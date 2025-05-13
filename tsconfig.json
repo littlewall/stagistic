@@ -1,0 +1,38 @@
+{
+    "extends": "@dvdevcz/typescript-config",
+    "compilerOptions": {
+      "incremental": true,
+      "checkJs": true,
+      "skipLibCheck": true,
+      "target": "es6",
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "esModuleInterop": true,
+      "baseUrl": "./app",
+      "paths": {
+        "~util/*": ["./util/*"],
+        "~config/*": ["./config/*"],
+        "~lib/*": ["./lib/*"],
+        "~types/*": ["./types/*"],
+      },
+      "module": "ESNext",
+      "moduleResolution": "Bundler",
+      "maxNodeModuleJsDepth": 10,
+      "typeRoots": [
+          "./@types",
+          "./node_modules/@types"
+      ]
+    },
+    "include": [
+        "./app/**/*",
+        "./eslint.config.mjs",
+        "./stylelint.config.mjs",
+        "./postcss.config.mjs",
+        "./src/**/*.d.ts",
+        "./.config/**/*.ts",
+        "./scripts/**/*.ts",
+        "./vite.config.ts",
+        "./mikro-orm.config.ts",
+        "./migrations/**/*.ts",
+    ]
+}

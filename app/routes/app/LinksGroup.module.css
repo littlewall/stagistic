@@ -1,0 +1,45 @@
+.control {
+    display: block;
+    width: 100%;
+    padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+    font-size: var(--mantine-font-size-sm);
+    font-weight: 500;
+    color: var(--mantine-color-text);
+
+    &:hover {
+        color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));
+    }
+    
+    &[aria-current = 'page'] {
+        color: var(--mantine-color-blue-filled);
+        background-color: light-dark(var(--mantine-color-blue-0), var(--mantine-color-dark-5));
+    }
+}
+
+.link {
+    display: block;
+    margin-left: var(--mantine-spacing-xl);
+    padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+    padding-left: var(--mantine-spacing-md);
+    font-size: var(--mantine-font-size-sm);
+    font-weight: 500;
+    color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-dark-0));
+    text-decoration: none;
+    border-left: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+
+    &:hover {
+        color: light-dark(var(--mantine-color-black), var(--mantine-color-dark-0));
+        background-color: light-dark(var(--mantine-color-gray-0), var(--mantine-color-dark-7));
+    }
+}
+
+.activeLink {
+    font-weight: 600;
+    color: var(--mantine-color-blue-filled);
+    background-color: light-dark(var(--mantine-color-blue-0), var(--mantine-color-dark-5));
+}
+
+.chevron {
+    transition: transform 200ms ease;
+}
