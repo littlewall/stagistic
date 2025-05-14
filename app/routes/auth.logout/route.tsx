@@ -1,16 +1,12 @@
-import {ActionFunctionArgs, redirect} from '@remix-run/node';
+import {redirect} from '@remix-run/react';
 import {removeUserSession} from '~lib/auth/session.server';
 
-export function action({request}: ActionFunctionArgs) {
-    if (request.method !== 'POST') {
-        return redirect('/');
-    }
+export const loader = () => {
+    return redirect('/auth/login');
+};
 
-    const response = redirect('/auth/login');
+export const action = () => {
+    const response = redirect('/');
 
     return removeUserSession(response);
-}
-
-export function loader() {
-    return redirect('/auth/login');
-}
+};

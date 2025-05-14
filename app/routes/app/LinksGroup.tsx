@@ -20,13 +20,13 @@ interface LinksGroupProps {
     link?: string,
 }
 
-export function LinksGroup({
+const LinksGroup = ({
     icon: Icon,
     label,
     initiallyOpened,
     links,
     link,
-}: LinksGroupProps) {
+}: LinksGroupProps) => {
     const hasLinks = Array.isArray(links);
     const [opened, setOpened] = useState(initiallyOpened || false);
     const items = (hasLinks ? links : []).map(link => (
@@ -69,4 +69,6 @@ export function LinksGroup({
             ) : null}
         </>
     );
-}
+};
+
+export default LinksGroup;

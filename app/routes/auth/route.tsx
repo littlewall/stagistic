@@ -5,7 +5,7 @@ import {
 import {LoaderFunctionArgs} from '@remix-run/node';
 import {getUserSession} from '~lib/auth/session.server';
 
-export async function loader({request}: LoaderFunctionArgs) {
+export const loader = async ({request}: LoaderFunctionArgs) => {
     try {
         const userSession = await getUserSession(request);
 
@@ -19,7 +19,7 @@ export async function loader({request}: LoaderFunctionArgs) {
 
         return redirect('/auth/login');
     }
-}
+};
 
 const AuthRoute = () => {
     return (

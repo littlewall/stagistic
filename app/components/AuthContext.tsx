@@ -1,10 +1,8 @@
-import {redirect} from '@remix-run/react';
 import {
     createContext,
     useContext,
     useState,
     ReactNode,
-    useCallback,
 } from 'react';
 import {User} from '~lib/db/entities/User';
 
@@ -13,7 +11,6 @@ interface AuthContextType {
     user: User | null,
     setAccessToken: (token: string | null) => void,
     setUser: (user: User | null) => void,
-    logout: () => Promise<void>,
     isAuthenticated: boolean,
 }
 
@@ -31,31 +28,7 @@ export const AuthProvider = ({
     const [accessToken, setAccessToken] = useState<string | null>(initialAccessToken || null);
     const [user, setUser] = useState<User | null>(initialUser || null);
 
-    // Computed property to check if user is authenticated
     const isAuthenticated = Boolean(accessToken && user);
-
-    // Logout function that clears auth state and calls logout endpoint
-    const logout = useCallback(async () => {
-        try {
-            // Call the logout endpoint
-            await fetch('/auth/logout', {
-                method: 'POST',
-                credentials: 'include',
-            });
-
-            // Clear local state regardless of API response
-            setAccessToken(null);
-            setUser(null);
-
-            // Reload the page to ensure clean state
-            redirect('/auth/login');
-        } catch (error) {
-            console.error('Logout error:', error);
-            // Still clear state on error
-            setAccessToken(null);
-            setUser(null);
-        }
-    }, []);
 
     return (
         <AuthContext.Provider value={{
@@ -63,7 +36,6 @@ export const AuthProvider = ({
             user,
             setAccessToken,
             setUser,
-            logout,
             isAuthenticated,
         }}>
             {children}
@@ -80,3 +52,5 @@ export const useAuth = (): AuthContextType => {
 
     return context;
 };
+
+export default AuthContext;

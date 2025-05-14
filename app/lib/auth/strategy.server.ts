@@ -95,7 +95,6 @@ export class MagicLinkStrategy<User> extends Strategy<
         const requestToken = requestParams.get(this.options.magicLinkTokenKey) ?? '';
 
         try {
-            // Use the jwt library directly for magic link tokens since they still use the strategy secret
             const payload = jwt.verify(requestToken, this.options.secret) as {email: string};
 
             return payload.email;
@@ -118,8 +117,6 @@ export class MagicLinkStrategy<User> extends Strategy<
             const user = await this.verify({email});
 
             if (!user) {
-                // TODO: Handle user not found
-
                 return null;
             }
 
