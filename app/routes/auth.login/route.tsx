@@ -18,27 +18,19 @@ import {
     useLoaderData,
 } from '@remix-run/react';
 import {ActionFunctionArgs, LoaderFunctionArgs} from '@remix-run/node';
-import {authenticator} from '~lib/auth/authenticator.server';
+import {authenticator} from '~lib/auth/authentication.server';
 import {Cookie} from '@mjackson/headers';
 import {data} from '@remix-run/node';
 import {COOKIE_MAGIC_LINK_SENT} from '~lib/auth/strategy.server';
 
-export const loader = async ({request}: LoaderFunctionArgs) => {
+export const loader = ({request}: LoaderFunctionArgs) => {
     try {
-        const user = await authenticator.authenticate('magic-link', request);
-
-        if (user) {
-            throw redirect('/app/dashboard');
-        }
-
         const hasCookie = new Cookie(request.headers.get('cookie') ?? '').has(COOKIE_MAGIC_LINK_SENT);
 
         return data({
             magicLinkSent: hasCookie,
         });
     } catch (error) {
-        console.log(error);
-
         if (error instanceof Headers) {
             return data({
                 magicLinkSent: false,

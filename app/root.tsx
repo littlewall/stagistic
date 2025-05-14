@@ -12,6 +12,7 @@ import {
     createTheme,
     mantineHtmlProps,
 } from '@mantine/core';
+import {AuthProvider} from './components/AuthContext';
 import appStylesHref from './app.css?url';
 import mantineStylesHref from '@mantine/core/styles.css?url';
 
@@ -49,9 +50,11 @@ const App = () => {
                 <Links />
             </head>
             <body>
-                <MantineProvider theme={theme} >
-                    <Outlet />
-                </MantineProvider>
+                <AuthProvider>
+                    <MantineProvider theme={theme}>
+                        <Outlet />
+                    </MantineProvider>
+                </AuthProvider>
                 <Scripts />
             </body>
         </html>

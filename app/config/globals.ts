@@ -22,6 +22,10 @@ type GlobalsConfig = {
         magicLink: {
             secret: string,
         },
+        jwt: {
+            accessTokenSecret: string,
+            refreshTokenSecret: string,
+        },
     },
     api: {
         postmark: {
@@ -113,6 +117,20 @@ const schema = {
                 format: String,
                 default: 'jalapeno',
                 env: 'AUTH_MAGIC_LINK_SECRET',
+            },
+        },
+        jwt: {
+            accessTokenSecret: {
+                doc: 'JWT access token secret',
+                format: String,
+                default: 'jalapeno',
+                env: 'JWT_ACCESS_TOKEN_SECRET',
+            },
+            refreshTokenSecret: {
+                doc: 'JWT refresh token secret',
+                format: String,
+                default: 'chipotle',
+                env: 'JWT_REFRESH_TOKEN_SECRET',
             },
         },
     },

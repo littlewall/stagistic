@@ -4,11 +4,14 @@ import jwt from 'jsonwebtoken';
 import {SetCookie} from '@mjackson/headers';
 
 type URLConstructor = ConstructorParameters<typeof URL>[0];
+interface VerifyOptions {
+    email: string,
+}
 
 export const COOKIE_MAGIC_LINK_SENT = 'magic-link-sent';
 export const STRATEGY_NAME = 'magic-link';
 
-export class EmailLinkStrategy<User> extends Strategy<
+export class MagicLinkStrategy<User> extends Strategy<
     User | null,
     VerifyOptions
 > {
@@ -19,7 +22,7 @@ export class EmailLinkStrategy<User> extends Strategy<
     constructor(
         {
             emailField = 'email',
-            tokenKey = 'token',
+            magicLinkTokenKey = 'token',
             linkMaxAge = 60 * 10,
             validateEmail = (email: string) => (/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/).test(email),
             ...restOptions
@@ -30,7 +33,7 @@ export class EmailLinkStrategy<User> extends Strategy<
 
         this.options = {
             emailField,
-            tokenKey,
+            magicLinkTokenKey,
             linkMaxAge,
             validateEmail,
             ...restOptions,
@@ -47,12 +50,12 @@ export class EmailLinkStrategy<User> extends Strategy<
         const token = jwt.sign(payload, this.options.secret);
         const url = new URL(this.options.magicEndpoint);
 
-        url.searchParams.set(this.options.tokenKey, token);
+        url.searchParams.set(this.options.magicLinkTokenKey, token);
 
         return {magicLink: url.toString(), token};
     }
 
-    private async sendToken(email: string): Promise<Headers> {
+    private async sendMagicLinkToken(email: string): Promise<Headers> {
         const valid = await this.options.validateEmail(email);
 
         if (!valid) {
@@ -82,17 +85,18 @@ export class EmailLinkStrategy<User> extends Strategy<
         return new Headers({'Set-Cookie': cookie.toString()});
     }
 
-    private validateToken(request: Request) {
+    private validateMagicLinkToken(request: Request): string {
         const requestParams = new URL(request.url).searchParams;
 
-        if (!requestParams.has(this.options.tokenKey)) {
+        if (!requestParams.has(this.options.magicLinkTokenKey)) {
             throw new ReferenceError('Missing token on params.');
         }
 
-        const requestToken = requestParams.get(this.options.tokenKey) ?? '';
+        const requestToken = requestParams.get(this.options.magicLinkTokenKey) ?? '';
 
         try {
-            const payload = jwt.verify(requestToken, this.options.secret) as JwtPayload;
+            // Use the jwt library directly for magic link tokens since they still use the strategy secret
+            const payload = jwt.verify(requestToken, this.options.secret) as {email: string};
 
             return payload.email;
         } catch (err: unknown) {
@@ -104,28 +108,26 @@ export class EmailLinkStrategy<User> extends Strategy<
         }
     }
 
-    public async getSession(request: Request): Promise<User | null> {
-        try {
-            const email = this.validateToken(request);
-
-            if (email) {
-                return this.verify({email});
-            }
-        } catch (error) {
-            console.error('Error validating token:', error);
-        }
-
-        return null;
-    }
-
     public async authenticate(request: Request): Promise<User | null> {
         const url = new URL(request.url);
-        const token = url.searchParams.get(this.options.tokenKey);
+        const magicLinkToken = url.searchParams.get(this.options.magicLinkTokenKey);
         const isSendingLoginForm = isFormDataRequest(request);
 
-        if (!token && isSendingLoginForm) {
-            const formData = await request.formData();
+        if (magicLinkToken) {
+            const email = this.validateMagicLinkToken(request);
+            const user = await this.verify({email});
 
+            if (!user) {
+                // TODO: Handle user not found
+
+                return null;
+            }
+
+            return user;
+        }
+
+        if (!magicLinkToken && isSendingLoginForm) {
+            const formData = await request.formData();
             const email = formData.get(this.options.emailField);
 
             if (!email) {
@@ -138,27 +140,11 @@ export class EmailLinkStrategy<User> extends Strategy<
                 throw new Error('Email must be a string.');
             }
 
-            return this.sendToken(email) as unknown as User;
+            throw await this.sendMagicLinkToken(email);
         }
 
-        if (!token && !isSendingLoginForm) {
-            return null;
-        }
-
-        const email = this.validateToken(request);
-
-        return this.verify({email});
+        return null;
     }
-}
-
-type JwtPayload = {
-    email: string,
-    iat: number,
-    exp: number,
-};
-
-export interface VerifyOptions {
-    email: string,
 }
 
 export interface ConstructorOptions {
@@ -167,7 +153,7 @@ export interface ConstructorOptions {
     magicEndpoint: URLConstructor,
     sendEmail: SendEmailFunction,
     validateEmail?: ValidateEmailFunction,
-    tokenKey?: string,
+    magicLinkTokenKey?: string,
     linkMaxAge?: number,
 }
 

@@ -10,17 +10,24 @@ import {
     useLoaderData,
 } from '@remix-run/react';
 import {LoaderFunctionArgs} from '@remix-run/node';
-import {authenticator} from '~lib/auth/authenticator.server';
+import {authenticator} from '~lib/auth/authentication.server';
 import {Cookie, SetCookie} from '@mjackson/headers';
 import {data} from '@remix-run/node';
 import {COOKIE_MAGIC_LINK_SENT} from '~lib/auth/strategy.server';
+import {createUserSession, getUserSession} from '~lib/auth/session.server';
 
 export const loader = async ({request}: LoaderFunctionArgs) => {
     try {
+        const authUser = await getUserSession(request);
+
+        if (authUser) {
+            return redirect('/app/dashboard');
+        }
+
         const user = await authenticator.authenticate('magic-link', request);
 
         if (user) {
-            const cookie = new SetCookie({
+            const magicCookie = new SetCookie({
                 name: COOKIE_MAGIC_LINK_SENT,
                 httpOnly: true,
                 value: '',
@@ -29,9 +36,12 @@ export const loader = async ({request}: LoaderFunctionArgs) => {
                 sameSite: 'Lax',
             });
 
-            const headers = new Headers({'Set-Cookie': cookie.toString()});
+            const headers = new Headers({'Set-Cookie': magicCookie.toString()});
+            const baseResponse = redirect('/app/dashboard', {headers});
 
-            return redirect('/app/dashboard', {headers});
+            const {response} = createUserSession(user, baseResponse);
+
+            return response;
         }
 
         const hasCookie = new Cookie(request.headers.get('cookie') ?? '').has(COOKIE_MAGIC_LINK_SENT);
@@ -44,8 +54,6 @@ export const loader = async ({request}: LoaderFunctionArgs) => {
             magicLinkSent: hasCookie,
         });
     } catch (error) {
-        console.log(error);
-
         if (error instanceof Headers) {
             return data({
                 magicLinkSent: false,

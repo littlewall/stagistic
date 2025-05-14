@@ -1,11 +1,12 @@
 import {Authenticator} from 'remix-auth';
-import {EmailLinkStrategy} from './strategy.server';
+import {MagicLinkStrategy} from './strategy.server';
 import {User} from '~lib/db/entities/User';
 import {resolveEntityManager} from '~lib/db/orm';
 import globals from '~config/globals';
 import {sendMagicLinkEmail} from './email.server';
 
 type UserAuth = {
+    id: string,
     email: string,
 };
 
@@ -15,7 +16,7 @@ const clientBaseUrl = globals.get('client.baseUrl');
 export const authenticator = new Authenticator<UserAuth | null>();
 
 authenticator.use(
-    new EmailLinkStrategy(
+    new MagicLinkStrategy(
         {
             sendEmail: sendMagicLinkEmail,
             secret: magicLinkSecret,
@@ -35,7 +36,10 @@ authenticator.use(
                 throw new Error('User not found');
             }
 
-            return user;
+            return {
+                id: user.id,
+                email: user.email,
+            };
         },
     ),
 );
