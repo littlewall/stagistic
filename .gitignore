@@ -17,3 +17,5 @@ temp
 
 #!.yarn/cache
 .pnp.*
+
+.env
