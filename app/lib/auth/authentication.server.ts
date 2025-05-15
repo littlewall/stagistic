@@ -3,7 +3,7 @@ import {User} from '~lib/db/entities/User';
 import {resolveEntityManager} from '~lib/db/orm';
 import globals from '~config/globals';
 import {sendMagicLinkEmail} from './email.server';
-import {createMagicLinkCookie} from './cookie-helpers';
+import {createMagicLinkCookie} from './utils';
 import {MagicLinkErrorCode} from './configs';
 
 export type UserAuth = {

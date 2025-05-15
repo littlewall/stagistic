@@ -6,7 +6,7 @@ import {
     MagicLinkError,
     verifyMagicLinkFlow,
 } from '~lib/auth/authentication.server';
-import {deleteMagicLinkCookie} from '~lib/auth/cookie-helpers';
+import {deleteMagicLinkCookie} from '~lib/auth/utils';
 import {MAGIC_LINK_ERRORS, MagicLinkErrorCode} from '~lib/auth/configs';
 import {createUserSession, getUserSession} from '~lib/auth/session.server';
 

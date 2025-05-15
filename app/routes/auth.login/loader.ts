@@ -3,7 +3,7 @@ import {Cookie} from '@mjackson/headers';
 import {data, redirect} from '@remix-run/node';
 import {COOKIE_MAGIC_LINK_SENT} from '~lib/auth/authentication.server';
 import {MagicLinkErrorCode} from '~lib/auth/configs';
-import {deleteMagicLinkCookie} from '~lib/auth/cookie-helpers';
+import {deleteMagicLinkCookie} from '~lib/auth/utils';
 
 export type LoaderData = {
     magicLinkSent: boolean,

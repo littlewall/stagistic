@@ -1,4 +1,5 @@
 import {getUserSession} from './session.server';
+import {SetCookie} from '@mjackson/headers';
 
 export const isFormDataRequest = (request: Request): boolean => {
     const contentType = request.headers.get('Content-Type') ?? '';
@@ -26,4 +27,29 @@ export const authenticate = async (request: Request, returnTo?: string) => {
         user: userSession,
         response,
     };
+};
+
+export const createMagicLinkCookie = (name: string, value: string, options: Partial<{
+    maxAge: number, expires: Date, path: string, sameSite: 'Lax' | 'Strict' | 'None',
+}> = {}) => {
+    return new SetCookie({
+        name,
+        value,
+        httpOnly: true,
+        path: '/',
+        sameSite: 'Lax',
+        ...options,
+    });
+};
+
+export const deleteMagicLinkCookie = (name: string) => {
+    return new SetCookie({
+        name,
+        value: '',
+        httpOnly: true,
+        path: '/',
+        sameSite: 'Lax',
+        maxAge: 0,
+        expires: new Date(0),
+    });
 };

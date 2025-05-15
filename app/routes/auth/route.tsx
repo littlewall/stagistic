@@ -6,6 +6,7 @@ import {LoaderFunctionArgs} from '@remix-run/node';
 import {getUserSession} from '~lib/auth/session.server';
 import classes from './auth.module.css';
 import {Paper} from '@mantine/core';
+import authBgImageSrc from '~assets/ui/auth/auth-cover.png';
 
 export const loader = async ({request}: LoaderFunctionArgs) => {
     try {
@@ -25,7 +26,12 @@ export const loader = async ({request}: LoaderFunctionArgs) => {
 
 const AuthRoute = () => {
     return (
-        <div className={classes.wrapper}>
+        <div
+            className={classes.wrapper}
+            style={{
+                backgroundImage: `url(${authBgImageSrc})`,
+            }}
+        >
             <Paper className={classes.form}>
                 <Outlet />
             </Paper>
