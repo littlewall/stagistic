@@ -14,7 +14,8 @@ import {
 import {
     LayoutDashboard,
     BookOpenText,
-    LogOut,
+    SwitchCamera,
+    LogOutIcon,
 } from 'lucide-react';
 import {LoaderFunctionArgs} from '@remix-run/node';
 import classes from './app.module.css';
@@ -78,13 +79,18 @@ const AppRoute = () => {
                         </ScrollArea>
 
                         <div className={classes.footer}>
+                            <a href="#" className={classes.link} onClick={event => event.preventDefault()}>
+                                <SwitchCamera className={classes.linkIcon} strokeWidth={1.5} />
+                                <span>Change production</span>
+                            </a>
+
                             <Form method="post" action="/auth/logout">
                                 <Button
                                     type="submit"
                                     size="xs"
                                     variant="light"
                                     color="red"
-                                    leftSection={<LogOut size={14} />}
+                                    leftSection={<LogOutIcon size={14} />}
                                 >
                                     Logout
                                 </Button>

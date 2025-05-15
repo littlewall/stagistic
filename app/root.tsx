@@ -39,7 +39,7 @@ const theme = createTheme({
 
 const App = () => {
     return (
-        <html lang="en" {...mantineHtmlProps}>
+        <html lang="en" {...mantineHtmlProps} suppressHydrationWarning={true}>
             <head>
                 <link
                     rel="icon"
@@ -49,7 +49,7 @@ const App = () => {
                 <Meta />
                 <Links />
             </head>
-            <body>
+            <body suppressHydrationWarning={true}>
                 <AuthProvider>
                     <MantineProvider theme={theme}>
                         <Outlet />

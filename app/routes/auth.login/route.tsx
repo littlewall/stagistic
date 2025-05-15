@@ -2,10 +2,7 @@ import {
     Anchor,
     Box,
     Button,
-    Center,
-    Container,
     Group,
-    Paper,
     Text,
     TextInput,
     Title,
@@ -13,116 +10,153 @@ import {
 import classes from './login.module.css';
 import {ArrowLeft} from 'lucide-react';
 import {
-    redirect,
-    useFetcher,
     useLoaderData,
+    useFetcher,
+    NavLink,
 } from '@remix-run/react';
-import {ActionFunctionArgs, LoaderFunctionArgs} from '@remix-run/node';
-import {authenticator} from '~lib/auth/authentication.server';
-import {Cookie} from '@mjackson/headers';
-import {data} from '@remix-run/node';
-import {COOKIE_MAGIC_LINK_SENT} from '~lib/auth/strategy.server';
+import {
+    getFormProps, getInputProps, useForm,
+} from '@conform-to/react';
+import {parseWithValibot} from '@conform-to/valibot';
+import {useUrlErrorMessage} from './useUrlErrorMessage';
+import {loginFormSchema} from './helpers';
+import {useMemo} from 'react';
+import loader from './loader';
+import action from './action';
 
-export const loader = ({request}: LoaderFunctionArgs) => {
-    try {
-        const hasCookie = new Cookie(request.headers.get('cookie') ?? '').has(COOKIE_MAGIC_LINK_SENT);
-
-        return data({
-            magicLinkSent: hasCookie,
-        });
-    } catch (error) {
-        if (error instanceof Headers) {
-            return data({
-                magicLinkSent: false,
-            }, {headers: error});
-        }
-
-        throw error;
-    }
-};
-
-export const action = async ({request}: ActionFunctionArgs) => {
-    const headers = (await authenticator
-        .authenticate('magic-link', request)
-        .catch(unknown => {
-            if (unknown instanceof Headers) {
-                return unknown;
-            }
-
-            throw unknown;
-        })) as Headers;
-
-    throw redirect('/auth/login', {headers});
+export {
+    loader,
+    action,
 };
 
 const AuthLogin = () => {
     const {magicLinkSent} = useLoaderData<typeof loader>();
-    const fetcher = useFetcher();
-    const isSubmitting = fetcher.state !== 'idle' || fetcher.formData != null;
+    const fetcher = useFetcher<typeof action>();
+    const isSubmitting = fetcher.state === 'submitting';
+
+    const urlErrorMessage = useUrlErrorMessage('error');
+
+    const [form, {email}] = useForm({
+        id: 'login-form',
+        lastResult: fetcher.data,
+        onValidate({formData}) {
+            return parseWithValibot(formData, {
+                schema: loginFormSchema,
+            });
+        },
+        shouldValidate: 'onBlur',
+        shouldRevalidate: 'onInput',
+    });
+
+    const errors = useMemo(
+        () => {
+            const errorMessages = [];
+
+            if (urlErrorMessage) {
+                errorMessages.push(urlErrorMessage);
+            }
+
+            if (form.errors) {
+                errorMessages.push(...form.errors);
+            }
+
+            return errorMessages;
+        }
+        , [urlErrorMessage, form.errors],
+    );
 
     return (
-        <Container size={460} my={30}>
-            <Paper
-                withBorder
-                shadow="md"
-                p={30}
-                radius="md"
-                mt="xl"
-            >
-                {!magicLinkSent && (
-                    <>
-                        <Title className={classes.title} ta="center">
-                            Welcome to Stagistic
-                        </Title>
-                        <Text c="dimmed" fz="sm" ta="center">
-                            Enter your email to recieve "magic link" that will log you in
+        <>
+            {!magicLinkSent && (
+                <>
+                    <Title
+                        className={classes.title}
+                        ta="center"
+                    >
+                        Welcome to Stagistic
+                    </Title>
+                    <Text
+                        c="dimmed"
+                        fz="sm"
+                        ta="center"
+                    >
+                        Enter your email to recieve "magic link" that will log you in
+                    </Text>
+                    {errors.map((error, index) => (
+                        <Text
+                            key={index}
+                            c="red"
+                            ta="center"
+                            mb="md"
+                            mt="lg"
+                        >
+                            {error}
                         </Text>
-                        <fetcher.Form method="post" className="space-y-2 w-full">
-                            <TextInput
-                                name="email"
-                                label="Your email"
-                                placeholder="me@example.com"
-                                required
-                            />
-                            <Group
-                                justify="space-between"
-                                mt="lg"
-                                className={classes.controls}
+                    ))}
+                    <fetcher.Form
+                        method="post"
+                        className={classes.form}
+                        {...getFormProps(form)}
+                    >
+                        <TextInput
+                            {...getInputProps(email, {
+                                type: 'email',
+                                required: true,
+                                defaultValue: '',
+                                autoComplete: 'email',
+                                autoFocus: true,
+                            })}
+                            label="Your email"
+                            placeholder="me@example.com"
+                            error={email.errors}
+                            size="md"
+                            radius="md"
+                        />
+                        <Group
+                            justify="space-between"
+                            align='center'
+                            mt="xl"
+                            className={classes.controls}
+                        >
+                            <Button
+                                type="submit"
+                                fullWidth
+                                size="md"
+                                radius="md"
+                                loading={isSubmitting}
+                                disabled={isSubmitting}
                             >
-                                <Anchor
-                                    c="dimmed"
-                                    size="sm"
-                                    className={classes.control}
-                                >
-                                    <Center inline>
-                                        <ArrowLeft size={12} strokeWidth={1.5} />
-                                        <Box ml={5}>Back to homepage</Box>
-                                    </Center>
-                                </Anchor>
-                                <Button
-                                    type="submit"
-                                    disabled={isSubmitting}
-                                    loading={isSubmitting}
-                                    className={classes.control}
-                                >
-                                    {isSubmitting ? 'Sending...' : 'Send magic link'}
-                                </Button>
-                            </Group>
-                        </fetcher.Form>
-                    </>
-                )}
-                {magicLinkSent && (
-                    <>
-                        <Title className={classes.title} ta="center">
-                            Check your email
-                        </Title>
-                        <Text c="dimmed" fz="sm" ta="center">
-                            We sent a magic link to your email. Click the link in email to log in.
-                        </Text>
-                    </>
-                )}
-            </Paper>
-        </Container>
+                                Send magic link
+                            </Button>
+                            <Anchor
+                                component={NavLink}
+                                to="/"
+                                size="sm"
+                                style={{
+                                    display: 'flex',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    width: '100%',
+                                }}
+                            >
+                                <ArrowLeft size={12} strokeWidth={1.5} />
+                                <Box ml={5}>Back to homepage</Box>
+                            </Anchor>
+                        </Group>
+                    </fetcher.Form>
+                </>
+            )}
+            {magicLinkSent && (
+                <>
+                    <Title className={classes.title} ta="center">
+                        Check your email
+                    </Title>
+                    <Text c="dimmed" fz="sm" ta="center">
+                        We sent a magic link to your email. Click the link in email to log in.
+                    </Text>
+                </>
+            )}
+        </>
     );
 };
 

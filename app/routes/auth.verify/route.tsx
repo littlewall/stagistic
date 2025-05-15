@@ -1,93 +1,42 @@
 import {
-    Container,
-    Paper,
     Text,
     Title,
 } from '@mantine/core';
 import classes from './verify.module.css';
 import {
-    redirect,
     useLoaderData,
 } from '@remix-run/react';
-import {LoaderFunctionArgs} from '@remix-run/node';
-import {authenticator} from '~lib/auth/authentication.server';
-import {Cookie, SetCookie} from '@mjackson/headers';
-import {data} from '@remix-run/node';
-import {COOKIE_MAGIC_LINK_SENT} from '~lib/auth/strategy.server';
-import {createUserSession, getUserSession} from '~lib/auth/session.server';
+import {useMemo} from 'react';
+import loader, {LoaderData} from './loader';
 
-export const loader = async ({request}: LoaderFunctionArgs) => {
-    try {
-        const authUser = await getUserSession(request);
-
-        if (authUser) {
-            return redirect('/app/dashboard');
-        }
-
-        const user = await authenticator.authenticate('magic-link', request);
-
-        if (user) {
-            const magicCookie = new SetCookie({
-                name: COOKIE_MAGIC_LINK_SENT,
-                httpOnly: true,
-                value: '',
-                maxAge: 1,
-                path: '/',
-                sameSite: 'Lax',
-            });
-
-            const headers = new Headers({'Set-Cookie': magicCookie.toString()});
-            const baseResponse = redirect('/app/dashboard', {headers});
-
-            const {response} = createUserSession(user, baseResponse);
-
-            return response;
-        }
-
-        const hasCookie = new Cookie(request.headers.get('cookie') ?? '').has(COOKIE_MAGIC_LINK_SENT);
-
-        if (!hasCookie) {
-            return redirect('/auth/login');
-        }
-
-        return data({
-            magicLinkSent: hasCookie,
-        });
-    } catch (error) {
-        if (error instanceof Headers) {
-            return data({
-                magicLinkSent: false,
-            }, {headers: error});
-        }
-
-        throw error;
-    }
+export {
+    loader,
 };
 
 const AuthVerify = () => {
-    const {magicLinkSent} = useLoaderData<typeof loader>();
+    const {magicLinkSent, error: loaderError} = useLoaderData<LoaderData>();
+    const errorMessage = useMemo(() => {
+        return loaderError?.message || undefined;
+    }, [loaderError]);
 
     return (
-        <Container size={460} my={30}>
-            <Paper
-                withBorder
-                shadow="md"
-                p={30}
-                radius="md"
-                mt="xl"
-            >
-                {magicLinkSent && (
-                    <>
-                        <Title className={classes.title} ta="center">
-                            Check your email
-                        </Title>
-                        <Text c="dimmed" fz="sm" ta="center">
-                            We sent a magic link to your email. Click the link in email to log in.
-                        </Text>
-                    </>
-                )}
-            </Paper>
-        </Container>
+        <>
+            {errorMessage && (
+                <Text c="red" ta="center" mb="sm">
+                    {errorMessage}
+                </Text>
+            )}
+            {magicLinkSent && (
+                <>
+                    <Title className={classes.title} ta="center">
+                        Check your email
+                    </Title>
+                    <Text c="dimmed" fz="sm" ta="center">
+                        We sent a magic link to your email. Click the link in email to log in.
+                    </Text>
+                </>
+            )}
+        </>
     );
 };
 

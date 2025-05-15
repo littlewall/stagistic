@@ -1,5 +1,11 @@
 .title {
+    margin-top: var(--mantine-spacing-md);
     font-family: Outfit, var(--mantine-font-family);
-    font-size: 26px;
     font-weight: 500;
+    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
+    text-align: center;
+}
+
+.form {
+    margin-top: var(--mantine-spacing-xl);
 }

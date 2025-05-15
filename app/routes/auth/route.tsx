@@ -4,6 +4,8 @@ import {
 } from '@remix-run/react';
 import {LoaderFunctionArgs} from '@remix-run/node';
 import {getUserSession} from '~lib/auth/session.server';
+import classes from './auth.module.css';
+import {Paper} from '@mantine/core';
 
 export const loader = async ({request}: LoaderFunctionArgs) => {
     try {
@@ -23,7 +25,11 @@ export const loader = async ({request}: LoaderFunctionArgs) => {
 
 const AuthRoute = () => {
     return (
-        <Outlet />
+        <div className={classes.wrapper}>
+            <Paper className={classes.form}>
+                <Outlet />
+            </Paper>
+        </div>
     );
 };
 
