@@ -1,8 +1,8 @@
 import {
     AppShell,
     Burger,
-    ScrollArea,
-    Button,
+    Menu,
+    UnstyledButton,
 } from '@mantine/core';
 import {useDisclosure} from '@mantine/hooks';
 import {
@@ -10,17 +10,19 @@ import {
     Outlet,
     redirect,
     Form,
+    NavLink,
 } from '@remix-run/react';
 import {
     LayoutDashboard,
     BookOpenText,
-    SwitchCamera,
-    LogOutIcon,
+    ArrowLeftRight,
+    LogOut,
 } from 'lucide-react';
 import {LoaderFunctionArgs} from '@remix-run/node';
 import classes from './app.module.css';
-import LinksGroup from './LinksGroup';
+import LinksGroup from '../../components/nav/LinksGroup/LinksGroup';
 import {authenticate} from '~lib/auth/auth-session.server';
+import UserButton from '~components/nav/UserButton/UserButton';
 
 export const loader = async ({request}: LoaderFunctionArgs) => {
     try {
@@ -67,41 +69,78 @@ const AppRoute = () => {
                 collapsed: {mobile: !opened},
             }}
             padding="md"
+            layout='alt'
+            footer={{
+                height: 20,
+            }}
         >
             <AppShell.Navbar>
-                <AppShell.Section style={{minHeight: '100vh'}} my="md">
-                    <nav className={classes.navbar}>
-                        <div className={classes.title}>
-                            Stagistic
-                        </div>
+                <nav className={classes.navbar}>
+                    <div className={classes.title}>
+                        Stagistic
+                    </div>
 
-                        <div className={classes.menu}>{links}</div>
+                    <div className={classes.menu}>{links}</div>
 
-                        <div className={classes.footer}>
-                            <a href="#" className={classes.link} onClick={event => event.preventDefault()}>
-                                <SwitchCamera className={classes.linkIcon} strokeWidth={1.5} />
-                                <span>Change production</span>
-                            </a>
-
-                            <Form method="post" action="/auth/logout">
-                                <Button
-                                    type="submit"
-                                    size="xs"
-                                    variant="light"
-                                    color="red"
-                                    leftSection={<LogOutIcon size={14} />}
+                    <div className={classes.footer}>
+                        <Menu position="right-end" offset={0}>
+                            <Menu.Target>
+                                <UserButton
+                                    image='https://i.pravatar.cc/300'
+                                    name='John Doe'
+                                    email="john.doe@example.com"
+                                />
+                            </Menu.Target>
+                            <Menu.Dropdown>
+                                <Menu.Label>Application</Menu.Label>
+                                <Menu.Item
+                                    component={NavLink}
+                                    to="/app/settings"
                                 >
-                                    Logout
-                                </Button>
-                            </Form>
-                        </div>
-                    </nav>
-                </AppShell.Section>
+                                    Settings
+                                </Menu.Item>
+                                <Menu.Item
+                                    component={NavLink}
+                                    to="/app/productions"
+                                >
+                                    Productions
+                                </Menu.Item>
+
+                                <Menu.Divider />
+
+                                <Menu.Item
+                                    leftSection={<ArrowLeftRight size={14} />}
+                                >
+                                    Switch production
+                                </Menu.Item>
+                                <Menu.Item
+                                    color="red"
+                                    leftSection={<LogOut size={14} />}
+                                >
+                                    <Form method="post" action="/auth/logout">
+                                        <UnstyledButton
+                                            type="submit"
+                                        >
+                                            Logout
+                                        </UnstyledButton>
+                                    </Form>
+                                </Menu.Item>
+                            </Menu.Dropdown>
+                        </Menu>
+                    </div>
+                </nav>
             </AppShell.Navbar>
             <AppShell.Main>
                 <Burger opened={opened} onClick={toggle} hiddenFrom="sm" size="sm" />
                 <Outlet />
             </AppShell.Main>
+            <AppShell.Footer >
+                <div className={classes.footer}>
+                    <div className={classes.footerText}>
+                        Stagistic &copy; {new Date().getFullYear()}
+                    </div>
+                </div>
+            </AppShell.Footer>
         </AppShell>
     );
 };

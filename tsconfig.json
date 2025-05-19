@@ -15,6 +15,7 @@
         "~lib/*": ["./lib/*"],
         "~types/*": ["./types/*"],
         "~assets/*": ["./assets/*"],
+        "~components/*": ["./components/*"],
       },
       "module": "ESNext",
       "moduleResolution": "Bundler",
