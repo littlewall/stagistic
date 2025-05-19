@@ -1,9 +1,3 @@
-import {REFRESH_TOKEN_COOKIE_NAME} from './jwt';
-
-export const clearRefreshTokenCookie = () => {
-    return `${REFRESH_TOKEN_COOKIE_NAME}=; HttpOnly; Path=/; Max-Age=0; SameSite=Lax; Secure`;
-};
-
 export const refreshToken = async (): Promise<boolean> => {
     try {
         const response = await fetch('/api/auth/refresh-token', {

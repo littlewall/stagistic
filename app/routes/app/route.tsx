@@ -20,7 +20,7 @@ import {
 import {LoaderFunctionArgs} from '@remix-run/node';
 import classes from './app.module.css';
 import LinksGroup from './LinksGroup';
-import {authenticate} from '~lib/auth/utils';
+import {authenticate} from '~lib/auth/auth-session.server';
 
 export const loader = async ({request}: LoaderFunctionArgs) => {
     try {
@@ -69,14 +69,13 @@ const AppRoute = () => {
             padding="md"
         >
             <AppShell.Navbar>
-                <AppShell.Section grow my="md">
+                <AppShell.Section style={{minHeight: '100vh'}} my="md">
                     <nav className={classes.navbar}>
-                        <div className={classes.header}>
+                        <div className={classes.title}>
+                            Stagistic
                         </div>
 
-                        <ScrollArea className={classes.links}>
-                            <div className={classes.linksInner}>{links}</div>
-                        </ScrollArea>
+                        <div className={classes.menu}>{links}</div>
 
                         <div className={classes.footer}>
                             <a href="#" className={classes.link} onClick={event => event.preventDefault()}>

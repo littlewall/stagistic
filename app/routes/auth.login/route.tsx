@@ -15,7 +15,9 @@ import {
     NavLink,
 } from '@remix-run/react';
 import {
-    getFormProps, getInputProps, useForm,
+    getFormProps,
+    getInputProps,
+    useForm,
 } from '@conform-to/react';
 import {parseWithValibot} from '@conform-to/valibot';
 import {useUrlErrorMessage} from './useUrlErrorMessage';
@@ -23,6 +25,8 @@ import {loginFormSchema} from './helpers';
 import {useMemo} from 'react';
 import loader from './loader';
 import action from './action';
+import {GENERIC_ERRORS} from '~lib/auth/configs';
+import {AuthenticityTokenInput} from '~lib/csrf/react';
 
 export {
     loader,
@@ -60,9 +64,18 @@ const AuthLogin = () => {
                 errorMessages.push(...form.errors);
             }
 
+            // Fallback for unknown errors
+            if (errorMessages.length === 0 && fetcher.data) {
+                errorMessages.push(GENERIC_ERRORS.GENERIC_UI.message);
+            }
+
             return errorMessages;
         }
-        , [urlErrorMessage, form.errors],
+        , [
+            urlErrorMessage,
+            form.errors,
+            fetcher.data,
+        ],
     );
 
     return (
@@ -98,6 +111,7 @@ const AuthLogin = () => {
                         className={classes.form}
                         {...getFormProps(form)}
                     >
+                        <AuthenticityTokenInput />
                         <TextInput
                             {...getInputProps(email, {
                                 type: 'email',

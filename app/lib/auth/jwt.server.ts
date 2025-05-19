@@ -1,7 +1,8 @@
 import jwt from 'jsonwebtoken';
-import {SetCookie} from '@mjackson/headers';
 import globals from '~config/globals';
 import {REFRESH_TOKEN_COOKIE_NAME} from './jwt';
+import {createCookieSessionStorage} from '@remix-run/node';
+import {JWT_ERRORS, JwtErrorCode} from './configs';
 
 export type TokenPayload = {
     id: string,
@@ -12,15 +13,6 @@ export type TokenPayload = {
 
 export type TokenResponse = {
     accessToken: string,
-    headers: Headers,
-};
-
-export type AccessTokenResponse = {
-    accessToken: string,
-};
-
-export type RefreshTokenResponse = {
-    refreshToken: string,
     headers: Headers,
 };
 
@@ -48,44 +40,40 @@ export const createRefreshToken = (payload: TokenPayload): string => {
     );
 };
 
-export const createRefreshTokenCookie = (refreshToken: string): SetCookie => {
-    return new SetCookie({
+export const refreshTokenSession = createCookieSessionStorage({
+    cookie: {
         name: REFRESH_TOKEN_COOKIE_NAME,
         httpOnly: true,
-        value: refreshToken,
         maxAge: REFRESH_TOKEN_EXPIRY,
         path: '/',
-        sameSite: 'Lax',
+        sameSite: 'lax',
         secure: true,
-    });
+        secrets: [REFRESH_TOKEN_SECRET],
+    },
+});
+
+export const setRefreshTokenCookie = async (refreshToken: string) => {
+    const session = await refreshTokenSession.getSession();
+
+    session.set(REFRESH_TOKEN_COOKIE_NAME, refreshToken);
+
+    return refreshTokenSession.commitSession(session);
 };
 
-export const createAccessTokenOnly = (payload: TokenPayload): AccessTokenResponse => {
+export const destroyRefreshTokenCookie = async (request: Request) => {
+    const session = await refreshTokenSession.getSession(request.headers.get('Cookie'));
+
+    return refreshTokenSession.destroySession(session);
+};
+
+export const createTokens = async (payload: TokenPayload): Promise<TokenResponse> => {
     const accessToken = createAccessToken(payload);
-
-    return {
-        accessToken,
-    };
-};
-
-export const createRefreshTokenOnly = (payload: TokenPayload): RefreshTokenResponse => {
     const refreshToken = createRefreshToken(payload);
+    const cookie = await setRefreshTokenCookie(refreshToken);
 
     const headers = new Headers();
-    const refreshCookie = createRefreshTokenCookie(refreshToken);
 
-    headers.append('Set-Cookie', refreshCookie.toString());
-
-    return {
-        refreshToken,
-        headers,
-    };
-};
-
-export const createTokens = (payload: TokenPayload): TokenResponse => {
-    const {accessToken} = createAccessTokenOnly(payload);
-
-    const {headers} = createRefreshTokenOnly(payload);
+    headers.append('Set-Cookie', cookie);
 
     return {
         accessToken,
@@ -98,10 +86,10 @@ export const verifyAccessToken = (token: string): TokenPayload => {
         return jwt.verify(token, ACCESS_TOKEN_SECRET) as TokenPayload;
     } catch (err) {
         if (err instanceof jwt.TokenExpiredError) {
-            throw new Error('Token expired. Please request a new one.');
+            throw new Error(JWT_ERRORS[JwtErrorCode.TOKEN_EXPIRED].message);
         }
 
-        throw new TypeError('Invalid Token');
+        throw new TypeError(JWT_ERRORS[JwtErrorCode.INVALID_TOKEN].message);
     }
 };
 
@@ -110,26 +98,9 @@ export const verifyRefreshToken = (token: string): TokenPayload => {
         return jwt.verify(token, REFRESH_TOKEN_SECRET) as TokenPayload;
     } catch (err) {
         if (err instanceof jwt.TokenExpiredError) {
-            throw new Error('Token expired. Please request a new one.');
+            throw new Error(JWT_ERRORS[JwtErrorCode.TOKEN_EXPIRED].message);
         }
 
-        throw new TypeError('Invalid Token');
+        throw new TypeError(JWT_ERRORS[JwtErrorCode.INVALID_TOKEN].message);
     }
-};
-
-export const getRefreshTokenFromRequest = (request: Request): string | null => {
-    const cookieHeader = request.headers.get('Cookie');
-
-    if (!cookieHeader) {
-        return null;
-    }
-
-    const cookies = cookieHeader.split(';').map(cookie => cookie.trim());
-    const refreshCookie = cookies.find(cookie => cookie.startsWith(`${REFRESH_TOKEN_COOKIE_NAME}=`));
-
-    if (!refreshCookie) {
-        return null;
-    }
-
-    return refreshCookie.split('=')[1];
 };

@@ -2,13 +2,17 @@ import {Cookie} from '@mjackson/headers';
 import {LoaderFunctionArgs} from '@remix-run/node';
 import {data, redirect} from '@remix-run/react';
 import {
-    COOKIE_MAGIC_LINK_SENT,
     MagicLinkError,
     verifyMagicLinkFlow,
 } from '~lib/auth/authentication.server';
-import {deleteMagicLinkCookie} from '~lib/auth/utils';
-import {MAGIC_LINK_ERRORS, MagicLinkErrorCode} from '~lib/auth/configs';
-import {createUserSession, getUserSession} from '~lib/auth/session.server';
+import {deleteMagicLinkCookie, getMagicLinkSession} from '~lib/auth/auth-session.server';
+import {
+    COOKIE_MAGIC_LINK_SENT,
+    MAGIC_LINK_ERRORS,
+    MagicLinkErrorCode,
+    GENERIC_ERRORS,
+} from '~lib/auth/configs';
+import {createUserSession, getUserSession} from '~lib/auth/auth-session.server';
 
 export type LoaderData = {
     magicLinkSent: boolean,
@@ -26,12 +30,13 @@ const loader = async ({request}: LoaderFunctionArgs) => {
         const user = await verifyMagicLinkFlow(request);
 
         if (user) {
-            const magicCookie = deleteMagicLinkCookie(COOKIE_MAGIC_LINK_SENT);
+            const magicLinkSession = await getMagicLinkSession(request.headers.get('Cookie'));
+            const magicCookie = await deleteMagicLinkCookie(magicLinkSession);
 
             const headers = new Headers({'Set-Cookie': magicCookie.toString()});
             const baseResponse = redirect('/app/dashboard', {headers});
 
-            const {response} = createUserSession(user, baseResponse);
+            const {response} = await createUserSession(user, baseResponse);
 
             return response;
         }
@@ -46,7 +51,8 @@ const loader = async ({request}: LoaderFunctionArgs) => {
             magicLinkSent: hasCookie,
         });
     } catch (error) {
-        const magicCookie = deleteMagicLinkCookie(COOKIE_MAGIC_LINK_SENT);
+        const magicLinkSession = await getMagicLinkSession(request.headers.get('Cookie'));
+        const magicCookie = await deleteMagicLinkCookie(magicLinkSession);
 
         let errorCode: MagicLinkErrorCode = MagicLinkErrorCode.UNKNOWN;
 
@@ -58,11 +64,18 @@ const loader = async ({request}: LoaderFunctionArgs) => {
             }
         }
 
-        const params = new URLSearchParams({error: errorCode});
+        try {
+            const params = new URLSearchParams({error: errorCode});
 
-        return redirect(`/auth/login?${params.toString()}`, {
-            headers: new Headers({'Set-Cookie': magicCookie.toString()}),
-        });
+            return redirect(`/auth/login?${params.toString()}`, {
+                headers: new Headers({'Set-Cookie': magicCookie.toString()}),
+            });
+        } catch (e) {
+            return data({
+                magicLinkSent: false,
+                error: {message: GENERIC_ERRORS.GENERIC_UI.message},
+            }, {headers: new Headers({'Set-Cookie': magicCookie.toString()})});
+        }
     }
 };
 

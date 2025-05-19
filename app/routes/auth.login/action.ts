@@ -4,8 +4,15 @@ import {redirect} from '@remix-run/node';
 import {sendMagicLinkFlow, MagicLinkError} from '~lib/auth/authentication.server';
 import {MAGIC_LINK_ERRORS, MagicLinkErrorCode} from '~lib/auth/configs';
 import {loginFormSchema} from './helpers';
+import {getMagicLinkSession} from '~lib/auth/auth-session.server';
+import {getSession} from '~lib/session.server';
+import {verifyAuthenticityToken} from '~lib/csrf/csrf.server';
 
 const action = async ({request}: ActionFunctionArgs) => {
+    const session = await getSession(request.headers.get('cookie'));
+
+    await verifyAuthenticityToken(request, session);
+
     const formData = await request.formData();
     const submission = parseWithValibot(formData, {schema: loginFormSchema});
 
@@ -14,7 +21,10 @@ const action = async ({request}: ActionFunctionArgs) => {
     }
 
     try {
-        const magicLinkHeaders = await sendMagicLinkFlow(request, {formData});
+        const magicLinkSession = await getMagicLinkSession(
+            request.headers.get('Cookie'),
+        );
+        const magicLinkHeaders = await sendMagicLinkFlow(submission.value.email, magicLinkSession);
 
         return redirect('/auth/login', {
             headers: magicLinkHeaders,

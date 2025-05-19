@@ -1,47 +1,5 @@
 import convict from 'convict';
 
-type GlobalsConfig = {
-    env: string,
-    server: {
-        port: number,
-        baseUrl: string,
-    },
-    client: {
-        baseUrl: string,
-    },
-    database: {
-        postgres: {
-            host: string,
-            port: number,
-            user: string,
-            password: string,
-            database: string,
-        },
-    },
-    auth: {
-        magicLink: {
-            secret: string,
-        },
-        jwt: {
-            accessTokenSecret: string,
-            refreshTokenSecret: string,
-        },
-    },
-    api: {
-        postmark: {
-            token: string,
-            fromEmail: string,
-        },
-    },
-    storage: {
-        s3: {
-            accessKey: string,
-            secretKey: string,
-            bucketName: string,
-        },
-    },
-};
-
 const schema = {
     env: {
         doc: 'The application environment.',
@@ -133,6 +91,14 @@ const schema = {
                 env: 'JWT_REFRESH_TOKEN_SECRET',
             },
         },
+        session: {
+            sessionSecret: {
+                doc: 'Session secret',
+                format: String,
+                default: 'habanero',
+                env: 'SESSION_SECRET',
+            },
+        },
     },
     api: {
         postmark: {
@@ -174,7 +140,7 @@ const schema = {
     },
 };
 
-const config = convict<GlobalsConfig>(schema);
+const config = convict(schema);
 
 config.validate({allowed: 'strict'});
 

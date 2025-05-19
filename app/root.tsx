@@ -3,8 +3,9 @@ import {
     Meta,
     Outlet,
     Scripts,
+    useLoaderData,
 } from '@remix-run/react';
-import type {LinksFunction} from '@remix-run/node';
+import type {LinksFunction, LoaderFunctionArgs} from '@remix-run/node';
 import {
     ColorSchemeScript,
     MantineColorsTuple,
@@ -15,6 +16,9 @@ import {
 import {AuthProvider} from './components/AuthContext';
 import appStylesHref from './app.css?url';
 import mantineStylesHref from '@mantine/core/styles.css?url';
+import {commitSession, getSession} from '~lib/session.server';
+import {createAuthenticityToken} from '~lib/csrf/csrf.server';
+import {AuthenticityTokenProvider} from '~lib/csrf/react';
 
 export const links: LinksFunction = () => [{rel: 'stylesheet', href: appStylesHref}, {rel: 'stylesheet', href: mantineStylesHref}];
 
@@ -37,7 +41,26 @@ const theme = createTheme({
     },
 });
 
+interface LoaderData {
+    csrfToken: string,
+}
+
+export const loader = async ({request}: LoaderFunctionArgs) => {
+    const session = await getSession(request.headers.get('cookie'));
+    const csrfToken = createAuthenticityToken(session);
+
+    return Response.json({
+        csrfToken,
+    }, {
+        headers: {
+            'Set-Cookie': await commitSession(session),
+        },
+    });
+};
+
 const App = () => {
+    const {csrfToken} = useLoaderData<LoaderData>();
+
     return (
         <html lang="en" {...mantineHtmlProps} suppressHydrationWarning={true}>
             <head>
@@ -50,11 +73,13 @@ const App = () => {
                 <Links />
             </head>
             <body suppressHydrationWarning={true}>
-                <AuthProvider>
-                    <MantineProvider theme={theme}>
-                        <Outlet />
-                    </MantineProvider>
-                </AuthProvider>
+                <AuthenticityTokenProvider token={csrfToken}>
+                    <AuthProvider>
+                        <MantineProvider theme={theme}>
+                            <Outlet />
+                        </MantineProvider>
+                    </AuthProvider>
+                </AuthenticityTokenProvider>
                 <Scripts />
             </body>
         </html>

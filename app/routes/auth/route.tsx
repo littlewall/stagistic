@@ -3,7 +3,7 @@ import {
     redirect,
 } from '@remix-run/react';
 import {LoaderFunctionArgs} from '@remix-run/node';
-import {getUserSession} from '~lib/auth/session.server';
+import {getUserSession} from '~lib/auth/auth-session.server';
 import classes from './auth.module.css';
 import {Paper} from '@mantine/core';
 import authBgImageSrc from '~assets/ui/auth/auth-cover.png';

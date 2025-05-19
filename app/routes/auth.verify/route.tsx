@@ -8,6 +8,7 @@ import {
 } from '@remix-run/react';
 import {useMemo} from 'react';
 import loader, {LoaderData} from './loader';
+import {GENERIC_ERRORS} from '~lib/auth/configs';
 
 export {
     loader,
@@ -16,7 +17,7 @@ export {
 const AuthVerify = () => {
     const {magicLinkSent, error: loaderError} = useLoaderData<LoaderData>();
     const errorMessage = useMemo(() => {
-        return loaderError?.message || undefined;
+        return loaderError?.message || GENERIC_ERRORS.GENERIC_UI.message;
     }, [loaderError]);
 
     return (
