@@ -22,7 +22,7 @@ const schema = {
         baseUrl: {
             doc: 'Backend server base url',
             format: String,
-            default: 'https://api.stagistic.com',
+            default: 'https://api.example.com',
             env: 'SERVER_BASE_URL',
         },
     },
@@ -30,7 +30,7 @@ const schema = {
         baseUrl: {
             doc: 'The client base url.',
             format: String,
-            default: 'https://stagistic.com',
+            default: 'https://example.com',
             env: 'CLIENT_BASE_URL',
         },
     },
@@ -51,19 +51,19 @@ const schema = {
             user: {
                 doc: 'Postgres user name',
                 format: String,
-                default: 'idefix',
+                default: 'user',
                 env: 'POSTGRES_USER',
             },
             password: {
                 doc: 'Postgres user password',
                 format: String,
-                default: 'idefix',
+                default: 'password',
                 env: 'POSTGRES_PASSWORD',
             },
             database: {
                 doc: 'Postgres database name',
                 format: String,
-                default: 'idefix',
+                default: 'database',
                 env: 'POSTGRES_DB',
             },
         },
@@ -111,7 +111,7 @@ const schema = {
             fromEmail: {
                 doc: 'From email address',
                 format: String,
-                default: 'hello@stagistic.com',
+                default: 'hello@dvdev.cz',
                 env: 'POSTMARK_FROM_EMAIL',
             },
         },
@@ -133,7 +133,7 @@ const schema = {
             bucketName: {
                 doc: 'S3 bucket for temporary files',
                 format: String,
-                default: 'lego-idefix-temp-storage-dev',
+                default: '',
                 env: 'AWS_S3_BUCKET_TEMP_STORAGE',
             },
         },

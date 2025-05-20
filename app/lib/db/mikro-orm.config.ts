@@ -23,10 +23,6 @@ const config: Options<PostgreSqlDriver> = {
         tableName: 'migrations',
         transactional: false,
     },
-    seeder: {
-        path: './seeders',
-        emit: 'ts',
-    },
     tsNode: process.env.NODE_DEV === 'true',
     driver: PostgreSqlDriver,
     driverOptions: {
@@ -39,7 +35,6 @@ const config: Options<PostgreSqlDriver> = {
     metadataProvider: TsMorphMetadataProvider,
     populateWhere: PopulateHint.INFER,
     allowGlobalContext: true,
-    debug: true,
     pool: {
         min: 0,
         max: 10,

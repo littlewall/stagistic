@@ -1,5 +1,5 @@
 {
-  "name": "stagistic",
+  "name": "remix-app-bootstrap",
   "packageManager": "yarn@4.9.1",
   "type": "module",
   "scripts": {

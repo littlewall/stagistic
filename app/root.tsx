@@ -1,24 +1,26 @@
 import {
+    ColorSchemeScript,
+    createTheme,
+    MantineColorsTuple,
+    mantineHtmlProps,
+    MantineProvider,
+} from '@mantine/core';
+import mantineStylesHref from '@mantine/core/styles.css?url';
+import type {LinksFunction, LoaderFunctionArgs} from '@remix-run/node';
+import {
     Links,
     Meta,
     Outlet,
     Scripts,
     useLoaderData,
 } from '@remix-run/react';
-import type {LinksFunction, LoaderFunctionArgs} from '@remix-run/node';
-import {
-    ColorSchemeScript,
-    MantineColorsTuple,
-    MantineProvider,
-    createTheme,
-    mantineHtmlProps,
-} from '@mantine/core';
-import {AuthProvider} from './components/AuthContext';
-import appStylesHref from './app.css?url';
-import mantineStylesHref from '@mantine/core/styles.css?url';
-import {commitSession, getSession} from '~lib/session.server';
+
+import {AuthProvider} from '~components/AuthContext';
 import {createAuthenticityToken} from '~lib/csrf/csrf.server';
 import {AuthenticityTokenProvider} from '~lib/csrf/react';
+import {commitSession, getSession} from '~lib/session.server';
+
+import appStylesHref from './app.css?url';
 
 export const links: LinksFunction = () => [{rel: 'stylesheet', href: appStylesHref}, {rel: 'stylesheet', href: mantineStylesHref}];
 

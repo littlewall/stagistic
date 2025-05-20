@@ -88,7 +88,7 @@ const AuthLogin = () => {
                         className={classes.title}
                         ta="center"
                     >
-                        Welcome to Stagistic
+                        Welcome to Remix App
                     </Title>
                     <Text
                         c="dimmed"

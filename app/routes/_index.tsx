@@ -1,7 +1,7 @@
 const IndexRoute = () => {
     return (
         <div>
-            <h1>Welcome to Stagistic</h1>
+            <h1>Welcome to Remix App</h1>
         </div>
     );
 };

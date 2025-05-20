@@ -1,1 +1,1 @@
-# stagistic
+# Remix App Bootstrap

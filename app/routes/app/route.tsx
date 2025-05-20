@@ -14,16 +14,14 @@ import {
     redirect,
 } from '@remix-run/react';
 import {
-    ArrowLeftRight,
-    BookOpenText,
     LayoutDashboard,
     LogOut,
 } from 'lucide-react';
 
+import LinksGroup from '~components/nav/LinksGroup/LinksGroup';
 import UserButton from '~components/nav/UserButton/UserButton';
 import {authenticate} from '~lib/auth/auth-session.server';
 
-import LinksGroup from '../../components/nav/LinksGroup/LinksGroup';
 import classes from './app.module.css';
 
 export const loader = async ({request}: LoaderFunctionArgs) => {
@@ -50,11 +48,6 @@ const mainLinksData = [
         key: 'dashboard',
         icon: LayoutDashboard,
         link: '/app/dashboard',
-    }, {
-        label: 'Programs',
-        key: 'programs',
-        icon: BookOpenText,
-        link: '/app/programs',
     },
 ];
 
@@ -79,7 +72,7 @@ const AppRoute = () => {
             <AppShell.Navbar>
                 <nav className={classes.navbar}>
                     <div className={classes.title}>
-                        Stagistic
+                        Remix App
                     </div>
 
                     <div className={classes.menu}>{links}</div>
@@ -101,20 +94,8 @@ const AppRoute = () => {
                                 >
                                     Settings
                                 </Menu.Item>
-                                <Menu.Item
-                                    component={NavLink}
-                                    to="/app/productions"
-                                >
-                                    Productions
-                                </Menu.Item>
 
                                 <Menu.Divider />
-
-                                <Menu.Item
-                                    leftSection={<ArrowLeftRight size={14} />}
-                                >
-                                    Switch production
-                                </Menu.Item>
                                 <Menu.Item
                                     color="red"
                                     leftSection={<LogOut size={14} />}
@@ -139,7 +120,7 @@ const AppRoute = () => {
             <AppShell.Footer >
                 <div className={classes.footer}>
                     <div className={classes.footerText}>
-                        Stagistic &copy; {new Date().getFullYear()}
+                        Remix App &copy; {new Date().getFullYear()}
                     </div>
                 </div>
             </AppShell.Footer>
