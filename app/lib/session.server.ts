@@ -1,4 +1,5 @@
 import {createCookieSessionStorage} from '@remix-run/node';
+
 import config from '~config/globals';
 
 const SESSION_SECRET = config.get('auth.session.sessionSecret');

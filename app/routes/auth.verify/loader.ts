@@ -1,18 +1,19 @@
 import {Cookie} from '@mjackson/headers';
 import {LoaderFunctionArgs} from '@remix-run/node';
 import {data, redirect} from '@remix-run/react';
+
+import {deleteMagicLinkCookie, getMagicLinkSession} from '~lib/auth/auth-session.server';
+import {createUserSession, getUserSession} from '~lib/auth/auth-session.server';
 import {
     MagicLinkError,
     verifyMagicLinkFlow,
 } from '~lib/auth/authentication.server';
-import {deleteMagicLinkCookie, getMagicLinkSession} from '~lib/auth/auth-session.server';
 import {
     COOKIE_MAGIC_LINK_SENT,
+    GENERIC_ERRORS,
     MAGIC_LINK_ERRORS,
     MagicLinkErrorCode,
-    GENERIC_ERRORS,
 } from '~lib/auth/configs';
-import {createUserSession, getUserSession} from '~lib/auth/auth-session.server';
 
 export type LoaderData = {
     magicLinkSent: boolean,

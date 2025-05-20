@@ -1,11 +1,12 @@
-import {MagicLinkErrorCode, MAGIC_LINK_ERRORS} from '~lib/auth/configs';
 import {
+    email,
+    minLength,
     object,
     pipe,
     string,
-    email,
-    minLength,
 } from 'valibot';
+
+import {MAGIC_LINK_ERRORS, MagicLinkErrorCode} from '~lib/auth/configs';
 
 export function getMagicLinkErrorMessage(errorCode: string | null | undefined): string | undefined {
     if (!errorCode) return undefined;

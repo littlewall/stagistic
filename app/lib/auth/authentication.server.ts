@@ -1,15 +1,17 @@
+import {Session} from '@remix-run/node';
 import jwt from 'jsonwebtoken';
+
+import globals from '~config/globals';
 import {User} from '~lib/db/entities/User';
 import {resolveEntityManager} from '~lib/db/orm';
-import globals from '~config/globals';
-import {sendMagicLinkEmail} from './email.server';
+
 import {createMagicLinkCookie} from './auth-session.server';
 import {
-    MAGIC_LINK_ERRORS,
     GENERIC_ERRORS,
+    MAGIC_LINK_ERRORS,
     MagicLinkErrorCode,
 } from './configs';
-import {Session} from '@remix-run/node';
+import {sendMagicLinkEmail} from './email.server';
 
 export type UserAuth = {
     id: string,

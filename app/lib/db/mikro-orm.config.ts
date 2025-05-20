@@ -1,11 +1,12 @@
-import {PostgreSqlDriver} from '@mikro-orm/postgresql';
-import {TsMorphMetadataProvider} from '@mikro-orm/reflection';
-import {SqlHighlighter} from '@mikro-orm/sql-highlighter';
 import {
     LoadStrategy,
     Options,
     PopulateHint,
 } from '@mikro-orm/core';
+import {PostgreSqlDriver} from '@mikro-orm/postgresql';
+import {TsMorphMetadataProvider} from '@mikro-orm/reflection';
+import {SqlHighlighter} from '@mikro-orm/sql-highlighter';
+
 import globals from '../../config/globals';
 import entities from './entities';
 

@@ -1,7 +1,8 @@
 import {
-    Property,
     Entity,
+    Property,
 } from '@mikro-orm/core';
+
 import {Base} from './Base';
 
 @Entity()

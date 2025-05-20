@@ -1,5 +1,6 @@
 import {useSearchParams} from '@remix-run/react';
 import {useEffect, useMemo} from 'react';
+
 import {getMagicLinkErrorMessage} from './helpers';
 
 export function useUrlErrorMessage(param: string): string | undefined {

@@ -1,4 +1,5 @@
 import {ActionFunctionArgs} from '@remix-run/node';
+
 import {refreshUserSession} from '~lib/auth/auth-session.server';
 
 export async function action({request}: ActionFunctionArgs) {

@@ -11,7 +11,7 @@
     "migrations:down": "yarn mikro-orm migration:down"
   },
   "devDependencies": {
-    "@dvdevcz/eslint": "^0.3.3",
+    "@dvdevcz/eslint": "^0.4.0",
     "@dvdevcz/stylelint": "^0.1.0",
     "@dvdevcz/typescript-config": "^0.0.3",
     "@mikro-orm/cli": "^6.4.14",

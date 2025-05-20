@@ -1,8 +1,12 @@
 import {
-    Avatar, Text, UnstyledButton, Group,
+    Avatar,
+    Group,
+    Text,
+    UnstyledButton,
 } from '@mantine/core';
 import {ChevronRight} from 'lucide-react';
 import {forwardRef} from 'react';
+
 import classes from './UserButton.module.css';
 
 interface UserButtonProps extends React.ComponentPropsWithoutRef<'button'> {

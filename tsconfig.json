@@ -21,7 +21,7 @@
       "moduleResolution": "Bundler",
       "maxNodeModuleJsDepth": 10,
       "typeRoots": [
-          "./@types",
+          "./types",
           "./node_modules/@types"
       ]
     },
@@ -35,6 +35,6 @@
         "./scripts/**/*.ts",
         "./vite.config.ts",
         "./mikro-orm.config.ts",
-        "./migrations/**/*.ts",
+        "./migrations/**/*.ts", "types/vite-env.d.ts", "types/eslint.d.ts",
     ]
 }

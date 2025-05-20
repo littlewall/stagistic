@@ -1,4 +1,3 @@
-import {useState} from 'react';
 import {
     Box,
     Collapse,
@@ -7,8 +6,10 @@ import {
     UnstyledButton,
 } from '@mantine/core';
 import {NavLink} from '@remix-run/react';
-import classes from './LinksGroup.module.css';
 import {ChevronRight, LucideIcon} from 'lucide-react';
+import {useState} from 'react';
+
+import classes from './LinksGroup.module.css';
 
 interface LinksGroupProps {
     icon: LucideIcon,

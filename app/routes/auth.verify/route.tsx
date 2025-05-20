@@ -2,13 +2,15 @@ import {
     Text,
     Title,
 } from '@mantine/core';
-import classes from './verify.module.css';
 import {
     useLoaderData,
 } from '@remix-run/react';
 import {useMemo} from 'react';
-import loader, {LoaderData} from './loader';
+
 import {GENERIC_ERRORS} from '~lib/auth/configs';
+
+import loader, {LoaderData} from './loader';
+import classes from './verify.module.css';
 
 export {
     loader,

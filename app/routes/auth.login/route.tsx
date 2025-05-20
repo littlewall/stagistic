@@ -1,4 +1,10 @@
 import {
+    getFormProps,
+    getInputProps,
+    useForm,
+} from '@conform-to/react';
+import {parseWithValibot} from '@conform-to/valibot';
+import {
     Anchor,
     Box,
     Button,
@@ -7,30 +13,26 @@ import {
     TextInput,
     Title,
 } from '@mantine/core';
-import classes from './login.module.css';
-import {ArrowLeft} from 'lucide-react';
 import {
-    useLoaderData,
-    useFetcher,
     NavLink,
+    useFetcher,
+    useLoaderData,
 } from '@remix-run/react';
-import {
-    getFormProps,
-    getInputProps,
-    useForm,
-} from '@conform-to/react';
-import {parseWithValibot} from '@conform-to/valibot';
-import {useUrlErrorMessage} from './useUrlErrorMessage';
-import {loginFormSchema} from './helpers';
+import {ArrowLeft} from 'lucide-react';
 import {useMemo} from 'react';
-import loader from './loader';
-import action from './action';
+
 import {GENERIC_ERRORS} from '~lib/auth/configs';
 import {AuthenticityTokenInput} from '~lib/csrf/react';
 
+import action from './action';
+import {loginFormSchema} from './helpers';
+import loader from './loader';
+import classes from './login.module.css';
+import {useUrlErrorMessage} from './useUrlErrorMessage';
+
 export {
-    loader,
     action,
+    loader,
 };
 
 const AuthLogin = () => {

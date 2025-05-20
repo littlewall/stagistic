@@ -1,9 +1,10 @@
 import {
     createContext,
+    ReactNode,
     useContext,
     useState,
-    ReactNode,
 } from 'react';
+
 import {User} from '~lib/db/entities/User';
 
 interface AuthContextType {

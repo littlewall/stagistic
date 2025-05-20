@@ -5,24 +5,26 @@ import {
     UnstyledButton,
 } from '@mantine/core';
 import {useDisclosure} from '@mantine/hooks';
+import {LoaderFunctionArgs} from '@remix-run/node';
 import {
     data,
-    Outlet,
-    redirect,
     Form,
     NavLink,
+    Outlet,
+    redirect,
 } from '@remix-run/react';
 import {
-    LayoutDashboard,
-    BookOpenText,
     ArrowLeftRight,
+    BookOpenText,
+    LayoutDashboard,
     LogOut,
 } from 'lucide-react';
-import {LoaderFunctionArgs} from '@remix-run/node';
-import classes from './app.module.css';
-import LinksGroup from '../../components/nav/LinksGroup/LinksGroup';
-import {authenticate} from '~lib/auth/auth-session.server';
+
 import UserButton from '~components/nav/UserButton/UserButton';
+import {authenticate} from '~lib/auth/auth-session.server';
+
+import LinksGroup from '../../components/nav/LinksGroup/LinksGroup';
+import classes from './app.module.css';
 
 export const loader = async ({request}: LoaderFunctionArgs) => {
     try {

@@ -1,12 +1,14 @@
-import {ActionFunctionArgs} from '@remix-run/node';
 import {parseWithValibot} from '@conform-to/valibot';
+import {ActionFunctionArgs} from '@remix-run/node';
 import {redirect} from '@remix-run/node';
-import {sendMagicLinkFlow, MagicLinkError} from '~lib/auth/authentication.server';
-import {MAGIC_LINK_ERRORS, MagicLinkErrorCode} from '~lib/auth/configs';
-import {loginFormSchema} from './helpers';
+
 import {getMagicLinkSession} from '~lib/auth/auth-session.server';
-import {getSession} from '~lib/session.server';
+import {MagicLinkError, sendMagicLinkFlow} from '~lib/auth/authentication.server';
+import {MAGIC_LINK_ERRORS, MagicLinkErrorCode} from '~lib/auth/configs';
 import {verifyAuthenticityToken} from '~lib/csrf/csrf.server';
+import {getSession} from '~lib/session.server';
+
+import {loginFormSchema} from './helpers';
 
 const action = async ({request}: ActionFunctionArgs) => {
     const session = await getSession(request.headers.get('cookie'));

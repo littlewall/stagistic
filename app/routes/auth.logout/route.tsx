@@ -1,4 +1,5 @@
 import {redirect} from '@remix-run/react';
+
 import {removeUserSession} from '~lib/auth/auth-session.server';
 
 export const loader = () => {

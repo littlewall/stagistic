@@ -1,8 +1,10 @@
-import jwt from 'jsonwebtoken';
-import globals from '~config/globals';
-import {REFRESH_TOKEN_COOKIE_NAME} from './jwt';
 import {createCookieSessionStorage} from '@remix-run/node';
+import jwt from 'jsonwebtoken';
+
+import globals from '~config/globals';
+
 import {JWT_ERRORS, JwtErrorCode} from './configs';
+import {REFRESH_TOKEN_COOKIE_NAME} from './jwt';
 
 export type TokenPayload = {
     id: string,

@@ -1,5 +1,6 @@
-import {ServerClient} from 'postmark';
 import type postmark from 'postmark';
+import {ServerClient} from 'postmark';
+
 import globals from '~config/globals';
 
 interface EmailConfig {

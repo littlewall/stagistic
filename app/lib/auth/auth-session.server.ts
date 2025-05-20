@@ -1,18 +1,20 @@
+import {createCookieSessionStorage, Session} from '@remix-run/node';
 import jwt from 'jsonwebtoken';
+
+import globals from '~config/globals';
+import config from '~config/globals';
+import {User} from '~lib/db/entities/User';
+import {resolveEntityManager} from '~lib/db/orm';
+
+import {COOKIE_MAGIC_LINK_SENT} from './configs';
+import {REFRESH_TOKEN_COOKIE_NAME} from './jwt';
 import {
     createAccessToken,
     createRefreshToken,
+    refreshTokenSession,
     setRefreshTokenCookie,
     TokenPayload,
-    refreshTokenSession,
 } from './jwt.server';
-import globals from '~config/globals';
-import {resolveEntityManager} from '~lib/db/orm';
-import {User} from '~lib/db/entities/User';
-import {REFRESH_TOKEN_COOKIE_NAME} from './jwt';
-import {createCookieSessionStorage, Session} from '@remix-run/node';
-import {COOKIE_MAGIC_LINK_SENT} from './configs';
-import config from '~config/globals';
 
 const REFRESH_TOKEN_SECRET = globals.get('auth.jwt.refreshTokenSecret');
 

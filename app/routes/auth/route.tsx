@@ -1,12 +1,14 @@
+import {Paper} from '@mantine/core';
+import {LoaderFunctionArgs} from '@remix-run/node';
 import {
     Outlet,
     redirect,
 } from '@remix-run/react';
-import {LoaderFunctionArgs} from '@remix-run/node';
-import {getUserSession} from '~lib/auth/auth-session.server';
-import classes from './auth.module.css';
-import {Paper} from '@mantine/core';
+
 import authBgImageSrc from '~assets/ui/auth/auth-cover.png';
+import {getUserSession} from '~lib/auth/auth-session.server';
+
+import classes from './auth.module.css';
 
 export const loader = async ({request}: LoaderFunctionArgs) => {
     try {
