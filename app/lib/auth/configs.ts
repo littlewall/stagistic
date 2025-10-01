@@ -36,7 +36,7 @@ export const MAGIC_LINK_ERRORS: Record<MagicLinkErrorCode, {key: MagicLinkErrorC
     },
     [MagicLinkErrorCode.USER_NOT_FOUND]: {
         key: MagicLinkErrorCode.USER_NOT_FOUND,
-        message: 'User not found. Please check your email and try again.',
+        message: 'No account found for this email. If you are new, check your email to activate your account.',
     },
     [MagicLinkErrorCode.TOKEN_EXPIRED]: {
         key: MagicLinkErrorCode.TOKEN_EXPIRED,

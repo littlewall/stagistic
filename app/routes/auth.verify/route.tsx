@@ -35,7 +35,9 @@ const AuthVerify = () => {
                         Check your email
                     </Title>
                     <Text c="dimmed" fz="sm" ta="center">
-                        We sent a magic link to your email. Click the link in email to log in.
+                        We sent a magic link to your email. <br /><br />
+                        <b>If you already have an account</b>, click the link to log in.<br />
+                        <b>If you are new</b>, click the link to confirm and activate your account.
                     </Text>
                 </>
             )}

@@ -19,8 +19,8 @@ import {
 const REFRESH_TOKEN_SECRET = globals.get('auth.jwt.refreshTokenSecret');
 
 interface UserSession {
-    user: User | null,
-    accessToken?: string | null,
+    user: User,
+    accessToken?: string,
 }
 
 export const getUserSession = async (request: Request): Promise<UserSession | null> => {
@@ -152,6 +152,11 @@ export const authenticate = async (request: Request, returnTo?: string) => {
                 Location: redirectUrl,
             },
         });
+
+        return {
+            user: null,
+            response,
+        };
     }
 
     return {

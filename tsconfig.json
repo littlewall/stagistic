@@ -15,6 +15,7 @@
         "~lib/*": ["./lib/*"],
         "~types/*": ["./types/*"],
         "~assets/*": ["./assets/*"],
+        "~schemas/*": ["./schemas/*"],
         "~components/*": ["./components/*"],
       },
       "module": "ESNext",

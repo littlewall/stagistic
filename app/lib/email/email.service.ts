@@ -12,6 +12,12 @@ export interface EmailTemplates {
     'magic-link': {
         magic_link: string,
     },
+    'magic-link-signup': {
+        magic_link: string,
+    },
+    'dangerous-action-otp': {
+        otp: string,
+    },
 }
 
 let client: postmark.ServerClient;

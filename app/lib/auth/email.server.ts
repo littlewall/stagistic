@@ -16,3 +16,13 @@ export const sendMagicLinkEmail: SendEmailFunction = async options => {
         console.error('Error sending TOTP email:', error);
     }
 };
+
+export const sendMagicLinkSignupEmail: SendEmailFunction = async options => {
+    try {
+        await sendTemplateEmail(options.email, 'magic-link-signup', {
+            magic_link: options.magicLink,
+        });
+    } catch (error) {
+        console.error('Error sending signup magic link email:', error);
+    }
+};

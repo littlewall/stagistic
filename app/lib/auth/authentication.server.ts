@@ -11,7 +11,7 @@ import {
     MAGIC_LINK_ERRORS,
     MagicLinkErrorCode,
 } from './configs';
-import {sendMagicLinkEmail} from './email.server';
+import {sendMagicLinkEmail, sendMagicLinkSignupEmail} from './email.server';
 
 export type UserAuth = {
     id: string,
@@ -56,14 +56,14 @@ const sendMagicLink = async (email: string, session: Session) => {
     const em = await resolveEntityManager();
     const user = await em.getRepository(User).findOne({email});
 
-    if (user) {
-        const {magicLink} = createMagicLink(email);
+    const {magicLink} = createMagicLink(email);
 
+    if (user) {
         await sendMagicLinkEmail({email, magicLink});
     }
 
     if (!user) {
-        await new Promise(res => setTimeout(res, 500));
+        await sendMagicLinkSignupEmail({email, magicLink});
     }
 
     const cookie = await createMagicLinkCookie(session);
@@ -105,16 +105,19 @@ const validateMagicLinkToken = (request: Request) => {
 const verifyMagicLink = async (request: Request) => {
     const email = validateMagicLinkToken(request);
     const em = await resolveEntityManager();
-    const user = await em.getRepository(User).findOne({email});
+    let user = await em.getRepository(User).findOne({email});
 
     if (!user) {
-        throw new MagicLinkError(
-            MagicLinkErrorCode.USER_NOT_FOUND,
-            MAGIC_LINK_ERRORS[MagicLinkErrorCode.USER_NOT_FOUND].message,
-        );
+        user = new User();
+        user.email = email;
+
+        await em.persistAndFlush(user);
     }
 
-    return {id: user.id, email: user.email};
+    return {
+        id: user.id,
+        email: user.email,
+    };
 };
 
 export interface ConstructorOptions {

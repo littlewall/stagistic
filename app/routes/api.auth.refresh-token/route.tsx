@@ -2,7 +2,7 @@ import {ActionFunctionArgs} from '@remix-run/node';
 
 import {refreshUserSession} from '~lib/auth/auth-session.server';
 
-export async function action({request}: ActionFunctionArgs) {
+export const action = async ({request}: ActionFunctionArgs) => {
     if (request.method !== 'POST') {
         return Response.json(
             {message: 'Method not allowed'},
@@ -41,4 +41,4 @@ export async function action({request}: ActionFunctionArgs) {
             {status: isExpired ? 401 : 500},
         );
     }
-}
+};

@@ -7,7 +7,8 @@ import {PostgreSqlDriver} from '@mikro-orm/postgresql';
 import {TsMorphMetadataProvider} from '@mikro-orm/reflection';
 import {SqlHighlighter} from '@mikro-orm/sql-highlighter';
 
-import globals from '../../config/globals';
+import globals from '~config/globals';
+
 import entities from './entities';
 
 const {
@@ -29,7 +30,7 @@ const config: Options<PostgreSqlDriver> = {
         connection: {ssl: true},
     },
     entities,
-    clientUrl: `postgresql://${user}:${password}@${host}/${database}?sslmode=require`,
+    clientUrl: `postgres://${user}:${password}@${host}/${database}?sslmode=require`,
     loadStrategy: LoadStrategy.JOINED,
     highlighter: new SqlHighlighter(),
     metadataProvider: TsMorphMetadataProvider,

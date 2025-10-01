@@ -18,6 +18,12 @@ export const loader = async ({request}: LoaderFunctionArgs) => {
             return redirect('/app/dashboard');
         }
 
+        const url = new URL(request.url);
+
+        if (url.pathname === '/auth') {
+            return redirect('/auth/login');
+        }
+
         return {};
     } catch (error) {
         console.error('Error in app route loader:', error);
