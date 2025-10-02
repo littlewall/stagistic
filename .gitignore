@@ -19,3 +19,9 @@ temp
 .pnp.*
 
 .env
+
+# Migrations - generated files (auto-applied)
+migrations/better-auth/*.sql
+
+# GitHub Copilot session outputs (temporary)
+.copilot-sessions/

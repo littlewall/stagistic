@@ -1,13 +1,18 @@
-import {redirect} from '@remix-run/react';
+import {
+    ActionFunctionArgs,
+    redirect,
+} from '@remix-run/node';
 
-import {removeUserSession} from '~lib/auth/auth-session.server';
+import {auth} from '~lib/auth/auth.server';
 
 export const loader = () => {
     return redirect('/auth/login');
 };
 
-export const action = async ({request}: {request: Request}) => {
-    const response = redirect('/');
+export const action = async ({request}: ActionFunctionArgs) => {
+    await auth.api.signOut({
+        headers: request.headers,
+    });
 
-    return await removeUserSession(request, response);
+    return redirect('/auth/login');
 };

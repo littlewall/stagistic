@@ -20,17 +20,14 @@ const {
 
 const config: Options<PostgreSqlDriver> = {
     migrations: {
-        path: './migrations',
-        tableName: 'migrations',
+        path: './migrations/mikro-orm',
+        tableName: 'mikro_orm_migrations',
         transactional: false,
     },
     tsNode: process.env.NODE_DEV === 'true',
     driver: PostgreSqlDriver,
-    driverOptions: {
-        connection: {ssl: true},
-    },
     entities,
-    clientUrl: `postgres://${user}:${password}@${host}/${database}?sslmode=require`,
+    clientUrl: `postgres://${user}:${password}@${host}/${database}`,
     loadStrategy: LoadStrategy.JOINED,
     highlighter: new SqlHighlighter(),
     metadataProvider: TsMorphMetadataProvider,

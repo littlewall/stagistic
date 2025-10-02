@@ -1,12 +1,14 @@
 import {LoaderFunctionArgs, redirect} from '@remix-run/node';
 
-import {authenticate} from '~lib/auth/auth-session.server';
+import {auth} from '~lib/auth/auth.server';
 
 export const loader = async ({request}: LoaderFunctionArgs) => {
-    const {response} = await authenticate(request);
+    const session = await auth.api.getSession({
+        headers: request.headers,
+    });
 
-    if (response) {
-        return response;
+    if (!session?.user) {
+        return redirect('/auth/login');
     }
 
     if (request.url.endsWith('/app/teams') || request.url.endsWith('/app/teams/')) {

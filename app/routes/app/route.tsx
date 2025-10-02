@@ -7,11 +7,11 @@ import {
 import {useDisclosure} from '@mantine/hooks';
 import {LoaderFunctionArgs} from '@remix-run/node';
 import {
-    data,
     Form,
     NavLink,
     Outlet,
     redirect,
+    useLoaderData,
 } from '@remix-run/react';
 import {
     LayoutDashboard,
@@ -21,21 +21,23 @@ import {
 import LinksGroup from '~components/nav/LinksGroup/LinksGroup';
 import UserButton from '~components/nav/UserButton/UserButton';
 import {ToastContainer, ToastProvider} from '~components/ToastProvider';
-import {authenticate} from '~lib/auth/auth-session.server';
+import {auth} from '~lib/auth/auth.server';
 
 import classes from './app.module.css';
 
 export const loader = async ({request}: LoaderFunctionArgs) => {
     try {
-        const {user, response} = await authenticate(request);
+        const session = await auth.api.getSession({
+            headers: request.headers,
+        });
 
-        if (response) {
-            return response;
+        if (!session?.user) {
+            return redirect('/auth/login');
         }
 
-        return data({
-            user,
-        });
+        return {
+            user: session.user,
+        };
     } catch (error) {
         console.error('Error in app route loader:', error);
 
@@ -54,6 +56,7 @@ const mainLinksData = [
 
 const AppRoute = () => {
     const [opened, {toggle}] = useDisclosure();
+    const {user} = useLoaderData<typeof loader>();
 
     const links = mainLinksData.map(item => <LinksGroup {...item} key={item.key || item.label} />);
 
@@ -75,7 +78,7 @@ const AppRoute = () => {
                 <AppShell.Navbar>
                     <nav className={classes.navbar}>
                         <div className={classes.title}>
-                            Remix App
+                            Stagistic
                         </div>
 
                         <div className={classes.menu}>{links}</div>
@@ -84,9 +87,9 @@ const AppRoute = () => {
                             <Menu position="right-end" offset={0}>
                                 <Menu.Target>
                                     <UserButton
-                                        image='https://i.pravatar.cc/300'
-                                        name='John Doe'
-                                        email="john.doe@example.com"
+                                        image={user.image || 'https://i.pravatar.cc/300'}
+                                        name={user.name}
+                                        email={user.email}
                                     />
                                 </Menu.Target>
                                 <Menu.Dropdown>

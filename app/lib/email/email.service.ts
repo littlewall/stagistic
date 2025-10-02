@@ -1,7 +1,7 @@
 import type postmark from 'postmark';
 import {ServerClient} from 'postmark';
 
-import globals from '~config/globals';
+import globals from '../../config/globals';
 
 interface EmailConfig {
     apiKey: string,

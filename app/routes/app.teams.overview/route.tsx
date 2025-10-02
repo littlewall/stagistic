@@ -37,7 +37,7 @@ import {
 import {useEffect} from 'react';
 import {teamFormSchema} from 'schemas/forms/team';
 
-import {authenticate} from '~lib/auth/auth-session.server';
+import {auth} from '~lib/auth/auth.server';
 import {Role} from '~lib/db/entities/Role';
 import {Team} from '~lib/db/entities/Team';
 import {User} from '~lib/db/entities/User';
@@ -65,10 +65,12 @@ interface ActionData {
 
 export const action = async ({request}: ActionFunctionArgs) => {
     try {
-        const {user, response} = await authenticate(request);
+        const session = await auth.api.getSession({
+            headers: request.headers,
+        });
 
-        if (response) {
-            return response;
+        if (!session?.user) {
+            return json({error: 'Unauthorized'}, {status: 401});
         }
 
         const formData = await request.formData();
@@ -79,7 +81,7 @@ export const action = async ({request}: ActionFunctionArgs) => {
         }
 
         const em = await resolveEntityManager();
-        const userEntity = await em.findOne(User, {id: user.user.id});
+        const userEntity = await em.findOne(User, {id: session.user.id});
 
         if (!userEntity) {
             return json({error: 'User not found'}, {status: 404});
@@ -126,14 +128,16 @@ export const action = async ({request}: ActionFunctionArgs) => {
 
 export const loader = async ({request}: LoaderFunctionArgs) => {
     try {
-        const {user, response} = await authenticate(request);
+        const session = await auth.api.getSession({
+            headers: request.headers,
+        });
 
-        if (response) {
-            return response;
+        if (!session?.user) {
+            return json({error: 'Unauthorized'}, {status: 401});
         }
 
         const em = await resolveEntityManager();
-        const userWithTeams = await em.findOneOrFail(User, {id: user.user.id}, {populate: ['userTeams.team', 'userTeams.role']});
+        const userWithTeams = await em.findOneOrFail(User, {id: session.user.id}, {populate: ['userTeams.team', 'userTeams.role']});
 
         if (!userWithTeams) {
             return data({teams: []});
@@ -143,7 +147,7 @@ export const loader = async ({request}: LoaderFunctionArgs) => {
             id: ut.team.id,
             name: ut.team.name,
             role: ut.role.name,
-            isOwner: ut.team.owner?.id === user.user.id,
+            isOwner: ut.team.owner?.id === session.user.id,
         }));
 
         return data({teams});

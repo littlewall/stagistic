@@ -6,15 +6,17 @@ import {
 } from '@remix-run/react';
 
 import authBgImageSrc from '~assets/ui/auth/auth-cover.png';
-import {getUserSession} from '~lib/auth/auth-session.server';
+import {auth} from '~lib/auth/auth.server';
 
 import classes from './auth.module.css';
 
 export const loader = async ({request}: LoaderFunctionArgs) => {
     try {
-        const userSession = await getUserSession(request);
+        const session = await auth.api.getSession({
+            headers: request.headers,
+        });
 
-        if (userSession) {
+        if (session) {
             return redirect('/app/dashboard');
         }
 
@@ -26,9 +28,15 @@ export const loader = async ({request}: LoaderFunctionArgs) => {
 
         return {};
     } catch (error) {
-        console.error('Error in app route loader:', error);
+        console.error('Error in auth route loader:', error);
 
-        return redirect('/auth/login');
+        const url = new URL(request.url);
+
+        if (url.pathname === '/auth') {
+            return redirect('/auth/login');
+        }
+
+        return {};
     }
 };
 

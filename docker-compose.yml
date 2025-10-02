@@ -1,0 +1,84 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: stagistic-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: stagistic
+      POSTGRES_PASSWORD: stagistic_password
+      POSTGRES_DB: stagistic
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U stagistic"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: stagistic-app
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=webapp
+      - 'traefik.http.routers.stagistic-prod-secure.rule=Host(`stagistic.dvdev.cz`)'
+      - 'traefik.http.routers.stagistic-prod-secure.entrypoints=https'
+      - 'traefik.http.routers.stagistic-prod-secure.tls=true'
+      - 'traefik.http.services.stagistic-prod.loadbalancer.server.port=3000'
+    networks:
+      - default
+      - webapp
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      
+      # Database configuration
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: stagistic
+      POSTGRES_PASSWORD: stagistic_password
+      POSTGRES_DB: stagistic
+      
+      # Server URLs (update these for your production domain)
+      SERVER_BASE_URL: https://stagistic.dvdev.cz
+      CLIENT_BASE_URL: https://stagistic.dvdev.cz
+      
+      # Auth secrets (CHANGE THESE IN PRODUCTION!)
+      AUTH_MAGIC_LINK_SECRET: your-magic-link-secret-change-me
+      JWT_ACCESS_TOKEN_SECRET: your-jwt-access-token-secret-change-me
+      JWT_REFRESH_TOKEN_SECRET: your-jwt-refresh-token-secret-change-me
+      SESSION_SECRET: your-session-secret-change-me
+      
+      # Email configuration (Postmark)
+      POSTMARK_API_KEY: your-postmark-api-key
+      POSTMARK_FROM_EMAIL: hello@yourdomain.com
+      
+      # S3 Storage (optional)
+      # AWS_ACCESS_KEY_ID: your-access-key
+      # AWS_SECRET_ACCESS_KEY: your-secret-key
+      # AWS_S3_BUCKET_TEMP_STORAGE: your-bucket-name
+      
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./migrations/mikro-orm:/app/migrations/mikro-orm
+      - ./migrations/better-auth:/app/migrations/better-auth
+    command: sh -c "yarn migrate:apply && node server.js"
+
+volumes:
+  postgres_data:
+    driver: local
+
+networks:
+  webapp:
+    external: true

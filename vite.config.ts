@@ -9,6 +9,9 @@ declare module '@remix-run/node' {
 }
 
 export default defineConfig({
+    server: {
+        allowedHosts: ['stagistic.local.dvdev.cz', 'localhost'],
+    },
     plugins: [
         remix({
             ignoredRouteFiles: ['**/*.css'],

@@ -43,16 +43,10 @@ import {
 import {useEffect, useState} from 'react';
 import {teamFormSchema} from 'schemas/forms/team';
 
-import {authenticate} from '~lib/auth/auth-session.server';
-import {
-    clearOtp,
-    generateAndSendOtp,
-    generateRequestId,
-    validateOtp,
-} from '~lib/auth/otp.server';
+import {auth} from '~lib/auth/auth.server';
+import {useEmailOTP} from '~lib/auth/useEmailOTP';
 import {Team} from '~lib/db/entities/Team';
 import {resolveEntityManager} from '~lib/db/orm';
-import {commitSession, getSession} from '~lib/session.server';
 import {redirectWithToast} from '~lib/toast/toast.server';
 
 interface TeamMember {
@@ -76,20 +70,19 @@ interface ActionData {
     success?: boolean,
     error?: string,
     formError?: string,
-    otpRequired?: boolean,
-    requestId?: string,
 }
 
 export const action = async ({request, params}: ActionFunctionArgs) => {
     try {
-        const session = await getSession(request.headers.get('Cookie'));
-        const authResult = await authenticate(request);
+        const authSession = await auth.api.getSession({
+            headers: request.headers,
+        });
 
-        if (authResult.response) {
-            return authResult.response;
+        if (!authSession?.user) {
+            return data({error: 'Unauthorized'}, {status: 401});
         }
 
-        const user = authResult.user;
+        const user = authSession.user;
         const teamId = params.teamId;
 
         if (!teamId) {
@@ -115,14 +108,14 @@ export const action = async ({request, params}: ActionFunctionArgs) => {
         }
 
         // Check if user is a member of the team
-        const isMember = team.userTeams.getItems().some(ut => ut.user.id === user.user.id);
+        const isMember = team.userTeams.getItems().some(ut => ut.user.id === user.id);
 
         if (!isMember) {
             return data({error: 'You are not a member of this team'}, {status: 403});
         }
 
         // Check if the user is the owner of the team
-        const isOwner = team.owner?.id === user.user.id;
+        const isOwner = team.owner?.id === user.id;
         const formData = await request.formData();
         const intent = formData.get('intent');
 
@@ -145,115 +138,42 @@ export const action = async ({request, params}: ActionFunctionArgs) => {
             return data({success: true});
         }
 
-        // Handle dangerous actions with OTP verification
-        if (intent === 'request-otp') {
+        // Handle dangerous actions (OTP verification happens on client side)
+        if (intent === 'delete-team') {
             if (!isOwner) {
                 return data({error: 'Only the team owner can perform this action'}, {status: 403});
             }
 
-            const requestId = generateRequestId();
+            const otpVerified = formData.get('otpVerified') === 'true';
 
-            await generateAndSendOtp({
-                email: user.user.email,
-                userId: user.user.id,
-                requestId,
-                session,
+            if (!otpVerified) {
+                return data({error: 'OTP verification required'}, {status: 400});
+            }
+
+            // First, remove all relationships in a transaction
+            await em.transactional(em => {
+                // Remove user team associations
+                const userTeams = team.userTeams.getItems();
+
+                for (const userTeam of userTeams) {
+                    em.remove(userTeam);
+                }
+
+                // Remove role associations
+                const roles = team.roles.getItems();
+
+                for (const role of roles) {
+                    em.remove(role);
+                }
             });
 
-            const cookie = await commitSession(session);
+            // Finally delete the team
+            await em.removeAndFlush(team);
 
-            return data(
-                {
-                    otpRequired: true,
-                    requestId,
-                },
-                {
-                    headers: {
-                        'Set-Cookie': cookie,
-                    },
-                },
-            );
-        }
-
-        if (intent === 'verify-otp') {
-            if (!isOwner) {
-                return data({error: 'Only the team owner can perform this action'}, {status: 403});
-            }
-
-            const otp = formData.get('otp') as string;
-            const requestId = formData.get('requestId') as string;
-            const action = formData.get('action') as string;
-
-            const validation = validateOtp({
-                session,
-                otp,
-                userId: user.user.id,
-                requestId,
-            });
-
-            if (!validation.valid) {
-                const cookie = await commitSession(session);
-
-                return data(
-                    {error: validation.error || 'Invalid OTP'},
-                    {
-                        status: 400,
-                        headers: {
-                            'Set-Cookie': cookie,
-                        },
-                    },
-                );
-            }
-
-            clearOtp(session);
-
-            // Handle different dangerous actions
-            if (action === 'delete-team') {
-                // First, remove all relationships in a transaction
-                await em.transactional(em => {
-                    // Remove user team associations
-                    const userTeams = team.userTeams.getItems();
-
-                    for (const userTeam of userTeams) {
-                        em.remove(userTeam);
-                    }
-
-                    // Remove role associations
-                    const roles = team.roles.getItems();
-
-                    for (const role of roles) {
-                        em.remove(role);
-                    }
-                });
-
-                // Finally delete the team
-                await em.removeAndFlush(team);
-
-                // Clear OTP and redirect with success message
-                const cookie = await commitSession(session);
-
-                return redirectWithToast(
-                    '/app/teams/overview',
-                    `Team "${team.name}" has been successfully deleted.`,
-                    'success',
-                    {
-                        headers: {
-                            'Set-Cookie': cookie,
-                        },
-                    },
-                );
-            }
-
-            const cookie = await commitSession(session);
-
-            return data(
-                {error: 'Unknown action'},
-                {
-                    status: 400,
-                    headers: {
-                        'Set-Cookie': cookie,
-                    },
-                },
+            return redirectWithToast(
+                '/app/teams/overview',
+                `Team "${team.name}" has been successfully deleted.`,
+                'success',
             );
         }
 
@@ -269,12 +189,15 @@ export const action = async ({request, params}: ActionFunctionArgs) => {
 
 export const loader = async ({request, params}: LoaderFunctionArgs) => {
     try {
-        const {user, response} = await authenticate(request);
+        const session = await auth.api.getSession({
+            headers: request.headers,
+        });
 
-        if (response) {
-            return response;
+        if (!session?.user) {
+            return redirectWithToast('/auth/login', 'Please sign in', 'error');
         }
 
+        const user = session.user;
         const teamId = params.teamId;
 
         if (!teamId) {
@@ -299,7 +222,7 @@ export const loader = async ({request, params}: LoaderFunctionArgs) => {
         }
 
         // Check if user is a member of the team
-        const isMember = team.userTeams.getItems().some(ut => ut.user.id === user.user.id);
+        const isMember = team.userTeams.getItems().some(ut => ut.user.id === user.id);
 
         if (!isMember) {
             return redirectWithToast(
@@ -322,9 +245,9 @@ export const loader = async ({request, params}: LoaderFunctionArgs) => {
                 id: team.id,
                 name: team.name,
             },
-            isOwner: team.owner?.id === user.user.id,
+            isOwner: team.owner?.id === user.id,
             members,
-            currentUserEmail: user.user.email,
+            currentUserEmail: user.email,
         });
     } catch (error) {
         console.error('Team details error:', error);
@@ -353,6 +276,34 @@ const TeamDetailsRoute = () => {
     const [showOtpInput, setShowOtpInput] = useState(false);
     const [otp, setOtp] = useState('');
     const [pendingAction, setPendingAction] = useState<string | null>(null);
+    const [otpError, setOtpError] = useState<string | null>(null);
+
+    // Email OTP hook
+    const {
+        sendOTP,
+        verifyOTP,
+        isLoading: isOtpLoading,
+    } = useEmailOTP({
+        email: currentUserEmail,
+        onSuccess: () => {
+            // OTP verified successfully, now execute the pending action
+            if (pendingAction === 'delete-team') {
+                const formData = new FormData();
+
+                formData.append('intent', 'delete-team');
+                formData.append('otpVerified', 'true');
+                submit(formData, {method: 'post'});
+            }
+
+            setShowOtpInput(false);
+            setPendingAction(null);
+            setOtp('');
+            setOtpError(null);
+        },
+        onError: error => {
+            setOtpError(error);
+        },
+    });
 
     // Form for editing team name
     const [form, fields] = useForm({
@@ -364,23 +315,13 @@ const TeamDetailsRoute = () => {
         shouldRevalidate: 'onBlur',
     });
 
-    // Handle OTP request response and form submission results
+    // Handle form submission results
     useEffect(() => {
-        if (actionData?.otpRequired) {
-            setShowOtpInput(true);
-        }
-
         if (actionData?.success) {
-            // Reset states based on what action was completed
-            setShowOtpInput(false);
-
             // If editing was successful, exit editing mode
             if (isEditing) {
                 setIsEditing(false);
             }
-
-            // Clear any pending actions (like team deletion)
-            setPendingAction(null);
         }
     }, [actionData, isEditing]);
 
@@ -392,26 +333,34 @@ const TeamDetailsRoute = () => {
         setIsEditing(false);
     };
 
-    const handleDeleteTeam = () => {
+    const handleDeleteTeam = async () => {
         setPendingAction('delete-team');
+        setOtpError(null);
 
-        const formData = new FormData();
+        // Send OTP to user's email
+        const result = await sendOTP();
 
-        formData.append('intent', 'request-otp');
-        submit(formData, {method: 'post'});
+        if (result.success) {
+            setShowOtpInput(true);
+        }
     };
 
-    const handleVerifyOtp = () => {
-        if (!actionData?.requestId || !pendingAction) return;
+    const handleVerifyOtp = async () => {
+        if (!otp.trim()) {
+            setOtpError('Please enter the verification code');
 
-        const formData = new FormData();
+            return;
+        }
 
-        formData.append('intent', 'verify-otp');
-        formData.append('otp', otp.trim()); // Trim whitespace from OTP
-        formData.append('requestId', actionData.requestId);
-        formData.append('action', pendingAction);
+        setOtpError(null);
+        await verifyOTP(otp.trim());
+    };
 
-        submit(formData, {method: 'post'});
+    const handleCancelOtp = () => {
+        setShowOtpInput(false);
+        setPendingAction(null);
+        setOtp('');
+        setOtpError(null);
     };
 
     return (
@@ -469,27 +418,26 @@ const TeamDetailsRoute = () => {
                             <TextInput
                                 placeholder="Enter verification code"
                                 value={otp}
-                                onChange={e => setOtp(e.currentTarget.value.trim())}
+                                onChange={e => setOtp(e.currentTarget.value)}
                                 style={{flexGrow: 1}}
-                                maxLength={4}
-                                pattern="[0-9]{4}"
+                                maxLength={6}
+                                pattern="[0-9]{6}"
+                                error={otpError}
                             />
-                            <Button onClick={handleVerifyOtp} loading={isSubmitting}>
+                            <Button onClick={handleVerifyOtp} loading={isOtpLoading || isSubmitting}>
                                 Verify
                             </Button>
                             <Button
                                 variant="subtle"
                                 color="gray"
-                                onClick={() => {
-                                    setShowOtpInput(false);
-                                    setPendingAction(null);
-                                }}
+                                onClick={handleCancelOtp}
+                                disabled={isOtpLoading || isSubmitting}
                             >
                                 Cancel
                             </Button>
                         </Flex>
-                        {actionData?.error && showOtpInput && (
-                            <Text c="red" size="sm">{actionData.error}</Text>
+                        {otpError && (
+                            <Text c="red" size="sm">{otpError}</Text>
                         )}
                     </Stack>
                 </Paper>

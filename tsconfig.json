@@ -8,7 +8,6 @@
       "experimentalDecorators": true,
       "emitDecoratorMetadata": true,
       "esModuleInterop": true,
-      "baseUrl": "./app",
       "paths": {
         "~util/*": ["./util/*"],
         "~config/*": ["./config/*"],
@@ -36,6 +35,7 @@
         "./scripts/**/*.ts",
         "./vite.config.ts",
         "./mikro-orm.config.ts",
+        "./auth.config.ts",
         "./migrations/**/*.ts", "types/vite-env.d.ts", "types/eslint.d.ts",
     ]
 }
