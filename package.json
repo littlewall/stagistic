@@ -6,17 +6,12 @@
     "dev": "node ./server.js",
     "start": "cross-env NODE_ENV=production node ./server.js",
     "mikro-orm": "NODE_OPTIONS='--import tsx --no-warnings -r dotenv/config' mikro-orm",
-    "migrations:create": "yarn mikro-orm migration:create",
-    "migrations:up": "yarn mikro-orm migration:up",
-    "migrations:down": "yarn mikro-orm migration:down",
-    "auth:generate": "NODE_OPTIONS='--import tsx' npx @better-auth/cli generate --config auth.config.ts --output migrations/better-auth --yes",
+    "auth:generate": "NODE_OPTIONS='--import tsx' npx @better-auth/cli generate --config auth.config.ts --output migrations/better-auth/schema.sql --yes",
     "auth:migrate": "NODE_OPTIONS='--import tsx' npx @better-auth/cli migrate --config auth.config.ts --yes",
-    "auth:local:generate": "./scripts/auth-local.sh generate",
-    "auth:local:migrate": "./scripts/auth-local.sh migrate",
-    "migrate:generate": "yarn auth:generate",
-    "migrate:apply": "yarn migrations:up; yarn auth:migrate",
-    "migrate:local:generate": "yarn auth:local:generate",
-    "migrate:local:apply": "./scripts/migrate-local.sh"
+    "migrate:create": "./scripts/migrate.sh create",
+    "migrate:generate": "./scripts/migrate.sh generate",
+    "migrate:prepare": "./scripts/migrate.sh prepare",
+    "migrate:apply": "./scripts/migrate.sh apply"
   },
   "devDependencies": {
     "@dvdevcz/eslint": "^0.4.0",

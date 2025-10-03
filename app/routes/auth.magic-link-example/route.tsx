@@ -19,7 +19,7 @@ export default function MagicLinkExampleRoute() {
                 </Title>
                 <MagicLinkLogin
                     callbackURL="/app/dashboard"
-                    newUserCallbackURL="/app/teams/overview"
+                    newUserCallbackURL="/app/organizations/overview"
                     errorCallbackURL="/auth/login"
                 />
             </Paper>

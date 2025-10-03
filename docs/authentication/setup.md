@@ -1,64 +1,64 @@
-# Better Auth Migrace
+# Authentication Setup
 
-Tento dokument popisuje, jak pracovat s Better Auth migracemi v projektu.
+## Overview
 
-## Nastavení
+The project uses Better Auth for authentication with magic link and email OTP plugins.
 
-### Lokální vývoj
+## Configuration
 
-1. Zkopírujte `.env.example` do `.env`:
-   ```bash
-   cp .env.example .env
-   ```
+### Shared Configuration
+- **File**: `app/lib/auth/config.ts`
+- **Purpose**: Shared configuration function used by both app and CLI
 
-2. Upravte hodnoty v `.env` podle potřeby (zejména databázové údaje, pokud používáte jiné než výchozí)
+### Application Config
+- **File**: `app/lib/auth/auth.server.ts`
+- **Purpose**: Server-side auth instance with real email sending
 
-### Docker prostředí
+### CLI Config
+- **File**: `auth.config.ts` (root)
+- **Purpose**: CLI configuration for migrations (uses console.log for emails)
 
-Environment proměnné jsou definované v `docker-compose.dev.yml`, není potřeba nic dalšího nastavovat.
+## Environment Variables
 
-## Použití
-
-### Lokální spuštění (bez Dockeru)
-
-Před spuštěním se ujistěte, že máte:
-- PostgreSQL databázi běžící na `localhost:5432`
-- Nastavený `.env` soubor s korektními údaji
-
+Required for authentication:
 ```bash
-# Generování Better Auth migrací
-yarn auth:generate
-
-# Spuštění Better Auth migrací
-yarn auth:migrate
+BETTER_AUTH_SECRET=your-secret-key
+BETTER_AUTH_URL=http://localhost:3000
+POSTGRES_HOST=localhost
+POSTGRES_USER=stagistic
+POSTGRES_PASSWORD=password
+POSTGRES_DB=stagistic
 ```
 
-### Docker prostředí
+## Commands
 
+### Generate Schema
 ```bash
-# Generování Better Auth migrací v Docker kontejneru
-yarn auth:generate:docker
-
-# Spuštění Better Auth migrací v Docker kontejneru
-yarn auth:migrate:docker
+yarn migrate:generate
 ```
 
-## Poznámky
+### Apply Migrations
+```bash
+yarn migrate:apply
+```
 
-- Better Auth migrace používají samostatný config soubor `app/lib/auth/auth.config.ts`
-- Tento config číst environment proměnné přímo, aby byl kompatibilní s Better Auth CLI
-- Aplikace stále používá `auth.server.ts`, který pouze re-exportuje instanci z `auth.config.ts`
-- Pro lokální vývoj je nutné mít `.env` soubor, protože Better Auth CLI běží mimo Docker kontext
+### Docker Commands
+```bash
+make dev-auth-generate
+make dev-auth-migrate
+```
 
-## Řešení problémů
+## Plugins
 
-### "Couldn't read your auth config"
+- **Magic Link**: Passwordless authentication via email
+- **Email OTP**: One-time passwords for verification
+- **Organization**: Team management (see organizations docs)
 
-Tato chyba se objevuje když:
-1. Chybí environment proměnné (pro lokální spuštění vytvořte `.env` soubor)
-2. TypeScript nemůže správně zpracovat importy (použijte `NODE_OPTIONS='--import tsx'`)
+## Email Integration
 
-### Databázové připojení selhává
+Uses Postmark for production emails. Configure in `app/lib/auth/auth.server.ts`.
 
-- **Lokálně**: Zkontrolujte, že PostgreSQL běží a údaje v `.env` jsou správné
-- **Docker**: Ujistěte se, že kontejner `postgres` běží: `docker compose -f docker-compose.dev.yml ps`
+## See Also
+
+- [Database Migrations](../database/migrations.md)
+- [Organizations](../organizations/README.md)

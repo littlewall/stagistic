@@ -11,8 +11,8 @@ export const loader = async ({request}: LoaderFunctionArgs) => {
         return redirect('/auth/login');
     }
 
-    if (request.url.endsWith('/app/teams') || request.url.endsWith('/app/teams/')) {
-        return redirect('/app/teams/overview');
+    if (request.url.endsWith('/app/organizations') || request.url.endsWith('/app/organizations/')) {
+        return redirect('/app/organizations/overview');
     }
 
     return {};

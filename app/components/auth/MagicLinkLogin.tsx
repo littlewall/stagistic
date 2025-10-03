@@ -22,7 +22,6 @@ export function MagicLinkLogin({
     redirectOnSuccess = true,
 }: MagicLinkLoginProps) {
     const [email, setEmail] = useState('');
-    const [name, setName] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const [success, setSuccess] = useState(false);
@@ -35,7 +34,7 @@ export function MagicLinkLogin({
         try {
             const {error: magicLinkError} = await authClient.signIn.magicLink({
                 email,
-                name,
+                name: email,
                 callbackURL,
                 newUserCallbackURL,
                 errorCallbackURL,
@@ -78,15 +77,6 @@ export function MagicLinkLogin({
                     placeholder="you@example.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    required
-                    disabled={isLoading}
-                />
-                <TextInput
-                    label="Name"
-                    type="text"
-                    placeholder="Your name"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
                     required
                     disabled={isLoading}
                 />

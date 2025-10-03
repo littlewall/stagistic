@@ -1,3 +1,4 @@
+
 import {getInputProps, useForm} from '@conform-to/react';
 import {parseWithValibot} from '@conform-to/valibot';
 import {
@@ -16,13 +17,12 @@ import {
     Tooltip,
 } from '@mantine/core';
 import {useDisclosure} from '@mantine/hooks';
-import {
+import type {
     ActionFunctionArgs,
-    json,
     LoaderFunctionArgs,
 } from '@remix-run/node';
+import {data} from '@remix-run/node';
 import {
-    data,
     Form,
     Link,
     useActionData,
@@ -35,26 +35,28 @@ import {
     Users,
 } from 'lucide-react';
 import {useEffect} from 'react';
-import {teamFormSchema} from 'schemas/forms/team';
 
 import {auth} from '~lib/auth/auth.server';
-import {Role} from '~lib/db/entities/Role';
-import {Team} from '~lib/db/entities/Team';
-import {User} from '~lib/db/entities/User';
-import {UserTeam} from '~lib/db/entities/UserTeam';
-import {resolveEntityManager} from '~lib/db/orm';
+import {
+    createOrganization,
+    listOrganizationsForUser,
+} from '~lib/auth/organization.server';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import type {OrganizationFormOutput} from '~schemas/forms/organization';
+import {organizationFormSchema} from '~schemas/forms/organization';
 
 import {useToastFromUrl} from './useToastFromUrl';
 
-interface TeamData {
+interface OrganizationData {
     id: string,
     name: string,
+    slug: string,
     role: string,
-    isOwner: boolean,
+    createdAt: string,
 }
 
 interface LoaderData {
-    teams: TeamData[],
+    organizations: OrganizationData[],
 }
 
 interface ActionData {
@@ -70,58 +72,48 @@ export const action = async ({request}: ActionFunctionArgs) => {
         });
 
         if (!session?.user) {
-            return json({error: 'Unauthorized'}, {status: 401});
+            return data({error: 'Unauthorized'}, {status: 401});
         }
 
         const formData = await request.formData();
-        const submission = parseWithValibot(formData, {schema: teamFormSchema});
+
+        const submission = parseWithValibot(formData, {schema: organizationFormSchema});
 
         if (submission.status !== 'success') {
-            return json({formError: 'Invalid form submission'});
+            return data({formError: 'Invalid form submission'});
         }
 
-        const em = await resolveEntityManager();
-        const userEntity = await em.findOne(User, {id: session.user.id});
+        // Generate slug from name if not provided
+        const submissionValue = submission.value;
+        const slug = submissionValue.slug || submissionValue.name
+            .toLowerCase()
+            .replace(/\s+/g, '-')
+            .replace(/[^a-z0-9-]/g, '');
 
-        if (!userEntity) {
-            return json({error: 'User not found'}, {status: 404});
+        // Create organization with the current user as owner
+        const newOrg = await createOrganization({
+            name: submissionValue.name,
+            slug,
+            userId: session.user.id,
+        });
+
+        if (!newOrg) {
+            return data({error: 'Failed to create organization'}, {status: 500});
         }
 
-        const team = new Team();
+        return data({success: true});
+    } catch (error: unknown) {
+        console.error('Organization creation error:', error);
 
-        team.name = submission.value.name;
-        team.owner = userEntity;
+        // Check for slug already exists error
+        if (error instanceof Error && error.message.includes('slug')) {
+            return data({
+                error: 'An organization with this name already exists. Please choose a different name.',
+            }, {status: 400});
+        }
 
-        await em.persistAndFlush(team);
-
-        // Create admin and user roles
-        const adminRole = new Role();
-
-        adminRole.name = 'admin';
-        adminRole.team = team;
-
-        const userRole = new Role();
-
-        userRole.name = 'user';
-        userRole.team = team;
-
-        await em.persistAndFlush([adminRole, userRole]);
-
-        // Add current user as admin
-        const userTeam = new UserTeam();
-
-        userTeam.user = userEntity;
-        userTeam.team = team;
-        userTeam.role = adminRole;
-
-        await em.persistAndFlush(userTeam);
-
-        return json({success: true});
-    } catch (error) {
-        console.error('Team creation error:', error);
-
-        return json({
-            error: 'An error occurred while creating the team.',
+        return data({
+            error: 'An error occurred while creating the organization.',
         }, {status: 500});
     }
 };
@@ -133,31 +125,31 @@ export const loader = async ({request}: LoaderFunctionArgs) => {
         });
 
         if (!session?.user) {
-            return json({error: 'Unauthorized'}, {status: 401});
+            return data({error: 'Unauthorized'}, {status: 401});
         }
 
-        const em = await resolveEntityManager();
-        const userWithTeams = await em.findOneOrFail(User, {id: session.user.id}, {populate: ['userTeams.team', 'userTeams.role']});
+        // Get all organizations for the user
+        const orgs = await listOrganizationsForUser(session.user.id);
 
-        if (!userWithTeams) {
-            return data({teams: []});
-        }
-
-        const teams = userWithTeams.userTeams.getItems().map(ut => ({
-            id: ut.team.id,
-            name: ut.team.name,
-            role: ut.role.name,
-            isOwner: ut.team.owner?.id === session.user.id,
+        // Map organizations data
+        const organizationData: OrganizationData[] = orgs.map(org => ({
+            id: org.id,
+            name: org.name,
+            slug: org.slug,
+            role: org.role,
+            createdAt: org.createdAt.toISOString(),
         }));
 
-        return data({teams});
+        return data({organizations: organizationData});
     } catch (error) {
-        return new Response('An error occurred while loading the teams overview.', {status: 500});
+        console.error('Error loading organizations:', error);
+
+        return new Response('An error occurred while loading the organizations overview.', {status: 500});
     }
 };
 
-const TeamsRoute = () => {
-    const {teams} = useLoaderData<LoaderData>();
+const OrganizationsRoute = () => {
+    const {organizations} = useLoaderData<LoaderData>();
     const actionData = useActionData<ActionData>();
     const navigation = useNavigation();
     const isSubmitting = navigation.state === 'submitting';
@@ -168,11 +160,14 @@ const TeamsRoute = () => {
     const [opened, {open, close}] = useDisclosure(false);
 
     const [form, fields] = useForm({
-        id: 'team-form',
+        id: 'organization-form',
         onValidate({formData}) {
-            return parseWithValibot(formData, {schema: teamFormSchema});
+            return parseWithValibot(formData, {schema: organizationFormSchema});
         },
-        defaultValue: {name: ''},
+        defaultValue: {
+            name: '',
+            slug: '',
+        },
         shouldRevalidate: 'onBlur',
     });
 
@@ -189,17 +184,26 @@ const TeamsRoute = () => {
 
     return (
         <>
-            <Modal opened={opened} onClose={close} title="Create New Team" size="md">
+            <Modal opened={opened} onClose={close} title="Create New Organization" size="md">
                 <Form method="post" id={form.id}>
                     <Stack gap="md">
                         <TextInput
-                            label="Team Name"
-                            placeholder="Enter team name"
+                            label="Organization Name"
+                            placeholder="Enter organization name"
                             required
                             {...getInputProps(fields.name, {type: 'text'})}
                         />
                         {fields.name.errors && (
                             <Text c="red" size="sm">{fields.name.errors}</Text>
+                        )}
+                        <TextInput
+                            label="Slug (optional)"
+                            placeholder="my-organization"
+                            description="Will be auto-generated from name if not provided"
+                            {...getInputProps(fields.slug, {type: 'text'})}
+                        />
+                        {fields.slug.errors && (
+                            <Text c="red" size="sm">{fields.slug.errors}</Text>
                         )}
                         {actionData?.error && (
                             <Text c="red" size="sm">{actionData.error}</Text>
@@ -213,7 +217,7 @@ const TeamsRoute = () => {
                                 variant="filled"
                                 loading={isSubmitting}
                             >
-                                Create Team
+                                Create Organization
                             </Button>
                         </Group>
                     </Stack>
@@ -221,32 +225,32 @@ const TeamsRoute = () => {
             </Modal>
 
             <Group justify="space-between" mb="md">
-                <Title order={2}>Teams Overview</Title>
+                <Title order={2}>Organizations Overview</Title>
                 <Button
                     leftSection={<UserPlus size={16} />}
                     variant="filled"
                     onClick={handleOpenModal}
                 >
-                    Create New Team
+                    Create New Organization
                 </Button>
             </Group>
 
-            {teams.length === 0 ? (
+            {organizations.length === 0 ? (
                 <Card withBorder padding="xl" radius="md">
                     <Stack align="center" gap="md">
                         <Users size={64} opacity={0.5} />
                         <Text size="xl" ta="center" fw={500}>
-                            You don't have any teams yet
+                            You don't have any organizations yet
                         </Text>
                         <Text size="sm" ta="center" c="dimmed" maw={400}>
-                            Teams allow you to collaborate with other users. Create your first team to get started.
+                            Organizations allow you to collaborate with other users. Create your first organization to get started.
                         </Text>
                         <Button
                             leftSection={<UserPlus size={16} />}
                             variant="filled"
                             onClick={handleOpenModal}
                         >
-                            Create Your First Team
+                            Create Your First Organization
                         </Button>
                     </Stack>
                 </Card>
@@ -255,32 +259,31 @@ const TeamsRoute = () => {
                     <Table striped highlightOnHover>
                         <Table.Thead>
                             <Table.Tr>
-                                <Table.Th>Team Name</Table.Th>
+                                <Table.Th>Organization Name</Table.Th>
+                                <Table.Th>Slug</Table.Th>
                                 <Table.Th>Role</Table.Th>
                                 <Table.Th style={{width: '80px'}}>Actions</Table.Th>
                             </Table.Tr>
                         </Table.Thead>
                         <Table.Tbody>
-                            {teams.map(team => (
-                                <Table.Tr key={team.id}>
+                            {organizations.map(org => (
+                                <Table.Tr key={org.id}>
                                     <Table.Td>
-                                        <Group gap="xs">
-                                            <Text fw={500}>{team.name}</Text>
-                                            {team.isOwner && (
-                                                <Badge color='green' variant='light' size="xs">Owner</Badge>
-                                            )}
-                                        </Group>
+                                        <Text fw={500}>{org.name}</Text>
                                     </Table.Td>
                                     <Table.Td>
-                                        <Badge color={team.isOwner ? 'blue' : 'gray'} variant='light'>
-                                            {team.role}
+                                        <Text c="dimmed" size="sm">{org.slug}</Text>
+                                    </Table.Td>
+                                    <Table.Td>
+                                        <Badge color={org.role === 'owner' ? 'blue' : 'gray'} variant='light'>
+                                            {org.role}
                                         </Badge>
                                     </Table.Td>
                                     <Table.Td>
-                                        <Tooltip label="View Team Details">
+                                        <Tooltip label="View Organization Details">
                                             <ActionIcon
                                                 component={Link}
-                                                to={`/app/teams/${team.id}`}
+                                                to={`/app/organizations/${org.id}`}
                                                 variant="subtle"
                                                 color="blue"
                                                 size="md"
@@ -299,4 +302,4 @@ const TeamsRoute = () => {
     );
 };
 
-export default TeamsRoute;
+export default OrganizationsRoute;

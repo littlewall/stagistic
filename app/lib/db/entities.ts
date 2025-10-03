@@ -1,13 +1,5 @@
-import {Role} from './entities/Role';
-import {Team} from './entities/Team';
-import {User} from './entities/User';
-import {UserTeam} from './entities/UserTeam';
+import {EntityClass} from '@mikro-orm/core';
 
-const entities = [
-    User,
-    Team,
-    UserTeam,
-    Role,
-];
+const entities: EntityClass<Partial<any>>[] = [];
 
 export default entities;

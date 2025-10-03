@@ -1,5 +1,9 @@
 import type {BetterAuthOptions} from 'better-auth';
-import {emailOTP, magicLink} from 'better-auth/plugins';
+import {
+    emailOTP,
+    magicLink,
+    organization,
+} from 'better-auth/plugins';
 
 interface AuthConfigOptions {
     database: BetterAuthOptions['database'],
@@ -21,7 +25,8 @@ export function createAuthConfig(options: AuthConfigOptions): BetterAuthOptions 
                     await Promise.resolve();
                     console.log(`Magic link for ${email}: ${url}`);
                 }),
-            }), emailOTP({
+            }),
+            emailOTP({
                 sendVerificationOTP: options.sendVerificationOTP || (async ({email, otp}) => {
                     // Default implementation for CLI (just log)
                     await Promise.resolve();
@@ -30,6 +35,13 @@ export function createAuthConfig(options: AuthConfigOptions): BetterAuthOptions 
                 otpLength: 6,
                 expiresIn: 300, // 5 minutes
                 allowedAttempts: 3,
+            }),
+            organization({
+                async sendInvitationEmail(data) {
+                    // TODO: Implement invitation email sending
+                    await Promise.resolve();
+                    console.log(`Invitation email for ${data.email} to organization ${data.organization.name}`);
+                },
             }),
         ],
     };

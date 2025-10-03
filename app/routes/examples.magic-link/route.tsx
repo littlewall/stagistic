@@ -46,7 +46,7 @@ export default function MagicLinkExamplesRoute() {
                         </Text>
                         <MagicLinkLogin
                             callbackURL="/app/dashboard"
-                            newUserCallbackURL="/app/teams/overview"
+                            newUserCallbackURL="/app/organizations/overview"
                             errorCallbackURL="/auth/login"
                         />
                     </Paper>
@@ -107,7 +107,6 @@ export default function MagicLinkExamplesRoute() {
  */
 function HookExample() {
     const [email, setEmail] = useState('');
-    const [name, setName] = useState('');
 
     const {
         sendMagicLink,
@@ -116,13 +115,13 @@ function HookExample() {
         success,
     } = useMagicLink({
         callbackURL: '/app/dashboard',
-        newUserCallbackURL: '/app/teams/overview',
+        newUserCallbackURL: '/app/organizations/overview',
         errorCallbackURL: '/auth/login',
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        await sendMagicLink(email, name);
+        await sendMagicLink(email, email); // Use email as default name
     };
 
     if (success) {
@@ -148,15 +147,6 @@ function HookExample() {
                     placeholder="you@example.com"
                     value={email}
                     onChange={e => setEmail(e.target.value)}
-                    required
-                    disabled={isLoading}
-                />
-                <TextInput
-                    label="Name"
-                    type="text"
-                    placeholder="Your name"
-                    value={name}
-                    onChange={e => setName(e.target.value)}
                     required
                     disabled={isLoading}
                 />

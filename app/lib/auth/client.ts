@@ -1,6 +1,14 @@
-import {emailOTPClient, magicLinkClient} from 'better-auth/client/plugins';
+import {
+    emailOTPClient,
+    magicLinkClient,
+    organizationClient,
+} from 'better-auth/client/plugins';
 import {createAuthClient} from 'better-auth/react';
 
 export const authClient = createAuthClient({
-    plugins: [magicLinkClient(), emailOTPClient()],
+    plugins: [
+        magicLinkClient(),
+        emailOTPClient(),
+        organizationClient(),
+    ],
 });

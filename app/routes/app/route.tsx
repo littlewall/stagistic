@@ -102,9 +102,9 @@ const AppRoute = () => {
                                     </Menu.Item>
                                     <Menu.Item
                                         component={NavLink}
-                                        to="/app/teams"
+                                        to="/app/organizations"
                                     >
-                                        Teams
+                                        Organizations
                                     </Menu.Item>
 
                                     <Menu.Divider />

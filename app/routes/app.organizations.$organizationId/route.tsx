@@ -1,4 +1,4 @@
-// filepath: /Users/milanzitka/git/stagistic/app/routes/app.teams.$teamId/route.tsx
+
 import {getInputProps, useForm} from '@conform-to/react';
 import {parseWithValibot} from '@conform-to/valibot';
 import {
@@ -17,12 +17,9 @@ import {
     Title,
     Tooltip,
 } from '@mantine/core';
+import type {ActionFunctionArgs, LoaderFunctionArgs} from '@remix-run/node';
+import {data} from '@remix-run/node';
 import {
-    ActionFunctionArgs,
-    LoaderFunctionArgs,
-} from '@remix-run/node';
-import {
-    data,
     Form,
     Link,
     useActionData,
@@ -41,28 +38,35 @@ import {
     X,
 } from 'lucide-react';
 import {useEffect, useState} from 'react';
-import {teamFormSchema} from 'schemas/forms/team';
 
 import {auth} from '~lib/auth/auth.server';
+import {
+    deleteOrganization,
+    getOrganizationById,
+    getOrganizationMember,
+    listOrganizationMembers,
+    updateOrganization,
+} from '~lib/auth/organization.server';
 import {useEmailOTP} from '~lib/auth/useEmailOTP';
-import {Team} from '~lib/db/entities/Team';
-import {resolveEntityManager} from '~lib/db/orm';
 import {redirectWithToast} from '~lib/toast/toast.server';
+import {organizationFormSchema} from '~schemas/forms/organization';
 
-interface TeamMember {
+interface OrganizationMember {
+    id: string,
     userId: string,
     name: string | null,
     email: string,
     role: string,
 }
 
-interface TeamDetailsData {
-    team: {
+interface OrganizationDetailsData {
+    organization: {
         id: string,
         name: string,
+        slug: string,
     },
     isOwner: boolean,
-    members: TeamMember[],
+    members: OrganizationMember[],
     currentUserEmail: string,
 }
 
@@ -83,65 +87,56 @@ export const action = async ({request, params}: ActionFunctionArgs) => {
         }
 
         const user = authSession.user;
-        const teamId = params.teamId;
+        const organizationId = params.organizationId;
 
-        if (!teamId) {
-            return data({error: 'Team ID is required'}, {status: 400});
+        if (!organizationId) {
+            return data({error: 'Organization ID is required'}, {status: 400});
         }
 
-        const em = await resolveEntityManager();
-        const team = await em.findOne(
-            Team,
-            {id: teamId},
-            {
-                populate: [
-                    'owner',
-                    'userTeams.user',
-                    'userTeams.role',
-                    'roles',
-                ],
-            },
-        );
+        const organization = await getOrganizationById(organizationId);
 
-        if (!team) {
-            return data({error: 'Team not found'}, {status: 404});
+        if (!organization) {
+            return data({error: 'Organization not found'}, {status: 404});
         }
 
-        // Check if user is a member of the team
-        const isMember = team.userTeams.getItems().some(ut => ut.user.id === user.id);
+        // Check if user is a member of the organization
+        const member = await getOrganizationMember(organizationId, user.id);
 
-        if (!isMember) {
-            return data({error: 'You are not a member of this team'}, {status: 403});
+        if (!member) {
+            return data({error: 'You are not a member of this organization'}, {status: 403});
         }
 
-        // Check if the user is the owner of the team
-        const isOwner = team.owner?.id === user.id;
+        const isOwner = member.role === 'owner';
         const formData = await request.formData();
         const intent = formData.get('intent');
 
-        // Handle team update (only for owners)
-        if (intent === 'update-team') {
+        // Handle organization update (only for owners)
+        if (intent === 'update-organization') {
             if (!isOwner) {
-                return data({error: 'Only the team owner can update team details'}, {status: 403});
+                return data({error: 'Only the organization owner can update organization details'}, {status: 403});
             }
 
-            const submission = parseWithValibot(formData, {schema: teamFormSchema});
+            const submission = parseWithValibot(formData, {schema: organizationFormSchema});
 
             if (submission.status !== 'success') {
                 return data({formError: 'Invalid form submission'});
             }
 
-            // Update team
-            team.name = submission.value.name;
-            await em.persistAndFlush(team);
+            const submissionValue = submission.value;
+
+            // Update organization
+            await updateOrganization(organizationId, {
+                name: submissionValue.name,
+                slug: submissionValue.slug || undefined,
+            });
 
             return data({success: true});
         }
 
         // Handle dangerous actions (OTP verification happens on client side)
-        if (intent === 'delete-team') {
+        if (intent === 'delete-organization') {
             if (!isOwner) {
-                return data({error: 'Only the team owner can perform this action'}, {status: 403});
+                return data({error: 'Only the organization owner can perform this action'}, {status: 403});
             }
 
             const otpVerified = formData.get('otpVerified') === 'true';
@@ -150,36 +145,19 @@ export const action = async ({request, params}: ActionFunctionArgs) => {
                 return data({error: 'OTP verification required'}, {status: 400});
             }
 
-            // First, remove all relationships in a transaction
-            await em.transactional(em => {
-                // Remove user team associations
-                const userTeams = team.userTeams.getItems();
-
-                for (const userTeam of userTeams) {
-                    em.remove(userTeam);
-                }
-
-                // Remove role associations
-                const roles = team.roles.getItems();
-
-                for (const role of roles) {
-                    em.remove(role);
-                }
-            });
-
-            // Finally delete the team
-            await em.removeAndFlush(team);
+            // Delete the organization (cascade will handle members and invitations)
+            await deleteOrganization(organizationId);
 
             return redirectWithToast(
-                '/app/teams/overview',
-                `Team "${team.name}" has been successfully deleted.`,
+                '/app/organizations/overview',
+                `Organization "${organization.name}" has been successfully deleted.`,
                 'success',
             );
         }
 
         return data({error: 'Invalid action'}, {status: 400});
     } catch (error) {
-        console.error('Team action error:', error);
+        console.error('Organization action error:', error);
 
         return data({
             error: 'An error occurred while processing your request.',
@@ -198,75 +176,104 @@ export const loader = async ({request, params}: LoaderFunctionArgs) => {
         }
 
         const user = session.user;
-        const teamId = params.teamId;
+        const organizationId = params.organizationId;
 
-        if (!teamId) {
-            return redirectWithToast('/app/teams/overview', 'Team ID is required', 'error');
+        if (!organizationId) {
+            return redirectWithToast('/app/organizations/overview', 'Organization ID is required', 'error');
         }
 
-        const em = await resolveEntityManager();
-        const team = await em.findOne(
-            Team,
-            {id: teamId},
-            {
-                populate: [
-                    'owner',
-                    'userTeams.user',
-                    'userTeams.role',
-                ],
-            },
-        );
+        const organization = await getOrganizationById(organizationId);
 
-        if (!team) {
-            return redirectWithToast('/app/teams/overview', 'Team not found', 'error');
+        if (!organization) {
+            return redirectWithToast('/app/organizations/overview', 'Organization not found', 'error');
         }
 
-        // Check if user is a member of the team
-        const isMember = team.userTeams.getItems().some(ut => ut.user.id === user.id);
+        // Check if user is a member of the organization
+        const currentMember = await getOrganizationMember(organizationId, user.id);
 
-        if (!isMember) {
+        if (!currentMember) {
             return redirectWithToast(
-                '/app/teams/overview',
-                'You are not a member of this team',
+                '/app/organizations/overview',
+                'You are not a member of this organization',
                 'error',
             );
         }
 
-        // Get team members
-        const members = team.userTeams.getItems().map(ut => ({
-            userId: ut.user.id,
-            name: ut.user.name || null,
-            email: ut.user.email,
-            role: ut.role.name,
-        }));
+        // Get organization members with user details
+        const members = await listOrganizationMembers(organizationId);
+        const memberIds = members.map(m => m.userId);
+
+        // Fetch user details from Better Auth's user table
+        const {Pool} = await import('pg');
+        const globals = await import('../../config/globals');
+        const {
+            user: dbUser,
+            password,
+            host,
+            database,
+        } = globals.default.get('database.postgres');
+
+        const pool = new Pool({
+            connectionString: `postgres://${dbUser}:${password}@${host}/${database}`,
+        });
+
+        interface UserDetail {
+            id: string,
+            name: string | null,
+            email: string,
+        }
+
+        const userDetailsResult = await pool.query(
+            'SELECT id, name, email FROM "user" WHERE id = ANY($1)',
+            [memberIds],
+        );
+
+        void pool.end();
+
+        const userDetailsMap = new Map<string, UserDetail>(
+            userDetailsResult.rows.map((u: UserDetail) => [u.id, u]),
+        );
+
+        const membersWithDetails: OrganizationMember[] = members.map(member => {
+            const userDetails = userDetailsMap.get(member.userId);
+
+            return {
+                id: member.id,
+                userId: member.userId,
+                name: userDetails?.name || null,
+                email: userDetails?.email || 'Unknown',
+                role: member.role,
+            };
+        });
 
         return data({
-            team: {
-                id: team.id,
-                name: team.name,
+            organization: {
+                id: organization.id,
+                name: organization.name,
+                slug: organization.slug,
             },
-            isOwner: team.owner?.id === user.id,
-            members,
+            isOwner: currentMember.role === 'owner',
+            members: membersWithDetails,
             currentUserEmail: user.email,
         });
     } catch (error) {
-        console.error('Team details error:', error);
+        console.error('Organization details error:', error);
 
         return redirectWithToast(
-            '/app/teams/overview',
-            'An error occurred while loading team details.',
+            '/app/organizations/overview',
+            'An error occurred while loading organization details.',
             'error',
         );
     }
 };
 
-const TeamDetailsRoute = () => {
+const OrganizationDetailsRoute = () => {
     const {
-        team,
+        organization,
         isOwner,
         members,
         currentUserEmail,
-    } = useLoaderData<TeamDetailsData>();
+    } = useLoaderData<OrganizationDetailsData>();
     const actionData = useActionData<ActionData>();
     const navigation = useNavigation();
     const submit = useSubmit();
@@ -287,10 +294,10 @@ const TeamDetailsRoute = () => {
         email: currentUserEmail,
         onSuccess: () => {
             // OTP verified successfully, now execute the pending action
-            if (pendingAction === 'delete-team') {
+            if (pendingAction === 'delete-organization') {
                 const formData = new FormData();
 
-                formData.append('intent', 'delete-team');
+                formData.append('intent', 'delete-organization');
                 formData.append('otpVerified', 'true');
                 submit(formData, {method: 'post'});
             }
@@ -305,13 +312,16 @@ const TeamDetailsRoute = () => {
         },
     });
 
-    // Form for editing team name
+    // Form for editing organization
     const [form, fields] = useForm({
-        id: 'team-edit-form',
+        id: 'organization-edit-form',
         onValidate({formData}) {
-            return parseWithValibot(formData, {schema: teamFormSchema});
+            return parseWithValibot(formData, {schema: organizationFormSchema});
         },
-        defaultValue: {name: team.name},
+        defaultValue: {
+            name: organization.name,
+            slug: organization.slug,
+        },
         shouldRevalidate: 'onBlur',
     });
 
@@ -333,8 +343,8 @@ const TeamDetailsRoute = () => {
         setIsEditing(false);
     };
 
-    const handleDeleteTeam = async () => {
-        setPendingAction('delete-team');
+    const handleDeleteOrganization = async () => {
+        setPendingAction('delete-organization');
         setOtpError(null);
 
         // Send OTP to user's email
@@ -369,13 +379,13 @@ const TeamDetailsRoute = () => {
                 <Group>
                     <Button
                         component={Link}
-                        to="/app/teams/overview"
+                        to="/app/organizations/overview"
                         variant="subtle"
                         leftSection={<ArrowLeft size={16} />}
                     >
-                        Back to Teams
+                        Back to Organizations
                     </Button>
-                    <Title order={2}>Team Details</Title>
+                    <Title order={2}>Organization Details</Title>
                 </Group>
 
                 {isOwner && !isEditing && (
@@ -385,15 +395,15 @@ const TeamDetailsRoute = () => {
                             variant="outline"
                             onClick={handleEdit}
                         >
-                            Edit Team
+                            Edit Organization
                         </Button>
                         <Button
                             leftSection={<Trash size={16} />}
                             variant="filled"
                             color="red"
-                            onClick={handleDeleteTeam}
+                            onClick={handleDeleteOrganization}
                         >
-                            Delete Team
+                            Delete Organization
                         </Button>
                     </Group>
                 )}
@@ -446,7 +456,7 @@ const TeamDetailsRoute = () => {
             <Card withBorder radius="md" mb="md">
                 <Stack>
                     <Group>
-                        <Text fw={700} size="sm" c="dimmed">Team Details</Text>
+                        <Text fw={700} size="sm" c="dimmed">Organization Details</Text>
                         {isOwner && (
                             <Badge color="green">Owner</Badge>
                         )}
@@ -456,16 +466,24 @@ const TeamDetailsRoute = () => {
 
                     {isEditing ? (
                         <Form method="post" id={form.id}>
-                            <input type="hidden" name="intent" value="update-team" />
+                            <input type="hidden" name="intent" value="update-organization" />
                             <Stack>
                                 <TextInput
-                                    label="Team Name"
-                                    placeholder="Enter team name"
+                                    label="Organization Name"
+                                    placeholder="Enter organization name"
                                     required
                                     {...getInputProps(fields.name, {type: 'text'})}
                                 />
                                 {fields.name.errors && (
                                     <Text c="red" size="sm">{fields.name.errors}</Text>
+                                )}
+                                <TextInput
+                                    label="Slug"
+                                    placeholder="my-organization"
+                                    {...getInputProps(fields.slug, {type: 'text'})}
+                                />
+                                {fields.slug.errors && (
+                                    <Text c="red" size="sm">{fields.slug.errors}</Text>
                                 )}
                                 {actionData?.formError && (
                                     <Text c="red" size="sm">{actionData.formError}</Text>
@@ -491,10 +509,16 @@ const TeamDetailsRoute = () => {
                             </Stack>
                         </Form>
                     ) : (
-                        <Group>
-                            <Text fw={500}>Name:</Text>
-                            <Text>{team.name}</Text>
-                        </Group>
+                        <>
+                            <Group>
+                                <Text fw={500}>Name:</Text>
+                                <Text>{organization.name}</Text>
+                            </Group>
+                            <Group>
+                                <Text fw={500}>Slug:</Text>
+                                <Text c="dimmed">{organization.slug}</Text>
+                            </Group>
+                        </>
                     )}
                 </Stack>
             </Card>
@@ -502,12 +526,13 @@ const TeamDetailsRoute = () => {
             <Card withBorder radius="md">
                 <Stack>
                     <Group justify="space-between">
-                        <Text fw={700} size="sm" c="dimmed">Team Members ({members.length})</Text>
+                        <Text fw={700} size="sm" c="dimmed">Organization Members ({members.length})</Text>
                         {isOwner && (
                             <Button
                                 variant="light"
                                 size="xs"
                                 leftSection={<UserPlus size={16} />}
+                                disabled
                             >
                                 Invite Member
                             </Button>
@@ -526,7 +551,7 @@ const TeamDetailsRoute = () => {
                         </Table.Thead>
                         <Table.Tbody>
                             {members.map(member => (
-                                <Table.Tr key={member.userId}>
+                                <Table.Tr key={member.id}>
                                     <Table.Td>
                                         <Stack gap="xs">
                                             <Text fw={500}>{member.name || 'No name'}</Text>
@@ -537,7 +562,7 @@ const TeamDetailsRoute = () => {
                                         </Stack>
                                     </Table.Td>
                                     <Table.Td>
-                                        <Badge color={member.role === 'admin' ? 'blue' : 'gray'} variant="light">
+                                        <Badge color={member.role === 'owner' ? 'blue' : 'gray'} variant="light">
                                             {member.role}
                                         </Badge>
                                     </Table.Td>
@@ -566,4 +591,4 @@ const TeamDetailsRoute = () => {
     );
 };
 
-export default TeamDetailsRoute;
+export default OrganizationDetailsRoute;

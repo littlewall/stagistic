@@ -14,8 +14,6 @@ import {
     Scripts,
 } from '@remix-run/react';
 
-import {AuthProvider} from '~components/AuthContext';
-
 import appStylesHref from './app.css?url';
 
 export const links: LinksFunction = () => [{rel: 'stylesheet', href: appStylesHref}, {rel: 'stylesheet', href: mantineStylesHref}];
@@ -52,11 +50,9 @@ const App = () => {
                 <Links />
             </head>
             <body suppressHydrationWarning={true}>
-                <AuthProvider>
-                    <MantineProvider theme={theme}>
-                        <Outlet />
-                    </MantineProvider>
-                </AuthProvider>
+                <MantineProvider theme={theme}>
+                    <Outlet />
+                </MantineProvider>
                 <Scripts />
             </body>
         </html>

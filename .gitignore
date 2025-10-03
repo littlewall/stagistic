@@ -19,6 +19,7 @@ temp
 .pnp.*
 
 .env
+.DS_Store
 
 # Migrations - generated files (auto-applied)
 migrations/better-auth/*.sql

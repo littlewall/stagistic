@@ -58,7 +58,7 @@ const AuthLogin = () => {
                     <Box className={classes.form}>
                         <MagicLinkLogin
                             callbackURL="/app/dashboard"
-                            newUserCallbackURL="/app/teams/overview"
+                            newUserCallbackURL="/app/organizations/overview"
                             errorCallbackURL="/auth/login?error=auth_failed"
                         />
                     </Box>

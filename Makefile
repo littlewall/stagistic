@@ -1,5 +1,5 @@
-.PHONY: help dev-up dev-down dev-logs dev-shell dev-db dev-migrate-up dev-migrate-create dev-rebuild dev-clean
-.PHONY: prod-up prod-down prod-logs prod-shell prod-rebuild prod-clean ps
+.PHONY: help dev-up dev-down dev-logs dev-shell dev-db dev-migrate-create dev-migrate-gen dev-migrate dev-rebuild dev-clean
+.PHONY: prod-up prod-down prod-logs prod-shell prod-migrate-create prod-migrate-gen prod-migrate prod-rebuild prod-clean ps
 
 COMPOSE_DEV := docker-compose -f docker-compose.dev.yml
 COMPOSE_PROD := docker-compose
@@ -14,12 +14,9 @@ help: ## Show this help message
 	@echo '  dev-logs            View development logs (follow mode)'
 	@echo '  dev-shell           Open shell in app container'
 	@echo '  dev-db              Connect to PostgreSQL database'
-	@echo '  dev-migrate-up      Run database migrations (MikroORM)'
-	@echo '  dev-migrate-create  Create a new migration (MikroORM)'
-	@echo '  dev-migrate-down    Rollback last migration (MikroORM)'
-	@echo '  dev-auth-generate   Generate Better Auth schema'
-	@echo '  dev-auth-migrate    Run Better Auth migrations'
-	@echo '  dev-migrate         Run ALL migrations (MikroORM + Better Auth)'
+	@echo '  dev-migrate-create  Create a new migration'
+	@echo '  dev-migrate-gen     Generate Better Auth schema'
+	@echo '  dev-migrate         Apply ALL migrations'
 	@echo '  dev-rebuild         Rebuild development containers (no cache)'
 	@echo '  dev-clean           Stop and remove all dev containers, volumes'
 	@echo ''
@@ -29,9 +26,9 @@ help: ## Show this help message
 	@echo '  prod-restart        Restart production environment'
 	@echo '  prod-logs           View production logs (follow mode)'
 	@echo '  prod-shell          Open shell in app container'
-	@echo '  prod-auth-generate  Generate Better Auth schema'
-	@echo '  prod-auth-migrate   Run Better Auth migrations'
-	@echo '  prod-migrate        Run ALL migrations (MikroORM + Better Auth)'
+	@echo '  prod-migrate-create Create a new migration'
+	@echo '  prod-migrate-gen    Generate Better Auth schema'
+	@echo '  prod-migrate        Apply ALL migrations'
 	@echo '  prod-rebuild        Rebuild production containers (no cache)'
 	@echo '  prod-clean          Stop and remove all prod containers, volumes'
 	@echo ''
@@ -64,28 +61,16 @@ dev-db: ## Connect to development PostgreSQL database
 	@echo "🗄️  Connecting to PostgreSQL database..."
 	$(COMPOSE_DEV) exec postgres psql -U stagistic -d stagistic
 
-dev-migrate-up: ## Run database migrations in development
-	@echo "⬆️  Running migrations..."
-	$(COMPOSE_DEV) exec app yarn mikro-orm migration:up
-
 dev-migrate-create: ## Create a new migration in development
 	@echo "📝 Creating new migration..."
-	$(COMPOSE_DEV) exec app yarn mikro-orm migration:create
+	$(COMPOSE_DEV) exec app yarn migrate:create
 
-dev-migrate-down: ## Rollback last migration in development
-	@echo "⬇️  Rolling back migration..."
-	$(COMPOSE_DEV) exec app yarn mikro-orm migration:down
-
-dev-auth-generate: ## Generate Better Auth schema in development
+dev-migrate-gen: ## Generate Better Auth schema in development
 	@echo "🔐 Generating Better Auth schema..."
-	$(COMPOSE_DEV) exec app yarn auth:generate
+	$(COMPOSE_DEV) exec app yarn migrate:generate
 
-dev-auth-migrate: ## Run Better Auth migrations in development
-	@echo "🔐 Running Better Auth migrations..."
-	$(COMPOSE_DEV) exec app yarn auth:migrate
-
-dev-migrate: ## Run ALL migrations (MikroORM + Better Auth) in development
-	@echo "🗄️  Running all migrations..."
+dev-migrate: ## Apply ALL migrations (MikroORM + Better Auth) in development
+	@echo "🗄️  Applying all migrations..."
 	$(COMPOSE_DEV) exec app yarn migrate:apply
 
 dev-rebuild: ## Rebuild development containers from scratch
@@ -119,16 +104,16 @@ prod-shell: ## Open shell in production app container
 	@echo "🐚 Opening shell in app container..."
 	$(COMPOSE_PROD) exec app sh
 
-prod-auth-generate: ## Generate Better Auth schema in production
+prod-migrate-create: ## Create a new migration in production
+	@echo "� Creating new migration..."
+	$(COMPOSE_PROD) exec app yarn migrate:create
+
+prod-migrate-gen: ## Generate Better Auth schema in production
 	@echo "🔐 Generating Better Auth schema..."
-	$(COMPOSE_PROD) exec app yarn auth:generate
+	$(COMPOSE_PROD) exec app yarn migrate:generate
 
-prod-auth-migrate: ## Run Better Auth migrations in production
-	@echo "🔐 Running Better Auth migrations..."
-	$(COMPOSE_PROD) exec app yarn auth:migrate
-
-prod-migrate: ## Run ALL migrations (MikroORM + Better Auth) in production
-	@echo "🗄️  Running all migrations..."
+prod-migrate: ## Apply ALL migrations (MikroORM + Better Auth) in production
+	@echo "🗄️  Applying all migrations..."
 	$(COMPOSE_PROD) exec app yarn migrate:apply
 
 prod-rebuild: ## Rebuild production containers from scratch
