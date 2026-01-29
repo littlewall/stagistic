@@ -28,7 +28,8 @@ stagistic/
 ├── apps/
 │   ├── web/              # React + Vite frontend
 │   ├── api/              # Fastify backend
-│   └── worker/           # Background jobs (placeholder)
+│   ├── worker/           # Background jobs (placeholder)
+│   └── desktop/          # Tauri desktop app (offline-first)
 ├── packages/
 │   ├── db/               # Database schema and queries
 │   ├── shared/           # Shared utilities and types
@@ -78,6 +79,8 @@ stagistic/
 - **Node.js** >= 24.12.0
 - **pnpm** >= 9.0.0
 - **Docker** and **Docker Compose**
+- **Rust toolchain** (for desktop app)
+- **Tauri prerequisites** (platform-specific)
 
 ### Basic Setup (HTTP)
 
@@ -204,6 +207,15 @@ cd apps/web
 pnpm dev
 ```
 
+### Desktop Development (offline-first)
+
+```bash
+# From repo root
+pnpm desktop:dev
+```
+
+The desktop app runs locally with a Tauri shell and a SQLite database. No Docker, HTTPS, or cloud services are required.
+
 ### Development Commands
 
 ```bash
@@ -218,6 +230,12 @@ pnpm build
 
 # Lint all code
 pnpm lint
+
+# Run desktop app (Tauri)
+pnpm desktop:dev
+
+# Build desktop app
+pnpm desktop:build
 
 # Format code
 pnpm format

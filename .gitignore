@@ -14,6 +14,13 @@ build
 .next
 out
 
+# Tauri (desktop)
+apps/desktop/src-tauri/target
+apps/desktop/src-tauri/gen
+apps/desktop/src-tauri/.tauri
+apps/desktop/src-tauri/icons/*.icns
+apps/desktop/src-tauri/icons/*.ico
+
 # Cache
 .turbo
 .cache
