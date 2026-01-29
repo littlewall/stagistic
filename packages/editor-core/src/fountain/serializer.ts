@@ -1,126 +1,206 @@
 import {
-    FountainNodeType,
-    type FountainBlockNode,
-    type FountainDialogueBlockNode,
-    type FountainDualDialogueNode,
-    type FountainTitlePageNode,
+    ELEMENT_CENTERED,
+    ELEMENT_LYRICS,
+    ELEMENT_PARENTHETICAL,
+    ELEMENT_DUAL_DIALOGUE_CHARACTER,
+    ELEMENT_ACTION,
+    ELEMENT_CHARACTER,
+    ELEMENT_DIALOGUE,
+    ELEMENT_TRANSITION,
+    ELEMENT_COLUMN,
+    ELEMENT_COLUMN_GROUP,
+    type FountainDocument,
+    type FountainElement,
+    type ColumnElement,
+    type ColumnGroupElement,
+    type FountainNode,
 } from './types';
 
-const joinText = (node: { children?: Array<{ text: string }> }) =>
-    node.children?.map((child) => child.text).join('') ?? '';
-
-const serializeTitlePage = (node: FountainTitlePageNode) => {
-    const lines: string[] = [];
-    node.children.forEach((field) => {
-        const values = field.value.length > 0 ? field.value : [joinText(field)];
-        if (values.length === 0) {
-            lines.push(`${field.key}:`);
-            return;
+const uppercaseOutsideParentheses = (value: string) => {
+    let inside = false;
+    let result = '';
+    for (const char of value) {
+        if (char === '(') {
+            inside = true;
+            result += char;
+            continue;
         }
-        lines.push(`${field.key}: ${values[0]}`);
-        for (let i = 1; i < values.length; i += 1) {
-            lines.push(`    ${values[i]}`);
+        if (char === ')') {
+            inside = false;
+            result += char;
+            continue;
         }
-    });
-    return lines.join('\n');
+        result += inside ? char : char.toUpperCase();
+    }
+    return result;
 };
 
-const serializeDialogueBlock = (node: FountainDialogueBlockNode) => {
-    const lines: string[] = [];
-    node.children.forEach((child) => {
-        const text = joinText(child);
-        switch (child.type) {
-            case FountainNodeType.character:
-                lines.push(text.toUpperCase());
-                break;
-            case FountainNodeType.parenthetical:
-                lines.push(text);
-                break;
-            case FountainNodeType.lyric:
-                lines.push(`~${text}`);
-                break;
-            case FountainNodeType.dialogue:
-            default:
-                lines.push(text);
-                break;
-        }
-    });
-    return lines.join('\n');
+const isAllCaps = (value: string) => {
+    const letters = value.replace(/[^A-Za-z]/g, '');
+    return letters.length > 0 && letters === letters.toUpperCase();
 };
 
-const serializeDualDialogue = (node: FountainDualDialogueNode) =>
-    node.children.map(serializeDialogueBlock).join('\n\n');
-
-export const serializeFountain = (nodes: FountainBlockNode[]) => {
-    const lines: string[] = [];
-
-    nodes.forEach((node) => {
-        switch (node.type) {
-            case FountainNodeType.titlePage:
-                lines.push(serializeTitlePage(node));
-                lines.push('');
-                break;
-            case FountainNodeType.section:
-                lines.push(`${'#'.repeat(node.level)} ${joinText(node)}`.trim());
-                lines.push('');
-                break;
-            case FountainNodeType.synopsis:
-                lines.push(`= ${joinText(node)}`.trim());
-                lines.push('');
-                break;
-            case FountainNodeType.sceneHeading: {
-                const number = node.sceneNumber ? ` #${node.sceneNumber}#` : '';
-                const prefix = node.forced ? '.' : '';
-                lines.push(`${prefix}${joinText(node)}${number}`.trim());
-                lines.push('');
-                break;
+const serializeLeaves = (node: FountainElement): string =>
+    node.children
+        .map((child) => {
+            if (!child.text) return '';
+            let value = child.text;
+            if (child.underline) {
+                value = `_${value}_`;
             }
-            case FountainNodeType.transition:
-                lines.push(node.forced ? `>${joinText(node)}` : joinText(node));
-                lines.push('');
-                break;
-            case FountainNodeType.centered:
-                lines.push(`>${joinText(node)}<`);
-                lines.push('');
-                break;
-            case FountainNodeType.pageBreak:
-                lines.push('===');
-                lines.push('');
-                break;
-            case FountainNodeType.note:
-                lines.push(`[[${joinText(node)}]]`);
-                lines.push('');
-                break;
-            case FountainNodeType.boneyard:
-                lines.push(joinText(node));
-                lines.push('');
-                break;
-            case FountainNodeType.lyric:
-                lines.push(`~${joinText(node)}`);
-                lines.push('');
-                break;
-            case FountainNodeType.dialogueBlock:
-                lines.push(serializeDialogueBlock(node));
-                lines.push('');
-                break;
-            case FountainNodeType.dualDialogue:
-                lines.push(serializeDualDialogue(node));
-                lines.push('');
-                break;
-            case FountainNodeType.action:
-                lines.push(node.forced ? `!${joinText(node)}` : joinText(node));
-                lines.push('');
-                break;
-            case FountainNodeType.character:
-            case FountainNodeType.parenthetical:
-            case FountainNodeType.dialogue:
-            case FountainNodeType.titlePageField:
-            default:
-                lines.push(joinText(node));
-                lines.push('');
-                break;
-        }
-    });
+            if (child.bold && child.italic) {
+                value = `***${value}***`;
+            } else if (child.bold) {
+                value = `**${value}**`;
+            } else if (child.italic) {
+                value = `*${value}*`;
+            }
+            return value;
+        })
+        .join('');
 
-    return lines.join('\n').replace(/\n{3,}/g, '\n\n').trim();
+const serializeLine = (node: FountainElement): string => {
+    let text = serializeLeaves(node);
+
+    if (
+        node.type === ELEMENT_CHARACTER
+        || node.type === ELEMENT_DUAL_DIALOGUE_CHARACTER
+    ) {
+        text = uppercaseOutsideParentheses(text);
+    }
+    const lines = text.split('\n');
+
+    if (node.type === ELEMENT_LYRICS) {
+        return lines
+            .map((line, index) => `${index === 0 ? '~' : ''}${line}${index < lines.length - 1 ? '  ' : ''}`)
+            .join('\n');
+    }
+
+    const withLineBreaks = lines
+        .map((line, index) => `${line}${index < lines.length - 1 ? '  ' : ''}`)
+        .join('\n');
+
+    if (node.type === ELEMENT_CENTERED) {
+        return `>${withLineBreaks}<`;
+    }
+
+    if (node.type === ELEMENT_PARENTHETICAL) {
+        return `(${withLineBreaks})`;
+    }
+
+    if (node.type === ELEMENT_DUAL_DIALOGUE_CHARACTER) {
+        return `${withLineBreaks}^`;
+    }
+
+    if (node.type === ELEMENT_TRANSITION) {
+        const upper = withLineBreaks.toUpperCase();
+        return upper.endsWith('TO:') ? upper : `>${upper}`;
+    }
+
+    if (node.type === ELEMENT_ACTION) {
+        return isAllCaps(withLineBreaks.trim())
+            ? `!${withLineBreaks}`
+            : withLineBreaks;
+    }
+
+    return withLineBreaks;
 };
+
+const flattenNodes = (nodes: FountainDocument): FountainElement[] => {
+    const flattened: FountainElement[] = [];
+
+    const walk = (nodeList: FountainNode[]) => {
+        for (const node of nodeList) {
+            if (node.type === ELEMENT_COLUMN_GROUP) {
+                const group = node as ColumnGroupElement;
+                const columns = group.children ?? [];
+                if (columns[0]) walk(columns[0].children);
+                if (columns[1]) walk(columns[1].children);
+                continue;
+            }
+
+            if (node.type === ELEMENT_COLUMN) {
+                const column = node as ColumnElement;
+                walk(column.children ?? []);
+                continue;
+            }
+
+            flattened.push(node as FountainElement);
+        }
+    };
+
+    walk(nodes);
+    return flattened;
+};
+
+export const fountainSerializer = (nodes: FountainDocument): string => {
+    const outputLines: string[] = [];
+    let previousNonEmptyType: FountainElement['type'] | null = null;
+    const flatNodes = flattenNodes(nodes);
+
+    const getText = (node: FountainElement) => serializeLeaves(node);
+    const isEmptyAction = (node: FountainElement) =>
+        node.type === ELEMENT_ACTION && getText(node).trim().length === 0;
+    const nextNonEmptyType = (startIndex: number) => {
+        for (let i = startIndex; i < flatNodes.length; i += 1) {
+            if (!isEmptyAction(flatNodes[i])) {
+                return flatNodes[i].type;
+            }
+        }
+        return null;
+    };
+    const pushSerialized = (value: string) => {
+        outputLines.push(...value.split('\n'));
+    };
+
+    for (let i = 0; i < flatNodes.length; i += 1) {
+        const node = flatNodes[i];
+
+        if (isEmptyAction(node)) {
+            const nextType = nextNonEmptyType(i + 1);
+            if (
+                previousNonEmptyType === ELEMENT_CHARACTER
+                && (nextType === ELEMENT_PARENTHETICAL
+                    || nextType === ELEMENT_DIALOGUE
+                    || nextType === ELEMENT_LYRICS)
+            ) {
+                continue;
+            }
+            if (
+                previousNonEmptyType === ELEMENT_TRANSITION
+                || nextType === ELEMENT_TRANSITION
+            ) {
+                continue;
+            }
+
+            pushSerialized(serializeLine(node));
+            continue;
+        }
+
+        if (
+            node.type === ELEMENT_CHARACTER
+            || node.type === ELEMENT_DUAL_DIALOGUE_CHARACTER
+        ) {
+            if (outputLines.length > 0 && outputLines[outputLines.length - 1] !== '') {
+                outputLines.push('');
+            }
+        }
+
+        if (node.type === ELEMENT_TRANSITION) {
+            if (outputLines.length > 0 && outputLines[outputLines.length - 1] !== '') {
+                outputLines.push('');
+            }
+        }
+
+        pushSerialized(serializeLine(node));
+        previousNonEmptyType = node.type;
+
+        if (node.type === ELEMENT_TRANSITION) {
+            outputLines.push('');
+        }
+    }
+
+    return outputLines.join('\n');
+};
+
+export const serializeFountain = fountainSerializer;

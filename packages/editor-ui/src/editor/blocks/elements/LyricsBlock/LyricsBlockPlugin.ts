@@ -1,0 +1,12 @@
+import { createPlatePlugin } from 'platejs/react';
+import { ELEMENT_LYRICS } from '@stagistic/editor-core';
+import LyricsBlock from './LyricsBlock';
+
+export const lyricsPlugin = createPlatePlugin({
+  key: ELEMENT_LYRICS,
+  node: {
+    isElement: true,
+    type: ELEMENT_LYRICS,
+    component: LyricsBlock,
+  },
+});

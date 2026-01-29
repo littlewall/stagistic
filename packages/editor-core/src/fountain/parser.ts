@@ -1,375 +1,402 @@
 import {
-    FountainNodeType,
-    type FountainActionNode,
-    type FountainBoneyardNode,
-    type FountainBlockNode,
-    type FountainCenteredNode,
-    type FountainCharacterNode,
-    type FountainDialogueBlockNode,
-    type FountainDialogueNode,
-    type FountainDualDialogueNode,
-    type FountainLyricNode,
-    type FountainNoteNode,
-    type FountainParentheticalNode,
-    type FountainPageBreakNode,
-    type FountainSceneHeadingNode,
-    type FountainSectionNode,
-    type FountainSynopsisNode,
-    type FountainTextNode,
-    type FountainTitlePageFieldNode,
-    type FountainTitlePageNode,
-    type FountainTransitionNode,
+    ELEMENT_ACTION,
+    ELEMENT_CHARACTER,
+    ELEMENT_CENTERED,
+    ELEMENT_DIALOGUE,
+    ELEMENT_DUAL_DIALOGUE,
+    ELEMENT_DUAL_DIALOGUE_CHARACTER,
+    ELEMENT_LYRICS,
+    ELEMENT_PARENTHETICAL,
+    ELEMENT_SCENE_HEADING,
+    ELEMENT_TRANSITION,
+    ELEMENT_COLUMN,
+    ELEMENT_COLUMN_GROUP,
+    type ColumnGroupElement,
+    type ColumnElement,
+    type FountainDocument,
+    type FountainElementType,
+    type FountainElement,
+    type FountainText,
 } from './types';
 
-const titlePageFieldPattern = /^([A-Za-z0-9][A-Za-z0-9 ]+):\s*(.*)$/;
-const sceneHeadingPattern = /^(INT|EXT|EST|INT\/EXT|INT\.\/EXT)\b/i;
-const transitionPattern = /TO:$/;
+const SCENE_HEADING_PATTERN = /^(INT\.|EXT\.|EST\.|INT\/EXT\.|I\/E\.)/;
+const TRANSITION_PATTERN = /(TO:|FADE OUT\.|FADE TO BLACK\.)$/;
+const CENTERED_PATTERN = /^>.*<$/;
 
-const createTextNode = (text: string): FountainTextNode => ({ text });
-
-const createSimpleNode = <T extends { children: FountainTextNode[] }>(
-    node: Omit<T, 'children'>,
-    text: string
-): T =>
-    ({
-        ...node,
-        children: [createTextNode(text)],
-    }) as T;
-
-const isUpperCaseLine = (line: string) =>
-    line.length > 0 && line === line.toUpperCase() && /[A-Z]/.test(line);
-
-const stripSceneNumber = (line: string) => {
-    const match = line.match(/\s+#([^#]+)#\s*$/);
-    if (!match) {
-        return { text: line.trim(), sceneNumber: undefined };
-    }
-
-    return {
-        text: line.replace(match[0], '').trim(),
-        sceneNumber: match[1].trim(),
-    };
+const isAllCaps = (line: string) => {
+    const letters = line.replace(/[^A-Za-z]/g, '');
+    return letters.length > 0 && letters === letters.toUpperCase();
 };
 
-export const parseFountain = (source: string): FountainBlockNode[] => {
-    const lines = source.replace(/\r\n/g, '\n').split('\n');
-    const nodes: FountainBlockNode[] = [];
+const isDualCharacterLine = (line: string) => /\^\s*$/.test(line);
+const stripCharacterExtensions = (line: string) =>
+    line.replace(/\^\s*$/, '').replace(/\s*\(.*?\)\s*/g, ' ').trim();
+const isCharacterLine = (line: string) => {
+    const stripped = stripCharacterExtensions(line);
+    if (stripped.length === 0) return false;
+    return isAllCaps(stripped);
+};
+const hasHardLineBreak = (line: string) => /[ \t]{2}$/.test(line);
+const stripHardLineBreak = (line: string) => line.replace(/[ \t]{2}$/, '');
+const uppercaseOutsideParentheses = (value: string) => {
+    let inside = false;
+    let result = '';
+    for (const char of value) {
+        if (char === '(') {
+            inside = true;
+            result += char;
+            continue;
+        }
+        if (char === ')') {
+            inside = false;
+            result += char;
+            continue;
+        }
+        result += inside ? char : char.toUpperCase();
+    }
+    return result;
+};
 
+type InlineMark = {
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
+};
+
+const INLINE_RULES: Array<{
+    pattern: RegExp;
+    mark: InlineMark;
+}> = [
+    { pattern: /\*\*\*([^\n*][^*\n]*?)\*\*\*/g, mark: { bold: true, italic: true } },
+    { pattern: /\*\*([^\n*][^*\n]*?)\*\*/g, mark: { bold: true } },
+    { pattern: /_([^\n_][^_\n]*?)_/g, mark: { underline: true } },
+    { pattern: /\*([^\n*][^*\n]*?)\*/g, mark: { italic: true } },
+];
+
+const parseInlineEmphasis = (value: string) => {
+    const nodes: FountainText[] = [];
     let index = 0;
-    let inTitlePage = true;
-    let currentDialogueBlock: FountainDialogueBlockNode | null = null;
-    let pendingDualDialogue: FountainDualDialogueNode | null = null;
-    let inBoneyard = false;
-    let boneyardBuffer: string[] = [];
 
-    const flushDialogueBlock = () => {
-        if (!currentDialogueBlock) {
-            return;
+    while (index < value.length) {
+        let nextMatch: {
+            start: number;
+            end: number;
+            inner: string;
+            mark: InlineMark;
+        } | null = null;
+
+        for (const rule of INLINE_RULES) {
+            rule.pattern.lastIndex = index;
+            const match = rule.pattern.exec(value);
+            if (!match) continue;
+            const start = match.index;
+            const end = start + match[0].length;
+            const inner = match[1] ?? '';
+            if (
+                nextMatch === null
+                || start < nextMatch.start
+                || (start === nextMatch.start && end > nextMatch.end)
+            ) {
+                nextMatch = { start, end, inner, mark: rule.mark };
+            }
         }
 
-        if (pendingDualDialogue) {
-            pendingDualDialogue.children.push(currentDialogueBlock);
-            nodes.push(pendingDualDialogue);
-            pendingDualDialogue = null;
+        if (!nextMatch) {
+            nodes.push({ text: value.slice(index) });
+            break;
+        }
+
+        if (nextMatch.start > index) {
+            nodes.push({ text: value.slice(index, nextMatch.start) });
+        }
+
+        if (nextMatch.inner.length > 0) {
+            nodes.push({ text: nextMatch.inner, ...nextMatch.mark });
+        }
+
+        index = nextMatch.end;
+    }
+
+    return nodes.length > 0 ? nodes : [{ text: '' }];
+};
+
+const detectType = (
+    line: string,
+    previousType: FountainElementType | null
+): FountainElementType => {
+    const trimmed = line.trim();
+
+    if (trimmed.startsWith('!')) {
+        return ELEMENT_ACTION;
+    }
+
+    if (trimmed.length === 0) {
+        return ELEMENT_ACTION;
+    }
+
+    if (SCENE_HEADING_PATTERN.test(trimmed)) {
+        return ELEMENT_SCENE_HEADING;
+    }
+
+    if (CENTERED_PATTERN.test(trimmed)) {
+        return ELEMENT_CENTERED;
+    }
+
+    if (trimmed.startsWith('>')) {
+        return ELEMENT_TRANSITION;
+    }
+
+    if (TRANSITION_PATTERN.test(trimmed) && isAllCaps(trimmed)) {
+        return ELEMENT_TRANSITION;
+    }
+
+    if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
+        return ELEMENT_PARENTHETICAL;
+    }
+
+    if (trimmed.startsWith('~')) {
+        return ELEMENT_LYRICS;
+    }
+
+    if (isDualCharacterLine(trimmed)) {
+        return ELEMENT_DUAL_DIALOGUE_CHARACTER;
+    }
+
+    if (isCharacterLine(trimmed)) {
+        return ELEMENT_CHARACTER;
+    }
+
+    if (
+        previousType === ELEMENT_CHARACTER
+        || previousType === ELEMENT_DUAL_DIALOGUE_CHARACTER
+        || previousType === ELEMENT_PARENTHETICAL
+        || previousType === ELEMENT_DIALOGUE
+        || previousType === ELEMENT_DUAL_DIALOGUE
+    ) {
+        return ELEMENT_DIALOGUE;
+    }
+
+    return ELEMENT_ACTION;
+};
+
+export const fountainParser = (source: string): FountainDocument => {
+    // Phase 1: structure only. Each line becomes one block.
+    const lines = source.replace(/\r\n/g, '\n').split('\n');
+    let previousType: FountainElementType | null = null;
+    let carryOver = false;
+    const blocks: FountainDocument = [];
+
+    for (const rawLine of lines) {
+        const hardBreak = hasHardLineBreak(rawLine);
+        const line = hardBreak ? stripHardLineBreak(rawLine) : rawLine;
+        const targetBlock = carryOver ? blocks[blocks.length - 1] : null;
+        const type = targetBlock ? targetBlock.type : detectType(line, previousType);
+        let text =
+            type === ELEMENT_LYRICS ? line.trim().replace(/^~\s?/, '') : line;
+
+        if (type === ELEMENT_ACTION) {
+            text = text.replace(/^\s*!\s*/, '');
+        }
+
+        if (type === ELEMENT_PARENTHETICAL) {
+            text = text.trim().replace(/^\(/, '').replace(/\)$/, '').trim();
+        }
+
+        if (type === ELEMENT_CENTERED) {
+            text = text.trim().replace(/^>/, '').replace(/<$/, '').trim();
+        }
+
+        if (type === ELEMENT_DUAL_DIALOGUE_CHARACTER) {
+            text = text.trim().replace(/\^\s*$/, '').trim();
+            text = uppercaseOutsideParentheses(text);
+        }
+
+        if (type === ELEMENT_CHARACTER) {
+            text = uppercaseOutsideParentheses(text);
+        }
+
+        if (type === ELEMENT_TRANSITION) {
+            text = text.trim().replace(/^>\s*/, '').trim().toUpperCase();
+        }
+
+        if (targetBlock) {
+            targetBlock.children[0].text += `\n${text}`;
         } else {
-            nodes.push(currentDialogueBlock);
+            blocks.push({
+                type,
+                children: parseInlineEmphasis(text),
+            });
+            previousType = type;
         }
 
-        currentDialogueBlock = null;
-    };
+        carryOver = hardBreak;
+    }
 
-    const pushDialogueChild = (
-        node: FountainCharacterNode | FountainParentheticalNode | FountainDialogueNode | FountainLyricNode
-    ) => {
-        if (!currentDialogueBlock) {
-            currentDialogueBlock = {
-                type: FountainNodeType.dialogueBlock,
-                children: [],
-            };
-        }
-        currentDialogueBlock.children.push(node);
-    };
+    const isEmptyAction = (block: FountainDocument[number]) =>
+        block.type === ELEMENT_ACTION
+        && 'children' in block
+        && Array.isArray(block.children)
+        && typeof block.children[0] === 'object'
+        && 'text' in block.children[0]
+        && block.children[0].text.trim().length === 0;
 
-    while (index < lines.length) {
-        const rawLine = lines[index];
-        const line = rawLine.trimEnd();
-        const trimmed = line.trim();
-
-        if (inBoneyard) {
-            boneyardBuffer.push(rawLine);
-            if (rawLine.includes('*/')) {
-                nodes.push(
-                    createSimpleNode<FountainBoneyardNode>(
-                        { type: FountainNodeType.boneyard },
-                        boneyardBuffer.join('\n')
-                    )
-                );
-                boneyardBuffer = [];
-                inBoneyard = false;
+    const cleaned: FountainDocument = [];
+    let previousNonEmptyType: FountainElementType | null = null;
+    for (let i = 0; i < blocks.length; i += 1) {
+        const block = blocks[i];
+        if (isEmptyAction(block)) {
+            let nextNonEmptyType: FountainElementType | null = null;
+            for (let j = i + 1; j < blocks.length; j += 1) {
+                if (!isEmptyAction(blocks[j])) {
+                    nextNonEmptyType = blocks[j].type;
+                    break;
+                }
             }
-            index += 1;
-            continue;
-        }
 
-        if (trimmed.startsWith('/*')) {
-            flushDialogueBlock();
-            inBoneyard = true;
-            boneyardBuffer = [rawLine];
-            if (rawLine.includes('*/')) {
-                nodes.push(
-                    createSimpleNode<FountainBoneyardNode>(
-                        { type: FountainNodeType.boneyard },
-                        rawLine
-                    )
-                );
-                boneyardBuffer = [];
-                inBoneyard = false;
+            if (nextNonEmptyType === ELEMENT_CHARACTER) {
+                continue;
             }
-            index += 1;
-            continue;
+
+            if (
+                previousNonEmptyType === ELEMENT_TRANSITION
+                || nextNonEmptyType === ELEMENT_TRANSITION
+            ) {
+                continue;
+            }
         }
 
-        if (inTitlePage) {
-            if (trimmed.length === 0 && nodes.length > 0) {
-                inTitlePage = false;
+        cleaned.push(block);
+        if (!isEmptyAction(block)) {
+            previousNonEmptyType = block.type;
+        }
+    }
+
+    const isDialogueSectionType = (type: FountainElementType) =>
+        type === ELEMENT_CHARACTER
+        || type === ELEMENT_DUAL_DIALOGUE_CHARACTER
+        || type === ELEMENT_DIALOGUE
+        || type === ELEMENT_DUAL_DIALOGUE
+        || type === ELEMENT_PARENTHETICAL;
+
+    const wrapDualSections = (blocksToWrap: FountainElement[]) => {
+        const wrapped: FountainDocument = [];
+        let index = 0;
+
+        const nextNonEmptyType = (start: number) => {
+            for (let i = start; i < blocksToWrap.length; i += 1) {
+                if (!isEmptyAction(blocksToWrap[i])) {
+                    return blocksToWrap[i].type;
+                }
+            }
+            return null;
+        };
+
+        while (index < blocksToWrap.length) {
+            const block = blocksToWrap[index];
+            if (!isDialogueSectionType(block.type)) {
+                wrapped.push(block);
                 index += 1;
                 continue;
             }
 
-            const fieldMatch = rawLine.match(titlePageFieldPattern);
-            const lastNode = nodes[nodes.length - 1];
-            if (fieldMatch) {
-                const titlePageNode =
-                    lastNode?.type === FountainNodeType.titlePage
-                        ? (lastNode as FountainTitlePageNode)
-                        : null;
-                const fieldNode: FountainTitlePageFieldNode = {
-                    type: FountainNodeType.titlePageField,
-                    key: fieldMatch[1].trim(),
-                    value: [fieldMatch[2].trim()].filter(Boolean),
-                    children: [createTextNode(fieldMatch[2].trim())],
-                };
-
-                if (titlePageNode) {
-                    titlePageNode.children.push(fieldNode);
-                } else {
-                    nodes.push({
-                        type: FountainNodeType.titlePage,
-                        children: [fieldNode],
-                    });
+            const section: FountainElement[] = [];
+            let cursor = index;
+            while (cursor < blocksToWrap.length) {
+                const current = blocksToWrap[cursor];
+                if (isDialogueSectionType(current.type)) {
+                    section.push(current);
+                    cursor += 1;
+                    continue;
                 }
 
-                index += 1;
-                continue;
-            }
-
-            if (rawLine.startsWith('    ') || rawLine.startsWith('\t')) {
-                const titlePageNode = nodes[nodes.length - 1];
-                if (titlePageNode?.type === FountainNodeType.titlePage) {
-                    const lastField = titlePageNode.children[titlePageNode.children.length - 1];
-                    if (lastField) {
-                        const continuation = rawLine.trim();
-                        lastField.value.push(continuation);
-                        lastField.children.push(createTextNode(continuation));
-                        index += 1;
+                if (isEmptyAction(current)) {
+                    const nextType = nextNonEmptyType(cursor + 1);
+                    if (nextType && isDialogueSectionType(nextType)) {
+                        section.push(current);
+                        cursor += 1;
                         continue;
                     }
                 }
+
+                break;
             }
-        }
 
-        if (trimmed.length === 0) {
-            flushDialogueBlock();
-            inTitlePage = false;
-            index += 1;
-            continue;
-        }
-
-        inTitlePage = false;
-
-        if (trimmed === '===') {
-            flushDialogueBlock();
-            nodes.push(
-                createSimpleNode<FountainPageBreakNode>({ type: FountainNodeType.pageBreak }, '')
-            );
-            index += 1;
-            continue;
-        }
-
-        if (trimmed.startsWith('[[') && trimmed.endsWith(']]')) {
-            flushDialogueBlock();
-            nodes.push(
-                createSimpleNode<FountainNoteNode>(
-                    { type: FountainNodeType.note },
-                    trimmed.slice(2, -2).trim()
-                )
-            );
-            index += 1;
-            continue;
-        }
-
-        if (trimmed.startsWith('#')) {
-            flushDialogueBlock();
-            const level = trimmed.match(/^#+/)?.[0].length ?? 1;
-            const text = trimmed.replace(/^#+\s*/, '');
-            nodes.push(
-                createSimpleNode<FountainSectionNode>(
-                    { type: FountainNodeType.section, level },
-                    text
-                )
-            );
-            index += 1;
-            continue;
-        }
-
-        if (trimmed.startsWith('=')) {
-            flushDialogueBlock();
-            const text = trimmed.replace(/^=+\s*/, '');
-            nodes.push(
-                createSimpleNode<FountainSynopsisNode>(
-                    { type: FountainNodeType.synopsis },
-                    text
-                )
-            );
-            index += 1;
-            continue;
-        }
-
-        if (trimmed.startsWith('>') && trimmed.endsWith('<')) {
-            flushDialogueBlock();
-            nodes.push(
-                createSimpleNode<FountainCenteredNode>(
-                    { type: FountainNodeType.centered },
-                    trimmed.slice(1, -1).trim()
-                )
-            );
-            index += 1;
-            continue;
-        }
-
-        if (trimmed.startsWith('>')) {
-            flushDialogueBlock();
-            nodes.push(
-                createSimpleNode<FountainTransitionNode>(
-                    { type: FountainNodeType.transition, forced: true },
-                    trimmed.slice(1).trim()
-                )
-            );
-            index += 1;
-            continue;
-        }
-
-        if (trimmed.startsWith('.') || sceneHeadingPattern.test(trimmed)) {
-            flushDialogueBlock();
-            const forced = trimmed.startsWith('.');
-            const sceneLine = forced ? trimmed.slice(1).trim() : trimmed;
-            const { text, sceneNumber } = stripSceneNumber(sceneLine);
-            nodes.push(
-                createSimpleNode<FountainSceneHeadingNode>(
-                    { type: FountainNodeType.sceneHeading, forced, sceneNumber },
-                    text
-                )
-            );
-            index += 1;
-            continue;
-        }
-
-        if (transitionPattern.test(trimmed) && isUpperCaseLine(trimmed)) {
-            flushDialogueBlock();
-            nodes.push(
-                createSimpleNode<FountainTransitionNode>(
-                    { type: FountainNodeType.transition },
-                    trimmed
-                )
-            );
-            index += 1;
-            continue;
-        }
-
-        if (trimmed.startsWith('!')) {
-            flushDialogueBlock();
-            nodes.push(
-                createSimpleNode<FountainActionNode>(
-                    { type: FountainNodeType.action, forced: true },
-                    trimmed.slice(1).trim()
-                )
-            );
-            index += 1;
-            continue;
-        }
-
-        if (trimmed.startsWith('~')) {
-            flushDialogueBlock();
-            nodes.push(
-                createSimpleNode<FountainLyricNode>(
-                    { type: FountainNodeType.lyric },
-                    trimmed.slice(1).trim()
-                )
-            );
-            index += 1;
-            continue;
-        }
-
-        if (trimmed.startsWith('@') || isUpperCaseLine(trimmed)) {
-            flushDialogueBlock();
-            const forced = trimmed.startsWith('@');
-            const characterText = forced ? trimmed.slice(1).trim() : trimmed;
-            const isDual = characterText.endsWith('^');
-            const character = characterText.replace(/\^$/, '').trim();
-            const characterNode = createSimpleNode<FountainCharacterNode>(
-                { type: FountainNodeType.character, forced, dual: isDual },
-                character
+            const hasDual = section.some(
+                (node) =>
+                    node.type === ELEMENT_DUAL_DIALOGUE_CHARACTER
+                    || node.type === ELEMENT_DUAL_DIALOGUE
             );
 
-            currentDialogueBlock = {
-                type: FountainNodeType.dialogueBlock,
-                children: [characterNode],
+            if (!hasDual) {
+                wrapped.push(...section);
+                index = cursor;
+                continue;
+            }
+
+            const left: FountainElement[] = [];
+            const right: FountainElement[] = [];
+            let currentColumn: 'left' | 'right' = 'left';
+
+            for (const node of section) {
+                if (isEmptyAction(node)) {
+                    continue;
+                }
+
+                if (node.type === ELEMENT_CHARACTER) {
+                    currentColumn = 'left';
+                    left.push(node);
+                    continue;
+                }
+
+                if (
+                    node.type === ELEMENT_DUAL_DIALOGUE_CHARACTER
+                    || node.type === ELEMENT_DUAL_DIALOGUE
+                ) {
+                    currentColumn = 'right';
+                    right.push(node);
+                    continue;
+                }
+
+                if (node.type === ELEMENT_DIALOGUE || node.type === ELEMENT_PARENTHETICAL) {
+                    if (currentColumn === 'left') {
+                        left.push(node);
+                    } else {
+                        right.push(node);
+                    }
+                    continue;
+                }
+
+                left.push(node);
+            }
+
+            const columnGroup: ColumnGroupElement = {
+                type: ELEMENT_COLUMN_GROUP,
+                children: [
+                    {
+                        type: ELEMENT_COLUMN,
+                        width: '50%',
+                        children: left,
+                    } as ColumnElement,
+                    {
+                        type: ELEMENT_COLUMN,
+                        width: '50%',
+                        children: right,
+                    } as ColumnElement,
+                ],
             };
 
-            if (isDual) {
-                const previousNode = nodes[nodes.length - 1];
-                if (previousNode?.type === FountainNodeType.dialogueBlock) {
-                    pendingDualDialogue = {
-                        type: FountainNodeType.dualDialogue,
-                        children: [previousNode as FountainDialogueBlockNode],
-                    };
-                    nodes.pop();
-                }
-            }
-
-            index += 1;
-            continue;
+            wrapped.push(columnGroup);
+            index = cursor;
         }
 
-        if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
-            pushDialogueChild(
-                createSimpleNode<FountainParentheticalNode>(
-                    { type: FountainNodeType.parenthetical },
-                    trimmed
-                )
-            );
-            index += 1;
-            continue;
-        }
+        return wrapped;
+    };
 
-        if (currentDialogueBlock) {
-            pushDialogueChild(
-                createSimpleNode<FountainDialogueNode>(
-                    { type: FountainNodeType.dialogue },
-                    rawLine
-                )
-            );
-            index += 1;
-            continue;
-        }
-
-        nodes.push(
-            createSimpleNode<FountainActionNode>({ type: FountainNodeType.action }, rawLine)
-        );
-        index += 1;
-    }
-
-    flushDialogueBlock();
-
-    return nodes;
+    const flatBlocks = cleaned.filter(
+        (node): node is FountainElement =>
+            node.type !== ELEMENT_COLUMN_GROUP && node.type !== ELEMENT_COLUMN
+    );
+    return wrapDualSections(flatBlocks);
 };
+
+export const parseFountain = fountainParser;

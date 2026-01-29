@@ -1,0 +1,326 @@
+:root {
+  color-scheme: light;
+  font-family: "Iowan Old Style", "Palatino", "Georgia", serif;
+  line-height: 1.5;
+  font-weight: 400;
+  background-color: #f8f3ea;
+  color: #1b1b1b;
+  /* Plate UI brand token (manual install step). */
+  --brand: oklch(0.623 0.214 259.815);
+}
+
+.dark {
+  --brand: oklch(0.707 0.165 254.624);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at top, #fff4d6 0%, #f6efe6 45%, #efe7db 100%);
+}
+
+#root {
+  min-height: 100vh;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  padding: 48px;
+  gap: 24px;
+}
+
+.app__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border: 1px solid #d5c7b0;
+  border-radius: 18px;
+  padding: 20px 24px;
+  background: linear-gradient(120deg, #fff8eb 0%, #f3e6d2 100%);
+  box-shadow: 0 12px 24px rgba(90, 72, 41, 0.15);
+}
+
+.app__header h1 {
+  margin: 0 0 4px;
+  font-size: 28px;
+}
+
+.app__header p {
+  margin: 0;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #5c4b36;
+}
+
+.app__main {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+}
+
+.editor-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 320px);
+  gap: 24px;
+  align-items: start;
+  width: min(1240px, 100%);
+}
+
+.editor-shell {
+  width: 100%;
+  border-radius: 22px;
+  background: #fffdfa;
+  padding: 24px;
+  box-shadow: 0 18px 36px rgba(76, 59, 33, 0.18);
+  border: 1px solid #e0d3c0;
+  overflow: visible;
+  --editor-left: 0px;
+}
+
+.editor-sidebar {
+  border-radius: 18px;
+  border: 1px solid #e0d3c0;
+  background: #fff8ec;
+  padding: 16px;
+  box-shadow: 0 12px 24px rgba(76, 59, 33, 0.12);
+  font-family: "Courier Prime", "Courier New", ui-monospace, monospace;
+  font-size: 12px;
+  color: #4f3f2a;
+}
+
+.editor-sidebar__header {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 11px;
+  margin-bottom: 12px;
+}
+
+.editor-sidebar__content {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.editor {
+  --editor-padding-x: 32px;
+  font-family: "Courier Prime", "Courier New", ui-monospace, monospace;
+  font-size: 16px;
+  line-height: 1.25;
+  padding: 18px var(--editor-padding-x);
+  min-height: 420px;
+  outline: none;
+  display: block;
+}
+
+.editor-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  margin: -24px -24px 14px;
+  border-bottom: 1px solid #e0d3c0;
+  background: #fffdfa;
+}
+
+.editor-toolbar__group {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.editor-toolbar__icon-button {
+  border: 1px solid #e4e4e7;
+  background: #ffffff;
+  color: #18181b;
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.editor-toolbar__icon-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.editor-toolbar__icon svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.editor-toolbar__icon-button svg {
+  width: 16px;
+  height: 16px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.editor-toolbar__text-icon {
+  font-family: "Courier Prime", "Courier New", ui-monospace, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.editor-toolbar__text-icon--italic {
+  font-style: italic;
+  font-weight: 600;
+}
+
+.editor-toolbar__text-icon--underline {
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.editor-toolbar__dropdown {
+  position: relative;
+}
+
+.editor-toolbar__select-button {
+  border: 1px solid #e4e4e7;
+  background: #ffffff;
+  color: #18181b;
+  padding: 0 10px;
+  height: 28px;
+  width: 190px;
+  border-radius: 7px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.editor-toolbar__select-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.editor-toolbar__select-label {
+  font-family: "Courier Prime", "Courier New", ui-monospace, monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  flex: 1;
+  text-align: left;
+}
+
+.editor-toolbar__chevron {
+  width: 12px;
+  height: 12px;
+  stroke: currentColor;
+  fill: none;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.75;
+}
+
+.editor-toolbar__menu {
+  position: absolute;
+  top: 34px;
+  left: 0;
+  display: grid;
+  gap: 2px;
+  padding: 6px;
+  min-width: 180px;
+  border-radius: 10px;
+  border: 1px solid #e4e4e7;
+  background: #ffffff;
+  z-index: 10;
+}
+
+.editor-toolbar__menu-item {
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 6px 8px;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 18px 1fr;
+  align-items: center;
+  gap: 8px;
+  color: #18181b;
+  cursor: pointer;
+}
+
+.editor-toolbar__menu-label {
+  font-family: "Courier Prime", "Courier New", ui-monospace, monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  text-align: left;
+}
+
+.editor-toolbar__menu-item:hover {
+  background: #f4f4f5;
+}
+
+.editor-toolbar__menu-item.is-active {
+  background: #e4e4e7;
+  border-color: #d4d4d8;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  font-family: "Courier Prime", "Courier New", ui-monospace, monospace;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #6d5a3e;
+}
+
+.toolbar__badge {
+  border: 1px solid #d5c7b0;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: #fff8ec;
+}
+
+@media (max-width: 720px) {
+  .app {
+    padding: 28px;
+  }
+
+  .app__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .editor {
+    font-size: 15px;
+  }
+
+  .editor-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .editor-sidebar {
+    order: 2;
+  }
+}

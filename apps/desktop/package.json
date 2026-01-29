@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@stagistic/editor-core": "workspace:*",
+        "@stagistic/editor-ui": "workspace:*",
         "@stagistic/shared": "workspace:*",
         "@stagistic/sync-core": "workspace:*",
         "@tauri-apps/api": "^2.0.0",

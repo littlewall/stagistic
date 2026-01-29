@@ -1,143 +1,75 @@
+export const ELEMENT_SCENE_HEADING = 'fountain_scene_heading';
+export const ELEMENT_ACTION = 'fountain_action';
+export const ELEMENT_CHARACTER = 'fountain_character';
+export const ELEMENT_DUAL_DIALOGUE_CHARACTER = 'fountain_dual_dialogue_character';
+export const ELEMENT_PARENTHETICAL = 'fountain_parenthetical';
+export const ELEMENT_DIALOGUE = 'fountain_dialogue';
+export const ELEMENT_DUAL_DIALOGUE = 'fountain_dual_dialogue';
+export const ELEMENT_TRANSITION = 'fountain_transition';
+export const ELEMENT_LYRICS = 'fountain_lyrics';
+export const ELEMENT_CENTERED = 'fountain_centered';
+export const ELEMENT_COLUMN_GROUP = 'column_group';
+export const ELEMENT_COLUMN = 'column';
+
 export const FountainNodeType = {
-    titlePage: 'title-page',
-    titlePageField: 'title-page-field',
-    sceneHeading: 'scene-heading',
-    action: 'action',
-    character: 'character',
-    dialogue: 'dialogue',
-    parenthetical: 'parenthetical',
-    transition: 'transition',
-    lyric: 'lyric',
-    section: 'section',
-    synopsis: 'synopsis',
-    note: 'note',
-    pageBreak: 'page-break',
-    boneyard: 'boneyard',
-    dualDialogue: 'dual-dialogue',
-    dialogueBlock: 'dialogue-block',
-    centered: 'centered',
+    sceneHeading: ELEMENT_SCENE_HEADING,
+    action: ELEMENT_ACTION,
+    character: ELEMENT_CHARACTER,
+    parenthetical: ELEMENT_PARENTHETICAL,
+    dialogue: ELEMENT_DIALOGUE,
+    dualDialogue: ELEMENT_DUAL_DIALOGUE,
+    dualDialogueCharacter: ELEMENT_DUAL_DIALOGUE_CHARACTER,
+    transition: ELEMENT_TRANSITION,
+    lyric: ELEMENT_LYRICS,
+    centered: ELEMENT_CENTERED,
+    section: 'fountain_section',
+    synopsis: 'fountain_synopsis',
+    note: 'fountain_note',
+    pageBreak: 'fountain_page_break',
+    boneyard: 'fountain_boneyard',
+    dialogueBlock: 'fountain_dialogue_block',
+    titlePage: 'fountain_title_page',
+    titlePageField: 'fountain_title_page_field',
 } as const;
 
 export type FountainNodeTypeKey = keyof typeof FountainNodeType;
 export type FountainNodeTypeValue = (typeof FountainNodeType)[FountainNodeTypeKey];
 
-export type FountainTextNode = {
+export type FountainElementType =
+    | typeof ELEMENT_SCENE_HEADING
+    | typeof ELEMENT_ACTION
+    | typeof ELEMENT_CHARACTER
+    | typeof ELEMENT_DUAL_DIALOGUE_CHARACTER
+    | typeof ELEMENT_PARENTHETICAL
+    | typeof ELEMENT_DIALOGUE
+    | typeof ELEMENT_DUAL_DIALOGUE
+    | typeof ELEMENT_TRANSITION
+    | typeof ELEMENT_LYRICS
+    | typeof ELEMENT_CENTERED;
+
+export type FountainText = {
     text: string;
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
 };
 
-export type FountainTitlePageFieldNode = {
-    type: typeof FountainNodeType.titlePageField;
-    key: string;
-    value: string[];
-    children: FountainTextNode[];
+export type FountainElement = {
+    type: FountainElementType;
+    children: FountainText[];
 };
 
-export type FountainTitlePageNode = {
-    type: typeof FountainNodeType.titlePage;
-    children: FountainTitlePageFieldNode[];
+export type ColumnElement = {
+    type: typeof ELEMENT_COLUMN;
+    width?: string;
+    children: FountainElement[];
 };
 
-export type FountainSectionNode = {
-    type: typeof FountainNodeType.section;
-    level: number;
-    children: FountainTextNode[];
+export type ColumnGroupElement = {
+    type: typeof ELEMENT_COLUMN_GROUP;
+    children: ColumnElement[];
 };
 
-export type FountainSynopsisNode = {
-    type: typeof FountainNodeType.synopsis;
-    children: FountainTextNode[];
-};
+export type FountainNode = FountainElement | ColumnElement | ColumnGroupElement;
 
-export type FountainSceneHeadingNode = {
-    type: typeof FountainNodeType.sceneHeading;
-    forced?: boolean;
-    sceneNumber?: string;
-    children: FountainTextNode[];
-};
-
-export type FountainActionNode = {
-    type: typeof FountainNodeType.action;
-    forced?: boolean;
-    children: FountainTextNode[];
-};
-
-export type FountainCenteredNode = {
-    type: typeof FountainNodeType.centered;
-    children: FountainTextNode[];
-};
-
-export type FountainCharacterNode = {
-    type: typeof FountainNodeType.character;
-    forced?: boolean;
-    dual?: boolean;
-    children: FountainTextNode[];
-};
-
-export type FountainParentheticalNode = {
-    type: typeof FountainNodeType.parenthetical;
-    children: FountainTextNode[];
-};
-
-export type FountainDialogueNode = {
-    type: typeof FountainNodeType.dialogue;
-    children: FountainTextNode[];
-};
-
-export type FountainLyricNode = {
-    type: typeof FountainNodeType.lyric;
-    children: FountainTextNode[];
-};
-
-export type FountainTransitionNode = {
-    type: typeof FountainNodeType.transition;
-    forced?: boolean;
-    children: FountainTextNode[];
-};
-
-export type FountainNoteNode = {
-    type: typeof FountainNodeType.note;
-    children: FountainTextNode[];
-};
-
-export type FountainPageBreakNode = {
-    type: typeof FountainNodeType.pageBreak;
-    children: FountainTextNode[];
-};
-
-export type FountainBoneyardNode = {
-    type: typeof FountainNodeType.boneyard;
-    children: FountainTextNode[];
-};
-
-export type FountainDialogueBlockNode = {
-    type: typeof FountainNodeType.dialogueBlock;
-    children: Array<
-        FountainCharacterNode | FountainParentheticalNode | FountainDialogueNode | FountainLyricNode
-    >;
-};
-
-export type FountainDualDialogueNode = {
-    type: typeof FountainNodeType.dualDialogue;
-    children: FountainDialogueBlockNode[];
-};
-
-export type FountainBlockNode =
-    | FountainTitlePageNode
-    | FountainTitlePageFieldNode
-    | FountainSectionNode
-    | FountainSynopsisNode
-    | FountainSceneHeadingNode
-    | FountainActionNode
-    | FountainCenteredNode
-    | FountainCharacterNode
-    | FountainParentheticalNode
-    | FountainDialogueNode
-    | FountainLyricNode
-    | FountainTransitionNode
-    | FountainNoteNode
-    | FountainPageBreakNode
-    | FountainBoneyardNode
-    | FountainDialogueBlockNode
-    | FountainDualDialogueNode;
-
-export type FountainDocument = FountainBlockNode[];
+export type FountainDocument = FountainNode[];
