@@ -1,0 +1,31 @@
+{
+    "name": "stagistic",
+    "version": "0.1.0",
+    "private": true,
+    "description": "Cloud editor for theatre and musical scripts",
+    "license": "MIT",
+    "author": "Stagistic Team",
+    "engines": {
+        "node": ">=24.12.0",
+        "pnpm": ">=9.0.0"
+    },
+    "packageManager": "pnpm@9.15.0",
+    "scripts": {
+        "dev": "turbo dev",
+        "build": "turbo build",
+        "lint": "turbo lint",
+        "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md}\"",
+        "clean": "turbo clean && rm -rf node_modules",
+        "docker:up": "docker compose up -d",
+        "docker:down": "docker compose down",
+        "docker:https": "docker compose -f docker-compose.yml -f infra/proxy/caddy/docker-compose.https.yml up -d",
+        "docker:logs": "docker compose logs -f"
+    },
+    "devDependencies": {
+        "@types/node": "^24.0.0",
+        "prettier": "^3.4.2",
+        "turbo": "^2.3.3",
+        "typescript": "^5.7.2"
+    }
+}

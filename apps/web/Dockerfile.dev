@@ -1,0 +1,30 @@
+# Development Dockerfile for Web (with hot reload)
+FROM node:24.12-alpine
+
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+
+WORKDIR /app
+
+# Copy workspace config
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+
+# Copy all workspace packages first
+COPY packages ./packages
+COPY apps/web/package.json ./apps/web/
+
+# Install all dependencies
+RUN pnpm install
+
+# Copy source code (only what is needed)
+COPY apps/web/src ./apps/web/src
+COPY apps/web/index.html ./apps/web/
+COPY apps/web/vite.config.ts ./apps/web/
+COPY apps/web/tsconfig.json ./apps/web/
+COPY apps/web/src/vite-env.d.ts ./apps/web/src/
+COPY tsconfig.base.json ./
+
+WORKDIR /app/apps/web
+
+EXPOSE 3000
+
+CMD ["pnpm", "dev"]

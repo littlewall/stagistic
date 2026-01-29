@@ -1,0 +1,16 @@
+{
+    admin off
+}
+
+stagistic.local {
+    # Proxy web app (Vite dev server)
+    reverse_proxy web:3000
+
+    # Proxy API
+    handle /api/* {
+        reverse_proxy api:4000
+    }
+
+    # TLS configuration
+    tls /etc/caddy/certs/stagistic.local.pem /etc/caddy/certs/stagistic.local-key.pem
+}
