@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import clsx from 'clsx';
 import { useEditorRef, useEditorVersion } from 'platejs/react';
 import { FOUNTAIN_BLOCKS } from '../blocks/fountainBlockRegistry';
@@ -16,6 +16,7 @@ type EditorToolbarProps = {
 const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
   const editor = useEditorRef();
   const editorVersion = useEditorVersion();
+  const dropdownRef = useRef<HTMLDivElement | null>(null);
 
   const activeBlock = useMemo(() => {
     return editor.api.block({ at: editor.selection ?? undefined });
@@ -33,6 +34,26 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
   useEffect(() => {
     setIsOpen(false);
   }, [activeBlockKey]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onPointerDown = (event: MouseEvent | PointerEvent) => {
+      if (!dropdownRef.current) return;
+      if (dropdownRef.current.contains(event.target as Node)) return;
+      setIsOpen(false);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener('pointerdown', onPointerDown);
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown);
+      document.removeEventListener('keydown', onKeyDown);
+    };
+  }, [isOpen]);
 
   const toggleMark = (key: 'bold' | 'italic' | 'underline') => {
     const isActive = !!editor.api.marks()?.[key];
@@ -127,7 +148,7 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
           <span className={clsx(styles.textIcon, styles.textIconUnderline)}>U</span>
         </button>
       </div>
-      <div className={clsx(styles.group, styles.dropdown)}>
+      <div className={clsx(styles.group, styles.dropdown)} ref={dropdownRef}>
         <button
           className={styles.selectButton}
           type="button"
@@ -145,7 +166,7 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
           </span>
           <span className={styles.selectLabel}>
             {FOUNTAIN_BLOCKS.find((option) => option.type === activeType)
-              ?.label ?? 'Block'}
+              ?.label ?? 'Select block in editor'}
           </span>
           <svg
             viewBox="0 0 24 24"

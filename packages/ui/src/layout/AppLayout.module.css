@@ -15,7 +15,7 @@
 .body {
   flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 280px;
+  grid-template-columns: minmax(0, 1fr) calc(280px * var(--size-scale));
   min-height: 0;
   overflow: hidden;
 }

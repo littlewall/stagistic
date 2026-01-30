@@ -21,15 +21,19 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow: hidden;
-  font-size: calc(13px * var(--font-scale, 1));
+  font-size: calc(13px * var(--size-scale));
 }
 
-.font-size-md {
-  --font-scale: 1.08;
+.size-sm {
+  --size-scale: 1;
 }
 
-.font-size-lg {
-  --font-scale: 1.16;
+.size-md {
+  --size-scale: 1.1;
+}
+
+.size-lg {
+  --size-scale: 1.2;
 }
 
 button,

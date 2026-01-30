@@ -20,8 +20,8 @@
 
 .tab {
   flex: 1;
-  padding: 10px 0 9px;
-  font-size: 10px;
+  padding: var(--space-2) 0 calc(var(--space-2) - 1px);
+  font-size: calc(10px * var(--size-scale));
   text-transform: uppercase;
   letter-spacing: 0.16em;
   border: none;
@@ -32,7 +32,7 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
+  gap: var(--space-2);
   position: relative;
 
   &[data-selected] {
@@ -48,8 +48,8 @@
 }
 
 .tabIcon {
-  width: 14px;
-  height: 14px;
+  width: calc(14px * var(--size-scale));
+  height: calc(14px * var(--size-scale));
   color: currentColor;
 }
 
@@ -60,9 +60,9 @@
 }
 
 .emptyState {
-  font-size: 12px;
+  font-size: calc(12px * var(--size-scale));
   color: var(--color-ink-muted);
-  padding: 16px;
+  padding: var(--space-4);
 
   & code {
     display: block;
@@ -78,15 +78,15 @@
 
 .sceneList {
   list-style: none;
-  padding: 12px 0;
+  padding: var(--space-3) 0;
 }
 
 .sceneButton {
   width: 100%;
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 16px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
   border: none;
   background: transparent;
   text-align: left;
@@ -102,19 +102,19 @@
 .sceneIndex {
   font-family: var(--font-mono);
   color: var(--color-ink-muted);
-  width: 22px;
+  width: calc(22px * var(--size-scale));
 }
 
 .sceneHeading {
   flex: 1;
-  font-size: 12px;
+  font-size: calc(12px * var(--size-scale));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .sceneChevron {
-  font-size: 12px;
+  font-size: calc(12px * var(--size-scale));
   opacity: 0;
   transition: opacity 0.2s ease;
 }
@@ -125,12 +125,12 @@
 
 .notesArea {
   width: 100%;
-  min-height: 220px;
-  padding: 16px;
+  min-height: calc(220px * var(--size-scale));
+  padding: var(--space-4);
   border: none;
   background: transparent;
   resize: none;
-  font-size: 12px;
+  font-size: calc(12px * var(--size-scale));
   color: var(--color-ink);
 
   &::placeholder {
@@ -144,11 +144,11 @@
 
 .historyList {
   list-style: none;
-  padding: 12px 0;
+  padding: var(--space-3) 0;
 }
 
 .historyItem {
-  padding: 12px 16px;
+  padding: var(--space-3) var(--space-4);
   border-bottom: 1px solid var(--color-divider);
 
   &:last-child {
@@ -157,12 +157,12 @@
 }
 
 .historyAction {
-  font-size: 12px;
+  font-size: calc(12px * var(--size-scale));
   color: var(--color-ink);
 }
 
 .historyTime {
-  font-size: 10px;
+  font-size: calc(10px * var(--size-scale));
   color: var(--color-ink-muted);
-  margin-top: 4px;
+  margin-top: var(--space-1);
 }

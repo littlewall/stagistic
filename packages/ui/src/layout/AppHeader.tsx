@@ -25,7 +25,7 @@ type AppHeaderProps = {
 
 export function AppHeader({ currentProject, recentProjects, onSelectProject }: AppHeaderProps) {
   return (
-    <header className={styles.header}>
+    <header className={styles.header} data-tauri-drag-region>
       <div className={styles.logo}>
         <span className={styles.logoMark} aria-hidden="true">
           S
@@ -34,7 +34,7 @@ export function AppHeader({ currentProject, recentProjects, onSelectProject }: A
       </div>
 
       <MenuTrigger>
-        <Button className={styles.menuTrigger}>
+        <Button className={styles.menuTrigger} data-tauri-drag-region="false">
           <span className={styles.menuTriggerLabel}>{currentProject.name}</span>
           <NavArrowDown className={styles.caret} aria-hidden="true" />
         </Button>
@@ -96,7 +96,7 @@ export function AppHeader({ currentProject, recentProjects, onSelectProject }: A
       </MenuTrigger>
 
       <MenuTrigger>
-        <Button className={styles.avatarTrigger}>
+        <Button className={styles.avatarTrigger} data-tauri-drag-region="false">
           <UserCircle className={styles.avatarIcon} aria-hidden="true" />
           <NavArrowDown className={styles.caret} aria-hidden="true" />
         </Button>

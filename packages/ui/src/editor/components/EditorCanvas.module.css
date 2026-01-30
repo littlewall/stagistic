@@ -6,19 +6,24 @@
   overflow: auto;
   background: var(--color-surface);
   border: 1px solid var(--color-divider);
-  border-radius: 18px;
-  max-width: 960px;
+  border-radius: calc(18px * var(--size-scale));
+  max-width: calc(960px * var(--size-scale));
   margin: 0 auto;
-  padding: 24px 28px 32px;
+  padding: var(--space-6) clamp(var(--space-4), 15%, var(--space-12)) var(--space-8);
   box-shadow: 0 12px 30px rgba(30, 20, 15, 0.04);
 }
 
 .content {
   width: 100%;
   min-height: 100%;
+  --block-controls-gutter: clamp(
+    calc(28px * var(--size-scale)),
+    4.5vw,
+    calc(56px * var(--size-scale))
+  );
   outline: none;
   font-family: var(--font-mono);
-  font-size: calc(13px * var(--font-scale, 1));
+  font-size: calc(13px * var(--size-scale));
   line-height: 1.7;
   color: var(--color-ink);
 }

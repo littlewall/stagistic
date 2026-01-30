@@ -12,7 +12,7 @@
     "app": {
         "windows": [
             {
-                "title": "Stagistic Desktop",
+                "title": "Stagistic Editor",
                 "width": 1280,
                 "height": 800
             }

@@ -2,29 +2,33 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  height: 44px;
-  padding: 0 16px;
+  height: var(--app-header-height);
+  padding: 0 var(--space-4);
   border-bottom: 1px solid var(--color-divider);
   background: var(--color-surface);
   backdrop-filter: blur(8px);
 }
 
+:global(.platform-macos) .header {
+  padding-left: calc(var(--space-4) + var(--traffic-light-space));
+}
+
 .logo {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  min-width: 140px;
+  gap: var(--space-2);
+  min-width: calc(140px * var(--size-scale));
   font-weight: 500;
 
   & .logoMark {
-    width: 22px;
-    height: 22px;
+    width: calc(22px * var(--size-scale));
+    height: calc(22px * var(--size-scale));
     display: grid;
     place-items: center;
-    border-radius: 7px;
+    border-radius: calc(7px * var(--size-scale));
     background: var(--color-ink);
     color: var(--color-surface);
-    font-size: 12px;
+    font-size: calc(12px * var(--size-scale));
   }
 
   & .logoText {
@@ -36,15 +40,21 @@
 .avatarTrigger {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 10px;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-sm);
   background: transparent;
   border: 1px solid transparent;
   color: var(--color-ink);
-  font-size: 13px;
+  font-size: calc(13px * var(--size-scale));
   cursor: pointer;
   transition: all 0.15s ease;
+
+  &:focus {
+    outline: none;
+    box-shadow: none;
+    border-color: transparent;
+  }
 
   &[data-hovered] {
     background: color-mix(in srgb, var(--color-accent) 60%, transparent);
@@ -56,38 +66,39 @@
 
   &[data-focus-visible] {
     border-color: transparent;
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-ink) 35%, transparent);
+    box-shadow: none;
     outline: none;
+    background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
   }
 }
 
 .menuTriggerLabel {
-  max-width: 220px;
+  max-width: calc(220px * var(--size-scale));
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
 .caret {
-  width: 14px;
-  height: 14px;
+  width: calc(14px * var(--size-scale));
+  height: calc(14px * var(--size-scale));
   color: var(--color-ink-muted);
 }
 
 .avatarTrigger {
-  min-width: 140px;
+  min-width: calc(140px * var(--size-scale));
   justify-content: flex-end;
 }
 
 .avatarIcon {
-  width: 22px;
-  height: 22px;
+  width: calc(22px * var(--size-scale));
+  height: calc(22px * var(--size-scale));
   color: var(--color-ink-muted);
 }
 
 .menuPopover {
   padding: 0;
-  margin-top: 8px;
+  margin-top: var(--space-2);
   border-radius: var(--radius-md);
   background: var(--color-surface);
   border: 1px solid var(--color-divider);
@@ -101,11 +112,11 @@
 .menu {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--space-2);
   padding: 0;
-  min-width: 240px;
-  font-size: 13px;
-  padding-bottom: 8px;
+  min-width: calc(240px * var(--size-scale));
+  font-size: calc(13px * var(--size-scale));
+  padding-bottom: var(--space-2);
 
   &:focus-visible {
     outline: none;
@@ -115,40 +126,40 @@
 .menuSection {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: var(--space-1);
 }
 
 .menuHeader {
-  font-size: 10px;
+  font-size: calc(10px * var(--size-scale));
   text-transform: uppercase;
   letter-spacing: 0.12em;
   color: var(--color-ink-muted);
-  padding: 4px 12px;
+  padding: var(--space-1) var(--space-3);
 }
 
 .currentProjectBlock {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  padding: 10px 12px;
-  border-radius: 10px 10px 0 0;
+  gap: var(--space-1);
+  padding: var(--space-2) var(--space-3);
+  border-radius: calc(10px * var(--size-scale)) calc(10px * var(--size-scale)) 0 0;
   background: color-mix(in srgb, var(--color-highlight) 75%, transparent);
   border: 1px solid color-mix(in srgb, var(--color-divider) 70%, transparent);
   cursor: default;
   width: 100%;
   align-items: flex-start;
-  margin-bottom: 6px;
+  margin-bottom: var(--space-2);
 }
 
 .currentProjectLabel {
-  font-size: 9px;
+  font-size: calc(9px * var(--size-scale));
   text-transform: uppercase;
   letter-spacing: 0.16em;
   color: var(--color-ink-muted);
 }
 
 .currentProjectName {
-  font-size: 13px;
+  font-size: calc(13px * var(--size-scale));
   color: var(--color-ink);
   font-weight: 500;
 }
@@ -156,10 +167,10 @@
 .menuItem {
   display: flex;
   align-items: center;
-  gap: 8px;
-  border-radius: 8px;
-  padding: 6px 12px;
-  margin: 0 12px;
+  gap: var(--space-2);
+  border-radius: calc(8px * var(--size-scale));
+  padding: var(--space-2) var(--space-3);
+  margin: 0 var(--space-3);
   cursor: pointer;
   transition: background 0.15s ease, box-shadow 0.15s ease;
 
@@ -180,8 +191,8 @@
 }
 
 .menuIcon {
-  width: 16px;
-  height: 16px;
+  width: calc(16px * var(--size-scale));
+  height: calc(16px * var(--size-scale));
   color: var(--color-ink-muted);
 }
 
@@ -192,5 +203,5 @@
 .menuSeparator {
   height: 1px;
   background: var(--color-divider);
-  margin: 2px 0;
+  margin: var(--space-1) 0;
 }
