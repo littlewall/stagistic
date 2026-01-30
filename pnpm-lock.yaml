@@ -24,7 +24,7 @@ importers:
         specifier: ^2.3.3
         version: 2.7.4
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
       typescript-plugin-css-modules:
         specifier: ^5.0.1
@@ -49,7 +49,7 @@ importers:
         specifier: ^24.0.0
         version: 24.10.9
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
 
   apps/desktop:
@@ -116,7 +116,7 @@ importers:
         specifier: ^1.30.1
         version: 1.31.1
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
       vite:
         specifier: ^6.0.5
@@ -186,7 +186,7 @@ importers:
         specifier: ^1.30.1
         version: 1.31.1
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
       vite:
         specifier: ^6.0.5
@@ -202,49 +202,49 @@ importers:
         specifier: ^24.0.0
         version: 24.10.9
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
 
   packages/auth:
     devDependencies:
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
 
   packages/config:
     devDependencies:
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
 
   packages/db:
     devDependencies:
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
 
   packages/editor-core:
     devDependencies:
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
 
   packages/music:
     devDependencies:
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
 
   packages/shared:
     devDependencies:
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
 
   packages/sync-core:
     devDependencies:
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
 
   packages/ui:
@@ -290,7 +290,7 @@ importers:
         specifier: ^19.0.0
         version: 19.2.3(@types/react@19.2.10)
       typescript:
-        specifier: ^5.7.2
+        specifier: ^5.9.2
         version: 5.9.3
 
 packages:

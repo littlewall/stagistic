@@ -1,5 +1,9 @@
 import clsx from 'clsx';
-import {useEditorRef, useEditorVersion} from 'platejs/react';
+import {
+    useEditorRef,
+    useEditorVersion,
+    useFocused,
+} from 'platejs/react';
 import {
     useEffect,
     useMemo,
@@ -23,11 +27,20 @@ type EditorToolbarProps = {
 const EditorToolbar = ({onSave}: EditorToolbarProps) => {
     const editor = useEditorRef();
     const editorVersion = useEditorVersion();
+    const isFocused = useFocused();
     const dropdownRef = useRef<HTMLDivElement | null>(null);
+    const toolbarRef = useRef<HTMLDivElement | null>(null);
+    const [isEditorActive, setIsEditorActive] = useState(false);
 
     const activeBlock = useMemo(() => {
-        return editor.api.block({at: editor.selection ?? undefined});
-    }, [editor, editorVersion]);
+        if (!isEditorActive || !editor.selection) return null;
+
+        return editor.api.block({at: editor.selection});
+    }, [
+        editor,
+        editorVersion,
+        isEditorActive,
+    ]);
 
     const activeElement = activeBlock?.[0] as FountainBlockTypeChangeTarget | undefined;
     const activePath = activeBlock?.[1];
@@ -41,6 +54,33 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
     useEffect(() => {
         setIsOpen(false);
     }, [activeBlockKey]);
+
+    useEffect(() => {
+        const updateActive = () => {
+            const activeElement = document.activeElement;
+
+            if (!(activeElement instanceof HTMLElement)) {
+                setIsEditorActive(false);
+
+                return;
+            }
+
+            const isInEditor = !!activeElement.closest('[data-slate-editor="true"]');
+            const isInToolbar = !!(toolbarRef.current && toolbarRef.current.contains(activeElement));
+
+            setIsEditorActive(isFocused || isInEditor || isInToolbar);
+        };
+
+        updateActive();
+
+        document.addEventListener('focusin', updateActive);
+        document.addEventListener('focusout', updateActive);
+
+        return () => {
+            document.removeEventListener('focusin', updateActive);
+            document.removeEventListener('focusout', updateActive);
+        };
+    }, [isFocused]);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -78,7 +118,7 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
     };
 
     return (
-        <div className={styles.toolbar}>
+        <div className={styles.toolbar} ref={toolbarRef}>
             <div className={styles.group}>
                 {onSave ? (
                     <button
@@ -187,8 +227,16 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                         setIsOpen(prev => !prev);
                     }}
                 >
-                    <span className={styles.icon}>
-                        {activeIcon}
+                    <span className={clsx(styles.selectIcon, !activeIcon && styles.selectIconMuted)}>
+                        {activeIcon ?? (
+                            <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                                focusable="false"
+                            >
+                                <path d="M6 12h12" />
+                            </svg>
+                        )}
                     </span>
                     <span className={styles.selectLabel}>
                         {FOUNTAIN_BLOCKS.find(option => option.type === activeType)

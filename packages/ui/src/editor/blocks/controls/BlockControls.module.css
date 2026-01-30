@@ -2,7 +2,7 @@
     position: absolute;
     z-index: 2;
     top: calc(.625em + 2px + var(--block-controls-offset, 0px));
-    left: calc(-1 * var(--block-controls-gutter, 32px));
+    right: calc(100% + var(--block-controls-gutter, 32px));
     transform: translateY(-50%);
     display: inline-flex;
     align-items: center;
@@ -17,14 +17,14 @@
     height: calc(24px * var(--size-scale));
     font-size: calc(16px * var(--size-scale));
     line-height: 1;
-    color: #18181b;
-    background: #fff;
-    border: 1px solid #e4e4e7;
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
     border-radius: calc(6px * var(--size-scale));
 }
 
 .trigger:hover {
-    background: #f4f4f5;
+    background: color-mix(in srgb, var(--color-accent) 35%, transparent);
 }
 
 .triggerIcon {
@@ -51,32 +51,38 @@
     top: calc(28px * var(--size-scale));
     left: 0;
     display: grid;
-    gap: 2px;
     min-width: calc(180px * var(--size-scale));
-    padding: var(--space-2);
-    background: #fff;
-    border: 1px solid #e4e4e7;
-    border-radius: calc(10px * var(--size-scale));
+    padding: var(--space-1);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-popover);
+}
+
+.menuAbove {
+    top: auto;
+    bottom: calc(100% + var(--space-2));
 }
 
 .menuItem {
     cursor: pointer;
     display: grid;
     grid-template-columns: 18px 1fr;
-    gap: 8px;
+    gap: var(--space-2);
     align-items: center;
-    padding: var(--space-2) var(--space-2);
+    padding: var(--space-1) var(--space-2);
     font-family: inherit;
-    font-size: calc(13px * var(--size-scale));
-    color: #18181b;
+    font-size: calc(12px * var(--size-scale));
+    color: var(--color-ink);
     text-align: left;
     background: transparent;
     border: 1px solid transparent;
     border-radius: calc(8px * var(--size-scale));
+    transition: background .15s ease, box-shadow .15s ease;
 }
 
 .menuItem:hover {
-    background: #f4f4f5;
+    background: color-mix(in srgb, var(--color-accent) 45%, transparent);
 }
 
 .menuItemIcon {
@@ -85,7 +91,7 @@
     justify-content: center;
     width: calc(18px * var(--size-scale));
     height: calc(18px * var(--size-scale));
-    color: #52525b;
+    color: var(--color-ink-muted);
 }
 
 .menuItemLabel {
@@ -94,6 +100,9 @@
 
 .menuItemActive {
     font-weight: 600;
-    background: #e4e4e7;
-    border-color: #d4d4d8;
+    background: color-mix(in srgb, var(--color-accent) 85%, transparent);
+
+    &:hover {
+        background: color-mix(in srgb, var(--color-accent) 85%, transparent);
+    }
 }
