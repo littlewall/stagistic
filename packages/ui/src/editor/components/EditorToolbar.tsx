@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import clsx from 'clsx';
 import { useEditorRef, useEditorVersion } from 'platejs/react';
 import { FOUNTAIN_BLOCKS } from '../blocks/fountainBlockRegistry';
 import {
@@ -6,6 +7,7 @@ import {
   type FountainBlockTypeChangeTarget,
 } from '../blocks/fountainBlockHelpers';
 import { BLOCK_ICONS } from '../blocks/controls/blockIcons';
+import styles from './EditorToolbar.module.css';
 
 type EditorToolbarProps = {
   onSave?: () => void;
@@ -42,11 +44,11 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
   };
 
   return (
-    <div className="editor-toolbar">
-      <div className="editor-toolbar__group">
+    <div className={styles.toolbar}>
+      <div className={styles.group}>
         {onSave ? (
           <button
-            className="editor-toolbar__icon-button"
+            className={styles.iconButton}
             type="button"
             aria-label="Save"
             onMouseDown={(event) => {
@@ -62,7 +64,7 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
           </button>
         ) : null}
         <button
-          className="editor-toolbar__icon-button"
+          className={styles.iconButton}
           type="button"
           aria-label="Undo"
           disabled={!canUndo}
@@ -77,7 +79,7 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
           </svg>
         </button>
         <button
-          className="editor-toolbar__icon-button"
+          className={styles.iconButton}
           type="button"
           aria-label="Redo"
           disabled={!canRedo}
@@ -92,7 +94,7 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
           </svg>
         </button>
         <button
-          className="editor-toolbar__icon-button"
+          className={styles.iconButton}
           type="button"
           aria-label="Bold"
           onMouseDown={(event) => {
@@ -100,10 +102,10 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
             toggleMark('bold');
           }}
         >
-          <span className="editor-toolbar__text-icon">B</span>
+          <span className={styles.textIcon}>B</span>
         </button>
         <button
-          className="editor-toolbar__icon-button"
+          className={styles.iconButton}
           type="button"
           aria-label="Italic"
           onMouseDown={(event) => {
@@ -111,10 +113,10 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
             toggleMark('italic');
           }}
         >
-          <span className="editor-toolbar__text-icon editor-toolbar__text-icon--italic">I</span>
+          <span className={clsx(styles.textIcon, styles.textIconItalic)}>I</span>
         </button>
         <button
-          className="editor-toolbar__icon-button"
+          className={styles.iconButton}
           type="button"
           aria-label="Underline"
           onMouseDown={(event) => {
@@ -122,12 +124,12 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
             toggleMark('underline');
           }}
         >
-          <span className="editor-toolbar__text-icon editor-toolbar__text-icon--underline">U</span>
+          <span className={clsx(styles.textIcon, styles.textIconUnderline)}>U</span>
         </button>
       </div>
-      <div className="editor-toolbar__group editor-toolbar__dropdown">
+      <div className={clsx(styles.group, styles.dropdown)}>
         <button
-          className="editor-toolbar__select-button"
+          className={styles.selectButton}
           type="button"
           aria-label="Change block type"
           aria-expanded={isOpen}
@@ -138,10 +140,10 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
             setIsOpen((prev) => !prev);
           }}
         >
-          <span className="editor-toolbar__icon">
+          <span className={styles.icon}>
             {activeIcon}
           </span>
-          <span className="editor-toolbar__select-label">
+          <span className={styles.selectLabel}>
             {FOUNTAIN_BLOCKS.find((option) => option.type === activeType)
               ?.label ?? 'Block'}
           </span>
@@ -149,23 +151,22 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
             viewBox="0 0 24 24"
             aria-hidden="true"
             focusable="false"
-            className="editor-toolbar__chevron"
+            className={styles.chevron}
           >
             <path d="m6 9 6 6 6-6" />
           </svg>
         </button>
         {isOpen ? (
-          <div className="editor-toolbar__menu" role="menu">
+          <div className={styles.menu} role="menu">
             {FOUNTAIN_BLOCKS.map((option) => (
               <button
                 key={option.type}
                 type="button"
                 role="menuitem"
-                className={
-                  option.type === activeType
-                    ? 'editor-toolbar__menu-item is-active'
-                    : 'editor-toolbar__menu-item'
-                }
+                className={clsx(
+                  styles.menuItem,
+                  option.type === activeType && styles.menuItemActive
+                )}
                 aria-label={`Set block type to ${option.label}`}
                 onMouseDown={(event) => {
                   event.preventDefault();
@@ -180,10 +181,10 @@ const EditorToolbar = ({ onSave }: EditorToolbarProps) => {
                   );
                 }}
               >
-                <span className="editor-toolbar__icon">
+                <span className={styles.icon}>
                   {BLOCK_ICONS[option.type]}
                 </span>
-                <span className="editor-toolbar__menu-label">
+                <span className={styles.menuLabel}>
                   {option.label}
                 </span>
               </button>

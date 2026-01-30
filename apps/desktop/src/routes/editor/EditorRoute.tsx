@@ -1,16 +1,45 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { FountainEditor } from '@stagistic/editor-ui';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { serializeFountain } from '@stagistic/editor-core';
+import { AppHeader, AppLayout, EditorSidebar, FountainEditor } from '@stagistic/ui';
 import type { SlateValue } from '@stagistic/shared';
 import {
   latestScriptStorage,
   serializeSlateValue,
 } from '../../storage/latestScriptStorage';
 
+const mockProjects = [
+  { id: '1', name: 'The Last Light' },
+  { id: '2', name: 'Midnight Express' },
+  { id: '3', name: 'Summer Solstice' },
+  { id: '4', name: "Winter's Tale" },
+];
+
 export const EditorRoute = () => {
     const [initialValue, setInitialValue] = useState<SlateValue | null | undefined>(undefined);
+    const [serializedPreview, setSerializedPreview] = useState<string>('');
     const latestValueRef = useRef<SlateValue | null>(null);
     const lastSavedSerializedRef = useRef<string | null>(null);
     const autosaveTimerRef = useRef<number | null>(null);
+    const [currentProject, setCurrentProject] = useState(mockProjects[0]);
+
+    const recentProjects = useMemo(
+        () => mockProjects.filter((project) => project.id !== currentProject.id).slice(0, 3),
+        [currentProject]
+    );
+
+    const scenes = useMemo(() => {
+        const lines = serializedPreview.split('\n');
+        const scenePattern = /^(INT\.|EXT\.|INT\/EXT\.|I\/E\.)\s+.+/i;
+
+        return lines
+            .map((line, index) => ({ line: line.trim(), lineNumber: index }))
+            .filter(({ line }) => scenePattern.test(line))
+            .map(({ line, lineNumber }, index) => ({
+                id: `scene-${index}`,
+                heading: line,
+                lineNumber,
+            }));
+    }, [serializedPreview]);
 
     useEffect(() => {
         const loadLatest = async () => {
@@ -18,9 +47,11 @@ export const EditorRoute = () => {
             if (stored) {
                 latestValueRef.current = stored;
                 lastSavedSerializedRef.current = serializeSlateValue(stored);
+                setSerializedPreview(serializeFountain(stored));
                 setInitialValue(stored);
             } else {
                 setInitialValue(null);
+                setSerializedPreview('');
             }
         };
 
@@ -62,6 +93,7 @@ export const EditorRoute = () => {
         (value: SlateValue) => {
             latestValueRef.current = value;
             scheduleAutosave(value);
+            setSerializedPreview(serializeFountain(value));
         },
         [scheduleAutosave]
     );
@@ -79,10 +111,21 @@ export const EditorRoute = () => {
     }
 
     return (
-        <FountainEditor
-            initialValue={initialValue ?? undefined}
-            onValueChange={handleValueChange}
-            onManualSave={handleManualSave}
-        />
+        <AppLayout
+            header={
+                <AppHeader
+                    currentProject={currentProject}
+                    recentProjects={recentProjects}
+                    onSelectProject={setCurrentProject}
+                />
+            }
+            sidebar={<EditorSidebar scenes={scenes} onSceneClick={() => {}} />}
+        >
+            <FountainEditor
+                initialValue={initialValue ?? undefined}
+                onValueChange={handleValueChange}
+                onManualSave={handleManualSave}
+            />
+        </AppLayout>
     );
 };

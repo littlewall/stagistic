@@ -1,11 +1,13 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { type Value } from 'platejs';
 import type { SlateValue } from '@stagistic/shared';
-import { Plate, PlateContent, usePlateEditor } from 'platejs/react';
+import { Plate, usePlateEditor } from 'platejs/react';
 import { createFountainPlugins } from './plugins/fountainPlugin';
-import { fountainParser, fountainSerializer } from '@stagistic/editor-core';
+import { fountainParser } from '@stagistic/editor-core';
 import EditorToolbar from './components/EditorToolbar';
 import { FountainLeaf } from './utils/fountainMarks';
+import { EditorCanvas } from './components/EditorCanvas';
+import styles from './Editor.module.css';
 
 const SAMPLE_FOUNTAIN = `INT. WRITERS' ROOM - DAY
 
@@ -37,9 +39,6 @@ type EditorProps = {
 const Editor = ({ initialValue, onValueChange, onManualSave }: EditorProps) => {
   const defaultValue = useMemo(() => fountainParser(SAMPLE_FOUNTAIN), []);
   const resolvedInitialValue = initialValue ?? defaultValue;
-  const [serializedValue, setSerializedValue] = useState(
-    fountainSerializer(resolvedInitialValue)
-  );
   const latestValueRef = useRef<Value>(resolvedInitialValue as Value);
 
   const plugins = useMemo(() => createFountainPlugins(), []);
@@ -47,23 +46,6 @@ const Editor = ({ initialValue, onValueChange, onManualSave }: EditorProps) => {
     plugins,
     value: resolvedInitialValue as Value,
   });
-  const shellRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    const updateShellOffset = () => {
-      if (!shellRef.current) return;
-      const { left } = shellRef.current.getBoundingClientRect();
-      shellRef.current.style.setProperty('--editor-left', `${left}px`);
-    };
-
-    updateShellOffset();
-    window.addEventListener('resize', updateShellOffset);
-
-    return () => {
-      window.removeEventListener('resize', updateShellOffset);
-    };
-  }, []);
-
   useEffect(() => {
     if (!onManualSave) return;
     const onKeyDown = (event: KeyboardEvent) => {
@@ -77,30 +59,19 @@ const Editor = ({ initialValue, onValueChange, onManualSave }: EditorProps) => {
   }, [onManualSave]);
 
   return (
-    <div className="editor-layout">
-      <div className="editor-shell" ref={shellRef}>
-        <Plate
-          editor={editor}
-          onValueChange={({ value }) => {
-            latestValueRef.current = value as Value;
-            setSerializedValue(fountainSerializer(value));
-            onValueChange?.(value as SlateValue);
-          }}
-        >
-          <EditorToolbar
-            onSave={
-              onManualSave ? () => onManualSave(latestValueRef.current as SlateValue) : undefined
-            }
-          />
-          <PlateContent className="editor" spellCheck={false} renderLeaf={FountainLeaf} />
-        </Plate>
-      </div>
-      <aside className="editor-sidebar">
-        <div className="editor-sidebar__header">Fountain preview</div>
-        <pre className="editor-sidebar__content">
-          {serializedValue}
-        </pre>
-      </aside>
+    <div className={styles.root}>
+      <Plate
+        editor={editor}
+        onValueChange={({ value }) => {
+          latestValueRef.current = value as Value;
+          onValueChange?.(value as SlateValue);
+        }}
+      >
+        <EditorToolbar
+          onSave={onManualSave ? () => onManualSave(latestValueRef.current as SlateValue) : undefined}
+        />
+        <EditorCanvas renderLeaf={FountainLeaf} />
+      </Plate>
     </div>
   );
 };

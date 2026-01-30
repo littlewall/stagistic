@@ -1,0 +1,16 @@
+:root {
+  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
+
+  --color-paper: #f6f2ed;
+  --color-surface: #fbf9f6;
+  --color-ink: #2b231b;
+  --color-ink-muted: #8a8076;
+  --color-divider: #e3dbd0;
+  --color-accent: #f1e9df;
+  --color-highlight: #f8f2ea;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --shadow-popover: 0 10px 30px rgba(26, 20, 15, 0.12);
+}

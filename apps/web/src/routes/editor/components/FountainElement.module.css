@@ -1,0 +1,131 @@
+.element {
+  margin: 0 0 0.85rem;
+  position: relative;
+}
+
+.sceneHeading {
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+}
+
+.action {
+  color: var(--color-ink);
+}
+
+.character {
+  margin-left: 40%;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.parenthetical {
+  margin-left: 32%;
+  font-style: italic;
+  color: var(--color-ink-muted);
+}
+
+.dialogue {
+  margin-left: 25%;
+}
+
+.transition {
+  text-align: right;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.section {
+  font-weight: 600;
+}
+
+.synopsis {
+  color: var(--color-ink-muted);
+}
+
+.note {
+  color: var(--color-ink-muted);
+  font-style: italic;
+}
+
+.lyric {
+  font-style: italic;
+}
+
+.centered {
+  text-align: center;
+  font-weight: 600;
+}
+
+.pageBreak {
+  border-top: 1px dashed var(--color-divider);
+  margin: 1.5rem 0;
+}
+
+.boneyard {
+  color: var(--color-ink-muted);
+}
+
+.titlePage,
+.titlePageField {
+  color: var(--color-ink);
+}
+
+.dialogueBlock {
+  margin-bottom: 1.2rem;
+}
+
+.dualDialogue {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+
+.nodeGutter {
+  position: absolute;
+  left: -3.25rem;
+  top: 0.2rem;
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  z-index: 5;
+}
+
+.nodeButton {
+  border: 1px solid var(--color-divider);
+  background: var(--color-surface);
+  color: var(--color-ink);
+  width: 28px;
+  height: 28px;
+  font-size: 0.8rem;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+}
+
+.nodeMenu {
+  border: 1px solid var(--color-divider);
+  background: var(--color-surface);
+  min-width: 200px;
+  display: grid;
+  box-shadow: var(--shadow-popover);
+}
+
+.nodeOption {
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  color: var(--color-ink);
+  transition: background 0.15s ease;
+
+  &:hover {
+    background: var(--color-accent);
+  }
+}
+
+.nodeOptionActive {
+  background: var(--color-ink);
+  color: var(--color-surface);
+}

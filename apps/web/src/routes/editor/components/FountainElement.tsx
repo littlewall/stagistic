@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import clsx from 'clsx';
 import {
     PlateElement,
     useEditorRef,
@@ -9,6 +10,7 @@ import {
 } from 'platejs/react';
 import type { TElement } from 'platejs';
 import { FountainNodeType } from '@stagistic/editor-core';
+import styles from './FountainElement.module.css';
 
 type Option = {
     label: string;
@@ -29,23 +31,23 @@ const NODE_OPTIONS: Option[] = [
 ];
 
 const typeClassMap: Record<string, string> = {
-    [FountainNodeType.sceneHeading]: 'scene-heading',
-    [FountainNodeType.action]: 'action',
-    [FountainNodeType.centered]: 'centered',
-    [FountainNodeType.character]: 'character',
-    [FountainNodeType.parenthetical]: 'parenthetical',
-    [FountainNodeType.dialogue]: 'dialogue',
-    [FountainNodeType.lyric]: 'lyric',
-    [FountainNodeType.transition]: 'transition',
-    [FountainNodeType.section]: 'section',
-    [FountainNodeType.synopsis]: 'synopsis',
-    [FountainNodeType.note]: 'note',
-    [FountainNodeType.pageBreak]: 'page-break',
-    [FountainNodeType.boneyard]: 'boneyard',
-    [FountainNodeType.dialogueBlock]: 'dialogue-block',
-    [FountainNodeType.dualDialogue]: 'dual-dialogue',
-    [FountainNodeType.titlePage]: 'title-page',
-    [FountainNodeType.titlePageField]: 'title-page-field',
+    [FountainNodeType.sceneHeading]: styles.sceneHeading,
+    [FountainNodeType.action]: styles.action,
+    [FountainNodeType.centered]: styles.centered,
+    [FountainNodeType.character]: styles.character,
+    [FountainNodeType.parenthetical]: styles.parenthetical,
+    [FountainNodeType.dialogue]: styles.dialogue,
+    [FountainNodeType.lyric]: styles.lyric,
+    [FountainNodeType.transition]: styles.transition,
+    [FountainNodeType.section]: styles.section,
+    [FountainNodeType.synopsis]: styles.synopsis,
+    [FountainNodeType.note]: styles.note,
+    [FountainNodeType.pageBreak]: styles.pageBreak,
+    [FountainNodeType.boneyard]: styles.boneyard,
+    [FountainNodeType.dialogueBlock]: styles.dialogueBlock,
+    [FountainNodeType.dualDialogue]: styles.dualDialogue,
+    [FountainNodeType.titlePage]: styles.titlePage,
+    [FountainNodeType.titlePageField]: styles.titlePageField,
 };
 
 export function FountainElement(props: Parameters<typeof PlateElement>[0]) {
@@ -61,7 +63,7 @@ export function FountainElement(props: Parameters<typeof PlateElement>[0]) {
 
     const className = useMemo(() => {
         const typeClass = activeType ? typeClassMap[activeType] ?? '' : '';
-        return ['fountain-element', typeClass, props.className].filter(Boolean).join(' ');
+        return clsx(styles.element, typeClass, props.className);
     }, [activeType, props.className]);
 
     const handleChange = (type: string) => {
@@ -75,9 +77,9 @@ export function FountainElement(props: Parameters<typeof PlateElement>[0]) {
     return (
         <PlateElement {...props} className={className}>
             {isActive && (
-                <span className="editor-node-gutter" contentEditable={false}>
+                <span className={styles.nodeGutter} contentEditable={false}>
                     <button
-                        className="editor-node-button"
+                        className={styles.nodeButton}
                         type="button"
                         onMouseDown={(event) => {
                             event.preventDefault();
@@ -87,15 +89,14 @@ export function FountainElement(props: Parameters<typeof PlateElement>[0]) {
                         ⋮
                     </button>
                     {open && (
-                        <div className="editor-node-menu">
+                        <div className={styles.nodeMenu}>
                             {NODE_OPTIONS.map((option) => (
                                 <button
                                     key={option.type}
-                                    className={
-                                        option.type === activeType
-                                            ? 'editor-node-option active'
-                                            : 'editor-node-option'
-                                    }
+                                    className={clsx(
+                                        styles.nodeOption,
+                                        option.type === activeType && styles.nodeOptionActive
+                                    )}
                                     type="button"
                                     onMouseDown={(event) => {
                                         event.preventDefault();
