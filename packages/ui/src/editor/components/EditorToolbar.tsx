@@ -1,15 +1,19 @@
 import clsx from 'clsx';
 import {useEditorRef, useEditorVersion} from 'platejs/react';
 import {
-    useEffect, useMemo, useRef, useState,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
 } from 'react';
 
-import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
+import {BLOCK_ICONS} from '~blocks/controls/blockIcons';
 import {
     applyBlockTypeChange,
     type FountainBlockTypeChangeTarget,
-} from '../blocks/fountainBlockHelpers';
-import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
+} from '~blocks/fountainBlockHelpers';
+import {FOUNTAIN_BLOCKS} from '~blocks/fountainBlockRegistry';
+
 import styles from './EditorToolbar.module.css';
 
 type EditorToolbarProps = {

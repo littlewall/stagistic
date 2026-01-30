@@ -13,7 +13,8 @@ import {
     getEnterNextType,
     isCharacterSelection,
     setSelectionBlockType,
-} from '../../fountainBlockHelpers';
+} from '~blocks/fountainBlockHelpers';
+
 import CharacterBlock from './CharacterBlock';
 
 export const characterPlugin = createPlatePlugin({
@@ -29,7 +30,7 @@ export const characterPlugin = createPlatePlugin({
                 return undefined;
             }
 
-            const data = event.data;
+            const data = (event as {data?: string}).data ?? null;
 
             if (!data) {
                 return undefined;
@@ -124,8 +125,12 @@ export const characterPlugin = createPlatePlugin({
                 const start = editor.api.start(path);
                 const end = editor.api.end(path);
                 const isCollapsed = Range.isCollapsed(selection);
-                const isAtStart = isCollapsed && Point.equals(selection.anchor, start);
-                const isAtEnd = isCollapsed && Point.equals(selection.anchor, end);
+                const isAtStart = isCollapsed && start
+                    ? Point.equals(selection.anchor, start)
+                    : false;
+                const isAtEnd = isCollapsed && end
+                    ? Point.equals(selection.anchor, end)
+                    : false;
 
                 if (!isCollapsed) {
                     editor.tf.delete();
@@ -155,7 +160,9 @@ export const characterPlugin = createPlatePlugin({
 
                     const point = editor.api.start(nextPath);
 
-                    editor.tf.select(point);
+                    if (point) {
+                        editor.tf.select(point);
+                    }
 
                     return true;
                 }
@@ -178,7 +185,9 @@ export const characterPlugin = createPlatePlugin({
                     if (nextPath) {
                         const point = editor.api.start(nextPath);
 
-                        editor.tf.select(point);
+                        if (point) {
+                            editor.tf.select(point);
+                        }
                     }
 
                     return true;
@@ -192,7 +201,9 @@ export const characterPlugin = createPlatePlugin({
 
                     const point = editor.api.start(path);
 
-                    editor.tf.select(point);
+                    if (point) {
+                        editor.tf.select(point);
+                    }
 
                     return true;
                 }
@@ -206,7 +217,9 @@ export const characterPlugin = createPlatePlugin({
                     if (nextPath) {
                         const point = editor.api.start(nextPath);
 
-                        editor.tf.select(point);
+                        if (point) {
+                            editor.tf.select(point);
+                        }
                     }
 
                     return true;
@@ -234,7 +247,9 @@ export const characterPlugin = createPlatePlugin({
 
                     const point = editor.api.start(nextPath);
 
-                    editor.tf.select(point);
+                    if (point) {
+                        editor.tf.select(point);
+                    }
                 }
 
                 return true;

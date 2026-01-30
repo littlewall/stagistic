@@ -1,28 +1,38 @@
-import {PlateLeaf, type PlateLeafProps} from 'platejs/react';
+import {
+    type PlateContentProps,
+    PlateLeaf,
+    type PlateLeafProps,
+} from 'platejs/react';
 import type {CSSProperties} from 'react';
 
-type EmphasisLeafProps = PlateLeafProps & {
-    leaf: {
-        bold?: boolean,
-        italic?: boolean,
-        underline?: boolean,
-    },
+type EmphasisLeaf = {
+    bold?: boolean,
+    italic?: boolean,
+    underline?: boolean,
 };
 
-export const FountainLeaf = ({
-    leaf, style, ...props
-}: EmphasisLeafProps) => {
+export const FountainLeaf: NonNullable<PlateContentProps['renderLeaf']> = props => {
+    const {
+        leaf, style, ...rest
+    } = props as PlateLeafProps;
     const emphasisStyle: CSSProperties = {};
+    const emphasisLeaf = leaf as EmphasisLeaf;
 
-    if (leaf.bold) emphasisStyle.fontWeight = 700;
+    if (emphasisLeaf.bold) {
+        emphasisStyle.fontWeight = 700;
+    }
 
-    if (leaf.italic) emphasisStyle.fontStyle = 'italic';
+    if (emphasisLeaf.italic) {
+        emphasisStyle.fontStyle = 'italic';
+    }
 
-    if (leaf.underline) emphasisStyle.textDecoration = 'underline';
+    if (emphasisLeaf.underline) {
+        emphasisStyle.textDecoration = 'underline';
+    }
 
     return (
         <PlateLeaf
-            {...props}
+            {...rest}
             leaf={leaf}
             style={{...style, ...emphasisStyle}}
         />

@@ -1,6 +1,4 @@
 import {
-    type ColumnElement,
-    type ColumnGroupElement,
     ELEMENT_ACTION,
     ELEMENT_CENTERED,
     ELEMENT_CHARACTER,

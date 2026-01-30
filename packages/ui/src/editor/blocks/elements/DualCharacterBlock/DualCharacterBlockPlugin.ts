@@ -4,7 +4,9 @@ import {
 } from '@stagistic/editor-core';
 import {createPlatePlugin} from 'platejs/react';
 import {
-    Path, Point, Range,
+    Path,
+    Point,
+    Range,
 } from 'slate';
 
 import {
@@ -12,7 +14,8 @@ import {
     getEnterNextType,
     isDualCharacterSelection,
     setSelectionBlockType,
-} from '../../fountainBlockHelpers';
+} from '~blocks/fountainBlockHelpers';
+
 import DualCharacterBlock from './DualCharacterBlock';
 
 export const dualCharacterPlugin = createPlatePlugin({
@@ -28,7 +31,7 @@ export const dualCharacterPlugin = createPlatePlugin({
                 return undefined;
             }
 
-            const data = event.data;
+            const data = (event as {data?: string}).data ?? null;
 
             if (!data) {
                 return undefined;
@@ -119,12 +122,16 @@ export const dualCharacterPlugin = createPlatePlugin({
                     return true;
                 }
 
-                const [, path] = blockEntry;
+                const [blockNode, path] = blockEntry;
                 const start = editor.api.start(path);
                 const end = editor.api.end(path);
                 const isCollapsed = Range.isCollapsed(selection);
-                const isAtStart = isCollapsed && Point.equals(selection.anchor, start);
-                const isAtEnd = isCollapsed && Point.equals(selection.anchor, end);
+                const isAtStart = isCollapsed && start
+                    ? Point.equals(selection.anchor, start)
+                    : false;
+                const isAtEnd = isCollapsed && end
+                    ? Point.equals(selection.anchor, end)
+                    : false;
 
                 if (insideParens && !event.shiftKey && !isAtStart && !isAtEnd) {
                     const firstText = `${splitBefore})`;
@@ -150,7 +157,9 @@ export const dualCharacterPlugin = createPlatePlugin({
 
                     const point = editor.api.start(nextPath);
 
-                    editor.tf.select(point);
+                    if (point) {
+                        editor.tf.select(point);
+                    }
 
                     return true;
                 }
@@ -173,7 +182,9 @@ export const dualCharacterPlugin = createPlatePlugin({
                     if (nextPath) {
                         const point = editor.api.start(nextPath);
 
-                        editor.tf.select(point);
+                        if (point) {
+                            editor.tf.select(point);
+                        }
                     }
 
                     return true;
@@ -204,7 +215,9 @@ export const dualCharacterPlugin = createPlatePlugin({
 
                     const point = editor.api.start(nextPath);
 
-                    editor.tf.select(point);
+                    if (point) {
+                        editor.tf.select(point);
+                    }
                 }
 
                 return true;

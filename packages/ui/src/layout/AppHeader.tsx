@@ -1,4 +1,3 @@
-import clsx from 'clsx';
 import {
     Folder, NavArrowDown, Plus, UserCircle,
 } from 'iconoir-react';

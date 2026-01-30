@@ -1,14 +1,16 @@
 import type {FountainElementType} from '@stagistic/editor-core';
 import type {PlateEditor} from 'platejs/react';
 import {
-    Path, Point, Range,
+    Path,
+    Point,
+    Range,
 } from 'slate';
 
 import {
     getElementText,
     getEnterNextType,
     setSelectionBlockType,
-} from '../fountainBlockHelpers';
+} from '~blocks/fountainBlockHelpers';
 
 type KeyEventLike = {
     key: string,
@@ -91,7 +93,9 @@ export const defaultEnterKeyHandler =
       if (selection && Range.isCollapsed(selection)) {
           const end = editor.api.end(path);
 
-          isAtEnd = Point.equals(selection.anchor, end);
+          if (end) {
+              isAtEnd = Point.equals(selection.anchor, end);
+          }
       }
 
       editor.tf.insertBreak();
@@ -132,6 +136,10 @@ export const createLeadingIndentKeyHandler = (
         event.preventDefault();
 
         const start = editor.api.start(path);
+
+        if (!start) {
+            return true;
+        }
 
         if (selection && !Range.isCollapsed(selection)) {
             editor.tf.delete();

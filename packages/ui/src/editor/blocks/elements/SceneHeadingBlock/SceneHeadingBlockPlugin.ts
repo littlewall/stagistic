@@ -4,7 +4,8 @@ import {createPlatePlugin} from 'platejs/react';
 import {
     createBlockKeyHandler,
     defaultEnterKeyHandler,
-} from '../../keyboard/blockKeyHandlers';
+} from '~blocks/keyboard/blockKeyHandlers';
+
 import SceneHeadingBlock from './SceneHeadingBlock';
 
 const onKeyDown = createBlockKeyHandler({

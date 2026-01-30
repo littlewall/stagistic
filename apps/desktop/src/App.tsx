@@ -1,4 +1,4 @@
-import {EditorRoute} from './routes/editor/EditorRoute';
+import {EditorRoute} from '~routes/editor/EditorRoute';
 
 const App = () => {
     return <EditorRoute />;

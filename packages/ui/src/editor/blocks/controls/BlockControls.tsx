@@ -11,31 +11,30 @@ import {
 import {useEffect} from 'react';
 import {Path} from 'slate';
 
-import {applyBlockTypeChange} from '../fountainBlockHelpers';
-import {FOUNTAIN_BLOCKS} from '../fountainBlockRegistry';
+import {BLOCK_ICONS} from '~blocks/controls/blockIcons';
+import {applyBlockTypeChange} from '~blocks/fountainBlockHelpers';
+import {FOUNTAIN_BLOCKS} from '~blocks/fountainBlockRegistry';
+
 import styles from './BlockControls.module.css';
-import {BLOCK_ICONS} from './blockIcons';
 
 const BlockControls = () => {
     const editor = useEditorRef();
     const element = useElement<FountainElement>();
     const path = usePath();
-    let elementPath = path;
+    let elementPath: Path;
 
     try {
-        elementPath = editor.api.findPath(element);
+        elementPath = path ?? editor.api.findPath(element);
     } catch {
-        elementPath = path;
+        return null;
     }
 
     const isFocused = useFocused();
-    const selectionPath = editor.selection?.focus?.path
-    ?? editor.selection?.anchor?.path;
+    const selectionPath = editor.selection?.focus?.path ?? editor.selection?.anchor?.path;
     const activeBlockEntry = selectionPath
         ? editor.api.block({at: selectionPath})
         : null;
-    const isSelectionInBlock = !!activeBlockEntry
-    && Path.equals(activeBlockEntry[1], elementPath);
+    const isSelectionInBlock = !!activeBlockEntry && Path.equals(activeBlockEntry[1], elementPath);
     const blockId = elementPath.join('-');
     const openId = usePluginOption(BlockMenuPlugin, 'openId');
     const isOpen = openId === blockId;
@@ -72,11 +71,14 @@ const BlockControls = () => {
                 onMouseDown={event => {
                     event.preventDefault();
                     event.stopPropagation();
+
                     if (isOpen) {
                         blockMenuApi.hide();
-                    } else {
-                        blockMenuApi.show(blockId);
+
+                        return;
                     }
+
+                    blockMenuApi.show(blockId);
                 }}
             >
                 <span className={styles.triggerIcon}>{activeIcon}</span>

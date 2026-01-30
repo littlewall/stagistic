@@ -3,14 +3,17 @@ import type {SlateValue} from '@stagistic/shared';
 import {type Value} from 'platejs';
 import {Plate, usePlateEditor} from 'platejs/react';
 import {
-    useEffect, useMemo, useRef,
+    useEffect,
+    useMemo,
+    useRef,
 } from 'react';
 
-import {EditorCanvas} from './components/EditorCanvas';
-import EditorToolbar from './components/EditorToolbar';
+import {EditorCanvas} from '~components/EditorCanvas';
+import EditorToolbar from '~components/EditorToolbar';
+import {createFountainPlugins} from '~plugins/fountainPlugin';
+import {FountainLeaf} from '~utils/fountainMarks';
+
 import styles from './Editor.module.css';
-import {createFountainPlugins} from './plugins/fountainPlugin';
-import {FountainLeaf} from './utils/fountainMarks';
 
 const SAMPLE_FOUNTAIN = `INT. WRITERS' ROOM - DAY
 
@@ -40,7 +43,9 @@ type EditorProps = {
 };
 
 const Editor = ({
-    initialValue, onValueChange, onManualSave,
+    initialValue,
+    onValueChange,
+    onManualSave,
 }: EditorProps) => {
     const defaultValue = useMemo(() => fountainParser(SAMPLE_FOUNTAIN), []);
     const resolvedInitialValue = initialValue ?? defaultValue;

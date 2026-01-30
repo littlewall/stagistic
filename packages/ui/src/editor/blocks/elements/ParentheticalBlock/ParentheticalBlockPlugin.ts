@@ -11,7 +11,8 @@ import {
     getEnterNextType,
     isParentheticalSelection,
     setSelectionBlockType,
-} from '../../fountainBlockHelpers';
+} from '~blocks/fountainBlockHelpers';
+
 import ParentheticalBlock from './ParentheticalBlock';
 
 export const parentheticalPlugin = createPlatePlugin({
@@ -27,7 +28,7 @@ export const parentheticalPlugin = createPlatePlugin({
                 return undefined;
             }
 
-            const data = event.data;
+            const data = (event as {data?: string}).data ?? null;
 
             if (!data || (!data.includes('(') && !data.includes(')'))) {
                 return undefined;
@@ -52,7 +53,9 @@ export const parentheticalPlugin = createPlatePlugin({
                 if (nextPath) {
                     const point = editor.api.start(nextPath);
 
-                    editor.tf.select(point);
+                    if (point) {
+                        editor.tf.select(point);
+                    }
                 }
 
                 return true;
@@ -89,7 +92,7 @@ export const parentheticalPlugin = createPlatePlugin({
                 const selection = editor.selection;
                 const end = editor.api.end(path);
                 const isAtEnd =
-          selection && Range.isCollapsed(selection)
+          selection && Range.isCollapsed(selection) && end
               ? Point.equals(selection.anchor, end)
               : false;
                 const nextType = isAtEnd
@@ -104,7 +107,9 @@ export const parentheticalPlugin = createPlatePlugin({
                 if (hasEmptyNextBlock) {
                     const point = editor.api.start(nextPath);
 
-                    editor.tf.select(point);
+                    if (point) {
+                        editor.tf.select(point);
+                    }
 
                     return true;
                 }
@@ -119,7 +124,9 @@ export const parentheticalPlugin = createPlatePlugin({
 
                 const point = editor.api.start(nextPath);
 
-                editor.tf.select(point);
+                if (point) {
+                    editor.tf.select(point);
+                }
 
                 return true;
             }

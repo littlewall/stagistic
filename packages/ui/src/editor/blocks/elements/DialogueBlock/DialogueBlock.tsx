@@ -1,8 +1,10 @@
 import {ELEMENT_DIALOGUE} from '@stagistic/editor-core';
 import type {PlateElementProps} from 'platejs/react';
+import {ReactNode} from 'react';
 
-import FountainBlock from '../../base/FountainBlock';
-import useDualColumnPlacement from '../../layout/useDualColumnPlacement';
+import FountainBlock from '~blocks/base/FountainBlock';
+import useDualColumnPlacement from '~blocks/layout/useDualColumnPlacement';
+
 import styles from './DialogueBlock.module.css';
 
 const DialogueBlock = ({children, ...props}: PlateElementProps) => {
@@ -14,8 +16,10 @@ const DialogueBlock = ({children, ...props}: PlateElementProps) => {
             blockClassName={className}
             blockStyle={style}
             contentClassName={styles.dialogue}
-            content={children}
-        />
+            content={children as ReactNode}
+        >
+            {children}
+        </FountainBlock>
     );
 };
 

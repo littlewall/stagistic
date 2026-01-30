@@ -5,7 +5,7 @@ import {
     type SlateValue,
 } from '@stagistic/shared';
 
-import {loadLocalDb} from '../db';
+import {loadLocalDb} from '~db';
 
 const TABLE_NAME = 'scripts_latest';
 
@@ -38,7 +38,7 @@ export const createSqliteLatestScriptStorage = (): LatestScriptStorage => {
 
                 await ensureLatestScriptsTable(db);
 
-                const rows = await db.select<{content_json: string}>(
+                const rows = await db.select<{content_json: string}[]>(
                     `SELECT content_json FROM ${TABLE_NAME} WHERE key = ? LIMIT 1`,
                     [LATEST_SCRIPT_KEY],
                 );

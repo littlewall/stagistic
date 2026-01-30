@@ -1,1 +1,1 @@
-export {createFountainPlugins} from '../blocks/fountainBlockPlugins';
+export {createFountainPlugins} from '~blocks/fountainBlockPlugins';

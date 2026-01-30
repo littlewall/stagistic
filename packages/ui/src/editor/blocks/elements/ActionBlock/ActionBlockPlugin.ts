@@ -5,7 +5,8 @@ import {
     createBlockKeyHandler,
     createLeadingIndentKeyHandler,
     defaultEnterKeyHandler,
-} from '../../keyboard/blockKeyHandlers';
+} from '~blocks/keyboard/blockKeyHandlers';
+
 import ActionBlock from './ActionBlock';
 
 const onKeyDown = createBlockKeyHandler({

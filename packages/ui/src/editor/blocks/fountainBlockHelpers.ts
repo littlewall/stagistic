@@ -1,6 +1,9 @@
 import {
+    type ColumnElement,
+    type ColumnGroupElement,
     ELEMENT_ACTION,
     ELEMENT_CHARACTER,
+    ELEMENT_COLUMN,
     ELEMENT_COLUMN_GROUP,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE,
@@ -215,7 +218,17 @@ export const shouldSuppressCharacterGap = (
     return true;
 };
 
-export const getElementText = (node: FountainElement) => node.children.map(child => child.text).join('');
+export const getElementText = (node: unknown) => {
+    if (!node || typeof node !== 'object') return '';
+
+    if (!('children' in node)) return '';
+
+    const children = (node as {children?: Array<{text?: string}>}).children;
+
+    if (!Array.isArray(children)) return '';
+
+    return children.map(child => child.text ?? '').join('');
+};
 
 const stripOuterCharactersFromChildren = (
     children: FountainElement['children'],
@@ -355,7 +368,7 @@ export const convertDualCharacterToCharacter = (
                 match: node => typeof node === 'object' &&
           node !== null &&
           'type' in node &&
-          node.type === 'column',
+          node.type === ELEMENT_COLUMN,
             });
             editor.tf.unwrapNodes({
                 at: groupPath,
@@ -501,7 +514,7 @@ export const convertCharacterToDual = (editor: PlateEditor, path: Path) => {
 
         const element = sectionNode as FountainElement;
         const isRight = Path.compare(sectionPath, path) >= 0;
-        const nextElement =
+        const nextElement: FountainElement =
       Path.equals(sectionPath, path)
           ? {...element, type: ELEMENT_DUAL_DIALOGUE_CHARACTER}
           : element;
@@ -517,11 +530,11 @@ export const convertCharacterToDual = (editor: PlateEditor, path: Path) => {
         type: ELEMENT_COLUMN_GROUP,
         children: [
             {
-                type: 'column',
+                type: ELEMENT_COLUMN,
                 width: '50%',
                 children: leftNodes,
             } as ColumnElement, {
-                type: 'column',
+                type: ELEMENT_COLUMN,
                 width: '50%',
                 children: rightNodes,
             } as ColumnElement,

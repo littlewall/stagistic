@@ -196,13 +196,15 @@ export const fountainParser = (source: string): FountainDocument => {
     const lines = source.replace(/\r\n/g, '\n').split('\n');
     let previousType: FountainElementType | null = null;
     let carryOver = false;
-    const blocks: FountainDocument = [];
+    const blocks: FountainElement[] = [];
 
     for (const rawLine of lines) {
         const hardBreak = hasHardLineBreak(rawLine);
         const line = hardBreak ? stripHardLineBreak(rawLine) : rawLine;
-        const targetBlock = carryOver ? blocks[blocks.length - 1] : null;
-        const type = targetBlock ? targetBlock.type : detectType(line, previousType);
+        const targetBlock = carryOver ? blocks[blocks.length - 1] : undefined;
+        const type: FountainElementType = targetBlock
+            ? targetBlock.type
+            : detectType(line, previousType);
         let text =
             type === ELEMENT_LYRICS ? line.trim().replace(/^~\s?/, '') : line;
 
@@ -247,14 +249,11 @@ export const fountainParser = (source: string): FountainDocument => {
         carryOver = hardBreak;
     }
 
-    const isEmptyAction = (block: FountainDocument[number]) => block.type === ELEMENT_ACTION
-        && 'children' in block
-        && Array.isArray(block.children)
-        && typeof block.children[0] === 'object'
-        && 'text' in block.children[0]
+    const isEmptyAction = (block: FountainElement) => block.type === ELEMENT_ACTION
+        && block.children.length > 0
         && block.children[0].text.trim().length === 0;
 
-    const cleaned: FountainDocument = [];
+    const cleaned: FountainElement[] = [];
     let previousNonEmptyType: FountainElementType | null = null;
 
     for (let i = 0; i < blocks.length; i += 1) {
@@ -412,11 +411,7 @@ export const fountainParser = (source: string): FountainDocument => {
         return wrapped;
     };
 
-    const flatBlocks = cleaned.filter(
-        (node): node is FountainElement => node.type !== ELEMENT_COLUMN_GROUP && node.type !== ELEMENT_COLUMN,
-    );
-
-    return wrapDualSections(flatBlocks);
+    return wrapDualSections(cleaned);
 };
 
 export const parseFountain = fountainParser;

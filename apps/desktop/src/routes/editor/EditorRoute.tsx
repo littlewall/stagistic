@@ -1,16 +1,23 @@
-import {serializeFountain} from '@stagistic/editor-core';
+import {type FountainDocument, serializeFountain} from '@stagistic/editor-core';
 import type {SlateValue} from '@stagistic/shared';
 import {
-    AppHeader, AppLayout, EditorSidebar, FountainEditor,
+    AppHeader,
+    AppLayout,
+    EditorSidebar,
+    FountainEditor,
 } from '@stagistic/ui';
 import {
-    useCallback, useEffect, useMemo, useRef, useState,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
 } from 'react';
 
 import {
     latestScriptStorage,
     serializeSlateValue,
-} from '../../storage/latestScriptStorage';
+} from '~storage/latestScriptStorage';
 
 const mockProjects = [
     {id: '1', name: 'The Last Light'},
@@ -18,6 +25,8 @@ const mockProjects = [
     {id: '3', name: 'Summer Solstice'},
     {id: '4', name: 'Winter\'s Tale'},
 ];
+
+const AUTOSAVE_DELAY_MS = 1500;
 
 export const EditorRoute = () => {
     const [initialValue, setInitialValue] = useState<SlateValue | null | undefined>(undefined);
@@ -53,12 +62,14 @@ export const EditorRoute = () => {
             if (stored) {
                 latestValueRef.current = stored;
                 lastSavedSerializedRef.current = serializeSlateValue(stored);
-                setSerializedPreview(serializeFountain(stored));
+                setSerializedPreview(serializeFountain(stored as unknown as FountainDocument));
                 setInitialValue(stored);
-            } else {
-                setInitialValue(null);
-                setSerializedPreview('');
+
+                return;
             }
+
+            setInitialValue(null);
+            setSerializedPreview('');
         };
 
         void loadLatest();
@@ -75,7 +86,9 @@ export const EditorRoute = () => {
     const saveLatest = useCallback(async (value: SlateValue) => {
         const serialized = serializeSlateValue(value);
 
-        if (serialized === lastSavedSerializedRef.current) return;
+        if (serialized === lastSavedSerializedRef.current) {
+            return;
+        }
 
         await latestScriptStorage.saveLatestScript(value);
         lastSavedSerializedRef.current = serialized;
@@ -85,7 +98,9 @@ export const EditorRoute = () => {
         (value: SlateValue) => {
             const serialized = serializeSlateValue(value);
 
-            if (serialized === lastSavedSerializedRef.current) return;
+            if (serialized === lastSavedSerializedRef.current) {
+                return;
+            }
 
             if (autosaveTimerRef.current) {
                 window.clearTimeout(autosaveTimerRef.current);
@@ -94,10 +109,12 @@ export const EditorRoute = () => {
             autosaveTimerRef.current = window.setTimeout(() => {
                 const latestValue = latestValueRef.current;
 
-                if (!latestValue) return;
+                if (!latestValue) {
+                    return;
+                }
 
                 void saveLatest(latestValue);
-            }, 1500);
+            }, AUTOSAVE_DELAY_MS);
         },
         [saveLatest],
     );
@@ -106,7 +123,7 @@ export const EditorRoute = () => {
         (value: SlateValue) => {
             latestValueRef.current = value;
             scheduleAutosave(value);
-            setSerializedPreview(serializeFountain(value));
+            setSerializedPreview(serializeFountain(value as unknown as FountainDocument));
         },
         [scheduleAutosave],
     );

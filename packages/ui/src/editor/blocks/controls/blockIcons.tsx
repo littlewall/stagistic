@@ -11,8 +11,9 @@ import {
     ELEMENT_TRANSITION,
     type FountainElementType,
 } from '@stagistic/editor-core';
+import type {ReactElement} from 'react';
 
-const createIcon = (children: JSX.Element | JSX.Element[]) => (
+const createIcon = (children: ReactElement | ReactElement[]) => (
     <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
@@ -22,7 +23,7 @@ const createIcon = (children: JSX.Element | JSX.Element[]) => (
     </svg>
 );
 
-export const BLOCK_ICONS: Record<FountainElementType, JSX.Element> = {
+export const BLOCK_ICONS: Record<FountainElementType, ReactElement> = {
     [ELEMENT_SCENE_HEADING]: createIcon(
         <>
             <path d="M4 8h16v10H4z" />
