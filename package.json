@@ -30,6 +30,7 @@
         "@types/node": "^24.0.0",
         "stylelint": "^16.10.0",
         "turbo": "^2.3.3",
-        "typescript": "^5.7.2"
+        "typescript-plugin-css-modules": "^5.0.1",
+        "typescript": "^5.9.2"
     }
 }
