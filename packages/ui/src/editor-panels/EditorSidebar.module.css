@@ -1,168 +1,168 @@
 .sidebar {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  background: var(--color-surface);
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    background: var(--color-surface);
 }
 
 .tabs {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  height: 100%;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
 }
 
 .tabList {
-  display: flex;
-  border-bottom: 1px solid var(--color-divider);
-  background: color-mix(in srgb, var(--color-surface) 60%, var(--color-accent));
+    display: flex;
+    background: color-mix(in srgb, var(--color-surface) 60%, var(--color-accent));
+    border-bottom: 1px solid var(--color-divider);
 }
 
 .tab {
-  flex: 1;
-  padding: var(--space-2) 0 calc(var(--space-2) - 1px);
-  font-size: calc(10px * var(--size-scale));
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  border: none;
-  background: transparent;
-  color: var(--color-ink-muted);
-  cursor: pointer;
-  transition: color 0.15s ease, border-color 0.15s ease, background 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--space-2);
-  position: relative;
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    flex: 1;
+    gap: var(--space-2);
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-2) 0 calc(var(--space-2) - 1px);
+    font-size: calc(10px * var(--size-scale));
+    color: var(--color-ink-muted);
+    text-transform: uppercase;
+    letter-spacing: .16em;
+    background: transparent;
+    border: none;
+    transition: color .15s ease, border-color .15s ease, background .2s ease;
 
-  &[data-selected] {
-    color: var(--color-ink);
-    background: var(--color-surface);
-    border-bottom: 2px solid var(--color-ink);
-  }
+    &[data-selected] {
+        color: var(--color-ink);
+        background: var(--color-surface);
+        border-bottom: 2px solid var(--color-ink);
+    }
 
-  &[data-hovered] {
-    color: var(--color-ink);
-    background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
-  }
+    &[data-hovered] {
+        color: var(--color-ink);
+        background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
+    }
 }
 
 .tabIcon {
-  width: calc(14px * var(--size-scale));
-  height: calc(14px * var(--size-scale));
-  color: currentColor;
+    width: calc(14px * var(--size-scale));
+    height: calc(14px * var(--size-scale));
+    color: currentcolor;
 }
 
 .tabPanel {
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
+    overflow: auto;
+    flex: 1;
+    min-height: 0;
 }
 
 .emptyState {
-  font-size: calc(12px * var(--size-scale));
-  color: var(--color-ink-muted);
-  padding: var(--space-4);
+    padding: var(--space-4);
+    font-size: calc(12px * var(--size-scale));
+    color: var(--color-ink-muted);
 
-  & code {
-    display: block;
-    font-family: var(--font-mono);
-    margin-top: 8px;
-    color: var(--color-ink);
-  }
+    & code {
+        display: block;
+        margin-top: 8px;
+        font-family: var(--font-mono);
+        color: var(--color-ink);
+    }
 }
 
 .inlineCode {
-  font-family: var(--font-mono);
+    font-family: var(--font-mono);
 }
 
 .sceneList {
-  list-style: none;
-  padding: var(--space-3) 0;
+    padding: var(--space-3) 0;
+    list-style: none;
 }
 
 .sceneButton {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-4);
-  border: none;
-  background: transparent;
-  text-align: left;
-  cursor: pointer;
-  color: var(--color-ink);
-  transition: background 0.15s ease;
+    cursor: pointer;
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    width: 100%;
+    padding: var(--space-2) var(--space-4);
+    color: var(--color-ink);
+    text-align: left;
+    background: transparent;
+    border: none;
+    transition: background .15s ease;
 
-  &:hover {
-    background: color-mix(in srgb, var(--color-accent) 45%, transparent);
-  }
+    &:hover {
+        background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    }
 }
 
 .sceneIndex {
-  font-family: var(--font-mono);
-  color: var(--color-ink-muted);
-  width: calc(22px * var(--size-scale));
+    width: calc(22px * var(--size-scale));
+    font-family: var(--font-mono);
+    color: var(--color-ink-muted);
 }
 
 .sceneHeading {
-  flex: 1;
-  font-size: calc(12px * var(--size-scale));
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    overflow: hidden;
+    flex: 1;
+    font-size: calc(12px * var(--size-scale));
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .sceneChevron {
-  font-size: calc(12px * var(--size-scale));
-  opacity: 0;
-  transition: opacity 0.2s ease;
+    font-size: calc(12px * var(--size-scale));
+    opacity: 0;
+    transition: opacity .2s ease;
 }
 
 .sceneButton:hover .sceneChevron {
-  opacity: 1;
+    opacity: 1;
 }
 
 .notesArea {
-  width: 100%;
-  min-height: calc(220px * var(--size-scale));
-  padding: var(--space-4);
-  border: none;
-  background: transparent;
-  resize: none;
-  font-size: calc(12px * var(--size-scale));
-  color: var(--color-ink);
+    resize: none;
+    width: 100%;
+    min-height: calc(220px * var(--size-scale));
+    padding: var(--space-4);
+    font-size: calc(12px * var(--size-scale));
+    color: var(--color-ink);
+    background: transparent;
+    border: none;
 
-  &::placeholder {
-    color: var(--color-ink-muted);
-  }
+    &:focus {
+        outline: none;
+    }
 
-  &:focus {
-    outline: none;
-  }
+    &::placeholder {
+        color: var(--color-ink-muted);
+    }
 }
 
 .historyList {
-  list-style: none;
-  padding: var(--space-3) 0;
+    padding: var(--space-3) 0;
+    list-style: none;
 }
 
 .historyItem {
-  padding: var(--space-3) var(--space-4);
-  border-bottom: 1px solid var(--color-divider);
+    padding: var(--space-3) var(--space-4);
+    border-bottom: 1px solid var(--color-divider);
 
-  &:last-child {
-    border-bottom: none;
-  }
+    &:last-child {
+        border-bottom: none;
+    }
 }
 
 .historyAction {
-  font-size: calc(12px * var(--size-scale));
-  color: var(--color-ink);
+    font-size: calc(12px * var(--size-scale));
+    color: var(--color-ink);
 }
 
 .historyTime {
-  font-size: calc(10px * var(--size-scale));
-  color: var(--color-ink-muted);
-  margin-top: var(--space-1);
+    margin-top: var(--space-1);
+    font-size: calc(10px * var(--size-scale));
+    color: var(--color-ink-muted);
 }

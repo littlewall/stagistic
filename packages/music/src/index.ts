@@ -1,4 +1,6 @@
-// Music notation and audio features
-// For musical theatre scripts
+/*
+ * Music notation and audio features
+ * For musical theatre scripts
+ */
 
 export const placeholder = 'music';

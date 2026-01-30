@@ -1,12 +1,12 @@
 .dualCharacter {
-  margin-top: var(--character-gap, 1.8em);
-  margin-left: var(--dual-character-indent, 64px);
-  font-weight: 700;
-  color: #7b4b2a;
+    margin-top: var(--character-gap, 1.8em);
+    margin-left: var(--dual-character-indent, 64px);
+    font-weight: 700;
+    color: #7b4b2a;
 }
 
 .dualCharacterBlock {
-  --dual-character-indent: 64px;
-  --character-gap: 1.8em;
-  --block-controls-offset: var(--character-gap);
+    --dual-character-indent: 64px;
+    --character-gap: 1.8em;
+    --block-controls-offset: var(--character-gap);
 }

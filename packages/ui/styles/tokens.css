@@ -1,32 +1,30 @@
 :root {
-  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
+    --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
 
-  /* Size scale: default is medium; override with .size-sm or .size-lg on body/root. */
-  --size-scale: 1.08;
-  --app-header-height: 44px;
-  --traffic-light-space: 76px;
-  --space-unit: 4px;
-  --space-1: calc(var(--space-unit) * 1 * var(--size-scale));
-  --space-2: calc(var(--space-unit) * 2 * var(--size-scale));
-  --space-3: calc(var(--space-unit) * 3 * var(--size-scale));
-  --space-4: calc(var(--space-unit) * 4 * var(--size-scale));
-  --space-5: calc(var(--space-unit) * 5 * var(--size-scale));
-  --space-6: calc(var(--space-unit) * 6 * var(--size-scale));
-  --space-7: calc(var(--space-unit) * 7 * var(--size-scale));
-  --space-8: calc(var(--space-unit) * 8 * var(--size-scale));
-  --space-10: calc(var(--space-unit) * 10 * var(--size-scale));
-  --space-12: calc(var(--space-unit) * 12 * var(--size-scale));
-
-  --color-paper: #f6f2ed;
-  --color-surface: #fbf9f6;
-  --color-ink: #2b231b;
-  --color-ink-muted: #8a8076;
-  --color-divider: #e3dbd0;
-  --color-accent: #f1e9df;
-  --color-highlight: #f8f2ea;
-
-  --radius-sm: calc(6px * var(--size-scale));
-  --radius-md: calc(10px * var(--size-scale));
-  --shadow-popover: 0 10px 30px rgba(26, 20, 15, 0.12);
+    /* Size scale: default is medium; override with .size-sm or .size-lg on body/root. */
+    --size-scale: 1.08;
+    --app-header-height: 44px;
+    --traffic-light-space: 76px;
+    --space-unit: 4px;
+    --space-1: calc(var(--space-unit) * 1 * var(--size-scale));
+    --space-2: calc(var(--space-unit) * 2 * var(--size-scale));
+    --space-3: calc(var(--space-unit) * 3 * var(--size-scale));
+    --space-4: calc(var(--space-unit) * 4 * var(--size-scale));
+    --space-5: calc(var(--space-unit) * 5 * var(--size-scale));
+    --space-6: calc(var(--space-unit) * 6 * var(--size-scale));
+    --space-7: calc(var(--space-unit) * 7 * var(--size-scale));
+    --space-8: calc(var(--space-unit) * 8 * var(--size-scale));
+    --space-10: calc(var(--space-unit) * 10 * var(--size-scale));
+    --space-12: calc(var(--space-unit) * 12 * var(--size-scale));
+    --color-paper: #f6f2ed;
+    --color-surface: #fbf9f6;
+    --color-ink: #2b231b;
+    --color-ink-muted: #8a8076;
+    --color-divider: #e3dbd0;
+    --color-accent: #f1e9df;
+    --color-highlight: #f8f2ea;
+    --radius-sm: calc(6px * var(--size-scale));
+    --radius-md: calc(10px * var(--size-scale));
+    --shadow-popover: 0 10px 30px rgba(26, 20, 15, .12);
 }

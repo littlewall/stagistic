@@ -1,63 +1,71 @@
 import {
-    ELEMENT_CENTERED,
-    ELEMENT_LYRICS,
-    ELEMENT_PARENTHETICAL,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
-    ELEMENT_ACTION,
-    ELEMENT_CHARACTER,
-    ELEMENT_DIALOGUE,
-    ELEMENT_TRANSITION,
-    ELEMENT_COLUMN,
-    ELEMENT_COLUMN_GROUP,
-    type FountainDocument,
-    type FountainElement,
     type ColumnElement,
     type ColumnGroupElement,
+    ELEMENT_ACTION,
+    ELEMENT_CENTERED,
+    ELEMENT_CHARACTER,
+    ELEMENT_COLUMN,
+    ELEMENT_COLUMN_GROUP,
+    ELEMENT_DIALOGUE,
+    ELEMENT_DUAL_DIALOGUE_CHARACTER,
+    ELEMENT_LYRICS,
+    ELEMENT_PARENTHETICAL,
+    ELEMENT_TRANSITION,
+    type FountainDocument,
+    type FountainElement,
     type FountainNode,
 } from './types';
 
 const uppercaseOutsideParentheses = (value: string) => {
     let inside = false;
     let result = '';
+
     for (const char of value) {
         if (char === '(') {
             inside = true;
             result += char;
             continue;
         }
+
         if (char === ')') {
             inside = false;
             result += char;
             continue;
         }
+
         result += inside ? char : char.toUpperCase();
     }
+
     return result;
 };
 
 const isAllCaps = (value: string) => {
     const letters = value.replace(/[^A-Za-z]/g, '');
+
     return letters.length > 0 && letters === letters.toUpperCase();
 };
 
-const serializeLeaves = (node: FountainElement): string =>
-    node.children
-        .map((child) => {
-            if (!child.text) return '';
-            let value = child.text;
-            if (child.underline) {
-                value = `_${value}_`;
-            }
-            if (child.bold && child.italic) {
-                value = `***${value}***`;
-            } else if (child.bold) {
-                value = `**${value}**`;
-            } else if (child.italic) {
-                value = `*${value}*`;
-            }
-            return value;
-        })
-        .join('');
+const serializeLeaves = (node: FountainElement): string => node.children
+    .map(child => {
+        if (!child.text) return '';
+
+        let value = child.text;
+
+        if (child.underline) {
+            value = `_${value}_`;
+        }
+
+        if (child.bold && child.italic) {
+            value = `***${value}***`;
+        } else if (child.bold) {
+            value = `**${value}**`;
+        } else if (child.italic) {
+            value = `*${value}*`;
+        }
+
+        return value;
+    })
+    .join('');
 
 const serializeLine = (node: FountainElement): string => {
     let text = serializeLeaves(node);
@@ -68,6 +76,7 @@ const serializeLine = (node: FountainElement): string => {
     ) {
         text = uppercaseOutsideParentheses(text);
     }
+
     const lines = text.split('\n');
 
     if (node.type === ELEMENT_LYRICS) {
@@ -94,6 +103,7 @@ const serializeLine = (node: FountainElement): string => {
 
     if (node.type === ELEMENT_TRANSITION) {
         const upper = withLineBreaks.toUpperCase();
+
         return upper.endsWith('TO:') ? upper : `>${upper}`;
     }
 
@@ -112,24 +122,29 @@ const flattenNodes = (nodes: FountainDocument): FountainElement[] => {
     const walk = (nodeList: FountainNode[]) => {
         for (const node of nodeList) {
             if (node.type === ELEMENT_COLUMN_GROUP) {
-                const group = node as ColumnGroupElement;
+                const group = node;
                 const columns = group.children ?? [];
+
                 if (columns[0]) walk(columns[0].children);
+
                 if (columns[1]) walk(columns[1].children);
+
                 continue;
             }
 
             if (node.type === ELEMENT_COLUMN) {
-                const column = node as ColumnElement;
+                const column = node;
+
                 walk(column.children ?? []);
                 continue;
             }
 
-            flattened.push(node as FountainElement);
+            flattened.push(node);
         }
     };
 
     walk(nodes);
+
     return flattened;
 };
 
@@ -139,14 +154,14 @@ export const fountainSerializer = (nodes: FountainDocument): string => {
     const flatNodes = flattenNodes(nodes);
 
     const getText = (node: FountainElement) => serializeLeaves(node);
-    const isEmptyAction = (node: FountainElement) =>
-        node.type === ELEMENT_ACTION && getText(node).trim().length === 0;
+    const isEmptyAction = (node: FountainElement) => node.type === ELEMENT_ACTION && getText(node).trim().length === 0;
     const nextNonEmptyType = (startIndex: number) => {
         for (let i = startIndex; i < flatNodes.length; i += 1) {
             if (!isEmptyAction(flatNodes[i])) {
                 return flatNodes[i].type;
             }
         }
+
         return null;
     };
     const pushSerialized = (value: string) => {
@@ -158,6 +173,7 @@ export const fountainSerializer = (nodes: FountainDocument): string => {
 
         if (isEmptyAction(node)) {
             const nextType = nextNonEmptyType(i + 1);
+
             if (
                 previousNonEmptyType === ELEMENT_CHARACTER
                 && (nextType === ELEMENT_PARENTHETICAL
@@ -166,6 +182,7 @@ export const fountainSerializer = (nodes: FountainDocument): string => {
             ) {
                 continue;
             }
+
             if (
                 previousNonEmptyType === ELEMENT_TRANSITION
                 || nextType === ELEMENT_TRANSITION

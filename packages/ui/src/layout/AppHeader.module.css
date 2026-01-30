@@ -1,207 +1,207 @@
 .header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  height: var(--app-header-height);
-  padding: 0 var(--space-4);
-  border-bottom: 1px solid var(--color-divider);
-  background: var(--color-surface);
-  backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: var(--app-header-height);
+    padding: 0 var(--space-4);
+    background: var(--color-surface);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--color-divider);
 }
 
 :global(.platform-macos) .header {
-  padding-left: calc(var(--space-4) + var(--traffic-light-space));
+    padding-left: calc(var(--space-4) + var(--traffic-light-space));
 }
 
 .logo {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-width: calc(140px * var(--size-scale));
-  font-weight: 500;
+    display: inline-flex;
+    gap: var(--space-2);
+    align-items: center;
+    min-width: calc(140px * var(--size-scale));
+    font-weight: 500;
 
-  & .logoMark {
-    width: calc(22px * var(--size-scale));
-    height: calc(22px * var(--size-scale));
-    display: grid;
-    place-items: center;
-    border-radius: calc(7px * var(--size-scale));
-    background: var(--color-ink);
-    color: var(--color-surface);
-    font-size: calc(12px * var(--size-scale));
-  }
+    & .logoMark {
+        display: grid;
+        place-items: center;
+        width: calc(22px * var(--size-scale));
+        height: calc(22px * var(--size-scale));
+        font-size: calc(12px * var(--size-scale));
+        color: var(--color-surface);
+        background: var(--color-ink);
+        border-radius: calc(7px * var(--size-scale));
+    }
 
-  & .logoText {
-    letter-spacing: 0.02em;
-  }
+    & .logoText {
+        letter-spacing: .02em;
+    }
 }
 
 .menuTrigger,
 .avatarTrigger {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-3);
-  border-radius: var(--radius-sm);
-  background: transparent;
-  border: 1px solid transparent;
-  color: var(--color-ink);
-  font-size: calc(13px * var(--size-scale));
-  cursor: pointer;
-  transition: all 0.15s ease;
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--space-2);
+    align-items: center;
+    padding: var(--space-2) var(--space-3);
+    font-size: calc(13px * var(--size-scale));
+    color: var(--color-ink);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: all .15s ease;
 
-  &:focus {
-    outline: none;
-    box-shadow: none;
-    border-color: transparent;
-  }
+    &:focus {
+        border-color: transparent;
+        outline: none;
+        box-shadow: none;
+    }
 
-  &[data-hovered] {
-    background: color-mix(in srgb, var(--color-accent) 60%, transparent);
-  }
+    &[data-hovered] {
+        background: color-mix(in srgb, var(--color-accent) 60%, transparent);
+    }
 
-  &[data-pressed] {
-    background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
-  }
+    &[data-pressed] {
+        background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
+    }
 
-  &[data-focus-visible] {
-    border-color: transparent;
-    box-shadow: none;
-    outline: none;
-    background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
-  }
+    &[data-focus-visible] {
+        background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
+        border-color: transparent;
+        outline: none;
+        box-shadow: none;
+    }
 }
 
 .menuTriggerLabel {
-  max-width: calc(220px * var(--size-scale));
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+    overflow: hidden;
+    max-width: calc(220px * var(--size-scale));
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .caret {
-  width: calc(14px * var(--size-scale));
-  height: calc(14px * var(--size-scale));
-  color: var(--color-ink-muted);
+    width: calc(14px * var(--size-scale));
+    height: calc(14px * var(--size-scale));
+    color: var(--color-ink-muted);
 }
 
 .avatarTrigger {
-  min-width: calc(140px * var(--size-scale));
-  justify-content: flex-end;
+    justify-content: flex-end;
+    min-width: calc(140px * var(--size-scale));
 }
 
 .avatarIcon {
-  width: calc(22px * var(--size-scale));
-  height: calc(22px * var(--size-scale));
-  color: var(--color-ink-muted);
+    width: calc(22px * var(--size-scale));
+    height: calc(22px * var(--size-scale));
+    color: var(--color-ink-muted);
 }
 
 .menuPopover {
-  padding: 0;
-  margin-top: var(--space-2);
-  border-radius: var(--radius-md);
-  background: var(--color-surface);
-  border: 1px solid var(--color-divider);
-  box-shadow: var(--shadow-popover);
+    margin-top: var(--space-2);
+    padding: 0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-popover);
 
-  &:focus-visible {
-    outline: none;
-  }
+    &:focus-visible {
+        outline: none;
+    }
 }
 
 .menu {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-2);
-  padding: 0;
-  min-width: calc(240px * var(--size-scale));
-  font-size: calc(13px * var(--size-scale));
-  padding-bottom: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: calc(240px * var(--size-scale));
+    padding: 0;
+    padding-bottom: var(--space-2);
+    font-size: calc(13px * var(--size-scale));
 
-  &:focus-visible {
-    outline: none;
-  }
+    &:focus-visible {
+        outline: none;
+    }
 }
 
 .menuSection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
 }
 
 .menuHeader {
-  font-size: calc(10px * var(--size-scale));
-  text-transform: uppercase;
-  letter-spacing: 0.12em;
-  color: var(--color-ink-muted);
-  padding: var(--space-1) var(--space-3);
+    padding: var(--space-1) var(--space-3);
+    font-size: calc(10px * var(--size-scale));
+    color: var(--color-ink-muted);
+    text-transform: uppercase;
+    letter-spacing: .12em;
 }
 
 .currentProjectBlock {
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  padding: var(--space-2) var(--space-3);
-  border-radius: calc(10px * var(--size-scale)) calc(10px * var(--size-scale)) 0 0;
-  background: color-mix(in srgb, var(--color-highlight) 75%, transparent);
-  border: 1px solid color-mix(in srgb, var(--color-divider) 70%, transparent);
-  cursor: default;
-  width: 100%;
-  align-items: flex-start;
-  margin-bottom: var(--space-2);
+    cursor: default;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    align-items: flex-start;
+    width: 100%;
+    margin-bottom: var(--space-2);
+    padding: var(--space-2) var(--space-3);
+    background: color-mix(in srgb, var(--color-highlight) 75%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-divider) 70%, transparent);
+    border-radius: calc(10px * var(--size-scale)) calc(10px * var(--size-scale)) 0 0;
 }
 
 .currentProjectLabel {
-  font-size: calc(9px * var(--size-scale));
-  text-transform: uppercase;
-  letter-spacing: 0.16em;
-  color: var(--color-ink-muted);
+    font-size: calc(9px * var(--size-scale));
+    color: var(--color-ink-muted);
+    text-transform: uppercase;
+    letter-spacing: .16em;
 }
 
 .currentProjectName {
-  font-size: calc(13px * var(--size-scale));
-  color: var(--color-ink);
-  font-weight: 500;
+    font-size: calc(13px * var(--size-scale));
+    font-weight: 500;
+    color: var(--color-ink);
 }
 
 .menuItem {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  border-radius: calc(8px * var(--size-scale));
-  padding: var(--space-2) var(--space-3);
-  margin: 0 var(--space-3);
-  cursor: pointer;
-  transition: background 0.15s ease, box-shadow 0.15s ease;
+    cursor: pointer;
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    margin: 0 var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-radius: calc(8px * var(--size-scale));
+    transition: background .15s ease, box-shadow .15s ease;
 
-  &[data-focused],
-  &[data-hovered] {
-    background: color-mix(in srgb, var(--color-accent) 35%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-divider) 45%, transparent);
-  }
+    &:focus-visible {
+        outline: none;
+    }
 
-  &[data-disabled] {
-    color: var(--color-ink-muted);
-    cursor: default;
-  }
+    &[data-focused],
+    &[data-hovered] {
+        background: color-mix(in srgb, var(--color-accent) 35%, transparent);
+        box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-divider) 45%, transparent);
+    }
 
-  &:focus-visible {
-    outline: none;
-  }
+    &[data-disabled] {
+        cursor: default;
+        color: var(--color-ink-muted);
+    }
 }
 
 .menuIcon {
-  width: calc(16px * var(--size-scale));
-  height: calc(16px * var(--size-scale));
-  color: var(--color-ink-muted);
+    width: calc(16px * var(--size-scale));
+    height: calc(16px * var(--size-scale));
+    color: var(--color-ink-muted);
 }
 
 .menuItemMuted {
-  background: var(--color-highlight);
+    background: var(--color-highlight);
 }
 
 .menuSeparator {
-  height: 1px;
-  background: var(--color-divider);
-  margin: var(--space-1) 0;
+    height: 1px;
+    margin: var(--space-1) 0;
+    background: var(--color-divider);
 }

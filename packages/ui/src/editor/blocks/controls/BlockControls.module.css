@@ -1,99 +1,99 @@
 .controls {
-  position: absolute;
-  left: calc(-1 * var(--block-controls-gutter, 32px));
-  top: calc(0.625em + 2px + var(--block-controls-offset, 0px));
-  display: inline-flex;
-  align-items: center;
-  z-index: 2;
-  transform: translateY(-50%);
+    position: absolute;
+    z-index: 2;
+    top: calc(.625em + 2px + var(--block-controls-offset, 0px));
+    left: calc(-1 * var(--block-controls-gutter, 32px));
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
 }
 
 .trigger {
-  border: 1px solid #e4e4e7;
-  background: #ffffff;
-  color: #18181b;
-  width: calc(24px * var(--size-scale));
-  height: calc(24px * var(--size-scale));
-  border-radius: calc(6px * var(--size-scale));
-  font-size: calc(16px * var(--size-scale));
-  line-height: 1;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(24px * var(--size-scale));
+    height: calc(24px * var(--size-scale));
+    font-size: calc(16px * var(--size-scale));
+    line-height: 1;
+    color: #18181b;
+    background: #fff;
+    border: 1px solid #e4e4e7;
+    border-radius: calc(6px * var(--size-scale));
 }
 
 .trigger:hover {
-  background: #f4f4f5;
+    background: #f4f4f5;
 }
 
 .triggerIcon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: calc(16px * var(--size-scale));
-  height: calc(16px * var(--size-scale));
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(16px * var(--size-scale));
+    height: calc(16px * var(--size-scale));
 }
 
 .triggerIcon svg,
 .menuItemIcon svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
 }
 
 .menu {
-  position: absolute;
-  left: 0;
-  top: calc(28px * var(--size-scale));
-  display: grid;
-  gap: 2px;
-  padding: var(--space-2);
-  min-width: calc(180px * var(--size-scale));
-  border-radius: calc(10px * var(--size-scale));
-  border: 1px solid #e4e4e7;
-  background: #ffffff;
+    position: absolute;
+    top: calc(28px * var(--size-scale));
+    left: 0;
+    display: grid;
+    gap: 2px;
+    min-width: calc(180px * var(--size-scale));
+    padding: var(--space-2);
+    background: #fff;
+    border: 1px solid #e4e4e7;
+    border-radius: calc(10px * var(--size-scale));
 }
 
 .menuItem {
-  border: 1px solid transparent;
-  background: transparent;
-  padding: var(--space-2) var(--space-2);
-  text-align: left;
-  border-radius: calc(8px * var(--size-scale));
-  font-family: inherit;
-  font-size: calc(13px * var(--size-scale));
-  cursor: pointer;
-  color: #18181b;
-  display: grid;
-  grid-template-columns: 18px 1fr;
-  align-items: center;
-  gap: 8px;
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 18px 1fr;
+    gap: 8px;
+    align-items: center;
+    padding: var(--space-2) var(--space-2);
+    font-family: inherit;
+    font-size: calc(13px * var(--size-scale));
+    color: #18181b;
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: calc(8px * var(--size-scale));
 }
 
 .menuItem:hover {
-  background: #f4f4f5;
+    background: #f4f4f5;
 }
 
 .menuItemIcon {
-  width: calc(18px * var(--size-scale));
-  height: calc(18px * var(--size-scale));
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color: #52525b;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(18px * var(--size-scale));
+    height: calc(18px * var(--size-scale));
+    color: #52525b;
 }
 
 .menuItemLabel {
-  line-height: 1.2;
+    line-height: 1.2;
 }
 
 .menuItemActive {
-  background: #e4e4e7;
-  border-color: #d4d4d8;
-  font-weight: 600;
+    font-weight: 600;
+    background: #e4e4e7;
+    border-color: #d4d4d8;
 }

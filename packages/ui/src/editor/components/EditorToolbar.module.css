@@ -1,169 +1,168 @@
 .toolbar {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-2);
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--space-2) var(--space-3);
-  border-bottom: 1px solid var(--color-divider);
-  background: var(--color-surface);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-2) var(--space-3);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-divider);
 }
 
 .group {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
+    display: inline-flex;
+    gap: var(--space-2);
+    align-items: center;
 }
 
 .iconButton {
-  border: 1px solid var(--color-divider);
-  background: var(--color-surface);
-  color: var(--color-ink);
-  width: calc(26px * var(--size-scale));
-  height: calc(26px * var(--size-scale));
-  border-radius: calc(7px * var(--size-scale));
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(26px * var(--size-scale));
+    height: calc(26px * var(--size-scale));
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: calc(7px * var(--size-scale));
+    transition: background .15s ease, border-color .15s ease;
 
-  &:hover {
-    background: color-mix(in srgb, var(--color-accent) 45%, transparent);
-  }
+    &:hover {
+        background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    }
 
-  &:disabled {
-    opacity: 0.45;
-    cursor: not-allowed;
-  }
+    &:disabled {
+        cursor: not-allowed;
+        opacity: .45;
+    }
 
-  & svg {
-    width: 16px;
-    height: 16px;
-    stroke: currentColor;
-    fill: none;
-    stroke-width: 1.6;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-  }
+    & svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
 }
 
 .icon {
-
-  width: 16px;
-  height: 16px;
+    width: 16px;
+    height: 16px;
 }
 
 .icon svg {
-  width: 16px;
-  height: 16px;
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
 }
 
 .textIcon {
-  font-family: var(--font-mono);
-  font-size: calc(12px * var(--size-scale));
-  font-weight: 700;
-  letter-spacing: 0.02em;
+    font-family: var(--font-mono);
+    font-size: calc(12px * var(--size-scale));
+    font-weight: 700;
+    letter-spacing: .02em;
 }
 
 .textIconItalic {
-  font-style: italic;
-  font-weight: 600;
+    font-weight: 600;
+    font-style: italic;
 }
 
 .textIconUnderline {
-  text-decoration: underline;
-  text-underline-offset: 2px;
+    text-decoration: underline;
+    text-underline-offset: 2px;
 }
 
 .dropdown {
-  position: relative;
+    position: relative;
 }
 
 .selectButton {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--space-2);
-  border: 1px solid var(--color-divider);
-  background: var(--color-surface);
-  color: var(--color-ink);
-  border-radius: calc(8px * var(--size-scale));
-  padding: var(--space-1) var(--space-2);
-  font-size: calc(12px * var(--size-scale));
-  cursor: pointer;
-  transition: background 0.15s ease;
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--space-2);
+    align-items: center;
+    padding: var(--space-1) var(--space-2);
+    font-size: calc(12px * var(--size-scale));
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: calc(8px * var(--size-scale));
+    transition: background .15s ease;
 
-  &:hover {
-    background: color-mix(in srgb, var(--color-accent) 45%, transparent);
-  }
+    &:hover {
+        background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    }
 
-  &:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-  }
+    &:disabled {
+        cursor: not-allowed;
+        opacity: .5;
+    }
 }
 
 .selectLabel {
-  min-width: calc(110px * var(--size-scale));
-  text-align: left;
+    min-width: calc(110px * var(--size-scale));
+    text-align: left;
 }
 
 .chevron {
-  width: calc(14px * var(--size-scale));
-  height: calc(14px * var(--size-scale));
-  stroke: currentColor;
-  fill: none;
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+    width: calc(14px * var(--size-scale));
+    height: calc(14px * var(--size-scale));
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
 }
 
 .menu {
-  position: absolute;
-  top: calc(100% + var(--space-2));
-  left: 0;
-  display: grid;
-  min-width: calc(200px * var(--size-scale));
-  border: 1px solid var(--color-divider);
-  border-radius: calc(10px * var(--size-scale));
-  background: var(--color-surface);
-  box-shadow: var(--shadow-popover);
-  padding: var(--space-2);
-  gap: var(--space-1);
-  z-index: 10;
+    position: absolute;
+    z-index: 10;
+    top: calc(100% + var(--space-2));
+    left: 0;
+    display: grid;
+    gap: var(--space-1);
+    min-width: calc(200px * var(--size-scale));
+    padding: var(--space-2);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: calc(10px * var(--size-scale));
+    box-shadow: var(--shadow-popover);
 }
 
 .menuItem {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) var(--space-2);
-  border: none;
-  background: transparent;
-  color: var(--color-ink);
-  border-radius: calc(8px * var(--size-scale));
-  cursor: pointer;
-  font-size: calc(12px * var(--size-scale));
+    cursor: pointer;
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    padding: var(--space-2) var(--space-2);
+    font-size: calc(12px * var(--size-scale));
+    color: var(--color-ink);
+    background: transparent;
+    border: none;
+    border-radius: calc(8px * var(--size-scale));
 
-  &:hover {
-    background: var(--color-accent);
-  }
+    &:hover {
+        background: var(--color-accent);
+    }
 }
 
 .menuItemActive {
-  background: var(--color-ink);
-  color: var(--color-surface);
-
-  &:hover {
+    color: var(--color-surface);
     background: var(--color-ink);
-  }
+
+    &:hover {
+        background: var(--color-ink);
+    }
 }
 
 .menuLabel {
-  white-space: nowrap;
+    white-space: nowrap;
 }

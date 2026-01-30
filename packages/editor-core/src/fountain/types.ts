@@ -48,26 +48,26 @@ export type FountainElementType =
     | typeof ELEMENT_CENTERED;
 
 export type FountainText = {
-    text: string;
-    bold?: boolean;
-    italic?: boolean;
-    underline?: boolean;
+    text: string,
+    bold?: boolean,
+    italic?: boolean,
+    underline?: boolean,
 };
 
 export type FountainElement = {
-    type: FountainElementType;
-    children: FountainText[];
+    type: FountainElementType,
+    children: FountainText[],
 };
 
 export type ColumnElement = {
-    type: typeof ELEMENT_COLUMN;
-    width?: string;
-    children: FountainElement[];
+    type: typeof ELEMENT_COLUMN,
+    width?: string,
+    children: FountainElement[],
 };
 
 export type ColumnGroupElement = {
-    type: typeof ELEMENT_COLUMN_GROUP;
-    children: ColumnElement[];
+    type: typeof ELEMENT_COLUMN_GROUP,
+    children: ColumnElement[],
 };
 
 export type FountainNode = FountainElement | ColumnElement | ColumnGroupElement;

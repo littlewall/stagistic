@@ -1,7 +1,11 @@
 import {
+    type ColumnElement,
+    type ColumnGroupElement,
     ELEMENT_ACTION,
-    ELEMENT_CHARACTER,
     ELEMENT_CENTERED,
+    ELEMENT_CHARACTER,
+    ELEMENT_COLUMN,
+    ELEMENT_COLUMN_GROUP,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
@@ -9,13 +13,9 @@ import {
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
-    ELEMENT_COLUMN,
-    ELEMENT_COLUMN_GROUP,
-    type ColumnGroupElement,
-    type ColumnElement,
     type FountainDocument,
-    type FountainElementType,
     type FountainElement,
+    type FountainElementType,
     type FountainText,
 } from './types';
 
@@ -25,52 +25,58 @@ const CENTERED_PATTERN = /^>.*<$/;
 
 const isAllCaps = (line: string) => {
     const letters = line.replace(/[^A-Za-z]/g, '');
+
     return letters.length > 0 && letters === letters.toUpperCase();
 };
 
-const isDualCharacterLine = (line: string) => /\^\s*$/.test(line);
-const stripCharacterExtensions = (line: string) =>
-    line.replace(/\^\s*$/, '').replace(/\s*\(.*?\)\s*/g, ' ').trim();
+const isDualCharacterLine = (line: string) => (/\^\s*$/).test(line);
+const stripCharacterExtensions = (line: string) => line.replace(/\^\s*$/, '').replace(/\s*\(.*?\)\s*/g, ' ').trim();
 const isCharacterLine = (line: string) => {
     const stripped = stripCharacterExtensions(line);
+
     if (stripped.length === 0) return false;
+
     return isAllCaps(stripped);
 };
-const hasHardLineBreak = (line: string) => /[ \t]{2}$/.test(line);
+const hasHardLineBreak = (line: string) => (/[ \t]{2}$/).test(line);
 const stripHardLineBreak = (line: string) => line.replace(/[ \t]{2}$/, '');
 const uppercaseOutsideParentheses = (value: string) => {
     let inside = false;
     let result = '';
+
     for (const char of value) {
         if (char === '(') {
             inside = true;
             result += char;
             continue;
         }
+
         if (char === ')') {
             inside = false;
             result += char;
             continue;
         }
+
         result += inside ? char : char.toUpperCase();
     }
+
     return result;
 };
 
 type InlineMark = {
-    bold?: boolean;
-    italic?: boolean;
-    underline?: boolean;
+    bold?: boolean,
+    italic?: boolean,
+    underline?: boolean,
 };
 
 const INLINE_RULES: Array<{
-    pattern: RegExp;
-    mark: InlineMark;
+    pattern: RegExp,
+    mark: InlineMark,
 }> = [
-    { pattern: /\*\*\*([^\n*][^*\n]*?)\*\*\*/g, mark: { bold: true, italic: true } },
-    { pattern: /\*\*([^\n*][^*\n]*?)\*\*/g, mark: { bold: true } },
-    { pattern: /_([^\n_][^_\n]*?)_/g, mark: { underline: true } },
-    { pattern: /\*([^\n*][^*\n]*?)\*/g, mark: { italic: true } },
+    {pattern: /\*\*\*([^\n*][^*\n]*?)\*\*\*/g, mark: {bold: true, italic: true}},
+    {pattern: /\*\*([^\n*][^*\n]*?)\*\*/g, mark: {bold: true}},
+    {pattern: /_([^\n_][^_\n]*?)_/g, mark: {underline: true}},
+    {pattern: /\*([^\n*][^*\n]*?)\*/g, mark: {italic: true}},
 ];
 
 const parseInlineEmphasis = (value: string) => {
@@ -79,50 +85,56 @@ const parseInlineEmphasis = (value: string) => {
 
     while (index < value.length) {
         let nextMatch: {
-            start: number;
-            end: number;
-            inner: string;
-            mark: InlineMark;
+            start: number,
+            end: number,
+            inner: string,
+            mark: InlineMark,
         } | null = null;
 
         for (const rule of INLINE_RULES) {
             rule.pattern.lastIndex = index;
+
             const match = rule.pattern.exec(value);
+
             if (!match) continue;
+
             const start = match.index;
             const end = start + match[0].length;
             const inner = match[1] ?? '';
+
             if (
                 nextMatch === null
                 || start < nextMatch.start
                 || (start === nextMatch.start && end > nextMatch.end)
             ) {
-                nextMatch = { start, end, inner, mark: rule.mark };
+                nextMatch = {
+                    start, end, inner, mark: rule.mark,
+                };
             }
         }
 
         if (!nextMatch) {
-            nodes.push({ text: value.slice(index) });
+            nodes.push({text: value.slice(index)});
             break;
         }
 
         if (nextMatch.start > index) {
-            nodes.push({ text: value.slice(index, nextMatch.start) });
+            nodes.push({text: value.slice(index, nextMatch.start)});
         }
 
         if (nextMatch.inner.length > 0) {
-            nodes.push({ text: nextMatch.inner, ...nextMatch.mark });
+            nodes.push({text: nextMatch.inner, ...nextMatch.mark});
         }
 
         index = nextMatch.end;
     }
 
-    return nodes.length > 0 ? nodes : [{ text: '' }];
+    return nodes.length > 0 ? nodes : [{text: ''}];
 };
 
 const detectType = (
     line: string,
-    previousType: FountainElementType | null
+    previousType: FountainElementType | null,
 ): FountainElementType => {
     const trimmed = line.trim();
 
@@ -199,11 +211,13 @@ export const fountainParser = (source: string): FountainDocument => {
         }
 
         if (type === ELEMENT_PARENTHETICAL) {
-            text = text.trim().replace(/^\(/, '').replace(/\)$/, '').trim();
+            text = text.trim().replace(/^\(/, '').replace(/\)$/, '')
+                .trim();
         }
 
         if (type === ELEMENT_CENTERED) {
-            text = text.trim().replace(/^>/, '').replace(/<$/, '').trim();
+            text = text.trim().replace(/^>/, '').replace(/<$/, '')
+                .trim();
         }
 
         if (type === ELEMENT_DUAL_DIALOGUE_CHARACTER) {
@@ -216,7 +230,8 @@ export const fountainParser = (source: string): FountainDocument => {
         }
 
         if (type === ELEMENT_TRANSITION) {
-            text = text.trim().replace(/^>\s*/, '').trim().toUpperCase();
+            text = text.trim().replace(/^>\s*/, '').trim()
+                .toUpperCase();
         }
 
         if (targetBlock) {
@@ -232,8 +247,7 @@ export const fountainParser = (source: string): FountainDocument => {
         carryOver = hardBreak;
     }
 
-    const isEmptyAction = (block: FountainDocument[number]) =>
-        block.type === ELEMENT_ACTION
+    const isEmptyAction = (block: FountainDocument[number]) => block.type === ELEMENT_ACTION
         && 'children' in block
         && Array.isArray(block.children)
         && typeof block.children[0] === 'object'
@@ -242,10 +256,13 @@ export const fountainParser = (source: string): FountainDocument => {
 
     const cleaned: FountainDocument = [];
     let previousNonEmptyType: FountainElementType | null = null;
+
     for (let i = 0; i < blocks.length; i += 1) {
         const block = blocks[i];
+
         if (isEmptyAction(block)) {
             let nextNonEmptyType: FountainElementType | null = null;
+
             for (let j = i + 1; j < blocks.length; j += 1) {
                 if (!isEmptyAction(blocks[j])) {
                     nextNonEmptyType = blocks[j].type;
@@ -271,8 +288,7 @@ export const fountainParser = (source: string): FountainDocument => {
         }
     }
 
-    const isDialogueSectionType = (type: FountainElementType) =>
-        type === ELEMENT_CHARACTER
+    const isDialogueSectionType = (type: FountainElementType) => type === ELEMENT_CHARACTER
         || type === ELEMENT_DUAL_DIALOGUE_CHARACTER
         || type === ELEMENT_DIALOGUE
         || type === ELEMENT_DUAL_DIALOGUE
@@ -288,11 +304,13 @@ export const fountainParser = (source: string): FountainDocument => {
                     return blocksToWrap[i].type;
                 }
             }
+
             return null;
         };
 
         while (index < blocksToWrap.length) {
             const block = blocksToWrap[index];
+
             if (!isDialogueSectionType(block.type)) {
                 wrapped.push(block);
                 index += 1;
@@ -301,8 +319,10 @@ export const fountainParser = (source: string): FountainDocument => {
 
             const section: FountainElement[] = [];
             let cursor = index;
+
             while (cursor < blocksToWrap.length) {
                 const current = blocksToWrap[cursor];
+
                 if (isDialogueSectionType(current.type)) {
                     section.push(current);
                     cursor += 1;
@@ -311,6 +331,7 @@ export const fountainParser = (source: string): FountainDocument => {
 
                 if (isEmptyAction(current)) {
                     const nextType = nextNonEmptyType(cursor + 1);
+
                     if (nextType && isDialogueSectionType(nextType)) {
                         section.push(current);
                         cursor += 1;
@@ -322,9 +343,8 @@ export const fountainParser = (source: string): FountainDocument => {
             }
 
             const hasDual = section.some(
-                (node) =>
-                    node.type === ELEMENT_DUAL_DIALOGUE_CHARACTER
-                    || node.type === ELEMENT_DUAL_DIALOGUE
+                node => node.type === ELEMENT_DUAL_DIALOGUE_CHARACTER
+                    || node.type === ELEMENT_DUAL_DIALOGUE,
             );
 
             if (!hasDual) {
@@ -363,6 +383,7 @@ export const fountainParser = (source: string): FountainDocument => {
                     } else {
                         right.push(node);
                     }
+
                     continue;
                 }
 
@@ -376,8 +397,7 @@ export const fountainParser = (source: string): FountainDocument => {
                         type: ELEMENT_COLUMN,
                         width: '50%',
                         children: left,
-                    } as ColumnElement,
-                    {
+                    } as ColumnElement, {
                         type: ELEMENT_COLUMN,
                         width: '50%',
                         children: right,
@@ -393,9 +413,9 @@ export const fountainParser = (source: string): FountainDocument => {
     };
 
     const flatBlocks = cleaned.filter(
-        (node): node is FountainElement =>
-            node.type !== ELEMENT_COLUMN_GROUP && node.type !== ELEMENT_COLUMN
+        (node): node is FountainElement => node.type !== ELEMENT_COLUMN_GROUP && node.type !== ELEMENT_COLUMN,
     );
+
     return wrapDualSections(flatBlocks);
 };
 

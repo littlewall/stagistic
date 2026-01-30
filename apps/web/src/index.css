@@ -1,70 +1,68 @@
 @import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400;1,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
 
 :root {
-  --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --font-mono: 'Courier Prime', 'Courier New', monospace;
-
-  --color-paper: #f8f5f0;
-  --color-surface: #fcfaf7;
-  --color-ink: #2f251d;
-  --color-ink-muted: #8b7f73;
-  --color-divider: #e6dfd6;
-  --color-accent: #f2ebe3;
-  --color-highlight: #f7f1e7;
-
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --shadow-popover: 0 10px 30px rgba(26, 20, 15, 0.12);
+    --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'Courier Prime', 'Courier New', monospace;
+    --color-paper: #f8f5f0;
+    --color-surface: #fcfaf7;
+    --color-ink: #2f251d;
+    --color-ink-muted: #8b7f73;
+    --color-divider: #e6dfd6;
+    --color-accent: #f2ebe3;
+    --color-highlight: #f7f1e7;
+    --radius-sm: 6px;
+    --radius-md: 10px;
+    --shadow-popover: 0 10px 30px rgba(26, 20, 15, .12);
 }
 
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 html,
 body,
 #root {
-  height: 100%;
+    height: 100%;
 }
 
 body {
-  font-family: var(--font-sans);
-  background: var(--color-paper);
-  color: var(--color-ink);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: var(--color-ink);
+    background: var(--color-paper);
 }
 
 button,
 input,
 textarea,
 select {
-  font: inherit;
-  color: inherit;
+    font: inherit;
+    color: inherit;
 }
 
 ::selection {
-  background: var(--color-highlight);
+    background: var(--color-highlight);
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-divider);
-  border-radius: 999px;
+    background: var(--color-divider);
+    border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--color-ink) 20%, var(--color-divider));
+    background: color-mix(in srgb, var(--color-ink) 20%, var(--color-divider));
 }

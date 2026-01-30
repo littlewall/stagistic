@@ -1,17 +1,22 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { serializeFountain } from '@stagistic/editor-core';
-import { AppHeader, AppLayout, EditorSidebar, FountainEditor } from '@stagistic/ui';
-import type { SlateValue } from '@stagistic/shared';
+import {serializeFountain} from '@stagistic/editor-core';
+import type {SlateValue} from '@stagistic/shared';
 import {
-  latestScriptStorage,
-  serializeSlateValue,
+    AppHeader, AppLayout, EditorSidebar, FountainEditor,
+} from '@stagistic/ui';
+import {
+    useCallback, useEffect, useMemo, useRef, useState,
+} from 'react';
+
+import {
+    latestScriptStorage,
+    serializeSlateValue,
 } from '../../storage/latestScriptStorage';
 
 const mockProjects = [
-  { id: '1', name: 'The Last Light' },
-  { id: '2', name: 'Midnight Express' },
-  { id: '3', name: 'Summer Solstice' },
-  { id: '4', name: "Winter's Tale" },
+    {id: '1', name: 'The Last Light'},
+    {id: '2', name: 'Midnight Express'},
+    {id: '3', name: 'Summer Solstice'},
+    {id: '4', name: 'Winter\'s Tale'},
 ];
 
 export const EditorRoute = () => {
@@ -23,8 +28,8 @@ export const EditorRoute = () => {
     const [currentProject, setCurrentProject] = useState(mockProjects[0]);
 
     const recentProjects = useMemo(
-        () => mockProjects.filter((project) => project.id !== currentProject.id).slice(0, 3),
-        [currentProject]
+        () => mockProjects.filter(project => project.id !== currentProject.id).slice(0, 3),
+        [currentProject],
     );
 
     const scenes = useMemo(() => {
@@ -32,9 +37,9 @@ export const EditorRoute = () => {
         const scenePattern = /^(INT\.|EXT\.|INT\/EXT\.|I\/E\.)\s+.+/i;
 
         return lines
-            .map((line, index) => ({ line: line.trim(), lineNumber: index }))
-            .filter(({ line }) => scenePattern.test(line))
-            .map(({ line, lineNumber }, index) => ({
+            .map((line, index) => ({line: line.trim(), lineNumber: index}))
+            .filter(({line}) => scenePattern.test(line))
+            .map(({line, lineNumber}, index) => ({
                 id: `scene-${index}`,
                 heading: line,
                 lineNumber,
@@ -44,6 +49,7 @@ export const EditorRoute = () => {
     useEffect(() => {
         const loadLatest = async () => {
             const stored = await latestScriptStorage.loadLatestScript();
+
             if (stored) {
                 latestValueRef.current = stored;
                 lastSavedSerializedRef.current = serializeSlateValue(stored);
@@ -68,7 +74,9 @@ export const EditorRoute = () => {
 
     const saveLatest = useCallback(async (value: SlateValue) => {
         const serialized = serializeSlateValue(value);
+
         if (serialized === lastSavedSerializedRef.current) return;
+
         await latestScriptStorage.saveLatestScript(value);
         lastSavedSerializedRef.current = serialized;
     }, []);
@@ -76,17 +84,22 @@ export const EditorRoute = () => {
     const scheduleAutosave = useCallback(
         (value: SlateValue) => {
             const serialized = serializeSlateValue(value);
+
             if (serialized === lastSavedSerializedRef.current) return;
+
             if (autosaveTimerRef.current) {
                 window.clearTimeout(autosaveTimerRef.current);
             }
+
             autosaveTimerRef.current = window.setTimeout(() => {
                 const latestValue = latestValueRef.current;
+
                 if (!latestValue) return;
+
                 void saveLatest(latestValue);
             }, 1500);
         },
-        [saveLatest]
+        [saveLatest],
     );
 
     const handleValueChange = useCallback(
@@ -95,7 +108,7 @@ export const EditorRoute = () => {
             scheduleAutosave(value);
             setSerializedPreview(serializeFountain(value));
         },
-        [scheduleAutosave]
+        [scheduleAutosave],
     );
 
     const handleManualSave = useCallback(async (value: SlateValue) => {
@@ -103,6 +116,7 @@ export const EditorRoute = () => {
             window.clearTimeout(autosaveTimerRef.current);
             autosaveTimerRef.current = null;
         }
+
         await saveLatest(value);
     }, [saveLatest]);
 
@@ -112,13 +126,13 @@ export const EditorRoute = () => {
 
     return (
         <AppLayout
-            header={
+            header={(
                 <AppHeader
                     currentProject={currentProject}
                     recentProjects={recentProjects}
                     onSelectProject={setCurrentProject}
                 />
-            }
+            )}
             sidebar={<EditorSidebar scenes={scenes} onSceneClick={() => {}} />}
         >
             <FountainEditor

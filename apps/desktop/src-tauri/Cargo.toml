@@ -1,7 +1,7 @@
 [package]
-name = "stagistic-desktop"
-version = "0.1.0"
-description = "Stagistic Desktop"
+name = "stagistic-editor"
+version = "0.0.1"
+description = "Stagistic Editor"
 edition = "2021"
 
 [build-dependencies]

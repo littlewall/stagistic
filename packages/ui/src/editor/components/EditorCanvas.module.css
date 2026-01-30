@@ -1,29 +1,26 @@
 .canvas {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  overflow: auto;
-  background: var(--color-surface);
-  border: 1px solid var(--color-divider);
-  border-radius: calc(18px * var(--size-scale));
-  max-width: calc(960px * var(--size-scale));
-  margin: 0 auto;
-  padding: var(--space-6) clamp(var(--space-4), 15%, var(--space-12)) var(--space-8);
-  box-shadow: 0 12px 30px rgba(30, 20, 15, 0.04);
+    overflow: auto;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    max-width: calc(960px * var(--size-scale));
+    min-height: 0;
+    margin: 0 auto;
+    padding: var(--space-6) clamp(var(--space-4), 15%, var(--space-12)) var(--space-8);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: calc(18px * var(--size-scale));
+    box-shadow: 0 12px 30px rgba(30, 20, 15, .04);
 }
 
 .content {
-  width: 100%;
-  min-height: 100%;
-  --block-controls-gutter: clamp(
-    calc(28px * var(--size-scale)),
-    4.5vw,
-    calc(56px * var(--size-scale))
-  );
-  outline: none;
-  font-family: var(--font-mono);
-  font-size: calc(13px * var(--size-scale));
-  line-height: 1.7;
-  color: var(--color-ink);
+    --block-controls-gutter: clamp(calc(28px * var(--size-scale)), 4.5vw, calc(56px * var(--size-scale)));
+
+    width: 100%;
+    min-height: 100%;
+    font-family: var(--font-mono);
+    font-size: calc(13px * var(--size-scale));
+    line-height: 1.7;
+    color: var(--color-ink);
+    outline: none;
 }

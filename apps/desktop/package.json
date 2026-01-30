@@ -8,8 +8,7 @@
         "dev:ui": "vite",
         "build": "tauri build",
         "build:ui": "tsc && vite build",
-        "lint": "eslint . --ext ts,tsx",
-        "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\""
+        "lint": "eslint . --ext ts,tsx"
     },
     "dependencies": {
         "@stagistic/editor-core": "workspace:*",
@@ -34,7 +33,6 @@
         "eslint-plugin-react": "^7.37.2",
         "eslint-plugin-react-refresh": "^0.4.14",
         "lightningcss": "^1.30.1",
-        "prettier": "^3.4.2",
         "typescript": "^5.7.2",
         "vite": "^6.0.5"
     }

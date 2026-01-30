@@ -1,4 +1,6 @@
-// Database package
-// This will contain Drizzle/Prisma schema and queries
+/*
+ * Database package
+ * This will contain Drizzle/Prisma schema and queries
+ */
 
 export const placeholder = 'db';

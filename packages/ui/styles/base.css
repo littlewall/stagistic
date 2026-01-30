@@ -3,65 +3,65 @@
 *,
 *::before,
 *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
 }
 
 html,
 body,
 #root {
-  height: 100%;
+    height: 100%;
 }
 
 body {
-  font-family: var(--font-sans);
-  background: var(--color-paper);
-  color: var(--color-ink);
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
-  font-size: calc(13px * var(--size-scale));
+    overflow: hidden;
+    font-family: var(--font-sans);
+    font-size: calc(13px * var(--size-scale));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    color: var(--color-ink);
+    background: var(--color-paper);
 }
 
 .size-sm {
-  --size-scale: 1;
+    --size-scale: 1;
 }
 
 .size-md {
-  --size-scale: 1.1;
+    --size-scale: 1.1;
 }
 
 .size-lg {
-  --size-scale: 1.2;
+    --size-scale: 1.2;
 }
 
 button,
 input,
 textarea,
 select {
-  font: inherit;
-  color: inherit;
+    font: inherit;
+    color: inherit;
 }
 
 ::selection {
-  background: var(--color-highlight);
+    background: var(--color-highlight);
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+    width: 6px;
+    height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-divider);
-  border-radius: 999px;
+    background: var(--color-divider);
+    border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: color-mix(in srgb, var(--color-ink) 20%, var(--color-divider));
+    background: color-mix(in srgb, var(--color-ink) 20%, var(--color-divider));
 }

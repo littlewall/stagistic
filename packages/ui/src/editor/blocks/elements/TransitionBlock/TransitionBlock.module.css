@@ -1,12 +1,12 @@
 .transition {
-  display: block;
-  margin: var(--transition-gap, 1.8em) 0;
-  text-align: right;
-  font-weight: 700;
-  text-transform: uppercase;
+    display: block;
+    margin: var(--transition-gap, 1.8em) 0;
+    font-weight: 700;
+    text-align: right;
+    text-transform: uppercase;
 }
 
 .transitionBlock {
-  --transition-gap: 1.8em;
-  --block-controls-offset: var(--transition-gap);
+    --transition-gap: 1.8em;
+    --block-controls-offset: var(--transition-gap);
 }

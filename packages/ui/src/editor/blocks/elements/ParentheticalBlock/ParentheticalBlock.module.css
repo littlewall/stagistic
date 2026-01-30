@@ -1,31 +1,31 @@
 .parenthetical {
-  margin-left: var(--parenthetical-indent-left, 40px);
-  margin-right: var(--parenthetical-indent-right, 24px);
-  font-style: italic;
-  color: #4f4a42;
+    margin-right: var(--parenthetical-indent-right, 24px);
+    margin-left: var(--parenthetical-indent-left, 40px);
+    font-style: italic;
+    color: #4f4a42;
 }
 
 .text {
-  position: relative;
-  display: inline;
-  min-width: 1px;
+    position: relative;
+    display: inline;
+    min-width: 1px;
 }
 
 .text br {
-  display: none;
+    display: none;
 }
 
 .text::before,
 .text::after {
-  pointer-events: none;
-  user-select: none;
-  color: inherit;
+    pointer-events: none;
+    user-select: none;
+    color: inherit;
 }
 
 .text::before {
-  content: "(";
+    content: '(';
 }
 
 .text::after {
-  content: ")";
+    content: ')';
 }

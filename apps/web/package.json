@@ -7,8 +7,7 @@
         "dev": "vite",
         "build": "tsc && vite build",
         "preview": "vite preview",
-        "lint": "eslint . --ext ts,tsx",
-        "format": "prettier --write \"src/**/*.{ts,tsx,css,md}\""
+        "lint": "eslint . --ext ts,tsx"
     },
     "dependencies": {
         "@platejs/basic-nodes": "^52.0.11",
@@ -32,7 +31,6 @@
         "eslint-plugin-react": "^7.37.2",
         "eslint-plugin-react-refresh": "^0.4.14",
         "lightningcss": "^1.30.1",
-        "prettier": "^3.4.2",
         "typescript": "^5.7.2",
         "vite": "^6.0.5"
     }

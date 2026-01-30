@@ -1,11 +1,11 @@
 .block {
-  position: relative;
-  padding: 2px 0;
+    position: relative;
+    padding: 2px 0;
 }
 
 .content {
-  display: inline-block;
-  min-height: 1.2em;
-  min-width: 1px;
-  white-space: pre-wrap;
+    display: inline-block;
+    min-width: 1px;
+    min-height: 1.2em;
+    white-space: pre-wrap;
 }
