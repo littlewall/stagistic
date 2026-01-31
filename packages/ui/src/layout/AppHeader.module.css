@@ -37,7 +37,8 @@
 }
 
 .menuTrigger,
-.avatarTrigger {
+.avatarTrigger,
+.iconButton {
     cursor: pointer;
     display: inline-flex;
     gap: var(--space-2);
@@ -72,6 +73,19 @@
     }
 }
 
+.backButton {
+    padding: var(--space-2) var(--space-4);
+    border-color: var(--color-divider);
+    border-radius: 999px;
+    font-weight: 500;
+}
+
+.scriptControls {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
 .menuTriggerLabel {
     overflow: hidden;
     max-width: calc(220px * var(--size-scale));
@@ -88,6 +102,17 @@
 .avatarTrigger {
     justify-content: flex-end;
     min-width: calc(140px * var(--size-scale));
+}
+
+.iconButton {
+    padding: var(--space-2);
+    border-radius: 999px;
+}
+
+.iconButtonGlyph {
+    width: calc(16px * var(--size-scale));
+    height: calc(16px * var(--size-scale));
+    color: var(--color-ink);
 }
 
 .avatarIcon {
@@ -135,7 +160,7 @@
     letter-spacing: .12em;
 }
 
-.currentProjectBlock {
+.currentScriptBlock {
     cursor: default;
     display: flex;
     flex-direction: column;
@@ -147,14 +172,14 @@
     background: color-mix(in srgb, var(--color-highlight) 75%, transparent);
 }
 
-.currentProjectLabel {
+.currentScriptLabel {
     font-size: calc(9px * var(--size-scale));
     color: var(--color-ink-muted);
     text-transform: uppercase;
     letter-spacing: .16em;
 }
 
-.currentProjectName {
+.currentScriptName {
     font-size: calc(13px * var(--size-scale));
     font-weight: 500;
     color: var(--color-ink);

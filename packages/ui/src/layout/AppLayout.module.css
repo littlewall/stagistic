@@ -20,6 +20,10 @@
     min-height: 0;
 }
 
+.bodySingle {
+    grid-template-columns: minmax(0, 1fr);
+}
+
 .main {
     display: flex;
     flex-direction: column;

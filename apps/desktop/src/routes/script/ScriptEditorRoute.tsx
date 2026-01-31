@@ -13,32 +13,41 @@ import {
     useRef,
     useState,
 } from 'react';
+import {
+    useNavigate,
+    useParams,
+} from 'react-router-dom';
 
+import {NewScriptModal} from '~components/NewScriptModal';
+import {useScripts} from '~hooks/useScripts';
 import {
     latestScriptStorage,
     serializeSlateValue,
 } from '~storage/latestScriptStorage';
 
-const mockProjects = [
-    {id: '1', name: 'The Last Light'},
-    {id: '2', name: 'Midnight Express'},
-    {id: '3', name: 'Summer Solstice'},
-    {id: '4', name: 'Winter\'s Tale'},
-];
-
 const AUTOSAVE_DELAY_MS = 1500;
 
-export const EditorRoute = () => {
+export const ScriptEditorRoute = () => {
+    const navigate = useNavigate();
+    const {scriptId} = useParams();
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const {scripts, createScript} = useScripts();
     const [initialValue, setInitialValue] = useState<SlateValue | null | undefined>(undefined);
     const [serializedPreview, setSerializedPreview] = useState<string>('');
     const latestValueRef = useRef<SlateValue | null>(null);
     const lastSavedSerializedRef = useRef<string | null>(null);
     const autosaveTimerRef = useRef<number | null>(null);
-    const [currentProject, setCurrentProject] = useState(mockProjects[0]);
 
-    const recentProjects = useMemo(
-        () => mockProjects.filter(project => project.id !== currentProject.id).slice(0, 3),
-        [currentProject],
+    const currentScript = useMemo(
+        () => scripts.find(script => script.id === scriptId) ?? scripts[0],
+        [scripts, scriptId],
+    );
+
+    const recentScripts = useMemo(
+        () => currentScript
+            ? scripts.filter(script => script.id !== currentScript.id).slice(0, 3)
+            : [],
+        [scripts, currentScript],
     );
 
     const scenes = useMemo(() => {
@@ -74,6 +83,22 @@ export const EditorRoute = () => {
 
         void loadLatest();
     }, []);
+
+    useEffect(() => {
+        if (!scriptId || scripts.length === 0) {
+            return;
+        }
+
+        const exists = scripts.some(script => script.id === scriptId);
+
+        if (!exists && scripts[0]) {
+            void navigate(`/script/${scripts[0].id}/editor`, {replace: true});
+        }
+    }, [
+        scriptId,
+        scripts,
+        navigate,
+    ]);
 
     useEffect(() => {
         return () => {
@@ -141,13 +166,35 @@ export const EditorRoute = () => {
         return null;
     }
 
+    if (!currentScript) {
+        return null;
+    }
+
     return (
         <AppLayout
             header={(
                 <AppHeader
-                    currentProject={currentProject}
-                    recentProjects={recentProjects}
-                    onSelectProject={setCurrentProject}
+                    currentScript={currentScript}
+                    recentScripts={recentScripts}
+                    onSelectScript={script => navigate(`/script/${script.id}/editor`)}
+                    onHome={() => navigate('/')}
+                    onMenuAction={actionId => {
+                        if (actionId === 'scripts') {
+                            void navigate('/script/list');
+
+                            return;
+                        }
+
+                        if (actionId === 'settings') {
+                            void navigate(`/script/${currentScript.id}/settings`);
+
+                            return;
+                        }
+
+                        if (actionId === 'new-script') {
+                            setIsModalOpen(true);
+                        }
+                    }}
                 />
             )}
             sidebar={<EditorSidebar scenes={scenes} onSceneClick={() => {}} />}
@@ -156,6 +203,16 @@ export const EditorRoute = () => {
                 initialValue={initialValue ?? undefined}
                 onValueChange={handleValueChange}
                 onManualSave={handleManualSave}
+            />
+            <NewScriptModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onCreate={name => {
+                    const script = createScript(name);
+
+                    setIsModalOpen(false);
+                    void navigate(`/script/${script.id}/editor`);
+                }}
             />
         </AppLayout>
     );

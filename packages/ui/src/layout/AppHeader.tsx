@@ -1,5 +1,5 @@
 import {
-    Folder, NavArrowDown, Plus, UserCircle,
+    Folder, Home, NavArrowDown, Plus, UserCircle,
 } from 'iconoir-react';
 import {
     Button,
@@ -14,20 +14,36 @@ import {
 
 import styles from './AppHeader.module.css';
 
-export type Project = {
+export type Script = {
     id: string,
     name: string,
 };
 
 type AppHeaderProps = {
-    currentProject: Project,
-    recentProjects: Project[],
-    onSelectProject: (project: Project) => void,
+    currentScript?: Script,
+    recentScripts?: Script[],
+    onSelectScript?: (script: Script) => void,
+    onMenuAction?: (actionId: string) => void,
+    showScriptMenu?: boolean,
+    onHome?: () => void,
+    onBackToEditor?: () => void,
+    backToEditorLabel?: string,
 };
 
 export function AppHeader({
-    currentProject, recentProjects, onSelectProject,
+    currentScript,
+    recentScripts = [],
+    onSelectScript,
+    onMenuAction,
+    showScriptMenu = true,
+    onHome,
+    onBackToEditor,
+    backToEditorLabel = 'Back to editor',
 }: AppHeaderProps) {
+    const script = currentScript;
+    const handleSelectScript = onSelectScript;
+    const canShowScriptMenu = Boolean(showScriptMenu && script && handleSelectScript);
+
     return (
         <header className={styles.header} data-tauri-drag-region>
             <div className={styles.logo}>
@@ -36,68 +52,103 @@ export function AppHeader({
                 </span>
                 <span className={styles.logoText}>Stagistic Editor</span>
             </div>
-            <MenuTrigger>
-                <Button className={styles.menuTrigger} data-tauri-drag-region="false">
-                    <span className={styles.menuTriggerLabel}>{currentProject.name}</span>
-                    <NavArrowDown className={styles.caret} aria-hidden="true" />
-                </Button>
-                <Popover className={styles.menuPopover} placement="bottom">
-                    <Menu
-                        className={styles.menu}
-                        onAction={key => {
-                            if (typeof key === 'string' && key.startsWith('project:')) {
-                                const projectId = key.replace('project:', '');
-                                const project = recentProjects.find(item => item.id === projectId);
+            {canShowScriptMenu || onHome || onBackToEditor ? (
+                <div className={styles.scriptControls}>
+                    {onHome ? (
+                        <Button
+                            className={styles.iconButton}
+                            onPress={onHome}
+                            aria-label="Go to home"
+                            data-tauri-drag-region="false"
+                        >
+                            <Home className={styles.iconButtonGlyph} aria-hidden="true" />
+                        </Button>
+                    ) : null}
+                    {onBackToEditor ? (
+                        <Button
+                            className={`${styles.menuTrigger} ${styles.backButton}`}
+                            onPress={onBackToEditor}
+                            data-tauri-drag-region="false"
+                        >
+                            {backToEditorLabel}
+                        </Button>
+                    ) : null}
+                    {canShowScriptMenu ? (
+                        <MenuTrigger>
+                            <Button className={styles.menuTrigger} data-tauri-drag-region="false">
+                                <span className={styles.menuTriggerLabel}>{script!.name}</span>
+                                <NavArrowDown className={styles.caret} aria-hidden="true" />
+                            </Button>
+                            <Popover className={styles.menuPopover} placement="bottom">
+                                <Menu
+                                    className={styles.menu}
+                                    onAction={key => {
+                                        if (typeof key !== 'string') {
+                                            return;
+                                        }
 
-                                if (project) {
-                                    onSelectProject(project);
-                                }
-                            }
-                        }}
-                    >
-                        <MenuSection className={styles.menuSection}>
-                            <MenuItem className={styles.currentProjectBlock} isDisabled>
-                                <span className={styles.currentProjectLabel}>Current project</span>
-                                <span className={styles.currentProjectName}>{currentProject.name}</span>
-                            </MenuItem>
-                            <MenuItem className={styles.menuItem} id="settings">
-                                Project settings
-                            </MenuItem>
-                            <MenuItem className={styles.menuItem} id="attributes">
-                                Attribute manager
-                            </MenuItem>
-                        </MenuSection>
-                        {recentProjects.length > 0 ? (
-                            <>
-                                <Separator className={styles.menuSeparator} />
-                                <MenuSection className={styles.menuSection}>
-                                    <MenuHeader className={styles.menuHeader}>Recent projects</MenuHeader>
-                                    {recentProjects.map(project => (
-                                        <MenuItem
-                                            key={project.id}
-                                            id={`project:${project.id}`}
-                                            className={styles.menuItem}
-                                        >
-                                            {project.name}
+                                        if (key.startsWith('script:')) {
+                                            const scriptId = key.replace('script:', '');
+                                            const script = recentScripts.find(item => item.id === scriptId);
+
+                                            if (script && handleSelectScript) {
+                                                handleSelectScript(script);
+                                            }
+
+                                            return;
+                                        }
+
+                                        if (onMenuAction) {
+                                            onMenuAction(key);
+                                        }
+                                    }}
+                                >
+                                    <MenuSection className={styles.menuSection}>
+                                        <MenuItem className={styles.currentScriptBlock} isDisabled>
+                                            <span className={styles.currentScriptLabel}>Current script</span>
+                                            <span className={styles.currentScriptName}>{script!.name}</span>
                                         </MenuItem>
-                                    ))}
-                                </MenuSection>
-                            </>
-                        ) : null}
-                        <Separator className={styles.menuSeparator} />
-                        <MenuSection className={styles.menuSection}>
-                            <MenuItem className={styles.menuItem} id="projects">
-                                <Folder className={styles.menuIcon} aria-hidden="true" />
-                                All projects
-                            </MenuItem>
-                            <MenuItem className={styles.menuItem} id="new-project">
-                                <Plus className={styles.menuIcon} aria-hidden="true" />
-                                New project
-                            </MenuItem>
-                        </MenuSection>
-                    </Menu>
-                </Popover>
-            </MenuTrigger>
+                                        <MenuItem className={styles.menuItem} id="settings">
+                                            Script settings
+                                        </MenuItem>
+                                        <MenuItem className={styles.menuItem} id="attributes">
+                                            Attribute manager
+                                        </MenuItem>
+                                    </MenuSection>
+                                    {recentScripts.length > 0 ? (
+                                        <>
+                                            <Separator className={styles.menuSeparator} />
+                                            <MenuSection className={styles.menuSection}>
+                                                <MenuHeader className={styles.menuHeader}>Recent scripts</MenuHeader>
+                                                {recentScripts.map(scriptItem => (
+                                                    <MenuItem
+                                                        key={scriptItem.id}
+                                                        id={`script:${scriptItem.id}`}
+                                                        className={styles.menuItem}
+                                                    >
+                                                        {scriptItem.name}
+                                                    </MenuItem>
+                                                ))}
+                                            </MenuSection>
+                                        </>
+                                    ) : null}
+                                    <Separator className={styles.menuSeparator} />
+                                    <MenuSection className={styles.menuSection}>
+                                        <MenuItem className={styles.menuItem} id="scripts">
+                                            <Folder className={styles.menuIcon} aria-hidden="true" />
+                                            All scripts
+                                        </MenuItem>
+                                        <MenuItem className={styles.menuItem} id="new-script">
+                                            <Plus className={styles.menuIcon} aria-hidden="true" />
+                                            New script
+                                        </MenuItem>
+                                    </MenuSection>
+                                </Menu>
+                            </Popover>
+                        </MenuTrigger>
+                    ) : null}
+                </div>
+            ) : null}
             <MenuTrigger>
                 <Button className={styles.avatarTrigger} data-tauri-drag-region="false">
                     <UserCircle className={styles.avatarIcon} aria-hidden="true" />

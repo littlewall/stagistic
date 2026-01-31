@@ -15,27 +15,6 @@ import {FountainLeaf} from '~utils/fountainMarks';
 
 import styles from './Editor.module.css';
 
-const SAMPLE_FOUNTAIN = `INT. WRITERS' ROOM - DAY
-
-A sunlit table is strewn with notebooks.
-!SOMETHING IS COMMING TO LIFE
-Someone types **rapidly** on a laptop.
-
-SAM
-(softly)
-We need a simple editor before we build the real thing.
-But in the future, it will be amazing.
-
-ALEX (voiceover)^
-Let's keep it line-based for now.
-
-~A gentle hum fills the space.
-
-CUT TO:
-
-EXT. STREET - NIGHT
-Rain taps the sidewalk.`;
-
 type EditorProps = {
     initialValue?: SlateValue,
     onValueChange?: (value: SlateValue) => void,
@@ -47,7 +26,7 @@ const Editor = ({
     onValueChange,
     onManualSave,
 }: EditorProps) => {
-    const defaultValue = useMemo(() => fountainParser(SAMPLE_FOUNTAIN), []);
+    const defaultValue = useMemo(() => fountainParser(''), []);
     const resolvedInitialValue = initialValue ?? defaultValue;
     const latestValueRef = useRef<Value>(resolvedInitialValue as Value);
 

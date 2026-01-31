@@ -12,10 +12,12 @@ type AppLayoutProps = {
 export function AppLayout({
     header, sidebar, children,
 }: AppLayoutProps) {
+    const bodyClassName = clsx(styles.body, !sidebar && styles.bodySingle);
+
     return (
         <div className={styles.page}>
             {header ? <div className={styles.header}>{header}</div> : null}
-            <div className={styles.body}>
+            <div className={bodyClassName}>
                 <main className={styles.main}>{children}</main>
                 {sidebar ? <aside className={clsx(styles.sidebar)}>{sidebar}</aside> : null}
             </div>

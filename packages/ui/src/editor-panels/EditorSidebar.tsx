@@ -36,7 +36,7 @@ export function EditorSidebar({
                 id: '2', time: '15 min ago', action: 'Added new dialogue',
             },
             {
-                id: '3', time: '1 hour ago', action: 'Created project',
+                id: '3', time: '1 hour ago', action: 'Created script',
             },
         ],
         [],

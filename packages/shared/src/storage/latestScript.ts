@@ -1,6 +1,6 @@
 /*
  * Phase 1: single default script latest state (local-only).
- * Next: multiple scripts/projects + import/export, and remote cloud adapters.
+ * Next: multiple scripts + import/export, and remote cloud adapters.
  */
 
 // Plate/Slate values are JSON node arrays. Treat as opaque for storage.

@@ -28,7 +28,7 @@ export const parseSlateValue = (json: string) => JSON.parse(json) as SlateValue;
 
 /*
  * Phase 1: single default script latest state (local-only).
- * Next: multiple scripts/projects + import/export, and remote cloud adapters.
+ * Next: multiple scripts + import/export, and remote cloud adapters.
  */
 export const createSqliteLatestScriptStorage = (): LatestScriptStorage => {
     return {
