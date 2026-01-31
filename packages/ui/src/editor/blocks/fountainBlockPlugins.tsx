@@ -1,5 +1,7 @@
+import {createNodeId} from '@stagistic/shared';
 import {ColumnItemPlugin, ColumnPlugin} from '@platejs/layout/react';
 import {BlockSelectionPlugin} from '@platejs/selection/react';
+import {NodeIdPlugin} from 'platejs';
 
 import {actionPlugin} from '~blocks/elements/ActionBlock/ActionBlockPlugin';
 import {centeredPlugin} from '~blocks/elements/CenteredBlock/CenteredBlockPlugin';
@@ -14,6 +16,12 @@ import {transitionPlugin} from '~blocks/elements/TransitionBlock/TransitionBlock
 import {ColumnGroup, ColumnItem} from '~blocks/layout/ColumnGroup';
 
 export const createFountainPlugins = () => [
+    NodeIdPlugin.configure({
+        options: {
+            idCreator: createNodeId,
+            normalizeInitialValue: true,
+        },
+    }),
     ColumnPlugin.withComponent(ColumnGroup),
     ColumnItemPlugin.withComponent(ColumnItem),
     sceneHeadingPlugin,

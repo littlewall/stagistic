@@ -2,10 +2,15 @@ import {
     AppHeader,
     AppLayout,
 } from '@stagistic/ui';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {NewScriptModal} from '~components/NewScriptModal';
+import {useToastController} from '~components/ToastProvider';
+import {
+    MENU_EVENT_IMPORT_SCRIPT,
+    MENU_EVENT_NEW_SCRIPT,
+} from '~constants/menuEvents';
 import {useScripts} from '~hooks/useScripts';
 
 import styles from './ScriptLlstRoute.module.css';
@@ -34,13 +39,53 @@ const mockMeta = [
 export const ScriptListRoute = () => {
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [storageError, setStorageError] = useState<string | null>(null);
     const {scripts, createScript} = useScripts();
+    const {addToast} = useToastController();
 
-    const handleCreate = (name: string) => {
-        const script = createScript(name);
+    useEffect(() => {
+        const handleNewScript = () => {
+            setIsModalOpen(true);
+        };
 
-        setIsModalOpen(false);
-        void navigate(`/script/${script.id}/editor`);
+        const handleImport = () => {
+            addToast({
+                title: 'Import is coming soon',
+                description: 'We will add it in a future update.',
+                variant: 'info',
+            });
+        };
+
+        window.addEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
+        window.addEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
+
+        return () => {
+            window.removeEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
+            window.removeEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
+        };
+    }, [addToast]);
+
+    const handleCreate = async (name: string) => {
+        try {
+            const scriptId = await createScript(name);
+
+            setIsModalOpen(false);
+            void navigate(`/script/${scriptId}/editor`);
+            setStorageError(null);
+            addToast({
+                title: 'Script created',
+                description: name.trim() || 'Untitled script',
+                variant: 'success',
+            });
+        } catch (error) {
+            console.error('Failed to create script', error);
+            setStorageError('Failed to create script.');
+            addToast({
+                title: 'Failed to create script',
+                description: 'Please try again.',
+                variant: 'error',
+            });
+        }
     };
 
     return (
@@ -49,10 +94,16 @@ export const ScriptListRoute = () => {
                 <AppHeader
                     showScriptMenu={false}
                     onHome={() => navigate('/')}
+                    onNewScript={() => setIsModalOpen(true)}
                 />
             )}
         >
             <div className={styles.page}>
+                {storageError ? (
+                    <div role="alert" style={{padding: '12px 0'}}>
+                        {storageError}
+                    </div>
+                ) : null}
                 <section className={styles.header}>
                     <div>
                         <p className={styles.kicker}>Scripts</p>
@@ -122,7 +173,9 @@ export const ScriptListRoute = () => {
             <NewScriptModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onCreate={handleCreate}
+                onCreate={name => {
+                    void handleCreate(name);
+                }}
             />
         </AppLayout>
     );

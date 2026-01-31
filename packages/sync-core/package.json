@@ -7,6 +7,10 @@
     "scripts": {
         "lint": "eslint . --ext ts"
     },
+    "dependencies": {
+        "@stagistic/db": "workspace:*",
+        "@stagistic/shared": "workspace:*"
+    },
     "devDependencies": {
         "typescript": "^5.9.2"
     }

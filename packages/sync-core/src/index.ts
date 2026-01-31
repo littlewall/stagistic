@@ -1,6 +1,6 @@
 /*
- * Real-time collaboration and sync logic
- * CRDT, OT, or similar algorithms
+ * Repository interfaces and sync abstractions.
+ * No concrete storage drivers in this package.
  */
 
-export const placeholder = 'sync-core';
+export type {ScriptRepository} from './scriptRepository';

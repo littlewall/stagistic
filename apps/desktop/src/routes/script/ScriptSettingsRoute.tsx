@@ -3,13 +3,19 @@ import {
     AppLayout,
 } from '@stagistic/ui';
 import {
-    type SubmitEvent,
+    type FormEvent,
     useCallback,
     useEffect,
     useState,
 } from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 
+import {NewScriptModal} from '~components/NewScriptModal';
+import {useToastController} from '~components/ToastProvider';
+import {
+    MENU_EVENT_IMPORT_SCRIPT,
+    MENU_EVENT_NEW_SCRIPT,
+} from '~constants/menuEvents';
 import {useScripts} from '~hooks/useScripts';
 
 import styles from './ScriptSettingsRoute.module.css';
@@ -19,12 +25,25 @@ const FALLBACK_NAME = 'Untitled script';
 export const ScriptSettingsRoute = () => {
     const navigate = useNavigate();
     const {scriptId} = useParams();
-    const {scripts, updateScripts} = useScripts();
+    const {
+        scripts,
+        createScript,
+        renameScript,
+        deleteScript,
+        isLoading: scriptsLoading,
+    } = useScripts();
     const [scriptName, setScriptName] = useState('');
+    const [storageError, setStorageError] = useState<string | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const {addToast} = useToastController();
 
     const currentScript = scripts.find(script => script.id === scriptId) ?? scripts[0];
 
     useEffect(() => {
+        if (scriptsLoading) {
+            return;
+        }
+
         if (!scriptId || scripts.length === 0) {
             return;
         }
@@ -37,6 +56,7 @@ export const ScriptSettingsRoute = () => {
     }, [
         scriptId,
         scripts,
+        scriptsLoading,
         navigate,
     ]);
 
@@ -46,7 +66,56 @@ export const ScriptSettingsRoute = () => {
         }
     }, [currentScript]);
 
-    const handleSaveName = useCallback((event?: SubmitEvent<HTMLFormElement>) => {
+    useEffect(() => {
+        const handleNewScript = () => {
+            setIsModalOpen(true);
+        };
+
+        const handleImport = () => {
+            addToast({
+                title: 'Import is coming soon',
+                description: 'We will add it in a future update.',
+                variant: 'info',
+            });
+        };
+
+        window.addEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
+        window.addEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
+
+        return () => {
+            window.removeEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
+            window.removeEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
+        };
+    }, [addToast]);
+
+    const handleCreate = useCallback(async (name: string) => {
+        try {
+            const newScriptId = await createScript(name);
+
+            setIsModalOpen(false);
+            void navigate(`/script/${newScriptId}/editor`);
+            setStorageError(null);
+            addToast({
+                title: 'Script created',
+                description: name.trim() || 'Untitled script',
+                variant: 'success',
+            });
+        } catch (error) {
+            console.error('Failed to create script', error);
+            setStorageError('Failed to create script.');
+            addToast({
+                title: 'Failed to create script',
+                description: 'Please try again.',
+                variant: 'error',
+            });
+        }
+    }, [
+        addToast,
+        createScript,
+        navigate,
+    ]);
+
+    const handleSaveName = useCallback(async (event?: FormEvent<HTMLFormElement>) => {
         event?.preventDefault();
 
         if (!currentScript) {
@@ -61,38 +130,61 @@ export const ScriptSettingsRoute = () => {
             return;
         }
 
-        const nextScripts = scripts.map(script => {
-            return script.id === currentScript.id
-                ? {...script, name: nextName}
-                : script;
-        });
-
-        updateScripts(nextScripts);
-        setScriptName(nextName);
+        try {
+            await renameScript(currentScript.id, nextName);
+            setScriptName(nextName);
+            setStorageError(null);
+            addToast({
+                title: 'Script updated',
+                description: nextName,
+                variant: 'success',
+            });
+        } catch (error) {
+            console.error('Failed to rename script', error);
+            setStorageError('Failed to rename script.');
+            addToast({
+                title: 'Failed to update script',
+                description: 'Please try again.',
+                variant: 'error',
+            });
+        }
     }, [
+        addToast,
         currentScript,
         scriptName,
-        scripts,
-        updateScripts,
+        renameScript,
     ]);
 
-    const handleDelete = useCallback(() => {
+    const handleDelete = useCallback(async () => {
         if (!currentScript) {
             return;
         }
 
-        const nextScripts = scripts.filter(script => script.id !== currentScript.id);
-
-        updateScripts(nextScripts);
-        void navigate('/');
+        try {
+            await deleteScript(currentScript.id);
+            void navigate('/');
+            addToast({
+                title: 'Script deleted',
+                description: currentScript.name,
+                variant: 'success',
+            });
+        } catch (error) {
+            console.error('Failed to delete script', error);
+            setStorageError('Failed to delete script.');
+            addToast({
+                title: 'Failed to delete script',
+                description: 'Please try again.',
+                variant: 'error',
+            });
+        }
     }, [
+        addToast,
         currentScript,
         navigate,
-        scripts,
-        updateScripts,
+        deleteScript,
     ]);
 
-    if (!currentScript) {
+    if (scriptsLoading || !currentScript) {
         return null;
     }
 
@@ -102,11 +194,17 @@ export const ScriptSettingsRoute = () => {
                 <AppHeader
                     showScriptMenu={false}
                     onHome={() => navigate('/')}
+                    onNewScript={() => setIsModalOpen(true)}
                     onBackToEditor={() => navigate(`/script/${currentScript.id}/editor`)}
                 />
             )}
         >
             <div className={styles.page}>
+                {storageError ? (
+                    <div role="alert" style={{padding: '12px 0'}}>
+                        {storageError}
+                    </div>
+                ) : null}
                 <section className={styles.header}>
                     <div>
                         <p className={styles.kicker}>Script settings</p>
@@ -169,6 +267,13 @@ export const ScriptSettingsRoute = () => {
                     </button>
                 </section>
             </div>
+            <NewScriptModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onCreate={name => {
+                    void handleCreate(name);
+                }}
+            />
         </AppLayout>
     );
 };

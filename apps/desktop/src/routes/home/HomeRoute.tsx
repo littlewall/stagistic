@@ -2,10 +2,17 @@ import {
     AppHeader,
     AppLayout,
 } from '@stagistic/ui';
-import {useState} from 'react';
+import {
+    useEffect, useMemo, useState,
+} from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 
 import {NewScriptModal} from '~components/NewScriptModal';
+import {useToastController} from '~components/ToastProvider';
+import {
+    MENU_EVENT_IMPORT_SCRIPT,
+    MENU_EVENT_NEW_SCRIPT,
+} from '~constants/menuEvents';
 import {useScripts} from '~hooks/useScripts';
 
 import styles from './HomeRoute.module.css';
@@ -28,26 +35,114 @@ const mockUpdates = [
 export const HomeRoute = () => {
     const navigate = useNavigate();
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const {scripts, createScript} = useScripts();
+    const [storageError, setStorageError] = useState<string | null>(null);
+    const {
+        scripts,
+        scriptSummaries,
+        createScript,
+    } = useScripts();
+    const {addToast} = useToastController();
 
-    const handleCreate = (name: string) => {
-        const script = createScript(name);
+    const latestScript = useMemo(() => {
+        if (scriptSummaries.length === 0) {
+            return null;
+        }
 
-        setIsModalOpen(false);
-        void navigate(`/script/${script.id}/editor`);
+        return scriptSummaries[0];
+    }, [scriptSummaries]);
+
+    const formatLastEdited = (timestamp: number) => {
+        const now = new Date();
+        const updated = new Date(timestamp);
+        const diffMs = now.getTime() - updated.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+        if (diffDays <= 0) {
+            return 'Edited today';
+        }
+
+        if (diffDays === 1) {
+            return 'Edited yesterday';
+        }
+
+        if (diffDays < 7) {
+            return `Edited ${diffDays} days ago`;
+        }
+
+        const dateFormat = new Intl.DateTimeFormat('en-US', {
+            month: 'short',
+            day: 'numeric',
+            year: updated.getFullYear() === now.getFullYear() ? undefined : 'numeric',
+        });
+
+        return `Edited ${dateFormat.format(updated)}`;
+    };
+
+    useEffect(() => {
+        const handleNewScript = () => {
+            setIsModalOpen(true);
+        };
+
+        const handleImport = () => {
+            addToast({
+                title: 'Import is coming soon',
+                description: 'We will add it in a future update.',
+                variant: 'info',
+            });
+        };
+
+        window.addEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
+        window.addEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
+
+        return () => {
+            window.removeEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
+            window.removeEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
+        };
+    }, [addToast]);
+
+    const handleCreate = async (name: string) => {
+        try {
+            const scriptId = await createScript(name);
+
+            setIsModalOpen(false);
+            void navigate(`/script/${scriptId}/editor`);
+            setStorageError(null);
+            addToast({
+                title: 'Script created',
+                description: name.trim() || 'Untitled script',
+                variant: 'success',
+            });
+        } catch (error) {
+            console.error('Failed to create script', error);
+            setStorageError('Failed to create script.');
+            addToast({
+                title: 'Failed to create script',
+                description: 'Please try again.',
+                variant: 'error',
+            });
+        }
     };
 
     return (
         <AppLayout
             header={(
-                <AppHeader showScriptMenu={false} />
+                <AppHeader
+                    showScriptMenu={false}
+                    onHome={() => navigate('/')}
+                    onNewScript={() => setIsModalOpen(true)}
+                />
             )}
         >
             <div className={styles.page}>
+                {storageError ? (
+                    <div role="alert" style={{padding: '12px 0'}}>
+                        {storageError}
+                    </div>
+                ) : null}
                 <section className={styles.hero}>
                     <div className={styles.heroContent}>
-                        <p className={styles.kicker}>Welcome back</p>
-                        <h1 className={styles.title}>Build your next scenario with clarity.</h1>
+                        <p className={styles.kicker}>Welcome to Stagistic Editor!</p>
+                        <h1 className={styles.title}>Your script&apos;s next act</h1>
                         <p className={styles.subtitle}>
                             Create new scripts, explore active drafts, and keep your storytelling flow
                             within a focused workspace.
@@ -60,84 +155,95 @@ export const HomeRoute = () => {
                             >
                                 New script
                             </button>
-                            <Link className={styles.secondaryButton} to="/script/list">
-                                View all scripts
-                            </Link>
+                            {scripts && scripts.length > 0 && (
+                                <Link className={styles.secondaryButton} to="/script/list">
+                                    View all scripts
+                                </Link>
+                            )}
                         </div>
                     </div>
-                    <div className={styles.heroCard}>
-                        <h2 className={styles.heroCardTitle}>Today</h2>
-                        <p className={styles.heroCardValue}>2 drafts in progress</p>
-                        <p className={styles.heroCardHint}>Pick up where you left off.</p>
-                    </div>
-                </section>
-                <section className={styles.section}>
-                    <div className={styles.sectionHeader}>
-                        <div>
-                            <h2 className={styles.sectionTitle}>Recent scripts</h2>
-                            <p className={styles.sectionSubtitle}>Jump straight into your latest work.</p>
-                        </div>
-                        <button
-                            className={styles.secondaryButton}
-                            type="button"
-                            onClick={() => setIsModalOpen(true)}
-                        >
-                            New script
-                        </button>
-                    </div>
-                    <div className={styles.cardGrid}>
-                        {scripts.map((script, index) => (
-                            <article
-                                key={script.id}
-                                className={styles.card}
-                                onClick={() => navigate(`/script/${script.id}/editor`)}
-                                role="button"
-                                tabIndex={0}
-                                onKeyDown={event => {
-                                    if (event.key === 'Enter' || event.key === ' ') {
-                                        event.preventDefault();
-                                        void navigate(`/script/${script.id}/editor`);
-                                    }
-                                }}
+                    {latestScript && (
+                        <div className={styles.heroCard}>
+                            <p className={styles.heroCardTitle}>Continue writing</p>
+                            <h2 className={styles.heroCardValue}>{latestScript.title}</h2>
+                            <p className={styles.heroCardHint}>
+                                {formatLastEdited(latestScript.updatedAt)}
+                            </p>
+                            <button
+                                className={styles.heroCardButton}
+                                type="button"
+                                onClick={() => navigate(`/script/${latestScript.id}/editor`)}
                             >
-                                <div className={styles.cardHeader}>
-                                    <h3 className={styles.cardTitle}>{script.name}</h3>
-                                    <span className={styles.cardTag}>{mockUpdates[index]?.status ?? 'Draft'}</span>
-                                </div>
-                                <p className={styles.cardMeta}>
-                                    {mockUpdates[index]?.updated ?? 'Edited recently'}
-                                </p>
-                                <div className={styles.cardFooter}>
-                                    <button
-                                        className={styles.ghostButton}
-                                        type="button"
-                                        onClick={event => {
-                                            event.stopPropagation();
-                                            void navigate(`/script/${script.id}/editor`);
-                                        }}
-                                    >
-                                        Open editor
-                                    </button>
-                                    <button
-                                        className={styles.ghostButton}
-                                        type="button"
-                                        onClick={event => {
-                                            event.stopPropagation();
-                                            void navigate(`/script/${script.id}/settings`);
-                                        }}
-                                    >
-                                        Script settings
-                                    </button>
-                                </div>
-                            </article>
-                        ))}
-                    </div>
+                                Resume script
+                            </button>
+                        </div>
+
+                    )}
                 </section>
+                {scripts && scripts.length > 0 && (
+                    <section className={styles.section}>
+                        <div className={styles.sectionHeader}>
+                            <div>
+                                <h2 className={styles.sectionTitle}>Recent scripts</h2>
+                                <p className={styles.sectionSubtitle}>Jump straight into your latest work.</p>
+                            </div>
+                        </div>
+                        <div className={styles.cardGrid}>
+                            {scripts.map((script, index) => (
+                                <article
+                                    key={script.id}
+                                    className={styles.card}
+                                    onClick={() => navigate(`/script/${script.id}/editor`)}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={event => {
+                                        if (event.key === 'Enter' || event.key === ' ') {
+                                            event.preventDefault();
+                                            void navigate(`/script/${script.id}/editor`);
+                                        }
+                                    }}
+                                >
+                                    <div className={styles.cardHeader}>
+                                        <h3 className={styles.cardTitle}>{script.name}</h3>
+                                        <span className={styles.cardTag}>{mockUpdates[index]?.status ?? 'Draft'}</span>
+                                    </div>
+                                    <p className={styles.cardMeta}>
+                                        {mockUpdates[index]?.updated ?? 'Edited recently'}
+                                    </p>
+                                    <div className={styles.cardFooter}>
+                                        <button
+                                            className={styles.ghostButton}
+                                            type="button"
+                                            onClick={event => {
+                                                event.stopPropagation();
+                                                void navigate(`/script/${script.id}/editor`);
+                                            }}
+                                        >
+                                            Open editor
+                                        </button>
+                                        <button
+                                            className={styles.ghostButton}
+                                            type="button"
+                                            onClick={event => {
+                                                event.stopPropagation();
+                                                void navigate(`/script/${script.id}/settings`);
+                                            }}
+                                        >
+                                            Script settings
+                                        </button>
+                                    </div>
+                                </article>
+                            ))}
+                        </div>
+                    </section>
+                )}
             </div>
             <NewScriptModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onCreate={handleCreate}
+                onCreate={name => {
+                    void handleCreate(name);
+                }}
             />
         </AppLayout>
     );

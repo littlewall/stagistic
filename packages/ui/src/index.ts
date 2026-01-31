@@ -4,5 +4,6 @@ export {default as FountainEditor} from './editor/Editor';
 export {createFountainPlugins} from './editor/plugins/fountainPlugin';
 export {FountainLeaf} from './editor/utils/fountainMarks';
 export {EditorSidebar, type Scene} from './editor-panels/EditorSidebar';
+export {ToastProvider, useToastController} from './feedback/ToastProvider';
 export {AppHeader, type Script} from './layout/AppHeader';
 export {AppLayout} from './layout/AppLayout';

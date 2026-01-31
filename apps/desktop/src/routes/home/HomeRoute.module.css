@@ -124,6 +124,22 @@
     color: var(--color-ink-muted);
 }
 
+.heroCardButton {
+    align-self: flex-start;
+    padding: var(--space-2) var(--space-5);
+    font-weight: 600;
+    color: var(--color-surface);
+    background: var(--color-ink);
+    border: none;
+    border-radius: 999px;
+    cursor: pointer;
+    transition: background 150ms ease;
+}
+
+.heroCardButton:hover {
+    background: color-mix(in srgb, var(--color-ink) 85%, #000);
+}
+
 .section {
     display: flex;
     flex-direction: column;
@@ -152,6 +168,7 @@
 }
 
 .card {
+    cursor: pointer;
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
@@ -160,15 +177,14 @@
     background: var(--color-surface);
     border: 1px solid var(--color-divider);
     border-radius: var(--radius-md);
-    cursor: pointer;
     transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
 .card:hover,
 .card:focus-visible {
     border-color: color-mix(in srgb, var(--color-ink) 12%, var(--color-divider));
-    box-shadow: 0 10px 20px rgba(27, 23, 18, 0.08);
     outline: none;
+    box-shadow: 0 10px 20px rgba(27, 23, 18, .08);
 }
 
 .cardHeader {

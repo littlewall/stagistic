@@ -1,5 +1,6 @@
 .header {
-    display: flex;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
     justify-content: space-between;
     height: var(--app-header-height);
@@ -13,27 +14,10 @@
     padding-left: calc(var(--space-4) + var(--traffic-light-space));
 }
 
-.logo {
+.leftControls {
     display: inline-flex;
-    gap: var(--space-2);
     align-items: center;
-    min-width: calc(140px * var(--size-scale));
-    font-weight: 500;
-
-    & .logoMark {
-        display: grid;
-        place-items: center;
-        width: calc(22px * var(--size-scale));
-        height: calc(22px * var(--size-scale));
-        font-size: calc(12px * var(--size-scale));
-        color: var(--color-surface);
-        background: var(--color-ink);
-        border-radius: calc(7px * var(--size-scale));
-    }
-
-    & .logoText {
-        letter-spacing: .02em;
-    }
+    gap: var(--space-2);
 }
 
 .menuTrigger,
@@ -84,6 +68,7 @@
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
+    justify-content: center;
 }
 
 .menuTriggerLabel {

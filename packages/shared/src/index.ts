@@ -4,3 +4,4 @@
  */
 
 export * from './storage/latestScript';
+export * from './nodeId';

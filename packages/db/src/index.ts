@@ -1,6 +1,6 @@
 /*
  * Database package
- * This will contain Drizzle/Prisma schema and queries
+ * Shared domain types and schema definitions (platform-agnostic).
  */
 
-export const placeholder = 'db';
+export type {ScriptSummary} from './scriptTypes';

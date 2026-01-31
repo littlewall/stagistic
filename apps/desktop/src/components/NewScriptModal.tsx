@@ -1,4 +1,6 @@
-import {type FormEvent, useEffect, useRef, useState} from 'react';
+import {
+    type FormEvent, useEffect, useRef, useState,
+} from 'react';
 
 import styles from './NewScriptModal.module.css';
 
@@ -19,6 +21,7 @@ export const NewScriptModal = ({
     useEffect(() => {
         if (!isOpen) {
             setName('');
+
             return;
         }
 
@@ -56,7 +59,11 @@ export const NewScriptModal = ({
     };
 
     return (
-        <div className={styles.backdrop} role="presentation" onClick={onClose}>
+        <div
+            className={styles.backdrop}
+            role="presentation"
+            onClick={onClose}
+        >
             <div
                 className={styles.modal}
                 role="dialog"
@@ -81,7 +88,11 @@ export const NewScriptModal = ({
                         placeholder="Untitled scenario"
                     />
                     <div className={styles.actions}>
-                        <button className={styles.ghostButton} type="button" onClick={onClose}>
+                        <button
+                            className={styles.ghostButton}
+                            type="button"
+                            onClick={onClose}
+                        >
                             Cancel
                         </button>
                         <button className={styles.primaryButton} type="submit">

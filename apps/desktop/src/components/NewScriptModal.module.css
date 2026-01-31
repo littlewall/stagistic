@@ -1,23 +1,23 @@
 .backdrop {
     position: fixed;
+    z-index: 40;
     inset: 0;
     display: grid;
     place-items: center;
-    background: rgba(20, 18, 16, 0.45);
-    z-index: 40;
     padding: var(--space-6);
+    background: rgba(20, 18, 16, .45);
 }
 
 .modal {
-    width: min(520px, 100%);
-    background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: var(--radius-md);
-    padding: var(--space-7);
-    box-shadow: var(--shadow-popover);
     display: flex;
     flex-direction: column;
     gap: var(--space-3);
+    width: min(520px, 100%);
+    padding: var(--space-7);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-popover);
 }
 
 .title {
@@ -36,60 +36,60 @@
 }
 
 .label {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
+    font-size: .8rem;
     color: var(--color-ink-muted);
+    text-transform: uppercase;
+    letter-spacing: .12em;
 }
 
 .input {
     padding: var(--space-3) var(--space-4);
-    border-radius: var(--radius-sm);
-    border: 1px solid var(--color-divider);
     background: var(--color-highlight);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-sm);
 }
 
 .input:focus {
-    outline: none;
-    border-color: color-mix(in srgb, var(--color-ink) 25%, var(--color-divider));
     background: var(--color-surface);
+    border-color: color-mix(in srgb, var(--color-ink) 25%, var(--color-divider));
+    outline: none;
 }
 
 .actions {
     display: flex;
-    justify-content: flex-end;
     gap: var(--space-2);
+    justify-content: flex-end;
 }
 
 .primaryButton,
 .ghostButton {
+    cursor: pointer;
     display: inline-flex;
+    gap: var(--space-2);
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
     padding: var(--space-2) var(--space-5);
-    border-radius: 999px;
-    border: 1px solid transparent;
     font-weight: 500;
-    cursor: pointer;
+    border: 1px solid transparent;
+    border-radius: 999px;
     transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 
 .primaryButton {
-    background: var(--color-ink);
     color: var(--color-surface);
+    background: var(--color-ink);
 }
 
 .primaryButton:hover {
-    background: color-mix(in srgb, var(--color-ink) 85%, black);
+    background: color-mix(in srgb, var(--color-ink) 85%, #000);
 }
 
 .ghostButton {
-    background: transparent;
     color: var(--color-ink-muted);
+    background: transparent;
 }
 
 .ghostButton:hover {
-    background: var(--color-highlight);
     color: var(--color-ink);
+    background: var(--color-highlight);
 }

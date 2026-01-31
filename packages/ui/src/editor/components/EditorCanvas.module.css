@@ -3,7 +3,7 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    max-width: calc(960px * var(--size-scale));
+    width: calc(960px * var(--size-scale));
     min-height: 0;
     margin: 0 auto;
     padding: var(--space-6) clamp(var(--space-4), 15%, 15%) var(--space-8);

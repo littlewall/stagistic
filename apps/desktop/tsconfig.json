@@ -12,6 +12,7 @@
                 "./src/components/*",
                 "../../packages/ui/src/editor/components/*"
             ],
+            "~constants/*": ["./src/constants/*"],
             "~db": ["./src/db/index.ts"],
             "~db/*": ["./src/db/*"],
             "~helpers/*": [
@@ -24,8 +25,11 @@
                 "./src/plugins/*",
                 "../../packages/ui/src/editor/plugins/*"
             ],
+            "~repo": ["./src/repo/index.ts"],
+            "~repo/*": ["./src/repo/*"],
             "~routes/*": ["./src/routes/*"],
-            "~storage/*": ["./src/storage/*"],
+            "~store": ["./src/store/index.ts"],
+            "~store/*": ["./src/store/*"],
             "~utils/*": [
                 "./src/utils/*",
                 "../../packages/ui/src/editor/utils/*"
