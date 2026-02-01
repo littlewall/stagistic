@@ -10,7 +10,7 @@ import {
     getElementText,
     getEnterNextType,
     setSelectionBlockType,
-} from '~blocks/fountainBlockHelpers';
+} from '../fountainBlockHelpers';
 
 type KeyEventLike = {
     key: string,

@@ -6,14 +6,6 @@
         "jsx": "react-jsx",
         "module": "ESNext",
         "moduleResolution": "bundler",
-        "paths": {
-            "~blocks/*": ["./src/editor/blocks/*"],
-            "~components/*": ["./src/editor/components/*"],
-            "~helpers/*": ["./src/editor/blocks/*"],
-            "~layout/*": ["./src/layout/*"],
-            "~plugins/*": ["./src/editor/plugins/*"],
-            "~utils/*": ["./src/editor/utils/*"]
-        },
         "plugins": [
             {
                 "name": "typescript-plugin-css-modules"

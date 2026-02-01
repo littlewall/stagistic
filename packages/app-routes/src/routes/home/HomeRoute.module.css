@@ -1,0 +1,52 @@
+.hero {
+    padding: var(--space-8);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-md);
+}
+
+.heroContent {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.subtitle {
+    max-width: 32rem;
+    font-size: 1rem;
+}
+
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-top: var(--space-2);
+}
+
+.heroCard {
+    justify-content: center;
+    padding: var(--space-6);
+}
+
+.heroCardValue {
+    font-size: 1.6rem;
+    font-weight: 600;
+}
+
+.heroCardButton {
+    align-self: flex-start;
+}
+
+.card {
+    min-height: 160px;
+}
+
+.cardTitle {
+    font-size: 1.05rem;
+}
+
+.heroCardFooter {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}

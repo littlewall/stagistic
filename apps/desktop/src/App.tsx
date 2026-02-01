@@ -1,3 +1,15 @@
+import {
+    MENU_EVENT_IMPORT_SCRIPT,
+    MENU_EVENT_NEW_SCRIPT,
+    ScriptRepositoryProvider,
+} from '@stagistic/app-core';
+import {
+    HomeRoute,
+    ScriptEditorRoute,
+    ScriptListRoute,
+    ScriptSettingsRoute,
+} from '@stagistic/app-routes';
+import {ToastProvider} from '@stagistic/ui';
 import {listen, type UnlistenFn} from '@tauri-apps/api/event';
 import {useEffect} from 'react';
 import {
@@ -8,15 +20,7 @@ import {
     useNavigate,
 } from 'react-router-dom';
 
-import {ToastProvider} from '~components/ToastProvider';
-import {
-    MENU_EVENT_IMPORT_SCRIPT,
-    MENU_EVENT_NEW_SCRIPT,
-} from '~constants/menuEvents';
-import {HomeRoute} from '~routes/home/HomeRoute';
-import {ScriptEditorRoute} from '~routes/script/ScriptEditorRoute';
-import {ScriptListRoute} from '~routes/script/ScriptListRoute';
-import {ScriptSettingsRoute} from '~routes/script/ScriptSettingsRoute';
+import {scriptRepository} from '~repo';
 
 const MenuEventHandler = () => {
     const navigate = useNavigate();
@@ -71,16 +75,18 @@ const MenuEventHandler = () => {
 const App = () => {
     return (
         <BrowserRouter>
-            <ToastProvider>
-                <MenuEventHandler />
-                <Routes>
-                    <Route path="/" element={<HomeRoute />} />
-                    <Route path="/script/list" element={<ScriptListRoute />} />
-                    <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
-                    <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-            </ToastProvider>
+            <ScriptRepositoryProvider repository={scriptRepository}>
+                <ToastProvider>
+                    <MenuEventHandler />
+                    <Routes>
+                        <Route path="/" element={<HomeRoute />} />
+                        <Route path="/script/list" element={<ScriptListRoute />} />
+                        <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
+                        <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </ToastProvider>
+            </ScriptRepositoryProvider>
         </BrowserRouter>
     );
 };

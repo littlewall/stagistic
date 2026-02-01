@@ -1,11 +1,10 @@
 import type {ScriptSummary} from '@stagistic/db';
 import type {SlateValue} from '@stagistic/shared';
+import {uuidv7} from '@stagistic/shared';
 import type {ScriptRepository} from '@stagistic/sync-core';
 
 import {loadLocalDb} from '~db';
 import {ensureSchema} from '~db/migrations';
-
-import {uuidv7} from './uuid';
 
 const LATEST_SCHEMA_VERSION = 1;
 const ENABLE_OUTBOX = false;
@@ -41,6 +40,30 @@ export const createLocalSqliteRepository = (): ScriptRepository => {
                 const db = await loadLocalDb();
 
                 await ensureSchema(db);
+
+                try {
+                    const rows = await db.select<Array<{count: number}>>('SELECT COUNT(*) as count FROM scripts');
+                    const count = rows[0]?.count ?? 0;
+
+                    if (count === 0) {
+                        const legacyDb = await loadLocalDb({path: 'sqlite:stagistic.db'});
+
+                        await ensureSchema(legacyDb);
+
+                        const legacyRows = await legacyDb.select<Array<{count: number}>>('SELECT COUNT(*) as count FROM scripts');
+                        const legacyCount = legacyRows[0]?.count ?? 0;
+
+                        console.info('SQLite legacy scripts count', legacyCount);
+
+                        if (legacyCount > 0) {
+                            console.warn('Using legacy SQLite database location for existing scripts.');
+
+                            return legacyDb;
+                        }
+                    }
+                } catch (error) {
+                    console.warn('Failed to check legacy SQLite database', error);
+                }
 
                 return db;
             })();

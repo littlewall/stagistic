@@ -2,8 +2,8 @@ import {ELEMENT_ACTION} from '@stagistic/editor-core';
 import type {PlateElementProps} from 'platejs/react';
 import {ReactNode} from 'react';
 
-import FountainBlock from '~blocks/base/FountainBlock';
-import useDualColumnPlacement from '~blocks/layout/useDualColumnPlacement';
+import FountainBlock from '../../base/FountainBlock';
+import useDualColumnPlacement from '../../layout/useDualColumnPlacement';
 
 import styles from './ActionBlock.module.css';
 

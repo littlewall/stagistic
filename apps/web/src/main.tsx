@@ -1,3 +1,4 @@
+import '@stagistic/ui/styles/base.css';
 import './index.css';
 
 import React from 'react';

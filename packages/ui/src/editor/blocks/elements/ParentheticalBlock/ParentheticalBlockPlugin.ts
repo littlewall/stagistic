@@ -11,7 +11,7 @@ import {
     getEnterNextType,
     isParentheticalSelection,
     setSelectionBlockType,
-} from '~blocks/fountainBlockHelpers';
+} from '../../fountainBlockHelpers';
 
 import ParentheticalBlock from './ParentheticalBlock';
 

@@ -1,0 +1,67 @@
+.button {
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--space-2);
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    text-decoration: none;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.md {
+    padding: var(--space-2) var(--space-5);
+}
+
+.sm {
+    padding: var(--space-2) var(--space-4);
+}
+
+.primary {
+    color: var(--color-surface);
+    background: var(--color-ink);
+}
+
+.primary:hover {
+    background: color-mix(in srgb, var(--color-ink) 85%, #000);
+}
+
+.primary:disabled,
+.primary[aria-disabled = 'true'] {
+    cursor: not-allowed;
+    opacity: .6;
+}
+
+.secondary {
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border-color: var(--color-divider);
+}
+
+.secondary:hover {
+    background: var(--color-highlight);
+}
+
+.ghost {
+    color: var(--color-ink-muted);
+    background: transparent;
+    border-color: transparent;
+}
+
+.ghost:hover {
+    color: var(--color-ink);
+    background: var(--color-highlight);
+}
+
+.danger {
+    color: var(--color-danger, #c2410c);
+    background: transparent;
+    border-color: color-mix(in srgb, var(--color-danger, #c2410c) 35%, var(--color-divider));
+}
+
+.danger:hover {
+    background: color-mix(in srgb, var(--color-danger, #c2410c) 10%, transparent);
+}

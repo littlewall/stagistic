@@ -7,6 +7,7 @@ import {
     useFocused,
     usePath,
     usePluginOption,
+    useSelected,
 } from 'platejs/react';
 import {
     useEffect,
@@ -16,9 +17,9 @@ import {
 } from 'react';
 import {Path} from 'slate';
 
-import {BLOCK_ICONS} from '~blocks/controls/blockIcons';
-import {applyBlockTypeChange} from '~blocks/fountainBlockHelpers';
-import {FOUNTAIN_BLOCKS} from '~blocks/fountainBlockRegistry';
+import {BLOCK_ICONS} from './blockIcons';
+import {applyBlockTypeChange} from '../fountainBlockHelpers';
+import {FOUNTAIN_BLOCKS} from '../fountainBlockRegistry';
 
 import styles from './BlockControls.module.css';
 
@@ -35,11 +36,7 @@ const BlockControls = () => {
     }
 
     const isFocused = useFocused();
-    const selectionPath = editor.selection?.focus?.path ?? editor.selection?.anchor?.path;
-    const activeBlockEntry = selectionPath
-        ? editor.api.block({at: selectionPath})
-        : null;
-    const isSelectionInBlock = !!activeBlockEntry && Path.equals(activeBlockEntry[1], elementPath);
+    const isSelected = useSelected();
     const blockId = elementPath.join('-');
     const openId = usePluginOption(BlockMenuPlugin, 'openId');
     const isOpen = openId === blockId;
@@ -49,7 +46,7 @@ const BlockControls = () => {
     const activeIcon = BLOCK_ICONS[element.type];
     const activeLabel = activeOption?.label ?? 'Block';
     const blockMenuApi = editor.getApi(BlockMenuPlugin).blockMenu;
-    const shouldShowControls = isFocused && isSelectionInBlock;
+    const shouldShowControls = isFocused && isSelected;
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLSpanElement | null>(null);
     const [isMenuAbove, setIsMenuAbove] = useState(false);

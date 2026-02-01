@@ -1,7 +1,8 @@
-import Fastify from 'fastify';
 import cors from '@fastify/cors';
-import { config } from './config.js';
-import { healthRoutes } from './routes/health.js';
+import Fastify from 'fastify';
+
+import {config} from './config.js';
+import {healthRoutes} from './routes/health.js';
 
 const app = Fastify({
     logger: {
@@ -15,7 +16,7 @@ await app.register(cors, {
 });
 
 // Register routes
-await app.register(healthRoutes, { prefix: '/api' });
+await app.register(healthRoutes, {prefix: '/api'});
 
 // Start server
 const start = async () => {
@@ -31,4 +32,8 @@ const start = async () => {
     }
 };
 
-start();
+start()
+    .catch(err => {
+        app.log.error(err);
+        process.exit(1);
+    });

@@ -1,21 +1,28 @@
-import './App.css';
 
-import {useEffect, useState} from 'react';
+import {
+    HomeRoute,
+    ScriptEditorRoute,
+    ScriptListRoute,
+    ScriptSettingsRoute,
+} from '@stagistic/app-routes';
+import {ToastProvider} from '@stagistic/ui';
+import {
+    Navigate,
+    Route,
+    Routes,
+} from 'react-router-dom';
 
 function App() {
-    const [health, setHealth] = useState<string>('Checking...');
-
-    useEffect(() => {
-        fetch('/api/health')
-            .then(res => res.json())
-            .then(data => setHealth(data.status))
-            .catch(() => setHealth('API unavailable'));
-    }, []);
-
     return (
-        <>
-            {health}
-        </>
+        <ToastProvider>
+            <Routes>
+                <Route path="/" element={<HomeRoute />} />
+                <Route path="/script/list" element={<ScriptListRoute />} />
+                <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
+                <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
+                <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+        </ToastProvider>
     );
 }
 

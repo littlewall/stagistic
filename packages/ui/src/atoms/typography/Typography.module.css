@@ -1,0 +1,19 @@
+.kicker {
+    font-size: .8rem;
+    color: var(--color-ink-muted);
+    text-transform: uppercase;
+    letter-spacing: .12em;
+}
+
+.pageTitle {
+    font-size: 2.2rem;
+    line-height: 1.1;
+}
+
+.sectionTitle {
+    font-size: 1.4rem;
+}
+
+.subtle {
+    color: var(--color-ink-muted);
+}

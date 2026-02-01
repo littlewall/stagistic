@@ -5,7 +5,7 @@ import {
     createBlockKeyHandler,
     createLeadingIndentKeyHandler,
     defaultEnterKeyHandler,
-} from '~blocks/keyboard/blockKeyHandlers';
+} from '../../keyboard/blockKeyHandlers';
 
 import ActionBlock from './ActionBlock';
 

@@ -1,0 +1,12 @@
+.root {
+    display: grid;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr);
+    gap: var(--space-8);
+    align-items: stretch;
+}
+
+@media (max-width: 900px) {
+    .root {
+        grid-template-columns: 1fr;
+    }
+}

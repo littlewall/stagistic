@@ -1,0 +1,26 @@
+{
+    "name": "@stagistic/app-routes",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "main": "./src/index.ts",
+    "scripts": {
+        "lint": "eslint . --ext ts,tsx"
+    },
+    "dependencies": {
+        "@stagistic/app-core": "workspace:*",
+        "@stagistic/editor-core": "workspace:*",
+        "@stagistic/shared": "workspace:*",
+        "@stagistic/ui": "workspace:*"
+    },
+    "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0",
+        "react-router-dom": "^7.13.0"
+    },
+    "devDependencies": {
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "typescript": "^5.9.2"
+    }
+}

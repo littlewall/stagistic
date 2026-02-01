@@ -21,7 +21,9 @@
     grid-template-columns: 1fr auto;
     gap: var(--space-3);
     align-items: start;
+    /* stylelint-disable-next-line csstree/validator */
     min-width: min(320px, 80vw);
+    /* stylelint-disable-next-line csstree/validator */
     max-width: min(420px, 90vw);
     padding: var(--space-4) var(--space-4);
     color: var(--color-ink);

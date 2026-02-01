@@ -11,12 +11,12 @@ import {
     useState,
 } from 'react';
 
-import {BLOCK_ICONS} from '~blocks/controls/blockIcons';
+import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
 import {
     applyBlockTypeChange,
     type FountainBlockTypeChangeTarget,
-} from '~blocks/fountainBlockHelpers';
-import {FOUNTAIN_BLOCKS} from '~blocks/fountainBlockRegistry';
+} from '../blocks/fountainBlockHelpers';
+import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
 
 import styles from './EditorToolbar.module.css';
 
@@ -239,7 +239,7 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                         )}
                     </span>
                     <span className={styles.selectLabel}>
-                        {FOUNTAIN_BLOCKS.find(option => option.type === activeType)
+                        {FOUNTAIN_BLOCKS.find((option: (typeof FOUNTAIN_BLOCKS)[number]) => option.type === activeType)
                             ?.label ?? 'Select block in editor'}
                     </span>
                     <svg
@@ -253,7 +253,7 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                 </button>
                 {isOpen ? (
                     <div className={styles.menu} role="menu">
-                        {FOUNTAIN_BLOCKS.map(option => (
+                        {FOUNTAIN_BLOCKS.map((option: (typeof FOUNTAIN_BLOCKS)[number]) => (
                             <button
                                 key={option.type}
                                 type="button"

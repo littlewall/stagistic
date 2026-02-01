@@ -2,7 +2,7 @@ import clsx from 'clsx';
 import {PlateElement, type PlateElementProps} from 'platejs/react';
 import type {CSSProperties, ReactNode} from 'react';
 
-import BlockControls from '~blocks/controls/BlockControls';
+import BlockControls from '../controls/BlockControls';
 
 import styles from './FountainBlock.module.css';
 

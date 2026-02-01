@@ -1,7 +1,7 @@
-import type { FastifyInstance } from 'fastify';
+import type {FastifyInstance} from 'fastify';
 
-export async function healthRoutes(app: FastifyInstance) {
-    app.get('/health', async () => {
+export function healthRoutes(app: FastifyInstance) {
+    app.get('/health', () => {
         return {
             status: 'ok',
             timestamp: new Date().toISOString(),
@@ -10,7 +10,7 @@ export async function healthRoutes(app: FastifyInstance) {
         };
     });
 
-    app.get('/ready', async () => {
+    app.get('/ready', () => {
         return {
             status: 'ready',
             checks: {

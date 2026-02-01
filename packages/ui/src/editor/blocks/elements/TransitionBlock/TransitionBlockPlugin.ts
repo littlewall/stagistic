@@ -4,7 +4,7 @@ import {createPlatePlugin} from 'platejs/react';
 import {
     createBlockKeyHandler,
     defaultEnterKeyHandler,
-} from '~blocks/keyboard/blockKeyHandlers';
+} from '../../keyboard/blockKeyHandlers';
 
 import TransitionBlock from './TransitionBlock';
 

@@ -13,7 +13,7 @@ import {
     getEnterNextType,
     isCharacterSelection,
     setSelectionBlockType,
-} from '~blocks/fountainBlockHelpers';
+} from '../../fountainBlockHelpers';
 
 import CharacterBlock from './CharacterBlock';
 

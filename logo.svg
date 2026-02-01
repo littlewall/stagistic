@@ -1,0 +1,62 @@
+<svg viewBox="0 0 200 200" width="1000px" height="1000px">
+        <defs>
+          <linearGradient id="grad3" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#0F172A; stop-opacity:1" />
+            <stop offset="100%" style="stop-color:#1E293B; stop-opacity:1" />
+          </linearGradient>
+          <linearGradient id="glassGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#ffffff; stop-opacity:0.9" />
+            <stop offset="100%" style="stop-color:#f1f5f9; stop-opacity:0.7" />
+          </linearGradient>
+          <filter id="glassBlur">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="0.5" />
+          </filter>
+        </defs>
+        
+        {/* Background */}
+        <rect width="200" height="200" rx="45" fill="url(#grad3)" />
+        
+        {/* Shadow page 3 (furthest back) */}
+        <rect x="110" y="65" width="100" height="140" rx="8" fill="#64748b" opacity="0.15" />
+        
+        {/* Shadow page 2 */}
+        <rect x="105" y="60" width="100" height="140" rx="8" fill="#64748b" opacity="0.25" />
+        
+        {/* Main script page - liquid glass effect - centered */}
+        <rect x="50" y="30" width="100" height="140" rx="8" fill="url(#glassGrad)" filter="url(#glassBlur)" />
+        <rect x="50" y="30" width="100" height="140" rx="8" fill="none" stroke="rgba(255, 255, 255, 0.6)" stroke-width="1.5" />
+        
+        {/* Glass shine/reflection */}
+        <path 
+          d="M 58 38 Q 80 45, 90 38 L 90 60 Q 80 65, 70 60 Z" 
+          fill="white" 
+          opacity="0.3"
+        />
+        
+        {/* Script lines - various lengths and indents mimicking Fountain format */}
+        
+        {/* Scene heading (full width, bold) */}
+        <line x1="60" y1="50" x2="140" y2="50" stroke="#0F172A" stroke-width="3" opacity="0.8" />
+        
+        {/* Action (full width) */}
+        <line x1="60" y1="64" x2="135" y2="64" stroke="#0F172A" stroke-width="2" opacity="0.7" />
+        <line x1="60" y1="72" x2="130" y2="72" stroke="#0F172A" stroke-width="2" opacity="0.7" />
+        
+        {/* Character name (centered, shorter) */}
+        <line x1="85" y1="86" x2="115" y2="86" stroke="#0F172A" stroke-width="2.5" opacity="0.8" />
+        
+        {/* Dialogue (indented, medium length) */}
+        <line x1="75" y1="97" x2="135" y2="97" stroke="#0F172A" stroke-width="2" opacity="0.7" />
+        <line x1="75" y1="105" x2="130" y2="105" stroke="#0F172A" stroke-width="2" opacity="0.7" />
+        <line x1="75" y1="113" x2="128" y2="113" stroke="#0F172A" stroke-width="2" opacity="0.7" />
+        
+        {/* Action (full width) */}
+        <line x1="60" y1="127" x2="138" y2="127" stroke="#0F172A" stroke-width="2" opacity="0.7" />
+        
+        {/* Character name (centered, shorter) */}
+        <line x1="82" y1="141" x2="118" y2="141" stroke="#0F172A" stroke-width="2.5" opacity="0.8" />
+        
+        {/* Dialogue (indented) */}
+        <line x1="75" y1="152" x2="133" y2="152" stroke="#0F172A" stroke-width="2" opacity="0.7" />
+        <line x1="75" y1="160" x2="125" y2="160" stroke="#0F172A" stroke-width="2" opacity="0.7" />
+      </svg>

@@ -16,8 +16,8 @@
 
 .leftControls {
     display: inline-flex;
-    align-items: center;
     gap: var(--space-2);
+    align-items: center;
 }
 
 .menuTrigger,
@@ -59,15 +59,15 @@
 
 .backButton {
     padding: var(--space-2) var(--space-4);
+    font-weight: 500;
     border-color: var(--color-divider);
     border-radius: 999px;
-    font-weight: 500;
 }
 
 .scriptControls {
     display: inline-flex;
-    align-items: center;
     gap: var(--space-2);
+    align-items: center;
     justify-content: center;
 }
 

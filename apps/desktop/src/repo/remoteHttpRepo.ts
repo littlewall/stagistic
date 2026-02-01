@@ -7,15 +7,15 @@ export const createRemoteHttpRepository = (): ScriptRepository => {
     };
 
     return {
-        listScripts: async () => notImplemented() as ScriptSummary[],
-        createScript: async () => notImplemented(),
-        renameScript: async () => notImplemented(),
-        deleteScript: async () => notImplemented(),
-        setActiveBlock: async () => notImplemented(),
-        loadLatest: async () => notImplemented(),
-        saveLatest: async () => notImplemented(),
-        commitVersion: async () => notImplemented(),
-        loadVersion: async () => notImplemented(),
-        restoreLatestFromVersion: async () => notImplemented(),
+        listScripts: () => notImplemented() as ScriptSummary[],
+        createScript: () => notImplemented(),
+        renameScript: () => notImplemented(),
+        deleteScript: () => notImplemented(),
+        setActiveBlock: () => notImplemented(),
+        loadLatest: () => notImplemented(),
+        saveLatest: () => notImplemented(),
+        commitVersion: () => notImplemented(),
+        loadVersion: () => notImplemented(),
+        restoreLatestFromVersion: () => notImplemented(),
     } satisfies ScriptRepository;
 };

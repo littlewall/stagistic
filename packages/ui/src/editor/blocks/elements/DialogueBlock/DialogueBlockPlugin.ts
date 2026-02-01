@@ -4,11 +4,11 @@ import {createPlatePlugin} from 'platejs/react';
 import {
     isDialogueSelection,
     setSelectionBlockType,
-} from '~blocks/fountainBlockHelpers';
+} from '../../fountainBlockHelpers';
 import {
     createBlockKeyHandler,
     defaultEnterKeyHandler,
-} from '~blocks/keyboard/blockKeyHandlers';
+} from '../../keyboard/blockKeyHandlers';
 
 import DialogueBlock from './DialogueBlock';
 

@@ -9,7 +9,7 @@ import {
 import type {CSSProperties} from 'react';
 import {useMemo} from 'react';
 
-import {shouldSuppressCharacterGap} from '~blocks/fountainBlockHelpers';
+import {shouldSuppressCharacterGap} from '../fountainBlockHelpers';
 
 type DualPlacement = {
     className?: string,

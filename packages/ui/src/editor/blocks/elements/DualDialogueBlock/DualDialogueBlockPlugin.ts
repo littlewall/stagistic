@@ -4,7 +4,7 @@ import {createPlatePlugin} from 'platejs/react';
 import {
     isDualDialogueSelection,
     setSelectionBlockType,
-} from '~blocks/fountainBlockHelpers';
+} from '../../fountainBlockHelpers';
 
 import DualDialogueBlock from './DualDialogueBlock';
 

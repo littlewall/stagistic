@@ -14,7 +14,7 @@ import {
     getEnterNextType,
     isDualCharacterSelection,
     setSelectionBlockType,
-} from '~blocks/fountainBlockHelpers';
+} from '../../fountainBlockHelpers';
 
 import DualCharacterBlock from './DualCharacterBlock';
 

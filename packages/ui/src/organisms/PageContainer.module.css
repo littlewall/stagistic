@@ -1,0 +1,17 @@
+.root {
+    overflow: auto;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.standard {
+    gap: var(--space-10);
+    padding: calc(var(--space-8) + var(--space-2));
+}
+
+.compact {
+    gap: var(--space-6);
+    padding: calc(var(--space-8) + var(--space-2));
+}

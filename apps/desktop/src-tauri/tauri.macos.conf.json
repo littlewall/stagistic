@@ -3,6 +3,7 @@
         "windows": [
             {
                 "title": "Stagistic Editor",
+                "maximized": true,
                 "titleBarStyle": "Overlay",
                 "hiddenTitle": true,
                 "decorations": true,

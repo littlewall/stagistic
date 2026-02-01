@@ -1,5 +1,7 @@
 .canvas {
-    overflow: auto;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    scrollbar-gutter: stable;
     display: flex;
     flex: 1;
     flex-direction: column;
