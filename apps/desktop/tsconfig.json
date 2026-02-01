@@ -12,28 +12,19 @@
                 "./src/components/*",
                 "../../packages/ui/src/editor/components/*"
             ],
-            "~constants/*": ["./src/constants/*"],
             "~db": ["./src/db/index.ts"],
             "~db/*": ["./src/db/*"],
             "~helpers/*": [
                 "./src/helpers/*",
                 "../../packages/ui/src/editor/blocks/*"
             ],
-            "~hooks/*": ["./src/hooks/*"],
             "~libs/*": ["./src/libs/*"],
             "~plugins/*": [
                 "./src/plugins/*",
                 "../../packages/ui/src/editor/plugins/*"
             ],
             "~repo": ["./src/repo/index.ts"],
-            "~repo/*": ["./src/repo/*"],
-            "~routes/*": ["./src/routes/*"],
-            "~store": ["./src/store/index.ts"],
-            "~store/*": ["./src/store/*"],
-            "~utils/*": [
-                "./src/utils/*",
-                "../../packages/ui/src/editor/utils/*"
-            ]
+            "~repo/*": ["./src/repo/*"]
         },
         "plugins": [
             {
@@ -43,6 +34,6 @@
         "allowImportingTsExtensions": true,
         "noEmit": true
     },
-    "include": ["src"],
+    "include": ["src", "vite.config.ts"],
     "references": []
 }

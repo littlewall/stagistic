@@ -1,0 +1,20 @@
+{
+    "extends": "./tsconfig.base.json",
+    "files": [],
+    "compilerOptions": {
+        "noEmit": true
+    },
+    "references": [
+        {"path": "./packages/shared"},
+        {"path": "./packages/app-core"},
+        {"path": "./packages/app-routes"},
+        {"path": "./packages/db"},
+        {"path": "./packages/editor-core"},
+        {"path": "./packages/sync-core"},
+        {"path": "./packages/auth"},
+        {"path": "./packages/config"},
+        {"path": "./packages/music"},
+        {"path": "./apps/api"},
+        {"path": "./apps/worker"}
+    ]
+}

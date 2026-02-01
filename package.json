@@ -2,6 +2,7 @@
     "name": "stagistic",
     "version": "0.1.0",
     "private": true,
+    "type": "module",
     "description": "Cloud editor for theatre and musical scripts",
     "license": "MIT",
     "author": "Stagistic Team",
