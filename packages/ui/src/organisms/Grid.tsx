@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import type {ReactNode} from 'react';
+import {type ReactNode} from 'react';
 
 import styles from './Grid.module.css';
 
@@ -16,13 +16,10 @@ export const Grid = ({
 }: GridProps) => {
     return (
         <div
-            className={clsx(
-                styles.grid,
-                {
-                    [styles.cols2]: columns === 2,
-                },
-                className,
-            )}
+            className={clsx(styles.grid, className)}
+            style={{
+                '--grid-template-columns': `repeat(${columns}, minmax(0, 1fr))`,
+            } as React.CSSProperties}
         >
             {children}
         </div>

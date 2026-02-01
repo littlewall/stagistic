@@ -89,7 +89,7 @@ export const createScriptsStore = (repository: ScriptRepository): ScriptsStoreSt
             const scripts = await repository.listScripts();
 
             await replaceAll(scripts);
-            console.info('Scripts collection size', scriptsCollection.keys().length, 'listScripts', scripts.length);
+
             setMeta({error: null, isLoading: false});
         } catch (error) {
             console.error('Failed to refresh scripts collection', error);

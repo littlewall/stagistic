@@ -4,6 +4,7 @@ import {
     MENU_EVENT_NEW_SCRIPT,
 } from '@stagistic/app-core';
 import {type FountainDocument, serializeFountain} from '@stagistic/editor-core';
+import {FountainEditor} from '@stagistic/editor-ui';
 import {
     ensureNodeIds,
     ensureSceneHeading,
@@ -14,7 +15,6 @@ import {
     AppHeader,
     AppLayout,
     EditorSidebar,
-    FountainEditor,
     NewScriptModal,
     type ScriptSyncState,
     useToastController,
@@ -34,6 +34,7 @@ import {
 const AUTOSAVE_DELAY_MS = 1500;
 const SAVE_SLOW_INDICATOR_MS = 600;
 const DEFAULT_SCRIPT_TITLE = 'Untitled script';
+const SEED_COOLDOWN_MS = 5000;
 
 export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
@@ -43,6 +44,7 @@ export const ScriptEditorRoute = () => {
         scripts,
         createScript,
         isLoading: scriptsLoading,
+        error: scriptsError,
     } = useScripts();
     const [initialValue, setInitialValue] = useState<SlateValue | null | undefined>(undefined);
     const [serializedPreview, setSerializedPreview] = useState<string>('');
@@ -51,6 +53,11 @@ export const ScriptEditorRoute = () => {
     const [saveIndicator, setSaveIndicator] = useState<ScriptSyncState>('saved');
     const pendingSaveRef = useRef(0);
     const slowSaveTimerRef = useRef<number | null>(null);
+    const seedStateRef = useRef({
+        pending: false,
+        lastAttempt: 0,
+        seeded: false,
+    });
     const {addToast} = useToastController();
     const scriptRepository = useScriptRepository();
 
@@ -147,11 +154,29 @@ export const ScriptEditorRoute = () => {
             return;
         }
 
+        if (scriptsError) {
+            return;
+        }
+
         if (scripts.length === 0) {
             const seedDefault = async () => {
+                const now = Date.now();
+
+                if (seedStateRef.current.seeded || seedStateRef.current.pending) {
+                    return;
+                }
+
+                if (now - seedStateRef.current.lastAttempt < SEED_COOLDOWN_MS) {
+                    return;
+                }
+
+                seedStateRef.current.lastAttempt = now;
+                seedStateRef.current.pending = true;
+
                 try {
                     const newScriptId = await createScript(DEFAULT_SCRIPT_TITLE);
 
+                    seedStateRef.current.seeded = true;
                     void navigate(`/script/${newScriptId}/editor`, {replace: true});
                 } catch (error) {
                     console.error('Failed to seed default script', error);
@@ -161,6 +186,8 @@ export const ScriptEditorRoute = () => {
                         description: 'Please restart the app.',
                         variant: 'error',
                     });
+                } finally {
+                    seedStateRef.current.pending = false;
                 }
             };
 
@@ -186,6 +213,7 @@ export const ScriptEditorRoute = () => {
         scriptId,
         scripts,
         scriptsLoading,
+        scriptsError,
     ]);
 
     useEffect(() => {
@@ -254,8 +282,6 @@ export const ScriptEditorRoute = () => {
 
     const handleValueChange = useCallback(
         (value: SlateValue) => {
-            console.log('EDITOR VALUE (DB JSON):', value);
-
             setSerializedPreview(serializeFountain(value as unknown as FountainDocument));
         },
         [setSerializedPreview, serializeFountain],

@@ -1,6 +1,16 @@
+@import '@fontsource-variable/ibm-plex-sans';
+@import '@fontsource/courier-prime/400.css';
+@import '@fontsource/courier-prime/700.css';
+
 :root {
-    --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-sans: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
+
+    /* Media query variables */
+    /* stylelint-disable-next-line csstree/validator */
+    --media-tablet: (max-width: 1024px);
+    /* stylelint-disable-next-line csstree/validator */
+    --media-mobile: (max-width: 900px);
 
     /* Size scale: default is medium; override with .size-sm or .size-lg on body/root. */
     --size-scale: 1.08;

@@ -1,0 +1,27 @@
+.canvas {
+    scrollbar-gutter: stable;
+    overflow: hidden scroll;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    width: calc(960px * var(--size-scale));
+    min-height: 0;
+    margin: 0 auto;
+    padding: var(--space-6) clamp(var(--space-4), 15%, 15%) var(--space-8);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: calc(18px * var(--size-scale));
+    box-shadow: 0 12px 30px rgba(30, 20, 15, .04);
+}
+
+.content {
+    --block-controls-gutter: clamp(calc(10px * var(--size-scale)), 1vw, calc(28px * var(--size-scale)));
+
+    width: 100%;
+    min-height: 100%;
+    font-family: var(--font-mono);
+    font-size: calc(13px * var(--size-scale));
+    line-height: 1.7;
+    color: var(--color-ink);
+    outline: none;
+}

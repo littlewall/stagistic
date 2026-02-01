@@ -274,6 +274,9 @@ importers:
       '@stagistic/editor-core':
         specifier: workspace:*
         version: link:../editor-core
+      '@stagistic/editor-ui':
+        specifier: workspace:*
+        version: link:../editor-ui
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../shared
@@ -326,7 +329,60 @@ importers:
         version: 5.9.3
 
   packages/editor-core:
+    dependencies:
+      platejs:
+        specifier: ^52.0.11
+        version: 52.0.17(@types/react@19.2.10)(immer@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(scheduler@0.27.0)(use-sync-external-store@1.6.0(react@19.2.4))
+      slate:
+        specifier: ^0.112.0
+        version: 0.112.0
     devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.10
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+
+  packages/editor-ui:
+    dependencies:
+      '@platejs/layout':
+        specifier: ^52.0.11
+        version: 52.0.11(platejs@52.0.17(@types/react@19.2.10)(immer@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(scheduler@0.27.0)(use-sync-external-store@1.6.0(react@19.2.4)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@platejs/selection':
+        specifier: ^52.0.16
+        version: 52.0.16(platejs@52.0.17(@types/react@19.2.10)(immer@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(scheduler@0.27.0)(use-sync-external-store@1.6.0(react@19.2.4)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@stagistic/editor-core':
+        specifier: workspace:*
+        version: link:../editor-core
+      '@stagistic/shared':
+        specifier: workspace:*
+        version: link:../shared
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
+      iconoir-react:
+        specifier: ^7.11.0
+        version: 7.11.0(react@19.2.4)
+      platejs:
+        specifier: ^52.0.11
+        version: 52.0.17(@types/react@19.2.10)(immer@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(scheduler@0.27.0)(use-sync-external-store@1.6.0(react@19.2.4))
+      react:
+        specifier: ^19.0.0
+        version: 19.2.4
+      react-dom:
+        specifier: ^19.0.0
+        version: 19.2.4(react@19.2.4)
+      slate:
+        specifier: ^0.112.0
+        version: 0.112.0
+    devDependencies:
+      '@types/react':
+        specifier: ^19.0.0
+        version: 19.2.10
+      '@types/react-dom':
+        specifier: ^19.0.0
+        version: 19.2.3(@types/react@19.2.10)
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
@@ -362,15 +418,12 @@ importers:
 
   packages/ui:
     dependencies:
-      '@platejs/layout':
-        specifier: ^52.0.11
-        version: 52.0.11(platejs@52.0.17(@types/react@19.2.10)(immer@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(scheduler@0.27.0)(use-sync-external-store@1.6.0(react@19.2.4)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@platejs/selection':
-        specifier: ^52.0.16
-        version: 52.0.16(platejs@52.0.17(@types/react@19.2.10)(immer@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(scheduler@0.27.0)(use-sync-external-store@1.6.0(react@19.2.4)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@stagistic/editor-core':
-        specifier: workspace:*
-        version: link:../editor-core
+      '@fontsource-variable/ibm-plex-sans':
+        specifier: ^5.2.8
+        version: 5.2.8
+      '@fontsource/courier-prime':
+        specifier: ^5.2.8
+        version: 5.2.8
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../shared
@@ -380,9 +433,6 @@ importers:
       iconoir-react:
         specifier: ^7.11.0
         version: 7.11.0(react@19.2.4)
-      platejs:
-        specifier: ^52.0.11
-        version: 52.0.17(@types/react@19.2.10)(immer@10.2.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(scheduler@0.27.0)(use-sync-external-store@1.6.0(react@19.2.4))
       react:
         specifier: ^19.0.0
         version: 19.2.4
@@ -392,9 +442,6 @@ importers:
       react-dom:
         specifier: ^19.0.0
         version: 19.2.4(react@19.2.4)
-      slate:
-        specifier: ^0.112.0
-        version: 0.112.0
     devDependencies:
       '@types/react':
         specifier: ^19.0.0
@@ -1083,6 +1130,12 @@ packages:
 
   '@fastify/proxy-addr@5.1.0':
     resolution: {integrity: sha512-INS+6gh91cLUjB+PVHfu1UqcB76Sqtpyp7bnL+FYojhjygvOPA9ctiD/JDKsyD9Xgu4hUhCSJBPig/w7duNajw==}
+
+  '@fontsource-variable/ibm-plex-sans@5.2.8':
+    resolution: {integrity: sha512-n5PF2iFa0CZT0QYTPzxvZ39opC9LnU0zdoRccoADbs+Dtsd+lbXOZF7RNuIPHcQX1dKjF63sxnRImQIB5eD0Ag==}
+
+  '@fontsource/courier-prime@5.2.8':
+    resolution: {integrity: sha512-M3xOCcXnGuFi9TcGCrz4hm5yeWg4Sn35MALRLPnqNoHhawTFvhyi2KSI2+5RyFtDNJrb58bPh8LLipgiI9KA0w==}
 
   '@formatjs/ecma402-abstract@2.3.6':
     resolution: {integrity: sha512-HJnTFeRM2kVFVr5gr5kH1XP6K0JcJtE7Lzvtr3FS/so5f1kpsqqqxy5JF+FRaO6H2qmcMfAUIox7AJteieRtVw==}
@@ -5056,6 +5109,10 @@ snapshots:
     dependencies:
       '@fastify/forwarded': 3.0.1
       ipaddr.js: 2.3.0
+
+  '@fontsource-variable/ibm-plex-sans@5.2.8': {}
+
+  '@fontsource/courier-prime@5.2.8': {}
 
   '@formatjs/ecma402-abstract@2.3.6':
     dependencies:

@@ -1,5 +1,5 @@
 {
-    "name": "@stagistic/ui",
+    "name": "@stagistic/editor-ui",
     "version": "0.1.0",
     "private": true,
     "type": "module",
@@ -8,12 +8,14 @@
         "lint": "eslint . --ext ts,tsx"
     },
     "dependencies": {
-        "@fontsource-variable/ibm-plex-sans": "^5.2.8",
-        "@fontsource/courier-prime": "^5.2.8",
+        "@platejs/layout": "^52.0.11",
+        "@platejs/selection": "^52.0.16",
+        "@stagistic/editor-core": "workspace:*",
         "@stagistic/shared": "workspace:*",
         "clsx": "^2.1.1",
         "iconoir-react": "^7.11.0",
-        "react-aria-components": "^1.10.0"
+        "platejs": "^52.0.11",
+        "slate": "^0.112.0"
     },
     "peerDependencies": {
         "react": "^19.0.0",

@@ -49,8 +49,8 @@ export const AppHeader = ({
     onBackToEditor,
     backToEditorLabel = 'Back to editor',
 }: AppHeaderProps) => {
-    const script = currentScript;
-    const handleSelectScript = onSelectScript;
+    const script = useMemo(() => currentScript, [currentScript]);
+    const handleSelectScript = useMemo(() => onSelectScript, [onSelectScript]);
     const canShowScriptMenu = useMemo(
         () => Boolean(showScriptMenu && script && handleSelectScript),
         [
@@ -59,7 +59,7 @@ export const AppHeader = ({
             showScriptMenu,
         ],
     );
-    const showSyncState = canShowScriptMenu;
+    const showSyncState = useMemo(() => canShowScriptMenu, [canShowScriptMenu]);
     const syncMeta = useMemo(() => {
         const resolvedSyncState = scriptSyncState ?? 'saved';
 
@@ -122,7 +122,7 @@ export const AppHeader = ({
                 </Button>
             </div>
             <div className={styles.scriptControls}>
-                {onBackToEditor ? (
+                {onBackToEditor && (
                     <Button
                         className={`${styles.menuTrigger} ${styles.backButton}`}
                         onPress={onBackToEditor}
@@ -130,8 +130,8 @@ export const AppHeader = ({
                     >
                         {backToEditorLabel}
                     </Button>
-                ) : null}
-                {canShowScriptMenu ? (
+                )}
+                {canShowScriptMenu && (
                     <MenuTrigger>
                         <Button className={styles.menuTrigger} data-tauri-drag-region="false">
                             <span className={styles.menuTriggerLabel}>{script!.name}</span>
@@ -185,8 +185,8 @@ export const AppHeader = ({
                             </Menu>
                         </Popover>
                     </MenuTrigger>
-                ) : null}
-                {showSyncState ? (
+                )}
+                {showSyncState && (
                     <TooltipTrigger>
                         <span
                             className={styles.scriptStatus}
@@ -203,7 +203,7 @@ export const AppHeader = ({
                             {syncMeta.label}
                         </Tooltip>
                     </TooltipTrigger>
-                ) : null}
+                )}
             </div>
             <MenuTrigger>
                 <Button className={styles.avatarTrigger} data-tauri-drag-region="false">

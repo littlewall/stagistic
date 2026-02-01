@@ -1,14 +1,14 @@
+
 .grid {
+    --grid-template-columns: repeat(2, minmax(0, 1fr));
+
     display: grid;
+    grid-template-columns: var(--grid-template-columns);
     gap: var(--space-5);
 }
 
-.cols2 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
 @media (max-width: 900px) {
-    .cols2 {
-        grid-template-columns: 1fr;
+    .grid {
+        --grid-template-columns: 1fr;
     }
 }
