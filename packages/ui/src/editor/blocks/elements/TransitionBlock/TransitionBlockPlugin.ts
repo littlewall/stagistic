@@ -5,7 +5,6 @@ import {
     createBlockKeyHandler,
     defaultEnterKeyHandler,
 } from '../../keyboard/blockKeyHandlers';
-
 import TransitionBlock from './TransitionBlock';
 
 const onKeyDown = createBlockKeyHandler({

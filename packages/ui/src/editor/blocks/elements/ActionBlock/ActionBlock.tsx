@@ -4,7 +4,6 @@ import {ReactNode} from 'react';
 
 import FountainBlock from '../../base/FountainBlock';
 import useDualColumnPlacement from '../../layout/useDualColumnPlacement';
-
 import styles from './ActionBlock.module.css';
 
 const ActionBlock = ({children, ...props}: PlateElementProps) => {

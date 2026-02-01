@@ -14,7 +14,6 @@ import {
     isCharacterSelection,
     setSelectionBlockType,
 } from '../../fountainBlockHelpers';
-
 import CharacterBlock from './CharacterBlock';
 
 export const characterPlugin = createPlatePlugin({

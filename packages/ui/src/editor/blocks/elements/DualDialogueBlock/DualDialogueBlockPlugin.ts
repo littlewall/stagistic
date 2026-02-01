@@ -5,7 +5,6 @@ import {
     isDualDialogueSelection,
     setSelectionBlockType,
 } from '../../fountainBlockHelpers';
-
 import DualDialogueBlock from './DualDialogueBlock';
 
 export const dualDialoguePlugin = createPlatePlugin({

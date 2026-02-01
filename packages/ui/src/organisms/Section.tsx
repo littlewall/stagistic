@@ -16,7 +16,13 @@ export const Section = ({
 }: SectionProps) => {
     return (
         <section
-            className={clsx(styles.section, variant === 'danger' && styles.danger, className)}
+            className={clsx(
+                styles.section,
+                {
+                    [styles.danger]: variant === 'danger',
+                },
+                className,
+            )}
         >
             {children}
         </section>

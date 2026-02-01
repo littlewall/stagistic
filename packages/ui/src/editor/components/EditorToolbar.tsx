@@ -5,6 +5,8 @@ import {
     useFocused,
 } from 'platejs/react';
 import {
+    type MouseEvent as ReactMouseEvent,
+    useCallback,
     useEffect,
     useMemo,
     useRef,
@@ -17,7 +19,6 @@ import {
     type FountainBlockTypeChangeTarget,
 } from '../blocks/fountainBlockHelpers';
 import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
-
 import styles from './EditorToolbar.module.css';
 
 type EditorToolbarProps = {
@@ -33,7 +34,9 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
     const [isEditorActive, setIsEditorActive] = useState(false);
 
     const activeBlock = useMemo(() => {
-        if (!isEditorActive || !editor.selection) return null;
+        if (!isEditorActive || !editor.selection) {
+            return null;
+        }
 
         return editor.api.block({at: editor.selection});
     }, [
@@ -42,14 +45,21 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
         isEditorActive,
     ]);
 
-    const activeElement = activeBlock?.[0] as FountainBlockTypeChangeTarget | undefined;
-    const activePath = activeBlock?.[1];
-    const activeType = activeElement?.type;
-    const activeIcon = activeType ? BLOCK_ICONS[activeType] : null;
-    const canUndo = (editor.history?.undos?.length ?? 0) > 0;
-    const canRedo = (editor.history?.redos?.length ?? 0) > 0;
+    const activeElement = useMemo(() => activeBlock?.[0] as FountainBlockTypeChangeTarget | undefined, [activeBlock]);
+    const activePath = useMemo(() => activeBlock?.[1], [activeBlock]);
+    const activeType = useMemo(() => activeElement?.type, [activeElement]);
+    const activeOption = useMemo(
+        () => FOUNTAIN_BLOCKS.find(option => option.type === activeType),
+        [activeType],
+    );
+    const activeIcon = useMemo(
+        () => activeType ? BLOCK_ICONS[activeType] : null,
+        [activeType],
+    );
+    const canUndo = useMemo(() => (editor.history?.undos?.length ?? 0) > 0, [editor.history?.undos?.length]);
+    const canRedo = useMemo(() => (editor.history?.redos?.length ?? 0) > 0, [editor.history?.redos?.length]);
     const [isOpen, setIsOpen] = useState(false);
-    const activeBlockKey = activePath ? activePath.join('-') : null;
+    const activeBlockKey = useMemo(() => activePath ? activePath.join('-') : null, [activePath]);
 
     useEffect(() => {
         setIsOpen(false);
@@ -83,7 +93,9 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
     }, [isFocused]);
 
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen) {
+            return;
+        }
 
         const onPointerDown = (event: MouseEvent | PointerEvent) => {
             if (!dropdownRef.current) return;
@@ -107,28 +119,89 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
         };
     }, [isOpen]);
 
-    const toggleMark = (key: 'bold' | 'italic' | 'underline') => {
+    const toggleMark = useCallback((key: 'bold' | 'italic' | 'underline') => {
         const isActive = !!editor.api.marks()?.[key];
 
         if (isActive) {
             editor.tf.removeMarks(key);
-        } else {
-            editor.tf.addMark(key, true);
+
+            return;
         }
-    };
+
+        editor.tf.addMark(key, true);
+    }, [editor]);
+    const handleSaveMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        onSave?.();
+    }, [onSave]);
+    const handleUndoMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        if (canUndo) {
+            editor.undo();
+        }
+    }, [canUndo, editor]);
+    const handleRedoMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        if (canRedo) {
+            editor.redo();
+        }
+    }, [canRedo, editor]);
+    const handleBoldMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        toggleMark('bold');
+    }, [toggleMark]);
+    const handleItalicMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        toggleMark('italic');
+    }, [toggleMark]);
+    const handleUnderlineMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        toggleMark('underline');
+    }, [toggleMark]);
+    const handleSelectMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        if (!activeType) {
+            return;
+        }
+
+        setIsOpen(prev => !prev);
+    }, [activeType]);
+    const handleMenuItemMouseDown = useCallback((
+        optionType: FountainBlockTypeChangeTarget['type'],
+        event: ReactMouseEvent<HTMLButtonElement>,
+    ) => {
+        event.preventDefault();
+        if (!activeElement || !activePath) {
+            return;
+        }
+
+        if (optionType === activeType) {
+            return;
+        }
+
+        setIsOpen(false);
+        applyBlockTypeChange(
+            editor,
+            activeElement,
+            activePath,
+            optionType,
+        );
+    }, [
+        activeElement,
+        activePath,
+        activeType,
+        editor,
+    ]);
 
     return (
         <div className={styles.toolbar} ref={toolbarRef}>
             <div className={styles.group}>
-                {onSave ? (
+                {onSave && (
                     <button
                         className={styles.iconButton}
                         type="button"
                         aria-label="Save"
-                        onMouseDown={event => {
-                            event.preventDefault();
-                            onSave();
-                        }}
+                        onMouseDown={handleSaveMouseDown}
                     >
                         <svg
                             viewBox="0 0 24 24"
@@ -140,16 +213,13 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                             <path d="M8 20v-6h8v6" />
                         </svg>
                     </button>
-                ) : null}
+                )}
                 <button
                     className={styles.iconButton}
                     type="button"
                     aria-label="Undo"
                     disabled={!canUndo}
-                    onMouseDown={event => {
-                        event.preventDefault();
-                        if (canUndo) editor.undo();
-                    }}
+                    onMouseDown={handleUndoMouseDown}
                 >
                     <svg
                         viewBox="0 0 24 24"
@@ -165,10 +235,7 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                     type="button"
                     aria-label="Redo"
                     disabled={!canRedo}
-                    onMouseDown={event => {
-                        event.preventDefault();
-                        if (canRedo) editor.redo();
-                    }}
+                    onMouseDown={handleRedoMouseDown}
                 >
                     <svg
                         viewBox="0 0 24 24"
@@ -183,10 +250,7 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                     className={styles.iconButton}
                     type="button"
                     aria-label="Bold"
-                    onMouseDown={event => {
-                        event.preventDefault();
-                        toggleMark('bold');
-                    }}
+                    onMouseDown={handleBoldMouseDown}
                 >
                     <span className={styles.textIcon}>B</span>
                 </button>
@@ -194,10 +258,7 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                     className={styles.iconButton}
                     type="button"
                     aria-label="Italic"
-                    onMouseDown={event => {
-                        event.preventDefault();
-                        toggleMark('italic');
-                    }}
+                    onMouseDown={handleItalicMouseDown}
                 >
                     <span className={clsx(styles.textIcon, styles.textIconItalic)}>I</span>
                 </button>
@@ -205,10 +266,7 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                     className={styles.iconButton}
                     type="button"
                     aria-label="Underline"
-                    onMouseDown={event => {
-                        event.preventDefault();
-                        toggleMark('underline');
-                    }}
+                    onMouseDown={handleUnderlineMouseDown}
                 >
                     <span className={clsx(styles.textIcon, styles.textIconUnderline)}>U</span>
                 </button>
@@ -220,12 +278,7 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                     aria-label="Change block type"
                     aria-expanded={isOpen}
                     disabled={!activeType}
-                    onMouseDown={event => {
-                        event.preventDefault();
-                        if (!activeType) return;
-
-                        setIsOpen(prev => !prev);
-                    }}
+                    onMouseDown={handleSelectMouseDown}
                 >
                     <span className={clsx(styles.selectIcon, !activeIcon && styles.selectIconMuted)}>
                         {activeIcon ?? (
@@ -239,8 +292,7 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                         )}
                     </span>
                     <span className={styles.selectLabel}>
-                        {FOUNTAIN_BLOCKS.find((option: (typeof FOUNTAIN_BLOCKS)[number]) => option.type === activeType)
-                            ?.label ?? 'Select block in editor'}
+                        {activeOption?.label ?? 'Select block in editor'}
                     </span>
                     <svg
                         viewBox="0 0 24 24"
@@ -251,7 +303,7 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                         <path d="m6 9 6 6 6-6" />
                     </svg>
                 </button>
-                {isOpen ? (
+                {isOpen && (
                     <div className={styles.menu} role="menu">
                         {FOUNTAIN_BLOCKS.map((option: (typeof FOUNTAIN_BLOCKS)[number]) => (
                             <button
@@ -263,20 +315,7 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                                     option.type === activeType && styles.menuItemActive,
                                 )}
                                 aria-label={`Set block type to ${option.label}`}
-                                onMouseDown={event => {
-                                    event.preventDefault();
-                                    if (!activeElement || !activePath) return;
-
-                                    if (option.type === activeType) return;
-
-                                    setIsOpen(false);
-                                    applyBlockTypeChange(
-                                        editor,
-                                        activeElement,
-                                        activePath,
-                                        option.type,
-                                    );
-                                }}
+                                onMouseDown={event => handleMenuItemMouseDown(option.type, event)}
                             >
                                 <span className={styles.icon}>
                                     {BLOCK_ICONS[option.type]}
@@ -287,7 +326,7 @@ const EditorToolbar = ({onSave}: EditorToolbarProps) => {
                             </button>
                         ))}
                     </div>
-                ) : null}
+                )}
             </div>
         </div>
     );

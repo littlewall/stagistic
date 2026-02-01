@@ -1,4 +1,4 @@
-import {BlockMenuPlugin} from '@platejs/selection/react';
+import {BlockMenuPlugin, BlockSelectionPlugin} from '@platejs/selection/react';
 import {type FountainElement} from '@stagistic/editor-core';
 import clsx from 'clsx';
 import {
@@ -8,25 +8,31 @@ import {
     usePath,
     usePluginOption,
     useSelected,
+    useSelectionVersion,
 } from 'platejs/react';
 import {
+    type MouseEvent as ReactMouseEvent,
+    useCallback,
     useEffect,
     useLayoutEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
-import {Path} from 'slate';
+import {Path, Range} from 'slate';
 
-import {BLOCK_ICONS} from './blockIcons';
 import {applyBlockTypeChange} from '../fountainBlockHelpers';
 import {FOUNTAIN_BLOCKS} from '../fountainBlockRegistry';
-
 import styles from './BlockControls.module.css';
+import {BLOCK_ICONS} from './blockIcons';
+
+type BlockOptionType = (typeof FOUNTAIN_BLOCKS)[number]['type'];
 
 const BlockControls = () => {
     const editor = useEditorRef();
     const element = useElement<FountainElement>();
     const path = usePath();
+    const selectionVersion = useSelectionVersion();
     let elementPath: Path;
 
     try {
@@ -37,21 +43,84 @@ const BlockControls = () => {
 
     const isFocused = useFocused();
     const isSelected = useSelected();
-    const blockId = elementPath.join('-');
+    const selectedIds = usePluginOption(BlockSelectionPlugin, 'selectedIds');
+    const blockId = useMemo(() => elementPath.join('-'), [elementPath]);
     const openId = usePluginOption(BlockMenuPlugin, 'openId');
-    const isOpen = openId === blockId;
-    const activeOption = FOUNTAIN_BLOCKS.find(
-        option => option.type === element.type,
+    const isOpen = useMemo(() => openId === blockId, [openId, blockId]);
+    const activeOption = useMemo(
+        () => FOUNTAIN_BLOCKS.find(option => option.type === element.type),
+        [element.type],
     );
-    const activeIcon = BLOCK_ICONS[element.type];
-    const activeLabel = activeOption?.label ?? 'Block';
-    const blockMenuApi = editor.getApi(BlockMenuPlugin).blockMenu;
-    const shouldShowControls = isFocused && isSelected;
+    const activeIcon = useMemo(
+        () => BLOCK_ICONS[element.type],
+        [element.type],
+    );
+    const activeLabel = useMemo(() => activeOption?.label ?? 'Block', [activeOption]);
+    const blockMenuApi = useMemo(() => editor.getApi(BlockMenuPlugin).blockMenu, [editor]);
+    const hasMultiBlockSelection = useMemo(() => {
+        if ((selectedIds?.size ?? 0) > 1) {
+            return true;
+        }
+
+        const selection = editor.selection;
+
+        if (!selection || Range.isCollapsed(selection)) {
+            return false;
+        }
+
+        const anchorBlock = editor.api.block({at: selection.anchor});
+        const focusBlock = editor.api.block({at: selection.focus});
+
+        if (!anchorBlock || !focusBlock) {
+            return false;
+        }
+
+        return !Path.equals(anchorBlock[1], focusBlock[1]);
+    }, [
+        editor,
+        selectedIds,
+        selectionVersion,
+    ]);
+    const shouldShowControls = useMemo(() => isFocused && isSelected && !hasMultiBlockSelection, [
+        isFocused,
+        isSelected,
+        hasMultiBlockSelection,
+    ]);
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLSpanElement | null>(null);
     const [isMenuAbove, setIsMenuAbove] = useState(false);
     const scrollContainerRef = useRef<HTMLElement | null>(null);
     const scrollLockRef = useRef<{el: HTMLElement, overflow: string} | null>(null);
+    const handleTriggerMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        if (isOpen) {
+            blockMenuApi.hide();
+
+            return;
+        }
+
+        blockMenuApi.show(blockId);
+    }, [
+        blockId,
+        blockMenuApi,
+        isOpen,
+    ]);
+    const handleMenuItemMouseDown = useCallback((
+        optionType: BlockOptionType,
+        event: ReactMouseEvent<HTMLButtonElement>,
+    ) => {
+        event.preventDefault();
+        event.stopPropagation();
+        blockMenuApi.hide();
+        applyBlockTypeChange(editor, element, elementPath, optionType);
+    }, [
+        blockMenuApi,
+        editor,
+        element,
+        elementPath,
+    ]);
 
     useEffect(() => {
         if (!shouldShowControls && openId === blockId) {
@@ -65,7 +134,9 @@ const BlockControls = () => {
     ]);
 
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen) {
+            return;
+        }
 
         const onPointerDown = (event: MouseEvent | PointerEvent) => {
             const target = event.target as Node | null;
@@ -189,18 +260,7 @@ const BlockControls = () => {
                 aria-label={`Change block type (current: ${activeLabel})`}
                 aria-expanded={isOpen}
                 ref={triggerRef}
-                onMouseDown={event => {
-                    event.preventDefault();
-                    event.stopPropagation();
-
-                    if (isOpen) {
-                        blockMenuApi.hide();
-
-                        return;
-                    }
-
-                    blockMenuApi.show(blockId);
-                }}
+                onMouseDown={handleTriggerMouseDown}
             >
                 <span className={styles.triggerIcon}>{activeIcon}</span>
             </button>
@@ -219,12 +279,7 @@ const BlockControls = () => {
                                 styles.menuItem,
                                 option.type === element.type && styles.menuItemActive,
                             )}
-                            onMouseDown={event => {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                blockMenuApi.hide();
-                                applyBlockTypeChange(editor, element, elementPath, option.type);
-                            }}
+                            onMouseDown={event => handleMenuItemMouseDown(option.type, event)}
                         >
                             <span className={styles.menuItemIcon}>
                                 {BLOCK_ICONS[option.type]}

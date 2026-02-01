@@ -3,7 +3,6 @@ import {PlateElement, type PlateElementProps} from 'platejs/react';
 import type {CSSProperties, ReactNode} from 'react';
 
 import BlockControls from '../controls/BlockControls';
-
 import styles from './FountainBlock.module.css';
 
 type FountainBlockProps = PlateElementProps & {

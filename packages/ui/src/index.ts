@@ -14,7 +14,11 @@ export {createFountainPlugins} from './editor/plugins/fountainPlugin';
 export {FountainLeaf} from './editor/utils/fountainMarks';
 export {EditorSidebar, type Scene} from './editor-panels/EditorSidebar';
 export {ToastProvider, useToastController} from './feedback/ToastProvider';
-export {AppHeader, type Script} from './layout/AppHeader';
+export {
+    AppHeader,
+    type Script,
+    type ScriptSyncState,
+} from './layout/AppHeader';
 export {AppLayout} from './layout/AppLayout';
 export {ButtonGroup} from './molecules/ButtonGroup';
 export {

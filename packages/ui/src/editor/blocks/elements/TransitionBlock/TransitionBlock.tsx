@@ -5,7 +5,6 @@ import {ReactNode} from 'react';
 
 import FountainBlock from '../../base/FountainBlock';
 import useDualColumnPlacement from '../../layout/useDualColumnPlacement';
-
 import styles from './TransitionBlock.module.css';
 
 const TransitionBlock = ({children, ...props}: PlateElementProps) => {

@@ -4,6 +4,7 @@ import type {
     ElementType,
     ReactNode,
 } from 'react';
+import {useMemo} from 'react';
 
 import styles from './Card.module.css';
 
@@ -23,12 +24,20 @@ export const Card = <T extends ElementType = typeof defaultElement>({
     variant = 'default',
     ...props
 }: CardProps<T>) => {
-    const Component = as ?? defaultElement;
+    const Component = useMemo(() => as ?? defaultElement, [as]);
+    const isInteractive = useMemo(() => Boolean(props.onClick || props.href), [props.onClick, props.href]);
 
     return (
         <Component
             {...props}
-            className={clsx(styles.card, variant === 'highlight' && styles.highlight, className)}
+            className={clsx(
+                styles.card,
+                {
+                    [styles.highlight]: variant === 'highlight',
+                    [styles.interactive]: isInteractive,
+                },
+                className,
+            )}
         >
             {children}
         </Component>

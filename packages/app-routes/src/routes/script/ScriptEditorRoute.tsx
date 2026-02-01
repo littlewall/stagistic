@@ -16,6 +16,7 @@ import {
     EditorSidebar,
     FountainEditor,
     NewScriptModal,
+    type ScriptSyncState,
     useToastController,
 } from '@stagistic/ui';
 import {
@@ -31,9 +32,8 @@ import {
 } from 'react-router-dom';
 
 const AUTOSAVE_DELAY_MS = 1500;
+const SAVE_SLOW_INDICATOR_MS = 600;
 const DEFAULT_SCRIPT_TITLE = 'Untitled script';
-
-const serializeValue = (value: SlateValue) => JSON.stringify(value);
 
 export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
@@ -48,11 +48,50 @@ export const ScriptEditorRoute = () => {
     const [serializedPreview, setSerializedPreview] = useState<string>('');
     const [storageError, setStorageError] = useState<string | null>(null);
     const [shouldAutoFocus, setShouldAutoFocus] = useState(false);
-    const latestValueRef = useRef<SlateValue | null>(null);
-    const lastSavedSerializedRef = useRef<string | null>(null);
-    const autosaveTimerRef = useRef<number | null>(null);
+    const [saveIndicator, setSaveIndicator] = useState<ScriptSyncState>('saved');
+    const pendingSaveRef = useRef(0);
+    const slowSaveTimerRef = useRef<number | null>(null);
     const {addToast} = useToastController();
     const scriptRepository = useScriptRepository();
+
+    const startSaveIndicator = useCallback(() => {
+        pendingSaveRef.current += 1;
+
+        if (slowSaveTimerRef.current) {
+            window.clearTimeout(slowSaveTimerRef.current);
+        }
+
+        slowSaveTimerRef.current = window.setTimeout(() => {
+            if (pendingSaveRef.current > 0) {
+                setSaveIndicator('saving');
+            }
+        }, SAVE_SLOW_INDICATOR_MS);
+    }, []);
+
+    const finishSaveIndicator = useCallback((success: boolean) => {
+        if (!success) {
+            setSaveIndicator('error');
+        }
+
+        pendingSaveRef.current = Math.max(0, pendingSaveRef.current - 1);
+
+        if (pendingSaveRef.current === 0) {
+            if (slowSaveTimerRef.current) {
+                window.clearTimeout(slowSaveTimerRef.current);
+                slowSaveTimerRef.current = null;
+            }
+
+            setSaveIndicator(success ? 'saved' : 'error');
+        }
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (slowSaveTimerRef.current) {
+                window.clearTimeout(slowSaveTimerRef.current);
+            }
+        };
+    }, []);
 
     useEffect(() => {
         const handleNewScript = () => {
@@ -158,8 +197,6 @@ export const ScriptEditorRoute = () => {
 
         setInitialValue(undefined);
         setSerializedPreview('');
-        lastSavedSerializedRef.current = null;
-        latestValueRef.current = null;
         setShouldAutoFocus(false);
 
         const loadLatest = async () => {
@@ -174,9 +211,9 @@ export const ScriptEditorRoute = () => {
 
                 if (stored) {
                     const needsFocus = isSlateValueEmpty(stored);
-                    const storedSerialized = serializeValue(stored);
+                    const storedSerialized = JSON.stringify(stored);
                     const normalized = ensureNodeIds(ensureSceneHeading(stored));
-                    const normalizedSerialized = serializeValue(normalized);
+                    const normalizedSerialized = JSON.stringify(normalized);
 
                     if (storedSerialized !== normalizedSerialized) {
                         void scriptRepository.saveLatest(currentScriptId, normalized).catch(error => {
@@ -184,8 +221,6 @@ export const ScriptEditorRoute = () => {
                         });
                     }
 
-                    latestValueRef.current = normalized;
-                    lastSavedSerializedRef.current = normalizedSerialized;
                     setSerializedPreview(serializeFountain(normalized as unknown as FountainDocument));
                     setInitialValue(normalized);
                     setShouldAutoFocus(needsFocus);
@@ -195,8 +230,6 @@ export const ScriptEditorRoute = () => {
 
                 const fallback = ensureNodeIds(ensureSceneHeading(null));
 
-                latestValueRef.current = fallback;
-                lastSavedSerializedRef.current = serializeValue(fallback);
                 setInitialValue(fallback);
                 setSerializedPreview(serializeFountain(fallback as unknown as FountainDocument));
                 setShouldAutoFocus(true);
@@ -217,39 +250,28 @@ export const ScriptEditorRoute = () => {
         return () => {
             isActive = false;
         };
-    }, [
-        currentScriptId,
-    ]);
-
-    useEffect(() => {
-        return () => {
-            if (autosaveTimerRef.current) {
-                window.clearTimeout(autosaveTimerRef.current);
-            }
-        };
-    }, []);
-
-    useEffect(() => {
-        if (autosaveTimerRef.current) {
-            window.clearTimeout(autosaveTimerRef.current);
-            autosaveTimerRef.current = null;
-        }
     }, [currentScriptId]);
 
-    const saveLatest = useCallback(async (value: SlateValue) => {
+    const handleValueChange = useCallback(
+        (value: SlateValue) => {
+            console.log('EDITOR VALUE (DB JSON):', value);
+
+            setSerializedPreview(serializeFountain(value as unknown as FountainDocument));
+        },
+        [setSerializedPreview, serializeFountain],
+    );
+
+    const handleAutoSave = useCallback(async (value: SlateValue) => {
         if (!currentScriptId) {
-            return;
-        }
-
-        const serialized = serializeValue(value);
-
-        if (serialized === lastSavedSerializedRef.current) {
-            return;
+            return false;
         }
 
         try {
+            startSaveIndicator();
             await scriptRepository.saveLatest(currentScriptId, value);
-            lastSavedSerializedRef.current = serialized;
+            finishSaveIndicator(true);
+
+            return true;
         } catch (error) {
             console.error('Failed to save latest script', error);
             setStorageError('Failed to save script data.');
@@ -258,64 +280,35 @@ export const ScriptEditorRoute = () => {
                 description: 'Changes were not saved.',
                 variant: 'error',
             });
+            finishSaveIndicator(false);
+
+            return false;
         }
-    }, [currentScriptId]);
-
-    const scheduleAutosave = useCallback(
-        (value: SlateValue) => {
-            const serialized = serializeValue(value);
-
-            if (serialized === lastSavedSerializedRef.current) {
-                return;
-            }
-
-            if (autosaveTimerRef.current) {
-                window.clearTimeout(autosaveTimerRef.current);
-            }
-
-            autosaveTimerRef.current = window.setTimeout(() => {
-                const latestValue = latestValueRef.current;
-
-                if (!latestValue) {
-                    return;
-                }
-
-                void saveLatest(latestValue);
-            }, AUTOSAVE_DELAY_MS);
-        },
-        [saveLatest],
-    );
-
-    const handleValueChange = useCallback(
-        (value: SlateValue) => {
-            console.log('EDITOR VALUE (DB JSON):', value);
-
-            latestValueRef.current = value;
-            scheduleAutosave(value);
-            setSerializedPreview(serializeFountain(value as unknown as FountainDocument));
-        },
-        [scheduleAutosave],
-    );
+    }, [
+        addToast,
+        currentScriptId,
+        finishSaveIndicator,
+        scriptRepository,
+        startSaveIndicator,
+    ]);
 
     const handleManualSave = useCallback(async (value: SlateValue) => {
-        if (autosaveTimerRef.current) {
-            window.clearTimeout(autosaveTimerRef.current);
-            autosaveTimerRef.current = null;
-        }
-
-        if (!currentScript) {
-            return;
+        if (!currentScript || !currentScriptId) {
+            return false;
         }
 
         try {
+            startSaveIndicator();
             await scriptRepository.saveLatest(currentScriptId, value);
-            lastSavedSerializedRef.current = serializeValue(value);
             await scriptRepository.commitVersion(currentScriptId);
             addToast({
                 title: 'Script saved',
                 description: currentScript.name,
                 variant: 'success',
             });
+            finishSaveIndicator(true);
+
+            return true;
         } catch (error) {
             console.error('Failed to commit script version', error);
             setStorageError('Failed to commit script version.');
@@ -324,8 +317,77 @@ export const ScriptEditorRoute = () => {
                 description: 'Please try again.',
                 variant: 'error',
             });
+            finishSaveIndicator(false);
+
+            return false;
         }
-    }, [currentScript, currentScriptId]);
+    }, [
+        addToast,
+        currentScript,
+        currentScriptId,
+        finishSaveIndicator,
+        scriptRepository,
+        startSaveIndicator,
+    ]);
+    const handleSelectScript = useCallback((script: {id: string}) => {
+        void navigate(`/script/${script.id}/editor`);
+    }, [navigate]);
+    const handleHome = useCallback(() => {
+        void navigate('/');
+    }, [navigate]);
+    const handleNewScript = useCallback(() => {
+        setIsModalOpen(true);
+    }, []);
+    const handleMenuAction = useCallback((actionId: string) => {
+        if (actionId === 'scripts') {
+            void navigate('/script/list');
+
+            return;
+        }
+
+        if (actionId === 'settings' && currentScript) {
+            void navigate(`/script/${currentScript.id}/settings`);
+
+            return;
+        }
+
+        if (actionId === 'new-script') {
+            setIsModalOpen(true);
+        }
+    }, [currentScript, navigate]);
+    const handleSceneClick = useCallback(() => {}, []);
+    const handleCloseModal = useCallback(() => {
+        setIsModalOpen(false);
+    }, []);
+    const handleCreate = useCallback((name: string) => {
+        const createAndNavigate = async () => {
+            try {
+                const newScriptId = await createScript(name);
+
+                setIsModalOpen(false);
+                void navigate(`/script/${newScriptId}/editor`);
+                addToast({
+                    title: 'Script created',
+                    description: name.trim() || 'Untitled script',
+                    variant: 'success',
+                });
+            } catch (error) {
+                console.error('Failed to create script', error);
+                setStorageError('Failed to create script.');
+                addToast({
+                    title: 'Failed to create script',
+                    description: 'Please try again.',
+                    variant: 'error',
+                });
+            }
+        };
+
+        void createAndNavigate();
+    }, [
+        addToast,
+        createScript,
+        navigate,
+    ]);
 
     if (scriptsLoading || initialValue === undefined) {
         return null;
@@ -341,29 +403,14 @@ export const ScriptEditorRoute = () => {
                 <AppHeader
                     currentScript={currentScript}
                     recentScripts={recentScripts}
-                    onSelectScript={script => navigate(`/script/${script.id}/editor`)}
-                    onHome={() => navigate('/')}
-                    onNewScript={() => setIsModalOpen(true)}
-                    onMenuAction={actionId => {
-                        if (actionId === 'scripts') {
-                            void navigate('/script/list');
-
-                            return;
-                        }
-
-                        if (actionId === 'settings') {
-                            void navigate(`/script/${currentScript.id}/settings`);
-
-                            return;
-                        }
-
-                        if (actionId === 'new-script') {
-                            setIsModalOpen(true);
-                        }
-                    }}
+                    onSelectScript={handleSelectScript}
+                    onHome={handleHome}
+                    onNewScript={handleNewScript}
+                    scriptSyncState={saveIndicator}
+                    onMenuAction={handleMenuAction}
                 />
             )}
-            sidebar={<EditorSidebar scenes={scenes} onSceneClick={() => {}} />}
+            sidebar={<EditorSidebar scenes={scenes} onSceneClick={handleSceneClick} />}
         >
             {storageError ? (
                 <div role="alert" style={{padding: '12px 20px'}}>
@@ -372,38 +419,16 @@ export const ScriptEditorRoute = () => {
             ) : null}
             <FountainEditor
                 initialValue={initialValue ?? undefined}
+                onAutoSave={handleAutoSave}
                 onValueChange={handleValueChange}
                 onManualSave={handleManualSave}
+                autoSaveDelayMs={AUTOSAVE_DELAY_MS}
                 autoFocus={shouldAutoFocus}
             />
             <NewScriptModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onCreate={name => {
-                    const createAndNavigate = async () => {
-                        try {
-                            const newScriptId = await createScript(name);
-
-                            setIsModalOpen(false);
-                            void navigate(`/script/${newScriptId}/editor`);
-                            addToast({
-                                title: 'Script created',
-                                description: name.trim() || 'Untitled script',
-                                variant: 'success',
-                            });
-                        } catch (error) {
-                            console.error('Failed to create script', error);
-                            setStorageError('Failed to create script.');
-                            addToast({
-                                title: 'Failed to create script',
-                                description: 'Please try again.',
-                                variant: 'error',
-                            });
-                        }
-                    };
-
-                    void createAndNavigate();
-                }}
+                onClose={handleCloseModal}
+                onCreate={handleCreate}
             />
         </AppLayout>
     );

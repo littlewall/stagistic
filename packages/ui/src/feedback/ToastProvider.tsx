@@ -1,3 +1,4 @@
+import {Xmark} from 'iconoir-react';
 import {
     createContext,
     type ReactNode,
@@ -35,7 +36,7 @@ const ToastContext = createContext<ToastContextValue | null>(null);
 const toastQueue = new ToastQueue<ToastContent>({maxVisibleToasts: 3});
 
 const ToastItem = ({toast}: {toast: QueuedToast<ToastContent>}) => {
-    const variant = toast.content.variant ?? 'info';
+    const variant = useMemo(() => toast.content.variant ?? 'info', [toast.content.variant]);
 
     return (
         <Toast
@@ -47,14 +48,14 @@ const ToastItem = ({toast}: {toast: QueuedToast<ToastContent>}) => {
                 <Text slot="title" className={styles.title}>
                     {toast.content.title}
                 </Text>
-                {toast.content.description ? (
+                {toast.content.description && (
                     <Text slot="description" className={styles.description}>
                         {toast.content.description}
                     </Text>
-                ) : null}
+                )}
             </ToastContent>
             <Button slot="close" className={styles.closeButton}>
-                ×
+                <Xmark />
             </Button>
         </Toast>
     );
@@ -70,6 +71,12 @@ export const ToastProvider = ({children}: {children: ReactNode}) => {
     );
 
     const value = useMemo(() => ({addToast}), [addToast]);
+    const renderToast = useCallback(
+        ({toast}: {toast: QueuedToast<ToastContent>}) => (
+            <ToastItem toast={toast} />
+        ),
+        [],
+    );
 
     return (
         <ToastContext.Provider value={value}>
@@ -80,7 +87,7 @@ export const ToastProvider = ({children}: {children: ReactNode}) => {
                 aria-label="Notifications"
             >
                 <ToastList className={styles.list}>
-                    {({toast}) => <ToastItem toast={toast as QueuedToast<ToastContent>} />}
+                    {renderToast}
                 </ToastList>
             </ToastRegion>
         </ToastContext.Provider>

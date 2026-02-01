@@ -9,9 +9,6 @@
     "core:event:default",
     "core:event:allow-listen",
     "core:path:default",
-    "core:path:allow-resolve-directory",
-    "sql:default",
-    "sql:allow-load",
-    "sql:allow-execute"
+    "core:path:allow-resolve-directory"
   ]
 }

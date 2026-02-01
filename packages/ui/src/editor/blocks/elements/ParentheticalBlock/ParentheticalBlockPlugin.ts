@@ -4,7 +4,9 @@ import {
 } from '@stagistic/editor-core';
 import {createPlatePlugin} from 'platejs/react';
 import {
-    Path, Point, Range,
+    Path,
+    Point,
+    Range,
 } from 'slate';
 
 import {
@@ -12,7 +14,6 @@ import {
     isParentheticalSelection,
     setSelectionBlockType,
 } from '../../fountainBlockHelpers';
-
 import ParentheticalBlock from './ParentheticalBlock';
 
 export const parentheticalPlugin = createPlatePlugin({

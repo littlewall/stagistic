@@ -5,7 +5,6 @@ import {ReactNode} from 'react';
 
 import FountainBlock from '../../base/FountainBlock';
 import useDualColumnPlacement from '../../layout/useDualColumnPlacement';
-
 import styles from './CharacterBlock.module.css';
 
 const CharacterBlock = ({children, ...props}: PlateElementProps) => {

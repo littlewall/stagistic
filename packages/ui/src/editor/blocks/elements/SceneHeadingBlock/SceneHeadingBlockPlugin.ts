@@ -5,7 +5,6 @@ import {
     createBlockKeyHandler,
     defaultEnterKeyHandler,
 } from '../../keyboard/blockKeyHandlers';
-
 import SceneHeadingBlock from './SceneHeadingBlock';
 
 const onKeyDown = createBlockKeyHandler({

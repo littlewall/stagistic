@@ -25,7 +25,12 @@ import {
     useToastController,
 } from '@stagistic/ui';
 import {
-    useEffect, useMemo, useState,
+    type KeyboardEvent as ReactKeyboardEvent,
+    type MouseEvent as ReactMouseEvent,
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
 } from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 
@@ -56,6 +61,13 @@ export const HomeRoute = () => {
         createScript,
     } = useScripts();
     const {addToast} = useToastController();
+    const recentScripts = useMemo(() => scripts.slice(0, 6), [scripts]);
+    const openModal = useCallback(() => {
+        setIsModalOpen(true);
+    }, []);
+    const closeModal = useCallback(() => {
+        setIsModalOpen(false);
+    }, []);
 
     const latestScript = useMemo(() => {
         if (scriptSummaries.length === 0) {
@@ -65,7 +77,7 @@ export const HomeRoute = () => {
         return scriptSummaries[0];
     }, [scriptSummaries]);
 
-    const formatLastEdited = (timestamp: number) => {
+    const formatLastEdited = useCallback((timestamp: number) => {
         const now = new Date();
         const updated = new Date(timestamp);
         const diffMs = now.getTime() - updated.getTime();
@@ -90,11 +102,11 @@ export const HomeRoute = () => {
         });
 
         return `Edited ${dateFormat.format(updated)}`;
-    };
+    }, []);
 
     useEffect(() => {
         const handleNewScript = () => {
-            setIsModalOpen(true);
+            openModal();
         };
 
         const handleImport = () => {
@@ -112,38 +124,120 @@ export const HomeRoute = () => {
             window.removeEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
             window.removeEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
         };
-    }, [addToast]);
+    }, [addToast, openModal]);
 
-    const handleCreate = async (name: string) => {
-        try {
-            const scriptId = await createScript(name);
+    const handleCreate = useCallback((name: string) => {
+        const createAndNavigate = async () => {
+            try {
+                const scriptId = await createScript(name);
 
-            setIsModalOpen(false);
-            void navigate(`/script/${scriptId}/editor`);
-            setStorageError(null);
-            addToast({
-                title: 'Script created',
-                description: name.trim() || 'Untitled script',
-                variant: 'success',
-            });
-        } catch (error) {
-            console.error('Failed to create script', error);
-            setStorageError('Failed to create script.');
-            addToast({
-                title: 'Failed to create script',
-                description: 'Please try again.',
-                variant: 'error',
-            });
+                setIsModalOpen(false);
+                void navigate(`/script/${scriptId}/editor`);
+                setStorageError(null);
+                addToast({
+                    title: 'Script created',
+                    description: name.trim() || 'Untitled script',
+                    variant: 'success',
+                });
+            } catch (error) {
+                console.error('Failed to create script', error);
+                setStorageError('Failed to create script.');
+                addToast({
+                    title: 'Failed to create script',
+                    description: 'Please try again.',
+                    variant: 'error',
+                });
+            }
+        };
+
+        void createAndNavigate();
+    }, [
+        addToast,
+        createScript,
+        navigate,
+    ]);
+    const handleHome = useCallback(() => {
+        void navigate('/');
+    }, [navigate]);
+    const handleResumeScript = useCallback(() => {
+        if (!latestScript) {
+            return;
         }
-    };
+
+        void navigate(`/script/${latestScript.id}/editor`);
+    }, [latestScript, navigate]);
+    const handleCardClick = useCallback((scriptId: string) => {
+        void navigate(`/script/${scriptId}/editor`);
+    }, [navigate]);
+    const handleCardKeyDown = useCallback((scriptId: string, event: ReactKeyboardEvent<HTMLElement>) => {
+        if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            void navigate(`/script/${scriptId}/editor`);
+        }
+    }, [navigate]);
+    const handleOpenEditor = useCallback((scriptId: string, event: ReactMouseEvent<HTMLElement>) => {
+        event.stopPropagation();
+        void navigate(`/script/${scriptId}/editor`);
+    }, [navigate]);
+    const handleOpenSettings = useCallback((scriptId: string, event: ReactMouseEvent<HTMLElement>) => {
+        event.stopPropagation();
+        void navigate(`/script/${scriptId}/settings`);
+    }, [navigate]);
+    const recentScriptCards = useMemo(
+        () => recentScripts.map((script, index) => (
+            <Card
+                key={script.id}
+                className={styles.card}
+                onClick={() => handleCardClick(script.id)}
+                role="button"
+                tabIndex={0}
+                onKeyDown={event => handleCardKeyDown(script.id, event)}
+            >
+                <CardHeader>
+                    <h3 className={styles.cardTitle}>{script.name}</h3>
+                    <Tag>
+                        {mockUpdates[index]?.status ?? 'Draft'}
+                    </Tag>
+                </CardHeader>
+                <CardContent>
+                    <SubtleText>
+                        {mockUpdates[index]?.updated ?? 'Edited recently'}
+                    </SubtleText>
+                </CardContent>
+                <CardFooter>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={event => handleOpenEditor(script.id, event)}
+                    >
+                        Open editor
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={event => handleOpenSettings(script.id, event)}
+                    >
+                        Script settings
+                    </Button>
+                </CardFooter>
+            </Card>
+        ))
+        , [
+            handleCardClick,
+            handleCardKeyDown,
+            handleOpenEditor,
+            handleOpenSettings,
+            recentScripts,
+        ],
+    );
 
     return (
         <AppLayout
             header={(
                 <AppHeader
                     showScriptMenu={false}
-                    onHome={() => navigate('/')}
-                    onNewScript={() => setIsModalOpen(true)}
+                    onHome={handleHome}
+                    onNewScript={openModal}
                 />
             )}
         >
@@ -163,10 +257,10 @@ export const HomeRoute = () => {
                                 within a focused workspace.
                             </SubtleText>
                             <div className={styles.actions}>
-                                <Button onClick={() => setIsModalOpen(true)}>
+                                <Button onClick={openModal}>
                                     New script
                                 </Button>
-                                {scripts && scripts.length > 0 && (
+                                {scripts && scripts.length > 6 && (
                                     <Button
                                         as={Link}
                                         variant="secondary"
@@ -189,7 +283,7 @@ export const HomeRoute = () => {
                                 <CardFooter className={styles.heroCardFooter}>
                                     <Button
                                         className={styles.heroCardButton}
-                                        onClick={() => navigate(`/script/${latestScript.id}/editor`)}
+                                        onClick={handleResumeScript}
                                     >
                                         Resume script
                                     </Button>
@@ -199,7 +293,7 @@ export const HomeRoute = () => {
                         )}
                     </HeroLayout>
                 </section>
-                {scripts && scripts.length > 0 && (
+                {recentScripts.length > 0 && (
                     <Section>
                         <SectionHeader>
                             <div>
@@ -210,65 +304,15 @@ export const HomeRoute = () => {
                             </div>
                         </SectionHeader>
                         <Grid>
-                            {scripts.map((script, index) => (
-                                <Card
-                                    key={script.id}
-                                    className={styles.card}
-                                    onClick={() => navigate(`/script/${script.id}/editor`)}
-                                    role="button"
-                                    tabIndex={0}
-                                    onKeyDown={event => {
-                                        if (event.key === 'Enter' || event.key === ' ') {
-                                            event.preventDefault();
-                                            void navigate(`/script/${script.id}/editor`);
-                                        }
-                                    }}
-                                >
-                                    <CardHeader>
-                                        <h3 className={styles.cardTitle}>{script.name}</h3>
-                                        <Tag>
-                                            {mockUpdates[index]?.status ?? 'Draft'}
-                                        </Tag>
-                                    </CardHeader>
-                                    <CardContent>
-                                        <SubtleText>
-                                            {mockUpdates[index]?.updated ?? 'Edited recently'}
-                                        </SubtleText>
-                                    </CardContent>
-                                    <CardFooter>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={event => {
-                                                event.stopPropagation();
-                                                void navigate(`/script/${script.id}/editor`);
-                                            }}
-                                        >
-                                            Open editor
-                                        </Button>
-                                        <Button
-                                            variant="ghost"
-                                            size="sm"
-                                            onClick={event => {
-                                                event.stopPropagation();
-                                                void navigate(`/script/${script.id}/settings`);
-                                            }}
-                                        >
-                                            Script settings
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
-                            ))}
+                            {recentScriptCards}
                         </Grid>
                     </Section>
                 )}
             </PageContainer>
             <NewScriptModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onCreate={name => {
-                    void handleCreate(name);
-                }}
+                onClose={closeModal}
+                onCreate={handleCreate}
             />
         </AppLayout>
     );

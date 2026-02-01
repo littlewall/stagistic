@@ -9,7 +9,6 @@ import {
     createBlockKeyHandler,
     defaultEnterKeyHandler,
 } from '../../keyboard/blockKeyHandlers';
-
 import DialogueBlock from './DialogueBlock';
 
 const onKeyDown = createBlockKeyHandler({

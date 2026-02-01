@@ -1,5 +1,8 @@
 import {
+    type ChangeEvent,
     type FormEvent,
+    type MouseEvent as ReactMouseEvent,
+    useCallback,
     useEffect,
     useRef,
     useState,
@@ -51,28 +54,37 @@ export const NewScriptModal = ({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, onClose]);
 
-    if (!isOpen) {
-        return null;
-    }
-
-    const handleSubmit = (event: FormEvent) => {
+    const handleSubmit = useCallback((event: FormEvent) => {
         event.preventDefault();
         onCreate(name);
         setName('');
-    };
+    }, [name, onCreate]);
+    const handleBackdropClick = useCallback(() => {
+        onClose();
+    }, [onClose]);
+    const handleModalClick = useCallback((event: ReactMouseEvent<HTMLDivElement>) => {
+        event.stopPropagation();
+    }, []);
+    const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+        setName(event.target.value);
+    }, []);
+
+    if (!isOpen) {
+        return null;
+    }
 
     return (
         <div
             className={styles.backdrop}
             role="presentation"
-            onClick={onClose}
+            onClick={handleBackdropClick}
         >
             <div
                 className={styles.modal}
                 role="dialog"
                 aria-modal="true"
                 aria-label="Create new script"
-                onClick={event => event.stopPropagation()}
+                onClick={handleModalClick}
             >
                 <h2 className={styles.title}>Create new script</h2>
                 <p className={styles.subtitle}>
@@ -87,7 +99,7 @@ export const NewScriptModal = ({
                         ref={inputRef}
                         className={styles.input}
                         value={name}
-                        onChange={event => setName(event.target.value)}
+                        onChange={handleNameChange}
                         placeholder="Untitled scenario"
                     />
                     <div className={styles.actions}>

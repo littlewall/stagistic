@@ -4,7 +4,9 @@ import {
     type FountainElementType,
 } from '@stagistic/editor-core';
 import {
-    useEditorRef, useEditorVersion, usePath,
+    useEditorRef,
+    useEditorVersion,
+    usePath,
 } from 'platejs/react';
 import type {CSSProperties} from 'react';
 import {useMemo} from 'react';

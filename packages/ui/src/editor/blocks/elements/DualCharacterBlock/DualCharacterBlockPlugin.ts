@@ -15,7 +15,6 @@ import {
     isDualCharacterSelection,
     setSelectionBlockType,
 } from '../../fountainBlockHelpers';
-
 import DualCharacterBlock from './DualCharacterBlock';
 
 export const dualCharacterPlugin = createPlatePlugin({

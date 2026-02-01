@@ -1,6 +1,6 @@
 import type {FastifyInstance} from 'fastify';
 
-export function healthRoutes(app: FastifyInstance) {
+export const healthRoutes = (app: FastifyInstance) => {
     app.get('/health', () => {
         return {
             status: 'ok',
@@ -19,4 +19,4 @@ export function healthRoutes(app: FastifyInstance) {
             },
         };
     });
-}
+};

@@ -9,18 +9,22 @@ type AppLayoutProps = {
     children: ReactNode,
 };
 
-export function AppLayout({
-    header, sidebar, children,
-}: AppLayoutProps) {
-    const bodyClassName = clsx(styles.body, !sidebar && styles.bodySingle);
-
+export const AppLayout = ({
+    header,
+    sidebar,
+    children,
+}: AppLayoutProps) => {
     return (
         <div className={styles.page}>
-            {header ? <div className={styles.header}>{header}</div> : null}
-            <div className={bodyClassName}>
+            {header && (
+                <div className={styles.header}>{header}</div>
+            )}
+            <div className={clsx(styles.body, !sidebar && styles.bodySingle)}>
                 <main className={styles.main}>{children}</main>
-                {sidebar ? <aside className={clsx(styles.sidebar)}>{sidebar}</aside> : null}
+                {sidebar && (
+                    <aside className={clsx(styles.sidebar)}>{sidebar}</aside>
+                )}
             </div>
         </div>
     );
-}
+};

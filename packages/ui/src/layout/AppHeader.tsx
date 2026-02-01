@@ -1,6 +1,7 @@
 import {
     Folder, Home, NavArrowDown, Plus, UserCircle,
 } from 'iconoir-react';
+import {useCallback, useMemo} from 'react';
 import {
     Button,
     Header as MenuHeader,
@@ -10,6 +11,8 @@ import {
     MenuTrigger,
     Popover,
     Separator,
+    Tooltip,
+    TooltipTrigger,
 } from 'react-aria-components';
 
 import styles from './AppHeader.module.css';
@@ -19,32 +22,84 @@ export type Script = {
     name: string,
 };
 
+export type ScriptSyncState = 'saved' | 'saving' | 'error';
+
 type AppHeaderProps = {
     currentScript?: Script,
     recentScripts?: Script[],
     onSelectScript?: (script: Script) => void,
     onMenuAction?: (actionId: string) => void,
     showScriptMenu?: boolean,
+    scriptSyncState?: ScriptSyncState,
     onHome: () => void,
     onNewScript: () => void,
     onBackToEditor?: () => void,
     backToEditorLabel?: string,
 };
 
-export function AppHeader({
+export const AppHeader = ({
     currentScript,
     recentScripts = [],
     onSelectScript,
     onMenuAction,
     showScriptMenu = true,
+    scriptSyncState,
     onHome,
     onNewScript,
     onBackToEditor,
     backToEditorLabel = 'Back to editor',
-}: AppHeaderProps) {
+}: AppHeaderProps) => {
     const script = currentScript;
     const handleSelectScript = onSelectScript;
-    const canShowScriptMenu = Boolean(showScriptMenu && script && handleSelectScript);
+    const canShowScriptMenu = useMemo(
+        () => Boolean(showScriptMenu && script && handleSelectScript),
+        [
+            handleSelectScript,
+            script,
+            showScriptMenu,
+        ],
+    );
+    const showSyncState = canShowScriptMenu;
+    const syncMeta = useMemo(() => {
+        const resolvedSyncState = scriptSyncState ?? 'saved';
+
+        return {
+            label: resolvedSyncState === 'saving'
+                ? 'Saving'
+                : resolvedSyncState === 'error'
+                    ? 'Error'
+                    : 'Saved',
+            className: resolvedSyncState === 'saving'
+                ? styles.scriptStatusSaving
+                : resolvedSyncState === 'error'
+                    ? styles.scriptStatusError
+                    : styles.scriptStatusSaved,
+        };
+    }, [scriptSyncState]);
+    const handleMenuAction = useCallback((key: string | number) => {
+        if (typeof key !== 'string') {
+            return;
+        }
+
+        if (key.startsWith('script:')) {
+            const scriptId = key.replace('script:', '');
+            const script = recentScripts.find(item => item.id === scriptId);
+
+            if (script && handleSelectScript) {
+                handleSelectScript(script);
+            }
+
+            return;
+        }
+
+        if (onMenuAction) {
+            onMenuAction(key);
+        }
+    }, [
+        handleSelectScript,
+        onMenuAction,
+        recentScripts,
+    ]);
 
     return (
         <header className={styles.header} data-tauri-drag-region>
@@ -85,26 +140,7 @@ export function AppHeader({
                         <Popover className={styles.menuPopover} placement="bottom">
                             <Menu
                                 className={styles.menu}
-                                onAction={key => {
-                                    if (typeof key !== 'string') {
-                                        return;
-                                    }
-
-                                    if (key.startsWith('script:')) {
-                                        const scriptId = key.replace('script:', '');
-                                        const script = recentScripts.find(item => item.id === scriptId);
-
-                                        if (script && handleSelectScript) {
-                                            handleSelectScript(script);
-                                        }
-
-                                        return;
-                                    }
-
-                                    if (onMenuAction) {
-                                        onMenuAction(key);
-                                    }
-                                }}
+                                onAction={handleMenuAction}
                             >
                                 <MenuSection className={styles.menuSection}>
                                     <MenuItem className={styles.currentScriptBlock} isDisabled>
@@ -150,6 +186,24 @@ export function AppHeader({
                         </Popover>
                     </MenuTrigger>
                 ) : null}
+                {showSyncState ? (
+                    <TooltipTrigger>
+                        <span
+                            className={styles.scriptStatus}
+                            aria-label={syncMeta.label}
+                            aria-live="polite"
+                            tabIndex={0}
+                        >
+                            <span
+                                className={`${styles.scriptStatusDot} ${syncMeta.className}`}
+                                aria-hidden="true"
+                            />
+                        </span>
+                        <Tooltip className={styles.tooltip}>
+                            {syncMeta.label}
+                        </Tooltip>
+                    </TooltipTrigger>
+                ) : null}
             </div>
             <MenuTrigger>
                 <Button className={styles.avatarTrigger} data-tauri-drag-region="false">
@@ -170,4 +224,4 @@ export function AppHeader({
             </MenuTrigger>
         </header>
     );
-}
+};

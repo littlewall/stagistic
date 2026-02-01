@@ -5,7 +5,7 @@ import styles from './EditorCanvas.module.css';
 
 type EditorCanvasProps = Pick<PlateContentProps, 'renderLeaf' | 'autoFocus'>;
 
-export function EditorCanvas({renderLeaf, autoFocus}: EditorCanvasProps) {
+export const EditorCanvas = ({renderLeaf, autoFocus}: EditorCanvasProps) => {
     return (
         <section className={styles.canvas}>
             <PlateContent
@@ -16,4 +16,4 @@ export function EditorCanvas({renderLeaf, autoFocus}: EditorCanvasProps) {
             />
         </section>
     );
-}
+};

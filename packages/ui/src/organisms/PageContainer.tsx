@@ -15,7 +15,13 @@ export const PageContainer = ({
     className,
 }: PageContainerProps) => {
     return (
-        <div className={clsx(styles.root, styles[variant], className)}>
+        <div
+            className={clsx(
+                styles.root,
+                styles[variant],
+                className,
+            )}
+        >
             {children}
         </div>
     );

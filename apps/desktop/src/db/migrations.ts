@@ -1,56 +1,51 @@
-import type Database from '@tauri-apps/plugin-sql';
+import type {PGlite} from '@electric-sql/pglite';
+import {compiledMigrations} from '@stagistic/db';
 
-const MIGRATIONS: string[] = [
-    'PRAGMA foreign_keys = ON;',
-    `CREATE TABLE IF NOT EXISTS scripts (
-        id TEXT PRIMARY KEY,
-        title TEXT NOT NULL,
-        created_at INTEGER NOT NULL,
-        updated_at INTEGER NOT NULL,
-        active_block_id TEXT
-    );`,
-    `CREATE TABLE IF NOT EXISTS script_latest (
-        script_id TEXT PRIMARY KEY,
-        content_json TEXT NOT NULL,
-        updated_at INTEGER NOT NULL,
-        schema_version INTEGER NOT NULL DEFAULT 1,
-        FOREIGN KEY (script_id) REFERENCES scripts(id) ON DELETE CASCADE
-    );`,
-    `CREATE TABLE IF NOT EXISTS script_versions (
-        id TEXT PRIMARY KEY,
-        script_id TEXT NOT NULL,
-        message TEXT NULL,
-        content_json TEXT NOT NULL,
-        created_at INTEGER NOT NULL,
-        schema_version INTEGER NOT NULL DEFAULT 1,
-        FOREIGN KEY (script_id) REFERENCES scripts(id) ON DELETE CASCADE
-    );`,
-    'CREATE INDEX IF NOT EXISTS script_versions_script_id_created_at_idx ON script_versions (script_id, created_at DESC);',
-    `CREATE TABLE IF NOT EXISTS sync_outbox (
-        id TEXT PRIMARY KEY,
-        script_id TEXT,
-        op_type TEXT,
-        payload_json TEXT,
-        created_at INTEGER,
-        status TEXT NOT NULL DEFAULT 'pending'
-    );`,
-];
+const MIGRATIONS_TABLE = '__stagistic_migrations';
 
-const ensureScriptsColumns = async (db: Database) => {
-    const columns = await db.select<Array<{name: string}>>(
-        'PRAGMA table_info(scripts);',
+const ensureMigrationsTable = async (client: PGlite) => {
+    await client.exec(
+        `CREATE TABLE IF NOT EXISTS ${MIGRATIONS_TABLE} (`
+        + 'id text PRIMARY KEY,'
+        + 'applied_at bigint NOT NULL'
+        + ');',
     );
-    const hasActiveBlock = columns.some(column => column.name === 'active_block_id');
-
-    if (!hasActiveBlock) {
-        await db.execute('ALTER TABLE scripts ADD COLUMN active_block_id TEXT;');
-    }
 };
 
-export const ensureSchema = async (db: Database) => {
-    for (const sql of MIGRATIONS) {
-        await db.execute(sql);
-    }
+const getAppliedMigrationIds = async (client: PGlite) => {
+    const result = await client.query<{id: string}>(
+        `SELECT id FROM ${MIGRATIONS_TABLE} ORDER BY id`,
+    );
 
-    await ensureScriptsColumns(db);
+    return new Set(result.rows.map(row => row.id));
+};
+
+export const runMigrations = async (client: PGlite) => {
+    await ensureMigrationsTable(client);
+
+    const applied = await getAppliedMigrationIds(client);
+
+    for (const migration of compiledMigrations) {
+        if (applied.has(migration.id)) {
+            continue;
+        }
+
+        const safeId = migration.id.replace(/'/gu, '\'\'');
+
+        try {
+            await client.exec(
+                `BEGIN;\n${migration.sql}\n`
+                + `INSERT INTO ${MIGRATIONS_TABLE} (id, applied_at) VALUES ('${safeId}', ${Date.now()});\n`
+                + 'COMMIT;',
+            );
+        } catch (error) {
+            try {
+                await client.exec('ROLLBACK;');
+            } catch (rollbackError) {
+                console.warn('Failed to rollback migration', rollbackError);
+            }
+
+            throw error;
+        }
+    }
 };

@@ -20,9 +20,11 @@ import {
     useToastController,
 } from '@stagistic/ui';
 import {
+    type ChangeEvent,
     type FormEvent,
     useCallback,
     useEffect,
+    useMemo,
     useState,
 } from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
@@ -46,7 +48,10 @@ export const ScriptSettingsRoute = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const {addToast} = useToastController();
 
-    const currentScript = scripts.find(script => script.id === scriptId) ?? scripts[0];
+    const currentScript = useMemo(
+        () => scripts.find(script => script.id === scriptId) ?? scripts[0],
+        [scriptId, scripts],
+    );
 
     useEffect(() => {
         if (scriptsLoading) {
@@ -75,9 +80,26 @@ export const ScriptSettingsRoute = () => {
         }
     }, [currentScript]);
 
+    const openModal = useCallback(() => {
+        setIsModalOpen(true);
+    }, []);
+    const closeModal = useCallback(() => {
+        setIsModalOpen(false);
+    }, []);
+    const handleHome = useCallback(() => {
+        void navigate('/');
+    }, [navigate]);
+    const handleBackToEditor = useCallback(() => {
+        if (!currentScript) {
+            return;
+        }
+
+        void navigate(`/script/${currentScript.id}/editor`);
+    }, [currentScript, navigate]);
+
     useEffect(() => {
         const handleNewScript = () => {
-            setIsModalOpen(true);
+            openModal();
         };
 
         const handleImport = () => {
@@ -95,7 +117,7 @@ export const ScriptSettingsRoute = () => {
             window.removeEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
             window.removeEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
         };
-    }, [addToast]);
+    }, [addToast, openModal]);
 
     const handleCreate = useCallback(async (name: string) => {
         try {
@@ -192,6 +214,17 @@ export const ScriptSettingsRoute = () => {
         navigate,
         deleteScript,
     ]);
+    const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+        setScriptName(event.target.value);
+    }, []);
+    const handleResetName = useCallback(() => {
+        if (!currentScript) {
+            return;
+        }
+
+        setScriptName(currentScript.name);
+    }, [currentScript]);
+    const isSaveDisabled = useMemo(() => scriptName.trim() === '', [scriptName]);
 
     if (scriptsLoading || !currentScript) {
         return null;
@@ -202,9 +235,9 @@ export const ScriptSettingsRoute = () => {
             header={(
                 <AppHeader
                     showScriptMenu={false}
-                    onHome={() => navigate('/')}
-                    onNewScript={() => setIsModalOpen(true)}
-                    onBackToEditor={() => navigate(`/script/${currentScript.id}/editor`)}
+                    onHome={handleHome}
+                    onNewScript={openModal}
+                    onBackToEditor={handleBackToEditor}
                 />
             )}
         >
@@ -234,20 +267,20 @@ export const ScriptSettingsRoute = () => {
                         <TextInput
                             label="Script name"
                             value={scriptName}
-                            onChange={event => setScriptName(event.target.value)}
+                            onChange={handleNameChange}
                             placeholder="Script name"
                         />
                         <ButtonGroup>
                             <Button
                                 type="submit"
-                                disabled={scriptName.trim() === ''}
+                                disabled={isSaveDisabled}
                             >
                                 Save name
                             </Button>
                             <Button
                                 variant="secondary"
                                 type="button"
-                                onClick={() => setScriptName(currentScript.name)}
+                                onClick={handleResetName}
                             >
                                 Reset
                             </Button>
@@ -272,10 +305,8 @@ export const ScriptSettingsRoute = () => {
             </PageContainer>
             <NewScriptModal
                 isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onCreate={name => {
-                    void handleCreate(name);
-                }}
+                onClose={closeModal}
+                onCreate={handleCreate}
             />
         </AppLayout>
     );

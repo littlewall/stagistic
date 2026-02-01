@@ -3,6 +3,7 @@ import {
     type ComponentPropsWithoutRef,
     forwardRef,
     useId,
+    useMemo,
 } from 'react';
 
 import styles from './TextInput.module.css';
@@ -23,8 +24,8 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
     ...props
 }, ref) => {
     const fallbackId = useId();
-    const resolvedId = id ?? fallbackId;
-    const descriptionId = description ? `${resolvedId}-description` : undefined;
+    const resolvedId = useMemo(() => id ?? fallbackId, [id, fallbackId]);
+    const descriptionId = useMemo(() => description ? `${resolvedId}-description` : undefined, [description, resolvedId]);
 
     return (
         <label className={clsx(styles.field, className)} htmlFor={resolvedId}>

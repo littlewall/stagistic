@@ -10,12 +10,16 @@
     transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
+.interactive {
+    cursor: pointer;
+}
+
 .highlight {
     background: var(--color-highlight);
 }
 
-.card:hover,
-.card:focus-visible {
+.interactive:hover,
+.interactive:focus-visible {
     border-color: color-mix(in srgb, var(--color-ink) 12%, var(--color-divider));
     outline: none;
     box-shadow: 0 10px 20px rgba(27, 23, 18, .08);

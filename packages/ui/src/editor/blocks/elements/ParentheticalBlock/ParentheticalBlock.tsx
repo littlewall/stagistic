@@ -3,7 +3,6 @@ import type {PlateElementProps} from 'platejs/react';
 
 import FountainBlock from '../../base/FountainBlock';
 import useDualColumnPlacement from '../../layout/useDualColumnPlacement';
-
 import styles from './ParentheticalBlock.module.css';
 
 const ParentheticalBlock = ({children, ...props}: PlateElementProps) => {

@@ -18,7 +18,9 @@ export const Grid = ({
         <div
             className={clsx(
                 styles.grid,
-                columns === 2 && styles.cols2,
+                {
+                    [styles.cols2]: columns === 2,
+                },
                 className,
             )}
         >

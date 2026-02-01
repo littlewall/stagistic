@@ -12,7 +12,7 @@ import {
     Routes,
 } from 'react-router-dom';
 
-function App() {
+const App = () => {
     return (
         <ToastProvider>
             <Routes>
@@ -24,6 +24,6 @@ function App() {
             </Routes>
         </ToastProvider>
     );
-}
+};
 
 export default App;

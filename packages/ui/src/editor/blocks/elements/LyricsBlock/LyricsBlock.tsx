@@ -4,7 +4,6 @@ import {ReactNode} from 'react';
 
 import FountainBlock from '../../base/FountainBlock';
 import useDualColumnPlacement from '../../layout/useDualColumnPlacement';
-
 import styles from './LyricsBlock.module.css';
 
 const LyricsBlock = ({children, ...props}: PlateElementProps) => {

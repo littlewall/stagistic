@@ -50,7 +50,9 @@ const removeEmptyBlocksAfterCharacter = (
 ) => {
     const entry = editor.api.node(path);
 
-    if (!entry) return;
+    if (!entry) {
+        return;
+    }
 
     const [node] = entry;
 
@@ -69,7 +71,9 @@ const removeEmptyBlocksAfterCharacter = (
     while (true) {
         const nextEntry = editor.api.node(current);
 
-        if (!nextEntry) return;
+        if (!nextEntry) {
+            return;
+        }
 
         if (editor.api.isEmpty(current, {block: true})) {
             emptyPaths.push(current);
@@ -153,7 +157,9 @@ export const setSelectionBlockType = (
 ) => {
     const blockEntry = editor.api.block({at: editor.selection ?? undefined});
 
-    if (!blockEntry) return undefined;
+    if (!blockEntry) {
+        return undefined;
+    }
 
     editor.tf.setNodes({type}, {at: blockEntry[1]});
 
@@ -161,12 +167,16 @@ export const setSelectionBlockType = (
 };
 
 export const isDualDialogueContext = (editor: PlateEditor, path: Path) => {
-    if (path.length === 0 || path[0] === 0) return false;
+    if (path.length === 0 || path[0] === 0) {
+        return false;
+    }
 
     const previousPath = Path.previous(path);
     const previousNode = editor.api.node(previousPath);
 
-    if (!previousNode) return false;
+    if (!previousNode) {
+        return false;
+    }
 
     const [node] = previousNode;
 
@@ -183,7 +193,9 @@ export const shouldSuppressCharacterGap = (
     editor: PlateEditor,
     path: Path,
 ) => {
-    if (path.length === 0 || path[0] === 0) return false;
+    if (path.length === 0 || path[0] === 0) {
+        return false;
+    }
 
     let previousPath: Path;
 
@@ -219,13 +231,19 @@ export const shouldSuppressCharacterGap = (
 };
 
 export const getElementText = (node: unknown) => {
-    if (!node || typeof node !== 'object') return '';
+    if (!node || typeof node !== 'object') {
+        return '';
+    }
 
-    if (!('children' in node)) return '';
+    if (!('children' in node)) {
+        return '';
+    }
 
     const children = (node as {children?: Array<{text?: string}>}).children;
 
-    if (!Array.isArray(children)) return '';
+    if (!Array.isArray(children)) {
+        return '';
+    }
 
     return children.map(child => child.text ?? '').join('');
 };
@@ -246,7 +264,9 @@ const stripOuterCharactersFromChildren = (
     for (let i = 0; i < nextChildren.length; i += 1) {
         const value = nextChildren[i].text;
 
-        if (value.length === 0) continue;
+        if (value.length === 0) {
+            continue;
+        }
 
         nextChildren[i].text = value.slice(1);
         if (nextChildren[i].text.length === 0) {
@@ -259,7 +279,9 @@ const stripOuterCharactersFromChildren = (
     for (let i = nextChildren.length - 1; i >= 0; i -= 1) {
         const value = nextChildren[i].text;
 
-        if (value.length === 0) continue;
+        if (value.length === 0) {
+            continue;
+        }
 
         nextChildren[i].text = value.slice(0, -1);
         if (nextChildren[i].text.length === 0) {
@@ -405,12 +427,16 @@ export const convertDualCharacterToCharacter = (
 
     const entry = editor.api.node(path);
 
-    if (!entry) return;
+    if (!entry) {
+        return;
+    }
 
     const [node] = entry;
     const type = getNodeType(node);
 
-    if (type !== ELEMENT_DUAL_DIALOGUE_CHARACTER) return;
+    if (type !== ELEMENT_DUAL_DIALOGUE_CHARACTER) {
+        return;
+    }
 
     editor.tf.setNodes({type: ELEMENT_CHARACTER}, {at: path});
 
@@ -419,7 +445,9 @@ export const convertDualCharacterToCharacter = (
     while (true) {
         const nextEntry = editor.api.node(current);
 
-        if (!nextEntry) break;
+        if (!nextEntry) {
+            break;
+        }
 
         const nextType = getNodeType(nextEntry[0]);
 
@@ -460,7 +488,9 @@ export const convertCharacterToDual = (editor: PlateEditor, path: Path) => {
     const [node] = entry;
     const type = getNodeType(node);
 
-    if (type !== ELEMENT_CHARACTER) return;
+    if (type !== ELEMENT_CHARACTER) {
+        return;
+    }
 
     const sectionStart = getSectionStartPath(editor, path);
     const sectionPaths: Path[] = [];
@@ -469,7 +499,9 @@ export const convertCharacterToDual = (editor: PlateEditor, path: Path) => {
     while (true) {
         const nextEntry = editor.api.node(current);
 
-        if (!nextEntry) break;
+        if (!nextEntry) {
+            break;
+        }
 
         const nextNode = nextEntry[0];
         const nextType = getNodeType(nextNode);
@@ -504,7 +536,9 @@ export const convertCharacterToDual = (editor: PlateEditor, path: Path) => {
     for (const sectionPath of sectionPaths) {
         const sectionEntry = editor.api.node(sectionPath);
 
-        if (!sectionEntry) continue;
+        if (!sectionEntry) {
+            continue;
+        }
 
         const [sectionNode] = sectionEntry;
 
@@ -521,9 +555,11 @@ export const convertCharacterToDual = (editor: PlateEditor, path: Path) => {
 
         if (isRight) {
             rightNodes.push(nextElement);
-        } else {
-            leftNodes.push(nextElement);
+
+            return;
         }
+
+        leftNodes.push(nextElement);
     }
 
     const columnGroup: ColumnGroupElement = {

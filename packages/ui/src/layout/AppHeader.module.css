@@ -71,6 +71,44 @@
     justify-content: center;
 }
 
+.scriptStatus {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--space-1);
+}
+
+.scriptStatusDot {
+    width: 8px;
+    height: 8px;
+    background: var(--color-ink-muted);
+    border-radius: 999px;
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-ink) 8%, transparent);
+}
+
+.scriptStatusSaved {
+    background: var(--color-success, #16a34a);
+}
+
+.scriptStatusSaving {
+    background: var(--color-warning, #f59e0b);
+}
+
+.scriptStatusError {
+    background: var(--color-danger, #dc2626);
+}
+
+.tooltip {
+    padding: var(--space-1) var(--space-2);
+    font-size: calc(10px * var(--size-scale));
+    font-weight: 600;
+    color: var(--color-surface);
+    letter-spacing: .02em;
+    background: var(--color-ink);
+    border-radius: 999px;
+    box-shadow: var(--shadow-popover);
+}
+
 .menuTriggerLabel {
     overflow: hidden;
     max-width: calc(220px * var(--size-scale));
