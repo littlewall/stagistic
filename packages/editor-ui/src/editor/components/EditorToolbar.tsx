@@ -1,7 +1,3 @@
-import {
-    applyBlockTypeChange,
-    type FountainBlockTypeChangeTarget,
-} from '@stagistic/editor-core';
 import clsx from 'clsx';
 import {
     Bold,
@@ -10,10 +6,8 @@ import {
     Underline,
     Undo,
 } from 'iconoir-react';
-import {useEditorRef} from 'platejs/react';
 import {
     type MouseEvent as ReactMouseEvent,
-    type ReactElement,
     useCallback,
     useEffect,
     useMemo,
@@ -23,23 +17,32 @@ import {
 
 import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
 import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
-import {useEditorState} from '../state/EditorStateProvider';
+import {
+    useEditorActiveBlock,
+    useEditorHistoryState,
+    useEditorSessionCommands,
+} from '../state/EditorStateProvider';
 import styles from './EditorToolbar.module.css';
 
 const EditorToolbar = () => {
-    const editor = useEditorRef();
     const {
-        activeBlockPath,
-        activeElement,
+        activeBlockPathString,
         activeBlockInfo,
-        isEditorActive,
-    } = useEditorState();
+    } = useEditorActiveBlock();
+    const {
+        canRedo,
+        canUndo,
+    } = useEditorHistoryState();
+    const {
+        redo,
+        setBlockType,
+        toggleMark,
+        undo,
+    } = useEditorSessionCommands();
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
-    const canUndo = useMemo(() => (editor.history?.undos?.length ?? 0) > 0, [editor.history?.undos?.length]);
-    const canRedo = useMemo(() => (editor.history?.redos?.length ?? 0) > 0, [editor.history?.redos?.length]);
     const [isOpen, setIsOpen] = useState(false);
-    const activeBlockKey = useMemo(() => activeBlockPath ? activeBlockPath.join('-') : null, [activeBlockPath]);
+    const activeBlockKey = useMemo(() => activeBlockPathString ?? null, [activeBlockPathString]);
 
     useEffect(() => {
         setIsOpen(false);
@@ -79,29 +82,18 @@ const EditorToolbar = () => {
         };
     }, [isOpen]);
 
-    const toggleMark = useCallback((key: 'bold' | 'italic' | 'underline') => {
-        const isActive = !!editor.api.marks()?.[key];
-
-        if (isActive) {
-            editor.tf.removeMarks(key);
-
-            return;
-        }
-
-        editor.tf.addMark(key, true);
-    }, [editor]);
     const handleUndoMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         if (canUndo) {
-            editor.undo();
+            undo();
         }
-    }, [canUndo, editor]);
+    }, [canUndo, undo]);
     const handleRedoMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         if (canRedo) {
-            editor.redo();
+            redo();
         }
-    }, [canRedo, editor]);
+    }, [canRedo, redo]);
     const handleBoldMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         toggleMark('bold');
@@ -123,30 +115,14 @@ const EditorToolbar = () => {
         setIsOpen(prev => !prev);
     }, [activeBlockInfo]);
     const handleMenuItemMouseDown = useCallback((
-        optionType: FountainBlockTypeChangeTarget['type'],
+        optionType: (typeof FOUNTAIN_BLOCKS)[number]['type'],
         event: ReactMouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault();
-        if (!activeElement || !activeBlockPath) {
-            return;
-        }
-
-        if (optionType === activeBlockInfo?.type) {
-            return;
-        }
-
         setIsOpen(false);
-        applyBlockTypeChange(
-            editor,
-            activeElement,
-            activeBlockPath,
-            optionType,
-        );
+        setBlockType(optionType);
     }, [
-        activeElement,
-        activeBlockPath,
-        activeBlockInfo,
-        editor,
+        setBlockType,
     ]);
 
     return (

@@ -13,6 +13,8 @@ import {
     localOnlyCollectionOptions,
 } from '@tanstack/react-db';
 
+import {emitScriptsInvalidated} from './scriptsEvents';
+
 type ScriptsMeta = {
     isLoading: boolean,
     error: Error | null,
@@ -91,6 +93,7 @@ export const createScriptsStore = (repository: ScriptRepository): ScriptsStoreSt
             await replaceAll(scripts);
 
             setMeta({error: null, isLoading: false});
+            emitScriptsInvalidated();
         } catch (error) {
             console.error('Failed to refresh scripts collection', error);
             setMeta({error: error as Error, isLoading: false});

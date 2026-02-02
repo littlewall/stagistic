@@ -7,11 +7,20 @@ import type {DbClient} from '../types';
 /**
  * List all scripts ordered by last update.
  */
-export const listScripts = async (db: DbClient): Promise<ScriptSummary[]> => {
-    const rows = await db
+export const listScripts = async (
+    db: DbClient,
+    options?: {limit?: number},
+): Promise<ScriptSummary[]> => {
+    let query = db
         .select()
         .from(scripts)
         .orderBy(desc(scripts.updatedAt));
+
+    if (options?.limit) {
+        query = query.limit(options.limit);
+    }
+
+    const rows = await query;
 
     return rows.map(row => ({
         id: row.id,
@@ -20,6 +29,34 @@ export const listScripts = async (db: DbClient): Promise<ScriptSummary[]> => {
         updatedAt: row.updatedAt,
         activeBlockId: row.activeBlockId ?? null,
     }));
+};
+
+/**
+ * Fetch a single script summary by ID.
+ */
+export const getScriptSummary = async (
+    db: DbClient,
+    scriptId: string,
+): Promise<ScriptSummary | null> => {
+    const rows = await db
+        .select()
+        .from(scripts)
+        .where(eq(scripts.id, scriptId))
+        .limit(1);
+
+    const row = rows[0];
+
+    if (!row) {
+        return null;
+    }
+
+    return {
+        id: row.id,
+        title: row.title,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        activeBlockId: row.activeBlockId ?? null,
+    };
 };
 
 /**

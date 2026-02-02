@@ -7,7 +7,8 @@ export const createRemoteHttpRepository = (): ScriptRepository => {
     };
 
     return {
-        listScripts: () => notImplemented() as Promise<ScriptSummary[]>,
+        listScripts: (_options?: {limit?: number}) => notImplemented() as Promise<ScriptSummary[]>,
+        getScriptSummary: (_scriptId: string) => notImplemented() as Promise<ScriptSummary | null>,
         createScript: () => notImplemented(),
         renameScript: () => notImplemented(),
         deleteScript: () => notImplemented(),

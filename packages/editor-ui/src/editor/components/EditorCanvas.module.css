@@ -1,4 +1,5 @@
 .canvas {
+    position: relative;
     scrollbar-gutter: stable;
     overflow: hidden scroll;
     display: flex;

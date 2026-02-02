@@ -1,12 +1,14 @@
-import {useScripts} from '@stagistic/app-core';
+import {useScriptRepository, useScriptsContext} from '@stagistic/app-core';
 import {
     MENU_EVENT_IMPORT_SCRIPT,
     MENU_EVENT_NEW_SCRIPT,
 } from '@stagistic/app-core';
 import {parseFountain} from '@stagistic/editor-core';
 import {
+    createNodeId,
     ensureNodeIds,
     ensureSceneHeading,
+    getFirstBlockId,
     type SlateValue,
 } from '@stagistic/shared';
 import {
@@ -53,7 +55,8 @@ const normalizeFountainSource = (source: string) => source
 
 export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
     const navigate = useNavigate();
-    const {createScript} = useScripts();
+    const scriptRepository = useScriptRepository();
+    const {scriptsStore} = useScriptsContext();
     const {addToast} = useToastController();
     const [isNewScriptOpen, setIsNewScriptOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
@@ -189,10 +192,25 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         };
     }, [addToast, isTauri]);
 
+    const createScriptWithActiveBlock = useCallback(async (name: string, initialContent?: SlateValue) => {
+        const scriptId = await scriptRepository.createScript(name, initialContent);
+        const activeBlockId = initialContent
+            ? getFirstBlockId(initialContent)
+            : createNodeId();
+
+        if (activeBlockId) {
+            await scriptRepository.setActiveBlock(scriptId, activeBlockId);
+        }
+
+        void scriptsStore.refresh();
+
+        return scriptId;
+    }, [scriptRepository, scriptsStore]);
+
     const handleCreate = useCallback((name: string) => {
         const createAndNavigate = async () => {
             try {
-                const scriptId = await createScript(name);
+                const scriptId = await createScriptWithActiveBlock(name);
 
                 setIsNewScriptOpen(false);
                 void navigate(`/script/${scriptId}/editor`);
@@ -214,7 +232,7 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         void createAndNavigate();
     }, [
         addToast,
-        createScript,
+        createScriptWithActiveBlock,
         navigate,
     ]);
 
@@ -240,7 +258,10 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
                 const resolvedName = payload.name.trim()
                     || payload.fileName.replace(/\.fountain$/i, '').trim()
                     || 'Untitled script';
-                const scriptId = await createScript(resolvedName, normalized as unknown as SlateValue);
+                const scriptId = await createScriptWithActiveBlock(
+                    resolvedName,
+                    normalized as unknown as SlateValue,
+                );
 
                 setIsImportOpen(false);
                 void navigate(`/script/${scriptId}/editor`);
@@ -262,7 +283,7 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         void importAndNavigate();
     }, [
         addToast,
-        createScript,
+        createScriptWithActiveBlock,
         navigate,
     ]);
 

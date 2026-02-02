@@ -36,10 +36,16 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
         });
     };
 
-    const listScripts = async (): Promise<ScriptSummary[]> => {
+    const listScripts = async (options?: {limit?: number}): Promise<ScriptSummary[]> => {
         const db = await getDb();
 
-        return dbQueries.listScripts(db);
+        return dbQueries.listScripts(db, options);
+    };
+
+    const getScriptSummary = async (scriptId: string): Promise<ScriptSummary | null> => {
+        const db = await getDb();
+
+        return dbQueries.getScriptSummary(db, scriptId);
     };
 
     const createScript = async (title: string, initialContent?: SlateValue) => {
@@ -181,6 +187,7 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
 
     return {
         listScripts,
+        getScriptSummary,
         createScript,
         renameScript,
         deleteScript,
