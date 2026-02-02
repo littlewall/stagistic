@@ -5,6 +5,7 @@ import {
 } from '@stagistic/app-core';
 import {
     HomeRoute,
+    GlobalModalsProvider,
     ScriptEditorRoute,
     ScriptListRoute,
     ScriptSettingsRoute,
@@ -77,14 +78,16 @@ const App = () => {
         <BrowserRouter>
             <ScriptRepositoryProvider repository={scriptRepository}>
                 <ToastProvider>
-                    <MenuEventHandler />
-                    <Routes>
-                        <Route path="/" element={<HomeRoute />} />
-                        <Route path="/script/list" element={<ScriptListRoute />} />
-                        <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
-                        <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
-                        <Route path="*" element={<Navigate to="/" replace />} />
-                    </Routes>
+                    <GlobalModalsProvider>
+                        <MenuEventHandler />
+                        <Routes>
+                            <Route path="/" element={<HomeRoute />} />
+                            <Route path="/script/list" element={<ScriptListRoute />} />
+                            <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
+                            <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
+                            <Route path="*" element={<Navigate to="/" replace />} />
+                        </Routes>
+                    </GlobalModalsProvider>
                 </ToastProvider>
             </ScriptRepositoryProvider>
         </BrowserRouter>

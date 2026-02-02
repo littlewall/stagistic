@@ -1,15 +1,10 @@
 import {useScripts} from '@stagistic/app-core';
 import {
-    MENU_EVENT_IMPORT_SCRIPT,
-    MENU_EVENT_NEW_SCRIPT,
-} from '@stagistic/app-core';
-import {
     AppHeader,
     AppLayout,
     Button,
     ButtonGroup,
     Kicker,
-    NewScriptModal,
     PageContainer,
     PageTitle,
     Section,
@@ -29,6 +24,7 @@ import {
 } from 'react';
 import {useNavigate, useParams} from 'react-router-dom';
 
+import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import styles from './ScriptSettingsRoute.module.css';
 
 const FALLBACK_NAME = 'Untitled script';
@@ -38,15 +34,14 @@ export const ScriptSettingsRoute = () => {
     const {scriptId} = useParams();
     const {
         scripts,
-        createScript,
         renameScript,
         deleteScript,
         isLoading: scriptsLoading,
     } = useScripts();
     const [scriptName, setScriptName] = useState('');
     const [storageError, setStorageError] = useState<string | null>(null);
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const {addToast} = useToastController();
+    const {openNewScript} = useGlobalModals();
 
     const currentScript = useMemo(
         () => scripts.find(script => script.id === scriptId) ?? scripts[0],
@@ -81,11 +76,8 @@ export const ScriptSettingsRoute = () => {
     }, [currentScript]);
 
     const openModal = useCallback(() => {
-        setIsModalOpen(true);
-    }, []);
-    const closeModal = useCallback(() => {
-        setIsModalOpen(false);
-    }, []);
+        openNewScript();
+    }, [openNewScript]);
     const handleHome = useCallback(() => {
         void navigate('/');
     }, [navigate]);
@@ -96,55 +88,6 @@ export const ScriptSettingsRoute = () => {
 
         void navigate(`/script/${currentScript.id}/editor`);
     }, [currentScript, navigate]);
-
-    useEffect(() => {
-        const handleNewScript = () => {
-            openModal();
-        };
-
-        const handleImport = () => {
-            addToast({
-                title: 'Import is coming soon',
-                description: 'We will add it in a future update.',
-                variant: 'info',
-            });
-        };
-
-        window.addEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
-        window.addEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
-
-        return () => {
-            window.removeEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
-            window.removeEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
-        };
-    }, [addToast, openModal]);
-
-    const handleCreate = useCallback(async (name: string) => {
-        try {
-            const newScriptId = await createScript(name);
-
-            setIsModalOpen(false);
-            void navigate(`/script/${newScriptId}/editor`);
-            setStorageError(null);
-            addToast({
-                title: 'Script created',
-                description: name.trim() || 'Untitled script',
-                variant: 'success',
-            });
-        } catch (error) {
-            console.error('Failed to create script', error);
-            setStorageError('Failed to create script.');
-            addToast({
-                title: 'Failed to create script',
-                description: 'Please try again.',
-                variant: 'error',
-            });
-        }
-    }, [
-        addToast,
-        createScript,
-        navigate,
-    ]);
 
     const handleSaveName = useCallback(async (event?: FormEvent<HTMLFormElement>) => {
         event?.preventDefault();
@@ -303,11 +246,6 @@ export const ScriptSettingsRoute = () => {
                     </Button>
                 </Section>
             </PageContainer>
-            <NewScriptModal
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                onCreate={handleCreate}
-            />
         </AppLayout>
     );
 };

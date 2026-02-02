@@ -10,13 +10,10 @@ import {
     Underline,
     Undo,
 } from 'iconoir-react';
-import {
-    useEditorRef,
-    useEditorVersion,
-    useFocused,
-} from 'platejs/react';
+import {useEditorRef} from 'platejs/react';
 import {
     type MouseEvent as ReactMouseEvent,
+    type ReactElement,
     useCallback,
     useEffect,
     useMemo,
@@ -26,74 +23,34 @@ import {
 
 import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
 import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
+import {useEditorState} from '../state/EditorStateProvider';
 import styles from './EditorToolbar.module.css';
 
 const EditorToolbar = () => {
     const editor = useEditorRef();
-    const editorVersion = useEditorVersion();
-    const isFocused = useFocused();
+    const {
+        activeBlockPath,
+        activeElement,
+        activeBlockInfo,
+        isEditorActive,
+    } = useEditorState();
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
-    const [isEditorActive, setIsEditorActive] = useState(false);
-
-    const activeBlock = useMemo(() => {
-        if (!isEditorActive || !editor.selection) {
-            return null;
-        }
-
-        return editor.api.block({at: editor.selection});
-    }, [
-        editor,
-        editorVersion,
-        isEditorActive,
-    ]);
-
-    const activeElement = useMemo(() => activeBlock?.[0] as FountainBlockTypeChangeTarget | undefined, [activeBlock]);
-    const activePath = useMemo(() => activeBlock?.[1], [activeBlock]);
-    const activeType = useMemo(() => activeElement?.type, [activeElement]);
-    const activeOption = useMemo(
-        () => FOUNTAIN_BLOCKS.find(option => option.type === activeType),
-        [activeType],
-    );
-    const activeIcon = useMemo(
-        () => activeType ? BLOCK_ICONS[activeType] : null,
-        [activeType],
-    );
     const canUndo = useMemo(() => (editor.history?.undos?.length ?? 0) > 0, [editor.history?.undos?.length]);
     const canRedo = useMemo(() => (editor.history?.redos?.length ?? 0) > 0, [editor.history?.redos?.length]);
     const [isOpen, setIsOpen] = useState(false);
-    const activeBlockKey = useMemo(() => activePath ? activePath.join('-') : null, [activePath]);
+    const activeBlockKey = useMemo(() => activeBlockPath ? activeBlockPath.join('-') : null, [activeBlockPath]);
 
     useEffect(() => {
         setIsOpen(false);
     }, [activeBlockKey]);
 
     useEffect(() => {
-        const updateActive = () => {
-            const activeElement = document.activeElement;
-
-            if (!(activeElement instanceof HTMLElement)) {
-                setIsEditorActive(false);
-
-                return;
-            }
-
-            const isInEditor = !!activeElement.closest('[data-slate-editor="true"]');
-            const isInToolbar = !!(toolbarRef.current && toolbarRef.current.contains(activeElement));
-
-            setIsEditorActive(isFocused || isInEditor || isInToolbar);
-        };
-
-        updateActive();
-
-        document.addEventListener('focusin', updateActive);
-        document.addEventListener('focusout', updateActive);
-
-        return () => {
-            document.removeEventListener('focusin', updateActive);
-            document.removeEventListener('focusout', updateActive);
-        };
-    }, [isFocused]);
+        // Keep toolbar ref to let the shared editor state treat toolbar as active.
+        if (toolbarRef.current) {
+            toolbarRef.current.dataset.editorToolbar = 'true';
+        }
+    }, []);
 
     useEffect(() => {
         if (!isOpen) {
@@ -159,22 +116,22 @@ const EditorToolbar = () => {
     }, [toggleMark]);
     const handleSelectMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        if (!activeType) {
+        if (!activeBlockInfo) {
             return;
         }
 
         setIsOpen(prev => !prev);
-    }, [activeType]);
+    }, [activeBlockInfo]);
     const handleMenuItemMouseDown = useCallback((
         optionType: FountainBlockTypeChangeTarget['type'],
         event: ReactMouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault();
-        if (!activeElement || !activePath) {
+        if (!activeElement || !activeBlockPath) {
             return;
         }
 
-        if (optionType === activeType) {
+        if (optionType === activeBlockInfo?.type) {
             return;
         }
 
@@ -182,18 +139,22 @@ const EditorToolbar = () => {
         applyBlockTypeChange(
             editor,
             activeElement,
-            activePath,
+            activeBlockPath,
             optionType,
         );
     }, [
         activeElement,
-        activePath,
-        activeType,
+        activeBlockPath,
+        activeBlockInfo,
         editor,
     ]);
 
     return (
-        <div className={styles.toolbar} ref={toolbarRef}>
+        <div
+            className={styles.toolbar}
+            ref={toolbarRef}
+            data-editor-toolbar="true"
+        >
             <div className={styles.group}>
                 <button
                     className={styles.iconButton}
@@ -244,11 +205,11 @@ const EditorToolbar = () => {
                     type="button"
                     aria-label="Change block type"
                     aria-expanded={isOpen}
-                    disabled={!activeType}
+                    disabled={!activeBlockInfo}
                     onMouseDown={handleSelectMouseDown}
                 >
-                    <span className={clsx(styles.selectIcon, !activeIcon && styles.selectIconMuted)}>
-                        {activeIcon ?? (
+                    <span className={clsx(styles.selectIcon, !activeBlockInfo?.icon && styles.selectIconMuted)}>
+                        {activeBlockInfo?.icon ?? (
                             <svg
                                 viewBox="0 0 24 24"
                                 aria-hidden="true"
@@ -259,7 +220,7 @@ const EditorToolbar = () => {
                         )}
                     </span>
                     <span className={styles.selectLabel}>
-                        {activeOption?.label ?? 'Select block in editor'}
+                        {activeBlockInfo?.label ?? 'Select block in editor'}
                     </span>
                     <svg
                         viewBox="0 0 24 24"
@@ -279,7 +240,7 @@ const EditorToolbar = () => {
                                 role="menuitem"
                                 className={clsx(
                                     styles.menuItem,
-                                    option.type === activeType && styles.menuItemActive,
+                                    option.type === activeBlockInfo?.type && styles.menuItemActive,
                                 )}
                                 aria-label={`Set block type to ${option.label}`}
                                 onMouseDown={event => handleMenuItemMouseDown(option.type, event)}

@@ -1,9 +1,5 @@
 import {useScripts} from '@stagistic/app-core';
 import {
-    MENU_EVENT_IMPORT_SCRIPT,
-    MENU_EVENT_NEW_SCRIPT,
-} from '@stagistic/app-core';
-import {
     AppHeader,
     AppLayout,
     Button,
@@ -14,7 +10,6 @@ import {
     Grid,
     HeroLayout,
     Kicker,
-    NewScriptModal,
     PageContainer,
     PageTitle,
     Section,
@@ -22,18 +17,16 @@ import {
     SectionTitle,
     SubtleText,
     Tag,
-    useToastController,
 } from '@stagistic/ui';
 import {
     type KeyboardEvent as ReactKeyboardEvent,
     type MouseEvent as ReactMouseEvent,
     useCallback,
-    useEffect,
     useMemo,
-    useState,
 } from 'react';
 import {Link, useNavigate} from 'react-router-dom';
 
+import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import styles from './HomeRoute.module.css';
 
 const mockUpdates = [
@@ -53,21 +46,15 @@ const mockUpdates = [
 
 export const HomeRoute = () => {
     const navigate = useNavigate();
-    const [isModalOpen, setIsModalOpen] = useState(false);
-    const [storageError, setStorageError] = useState<string | null>(null);
     const {
         scripts,
         scriptSummaries,
-        createScript,
     } = useScripts();
-    const {addToast} = useToastController();
+    const {openNewScript} = useGlobalModals();
     const recentScripts = useMemo(() => scripts.slice(0, 6), [scripts]);
     const openModal = useCallback(() => {
-        setIsModalOpen(true);
-    }, []);
-    const closeModal = useCallback(() => {
-        setIsModalOpen(false);
-    }, []);
+        openNewScript();
+    }, [openNewScript]);
 
     const latestScript = useMemo(() => {
         if (scriptSummaries.length === 0) {
@@ -104,58 +91,6 @@ export const HomeRoute = () => {
         return `Edited ${dateFormat.format(updated)}`;
     }, []);
 
-    useEffect(() => {
-        const handleNewScript = () => {
-            openModal();
-        };
-
-        const handleImport = () => {
-            addToast({
-                title: 'Import is coming soon',
-                description: 'We will add it in a future update.',
-                variant: 'info',
-            });
-        };
-
-        window.addEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
-        window.addEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
-
-        return () => {
-            window.removeEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
-            window.removeEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
-        };
-    }, [addToast, openModal]);
-
-    const handleCreate = useCallback((name: string) => {
-        const createAndNavigate = async () => {
-            try {
-                const scriptId = await createScript(name);
-
-                setIsModalOpen(false);
-                void navigate(`/script/${scriptId}/editor`);
-                setStorageError(null);
-                addToast({
-                    title: 'Script created',
-                    description: name.trim() || 'Untitled script',
-                    variant: 'success',
-                });
-            } catch (error) {
-                console.error('Failed to create script', error);
-                setStorageError('Failed to create script.');
-                addToast({
-                    title: 'Failed to create script',
-                    description: 'Please try again.',
-                    variant: 'error',
-                });
-            }
-        };
-
-        void createAndNavigate();
-    }, [
-        addToast,
-        createScript,
-        navigate,
-    ]);
     const handleHome = useCallback(() => {
         void navigate('/');
     }, [navigate]);
@@ -242,11 +177,6 @@ export const HomeRoute = () => {
             )}
         >
             <PageContainer variant="standard">
-                {storageError ? (
-                    <div role="alert" style={{padding: '12px 0'}}>
-                        {storageError}
-                    </div>
-                ) : null}
                 <section className={styles.hero}>
                     <HeroLayout>
                         <div className={styles.heroContent}>
@@ -309,11 +239,6 @@ export const HomeRoute = () => {
                     </Section>
                 )}
             </PageContainer>
-            <NewScriptModal
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                onCreate={handleCreate}
-            />
         </AppLayout>
     );
 };

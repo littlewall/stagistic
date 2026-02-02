@@ -21,6 +21,7 @@ import {EditorCanvas} from './components/EditorCanvas';
 import EditorToolbar from './components/EditorToolbar';
 import styles from './Editor.module.css';
 import {createFountainPlugins} from './plugins/fountainPlugin';
+import {EditorStateProvider} from './state/EditorStateProvider';
 import {FountainLeaf} from './utils/fountainMarks';
 
 const DEFAULT_AUTOSAVE_DELAY_MS = 1500;
@@ -257,19 +258,21 @@ const Editor = ({
     return (
         <div className={styles.root}>
             <Plate editor={editor}>
-                <EditorAutosave
-                    autoSaveDelayMs={autoSaveDelayMs}
-                    initialValue={resolvedInitialValue}
-                    manualSaveRef={manualSaveRef}
-                    onAutoSave={onAutoSave}
-                    onDirtyChange={onDirtyChange}
-                    onManualSave={onManualSave}
-                    onValueChange={onValueChange}
-                />
-                <EditorToolbar
-                    onSave={toolbarSave}
-                />
-                <EditorCanvas renderLeaf={FountainLeaf} autoFocus={autoFocus} />
+                <EditorStateProvider>
+                    <EditorAutosave
+                        autoSaveDelayMs={autoSaveDelayMs}
+                        initialValue={resolvedInitialValue}
+                        manualSaveRef={manualSaveRef}
+                        onAutoSave={onAutoSave}
+                        onDirtyChange={onDirtyChange}
+                        onManualSave={onManualSave}
+                        onValueChange={onValueChange}
+                    />
+                    <EditorToolbar
+                        onSave={toolbarSave}
+                    />
+                    <EditorCanvas renderLeaf={FountainLeaf} autoFocus={autoFocus} />
+                </EditorStateProvider>
             </Plate>
         </div>
     );

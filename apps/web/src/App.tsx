@@ -1,6 +1,7 @@
 
 import {
     HomeRoute,
+    GlobalModalsProvider,
     ScriptEditorRoute,
     ScriptListRoute,
     ScriptSettingsRoute,
@@ -26,14 +27,16 @@ const App = () => {
 
     return (
         <ToastProvider>
-            {loading && <LoaderOverlay />}
-            <Routes>
-                <Route path="/" element={<HomeRoute />} />
-                <Route path="/script/list" element={<ScriptListRoute />} />
-                <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
-                <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-            </Routes>
+            <GlobalModalsProvider>
+                {loading && <LoaderOverlay />}
+                <Routes>
+                    <Route path="/" element={<HomeRoute />} />
+                    <Route path="/script/list" element={<ScriptListRoute />} />
+                    <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
+                    <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+            </GlobalModalsProvider>
         </ToastProvider>
     );
 };

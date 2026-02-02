@@ -1,8 +1,4 @@
 import {useScriptRepository, useScripts} from '@stagistic/app-core';
-import {
-    MENU_EVENT_IMPORT_SCRIPT,
-    MENU_EVENT_NEW_SCRIPT,
-} from '@stagistic/app-core';
 import {type FountainDocument, serializeFountain} from '@stagistic/editor-core';
 import {FountainEditor} from '@stagistic/editor-ui';
 import {
@@ -15,7 +11,6 @@ import {
     AppHeader,
     AppLayout,
     EditorSidebar,
-    NewScriptModal,
     type ScriptSyncState,
     useToastController,
 } from '@stagistic/ui';
@@ -31,6 +26,8 @@ import {
     useParams,
 } from 'react-router-dom';
 
+import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
+
 const AUTOSAVE_DELAY_MS = 1500;
 const SAVE_SLOW_INDICATOR_MS = 600;
 const DEFAULT_SCRIPT_TITLE = 'Untitled script';
@@ -39,7 +36,6 @@ const SEED_COOLDOWN_MS = 5000;
 export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
     const {scriptId} = useParams();
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const {
         scripts,
         createScript,
@@ -60,6 +56,7 @@ export const ScriptEditorRoute = () => {
     });
     const {addToast} = useToastController();
     const scriptRepository = useScriptRepository();
+    const {openNewScript} = useGlobalModals();
 
     const startSaveIndicator = useCallback(() => {
         pendingSaveRef.current += 1;
@@ -99,28 +96,6 @@ export const ScriptEditorRoute = () => {
             }
         };
     }, []);
-
-    useEffect(() => {
-        const handleNewScript = () => {
-            setIsModalOpen(true);
-        };
-
-        const handleImport = () => {
-            addToast({
-                title: 'Import is coming soon',
-                description: 'We will add it in a future update.',
-                variant: 'info',
-            });
-        };
-
-        window.addEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
-        window.addEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
-
-        return () => {
-            window.removeEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
-            window.removeEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
-        };
-    }, [addToast]);
 
     const currentScript = useMemo(
         () => scripts.find(script => script.id === scriptId) ?? scripts[0],
@@ -362,8 +337,8 @@ export const ScriptEditorRoute = () => {
         void navigate('/');
     }, [navigate]);
     const handleNewScript = useCallback(() => {
-        setIsModalOpen(true);
-    }, []);
+        openNewScript();
+    }, [openNewScript]);
     const handleMenuAction = useCallback((actionId: string) => {
         if (actionId === 'scripts') {
             void navigate('/script/list');
@@ -378,42 +353,10 @@ export const ScriptEditorRoute = () => {
         }
 
         if (actionId === 'new-script') {
-            setIsModalOpen(true);
+            openNewScript();
         }
-    }, [currentScript, navigate]);
+    }, [currentScript, navigate, openNewScript]);
     const handleSceneClick = useCallback(() => {}, []);
-    const handleCloseModal = useCallback(() => {
-        setIsModalOpen(false);
-    }, []);
-    const handleCreate = useCallback((name: string) => {
-        const createAndNavigate = async () => {
-            try {
-                const newScriptId = await createScript(name);
-
-                setIsModalOpen(false);
-                void navigate(`/script/${newScriptId}/editor`);
-                addToast({
-                    title: 'Script created',
-                    description: name.trim() || 'Untitled script',
-                    variant: 'success',
-                });
-            } catch (error) {
-                console.error('Failed to create script', error);
-                setStorageError('Failed to create script.');
-                addToast({
-                    title: 'Failed to create script',
-                    description: 'Please try again.',
-                    variant: 'error',
-                });
-            }
-        };
-
-        void createAndNavigate();
-    }, [
-        addToast,
-        createScript,
-        navigate,
-    ]);
 
     if (scriptsLoading || initialValue === undefined) {
         return null;
@@ -450,11 +393,6 @@ export const ScriptEditorRoute = () => {
                 onManualSave={handleManualSave}
                 autoSaveDelayMs={AUTOSAVE_DELAY_MS}
                 autoFocus={shouldAutoFocus}
-            />
-            <NewScriptModal
-                isOpen={isModalOpen}
-                onClose={handleCloseModal}
-                onCreate={handleCreate}
             />
         </AppLayout>
     );

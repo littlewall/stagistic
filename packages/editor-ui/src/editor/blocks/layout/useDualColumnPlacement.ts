@@ -6,8 +6,8 @@ import {
 } from '@stagistic/editor-core';
 import {
     useEditorRef,
-    useEditorVersion,
     usePath,
+    useValueVersion,
 } from 'platejs/react';
 import type {CSSProperties} from 'react';
 import {useMemo} from 'react';
@@ -20,7 +20,7 @@ type DualPlacement = {
 const useDualColumnPlacement = (type: FountainElementType): DualPlacement => {
     const editor = useEditorRef();
     const path = usePath();
-    const editorVersion = useEditorVersion();
+    const valueVersion = useValueVersion();
 
     return useMemo(() => {
         const gapStyle =
@@ -32,9 +32,9 @@ const useDualColumnPlacement = (type: FountainElementType): DualPlacement => {
         return {style: gapStyle as CSSProperties};
     }, [
         editor,
-        editorVersion,
         path,
         type,
+        valueVersion,
     ]);
 };
 

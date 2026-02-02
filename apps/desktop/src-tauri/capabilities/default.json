@@ -9,6 +9,24 @@
     "core:event:default",
     "core:event:allow-listen",
     "core:path:default",
-    "core:path:allow-resolve-directory"
+    "core:path:allow-resolve-directory",
+    "dialog:default",
+    {
+      "identifier": "fs:allow-read-text-file",
+      "allow": [
+        {
+          "path": "$HOME/**"
+        },
+        {
+          "path": "$DESKTOP/**"
+        },
+        {
+          "path": "$DOCUMENT/**"
+        },
+        {
+          "path": "$DOWNLOAD/**"
+        }
+      ]
+    }
   ]
 }

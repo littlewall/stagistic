@@ -6,6 +6,7 @@ export {
     SectionTitle,
     SubtleText,
 } from './atoms/typography/Typography';
+export {ImportScriptModal} from './dialogs/ImportScriptModal';
 export {NewScriptModal} from './dialogs/NewScriptModal';
 export {EditorSidebar, type Scene} from './editor-panels/EditorSidebar';
 export {ToastProvider, useToastController} from './feedback/ToastProvider';
