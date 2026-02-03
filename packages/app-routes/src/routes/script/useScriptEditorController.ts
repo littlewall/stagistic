@@ -34,6 +34,11 @@ type ScriptEditorController = {
     storageError: string | null,
     shouldAutoFocus: boolean,
     saveIndicator: ScriptSyncState,
+    editorLoadState: {
+        progress: number,
+        statusText: string,
+        isLoading: boolean,
+    },
     handleAutoSave: (value: SlateValue) => Promise<boolean>,
     handleManualSave: (value: SlateValue) => Promise<boolean>,
 };
@@ -107,6 +112,66 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     const scriptsLoading = recentScriptsLoading || (scriptId ? currentScriptLoading : false);
     const scriptsError = currentScriptError ?? recentScriptsError;
     const currentScriptId = currentScript?.id ?? null;
+    const isContentLoading = !!currentScriptId && initialValue === undefined;
+    const editorLoadState = useMemo(() => {
+        const items = [
+            {
+                label: 'Načítám seznam scénářů',
+                status: recentScriptsError
+                    ? 'error'
+                    : recentScriptsLoading
+                        ? 'active'
+                        : 'done',
+            },
+            {
+                label: 'Načítám metadata scénáře',
+                status: currentScriptError
+                    ? 'error'
+                    : currentScriptLoading
+                        ? 'active'
+                        : scriptId
+                            ? 'done'
+                            : 'pending',
+            },
+            {
+                label: 'Načítám obsah scénáře',
+                status: storageError
+                    ? 'error'
+                    : isContentLoading
+                        ? 'active'
+                        : initialValue
+                            ? 'done'
+                            : 'pending',
+            },
+        ] as const;
+
+        const score = (status: typeof items[number]['status']) => {
+            if (status === 'done') return 1;
+            if (status === 'active') return 0.5;
+
+            return 0;
+        };
+        const progress = items.reduce((sum, item) => sum + score(item.status), 0) / items.length;
+        const statusText = items.find(item => item.status === 'active')?.label
+            ?? items.find(item => item.status === 'error')?.label
+            ?? 'Připravuji editor';
+
+        return {
+            progress,
+            statusText,
+            isLoading: scriptsLoading || isContentLoading,
+        };
+    }, [
+        currentScriptError,
+        currentScriptLoading,
+        initialValue,
+        isContentLoading,
+        recentScriptsError,
+        recentScriptsLoading,
+        scriptId,
+        scriptsLoading,
+        storageError,
+    ]);
 
     const recentScripts = useMemo(
         () => currentScript
@@ -330,6 +395,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         storageError,
         shouldAutoFocus,
         saveIndicator,
+        editorLoadState,
         handleAutoSave,
         handleManualSave,
     };

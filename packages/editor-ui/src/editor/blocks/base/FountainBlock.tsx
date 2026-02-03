@@ -26,12 +26,10 @@ const FountainBlock = ({
     return (
         <PlateElement
             {...props}
-            className={clsx(styles.block, blockClassName)}
+            className={clsx(styles.block, styles.content, blockClassName, contentClassName)}
             style={blockStyle}
         >
-            <span className={clsx(styles.content, contentClassName)}>
-                {content ?? children}
-            </span>
+            {content ?? children}
         </PlateElement>
     );
 };

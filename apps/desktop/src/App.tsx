@@ -4,15 +4,20 @@ import {
     ScriptRepositoryProvider,
 } from '@stagistic/app-core';
 import {
-    HomeRoute,
     GlobalModalsProvider,
+    HomeRoute,
     ScriptEditorRoute,
     ScriptListRoute,
     ScriptSettingsRoute,
 } from '@stagistic/app-routes';
-import {ToastProvider} from '@stagistic/ui';
+import {
+    LoaderOverlay,
+    ToastProvider,
+} from '@stagistic/ui';
 import {listen, type UnlistenFn} from '@tauri-apps/api/event';
-import {useEffect} from 'react';
+import {
+    useEffect, useState,
+} from 'react';
 import {
     BrowserRouter,
     Navigate,
@@ -21,6 +26,7 @@ import {
     useNavigate,
 } from 'react-router-dom';
 
+import {prepareLocalDbWithProgress} from '~db';
 import {scriptRepository} from '~repo';
 
 const MenuEventHandler = () => {
@@ -74,6 +80,62 @@ const MenuEventHandler = () => {
 };
 
 const App = () => {
+    const [bootProgress, setBootProgress] = useState(0);
+    const [bootError, setBootError] = useState<string | null>(null);
+    const [bootReady, setBootReady] = useState(false);
+    const [bootStatus, setBootStatus] = useState('Připravuji aplikaci');
+
+    useEffect(() => {
+        let isActive = true;
+
+        const boot = async () => {
+            try {
+                setBootStatus('Načítám UI assety');
+                if (document?.fonts?.ready) {
+                    await document.fonts.ready;
+                }
+
+                if (!isActive) return;
+
+                setBootProgress(0.15);
+
+                await prepareLocalDbWithProgress(update => {
+                    if (!isActive) return;
+                    setBootStatus(update.label);
+                    setBootProgress(0.15 + update.progress * 0.85);
+                });
+
+                if (!isActive) return;
+
+                setBootProgress(1);
+                setBootStatus('Hotovo');
+                setBootReady(true);
+            } catch (error) {
+                console.error('Failed to initialize app', error);
+                if (isActive) {
+                    setBootError('Nepodařilo se inicializovat aplikaci.');
+                }
+            }
+        };
+
+        void boot();
+
+        return () => {
+            isActive = false;
+        };
+    }, []);
+
+    if (!bootReady) {
+        return (
+            <LoaderOverlay
+                title="Inicializuji Stagistic"
+                subtitle={bootStatus}
+                progress={bootProgress}
+                hint={bootError ?? 'Prosím vyčkejte, připravujeme pracovní prostředí.'}
+            />
+        );
+    }
+
     return (
         <BrowserRouter>
             <ScriptRepositoryProvider repository={scriptRepository}>

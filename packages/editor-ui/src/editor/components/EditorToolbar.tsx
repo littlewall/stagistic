@@ -48,6 +48,7 @@ const EditorToolbar = () => {
         setIsOpen(false);
     }, [activeBlockKey]);
 
+
     useEffect(() => {
         // Keep toolbar ref to let the shared editor state treat toolbar as active.
         if (toolbarRef.current) {

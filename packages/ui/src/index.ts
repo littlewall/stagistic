@@ -9,6 +9,9 @@ export {
 export {ImportScriptModal} from './dialogs/ImportScriptModal';
 export {NewScriptModal} from './dialogs/NewScriptModal';
 export {EditorSidebar, type Scene} from './editor-panels/EditorSidebar';
+export {LoaderOverlay} from './LoaderOverlay';
+export {ProgressBar} from './feedback/ProgressBar';
+export {ProgressPanel} from './feedback/ProgressPanel';
 export {ToastProvider, useToastController} from './feedback/ToastProvider';
 export {
     AppHeader,

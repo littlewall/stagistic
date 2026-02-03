@@ -3,6 +3,7 @@ import {
     AppHeader,
     AppLayout,
     EditorSidebar,
+    ProgressPanel,
 } from '@stagistic/ui';
 import {
     useCallback,
@@ -15,6 +16,7 @@ import {
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import {useScriptEditorController} from './useScriptEditorController';
+import styles from './ScriptEditorRoute.module.css';
 
 const AUTOSAVE_DELAY_MS = 1500;
 
@@ -23,13 +25,13 @@ export const ScriptEditorRoute = () => {
     const {scriptId} = useParams();
     const {openNewScript} = useGlobalModals();
     const {
-        scriptsLoading,
         currentScript,
         recentScripts,
         initialValue,
         storageError,
         shouldAutoFocus,
         saveIndicator,
+        editorLoadState,
         handleAutoSave,
         handleManualSave,
     } = useScriptEditorController(scriptId);
@@ -70,19 +72,13 @@ export const ScriptEditorRoute = () => {
     ]);
     const handleSceneClick = useCallback(() => {}, []);
 
-    if (scriptsLoading) {
-        return null;
-    }
-
-    if (!currentScript) {
-        return null;
-    }
+    const showEditorLoader = editorLoadState.isLoading || !initialValue;
 
     return (
         <AppLayout
             header={(
                 <AppHeader
-                    currentScript={currentScript}
+                    currentScript={currentScript ?? undefined}
                     recentScripts={recentScripts}
                     onSelectScript={handleSelectScript}
                     onHome={handleHome}
@@ -98,9 +94,18 @@ export const ScriptEditorRoute = () => {
                     {storageError}
                 </div>
             ) : null}
-            {initialValue && (
+            {showEditorLoader ? (
+                <div className={styles.editorLoading}>
+                    <ProgressPanel
+                        title="Připravuji editor"
+                        subtitle="Načítám scénář a editorové prostředí"
+                        progress={editorLoadState.progress}
+                        statusText={editorLoadState.statusText}
+                    />
+                </div>
+            ) : (
                 <FountainEditor
-                    key={currentScript.id}
+                    key={currentScript?.id ?? 'editor'}
                     initialValue={initialValue}
                     onAutoSave={handleAutoSave}
                     onManualSave={handleManualSave}
