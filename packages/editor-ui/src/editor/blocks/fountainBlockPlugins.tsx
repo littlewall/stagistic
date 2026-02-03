@@ -1,7 +1,12 @@
 import {ColumnItemPlugin, ColumnPlugin} from '@platejs/layout/react';
 import {BlockSelectionPlugin} from '@platejs/selection/react';
 import {createNodeId} from '@stagistic/shared';
-import {NodeIdPlugin} from 'platejs';
+import {
+    ChunkingPlugin,
+    DOMPlugin,
+    NodeApi,
+    NodeIdPlugin,
+} from 'platejs';
 import {createPlatePlugin} from 'platejs/react';
 
 import {actionPlugin} from './elements/ActionBlock/ActionBlockPlugin';
@@ -32,6 +37,14 @@ const tabFallbackPlugin = createPlatePlugin({
 });
 
 export const createFountainPlugins = () => [
+    ChunkingPlugin.configure({
+        options: {
+            chunkSize: 200,
+            contentVisibilityAuto: true,
+            query: NodeApi.isEditor,
+        },
+    }),
+    DOMPlugin,
     NodeIdPlugin.configure({
         options: {
             idCreator: createNodeId,

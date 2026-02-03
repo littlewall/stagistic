@@ -1,3 +1,3 @@
-import {uuidv7} from './ids/uuidv7';
+import {nanoid} from 'nanoid';
 
-export const createNodeId = () => uuidv7();
+export const createNodeId = () => nanoid(6);

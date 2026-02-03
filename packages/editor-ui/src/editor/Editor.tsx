@@ -1,4 +1,5 @@
 import {
+    createNodeId,
     type SlateValue,
 } from '@stagistic/shared';
 import {type Value} from 'platejs';
@@ -228,6 +229,9 @@ const Editor = ({
     const editor = usePlateEditor({
         plugins,
         value: (initialValue) as Value,
+        nodeId: {
+            idCreator: () => createNodeId(),
+        },
     });
 
     useEffect(() => {
@@ -246,8 +250,6 @@ const Editor = ({
 
         return () => window.removeEventListener('keydown', onKeyDown);
     }, [onManualSave]);
-
-    editor.getChunkSize = () => 100;
 
     return (
         <div className={styles.root}>
