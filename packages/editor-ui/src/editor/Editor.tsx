@@ -1,4 +1,3 @@
-import {fountainParser} from '@stagistic/editor-core';
 import {
     type SlateValue,
 } from '@stagistic/shared';
@@ -31,7 +30,7 @@ const serializeValue = (value: SlateValue) => JSON.stringify(value);
 type SaveResult = boolean | void | Promise<boolean | void>;
 
 type EditorProps = {
-    initialValue?: SlateValue,
+    initialValue: SlateValue,
     onValueChange?: (value: SlateValue) => void,
     onAutoSave?: (value: SlateValue) => SaveResult,
     onManualSave?: (value: SlateValue) => SaveResult,
@@ -59,7 +58,7 @@ const EditorAutosave = ({
     onManualSave,
     onValueChange,
 }: EditorAutosaveProps) => {
-    const editorValue = useEditorValue();
+    const editorValue = useEditorValue() as SlateValue | undefined;
     const valueVersion = useValueVersion();
     const latestValueRef = useRef<Value>(initialValue as Value);
     const lastSavedSerializedRef = useRef<string>(serializeValue(initialValue));
@@ -148,12 +147,10 @@ const EditorAutosave = ({
             return;
         }
 
-        const value = editorValue as SlateValue;
+        latestValueRef.current = editorValue as Value;
+        onValueChange?.(editorValue);
 
-        latestValueRef.current = value as Value;
-        onValueChange?.(value);
-
-        const serialized = serializeValue(value);
+        const serialized = serializeValue(editorValue);
         const isDirty = serialized !== lastSavedSerializedRef.current;
 
         updateDirty(isDirty);
@@ -221,22 +218,17 @@ const Editor = ({
     autoSaveDelayMs,
     autoFocus,
 }: EditorProps) => {
-    const defaultValue = useMemo(() => fountainParser(''), []);
-    const resolvedInitialValue = initialValue ?? defaultValue;
     const manualSaveRef = useRef<(() => void) | null>(null);
 
-    const plugins = useMemo(() => createFountainPlugins(), []);
+    const plugins = useMemo(() => {
+        const result = createFountainPlugins();
+
+        return result;
+    }, []);
     const editor = usePlateEditor({
         plugins,
-        value: resolvedInitialValue as Value,
+        value: (initialValue) as Value,
     });
-    const handleToolbarSave = useCallback(() => {
-        manualSaveRef.current?.();
-    }, []);
-    const toolbarSave = useMemo(
-        () => onManualSave ? handleToolbarSave : undefined,
-        [handleToolbarSave, onManualSave],
-    );
 
     useEffect(() => {
         if (!onManualSave) {
@@ -255,22 +247,22 @@ const Editor = ({
         return () => window.removeEventListener('keydown', onKeyDown);
     }, [onManualSave]);
 
+    editor.getChunkSize = () => 100;
+
     return (
         <div className={styles.root}>
             <Plate editor={editor}>
                 <EditorStateProvider>
                     <EditorAutosave
                         autoSaveDelayMs={autoSaveDelayMs}
-                        initialValue={resolvedInitialValue}
+                        initialValue={initialValue}
                         manualSaveRef={manualSaveRef}
                         onAutoSave={onAutoSave}
                         onDirtyChange={onDirtyChange}
                         onManualSave={onManualSave}
                         onValueChange={onValueChange}
                     />
-                    <EditorToolbar
-                        onSave={toolbarSave}
-                    />
+                    <EditorToolbar />
                     <EditorCanvas renderLeaf={FountainLeaf} autoFocus={autoFocus} />
                 </EditorStateProvider>
             </Plate>

@@ -63,10 +63,14 @@ export const ScriptEditorRoute = () => {
         if (actionId === 'new-script') {
             openNewScript();
         }
-    }, [currentScript, navigate, openNewScript]);
+    }, [
+        currentScript,
+        navigate,
+        openNewScript,
+    ]);
     const handleSceneClick = useCallback(() => {}, []);
 
-    if (scriptsLoading || initialValue === undefined) {
+    if (scriptsLoading) {
         return null;
     }
 
@@ -94,13 +98,16 @@ export const ScriptEditorRoute = () => {
                     {storageError}
                 </div>
             ) : null}
-            <FountainEditor
-                initialValue={initialValue ?? undefined}
-                onAutoSave={handleAutoSave}
-                onManualSave={handleManualSave}
-                autoSaveDelayMs={AUTOSAVE_DELAY_MS}
-                autoFocus={shouldAutoFocus}
-            />
+            {initialValue && (
+                <FountainEditor
+                    key={currentScript.id}
+                    initialValue={initialValue}
+                    onAutoSave={handleAutoSave}
+                    onManualSave={handleManualSave}
+                    autoSaveDelayMs={AUTOSAVE_DELAY_MS}
+                    autoFocus={shouldAutoFocus}
+                />
+            )}
         </AppLayout>
     );
 };

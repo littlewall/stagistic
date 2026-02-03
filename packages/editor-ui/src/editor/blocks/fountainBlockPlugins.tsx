@@ -50,6 +50,10 @@ export const createFountainPlugins = () => [
     transitionPlugin,
     lyricsPlugin,
     centeredPlugin,
-    BlockSelectionPlugin,
+    BlockSelectionPlugin.configure({
+        options: {
+            enableContextMenu: false,
+        },
+    }),
     tabFallbackPlugin,
 ];

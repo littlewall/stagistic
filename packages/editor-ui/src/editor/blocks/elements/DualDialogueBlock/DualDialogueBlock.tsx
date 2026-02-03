@@ -1,6 +1,6 @@
 import {ELEMENT_DUAL_DIALOGUE} from '@stagistic/editor-core';
 import type {PlateElementProps} from 'platejs/react';
-import {ReactNode} from 'react';
+import {memo} from 'react';
 
 import FountainBlock from '../../base/FountainBlock';
 import useDualColumnPlacement from '../../layout/useDualColumnPlacement';
@@ -15,11 +15,10 @@ const DualDialogueBlock = ({children, ...props}: PlateElementProps) => {
             blockClassName={className}
             blockStyle={style}
             contentClassName={styles.dualDialogue}
-            content={children as ReactNode}
         >
             {children}
         </FountainBlock>
     );
 };
 
-export default DualDialogueBlock;
+export default memo(DualDialogueBlock);

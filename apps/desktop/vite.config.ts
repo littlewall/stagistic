@@ -1,5 +1,6 @@
-import react from '@vitejs/plugin-react';
 import {fileURLToPath} from 'node:url';
+
+import react from '@vitejs/plugin-react';
 import {defineConfig} from 'vite';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
@@ -16,11 +17,11 @@ export default defineConfig({
     css: {
         transformer: 'lightningcss',
     },
+    optimizeDeps: {
+        exclude: ['@electric-sql/pglite'],
+    },
     resolve: {
-        alias: [
-            {find: /^@pglite-data/, replacement: pgliteDataPath},
-            {find: /^@pglite-wasm/, replacement: pgliteWasmPath},
-        ],
+        alias: [{find: /^@pglite-data/, replacement: pgliteDataPath}, {find: /^@pglite-wasm/, replacement: pgliteWasmPath}],
     },
     clearScreen: false,
     server: {

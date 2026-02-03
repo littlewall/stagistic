@@ -1,7 +1,7 @@
 import {ELEMENT_CHARACTER} from '@stagistic/editor-core';
 import clsx from 'clsx';
 import type {PlateElementProps} from 'platejs/react';
-import {ReactNode} from 'react';
+import {memo} from 'react';
 
 import FountainBlock from '../../base/FountainBlock';
 import useDualColumnPlacement from '../../layout/useDualColumnPlacement';
@@ -16,11 +16,10 @@ const CharacterBlock = ({children, ...props}: PlateElementProps) => {
             blockClassName={clsx(className, styles.characterBlock)}
             blockStyle={style}
             contentClassName={styles.character}
-            content={children as ReactNode}
         >
             {children}
         </FountainBlock>
     );
 };
 
-export default CharacterBlock;
+export default memo(CharacterBlock);

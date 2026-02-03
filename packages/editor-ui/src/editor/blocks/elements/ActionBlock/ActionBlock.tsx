@@ -1,6 +1,6 @@
 import {ELEMENT_ACTION} from '@stagistic/editor-core';
 import type {PlateElementProps} from 'platejs/react';
-import {ReactNode} from 'react';
+import {memo} from 'react';
 
 import FountainBlock from '../../base/FountainBlock';
 import useDualColumnPlacement from '../../layout/useDualColumnPlacement';
@@ -15,11 +15,10 @@ const ActionBlock = ({children, ...props}: PlateElementProps) => {
             blockClassName={className}
             blockStyle={style}
             contentClassName={styles.action}
-            content={children as ReactNode}
         >
             {children}
         </FountainBlock>
     );
 };
 
-export default ActionBlock;
+export default memo(ActionBlock);

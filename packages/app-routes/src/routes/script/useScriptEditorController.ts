@@ -2,8 +2,6 @@ import {
     useRecentScripts,
     useScriptRepository,
     useScriptSummary,
-    getCachedLatest,
-    setCachedLatest,
 } from '@stagistic/app-core';
 import {
     ensureNodeIds,
@@ -211,18 +209,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
 
         const loadLatest = async () => {
             try {
-                const cached = getCachedLatest(currentScriptId);
-
-                if (cached) {
-                    const needsFocus = isSlateValueEmpty(cached);
-
-                    setStorageError(null);
-                    setInitialValue(cached);
-                    setShouldAutoFocus(needsFocus);
-
-                    return;
-                }
-
                 const stored = await scriptRepository.loadLatest(currentScriptId);
 
                 if (!isActive) {
@@ -233,37 +219,28 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
 
                 if (stored) {
                     const needsFocus = isSlateValueEmpty(stored);
-                    const storedSerialized = JSON.stringify(stored);
-                    const normalized = ensureNodeIds(ensureSceneHeading(stored));
-                    const normalizedSerialized = JSON.stringify(normalized);
-
-                    if (storedSerialized !== normalizedSerialized) {
-                        void scriptRepository.saveLatest(currentScriptId, normalized).catch(error => {
-                            console.error('Failed to persist script node ids', error);
-                        });
-                    }
+                    // Ensure IDs and scene heading
+                    const withIds = ensureNodeIds(stored);
+                    const normalized = ensureSceneHeading(withIds);
 
                     setInitialValue(normalized);
                     setShouldAutoFocus(needsFocus);
-                    setCachedLatest(currentScriptId, normalized);
 
                     return;
                 }
 
-                const fallback = ensureNodeIds(ensureSceneHeading(null));
+                const fallback = ensureSceneHeading(null);
 
                 setInitialValue(fallback);
                 setShouldAutoFocus(true);
-                setCachedLatest(currentScriptId, fallback);
             } catch (error) {
                 console.error('Failed to load latest script', error);
                 setStorageError('Failed to load script data.');
 
-                const fallback = ensureNodeIds(ensureSceneHeading(null));
+                const fallback = ensureSceneHeading(null);
 
                 setInitialValue(fallback);
                 setShouldAutoFocus(true);
-                setCachedLatest(currentScriptId, fallback);
             }
         };
 
@@ -282,7 +259,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         try {
             startSaveIndicator();
             await scriptRepository.saveLatest(currentScriptId, value);
-            setCachedLatest(currentScriptId, value);
             finishSaveIndicator(true);
 
             return true;
@@ -314,7 +290,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         try {
             startSaveIndicator();
             await scriptRepository.saveLatest(currentScriptId, value);
-            setCachedLatest(currentScriptId, value);
             await scriptRepository.commitVersion(currentScriptId);
             addToast({
                 title: 'Script saved',

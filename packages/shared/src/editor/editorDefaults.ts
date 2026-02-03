@@ -46,6 +46,36 @@ const isElementNode = (node: unknown): node is {children: unknown[], id?: string
     && Array.isArray((node as {children?: unknown}).children);
 
 export const ensureNodeIds = (value: SlateValue): SlateValue => {
+    let needsUpdate = false;
+
+    const checkNeedsIds = (node: unknown): void => {
+        if (needsUpdate) return;
+
+        if (Array.isArray(node)) {
+            node.forEach(checkNeedsIds);
+
+            return;
+        }
+
+        if (isElementNode(node)) {
+            if (!node.id) {
+                needsUpdate = true;
+
+                return;
+            }
+
+            if (Array.isArray(node.children)) {
+                node.children.forEach(checkNeedsIds);
+            }
+        }
+    };
+
+    checkNeedsIds(value);
+
+    if (!needsUpdate) {
+        return value;
+    }
+
     const assignIds = (node: unknown): unknown => {
         if (Array.isArray(node)) {
             return node.map(assignIds);

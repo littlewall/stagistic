@@ -121,9 +121,7 @@ const EditorToolbar = () => {
         event.preventDefault();
         setIsOpen(false);
         setBlockType(optionType);
-    }, [
-        setBlockType,
-    ]);
+    }, [setBlockType]);
 
     return (
         <div

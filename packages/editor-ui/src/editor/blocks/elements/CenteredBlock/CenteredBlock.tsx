@@ -1,6 +1,6 @@
 import {ELEMENT_CENTERED} from '@stagistic/editor-core';
 import type {PlateElementProps} from 'platejs/react';
-import {ReactNode} from 'react';
+import {memo} from 'react';
 
 import FountainBlock from '../../base/FountainBlock';
 import useDualColumnPlacement from '../../layout/useDualColumnPlacement';
@@ -15,11 +15,10 @@ const CenteredBlock = ({children, ...props}: PlateElementProps) => {
             blockClassName={className}
             blockStyle={style}
             contentClassName={styles.centered}
-            content={children as ReactNode}
         >
             {children}
         </FountainBlock>
     );
 };
 
-export default CenteredBlock;
+export default memo(CenteredBlock);

@@ -1,64 +1,118 @@
+import {useEditorRef} from 'platejs/react';
 import type {CSSProperties, RefObject} from 'react';
 import {
     useCallback,
     useEffect,
     useLayoutEffect,
+    useRef,
     useState,
 } from 'react';
 
+import BlockControls from '../blocks/controls/BlockControls';
 import {
     useEditorActiveBlock,
     useEditorActivityState,
     useEditorSelectionState,
 } from '../state/EditorStateProvider';
-import BlockControls from '../blocks/controls/BlockControls';
 import styles from './EditorBlockControlsOverlay.module.css';
 
 type EditorBlockControlsOverlayProps = {
-    canvasRef: RefObject<HTMLElement>,
+    canvasRef: RefObject<HTMLElement | null>,
 };
 
+const nodeToDOMCache = new WeakMap<object, HTMLElement>();
+
 const EditorBlockControlsOverlay = ({canvasRef}: EditorBlockControlsOverlayProps) => {
-    const {activeBlockPathString, activeBlockInfo} = useEditorActiveBlock();
+    const editor = useEditorRef();
+    const {activeBlockPath, activeBlockInfo} = useEditorActiveBlock();
     const {isEditorActive} = useEditorActivityState();
     const {isMultiBlockSelection, selection} = useEditorSelectionState();
     const [overlayStyle, setOverlayStyle] = useState<CSSProperties | null>(null);
+    const targetElementRef = useRef<HTMLElement | null>(null);
 
     const updatePosition = useCallback(() => {
         const canvas = canvasRef.current;
 
-        if (!canvas || !activeBlockPathString) {
+        if (!canvas || !activeBlockPath) {
             setOverlayStyle(null);
+            targetElementRef.current = null;
 
             return;
         }
 
-        const target = canvas.querySelector<HTMLElement>(
-            `[data-block-id="${activeBlockPathString}"]`,
-        );
+        try {
+            const entry = editor.api.node(activeBlockPath);
 
-        if (!target) {
+            if (!entry) {
+                setOverlayStyle(null);
+                targetElementRef.current = null;
+
+                return;
+            }
+
+            const [node] = entry;
+
+            // Try to get from cache first
+            let target = nodeToDOMCache.get(node);
+
+            // If not in cache, find it
+            if (!target || !canvas.contains(target)) {
+                const pathKey = activeBlockPath.join(',');
+                const allElements = canvas.querySelectorAll<HTMLElement>('[data-slate-node="element"]');
+
+                for (const el of allElements) {
+                    const slateNode = (el as any).__slateNode;
+
+                    if (slateNode) {
+                        const nodePath = editor.api.path(slateNode);
+
+                        if (nodePath && nodePath.join(',') === pathKey) {
+                            target = el;
+                            nodeToDOMCache.set(node, el);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!target) {
+                setOverlayStyle(null);
+                targetElementRef.current = null;
+
+                return;
+            }
+
+            targetElementRef.current = target;
+
+            const canvasRect = canvas.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+            const top = targetRect.top - canvasRect.top + canvas.scrollTop;
+            const left = targetRect.left - canvasRect.left + canvas.scrollLeft;
+
+            setOverlayStyle({
+                top,
+                left,
+                width: targetRect.width,
+                height: targetRect.height,
+            });
+        } catch {
             setOverlayStyle(null);
-
-            return;
+            targetElementRef.current = null;
         }
-
-        const canvasRect = canvas.getBoundingClientRect();
-        const targetRect = target.getBoundingClientRect();
-        const top = targetRect.top - canvasRect.top + canvas.scrollTop;
-        const left = targetRect.left - canvasRect.left + canvas.scrollLeft;
-
-        setOverlayStyle({
-            top,
-            left,
-            width: targetRect.width,
-            height: targetRect.height,
-        });
-    }, [activeBlockPathString, canvasRef]);
+    }, [
+        activeBlockPath,
+        canvasRef,
+        editor,
+    ]);
 
     useLayoutEffect(() => {
         updatePosition();
-    }, [updatePosition, selection, activeBlockInfo, isEditorActive]);
+    }, [
+        updatePosition,
+        selection,
+        activeBlockInfo,
+        isEditorActive,
+    ]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -74,14 +128,9 @@ const EditorBlockControlsOverlay = ({canvasRef}: EditorBlockControlsOverlayProps
         window.addEventListener('resize', handleUpdate);
         resizeObserver.observe(canvas);
 
-        if (activeBlockPathString) {
-            const target = canvas.querySelector<HTMLElement>(
-                `[data-block-id="${activeBlockPathString}"]`,
-            );
-
-            if (target) {
-                resizeObserver.observe(target);
-            }
+        // Observe the target element if available
+        if (targetElementRef.current) {
+            resizeObserver.observe(targetElementRef.current);
         }
 
         return () => {
@@ -89,18 +138,20 @@ const EditorBlockControlsOverlay = ({canvasRef}: EditorBlockControlsOverlayProps
             window.removeEventListener('resize', handleUpdate);
             resizeObserver.disconnect();
         };
-    }, [activeBlockPathString, canvasRef, updatePosition]);
+    }, [canvasRef, updatePosition]);
 
     if (
         !isEditorActive ||
         !selection ||
         isMultiBlockSelection ||
         !activeBlockInfo ||
-        !activeBlockPathString ||
+        !activeBlockPath ||
         !overlayStyle
     ) {
         return null;
     }
+
+    const pathString = activeBlockPath.join('-');
 
     return (
         <div className={styles.overlay} style={overlayStyle}>
@@ -111,7 +162,7 @@ const EditorBlockControlsOverlay = ({canvasRef}: EditorBlockControlsOverlayProps
                     visible={true}
                     element={activeBlockInfo.element}
                     path={activeBlockInfo.path}
-                    blockId={activeBlockPathString}
+                    blockId={pathString}
                 />
             </div>
         </div>

@@ -1,5 +1,6 @@
 import {ELEMENT_PARENTHETICAL} from '@stagistic/editor-core';
 import type {PlateElementProps} from 'platejs/react';
+import {memo} from 'react';
 
 import FountainBlock from '../../base/FountainBlock';
 import useDualColumnPlacement from '../../layout/useDualColumnPlacement';
@@ -14,11 +15,10 @@ const ParentheticalBlock = ({children, ...props}: PlateElementProps) => {
             blockClassName={className}
             blockStyle={style}
             contentClassName={styles.parenthetical}
-            content={<span className={styles.text}>{children}</span>}
         >
-            {children}
+            <span className={styles.text}>{children}</span>
         </FountainBlock>
     );
 };
 
-export default ParentheticalBlock;
+export default memo(ParentheticalBlock);

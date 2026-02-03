@@ -6,7 +6,6 @@ import {
     useEditorRef,
     useFocused,
     useSelectionVersion,
-    useValueVersion,
 } from 'platejs/react';
 import {
     createContext,
@@ -50,7 +49,7 @@ type EditorCommandsValue = {
 };
 
 type ActiveBlockValue = Pick<
-EditorStateValue,
+    EditorStateValue,
 'activeBlockPath' | 'activeBlockPathString' | 'activeElement' | 'activeBlockInfo'
 >;
 
@@ -136,7 +135,6 @@ type EditorStateProviderProps = {
 export const EditorStateProvider = ({children}: EditorStateProviderProps) => {
     const editor = useEditorRef();
     const selectionVersion = useSelectionVersion();
-    const valueVersion = useValueVersion();
     const isFocused = useFocused();
 
     const selection = editor.selection ?? null;
@@ -185,14 +183,12 @@ export const EditorStateProvider = ({children}: EditorStateProviderProps) => {
         return !Path.equals(anchorBlock[1], focusBlock[1]);
     }, [editor, selectionVersion]);
 
-    const canUndo = useMemo(() => (editor.history?.undos?.length ?? 0) > 0, [
-        editor.history?.undos?.length,
-        valueVersion,
-    ]);
-    const canRedo = useMemo(() => (editor.history?.redos?.length ?? 0) > 0, [
-        editor.history?.redos?.length,
-        valueVersion,
-    ]);
+    // Only recompute history state when history arrays actually change length
+    const undosLength = editor.history?.undos?.length ?? 0;
+    const redosLength = editor.history?.redos?.length ?? 0;
+
+    const canUndo = undosLength > 0;
+    const canRedo = redosLength > 0;
 
     const [isEditorActive, setIsEditorActive] = useState(false);
 
@@ -258,20 +254,14 @@ export const EditorStateProvider = ({children}: EditorStateProviderProps) => {
     const selectionValue = useMemo<SelectionValue>(() => ({
         isMultiBlockSelection,
         selection,
-    }), [
-        isMultiBlockSelection,
-        selection,
-    ]);
+    }), [isMultiBlockSelection, selection]);
     const activityValue = useMemo<ActivityValue>(() => ({
         isEditorActive,
     }), [isEditorActive]);
     const historyValue = useMemo<HistoryValue>(() => ({
         canRedo,
         canUndo,
-    }), [
-        canRedo,
-        canUndo,
-    ]);
+    }), [canRedo, canUndo]);
 
     const commands = useMemo<EditorCommandsValue>(() => ({
         redo: () => editor.redo(),
