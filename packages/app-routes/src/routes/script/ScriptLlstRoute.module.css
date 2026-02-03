@@ -24,6 +24,9 @@
 .cardTitle {
     font-size: 1.1rem;
 }
+.listLoading {
+    margin-top: var(--space-6);
+}
 
 @media (max-width: 900px) {
     .header {

@@ -1,12 +1,13 @@
 import {BlockMenuPlugin} from '@platejs/selection/react';
 import {applyBlockTypeChange, type FountainElement} from '@stagistic/editor-core';
 import clsx from 'clsx';
-import {useEditorRef, usePluginOption} from 'platejs/react';
+import {useEditorRef, usePluginOption, useValueVersion} from 'platejs/react';
 import {
     type MouseEvent as ReactMouseEvent,
     useCallback,
     useEffect,
     useLayoutEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -39,6 +40,18 @@ const BlockMenu = ({
     const openId = usePluginOption(BlockMenuPlugin, 'openId');
     const isOpen = openId === blockId;
     const blockMenuApi = editor.getApi(BlockMenuPlugin).blockMenu;
+    const valueVersion = useValueVersion();
+
+    const activeType = useMemo(() => {
+        const entry = editor.api.node(path);
+        const node = entry?.[0];
+
+        if (node && typeof node === 'object' && 'type' in node) {
+            return node.type;
+        }
+
+        return element.type;
+    }, [editor, element.type, path, valueVersion]);
 
     const menuRef = useRef<HTMLSpanElement | null>(null);
     const [isMenuAbove, setIsMenuAbove] = useState(false);
@@ -52,11 +65,22 @@ const BlockMenu = ({
         event.preventDefault();
         event.stopPropagation();
         blockMenuApi.hide();
-        applyBlockTypeChange(editor, element, path, optionType);
+        const entry = editor.api.node(path);
+
+        if (!entry) {
+            return;
+        }
+
+        const [node] = entry;
+
+        if (!node || typeof node !== 'object' || !('type' in node)) {
+            return;
+        }
+
+        applyBlockTypeChange(editor, node as FountainElement, path, optionType);
     }, [
         blockMenuApi,
         editor,
-        element,
         path,
     ]);
 
@@ -194,7 +218,7 @@ const BlockMenu = ({
                     role="menuitem"
                     className={clsx(
                         styles.menuItem,
-                        option.type === element.type && styles.menuItemActive,
+                        option.type === activeType && styles.menuItemActive,
                     )}
                     onMouseDown={event => handleMenuItemMouseDown(option.type, event)}
                 >

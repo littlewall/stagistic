@@ -16,6 +16,13 @@ let migrationsPromise: Promise<void> | null = null;
 let fsBundlePromise: Promise<Blob> | null = null;
 let wasmModulePromise: Promise<WebAssembly.Module> | null = null;
 
+export type DbBootstrapStep = 'fs-bundle' | 'wasm' | 'client' | 'migrations' | 'ready';
+export type DbBootstrapUpdate = {
+    step: DbBootstrapStep,
+    label: string,
+    progress: number,
+};
+
 const loadFsBundle = async () => {
     if (!fsBundlePromise) {
         fsBundlePromise = (async () => {
@@ -93,5 +100,44 @@ export const getLocalDb = async () => {
 };
 
 export const prepareLocalDb = async () => {
+    await getLocalDb();
+};
+
+export const prepareLocalDbWithProgress = async (
+    onProgress: (update: DbBootstrapUpdate) => void,
+) => {
+    onProgress({
+        step: 'fs-bundle',
+        label: 'Načítám PGlite datový balík',
+        progress: 0.1,
+    });
+    await loadFsBundle();
+
+    onProgress({
+        step: 'wasm',
+        label: 'Načítám PGlite wasm modul',
+        progress: 0.35,
+    });
+    await loadWasmModule();
+
+    onProgress({
+        step: 'client',
+        label: 'Spouštím lokální databázi',
+        progress: 0.6,
+    });
+    await getClient();
+
+    onProgress({
+        step: 'migrations',
+        label: 'Aplikuji migrace',
+        progress: 0.8,
+    });
+    await runMigrations();
+
+    onProgress({
+        step: 'ready',
+        label: 'Finalizuji databázi',
+        progress: 1,
+    });
     await getLocalDb();
 };

@@ -12,6 +12,7 @@ import {
     Kicker,
     PageContainer,
     PageTitle,
+    ProgressPanel,
     Section,
     SectionHeader,
     SectionTitle,
@@ -49,6 +50,7 @@ export const HomeRoute = () => {
     const {
         scripts,
         scriptSummaries,
+        isLoading: scriptsLoading,
     } = useScripts();
     const {openNewScript} = useGlobalModals();
     const recentScripts = useMemo(() => scripts.slice(0, 6), [scripts]);
@@ -201,7 +203,14 @@ export const HomeRoute = () => {
                                 )}
                             </div>
                         </div>
-                        {latestScript && (
+                        {scriptsLoading ? (
+                            <ProgressPanel
+                                title="Načítám poslední scénář"
+                                subtitle="Zjišťuji naposledy otevřený scénář"
+                                size="sm"
+                                statusText="Načítám poslední scénář"
+                            />
+                        ) : latestScript ? (
                             <Card className={styles.heroCard} variant="highlight">
                                 <CardContent>
                                     <Kicker>Continue writing</Kicker>
@@ -220,10 +229,29 @@ export const HomeRoute = () => {
                                 </CardFooter>
                             </Card>
 
-                        )}
+                        ) : null}
                     </HeroLayout>
                 </section>
-                {recentScripts.length > 0 && (
+                {scriptsLoading ? (
+                    <Section>
+                        <SectionHeader>
+                            <div>
+                                <SectionTitle>Recent scripts</SectionTitle>
+                                <SubtleText>
+                                    Gathering your latest work.
+                                </SubtleText>
+                            </div>
+                        </SectionHeader>
+                        <div className={styles.recentLoading}>
+                            <ProgressPanel
+                                title="Načítám scénáře"
+                                subtitle="Synchronizuji seznam scénářů"
+                                size="sm"
+                                statusText="Načítám seznam scénářů"
+                            />
+                        </div>
+                    </Section>
+                ) : recentScripts.length > 0 && (
                     <Section>
                         <SectionHeader>
                             <div>

@@ -4,8 +4,11 @@ import {
 } from '@stagistic/editor-core';
 import {
     useEditorRef,
+    useEditorSelection,
+    useEditorVersion,
     useFocused,
     useSelectionVersion,
+    useValueVersion,
 } from 'platejs/react';
 import {
     createContext,
@@ -134,10 +137,14 @@ type EditorStateProviderProps = {
 
 export const EditorStateProvider = ({children}: EditorStateProviderProps) => {
     const editor = useEditorRef();
-    const selectionVersion = useSelectionVersion();
+    const editorId = editor.id;
+    const selectionStore = useEditorSelection(editorId);
+    const selection = editor.selection ?? selectionStore ?? null;
+    const editorVersion = useEditorVersion(editorId);
+    const selectionVersion = useSelectionVersion(editorId);
+    const valueVersion = useValueVersion(editorId);
     const isFocused = useFocused();
-
-    const selection = editor.selection ?? null;
+    const [selectionTick, setSelectionTick] = useState(0);
 
     const activeBlockEntry = useMemo(
         () => {
@@ -145,7 +152,7 @@ export const EditorStateProvider = ({children}: EditorStateProviderProps) => {
 
             return editor.api.block({at: selection});
         },
-        [editor, selectionVersion],
+        [editor, selection, selectionTick, editorVersion, selectionVersion, valueVersion],
     );
 
     const activeBlockPath = activeBlockEntry?.[1] ?? null;
@@ -181,7 +188,7 @@ export const EditorStateProvider = ({children}: EditorStateProviderProps) => {
         }
 
         return !Path.equals(anchorBlock[1], focusBlock[1]);
-    }, [editor, selectionVersion]);
+    }, [editor, selection, selectionTick, selectionVersion]);
 
     // Only recompute history state when history arrays actually change length
     const undosLength = editor.history?.undos?.length ?? 0;
@@ -191,6 +198,33 @@ export const EditorStateProvider = ({children}: EditorStateProviderProps) => {
     const canRedo = redosLength > 0;
 
     const [isEditorActive, setIsEditorActive] = useState(false);
+
+    useEffect(() => {
+        // Fallback: force updates when native selection changes inside the editor.
+        const handleSelectionChange = () => {
+            const activeElement = document.activeElement;
+
+            if (!(activeElement instanceof HTMLElement)) {
+                return;
+            }
+
+            if (!activeElement.closest('[data-slate-editor="true"]')) {
+                return;
+            }
+
+            setSelectionTick(prev => prev + 1);
+        };
+
+        document.addEventListener('selectionchange', handleSelectionChange);
+        document.addEventListener('pointerup', handleSelectionChange);
+        document.addEventListener('keyup', handleSelectionChange);
+
+        return () => {
+            document.removeEventListener('selectionchange', handleSelectionChange);
+            document.removeEventListener('pointerup', handleSelectionChange);
+            document.removeEventListener('keyup', handleSelectionChange);
+        };
+    }, []);
 
     useEffect(() => {
         const updateActive = () => {
@@ -266,7 +300,7 @@ export const EditorStateProvider = ({children}: EditorStateProviderProps) => {
     const commands = useMemo<EditorCommandsValue>(() => ({
         redo: () => editor.redo(),
         setBlockType: (type: FountainBlockTypeChangeTarget['type']) => {
-            if (!activeElement || !activeBlockPath) {
+            if (!activeBlockPath) {
                 return;
             }
 
@@ -274,9 +308,25 @@ export const EditorStateProvider = ({children}: EditorStateProviderProps) => {
                 return;
             }
 
+            const entry = editor.api.node(activeBlockPath);
+
+            if (!entry) {
+                return;
+            }
+
+            const [node] = entry;
+
+            if (
+                !node ||
+                typeof node !== 'object' ||
+                !('type' in node)
+            ) {
+                return;
+            }
+
             applyBlockTypeChange(
                 editor,
-                activeElement,
+                node as FountainBlockTypeChangeTarget,
                 activeBlockPath,
                 type,
             );
@@ -296,7 +346,6 @@ export const EditorStateProvider = ({children}: EditorStateProviderProps) => {
     }), [
         activeBlockInfo?.type,
         activeBlockPath,
-        activeElement,
         editor,
     ]);
 

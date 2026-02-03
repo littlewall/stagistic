@@ -6,29 +6,53 @@ import {
     ScriptListRoute,
     ScriptSettingsRoute,
 } from '@stagistic/app-routes';
-import {ToastProvider} from '@stagistic/ui';
+import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {useEffect, useState} from 'react';
 import {
     Navigate, Route, Routes,
 } from 'react-router-dom';
 
-import {LoaderOverlay} from '../../packages/ui/src/LoaderOverlay';
-
 const App = () => {
-    // Simulace globálního načítání (např. při mountu, refreshi, delším fetchi)
-    const [loading, setLoading] = useState(true);
+    const [bootReady, setBootReady] = useState(false);
+    const [bootProgress, setBootProgress] = useState(0);
+    const [bootStatus, setBootStatus] = useState('Připravuji aplikaci');
 
     useEffect(() => {
-        // Simulace načítání (např. fetchování dat, inicializace)
-        const timeout = setTimeout(() => setLoading(false), 1200); // 1.2s loader
+        let isActive = true;
 
-        return () => clearTimeout(timeout);
+        const boot = async () => {
+            setBootStatus('Načítám UI assety');
+            if (document?.fonts?.ready) {
+                await document.fonts.ready;
+            }
+            if (!isActive) return;
+
+            setBootProgress(1);
+            setBootStatus('Hotovo');
+            setBootReady(true);
+        };
+
+        void boot();
+
+        return () => {
+            isActive = false;
+        };
     }, []);
+
+    if (!bootReady) {
+        return (
+            <LoaderOverlay
+                title="Inicializuji Stagistic"
+                subtitle={bootStatus}
+                progress={bootProgress}
+                hint="Prosím vyčkejte, připravujeme prostředí."
+            />
+        );
+    }
 
     return (
         <ToastProvider>
             <GlobalModalsProvider>
-                {loading && <LoaderOverlay />}
                 <Routes>
                     <Route path="/" element={<HomeRoute />} />
                     <Route path="/script/list" element={<ScriptListRoute />} />

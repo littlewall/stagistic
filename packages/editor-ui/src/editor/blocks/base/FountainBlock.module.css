@@ -4,7 +4,7 @@
 }
 
 .content {
-    display: inline-block;
+    display: block;
     min-width: 1px;
     min-height: 1.2em;
     white-space: pre-wrap;

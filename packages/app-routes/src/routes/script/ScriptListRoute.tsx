@@ -11,6 +11,7 @@ import {
     Kicker,
     PageContainer,
     PageTitle,
+    ProgressPanel,
     SubtleText,
     Tag,
 } from '@stagistic/ui';
@@ -48,7 +49,7 @@ const mockMeta = [
 
 export const ScriptListRoute = () => {
     const navigate = useNavigate();
-    const {scripts} = useScripts();
+    const {scripts, isLoading: scriptsLoading} = useScripts();
     const {openNewScript} = useGlobalModals();
     const openModal = useCallback(() => {
         openNewScript();
@@ -144,9 +145,20 @@ export const ScriptListRoute = () => {
                         New script
                     </Button>
                 </section>
-                <Grid>
-                    {scriptCards}
-                </Grid>
+                {scriptsLoading ? (
+                    <div className={styles.listLoading}>
+                        <ProgressPanel
+                            title="Načítám scénáře"
+                            subtitle="Synchronizuji seznam scénářů"
+                            size="sm"
+                            statusText="Načítám seznam scénářů"
+                        />
+                    </div>
+                ) : (
+                    <Grid>
+                        {scriptCards}
+                    </Grid>
+                )}
             </PageContainer>
         </AppLayout>
     );

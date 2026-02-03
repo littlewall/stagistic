@@ -1,0 +1,13 @@
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: grid;
+    place-items: center;
+    padding: var(--space-8);
+    background: var(--color-paper);
+}
+
+.panel {
+    width: min(520px, 90vw);
+}
