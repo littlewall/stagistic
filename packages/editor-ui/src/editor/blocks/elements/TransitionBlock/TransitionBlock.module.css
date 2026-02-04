@@ -1,6 +1,6 @@
 .transition {
     display: block;
-    margin: var(--transition-gap, 1.8em) 0;
+    padding: var(--transition-gap, 1.8em) 0;
     font-weight: 700;
     text-align: right;
     text-transform: uppercase;

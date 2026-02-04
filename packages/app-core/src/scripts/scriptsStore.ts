@@ -1,11 +1,11 @@
 import type {ScriptSummary} from '@stagistic/db';
 import {
     createNodeId,
-    ensureNodeIds,
+    ensureFountainBlockIds,
     ensureSceneHeading,
     getFirstBlockId,
-    isSlateValueEmpty,
-    type SlateValue,
+    isScriptDocumentEmpty,
+    type ScriptDocument,
 } from '@stagistic/shared';
 import type {ScriptRepository} from '@stagistic/sync-core';
 import {
@@ -39,7 +39,7 @@ export type ScriptsStoreState = {
         subscribeMeta: (listener: Listener) => () => void,
         init: () => Promise<void>,
         refresh: () => Promise<void>,
-        createScript: (title: string, initialContent?: SlateValue) => Promise<string>,
+        createScript: (title: string, initialContent?: ScriptDocument) => Promise<string>,
         renameScript: (scriptId: string, title: string) => Promise<void>,
         deleteScript: (scriptId: string) => Promise<void>,
         setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,
@@ -109,13 +109,13 @@ export const createScriptsStore = (repository: ScriptRepository): ScriptsStoreSt
         return initPromise;
     };
 
-    const createScript = async (title: string, initialContent?: SlateValue) => {
+    const createScript = async (title: string, initialContent?: ScriptDocument) => {
         let activeBlockId = createNodeId();
-        let normalizedContent: SlateValue | undefined;
+        let normalizedContent: ScriptDocument | undefined;
 
-        if (initialContent && !isSlateValueEmpty(initialContent)) {
+        if (initialContent && !isScriptDocumentEmpty(initialContent)) {
             const normalized = ensureSceneHeading(initialContent);
-            const withIds = ensureNodeIds(normalized);
+            const withIds = ensureFountainBlockIds(normalized);
 
             normalizedContent = withIds;
             activeBlockId = getFirstBlockId(withIds) ?? activeBlockId;

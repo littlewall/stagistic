@@ -1,6 +1,6 @@
 .character {
-    margin-top: var(--character-gap, 1.8em);
-    margin-left: var(--character-indent, 56px);
+    padding-top: var(--character-gap, 1.8em);
+    padding-left: var(--character-indent, 56px);
     font-weight: 700;
 }
 

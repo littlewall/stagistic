@@ -1,3 +1,6 @@
+import {redoDepth, undoDepth} from '@tiptap/pm/history';
+import type {Editor as TiptapEditor} from '@tiptap/react';
+import {useEditorState} from '@tiptap/react';
 import clsx from 'clsx';
 import {
     Bold,
@@ -18,39 +21,74 @@ import {
 import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
 import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
 import {
-    useEditorActiveBlock,
-    useEditorHistoryState,
-    useEditorSessionCommands,
-} from '../state/EditorStateProvider';
+    FOUNTAIN_BLOCK_NODE_NAME,
+    getActiveFountainBlockFromState,
+} from '../tiptap/fountainCore';
 import styles from './EditorToolbar.module.css';
 
-const EditorToolbar = () => {
-    const {
-        activeBlockPathString,
-        activeBlockInfo,
-    } = useEditorActiveBlock();
-    const {
-        canRedo,
-        canUndo,
-    } = useEditorHistoryState();
-    const {
-        redo,
-        setBlockType,
-        toggleMark,
-        undo,
-    } = useEditorSessionCommands();
+type EditorToolbarProps = {
+    editor: TiptapEditor | null,
+};
+
+const EditorToolbar = ({editor}: EditorToolbarProps) => {
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState(false);
-    const activeBlockKey = useMemo(() => activeBlockPathString ?? null, [activeBlockPathString]);
+
+    const toolbarState = useEditorState({
+        editor,
+        selector: ({editor: stateEditor}) => {
+            if (!stateEditor) {
+                return {
+                    activeType: null,
+                    canRedo: false,
+                    canUndo: false,
+                };
+            }
+
+            const activeBlock = getActiveFountainBlockFromState(
+                stateEditor.state,
+                FOUNTAIN_BLOCK_NODE_NAME,
+            );
+
+            return {
+                activeType: activeBlock?.blockType ?? null,
+                canRedo: redoDepth(stateEditor.state) > 0,
+                canUndo: undoDepth(stateEditor.state) > 0,
+            };
+        },
+        equalityFn: (a, b) => Boolean(
+            a
+            && b
+            && a.activeType === b.activeType
+            && a.canRedo === b.canRedo
+            && a.canUndo === b.canUndo,
+        ),
+    });
+
+    const activeType = toolbarState?.activeType ?? null;
+    const canUndo = toolbarState?.canUndo ?? false;
+    const canRedo = toolbarState?.canRedo ?? false;
+
+    const activeBlockInfo = useMemo(() => {
+        if (!activeType) {
+            return null;
+        }
+
+        const option = FOUNTAIN_BLOCKS.find(block => block.type === activeType);
+
+        return {
+            type: activeType,
+            icon: BLOCK_ICONS[activeType],
+            label: option?.label ?? 'Block',
+        };
+    }, [activeType]);
 
     useEffect(() => {
         setIsOpen(false);
-    }, [activeBlockKey]);
-
+    }, [activeType]);
 
     useEffect(() => {
-        // Keep toolbar ref to let the shared editor state treat toolbar as active.
         if (toolbarRef.current) {
             toolbarRef.current.dataset.editorToolbar = 'true';
         }
@@ -62,9 +100,13 @@ const EditorToolbar = () => {
         }
 
         const onPointerDown = (event: MouseEvent | PointerEvent) => {
-            if (!dropdownRef.current) return;
+            if (!dropdownRef.current) {
+                return;
+            }
 
-            if (dropdownRef.current.contains(event.target as Node)) return;
+            if (dropdownRef.current.contains(event.target as Node)) {
+                return;
+            }
 
             setIsOpen(false);
         };
@@ -86,27 +128,47 @@ const EditorToolbar = () => {
     const handleUndoMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         if (canUndo) {
-            undo();
+            editor
+                ?.chain()
+                .focus()
+                .undo()
+                .run();
         }
-    }, [canUndo, undo]);
+    }, [canUndo, editor]);
     const handleRedoMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         if (canRedo) {
-            redo();
+            editor
+                ?.chain()
+                .focus()
+                .redo()
+                .run();
         }
-    }, [canRedo, redo]);
+    }, [canRedo, editor]);
     const handleBoldMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        toggleMark('bold');
-    }, [toggleMark]);
+        editor
+            ?.chain()
+            .focus()
+            .toggleBold()
+            .run();
+    }, [editor]);
     const handleItalicMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        toggleMark('italic');
-    }, [toggleMark]);
+        editor
+            ?.chain()
+            .focus()
+            .toggleItalic()
+            .run();
+    }, [editor]);
     const handleUnderlineMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        toggleMark('underline');
-    }, [toggleMark]);
+        editor
+            ?.chain()
+            .focus()
+            .toggleUnderline()
+            .run();
+    }, [editor]);
     const handleSelectMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
         if (!activeBlockInfo) {
@@ -121,8 +183,20 @@ const EditorToolbar = () => {
     ) => {
         event.preventDefault();
         setIsOpen(false);
-        setBlockType(optionType);
-    }, [setBlockType]);
+        if (!editor) {
+            return;
+        }
+
+        if (optionType === activeBlockInfo?.type) {
+            return;
+        }
+
+        editor
+            .chain()
+            .focus()
+            .updateAttributes(FOUNTAIN_BLOCK_NODE_NAME, {blockType: optionType})
+            .run();
+    }, [activeBlockInfo?.type, editor]);
 
     return (
         <div
@@ -208,7 +282,7 @@ const EditorToolbar = () => {
                 </button>
                 {isOpen && (
                     <div className={styles.menu} role="menu">
-                        {FOUNTAIN_BLOCKS.map((option: (typeof FOUNTAIN_BLOCKS)[number]) => (
+                        {FOUNTAIN_BLOCKS.map(option => (
                             <button
                                 key={option.type}
                                 type="button"
