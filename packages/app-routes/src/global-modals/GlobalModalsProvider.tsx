@@ -6,10 +6,11 @@ import {
 import {parseFountain} from '@stagistic/editor-core';
 import {
     createNodeId,
-    ensureNodeIds,
+    ensureFountainBlockIds,
     ensureSceneHeading,
     getFirstBlockId,
-    type SlateValue,
+    scriptDocumentFromFountainAst,
+    type ScriptDocument,
 } from '@stagistic/shared';
 import {
     ImportScriptModal,
@@ -192,7 +193,7 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         };
     }, [addToast, isTauri]);
 
-    const createScriptWithActiveBlock = useCallback(async (name: string, initialContent?: SlateValue) => {
+    const createScriptWithActiveBlock = useCallback(async (name: string, initialContent?: ScriptDocument) => {
         const scriptId = await scriptRepository.createScript(name, initialContent);
         const activeBlockId = initialContent
             ? getFirstBlockId(initialContent)
@@ -254,13 +255,14 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
                 }
 
                 const parsed = parseFountain(normalizeFountainSource(payload.text));
-                const normalized = ensureNodeIds(ensureSceneHeading(parsed));
+                const doc = scriptDocumentFromFountainAst(parsed);
+                const normalized = ensureFountainBlockIds(ensureSceneHeading(doc));
                 const resolvedName = payload.name.trim()
                     || payload.fileName.replace(/\.fountain$/i, '').trim()
                     || 'Untitled script';
                 const scriptId = await createScriptWithActiveBlock(
                     resolvedName,
-                    normalized as unknown as SlateValue,
+                    normalized,
                 );
 
                 setIsImportOpen(false);

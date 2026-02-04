@@ -13,11 +13,10 @@
     border: 1px solid var(--color-divider);
     border-radius: calc(18px * var(--size-scale));
     box-shadow: 0 12px 30px rgba(30, 20, 15, .04);
+    --block-controls-gutter: clamp(calc(10px * var(--size-scale)), 1vw, calc(28px * var(--size-scale)));
 }
 
 .content {
-    --block-controls-gutter: clamp(calc(10px * var(--size-scale)), 1vw, calc(28px * var(--size-scale)));
-
     width: 100%;
     min-height: 100%;
     font-family: var(--font-mono);
@@ -25,4 +24,10 @@
     line-height: 1.7;
     color: var(--color-ink);
     outline: none;
+}
+
+.content :global(.ProseMirror),
+.content :global(.ProseMirror-focused) {
+    outline: none;
+    box-shadow: none;
 }

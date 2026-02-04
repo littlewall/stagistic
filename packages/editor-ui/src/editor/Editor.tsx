@@ -1,16 +1,12 @@
+import type {ScriptDocument} from '@stagistic/shared';
+import Bold from '@tiptap/extension-bold';
+import Document from '@tiptap/extension-document';
+import History from '@tiptap/extension-history';
+import Italic from '@tiptap/extension-italic';
+import Text from '@tiptap/extension-text';
+import Underline from '@tiptap/extension-underline';
+import {type Editor as TiptapEditor, useEditor} from '@tiptap/react';
 import {
-    createNodeId,
-    type SlateValue,
-} from '@stagistic/shared';
-import {type Value} from 'platejs';
-import {
-    Plate,
-    useEditorValue,
-    usePlateEditor,
-    useValueVersion,
-} from 'platejs/react';
-import {
-    type MutableRefObject,
     useCallback,
     useEffect,
     useMemo,
@@ -20,51 +16,57 @@ import {
 import {EditorCanvas} from './components/EditorCanvas';
 import EditorToolbar from './components/EditorToolbar';
 import styles from './Editor.module.css';
-import {createFountainPlugins} from './plugins/fountainPlugin';
-import {EditorStateProvider} from './state/EditorStateProvider';
-import {FountainLeaf} from './utils/fountainMarks';
+import FountainBlockExtension from './tiptap/FountainBlockExtension';
+import {
+    FountainColumnExtension,
+    FountainColumnGroupExtension,
+} from './tiptap/FountainColumnExtensions';
 
 const DEFAULT_AUTOSAVE_DELAY_MS = 1500;
 
-const serializeValue = (value: SlateValue) => JSON.stringify(value);
+const serializeValue = (value: ScriptDocument) => JSON.stringify(value);
 
 type SaveResult = boolean | void | Promise<boolean | void>;
 
 type EditorProps = {
-    initialValue: SlateValue,
-    onValueChange?: (value: SlateValue) => void,
-    onAutoSave?: (value: SlateValue) => SaveResult,
-    onManualSave?: (value: SlateValue) => SaveResult,
+    initialValue: ScriptDocument,
+    onValueChange?: (value: ScriptDocument) => void,
+    onAutoSave?: (value: ScriptDocument) => SaveResult,
+    onManualSave?: (value: ScriptDocument) => SaveResult,
     onDirtyChange?: (isDirty: boolean) => void,
     autoSaveDelayMs?: number,
     autoFocus?: boolean,
 };
 
-type EditorAutosaveProps = {
-    autoSaveDelayMs?: number,
-    initialValue: SlateValue,
-    manualSaveRef: MutableRefObject<(() => void) | null>,
-    onAutoSave?: (value: SlateValue) => SaveResult,
-    onDirtyChange?: (isDirty: boolean) => void,
-    onManualSave?: (value: SlateValue) => SaveResult,
-    onValueChange?: (value: SlateValue) => void,
+const useLatestRef = <T,>(value: T) => {
+    const ref = useRef(value);
+
+    useEffect(() => {
+        ref.current = value;
+    }, [value]);
+
+    return ref;
 };
 
-const EditorAutosave = ({
-    autoSaveDelayMs,
+const Editor = ({
     initialValue,
-    manualSaveRef,
-    onAutoSave,
-    onDirtyChange,
-    onManualSave,
     onValueChange,
-}: EditorAutosaveProps) => {
-    const editorValue = useEditorValue() as SlateValue | undefined;
-    const valueVersion = useValueVersion();
-    const latestValueRef = useRef<Value>(initialValue as Value);
-    const lastSavedSerializedRef = useRef<string>(serializeValue(initialValue));
+    onAutoSave,
+    onManualSave,
+    onDirtyChange,
+    autoSaveDelayMs,
+    autoFocus,
+}: EditorProps) => {
+    const initialSerialized = useMemo(() => serializeValue(initialValue), [initialValue]);
+    const latestValueRef = useRef<ScriptDocument>(initialValue);
+    const lastSavedSerializedRef = useRef<string>(initialSerialized);
     const autosaveTimerRef = useRef<number | null>(null);
     const dirtyRef = useRef(false);
+    const isApplyingInitialRef = useRef(false);
+    const onValueChangeRef = useLatestRef(onValueChange);
+    const onAutoSaveRef = useLatestRef(onAutoSave);
+    const onManualSaveRef = useLatestRef(onManualSave);
+    const onDirtyChangeRef = useLatestRef(onDirtyChange);
 
     const updateDirty = useCallback((nextDirty: boolean) => {
         if (dirtyRef.current === nextDirty) {
@@ -72,8 +74,8 @@ const EditorAutosave = ({
         }
 
         dirtyRef.current = nextDirty;
-        onDirtyChange?.(nextDirty);
-    }, [onDirtyChange]);
+        onDirtyChangeRef.current?.(nextDirty);
+    }, [onDirtyChangeRef]);
 
     const clearAutosaveTimer = useCallback(() => {
         if (!autosaveTimerRef.current) {
@@ -84,79 +86,15 @@ const EditorAutosave = ({
         autosaveTimerRef.current = null;
     }, []);
 
-    const handleManualSave = useCallback(async () => {
-        if (!onManualSave) {
-            return;
-        }
-
-        clearAutosaveTimer();
-
-        const currentValue = latestValueRef.current as SlateValue;
-        const serialized = serializeValue(currentValue);
-
-        if (serialized === lastSavedSerializedRef.current) {
-            return;
-        }
-
-        try {
-            const result = await onManualSave(currentValue);
-
-            if (result === false) {
-                return;
-            }
-
-            lastSavedSerializedRef.current = serialized;
-            updateDirty(false);
-        } catch {
-            // onManualSave should handle reporting errors.
-        }
-    }, [
-        clearAutosaveTimer,
-        onManualSave,
-        updateDirty,
-    ]);
-
-    useEffect(() => {
-        manualSaveRef.current = onManualSave ? handleManualSave : null;
-
-        return () => {
-            if (manualSaveRef.current === handleManualSave) {
-                manualSaveRef.current = null;
-            }
-        };
-    }, [
-        handleManualSave,
-        manualSaveRef,
-        onManualSave,
-    ]);
-
-    useEffect(() => {
-        const serialized = serializeValue(initialValue);
-
-        latestValueRef.current = initialValue as Value;
-        lastSavedSerializedRef.current = serialized;
-        updateDirty(false);
-        clearAutosaveTimer();
-    }, [
-        clearAutosaveTimer,
-        initialValue,
-        updateDirty,
-    ]);
-
-    useEffect(() => {
-        if (!editorValue) {
-            return;
-        }
-
-        latestValueRef.current = editorValue as Value;
-        onValueChange?.(editorValue);
-
-        const serialized = serializeValue(editorValue);
+    const scheduleAutosave = useCallback((nextValue: ScriptDocument) => {
+        const serialized = serializeValue(nextValue);
         const isDirty = serialized !== lastSavedSerializedRef.current;
 
         updateDirty(isDirty);
 
-        if (!onAutoSave || !isDirty) {
+        const autoSaveHandler = onAutoSaveRef.current;
+
+        if (!autoSaveHandler || !isDirty) {
             clearAutosaveTimer();
 
             return;
@@ -167,7 +105,7 @@ const EditorAutosave = ({
         const delay = autoSaveDelayMs ?? DEFAULT_AUTOSAVE_DELAY_MS;
 
         autosaveTimerRef.current = window.setTimeout(() => {
-            const latestValue = latestValueRef.current as SlateValue;
+            const latestValue = latestValueRef.current;
             const latestSerialized = serializeValue(latestValue);
 
             if (latestSerialized === lastSavedSerializedRef.current) {
@@ -176,7 +114,7 @@ const EditorAutosave = ({
 
             const run = async () => {
                 try {
-                    const result = await onAutoSave(latestValue);
+                    const result = await autoSaveHandler(latestValue);
 
                     if (result === false) {
                         return;
@@ -194,45 +132,131 @@ const EditorAutosave = ({
     }, [
         autoSaveDelayMs,
         clearAutosaveTimer,
-        editorValue,
-        onAutoSave,
-        onValueChange,
+        onAutoSaveRef,
         updateDirty,
-        valueVersion,
+    ]);
+
+    const handleManualSave = useCallback(async () => {
+        const manualSaveHandler = onManualSaveRef.current;
+
+        if (!manualSaveHandler) {
+            return;
+        }
+
+        clearAutosaveTimer();
+
+        const currentValue = latestValueRef.current;
+        const serialized = serializeValue(currentValue);
+
+        if (serialized === lastSavedSerializedRef.current) {
+            return;
+        }
+
+        try {
+            const result = await manualSaveHandler(currentValue);
+
+            if (result === false) {
+                return;
+            }
+
+            lastSavedSerializedRef.current = serialized;
+            updateDirty(false);
+        } catch {
+            // onManualSave should handle reporting errors.
+        }
+    }, [
+        clearAutosaveTimer,
+        onManualSaveRef,
+        updateDirty,
+    ]);
+
+    const initialDoc = useMemo<ScriptDocument>(
+        () => initialValue,
+        [initialSerialized],
+    );
+
+    const editor = useEditor({
+        extensions: [
+            Document,
+            Text,
+            History,
+            Bold,
+            Italic,
+            Underline,
+            FountainColumnGroupExtension,
+            FountainColumnExtension,
+            FountainBlockExtension,
+        ],
+        content: initialDoc,
+        autofocus: autoFocus ? 'start' : false,
+        shouldRerenderOnTransaction: false,
+        editorProps: {
+            attributes: {
+                'data-fountain-editor': 'true',
+            },
+        },
+    }, [initialDoc]);
+
+    useEffect(() => {
+        if (!editor) {
+            return;
+        }
+
+        const handleUpdate = ({editor: updatedEditor}: {editor: TiptapEditor}) => {
+            if (isApplyingInitialRef.current) {
+                return;
+            }
+
+            const nextValue = updatedEditor.getJSON() as ScriptDocument;
+
+            latestValueRef.current = nextValue;
+            onValueChangeRef.current?.(nextValue);
+            scheduleAutosave(nextValue);
+        };
+
+        editor.on('update', handleUpdate);
+
+        return () => {
+            editor.off('update', handleUpdate);
+        };
+    }, [
+        editor,
+        onValueChangeRef,
+        scheduleAutosave,
     ]);
 
     useEffect(() => {
-        return () => {
-            clearAutosaveTimer();
-        };
-    }, [clearAutosaveTimer]);
+        if (!editor) {
+            return;
+        }
 
-    return null;
-};
+        isApplyingInitialRef.current = true;
+        editor.commands.setContent(initialValue, {emitUpdate: false});
+        isApplyingInitialRef.current = false;
 
-const Editor = ({
-    initialValue,
-    onValueChange,
-    onAutoSave,
-    onManualSave,
-    onDirtyChange,
-    autoSaveDelayMs,
-    autoFocus,
-}: EditorProps) => {
-    const manualSaveRef = useRef<(() => void) | null>(null);
+        latestValueRef.current = initialValue;
+        lastSavedSerializedRef.current = initialSerialized;
+        updateDirty(false);
+        clearAutosaveTimer();
+    }, [
+        clearAutosaveTimer,
+        editor,
+        initialSerialized,
+        initialValue,
+        updateDirty,
+    ]);
 
-    const plugins = useMemo(() => {
-        const result = createFountainPlugins();
+    useEffect(() => {
+        if (!editor) {
+            return;
+        }
 
-        return result;
-    }, []);
-    const editor = usePlateEditor({
-        plugins,
-        value: (initialValue) as Value,
-        nodeId: {
-            idCreator: () => createNodeId(),
-        },
-    });
+        if (!autoFocus) {
+            return;
+        }
+
+        editor.commands.focus('start');
+    }, [autoFocus, editor]);
 
     useEffect(() => {
         if (!onManualSave) {
@@ -242,32 +266,25 @@ const Editor = ({
         const onKeyDown = (event: KeyboardEvent) => {
             if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
                 event.preventDefault();
-                manualSaveRef.current?.();
+                void handleManualSave();
             }
         };
 
         window.addEventListener('keydown', onKeyDown);
 
         return () => window.removeEventListener('keydown', onKeyDown);
-    }, [onManualSave]);
+    }, [handleManualSave, onManualSave]);
+
+    useEffect(() => {
+        return () => {
+            clearAutosaveTimer();
+        };
+    }, [clearAutosaveTimer]);
 
     return (
         <div className={styles.root}>
-            <Plate editor={editor}>
-                <EditorStateProvider>
-                    <EditorAutosave
-                        autoSaveDelayMs={autoSaveDelayMs}
-                        initialValue={initialValue}
-                        manualSaveRef={manualSaveRef}
-                        onAutoSave={onAutoSave}
-                        onDirtyChange={onDirtyChange}
-                        onManualSave={onManualSave}
-                        onValueChange={onValueChange}
-                    />
-                    <EditorToolbar />
-                    <EditorCanvas renderLeaf={FountainLeaf} autoFocus={autoFocus} />
-                </EditorStateProvider>
-            </Plate>
+            <EditorToolbar editor={editor} />
+            <EditorCanvas editor={editor} autoFocus={autoFocus} />
         </div>
     );
 };

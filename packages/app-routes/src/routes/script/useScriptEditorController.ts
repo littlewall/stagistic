@@ -4,11 +4,11 @@ import {
     useScriptSummary,
 } from '@stagistic/app-core';
 import {
-    ensureNodeIds,
+    ensureFountainBlockIds,
     ensureSceneHeading,
     getFirstBlockId,
-    isSlateValueEmpty,
-    type SlateValue,
+    isScriptDocumentEmpty,
+    type ScriptDocument,
 } from '@stagistic/shared';
 import {type ScriptSyncState, useToastController} from '@stagistic/ui';
 import {
@@ -30,7 +30,7 @@ type ScriptEditorController = {
     currentScript: {id: string, name: string} | null,
     currentScriptId: string | null,
     recentScripts: {id: string, name: string}[],
-    initialValue: SlateValue | null | undefined,
+    initialValue: ScriptDocument | null | undefined,
     storageError: string | null,
     shouldAutoFocus: boolean,
     saveIndicator: ScriptSyncState,
@@ -39,8 +39,8 @@ type ScriptEditorController = {
         statusText: string,
         isLoading: boolean,
     },
-    handleAutoSave: (value: SlateValue) => Promise<boolean>,
-    handleManualSave: (value: SlateValue) => Promise<boolean>,
+    handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
+    handleManualSave: (value: ScriptDocument) => Promise<boolean>,
 };
 
 export const useScriptEditorController = (scriptId: string | undefined): ScriptEditorController => {
@@ -56,7 +56,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         isLoading: currentScriptLoading,
         error: currentScriptError,
     } = useScriptSummary(scriptId);
-    const [initialValue, setInitialValue] = useState<SlateValue | null | undefined>(undefined);
+    const [initialValue, setInitialValue] = useState<ScriptDocument | null | undefined>(undefined);
     const [storageError, setStorageError] = useState<string | null>(null);
     const [shouldAutoFocus, setShouldAutoFocus] = useState(false);
     const [saveIndicator, setSaveIndicator] = useState<ScriptSyncState>('saved');
@@ -209,7 +209,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
                 seedStateRef.current.pending = true;
 
                 try {
-                    const seedValue = ensureNodeIds(ensureSceneHeading(null));
+                    const seedValue = ensureFountainBlockIds(ensureSceneHeading(null));
                     const newScriptId = await scriptRepository.createScript(DEFAULT_SCRIPT_TITLE, seedValue);
                     const activeBlockId = getFirstBlockId(seedValue);
 
@@ -283,9 +283,9 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
                 setStorageError(null);
 
                 if (stored) {
-                    const needsFocus = isSlateValueEmpty(stored);
+                    const needsFocus = isScriptDocumentEmpty(stored);
                     // Ensure IDs and scene heading
-                    const withIds = ensureNodeIds(stored);
+                    const withIds = ensureFountainBlockIds(stored);
                     const normalized = ensureSceneHeading(withIds);
 
                     setInitialValue(normalized);
@@ -316,7 +316,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         };
     }, [currentScriptId, scriptRepository]);
 
-    const handleAutoSave = useCallback(async (value: SlateValue) => {
+    const handleAutoSave = useCallback(async (value: ScriptDocument) => {
         if (!currentScriptId) {
             return false;
         }
@@ -347,7 +347,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         startSaveIndicator,
     ]);
 
-    const handleManualSave = useCallback(async (value: SlateValue) => {
+    const handleManualSave = useCallback(async (value: ScriptDocument) => {
         if (!currentScript || !currentScriptId) {
             return false;
         }

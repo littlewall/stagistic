@@ -1,31 +1,26 @@
 .parenthetical {
-    margin-right: var(--parenthetical-indent-right, 24px);
-    margin-left: var(--parenthetical-indent-left, 40px);
+    position: relative;
+    padding-right: var(--parenthetical-indent-right, 24px);
+    padding-left: var(--parenthetical-indent-left, 40px);
     font-style: italic;
     color: #4f4a42;
 }
 
-.text {
-    position: relative;
-    display: inline;
-    min-width: 1px;
-}
-
-.text br {
-    display: none;
-}
-
-.text::before,
-.text::after {
+.parenthetical::before,
+.parenthetical::after {
     pointer-events: none;
     user-select: none;
     color: inherit;
 }
 
-.text::before {
+.parenthetical::before {
     content: '(';
 }
 
-.text::after {
+.parenthetical::after {
     content: ')';
+}
+
+.text {
+    display: inline;
 }

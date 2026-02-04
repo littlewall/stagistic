@@ -4,6 +4,7 @@
  */
 
 export * from './editor/editorDefaults';
+export * from './editor/scriptDocument';
 export * from './ids/uuidv7';
 export * from './nodeId';
 export * from './storage/latestScript';
