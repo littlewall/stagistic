@@ -15,7 +15,12 @@ export const EditorCanvas = ({editor, autoFocus, style}: EditorCanvasProps) => {
     const canvasRef = useRef<HTMLElement | null>(null);
 
     return (
-        <section className={styles.canvas} ref={canvasRef} style={style}>
+        <section
+            className={styles.canvas}
+            data-editor-scroll-container="true"
+            ref={canvasRef}
+            style={style}
+        >
             <EditorContent
                 className={clsx(styles.content)}
                 editor={editor}

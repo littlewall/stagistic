@@ -21,11 +21,12 @@ import {
     resolveEditorSettings,
     stripScriptSettings,
 } from './editorSettings';
-import FountainBlockExtension from './tiptap/FountainBlockExtension';
 import {
+    createPaginationExtension,
+    FountainBlockExtension,
     FountainColumnExtension,
     FountainColumnGroupExtension,
-} from './tiptap/FountainColumnExtensions';
+} from './tiptap/extensions';
 
 const DEFAULT_AUTOSAVE_DELAY_MS = 1500;
 
@@ -95,6 +96,10 @@ const Editor = ({
     );
     const editorStyle = useMemo(
         () => getEditorCssVars(resolvedSettings, sizeScale),
+        [resolvedSettings, sizeScale],
+    );
+    const paginationExtension = useMemo(
+        () => createPaginationExtension(resolvedSettings, sizeScale),
         [resolvedSettings, sizeScale],
     );
     const latestValueRef = useRef<ScriptDocument>(initialValue);
@@ -217,6 +222,7 @@ const Editor = ({
     const editor = useEditor({
         extensions: [
             DocumentWithSettings,
+            paginationExtension,
             Text,
             History,
             Bold,
@@ -235,6 +241,28 @@ const Editor = ({
             },
         },
     }, [initialDoc]);
+
+    useEffect(() => {
+        if (!editor) {
+            return;
+        }
+
+        const {page, typography} = resolvedSettings;
+        const scaleValue = (value: number) => value * sizeScale;
+        const lineHeightPx = scaleValue(typography.fontSizePx * typography.lineHeight);
+
+        editor.commands.updatePaginationSettings({
+            pageHeight: scaleValue(page.heightPx),
+            pageWidth: scaleValue(page.widthPx),
+            marginTop: scaleValue(page.marginTopPx),
+            marginBottom: scaleValue(page.marginBottomPx),
+            marginLeft: scaleValue(page.marginLeftPx),
+            marginRight: scaleValue(page.marginRightPx),
+            lineHeightPx,
+            dividerColor: 'var(--color-divider)',
+            dividerThickness: 1,
+        });
+    }, [editor, resolvedSettings, sizeScale]);
 
     useEffect(() => {
         if (!editor) {

@@ -1,29 +1,19 @@
 .canvas {
-    position: relative;
+    --block-controls-gutter: clamp(calc(10px * var(--size-scale)), 1vw, calc(28px * var(--size-scale)));
+
     scrollbar-gutter: stable;
+    position: relative;
     overflow: hidden scroll;
     display: flex;
     flex: 1;
     flex-direction: column;
-    width: var(--editor-page-width, 960px);
+    width: 100%;
+    max-width: var(--editor-page-width, 960px);
     min-height: 0;
     margin: 0 auto;
     padding: var(--space-6) clamp(var(--space-4), 15%, 15%) var(--space-8);
     background-color: var(--editor-page-break-background, var(--color-surface));
-    background-image: linear-gradient(
-        to bottom,
-        transparent calc(var(--editor-page-height, 1060px) - 1px),
-        var(--color-divider) calc(var(--editor-page-height, 1060px) - 1px),
-        var(--color-divider) var(--editor-page-height, 1060px),
-        transparent var(--editor-page-height, 1060px)
-    );
-    background-size: 100% calc(var(--editor-page-height, 1060px) + var(--editor-page-gap, 28px));
-    background-position: 0 var(--space-6);
-    background-repeat: repeat;
-    border: 1px solid var(--color-divider);
-    border-radius: calc(18px * var(--size-scale));
     box-shadow: 0 12px 30px rgba(30, 20, 15, .04);
-    --block-controls-gutter: clamp(calc(10px * var(--size-scale)), 1vw, calc(28px * var(--size-scale)));
 }
 
 .content {
