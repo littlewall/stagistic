@@ -1,4 +1,4 @@
-import type {ScriptDocument} from '@stagistic/shared';
+import type {EditorSettingsOverride, ScriptDocument} from '@stagistic/shared';
 import Bold from '@tiptap/extension-bold';
 import Document from '@tiptap/extension-document';
 import History from '@tiptap/extension-history';
@@ -16,6 +16,11 @@ import {
 import {EditorCanvas} from './components/EditorCanvas';
 import EditorToolbar from './components/EditorToolbar';
 import styles from './Editor.module.css';
+import {
+    getEditorCssVars,
+    resolveEditorSettings,
+    stripScriptSettings,
+} from './editorSettings';
 import FountainBlockExtension from './tiptap/FountainBlockExtension';
 import {
     FountainColumnExtension,
@@ -24,9 +29,32 @@ import {
 
 const DEFAULT_AUTOSAVE_DELAY_MS = 1500;
 
-const serializeValue = (value: ScriptDocument) => JSON.stringify(value);
+const serializeValue = (value: ScriptDocument) => JSON.stringify(stripScriptSettings(value));
 
 type SaveResult = boolean | void | Promise<boolean | void>;
+
+const DocumentWithSettings = Document.extend({
+    addAttributes() {
+        return {
+            settings: {
+                default: null,
+            },
+        };
+    },
+});
+
+const getSizeScale = () => {
+    if (typeof window === 'undefined') {
+        return 1;
+    }
+
+    const raw = window
+        .getComputedStyle(document.documentElement)
+        .getPropertyValue('--size-scale');
+    const parsed = Number.parseFloat(raw);
+
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
+};
 
 type EditorProps = {
     initialValue: ScriptDocument,
@@ -36,6 +64,7 @@ type EditorProps = {
     onDirtyChange?: (isDirty: boolean) => void,
     autoSaveDelayMs?: number,
     autoFocus?: boolean,
+    settings?: EditorSettingsOverride,
 };
 
 const useLatestRef = <T,>(value: T) => {
@@ -56,8 +85,18 @@ const Editor = ({
     onDirtyChange,
     autoSaveDelayMs,
     autoFocus,
+    settings,
 }: EditorProps) => {
     const initialSerialized = useMemo(() => serializeValue(initialValue), [initialValue]);
+    const sizeScale = useMemo(() => getSizeScale(), []);
+    const resolvedSettings = useMemo(
+        () => resolveEditorSettings(settings, initialValue.attrs?.settings),
+        [initialSerialized, settings],
+    );
+    const editorStyle = useMemo(
+        () => getEditorCssVars(resolvedSettings, sizeScale),
+        [resolvedSettings, sizeScale],
+    );
     const latestValueRef = useRef<ScriptDocument>(initialValue);
     const lastSavedSerializedRef = useRef<string>(initialSerialized);
     const autosaveTimerRef = useRef<number | null>(null);
@@ -177,7 +216,7 @@ const Editor = ({
 
     const editor = useEditor({
         extensions: [
-            Document,
+            DocumentWithSettings,
             Text,
             History,
             Bold,
@@ -207,7 +246,7 @@ const Editor = ({
                 return;
             }
 
-            const nextValue = updatedEditor.getJSON() as ScriptDocument;
+            const nextValue = stripScriptSettings(updatedEditor.getJSON() as ScriptDocument);
 
             latestValueRef.current = nextValue;
             onValueChangeRef.current?.(nextValue);
@@ -234,7 +273,7 @@ const Editor = ({
         editor.commands.setContent(initialValue, {emitUpdate: false});
         isApplyingInitialRef.current = false;
 
-        latestValueRef.current = initialValue;
+        latestValueRef.current = stripScriptSettings(initialValue);
         lastSavedSerializedRef.current = initialSerialized;
         updateDirty(false);
         clearAutosaveTimer();
@@ -284,7 +323,7 @@ const Editor = ({
     return (
         <div className={styles.root}>
             <EditorToolbar editor={editor} />
-            <EditorCanvas editor={editor} autoFocus={autoFocus} />
+            <EditorCanvas editor={editor} autoFocus={autoFocus} style={editorStyle} />
         </div>
     );
 };

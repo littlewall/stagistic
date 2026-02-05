@@ -14,6 +14,7 @@ import {
 } from '@stagistic/editor-core';
 
 import {createNodeId} from '../nodeId';
+import type {EditorSettingsOverride} from './editorSettings';
 
 export const FOUNTAIN_BLOCK_NODE_NAME = 'fountainBlock';
 export const FOUNTAIN_COLUMN_GROUP_NODE_NAME = 'fountainColumnGroup';
@@ -32,6 +33,9 @@ export type FountainJSONContent = {
 
 export type ScriptDocument = {
     type: 'doc',
+    attrs?: {
+        settings?: EditorSettingsOverride,
+    },
     content: FountainJSONContent[],
 };
 
@@ -173,7 +177,10 @@ const toFountainDocNode = (node: FountainAst[number]): FountainJSONContent | nul
     return toFountainBlockNode(node);
 };
 
-export const scriptDocumentFromFountainAst = (value: FountainAst): ScriptDocument => {
+export const scriptDocumentFromFountainAst = (
+    value: FountainAst,
+    options?: {settings?: EditorSettingsOverride},
+): ScriptDocument => {
     const content = Array.isArray(value)
         ? value
             .map(node => toFountainDocNode(node))
@@ -183,17 +190,23 @@ export const scriptDocumentFromFountainAst = (value: FountainAst): ScriptDocumen
     if (content.length === 0) {
         return {
             type: 'doc',
+            attrs: options?.settings ? {settings: options.settings} : undefined,
             content: [createEmptyFountainBlock(ELEMENT_SCENE_HEADING)],
         };
     }
 
     return {
         type: 'doc',
+        attrs: options?.settings ? {settings: options.settings} : undefined,
         content,
     };
 };
 
-export const createEmptyScriptDocument = (blockId?: string): ScriptDocument => ({
+export const createEmptyScriptDocument = (
+    blockId?: string,
+    settings?: EditorSettingsOverride,
+): ScriptDocument => ({
     type: 'doc',
+    attrs: settings ? {settings} : undefined,
     content: [createEmptyFountainBlock(ELEMENT_SCENE_HEADING, blockId)],
 });

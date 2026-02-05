@@ -15,8 +15,8 @@ import {
 } from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
-import {useScriptEditorController} from './useScriptEditorController';
 import styles from './ScriptEditorRoute.module.css';
+import {useScriptEditorController} from './useScriptEditorController';
 
 const AUTOSAVE_DELAY_MS = 1500;
 

@@ -27,7 +27,11 @@ export const ProgressPanel = ({
                 <div className={styles.title}>{title}</div>
                 {subtitle ? <div className={styles.subtitle}>{subtitle}</div> : null}
             </div>
-            <ProgressBar value={progress} label={title} size={size} />
+            <ProgressBar
+                value={progress}
+                label={title}
+                size={size}
+            />
             {statusText ? <div className={styles.status}>{statusText}</div> : null}
             {hint ? <div className={styles.hint}>{hint}</div> : null}
         </div>

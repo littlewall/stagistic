@@ -5,7 +5,7 @@
 }
 
 .characterBlock {
-    --character-indent: calc(56px + 1em);
-    --character-gap: 1.8em;
+    --character-indent: var(--editor-character-indent, calc(56px + 1em));
+    --character-gap: var(--editor-character-gap, 1.8em);
     --block-controls-offset: var(--character-gap);
 }

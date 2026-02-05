@@ -147,6 +147,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
 
         const score = (status: typeof items[number]['status']) => {
             if (status === 'done') return 1;
+
             if (status === 'active') return 0.5;
 
             return 0;
