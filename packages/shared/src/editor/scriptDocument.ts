@@ -1,4 +1,6 @@
 import {
+    type ColumnElement,
+    type ColumnGroupElement,
     ELEMENT_ACTION,
     ELEMENT_CHARACTER,
     ELEMENT_COLUMN,
@@ -6,8 +8,6 @@ import {
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE,
     ELEMENT_SCENE_HEADING,
-    type ColumnElement,
-    type ColumnGroupElement,
     type FountainDocument as FountainAst,
     type FountainElement,
     type FountainText,
@@ -163,14 +163,14 @@ const toFountainDocNode = (node: FountainAst[number]): FountainJSONContent | nul
     }
 
     if (node.type === ELEMENT_COLUMN_GROUP) {
-        return toFountainColumnGroupNode(node as ColumnGroupElement);
+        return toFountainColumnGroupNode(node);
     }
 
     if (node.type === ELEMENT_COLUMN) {
         return null;
     }
 
-    return toFountainBlockNode(node as FountainElement);
+    return toFountainBlockNode(node);
 };
 
 export const scriptDocumentFromFountainAst = (value: FountainAst): ScriptDocument => {

@@ -16,9 +16,9 @@ import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
 import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
+    type FountainBlockType,
     getActiveFountainBlockFromState,
     isSelectionAcrossBlocks,
-    type FountainBlockType,
 } from '../tiptap/fountainCore';
 import styles from './EditorBlockActionsOverlay.module.css';
 
@@ -70,16 +70,19 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
 
         if (!editor || !canvas) {
             setOverlayState(null);
+
             return;
         }
 
         if (!editor.view.hasFocus() && !isMenuOpen) {
             setOverlayState(null);
+
             return;
         }
 
         if (isSelectionAcrossBlocks(editor.state, FOUNTAIN_BLOCK_NODE_NAME)) {
             setOverlayState(null);
+
             return;
         }
 
@@ -87,6 +90,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
 
         if (!activeBlock) {
             setOverlayState(null);
+
             return;
         }
 
@@ -94,6 +98,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
 
         if (!target) {
             setOverlayState(null);
+
             return;
         }
 
@@ -115,7 +120,11 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             blockType: activeBlock.blockType,
             blockId: activeBlock.id,
         });
-    }, [canvasRef, editor, isMenuOpen]);
+    }, [
+        canvasRef,
+        editor,
+        isMenuOpen,
+    ]);
 
     useLayoutEffect(() => {
         updatePosition();
@@ -178,6 +187,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             const target = event.target as Node;
 
             if (menuRef.current && menuRef.current.contains(target)) return;
+
             if (triggerRef.current && triggerRef.current.contains(target)) return;
 
             setIsMenuOpen(false);
