@@ -7,16 +7,16 @@ import {
 import type {Editor} from '@tiptap/react';
 
 import {
+    handleKeyDown,
+    handlePaste,
+    handleTextInput,
+} from '../fountainBlock/handlers';
+import {
     ensureFountainBlockId,
     FOUNTAIN_BLOCK_NODE_NAME,
     getFountainBlockClassName,
     normalizeFountainBlockType,
-} from './fountainCore';
-import {
-    handleKeyDown,
-    handlePaste,
-    handleTextInput,
-} from './fountainBlock/handlers';
+} from '../fountainCore';
 
 const ensureBlockIdsPlugin = (editor: Editor) => new Plugin({
     key: new PluginKey('fountain-block-ids'),

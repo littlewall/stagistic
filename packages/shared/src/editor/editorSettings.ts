@@ -53,12 +53,12 @@ export type EditorSettingsOverride = Partial<{
 
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
     page: {
-        widthPx: 818,
-        heightPx: 1060,
-        marginTopPx: 96,
-        marginRightPx: 110,
-        marginBottomPx: 96,
-        marginLeftPx: 120,
+        widthPx: 794,
+        heightPx: 1123,
+        marginTopPx: 95,
+        marginRightPx: 76,
+        marginBottomPx: 95,
+        marginLeftPx: 76,
         pageGapPx: 28,
         pageBreakBackground: 'var(--color-surface)',
         contentMarginTopPx: 0,

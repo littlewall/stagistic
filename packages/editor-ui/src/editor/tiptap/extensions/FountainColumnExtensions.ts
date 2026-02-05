@@ -1,11 +1,11 @@
 import {mergeAttributes, Node} from '@tiptap/core';
 
-import columnStyles from '../blocks/layout/ColumnGroup.module.css';
+import columnStyles from '../../blocks/layout/ColumnGroup.module.css';
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
     FOUNTAIN_COLUMN_NODE_NAME,
-} from './fountainCore';
+} from '../fountainCore';
 
 export const FountainColumnGroupExtension = Node.create({
     name: FOUNTAIN_COLUMN_GROUP_NODE_NAME,
