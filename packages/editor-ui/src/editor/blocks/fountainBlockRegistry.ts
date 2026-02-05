@@ -19,6 +19,6 @@ export const FOUNTAIN_BLOCKS: {type: FountainElementType, label: string}[] = [
     {type: ELEMENT_LYRICS, label: 'Lyrics'},
     {type: ELEMENT_SCENE_HEADING, label: 'Scene heading'},
     {type: ELEMENT_TRANSITION, label: 'Transition'},
-    {type: ELEMENT_DUAL_DIALOGUE_CHARACTER, label: 'Character (dual'},
+    {type: ELEMENT_DUAL_DIALOGUE_CHARACTER, label: 'Character (dual)'},
     {type: ELEMENT_CENTERED, label: 'Centered text'},
 ];

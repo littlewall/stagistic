@@ -3,14 +3,13 @@
  * Next: multiple scripts + import/export, and remote cloud adapters.
  */
 
-// Plate/Slate values are JSON node arrays. Treat as opaque for storage.
-export type SlateValue = unknown[];
+import type {ScriptDocument} from '../editor/scriptDocument';
 
 export interface LatestScriptStorage {
-    loadLatestScript(): Promise<SlateValue | null>,
-    saveLatestScript(value: SlateValue): Promise<void>,
+    loadLatestScript(): Promise<ScriptDocument | null>,
+    saveLatestScript(value: ScriptDocument): Promise<void>,
     clearLatestScript(): Promise<void>,
 }
 
 export const LATEST_SCRIPT_KEY = 'default';
-export const LATEST_SCRIPT_SCHEMA_VERSION = 1;
+export const LATEST_SCRIPT_SCHEMA_VERSION = 2;

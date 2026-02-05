@@ -1,29 +1,28 @@
+import {type Editor as TiptapEditor, EditorContent} from '@tiptap/react';
 import clsx from 'clsx';
-import {
-    PlateContent,
-    type PlateContentProps,
-} from 'platejs/react';
-import {
-    useRef,
-} from 'react';
+import {type CSSProperties, useRef} from 'react';
 
-import EditorBlockControlsOverlay from './EditorBlockControlsOverlay';
+import EditorBlockActionsOverlay from './EditorBlockActionsOverlay';
 import styles from './EditorCanvas.module.css';
 
-type EditorCanvasProps = Pick<PlateContentProps, 'renderLeaf' | 'autoFocus'>;
+type EditorCanvasProps = {
+    editor: TiptapEditor | null,
+    autoFocus?: boolean,
+    style?: CSSProperties,
+};
 
-export const EditorCanvas = ({renderLeaf, autoFocus}: EditorCanvasProps) => {
+export const EditorCanvas = ({editor, autoFocus, style}: EditorCanvasProps) => {
     const canvasRef = useRef<HTMLElement | null>(null);
 
     return (
-        <section className={styles.canvas} ref={canvasRef}>
-            <PlateContent
+        <section className={styles.canvas} ref={canvasRef} style={style}>
+            <EditorContent
                 className={clsx(styles.content)}
+                editor={editor}
                 spellCheck={false}
-                renderLeaf={renderLeaf}
                 autoFocus={autoFocus}
             />
-            <EditorBlockControlsOverlay canvasRef={canvasRef} />
+            <EditorBlockActionsOverlay editor={editor} canvasRef={canvasRef} />
         </section>
     );
 };

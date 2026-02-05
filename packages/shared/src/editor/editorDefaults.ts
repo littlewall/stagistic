@@ -1,156 +1,177 @@
-import {ELEMENT_SCENE_HEADING} from '@stagistic/editor-core';
-
 import {createNodeId} from '../nodeId';
-import type {SlateValue} from '../storage/latestScript';
+import {
+    createEmptyScriptDocument,
+    FOUNTAIN_BLOCK_NODE_NAME,
+    type FountainJSONContent,
+    type ScriptDocument,
+} from './scriptDocument';
 
 const hasTextContent = (node: unknown): boolean => {
-    if (!node) {
+    if (!node || typeof node !== 'object') {
         return false;
     }
 
-    if (typeof node === 'string') {
-        return node.trim().length > 0;
+    const maybeText = (node as {text?: unknown}).text;
+
+    if (typeof maybeText === 'string' && maybeText.trim().length > 0) {
+        return true;
     }
 
-    if (Array.isArray(node)) {
-        return node.some(hasTextContent);
-    }
+    const content = (node as {content?: unknown}).content;
 
-    if (typeof node === 'object') {
-        const maybeText = (node as {text?: unknown}).text;
-
-        if (typeof maybeText === 'string' && maybeText.trim().length > 0) {
-            return true;
-        }
-
-        const children = (node as {children?: unknown}).children;
-
-        if (Array.isArray(children)) {
-            return children.some(hasTextContent);
-        }
+    if (Array.isArray(content)) {
+        return content.some(hasTextContent);
     }
 
     return false;
 };
 
-export const isSlateValueEmpty = (value?: SlateValue | null) => {
-    if (!value || !Array.isArray(value) || value.length === 0) {
+export const isScriptDocumentEmpty = (value?: ScriptDocument | null) => {
+    if (!value || value.type !== 'doc' || !Array.isArray(value.content) || value.content.length === 0) {
         return true;
     }
 
-    return !value.some(hasTextContent);
+    return !value.content.some(hasTextContent);
 };
 
-const isElementNode = (node: unknown): node is {children: unknown[], id?: string} => typeof node === 'object'
-    && node !== null
-    && Array.isArray((node as {children?: unknown}).children);
+const ensureNodeIds = (node: FountainJSONContent): [FountainJSONContent, boolean] => {
+    let changed = false;
+    let nextNode = node;
 
-export const ensureNodeIds = (value: SlateValue): SlateValue => {
-    let needsUpdate = false;
+    if (node.type === FOUNTAIN_BLOCK_NODE_NAME) {
+        const attrs = node.attrs && typeof node.attrs === 'object' ? node.attrs : {};
+        const id = attrs.id;
 
-    const checkNeedsIds = (node: unknown): void => {
-        if (needsUpdate) return;
-
-        if (Array.isArray(node)) {
-            node.forEach(checkNeedsIds);
-
-            return;
+        if (typeof id !== 'string' || id.length === 0) {
+            nextNode = {
+                ...nextNode,
+                attrs: {
+                    ...attrs,
+                    id: createNodeId(),
+                },
+            };
+            changed = true;
         }
+    }
 
-        if (isElementNode(node)) {
-            if (!node.id) {
-                needsUpdate = true;
+    if (Array.isArray(node.content)) {
+        let contentChanged = false;
+        const nextContent = node.content.map(child => {
+            const [nextChild, childChanged] = ensureNodeIds(child);
 
-                return;
+            if (childChanged) {
+                contentChanged = true;
             }
 
-            if (Array.isArray(node.children)) {
-                node.children.forEach(checkNeedsIds);
-            }
+            return nextChild;
+        });
+
+        if (contentChanged) {
+            nextNode = {
+                ...nextNode,
+                content: nextContent,
+            };
+            changed = true;
         }
-    };
+    }
 
-    checkNeedsIds(value);
+    return [nextNode, changed];
+};
 
-    if (!needsUpdate) {
+export const ensureFountainBlockIds = (value: ScriptDocument): ScriptDocument => {
+    if (!value || value.type !== 'doc') {
+        return createEmptyScriptDocument();
+    }
+
+    let changed = false;
+    const nextContent = value.content.map(node => {
+        const [nextNode, nodeChanged] = ensureNodeIds(node);
+
+        if (nodeChanged) {
+            changed = true;
+        }
+
+        return nextNode;
+    });
+
+    if (!changed) {
         return value;
     }
 
-    const assignIds = (node: unknown): unknown => {
-        if (Array.isArray(node)) {
-            return node.map(assignIds);
-        }
-
-        if (isElementNode(node)) {
-            const next = {
-                ...node,
-                id: node.id ?? createNodeId(),
-            };
-
-            next.children = next.children.map(assignIds);
-
-            return next;
-        }
-
-        return node;
+    return {
+        ...value,
+        content: nextContent,
     };
-
-    return assignIds(value) as SlateValue;
 };
 
-export const getFirstBlockId = (value?: SlateValue | null) => {
-    if (!value || !Array.isArray(value) || value.length === 0) {
+const findFirstBlockId = (node: FountainJSONContent): string | null => {
+    if (node.type === FOUNTAIN_BLOCK_NODE_NAME) {
+        const id = node.attrs?.id;
+
+        if (typeof id === 'string' && id.length > 0) {
+            return id;
+        }
+    }
+
+    if (Array.isArray(node.content)) {
+        for (const child of node.content) {
+            const next = findFirstBlockId(child);
+
+            if (next) {
+                return next;
+            }
+        }
+    }
+
+    return null;
+};
+
+export const getFirstBlockId = (value?: ScriptDocument | null) => {
+    if (!value || value.type !== 'doc' || !Array.isArray(value.content)) {
         return null;
     }
 
-    const first = value[0] as {id?: string} | undefined;
+    for (const node of value.content) {
+        const id = findFirstBlockId(node);
 
-    return typeof first?.id === 'string' ? first.id : null;
+        if (id) {
+            return id;
+        }
+    }
+
+    return null;
 };
 
-export const valueHasBlockId = (value: SlateValue, blockId: string) => {
-    let found = false;
+const hasBlockId = (node: FountainJSONContent, blockId: string): boolean => {
+    if (node.type === FOUNTAIN_BLOCK_NODE_NAME) {
+        return node.attrs?.id === blockId;
+    }
 
-    const visit = (node: unknown) => {
-        if (found) {
-            return;
-        }
+    if (Array.isArray(node.content)) {
+        return node.content.some(child => hasBlockId(child, blockId));
+    }
 
-        if (Array.isArray(node)) {
-            node.forEach(visit);
+    return false;
+};
 
-            return;
-        }
+export const valueHasBlockId = (value: ScriptDocument, blockId: string) => {
+    if (!value || value.type !== 'doc' || !Array.isArray(value.content)) {
+        return false;
+    }
 
-        if (isElementNode(node)) {
-            if (node.id === blockId) {
-                found = true;
-
-                return;
-            }
-
-            node.children.forEach(visit);
-        }
-    };
-
-    visit(value);
-
-    return found;
+    return value.content.some(node => hasBlockId(node, blockId));
 };
 
 export const ensureSceneHeading = (
-    value?: SlateValue | null,
+    value?: ScriptDocument | null,
     options?: {activeBlockId?: string | null},
-): SlateValue => {
-    if (isSlateValueEmpty(value)) {
-        return [
-            {
-                id: options?.activeBlockId ?? createNodeId(),
-                type: ELEMENT_SCENE_HEADING,
-                children: [{text: ''}],
-            },
-        ];
+): ScriptDocument => {
+    if (isScriptDocumentEmpty(value)) {
+        return createEmptyScriptDocument(
+            options?.activeBlockId ?? createNodeId(),
+            value?.attrs?.settings,
+        );
     }
 
-    return value as SlateValue;
+    return value as ScriptDocument;
 };

@@ -1,0 +1,121 @@
+.overlay {
+    pointer-events: none;
+    position: absolute;
+    z-index: 4;
+}
+
+.controls {
+    pointer-events: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translate(-100%, -50%);
+    display: inline-flex;
+    gap: var(--space-1);
+    align-items: center;
+    margin-left: calc(-1 * var(--block-controls-gutter, 32px));
+}
+
+.trigger {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(26px * var(--size-scale));
+    height: calc(26px * var(--size-scale));
+    font-size: calc(16px * var(--size-scale));
+    line-height: 1;
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: calc(8px * var(--size-scale));
+    transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+}
+
+.trigger:hover {
+    background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+.triggerOpen {
+    background: color-mix(in srgb, var(--color-accent) 50%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-divider));
+}
+
+.triggerIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(16px * var(--size-scale));
+    height: calc(16px * var(--size-scale));
+}
+
+.triggerIcon svg,
+.menuItemIcon svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
+}
+
+.menu {
+    position: absolute;
+    top: calc(32px * var(--size-scale));
+    left: 0;
+    display: grid;
+    min-width: calc(200px * var(--size-scale));
+    padding: var(--space-1);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: calc(12px * var(--size-scale));
+}
+
+.menuAbove {
+    top: auto;
+    bottom: calc(100% + var(--space-2));
+}
+
+.menuItem {
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: var(--space-2);
+    align-items: center;
+    padding: var(--space-1) var(--space-2);
+    font-family: inherit;
+    font-size: calc(12px * var(--size-scale));
+    color: var(--color-ink);
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: calc(10px * var(--size-scale));
+    transition: background .15s ease, box-shadow .15s ease;
+}
+
+.menuItem:hover {
+    background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+
+.menuItemIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(18px * var(--size-scale));
+    height: calc(18px * var(--size-scale));
+    color: var(--color-ink-muted);
+}
+
+.menuItemLabel {
+    line-height: 1.2;
+}
+
+.menuItemActive {
+    font-weight: 600;
+    background: color-mix(in srgb, var(--color-accent) 70%, transparent);
+
+    &:hover {
+        background: color-mix(in srgb, var(--color-accent) 70%, transparent);
+    }
+}

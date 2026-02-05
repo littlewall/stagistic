@@ -1,5 +1,5 @@
 import type {ScriptSummary} from '@stagistic/db';
-import type {SlateValue} from '@stagistic/shared';
+import type {ScriptDocument} from '@stagistic/shared';
 import {useLiveQuery} from '@tanstack/react-db';
 import {
     useCallback,
@@ -53,7 +53,7 @@ export const useScripts = () => {
     );
 
     const createScript = useCallback(
-        (name: string, initialContent?: SlateValue) => scriptsStore.createScript(name, initialContent),
+        (name: string, initialContent?: ScriptDocument) => scriptsStore.createScript(name, initialContent),
         [scriptsStore],
     );
 
