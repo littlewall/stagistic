@@ -67,6 +67,7 @@ type BlockCacheEntry = {
     node: ProseMirrorNode,
     height: number,
     isFallback: boolean,
+    hasInlineBreaks: boolean,
 };
 
 const paginationKey = new PluginKey<PaginationPluginState>('fountain-pagination');
@@ -193,7 +194,10 @@ const createSpacerElement = (
 };
 
 const getBlockKey = (node: ProseMirrorNode, pos: number) => {
-    return `pos:${pos}`;
+    const attrs = node.attrs as Record<string, unknown>;
+    const id = typeof attrs.id === 'string' ? attrs.id : null;
+
+    return id ? `id:${id}` : `pos:${pos}`;
 };
 
 const measureBlockHeight = (
@@ -201,18 +205,23 @@ const measureBlockHeight = (
     pos: number,
     fallbackHeight: number,
     domOverride?: HTMLElement | null,
-): {height: number, isFallback: boolean} => {
+): {
+    height: number, isFallback: boolean, hasInlineBreaks: boolean,
+} => {
     const dom = domOverride ?? (view.nodeDOM(pos) as HTMLElement | null);
 
     if (!dom) {
-        return {height: fallbackHeight, isFallback: true};
+        return {
+            height: fallbackHeight, isFallback: true, hasInlineBreaks: false,
+        };
     }
 
     let height = dom.offsetHeight;
 
     const inlineBreaks = dom.querySelectorAll('[data-pagination-inline-break]');
+    const hasInlineBreaks = inlineBreaks.length > 0;
 
-    if (inlineBreaks.length > 0) {
+    if (hasInlineBreaks) {
         let inlineBreakHeight = 0;
 
         for (let i = 0; i < inlineBreaks.length; i += 1) {
@@ -225,10 +234,14 @@ const measureBlockHeight = (
     }
 
     if (height > 0) {
-        return {height, isFallback: false};
+        return {
+            height, isFallback: false, hasInlineBreaks,
+        };
     }
 
-    return {height: fallbackHeight, isFallback: true};
+    return {
+        height: fallbackHeight, isFallback: true, hasInlineBreaks,
+    };
 };
 
 const resolveBreakPos = (
@@ -253,7 +266,55 @@ const resolveBreakPos = (
     const minPos = blockPos + 1;
     const maxPos = blockPos + blockNode.nodeSize - 1;
 
-    return Math.min(Math.max(coords.pos, minPos), maxPos);
+    const rawPos = Math.min(Math.max(coords.pos, minPos), maxPos);
+
+    return resolveWordBoundaryPos(blockNode, blockPos, rawPos);
+};
+
+const resolveWordBoundaryPos = (
+    blockNode: ProseMirrorNode,
+    blockPos: number,
+    breakPos: number,
+): number => {
+    const blockStart = blockPos + 1;
+    const blockEnd = blockPos + blockNode.nodeSize - 1;
+    const isWhitespace = (value: string) => (/\s/).test(value);
+    let nearestBefore: number | null = null;
+    let nearestAfter: number | null = null;
+
+    blockNode.nodesBetween(0, blockNode.content.size, (node, pos) => {
+        if (!node.isText) {
+            return true;
+        }
+
+        const text = node.text ?? '';
+
+        for (let i = 0; i < text.length; i += 1) {
+            if (!isWhitespace(text[i])) {
+                continue;
+            }
+
+            const boundaryPos = blockStart + pos + i + 1;
+
+            if (boundaryPos <= breakPos) {
+                if (nearestBefore === null || boundaryPos > nearestBefore) {
+                    nearestBefore = boundaryPos;
+                }
+            } else if (nearestAfter === null || boundaryPos < nearestAfter) {
+                nearestAfter = boundaryPos;
+            }
+        }
+
+        return true;
+    });
+
+    const candidate = nearestBefore ?? nearestAfter;
+
+    if (candidate === null) {
+        return breakPos;
+    }
+
+    return Math.min(Math.max(candidate, blockStart), blockEnd);
 };
 
 const buildPaginationState = (
@@ -310,30 +371,44 @@ const buildPaginationState = (
     const resolveBlockHeight = (
         node: ProseMirrorNode,
         pos: number,
-        dom: HTMLElement | null,
-        skipCache: boolean,
+        getDom: () => HTMLElement | null,
     ) => {
         const key = getBlockKey(node, pos);
         const cached = cache.get(key);
+        const canUseCache = cached
+            && !cached.isFallback
+            && !cached.hasInlineBreaks
+            && (cached.node === node || cached.node.eq(node));
 
-        if (!skipCache && cached && cached.node === node && !cached.isFallback) {
+        if (canUseCache) {
             nextCache.set(key, cached);
 
-            return cached.height;
+            return {
+                key,
+                height: cached.height,
+                hasInlineBreaks: cached.hasInlineBreaks,
+            };
         }
 
-        if (!skipCache && cached && cached.node.eq(node) && !cached.isFallback) {
+        const measurement = measureBlockHeight(view, pos, fallbackHeight, getDom());
+
+        if (measurement.isFallback && cached && !cached.isFallback) {
+            usedFallbackMeasurements = true;
             nextCache.set(key, cached);
 
-            return cached.height;
+            return {
+                key,
+                height: cached.height,
+                hasInlineBreaks: cached.hasInlineBreaks,
+            };
         }
 
-        const measurement = measureBlockHeight(view, pos, fallbackHeight, dom);
         const height = Math.max(measurement.height, fallbackHeight);
         const entry = {
             node,
             height,
             isFallback: measurement.isFallback,
+            hasInlineBreaks: measurement.hasInlineBreaks,
         };
 
         if (measurement.isFallback) {
@@ -342,13 +417,12 @@ const buildPaginationState = (
 
         nextCache.set(key, entry);
 
-        return height;
+        return {
+            key,
+            height,
+            hasInlineBreaks: entry.hasInlineBreaks,
+        };
     };
-
-    if (topSpacing > 0) {
-        decorations.push(Decoration.widget(0, () => createSpacerElement(topSpacing, options), {side: -1}));
-        offsetCursor += topSpacing;
-    }
 
     view.state.doc.forEach((node, offset) => {
         if (node.type.name === FOUNTAIN_COLUMN_GROUP_NODE_NAME) {
@@ -364,11 +438,17 @@ const buildPaginationState = (
         const isSplittable = blockType ? SPLITTABLE_BLOCK_TYPES.has(blockType) : false;
         const needsMoreContd = blockType ? MORE_CONTD_BLOCK_TYPES.has(blockType) : false;
         const isOrphanCandidate = blockType ? ORPHAN_PUSHDOWN_TYPES.has(blockType) : false;
-        const blockDom = view.nodeDOM(offset) as HTMLElement | null;
-        const blockHasInlineBreaks = blockDom
-            ? blockDom.querySelector('[data-pagination-inline-break]') !== null
-            : false;
-        const blockHeight = resolveBlockHeight(node, offset, blockDom, blockHasInlineBreaks);
+        let blockDom: HTMLElement | null | undefined;
+        const getBlockDom = () => {
+            if (blockDom === undefined) {
+                blockDom = view.nodeDOM(offset) as HTMLElement | null;
+            }
+
+            return blockDom;
+        };
+        const resolvedBlock = resolveBlockHeight(node, offset, getBlockDom);
+        const blockHeight = resolvedBlock.height;
+        const blockHasInlineBreaks = resolvedBlock.hasInlineBreaks;
 
         if (blockHasInlineBreaks) {
             hasInlineBreaks = true;
@@ -377,7 +457,7 @@ const buildPaginationState = (
         const ensurePageStart = () => {
             if (pageStartPos === null) {
                 pageStartPos = offset;
-                pageStartOffset = offsetCursor - topSpacing;
+                pageStartOffset = offsetCursor;
             }
         };
 
@@ -391,7 +471,7 @@ const buildPaginationState = (
                 startPos: pageStartPos,
                 endPos: endPosOverride ?? lastBlockEndPos ?? pageStartPos,
                 startOffset: pageStartOffset,
-                endOffset: offsetCursor - topSpacing,
+                endOffset: offsetCursor,
             });
 
             pageIndex += 1;
@@ -424,7 +504,12 @@ const buildPaginationState = (
             ensurePageStart();
 
             const spaceLeft = Math.max(0, contentHeight - currentHeight);
-            const fits = blockRemaining <= spaceLeft || currentHeight === 0;
+            const breakBuffer = Math.max(
+                1,
+                Math.round(options.lineHeightPx * 0.25),
+            );
+            const bufferedSpaceLeft = Math.max(0, spaceLeft - breakBuffer);
+            const fits = currentHeight === 0 || blockRemaining <= bufferedSpaceLeft;
 
             if (fits) {
                 currentHeight += blockRemaining;
@@ -434,7 +519,9 @@ const buildPaginationState = (
                 break;
             }
 
-            if (!isSplittable || !blockDom) {
+            const domForSplit = getBlockDom();
+
+            if (!isSplittable || !domForSplit) {
                 if (lastBlockEndPos !== null) {
                     const remaining = Math.max(0, contentHeight - currentHeight);
                     const spacerHeight = remaining + bottomSpacing + topSpacing;
@@ -459,7 +546,7 @@ const buildPaginationState = (
 
             const remaining = Math.max(0, contentHeight - currentHeight);
             const breakY = offsetCursor + remaining;
-            const breakPos = resolveBreakPos(view, offset, node, blockDom, breakY);
+            const breakPos = resolveBreakPos(view, offset, node, domForSplit, breakY);
             const spacerHeight = bottomSpacing + topSpacing;
             const dividerOffset = bottomSpacing;
             const overlay = needsMoreContd && lastCharacterName
@@ -479,6 +566,13 @@ const buildPaginationState = (
                 {side: 1},
             ));
             hasInlineBreaks = true;
+
+            const cacheEntry = nextCache.get(resolvedBlock.key);
+
+            if (cacheEntry && !cacheEntry.hasInlineBreaks) {
+                cacheEntry.hasInlineBreaks = true;
+            }
+
             offsetCursor += spacerHeight;
             blockRemaining -= remaining;
             closePage(offset);
@@ -579,11 +673,9 @@ export const FountainPaginationExtension = Extension.create<PaginationOptions, P
     },
 
     addProseMirrorPlugins() {
+        // eslint-disable-next-line @typescript-eslint/no-this-alias
         const extension = this;
-        let pendingUpdate: number | null = null;
-        let lastDoc: ProseMirrorNode | null = null;
         let lastOptionsVersion = -1;
-        let lastStyleKey = '';
         let lastContentWidth = 0;
         let lastHeightKey = '';
         let blockCache = new Map<string, BlockCacheEntry>();
@@ -620,6 +712,13 @@ export const FountainPaginationExtension = Extension.create<PaginationOptions, P
                             return meta;
                         }
 
+                        if (tr.docChanged) {
+                            return {
+                                decorations: pluginState.decorations.map(tr.mapping, tr.doc),
+                                pagination: pluginState.pagination,
+                            };
+                        }
+
                         return pluginState;
                     },
                 },
@@ -631,160 +730,121 @@ export const FountainPaginationExtension = Extension.create<PaginationOptions, P
                     },
                 },
                 view: view => {
-                    let recalcHandle: number | null = null;
-                    let forceRecalc = true;
                     let destroyed = false;
                     let resizeObserver: ResizeObserver | null = null;
                     let lastInlineBreakDoc: ProseMirrorNode | null = null;
                     let lastFallbackDoc: ProseMirrorNode | null = null;
+                    let isRecalcRunning = false;
+                    let needsRecalc = false;
 
-                    const scheduleRecalcAfterPaint = (frames = 2) => {
+                    const runRecalc = () => {
                         if (destroyed) {
                             return;
                         }
 
-                        if (frames <= 0) {
-                            scheduleRecalc();
+                        if (isRecalcRunning) {
+                            needsRecalc = true;
 
                             return;
                         }
 
-                        requestAnimationFrame(() => {
-                            scheduleRecalcAfterPaint(frames - 1);
-                        });
-                    };
+                        isRecalcRunning = true;
 
-                    const scheduleRecalc = () => {
-                        if (destroyed) {
-                            return;
-                        }
+                        do {
+                            needsRecalc = false;
 
-                        if (recalcHandle !== null) {
-                            cancelAnimationFrame(recalcHandle);
-                        }
+                            const optionsVersion = extension.storage.optionsVersion;
+                            const heightKey = `${extension.options.pageWidth}|${extension.options.marginLeft}|` +
+                                `${extension.options.marginRight}|${extension.options.lineHeightPx}`;
 
-                        recalcHandle = requestAnimationFrame(() => {
-                            recalcHandle = null;
+                            const contentWidth = Math.max(
+                                0,
+                                view.dom.clientWidth - extension.options.marginLeft - extension.options.marginRight,
+                            );
 
-                            if (destroyed) {
-                                return;
+                            const layoutChanged = heightKey !== lastHeightKey || contentWidth !== lastContentWidth;
+
+                            lastOptionsVersion = optionsVersion;
+
+                            if (layoutChanged) {
+                                blockCache = new Map();
+                                lastHeightKey = heightKey;
+                                lastContentWidth = contentWidth;
                             }
 
-                            forceRecalc = true;
-                            view.dispatch(view.state.tr.setMeta('pagination-recalc', true));
-                        });
+                            const {
+                                decorations,
+                                pagination,
+                                nextCache,
+                                hasInlineBreaks,
+                                usedFallbackMeasurements,
+                            } = buildPaginationState(
+                                view,
+                                extension.options,
+                                blockCache,
+                            );
+
+                            blockCache = nextCache;
+
+                            extension.storage.state = pagination;
+
+                            const tr = view.state.tr.setMeta(paginationKey, {decorations, pagination});
+
+                            view.dispatch(tr);
+
+                            if (hasInlineBreaks && lastInlineBreakDoc !== view.state.doc) {
+                                lastInlineBreakDoc = view.state.doc;
+                                needsRecalc = true;
+                            }
+
+                            if (usedFallbackMeasurements && lastFallbackDoc !== view.state.doc) {
+                                lastFallbackDoc = view.state.doc;
+                                needsRecalc = true;
+                            }
+                        } while (needsRecalc && !destroyed);
+
+                        isRecalcRunning = false;
                     };
 
                     if (typeof ResizeObserver !== 'undefined') {
                         resizeObserver = new ResizeObserver(() => {
-                            scheduleRecalc();
+                            runRecalc();
                         });
                         resizeObserver.observe(view.dom);
                     }
 
                     if (typeof document !== 'undefined' && 'fonts' in document) {
                         document.fonts.ready.then(() => {
-                            scheduleRecalc();
+                            runRecalc();
                         }).catch(() => {});
                     }
 
-                    scheduleRecalcAfterPaint(2);
+                    runRecalc();
 
                     return {
                         update: view => {
-                            if (pendingUpdate !== null) {
-                                cancelAnimationFrame(pendingUpdate);
+                            const optionsVersion = extension.storage.optionsVersion;
+                            // Only recalculate if content actually changed (not just selection)
+                            const docChanged = view.state.tr.docChanged;
+                            const heightKey = `${extension.options.pageWidth}|${extension.options.marginLeft}|` +
+                                `${extension.options.marginRight}|${extension.options.lineHeightPx}`;
+
+                            const contentWidth = Math.max(
+                                0,
+                                view.dom.clientWidth - extension.options.marginLeft - extension.options.marginRight,
+                            );
+
+                            const layoutChanged = heightKey !== lastHeightKey || contentWidth !== lastContentWidth;
+
+                            // Skip recalculation if only selection changed and no layout/pagination changes needed
+                            if (!docChanged && optionsVersion === lastOptionsVersion && !layoutChanged) {
+                                return;
                             }
 
-                            pendingUpdate = requestAnimationFrame(() => {
-                                pendingUpdate = null;
-
-                                const optionsVersion = extension.storage.optionsVersion;
-                                const docChanged = lastDoc !== view.state.doc;
-                                const heightKey = `${extension.options.pageWidth}|${extension.options.marginLeft}|${extension.options.marginRight}|${extension.options.lineHeightPx}`;
-                                const nextStyleKey = `${extension.options.pageWidth}|${extension.options.marginLeft}|${extension.options.marginRight}`;
-
-                                if (nextStyleKey !== lastStyleKey) {
-                                    view.dom.style.width = '100%';
-                                    view.dom.style.maxWidth = `${extension.options.pageWidth}px`;
-                                    view.dom.style.paddingLeft = `${extension.options.marginLeft}px`;
-                                    view.dom.style.paddingRight = `${extension.options.marginRight}px`;
-                                    view.dom.style.boxSizing = 'border-box';
-                                    lastStyleKey = nextStyleKey;
-                                }
-
-                                const contentWidth = Math.max(
-                                    0,
-                                    view.dom.clientWidth - extension.options.marginLeft - extension.options.marginRight,
-                                );
-
-                                const layoutChanged = heightKey !== lastHeightKey || contentWidth !== lastContentWidth;
-
-                                if (!docChanged && optionsVersion === lastOptionsVersion && !layoutChanged && !forceRecalc) {
-                                    return;
-                                }
-
-                                forceRecalc = false;
-                                lastDoc = view.state.doc;
-                                lastOptionsVersion = optionsVersion;
-
-                                if (heightKey !== lastHeightKey || contentWidth !== lastContentWidth) {
-                                    blockCache = new Map();
-                                    lastHeightKey = heightKey;
-                                    lastContentWidth = contentWidth;
-                                }
-
-                                if (docChanged) {
-                                    blockCache = new Map();
-                                }
-
-                                if (forceRecalc) {
-                                    blockCache = new Map();
-                                }
-
-                                const {
-                                    decorations,
-                                    pagination,
-                                    nextCache,
-                                    hasInlineBreaks,
-                                    usedFallbackMeasurements,
-                                } = buildPaginationState(
-                                    view,
-                                    extension.options,
-                                    blockCache,
-                                );
-
-                                blockCache = nextCache;
-
-                                extension.storage.state = pagination;
-
-                                const tr = view.state.tr.setMeta(paginationKey, {decorations, pagination});
-
-                                view.dispatch(tr);
-
-                                if (hasInlineBreaks && lastInlineBreakDoc !== view.state.doc) {
-                                    lastInlineBreakDoc = view.state.doc;
-                                    scheduleRecalc();
-                                }
-
-                                if (usedFallbackMeasurements && lastFallbackDoc !== view.state.doc) {
-                                    lastFallbackDoc = view.state.doc;
-                                    scheduleRecalc();
-                                }
-                            });
+                            runRecalc();
                         },
                         destroy: () => {
                             destroyed = true;
-                            if (pendingUpdate !== null) {
-                                cancelAnimationFrame(pendingUpdate);
-                                pendingUpdate = null;
-                            }
-
-                            if (recalcHandle !== null) {
-                                cancelAnimationFrame(recalcHandle);
-                                recalcHandle = null;
-                            }
-
                             resizeObserver?.disconnect();
                         },
                     };

@@ -3,6 +3,7 @@ import {mergeAttributes, Node} from '@tiptap/core';
 import {
     Plugin,
     PluginKey,
+    type Transaction,
 } from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
@@ -18,41 +19,154 @@ import {
     normalizeFountainBlockType,
 } from '../fountainCore';
 
-const ensureBlockIdsPlugin = (editor: Editor) => new Plugin({
-    key: new PluginKey('fountain-block-ids'),
-    appendTransaction: (_transactions, _oldState, newState) => {
-        let tr = newState.tr;
-        let changed = false;
+type DocRange = {
+    from: number,
+    to: number,
+};
 
-        newState.doc.descendants((node, pos) => {
-            if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
-                return true;
-            }
+const clampRange = (range: DocRange, max: number): DocRange => {
+    const start = Math.max(0, Math.min(range.from, range.to));
+    const end = Math.min(max, Math.max(range.from, range.to));
 
-            const attrs = node.attrs as Record<string, unknown>;
-            const id = ensureFountainBlockId(attrs.id);
+    return {
+        from: start,
+        to: end,
+    };
+};
 
-            if (id === attrs.id) {
-                return true;
-            }
+const expandRange = (range: DocRange, max: number, padding = 2): DocRange => {
+    const clamped = clampRange(range, max);
 
-            tr = tr.setNodeMarkup(pos, undefined, {
-                ...attrs,
-                id,
+    return {
+        from: Math.max(0, clamped.from - padding),
+        to: Math.min(max, clamped.to + padding),
+    };
+};
+
+const mergeRanges = (ranges: DocRange[]): DocRange[] => {
+    if (ranges.length === 0) {
+        return ranges;
+    }
+
+    const sorted = ranges
+        .filter(range => range.to > range.from)
+        .sort((a, b) => a.from - b.from);
+
+    if (sorted.length === 0) {
+        return [];
+    }
+
+    const merged: DocRange[] = [sorted[0]];
+
+    for (let i = 1; i < sorted.length; i += 1) {
+        const current = sorted[i];
+        const last = merged[merged.length - 1];
+
+        if (current.from <= last.to + 1) {
+            last.to = Math.max(last.to, current.to);
+            continue;
+        }
+
+        merged.push(current);
+    }
+
+    return merged;
+};
+
+const getChangedRanges = (transactions: readonly Transaction[], docSize: number) => {
+    const ranges: DocRange[] = [];
+
+    transactions.forEach(transaction => {
+        if (!transaction.docChanged) {
+            return;
+        }
+
+        const maps = transaction.mapping.maps;
+
+        for (let mapIndex = 0; mapIndex < maps.length; mapIndex += 1) {
+            const map = maps[mapIndex];
+            const remap = transaction.mapping.slice(mapIndex + 1);
+
+            map.forEach((_oldStart, _oldEnd, newStart, newEnd) => {
+                const mappedFrom = remap.map(newStart, 1);
+                const mappedTo = remap.map(newEnd, -1);
+                const expanded = expandRange(
+                    {
+                        from: mappedFrom,
+                        to: mappedTo,
+                    },
+                    docSize,
+                );
+
+                ranges.push(expanded);
             });
-            changed = true;
+        }
+    });
 
-            return true;
-        });
+    return mergeRanges(ranges);
+};
 
-        return changed ? tr : null;
-    },
-    props: {
-        handleKeyDown: (_view, event) => handleKeyDown(editor, event),
-        handleTextInput: (_view, from, to, text) => handleTextInput(editor, from, to, text),
-        handlePaste: (_view, event) => handlePaste(editor, event),
-    },
-});
+const ensureBlockIdsPlugin = (editor: Editor) => {
+    let didInitialScan = false;
+
+    return new Plugin({
+        key: new PluginKey('fountain-block-ids'),
+        appendTransaction: (transactions, _oldState, newState) => {
+            if (!transactions.some(transaction => transaction.docChanged)) {
+                return null;
+            }
+
+            let tr = newState.tr;
+            let changed = false;
+
+            const scanRanges = didInitialScan
+                ? getChangedRanges(transactions, newState.doc.content.size)
+                : [{
+                    from: 0,
+                    to: newState.doc.content.size,
+                }];
+
+            didInitialScan = true;
+
+            const rangesToScan = scanRanges.length > 0
+                ? scanRanges
+                : [{
+                    from: 0,
+                    to: newState.doc.content.size,
+                }];
+
+            rangesToScan.forEach(range => {
+                newState.doc.nodesBetween(range.from, range.to, (node, pos) => {
+                    if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+                        return true;
+                    }
+
+                    const attrs = node.attrs as Record<string, unknown>;
+                    const id = ensureFountainBlockId(attrs.id);
+
+                    if (id === attrs.id) {
+                        return false;
+                    }
+
+                    tr = tr.setNodeMarkup(pos, undefined, {
+                        ...attrs,
+                        id,
+                    });
+                    changed = true;
+
+                    return false;
+                });
+            });
+
+            return changed ? tr : null;
+        },
+        props: {
+            handleKeyDown: (_view, event) => handleKeyDown(editor, event),
+            handleTextInput: (_view, from, to, text) => handleTextInput(editor, from, to, text),
+            handlePaste: (_view, event) => handlePaste(editor, event),
+        },
+    });
+};
 
 const FountainBlockExtension = Node.create({
     name: FOUNTAIN_BLOCK_NODE_NAME,

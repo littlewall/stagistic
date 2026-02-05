@@ -17,8 +17,11 @@
 }
 
 .content {
+    box-sizing: border-box;
     width: 100%;
     min-height: 100%;
+    /* Margins */
+    padding: var(--editor-margin-top, 96px) var(--editor-margin-right, 96px) var(--editor-margin-bottom, 96px) var(--editor-margin-left, 96px);
     font-family: var(--font-mono);
     font-size: var(--editor-font-size, calc(13px * var(--size-scale)));
     line-height: var(--editor-line-height, 1.7);
@@ -28,6 +31,7 @@
 
 .content :global(.ProseMirror),
 .content :global(.ProseMirror-focused) {
+    padding: 0;
     outline: none;
     box-shadow: none;
 }

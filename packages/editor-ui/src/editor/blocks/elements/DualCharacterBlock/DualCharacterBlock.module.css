@@ -1,12 +1,14 @@
 .dualCharacter {
-    padding-top: var(--character-gap, 1.8em);
+    padding-top: var(--dual-character-spacing-before, 1.8em);
+    padding-right: var(--dual-character-indent-right, 0);
     padding-left: var(--dual-character-indent, 64px);
     font-weight: 700;
+    line-height: var(--dual-character-line-height, inherit);
     color: #7b4b2a;
 }
 
 .dualCharacterBlock {
     --dual-character-indent: var(--editor-dual-character-indent, 64px);
-    --character-gap: var(--editor-dual-character-gap, var(--editor-character-gap, 1.8em));
-    --block-controls-offset: var(--character-gap);
+    --dual-character-spacing-before: var(--dual-character-spacing-before, 1.8em);
+    --block-controls-offset: var(--dual-character-spacing-before);
 }

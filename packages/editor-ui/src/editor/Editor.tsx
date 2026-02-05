@@ -105,6 +105,8 @@ const Editor = ({
     const latestValueRef = useRef<ScriptDocument>(initialValue);
     const lastSavedSerializedRef = useRef<string>(initialSerialized);
     const autosaveTimerRef = useRef<number | null>(null);
+    const pendingUpdateRef = useRef<number | null>(null);
+    const latestEditorRef = useRef<TiptapEditor | null>(null);
     const dirtyRef = useRef(false);
     const isApplyingInitialRef = useRef(false);
     const onValueChangeRef = useLatestRef(onValueChange);
@@ -216,7 +218,8 @@ const Editor = ({
 
     const initialDoc = useMemo<ScriptDocument>(
         () => initialValue,
-        [initialSerialized],
+        // Use stable JSON string for content comparison to prevent unnecessary editor re-creation
+        [JSON.stringify(stripScriptSettings(initialValue))],
     );
 
     const editor = useEditor({
@@ -240,7 +243,7 @@ const Editor = ({
                 'data-fountain-editor': 'true',
             },
         },
-    }, [initialDoc]);
+    }, [initialDoc, paginationExtension]);
 
     useEffect(() => {
         if (!editor) {
@@ -251,7 +254,22 @@ const Editor = ({
         const scaleValue = (value: number) => value * sizeScale;
         const lineHeightPx = scaleValue(typography.fontSizePx * typography.lineHeight);
 
-        editor.commands.updatePaginationSettings({
+        // Cast to access the custom command from the pagination extension
+        const commands = editor.commands as {
+            updatePaginationSettings?: (settings: {
+                pageHeight: number,
+                pageWidth: number,
+                marginTop: number,
+                marginBottom: number,
+                marginLeft: number,
+                marginRight: number,
+                lineHeightPx: number,
+                dividerColor: string,
+                dividerThickness: number,
+            }) => boolean,
+        };
+
+        commands.updatePaginationSettings?.({
             pageHeight: scaleValue(page.heightPx),
             pageWidth: scaleValue(page.widthPx),
             marginTop: scaleValue(page.marginTopPx),
@@ -262,29 +280,55 @@ const Editor = ({
             dividerColor: 'var(--color-divider)',
             dividerThickness: 1,
         });
-    }, [editor, resolvedSettings, sizeScale]);
+    }, [
+        editor,
+        resolvedSettings,
+        sizeScale,
+    ]);
 
     useEffect(() => {
         if (!editor) {
             return;
         }
 
+        latestEditorRef.current = editor;
+
         const handleUpdate = ({editor: updatedEditor}: {editor: TiptapEditor}) => {
             if (isApplyingInitialRef.current) {
                 return;
             }
 
-            const nextValue = stripScriptSettings(updatedEditor.getJSON() as ScriptDocument);
+            latestEditorRef.current = updatedEditor;
 
-            latestValueRef.current = nextValue;
-            onValueChangeRef.current?.(nextValue);
-            scheduleAutosave(nextValue);
+            if (pendingUpdateRef.current !== null) {
+                return;
+            }
+
+            pendingUpdateRef.current = window.requestAnimationFrame(() => {
+                pendingUpdateRef.current = null;
+
+                const activeEditor = latestEditorRef.current;
+
+                if (!activeEditor || isApplyingInitialRef.current) {
+                    return;
+                }
+
+                const nextValue = stripScriptSettings(activeEditor.getJSON() as ScriptDocument);
+
+                latestValueRef.current = nextValue;
+                onValueChangeRef.current?.(nextValue);
+                scheduleAutosave(nextValue);
+            });
         };
 
         editor.on('update', handleUpdate);
 
         return () => {
             editor.off('update', handleUpdate);
+            if (pendingUpdateRef.current !== null) {
+                window.cancelAnimationFrame(pendingUpdateRef.current);
+                pendingUpdateRef.current = null;
+            }
         };
     }, [
         editor,
@@ -351,7 +395,11 @@ const Editor = ({
     return (
         <div className={styles.root}>
             <EditorToolbar editor={editor} />
-            <EditorCanvas editor={editor} autoFocus={autoFocus} style={editorStyle} />
+            <EditorCanvas
+                editor={editor}
+                autoFocus={autoFocus}
+                style={editorStyle}
+            />
         </div>
     );
 };

@@ -1,8 +1,10 @@
 .parenthetical {
     position: relative;
+    padding-top: var(--parenthetical-spacing-before, 0);
     padding-right: var(--parenthetical-indent-right, 24px);
     padding-left: var(--parenthetical-indent-left, 40px);
     font-style: italic;
+    line-height: var(--parenthetical-line-height, inherit);
     color: #4f4a42;
 }
 

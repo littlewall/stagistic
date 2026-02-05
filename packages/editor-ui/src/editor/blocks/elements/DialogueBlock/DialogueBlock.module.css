@@ -1,3 +1,6 @@
 .dialogue {
+    padding-top: var(--dialogue-spacing-before, 0);
+    padding-right: var(--dialogue-indent-right, 0);
     padding-left: var(--dialogue-indent, 24px);
+    line-height: var(--dialogue-line-height, inherit);
 }

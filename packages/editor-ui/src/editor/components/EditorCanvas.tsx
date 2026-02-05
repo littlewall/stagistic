@@ -11,7 +11,9 @@ type EditorCanvasProps = {
     style?: CSSProperties,
 };
 
-export const EditorCanvas = ({editor, autoFocus, style}: EditorCanvasProps) => {
+export const EditorCanvas = ({
+    editor, autoFocus, style,
+}: EditorCanvasProps) => {
     const canvasRef = useRef<HTMLElement | null>(null);
 
     return (

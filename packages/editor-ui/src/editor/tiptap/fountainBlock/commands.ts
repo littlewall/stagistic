@@ -5,8 +5,8 @@ import {TextSelection, type Transaction} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
     type ActiveFountainBlock,
+    FOUNTAIN_BLOCK_NODE_NAME,
     type FountainBlockType,
     normalizeFountainBlockType,
 } from '../fountainCore';

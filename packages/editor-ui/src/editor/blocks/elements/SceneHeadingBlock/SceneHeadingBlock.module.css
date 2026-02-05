@@ -1,4 +1,8 @@
 .scene {
+    padding-top: var(--scene-heading-spacing-before, 0);
+    padding-right: var(--scene-heading-indent-right, 0);
+    padding-left: var(--scene-heading-indent-left, 0);
     font-weight: 700;
+    line-height: var(--scene-heading-line-height, inherit);
     text-transform: uppercase;
 }

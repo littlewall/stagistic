@@ -64,24 +64,25 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
     const [isMenuAbove, setIsMenuAbove] = useState(false);
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
+    const rafIdRef = useRef<number | null>(null);
 
     const updatePosition = useCallback(() => {
         const canvas = canvasRef.current;
 
         if (!editor || !canvas) {
-            setOverlayState(null);
+            setOverlayState(prev => (prev ? null : prev));
 
             return;
         }
 
         if (!editor.view.hasFocus() && !isMenuOpen) {
-            setOverlayState(null);
+            setOverlayState(prev => (prev ? null : prev));
 
             return;
         }
 
         if (isSelectionAcrossBlocks(editor.state, FOUNTAIN_BLOCK_NODE_NAME)) {
-            setOverlayState(null);
+            setOverlayState(prev => (prev ? null : prev));
 
             return;
         }
@@ -89,7 +90,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
 
         if (!activeBlock) {
-            setOverlayState(null);
+            setOverlayState(prev => (prev ? null : prev));
 
             return;
         }
@@ -97,7 +98,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         const target = findBlockElement(editor, activeBlock.from);
 
         if (!target) {
-            setOverlayState(null);
+            setOverlayState(prev => (prev ? null : prev));
 
             return;
         }
@@ -111,14 +112,32 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         const top = targetRect.top - canvasRect.top + canvas.scrollTop + paddingTop + lineOffset;
         const left = targetRect.left - canvasRect.left + canvas.scrollLeft;
 
-        setOverlayState({
-            style: {
-                top,
-                left,
-                width: targetRect.width,
-            },
-            blockType: activeBlock.blockType,
-            blockId: activeBlock.id,
+        setOverlayState(prev => {
+            const nextState = {
+                style: {
+                    top,
+                    left,
+                    width: targetRect.width,
+                },
+                blockType: activeBlock.blockType,
+                blockId: activeBlock.id,
+            };
+
+            if (!prev) {
+                return nextState;
+            }
+
+            if (
+                prev.blockId === nextState.blockId
+                && prev.blockType === nextState.blockType
+                && prev.style.top === nextState.style.top
+                && prev.style.left === nextState.style.left
+                && prev.style.width === nextState.style.width
+            ) {
+                return prev;
+            }
+
+            return nextState;
         });
     }, [
         canvasRef,
@@ -126,16 +145,27 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         isMenuOpen,
     ]);
 
-    useLayoutEffect(() => {
-        updatePosition();
+    const scheduleUpdatePosition = useCallback(() => {
+        if (rafIdRef.current !== null) {
+            return;
+        }
+
+        rafIdRef.current = window.requestAnimationFrame(() => {
+            rafIdRef.current = null;
+            updatePosition();
+        });
     }, [updatePosition]);
+
+    useLayoutEffect(() => {
+        scheduleUpdatePosition();
+    }, [scheduleUpdatePosition]);
 
     useEffect(() => {
         if (!editor) {
             return;
         }
 
-        const handleUpdate = () => updatePosition();
+        const handleUpdate = () => scheduleUpdatePosition();
 
         editor.on('selectionUpdate', handleUpdate);
         editor.on('transaction', handleUpdate);
@@ -148,7 +178,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             editor.off('focus', handleUpdate);
             editor.off('blur', handleUpdate);
         };
-    }, [editor, updatePosition]);
+    }, [editor, scheduleUpdatePosition]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -157,7 +187,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             return;
         }
 
-        const handleScroll = () => updatePosition();
+        const handleScroll = () => scheduleUpdatePosition();
 
         canvas.addEventListener('scroll', handleScroll);
         window.addEventListener('resize', handleScroll);
@@ -166,7 +196,16 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             canvas.removeEventListener('scroll', handleScroll);
             window.removeEventListener('resize', handleScroll);
         };
-    }, [canvasRef, updatePosition]);
+    }, [canvasRef, scheduleUpdatePosition]);
+
+    useEffect(() => {
+        return () => {
+            if (rafIdRef.current !== null) {
+                window.cancelAnimationFrame(rafIdRef.current);
+                rafIdRef.current = null;
+            }
+        };
+    }, []);
 
     useEffect(() => {
         setIsMenuOpen(false);

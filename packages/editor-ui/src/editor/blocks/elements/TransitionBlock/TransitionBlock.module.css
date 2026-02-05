@@ -1,12 +1,13 @@
 .transition {
     display: block;
-    padding: var(--transition-gap, 1.8em) 0;
+    padding: var(--transition-spacing-before, 1.8em) var(--transition-indent-right, 0) var(--transition-spacing-before, 1.8em) var(--transition-indent, 0);
     font-weight: 700;
+    line-height: var(--transition-line-height, inherit);
     text-align: right;
     text-transform: uppercase;
 }
 
 .transitionBlock {
-    --transition-gap: var(--editor-transition-gap, 1.8em);
-    --block-controls-offset: var(--transition-gap);
+    --transition-spacing-before: var(--transition-spacing-before, 1.8em);
+    --block-controls-offset: var(--transition-spacing-before);
 }
