@@ -1,4 +1,8 @@
 .lyrics {
+    padding-top: var(--lyrics-spacing-before, 0);
+    padding-right: var(--lyrics-indent-right, 0);
+    padding-left: var(--lyrics-indent-left, 0);
     font-style: italic;
+    line-height: var(--lyrics-line-height, inherit);
     color: #5c2f11;
 }

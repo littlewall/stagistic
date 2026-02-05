@@ -14,19 +14,19 @@ import {
     getNextTypeOnEnter,
 } from '../fountainCore';
 import {
-    type BlockContext,
-    createBlockContext,
-    getSelectionOffset,
-    isEmptyDialogueBlock,
-    isInsideParentheses,
-} from './context';
-import {
     insertActionBefore,
     insertParenPair,
     setBlockTypeWithSelection,
     splitBlockWithType,
     updateBlockType,
 } from './commands';
+import {
+    type BlockContext,
+    createBlockContext,
+    getSelectionOffset,
+    isEmptyDialogueBlock,
+    isInsideParentheses,
+} from './context';
 
 const MAX_ACTION_INDENT = 3;
 

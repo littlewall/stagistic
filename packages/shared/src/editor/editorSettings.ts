@@ -13,8 +13,8 @@ import {
 
 type BlockSpacingSettings = {
     spacingBeforeEm?: number,
-    indentLeftPx?: number,
-    indentRightPx?: number,
+    indentLeftChars?: number,
+    indentRightChars?: number,
     fontSizePx?: number,
     lineHeight?: number,
 };
@@ -53,43 +53,63 @@ export type EditorSettingsOverride = Partial<{
 
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
     page: {
-        widthPx: 794,
-        heightPx: 1123,
-        marginTopPx: 95,
-        marginRightPx: 76,
-        marginBottomPx: 95,
-        marginLeftPx: 76,
-        pageGapPx: 28,
+        widthPx: 794, // A4 Width (8.27in * 96)
+        heightPx: 1123, // A4 Height (11.69in * 96)
+        marginTopPx: 96, // 1.0in
+        marginRightPx: 88, // ~0.92in (To fit 61 chars content)
+        marginBottomPx: 96, // 1.0in
+        marginLeftPx: 120, // 1.25in
+        pageGapPx: 32,
         pageBreakBackground: 'var(--color-surface)',
         contentMarginTopPx: 0,
         contentMarginBottomPx: 0,
     },
     typography: {
-        fontSizePx: 13,
-        lineHeight: 1.7,
+        fontSizePx: 16, // 12pt @ 96dpi (Results in ~9.6px char width for 10cpi)
+        lineHeight: 1.0, // 6 lines per inch (16px line height)
     },
     blocks: {
-        [ELEMENT_ACTION]: {},
-        [ELEMENT_SCENE_HEADING]: {},
+        [ELEMENT_ACTION]: {
+            spacingBeforeEm: 1.0,
+            lineHeight: 1.0,
+        },
+        [ELEMENT_SCENE_HEADING]: {
+            spacingBeforeEm: 2.0,
+            lineHeight: 1.0,
+        },
         [ELEMENT_CHARACTER]: {
-            spacingBeforeEm: 1.8,
-            indentLeftPx: 56,
+            spacingBeforeEm: 1.0,
+            lineHeight: 1.0,
+            indentLeftChars: 20, // ~2.0in from margin (3.25in from edge)
+            indentRightChars: 3, // ~0.3in from margin (1.45in from edge)
         },
         [ELEMENT_DUAL_DIALOGUE_CHARACTER]: {
-            spacingBeforeEm: 1.8,
-            indentLeftPx: 64,
+            spacingBeforeEm: 1.0,
+            lineHeight: 1.0,
+            indentLeftChars: 20,
+            indentRightChars: 3,
         },
         [ELEMENT_PARENTHETICAL]: {
-            indentLeftPx: 40,
-            indentRightPx: 24,
+            spacingBeforeEm: 0,
+            lineHeight: 1.0,
+            indentLeftChars: 16, // ~1.6in from margin
+            indentRightChars: 21, // ~2.1in from margin
         },
         [ELEMENT_DIALOGUE]: {
-            indentLeftPx: 24,
+            spacingBeforeEm: 0,
+            lineHeight: 1.0,
+            indentLeftChars: 10, // ~1.0in from margin (2.25in from edge)
+            indentRightChars: 3, // ~0.3in from margin (1.45in from edge)
         },
         [ELEMENT_TRANSITION]: {
-            spacingBeforeEm: 1.8,
+            spacingBeforeEm: 1.0,
+            lineHeight: 1.0,
+            indentRightChars: 5, // ~0.5in from margin
         },
-        [ELEMENT_LYRICS]: {},
+        [ELEMENT_LYRICS]: {
+            indentLeftChars: 10, // ~1.0in from margin (2.25in from edge)
+            indentRightChars: 10,
+        },
         [ELEMENT_CENTERED]: {},
     },
 };
