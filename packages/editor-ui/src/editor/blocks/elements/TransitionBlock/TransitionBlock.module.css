@@ -7,6 +7,6 @@
 }
 
 .transitionBlock {
-    --transition-gap: 1.8em;
+    --transition-gap: var(--editor-transition-gap, 1.8em);
     --block-controls-offset: var(--transition-gap);
 }

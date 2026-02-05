@@ -1,7 +1,7 @@
 .bar {
     display: flex;
-    align-items: center;
     gap: var(--space-3);
+    align-items: center;
 }
 
 .barSmall {
@@ -10,11 +10,11 @@
 
 .track {
     position: relative;
+    overflow: hidden;
     flex: 1;
     height: 8px;
-    border-radius: 999px;
     background: var(--color-accent);
-    overflow: hidden;
+    border-radius: 999px;
 }
 
 .trackIndeterminate {
@@ -23,21 +23,21 @@
 
 .fill {
     height: 100%;
-    border-radius: 999px;
     background: linear-gradient(90deg, #b38a5f 0%, #d1aa7d 50%, #f1d4b1 100%);
+    border-radius: 999px;
     transition: width 200ms ease;
 }
 
 .fillIndeterminate {
-    width: 35%;
     position: absolute;
     left: -35%;
+    width: 35%;
     animation: progress-wave 1.2s ease-in-out infinite;
 }
 
 .percent {
     min-width: 38px;
-    font-size: 0.85rem;
+    font-size: .85rem;
     font-weight: 600;
     color: var(--color-ink-muted);
     text-align: right;
@@ -46,13 +46,13 @@
 @keyframes progress-wave {
     0% {
         left: -35%;
-        opacity: 0.5;
+        opacity: .5;
     }
     50% {
         opacity: 1;
     }
     100% {
         left: 100%;
-        opacity: 0.5;
+        opacity: .5;
     }
 }

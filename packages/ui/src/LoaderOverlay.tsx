@@ -19,7 +19,11 @@ export function LoaderOverlay({
     hint,
 }: LoaderOverlayProps) {
     return (
-        <div className={styles.overlay} role="status" aria-live="polite">
+        <div
+            className={styles.overlay}
+            role="status"
+            aria-live="polite"
+        >
             <div className={styles.panel}>
                 <ProgressPanel
                     title={title}

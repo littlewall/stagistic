@@ -6,7 +6,7 @@
 }
 
 .dualCharacterBlock {
-    --dual-character-indent: 64px;
-    --character-gap: 1.8em;
+    --dual-character-indent: var(--editor-dual-character-indent, 64px);
+    --character-gap: var(--editor-dual-character-gap, var(--editor-character-gap, 1.8em));
     --block-controls-offset: var(--character-gap);
 }

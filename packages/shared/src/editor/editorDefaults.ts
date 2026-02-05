@@ -167,7 +167,10 @@ export const ensureSceneHeading = (
     options?: {activeBlockId?: string | null},
 ): ScriptDocument => {
     if (isScriptDocumentEmpty(value)) {
-        return createEmptyScriptDocument(options?.activeBlockId ?? createNodeId());
+        return createEmptyScriptDocument(
+            options?.activeBlockId ?? createNodeId(),
+            value?.attrs?.settings,
+        );
     }
 
     return value as ScriptDocument;

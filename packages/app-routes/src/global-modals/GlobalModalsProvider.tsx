@@ -9,8 +9,8 @@ import {
     ensureFountainBlockIds,
     ensureSceneHeading,
     getFirstBlockId,
-    scriptDocumentFromFountainAst,
     type ScriptDocument,
+    scriptDocumentFromFountainAst,
 } from '@stagistic/shared';
 import {
     ImportScriptModal,
