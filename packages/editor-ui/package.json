@@ -8,14 +8,19 @@
         "lint": "eslint . --ext ts,tsx"
     },
     "dependencies": {
-        "@platejs/layout": "^52.0.11",
-        "@platejs/selection": "^52.0.16",
         "@stagistic/editor-core": "workspace:*",
         "@stagistic/shared": "workspace:*",
+        "@tiptap/extension-bold": "^3.19.0",
+        "@tiptap/core": "^3.19.0",
+        "@tiptap/extension-document": "^3.19.0",
+        "@tiptap/extension-history": "^3.19.0",
+        "@tiptap/extension-italic": "^3.19.0",
+        "@tiptap/extension-text": "^3.19.0",
+        "@tiptap/extension-underline": "^3.19.0",
+        "@tiptap/pm": "^3.19.0",
+        "@tiptap/react": "^3.19.0",
         "clsx": "^2.1.1",
-        "iconoir-react": "^7.11.0",
-        "platejs": "^52.0.11",
-        "slate": "^0.112.0"
+        "iconoir-react": "^7.11.0"
     },
     "peerDependencies": {
         "react": "^19.0.0",

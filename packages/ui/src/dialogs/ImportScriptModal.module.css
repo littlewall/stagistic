@@ -57,15 +57,15 @@
 }
 
 .dropZone {
+    cursor: pointer;
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
     padding: var(--space-5);
+    text-align: center;
     background: var(--color-highlight);
     border: 1px dashed var(--color-divider);
     border-radius: var(--radius-sm);
-    text-align: center;
-    cursor: pointer;
     transition: border-color 150ms ease, background 150ms ease;
 }
 
@@ -85,13 +85,13 @@
 }
 
 .dropZoneHint {
-    color: var(--color-ink-muted);
     font-size: .9rem;
+    color: var(--color-ink-muted);
 }
 
 .error {
-    color: var(--color-danger);
     font-size: .9rem;
+    color: var(--color-danger);
 }
 
 .actions {

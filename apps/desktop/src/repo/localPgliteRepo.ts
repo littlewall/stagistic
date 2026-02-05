@@ -1,16 +1,18 @@
 import {dbQueries, type ScriptSummary} from '@stagistic/db';
-import type {SlateValue} from '@stagistic/shared';
+import {
+    LATEST_SCRIPT_SCHEMA_VERSION,
+    type ScriptDocument,
+} from '@stagistic/shared';
 import {uuidv7} from '@stagistic/shared';
 import type {ScriptRepository} from '@stagistic/sync-core';
 
 import {getLocalDb} from '~db';
 
-const LATEST_SCHEMA_VERSION = 1;
 const ENABLE_OUTBOX = false;
 
-const serializeSlateValue = (value: SlateValue) => JSON.stringify(value);
+const serializeDocument = (value: ScriptDocument) => JSON.stringify(value);
 
-const parseSlateValue = (value: string) => JSON.parse(value) as SlateValue;
+const parseDocument = (value: string) => JSON.parse(value) as ScriptDocument;
 
 export const createLocalPgliteRepository = (): ScriptRepository => {
     const dbPromise = getLocalDb();
@@ -48,7 +50,7 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
         return dbQueries.getScriptSummary(db, scriptId);
     };
 
-    const createScript = async (title: string, initialContent?: SlateValue) => {
+    const createScript = async (title: string, initialContent?: ScriptDocument) => {
         const db = await getDb();
         const id = uuidv7();
         const now = Date.now();
@@ -63,9 +65,9 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
         if (initialContent) {
             await dbQueries.insertLatest(db, {
                 scriptId: id,
-                contentJson: serializeSlateValue(initialContent),
+                contentJson: serializeDocument(initialContent),
                 updatedAt: now,
-                schemaVersion: LATEST_SCHEMA_VERSION,
+                schemaVersion: LATEST_SCRIPT_SCHEMA_VERSION,
             });
         }
 
@@ -103,19 +105,19 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
         const db = await getDb();
         const contentJson = await dbQueries.getLatestContent(db, scriptId);
 
-        return contentJson ? parseSlateValue(contentJson) : null;
+        return contentJson ? parseDocument(contentJson) : null;
     };
 
-    const saveLatest = async (scriptId: string, value: SlateValue) => {
+    const saveLatest = async (scriptId: string, value: ScriptDocument) => {
         const db = await getDb();
         const now = Date.now();
-        const contentJson = serializeSlateValue(value);
+        const contentJson = serializeDocument(value);
 
         await dbQueries.upsertLatest(db, {
             scriptId,
             contentJson,
             updatedAt: now,
-            schemaVersion: LATEST_SCHEMA_VERSION,
+            schemaVersion: LATEST_SCRIPT_SCHEMA_VERSION,
         });
 
         await dbQueries.updateScriptTimestamp(db, {
@@ -134,7 +136,7 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
         const db = await getDb();
         const contentJson = await dbQueries.getVersionContent(db, versionId);
 
-        return contentJson ? parseSlateValue(contentJson) : null;
+        return contentJson ? parseDocument(contentJson) : null;
     };
 
     const commitVersion = async (scriptId: string, message?: string) => {
@@ -152,9 +154,9 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
             id: versionId,
             scriptId,
             message: message ?? null,
-            contentJson: serializeSlateValue(latest),
+            contentJson: serializeDocument(latest),
             createdAt: now,
-            schemaVersion: LATEST_SCHEMA_VERSION,
+            schemaVersion: LATEST_SCRIPT_SCHEMA_VERSION,
         });
 
         await dbQueries.updateScriptTimestamp(db, {
