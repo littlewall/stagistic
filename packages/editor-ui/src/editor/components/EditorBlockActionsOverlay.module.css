@@ -1,19 +1,19 @@
 .overlay {
+    pointer-events: none;
     position: absolute;
     z-index: 4;
-    pointer-events: none;
 }
 
 .controls {
-    position: absolute;
-    left: 0;
-    top: 0;
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-1);
-    margin-left: calc(-1 * var(--block-controls-gutter, 32px));
-    transform: translate(-100%, -50%);
     pointer-events: auto;
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: translate(-100%, -50%);
+    display: inline-flex;
+    gap: var(--space-1);
+    align-items: center;
+    margin-left: calc(-1 * var(--block-controls-gutter, 32px));
 }
 
 .trigger {
@@ -29,8 +29,7 @@
     background: var(--color-surface);
     border: 1px solid var(--color-divider);
     border-radius: calc(8px * var(--size-scale));
-    box-shadow: 0 6px 14px rgba(40, 24, 12, 0.08);
-    transition: background 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+    transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
 
 .trigger:hover {
@@ -71,7 +70,6 @@
     background: var(--color-surface);
     border: 1px solid var(--color-divider);
     border-radius: calc(12px * var(--size-scale));
-    box-shadow: var(--shadow-popover);
 }
 
 .menuAbove {
@@ -93,7 +91,7 @@
     background: transparent;
     border: 1px solid transparent;
     border-radius: calc(10px * var(--size-scale));
-    transition: background 0.15s ease, box-shadow 0.15s ease;
+    transition: background .15s ease, box-shadow .15s ease;
 }
 
 .menuItem:hover {

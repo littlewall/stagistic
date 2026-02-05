@@ -39,7 +39,7 @@ const ensureNodeIds = (node: FountainJSONContent): [FountainJSONContent, boolean
     let nextNode = node;
 
     if (node.type === FOUNTAIN_BLOCK_NODE_NAME) {
-        const attrs = (node.attrs && typeof node.attrs === 'object') ? node.attrs : {};
+        const attrs = node.attrs && typeof node.attrs === 'object' ? node.attrs : {};
         const id = attrs.id;
 
         if (typeof id !== 'string' || id.length === 0) {
