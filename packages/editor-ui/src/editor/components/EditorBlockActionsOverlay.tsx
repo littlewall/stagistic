@@ -69,20 +69,28 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
     const updatePosition = useCallback(() => {
         const canvas = canvasRef.current;
 
-        if (!editor || !canvas) {
-            setOverlayState(prev => (prev ? null : prev));
+        // Check if editor is available and mounted
+        if (!editor || !editor.view || !canvas) {
+            setOverlayState(null);
 
             return;
         }
 
-        if (!editor.view.hasFocus() && !isMenuOpen) {
-            setOverlayState(prev => (prev ? null : prev));
+        try {
+            if (!editor.view.hasFocus() && !isMenuOpen) {
+                setOverlayState(null);
+
+                return;
+            }
+        } catch {
+            // Editor view may not be available
+            setOverlayState(null);
 
             return;
         }
 
         if (isSelectionAcrossBlocks(editor.state, FOUNTAIN_BLOCK_NODE_NAME)) {
-            setOverlayState(prev => (prev ? null : prev));
+            setOverlayState(null);
 
             return;
         }
@@ -90,7 +98,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
 
         if (!activeBlock) {
-            setOverlayState(prev => (prev ? null : prev));
+            setOverlayState(null);
 
             return;
         }
@@ -98,7 +106,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         const target = findBlockElement(editor, activeBlock.from);
 
         if (!target) {
-            setOverlayState(prev => (prev ? null : prev));
+            setOverlayState(null);
 
             return;
         }
@@ -285,7 +293,12 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
 
         schedule();
 
-        const resizeObserver = new ResizeObserver(schedule);
+        const resizeObserver = new ResizeObserver(() => {
+            // Check if menu is still mounted before scheduling update
+            if (menuRef.current) {
+                schedule();
+            }
+        });
 
         if (menuRef.current) {
             resizeObserver.observe(menuRef.current);
