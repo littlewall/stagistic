@@ -3,6 +3,7 @@ import {
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
+    ELEMENT_LYRICS,
     ELEMENT_PARENTHETICAL,
 } from '@stagistic/editor-core';
 import type {Editor} from '@tiptap/react';
@@ -12,6 +13,7 @@ import {
     type FountainBlockType,
     getActiveFountainBlockFromState,
     getNextTypeOnEnter,
+    normalizeFountainBlockType,
 } from '../fountainCore';
 import {
     insertActionBefore,
@@ -24,13 +26,70 @@ import {
     type BlockContext,
     createBlockContext,
     getSelectionOffset,
-    isEmptyDialogueBlock,
+    isEmptyDialogueLikeBlock,
     isInsideParentheses,
 } from './context';
 
+type HandlerMap<T> = Partial<Record<FountainBlockType, T>>;
+type DialogueLikeBlockType = typeof ELEMENT_DIALOGUE | typeof ELEMENT_LYRICS;
+type FountainBlockEntry = {
+    pos: number,
+    blockType: FountainBlockType,
+};
+
 const MAX_ACTION_INDENT = 3;
 
-type HandlerMap<T> = Partial<Record<FountainBlockType, T>>;
+const isDialogueLikeType = (blockType: FountainBlockType): blockType is DialogueLikeBlockType => {
+    return blockType === ELEMENT_DIALOGUE || blockType === ELEMENT_LYRICS;
+};
+
+const collectFountainBlocks = (editor: Editor) => {
+    const blocks: FountainBlockEntry[] = [];
+
+    editor.state.doc.descendants((node, pos) => {
+        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+            return true;
+        }
+
+        blocks.push({
+            pos,
+            blockType: normalizeFountainBlockType(node.attrs.blockType),
+        });
+
+        return false;
+    });
+
+    return blocks;
+};
+
+const findNearestDialogueLikeType = (
+    blocks: FountainBlockEntry[],
+    blockIndex: number,
+    direction: -1 | 1,
+): DialogueLikeBlockType | null => {
+    for (let index = blockIndex + direction; index >= 0 && index < blocks.length; index += direction) {
+        const {blockType} = blocks[index];
+
+        if (isDialogueLikeType(blockType)) {
+            return blockType;
+        }
+    }
+
+    return null;
+};
+
+const resolveParentheticalTabTarget = (editor: Editor, blockPos: number): DialogueLikeBlockType => {
+    const blocks = collectFountainBlocks(editor);
+    const blockIndex = blocks.findIndex(({pos}) => pos === blockPos);
+
+    if (blockIndex < 0) {
+        return ELEMENT_DIALOGUE;
+    }
+
+    return findNearestDialogueLikeType(blocks, blockIndex, -1)
+        ?? findNearestDialogueLikeType(blocks, blockIndex, 1)
+        ?? ELEMENT_DIALOGUE;
+};
 
 const enterHandlers: HandlerMap<(context: BlockContext) => boolean> = {
     [ELEMENT_CHARACTER]: context => {
@@ -42,6 +101,7 @@ const enterHandlers: HandlerMap<(context: BlockContext) => boolean> = {
     },
     [ELEMENT_DUAL_DIALOGUE_CHARACTER]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
     [ELEMENT_DIALOGUE]: context => splitBlockWithType(context.editor, ELEMENT_CHARACTER),
+    [ELEMENT_LYRICS]: context => splitBlockWithType(context.editor, ELEMENT_CHARACTER),
     [ELEMENT_PARENTHETICAL]: context => splitBlockWithType(context.editor, ELEMENT_CHARACTER),
 };
 
@@ -49,7 +109,11 @@ const shiftEnterHandlers: HandlerMap<(context: BlockContext) => boolean> = {
     [ELEMENT_CHARACTER]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
     [ELEMENT_DUAL_DIALOGUE_CHARACTER]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
     [ELEMENT_DIALOGUE]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
-    [ELEMENT_PARENTHETICAL]: context => splitBlockWithType(context.editor, ELEMENT_CHARACTER),
+    [ELEMENT_LYRICS]: context => splitBlockWithType(context.editor, ELEMENT_LYRICS),
+    [ELEMENT_PARENTHETICAL]: context => splitBlockWithType(
+        context.editor,
+        resolveParentheticalTabTarget(context.editor, context.block.pos),
+    ),
 };
 
 const handleActionTab = (context: BlockContext, event: KeyboardEvent) => {
@@ -86,7 +150,17 @@ const handleActionTab = (context: BlockContext, event: KeyboardEvent) => {
 };
 
 const tabHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => boolean> = {
+    [ELEMENT_CHARACTER]: (context, event) => {
+        event.preventDefault();
+
+        return updateBlockType(context.editor, ELEMENT_ACTION);
+    },
     [ELEMENT_DIALOGUE]: (context, event) => {
+        event.preventDefault();
+
+        return updateBlockType(context.editor, ELEMENT_PARENTHETICAL);
+    },
+    [ELEMENT_LYRICS]: (context, event) => {
         event.preventDefault();
 
         return updateBlockType(context.editor, ELEMENT_PARENTHETICAL);
@@ -94,7 +168,10 @@ const tabHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => b
     [ELEMENT_PARENTHETICAL]: (context, event) => {
         event.preventDefault();
 
-        return updateBlockType(context.editor, ELEMENT_DIALOGUE);
+        return updateBlockType(
+            context.editor,
+            resolveParentheticalTabTarget(context.editor, context.block.pos),
+        );
     },
     [ELEMENT_ACTION]: handleActionTab,
 };
@@ -228,7 +305,14 @@ export const handleEnter = (editor: Editor, event: KeyboardEvent) => {
         editor.commands.deleteSelection();
     }
 
-    if (isEmptyDialogueBlock(block)) {
+    if (
+        block.blockType === ELEMENT_PARENTHETICAL
+        && (block.node.textContent ?? '').trim().length === 0
+    ) {
+        return setBlockTypeWithSelection(editor, block, ELEMENT_CHARACTER);
+    }
+
+    if (isEmptyDialogueLikeBlock(block)) {
         return setBlockTypeWithSelection(editor, block, ELEMENT_CHARACTER);
     }
 
@@ -262,7 +346,9 @@ export const handleTab = (editor: Editor, event: KeyboardEvent) => {
         return handler(context, event);
     }
 
-    return false;
+    event.preventDefault();
+
+    return true;
 };
 
 export const handleKeyDown = (editor: Editor, event: KeyboardEvent) => {

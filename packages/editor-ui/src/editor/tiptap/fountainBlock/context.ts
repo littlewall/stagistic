@@ -1,4 +1,7 @@
-import {ELEMENT_DIALOGUE} from '@stagistic/editor-core';
+import {
+    ELEMENT_DIALOGUE,
+    ELEMENT_LYRICS,
+} from '@stagistic/editor-core';
 import type {Editor} from '@tiptap/react';
 
 import type {ActiveFountainBlock} from '../fountainCore';
@@ -40,5 +43,7 @@ export const isInsideParentheses = (text: string, offset: number) => {
     return lastOpen > lastClose;
 };
 
-export const isEmptyDialogueBlock = (block: ActiveFountainBlock) => block.blockType === ELEMENT_DIALOGUE
-    && (block.node.textContent ?? '').trim().length === 0;
+export const isEmptyDialogueLikeBlock = (block: ActiveFountainBlock) => (
+    block.blockType === ELEMENT_DIALOGUE
+    || block.blockType === ELEMENT_LYRICS
+) && (block.node.textContent ?? '').trim().length === 0;
