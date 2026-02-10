@@ -8,6 +8,12 @@ export {
 } from './atoms/typography/Typography';
 export {ImportScriptModal} from './dialogs/ImportScriptModal';
 export {NewScriptModal} from './dialogs/NewScriptModal';
+export {
+    ScriptSettingsModal,
+    type SettingsNavGroup,
+    type SettingsNavItem,
+    type SettingsNavSubItem,
+} from './dialogs/ScriptSettingsModal';
 export {EditorSidebar, type Scene} from './editor-panels/EditorSidebar';
 export {ProgressBar} from './feedback/ProgressBar';
 export {ProgressPanel} from './feedback/ProgressPanel';

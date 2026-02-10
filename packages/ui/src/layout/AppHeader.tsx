@@ -102,13 +102,13 @@ export const AppHeader = ({
     ]);
 
     return (
-        <header className={styles.header} data-tauri-drag-region>
-            <div className={styles.leftControls} data-tauri-drag-region>
+        <header className={styles.header}>
+            <div className={styles.dragRegion} data-tauri-drag-region aria-hidden="true" />
+            <div className={styles.leftControls}>
                 <Button
                     className={styles.iconButton}
                     onPress={onHome}
                     aria-label="Go to home"
-                    data-tauri-drag-region="false"
                 >
                     <Home className={styles.iconButtonGlyph} aria-hidden="true" />
                 </Button>
@@ -116,24 +116,22 @@ export const AppHeader = ({
                     className={styles.iconButton}
                     onPress={onNewScript}
                     aria-label="New script"
-                    data-tauri-drag-region="false"
                 >
                     <Plus className={styles.iconButtonGlyph} aria-hidden="true" />
                 </Button>
             </div>
-            <div className={styles.scriptControls} data-tauri-drag-region>
+            <div className={styles.scriptControls}>
                 {onBackToEditor && (
                     <Button
                         className={`${styles.menuTrigger} ${styles.backButton}`}
                         onPress={onBackToEditor}
-                        data-tauri-drag-region="false"
                     >
                         {backToEditorLabel}
                     </Button>
                 )}
                 {canShowScriptMenu && (
                     <MenuTrigger>
-                        <Button className={styles.menuTrigger} data-tauri-drag-region="false">
+                        <Button className={styles.menuTrigger}>
                             <span className={styles.menuTriggerLabel}>{script!.name}</span>
                             <NavArrowDown className={styles.caret} aria-hidden="true" />
                         </Button>
@@ -205,9 +203,9 @@ export const AppHeader = ({
                     </TooltipTrigger>
                 )}
             </div>
-            <div data-tauri-drag-region>
+            <div className={styles.rightControls}>
                 <MenuTrigger>
-                    <Button className={styles.avatarTrigger} data-tauri-drag-region="false">
+                    <Button className={styles.avatarTrigger}>
                         <UserCircle className={styles.avatarIcon} aria-hidden="true" />
                         <NavArrowDown className={styles.caret} aria-hidden="true" />
                     </Button>

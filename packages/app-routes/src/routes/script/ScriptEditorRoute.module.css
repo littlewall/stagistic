@@ -5,3 +5,42 @@
 .sidebarPlaceholder {
     height: 100%;
 }
+
+.panelStack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.panelTitle {
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.panelDescription {
+    color: var(--color-ink-muted);
+}
+
+.panelCaption {
+    color: var(--color-ink-muted);
+    font-size: .875rem;
+}
+
+.placeholderCard,
+.overrideCard {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-md);
+    background: var(--color-highlight);
+}
+
+.overrideLabel {
+    font-weight: 600;
+}
+
+.overrideHint {
+    color: var(--color-ink-muted);
+}

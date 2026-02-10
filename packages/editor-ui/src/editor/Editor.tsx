@@ -10,6 +10,7 @@ import {
     NavArrowLeft,
     NavArrowRight,
 } from 'iconoir-react';
+import clsx from 'clsx';
 import {
     type CSSProperties,
     type MouseEvent as ReactMouseEvent,
@@ -146,13 +147,13 @@ const Editor = ({
     const rootStyle = useMemo(() => ({
         ...editorStyle,
         '--editor-sidebar-width': sidebarWidth ?? 'calc(280px * var(--size-scale))',
-        '--toolbar-toggle-width': 'calc(44px * var(--size-scale))',
+        '--toolbar-toggle-width': 'calc(calc(26px * var(--size-scale)) + (var(--space-3) * 2))',
         '--left-toolbar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
         '--right-toolbar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
         '--left-toolbar-divider-opacity': isLeftSidebarOpen ? '1' : '0',
         '--right-toolbar-divider-opacity': isRightSidebarOpen ? '1' : '0',
-        '--left-sidebar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : '0px',
-        '--right-sidebar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : '0px',
+        '--left-sidebar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
+        '--right-sidebar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
     }) as CSSProperties, [
         editorStyle,
         isLeftSidebarOpen,
@@ -520,11 +521,13 @@ const Editor = ({
                             aria-pressed={isLeftSidebarOpen}
                             onMouseDown={handleLeftSidebarToggleMouseDown}
                         >
-                            {isLeftSidebarOpen ? (
-                                <NavArrowLeft aria-hidden="true" />
-                            ) : (
-                                <NavArrowRight aria-hidden="true" />
-                            )}
+                            <NavArrowLeft
+                                aria-hidden="true"
+                                className={clsx(
+                                    styles.sidebarToggleIcon,
+                                    !isLeftSidebarOpen && styles.sidebarToggleIconFlipped,
+                                )}
+                            />
                         </button>
                     )}
                 </div>
@@ -542,11 +545,13 @@ const Editor = ({
                             aria-pressed={isRightSidebarOpen}
                             onMouseDown={handleRightSidebarToggleMouseDown}
                         >
-                            {isRightSidebarOpen ? (
-                                <NavArrowRight aria-hidden="true" />
-                            ) : (
-                                <NavArrowLeft aria-hidden="true" />
-                            )}
+                            <NavArrowRight
+                                aria-hidden="true"
+                                className={clsx(
+                                    styles.sidebarToggleIcon,
+                                    !isRightSidebarOpen && styles.sidebarToggleIconFlipped,
+                                )}
+                            />
                         </button>
                     )}
                 </div>
