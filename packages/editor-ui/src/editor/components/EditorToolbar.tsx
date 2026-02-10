@@ -248,62 +248,67 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
                     <Underline aria-hidden="true" />
                 </button>
             </div>
-            <div className={clsx(styles.group, styles.dropdown)} ref={dropdownRef}>
-                <button
-                    className={styles.selectButton}
-                    type="button"
-                    aria-label="Change block type"
-                    aria-expanded={isOpen}
-                    disabled={!activeBlockInfo}
-                    onMouseDown={handleSelectMouseDown}
+            <div className={styles.rightGroup}>
+                <div
+                    className={clsx(styles.group, styles.dropdown)}
+                    ref={dropdownRef}
                 >
-                    <span className={clsx(styles.selectIcon, !activeBlockInfo?.icon && styles.selectIconMuted)}>
-                        {activeBlockInfo?.icon ?? (
-                            <svg
-                                viewBox="0 0 24 24"
-                                aria-hidden="true"
-                                focusable="false"
-                            >
-                                <path d="M6 12h12" />
-                            </svg>
-                        )}
-                    </span>
-                    <span className={styles.selectLabel}>
-                        {activeBlockInfo?.label ?? 'Select block in editor'}
-                    </span>
-                    <svg
-                        viewBox="0 0 24 24"
-                        aria-hidden="true"
-                        focusable="false"
-                        className={styles.chevron}
+                    <button
+                        className={styles.selectButton}
+                        type="button"
+                        aria-label="Change block type"
+                        aria-expanded={isOpen}
+                        disabled={!activeBlockInfo}
+                        onMouseDown={handleSelectMouseDown}
                     >
-                        <path d="m6 9 6 6 6-6" />
-                    </svg>
-                </button>
-                {isOpen && (
-                    <div className={styles.menu} role="menu">
-                        {FOUNTAIN_BLOCKS.map(option => (
-                            <button
-                                key={option.type}
-                                type="button"
-                                role="menuitem"
-                                className={clsx(
-                                    styles.menuItem,
-                                    option.type === activeBlockInfo?.type && styles.menuItemActive,
-                                )}
-                                aria-label={`Set block type to ${option.label}`}
-                                onMouseDown={event => handleMenuItemMouseDown(option.type, event)}
-                            >
-                                <span className={styles.icon}>
-                                    {BLOCK_ICONS[option.type]}
-                                </span>
-                                <span className={styles.menuLabel}>
-                                    {option.label}
-                                </span>
-                            </button>
-                        ))}
-                    </div>
-                )}
+                        <span className={clsx(styles.selectIcon, !activeBlockInfo?.icon && styles.selectIconMuted)}>
+                            {activeBlockInfo?.icon ?? (
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                    focusable="false"
+                                >
+                                    <path d="M6 12h12" />
+                                </svg>
+                            )}
+                        </span>
+                        <span className={styles.selectLabel}>
+                            {activeBlockInfo?.label ?? 'Select block in editor'}
+                        </span>
+                        <svg
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                            focusable="false"
+                            className={styles.chevron}
+                        >
+                            <path d="m6 9 6 6 6-6" />
+                        </svg>
+                    </button>
+                    {isOpen && (
+                        <div className={styles.menu} role="menu">
+                            {FOUNTAIN_BLOCKS.map(option => (
+                                <button
+                                    key={option.type}
+                                    type="button"
+                                    role="menuitem"
+                                    className={clsx(
+                                        styles.menuItem,
+                                        option.type === activeBlockInfo?.type && styles.menuItemActive,
+                                    )}
+                                    aria-label={`Set block type to ${option.label}`}
+                                    onMouseDown={event => handleMenuItemMouseDown(option.type, event)}
+                                >
+                                    <span className={styles.icon}>
+                                        {BLOCK_ICONS[option.type]}
+                                    </span>
+                                    <span className={styles.menuLabel}>
+                                        {option.label}
+                                    </span>
+                                </button>
+                            ))}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );

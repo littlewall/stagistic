@@ -3,11 +3,12 @@ import {
     AppHeader,
     AppLayout,
     EditorSidebar,
-    ProgressPanel,
+    LoaderOverlay,
 } from '@stagistic/ui';
 import {
     useCallback,
     useMemo,
+    useState,
 } from 'react';
 import {
     useNavigate,
@@ -19,11 +20,14 @@ import styles from './ScriptEditorRoute.module.css';
 import {useScriptEditorController} from './useScriptEditorController';
 
 const AUTOSAVE_DELAY_MS = 1500;
+const SIDEBAR_WIDTH = 'calc(280px * var(--size-scale))';
 
 export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
     const {scriptId} = useParams();
     const {openNewScript} = useGlobalModals();
+    const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
+    const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
     const {
         currentScript,
         recentScripts,
@@ -71,8 +75,26 @@ export const ScriptEditorRoute = () => {
         openNewScript,
     ]);
     const handleSceneClick = useCallback(() => {}, []);
+    const handleToggleLeftSidebar = useCallback(() => {
+        setIsLeftSidebarOpen(previous => !previous);
+    }, []);
+    const handleToggleRightSidebar = useCallback(() => {
+        setIsRightSidebarOpen(previous => !previous);
+    }, []);
 
     const showEditorLoader = editorLoadState.isLoading || !initialValue;
+
+    if (showEditorLoader) {
+        return (
+            <LoaderOverlay
+                title="Připravuji editor"
+                subtitle="Načítám scénář a editorové prostředí"
+                progress={editorLoadState.progress}
+                statusText={editorLoadState.statusText}
+                hint={storageError ?? 'Prosím vyčkejte, připravujeme editor.'}
+            />
+        );
+    }
 
     return (
         <AppLayout
@@ -87,32 +109,37 @@ export const ScriptEditorRoute = () => {
                     onMenuAction={handleMenuAction}
                 />
             )}
-            sidebar={<EditorSidebar scenes={scenes} onSceneClick={handleSceneClick} />}
         >
             {storageError ? (
                 <div role="alert" style={{padding: '12px 20px'}}>
                     {storageError}
                 </div>
             ) : null}
-            {showEditorLoader ? (
-                <div className={styles.editorLoading}>
-                    <ProgressPanel
-                        title="Připravuji editor"
-                        subtitle="Načítám scénář a editorové prostředí"
-                        progress={editorLoadState.progress}
-                        statusText={editorLoadState.statusText}
+            <FountainEditor
+                key={currentScript?.id ?? 'editor'}
+                initialValue={initialValue}
+                onAutoSave={handleAutoSave}
+                onManualSave={handleManualSave}
+                autoSaveDelayMs={AUTOSAVE_DELAY_MS}
+                autoFocus={shouldAutoFocus}
+                leftSidebarToggle={{
+                    isOpen: isLeftSidebarOpen,
+                    onToggle: handleToggleLeftSidebar,
+                }}
+                rightSidebarToggle={{
+                    isOpen: isRightSidebarOpen,
+                    onToggle: handleToggleRightSidebar,
+                }}
+                leftSidebar={<div className={styles.sidebarPlaceholder} />}
+                rightSidebar={(
+                    <EditorSidebar
+                        scenes={scenes}
+                        onSceneClick={handleSceneClick}
+                        className={styles.sidebarContent}
                     />
-                </div>
-            ) : (
-                <FountainEditor
-                    key={currentScript?.id ?? 'editor'}
-                    initialValue={initialValue}
-                    onAutoSave={handleAutoSave}
-                    onManualSave={handleManualSave}
-                    autoSaveDelayMs={AUTOSAVE_DELAY_MS}
-                    autoFocus={shouldAutoFocus}
-                />
-            )}
+                )}
+                sidebarWidth={SIDEBAR_WIDTH}
+            />
         </AppLayout>
     );
 };

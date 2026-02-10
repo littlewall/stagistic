@@ -2,8 +2,150 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    gap: var(--space-4);
+    min-height: 0;
+    background: var(--color-surface);
+}
+
+.toolbarRow {
+    display: grid;
+    grid-template-columns: var(--left-toolbar-size) minmax(0, 1fr) var(--right-toolbar-size);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-divider);
+    transition: grid-template-columns .24s ease;
+}
+
+.toolbarSideLeft {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+    padding: var(--space-2) var(--space-3);
+}
+
+.toolbarSideLeft::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 1px;
+    opacity: var(--left-toolbar-divider-opacity, 0);
+    background: var(--color-divider);
+    transition: opacity .24s ease;
+}
+
+.toolbarSideRight {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+    padding: var(--space-2) var(--space-3);
+}
+
+.toolbarSideRight::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 1px;
+    opacity: var(--right-toolbar-divider-opacity, 0);
+    background: var(--color-divider);
+    transition: opacity .24s ease;
+}
+
+.sidebarToggleButton {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(26px * var(--size-scale));
+    height: calc(26px * var(--size-scale));
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: calc(7px * var(--size-scale));
+    transition: background .15s ease, border-color .15s ease;
+
+    &:hover {
+        background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    }
+
+    & svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
+}
+
+.toolbarCenter {
+    overflow: hidden;
+    min-width: 0;
+    padding: 0 var(--space-6);
+}
+
+.toolbarCenterInner {
+    width: min(100%, var(--editor-page-width, 960px));
+    margin: 0 auto;
+}
+
+.contentRow {
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: var(--left-sidebar-size) minmax(0, 1fr) var(--right-sidebar-size);
+    flex: 1;
+    min-height: 0;
+    transition: grid-template-columns .24s ease;
+}
+
+.canvasHost {
+    overflow: hidden;
+    min-width: 0;
     min-height: 0;
     padding: 0 var(--space-6) var(--space-10);
+}
+
+.sidebarLeftHidden,
+.sidebarRightHidden {
+    pointer-events: none;
+    overflow: hidden;
+    min-height: 0;
+    visibility: hidden;
+    opacity: 0;
     background: var(--color-surface);
+}
+
+.sidebarLeftOpen,
+.sidebarRightOpen {
+    overflow: hidden;
+    min-height: 0;
+    visibility: visible;
+    opacity: 1;
+    background: var(--color-surface);
+}
+
+.sidebarLeftHidden,
+.sidebarLeftOpen {
+    border-right: 1px solid var(--color-divider);
+}
+
+.sidebarRightHidden,
+.sidebarRightOpen {
+    border-left: 1px solid var(--color-divider);
+}
+
+@media (max-width: 900px) {
+    .toolbarCenter {
+        padding: 0 var(--space-4);
+    }
+
+    .canvasHost {
+        padding: 0 var(--space-4) var(--space-8);
+    }
 }
