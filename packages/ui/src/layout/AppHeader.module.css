@@ -1,4 +1,6 @@
 .header {
+    app-region: drag;
+    -webkit-app-region: drag;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
@@ -23,6 +25,8 @@
 .menuTrigger,
 .avatarTrigger,
 .iconButton {
+    app-region: no-drag;
+    -webkit-app-region: no-drag;
     cursor: pointer;
     display: inline-flex;
     gap: var(--space-2);
