@@ -23,6 +23,7 @@ import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
+    isSelectionAcrossBlocks,
 } from '../tiptap/fountainCore';
 import styles from './EditorToolbar.module.css';
 
@@ -34,6 +35,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState(false);
+    const [hasEditorFocus, setHasEditorFocus] = useState(() => Boolean(editor?.isFocused));
 
     const toolbarState = useEditorState({
         editor,
@@ -50,9 +52,13 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
                 stateEditor.state,
                 FOUNTAIN_BLOCK_NODE_NAME,
             );
+            const hasSingleBlockSelection = !isSelectionAcrossBlocks(
+                stateEditor.state,
+                FOUNTAIN_BLOCK_NODE_NAME,
+            );
 
             return {
-                activeType: activeBlock?.blockType ?? null,
+                activeType: hasSingleBlockSelection ? activeBlock?.blockType ?? null : null,
                 canRedo: redoDepth(stateEditor.state) > 0,
                 canUndo: undoDepth(stateEditor.state) > 0,
             };
@@ -83,10 +89,37 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             label: option?.label ?? 'Block',
         };
     }, [activeType]);
+    const canChangeBlockType = Boolean(activeBlockInfo) && hasEditorFocus;
+    const visibleBlockInfo = canChangeBlockType ? activeBlockInfo : null;
 
     useEffect(() => {
         setIsOpen(false);
     }, [activeType]);
+
+    useEffect(() => {
+        setHasEditorFocus(Boolean(editor?.isFocused));
+
+        if (!editor) {
+            return;
+        }
+
+        const handleFocus = () => setHasEditorFocus(true);
+        const handleBlur = () => setHasEditorFocus(false);
+
+        editor.on('focus', handleFocus);
+        editor.on('blur', handleBlur);
+
+        return () => {
+            editor.off('focus', handleFocus);
+            editor.off('blur', handleBlur);
+        };
+    }, [editor]);
+
+    useEffect(() => {
+        if (!canChangeBlockType && isOpen) {
+            setIsOpen(false);
+        }
+    }, [canChangeBlockType, isOpen]);
 
     useEffect(() => {
         if (toolbarRef.current) {
@@ -171,12 +204,12 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
     }, [editor]);
     const handleSelectMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        if (!activeBlockInfo) {
+        if (!canChangeBlockType) {
             return;
         }
 
         setIsOpen(prev => !prev);
-    }, [activeBlockInfo]);
+    }, [canChangeBlockType]);
     const handleMenuItemMouseDown = useCallback((
         optionType: (typeof FOUNTAIN_BLOCKS)[number]['type'],
         event: ReactMouseEvent<HTMLButtonElement>,
@@ -258,11 +291,11 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
                         type="button"
                         aria-label="Change block type"
                         aria-expanded={isOpen}
-                        disabled={!activeBlockInfo}
+                        disabled={!canChangeBlockType}
                         onMouseDown={handleSelectMouseDown}
                     >
-                        <span className={clsx(styles.selectIcon, !activeBlockInfo?.icon && styles.selectIconMuted)}>
-                            {activeBlockInfo?.icon ?? (
+                        <span className={clsx(styles.selectIcon, !visibleBlockInfo?.icon && styles.selectIconMuted)}>
+                            {visibleBlockInfo?.icon ?? (
                                 <svg
                                     viewBox="0 0 24 24"
                                     aria-hidden="true"
@@ -273,7 +306,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
                             )}
                         </span>
                         <span className={styles.selectLabel}>
-                            {activeBlockInfo?.label ?? 'Select block in editor'}
+                            {visibleBlockInfo?.label ?? 'Select block in editor'}
                         </span>
                         <svg
                             viewBox="0 0 24 24"
