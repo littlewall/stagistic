@@ -1,6 +1,5 @@
 .header {
-    app-region: drag;
-    -webkit-app-region: drag;
+    position: relative;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
     align-items: center;
@@ -12,21 +11,33 @@
     border-bottom: 1px solid var(--color-divider);
 }
 
+.dragRegion {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+
 :global(.platform-macos) .header {
     padding-left: calc(var(--space-4) + var(--traffic-light-space));
+}
+
+.leftControls,
+.scriptControls,
+.rightControls {
+    position: relative;
+    z-index: 1;
 }
 
 .leftControls {
     display: inline-flex;
     gap: var(--space-2);
     align-items: center;
+    justify-self: start;
 }
 
 .menuTrigger,
 .avatarTrigger,
 .iconButton {
-    app-region: no-drag;
-    -webkit-app-region: no-drag;
     cursor: pointer;
     display: inline-flex;
     gap: var(--space-2);
@@ -37,7 +48,7 @@
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
-    transition: all .15s ease;
+    transition: background .12s ease, border-color .12s ease, color .12s ease;
 
     &:focus {
         border-color: transparent;
@@ -73,6 +84,14 @@
     gap: var(--space-2);
     align-items: center;
     justify-content: center;
+    justify-self: center;
+    width: max-content;
+}
+
+.rightControls {
+    display: inline-flex;
+    align-items: center;
+    justify-self: end;
 }
 
 .scriptStatus {

@@ -84,6 +84,15 @@
     }
 }
 
+.sidebarToggleIcon {
+    transform-origin: center;
+    transform: rotate(0deg);
+}
+
+.sidebarToggleIconFlipped {
+    transform: rotate(180deg);
+}
+
 .toolbarCenter {
     overflow: hidden;
     min-width: 0;
