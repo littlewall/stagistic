@@ -7,10 +7,18 @@ import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
 import {type Editor as TiptapEditor, useEditor} from '@tiptap/react';
 import {
+    NavArrowLeft,
+    NavArrowRight,
+} from 'iconoir-react';
+import {
+    type CSSProperties,
+    type MouseEvent as ReactMouseEvent,
+    type ReactNode,
     useCallback,
     useEffect,
     useMemo,
     useRef,
+    useState,
 } from 'react';
 
 import {EditorCanvas} from './components/EditorCanvas';
@@ -66,6 +74,17 @@ type EditorProps = {
     autoSaveDelayMs?: number,
     autoFocus?: boolean,
     settings?: EditorSettingsOverride,
+    leftSidebarToggle?: {
+        isOpen: boolean,
+        onToggle: () => void,
+    },
+    rightSidebarToggle?: {
+        isOpen: boolean,
+        onToggle: () => void,
+    },
+    leftSidebar?: ReactNode,
+    rightSidebar?: ReactNode,
+    sidebarWidth?: string,
 };
 
 const useLatestRef = <T,>(value: T) => {
@@ -87,16 +106,25 @@ const Editor = ({
     autoSaveDelayMs,
     autoFocus,
     settings,
+    leftSidebarToggle,
+    rightSidebarToggle,
+    leftSidebar,
+    rightSidebar,
+    sidebarWidth,
 }: EditorProps) => {
     const initialSerialized = useMemo(() => serializeValue(initialValue), [initialValue]);
     const sizeScale = useMemo(() => getSizeScale(), []);
+    const [responsiveScale, setResponsiveScale] = useState(1);
+    const rootRef = useRef<HTMLDivElement | null>(null);
+    const canvasHostRef = useRef<HTMLDivElement | null>(null);
     const resolvedSettings = useMemo(
         () => resolveEditorSettings(settings, initialValue.attrs?.settings),
         [initialSerialized, settings],
     );
+    const renderScale = useMemo(() => sizeScale * responsiveScale, [responsiveScale, sizeScale]);
     const editorStyle = useMemo(
-        () => getEditorCssVars(resolvedSettings, sizeScale),
-        [resolvedSettings, sizeScale],
+        () => getEditorCssVars(resolvedSettings, renderScale),
+        [renderScale, resolvedSettings],
     );
     const paginationExtension = useMemo(
         () => createPaginationExtension(resolvedSettings, sizeScale),
@@ -113,6 +141,24 @@ const Editor = ({
     const onAutoSaveRef = useLatestRef(onAutoSave);
     const onManualSaveRef = useLatestRef(onManualSave);
     const onDirtyChangeRef = useLatestRef(onDirtyChange);
+    const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;
+    const isRightSidebarOpen = rightSidebarToggle?.isOpen ?? false;
+    const rootStyle = useMemo(() => ({
+        ...editorStyle,
+        '--editor-sidebar-width': sidebarWidth ?? 'calc(280px * var(--size-scale))',
+        '--toolbar-toggle-width': 'calc(44px * var(--size-scale))',
+        '--left-toolbar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
+        '--right-toolbar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
+        '--left-toolbar-divider-opacity': isLeftSidebarOpen ? '1' : '0',
+        '--right-toolbar-divider-opacity': isRightSidebarOpen ? '1' : '0',
+        '--left-sidebar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : '0px',
+        '--right-sidebar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : '0px',
+    }) as CSSProperties, [
+        editorStyle,
+        isLeftSidebarOpen,
+        isRightSidebarOpen,
+        sidebarWidth,
+    ]);
 
     const updateDirty = useCallback((nextDirty: boolean) => {
         if (dirtyRef.current === nextDirty) {
@@ -246,12 +292,68 @@ const Editor = ({
     }, [initialDoc, paginationExtension]);
 
     useEffect(() => {
+        const rootElement = rootRef.current;
+        const canvasHostElement = canvasHostRef.current;
+
+        if (!rootElement || !canvasHostElement) {
+            return;
+        }
+
+        const pageWidthPx = resolvedSettings.page.widthPx * sizeScale;
+
+        if (!Number.isFinite(pageWidthPx) || pageWidthPx <= 0) {
+            setResponsiveScale(1);
+
+            return;
+        }
+
+        const updateScale = () => {
+            const availableWidth = Math.max(0, canvasHostElement.clientWidth);
+            const nextScale = Math.min(1, availableWidth / pageWidthPx);
+
+            setResponsiveScale(prev => {
+                if (Math.abs(prev - nextScale) < 0.001) {
+                    return prev;
+                }
+
+                return nextScale;
+            });
+        };
+
+        updateScale();
+
+        if (typeof ResizeObserver === 'undefined') {
+            window.addEventListener('resize', updateScale);
+
+            return () => {
+                window.removeEventListener('resize', updateScale);
+            };
+        }
+
+        const observer = new ResizeObserver(() => {
+            updateScale();
+        });
+
+        observer.observe(rootElement);
+        observer.observe(canvasHostElement);
+
+        return () => {
+            observer.disconnect();
+        };
+    }, [
+        isLeftSidebarOpen,
+        isRightSidebarOpen,
+        resolvedSettings.page.widthPx,
+        sizeScale,
+    ]);
+
+    useEffect(() => {
         if (!editor) {
             return;
         }
 
         const {page, typography} = resolvedSettings;
-        const scaleValue = (value: number) => value * sizeScale;
+        const scaleValue = (value: number) => value * renderScale;
         const lineHeightPx = scaleValue(typography.fontSizePx * typography.lineHeight);
 
         // Cast to access the custom command from the pagination extension
@@ -282,8 +384,8 @@ const Editor = ({
         });
     }, [
         editor,
+        renderScale,
         resolvedSettings,
-        sizeScale,
     ]);
 
     useEffect(() => {
@@ -392,14 +494,86 @@ const Editor = ({
         };
     }, [clearAutosaveTimer]);
 
+    const handleLeftSidebarToggleMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        leftSidebarToggle?.onToggle();
+    }, [leftSidebarToggle]);
+
+    const handleRightSidebarToggleMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        rightSidebarToggle?.onToggle();
+    }, [rightSidebarToggle]);
+
     return (
-        <div className={styles.root}>
-            <EditorToolbar editor={editor} />
-            <EditorCanvas
-                editor={editor}
-                autoFocus={autoFocus}
-                style={editorStyle}
-            />
+        <div
+            className={styles.root}
+            ref={rootRef}
+            style={rootStyle}
+        >
+            <div className={styles.toolbarRow}>
+                <div className={styles.toolbarSideLeft}>
+                    {leftSidebarToggle && (
+                        <button
+                            className={styles.sidebarToggleButton}
+                            type="button"
+                            aria-label={isLeftSidebarOpen ? 'Hide left sidebar' : 'Show left sidebar'}
+                            aria-pressed={isLeftSidebarOpen}
+                            onMouseDown={handleLeftSidebarToggleMouseDown}
+                        >
+                            {isLeftSidebarOpen ? (
+                                <NavArrowLeft aria-hidden="true" />
+                            ) : (
+                                <NavArrowRight aria-hidden="true" />
+                            )}
+                        </button>
+                    )}
+                </div>
+                <div className={styles.toolbarCenter}>
+                    <div className={styles.toolbarCenterInner}>
+                        <EditorToolbar editor={editor} />
+                    </div>
+                </div>
+                <div className={styles.toolbarSideRight}>
+                    {rightSidebarToggle && (
+                        <button
+                            className={styles.sidebarToggleButton}
+                            type="button"
+                            aria-label={isRightSidebarOpen ? 'Hide right sidebar' : 'Show right sidebar'}
+                            aria-pressed={isRightSidebarOpen}
+                            onMouseDown={handleRightSidebarToggleMouseDown}
+                        >
+                            {isRightSidebarOpen ? (
+                                <NavArrowRight aria-hidden="true" />
+                            ) : (
+                                <NavArrowLeft aria-hidden="true" />
+                            )}
+                        </button>
+                    )}
+                </div>
+            </div>
+            <div className={styles.contentRow}>
+                <aside
+                    className={isLeftSidebarOpen ? styles.sidebarLeftOpen : styles.sidebarLeftHidden}
+                    aria-hidden={!isLeftSidebarOpen}
+                >
+                    {leftSidebar}
+                </aside>
+                <div
+                    className={styles.canvasHost}
+                    ref={canvasHostRef}
+                >
+                    <EditorCanvas
+                        editor={editor}
+                        autoFocus={autoFocus}
+                    />
+                </div>
+                <aside
+                    className={isRightSidebarOpen ? styles.sidebarRightOpen : styles.sidebarRightHidden}
+                    aria-hidden={!isRightSidebarOpen}
+                >
+                    {rightSidebar}
+                </aside>
+            </div>
         </div>
     );
 };
