@@ -103,7 +103,7 @@ export const AppHeader = ({
 
     return (
         <header className={styles.header} data-tauri-drag-region>
-            <div className={styles.leftControls}>
+            <div className={styles.leftControls} data-tauri-drag-region>
                 <Button
                     className={styles.iconButton}
                     onPress={onHome}
@@ -121,7 +121,7 @@ export const AppHeader = ({
                     <Plus className={styles.iconButtonGlyph} aria-hidden="true" />
                 </Button>
             </div>
-            <div className={styles.scriptControls}>
+            <div className={styles.scriptControls} data-tauri-drag-region>
                 {onBackToEditor && (
                     <Button
                         className={`${styles.menuTrigger} ${styles.backButton}`}
@@ -205,23 +205,25 @@ export const AppHeader = ({
                     </TooltipTrigger>
                 )}
             </div>
-            <MenuTrigger>
-                <Button className={styles.avatarTrigger} data-tauri-drag-region="false">
-                    <UserCircle className={styles.avatarIcon} aria-hidden="true" />
-                    <NavArrowDown className={styles.caret} aria-hidden="true" />
-                </Button>
-                <Popover className={styles.menuPopover} placement="bottom end">
-                    <Menu className={styles.menu}>
-                        <MenuItem className={styles.menuItem} id="profile">
-                            Account settings
-                        </MenuItem>
-                        <Separator className={styles.menuSeparator} />
-                        <MenuItem className={styles.menuItem} id="logout">
-                            Sign out
-                        </MenuItem>
-                    </Menu>
-                </Popover>
-            </MenuTrigger>
+            <div data-tauri-drag-region>
+                <MenuTrigger>
+                    <Button className={styles.avatarTrigger} data-tauri-drag-region="false">
+                        <UserCircle className={styles.avatarIcon} aria-hidden="true" />
+                        <NavArrowDown className={styles.caret} aria-hidden="true" />
+                    </Button>
+                    <Popover className={styles.menuPopover} placement="bottom end">
+                        <Menu className={styles.menu}>
+                            <MenuItem className={styles.menuItem} id="profile">
+                                Account settings
+                            </MenuItem>
+                            <Separator className={styles.menuSeparator} />
+                            <MenuItem className={styles.menuItem} id="logout">
+                                Sign out
+                            </MenuItem>
+                        </Menu>
+                    </Popover>
+                </MenuTrigger>
+            </div>
         </header>
     );
 };
