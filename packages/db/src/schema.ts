@@ -1,9 +1,11 @@
 import {
     bigint,
+    boolean,
     index,
     integer,
     pgTable,
     text,
+    uniqueIndex,
 } from 'drizzle-orm/pg-core';
 
 export const scripts = pgTable('scripts', {
@@ -50,9 +52,60 @@ export const syncOutbox = pgTable('sync_outbox', {
     status: text('status').notNull().default('pending'),
 });
 
+export const scriptConfigs = pgTable(
+    'script_configs',
+    {
+        id: text('id').primaryKey(),
+        scriptId: text('script_id')
+            .notNull()
+            .references(() => scripts.id, {onDelete: 'cascade'}),
+        namespace: text('namespace').notNull(),
+        payloadJson: text('payload_json'),
+        createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+        updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+        schemaVersion: integer('schema_version').notNull().default(1),
+    },
+    table => ({
+        scriptNamespaceUniqueIdx: uniqueIndex('script_configs_script_namespace_unique_idx')
+            .on(table.scriptId, table.namespace),
+        scriptIdIdx: index('script_configs_script_id_idx').on(table.scriptId),
+    }),
+);
+
+export const scriptConfigBlocks = pgTable(
+    'script_config_blocks',
+    {
+        id: text('id').primaryKey(),
+        configId: text('config_id')
+            .notNull()
+            .references(() => scriptConfigs.id, {onDelete: 'cascade'}),
+        blockType: text('block_type').notNull(),
+        spacingBeforeMillis: integer('spacing_before_millis'),
+        lineHeightMillis: integer('line_height_millis'),
+        indentLeftChars: integer('indent_left_chars'),
+        indentRightChars: integer('indent_right_chars'),
+        shortcut: text('shortcut'),
+        nextElement: text('next_element'),
+        textAlign: text('text_align'),
+        casing: text('casing'),
+        isBold: boolean('is_bold'),
+        isItalic: boolean('is_italic'),
+        isUnderline: boolean('is_underline'),
+        createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+        updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+    },
+    table => ({
+        configBlockTypeUniqueIdx: uniqueIndex('script_config_blocks_config_block_type_unique_idx')
+            .on(table.configId, table.blockType),
+        configIdIdx: index('script_config_blocks_config_id_idx').on(table.configId),
+    }),
+);
+
 export const dbSchema = {
     scripts,
     scriptLatest,
     scriptVersions,
     syncOutbox,
+    scriptConfigs,
+    scriptConfigBlocks,
 };

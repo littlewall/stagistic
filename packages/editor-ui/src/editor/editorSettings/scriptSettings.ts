@@ -5,28 +5,26 @@ export const stripScriptSettings = (value: ScriptDocument): ScriptDocument => {
         return value;
     }
 
-    const {settings, ...restAttrs} = value.attrs ?? {};
+    const restAttrs = {
+        ...value.attrs,
+    };
 
-    // If no settings exist, return the original value to avoid creating new objects
-    if (!settings || Object.keys(settings).length === 0) {
-        const hasOtherAttrs = Object.keys(restAttrs).length > 0;
+    delete restAttrs.settings;
 
-        if (!hasOtherAttrs) {
-            // Only type and content, no attrs needed
-            return {
-                type: value.type,
-                content: value.content,
-            };
-        }
+    const hasOtherAttrs = Object.keys(restAttrs).length > 0;
 
+    if (!hasOtherAttrs) {
         return {
             type: value.type,
             content: value.content,
-            attrs: restAttrs,
         };
     }
 
-    return value;
+    return {
+        type: value.type,
+        content: value.content,
+        attrs: restAttrs,
+    };
 };
 
 export const applyScriptSettings = (

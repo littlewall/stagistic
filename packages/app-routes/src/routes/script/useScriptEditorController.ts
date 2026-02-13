@@ -4,6 +4,7 @@ import {
     useScriptSummary,
 } from '@stagistic/app-core';
 import {
+    type EditorSettingsOverride,
     ensureFountainBlockIds,
     ensureSceneHeading,
     getFirstBlockId,
@@ -23,6 +24,19 @@ import {useNavigate} from 'react-router-dom';
 const SAVE_SLOW_INDICATOR_MS = 600;
 const DEFAULT_SCRIPT_TITLE = 'Untitled script';
 const SEED_COOLDOWN_MS = 5000;
+const EDITOR_SETTINGS_NAMESPACE = 'editor';
+
+const isEditorSettingsOverrideEmpty = (value?: EditorSettingsOverride | null) => {
+    if (!value) {
+        return true;
+    }
+
+    const hasPage = Boolean(value.page && Object.keys(value.page).length > 0);
+    const hasTypography = Boolean(value.typography && Object.keys(value.typography).length > 0);
+    const hasBlocks = Boolean(value.blocks && Object.keys(value.blocks).length > 0);
+
+    return !(hasPage || hasTypography || hasBlocks);
+};
 
 type ScriptEditorController = {
     scriptsLoading: boolean,
@@ -31,6 +45,7 @@ type ScriptEditorController = {
     currentScriptId: string | null,
     recentScripts: {id: string, name: string}[],
     initialValue: ScriptDocument | null | undefined,
+    scriptSettingsOverride: EditorSettingsOverride | null | undefined,
     storageError: string | null,
     shouldAutoFocus: boolean,
     saveIndicator: ScriptSyncState,
@@ -41,6 +56,7 @@ type ScriptEditorController = {
     },
     handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
     handleManualSave: (value: ScriptDocument) => Promise<boolean>,
+    handleSaveScriptSettingsOverride: (settings?: EditorSettingsOverride) => Promise<boolean>,
 };
 
 export const useScriptEditorController = (scriptId: string | undefined): ScriptEditorController => {
@@ -57,6 +73,9 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         error: currentScriptError,
     } = useScriptSummary(scriptId);
     const [initialValue, setInitialValue] = useState<ScriptDocument | null | undefined>(undefined);
+    const [scriptSettingsOverride, setScriptSettingsOverride] = useState<EditorSettingsOverride | null | undefined>(
+        undefined,
+    );
     const [storageError, setStorageError] = useState<string | null>(null);
     const [shouldAutoFocus, setShouldAutoFocus] = useState(false);
     const [saveIndicator, setSaveIndicator] = useState<ScriptSyncState>('saved');
@@ -112,7 +131,8 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     const scriptsLoading = recentScriptsLoading || (scriptId ? currentScriptLoading : false);
     const scriptsError = currentScriptError ?? recentScriptsError;
     const currentScriptId = currentScript?.id ?? null;
-    const isContentLoading = !!currentScriptId && initialValue === undefined;
+    const isContentLoading = !!currentScriptId
+        && (initialValue === undefined || scriptSettingsOverride === undefined);
     const editorLoadState = useMemo(() => {
         const items = [
             {
@@ -143,6 +163,14 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
                             ? 'done'
                             : 'pending',
             },
+            {
+                label: 'Načítám editor settings',
+                status: storageError
+                    ? 'error'
+                    : scriptSettingsOverride === undefined
+                        ? 'active'
+                        : 'done',
+            },
         ] as const;
 
         const score = (status: typeof items[number]['status']) => {
@@ -171,6 +199,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         recentScriptsLoading,
         scriptId,
         scriptsLoading,
+        scriptSettingsOverride,
         storageError,
     ]);
 
@@ -271,17 +300,24 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         let isActive = true;
 
         setInitialValue(undefined);
+        setScriptSettingsOverride(undefined);
         setShouldAutoFocus(false);
 
         const loadLatest = async () => {
             try {
-                const stored = await scriptRepository.loadLatest(currentScriptId);
+                const loadLatestPromise = scriptRepository.loadLatest(currentScriptId);
+                const loadSettingsPromise = scriptRepository.loadScriptConfig(
+                    currentScriptId,
+                    EDITOR_SETTINGS_NAMESPACE,
+                );
+                const [stored, storedSettings] = await Promise.all([loadLatestPromise, loadSettingsPromise]);
 
                 if (!isActive) {
                     return;
                 }
 
                 setStorageError(null);
+                setScriptSettingsOverride(storedSettings);
 
                 if (stored) {
                     const needsFocus = isScriptDocumentEmpty(stored);
@@ -298,6 +334,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
                 const fallback = ensureSceneHeading(null);
 
                 setInitialValue(fallback);
+                setScriptSettingsOverride(null);
                 setShouldAutoFocus(true);
             } catch (error) {
                 console.error('Failed to load latest script', error);
@@ -306,6 +343,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
                 const fallback = ensureSceneHeading(null);
 
                 setInitialValue(fallback);
+                setScriptSettingsOverride(null);
                 setShouldAutoFocus(true);
             }
         };
@@ -386,6 +424,41 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         startSaveIndicator,
     ]);
 
+    const handleSaveScriptSettingsOverride = useCallback(async (settings?: EditorSettingsOverride) => {
+        if (!currentScriptId) {
+            return false;
+        }
+
+        try {
+            const nextSettings = settings ?? {};
+
+            if (isEditorSettingsOverrideEmpty(nextSettings)) {
+                await scriptRepository.deleteScriptConfig(currentScriptId, EDITOR_SETTINGS_NAMESPACE);
+                setScriptSettingsOverride(null);
+
+                return true;
+            }
+
+            await scriptRepository.saveScriptConfig(currentScriptId, EDITOR_SETTINGS_NAMESPACE, nextSettings);
+            setScriptSettingsOverride(nextSettings);
+
+            return true;
+        } catch (error) {
+            console.error('Failed to save script settings config', error);
+            addToast({
+                title: 'Failed to save settings',
+                description: 'Editor settings were not saved.',
+                variant: 'error',
+            });
+
+            return false;
+        }
+    }, [
+        addToast,
+        currentScriptId,
+        scriptRepository,
+    ]);
+
     return {
         scriptsLoading,
         scriptsError,
@@ -393,11 +466,13 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         currentScriptId,
         recentScripts,
         initialValue,
+        scriptSettingsOverride,
         storageError,
         shouldAutoFocus,
         saveIndicator,
         editorLoadState,
         handleAutoSave,
         handleManualSave,
+        handleSaveScriptSettingsOverride,
     };
 };

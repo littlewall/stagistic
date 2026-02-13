@@ -2,7 +2,10 @@
     padding-top: var(--scene-heading-spacing-before, 0);
     padding-right: var(--scene-heading-indent-right, 0);
     padding-left: var(--scene-heading-indent-left, 0);
-    font-weight: 700;
+    text-align: var(--scene-heading-align, left);
+    text-transform: var(--scene-heading-casing, uppercase);
+    font-weight: var(--scene-heading-font-weight, 700);
+    font-style: var(--scene-heading-font-style, normal);
+    text-decoration-line: var(--scene-heading-underline, none);
     line-height: var(--scene-heading-line-height, inherit);
-    text-transform: uppercase;
 }

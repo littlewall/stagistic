@@ -2,6 +2,11 @@
     padding-top: var(--action-spacing-before, 0);
     padding-right: var(--action-indent-right, 0);
     padding-left: var(--action-indent-left, 0);
+    text-align: var(--action-align, left);
+    text-transform: var(--action-casing, none);
+    font-weight: var(--action-font-weight, 400);
+    font-style: var(--action-font-style, normal);
+    text-decoration-line: var(--action-underline, none);
     line-height: var(--action-line-height, inherit);
     color: #1b1b1b;
 }

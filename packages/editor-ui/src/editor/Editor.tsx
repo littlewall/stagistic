@@ -1,4 +1,11 @@
-import type {EditorSettingsOverride, ScriptDocument} from '@stagistic/shared';
+import {
+    type BlockCasing,
+    type BlockShortcut,
+    type EditorSettings,
+    type EditorSettingsOverride,
+    isBlockShortcut,
+    type ScriptDocument,
+} from '@stagistic/shared';
 import Bold from '@tiptap/extension-bold';
 import Document from '@tiptap/extension-document';
 import History from '@tiptap/extension-history';
@@ -6,11 +13,11 @@ import Italic from '@tiptap/extension-italic';
 import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
 import {type Editor as TiptapEditor, useEditor} from '@tiptap/react';
+import clsx from 'clsx';
 import {
     NavArrowLeft,
     NavArrowRight,
 } from 'iconoir-react';
-import clsx from 'clsx';
 import {
     type CSSProperties,
     type MouseEvent as ReactMouseEvent,
@@ -22,6 +29,7 @@ import {
     useState,
 } from 'react';
 
+import {FOUNTAIN_BLOCK_TYPES, type FountainBlockType} from './blocks/fountain';
 import {EditorCanvas} from './components/EditorCanvas';
 import EditorToolbar from './components/EditorToolbar';
 import styles from './Editor.module.css';
@@ -36,6 +44,7 @@ import {
     FountainColumnExtension,
     FountainColumnGroupExtension,
 } from './tiptap/extensions';
+import {normalizeFountainBlockType} from './tiptap/fountainCore';
 
 const DEFAULT_AUTOSAVE_DELAY_MS = 1500;
 
@@ -66,6 +75,52 @@ const getSizeScale = () => {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
 };
 
+type BlockShortcutOptions = Partial<Record<FountainBlockType, BlockShortcut>>;
+type BlockNextElementOptions = Partial<Record<FountainBlockType, FountainBlockType>>;
+type BlockCasingOptions = Partial<Record<FountainBlockType, BlockCasing>>;
+
+const getBlockShortcuts = (resolvedSettings: EditorSettings): BlockShortcutOptions => {
+    const shortcuts: BlockShortcutOptions = {};
+
+    for (const blockType of FOUNTAIN_BLOCK_TYPES) {
+        const shortcut = resolvedSettings.blocks[blockType]?.shortcut;
+
+        if (isBlockShortcut(shortcut)) {
+            shortcuts[blockType] = shortcut;
+        }
+    }
+
+    return shortcuts;
+};
+
+const getBlockNextElements = (resolvedSettings: EditorSettings): BlockNextElementOptions => {
+    const nextElements: BlockNextElementOptions = {};
+
+    for (const blockType of FOUNTAIN_BLOCK_TYPES) {
+        const nextElement = resolvedSettings.blocks[blockType]?.nextElement;
+
+        if (typeof nextElement === 'string') {
+            nextElements[blockType] = normalizeFountainBlockType(nextElement);
+        }
+    }
+
+    return nextElements;
+};
+
+const getBlockCasing = (resolvedSettings: EditorSettings): BlockCasingOptions => {
+    const blockCasing: BlockCasingOptions = {};
+
+    for (const blockType of FOUNTAIN_BLOCK_TYPES) {
+        const casing = resolvedSettings.blocks[blockType]?.casing;
+
+        if (casing === 'normal' || casing === 'uppercase') {
+            blockCasing[blockType] = casing;
+        }
+    }
+
+    return blockCasing;
+};
+
 type EditorProps = {
     initialValue: ScriptDocument,
     onValueChange?: (value: ScriptDocument) => void,
@@ -75,6 +130,7 @@ type EditorProps = {
     autoSaveDelayMs?: number,
     autoFocus?: boolean,
     settings?: EditorSettingsOverride,
+    scriptSettings?: EditorSettingsOverride,
     leftSidebarToggle?: {
         isOpen: boolean,
         onToggle: () => void,
@@ -107,6 +163,7 @@ const Editor = ({
     autoSaveDelayMs,
     autoFocus,
     settings,
+    scriptSettings,
     leftSidebarToggle,
     rightSidebarToggle,
     leftSidebar,
@@ -118,10 +175,15 @@ const Editor = ({
     const [responsiveScale, setResponsiveScale] = useState(1);
     const rootRef = useRef<HTMLDivElement | null>(null);
     const canvasHostRef = useRef<HTMLDivElement | null>(null);
-    const resolvedSettings = useMemo(
-        () => resolveEditorSettings(settings, initialValue.attrs?.settings),
-        [initialSerialized, settings],
-    );
+    const resolvedSettings = useMemo(() => {
+        const effectiveScriptSettings = scriptSettings ?? initialValue.attrs?.settings;
+
+        return resolveEditorSettings(settings, effectiveScriptSettings);
+    }, [
+        initialValue.attrs?.settings,
+        scriptSettings,
+        settings,
+    ]);
     const renderScale = useMemo(() => sizeScale * responsiveScale, [responsiveScale, sizeScale]);
     const editorStyle = useMemo(
         () => getEditorCssVars(resolvedSettings, renderScale),
@@ -130,6 +192,30 @@ const Editor = ({
     const paginationExtension = useMemo(
         () => createPaginationExtension(resolvedSettings, sizeScale),
         [resolvedSettings, sizeScale],
+    );
+    const blockShortcuts = useMemo(
+        () => getBlockShortcuts(resolvedSettings),
+        [resolvedSettings],
+    );
+    const blockNextElements = useMemo(
+        () => getBlockNextElements(resolvedSettings),
+        [resolvedSettings],
+    );
+    const blockCasing = useMemo(
+        () => getBlockCasing(resolvedSettings),
+        [resolvedSettings],
+    );
+    const fountainBlockExtension = useMemo(
+        () => FountainBlockExtension.configure({
+            blockShortcuts,
+            blockNextElements,
+            blockCasing,
+        }),
+        [
+            blockCasing,
+            blockNextElements,
+            blockShortcuts,
+        ],
     );
     const latestValueRef = useRef<ScriptDocument>(initialValue);
     const lastSavedSerializedRef = useRef<string>(initialSerialized);
@@ -280,7 +366,7 @@ const Editor = ({
             Underline,
             FountainColumnGroupExtension,
             FountainColumnExtension,
-            FountainBlockExtension,
+            fountainBlockExtension,
         ],
         content: initialDoc,
         autofocus: autoFocus ? 'start' : false,
@@ -290,7 +376,11 @@ const Editor = ({
                 'data-fountain-editor': 'true',
             },
         },
-    }, [initialDoc, paginationExtension]);
+    }, [
+        fountainBlockExtension,
+        initialDoc,
+        paginationExtension,
+    ]);
 
     useEffect(() => {
         const rootElement = rootRef.current;

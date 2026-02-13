@@ -45,6 +45,9 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
                     activeType: null,
                     canRedo: false,
                     canUndo: false,
+                    isBold: false,
+                    isItalic: false,
+                    isUnderline: false,
                 };
             }
 
@@ -61,6 +64,9 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
                 activeType: hasSingleBlockSelection ? activeBlock?.blockType ?? null : null,
                 canRedo: redoDepth(stateEditor.state) > 0,
                 canUndo: undoDepth(stateEditor.state) > 0,
+                isBold: stateEditor.isActive('bold'),
+                isItalic: stateEditor.isActive('italic'),
+                isUnderline: stateEditor.isActive('underline'),
             };
         },
         equalityFn: (a, b) => Boolean(
@@ -68,13 +74,19 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             && b
             && a.activeType === b.activeType
             && a.canRedo === b.canRedo
-            && a.canUndo === b.canUndo,
+            && a.canUndo === b.canUndo
+            && a.isBold === b.isBold
+            && a.isItalic === b.isItalic
+            && a.isUnderline === b.isUnderline,
         ),
     });
 
     const activeType = toolbarState?.activeType ?? null;
     const canUndo = toolbarState?.canUndo ?? false;
     const canRedo = toolbarState?.canRedo ?? false;
+    const isBoldActive = toolbarState?.isBold ?? false;
+    const isItalicActive = toolbarState?.isItalic ?? false;
+    const isUnderlineActive = toolbarState?.isUnderline ?? false;
 
     const activeBlockInfo = useMemo(() => {
         if (!activeType) {
@@ -257,25 +269,28 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
                     <Redo aria-hidden="true" />
                 </button>
                 <button
-                    className={styles.iconButton}
+                    className={clsx(styles.iconButton, isBoldActive && styles.iconButtonActive)}
                     type="button"
                     aria-label="Bold"
+                    aria-pressed={isBoldActive}
                     onMouseDown={handleBoldMouseDown}
                 >
                     <Bold aria-hidden="true" />
                 </button>
                 <button
-                    className={styles.iconButton}
+                    className={clsx(styles.iconButton, isItalicActive && styles.iconButtonActive)}
                     type="button"
                     aria-label="Italic"
+                    aria-pressed={isItalicActive}
                     onMouseDown={handleItalicMouseDown}
                 >
                     <Italic aria-hidden="true" />
                 </button>
                 <button
-                    className={styles.iconButton}
+                    className={clsx(styles.iconButton, isUnderlineActive && styles.iconButtonActive)}
                     type="button"
                     aria-label="Underline"
+                    aria-pressed={isUnderlineActive}
                     onMouseDown={handleUnderlineMouseDown}
                 >
                     <Underline aria-hidden="true" />
