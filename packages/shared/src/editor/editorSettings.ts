@@ -3,6 +3,7 @@ import {
     ELEMENT_CENTERED,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
+    ELEMENT_DUAL_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
     ELEMENT_PARENTHETICAL,
@@ -11,12 +12,51 @@ import {
     type FountainElementType,
 } from '@stagistic/editor-core';
 
+export const BLOCK_SHORTCUT_OPTIONS = [
+    '1',
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    '0',
+] as const;
+
+export type BlockShortcut = (typeof BLOCK_SHORTCUT_OPTIONS)[number];
+
+export const isBlockShortcut = (value: unknown): value is BlockShortcut => {
+    return typeof value === 'string'
+        && BLOCK_SHORTCUT_OPTIONS.includes(value as BlockShortcut);
+};
+
+export const BLOCK_TEXT_ALIGN_OPTIONS = [
+    'left',
+    'center',
+    'right',
+] as const;
+export type BlockTextAlign = (typeof BLOCK_TEXT_ALIGN_OPTIONS)[number];
+
+export const BLOCK_CASING_OPTIONS = ['normal', 'uppercase'] as const;
+export type BlockCasing = (typeof BLOCK_CASING_OPTIONS)[number];
+
 type BlockSpacingSettings = {
     spacingBeforeEm?: number,
     indentLeftChars?: number,
     indentRightChars?: number,
+    indentLeftPx?: number,
+    indentRightPx?: number,
     fontSizePx?: number,
     lineHeight?: number,
+    shortcut?: BlockShortcut,
+    nextElement?: FountainElementType,
+    textAlign?: BlockTextAlign,
+    casing?: BlockCasing,
+    isBold?: boolean,
+    isItalic?: boolean,
+    isUnderline?: boolean,
 };
 
 export type PageSettings = {
@@ -72,45 +112,122 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         [ELEMENT_ACTION]: {
             spacingBeforeEm: 1.0,
             lineHeight: 1.0,
+            shortcut: '2',
+            nextElement: ELEMENT_ACTION,
+            textAlign: 'left',
+            casing: 'normal',
+            isBold: false,
+            isItalic: false,
+            isUnderline: false,
         },
         [ELEMENT_SCENE_HEADING]: {
             spacingBeforeEm: 2.0,
             lineHeight: 1.0,
+            shortcut: '1',
+            nextElement: ELEMENT_ACTION,
+            textAlign: 'left',
+            casing: 'uppercase',
+            isBold: true,
+            isItalic: false,
+            isUnderline: false,
         },
         [ELEMENT_CHARACTER]: {
             spacingBeforeEm: 1.0,
             lineHeight: 1.0,
             indentLeftChars: 20, // ~2.0in from margin (3.25in from edge)
             indentRightChars: 3, // ~0.3in from margin (1.45in from edge)
+            shortcut: '3',
+            nextElement: ELEMENT_DIALOGUE,
+            textAlign: 'left',
+            casing: 'uppercase',
+            isBold: true,
+            isItalic: false,
+            isUnderline: false,
         },
         [ELEMENT_DUAL_DIALOGUE_CHARACTER]: {
             spacingBeforeEm: 1.0,
             lineHeight: 1.0,
             indentLeftChars: 20,
             indentRightChars: 3,
+            shortcut: '9',
+            nextElement: ELEMENT_DIALOGUE,
+            textAlign: 'left',
+            casing: 'uppercase',
+            isBold: true,
+            isItalic: false,
+            isUnderline: false,
         },
         [ELEMENT_PARENTHETICAL]: {
             spacingBeforeEm: 0,
             lineHeight: 1.0,
             indentLeftChars: 16, // ~1.6in from margin
             indentRightChars: 21, // ~2.1in from margin
+            shortcut: '4',
+            nextElement: ELEMENT_CHARACTER,
+            textAlign: 'left',
+            casing: 'normal',
+            isBold: false,
+            isItalic: true,
+            isUnderline: false,
         },
         [ELEMENT_DIALOGUE]: {
             spacingBeforeEm: 0,
             lineHeight: 1.0,
             indentLeftChars: 10, // ~1.0in from margin (2.25in from edge)
             indentRightChars: 3, // ~0.3in from margin (1.45in from edge)
+            shortcut: '5',
+            nextElement: ELEMENT_CHARACTER,
+            textAlign: 'left',
+            casing: 'normal',
+            isBold: false,
+            isItalic: false,
+            isUnderline: false,
+        },
+        [ELEMENT_DUAL_DIALOGUE]: {
+            spacingBeforeEm: 0,
+            lineHeight: 1.0,
+            indentLeftChars: 10,
+            indentRightChars: 3,
+            shortcut: '5',
+            nextElement: ELEMENT_CHARACTER,
+            textAlign: 'left',
+            casing: 'normal',
+            isBold: false,
+            isItalic: false,
+            isUnderline: false,
         },
         [ELEMENT_TRANSITION]: {
             spacingBeforeEm: 1.0,
             lineHeight: 1.0,
             indentRightChars: 5, // ~0.5in from margin
+            shortcut: '6',
+            nextElement: ELEMENT_SCENE_HEADING,
+            textAlign: 'right',
+            casing: 'uppercase',
+            isBold: true,
+            isItalic: false,
+            isUnderline: false,
         },
         [ELEMENT_LYRICS]: {
             indentLeftChars: 10, // ~1.0in from margin (2.25in from edge)
             indentRightChars: 10,
+            shortcut: '7',
+            nextElement: ELEMENT_LYRICS,
+            textAlign: 'left',
+            casing: 'normal',
+            isBold: false,
+            isItalic: true,
+            isUnderline: false,
         },
-        [ELEMENT_CENTERED]: {},
+        [ELEMENT_CENTERED]: {
+            shortcut: '8',
+            nextElement: ELEMENT_CENTERED,
+            textAlign: 'center',
+            casing: 'normal',
+            isBold: false,
+            isItalic: true,
+            isUnderline: false,
+        },
     },
 };
 

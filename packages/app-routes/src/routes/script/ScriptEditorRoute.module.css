@@ -27,7 +27,7 @@
 }
 
 .placeholderCard,
-.overrideCard {
+.infoCard {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
@@ -37,10 +37,126 @@
     background: var(--color-highlight);
 }
 
-.overrideLabel {
+.infoLabel {
+    font-size: .75rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--color-ink-muted);
+}
+
+.infoValue {
     font-weight: 600;
 }
 
-.overrideHint {
+.settingsGrid {
+    display: grid;
+    grid-template-columns: minmax(180px, 220px) minmax(0, 1fr);
+    gap: var(--space-3) var(--space-4);
+    align-items: center;
+}
+
+.fieldLabel {
+    font-size: .95rem;
+    font-weight: 500;
+}
+
+.fieldControl {
+    width: 100%;
+    min-height: 40px;
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    padding: 0 var(--space-3);
+    font: inherit;
+}
+
+.shortcutField {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.shortcutPrefix {
     color: var(--color-ink-muted);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: .875rem;
+}
+
+.toggleGroup {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.toggleButton,
+.toggleButtonActive {
+    min-width: 84px;
+    min-height: 36px;
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font: inherit;
+    cursor: pointer;
+}
+
+.toggleButton:hover {
+    background: var(--color-highlight);
+}
+
+.toggleButtonActive {
+    border-color: color-mix(in srgb, var(--color-accent) 70%, var(--color-divider));
+    background: color-mix(in srgb, var(--color-accent) 25%, var(--color-surface));
+    font-weight: 600;
+}
+
+.stepperField {
+    display: inline-grid;
+    grid-template-columns: 36px minmax(120px, 1fr) 36px;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+.stepperButton {
+    min-height: 36px;
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    color: var(--color-ink);
+    font: inherit;
+    cursor: pointer;
+}
+
+.stepperButton:hover:not(:disabled) {
+    background: var(--color-highlight);
+}
+
+.stepperButton:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.stepperValue {
+    min-height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-sm);
+    background: var(--color-surface);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+@media (max-width: 900px) {
+    .settingsGrid {
+        grid-template-columns: 1fr;
+        gap: var(--space-2);
+    }
+
+    .fieldLabel {
+        margin-top: var(--space-2);
+    }
 }

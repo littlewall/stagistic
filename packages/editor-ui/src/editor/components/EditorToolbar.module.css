@@ -22,6 +22,7 @@
 
 .iconButton {
     cursor: pointer;
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -50,6 +51,17 @@
         stroke-linecap: round;
         stroke-linejoin: round;
         stroke-width: 1.6;
+    }
+}
+
+.iconButtonActive {
+    color: var(--color-ink);
+    background: var(--color-highlight);
+    border-color: color-mix(in srgb, var(--color-ink) 28%, var(--color-divider));
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-ink) 16%, transparent);
+
+    &:hover {
+        background: color-mix(in srgb, var(--color-highlight) 82%, var(--color-surface));
     }
 }
 

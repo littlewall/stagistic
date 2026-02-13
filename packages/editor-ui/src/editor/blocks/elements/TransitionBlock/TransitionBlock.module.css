@@ -1,10 +1,12 @@
 .transition {
     display: block;
     padding: var(--transition-spacing-before, 1.8em) var(--transition-indent-right, 0) var(--transition-spacing-before, 1.8em) var(--transition-indent, 0);
-    font-weight: 700;
+    text-align: var(--transition-align, right);
+    text-transform: var(--transition-casing, uppercase);
+    font-weight: var(--transition-font-weight, 700);
+    font-style: var(--transition-font-style, normal);
+    text-decoration-line: var(--transition-underline, none);
     line-height: var(--transition-line-height, inherit);
-    text-align: right;
-    text-transform: uppercase;
 }
 
 .transitionBlock {

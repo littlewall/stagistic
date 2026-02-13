@@ -7,8 +7,8 @@ export const createRemoteHttpRepository = (): ScriptRepository => {
     };
 
     return {
-        listScripts: (_options?: {limit?: number}) => notImplemented() as Promise<ScriptSummary[]>,
-        getScriptSummary: (_scriptId: string) => notImplemented() as Promise<ScriptSummary | null>,
+        listScripts: () => notImplemented() as Promise<ScriptSummary[]>,
+        getScriptSummary: () => notImplemented() as Promise<ScriptSummary | null>,
         createScript: () => notImplemented(),
         renameScript: () => notImplemented(),
         deleteScript: () => notImplemented(),
@@ -16,6 +16,9 @@ export const createRemoteHttpRepository = (): ScriptRepository => {
         loadLatest: () => notImplemented(),
         saveLatest: () => notImplemented(),
         commitVersion: () => notImplemented(),
+        loadScriptConfig: () => notImplemented(),
+        saveScriptConfig: () => notImplemented(),
+        deleteScriptConfig: () => notImplemented(),
         loadVersion: () => notImplemented(),
         restoreLatestFromVersion: () => notImplemented(),
     } satisfies ScriptRepository;

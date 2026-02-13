@@ -7,15 +7,14 @@ import {
 import {
     SCRIPT_SETTINGS_EXPANDABLE_ELEMENTS,
     SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
-    type ScriptSettingsPanelId,
     scriptSettingsMenu,
+    type ScriptSettingsPanelId,
 } from './settingsMenu';
 
 export const useScriptSettingsModalState = () => {
     const [isOpen, setIsOpen] = useState(false);
     const [activePanelId, setActivePanelId] = useState<ScriptSettingsPanelId>(SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO);
     const [expandedItemIds, setExpandedItemIds] = useState<string[]>([SCRIPT_SETTINGS_EXPANDABLE_ELEMENTS]);
-    const [isOverrideEnabled, setIsOverrideEnabled] = useState(false);
 
     const open = useCallback(() => {
         setIsOpen(true);
@@ -27,14 +26,14 @@ export const useScriptSettingsModalState = () => {
         setActivePanelId(panelId);
     }, []);
     const toggleExpanded = useCallback((itemId: string) => {
-        setExpandedItemIds(previous => previous.includes(itemId)
-            ? previous.filter(id => id !== itemId)
-            : [...previous, itemId]);
-    }, []);
-    const toggleOverride = useCallback(() => {
-        setIsOverrideEnabled(previous => !previous);
-    }, []);
+        setExpandedItemIds(previous => {
+            if (previous.includes(itemId)) {
+                return previous.filter(id => id !== itemId);
+            }
 
+            return [...previous, itemId];
+        });
+    }, []);
     const groups = useMemo(() => scriptSettingsMenu, []);
 
     return {
@@ -42,12 +41,9 @@ export const useScriptSettingsModalState = () => {
         activePanelId,
         expandedItemIds,
         groups,
-        isOverrideEnabled,
         open,
         close,
         selectPanel,
         toggleExpanded,
-        toggleOverride,
     };
 };
-

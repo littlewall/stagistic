@@ -2,5 +2,10 @@
     padding-top: var(--dialogue-spacing-before, 0);
     padding-right: var(--dialogue-indent-right, 0);
     padding-left: var(--dialogue-indent, 24px);
+    text-align: var(--dialogue-align, left);
+    text-transform: var(--dialogue-casing, none);
+    font-weight: var(--dialogue-font-weight, 400);
+    font-style: var(--dialogue-font-style, normal);
+    text-decoration-line: var(--dialogue-underline, none);
     line-height: var(--dialogue-line-height, inherit);
 }

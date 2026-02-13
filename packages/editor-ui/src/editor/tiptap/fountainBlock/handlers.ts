@@ -6,8 +6,14 @@ import {
     ELEMENT_LYRICS,
     ELEMENT_PARENTHETICAL,
 } from '@stagistic/editor-core';
+import {
+    type BlockCasing,
+    type BlockShortcut,
+    isBlockShortcut,
+} from '@stagistic/shared';
 import type {Editor} from '@tiptap/react';
 
+import {FOUNTAIN_BLOCK_TYPES} from '../../blocks/fountain';
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
     type FountainBlockType,
@@ -36,6 +42,9 @@ type FountainBlockEntry = {
     pos: number,
     blockType: FountainBlockType,
 };
+export type BlockShortcutMap = Partial<Record<FountainBlockType, BlockShortcut>>;
+export type BlockNextElementMap = Partial<Record<FountainBlockType, FountainBlockType>>;
+export type BlockCasingMap = Partial<Record<FountainBlockType, BlockCasing>>;
 
 const MAX_ACTION_INDENT = 3;
 
@@ -91,18 +100,111 @@ const resolveParentheticalTabTarget = (editor: Editor, blockPos: number): Dialog
         ?? ELEMENT_DIALOGUE;
 };
 
-const enterHandlers: HandlerMap<(context: BlockContext) => boolean> = {
-    [ELEMENT_CHARACTER]: context => {
+const isApplePlatform = () => {
+    if (typeof navigator === 'undefined') {
+        return false;
+    }
+
+    const platform = navigator.platform || navigator.userAgent;
+
+    return (/mac|iphone|ipad|ipod/i).test(platform);
+};
+
+const hasShortcutModifier = (event: KeyboardEvent) => {
+    if (isApplePlatform()) {
+        return event.metaKey && !event.ctrlKey;
+    }
+
+    return event.ctrlKey && !event.metaKey;
+};
+
+const findBlockTypeByShortcut = (
+    shortcut: BlockShortcut,
+    blockShortcuts?: BlockShortcutMap,
+): FountainBlockType | null => {
+    if (!blockShortcuts) {
+        return null;
+    }
+
+    for (const blockType of FOUNTAIN_BLOCK_TYPES) {
+        if (blockShortcuts[blockType] === shortcut) {
+            return normalizeFountainBlockType(blockType);
+        }
+    }
+
+    return null;
+};
+
+const handleBlockShortcut = (
+    editor: Editor,
+    event: KeyboardEvent,
+    blockShortcuts?: BlockShortcutMap,
+) => {
+    if (event.altKey || event.shiftKey || !hasShortcutModifier(event)) {
+        return false;
+    }
+
+    if (!isBlockShortcut(event.key)) {
+        return false;
+    }
+
+    const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+
+    if (!block) {
+        return false;
+    }
+
+    const nextType = findBlockTypeByShortcut(event.key, blockShortcuts);
+
+    if (!nextType) {
+        return false;
+    }
+
+    event.preventDefault();
+
+    if (nextType === block.blockType) {
+        return true;
+    }
+
+    return updateBlockType(editor, nextType, block.id);
+};
+
+const resolveNextTypeOnEnter = (
+    blockType: FountainBlockType,
+    blockNextElements?: BlockNextElementMap,
+) => {
+    const configured = blockNextElements?.[blockType];
+
+    return configured ?? getNextTypeOnEnter(blockType);
+};
+
+const enterHandlers: HandlerMap<(context: BlockContext, blockNextElements?: BlockNextElementMap) => boolean> = {
+    [ELEMENT_CHARACTER]: (context, blockNextElements) => {
         if (context.isAtStart) {
             return insertActionBefore(context.editor, context.block.pos, context.block.from);
         }
 
-        return splitBlockWithType(context.editor, ELEMENT_DIALOGUE);
+        return splitBlockWithType(
+            context.editor,
+            resolveNextTypeOnEnter(ELEMENT_CHARACTER, blockNextElements),
+        );
     },
-    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
-    [ELEMENT_DIALOGUE]: context => splitBlockWithType(context.editor, ELEMENT_CHARACTER),
-    [ELEMENT_LYRICS]: context => splitBlockWithType(context.editor, ELEMENT_CHARACTER),
-    [ELEMENT_PARENTHETICAL]: context => splitBlockWithType(context.editor, ELEMENT_CHARACTER),
+    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: (_context, blockNextElements) => splitBlockWithType(
+        _context.editor,
+        resolveNextTypeOnEnter(ELEMENT_DUAL_DIALOGUE_CHARACTER, blockNextElements),
+    ),
+    [ELEMENT_DIALOGUE]: (_context, blockNextElements) => splitBlockWithType(
+        _context.editor,
+        resolveNextTypeOnEnter(ELEMENT_DIALOGUE, blockNextElements),
+    ),
+    [ELEMENT_LYRICS]: (_context, blockNextElements) => splitBlockWithType(
+        _context.editor,
+        resolveNextTypeOnEnter(ELEMENT_LYRICS, blockNextElements),
+    ),
+    [ELEMENT_PARENTHETICAL]: (_context, blockNextElements) => splitBlockWithType(
+        _context.editor,
+        resolveNextTypeOnEnter(ELEMENT_PARENTHETICAL, blockNextElements),
+    ),
 };
 
 const shiftEnterHandlers: HandlerMap<(context: BlockContext) => boolean> = {
@@ -213,6 +315,7 @@ const handleCharacterInput = (
     from: number,
     to: number,
     text: string,
+    enforceUppercase: boolean,
 ) => {
     if (text === '(') {
         insertParenPair(context.editor, from, to);
@@ -223,7 +326,7 @@ const handleCharacterInput = (
     const offset = getSelectionOffset(context.editor, context.block.from);
     const insideParens = isInsideParentheses(context.block.node.textContent ?? '', offset);
 
-    if (!insideParens) {
+    if (enforceUppercase && !insideParens) {
         const upper = text.toUpperCase();
 
         if (upper !== text) {
@@ -267,8 +370,6 @@ const textInputHandlers: HandlerMap<(
     to: number,
     text: string,
 ) => boolean> = {
-    [ELEMENT_CHARACTER]: handleCharacterInput,
-    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: handleCharacterInput,
     [ELEMENT_PARENTHETICAL]: handleParentheticalInput,
 };
 
@@ -292,7 +393,11 @@ const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) =
     },
 };
 
-export const handleEnter = (editor: Editor, event: KeyboardEvent) => {
+export const handleEnter = (
+    editor: Editor,
+    event: KeyboardEvent,
+    blockNextElements?: BlockNextElementMap,
+) => {
     const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
 
     if (!block) {
@@ -317,16 +422,23 @@ export const handleEnter = (editor: Editor, event: KeyboardEvent) => {
     }
 
     const context = createBlockContext(editor, block);
-    const handler = event.shiftKey
-        ? shiftEnterHandlers[block.blockType]
-        : enterHandlers[block.blockType];
 
-    if (handler) {
-        return handler(context);
+    if (event.shiftKey) {
+        const shiftHandler = shiftEnterHandlers[block.blockType];
+
+        if (shiftHandler) {
+            return shiftHandler(context);
+        }
+    } else {
+        const enterHandler = enterHandlers[block.blockType];
+
+        if (enterHandler) {
+            return enterHandler(context, blockNextElements);
+        }
     }
 
     const nextType = context.isAtEnd
-        ? getNextTypeOnEnter(block.blockType)
+        ? resolveNextTypeOnEnter(block.blockType, blockNextElements)
         : block.blockType;
 
     return splitBlockWithType(editor, nextType);
@@ -351,9 +463,18 @@ export const handleTab = (editor: Editor, event: KeyboardEvent) => {
     return true;
 };
 
-export const handleKeyDown = (editor: Editor, event: KeyboardEvent) => {
+export const handleKeyDown = (
+    editor: Editor,
+    event: KeyboardEvent,
+    blockShortcuts?: BlockShortcutMap,
+    blockNextElements?: BlockNextElementMap,
+) => {
+    if (handleBlockShortcut(editor, event, blockShortcuts)) {
+        return true;
+    }
+
     if (event.key === 'Enter') {
-        return handleEnter(editor, event);
+        return handleEnter(editor, event, blockNextElements);
     }
 
     if (event.key === 'Tab') {
@@ -375,11 +496,27 @@ export const handleKeyDown = (editor: Editor, event: KeyboardEvent) => {
     return handler(createBlockContext(editor, block), event);
 };
 
-export const handleTextInput = (editor: Editor, from: number, to: number, text: string) => {
+export const handleTextInput = (
+    editor: Editor,
+    from: number,
+    to: number,
+    text: string,
+    blockCasing?: BlockCasingMap,
+) => {
     const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
 
     if (!block) {
         return false;
+    }
+
+    if (
+        block.blockType === ELEMENT_CHARACTER
+        || block.blockType === ELEMENT_DUAL_DIALOGUE_CHARACTER
+    ) {
+        const casing = blockCasing?.[block.blockType] ?? 'uppercase';
+        const enforceUppercase = casing === 'uppercase';
+
+        return handleCharacterInput(createBlockContext(editor, block), from, to, text, enforceUppercase);
     }
 
     const handler = textInputHandlers[block.blockType];

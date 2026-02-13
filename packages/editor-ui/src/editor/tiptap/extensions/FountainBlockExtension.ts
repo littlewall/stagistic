@@ -8,6 +8,9 @@ import {
 import type {Editor} from '@tiptap/react';
 
 import {
+    type BlockCasingMap,
+    type BlockNextElementMap,
+    type BlockShortcutMap,
     handleKeyDown,
     handlePaste,
     handleTextInput,
@@ -106,7 +109,12 @@ const getChangedRanges = (transactions: readonly Transaction[], docSize: number)
     return mergeRanges(ranges);
 };
 
-const ensureBlockIdsPlugin = (editor: Editor) => {
+const ensureBlockIdsPlugin = (
+    editor: Editor,
+    blockShortcuts?: BlockShortcutMap,
+    blockNextElements?: BlockNextElementMap,
+    blockCasing?: BlockCasingMap,
+) => {
     let didInitialScan = false;
 
     return new Plugin({
@@ -121,19 +129,23 @@ const ensureBlockIdsPlugin = (editor: Editor) => {
 
             const scanRanges = didInitialScan
                 ? getChangedRanges(transactions, newState.doc.content.size)
-                : [{
-                    from: 0,
-                    to: newState.doc.content.size,
-                }];
+                : [
+                    {
+                        from: 0,
+                        to: newState.doc.content.size,
+                    },
+                ];
 
             didInitialScan = true;
 
             const rangesToScan = scanRanges.length > 0
                 ? scanRanges
-                : [{
-                    from: 0,
-                    to: newState.doc.content.size,
-                }];
+                : [
+                    {
+                        from: 0,
+                        to: newState.doc.content.size,
+                    },
+                ];
 
             rangesToScan.forEach(range => {
                 newState.doc.nodesBetween(range.from, range.to, (node, pos) => {
@@ -161,19 +173,30 @@ const ensureBlockIdsPlugin = (editor: Editor) => {
             return changed ? tr : null;
         },
         props: {
-            handleKeyDown: (_view, event) => handleKeyDown(editor, event),
-            handleTextInput: (_view, from, to, text) => handleTextInput(editor, from, to, text),
+            handleKeyDown: (_view, event) => handleKeyDown(editor, event, blockShortcuts, blockNextElements),
+            handleTextInput: (_view, from, to, text) => handleTextInput(editor, from, to, text, blockCasing),
             handlePaste: (_view, event) => handlePaste(editor, event),
         },
     });
 };
 
-const FountainBlockExtension = Node.create({
+const FountainBlockExtension = Node.create<{
+    blockShortcuts?: BlockShortcutMap,
+    blockNextElements?: BlockNextElementMap,
+    blockCasing?: BlockCasingMap,
+}>({
     name: FOUNTAIN_BLOCK_NODE_NAME,
     group: 'block',
     content: 'inline*',
     defining: true,
     isolating: false,
+    addOptions() {
+        return {
+            blockShortcuts: undefined,
+            blockNextElements: undefined,
+            blockCasing: undefined,
+        };
+    },
     addAttributes() {
         return {
             blockType: {
@@ -215,7 +238,14 @@ const FountainBlockExtension = Node.create({
     addProseMirrorPlugins() {
         const editorInstance = this.editor;
 
-        return [ensureBlockIdsPlugin(editorInstance)];
+        return [
+            ensureBlockIdsPlugin(
+                editorInstance,
+                this.options.blockShortcuts,
+                this.options.blockNextElements,
+                this.options.blockCasing,
+            ),
+        ];
     },
 });
 

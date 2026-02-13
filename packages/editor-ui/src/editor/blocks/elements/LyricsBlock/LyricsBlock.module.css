@@ -2,7 +2,11 @@
     padding-top: var(--lyrics-spacing-before, 0);
     padding-right: var(--lyrics-indent-right, 0);
     padding-left: var(--lyrics-indent-left, 0);
-    font-style: italic;
+    text-align: var(--lyrics-align, left);
+    text-transform: var(--lyrics-casing, none);
+    font-weight: var(--lyrics-font-weight, 400);
+    font-style: var(--lyrics-font-style, italic);
+    text-decoration-line: var(--lyrics-underline, none);
     line-height: var(--lyrics-line-height, inherit);
     color: #5c2f11;
 }

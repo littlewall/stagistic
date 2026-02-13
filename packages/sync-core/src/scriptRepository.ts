@@ -1,5 +1,8 @@
 import type {ScriptSummary} from '@stagistic/db';
-import type {ScriptDocument} from '@stagistic/shared';
+import type {
+    EditorSettingsOverride,
+    ScriptDocument,
+} from '@stagistic/shared';
 
 export interface ScriptRepository {
     listScripts(options?: {limit?: number}): Promise<ScriptSummary[]>,
@@ -11,6 +14,9 @@ export interface ScriptRepository {
     loadLatest(scriptId: string): Promise<ScriptDocument | null>,
     saveLatest(scriptId: string, value: ScriptDocument): Promise<void>,
     commitVersion(scriptId: string, message?: string): Promise<string>,
+    loadScriptConfig(scriptId: string, namespace: string): Promise<EditorSettingsOverride | null>,
+    saveScriptConfig(scriptId: string, namespace: string, settings: EditorSettingsOverride): Promise<void>,
+    deleteScriptConfig(scriptId: string, namespace: string): Promise<void>,
     loadVersion?(versionId: string): Promise<ScriptDocument | null>,
     restoreLatestFromVersion?(scriptId: string, versionId: string): Promise<void>,
 }
