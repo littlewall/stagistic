@@ -80,6 +80,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     const [shouldAutoFocus, setShouldAutoFocus] = useState(false);
     const [saveIndicator, setSaveIndicator] = useState<ScriptSyncState>('saved');
     const pendingSaveRef = useRef(0);
+    const settingsSaveRequestRef = useRef(0);
     const slowSaveTimerRef = useRef<number | null>(null);
     const seedStateRef = useRef({
         pending: false,
@@ -430,17 +431,27 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         }
 
         try {
+            const requestId = settingsSaveRequestRef.current + 1;
+
+            settingsSaveRequestRef.current = requestId;
+
             const nextSettings = settings ?? {};
 
             if (isEditorSettingsOverrideEmpty(nextSettings)) {
                 await scriptRepository.deleteScriptConfig(currentScriptId, EDITOR_SETTINGS_NAMESPACE);
-                setScriptSettingsOverride(null);
+
+                if (requestId === settingsSaveRequestRef.current) {
+                    setScriptSettingsOverride(null);
+                }
 
                 return true;
             }
 
             await scriptRepository.saveScriptConfig(currentScriptId, EDITOR_SETTINGS_NAMESPACE, nextSettings);
-            setScriptSettingsOverride(nextSettings);
+
+            if (requestId === settingsSaveRequestRef.current) {
+                setScriptSettingsOverride(nextSettings);
+            }
 
             return true;
         } catch (error) {

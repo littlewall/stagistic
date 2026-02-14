@@ -96,9 +96,9 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         widthPx: 794, // A4 Width (8.27in * 96)
         heightPx: 1123, // A4 Height (11.69in * 96)
         marginTopPx: 96, // 1.0in
-        marginRightPx: 88, // ~0.92in (To fit 61 chars content)
+        marginRightPx: 96, // 1.0in
         marginBottomPx: 96, // 1.0in
-        marginLeftPx: 120, // 1.25in
+        marginLeftPx: 144, // 1.5in
         pageGapPx: 32,
         pageBreakBackground: 'var(--color-surface)',
         contentMarginTopPx: 0,
@@ -134,8 +134,8 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         [ELEMENT_CHARACTER]: {
             spacingBeforeEm: 1.0,
             lineHeight: 1.0,
-            indentLeftChars: 20, // ~2.0in from margin (3.25in from edge)
-            indentRightChars: 3, // ~0.3in from margin (1.45in from edge)
+            indentLeftChars: 20, // ~2.0in from margin (3.5in from edge)
+            indentRightChars: 3, // ~0.3in from margin (1.3in from edge)
             shortcut: '3',
             nextElement: ELEMENT_DIALOGUE,
             textAlign: 'left',
@@ -160,7 +160,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         [ELEMENT_PARENTHETICAL]: {
             spacingBeforeEm: 0,
             lineHeight: 1.0,
-            indentLeftChars: 16, // ~1.6in from margin
+            indentLeftChars: 16, // ~1.6in from margin (3.1in from edge)
             indentRightChars: 21, // ~2.1in from margin
             shortcut: '4',
             nextElement: ELEMENT_CHARACTER,
@@ -173,8 +173,8 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         [ELEMENT_DIALOGUE]: {
             spacingBeforeEm: 0,
             lineHeight: 1.0,
-            indentLeftChars: 10, // ~1.0in from margin (2.25in from edge)
-            indentRightChars: 3, // ~0.3in from margin (1.45in from edge)
+            indentLeftChars: 10, // ~1.0in from margin (2.5in from edge)
+            indentRightChars: 3, // ~0.3in from margin (1.3in from edge)
             shortcut: '5',
             nextElement: ELEMENT_CHARACTER,
             textAlign: 'left',
@@ -199,7 +199,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         [ELEMENT_TRANSITION]: {
             spacingBeforeEm: 1.0,
             lineHeight: 1.0,
-            indentRightChars: 5, // ~0.5in from margin
+            indentRightChars: 5, // ~0.5in from margin (1.5in from edge)
             shortcut: '6',
             nextElement: ELEMENT_SCENE_HEADING,
             textAlign: 'right',
@@ -209,7 +209,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
             isUnderline: false,
         },
         [ELEMENT_LYRICS]: {
-            indentLeftChars: 10, // ~1.0in from margin (2.25in from edge)
+            indentLeftChars: 10, // ~1.0in from margin (2.5in from edge)
             indentRightChars: 10,
             shortcut: '7',
             nextElement: ELEMENT_LYRICS,

@@ -1,5 +1,20 @@
-import type {FountainElementType} from '@stagistic/editor-core';
-import {FountainEditor} from '@stagistic/editor-ui';
+import {
+    ELEMENT_ACTION,
+    ELEMENT_CENTERED,
+    ELEMENT_CHARACTER,
+    ELEMENT_DIALOGUE,
+    ELEMENT_DUAL_DIALOGUE,
+    ELEMENT_DUAL_DIALOGUE_CHARACTER,
+    ELEMENT_LYRICS,
+    ELEMENT_PARENTHETICAL,
+    ELEMENT_SCENE_HEADING,
+    ELEMENT_TRANSITION,
+    type FountainElementType,
+} from '@stagistic/editor-core';
+import {
+    BLOCK_ICONS,
+    FountainEditor,
+} from '@stagistic/editor-ui';
 import {
     BLOCK_CASING_OPTIONS,
     BLOCK_SHORTCUT_OPTIONS,
@@ -17,6 +32,8 @@ import {
     ScriptSettingsModal,
 } from '@stagistic/ui';
 import {
+    type CSSProperties,
+    type ReactNode,
     useCallback,
     useEffect,
     useMemo,
@@ -45,30 +62,37 @@ const AUTOSAVE_DELAY_MS = 1500;
 const SETTINGS_SAVE_DEBOUNCE_MS = 450;
 const SIDEBAR_WIDTH = 'calc(280px * var(--size-scale))';
 const SETTINGS_MODAL_QUERY_KEY = 'settingsModal';
+const SCREENPLAY_CHARS_PER_INCH = 10;
 
 const SPACING_BEFORE_OPTIONS = [
     0,
-    0.5,
     1,
     1.5,
     2,
-    2.5,
-    3,
-    3.5,
-    4,
 ] as const;
 const LINE_HEIGHT_OPTIONS = [
-    0.8,
-    0.9,
     1,
-    1.1,
-    1.2,
-    1.3,
-    1.4,
+    1.25,
     1.5,
-    1.6,
+    1.75,
+    2,
 ] as const;
 const INDENT_SPACING_STEPS = Array.from({length: 41}, (_, index) => index);
+const MAX_INDENT_CHARS = INDENT_SPACING_STEPS[INDENT_SPACING_STEPS.length - 1] ?? 40;
+const MIN_PREVIEW_CONTENT_CHARS = 30;
+
+const BLOCK_PREVIEW_TEXT: Record<FountainElementType, string> = {
+    [ELEMENT_SCENE_HEADING]: 'INT. LOREM MANSION - DAY',
+    [ELEMENT_ACTION]: 'She closes the door and exhales.',
+    [ELEMENT_CHARACTER]: 'ALEX',
+    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: 'ALEX',
+    [ELEMENT_DUAL_DIALOGUE]: 'I will answer you on the overlap.',
+    [ELEMENT_PARENTHETICAL]: '(quietly)',
+    [ELEMENT_DIALOGUE]: 'I think this is where it starts.',
+    [ELEMENT_TRANSITION]: 'CUT TO:',
+    [ELEMENT_LYRICS]: 'Sing me a line for the morning.',
+    [ELEMENT_CENTERED]: 'THE END',
+};
 
 const panelDescriptions: Record<string, {
     title: string,
@@ -76,7 +100,7 @@ const panelDescriptions: Record<string, {
 }> = {
     'settings-source': {
         title: 'Settings Source',
-        description: 'This script uses its own block settings stored in local config tables.',
+        description: 'Editor settings are currently stored in local config tables.',
     },
     'document-info': {
         title: 'Document Info',
@@ -147,7 +171,9 @@ const formatNumeric = (value: number) => {
         return value.toString();
     }
 
-    return value.toFixed(1);
+    return value
+        .toFixed(2)
+        .replace(/\.?0+$/, '');
 };
 
 const formatLines = (value: number) => {
@@ -155,6 +181,9 @@ const formatLines = (value: number) => {
 
     return `${label} line${value === 1 ? '' : 's'}`;
 };
+
+const formatInches = (value: number) => `${value.toFixed(2)}"`;
+const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
 const getClosestStepIndex = (steps: readonly number[], value: number) => {
     let bestIndex = 0;
@@ -172,45 +201,171 @@ const getClosestStepIndex = (steps: readonly number[], value: number) => {
     return bestIndex;
 };
 
-type IndentKey = 'indentLeftChars' | 'indentRightChars';
 type BlockSettingsPatch = Partial<EditorSettings['blocks'][FountainElementType]>;
 
-type StepperFieldProps = {
-    valueLabel: string,
-    canDecrease: boolean,
-    canIncrease: boolean,
-    onDecrease: () => void,
-    onIncrease: () => void,
+type SettingsSelectOption = {
+    value: number | string,
+    label: string,
+    icon?: ReactNode,
 };
 
-const StepperField = ({
-    valueLabel,
-    canDecrease,
-    canIncrease,
-    onDecrease,
-    onIncrease,
-}: StepperFieldProps) => {
+type SettingsSelectProps = {
+    id?: string,
+    value: number | string,
+    options: SettingsSelectOption[],
+    ariaLabel: string,
+    onChange: (value: number | string) => void,
+};
+
+const getClosestStepValue = (steps: readonly number[], value: number) => {
+    const closestIndex = getClosestStepIndex(steps, value);
+
+    return steps[closestIndex] ?? steps[0] ?? value;
+};
+
+const normalizeSettingsOverride = (settings: EditorSettingsOverride): EditorSettingsOverride => {
+    if (!settings.blocks) {
+        return settings;
+    }
+
+    const nextBlocks = Object.entries(settings.blocks).reduce<NonNullable<EditorSettingsOverride['blocks']>>(
+        (acc, [blockType, blockSettings]) => {
+            if (!blockSettings) {
+                acc[blockType as FountainElementType] = blockSettings;
+
+                return acc;
+            }
+
+            const normalizedBlockSettings = {
+                ...blockSettings,
+            };
+
+            if (typeof blockSettings.spacingBeforeEm === 'number') {
+                normalizedBlockSettings.spacingBeforeEm = getClosestStepValue(
+                    SPACING_BEFORE_OPTIONS,
+                    blockSettings.spacingBeforeEm,
+                );
+            }
+
+            if (typeof blockSettings.lineHeight === 'number') {
+                normalizedBlockSettings.lineHeight = getClosestStepValue(
+                    LINE_HEIGHT_OPTIONS,
+                    blockSettings.lineHeight,
+                );
+            }
+
+            acc[blockType as FountainElementType] = normalizedBlockSettings;
+
+            return acc;
+        },
+        {},
+    );
+
+    return {
+        ...settings,
+        blocks: nextBlocks,
+    };
+};
+
+const SettingsSelect = ({
+    id,
+    value,
+    options,
+    ariaLabel,
+    onChange,
+}: SettingsSelectProps) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const selectRef = useRef<HTMLDivElement | null>(null);
+    const selectedOption = useMemo(
+        () => options.find(option => option.value === value) ?? options[0] ?? null,
+        [options, value],
+    );
+
+    useEffect(() => {
+        if (!isOpen) {
+            return;
+        }
+
+        const onPointerDown = (event: MouseEvent | PointerEvent) => {
+            if (!selectRef.current) {
+                return;
+            }
+
+            if (selectRef.current.contains(event.target as Node)) {
+                return;
+            }
+
+            setIsOpen(false);
+        };
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === 'Escape') {
+                setIsOpen(false);
+            }
+        };
+
+        document.addEventListener('pointerdown', onPointerDown);
+        document.addEventListener('keydown', onKeyDown);
+
+        return () => {
+            document.removeEventListener('pointerdown', onPointerDown);
+            document.removeEventListener('keydown', onKeyDown);
+        };
+    }, [isOpen]);
+
     return (
-        <div className={styles.stepperField}>
+        <div className={styles.settingsSelect} ref={selectRef}>
             <button
+                id={id}
                 type="button"
-                className={styles.stepperButton}
-                onClick={onDecrease}
-                disabled={!canDecrease}
-                aria-label="Decrease spacing"
+                className={styles.settingsSelectButton}
+                aria-label={ariaLabel}
+                aria-haspopup="listbox"
+                aria-expanded={isOpen}
+                onClick={() => setIsOpen(prev => !prev)}
             >
-                {'<'}
+                <span className={styles.settingsSelectValue}>
+                    {selectedOption?.icon ? (
+                        <span className={styles.settingsSelectIcon}>{selectedOption.icon}</span>
+                    ) : null}
+                    <span className={styles.settingsSelectLabel}>{selectedOption?.label ?? ''}</span>
+                </span>
+                <svg
+                    viewBox="0 0 24 24"
+                    aria-hidden="true"
+                    focusable="false"
+                    className={styles.settingsSelectChevron}
+                >
+                    <path d="m6 9 6 6 6-6" />
+                </svg>
             </button>
-            <div className={styles.stepperValue}>{valueLabel}</div>
-            <button
-                type="button"
-                className={styles.stepperButton}
-                onClick={onIncrease}
-                disabled={!canIncrease}
-                aria-label="Increase spacing"
-            >
-                {'>'}
-            </button>
+            {isOpen ? (
+                <div
+                    className={styles.settingsSelectMenu}
+                    role="listbox"
+                    aria-labelledby={id}
+                >
+                    {options.map(option => (
+                        <button
+                            key={String(option.value)}
+                            type="button"
+                            role="option"
+                            aria-selected={option.value === value}
+                            className={option.value === value ? styles.settingsSelectItemActive : styles.settingsSelectItem}
+                            onClick={() => {
+                                onChange(option.value);
+                                setIsOpen(false);
+                            }}
+                        >
+                            <span className={styles.settingsSelectItemValue}>
+                                {option.icon ? (
+                                    <span className={styles.settingsSelectIcon}>{option.icon}</span>
+                                ) : null}
+                                <span className={styles.settingsSelectItemLabel}>{option.label}</span>
+                            </span>
+                        </button>
+                    ))}
+                </div>
+            ) : null}
         </div>
     );
 };
@@ -224,6 +379,7 @@ export const ScriptEditorRoute = () => {
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
     const [scriptSettingsDraft, setScriptSettingsDraft] = useState<EditorSettingsOverride>({});
     const settingsSaveTimerRef = useRef<number | null>(null);
+    const hydratedSettingsScriptIdRef = useRef<string | null>(null);
     const {
         isOpen: isSettingsOpen,
         activePanelId,
@@ -285,11 +441,21 @@ export const ScriptEditorRoute = () => {
     }, []);
 
     useEffect(() => {
-        if (scriptSettingsOverride === undefined) {
+        hydratedSettingsScriptIdRef.current = null;
+        setScriptSettingsDraft({});
+    }, [currentScriptId]);
+
+    useEffect(() => {
+        if (!currentScriptId || scriptSettingsOverride === undefined) {
             return;
         }
 
-        setScriptSettingsDraft(scriptSettingsOverride ?? {});
+        if (hydratedSettingsScriptIdRef.current === currentScriptId) {
+            return;
+        }
+
+        setScriptSettingsDraft(normalizeSettingsOverride(scriptSettingsOverride ?? {}));
+        hydratedSettingsScriptIdRef.current = currentScriptId;
     }, [currentScriptId, scriptSettingsOverride]);
 
     useEffect(() => {
@@ -401,44 +567,6 @@ export const ScriptEditorRoute = () => {
         }));
     }, []);
 
-    const getIndentStepState = useCallback((
-        blockType: FountainElementType,
-        key: IndentKey,
-    ) => {
-        const currentValue = resolvedScriptSettings.blocks[blockType]?.[key] ?? 0;
-        const normalizedValue = Math.max(0, Math.round(currentValue));
-        const steps = INDENT_SPACING_STEPS.includes(normalizedValue)
-            ? INDENT_SPACING_STEPS
-            : [...INDENT_SPACING_STEPS, normalizedValue].sort((a, b) => a - b);
-        const currentIndex = getClosestStepIndex(steps, normalizedValue);
-
-        return {
-            value: normalizedValue,
-            steps,
-            currentIndex,
-        };
-    }, [resolvedScriptSettings.blocks]);
-
-    const changeIndentWithStep = useCallback((
-        blockType: FountainElementType,
-        key: IndentKey,
-        direction: -1 | 1,
-    ) => {
-        const {
-            steps,
-            currentIndex,
-        } = getIndentStepState(blockType, key);
-        const nextIndex = Math.max(0, Math.min(steps.length - 1, currentIndex + direction));
-
-        if (nextIndex === currentIndex) {
-            return;
-        }
-
-        updateBlockSettings(blockType, {
-            [key]: steps[nextIndex],
-        });
-    }, [getIndentStepState, updateBlockSettings]);
-
     const renderSettingsPanel = useCallback((panelId: string) => {
         if (isElementSettingsPanelId(panelId)) {
             const blockType = getBlockTypeFromElementPanelId(panelId);
@@ -450,8 +578,34 @@ export const ScriptEditorRoute = () => {
             const blockDefaults = DEFAULT_EDITOR_SETTINGS.blocks[blockType];
             const blockSettings = resolvedScriptSettings.blocks[blockType];
             const blockLabel = blockLabelByType.get(blockType) ?? 'Element';
-            const spacingBefore = blockSettings.spacingBeforeEm ?? blockDefaults.spacingBeforeEm ?? 0;
-            const lineHeight = blockSettings.lineHeight ?? blockDefaults.lineHeight ?? 1;
+            const pageWidthPx = resolvedScriptSettings.page.widthPx ?? DEFAULT_EDITOR_SETTINGS.page.widthPx;
+            const pageMarginLeftPx = resolvedScriptSettings.page.marginLeftPx ?? DEFAULT_EDITOR_SETTINGS.page.marginLeftPx;
+            const pageMarginRightPx = resolvedScriptSettings.page.marginRightPx ?? DEFAULT_EDITOR_SETTINGS.page.marginRightPx;
+            const typographyFontSizePx = resolvedScriptSettings.typography.fontSizePx
+                ?? DEFAULT_EDITOR_SETTINGS.typography.fontSizePx;
+            const fallbackTypographyLineHeight = resolvedScriptSettings.typography.lineHeight
+                ?? DEFAULT_EDITOR_SETTINGS.typography.lineHeight;
+            const previewReferenceChars = Math.max(
+                MIN_PREVIEW_CONTENT_CHARS,
+                Math.round(
+                    Math.max(0, (pageWidthPx - pageMarginLeftPx - pageMarginRightPx) / 96) * SCREENPLAY_CHARS_PER_INCH,
+                ),
+            );
+            const defaultContentChars = Math.max(
+                1,
+                previewReferenceChars - (blockDefaults.indentLeftChars ?? 0) - (blockDefaults.indentRightChars ?? 0),
+            );
+            const minPreviewContentChars = Math.min(MIN_PREVIEW_CONTENT_CHARS, defaultContentChars);
+            const spacingBefore = getClosestStepValue(
+                SPACING_BEFORE_OPTIONS,
+                blockSettings.spacingBeforeEm ?? blockDefaults.spacingBeforeEm ?? 0,
+            );
+            const lineHeight = getClosestStepValue(
+                LINE_HEIGHT_OPTIONS,
+                blockSettings.lineHeight ?? blockDefaults.lineHeight ?? fallbackTypographyLineHeight,
+            );
+            const leftIndent = blockSettings.indentLeftChars ?? blockDefaults.indentLeftChars ?? 0;
+            const rightIndent = blockSettings.indentRightChars ?? blockDefaults.indentRightChars ?? 0;
             const shortcut = blockSettings.shortcut ?? blockDefaults.shortcut ?? BLOCK_SHORTCUT_OPTIONS[0];
             const nextElement = blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType;
             const textAlign = blockSettings.textAlign ?? blockDefaults.textAlign ?? BLOCK_TEXT_ALIGN_OPTIONS[0];
@@ -459,170 +613,291 @@ export const ScriptEditorRoute = () => {
             const isBold = blockSettings.isBold ?? blockDefaults.isBold ?? false;
             const isItalic = blockSettings.isItalic ?? blockDefaults.isItalic ?? false;
             const isUnderline = blockSettings.isUnderline ?? blockDefaults.isUnderline ?? false;
-            const spacingBeforeOptions = SPACING_BEFORE_OPTIONS.includes(spacingBefore as never)
-                ? SPACING_BEFORE_OPTIONS
-                : [...SPACING_BEFORE_OPTIONS, spacingBefore].sort((a, b) => a - b);
-            const lineHeightOptions = LINE_HEIGHT_OPTIONS.includes(lineHeight as never)
-                ? LINE_HEIGHT_OPTIONS
-                : [...LINE_HEIGHT_OPTIONS, lineHeight].sort((a, b) => a - b);
-            const leftIndentState = getIndentStepState(blockType, 'indentLeftChars');
-            const rightIndentState = getIndentStepState(blockType, 'indentRightChars');
+            const previewText = BLOCK_PREVIEW_TEXT[blockType];
+            const previewTextOffsetChars = blockType === ELEMENT_PARENTHETICAL ? 1 : 0;
+            const spacingBeforeOptions: SettingsSelectOption[] = SPACING_BEFORE_OPTIONS.map(option => ({
+                value: option,
+                label: formatLines(option),
+            }));
+            const lineHeightOptions: SettingsSelectOption[] = LINE_HEIGHT_OPTIONS.map(option => ({
+                value: option,
+                label: formatNumeric(option),
+            }));
+            const shortcutOptions: SettingsSelectOption[] = BLOCK_SHORTCUT_OPTIONS.map(option => ({
+                value: option,
+                label: option,
+            }));
+            const nextElementOptions: SettingsSelectOption[] = SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => ({
+                value: item.blockType,
+                label: item.label,
+                icon: BLOCK_ICONS[item.blockType],
+            }));
+            const normalizedLeftIndent = clamp(
+                Math.round(leftIndent),
+                0,
+                MAX_INDENT_CHARS,
+            );
+            const normalizedRightIndent = clamp(
+                Math.round(rightIndent),
+                0,
+                MAX_INDENT_CHARS,
+            );
+            const defaultSliderStartChars = 0;
+            const defaultSliderEndChars = previewReferenceChars;
+            const currentEndChars = previewReferenceChars - normalizedRightIndent;
+            const initialSliderStart = clamp(
+                normalizedLeftIndent,
+                defaultSliderStartChars,
+                defaultSliderEndChars - minPreviewContentChars,
+            );
+            const initialSliderEnd = clamp(
+                currentEndChars,
+                defaultSliderStartChars + minPreviewContentChars,
+                defaultSliderEndChars,
+            );
+            const sliderStart = clamp(
+                initialSliderStart,
+                defaultSliderStartChars,
+                initialSliderEnd - minPreviewContentChars,
+            );
+            const sliderEnd = clamp(
+                initialSliderEnd,
+                sliderStart + minPreviewContentChars,
+                defaultSliderEndChars,
+            );
+            const contentChars = Math.max(minPreviewContentChars, sliderEnd - sliderStart);
+            const leftTotalInches = (pageMarginLeftPx / 96) + (sliderStart / SCREENPLAY_CHARS_PER_INCH);
+            const rightTotalInches = (pageMarginRightPx / 96)
+                + ((previewReferenceChars - sliderEnd) / SCREENPLAY_CHARS_PER_INCH);
+            const safePageWidthPx = Math.max(1, pageWidthPx);
+            const pageStartPercent = clamp((pageMarginLeftPx / safePageWidthPx) * 100, 0, 45);
+            const pageEndPercent = clamp(100 - ((pageMarginRightPx / safePageWidthPx) * 100), 55, 100);
+            const pageContentPercent = Math.max(8, pageEndPercent - pageStartPercent);
+            const lineStartPercent = pageStartPercent + ((sliderStart / previewReferenceChars) * pageContentPercent);
+            const lineEndPercent = pageStartPercent + ((sliderEnd / previewReferenceChars) * pageContentPercent);
+            const previewStyle = {
+                '--preview-spacing-before': `${Math.max(0, spacingBefore) * typographyFontSizePx}px`,
+                '--preview-spacing-line-unit': `${typographyFontSizePx}px`,
+                '--preview-line-height': String(lineHeight),
+                '--preview-line-box-height': `${typographyFontSizePx}px`,
+                '--preview-font-size': `${typographyFontSizePx}px`,
+                '--preview-line-start-percent': `${lineStartPercent}%`,
+                '--preview-line-width': `${Math.max(6, lineEndPercent - lineStartPercent)}%`,
+                '--preview-slider-zone-start-percent': `${pageStartPercent}%`,
+                '--preview-slider-zone-end-percent': `${pageEndPercent}%`,
+                '--preview-indent-start-percent': `${lineStartPercent}%`,
+                '--preview-indent-end-percent': `${lineEndPercent}%`,
+                '--preview-indent-default-start-percent': `${pageStartPercent}%`,
+                '--preview-indent-default-end-percent': `${pageEndPercent}%`,
+                '--preview-text-align': textAlign,
+                '--preview-text-transform': casing === 'uppercase' ? 'uppercase' : 'none',
+                '--preview-font-weight': isBold ? '700' : '400',
+                '--preview-font-style': isItalic ? 'italic' : 'normal',
+                '--preview-text-decoration': isUnderline ? 'underline' : 'none',
+                '--preview-text-offset-ch': String(previewTextOffsetChars),
+            } as CSSProperties;
 
             return (
                 <div className={styles.panelStack}>
                     <h3 className={styles.panelTitle}>{blockLabel}</h3>
-                    <p className={styles.panelDescription}>
-                        Configure formatting and behavior for this block type.
-                    </p>
-                    <div className={styles.settingsGrid}>
-                        <label className={styles.fieldLabel} htmlFor="settings-spacing-before">Spacing before</label>
-                        <select
-                            id="settings-spacing-before"
-                            className={styles.fieldControl}
-                            value={spacingBefore}
-                            onChange={event => {
-                                updateBlockSettings(blockType, {
-                                    spacingBeforeEm: Number.parseFloat(event.target.value),
-                                });
-                            }}
-                        >
-                            {spacingBeforeOptions.map(option => (
-                                <option key={option} value={option}>
-                                    {formatLines(option)}
-                                </option>
-                            ))}
-                        </select>
-                        <label className={styles.fieldLabel} htmlFor="settings-line-height">Line height</label>
-                        <select
-                            id="settings-line-height"
-                            className={styles.fieldControl}
-                            value={lineHeight}
-                            onChange={event => {
-                                updateBlockSettings(blockType, {
-                                    lineHeight: Number.parseFloat(event.target.value),
-                                });
-                            }}
-                        >
-                            {lineHeightOptions.map(option => (
-                                <option key={option} value={option}>
-                                    {formatNumeric(option)}
-                                </option>
-                            ))}
-                        </select>
-                        <span className={styles.fieldLabel}>Shortcut</span>
-                        <div className={styles.shortcutField}>
-                            <span className={styles.shortcutPrefix}>{shortcutPrefix} +</span>
-                            <select
-                                className={styles.fieldControl}
-                                value={shortcut}
+                    <div className={styles.previewCard} style={previewStyle}>
+                        <div className={styles.previewToolbar}>
+                            <div className={styles.toolbarGroup}>
+                                {BLOCK_TEXT_ALIGN_OPTIONS.map(option => (
+                                    <button
+                                        key={option}
+                                        type="button"
+                                        className={option === textAlign ? styles.toolbarButtonActive : styles.toolbarButton}
+                                        onClick={() => {
+                                            updateBlockSettings(blockType, {
+                                                textAlign: option,
+                                            });
+                                        }}
+                                        aria-label={`${option} align`}
+                                    >
+                                        <span
+                                            className={`${styles.alignGlyph} ${
+                                                option === 'left'
+                                                    ? styles.alignGlyphLeft
+                                                    : option === 'center'
+                                                        ? styles.alignGlyphCenter
+                                                        : styles.alignGlyphRight
+                                            }`}
+                                        />
+                                    </button>
+                                ))}
+                            </div>
+                            <div className={styles.toolbarGroup}>
+                                <button
+                                    type="button"
+                                    className={casing === 'normal' ? styles.toolbarButtonActive : styles.toolbarButton}
+                                    onClick={() => {
+                                        updateBlockSettings(blockType, {
+                                            casing: 'normal',
+                                        });
+                                    }}
+                                    aria-label="Normal casing"
+                                >
+                                    <span className={styles.textIcon}>Aa</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={casing === 'uppercase' ? styles.toolbarButtonActive : styles.toolbarButton}
+                                    onClick={() => {
+                                        updateBlockSettings(blockType, {
+                                            casing: 'uppercase',
+                                        });
+                                    }}
+                                    aria-label="Uppercase casing"
+                                >
+                                    <span className={styles.textIcon}>AA</span>
+                                </button>
+                            </div>
+                            <div className={styles.toolbarGroup}>
+                                <button
+                                    type="button"
+                                    className={isBold ? styles.toolbarButtonActive : styles.toolbarButton}
+                                    onClick={() => updateBlockSettings(blockType, {isBold: !isBold})}
+                                    aria-label="Bold"
+                                >
+                                    <span className={styles.textIcon}>B</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={isItalic ? styles.toolbarButtonActive : styles.toolbarButton}
+                                    onClick={() => updateBlockSettings(blockType, {isItalic: !isItalic})}
+                                    aria-label="Italic"
+                                >
+                                    <span className={`${styles.textIcon} ${styles.textIconItalic}`}>I</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    className={isUnderline ? styles.toolbarButtonActive : styles.toolbarButton}
+                                    onClick={() => updateBlockSettings(blockType, {isUnderline: !isUnderline})}
+                                    aria-label="Underline"
+                                >
+                                    <span className={`${styles.textIcon} ${styles.textIconUnderline}`}>U</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div className={styles.previewSpacingRow} />
+                        <div className={styles.previewLineCanvas}>
+                            <div className={styles.previewLineInner}>
+                                <span className={styles.previewLineText}>{previewText}</span>
+                            </div>
+                        </div>
+                        <div className={styles.indentSliderTrack}>
+                            <span className={styles.indentSliderBase} />
+                            <span className={styles.indentSliderMiddleBase} />
+                            <span className={styles.indentSliderSelected} />
+                            <span className={styles.indentSliderDefaultStart} />
+                            <span className={styles.indentSliderDefaultEnd} />
+                            <input
+                                type="range"
+                                className={`${styles.indentSliderInput} ${styles.indentSliderInputStart}`}
+                                min={0}
+                                max={previewReferenceChars}
+                                step={1}
+                                value={sliderStart}
                                 onChange={event => {
+                                    const rawStart = Number.parseInt(event.target.value, 10);
+                                    const maxStart = Math.max(
+                                        defaultSliderStartChars,
+                                        sliderEnd - minPreviewContentChars,
+                                    );
+                                    const nextStart = clamp(rawStart, defaultSliderStartChars, maxStart);
+
                                     updateBlockSettings(blockType, {
-                                        shortcut: event.target.value as typeof shortcut,
+                                        indentLeftChars: nextStart,
                                     });
                                 }}
-                            >
-                                {BLOCK_SHORTCUT_OPTIONS.map(option => (
-                                    <option key={option} value={option}>
-                                        {option}
-                                    </option>
-                                ))}
-                            </select>
+                                aria-label="Block start indent"
+                            />
+                            <input
+                                type="range"
+                                className={`${styles.indentSliderInput} ${styles.indentSliderInputEnd}`}
+                                min={0}
+                                max={previewReferenceChars}
+                                step={1}
+                                value={sliderEnd}
+                                onChange={event => {
+                                    const rawEnd = Number.parseInt(event.target.value, 10);
+                                    const minEnd = sliderStart + minPreviewContentChars;
+                                    const nextEnd = clamp(rawEnd, minEnd, defaultSliderEndChars);
+
+                                    updateBlockSettings(blockType, {
+                                        indentRightChars: previewReferenceChars - nextEnd,
+                                    });
+                                }}
+                                aria-label="Block end indent"
+                            />
                         </div>
-                        <label className={styles.fieldLabel} htmlFor="settings-next-element">Next element</label>
-                        <select
-                            id="settings-next-element"
-                            className={styles.fieldControl}
-                            value={nextElement}
-                            onChange={event => {
-                                updateBlockSettings(blockType, {
-                                    nextElement: event.target.value as FountainElementType,
-                                });
-                            }}
-                        >
-                            {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => (
-                                <option key={item.blockType} value={item.blockType}>
-                                    {item.label}
-                                </option>
-                            ))}
-                        </select>
-                        <label className={styles.fieldLabel} htmlFor="settings-text-align">Alignment</label>
-                        <select
-                            id="settings-text-align"
-                            className={styles.fieldControl}
-                            value={textAlign}
-                            onChange={event => {
-                                updateBlockSettings(blockType, {
-                                    textAlign: event.target.value as typeof textAlign,
-                                });
-                            }}
-                        >
-                            {BLOCK_TEXT_ALIGN_OPTIONS.map(option => (
-                                <option key={option} value={option}>
-                                    {option}
-                                </option>
-                            ))}
-                        </select>
-                        <label className={styles.fieldLabel} htmlFor="settings-casing">Casing</label>
-                        <select
-                            id="settings-casing"
-                            className={styles.fieldControl}
-                            value={casing}
-                            onChange={event => {
-                                updateBlockSettings(blockType, {
-                                    casing: event.target.value as typeof casing,
-                                });
-                            }}
-                        >
-                            {BLOCK_CASING_OPTIONS.map(option => (
-                                <option key={option} value={option}>
-                                    {option}
-                                </option>
-                            ))}
-                        </select>
-                        <span className={styles.fieldLabel}>Text style</span>
-                        <div className={styles.toggleGroup}>
-                            <button
-                                type="button"
-                                className={isBold ? styles.toggleButtonActive : styles.toggleButton}
-                                onClick={() => updateBlockSettings(blockType, {isBold: !isBold})}
-                            >
-                                Bold
-                            </button>
-                            <button
-                                type="button"
-                                className={isItalic ? styles.toggleButtonActive : styles.toggleButton}
-                                onClick={() => updateBlockSettings(blockType, {isItalic: !isItalic})}
-                            >
-                                Italic
-                            </button>
-                            <button
-                                type="button"
-                                className={isUnderline ? styles.toggleButtonActive : styles.toggleButton}
-                                onClick={() => updateBlockSettings(blockType, {isUnderline: !isUnderline})}
-                            >
-                                Underline
-                            </button>
+                        <div className={styles.indentSliderLabels}>
+                            <span>{'Start: '}{formatInches(leftTotalInches)}</span>
+                            <span>{formatNumeric(contentChars / SCREENPLAY_CHARS_PER_INCH)}&quot; / {contentChars} chars</span>
+                            <span>{'End: '}{formatInches(rightTotalInches)}</span>
                         </div>
-                        <span className={styles.fieldLabel}>Spacing left</span>
-                        <StepperField
-                            valueLabel={`${leftIndentState.value} ch`}
-                            canDecrease={leftIndentState.currentIndex > 0}
-                            canIncrease={leftIndentState.currentIndex < leftIndentState.steps.length - 1}
-                            onDecrease={() => changeIndentWithStep(blockType, 'indentLeftChars', -1)}
-                            onIncrease={() => changeIndentWithStep(blockType, 'indentLeftChars', 1)}
-                        />
-                        <span className={styles.fieldLabel}>Spacing right</span>
-                        <StepperField
-                            valueLabel={`${rightIndentState.value} ch`}
-                            canDecrease={rightIndentState.currentIndex > 0}
-                            canIncrease={rightIndentState.currentIndex < rightIndentState.steps.length - 1}
-                            onDecrease={() => changeIndentWithStep(blockType, 'indentRightChars', -1)}
-                            onIncrease={() => changeIndentWithStep(blockType, 'indentRightChars', 1)}
-                        />
                     </div>
-                    <p className={styles.panelCaption}>
-                        Settings are persisted per script and prepared for future cloud sync.
-                    </p>
+                    <div className={styles.settingsFlatGrid}>
+                        <div className={styles.settingsField}>
+                            <span className={styles.fieldLabel}>Spacing before</span>
+                            <SettingsSelect
+                                id="settings-spacing-before"
+                                ariaLabel="Select spacing before"
+                                value={spacingBefore}
+                                options={spacingBeforeOptions}
+                                onChange={nextValue => {
+                                    updateBlockSettings(blockType, {
+                                        spacingBeforeEm: Number(nextValue),
+                                    });
+                                }}
+                            />
+                        </div>
+                        <div className={styles.settingsField}>
+                            <span className={styles.fieldLabel}>Line height</span>
+                            <SettingsSelect
+                                id="settings-line-height"
+                                ariaLabel="Select line height"
+                                value={lineHeight}
+                                options={lineHeightOptions}
+                                onChange={nextValue => {
+                                    updateBlockSettings(blockType, {
+                                        lineHeight: Number(nextValue),
+                                    });
+                                }}
+                            />
+                        </div>
+                        <div className={styles.settingsField}>
+                            <span className={styles.fieldLabel}>Shortcut</span>
+                            <div className={styles.shortcutField}>
+                                <span className={styles.shortcutPrefix}>{shortcutPrefix} +</span>
+                                <SettingsSelect
+                                    ariaLabel="Select block shortcut"
+                                    value={shortcut}
+                                    options={shortcutOptions}
+                                    onChange={nextValue => {
+                                        updateBlockSettings(blockType, {
+                                            shortcut: nextValue as typeof shortcut,
+                                        });
+                                    }}
+                                />
+                            </div>
+                        </div>
+                        <div className={styles.settingsField}>
+                            <span className={styles.fieldLabel}>Next element</span>
+                            <SettingsSelect
+                                id="settings-next-element"
+                                ariaLabel="Select next element"
+                                value={nextElement}
+                                options={nextElementOptions}
+                                onChange={nextValue => {
+                                    updateBlockSettings(blockType, {
+                                        nextElement: nextValue as FountainElementType,
+                                    });
+                                }}
+                            />
+                        </div>
+                    </div>
                 </div>
             );
         }
@@ -662,8 +937,6 @@ export const ScriptEditorRoute = () => {
         );
     }, [
         blockLabelByType,
-        changeIndentWithStep,
-        getIndentStepState,
         resolvedScriptSettings.blocks,
         shortcutPrefix,
         updateBlockSettings,
