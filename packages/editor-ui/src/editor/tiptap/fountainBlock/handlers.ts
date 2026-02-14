@@ -5,12 +5,14 @@ import {
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
     ELEMENT_PARENTHETICAL,
+    normalizeCharacterEditorDelimiters,
 } from '@stagistic/editor-core';
 import {
     type BlockCasing,
     type BlockShortcut,
     isBlockShortcut,
 } from '@stagistic/shared';
+import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
 import {FOUNTAIN_BLOCK_TYPES} from '../../blocks/fountain';
@@ -310,6 +312,31 @@ const keyDownHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) 
     },
 };
 
+const normalizeActiveCharacterDelimiters = (editor: Editor) => {
+    const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+
+    if (
+        !block
+        || (block.blockType !== ELEMENT_CHARACTER
+            && block.blockType !== ELEMENT_DUAL_DIALOGUE_CHARACTER)
+    ) {
+        return;
+    }
+
+    const text = block.node.textContent ?? '';
+    const normalized = normalizeCharacterEditorDelimiters(text);
+
+    if (normalized === text) {
+        return;
+    }
+
+    const selectionOffset = Math.max(0, Math.min(editor.state.selection.from - block.from, normalized.length));
+    let tr = editor.state.tr.insertText(normalized, block.from, block.to);
+
+    tr = tr.setSelection(TextSelection.create(tr.doc, block.from + selectionOffset));
+    editor.view.dispatch(tr);
+};
+
 const handleCharacterInput = (
     context: BlockContext,
     from: number,
@@ -324,7 +351,26 @@ const handleCharacterInput = (
     }
 
     const offset = getSelectionOffset(context.editor, context.block.from);
-    const insideParens = isInsideParentheses(context.block.node.textContent ?? '', offset);
+    const blockText = context.block.node.textContent ?? '';
+    const insideParens = isInsideParentheses(blockText, offset);
+
+    if (text === '+') {
+        const tr = context.editor.state.tr.insertText('+', from, to);
+
+        context.editor.view.dispatch(tr);
+        normalizeActiveCharacterDelimiters(context.editor);
+
+        return true;
+    }
+
+    if (text === ' ' && !insideParens) {
+        const previous = offset > 0 ? blockText[offset - 1] : '';
+        const next = blockText[offset] ?? '';
+
+        if (previous === '+' || next === '+') {
+            return true;
+        }
+    }
 
     if (enforceUppercase && !insideParens) {
         const upper = text.toUpperCase();

@@ -1,3 +1,4 @@
+import {useScriptRepository} from '@stagistic/app-core';
 import {
     ELEMENT_ACTION,
     ELEMENT_CENTERED,
@@ -9,11 +10,15 @@ import {
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
+    extractCharacterKeys,
     type FountainElementType,
+    normalizeCharacterKey,
+    splitCharacterTokens,
 } from '@stagistic/editor-core';
 import {
     BLOCK_ICONS,
     FountainEditor,
+    getCharacterColor,
 } from '@stagistic/editor-ui';
 import {
     BLOCK_CASING_OPTIONS,
@@ -22,7 +27,10 @@ import {
     DEFAULT_EDITOR_SETTINGS,
     type EditorSettings,
     type EditorSettingsOverride,
+    FOUNTAIN_BLOCK_NODE_NAME,
+    type FountainJSONContent,
     mergeEditorSettings,
+    type ScriptDocument,
 } from '@stagistic/shared';
 import {
     AppHeader,
@@ -198,6 +206,33 @@ const formatLines = (value: number) => {
 const formatInches = (value: number) => `${value.toFixed(2)}"`;
 const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
 
+const SETTINGS_BLOCK_TYPE_SET = new Set<FountainElementType>([
+    ELEMENT_SCENE_HEADING,
+    ELEMENT_ACTION,
+    ELEMENT_CHARACTER,
+    ELEMENT_DUAL_DIALOGUE_CHARACTER,
+    ELEMENT_PARENTHETICAL,
+    ELEMENT_DIALOGUE,
+    ELEMENT_DUAL_DIALOGUE,
+    ELEMENT_TRANSITION,
+    ELEMENT_LYRICS,
+    ELEMENT_CENTERED,
+]);
+
+const normalizeSettingsBlockType = (value: unknown): FountainElementType | null => {
+    if (value === 'fountain_lyric' || value === 'lyrics') {
+        return ELEMENT_LYRICS;
+    }
+
+    if (value === ELEMENT_DUAL_DIALOGUE) {
+        return ELEMENT_DIALOGUE;
+    }
+
+    return typeof value === 'string' && SETTINGS_BLOCK_TYPE_SET.has(value as FountainElementType)
+        ? value as FountainElementType
+        : null;
+};
+
 const getClosestStepIndex = (steps: readonly number[], value: number) => {
     let bestIndex = 0;
     let bestDistance = Number.POSITIVE_INFINITY;
@@ -215,6 +250,31 @@ const getClosestStepIndex = (steps: readonly number[], value: number) => {
 };
 
 type BlockSettingsPatch = Partial<EditorSettings['blocks'][FountainElementType]>;
+
+type CharacterCountItem = {
+    id?: string,
+    key: string,
+    count: number,
+    color: string,
+    isConfirmed: boolean,
+    isPending?: boolean,
+    isConfirmPending?: boolean,
+    isDeletePending?: boolean,
+    isRenamePending?: boolean,
+};
+
+type ScriptCharacterRecord = {
+    id: string,
+    key: string,
+};
+
+type CharacterRefByKey = Record<string, string>;
+
+type ScriptCharacterStats = {
+    countsByKey: Map<string, number>,
+    confirmedCountsById: Map<string, number>,
+    unconfirmedCountsByKey: Map<string, number>,
+};
 
 type SettingsSelectOption = {
     value: number | string,
@@ -236,6 +296,639 @@ const getClosestStepValue = (steps: readonly number[], value: number) => {
     return steps[closestIndex] ?? steps[0] ?? value;
 };
 
+const isCharacterBlockType = (value: unknown) => {
+    return value === ELEMENT_CHARACTER || value === ELEMENT_DUAL_DIALOGUE_CHARACTER;
+};
+
+const getNodeTextContent = (node: FountainJSONContent): string => {
+    if (typeof node.text === 'string') {
+        return node.text;
+    }
+
+    if (!Array.isArray(node.content)) {
+        return '';
+    }
+
+    return node.content.map(getNodeTextContent).join('');
+};
+
+const splitCharacterBaseAndSuffix = (value: string) => {
+    const trimmed = value.trim();
+    const suffixMatch = trimmed.match(/\s*(\([^()]*\)\s*)+$/);
+
+    if (!suffixMatch) {
+        return {
+            base: trimmed,
+            suffix: '',
+        };
+    }
+
+    const suffix = suffixMatch[0].trim();
+    const base = trimmed.slice(0, trimmed.length - suffixMatch[0].length).trim();
+
+    return {
+        base,
+        suffix,
+    };
+};
+
+const normalizeCharacterDisplayName = (value: string) => value
+    .replace(/\s+/g, ' ')
+    .trim();
+
+const isObjectRecord = (value: unknown): value is Record<string, unknown> => {
+    return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
+};
+
+const getCharacterRefByKey = (attrs: Record<string, unknown> | undefined): CharacterRefByKey => {
+    if (!attrs || !isObjectRecord(attrs.characterRefs)) {
+        return {};
+    }
+
+    const characterRefs: CharacterRefByKey = {};
+
+    Object.entries(attrs.characterRefs).forEach(([rawKey, rawCharacterId]) => {
+        if (typeof rawCharacterId !== 'string' || rawCharacterId.length === 0) {
+            return;
+        }
+
+        const key = normalizeCharacterKey(rawKey);
+
+        if (key.length === 0) {
+            return;
+        }
+
+        characterRefs[key] = rawCharacterId;
+    });
+
+    return characterRefs;
+};
+
+const withCharacterRefByKey = (node: FountainJSONContent, characterRefByKey: CharacterRefByKey): FountainJSONContent => {
+    const attrs = isObjectRecord(node.attrs) ? node.attrs : {};
+    const nextAttrs = {
+        ...attrs,
+    };
+
+    if (Object.keys(characterRefByKey).length === 0) {
+        delete nextAttrs.characterRefs;
+    } else {
+        nextAttrs.characterRefs = characterRefByKey;
+    }
+
+    return {
+        ...node,
+        attrs: nextAttrs,
+    };
+};
+
+const renameCharacterLine = (
+    line: string,
+    fromCharacterKey: string,
+    toCharacterName: string,
+    characterRefByKey: CharacterRefByKey,
+    characterId?: string,
+) => {
+    const tokens = splitCharacterTokens(line);
+    let didRename = false;
+    const normalizedSourceKey = normalizeCharacterKey(fromCharacterKey);
+    const normalizedTargetName = normalizeCharacterDisplayName(toCharacterName);
+    const normalizedTargetKey = normalizeCharacterKey(normalizedTargetName);
+
+    const renamedTokens = tokens.map(token => {
+        const sourceValue = token.value.trim();
+        const sourceKey = normalizeCharacterKey(sourceValue);
+        const tokenCharacterId = characterRefByKey[sourceKey];
+        const shouldRename = characterId
+            ? tokenCharacterId === characterId
+                || (!tokenCharacterId && sourceKey === normalizedSourceKey)
+            : sourceKey === normalizedSourceKey;
+
+        if (!shouldRename) {
+            return {
+                value: sourceValue,
+                key: sourceKey,
+            };
+        }
+
+        const {
+            suffix,
+        } = splitCharacterBaseAndSuffix(sourceValue);
+        const nextValue = suffix.length > 0
+            ? `${normalizedTargetName} ${suffix}`
+            : normalizedTargetName;
+
+        didRename = true;
+
+        return {
+            value: nextValue,
+            key: normalizeCharacterKey(nextValue),
+        };
+    });
+
+    if (!didRename) {
+        return {
+            line,
+            changed: false,
+            characterRefByKey,
+        };
+    }
+
+    const dedupedValues: string[] = [];
+    const dedupedKeys: string[] = [];
+    const seen = new Set<string>();
+
+    renamedTokens.forEach(token => {
+        if (token.value.length === 0 || token.key.length === 0 || seen.has(token.key)) {
+            return;
+        }
+
+        seen.add(token.key);
+        dedupedValues.push(token.value);
+        dedupedKeys.push(token.key);
+    });
+
+    const presentKeys = new Set(dedupedKeys);
+    const nextCharacterRefByKey: CharacterRefByKey = {};
+
+    Object.entries(characterRefByKey).forEach(([key, id]) => {
+        if (!presentKeys.has(key)) {
+            return;
+        }
+
+        if (characterId && id === characterId && key === normalizedSourceKey && key !== normalizedTargetKey) {
+            return;
+        }
+
+        nextCharacterRefByKey[key] = id;
+    });
+
+    if (normalizedTargetKey.length > 0) {
+        if (characterId) {
+            nextCharacterRefByKey[normalizedTargetKey] = characterId;
+        } else {
+            const sourceCharacterId = characterRefByKey[normalizedSourceKey];
+
+            if (sourceCharacterId) {
+                nextCharacterRefByKey[normalizedTargetKey] = sourceCharacterId;
+            }
+        }
+    }
+
+    return {
+        line: dedupedValues.join('+'),
+        changed: true,
+        characterRefByKey: nextCharacterRefByKey,
+    };
+};
+
+const renameCharacterInScriptDocument = (
+    value: ScriptDocument,
+    fromCharacterKey: string,
+    toCharacterName: string,
+    getCharacterNameForBlockType: (name: string, blockType: unknown) => string,
+    options?: {characterId?: string},
+) => {
+    const replaceNodes = (nodes: FountainJSONContent[] | undefined): {
+        nodes: FountainJSONContent[] | undefined,
+        changed: boolean,
+    } => {
+        if (!Array.isArray(nodes)) {
+            return {
+                nodes,
+                changed: false,
+            };
+        }
+
+        let didChange = false;
+        const nextNodes = nodes.map(node => {
+            if (!node || typeof node !== 'object') {
+                return node;
+            }
+
+            if (node.type === FOUNTAIN_BLOCK_NODE_NAME && isCharacterBlockType(node.attrs?.blockType)) {
+                const sourceLine = getNodeTextContent(node);
+                const replacementName = getCharacterNameForBlockType(toCharacterName, node.attrs?.blockType);
+                const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
+                const {
+                    line: renamedLine,
+                    changed: didRenameLine,
+                    characterRefByKey: nextCharacterRefByKey,
+                } = renameCharacterLine(
+                    sourceLine,
+                    fromCharacterKey,
+                    replacementName,
+                    sourceCharacterRefByKey,
+                    options?.characterId,
+                );
+
+                if (!didRenameLine) {
+                    return node;
+                }
+
+                didChange = true;
+
+                return withCharacterRefByKey({
+                    ...node,
+                    content: renamedLine.length > 0
+                        ? [{type: 'text', text: renamedLine}]
+                        : [],
+                }, nextCharacterRefByKey);
+            }
+
+            const {
+                nodes: nextContent,
+                changed: didChangeChildren,
+            } = replaceNodes(node.content);
+
+            if (!didChangeChildren) {
+                return node;
+            }
+
+            didChange = true;
+
+            return {
+                ...node,
+                content: nextContent,
+            };
+        });
+
+        return {
+            nodes: didChange ? nextNodes : nodes,
+            changed: didChange,
+        };
+    };
+
+    const {
+        nodes: nextContent,
+        changed,
+    } = replaceNodes(value.content);
+
+    if (!changed || !nextContent) {
+        return {
+            value,
+            changed: false,
+        };
+    }
+
+    return {
+        value: {
+            ...value,
+            content: nextContent,
+        },
+        changed: true,
+    };
+};
+
+const linkCharacterRefInScriptDocument = (
+    value: ScriptDocument,
+    characterKey: string,
+    characterId: string,
+) => {
+    const normalizedCharacterKey = normalizeCharacterKey(characterKey);
+
+    if (normalizedCharacterKey.length === 0 || characterId.length === 0) {
+        return {
+            value,
+            changed: false,
+        };
+    }
+
+    const replaceNodes = (nodes: FountainJSONContent[] | undefined): {
+        nodes: FountainJSONContent[] | undefined,
+        changed: boolean,
+    } => {
+        if (!Array.isArray(nodes)) {
+            return {
+                nodes,
+                changed: false,
+            };
+        }
+
+        let didChange = false;
+        const nextNodes = nodes.map(node => {
+            if (!node || typeof node !== 'object') {
+                return node;
+            }
+
+            if (node.type === FOUNTAIN_BLOCK_NODE_NAME && isCharacterBlockType(node.attrs?.blockType)) {
+                const text = getNodeTextContent(node);
+                const keys = extractCharacterKeys(text);
+
+                if (!keys.includes(normalizedCharacterKey)) {
+                    return node;
+                }
+
+                const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
+
+                if (sourceCharacterRefByKey[normalizedCharacterKey] === characterId) {
+                    return node;
+                }
+
+                didChange = true;
+
+                return withCharacterRefByKey(node, {
+                    ...sourceCharacterRefByKey,
+                    [normalizedCharacterKey]: characterId,
+                });
+            }
+
+            const {
+                nodes: nextContent,
+                changed: didChangeChildren,
+            } = replaceNodes(node.content);
+
+            if (!didChangeChildren) {
+                return node;
+            }
+
+            didChange = true;
+
+            return {
+                ...node,
+                content: nextContent,
+            };
+        });
+
+        return {
+            nodes: didChange ? nextNodes : nodes,
+            changed: didChange,
+        };
+    };
+
+    const {
+        nodes: nextContent,
+        changed,
+    } = replaceNodes(value.content);
+
+    if (!changed || !nextContent) {
+        return {
+            value,
+            changed: false,
+        };
+    }
+
+    return {
+        value: {
+            ...value,
+            content: nextContent,
+        },
+        changed: true,
+    };
+};
+
+const unlinkCharacterRefInScriptDocument = (
+    value: ScriptDocument,
+    characterId: string,
+) => {
+    if (characterId.length === 0) {
+        return {
+            value,
+            changed: false,
+        };
+    }
+
+    const replaceNodes = (nodes: FountainJSONContent[] | undefined): {
+        nodes: FountainJSONContent[] | undefined,
+        changed: boolean,
+    } => {
+        if (!Array.isArray(nodes)) {
+            return {
+                nodes,
+                changed: false,
+            };
+        }
+
+        let didChange = false;
+        const nextNodes = nodes.map(node => {
+            if (!node || typeof node !== 'object') {
+                return node;
+            }
+
+            if (node.type === FOUNTAIN_BLOCK_NODE_NAME && isCharacterBlockType(node.attrs?.blockType)) {
+                const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
+                const nextCharacterRefByKey = Object.entries(sourceCharacterRefByKey).reduce<CharacterRefByKey>(
+                    (acc, [key, id]) => {
+                        if (id !== characterId) {
+                            acc[key] = id;
+                        }
+
+                        return acc;
+                    },
+                    {},
+                );
+
+                if (Object.keys(nextCharacterRefByKey).length === Object.keys(sourceCharacterRefByKey).length) {
+                    return node;
+                }
+
+                didChange = true;
+
+                return withCharacterRefByKey(node, nextCharacterRefByKey);
+            }
+
+            const {
+                nodes: nextContent,
+                changed: didChangeChildren,
+            } = replaceNodes(node.content);
+
+            if (!didChangeChildren) {
+                return node;
+            }
+
+            didChange = true;
+
+            return {
+                ...node,
+                content: nextContent,
+            };
+        });
+
+        return {
+            nodes: didChange ? nextNodes : nodes,
+            changed: didChange,
+        };
+    };
+
+    const {
+        nodes: nextContent,
+        changed,
+    } = replaceNodes(value.content);
+
+    if (!changed || !nextContent) {
+        return {
+            value,
+            changed: false,
+        };
+    }
+
+    return {
+        value: {
+            ...value,
+            content: nextContent,
+        },
+        changed: true,
+    };
+};
+
+const replaceCharacterRefIdInScriptDocument = (
+    value: ScriptDocument,
+    sourceCharacterId: string,
+    targetCharacterId: string,
+) => {
+    if (
+        sourceCharacterId.length === 0
+        || targetCharacterId.length === 0
+        || sourceCharacterId === targetCharacterId
+    ) {
+        return {
+            value,
+            changed: false,
+        };
+    }
+
+    const replaceNodes = (nodes: FountainJSONContent[] | undefined): {
+        nodes: FountainJSONContent[] | undefined,
+        changed: boolean,
+    } => {
+        if (!Array.isArray(nodes)) {
+            return {
+                nodes,
+                changed: false,
+            };
+        }
+
+        let didChange = false;
+        const nextNodes = nodes.map(node => {
+            if (!node || typeof node !== 'object') {
+                return node;
+            }
+
+            if (node.type === FOUNTAIN_BLOCK_NODE_NAME && isCharacterBlockType(node.attrs?.blockType)) {
+                const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
+                let changedCharacterRef = false;
+                const nextCharacterRefByKey = Object.entries(sourceCharacterRefByKey).reduce<CharacterRefByKey>(
+                    (acc, [key, id]) => {
+                        if (id === sourceCharacterId) {
+                            acc[key] = targetCharacterId;
+                            changedCharacterRef = true;
+
+                            return acc;
+                        }
+
+                        acc[key] = id;
+
+                        return acc;
+                    },
+                    {},
+                );
+
+                if (!changedCharacterRef) {
+                    return node;
+                }
+
+                didChange = true;
+
+                return withCharacterRefByKey(node, nextCharacterRefByKey);
+            }
+
+            const {
+                nodes: nextContent,
+                changed: didChangeChildren,
+            } = replaceNodes(node.content);
+
+            if (!didChangeChildren) {
+                return node;
+            }
+
+            didChange = true;
+
+            return {
+                ...node,
+                content: nextContent,
+            };
+        });
+
+        return {
+            nodes: didChange ? nextNodes : nodes,
+            changed: didChange,
+        };
+    };
+
+    const {
+        nodes: nextContent,
+        changed,
+    } = replaceNodes(value.content);
+
+    if (!changed || !nextContent) {
+        return {
+            value,
+            changed: false,
+        };
+    }
+
+    return {
+        value: {
+            ...value,
+            content: nextContent,
+        },
+        changed: true,
+    };
+};
+
+const collectScriptCharacterStats = (
+    documentValue: ScriptDocument | null | undefined,
+    confirmedCharacterIdSet: ReadonlySet<string>,
+): ScriptCharacterStats => {
+    const countsByKey = new Map<string, number>();
+    const confirmedCountsById = new Map<string, number>();
+    const unconfirmedCountsByKey = new Map<string, number>();
+    const walkNodes = (nodes?: FountainJSONContent[]) => {
+        if (!Array.isArray(nodes)) {
+            return;
+        }
+
+        nodes.forEach(node => {
+            if (!node || typeof node !== 'object') {
+                return;
+            }
+
+            if (node.type === FOUNTAIN_BLOCK_NODE_NAME) {
+                const blockType = node.attrs?.blockType;
+
+                if (isCharacterBlockType(blockType)) {
+                    const text = getNodeTextContent(node);
+                    const characterRefByKey = getCharacterRefByKey(node.attrs);
+
+                    extractCharacterKeys(text).forEach(key => {
+                        countsByKey.set(key, (countsByKey.get(key) ?? 0) + 1);
+
+                        const characterId = characterRefByKey[key];
+
+                        if (characterId && confirmedCharacterIdSet.has(characterId)) {
+                            confirmedCountsById.set(characterId, (confirmedCountsById.get(characterId) ?? 0) + 1);
+
+                            return;
+                        }
+
+                        unconfirmedCountsByKey.set(key, (unconfirmedCountsByKey.get(key) ?? 0) + 1);
+                    });
+                }
+            }
+
+            walkNodes(node.content);
+        });
+    };
+
+    walkNodes(documentValue?.content);
+
+    return {
+        countsByKey,
+        confirmedCountsById,
+        unconfirmedCountsByKey,
+    };
+};
+
 const normalizeSettingsOverride = (settings: EditorSettingsOverride): EditorSettingsOverride => {
     if (!settings.blocks) {
         return settings;
@@ -243,8 +936,14 @@ const normalizeSettingsOverride = (settings: EditorSettingsOverride): EditorSett
 
     const nextBlocks = Object.entries(settings.blocks).reduce<NonNullable<EditorSettingsOverride['blocks']>>(
         (acc, [blockType, blockSettings]) => {
+            const normalizedBlockType = normalizeSettingsBlockType(blockType);
+
+            if (!normalizedBlockType) {
+                return acc;
+            }
+
             if (!blockSettings) {
-                acc[blockType as FountainElementType] = blockSettings;
+                acc[normalizedBlockType] = blockSettings;
 
                 return acc;
             }
@@ -252,6 +951,10 @@ const normalizeSettingsOverride = (settings: EditorSettingsOverride): EditorSett
             const normalizedBlockSettings = {
                 ...blockSettings,
             };
+
+            if (blockSettings.nextElement !== undefined) {
+                normalizedBlockSettings.nextElement = normalizeSettingsBlockType(blockSettings.nextElement) ?? undefined;
+            }
 
             if (typeof blockSettings.spacingBeforeEm === 'number') {
                 normalizedBlockSettings.spacingBeforeEm = getClosestStepValue(
@@ -267,7 +970,18 @@ const normalizeSettingsOverride = (settings: EditorSettingsOverride): EditorSett
                 );
             }
 
-            acc[blockType as FountainElementType] = normalizedBlockSettings;
+            const compactedBlockSettings = Object.fromEntries(
+                Object.entries(normalizedBlockSettings).filter(([, value]) => value !== undefined),
+            ) as NonNullable<EditorSettingsOverride['blocks']>[FountainElementType];
+
+            if (Object.keys(compactedBlockSettings).length === 0) {
+                return acc;
+            }
+
+            acc[normalizedBlockType] = {
+                ...acc[normalizedBlockType],
+                ...compactedBlockSettings,
+            };
 
             return acc;
         },
@@ -386,11 +1100,20 @@ const SettingsSelect = ({
 export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
     const {scriptId} = useParams();
+    const scriptRepository = useScriptRepository();
     const [searchParams, setSearchParams] = useSearchParams();
     const {openNewScript} = useGlobalModals();
     const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
     const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
     const [scriptSettingsDraft, setScriptSettingsDraft] = useState<EditorSettingsOverride>({});
+    const [editorValue, setEditorValue] = useState<ScriptDocument | null>(null);
+    const [editorOverrideValue, setEditorOverrideValue] = useState<ScriptDocument | null>(null);
+    const [confirmedCharacterRecords, setConfirmedCharacterRecords] = useState<ScriptCharacterRecord[]>([]);
+    const [confirmingCharacterKeys, setConfirmingCharacterKeys] = useState<string[]>([]);
+    const [deletingCharacterIds, setDeletingCharacterIds] = useState<string[]>([]);
+    const [renamingCharacterIds, setRenamingCharacterIds] = useState<string[]>([]);
+    const [renamingCharacterKeys, setRenamingCharacterKeys] = useState<string[]>([]);
+    const [isCharactersLoading, setIsCharactersLoading] = useState(false);
     const settingsSaveTimerRef = useRef<number | null>(null);
     const hydratedSettingsScriptIdRef = useRef<string | null>(null);
     const {
@@ -439,10 +1162,118 @@ export const ScriptEditorRoute = () => {
         () => JSON.stringify(scriptSettingsOverride ?? {}),
         [scriptSettingsOverride],
     );
+    const confirmingCharacterSet = useMemo(
+        () => new Set(confirmingCharacterKeys),
+        [confirmingCharacterKeys],
+    );
+    const deletingCharacterIdSet = useMemo(
+        () => new Set(deletingCharacterIds),
+        [deletingCharacterIds],
+    );
+    const renamingCharacterIdSet = useMemo(
+        () => new Set(renamingCharacterIds),
+        [renamingCharacterIds],
+    );
+    const renamingCharacterKeySet = useMemo(
+        () => new Set(renamingCharacterKeys),
+        [renamingCharacterKeys],
+    );
+    const confirmedCharactersById = useMemo(() => {
+        const result = new Map<string, ScriptCharacterRecord>();
 
-    const scenes = useMemo(() => {
-        return [];
-    }, []);
+        confirmedCharacterRecords.forEach(character => {
+            if (!character.id) {
+                return;
+            }
+
+            result.set(character.id, character);
+        });
+
+        return result;
+    }, [confirmedCharacterRecords]);
+    const normalizedConfirmedCharacterRecords = useMemo(() => {
+        const seen = new Set<string>();
+        const normalized: ScriptCharacterRecord[] = [];
+
+        confirmedCharacterRecords.forEach(character => {
+            const key = normalizeCharacterKey(character.key);
+
+            if (!key || seen.has(key)) {
+                return;
+            }
+
+            seen.add(key);
+            normalized.push({
+                id: character.id,
+                key,
+            });
+        });
+
+        normalized.sort((a, b) => a.key.localeCompare(b.key));
+
+        return normalized;
+    }, [confirmedCharacterRecords]);
+    const normalizedConfirmedCharacterKeys = useMemo(
+        () => normalizedConfirmedCharacterRecords.map(character => character.key),
+        [normalizedConfirmedCharacterRecords],
+    );
+    const confirmedCharacterIdSet = useMemo(
+        () => new Set(normalizedConfirmedCharacterRecords.map(character => character.id)),
+        [normalizedConfirmedCharacterRecords],
+    );
+    const scriptCharacterStats = useMemo(
+        () => collectScriptCharacterStats(editorValue ?? initialValue, confirmedCharacterIdSet),
+        [
+            confirmedCharacterIdSet,
+            editorValue,
+            initialValue,
+        ],
+    );
+    const confirmedCharacterSet = useMemo(
+        () => new Set(normalizedConfirmedCharacterKeys),
+        [normalizedConfirmedCharacterKeys],
+    );
+    const confirmedCharacters = useMemo<CharacterCountItem[]>(
+        () => normalizedConfirmedCharacterRecords.map(character => ({
+            id: character.id,
+            key: character.key,
+            count: scriptCharacterStats.confirmedCountsById.get(character.id)
+                ?? scriptCharacterStats.countsByKey.get(character.key)
+                ?? 0,
+            color: getCharacterColor(character.key),
+            isConfirmed: true,
+            isDeletePending: deletingCharacterIdSet.has(character.id),
+            isRenamePending: renamingCharacterIdSet.has(character.id),
+            isPending: deletingCharacterIdSet.has(character.id) || renamingCharacterIdSet.has(character.id),
+        })),
+        [
+            deletingCharacterIdSet,
+            normalizedConfirmedCharacterRecords,
+            renamingCharacterIdSet,
+            scriptCharacterStats.confirmedCountsById,
+            scriptCharacterStats.countsByKey,
+        ],
+    );
+    const unconfirmedCharacters = useMemo<CharacterCountItem[]>(
+        () => Array.from(scriptCharacterStats.unconfirmedCountsByKey.entries())
+            .filter(([key]) => !confirmedCharacterSet.has(key))
+            .filter(([key]) => !renamingCharacterKeySet.has(key))
+            .sort((a, b) => a[0].localeCompare(b[0]))
+            .map(([key, count]) => ({
+                key,
+                count,
+                color: getCharacterColor(key),
+                isConfirmed: false,
+                isConfirmPending: confirmingCharacterSet.has(key),
+                isPending: confirmingCharacterSet.has(key),
+            })),
+        [
+            confirmedCharacterSet,
+            confirmingCharacterSet,
+            renamingCharacterKeySet,
+            scriptCharacterStats.unconfirmedCountsByKey,
+        ],
+    );
 
     const clearSettingsSaveTimer = useCallback(() => {
         if (!settingsSaveTimerRef.current) {
@@ -457,6 +1288,11 @@ export const ScriptEditorRoute = () => {
         hydratedSettingsScriptIdRef.current = null;
         setScriptSettingsDraft({});
     }, [currentScriptId]);
+
+    useEffect(() => {
+        setEditorValue(initialValue ?? null);
+        setEditorOverrideValue(null);
+    }, [currentScriptId, initialValue]);
 
     useEffect(() => {
         if (!currentScriptId || scriptSettingsOverride === undefined) {
@@ -507,6 +1343,56 @@ export const ScriptEditorRoute = () => {
         };
     }, [clearSettingsSaveTimer]);
 
+    useEffect(() => {
+        if (!currentScriptId) {
+            setConfirmedCharacterRecords([]);
+            setConfirmingCharacterKeys([]);
+            setDeletingCharacterIds([]);
+            setRenamingCharacterIds([]);
+            setRenamingCharacterKeys([]);
+            setIsCharactersLoading(false);
+
+            return;
+        }
+
+        let isActive = true;
+
+        setIsCharactersLoading(true);
+        setConfirmingCharacterKeys([]);
+        setDeletingCharacterIds([]);
+        setRenamingCharacterIds([]);
+        setRenamingCharacterKeys([]);
+
+        const loadCharacters = async () => {
+            try {
+                const storedCharacters = await scriptRepository.listScriptCharacters(currentScriptId);
+
+                if (!isActive) {
+                    return;
+                }
+
+                setConfirmedCharacterRecords(storedCharacters);
+            } catch (error) {
+                if (!isActive) {
+                    return;
+                }
+
+                console.error('Failed to load script characters', error);
+                setConfirmedCharacterRecords([]);
+            } finally {
+                if (isActive) {
+                    setIsCharactersLoading(false);
+                }
+            }
+        };
+
+        void loadCharacters();
+
+        return () => {
+            isActive = false;
+        };
+    }, [currentScriptId, scriptRepository]);
+
     const handleSelectScript = useCallback((script: {id: string}) => {
         void navigate(`/script/${script.id}/editor`);
     }, [navigate]);
@@ -556,7 +1442,349 @@ export const ScriptEditorRoute = () => {
         searchParams,
         setSearchParams,
     ]);
-    const handleSceneClick = useCallback(() => {}, []);
+    const handleEditorValueChange = useCallback((value: ScriptDocument) => {
+        setEditorValue(value);
+    }, []);
+    const handleConfirmCharacter = useCallback((characterKey: string) => {
+        if (!currentScriptId) {
+            return;
+        }
+
+        const normalizedKey = normalizeCharacterKey(characterKey);
+
+        if (!normalizedKey || confirmedCharacterSet.has(normalizedKey)) {
+            return;
+        }
+
+        setConfirmingCharacterKeys(previous => {
+            if (previous.includes(normalizedKey)) {
+                return previous;
+            }
+
+            return [...previous, normalizedKey];
+        });
+
+        const run = async () => {
+            try {
+                const confirmedCharacter = await scriptRepository.confirmScriptCharacter(currentScriptId, normalizedKey);
+
+                if (!confirmedCharacter) {
+                    return;
+                }
+
+                setConfirmedCharacterRecords(previous => {
+                    const next = previous
+                        .filter(character => character.id !== confirmedCharacter.id && character.key !== confirmedCharacter.key);
+
+                    next.push(confirmedCharacter);
+
+                    return next;
+                });
+
+                const sourceDocument = editorValue ?? initialValue;
+
+                if (sourceDocument) {
+                    const {
+                        value: linkedDocument,
+                        changed: didLinkCharacterRef,
+                    } = linkCharacterRefInScriptDocument(
+                        sourceDocument,
+                        normalizedKey,
+                        confirmedCharacter.id,
+                    );
+
+                    if (didLinkCharacterRef) {
+                        setEditorOverrideValue(linkedDocument);
+                        setEditorValue(linkedDocument);
+                        await handleAutoSave(linkedDocument);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to confirm script character', error);
+            } finally {
+                setConfirmingCharacterKeys(previous => previous.filter(value => value !== normalizedKey));
+            }
+        };
+
+        void run();
+    }, [
+        confirmedCharacterSet,
+        currentScriptId,
+        editorValue,
+        handleAutoSave,
+        initialValue,
+        scriptRepository,
+    ]);
+    const getCharacterNameForBlockType = useCallback((name: string, blockType: unknown) => {
+        const normalizedName = normalizeCharacterDisplayName(name);
+        const shouldUppercase = (blockType === ELEMENT_CHARACTER || blockType === ELEMENT_DUAL_DIALOGUE_CHARACTER)
+            && (
+                resolvedScriptSettings.blocks[blockType].casing
+                ?? DEFAULT_EDITOR_SETTINGS.blocks[blockType].casing
+                ?? 'normal'
+            ) === 'uppercase';
+
+        return shouldUppercase
+            ? normalizedName.toUpperCase()
+            : normalizedName;
+    }, [resolvedScriptSettings.blocks]);
+    const normalizeCharacterNameForInlineInput = useCallback((name: string) => {
+        return getCharacterNameForBlockType(name, ELEMENT_CHARACTER);
+    }, [getCharacterNameForBlockType]);
+    const handleRenameCharacterPreview = useCallback((
+        characterId: string,
+        _previousCharacterName: string,
+        nextCharacterName: string,
+    ) => {
+        if (!currentScriptId) {
+            return;
+        }
+
+        if (!characterId) {
+            return;
+        }
+
+        const characterRecord = confirmedCharactersById.get(characterId);
+
+        if (!characterRecord) {
+            return;
+        }
+
+        const previousKey = normalizeCharacterKey(characterRecord.key);
+        const normalizedNextName = normalizeCharacterDisplayName(nextCharacterName);
+
+        if (!previousKey || normalizedNextName.length === 0) {
+            return;
+        }
+
+        const sourceDocument = editorValue ?? initialValue;
+
+        if (!sourceDocument) {
+            return;
+        }
+
+        const {
+            value: nextDocument,
+            changed: didChangeDocument,
+        } = renameCharacterInScriptDocument(
+            sourceDocument,
+            previousKey,
+            normalizedNextName,
+            getCharacterNameForBlockType,
+            {characterId},
+        );
+
+        if (!didChangeDocument) {
+            return;
+        }
+
+        setEditorOverrideValue(nextDocument);
+    }, [
+        confirmedCharactersById,
+        currentScriptId,
+        editorValue,
+        getCharacterNameForBlockType,
+        initialValue,
+    ]);
+    const handleDeleteCharacter = useCallback((characterId: string) => {
+        if (!currentScriptId) {
+            return;
+        }
+
+        if (!characterId) {
+            return;
+        }
+
+        if (!confirmedCharactersById.has(characterId)) {
+            return;
+        }
+
+        setDeletingCharacterIds(previous => {
+            if (previous.includes(characterId)) {
+                return previous;
+            }
+
+            return [...previous, characterId];
+        });
+
+        const run = async () => {
+            try {
+                await scriptRepository.deleteScriptCharacter(currentScriptId, characterId);
+                setConfirmedCharacterRecords(previous => {
+                    return previous.filter(character => character.id !== characterId);
+                });
+
+                const sourceDocument = editorValue ?? initialValue;
+
+                if (sourceDocument) {
+                    const {
+                        value: unlinkedDocument,
+                        changed: didUnlinkCharacterRef,
+                    } = unlinkCharacterRefInScriptDocument(sourceDocument, characterId);
+
+                    if (didUnlinkCharacterRef) {
+                        setEditorOverrideValue(unlinkedDocument);
+                        setEditorValue(unlinkedDocument);
+                        await handleAutoSave(unlinkedDocument);
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to delete script character', error);
+            } finally {
+                setDeletingCharacterIds(previous => previous.filter(value => value !== characterId));
+            }
+        };
+
+        void run();
+    }, [
+        confirmedCharactersById,
+        currentScriptId,
+        editorValue,
+        handleAutoSave,
+        initialValue,
+        scriptRepository,
+    ]);
+    const handleRenameCharacter = useCallback((
+        characterId: string,
+        _previousCharacterName: string,
+        nextCharacterName: string,
+    ) => {
+        if (!currentScriptId) {
+            return;
+        }
+
+        const characterRecord = confirmedCharactersById.get(characterId);
+
+        if (!characterRecord) {
+            return;
+        }
+
+        const previousKey = normalizeCharacterKey(characterRecord.key);
+        const normalizedNextName = normalizeCharacterDisplayName(nextCharacterName);
+        const nextKey = normalizeCharacterKey(normalizedNextName);
+
+        if (!previousKey || !nextKey) {
+            return;
+        }
+
+        const sourceDocument = editorValue ?? initialValue;
+
+        if (!sourceDocument) {
+            return;
+        }
+
+        setRenamingCharacterIds(previous => {
+            if (previous.includes(characterId)) {
+                return previous;
+            }
+
+            return [...previous, characterId];
+        });
+        setRenamingCharacterKeys(previous => {
+            const next = new Set(previous);
+
+            next.add(previousKey);
+            next.add(nextKey);
+
+            return Array.from(next);
+        });
+
+        const run = async () => {
+            try {
+                const {
+                    value: renamedDocument,
+                    changed: didChangeDocument,
+                } = renameCharacterInScriptDocument(
+                    sourceDocument,
+                    previousKey,
+                    normalizedNextName,
+                    getCharacterNameForBlockType,
+                    {characterId},
+                );
+                let documentToPersist = didChangeDocument
+                    ? renamedDocument
+                    : sourceDocument;
+
+                if (didChangeDocument) {
+                    const didSave = await handleAutoSave(renamedDocument);
+
+                    if (!didSave) {
+                        const storedCharacters = await scriptRepository.listScriptCharacters(currentScriptId);
+
+                        setConfirmedCharacterRecords(storedCharacters);
+
+                        return;
+                    }
+
+                    setEditorOverrideValue(renamedDocument);
+                    setEditorValue(renamedDocument);
+                }
+
+                const renamedCharacter = await scriptRepository.renameScriptCharacter(
+                    currentScriptId,
+                    characterId,
+                    nextKey,
+                );
+
+                if (renamedCharacter) {
+                    setConfirmedCharacterRecords(previous => {
+                        const next = previous
+                            .filter(character => character.id !== characterId && character.id !== renamedCharacter.id);
+
+                        next.push(renamedCharacter);
+
+                        return next;
+                    });
+
+                    if (renamedCharacter.id !== characterId) {
+                        const {
+                            value: relinkedDocument,
+                            changed: didRelinkCharacterRef,
+                        } = replaceCharacterRefIdInScriptDocument(
+                            documentToPersist,
+                            characterId,
+                            renamedCharacter.id,
+                        );
+
+                        if (didRelinkCharacterRef) {
+                            documentToPersist = relinkedDocument;
+                            setEditorOverrideValue(relinkedDocument);
+                            setEditorValue(relinkedDocument);
+                            await handleAutoSave(relinkedDocument);
+                        }
+                    }
+                } else {
+                    const storedCharacters = await scriptRepository.listScriptCharacters(currentScriptId);
+
+                    setConfirmedCharacterRecords(storedCharacters);
+                }
+            } catch (error) {
+                console.error('Failed to rename script character', error);
+
+                try {
+                    const storedCharacters = await scriptRepository.listScriptCharacters(currentScriptId);
+
+                    setConfirmedCharacterRecords(storedCharacters);
+                } catch (refreshError) {
+                    console.error('Failed to refresh script characters after rename failure', refreshError);
+                }
+            } finally {
+                setRenamingCharacterIds(previous => previous.filter(value => value !== characterId));
+                setRenamingCharacterKeys(previous => previous
+                    .filter(value => value !== previousKey && value !== nextKey));
+            }
+        };
+
+        void run();
+    }, [
+        confirmedCharactersById,
+        currentScriptId,
+        editorValue,
+        getCharacterNameForBlockType,
+        handleAutoSave,
+        initialValue,
+        scriptRepository,
+    ]);
     const handleToggleLeftSidebar = useCallback(() => {
         setIsLeftSidebarOpen(previous => !previous);
     }, []);
@@ -999,12 +2227,14 @@ export const ScriptEditorRoute = () => {
             ) : null}
             <FountainEditor
                 key={currentScript?.id ?? 'editor'}
-                initialValue={initialValue}
+                initialValue={editorOverrideValue ?? initialValue}
                 scriptSettings={scriptSettingsDraft}
+                onValueChange={handleEditorValueChange}
                 onAutoSave={handleAutoSave}
                 onManualSave={handleManualSave}
                 autoSaveDelayMs={AUTOSAVE_DELAY_MS}
                 autoFocus={shouldAutoFocus}
+                persistentCharacters={normalizedConfirmedCharacterRecords}
                 leftSidebarToggle={{
                     isOpen: isLeftSidebarOpen,
                     onToggle: handleToggleLeftSidebar,
@@ -1016,8 +2246,14 @@ export const ScriptEditorRoute = () => {
                 leftSidebar={<div className={styles.sidebarPlaceholder} />}
                 rightSidebar={(
                     <EditorSidebar
-                        scenes={scenes}
-                        onSceneClick={handleSceneClick}
+                        confirmedCharacters={confirmedCharacters}
+                        unconfirmedCharacters={unconfirmedCharacters}
+                        onConfirmCharacter={handleConfirmCharacter}
+                        onDeleteCharacter={handleDeleteCharacter}
+                        normalizeRenameInput={normalizeCharacterNameForInlineInput}
+                        onRenameCharacterPreview={handleRenameCharacterPreview}
+                        onRenameCharacter={handleRenameCharacter}
+                        isLoading={isCharactersLoading}
                         className={styles.sidebarContent}
                     />
                 )}

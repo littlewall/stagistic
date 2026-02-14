@@ -1,0 +1,13 @@
+.characterTag {
+    padding: 0 calc(7px * var(--size-scale));
+    border-radius: 999px;
+    background: color-mix(
+        in srgb,
+        var(--character-tag-color, var(--color-accent)) var(--character-tag-tint-strength, 30%),
+        var(--color-surface)
+    );
+}
+
+.characterSeparator {
+    color: var(--color-ink-muted);
+}

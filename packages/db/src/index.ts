@@ -4,6 +4,7 @@ export * as dbQueries from './queries';
 export * from './schema';
 export type {
     Script,
+    ScriptCharacter,
     ScriptConfig,
     ScriptConfigBlock,
     ScriptSummary,

@@ -44,6 +44,10 @@ export const isFountainBlockType = (value: unknown): value is FountainBlockType 
 };
 
 export const normalizeFountainBlockType = (value: unknown): FountainBlockType => {
+    if (value === 'fountain_lyric' || value === 'lyrics') {
+        return ELEMENT_LYRICS;
+    }
+
     if (value === ELEMENT_DUAL_DIALOGUE) {
         return ELEMENT_DIALOGUE;
     }

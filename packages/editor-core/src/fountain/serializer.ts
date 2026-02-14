@@ -1,3 +1,4 @@
+import {normalizeCharacterDelimiters} from './characterNames';
 import {
     ELEMENT_ACTION,
     ELEMENT_CENTERED,
@@ -73,6 +74,7 @@ const serializeLine = (node: FountainElement): string => {
         || node.type === ELEMENT_DUAL_DIALOGUE_CHARACTER
     ) {
         text = uppercaseOutsideParentheses(text);
+        text = normalizeCharacterDelimiters(text);
     }
 
     const lines = text.split('\n');

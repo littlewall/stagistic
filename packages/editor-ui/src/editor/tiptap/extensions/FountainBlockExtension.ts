@@ -7,6 +7,7 @@ import {
 } from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
+import {createCharacterTagDecorationsPlugin} from '../fountainBlock/characterTagDecorations';
 import {
     type BlockCasingMap,
     type BlockNextElementMap,
@@ -207,6 +208,9 @@ const FountainBlockExtension = Node.create<{
                 default: null,
                 parseHTML: (element: HTMLElement) => element.getAttribute('data-block-id'),
             },
+            characterRefs: {
+                default: null,
+            },
         };
     },
     parseHTML() {
@@ -244,7 +248,7 @@ const FountainBlockExtension = Node.create<{
                 this.options.blockShortcuts,
                 this.options.blockNextElements,
                 this.options.blockCasing,
-            ),
+            ), createCharacterTagDecorationsPlugin(),
         ];
     },
 });

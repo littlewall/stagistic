@@ -77,6 +77,7 @@
     --tone-progress-start-lightness: 52%;
     --tone-progress-mid-lightness: 62%;
     --tone-progress-end-lightness: 77%;
+    --character-tag-tint-strength: 30%;
 
     /* Semantic tokens derived from base colors + theme knobs. */
     --color-paper: hsla(from rgb(var(--rgb-base-neutral))
@@ -238,6 +239,7 @@
     --tone-progress-start-lightness: 57%;
     --tone-progress-mid-lightness: 66%;
     --tone-progress-end-lightness: 74%;
+    --character-tag-tint-strength: 44%;
 
     color-scheme: dark;
 }

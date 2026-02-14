@@ -70,7 +70,7 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         const check = async () => {
             try {
                 const {isTauri: isTauriRuntime} = await import('@tauri-apps/api/core');
-                const result = await isTauriRuntime();
+                const result = isTauriRuntime();
 
                 if (active) {
                     setIsTauri(Boolean(result));

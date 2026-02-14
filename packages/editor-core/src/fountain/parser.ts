@@ -1,3 +1,4 @@
+import {normalizeCharacterEditorDelimiters} from './characterNames';
 import {
     type ColumnElement,
     type ColumnGroupElement,
@@ -225,10 +226,12 @@ export const fountainParser = (source: string): FountainDocument => {
         if (type === ELEMENT_DUAL_DIALOGUE_CHARACTER) {
             text = text.trim().replace(/\^\s*$/, '').trim();
             text = uppercaseOutsideParentheses(text);
+            text = normalizeCharacterEditorDelimiters(text);
         }
 
         if (type === ELEMENT_CHARACTER) {
             text = uppercaseOutsideParentheses(text);
+            text = normalizeCharacterEditorDelimiters(text);
         }
 
         if (type === ELEMENT_TRANSITION) {

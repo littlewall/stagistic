@@ -2,11 +2,11 @@ import {
     type ColumnElement,
     type ColumnGroupElement,
     ELEMENT_ACTION,
-    ELEMENT_CHARACTER,
     ELEMENT_COLUMN,
     ELEMENT_COLUMN_GROUP,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE,
+    ELEMENT_LYRICS,
     ELEMENT_SCENE_HEADING,
     type FountainDocument as FountainAst,
     type FountainElement,
@@ -106,6 +106,10 @@ const fountainTextToInlineContent = (children?: FountainText[]): FountainJSONCon
 };
 
 const normalizeBlockType = (value: string) => {
+    if (value === 'fountain_lyric' || value === 'lyrics') {
+        return ELEMENT_LYRICS;
+    }
+
     if (value === ELEMENT_DUAL_DIALOGUE) {
         return ELEMENT_DIALOGUE;
     }
