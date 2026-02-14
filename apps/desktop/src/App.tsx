@@ -91,7 +91,7 @@ const App = () => {
         const boot = async () => {
             try {
                 setBootStatus('Načítám UI assety');
-                if (document?.fonts?.ready) {
+                if (document?.fonts) {
                     await document.fonts.ready;
                 }
 
@@ -101,6 +101,7 @@ const App = () => {
 
                 await prepareLocalDbWithProgress(update => {
                     if (!isActive) return;
+
                     setBootStatus(update.label);
                     setBootProgress(0.15 + update.progress * 0.85);
                 });

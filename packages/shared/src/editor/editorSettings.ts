@@ -91,6 +91,33 @@ export type EditorSettingsOverride = Partial<{
     blocks: Partial<Record<FountainElementType, Partial<BlockSpacingSettings>>>,
 }>;
 
+const EDITOR_SETTINGS_BLOCK_TYPES = new Set<FountainElementType>([
+    ELEMENT_SCENE_HEADING,
+    ELEMENT_ACTION,
+    ELEMENT_CHARACTER,
+    ELEMENT_DUAL_DIALOGUE_CHARACTER,
+    ELEMENT_PARENTHETICAL,
+    ELEMENT_DIALOGUE,
+    ELEMENT_DUAL_DIALOGUE,
+    ELEMENT_TRANSITION,
+    ELEMENT_LYRICS,
+    ELEMENT_CENTERED,
+]);
+
+const normalizeEditorSettingsBlockType = (value: string): FountainElementType | null => {
+    if (value === 'fountain_lyric' || value === 'lyrics') {
+        return ELEMENT_LYRICS;
+    }
+
+    if (value === ELEMENT_DUAL_DIALOGUE) {
+        return ELEMENT_DIALOGUE;
+    }
+
+    return EDITOR_SETTINGS_BLOCK_TYPES.has(value as FountainElementType)
+        ? value as FountainElementType
+        : null;
+};
+
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
     page: {
         widthPx: 794, // A4 Width (8.27in * 96)
@@ -209,6 +236,8 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
             isUnderline: false,
         },
         [ELEMENT_LYRICS]: {
+            spacingBeforeEm: 0,
+            lineHeight: 1.0,
             indentLeftChars: 10, // ~1.0in from margin (2.5in from edge)
             indentRightChars: 10,
             shortcut: '7',
@@ -247,17 +276,35 @@ export const mergeEditorSettings = (
         }
 
         if (override.page) {
-            next.page = {
+            const mergedPage = {
                 ...next.page,
-                ...override.page,
             };
+
+            for (const [key, value] of Object.entries(override.page)) {
+                if (value === undefined) {
+                    continue;
+                }
+
+                mergedPage[key as keyof PageSettings] = value as never;
+            }
+
+            next.page = mergedPage;
         }
 
         if (override.typography) {
-            next.typography = {
+            const mergedTypography = {
                 ...next.typography,
-                ...override.typography,
             };
+
+            for (const [key, value] of Object.entries(override.typography)) {
+                if (value === undefined) {
+                    continue;
+                }
+
+                mergedTypography[key as keyof TypographySettings] = value as never;
+            }
+
+            next.typography = mergedTypography;
         }
 
         if (override.blocks) {
@@ -270,12 +317,25 @@ export const mergeEditorSettings = (
                     continue;
                 }
 
-                const key = blockType as FountainElementType;
+                const key = normalizeEditorSettingsBlockType(blockType);
 
-                mergedBlocks[key] = {
+                if (!key) {
+                    continue;
+                }
+
+                const mergedBlock = {
                     ...mergedBlocks[key],
-                    ...blockOverrides,
                 };
+
+                for (const [settingKey, settingValue] of Object.entries(blockOverrides)) {
+                    if (settingValue === undefined) {
+                        continue;
+                    }
+
+                    mergedBlock[settingKey as keyof BlockSpacingSettings] = settingValue as never;
+                }
+
+                mergedBlocks[key] = mergedBlock;
             }
 
             next = {

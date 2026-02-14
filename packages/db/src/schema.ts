@@ -101,6 +101,24 @@ export const scriptConfigBlocks = pgTable(
     }),
 );
 
+export const scriptCharacters = pgTable(
+    'script_characters',
+    {
+        id: text('id').primaryKey(),
+        scriptId: text('script_id')
+            .notNull()
+            .references(() => scripts.id, {onDelete: 'cascade'}),
+        characterKey: text('character_key').notNull(),
+        createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+        updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+    },
+    table => ({
+        scriptCharacterUniqueIdx: uniqueIndex('script_characters_script_character_unique_idx')
+            .on(table.scriptId, table.characterKey),
+        scriptIdIdx: index('script_characters_script_id_idx').on(table.scriptId),
+    }),
+);
+
 export const dbSchema = {
     scripts,
     scriptLatest,
@@ -108,4 +126,5 @@ export const dbSchema = {
     syncOutbox,
     scriptConfigs,
     scriptConfigBlocks,
+    scriptCharacters,
 };

@@ -6,6 +6,7 @@ import {
     ELEMENT_LYRICS,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
+    extractCharacterKeys,
 } from '@stagistic/editor-core';
 import type {EditorSettings} from '@stagistic/shared';
 import {Extension} from '@tiptap/core';
@@ -585,9 +586,9 @@ const buildPaginationState = (
         }
 
         if (blockType === ELEMENT_CHARACTER || blockType === ELEMENT_DUAL_DIALOGUE_CHARACTER) {
-            const name = node.textContent.trim();
+            const [name] = extractCharacterKeys(node.textContent);
 
-            lastCharacterName = name ? name.toUpperCase() : null;
+            lastCharacterName = name ?? null;
         }
     });
 

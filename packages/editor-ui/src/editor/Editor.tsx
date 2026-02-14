@@ -78,6 +78,10 @@ const getSizeScale = () => {
 type BlockShortcutOptions = Partial<Record<FountainBlockType, BlockShortcut>>;
 type BlockNextElementOptions = Partial<Record<FountainBlockType, FountainBlockType>>;
 type BlockCasingOptions = Partial<Record<FountainBlockType, BlockCasing>>;
+type PersistentCharacterRef = {
+    id: string,
+    key: string,
+};
 
 const getBlockShortcuts = (resolvedSettings: EditorSettings): BlockShortcutOptions => {
     const shortcuts: BlockShortcutOptions = {};
@@ -142,6 +146,7 @@ type EditorProps = {
     leftSidebar?: ReactNode,
     rightSidebar?: ReactNode,
     sidebarWidth?: string,
+    persistentCharacters?: readonly PersistentCharacterRef[],
 };
 
 const useLatestRef = <T,>(value: T) => {
@@ -169,6 +174,7 @@ const Editor = ({
     leftSidebar,
     rightSidebar,
     sidebarWidth,
+    persistentCharacters = [],
 }: EditorProps) => {
     const initialSerialized = useMemo(() => serializeValue(initialValue), [initialValue]);
     const sizeScale = useMemo(() => getSizeScale(), []);
@@ -659,6 +665,7 @@ const Editor = ({
                 >
                     <EditorCanvas
                         editor={editor}
+                        persistentCharacters={persistentCharacters}
                         autoFocus={autoFocus}
                     />
                 </div>

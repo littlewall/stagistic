@@ -14,7 +14,7 @@ export {
     type SettingsNavItem,
     type SettingsNavSubItem,
 } from './dialogs/ScriptSettingsModal';
-export {EditorSidebar, type Scene} from './editor-panels/EditorSidebar';
+export {EditorSidebar, type EditorSidebarCharacter} from './editor-panels/EditorSidebar';
 export {ProgressBar} from './feedback/ProgressBar';
 export {ProgressPanel} from './feedback/ProgressPanel';
 export {ToastProvider, useToastController} from './feedback/ToastProvider';

@@ -1,6 +1,7 @@
 import type {InferSelectModel} from 'drizzle-orm';
 
 import {
+    scriptCharacters,
     scriptConfigBlocks,
     scriptConfigs,
     scripts,
@@ -14,3 +15,4 @@ export type ScriptSummary = Pick<Script, 'id' | 'title' | 'createdAt' | 'updated
 
 export type ScriptConfig = InferSelectModel<typeof scriptConfigs>;
 export type ScriptConfigBlock = InferSelectModel<typeof scriptConfigBlocks>;
+export type ScriptCharacter = InferSelectModel<typeof scriptCharacters>;

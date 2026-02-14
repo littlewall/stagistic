@@ -20,7 +20,6 @@
 
 .tab {
     cursor: pointer;
-    position: relative;
     display: inline-flex;
     flex: 1;
     gap: var(--space-2);
@@ -28,23 +27,12 @@
     justify-content: center;
     padding: var(--space-2) 0 calc(var(--space-2) - 1px);
     font-size: calc(10px * var(--size-scale));
-    color: var(--color-ink-muted);
+    color: var(--color-ink);
     text-transform: uppercase;
     letter-spacing: .16em;
-    background: transparent;
+    background: var(--color-surface);
     border: none;
-    transition: color .15s ease, border-color .15s ease, background .2s ease;
-
-    &[data-selected] {
-        color: var(--color-ink);
-        background: var(--color-surface);
-        border-bottom: 2px solid var(--color-ink);
-    }
-
-    &[data-hovered] {
-        color: var(--color-ink);
-        background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
-    }
+    border-bottom: 2px solid var(--color-ink);
 }
 
 .tabIcon {
@@ -59,110 +47,262 @@
     min-height: 0;
 }
 
-.emptyState {
-    padding: var(--space-4);
+.section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-3);
+}
+
+.sectionTitle {
     font-size: calc(12px * var(--size-scale));
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
     color: var(--color-ink-muted);
-
-    & code {
-        display: block;
-        margin-top: 8px;
-        font-family: var(--font-mono);
-        color: var(--color-ink);
-    }
 }
 
-.inlineCode {
-    font-family: var(--font-mono);
-}
-
-.sceneList {
-    padding: var(--space-3) 0;
+.characterList {
+    display: grid;
+    gap: var(--space-2);
     list-style: none;
 }
 
-.sceneButton {
-    cursor: pointer;
+.characterItem {
+    overflow: hidden;
+    border: 1px solid var(--color-divider);
+    border-radius: calc(8px * var(--size-scale));
+    background: color-mix(
+        in srgb,
+        var(--character-color, var(--color-accent)) 14%,
+        var(--color-surface)
+    );
+}
+
+.characterItemUnconfirmed {
+    background: transparent;
+    border-color: color-mix(in srgb, var(--character-color) 58%, var(--color-divider));
+}
+
+.characterRow,
+.characterRowButton {
     display: flex;
     gap: var(--space-2);
     align-items: center;
+    min-height: calc(30px * var(--size-scale));
+    padding: var(--space-1) var(--space-2);
+}
+
+.characterRowButton {
+    cursor: pointer;
     width: 100%;
-    padding: var(--space-2) var(--space-4);
-    color: var(--color-ink);
+    color: inherit;
     text-align: left;
     background: transparent;
     border: none;
-    transition: background .15s ease;
-
-    &:hover {
-        background: color-mix(in srgb, var(--color-accent) 45%, transparent);
-    }
 }
 
-.sceneIndex {
-    width: calc(22px * var(--size-scale));
-    font-family: var(--font-mono);
+.characterRowButton:hover {
+    background: color-mix(in srgb, var(--character-color) 10%, transparent);
+}
+
+.characterRowButton:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--character-color) 45%, var(--color-ink));
+    outline-offset: -2px;
+}
+
+.expandIcon {
+    width: calc(14px * var(--size-scale));
+    height: calc(14px * var(--size-scale));
+}
+
+.expandIndicatorButton {
+    cursor: pointer;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: calc(18px * var(--size-scale));
+    height: calc(18px * var(--size-scale));
     color: var(--color-ink-muted);
+    background: transparent;
+    border: none;
+    border-radius: calc(4px * var(--size-scale));
 }
 
-.sceneHeading {
+.expandIndicatorButton:hover {
+    background: color-mix(in srgb, var(--character-color) 18%, transparent);
+}
+
+.expandIndicatorButton:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--character-color) 45%, var(--color-ink));
+    outline-offset: 1px;
+}
+
+.characterColor {
+    flex-shrink: 0;
+    width: calc(10px * var(--size-scale));
+    height: calc(10px * var(--size-scale));
+    border: 1px solid color-mix(in srgb, var(--color-ink) 15%, var(--color-surface));
+    border-radius: 999px;
+    background: var(--character-color, var(--color-accent));
+}
+
+.characterName {
     overflow: hidden;
     flex: 1;
+    min-width: 0;
     font-size: calc(12px * var(--size-scale));
+    color: var(--color-ink);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.sceneChevron {
-    font-size: calc(12px * var(--size-scale));
-    opacity: 0;
-    transition: opacity .2s ease;
-}
-
-.sceneButton:hover .sceneChevron {
-    opacity: 1;
-}
-
-.notesArea {
-    resize: none;
+.characterInlineRenameInput {
     width: 100%;
-    min-height: calc(220px * var(--size-scale));
-    padding: var(--space-4);
+    min-width: 0;
+    padding: 0;
     font-size: calc(12px * var(--size-scale));
     color: var(--color-ink);
     background: transparent;
     border: none;
-
-    &:focus {
-        outline: none;
-    }
-
-    &::placeholder {
-        color: var(--color-ink-muted);
-    }
 }
 
-.historyList {
-    padding: var(--space-3) 0;
-    list-style: none;
+.characterInlineRenameInput:focus-visible {
+    outline: none;
 }
 
-.historyItem {
-    padding: var(--space-3) var(--space-4);
-    border-bottom: 1px solid var(--color-divider);
-
-    &:last-child {
-        border-bottom: none;
-    }
+.characterInlineRenameInput:disabled {
+    opacity: .68;
 }
 
-.historyAction {
-    font-size: calc(12px * var(--size-scale));
+.confirmIconButton {
+    cursor: pointer;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: calc(18px * var(--size-scale));
+    height: calc(18px * var(--size-scale));
+    color: color-mix(in srgb, var(--color-ink) 84%, var(--character-color));
+    background: transparent;
+    border: none;
+    border-radius: calc(4px * var(--size-scale));
+    transition: color .15s ease, background .15s ease;
+}
+
+.confirmIconButton:hover {
+    color: color-mix(in srgb, var(--character-color) 55%, var(--color-ink));
+    background: color-mix(in srgb, var(--character-color) 18%, transparent);
+}
+
+.confirmIconButton:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--character-color) 45%, var(--color-ink));
+    outline-offset: 1px;
+}
+
+.confirmIconButton[aria-disabled='true'] {
+    cursor: default;
+    opacity: .65;
+}
+
+.iconGlyph {
+    width: calc(13px * var(--size-scale));
+    height: calc(13px * var(--size-scale));
+    stroke: currentcolor;
+    stroke-width: 2.4;
+    fill: none;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.confirmSpinner {
+    width: calc(11px * var(--size-scale));
+    height: calc(11px * var(--size-scale));
+    border: 2px solid color-mix(in srgb, var(--color-ink) 25%, transparent);
+    border-top-color: color-mix(in srgb, var(--color-ink) 86%, var(--character-color));
+    border-radius: 999px;
+    animation: characterConfirmSpin .8s linear infinite;
+}
+
+.confirmTooltip {
+    z-index: 1000;
+    padding: var(--space-1) var(--space-2);
+    font-size: calc(10px * var(--size-scale));
+    font-weight: 700;
+    color: var(--color-surface);
+    letter-spacing: .02em;
+    background: color-mix(in srgb, var(--color-ink) 92%, black);
+    border: 1px solid color-mix(in srgb, var(--color-surface) 15%, var(--color-ink));
+    border-radius: calc(6px * var(--size-scale));
+    box-shadow: var(--shadow-popover);
+}
+
+.characterDetails {
+    display: grid;
+    gap: var(--space-2);
+    padding: 0 var(--space-2) var(--space-2);
+    font-size: calc(10px * var(--size-scale));
+}
+
+.characterMetaRow {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+}
+
+.characterMiniToolbar {
+    display: inline-flex;
+    gap: var(--space-1);
+    align-items: center;
+}
+
+.deleteIconButton {
+    cursor: pointer;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: calc(20px * var(--size-scale));
+    height: calc(20px * var(--size-scale));
+    color: color-mix(in srgb, var(--color-danger) 70%, var(--color-ink));
+    background: transparent;
+    border: none;
+    border-radius: calc(4px * var(--size-scale));
+    transition: color .15s ease, background .15s ease;
+}
+
+.deleteIconButton:hover {
+    color: var(--color-danger);
+    background: color-mix(in srgb, var(--color-danger) 16%, transparent);
+}
+
+.deleteIconButton:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-danger) 55%, var(--color-ink));
+    outline-offset: 1px;
+}
+
+.deleteIconButton[aria-disabled='true'] {
+    cursor: default;
+    opacity: .65;
+}
+
+.detailLabel {
+    color: var(--color-ink-muted);
+}
+
+.detailValue {
+    font-weight: 700;
     color: var(--color-ink);
 }
 
-.historyTime {
-    margin-top: var(--space-1);
-    font-size: calc(10px * var(--size-scale));
+.emptyState {
+    font-size: calc(12px * var(--size-scale));
     color: var(--color-ink-muted);
+}
+
+@keyframes characterConfirmSpin {
+    to {
+        transform: rotate(360deg);
+    }
 }
