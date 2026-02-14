@@ -23,7 +23,7 @@
 
 .fill {
     height: 100%;
-    background: linear-gradient(90deg, #b38a5f 0%, #d1aa7d 50%, #f1d4b1 100%);
+    background: linear-gradient(90deg, var(--color-progress-start) 0%, var(--color-progress-middle) 50%, var(--color-progress-end) 100%);
     border-radius: 999px;
     transition: width 200ms ease;
 }

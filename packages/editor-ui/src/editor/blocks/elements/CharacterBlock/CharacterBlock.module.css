@@ -8,6 +8,7 @@
     font-style: var(--character-font-style, normal);
     text-decoration-line: var(--character-underline, none);
     line-height: var(--character-line-height, inherit);
+    color: var(--color-block-character);
 }
 
 .characterBlock {

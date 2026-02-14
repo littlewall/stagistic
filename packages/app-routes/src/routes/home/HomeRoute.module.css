@@ -1,7 +1,6 @@
 .hero {
     padding: var(--space-8);
     background: var(--color-surface);
-    border: 1px solid var(--color-divider);
     border-radius: var(--radius-md);
 }
 
@@ -26,6 +25,7 @@
 .heroCard {
     justify-content: center;
     padding: var(--space-6);
+    border: none;
 }
 
 .heroCardValue {
@@ -53,4 +53,8 @@
 
 .recentLoading {
     margin-top: var(--space-4);
+}
+
+.recentSection {
+    border: none;
 }

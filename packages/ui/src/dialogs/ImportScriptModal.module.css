@@ -5,7 +5,7 @@
     display: grid;
     place-items: center;
     padding: var(--space-6);
-    background: rgba(20, 18, 16, .45);
+    background: var(--color-backdrop);
 }
 
 .modal {
@@ -120,7 +120,7 @@
 }
 
 .primaryButton:hover {
-    background: color-mix(in srgb, var(--color-ink) 85%, #000);
+    background: color-mix(in srgb, var(--color-ink) 86%, var(--color-paper));
 }
 
 .primaryButton:disabled {

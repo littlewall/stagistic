@@ -35,11 +35,11 @@
 }
 
 .toast[data-variant = 'success'] {
-    border-left-color: #2f7a4b;
+    border-left-color: var(--color-success);
 }
 
 .toast[data-variant = 'error'] {
-    border-left-color: #b54d47;
+    border-left-color: var(--color-danger);
 }
 
 .toast[data-variant = 'info'] {

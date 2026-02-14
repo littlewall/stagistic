@@ -8,4 +8,5 @@
     font-style: var(--scene-heading-font-style, normal);
     text-decoration-line: var(--scene-heading-underline, none);
     line-height: var(--scene-heading-line-height, inherit);
+    color: var(--color-block-scene-heading);
 }

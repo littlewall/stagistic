@@ -9,7 +9,7 @@
     font-style: var(--parenthetical-font-style, italic);
     text-decoration-line: var(--parenthetical-underline, none);
     line-height: var(--parenthetical-line-height, inherit);
-    color: #4f4a42;
+    color: var(--color-block-parenthetical);
 }
 
 .parenthetical::before,

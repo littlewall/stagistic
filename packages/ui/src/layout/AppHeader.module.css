@@ -110,15 +110,15 @@
 }
 
 .scriptStatusSaved {
-    background: var(--color-success, #16a34a);
+    background: var(--color-success);
 }
 
 .scriptStatusSaving {
-    background: var(--color-warning, #f59e0b);
+    background: var(--color-warning);
 }
 
 .scriptStatusError {
-    background: var(--color-danger, #dc2626);
+    background: var(--color-danger);
 }
 
 .tooltip {
