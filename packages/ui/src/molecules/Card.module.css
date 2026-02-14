@@ -22,7 +22,7 @@
 .interactive:focus-visible {
     border-color: color-mix(in srgb, var(--color-ink) 12%, var(--color-divider));
     outline: none;
-    box-shadow: 0 10px 20px rgba(27, 23, 18, .08);
+    box-shadow: var(--shadow-card);
 }
 
 .header {

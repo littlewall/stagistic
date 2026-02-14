@@ -233,7 +233,7 @@ export const HomeRoute = () => {
                     </HeroLayout>
                 </section>
                 {scriptsLoading ? (
-                    <Section>
+                    <Section className={styles.recentSection}>
                         <SectionHeader>
                             <div>
                                 <SectionTitle>Recent scripts</SectionTitle>
@@ -252,7 +252,7 @@ export const HomeRoute = () => {
                         </div>
                     </Section>
                 ) : recentScripts.length > 0 && (
-                    <Section>
+                    <Section className={styles.recentSection}>
                         <SectionHeader>
                             <div>
                                 <SectionTitle>Recent scripts</SectionTitle>

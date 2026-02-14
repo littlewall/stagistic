@@ -94,6 +94,19 @@ const BLOCK_PREVIEW_TEXT: Record<FountainElementType, string> = {
     [ELEMENT_CENTERED]: 'THE END',
 };
 
+const BLOCK_PREVIEW_TEXT_COLOR: Record<FountainElementType, string> = {
+    [ELEMENT_SCENE_HEADING]: 'var(--color-block-scene-heading)',
+    [ELEMENT_ACTION]: 'var(--color-block-action)',
+    [ELEMENT_CHARACTER]: 'var(--color-block-character)',
+    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: 'var(--color-block-dual-character)',
+    [ELEMENT_DUAL_DIALOGUE]: 'var(--color-block-dual-dialogue)',
+    [ELEMENT_PARENTHETICAL]: 'var(--color-block-parenthetical)',
+    [ELEMENT_DIALOGUE]: 'var(--color-block-dialogue)',
+    [ELEMENT_TRANSITION]: 'var(--color-block-transition)',
+    [ELEMENT_LYRICS]: 'var(--color-block-lyrics)',
+    [ELEMENT_CENTERED]: 'var(--color-block-centered)',
+};
+
 const panelDescriptions: Record<string, {
     title: string,
     description: string,
@@ -695,6 +708,7 @@ export const ScriptEditorRoute = () => {
                 '--preview-font-style': isItalic ? 'italic' : 'normal',
                 '--preview-text-decoration': isUnderline ? 'underline' : 'none',
                 '--preview-text-offset-ch': String(previewTextOffsetChars),
+                '--preview-text-color': BLOCK_PREVIEW_TEXT_COLOR[blockType],
             } as CSSProperties;
 
             return (

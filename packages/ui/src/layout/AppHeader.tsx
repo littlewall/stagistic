@@ -1,7 +1,12 @@
 import {
     Folder, Home, NavArrowDown, Plus, UserCircle,
 } from 'iconoir-react';
-import {useCallback, useMemo} from 'react';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from 'react';
 import {
     Button,
     Header as MenuHeader,
@@ -15,6 +20,12 @@ import {
     TooltipTrigger,
 } from 'react-aria-components';
 
+import {
+    applyAppTheme,
+    type AppTheme,
+    readPreferredAppTheme,
+    toggleAppTheme,
+} from '../theme';
 import styles from './AppHeader.module.css';
 
 export type Script = {
@@ -49,6 +60,7 @@ export const AppHeader = ({
     onBackToEditor,
     backToEditorLabel = 'Back to editor',
 }: AppHeaderProps) => {
+    const [theme, setTheme] = useState<AppTheme>(() => readPreferredAppTheme());
     const script = useMemo(() => currentScript, [currentScript]);
     const handleSelectScript = useMemo(() => onSelectScript, [onSelectScript]);
     const canShowScriptMenu = useMemo(
@@ -100,10 +112,33 @@ export const AppHeader = ({
         onMenuAction,
         recentScripts,
     ]);
+    const handleAccountMenuAction = useCallback((key: string | number) => {
+        if (typeof key !== 'string') {
+            return;
+        }
+
+        if (key === 'toggle-theme') {
+            setTheme(previous => toggleAppTheme(previous));
+
+            return;
+        }
+
+        if (onMenuAction) {
+            onMenuAction(key);
+        }
+    }, [onMenuAction]);
+
+    useEffect(() => {
+        applyAppTheme(theme);
+    }, [theme]);
 
     return (
         <header className={styles.header}>
-            <div className={styles.dragRegion} data-tauri-drag-region aria-hidden="true" />
+            <div
+                className={styles.dragRegion}
+                data-tauri-drag-region
+                aria-hidden="true"
+            />
             <div className={styles.leftControls}>
                 <Button
                     className={styles.iconButton}
@@ -210,7 +245,11 @@ export const AppHeader = ({
                         <NavArrowDown className={styles.caret} aria-hidden="true" />
                     </Button>
                     <Popover className={styles.menuPopover} placement="bottom end">
-                        <Menu className={styles.menu}>
+                        <Menu className={styles.menu} onAction={handleAccountMenuAction}>
+                            <MenuItem className={styles.menuItem} id="toggle-theme">
+                                {theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+                            </MenuItem>
+                            <Separator className={styles.menuSeparator} />
                             <MenuItem className={styles.menuItem} id="profile">
                                 Account settings
                             </MenuItem>

@@ -8,4 +8,5 @@
     font-style: var(--dialogue-font-style, normal);
     text-decoration-line: var(--dialogue-underline, none);
     line-height: var(--dialogue-line-height, inherit);
+    color: var(--color-block-dialogue);
 }

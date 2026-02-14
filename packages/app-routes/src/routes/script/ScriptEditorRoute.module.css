@@ -177,10 +177,10 @@
     height: var(--preview-spacing-before, 0px);
     background: repeating-linear-gradient(
         180deg,
-        color-mix(in srgb, #f29c27 20%, transparent) 0,
-        color-mix(in srgb, #f29c27 20%, transparent) calc(var(--preview-spacing-line-unit, 14px) - 1px),
-        color-mix(in srgb, #f29c27 42%, transparent) calc(var(--preview-spacing-line-unit, 14px) - 1px),
-        color-mix(in srgb, #f29c27 42%, transparent) var(--preview-spacing-line-unit, 14px)
+        var(--color-preview-spacing-soft) 0,
+        var(--color-preview-spacing-soft) calc(var(--preview-spacing-line-unit, 14px) - 1px),
+        var(--color-preview-spacing-strong) calc(var(--preview-spacing-line-unit, 14px) - 1px),
+        var(--color-preview-spacing-strong) var(--preview-spacing-line-unit, 14px)
     );
 }
 
@@ -207,7 +207,7 @@
     font-weight: var(--preview-font-weight, 400);
     font-style: var(--preview-font-style, normal);
     text-decoration: var(--preview-text-decoration, none);
-    color: var(--color-ink);
+    color: var(--preview-text-color, var(--color-ink));
     line-height: var(--preview-line-height, 1);
 }
 
@@ -229,19 +229,19 @@
 
 .indentSliderBase {
     inset-inline: 0;
-    background: color-mix(in srgb, #f29c27 70%, transparent);
+    background: var(--color-preview-indent-rail);
 }
 
 .indentSliderMiddleBase {
     left: var(--preview-slider-zone-start-percent, 10%);
     right: calc(100% - var(--preview-slider-zone-end-percent, 90%));
-    background: color-mix(in srgb, #f29c27 70%, transparent);
+    background: var(--color-preview-indent-rail);
 }
 
 .indentSliderSelected {
     left: var(--preview-indent-start-percent, 0%);
     right: calc(100% - var(--preview-indent-end-percent, 100%));
-    background: color-mix(in srgb, var(--color-accent) 72%, #2d8deb);
+    background: var(--color-preview-slider-selected);
 }
 
 .indentSliderDefaultStart,
@@ -250,7 +250,7 @@
     top: 50%;
     width: 1px;
     height: 14px;
-    background: color-mix(in srgb, var(--color-ink) 45%, transparent);
+    background: var(--color-preview-slider-boundary);
     transform: translate(-50%, -50%);
     pointer-events: none;
 }
@@ -320,12 +320,12 @@
 
 .indentSliderInputStart::-webkit-slider-thumb,
 .indentSliderInputStart::-moz-range-thumb {
-    background: color-mix(in srgb, var(--color-accent) 72%, #0f6ad9);
+    background: var(--color-preview-slider-handle);
 }
 
 .indentSliderInputEnd::-webkit-slider-thumb,
 .indentSliderInputEnd::-moz-range-thumb {
-    background: color-mix(in srgb, var(--color-accent) 72%, #0f6ad9);
+    background: var(--color-preview-slider-handle);
 }
 
 .indentSliderLabels {

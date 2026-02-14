@@ -9,5 +9,5 @@
     font-style: var(--centered-font-style, italic);
     text-decoration-line: var(--centered-underline, none);
     line-height: var(--centered-line-height, inherit);
-    color: #3c3325;
+    color: var(--color-block-centered);
 }

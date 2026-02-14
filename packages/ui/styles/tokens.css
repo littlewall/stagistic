@@ -27,14 +27,217 @@
     --space-8: calc(var(--space-unit) * 8 * var(--size-scale));
     --space-10: calc(var(--space-unit) * 10 * var(--size-scale));
     --space-12: calc(var(--space-unit) * 12 * var(--size-scale));
-    --color-paper: #f6f2ed;
-    --color-surface: #fbf9f6;
-    --color-ink: #2b231b;
-    --color-ink-muted: #8a8076;
-    --color-divider: #e3dbd0;
-    --color-accent: #f1e9df;
-    --color-highlight: #f8f2ea;
+
+    /* Base RGB colors (shared by light and dark themes). */
+    --rgb-base-neutral: 104 84 64;
+    --rgb-base-amber: 242 156 39;
+    --rgb-base-blue: 45 141 235;
+    --rgb-base-green: 47 122 75;
+    --rgb-base-yellow: 245 158 11;
+    --rgb-base-red: 181 77 71;
+    --rgb-base-sepia: 92 47 17;
+    --rgb-base-umber: 123 75 42;
+    --rgb-base-shadow: 20 16 13;
+
+    /* Theme knobs (light). */
+    --tone-neutral-saturation: .52;
+    --tone-paper-lightness: 95%;
+    --tone-surface-lightness: 98%;
+    --tone-ink-lightness: 13%;
+    --tone-ink-muted-lightness: 45%;
+    --tone-divider-lightness: 86%;
+    --tone-accent-lightness: 90%;
+    --tone-highlight-lightness: 95%;
+    --tone-success-lightness: 38%;
+    --tone-warning-lightness: 50%;
+    --tone-danger-lightness: 45%;
+    --tone-backdrop-alpha: .45;
+    --tone-shadow-popover-alpha: .18;
+    --tone-shadow-card-alpha: .08;
+    --tone-shadow-panel-alpha: .08;
+    --tone-shadow-canvas-alpha: .06;
+    --tone-block-neutral-saturation: .72;
+    --tone-block-warm-saturation: .92;
+    --tone-block-lyrics-saturation: 1.05;
+    --tone-block-scene-lightness: 18%;
+    --tone-block-action-lightness: 13%;
+    --tone-block-character-lightness: 20%;
+    --tone-block-dialogue-lightness: 14%;
+    --tone-block-parenthetical-lightness: 30%;
+    --tone-block-transition-lightness: 22%;
+    --tone-block-centered-lightness: 24%;
+    --tone-block-lyrics-lightness: 24%;
+    --tone-block-dual-lightness: 31%;
+    --tone-preview-amber-lightness: 60%;
+    --tone-preview-amber-alpha: .72;
+    --tone-preview-amber-soft-alpha: .2;
+    --tone-preview-amber-strong-alpha: .42;
+    --tone-preview-blue-lightness: 56%;
+    --tone-preview-blue-alpha: .95;
+    --tone-progress-start-lightness: 52%;
+    --tone-progress-mid-lightness: 62%;
+    --tone-progress-end-lightness: 77%;
+
+    /* Semantic tokens derived from base colors + theme knobs. */
+    --color-paper: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-neutral-saturation))
+    var(--tone-paper-lightness)
+    / 1);
+    --color-surface: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-neutral-saturation))
+    var(--tone-surface-lightness)
+    / 1);
+    --color-ink: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-neutral-saturation))
+    var(--tone-ink-lightness)
+    / 1);
+    --color-ink-muted: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-neutral-saturation))
+    var(--tone-ink-muted-lightness)
+    / 1);
+    --color-divider: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-neutral-saturation))
+    var(--tone-divider-lightness)
+    / 1);
+    --color-accent: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-neutral-saturation))
+    var(--tone-accent-lightness)
+    / 1);
+    --color-highlight: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-neutral-saturation))
+    var(--tone-highlight-lightness)
+    / 1);
+    --color-success: hsla(from rgb(var(--rgb-base-green)) h s var(--tone-success-lightness) / 1);
+    --color-warning: hsla(from rgb(var(--rgb-base-yellow)) h s var(--tone-warning-lightness) / 1);
+    --color-danger: hsla(from rgb(var(--rgb-base-red)) h s var(--tone-danger-lightness) / 1);
+    --color-backdrop: hsla(from rgb(var(--rgb-base-shadow)) h calc(s * .5) 8% / var(--tone-backdrop-alpha));
+    --color-shadow-popover: hsla(from rgb(var(--rgb-base-shadow)) h calc(s * .6) 9% / var(--tone-shadow-popover-alpha));
+    --color-shadow-card: hsla(from rgb(var(--rgb-base-shadow)) h calc(s * .6) 10% / var(--tone-shadow-card-alpha));
+    --color-shadow-panel: hsla(from rgb(var(--rgb-base-shadow)) h calc(s * .65) 10% / var(--tone-shadow-panel-alpha));
+    --color-shadow-canvas: hsla(from rgb(var(--rgb-base-shadow)) h calc(s * .65) 9% / var(--tone-shadow-canvas-alpha));
+    --color-preview-indent-rail: hsla(from rgb(var(--rgb-base-amber))
+    h
+    calc(s * .95)
+    var(--tone-preview-amber-lightness)
+    / var(--tone-preview-amber-alpha));
+    --color-preview-spacing-soft: hsla(from rgb(var(--rgb-base-amber))
+    h
+    calc(s * .9)
+    var(--tone-preview-amber-lightness)
+    / var(--tone-preview-amber-soft-alpha));
+    --color-preview-spacing-strong: hsla(from rgb(var(--rgb-base-amber))
+    h
+    calc(s * .95)
+    var(--tone-preview-amber-lightness)
+    / var(--tone-preview-amber-strong-alpha));
+    --color-preview-slider-selected: hsla(from rgb(var(--rgb-base-blue))
+    h
+    s
+    var(--tone-preview-blue-lightness)
+    / .32);
+    --color-preview-slider-handle: hsla(from rgb(var(--rgb-base-blue))
+    h
+    s
+    var(--tone-preview-blue-lightness)
+    / var(--tone-preview-blue-alpha));
+    --color-preview-slider-boundary: hsla(from rgb(var(--rgb-base-neutral)) h calc(s * .45) 52% / .55);
+    --color-progress-start: hsla(from rgb(var(--rgb-base-amber)) h s var(--tone-progress-start-lightness) / 1);
+    --color-progress-middle: hsla(from rgb(var(--rgb-base-amber)) h s var(--tone-progress-mid-lightness) / 1);
+    --color-progress-end: hsla(from rgb(var(--rgb-base-amber)) h calc(s * .8) var(--tone-progress-end-lightness) / 1);
+    --color-block-scene-heading: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-block-neutral-saturation))
+    var(--tone-block-scene-lightness)
+    / 1);
+    --color-block-action: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-block-neutral-saturation))
+    var(--tone-block-action-lightness)
+    / 1);
+    --color-block-character: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-block-neutral-saturation))
+    var(--tone-block-character-lightness)
+    / 1);
+    --color-block-dialogue: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-block-neutral-saturation))
+    var(--tone-block-dialogue-lightness)
+    / 1);
+    --color-block-parenthetical: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-block-neutral-saturation))
+    var(--tone-block-parenthetical-lightness)
+    / 1);
+    --color-block-transition: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-block-neutral-saturation))
+    var(--tone-block-transition-lightness)
+    / 1);
+    --color-block-centered: hsla(from rgb(var(--rgb-base-neutral))
+    h
+    calc(s * var(--tone-block-neutral-saturation))
+    var(--tone-block-centered-lightness)
+    / 1);
+    --color-block-lyrics: var(--color-block-dialogue);
+    --color-block-dual-character: hsla(from rgb(var(--rgb-base-umber))
+    h
+    calc(s * var(--tone-block-warm-saturation))
+    var(--tone-block-dual-lightness)
+    / 1);
+    --color-block-dual-dialogue: var(--color-block-dual-character);
     --radius-sm: calc(6px * var(--size-scale));
     --radius-md: calc(10px * var(--size-scale));
-    --shadow-popover: 0 10px 30px rgba(26, 20, 15, .12);
+    --shadow-popover: 0 10px 30px var(--color-shadow-popover);
+    --shadow-card: 0 10px 20px var(--color-shadow-card);
+    --shadow-panel: 0 12px 32px var(--color-shadow-panel);
+    --shadow-canvas: 0 12px 30px var(--color-shadow-canvas);
+
+    color-scheme: light;
+}
+
+:root[data-theme = 'dark'] {
+    --tone-neutral-saturation: .68;
+    --tone-paper-lightness: 12%;
+    --tone-surface-lightness: 15%;
+    --tone-ink-lightness: 90%;
+    --tone-ink-muted-lightness: 71%;
+    --tone-divider-lightness: 30%;
+    --tone-accent-lightness: 25%;
+    --tone-highlight-lightness: 33%;
+    --tone-success-lightness: 57%;
+    --tone-warning-lightness: 63%;
+    --tone-danger-lightness: 62%;
+    --tone-backdrop-alpha: .6;
+    --tone-shadow-popover-alpha: .5;
+    --tone-shadow-card-alpha: .24;
+    --tone-shadow-panel-alpha: .3;
+    --tone-shadow-canvas-alpha: .22;
+    --tone-block-scene-lightness: 87%;
+    --tone-block-action-lightness: 88%;
+    --tone-block-character-lightness: 86%;
+    --tone-block-dialogue-lightness: 89%;
+    --tone-block-parenthetical-lightness: 82%;
+    --tone-block-transition-lightness: 84%;
+    --tone-block-centered-lightness: 85%;
+    --tone-block-lyrics-lightness: 80%;
+    --tone-block-dual-lightness: 78%;
+    --tone-preview-amber-lightness: 56%;
+    --tone-preview-amber-alpha: .62;
+    --tone-preview-amber-soft-alpha: .24;
+    --tone-preview-amber-strong-alpha: .46;
+    --tone-preview-blue-lightness: 62%;
+    --tone-preview-blue-alpha: .96;
+    --tone-progress-start-lightness: 57%;
+    --tone-progress-mid-lightness: 66%;
+    --tone-progress-end-lightness: 74%;
+
+    color-scheme: dark;
 }

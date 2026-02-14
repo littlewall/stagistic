@@ -15,7 +15,7 @@
     margin: 0 auto;
     padding: var(--space-6) 0 var(--space-8);
     background-color: var(--editor-page-break-background, var(--color-surface));
-    box-shadow: 0 12px 30px rgba(30, 20, 15, .04);
+    box-shadow: var(--shadow-canvas);
 }
 
 .content {

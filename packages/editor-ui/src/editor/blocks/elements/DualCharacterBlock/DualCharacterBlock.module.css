@@ -8,7 +8,7 @@
     font-style: var(--dual-character-font-style, normal);
     text-decoration-line: var(--dual-character-underline, none);
     line-height: var(--dual-character-line-height, inherit);
-    color: #7b4b2a;
+    color: var(--color-block-dual-character);
 }
 
 .dualCharacterBlock {

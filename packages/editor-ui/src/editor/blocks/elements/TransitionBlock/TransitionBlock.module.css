@@ -7,6 +7,7 @@
     font-style: var(--transition-font-style, normal);
     text-decoration-line: var(--transition-underline, none);
     line-height: var(--transition-line-height, inherit);
+    color: var(--color-block-transition);
 }
 
 .transitionBlock {

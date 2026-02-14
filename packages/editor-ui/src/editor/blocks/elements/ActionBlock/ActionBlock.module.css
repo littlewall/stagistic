@@ -8,5 +8,5 @@
     font-style: var(--action-font-style, normal);
     text-decoration-line: var(--action-underline, none);
     line-height: var(--action-line-height, inherit);
-    color: #1b1b1b;
+    color: var(--color-block-action);
 }
