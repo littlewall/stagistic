@@ -17,6 +17,7 @@ import {
     LINE_HEIGHT_OPTIONS,
     MAX_INDENT_CHARS,
     MIN_PREVIEW_CONTENT_CHARS,
+    PX_PER_INCH,
     SCREENPLAY_CHARS_PER_INCH,
     SPACING_BEFORE_OPTIONS,
 } from './constants';
@@ -71,7 +72,7 @@ export const useElementSettingsViewModel = ({
         const previewReferenceChars = Math.max(
             MIN_PREVIEW_CONTENT_CHARS,
             Math.round(
-                Math.max(0, (pageWidthPx - pageMarginLeftPx - pageMarginRightPx) / 96) * SCREENPLAY_CHARS_PER_INCH,
+                Math.max(0, (pageWidthPx - pageMarginLeftPx - pageMarginRightPx) / PX_PER_INCH) * SCREENPLAY_CHARS_PER_INCH,
             ),
         );
         const defaultContentChars = Math.max(
@@ -149,8 +150,8 @@ export const useElementSettingsViewModel = ({
             defaultSliderEndChars,
         );
         const contentChars = Math.max(minPreviewContentChars, sliderEnd - sliderStart);
-        const leftTotalInches = (pageMarginLeftPx / 96) + (sliderStart / SCREENPLAY_CHARS_PER_INCH);
-        const rightTotalInches = (pageMarginRightPx / 96)
+        const leftTotalInches = (pageMarginLeftPx / PX_PER_INCH) + (sliderStart / SCREENPLAY_CHARS_PER_INCH);
+        const rightTotalInches = (pageMarginRightPx / PX_PER_INCH)
             + ((previewReferenceChars - sliderEnd) / SCREENPLAY_CHARS_PER_INCH);
         const safePageWidthPx = Math.max(1, pageWidthPx);
         const pageStartPercent = clamp((pageMarginLeftPx / safePageWidthPx) * 100, 0, 45);
