@@ -8,7 +8,10 @@ import {
     DecorationSet,
 } from '@tiptap/pm/view';
 
-import {getCharacterColor} from '../../../characterColors';
+import {
+    getCharacterColor,
+    getCharacterColorVarName,
+} from '../../../characterColors';
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
     normalizeFountainBlockType,
@@ -16,7 +19,7 @@ import {
 import styles from '../CharacterTagDecorations.module.css';
 import {isCharacterBlockType} from './types';
 
-export const buildDecorations = (doc: ProseMirrorNode) => {
+export const buildDecorations = (doc: ProseMirrorNode, characterColorSaturation?: number) => {
     const decorations: Decoration[] = [];
 
     doc.descendants((node, pos) => {
@@ -37,7 +40,7 @@ export const buildDecorations = (doc: ProseMirrorNode) => {
         tokens.forEach((token, index) => {
             if (token.valueStart < token.valueEnd) {
                 const key = normalizeCharacterKey(token.value);
-                const color = getCharacterColor(key);
+                const color = getCharacterColor(key, characterColorSaturation);
                 const decorationEnd = Math.max(token.valueEnd, token.end);
 
                 decorations.push(Decoration.inline(
@@ -45,7 +48,7 @@ export const buildDecorations = (doc: ProseMirrorNode) => {
                     blockStart + decorationEnd,
                     {
                         class: styles.characterTag,
-                        style: `--character-tag-color: ${color};`,
+                        style: `--character-tag-color: var(${getCharacterColorVarName(key)}, ${color});`,
                     },
                 ));
             }

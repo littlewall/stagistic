@@ -11,6 +11,7 @@ export const useScriptEditorCharacters = ({
     scriptRepository,
     initialValue,
     resolvedScriptSettings,
+    characterColorSaturation,
     handleAutoSave,
 }: UseScriptEditorCharactersArgs): UseScriptEditorCharactersResult => {
     const {
@@ -28,6 +29,12 @@ export const useScriptEditorCharacters = ({
         setRenamingCharacterIds,
         renamingCharacterKeys,
         setRenamingCharacterKeys,
+        colorUpdatingCharacterIds,
+        setColorUpdatingCharacterIds,
+        genderUpdatingCharacterIds,
+        setGenderUpdatingCharacterIds,
+        characterGenderOptions,
+        setCharacterGenderOptions,
         isCharactersLoading,
         handleEditorValueChange,
     } = useCharacterState({
@@ -50,9 +57,12 @@ export const useScriptEditorCharacters = ({
         deletingCharacterIds,
         renamingCharacterIds,
         renamingCharacterKeys,
+        colorUpdatingCharacterIds,
+        genderUpdatingCharacterIds,
         editorValue,
         initialValue,
         resolvedScriptSettings,
+        characterColorSaturation,
     });
 
     const {
@@ -60,6 +70,9 @@ export const useScriptEditorCharacters = ({
         handleDeleteCharacter,
         handleRenameCharacterPreview,
         handleRenameCharacter,
+        handleSetCharacterColor,
+        handleSetCharacterGender,
+        handleUpsertCharacterGender,
     } = useCharacterActions({
         currentScriptId,
         scriptRepository,
@@ -72,6 +85,9 @@ export const useScriptEditorCharacters = ({
         setDeletingCharacterIds,
         setRenamingCharacterIds,
         setRenamingCharacterKeys,
+        setColorUpdatingCharacterIds,
+        setGenderUpdatingCharacterIds,
+        setCharacterGenderOptions,
         confirmedCharacterSet,
         confirmedCharactersById,
         getCharacterNameForBlockType,
@@ -84,6 +100,7 @@ export const useScriptEditorCharacters = ({
         normalizedConfirmedCharacterRecords,
         confirmedCharacters,
         unconfirmedCharacters,
+        characterGenderOptions,
         isCharactersLoading,
         handleEditorValueChange,
         normalizeCharacterNameForInlineInput,
@@ -91,5 +108,8 @@ export const useScriptEditorCharacters = ({
         handleDeleteCharacter,
         handleRenameCharacterPreview,
         handleRenameCharacter,
+        handleSetCharacterColor,
+        handleSetCharacterGender,
+        handleUpsertCharacterGender,
     };
 };

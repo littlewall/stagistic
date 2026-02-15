@@ -11,12 +11,14 @@ type CharacterSuggestionsOverlayProps = {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
     persistentCharacters?: readonly PersistentCharacterRef[],
+    characterColorSaturation?: number,
 };
 
 const CharacterSuggestionsOverlay = ({
     editor,
     canvasRef,
     persistentCharacters = [],
+    characterColorSaturation,
 }: CharacterSuggestionsOverlayProps) => {
     const {
         overlayState,
@@ -26,6 +28,7 @@ const CharacterSuggestionsOverlay = ({
         editor,
         canvasRef,
         persistentCharacters,
+        characterColorSaturation,
     });
 
     if (!overlayState || !editor) {

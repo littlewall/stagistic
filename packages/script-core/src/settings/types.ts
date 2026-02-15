@@ -40,16 +40,22 @@ export type TypographySettings = {
     lineHeight: number,
 };
 
+export type VisualSettings = {
+    characterColorSaturation: number,
+};
+
 export type BlockSettings = Record<FountainElementType, BlockSpacingSettings>;
 
 export type EditorSettings = {
     page: PageSettings,
     typography: TypographySettings,
+    visual: VisualSettings,
     blocks: BlockSettings,
 };
 
 export type EditorSettingsOverride = Partial<{
     page: Partial<PageSettings>,
     typography: Partial<TypographySettings>,
+    visual: Partial<VisualSettings>,
     blocks: Partial<Record<FountainElementType, Partial<BlockSpacingSettings>>>,
 }>;

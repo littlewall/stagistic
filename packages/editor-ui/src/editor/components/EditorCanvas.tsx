@@ -9,11 +9,13 @@ import styles from './EditorCanvas.module.css';
 type PersistentCharacterRef = {
     id: string,
     key: string,
+    colorHex?: string | null,
 };
 
 type EditorCanvasProps = {
     editor: TiptapEditor | null,
     persistentCharacters?: readonly PersistentCharacterRef[],
+    characterColorSaturation?: number,
     autoFocus?: boolean,
     style?: CSSProperties,
 };
@@ -21,6 +23,7 @@ type EditorCanvasProps = {
 export const EditorCanvas = ({
     editor,
     persistentCharacters = [],
+    characterColorSaturation,
     autoFocus,
     style,
 }: EditorCanvasProps) => {
@@ -43,6 +46,7 @@ export const EditorCanvas = ({
                 editor={editor}
                 canvasRef={canvasRef}
                 persistentCharacters={persistentCharacters}
+                characterColorSaturation={characterColorSaturation}
             />
             <EditorBlockActionsOverlay editor={editor} canvasRef={canvasRef} />
         </section>

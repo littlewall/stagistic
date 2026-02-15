@@ -5,6 +5,7 @@ export * from './schema';
 export type {
     Script,
     ScriptCharacter,
+    ScriptCharacterGender,
     ScriptConfig,
     ScriptConfigBlock,
     ScriptSummary,

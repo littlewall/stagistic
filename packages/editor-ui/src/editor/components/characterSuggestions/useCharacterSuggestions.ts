@@ -35,12 +35,14 @@ type UseCharacterSuggestionsArgs = {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
     persistentCharacters?: readonly PersistentCharacterRef[],
+    characterColorSaturation?: number,
 };
 
 export const useCharacterSuggestions = ({
     editor,
     canvasRef,
     persistentCharacters = [],
+    characterColorSaturation,
 }: UseCharacterSuggestionsArgs) => {
     const [overlayState, setOverlayState] = useState<OverlayState | null>(null);
     const rafIdRef = useRef<number | null>(null);
@@ -69,6 +71,7 @@ export const useCharacterSuggestions = ({
             canvas,
             normalizedPersistentCharacters,
             suppressedSelection: suppressedSelectionRef.current,
+            characterColorSaturation,
         });
 
         if (!overlay) {
@@ -96,6 +99,7 @@ export const useCharacterSuggestions = ({
         });
     }, [
         canvasRef,
+        characterColorSaturation,
         editor,
         normalizedPersistentCharacters,
     ]);

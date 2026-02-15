@@ -64,13 +64,13 @@ export const panelDescriptions: Record<string, {
     title: string,
     description: string,
 }> = {
-    'settings-source': {
-        title: 'Settings Source',
-        description: 'Editor settings are currently stored in local config tables.',
-    },
     'document-info': {
-        title: 'Document Info',
-        description: 'Document metadata panel placeholder.',
+        title: 'Script Info',
+        description: 'Script metadata panel placeholder.',
+    },
+    'visual-preferences': {
+        title: 'Visual Preferences',
+        description: 'Customize character color intensity for better readability.',
     },
     production: {
         title: 'Production',
@@ -91,30 +91,6 @@ export const panelDescriptions: Record<string, {
     notes: {
         title: 'Notes',
         description: 'Document notes configuration placeholder.',
-    },
-    'account-writing': {
-        title: 'Writing Preferences',
-        description: 'Account writing preferences placeholder.',
-    },
-    'account-profile': {
-        title: 'Profile',
-        description: 'Profile settings placeholder.',
-    },
-    'account-notifications': {
-        title: 'Notifications',
-        description: 'Notifications settings placeholder.',
-    },
-    'account-security': {
-        title: 'Password & Security',
-        description: 'Security settings placeholder.',
-    },
-    'account-billing': {
-        title: 'Billing',
-        description: 'Billing settings placeholder.',
-    },
-    'account-ai': {
-        title: 'AI',
-        description: 'AI settings placeholder.',
     },
     'project-statuses': {
         title: 'Project Statuses',

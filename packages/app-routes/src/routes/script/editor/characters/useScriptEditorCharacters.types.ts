@@ -5,6 +5,7 @@ import {
 } from '@stagistic/script-core';
 
 import type {
+    CharacterGenderOption,
     CharacterCountItem,
     ScriptCharacterRecord,
 } from './types';
@@ -16,6 +17,7 @@ export type UseScriptEditorCharactersArgs = {
     scriptRepository: ScriptRepository,
     initialValue: ScriptDocument | null | undefined,
     resolvedScriptSettings: EditorSettings,
+    characterColorSaturation: number,
     handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
 };
 
@@ -25,6 +27,7 @@ export type UseScriptEditorCharactersResult = {
     normalizedConfirmedCharacterRecords: ScriptCharacterRecord[],
     confirmedCharacters: CharacterCountItem[],
     unconfirmedCharacters: CharacterCountItem[],
+    characterGenderOptions: CharacterGenderOption[],
     isCharactersLoading: boolean,
     handleEditorValueChange: (value: ScriptDocument) => void,
     normalizeCharacterNameForInlineInput: (name: string) => string,
@@ -40,4 +43,7 @@ export type UseScriptEditorCharactersResult = {
         previousCharacterName: string,
         nextCharacterName: string,
     ) => void,
+    handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
+    handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
+    handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,
 };

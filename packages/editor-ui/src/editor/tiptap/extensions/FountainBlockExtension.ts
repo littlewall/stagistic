@@ -185,6 +185,7 @@ const FountainBlockExtension = Node.create<{
     blockShortcuts?: BlockShortcutMap,
     blockNextElements?: BlockNextElementMap,
     blockCasing?: BlockCasingMap,
+    characterColorSaturation?: number,
 }>({
     name: FOUNTAIN_BLOCK_NODE_NAME,
     group: 'block',
@@ -196,6 +197,7 @@ const FountainBlockExtension = Node.create<{
             blockShortcuts: undefined,
             blockNextElements: undefined,
             blockCasing: undefined,
+            characterColorSaturation: undefined,
         };
     },
     addAttributes() {
@@ -248,7 +250,7 @@ const FountainBlockExtension = Node.create<{
                 this.options.blockShortcuts,
                 this.options.blockNextElements,
                 this.options.blockCasing,
-            ), createCharacterTagDecorationsPlugin(),
+            ), createCharacterTagDecorationsPlugin(this.options.characterColorSaturation),
         ];
     },
 });

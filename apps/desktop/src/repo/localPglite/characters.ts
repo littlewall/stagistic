@@ -1,6 +1,9 @@
 import {dbQueries} from '@stagistic/db';
 import {normalizeCharacterKey} from '@stagistic/script-core';
-import {uuidv7} from '@stagistic/shared';
+import {
+    collapseWhitespace,
+    uuidv7,
+} from '@stagistic/shared';
 import type {ScriptRepository} from '@stagistic/sync-core';
 
 import type {
@@ -10,7 +13,13 @@ import type {
 
 type CharacterHandlers = Pick<
     ScriptRepository,
-    'confirmScriptCharacter' | 'deleteScriptCharacter' | 'renameScriptCharacter'
+    | 'listScriptCharacterGenders'
+    | 'confirmScriptCharacter'
+    | 'deleteScriptCharacter'
+    | 'renameScriptCharacter'
+    | 'setScriptCharacterColor'
+    | 'setScriptCharacterGender'
+    | 'upsertScriptCharacterGender'
 >;
 
 type CreateCharacterHandlersArgs = {
@@ -22,6 +31,25 @@ export const createCharacterHandlers = ({
     getDb,
     recordOutbox,
 }: CreateCharacterHandlersArgs): CharacterHandlers => {
+    const defaultGenderLabelByKey = new Map<string, string>([
+        [
+            'male',
+            'Male',
+        ],
+        [
+            'female',
+            'Female',
+        ],
+    ]);
+    const normalizeGenderLabel = (label: string) => collapseWhitespace(label);
+    const normalizeGenderKey = (label: string) => normalizeGenderLabel(label).toLocaleLowerCase();
+
+    const listScriptCharacterGenders: CharacterHandlers['listScriptCharacterGenders'] = async scriptId => {
+        const db = await getDb();
+
+        return dbQueries.listScriptCharacterGenders(db, scriptId);
+    };
+
     const confirmScriptCharacter: CharacterHandlers['confirmScriptCharacter'] = async (
         scriptId,
         characterKey,
@@ -198,9 +226,184 @@ export const createCharacterHandlers = ({
         });
     };
 
+    const setScriptCharacterColor: CharacterHandlers['setScriptCharacterColor'] = async (
+        scriptId,
+        characterId,
+        colorHex,
+    ) => {
+        if (!characterId) {
+            return null;
+        }
+
+        const db = await getDb();
+        const now = Date.now();
+        const currentCharacter = await dbQueries.getScriptCharacterById(db, {
+            scriptId,
+            characterId,
+        });
+
+        if (!currentCharacter) {
+            return null;
+        }
+
+        await dbQueries.updateScriptCharacterColor(db, {
+            scriptId,
+            characterId,
+            colorHex,
+            updatedAt: now,
+        });
+        await dbQueries.updateScriptTimestamp(db, {
+            scriptId,
+            updatedAt: now,
+        });
+        await recordOutbox({
+            scriptId,
+            opType: 'character.color',
+            payloadJson: JSON.stringify({
+                scriptId,
+                characterId,
+                colorHex,
+                updatedAt: now,
+            }),
+        });
+
+        return dbQueries.getScriptCharacterById(db, {
+            scriptId,
+            characterId,
+        });
+    };
+
+    const setScriptCharacterGender: CharacterHandlers['setScriptCharacterGender'] = async (
+        scriptId,
+        characterId,
+        genderKey,
+    ) => {
+        if (!characterId) {
+            return null;
+        }
+
+        const normalizedGenderKey = genderKey === null
+            ? null
+            : normalizeGenderKey(genderKey);
+
+        if (normalizedGenderKey !== null && normalizedGenderKey.length === 0) {
+            return null;
+        }
+
+        const db = await getDb();
+        const now = Date.now();
+        const currentCharacter = await dbQueries.getScriptCharacterById(db, {
+            scriptId,
+            characterId,
+        });
+
+        if (!currentCharacter) {
+            return null;
+        }
+
+        if (normalizedGenderKey !== null) {
+            const genderOption = await dbQueries.getScriptCharacterGenderByKey(db, {
+                scriptId,
+                genderKey: normalizedGenderKey,
+            });
+
+            if (!genderOption) {
+                const defaultGenderLabel = defaultGenderLabelByKey.get(normalizedGenderKey);
+
+                if (!defaultGenderLabel) {
+                    return null;
+                }
+
+                await dbQueries.upsertScriptCharacterGender(db, {
+                    id: uuidv7(),
+                    scriptId,
+                    genderKey: normalizedGenderKey,
+                    genderLabel: defaultGenderLabel,
+                    createdAt: now,
+                    updatedAt: now,
+                });
+            }
+        }
+
+        await dbQueries.updateScriptCharacterGender(db, {
+            scriptId,
+            characterId,
+            genderKey: normalizedGenderKey,
+            updatedAt: now,
+        });
+        await dbQueries.updateScriptTimestamp(db, {
+            scriptId,
+            updatedAt: now,
+        });
+        await recordOutbox({
+            scriptId,
+            opType: 'character.gender',
+            payloadJson: JSON.stringify({
+                scriptId,
+                characterId,
+                genderKey: normalizedGenderKey,
+                updatedAt: now,
+            }),
+        });
+
+        return dbQueries.getScriptCharacterById(db, {
+            scriptId,
+            characterId,
+        });
+    };
+
+    const upsertScriptCharacterGender: CharacterHandlers['upsertScriptCharacterGender'] = async (
+        scriptId,
+        label,
+    ) => {
+        const normalizedLabel = normalizeGenderLabel(label);
+        const genderKey = normalizeGenderKey(normalizedLabel);
+
+        if (!genderKey) {
+            return null;
+        }
+
+        const db = await getDb();
+        const now = Date.now();
+
+        await dbQueries.upsertScriptCharacterGender(db, {
+            id: uuidv7(),
+            scriptId,
+            genderKey,
+            genderLabel: normalizedLabel,
+            createdAt: now,
+            updatedAt: now,
+        });
+
+        await dbQueries.updateScriptTimestamp(db, {
+            scriptId,
+            updatedAt: now,
+        });
+
+        await recordOutbox({
+            scriptId,
+            opType: 'character.gender.upsert',
+            payloadJson: JSON.stringify({
+                scriptId,
+                genderKey,
+                genderLabel: normalizedLabel,
+                updatedAt: now,
+            }),
+        });
+
+        return dbQueries.getScriptCharacterGenderByKey(db, {
+            scriptId,
+            genderKey,
+        });
+    };
+
     return {
+        listScriptCharacterGenders,
         confirmScriptCharacter,
         deleteScriptCharacter,
         renameScriptCharacter,
+        setScriptCharacterColor,
+        setScriptCharacterGender,
+        upsertScriptCharacterGender,
     };
 };

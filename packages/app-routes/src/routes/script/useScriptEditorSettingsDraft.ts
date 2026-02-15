@@ -1,5 +1,6 @@
 import {type FountainElementType} from '@stagistic/script-core';
 import {
+    clampCharacterColorSaturation,
     DEFAULT_EDITOR_SETTINGS,
     type EditorSettings,
     type EditorSettingsOverride,
@@ -128,9 +129,22 @@ export const useScriptEditorSettingsDraft = ({
         }));
     }, []);
 
+    const updateCharacterColorSaturation = useCallback((value: number) => {
+        const nextSaturation = clampCharacterColorSaturation(value);
+
+        setScriptSettingsDraft(previous => ({
+            ...previous,
+            visual: {
+                ...previous.visual ?? {},
+                characterColorSaturation: nextSaturation,
+            },
+        }));
+    }, []);
+
     return {
         scriptSettingsDraft,
         resolvedScriptSettings,
         updateBlockSettings,
+        updateCharacterColorSaturation,
     };
 };

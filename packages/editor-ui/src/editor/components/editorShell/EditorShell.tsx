@@ -24,7 +24,9 @@ type EditorShellProps = {
     persistentCharacters?: readonly {
         id: string,
         key: string,
+        colorHex?: string | null,
     }[],
+    characterColorSaturation?: number,
     leftSidebarToggle?: {
         isOpen: boolean,
         onToggle: () => void,
@@ -46,6 +48,7 @@ export const EditorShell = ({
     rootStyle,
     autoFocus,
     persistentCharacters,
+    characterColorSaturation,
     leftSidebarToggle,
     rightSidebarToggle,
     leftSidebar,
@@ -124,6 +127,7 @@ export const EditorShell = ({
                     <EditorCanvas
                         editor={editor}
                         persistentCharacters={persistentCharacters}
+                        characterColorSaturation={characterColorSaturation}
                         autoFocus={autoFocus}
                     />
                 </div>

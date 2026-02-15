@@ -8,8 +8,13 @@ import {
     useConfirmCharacter,
     useDeleteCharacter,
     useRenameCharacter,
+    useSetCharacterColor,
+    useSetCharacterGender,
 } from './actions';
-import type {ScriptCharacterRecord} from './types';
+import type {
+    CharacterGenderOption,
+    ScriptCharacterRecord,
+} from './types';
 import type {ScriptRepository} from './useScriptEditorCharacters.types';
 
 type UseCharacterActionsArgs = {
@@ -24,6 +29,9 @@ type UseCharacterActionsArgs = {
     setDeletingCharacterIds: Dispatch<SetStateAction<string[]>>,
     setRenamingCharacterIds: Dispatch<SetStateAction<string[]>>,
     setRenamingCharacterKeys: Dispatch<SetStateAction<string[]>>,
+    setColorUpdatingCharacterIds: Dispatch<SetStateAction<string[]>>,
+    setGenderUpdatingCharacterIds: Dispatch<SetStateAction<string[]>>,
+    setCharacterGenderOptions: Dispatch<SetStateAction<CharacterGenderOption[]>>,
     confirmedCharacterSet: ReadonlySet<string>,
     confirmedCharactersById: ReadonlyMap<string, ScriptCharacterRecord>,
     getCharacterNameForBlockType: (name: string, blockType: unknown) => string,
@@ -43,6 +51,9 @@ export type CharacterActions = {
         previousCharacterName: string,
         nextCharacterName: string,
     ) => void,
+    handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
+    handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
+    handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,
 };
 
 export const useCharacterActions = ({
@@ -57,6 +68,9 @@ export const useCharacterActions = ({
     setDeletingCharacterIds,
     setRenamingCharacterIds,
     setRenamingCharacterKeys,
+    setColorUpdatingCharacterIds,
+    setGenderUpdatingCharacterIds,
+    setCharacterGenderOptions,
     confirmedCharacterSet,
     confirmedCharactersById,
     getCharacterNameForBlockType,
@@ -93,11 +107,28 @@ export const useCharacterActions = ({
         setRenamingCharacterIds,
         setRenamingCharacterKeys,
     });
+    const handleSetCharacterColor = useSetCharacterColor({
+        ...baseArgs,
+        confirmedCharactersById,
+        setColorUpdatingCharacterIds,
+    });
+    const {
+        handleSetCharacterGender,
+        handleUpsertCharacterGender,
+    } = useSetCharacterGender({
+        ...baseArgs,
+        confirmedCharactersById,
+        setGenderUpdatingCharacterIds,
+        setCharacterGenderOptions,
+    });
 
     return {
         handleConfirmCharacter,
         handleDeleteCharacter,
         handleRenameCharacterPreview,
         handleRenameCharacter,
+        handleSetCharacterColor,
+        handleSetCharacterGender,
+        handleUpsertCharacterGender,
     };
 };

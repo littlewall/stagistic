@@ -34,7 +34,8 @@ export const isEditorSettingsOverrideEmpty = (value?: EditorSettingsOverride | n
 
     const hasPage = Boolean(value.page && Object.keys(value.page).length > 0);
     const hasTypography = Boolean(value.typography && Object.keys(value.typography).length > 0);
+    const hasVisual = Boolean(value.visual && Object.values(value.visual).some(item => item !== undefined));
     const hasBlocks = Boolean(value.blocks && Object.keys(value.blocks).length > 0);
 
-    return !(hasPage || hasTypography || hasBlocks);
+    return !(hasPage || hasTypography || hasVisual || hasBlocks);
 };
