@@ -1,5 +1,8 @@
 import {
-    Folder, Home, NavArrowDown, Plus, UserCircle,
+    Computer,
+    Folder, HalfMoon,
+    Home, NavArrowDown, Plus, SunLight,
+    UserCircle,
 } from 'iconoir-react';
 import {
     useCallback,
@@ -21,10 +24,10 @@ import {
 } from 'react-aria-components';
 
 import {
-    applyAppTheme,
-    type AppTheme,
-    readPreferredAppTheme,
-    toggleAppTheme,
+    applyAppThemeMode,
+    type AppThemeMode,
+    readPreferredAppThemeMode,
+    subscribeToSystemThemeChange,
 } from '../theme';
 import styles from './AppHeader.module.css';
 
@@ -60,7 +63,7 @@ export const AppHeader = ({
     onBackToEditor,
     backToEditorLabel = 'Back to editor',
 }: AppHeaderProps) => {
-    const [theme, setTheme] = useState<AppTheme>(() => readPreferredAppTheme());
+    const [themeMode, setThemeMode] = useState<AppThemeMode>(() => readPreferredAppThemeMode());
     const script = useMemo(() => currentScript, [currentScript]);
     const handleSelectScript = useMemo(() => onSelectScript, [onSelectScript]);
     const canShowScriptMenu = useMemo(
@@ -117,20 +120,22 @@ export const AppHeader = ({
             return;
         }
 
-        if (key === 'toggle-theme') {
-            setTheme(previous => toggleAppTheme(previous));
-
-            return;
-        }
-
         if (onMenuAction) {
             onMenuAction(key);
         }
     }, [onMenuAction]);
 
     useEffect(() => {
-        applyAppTheme(theme);
-    }, [theme]);
+        applyAppThemeMode(themeMode);
+
+        if (themeMode !== 'auto') {
+            return;
+        }
+
+        return subscribeToSystemThemeChange(() => {
+            applyAppThemeMode('auto');
+        });
+    }, [themeMode]);
 
     return (
         <header className={styles.header}>
@@ -240,24 +245,53 @@ export const AppHeader = ({
             </div>
             <div className={styles.rightControls}>
                 <MenuTrigger>
-                    <Button className={styles.avatarTrigger}>
+                    <Button className={styles.avatarTrigger} aria-label="Open account menu">
                         <UserCircle className={styles.avatarIcon} aria-hidden="true" />
-                        <NavArrowDown className={styles.caret} aria-hidden="true" />
                     </Button>
                     <Popover className={styles.menuPopover} placement="bottom end">
-                        <Menu className={styles.menu} onAction={handleAccountMenuAction}>
-                            <MenuItem className={styles.menuItem} id="toggle-theme">
-                                {theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
-                            </MenuItem>
-                            <Separator className={styles.menuSeparator} />
-                            <MenuItem className={styles.menuItem} id="profile">
-                                Account settings
-                            </MenuItem>
-                            <Separator className={styles.menuSeparator} />
-                            <MenuItem className={styles.menuItem} id="logout">
-                                Sign out
-                            </MenuItem>
-                        </Menu>
+                        <div className={styles.accountPopoverContent}>
+                            <div className={styles.themeControlsContainer}>
+                                <div
+                                    className={styles.themeControls}
+                                    role="group"
+                                    aria-label="Theme mode"
+                                >
+                                    <Button
+                                        className={`${styles.themeButton} ${themeMode === 'light' ? styles.themeButtonActive : ''}`}
+                                        onPress={() => setThemeMode('light')}
+                                        aria-label="Light theme"
+                                        title="Light theme"
+                                    >
+                                        <SunLight className={styles.themeButtonIcon} aria-hidden="true" />
+                                    </Button>
+                                    <Button
+                                        className={`${styles.themeButton} ${themeMode === 'dark' ? styles.themeButtonActive : ''}`}
+                                        onPress={() => setThemeMode('dark')}
+                                        aria-label="Dark theme"
+                                        title="Dark theme"
+                                    >
+                                        <HalfMoon className={styles.themeButtonIcon} aria-hidden="true" />
+                                    </Button>
+                                    <Button
+                                        className={`${styles.themeButton} ${themeMode === 'auto' ? styles.themeButtonActive : ''}`}
+                                        onPress={() => setThemeMode('auto')}
+                                        aria-label="System theme"
+                                        title="System theme"
+                                    >
+                                        <Computer className={styles.themeButtonIcon} aria-hidden="true" />
+                                    </Button>
+                                </div>
+                            </div>
+                            <Menu className={styles.menu} onAction={handleAccountMenuAction}>
+                                <MenuItem className={styles.menuItem} id="profile">
+                                    Account settings
+                                </MenuItem>
+                                <Separator className={styles.menuSeparator} />
+                                <MenuItem className={styles.menuItem} id="logout">
+                                    Sign out
+                                </MenuItem>
+                            </Menu>
+                        </div>
                     </Popover>
                 </MenuTrigger>
             </div>

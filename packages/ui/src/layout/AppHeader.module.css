@@ -94,6 +94,69 @@
     justify-self: end;
 }
 
+.accountPopoverContent {
+    display: flex;
+    flex-direction: column;
+}
+
+.themeControlsContainer {
+    display: flex;
+    justify-content: flex-start;
+    padding: var(--space-2);
+}
+
+.themeControls {
+    display: inline-flex;
+    gap: calc(2px * var(--size-scale));
+    align-items: center;
+    padding: calc(2px * var(--size-scale));
+    background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
+    border: 1px solid var(--color-divider);
+    border-radius: 999px;
+}
+
+.themeButton {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(28px * var(--size-scale));
+    height: calc(28px * var(--size-scale));
+    color: var(--color-ink-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    transition: background .12s ease, border-color .12s ease, color .12s ease;
+
+    &:focus {
+        border-color: transparent;
+        outline: none;
+        box-shadow: none;
+    }
+
+    &[data-hovered] {
+        background: color-mix(in srgb, var(--color-accent) 40%, transparent);
+    }
+
+    &[data-focus-visible] {
+        background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
+        border-color: transparent;
+        outline: none;
+        box-shadow: none;
+    }
+}
+
+.themeButtonActive {
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border-color: var(--color-divider);
+}
+
+.themeButtonIcon {
+    width: calc(14px * var(--size-scale));
+    height: calc(14px * var(--size-scale));
+}
+
 .scriptStatus {
     display: inline-flex;
     align-items: center;
@@ -146,8 +209,9 @@
 }
 
 .avatarTrigger {
-    justify-content: flex-end;
-    min-width: calc(140px * var(--size-scale));
+    justify-content: center;
+    padding: var(--space-2);
+    border-radius: 999px;
 }
 
 .iconButton {
