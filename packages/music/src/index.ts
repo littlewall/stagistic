@@ -1,6 +1,2 @@
-/*
- * Music notation and audio features
- * For musical theatre scripts
- */
-
-export const placeholder = 'music';
+// Placeholder package for future music/script scoring features.
+export type MusicPackagePlaceholder = never;

@@ -1,4 +1,4 @@
-import type {EditorSettingsOverride, ScriptDocument} from '@stagistic/shared';
+import type {EditorSettingsOverride, ScriptDocument} from '@stagistic/script-core';
 
 export const stripScriptSettings = (value: ScriptDocument): ScriptDocument => {
     if (!value.attrs || !('settings' in value.attrs)) {

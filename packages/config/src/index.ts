@@ -1,6 +1,2 @@
-/*
- * Shared configuration and constants
- * Environment setup, feature flags, etc.
- */
-
-export const placeholder = 'config';
+// Placeholder package for future shared configuration.
+export type ConfigPackagePlaceholder = never;

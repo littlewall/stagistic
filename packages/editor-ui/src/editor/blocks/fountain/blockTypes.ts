@@ -8,8 +8,8 @@ import {
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
-} from '@stagistic/editor-core';
-import {normalizeEditorSettingsBlockType} from '@stagistic/shared';
+} from '@stagistic/script-core';
+import {normalizeEditorSettingsBlockType} from '@stagistic/script-core';
 
 export const FOUNTAIN_BLOCK_TYPES = [
     ELEMENT_ACTION,

@@ -1,31 +1,15 @@
-import {redoDepth, undoDepth} from '@tiptap/pm/history';
 import type {Editor as TiptapEditor} from '@tiptap/react';
-import {useEditorState} from '@tiptap/react';
-import clsx from 'clsx';
 import {
-    Bold,
-    Italic,
-    Redo,
-    Underline,
-    Undo,
-} from 'iconoir-react';
-import {
-    type MouseEvent as ReactMouseEvent,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
+    type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState,
 } from 'react';
 
-import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
 import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
-import {
-    FOUNTAIN_BLOCK_NODE_NAME,
-    getActiveFountainBlockFromState,
-    isSelectionAcrossBlocks,
-} from '../tiptap/fountainCore';
+import {FOUNTAIN_BLOCK_NODE_NAME} from '../tiptap/fountainCore';
 import styles from './EditorToolbar.module.css';
+import {BlockTypeSelect} from './toolbar/BlockTypeSelect';
+import {InlineMarksGroup} from './toolbar/InlineMarksGroup';
+import {useDropdownDismiss} from './toolbar/useDropdownDismiss';
+import {useToolbarState} from './toolbar/useToolbarState';
 
 type EditorToolbarProps = {
     editor: TiptapEditor | null,
@@ -35,97 +19,27 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState(false);
-    const [hasEditorFocus, setHasEditorFocus] = useState(() => Boolean(editor?.isFocused));
+    const {
+        activeType,
+        activeBlockInfo,
+        canUndo,
+        canRedo,
+        isBoldActive,
+        isItalicActive,
+        isUnderlineActive,
+        canChangeBlockType,
+        visibleBlockInfo,
+    } = useToolbarState({editor});
 
-    const toolbarState = useEditorState({
-        editor,
-        selector: ({editor: stateEditor}) => {
-            if (!stateEditor) {
-                return {
-                    activeType: null,
-                    canRedo: false,
-                    canUndo: false,
-                    isBold: false,
-                    isItalic: false,
-                    isUnderline: false,
-                };
-            }
-
-            const activeBlock = getActiveFountainBlockFromState(
-                stateEditor.state,
-                FOUNTAIN_BLOCK_NODE_NAME,
-            );
-            const hasSingleBlockSelection = !isSelectionAcrossBlocks(
-                stateEditor.state,
-                FOUNTAIN_BLOCK_NODE_NAME,
-            );
-
-            return {
-                activeType: hasSingleBlockSelection ? activeBlock?.blockType ?? null : null,
-                canRedo: redoDepth(stateEditor.state) > 0,
-                canUndo: undoDepth(stateEditor.state) > 0,
-                isBold: stateEditor.isActive('bold'),
-                isItalic: stateEditor.isActive('italic'),
-                isUnderline: stateEditor.isActive('underline'),
-            };
-        },
-        equalityFn: (a, b) => Boolean(
-            a
-            && b
-            && a.activeType === b.activeType
-            && a.canRedo === b.canRedo
-            && a.canUndo === b.canUndo
-            && a.isBold === b.isBold
-            && a.isItalic === b.isItalic
-            && a.isUnderline === b.isUnderline,
-        ),
+    useDropdownDismiss({
+        isOpen,
+        setIsOpen,
+        dropdownRef,
     });
-
-    const activeType = toolbarState?.activeType ?? null;
-    const canUndo = toolbarState?.canUndo ?? false;
-    const canRedo = toolbarState?.canRedo ?? false;
-    const isBoldActive = toolbarState?.isBold ?? false;
-    const isItalicActive = toolbarState?.isItalic ?? false;
-    const isUnderlineActive = toolbarState?.isUnderline ?? false;
-
-    const activeBlockInfo = useMemo(() => {
-        if (!activeType) {
-            return null;
-        }
-
-        const option = FOUNTAIN_BLOCKS.find(block => block.type === activeType);
-
-        return {
-            type: activeType,
-            icon: BLOCK_ICONS[activeType],
-            label: option?.label ?? 'Block',
-        };
-    }, [activeType]);
-    const canChangeBlockType = Boolean(activeBlockInfo) && hasEditorFocus;
-    const visibleBlockInfo = canChangeBlockType ? activeBlockInfo : null;
 
     useEffect(() => {
         setIsOpen(false);
     }, [activeType]);
-
-    useEffect(() => {
-        setHasEditorFocus(Boolean(editor?.isFocused));
-
-        if (!editor) {
-            return;
-        }
-
-        const handleFocus = () => setHasEditorFocus(true);
-        const handleBlur = () => setHasEditorFocus(false);
-
-        editor.on('focus', handleFocus);
-        editor.on('blur', handleBlur);
-
-        return () => {
-            editor.off('focus', handleFocus);
-            editor.off('blur', handleBlur);
-        };
-    }, [editor]);
 
     useEffect(() => {
         if (!canChangeBlockType && isOpen) {
@@ -138,37 +52,6 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             toolbarRef.current.dataset.editorToolbar = 'true';
         }
     }, []);
-
-    useEffect(() => {
-        if (!isOpen) {
-            return;
-        }
-
-        const onPointerDown = (event: MouseEvent | PointerEvent) => {
-            if (!dropdownRef.current) {
-                return;
-            }
-
-            if (dropdownRef.current.contains(event.target as Node)) {
-                return;
-            }
-
-            setIsOpen(false);
-        };
-        const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                setIsOpen(false);
-            }
-        };
-
-        document.addEventListener('pointerdown', onPointerDown);
-        document.addEventListener('keydown', onKeyDown);
-
-        return () => {
-            document.removeEventListener('pointerdown', onPointerDown);
-            document.removeEventListener('keydown', onKeyDown);
-        };
-    }, [isOpen]);
 
     const handleUndoMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
@@ -249,115 +132,27 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             ref={toolbarRef}
             data-editor-toolbar="true"
         >
-            <div className={styles.group}>
-                <button
-                    className={styles.iconButton}
-                    type="button"
-                    aria-label="Undo"
-                    disabled={!canUndo}
-                    onMouseDown={handleUndoMouseDown}
-                >
-                    <Undo aria-hidden="true" />
-                </button>
-                <button
-                    className={styles.iconButton}
-                    type="button"
-                    aria-label="Redo"
-                    disabled={!canRedo}
-                    onMouseDown={handleRedoMouseDown}
-                >
-                    <Redo aria-hidden="true" />
-                </button>
-                <button
-                    className={clsx(styles.iconButton, isBoldActive && styles.iconButtonActive)}
-                    type="button"
-                    aria-label="Bold"
-                    aria-pressed={isBoldActive}
-                    onMouseDown={handleBoldMouseDown}
-                >
-                    <Bold aria-hidden="true" />
-                </button>
-                <button
-                    className={clsx(styles.iconButton, isItalicActive && styles.iconButtonActive)}
-                    type="button"
-                    aria-label="Italic"
-                    aria-pressed={isItalicActive}
-                    onMouseDown={handleItalicMouseDown}
-                >
-                    <Italic aria-hidden="true" />
-                </button>
-                <button
-                    className={clsx(styles.iconButton, isUnderlineActive && styles.iconButtonActive)}
-                    type="button"
-                    aria-label="Underline"
-                    aria-pressed={isUnderlineActive}
-                    onMouseDown={handleUnderlineMouseDown}
-                >
-                    <Underline aria-hidden="true" />
-                </button>
-            </div>
-            <div className={styles.rightGroup}>
-                <div
-                    className={clsx(styles.group, styles.dropdown)}
-                    ref={dropdownRef}
-                >
-                    <button
-                        className={styles.selectButton}
-                        type="button"
-                        aria-label="Change block type"
-                        aria-expanded={isOpen}
-                        disabled={!canChangeBlockType}
-                        onMouseDown={handleSelectMouseDown}
-                    >
-                        <span className={clsx(styles.selectIcon, !visibleBlockInfo?.icon && styles.selectIconMuted)}>
-                            {visibleBlockInfo?.icon ?? (
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                    focusable="false"
-                                >
-                                    <path d="M6 12h12" />
-                                </svg>
-                            )}
-                        </span>
-                        <span className={styles.selectLabel}>
-                            {visibleBlockInfo?.label ?? 'Select block in editor'}
-                        </span>
-                        <svg
-                            viewBox="0 0 24 24"
-                            aria-hidden="true"
-                            focusable="false"
-                            className={styles.chevron}
-                        >
-                            <path d="m6 9 6 6 6-6" />
-                        </svg>
-                    </button>
-                    {isOpen && (
-                        <div className={styles.menu} role="menu">
-                            {FOUNTAIN_BLOCKS.map(option => (
-                                <button
-                                    key={option.type}
-                                    type="button"
-                                    role="menuitem"
-                                    className={clsx(
-                                        styles.menuItem,
-                                        option.type === activeBlockInfo?.type && styles.menuItemActive,
-                                    )}
-                                    aria-label={`Set block type to ${option.label}`}
-                                    onMouseDown={event => handleMenuItemMouseDown(option.type, event)}
-                                >
-                                    <span className={styles.icon}>
-                                        {BLOCK_ICONS[option.type]}
-                                    </span>
-                                    <span className={styles.menuLabel}>
-                                        {option.label}
-                                    </span>
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-            </div>
+            <InlineMarksGroup
+                canUndo={canUndo}
+                canRedo={canRedo}
+                isBoldActive={isBoldActive}
+                isItalicActive={isItalicActive}
+                isUnderlineActive={isUnderlineActive}
+                onUndoMouseDown={handleUndoMouseDown}
+                onRedoMouseDown={handleRedoMouseDown}
+                onBoldMouseDown={handleBoldMouseDown}
+                onItalicMouseDown={handleItalicMouseDown}
+                onUnderlineMouseDown={handleUnderlineMouseDown}
+            />
+            <BlockTypeSelect
+                isOpen={isOpen}
+                canChangeBlockType={canChangeBlockType}
+                visibleBlockInfo={visibleBlockInfo}
+                activeBlockInfo={activeBlockInfo}
+                dropdownRef={dropdownRef}
+                onSelectMouseDown={handleSelectMouseDown}
+                onMenuItemMouseDown={handleMenuItemMouseDown}
+            />
         </div>
     );
 };

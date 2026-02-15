@@ -9,13 +9,10 @@
     },
     "dependencies": {
         "@stagistic/app-core": "workspace:*",
-        "@stagistic/editor-core": "workspace:*",
+        "@stagistic/script-core": "workspace:*",
         "@stagistic/editor-ui": "workspace:*",
-        "@stagistic/shared": "workspace:*",
         "@stagistic/ui": "workspace:*",
-        "@tauri-apps/api": "^2.0.0",
-        "@tauri-apps/plugin-dialog": "^2.0.0",
-        "@tauri-apps/plugin-fs": "^2.0.0"
+        "@stagistic/platform-core": "workspace:*"
     },
     "peerDependencies": {
         "react": "^19.0.0",

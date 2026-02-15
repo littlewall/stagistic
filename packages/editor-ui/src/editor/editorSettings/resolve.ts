@@ -3,7 +3,7 @@ import {
     type EditorSettings,
     type EditorSettingsOverride,
     mergeEditorSettings,
-} from '@stagistic/shared';
+} from '@stagistic/script-core';
 
 export const resolveEditorSettings = (
     globalOverrides?: EditorSettingsOverride,

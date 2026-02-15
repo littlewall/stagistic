@@ -9,7 +9,7 @@
         {"path": "./packages/app-core"},
         {"path": "./packages/app-routes"},
         {"path": "./packages/db"},
-        {"path": "./packages/editor-core"},
+        {"path": "./packages/script-core"},
         {"path": "./packages/editor-ui"},
         {"path": "./packages/sync-core"},
         {"path": "./packages/auth"},

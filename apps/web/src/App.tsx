@@ -1,7 +1,7 @@
 
 import {
-    HomeRoute,
     GlobalModalsProvider,
+    HomeRoute,
     ScriptEditorRoute,
     ScriptListRoute,
     ScriptSettingsRoute,
@@ -22,10 +22,13 @@ const App = () => {
 
         const boot = async () => {
             setBootStatus('Načítám UI assety');
-            if (document?.fonts?.ready) {
+            if (document?.fonts) {
                 await document.fonts.ready;
             }
-            if (!isActive) return;
+
+            if (!isActive) {
+                return;
+            }
 
             setBootProgress(1);
             setBootStatus('Hotovo');

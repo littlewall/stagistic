@@ -1,5 +1,8 @@
 import {type useScriptRepository} from '@stagistic/app-core';
-import {type EditorSettings, type ScriptDocument} from '@stagistic/shared';
+import {type EditorSettings} from '@stagistic/script-core';
+import {
+    type ScriptDocument,
+} from '@stagistic/script-core';
 
 import type {
     CharacterCountItem,

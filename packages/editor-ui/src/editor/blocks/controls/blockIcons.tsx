@@ -10,7 +10,7 @@ import {
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
     type FountainElementType,
-} from '@stagistic/editor-core';
+} from '@stagistic/script-core';
 import type {ReactElement} from 'react';
 
 const createIcon = (children: ReactElement | ReactElement[]) => (

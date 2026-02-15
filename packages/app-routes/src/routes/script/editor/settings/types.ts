@@ -1,5 +1,5 @@
-import type {FountainElementType} from '@stagistic/editor-core';
-import type {EditorSettings} from '@stagistic/shared';
+import type {FountainElementType} from '@stagistic/script-core';
+import type {EditorSettings} from '@stagistic/script-core';
 
 export type BlockSettingsPatch = Partial<EditorSettings['blocks'][FountainElementType]>;
 

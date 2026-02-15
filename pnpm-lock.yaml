@@ -72,9 +72,12 @@ importers:
       '@stagistic/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@stagistic/editor-core':
+      '@stagistic/platform-core':
         specifier: workspace:*
-        version: link:../../packages/editor-core
+        version: link:../../packages/platform-core
+      '@stagistic/script-core':
+        specifier: workspace:*
+        version: link:../../packages/script-core
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -84,15 +87,6 @@ importers:
       '@stagistic/ui':
         specifier: workspace:*
         version: link:../../packages/ui
-      '@tauri-apps/api':
-        specifier: ^2.0.0
-        version: 2.9.1
-      '@tauri-apps/plugin-dialog':
-        specifier: ^2.0.0
-        version: 2.6.0
-      '@tauri-apps/plugin-fs':
-        specifier: ^2.0.0
-        version: 2.4.5
       drizzle-orm:
         specifier: ^0.44.0
         version: 0.44.7(@electric-sql/pglite@0.3.15)
@@ -163,9 +157,9 @@ importers:
       '@stagistic/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@stagistic/editor-core':
+      '@stagistic/script-core':
         specifier: workspace:*
-        version: link:../../packages/editor-core
+        version: link:../../packages/script-core
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -246,9 +240,9 @@ importers:
       '@stagistic/db':
         specifier: workspace:*
         version: link:../db
-      '@stagistic/shared':
+      '@stagistic/script-core':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../script-core
       '@stagistic/sync-core':
         specifier: workspace:*
         version: link:../sync-core
@@ -271,27 +265,21 @@ importers:
       '@stagistic/app-core':
         specifier: workspace:*
         version: link:../app-core
-      '@stagistic/editor-core':
-        specifier: workspace:*
-        version: link:../editor-core
       '@stagistic/editor-ui':
         specifier: workspace:*
         version: link:../editor-ui
-      '@stagistic/shared':
+      '@stagistic/platform-core':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../platform-core
+      '@stagistic/script-core':
+        specifier: workspace:*
+        version: link:../script-core
       '@stagistic/ui':
         specifier: workspace:*
         version: link:../ui
-      '@tauri-apps/api':
-        specifier: ^2.0.0
-        version: 2.9.1
-      '@tauri-apps/plugin-dialog':
-        specifier: ^2.0.0
-        version: 2.6.0
-      '@tauri-apps/plugin-fs':
-        specifier: ^2.0.0
-        version: 2.4.5
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       react:
         specifier: ^19.0.0
         version: 19.2.4
@@ -337,23 +325,14 @@ importers:
         specifier: ^5.9.2
         version: 5.9.3
 
-  packages/editor-core:
-    devDependencies:
-      '@types/react':
-        specifier: ^19.0.0
-        version: 19.2.10
-      typescript:
-        specifier: ^5.9.2
-        version: 5.9.3
-
   packages/editor-ui:
     dependencies:
-      '@stagistic/editor-core':
+      '@stagistic/platform-core':
         specifier: workspace:*
-        version: link:../editor-core
-      '@stagistic/shared':
+        version: link:../platform-core
+      '@stagistic/script-core':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../script-core
       '@tiptap/core':
         specifier: ^3.19.0
         version: 3.19.0(@tiptap/pm@3.19.0)
@@ -410,11 +389,34 @@ importers:
         specifier: ^5.9.2
         version: 5.9.3
 
+  packages/platform-core:
+    dependencies:
+      '@tauri-apps/api':
+        specifier: ^2.0.0
+        version: 2.9.1
+      '@tauri-apps/plugin-dialog':
+        specifier: ^2.0.0
+        version: 2.6.0
+      '@tauri-apps/plugin-fs':
+        specifier: ^2.0.0
+        version: 2.4.5
+    devDependencies:
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+
+  packages/script-core:
+    dependencies:
+      '@stagistic/shared':
+        specifier: workspace:*
+        version: link:../shared
+    devDependencies:
+      typescript:
+        specifier: ^5.9.2
+        version: 5.9.3
+
   packages/shared:
     dependencies:
-      '@stagistic/editor-core':
-        specifier: workspace:*
-        version: link:../editor-core
       nanoid:
         specifier: ^5.0.7
         version: 5.1.6
@@ -428,9 +430,9 @@ importers:
       '@stagistic/db':
         specifier: workspace:*
         version: link:../db
-      '@stagistic/shared':
+      '@stagistic/script-core':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../script-core
     devDependencies:
       typescript:
         specifier: ^5.9.2
@@ -444,9 +446,9 @@ importers:
       '@fontsource/courier-prime':
         specifier: ^5.2.8
         version: 5.2.8
-      '@stagistic/shared':
+      '@stagistic/script-core':
         specifier: workspace:*
-        version: link:../shared
+        version: link:../script-core
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
@@ -3220,7 +3222,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
-    deprecated: Glob versions prior to v9 are no longer supported
+    deprecated: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
 
   global-modules@2.0.0:
     resolution: {integrity: sha512-NGbfmJBp9x8IxyJSd1P+otYK8vonoJactOogrVfFRIAEY1ukil8RSKDz2Yo7wh1oihl51l/r6W4epkeKJHqL8A==}

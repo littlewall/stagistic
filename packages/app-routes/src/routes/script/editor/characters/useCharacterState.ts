@@ -1,4 +1,6 @@
-import {type ScriptDocument} from '@stagistic/shared';
+import {
+    type ScriptDocument,
+} from '@stagistic/script-core';
 import {
     type Dispatch,
     type SetStateAction,

@@ -1,5 +1,5 @@
 import type {ScriptSummary} from '@stagistic/db';
-import type {ScriptDocument} from '@stagistic/shared';
+import type {ScriptDocument} from '@stagistic/script-core';
 import {useLiveQuery} from '@tanstack/react-db';
 import {
     useCallback,

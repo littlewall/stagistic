@@ -8,7 +8,7 @@ import {
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
-} from '@stagistic/editor-core';
+} from '@stagistic/script-core';
 
 import baseStyles from '../base/FountainBlock.module.css';
 import actionStyles from '../elements/ActionBlock/ActionBlock.module.css';

@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import {
     type MouseEvent as ReactMouseEvent,
     type ReactNode,
@@ -125,7 +126,10 @@ export const ScriptSettingsModal = ({
                                                 <li key={item.id}>
                                                     <button
                                                         type="button"
-                                                        className={isActive ? styles.navItemActive : styles.navItem}
+                                                        className={clsx(
+                                                            styles.navItem,
+                                                            isActive && styles.navItemActive,
+                                                        )}
                                                         onClick={() => onSelectPanel(item.panelId)}
                                                     >
                                                         {item.label}
@@ -157,9 +161,10 @@ export const ScriptSettingsModal = ({
                                                                 <li key={subItem.id}>
                                                                     <button
                                                                         type="button"
-                                                                        className={isSubActive
-                                                                            ? styles.subItemActive
-                                                                            : styles.subItem}
+                                                                        className={clsx(
+                                                                            styles.subItem,
+                                                                            isSubActive && styles.subItemActive,
+                                                                        )}
                                                                         onClick={() => onSelectPanel(subItem.panelId)}
                                                                     >
                                                                         {subItem.label}

@@ -8,7 +8,7 @@ import {
 } from 'react';
 
 import {useScriptRepository} from './ScriptRepositoryProvider';
-import {SCRIPTS_INVALIDATE_EVENT} from './scriptsEvents';
+import {onScriptsInvalidated} from './scriptsEvents';
 
 type ScriptListItem = {
     id: string,
@@ -72,19 +72,9 @@ export const useScriptSummary = (scriptId?: string | null): ScriptSummaryState =
     }, [load]);
 
     useEffect(() => {
-        if (typeof window === 'undefined') {
-            return;
-        }
-
-        const handleInvalidate = () => {
+        return onScriptsInvalidated(() => {
             void load();
-        };
-
-        window.addEventListener(SCRIPTS_INVALIDATE_EVENT, handleInvalidate);
-
-        return () => {
-            window.removeEventListener(SCRIPTS_INVALIDATE_EVENT, handleInvalidate);
-        };
+        });
     }, [load]);
 
     const script = useMemo<ScriptListItem | null>(

@@ -1,3 +1,4 @@
+import {clampNumber} from '@stagistic/script-core';
 import clsx from 'clsx';
 
 import styles from './ProgressBar.module.css';
@@ -8,7 +9,7 @@ type ProgressBarProps = {
     size?: 'sm' | 'md',
 };
 
-const clampProgress = (value: number) => Math.max(0, Math.min(1, value));
+const clampProgress = (value: number) => clampNumber(value, 0, 1);
 
 export const ProgressBar = ({
     value,

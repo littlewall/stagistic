@@ -8,8 +8,7 @@
         "lint": "eslint . --ext ts,tsx"
     },
     "dependencies": {
-        "@stagistic/editor-core": "workspace:*",
-        "@stagistic/shared": "workspace:*",
+        "@stagistic/script-core": "workspace:*",
         "@tiptap/extension-bold": "^3.19.0",
         "@tiptap/core": "^3.19.0",
         "@tiptap/extension-document": "^3.19.0",
@@ -20,7 +19,8 @@
         "@tiptap/pm": "^3.19.0",
         "@tiptap/react": "^3.19.0",
         "clsx": "^2.1.1",
-        "iconoir-react": "^7.11.0"
+        "iconoir-react": "^7.11.0",
+        "@stagistic/platform-core": "workspace:*"
     },
     "peerDependencies": {
         "react": "^19.0.0",

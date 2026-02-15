@@ -1,9 +1,11 @@
-import {type FountainElementType} from '@stagistic/editor-core';
+import {type FountainElementType} from '@stagistic/script-core';
 import {
     type EditorSettings,
+} from '@stagistic/script-core';
+import {
     type EditorSettingsOverride,
     normalizeEditorSettingsBlockType,
-} from '@stagistic/shared';
+} from '@stagistic/script-core';
 
 import {
     LINE_HEIGHT_OPTIONS,

@@ -1,0 +1,3 @@
+export const MAX_SUGGESTIONS = 6;
+export const OVERLAY_WIDTH_PX = 220;
+export const CHARACTER_TAG_HORIZONTAL_PADDING_PX = 7;
