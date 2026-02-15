@@ -2,13 +2,13 @@
     padding-top: var(--character-spacing-before, 1.8em);
     padding-right: var(--character-indent-right, 0);
     padding-left: var(--character-indent, 56px);
-    text-align: var(--character-align, left);
-    text-transform: var(--character-casing, uppercase);
     font-weight: var(--character-font-weight, 700);
     font-style: var(--character-font-style, normal);
-    text-decoration-line: var(--character-underline, none);
     line-height: var(--character-line-height, inherit);
     color: var(--color-block-character);
+    text-align: var(--character-align, left);
+    text-decoration-line: var(--character-underline, none);
+    text-transform: var(--character-casing, uppercase);
 }
 
 .characterBlock {

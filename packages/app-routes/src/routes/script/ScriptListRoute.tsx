@@ -24,7 +24,7 @@ import {
 import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
-import styles from './ScriptLlstRoute.module.css';
+import styles from './ScriptListRoute.module.css';
 
 const mockMeta = [
     {

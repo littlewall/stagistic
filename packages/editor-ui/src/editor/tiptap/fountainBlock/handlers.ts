@@ -10,6 +10,7 @@ import {
 import {
     type BlockCasing,
     type BlockShortcut,
+    isApplePlatform,
     isBlockShortcut,
 } from '@stagistic/shared';
 import {TextSelection} from '@tiptap/pm/state';
@@ -100,16 +101,6 @@ const resolveParentheticalTabTarget = (editor: Editor, blockPos: number): Dialog
     return findNearestDialogueLikeType(blocks, blockIndex, -1)
         ?? findNearestDialogueLikeType(blocks, blockIndex, 1)
         ?? ELEMENT_DIALOGUE;
-};
-
-const isApplePlatform = () => {
-    if (typeof navigator === 'undefined') {
-        return false;
-    }
-
-    const platform = navigator.platform || navigator.userAgent;
-
-    return (/mac|iphone|ipad|ipod/i).test(platform);
 };
 
 const hasShortcutModifier = (event: KeyboardEvent) => {

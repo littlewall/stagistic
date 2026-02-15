@@ -3,11 +3,11 @@
     padding-top: var(--centered-spacing-before, 0);
     padding-right: var(--centered-indent-right, 0);
     padding-left: var(--centered-indent-left, 0);
-    text-align: var(--centered-align, center);
-    text-transform: var(--centered-casing, none);
     font-weight: var(--centered-font-weight, 400);
     font-style: var(--centered-font-style, italic);
-    text-decoration-line: var(--centered-underline, none);
     line-height: var(--centered-line-height, inherit);
     color: var(--color-block-centered);
+    text-align: var(--centered-align, center);
+    text-decoration-line: var(--centered-underline, none);
+    text-transform: var(--centered-casing, none);
 }

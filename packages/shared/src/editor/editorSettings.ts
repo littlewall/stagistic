@@ -104,7 +104,11 @@ const EDITOR_SETTINGS_BLOCK_TYPES = new Set<FountainElementType>([
     ELEMENT_CENTERED,
 ]);
 
-const normalizeEditorSettingsBlockType = (value: string): FountainElementType | null => {
+export const normalizeEditorSettingsBlockType = (value: unknown): FountainElementType | null => {
+    if (typeof value !== 'string') {
+        return null;
+    }
+
     if (value === 'fountain_lyric' || value === 'lyrics') {
         return ELEMENT_LYRICS;
     }
