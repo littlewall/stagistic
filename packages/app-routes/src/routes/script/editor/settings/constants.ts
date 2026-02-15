@@ -13,6 +13,7 @@ import {
 } from '@stagistic/script-core';
 
 export const SCREENPLAY_CHARS_PER_INCH = 10;
+export const PX_PER_INCH = 96;
 export const MIN_PREVIEW_CONTENT_CHARS = 30;
 
 const INDENT_SPACING_STEPS = Array.from({length: 41}, (_, index) => index);

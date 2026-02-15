@@ -138,8 +138,6 @@ const Editor = ({
         canvasHostRef,
         pageWidthPx: resolvedSettings.page.widthPx,
         sizeScale,
-        isLeftSidebarOpen,
-        isRightSidebarOpen,
     });
     const renderScale = useMemo(() => sizeScale * responsiveScale, [responsiveScale, sizeScale]);
     const editorStyle = useMemo(
