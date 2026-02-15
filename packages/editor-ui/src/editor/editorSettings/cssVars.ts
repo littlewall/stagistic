@@ -1,3 +1,4 @@
+import type {EditorSettings} from '@stagistic/script-core';
 import {
     ELEMENT_ACTION,
     ELEMENT_CENTERED,
@@ -8,8 +9,7 @@ import {
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
-} from '@stagistic/editor-core';
-import type {EditorSettings} from '@stagistic/shared';
+} from '@stagistic/script-core';
 import type {CSSProperties} from 'react';
 
 type EditorCssVars = CSSProperties;

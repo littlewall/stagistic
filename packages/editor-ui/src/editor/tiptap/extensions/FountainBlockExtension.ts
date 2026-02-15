@@ -1,4 +1,4 @@
-import {ELEMENT_ACTION} from '@stagistic/editor-core';
+import {ELEMENT_ACTION} from '@stagistic/script-core';
 import {mergeAttributes, Node} from '@tiptap/core';
 import {
     Plugin,

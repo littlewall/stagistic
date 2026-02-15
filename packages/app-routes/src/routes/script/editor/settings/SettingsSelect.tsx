@@ -1,3 +1,4 @@
+import {clsx} from '@stagistic/ui';
 import {
     type ReactNode,
     useEffect,
@@ -105,7 +106,10 @@ export const SettingsSelect = ({
                             type="button"
                             role="option"
                             aria-selected={option.value === value}
-                            className={option.value === value ? styles.settingsSelectItemActive : styles.settingsSelectItem}
+                            className={clsx(
+                                styles.settingsSelectItem,
+                                option.value === value && styles.settingsSelectItemActive,
+                            )}
                             onClick={() => {
                                 onChange(option.value);
                                 setIsOpen(false);

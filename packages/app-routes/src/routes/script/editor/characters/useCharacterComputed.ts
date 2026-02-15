@@ -1,14 +1,16 @@
+import {getCharacterColor} from '@stagistic/editor-ui';
 import {
     ELEMENT_CHARACTER,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     normalizeCharacterKey,
-} from '@stagistic/editor-core';
-import {getCharacterColor} from '@stagistic/editor-ui';
+} from '@stagistic/script-core';
 import {
     DEFAULT_EDITOR_SETTINGS,
+} from '@stagistic/script-core';
+import {
     type EditorSettings,
     type ScriptDocument,
-} from '@stagistic/shared';
+} from '@stagistic/script-core';
 import {
     useCallback,
     useMemo,

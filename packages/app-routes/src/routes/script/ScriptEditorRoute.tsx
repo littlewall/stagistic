@@ -1,15 +1,8 @@
 import {useScriptRepository} from '@stagistic/app-core';
-import {type FountainElementType} from '@stagistic/editor-core';
 import {
     FountainEditor,
 } from '@stagistic/editor-ui';
-import {
-    DEFAULT_EDITOR_SETTINGS,
-    type EditorSettings,
-    type EditorSettingsOverride,
-    isApplePlatform,
-    mergeEditorSettings,
-} from '@stagistic/shared';
+import {isApplePlatform} from '@stagistic/platform-core';
 import {
     AppHeader,
     AppLayout,
@@ -21,8 +14,6 @@ import {
     useCallback,
     useEffect,
     useMemo,
-    useRef,
-    useState,
 } from 'react';
 import {
     useNavigate,
@@ -31,12 +22,10 @@ import {
 } from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
+import {useScriptEditorCharacters} from './editor/characters/useScriptEditorCharacters';
 import {
-    type BlockSettingsPatch,
-    normalizeSettingsOverride,
     ScriptEditorSettingsPanel,
-} from './editor/ScriptEditorSettingsPanel';
-import {useScriptEditorCharacters} from './editor/useScriptEditorCharacters';
+} from './editor/settings';
 import styles from './ScriptEditorRoute.module.css';
 import {
     SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS,
@@ -44,9 +33,11 @@ import {
 } from './settings/settingsMenu';
 import {useScriptSettingsModalState} from './settings/useScriptSettingsModalState';
 import {useScriptEditorController} from './useScriptEditorController';
+import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
+import {useScriptEditorLayoutState} from './useScriptEditorLayoutState';
+import {useScriptEditorSettingsDraft} from './useScriptEditorSettingsDraft';
 
 const AUTOSAVE_DELAY_MS = 1500;
-const SETTINGS_SAVE_DEBOUNCE_MS = 450;
 const SIDEBAR_WIDTH = 'calc(280px * var(--size-scale))';
 const SETTINGS_MODAL_QUERY_KEY = 'settingsModal';
 
@@ -56,11 +47,6 @@ export const ScriptEditorRoute = () => {
     const scriptRepository = useScriptRepository();
     const [searchParams, setSearchParams] = useSearchParams();
     const {openNewScript} = useGlobalModals();
-    const [isLeftSidebarOpen, setIsLeftSidebarOpen] = useState(false);
-    const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
-    const [scriptSettingsDraft, setScriptSettingsDraft] = useState<EditorSettingsOverride>({});
-    const settingsSaveTimerRef = useRef<number | null>(null);
-    const hydratedSettingsScriptIdRef = useRef<string | null>(null);
     const {
         isOpen: isSettingsOpen,
         activePanelId,
@@ -85,19 +71,32 @@ export const ScriptEditorRoute = () => {
         handleManualSave,
         handleSaveScriptSettingsOverride,
     } = useScriptEditorController(scriptId);
-
+    const {
+        scriptSettingsDraft,
+        resolvedScriptSettings,
+        updateBlockSettings,
+    } = useScriptEditorSettingsDraft({
+        currentScriptId,
+        scriptSettingsOverride,
+        handleSaveScriptSettingsOverride,
+    });
+    const {
+        isLeftSidebarOpen,
+        isRightSidebarOpen,
+        handleToggleLeftSidebar,
+        handleToggleRightSidebar,
+    } = useScriptEditorLayoutState();
+    const leftSidebarToggle = useMemo(() => ({
+        isOpen: isLeftSidebarOpen,
+        onToggle: handleToggleLeftSidebar,
+    }), [handleToggleLeftSidebar, isLeftSidebarOpen]);
+    const rightSidebarToggle = useMemo(() => ({
+        isOpen: isRightSidebarOpen,
+        onToggle: handleToggleRightSidebar,
+    }), [handleToggleRightSidebar, isRightSidebarOpen]);
     const shortcutPrefix = useMemo(
         () => isApplePlatform() ? 'Cmd' : 'Ctrl',
         [],
-    );
-    const blockLabelByType = useMemo(() => {
-        return new Map(
-            SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label]),
-        );
-    }, []);
-    const resolvedScriptSettings = useMemo<EditorSettings>(
-        () => mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, scriptSettingsDraft),
-        [scriptSettingsDraft],
     );
 
     const {
@@ -120,109 +119,69 @@ export const ScriptEditorRoute = () => {
         handleAutoSave,
     });
 
-    const draftSerialized = useMemo(
-        () => JSON.stringify(scriptSettingsDraft ?? {}),
-        [scriptSettingsDraft],
-    );
-    const loadedSerialized = useMemo(
-        () => JSON.stringify(scriptSettingsOverride ?? {}),
-        [scriptSettingsOverride],
-    );
-
-    const clearSettingsSaveTimer = useCallback(() => {
-        if (!settingsSaveTimerRef.current) {
-            return;
-        }
-
-        window.clearTimeout(settingsSaveTimerRef.current);
-        settingsSaveTimerRef.current = null;
-    }, []);
-
-    useEffect(() => {
-        hydratedSettingsScriptIdRef.current = null;
-        setScriptSettingsDraft({});
-    }, [currentScriptId]);
-
-    useEffect(() => {
-        if (!currentScriptId || scriptSettingsOverride === undefined) {
-            return;
-        }
-
-        if (hydratedSettingsScriptIdRef.current === currentScriptId) {
-            return;
-        }
-
-        setScriptSettingsDraft(normalizeSettingsOverride(scriptSettingsOverride ?? {}));
-        hydratedSettingsScriptIdRef.current = currentScriptId;
-    }, [currentScriptId, scriptSettingsOverride]);
-
-    useEffect(() => {
-        if (!currentScriptId || scriptSettingsOverride === undefined) {
-            return;
-        }
-
-        if (draftSerialized === loadedSerialized) {
-            return;
-        }
-
-        clearSettingsSaveTimer();
-
-        const snapshot = scriptSettingsDraft;
-
-        settingsSaveTimerRef.current = window.setTimeout(() => {
-            void handleSaveScriptSettingsOverride(snapshot);
-        }, SETTINGS_SAVE_DEBOUNCE_MS);
-
-        return () => {
-            clearSettingsSaveTimer();
-        };
-    }, [
-        clearSettingsSaveTimer,
-        currentScriptId,
-        draftSerialized,
-        handleSaveScriptSettingsOverride,
-        loadedSerialized,
-        scriptSettingsDraft,
-        scriptSettingsOverride,
-    ]);
-
-    useEffect(() => {
-        return () => {
-            clearSettingsSaveTimer();
-        };
-    }, [clearSettingsSaveTimer]);
-
-    const handleSelectScript = useCallback((script: {id: string}) => {
-        void navigate(`/script/${script.id}/editor`);
-    }, [navigate]);
-    const handleHome = useCallback(() => {
-        void navigate('/');
-    }, [navigate]);
-    const handleNewScript = useCallback(() => {
-        openNewScript();
-    }, [openNewScript]);
-    const handleMenuAction = useCallback((actionId: string) => {
-        if (actionId === 'scripts') {
-            void navigate('/script/list');
-
-            return;
-        }
-
-        if (actionId === 'settings' && currentScript) {
-            openSettingsModal();
-
-            return;
-        }
-
-        if (actionId === 'new-script') {
-            openNewScript();
-        }
-    }, [
-        currentScript,
+    const {
+        handleSelectScript,
+        handleHome,
+        handleNewScript,
+        handleMenuAction,
+    } = useScriptEditorHeaderActions({
         navigate,
+        currentScript,
         openSettingsModal,
         openNewScript,
+    });
+
+    const blockLabelByType = useMemo(() => {
+        return new Map(
+            SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label]),
+        );
+    }, []);
+
+    const renderSettingsPanel = useCallback((panelId: string) => {
+        return (
+            <ScriptEditorSettingsPanel
+                panelId={panelId}
+                resolvedScriptSettings={resolvedScriptSettings}
+                blockLabelByType={blockLabelByType}
+                shortcutPrefix={shortcutPrefix}
+                onUpdateBlockSettings={updateBlockSettings}
+            />
+        );
+    }, [
+        blockLabelByType,
+        resolvedScriptSettings,
+        shortcutPrefix,
+        updateBlockSettings,
     ]);
+    const handleSelectSettingsPanel = useCallback((panelId: string) => {
+        selectPanel(panelId as ScriptSettingsPanelId);
+    }, [selectPanel]);
+    const leftSidebarContent = useMemo(() => (
+        <div className={styles.sidebarPlaceholder} />
+    ), []);
+    const rightSidebarContent = useMemo(() => (
+        <EditorSidebar
+            confirmedCharacters={confirmedCharacters}
+            unconfirmedCharacters={unconfirmedCharacters}
+            onConfirmCharacter={handleConfirmCharacter}
+            onDeleteCharacter={handleDeleteCharacter}
+            normalizeRenameInput={normalizeCharacterNameForInlineInput}
+            onRenameCharacterPreview={handleRenameCharacterPreview}
+            onRenameCharacter={handleRenameCharacter}
+            isLoading={isCharactersLoading}
+            className={styles.sidebarContent}
+        />
+    ), [
+        confirmedCharacters,
+        handleConfirmCharacter,
+        handleDeleteCharacter,
+        handleRenameCharacter,
+        handleRenameCharacterPreview,
+        isCharactersLoading,
+        normalizeCharacterNameForInlineInput,
+        unconfirmedCharacters,
+    ]);
+
     const handleCloseSettings = useCallback(() => {
         closeSettingsModal();
 
@@ -241,45 +200,6 @@ export const ScriptEditorRoute = () => {
         closeSettingsModal,
         searchParams,
         setSearchParams,
-    ]);
-    const handleToggleLeftSidebar = useCallback(() => {
-        setIsLeftSidebarOpen(previous => !previous);
-    }, []);
-    const handleToggleRightSidebar = useCallback(() => {
-        setIsRightSidebarOpen(previous => !previous);
-    }, []);
-
-    const updateBlockSettings = useCallback((
-        blockType: FountainElementType,
-        patch: BlockSettingsPatch,
-    ) => {
-        setScriptSettingsDraft(previous => ({
-            ...previous,
-            blocks: {
-                ...previous.blocks ?? {},
-                [blockType]: {
-                    ...previous.blocks?.[blockType] ?? {},
-                    ...patch,
-                },
-            },
-        }));
-    }, []);
-
-    const renderSettingsPanel = useCallback((panelId: string) => {
-        return (
-            <ScriptEditorSettingsPanel
-                panelId={panelId}
-                resolvedScriptSettings={resolvedScriptSettings}
-                blockLabelByType={blockLabelByType}
-                shortcutPrefix={shortcutPrefix}
-                onUpdateBlockSettings={updateBlockSettings}
-            />
-        );
-    }, [
-        blockLabelByType,
-        resolvedScriptSettings,
-        shortcutPrefix,
-        updateBlockSettings,
     ]);
 
     useEffect(() => {
@@ -333,28 +253,10 @@ export const ScriptEditorRoute = () => {
                 autoSaveDelayMs={AUTOSAVE_DELAY_MS}
                 autoFocus={shouldAutoFocus}
                 persistentCharacters={normalizedConfirmedCharacterRecords}
-                leftSidebarToggle={{
-                    isOpen: isLeftSidebarOpen,
-                    onToggle: handleToggleLeftSidebar,
-                }}
-                rightSidebarToggle={{
-                    isOpen: isRightSidebarOpen,
-                    onToggle: handleToggleRightSidebar,
-                }}
-                leftSidebar={<div className={styles.sidebarPlaceholder} />}
-                rightSidebar={(
-                    <EditorSidebar
-                        confirmedCharacters={confirmedCharacters}
-                        unconfirmedCharacters={unconfirmedCharacters}
-                        onConfirmCharacter={handleConfirmCharacter}
-                        onDeleteCharacter={handleDeleteCharacter}
-                        normalizeRenameInput={normalizeCharacterNameForInlineInput}
-                        onRenameCharacterPreview={handleRenameCharacterPreview}
-                        onRenameCharacter={handleRenameCharacter}
-                        isLoading={isCharactersLoading}
-                        className={styles.sidebarContent}
-                    />
-                )}
+                leftSidebarToggle={leftSidebarToggle}
+                rightSidebarToggle={rightSidebarToggle}
+                leftSidebar={leftSidebarContent}
+                rightSidebar={rightSidebarContent}
                 sidebarWidth={SIDEBAR_WIDTH}
             />
             <ScriptSettingsModal
@@ -364,7 +266,7 @@ export const ScriptEditorRoute = () => {
                 activePanelId={activePanelId}
                 expandedItemIds={expandedItemIds}
                 onClose={handleCloseSettings}
-                onSelectPanel={panelId => selectPanel(panelId as ScriptSettingsPanelId)}
+                onSelectPanel={handleSelectSettingsPanel}
                 onToggleExpand={toggleExpanded}
                 renderPanel={renderSettingsPanel}
             />

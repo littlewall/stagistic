@@ -1,56 +1,48 @@
 import {
-    type BlockCasing,
-    type BlockShortcut,
-    type EditorSettings,
     type EditorSettingsOverride,
-    isBlockShortcut,
     type ScriptDocument,
-} from '@stagistic/shared';
+} from '@stagistic/script-core';
 import Bold from '@tiptap/extension-bold';
 import Document from '@tiptap/extension-document';
 import History from '@tiptap/extension-history';
 import Italic from '@tiptap/extension-italic';
 import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
-import {type Editor as TiptapEditor, useEditor} from '@tiptap/react';
-import clsx from 'clsx';
-import {
-    NavArrowLeft,
-    NavArrowRight,
-} from 'iconoir-react';
+import {useEditor} from '@tiptap/react';
 import {
     type CSSProperties,
     type MouseEvent as ReactMouseEvent,
     type ReactNode,
     useCallback,
-    useEffect,
     useMemo,
     useRef,
-    useState,
 } from 'react';
 
-import {FOUNTAIN_BLOCK_TYPES, type FountainBlockType} from './blocks/fountain';
-import {EditorCanvas} from './components/EditorCanvas';
-import EditorToolbar from './components/EditorToolbar';
-import styles from './Editor.module.css';
+import {EditorShell} from './components/editorShell/EditorShell';
 import {
     getEditorCssVars,
     resolveEditorSettings,
     stripScriptSettings,
 } from './editorSettings';
 import {
+    type SaveResult,
+    serializeDocumentForSave,
+    useAutosaveController,
+} from './hooks/useAutosaveController';
+import {useEditorLifecycle} from './hooks/useEditorLifecycle';
+import {usePaginationSettings} from './hooks/usePaginationSettings';
+import {useResponsiveScale} from './hooks/useResponsiveScale';
+import {
+    getBlockCasing,
+    getBlockNextElements,
+    getBlockShortcuts,
+} from './model/blockSettingMaps';
+import {
     createPaginationExtension,
     FountainBlockExtension,
     FountainColumnExtension,
     FountainColumnGroupExtension,
 } from './tiptap/extensions';
-import {normalizeFountainBlockType} from './tiptap/fountainCore';
-
-const DEFAULT_AUTOSAVE_DELAY_MS = 1500;
-
-const serializeValue = (value: ScriptDocument) => JSON.stringify(stripScriptSettings(value));
-
-type SaveResult = boolean | void | Promise<boolean | void>;
 
 const DocumentWithSettings = Document.extend({
     addAttributes() {
@@ -75,54 +67,9 @@ const getSizeScale = () => {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
 };
 
-type BlockShortcutOptions = Partial<Record<FountainBlockType, BlockShortcut>>;
-type BlockNextElementOptions = Partial<Record<FountainBlockType, FountainBlockType>>;
-type BlockCasingOptions = Partial<Record<FountainBlockType, BlockCasing>>;
 type PersistentCharacterRef = {
     id: string,
     key: string,
-};
-
-const getBlockShortcuts = (resolvedSettings: EditorSettings): BlockShortcutOptions => {
-    const shortcuts: BlockShortcutOptions = {};
-
-    for (const blockType of FOUNTAIN_BLOCK_TYPES) {
-        const shortcut = resolvedSettings.blocks[blockType]?.shortcut;
-
-        if (isBlockShortcut(shortcut)) {
-            shortcuts[blockType] = shortcut;
-        }
-    }
-
-    return shortcuts;
-};
-
-const getBlockNextElements = (resolvedSettings: EditorSettings): BlockNextElementOptions => {
-    const nextElements: BlockNextElementOptions = {};
-
-    for (const blockType of FOUNTAIN_BLOCK_TYPES) {
-        const nextElement = resolvedSettings.blocks[blockType]?.nextElement;
-
-        if (typeof nextElement === 'string') {
-            nextElements[blockType] = normalizeFountainBlockType(nextElement);
-        }
-    }
-
-    return nextElements;
-};
-
-const getBlockCasing = (resolvedSettings: EditorSettings): BlockCasingOptions => {
-    const blockCasing: BlockCasingOptions = {};
-
-    for (const blockType of FOUNTAIN_BLOCK_TYPES) {
-        const casing = resolvedSettings.blocks[blockType]?.casing;
-
-        if (casing === 'normal' || casing === 'uppercase') {
-            blockCasing[blockType] = casing;
-        }
-    }
-
-    return blockCasing;
 };
 
 type EditorProps = {
@@ -149,16 +96,6 @@ type EditorProps = {
     persistentCharacters?: readonly PersistentCharacterRef[],
 };
 
-const useLatestRef = <T,>(value: T) => {
-    const ref = useRef(value);
-
-    useEffect(() => {
-        ref.current = value;
-    }, [value]);
-
-    return ref;
-};
-
 const Editor = ({
     initialValue,
     onValueChange,
@@ -176,9 +113,8 @@ const Editor = ({
     sidebarWidth,
     persistentCharacters = [],
 }: EditorProps) => {
-    const initialSerialized = useMemo(() => serializeValue(initialValue), [initialValue]);
+    const initialSerialized = useMemo(() => serializeDocumentForSave(initialValue), [initialValue]);
     const sizeScale = useMemo(() => getSizeScale(), []);
-    const [responsiveScale, setResponsiveScale] = useState(1);
     const rootRef = useRef<HTMLDivElement | null>(null);
     const canvasHostRef = useRef<HTMLDivElement | null>(null);
     const resolvedSettings = useMemo(() => {
@@ -190,6 +126,16 @@ const Editor = ({
         scriptSettings,
         settings,
     ]);
+    const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;
+    const isRightSidebarOpen = rightSidebarToggle?.isOpen ?? false;
+    const responsiveScale = useResponsiveScale({
+        rootRef,
+        canvasHostRef,
+        pageWidthPx: resolvedSettings.page.widthPx,
+        sizeScale,
+        isLeftSidebarOpen,
+        isRightSidebarOpen,
+    });
     const renderScale = useMemo(() => sizeScale * responsiveScale, [responsiveScale, sizeScale]);
     const editorStyle = useMemo(
         () => getEditorCssVars(resolvedSettings, renderScale),
@@ -223,19 +169,17 @@ const Editor = ({
             blockShortcuts,
         ],
     );
-    const latestValueRef = useRef<ScriptDocument>(initialValue);
-    const lastSavedSerializedRef = useRef<string>(initialSerialized);
-    const autosaveTimerRef = useRef<number | null>(null);
-    const pendingUpdateRef = useRef<number | null>(null);
-    const latestEditorRef = useRef<TiptapEditor | null>(null);
-    const dirtyRef = useRef(false);
-    const isApplyingInitialRef = useRef(false);
-    const onValueChangeRef = useLatestRef(onValueChange);
-    const onAutoSaveRef = useLatestRef(onAutoSave);
-    const onManualSaveRef = useLatestRef(onManualSave);
-    const onDirtyChangeRef = useLatestRef(onDirtyChange);
-    const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;
-    const isRightSidebarOpen = rightSidebarToggle?.isOpen ?? false;
+    const {
+        scheduleAutosave,
+        handleManualSave,
+        setLatestValue,
+        syncInitialValue,
+    } = useAutosaveController({
+        onAutoSave,
+        onManualSave,
+        onDirtyChange,
+        autoSaveDelayMs,
+    });
     const rootStyle = useMemo(() => ({
         ...editorStyle,
         '--editor-sidebar-width': sidebarWidth ?? 'calc(280px * var(--size-scale))',
@@ -252,113 +196,15 @@ const Editor = ({
         isRightSidebarOpen,
         sidebarWidth,
     ]);
-
-    const updateDirty = useCallback((nextDirty: boolean) => {
-        if (dirtyRef.current === nextDirty) {
-            return;
-        }
-
-        dirtyRef.current = nextDirty;
-        onDirtyChangeRef.current?.(nextDirty);
-    }, [onDirtyChangeRef]);
-
-    const clearAutosaveTimer = useCallback(() => {
-        if (!autosaveTimerRef.current) {
-            return;
-        }
-
-        window.clearTimeout(autosaveTimerRef.current);
-        autosaveTimerRef.current = null;
-    }, []);
-
-    const scheduleAutosave = useCallback((nextValue: ScriptDocument) => {
-        const serialized = serializeValue(nextValue);
-        const isDirty = serialized !== lastSavedSerializedRef.current;
-
-        updateDirty(isDirty);
-
-        const autoSaveHandler = onAutoSaveRef.current;
-
-        if (!autoSaveHandler || !isDirty) {
-            clearAutosaveTimer();
-
-            return;
-        }
-
-        clearAutosaveTimer();
-
-        const delay = autoSaveDelayMs ?? DEFAULT_AUTOSAVE_DELAY_MS;
-
-        autosaveTimerRef.current = window.setTimeout(() => {
-            const latestValue = latestValueRef.current;
-            const latestSerialized = serializeValue(latestValue);
-
-            if (latestSerialized === lastSavedSerializedRef.current) {
-                return;
-            }
-
-            const run = async () => {
-                try {
-                    const result = await autoSaveHandler(latestValue);
-
-                    if (result === false) {
-                        return;
-                    }
-
-                    lastSavedSerializedRef.current = latestSerialized;
-                    updateDirty(false);
-                } catch {
-                    // onAutoSave should handle reporting errors.
-                }
-            };
-
-            void run();
-        }, delay);
-    }, [
-        autoSaveDelayMs,
-        clearAutosaveTimer,
-        onAutoSaveRef,
-        updateDirty,
-    ]);
-
-    const handleManualSave = useCallback(async () => {
-        const manualSaveHandler = onManualSaveRef.current;
-
-        if (!manualSaveHandler) {
-            return;
-        }
-
-        clearAutosaveTimer();
-
-        const currentValue = latestValueRef.current;
-        const serialized = serializeValue(currentValue);
-
-        if (serialized === lastSavedSerializedRef.current) {
-            return;
-        }
-
-        try {
-            const result = await manualSaveHandler(currentValue);
-
-            if (result === false) {
-                return;
-            }
-
-            lastSavedSerializedRef.current = serialized;
-            updateDirty(false);
-        } catch {
-            // onManualSave should handle reporting errors.
-        }
-    }, [
-        clearAutosaveTimer,
-        onManualSaveRef,
-        updateDirty,
-    ]);
+    const initialContentSignature = useMemo(
+        () => JSON.stringify(stripScriptSettings(initialValue)),
+        [initialValue],
+    );
 
     const initialDoc = useMemo<ScriptDocument>(
         () => initialValue,
         // Use stable JSON string for content comparison to prevent unnecessary editor re-creation
-        [JSON.stringify(stripScriptSettings(initialValue))],
+        [initialContentSignature],
     );
 
     const editor = useEditor({
@@ -388,295 +234,53 @@ const Editor = ({
         paginationExtension,
     ]);
 
-    useEffect(() => {
-        const rootElement = rootRef.current;
-        const canvasHostElement = canvasHostRef.current;
-
-        if (!rootElement || !canvasHostElement) {
-            return;
-        }
-
-        const pageWidthPx = resolvedSettings.page.widthPx * sizeScale;
-
-        if (!Number.isFinite(pageWidthPx) || pageWidthPx <= 0) {
-            setResponsiveScale(1);
-
-            return;
-        }
-
-        const updateScale = () => {
-            const availableWidth = Math.max(0, canvasHostElement.clientWidth);
-            const nextScale = Math.min(1, availableWidth / pageWidthPx);
-
-            setResponsiveScale(prev => {
-                if (Math.abs(prev - nextScale) < 0.001) {
-                    return prev;
-                }
-
-                return nextScale;
-            });
-        };
-
-        updateScale();
-
-        if (typeof ResizeObserver === 'undefined') {
-            window.addEventListener('resize', updateScale);
-
-            return () => {
-                window.removeEventListener('resize', updateScale);
-            };
-        }
-
-        const observer = new ResizeObserver(() => {
-            updateScale();
-        });
-
-        observer.observe(rootElement);
-        observer.observe(canvasHostElement);
-
-        return () => {
-            observer.disconnect();
-        };
-    }, [
-        isLeftSidebarOpen,
-        isRightSidebarOpen,
-        resolvedSettings.page.widthPx,
-        sizeScale,
-    ]);
-
-    useEffect(() => {
-        if (!editor) {
-            return;
-        }
-
-        const {page, typography} = resolvedSettings;
-        const scaleValue = (value: number) => value * renderScale;
-        const lineHeightPx = scaleValue(typography.fontSizePx * typography.lineHeight);
-
-        // Cast to access the custom command from the pagination extension
-        const commands = editor.commands as {
-            updatePaginationSettings?: (settings: {
-                pageHeight: number,
-                pageWidth: number,
-                marginTop: number,
-                marginBottom: number,
-                marginLeft: number,
-                marginRight: number,
-                lineHeightPx: number,
-                dividerColor: string,
-                dividerThickness: number,
-            }) => boolean,
-        };
-
-        commands.updatePaginationSettings?.({
-            pageHeight: scaleValue(page.heightPx),
-            pageWidth: scaleValue(page.widthPx),
-            marginTop: scaleValue(page.marginTopPx),
-            marginBottom: scaleValue(page.marginBottomPx),
-            marginLeft: scaleValue(page.marginLeftPx),
-            marginRight: scaleValue(page.marginRightPx),
-            lineHeightPx,
-            dividerColor: 'var(--color-divider)',
-            dividerThickness: 1,
-        });
-    }, [
+    usePaginationSettings({
         editor,
-        renderScale,
         resolvedSettings,
-    ]);
+        renderScale,
+    });
 
-    useEffect(() => {
-        if (!editor) {
-            return;
-        }
-
-        latestEditorRef.current = editor;
-
-        const handleUpdate = ({editor: updatedEditor}: {editor: TiptapEditor}) => {
-            if (isApplyingInitialRef.current) {
-                return;
-            }
-
-            latestEditorRef.current = updatedEditor;
-
-            if (pendingUpdateRef.current !== null) {
-                return;
-            }
-
-            pendingUpdateRef.current = window.requestAnimationFrame(() => {
-                pendingUpdateRef.current = null;
-
-                const activeEditor = latestEditorRef.current;
-
-                if (!activeEditor || isApplyingInitialRef.current) {
-                    return;
-                }
-
-                const nextValue = stripScriptSettings(activeEditor.getJSON() as ScriptDocument);
-
-                latestValueRef.current = nextValue;
-                onValueChangeRef.current?.(nextValue);
-                scheduleAutosave(nextValue);
-            });
-        };
-
-        editor.on('update', handleUpdate);
-
-        return () => {
-            editor.off('update', handleUpdate);
-            if (pendingUpdateRef.current !== null) {
-                window.cancelAnimationFrame(pendingUpdateRef.current);
-                pendingUpdateRef.current = null;
-            }
-        };
-    }, [
+    useEditorLifecycle({
         editor,
-        onValueChangeRef,
-        scheduleAutosave,
-    ]);
-
-    useEffect(() => {
-        if (!editor) {
-            return;
-        }
-
-        isApplyingInitialRef.current = true;
-        editor.commands.setContent(initialValue, {emitUpdate: false});
-        isApplyingInitialRef.current = false;
-
-        latestValueRef.current = stripScriptSettings(initialValue);
-        lastSavedSerializedRef.current = initialSerialized;
-        updateDirty(false);
-        clearAutosaveTimer();
-    }, [
-        clearAutosaveTimer,
-        editor,
-        initialSerialized,
         initialValue,
-        updateDirty,
-    ]);
+        initialSerialized,
+        autoFocus,
+        onManualSave,
+        onValueChange,
+        setLatestValue,
+        syncInitialValue,
+        scheduleAutosave,
+        handleManualSave,
+    });
 
-    useEffect(() => {
-        if (!editor) {
-            return;
-        }
-
-        if (!autoFocus) {
-            return;
-        }
-
-        editor.commands.focus('start');
-    }, [autoFocus, editor]);
-
-    useEffect(() => {
-        if (!onManualSave) {
-            return;
-        }
-
-        const onKeyDown = (event: KeyboardEvent) => {
-            if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
-                event.preventDefault();
-                void handleManualSave();
-            }
-        };
-
-        window.addEventListener('keydown', onKeyDown);
-
-        return () => window.removeEventListener('keydown', onKeyDown);
-    }, [handleManualSave, onManualSave]);
-
-    useEffect(() => {
-        return () => {
-            clearAutosaveTimer();
-        };
-    }, [clearAutosaveTimer]);
+    const handleLeftSidebarToggle = leftSidebarToggle?.onToggle;
+    const handleRightSidebarToggle = rightSidebarToggle?.onToggle;
 
     const handleLeftSidebarToggleMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        leftSidebarToggle?.onToggle();
-    }, [leftSidebarToggle]);
+        handleLeftSidebarToggle?.();
+    }, [handleLeftSidebarToggle]);
 
     const handleRightSidebarToggleMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
         event.preventDefault();
-        rightSidebarToggle?.onToggle();
-    }, [rightSidebarToggle]);
+        handleRightSidebarToggle?.();
+    }, [handleRightSidebarToggle]);
 
     return (
-        <div
-            className={styles.root}
-            ref={rootRef}
-            style={rootStyle}
-        >
-            <div className={styles.toolbarRow}>
-                <div className={styles.toolbarSideLeft}>
-                    {leftSidebarToggle && (
-                        <button
-                            className={styles.sidebarToggleButton}
-                            type="button"
-                            aria-label={isLeftSidebarOpen ? 'Hide left sidebar' : 'Show left sidebar'}
-                            aria-pressed={isLeftSidebarOpen}
-                            onMouseDown={handleLeftSidebarToggleMouseDown}
-                        >
-                            <NavArrowLeft
-                                aria-hidden="true"
-                                className={clsx(
-                                    styles.sidebarToggleIcon,
-                                    !isLeftSidebarOpen && styles.sidebarToggleIconFlipped,
-                                )}
-                            />
-                        </button>
-                    )}
-                </div>
-                <div className={styles.toolbarCenter}>
-                    <div className={styles.toolbarCenterInner}>
-                        <EditorToolbar editor={editor} />
-                    </div>
-                </div>
-                <div className={styles.toolbarSideRight}>
-                    {rightSidebarToggle && (
-                        <button
-                            className={styles.sidebarToggleButton}
-                            type="button"
-                            aria-label={isRightSidebarOpen ? 'Hide right sidebar' : 'Show right sidebar'}
-                            aria-pressed={isRightSidebarOpen}
-                            onMouseDown={handleRightSidebarToggleMouseDown}
-                        >
-                            <NavArrowRight
-                                aria-hidden="true"
-                                className={clsx(
-                                    styles.sidebarToggleIcon,
-                                    !isRightSidebarOpen && styles.sidebarToggleIconFlipped,
-                                )}
-                            />
-                        </button>
-                    )}
-                </div>
-            </div>
-            <div className={styles.contentRow}>
-                <aside
-                    className={isLeftSidebarOpen ? styles.sidebarLeftOpen : styles.sidebarLeftHidden}
-                    aria-hidden={!isLeftSidebarOpen}
-                >
-                    {leftSidebar}
-                </aside>
-                <div
-                    className={styles.canvasHost}
-                    ref={canvasHostRef}
-                >
-                    <EditorCanvas
-                        editor={editor}
-                        persistentCharacters={persistentCharacters}
-                        autoFocus={autoFocus}
-                    />
-                </div>
-                <aside
-                    className={isRightSidebarOpen ? styles.sidebarRightOpen : styles.sidebarRightHidden}
-                    aria-hidden={!isRightSidebarOpen}
-                >
-                    {rightSidebar}
-                </aside>
-            </div>
-        </div>
+        <EditorShell
+            editor={editor}
+            rootRef={rootRef}
+            canvasHostRef={canvasHostRef}
+            rootStyle={rootStyle}
+            autoFocus={autoFocus}
+            persistentCharacters={persistentCharacters}
+            leftSidebarToggle={leftSidebarToggle}
+            rightSidebarToggle={rightSidebarToggle}
+            leftSidebar={leftSidebar}
+            rightSidebar={rightSidebar}
+            onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
+            onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
+        />
     );
 };
 

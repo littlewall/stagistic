@@ -9,9 +9,9 @@
     },
     "dependencies": {
         "@stagistic/db": "workspace:*",
-        "@stagistic/shared": "workspace:*",
         "@stagistic/sync-core": "workspace:*",
-        "@tanstack/react-db": "^0.1.69"
+        "@tanstack/react-db": "^0.1.69",
+        "@stagistic/script-core": "workspace:*"
     },
     "peerDependencies": {
         "react": "^19.0.0"

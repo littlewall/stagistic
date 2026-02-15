@@ -17,17 +17,15 @@
         "@stagistic/app-core": "workspace:*",
         "@stagistic/app-routes": "workspace:*",
         "@stagistic/db": "workspace:*",
-        "@stagistic/editor-core": "workspace:*",
+        "@stagistic/script-core": "workspace:*",
         "@stagistic/shared": "workspace:*",
         "@stagistic/sync-core": "workspace:*",
         "@stagistic/ui": "workspace:*",
-        "@tauri-apps/api": "^2.0.0",
-        "@tauri-apps/plugin-dialog": "^2.0.0",
-        "@tauri-apps/plugin-fs": "^2.0.0",
         "drizzle-orm": "^0.44.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
-        "react-router-dom": "^7.13.0"
+        "react-router-dom": "^7.13.0",
+        "@stagistic/platform-core": "workspace:*"
     },
     "devDependencies": {
         "@tauri-apps/cli": "^2.0.0",

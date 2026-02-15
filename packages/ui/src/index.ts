@@ -58,3 +58,4 @@ export {
     toggleAppTheme,
     toggleAppThemeMode,
 } from './theme';
+export {default as clsx} from 'clsx';

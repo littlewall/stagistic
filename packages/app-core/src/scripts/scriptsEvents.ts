@@ -1,9 +1,17 @@
 export const SCRIPTS_INVALIDATE_EVENT = 'stagistic:scripts:invalidate';
 
-export const emitScriptsInvalidated = () => {
-    if (typeof window === 'undefined') {
-        return;
-    }
+type InvalidateListener = () => void;
 
-    window.dispatchEvent(new CustomEvent(SCRIPTS_INVALIDATE_EVENT));
+const invalidateListeners = new Set<InvalidateListener>();
+
+export const onScriptsInvalidated = (listener: InvalidateListener) => {
+    invalidateListeners.add(listener);
+
+    return () => {
+        invalidateListeners.delete(listener);
+    };
+};
+
+export const emitScriptsInvalidated = () => {
+    invalidateListeners.forEach(listener => listener());
 };

@@ -1,7 +1,7 @@
 import {
     ELEMENT_DIALOGUE,
     ELEMENT_LYRICS,
-} from '@stagistic/editor-core';
+} from '@stagistic/script-core';
 import type {Editor} from '@tiptap/react';
 
 import type {ActiveFountainBlock} from '../fountainCore';

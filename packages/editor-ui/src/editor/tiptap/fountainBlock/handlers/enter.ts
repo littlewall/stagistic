@@ -1,0 +1,196 @@
+import {
+    ELEMENT_CHARACTER,
+    ELEMENT_DIALOGUE,
+    ELEMENT_DUAL_DIALOGUE_CHARACTER,
+    ELEMENT_LYRICS,
+    ELEMENT_PARENTHETICAL,
+} from '@stagistic/script-core';
+import type {Editor} from '@tiptap/react';
+
+import {
+    FOUNTAIN_BLOCK_NODE_NAME,
+    type FountainBlockType,
+    getActiveFountainBlockFromState,
+    getNextTypeOnEnter,
+    normalizeFountainBlockType,
+} from '../../fountainCore';
+import {
+    insertActionBefore,
+    setBlockTypeWithSelection,
+    splitBlockWithType,
+} from '../commands';
+import {
+    type BlockContext,
+    createBlockContext,
+    isEmptyDialogueLikeBlock,
+} from '../context';
+import {
+    type BlockNextElementMap,
+    type HandlerMap,
+} from './types';
+
+type DialogueLikeBlockType = typeof ELEMENT_DIALOGUE | typeof ELEMENT_LYRICS;
+
+type FountainBlockEntry = {
+    pos: number,
+    blockType: FountainBlockType,
+};
+
+const isDialogueLikeType = (blockType: FountainBlockType): blockType is DialogueLikeBlockType => {
+    return blockType === ELEMENT_DIALOGUE || blockType === ELEMENT_LYRICS;
+};
+
+const collectFountainBlocks = (editor: Editor) => {
+    const blocks: FountainBlockEntry[] = [];
+
+    editor.state.doc.descendants((node, pos) => {
+        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+            return true;
+        }
+
+        blocks.push({
+            pos,
+            blockType: normalizeFountainBlockType(node.attrs.blockType),
+        });
+
+        return false;
+    });
+
+    return blocks;
+};
+
+const findNearestDialogueLikeType = (
+    blocks: FountainBlockEntry[],
+    blockIndex: number,
+    direction: -1 | 1,
+): DialogueLikeBlockType | null => {
+    for (let index = blockIndex + direction; index >= 0 && index < blocks.length; index += direction) {
+        const {blockType} = blocks[index];
+
+        if (isDialogueLikeType(blockType)) {
+            return blockType;
+        }
+    }
+
+    return null;
+};
+
+export const resolveParentheticalTabTarget = (editor: Editor, blockPos: number): DialogueLikeBlockType => {
+    const blocks = collectFountainBlocks(editor);
+    const blockIndex = blocks.findIndex(({pos}) => pos === blockPos);
+
+    if (blockIndex < 0) {
+        return ELEMENT_DIALOGUE;
+    }
+
+    return findNearestDialogueLikeType(blocks, blockIndex, -1)
+        ?? findNearestDialogueLikeType(blocks, blockIndex, 1)
+        ?? ELEMENT_DIALOGUE;
+};
+
+const resolveNextTypeOnEnter = (
+    blockType: FountainBlockType,
+    blockNextElements?: BlockNextElementMap,
+) => {
+    const configured = blockNextElements?.[blockType];
+
+    return configured ?? getNextTypeOnEnter(blockType);
+};
+
+const enterHandlers: HandlerMap<(context: BlockContext, blockNextElements?: BlockNextElementMap) => boolean> = {
+    [ELEMENT_CHARACTER]: (context, blockNextElements) => {
+        if (context.isAtStart) {
+            return insertActionBefore(context.editor, context.block.pos, context.block.from);
+        }
+
+        return splitBlockWithType(
+            context.editor,
+            resolveNextTypeOnEnter(ELEMENT_CHARACTER, blockNextElements),
+        );
+    },
+    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: (_context, blockNextElements) => splitBlockWithType(
+        _context.editor,
+        resolveNextTypeOnEnter(ELEMENT_DUAL_DIALOGUE_CHARACTER, blockNextElements),
+    ),
+    [ELEMENT_DIALOGUE]: (_context, blockNextElements) => splitBlockWithType(
+        _context.editor,
+        resolveNextTypeOnEnter(ELEMENT_DIALOGUE, blockNextElements),
+    ),
+    [ELEMENT_LYRICS]: (_context, blockNextElements) => splitBlockWithType(
+        _context.editor,
+        resolveNextTypeOnEnter(ELEMENT_LYRICS, blockNextElements),
+    ),
+    [ELEMENT_PARENTHETICAL]: (_context, blockNextElements) => splitBlockWithType(
+        _context.editor,
+        resolveNextTypeOnEnter(ELEMENT_PARENTHETICAL, blockNextElements),
+    ),
+};
+
+const shiftEnterHandlers: HandlerMap<(context: BlockContext) => boolean> = {
+    [ELEMENT_CHARACTER]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
+    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
+    [ELEMENT_DIALOGUE]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
+    [ELEMENT_LYRICS]: context => splitBlockWithType(context.editor, ELEMENT_LYRICS),
+    [ELEMENT_PARENTHETICAL]: context => splitBlockWithType(
+        context.editor,
+        resolveParentheticalTabTarget(context.editor, context.block.pos),
+    ),
+};
+
+export const handleEnter = (
+    editor: Editor,
+    event: KeyboardEvent,
+    blockNextElements?: BlockNextElementMap,
+) => {
+    const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+
+    if (!block) {
+        return false;
+    }
+
+    event.preventDefault();
+
+    if (!editor.state.selection.empty) {
+        editor.commands.deleteSelection();
+    }
+
+    if (
+        block.blockType === ELEMENT_PARENTHETICAL
+        && (block.node.textContent ?? '').trim().length === 0
+    ) {
+        return setBlockTypeWithSelection(editor, block, ELEMENT_CHARACTER);
+    }
+
+    if (isEmptyDialogueLikeBlock(block)) {
+        return setBlockTypeWithSelection(editor, block, ELEMENT_CHARACTER);
+    }
+
+    const context = createBlockContext(editor, block);
+
+    if (event.shiftKey) {
+        const shiftHandler = shiftEnterHandlers[block.blockType];
+
+        if (shiftHandler) {
+            return shiftHandler(context);
+        }
+    }
+
+    if (!event.shiftKey) {
+        const enterHandler = enterHandlers[block.blockType];
+
+        if (enterHandler) {
+            return enterHandler(context, blockNextElements);
+        }
+    }
+
+    const nextType = context.isAtEnd
+        ? resolveNextTypeOnEnter(block.blockType, blockNextElements)
+        : block.blockType;
+
+    return splitBlockWithType(editor, nextType);
+};
+
+export const enterHandlerMaps = {
+    enterHandlers,
+    shiftEnterHandlers,
+};

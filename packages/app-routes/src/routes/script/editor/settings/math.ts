@@ -1,3 +1,5 @@
+import {clampNumber} from '@stagistic/script-core';
+
 export const formatNumeric = (value: number) => {
     if (Number.isInteger(value)) {
         return value.toString();
@@ -16,7 +18,7 @@ export const formatLines = (value: number) => {
 
 export const formatInches = (value: number) => `${value.toFixed(2)}"`;
 
-export const clamp = (value: number, min: number, max: number) => Math.min(max, Math.max(min, value));
+export const clamp = (value: number, min: number, max: number) => clampNumber(value, min, max);
 
 const getClosestStepIndex = (steps: readonly number[], value: number) => {
     let bestIndex = 0;

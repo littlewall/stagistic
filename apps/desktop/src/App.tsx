@@ -1,130 +1,64 @@
-import {
-    MENU_EVENT_IMPORT_SCRIPT,
-    MENU_EVENT_NEW_SCRIPT,
-    ScriptRepositoryProvider,
-} from '@stagistic/app-core';
-import {
-    GlobalModalsProvider,
-    HomeRoute,
-    ScriptEditorRoute,
-    ScriptListRoute,
-    ScriptSettingsRoute,
-} from '@stagistic/app-routes';
+import {ScriptRepositoryProvider} from '@stagistic/app-core';
+import {GlobalModalsProvider} from '@stagistic/app-routes';
 import {
     LoaderOverlay,
     ToastProvider,
 } from '@stagistic/ui';
-import {listen, type UnlistenFn} from '@tauri-apps/api/event';
 import {
-    useEffect, useState,
+    lazy,
+    Suspense,
 } from 'react';
 import {
     BrowserRouter,
     Navigate,
     Route,
     Routes,
-    useNavigate,
 } from 'react-router-dom';
 
-import {prepareLocalDbWithProgress} from '~db';
 import {scriptRepository} from '~repo';
 
-const MenuEventHandler = () => {
-    const navigate = useNavigate();
+import {DesktopMenuEventHandler} from './components/DesktopMenuEventHandler';
+import {useDesktopBootstrap} from './hooks/useDesktopBootstrap';
 
-    useEffect(() => {
-        let unlisten: UnlistenFn | null = null;
-        let disposed = false;
+const HomeRoute = lazy(async () => {
+    const module = await import('@stagistic/app-routes');
 
-        const setup = async () => {
-            try {
-                const stop = await listen<string>('menu-action', event => {
-                    switch (event.payload) {
-                        case 'open-script':
-                            void navigate('/script/list');
-                            break;
-                        case 'new-script':
-                            window.dispatchEvent(new CustomEvent(MENU_EVENT_NEW_SCRIPT));
-                            break;
-                        case 'import-script':
-                            window.dispatchEvent(new CustomEvent(MENU_EVENT_IMPORT_SCRIPT));
-                            break;
-                        default:
-                            break;
-                    }
-                });
+    return {
+        default: module.HomeRoute,
+    };
+});
 
-                if (disposed) {
-                    stop();
+const ScriptListRoute = lazy(async () => {
+    const module = await import('@stagistic/app-routes');
 
-                    return;
-                }
+    return {
+        default: module.ScriptListRoute,
+    };
+});
 
-                unlisten = stop;
-            } catch (error) {
-                console.error('Failed to listen to menu events', error);
-            }
-        };
+const ScriptEditorRoute = lazy(async () => {
+    const module = await import('@stagistic/app-routes');
 
-        void setup();
+    return {
+        default: module.ScriptEditorRoute,
+    };
+});
 
-        return () => {
-            disposed = true;
-            if (unlisten) {
-                unlisten();
-            }
-        };
-    }, [navigate]);
+const ScriptSettingsRoute = lazy(async () => {
+    const module = await import('@stagistic/app-routes');
 
-    return null;
-};
+    return {
+        default: module.ScriptSettingsRoute,
+    };
+});
 
 const App = () => {
-    const [bootProgress, setBootProgress] = useState(0);
-    const [bootError, setBootError] = useState<string | null>(null);
-    const [bootReady, setBootReady] = useState(false);
-    const [bootStatus, setBootStatus] = useState('Připravuji aplikaci');
-
-    useEffect(() => {
-        let isActive = true;
-
-        const boot = async () => {
-            try {
-                setBootStatus('Načítám UI assety');
-                if (document?.fonts) {
-                    await document.fonts.ready;
-                }
-
-                if (!isActive) return;
-
-                setBootProgress(0.15);
-
-                await prepareLocalDbWithProgress(update => {
-                    if (!isActive) return;
-
-                    setBootStatus(update.label);
-                    setBootProgress(0.15 + update.progress * 0.85);
-                });
-
-                if (!isActive) return;
-
-                setBootProgress(1);
-                setBootStatus('Hotovo');
-                setBootReady(true);
-            } catch (error) {
-                console.error('Failed to initialize app', error);
-                if (isActive) {
-                    setBootError('Nepodařilo se inicializovat aplikaci.');
-                }
-            }
-        };
-
-        void boot();
-
-        return () => {
-            isActive = false;
-        };
-    }, []);
+    const {
+        bootError,
+        bootProgress,
+        bootReady,
+        bootStatus,
+    } = useDesktopBootstrap();
 
     if (!bootReady) {
         return (
@@ -142,14 +76,24 @@ const App = () => {
             <ScriptRepositoryProvider repository={scriptRepository}>
                 <ToastProvider>
                     <GlobalModalsProvider>
-                        <MenuEventHandler />
-                        <Routes>
-                            <Route path="/" element={<HomeRoute />} />
-                            <Route path="/script/list" element={<ScriptListRoute />} />
-                            <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
-                            <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
-                            <Route path="*" element={<Navigate to="/" replace />} />
-                        </Routes>
+                        <DesktopMenuEventHandler />
+                        <Suspense
+                            fallback={(
+                                <LoaderOverlay
+                                    title="Načítám obrazovku"
+                                    subtitle="Připravuji routu"
+                                    hint="Prosím vyčkejte"
+                                />
+                            )}
+                        >
+                            <Routes>
+                                <Route path="/" element={<HomeRoute />} />
+                                <Route path="/script/list" element={<ScriptListRoute />} />
+                                <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
+                                <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
+                                <Route path="*" element={<Navigate to="/" replace />} />
+                            </Routes>
+                        </Suspense>
                     </GlobalModalsProvider>
                 </ToastProvider>
             </ScriptRepositoryProvider>

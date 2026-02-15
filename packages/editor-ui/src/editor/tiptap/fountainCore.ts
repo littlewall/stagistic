@@ -1,10 +1,10 @@
-import type {FountainElementType} from '@stagistic/editor-core';
+import type {FountainElementType} from '@stagistic/script-core';
 import {
     createNodeId,
     FOUNTAIN_BLOCK_NODE_NAME,
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
     FOUNTAIN_COLUMN_NODE_NAME,
-} from '@stagistic/shared';
+} from '@stagistic/script-core';
 import type {Node as ProseMirrorNode, ResolvedPos} from '@tiptap/pm/model';
 import type {EditorState} from '@tiptap/pm/state';
 import type {Editor as TiptapEditor} from '@tiptap/react';

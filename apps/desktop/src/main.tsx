@@ -1,6 +1,7 @@
 import '@stagistic/ui/styles/base.css';
 import './index.css';
 
+import {isApplePlatform} from '@stagistic/platform-core';
 import {bootstrapAppTheme} from '@stagistic/ui';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
@@ -9,7 +10,7 @@ import App from './App';
 
 bootstrapAppTheme();
 
-if (navigator.userAgent.includes('Mac')) {
+if (isApplePlatform()) {
     document.body.classList.add('platform-macos');
 }
 

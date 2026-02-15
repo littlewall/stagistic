@@ -2,7 +2,7 @@ import type {ScriptSummary} from '@stagistic/db';
 import type {
     EditorSettingsOverride,
     ScriptDocument,
-} from '@stagistic/shared';
+} from '@stagistic/script-core';
 
 export type ScriptCharacterRef = {
     id: string,

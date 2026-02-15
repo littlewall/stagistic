@@ -1,5 +1,7 @@
-import {ELEMENT_ACTION} from '@stagistic/editor-core';
-import {createNodeId} from '@stagistic/shared';
+import {
+    createNodeId,
+    ELEMENT_ACTION,
+} from '@stagistic/script-core';
 import type {NodeType} from '@tiptap/pm/model';
 import {TextSelection, type Transaction} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
@@ -16,7 +18,7 @@ const focusEditor = (editor: Editor) => {
     editor.commands.focus();
 };
 
-const setSelectionNearBlockStart = (editor: Editor, tr: Transaction, blockPos: number) => {
+const setSelectionNearBlockStart = (tr: Transaction, blockPos: number) => {
     const mappedPos = tr.mapping.map(blockPos + 1);
     const resolved = tr.doc.resolve(mappedPos);
 
@@ -92,7 +94,7 @@ export const setBlockTypeWithSelection = (
 
     let tr = editor.state.tr.setNodeMarkup(block.pos, undefined, attrs);
 
-    tr = setSelectionNearBlockStart(editor, tr, block.pos);
+    tr = setSelectionNearBlockStart(tr, block.pos);
 
     editor.view.dispatch(tr.scrollIntoView());
     focusEditor(editor);

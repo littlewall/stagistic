@@ -8,7 +8,6 @@
         "lint": "eslint . --ext ts"
     },
     "dependencies": {
-        "@stagistic/editor-core": "workspace:*",
         "nanoid": "^5.0.7"
     },
     "devDependencies": {

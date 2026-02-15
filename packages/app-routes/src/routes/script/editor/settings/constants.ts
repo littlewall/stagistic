@@ -10,7 +10,7 @@ import {
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
     type FountainElementType,
-} from '@stagistic/editor-core';
+} from '@stagistic/script-core';
 
 export const SCREENPLAY_CHARS_PER_INCH = 10;
 export const MIN_PREVIEW_CONTENT_CHARS = 30;

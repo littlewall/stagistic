@@ -1,6 +1,2 @@
-/*
- * Authentication and authorization
- * Prepared for better-auth integration
- */
-
-export const placeholder = 'auth';
+// Placeholder package for future authentication features.
+export type AuthPackagePlaceholder = never;

@@ -167,6 +167,47 @@ export const HomeRoute = () => {
             recentScripts,
         ],
     );
+    const heroPanel = useMemo(() => {
+        if (scriptsLoading) {
+            return (
+                <ProgressPanel
+                    title="Načítám poslední scénář"
+                    subtitle="Zjišťuji naposledy otevřený scénář"
+                    size="sm"
+                    statusText="Načítám poslední scénář"
+                />
+            );
+        }
+
+        if (!latestScript) {
+            return null;
+        }
+
+        return (
+            <Card className={styles.heroCard} variant="highlight">
+                <CardContent>
+                    <Kicker>Continue writing</Kicker>
+                    <h2 className={styles.heroCardValue}>{latestScript.title}</h2>
+                    <SubtleText>
+                        {formatLastEdited(latestScript.updatedAt)}
+                    </SubtleText>
+                </CardContent>
+                <CardFooter className={styles.heroCardFooter}>
+                    <Button
+                        className={styles.heroCardButton}
+                        onClick={handleResumeScript}
+                    >
+                        Resume script
+                    </Button>
+                </CardFooter>
+            </Card>
+        );
+    }, [
+        formatLastEdited,
+        handleResumeScript,
+        latestScript,
+        scriptsLoading,
+    ]);
 
     return (
         <AppLayout
@@ -203,33 +244,7 @@ export const HomeRoute = () => {
                                 )}
                             </div>
                         </div>
-                        {scriptsLoading ? (
-                            <ProgressPanel
-                                title="Načítám poslední scénář"
-                                subtitle="Zjišťuji naposledy otevřený scénář"
-                                size="sm"
-                                statusText="Načítám poslední scénář"
-                            />
-                        ) : latestScript ? (
-                            <Card className={styles.heroCard} variant="highlight">
-                                <CardContent>
-                                    <Kicker>Continue writing</Kicker>
-                                    <h2 className={styles.heroCardValue}>{latestScript.title}</h2>
-                                    <SubtleText>
-                                        {formatLastEdited(latestScript.updatedAt)}
-                                    </SubtleText>
-                                </CardContent>
-                                <CardFooter className={styles.heroCardFooter}>
-                                    <Button
-                                        className={styles.heroCardButton}
-                                        onClick={handleResumeScript}
-                                    >
-                                        Resume script
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-
-                        ) : null}
+                        {heroPanel}
                     </HeroLayout>
                 </section>
                 {scriptsLoading ? (

@@ -11,13 +11,13 @@ type LoaderOverlayProps = {
     hint?: ReactNode,
 };
 
-export function LoaderOverlay({
+export const LoaderOverlay = ({
     title = 'Preparing Stagistic',
     subtitle = 'Setting up your workspace',
     progress,
     statusText,
     hint,
-}: LoaderOverlayProps) {
+}: LoaderOverlayProps) => {
     return (
         <div
             className={styles.overlay}
@@ -35,4 +35,4 @@ export function LoaderOverlay({
             </div>
         </div>
     );
-}
+};
