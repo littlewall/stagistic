@@ -3,6 +3,7 @@ import {
     type EditorSettings,
 } from '@stagistic/script-core';
 import {
+    clampCharacterColorSaturation,
     type EditorSettingsOverride,
     normalizeEditorSettingsBlockType,
 } from '@stagistic/script-core';
@@ -14,8 +15,19 @@ import {
 import {getClosestStepValue} from './math';
 
 export const normalizeSettingsOverride = (settings: EditorSettingsOverride): EditorSettingsOverride => {
+    const nextSettings: EditorSettingsOverride = {
+        ...settings,
+    };
+
+    if (settings.visual?.characterColorSaturation !== undefined) {
+        nextSettings.visual = {
+            ...settings.visual,
+            characterColorSaturation: clampCharacterColorSaturation(settings.visual.characterColorSaturation),
+        };
+    }
+
     if (!settings.blocks) {
-        return settings;
+        return nextSettings;
     }
 
     const nextBlocks = Object.entries(settings.blocks).reduce<NonNullable<EditorSettingsOverride['blocks']>>(
@@ -76,7 +88,7 @@ export const normalizeSettingsOverride = (settings: EditorSettingsOverride): Edi
     );
 
     return {
-        ...settings,
+        ...nextSettings,
         blocks: nextBlocks,
     };
 };

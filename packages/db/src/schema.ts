@@ -109,6 +109,8 @@ export const scriptCharacters = pgTable(
             .notNull()
             .references(() => scripts.id, {onDelete: 'cascade'}),
         characterKey: text('character_key').notNull(),
+        colorHex: text('color_hex'),
+        genderKey: text('gender_key'),
         createdAt: bigint('created_at', {mode: 'number'}).notNull(),
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },
@@ -116,6 +118,25 @@ export const scriptCharacters = pgTable(
         scriptCharacterUniqueIdx: uniqueIndex('script_characters_script_character_unique_idx')
             .on(table.scriptId, table.characterKey),
         scriptIdIdx: index('script_characters_script_id_idx').on(table.scriptId),
+    }),
+);
+
+export const scriptCharacterGenders = pgTable(
+    'script_character_genders',
+    {
+        id: text('id').primaryKey(),
+        scriptId: text('script_id')
+            .notNull()
+            .references(() => scripts.id, {onDelete: 'cascade'}),
+        genderKey: text('gender_key').notNull(),
+        genderLabel: text('gender_label').notNull(),
+        createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+        updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+    },
+    table => ({
+        scriptGenderUniqueIdx: uniqueIndex('script_character_genders_script_gender_unique_idx')
+            .on(table.scriptId, table.genderKey),
+        scriptIdIdx: index('script_character_genders_script_id_idx').on(table.scriptId),
     }),
 );
 
@@ -127,4 +148,5 @@ export const dbSchema = {
     scriptConfigs,
     scriptConfigBlocks,
     scriptCharacters,
+    scriptCharacterGenders,
 };

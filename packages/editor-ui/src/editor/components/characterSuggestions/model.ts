@@ -5,7 +5,10 @@ import {
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
-import {getCharacterColor} from '../../characterColors';
+import {
+    getCharacterColor,
+    normalizeCharacterColorHex,
+} from '../../characterColors';
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
@@ -53,6 +56,7 @@ export const normalizePersistentCharacters = (persistentCharacters: readonly Per
         result.push({
             id: character.id,
             key,
+            colorHex: normalizeCharacterColorHex(character.colorHex) ?? null,
         });
     });
 
@@ -140,6 +144,7 @@ type OverlayComputationArgs = {
     canvas: HTMLElement,
     normalizedPersistentCharacters: readonly PersistentCharacterRef[],
     suppressedSelection: SuppressedSelection | null,
+    characterColorSaturation?: number,
 };
 
 export const computeCharacterSuggestions = ({
@@ -147,6 +152,7 @@ export const computeCharacterSuggestions = ({
     canvas,
     normalizedPersistentCharacters,
     suppressedSelection,
+    characterColorSaturation,
 }: OverlayComputationArgs): CharacterSuggestionsResult | null => {
     const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
 
@@ -183,6 +189,11 @@ export const computeCharacterSuggestions = ({
     const activeKey = normalizeCharacterKey(activeToken.value);
     const occupiedKeys = new Set<string>();
     const counts = collectCharacterCounts(editor, normalizedPersistentCharacters);
+    const persistentColorByKey = new Map(
+        normalizedPersistentCharacters
+            .filter(character => Boolean(character.colorHex))
+            .map(character => [character.key, character.colorHex as string]),
+    );
     const hasKnownActiveCharacter = activeKey.length > 0 && counts.has(activeKey);
     const shouldFilterByPrefix = !(hasKnownActiveCharacter && query === activeKey);
 
@@ -228,7 +239,7 @@ export const computeCharacterSuggestions = ({
 
     const suggestions = suggestionRows.map(([key]) => ({
         key,
-        color: getCharacterColor(key),
+        color: persistentColorByKey.get(key) ?? getCharacterColor(key, characterColorSaturation),
     }));
 
     return {

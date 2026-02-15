@@ -75,6 +75,7 @@ export const ScriptEditorRoute = () => {
         scriptSettingsDraft,
         resolvedScriptSettings,
         updateBlockSettings,
+        updateCharacterColorSaturation,
     } = useScriptEditorSettingsDraft({
         currentScriptId,
         scriptSettingsOverride,
@@ -104,6 +105,7 @@ export const ScriptEditorRoute = () => {
         normalizedConfirmedCharacterRecords,
         confirmedCharacters,
         unconfirmedCharacters,
+        characterGenderOptions,
         isCharactersLoading,
         handleEditorValueChange,
         normalizeCharacterNameForInlineInput,
@@ -111,11 +113,15 @@ export const ScriptEditorRoute = () => {
         handleDeleteCharacter,
         handleRenameCharacterPreview,
         handleRenameCharacter,
+        handleSetCharacterColor,
+        handleSetCharacterGender,
+        handleUpsertCharacterGender,
     } = useScriptEditorCharacters({
         currentScriptId,
         scriptRepository,
         initialValue,
         resolvedScriptSettings,
+        characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
 
@@ -145,12 +151,14 @@ export const ScriptEditorRoute = () => {
                 blockLabelByType={blockLabelByType}
                 shortcutPrefix={shortcutPrefix}
                 onUpdateBlockSettings={updateBlockSettings}
+                onUpdateCharacterColorSaturation={updateCharacterColorSaturation}
             />
         );
     }, [
         blockLabelByType,
         resolvedScriptSettings,
         shortcutPrefix,
+        updateCharacterColorSaturation,
         updateBlockSettings,
     ]);
     const handleSelectSettingsPanel = useCallback((panelId: string) => {
@@ -168,17 +176,27 @@ export const ScriptEditorRoute = () => {
             normalizeRenameInput={normalizeCharacterNameForInlineInput}
             onRenameCharacterPreview={handleRenameCharacterPreview}
             onRenameCharacter={handleRenameCharacter}
+            characterGenderOptions={characterGenderOptions}
+            onSetCharacterColor={handleSetCharacterColor}
+            onSetCharacterGender={handleSetCharacterGender}
+            onUpsertCharacterGender={handleUpsertCharacterGender}
+            characterColorSaturation={resolvedScriptSettings.visual.characterColorSaturation}
             isLoading={isCharactersLoading}
             className={styles.sidebarContent}
         />
     ), [
+        characterGenderOptions,
         confirmedCharacters,
         handleConfirmCharacter,
         handleDeleteCharacter,
         handleRenameCharacter,
         handleRenameCharacterPreview,
+        handleSetCharacterColor,
+        handleSetCharacterGender,
+        handleUpsertCharacterGender,
         isCharactersLoading,
         normalizeCharacterNameForInlineInput,
+        resolvedScriptSettings.visual.characterColorSaturation,
         unconfirmedCharacters,
     ]);
 
@@ -261,7 +279,7 @@ export const ScriptEditorRoute = () => {
             />
             <ScriptSettingsModal
                 isOpen={isSettingsOpen}
-                title={currentScript ? `${currentScript.name} Settings` : 'Script Settings'}
+                title="Settings"
                 groups={groups}
                 activePanelId={activePanelId}
                 expandedItemIds={expandedItemIds}

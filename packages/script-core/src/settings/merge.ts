@@ -6,6 +6,7 @@ import type {
     EditorSettingsOverride,
     PageSettings,
     TypographySettings,
+    VisualSettings,
 } from './types';
 
 export const mergeEditorSettings = (
@@ -15,6 +16,7 @@ export const mergeEditorSettings = (
     let next: EditorSettings = {
         page: {...base.page},
         typography: {...base.typography},
+        visual: {...base.visual},
         blocks: {...base.blocks},
     };
 
@@ -53,6 +55,22 @@ export const mergeEditorSettings = (
             }
 
             next.typography = mergedTypography;
+        }
+
+        if (override.visual) {
+            const mergedVisual = {
+                ...next.visual,
+            };
+
+            for (const [key, value] of Object.entries(override.visual)) {
+                if (value === undefined) {
+                    continue;
+                }
+
+                mergedVisual[key as keyof VisualSettings] = value as never;
+            }
+
+            next.visual = mergedVisual;
         }
 
         if (override.blocks) {

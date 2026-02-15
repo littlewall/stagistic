@@ -1,4 +1,5 @@
 import type {CharacterCountItem as EditorSidebarCharacter} from '@stagistic/script-core';
+import type {CharacterGenderOption} from '@stagistic/script-core';
 import clsx from 'clsx';
 import {List} from 'iconoir-react';
 import {
@@ -41,6 +42,11 @@ type EditorSidebarProps = {
         previousCharacterName: string,
         nextCharacterName: string,
     ) => void | Promise<void>,
+    characterGenderOptions?: CharacterGenderOption[],
+    onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
+    onSetCharacterGender?: (characterId: string, genderKey: string | null) => void,
+    onUpsertCharacterGender?: (label: string) => Promise<CharacterGenderOption | null>,
+    characterColorSaturation?: number,
     isLoading?: boolean,
     className?: string,
 };
@@ -53,6 +59,11 @@ export const EditorSidebar = ({
     normalizeRenameInput,
     onRenameCharacterPreview,
     onRenameCharacter,
+    characterGenderOptions = [],
+    onSetCharacterColor,
+    onSetCharacterGender,
+    onUpsertCharacterGender,
+    characterColorSaturation,
     isLoading,
     className,
 }: EditorSidebarProps) => {
@@ -142,6 +153,11 @@ export const EditorSidebar = ({
                                                     onCommitRenameDraft={commitRenameDraft}
                                                     onDeleteCharacter={onDeleteCharacter}
                                                     onRenameCharacter={onRenameCharacter}
+                                                    characterGenderOptions={characterGenderOptions}
+                                                    onSetCharacterColor={onSetCharacterColor}
+                                                    onSetCharacterGender={onSetCharacterGender}
+                                                    onUpsertCharacterGender={onUpsertCharacterGender}
+                                                    characterColorSaturation={characterColorSaturation}
                                                 />
                                             ) : (
                                                 <CharacterRowPending

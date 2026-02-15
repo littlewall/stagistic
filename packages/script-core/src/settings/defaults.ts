@@ -10,6 +10,7 @@ import {
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
 } from '../fountain';
+import {CHARACTER_COLOR_SATURATION_DEFAULT} from './options';
 import type {EditorSettings} from './types';
 
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
@@ -28,6 +29,9 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
     typography: {
         fontSizePx: 16,
         lineHeight: 1.0,
+    },
+    visual: {
+        characterColorSaturation: CHARACTER_COLOR_SATURATION_DEFAULT,
     },
     blocks: {
         [ELEMENT_ACTION]: {

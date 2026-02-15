@@ -29,3 +29,24 @@ export type BlockTextAlign = (typeof BLOCK_TEXT_ALIGN_OPTIONS)[number];
 export const BLOCK_CASING_OPTIONS = ['normal', 'uppercase'] as const;
 
 export type BlockCasing = (typeof BLOCK_CASING_OPTIONS)[number];
+
+export const CHARACTER_COLOR_SATURATION_MIN = 30;
+export const CHARACTER_COLOR_SATURATION_MAX = 60;
+export const CHARACTER_COLOR_SATURATION_DEFAULT = CHARACTER_COLOR_SATURATION_MAX;
+export const CHARACTER_COLOR_SATURATION_OPTIONS = [
+    30,
+    40,
+    50,
+    60,
+] as const;
+
+export const clampCharacterColorSaturation = (value: number | null | undefined): number => {
+    if (!Number.isFinite(value)) {
+        return CHARACTER_COLOR_SATURATION_DEFAULT;
+    }
+
+    return Math.max(
+        CHARACTER_COLOR_SATURATION_MIN,
+        Math.min(CHARACTER_COLOR_SATURATION_MAX, Math.round(value as number)),
+    );
+};

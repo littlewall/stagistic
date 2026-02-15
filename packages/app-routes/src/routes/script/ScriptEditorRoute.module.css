@@ -12,6 +12,11 @@
     gap: var(--space-3);
 }
 
+.panelTitle + .settingsFlatGrid,
+.panelTitle + .settingsField {
+    margin-top: var(--space-4);
+}
+
 .panelTitle {
     font-size: 1.125rem;
     font-weight: 600;
@@ -360,6 +365,50 @@
     gap: 6px;
 }
 
+.visualPreferencesInlineRow {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.visualSelectCompact .settingsSelect {
+    width: max-content;
+}
+
+.visualSelectCompact .settingsSelectButton {
+    width: auto;
+    min-height: calc(30px * var(--size-scale));
+    padding: 0 var(--space-2);
+}
+
+.visualSelectCompact .settingsSelectLabel {
+    font-variant-numeric: tabular-nums;
+}
+
+.visualSelectCompact .settingsSelectMenu {
+    right: auto;
+    min-width: 100%;
+}
+
+.visualPreviewPrefix {
+    color: var(--color-ink-muted);
+    font-size: .875rem;
+    font-weight: 600;
+}
+
+.visualPreviewDots {
+    display: inline-flex;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+.visualPreviewDot {
+    width: calc(10px * var(--size-scale));
+    height: calc(10px * var(--size-scale));
+    border: 1px solid color-mix(in srgb, var(--color-ink) 14%, var(--color-surface));
+    border-radius: 999px;
+}
+
 .fieldLabel {
     font-size: .85rem;
     font-weight: 600;
@@ -511,6 +560,11 @@
 @media (max-width: 900px) {
     .settingsFlatGrid {
         grid-template-columns: 1fr;
+    }
+
+    .visualPreferencesInlineRow {
+        gap: var(--space-2);
+        flex-wrap: wrap;
     }
 
     .previewToolbar {

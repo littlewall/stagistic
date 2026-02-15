@@ -1,6 +1,7 @@
 export type PersistentCharacterRef = {
     id: string,
     key: string,
+    colorHex?: string | null,
 };
 
 export type SuggestionEntry = {

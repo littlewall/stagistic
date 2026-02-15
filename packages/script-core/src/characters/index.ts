@@ -7,6 +7,7 @@ export {collectScriptCharacterStats} from './collectScriptCharacterStats';
 export {normalizeCharacterDisplayName} from './documentHelpers';
 export {renameCharacterInScriptDocument} from './renameCharacterInScriptDocument';
 export type {
+    CharacterGenderOption,
     CharacterCountItem,
     ScriptCharacterRecord,
     ScriptCharacterStats,

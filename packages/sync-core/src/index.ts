@@ -4,6 +4,7 @@
  */
 
 export type {
+    ScriptCharacterGenderOption,
     ScriptCharacterRef,
     ScriptRepository,
 } from './scriptRepository';

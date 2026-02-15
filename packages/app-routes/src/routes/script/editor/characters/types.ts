@@ -1,4 +1,5 @@
 export type {
+    CharacterGenderOption,
     CharacterCountItem,
     ScriptCharacterRecord,
     ScriptCharacterStats,

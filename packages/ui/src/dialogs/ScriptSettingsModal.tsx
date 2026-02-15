@@ -12,6 +12,7 @@ export type SettingsNavSubItem = {
     id: string,
     label: string,
     panelId: string,
+    icon?: ReactNode,
 };
 
 type SettingsNavLinkItem = {
@@ -150,7 +151,14 @@ export const ScriptSettingsModal = ({
                                                     aria-expanded={isExpanded}
                                                 >
                                                     <span>{item.label}</span>
-                                                    <span className={arrowClass} aria-hidden="true">▸</span>
+                                                    <svg
+                                                        viewBox="0 0 24 24"
+                                                        className={arrowClass}
+                                                        aria-hidden="true"
+                                                        focusable="false"
+                                                    >
+                                                        <path d="m9 6 6 6-6 6" />
+                                                    </svg>
                                                 </button>
                                                 {isExpanded ? (
                                                     <ul className={styles.subList}>
@@ -167,7 +175,17 @@ export const ScriptSettingsModal = ({
                                                                         )}
                                                                         onClick={() => onSelectPanel(subItem.panelId)}
                                                                     >
-                                                                        {subItem.label}
+                                                                        <span className={styles.subItemContent}>
+                                                                            {subItem.icon ? (
+                                                                                <span
+                                                                                    className={styles.subItemIcon}
+                                                                                    aria-hidden="true"
+                                                                                >
+                                                                                    {subItem.icon}
+                                                                                </span>
+                                                                            ) : null}
+                                                                            <span>{subItem.label}</span>
+                                                                        </span>
                                                                     </button>
                                                                 </li>
                                                             );

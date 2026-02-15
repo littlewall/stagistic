@@ -9,7 +9,10 @@ import {
     useState,
 } from 'react';
 
-import type {ScriptCharacterRecord} from './types';
+import type {
+    CharacterGenderOption,
+    ScriptCharacterRecord,
+} from './types';
 import type {ScriptRepository} from './useScriptEditorCharacters.types';
 
 type UseCharacterStateArgs = {
@@ -33,8 +36,42 @@ export type CharacterState = {
     setRenamingCharacterIds: Dispatch<SetStateAction<string[]>>,
     renamingCharacterKeys: string[],
     setRenamingCharacterKeys: Dispatch<SetStateAction<string[]>>,
+    colorUpdatingCharacterIds: string[],
+    setColorUpdatingCharacterIds: Dispatch<SetStateAction<string[]>>,
+    genderUpdatingCharacterIds: string[],
+    setGenderUpdatingCharacterIds: Dispatch<SetStateAction<string[]>>,
+    characterGenderOptions: CharacterGenderOption[],
+    setCharacterGenderOptions: Dispatch<SetStateAction<CharacterGenderOption[]>>,
     isCharactersLoading: boolean,
     handleEditorValueChange: (value: ScriptDocument) => void,
+};
+
+const DEFAULT_CHARACTER_GENDER_OPTIONS: CharacterGenderOption[] = [{
+    id: 'default:male',
+    key: 'male',
+    label: 'Male',
+}, {
+    id: 'default:female',
+    key: 'female',
+    label: 'Female',
+}];
+
+const mergeCharacterGenderOptions = (options: CharacterGenderOption[]): CharacterGenderOption[] => {
+    const byKey = new Map<string, CharacterGenderOption>();
+
+    DEFAULT_CHARACTER_GENDER_OPTIONS.forEach(option => {
+        byKey.set(option.key, option);
+    });
+    options.forEach(option => {
+        if (!option.key || !option.label) {
+            return;
+        }
+
+        byKey.set(option.key, option);
+    });
+
+    return Array.from(byKey.values())
+        .sort((a, b) => a.label.localeCompare(b.label));
 };
 
 export const useCharacterState = ({
@@ -49,6 +86,11 @@ export const useCharacterState = ({
     const [deletingCharacterIds, setDeletingCharacterIds] = useState<string[]>([]);
     const [renamingCharacterIds, setRenamingCharacterIds] = useState<string[]>([]);
     const [renamingCharacterKeys, setRenamingCharacterKeys] = useState<string[]>([]);
+    const [colorUpdatingCharacterIds, setColorUpdatingCharacterIds] = useState<string[]>([]);
+    const [genderUpdatingCharacterIds, setGenderUpdatingCharacterIds] = useState<string[]>([]);
+    const [characterGenderOptions, setCharacterGenderOptions] = useState<CharacterGenderOption[]>(
+        DEFAULT_CHARACTER_GENDER_OPTIONS,
+    );
     const [isCharactersLoading, setIsCharactersLoading] = useState(false);
 
     useEffect(() => {
@@ -63,6 +105,9 @@ export const useCharacterState = ({
             setDeletingCharacterIds([]);
             setRenamingCharacterIds([]);
             setRenamingCharacterKeys([]);
+            setColorUpdatingCharacterIds([]);
+            setGenderUpdatingCharacterIds([]);
+            setCharacterGenderOptions(DEFAULT_CHARACTER_GENDER_OPTIONS);
             setIsCharactersLoading(false);
 
             return;
@@ -75,16 +120,22 @@ export const useCharacterState = ({
         setDeletingCharacterIds([]);
         setRenamingCharacterIds([]);
         setRenamingCharacterKeys([]);
+        setColorUpdatingCharacterIds([]);
+        setGenderUpdatingCharacterIds([]);
 
         const loadCharacters = async () => {
             try {
-                const storedCharacters = await scriptRepository.listScriptCharacters(currentScriptId);
+                const [storedCharacters, storedGenderOptions] = await Promise.all([
+                    scriptRepository.listScriptCharacters(currentScriptId),
+                    scriptRepository.listScriptCharacterGenders(currentScriptId),
+                ]);
 
                 if (!isActive) {
                     return;
                 }
 
                 setConfirmedCharacterRecords(storedCharacters);
+                setCharacterGenderOptions(mergeCharacterGenderOptions(storedGenderOptions));
             } catch (error) {
                 if (!isActive) {
                     return;
@@ -92,6 +143,7 @@ export const useCharacterState = ({
 
                 console.error('Failed to load script characters', error);
                 setConfirmedCharacterRecords([]);
+                setCharacterGenderOptions(DEFAULT_CHARACTER_GENDER_OPTIONS);
             } finally {
                 if (isActive) {
                     setIsCharactersLoading(false);
@@ -125,6 +177,12 @@ export const useCharacterState = ({
         setRenamingCharacterIds,
         renamingCharacterKeys,
         setRenamingCharacterKeys,
+        colorUpdatingCharacterIds,
+        setColorUpdatingCharacterIds,
+        genderUpdatingCharacterIds,
+        setGenderUpdatingCharacterIds,
+        characterGenderOptions,
+        setCharacterGenderOptions,
         isCharactersLoading,
         handleEditorValueChange,
     };

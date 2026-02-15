@@ -100,9 +100,13 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
     };
 
     const {
+        listScriptCharacterGenders,
         confirmScriptCharacter,
         deleteScriptCharacter,
         renameScriptCharacter,
+        setScriptCharacterColor,
+        setScriptCharacterGender,
+        upsertScriptCharacterGender,
     } = createCharacterHandlers({
         getDb,
         recordOutbox,
@@ -132,6 +136,7 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
         listScripts,
         getScriptSummary,
         listScriptCharacters,
+        listScriptCharacterGenders,
         createScript,
         renameScript,
         deleteScript,
@@ -139,6 +144,9 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
         confirmScriptCharacter,
         deleteScriptCharacter,
         renameScriptCharacter,
+        setScriptCharacterColor,
+        setScriptCharacterGender,
+        upsertScriptCharacterGender,
         loadLatest,
         saveLatest,
         commitVersion,

@@ -1,4 +1,7 @@
-import {getCharacterColor} from '@stagistic/editor-ui';
+import {
+    getCharacterColor,
+    normalizeCharacterColorHex,
+} from '@stagistic/editor-ui';
 import {
     ELEMENT_CHARACTER,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
@@ -31,9 +34,12 @@ type UseCharacterComputedArgs = {
     deletingCharacterIds: string[],
     renamingCharacterIds: string[],
     renamingCharacterKeys: string[],
+    colorUpdatingCharacterIds: string[],
+    genderUpdatingCharacterIds: string[],
     editorValue: ScriptDocument | null,
     initialValue: ScriptDocument | null | undefined,
     resolvedScriptSettings: EditorSettings,
+    characterColorSaturation: number,
 };
 
 export type CharacterComputed = {
@@ -52,9 +58,12 @@ export const useCharacterComputed = ({
     deletingCharacterIds,
     renamingCharacterIds,
     renamingCharacterKeys,
+    colorUpdatingCharacterIds,
+    genderUpdatingCharacterIds,
     editorValue,
     initialValue,
     resolvedScriptSettings,
+    characterColorSaturation,
 }: UseCharacterComputedArgs): CharacterComputed => {
     const confirmingCharacterSet = useMemo(
         () => new Set(confirmingCharacterKeys),
@@ -71,6 +80,14 @@ export const useCharacterComputed = ({
     const renamingCharacterKeySet = useMemo(
         () => new Set(renamingCharacterKeys),
         [renamingCharacterKeys],
+    );
+    const colorUpdatingCharacterIdSet = useMemo(
+        () => new Set(colorUpdatingCharacterIds),
+        [colorUpdatingCharacterIds],
+    );
+    const genderUpdatingCharacterIdSet = useMemo(
+        () => new Set(genderUpdatingCharacterIds),
+        [genderUpdatingCharacterIds],
     );
 
     const confirmedCharactersById = useMemo(() => {
@@ -102,6 +119,8 @@ export const useCharacterComputed = ({
             normalized.push({
                 id: character.id,
                 key,
+                colorHex: character.colorHex ?? null,
+                genderKey: character.genderKey ?? null,
             });
         });
 
@@ -135,20 +154,34 @@ export const useCharacterComputed = ({
     );
 
     const confirmedCharacters = useMemo<CharacterCountItem[]>(
-        () => normalizedConfirmedCharacterRecords.map(character => ({
-            id: character.id,
-            key: character.key,
-            count: scriptCharacterStats.confirmedCountsById.get(character.id)
-                ?? scriptCharacterStats.countsByKey.get(character.key)
-                ?? 0,
-            color: getCharacterColor(character.key),
-            isConfirmed: true,
-            isDeletePending: deletingCharacterIdSet.has(character.id),
-            isRenamePending: renamingCharacterIdSet.has(character.id),
-            isPending: deletingCharacterIdSet.has(character.id) || renamingCharacterIdSet.has(character.id),
-        })),
+        () => normalizedConfirmedCharacterRecords.map(character => {
+            const normalizedColorHex = normalizeCharacterColorHex(character.colorHex);
+
+            return {
+                id: character.id,
+                key: character.key,
+                count: scriptCharacterStats.confirmedCountsById.get(character.id)
+                    ?? scriptCharacterStats.countsByKey.get(character.key)
+                    ?? 0,
+                color: normalizedColorHex ?? getCharacterColor(character.key, characterColorSaturation),
+                colorHex: normalizedColorHex ?? null,
+                genderKey: character.genderKey ?? null,
+                isConfirmed: true,
+                isDeletePending: deletingCharacterIdSet.has(character.id),
+                isRenamePending: renamingCharacterIdSet.has(character.id),
+                isColorUpdatePending: colorUpdatingCharacterIdSet.has(character.id),
+                isGenderUpdatePending: genderUpdatingCharacterIdSet.has(character.id),
+                isPending: deletingCharacterIdSet.has(character.id)
+                    || renamingCharacterIdSet.has(character.id)
+                    || colorUpdatingCharacterIdSet.has(character.id)
+                    || genderUpdatingCharacterIdSet.has(character.id),
+            };
+        }),
         [
+            characterColorSaturation,
+            colorUpdatingCharacterIdSet,
             deletingCharacterIdSet,
+            genderUpdatingCharacterIdSet,
             normalizedConfirmedCharacterRecords,
             renamingCharacterIdSet,
             scriptCharacterStats.confirmedCountsById,
@@ -164,12 +197,13 @@ export const useCharacterComputed = ({
             .map(([key, count]) => ({
                 key,
                 count,
-                color: getCharacterColor(key),
+                color: getCharacterColor(key, characterColorSaturation),
                 isConfirmed: false,
                 isConfirmPending: confirmingCharacterSet.has(key),
                 isPending: confirmingCharacterSet.has(key),
             })),
         [
+            characterColorSaturation,
             confirmedCharacterSet,
             confirmingCharacterSet,
             renamingCharacterKeySet,

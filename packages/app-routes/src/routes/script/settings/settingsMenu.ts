@@ -1,22 +1,17 @@
+import {BLOCK_ICONS} from '@stagistic/editor-ui';
 import {
     FOUNTAIN_BLOCK_ITEMS,
     type FountainElementType,
 } from '@stagistic/script-core';
 import type {SettingsNavGroup} from '@stagistic/ui';
 
-export const SCRIPT_SETTINGS_PANEL_SOURCE = 'settings-source';
 export const SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO = 'document-info';
+export const SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES = 'visual-preferences';
 export const SCRIPT_SETTINGS_PANEL_PRODUCTION = 'production';
 export const SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT = 'page-layout';
 export const SCRIPT_SETTINGS_PANEL_HEADERS = 'headers-footers';
 export const SCRIPT_SETTINGS_PANEL_STATUSES = 'document-statuses';
 export const SCRIPT_SETTINGS_PANEL_NOTES = 'notes';
-export const SCRIPT_SETTINGS_PANEL_ACCOUNT_WRITING = 'account-writing';
-export const SCRIPT_SETTINGS_PANEL_ACCOUNT_PROFILE = 'account-profile';
-export const SCRIPT_SETTINGS_PANEL_ACCOUNT_NOTIFICATIONS = 'account-notifications';
-export const SCRIPT_SETTINGS_PANEL_ACCOUNT_SECURITY = 'account-security';
-export const SCRIPT_SETTINGS_PANEL_ACCOUNT_BILLING = 'account-billing';
-export const SCRIPT_SETTINGS_PANEL_ACCOUNT_AI = 'account-ai';
 export const SCRIPT_SETTINGS_PANEL_PROJECT_STATUSES = 'project-statuses';
 
 export const SCRIPT_SETTINGS_EXPANDABLE_ELEMENTS = 'elements-settings';
@@ -62,80 +57,32 @@ export const getBlockTypeFromElementPanelId = (panelId: string): FountainElement
 };
 
 export type ScriptSettingsPanelId =
-    | typeof SCRIPT_SETTINGS_PANEL_SOURCE
     | typeof SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO
+    | typeof SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES
     | typeof SCRIPT_SETTINGS_PANEL_PRODUCTION
     | typeof SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT
     | typeof SCRIPT_SETTINGS_PANEL_HEADERS
     | typeof SCRIPT_SETTINGS_PANEL_STATUSES
     | typeof SCRIPT_SETTINGS_PANEL_NOTES
-    | typeof SCRIPT_SETTINGS_PANEL_ACCOUNT_WRITING
-    | typeof SCRIPT_SETTINGS_PANEL_ACCOUNT_PROFILE
-    | typeof SCRIPT_SETTINGS_PANEL_ACCOUNT_NOTIFICATIONS
-    | typeof SCRIPT_SETTINGS_PANEL_ACCOUNT_SECURITY
-    | typeof SCRIPT_SETTINGS_PANEL_ACCOUNT_BILLING
-    | typeof SCRIPT_SETTINGS_PANEL_ACCOUNT_AI
     | typeof SCRIPT_SETTINGS_PANEL_PROJECT_STATUSES
     | ElementSettingsPanelId;
 
 export const scriptSettingsMenu: SettingsNavGroup[] = [
     {
-        id: 'account',
-        label: 'Account',
+        id: 'script',
+        label: 'Script',
         items: [
-            {
-                kind: 'item',
-                id: 'account-writing',
-                label: 'Writing Preferences',
-                panelId: SCRIPT_SETTINGS_PANEL_ACCOUNT_WRITING,
-            },
-            {
-                kind: 'item',
-                id: 'account-profile',
-                label: 'Profile',
-                panelId: SCRIPT_SETTINGS_PANEL_ACCOUNT_PROFILE,
-            },
-            {
-                kind: 'item',
-                id: 'account-notifications',
-                label: 'Notifications',
-                panelId: SCRIPT_SETTINGS_PANEL_ACCOUNT_NOTIFICATIONS,
-            },
-            {
-                kind: 'item',
-                id: 'account-security',
-                label: 'Password & Security',
-                panelId: SCRIPT_SETTINGS_PANEL_ACCOUNT_SECURITY,
-            },
-            {
-                kind: 'item',
-                id: 'account-billing',
-                label: 'Billing',
-                panelId: SCRIPT_SETTINGS_PANEL_ACCOUNT_BILLING,
-            },
-            {
-                kind: 'item',
-                id: 'account-ai',
-                label: 'AI',
-                panelId: SCRIPT_SETTINGS_PANEL_ACCOUNT_AI,
-            },
-        ],
-    },
-    {
-        id: 'document',
-        label: 'Document',
-        items: [
-            {
-                kind: 'item',
-                id: 'settings-source',
-                label: 'Settings Source',
-                panelId: SCRIPT_SETTINGS_PANEL_SOURCE,
-            },
             {
                 kind: 'item',
                 id: 'document-info',
-                label: 'Document Info',
+                label: 'Script Info',
                 panelId: SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
+            },
+            {
+                kind: 'item',
+                id: 'visual-preferences',
+                label: 'Visual Preferences',
+                panelId: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
             },
             {
                 kind: 'item',
@@ -175,6 +122,7 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
                     id: item.id,
                     label: item.label,
                     panelId: getElementSettingsPanelId(item.blockType),
+                    icon: BLOCK_ICONS[item.blockType],
                 })),
             },
         ],

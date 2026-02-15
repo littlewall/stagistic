@@ -4,11 +4,15 @@ import {
     type SetStateAction,
 } from 'react';
 
-import type {ScriptCharacterRecord} from '../types';
+import type {
+    CharacterGenderOption,
+    ScriptCharacterRecord,
+} from '../types';
 import type {ScriptRepository} from '../useScriptEditorCharacters.types';
 
 export type SetScriptDocumentState = Dispatch<SetStateAction<ScriptDocument | null>>;
 export type SetScriptCharacterRecordsState = Dispatch<SetStateAction<ScriptCharacterRecord[]>>;
+export type SetCharacterGenderOptionsState = Dispatch<SetStateAction<CharacterGenderOption[]>>;
 export type SetStringArrayState = Dispatch<SetStateAction<string[]>>;
 
 export type CharacterActionSharedArgs = {

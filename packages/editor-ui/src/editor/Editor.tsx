@@ -18,6 +18,10 @@ import {
     useRef,
 } from 'react';
 
+import {
+    getCharacterColorVarName,
+    normalizeCharacterColorHex,
+} from './characterColors';
 import {EditorShell} from './components/editorShell/EditorShell';
 import {
     getEditorCssVars,
@@ -70,6 +74,7 @@ const getSizeScale = () => {
 type PersistentCharacterRef = {
     id: string,
     key: string,
+    colorHex?: string | null,
 };
 
 type EditorProps = {
@@ -162,11 +167,13 @@ const Editor = ({
             blockShortcuts,
             blockNextElements,
             blockCasing,
+            characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
         }),
         [
             blockCasing,
             blockNextElements,
             blockShortcuts,
+            resolvedSettings.visual.characterColorSaturation,
         ],
     );
     const {
@@ -181,6 +188,17 @@ const Editor = ({
         autoSaveDelayMs,
     });
     const rootStyle = useMemo(() => ({
+        ...persistentCharacters.reduce<Record<string, string>>((variables, character) => {
+            const normalizedColor = normalizeCharacterColorHex(character.colorHex);
+
+            if (!normalizedColor) {
+                return variables;
+            }
+
+            variables[getCharacterColorVarName(character.key)] = normalizedColor;
+
+            return variables;
+        }, {}),
         ...editorStyle,
         '--editor-sidebar-width': sidebarWidth ?? 'calc(280px * var(--size-scale))',
         '--toolbar-toggle-width': 'calc(calc(26px * var(--size-scale)) + (var(--space-3) * 2))',
@@ -194,6 +212,7 @@ const Editor = ({
         editorStyle,
         isLeftSidebarOpen,
         isRightSidebarOpen,
+        persistentCharacters,
         sidebarWidth,
     ]);
     const initialContentSignature = useMemo(
@@ -274,6 +293,7 @@ const Editor = ({
             rootStyle={rootStyle}
             autoFocus={autoFocus}
             persistentCharacters={persistentCharacters}
+            characterColorSaturation={resolvedSettings.visual.characterColorSaturation}
             leftSidebarToggle={leftSidebarToggle}
             rightSidebarToggle={rightSidebarToggle}
             leftSidebar={leftSidebar}

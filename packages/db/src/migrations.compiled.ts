@@ -12,5 +12,9 @@ export const compiledMigrations = [
     {
         "id": "0002_script_characters",
         "sql": "CREATE TABLE IF NOT EXISTS \"script_characters\" (\n    \"id\" text PRIMARY KEY,\n    \"script_id\" text NOT NULL REFERENCES \"scripts\"(\"id\") ON DELETE CASCADE,\n    \"character_key\" text NOT NULL,\n    \"created_at\" bigint NOT NULL,\n    \"updated_at\" bigint NOT NULL\n);\n\nCREATE UNIQUE INDEX IF NOT EXISTS \"script_characters_script_character_unique_idx\"\n    ON \"script_characters\" (\"script_id\", \"character_key\");\n\nCREATE INDEX IF NOT EXISTS \"script_characters_script_id_idx\"\n    ON \"script_characters\" (\"script_id\");\n"
+    },
+    {
+        "id": "0003_script_character_metadata",
+        "sql": "ALTER TABLE \"script_characters\"\n    ADD COLUMN IF NOT EXISTS \"color_hex\" text;\n\nALTER TABLE \"script_characters\"\n    ADD COLUMN IF NOT EXISTS \"gender_key\" text;\n\nCREATE TABLE IF NOT EXISTS \"script_character_genders\" (\n    \"id\" text PRIMARY KEY,\n    \"script_id\" text NOT NULL REFERENCES \"scripts\"(\"id\") ON DELETE CASCADE,\n    \"gender_key\" text NOT NULL,\n    \"gender_label\" text NOT NULL,\n    \"created_at\" bigint NOT NULL,\n    \"updated_at\" bigint NOT NULL\n);\n\nCREATE UNIQUE INDEX IF NOT EXISTS \"script_character_genders_script_gender_unique_idx\"\n    ON \"script_character_genders\" (\"script_id\", \"gender_key\");\n\nCREATE INDEX IF NOT EXISTS \"script_character_genders_script_id_idx\"\n    ON \"script_character_genders\" (\"script_id\");\n"
     }
 ] as const;

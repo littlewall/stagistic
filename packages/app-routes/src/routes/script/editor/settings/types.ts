@@ -1,5 +1,7 @@
 import type {FountainElementType} from '@stagistic/script-core';
-import type {EditorSettings} from '@stagistic/script-core';
+import type {
+    EditorSettings,
+} from '@stagistic/script-core';
 
 export type BlockSettingsPatch = Partial<EditorSettings['blocks'][FountainElementType]>;
 
@@ -14,6 +16,7 @@ export type ScriptEditorSettingsPanelProps = {
     blockLabelByType: Map<FountainElementType, string>,
     shortcutPrefix: string,
     onUpdateBlockSettings: UpdateBlockSettings,
+    onUpdateCharacterColorSaturation: (value: number) => void,
 };
 
 export type ElementSettingsPanelProps = {
