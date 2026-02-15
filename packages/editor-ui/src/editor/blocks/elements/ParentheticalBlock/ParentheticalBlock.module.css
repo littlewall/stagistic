@@ -3,13 +3,13 @@
     padding-top: var(--parenthetical-spacing-before, 0);
     padding-right: var(--parenthetical-indent-right, 24px);
     padding-left: calc(var(--parenthetical-indent-left, 40px) + 1ch);
-    text-align: var(--parenthetical-align, left);
-    text-transform: var(--parenthetical-casing, none);
     font-weight: var(--parenthetical-font-weight, 400);
     font-style: var(--parenthetical-font-style, italic);
-    text-decoration-line: var(--parenthetical-underline, none);
     line-height: var(--parenthetical-line-height, inherit);
     color: var(--color-block-parenthetical);
+    text-align: var(--parenthetical-align, left);
+    text-decoration-line: var(--parenthetical-underline, none);
+    text-transform: var(--parenthetical-casing, none);
 }
 
 .parenthetical::before,
@@ -29,12 +29,12 @@
     content: ')';
 }
 
-.parenthetical > :global(br.ProseMirror-trailingBreak:only-child) {
+.parenthetical > :global(.ProseMirror-trailingBreak:only-child) {
     pointer-events: none;
     position: absolute;
+    overflow: hidden;
     width: 0;
     height: 0;
-    overflow: hidden;
 }
 
 .text {

@@ -4,9 +4,6 @@ import {
     ELEMENT_ACTION,
     ELEMENT_COLUMN,
     ELEMENT_COLUMN_GROUP,
-    ELEMENT_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE,
-    ELEMENT_LYRICS,
     ELEMENT_SCENE_HEADING,
     type FountainDocument as FountainAst,
     type FountainElement,
@@ -14,7 +11,10 @@ import {
 } from '@stagistic/editor-core';
 
 import {createNodeId} from '../nodeId';
-import type {EditorSettingsOverride} from './editorSettings';
+import {
+    type EditorSettingsOverride,
+    normalizeEditorSettingsBlockType,
+} from './editorSettings';
 
 export const FOUNTAIN_BLOCK_NODE_NAME = 'fountainBlock';
 export const FOUNTAIN_COLUMN_GROUP_NODE_NAME = 'fountainColumnGroup';
@@ -105,21 +105,9 @@ const fountainTextToInlineContent = (children?: FountainText[]): FountainJSONCon
     return content;
 };
 
-const normalizeBlockType = (value: string) => {
-    if (value === 'fountain_lyric' || value === 'lyrics') {
-        return ELEMENT_LYRICS;
-    }
-
-    if (value === ELEMENT_DUAL_DIALOGUE) {
-        return ELEMENT_DIALOGUE;
-    }
-
-    return value;
-};
-
 const toFountainBlockNode = (block: FountainElement): FountainJSONContent => {
     const rawType = typeof block.type === 'string' ? block.type : ELEMENT_ACTION;
-    const blockType = normalizeBlockType(rawType);
+    const blockType = normalizeEditorSettingsBlockType(rawType) ?? rawType;
 
     return {
         type: FOUNTAIN_BLOCK_NODE_NAME,

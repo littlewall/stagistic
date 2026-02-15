@@ -3,13 +3,13 @@ import {
     ELEMENT_CENTERED,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
 } from '@stagistic/editor-core';
+import {normalizeEditorSettingsBlockType} from '@stagistic/shared';
 
 export const FOUNTAIN_BLOCK_TYPES = [
     ELEMENT_ACTION,
@@ -44,15 +44,11 @@ export const isFountainBlockType = (value: unknown): value is FountainBlockType 
 };
 
 export const normalizeFountainBlockType = (value: unknown): FountainBlockType => {
-    if (value === 'fountain_lyric' || value === 'lyrics') {
-        return ELEMENT_LYRICS;
-    }
+    const normalized = normalizeEditorSettingsBlockType(value);
 
-    if (value === ELEMENT_DUAL_DIALOGUE) {
-        return ELEMENT_DIALOGUE;
-    }
-
-    return isFountainBlockType(value) ? value : DEFAULT_BLOCK_TYPE;
+    return normalized && isFountainBlockType(normalized)
+        ? normalized
+        : DEFAULT_BLOCK_TYPE;
 };
 
 export const getNextTypeOnEnter = (type: FountainBlockType) => ENTER_NEXT_TYPE[type] ?? type;

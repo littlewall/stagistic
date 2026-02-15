@@ -3,8 +3,7 @@
 
     scrollbar-gutter: stable;
     position: relative;
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: hidden auto;
     overscroll-behavior: contain;
     display: flex;
     flex: 1;
