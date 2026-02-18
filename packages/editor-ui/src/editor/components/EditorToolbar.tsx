@@ -1,9 +1,10 @@
+import {ELEMENT_ACT, type FountainElementType} from '@stagistic/script-core';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
     type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState,
 } from 'react';
 
-import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
+import {FOUNTAIN_BLOCKS_WITHOUT_ACT} from '../blocks/fountainBlockRegistry';
 import {FOUNTAIN_BLOCK_NODE_NAME} from '../tiptap/fountainCore';
 import styles from './EditorToolbar.module.css';
 import {BlockTypeSelect} from './toolbar/BlockTypeSelect';
@@ -106,7 +107,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
         setIsOpen(prev => !prev);
     }, [canChangeBlockType]);
     const handleMenuItemMouseDown = useCallback((
-        optionType: (typeof FOUNTAIN_BLOCKS)[number]['type'],
+        optionType: FountainElementType,
         event: ReactMouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault();
@@ -116,6 +117,10 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
         }
 
         if (optionType === activeBlockInfo?.type) {
+            return;
+        }
+
+        if (activeBlockInfo?.type === ELEMENT_ACT) {
             return;
         }
 
@@ -145,6 +150,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
                 onUnderlineMouseDown={handleUnderlineMouseDown}
             />
             <BlockTypeSelect
+                options={FOUNTAIN_BLOCKS_WITHOUT_ACT}
                 isOpen={isOpen}
                 canChangeBlockType={canChangeBlockType}
                 visibleBlockInfo={visibleBlockInfo}

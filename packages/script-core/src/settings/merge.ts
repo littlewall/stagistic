@@ -5,6 +5,7 @@ import type {
     EditorSettings,
     EditorSettingsOverride,
     PageSettings,
+    StructureSettings,
     TypographySettings,
     VisualSettings,
 } from './types';
@@ -17,6 +18,18 @@ export const mergeEditorSettings = (
         page: {...base.page},
         typography: {...base.typography},
         visual: {...base.visual},
+        structure: {
+            actPrefix: base.structure.actPrefix,
+            actDisplay: {
+                linesBefore: base.structure.actDisplay.linesBefore,
+                linesAfter: base.structure.actDisplay.linesAfter,
+            },
+            musicPrefixes: {
+                song: {...base.structure.musicPrefixes.song},
+                reprise: {...base.structure.musicPrefixes.reprise},
+                underscore: {...base.structure.musicPrefixes.underscore},
+            },
+        },
         blocks: {...base.blocks},
     };
 
@@ -71,6 +84,40 @@ export const mergeEditorSettings = (
             }
 
             next.visual = mergedVisual;
+        }
+
+        if (override.structure) {
+            const mergedStructure: StructureSettings = {
+                actPrefix: override.structure.actPrefix ?? next.structure.actPrefix,
+                actDisplay: {
+                    linesBefore: override.structure.actDisplay?.linesBefore
+                        ?? next.structure.actDisplay.linesBefore,
+                    linesAfter: override.structure.actDisplay?.linesAfter
+                        ?? next.structure.actDisplay.linesAfter,
+                },
+                musicPrefixes: {
+                    song: {
+                        start: override.structure.musicPrefixes?.song?.start
+                            ?? next.structure.musicPrefixes.song.start,
+                        end: override.structure.musicPrefixes?.song?.end
+                            ?? next.structure.musicPrefixes.song.end,
+                    },
+                    reprise: {
+                        start: override.structure.musicPrefixes?.reprise?.start
+                            ?? next.structure.musicPrefixes.reprise.start,
+                        end: override.structure.musicPrefixes?.reprise?.end
+                            ?? next.structure.musicPrefixes.reprise.end,
+                    },
+                    underscore: {
+                        start: override.structure.musicPrefixes?.underscore?.start
+                            ?? next.structure.musicPrefixes.underscore.start,
+                        end: override.structure.musicPrefixes?.underscore?.end
+                            ?? next.structure.musicPrefixes.underscore.end,
+                    },
+                },
+            };
+
+            next.structure = mergedStructure;
         }
 
         if (override.blocks) {

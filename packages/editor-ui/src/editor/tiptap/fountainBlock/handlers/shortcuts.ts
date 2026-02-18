@@ -1,5 +1,8 @@
 import {isApplePlatform} from '@stagistic/platform-core';
-import {isBlockShortcut} from '@stagistic/script-core';
+import {
+    ELEMENT_ACT,
+    isBlockShortcut,
+} from '@stagistic/script-core';
 import type {Editor} from '@tiptap/react';
 
 import {FOUNTAIN_BLOCK_TYPES} from '../../../blocks/fountain';
@@ -62,6 +65,10 @@ export const handleBlockShortcut = (
     }
 
     event.preventDefault();
+
+    if (block.blockType === ELEMENT_ACT && nextType !== ELEMENT_ACT) {
+        return true;
+    }
 
     if (nextType === block.blockType) {
         return true;

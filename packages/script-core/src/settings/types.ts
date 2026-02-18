@@ -54,12 +54,31 @@ export type VisualSettings = {
     characterColorSaturation: number,
 };
 
+export type MusicTypePrefixSettings = {
+    start: string,
+    end: string,
+};
+
+export type StructureSettings = {
+    actPrefix: string,
+    actDisplay: {
+        linesBefore: number,
+        linesAfter: number,
+    },
+    musicPrefixes: {
+        song: MusicTypePrefixSettings,
+        reprise: MusicTypePrefixSettings,
+        underscore: MusicTypePrefixSettings,
+    },
+};
+
 export type BlockSettings = Record<FountainElementType, BlockSpacingSettings>;
 
 export type EditorSettings = {
     page: PageSettings,
     typography: TypographySettings,
     visual: VisualSettings,
+    structure: StructureSettings,
     blocks: BlockSettings,
 };
 
@@ -67,5 +86,17 @@ export type EditorSettingsOverride = Partial<{
     page: Partial<PageSettings>,
     typography: Partial<TypographySettings>,
     visual: Partial<VisualSettings>,
+    structure: Partial<{
+        actPrefix: string,
+        actDisplay: Partial<{
+            linesBefore: number,
+            linesAfter: number,
+        }>,
+        musicPrefixes: Partial<{
+            song: Partial<MusicTypePrefixSettings>,
+            reprise: Partial<MusicTypePrefixSettings>,
+            underscore: Partial<MusicTypePrefixSettings>,
+        }>,
+    }>,
     blocks: Partial<Record<FountainElementType, Partial<BlockSpacingSettings>>>,
 }>;

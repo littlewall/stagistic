@@ -3,6 +3,7 @@ import {
     createNodeId,
     ensureFountainBlockIds,
     ensureSceneHeading,
+    ensureScriptStructure,
     getFirstBlockId,
     isScriptDocumentEmpty,
     type ScriptDocument,
@@ -115,7 +116,7 @@ export const createScriptsStore = (repository: ScriptRepository): ScriptsStoreSt
 
         if (initialContent && !isScriptDocumentEmpty(initialContent)) {
             const normalized = ensureSceneHeading(initialContent);
-            const withIds = ensureFountainBlockIds(normalized);
+            const withIds = ensureScriptStructure(ensureFountainBlockIds(normalized));
 
             normalizedContent = withIds;
             activeBlockId = getFirstBlockId(withIds) ?? activeBlockId;

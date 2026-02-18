@@ -1,11 +1,12 @@
 import {
+    ELEMENT_ACT,
     ELEMENT_ACTION,
-    ELEMENT_CENTERED,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
+    ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
@@ -33,6 +34,27 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
     visual: {
         characterColorSaturation: CHARACTER_COLOR_SATURATION_DEFAULT,
     },
+    structure: {
+        actPrefix: 'ACT:',
+        actDisplay: {
+            linesBefore: 1,
+            linesAfter: 1,
+        },
+        musicPrefixes: {
+            song: {
+                start: 'SONG:',
+                end: 'SONG END:',
+            },
+            reprise: {
+                start: 'REPRISE:',
+                end: 'REPRISE END:',
+            },
+            underscore: {
+                start: 'UNDERSCORE:',
+                end: 'UNDERSCORE END:',
+            },
+        },
+    },
     blocks: {
         [ELEMENT_ACTION]: {
             spacingBeforeEm: 1.0,
@@ -44,6 +66,16 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
             isBold: false,
             isItalic: false,
             isUnderline: false,
+        },
+        [ELEMENT_ACT]: {
+            spacingBeforeEm: 1.0,
+            lineHeight: 1.0,
+            nextElement: ELEMENT_SCENE_HEADING,
+            textAlign: 'left',
+            casing: 'uppercase',
+            isBold: true,
+            isItalic: false,
+            isUnderline: true,
         },
         [ELEMENT_SCENE_HEADING]: {
             spacingBeforeEm: 2.0,
@@ -146,13 +178,15 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
             isItalic: true,
             isUnderline: false,
         },
-        [ELEMENT_CENTERED]: {
-            shortcut: '8',
-            nextElement: ELEMENT_CENTERED,
-            textAlign: 'center',
+        [ELEMENT_NOTE]: {
+            spacingBeforeEm: 1.0,
+            lineHeight: 1.0,
+            shortcut: '0',
+            nextElement: ELEMENT_ACTION,
+            textAlign: 'left',
             casing: 'normal',
             isBold: false,
-            isItalic: true,
+            isItalic: false,
             isUnderline: false,
         },
     },

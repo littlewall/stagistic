@@ -1,4 +1,7 @@
-import {ELEMENT_PARENTHETICAL} from '@stagistic/script-core';
+import {
+    ELEMENT_ACT,
+    ELEMENT_PARENTHETICAL,
+} from '@stagistic/script-core';
 import type {Editor} from '@tiptap/react';
 
 import {
@@ -12,6 +15,23 @@ import {
 import {type HandlerMap} from './types';
 
 const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) => boolean> = {
+    [ELEMENT_ACT]: (context, event) => {
+        const text = event.clipboardData?.getData('text/plain');
+
+        if (text === undefined) {
+            return false;
+        }
+
+        event.preventDefault();
+
+        const normalized = text
+            .replace(/\s*\n+\s*/g, ' ')
+            .toLocaleUpperCase();
+
+        context.editor.commands.insertContent(normalized);
+
+        return true;
+    },
     [ELEMENT_PARENTHETICAL]: (context, event) => {
         const text = event.clipboardData?.getData('text/plain');
 

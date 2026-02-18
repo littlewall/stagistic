@@ -1,5 +1,8 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
-import {type RefObject} from 'react';
+import {
+    type RefObject,
+    useRef,
+} from 'react';
 
 import {CharacterSuggestionsOverlayView} from './characterSuggestions/CharacterSuggestionsOverlayView';
 import {
@@ -20,6 +23,7 @@ const CharacterSuggestionsOverlay = ({
     persistentCharacters = [],
     characterColorSaturation,
 }: CharacterSuggestionsOverlayProps) => {
+    const overlayRef = useRef<HTMLDivElement | null>(null);
     const {
         overlayState,
         suggestionEntries,
@@ -27,6 +31,7 @@ const CharacterSuggestionsOverlay = ({
     } = useCharacterSuggestions({
         editor,
         canvasRef,
+        overlayRef,
         persistentCharacters,
         characterColorSaturation,
     });
@@ -37,6 +42,7 @@ const CharacterSuggestionsOverlay = ({
 
     return (
         <CharacterSuggestionsOverlayView
+            overlayRef={overlayRef}
             style={overlayState.style}
             suggestions={suggestionEntries}
             onSuggestionMouseDown={handleSuggestionMouseDown}

@@ -2,6 +2,7 @@ import {
     type EditorSettingsOverride,
     ensureFountainBlockIds,
     ensureSceneHeading,
+    ensureScriptStructure,
     isScriptDocumentEmpty,
     type ScriptDocument,
 } from '@stagistic/script-core';
@@ -67,7 +68,8 @@ export const useScriptLoader = (
                 if (stored) {
                     const needsFocus = isScriptDocumentEmpty(stored);
                     const withIds = ensureFountainBlockIds(stored);
-                    const normalized = ensureSceneHeading(withIds);
+                    const withScene = ensureSceneHeading(withIds);
+                    const normalized = ensureScriptStructure(withScene);
 
                     setInitialValue(normalized);
                     setShouldAutoFocus(needsFocus);
@@ -77,7 +79,7 @@ export const useScriptLoader = (
 
                 const fallback = ensureSceneHeading(null);
 
-                setInitialValue(fallback);
+                setInitialValue(ensureScriptStructure(fallback));
                 setScriptSettingsOverrideState(null);
                 setShouldAutoFocus(true);
             } catch (error) {
@@ -86,7 +88,7 @@ export const useScriptLoader = (
 
                 const fallback = ensureSceneHeading(null);
 
-                setInitialValue(fallback);
+                setInitialValue(ensureScriptStructure(fallback));
                 setScriptSettingsOverrideState(null);
                 setShouldAutoFocus(true);
             }

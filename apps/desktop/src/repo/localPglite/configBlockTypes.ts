@@ -5,13 +5,14 @@ import {
     type BlockCasing,
     type BlockShortcut,
     type BlockTextAlign,
+    ELEMENT_ACT,
     ELEMENT_ACTION,
-    ELEMENT_CENTERED,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
+    ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
@@ -20,6 +21,7 @@ import {
 
 const FOUNTAIN_ELEMENT_TYPES = new Set<FountainElementType>([
     ELEMENT_SCENE_HEADING,
+    ELEMENT_ACT,
     ELEMENT_ACTION,
     ELEMENT_CHARACTER,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
@@ -28,7 +30,7 @@ const FOUNTAIN_ELEMENT_TYPES = new Set<FountainElementType>([
     ELEMENT_DUAL_DIALOGUE,
     ELEMENT_TRANSITION,
     ELEMENT_LYRICS,
-    ELEMENT_CENTERED,
+    ELEMENT_NOTE,
 ]);
 
 const isFountainElementType = (value: unknown): value is FountainElementType => {

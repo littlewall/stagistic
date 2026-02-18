@@ -1,3 +1,4 @@
+import {type FountainElementType} from '@stagistic/script-core';
 import clsx from 'clsx';
 import {
     type MouseEvent as ReactMouseEvent,
@@ -6,7 +7,6 @@ import {
 } from 'react';
 
 import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
-import {FOUNTAIN_BLOCKS} from '../../blocks/fountainBlockRegistry';
 import styles from '../EditorToolbar.module.css';
 
 type VisibleBlockInfo = {
@@ -15,10 +15,14 @@ type VisibleBlockInfo = {
 } | null;
 
 type ActiveBlockInfo = {
-    type: (typeof FOUNTAIN_BLOCKS)[number]['type'],
+    type: FountainElementType,
 } | null;
 
 type BlockTypeSelectProps = {
+    options: readonly {
+        type: FountainElementType,
+        label: string,
+    }[],
     isOpen: boolean,
     canChangeBlockType: boolean,
     visibleBlockInfo: VisibleBlockInfo,
@@ -26,12 +30,13 @@ type BlockTypeSelectProps = {
     dropdownRef: RefObject<HTMLDivElement | null>,
     onSelectMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
     onMenuItemMouseDown: (
-        optionType: (typeof FOUNTAIN_BLOCKS)[number]['type'],
+        optionType: FountainElementType,
         event: ReactMouseEvent<HTMLButtonElement>,
     ) => void,
 };
 
 export const BlockTypeSelect = ({
+    options,
     isOpen,
     canChangeBlockType,
     visibleBlockInfo,
@@ -79,7 +84,7 @@ export const BlockTypeSelect = ({
                 </button>
                 {isOpen ? (
                     <div className={styles.menu} role="menu">
-                        {FOUNTAIN_BLOCKS.map(option => (
+                        {options.map(option => (
                             <button
                                 key={option.type}
                                 type="button"

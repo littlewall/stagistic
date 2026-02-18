@@ -4,20 +4,26 @@ import {
     uppercaseOutsideParentheses,
 } from './sharedText';
 import {
+    ELEMENT_ACT,
     ELEMENT_ACTION,
-    ELEMENT_CENTERED,
     ELEMENT_CHARACTER,
     ELEMENT_COLUMN,
     ELEMENT_COLUMN_GROUP,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
+    ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_TRANSITION,
     type FountainDocument,
     type FountainElement,
     type FountainNode,
 } from './types';
+
+export type FountainSerializerOptions = {
+    beforeNodeLines?: (args: {index: number, node: FountainElement}) => string[] | null | undefined,
+    actPrefix?: string,
+};
 
 const serializeLeaves = (node: FountainElement): string => node.children
     .map(child => {
@@ -51,7 +57,10 @@ const serializeLeaves = (node: FountainElement): string => node.children
     })
     .join('');
 
-const serializeLine = (node: FountainElement): string => {
+const serializeLine = (
+    node: FountainElement,
+    options?: Pick<FountainSerializerOptions, 'actPrefix'>,
+): string => {
     let text = serializeLeaves(node);
 
     if (
@@ -74,10 +83,6 @@ const serializeLine = (node: FountainElement): string => {
         .map((line, index) => `${line}${index < lines.length - 1 ? '  ' : ''}`)
         .join('\n');
 
-    if (node.type === ELEMENT_CENTERED) {
-        return `>${withLineBreaks}<`;
-    }
-
     if (node.type === ELEMENT_PARENTHETICAL) {
         return `(${withLineBreaks})`;
     }
@@ -90,6 +95,21 @@ const serializeLine = (node: FountainElement): string => {
         const upper = withLineBreaks.toUpperCase();
 
         return upper.endsWith('TO:') ? upper : `>${upper}`;
+    }
+
+    if (node.type === ELEMENT_NOTE) {
+        return `[[${withLineBreaks}]]`;
+    }
+
+    if (node.type === ELEMENT_ACT) {
+        const prefix = (options?.actPrefix ?? 'ACT:').trim();
+        const name = withLineBreaks.trim();
+
+        if (!name) {
+            return `# ${prefix}`;
+        }
+
+        return `# ${prefix} ${name}`;
     }
 
     if (node.type === ELEMENT_ACTION) {
@@ -137,7 +157,10 @@ const flattenNodes = (nodes: FountainDocument): FountainElement[] => {
     return flattened;
 };
 
-export const fountainSerializer = (nodes: FountainDocument): string => {
+export const fountainSerializer = (
+    nodes: FountainDocument,
+    options?: FountainSerializerOptions,
+): string => {
     const outputLines: string[] = [];
     let previousNonEmptyType: FountainElement['type'] | null = null;
     const flatNodes = flattenNodes(nodes);
@@ -155,6 +178,20 @@ export const fountainSerializer = (nodes: FountainDocument): string => {
     };
     const pushSerialized = (value: string) => {
         outputLines.push(...value.split('\n'));
+    };
+    const pushBeforeNodeLines = (index: number, node: FountainElement) => {
+        const beforeNodeLines = options?.beforeNodeLines?.({
+            index,
+            node,
+        });
+
+        if (!beforeNodeLines || beforeNodeLines.length === 0) {
+            return;
+        }
+
+        beforeNodeLines.forEach(line => {
+            pushSerialized(line);
+        });
     };
 
     for (let i = 0; i < flatNodes.length; i += 1) {
@@ -179,7 +216,8 @@ export const fountainSerializer = (nodes: FountainDocument): string => {
                 continue;
             }
 
-            pushSerialized(serializeLine(node));
+            pushBeforeNodeLines(i, node);
+            pushSerialized(serializeLine(node, {actPrefix: options?.actPrefix}));
             continue;
         }
 
@@ -198,7 +236,8 @@ export const fountainSerializer = (nodes: FountainDocument): string => {
             }
         }
 
-        pushSerialized(serializeLine(node));
+        pushBeforeNodeLines(i, node);
+        pushSerialized(serializeLine(node, {actPrefix: options?.actPrefix}));
         previousNonEmptyType = node.type;
 
         if (node.type === ELEMENT_TRANSITION) {

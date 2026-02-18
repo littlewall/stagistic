@@ -5,6 +5,7 @@ export * from './fountain';
 export * from './nodeId';
 export * from './settings';
 export * from './storage/latestScript';
+export * from './structure';
 export {
     clampNumber,
     collapseWhitespace,

@@ -1,12 +1,13 @@
 import {isAllCaps} from '../sharedText';
 import {
+    ELEMENT_ACT,
     ELEMENT_ACTION,
-    ELEMENT_CENTERED,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
+    ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
@@ -15,7 +16,9 @@ import {
 
 const SCENE_HEADING_PATTERN = /^(INT\.|EXT\.|EST\.|INT\/EXT\.|I\/E\.)/;
 const TRANSITION_PATTERN = /(TO:|FADE OUT\.|FADE TO BLACK\.)$/;
-const CENTERED_PATTERN = /^>.*<$/;
+const LEGACY_CENTERED_PATTERN = /^>.*<$/;
+const NOTE_PATTERN = /^\[\[.*\]\]$/;
+const ACT_PATTERN = /^#\s*ACT:\s*/i;
 
 const isDualCharacterLine = (line: string) => (/\^\s*$/).test(line);
 const stripCharacterExtensions = (line: string) => line.replace(/\^\s*$/, '').replace(/\s*\(.*?\)\s*/g, ' ').trim();
@@ -51,8 +54,12 @@ export const detectType = (
         return ELEMENT_SCENE_HEADING;
     }
 
-    if (CENTERED_PATTERN.test(trimmed)) {
-        return ELEMENT_CENTERED;
+    if (ACT_PATTERN.test(trimmed)) {
+        return ELEMENT_ACT;
+    }
+
+    if (LEGACY_CENTERED_PATTERN.test(trimmed)) {
+        return ELEMENT_ACTION;
     }
 
     if (trimmed.startsWith('>')) {
@@ -69,6 +76,10 @@ export const detectType = (
 
     if (trimmed.startsWith('~')) {
         return ELEMENT_LYRICS;
+    }
+
+    if (NOTE_PATTERN.test(trimmed)) {
+        return ELEMENT_NOTE;
     }
 
     if (isDualCharacterLine(trimmed)) {

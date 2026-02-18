@@ -1,6 +1,7 @@
 import {
     ensureFountainBlockIds,
     ensureSceneHeading,
+    ensureScriptStructure,
     getFirstBlockId,
     type ScriptDocument,
 } from '@stagistic/script-core';
@@ -52,7 +53,7 @@ export const useSeedDefaultScript = (
         seedStateRef.current.pending = true;
 
         try {
-            const seedValue = ensureFountainBlockIds(ensureSceneHeading(null));
+            const seedValue = ensureScriptStructure(ensureFountainBlockIds(ensureSceneHeading(null)));
             const newScriptId = await scriptRepository.createScript(DEFAULT_SCRIPT_TITLE, seedValue);
             const activeBlockId = getFirstBlockId(seedValue);
 

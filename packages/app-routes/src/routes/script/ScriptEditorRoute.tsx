@@ -1,20 +1,13 @@
 import {useScriptRepository} from '@stagistic/app-core';
-import {
-    FountainEditor,
-} from '@stagistic/editor-ui';
+import {FountainEditor} from '@stagistic/editor-ui';
 import {isApplePlatform} from '@stagistic/platform-core';
 import {
     AppHeader,
     AppLayout,
-    EditorSidebar,
     LoaderOverlay,
     ScriptSettingsModal,
 } from '@stagistic/ui';
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-} from 'react';
+import {useCallback, useMemo} from 'react';
 import {
     useNavigate,
     useParams,
@@ -23,14 +16,15 @@ import {
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import {useScriptEditorCharacters} from './editor/characters/useScriptEditorCharacters';
-import {
-    ScriptEditorSettingsPanel,
-} from './editor/settings';
+import {ScriptEditorSettingsPanel} from './editor/settings';
+import {useStructureSidebarController} from './editor/structure/useStructureSidebarController';
+import {useScriptEditorSidebars} from './editor/useScriptEditorSidebars';
 import styles from './ScriptEditorRoute.module.css';
 import {
     SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS,
     type ScriptSettingsPanelId,
 } from './settings/settingsMenu';
+import {useScriptSettingsModalQuerySync} from './settings/useScriptSettingsModalQuerySync';
 import {useScriptSettingsModalState} from './settings/useScriptSettingsModalState';
 import {useScriptEditorController} from './useScriptEditorController';
 import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
@@ -76,6 +70,7 @@ export const ScriptEditorRoute = () => {
         resolvedScriptSettings,
         updateBlockSettings,
         updateCharacterColorSaturation,
+        updateStructureSettings,
     } = useScriptEditorSettingsDraft({
         currentScriptId,
         scriptSettingsOverride,
@@ -102,6 +97,7 @@ export const ScriptEditorRoute = () => {
 
     const {
         editorOverrideValue,
+        editorValue,
         normalizedConfirmedCharacterRecords,
         confirmedCharacters,
         unconfirmedCharacters,
@@ -123,6 +119,29 @@ export const ScriptEditorRoute = () => {
         resolvedScriptSettings,
         characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
+    });
+    const sourceValueForStructure = editorValue ?? editorOverrideValue ?? initialValue;
+    const {
+        focusBlockRequest,
+        insertActRequest,
+        renameActRequest,
+        deleteActRequest,
+        moveSceneRequest,
+        moveActRequest,
+        actNamePreviewById,
+        activeBlockId,
+        handleSidebarFocusBlock,
+        handleSidebarRenameAct,
+        handleActNamePreview,
+        handleSidebarDeleteAct,
+        handleSidebarInsertAct,
+        handleSidebarReorderScene,
+        handleSidebarReorderAct,
+        handleActiveBlockChange,
+    } = useStructureSidebarController({
+        currentScriptId,
+        scriptRepository,
+        sourceValue: sourceValueForStructure,
     });
 
     const {
@@ -152,6 +171,7 @@ export const ScriptEditorRoute = () => {
                 shortcutPrefix={shortcutPrefix}
                 onUpdateBlockSettings={updateBlockSettings}
                 onUpdateCharacterColorSaturation={updateCharacterColorSaturation}
+                onUpdateStructureSettings={updateStructureSettings}
             />
         );
     }, [
@@ -160,73 +180,49 @@ export const ScriptEditorRoute = () => {
         shortcutPrefix,
         updateCharacterColorSaturation,
         updateBlockSettings,
+        updateStructureSettings,
     ]);
     const handleSelectSettingsPanel = useCallback((panelId: string) => {
         selectPanel(panelId as ScriptSettingsPanelId);
     }, [selectPanel]);
-    const leftSidebarContent = useMemo(() => (
-        <div className={styles.sidebarPlaceholder} />
-    ), []);
-    const rightSidebarContent = useMemo(() => (
-        <EditorSidebar
-            confirmedCharacters={confirmedCharacters}
-            unconfirmedCharacters={unconfirmedCharacters}
-            onConfirmCharacter={handleConfirmCharacter}
-            onDeleteCharacter={handleDeleteCharacter}
-            normalizeRenameInput={normalizeCharacterNameForInlineInput}
-            onRenameCharacterPreview={handleRenameCharacterPreview}
-            onRenameCharacter={handleRenameCharacter}
-            characterGenderOptions={characterGenderOptions}
-            onSetCharacterColor={handleSetCharacterColor}
-            onSetCharacterGender={handleSetCharacterGender}
-            onUpsertCharacterGender={handleUpsertCharacterGender}
-            characterColorSaturation={resolvedScriptSettings.visual.characterColorSaturation}
-            isLoading={isCharactersLoading}
-            className={styles.sidebarContent}
-        />
-    ), [
-        characterGenderOptions,
-        confirmedCharacters,
-        handleConfirmCharacter,
-        handleDeleteCharacter,
-        handleRenameCharacter,
-        handleRenameCharacterPreview,
-        handleSetCharacterColor,
-        handleSetCharacterGender,
-        handleUpsertCharacterGender,
-        isCharactersLoading,
-        normalizeCharacterNameForInlineInput,
-        resolvedScriptSettings.visual.characterColorSaturation,
-        unconfirmedCharacters,
-    ]);
-
-    const handleCloseSettings = useCallback(() => {
-        closeSettingsModal();
-
-        if (!searchParams.has(SETTINGS_MODAL_QUERY_KEY)) {
-            return;
-        }
-
-        setSearchParams(previous => {
-            const next = new URLSearchParams(previous);
-
-            next.delete(SETTINGS_MODAL_QUERY_KEY);
-
-            return next;
-        }, {replace: true});
-    }, [
-        closeSettingsModal,
+    const {leftSidebarContent, rightSidebarContent} = useScriptEditorSidebars({
+        structureSidebarProps: {
+            value: sourceValueForStructure,
+            structureSettings: resolvedScriptSettings.structure,
+            actNamePreviewById,
+            activeBlockId,
+            onFocusBlock: handleSidebarFocusBlock,
+            onRenameAct: handleSidebarRenameAct,
+            onActNamePreview: handleActNamePreview,
+            onDeleteAct: handleSidebarDeleteAct,
+            onInsertAct: handleSidebarInsertAct,
+            onReorderAct: handleSidebarReorderAct,
+            onReorderScene: handleSidebarReorderScene,
+        },
+        characterSidebarProps: {
+            confirmedCharacters,
+            unconfirmedCharacters,
+            onConfirmCharacter: handleConfirmCharacter,
+            onDeleteCharacter: handleDeleteCharacter,
+            normalizeRenameInput: normalizeCharacterNameForInlineInput,
+            onRenameCharacterPreview: handleRenameCharacterPreview,
+            onRenameCharacter: handleRenameCharacter,
+            characterGenderOptions,
+            onSetCharacterColor: handleSetCharacterColor,
+            onSetCharacterGender: handleSetCharacterGender,
+            onUpsertCharacterGender: handleUpsertCharacterGender,
+            characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
+            isLoading: isCharactersLoading,
+            className: styles.sidebarContent,
+        },
+    });
+    const handleCloseSettings = useScriptSettingsModalQuerySync({
+        queryKey: SETTINGS_MODAL_QUERY_KEY,
         searchParams,
         setSearchParams,
-    ]);
-
-    useEffect(() => {
-        if (searchParams.get(SETTINGS_MODAL_QUERY_KEY) !== '1') {
-            return;
-        }
-
-        openSettingsModal();
-    }, [openSettingsModal, searchParams]);
+        openSettingsModal,
+        closeSettingsModal,
+    });
 
     const showEditorLoader = editorLoadState.isLoading || !initialValue;
 
@@ -276,6 +272,13 @@ export const ScriptEditorRoute = () => {
                 leftSidebar={leftSidebarContent}
                 rightSidebar={rightSidebarContent}
                 sidebarWidth={SIDEBAR_WIDTH}
+                focusBlockRequest={focusBlockRequest}
+                insertActRequest={insertActRequest}
+                renameActRequest={renameActRequest}
+                deleteActRequest={deleteActRequest}
+                moveSceneRequest={moveSceneRequest}
+                moveActRequest={moveActRequest}
+                onActiveBlockChange={handleActiveBlockChange}
             />
             <ScriptSettingsModal
                 isOpen={isSettingsOpen}

@@ -1,0 +1,21 @@
+.act {
+    padding-top: var(--act-spacing-before, 0);
+    padding-right: var(--act-indent-right, 0);
+    padding-bottom: var(--act-spacing-after, 0);
+    padding-left: var(--act-indent-left, 0);
+    font-weight: var(--act-font-weight, 700);
+    font-style: var(--act-font-style, normal);
+    line-height: var(--act-line-height, inherit);
+    color: var(--color-block-scene-heading);
+    text-align: var(--act-align, left);
+    text-decoration-line: var(--act-underline, underline);
+    text-transform: var(--act-casing, uppercase);
+    letter-spacing: .02em;
+}
+
+.act[data-act-prefix]::before {
+    content: attr(data-act-prefix) " ";
+    pointer-events: none;
+    user-select: none;
+    color: inherit;
+}

@@ -1,0 +1,1 @@
+export {ScriptStructureSidebar} from './ScriptStructureSidebar';

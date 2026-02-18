@@ -1,4 +1,5 @@
 import {
+    ELEMENT_ACT,
     ELEMENT_CHARACTER,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_PARENTHETICAL,
@@ -185,6 +186,18 @@ export const handleTextInput = (
         const enforceUppercase = casing === 'uppercase';
 
         return handleCharacterInput(createBlockContext(editor, block), from, to, text, enforceUppercase);
+    }
+
+    if (block.blockType === ELEMENT_ACT) {
+        const upper = text.toLocaleUpperCase();
+
+        if (upper !== text) {
+            const tr = editor.state.tr.insertText(upper, from, to);
+
+            editor.view.dispatch(tr);
+
+            return true;
+        }
     }
 
     const handler = textInputHandlers[block.blockType];

@@ -1,11 +1,12 @@
 import type {EditorSettings} from '@stagistic/script-core';
 import {
+    ELEMENT_ACT,
     ELEMENT_ACTION,
-    ELEMENT_CENTERED,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
+    ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
@@ -75,9 +76,18 @@ const toUnderline = (value?: boolean) => {
 
     return value ? 'underline' : 'none';
 };
+const toLineGapEm = (lines?: number, lineHeight = 1) => {
+    if (typeof lines !== 'number' || !Number.isFinite(lines) || lines < 0) {
+        return undefined;
+    }
+
+    return `${lines * lineHeight}em`;
+};
 
 export const getEditorCssVars = (settings: EditorSettings, scale = 1): EditorCssVars => {
     const blocks = settings.blocks;
+    const actLineHeight = blocks[ELEMENT_ACT]?.lineHeight ?? settings.typography.lineHeight;
+    const actDisplay = settings.structure.actDisplay;
 
     return {
         '--editor-font-size': toPxScaled(settings.typography.fontSizePx, scale),
@@ -90,6 +100,18 @@ export const getEditorCssVars = (settings: EditorSettings, scale = 1): EditorCss
         '--editor-margin-left': toPxScaled(settings.page.marginLeftPx, scale),
         '--editor-page-gap': toPxScaled(settings.page.pageGapPx, scale),
         '--editor-page-break-background': settings.page.pageBreakBackground,
+
+        // Act
+        '--act-spacing-before': toLineGapEm(actDisplay.linesBefore, actLineHeight),
+        '--act-spacing-after': toLineGapEm(actDisplay.linesAfter, actLineHeight),
+        '--act-line-height': String(actLineHeight),
+        '--act-indent-left': toIndent(blocks[ELEMENT_ACT]?.indentLeftChars, blocks[ELEMENT_ACT]?.indentLeftPx),
+        '--act-indent-right': toIndent(blocks[ELEMENT_ACT]?.indentRightChars, blocks[ELEMENT_ACT]?.indentRightPx),
+        '--act-align': toTextAlign(blocks[ELEMENT_ACT]?.textAlign),
+        '--act-casing': toCasing(blocks[ELEMENT_ACT]?.casing),
+        '--act-font-weight': toFontWeight(blocks[ELEMENT_ACT]?.isBold),
+        '--act-font-style': toFontStyle(blocks[ELEMENT_ACT]?.isItalic),
+        '--act-underline': toUnderline(blocks[ELEMENT_ACT]?.isUnderline),
 
         /*
          * Block specific settings
@@ -183,16 +205,16 @@ export const getEditorCssVars = (settings: EditorSettings, scale = 1): EditorCss
         '--lyrics-font-style': toFontStyle(blocks[ELEMENT_LYRICS]?.isItalic),
         '--lyrics-underline': toUnderline(blocks[ELEMENT_LYRICS]?.isUnderline),
 
-        // Centered
-        '--centered-spacing-before': toEm(blocks[ELEMENT_CENTERED]?.spacingBeforeEm),
-        '--centered-line-height': String(blocks[ELEMENT_CENTERED]?.lineHeight ?? settings.typography.lineHeight),
-        '--centered-indent-left': toIndent(blocks[ELEMENT_CENTERED]?.indentLeftChars, blocks[ELEMENT_CENTERED]?.indentLeftPx),
-        '--centered-indent-right': toIndent(blocks[ELEMENT_CENTERED]?.indentRightChars, blocks[ELEMENT_CENTERED]?.indentRightPx),
-        '--centered-align': toTextAlign(blocks[ELEMENT_CENTERED]?.textAlign),
-        '--centered-casing': toCasing(blocks[ELEMENT_CENTERED]?.casing),
-        '--centered-font-weight': toFontWeight(blocks[ELEMENT_CENTERED]?.isBold),
-        '--centered-font-style': toFontStyle(blocks[ELEMENT_CENTERED]?.isItalic),
-        '--centered-underline': toUnderline(blocks[ELEMENT_CENTERED]?.isUnderline),
+        // Notes
+        '--note-spacing-before': toEm(blocks[ELEMENT_NOTE]?.spacingBeforeEm),
+        '--note-line-height': String(blocks[ELEMENT_NOTE]?.lineHeight ?? settings.typography.lineHeight),
+        '--note-indent-left': toIndent(blocks[ELEMENT_NOTE]?.indentLeftChars, blocks[ELEMENT_NOTE]?.indentLeftPx),
+        '--note-indent-right': toIndent(blocks[ELEMENT_NOTE]?.indentRightChars, blocks[ELEMENT_NOTE]?.indentRightPx),
+        '--note-align': toTextAlign(blocks[ELEMENT_NOTE]?.textAlign),
+        '--note-casing': toCasing(blocks[ELEMENT_NOTE]?.casing),
+        '--note-font-weight': toFontWeight(blocks[ELEMENT_NOTE]?.isBold),
+        '--note-font-style': toFontStyle(blocks[ELEMENT_NOTE]?.isItalic),
+        '--note-underline': toUnderline(blocks[ELEMENT_NOTE]?.isUnderline),
 
         // Backward compatibility mappings (if any strictly needed by old code not being updated yet)
         '--editor-character-indent': toIndent(blocks[ELEMENT_CHARACTER]?.indentLeftChars, blocks[ELEMENT_CHARACTER]?.indentLeftPx),

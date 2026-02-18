@@ -1,11 +1,12 @@
 import {
+    ELEMENT_ACT,
     ELEMENT_ACTION,
-    ELEMENT_CENTERED,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
+    ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
@@ -24,6 +25,12 @@ const createIcon = (children: ReactElement | ReactElement[]) => (
 );
 
 export const BLOCK_ICONS: Record<FountainElementType, ReactElement> = {
+    [ELEMENT_ACT]: createIcon(
+        <>
+            <path d="M5 18h14M12 6v12" />
+            <path d="M8 10h8" />
+        </>,
+    ),
     [ELEMENT_SCENE_HEADING]: createIcon(
         <>
             <path d="M4 8h16v10H4z" />
@@ -115,9 +122,11 @@ export const BLOCK_ICONS: Record<FountainElementType, ReactElement> = {
             />
         </>,
     ),
-    [ELEMENT_CENTERED]: createIcon(
+    [ELEMENT_NOTE]: createIcon(
         <>
-            <path d="M6 7h12M8 12h8M6 17h12" />
+            <path d="M7 4h7l4 4v12H7z" />
+            <path d="M14 4v4h4" />
+            <path d="M9 12h7M9 16h6" />
         </>,
     ),
 };

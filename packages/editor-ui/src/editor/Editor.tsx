@@ -54,6 +54,9 @@ const DocumentWithSettings = Document.extend({
             settings: {
                 default: null,
             },
+            structure: {
+                default: null,
+            },
         };
     },
 });
@@ -99,6 +102,34 @@ type EditorProps = {
     rightSidebar?: ReactNode,
     sidebarWidth?: string,
     persistentCharacters?: readonly PersistentCharacterRef[],
+    focusBlockRequest?: {
+        blockId: string,
+        requestId: number,
+    } | null,
+    insertActRequest?: {
+        beforeBlockId: string | null,
+        requestId: number,
+    } | null,
+    renameActRequest?: {
+        blockId: string,
+        nextName: string,
+        requestId: number,
+    } | null,
+    deleteActRequest?: {
+        blockId: string,
+        requestId: number,
+    } | null,
+    moveSceneRequest?: {
+        sourceSceneBlockId: string,
+        beforeBlockId: string | null,
+        requestId: number,
+    } | null,
+    moveActRequest?: {
+        sourceActBlockId: string,
+        beforeBlockId: string | null,
+        requestId: number,
+    } | null,
+    onActiveBlockChange?: (blockId: string | null) => void,
 };
 
 const Editor = ({
@@ -117,6 +148,13 @@ const Editor = ({
     rightSidebar,
     sidebarWidth,
     persistentCharacters = [],
+    focusBlockRequest,
+    insertActRequest,
+    renameActRequest,
+    deleteActRequest,
+    moveSceneRequest,
+    moveActRequest,
+    onActiveBlockChange,
 }: EditorProps) => {
     const initialSerialized = useMemo(() => serializeDocumentForSave(initialValue), [initialValue]);
     const sizeScale = useMemo(() => getSizeScale(), []);
@@ -166,12 +204,14 @@ const Editor = ({
             blockNextElements,
             blockCasing,
             characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
+            structureSettings: resolvedSettings.structure,
         }),
         [
             blockCasing,
             blockNextElements,
             blockShortcuts,
             resolvedSettings.visual.characterColorSaturation,
+            resolvedSettings.structure,
         ],
     );
     const {
@@ -268,6 +308,13 @@ const Editor = ({
         syncInitialValue,
         scheduleAutosave,
         handleManualSave,
+        focusBlockRequest,
+        insertActRequest,
+        renameActRequest,
+        deleteActRequest,
+        moveSceneRequest,
+        moveActRequest,
+        onActiveBlockChange,
     });
 
     const handleLeftSidebarToggle = leftSidebarToggle?.onToggle;

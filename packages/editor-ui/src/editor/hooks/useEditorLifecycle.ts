@@ -1,4 +1,5 @@
 import {
+    normalizeScriptStructure,
     type ScriptDocument,
 } from '@stagistic/script-core';
 import {
@@ -11,6 +12,7 @@ import {
 
 import {stripScriptSettings} from '../editorSettings';
 import {type SaveResult} from './useAutosaveController';
+import {useEditorStructureRequests} from './useEditorStructureRequests';
 import {useLatestRef} from './useLatestRef';
 
 type UseEditorLifecycleArgs = {
@@ -24,6 +26,34 @@ type UseEditorLifecycleArgs = {
     syncInitialValue: (value: ScriptDocument, initialSerialized: string) => void,
     scheduleAutosave: (value: ScriptDocument) => void,
     handleManualSave: () => Promise<void>,
+    focusBlockRequest?: {
+        blockId: string,
+        requestId: number,
+    } | null,
+    insertActRequest?: {
+        beforeBlockId: string | null,
+        requestId: number,
+    } | null,
+    renameActRequest?: {
+        blockId: string,
+        nextName: string,
+        requestId: number,
+    } | null,
+    deleteActRequest?: {
+        blockId: string,
+        requestId: number,
+    } | null,
+    moveSceneRequest?: {
+        sourceSceneBlockId: string,
+        beforeBlockId: string | null,
+        requestId: number,
+    } | null,
+    moveActRequest?: {
+        sourceActBlockId: string,
+        beforeBlockId: string | null,
+        requestId: number,
+    } | null,
+    onActiveBlockChange?: (blockId: string | null) => void,
 };
 
 export const useEditorLifecycle = ({
@@ -37,11 +67,32 @@ export const useEditorLifecycle = ({
     syncInitialValue,
     scheduleAutosave,
     handleManualSave,
+    focusBlockRequest,
+    insertActRequest,
+    renameActRequest,
+    deleteActRequest,
+    moveSceneRequest,
+    moveActRequest,
+    onActiveBlockChange,
 }: UseEditorLifecycleArgs) => {
     const pendingUpdateRef = useRef<number | null>(null);
     const latestEditorRef = useRef<TiptapEditor | null>(null);
     const isApplyingInitialRef = useRef(false);
     const onValueChangeRef = useLatestRef(onValueChange);
+
+    useEditorStructureRequests({
+        editor,
+        focusBlockRequest,
+        insertActRequest,
+        renameActRequest,
+        deleteActRequest,
+        moveSceneRequest,
+        moveActRequest,
+        onActiveBlockChange,
+        onValueChangeRef,
+        setLatestValue,
+        scheduleAutosave,
+    });
 
     useEffect(() => {
         if (!editor) {
@@ -99,8 +150,18 @@ export const useEditorLifecycle = ({
             return;
         }
 
+        const normalizedStructure = normalizeScriptStructure(initialValue.attrs?.structure, {
+            content: initialValue.content,
+        });
+
         isApplyingInitialRef.current = true;
         editor.commands.setContent(initialValue, {emitUpdate: false});
+        editor.view.dispatch(
+            editor.state.tr
+                .setDocAttribute('structure', normalizedStructure)
+                .setDocAttribute('settings', initialValue.attrs?.settings ?? null)
+                .setMeta('preventUpdate', true),
+        );
         isApplyingInitialRef.current = false;
 
         syncInitialValue(initialValue, initialSerialized);

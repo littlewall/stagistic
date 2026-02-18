@@ -15,6 +15,7 @@ import {
 
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
+    getActiveFountainBlockFromState,
     isSelectionAcrossBlocks,
 } from '../../tiptap/fountainCore';
 import {
@@ -34,6 +35,7 @@ type OverlayState = {
 type UseCharacterSuggestionsArgs = {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
+    overlayRef: RefObject<HTMLDivElement | null>,
     persistentCharacters?: readonly PersistentCharacterRef[],
     characterColorSaturation?: number,
 };
@@ -41,6 +43,7 @@ type UseCharacterSuggestionsArgs = {
 export const useCharacterSuggestions = ({
     editor,
     canvasRef,
+    overlayRef,
     persistentCharacters = [],
     characterColorSaturation,
 }: UseCharacterSuggestionsArgs) => {
@@ -50,11 +53,41 @@ export const useCharacterSuggestions = ({
     const normalizedPersistentCharacters = useMemo(() => {
         return normalizePersistentCharacters(persistentCharacters);
     }, [persistentCharacters]);
+    const dismissOverlayForCurrentSelection = useCallback(() => {
+        if (!editor) {
+            setOverlayState(null);
+
+            return;
+        }
+
+        const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+
+        if (!block || !editor.state.selection.empty) {
+            suppressedSelectionRef.current = null;
+
+            setOverlayState(null);
+
+            return;
+        }
+
+        suppressedSelectionRef.current = {
+            blockId: block.id,
+            position: editor.state.selection.from,
+        };
+
+        setOverlayState(null);
+    }, [editor]);
 
     const updateOverlay = useCallback(() => {
         const canvas = canvasRef.current;
 
         if (!editor || !canvas) {
+            setOverlayState(null);
+
+            return;
+        }
+
+        if (!editor.isFocused) {
             setOverlayState(null);
 
             return;
@@ -156,6 +189,46 @@ export const useCharacterSuggestions = ({
             window.removeEventListener('resize', handleScroll);
         };
     }, [canvasRef, scheduleOverlayUpdate]);
+
+    useEffect(() => {
+        if (!overlayState) {
+            return;
+        }
+
+        const handlePointerDown = (event: PointerEvent) => {
+            const target = event.target as Node;
+            const targetElement = target instanceof Element
+                ? target
+                : target.parentElement;
+
+            if (targetElement?.closest('[data-block-actions-trigger="true"]')) {
+                dismissOverlayForCurrentSelection();
+
+                return;
+            }
+
+            if (overlayRef.current?.contains(target)) {
+                return;
+            }
+
+            if (canvasRef.current?.contains(target)) {
+                return;
+            }
+
+            dismissOverlayForCurrentSelection();
+        };
+
+        document.addEventListener('pointerdown', handlePointerDown);
+
+        return () => {
+            document.removeEventListener('pointerdown', handlePointerDown);
+        };
+    }, [
+        canvasRef,
+        dismissOverlayForCurrentSelection,
+        overlayRef,
+        overlayState,
+    ]);
 
     useEffect(() => {
         return () => {

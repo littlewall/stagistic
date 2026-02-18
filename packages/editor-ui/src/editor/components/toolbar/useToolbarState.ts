@@ -1,3 +1,4 @@
+import {ELEMENT_ACT} from '@stagistic/script-core';
 import {redoDepth, undoDepth} from '@tiptap/pm/history';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useEditorState} from '@tiptap/react';
@@ -87,7 +88,7 @@ export const useToolbarState = ({editor}: UseToolbarStateArgs) => {
         };
     }, [activeType]);
 
-    const canChangeBlockType = Boolean(activeBlockInfo) && hasEditorFocus;
+    const canChangeBlockType = Boolean(activeBlockInfo) && hasEditorFocus && activeType !== ELEMENT_ACT;
     const visibleBlockInfo = canChangeBlockType ? activeBlockInfo : null;
 
     useEffect(() => {
