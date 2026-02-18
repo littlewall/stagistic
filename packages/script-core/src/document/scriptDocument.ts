@@ -1,6 +1,7 @@
 import {
     type ColumnElement,
     type ColumnGroupElement,
+    ELEMENT_ACT,
     ELEMENT_ACTION,
     ELEMENT_COLUMN,
     ELEMENT_COLUMN_GROUP,
@@ -14,6 +15,7 @@ import {
     type EditorSettingsOverride,
     normalizeEditorSettingsBlockType,
 } from '../settings/editorSettings';
+import type {ScriptStructure} from '../structure';
 
 export const FOUNTAIN_BLOCK_NODE_NAME = 'fountainBlock';
 export const FOUNTAIN_COLUMN_GROUP_NODE_NAME = 'fountainColumnGroup';
@@ -34,6 +36,7 @@ export type ScriptDocument = {
     type: 'doc',
     attrs?: {
         settings?: EditorSettingsOverride,
+        structure?: ScriptStructure,
     },
     content: FountainJSONContent[],
 };
@@ -106,7 +109,7 @@ const fountainTextToInlineContent = (children?: FountainText[]): FountainJSONCon
 
 const toFountainBlockNode = (block: FountainElement): FountainJSONContent => {
     const rawType = typeof block.type === 'string' ? block.type : ELEMENT_ACTION;
-    const blockType = normalizeEditorSettingsBlockType(rawType) ?? rawType;
+    const blockType = normalizeEditorSettingsBlockType(rawType) ?? ELEMENT_ACTION;
 
     return {
         type: FOUNTAIN_BLOCK_NODE_NAME,
@@ -199,5 +202,19 @@ export const createEmptyScriptDocument = (
 ): ScriptDocument => ({
     type: 'doc',
     attrs: settings ? {settings} : undefined,
-    content: [createEmptyFountainBlock(ELEMENT_SCENE_HEADING, blockId)],
+    content: [
+        {
+            type: FOUNTAIN_BLOCK_NODE_NAME,
+            attrs: {
+                blockType: ELEMENT_ACT,
+                id: createNodeId(),
+            },
+            content: [
+                {
+                    type: 'text',
+                    text: 'ONE',
+                },
+            ],
+        }, createEmptyFountainBlock(ELEMENT_SCENE_HEADING, blockId),
+    ],
 });

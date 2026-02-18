@@ -8,11 +8,12 @@
         "lint": "eslint . --ext ts,tsx"
     },
     "dependencies": {
+        "@dnd-kit/react": "^0.3.0",
         "@stagistic/app-core": "workspace:*",
-        "@stagistic/script-core": "workspace:*",
         "@stagistic/editor-ui": "workspace:*",
-        "@stagistic/ui": "workspace:*",
-        "@stagistic/platform-core": "workspace:*"
+        "@stagistic/platform-core": "workspace:*",
+        "@stagistic/script-core": "workspace:*",
+        "@stagistic/ui": "workspace:*"
     },
     "peerDependencies": {
         "react": "^19.0.0",

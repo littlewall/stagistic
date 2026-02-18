@@ -1,0 +1,31 @@
+.marker {
+    user-select: none;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding: 0 calc(6px * var(--size-scale));
+    font-family: var(--font-mono);
+    font-size: var(--editor-font-size, calc(13px * var(--size-scale)));
+    font-weight: 400;
+    line-height: var(--editor-line-height, 1);
+    color: var(--color-ink-muted);
+    text-transform: none;
+    letter-spacing: 0;
+    white-space: pre-wrap;
+    border: none;
+    border-radius: calc(4px * var(--size-scale));
+}
+
+.markerMusicStart {
+    pointer-events: none;
+    color: color-mix(in srgb, var(--color-accent) 75%, var(--color-ink-muted));
+    background: color-mix(in srgb, var(--color-accent) 7%, transparent);
+}
+
+.markerMusicEnd {
+    pointer-events: none;
+    color: color-mix(in srgb, var(--color-ink-muted) 92%, var(--color-ink));
+    background: color-mix(in srgb, var(--color-divider) 20%, transparent);
+}

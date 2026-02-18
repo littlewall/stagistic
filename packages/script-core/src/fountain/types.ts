@@ -1,4 +1,5 @@
 export const ELEMENT_SCENE_HEADING = 'fountain_scene_heading';
+export const ELEMENT_ACT = 'fountain_act';
 export const ELEMENT_ACTION = 'fountain_action';
 export const ELEMENT_CHARACTER = 'fountain_character';
 export const ELEMENT_DUAL_DIALOGUE_CHARACTER = 'fountain_dual_dialogue_character';
@@ -7,12 +8,13 @@ export const ELEMENT_DIALOGUE = 'fountain_dialogue';
 export const ELEMENT_DUAL_DIALOGUE = 'fountain_dual_dialogue';
 export const ELEMENT_TRANSITION = 'fountain_transition';
 export const ELEMENT_LYRICS = 'fountain_lyrics';
-export const ELEMENT_CENTERED = 'fountain_centered';
+export const ELEMENT_NOTE = 'fountain_note';
 export const ELEMENT_COLUMN_GROUP = 'column_group';
 export const ELEMENT_COLUMN = 'column';
 
 export const FountainNodeType = {
     sceneHeading: ELEMENT_SCENE_HEADING,
+    act: ELEMENT_ACT,
     action: ELEMENT_ACTION,
     character: ELEMENT_CHARACTER,
     parenthetical: ELEMENT_PARENTHETICAL,
@@ -21,10 +23,9 @@ export const FountainNodeType = {
     dualDialogueCharacter: ELEMENT_DUAL_DIALOGUE_CHARACTER,
     transition: ELEMENT_TRANSITION,
     lyric: ELEMENT_LYRICS,
-    centered: ELEMENT_CENTERED,
+    note: ELEMENT_NOTE,
     section: 'fountain_section',
     synopsis: 'fountain_synopsis',
-    note: 'fountain_note',
     pageBreak: 'fountain_page_break',
     boneyard: 'fountain_boneyard',
     dialogueBlock: 'fountain_dialogue_block',
@@ -37,6 +38,7 @@ export type FountainNodeTypeValue = (typeof FountainNodeType)[FountainNodeTypeKe
 
 export type FountainElementType =
     | typeof ELEMENT_SCENE_HEADING
+    | typeof ELEMENT_ACT
     | typeof ELEMENT_ACTION
     | typeof ELEMENT_CHARACTER
     | typeof ELEMENT_DUAL_DIALOGUE_CHARACTER
@@ -45,7 +47,7 @@ export type FountainElementType =
     | typeof ELEMENT_DUAL_DIALOGUE
     | typeof ELEMENT_TRANSITION
     | typeof ELEMENT_LYRICS
-    | typeof ELEMENT_CENTERED;
+    | typeof ELEMENT_NOTE;
 
 export type FountainText = {
     text: string,

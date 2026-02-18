@@ -1,11 +1,12 @@
 import {
+    ELEMENT_ACT,
     ELEMENT_ACTION,
-    ELEMENT_CENTERED,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
+    ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
@@ -37,6 +38,7 @@ export const LINE_HEIGHT_OPTIONS = [
 
 export const BLOCK_PREVIEW_TEXT: Record<FountainElementType, string> = {
     [ELEMENT_SCENE_HEADING]: 'INT. LOREM MANSION - DAY',
+    [ELEMENT_ACT]: 'ACT: ONE',
     [ELEMENT_ACTION]: 'She closes the door and exhales.',
     [ELEMENT_CHARACTER]: 'ALEX',
     [ELEMENT_DUAL_DIALOGUE_CHARACTER]: 'ALEX',
@@ -45,11 +47,12 @@ export const BLOCK_PREVIEW_TEXT: Record<FountainElementType, string> = {
     [ELEMENT_DIALOGUE]: 'I think this is where it starts.',
     [ELEMENT_TRANSITION]: 'CUT TO:',
     [ELEMENT_LYRICS]: 'Sing me a line for the morning.',
-    [ELEMENT_CENTERED]: 'THE END',
+    [ELEMENT_NOTE]: '[[Production note goes here.]]',
 };
 
 export const BLOCK_PREVIEW_TEXT_COLOR: Record<FountainElementType, string> = {
     [ELEMENT_SCENE_HEADING]: 'var(--color-block-scene-heading)',
+    [ELEMENT_ACT]: 'var(--color-block-scene-heading)',
     [ELEMENT_ACTION]: 'var(--color-block-action)',
     [ELEMENT_CHARACTER]: 'var(--color-block-character)',
     [ELEMENT_DUAL_DIALOGUE_CHARACTER]: 'var(--color-block-dual-character)',
@@ -58,7 +61,7 @@ export const BLOCK_PREVIEW_TEXT_COLOR: Record<FountainElementType, string> = {
     [ELEMENT_DIALOGUE]: 'var(--color-block-dialogue)',
     [ELEMENT_TRANSITION]: 'var(--color-block-transition)',
     [ELEMENT_LYRICS]: 'var(--color-block-lyrics)',
-    [ELEMENT_CENTERED]: 'var(--color-block-centered)',
+    [ELEMENT_NOTE]: 'var(--color-block-note, var(--color-block-action))',
 };
 
 export const panelDescriptions: Record<string, {
@@ -72,6 +75,10 @@ export const panelDescriptions: Record<string, {
     'visual-preferences': {
         title: 'Visual Preferences',
         description: 'Customize character color intensity for better readability.',
+    },
+    'structure-markers': {
+        title: 'Structure Markers',
+        description: 'Configure ACT and music segment prefixes for Fountain import/export.',
     },
     production: {
         title: 'Production',

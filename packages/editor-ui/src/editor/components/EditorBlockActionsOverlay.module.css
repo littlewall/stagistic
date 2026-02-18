@@ -1,7 +1,20 @@
 .overlay {
+    --block-trigger-size: calc(26px * var(--size-scale));
+
     pointer-events: none;
     position: absolute;
     z-index: 4;
+}
+
+.globalRail {
+    position: absolute;
+    left: calc(-1 * var(--block-controls-gutter)
+    - var(--space-1)
+    - (var(--block-trigger-size) / 2));
+    width: 1px;
+    opacity: .28;
+    background: color-mix(in srgb, var(--color-divider) 88%, var(--color-ink-muted));
+    border-radius: 999px;
 }
 
 .controls {
@@ -11,7 +24,7 @@
     left: 0;
     transform: translate(-100%, -50%);
     display: inline-flex;
-    gap: var(--space-1);
+    gap: 0;
     align-items: center;
     margin-left: calc(-1 * var(--block-controls-gutter, 32px));
 }
@@ -21,8 +34,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(26px * var(--size-scale));
-    height: calc(26px * var(--size-scale));
+    width: var(--block-trigger-size);
+    height: var(--block-trigger-size);
     font-size: calc(16px * var(--size-scale));
     line-height: 1;
     color: var(--color-ink);
@@ -34,6 +47,15 @@
 
 .trigger:hover {
     background: color-mix(in srgb, var(--color-accent) 30%, transparent);
+}
+
+.triggerNoHover {
+    cursor: default;
+}
+
+.triggerNoHover:hover {
+    background: var(--color-surface);
+    border-color: var(--color-divider);
 }
 
 .triggerOpen {
@@ -64,17 +86,53 @@
     position: absolute;
     top: calc(32px * var(--size-scale));
     left: 0;
-    display: grid;
+    display: flex;
+    align-items: stretch;
     min-width: calc(200px * var(--size-scale));
-    padding: var(--space-1);
     background: var(--color-surface);
     border: 1px solid var(--color-divider);
     border-radius: calc(12px * var(--size-scale));
+    box-shadow: var(--shadow-popover);
+    overflow: hidden;
 }
 
 .menuAbove {
     top: auto;
     bottom: calc(100% + var(--space-2));
+}
+
+.menuWithSubmenu {
+    min-width: calc(360px * var(--size-scale));
+}
+
+.menuPrimaryPanel {
+    display: grid;
+    align-content: start;
+    gap: 0;
+    min-width: calc(200px * var(--size-scale));
+    padding: var(--space-1);
+}
+
+.menuSecondaryPanel {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-width: calc(160px * var(--size-scale));
+    border-left: 1px solid var(--color-divider);
+    background: color-mix(in srgb, var(--color-surface) 95%, var(--color-accent) 5%);
+}
+
+.menuSecondaryHeader {
+    padding: var(--space-2);
+    font-size: calc(11px * var(--size-scale));
+    line-height: 1.2;
+    color: var(--color-ink-muted);
+    border-bottom: 1px solid var(--color-divider);
+}
+
+.menuSecondaryContent {
+    display: grid;
+    align-content: start;
+    padding: var(--space-1);
 }
 
 .menuItem {
@@ -114,8 +172,24 @@
 .menuItemActive {
     font-weight: 600;
     background: color-mix(in srgb, var(--color-accent) 70%, transparent);
+}
 
-    &:hover {
-        background: color-mix(in srgb, var(--color-accent) 70%, transparent);
-    }
+.menuItemActive:hover {
+    background: color-mix(in srgb, var(--color-accent) 70%, transparent);
+}
+
+.menuSeparator {
+    height: 1px;
+    margin: var(--space-1) var(--space-2);
+    background: var(--color-divider);
+}
+
+.menuItemSubmenu {
+    grid-template-columns: 20px 1fr auto;
+}
+
+.menuItemCaret {
+    margin-left: auto;
+    justify-self: end;
+    color: var(--color-ink-muted);
 }

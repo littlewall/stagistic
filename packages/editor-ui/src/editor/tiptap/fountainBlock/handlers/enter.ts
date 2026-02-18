@@ -1,10 +1,15 @@
 import {
+    createNodeId,
+    ELEMENT_ACT,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
     ELEMENT_PARENTHETICAL,
+    ELEMENT_SCENE_HEADING,
 } from '@stagistic/script-core';
+import type {NodeType} from '@tiptap/pm/model';
+import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
 import {
@@ -97,7 +102,42 @@ const resolveNextTypeOnEnter = (
     return configured ?? getNextTypeOnEnter(blockType);
 };
 
+const insertBlockAfter = (
+    context: BlockContext,
+    blockType: FountainBlockType,
+) => {
+    const nodes = context.editor.schema.nodes as Record<string, NodeType>;
+    const fountainBlockNode = nodes[FOUNTAIN_BLOCK_NODE_NAME];
+
+    if (!fountainBlockNode) {
+        return false;
+    }
+
+    const insertPos = context.block.pos + context.block.node.nodeSize;
+    const insertedNode = fountainBlockNode.create({
+        blockType,
+        id: createNodeId(),
+    });
+    let tr = context.editor.state.tr.insert(insertPos, insertedNode);
+    const selectionPos = tr.mapping.map(insertPos + 1);
+
+    tr = tr.setSelection(TextSelection.near(tr.doc.resolve(selectionPos), 1));
+    context.editor.view.dispatch(tr.scrollIntoView());
+    context.editor.commands.focus(selectionPos);
+
+    return true;
+};
+
 const enterHandlers: HandlerMap<(context: BlockContext, blockNextElements?: BlockNextElementMap) => boolean> = {
+    [ELEMENT_ACT]: (context, blockNextElements) => {
+        const nextType = blockNextElements?.[ELEMENT_ACT] ?? ELEMENT_SCENE_HEADING;
+
+        if (context.isAtEnd) {
+            return insertBlockAfter(context, nextType);
+        }
+
+        return splitBlockWithType(context.editor, nextType);
+    },
     [ELEMENT_CHARACTER]: (context, blockNextElements) => {
         if (context.isAtStart) {
             return insertActionBefore(context.editor, context.block.pos, context.block.from);

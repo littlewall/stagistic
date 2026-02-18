@@ -24,6 +24,10 @@ type OverlayState = {
     blockId: string,
 };
 
+type RailAnchorState = {
+    style: CSSProperties,
+};
+
 const findBlockElement = (editor: TiptapEditor, from: number) => {
     try {
         const domAtPos = editor.view.domAtPos(from);
@@ -61,6 +65,7 @@ export const useOverlayPosition = ({
     isMenuOpen,
 }: UseOverlayPositionArgs) => {
     const [overlayState, setOverlayState] = useState<OverlayState | null>(null);
+    const [railAnchorState, setRailAnchorState] = useState<RailAnchorState | null>(null);
     const rafIdRef = useRef<number | null>(null);
 
     const updatePosition = useCallback(() => {
@@ -68,8 +73,52 @@ export const useOverlayPosition = ({
 
         if (!editor || !editor.view || !canvas) {
             setOverlayState(null);
+            setRailAnchorState(null);
 
             return;
+        }
+
+        const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+        const activeTarget = activeBlock
+            ? findBlockElement(editor, activeBlock.from)
+            : null;
+        const fallbackTarget = editor.view.dom.querySelector<HTMLElement>('[data-fountain-block]');
+        const railTarget = activeTarget ?? fallbackTarget;
+
+        if (railTarget) {
+            const canvasRect = canvas.getBoundingClientRect();
+            const targetRect = railTarget.getBoundingClientRect();
+            const computed = window.getComputedStyle(railTarget);
+            const paddingTop = Number.parseFloat(computed.paddingTop) || 0;
+            const lineHeightValue = Number.parseFloat(computed.lineHeight);
+            const lineOffset = Number.isFinite(lineHeightValue) ? lineHeightValue / 2 : 0;
+            const top = targetRect.top - canvasRect.top + canvas.scrollTop + paddingTop + lineOffset;
+            const left = targetRect.left - canvasRect.left + canvas.scrollLeft;
+
+            setRailAnchorState(previous => {
+                const nextState = {
+                    style: {
+                        top,
+                        left,
+                        width: targetRect.width,
+                    },
+                };
+
+                if (
+                    previous
+                    && previous.style.top === nextState.style.top
+                    && previous.style.left === nextState.style.left
+                    && previous.style.width === nextState.style.width
+                ) {
+                    return previous;
+                }
+
+                return nextState;
+            });
+        }
+
+        if (railTarget === null) {
+            setRailAnchorState(null);
         }
 
         try {
@@ -90,25 +139,15 @@ export const useOverlayPosition = ({
             return;
         }
 
-        const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
-
-        if (!activeBlock) {
-            setOverlayState(null);
-
-            return;
-        }
-
-        const target = findBlockElement(editor, activeBlock.from);
-
-        if (!target) {
+        if (!activeBlock || !activeTarget) {
             setOverlayState(null);
 
             return;
         }
 
         const canvasRect = canvas.getBoundingClientRect();
-        const targetRect = target.getBoundingClientRect();
-        const computed = window.getComputedStyle(target);
+        const targetRect = activeTarget.getBoundingClientRect();
+        const computed = window.getComputedStyle(activeTarget);
         const paddingTop = Number.parseFloat(computed.paddingTop) || 0;
         const lineHeightValue = Number.parseFloat(computed.lineHeight);
         const lineOffset = Number.isFinite(lineHeightValue) ? lineHeightValue / 2 : 0;
@@ -212,5 +251,6 @@ export const useOverlayPosition = ({
 
     return {
         overlayState,
+        railAnchorState,
     };
 };

@@ -1,10 +1,11 @@
 import {
+    ELEMENT_ACT,
     ELEMENT_ACTION,
-    ELEMENT_CENTERED,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
+    ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     ELEMENT_TRANSITION,
@@ -22,6 +23,11 @@ export const FOUNTAIN_BLOCK_ITEMS: FountainBlockMeta[] = [
         id: 'element-scene-heading',
         type: ELEMENT_SCENE_HEADING,
         label: 'Scene heading',
+    },
+    {
+        id: 'element-act',
+        type: ELEMENT_ACT,
+        label: 'ACT',
     },
     {
         id: 'element-action',
@@ -59,8 +65,8 @@ export const FOUNTAIN_BLOCK_ITEMS: FountainBlockMeta[] = [
         label: 'Character (dual)',
     },
     {
-        id: 'element-centered',
-        type: ELEMENT_CENTERED,
-        label: 'Centered text',
+        id: 'element-note',
+        type: ELEMENT_NOTE,
+        label: 'Notes',
     },
 ];

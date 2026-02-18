@@ -81,6 +81,8 @@ export const createConfigHandlers = ({
         const payloadJson = JSON.stringify({
             page: settings.page,
             typography: settings.typography,
+            visual: settings.visual,
+            structure: settings.structure,
         });
         const blockRows = buildConfigRows(settings, now);
 

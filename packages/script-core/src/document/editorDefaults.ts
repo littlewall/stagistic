@@ -1,4 +1,5 @@
 import {createNodeId} from '../nodeId';
+import {normalizeScriptStructure} from '../structure';
 import {
     createEmptyScriptDocument,
     FOUNTAIN_BLOCK_NODE_NAME,
@@ -174,4 +175,20 @@ export const ensureSceneHeading = (
     }
 
     return value as ScriptDocument;
+};
+
+export const ensureScriptStructure = (
+    value: ScriptDocument,
+): ScriptDocument => {
+    const normalizedStructure = normalizeScriptStructure(value.attrs?.structure, {
+        content: value.content,
+    });
+
+    return {
+        ...value,
+        attrs: {
+            ...value.attrs,
+            structure: normalizedStructure,
+        },
+    };
 };

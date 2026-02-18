@@ -22,16 +22,22 @@ import {
 type ScriptConfigBlockRow = Awaited<ReturnType<typeof dbQueries.listScriptConfigBlocks>>[number];
 type ScriptConfigReplacementRow = Parameters<typeof dbQueries.replaceScriptConfigBlocks>[1]['rows'][number];
 
-export const isScriptSettingsPayload = (value: unknown): value is Pick<EditorSettingsOverride, 'page' | 'typography'> => {
+export const isScriptSettingsPayload = (
+    value: unknown,
+): value is Pick<EditorSettingsOverride, 'page' | 'typography' | 'visual' | 'structure'> => {
     if (!isObjectRecord(value)) {
         return false;
     }
 
     const page = value.page;
     const typography = value.typography;
+    const visual = value.visual;
+    const structure = value.structure;
 
     return (page === undefined || isObjectRecord(page))
-        && (typography === undefined || isObjectRecord(typography));
+        && (typography === undefined || isObjectRecord(typography))
+        && (visual === undefined || isObjectRecord(visual))
+        && (structure === undefined || isObjectRecord(structure));
 };
 
 export const hydrateBlockSettings = (
