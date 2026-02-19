@@ -9,12 +9,7 @@ import {
 } from 'react';
 
 import styles from './NewScriptModal.module.css';
-
-type NewScriptModalProps = {
-    isOpen: boolean,
-    onClose: () => void,
-    onCreate: (name: string) => void,
-};
+import type {NewScriptModalProps} from './types';
 
 export const NewScriptModal = ({
     isOpen,

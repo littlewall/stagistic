@@ -2,15 +2,10 @@ import {type Editor as TiptapEditor, EditorContent} from '@tiptap/react';
 import clsx from 'clsx';
 import {type CSSProperties, useRef} from 'react';
 
+import type {PersistentCharacterRef} from '../types';
 import CharacterSuggestionsOverlay from './CharacterSuggestionsOverlay';
 import EditorBlockActionsOverlay from './EditorBlockActionsOverlay';
 import styles from './EditorCanvas.module.css';
-
-type PersistentCharacterRef = {
-    id: string,
-    key: string,
-    colorHex?: string | null,
-};
 
 type EditorCanvasProps = {
     editor: TiptapEditor | null,

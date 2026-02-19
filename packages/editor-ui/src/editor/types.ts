@@ -6,11 +6,11 @@ import type {ReactNode} from 'react';
 
 import type {SaveResult} from './hooks/useAutosaveController';
 
-export type PersistentCharacterRef = {
+export interface PersistentCharacterRef {
     id: string,
     key: string,
     colorHex?: string | null,
-};
+}
 
 export type EditorProps = {
     initialValue: ScriptDocument,

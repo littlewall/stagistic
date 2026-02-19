@@ -4,10 +4,10 @@ import type {ChangeEvent} from 'react';
 import styles from '../../ScriptEditorRoute.module.css';
 import type {StructureSettingsPatch} from './types';
 
-type StructureMarkersSettingsPanelProps = {
+interface StructureMarkersSettingsPanelProps {
     structureSettings: EditorSettings['structure'],
     onUpdateStructureSettings: (patch: StructureSettingsPatch) => void,
-};
+}
 
 type MusicPrefixField = 'start' | 'end';
 

@@ -1,17 +1,11 @@
 import {syncOutbox} from '../../schema';
 import type {DbClient} from '../types';
+import type {InsertOutboxPayload} from './payloads';
 
 /**
  * Insert a new outbox entry for sync.
  */
-export const insertOutbox = async (db: DbClient, payload: {
-    id: string,
-    scriptId: string | null,
-    opType: string | null,
-    payloadJson: string | null,
-    createdAt: number | null,
-    status: string,
-}) => {
+export const insertOutbox = async (db: DbClient, payload: InsertOutboxPayload) => {
     await db.insert(syncOutbox).values({
         id: payload.id,
         scriptId: payload.scriptId,

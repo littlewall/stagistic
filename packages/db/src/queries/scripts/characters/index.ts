@@ -1,3 +1,7 @@
+export type {
+    ScriptCharacterGenderOption,
+    ScriptCharacterRef,
+} from '../../../types';
 export {
     getScriptCharacterGenderByKey,
     listScriptCharacterGenders,
@@ -8,10 +12,6 @@ export {
     getScriptCharacterByKey,
     listScriptCharacters,
 } from './read';
-export type {
-    ScriptCharacterGenderOption,
-    ScriptCharacterRef,
-} from './types';
 export {
     deleteScriptCharacter,
     touchScriptCharacter,

@@ -2,18 +2,12 @@ import {eq} from 'drizzle-orm';
 
 import {scriptVersions} from '../../schema';
 import type {DbClient} from '../types';
+import type {InsertVersionPayload} from './payloads';
 
 /**
  * Insert a new script version.
  */
-export const insertVersion = async (db: DbClient, payload: {
-    id: string,
-    scriptId: string,
-    message: string | null,
-    contentJson: string,
-    createdAt: number,
-    schemaVersion: number,
-}) => {
+export const insertVersion = async (db: DbClient, payload: InsertVersionPayload) => {
     await db.insert(scriptVersions).values({
         id: payload.id,
         scriptId: payload.scriptId,

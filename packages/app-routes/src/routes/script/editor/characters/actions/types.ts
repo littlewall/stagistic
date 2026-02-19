@@ -15,7 +15,7 @@ export type SetScriptCharacterRecordsState = Dispatch<SetStateAction<ScriptChara
 export type SetCharacterGenderOptionsState = Dispatch<SetStateAction<CharacterGenderOption[]>>;
 export type SetStringArrayState = Dispatch<SetStateAction<string[]>>;
 
-export type CharacterActionSharedArgs = {
+export interface CharacterActionSharedArgs {
     currentScriptId: string | null,
     scriptRepository: ScriptRepository,
     initialValue: ScriptDocument | null | undefined,
@@ -24,4 +24,4 @@ export type CharacterActionSharedArgs = {
     setEditorOverrideValue: SetScriptDocumentState,
     setConfirmedCharacterRecords: SetScriptCharacterRecordsState,
     handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
-};
+}

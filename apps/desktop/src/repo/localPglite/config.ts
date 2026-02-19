@@ -23,10 +23,10 @@ type ConfigHandlers = Pick<
     'loadScriptConfig' | 'saveScriptConfig' | 'deleteScriptConfig'
 >;
 
-type CreateConfigHandlersArgs = {
+interface CreateConfigHandlersArgs {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
-};
+}
 
 export const createConfigHandlers = ({
     getDb,

@@ -6,10 +6,7 @@ import {
 } from 'react';
 
 import styles from './ScriptStructureSidebar.module.css';
-
-type StructureSidebarHeaderProps = {
-    onInsertAct: () => void,
-};
+import type {StructureSidebarHeaderProps} from './types';
 
 const joinClassNames = (...classNames: Array<string | false | null | undefined>) => {
     return classNames.filter(Boolean).join(' ');

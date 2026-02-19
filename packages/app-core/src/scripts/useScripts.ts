@@ -8,12 +8,9 @@ import {
     useSyncExternalStore,
 } from 'react';
 
+import {toScriptListItem} from './mappers';
 import {useScriptsContext} from './ScriptRepositoryProvider';
-
-type ScriptListItem = {
-    id: string,
-    name: string,
-};
+import type {ScriptListItem} from './types';
 
 export const useScripts = () => {
     const {
@@ -41,10 +38,7 @@ export const useScripts = () => {
     );
 
     const scripts = useMemo<ScriptListItem[]>(
-        () => (data ?? []).map((summary: ScriptSummary) => ({
-            id: summary.id,
-            name: summary.title,
-        })),
+        () => (data ?? []).map((summary: ScriptSummary) => toScriptListItem(summary)),
         [data],
     );
     const scriptSummaries = useMemo<ScriptSummary[]>(

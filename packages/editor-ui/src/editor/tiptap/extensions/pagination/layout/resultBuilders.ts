@@ -11,14 +11,14 @@ import type {
     PaginationState,
 } from '../types';
 
-type SharedResultArgs = {
+interface SharedResultArgs {
     options: PaginationOptions,
     contentHeight: number,
     fallbackHeight: number,
     nextCache: Map<string, BlockCacheEntry>,
     hasInlineBreaks: boolean,
     usedFallbackMeasurements: boolean,
-};
+}
 
 export const buildEmptyPaginationStateResult = ({
     options,
@@ -47,11 +47,11 @@ export const buildEmptyPaginationStateResult = ({
     };
 };
 
-type BuildFinalPaginationStateResultArgs = SharedResultArgs & {
+interface BuildFinalPaginationStateResultArgs extends SharedResultArgs {
     view: EditorView,
     decorations: Decoration[],
     pages: PaginationState['pages'],
-};
+}
 
 export const buildFinalPaginationStateResult = ({
     view,

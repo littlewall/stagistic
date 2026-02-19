@@ -1,5 +1,5 @@
 import {useSortable} from '@dnd-kit/react/sortable';
-import {normalizeActName, type StructureSettings} from '@stagistic/script-core';
+import {normalizeActName} from '@stagistic/script-core';
 import {
     memo,
     useCallback,
@@ -9,18 +9,7 @@ import {
     ACT_DND_TYPE, SCENE_DND_TYPE, STRUCTURE_SORT_GROUP,
 } from './dnd';
 import styles from './ScriptStructureSidebar.module.css';
-import type {StructureActRow} from './structureRows';
-
-type StructureRowActProps = {
-    act: StructureActRow,
-    rowIndex: number,
-    structureSettings: StructureSettings,
-    actNamePreviewById: Record<string, string>,
-    onFocusBlock: (blockId: string) => void,
-    onRenameAct: (blockId: string, nextName: string) => void,
-    onActNamePreview: (blockId: string, nextName: string) => void,
-    onDeleteAct: (blockId: string) => void,
-};
+import type {StructureRowActProps} from './types';
 
 const joinClassNames = (...classNames: Array<string | false | null | undefined>) => {
     return classNames.filter(Boolean).join(' ');

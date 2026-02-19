@@ -5,16 +5,10 @@ import {
     getDefaultActName,
 } from '@stagistic/script-core';
 import {TextSelection} from '@tiptap/pm/state';
-import type {Editor as TiptapEditor} from '@tiptap/react';
 import {type MouseEvent as ReactMouseEvent, useCallback} from 'react';
 
 import {FOUNTAIN_BLOCK_NODE_NAME} from '../../tiptap/fountainCore';
-
-type UseActInsertCommandArgs = {
-    editor: TiptapEditor | null,
-    activeBlockId: string | null,
-    closeMenu: () => void,
-};
+import type {UseActInsertCommandArgs} from './types';
 
 export const useActInsertCommand = ({
     editor,

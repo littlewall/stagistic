@@ -1,8 +1,6 @@
-export type PersistentCharacterRef = {
-    id: string,
-    key: string,
-    colorHex?: string | null,
-};
+import type {PersistentCharacterRef} from '../../types';
+
+export type {PersistentCharacterRef};
 
 export type SuggestionEntry = {
     key: string,

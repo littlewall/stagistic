@@ -1,22 +1,16 @@
+import type {ScriptListItem} from '@stagistic/app-core';
 import {
     useEffect,
 } from 'react';
 import {type NavigateFunction} from 'react-router-dom';
 
-type ScriptSummaryItem = {
-    id: string,
-};
-
-type CurrentScript = {
-    id: string,
-    name: string,
-} | null;
+import type {CurrentScriptItem} from '../types';
 
 export const useEditorRedirects = (params: {
     scriptsLoading: boolean,
     scriptsError: unknown,
-    recentScriptsData: ScriptSummaryItem[],
-    currentScript: CurrentScript,
+    recentScriptsData: ScriptListItem[],
+    currentScript: CurrentScriptItem | null,
     scriptId: string | undefined,
     navigate: NavigateFunction,
     seedDefaultScript: () => Promise<void>,

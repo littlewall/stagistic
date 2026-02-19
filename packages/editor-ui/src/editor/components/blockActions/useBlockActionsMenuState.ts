@@ -1,16 +1,10 @@
-import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type RefObject,
     useCallback,
     useEffect,
     useState,
 } from 'react';
 
-type UseBlockActionsMenuStateArgs = {
-    editor: TiptapEditor | null,
-    triggerRef: RefObject<HTMLButtonElement | null>,
-    menuRef: RefObject<HTMLDivElement | null>,
-};
+import type {UseBlockActionsMenuStateArgs} from './types';
 
 export const useBlockActionsMenuState = ({
     editor,

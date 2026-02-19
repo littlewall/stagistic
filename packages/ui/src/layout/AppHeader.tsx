@@ -21,19 +21,19 @@ import {AccountMenu} from './header/AccountMenu';
 import {ScriptMenu} from './header/ScriptMenu';
 import {SyncIndicator} from './header/SyncIndicator';
 import type {
-    Script,
+    ScriptListItem,
     ScriptSyncState,
 } from './header/types';
 
 export type {
-    Script,
+    ScriptListItem,
     ScriptSyncState,
 };
 
 type AppHeaderProps = {
-    currentScript?: Script,
-    recentScripts?: Script[],
-    onSelectScript?: (script: Script) => void,
+    currentScript?: ScriptListItem,
+    recentScripts?: ScriptListItem[],
+    onSelectScript?: (script: ScriptListItem) => void,
     onMenuAction?: (actionId: string) => void,
     showScriptMenu?: boolean,
     scriptSyncState?: ScriptSyncState,

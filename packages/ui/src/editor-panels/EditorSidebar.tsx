@@ -1,5 +1,3 @@
-import type {CharacterCountItem as EditorSidebarCharacter} from '@stagistic/script-core';
-import type {CharacterGenderOption} from '@stagistic/script-core';
 import clsx from 'clsx';
 import {List} from 'iconoir-react';
 import {
@@ -18,6 +16,10 @@ import {
 import {CharacterRowConfirmed} from './CharacterRowConfirmed';
 import {CharacterRowPending} from './CharacterRowPending';
 import styles from './EditorSidebar.module.css';
+import type {
+    CharacterGenderOption,
+    EditorSidebarCharacter,
+} from './types';
 import {useRenameDrafts} from './useRenameDrafts';
 import {
     getCharacterIdentityKey,

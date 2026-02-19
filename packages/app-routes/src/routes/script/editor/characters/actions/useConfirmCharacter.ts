@@ -9,10 +9,10 @@ import {
     removePendingValue,
 } from './utils';
 
-type UseConfirmCharacterArgs = CharacterActionSharedArgs & {
+interface UseConfirmCharacterArgs extends CharacterActionSharedArgs {
     confirmedCharacterSet: ReadonlySet<string>,
     setConfirmingCharacterKeys: SetStringArrayState,
-};
+}
 
 export const useConfirmCharacter = ({
     currentScriptId,

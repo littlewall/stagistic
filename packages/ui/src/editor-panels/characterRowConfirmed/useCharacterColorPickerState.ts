@@ -1,10 +1,10 @@
-import type {CharacterCountItem as EditorSidebarCharacter} from '@stagistic/script-core';
 import {clampCharacterColorSaturation} from '@stagistic/script-core';
 import {
     useEffect, useMemo, useRef, useState,
 } from 'react';
 
 import styles from '../EditorSidebar.module.css';
+import type {EditorSidebarCharacter} from '../types';
 import {
     getPastelHexFromHue,
     getPastelHueFromHex,

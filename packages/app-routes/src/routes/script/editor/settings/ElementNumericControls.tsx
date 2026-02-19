@@ -10,7 +10,7 @@ import {
 } from './SettingsSelect';
 import type {UpdateBlockSettings} from './types';
 
-type ElementNumericControlsProps = {
+interface ElementNumericControlsProps {
     blockType: FountainElementType,
     shortcutPrefix: string,
     spacingBefore: number,
@@ -22,7 +22,7 @@ type ElementNumericControlsProps = {
     shortcutOptions: SettingsSelectOption[],
     nextElementOptions: SettingsSelectOption[],
     onUpdateBlockSettings: UpdateBlockSettings,
-};
+}
 
 export const ElementNumericControls = ({
     blockType,

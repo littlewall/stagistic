@@ -17,7 +17,7 @@ import type {
 } from './types';
 import type {ScriptRepository} from './useScriptEditorCharacters.types';
 
-type UseCharacterActionsArgs = {
+interface UseCharacterActionsArgs {
     currentScriptId: string | null,
     scriptRepository: ScriptRepository,
     initialValue: ScriptDocument | null | undefined,
@@ -36,9 +36,9 @@ type UseCharacterActionsArgs = {
     confirmedCharactersById: ReadonlyMap<string, ScriptCharacterRecord>,
     getCharacterNameForBlockType: (name: string, blockType: unknown) => string,
     handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
-};
+}
 
-export type CharacterActions = {
+export interface CharacterActions {
     handleConfirmCharacter: (characterKey: string) => void,
     handleDeleteCharacter: (characterId: string) => void,
     handleRenameCharacterPreview: (
@@ -54,7 +54,7 @@ export type CharacterActions = {
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
     handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,
-};
+}
 
 export const useCharacterActions = ({
     currentScriptId,

@@ -4,7 +4,7 @@ import {clsx} from '@stagistic/ui';
 import styles from '../../ScriptEditorRoute.module.css';
 import type {BlockSettingsPatch, UpdateBlockSettings} from './types';
 
-type ElementFormattingToolbarProps = {
+interface ElementFormattingToolbarProps {
     blockType: FountainElementType,
     textAlign: 'left' | 'center' | 'right',
     casing: 'normal' | 'uppercase',
@@ -12,7 +12,7 @@ type ElementFormattingToolbarProps = {
     isItalic: boolean,
     isUnderline: boolean,
     onUpdateBlockSettings: UpdateBlockSettings,
-};
+}
 
 const withPatch = (
     blockType: FountainElementType,

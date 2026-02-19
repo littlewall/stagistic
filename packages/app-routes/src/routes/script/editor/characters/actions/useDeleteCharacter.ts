@@ -9,10 +9,10 @@ import {
     removePendingValue,
 } from './utils';
 
-type UseDeleteCharacterArgs = CharacterActionSharedArgs & {
+interface UseDeleteCharacterArgs extends CharacterActionSharedArgs {
     confirmedCharactersById: ReadonlyMap<string, ScriptCharacterRecord>,
     setDeletingCharacterIds: SetStringArrayState,
-};
+}
 
 export const useDeleteCharacter = ({
     currentScriptId,

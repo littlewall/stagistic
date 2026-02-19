@@ -10,7 +10,7 @@ import {
 import {clamp} from './geometry';
 import type {ActiveDragState} from './types';
 
-type UseDragRuntimeEffectsArgs = {
+interface UseDragRuntimeEffectsArgs {
     canvasRef: RefObject<HTMLElement | null>,
     activeDrag: ActiveDragState | null,
     activeDragRef: MutableRefObject<ActiveDragState | null>,
@@ -26,7 +26,7 @@ type UseDragRuntimeEffectsArgs = {
     revertPreviewMove: () => void,
     clearPressVisualState: () => void,
     clearDragState: () => void,
-};
+}
 
 export const useDragRuntimeEffects = ({
     canvasRef,

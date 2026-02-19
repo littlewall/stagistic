@@ -1,7 +1,7 @@
 import type {
-    CharacterCountItem as EditorSidebarCharacter,
     CharacterGenderOption,
-} from '@stagistic/script-core';
+    EditorSidebarCharacter,
+} from '../types';
 
 export type CharacterRowConfirmedProps = {
     character: EditorSidebarCharacter,

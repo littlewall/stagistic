@@ -2,16 +2,15 @@ import {eq} from 'drizzle-orm';
 
 import {scriptLatest} from '../../schema';
 import type {DbClient} from '../types';
+import type {
+    InsertLatestPayload,
+    UpsertLatestPayload,
+} from './payloads';
 
 /**
  * Insert a new latest script content.
  */
-export const insertLatest = async (db: DbClient, payload: {
-    scriptId: string,
-    contentJson: string,
-    updatedAt: number,
-    schemaVersion: number,
-}) => {
+export const insertLatest = async (db: DbClient, payload: InsertLatestPayload) => {
     await db.insert(scriptLatest).values({
         scriptId: payload.scriptId,
         contentJson: payload.contentJson,
@@ -23,12 +22,7 @@ export const insertLatest = async (db: DbClient, payload: {
 /**
  * Upsert the latest script content.
  */
-export const upsertLatest = async (db: DbClient, payload: {
-    scriptId: string,
-    contentJson: string,
-    updatedAt: number,
-    schemaVersion: number,
-}) => {
+export const upsertLatest = async (db: DbClient, payload: UpsertLatestPayload) => {
     await db
         .insert(scriptLatest)
         .values({

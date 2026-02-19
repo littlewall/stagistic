@@ -12,6 +12,7 @@ import {
 } from 'react';
 
 import styles from '../../Editor.module.css';
+import type {PersistentCharacterRef} from '../../types';
 import {EditorCanvas} from '../EditorCanvas';
 import EditorToolbar from '../EditorToolbar';
 
@@ -21,11 +22,7 @@ type EditorShellProps = {
     canvasHostRef: RefObject<HTMLDivElement | null>,
     rootStyle: CSSProperties,
     autoFocus?: boolean,
-    persistentCharacters?: readonly {
-        id: string,
-        key: string,
-        colorHex?: string | null,
-    }[],
+    persistentCharacters?: readonly PersistentCharacterRef[],
     characterColorSaturation?: number,
     leftSidebarToggle?: {
         isOpen: boolean,

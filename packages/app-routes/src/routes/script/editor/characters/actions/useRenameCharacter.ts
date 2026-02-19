@@ -14,14 +14,14 @@ import {
     removePendingValue,
 } from './utils';
 
-type UseRenameCharacterArgs = CharacterActionSharedArgs & {
+interface UseRenameCharacterArgs extends CharacterActionSharedArgs {
     confirmedCharactersById: ReadonlyMap<string, ScriptCharacterRecord>,
     getCharacterNameForBlockType: (name: string, blockType: unknown) => string,
     setRenamingCharacterIds: SetStringArrayState,
     setRenamingCharacterKeys: SetStringArrayState,
-};
+}
 
-type RenameCharacterActions = {
+interface RenameCharacterActions {
     handleRenameCharacterPreview: (
         characterId: string,
         previousCharacterName: string,
@@ -32,7 +32,7 @@ type RenameCharacterActions = {
         previousCharacterName: string,
         nextCharacterName: string,
     ) => void,
-};
+}
 
 export const useRenameCharacter = ({
     currentScriptId,

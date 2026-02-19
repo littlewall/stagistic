@@ -4,6 +4,7 @@
  */
 
 export type {
+    ListScriptsOptions,
     ScriptCharacterGenderOption,
     ScriptCharacterRef,
     ScriptRepository,

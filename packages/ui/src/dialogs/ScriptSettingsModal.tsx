@@ -1,55 +1,17 @@
 import clsx from 'clsx';
 import {
     type MouseEvent as ReactMouseEvent,
-    type ReactNode,
     useCallback,
     useEffect,
 } from 'react';
 
 import styles from './ScriptSettingsModal.module.css';
-
-export type SettingsNavSubItem = {
-    id: string,
-    label: string,
-    panelId: string,
-    icon?: ReactNode,
-};
-
-type SettingsNavLinkItem = {
-    id: string,
-    label: string,
-    panelId: string,
-};
-
-type SettingsNavExpandableItem = {
-    id: string,
-    label: string,
-    subItems: SettingsNavSubItem[],
-};
-
-export type SettingsNavItem = ({
-    kind: 'item',
-} & SettingsNavLinkItem) | ({
-    kind: 'expandable',
-} & SettingsNavExpandableItem);
-
-export type SettingsNavGroup = {
-    id: string,
-    label: string,
-    items: SettingsNavItem[],
-};
-
-type ScriptSettingsModalProps = {
-    isOpen: boolean,
-    title?: string,
-    groups: SettingsNavGroup[],
-    activePanelId: string,
-    expandedItemIds: string[],
-    onClose: () => void,
-    onSelectPanel: (panelId: string) => void,
-    onToggleExpand: (itemId: string) => void,
-    renderPanel: (panelId: string) => ReactNode,
-};
+import type {ScriptSettingsModalProps} from './types';
+export type {
+    SettingsNavGroup,
+    SettingsNavItem,
+    SettingsNavSubItem,
+} from './types';
 
 export const ScriptSettingsModal = ({
     isOpen,

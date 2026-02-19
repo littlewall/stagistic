@@ -7,21 +7,10 @@ import {
     useState,
 } from 'react';
 
+import {toScriptListItem} from './mappers';
 import {useScriptRepository} from './ScriptRepositoryProvider';
 import {onScriptsInvalidated} from './scriptsEvents';
-
-type ScriptListItem = {
-    id: string,
-    name: string,
-};
-
-type RecentScriptsState = {
-    scripts: ScriptListItem[],
-    scriptSummaries: ScriptSummary[],
-    isLoading: boolean,
-    error: Error | null,
-    refresh: () => Promise<void>,
-};
+import type {RecentScriptsState, ScriptListItem} from './types';
 
 export const useRecentScripts = (limit = 3): RecentScriptsState => {
     const repository = useScriptRepository();
@@ -69,10 +58,7 @@ export const useRecentScripts = (limit = 3): RecentScriptsState => {
     }, [load]);
 
     const scripts = useMemo<ScriptListItem[]>(
-        () => data.map(summary => ({
-            id: summary.id,
-            name: summary.title,
-        })),
+        () => data.map(summary => toScriptListItem(summary)),
         [data],
     );
 

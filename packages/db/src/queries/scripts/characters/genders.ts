@@ -5,9 +5,13 @@ import {
 } from 'drizzle-orm';
 
 import {scriptCharacterGenders} from '../../../schema';
+import type {ScriptCharacterGenderOption} from '../../../types';
 import type {DbClient} from '../../types';
+import type {
+    GetScriptCharacterGenderByKeyPayload,
+    UpsertScriptCharacterGenderPayload,
+} from '../payloads';
 import {mapGenderRow} from './mappers';
-import type {ScriptCharacterGenderOption} from './types';
 
 export const listScriptCharacterGenders = async (
     db: DbClient,
@@ -26,14 +30,10 @@ export const listScriptCharacterGenders = async (
     return rows.map(mapGenderRow);
 };
 
-export const upsertScriptCharacterGender = async (db: DbClient, payload: {
-    id: string,
-    scriptId: string,
-    genderKey: string,
-    genderLabel: string,
-    createdAt: number,
-    updatedAt: number,
-}) => {
+export const upsertScriptCharacterGender = async (
+    db: DbClient,
+    payload: UpsertScriptCharacterGenderPayload,
+) => {
     await db
         .insert(scriptCharacterGenders)
         .values({
@@ -52,10 +52,10 @@ export const upsertScriptCharacterGender = async (db: DbClient, payload: {
         });
 };
 
-export const getScriptCharacterGenderByKey = async (db: DbClient, payload: {
-    scriptId: string,
-    genderKey: string,
-}): Promise<ScriptCharacterGenderOption | null> => {
+export const getScriptCharacterGenderByKey = async (
+    db: DbClient,
+    payload: GetScriptCharacterGenderByKeyPayload,
+): Promise<ScriptCharacterGenderOption | null> => {
     const rows = await db
         .select({
             id: scriptCharacterGenders.id,

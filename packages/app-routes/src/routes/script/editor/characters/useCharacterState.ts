@@ -15,13 +15,13 @@ import type {
 } from './types';
 import type {ScriptRepository} from './useScriptEditorCharacters.types';
 
-type UseCharacterStateArgs = {
+interface UseCharacterStateArgs {
     currentScriptId: string | null,
     scriptRepository: ScriptRepository,
     initialValue: ScriptDocument | null | undefined,
-};
+}
 
-export type CharacterState = {
+export interface CharacterState {
     editorValue: ScriptDocument | null,
     setEditorValue: Dispatch<SetStateAction<ScriptDocument | null>>,
     editorOverrideValue: ScriptDocument | null,
@@ -44,17 +44,19 @@ export type CharacterState = {
     setCharacterGenderOptions: Dispatch<SetStateAction<CharacterGenderOption[]>>,
     isCharactersLoading: boolean,
     handleEditorValueChange: (value: ScriptDocument) => void,
-};
+}
 
-const DEFAULT_CHARACTER_GENDER_OPTIONS: CharacterGenderOption[] = [{
-    id: 'default:male',
-    key: 'male',
-    label: 'Male',
-}, {
-    id: 'default:female',
-    key: 'female',
-    label: 'Female',
-}];
+const DEFAULT_CHARACTER_GENDER_OPTIONS: CharacterGenderOption[] = [
+    {
+        id: 'default:male',
+        key: 'male',
+        label: 'Male',
+    }, {
+        id: 'default:female',
+        key: 'female',
+        label: 'Female',
+    },
+];
 
 const mergeCharacterGenderOptions = (options: CharacterGenderOption[]): CharacterGenderOption[] => {
     const byKey = new Map<string, CharacterGenderOption>();
@@ -125,10 +127,9 @@ export const useCharacterState = ({
 
         const loadCharacters = async () => {
             try {
-                const [storedCharacters, storedGenderOptions] = await Promise.all([
-                    scriptRepository.listScriptCharacters(currentScriptId),
-                    scriptRepository.listScriptCharacterGenders(currentScriptId),
-                ]);
+                const listCharactersRequest = scriptRepository.listScriptCharacters(currentScriptId);
+                const listGendersRequest = scriptRepository.listScriptCharacterGenders(currentScriptId);
+                const [storedCharacters, storedGenderOptions] = await Promise.all([listCharactersRequest, listGendersRequest]);
 
                 if (!isActive) {
                     return;

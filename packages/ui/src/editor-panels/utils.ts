@@ -1,4 +1,4 @@
-import type {CharacterCountItem as EditorSidebarCharacter} from '@stagistic/script-core';
+import type {EditorSidebarCharacter} from './types';
 
 export const isInlineInteractiveTarget = (target: EventTarget | null) => {
     if (!(target instanceof HTMLElement)) {

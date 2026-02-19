@@ -12,12 +12,12 @@ import type {
     PendingPressState,
 } from './types';
 
-type UsePointerDragStateArgs = {
+interface UsePointerDragStateArgs {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
     applyPreviewMove: (beforeBlockId: string | null) => void,
     clearDraggedSourceHighlight: () => void,
-};
+}
 
 export const usePointerDragState = ({
     editor,

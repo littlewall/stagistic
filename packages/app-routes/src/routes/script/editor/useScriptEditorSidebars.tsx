@@ -4,10 +4,10 @@ import {useMemo} from 'react';
 
 import {ScriptStructureSidebar} from './structure';
 
-type UseScriptEditorSidebarsArgs = {
+interface UseScriptEditorSidebarsArgs {
     structureSidebarProps: ComponentProps<typeof ScriptStructureSidebar>,
     characterSidebarProps: ComponentProps<typeof EditorSidebar>,
-};
+}
 
 export const useScriptEditorSidebars = ({
     structureSidebarProps,

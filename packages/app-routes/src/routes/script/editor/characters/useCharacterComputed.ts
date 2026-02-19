@@ -24,11 +24,11 @@ import {
     normalizeCharacterDisplayName,
 } from './index';
 import type {
-    CharacterCountItem,
+    EditorSidebarCharacter,
     ScriptCharacterRecord,
 } from './types';
 
-type UseCharacterComputedArgs = {
+interface UseCharacterComputedArgs {
     confirmedCharacterRecords: ScriptCharacterRecord[],
     confirmingCharacterKeys: string[],
     deletingCharacterIds: string[],
@@ -40,17 +40,17 @@ type UseCharacterComputedArgs = {
     initialValue: ScriptDocument | null | undefined,
     resolvedScriptSettings: EditorSettings,
     characterColorSaturation: number,
-};
+}
 
-export type CharacterComputed = {
+export interface CharacterComputed {
     normalizedConfirmedCharacterRecords: ScriptCharacterRecord[],
-    confirmedCharacters: CharacterCountItem[],
-    unconfirmedCharacters: CharacterCountItem[],
+    confirmedCharacters: EditorSidebarCharacter[],
+    unconfirmedCharacters: EditorSidebarCharacter[],
     confirmedCharactersById: Map<string, ScriptCharacterRecord>,
     confirmedCharacterSet: Set<string>,
     getCharacterNameForBlockType: (name: string, blockType: unknown) => string,
     normalizeCharacterNameForInlineInput: (name: string) => string,
-};
+}
 
 export const useCharacterComputed = ({
     confirmedCharacterRecords,
@@ -153,7 +153,7 @@ export const useCharacterComputed = ({
         [normalizedConfirmedCharacterKeys],
     );
 
-    const confirmedCharacters = useMemo<CharacterCountItem[]>(
+    const confirmedCharacters = useMemo<EditorSidebarCharacter[]>(
         () => normalizedConfirmedCharacterRecords.map(character => {
             const normalizedColorHex = normalizeCharacterColorHex(character.colorHex);
 
@@ -189,7 +189,7 @@ export const useCharacterComputed = ({
         ],
     );
 
-    const unconfirmedCharacters = useMemo<CharacterCountItem[]>(
+    const unconfirmedCharacters = useMemo<EditorSidebarCharacter[]>(
         () => Array.from(scriptCharacterStats.unconfirmedCountsByKey.entries())
             .filter(([key]) => !confirmedCharacterSet.has(key))
             .filter(([key]) => !renamingCharacterKeySet.has(key))

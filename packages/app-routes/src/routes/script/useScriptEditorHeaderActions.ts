@@ -1,14 +1,17 @@
+import type {ScriptListItem} from '@stagistic/app-core';
 import {
     useCallback,
 } from 'react';
 import {type NavigateFunction} from 'react-router-dom';
 
-type HeaderActionsParams = {
+import type {CurrentScriptItem} from './types';
+
+interface HeaderActionsParams {
     navigate: NavigateFunction,
-    currentScript: {id: string, name: string} | null,
+    currentScript: CurrentScriptItem | null,
     openSettingsModal: () => void,
     openNewScript: () => void,
-};
+}
 
 export const useScriptEditorHeaderActions = ({
     navigate,
@@ -16,7 +19,7 @@ export const useScriptEditorHeaderActions = ({
     openSettingsModal,
     openNewScript,
 }: HeaderActionsParams) => {
-    const handleSelectScript = useCallback((script: {id: string}) => {
+    const handleSelectScript = useCallback((script: ScriptListItem) => {
         void navigate(`/script/${script.id}/editor`);
     }, [navigate]);
     const handleHome = useCallback(() => {

@@ -1,9 +1,9 @@
-import type {CharacterCountItem as EditorSidebarCharacter} from '@stagistic/script-core';
 import {NavArrowDown, NavArrowRight} from 'iconoir-react';
 import type {ComponentProps, RefObject} from 'react';
 import {Tooltip, TooltipTrigger} from 'react-aria-components';
 
 import styles from '../EditorSidebar.module.css';
+import type {EditorSidebarCharacter} from '../types';
 import {isInlineInteractiveTarget} from '../utils';
 import {CharacterColorPopover} from './CharacterColorPopover';
 

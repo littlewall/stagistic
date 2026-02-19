@@ -5,10 +5,17 @@ import {
     scriptConfigs,
 } from '../../schema';
 import type {DbClient} from '../types';
+import type {
+    DeleteScriptConfigPayload,
+    InsertScriptConfigPayload,
+    ReplaceScriptConfigBlocksPayload,
+    ScriptConfigLookupPayload,
+    UpdateScriptConfigPayload,
+} from './payloads';
 
 export const getScriptConfigMeta = async (
     db: DbClient,
-    payload: {scriptId: string, namespace: string},
+    payload: ScriptConfigLookupPayload,
 ) => {
     const rows = await db
         .select()
@@ -22,15 +29,7 @@ export const getScriptConfigMeta = async (
     return rows[0] ?? null;
 };
 
-export const insertScriptConfig = async (db: DbClient, payload: {
-    id: string,
-    scriptId: string,
-    namespace: string,
-    payloadJson: string | null,
-    createdAt: number,
-    updatedAt: number,
-    schemaVersion: number,
-}) => {
+export const insertScriptConfig = async (db: DbClient, payload: InsertScriptConfigPayload) => {
     await db.insert(scriptConfigs).values({
         id: payload.id,
         scriptId: payload.scriptId,
@@ -42,12 +41,7 @@ export const insertScriptConfig = async (db: DbClient, payload: {
     });
 };
 
-export const updateScriptConfig = async (db: DbClient, payload: {
-    id: string,
-    payloadJson: string | null,
-    updatedAt: number,
-    schemaVersion: number,
-}) => {
+export const updateScriptConfig = async (db: DbClient, payload: UpdateScriptConfigPayload) => {
     await db
         .update(scriptConfigs)
         .set({
@@ -58,10 +52,7 @@ export const updateScriptConfig = async (db: DbClient, payload: {
         .where(eq(scriptConfigs.id, payload.id));
 };
 
-export const deleteScriptConfig = async (db: DbClient, payload: {
-    scriptId: string,
-    namespace: string,
-}) => {
+export const deleteScriptConfig = async (db: DbClient, payload: DeleteScriptConfigPayload) => {
     await db
         .delete(scriptConfigs)
         .where(and(
@@ -77,26 +68,7 @@ export const listScriptConfigBlocks = async (db: DbClient, configId: string) => 
         .where(eq(scriptConfigBlocks.configId, configId));
 };
 
-export const replaceScriptConfigBlocks = async (db: DbClient, payload: {
-    configId: string,
-    rows: Array<{
-        id: string,
-        blockType: string,
-        spacingBeforeMillis: number | null,
-        lineHeightMillis: number | null,
-        indentLeftChars: number | null,
-        indentRightChars: number | null,
-        shortcut: string | null,
-        nextElement: string | null,
-        textAlign: string | null,
-        casing: string | null,
-        isBold: boolean | null,
-        isItalic: boolean | null,
-        isUnderline: boolean | null,
-        createdAt: number,
-        updatedAt: number,
-    }>,
-}) => {
+export const replaceScriptConfigBlocks = async (db: DbClient, payload: ReplaceScriptConfigBlocksPayload) => {
     await db.delete(scriptConfigBlocks).where(eq(scriptConfigBlocks.configId, payload.configId));
 
     if (payload.rows.length === 0) {

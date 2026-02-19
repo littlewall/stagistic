@@ -7,21 +7,13 @@ import {
     useState,
 } from 'react';
 
+import {toScriptListItem} from './mappers';
 import {useScriptRepository} from './ScriptRepositoryProvider';
 import {onScriptsInvalidated} from './scriptsEvents';
-
-type ScriptListItem = {
-    id: string,
-    name: string,
-};
-
-type ScriptSummaryState = {
-    script: ScriptListItem | null,
-    summary: ScriptSummary | null,
-    isLoading: boolean,
-    error: Error | null,
-    refresh: () => void,
-};
+import type {
+    ScriptListItem,
+    ScriptSummaryState,
+} from './types';
 
 export const useScriptSummary = (scriptId?: string | null): ScriptSummaryState => {
     const repository = useScriptRepository();
@@ -78,12 +70,7 @@ export const useScriptSummary = (scriptId?: string | null): ScriptSummaryState =
     }, [load]);
 
     const script = useMemo<ScriptListItem | null>(
-        () => summary
-            ? {
-                id: summary.id,
-                name: summary.title,
-            }
-            : null,
+        () => summary ? toScriptListItem(summary) : null,
         [summary],
     );
 

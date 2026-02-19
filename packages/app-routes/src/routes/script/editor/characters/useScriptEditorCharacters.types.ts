@@ -6,27 +6,27 @@ import {
 
 import type {
     CharacterGenderOption,
-    CharacterCountItem,
+    EditorSidebarCharacter,
     ScriptCharacterRecord,
 } from './types';
 
 export type ScriptRepository = ReturnType<typeof useScriptRepository>;
 
-export type UseScriptEditorCharactersArgs = {
+export interface UseScriptEditorCharactersArgs {
     currentScriptId: string | null,
     scriptRepository: ScriptRepository,
     initialValue: ScriptDocument | null | undefined,
     resolvedScriptSettings: EditorSettings,
     characterColorSaturation: number,
     handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
-};
+}
 
-export type UseScriptEditorCharactersResult = {
+export interface UseScriptEditorCharactersResult {
     editorValue: ScriptDocument | null,
     editorOverrideValue: ScriptDocument | null,
     normalizedConfirmedCharacterRecords: ScriptCharacterRecord[],
-    confirmedCharacters: CharacterCountItem[],
-    unconfirmedCharacters: CharacterCountItem[],
+    confirmedCharacters: EditorSidebarCharacter[],
+    unconfirmedCharacters: EditorSidebarCharacter[],
     characterGenderOptions: CharacterGenderOption[],
     isCharactersLoading: boolean,
     handleEditorValueChange: (value: ScriptDocument) => void,
@@ -46,4 +46,4 @@ export type UseScriptEditorCharactersResult = {
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
     handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,
-};
+}
