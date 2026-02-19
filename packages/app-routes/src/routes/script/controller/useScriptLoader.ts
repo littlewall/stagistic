@@ -11,7 +11,7 @@ import {
     useState,
 } from 'react';
 
-const EDITOR_SETTINGS_NAMESPACE = 'editor';
+import {EDITOR_SETTINGS_NAMESPACE} from './constants';
 
 type ScriptLoaderResult = {
     initialValue: ScriptDocument | null | undefined,

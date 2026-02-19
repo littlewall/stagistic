@@ -74,6 +74,51 @@ export const getActiveFountainBlockFromState = (
     nodeName = FOUNTAIN_BLOCK_NODE_NAME,
 ) => getFountainBlockAtResolvedPosition(state.selection.$from, nodeName);
 
+export const findFountainBlockByIdFromState = (
+    state: EditorState,
+    blockId: string,
+    nodeName = FOUNTAIN_BLOCK_NODE_NAME,
+): ActiveFountainBlock | null => {
+    let resolvedBlock: ActiveFountainBlock | null = null;
+
+    state.doc.descendants((node, pos) => {
+        if (resolvedBlock) {
+            return false;
+        }
+
+        if (node.type.name !== nodeName) {
+            return true;
+        }
+
+        if (node.attrs?.id !== blockId) {
+            return false;
+        }
+
+        resolvedBlock = {
+            pos,
+            from: pos + 1,
+            to: pos + node.nodeSize - 1,
+            node,
+            blockType: normalizeFountainBlockType(node.attrs.blockType),
+            id: ensureFountainBlockId(node.attrs.id),
+        };
+
+        return false;
+    });
+
+    return resolvedBlock;
+};
+
+export const findFountainBlockSelectionPosFromState = (
+    state: EditorState,
+    blockId: string,
+    nodeName = FOUNTAIN_BLOCK_NODE_NAME,
+) => {
+    const block = findFountainBlockByIdFromState(state, blockId, nodeName);
+
+    return block ? block.from : null;
+};
+
 export const getSelectionBlockEntries = (
     state: EditorState,
     nodeName = FOUNTAIN_BLOCK_NODE_NAME,

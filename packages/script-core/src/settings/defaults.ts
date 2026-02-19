@@ -29,7 +29,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
     },
     typography: {
         fontSizePx: 16,
-        lineHeight: 1.0,
+        lineHeight: 1.2,
     },
     visual: {
         characterColorSaturation: CHARACTER_COLOR_SATURATION_DEFAULT,
@@ -58,7 +58,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
     blocks: {
         [ELEMENT_ACTION]: {
             spacingBeforeEm: 1.0,
-            lineHeight: 1.0,
+            lineHeight: 1.2,
             shortcut: '2',
             nextElement: ELEMENT_ACTION,
             textAlign: 'left',
@@ -69,7 +69,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         },
         [ELEMENT_ACT]: {
             spacingBeforeEm: 1.0,
-            lineHeight: 1.0,
+            lineHeight: 1.2,
             nextElement: ELEMENT_SCENE_HEADING,
             textAlign: 'left',
             casing: 'uppercase',
@@ -79,7 +79,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         },
         [ELEMENT_SCENE_HEADING]: {
             spacingBeforeEm: 2.0,
-            lineHeight: 1.0,
+            lineHeight: 1.2,
             shortcut: '1',
             nextElement: ELEMENT_ACTION,
             textAlign: 'left',
@@ -90,7 +90,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         },
         [ELEMENT_CHARACTER]: {
             spacingBeforeEm: 1.0,
-            lineHeight: 1.0,
+            lineHeight: 1.2,
             indentLeftChars: 20,
             indentRightChars: 3,
             shortcut: '3',
@@ -103,7 +103,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         },
         [ELEMENT_DUAL_DIALOGUE_CHARACTER]: {
             spacingBeforeEm: 1.0,
-            lineHeight: 1.0,
+            lineHeight: 1.2,
             indentLeftChars: 20,
             indentRightChars: 3,
             shortcut: '9',
@@ -116,7 +116,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         },
         [ELEMENT_PARENTHETICAL]: {
             spacingBeforeEm: 0,
-            lineHeight: 1.0,
+            lineHeight: 1.2,
             indentLeftChars: 16,
             indentRightChars: 21,
             shortcut: '4',
@@ -129,7 +129,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         },
         [ELEMENT_DIALOGUE]: {
             spacingBeforeEm: 0,
-            lineHeight: 1.0,
+            lineHeight: 1.2,
             indentLeftChars: 10,
             indentRightChars: 3,
             shortcut: '5',
@@ -142,7 +142,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         },
         [ELEMENT_DUAL_DIALOGUE]: {
             spacingBeforeEm: 0,
-            lineHeight: 1.0,
+            lineHeight: 1.2,
             indentLeftChars: 10,
             indentRightChars: 3,
             shortcut: '5',
@@ -155,7 +155,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         },
         [ELEMENT_TRANSITION]: {
             spacingBeforeEm: 1.0,
-            lineHeight: 1.0,
+            lineHeight: 1.2,
             indentRightChars: 5,
             shortcut: '6',
             nextElement: ELEMENT_SCENE_HEADING,
@@ -167,7 +167,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         },
         [ELEMENT_LYRICS]: {
             spacingBeforeEm: 0,
-            lineHeight: 1.0,
+            lineHeight: 1.2,
             indentLeftChars: 10,
             indentRightChars: 10,
             shortcut: '7',
@@ -180,7 +180,7 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         },
         [ELEMENT_NOTE]: {
             spacingBeforeEm: 1.0,
-            lineHeight: 1.0,
+            lineHeight: 1.2,
             shortcut: '0',
             nextElement: ELEMENT_ACTION,
             textAlign: 'left',

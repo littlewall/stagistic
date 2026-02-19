@@ -1,5 +1,8 @@
 .overlay {
     --block-trigger-size: calc(26px * var(--size-scale));
+    --block-rail-center-left: calc(-1 * var(--block-controls-gutter)
+    - var(--space-1)
+    - (var(--block-trigger-size) / 2));
 
     pointer-events: none;
     position: absolute;
@@ -8,9 +11,7 @@
 
 .globalRail {
     position: absolute;
-    left: calc(-1 * var(--block-controls-gutter)
-    - var(--space-1)
-    - (var(--block-trigger-size) / 2));
+    left: var(--block-rail-center-left);
     width: 1px;
     opacity: .28;
     background: color-mix(in srgb, var(--color-divider) 88%, var(--color-ink-muted));
@@ -26,12 +27,15 @@
     display: inline-flex;
     gap: 0;
     align-items: center;
-    margin-left: calc(-1 * var(--block-controls-gutter, 32px));
+    margin-left: calc(-1 * var(--block-controls-gutter, 32px) - var(--space-1));
 }
 
 .trigger {
     cursor: pointer;
+    position: relative;
+    box-sizing: border-box;
     display: inline-flex;
+    flex: 0 0 var(--block-trigger-size);
     align-items: center;
     justify-content: center;
     width: var(--block-trigger-size);
@@ -42,7 +46,6 @@
     background: var(--color-surface);
     border: 1px solid var(--color-divider);
     border-radius: calc(8px * var(--size-scale));
-    transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
 }
 
 .trigger:hover {
@@ -63,12 +66,88 @@
     border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-divider));
 }
 
-.triggerIcon {
+.triggerPressing,
+.triggerPressing:hover {
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.triggerDragging,
+.triggerDragging:hover {
+    cursor: move;
+    background: transparent;
+    border-color: transparent;
+    box-shadow: none;
+}
+
+.triggerGlyph {
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: calc(16px * var(--size-scale));
     height: calc(16px * var(--size-scale));
+    flex: 0 0 auto;
+    overflow: hidden;
+}
+
+.triggerIcon,
+.dragGrip {
+    position: absolute;
+    inset: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(16px * var(--size-scale));
+    height: calc(16px * var(--size-scale));
+    flex: 0 0 calc(16px * var(--size-scale));
+}
+
+.triggerIcon {
+    visibility: visible;
+    opacity: 1;
+}
+
+.dragGrip {
+    visibility: hidden;
+    opacity: 0;
+    position: relative;
+}
+
+.triggerPressing .triggerIcon,
+.triggerDragging .triggerIcon {
+    visibility: hidden;
+    opacity: 0;
+}
+
+.triggerPressing .dragGrip,
+.triggerDragging .dragGrip {
+    visibility: visible;
+    opacity: .72;
+}
+
+.dragGrip {
+    color: color-mix(in srgb, var(--color-ink-muted) 64%, var(--color-divider));
+}
+
+.dragGrip::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: calc(2px * var(--size-scale));
+    height: calc(2px * var(--size-scale));
+    border-radius: 999px;
+    background: currentcolor;
+    transform: translate(calc(-3px * var(--size-scale)), calc(-5px * var(--size-scale)));
+    box-shadow:
+        0 calc(4px * var(--size-scale)) 0 currentcolor,
+        0 calc(8px * var(--size-scale)) 0 currentcolor,
+        calc(4px * var(--size-scale)) 0 0 currentcolor,
+        calc(4px * var(--size-scale)) calc(4px * var(--size-scale)) 0 currentcolor,
+        calc(4px * var(--size-scale)) calc(8px * var(--size-scale)) 0 currentcolor;
+    opacity: 1;
 }
 
 .triggerIcon svg,

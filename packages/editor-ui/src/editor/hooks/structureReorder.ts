@@ -205,3 +205,45 @@ export const moveSceneSegment = (
 ): MoveResult => {
     return moveSceneSegmentInNodeList(content, sourceSceneBlockId, beforeBlockId);
 };
+
+const isStructureBlockType = (blockType: unknown) => {
+    return blockType === ELEMENT_ACT || blockType === ELEMENT_SCENE_HEADING;
+};
+
+export const moveTopLevelNonStructuralBlock = (
+    content: FountainJSONContent[] | undefined,
+    sourceBlockId: string,
+    beforeBlockId: string | null,
+): MoveResult => {
+    if (!Array.isArray(content) || content.length === 0) {
+        return [content, false];
+    }
+
+    const sourceIndex = content.findIndex(node => getBlockId(node) === sourceBlockId);
+
+    if (sourceIndex < 0) {
+        return [content, false];
+    }
+
+    const sourceNode = content[sourceIndex];
+    const sourceBlockType = getBlockType(sourceNode);
+
+    if (isStructureBlockType(sourceBlockType)) {
+        return [content, false];
+    }
+
+    const withoutSource = content.slice(0, sourceIndex).concat(content.slice(sourceIndex + 1));
+    const insertionIndex = resolveInsertionIndex(withoutSource, beforeBlockId);
+
+    if (insertionIndex === null) {
+        return [content, false];
+    }
+
+    const nextNodes = withoutSource
+        .slice(0, insertionIndex)
+        .concat(sourceNode, withoutSource.slice(insertionIndex));
+
+    return isSameOrder(content, nextNodes)
+        ? [content, false]
+        : [nextNodes, true];
+};

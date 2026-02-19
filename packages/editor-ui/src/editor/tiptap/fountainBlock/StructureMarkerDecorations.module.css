@@ -9,7 +9,7 @@
     font-family: var(--font-mono);
     font-size: var(--editor-font-size, calc(13px * var(--size-scale)));
     font-weight: 400;
-    line-height: var(--editor-line-height, 1);
+    line-height: var(--editor-line-height, 1.2);
     color: var(--color-ink-muted);
     text-transform: none;
     letter-spacing: 0;
