@@ -19,10 +19,10 @@ type ContentHandlers = Pick<
     'loadLatest' | 'saveLatest' | 'loadVersion' | 'commitVersion' | 'restoreLatestFromVersion'
 >;
 
-type CreateContentHandlersArgs = {
+interface CreateContentHandlersArgs {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
-};
+}
 
 export const createContentHandlers = ({
     getDb,

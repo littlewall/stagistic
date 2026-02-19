@@ -4,17 +4,9 @@ import {
 } from 'react';
 
 import {ImportDropZone} from './importScript/ImportDropZone';
-import type {ImportPayload} from './importScript/model';
 import {useImportScriptModalState} from './importScript/useImportScriptModalState';
 import styles from './ImportScriptModal.module.css';
-
-type ImportScriptModalProps = {
-    isOpen: boolean,
-    onClose: () => void,
-    onImport: (payload: ImportPayload) => void,
-    onPickFile?: () => Promise<{fileName: string, text: string} | null>,
-    preselectedFile?: {fileName: string, text: string} | null,
-};
+import type {ImportScriptModalProps} from './types';
 
 export const ImportScriptModal = ({
     isOpen,

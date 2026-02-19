@@ -30,7 +30,7 @@ import {
 import {type SettingsSelectOption} from './SettingsSelect';
 import type {ElementSettingsPanelProps} from './types';
 
-export type ElementSettingsViewModel = {
+export interface ElementSettingsViewModel {
     spacingBefore: number,
     lineHeight: number,
     shortcut: BlockShortcut,
@@ -53,7 +53,7 @@ export type ElementSettingsViewModel = {
     lineHeightOptions: SettingsSelectOption[],
     shortcutOptions: SettingsSelectOption[],
     nextElementOptions: SettingsSelectOption[],
-};
+}
 
 export const useElementSettingsViewModel = ({
     blockType,

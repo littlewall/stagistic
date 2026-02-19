@@ -11,6 +11,7 @@ import {
     uuidv7,
 } from '@stagistic/shared';
 import type {
+    ListScriptsOptions,
     ScriptCharacterRef,
     ScriptRepository,
 } from '@stagistic/sync-core';
@@ -30,7 +31,7 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
     const getDb: GetDb = async () => dbPromise;
     const recordOutbox = createOutboxRecorder(getDb);
 
-    const listScripts = async (options?: {limit?: number}): Promise<ScriptSummary[]> => {
+    const listScripts = async (options?: ListScriptsOptions): Promise<ScriptSummary[]> => {
         const db = await getDb();
 
         return dbQueries.listScripts(db, options);

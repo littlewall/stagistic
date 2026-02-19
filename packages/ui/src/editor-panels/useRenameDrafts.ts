@@ -1,10 +1,10 @@
-import type {CharacterCountItem as EditorSidebarCharacter} from '@stagistic/script-core';
 import {
     useCallback,
     useEffect,
     useState,
 } from 'react';
 
+import type {EditorSidebarCharacter} from './types';
 import {getRenameDraftKey} from './utils';
 
 type UseRenameDraftsArgs = {

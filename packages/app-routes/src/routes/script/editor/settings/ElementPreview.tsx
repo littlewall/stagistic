@@ -14,7 +14,7 @@ import {
     formatNumeric,
 } from './math';
 
-type ElementPreviewProps = {
+interface ElementPreviewProps {
     toolbar?: ReactNode,
     previewStyle: CSSProperties,
     previewText: string,
@@ -27,7 +27,7 @@ type ElementPreviewProps = {
     contentChars: number,
     onStartChange: (value: number) => void,
     onEndChange: (value: number) => void,
-};
+}
 
 export const ElementPreview = ({
     toolbar,

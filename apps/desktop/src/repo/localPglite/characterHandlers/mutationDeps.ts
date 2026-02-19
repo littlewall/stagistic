@@ -3,7 +3,7 @@ import type {
     RecordOutbox,
 } from '../types';
 
-export type CharacterMutationDeps = {
+export interface CharacterMutationDeps {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
-};
+}

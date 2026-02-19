@@ -1,6 +1,9 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type PointerEvent as ReactPointerEvent, type RefObject, useCallback, useEffect,
+    type PointerEvent as ReactPointerEvent,
+    type RefObject,
+    useCallback,
+    useEffect,
 } from 'react';
 
 import {setActiveBlockSyncSuppressed} from '../../../hooks/useEditorActiveBlockSync';
@@ -14,14 +17,16 @@ import {collectTopLevelBlockMetrics} from './geometry';
 import type {DropLockState, OverlayAnchorStyle} from './types';
 import {useDragRuntimeEffects} from './useDragRuntimeEffects';
 import {usePointerDragState} from './usePointerDragState';
-type OverlayStateForDrag = {
+
+interface DragInteractionOverlayState {
     blockId: string,
     blockType: FountainBlockType,
-};
-type UsePointerDragInteractionArgs = {
+}
+
+interface UsePointerDragInteractionArgs {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
-    activeOverlayState: OverlayStateForDrag | null,
+    activeOverlayState: DragInteractionOverlayState | null,
     isMenuDisabledBlock: boolean,
     closeMenu: () => void,
     toggleMenu: () => void,
@@ -35,7 +40,7 @@ type UsePointerDragInteractionArgs = {
     resolveOverlayStyleForBlockId: (blockId: string) => OverlayAnchorStyle | null,
     getLastDragOverlayStyle: () => OverlayAnchorStyle | null,
     setDropLock: (value: DropLockState | null) => void,
-};
+}
 export const usePointerDragInteraction = ({
     editor,
     canvasRef,

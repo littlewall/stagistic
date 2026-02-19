@@ -1,15 +1,9 @@
 import {
-    type RefObject,
     useLayoutEffect,
     useState,
 } from 'react';
 
-type UseMenuPlacementArgs = {
-    isMenuOpen: boolean,
-    canvasRef: RefObject<HTMLElement | null>,
-    triggerRef: RefObject<HTMLButtonElement | null>,
-    menuRef: RefObject<HTMLDivElement | null>,
-};
+import type {UseMenuPlacementArgs} from './types';
 
 export const useMenuPlacement = ({
     isMenuOpen,

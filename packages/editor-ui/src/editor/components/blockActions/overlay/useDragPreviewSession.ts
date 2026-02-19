@@ -13,9 +13,9 @@ import {moveTopLevelNonStructuralBlock} from '../../../hooks/structureReorder';
 import {findFountainBlockSelectionPosFromState} from '../../../tiptap/fountainCore';
 import type {DragSessionState} from './types';
 
-type UseDragPreviewSessionArgs = {
+interface UseDragPreviewSessionArgs {
     editor: TiptapEditor | null,
-};
+}
 
 export const useDragPreviewSession = ({editor}: UseDragPreviewSessionArgs) => {
     const dragSessionRef = useRef<DragSessionState | null>(null);

@@ -1,5 +1,4 @@
 export type {
-    CharacterCountItem,
     ScriptCharacterRecord,
     ScriptCharacterStats,
 } from '@stagistic/script-core';
@@ -11,3 +10,4 @@ export {
     replaceCharacterRefIdInScriptDocument,
     unlinkCharacterRefInScriptDocument,
 } from '@stagistic/script-core';
+export type {EditorSidebarCharacter} from '@stagistic/ui';

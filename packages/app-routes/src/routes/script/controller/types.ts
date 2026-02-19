@@ -4,6 +4,8 @@ import type {
 } from '@stagistic/script-core';
 import type {ScriptSyncState} from '@stagistic/ui';
 
+import type {CurrentScriptItem} from '../types';
+
 export type EditorLoadState = {
     progress: number,
     statusText: string,
@@ -13,9 +15,9 @@ export type EditorLoadState = {
 export type ScriptEditorController = {
     scriptsLoading: boolean,
     scriptsError: unknown,
-    currentScript: {id: string, name: string} | null,
+    currentScript: CurrentScriptItem | null,
     currentScriptId: string | null,
-    recentScripts: {id: string, name: string}[],
+    recentScripts: CurrentScriptItem[],
     initialValue: ScriptDocument | null | undefined,
     scriptSettingsOverride: EditorSettingsOverride | null | undefined,
     storageError: string | null,

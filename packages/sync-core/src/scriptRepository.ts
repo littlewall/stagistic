@@ -1,24 +1,24 @@
-import type {ScriptSummary} from '@stagistic/db';
+import type {
+    ScriptCharacterGenderOption,
+    ScriptCharacterRef,
+    ScriptSummary,
+} from '@stagistic/db';
 import type {
     EditorSettingsOverride,
     ScriptDocument,
 } from '@stagistic/script-core';
 
-export type ScriptCharacterRef = {
-    id: string,
-    key: string,
-    colorHex?: string | null,
-    genderKey?: string | null,
-};
+export type {
+    ScriptCharacterGenderOption,
+    ScriptCharacterRef,
+} from '@stagistic/db';
 
-export type ScriptCharacterGenderOption = {
-    id: string,
-    key: string,
-    label: string,
-};
+export interface ListScriptsOptions {
+    limit?: number,
+}
 
 export interface ScriptRepository {
-    listScripts(options?: {limit?: number}): Promise<ScriptSummary[]>,
+    listScripts(options?: ListScriptsOptions): Promise<ScriptSummary[]>,
     getScriptSummary(scriptId: string): Promise<ScriptSummary | null>,
     listScriptCharacters(scriptId: string): Promise<ScriptCharacterRef[]>,
     listScriptCharacterGenders(scriptId: string): Promise<ScriptCharacterGenderOption[]>,

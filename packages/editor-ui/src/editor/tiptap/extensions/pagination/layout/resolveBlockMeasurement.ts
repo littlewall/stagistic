@@ -5,7 +5,7 @@ import {getBlockKey} from '../measure/getBlockKey';
 import {measureBlockHeight} from '../measure/measureBlockHeight';
 import type {BlockCacheEntry} from '../types';
 
-type ResolveBlockMeasurementArgs = {
+interface ResolveBlockMeasurementArgs {
     view: EditorView,
     node: ProseMirrorNode,
     pos: number,
@@ -13,7 +13,7 @@ type ResolveBlockMeasurementArgs = {
     cache: Map<string, BlockCacheEntry>,
     nextCache: Map<string, BlockCacheEntry>,
     fallbackHeight: number,
-};
+}
 
 export const resolveBlockMeasurement = ({
     view,

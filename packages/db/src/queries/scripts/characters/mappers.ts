@@ -1,20 +1,20 @@
 import type {
     ScriptCharacterGenderOption,
     ScriptCharacterRef,
-} from './types';
+} from '../../../types';
 
-type ScriptCharacterRow = {
+interface ScriptCharacterRow {
     id: string,
     characterKey: string,
     colorHex: string | null,
     genderKey: string | null,
-};
+}
 
-type ScriptCharacterGenderRow = {
+interface ScriptCharacterGenderRow {
     id: string,
     genderKey: string,
     genderLabel: string,
-};
+}
 
 export const mapCharacterRow = (row: ScriptCharacterRow): ScriptCharacterRef => {
     return {

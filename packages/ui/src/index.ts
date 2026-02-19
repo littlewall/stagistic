@@ -17,10 +17,14 @@ export {
 export {EditorSidebar, type EditorSidebarCharacter} from './editor-panels/EditorSidebar';
 export {ProgressBar} from './feedback/ProgressBar';
 export {ProgressPanel} from './feedback/ProgressPanel';
-export {ToastProvider, useToastController} from './feedback/ToastProvider';
+export {
+    type ToastContent,
+    ToastProvider,
+    useToastController,
+} from './feedback/ToastProvider';
 export {
     AppHeader,
-    type Script,
+    type ScriptListItem,
     type ScriptSyncState,
 } from './layout/AppHeader';
 export {AppLayout} from './layout/AppLayout';

@@ -16,7 +16,7 @@ export type CharacterHandlers = Pick<
     | 'upsertScriptCharacterGender'
 >;
 
-export type CreateCharacterHandlersArgs = {
+export interface CreateCharacterHandlersArgs {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
-};
+}

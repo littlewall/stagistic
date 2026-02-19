@@ -24,10 +24,10 @@ const SATURATION_OPTIONS: SettingsSelectOption[] = CHARACTER_COLOR_SATURATION_OP
     label: `${value}%`,
 }));
 
-type VisualPreferencesSettingsPanelProps = {
+interface VisualPreferencesSettingsPanelProps {
     characterColorSaturation: number,
     onUpdateCharacterColorSaturation: (value: number) => void,
-};
+}
 
 export const VisualPreferencesSettingsPanel = ({
     characterColorSaturation,

@@ -142,13 +142,13 @@ export const resolveOverlayStyleForBlockId = (
     };
 };
 
-type ResolveDropLocationArgs = {
+interface ResolveDropLocationArgs {
     sourceBlockId: string,
     pointerClientY: number,
     editor: TiptapEditor,
     canvas: HTMLElement,
     dragDisabledBlockTypes: Set<unknown>,
-};
+}
 
 export const resolveDropLocation = ({
     sourceBlockId,

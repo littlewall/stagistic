@@ -20,25 +20,29 @@ import type {
     OverlayAnchorStyle,
 } from './types';
 
-type OverlayStateFromSelection = {
+interface SelectionOverlayState {
     style: CSSProperties,
     blockType: FountainBlockType,
     blockId: string,
-} | null;
+}
 
-type RailAnchorState = {
+interface SelectionRailAnchorState {
     style: CSSProperties,
-} | null;
+}
 
-type UseOverlayDisplayStateArgs = {
+type SelectionOverlayStateOrNull = SelectionOverlayState | null;
+
+type SelectionRailAnchorStateOrNull = SelectionRailAnchorState | null;
+
+interface UseOverlayDisplayStateArgs {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
     activeDrag: ActiveDragState | null,
     dropLock: DropLockState | null,
     setDropLock: (value: DropLockState | null | ((current: DropLockState | null) => DropLockState | null)) => void,
-    overlayStateFromSelection: OverlayStateFromSelection,
-    railAnchorStateFromSelection: RailAnchorState,
-};
+    overlayStateFromSelection: SelectionOverlayStateOrNull,
+    railAnchorStateFromSelection: SelectionRailAnchorStateOrNull,
+}
 
 export const useOverlayDisplayState = ({
     editor,

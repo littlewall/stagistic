@@ -2,6 +2,10 @@ import type {EditorSettingsOverride, ScriptDocument} from '@stagistic/script-cor
 import type {ScriptSyncState} from '@stagistic/ui';
 import {useCallback} from 'react';
 
+import type {
+    AppToastPayload,
+    CurrentScriptItem,
+} from '../types';
 import {EDITOR_SETTINGS_NAMESPACE} from './constants';
 import {isEditorSettingsOverrideEmpty} from './types';
 
@@ -23,13 +27,11 @@ type SaveRepository = {
 };
 
 type UseScriptSaveHandlersArgs = {
-    currentScript: {id: string, name: string} | null,
+    currentScript: CurrentScriptItem | null,
     currentScriptId: string | null,
     scriptRepository: SaveRepository,
     setStorageError: (value: string | null) => void,
-    addToast: (payload: {
-        title: string, description?: string, variant?: 'success' | 'error',
-    }) => void,
+    addToast: (payload: AppToastPayload) => void,
     setScriptSettingsOverride: (value: EditorSettingsOverride | null) => void,
     settingsSaveRequestRef: {current: number},
     saveIndicatorControls: SaveIndicatorControls,

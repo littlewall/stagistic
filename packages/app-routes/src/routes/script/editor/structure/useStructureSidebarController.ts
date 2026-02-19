@@ -1,7 +1,6 @@
 import {
     collectStructureBlocks,
     ELEMENT_ACT,
-    type ScriptDocument,
 } from '@stagistic/script-core';
 import {
     useCallback,
@@ -10,15 +9,7 @@ import {
     useState,
 } from 'react';
 
-type ActiveBlockRepository = {
-    setActiveBlock: (scriptId: string, blockId: string | null) => Promise<unknown>,
-};
-
-type UseStructureSidebarControllerArgs = {
-    currentScriptId: string | null,
-    scriptRepository: ActiveBlockRepository,
-    sourceValue: ScriptDocument | null | undefined,
-};
+import type {UseStructureSidebarControllerArgs} from './types';
 
 export const useStructureSidebarController = ({
     currentScriptId,

@@ -1,9 +1,9 @@
 import styles from '../../ScriptEditorRoute.module.css';
 import {panelDescriptions} from './constants';
 
-type PlaceholderSettingsPanelProps = {
+interface PlaceholderSettingsPanelProps {
     panelId: string,
-};
+}
 
 export const PlaceholderSettingsPanel = ({panelId}: PlaceholderSettingsPanelProps) => {
     const panel = panelDescriptions[panelId];

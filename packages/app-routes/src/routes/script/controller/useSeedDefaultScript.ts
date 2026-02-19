@@ -11,14 +11,10 @@ import {
 } from 'react';
 import {type NavigateFunction} from 'react-router-dom';
 
+import type {AppToastPayload} from '../types';
+
 const DEFAULT_SCRIPT_TITLE = 'Untitled script';
 const SEED_COOLDOWN_MS = 5000;
-
-type ToastPayload = {
-    title: string,
-    description?: string,
-    variant: 'success' | 'error' | 'info',
-};
 
 type SeedDefaultScriptRepository = {
     createScript: (title: string, initialContent?: ScriptDocument) => Promise<string>,
@@ -29,7 +25,7 @@ export const useSeedDefaultScript = (
     scriptRepository: SeedDefaultScriptRepository,
     refreshRecentScripts: () => Promise<void>,
     navigate: NavigateFunction,
-    addToast: (toast: ToastPayload) => void,
+    addToast: (toast: AppToastPayload) => void,
     setStorageError: (value: string | null) => void,
 ) => {
     const seedStateRef = useRef({

@@ -11,19 +11,11 @@ import {
 import {
     type DropEvent,
     getFileBaseName,
-    type ImportPayload,
     isFileDropItem,
     isFountainFileName,
     type SelectedFile,
 } from './model';
-
-type UseImportScriptModalStateArgs = {
-    isOpen: boolean,
-    onClose: () => void,
-    onImport: (payload: ImportPayload) => void,
-    onPickFile?: () => Promise<{fileName: string, text: string} | null>,
-    preselectedFile?: {fileName: string, text: string} | null,
-};
+import type {UseImportScriptModalStateArgs} from './types';
 
 export const useImportScriptModalState = ({
     isOpen,

@@ -7,10 +7,10 @@ import {
     removePendingValue,
 } from './utils';
 
-type UseSetCharacterColorArgs = CharacterActionSharedArgs & {
+interface UseSetCharacterColorArgs extends CharacterActionSharedArgs {
     confirmedCharactersById: ReadonlyMap<string, ScriptCharacterRecord>,
     setColorUpdatingCharacterIds: SetStringArrayState,
-};
+}
 
 export const useSetCharacterColor = ({
     currentScriptId,

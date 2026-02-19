@@ -5,16 +5,19 @@ import {
 
 import {scriptCharacters} from '../../../schema';
 import type {DbClient} from '../../types';
+import type {
+    DeleteScriptCharacterPayload,
+    TouchScriptCharacterPayload,
+    UpdateScriptCharacterColorPayload,
+    UpdateScriptCharacterGenderPayload,
+    UpdateScriptCharacterKeyPayload,
+    UpsertScriptCharacterPayload,
+} from '../payloads';
 
-export const upsertScriptCharacter = async (db: DbClient, payload: {
-    id: string,
-    scriptId: string,
-    characterKey: string,
-    colorHex?: string | null,
-    genderKey?: string | null,
-    createdAt: number,
-    updatedAt: number,
-}) => {
+export const upsertScriptCharacter = async (
+    db: DbClient,
+    payload: UpsertScriptCharacterPayload,
+) => {
     await db
         .insert(scriptCharacters)
         .values({
@@ -34,10 +37,10 @@ export const upsertScriptCharacter = async (db: DbClient, payload: {
         });
 };
 
-export const deleteScriptCharacter = async (db: DbClient, payload: {
-    scriptId: string,
-    characterId: string,
-}) => {
+export const deleteScriptCharacter = async (
+    db: DbClient,
+    payload: DeleteScriptCharacterPayload,
+) => {
     await db
         .delete(scriptCharacters)
         .where(
@@ -48,12 +51,10 @@ export const deleteScriptCharacter = async (db: DbClient, payload: {
         );
 };
 
-export const updateScriptCharacterKey = async (db: DbClient, payload: {
-    scriptId: string,
-    characterId: string,
-    characterKey: string,
-    updatedAt: number,
-}) => {
+export const updateScriptCharacterKey = async (
+    db: DbClient,
+    payload: UpdateScriptCharacterKeyPayload,
+) => {
     await db
         .update(scriptCharacters)
         .set({
@@ -68,11 +69,10 @@ export const updateScriptCharacterKey = async (db: DbClient, payload: {
         );
 };
 
-export const touchScriptCharacter = async (db: DbClient, payload: {
-    scriptId: string,
-    characterId: string,
-    updatedAt: number,
-}) => {
+export const touchScriptCharacter = async (
+    db: DbClient,
+    payload: TouchScriptCharacterPayload,
+) => {
     await db
         .update(scriptCharacters)
         .set({
@@ -86,12 +86,10 @@ export const touchScriptCharacter = async (db: DbClient, payload: {
         );
 };
 
-export const updateScriptCharacterColor = async (db: DbClient, payload: {
-    scriptId: string,
-    characterId: string,
-    colorHex: string | null,
-    updatedAt: number,
-}) => {
+export const updateScriptCharacterColor = async (
+    db: DbClient,
+    payload: UpdateScriptCharacterColorPayload,
+) => {
     await db
         .update(scriptCharacters)
         .set({
@@ -106,12 +104,10 @@ export const updateScriptCharacterColor = async (db: DbClient, payload: {
         );
 };
 
-export const updateScriptCharacterGender = async (db: DbClient, payload: {
-    scriptId: string,
-    characterId: string,
-    genderKey: string | null,
-    updatedAt: number,
-}) => {
+export const updateScriptCharacterGender = async (
+    db: DbClient,
+    payload: UpdateScriptCharacterGenderPayload,
+) => {
     await db
         .update(scriptCharacters)
         .set({

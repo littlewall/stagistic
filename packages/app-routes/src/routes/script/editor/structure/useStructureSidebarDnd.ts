@@ -1,30 +1,11 @@
-import {DragDropProvider} from '@dnd-kit/react';
-import type {ComponentProps} from 'react';
 import {useCallback} from 'react';
 
-import type {StructureRow} from './structureRows';
-
-type SortableCandidate = {
-    id?: unknown,
-    index?: unknown,
-    sortable?: {
-        index?: unknown,
-    } | null,
-} | null | undefined;
-
-type SortableMeta = {
-    index: number | null,
-};
-
-type DragEndEvent = Parameters<NonNullable<ComponentProps<typeof DragDropProvider>['onDragEnd']>>[0];
-
-type UseStructureSidebarDndArgs = {
-    rows: StructureRow[],
-    rowByBlockId: Map<string, StructureRow>,
-    rowIndexByBlockId: Map<string, number>,
-    onReorderAct: (sourceActBlockId: string, beforeBlockId: string | null) => void,
-    onReorderScene: (sourceSceneBlockId: string, beforeBlockId: string | null) => void,
-};
+import type {
+    DragEndEvent,
+    SortableCandidate,
+    SortableMeta,
+    UseStructureSidebarDndArgs,
+} from './types';
 
 const toFiniteNumber = (value: unknown): number | null => {
     if (typeof value !== 'number' || !Number.isFinite(value)) {

@@ -1,19 +1,21 @@
-import type {FountainElementType} from '@stagistic/script-core';
 import type {
+    BlockSettingsPatch,
     EditorSettings,
-    EditorSettingsOverride,
+    FountainElementType,
+    StructureSettingsPatch,
 } from '@stagistic/script-core';
 
-export type BlockSettingsPatch = Partial<EditorSettings['blocks'][FountainElementType]>;
+export type {
+    BlockSettingsPatch,
+    StructureSettingsPatch,
+};
 
 export type UpdateBlockSettings = (
     blockType: FountainElementType,
     patch: BlockSettingsPatch,
 ) => void;
 
-export type StructureSettingsPatch = Partial<NonNullable<EditorSettingsOverride['structure']>>;
-
-export type ScriptEditorSettingsPanelProps = {
+export interface ScriptEditorSettingsPanelProps {
     panelId: string,
     resolvedScriptSettings: EditorSettings,
     blockLabelByType: Map<FountainElementType, string>,
@@ -21,12 +23,12 @@ export type ScriptEditorSettingsPanelProps = {
     onUpdateBlockSettings: UpdateBlockSettings,
     onUpdateCharacterColorSaturation: (value: number) => void,
     onUpdateStructureSettings: (patch: StructureSettingsPatch) => void,
-};
+}
 
-export type ElementSettingsPanelProps = {
+export interface ElementSettingsPanelProps {
     blockType: FountainElementType,
     blockLabel: string,
     resolvedScriptSettings: EditorSettings,
     shortcutPrefix: string,
     onUpdateBlockSettings: UpdateBlockSettings,
-};
+}

@@ -1,15 +1,15 @@
-type TauriCoreModule = {
+interface TauriCoreModule {
     isTauri: () => boolean,
-};
+}
 
-type TauriEventModule = {
+interface TauriEventModule {
     listen: <T>(
         event: string,
         handler: (payload: {payload: T}) => void,
     ) => Promise<() => void>,
-};
+}
 
-type TauriWebviewModule = {
+interface TauriWebviewModule {
     getCurrentWebview: () => {
         onDragDropEvent: (
             handler: (event: {
@@ -20,13 +20,13 @@ type TauriWebviewModule = {
             }) => void | Promise<void>,
         ) => Promise<() => void>,
     },
-};
+}
 
-type TauriFsModule = {
+interface TauriFsModule {
     readTextFile: (path: string) => Promise<string>,
-};
+}
 
-type TauriDialogModule = {
+interface TauriDialogModule {
     open: (options: {
         multiple: boolean,
         filters: Array<{
@@ -34,7 +34,7 @@ type TauriDialogModule = {
             extensions: string[],
         }>,
     }) => Promise<string | string[] | null>,
-};
+}
 
 export const isTauriRuntime = async () => {
     try {

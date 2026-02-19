@@ -14,16 +14,16 @@ import {
     removePendingValue,
 } from './utils';
 
-type UseSetCharacterGenderArgs = CharacterActionSharedArgs & {
+interface UseSetCharacterGenderArgs extends CharacterActionSharedArgs {
     confirmedCharactersById: ReadonlyMap<string, ScriptCharacterRecord>,
     setGenderUpdatingCharacterIds: SetStringArrayState,
     setCharacterGenderOptions: SetCharacterGenderOptionsState,
-};
+}
 
-type SetCharacterGenderActions = {
+interface SetCharacterGenderActions {
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
     handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,
-};
+}
 
 const mergeCharacterGenderOptions = (
     current: CharacterGenderOption[],

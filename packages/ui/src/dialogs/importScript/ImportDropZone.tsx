@@ -5,14 +5,7 @@ import {
 } from 'react-aria-components';
 
 import styles from '../ImportScriptModal.module.css';
-import type {DropEvent} from './model';
-
-type ImportDropZoneProps = {
-    fileLabel: string,
-    onDrop: (event: DropEvent) => void,
-    onFileSelect: (files: FileList | null) => void,
-    onPickFile?: () => void | Promise<void>,
-};
+import type {ImportDropZoneProps} from './types';
 
 export const ImportDropZone = ({
     fileLabel,

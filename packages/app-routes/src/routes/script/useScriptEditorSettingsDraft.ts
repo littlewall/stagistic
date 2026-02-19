@@ -5,6 +5,7 @@ import {
     type EditorSettings,
     type EditorSettingsOverride,
     mergeEditorSettings,
+    type StructureSettingsPatch,
 } from '@stagistic/script-core';
 import {
     useCallback,
@@ -26,8 +27,6 @@ type UseScriptEditorSettingsDraftArgs = {
     scriptSettingsOverride: EditorSettingsOverride | null | undefined,
     handleSaveScriptSettingsOverride: (settings?: EditorSettingsOverride) => Promise<boolean>,
 };
-
-type StructureSettingsPatch = Partial<NonNullable<EditorSettingsOverride['structure']>>;
 
 export const useScriptEditorSettingsDraft = ({
     currentScriptId,

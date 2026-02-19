@@ -5,9 +5,13 @@ import {
 } from 'drizzle-orm';
 
 import {scriptCharacters} from '../../../schema';
+import type {ScriptCharacterRef} from '../../../types';
 import type {DbClient} from '../../types';
+import type {
+    GetScriptCharacterByIdPayload,
+    GetScriptCharacterByKeyPayload,
+} from '../payloads';
 import {mapCharacterRow} from './mappers';
-import type {ScriptCharacterRef} from './types';
 
 export const listScriptCharacters = async (
     db: DbClient,
@@ -27,10 +31,10 @@ export const listScriptCharacters = async (
     return rows.map(mapCharacterRow);
 };
 
-export const getScriptCharacterByKey = async (db: DbClient, payload: {
-    scriptId: string,
-    characterKey: string,
-}): Promise<ScriptCharacterRef | null> => {
+export const getScriptCharacterByKey = async (
+    db: DbClient,
+    payload: GetScriptCharacterByKeyPayload,
+): Promise<ScriptCharacterRef | null> => {
     const rows = await db
         .select({
             id: scriptCharacters.id,
@@ -55,10 +59,10 @@ export const getScriptCharacterByKey = async (db: DbClient, payload: {
     return mapCharacterRow(row);
 };
 
-export const getScriptCharacterById = async (db: DbClient, payload: {
-    scriptId: string,
-    characterId: string,
-}): Promise<ScriptCharacterRef | null> => {
+export const getScriptCharacterById = async (
+    db: DbClient,
+    payload: GetScriptCharacterByIdPayload,
+): Promise<ScriptCharacterRef | null> => {
     const rows = await db
         .select({
             id: scriptCharacters.id,

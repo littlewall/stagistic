@@ -11,6 +11,7 @@ import {
 } from 'react';
 import {type NavigateFunction} from 'react-router-dom';
 
+import type {AppToastPayload} from '../../routes/script/types';
 import {
     isSupportedImportFileName,
     parseImportedFountainScript,
@@ -22,17 +23,11 @@ type ScriptRepositoryAdapter = {
     setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,
 };
 
-type ToastPayload = {
-    title: string,
-    description?: string,
-    variant: 'success' | 'error' | 'info',
-};
-
 type UseGlobalModalActionsArgs = {
     scriptRepository: ScriptRepositoryAdapter,
     refreshScripts: () => void,
     navigate: NavigateFunction,
-    addToast: (toast: ToastPayload) => void,
+    addToast: (toast: AppToastPayload) => void,
     pickFile: () => Promise<{fileName: string, text: string} | null>,
 };
 

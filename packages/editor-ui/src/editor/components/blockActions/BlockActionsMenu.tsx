@@ -1,8 +1,6 @@
-import {ELEMENT_ACT, type FountainElementType} from '@stagistic/script-core';
+import {ELEMENT_ACT} from '@stagistic/script-core';
 import clsx from 'clsx';
 import {
-    type MouseEvent as ReactMouseEvent,
-    type RefObject,
     useCallback,
     useEffect,
     useRef,
@@ -11,19 +9,8 @@ import {
 
 import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
 import {FOUNTAIN_BLOCKS_WITHOUT_ACT} from '../../blocks/fountainBlockRegistry';
-import {type FountainBlockType} from '../../tiptap/fountainCore';
 import styles from '../EditorBlockActionsOverlay.module.css';
-
-type BlockActionsMenuProps = {
-    blockType: FountainBlockType,
-    isMenuAbove: boolean,
-    menuRef: RefObject<HTMLDivElement | null>,
-    onMenuItemMouseDown: (
-        optionType: FountainElementType,
-        event: ReactMouseEvent<HTMLButtonElement>,
-    ) => void,
-    onActMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
-};
+import type {BlockActionsMenuProps} from './types';
 
 export const BlockActionsMenu = ({
     blockType,

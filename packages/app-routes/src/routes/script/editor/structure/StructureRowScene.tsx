@@ -5,14 +5,7 @@ import {
     ACT_DND_TYPE, SCENE_DND_TYPE, STRUCTURE_SORT_GROUP,
 } from './dnd';
 import styles from './ScriptStructureSidebar.module.css';
-import type {StructureSceneRow} from './structureRows';
-
-type StructureRowSceneProps = {
-    scene: StructureSceneRow,
-    rowIndex: number,
-    isActive: boolean,
-    onFocusBlock: (blockId: string) => void,
-};
+import type {StructureRowSceneProps} from './types';
 
 const joinClassNames = (...classNames: Array<string | false | null | undefined>) => {
     return classNames.filter(Boolean).join(' ');

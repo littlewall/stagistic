@@ -2,8 +2,6 @@ import {
     type Editor as TiptapEditor,
 } from '@tiptap/react';
 import {
-    type CSSProperties,
-    type RefObject,
     useCallback,
     useEffect,
     useLayoutEffect,
@@ -13,20 +11,14 @@ import {
 
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
-    type FountainBlockType,
     getActiveFountainBlockFromState,
     isSelectionAcrossBlocks,
 } from '../../tiptap/fountainCore';
-
-type OverlayState = {
-    style: CSSProperties,
-    blockType: FountainBlockType,
-    blockId: string,
-};
-
-type RailAnchorState = {
-    style: CSSProperties,
-};
+import type {
+    BlockActionsOverlayAnchorState,
+    BlockActionsRailAnchorState,
+    UseOverlayPositionArgs,
+} from './types';
 
 const findBlockElement = (editor: TiptapEditor, from: number) => {
     try {
@@ -53,19 +45,13 @@ const findBlockElement = (editor: TiptapEditor, from: number) => {
     return null;
 };
 
-type UseOverlayPositionArgs = {
-    editor: TiptapEditor | null,
-    canvasRef: RefObject<HTMLElement | null>,
-    isMenuOpen: boolean,
-};
-
 export const useOverlayPosition = ({
     editor,
     canvasRef,
     isMenuOpen,
 }: UseOverlayPositionArgs) => {
-    const [overlayState, setOverlayState] = useState<OverlayState | null>(null);
-    const [railAnchorState, setRailAnchorState] = useState<RailAnchorState | null>(null);
+    const [overlayState, setOverlayState] = useState<BlockActionsOverlayAnchorState | null>(null);
+    const [railAnchorState, setRailAnchorState] = useState<BlockActionsRailAnchorState | null>(null);
     const rafIdRef = useRef<number | null>(null);
 
     const updatePosition = useCallback(() => {

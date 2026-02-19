@@ -32,10 +32,10 @@ import {useMenuPlacement} from './blockActions/useMenuPlacement';
 import {useOverlayPosition} from './blockActions/useOverlayPosition';
 import styles from './EditorBlockActionsOverlay.module.css';
 
-type EditorBlockActionsOverlayProps = {
+interface EditorBlockActionsOverlayProps {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
-};
+}
 
 const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverlayProps) => {
     const triggerRef = useRef<HTMLButtonElement | null>(null);

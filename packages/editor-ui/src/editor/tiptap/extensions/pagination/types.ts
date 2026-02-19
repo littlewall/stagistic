@@ -1,15 +1,15 @@
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {type DecorationSet} from '@tiptap/pm/view';
 
-export type PageInfo = {
+export interface PageInfo {
     index: number,
     startPos: number,
     endPos: number,
     startOffset: number,
     endOffset: number,
-};
+}
 
-export type PaginationState = {
+export interface PaginationState {
     pageCount: number,
     pages: PageInfo[],
     pageHeight: number,
@@ -19,14 +19,14 @@ export type PaginationState = {
     marginBottom: number,
     marginLeft: number,
     marginRight: number,
-};
+}
 
-export type PaginationPluginState = {
+export interface PaginationPluginState {
     decorations: DecorationSet,
     pagination: PaginationState,
-};
+}
 
-export type PaginationOptions = {
+export interface PaginationOptions {
     pageHeight: number,
     pageWidth: number,
     marginTop: number,
@@ -36,34 +36,34 @@ export type PaginationOptions = {
     lineHeightPx: number,
     dividerColor: string,
     dividerThickness: number,
-};
+}
 
-export type PaginationStorage = {
+export interface PaginationStorage {
     optionsVersion: number,
     state: PaginationState,
-};
+}
 
-export type BlockCacheEntry = {
+export interface BlockCacheEntry {
     node: ProseMirrorNode,
     height: number,
     isFallback: boolean,
     hasInlineBreaks: boolean,
-};
+}
 
-export type SpacerOverlay = {
+export interface SpacerOverlay {
     moreText?: string,
     contdText?: string,
-};
+}
 
-export type BuildPaginationStateResult = {
+export interface BuildPaginationStateResult {
     decorations: DecorationSet,
     pagination: PaginationState,
     nextCache: Map<string, BlockCacheEntry>,
     hasInlineBreaks: boolean,
     usedFallbackMeasurements: boolean,
-};
+}
 
-export type PaginationExtensionAdapter = {
+export interface PaginationExtensionAdapter {
     options: PaginationOptions,
     storage: PaginationStorage,
-};
+}

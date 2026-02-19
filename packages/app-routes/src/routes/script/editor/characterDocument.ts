@@ -1,6 +1,6 @@
 export {
-    type CharacterCountItem,
     collectScriptCharacterStats,
+    type EditorSidebarCharacter,
     linkCharacterRefInScriptDocument,
     normalizeCharacterDisplayName,
     renameCharacterInScriptDocument,

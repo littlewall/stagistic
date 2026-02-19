@@ -1,35 +1,35 @@
-import {isObjectRecord} from '@stagistic/script-core';
-
-export type ImportPayload = {
+export interface ImportPayload {
     name: string,
     fileName: string,
     text: string,
-};
+}
 
-export type SelectedFile = {
+export interface SelectedFile {
     name: string,
     file?: File,
     text?: string,
-};
+}
 
-export type DropEvent = {
+export interface DropEvent {
     items: readonly unknown[],
-};
+}
 
-type FileDropItem = {
+interface FileDropItem {
     kind: 'file',
     name: string,
     getFile: () => Promise<File>,
-};
+}
 
 export const isFileDropItem = (item: unknown): item is FileDropItem => {
-    if (!isObjectRecord(item)) {
+    if (typeof item !== 'object' || item === null) {
         return false;
     }
 
-    return item.kind === 'file'
-        && typeof item.name === 'string'
-        && typeof item.getFile === 'function';
+    const candidate = item as Record<string, unknown>;
+
+    return candidate.kind === 'file'
+        && typeof candidate.name === 'string'
+        && typeof candidate.getFile === 'function';
 };
 
 export const isFountainFileName = (name: string) => {

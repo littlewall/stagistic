@@ -6,28 +6,28 @@ import {
     normalizeActName,
 } from '@stagistic/script-core';
 
-export type StructureActRow = {
+export interface StructureActRow {
     kind: 'act',
     blockId: string,
     name: string,
     index: number,
-};
+}
 
-export type StructureSceneRow = {
+export interface StructureSceneRow {
     kind: 'scene',
     blockId: string,
     title: string,
     index: number,
-};
+}
 
 export type StructureRow = StructureActRow | StructureSceneRow;
 
-export type StructureRowsState = {
+export interface StructureRowsState {
     rows: StructureRow[],
     rowByBlockId: Map<string, StructureRow>,
     rowIndexByBlockId: Map<string, number>,
     activeSceneBlockId: string | null,
-};
+}
 
 export const deriveStructureRows = (
     content: FountainJSONContent[] | undefined,

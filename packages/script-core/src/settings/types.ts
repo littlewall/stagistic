@@ -5,7 +5,7 @@ import type {
     BlockTextAlign,
 } from './options';
 
-export type BlockSpacingSettings = {
+export interface BlockSpacingSettings {
     // Unitless multiplier of current block font size.
     spacingBeforeEm?: number,
     // Preferred screenplay indentation unit used in the editor.
@@ -25,9 +25,9 @@ export type BlockSpacingSettings = {
     isBold?: boolean,
     isItalic?: boolean,
     isUnderline?: boolean,
-};
+}
 
-export type PageSettings = {
+export interface PageSettings {
     // Page box dimensions in CSS pixels.
     widthPx: number,
     heightPx: number,
@@ -42,61 +42,68 @@ export type PageSettings = {
     // Optional extra content offsets in CSS pixels.
     contentMarginTopPx?: number,
     contentMarginBottomPx?: number,
-};
+}
 
-export type TypographySettings = {
+export interface TypographySettings {
     // Base editor typography in CSS pixels + unitless line-height.
     fontSizePx: number,
     lineHeight: number,
-};
+}
 
-export type VisualSettings = {
+export interface VisualSettings {
     characterColorSaturation: number,
-};
+}
 
-export type MusicTypePrefixSettings = {
+export interface MusicTypePrefixSettings {
     start: string,
     end: string,
-};
+}
 
-export type StructureSettings = {
+export interface StructureActDisplaySettings {
+    linesBefore: number,
+    linesAfter: number,
+}
+
+export interface StructureMusicPrefixesSettings {
+    song: MusicTypePrefixSettings,
+    reprise: MusicTypePrefixSettings,
+    underscore: MusicTypePrefixSettings,
+}
+
+export interface StructureSettings {
     actPrefix: string,
-    actDisplay: {
-        linesBefore: number,
-        linesAfter: number,
-    },
-    musicPrefixes: {
-        song: MusicTypePrefixSettings,
-        reprise: MusicTypePrefixSettings,
-        underscore: MusicTypePrefixSettings,
-    },
-};
+    actDisplay: StructureActDisplaySettings,
+    musicPrefixes: StructureMusicPrefixesSettings,
+}
 
 export type BlockSettings = Record<FountainElementType, BlockSpacingSettings>;
 
-export type EditorSettings = {
+export interface EditorSettings {
     page: PageSettings,
     typography: TypographySettings,
     visual: VisualSettings,
     structure: StructureSettings,
     blocks: BlockSettings,
-};
+}
 
-export type EditorSettingsOverride = Partial<{
-    page: Partial<PageSettings>,
-    typography: Partial<TypographySettings>,
-    visual: Partial<VisualSettings>,
-    structure: Partial<{
-        actPrefix: string,
-        actDisplay: Partial<{
-            linesBefore: number,
-            linesAfter: number,
-        }>,
-        musicPrefixes: Partial<{
-            song: Partial<MusicTypePrefixSettings>,
-            reprise: Partial<MusicTypePrefixSettings>,
-            underscore: Partial<MusicTypePrefixSettings>,
-        }>,
-    }>,
-    blocks: Partial<Record<FountainElementType, Partial<BlockSpacingSettings>>>,
-}>;
+export type BlockSettingsPatch = Partial<BlockSpacingSettings>;
+
+export interface StructureMusicPrefixesPatch {
+    song?: Partial<MusicTypePrefixSettings>,
+    reprise?: Partial<MusicTypePrefixSettings>,
+    underscore?: Partial<MusicTypePrefixSettings>,
+}
+
+export interface StructureSettingsPatch {
+    actPrefix?: string,
+    actDisplay?: Partial<StructureActDisplaySettings>,
+    musicPrefixes?: StructureMusicPrefixesPatch,
+}
+
+export interface EditorSettingsOverride {
+    page?: Partial<PageSettings>,
+    typography?: Partial<TypographySettings>,
+    visual?: Partial<VisualSettings>,
+    structure?: StructureSettingsPatch,
+    blocks?: Partial<Record<FountainElementType, BlockSettingsPatch>>,
+}

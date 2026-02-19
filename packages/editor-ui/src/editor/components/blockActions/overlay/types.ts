@@ -2,44 +2,44 @@ import type {ScriptDocument} from '@stagistic/script-core';
 
 import type {FountainBlockType} from '../../../tiptap/fountainCore';
 
-export type TopLevelBlockMetrics = {
+export interface TopLevelBlockMetrics {
     id: string,
     blockType: unknown,
     top: number,
     bottom: number,
     midpoint: number,
-};
+}
 
-export type PendingPressState = {
+export interface PendingPressState {
     pointerId: number,
     startClientX: number,
     startClientY: number,
     sourceBlockId: string,
-};
+}
 
-export type ActiveDragState = {
+export interface ActiveDragState {
     pointerId: number,
     sourceBlockId: string,
     sourceBlockType: FountainBlockType,
     pointerClientY: number,
     beforeBlockId: string | null,
-};
+}
 
-export type DragSessionState = {
+export interface DragSessionState {
     sourceBlockId: string,
     baseDocument: ScriptDocument,
     lastPreviewBeforeBlockId: string | null,
     hasPreviewChange: boolean,
-};
+}
 
-export type OverlayAnchorStyle = {
+export interface OverlayAnchorStyle {
     top: number,
     left: number,
     width: number,
-};
+}
 
-export type DropLockState = {
+export interface DropLockState {
     blockId: string,
     blockType: FountainBlockType,
     style: OverlayAnchorStyle | null,
-};
+}

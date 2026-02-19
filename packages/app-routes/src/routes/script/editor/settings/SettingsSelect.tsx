@@ -9,19 +9,19 @@ import {
 
 import styles from '../../ScriptEditorRoute.module.css';
 
-export type SettingsSelectOption = {
+export interface SettingsSelectOption {
     value: number | string,
     label: string,
     icon?: ReactNode,
-};
+}
 
-type SettingsSelectProps = {
+interface SettingsSelectProps {
     id?: string,
     value: number | string,
     options: SettingsSelectOption[],
     ariaLabel: string,
     onChange: (value: number | string) => void,
-};
+}
 
 export const SettingsSelect = ({
     id,

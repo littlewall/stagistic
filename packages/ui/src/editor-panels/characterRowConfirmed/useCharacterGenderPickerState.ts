@@ -1,7 +1,3 @@
-import type {
-    CharacterCountItem as EditorSidebarCharacter,
-    CharacterGenderOption,
-} from '@stagistic/script-core';
 import {
     useEffect,
     useMemo,
@@ -10,6 +6,10 @@ import {
 } from 'react';
 
 import styles from '../EditorSidebar.module.css';
+import type {
+    CharacterGenderOption,
+    EditorSidebarCharacter,
+} from '../types';
 import {
     DEFAULT_GENDER_LABEL,
     UNSPECIFIED_GENDER_KEY,

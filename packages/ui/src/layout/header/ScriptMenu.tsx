@@ -15,11 +15,11 @@ import {
 } from 'react-aria-components';
 
 import styles from '../AppHeader.module.css';
-import type {Script} from './types';
+import type {ScriptListItem} from './types';
 
 type ScriptMenuProps = {
-    script: Script,
-    recentScripts: Script[],
+    script: ScriptListItem,
+    recentScripts: ScriptListItem[],
     onAction: (actionKey: string) => void,
 };
 
