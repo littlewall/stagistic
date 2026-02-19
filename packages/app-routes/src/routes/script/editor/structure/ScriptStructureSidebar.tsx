@@ -42,7 +42,7 @@ const renderRow = (
     if (row.kind === 'act') {
         return (
             <StructureRowAct
-                key={`${row.kind}-${row.blockId}-${row.index}`}
+                key={`${row.kind}-${row.blockId}`}
                 act={row}
                 rowIndex={rowIndex}
                 structureSettings={args.structureSettings}
@@ -57,7 +57,7 @@ const renderRow = (
 
     return (
         <StructureRowScene
-            key={`${row.kind}-${row.blockId}-${row.index}`}
+            key={`${row.kind}-${row.blockId}`}
             scene={row}
             rowIndex={rowIndex}
             isActive={row.blockId === args.activeSceneBlockId}

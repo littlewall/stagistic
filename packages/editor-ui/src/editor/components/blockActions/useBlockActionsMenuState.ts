@@ -1,6 +1,5 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type MouseEvent as ReactMouseEvent,
     type RefObject,
     useCallback,
     useEffect,
@@ -62,10 +61,7 @@ export const useBlockActionsMenuState = ({
         setIsMenuOpen(false);
     }, []);
 
-    const handleTriggerMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-
+    const toggleMenu = useCallback(() => {
         setIsMenuOpen(previous => !previous);
         editor?.commands.focus();
     }, [editor]);
@@ -73,6 +69,6 @@ export const useBlockActionsMenuState = ({
     return {
         isMenuOpen,
         closeMenu,
-        handleTriggerMouseDown,
+        toggleMenu,
     };
 };

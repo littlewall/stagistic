@@ -2,9 +2,20 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useEffect, useRef} from 'react';
 
 import {
+    findFountainBlockSelectionPosFromState,
     FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
 } from '../tiptap/fountainCore';
+
+const ACTIVE_BLOCK_SYNC_SUPPRESSED_KEY = '__activeBlockSyncSuppressed';
+
+export const setActiveBlockSyncSuppressed = (editor: TiptapEditor, suppressed: boolean) => {
+    (editor.storage as unknown as Record<string, unknown>)[ACTIVE_BLOCK_SYNC_SUPPRESSED_KEY] = suppressed;
+};
+
+const isActiveBlockSyncSuppressed = (editor: TiptapEditor) => {
+    return (editor.storage as unknown as Record<string, unknown>)[ACTIVE_BLOCK_SYNC_SUPPRESSED_KEY] === true;
+};
 
 type UseEditorActiveBlockSyncArgs = {
     editor: TiptapEditor | null,
@@ -21,6 +32,7 @@ export const useEditorActiveBlockSync = ({
     focusBlockRequest,
 }: UseEditorActiveBlockSyncArgs) => {
     const lastFocusedRequestIdRef = useRef<number | null>(null);
+    const emitFrameRef = useRef<number | null>(null);
 
     useEffect(() => {
         if (!editor || !onActiveBlockChange) {
@@ -28,10 +40,22 @@ export const useEditorActiveBlockSync = ({
         }
 
         const emitActiveBlock = () => {
-            const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
-            const blockId = activeBlock?.id ?? null;
+            if (emitFrameRef.current !== null) {
+                return;
+            }
 
-            onActiveBlockChange(blockId);
+            emitFrameRef.current = window.requestAnimationFrame(() => {
+                emitFrameRef.current = null;
+
+                if (isActiveBlockSyncSuppressed(editor)) {
+                    return;
+                }
+
+                const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+                const blockId = activeBlock?.id ?? null;
+
+                onActiveBlockChange(blockId);
+            });
         };
 
         emitActiveBlock();
@@ -41,6 +65,11 @@ export const useEditorActiveBlockSync = ({
         return () => {
             editor.off('selectionUpdate', emitActiveBlock);
             editor.off('transaction', emitActiveBlock);
+
+            if (emitFrameRef.current !== null) {
+                window.cancelAnimationFrame(emitFrameRef.current);
+                emitFrameRef.current = null;
+            }
         };
     }, [editor, onActiveBlockChange]);
 
@@ -55,21 +84,7 @@ export const useEditorActiveBlockSync = ({
 
         lastFocusedRequestIdRef.current = focusBlockRequest.requestId;
 
-        let targetPos: number | null = null;
-
-        editor.state.doc.descendants((node, pos) => {
-            if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
-                return true;
-            }
-
-            if (node.attrs.id !== focusBlockRequest.blockId) {
-                return false;
-            }
-
-            targetPos = pos + 1;
-
-            return false;
-        });
+        const targetPos = findFountainBlockSelectionPosFromState(editor.state, focusBlockRequest.blockId);
 
         if (targetPos === null) {
             return;

@@ -1,5 +1,6 @@
 import {
     ELEMENT_ACT,
+    FOUNTAIN_BLOCK_NODE_NAME,
     type FountainElementType,
 } from '@stagistic/script-core';
 import type {Editor as TiptapEditor} from '@tiptap/react';
@@ -11,12 +12,20 @@ import {
     useEffect,
     useMemo,
     useRef,
+    useState,
 } from 'react';
 
 import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
 import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
-import {FOUNTAIN_BLOCK_NODE_NAME} from '../tiptap/fountainCore';
 import {BlockActionsMenu} from './blockActions/BlockActionsMenu';
+import type {
+    ActiveDragState,
+    DropLockState,
+} from './blockActions/overlay/types';
+import {useDragPreviewSession} from './blockActions/overlay/useDragPreviewSession';
+import {useDragSourceHighlight} from './blockActions/overlay/useDragSourceHighlight';
+import {useOverlayDisplayState} from './blockActions/overlay/useOverlayDisplayState';
+import {usePointerDragInteraction} from './blockActions/overlay/usePointerDragInteraction';
 import {useActInsertCommand} from './blockActions/useActInsertCommand';
 import {useBlockActionsMenuState} from './blockActions/useBlockActionsMenuState';
 import {useMenuPlacement} from './blockActions/useMenuPlacement';
@@ -28,39 +37,97 @@ type EditorBlockActionsOverlayProps = {
     canvasRef: RefObject<HTMLElement | null>,
 };
 
-const STRUCTURE_BLOCK_TYPES = new Set([ELEMENT_ACT]);
-
 const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverlayProps) => {
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
+    const [dropLock, setDropLock] = useState<DropLockState | null>(null);
     const {
         isMenuOpen,
         closeMenu,
-        handleTriggerMouseDown,
+        toggleMenu,
     } = useBlockActionsMenuState({
         editor,
         triggerRef,
         menuRef,
     });
     const {
-        overlayState,
-        railAnchorState,
+        overlayState: overlayStateFromSelection,
+        railAnchorState: railAnchorStateFromSelection,
     } = useOverlayPosition({
         editor,
         canvasRef,
         isMenuOpen,
     });
-    const isStructureBlock = overlayState
-        ? STRUCTURE_BLOCK_TYPES.has(overlayState.blockType)
-        : false;
-    const activeOverlayState = overlayState;
-    const activeRailAnchorState = railAnchorState;
     const {isMenuAbove} = useMenuPlacement({
         isMenuOpen,
         canvasRef,
         triggerRef,
         menuRef,
     });
+    const {
+        applyDraggedSourceHighlight,
+        clearDraggedSourceHighlight,
+    } = useDragSourceHighlight();
+    const {
+        beginDragPreviewSession,
+        clearDragPreviewSession,
+        applyPreviewMove,
+        revertPreviewMove,
+        commitPreviewMove,
+    } = useDragPreviewSession({editor});
+
+    const [activeDrag, setActiveDrag] = useState<ActiveDragState | null>(null);
+    const {
+        pointerOverlayState,
+        activeOverlayState,
+        globalRailStyle,
+        isMenuDisabledPointerBlock,
+        isMenuDisabledBlock,
+        activeRailAnchorState,
+        resolveOverlayStyleForBlockId,
+        getLastDragOverlayStyle,
+    } = useOverlayDisplayState({
+        editor,
+        canvasRef,
+        activeDrag,
+        dropLock,
+        setDropLock,
+        overlayStateFromSelection,
+        railAnchorStateFromSelection,
+    });
+    const {
+        pendingPress,
+        isPressVisualActive,
+        activeDrag: activeDragState,
+        handleTriggerPointerDown,
+    } = usePointerDragInteraction({
+        editor,
+        canvasRef,
+        activeOverlayState: pointerOverlayState,
+        isMenuDisabledBlock: isMenuDisabledPointerBlock,
+        closeMenu,
+        toggleMenu,
+        applyDraggedSourceHighlight,
+        clearDraggedSourceHighlight,
+        beginDragPreviewSession,
+        clearDragPreviewSession,
+        applyPreviewMove,
+        revertPreviewMove,
+        commitPreviewMove,
+        resolveOverlayStyleForBlockId,
+        getLastDragOverlayStyle,
+        setDropLock,
+    });
+
+    useEffect(() => {
+        if (!activeDragState) {
+            setActiveDrag(null);
+
+            return;
+        }
+
+        setActiveDrag(activeDragState);
+    }, [activeDragState]);
 
     const handleActMouseDown = useActInsertCommand({
         editor,
@@ -73,16 +140,14 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
     }, [activeOverlayState?.blockId, closeMenu]);
 
     useEffect(() => {
-        if (!activeOverlayState) {
+        if (!activeOverlayState || isMenuDisabledBlock) {
             closeMenu();
         }
-    }, [activeOverlayState, closeMenu]);
-
-    useEffect(() => {
-        if (isStructureBlock) {
-            closeMenu();
-        }
-    }, [closeMenu, isStructureBlock]);
+    }, [
+        activeOverlayState,
+        closeMenu,
+        isMenuDisabledBlock,
+    ]);
 
     const activeBlockInfo = useMemo(() => {
         if (!activeOverlayState) {
@@ -97,31 +162,6 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         };
     }, [activeOverlayState]);
 
-    const globalRailStyle = useMemo(() => {
-        if (!activeRailAnchorState) {
-            return null;
-        }
-
-        const canvas = canvasRef.current;
-
-        if (!canvas) {
-            return null;
-        }
-
-        const top = typeof activeRailAnchorState.style.top === 'number'
-            ? activeRailAnchorState.style.top
-            : Number.parseFloat(String(activeRailAnchorState.style.top ?? 0));
-
-        if (!Number.isFinite(top)) {
-            return null;
-        }
-
-        return {
-            top: -top,
-            height: canvas.scrollHeight,
-        };
-    }, [activeRailAnchorState, canvasRef]);
-
     const handleMenuItemMouseDown = useCallback((
         optionType: FountainElementType,
         event: ReactMouseEvent<HTMLButtonElement>,
@@ -134,11 +174,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             return;
         }
 
-        if (optionType === activeOverlayState.blockType) {
-            return;
-        }
-
-        if (activeOverlayState.blockType === ELEMENT_ACT) {
+        if (optionType === activeOverlayState.blockType || activeOverlayState.blockType === ELEMENT_ACT) {
             return;
         }
 
@@ -181,38 +217,34 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
                         className={clsx(
                             styles.trigger,
                             isMenuOpen && styles.triggerOpen,
-                            isStructureBlock && styles.triggerNoHover,
+                            isMenuDisabledBlock && styles.triggerNoHover,
+                            isPressVisualActive && styles.triggerPressing,
+                            activeDrag && styles.triggerDragging,
                         )}
                         type="button"
                         aria-label={`Change block type (current: ${activeBlockInfo?.label ?? 'Block'})`}
                         aria-expanded={isMenuOpen}
                         data-block-actions-trigger="true"
+                        data-drag-pending={pendingPress ? 'true' : undefined}
                         ref={triggerRef}
-                        onMouseDown={event => {
-                            if (isStructureBlock) {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                editor?.commands.focus();
-
-                                return;
-                            }
-
-                            handleTriggerMouseDown(event);
-                        }}
+                        onPointerDown={handleTriggerPointerDown}
                     >
-                        <span className={styles.triggerIcon}>
-                            {activeBlockInfo?.icon ?? (
-                                <svg
-                                    viewBox="0 0 24 24"
-                                    aria-hidden="true"
-                                    focusable="false"
-                                >
-                                    <path d="M6 12h12" />
-                                </svg>
-                            )}
+                        <span className={styles.triggerGlyph} aria-hidden="true">
+                            <span className={styles.triggerIcon}>
+                                {activeBlockInfo?.icon ?? (
+                                    <svg
+                                        viewBox="0 0 24 24"
+                                        aria-hidden="true"
+                                        focusable="false"
+                                    >
+                                        <path d="M6 12h12" />
+                                    </svg>
+                                )}
+                            </span>
+                            <span className={styles.dragGrip} />
                         </span>
                     </button>
-                    {isMenuOpen ? (
+                    {isMenuOpen && !activeDrag ? (
                         <BlockActionsMenu
                             blockType={activeOverlayState.blockType}
                             isMenuAbove={isMenuAbove}

@@ -84,15 +84,37 @@ export const useOverlayPosition = ({
             : null;
         const fallbackTarget = editor.view.dom.querySelector<HTMLElement>('[data-fountain-block]');
         const railTarget = activeTarget ?? fallbackTarget;
+        const resolveLineCenterTop = (target: HTMLElement, blockFrom: number | null) => {
+            const canvasRect = canvas.getBoundingClientRect();
+            const targetRect = target.getBoundingClientRect();
+            const computed = window.getComputedStyle(target);
+            const paddingTop = Number.parseFloat(computed.paddingTop) || 0;
+            const lineHeightValue = Number.parseFloat(computed.lineHeight);
+            const baseTop = targetRect.top - canvasRect.top + canvas.scrollTop + paddingTop;
+
+            if (Number.isFinite(lineHeightValue) && lineHeightValue > 0) {
+                return baseTop + (lineHeightValue / 2);
+            }
+
+            if (blockFrom !== null) {
+                try {
+                    const caretCoords = editor.view.coordsAtPos(blockFrom);
+
+                    return ((caretCoords.top + caretCoords.bottom) / 2) - canvasRect.top + canvas.scrollTop;
+                } catch {
+                    // Fall through to base top fallback.
+                }
+            }
+
+            return baseTop;
+        };
 
         if (railTarget) {
             const canvasRect = canvas.getBoundingClientRect();
             const targetRect = railTarget.getBoundingClientRect();
-            const computed = window.getComputedStyle(railTarget);
-            const paddingTop = Number.parseFloat(computed.paddingTop) || 0;
-            const lineHeightValue = Number.parseFloat(computed.lineHeight);
-            const lineOffset = Number.isFinite(lineHeightValue) ? lineHeightValue / 2 : 0;
-            const top = targetRect.top - canvasRect.top + canvas.scrollTop + paddingTop + lineOffset;
+            const blockFrom = activeBlock && activeTarget ? activeBlock.from : null;
+            const top = resolveLineCenterTop(railTarget, blockFrom);
+
             const left = targetRect.left - canvasRect.left + canvas.scrollLeft;
 
             setRailAnchorState(previous => {
@@ -147,11 +169,8 @@ export const useOverlayPosition = ({
 
         const canvasRect = canvas.getBoundingClientRect();
         const targetRect = activeTarget.getBoundingClientRect();
-        const computed = window.getComputedStyle(activeTarget);
-        const paddingTop = Number.parseFloat(computed.paddingTop) || 0;
-        const lineHeightValue = Number.parseFloat(computed.lineHeight);
-        const lineOffset = Number.isFinite(lineHeightValue) ? lineHeightValue / 2 : 0;
-        const top = targetRect.top - canvasRect.top + canvas.scrollTop + paddingTop + lineOffset;
+        const top = resolveLineCenterTop(activeTarget, activeBlock.from);
+
         const left = targetRect.left - canvasRect.left + canvas.scrollLeft;
 
         setOverlayState(prev => {

@@ -1,27 +1,10 @@
-import {
-    type EditorSettingsOverride,
-    type ScriptDocument,
-} from '@stagistic/script-core';
-import Bold from '@tiptap/extension-bold';
-import Document from '@tiptap/extension-document';
-import History from '@tiptap/extension-history';
-import Italic from '@tiptap/extension-italic';
-import Text from '@tiptap/extension-text';
-import Underline from '@tiptap/extension-underline';
+import {type ScriptDocument} from '@stagistic/script-core';
 import {useEditor} from '@tiptap/react';
 import {
-    type CSSProperties,
-    type MouseEvent as ReactMouseEvent,
-    type ReactNode,
-    useCallback,
-    useMemo,
-    useRef,
+    type MouseEvent as ReactMouseEvent, useCallback, useMemo, useRef,
 } from 'react';
 
-import {
-    getCharacterColorVarName,
-    normalizeCharacterColorHex,
-} from './characterColors';
+import {buildEditorRootStyle} from './buildRootStyle';
 import {EditorShell} from './components/editorShell/EditorShell';
 import {
     getEditorCssVars,
@@ -29,37 +12,14 @@ import {
     stripScriptSettings,
 } from './editorSettings';
 import {
-    type SaveResult,
     serializeDocumentForSave,
     useAutosaveController,
 } from './hooks/useAutosaveController';
 import {useEditorLifecycle} from './hooks/useEditorLifecycle';
 import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
-import {
-    getBlockCasing,
-    getBlockNextElements,
-    getBlockShortcuts,
-} from './model/blockSettingMaps';
-import {
-    createPaginationExtension,
-    FountainBlockExtension,
-    FountainColumnExtension,
-    FountainColumnGroupExtension,
-} from './tiptap/extensions';
-
-const DocumentWithSettings = Document.extend({
-    addAttributes() {
-        return {
-            settings: {
-                default: null,
-            },
-            structure: {
-                default: null,
-            },
-        };
-    },
-});
+import type {EditorProps} from './types';
+import {useEditorExtensions} from './useEditorExtensions';
 
 const getSizeScale = () => {
     if (typeof window === 'undefined') {
@@ -72,64 +32,6 @@ const getSizeScale = () => {
     const parsed = Number.parseFloat(raw);
 
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
-};
-
-type PersistentCharacterRef = {
-    id: string,
-    key: string,
-    colorHex?: string | null,
-};
-
-type EditorProps = {
-    initialValue: ScriptDocument,
-    onValueChange?: (value: ScriptDocument) => void,
-    onAutoSave?: (value: ScriptDocument) => SaveResult,
-    onManualSave?: (value: ScriptDocument) => SaveResult,
-    onDirtyChange?: (isDirty: boolean) => void,
-    autoSaveDelayMs?: number,
-    autoFocus?: boolean,
-    settings?: EditorSettingsOverride,
-    scriptSettings?: EditorSettingsOverride,
-    leftSidebarToggle?: {
-        isOpen: boolean,
-        onToggle: () => void,
-    },
-    rightSidebarToggle?: {
-        isOpen: boolean,
-        onToggle: () => void,
-    },
-    leftSidebar?: ReactNode,
-    rightSidebar?: ReactNode,
-    sidebarWidth?: string,
-    persistentCharacters?: readonly PersistentCharacterRef[],
-    focusBlockRequest?: {
-        blockId: string,
-        requestId: number,
-    } | null,
-    insertActRequest?: {
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null,
-    renameActRequest?: {
-        blockId: string,
-        nextName: string,
-        requestId: number,
-    } | null,
-    deleteActRequest?: {
-        blockId: string,
-        requestId: number,
-    } | null,
-    moveSceneRequest?: {
-        sourceSceneBlockId: string,
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null,
-    moveActRequest?: {
-        sourceActBlockId: string,
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null,
-    onActiveBlockChange?: (blockId: string | null) => void,
 };
 
 const Editor = ({
@@ -176,44 +78,18 @@ const Editor = ({
         canvasHostRef,
         pageWidthPx: resolvedSettings.page.widthPx,
         sizeScale,
+        isLeftSidebarOpen,
+        isRightSidebarOpen,
     });
     const renderScale = useMemo(() => sizeScale * responsiveScale, [responsiveScale, sizeScale]);
     const editorStyle = useMemo(
         () => getEditorCssVars(resolvedSettings, renderScale),
         [renderScale, resolvedSettings],
     );
-    const paginationExtension = useMemo(
-        () => createPaginationExtension(resolvedSettings, sizeScale),
-        [resolvedSettings, sizeScale],
-    );
-    const blockShortcuts = useMemo(
-        () => getBlockShortcuts(resolvedSettings),
-        [resolvedSettings],
-    );
-    const blockNextElements = useMemo(
-        () => getBlockNextElements(resolvedSettings),
-        [resolvedSettings],
-    );
-    const blockCasing = useMemo(
-        () => getBlockCasing(resolvedSettings),
-        [resolvedSettings],
-    );
-    const fountainBlockExtension = useMemo(
-        () => FountainBlockExtension.configure({
-            blockShortcuts,
-            blockNextElements,
-            blockCasing,
-            characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
-            structureSettings: resolvedSettings.structure,
-        }),
-        [
-            blockCasing,
-            blockNextElements,
-            blockShortcuts,
-            resolvedSettings.visual.characterColorSaturation,
-            resolvedSettings.structure,
-        ],
-    );
+    const extensions = useEditorExtensions({
+        resolvedSettings,
+        sizeScale,
+    });
     const {
         scheduleAutosave,
         handleManualSave,
@@ -225,28 +101,13 @@ const Editor = ({
         onDirtyChange,
         autoSaveDelayMs,
     });
-    const rootStyle = useMemo(() => ({
-        ...persistentCharacters.reduce<Record<string, string>>((variables, character) => {
-            const normalizedColor = normalizeCharacterColorHex(character.colorHex);
-
-            if (!normalizedColor) {
-                return variables;
-            }
-
-            variables[getCharacterColorVarName(character.key)] = normalizedColor;
-
-            return variables;
-        }, {}),
-        ...editorStyle,
-        '--editor-sidebar-width': sidebarWidth ?? 'calc(280px * var(--size-scale))',
-        '--toolbar-toggle-width': 'calc(calc(26px * var(--size-scale)) + (var(--space-3) * 2))',
-        '--left-toolbar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
-        '--right-toolbar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
-        '--left-toolbar-divider-opacity': isLeftSidebarOpen ? '1' : '0',
-        '--right-toolbar-divider-opacity': isRightSidebarOpen ? '1' : '0',
-        '--left-sidebar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
-        '--right-sidebar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
-    }) as CSSProperties, [
+    const rootStyle = useMemo(() => buildEditorRootStyle({
+        persistentCharacters,
+        editorStyle,
+        sidebarWidth,
+        isLeftSidebarOpen,
+        isRightSidebarOpen,
+    }), [
         editorStyle,
         isLeftSidebarOpen,
         isRightSidebarOpen,
@@ -260,23 +121,11 @@ const Editor = ({
 
     const initialDoc = useMemo<ScriptDocument>(
         () => initialValue,
-        // Use stable JSON string for content comparison to prevent unnecessary editor re-creation
         [initialContentSignature],
     );
 
     const editor = useEditor({
-        extensions: [
-            DocumentWithSettings,
-            paginationExtension,
-            Text,
-            History,
-            Bold,
-            Italic,
-            Underline,
-            FountainColumnGroupExtension,
-            FountainColumnExtension,
-            fountainBlockExtension,
-        ],
+        extensions,
         content: initialDoc,
         autofocus: autoFocus ? 'start' : false,
         shouldRerenderOnTransaction: false,
@@ -285,11 +134,7 @@ const Editor = ({
                 'data-fountain-editor': 'true',
             },
         },
-    }, [
-        fountainBlockExtension,
-        initialDoc,
-        paginationExtension,
-    ]);
+    }, [extensions, initialDoc]);
 
     usePaginationSettings({
         editor,
