@@ -7,58 +7,74 @@ import {
 } from 'react';
 
 import {setActiveBlockSyncSuppressed} from '../../../hooks/useEditorActiveBlockSync';
-import type {FountainBlockType} from '../../../tiptap/fountainCore';
 import {
     DRAG_DISABLED_BLOCK_TYPES,
     DRAG_START_THRESHOLD_PX,
     PRESS_TO_DRAG_VISUAL_DELAY_MS,
 } from './constants';
 import {collectTopLevelBlockMetrics} from './geometry';
-import type {DropLockState, OverlayAnchorStyle} from './types';
+import type {
+    BlockActionsPointerState,
+    DropLockState,
+    OverlayAnchorStyle,
+} from './types';
 import {useDragRuntimeEffects} from './useDragRuntimeEffects';
 import {usePointerDragState} from './usePointerDragState';
 
-interface DragInteractionOverlayState {
-    blockId: string,
-    blockType: FountainBlockType,
-}
-
 interface UsePointerDragInteractionArgs {
-    editor: TiptapEditor | null,
-    canvasRef: RefObject<HTMLElement | null>,
-    activeOverlayState: DragInteractionOverlayState | null,
-    isMenuDisabledBlock: boolean,
-    closeMenu: () => void,
-    toggleMenu: () => void,
-    applyDraggedSourceHighlight: (blockId: string) => void,
-    clearDraggedSourceHighlight: () => void,
-    beginDragPreviewSession: (sourceBlockId: string) => void,
-    clearDragPreviewSession: () => void,
-    applyPreviewMove: (beforeBlockId: string | null) => void,
-    revertPreviewMove: () => void,
-    commitPreviewMove: (beforeBlockId: string | null) => void,
-    resolveOverlayStyleForBlockId: (blockId: string) => OverlayAnchorStyle | null,
-    getLastDragOverlayStyle: () => OverlayAnchorStyle | null,
-    setDropLock: (value: DropLockState | null) => void,
+    context: {
+        editor: TiptapEditor | null,
+        canvasRef: RefObject<HTMLElement | null>,
+        activeOverlayState: BlockActionsPointerState | null,
+        isMenuDisabledBlock: boolean,
+    },
+    menu: {
+        closeMenu: () => void,
+        toggleMenu: () => void,
+    },
+    preview: {
+        applyDraggedSourceHighlight: (blockId: string) => void,
+        clearDraggedSourceHighlight: () => void,
+        beginDragPreviewSession: (sourceBlockId: string) => void,
+        clearDragPreviewSession: () => void,
+        applyPreviewMove: (beforeBlockId: string | null) => void,
+        revertPreviewMove: () => void,
+        commitPreviewMove: (beforeBlockId: string | null) => void,
+    },
+    overlay: {
+        resolveOverlayStyleForBlockId: (blockId: string) => OverlayAnchorStyle | null,
+        getLastDragOverlayStyle: () => OverlayAnchorStyle | null,
+        setDropLock: (value: DropLockState | null) => void,
+    },
 }
 export const usePointerDragInteraction = ({
-    editor,
-    canvasRef,
-    activeOverlayState,
-    isMenuDisabledBlock,
-    closeMenu,
-    toggleMenu,
-    applyDraggedSourceHighlight,
-    clearDraggedSourceHighlight,
-    beginDragPreviewSession,
-    clearDragPreviewSession,
-    applyPreviewMove,
-    revertPreviewMove,
-    commitPreviewMove,
-    resolveOverlayStyleForBlockId,
-    getLastDragOverlayStyle,
-    setDropLock,
+    context,
+    menu,
+    preview,
+    overlay,
 }: UsePointerDragInteractionArgs) => {
+    const {
+        editor,
+        canvasRef,
+        activeOverlayState,
+        isMenuDisabledBlock,
+    } = context;
+    const {closeMenu, toggleMenu} = menu;
+    const {
+        applyDraggedSourceHighlight,
+        clearDraggedSourceHighlight,
+        beginDragPreviewSession,
+        clearDragPreviewSession,
+        applyPreviewMove,
+        revertPreviewMove,
+        commitPreviewMove,
+    } = preview;
+    const {
+        resolveOverlayStyleForBlockId,
+        getLastDragOverlayStyle,
+        setDropLock,
+    } = overlay;
+
     const {
         interactionCleanupRef,
         activeDragRef,
@@ -82,16 +98,20 @@ export const usePointerDragInteraction = ({
     });
 
     useDragRuntimeEffects({
-        canvasRef,
-        activeDrag,
-        activeDragRef,
-        dragPointerYRef,
-        autoScrollFrameRef,
-        updateActiveDragState,
-        stopPointerInteraction,
-        revertPreviewMove,
-        clearPressVisualState,
-        clearDragState,
+        context: {
+            canvasRef,
+            activeDrag,
+            activeDragRef,
+            dragPointerYRef,
+            autoScrollFrameRef,
+        },
+        actions: {
+            updateActiveDragState,
+            stopPointerInteraction,
+            revertPreviewMove,
+            clearPressVisualState,
+            clearDragState,
+        },
     });
 
     useEffect(() => {

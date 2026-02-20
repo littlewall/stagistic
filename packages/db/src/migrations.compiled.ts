@@ -16,5 +16,9 @@ export const compiledMigrations = [
     {
         "id": "0003_script_character_metadata",
         "sql": "ALTER TABLE \"script_characters\"\n    ADD COLUMN IF NOT EXISTS \"color_hex\" text;\n\nALTER TABLE \"script_characters\"\n    ADD COLUMN IF NOT EXISTS \"gender_key\" text;\n\nCREATE TABLE IF NOT EXISTS \"script_character_genders\" (\n    \"id\" text PRIMARY KEY,\n    \"script_id\" text NOT NULL REFERENCES \"scripts\"(\"id\") ON DELETE CASCADE,\n    \"gender_key\" text NOT NULL,\n    \"gender_label\" text NOT NULL,\n    \"created_at\" bigint NOT NULL,\n    \"updated_at\" bigint NOT NULL\n);\n\nCREATE UNIQUE INDEX IF NOT EXISTS \"script_character_genders_script_gender_unique_idx\"\n    ON \"script_character_genders\" (\"script_id\", \"gender_key\");\n\nCREATE INDEX IF NOT EXISTS \"script_character_genders_script_id_idx\"\n    ON \"script_character_genders\" (\"script_id\");\n"
+    },
+    {
+        "id": "0004_script_latest_hash",
+        "sql": "ALTER TABLE \"script_latest\"\n    ADD COLUMN IF NOT EXISTS \"content_hash\" text NOT NULL DEFAULT '';\n\nALTER TABLE \"script_latest\"\n    ADD COLUMN IF NOT EXISTS \"content_size\" integer NOT NULL DEFAULT 0;\n"
     }
 ] as const;

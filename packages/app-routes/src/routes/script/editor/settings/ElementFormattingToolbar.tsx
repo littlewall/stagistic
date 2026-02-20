@@ -2,21 +2,21 @@ import {BLOCK_TEXT_ALIGN_OPTIONS, type FountainElementType} from '@stagistic/scr
 import {clsx} from '@stagistic/ui';
 
 import styles from '../../ScriptEditorRoute.module.css';
-import type {BlockSettingsPatch, UpdateBlockSettings} from './types';
+import type {
+    BlockSettingsPatch,
+    ElementFormattingModel,
+    ElementSettingsActions,
+} from './types';
 
 interface ElementFormattingToolbarProps {
     blockType: FountainElementType,
-    textAlign: 'left' | 'center' | 'right',
-    casing: 'normal' | 'uppercase',
-    isBold: boolean,
-    isItalic: boolean,
-    isUnderline: boolean,
-    onUpdateBlockSettings: UpdateBlockSettings,
+    model: ElementFormattingModel,
+    actions: ElementSettingsActions,
 }
 
 const withPatch = (
     blockType: FountainElementType,
-    onUpdateBlockSettings: UpdateBlockSettings,
+    onUpdateBlockSettings: ElementSettingsActions['onUpdateBlockSettings'],
     patch: BlockSettingsPatch,
 ) => {
     onUpdateBlockSettings(blockType, patch);
@@ -36,13 +36,18 @@ const getAlignGlyphClassName = (option: 'left' | 'center' | 'right') => {
 
 export const ElementFormattingToolbar = ({
     blockType,
-    textAlign,
-    casing,
-    isBold,
-    isItalic,
-    isUnderline,
-    onUpdateBlockSettings,
+    model,
+    actions,
 }: ElementFormattingToolbarProps) => {
+    const {onUpdateBlockSettings} = actions;
+    const {
+        textAlign,
+        casing,
+        isBold,
+        isItalic,
+        isUnderline,
+    } = model;
+
     return (
         <div className={styles.previewToolbar}>
             <div className={styles.toolbarGroup}>

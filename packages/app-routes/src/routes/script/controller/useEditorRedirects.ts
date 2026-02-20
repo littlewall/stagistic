@@ -6,24 +6,36 @@ import {type NavigateFunction} from 'react-router-dom';
 
 import type {CurrentScriptItem} from '../types';
 
-export const useEditorRedirects = (params: {
-    scriptsLoading: boolean,
-    scriptsError: unknown,
-    recentScriptsData: ScriptListItem[],
-    currentScript: CurrentScriptItem | null,
-    scriptId: string | undefined,
-    navigate: NavigateFunction,
-    seedDefaultScript: () => Promise<void>,
-}) => {
+interface UseEditorRedirectsArgs {
+    state: {
+        scriptsLoading: boolean,
+        scriptsError: unknown,
+        recentScriptsData: ScriptListItem[],
+        currentScript: CurrentScriptItem | null,
+        scriptId: string | undefined,
+    },
+    navigation: {
+        navigate: NavigateFunction,
+    },
+    requests: {
+        seedDefaultScript: () => Promise<void>,
+    },
+}
+
+export const useEditorRedirects = ({
+    state,
+    navigation,
+    requests,
+}: UseEditorRedirectsArgs) => {
     const {
         scriptsLoading,
         scriptsError,
         recentScriptsData,
         currentScript,
         scriptId,
-        navigate,
-        seedDefaultScript,
-    } = params;
+    } = state;
+    const {navigate} = navigation;
+    const {seedDefaultScript} = requests;
 
     useEffect(() => {
         if (scriptsLoading) {

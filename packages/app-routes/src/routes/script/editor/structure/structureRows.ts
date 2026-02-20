@@ -29,10 +29,35 @@ export interface StructureRowsState {
     activeSceneBlockId: string | null,
 }
 
-export const deriveStructureRows = (
+export interface StructureRowsDerived {
+    rows: StructureRow[],
+    rowByBlockId: Map<string, StructureRow>,
+    rowIndexByBlockId: Map<string, number>,
+    sceneByBlockId: Map<string, string>,
+}
+
+const EMPTY_STRUCTURE_ROWS_DERIVED: StructureRowsDerived = {
+    rows: [],
+    rowByBlockId: new Map<string, StructureRow>(),
+    rowIndexByBlockId: new Map<string, number>(),
+    sceneByBlockId: new Map<string, string>(),
+};
+
+const structureRowsCache = new WeakMap<FountainJSONContent[], StructureRowsDerived>();
+
+const buildStructureRows = (
     content: FountainJSONContent[] | undefined,
-    activeBlockId: string | null,
-): StructureRowsState => {
+): StructureRowsDerived => {
+    if (!Array.isArray(content) || content.length === 0) {
+        return EMPTY_STRUCTURE_ROWS_DERIVED;
+    }
+
+    const cached = structureRowsCache.get(content);
+
+    if (cached) {
+        return cached;
+    }
+
     const blocks = collectStructureBlocks(content).filter(block => block.id.length > 0);
     const rows: StructureRow[] = [];
     const rowByBlockId = new Map<string, StructureRow>();
@@ -79,16 +104,56 @@ export const deriveStructureRows = (
         }
     });
 
-    const activeSceneBlockId = activeBlockId
-        ? sceneByBlockId.get(activeBlockId) ?? (rowByBlockId.get(activeBlockId)?.kind === 'scene'
-            ? activeBlockId
-            : null)
-        : null;
-
-    return {
+    const result: StructureRowsDerived = {
         rows,
         rowByBlockId,
         rowIndexByBlockId,
+        sceneByBlockId,
+    };
+
+    structureRowsCache.set(content, result);
+
+    return result;
+};
+
+export const deriveStructureRowsBase = (
+    content: FountainJSONContent[] | undefined,
+): StructureRowsDerived => {
+    return buildStructureRows(content);
+};
+
+export const resolveActiveSceneBlockId = (
+    rowsState: Pick<StructureRowsDerived, 'sceneByBlockId' | 'rowByBlockId'>,
+    activeBlockId: string | null,
+) => {
+    if (!activeBlockId) {
+        return null;
+    }
+
+    const mappedSceneId = rowsState.sceneByBlockId.get(activeBlockId);
+
+    if (mappedSceneId) {
+        return mappedSceneId;
+    }
+
+    const directRow = rowsState.rowByBlockId.get(activeBlockId);
+
+    return directRow?.kind === 'scene'
+        ? activeBlockId
+        : null;
+};
+
+export const deriveStructureRows = (
+    content: FountainJSONContent[] | undefined,
+    activeBlockId: string | null,
+): StructureRowsState => {
+    const baseState = deriveStructureRowsBase(content);
+    const activeSceneBlockId = resolveActiveSceneBlockId(baseState, activeBlockId);
+
+    return {
+        rows: baseState.rows,
+        rowByBlockId: baseState.rowByBlockId,
+        rowIndexByBlockId: baseState.rowIndexByBlockId,
         activeSceneBlockId,
     };
 };

@@ -4,6 +4,7 @@ import {
     type SetStateAction,
 } from 'react';
 
+import type {CharacterDomainSetters} from '../characterStateReducer';
 import type {
     CharacterGenderOption,
     ScriptCharacterRecord,
@@ -23,5 +24,16 @@ export interface CharacterActionSharedArgs {
     setEditorValue: SetScriptDocumentState,
     setEditorOverrideValue: SetScriptDocumentState,
     setConfirmedCharacterRecords: SetScriptCharacterRecordsState,
+    handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
+}
+
+export interface CharacterActionContext {
+    currentScriptId: string | null,
+    scriptRepository: ScriptRepository,
+    initialValue: ScriptDocument | null | undefined,
+    editorValue: ScriptDocument | null,
+    setEditorValue: SetScriptDocumentState,
+    setEditorOverrideValue: SetScriptDocumentState,
+    setters: CharacterDomainSetters,
     handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
 }

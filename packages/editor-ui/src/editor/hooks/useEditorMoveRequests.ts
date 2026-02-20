@@ -2,9 +2,13 @@ import type {ScriptDocument} from '@stagistic/script-core';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type MutableRefObject, useEffect, useRef,
+    type MutableRefObject, useCallback, useEffect, useRef,
 } from 'react';
 
+import type {
+    EditorStructureRequests,
+    EditorValueChangeMeta,
+} from '../contracts';
 import {
     findFountainBlockSelectionPosFromState,
     FOUNTAIN_BLOCK_NODE_NAME,
@@ -12,33 +16,30 @@ import {
 } from '../tiptap/fountainCore';
 import {moveActMarker, moveSceneSegment} from './structureReorder';
 import {tryCommitDocument} from './structureRequestMutations';
+import {type AutosaveSchedulePayload} from './useAutosaveController';
 import {setActiveBlockSyncSuppressed} from './useEditorActiveBlockSync';
 
-type UseEditorMoveRequestsArgs = {
+interface UseEditorMoveRequestsArgs {
     editor: TiptapEditor | null,
-    moveSceneRequest?: {
-        sourceSceneBlockId: string,
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null,
-    moveActRequest?: {
-        sourceActBlockId: string,
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null,
-    onValueChangeRef: MutableRefObject<((value: ScriptDocument) => void) | undefined>,
-    setLatestValue: (value: ScriptDocument) => void,
-    scheduleAutosave: (value: ScriptDocument) => void,
-};
+    requests?: Pick<EditorStructureRequests, 'moveSceneRequest' | 'moveActRequest'>,
+    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
+    setLatestValue: (value: ScriptDocument, revision?: number) => void,
+    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
+    revisionRef: MutableRefObject<number>,
+}
 
 export const useEditorMoveRequests = ({
     editor,
-    moveSceneRequest,
-    moveActRequest,
+    requests,
     onValueChangeRef,
     setLatestValue,
     scheduleAutosave,
+    revisionRef,
 }: UseEditorMoveRequestsArgs) => {
+    const {
+        moveSceneRequest,
+        moveActRequest,
+    } = requests ?? {};
     const lastMoveSceneRequestIdRef = useRef<number | null>(null);
     const lastMoveActRequestIdRef = useRef<number | null>(null);
     const releaseSyncSuppressionFrameRef = useRef<number | null>(null);
@@ -54,7 +55,7 @@ export const useEditorMoveRequests = ({
         };
     }, []);
 
-    const restoreSelectionForBlock = (blockId: string | null) => {
+    const restoreSelectionForBlock = useCallback((blockId: string | null) => {
         if (!editor || !blockId) {
             return;
         }
@@ -67,12 +68,13 @@ export const useEditorMoveRequests = ({
 
         const tr = editor.state.tr
             .setSelection(TextSelection.near(editor.state.doc.resolve(selectionPos), 1))
-            .setMeta('preventUpdate', true);
+            .setMeta('preventUpdate', true)
+            .scrollIntoView();
 
         editor.view.dispatch(tr);
-    };
+    }, [editor]);
 
-    const withActiveBlockPreserved = (
+    const withActiveBlockPreserved = useCallback((
         callback: () => void,
     ) => {
         if (!editor) {
@@ -97,7 +99,7 @@ export const useEditorMoveRequests = ({
                 setActiveBlockSyncSuppressed(editor, false);
             });
         }
-    };
+    }, [editor, restoreSelectionForBlock]);
 
     useEffect(() => {
         if (!editor || !moveSceneRequest) {
@@ -136,6 +138,7 @@ export const useEditorMoveRequests = ({
                 setLatestValue,
                 onValueChangeRef,
                 scheduleAutosave,
+                revisionRef,
             );
         });
     }, [
@@ -144,6 +147,7 @@ export const useEditorMoveRequests = ({
         onValueChangeRef,
         scheduleAutosave,
         setLatestValue,
+        revisionRef,
         withActiveBlockPreserved,
     ]);
 
@@ -184,6 +188,7 @@ export const useEditorMoveRequests = ({
                 setLatestValue,
                 onValueChangeRef,
                 scheduleAutosave,
+                revisionRef,
             );
         });
     }, [
@@ -192,6 +197,7 @@ export const useEditorMoveRequests = ({
         onValueChangeRef,
         scheduleAutosave,
         setLatestValue,
+        revisionRef,
         withActiveBlockPreserved,
     ]);
 };

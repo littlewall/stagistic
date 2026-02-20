@@ -36,6 +36,101 @@ const buildCharacterCleanupEdit = (range: CharacterBlockRange): CharacterCleanup
     };
 };
 
+const resolveSafeRange = (maxPos: number, from: number, to: number): {from: number, to: number} | null => {
+    const clampedFrom = Math.max(0, Math.min(from, maxPos));
+    const clampedTo = Math.max(0, Math.min(to, maxPos));
+    let safeFrom = Math.min(clampedFrom, clampedTo);
+    let safeTo = Math.max(clampedFrom, clampedTo);
+
+    if (safeFrom === safeTo && safeTo < maxPos) {
+        safeTo += 1;
+    }
+
+    if (safeFrom === safeTo && safeFrom > 0) {
+        safeFrom -= 1;
+    }
+
+    if (safeFrom === safeTo) {
+        return null;
+    }
+
+    return {
+        from: safeFrom,
+        to: safeTo,
+    };
+};
+
+const collectCharacterBlockIdsInRange = (
+    state: EditorState,
+    from: number,
+    to: number,
+    blockIds: Set<string>,
+) => {
+    const safeRange = resolveSafeRange(state.doc.content.size, from, to);
+
+    if (!safeRange) {
+        return;
+    }
+
+    state.doc.nodesBetween(safeRange.from, safeRange.to, node => {
+        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+            return true;
+        }
+
+        const blockType = normalizeFountainBlockType(node.attrs.blockType);
+
+        if (!isCharacterBlockType(blockType)) {
+            return false;
+        }
+
+        const blockId = typeof node.attrs.id === 'string' ? node.attrs.id : null;
+
+        if (blockId) {
+            blockIds.add(blockId);
+        }
+
+        return false;
+    });
+};
+
+const collectCharacterBlockRangesInRange = (
+    state: EditorState,
+    from: number,
+    to: number,
+    rangesByKey: Map<string, CharacterBlockRange>,
+) => {
+    const safeRange = resolveSafeRange(state.doc.content.size, from, to);
+
+    if (!safeRange) {
+        return;
+    }
+
+    state.doc.nodesBetween(safeRange.from, safeRange.to, (node, pos) => {
+        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+            return true;
+        }
+
+        const blockType = normalizeFountainBlockType(node.attrs.blockType);
+
+        if (!isCharacterBlockType(blockType)) {
+            return false;
+        }
+
+        const fromPos = pos + 1;
+        const toPos = pos + node.nodeSize - 1;
+        const blockId = typeof node.attrs.id === 'string' ? node.attrs.id : '';
+        const rangeKey = blockId.length > 0 ? blockId : `${fromPos}:${toPos}`;
+
+        rangesByKey.set(rangeKey, {
+            from: fromPos,
+            to: toPos,
+            text: node.textContent ?? '',
+        });
+
+        return false;
+    });
+};
+
 export const cleanupCharacterDelimiters = (
     transactions: readonly Transaction[],
     oldState: EditorState,
@@ -51,36 +146,45 @@ export const cleanupCharacterDelimiters = (
     const edits: CharacterCleanupEdit[] = [];
 
     if (hasDeleteEvent) {
-        newState.doc.descendants((node, pos) => {
-            if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
-                return true;
+        const touchedOldBlockIds = new Set<string>();
+        const touchedRangesByKey = new Map<string, CharacterBlockRange>();
+
+        transactions.forEach(transaction => {
+            if (!transaction.docChanged) {
+                return;
             }
 
-            const blockType = normalizeFountainBlockType(node.attrs.blockType);
+            transaction.mapping.maps.forEach(stepMap => {
+                stepMap.forEach((oldStart, oldEnd, newStart, newEnd) => {
+                    const oldFrom = Math.max(0, oldStart - 1);
+                    const oldTo = Math.max(oldFrom + 1, oldEnd + 1);
+                    const newFrom = Math.max(0, newStart - 1);
+                    const newTo = Math.max(newFrom + 1, newEnd + 1);
 
-            if (!isCharacterBlockType(blockType)) {
-                return false;
-            }
-
-            const text = node.textContent ?? '';
-            const tokens = splitCharacterTokens(text);
-            const hasEmptyToken = tokens.some(token => token.value.length === 0);
-
-            if (!hasEmptyToken) {
-                return false;
-            }
-
-            const edit = buildCharacterCleanupEdit({
-                from: pos + 1,
-                to: pos + node.nodeSize - 1,
-                text,
+                    collectCharacterBlockIdsInRange(oldState, oldFrom, oldTo, touchedOldBlockIds);
+                    collectCharacterBlockRangesInRange(newState, newFrom, newTo, touchedRangesByKey);
+                });
             });
+        });
 
-            if (edit) {
-                edits.push(edit);
+        touchedOldBlockIds.forEach(blockId => {
+            const range = findCharacterBlockRangeById(newState, blockId);
+
+            if (!range) {
+                return;
             }
 
-            return false;
+            touchedRangesByKey.set(blockId, range);
+        });
+
+        touchedRangesByKey.forEach(range => {
+            const edit = buildCharacterCleanupEdit(range);
+
+            if (!edit) {
+                return;
+            }
+
+            edits.push(edit);
         });
     }
 

@@ -15,7 +15,7 @@ export const StructureRowScene = memo(({
     scene,
     rowIndex,
     isActive,
-    onFocusBlock,
+    actions,
 }: StructureRowSceneProps) => {
     const {
         ref,
@@ -51,7 +51,7 @@ export const StructureRowScene = memo(({
                     type="button"
                     className={styles.itemButton}
                     onClick={() => {
-                        onFocusBlock(scene.blockId);
+                        actions.onFocusBlock(scene.blockId);
                     }}
                 >
                     <span className={styles.itemLabel}>{scene.title}</span>

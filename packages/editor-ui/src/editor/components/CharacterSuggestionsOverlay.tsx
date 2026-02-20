@@ -27,7 +27,9 @@ const CharacterSuggestionsOverlay = ({
     const {
         overlayState,
         suggestionEntries,
+        activeSuggestionIndex,
         handleSuggestionMouseDown,
+        handleSuggestionMouseEnter,
     } = useCharacterSuggestions({
         editor,
         canvasRef,
@@ -45,7 +47,9 @@ const CharacterSuggestionsOverlay = ({
             overlayRef={overlayRef}
             style={overlayState.style}
             suggestions={suggestionEntries}
+            activeSuggestionIndex={activeSuggestionIndex}
             onSuggestionMouseDown={handleSuggestionMouseDown}
+            onSuggestionMouseEnter={handleSuggestionMouseEnter}
         />
     );
 };

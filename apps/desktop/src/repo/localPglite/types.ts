@@ -1,3 +1,5 @@
+import type {DbClient} from '@stagistic/db';
+
 import type {LocalDb} from '~db';
 
 export type GetDb = () => Promise<LocalDb>;
@@ -8,4 +10,4 @@ export interface OutboxPayload {
     payloadJson: string,
 }
 
-export type RecordOutbox = (payload: OutboxPayload) => Promise<void>;
+export type RecordOutbox = (payload: OutboxPayload, db?: DbClient) => Promise<void>;

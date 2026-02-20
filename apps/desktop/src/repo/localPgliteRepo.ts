@@ -21,7 +21,10 @@ import {getLocalDb} from '~db';
 import {createCharacterHandlers} from './localPglite/characters';
 import {createConfigHandlers} from './localPglite/config';
 import {createContentHandlers} from './localPglite/content';
-import {serializeDocument} from './localPglite/documentCodec';
+import {
+    computeContentHash,
+    serializeDocument,
+} from './localPglite/documentCodec';
 import {createOutboxRecorder} from './localPglite/outbox';
 import type {GetDb} from './localPglite/types';
 
@@ -62,9 +65,13 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
         });
 
         if (initialContent) {
+            const contentJson = serializeDocument(initialContent);
+
             await dbQueries.insertLatest(db, {
                 scriptId: id,
-                contentJson: serializeDocument(initialContent),
+                contentJson,
+                contentHash: computeContentHash(contentJson),
+                contentSize: contentJson.length,
                 updatedAt: now,
                 schemaVersion: LATEST_SCRIPT_SCHEMA_VERSION,
             });

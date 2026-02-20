@@ -44,9 +44,9 @@ export const useGlobalModals = () => {
     return context;
 };
 
-type GlobalModalsProviderProps = {
+interface GlobalModalsProviderProps {
     children: ReactNode,
-};
+}
 
 export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
     const navigate = useNavigate();
@@ -71,11 +71,21 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         handleImport,
         pickImportFile,
     } = useGlobalModalActions({
-        scriptRepository,
-        refreshScripts,
-        navigate,
-        addToast,
-        pickFile: pickTauriFountainFile,
+        repository: {
+            scriptRepository,
+        },
+        navigation: {
+            navigate,
+        },
+        notifications: {
+            addToast,
+        },
+        state: {
+            refreshScripts,
+        },
+        requests: {
+            pickFile: pickTauriFountainFile,
+        },
     });
 
     useEffect(() => {

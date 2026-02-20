@@ -4,7 +4,6 @@ import type {
     ElementType,
     ReactNode,
 } from 'react';
-import {useMemo} from 'react';
 
 import styles from './Card.module.css';
 
@@ -24,8 +23,8 @@ export const Card = <T extends ElementType = typeof defaultElement>({
     variant = 'default',
     ...props
 }: CardProps<T>) => {
-    const Component = useMemo(() => as ?? defaultElement, [as]);
-    const isInteractive = useMemo(() => Boolean(props.onClick || props.href), [props.onClick, props.href]);
+    const Component = as ?? defaultElement;
+    const isInteractive = Boolean(props.onClick || props.href);
 
     return (
         <Component

@@ -16,9 +16,9 @@ import {
     isSelectionAcrossBlocks,
 } from '../../tiptap/fountainCore';
 
-type UseToolbarStateArgs = {
+interface UseToolbarStateArgs {
     editor: TiptapEditor | null,
-};
+}
 
 export const useToolbarState = ({editor}: UseToolbarStateArgs) => {
     const [hasEditorFocus, setHasEditorFocus] = useState(() => Boolean(editor?.isFocused));

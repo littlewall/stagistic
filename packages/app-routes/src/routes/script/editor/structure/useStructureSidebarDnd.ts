@@ -45,8 +45,7 @@ export const useStructureSidebarDnd = ({
     rows,
     rowByBlockId,
     rowIndexByBlockId,
-    onReorderAct,
-    onReorderScene,
+    actions,
 }: UseStructureSidebarDndArgs) => {
     return useCallback((event: DragEndEvent) => {
         if (event.canceled) {
@@ -97,16 +96,17 @@ export const useStructureSidebarDnd = ({
             return;
         }
 
+        actions.onFocusBlock(sourceRow.blockId);
+
         if (sourceRow.kind === 'act') {
-            onReorderAct(sourceRow.blockId, beforeBlockId);
+            actions.onReorderAct(sourceRow.blockId, beforeBlockId);
 
             return;
         }
 
-        onReorderScene(sourceRow.blockId, beforeBlockId);
+        actions.onReorderScene(sourceRow.blockId, beforeBlockId);
     }, [
-        onReorderAct,
-        onReorderScene,
+        actions,
         rowByBlockId,
         rowIndexByBlockId,
         rows,

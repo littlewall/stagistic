@@ -9,12 +9,12 @@ import type {
 const ENABLE_OUTBOX = false;
 
 export const createOutboxRecorder = (getDb: GetDb): RecordOutbox => {
-    return async payload => {
+    return async (payload, dbOverride) => {
         if (!ENABLE_OUTBOX) {
             return;
         }
 
-        const db = await getDb();
+        const db = dbOverride ?? await getDb();
 
         await dbQueries.insertOutbox(db, {
             id: uuidv7(),

@@ -1,6 +1,7 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useEffect, useRef} from 'react';
 
+import type {FocusBlockRequest} from '../contracts';
 import {
     findFountainBlockSelectionPosFromState,
     FOUNTAIN_BLOCK_NODE_NAME,
@@ -17,14 +18,11 @@ const isActiveBlockSyncSuppressed = (editor: TiptapEditor) => {
     return (editor.storage as unknown as Record<string, unknown>)[ACTIVE_BLOCK_SYNC_SUPPRESSED_KEY] === true;
 };
 
-type UseEditorActiveBlockSyncArgs = {
+interface UseEditorActiveBlockSyncArgs {
     editor: TiptapEditor | null,
     onActiveBlockChange?: (blockId: string | null) => void,
-    focusBlockRequest?: {
-        blockId: string,
-        requestId: number,
-    } | null,
-};
+    focusBlockRequest?: FocusBlockRequest | null,
+}
 
 export const useEditorActiveBlockSync = ({
     editor,
@@ -32,30 +30,29 @@ export const useEditorActiveBlockSync = ({
     focusBlockRequest,
 }: UseEditorActiveBlockSyncArgs) => {
     const lastFocusedRequestIdRef = useRef<number | null>(null);
-    const emitFrameRef = useRef<number | null>(null);
+    const lastEmittedBlockIdRef = useRef<string | null | undefined>(undefined);
 
     useEffect(() => {
         if (!editor || !onActiveBlockChange) {
             return;
         }
 
+        lastEmittedBlockIdRef.current = undefined;
+
         const emitActiveBlock = () => {
-            if (emitFrameRef.current !== null) {
+            if (isActiveBlockSyncSuppressed(editor)) {
                 return;
             }
 
-            emitFrameRef.current = window.requestAnimationFrame(() => {
-                emitFrameRef.current = null;
+            const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+            const blockId = activeBlock?.id ?? null;
 
-                if (isActiveBlockSyncSuppressed(editor)) {
-                    return;
-                }
+            if (lastEmittedBlockIdRef.current === blockId) {
+                return;
+            }
 
-                const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
-                const blockId = activeBlock?.id ?? null;
-
-                onActiveBlockChange(blockId);
-            });
+            lastEmittedBlockIdRef.current = blockId;
+            onActiveBlockChange(blockId);
         };
 
         emitActiveBlock();
@@ -65,11 +62,6 @@ export const useEditorActiveBlockSync = ({
         return () => {
             editor.off('selectionUpdate', emitActiveBlock);
             editor.off('transaction', emitActiveBlock);
-
-            if (emitFrameRef.current !== null) {
-                window.cancelAnimationFrame(emitFrameRef.current);
-                emitFrameRef.current = null;
-            }
         };
     }, [editor, onActiveBlockChange]);
 

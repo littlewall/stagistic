@@ -4,6 +4,7 @@ import {
     extractCharacterKeys,
     normalizeCharacterKey,
 } from '@stagistic/script-core';
+import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {
@@ -17,10 +18,32 @@ export const isCharacterBlockType = (value: FountainBlockType) => {
     return value === ELEMENT_CHARACTER || value === ELEMENT_DUAL_DIALOGUE_CHARACTER;
 };
 
+interface CharacterCountsCacheEntry {
+    persistentKey: string,
+    counts: Map<string, number>,
+}
+
+const characterCountsCache = new WeakMap<ProseMirrorNode, CharacterCountsCacheEntry>();
+
+const getPersistentCharactersKey = (persistentCharacters: readonly PersistentCharacterRef[]) => {
+    return persistentCharacters
+        .map(character => normalizeCharacterKey(character.key))
+        .filter(key => key.length > 0)
+        .join('\u0001');
+};
+
 export const collectCharacterCounts = (
     editor: TiptapEditor,
     persistentCharacters: readonly PersistentCharacterRef[],
 ) => {
+    const doc = editor.state.doc;
+    const persistentKey = getPersistentCharactersKey(persistentCharacters);
+    const cached = characterCountsCache.get(doc);
+
+    if (cached && cached.persistentKey === persistentKey) {
+        return cached.counts;
+    }
+
     const counts = new Map<string, number>();
 
     persistentCharacters.forEach(character => {
@@ -31,7 +54,7 @@ export const collectCharacterCounts = (
         }
     });
 
-    editor.state.doc.descendants(node => {
+    doc.descendants(node => {
         if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
             return true;
         }
@@ -47,6 +70,11 @@ export const collectCharacterCounts = (
         });
 
         return false;
+    });
+
+    characterCountsCache.set(doc, {
+        persistentKey,
+        counts,
     });
 
     return counts;

@@ -35,29 +35,37 @@ const getSizeScale = () => {
 };
 
 const Editor = ({
-    initialValue,
-    onValueChange,
-    onAutoSave,
-    onManualSave,
-    onDirtyChange,
-    autoSaveDelayMs,
-    autoFocus,
-    settings,
-    scriptSettings,
-    leftSidebarToggle,
-    rightSidebarToggle,
-    leftSidebar,
-    rightSidebar,
-    sidebarWidth,
-    persistentCharacters = [],
-    focusBlockRequest,
-    insertActRequest,
-    renameActRequest,
-    deleteActRequest,
-    moveSceneRequest,
-    moveActRequest,
-    onActiveBlockChange,
+    document,
+    settings: settingsProps,
+    save,
+    layout,
+    requests,
+    callbacks,
 }: EditorProps) => {
+    const {
+        initialValue,
+        persistentCharacters = [],
+    } = document;
+    const {
+        settings,
+        scriptSettings,
+    } = settingsProps ?? {};
+    const {
+        onAutoSave,
+        onManualSave,
+        onDirtyChange,
+        autoSaveDelayMs,
+    } = save ?? {};
+    const {
+        autoFocus,
+        leftSidebarToggle,
+        rightSidebarToggle,
+        sidebarWidth,
+    } = layout ?? {};
+    const {
+        onValueChange,
+        onActiveBlockChange,
+    } = callbacks ?? {};
     const initialSerialized = useMemo(() => serializeDocumentForSave(initialValue), [initialValue]);
     const sizeScale = useMemo(() => getSizeScale(), []);
     const rootRef = useRef<HTMLDivElement | null>(null);
@@ -143,23 +151,26 @@ const Editor = ({
     });
 
     useEditorLifecycle({
-        editor,
-        initialValue,
-        initialSerialized,
-        autoFocus,
-        onManualSave,
-        onValueChange,
-        setLatestValue,
-        syncInitialValue,
-        scheduleAutosave,
-        handleManualSave,
-        focusBlockRequest,
-        insertActRequest,
-        renameActRequest,
-        deleteActRequest,
-        moveSceneRequest,
-        moveActRequest,
-        onActiveBlockChange,
+        editor: {
+            instance: editor,
+            autoFocus,
+        },
+        document: {
+            initialValue,
+            initialSerialized,
+            setLatestValue,
+            syncInitialValue,
+            scheduleAutosave,
+        },
+        save: {
+            onManualSave,
+            handleManualSave,
+        },
+        callbacks: {
+            onValueChange,
+            onActiveBlockChange,
+        },
+        requests,
     });
 
     const handleLeftSidebarToggle = leftSidebarToggle?.onToggle;
@@ -177,17 +188,16 @@ const Editor = ({
 
     return (
         <EditorShell
-            editor={editor}
+            canvas={{
+                autoFocus,
+                characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
+                editor,
+                persistentCharacters,
+            }}
+            layout={layout}
             rootRef={rootRef}
             canvasHostRef={canvasHostRef}
             rootStyle={rootStyle}
-            autoFocus={autoFocus}
-            persistentCharacters={persistentCharacters}
-            characterColorSaturation={resolvedSettings.visual.characterColorSaturation}
-            leftSidebarToggle={leftSidebarToggle}
-            rightSidebarToggle={rightSidebarToggle}
-            leftSidebar={leftSidebar}
-            rightSidebar={rightSidebar}
             onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
             onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
         />

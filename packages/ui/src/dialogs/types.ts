@@ -1,6 +1,7 @@
 import type {ReactNode} from 'react';
 
 import type {ImportPayload} from './importScript/model';
+import type {ImportScriptFile} from './importScript/types';
 
 export interface NewScriptModalProps {
     isOpen: boolean,
@@ -12,8 +13,8 @@ export interface ImportScriptModalProps {
     isOpen: boolean,
     onClose: () => void,
     onImport: (payload: ImportPayload) => void,
-    onPickFile?: () => Promise<{fileName: string, text: string} | null>,
-    preselectedFile?: {fileName: string, text: string} | null,
+    onPickFile?: () => Promise<ImportScriptFile | null>,
+    preselectedFile?: ImportScriptFile | null,
 }
 
 export interface SettingsNavSubItem {
@@ -56,5 +57,5 @@ export interface ScriptSettingsModalProps {
     onClose: () => void,
     onSelectPanel: (panelId: string) => void,
     onToggleExpand: (itemId: string) => void,
-    renderPanel: (panelId: string) => ReactNode,
+    children: ReactNode,
 }

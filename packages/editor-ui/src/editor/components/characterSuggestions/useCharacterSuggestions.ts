@@ -48,6 +48,7 @@ export const useCharacterSuggestions = ({
     characterColorSaturation,
 }: UseCharacterSuggestionsArgs) => {
     const [overlayState, setOverlayState] = useState<OverlayState | null>(null);
+    const [activeSuggestionIndex, setActiveSuggestionIndex] = useState(0);
     const rafIdRef = useRef<number | null>(null);
     const suppressedSelectionRef = useRef<SuppressedSelection | null>(null);
     const normalizedPersistentCharacters = useMemo(() => {
@@ -126,9 +127,27 @@ export const useCharacterSuggestions = ({
         }
 
         suppressedSelectionRef.current = null;
-        setOverlayState({
-            style: overlay.style,
-            suggestions: overlay.suggestions,
+        setOverlayState(previous => {
+            if (
+                previous
+                && previous.style.top === overlay.style.top
+                && previous.style.left === overlay.style.left
+                && previous.suggestions.length === overlay.suggestions.length
+                && previous.suggestions.every((entry, index) => {
+                    const nextEntry = overlay.suggestions[index];
+
+                    return nextEntry !== undefined
+                        && entry.key === nextEntry.key
+                        && entry.color === nextEntry.color;
+                })
+            ) {
+                return previous;
+            }
+
+            return {
+                style: overlay.style,
+                suggestions: overlay.suggestions,
+            };
         });
     }, [
         canvasRef,
@@ -136,6 +155,15 @@ export const useCharacterSuggestions = ({
         editor,
         normalizedPersistentCharacters,
     ]);
+
+    const cancelScheduledOverlayUpdate = useCallback(() => {
+        if (rafIdRef.current === null) {
+            return;
+        }
+
+        window.cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+    }, []);
 
     const scheduleOverlayUpdate = useCallback(() => {
         if (rafIdRef.current !== null) {
@@ -148,29 +176,45 @@ export const useCharacterSuggestions = ({
         });
     }, [updateOverlay]);
 
+    const runOverlayUpdateNow = useCallback(() => {
+        cancelScheduledOverlayUpdate();
+        updateOverlay();
+    }, [cancelScheduledOverlayUpdate, updateOverlay]);
+
     useLayoutEffect(() => {
-        scheduleOverlayUpdate();
-    }, [scheduleOverlayUpdate]);
+        runOverlayUpdateNow();
+    }, [runOverlayUpdateNow]);
 
     useEffect(() => {
         if (!editor) {
             return;
         }
 
-        const handleUpdate = () => scheduleOverlayUpdate();
+        const handleSelectionUpdate = () => runOverlayUpdateNow();
+        const handleTransaction = () => scheduleOverlayUpdate();
+        const handleFocus = () => runOverlayUpdateNow();
+        const handleBlur = () => {
+            cancelScheduledOverlayUpdate();
+            setOverlayState(null);
+        };
 
-        editor.on('selectionUpdate', handleUpdate);
-        editor.on('transaction', handleUpdate);
-        editor.on('focus', handleUpdate);
-        editor.on('blur', handleUpdate);
+        editor.on('selectionUpdate', handleSelectionUpdate);
+        editor.on('transaction', handleTransaction);
+        editor.on('focus', handleFocus);
+        editor.on('blur', handleBlur);
 
         return () => {
-            editor.off('selectionUpdate', handleUpdate);
-            editor.off('transaction', handleUpdate);
-            editor.off('focus', handleUpdate);
-            editor.off('blur', handleUpdate);
+            editor.off('selectionUpdate', handleSelectionUpdate);
+            editor.off('transaction', handleTransaction);
+            editor.off('focus', handleFocus);
+            editor.off('blur', handleBlur);
         };
-    }, [editor, scheduleOverlayUpdate]);
+    }, [
+        cancelScheduledOverlayUpdate,
+        editor,
+        runOverlayUpdateNow,
+        scheduleOverlayUpdate,
+    ]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -232,22 +276,36 @@ export const useCharacterSuggestions = ({
 
     useEffect(() => {
         return () => {
-            if (rafIdRef.current !== null) {
-                window.cancelAnimationFrame(rafIdRef.current);
-                rafIdRef.current = null;
-            }
+            cancelScheduledOverlayUpdate();
         };
-    }, []);
+    }, [cancelScheduledOverlayUpdate]);
 
     const suggestionEntries = useMemo(
         () => overlayState?.suggestions ?? [],
         [overlayState],
     );
 
-    const handleSuggestionMouseDown = useCallback((suggestion: string, event: ReactMouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
+    useEffect(() => {
+        if (suggestionEntries.length === 0) {
+            setActiveSuggestionIndex(0);
 
+            return;
+        }
+
+        setActiveSuggestionIndex(previous => {
+            if (previous < 0) {
+                return 0;
+            }
+
+            if (previous >= suggestionEntries.length) {
+                return suggestionEntries.length - 1;
+            }
+
+            return previous;
+        });
+    }, [suggestionEntries]);
+
+    const selectSuggestion = useCallback((suggestion: string) => {
         if (!editor) {
             return;
         }
@@ -256,9 +314,80 @@ export const useCharacterSuggestions = ({
         setOverlayState(null);
     }, [editor]);
 
+    const handleSuggestionMouseDown = useCallback((suggestion: string, event: ReactMouseEvent<HTMLButtonElement>) => {
+        event.preventDefault();
+        event.stopPropagation();
+
+        selectSuggestion(suggestion);
+    }, [selectSuggestion]);
+
+    useEffect(() => {
+        if (!overlayState || suggestionEntries.length === 0) {
+            return;
+        }
+
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (!editor?.isFocused) {
+                return;
+            }
+
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                event.stopPropagation();
+                setActiveSuggestionIndex(previous => {
+                    return (previous + 1) % suggestionEntries.length;
+                });
+
+                return;
+            }
+
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                event.stopPropagation();
+                setActiveSuggestionIndex(previous => {
+                    return (previous + suggestionEntries.length - 1) % suggestionEntries.length;
+                });
+
+                return;
+            }
+
+            if (event.key !== 'Enter') {
+                return;
+            }
+
+            const activeSuggestion = suggestionEntries[activeSuggestionIndex];
+
+            if (!activeSuggestion) {
+                return;
+            }
+
+            event.preventDefault();
+            event.stopPropagation();
+            selectSuggestion(activeSuggestion.key);
+        };
+
+        document.addEventListener('keydown', handleKeyDown, true);
+
+        return () => {
+            document.removeEventListener('keydown', handleKeyDown, true);
+        };
+    }, [
+        activeSuggestionIndex,
+        editor,
+        overlayState,
+        selectSuggestion,
+        suggestionEntries,
+    ]);
+
+    const handleSuggestionMouseEnter = useCallback((index: number) => {
+        setActiveSuggestionIndex(index);
+    }, []);
+
     return {
         overlayState,
         suggestionEntries,
+        activeSuggestionIndex,
         handleSuggestionMouseDown,
+        handleSuggestionMouseEnter,
     };
 };

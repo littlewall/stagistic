@@ -15,41 +15,58 @@ import type {
     GenderListOption,
 } from './types';
 
-type CharacterGenderPopoverProps = {
-    characterKey: string,
-    isOpen: boolean,
-    onOpenChange: (nextOpen: boolean) => void,
-    isGenderActionDisabled: boolean,
-    selectedGenderLabel: string,
-    selectedGenderIcon: CharacterGenderIcon,
-    genderQuery: string,
-    onGenderQueryChange: (value: string) => void,
-    genderListOptions: GenderListOption[],
-    effectiveGenderKey: string | null,
-    normalizedGenderInputLabel: string,
-    canCreateCustomGender: boolean,
-    shouldCloseGenderPopover: (target: Element) => boolean,
-    onCommitGenderQuery: () => Promise<boolean>,
-    onGenderSelection: (nextKey: string) => void,
-};
+interface CharacterGenderPopoverProps {
+    model: {
+        characterKey: string,
+    },
+    state: {
+        isOpen: boolean,
+        isGenderActionDisabled: boolean,
+        selectedGenderLabel: string,
+        selectedGenderIcon: CharacterGenderIcon,
+        genderQuery: string,
+        effectiveGenderKey: string | null,
+        normalizedGenderInputLabel: string,
+        canCreateCustomGender: boolean,
+    },
+    data: {
+        genderListOptions: GenderListOption[],
+    },
+    actions: {
+        onOpenChange: (nextOpen: boolean) => void,
+        onGenderQueryChange: (value: string) => void,
+        shouldCloseGenderPopover: (target: Element) => boolean,
+        onCommitGenderQuery: () => Promise<boolean>,
+        onGenderSelection: (nextKey: string) => void,
+    },
+}
 
 export const CharacterGenderPopover = ({
-    characterKey,
-    isOpen,
-    onOpenChange,
-    isGenderActionDisabled,
-    selectedGenderLabel,
-    selectedGenderIcon,
-    genderQuery,
-    onGenderQueryChange,
-    genderListOptions,
-    effectiveGenderKey,
-    normalizedGenderInputLabel,
-    canCreateCustomGender,
-    shouldCloseGenderPopover,
-    onCommitGenderQuery,
-    onGenderSelection,
+    model,
+    state,
+    data,
+    actions,
 }: CharacterGenderPopoverProps) => {
+    const {characterKey} = model;
+    const {
+        isOpen,
+        isGenderActionDisabled,
+        selectedGenderLabel,
+        selectedGenderIcon,
+        genderQuery,
+        effectiveGenderKey,
+        normalizedGenderInputLabel,
+        canCreateCustomGender,
+    } = state;
+    const {genderListOptions} = data;
+    const {
+        onOpenChange,
+        onGenderQueryChange,
+        shouldCloseGenderPopover,
+        onCommitGenderQuery,
+        onGenderSelection,
+    } = actions;
+
     return (
         <DialogTrigger
             isOpen={isOpen}

@@ -29,17 +29,21 @@ import type {
 } from './types';
 
 interface UseCharacterComputedArgs {
-    confirmedCharacterRecords: ScriptCharacterRecord[],
-    confirmingCharacterKeys: string[],
-    deletingCharacterIds: string[],
-    renamingCharacterIds: string[],
-    renamingCharacterKeys: string[],
-    colorUpdatingCharacterIds: string[],
-    genderUpdatingCharacterIds: string[],
-    editorValue: ScriptDocument | null,
-    initialValue: ScriptDocument | null | undefined,
-    resolvedScriptSettings: EditorSettings,
-    characterColorSaturation: number,
+    data: {
+        confirmedCharacterRecords: ScriptCharacterRecord[],
+        editorValue: ScriptDocument | null,
+        initialValue: ScriptDocument | null | undefined,
+        resolvedScriptSettings: EditorSettings,
+        characterColorSaturation: number,
+    },
+    pending: {
+        confirmingCharacterKeys: string[],
+        deletingCharacterIds: string[],
+        renamingCharacterIds: string[],
+        renamingCharacterKeys: string[],
+        colorUpdatingCharacterIds: string[],
+        genderUpdatingCharacterIds: string[],
+    },
 }
 
 export interface CharacterComputed {
@@ -52,19 +56,36 @@ export interface CharacterComputed {
     normalizeCharacterNameForInlineInput: (name: string) => string,
 }
 
+const EMPTY_SCRIPT_CHARACTER_STATS = {
+    countsByKey: new Map<string, number>(),
+    confirmedCountsById: new Map<string, number>(),
+    unconfirmedCountsByKey: new Map<string, number>(),
+} as const;
+
+const characterStatsCache = new WeakMap<ScriptDocument, {
+    confirmedCharacterIdsKey: string,
+    stats: ReturnType<typeof collectScriptCharacterStats>,
+}>();
+
 export const useCharacterComputed = ({
-    confirmedCharacterRecords,
-    confirmingCharacterKeys,
-    deletingCharacterIds,
-    renamingCharacterIds,
-    renamingCharacterKeys,
-    colorUpdatingCharacterIds,
-    genderUpdatingCharacterIds,
-    editorValue,
-    initialValue,
-    resolvedScriptSettings,
-    characterColorSaturation,
+    data,
+    pending,
 }: UseCharacterComputedArgs): CharacterComputed => {
+    const {
+        confirmedCharacterRecords,
+        editorValue,
+        initialValue,
+        resolvedScriptSettings,
+        characterColorSaturation,
+    } = data;
+    const {
+        confirmingCharacterKeys,
+        deletingCharacterIds,
+        renamingCharacterIds,
+        renamingCharacterKeys,
+        colorUpdatingCharacterIds,
+        genderUpdatingCharacterIds,
+    } = pending;
     const confirmingCharacterSet = useMemo(
         () => new Set(confirmingCharacterKeys),
         [confirmingCharacterKeys],
@@ -138,15 +159,40 @@ export const useCharacterComputed = ({
         () => new Set(normalizedConfirmedCharacterRecords.map(character => character.id)),
         [normalizedConfirmedCharacterRecords],
     );
+    const confirmedCharacterIdsKey = useMemo(() => {
+        return normalizedConfirmedCharacterRecords
+            .map(character => character.id)
+            .filter((id): id is string => typeof id === 'string' && id.length > 0)
+            .join('\u0001');
+    }, [normalizedConfirmedCharacterRecords]);
 
-    const scriptCharacterStats = useMemo(
-        () => collectScriptCharacterStats(editorValue ?? initialValue, confirmedCharacterIdSet),
-        [
-            confirmedCharacterIdSet,
-            editorValue,
-            initialValue,
-        ],
-    );
+    const scriptCharacterStats = useMemo(() => {
+        const sourceValue = editorValue ?? initialValue;
+
+        if (!sourceValue) {
+            return EMPTY_SCRIPT_CHARACTER_STATS;
+        }
+
+        const cached = characterStatsCache.get(sourceValue);
+
+        if (cached && cached.confirmedCharacterIdsKey === confirmedCharacterIdsKey) {
+            return cached.stats;
+        }
+
+        const nextStats = collectScriptCharacterStats(sourceValue, confirmedCharacterIdSet);
+
+        characterStatsCache.set(sourceValue, {
+            confirmedCharacterIdsKey,
+            stats: nextStats,
+        });
+
+        return nextStats;
+    }, [
+        confirmedCharacterIdSet,
+        confirmedCharacterIdsKey,
+        editorValue,
+        initialValue,
+    ]);
 
     const confirmedCharacterSet = useMemo(
         () => new Set(normalizedConfirmedCharacterKeys),

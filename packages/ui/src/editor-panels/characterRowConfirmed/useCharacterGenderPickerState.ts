@@ -22,13 +22,13 @@ import {
 } from './genderUtils';
 import type {GenderListOption} from './types';
 
-type UseCharacterGenderPickerStateArgs = {
+interface UseCharacterGenderPickerStateArgs {
     character: EditorSidebarCharacter,
     characterGenderOptions: CharacterGenderOption[],
     isGenderActionDisabled: boolean,
     onSetCharacterGender?: (characterId: string, genderKey: string | null) => void,
     onUpsertCharacterGender?: (label: string) => Promise<CharacterGenderOption | null>,
-};
+}
 
 export const useCharacterGenderPickerState = ({
     character,

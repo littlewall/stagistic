@@ -3,10 +3,8 @@ import {
     BLOCK_CASING_OPTIONS,
     BLOCK_SHORTCUT_OPTIONS,
     BLOCK_TEXT_ALIGN_OPTIONS,
-    type BlockShortcut,
     DEFAULT_EDITOR_SETTINGS,
     ELEMENT_PARENTHETICAL,
-    type FountainElementType,
 } from '@stagistic/script-core';
 import {type CSSProperties, useMemo} from 'react';
 
@@ -27,33 +25,10 @@ import {
     formatNumeric,
     getClosestStepValue,
 } from './math';
-import {type SettingsSelectOption} from './SettingsSelect';
-import type {ElementSettingsPanelProps} from './types';
-
-export interface ElementSettingsViewModel {
-    spacingBefore: number,
-    lineHeight: number,
-    shortcut: BlockShortcut,
-    nextElement: FountainElementType,
-    textAlign: 'left' | 'center' | 'right',
-    casing: 'normal' | 'uppercase',
-    isBold: boolean,
-    isItalic: boolean,
-    isUnderline: boolean,
-    previewText: string,
-    previewStyle: CSSProperties,
-    sliderStart: number,
-    sliderEnd: number,
-    previewReferenceChars: number,
-    minPreviewContentChars: number,
-    leftTotalInches: number,
-    rightTotalInches: number,
-    contentChars: number,
-    spacingBeforeOptions: SettingsSelectOption[],
-    lineHeightOptions: SettingsSelectOption[],
-    shortcutOptions: SettingsSelectOption[],
-    nextElementOptions: SettingsSelectOption[],
-}
+import type {
+    ElementSettingsPanelProps,
+    ElementSettingsViewModel,
+} from './types';
 
 export const useElementSettingsViewModel = ({
     blockType,
@@ -99,19 +74,19 @@ export const useElementSettingsViewModel = ({
         const isUnderline = blockSettings.isUnderline ?? blockDefaults.isUnderline ?? false;
         const previewText = BLOCK_PREVIEW_TEXT[blockType];
         const previewTextOffsetChars = blockType === ELEMENT_PARENTHETICAL ? 1 : 0;
-        const spacingBeforeOptions: SettingsSelectOption[] = SPACING_BEFORE_OPTIONS.map(option => ({
+        const spacingBeforeOptions = SPACING_BEFORE_OPTIONS.map(option => ({
             value: option,
             label: formatLines(option),
         }));
-        const lineHeightOptions: SettingsSelectOption[] = LINE_HEIGHT_OPTIONS.map(option => ({
+        const lineHeightOptions = LINE_HEIGHT_OPTIONS.map(option => ({
             value: option,
             label: formatNumeric(option),
         }));
-        const shortcutOptions: SettingsSelectOption[] = BLOCK_SHORTCUT_OPTIONS.map(option => ({
+        const shortcutOptions = BLOCK_SHORTCUT_OPTIONS.map(option => ({
             value: option,
             label: option,
         }));
-        const nextElementOptions: SettingsSelectOption[] = SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => ({
+        const nextElementOptions = SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => ({
             value: item.blockType,
             label: item.label,
             icon: BLOCK_ICONS[item.blockType],
@@ -183,28 +158,34 @@ export const useElementSettingsViewModel = ({
         } as CSSProperties;
 
         return {
-            spacingBefore,
-            lineHeight,
-            shortcut,
-            nextElement,
-            textAlign,
-            casing,
-            isBold,
-            isItalic,
-            isUnderline,
-            previewText,
-            previewStyle,
-            sliderStart,
-            sliderEnd,
-            previewReferenceChars,
-            minPreviewContentChars,
-            leftTotalInches,
-            rightTotalInches,
-            contentChars,
-            spacingBeforeOptions,
-            lineHeightOptions,
-            shortcutOptions,
-            nextElementOptions,
+            formatting: {
+                textAlign,
+                casing,
+                isBold,
+                isItalic,
+                isUnderline,
+            },
+            numeric: {
+                spacingBefore,
+                lineHeight,
+                shortcut,
+                nextElement,
+                spacingBeforeOptions,
+                lineHeightOptions,
+                shortcutOptions,
+                nextElementOptions,
+            },
+            preview: {
+                previewText,
+                previewStyle,
+                sliderStart,
+                sliderEnd,
+                previewReferenceChars,
+                minPreviewContentChars,
+                leftTotalInches,
+                rightTotalInches,
+                contentChars,
+            },
         };
     }, [blockType, resolvedScriptSettings]);
 };

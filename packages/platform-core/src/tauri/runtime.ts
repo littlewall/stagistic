@@ -1,3 +1,5 @@
+import type {ScriptImportFile} from './types';
+
 interface TauriCoreModule {
     isTauri: () => boolean,
 }
@@ -64,7 +66,7 @@ export const listenTauriMenuAction = async (
 };
 
 export const listenTauriFountainDrop = async (
-    onDrop: (payload: {fileName: string, text: string}) => void,
+    onDrop: (payload: ScriptImportFile) => void,
 ): Promise<(() => void) | null> => {
     try {
         const [{getCurrentWebview}, {readTextFile}] = await Promise.all([import('@tauri-apps/api/webview') as Promise<TauriWebviewModule>, import('@tauri-apps/plugin-fs') as Promise<TauriFsModule>]);
@@ -93,7 +95,7 @@ export const listenTauriFountainDrop = async (
     }
 };
 
-export const pickTauriFountainFile = async (): Promise<{fileName: string, text: string} | null> => {
+export const pickTauriFountainFile = async (): Promise<ScriptImportFile | null> => {
     try {
         const [{open}, {readTextFile}] = await Promise.all([import('@tauri-apps/plugin-dialog') as Promise<TauriDialogModule>, import('@tauri-apps/plugin-fs') as Promise<TauriFsModule>]);
         const selected = await open({

@@ -5,6 +5,7 @@ import {
     AppHeader,
     AppLayout,
     LoaderOverlay,
+    ScriptEditorAppHeader,
     ScriptSettingsModal,
 } from '@stagistic/ui';
 import {useCallback, useMemo} from 'react';
@@ -34,6 +35,9 @@ import {useScriptEditorSettingsDraft} from './useScriptEditorSettingsDraft';
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'calc(280px * var(--size-scale))';
 const SETTINGS_MODAL_QUERY_KEY = 'settingsModal';
+const BLOCK_LABEL_BY_TYPE = new Map(
+    SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const),
+);
 
 export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
@@ -72,9 +76,13 @@ export const ScriptEditorRoute = () => {
         updateCharacterColorSaturation,
         updateStructureSettings,
     } = useScriptEditorSettingsDraft({
-        currentScriptId,
-        scriptSettingsOverride,
-        handleSaveScriptSettingsOverride,
+        state: {
+            currentScriptId,
+            scriptSettingsOverride,
+        },
+        requests: {
+            handleSaveScriptSettingsOverride,
+        },
     });
     const {
         isLeftSidebarOpen,
@@ -90,14 +98,12 @@ export const ScriptEditorRoute = () => {
         isOpen: isRightSidebarOpen,
         onToggle: handleToggleRightSidebar,
     }), [handleToggleRightSidebar, isRightSidebarOpen]);
-    const shortcutPrefix = useMemo(
-        () => isApplePlatform() ? 'Cmd' : 'Ctrl',
-        [],
-    );
+    const shortcutPrefix = isApplePlatform() ? 'Cmd' : 'Ctrl';
 
     const {
         editorOverrideValue,
         editorValue,
+        sidebarValue,
         normalizedConfirmedCharacterRecords,
         confirmedCharacters,
         unconfirmedCharacters,
@@ -120,7 +126,8 @@ export const ScriptEditorRoute = () => {
         characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
-    const sourceValueForStructure = editorValue ?? editorOverrideValue ?? initialValue;
+    const sourceValueForController = editorValue ?? editorOverrideValue ?? initialValue;
+    const sourceValueForSidebars = sidebarValue ?? editorOverrideValue ?? initialValue;
     const {
         focusBlockRequest,
         insertActRequest,
@@ -141,7 +148,7 @@ export const ScriptEditorRoute = () => {
     } = useStructureSidebarController({
         currentScriptId,
         scriptRepository,
-        sourceValue: sourceValueForStructure,
+        sourceValue: sourceValueForController,
     });
 
     const {
@@ -156,41 +163,17 @@ export const ScriptEditorRoute = () => {
         openNewScript,
     });
 
-    const blockLabelByType = useMemo(() => {
-        return new Map(
-            SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label]),
-        );
-    }, []);
-
-    const renderSettingsPanel = useCallback((panelId: string) => {
-        return (
-            <ScriptEditorSettingsPanel
-                panelId={panelId}
-                resolvedScriptSettings={resolvedScriptSettings}
-                blockLabelByType={blockLabelByType}
-                shortcutPrefix={shortcutPrefix}
-                onUpdateBlockSettings={updateBlockSettings}
-                onUpdateCharacterColorSaturation={updateCharacterColorSaturation}
-                onUpdateStructureSettings={updateStructureSettings}
-            />
-        );
-    }, [
-        blockLabelByType,
-        resolvedScriptSettings,
-        shortcutPrefix,
-        updateCharacterColorSaturation,
-        updateBlockSettings,
-        updateStructureSettings,
-    ]);
     const handleSelectSettingsPanel = useCallback((panelId: string) => {
         selectPanel(panelId as ScriptSettingsPanelId);
     }, [selectPanel]);
-    const {leftSidebarContent, rightSidebarContent} = useScriptEditorSidebars({
-        structureSidebarProps: {
-            value: sourceValueForStructure,
+    const structureSidebarProps = useMemo(() => ({
+        data: {
+            value: sourceValueForSidebars,
             structureSettings: resolvedScriptSettings.structure,
             actNamePreviewById,
             activeBlockId,
+        },
+        actions: {
             onFocusBlock: handleSidebarFocusBlock,
             onRenameAct: handleSidebarRenameAct,
             onActNamePreview: handleActNamePreview,
@@ -199,22 +182,58 @@ export const ScriptEditorRoute = () => {
             onReorderAct: handleSidebarReorderAct,
             onReorderScene: handleSidebarReorderScene,
         },
-        characterSidebarProps: {
+    }), [
+        actNamePreviewById,
+        activeBlockId,
+        handleActNamePreview,
+        handleSidebarDeleteAct,
+        handleSidebarFocusBlock,
+        handleSidebarInsertAct,
+        handleSidebarRenameAct,
+        handleSidebarReorderAct,
+        handleSidebarReorderScene,
+        resolvedScriptSettings.structure,
+        sourceValueForSidebars,
+    ]);
+    const characterSidebarProps = useMemo(() => ({
+        data: {
             confirmedCharacters,
             unconfirmedCharacters,
+            characterGenderOptions,
+            isLoading: isCharactersLoading,
+        },
+        actions: {
             onConfirmCharacter: handleConfirmCharacter,
             onDeleteCharacter: handleDeleteCharacter,
             normalizeRenameInput: normalizeCharacterNameForInlineInput,
             onRenameCharacterPreview: handleRenameCharacterPreview,
             onRenameCharacter: handleRenameCharacter,
-            characterGenderOptions,
             onSetCharacterColor: handleSetCharacterColor,
             onSetCharacterGender: handleSetCharacterGender,
             onUpsertCharacterGender: handleUpsertCharacterGender,
+        },
+        options: {
             characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
-            isLoading: isCharactersLoading,
             className: styles.sidebarContent,
         },
+    }), [
+        characterGenderOptions,
+        confirmedCharacters,
+        handleConfirmCharacter,
+        handleDeleteCharacter,
+        handleRenameCharacter,
+        handleRenameCharacterPreview,
+        handleSetCharacterColor,
+        handleSetCharacterGender,
+        handleUpsertCharacterGender,
+        isCharactersLoading,
+        normalizeCharacterNameForInlineInput,
+        resolvedScriptSettings.visual.characterColorSaturation,
+        unconfirmedCharacters,
+    ]);
+    const {leftSidebarContent, rightSidebarContent} = useScriptEditorSidebars({
+        structureSidebarProps,
+        characterSidebarProps,
     });
     const handleCloseSettings = useScriptSettingsModalQuerySync({
         queryKey: SETTINGS_MODAL_QUERY_KEY,
@@ -241,15 +260,23 @@ export const ScriptEditorRoute = () => {
     return (
         <AppLayout
             header={(
-                <AppHeader
-                    currentScript={currentScript ?? undefined}
-                    recentScripts={recentScripts}
-                    onSelectScript={handleSelectScript}
-                    onHome={handleHome}
-                    onNewScript={handleNewScript}
-                    scriptSyncState={saveIndicator}
-                    onMenuAction={handleMenuAction}
-                />
+                currentScript ? (
+                    <ScriptEditorAppHeader
+                        currentScript={currentScript}
+                        recentScripts={recentScripts}
+                        onSelectScript={handleSelectScript}
+                        onHome={handleHome}
+                        onNewScript={handleNewScript}
+                        scriptSyncState={saveIndicator}
+                        onMenuAction={handleMenuAction}
+                    />
+                ) : (
+                    <AppHeader
+                        onHome={handleHome}
+                        onNewScript={handleNewScript}
+                        onMenuAction={handleMenuAction}
+                    />
+                )
             )}
         >
             {storageError ? (
@@ -259,26 +286,38 @@ export const ScriptEditorRoute = () => {
             ) : null}
             <FountainEditor
                 key={currentScript?.id ?? 'editor'}
-                initialValue={editorOverrideValue ?? initialValue}
-                scriptSettings={scriptSettingsDraft}
-                onValueChange={handleEditorValueChange}
-                onAutoSave={handleAutoSave}
-                onManualSave={handleManualSave}
-                autoSaveDelayMs={AUTOSAVE_DELAY_MS}
-                autoFocus={shouldAutoFocus}
-                persistentCharacters={normalizedConfirmedCharacterRecords}
-                leftSidebarToggle={leftSidebarToggle}
-                rightSidebarToggle={rightSidebarToggle}
-                leftSidebar={leftSidebarContent}
-                rightSidebar={rightSidebarContent}
-                sidebarWidth={SIDEBAR_WIDTH}
-                focusBlockRequest={focusBlockRequest}
-                insertActRequest={insertActRequest}
-                renameActRequest={renameActRequest}
-                deleteActRequest={deleteActRequest}
-                moveSceneRequest={moveSceneRequest}
-                moveActRequest={moveActRequest}
-                onActiveBlockChange={handleActiveBlockChange}
+                document={{
+                    initialValue: editorOverrideValue ?? initialValue,
+                    persistentCharacters: normalizedConfirmedCharacterRecords,
+                }}
+                settings={{
+                    scriptSettings: scriptSettingsDraft,
+                }}
+                save={{
+                    onAutoSave: handleAutoSave,
+                    onManualSave: handleManualSave,
+                    autoSaveDelayMs: AUTOSAVE_DELAY_MS,
+                }}
+                layout={{
+                    autoFocus: shouldAutoFocus,
+                    leftSidebarToggle,
+                    rightSidebarToggle,
+                    leftSidebar: leftSidebarContent,
+                    rightSidebar: rightSidebarContent,
+                    sidebarWidth: SIDEBAR_WIDTH,
+                }}
+                requests={{
+                    focusBlockRequest,
+                    insertActRequest,
+                    renameActRequest,
+                    deleteActRequest,
+                    moveSceneRequest,
+                    moveActRequest,
+                }}
+                callbacks={{
+                    onValueChange: handleEditorValueChange,
+                    onActiveBlockChange: handleActiveBlockChange,
+                }}
             />
             <ScriptSettingsModal
                 isOpen={isSettingsOpen}
@@ -289,8 +328,17 @@ export const ScriptEditorRoute = () => {
                 onClose={handleCloseSettings}
                 onSelectPanel={handleSelectSettingsPanel}
                 onToggleExpand={toggleExpanded}
-                renderPanel={renderSettingsPanel}
-            />
+            >
+                <ScriptEditorSettingsPanel
+                    panelId={activePanelId}
+                    resolvedScriptSettings={resolvedScriptSettings}
+                    blockLabelByType={BLOCK_LABEL_BY_TYPE}
+                    shortcutPrefix={shortcutPrefix}
+                    onUpdateBlockSettings={updateBlockSettings}
+                    onUpdateCharacterColorSaturation={updateCharacterColorSaturation}
+                    onUpdateStructureSettings={updateStructureSettings}
+                />
+            </ScriptSettingsModal>
         </AppLayout>
     );
 };

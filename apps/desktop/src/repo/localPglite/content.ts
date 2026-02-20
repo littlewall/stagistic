@@ -6,6 +6,7 @@ import {uuidv7} from '@stagistic/shared';
 import type {ScriptRepository} from '@stagistic/sync-core';
 
 import {
+    computeContentHash,
     parseDocument,
     serializeDocument,
 } from './documentCodec';
@@ -39,23 +40,36 @@ export const createContentHandlers = ({
         const db = await getDb();
         const now = Date.now();
         const contentJson = serializeDocument(value);
+        const contentHash = computeContentHash(contentJson);
+        const contentSize = contentJson.length;
+        const latestMeta = await dbQueries.getLatestContentMeta(db, scriptId);
+        const isRedundantWrite = latestMeta?.contentHash === contentHash
+            && latestMeta.contentSize === contentSize;
 
-        await dbQueries.upsertLatest(db, {
-            scriptId,
-            contentJson,
-            updatedAt: now,
-            schemaVersion: LATEST_SCRIPT_SCHEMA_VERSION,
-        });
+        if (isRedundantWrite) {
+            return;
+        }
 
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
+        await db.transaction(async tx => {
+            await dbQueries.upsertLatest(tx, {
+                scriptId,
+                contentJson,
+                contentHash,
+                contentSize,
+                updatedAt: now,
+                schemaVersion: LATEST_SCRIPT_SCHEMA_VERSION,
+            });
 
-        await recordOutbox({
-            scriptId,
-            opType: 'latest.save',
-            payloadJson: JSON.stringify({scriptId, updatedAt: now}),
+            await dbQueries.updateScriptTimestamp(tx, {
+                scriptId,
+                updatedAt: now,
+            });
+
+            await recordOutbox({
+                scriptId,
+                opType: 'latest.save',
+                payloadJson: JSON.stringify({scriptId, updatedAt: now}),
+            }, tx);
         });
     };
 
@@ -116,27 +130,33 @@ export const createContentHandlers = ({
         }
 
         const now = Date.now();
+        const contentHash = computeContentHash(versionContentJson);
+        const contentSize = versionContentJson.length;
 
-        await dbQueries.upsertLatest(db, {
-            scriptId,
-            contentJson: versionContentJson,
-            updatedAt: now,
-            schemaVersion: LATEST_SCRIPT_SCHEMA_VERSION,
-        });
-
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-
-        await recordOutbox({
-            scriptId,
-            opType: 'latest.restore-from-version',
-            payloadJson: JSON.stringify({
+        await db.transaction(async tx => {
+            await dbQueries.upsertLatest(tx, {
                 scriptId,
-                versionId,
-                restoredAt: now,
-            }),
+                contentJson: versionContentJson,
+                contentHash,
+                contentSize,
+                updatedAt: now,
+                schemaVersion: LATEST_SCRIPT_SCHEMA_VERSION,
+            });
+
+            await dbQueries.updateScriptTimestamp(tx, {
+                scriptId,
+                updatedAt: now,
+            });
+
+            await recordOutbox({
+                scriptId,
+                opType: 'latest.restore-from-version',
+                payloadJson: JSON.stringify({
+                    scriptId,
+                    versionId,
+                    restoredAt: now,
+                }),
+            }, tx);
         });
     };
 

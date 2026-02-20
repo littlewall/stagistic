@@ -7,8 +7,10 @@ import {
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import type {MutableRefObject} from 'react';
 
+import {type EditorValueChangeMeta} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
 import {FOUNTAIN_BLOCK_NODE_NAME} from '../tiptap/fountainCore';
+import {type AutosaveSchedulePayload} from './useAutosaveController';
 
 export const setPlainTextContent = (
     nodes: FountainJSONContent[] | undefined,
@@ -174,9 +176,10 @@ export const insertActBlockBeforeId = (
 const commitDocument = (
     editor: TiptapEditor,
     nextContent: FountainJSONContent[],
-    setLatestValue: (value: ScriptDocument) => void,
-    onValueChangeRef: MutableRefObject<((value: ScriptDocument) => void) | undefined>,
-    scheduleAutosave: (value: ScriptDocument) => void,
+    setLatestValue: (value: ScriptDocument, revision?: number) => void,
+    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
+    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
+    revisionRef: MutableRefObject<number>,
 ) => {
     const currentValue = editor.getJSON() as ScriptDocument;
     const nextStructure = normalizeScriptStructure(currentValue.attrs?.structure, {
@@ -201,22 +204,40 @@ const commitDocument = (
 
     const savedValue = stripScriptSettings(nextDocument);
 
-    setLatestValue(savedValue);
-    onValueChangeRef.current?.(savedValue);
-    scheduleAutosave(savedValue);
+    revisionRef.current += 1;
+
+    const revision = revisionRef.current;
+
+    setLatestValue(savedValue, revision);
+    onValueChangeRef.current?.(savedValue, {
+        source: 'structure',
+        revision,
+    });
+    scheduleAutosave({
+        value: savedValue,
+        revision,
+    });
 };
 
 export const tryCommitDocument = (
     editor: TiptapEditor,
     nextContent: FountainJSONContent[] | undefined,
     didChange: boolean,
-    setLatestValue: (value: ScriptDocument) => void,
-    onValueChangeRef: MutableRefObject<((value: ScriptDocument) => void) | undefined>,
-    scheduleAutosave: (value: ScriptDocument) => void,
+    setLatestValue: (value: ScriptDocument, revision?: number) => void,
+    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
+    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
+    revisionRef: MutableRefObject<number>,
 ) => {
     if (!didChange || !Array.isArray(nextContent)) {
         return;
     }
 
-    commitDocument(editor, nextContent, setLatestValue, onValueChangeRef, scheduleAutosave);
+    commitDocument(
+        editor,
+        nextContent,
+        setLatestValue,
+        onValueChangeRef,
+        scheduleAutosave,
+        revisionRef,
+    );
 };

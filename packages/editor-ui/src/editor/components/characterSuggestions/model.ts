@@ -35,6 +35,28 @@ export type {
     SuppressedSelection,
 } from './types';
 
+const persistentColorMapCache = new WeakMap<readonly PersistentCharacterRef[], Map<string, string>>();
+
+const getPersistentColorByKey = (
+    normalizedPersistentCharacters: readonly PersistentCharacterRef[],
+) => {
+    const cached = persistentColorMapCache.get(normalizedPersistentCharacters);
+
+    if (cached) {
+        return cached;
+    }
+
+    const nextMap = new Map(
+        normalizedPersistentCharacters
+            .filter(character => Boolean(character.colorHex))
+            .map(character => [character.key, character.colorHex as string]),
+    );
+
+    persistentColorMapCache.set(normalizedPersistentCharacters, nextMap);
+
+    return nextMap;
+};
+
 export const normalizePersistentCharacters = (persistentCharacters: readonly PersistentCharacterRef[]) => {
     const seenIds = new Set<string>();
     const seen = new Set<string>();
@@ -42,8 +64,14 @@ export const normalizePersistentCharacters = (persistentCharacters: readonly Per
 
     persistentCharacters.forEach(character => {
         const key = normalizeCharacterKey(character.key);
+        const rawId = typeof character.id === 'string'
+            ? character.id.trim()
+            : '';
+        const normalizedId = rawId.length > 0
+            ? rawId
+            : key;
 
-        if (!character.id || seenIds.has(character.id)) {
+        if (seenIds.has(normalizedId)) {
             return;
         }
 
@@ -51,10 +79,10 @@ export const normalizePersistentCharacters = (persistentCharacters: readonly Per
             return;
         }
 
-        seenIds.add(character.id);
+        seenIds.add(normalizedId);
         seen.add(key);
         result.push({
-            id: character.id,
+            id: normalizedId,
             key,
             colorHex: normalizeCharacterColorHex(character.colorHex) ?? null,
         });
@@ -184,18 +212,22 @@ export const computeCharacterSuggestions = ({
         return null;
     }
 
-    const {base} = splitBaseAndSuffix(activeToken.value);
-    const query = normalizeCharacterKey(base);
     const activeKey = normalizeCharacterKey(activeToken.value);
     const occupiedKeys = new Set<string>();
     const counts = collectCharacterCounts(editor, normalizedPersistentCharacters);
-    const persistentColorByKey = new Map(
-        normalizedPersistentCharacters
-            .filter(character => Boolean(character.colorHex))
-            .map(character => [character.key, character.colorHex as string]),
-    );
-    const hasKnownActiveCharacter = activeKey.length > 0 && counts.has(activeKey);
-    const shouldFilterByPrefix = !(hasKnownActiveCharacter && query === activeKey);
+    const countsByConfirmedKey = new Map<string, number>();
+
+    normalizedPersistentCharacters.forEach(character => {
+        const key = character.key;
+
+        if (countsByConfirmedKey.has(key)) {
+            return;
+        }
+
+        countsByConfirmedKey.set(key, counts.get(key) ?? 0);
+    });
+
+    const persistentColorByKey = getPersistentColorByKey(normalizedPersistentCharacters);
 
     tokens.forEach((token, index) => {
         if (index === activeTokenIndex) {
@@ -210,17 +242,11 @@ export const computeCharacterSuggestions = ({
     });
 
     const suggestionRows = buildSuggestionRows({
-        counts,
+        counts: countsByConfirmedKey,
         activeKey,
         occupiedKeys,
-        query,
-        shouldFilterByPrefix,
         limit: MAX_SUGGESTIONS,
     });
-
-    if (suggestionRows.length === 0) {
-        return null;
-    }
 
     const style = computeOverlayStyle({
         editor,

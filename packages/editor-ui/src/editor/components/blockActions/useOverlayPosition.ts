@@ -1,4 +1,7 @@
 import {
+    type EditorView,
+} from '@tiptap/pm/view';
+import {
     type Editor as TiptapEditor,
 } from '@tiptap/react';
 import {
@@ -15,14 +18,24 @@ import {
     isSelectionAcrossBlocks,
 } from '../../tiptap/fountainCore';
 import type {
-    BlockActionsOverlayAnchorState,
+    BlockActionsOverlayState,
     BlockActionsRailAnchorState,
+} from './overlay/types';
+import type {
     UseOverlayPositionArgs,
 } from './types';
 
-const findBlockElement = (editor: TiptapEditor, from: number) => {
+const getSafeEditorView = (editor: TiptapEditor): EditorView | null => {
     try {
-        const domAtPos = editor.view.domAtPos(from);
+        return editor.view;
+    } catch {
+        return null;
+    }
+};
+
+const findBlockElement = (view: EditorView, from: number) => {
+    try {
+        const domAtPos = view.domAtPos(from);
         let node: Node | null = domAtPos.node;
 
         if (node && node.nodeType === Node.TEXT_NODE) {
@@ -31,7 +44,7 @@ const findBlockElement = (editor: TiptapEditor, from: number) => {
 
         let element = node as HTMLElement | null;
 
-        while (element && element !== editor.view.dom) {
+        while (element && element !== view.dom) {
             if (element.dataset?.fountainBlock) {
                 return element;
             }
@@ -50,14 +63,26 @@ export const useOverlayPosition = ({
     canvasRef,
     isMenuOpen,
 }: UseOverlayPositionArgs) => {
-    const [overlayState, setOverlayState] = useState<BlockActionsOverlayAnchorState | null>(null);
+    const [overlayState, setOverlayState] = useState<BlockActionsOverlayState | null>(null);
     const [railAnchorState, setRailAnchorState] = useState<BlockActionsRailAnchorState | null>(null);
     const rafIdRef = useRef<number | null>(null);
 
+    const cancelScheduledUpdate = useCallback(() => {
+        if (rafIdRef.current === null) {
+            return;
+        }
+
+        window.cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+    }, []);
+
     const updatePosition = useCallback(() => {
         const canvas = canvasRef.current;
+        const view = editor
+            ? getSafeEditorView(editor)
+            : null;
 
-        if (!editor || !editor.view || !canvas) {
+        if (!editor || !view || !canvas) {
             setOverlayState(null);
             setRailAnchorState(null);
 
@@ -66,9 +91,9 @@ export const useOverlayPosition = ({
 
         const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
         const activeTarget = activeBlock
-            ? findBlockElement(editor, activeBlock.from)
+            ? findBlockElement(view, activeBlock.from)
             : null;
-        const fallbackTarget = editor.view.dom.querySelector<HTMLElement>('[data-fountain-block]');
+        const fallbackTarget = view.dom.querySelector<HTMLElement>('[data-fountain-block]');
         const railTarget = activeTarget ?? fallbackTarget;
         const resolveLineCenterTop = (target: HTMLElement, blockFrom: number | null) => {
             const canvasRect = canvas.getBoundingClientRect();
@@ -84,7 +109,7 @@ export const useOverlayPosition = ({
 
             if (blockFrom !== null) {
                 try {
-                    const caretCoords = editor.view.coordsAtPos(blockFrom);
+                    const caretCoords = view.coordsAtPos(blockFrom);
 
                     return ((caretCoords.top + caretCoords.bottom) / 2) - canvasRect.top + canvas.scrollTop;
                 } catch {
@@ -130,7 +155,7 @@ export const useOverlayPosition = ({
         }
 
         try {
-            if (!editor.view.hasFocus() && !isMenuOpen) {
+            if (!view.hasFocus() && !isMenuOpen) {
                 setOverlayState(null);
 
                 return;
@@ -203,29 +228,45 @@ export const useOverlayPosition = ({
         });
     }, [updatePosition]);
 
+    const runUpdatePositionNow = useCallback(() => {
+        cancelScheduledUpdate();
+        updatePosition();
+    }, [cancelScheduledUpdate, updatePosition]);
+
     useLayoutEffect(() => {
-        scheduleUpdatePosition();
-    }, [scheduleUpdatePosition]);
+        runUpdatePositionNow();
+    }, [runUpdatePositionNow]);
 
     useEffect(() => {
         if (!editor) {
             return;
         }
 
-        const handleUpdate = () => scheduleUpdatePosition();
+        const handleSelectionUpdate = () => runUpdatePositionNow();
+        const handleTransaction = () => scheduleUpdatePosition();
+        const handleFocus = () => runUpdatePositionNow();
+        const handleBlur = () => {
+            cancelScheduledUpdate();
+            setOverlayState(null);
+        };
 
-        editor.on('selectionUpdate', handleUpdate);
-        editor.on('transaction', handleUpdate);
-        editor.on('focus', handleUpdate);
-        editor.on('blur', handleUpdate);
+        editor.on('selectionUpdate', handleSelectionUpdate);
+        editor.on('transaction', handleTransaction);
+        editor.on('focus', handleFocus);
+        editor.on('blur', handleBlur);
 
         return () => {
-            editor.off('selectionUpdate', handleUpdate);
-            editor.off('transaction', handleUpdate);
-            editor.off('focus', handleUpdate);
-            editor.off('blur', handleUpdate);
+            editor.off('selectionUpdate', handleSelectionUpdate);
+            editor.off('transaction', handleTransaction);
+            editor.off('focus', handleFocus);
+            editor.off('blur', handleBlur);
         };
-    }, [editor, scheduleUpdatePosition]);
+    }, [
+        cancelScheduledUpdate,
+        editor,
+        runUpdatePositionNow,
+        scheduleUpdatePosition,
+    ]);
 
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -247,12 +288,9 @@ export const useOverlayPosition = ({
 
     useEffect(() => {
         return () => {
-            if (rafIdRef.current !== null) {
-                window.cancelAnimationFrame(rafIdRef.current);
-                rafIdRef.current = null;
-            }
+            cancelScheduledUpdate();
         };
-    }, []);
+    }, [cancelScheduledUpdate]);
 
     return {
         overlayState,

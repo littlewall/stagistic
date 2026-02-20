@@ -8,13 +8,19 @@ import {FOUNTAIN_BLOCKS_WITHOUT_ACT} from '../blocks/fountainBlockRegistry';
 import {FOUNTAIN_BLOCK_NODE_NAME} from '../tiptap/fountainCore';
 import styles from './EditorToolbar.module.css';
 import {BlockTypeSelect} from './toolbar/BlockTypeSelect';
+import type {
+    BlockTypeSelectActions,
+    BlockTypeSelectState,
+    InlineMarksGroupActions,
+    InlineMarksGroupState,
+} from './toolbar/contracts';
 import {InlineMarksGroup} from './toolbar/InlineMarksGroup';
 import {useDropdownDismiss} from './toolbar/useDropdownDismiss';
 import {useToolbarState} from './toolbar/useToolbarState';
 
-type EditorToolbarProps = {
+interface EditorToolbarProps {
     editor: TiptapEditor | null,
-};
+}
 
 const EditorToolbar = ({editor}: EditorToolbarProps) => {
     const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -131,6 +137,31 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             .run();
     }, [activeBlockInfo?.type, editor]);
 
+    const inlineMarksState: InlineMarksGroupState = {
+        canUndo,
+        canRedo,
+        isBoldActive,
+        isItalicActive,
+        isUnderlineActive,
+    };
+    const inlineMarksActions: InlineMarksGroupActions = {
+        onUndoMouseDown: handleUndoMouseDown,
+        onRedoMouseDown: handleRedoMouseDown,
+        onBoldMouseDown: handleBoldMouseDown,
+        onItalicMouseDown: handleItalicMouseDown,
+        onUnderlineMouseDown: handleUnderlineMouseDown,
+    };
+    const blockTypeState: BlockTypeSelectState = {
+        isOpen,
+        canChangeBlockType,
+        visibleBlockInfo,
+        activeBlockInfo,
+    };
+    const blockTypeActions: BlockTypeSelectActions = {
+        onSelectMouseDown: handleSelectMouseDown,
+        onMenuItemMouseDown: handleMenuItemMouseDown,
+    };
+
     return (
         <div
             className={styles.toolbar}
@@ -138,26 +169,14 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             data-editor-toolbar="true"
         >
             <InlineMarksGroup
-                canUndo={canUndo}
-                canRedo={canRedo}
-                isBoldActive={isBoldActive}
-                isItalicActive={isItalicActive}
-                isUnderlineActive={isUnderlineActive}
-                onUndoMouseDown={handleUndoMouseDown}
-                onRedoMouseDown={handleRedoMouseDown}
-                onBoldMouseDown={handleBoldMouseDown}
-                onItalicMouseDown={handleItalicMouseDown}
-                onUnderlineMouseDown={handleUnderlineMouseDown}
+                state={inlineMarksState}
+                actions={inlineMarksActions}
             />
             <BlockTypeSelect
                 options={FOUNTAIN_BLOCKS_WITHOUT_ACT}
-                isOpen={isOpen}
-                canChangeBlockType={canChangeBlockType}
-                visibleBlockInfo={visibleBlockInfo}
-                activeBlockInfo={activeBlockInfo}
                 dropdownRef={dropdownRef}
-                onSelectMouseDown={handleSelectMouseDown}
-                onMenuItemMouseDown={handleMenuItemMouseDown}
+                state={blockTypeState}
+                actions={blockTypeActions}
             />
         </div>
     );

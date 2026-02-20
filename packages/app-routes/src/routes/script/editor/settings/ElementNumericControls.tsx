@@ -6,37 +6,37 @@ import {
 import styles from '../../ScriptEditorRoute.module.css';
 import {
     SettingsSelect,
-    type SettingsSelectOption,
 } from './SettingsSelect';
-import type {UpdateBlockSettings} from './types';
+import type {
+    ElementNumericModel,
+    ElementSettingsActions,
+} from './types';
 
 interface ElementNumericControlsProps {
     blockType: FountainElementType,
     shortcutPrefix: string,
-    spacingBefore: number,
-    lineHeight: number,
-    shortcut: BlockShortcut,
-    nextElement: FountainElementType,
-    spacingBeforeOptions: SettingsSelectOption[],
-    lineHeightOptions: SettingsSelectOption[],
-    shortcutOptions: SettingsSelectOption[],
-    nextElementOptions: SettingsSelectOption[],
-    onUpdateBlockSettings: UpdateBlockSettings,
+    model: ElementNumericModel,
+    actions: ElementSettingsActions,
 }
 
 export const ElementNumericControls = ({
     blockType,
     shortcutPrefix,
-    spacingBefore,
-    lineHeight,
-    shortcut,
-    nextElement,
-    spacingBeforeOptions,
-    lineHeightOptions,
-    shortcutOptions,
-    nextElementOptions,
-    onUpdateBlockSettings,
+    model,
+    actions,
 }: ElementNumericControlsProps) => {
+    const {
+        spacingBefore,
+        lineHeight,
+        shortcut,
+        nextElement,
+        spacingBeforeOptions,
+        lineHeightOptions,
+        shortcutOptions,
+        nextElementOptions,
+    } = model;
+    const {onUpdateBlockSettings} = actions;
+
     return (
         <div className={styles.settingsFlatGrid}>
             <div className={styles.settingsField}>

@@ -1,3 +1,4 @@
+import clsx from 'clsx';
 import {
     type CSSProperties,
     type MouseEvent as ReactMouseEvent,
@@ -11,14 +12,18 @@ type CharacterSuggestionsOverlayViewProps = {
     overlayRef: RefObject<HTMLDivElement | null>,
     style: CSSProperties,
     suggestions: SuggestionEntry[],
+    activeSuggestionIndex: number,
     onSuggestionMouseDown: (suggestion: string, event: ReactMouseEvent<HTMLButtonElement>) => void,
+    onSuggestionMouseEnter: (index: number) => void,
 };
 
 export const CharacterSuggestionsOverlayView = ({
     overlayRef,
     style,
     suggestions,
+    activeSuggestionIndex,
     onSuggestionMouseDown,
+    onSuggestionMouseEnter,
 }: CharacterSuggestionsOverlayViewProps) => {
     return (
         <div
@@ -31,18 +36,29 @@ export const CharacterSuggestionsOverlayView = ({
                 role="listbox"
                 aria-label="Character suggestions"
             >
-                {suggestions.map(suggestion => (
-                    <button
-                        key={suggestion.key}
-                        className={styles.item}
-                        type="button"
-                        role="option"
-                        onMouseDown={event => onSuggestionMouseDown(suggestion.key, event)}
-                    >
-                        <span className={styles.itemDot} style={{backgroundColor: suggestion.color}} />
-                        <span className={styles.itemLabel}>{suggestion.key}</span>
-                    </button>
-                ))}
+                {suggestions.length === 0 ? (
+                    <div className={styles.empty}>
+                        No confirmed characters available
+                    </div>
+                ) : null}
+                {suggestions.map((suggestion, index) => {
+                    const isActive = activeSuggestionIndex === index;
+
+                    return (
+                        <button
+                            key={suggestion.key}
+                            className={clsx(styles.item, isActive && styles.itemActive)}
+                            type="button"
+                            role="option"
+                            aria-selected={isActive}
+                            onMouseDown={event => onSuggestionMouseDown(suggestion.key, event)}
+                            onMouseEnter={() => onSuggestionMouseEnter(index)}
+                        >
+                            <span className={styles.itemDot} style={{backgroundColor: suggestion.color}} />
+                            <span className={styles.itemLabel}>{suggestion.key}</span>
+                        </button>
+                    );
+                })}
             </div>
         </div>
     );

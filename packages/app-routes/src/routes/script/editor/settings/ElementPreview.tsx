@@ -1,6 +1,5 @@
 import {clsx} from '@stagistic/ui';
 import {
-    type CSSProperties,
     type ReactNode,
 } from 'react';
 
@@ -13,36 +12,33 @@ import {
     formatInches,
     formatNumeric,
 } from './math';
+import type {ElementPreviewModel} from './types';
 
 interface ElementPreviewProps {
     toolbar?: ReactNode,
-    previewStyle: CSSProperties,
-    previewText: string,
-    sliderStart: number,
-    sliderEnd: number,
-    previewReferenceChars: number,
-    minPreviewContentChars: number,
-    leftTotalInches: number,
-    rightTotalInches: number,
-    contentChars: number,
-    onStartChange: (value: number) => void,
-    onEndChange: (value: number) => void,
+    model: ElementPreviewModel,
+    actions: {
+        onStartChange: (value: number) => void,
+        onEndChange: (value: number) => void,
+    },
 }
 
 export const ElementPreview = ({
     toolbar,
-    previewStyle,
-    previewText,
-    sliderStart,
-    sliderEnd,
-    previewReferenceChars,
-    minPreviewContentChars,
-    leftTotalInches,
-    rightTotalInches,
-    contentChars,
-    onStartChange,
-    onEndChange,
+    model,
+    actions,
 }: ElementPreviewProps) => {
+    const {
+        previewStyle,
+        previewText,
+        sliderStart,
+        sliderEnd,
+        previewReferenceChars,
+        minPreviewContentChars,
+        leftTotalInches,
+        rightTotalInches,
+        contentChars,
+    } = model;
     const defaultSliderStartChars = 0;
     const defaultSliderEndChars = previewReferenceChars;
 
@@ -76,7 +72,7 @@ export const ElementPreview = ({
                         );
                         const nextStart = clamp(rawStart, defaultSliderStartChars, maxStart);
 
-                        onStartChange(nextStart);
+                        actions.onStartChange(nextStart);
                     }}
                     aria-label="Block start indent"
                 />
@@ -92,7 +88,7 @@ export const ElementPreview = ({
                         const minEnd = sliderStart + minPreviewContentChars;
                         const nextEnd = clamp(rawEnd, minEnd, defaultSliderEndChars);
 
-                        onEndChange(nextEnd);
+                        actions.onEndChange(nextEnd);
                     }}
                     aria-label="Block end indent"
                 />
