@@ -63,6 +63,7 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
             let lastFallbackDoc: ProseMirrorNode | null = null;
             let isRecalcRunning = false;
             let needsRecalc = false;
+            let recalcFrameId = 0;
 
             const runRecalc = () => {
                 if (destroyed) {
@@ -136,25 +137,41 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                 isRecalcRunning = false;
             };
 
+            const scheduleRecalc = () => {
+                if (destroyed) {
+                    return;
+                }
+
+                if (recalcFrameId) {
+                    window.cancelAnimationFrame(recalcFrameId);
+                }
+
+                recalcFrameId = window.requestAnimationFrame(() => {
+                    recalcFrameId = 0;
+                    runRecalc();
+                });
+            };
+
             if (typeof ResizeObserver !== 'undefined') {
                 resizeObserver = new ResizeObserver(() => {
-                    runRecalc();
+                    // Defer dispatching transactions outside the ResizeObserver delivery.
+                    scheduleRecalc();
                 });
                 resizeObserver.observe(view.dom);
             }
 
             if (typeof document !== 'undefined' && 'fonts' in document) {
                 document.fonts.ready.then(() => {
-                    runRecalc();
+                    scheduleRecalc();
                 }).catch(() => {});
             }
 
-            runRecalc();
+            scheduleRecalc();
 
             return {
-                update: view => {
+                update: (view, prevState) => {
                     const optionsVersion = extension.storage.optionsVersion;
-                    const docChanged = view.state.tr.docChanged;
+                    const docChanged = !prevState.doc.eq(view.state.doc);
                     const heightKey = `${extension.options.pageWidth}|${extension.options.marginLeft}|`
                         + `${extension.options.marginRight}|${extension.options.lineHeightPx}`;
 
@@ -169,10 +186,15 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                         return;
                     }
 
-                    runRecalc();
+                    scheduleRecalc();
                 },
                 destroy: () => {
                     destroyed = true;
+                    if (recalcFrameId) {
+                        window.cancelAnimationFrame(recalcFrameId);
+                        recalcFrameId = 0;
+                    }
+
                     resizeObserver?.disconnect();
                 },
             };

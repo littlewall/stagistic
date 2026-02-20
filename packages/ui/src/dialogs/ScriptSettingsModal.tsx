@@ -22,7 +22,7 @@ export const ScriptSettingsModal = ({
     onClose,
     onSelectPanel,
     onToggleExpand,
-    renderPanel,
+    children,
 }: ScriptSettingsModalProps) => {
     useEffect(() => {
         if (!isOpen) {
@@ -162,7 +162,7 @@ export const ScriptSettingsModal = ({
                         ))}
                     </aside>
                     <section className={styles.content}>
-                        {renderPanel(activePanelId)}
+                        {children}
                     </section>
                 </div>
             </div>

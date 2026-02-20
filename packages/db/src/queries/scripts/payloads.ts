@@ -78,6 +78,8 @@ export interface ReplaceScriptConfigBlocksPayload {
 export interface InsertLatestPayload {
     scriptId: string,
     contentJson: string,
+    contentHash: string,
+    contentSize: number,
     updatedAt: number,
     schemaVersion: number,
 }
@@ -85,6 +87,8 @@ export interface InsertLatestPayload {
 export interface UpsertLatestPayload {
     scriptId: string,
     contentJson: string,
+    contentHash: string,
+    contentSize: number,
     updatedAt: number,
     schemaVersion: number,
 }

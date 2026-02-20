@@ -28,9 +28,14 @@ import {
 
 export type {EditorSidebarCharacter};
 
-type EditorSidebarProps = {
+interface EditorSidebarData {
     confirmedCharacters: EditorSidebarCharacter[],
     unconfirmedCharacters: EditorSidebarCharacter[],
+    characterGenderOptions?: CharacterGenderOption[],
+    isLoading?: boolean,
+}
+
+interface EditorSidebarActions {
     onConfirmCharacter?: (characterKey: string) => void,
     onDeleteCharacter?: (characterId: string) => void | Promise<void>,
     normalizeRenameInput?: (value: string) => string,
@@ -44,31 +49,47 @@ type EditorSidebarProps = {
         previousCharacterName: string,
         nextCharacterName: string,
     ) => void | Promise<void>,
-    characterGenderOptions?: CharacterGenderOption[],
     onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
     onSetCharacterGender?: (characterId: string, genderKey: string | null) => void,
     onUpsertCharacterGender?: (label: string) => Promise<CharacterGenderOption | null>,
+}
+
+interface EditorSidebarOptions {
     characterColorSaturation?: number,
-    isLoading?: boolean,
     className?: string,
-};
+}
+
+export interface EditorSidebarProps {
+    data: EditorSidebarData,
+    actions?: EditorSidebarActions,
+    options?: EditorSidebarOptions,
+}
 
 export const EditorSidebar = ({
-    confirmedCharacters,
-    unconfirmedCharacters,
-    onConfirmCharacter,
-    onDeleteCharacter,
-    normalizeRenameInput,
-    onRenameCharacterPreview,
-    onRenameCharacter,
-    characterGenderOptions = [],
-    onSetCharacterColor,
-    onSetCharacterGender,
-    onUpsertCharacterGender,
-    characterColorSaturation,
-    isLoading,
-    className,
+    data,
+    actions,
+    options,
 }: EditorSidebarProps) => {
+    const {
+        confirmedCharacters,
+        unconfirmedCharacters,
+        characterGenderOptions = [],
+        isLoading,
+    } = data;
+    const {
+        onConfirmCharacter,
+        onDeleteCharacter,
+        normalizeRenameInput,
+        onRenameCharacterPreview,
+        onRenameCharacter,
+        onSetCharacterColor,
+        onSetCharacterGender,
+        onUpsertCharacterGender,
+    } = actions ?? {};
+    const {
+        characterColorSaturation,
+        className,
+    } = options ?? {};
     const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
     const hasCharacters = confirmedCharacters.length > 0 || unconfirmedCharacters.length > 0;
     const rows = useMemo(
@@ -144,28 +165,40 @@ export const EditorSidebar = ({
                                         >
                                             {character.isConfirmed ? (
                                                 <CharacterRowConfirmed
-                                                    character={character}
-                                                    characterIdentityKey={characterIdentityKey}
-                                                    isExpanded={isExpanded}
-                                                    isDeletePending={isDeletePending}
-                                                    isRenamePending={isRenamePending}
-                                                    renameDraft={renameDraft}
-                                                    onToggleExpanded={toggleExpanded}
-                                                    onRenameDraftChange={handleRenameDraftChange}
-                                                    onCommitRenameDraft={commitRenameDraft}
-                                                    onDeleteCharacter={onDeleteCharacter}
-                                                    onRenameCharacter={onRenameCharacter}
-                                                    characterGenderOptions={characterGenderOptions}
-                                                    onSetCharacterColor={onSetCharacterColor}
-                                                    onSetCharacterGender={onSetCharacterGender}
-                                                    onUpsertCharacterGender={onUpsertCharacterGender}
-                                                    characterColorSaturation={characterColorSaturation}
+                                                    model={{
+                                                        character,
+                                                        characterIdentityKey,
+                                                        renameDraft,
+                                                    }}
+                                                    state={{
+                                                        isExpanded,
+                                                        isDeletePending,
+                                                        isRenamePending,
+                                                    }}
+                                                    actions={{
+                                                        onToggleExpanded: toggleExpanded,
+                                                        onRenameDraftChange: handleRenameDraftChange,
+                                                        onCommitRenameDraft: commitRenameDraft,
+                                                        onDeleteCharacter,
+                                                        onRenameCharacter,
+                                                        onSetCharacterColor,
+                                                        onSetCharacterGender,
+                                                        onUpsertCharacterGender,
+                                                    }}
+                                                    options={{
+                                                        characterGenderOptions,
+                                                        characterColorSaturation,
+                                                    }}
                                                 />
                                             ) : (
                                                 <CharacterRowPending
-                                                    character={character}
-                                                    isConfirmPending={isConfirmPending}
-                                                    onConfirmCharacter={onConfirmCharacter}
+                                                    model={{
+                                                        character,
+                                                        isConfirmPending,
+                                                    }}
+                                                    actions={{
+                                                        onConfirmCharacter,
+                                                    }}
                                                 />
                                             )}
                                         </li>

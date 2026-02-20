@@ -7,52 +7,55 @@ import {
 import {
     type CSSProperties,
     type MouseEvent as ReactMouseEvent,
-    type ReactNode,
     type RefObject,
 } from 'react';
 
 import styles from '../../Editor.module.css';
-import type {PersistentCharacterRef} from '../../types';
+import type {
+    EditorLayoutProps,
+    PersistentCharacterRef,
+} from '../../types';
 import {EditorCanvas} from '../EditorCanvas';
 import EditorToolbar from '../EditorToolbar';
 
-type EditorShellProps = {
+interface EditorShellCanvasProps {
     editor: TiptapEditor | null,
-    rootRef: RefObject<HTMLDivElement | null>,
-    canvasHostRef: RefObject<HTMLDivElement | null>,
-    rootStyle: CSSProperties,
     autoFocus?: boolean,
     persistentCharacters?: readonly PersistentCharacterRef[],
     characterColorSaturation?: number,
-    leftSidebarToggle?: {
-        isOpen: boolean,
-        onToggle: () => void,
-    },
-    rightSidebarToggle?: {
-        isOpen: boolean,
-        onToggle: () => void,
-    },
-    leftSidebar?: ReactNode,
-    rightSidebar?: ReactNode,
+}
+
+interface EditorShellProps {
+    canvas: EditorShellCanvasProps,
+    layout?: EditorLayoutProps,
+    rootRef: RefObject<HTMLDivElement | null>,
+    canvasHostRef: RefObject<HTMLDivElement | null>,
+    rootStyle: CSSProperties,
     onLeftSidebarToggleMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
     onRightSidebarToggleMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
-};
+}
 
 export const EditorShell = ({
-    editor,
+    canvas,
+    layout,
     rootRef,
     canvasHostRef,
     rootStyle,
-    autoFocus,
-    persistentCharacters,
-    characterColorSaturation,
-    leftSidebarToggle,
-    rightSidebarToggle,
-    leftSidebar,
-    rightSidebar,
     onLeftSidebarToggleMouseDown,
     onRightSidebarToggleMouseDown,
 }: EditorShellProps) => {
+    const {
+        editor,
+        autoFocus,
+        persistentCharacters,
+        characterColorSaturation,
+    } = canvas;
+    const {
+        leftSidebarToggle,
+        rightSidebarToggle,
+        leftSidebar,
+        rightSidebar,
+    } = layout ?? {};
     const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;
     const isRightSidebarOpen = rightSidebarToggle?.isOpen ?? false;
 

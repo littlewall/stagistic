@@ -28,7 +28,6 @@ export const resolveBlockMeasurement = ({
     const cached = cache.get(key);
     const canUseCache = cached
         && !cached.isFallback
-        && !cached.hasInlineBreaks
         && (cached.node === node || cached.node.eq(node));
 
     if (canUseCache) {

@@ -64,13 +64,19 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     );
 
     useEditorRedirects({
-        scriptsLoading,
-        scriptsError,
-        recentScriptsData,
-        currentScript,
-        scriptId,
-        navigate,
-        seedDefaultScript,
+        state: {
+            scriptsLoading,
+            scriptsError,
+            recentScriptsData,
+            currentScript,
+            scriptId,
+        },
+        navigation: {
+            navigate,
+        },
+        requests: {
+            seedDefaultScript,
+        },
     });
 
     const editorLoadState = useMemo(() => {
@@ -115,17 +121,22 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         handleManualSave,
         handleSaveScriptSettingsOverride,
     } = useScriptSaveHandlers({
-        currentScript,
-        currentScriptId,
-        scriptRepository,
-        setStorageError,
-        addToast,
-        setScriptSettingsOverride,
-        settingsSaveRequestRef,
-        saveIndicatorControls: {
-            saveIndicator,
-            startSaveIndicator,
-            finishSaveIndicator,
+        context: {
+            currentScript,
+            currentScriptId,
+        },
+        repository: scriptRepository,
+        notifications: {
+            setStorageError,
+            addToast,
+        },
+        state: {
+            setScriptSettingsOverride,
+            settingsSaveRequestRef,
+            saveIndicatorControls: {
+                startSaveIndicator,
+                finishSaveIndicator,
+            },
         },
     });
 

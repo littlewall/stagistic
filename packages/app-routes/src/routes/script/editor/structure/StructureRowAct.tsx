@@ -18,13 +18,16 @@ const joinClassNames = (...classNames: Array<string | false | null | undefined>)
 export const StructureRowAct = memo(({
     act,
     rowIndex,
-    structureSettings,
-    actNamePreviewById,
-    onFocusBlock,
-    onRenameAct,
-    onActNamePreview,
-    onDeleteAct,
+    data,
+    actions,
 }: StructureRowActProps) => {
+    const {structureSettings, actNamePreviewById} = data;
+    const {
+        onFocusBlock,
+        onRenameAct,
+        onActNamePreview,
+        onDeleteAct,
+    } = actions;
     const {
         ref,
         handleRef,

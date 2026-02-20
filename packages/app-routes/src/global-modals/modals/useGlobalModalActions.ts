@@ -1,3 +1,4 @@
+import type {ScriptImportFile} from '@stagistic/platform-core';
 import {
     createNodeId,
     getFirstBlockId,
@@ -18,45 +19,58 @@ import {
     resolveImportedScriptName,
 } from '../services/scriptImportService';
 
-type ScriptRepositoryAdapter = {
+interface ScriptRepositoryAdapter {
     createScript: (name: string, initialContent?: ScriptDocument) => Promise<string>,
     setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,
-};
+}
 
-type UseGlobalModalActionsArgs = {
-    scriptRepository: ScriptRepositoryAdapter,
-    refreshScripts: () => void,
-    navigate: NavigateFunction,
-    addToast: (toast: AppToastPayload) => void,
-    pickFile: () => Promise<{fileName: string, text: string} | null>,
-};
+interface UseGlobalModalActionsArgs {
+    repository: {
+        scriptRepository: ScriptRepositoryAdapter,
+    },
+    navigation: {
+        navigate: NavigateFunction,
+    },
+    notifications: {
+        addToast: (toast: AppToastPayload) => void,
+    },
+    state: {
+        refreshScripts: () => void,
+    },
+    requests: {
+        pickFile: () => Promise<ScriptImportFile | null>,
+    },
+}
 
-export type GlobalModalActions = {
+export interface GlobalModalActions {
     isNewScriptOpen: boolean,
     isImportOpen: boolean,
-    prefilledImport: {fileName: string, text: string} | null,
+    prefilledImport: ScriptImportFile | null,
     openNewScript: () => void,
     closeNewScript: () => void,
     openImportScript: () => void,
     closeImportScript: () => void,
-    setPrefilledImport: (value: {fileName: string, text: string} | null) => void,
+    setPrefilledImport: (value: ScriptImportFile | null) => void,
     handleCreate: (name: string) => void,
-    handleImport: (payload: {
-        name: string, fileName: string, text: string,
-    }) => void,
-    pickImportFile: () => Promise<{fileName: string, text: string} | null>,
-};
+    handleImport: (payload: ScriptImportFile & {name: string}) => void,
+    pickImportFile: () => Promise<ScriptImportFile | null>,
+}
 
 export const useGlobalModalActions = ({
-    scriptRepository,
-    refreshScripts,
-    navigate,
-    addToast,
-    pickFile,
+    repository,
+    navigation,
+    notifications,
+    state,
+    requests,
 }: UseGlobalModalActionsArgs): GlobalModalActions => {
+    const {scriptRepository} = repository;
+    const {navigate} = navigation;
+    const {addToast} = notifications;
+    const {refreshScripts} = state;
+    const {pickFile} = requests;
     const [isNewScriptOpen, setIsNewScriptOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
-    const [prefilledImport, setPrefilledImport] = useState<{fileName: string, text: string} | null>(null);
+    const [prefilledImport, setPrefilledImport] = useState<ScriptImportFile | null>(null);
 
     const openNewScript = useCallback(() => {
         setIsNewScriptOpen(true);
@@ -119,11 +133,7 @@ export const useGlobalModalActions = ({
         navigate,
     ]);
 
-    const handleImport = useCallback((payload: {
-        name: string,
-        fileName: string,
-        text: string,
-    }) => {
+    const handleImport = useCallback((payload: ScriptImportFile & {name: string}) => {
         const importAndNavigate = async () => {
             try {
                 if (!isSupportedImportFileName(payload.fileName)) {

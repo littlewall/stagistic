@@ -1,4 +1,5 @@
 import {type useScriptRepository} from '@stagistic/app-core';
+import {type EditorValueChangeMeta} from '@stagistic/editor-ui';
 import {type EditorSettings} from '@stagistic/script-core';
 import {
     type ScriptDocument,
@@ -23,13 +24,14 @@ export interface UseScriptEditorCharactersArgs {
 
 export interface UseScriptEditorCharactersResult {
     editorValue: ScriptDocument | null,
+    sidebarValue: ScriptDocument | null,
     editorOverrideValue: ScriptDocument | null,
     normalizedConfirmedCharacterRecords: ScriptCharacterRecord[],
     confirmedCharacters: EditorSidebarCharacter[],
     unconfirmedCharacters: EditorSidebarCharacter[],
     characterGenderOptions: CharacterGenderOption[],
     isCharactersLoading: boolean,
-    handleEditorValueChange: (value: ScriptDocument) => void,
+    handleEditorValueChange: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,
     normalizeCharacterNameForInlineInput: (name: string) => string,
     handleConfirmCharacter: (characterKey: string) => void,
     handleDeleteCharacter: (characterId: string) => void,

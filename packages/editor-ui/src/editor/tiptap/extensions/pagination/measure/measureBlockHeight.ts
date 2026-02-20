@@ -24,10 +24,11 @@ export const measureBlockHeight = (
 
     let height = dom.offsetHeight;
 
-    const inlineBreaks = dom.querySelectorAll('[data-pagination-inline-break]');
-    const hasInlineBreaks = inlineBreaks.length > 0;
+    const firstInlineBreak = dom.querySelector('[data-pagination-inline-break]');
+    const hasInlineBreaks = Boolean(firstInlineBreak);
 
     if (hasInlineBreaks) {
+        const inlineBreaks = dom.querySelectorAll('[data-pagination-inline-break]');
         let inlineBreakHeight = 0;
 
         for (let i = 0; i < inlineBreaks.length; i += 1) {

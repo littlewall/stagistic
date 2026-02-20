@@ -21,6 +21,8 @@ export const scriptLatest = pgTable('script_latest', {
         .primaryKey()
         .references(() => scripts.id, {onDelete: 'cascade'}),
     contentJson: text('content_json').notNull(),
+    contentHash: text('content_hash').notNull().default(''),
+    contentSize: integer('content_size').notNull().default(0),
     updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     schemaVersion: integer('schema_version').notNull().default(1),
 });

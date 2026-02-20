@@ -1,5 +1,4 @@
 import type {EditorSettingsOverride, ScriptDocument} from '@stagistic/script-core';
-import type {ScriptSyncState} from '@stagistic/ui';
 import {useCallback} from 'react';
 
 import type {
@@ -9,13 +8,12 @@ import type {
 import {EDITOR_SETTINGS_NAMESPACE} from './constants';
 import {isEditorSettingsOverrideEmpty} from './types';
 
-type SaveIndicatorControls = {
-    saveIndicator: ScriptSyncState,
+interface SaveIndicatorControls {
     startSaveIndicator: () => void,
     finishSaveIndicator: (didSave: boolean) => void,
-};
+}
 
-type SaveRepository = {
+interface SaveRepository {
     saveLatest: (scriptId: string, value: ScriptDocument) => Promise<unknown>,
     commitVersion: (scriptId: string) => Promise<unknown>,
     deleteScriptConfig: (scriptId: string, namespace: string) => Promise<unknown>,
@@ -24,29 +22,39 @@ type SaveRepository = {
         namespace: string,
         value: EditorSettingsOverride,
     ) => Promise<unknown>,
-};
+}
 
-type UseScriptSaveHandlersArgs = {
-    currentScript: CurrentScriptItem | null,
-    currentScriptId: string | null,
-    scriptRepository: SaveRepository,
-    setStorageError: (value: string | null) => void,
-    addToast: (payload: AppToastPayload) => void,
-    setScriptSettingsOverride: (value: EditorSettingsOverride | null) => void,
-    settingsSaveRequestRef: {current: number},
-    saveIndicatorControls: SaveIndicatorControls,
-};
+interface UseScriptSaveHandlersArgs {
+    context: {
+        currentScript: CurrentScriptItem | null,
+        currentScriptId: string | null,
+    },
+    repository: SaveRepository,
+    notifications: {
+        setStorageError: (value: string | null) => void,
+        addToast: (payload: AppToastPayload) => void,
+    },
+    state: {
+        setScriptSettingsOverride: (value: EditorSettingsOverride | null) => void,
+        settingsSaveRequestRef: {current: number},
+        saveIndicatorControls: SaveIndicatorControls,
+    },
+}
 
 export const useScriptSaveHandlers = ({
-    currentScript,
-    currentScriptId,
-    scriptRepository,
-    setStorageError,
-    addToast,
-    setScriptSettingsOverride,
-    settingsSaveRequestRef,
-    saveIndicatorControls,
+    context,
+    repository,
+    notifications,
+    state,
 }: UseScriptSaveHandlersArgs) => {
+    const {currentScript, currentScriptId} = context;
+    const scriptRepository = repository;
+    const {setStorageError, addToast} = notifications;
+    const {
+        setScriptSettingsOverride,
+        settingsSaveRequestRef,
+        saveIndicatorControls,
+    } = state;
     const {startSaveIndicator, finishSaveIndicator} = saveIndicatorControls;
 
     const handleAutoSave = useCallback(async (value: ScriptDocument) => {

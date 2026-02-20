@@ -101,22 +101,30 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         activeDrag: activeDragState,
         handleTriggerPointerDown,
     } = usePointerDragInteraction({
-        editor,
-        canvasRef,
-        activeOverlayState: pointerOverlayState,
-        isMenuDisabledBlock: isMenuDisabledPointerBlock,
-        closeMenu,
-        toggleMenu,
-        applyDraggedSourceHighlight,
-        clearDraggedSourceHighlight,
-        beginDragPreviewSession,
-        clearDragPreviewSession,
-        applyPreviewMove,
-        revertPreviewMove,
-        commitPreviewMove,
-        resolveOverlayStyleForBlockId,
-        getLastDragOverlayStyle,
-        setDropLock,
+        context: {
+            editor,
+            canvasRef,
+            activeOverlayState: pointerOverlayState,
+            isMenuDisabledBlock: isMenuDisabledPointerBlock,
+        },
+        menu: {
+            closeMenu,
+            toggleMenu,
+        },
+        preview: {
+            applyDraggedSourceHighlight,
+            clearDraggedSourceHighlight,
+            beginDragPreviewSession,
+            clearDragPreviewSession,
+            applyPreviewMove,
+            revertPreviewMove,
+            commitPreviewMove,
+        },
+        overlay: {
+            resolveOverlayStyleForBlockId,
+            getLastDragOverlayStyle,
+            setDropLock,
+        },
     });
 
     useEffect(() => {

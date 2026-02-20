@@ -1,59 +1,31 @@
 import {NavArrowDown, NavArrowRight} from 'iconoir-react';
-import type {ComponentProps, RefObject} from 'react';
 import {Tooltip, TooltipTrigger} from 'react-aria-components';
 
 import styles from '../EditorSidebar.module.css';
-import type {EditorSidebarCharacter} from '../types';
 import {isInlineInteractiveTarget} from '../utils';
 import {CharacterColorPopover} from './CharacterColorPopover';
-
-type CharacterRowHeaderProps = {
-    character: EditorSidebarCharacter,
-    characterIdentityKey: string,
-    isExpanded: boolean,
-    renameDraft: string,
-    isColorActionDisabled: boolean,
-    isRenameActionDisabled: boolean,
-    isColorPickerOpen: boolean,
-    colorTriggerRef: RefObject<HTMLSpanElement | null>,
-    colorDraftHex: string,
-    pickerColorValue: ComponentProps<typeof CharacterColorPopover>['pickerColorValue'],
-    presetColorHexes: string[],
-    resolvedColorSaturation: number,
-    onToggleExpanded: (key: string) => void,
-    onRenameDraftChange: (characterId: string, characterKey: string, value: string) => void,
-    onCommitRenameDraft: (characterId: string, characterKey: string) => void,
-    onToggleColorPicker: () => void,
-    onSetColorPickerOpen: (nextOpen: boolean) => void,
-    onApplyColor: () => void,
-    onResetColor: () => void,
-    onSetColorDraftHue: (hue: number) => void,
-    isCharacterOverlayTarget: (target: EventTarget | null) => boolean,
-};
+import type {CharacterRowHeaderProps} from './contracts';
 
 export const CharacterRowHeader = ({
-    character,
-    characterIdentityKey,
-    isExpanded,
-    renameDraft,
-    isColorActionDisabled,
-    isRenameActionDisabled,
-    isColorPickerOpen,
-    colorTriggerRef,
-    colorDraftHex,
-    pickerColorValue,
-    presetColorHexes,
-    resolvedColorSaturation,
-    onToggleExpanded,
-    onRenameDraftChange,
-    onCommitRenameDraft,
-    onToggleColorPicker,
-    onSetColorPickerOpen,
-    onApplyColor,
-    onResetColor,
-    onSetColorDraftHue,
-    isCharacterOverlayTarget,
+    model,
+    state,
+    actions,
+    color,
+    overlay,
 }: CharacterRowHeaderProps) => {
+    const {
+        characterIdentityKey,
+        character,
+        renameDraft,
+    } = model;
+    const {isExpanded, isRenameActionDisabled} = state;
+    const {
+        onToggleExpanded,
+        onRenameDraftChange,
+        onCommitRenameDraft,
+    } = actions;
+    const {isCharacterOverlayTarget} = overlay;
+
     return (
         <div
             className={styles.characterRowButton}
@@ -62,7 +34,7 @@ export const CharacterRowHeader = ({
             aria-label={isExpanded ? `Collapse ${character.key}` : `Expand ${character.key}`}
             aria-expanded={isExpanded}
             onClick={event => {
-                if (isColorPickerOpen) {
+                if (color.state.isPickerOpen) {
                     return;
                 }
 
@@ -73,7 +45,7 @@ export const CharacterRowHeader = ({
                 onToggleExpanded(characterIdentityKey);
             }}
             onKeyDown={event => {
-                if (isColorPickerOpen) {
+                if (color.state.isPickerOpen) {
                     return;
                 }
 
@@ -113,31 +85,31 @@ export const CharacterRowHeader = ({
                         closeDelay={120}
                     >
                         <span
-                            ref={colorTriggerRef}
+                            ref={color.refs.triggerRef}
                             role="button"
-                            tabIndex={isColorActionDisabled ? -1 : 0}
+                            tabIndex={color.state.isActionDisabled ? -1 : 0}
                             aria-label={`Choose color for ${character.key}`}
-                            aria-disabled={isColorActionDisabled || undefined}
+                            aria-disabled={color.state.isActionDisabled || undefined}
                             className={styles.characterColorInteractive}
                             onClick={event => {
                                 event.stopPropagation();
-                                onToggleColorPicker();
+                                color.actions.togglePicker();
                             }}
                             onKeyDown={event => {
                                 event.stopPropagation();
 
-                                if (isColorActionDisabled) {
+                                if (color.state.isActionDisabled) {
                                     return;
                                 }
 
                                 if (event.key === 'Enter' || event.key === ' ') {
                                     event.preventDefault();
-                                    onToggleColorPicker();
+                                    color.actions.togglePicker();
                                 }
 
                                 if (event.key === 'Escape') {
                                     event.preventDefault();
-                                    onSetColorPickerOpen(false);
+                                    color.actions.setPickerOpen(false);
                                 }
                             }}
                         >
@@ -152,17 +124,25 @@ export const CharacterRowHeader = ({
                         </Tooltip>
                     </TooltipTrigger>
                     <CharacterColorPopover
-                        isOpen={isColorPickerOpen}
-                        triggerRef={colorTriggerRef}
-                        characterKey={character.key}
-                        colorDraftHex={colorDraftHex}
-                        pickerColorValue={pickerColorValue}
-                        presetColorHexes={presetColorHexes}
-                        resolvedColorSaturation={resolvedColorSaturation}
-                        onOpenChange={onSetColorPickerOpen}
-                        onHueChange={onSetColorDraftHue}
-                        onApply={onApplyColor}
-                        onReset={onResetColor}
+                        refs={{
+                            triggerRef: color.refs.triggerRef,
+                        }}
+                        model={{
+                            characterKey: character.key,
+                            colorDraftHex: color.state.colorDraftHex,
+                            pickerColorValue: color.state.pickerColorValue,
+                            presetColorHexes: color.state.presetColorHexes,
+                            resolvedColorSaturation: color.state.resolvedColorSaturation,
+                        }}
+                        state={{
+                            isOpen: color.state.isPickerOpen,
+                        }}
+                        actions={{
+                            onOpenChange: color.actions.setPickerOpen,
+                            onHueChange: color.actions.setDraftHue,
+                            onApply: color.actions.applyColor,
+                            onReset: color.actions.resetColor,
+                        }}
                     />
                 </>
             ) : (

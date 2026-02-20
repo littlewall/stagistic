@@ -3,6 +3,11 @@ import type {
     ImportPayload,
 } from './model';
 
+export interface ImportScriptFile {
+    fileName: string,
+    text: string,
+}
+
 export interface ImportDropZoneProps {
     fileLabel: string,
     onDrop: (event: DropEvent) => void,
@@ -14,6 +19,6 @@ export interface UseImportScriptModalStateArgs {
     isOpen: boolean,
     onClose: () => void,
     onImport: (payload: ImportPayload) => void,
-    onPickFile?: () => Promise<{fileName: string, text: string} | null>,
-    preselectedFile?: {fileName: string, text: string} | null,
+    onPickFile?: () => Promise<ImportScriptFile | null>,
+    preselectedFile?: ImportScriptFile | null,
 }

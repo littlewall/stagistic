@@ -1,9 +1,13 @@
 import type {
     BlockSettingsPatch,
+    BlockShortcut,
     EditorSettings,
     FountainElementType,
     StructureSettingsPatch,
 } from '@stagistic/script-core';
+import type {CSSProperties} from 'react';
+
+import type {SettingsSelectOption} from './SettingsSelect';
 
 export type {
     BlockSettingsPatch,
@@ -31,4 +35,45 @@ export interface ElementSettingsPanelProps {
     resolvedScriptSettings: EditorSettings,
     shortcutPrefix: string,
     onUpdateBlockSettings: UpdateBlockSettings,
+}
+
+export interface ElementFormattingModel {
+    textAlign: 'left' | 'center' | 'right',
+    casing: 'normal' | 'uppercase',
+    isBold: boolean,
+    isItalic: boolean,
+    isUnderline: boolean,
+}
+
+export interface ElementNumericModel {
+    spacingBefore: number,
+    lineHeight: number,
+    shortcut: BlockShortcut,
+    nextElement: FountainElementType,
+    spacingBeforeOptions: SettingsSelectOption[],
+    lineHeightOptions: SettingsSelectOption[],
+    shortcutOptions: SettingsSelectOption[],
+    nextElementOptions: SettingsSelectOption[],
+}
+
+export interface ElementPreviewModel {
+    previewStyle: CSSProperties,
+    previewText: string,
+    sliderStart: number,
+    sliderEnd: number,
+    previewReferenceChars: number,
+    minPreviewContentChars: number,
+    leftTotalInches: number,
+    rightTotalInches: number,
+    contentChars: number,
+}
+
+export interface ElementSettingsActions {
+    onUpdateBlockSettings: UpdateBlockSettings,
+}
+
+export interface ElementSettingsViewModel {
+    formatting: ElementFormattingModel,
+    numeric: ElementNumericModel,
+    preview: ElementPreviewModel,
 }

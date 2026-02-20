@@ -150,16 +150,22 @@ interface ResolveDropLocationArgs {
     dragDisabledBlockTypes: Set<unknown>,
 }
 
-export const resolveDropLocation = ({
+interface ResolveDropLocationFromMetricsArgs {
+    sourceBlockId: string,
+    pointerClientY: number,
+    canvas: HTMLElement,
+    dragDisabledBlockTypes: Set<unknown>,
+    metrics: readonly TopLevelBlockMetrics[],
+}
+
+export const resolveDropLocationFromMetrics = ({
     sourceBlockId,
     pointerClientY,
-    editor,
     canvas,
     dragDisabledBlockTypes,
-}: ResolveDropLocationArgs): string | null | undefined => {
-    const metrics = collectTopLevelBlockMetrics(editor, canvas);
-
-    if (metrics.length === 0) {
+    metrics,
+}: ResolveDropLocationFromMetricsArgs): string | null | undefined => {
+    if (metrics.length < 2) {
         return undefined;
     }
 
@@ -169,19 +175,38 @@ export const resolveDropLocation = ({
         return undefined;
     }
 
-    const metricsWithoutSource = metrics.filter(metric => metric.id !== sourceBlockId);
-
-    if (metricsWithoutSource.length === 0) {
-        return undefined;
-    }
-
     const canvasRect = canvas.getBoundingClientRect();
     const pointerY = pointerClientY - canvasRect.top + canvas.scrollTop;
-    const destinationIndex = metricsWithoutSource.findIndex(metric => pointerY < metric.midpoint);
 
-    if (destinationIndex < 0) {
-        return null;
+    for (let index = 0; index < metrics.length; index += 1) {
+        const metric = metrics[index];
+
+        if (!metric || metric.id === sourceBlockId) {
+            continue;
+        }
+
+        if (pointerY < metric.midpoint) {
+            return metric.id;
+        }
     }
 
-    return metricsWithoutSource[destinationIndex]?.id ?? null;
+    return null;
+};
+
+export const resolveDropLocation = ({
+    sourceBlockId,
+    pointerClientY,
+    editor,
+    canvas,
+    dragDisabledBlockTypes,
+}: ResolveDropLocationArgs): string | null | undefined => {
+    const metrics = collectTopLevelBlockMetrics(editor, canvas);
+
+    return resolveDropLocationFromMetrics({
+        sourceBlockId,
+        pointerClientY,
+        canvas,
+        dragDisabledBlockTypes,
+        metrics,
+    });
 };

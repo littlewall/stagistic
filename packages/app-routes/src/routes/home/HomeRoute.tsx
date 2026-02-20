@@ -213,7 +213,6 @@ export const HomeRoute = () => {
         <AppLayout
             header={(
                 <AppHeader
-                    showScriptMenu={false}
                     onHome={handleHome}
                     onNewScript={openModal}
                 />

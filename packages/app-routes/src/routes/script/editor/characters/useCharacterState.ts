@@ -1,4 +1,7 @@
 import {
+    type EditorValueChangeMeta,
+} from '@stagistic/editor-ui';
+import {
     type ScriptDocument,
 } from '@stagistic/script-core';
 import {
@@ -6,9 +9,18 @@ import {
     type SetStateAction,
     useCallback,
     useEffect,
+    useMemo,
+    useReducer,
     useState,
 } from 'react';
 
+import {
+    type CharacterDomainSetters,
+    type CharacterDomainState,
+    characterStateReducer,
+    createCharacterDomainSetters,
+    replaceCharacterDomainState,
+} from './characterStateReducer';
 import type {
     CharacterGenderOption,
     ScriptCharacterRecord,
@@ -21,29 +33,28 @@ interface UseCharacterStateArgs {
     initialValue: ScriptDocument | null | undefined,
 }
 
-export interface CharacterState {
+export interface CharacterEditorState {
     editorValue: ScriptDocument | null,
+    sidebarValue: ScriptDocument | null,
     setEditorValue: Dispatch<SetStateAction<ScriptDocument | null>>,
     editorOverrideValue: ScriptDocument | null,
     setEditorOverrideValue: Dispatch<SetStateAction<ScriptDocument | null>>,
+    handleEditorValueChange: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,
+}
+
+export interface CharacterCollectionsState {
     confirmedCharacterRecords: ScriptCharacterRecord[],
-    setConfirmedCharacterRecords: Dispatch<SetStateAction<ScriptCharacterRecord[]>>,
-    confirmingCharacterKeys: string[],
-    setConfirmingCharacterKeys: Dispatch<SetStateAction<string[]>>,
-    deletingCharacterIds: string[],
-    setDeletingCharacterIds: Dispatch<SetStateAction<string[]>>,
-    renamingCharacterIds: string[],
-    setRenamingCharacterIds: Dispatch<SetStateAction<string[]>>,
-    renamingCharacterKeys: string[],
-    setRenamingCharacterKeys: Dispatch<SetStateAction<string[]>>,
-    colorUpdatingCharacterIds: string[],
-    setColorUpdatingCharacterIds: Dispatch<SetStateAction<string[]>>,
-    genderUpdatingCharacterIds: string[],
-    setGenderUpdatingCharacterIds: Dispatch<SetStateAction<string[]>>,
     characterGenderOptions: CharacterGenderOption[],
-    setCharacterGenderOptions: Dispatch<SetStateAction<CharacterGenderOption[]>>,
     isCharactersLoading: boolean,
-    handleEditorValueChange: (value: ScriptDocument) => void,
+}
+
+export interface CharacterPendingState {
+    confirmingCharacterKeys: string[],
+    deletingCharacterIds: string[],
+    renamingCharacterIds: string[],
+    renamingCharacterKeys: string[],
+    colorUpdatingCharacterIds: string[],
+    genderUpdatingCharacterIds: string[],
 }
 
 const DEFAULT_CHARACTER_GENDER_OPTIONS: CharacterGenderOption[] = [
@@ -76,54 +87,75 @@ const mergeCharacterGenderOptions = (options: CharacterGenderOption[]): Characte
         .sort((a, b) => a.label.localeCompare(b.label));
 };
 
+const createInitialCharacterDomainState = (): CharacterDomainState => {
+    return {
+        confirmedCharacterRecords: [],
+        confirmingCharacterKeys: [],
+        deletingCharacterIds: [],
+        renamingCharacterIds: [],
+        renamingCharacterKeys: [],
+        colorUpdatingCharacterIds: [],
+        genderUpdatingCharacterIds: [],
+        characterGenderOptions: DEFAULT_CHARACTER_GENDER_OPTIONS,
+        isCharactersLoading: false,
+    };
+};
+
+export interface CharacterState {
+    editor: CharacterEditorState,
+    characters: CharacterCollectionsState,
+    pending: CharacterPendingState,
+    setters: CharacterDomainSetters,
+}
+
 export const useCharacterState = ({
     currentScriptId,
     scriptRepository,
     initialValue,
 }: UseCharacterStateArgs): CharacterState => {
     const [editorValue, setEditorValue] = useState<ScriptDocument | null>(null);
+    const [sidebarValue, setSidebarValue] = useState<ScriptDocument | null>(null);
     const [editorOverrideValue, setEditorOverrideValue] = useState<ScriptDocument | null>(null);
-    const [confirmedCharacterRecords, setConfirmedCharacterRecords] = useState<ScriptCharacterRecord[]>([]);
-    const [confirmingCharacterKeys, setConfirmingCharacterKeys] = useState<string[]>([]);
-    const [deletingCharacterIds, setDeletingCharacterIds] = useState<string[]>([]);
-    const [renamingCharacterIds, setRenamingCharacterIds] = useState<string[]>([]);
-    const [renamingCharacterKeys, setRenamingCharacterKeys] = useState<string[]>([]);
-    const [colorUpdatingCharacterIds, setColorUpdatingCharacterIds] = useState<string[]>([]);
-    const [genderUpdatingCharacterIds, setGenderUpdatingCharacterIds] = useState<string[]>([]);
-    const [characterGenderOptions, setCharacterGenderOptions] = useState<CharacterGenderOption[]>(
-        DEFAULT_CHARACTER_GENDER_OPTIONS,
+    const [characterDomainState, dispatchCharacterDomainState] = useReducer(
+        characterStateReducer,
+        undefined,
+        createInitialCharacterDomainState,
     );
-    const [isCharactersLoading, setIsCharactersLoading] = useState(false);
+    const setters = useMemo(
+        () => createCharacterDomainSetters(dispatchCharacterDomainState),
+        [],
+    );
+    const {
+        confirmedCharacterRecords,
+        confirmingCharacterKeys,
+        deletingCharacterIds,
+        renamingCharacterIds,
+        renamingCharacterKeys,
+        colorUpdatingCharacterIds,
+        genderUpdatingCharacterIds,
+        characterGenderOptions,
+        isCharactersLoading,
+    } = characterDomainState;
 
     useEffect(() => {
         setEditorValue(initialValue ?? null);
+        setSidebarValue(initialValue ?? null);
         setEditorOverrideValue(null);
     }, [currentScriptId, initialValue]);
 
     useEffect(() => {
         if (!currentScriptId) {
-            setConfirmedCharacterRecords([]);
-            setConfirmingCharacterKeys([]);
-            setDeletingCharacterIds([]);
-            setRenamingCharacterIds([]);
-            setRenamingCharacterKeys([]);
-            setColorUpdatingCharacterIds([]);
-            setGenderUpdatingCharacterIds([]);
-            setCharacterGenderOptions(DEFAULT_CHARACTER_GENDER_OPTIONS);
-            setIsCharactersLoading(false);
+            replaceCharacterDomainState(dispatchCharacterDomainState, createInitialCharacterDomainState());
 
             return;
         }
 
         let isActive = true;
 
-        setIsCharactersLoading(true);
-        setConfirmingCharacterKeys([]);
-        setDeletingCharacterIds([]);
-        setRenamingCharacterIds([]);
-        setRenamingCharacterKeys([]);
-        setColorUpdatingCharacterIds([]);
-        setGenderUpdatingCharacterIds([]);
+        replaceCharacterDomainState(dispatchCharacterDomainState, {
+            ...createInitialCharacterDomainState(),
+            isCharactersLoading: true,
+        });
 
         const loadCharacters = async () => {
             try {
@@ -135,19 +167,19 @@ export const useCharacterState = ({
                     return;
                 }
 
-                setConfirmedCharacterRecords(storedCharacters);
-                setCharacterGenderOptions(mergeCharacterGenderOptions(storedGenderOptions));
+                setters.setConfirmedCharacterRecords(storedCharacters);
+                setters.setCharacterGenderOptions(mergeCharacterGenderOptions(storedGenderOptions));
             } catch (error) {
                 if (!isActive) {
                     return;
                 }
 
                 console.error('Failed to load script characters', error);
-                setConfirmedCharacterRecords([]);
-                setCharacterGenderOptions(DEFAULT_CHARACTER_GENDER_OPTIONS);
+                setters.setConfirmedCharacterRecords([]);
+                setters.setCharacterGenderOptions(DEFAULT_CHARACTER_GENDER_OPTIONS);
             } finally {
                 if (isActive) {
-                    setIsCharactersLoading(false);
+                    setters.setIsCharactersLoading(false);
                 }
             }
         };
@@ -157,34 +189,39 @@ export const useCharacterState = ({
         return () => {
             isActive = false;
         };
-    }, [currentScriptId, scriptRepository]);
+    }, [
+        currentScriptId,
+        scriptRepository,
+        setters,
+    ]);
 
     const handleEditorValueChange = useCallback((value: ScriptDocument) => {
         setEditorValue(value);
+        setSidebarValue(value);
     }, []);
 
     return {
-        editorValue,
-        setEditorValue,
-        editorOverrideValue,
-        setEditorOverrideValue,
-        confirmedCharacterRecords,
-        setConfirmedCharacterRecords,
-        confirmingCharacterKeys,
-        setConfirmingCharacterKeys,
-        deletingCharacterIds,
-        setDeletingCharacterIds,
-        renamingCharacterIds,
-        setRenamingCharacterIds,
-        renamingCharacterKeys,
-        setRenamingCharacterKeys,
-        colorUpdatingCharacterIds,
-        setColorUpdatingCharacterIds,
-        genderUpdatingCharacterIds,
-        setGenderUpdatingCharacterIds,
-        characterGenderOptions,
-        setCharacterGenderOptions,
-        isCharactersLoading,
-        handleEditorValueChange,
+        editor: {
+            editorValue,
+            sidebarValue,
+            setEditorValue,
+            editorOverrideValue,
+            setEditorOverrideValue,
+            handleEditorValueChange,
+        },
+        characters: {
+            confirmedCharacterRecords,
+            characterGenderOptions,
+            isCharactersLoading,
+        },
+        pending: {
+            confirmingCharacterKeys,
+            deletingCharacterIds,
+            renamingCharacterIds,
+            renamingCharacterKeys,
+            colorUpdatingCharacterIds,
+            genderUpdatingCharacterIds,
+        },
+        setters,
     };
 };

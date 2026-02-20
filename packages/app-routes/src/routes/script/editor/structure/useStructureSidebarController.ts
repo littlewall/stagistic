@@ -1,3 +1,11 @@
+import type {
+    DeleteActRequest,
+    FocusBlockRequest,
+    InsertActRequest,
+    MoveActRequest,
+    MoveSceneRequest,
+    RenameActRequest,
+} from '@stagistic/editor-ui';
 import {
     collectStructureBlocks,
     ELEMENT_ACT,
@@ -11,35 +19,19 @@ import {
 
 import type {UseStructureSidebarControllerArgs} from './types';
 
+const ACTIVE_BLOCK_PERSIST_DELAY_MS = 250;
+
 export const useStructureSidebarController = ({
     currentScriptId,
     scriptRepository,
     sourceValue,
 }: UseStructureSidebarControllerArgs) => {
-    const [focusBlockRequest, setFocusBlockRequest] = useState<{blockId: string, requestId: number} | null>(null);
-    const [insertActRequest, setInsertActRequest] = useState<{
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null>(null);
-    const [renameActRequest, setRenameActRequest] = useState<{
-        blockId: string,
-        nextName: string,
-        requestId: number,
-    } | null>(null);
-    const [deleteActRequest, setDeleteActRequest] = useState<{
-        blockId: string,
-        requestId: number,
-    } | null>(null);
-    const [moveSceneRequest, setMoveSceneRequest] = useState<{
-        sourceSceneBlockId: string,
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null>(null);
-    const [moveActRequest, setMoveActRequest] = useState<{
-        sourceActBlockId: string,
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null>(null);
+    const [focusBlockRequest, setFocusBlockRequest] = useState<FocusBlockRequest | null>(null);
+    const [insertActRequest, setInsertActRequest] = useState<InsertActRequest | null>(null);
+    const [renameActRequest, setRenameActRequest] = useState<RenameActRequest | null>(null);
+    const [deleteActRequest, setDeleteActRequest] = useState<DeleteActRequest | null>(null);
+    const [moveSceneRequest, setMoveSceneRequest] = useState<MoveSceneRequest | null>(null);
+    const [moveActRequest, setMoveActRequest] = useState<MoveActRequest | null>(null);
     const [actNamePreviewById, setActNamePreviewById] = useState<Record<string, string>>({});
     const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
     const focusRequestCounterRef = useRef(0);
@@ -49,8 +41,38 @@ export const useStructureSidebarController = ({
     const moveSceneRequestCounterRef = useRef(0);
     const moveActRequestCounterRef = useRef(0);
     const lastPersistedActiveBlockIdRef = useRef<string | null>(null);
+    const pendingPersistScriptIdRef = useRef<string | null>(null);
+    const pendingPersistBlockIdRef = useRef<string | null>(null);
+    const persistTimerRef = useRef<number | null>(null);
+
+    const clearPendingPersistTimer = useCallback(() => {
+        if (persistTimerRef.current === null) {
+            return;
+        }
+
+        window.clearTimeout(persistTimerRef.current);
+        persistTimerRef.current = null;
+    }, []);
+
+    const flushPendingActiveBlockPersist = useCallback(() => {
+        clearPendingPersistTimer();
+
+        const scriptId = pendingPersistScriptIdRef.current;
+        const blockId = pendingPersistBlockIdRef.current;
+
+        pendingPersistScriptIdRef.current = null;
+        pendingPersistBlockIdRef.current = null;
+
+        if (!scriptId || lastPersistedActiveBlockIdRef.current === blockId) {
+            return;
+        }
+
+        lastPersistedActiveBlockIdRef.current = blockId;
+        void scriptRepository.setActiveBlock(scriptId, blockId);
+    }, [clearPendingPersistTimer, scriptRepository]);
 
     useEffect(() => {
+        flushPendingActiveBlockPersist();
         setActiveBlockId(null);
         setFocusBlockRequest(null);
         setInsertActRequest(null);
@@ -60,7 +82,13 @@ export const useStructureSidebarController = ({
         setMoveActRequest(null);
         setActNamePreviewById({});
         lastPersistedActiveBlockIdRef.current = null;
-    }, [currentScriptId]);
+    }, [currentScriptId, flushPendingActiveBlockPersist]);
+
+    useEffect(() => {
+        return () => {
+            flushPendingActiveBlockPersist();
+        };
+    }, [flushPendingActiveBlockPersist]);
 
     useEffect(() => {
         if (!sourceValue) {
@@ -194,9 +222,19 @@ export const useStructureSidebarController = ({
             return;
         }
 
-        lastPersistedActiveBlockIdRef.current = blockId;
-        void scriptRepository.setActiveBlock(currentScriptId, blockId);
-    }, [currentScriptId, scriptRepository]);
+        pendingPersistScriptIdRef.current = currentScriptId;
+        pendingPersistBlockIdRef.current = blockId;
+        clearPendingPersistTimer();
+
+        persistTimerRef.current = window.setTimeout(() => {
+            persistTimerRef.current = null;
+            flushPendingActiveBlockPersist();
+        }, ACTIVE_BLOCK_PERSIST_DELAY_MS);
+    }, [
+        clearPendingPersistTimer,
+        currentScriptId,
+        flushPendingActiveBlockPersist,
+    ]);
 
     return {
         focusBlockRequest,

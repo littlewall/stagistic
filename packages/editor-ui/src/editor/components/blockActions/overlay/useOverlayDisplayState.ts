@@ -1,6 +1,5 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type CSSProperties,
     type RefObject,
     useCallback,
     useEffect,
@@ -8,7 +7,6 @@ import {
     useRef,
 } from 'react';
 
-import type {FountainBlockType} from '../../../tiptap/fountainCore';
 import {MENU_DISABLED_BLOCK_TYPES} from './constants';
 import {
     resolveOverlayStyleForBlockId as resolveOverlayStyleForBlockIdFromGeometry,
@@ -16,23 +14,12 @@ import {
 } from './geometry';
 import type {
     ActiveDragState,
+    BlockActionsOverlayState,
+    BlockActionsPointerState,
+    BlockActionsRailAnchorState,
     DropLockState,
     OverlayAnchorStyle,
 } from './types';
-
-interface SelectionOverlayState {
-    style: CSSProperties,
-    blockType: FountainBlockType,
-    blockId: string,
-}
-
-interface SelectionRailAnchorState {
-    style: CSSProperties,
-}
-
-type SelectionOverlayStateOrNull = SelectionOverlayState | null;
-
-type SelectionRailAnchorStateOrNull = SelectionRailAnchorState | null;
 
 interface UseOverlayDisplayStateArgs {
     editor: TiptapEditor | null,
@@ -40,8 +27,8 @@ interface UseOverlayDisplayStateArgs {
     activeDrag: ActiveDragState | null,
     dropLock: DropLockState | null,
     setDropLock: (value: DropLockState | null | ((current: DropLockState | null) => DropLockState | null)) => void,
-    overlayStateFromSelection: SelectionOverlayStateOrNull,
-    railAnchorStateFromSelection: SelectionRailAnchorStateOrNull,
+    overlayStateFromSelection: BlockActionsOverlayState | null,
+    railAnchorStateFromSelection: BlockActionsRailAnchorState | null,
 }
 
 export const useOverlayDisplayState = ({
@@ -131,7 +118,7 @@ export const useOverlayDisplayState = ({
         resolveOverlayStyleForBlockId,
     ]);
 
-    const pointerOverlayState = useMemo(() => {
+    const pointerOverlayState = useMemo<BlockActionsPointerState | null>(() => {
         if (overlayStateFromSelection) {
             return {
                 blockId: overlayStateFromSelection.blockId,

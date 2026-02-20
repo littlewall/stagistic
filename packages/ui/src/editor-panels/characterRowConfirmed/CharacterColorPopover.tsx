@@ -12,33 +12,50 @@ import {
 import styles from '../EditorSidebar.module.css';
 import {getPastelHueFromHex} from './colorUtils';
 
-type CharacterColorPopoverProps = {
-    isOpen: boolean,
-    triggerRef: RefObject<HTMLSpanElement | null>,
-    characterKey: string,
-    colorDraftHex: string,
-    pickerColorValue: ComponentProps<typeof ColorSlider>['value'],
-    presetColorHexes: string[],
-    resolvedColorSaturation: number,
-    onOpenChange: (nextOpen: boolean) => void,
-    onHueChange: (hue: number) => void,
-    onApply: () => void,
-    onReset: () => void,
-};
+interface CharacterColorPopoverProps {
+    refs: {
+        triggerRef: RefObject<HTMLSpanElement | null>,
+    },
+    model: {
+        characterKey: string,
+        colorDraftHex: string,
+        pickerColorValue: ComponentProps<typeof ColorSlider>['value'],
+        presetColorHexes: string[],
+        resolvedColorSaturation: number,
+    },
+    state: {
+        isOpen: boolean,
+    },
+    actions: {
+        onOpenChange: (nextOpen: boolean) => void,
+        onHueChange: (hue: number) => void,
+        onApply: () => void,
+        onReset: () => void,
+    },
+}
 
 export const CharacterColorPopover = ({
-    isOpen,
-    triggerRef,
-    characterKey,
-    colorDraftHex,
-    pickerColorValue,
-    presetColorHexes,
-    resolvedColorSaturation,
-    onOpenChange,
-    onHueChange,
-    onApply,
-    onReset,
+    refs,
+    model,
+    state,
+    actions,
 }: CharacterColorPopoverProps) => {
+    const {triggerRef} = refs;
+    const {
+        characterKey,
+        colorDraftHex,
+        pickerColorValue,
+        presetColorHexes,
+        resolvedColorSaturation,
+    } = model;
+    const {isOpen} = state;
+    const {
+        onOpenChange,
+        onHueChange,
+        onApply,
+        onReset,
+    } = actions;
+
     if (!isOpen || !triggerRef.current) {
         return null;
     }

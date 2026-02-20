@@ -24,6 +24,9 @@ export {
 } from './feedback/ToastProvider';
 export {
     AppHeader,
+    type AppHeaderProps,
+    ScriptEditorAppHeader,
+    type ScriptEditorAppHeaderProps,
     type ScriptListItem,
     type ScriptSyncState,
 } from './layout/AppHeader';

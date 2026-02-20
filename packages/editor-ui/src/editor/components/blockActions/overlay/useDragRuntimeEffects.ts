@@ -11,35 +11,46 @@ import {clamp} from './geometry';
 import type {ActiveDragState} from './types';
 
 interface UseDragRuntimeEffectsArgs {
-    canvasRef: RefObject<HTMLElement | null>,
-    activeDrag: ActiveDragState | null,
-    activeDragRef: MutableRefObject<ActiveDragState | null>,
-    dragPointerYRef: MutableRefObject<number | null>,
-    autoScrollFrameRef: MutableRefObject<number | null>,
-    updateActiveDragState: (
-        pointerId: number,
-        sourceBlockId: string,
-        sourceBlockType: FountainBlockType,
-        pointerClientY: number,
-    ) => void,
-    stopPointerInteraction: () => void,
-    revertPreviewMove: () => void,
-    clearPressVisualState: () => void,
-    clearDragState: () => void,
+    context: {
+        canvasRef: RefObject<HTMLElement | null>,
+        activeDrag: ActiveDragState | null,
+        activeDragRef: MutableRefObject<ActiveDragState | null>,
+        dragPointerYRef: MutableRefObject<number | null>,
+        autoScrollFrameRef: MutableRefObject<number | null>,
+    },
+    actions: {
+        updateActiveDragState: (
+            pointerId: number,
+            sourceBlockId: string,
+            sourceBlockType: FountainBlockType,
+            pointerClientY: number,
+        ) => void,
+        stopPointerInteraction: () => void,
+        revertPreviewMove: () => void,
+        clearPressVisualState: () => void,
+        clearDragState: () => void,
+    },
 }
 
 export const useDragRuntimeEffects = ({
-    canvasRef,
-    activeDrag,
-    activeDragRef,
-    dragPointerYRef,
-    autoScrollFrameRef,
-    updateActiveDragState,
-    stopPointerInteraction,
-    revertPreviewMove,
-    clearPressVisualState,
-    clearDragState,
+    context,
+    actions,
 }: UseDragRuntimeEffectsArgs) => {
+    const {
+        canvasRef,
+        activeDrag,
+        activeDragRef,
+        dragPointerYRef,
+        autoScrollFrameRef,
+    } = context;
+    const {
+        updateActiveDragState,
+        stopPointerInteraction,
+        revertPreviewMove,
+        clearPressVisualState,
+        clearDragState,
+    } = actions;
+
     useEffect(() => {
         if (!activeDrag) {
             return;

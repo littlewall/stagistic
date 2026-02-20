@@ -89,26 +89,32 @@ export const usePointerDragState = ({
             pointerId,
             sourceBlockId,
             sourceBlockType,
-            pointerClientY,
             beforeBlockId: resolvedDropLocation,
         };
+        const previousDrag = activeDragRef.current;
+        const shouldApplyPreviewMove =
+            !previousDrag
+            || previousDrag.beforeBlockId !== resolvedDropLocation
+            || previousDrag.sourceBlockId !== sourceBlockId
+            || previousDrag.sourceBlockType !== sourceBlockType;
+        const shouldUpdateActiveDrag =
+            !previousDrag
+            || previousDrag.pointerId !== pointerId
+            || previousDrag.beforeBlockId !== resolvedDropLocation
+            || previousDrag.sourceBlockId !== sourceBlockId
+            || previousDrag.sourceBlockType !== sourceBlockType;
 
         activeDragRef.current = nextActiveDrag;
         dragPointerYRef.current = pointerClientY;
-        setActiveDrag(previous => {
-            if (
-                previous
-                && previous.pointerId === nextActiveDrag.pointerId
-                && previous.sourceBlockId === nextActiveDrag.sourceBlockId
-                && previous.sourceBlockType === nextActiveDrag.sourceBlockType
-                && previous.pointerClientY === nextActiveDrag.pointerClientY
-                && previous.beforeBlockId === nextActiveDrag.beforeBlockId
-            ) {
-                return previous;
-            }
 
-            return nextActiveDrag;
-        });
+        if (shouldUpdateActiveDrag) {
+            setActiveDrag(nextActiveDrag);
+        }
+
+        if (!shouldApplyPreviewMove) {
+            return;
+        }
+
         applyPreviewMove(resolvedDropLocation);
     }, [
         applyPreviewMove,

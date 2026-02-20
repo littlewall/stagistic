@@ -5,11 +5,15 @@ import {
 import styles from './EditorSidebar.module.css';
 import type {EditorSidebarCharacter} from './types';
 
-type CharacterRowPendingProps = {
-    character: EditorSidebarCharacter,
-    isConfirmPending: boolean,
-    onConfirmCharacter?: (characterKey: string) => void,
-};
+interface CharacterRowPendingProps {
+    model: {
+        character: EditorSidebarCharacter,
+        isConfirmPending: boolean,
+    },
+    actions: {
+        onConfirmCharacter?: (characterKey: string) => void,
+    },
+}
 
 const getConfirmTooltipLabel = (
     characterKey: string,
@@ -28,10 +32,11 @@ const getConfirmTooltipLabel = (
 };
 
 export const CharacterRowPending = ({
-    character,
-    isConfirmPending,
-    onConfirmCharacter,
+    model,
+    actions,
 }: CharacterRowPendingProps) => {
+    const {character, isConfirmPending} = model;
+    const {onConfirmCharacter} = actions;
     const isConfirmActionDisabled = isConfirmPending || !onConfirmCharacter;
     const confirmTooltipLabel = getConfirmTooltipLabel(
         character.key,

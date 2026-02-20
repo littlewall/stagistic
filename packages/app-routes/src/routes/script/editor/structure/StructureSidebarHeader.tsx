@@ -13,7 +13,7 @@ const joinClassNames = (...classNames: Array<string | false | null | undefined>)
 };
 
 export const StructureSidebarHeader = ({
-    onInsertAct,
+    actions,
 }: StructureSidebarHeaderProps) => {
     const [openHeaderMenu, setOpenHeaderMenu] = useState<'actions' | 'insert' | null>(null);
     const actionsTriggerRef = useRef<HTMLButtonElement | null>(null);
@@ -61,9 +61,9 @@ export const StructureSidebarHeader = ({
     }, []);
 
     const handleInsertAct = useCallback(() => {
-        onInsertAct();
+        actions.onInsertAct();
         setOpenHeaderMenu(null);
-    }, [onInsertAct]);
+    }, [actions]);
 
     return (
         <div className={styles.sidebarHeader}>

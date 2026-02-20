@@ -1,17 +1,126 @@
+import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {
     Plugin,
     PluginKey,
+    type Transaction,
 } from '@tiptap/pm/state';
+import {DecorationSet} from '@tiptap/pm/view';
 
+import {
+    FOUNTAIN_BLOCK_NODE_NAME,
+    normalizeFountainBlockType,
+} from '../fountainCore';
 import {buildDecorations} from './characterTags/buildDecorations';
 import {cleanupCharacterDelimiters} from './characterTags/cleanup';
+import {isCharacterBlockType} from './characterTags/types';
 
-const characterTagDecorationsKey = new PluginKey('fountain-character-tag-decorations');
+const characterTagDecorationsKey = new PluginKey<DecorationSet>('fountain-character-tag-decorations');
+
+const hasCharacterBlocksInRange = (
+    doc: ProseMirrorNode,
+    from: number,
+    to: number,
+) => {
+    const maxPos = doc.content.size;
+    const clampedFrom = Math.max(0, Math.min(from, maxPos));
+    const clampedTo = Math.max(0, Math.min(to, maxPos));
+    let safeFrom = Math.min(clampedFrom, clampedTo);
+    let safeTo = Math.max(clampedFrom, clampedTo);
+
+    if (safeFrom === safeTo && safeTo < maxPos) {
+        safeTo += 1;
+    }
+
+    if (safeFrom === safeTo && safeFrom > 0) {
+        safeFrom -= 1;
+    }
+
+    if (safeFrom === safeTo) {
+        return false;
+    }
+
+    let hasCharacterBlocks = false;
+
+    doc.nodesBetween(safeFrom, safeTo, node => {
+        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+            return true;
+        }
+
+        const blockType = normalizeFountainBlockType(node.attrs.blockType);
+
+        if (isCharacterBlockType(blockType)) {
+            hasCharacterBlocks = true;
+
+            return false;
+        }
+
+        return false;
+    });
+
+    return hasCharacterBlocks;
+};
+
+const transactionTouchesCharacterBlocks = (
+    tr: Transaction,
+    oldDoc: ProseMirrorNode,
+    newDoc: ProseMirrorNode,
+) => {
+    if (!tr.docChanged) {
+        return false;
+    }
+
+    let touchesCharacterBlocks = false;
+
+    tr.mapping.maps.forEach(stepMap => {
+        if (touchesCharacterBlocks) {
+            return;
+        }
+
+        stepMap.forEach((oldStart, oldEnd, newStart, newEnd) => {
+            if (touchesCharacterBlocks) {
+                return;
+            }
+
+            const oldFrom = Math.max(0, oldStart - 1);
+            const oldTo = Math.max(oldEnd + 1, oldFrom + 1);
+            const newFrom = Math.max(0, newStart - 1);
+            const newTo = Math.max(newEnd + 1, newFrom + 1);
+
+            if (hasCharacterBlocksInRange(oldDoc, oldFrom, oldTo)) {
+                touchesCharacterBlocks = true;
+
+                return;
+            }
+
+            if (hasCharacterBlocksInRange(newDoc, newFrom, newTo)) {
+                touchesCharacterBlocks = true;
+            }
+        });
+    });
+
+    return touchesCharacterBlocks;
+};
 
 export const createCharacterTagDecorationsPlugin = (characterColorSaturation?: number) => new Plugin({
     key: characterTagDecorationsKey,
+    state: {
+        init: (_config, state) => buildDecorations(state.doc, characterColorSaturation),
+        apply: (tr, pluginState, oldState) => {
+            if (!tr.docChanged) {
+                return pluginState;
+            }
+
+            const mappedDecorations = pluginState.map(tr.mapping, tr.doc);
+
+            if (!transactionTouchesCharacterBlocks(tr, oldState.doc, tr.doc)) {
+                return mappedDecorations;
+            }
+
+            return buildDecorations(tr.doc, characterColorSaturation);
+        },
+    },
     appendTransaction: (transactions, oldState, newState) => cleanupCharacterDelimiters(transactions, oldState, newState),
     props: {
-        decorations: state => buildDecorations(state.doc, characterColorSaturation),
+        decorations: state => characterTagDecorationsKey.getState(state) ?? DecorationSet.empty,
     },
 });

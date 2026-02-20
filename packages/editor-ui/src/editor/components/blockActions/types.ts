@@ -1,7 +1,6 @@
 import type {FountainElementType} from '@stagistic/script-core';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import type {
-    CSSProperties,
     MouseEvent as ReactMouseEvent,
     RefObject,
 } from 'react';
@@ -17,16 +16,6 @@ export interface BlockActionsMenuProps {
         event: ReactMouseEvent<HTMLButtonElement>,
     ) => void,
     onActMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
-}
-
-export interface BlockActionsOverlayAnchorState {
-    style: CSSProperties,
-    blockType: FountainBlockType,
-    blockId: string,
-}
-
-export interface BlockActionsRailAnchorState {
-    style: CSSProperties,
 }
 
 export interface UseOverlayPositionArgs {

@@ -21,11 +21,14 @@ export interface UseStructureSidebarControllerArgs {
     sourceValue: ScriptDocument | null | undefined,
 }
 
-export interface ScriptStructureSidebarProps {
+export interface StructureSidebarData {
     value: ScriptDocument | null | undefined,
     structureSettings: StructureSettings,
     actNamePreviewById: Record<string, string>,
     activeBlockId: string | null,
+}
+
+export interface StructureSidebarActions {
     onFocusBlock: (blockId: string) => void,
     onRenameAct: (blockId: string, nextName: string) => void,
     onActNamePreview: (blockId: string, nextName: string) => void,
@@ -35,26 +38,27 @@ export interface ScriptStructureSidebarProps {
     onReorderScene: (sourceSceneBlockId: string, beforeBlockId: string | null) => void,
 }
 
+export interface ScriptStructureSidebarProps {
+    data: StructureSidebarData,
+    actions: StructureSidebarActions,
+}
+
 export interface StructureRowSceneProps {
     scene: StructureSceneRow,
     rowIndex: number,
     isActive: boolean,
-    onFocusBlock: (blockId: string) => void,
+    actions: Pick<StructureSidebarActions, 'onFocusBlock'>,
 }
 
 export interface StructureRowActProps {
     act: StructureActRow,
     rowIndex: number,
-    structureSettings: StructureSettings,
-    actNamePreviewById: Record<string, string>,
-    onFocusBlock: (blockId: string) => void,
-    onRenameAct: (blockId: string, nextName: string) => void,
-    onActNamePreview: (blockId: string, nextName: string) => void,
-    onDeleteAct: (blockId: string) => void,
+    data: Pick<StructureSidebarData, 'structureSettings' | 'actNamePreviewById'>,
+    actions: Pick<StructureSidebarActions, 'onFocusBlock' | 'onRenameAct' | 'onActNamePreview' | 'onDeleteAct'>,
 }
 
 export interface StructureSidebarHeaderProps {
-    onInsertAct: () => void,
+    actions: Pick<StructureSidebarActions, 'onInsertAct'>,
 }
 
 export interface SortableCandidateObject {
@@ -77,6 +81,5 @@ export interface UseStructureSidebarDndArgs {
     rows: StructureRow[],
     rowByBlockId: Map<string, StructureRow>,
     rowIndexByBlockId: Map<string, number>,
-    onReorderAct: (sourceActBlockId: string, beforeBlockId: string | null) => void,
-    onReorderScene: (sourceSceneBlockId: string, beforeBlockId: string | null) => void,
+    actions: Pick<StructureSidebarActions, 'onFocusBlock' | 'onReorderAct' | 'onReorderScene'>,
 }

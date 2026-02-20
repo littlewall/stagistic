@@ -1,50 +1,23 @@
-import {type FountainElementType} from '@stagistic/script-core';
 import clsx from 'clsx';
-import {
-    type MouseEvent as ReactMouseEvent,
-    type ReactNode,
-    type RefObject,
-} from 'react';
 
 import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
 import styles from '../EditorToolbar.module.css';
-
-type VisibleBlockInfo = {
-    label: string,
-    icon: ReactNode,
-} | null;
-
-type ActiveBlockInfo = {
-    type: FountainElementType,
-} | null;
-
-type BlockTypeSelectProps = {
-    options: readonly {
-        type: FountainElementType,
-        label: string,
-    }[],
-    isOpen: boolean,
-    canChangeBlockType: boolean,
-    visibleBlockInfo: VisibleBlockInfo,
-    activeBlockInfo: ActiveBlockInfo,
-    dropdownRef: RefObject<HTMLDivElement | null>,
-    onSelectMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
-    onMenuItemMouseDown: (
-        optionType: FountainElementType,
-        event: ReactMouseEvent<HTMLButtonElement>,
-    ) => void,
-};
+import type {BlockTypeSelectProps} from './contracts';
 
 export const BlockTypeSelect = ({
     options,
-    isOpen,
-    canChangeBlockType,
-    visibleBlockInfo,
-    activeBlockInfo,
+    state,
+    actions,
     dropdownRef,
-    onSelectMouseDown,
-    onMenuItemMouseDown,
 }: BlockTypeSelectProps) => {
+    const {
+        isOpen,
+        canChangeBlockType,
+        visibleBlockInfo,
+        activeBlockInfo,
+    } = state;
+    const {onSelectMouseDown, onMenuItemMouseDown} = actions;
+
     return (
         <div className={styles.rightGroup}>
             <div

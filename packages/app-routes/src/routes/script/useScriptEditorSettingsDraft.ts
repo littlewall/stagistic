@@ -22,17 +22,25 @@ import {
 
 const SETTINGS_SAVE_DEBOUNCE_MS = 450;
 
-type UseScriptEditorSettingsDraftArgs = {
-    currentScriptId: string | null,
-    scriptSettingsOverride: EditorSettingsOverride | null | undefined,
-    handleSaveScriptSettingsOverride: (settings?: EditorSettingsOverride) => Promise<boolean>,
-};
+interface UseScriptEditorSettingsDraftArgs {
+    state: {
+        currentScriptId: string | null,
+        scriptSettingsOverride: EditorSettingsOverride | null | undefined,
+    },
+    requests: {
+        handleSaveScriptSettingsOverride: (settings?: EditorSettingsOverride) => Promise<boolean>,
+    },
+}
 
 export const useScriptEditorSettingsDraft = ({
-    currentScriptId,
-    scriptSettingsOverride,
-    handleSaveScriptSettingsOverride,
+    state,
+    requests,
 }: UseScriptEditorSettingsDraftArgs) => {
+    const {
+        currentScriptId,
+        scriptSettingsOverride,
+    } = state;
+    const {handleSaveScriptSettingsOverride} = requests;
     const [scriptSettingsDraft, setScriptSettingsDraft] = useState<EditorSettingsOverride>({});
     const settingsSaveTimerRef = useRef<number | null>(null);
     const hydratedSettingsScriptIdRef = useRef<string | null>(null);

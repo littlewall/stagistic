@@ -3,61 +3,20 @@ import {
 } from 'react-aria-components';
 
 import styles from '../EditorSidebar.module.css';
-import type {EditorSidebarCharacter} from '../types';
 import {CharacterGenderPopover} from './CharacterGenderPopover';
-import type {
-    CharacterGenderIcon,
-    GenderListOption,
-} from './types';
-
-type CharacterRowDetailsProps = {
-    character: EditorSidebarCharacter,
-    isExpanded: boolean,
-    isDeletePending: boolean,
-    isDeleteActionDisabled: boolean,
-    isGenderActionDisabled: boolean,
-    deleteTooltipLabel: string,
-    onDeleteCharacter?: (characterId: string) => void | Promise<void>,
-    isGenderPickerOpen: boolean,
-    setIsGenderPickerOpen: (nextOpen: boolean) => void,
-    selectedGenderLabel: string,
-    selectedGenderIcon: CharacterGenderIcon,
-    genderQuery: string,
-    setGenderQuery: (value: string) => void,
-    genderListOptions: GenderListOption[],
-    effectiveGenderKey: string | null,
-    normalizedGenderInputLabel: string,
-    canCreateCustomGender: boolean,
-    shouldCloseGenderPopover: (target: Element) => boolean,
-    commitGenderQuery: () => Promise<boolean>,
-    handleGenderSelection: (nextKey: string) => void,
-};
+import type {CharacterRowDetailsProps} from './contracts';
 
 export const CharacterRowDetails = ({
-    character,
-    isExpanded,
-    isDeletePending,
-    isDeleteActionDisabled,
-    isGenderActionDisabled,
-    deleteTooltipLabel,
-    onDeleteCharacter,
-    isGenderPickerOpen,
-    setIsGenderPickerOpen,
-    selectedGenderLabel,
-    selectedGenderIcon,
-    genderQuery,
-    setGenderQuery,
-    genderListOptions,
-    effectiveGenderKey,
-    normalizedGenderInputLabel,
-    canCreateCustomGender,
-    shouldCloseGenderPopover,
-    commitGenderQuery,
-    handleGenderSelection,
+    model,
+    state,
+    actions,
+    gender,
 }: CharacterRowDetailsProps) => {
-    if (!isExpanded) {
+    if (!state.isExpanded) {
         return null;
     }
+
+    const {character} = model;
 
     return (
         <div className={styles.characterDetails}>
@@ -68,24 +27,32 @@ export const CharacterRowDetails = ({
             <div className={styles.characterCardFooter}>
                 <div className={styles.characterFooterLeft}>
                     <CharacterGenderPopover
-                        characterKey={character.key}
-                        isOpen={isGenderPickerOpen}
-                        onOpenChange={nextOpen => {
-                            setIsGenderPickerOpen(nextOpen);
-                            setGenderQuery('');
+                        model={{
+                            characterKey: character.key,
                         }}
-                        isGenderActionDisabled={isGenderActionDisabled}
-                        selectedGenderLabel={selectedGenderLabel}
-                        selectedGenderIcon={selectedGenderIcon}
-                        genderQuery={genderQuery}
-                        onGenderQueryChange={setGenderQuery}
-                        genderListOptions={genderListOptions}
-                        effectiveGenderKey={effectiveGenderKey}
-                        normalizedGenderInputLabel={normalizedGenderInputLabel}
-                        canCreateCustomGender={canCreateCustomGender}
-                        shouldCloseGenderPopover={shouldCloseGenderPopover}
-                        onCommitGenderQuery={commitGenderQuery}
-                        onGenderSelection={handleGenderSelection}
+                        state={{
+                            isOpen: gender.state.isPickerOpen,
+                            isGenderActionDisabled: gender.state.isActionDisabled,
+                            selectedGenderLabel: gender.state.selectedGenderLabel,
+                            selectedGenderIcon: gender.state.selectedGenderIcon,
+                            genderQuery: gender.state.genderQuery,
+                            effectiveGenderKey: gender.state.effectiveGenderKey,
+                            normalizedGenderInputLabel: gender.state.normalizedGenderInputLabel,
+                            canCreateCustomGender: gender.state.canCreateCustomGender,
+                        }}
+                        data={{
+                            genderListOptions: gender.data.genderListOptions,
+                        }}
+                        actions={{
+                            onOpenChange: nextOpen => {
+                                gender.actions.setPickerOpen(nextOpen);
+                                gender.actions.setGenderQuery('');
+                            },
+                            onGenderQueryChange: gender.actions.setGenderQuery,
+                            shouldCloseGenderPopover: gender.actions.shouldClosePopover,
+                            onCommitGenderQuery: gender.actions.commitGenderQuery,
+                            onGenderSelection: gender.actions.selectGender,
+                        }}
                     />
                 </div>
                 <div className={styles.characterFooterRight}>
@@ -96,17 +63,17 @@ export const CharacterRowDetails = ({
                     >
                         <Button
                             className={styles.deleteIconButton}
-                            aria-disabled={isDeleteActionDisabled}
-                            aria-label={isDeletePending ? `Deleting ${character.key}` : `Delete ${character.key}`}
+                            aria-disabled={state.isDeleteActionDisabled}
+                            aria-label={state.isDeletePending ? `Deleting ${character.key}` : `Delete ${character.key}`}
                             onPress={() => {
-                                if (isDeleteActionDisabled) {
+                                if (state.isDeleteActionDisabled) {
                                     return;
                                 }
 
-                                void onDeleteCharacter?.(character.id ?? '');
+                                void actions.onDeleteCharacter?.(character.id ?? '');
                             }}
                         >
-                            {isDeletePending ? (
+                            {state.isDeletePending ? (
                                 <span className={styles.confirmSpinner} aria-hidden="true" />
                             ) : (
                                 <svg viewBox="0 0 24 24" className={styles.iconGlyph}>
@@ -123,7 +90,7 @@ export const CharacterRowDetails = ({
                             placement="right"
                             offset={8}
                         >
-                            {deleteTooltipLabel}
+                            {state.deleteTooltipLabel}
                         </Tooltip>
                     </TooltipTrigger>
                 </div>

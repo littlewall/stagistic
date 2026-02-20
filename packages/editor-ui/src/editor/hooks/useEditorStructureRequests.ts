@@ -11,6 +11,11 @@ import {
     type MutableRefObject, useEffect, useRef,
 } from 'react';
 
+import type {
+    EditorStructureRequests,
+    EditorValueChangeMeta,
+    InsertActRequest,
+} from '../contracts';
 import {FOUNTAIN_BLOCK_NODE_NAME} from '../tiptap/fountainCore';
 import {
     insertActBlockBeforeId,
@@ -18,60 +23,43 @@ import {
     setPlainTextContent,
     tryCommitDocument,
 } from './structureRequestMutations';
+import {type AutosaveSchedulePayload} from './useAutosaveController';
 import {useEditorActiveBlockSync} from './useEditorActiveBlockSync';
 import {useEditorMoveRequests} from './useEditorMoveRequests';
 
-type StructureRequestState = {
-    insertActRequest?: {
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null,
-    renameActRequest?: {
-        blockId: string,
-        nextName: string,
-        requestId: number,
-    } | null,
-    deleteActRequest?: {
-        blockId: string,
-        requestId: number,
-    } | null,
-    moveSceneRequest?: {
-        sourceSceneBlockId: string,
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null,
-    moveActRequest?: {
-        sourceActBlockId: string,
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null,
-};
-
-type UseEditorStructureRequestsArgs = StructureRequestState & {
+interface UseEditorStructureRequestsArgs {
     editor: TiptapEditor | null,
-    focusBlockRequest?: {
-        blockId: string,
-        requestId: number,
-    } | null,
+    requests?: EditorStructureRequests,
     onActiveBlockChange?: (blockId: string | null) => void,
-    onValueChangeRef: MutableRefObject<((value: ScriptDocument) => void) | undefined>,
-    setLatestValue: (value: ScriptDocument) => void,
-    scheduleAutosave: (value: ScriptDocument) => void,
+    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
+    setLatestValue: (value: ScriptDocument, revision?: number) => void,
+    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
+    revisionRef: MutableRefObject<number>,
+}
+
+const canInsertBeforeExistingBlock = (
+    request: InsertActRequest,
+): request is InsertActRequest & {beforeBlockId: string} => {
+    return typeof request.beforeBlockId === 'string' && request.beforeBlockId.length > 0;
 };
 
 export const useEditorStructureRequests = ({
     editor,
-    insertActRequest,
-    renameActRequest,
-    deleteActRequest,
-    moveSceneRequest,
-    moveActRequest,
-    focusBlockRequest,
+    requests,
     onActiveBlockChange,
     onValueChangeRef,
     setLatestValue,
     scheduleAutosave,
+    revisionRef,
 }: UseEditorStructureRequestsArgs) => {
+    const {
+        focusBlockRequest,
+        insertActRequest,
+        renameActRequest,
+        deleteActRequest,
+        moveSceneRequest,
+        moveActRequest,
+    } = requests ?? {};
     const lastInsertActRequestIdRef = useRef<number | null>(null);
     const lastRenameActRequestIdRef = useRef<number | null>(null);
     const lastDeleteActRequestIdRef = useRef<number | null>(null);
@@ -83,11 +71,14 @@ export const useEditorStructureRequests = ({
     });
     useEditorMoveRequests({
         editor,
-        moveSceneRequest,
-        moveActRequest,
+        requests: {
+            moveSceneRequest,
+            moveActRequest,
+        },
         onValueChangeRef,
         setLatestValue,
         scheduleAutosave,
+        revisionRef,
     });
 
     useEffect(() => {
@@ -122,7 +113,7 @@ export const useEditorStructureRequests = ({
         let nextContent = [...currentValue.content, nextActBlock];
         let didChange = true;
 
-        if (insertActRequest.beforeBlockId) {
+        if (canInsertBeforeExistingBlock(insertActRequest)) {
             const [insertedContent, didInsert] = insertActBlockBeforeId(
                 currentValue.content,
                 insertActRequest.beforeBlockId,
@@ -145,11 +136,13 @@ export const useEditorStructureRequests = ({
             setLatestValue,
             onValueChangeRef,
             scheduleAutosave,
+            revisionRef,
         );
     }, [
         editor,
         insertActRequest,
         onValueChangeRef,
+        revisionRef,
         scheduleAutosave,
         setLatestValue,
     ]);
@@ -185,11 +178,13 @@ export const useEditorStructureRequests = ({
             setLatestValue,
             onValueChangeRef,
             scheduleAutosave,
+            revisionRef,
         );
     }, [
         editor,
         onValueChangeRef,
         renameActRequest,
+        revisionRef,
         scheduleAutosave,
         setLatestValue,
     ]);
@@ -222,11 +217,13 @@ export const useEditorStructureRequests = ({
             setLatestValue,
             onValueChangeRef,
             scheduleAutosave,
+            revisionRef,
         );
     }, [
         deleteActRequest,
         editor,
         onValueChangeRef,
+        revisionRef,
         scheduleAutosave,
         setLatestValue,
     ]);

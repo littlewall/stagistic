@@ -15,6 +15,12 @@
     box-shadow: var(--shadow-popover);
 }
 
+.empty {
+    padding: var(--space-1) var(--space-2);
+    font-size: calc(12px * var(--size-scale));
+    color: var(--color-ink-muted);
+}
+
 .item {
     cursor: pointer;
     display: grid;
@@ -32,6 +38,10 @@
 }
 
 .item:hover {
+    background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+}
+
+.itemActive {
     background: color-mix(in srgb, var(--color-accent) 45%, transparent);
 }
 

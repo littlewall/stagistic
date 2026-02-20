@@ -16,12 +16,12 @@ import {
     PRESET_COLOR_HUES,
 } from './constants';
 
-type UseCharacterColorPickerStateArgs = {
+interface UseCharacterColorPickerStateArgs {
     character: EditorSidebarCharacter,
     isColorActionDisabled: boolean,
     onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
     characterColorSaturation?: number,
-};
+}
 
 export const useCharacterColorPickerState = ({
     character,

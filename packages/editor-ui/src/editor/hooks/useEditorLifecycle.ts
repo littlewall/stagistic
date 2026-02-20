@@ -10,143 +10,115 @@ import {
     useRef,
 } from 'react';
 
+import type {
+    EditorStructureRequests,
+    EditorValueChangeMeta,
+} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
-import {type SaveResult} from './useAutosaveController';
+import {
+    type AutosaveSchedulePayload,
+    type SaveResult,
+} from './useAutosaveController';
 import {useEditorStructureRequests} from './useEditorStructureRequests';
 import {useLatestRef} from './useLatestRef';
 
-type UseEditorLifecycleArgs = {
-    editor: TiptapEditor | null,
-    initialValue: ScriptDocument,
-    initialSerialized: string,
-    autoFocus?: boolean,
-    onManualSave?: (value: ScriptDocument) => SaveResult,
-    onValueChange?: (value: ScriptDocument) => void,
-    setLatestValue: (value: ScriptDocument) => void,
-    syncInitialValue: (value: ScriptDocument, initialSerialized: string) => void,
-    scheduleAutosave: (value: ScriptDocument) => void,
-    handleManualSave: () => Promise<void>,
-    focusBlockRequest?: {
-        blockId: string,
-        requestId: number,
-    } | null,
-    insertActRequest?: {
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null,
-    renameActRequest?: {
-        blockId: string,
-        nextName: string,
-        requestId: number,
-    } | null,
-    deleteActRequest?: {
-        blockId: string,
-        requestId: number,
-    } | null,
-    moveSceneRequest?: {
-        sourceSceneBlockId: string,
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null,
-    moveActRequest?: {
-        sourceActBlockId: string,
-        beforeBlockId: string | null,
-        requestId: number,
-    } | null,
-    onActiveBlockChange?: (blockId: string | null) => void,
-};
+interface UseEditorLifecycleArgs {
+    editor: {
+        instance: TiptapEditor | null,
+        autoFocus?: boolean,
+    },
+    document: {
+        initialValue: ScriptDocument,
+        initialSerialized: string,
+        setLatestValue: (value: ScriptDocument, revision?: number) => void,
+        syncInitialValue: (value: ScriptDocument, initialSerialized: string, revision?: number) => void,
+        scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
+    },
+    save: {
+        onManualSave?: (value: ScriptDocument) => SaveResult,
+        handleManualSave: () => Promise<void>,
+    },
+    callbacks: {
+        onValueChange?: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,
+        onActiveBlockChange?: (blockId: string | null) => void,
+    },
+    requests?: EditorStructureRequests,
+}
 
 export const useEditorLifecycle = ({
     editor,
-    initialValue,
-    initialSerialized,
-    autoFocus,
-    onManualSave,
-    onValueChange,
-    setLatestValue,
-    syncInitialValue,
-    scheduleAutosave,
-    handleManualSave,
-    focusBlockRequest,
-    insertActRequest,
-    renameActRequest,
-    deleteActRequest,
-    moveSceneRequest,
-    moveActRequest,
-    onActiveBlockChange,
+    document,
+    save,
+    callbacks,
+    requests,
 }: UseEditorLifecycleArgs) => {
-    const pendingUpdateRef = useRef<number | null>(null);
-    const latestEditorRef = useRef<TiptapEditor | null>(null);
+    const {instance, autoFocus} = editor;
+    const {
+        initialValue,
+        initialSerialized,
+        setLatestValue,
+        syncInitialValue,
+        scheduleAutosave,
+    } = document;
+    const {
+        onManualSave,
+        handleManualSave,
+    } = save;
+    const {
+        onValueChange,
+        onActiveBlockChange,
+    } = callbacks;
     const isApplyingInitialRef = useRef(false);
+    const revisionRef = useRef(0);
     const onValueChangeRef = useLatestRef(onValueChange);
 
     useEditorStructureRequests({
-        editor,
-        focusBlockRequest,
-        insertActRequest,
-        renameActRequest,
-        deleteActRequest,
-        moveSceneRequest,
-        moveActRequest,
+        editor: instance,
+        requests,
         onActiveBlockChange,
         onValueChangeRef,
         setLatestValue,
         scheduleAutosave,
+        revisionRef,
     });
 
     useEffect(() => {
-        if (!editor) {
+        if (!instance) {
             return;
         }
-
-        latestEditorRef.current = editor;
 
         const handleUpdate = ({editor: updatedEditor}: {editor: TiptapEditor}) => {
             if (isApplyingInitialRef.current) {
                 return;
             }
 
-            latestEditorRef.current = updatedEditor;
+            revisionRef.current += 1;
 
-            if (pendingUpdateRef.current !== null) {
-                return;
-            }
+            const revision = revisionRef.current;
+            const nextValue = stripScriptSettings(updatedEditor.getJSON() as ScriptDocument);
 
-            pendingUpdateRef.current = window.requestAnimationFrame(() => {
-                pendingUpdateRef.current = null;
-
-                const activeEditor = latestEditorRef.current;
-
-                if (!activeEditor || isApplyingInitialRef.current) {
-                    return;
-                }
-
-                const nextValue = stripScriptSettings(activeEditor.getJSON() as ScriptDocument);
-
-                setLatestValue(nextValue);
-                onValueChangeRef.current?.(nextValue);
-                scheduleAutosave(nextValue);
+            scheduleAutosave({revision});
+            setLatestValue(nextValue, revision);
+            onValueChangeRef.current?.(nextValue, {
+                source: 'typing',
+                revision,
             });
         };
 
-        editor.on('update', handleUpdate);
+        instance.on('update', handleUpdate);
 
         return () => {
-            editor.off('update', handleUpdate);
-            if (pendingUpdateRef.current !== null) {
-                window.cancelAnimationFrame(pendingUpdateRef.current);
-                pendingUpdateRef.current = null;
-            }
+            instance.off('update', handleUpdate);
         };
     }, [
-        editor,
+        instance,
         onValueChangeRef,
         scheduleAutosave,
         setLatestValue,
     ]);
 
     useEffect(() => {
-        if (!editor) {
+        if (!instance) {
             return;
         }
 
@@ -155,30 +127,31 @@ export const useEditorLifecycle = ({
         });
 
         isApplyingInitialRef.current = true;
-        editor.commands.setContent(initialValue, {emitUpdate: false});
-        editor.view.dispatch(
-            editor.state.tr
+        instance.commands.setContent(initialValue, {emitUpdate: false});
+        instance.view.dispatch(
+            instance.state.tr
                 .setDocAttribute('structure', normalizedStructure)
                 .setDocAttribute('settings', initialValue.attrs?.settings ?? null)
                 .setMeta('preventUpdate', true),
         );
         isApplyingInitialRef.current = false;
+        revisionRef.current = 0;
 
-        syncInitialValue(initialValue, initialSerialized);
+        syncInitialValue(initialValue, initialSerialized, revisionRef.current);
     }, [
-        editor,
+        instance,
         initialSerialized,
         initialValue,
         syncInitialValue,
     ]);
 
     useEffect(() => {
-        if (!editor || !autoFocus) {
+        if (!instance || !autoFocus) {
             return;
         }
 
-        editor.commands.focus('start');
-    }, [autoFocus, editor]);
+        instance.commands.focus('start');
+    }, [autoFocus, instance]);
 
     useEffect(() => {
         if (!onManualSave) {
@@ -196,13 +169,4 @@ export const useEditorLifecycle = ({
 
         return () => window.removeEventListener('keydown', onKeyDown);
     }, [handleManualSave, onManualSave]);
-
-    useEffect(() => {
-        return () => {
-            if (pendingUpdateRef.current !== null) {
-                window.cancelAnimationFrame(pendingUpdateRef.current);
-                pendingUpdateRef.current = null;
-            }
-        };
-    }, []);
 };

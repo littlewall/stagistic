@@ -27,7 +27,12 @@ type MarkerDecoration = {
     order: number,
 };
 
-const structureMarkerDecorationsKey = new PluginKey('fountain-structure-marker-decorations');
+interface StructureMarkerDecorationState {
+    decorations: DecorationSet,
+    structureRef: unknown,
+}
+
+const structureMarkerDecorationsKey = new PluginKey<StructureMarkerDecorationState>('fountain-structure-marker-decorations');
 
 type StructureMarkerDecorationsPluginOptions = {
     structureSettings?: Partial<StructureSettings>,
@@ -187,10 +192,42 @@ const buildStructureMarkerDecorations = (
 
 export const createStructureMarkerDecorationsPlugin = (options?: StructureMarkerDecorationsPluginOptions) => new Plugin({
     key: structureMarkerDecorationsKey,
+    state: {
+        init: (_config, state): StructureMarkerDecorationState => ({
+            decorations: buildStructureMarkerDecorations(
+                state.doc,
+                options?.structureSettings,
+            ),
+            structureRef: (state.doc.attrs as {structure?: unknown}).structure,
+        }),
+        apply: (tr, pluginState, oldState): StructureMarkerDecorationState => {
+            const nextStructureRef = (tr.doc.attrs as {structure?: unknown}).structure;
+            const previousStructureRef = (oldState.doc.attrs as {structure?: unknown}).structure;
+            const structureChanged = previousStructureRef !== nextStructureRef;
+
+            if (!tr.docChanged && !structureChanged) {
+                return pluginState;
+            }
+
+            if (!structureChanged && tr.docChanged) {
+                return {
+                    decorations: pluginState.decorations.map(tr.mapping, tr.doc),
+                    structureRef: nextStructureRef,
+                };
+            }
+
+            return {
+                decorations: buildStructureMarkerDecorations(
+                    tr.doc,
+                    options?.structureSettings,
+                ),
+                structureRef: nextStructureRef,
+            };
+        },
+    },
     props: {
-        decorations: state => buildStructureMarkerDecorations(
-            state.doc,
-            options?.structureSettings,
-        ),
+        decorations: state => {
+            return structureMarkerDecorationsKey.getState(state)?.decorations ?? DecorationSet.empty;
+        },
     },
 });

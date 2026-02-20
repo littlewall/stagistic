@@ -4,6 +4,7 @@ import {
     Plus,
 } from 'iconoir-react';
 import {
+    type ReactNode,
     useCallback,
     useEffect,
     useState,
@@ -30,52 +31,20 @@ export type {
     ScriptSyncState,
 };
 
-type AppHeaderProps = {
-    currentScript?: ScriptListItem,
-    recentScripts?: ScriptListItem[],
-    onSelectScript?: (script: ScriptListItem) => void,
+type AppHeaderFrameProps = {
+    scriptControls?: ReactNode,
     onMenuAction?: (actionId: string) => void,
-    showScriptMenu?: boolean,
-    scriptSyncState?: ScriptSyncState,
     onHome: () => void,
     onNewScript: () => void,
-    onBackToEditor?: () => void,
-    backToEditorLabel?: string,
 };
 
-export const AppHeader = ({
-    currentScript,
-    recentScripts = [],
-    onSelectScript,
+const AppHeaderFrame = ({
+    scriptControls,
     onMenuAction,
-    showScriptMenu = true,
-    scriptSyncState,
     onHome,
     onNewScript,
-    onBackToEditor,
-    backToEditorLabel = 'Back to editor',
-}: AppHeaderProps) => {
+}: AppHeaderFrameProps) => {
     const [themeMode, setThemeMode] = useState<AppThemeMode>(() => readPreferredAppThemeMode());
-    const canShowScriptMenu = Boolean(showScriptMenu && currentScript && onSelectScript);
-
-    const handleMenuAction = useCallback((key: string) => {
-        if (key.startsWith('script:')) {
-            const scriptId = key.replace('script:', '');
-            const script = recentScripts.find(item => item.id === scriptId);
-
-            if (script && onSelectScript) {
-                onSelectScript(script);
-            }
-
-            return;
-        }
-
-        onMenuAction?.(key);
-    }, [
-        onMenuAction,
-        onSelectScript,
-        recentScripts,
-    ]);
 
     useEffect(() => {
         applyAppThemeMode(themeMode);
@@ -113,24 +82,7 @@ export const AppHeader = ({
                 </Button>
             </div>
             <div className={styles.scriptControls}>
-                {onBackToEditor ? (
-                    <Button
-                        className={clsx(styles.menuTrigger, styles.backButton)}
-                        onPress={onBackToEditor}
-                    >
-                        {backToEditorLabel}
-                    </Button>
-                ) : null}
-                {canShowScriptMenu && currentScript ? (
-                    <ScriptMenu
-                        script={currentScript}
-                        recentScripts={recentScripts}
-                        onAction={handleMenuAction}
-                    />
-                ) : null}
-                {canShowScriptMenu ? (
-                    <SyncIndicator state={scriptSyncState} />
-                ) : null}
+                {scriptControls ? scriptControls : null}
             </div>
             <div className={styles.rightControls}>
                 <AccountMenu
@@ -140,5 +92,92 @@ export const AppHeader = ({
                 />
             </div>
         </header>
+    );
+};
+
+export type AppHeaderProps = {
+    onHome: () => void,
+    onNewScript: () => void,
+    onMenuAction?: (actionId: string) => void,
+};
+
+export const AppHeader = ({
+    onMenuAction,
+    onHome,
+    onNewScript,
+}: AppHeaderProps) => (
+    <AppHeaderFrame
+        onMenuAction={onMenuAction}
+        onHome={onHome}
+        onNewScript={onNewScript}
+    />
+);
+
+export type ScriptEditorAppHeaderProps = {
+    currentScript: ScriptListItem,
+    recentScripts?: ScriptListItem[],
+    onSelectScript: (script: ScriptListItem) => void,
+    onMenuAction?: (actionId: string) => void,
+    scriptSyncState?: ScriptSyncState,
+    onHome: () => void,
+    onNewScript: () => void,
+    onBackToEditor?: () => void,
+    backToEditorLabel?: string,
+};
+
+export const ScriptEditorAppHeader = ({
+    currentScript,
+    recentScripts = [],
+    onSelectScript,
+    onMenuAction,
+    scriptSyncState,
+    onHome,
+    onNewScript,
+    onBackToEditor,
+    backToEditorLabel = 'Back to editor',
+}: ScriptEditorAppHeaderProps) => {
+    const handleScriptMenuAction = useCallback((key: string) => {
+        if (key.startsWith('script:')) {
+            const scriptId = key.replace('script:', '');
+            const script = recentScripts.find(item => item.id === scriptId);
+
+            if (script) {
+                onSelectScript(script);
+            }
+
+            return;
+        }
+
+        onMenuAction?.(key);
+    }, [
+        onMenuAction,
+        onSelectScript,
+        recentScripts,
+    ]);
+
+    return (
+        <AppHeaderFrame
+            onMenuAction={onMenuAction}
+            onHome={onHome}
+            onNewScript={onNewScript}
+            scriptControls={(
+                <>
+                    {onBackToEditor ? (
+                        <Button
+                            className={clsx(styles.menuTrigger, styles.backButton)}
+                            onPress={onBackToEditor}
+                        >
+                            {backToEditorLabel}
+                        </Button>
+                    ) : null}
+                    <ScriptMenu
+                        script={currentScript}
+                        recentScripts={recentScripts}
+                        onAction={handleScriptMenuAction}
+                    />
+                    <SyncIndicator state={scriptSyncState} />
+                </>
+            )}
+        />
     );
 };

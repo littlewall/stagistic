@@ -126,7 +126,6 @@ export const ScriptListRoute = () => {
         <AppLayout
             header={(
                 <AppHeader
-                    showScriptMenu={false}
                     onHome={handleHome}
                     onNewScript={openModal}
                 />

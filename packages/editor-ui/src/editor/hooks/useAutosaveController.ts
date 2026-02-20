@@ -12,6 +12,11 @@ import {useLatestRef} from './useLatestRef';
 
 export type SaveResult = boolean | void | Promise<boolean | void>;
 
+export interface AutosaveSchedulePayload {
+    value?: ScriptDocument,
+    revision?: number,
+}
+
 type UseAutosaveControllerArgs = {
     onAutoSave?: (value: ScriptDocument) => SaveResult,
     onManualSave?: (value: ScriptDocument) => SaveResult,
@@ -25,6 +30,38 @@ export const serializeDocumentForSave = (value: ScriptDocument) => {
     return JSON.stringify(stripScriptSettings(value));
 };
 
+const toRevision = (value: unknown) => {
+    if (typeof value !== 'number' || !Number.isFinite(value)) {
+        return null;
+    }
+
+    return Math.max(0, Math.trunc(value));
+};
+
+const isAutosaveSchedulePayload = (value: unknown): value is AutosaveSchedulePayload => {
+    if (!value || typeof value !== 'object') {
+        return false;
+    }
+
+    return 'value' in value || 'revision' in value;
+};
+
+const resolveSchedulePayload = (
+    input?: ScriptDocument | AutosaveSchedulePayload,
+): AutosaveSchedulePayload => {
+    if (!input) {
+        return {};
+    }
+
+    if (isAutosaveSchedulePayload(input)) {
+        return input;
+    }
+
+    return {
+        value: input,
+    };
+};
+
 export const useAutosaveController = ({
     onAutoSave,
     onManualSave,
@@ -32,7 +69,8 @@ export const useAutosaveController = ({
     autoSaveDelayMs,
 }: UseAutosaveControllerArgs) => {
     const latestValueRef = useRef<ScriptDocument | null>(null);
-    const lastSavedSerializedRef = useRef<string>('');
+    const latestRevisionRef = useRef(0);
+    const lastSavedRevisionRef = useRef(0);
     const autosaveTimerRef = useRef<number | null>(null);
     const dirtyRef = useRef(false);
     const onAutoSaveRef = useLatestRef(onAutoSave);
@@ -57,20 +95,45 @@ export const useAutosaveController = ({
         autosaveTimerRef.current = null;
     }, []);
 
-    const setLatestValue = useCallback((value: ScriptDocument) => {
+    const setLatestValueWithRevision = useCallback((value: ScriptDocument, revision?: number) => {
         latestValueRef.current = value;
+
+        const normalizedRevision = toRevision(revision);
+
+        if (normalizedRevision === null) {
+            return;
+        }
+
+        latestRevisionRef.current = Math.max(latestRevisionRef.current, normalizedRevision);
     }, []);
 
-    const syncInitialValue = useCallback((value: ScriptDocument, initialSerialized: string) => {
+    const syncInitialValue = useCallback((
+        value: ScriptDocument,
+        _initialSerialized: string,
+        revision?: number,
+    ) => {
+        const nextRevision = toRevision(revision) ?? 0;
+
         latestValueRef.current = stripScriptSettings(value);
-        lastSavedSerializedRef.current = initialSerialized;
+        latestRevisionRef.current = nextRevision;
+        lastSavedRevisionRef.current = nextRevision;
         updateDirty(false);
         clearAutosaveTimer();
     }, [clearAutosaveTimer, updateDirty]);
 
-    const scheduleAutosave = useCallback((nextValue: ScriptDocument) => {
-        const serialized = serializeDocumentForSave(nextValue);
-        const isDirty = serialized !== lastSavedSerializedRef.current;
+    const scheduleAutosave = useCallback((input?: ScriptDocument | AutosaveSchedulePayload) => {
+        const payload = resolveSchedulePayload(input);
+        const normalizedRevision = toRevision(payload.revision);
+
+        if (payload.value) {
+            latestValueRef.current = payload.value;
+        }
+
+        if (normalizedRevision !== null) {
+            latestRevisionRef.current = Math.max(latestRevisionRef.current, normalizedRevision);
+        }
+
+        const isDirty = latestRevisionRef.current > lastSavedRevisionRef.current;
 
         updateDirty(isDirty);
 
@@ -87,15 +150,17 @@ export const useAutosaveController = ({
         const delay = autoSaveDelayMs ?? DEFAULT_AUTOSAVE_DELAY_MS;
 
         autosaveTimerRef.current = window.setTimeout(() => {
+            autosaveTimerRef.current = null;
+
             const latestValue = latestValueRef.current;
 
             if (!latestValue) {
                 return;
             }
 
-            const latestSerialized = serializeDocumentForSave(latestValue);
+            const revisionToSave = latestRevisionRef.current;
 
-            if (latestSerialized === lastSavedSerializedRef.current) {
+            if (revisionToSave <= lastSavedRevisionRef.current) {
                 return;
             }
 
@@ -107,8 +172,8 @@ export const useAutosaveController = ({
                         return;
                     }
 
-                    lastSavedSerializedRef.current = latestSerialized;
-                    updateDirty(false);
+                    lastSavedRevisionRef.current = Math.max(lastSavedRevisionRef.current, revisionToSave);
+                    updateDirty(latestRevisionRef.current > lastSavedRevisionRef.current);
                 } catch {
                     // onAutoSave should handle reporting errors.
                 }
@@ -138,9 +203,9 @@ export const useAutosaveController = ({
             return;
         }
 
-        const serialized = serializeDocumentForSave(currentValue);
+        const revisionToSave = latestRevisionRef.current;
 
-        if (serialized === lastSavedSerializedRef.current) {
+        if (revisionToSave <= lastSavedRevisionRef.current) {
             return;
         }
 
@@ -151,8 +216,8 @@ export const useAutosaveController = ({
                 return;
             }
 
-            lastSavedSerializedRef.current = serialized;
-            updateDirty(false);
+            lastSavedRevisionRef.current = Math.max(lastSavedRevisionRef.current, revisionToSave);
+            updateDirty(latestRevisionRef.current > lastSavedRevisionRef.current);
         } catch {
             // onManualSave should handle reporting errors.
         }
@@ -172,7 +237,7 @@ export const useAutosaveController = ({
         clearAutosaveTimer,
         scheduleAutosave,
         handleManualSave,
-        setLatestValue,
+        setLatestValue: setLatestValueWithRevision,
         syncInitialValue,
     };
 };

@@ -7,20 +7,24 @@ import {
 import type {EditorSidebarCharacter} from './types';
 import {getRenameDraftKey} from './utils';
 
-type UseRenameDraftsArgs = {
+type RenameCharacterPreview = (
+    characterId: string,
+    previousCharacterName: string,
+    nextCharacterName: string,
+) => void;
+
+type RenameCharacter = (
+    characterId: string,
+    previousCharacterName: string,
+    nextCharacterName: string,
+) => void | Promise<void>;
+
+interface UseRenameDraftsArgs {
     confirmedCharacters: EditorSidebarCharacter[],
     normalizeRenameInput?: (value: string) => string,
-    onRenameCharacterPreview?: (
-        characterId: string,
-        previousCharacterName: string,
-        nextCharacterName: string,
-    ) => void,
-    onRenameCharacter?: (
-        characterId: string,
-        previousCharacterName: string,
-        nextCharacterName: string,
-    ) => void | Promise<void>,
-};
+    onRenameCharacterPreview?: RenameCharacterPreview,
+    onRenameCharacter?: RenameCharacter,
+}
 
 export const useRenameDrafts = ({
     confirmedCharacters,

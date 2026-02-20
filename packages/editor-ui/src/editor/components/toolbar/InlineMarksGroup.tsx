@@ -6,35 +6,29 @@ import {
     Underline,
     Undo,
 } from 'iconoir-react';
-import {type MouseEvent as ReactMouseEvent} from 'react';
 
 import styles from '../EditorToolbar.module.css';
-
-type InlineMarksGroupProps = {
-    canUndo: boolean,
-    canRedo: boolean,
-    isBoldActive: boolean,
-    isItalicActive: boolean,
-    isUnderlineActive: boolean,
-    onUndoMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
-    onRedoMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
-    onBoldMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
-    onItalicMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
-    onUnderlineMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
-};
+import type {InlineMarksGroupProps} from './contracts';
 
 export const InlineMarksGroup = ({
-    canUndo,
-    canRedo,
-    isBoldActive,
-    isItalicActive,
-    isUnderlineActive,
-    onUndoMouseDown,
-    onRedoMouseDown,
-    onBoldMouseDown,
-    onItalicMouseDown,
-    onUnderlineMouseDown,
+    state,
+    actions,
 }: InlineMarksGroupProps) => {
+    const {
+        canUndo,
+        canRedo,
+        isBoldActive,
+        isItalicActive,
+        isUnderlineActive,
+    } = state;
+    const {
+        onUndoMouseDown,
+        onRedoMouseDown,
+        onBoldMouseDown,
+        onItalicMouseDown,
+        onUnderlineMouseDown,
+    } = actions;
+
     return (
         <div className={styles.group}>
             <button
