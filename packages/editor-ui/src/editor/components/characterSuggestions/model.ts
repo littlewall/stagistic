@@ -213,7 +213,6 @@ export const computeCharacterSuggestions = ({
     }
 
     const activeKey = normalizeCharacterKey(activeToken.value);
-    const occupiedKeys = new Set<string>();
     const counts = collectCharacterCounts(editor, normalizedPersistentCharacters);
     const countsByConfirmedKey = new Map<string, number>();
 
@@ -229,22 +228,9 @@ export const computeCharacterSuggestions = ({
 
     const persistentColorByKey = getPersistentColorByKey(normalizedPersistentCharacters);
 
-    tokens.forEach((token, index) => {
-        if (index === activeTokenIndex) {
-            return;
-        }
-
-        const key = normalizeCharacterKey(token.value);
-
-        if (key.length > 0) {
-            occupiedKeys.add(key);
-        }
-    });
-
     const suggestionRows = buildSuggestionRows({
         counts: countsByConfirmedKey,
         activeKey,
-        occupiedKeys,
         limit: MAX_SUGGESTIONS,
     });
 
