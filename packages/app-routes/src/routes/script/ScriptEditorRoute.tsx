@@ -145,7 +145,6 @@ export const ScriptEditorRoute = () => {
         moveSceneRequest,
         moveActRequest,
         actNamePreviewById,
-        activeBlockId,
         handleSidebarFocusBlock,
         handleSidebarRenameAct,
         handleActNamePreview,
@@ -181,7 +180,6 @@ export const ScriptEditorRoute = () => {
             indexSnapshot: sourceIndexForSidebars,
             structureSettings: resolvedScriptSettings.structure,
             actNamePreviewById,
-            activeBlockId,
         },
         actions: {
             onFocusBlock: handleSidebarFocusBlock,
@@ -194,7 +192,6 @@ export const ScriptEditorRoute = () => {
         },
     }), [
         actNamePreviewById,
-        activeBlockId,
         handleActNamePreview,
         handleSidebarDeleteAct,
         handleSidebarFocusBlock,

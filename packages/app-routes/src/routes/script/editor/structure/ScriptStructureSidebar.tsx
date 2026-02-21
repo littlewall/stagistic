@@ -43,7 +43,6 @@ export const ScriptStructureSidebar = ({
         indexSnapshot,
         structureSettings,
         actNamePreviewById,
-        activeBlockId,
     } = data;
     const liveStructure = useEditorLiveStructure();
     const liveActiveBlockId = useEditorLiveActiveBlock();
@@ -74,7 +73,7 @@ export const ScriptStructureSidebar = ({
         liveStructure,
         value?.content,
     ]);
-    const resolvedActiveBlockId = liveActiveBlockId ?? activeBlockId;
+    const resolvedActiveBlockId = liveActiveBlockId;
     const activeSceneBlockId = useMemo(() => {
         return resolveActiveSceneBlockId({
             rowByBlockId,
