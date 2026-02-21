@@ -4,6 +4,7 @@ import {
     index,
     integer,
     pgTable,
+    primaryKey,
     text,
     uniqueIndex,
 } from 'drizzle-orm/pg-core';
@@ -142,6 +143,52 @@ export const scriptCharacterGenders = pgTable(
     }),
 );
 
+export const scriptBlockIndexMeta = pgTable('script_block_index_meta', {
+    scriptId: text('script_id')
+        .primaryKey()
+        .references(() => scripts.id, {onDelete: 'cascade'}),
+    contentHash: text('content_hash').notNull().default(''),
+    indexSchemaVersion: integer('index_schema_version').notNull().default(1),
+    status: text('status').notNull().default('stale'),
+    updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+    lastError: text('last_error'),
+});
+
+export const scriptBlockIndexRows = pgTable(
+    'script_block_index_rows',
+    {
+        scriptId: text('script_id')
+            .notNull()
+            .references(() => scripts.id, {onDelete: 'cascade'}),
+        blockId: text('block_id').notNull(),
+        orderNo: integer('order_no').notNull(),
+        blockType: text('block_type').notNull(),
+        textContent: text('text_content').notNull(),
+        actBlockId: text('act_block_id'),
+        sceneBlockId: text('scene_block_id'),
+        columnGroupOrder: integer('column_group_order'),
+        columnOrder: integer('column_order'),
+        characterRefsJson: text('character_refs_json'),
+        updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+    },
+    table => ({
+        scriptBlockPk: primaryKey({
+            columns: [table.scriptId, table.blockId],
+            name: 'script_block_index_rows_script_block_pk',
+        }),
+        scriptOrderIdx: index('script_block_index_rows_script_order_idx')
+            .on(table.scriptId, table.orderNo),
+        scriptTypeIdx: index('script_block_index_rows_script_type_idx')
+            .on(table.scriptId, table.blockType),
+        scriptActIdx: index('script_block_index_rows_script_act_idx')
+            .on(table.scriptId, table.actBlockId),
+        scriptSceneIdx: index('script_block_index_rows_script_scene_idx')
+            .on(table.scriptId, table.sceneBlockId),
+        scriptTextIdx: index('script_block_index_rows_script_text_idx')
+            .on(table.scriptId, table.textContent),
+    }),
+);
+
 export const dbSchema = {
     scripts,
     scriptLatest,
@@ -151,4 +198,6 @@ export const dbSchema = {
     scriptConfigBlocks,
     scriptCharacters,
     scriptCharacterGenders,
+    scriptBlockIndexMeta,
+    scriptBlockIndexRows,
 };

@@ -7,7 +7,6 @@ import {
 import {mergeAttributes, Node} from '@tiptap/core';
 import {
     Plugin,
-    PluginKey,
 } from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
@@ -22,61 +21,18 @@ import {
 } from '../fountainBlock/handlers';
 import {createStructureMarkerDecorationsPlugin} from '../fountainBlock/structureMarkerDecorations';
 import {
-    ensureFountainBlockId,
     FOUNTAIN_BLOCK_NODE_NAME,
     getFountainBlockClassName,
     normalizeFountainBlockType,
 } from '../fountainCore';
 
-const ensureBlockIdsPlugin = (
+const createInputHandlersPlugin = (
     editor: Editor,
     blockShortcuts?: BlockShortcutMap,
     blockNextElements?: BlockNextElementMap,
     blockCasing?: BlockCasingMap,
 ) => {
     return new Plugin({
-        key: new PluginKey('fountain-block-ids'),
-        appendTransaction: (transactions, _oldState, newState) => {
-            if (!transactions.some(transaction => transaction.docChanged)) {
-                return null;
-            }
-
-            let tr = newState.tr;
-            let changed = false;
-            const seenIds = new Set<string>();
-
-            newState.doc.descendants((node, pos) => {
-                if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
-                    return true;
-                }
-
-                const attrs = node.attrs as Record<string, unknown>;
-                let id = ensureFountainBlockId(attrs.id);
-                const blockType = normalizeFountainBlockType(attrs.blockType);
-
-                // Keep every block id unique to avoid identity collisions in structure sidebar reorder.
-                while (seenIds.has(id)) {
-                    id = ensureFountainBlockId(null);
-                }
-
-                seenIds.add(id);
-
-                if (id === attrs.id && blockType === attrs.blockType) {
-                    return false;
-                }
-
-                tr = tr.setNodeMarkup(pos, undefined, {
-                    ...attrs,
-                    id,
-                    blockType,
-                });
-                changed = true;
-
-                return false;
-            });
-
-            return changed ? tr : null;
-        },
         props: {
             handleKeyDown: (_view, event) => handleKeyDown(editor, event, blockShortcuts, blockNextElements),
             handleTextInput: (_view, from, to, text) => handleTextInput(editor, from, to, text, blockCasing),
@@ -156,7 +112,7 @@ const FountainBlockExtension = Node.create<{
         const editorInstance = this.editor;
 
         return [
-            ensureBlockIdsPlugin(
+            createInputHandlersPlugin(
                 editorInstance,
                 this.options.blockShortcuts,
                 this.options.blockNextElements,

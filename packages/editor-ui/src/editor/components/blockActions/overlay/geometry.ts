@@ -2,24 +2,7 @@ import {FOUNTAIN_BLOCK_NODE_NAME} from '@stagistic/script-core';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {findFountainBlockByIdFromState} from '../../../tiptap/fountainCore';
-import type {
-    OverlayAnchorStyle,
-    TopLevelBlockMetrics,
-} from './types';
-
-export const toNumericStyleValue = (value: unknown): number | null => {
-    if (typeof value === 'number' && Number.isFinite(value)) {
-        return value;
-    }
-
-    if (typeof value === 'string') {
-        const parsed = Number.parseFloat(value);
-
-        return Number.isFinite(parsed) ? parsed : null;
-    }
-
-    return null;
-};
+import type {TopLevelBlockMetrics} from './types';
 
 export const clamp = (value: number, min: number, max: number) => {
     return Math.max(min, Math.min(max, value));
@@ -35,6 +18,52 @@ export const asFountainBlockElement = (value: Node | null): HTMLElement | null =
     }
 
     return value.closest<HTMLElement>('p[data-fountain-block]');
+};
+
+export const resolveFountainBlockElementById = (
+    editor: TiptapEditor,
+    blockId: string,
+): HTMLElement | null => {
+    const block = findFountainBlockByIdFromState(editor.state, blockId, FOUNTAIN_BLOCK_NODE_NAME);
+
+    if (!block) {
+        return null;
+    }
+
+    const nodeDom = editor.view.nodeDOM(block.pos);
+
+    return asFountainBlockElement(nodeDom);
+};
+
+export const resolveElementOffsetWithinAncestor = (
+    element: HTMLElement,
+    ancestor: HTMLElement,
+): {top: number, left: number} | null => {
+    let top = 0;
+    let left = 0;
+    let current: HTMLElement | null = element;
+
+    while (current && current !== ancestor) {
+        top += current.offsetTop;
+        left += current.offsetLeft;
+
+        const nextParent: Element | null = current.offsetParent;
+
+        if (!(nextParent instanceof HTMLElement)) {
+            return null;
+        }
+
+        current = nextParent;
+    }
+
+    if (current !== ancestor) {
+        return null;
+    }
+
+    return {
+        top,
+        left,
+    };
 };
 
 export const collectTopLevelBlockMetrics = (
@@ -76,70 +105,6 @@ export const collectTopLevelBlockMetrics = (
     });
 
     return metrics;
-};
-
-export const findBlockLayoutById = (
-    editor: TiptapEditor,
-    blockId: string,
-): {element: HTMLElement, from: number} | null => {
-    const block = findFountainBlockByIdFromState(editor.state, blockId, FOUNTAIN_BLOCK_NODE_NAME);
-
-    if (!block) {
-        return null;
-    }
-
-    const nodeDom = editor.view.nodeDOM(block.pos);
-    const element = asFountainBlockElement(nodeDom);
-
-    if (!element) {
-        return null;
-    }
-
-    return {
-        element,
-        from: block.from,
-    };
-};
-
-export const resolveOverlayStyleForBlockId = (
-    editor: TiptapEditor,
-    canvas: HTMLElement,
-    blockId: string,
-): OverlayAnchorStyle | null => {
-    const blockLayout = findBlockLayoutById(editor, blockId);
-
-    if (!blockLayout) {
-        return null;
-    }
-
-    const blockElement = blockLayout.element;
-    const canvasRect = canvas.getBoundingClientRect();
-    const targetRect = blockElement.getBoundingClientRect();
-    const computed = window.getComputedStyle(blockElement);
-    const paddingTop = Number.parseFloat(computed.paddingTop) || 0;
-    const lineHeightValue = Number.parseFloat(computed.lineHeight);
-    let top = targetRect.top - canvasRect.top + canvas.scrollTop + paddingTop;
-    const hasFiniteLineHeight = Number.isFinite(lineHeightValue) && lineHeightValue > 0;
-
-    if (hasFiniteLineHeight) {
-        top += lineHeightValue / 2;
-    }
-
-    if (!hasFiniteLineHeight) {
-        try {
-            const caretCoords = editor.view.coordsAtPos(blockLayout.from);
-
-            top = ((caretCoords.top + caretCoords.bottom) / 2) - canvasRect.top + canvas.scrollTop;
-        } catch {
-            // Fallback keeps computed first-line approximation.
-        }
-    }
-
-    return {
-        top,
-        left: targetRect.left - canvasRect.left + canvas.scrollLeft,
-        width: targetRect.width,
-    };
 };
 
 interface ResolveDropLocationArgs {

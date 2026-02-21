@@ -12,6 +12,7 @@ import {
 } from 'react';
 
 import type {
+    EditorIndexSnapshot,
     EditorStructureRequests,
     EditorValueChangeMeta,
     InsertActRequest,
@@ -32,6 +33,7 @@ interface UseEditorStructureRequestsArgs {
     requests?: EditorStructureRequests,
     onActiveBlockChange?: (blockId: string | null) => void,
     onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
+    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
     setLatestValue: (value: ScriptDocument, revision?: number) => void,
     scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
     revisionRef: MutableRefObject<number>,
@@ -48,6 +50,7 @@ export const useEditorStructureRequests = ({
     requests,
     onActiveBlockChange,
     onValueChangeRef,
+    onIndexChangeRef,
     setLatestValue,
     scheduleAutosave,
     revisionRef,
@@ -76,6 +79,7 @@ export const useEditorStructureRequests = ({
             moveActRequest,
         },
         onValueChangeRef,
+        onIndexChangeRef,
         setLatestValue,
         scheduleAutosave,
         revisionRef,
@@ -135,12 +139,14 @@ export const useEditorStructureRequests = ({
             didChange,
             setLatestValue,
             onValueChangeRef,
+            onIndexChangeRef,
             scheduleAutosave,
             revisionRef,
         );
     }, [
         editor,
         insertActRequest,
+        onIndexChangeRef,
         onValueChangeRef,
         revisionRef,
         scheduleAutosave,
@@ -177,11 +183,13 @@ export const useEditorStructureRequests = ({
             didChange,
             setLatestValue,
             onValueChangeRef,
+            onIndexChangeRef,
             scheduleAutosave,
             revisionRef,
         );
     }, [
         editor,
+        onIndexChangeRef,
         onValueChangeRef,
         renameActRequest,
         revisionRef,
@@ -216,12 +224,14 @@ export const useEditorStructureRequests = ({
             didChange,
             setLatestValue,
             onValueChangeRef,
+            onIndexChangeRef,
             scheduleAutosave,
             revisionRef,
         );
     }, [
         deleteActRequest,
         editor,
+        onIndexChangeRef,
         onValueChangeRef,
         revisionRef,
         scheduleAutosave,

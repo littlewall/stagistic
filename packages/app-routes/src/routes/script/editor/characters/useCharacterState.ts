@@ -11,6 +11,7 @@ import {
     useEffect,
     useMemo,
     useReducer,
+    useRef,
     useState,
 } from 'react';
 
@@ -34,9 +35,8 @@ interface UseCharacterStateArgs {
 }
 
 export interface CharacterEditorState {
-    editorValue: ScriptDocument | null,
-    sidebarValue: ScriptDocument | null,
-    setEditorValue: Dispatch<SetStateAction<ScriptDocument | null>>,
+    getEditorValue: () => ScriptDocument | null,
+    setEditorValue: (value: ScriptDocument | null) => void,
     editorOverrideValue: ScriptDocument | null,
     setEditorOverrideValue: Dispatch<SetStateAction<ScriptDocument | null>>,
     handleEditorValueChange: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,
@@ -113,8 +113,8 @@ export const useCharacterState = ({
     scriptRepository,
     initialValue,
 }: UseCharacterStateArgs): CharacterState => {
-    const [editorValue, setEditorValue] = useState<ScriptDocument | null>(null);
-    const [sidebarValue, setSidebarValue] = useState<ScriptDocument | null>(null);
+    const previousScriptIdRef = useRef<string | null>(null);
+    const editorValueRef = useRef<ScriptDocument | null>(null);
     const [editorOverrideValue, setEditorOverrideValue] = useState<ScriptDocument | null>(null);
     const [characterDomainState, dispatchCharacterDomainState] = useReducer(
         characterStateReducer,
@@ -138,9 +138,20 @@ export const useCharacterState = ({
     } = characterDomainState;
 
     useEffect(() => {
-        setEditorValue(initialValue ?? null);
-        setSidebarValue(initialValue ?? null);
-        setEditorOverrideValue(null);
+        const didScriptChange = previousScriptIdRef.current !== currentScriptId;
+
+        previousScriptIdRef.current = currentScriptId;
+
+        if (didScriptChange) {
+            editorValueRef.current = initialValue ?? null;
+            setEditorOverrideValue(null);
+
+            return;
+        }
+
+        if (!editorValueRef.current) {
+            editorValueRef.current = initialValue ?? null;
+        }
     }, [currentScriptId, initialValue]);
 
     useEffect(() => {
@@ -195,15 +206,17 @@ export const useCharacterState = ({
         setters,
     ]);
 
+    const setEditorValue = useCallback((value: ScriptDocument | null) => {
+        editorValueRef.current = value;
+    }, []);
+    const getEditorValue = useCallback(() => editorValueRef.current, []);
     const handleEditorValueChange = useCallback((value: ScriptDocument) => {
-        setEditorValue(value);
-        setSidebarValue(value);
+        editorValueRef.current = value;
     }, []);
 
     return {
         editor: {
-            editorValue,
-            sidebarValue,
+            getEditorValue,
             setEditorValue,
             editorOverrideValue,
             setEditorOverrideValue,

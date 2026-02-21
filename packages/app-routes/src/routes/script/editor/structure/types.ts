@@ -1,5 +1,6 @@
 import type {DragDropProvider} from '@dnd-kit/react';
 import type {
+    ScriptBlockIndexSnapshot,
     ScriptDocument,
     StructureSettings,
 } from '@stagistic/script-core';
@@ -23,6 +24,7 @@ export interface UseStructureSidebarControllerArgs {
 
 export interface StructureSidebarData {
     value: ScriptDocument | null | undefined,
+    indexSnapshot: ScriptBlockIndexSnapshot | null,
     structureSettings: StructureSettings,
     actNamePreviewById: Record<string, string>,
     activeBlockId: string | null,
@@ -78,8 +80,8 @@ export interface SortableMeta {
 export type DragEndEvent = Parameters<NonNullable<ComponentProps<typeof DragDropProvider>['onDragEnd']>>[0];
 
 export interface UseStructureSidebarDndArgs {
-    rows: StructureRow[],
-    rowByBlockId: Map<string, StructureRow>,
-    rowIndexByBlockId: Map<string, number>,
+    rows: readonly StructureRow[],
+    rowByBlockId: ReadonlyMap<string, StructureRow>,
+    rowIndexByBlockId: ReadonlyMap<string, number>,
     actions: Pick<StructureSidebarActions, 'onFocusBlock' | 'onReorderAct' | 'onReorderScene'>,
 }

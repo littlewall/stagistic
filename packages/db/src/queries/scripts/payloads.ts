@@ -111,6 +111,34 @@ export interface InsertOutboxPayload {
     status: string,
 }
 
+export interface ScriptBlockIndexMetaUpsertPayload {
+    scriptId: string,
+    contentHash: string,
+    indexSchemaVersion: number,
+    status: 'ready' | 'stale' | 'building' | 'failed',
+    updatedAt: number,
+    lastError: string | null,
+}
+
+export interface ScriptBlockIndexRowsReplaceRow {
+    scriptId: string,
+    blockId: string,
+    orderNo: number,
+    blockType: string,
+    textContent: string,
+    actBlockId: string | null,
+    sceneBlockId: string | null,
+    columnGroupOrder: number | null,
+    columnOrder: number | null,
+    characterRefsJson: string | null,
+    updatedAt: number,
+}
+
+export interface ScriptBlockIndexRowsReplacePayload {
+    scriptId: string,
+    rows: ScriptBlockIndexRowsReplaceRow[],
+}
+
 export interface UpsertScriptCharacterPayload {
     id: string,
     scriptId: string,

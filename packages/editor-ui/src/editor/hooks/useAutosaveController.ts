@@ -22,6 +22,7 @@ type UseAutosaveControllerArgs = {
     onManualSave?: (value: ScriptDocument) => SaveResult,
     onDirtyChange?: (isDirty: boolean) => void,
     autoSaveDelayMs?: number,
+    resolveLatestValue?: () => ScriptDocument | null,
 };
 
 const DEFAULT_AUTOSAVE_DELAY_MS = 1500;
@@ -67,6 +68,7 @@ export const useAutosaveController = ({
     onManualSave,
     onDirtyChange,
     autoSaveDelayMs,
+    resolveLatestValue,
 }: UseAutosaveControllerArgs) => {
     const latestValueRef = useRef<ScriptDocument | null>(null);
     const latestRevisionRef = useRef(0);
@@ -76,6 +78,7 @@ export const useAutosaveController = ({
     const onAutoSaveRef = useLatestRef(onAutoSave);
     const onManualSaveRef = useLatestRef(onManualSave);
     const onDirtyChangeRef = useLatestRef(onDirtyChange);
+    const resolveLatestValueRef = useLatestRef(resolveLatestValue);
 
     const updateDirty = useCallback((nextDirty: boolean) => {
         if (dirtyRef.current === nextDirty) {
@@ -94,6 +97,24 @@ export const useAutosaveController = ({
         window.clearTimeout(autosaveTimerRef.current);
         autosaveTimerRef.current = null;
     }, []);
+
+    const resolveLatestValueNow = useCallback(() => {
+        const resolver = resolveLatestValueRef.current;
+
+        if (!resolver) {
+            return latestValueRef.current;
+        }
+
+        const resolved = resolver();
+
+        if (resolved) {
+            latestValueRef.current = resolved;
+
+            return resolved;
+        }
+
+        return latestValueRef.current;
+    }, [resolveLatestValueRef]);
 
     const setLatestValueWithRevision = useCallback((value: ScriptDocument, revision?: number) => {
         latestValueRef.current = value;
@@ -152,7 +173,7 @@ export const useAutosaveController = ({
         autosaveTimerRef.current = window.setTimeout(() => {
             autosaveTimerRef.current = null;
 
-            const latestValue = latestValueRef.current;
+            const latestValue = resolveLatestValueNow();
 
             if (!latestValue) {
                 return;
@@ -185,6 +206,7 @@ export const useAutosaveController = ({
         autoSaveDelayMs,
         clearAutosaveTimer,
         onAutoSaveRef,
+        resolveLatestValueNow,
         updateDirty,
     ]);
 
@@ -197,7 +219,7 @@ export const useAutosaveController = ({
 
         clearAutosaveTimer();
 
-        const currentValue = latestValueRef.current;
+        const currentValue = resolveLatestValueNow();
 
         if (!currentValue) {
             return;
@@ -224,6 +246,7 @@ export const useAutosaveController = ({
     }, [
         clearAutosaveTimer,
         onManualSaveRef,
+        resolveLatestValueNow,
         updateDirty,
     ]);
 

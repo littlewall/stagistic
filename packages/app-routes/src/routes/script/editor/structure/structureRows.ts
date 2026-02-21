@@ -3,6 +3,7 @@ import {
     ELEMENT_ACT,
     ELEMENT_SCENE_HEADING,
     type FountainJSONContent,
+    type ScriptBlockIndexSnapshot,
     normalizeActName,
 } from '@stagistic/script-core';
 
@@ -23,17 +24,17 @@ export interface StructureSceneRow {
 export type StructureRow = StructureActRow | StructureSceneRow;
 
 export interface StructureRowsState {
-    rows: StructureRow[],
-    rowByBlockId: Map<string, StructureRow>,
-    rowIndexByBlockId: Map<string, number>,
+    rows: readonly StructureRow[],
+    rowByBlockId: ReadonlyMap<string, StructureRow>,
+    rowIndexByBlockId: ReadonlyMap<string, number>,
     activeSceneBlockId: string | null,
 }
 
 export interface StructureRowsDerived {
-    rows: StructureRow[],
-    rowByBlockId: Map<string, StructureRow>,
-    rowIndexByBlockId: Map<string, number>,
-    sceneByBlockId: Map<string, string>,
+    rows: readonly StructureRow[],
+    rowByBlockId: ReadonlyMap<string, StructureRow>,
+    rowIndexByBlockId: ReadonlyMap<string, number>,
+    sceneByBlockId: ReadonlyMap<string, string>,
 }
 
 const EMPTY_STRUCTURE_ROWS_DERIVED: StructureRowsDerived = {
@@ -44,6 +45,7 @@ const EMPTY_STRUCTURE_ROWS_DERIVED: StructureRowsDerived = {
 };
 
 const structureRowsCache = new WeakMap<FountainJSONContent[], StructureRowsDerived>();
+const structureRowsIndexCache = new WeakMap<ScriptBlockIndexSnapshot, StructureRowsDerived>();
 
 const buildStructureRows = (
     content: FountainJSONContent[] | undefined,
@@ -116,10 +118,87 @@ const buildStructureRows = (
     return result;
 };
 
+const buildStructureRowsFromIndex = (
+    indexSnapshot: ScriptBlockIndexSnapshot | null,
+): StructureRowsDerived => {
+    if (!indexSnapshot || !Array.isArray(indexSnapshot.blocks) || indexSnapshot.blocks.length === 0) {
+        return EMPTY_STRUCTURE_ROWS_DERIVED;
+    }
+
+    const cached = structureRowsIndexCache.get(indexSnapshot);
+
+    if (cached) {
+        return cached;
+    }
+
+    const rows: StructureRow[] = [];
+    const rowByBlockId = new Map<string, StructureRow>();
+    const rowIndexByBlockId = new Map<string, number>();
+    const sceneByBlockId = new Map<string, string>();
+
+    indexSnapshot.blocks.forEach(block => {
+        if (!block.blockId) {
+            return;
+        }
+
+        if (block.blockType === ELEMENT_ACT) {
+            const actRow: StructureActRow = {
+                kind: 'act',
+                blockId: block.blockId,
+                name: normalizeActName(block.textContent),
+                index: rows.length,
+            };
+
+            rows.push(actRow);
+            rowByBlockId.set(block.blockId, actRow);
+            rowIndexByBlockId.set(block.blockId, actRow.index);
+
+            return;
+        }
+
+        if (block.blockType === ELEMENT_SCENE_HEADING) {
+            const sceneRow: StructureSceneRow = {
+                kind: 'scene',
+                blockId: block.blockId,
+                title: block.textContent || 'Untitled scene',
+                index: rows.length,
+            };
+
+            rows.push(sceneRow);
+            rowByBlockId.set(block.blockId, sceneRow);
+            rowIndexByBlockId.set(block.blockId, sceneRow.index);
+            sceneByBlockId.set(block.blockId, block.blockId);
+
+            return;
+        }
+
+        if (block.sceneBlockId) {
+            sceneByBlockId.set(block.blockId, block.sceneBlockId);
+        }
+    });
+
+    const result: StructureRowsDerived = {
+        rows,
+        rowByBlockId,
+        rowIndexByBlockId,
+        sceneByBlockId,
+    };
+
+    structureRowsIndexCache.set(indexSnapshot, result);
+
+    return result;
+};
+
 export const deriveStructureRowsBase = (
     content: FountainJSONContent[] | undefined,
 ): StructureRowsDerived => {
     return buildStructureRows(content);
+};
+
+export const deriveStructureRowsBaseFromIndex = (
+    indexSnapshot: ScriptBlockIndexSnapshot | null,
+): StructureRowsDerived => {
+    return buildStructureRowsFromIndex(indexSnapshot);
 };
 
 export const resolveActiveSceneBlockId = (

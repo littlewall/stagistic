@@ -35,6 +35,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     const scriptRepository = useScriptRepository();
     const {
         initialValue,
+        initialIndexSnapshot,
         scriptSettingsOverride,
         storageError,
         shouldAutoFocus,
@@ -147,6 +148,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         currentScriptId,
         recentScripts,
         initialValue,
+        initialIndexSnapshot,
         scriptSettingsOverride,
         storageError,
         shouldAutoFocus,

@@ -19,6 +19,7 @@ import type {
 import {getLocalDb} from '~db';
 
 import {createCharacterHandlers} from './localPglite/characters';
+import {createBlockIndexHandlers} from './localPglite/blockIndex';
 import {createConfigHandlers} from './localPglite/config';
 import {createContentHandlers} from './localPglite/content';
 import {
@@ -33,6 +34,7 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
 
     const getDb: GetDb = async () => dbPromise;
     const recordOutbox = createOutboxRecorder(getDb);
+    const blockIndexHandlers = createBlockIndexHandlers({getDb});
 
     const listScripts = async (options?: ListScriptsOptions): Promise<ScriptSummary[]> => {
         const db = await getDb();
@@ -66,15 +68,29 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
 
         if (initialContent) {
             const contentJson = serializeDocument(initialContent);
+            const contentHash = computeContentHash(contentJson);
 
             await dbQueries.insertLatest(db, {
                 scriptId: id,
                 contentJson,
-                contentHash: computeContentHash(contentJson),
+                contentHash,
                 contentSize: contentJson.length,
                 updatedAt: now,
                 schemaVersion: LATEST_SCRIPT_SCHEMA_VERSION,
             });
+
+            try {
+                await blockIndexHandlers.rebuildScriptBlockIndexFromDocument({
+                    scriptId: id,
+                    value: initialContent,
+                    contentHash,
+                    updatedAt: now,
+                    db,
+                });
+            } catch (error) {
+                console.error('Failed to rebuild script block index after createScript', error);
+                await blockIndexHandlers.markScriptBlockIndexStale(id, contentHash, error);
+            }
         }
 
         return id;
@@ -129,6 +145,10 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
     } = createContentHandlers({
         getDb,
         recordOutbox,
+        blockIndex: {
+            rebuildScriptBlockIndexFromDocument: blockIndexHandlers.rebuildScriptBlockIndexFromDocument,
+            markScriptBlockIndexStale: blockIndexHandlers.markScriptBlockIndexStale,
+        },
     });
 
     const {
@@ -163,5 +183,8 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
         deleteScriptConfig,
         loadVersion,
         restoreLatestFromVersion,
+        getScriptBlockIndex: blockIndexHandlers.getScriptBlockIndex,
+        ensureScriptBlockIndex: blockIndexHandlers.ensureScriptBlockIndex,
+        rebuildScriptBlockIndex: blockIndexHandlers.rebuildScriptBlockIndex,
     } satisfies ScriptRepository;
 };

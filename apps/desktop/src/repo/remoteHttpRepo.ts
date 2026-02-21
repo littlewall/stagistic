@@ -33,5 +33,8 @@ export const createRemoteHttpRepository = (): ScriptRepository => {
         deleteScriptConfig: () => notImplemented(),
         loadVersion: () => notImplemented(),
         restoreLatestFromVersion: () => notImplemented(),
+        getScriptBlockIndex: () => notImplemented(),
+        ensureScriptBlockIndex: () => notImplemented(),
+        rebuildScriptBlockIndex: () => notImplemented(),
     } satisfies ScriptRepository;
 };

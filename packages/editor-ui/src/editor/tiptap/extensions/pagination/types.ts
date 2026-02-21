@@ -24,6 +24,7 @@ export interface PaginationState {
 export interface PaginationPluginState {
     decorations: DecorationSet,
     pagination: PaginationState,
+    forceRecalcToken: number,
 }
 
 export interface PaginationOptions {
@@ -41,6 +42,7 @@ export interface PaginationOptions {
 export interface PaginationStorage {
     optionsVersion: number,
     state: PaginationState,
+    forceRecalcToken: number,
 }
 
 export interface BlockCacheEntry {

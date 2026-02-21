@@ -12,8 +12,12 @@ import {
     type PaginationExtensionAdapter,
     type PaginationPluginState,
 } from '../types';
+import {incrementPaginationRecalcCount} from '../../../../perf/editorPerfMetrics';
 
 export const paginationKey = new PluginKey<PaginationPluginState>('fountain-pagination');
+export const PAGINATION_CONTROL_META_KEY = 'fountain-pagination-control';
+
+const TYPING_RECALC_DELAY_MS = 250;
 
 export const createPaginationPlugin = (extension: PaginationExtensionAdapter) => {
     let lastOptionsVersion = -1;
@@ -28,21 +32,40 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                 return {
                     decorations: DecorationSet.empty,
                     pagination: createInitialPaginationState(extension.options),
+                    forceRecalcToken: extension.storage.forceRecalcToken,
                 };
             },
             apply: (tr, pluginState: PaginationPluginState) => {
                 const meta = tr.getMeta(paginationKey) as PaginationPluginState | undefined;
+                const controlMeta = tr.getMeta(PAGINATION_CONTROL_META_KEY) as {
+                    forceRecalcToken?: number,
+                } | undefined;
 
                 if (meta) {
                     extension.storage.state = meta.pagination;
+                    extension.storage.forceRecalcToken = meta.forceRecalcToken;
 
                     return meta;
+                }
+
+                if (
+                    controlMeta
+                    && typeof controlMeta.forceRecalcToken === 'number'
+                    && controlMeta.forceRecalcToken !== pluginState.forceRecalcToken
+                ) {
+                    extension.storage.forceRecalcToken = controlMeta.forceRecalcToken;
+
+                    return {
+                        ...pluginState,
+                        forceRecalcToken: controlMeta.forceRecalcToken,
+                    };
                 }
 
                 if (tr.docChanged) {
                     return {
                         decorations: pluginState.decorations.map(tr.mapping, tr.doc),
                         pagination: pluginState.pagination,
+                        forceRecalcToken: pluginState.forceRecalcToken,
                     };
                 }
 
@@ -64,6 +87,7 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
             let isRecalcRunning = false;
             let needsRecalc = false;
             let recalcFrameId = 0;
+            let deferredTypingTimeout: number | null = null;
 
             const runRecalc = () => {
                 if (destroyed) {
@@ -119,9 +143,11 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                     const tr = view.state.tr.setMeta(paginationKey, {
                         decorations,
                         pagination,
+                        forceRecalcToken: extension.storage.forceRecalcToken,
                     });
 
                     view.dispatch(tr);
+                    incrementPaginationRecalcCount();
 
                     if (hasInlineBreaks && lastInlineBreakDoc !== view.state.doc) {
                         lastInlineBreakDoc = view.state.doc;
@@ -137,9 +163,14 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                 isRecalcRunning = false;
             };
 
-            const scheduleRecalc = () => {
+            const scheduleImmediateRecalc = () => {
                 if (destroyed) {
                     return;
+                }
+
+                if (deferredTypingTimeout !== null) {
+                    window.clearTimeout(deferredTypingTimeout);
+                    deferredTypingTimeout = null;
                 }
 
                 if (recalcFrameId) {
@@ -152,21 +183,37 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                 });
             };
 
+            const scheduleTypingRecalc = () => {
+                if (destroyed) {
+                    return;
+                }
+
+                if (deferredTypingTimeout !== null) {
+                    window.clearTimeout(deferredTypingTimeout);
+                    deferredTypingTimeout = null;
+                }
+
+                deferredTypingTimeout = window.setTimeout(() => {
+                    deferredTypingTimeout = null;
+                    scheduleImmediateRecalc();
+                }, TYPING_RECALC_DELAY_MS);
+            };
+
             if (typeof ResizeObserver !== 'undefined') {
                 resizeObserver = new ResizeObserver(() => {
                     // Defer dispatching transactions outside the ResizeObserver delivery.
-                    scheduleRecalc();
+                    scheduleImmediateRecalc();
                 });
                 resizeObserver.observe(view.dom);
             }
 
             if (typeof document !== 'undefined' && 'fonts' in document) {
                 document.fonts.ready.then(() => {
-                    scheduleRecalc();
+                    scheduleImmediateRecalc();
                 }).catch(() => {});
             }
 
-            scheduleRecalc();
+            scheduleImmediateRecalc();
 
             return {
                 update: (view, prevState) => {
@@ -181,18 +228,41 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                     );
 
                     const layoutChanged = heightKey !== lastHeightKey || contentWidth !== lastContentWidth;
+                    const previousPluginState = paginationKey.getState(prevState);
+                    const currentPluginState = paginationKey.getState(view.state);
+                    const forceRecalcTokenChanged = (
+                        previousPluginState?.forceRecalcToken ?? 0
+                    ) !== (
+                        currentPluginState?.forceRecalcToken ?? 0
+                    );
 
-                    if (!docChanged && optionsVersion === lastOptionsVersion && !layoutChanged) {
+                    if (
+                        !docChanged
+                        && optionsVersion === lastOptionsVersion
+                        && !layoutChanged
+                        && !forceRecalcTokenChanged
+                    ) {
                         return;
                     }
 
-                    scheduleRecalc();
+                    if (forceRecalcTokenChanged || layoutChanged || optionsVersion !== lastOptionsVersion) {
+                        scheduleImmediateRecalc();
+
+                        return;
+                    }
+
+                    scheduleTypingRecalc();
                 },
                 destroy: () => {
                     destroyed = true;
                     if (recalcFrameId) {
                         window.cancelAnimationFrame(recalcFrameId);
                         recalcFrameId = 0;
+                    }
+
+                    if (deferredTypingTimeout !== null) {
+                        window.clearTimeout(deferredTypingTimeout);
+                        deferredTypingTimeout = null;
                     }
 
                     resizeObserver?.disconnect();

@@ -11,6 +11,8 @@ import {
     resolveEditorSettings,
     stripScriptSettings,
 } from './editorSettings';
+import {EditorLiveStoreProvider} from './live/context';
+import {createEditorLiveStore} from './live/store';
 import {
     serializeDocumentForSave,
     useAutosaveController,
@@ -64,12 +66,15 @@ const Editor = ({
     } = layout ?? {};
     const {
         onValueChange,
+        onIndexChange,
         onActiveBlockChange,
+        onBlockUiEvent,
     } = callbacks ?? {};
     const initialSerialized = useMemo(() => serializeDocumentForSave(initialValue), [initialValue]);
     const sizeScale = useMemo(() => getSizeScale(), []);
     const rootRef = useRef<HTMLDivElement | null>(null);
     const canvasHostRef = useRef<HTMLDivElement | null>(null);
+    const liveStore = useMemo(() => createEditorLiveStore(), []);
     const resolvedSettings = useMemo(() => {
         const effectiveScriptSettings = scriptSettings ?? initialValue.attrs?.settings;
 
@@ -98,6 +103,39 @@ const Editor = ({
         resolvedSettings,
         sizeScale,
     });
+    const initialContentSignature = useMemo(
+        () => JSON.stringify(stripScriptSettings(initialValue)),
+        [initialValue],
+    );
+
+    const initialDoc = useMemo<ScriptDocument>(
+        () => initialValue,
+        [initialContentSignature],
+    );
+    const editor = useEditor({
+        extensions,
+        content: initialDoc,
+        autofocus: autoFocus ? 'start' : false,
+        shouldRerenderOnTransaction: false,
+        editorProps: {
+            attributes: {
+                'data-fountain-editor': 'true',
+            },
+        },
+    }, [extensions, initialDoc]);
+    const resolveLatestValue = useCallback(() => {
+        if (!editor) {
+            return null;
+        }
+
+        const paginationCommands = editor.commands as {
+            forcePaginationRecalc?: () => boolean,
+        };
+
+        paginationCommands.forcePaginationRecalc?.();
+
+        return stripScriptSettings(editor.getJSON() as ScriptDocument);
+    }, [editor]);
     const {
         scheduleAutosave,
         handleManualSave,
@@ -108,6 +146,7 @@ const Editor = ({
         onManualSave,
         onDirtyChange,
         autoSaveDelayMs,
+        resolveLatestValue,
     });
     const rootStyle = useMemo(() => buildEditorRootStyle({
         persistentCharacters,
@@ -122,27 +161,6 @@ const Editor = ({
         persistentCharacters,
         sidebarWidth,
     ]);
-    const initialContentSignature = useMemo(
-        () => JSON.stringify(stripScriptSettings(initialValue)),
-        [initialValue],
-    );
-
-    const initialDoc = useMemo<ScriptDocument>(
-        () => initialValue,
-        [initialContentSignature],
-    );
-
-    const editor = useEditor({
-        extensions,
-        content: initialDoc,
-        autofocus: autoFocus ? 'start' : false,
-        shouldRerenderOnTransaction: false,
-        editorProps: {
-            attributes: {
-                'data-fountain-editor': 'true',
-            },
-        },
-    }, [extensions, initialDoc]);
 
     usePaginationSettings({
         editor,
@@ -155,6 +173,7 @@ const Editor = ({
             instance: editor,
             autoFocus,
         },
+        liveStore,
         document: {
             initialValue,
             initialSerialized,
@@ -168,7 +187,9 @@ const Editor = ({
         },
         callbacks: {
             onValueChange,
+            onIndexChange,
             onActiveBlockChange,
+            onBlockUiEvent,
         },
         requests,
     });
@@ -187,20 +208,22 @@ const Editor = ({
     }, [handleRightSidebarToggle]);
 
     return (
-        <EditorShell
-            canvas={{
-                autoFocus,
-                characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
-                editor,
-                persistentCharacters,
-            }}
-            layout={layout}
-            rootRef={rootRef}
-            canvasHostRef={canvasHostRef}
-            rootStyle={rootStyle}
-            onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
-            onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
-        />
+        <EditorLiveStoreProvider store={liveStore}>
+            <EditorShell
+                canvas={{
+                    autoFocus,
+                    characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
+                    editor,
+                    persistentCharacters,
+                }}
+                layout={layout}
+                rootRef={rootRef}
+                canvasHostRef={canvasHostRef}
+                rootStyle={rootStyle}
+                onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
+                onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
+            />
+        </EditorLiveStoreProvider>
     );
 };
 

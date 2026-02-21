@@ -1,5 +1,6 @@
 import type {
     EditorSettingsOverride,
+    ScriptBlockIndexSnapshot,
     ScriptDocument,
 } from '@stagistic/script-core';
 import type {ReactNode} from 'react';
@@ -50,6 +51,80 @@ export interface EditorValueChangeMeta {
     revision: number,
 }
 
+export type EditorIndexSnapshot = ScriptBlockIndexSnapshot;
+export interface EditorLiveActRow {
+    kind: 'act',
+    blockId: string,
+    name: string,
+    index: number,
+}
+
+export interface EditorLiveSceneRow {
+    kind: 'scene',
+    blockId: string,
+    title: string,
+    index: number,
+}
+
+export type EditorLiveStructureRow = EditorLiveActRow | EditorLiveSceneRow;
+
+export interface EditorLiveStructureSnapshot {
+    rows: readonly EditorLiveStructureRow[],
+    rowIndexByBlockId: ReadonlyMap<string, number>,
+    sceneByBlockId: ReadonlyMap<string, string>,
+}
+
+export interface EditorLiveCharacterSnapshot {
+    countsByKey: ReadonlyMap<string, number>,
+    countsByCharacterId: ReadonlyMap<string, number>,
+}
+
+export interface EditorLiveSnapshot {
+    revision: number,
+    index: EditorIndexSnapshot,
+    structure: EditorLiveStructureSnapshot,
+    characters: EditorLiveCharacterSnapshot,
+    activeBlockId: string | null,
+}
+
+export type EditorBlockUiEventType =
+    | 'activeBlockChange'
+    | 'blockTypeChange'
+    | 'blockInserted'
+    | 'blockRemoved'
+    | 'blockReordered';
+
+export type EditorBlockUiEvent =
+    | {
+        type: 'activeBlockChange',
+        blockId: string | null,
+        previousBlockId: string | null,
+    }
+    | {
+        type: 'blockTypeChange',
+        blockId: string,
+        blockType: string,
+        previousBlockType: string,
+    }
+    | {
+        type: 'blockInserted',
+        blockId: string,
+        blockType: string,
+        orderNo: number,
+    }
+    | {
+        type: 'blockRemoved',
+        blockId: string,
+        blockType: string,
+        previousOrderNo: number,
+    }
+    | {
+        type: 'blockReordered',
+        blockId: string,
+        orderNo: number,
+        previousOrderNo: number,
+    };
+
 export interface EditorStructureRequests {
     focusBlockRequest?: FocusBlockRequest | null,
     insertActRequest?: InsertActRequest | null,
@@ -61,7 +136,9 @@ export interface EditorStructureRequests {
 
 export interface EditorLifecycleCallbacks {
     onValueChange?: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,
+    onIndexChange?: (snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void,
     onActiveBlockChange?: (blockId: string | null) => void,
+    onBlockUiEvent?: (event: EditorBlockUiEvent) => void,
 }
 
 export interface EditorSaveCallbacks {

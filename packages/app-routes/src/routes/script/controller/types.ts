@@ -1,5 +1,6 @@
 import type {
     EditorSettingsOverride,
+    ScriptBlockIndexSnapshot,
     ScriptDocument,
 } from '@stagistic/script-core';
 import type {ScriptSyncState} from '@stagistic/ui';
@@ -19,6 +20,7 @@ export type ScriptEditorController = {
     currentScriptId: string | null,
     recentScripts: CurrentScriptItem[],
     initialValue: ScriptDocument | null | undefined,
+    initialIndexSnapshot: ScriptBlockIndexSnapshot | null | undefined,
     scriptSettingsOverride: EditorSettingsOverride | null | undefined,
     storageError: string | null,
     shouldAutoFocus: boolean,

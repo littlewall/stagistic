@@ -1,12 +1,12 @@
-import {EditorSidebar} from '@stagistic/ui';
 import type {ComponentProps} from 'react';
 import {useMemo} from 'react';
 
+import {ScriptCharactersSidebar} from './characters/ScriptCharactersSidebar';
 import {ScriptStructureSidebar} from './structure';
 
 interface UseScriptEditorSidebarsArgs {
     structureSidebarProps: ComponentProps<typeof ScriptStructureSidebar>,
-    characterSidebarProps: ComponentProps<typeof EditorSidebar>,
+    characterSidebarProps: ComponentProps<typeof ScriptCharactersSidebar>,
 }
 
 export const useScriptEditorSidebars = ({
@@ -17,7 +17,7 @@ export const useScriptEditorSidebars = ({
         <ScriptStructureSidebar {...structureSidebarProps} />
     ), [structureSidebarProps]);
     const rightSidebarContent = useMemo(() => (
-        <EditorSidebar {...characterSidebarProps} />
+        <ScriptCharactersSidebar {...characterSidebarProps} />
     ), [characterSidebarProps]);
 
     return {

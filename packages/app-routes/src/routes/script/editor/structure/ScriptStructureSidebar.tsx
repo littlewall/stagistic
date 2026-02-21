@@ -1,16 +1,38 @@
 import {DragDropProvider} from '@dnd-kit/react';
+import {
+    useEditorLiveActiveBlock,
+    useEditorLiveStructure,
+} from '@stagistic/editor-ui';
 import {useMemo} from 'react';
 
 import styles from './ScriptStructureSidebar.module.css';
 import {StructureRowAct} from './StructureRowAct';
 import {
     deriveStructureRowsBase,
+    deriveStructureRowsBaseFromIndex,
     resolveActiveSceneBlockId,
+    type StructureRow,
 } from './structureRows';
 import {StructureRowScene} from './StructureRowScene';
 import {StructureSidebarHeader} from './StructureSidebarHeader';
 import type {ScriptStructureSidebarProps} from './types';
 import {useStructureSidebarDnd} from './useStructureSidebarDnd';
+
+const liveRowByBlockIdCache = new WeakMap<readonly StructureRow[], ReadonlyMap<string, StructureRow>>();
+
+const getLiveRowByBlockId = (rows: readonly StructureRow[]) => {
+    const cached = liveRowByBlockIdCache.get(rows);
+
+    if (cached) {
+        return cached;
+    }
+
+    const map = new Map(rows.map(row => [row.blockId, row] as const));
+
+    liveRowByBlockIdCache.set(rows, map);
+
+    return map;
+};
 
 export const ScriptStructureSidebar = ({
     data,
@@ -18,25 +40,48 @@ export const ScriptStructureSidebar = ({
 }: ScriptStructureSidebarProps) => {
     const {
         value,
+        indexSnapshot,
         structureSettings,
         actNamePreviewById,
         activeBlockId,
     } = data;
+    const liveStructure = useEditorLiveStructure();
+    const liveActiveBlockId = useEditorLiveActiveBlock();
     const {
         rows,
         rowByBlockId,
         rowIndexByBlockId,
         sceneByBlockId,
     } = useMemo(() => {
+        if (liveStructure.rows.length > 0) {
+            const rows = liveStructure.rows as readonly StructureRow[];
+
+            return {
+                rows,
+                rowByBlockId: getLiveRowByBlockId(rows),
+                rowIndexByBlockId: liveStructure.rowIndexByBlockId,
+                sceneByBlockId: liveStructure.sceneByBlockId,
+            };
+        }
+
+        if (indexSnapshot) {
+            return deriveStructureRowsBaseFromIndex(indexSnapshot);
+        }
+
         return deriveStructureRowsBase(value?.content);
-    }, [value?.content]);
+    }, [
+        indexSnapshot,
+        liveStructure,
+        value?.content,
+    ]);
+    const resolvedActiveBlockId = liveActiveBlockId ?? activeBlockId;
     const activeSceneBlockId = useMemo(() => {
         return resolveActiveSceneBlockId({
             rowByBlockId,
             sceneByBlockId,
-        }, activeBlockId);
+        }, resolvedActiveBlockId);
     }, [
-        activeBlockId,
+        resolvedActiveBlockId,
         rowByBlockId,
         sceneByBlockId,
     ]);

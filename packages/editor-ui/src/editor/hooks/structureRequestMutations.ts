@@ -1,4 +1,5 @@
 import {
+    buildScriptBlockIndex,
     ELEMENT_ACT,
     type FountainJSONContent,
     normalizeScriptStructure,
@@ -7,7 +8,10 @@ import {
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import type {MutableRefObject} from 'react';
 
-import {type EditorValueChangeMeta} from '../contracts';
+import type {
+    EditorIndexSnapshot,
+    EditorValueChangeMeta,
+} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
 import {FOUNTAIN_BLOCK_NODE_NAME} from '../tiptap/fountainCore';
 import {type AutosaveSchedulePayload} from './useAutosaveController';
@@ -178,6 +182,7 @@ const commitDocument = (
     nextContent: FountainJSONContent[],
     setLatestValue: (value: ScriptDocument, revision?: number) => void,
     onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
+    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
     scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
     revisionRef: MutableRefObject<number>,
 ) => {
@@ -213,6 +218,10 @@ const commitDocument = (
         source: 'structure',
         revision,
     });
+    onIndexChangeRef.current?.(buildScriptBlockIndex(savedValue).snapshot, {
+        source: 'structure',
+        revision,
+    });
     scheduleAutosave({
         value: savedValue,
         revision,
@@ -225,6 +234,7 @@ export const tryCommitDocument = (
     didChange: boolean,
     setLatestValue: (value: ScriptDocument, revision?: number) => void,
     onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
+    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
     scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
     revisionRef: MutableRefObject<number>,
 ) => {
@@ -237,6 +247,7 @@ export const tryCommitDocument = (
         nextContent,
         setLatestValue,
         onValueChangeRef,
+        onIndexChangeRef,
         scheduleAutosave,
         revisionRef,
     );
