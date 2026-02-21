@@ -18,7 +18,7 @@ export const useDeleteCharacter = ({
     currentScriptId,
     scriptRepository,
     initialValue,
-    editorValue,
+    getEditorValue,
     setEditorValue,
     setEditorOverrideValue,
     setConfirmedCharacterRecords,
@@ -44,7 +44,7 @@ export const useDeleteCharacter = ({
                     return previous.filter(character => character.id !== characterId);
                 });
 
-                const sourceDocument = getSourceDocument(editorValue, initialValue);
+                const sourceDocument = getSourceDocument(getEditorValue(), initialValue);
 
                 if (sourceDocument) {
                     const {
@@ -69,7 +69,7 @@ export const useDeleteCharacter = ({
     }, [
         confirmedCharactersById,
         currentScriptId,
-        editorValue,
+        getEditorValue,
         handleAutoSave,
         initialValue,
         scriptRepository,

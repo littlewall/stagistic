@@ -1,5 +1,7 @@
 import {type useScriptRepository} from '@stagistic/app-core';
-import {type EditorValueChangeMeta} from '@stagistic/editor-ui';
+import {
+    type EditorValueChangeMeta,
+} from '@stagistic/editor-ui';
 import {type EditorSettings} from '@stagistic/script-core';
 import {
     type ScriptDocument,
@@ -7,7 +9,6 @@ import {
 
 import type {
     CharacterGenderOption,
-    EditorSidebarCharacter,
     ScriptCharacterRecord,
 } from './types';
 
@@ -23,12 +24,15 @@ export interface UseScriptEditorCharactersArgs {
 }
 
 export interface UseScriptEditorCharactersResult {
-    editorValue: ScriptDocument | null,
-    sidebarValue: ScriptDocument | null,
     editorOverrideValue: ScriptDocument | null,
+    confirmedCharacterRecords: ScriptCharacterRecord[],
     normalizedConfirmedCharacterRecords: ScriptCharacterRecord[],
-    confirmedCharacters: EditorSidebarCharacter[],
-    unconfirmedCharacters: EditorSidebarCharacter[],
+    pendingCharacterKeys: string[],
+    deletingCharacterIds: string[],
+    renamingCharacterIds: string[],
+    renamingCharacterKeys: string[],
+    colorUpdatingCharacterIds: string[],
+    genderUpdatingCharacterIds: string[],
     characterGenderOptions: CharacterGenderOption[],
     isCharactersLoading: boolean,
     handleEditorValueChange: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,

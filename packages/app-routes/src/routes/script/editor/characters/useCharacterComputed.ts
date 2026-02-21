@@ -1,18 +1,14 @@
 import {
+    type EditorLiveCharacterSnapshot,
     getCharacterColor,
     normalizeCharacterColorHex,
 } from '@stagistic/editor-ui';
 import {
+    DEFAULT_EDITOR_SETTINGS,
     ELEMENT_CHARACTER,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     normalizeCharacterKey,
-} from '@stagistic/script-core';
-import {
-    DEFAULT_EDITOR_SETTINGS,
-} from '@stagistic/script-core';
-import {
     type EditorSettings,
-    type ScriptDocument,
 } from '@stagistic/script-core';
 import {
     useCallback,
@@ -20,7 +16,6 @@ import {
 } from 'react';
 
 import {
-    collectScriptCharacterStats,
     normalizeCharacterDisplayName,
 } from './index';
 import type {
@@ -31,8 +26,7 @@ import type {
 interface UseCharacterComputedArgs {
     data: {
         confirmedCharacterRecords: ScriptCharacterRecord[],
-        editorValue: ScriptDocument | null,
-        initialValue: ScriptDocument | null | undefined,
+        characterSnapshot: EditorLiveCharacterSnapshot | null,
         resolvedScriptSettings: EditorSettings,
         characterColorSaturation: number,
     },
@@ -43,6 +37,9 @@ interface UseCharacterComputedArgs {
         renamingCharacterKeys: string[],
         colorUpdatingCharacterIds: string[],
         genderUpdatingCharacterIds: string[],
+    },
+    options?: {
+        includeSidebarLists?: boolean,
     },
 }
 
@@ -57,24 +54,63 @@ export interface CharacterComputed {
 }
 
 const EMPTY_SCRIPT_CHARACTER_STATS = {
-    countsByKey: new Map<string, number>(),
-    confirmedCountsById: new Map<string, number>(),
+    countsByKey: new Map<string, number>() as ReadonlyMap<string, number>,
+    countsByCharacterId: new Map<string, number>() as ReadonlyMap<string, number>,
     unconfirmedCountsByKey: new Map<string, number>(),
 } as const;
 
-const characterStatsCache = new WeakMap<ScriptDocument, {
-    confirmedCharacterIdsKey: string,
-    stats: ReturnType<typeof collectScriptCharacterStats>,
-}>();
+const collectStatsFromSnapshot = (
+    snapshot: EditorLiveCharacterSnapshot,
+    normalizedConfirmedCharacterRecords: ScriptCharacterRecord[],
+) => {
+    const countsByKey = snapshot.countsByKey;
+    const countsByCharacterId = snapshot.countsByCharacterId;
+    const unconfirmedCountsByKey = new Map<string, number>();
+
+    countsByKey.forEach((count, key) => {
+        if (count > 0) {
+            unconfirmedCountsByKey.set(key, count);
+        }
+    });
+    normalizedConfirmedCharacterRecords.forEach(character => {
+        if (!character.id) {
+            return;
+        }
+
+        const normalizedKey = normalizeCharacterKey(character.key);
+
+        if (!normalizedKey) {
+            return;
+        }
+
+        const confirmedCount = countsByCharacterId.get(character.id) ?? 0;
+        const currentUnconfirmed = unconfirmedCountsByKey.get(normalizedKey) ?? 0;
+        const nextUnconfirmed = Math.max(0, currentUnconfirmed - confirmedCount);
+
+        if (nextUnconfirmed <= 0) {
+            unconfirmedCountsByKey.delete(normalizedKey);
+
+            return;
+        }
+
+        unconfirmedCountsByKey.set(normalizedKey, nextUnconfirmed);
+    });
+
+    return {
+        countsByKey,
+        countsByCharacterId,
+        unconfirmedCountsByKey,
+    };
+};
 
 export const useCharacterComputed = ({
     data,
     pending,
+    options,
 }: UseCharacterComputedArgs): CharacterComputed => {
     const {
         confirmedCharacterRecords,
-        editorValue,
-        initialValue,
+        characterSnapshot,
         resolvedScriptSettings,
         characterColorSaturation,
     } = data;
@@ -86,6 +122,7 @@ export const useCharacterComputed = ({
         colorUpdatingCharacterIds,
         genderUpdatingCharacterIds,
     } = pending;
+    const includeSidebarLists = options?.includeSidebarLists ?? true;
     const confirmingCharacterSet = useMemo(
         () => new Set(confirmingCharacterKeys),
         [confirmingCharacterKeys],
@@ -155,43 +192,15 @@ export const useCharacterComputed = ({
         [normalizedConfirmedCharacterRecords],
     );
 
-    const confirmedCharacterIdSet = useMemo(
-        () => new Set(normalizedConfirmedCharacterRecords.map(character => character.id)),
-        [normalizedConfirmedCharacterRecords],
-    );
-    const confirmedCharacterIdsKey = useMemo(() => {
-        return normalizedConfirmedCharacterRecords
-            .map(character => character.id)
-            .filter((id): id is string => typeof id === 'string' && id.length > 0)
-            .join('\u0001');
-    }, [normalizedConfirmedCharacterRecords]);
-
     const scriptCharacterStats = useMemo(() => {
-        const sourceValue = editorValue ?? initialValue;
-
-        if (!sourceValue) {
+        if (!characterSnapshot) {
             return EMPTY_SCRIPT_CHARACTER_STATS;
         }
 
-        const cached = characterStatsCache.get(sourceValue);
-
-        if (cached && cached.confirmedCharacterIdsKey === confirmedCharacterIdsKey) {
-            return cached.stats;
-        }
-
-        const nextStats = collectScriptCharacterStats(sourceValue, confirmedCharacterIdSet);
-
-        characterStatsCache.set(sourceValue, {
-            confirmedCharacterIdsKey,
-            stats: nextStats,
-        });
-
-        return nextStats;
+        return collectStatsFromSnapshot(characterSnapshot, normalizedConfirmedCharacterRecords);
     }, [
-        confirmedCharacterIdSet,
-        confirmedCharacterIdsKey,
-        editorValue,
-        initialValue,
+        characterSnapshot,
+        normalizedConfirmedCharacterRecords,
     ]);
 
     const confirmedCharacterSet = useMemo(
@@ -200,58 +209,72 @@ export const useCharacterComputed = ({
     );
 
     const confirmedCharacters = useMemo<EditorSidebarCharacter[]>(
-        () => normalizedConfirmedCharacterRecords.map(character => {
-            const normalizedColorHex = normalizeCharacterColorHex(character.colorHex);
+        () => {
+            if (!includeSidebarLists) {
+                return [];
+            }
 
-            return {
-                id: character.id,
-                key: character.key,
-                count: scriptCharacterStats.confirmedCountsById.get(character.id)
-                    ?? scriptCharacterStats.countsByKey.get(character.key)
-                    ?? 0,
-                color: normalizedColorHex ?? getCharacterColor(character.key, characterColorSaturation),
-                colorHex: normalizedColorHex ?? null,
-                genderKey: character.genderKey ?? null,
-                isConfirmed: true,
-                isDeletePending: deletingCharacterIdSet.has(character.id),
-                isRenamePending: renamingCharacterIdSet.has(character.id),
-                isColorUpdatePending: colorUpdatingCharacterIdSet.has(character.id),
-                isGenderUpdatePending: genderUpdatingCharacterIdSet.has(character.id),
-                isPending: deletingCharacterIdSet.has(character.id)
-                    || renamingCharacterIdSet.has(character.id)
-                    || colorUpdatingCharacterIdSet.has(character.id)
-                    || genderUpdatingCharacterIdSet.has(character.id),
-            };
-        }),
+            return normalizedConfirmedCharacterRecords.map(character => {
+                const normalizedColorHex = normalizeCharacterColorHex(character.colorHex);
+
+                return {
+                    id: character.id,
+                    key: character.key,
+                    count: scriptCharacterStats.countsByCharacterId.get(character.id)
+                        ?? scriptCharacterStats.countsByKey.get(character.key)
+                        ?? 0,
+                    color: normalizedColorHex ?? getCharacterColor(character.key, characterColorSaturation),
+                    colorHex: normalizedColorHex ?? null,
+                    genderKey: character.genderKey ?? null,
+                    isConfirmed: true,
+                    isDeletePending: deletingCharacterIdSet.has(character.id),
+                    isRenamePending: renamingCharacterIdSet.has(character.id),
+                    isColorUpdatePending: colorUpdatingCharacterIdSet.has(character.id),
+                    isGenderUpdatePending: genderUpdatingCharacterIdSet.has(character.id),
+                    isPending: deletingCharacterIdSet.has(character.id)
+                        || renamingCharacterIdSet.has(character.id)
+                        || colorUpdatingCharacterIdSet.has(character.id)
+                        || genderUpdatingCharacterIdSet.has(character.id),
+                };
+            });
+        },
         [
             characterColorSaturation,
             colorUpdatingCharacterIdSet,
             deletingCharacterIdSet,
             genderUpdatingCharacterIdSet,
+            includeSidebarLists,
             normalizedConfirmedCharacterRecords,
             renamingCharacterIdSet,
-            scriptCharacterStats.confirmedCountsById,
+            scriptCharacterStats.countsByCharacterId,
             scriptCharacterStats.countsByKey,
         ],
     );
 
     const unconfirmedCharacters = useMemo<EditorSidebarCharacter[]>(
-        () => Array.from(scriptCharacterStats.unconfirmedCountsByKey.entries())
-            .filter(([key]) => !confirmedCharacterSet.has(key))
-            .filter(([key]) => !renamingCharacterKeySet.has(key))
-            .sort((a, b) => a[0].localeCompare(b[0]))
-            .map(([key, count]) => ({
-                key,
-                count,
-                color: getCharacterColor(key, characterColorSaturation),
-                isConfirmed: false,
-                isConfirmPending: confirmingCharacterSet.has(key),
-                isPending: confirmingCharacterSet.has(key),
-            })),
+        () => {
+            if (!includeSidebarLists) {
+                return [];
+            }
+
+            return Array.from(scriptCharacterStats.unconfirmedCountsByKey.entries())
+                .filter(([key]) => !confirmedCharacterSet.has(key))
+                .filter(([key]) => !renamingCharacterKeySet.has(key))
+                .sort((a, b) => a[0].localeCompare(b[0]))
+                .map(([key, count]) => ({
+                    key,
+                    count,
+                    color: getCharacterColor(key, characterColorSaturation),
+                    isConfirmed: false,
+                    isConfirmPending: confirmingCharacterSet.has(key),
+                    isPending: confirmingCharacterSet.has(key),
+                }));
+        },
         [
             characterColorSaturation,
             confirmedCharacterSet,
             confirmingCharacterSet,
+            includeSidebarLists,
             renamingCharacterKeySet,
             scriptCharacterStats.unconfirmedCountsByKey,
         ],

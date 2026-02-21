@@ -103,6 +103,7 @@ export const useStructureSidebarController = ({
             }
 
             const persistedActNameByKey = new Map<string, string>();
+
             const blocks = collectStructureBlocks(sourceValue.content);
 
             blocks.forEach(block => {

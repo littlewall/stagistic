@@ -38,7 +38,7 @@ export const useRenameCharacter = ({
     currentScriptId,
     scriptRepository,
     initialValue,
-    editorValue,
+    getEditorValue,
     setEditorValue,
     setEditorOverrideValue,
     setConfirmedCharacterRecords,
@@ -70,7 +70,7 @@ export const useRenameCharacter = ({
             return;
         }
 
-        const sourceDocument = getSourceDocument(editorValue, initialValue);
+        const sourceDocument = getSourceDocument(getEditorValue(), initialValue);
 
         if (!sourceDocument) {
             return;
@@ -95,7 +95,7 @@ export const useRenameCharacter = ({
     }, [
         confirmedCharactersById,
         currentScriptId,
-        editorValue,
+        getEditorValue,
         getCharacterNameForBlockType,
         initialValue,
         setEditorOverrideValue,
@@ -124,7 +124,7 @@ export const useRenameCharacter = ({
             return;
         }
 
-        const sourceDocument = getSourceDocument(editorValue, initialValue);
+        const sourceDocument = getSourceDocument(getEditorValue(), initialValue);
 
         if (!sourceDocument) {
             return;
@@ -234,7 +234,7 @@ export const useRenameCharacter = ({
     }, [
         confirmedCharactersById,
         currentScriptId,
-        editorValue,
+        getEditorValue,
         getCharacterNameForBlockType,
         handleAutoSave,
         initialValue,

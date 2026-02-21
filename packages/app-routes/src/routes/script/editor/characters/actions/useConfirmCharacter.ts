@@ -18,7 +18,7 @@ export const useConfirmCharacter = ({
     currentScriptId,
     scriptRepository,
     initialValue,
-    editorValue,
+    getEditorValue,
     setEditorValue,
     setEditorOverrideValue,
     setConfirmedCharacterRecords,
@@ -56,7 +56,7 @@ export const useConfirmCharacter = ({
                     return next;
                 });
 
-                const sourceDocument = getSourceDocument(editorValue, initialValue);
+                const sourceDocument = getSourceDocument(getEditorValue(), initialValue);
 
                 if (sourceDocument) {
                     const {
@@ -85,7 +85,7 @@ export const useConfirmCharacter = ({
     }, [
         confirmedCharacterSet,
         currentScriptId,
-        editorValue,
+        getEditorValue,
         handleAutoSave,
         initialValue,
         scriptRepository,

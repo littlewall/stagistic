@@ -1,6 +1,7 @@
 import {dbQueries} from '@stagistic/db';
 import {
     LATEST_SCRIPT_SCHEMA_VERSION,
+    type ScriptDocument,
 } from '@stagistic/script-core';
 import {uuidv7} from '@stagistic/shared';
 import type {ScriptRepository} from '@stagistic/sync-core';
@@ -23,11 +24,21 @@ type ContentHandlers = Pick<
 interface CreateContentHandlersArgs {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
+    blockIndex: {
+        rebuildScriptBlockIndexFromDocument: (args: {
+            scriptId: string,
+            value: ScriptDocument,
+            contentHash: string,
+            updatedAt: number,
+        }) => Promise<unknown>,
+        markScriptBlockIndexStale: (scriptId: string, contentHash: string, error: unknown) => Promise<void>,
+    },
 }
 
 export const createContentHandlers = ({
     getDb,
     recordOutbox,
+    blockIndex,
 }: CreateContentHandlersArgs): ContentHandlers => {
     const loadLatest: ContentHandlers['loadLatest'] = async scriptId => {
         const db = await getDb();
@@ -71,6 +82,18 @@ export const createContentHandlers = ({
                 payloadJson: JSON.stringify({scriptId, updatedAt: now}),
             }, tx);
         });
+
+        try {
+            await blockIndex.rebuildScriptBlockIndexFromDocument({
+                scriptId,
+                value,
+                contentHash,
+                updatedAt: now,
+            });
+        } catch (error) {
+            console.error('Failed to rebuild script block index after saveLatest', error);
+            await blockIndex.markScriptBlockIndexStale(scriptId, contentHash, error);
+        }
     };
 
     const loadVersion: ContentHandlers['loadVersion'] = async versionId => {
@@ -158,6 +181,18 @@ export const createContentHandlers = ({
                 }),
             }, tx);
         });
+
+        try {
+            await blockIndex.rebuildScriptBlockIndexFromDocument({
+                scriptId,
+                value: parseDocument(versionContentJson),
+                contentHash,
+                updatedAt: now,
+            });
+        } catch (error) {
+            console.error('Failed to rebuild script block index after restoreLatestFromVersion', error);
+            await blockIndex.markScriptBlockIndexStale(scriptId, contentHash, error);
+        }
     };
 
     return {

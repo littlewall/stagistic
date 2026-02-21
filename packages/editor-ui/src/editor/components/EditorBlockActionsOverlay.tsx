@@ -6,6 +6,7 @@ import {
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
 import {
+    type CSSProperties,
     type MouseEvent as ReactMouseEvent,
     type RefObject,
     useCallback,
@@ -18,16 +19,17 @@ import {
 import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
 import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
 import {BlockActionsMenu} from './blockActions/BlockActionsMenu';
-import type {
-    ActiveDragState,
-    DropLockState,
-} from './blockActions/overlay/types';
+import {MENU_DISABLED_BLOCK_TYPES} from './blockActions/overlay/constants';
+import {
+    resolveElementOffsetWithinAncestor,
+    resolveFountainBlockElementById,
+} from './blockActions/overlay/geometry';
 import {useDragPreviewSession} from './blockActions/overlay/useDragPreviewSession';
 import {useDragSourceHighlight} from './blockActions/overlay/useDragSourceHighlight';
-import {useOverlayDisplayState} from './blockActions/overlay/useOverlayDisplayState';
 import {usePointerDragInteraction} from './blockActions/overlay/usePointerDragInteraction';
 import {useActInsertCommand} from './blockActions/useActInsertCommand';
 import {useBlockActionsMenuState} from './blockActions/useBlockActionsMenuState';
+import {useCanvasScrollLock} from './blockActions/useCanvasScrollLock';
 import {useMenuPlacement} from './blockActions/useMenuPlacement';
 import {useOverlayPosition} from './blockActions/useOverlayPosition';
 import styles from './EditorBlockActionsOverlay.module.css';
@@ -37,10 +39,16 @@ interface EditorBlockActionsOverlayProps {
     canvasRef: RefObject<HTMLElement | null>,
 }
 
+interface OverlayAnchorStyle extends CSSProperties {
+    '--overlay-block-spacing-before-px'?: string,
+    '--overlay-block-line-height-px'?: string,
+}
+
 const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverlayProps) => {
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
-    const [dropLock, setDropLock] = useState<DropLockState | null>(null);
+    const [clickedBlockId, setClickedBlockId] = useState<string | null>(null);
+    const [overlayAnchorStyle, setOverlayAnchorStyle] = useState<OverlayAnchorStyle | null>(null);
     const {
         isMenuOpen,
         closeMenu,
@@ -50,10 +58,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         triggerRef,
         menuRef,
     });
-    const {
-        overlayState: overlayStateFromSelection,
-        railAnchorState: railAnchorStateFromSelection,
-    } = useOverlayPosition({
+    const {activeBlockState} = useOverlayPosition({
         editor,
         canvasRef,
         isMenuOpen,
@@ -64,6 +69,12 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         triggerRef,
         menuRef,
     });
+
+    useCanvasScrollLock({
+        canvasRef,
+        isLocked: isMenuOpen,
+    });
+
     const {
         applyDraggedSourceHighlight,
         clearDraggedSourceHighlight,
@@ -75,37 +86,19 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         revertPreviewMove,
         commitPreviewMove,
     } = useDragPreviewSession({editor});
-
-    const [activeDrag, setActiveDrag] = useState<ActiveDragState | null>(null);
-    const {
-        pointerOverlayState,
-        activeOverlayState,
-        globalRailStyle,
-        isMenuDisabledPointerBlock,
-        isMenuDisabledBlock,
-        activeRailAnchorState,
-        resolveOverlayStyleForBlockId,
-        getLastDragOverlayStyle,
-    } = useOverlayDisplayState({
-        editor,
-        canvasRef,
-        activeDrag,
-        dropLock,
-        setDropLock,
-        overlayStateFromSelection,
-        railAnchorStateFromSelection,
-    });
     const {
         pendingPress,
         isPressVisualActive,
-        activeDrag: activeDragState,
+        activeDrag,
         handleTriggerPointerDown,
     } = usePointerDragInteraction({
         context: {
             editor,
             canvasRef,
-            activeOverlayState: pointerOverlayState,
-            isMenuDisabledBlock: isMenuDisabledPointerBlock,
+            activeOverlayState: activeBlockState,
+            isMenuDisabledBlock: activeBlockState
+                ? MENU_DISABLED_BLOCK_TYPES.has(activeBlockState.blockType)
+                : false,
         },
         menu: {
             closeMenu,
@@ -120,55 +113,174 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             revertPreviewMove,
             commitPreviewMove,
         },
-        overlay: {
-            resolveOverlayStyleForBlockId,
-            getLastDragOverlayStyle,
-            setDropLock,
-        },
+    });
+    const pointerOverlayState = activeDrag
+        ? {
+            blockId: activeDrag.sourceBlockId,
+            blockType: activeDrag.sourceBlockType,
+        }
+        : activeBlockState;
+    const visibleOverlayState = pointerOverlayState && clickedBlockId === pointerOverlayState.blockId
+        ? pointerOverlayState
+        : null;
+    const isOverlayVisible = visibleOverlayState !== null;
+    const isMenuDisabledBlock = visibleOverlayState
+        ? MENU_DISABLED_BLOCK_TYPES.has(visibleOverlayState.blockType)
+        : false;
+    const handleActMouseDown = useActInsertCommand({
+        editor,
+        activeBlockId: visibleOverlayState?.blockId ?? null,
+        closeMenu,
     });
 
-    useEffect(() => {
-        if (!activeDragState) {
-            setActiveDrag(null);
+    const updateOverlayAnchor = useCallback(() => {
+        const canvas = canvasRef.current;
+
+        if (!editor || !canvas || !visibleOverlayState) {
+            setOverlayAnchorStyle(null);
 
             return;
         }
 
-        setActiveDrag(activeDragState);
-    }, [activeDragState]);
+        const blockElement = resolveFountainBlockElementById(editor, visibleOverlayState.blockId);
 
-    const handleActMouseDown = useActInsertCommand({
+        if (!blockElement) {
+            setOverlayAnchorStyle(null);
+
+            return;
+        }
+
+        const offset = resolveElementOffsetWithinAncestor(blockElement, canvas);
+
+        if (!offset) {
+            setOverlayAnchorStyle(null);
+
+            return;
+        }
+
+        const computed = window.getComputedStyle(blockElement);
+        const lineHeightValue = Number.parseFloat(computed.lineHeight);
+        const fontSizeValue = Number.parseFloat(computed.fontSize);
+        let resolvedLineHeightPx = 'calc(var(--editor-line-height, 1.7) * var(--editor-font-size, 13px))';
+        const hasResolvedLineHeight = Number.isFinite(lineHeightValue) && lineHeightValue > 0;
+        const hasResolvedFontSize = Number.isFinite(fontSizeValue) && fontSizeValue > 0;
+
+        if (hasResolvedLineHeight) {
+            resolvedLineHeightPx = `${lineHeightValue}px`;
+        }
+
+        if (!hasResolvedLineHeight && hasResolvedFontSize) {
+            resolvedLineHeightPx = `${fontSizeValue * 1.2}px`;
+        }
+
+        setOverlayAnchorStyle({
+            top: `${offset.top}px`,
+            left: `${offset.left}px`,
+            '--overlay-block-spacing-before-px': computed.paddingTop,
+            '--overlay-block-line-height-px': resolvedLineHeightPx,
+        });
+    }, [
+        canvasRef,
         editor,
-        activeBlockId: activeOverlayState?.blockId ?? null,
-        closeMenu,
-    });
+        visibleOverlayState,
+    ]);
+
+    useEffect(() => {
+        if (!editor) {
+            return;
+        }
+
+        const editorElement = editor.view.dom;
+        const handleEditorPointerDown = (event: PointerEvent) => {
+            const target = event.target as HTMLElement | null;
+            const blockElement = target?.closest<HTMLElement>('p[data-fountain-block]') ?? null;
+
+            if (!blockElement) {
+                setClickedBlockId(null);
+
+                return;
+            }
+
+            const blockId = blockElement.getAttribute('data-block-id');
+
+            setClickedBlockId(blockId);
+        };
+        const handleDocumentPointerDown = (event: PointerEvent) => {
+            const target = event.target as Node | null;
+
+            if (!target) {
+                return;
+            }
+
+            const isInsideEditor = editorElement.contains(target);
+            const isInsideMenu = menuRef.current?.contains(target) ?? false;
+            const isInsideTrigger = triggerRef.current?.contains(target) ?? false;
+
+            if (isInsideEditor || isInsideMenu || isInsideTrigger) {
+                return;
+            }
+
+            setClickedBlockId(null);
+        };
+        const handleBlur = () => {
+            setClickedBlockId(null);
+        };
+
+        editorElement.addEventListener('pointerdown', handleEditorPointerDown);
+        document.addEventListener('pointerdown', handleDocumentPointerDown);
+        editor.on('blur', handleBlur);
+
+        return () => {
+            editorElement.removeEventListener('pointerdown', handleEditorPointerDown);
+            document.removeEventListener('pointerdown', handleDocumentPointerDown);
+            editor.off('blur', handleBlur);
+        };
+    }, [editor]);
 
     useEffect(() => {
         closeMenu();
-    }, [activeOverlayState?.blockId, closeMenu]);
+    }, [pointerOverlayState?.blockId, closeMenu]);
 
     useEffect(() => {
-        if (!activeOverlayState || isMenuDisabledBlock) {
+        if (!isOverlayVisible || isMenuDisabledBlock) {
             closeMenu();
         }
     }, [
-        activeOverlayState,
+        isOverlayVisible,
         closeMenu,
         isMenuDisabledBlock,
     ]);
+    useEffect(() => {
+        updateOverlayAnchor();
+    }, [updateOverlayAnchor]);
+    useEffect(() => {
+        if (!visibleOverlayState) {
+            return;
+        }
+
+        const handleWindowResize = () => {
+            updateOverlayAnchor();
+        };
+
+        window.addEventListener('resize', handleWindowResize);
+
+        return () => {
+            window.removeEventListener('resize', handleWindowResize);
+        };
+    }, [updateOverlayAnchor, visibleOverlayState]);
 
     const activeBlockInfo = useMemo(() => {
-        if (!activeOverlayState) {
+        if (!visibleOverlayState) {
             return null;
         }
 
-        const option = FOUNTAIN_BLOCKS.find(block => block.type === activeOverlayState.blockType);
+        const option = FOUNTAIN_BLOCKS.find(block => block.type === visibleOverlayState.blockType);
 
         return {
             label: option?.label ?? 'Block',
-            icon: BLOCK_ICONS[activeOverlayState.blockType],
+            icon: BLOCK_ICONS[visibleOverlayState.blockType],
         };
-    }, [activeOverlayState]);
+    }, [visibleOverlayState]);
 
     const handleMenuItemMouseDown = useCallback((
         optionType: FountainElementType,
@@ -178,11 +290,11 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         event.stopPropagation();
         closeMenu();
 
-        if (!editor || !activeOverlayState) {
+        if (!editor || !visibleOverlayState) {
             return;
         }
 
-        if (optionType === activeOverlayState.blockType || activeOverlayState.blockType === ELEMENT_ACT) {
+        if (optionType === visibleOverlayState.blockType || visibleOverlayState.blockType === ELEMENT_ACT) {
             return;
         }
 
@@ -191,78 +303,63 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             .focus()
             .updateAttributes(FOUNTAIN_BLOCK_NODE_NAME, {
                 blockType: optionType,
-                id: activeOverlayState.blockId,
+                id: visibleOverlayState.blockId,
             })
             .run();
     }, [
-        activeOverlayState,
         closeMenu,
         editor,
+        visibleOverlayState,
     ]);
 
-    if (!editor) {
-        return null;
-    }
-
-    const anchorStyle = activeOverlayState?.style ?? activeRailAnchorState?.style;
-
-    if (!anchorStyle) {
+    if (!editor || !isOverlayVisible || !overlayAnchorStyle || !visibleOverlayState) {
         return null;
     }
 
     return (
-        <div className={styles.overlay} style={anchorStyle}>
-            {globalRailStyle ? (
-                <span
-                    className={styles.globalRail}
-                    style={globalRailStyle}
-                    aria-hidden="true"
-                />
-            ) : null}
-            {activeOverlayState ? (
-                <div className={styles.controls}>
-                    <button
-                        className={clsx(
-                            styles.trigger,
-                            isMenuOpen && styles.triggerOpen,
-                            isMenuDisabledBlock && styles.triggerNoHover,
-                            isPressVisualActive && styles.triggerPressing,
-                            activeDrag && styles.triggerDragging,
-                        )}
-                        type="button"
-                        aria-label={`Change block type (current: ${activeBlockInfo?.label ?? 'Block'})`}
-                        aria-expanded={isMenuOpen}
-                        data-block-actions-trigger="true"
-                        data-drag-pending={pendingPress ? 'true' : undefined}
-                        ref={triggerRef}
-                        onPointerDown={handleTriggerPointerDown}
-                    >
-                        <span className={styles.triggerGlyph} aria-hidden="true">
-                            <span className={styles.triggerIcon}>
-                                {activeBlockInfo?.icon ?? (
-                                    <svg
-                                        viewBox="0 0 24 24"
-                                        aria-hidden="true"
-                                        focusable="false"
-                                    >
-                                        <path d="M6 12h12" />
-                                    </svg>
-                                )}
-                            </span>
-                            <span className={styles.dragGrip} />
+        <div className={styles.overlay} style={overlayAnchorStyle}>
+            <div className={styles.controls}>
+                <button
+                    className={clsx(
+                        styles.trigger,
+                        isMenuOpen && styles.triggerOpen,
+                        isMenuDisabledBlock && styles.triggerNoHover,
+                        isPressVisualActive && styles.triggerPressing,
+                        activeDrag && styles.triggerDragging,
+                    )}
+                    type="button"
+                    aria-label={`Change block type (current: ${activeBlockInfo?.label ?? 'Block'})`}
+                    aria-expanded={isMenuOpen}
+                    data-block-actions-trigger="true"
+                    data-drag-pending={pendingPress ? 'true' : undefined}
+                    ref={triggerRef}
+                    onPointerDown={handleTriggerPointerDown}
+                >
+                    <span className={styles.triggerGlyph} aria-hidden="true">
+                        <span className={styles.triggerIcon}>
+                            {activeBlockInfo?.icon ?? (
+                                <svg
+                                    viewBox="0 0 24 24"
+                                    aria-hidden="true"
+                                    focusable="false"
+                                >
+                                    <path d="M6 12h12" />
+                                </svg>
+                            )}
                         </span>
-                    </button>
-                    {isMenuOpen && !activeDrag ? (
-                        <BlockActionsMenu
-                            blockType={activeOverlayState.blockType}
-                            isMenuAbove={isMenuAbove}
-                            menuRef={menuRef}
-                            onMenuItemMouseDown={handleMenuItemMouseDown}
-                            onActMouseDown={handleActMouseDown}
-                        />
-                    ) : null}
-                </div>
-            ) : null}
+                        <span className={styles.dragGrip} />
+                    </span>
+                </button>
+                {isMenuOpen && !activeDrag ? (
+                    <BlockActionsMenu
+                        blockType={visibleOverlayState.blockType}
+                        isMenuAbove={isMenuAbove}
+                        menuRef={menuRef}
+                        onMenuItemMouseDown={handleMenuItemMouseDown}
+                        onActMouseDown={handleActMouseDown}
+                    />
+                ) : null}
+            </div>
         </div>
     );
 };

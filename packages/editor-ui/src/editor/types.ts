@@ -1,6 +1,13 @@
 export type {
     DeleteActRequest,
+    EditorBlockUiEvent,
+    EditorBlockUiEventType,
+    EditorLiveCharacterSnapshot,
+    EditorLiveSnapshot,
+    EditorLiveStructureRow,
+    EditorLiveStructureSnapshot,
     EditorDocumentProps,
+    EditorIndexSnapshot,
     EditorLayoutProps,
     EditorLifecycleCallbacks,
     EditorProps,

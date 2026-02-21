@@ -5,6 +5,7 @@ import type {
 } from '@stagistic/db';
 import type {
     EditorSettingsOverride,
+    ScriptBlockIndexSnapshot,
     ScriptDocument,
 } from '@stagistic/script-core';
 
@@ -40,4 +41,7 @@ export interface ScriptRepository {
     deleteScriptConfig(scriptId: string, namespace: string): Promise<void>,
     loadVersion?(versionId: string): Promise<ScriptDocument | null>,
     restoreLatestFromVersion?(scriptId: string, versionId: string): Promise<void>,
+    getScriptBlockIndex(scriptId: string): Promise<ScriptBlockIndexSnapshot | null>,
+    ensureScriptBlockIndex(scriptId: string): Promise<void>,
+    rebuildScriptBlockIndex(scriptId: string): Promise<void>,
 }

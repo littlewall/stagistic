@@ -1,5 +1,4 @@
 import type {ScriptDocument} from '@stagistic/script-core';
-import type {CSSProperties} from 'react';
 
 import type {FountainBlockType} from '../../../tiptap/fountainCore';
 
@@ -30,28 +29,6 @@ export interface DragSessionState {
     baseDocument: ScriptDocument,
     lastPreviewBeforeBlockId: string | null,
     hasPreviewChange: boolean,
-}
-
-export interface OverlayAnchorStyle {
-    top: number,
-    left: number,
-    width: number,
-}
-
-export interface DropLockState {
-    blockId: string,
-    blockType: FountainBlockType,
-    style: OverlayAnchorStyle | null,
-}
-
-export interface BlockActionsOverlayState {
-    style: CSSProperties,
-    blockType: FountainBlockType,
-    blockId: string,
-}
-
-export interface BlockActionsRailAnchorState {
-    style: CSSProperties,
 }
 
 export interface BlockActionsPointerState {

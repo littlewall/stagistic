@@ -6,6 +6,7 @@ import {
 } from 'react';
 
 import type {
+    EditorIndexSnapshot,
     EditorStructureRequests,
     EditorValueChangeMeta,
 } from '../contracts';
@@ -23,6 +24,7 @@ interface UseEditorMoveRequestsArgs {
     editor: TiptapEditor | null,
     requests?: Pick<EditorStructureRequests, 'moveSceneRequest' | 'moveActRequest'>,
     onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
+    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
     setLatestValue: (value: ScriptDocument, revision?: number) => void,
     scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
     revisionRef: MutableRefObject<number>,
@@ -32,6 +34,7 @@ export const useEditorMoveRequests = ({
     editor,
     requests,
     onValueChangeRef,
+    onIndexChangeRef,
     setLatestValue,
     scheduleAutosave,
     revisionRef,
@@ -137,6 +140,7 @@ export const useEditorMoveRequests = ({
                 didChange,
                 setLatestValue,
                 onValueChangeRef,
+                onIndexChangeRef,
                 scheduleAutosave,
                 revisionRef,
             );
@@ -144,6 +148,7 @@ export const useEditorMoveRequests = ({
     }, [
         editor,
         moveSceneRequest,
+        onIndexChangeRef,
         onValueChangeRef,
         scheduleAutosave,
         setLatestValue,
@@ -187,6 +192,7 @@ export const useEditorMoveRequests = ({
                 didChange,
                 setLatestValue,
                 onValueChangeRef,
+                onIndexChangeRef,
                 scheduleAutosave,
                 revisionRef,
             );
@@ -194,6 +200,7 @@ export const useEditorMoveRequests = ({
     }, [
         editor,
         moveActRequest,
+        onIndexChangeRef,
         onValueChangeRef,
         scheduleAutosave,
         setLatestValue,

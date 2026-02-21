@@ -1,5 +1,8 @@
 import {useScriptRepository} from '@stagistic/app-core';
-import {FountainEditor} from '@stagistic/editor-ui';
+import {
+    FountainEditor,
+    incrementRouteRenderCount,
+} from '@stagistic/editor-ui';
 import {isApplePlatform} from '@stagistic/platform-core';
 import {
     AppHeader,
@@ -40,6 +43,8 @@ const BLOCK_LABEL_BY_TYPE = new Map(
 );
 
 export const ScriptEditorRoute = () => {
+    incrementRouteRenderCount();
+
     const navigate = useNavigate();
     const {scriptId} = useParams();
     const scriptRepository = useScriptRepository();
@@ -60,6 +65,7 @@ export const ScriptEditorRoute = () => {
         currentScriptId,
         recentScripts,
         initialValue,
+        initialIndexSnapshot,
         scriptSettingsOverride,
         storageError,
         shouldAutoFocus,
@@ -102,11 +108,14 @@ export const ScriptEditorRoute = () => {
 
     const {
         editorOverrideValue,
-        editorValue,
-        sidebarValue,
+        confirmedCharacterRecords,
         normalizedConfirmedCharacterRecords,
-        confirmedCharacters,
-        unconfirmedCharacters,
+        pendingCharacterKeys,
+        deletingCharacterIds,
+        renamingCharacterIds,
+        renamingCharacterKeys,
+        colorUpdatingCharacterIds,
+        genderUpdatingCharacterIds,
         characterGenderOptions,
         isCharactersLoading,
         handleEditorValueChange,
@@ -126,8 +135,8 @@ export const ScriptEditorRoute = () => {
         characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
-    const sourceValueForController = editorValue ?? editorOverrideValue ?? initialValue;
-    const sourceValueForSidebars = sidebarValue ?? editorOverrideValue ?? initialValue;
+    const sourceValueForController = editorOverrideValue ?? initialValue;
+    const sourceIndexForSidebars = initialIndexSnapshot ?? null;
     const {
         focusBlockRequest,
         insertActRequest,
@@ -168,7 +177,8 @@ export const ScriptEditorRoute = () => {
     }, [selectPanel]);
     const structureSidebarProps = useMemo(() => ({
         data: {
-            value: sourceValueForSidebars,
+            value: sourceValueForController,
+            indexSnapshot: sourceIndexForSidebars,
             structureSettings: resolvedScriptSettings.structure,
             actNamePreviewById,
             activeBlockId,
@@ -193,14 +203,23 @@ export const ScriptEditorRoute = () => {
         handleSidebarReorderAct,
         handleSidebarReorderScene,
         resolvedScriptSettings.structure,
-        sourceValueForSidebars,
+        sourceIndexForSidebars,
+        sourceValueForController,
     ]);
     const characterSidebarProps = useMemo(() => ({
         data: {
-            confirmedCharacters,
-            unconfirmedCharacters,
+            confirmedCharacterRecords,
+            pendingCharacterKeys,
+            deletingCharacterIds,
+            renamingCharacterIds,
+            renamingCharacterKeys,
+            colorUpdatingCharacterIds,
+            genderUpdatingCharacterIds,
             characterGenderOptions,
+            resolvedScriptSettings,
+            characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
             isLoading: isCharactersLoading,
+            className: styles.sidebarContent,
         },
         actions: {
             onConfirmCharacter: handleConfirmCharacter,
@@ -212,13 +231,12 @@ export const ScriptEditorRoute = () => {
             onSetCharacterGender: handleSetCharacterGender,
             onUpsertCharacterGender: handleUpsertCharacterGender,
         },
-        options: {
-            characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
-            className: styles.sidebarContent,
-        },
     }), [
+        colorUpdatingCharacterIds,
         characterGenderOptions,
-        confirmedCharacters,
+        confirmedCharacterRecords,
+        deletingCharacterIds,
+        genderUpdatingCharacterIds,
         handleConfirmCharacter,
         handleDeleteCharacter,
         handleRenameCharacter,
@@ -228,8 +246,10 @@ export const ScriptEditorRoute = () => {
         handleUpsertCharacterGender,
         isCharactersLoading,
         normalizeCharacterNameForInlineInput,
-        resolvedScriptSettings.visual.characterColorSaturation,
-        unconfirmedCharacters,
+        pendingCharacterKeys,
+        renamingCharacterIds,
+        renamingCharacterKeys,
+        resolvedScriptSettings,
     ]);
     const {leftSidebarContent, rightSidebarContent} = useScriptEditorSidebars({
         structureSidebarProps,

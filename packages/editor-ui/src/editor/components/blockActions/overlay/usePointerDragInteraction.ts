@@ -15,8 +15,6 @@ import {
 import {collectTopLevelBlockMetrics} from './geometry';
 import type {
     BlockActionsPointerState,
-    DropLockState,
-    OverlayAnchorStyle,
 } from './types';
 import {useDragRuntimeEffects} from './useDragRuntimeEffects';
 import {usePointerDragState} from './usePointerDragState';
@@ -41,17 +39,11 @@ interface UsePointerDragInteractionArgs {
         revertPreviewMove: () => void,
         commitPreviewMove: (beforeBlockId: string | null) => void,
     },
-    overlay: {
-        resolveOverlayStyleForBlockId: (blockId: string) => OverlayAnchorStyle | null,
-        getLastDragOverlayStyle: () => OverlayAnchorStyle | null,
-        setDropLock: (value: DropLockState | null) => void,
-    },
 }
 export const usePointerDragInteraction = ({
     context,
     menu,
     preview,
-    overlay,
 }: UsePointerDragInteractionArgs) => {
     const {
         editor,
@@ -69,11 +61,6 @@ export const usePointerDragInteraction = ({
         revertPreviewMove,
         commitPreviewMove,
     } = preview;
-    const {
-        resolveOverlayStyleForBlockId,
-        getLastDragOverlayStyle,
-        setDropLock,
-    } = overlay;
 
     const {
         interactionCleanupRef,
@@ -246,15 +233,6 @@ export const usePointerDragInteraction = ({
 
             if (isDragging) {
                 const beforeBlockId = activeDragRef.current?.beforeBlockId ?? null;
-                const dragState = activeDragRef.current;
-
-                if (dragState) {
-                    setDropLock({
-                        blockId: dragState.sourceBlockId,
-                        blockType: dragState.sourceBlockType,
-                        style: resolveOverlayStyleForBlockId(dragState.sourceBlockId) ?? getLastDragOverlayStyle(),
-                    });
-                }
 
                 commitPreviewMove(beforeBlockId);
                 cleanup();
@@ -296,13 +274,10 @@ export const usePointerDragInteraction = ({
         closeMenu,
         commitPreviewMove,
         editor,
-        getLastDragOverlayStyle,
         interactionCleanupRef,
         isMenuDisabledBlock,
         pressVisualTimeoutRef,
-        resolveOverlayStyleForBlockId,
         revertPreviewMove,
-        setDropLock,
         setIsPressVisualActive,
         setPendingPress,
         stopPointerInteraction,

@@ -1,299 +1,139 @@
 import {
-    type EditorView,
-} from '@tiptap/pm/view';
-import {
     type Editor as TiptapEditor,
 } from '@tiptap/react';
 import {
     useCallback,
     useEffect,
-    useLayoutEffect,
-    useRef,
     useState,
 } from 'react';
 
+import {getBlockUiEventsFromState} from '../../tiptap/extensions';
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
     isSelectionAcrossBlocks,
 } from '../../tiptap/fountainCore';
-import type {
-    BlockActionsOverlayState,
-    BlockActionsRailAnchorState,
-} from './overlay/types';
-import type {
-    UseOverlayPositionArgs,
-} from './types';
+import type {BlockActionsPointerState} from './overlay/types';
+import type {UseOverlayPositionArgs} from './types';
 
-const getSafeEditorView = (editor: TiptapEditor): EditorView | null => {
+const getSafeHasFocus = (editor: TiptapEditor) => {
     try {
-        return editor.view;
+        return editor.view.hasFocus();
     } catch {
-        return null;
+        return false;
     }
-};
-
-const findBlockElement = (view: EditorView, from: number) => {
-    try {
-        const domAtPos = view.domAtPos(from);
-        let node: Node | null = domAtPos.node;
-
-        if (node && node.nodeType === Node.TEXT_NODE) {
-            node = node.parentElement;
-        }
-
-        let element = node as HTMLElement | null;
-
-        while (element && element !== view.dom) {
-            if (element.dataset?.fountainBlock) {
-                return element;
-            }
-
-            element = element.parentElement;
-        }
-    } catch {
-        return null;
-    }
-
-    return null;
 };
 
 export const useOverlayPosition = ({
     editor,
-    canvasRef,
     isMenuOpen,
 }: UseOverlayPositionArgs) => {
-    const [overlayState, setOverlayState] = useState<BlockActionsOverlayState | null>(null);
-    const [railAnchorState, setRailAnchorState] = useState<BlockActionsRailAnchorState | null>(null);
-    const rafIdRef = useRef<number | null>(null);
+    const [activeBlockState, setActiveBlockState] = useState<BlockActionsPointerState | null>(null);
 
-    const cancelScheduledUpdate = useCallback(() => {
-        if (rafIdRef.current === null) {
-            return;
-        }
-
-        window.cancelAnimationFrame(rafIdRef.current);
-        rafIdRef.current = null;
-    }, []);
-
-    const updatePosition = useCallback(() => {
-        const canvas = canvasRef.current;
-        const view = editor
-            ? getSafeEditorView(editor)
-            : null;
-
-        if (!editor || !view || !canvas) {
-            setOverlayState(null);
-            setRailAnchorState(null);
+    const updateActiveBlockState = useCallback(() => {
+        if (!editor) {
+            setActiveBlockState(null);
 
             return;
         }
 
-        const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
-        const activeTarget = activeBlock
-            ? findBlockElement(view, activeBlock.from)
-            : null;
-        const fallbackTarget = view.dom.querySelector<HTMLElement>('[data-fountain-block]');
-        const railTarget = activeTarget ?? fallbackTarget;
-        const resolveLineCenterTop = (target: HTMLElement, blockFrom: number | null) => {
-            const canvasRect = canvas.getBoundingClientRect();
-            const targetRect = target.getBoundingClientRect();
-            const computed = window.getComputedStyle(target);
-            const paddingTop = Number.parseFloat(computed.paddingTop) || 0;
-            const lineHeightValue = Number.parseFloat(computed.lineHeight);
-            const baseTop = targetRect.top - canvasRect.top + canvas.scrollTop + paddingTop;
-
-            if (Number.isFinite(lineHeightValue) && lineHeightValue > 0) {
-                return baseTop + (lineHeightValue / 2);
-            }
-
-            if (blockFrom !== null) {
-                try {
-                    const caretCoords = view.coordsAtPos(blockFrom);
-
-                    return ((caretCoords.top + caretCoords.bottom) / 2) - canvasRect.top + canvas.scrollTop;
-                } catch {
-                    // Fall through to base top fallback.
-                }
-            }
-
-            return baseTop;
-        };
-
-        if (railTarget) {
-            const canvasRect = canvas.getBoundingClientRect();
-            const targetRect = railTarget.getBoundingClientRect();
-            const blockFrom = activeBlock && activeTarget ? activeBlock.from : null;
-            const top = resolveLineCenterTop(railTarget, blockFrom);
-
-            const left = targetRect.left - canvasRect.left + canvas.scrollLeft;
-
-            setRailAnchorState(previous => {
-                const nextState = {
-                    style: {
-                        top,
-                        left,
-                        width: targetRect.width,
-                    },
-                };
-
-                if (
-                    previous
-                    && previous.style.top === nextState.style.top
-                    && previous.style.left === nextState.style.left
-                    && previous.style.width === nextState.style.width
-                ) {
-                    return previous;
-                }
-
-                return nextState;
-            });
-        }
-
-        if (railTarget === null) {
-            setRailAnchorState(null);
-        }
-
-        try {
-            if (!view.hasFocus() && !isMenuOpen) {
-                setOverlayState(null);
-
-                return;
-            }
-        } catch {
-            setOverlayState(null);
+        if (!getSafeHasFocus(editor) && !isMenuOpen) {
+            setActiveBlockState(null);
 
             return;
         }
 
         if (isSelectionAcrossBlocks(editor.state, FOUNTAIN_BLOCK_NODE_NAME)) {
-            setOverlayState(null);
+            setActiveBlockState(null);
 
             return;
         }
 
-        if (!activeBlock || !activeTarget) {
-            setOverlayState(null);
+        const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+
+        if (!activeBlock) {
+            setActiveBlockState(null);
 
             return;
         }
 
-        const canvasRect = canvas.getBoundingClientRect();
-        const targetRect = activeTarget.getBoundingClientRect();
-        const top = resolveLineCenterTop(activeTarget, activeBlock.from);
-
-        const left = targetRect.left - canvasRect.left + canvas.scrollLeft;
-
-        setOverlayState(prev => {
-            const nextState = {
-                style: {
-                    top,
-                    left,
-                    width: targetRect.width,
-                },
-                blockType: activeBlock.blockType,
+        setActiveBlockState(previous => {
+            const nextState: BlockActionsPointerState = {
                 blockId: activeBlock.id,
+                blockType: activeBlock.blockType,
             };
 
-            if (!prev) {
-                return nextState;
-            }
-
             if (
-                prev.blockId === nextState.blockId
-                && prev.blockType === nextState.blockType
-                && prev.style.top === nextState.style.top
-                && prev.style.left === nextState.style.left
-                && prev.style.width === nextState.style.width
+                previous
+                && previous.blockId === nextState.blockId
+                && previous.blockType === nextState.blockType
             ) {
-                return prev;
+                return previous;
             }
 
             return nextState;
         });
-    }, [
-        canvasRef,
-        editor,
-        isMenuOpen,
-    ]);
+    }, [editor, isMenuOpen]);
 
-    const scheduleUpdatePosition = useCallback(() => {
-        if (rafIdRef.current !== null) {
-            return;
-        }
-
-        rafIdRef.current = window.requestAnimationFrame(() => {
-            rafIdRef.current = null;
-            updatePosition();
-        });
-    }, [updatePosition]);
-
-    const runUpdatePositionNow = useCallback(() => {
-        cancelScheduledUpdate();
-        updatePosition();
-    }, [cancelScheduledUpdate, updatePosition]);
-
-    useLayoutEffect(() => {
-        runUpdatePositionNow();
-    }, [runUpdatePositionNow]);
+    useEffect(() => {
+        updateActiveBlockState();
+    }, [updateActiveBlockState]);
 
     useEffect(() => {
         if (!editor) {
             return;
         }
 
-        const handleSelectionUpdate = () => runUpdatePositionNow();
-        const handleTransaction = () => scheduleUpdatePosition();
-        const handleFocus = () => runUpdatePositionNow();
+        const handleSelectionUpdate = () => {
+            updateActiveBlockState();
+        };
+        const handleFocus = () => {
+            updateActiveBlockState();
+        };
         const handleBlur = () => {
-            cancelScheduledUpdate();
-            setOverlayState(null);
+            if (isMenuOpen) {
+                return;
+            }
+
+            setActiveBlockState(null);
+        };
+        const handleTransaction = () => {
+            const events = getBlockUiEventsFromState(editor.state);
+            const shouldRefresh = events.some(event => {
+                return (
+                    event.type === 'activeBlockChange'
+                    || event.type === 'blockTypeChange'
+                    || event.type === 'blockInserted'
+                    || event.type === 'blockRemoved'
+                    || event.type === 'blockReordered'
+                );
+            });
+
+            if (!shouldRefresh) {
+                return;
+            }
+
+            updateActiveBlockState();
         };
 
         editor.on('selectionUpdate', handleSelectionUpdate);
-        editor.on('transaction', handleTransaction);
         editor.on('focus', handleFocus);
         editor.on('blur', handleBlur);
+        editor.on('transaction', handleTransaction);
 
         return () => {
             editor.off('selectionUpdate', handleSelectionUpdate);
-            editor.off('transaction', handleTransaction);
             editor.off('focus', handleFocus);
             editor.off('blur', handleBlur);
+            editor.off('transaction', handleTransaction);
         };
     }, [
-        cancelScheduledUpdate,
         editor,
-        runUpdatePositionNow,
-        scheduleUpdatePosition,
+        isMenuOpen,
+        updateActiveBlockState,
     ]);
 
-    useEffect(() => {
-        const canvas = canvasRef.current;
-
-        if (!canvas) {
-            return;
-        }
-
-        const handleScroll = () => scheduleUpdatePosition();
-
-        canvas.addEventListener('scroll', handleScroll);
-        window.addEventListener('resize', handleScroll);
-
-        return () => {
-            canvas.removeEventListener('scroll', handleScroll);
-            window.removeEventListener('resize', handleScroll);
-        };
-    }, [canvasRef, scheduleUpdatePosition]);
-
-    useEffect(() => {
-        return () => {
-            cancelScheduledUpdate();
-        };
-    }, [cancelScheduledUpdate]);
-
     return {
-        overlayState,
-        railAnchorState,
+        activeBlockState,
     };
 };

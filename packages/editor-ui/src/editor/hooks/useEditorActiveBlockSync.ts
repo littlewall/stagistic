@@ -2,6 +2,7 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useEffect, useRef} from 'react';
 
 import type {FocusBlockRequest} from '../contracts';
+import {getBlockUiEventsFromState} from '../tiptap/extensions';
 import {
     findFountainBlockSelectionPosFromState,
     FOUNTAIN_BLOCK_NODE_NAME,
@@ -56,12 +57,23 @@ export const useEditorActiveBlockSync = ({
         };
 
         emitActiveBlock();
+
+        const handleTransaction = () => {
+            const shouldEmit = getBlockUiEventsFromState(editor.state).some(event => event.type === 'activeBlockChange');
+
+            if (!shouldEmit) {
+                return;
+            }
+
+            emitActiveBlock();
+        };
+
         editor.on('selectionUpdate', emitActiveBlock);
-        editor.on('transaction', emitActiveBlock);
+        editor.on('transaction', handleTransaction);
 
         return () => {
             editor.off('selectionUpdate', emitActiveBlock);
-            editor.off('transaction', emitActiveBlock);
+            editor.off('transaction', handleTransaction);
         };
     }, [editor, onActiveBlockChange]);
 

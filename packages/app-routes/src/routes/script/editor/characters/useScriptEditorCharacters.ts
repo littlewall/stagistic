@@ -27,8 +27,6 @@ export const useScriptEditorCharacters = ({
 
     const {
         normalizedConfirmedCharacterRecords,
-        confirmedCharacters,
-        unconfirmedCharacters,
         confirmedCharactersById,
         confirmedCharacterSet,
         getCharacterNameForBlockType,
@@ -36,8 +34,7 @@ export const useScriptEditorCharacters = ({
     } = useCharacterComputed({
         data: {
             confirmedCharacterRecords: characters.confirmedCharacterRecords,
-            editorValue: editor.sidebarValue,
-            initialValue,
+            characterSnapshot: null,
             resolvedScriptSettings,
             characterColorSaturation,
         },
@@ -48,6 +45,9 @@ export const useScriptEditorCharacters = ({
             renamingCharacterKeys: pending.renamingCharacterKeys,
             colorUpdatingCharacterIds: pending.colorUpdatingCharacterIds,
             genderUpdatingCharacterIds: pending.genderUpdatingCharacterIds,
+        },
+        options: {
+            includeSidebarLists: false,
         },
     });
 
@@ -64,7 +64,7 @@ export const useScriptEditorCharacters = ({
             currentScriptId,
             scriptRepository,
             initialValue,
-            editorValue: editor.editorValue,
+            getEditorValue: editor.getEditorValue,
             setEditorValue: editor.setEditorValue,
             setEditorOverrideValue: editor.setEditorOverrideValue,
             setters,
@@ -78,12 +78,15 @@ export const useScriptEditorCharacters = ({
     });
 
     return {
-        editorValue: editor.editorValue,
-        sidebarValue: editor.sidebarValue,
         editorOverrideValue: editor.editorOverrideValue,
+        confirmedCharacterRecords: characters.confirmedCharacterRecords,
         normalizedConfirmedCharacterRecords,
-        confirmedCharacters,
-        unconfirmedCharacters,
+        pendingCharacterKeys: pending.confirmingCharacterKeys,
+        deletingCharacterIds: pending.deletingCharacterIds,
+        renamingCharacterIds: pending.renamingCharacterIds,
+        renamingCharacterKeys: pending.renamingCharacterKeys,
+        colorUpdatingCharacterIds: pending.colorUpdatingCharacterIds,
+        genderUpdatingCharacterIds: pending.genderUpdatingCharacterIds,
         characterGenderOptions: characters.characterGenderOptions,
         isCharactersLoading: characters.isCharactersLoading,
         handleEditorValueChange: editor.handleEditorValueChange,

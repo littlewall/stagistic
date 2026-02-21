@@ -5,7 +5,10 @@ import {
 } from '@tiptap/core';
 
 import {DEFAULT_OPTIONS} from './pagination/constants';
-import {createPaginationPlugin} from './pagination/plugin/createPaginationPlugin';
+import {
+    createPaginationPlugin,
+    PAGINATION_CONTROL_META_KEY,
+} from './pagination/plugin/createPaginationPlugin';
 import {createInitialPaginationState} from './pagination/state/createInitialPaginationState';
 import {
     type PaginationOptions,
@@ -23,6 +26,7 @@ export const FountainPaginationExtension = Extension.create<PaginationOptions, P
         return {
             optionsVersion: 0,
             state: createInitialPaginationState(this.options),
+            forceRecalcToken: 0,
         };
     },
 
@@ -35,6 +39,23 @@ export const FountainPaginationExtension = Extension.create<PaginationOptions, P
                 };
 
                 this.storage.optionsVersion += 1;
+
+                this.editor.view.dispatch(
+                    this.editor.state.tr.setMeta(PAGINATION_CONTROL_META_KEY, {
+                        forceRecalcToken: this.storage.forceRecalcToken,
+                    }),
+                );
+
+                return true;
+            },
+            forcePaginationRecalc: () => () => {
+                this.storage.forceRecalcToken += 1;
+
+                this.editor.view.dispatch(
+                    this.editor.state.tr.setMeta(PAGINATION_CONTROL_META_KEY, {
+                        forceRecalcToken: this.storage.forceRecalcToken,
+                    }),
+                );
 
                 return true;
             },
