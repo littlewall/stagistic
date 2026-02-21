@@ -33,7 +33,7 @@ export const useStructureSidebarController = ({
     const [moveSceneRequest, setMoveSceneRequest] = useState<MoveSceneRequest | null>(null);
     const [moveActRequest, setMoveActRequest] = useState<MoveActRequest | null>(null);
     const [actNamePreviewById, setActNamePreviewById] = useState<Record<string, string>>({});
-    const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
+    const activeBlockIdRef = useRef<string | null>(null);
     const focusRequestCounterRef = useRef(0);
     const insertActRequestCounterRef = useRef(0);
     const renameActRequestCounterRef = useRef(0);
@@ -73,7 +73,7 @@ export const useStructureSidebarController = ({
 
     useEffect(() => {
         flushPendingActiveBlockPersist();
-        setActiveBlockId(null);
+        activeBlockIdRef.current = null;
         setFocusBlockRequest(null);
         setInsertActRequest(null);
         setRenameActRequest(null);
@@ -185,10 +185,10 @@ export const useStructureSidebarController = ({
     const handleSidebarInsertAct = useCallback(() => {
         insertActRequestCounterRef.current += 1;
         setInsertActRequest({
-            beforeBlockId: activeBlockId,
+            beforeBlockId: activeBlockIdRef.current,
             requestId: insertActRequestCounterRef.current,
         });
-    }, [activeBlockId]);
+    }, []);
 
     const handleSidebarReorderScene = useCallback((
         sourceSceneBlockId: string,
@@ -215,9 +215,7 @@ export const useStructureSidebarController = ({
     }, []);
 
     const handleActiveBlockChange = useCallback((blockId: string | null) => {
-        setActiveBlockId(previous => {
-            return previous === blockId ? previous : blockId;
-        });
+        activeBlockIdRef.current = blockId;
 
         if (!currentScriptId || lastPersistedActiveBlockIdRef.current === blockId) {
             return;
@@ -245,7 +243,6 @@ export const useStructureSidebarController = ({
         moveSceneRequest,
         moveActRequest,
         actNamePreviewById,
-        activeBlockId,
         handleSidebarFocusBlock,
         handleSidebarRenameAct,
         handleActNamePreview,

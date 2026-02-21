@@ -27,7 +27,6 @@ export interface StructureSidebarData {
     indexSnapshot: ScriptBlockIndexSnapshot | null,
     structureSettings: StructureSettings,
     actNamePreviewById: Record<string, string>,
-    activeBlockId: string | null,
 }
 
 export interface StructureSidebarActions {
