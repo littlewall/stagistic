@@ -12,7 +12,7 @@ export const useScriptEditorCharacters = ({
     initialValue,
     resolvedScriptSettings,
     characterColorSaturation,
-    handleAutoSave,
+    handleAutoSave: _handleAutoSave,
 }: UseScriptEditorCharactersArgs): UseScriptEditorCharactersResult => {
     const {
         editor,
@@ -29,7 +29,6 @@ export const useScriptEditorCharacters = ({
         normalizedConfirmedCharacterRecords,
         confirmedCharactersById,
         confirmedCharacterSet,
-        getCharacterNameForBlockType,
         normalizeCharacterNameForInlineInput,
     } = useCharacterComputed({
         data: {
@@ -63,17 +62,11 @@ export const useScriptEditorCharacters = ({
         context: {
             currentScriptId,
             scriptRepository,
-            initialValue,
-            getEditorValue: editor.getEditorValue,
-            setEditorValue: editor.setEditorValue,
-            setEditorOverrideValue: editor.setEditorOverrideValue,
             setters,
-            handleAutoSave,
         },
         computed: {
             confirmedCharacterSet,
             confirmedCharactersById,
-            getCharacterNameForBlockType,
         },
     });
 

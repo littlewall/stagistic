@@ -28,6 +28,7 @@ const EMPTY_STRUCTURE: EditorLiveStructureSnapshot = {
 const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
     countsByKey: new Map<string, number>(),
     countsByCharacterId: new Map<string, number>(),
+    keyByCharacterId: new Map<string, string>(),
 };
 
 export const createEmptyEditorLiveSnapshot = (): EditorLiveSnapshot => {
@@ -97,13 +98,12 @@ export const createEditorLiveStore = (initialSnapshot?: EditorLiveSnapshot): Edi
             ...snapshot,
             ...patch,
         };
-        const didChange = (
+        const didChange =
             !Object.is(snapshot.revision, nextSnapshot.revision)
             || !Object.is(snapshot.index, nextSnapshot.index)
             || !Object.is(snapshot.structure, nextSnapshot.structure)
             || !Object.is(snapshot.characters, nextSnapshot.characters)
-            || !Object.is(snapshot.activeBlockId, nextSnapshot.activeBlockId)
-        );
+            || !Object.is(snapshot.activeBlockId, nextSnapshot.activeBlockId);
 
         if (!didChange) {
             return;

@@ -19,7 +19,11 @@ import {
 import styles from '../CharacterTagDecorations.module.css';
 import {isCharacterBlockType} from './types';
 
-export const buildDecorations = (doc: ProseMirrorNode, characterColorSaturation?: number) => {
+export const buildDecorations = (
+    doc: ProseMirrorNode,
+    characterColorSaturation?: number,
+    colorByCharacterId?: ReadonlyMap<string, string>,
+) => {
     const decorations: Decoration[] = [];
 
     doc.descendants((node, pos) => {
@@ -36,11 +40,16 @@ export const buildDecorations = (doc: ProseMirrorNode, characterColorSaturation?
         const text = node.textContent ?? '';
         const blockStart = pos + 1;
         const tokens = splitCharacterTokens(text);
+        const characterRefs = (node.attrs.characterRefs ?? {}) as Record<string, string>;
 
         tokens.forEach((token, index) => {
             if (token.valueStart < token.valueEnd) {
                 const key = normalizeCharacterKey(token.value);
-                const color = getCharacterColor(key, characterColorSaturation);
+                const characterId = key ? characterRefs[key] ?? null : null;
+                const confirmedColor = characterId && colorByCharacterId
+                    ? colorByCharacterId.get(characterId)
+                    : undefined;
+                const color = confirmedColor ?? getCharacterColor(key, characterColorSaturation);
                 const decorationEnd = Math.max(token.valueEnd, token.end);
 
                 decorations.push(Decoration.inline(

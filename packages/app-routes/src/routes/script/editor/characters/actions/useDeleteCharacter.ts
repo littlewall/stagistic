@@ -1,11 +1,11 @@
 import {useCallback} from 'react';
 
-import {unlinkCharacterRefInScriptDocument} from '../index';
 import type {ScriptCharacterRecord} from '../types';
-import type {CharacterActionSharedArgs, SetStringArrayState} from './types';
+import type {
+    CharacterActionSharedArgs, DeleteEditorCallbacks, SetStringArrayState,
+} from './types';
 import {
     addPendingValue,
-    getSourceDocument,
     removePendingValue,
 } from './utils';
 
@@ -17,16 +17,11 @@ interface UseDeleteCharacterArgs extends CharacterActionSharedArgs {
 export const useDeleteCharacter = ({
     currentScriptId,
     scriptRepository,
-    initialValue,
-    getEditorValue,
-    setEditorValue,
-    setEditorOverrideValue,
     setConfirmedCharacterRecords,
     confirmedCharactersById,
     setDeletingCharacterIds,
-    handleAutoSave,
 }: UseDeleteCharacterArgs) => {
-    return useCallback((characterId: string) => {
+    return useCallback((characterId: string, editorCallbacks?: DeleteEditorCallbacks) => {
         if (!currentScriptId || !characterId) {
             return;
         }
@@ -44,20 +39,7 @@ export const useDeleteCharacter = ({
                     return previous.filter(character => character.id !== characterId);
                 });
 
-                const sourceDocument = getSourceDocument(getEditorValue(), initialValue);
-
-                if (sourceDocument) {
-                    const {
-                        value: unlinkedDocument,
-                        changed: didUnlinkCharacterRef,
-                    } = unlinkCharacterRefInScriptDocument(sourceDocument, characterId);
-
-                    if (didUnlinkCharacterRef) {
-                        setEditorOverrideValue(unlinkedDocument);
-                        setEditorValue(unlinkedDocument);
-                        await handleAutoSave(unlinkedDocument);
-                    }
-                }
+                editorCallbacks?.onUnlinkRef(characterId);
             } catch (error) {
                 console.error('Failed to delete script character', error);
             } finally {
@@ -69,13 +51,8 @@ export const useDeleteCharacter = ({
     }, [
         confirmedCharactersById,
         currentScriptId,
-        getEditorValue,
-        handleAutoSave,
-        initialValue,
         scriptRepository,
         setConfirmedCharacterRecords,
         setDeletingCharacterIds,
-        setEditorOverrideValue,
-        setEditorValue,
     ]);
 };

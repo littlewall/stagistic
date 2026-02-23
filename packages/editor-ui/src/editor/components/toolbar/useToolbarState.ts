@@ -41,18 +41,19 @@ export const useToolbarState = ({editor}: UseToolbarStateArgs) => {
                 stateEditor.state,
                 FOUNTAIN_BLOCK_NODE_NAME,
             );
-            const hasSingleBlockSelection = !isSelectionAcrossBlocks(
+            const isMultiBlockSelection = isSelectionAcrossBlocks(
                 stateEditor.state,
                 FOUNTAIN_BLOCK_NODE_NAME,
             );
 
             return {
-                activeType: hasSingleBlockSelection ? activeBlock?.blockType ?? null : null,
+                activeType: isMultiBlockSelection ? null : activeBlock?.blockType ?? null,
                 canRedo: redoDepth(stateEditor.state) > 0,
                 canUndo: undoDepth(stateEditor.state) > 0,
                 isBold: stateEditor.isActive('bold'),
                 isItalic: stateEditor.isActive('italic'),
                 isUnderline: stateEditor.isActive('underline'),
+                isMultiBlockSelection,
             };
         },
         equalityFn: (a, b) => Boolean(
@@ -63,7 +64,8 @@ export const useToolbarState = ({editor}: UseToolbarStateArgs) => {
             && a.canUndo === b.canUndo
             && a.isBold === b.isBold
             && a.isItalic === b.isItalic
-            && a.isUnderline === b.isUnderline,
+            && a.isUnderline === b.isUnderline
+            && a.isMultiBlockSelection === b.isMultiBlockSelection,
         ),
     });
 
@@ -73,6 +75,7 @@ export const useToolbarState = ({editor}: UseToolbarStateArgs) => {
     const isBoldActive = toolbarState?.isBold ?? false;
     const isItalicActive = toolbarState?.isItalic ?? false;
     const isUnderlineActive = toolbarState?.isUnderline ?? false;
+    const isMultiBlockSelection = toolbarState?.isMultiBlockSelection ?? false;
 
     const activeBlockInfo = useMemo(() => {
         if (!activeType) {
@@ -88,8 +91,28 @@ export const useToolbarState = ({editor}: UseToolbarStateArgs) => {
         };
     }, [activeType]);
 
-    const canChangeBlockType = Boolean(activeBlockInfo) && hasEditorFocus && activeType !== ELEMENT_ACT;
-    const visibleBlockInfo = canChangeBlockType ? activeBlockInfo : null;
+    const canChangeBlockType = hasEditorFocus && (
+        isMultiBlockSelection
+        || (Boolean(activeBlockInfo) && activeType !== ELEMENT_ACT)
+    );
+    const visibleBlockInfo = useMemo(() => {
+        if (!canChangeBlockType) {
+            return null;
+        }
+
+        if (isMultiBlockSelection) {
+            return {
+                icon: null,
+                label: 'Selected blocks',
+            };
+        }
+
+        return activeBlockInfo;
+    }, [
+        activeBlockInfo,
+        canChangeBlockType,
+        isMultiBlockSelection,
+    ]);
 
     useEffect(() => {
         setHasEditorFocus(Boolean(editor?.isFocused));
@@ -120,5 +143,6 @@ export const useToolbarState = ({editor}: UseToolbarStateArgs) => {
         isUnderlineActive,
         canChangeBlockType,
         visibleBlockInfo,
+        isMultiBlockSelection,
     };
 };

@@ -19,10 +19,13 @@ import type {
     EditorValueChangeMeta,
 } from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
+import {buildCharacterSnapshotFromDoc} from '../live/buildCharacterSnapshotFromDoc';
+import type {EditorLiveStore} from '../live/store';
+import {trackIndexUpdateDuration} from '../perf/editorPerfMetrics';
 import {
+    buildScriptSidebarProjectionFromIndexSnapshot,
     getBlockUiEventsFromState,
     getScriptBlockIndexSnapshotFromState,
-    buildScriptSidebarProjectionFromIndexSnapshot,
     getScriptSidebarProjectionChangeFromState,
     getScriptSidebarProjectionFromState,
 } from '../tiptap/extensions';
@@ -32,8 +35,6 @@ import {
     getActiveFountainBlockFromState,
     normalizeFountainBlockType,
 } from '../tiptap/fountainCore';
-import type {EditorLiveStore} from '../live/store';
-import {trackIndexUpdateDuration} from '../perf/editorPerfMetrics';
 import {
     type AutosaveSchedulePayload,
     type SaveResult,
@@ -116,7 +117,7 @@ const resolveSidebarProjection = (
         projection: buildScriptSidebarProjectionFromIndexSnapshot(snapshot),
         change: {
             structureChanged: true,
-            charactersChanged: true,
+            charactersChanged: false,
             reason: 'fallback' as const,
         },
     };
@@ -226,8 +227,8 @@ export const useEditorLifecycle = ({
             patch.structure = projection.structure;
         }
 
-        if (meta.source === 'structure' || change.charactersChanged) {
-            patch.characters = projection.characters;
+        if (targetEditor) {
+            patch.characters = buildCharacterSnapshotFromDoc(targetEditor.state.doc);
         }
 
         liveStore.patchSnapshot(patch);
@@ -235,10 +236,7 @@ export const useEditorLifecycle = ({
         if (hasIndexSubscriber) {
             onIndexChangeRef.current?.(snapshot, meta);
         }
-    }, [
-        liveStore,
-        onIndexChangeRef,
-    ]);
+    }, [liveStore, onIndexChangeRef]);
     const emitIndexFromEditor = useCallback((
         targetEditor: TiptapEditor,
         meta: EditorValueChangeMeta,

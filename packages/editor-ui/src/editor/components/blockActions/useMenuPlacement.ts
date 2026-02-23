@@ -49,7 +49,8 @@ export const useMenuPlacement = ({
             rafId = requestAnimationFrame(updatePlacement);
         };
 
-        schedule();
+        // Resolve placement immediately on open to avoid below->above flicker.
+        updatePlacement();
 
         const resizeObserver = new ResizeObserver(() => {
             if (menuRef.current) {

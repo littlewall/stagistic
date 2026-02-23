@@ -19,24 +19,32 @@ export interface ActiveBlockRepository {
 export interface UseStructureSidebarControllerArgs {
     currentScriptId: string | null,
     scriptRepository: ActiveBlockRepository,
-    sourceValue: ScriptDocument | null | undefined,
+    /** Used for act-name preview cleanup. Pass `initialValue` (stable DB snapshot). */
+    sourceValue?: ScriptDocument | null,
 }
 
 export interface StructureSidebarData {
-    value: ScriptDocument | null | undefined,
     indexSnapshot: ScriptBlockIndexSnapshot | null,
     structureSettings: StructureSettings,
     actNamePreviewById: Record<string, string>,
 }
 
+/**
+ * External actions provided by the route to the structure sidebar.
+ * Note: block focus is NOT here — the sidebar calls useFocusEditorBlock() directly.
+ */
 export interface StructureSidebarActions {
-    onFocusBlock: (blockId: string) => void,
     onRenameAct: (blockId: string, nextName: string) => void,
     onActNamePreview: (blockId: string, nextName: string) => void,
     onDeleteAct: (blockId: string) => void,
     onInsertAct: () => void,
     onReorderAct: (sourceActBlockId: string, beforeBlockId: string | null) => void,
     onReorderScene: (sourceSceneBlockId: string, beforeBlockId: string | null) => void,
+}
+
+/** Shared internal focus action used by row components and DnD. */
+export interface FocusBlockAction {
+    onFocusBlock: (blockId: string) => void,
 }
 
 export interface ScriptStructureSidebarProps {
@@ -48,14 +56,14 @@ export interface StructureRowSceneProps {
     scene: StructureSceneRow,
     rowIndex: number,
     isActive: boolean,
-    actions: Pick<StructureSidebarActions, 'onFocusBlock'>,
+    actions: FocusBlockAction,
 }
 
 export interface StructureRowActProps {
     act: StructureActRow,
     rowIndex: number,
     data: Pick<StructureSidebarData, 'structureSettings' | 'actNamePreviewById'>,
-    actions: Pick<StructureSidebarActions, 'onFocusBlock' | 'onRenameAct' | 'onActNamePreview' | 'onDeleteAct'>,
+    actions: FocusBlockAction & Pick<StructureSidebarActions, 'onRenameAct' | 'onActNamePreview' | 'onDeleteAct'>,
 }
 
 export interface StructureSidebarHeaderProps {
@@ -82,5 +90,5 @@ export interface UseStructureSidebarDndArgs {
     rows: readonly StructureRow[],
     rowByBlockId: ReadonlyMap<string, StructureRow>,
     rowIndexByBlockId: ReadonlyMap<string, number>,
-    actions: Pick<StructureSidebarActions, 'onFocusBlock' | 'onReorderAct' | 'onReorderScene'>,
+    actions: FocusBlockAction & Pick<StructureSidebarActions, 'onReorderAct' | 'onReorderScene'>,
 }

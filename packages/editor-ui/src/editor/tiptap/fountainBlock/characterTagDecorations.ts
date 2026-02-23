@@ -101,10 +101,17 @@ const transactionTouchesCharacterBlocks = (
     return touchesCharacterBlocks;
 };
 
-export const createCharacterTagDecorationsPlugin = (characterColorSaturation?: number) => new Plugin({
+export const createCharacterTagDecorationsPlugin = (
+    characterColorSaturation?: number,
+    colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
+) => new Plugin({
     key: characterTagDecorationsKey,
     state: {
-        init: (_config, state) => buildDecorations(state.doc, characterColorSaturation),
+        init: (_config, state) => buildDecorations(
+            state.doc,
+            characterColorSaturation,
+            colorByCharacterIdRef?.current,
+        ),
         apply: (tr, pluginState, oldState) => {
             if (!tr.docChanged) {
                 return pluginState;
@@ -116,7 +123,7 @@ export const createCharacterTagDecorationsPlugin = (characterColorSaturation?: n
                 return mappedDecorations;
             }
 
-            return buildDecorations(tr.doc, characterColorSaturation);
+            return buildDecorations(tr.doc, characterColorSaturation, colorByCharacterIdRef?.current);
         },
     },
     appendTransaction: (transactions, oldState, newState) => cleanupCharacterDelimiters(transactions, oldState, newState),

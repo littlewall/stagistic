@@ -19,10 +19,11 @@ import {
 } from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
+import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
 import {useScriptEditorCharacters} from './editor/characters/useScriptEditorCharacters';
 import {ScriptEditorSettingsPanel} from './editor/settings';
+import {ScriptStructureSidebar} from './editor/structure';
 import {useStructureSidebarController} from './editor/structure/useStructureSidebarController';
-import {useScriptEditorSidebars} from './editor/useScriptEditorSidebars';
 import styles from './ScriptEditorRoute.module.css';
 import {
     SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS,
@@ -135,17 +136,14 @@ export const ScriptEditorRoute = () => {
         characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
-    const sourceValueForController = editorOverrideValue ?? initialValue;
     const sourceIndexForSidebars = initialIndexSnapshot ?? null;
     const {
-        focusBlockRequest,
         insertActRequest,
         renameActRequest,
         deleteActRequest,
         moveSceneRequest,
         moveActRequest,
         actNamePreviewById,
-        handleSidebarFocusBlock,
         handleSidebarRenameAct,
         handleActNamePreview,
         handleSidebarDeleteAct,
@@ -156,7 +154,7 @@ export const ScriptEditorRoute = () => {
     } = useStructureSidebarController({
         currentScriptId,
         scriptRepository,
-        sourceValue: sourceValueForController,
+        sourceValue: initialValue,
     });
 
     const {
@@ -176,13 +174,11 @@ export const ScriptEditorRoute = () => {
     }, [selectPanel]);
     const structureSidebarProps = useMemo(() => ({
         data: {
-            value: sourceValueForController,
             indexSnapshot: sourceIndexForSidebars,
             structureSettings: resolvedScriptSettings.structure,
             actNamePreviewById,
         },
         actions: {
-            onFocusBlock: handleSidebarFocusBlock,
             onRenameAct: handleSidebarRenameAct,
             onActNamePreview: handleActNamePreview,
             onDeleteAct: handleSidebarDeleteAct,
@@ -194,14 +190,12 @@ export const ScriptEditorRoute = () => {
         actNamePreviewById,
         handleActNamePreview,
         handleSidebarDeleteAct,
-        handleSidebarFocusBlock,
         handleSidebarInsertAct,
         handleSidebarRenameAct,
         handleSidebarReorderAct,
         handleSidebarReorderScene,
         resolvedScriptSettings.structure,
         sourceIndexForSidebars,
-        sourceValueForController,
     ]);
     const characterSidebarProps = useMemo(() => ({
         data: {
@@ -248,10 +242,6 @@ export const ScriptEditorRoute = () => {
         renamingCharacterKeys,
         resolvedScriptSettings,
     ]);
-    const {leftSidebarContent, rightSidebarContent} = useScriptEditorSidebars({
-        structureSidebarProps,
-        characterSidebarProps,
-    });
     const handleCloseSettings = useScriptSettingsModalQuerySync({
         queryKey: SETTINGS_MODAL_QUERY_KEY,
         searchParams,
@@ -319,12 +309,9 @@ export const ScriptEditorRoute = () => {
                     autoFocus: shouldAutoFocus,
                     leftSidebarToggle,
                     rightSidebarToggle,
-                    leftSidebar: leftSidebarContent,
-                    rightSidebar: rightSidebarContent,
                     sidebarWidth: SIDEBAR_WIDTH,
                 }}
                 requests={{
-                    focusBlockRequest,
                     insertActRequest,
                     renameActRequest,
                     deleteActRequest,
@@ -335,7 +322,14 @@ export const ScriptEditorRoute = () => {
                     onValueChange: handleEditorValueChange,
                     onActiveBlockChange: handleActiveBlockChange,
                 }}
-            />
+            >
+                <FountainEditor.LeftSidebar>
+                    <ScriptStructureSidebar {...structureSidebarProps} />
+                </FountainEditor.LeftSidebar>
+                <FountainEditor.RightSidebar>
+                    <ScriptCharactersSidebar {...characterSidebarProps} />
+                </FountainEditor.RightSidebar>
+            </FountainEditor>
             <ScriptSettingsModal
                 isOpen={isSettingsOpen}
                 title="Settings"

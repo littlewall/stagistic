@@ -77,6 +77,8 @@ export interface EditorLiveStructureSnapshot {
 export interface EditorLiveCharacterSnapshot {
     countsByKey: ReadonlyMap<string, number>,
     countsByCharacterId: ReadonlyMap<string, number>,
+    /** Maps characterId → the key currently displayed in the editor (from characterRefs). */
+    keyByCharacterId: ReadonlyMap<string, string>,
 }
 
 export interface EditorLiveSnapshot {
@@ -126,7 +128,6 @@ export type EditorBlockUiEvent =
     };
 
 export interface EditorStructureRequests {
-    focusBlockRequest?: FocusBlockRequest | null,
     insertActRequest?: InsertActRequest | null,
     renameActRequest?: RenameActRequest | null,
     deleteActRequest?: DeleteActRequest | null,

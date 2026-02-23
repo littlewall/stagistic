@@ -5,10 +5,10 @@ import {
 } from '@stagistic/editor-ui';
 import {
     DEFAULT_EDITOR_SETTINGS,
+    type EditorSettings,
     ELEMENT_CHARACTER,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     normalizeCharacterKey,
-    type EditorSettings,
 } from '@stagistic/script-core';
 import {
     useCallback,
@@ -77,23 +77,28 @@ const collectStatsFromSnapshot = (
             return;
         }
 
-        const normalizedKey = normalizeCharacterKey(character.key);
+        /*
+         * Use the key currently shown in the editor (via refs) if available.
+         * During preview rename, this will be the new name rather than the stale DB key.
+         */
+        const currentKey = snapshot.keyByCharacterId.get(character.id)
+            ?? normalizeCharacterKey(character.key);
 
-        if (!normalizedKey) {
+        if (!currentKey) {
             return;
         }
 
         const confirmedCount = countsByCharacterId.get(character.id) ?? 0;
-        const currentUnconfirmed = unconfirmedCountsByKey.get(normalizedKey) ?? 0;
+        const currentUnconfirmed = unconfirmedCountsByKey.get(currentKey) ?? 0;
         const nextUnconfirmed = Math.max(0, currentUnconfirmed - confirmedCount);
 
         if (nextUnconfirmed <= 0) {
-            unconfirmedCountsByKey.delete(normalizedKey);
+            unconfirmedCountsByKey.delete(currentKey);
 
             return;
         }
 
-        unconfirmedCountsByKey.set(normalizedKey, nextUnconfirmed);
+        unconfirmedCountsByKey.set(currentKey, nextUnconfirmed);
     });
 
     return {
@@ -198,10 +203,7 @@ export const useCharacterComputed = ({
         }
 
         return collectStatsFromSnapshot(characterSnapshot, normalizedConfirmedCharacterRecords);
-    }, [
-        characterSnapshot,
-        normalizedConfirmedCharacterRecords,
-    ]);
+    }, [characterSnapshot, normalizedConfirmedCharacterRecords]);
 
     const confirmedCharacterSet = useMemo(
         () => new Set(normalizedConfirmedCharacterKeys),

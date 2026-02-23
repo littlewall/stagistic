@@ -3,55 +3,58 @@ import {useCallback} from 'react';
 
 import {
     normalizeCharacterDisplayName,
-    renameCharacterInScriptDocument,
-    replaceCharacterRefIdInScriptDocument,
 } from '../index';
 import type {ScriptCharacterRecord} from '../types';
-import type {CharacterActionSharedArgs, SetStringArrayState} from './types';
+import type {
+    CharacterActionSharedArgs,
+    RenameEditorCallbacks,
+    RenamePreviewEditorCallbacks,
+    SetStringArrayState,
+} from './types';
 import {
     addPendingValue,
-    getSourceDocument,
     removePendingValue,
 } from './utils';
 
 interface UseRenameCharacterArgs extends CharacterActionSharedArgs {
     confirmedCharactersById: ReadonlyMap<string, ScriptCharacterRecord>,
-    getCharacterNameForBlockType: (name: string, blockType: unknown) => string,
     setRenamingCharacterIds: SetStringArrayState,
     setRenamingCharacterKeys: SetStringArrayState,
 }
 
-interface RenameCharacterActions {
-    handleRenameCharacterPreview: (
-        characterId: string,
-        previousCharacterName: string,
-        nextCharacterName: string,
-    ) => void,
-    handleRenameCharacter: (
-        characterId: string,
-        previousCharacterName: string,
-        nextCharacterName: string,
-    ) => void,
-}
+const callOnRenameText = (
+    callbacks: RenamePreviewEditorCallbacks | undefined,
+    characterId: string,
+    newName: string,
+): void => {
+    if (callbacks) {
+        callbacks.onRenameText(characterId, newName);
+    }
+};
+
+const callOnReplaceId = (
+    callbacks: RenameEditorCallbacks | undefined,
+    oldId: string,
+    newId: string,
+): void => {
+    if (callbacks) {
+        callbacks.onReplaceId(oldId, newId);
+    }
+};
 
 export const useRenameCharacter = ({
     currentScriptId,
     scriptRepository,
-    initialValue,
-    getEditorValue,
-    setEditorValue,
-    setEditorOverrideValue,
     setConfirmedCharacterRecords,
     confirmedCharactersById,
-    getCharacterNameForBlockType,
     setRenamingCharacterIds,
     setRenamingCharacterKeys,
-    handleAutoSave,
-}: UseRenameCharacterArgs): RenameCharacterActions => {
+}: UseRenameCharacterArgs) => {
     const handleRenameCharacterPreview = useCallback((
         characterId: string,
         _previousCharacterName: string,
         nextCharacterName: string,
+        editorCallbacks?: RenamePreviewEditorCallbacks,
     ) => {
         if (!currentScriptId || !characterId) {
             return;
@@ -70,41 +73,14 @@ export const useRenameCharacter = ({
             return;
         }
 
-        const sourceDocument = getSourceDocument(getEditorValue(), initialValue);
-
-        if (!sourceDocument) {
-            return;
-        }
-
-        const {
-            value: nextDocument,
-            changed: didChangeDocument,
-        } = renameCharacterInScriptDocument(
-            sourceDocument,
-            previousKey,
-            normalizedNextName,
-            getCharacterNameForBlockType,
-            {characterId},
-        );
-
-        if (!didChangeDocument) {
-            return;
-        }
-
-        setEditorOverrideValue(nextDocument);
-    }, [
-        confirmedCharactersById,
-        currentScriptId,
-        getEditorValue,
-        getCharacterNameForBlockType,
-        initialValue,
-        setEditorOverrideValue,
-    ]);
+        callOnRenameText(editorCallbacks, characterId, normalizedNextName);
+    }, [confirmedCharactersById, currentScriptId]);
 
     const handleRenameCharacter = useCallback((
         characterId: string,
         _previousCharacterName: string,
         nextCharacterName: string,
+        editorCallbacks?: RenameEditorCallbacks,
     ) => {
         if (!currentScriptId) {
             return;
@@ -124,12 +100,6 @@ export const useRenameCharacter = ({
             return;
         }
 
-        const sourceDocument = getSourceDocument(getEditorValue(), initialValue);
-
-        if (!sourceDocument) {
-            return;
-        }
-
         setRenamingCharacterIds(previous => addPendingValue(previous, characterId));
         setRenamingCharacterKeys(previous => {
             const next = new Set(previous);
@@ -142,35 +112,10 @@ export const useRenameCharacter = ({
 
         const run = async () => {
             try {
-                const {
-                    value: renamedDocument,
-                    changed: didChangeDocument,
-                } = renameCharacterInScriptDocument(
-                    sourceDocument,
-                    previousKey,
-                    normalizedNextName,
-                    getCharacterNameForBlockType,
-                    {characterId},
-                );
-                let documentToPersist = didChangeDocument
-                    ? renamedDocument
-                    : sourceDocument;
+                // Rename in the editor immediately for responsiveness
+                callOnRenameText(editorCallbacks, characterId, normalizedNextName);
 
-                if (didChangeDocument) {
-                    const didSave = await handleAutoSave(renamedDocument);
-
-                    if (!didSave) {
-                        const storedCharacters = await scriptRepository.listScriptCharacters(currentScriptId);
-
-                        setConfirmedCharacterRecords(storedCharacters);
-
-                        return;
-                    }
-
-                    setEditorOverrideValue(renamedDocument);
-                    setEditorValue(renamedDocument);
-                }
-
+                // Update the database
                 const renamedCharacter = await scriptRepository.renameScriptCharacter(
                     currentScriptId,
                     characterId,
@@ -181,6 +126,8 @@ export const useRenameCharacter = ({
                     const storedCharacters = await scriptRepository.listScriptCharacters(currentScriptId);
 
                     setConfirmedCharacterRecords(storedCharacters);
+                    // Revert editor text
+                    callOnRenameText(editorCallbacks, characterId, characterRecord.key);
 
                     return;
                 }
@@ -194,24 +141,9 @@ export const useRenameCharacter = ({
                     return next;
                 });
 
-                if (renamedCharacter.id === characterId) {
-                    return;
-                }
-
-                const {
-                    value: relinkedDocument,
-                    changed: didRelinkCharacterRef,
-                } = replaceCharacterRefIdInScriptDocument(
-                    documentToPersist,
-                    characterId,
-                    renamedCharacter.id,
-                );
-
-                if (didRelinkCharacterRef) {
-                    documentToPersist = relinkedDocument;
-                    setEditorOverrideValue(relinkedDocument);
-                    setEditorValue(relinkedDocument);
-                    await handleAutoSave(relinkedDocument);
+                // If the character ID changed, update refs
+                if (renamedCharacter.id !== characterId) {
+                    callOnReplaceId(editorCallbacks, characterId, renamedCharacter.id);
                 }
             } catch (error) {
                 console.error('Failed to rename script character', error);
@@ -220,6 +152,8 @@ export const useRenameCharacter = ({
                     const storedCharacters = await scriptRepository.listScriptCharacters(currentScriptId);
 
                     setConfirmedCharacterRecords(storedCharacters);
+                    // Revert editor text
+                    callOnRenameText(editorCallbacks, characterId, characterRecord.key);
                 } catch (refreshError) {
                     console.error('Failed to refresh script characters after rename failure', refreshError);
                 }
@@ -234,14 +168,8 @@ export const useRenameCharacter = ({
     }, [
         confirmedCharactersById,
         currentScriptId,
-        getEditorValue,
-        getCharacterNameForBlockType,
-        handleAutoSave,
-        initialValue,
         scriptRepository,
         setConfirmedCharacterRecords,
-        setEditorOverrideValue,
-        setEditorValue,
         setRenamingCharacterIds,
         setRenamingCharacterKeys,
     ]);

@@ -22,8 +22,8 @@ import {
     FountainBlockExtension,
     FountainColumnExtension,
     FountainColumnGroupExtension,
-    ScriptSidebarProjectionExtension,
     ScriptBlockIndexExtension,
+    ScriptSidebarProjectionExtension,
 } from './tiptap/extensions';
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
@@ -32,11 +32,13 @@ import {
 type UseEditorExtensionsArgs = {
     resolvedSettings: EditorSettings,
     sizeScale: number,
+    colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
 };
 
 export const useEditorExtensions = ({
     resolvedSettings,
     sizeScale,
+    colorByCharacterIdRef,
 }: UseEditorExtensionsArgs) => {
     const paginationExtension = useMemo(
         () => createPaginationExtension(resolvedSettings, sizeScale),
@@ -60,12 +62,14 @@ export const useEditorExtensions = ({
             blockNextElements,
             blockCasing,
             characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
+            colorByCharacterIdRef,
             structureSettings: resolvedSettings.structure,
         }),
         [
             blockCasing,
             blockNextElements,
             blockShortcuts,
+            colorByCharacterIdRef,
             resolvedSettings.visual.characterColorSaturation,
             resolvedSettings.structure,
         ],

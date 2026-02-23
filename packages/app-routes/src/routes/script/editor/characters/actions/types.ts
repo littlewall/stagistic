@@ -1,4 +1,3 @@
-import {type ScriptDocument} from '@stagistic/script-core';
 import type {
     Dispatch,
     SetStateAction,
@@ -11,29 +10,36 @@ import type {
 } from '../types';
 import type {ScriptRepository} from '../useScriptEditorCharacters.types';
 
-export type SetScriptDocumentState = (value: ScriptDocument | null) => void;
 export type SetScriptCharacterRecordsState = Dispatch<SetStateAction<ScriptCharacterRecord[]>>;
 export type SetCharacterGenderOptionsState = Dispatch<SetStateAction<CharacterGenderOption[]>>;
 export type SetStringArrayState = Dispatch<SetStateAction<string[]>>;
 
+/** Editor mutation callbacks injected by ScriptCharactersSidebar (inside EditorInstanceProvider). */
+export interface ConfirmEditorCallbacks {
+    onLinkRef: (characterKey: string, characterId: string) => void,
+}
+
+export interface DeleteEditorCallbacks {
+    onUnlinkRef: (characterId: string) => void,
+}
+
+export interface RenameEditorCallbacks {
+    onRenameText: (characterId: string, newName: string) => void,
+    onReplaceId: (oldId: string, newId: string) => void,
+}
+
+export interface RenamePreviewEditorCallbacks {
+    onRenameText: (characterId: string, newName: string) => void,
+}
+
 export interface CharacterActionSharedArgs {
     currentScriptId: string | null,
     scriptRepository: ScriptRepository,
-    initialValue: ScriptDocument | null | undefined,
-    getEditorValue: () => ScriptDocument | null,
-    setEditorValue: SetScriptDocumentState,
-    setEditorOverrideValue: SetScriptDocumentState,
     setConfirmedCharacterRecords: SetScriptCharacterRecordsState,
-    handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
 }
 
 export interface CharacterActionContext {
     currentScriptId: string | null,
     scriptRepository: ScriptRepository,
-    initialValue: ScriptDocument | null | undefined,
-    getEditorValue: () => ScriptDocument | null,
-    setEditorValue: SetScriptDocumentState,
-    setEditorOverrideValue: SetScriptDocumentState,
     setters: CharacterDomainSetters,
-    handleAutoSave: (value: ScriptDocument) => Promise<boolean>,
 }

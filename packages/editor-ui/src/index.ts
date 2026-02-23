@@ -6,7 +6,12 @@ export {
 } from './editor/characterColors';
 export {EditorCanvas} from './editor/components/EditorCanvas';
 export {default as EditorToolbar} from './editor/components/EditorToolbar';
+export {
+    EditorInstanceProvider,
+    useEditorInstance,
+} from './editor/context';
 export {default as FountainEditor} from './editor/Editor';
+export {useFocusEditorBlock} from './editor/hooks/useFocusEditorBlock';
 export {
     useEditorLiveActiveBlock,
     useEditorLiveCharacters,
@@ -19,18 +24,25 @@ export {
     incrementRouteRenderCount,
     resetEditorPerfMetrics,
 } from './editor/perf/editorPerfMetrics';
+export {
+    focusFirstCharacterBlock,
+    linkCharacterRef,
+    renameCharacterText,
+    replaceCharacterRefId,
+    unlinkCharacterRef,
+} from './editor/tiptap/fountainBlock/characterRefCommands';
 export type {
     DeleteActRequest,
     EditorBlockUiEvent,
     EditorBlockUiEventType,
-    EditorLiveCharacterSnapshot,
-    EditorLiveSnapshot,
-    EditorLiveStructureRow,
-    EditorLiveStructureSnapshot,
     EditorDocumentProps,
     EditorIndexSnapshot,
     EditorLayoutProps,
     EditorLifecycleCallbacks,
+    EditorLiveCharacterSnapshot,
+    EditorLiveSnapshot,
+    EditorLiveStructureRow,
+    EditorLiveStructureSnapshot,
     EditorProps,
     EditorSaveCallbacks,
     EditorSaveProps,

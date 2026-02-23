@@ -38,6 +38,7 @@ interface EditorSidebarData {
 interface EditorSidebarActions {
     onConfirmCharacter?: (characterKey: string) => void,
     onDeleteCharacter?: (characterId: string) => void | Promise<void>,
+    onFocusCharacter?: (characterKey: string) => void,
     normalizeRenameInput?: (value: string) => string,
     onRenameCharacterPreview?: (
         characterId: string,
@@ -79,6 +80,7 @@ export const EditorSidebar = ({
     const {
         onConfirmCharacter,
         onDeleteCharacter,
+        onFocusCharacter,
         normalizeRenameInput,
         onRenameCharacterPreview,
         onRenameCharacter,
@@ -198,6 +200,7 @@ export const EditorSidebar = ({
                                                     }}
                                                     actions={{
                                                         onConfirmCharacter,
+                                                        onFocusCharacter,
                                                     }}
                                                 />
                                             )}
