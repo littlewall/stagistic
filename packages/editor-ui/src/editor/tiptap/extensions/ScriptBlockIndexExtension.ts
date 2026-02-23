@@ -5,17 +5,17 @@ import {
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_SCENE_HEADING,
     extractCharacterKeys,
-    normalizeCharacterKey,
-    type IndexedScriptCharacterRef,
     type IndexedScriptBlock,
+    type IndexedScriptCharacterRef,
+    normalizeCharacterKey,
     type ScriptBlockIndexSnapshot,
 } from '@stagistic/script-core';
 import {Extension} from '@tiptap/core';
 import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {
+    type EditorState,
     Plugin,
     PluginKey,
-    type EditorState,
     type Transaction,
 } from '@tiptap/pm/state';
 
@@ -190,6 +190,7 @@ const buildScriptBlockEntriesFromProseMirrorDoc = (doc: ProseMirrorNode): Indexe
                 const columnGroupOrder = columnGroupOrderCursor;
 
                 columnGroupOrderCursor += 1;
+
                 let columnOrder = 0;
 
                 node.forEach((columnNode, columnOffset) => {

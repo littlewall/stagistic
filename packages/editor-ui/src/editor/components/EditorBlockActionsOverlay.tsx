@@ -29,7 +29,6 @@ import {useDragSourceHighlight} from './blockActions/overlay/useDragSourceHighli
 import {usePointerDragInteraction} from './blockActions/overlay/usePointerDragInteraction';
 import {useActInsertCommand} from './blockActions/useActInsertCommand';
 import {useBlockActionsMenuState} from './blockActions/useBlockActionsMenuState';
-import {useCanvasScrollLock} from './blockActions/useCanvasScrollLock';
 import {useMenuPlacement} from './blockActions/useMenuPlacement';
 import {useOverlayPosition} from './blockActions/useOverlayPosition';
 import styles from './EditorBlockActionsOverlay.module.css';
@@ -68,11 +67,6 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         canvasRef,
         triggerRef,
         menuRef,
-    });
-
-    useCanvasScrollLock({
-        canvasRef,
-        isLocked: isMenuOpen,
     });
 
     const {

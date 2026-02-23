@@ -5,7 +5,9 @@ import {
     useSetCharacterColor,
     useSetCharacterGender,
 } from './actions';
-import type {CharacterActionContext} from './actions/types';
+import type {
+    CharacterActionContext, ConfirmEditorCallbacks, DeleteEditorCallbacks, RenameEditorCallbacks, RenamePreviewEditorCallbacks,
+} from './actions/types';
 import type {
     CharacterGenderOption,
     ScriptCharacterRecord,
@@ -16,22 +18,23 @@ interface UseCharacterActionsArgs {
     computed: {
         confirmedCharacterSet: ReadonlySet<string>,
         confirmedCharactersById: ReadonlyMap<string, ScriptCharacterRecord>,
-        getCharacterNameForBlockType: (name: string, blockType: unknown) => string,
     },
 }
 
 export interface CharacterActions {
-    handleConfirmCharacter: (characterKey: string) => void,
-    handleDeleteCharacter: (characterId: string) => void,
+    handleConfirmCharacter: (characterKey: string, editorCallbacks?: ConfirmEditorCallbacks) => void,
+    handleDeleteCharacter: (characterId: string, editorCallbacks?: DeleteEditorCallbacks) => void,
     handleRenameCharacterPreview: (
         characterId: string,
         previousCharacterName: string,
         nextCharacterName: string,
+        editorCallbacks?: RenamePreviewEditorCallbacks,
     ) => void,
     handleRenameCharacter: (
         characterId: string,
         previousCharacterName: string,
         nextCharacterName: string,
+        editorCallbacks?: RenameEditorCallbacks,
     ) => void,
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
@@ -45,28 +48,17 @@ export const useCharacterActions = ({
     const {
         currentScriptId,
         scriptRepository,
-        initialValue,
-        getEditorValue,
-        setEditorValue,
-        setEditorOverrideValue,
         setters,
-        handleAutoSave,
     } = context;
     const {
         confirmedCharacterSet,
         confirmedCharactersById,
-        getCharacterNameForBlockType,
     } = computed;
 
     const baseArgs = {
         currentScriptId,
         scriptRepository,
-        initialValue,
-        getEditorValue,
-        setEditorValue,
-        setEditorOverrideValue,
         setConfirmedCharacterRecords: setters.setConfirmedCharacterRecords,
-        handleAutoSave,
     };
 
     const handleConfirmCharacter = useConfirmCharacter({
@@ -85,7 +77,6 @@ export const useCharacterActions = ({
     } = useRenameCharacter({
         ...baseArgs,
         confirmedCharactersById,
-        getCharacterNameForBlockType,
         setRenamingCharacterIds: setters.setRenamingCharacterIds,
         setRenamingCharacterKeys: setters.setRenamingCharacterKeys,
     });

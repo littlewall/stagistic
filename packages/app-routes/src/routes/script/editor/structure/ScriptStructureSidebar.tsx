@@ -2,13 +2,13 @@ import {DragDropProvider} from '@dnd-kit/react';
 import {
     useEditorLiveActiveBlock,
     useEditorLiveStructure,
+    useFocusEditorBlock,
 } from '@stagistic/editor-ui';
 import {useMemo} from 'react';
 
 import styles from './ScriptStructureSidebar.module.css';
 import {StructureRowAct} from './StructureRowAct';
 import {
-    deriveStructureRowsBase,
     deriveStructureRowsBaseFromIndex,
     resolveActiveSceneBlockId,
     type StructureRow,
@@ -39,13 +39,14 @@ export const ScriptStructureSidebar = ({
     actions,
 }: ScriptStructureSidebarProps) => {
     const {
-        value,
         indexSnapshot,
         structureSettings,
         actNamePreviewById,
     } = data;
     const liveStructure = useEditorLiveStructure();
     const liveActiveBlockId = useEditorLiveActiveBlock();
+    // Direct editor API — no request/state/prop cascade needed
+    const focusBlock = useFocusEditorBlock();
     const {
         rows,
         rowByBlockId,
@@ -67,12 +68,8 @@ export const ScriptStructureSidebar = ({
             return deriveStructureRowsBaseFromIndex(indexSnapshot);
         }
 
-        return deriveStructureRowsBase(value?.content);
-    }, [
-        indexSnapshot,
-        liveStructure,
-        value?.content,
-    ]);
+        return deriveStructureRowsBaseFromIndex(null);
+    }, [indexSnapshot, liveStructure]);
     const resolvedActiveBlockId = liveActiveBlockId;
     const activeSceneBlockId = useMemo(() => {
         return resolveActiveSceneBlockId({
@@ -89,25 +86,25 @@ export const ScriptStructureSidebar = ({
         actNamePreviewById,
     }), [actNamePreviewById, structureSettings]);
     const actRowActions = useMemo(() => ({
-        onFocusBlock: actions.onFocusBlock,
+        onFocusBlock: focusBlock,
         onRenameAct: actions.onRenameAct,
         onActNamePreview: actions.onActNamePreview,
         onDeleteAct: actions.onDeleteAct,
     }), [
         actions.onActNamePreview,
         actions.onDeleteAct,
-        actions.onFocusBlock,
         actions.onRenameAct,
+        focusBlock,
     ]);
     const sceneRowActions = useMemo(() => ({
-        onFocusBlock: actions.onFocusBlock,
-    }), [actions.onFocusBlock]);
+        onFocusBlock: focusBlock,
+    }), [focusBlock]);
     const handleDragEnd = useStructureSidebarDnd({
         rows,
         rowByBlockId,
         rowIndexByBlockId,
         actions: {
-            onFocusBlock: actions.onFocusBlock,
+            onFocusBlock: focusBlock,
             onReorderAct: actions.onReorderAct,
             onReorderScene: actions.onReorderScene,
         },

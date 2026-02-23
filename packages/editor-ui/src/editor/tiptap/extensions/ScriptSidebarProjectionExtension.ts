@@ -3,8 +3,8 @@ import {
     ELEMENT_CHARACTER,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_SCENE_HEADING,
-    normalizeActName,
     type IndexedScriptBlock,
+    normalizeActName,
     type ScriptBlockIndexSnapshot,
 } from '@stagistic/script-core';
 import {Extension} from '@tiptap/core';
@@ -24,6 +24,7 @@ import {
     incrementSidebarProjectionFullRebuildCount,
 } from '../../perf/editorPerfMetrics';
 import {
+    buildScriptBlockIndexSnapshotFromProseMirrorDoc,
     getScriptBlockIndexChangeFromState,
     getScriptBlockIndexSnapshotFromState,
 } from './ScriptBlockIndexExtension';
@@ -51,6 +52,7 @@ const EMPTY_STRUCTURE: EditorLiveStructureSnapshot = {
 const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
     countsByKey: new Map<string, number>(),
     countsByCharacterId: new Map<string, number>(),
+    keyByCharacterId: new Map<string, string>(),
 };
 
 const EMPTY_CHANGE: ScriptSidebarProjectionChange = {
@@ -155,6 +157,7 @@ const decrementCount = (counts: Map<string, number>, key: string) => {
 const applyBlockCharacterRefs = (
     countsByKey: Map<string, number>,
     countsByCharacterId: Map<string, number>,
+    keyByCharacterId: Map<string, string> | null,
     block: IndexedScriptBlock,
     mode: 'add' | 'remove',
 ) => {
@@ -171,7 +174,9 @@ const applyBlockCharacterRefs = (
 
         if (mode === 'add') {
             incrementCount(countsByKey, key);
-        } else {
+        }
+
+        if (mode === 'remove') {
             decrementCount(countsByKey, key);
         }
 
@@ -181,8 +186,18 @@ const applyBlockCharacterRefs = (
 
         if (mode === 'add') {
             incrementCount(countsByCharacterId, characterRef.characterId);
-        } else {
+
+            if (keyByCharacterId) {
+                keyByCharacterId.set(characterRef.characterId, key);
+            }
+        }
+
+        if (mode === 'remove') {
             decrementCount(countsByCharacterId, characterRef.characterId);
+
+            if (keyByCharacterId && !countsByCharacterId.has(characterRef.characterId)) {
+                keyByCharacterId.delete(characterRef.characterId);
+            }
         }
     });
 };
@@ -194,9 +209,10 @@ const buildCharacterSnapshot = (indexSnapshot: ScriptBlockIndexSnapshot): Editor
 
     const countsByKey = new Map<string, number>();
     const countsByCharacterId = new Map<string, number>();
+    const keyByCharacterId = new Map<string, string>();
 
     indexSnapshot.blocks.forEach(block => {
-        applyBlockCharacterRefs(countsByKey, countsByCharacterId, block, 'add');
+        applyBlockCharacterRefs(countsByKey, countsByCharacterId, keyByCharacterId, block, 'add');
     });
 
     if (countsByKey.size === 0 && countsByCharacterId.size === 0) {
@@ -206,6 +222,7 @@ const buildCharacterSnapshot = (indexSnapshot: ScriptBlockIndexSnapshot): Editor
     return {
         countsByKey,
         countsByCharacterId,
+        keyByCharacterId,
     };
 };
 
@@ -224,6 +241,20 @@ export const buildScriptSidebarProjectionFromIndexSnapshot = (
 };
 
 const areStringNumberMapsEqual = (left: ReadonlyMap<string, number>, right: ReadonlyMap<string, number>) => {
+    if (left.size !== right.size) {
+        return false;
+    }
+
+    for (const [key, value] of left.entries()) {
+        if ((right.get(key) ?? null) !== value) {
+            return false;
+        }
+    }
+
+    return true;
+};
+
+const areStringMapsEqual = (left: ReadonlyMap<string, string>, right: ReadonlyMap<string, string>) => {
     if (left.size !== right.size) {
         return false;
     }
@@ -313,7 +344,8 @@ const areCharacterSnapshotsEqual = (
     right: EditorLiveCharacterSnapshot,
 ) => {
     return areStringNumberMapsEqual(left.countsByKey, right.countsByKey)
-        && areStringNumberMapsEqual(left.countsByCharacterId, right.countsByCharacterId);
+        && areStringNumberMapsEqual(left.countsByCharacterId, right.countsByCharacterId)
+        && areStringMapsEqual(left.keyByCharacterId, right.keyByCharacterId);
 };
 
 const createChange = (
@@ -426,17 +458,17 @@ const applyCharacterDelta = (
 
     const countsByKey = new Map(previousCharacters.countsByKey);
     const countsByCharacterId = new Map(previousCharacters.countsByCharacterId);
+    const keyByCharacterId = new Map(previousCharacters.keyByCharacterId);
 
-    applyBlockCharacterRefs(countsByKey, countsByCharacterId, previousBlock, 'remove');
-    applyBlockCharacterRefs(countsByKey, countsByCharacterId, nextBlock, 'add');
+    applyBlockCharacterRefs(countsByKey, countsByCharacterId, keyByCharacterId, previousBlock, 'remove');
+    applyBlockCharacterRefs(countsByKey, countsByCharacterId, keyByCharacterId, nextBlock, 'add');
 
-    const didCountsChange = (
+    const didCountsChange =
         countsByKey.size !== previousCharacters.countsByKey.size
         || countsByCharacterId.size !== previousCharacters.countsByCharacterId.size
         || Array.from(countsByKey.entries()).some(([key, value]) => previousCharacters.countsByKey.get(key) !== value)
         || Array.from(countsByCharacterId.entries())
-            .some(([key, value]) => previousCharacters.countsByCharacterId.get(key) !== value)
-    );
+            .some(([key, value]) => previousCharacters.countsByCharacterId.get(key) !== value);
 
     if (!didCountsChange) {
         return previousCharacters;
@@ -445,6 +477,7 @@ const applyCharacterDelta = (
     return {
         countsByKey,
         countsByCharacterId,
+        keyByCharacterId,
     };
 };
 
@@ -501,7 +534,8 @@ export const ScriptSidebarProjectionExtension = Extension.create<undefined, Scri
                 key: scriptSidebarProjectionKey,
                 state: {
                     init: (_config, state) => {
-                        const initialState = buildProjectionState(getScriptBlockIndexSnapshotFromState(state));
+                        const indexSnapshot = buildScriptBlockIndexSnapshotFromProseMirrorDoc(state.doc);
+                        const initialState = buildProjectionState(indexSnapshot);
 
                         this.storage.structure = initialState.structure;
                         this.storage.characters = initialState.characters;

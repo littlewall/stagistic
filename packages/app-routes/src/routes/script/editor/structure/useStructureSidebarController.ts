@@ -1,6 +1,5 @@
 import type {
     DeleteActRequest,
-    FocusBlockRequest,
     InsertActRequest,
     MoveActRequest,
     MoveSceneRequest,
@@ -26,7 +25,6 @@ export const useStructureSidebarController = ({
     scriptRepository,
     sourceValue,
 }: UseStructureSidebarControllerArgs) => {
-    const [focusBlockRequest, setFocusBlockRequest] = useState<FocusBlockRequest | null>(null);
     const [insertActRequest, setInsertActRequest] = useState<InsertActRequest | null>(null);
     const [renameActRequest, setRenameActRequest] = useState<RenameActRequest | null>(null);
     const [deleteActRequest, setDeleteActRequest] = useState<DeleteActRequest | null>(null);
@@ -34,7 +32,6 @@ export const useStructureSidebarController = ({
     const [moveActRequest, setMoveActRequest] = useState<MoveActRequest | null>(null);
     const [actNamePreviewById, setActNamePreviewById] = useState<Record<string, string>>({});
     const activeBlockIdRef = useRef<string | null>(null);
-    const focusRequestCounterRef = useRef(0);
     const insertActRequestCounterRef = useRef(0);
     const renameActRequestCounterRef = useRef(0);
     const deleteActRequestCounterRef = useRef(0);
@@ -74,7 +71,6 @@ export const useStructureSidebarController = ({
     useEffect(() => {
         flushPendingActiveBlockPersist();
         activeBlockIdRef.current = null;
-        setFocusBlockRequest(null);
         setInsertActRequest(null);
         setRenameActRequest(null);
         setDeleteActRequest(null);
@@ -90,6 +86,7 @@ export const useStructureSidebarController = ({
         };
     }, [flushPendingActiveBlockPersist]);
 
+    // Clean up stale act-name previews when the document changes
     useEffect(() => {
         if (!sourceValue) {
             return;
@@ -130,14 +127,6 @@ export const useStructureSidebarController = ({
             return didChange ? next : previous;
         });
     }, [sourceValue]);
-
-    const handleSidebarFocusBlock = useCallback((blockId: string) => {
-        focusRequestCounterRef.current += 1;
-        setFocusBlockRequest({
-            blockId,
-            requestId: focusRequestCounterRef.current,
-        });
-    }, []);
 
     const handleSidebarRenameAct = useCallback((blockId: string, nextName: string) => {
         const normalizedName = nextName.toLocaleUpperCase().trim();
@@ -236,14 +225,12 @@ export const useStructureSidebarController = ({
     ]);
 
     return {
-        focusBlockRequest,
         insertActRequest,
         renameActRequest,
         deleteActRequest,
         moveSceneRequest,
         moveActRequest,
         actNamePreviewById,
-        handleSidebarFocusBlock,
         handleSidebarRenameAct,
         handleActNamePreview,
         handleSidebarDeleteAct,

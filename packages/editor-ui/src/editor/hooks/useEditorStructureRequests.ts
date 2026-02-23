@@ -56,7 +56,6 @@ export const useEditorStructureRequests = ({
     revisionRef,
 }: UseEditorStructureRequestsArgs) => {
     const {
-        focusBlockRequest,
         insertActRequest,
         renameActRequest,
         deleteActRequest,
@@ -70,7 +69,6 @@ export const useEditorStructureRequests = ({
     useEditorActiveBlockSync({
         editor,
         onActiveBlockChange,
-        focusBlockRequest,
     });
     useEditorMoveRequests({
         editor,

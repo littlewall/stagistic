@@ -1,14 +1,20 @@
-import {useEditorLiveCharacters} from '@stagistic/editor-ui';
+import {
+    focusFirstCharacterBlock, linkCharacterRef, renameCharacterText, replaceCharacterRefId, unlinkCharacterRef, useEditorInstance, useEditorLiveCharacters,
+} from '@stagistic/editor-ui';
 import {type EditorSettings} from '@stagistic/script-core';
 import {
     EditorSidebar,
 } from '@stagistic/ui';
+import {useCallback} from 'react';
 
-import {useCharacterComputed} from './useCharacterComputed';
+import type {
+    ConfirmEditorCallbacks, DeleteEditorCallbacks, RenameEditorCallbacks, RenamePreviewEditorCallbacks,
+} from './actions/types';
 import type {
     CharacterGenderOption,
     ScriptCharacterRecord,
 } from './types';
+import {useCharacterComputed} from './useCharacterComputed';
 
 interface ScriptCharactersSidebarData {
     confirmedCharacterRecords: ScriptCharacterRecord[],
@@ -26,18 +32,20 @@ interface ScriptCharactersSidebarData {
 }
 
 interface ScriptCharactersSidebarActions {
-    onConfirmCharacter: (characterKey: string) => void,
-    onDeleteCharacter: (characterId: string) => void,
+    onConfirmCharacter: (characterKey: string, editorCallbacks?: ConfirmEditorCallbacks) => void,
+    onDeleteCharacter: (characterId: string, editorCallbacks?: DeleteEditorCallbacks) => void,
     normalizeRenameInput: (value: string) => string,
     onRenameCharacterPreview: (
         characterId: string,
         previousCharacterName: string,
         nextCharacterName: string,
+        editorCallbacks?: RenamePreviewEditorCallbacks,
     ) => void,
     onRenameCharacter: (
         characterId: string,
         previousCharacterName: string,
         nextCharacterName: string,
+        editorCallbacks?: RenameEditorCallbacks,
     ) => void,
     onSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     onSetCharacterGender: (characterId: string, genderKey: string | null) => void,
@@ -53,10 +61,12 @@ export const ScriptCharactersSidebar = ({
     data,
     actions,
 }: ScriptCharactersSidebarProps) => {
+    const editor = useEditorInstance();
     const liveCharacters = useEditorLiveCharacters();
     const {
         confirmedCharacters,
         unconfirmedCharacters,
+        getCharacterNameForBlockType,
     } = useCharacterComputed({
         data: {
             confirmedCharacterRecords: data.confirmedCharacterRecords,
@@ -74,6 +84,73 @@ export const ScriptCharactersSidebar = ({
         },
     });
 
+    const handleFocusCharacter = useCallback((characterKey: string) => {
+        if (editor) {
+            focusFirstCharacterBlock(editor, characterKey);
+        }
+    }, [editor]);
+
+    const handleConfirmCharacter = useCallback((characterKey: string) => {
+        actions.onConfirmCharacter(characterKey, {
+            onLinkRef: (key, id) => {
+                if (editor) {
+                    linkCharacterRef(editor, key, id);
+                }
+            },
+        });
+    }, [actions, editor]);
+
+    const handleDeleteCharacter = useCallback((characterId: string) => {
+        actions.onDeleteCharacter(characterId, {
+            onUnlinkRef: id => {
+                if (editor) {
+                    unlinkCharacterRef(editor, id);
+                }
+            },
+        });
+    }, [actions, editor]);
+
+    const handleRenameCharacterPreview = useCallback((
+        characterId: string,
+        previousCharacterName: string,
+        nextCharacterName: string,
+    ) => {
+        actions.onRenameCharacterPreview(characterId, previousCharacterName, nextCharacterName, {
+            onRenameText: (charId, newName) => {
+                if (editor) {
+                    renameCharacterText(editor, charId, newName, getCharacterNameForBlockType);
+                }
+            },
+        });
+    }, [
+        actions,
+        editor,
+        getCharacterNameForBlockType,
+    ]);
+
+    const handleRenameCharacter = useCallback((
+        characterId: string,
+        previousCharacterName: string,
+        nextCharacterName: string,
+    ) => {
+        actions.onRenameCharacter(characterId, previousCharacterName, nextCharacterName, {
+            onRenameText: (charId, newName) => {
+                if (editor) {
+                    renameCharacterText(editor, charId, newName, getCharacterNameForBlockType);
+                }
+            },
+            onReplaceId: (oldId, newId) => {
+                if (editor) {
+                    replaceCharacterRefId(editor, oldId, newId);
+                }
+            },
+        });
+    }, [
+        actions,
+        editor,
+        getCharacterNameForBlockType,
+    ]);
+
     return (
         <EditorSidebar
             data={{
@@ -83,11 +160,12 @@ export const ScriptCharactersSidebar = ({
                 isLoading: data.isLoading,
             }}
             actions={{
-                onConfirmCharacter: actions.onConfirmCharacter,
-                onDeleteCharacter: actions.onDeleteCharacter,
+                onConfirmCharacter: handleConfirmCharacter,
+                onDeleteCharacter: handleDeleteCharacter,
+                onFocusCharacter: handleFocusCharacter,
                 normalizeRenameInput: actions.normalizeRenameInput,
-                onRenameCharacterPreview: actions.onRenameCharacterPreview,
-                onRenameCharacter: actions.onRenameCharacter,
+                onRenameCharacterPreview: handleRenameCharacterPreview,
+                onRenameCharacter: handleRenameCharacter,
                 onSetCharacterColor: actions.onSetCharacterColor,
                 onSetCharacterGender: actions.onSetCharacterGender,
                 onUpsertCharacterGender: actions.onUpsertCharacterGender,

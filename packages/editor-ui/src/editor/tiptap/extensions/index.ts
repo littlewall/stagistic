@@ -9,8 +9,8 @@ export {
 } from './FountainColumnExtensions';
 export {createPaginationExtension} from './PaginationExtension';
 export {
-    getScriptBlockIndexSnapshotFromState,
     getScriptBlockIndexChangeFromState,
+    getScriptBlockIndexSnapshotFromState,
     ScriptBlockIndexExtension,
 } from './ScriptBlockIndexExtension';
 export {
@@ -18,6 +18,4 @@ export {
     getScriptSidebarProjectionChangeFromState,
     getScriptSidebarProjectionFromState,
     ScriptSidebarProjectionExtension,
-    type ScriptSidebarProjectionChange,
-    type ScriptSidebarProjectionChangeReason,
 } from './ScriptSidebarProjectionExtension';

@@ -1,3 +1,4 @@
+import {Eye} from 'iconoir-react';
 import {
     Button, Tooltip, TooltipTrigger,
 } from 'react-aria-components';
@@ -12,6 +13,7 @@ interface CharacterRowPendingProps {
     },
     actions: {
         onConfirmCharacter?: (characterKey: string) => void,
+        onFocusCharacter?: (characterKey: string) => void,
     },
 }
 
@@ -36,7 +38,7 @@ export const CharacterRowPending = ({
     actions,
 }: CharacterRowPendingProps) => {
     const {character, isConfirmPending} = model;
-    const {onConfirmCharacter} = actions;
+    const {onConfirmCharacter, onFocusCharacter} = actions;
     const isConfirmActionDisabled = isConfirmPending || !onConfirmCharacter;
     const confirmTooltipLabel = getConfirmTooltipLabel(
         character.key,
@@ -83,6 +85,28 @@ export const CharacterRowPending = ({
             </TooltipTrigger>
             <span className={styles.characterColor} aria-hidden="true" />
             <span className={styles.characterName}>{character.key}</span>
+            {onFocusCharacter && (
+                <TooltipTrigger
+                    trigger="hover"
+                    delay={0}
+                    closeDelay={120}
+                >
+                    <Button
+                        className={styles.focusIconButton}
+                        onPress={() => onFocusCharacter(character.key)}
+                        aria-label={`Focus ${character.key}`}
+                    >
+                        <Eye className={styles.iconGlyph} strokeWidth={2} />
+                    </Button>
+                    <Tooltip
+                        className={styles.confirmTooltip}
+                        placement="left"
+                        offset={8}
+                    >
+                        Focus first occurrence
+                    </Tooltip>
+                </TooltipTrigger>
+            )}
         </div>
     );
 };

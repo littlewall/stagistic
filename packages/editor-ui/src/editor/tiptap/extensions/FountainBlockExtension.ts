@@ -46,6 +46,7 @@ const FountainBlockExtension = Node.create<{
     blockNextElements?: BlockNextElementMap,
     blockCasing?: BlockCasingMap,
     characterColorSaturation?: number,
+    colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
     structureSettings?: Partial<StructureSettings>,
 }>({
     name: FOUNTAIN_BLOCK_NODE_NAME,
@@ -59,6 +60,7 @@ const FountainBlockExtension = Node.create<{
             blockNextElements: undefined,
             blockCasing: undefined,
             characterColorSaturation: undefined,
+            colorByCharacterIdRef: undefined,
             structureSettings: undefined,
         };
     },
@@ -121,7 +123,10 @@ const FountainBlockExtension = Node.create<{
             createStructureMarkerDecorationsPlugin({
                 structureSettings: this.options.structureSettings,
             }),
-            createCharacterTagDecorationsPlugin(this.options.characterColorSaturation),
+            createCharacterTagDecorationsPlugin(
+                this.options.characterColorSaturation,
+                this.options.colorByCharacterIdRef,
+            ),
         ];
     },
 });

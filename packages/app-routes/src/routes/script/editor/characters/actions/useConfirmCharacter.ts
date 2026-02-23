@@ -1,11 +1,11 @@
 import {normalizeCharacterKey} from '@stagistic/script-core';
 import {useCallback} from 'react';
 
-import {linkCharacterRefInScriptDocument} from '../index';
-import type {CharacterActionSharedArgs, SetStringArrayState} from './types';
+import type {
+    CharacterActionSharedArgs, ConfirmEditorCallbacks, SetStringArrayState,
+} from './types';
 import {
     addPendingValue,
-    getSourceDocument,
     removePendingValue,
 } from './utils';
 
@@ -17,16 +17,11 @@ interface UseConfirmCharacterArgs extends CharacterActionSharedArgs {
 export const useConfirmCharacter = ({
     currentScriptId,
     scriptRepository,
-    initialValue,
-    getEditorValue,
-    setEditorValue,
-    setEditorOverrideValue,
     setConfirmedCharacterRecords,
     setConfirmingCharacterKeys,
     confirmedCharacterSet,
-    handleAutoSave,
 }: UseConfirmCharacterArgs) => {
-    return useCallback((characterKey: string) => {
+    return useCallback((characterKey: string, editorCallbacks?: ConfirmEditorCallbacks) => {
         if (!currentScriptId) {
             return;
         }
@@ -56,24 +51,7 @@ export const useConfirmCharacter = ({
                     return next;
                 });
 
-                const sourceDocument = getSourceDocument(getEditorValue(), initialValue);
-
-                if (sourceDocument) {
-                    const {
-                        value: linkedDocument,
-                        changed: didLinkCharacterRef,
-                    } = linkCharacterRefInScriptDocument(
-                        sourceDocument,
-                        normalizedKey,
-                        confirmedCharacter.id,
-                    );
-
-                    if (didLinkCharacterRef) {
-                        setEditorOverrideValue(linkedDocument);
-                        setEditorValue(linkedDocument);
-                        await handleAutoSave(linkedDocument);
-                    }
-                }
+                editorCallbacks?.onLinkRef(normalizedKey, confirmedCharacter.id);
             } catch (error) {
                 console.error('Failed to confirm script character', error);
             } finally {
@@ -85,13 +63,8 @@ export const useConfirmCharacter = ({
     }, [
         confirmedCharacterSet,
         currentScriptId,
-        getEditorValue,
-        handleAutoSave,
-        initialValue,
         scriptRepository,
         setConfirmedCharacterRecords,
         setConfirmingCharacterKeys,
-        setEditorOverrideValue,
-        setEditorValue,
     ]);
 };

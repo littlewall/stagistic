@@ -1,4 +1,10 @@
-import {ELEMENT_ACT, type FountainElementType} from '@stagistic/script-core';
+import {
+    ELEMENT_ACT,
+    ELEMENT_ACTION,
+    ELEMENT_DIALOGUE,
+    ELEMENT_LYRICS,
+    type FountainElementType,
+} from '@stagistic/script-core';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
     type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState,
@@ -22,6 +28,14 @@ interface EditorToolbarProps {
     editor: TiptapEditor | null,
 }
 
+const MULTI_BLOCK_ALLOWED_TYPES = new Set<FountainElementType>([
+    ELEMENT_ACTION,
+    ELEMENT_DIALOGUE,
+    ELEMENT_LYRICS,
+]);
+
+const MULTI_BLOCK_OPTIONS = FOUNTAIN_BLOCKS_WITHOUT_ACT.filter(option => MULTI_BLOCK_ALLOWED_TYPES.has(option.type));
+
 const EditorToolbar = ({editor}: EditorToolbarProps) => {
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
@@ -36,6 +50,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
         isUnderlineActive,
         canChangeBlockType,
         visibleBlockInfo,
+        isMultiBlockSelection,
     } = useToolbarState({editor});
 
     useDropdownDismiss({
@@ -46,7 +61,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
 
     useEffect(() => {
         setIsOpen(false);
-    }, [activeType]);
+    }, [activeType, isMultiBlockSelection]);
 
     useEffect(() => {
         if (!canChangeBlockType && isOpen) {
@@ -122,11 +137,40 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             return;
         }
 
-        if (optionType === activeBlockInfo?.type) {
+        if (isMultiBlockSelection) {
+            const {from, to} = editor.state.selection;
+            let tr = editor.state.tr;
+            let didChange = false;
+
+            editor.state.doc.nodesBetween(from, to, (node, pos) => {
+                if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+                    return true;
+                }
+
+                if (node.attrs.blockType === ELEMENT_ACT || node.attrs.blockType === optionType) {
+                    return false;
+                }
+
+                tr = tr.setNodeMarkup(pos, undefined, {
+                    ...node.attrs,
+                    blockType: optionType,
+                });
+                didChange = true;
+
+                return false;
+            });
+
+            if (!didChange) {
+                return;
+            }
+
+            editor.commands.focus();
+            editor.view.dispatch(tr);
+
             return;
         }
 
-        if (activeBlockInfo?.type === ELEMENT_ACT) {
+        if (optionType === activeBlockInfo?.type || activeBlockInfo?.type === ELEMENT_ACT) {
             return;
         }
 
@@ -135,7 +179,11 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             .focus()
             .updateAttributes(FOUNTAIN_BLOCK_NODE_NAME, {blockType: optionType})
             .run();
-    }, [activeBlockInfo?.type, editor]);
+    }, [
+        activeBlockInfo?.type,
+        editor,
+        isMultiBlockSelection,
+    ]);
 
     const inlineMarksState: InlineMarksGroupState = {
         canUndo,
@@ -173,7 +221,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
                 actions={inlineMarksActions}
             />
             <BlockTypeSelect
-                options={FOUNTAIN_BLOCKS_WITHOUT_ACT}
+                options={isMultiBlockSelection ? MULTI_BLOCK_OPTIONS : FOUNTAIN_BLOCKS_WITHOUT_ACT}
                 dropdownRef={dropdownRef}
                 state={blockTypeState}
                 actions={blockTypeActions}

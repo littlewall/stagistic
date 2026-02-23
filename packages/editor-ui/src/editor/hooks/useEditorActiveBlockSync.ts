@@ -1,10 +1,8 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useEffect, useRef} from 'react';
 
-import type {FocusBlockRequest} from '../contracts';
 import {getBlockUiEventsFromState} from '../tiptap/extensions';
 import {
-    findFountainBlockSelectionPosFromState,
     FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
 } from '../tiptap/fountainCore';
@@ -22,15 +20,12 @@ const isActiveBlockSyncSuppressed = (editor: TiptapEditor) => {
 interface UseEditorActiveBlockSyncArgs {
     editor: TiptapEditor | null,
     onActiveBlockChange?: (blockId: string | null) => void,
-    focusBlockRequest?: FocusBlockRequest | null,
 }
 
 export const useEditorActiveBlockSync = ({
     editor,
     onActiveBlockChange,
-    focusBlockRequest,
 }: UseEditorActiveBlockSyncArgs) => {
-    const lastFocusedRequestIdRef = useRef<number | null>(null);
     const lastEmittedBlockIdRef = useRef<string | null | undefined>(undefined);
 
     useEffect(() => {
@@ -76,28 +71,4 @@ export const useEditorActiveBlockSync = ({
             editor.off('transaction', handleTransaction);
         };
     }, [editor, onActiveBlockChange]);
-
-    useEffect(() => {
-        if (!editor || !focusBlockRequest) {
-            return;
-        }
-
-        if (lastFocusedRequestIdRef.current === focusBlockRequest.requestId) {
-            return;
-        }
-
-        lastFocusedRequestIdRef.current = focusBlockRequest.requestId;
-
-        const targetPos = findFountainBlockSelectionPosFromState(editor.state, focusBlockRequest.blockId);
-
-        if (targetPos === null) {
-            return;
-        }
-
-        editor
-            .chain()
-            .focus()
-            .setTextSelection(targetPos)
-            .run();
-    }, [editor, focusBlockRequest]);
 };

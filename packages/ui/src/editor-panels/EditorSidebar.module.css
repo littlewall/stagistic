@@ -57,9 +57,9 @@
 .sectionTitle {
     font-size: calc(12px * var(--size-scale));
     font-weight: 700;
+    color: var(--color-ink-muted);
     text-transform: uppercase;
     letter-spacing: .08em;
-    color: var(--color-ink-muted);
 }
 
 .characterList {
@@ -70,9 +70,9 @@
 
 .characterItem {
     overflow: hidden;
+    background: transparent;
     border: 1px solid var(--color-divider);
     border-radius: calc(8px * var(--size-scale));
-    background: transparent;
 }
 
 .characterItemUnconfirmed {
@@ -139,9 +139,9 @@
     flex-shrink: 0;
     width: calc(10px * var(--size-scale));
     height: calc(10px * var(--size-scale));
+    background: var(--character-color, var(--color-accent));
     border: 1px solid color-mix(in srgb, var(--color-ink) 15%, var(--color-surface));
     border-radius: 999px;
-    background: var(--character-color, var(--color-accent));
 }
 
 .characterColorInteractive {
@@ -155,9 +155,9 @@
 }
 
 .characterColorInteractive:focus-visible {
+    border-radius: 999px;
     outline: 2px solid color-mix(in srgb, var(--character-color) 45%, var(--color-ink));
     outline-offset: 2px;
-    border-radius: 999px;
 }
 
 .characterColorInteractive[aria-disabled = 'true'] {
@@ -238,19 +238,19 @@
 
 .characterColorSliderTrack {
     position: relative;
+    overflow: hidden;
     width: 100%;
     height: calc(18px * var(--size-scale));
     border: 1px solid var(--color-divider);
     border-radius: calc(999px * var(--size-scale));
-    overflow: hidden;
 }
 
 .characterColorThumb {
     z-index: 1;
     top: 50%;
+    transform: translate(-50%, -50%);
     width: calc(12px * var(--size-scale));
     height: calc(12px * var(--size-scale));
-    transform: translate(-50%, -50%);
     background: var(--color-surface);
     border: 2px solid color-mix(in srgb, var(--color-ink) 74%, var(--color-surface));
     border-radius: 999px;
@@ -261,17 +261,17 @@
     width: 100%;
     padding: var(--space-1) var(--space-2);
     font-size: calc(11px * var(--size-scale));
+    background: var(--color-surface);
     border: 1px solid var(--color-divider);
     border-radius: calc(6px * var(--size-scale));
-    background: var(--color-surface);
 }
 
 .characterColorLabel {
     font-size: calc(10px * var(--size-scale));
     font-weight: 700;
-    letter-spacing: .06em;
     color: var(--color-ink-muted);
     text-transform: uppercase;
+    letter-spacing: .06em;
 }
 
 .characterColorSwatches {
@@ -303,8 +303,8 @@
 
 .characterColorActions {
     display: flex;
-    justify-content: flex-end;
     gap: var(--space-1);
+    justify-content: flex-end;
 }
 
 .characterColorActionButton,
@@ -315,8 +315,8 @@
     justify-content: center;
     min-height: calc(22px * var(--size-scale));
     padding: 0 var(--space-2);
-    border-radius: calc(6px * var(--size-scale));
     border: 1px solid transparent;
+    border-radius: calc(6px * var(--size-scale));
 }
 
 .characterColorActionButton {
@@ -388,14 +388,40 @@
     opacity: .65;
 }
 
+.focusIconButton {
+    cursor: pointer;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: calc(18px * var(--size-scale));
+    height: calc(18px * var(--size-scale));
+    margin-left: auto;
+    color: var(--color-ink-muted);
+    background: transparent;
+    border: none;
+    border-radius: calc(4px * var(--size-scale));
+    transition: color .15s ease, background .15s ease;
+}
+
+.focusIconButton:hover {
+    color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-ink) 8%, transparent);
+}
+
+.focusIconButton:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--character-color) 45%, var(--color-ink));
+    outline-offset: 1px;
+}
+
 .iconGlyph {
     width: calc(13px * var(--size-scale));
     height: calc(13px * var(--size-scale));
-    stroke: currentcolor;
-    stroke-width: 2.4;
     fill: none;
+    stroke: currentcolor;
     stroke-linecap: round;
     stroke-linejoin: round;
+    stroke-width: 2.4;
 }
 
 .confirmSpinner {
@@ -431,15 +457,15 @@
 
 .characterMetaRow {
     display: flex;
-    justify-content: space-between;
     gap: var(--space-2);
+    justify-content: space-between;
 }
 
 .characterCardFooter {
     display: flex;
-    justify-content: space-between;
     gap: var(--space-2);
     align-items: center;
+    justify-content: space-between;
 }
 
 .characterFooterLeft {
@@ -532,9 +558,9 @@
     display: grid;
     gap: var(--space-1);
     padding: var(--space-1);
+    background: color-mix(in srgb, var(--color-surface) 92%, var(--color-divider));
     border: 1px solid color-mix(in srgb, var(--character-color) 20%, var(--color-divider));
     border-radius: calc(7px * var(--size-scale));
-    background: color-mix(in srgb, var(--color-surface) 92%, var(--color-divider));
 }
 
 .characterGenderOption {
