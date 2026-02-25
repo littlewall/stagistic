@@ -28,8 +28,6 @@ type ScriptLoaderResult = {
 type ScriptLoaderRepository = {
     loadLatest: (scriptId: string) => Promise<ScriptDocument | null>,
     loadScriptConfig: (scriptId: string, namespace: string) => Promise<EditorSettingsOverride | null>,
-    getScriptBlockIndex: (scriptId: string) => Promise<ScriptBlockIndexSnapshot | null>,
-    ensureScriptBlockIndex: (scriptId: string) => Promise<void>,
 };
 
 export const useScriptLoader = (
@@ -63,12 +61,7 @@ export const useScriptLoader = (
                     currentScriptId,
                     EDITOR_SETTINGS_NAMESPACE,
                 );
-                const loadIndexPromise = scriptRepository.getScriptBlockIndex(currentScriptId);
-                const [stored, storedSettings, storedIndex] = await Promise.all([
-                    loadLatestPromise,
-                    loadSettingsPromise,
-                    loadIndexPromise,
-                ]);
+                const [stored, storedSettings] = await Promise.all([loadLatestPromise, loadSettingsPromise]);
 
                 if (!isActive) {
                     return;
@@ -76,43 +69,28 @@ export const useScriptLoader = (
 
                 setStorageErrorState(null);
                 setScriptSettingsOverrideState(storedSettings);
-                setInitialIndexSnapshot(storedIndex);
 
-                if (stored) {
-                    const needsFocus = isScriptDocumentEmpty(stored);
-                    const withIds = ensureFountainBlockIds(stored);
-                    const withScene = ensureSceneHeading(withIds);
-                    const normalized = ensureScriptStructure(withScene);
-                    const fallbackIndex = buildScriptBlockIndex(normalized).snapshot;
-
-                    setInitialValue(normalized);
-                    setInitialIndexSnapshot(storedIndex ?? fallbackIndex);
-                    setShouldAutoFocus(needsFocus);
-                } else {
+                if (!stored) {
                     const fallback = ensureSceneHeading(null);
                     const normalizedFallback = ensureScriptStructure(fallback);
 
                     setInitialValue(normalizedFallback);
-                    setInitialIndexSnapshot(storedIndex ?? buildScriptBlockIndex(normalizedFallback).snapshot);
+                    setInitialIndexSnapshot(buildScriptBlockIndex(normalizedFallback).snapshot);
                     setScriptSettingsOverrideState(null);
                     setShouldAutoFocus(true);
+
+                    return;
                 }
 
-                if (stored) {
-                    void scriptRepository
-                        .ensureScriptBlockIndex(currentScriptId)
-                        .then(() => scriptRepository.getScriptBlockIndex(currentScriptId))
-                        .then(ensuredIndex => {
-                            if (!isActive || !ensuredIndex) {
-                                return;
-                            }
+                const needsFocus = isScriptDocumentEmpty(stored);
+                const withIds = ensureFountainBlockIds(stored);
+                const withScene = ensureSceneHeading(withIds);
+                const normalized = ensureScriptStructure(withScene);
+                const fallbackIndex = buildScriptBlockIndex(normalized).snapshot;
 
-                            setInitialIndexSnapshot(ensuredIndex);
-                        })
-                        .catch(error => {
-                            console.error('Failed to ensure script block index', error);
-                        });
-                }
+                setInitialValue(normalized);
+                setInitialIndexSnapshot(fallbackIndex);
+                setShouldAutoFocus(needsFocus);
             } catch (error) {
                 console.error('Failed to load latest script', error);
                 setStorageErrorState('Failed to load script data.');

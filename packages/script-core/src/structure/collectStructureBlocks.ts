@@ -1,13 +1,19 @@
-import type {FountainJSONContent} from '../document';
-import {ELEMENT_SCENE_HEADING} from '../fountain';
-
-const FOUNTAIN_BLOCK_NODE_NAME = 'fountainBlock';
-const FOUNTAIN_COLUMN_NODE_NAME = 'fountainColumn';
-const FOUNTAIN_COLUMN_GROUP_NODE_NAME = 'fountainColumnGroup';
+import {
+    FOUNTAIN_COLUMN_GROUP_NODE_NAME,
+    FOUNTAIN_COLUMN_NODE_NAME,
+    type FountainJSONContent,
+    getScriptBlockId,
+    getScriptBlockLegacyType,
+    isScriptBlockNode,
+} from '../document';
+import {
+    ELEMENT_SCENE_HEADING,
+    type FountainElementType,
+} from '../fountain';
 
 export type StructureBlockEntry = {
     id: string,
-    blockType: unknown,
+    blockType: FountainElementType,
     text: string,
     index: number,
     sceneIndex: number,
@@ -57,7 +63,7 @@ const collectBlocks = (nodes: FountainJSONContent[] | undefined): FountainJSONCo
                 continue;
             }
 
-            if (node.type === FOUNTAIN_BLOCK_NODE_NAME) {
+            if (isScriptBlockNode(node)) {
                 blocks.push(node);
                 continue;
             }
@@ -76,13 +82,13 @@ export const collectStructureBlocks = (nodes: FountainJSONContent[] | undefined)
     let currentSceneIndex = -1;
 
     return blocks.map((block, index) => {
-        const blockType = block.attrs?.blockType;
+        const blockType = getScriptBlockLegacyType(block);
 
         if (blockType === ELEMENT_SCENE_HEADING) {
             currentSceneIndex += 1;
         }
 
-        const id = typeof block.attrs?.id === 'string' ? block.attrs.id : '';
+        const id = getScriptBlockId(block) ?? '';
 
         return {
             id,

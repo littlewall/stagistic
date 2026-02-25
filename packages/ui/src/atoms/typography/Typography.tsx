@@ -1,5 +1,10 @@
 import clsx from 'clsx';
-import type {ComponentPropsWithoutRef, ElementType} from 'react';
+import {
+    type ComponentPropsWithoutRef,
+    createElement,
+    type ElementType,
+    type ReactElement,
+} from 'react';
 
 import styles from './Typography.module.css';
 
@@ -8,23 +13,28 @@ type TypographyProps<T extends ElementType> = {
     className?: string,
 } & Omit<ComponentPropsWithoutRef<T>, 'as' | 'className'>;
 
-const createTypography = <T extends ElementType>(
-    defaultElement: T,
+type TypographyComponent<TDefault extends ElementType> = <
+    TElement extends ElementType = TDefault,
+>(
+    props: TypographyProps<TElement>,
+) => ReactElement | null;
+
+const createTypography = <TDefault extends ElementType>(
+    defaultElement: TDefault,
     baseClassName: string,
-) => {
-    const Component = <E extends ElementType = T>({
+): TypographyComponent<TDefault> => {
+    const Component = <TElement extends ElementType = TDefault>({
         as,
         className,
         ...props
-    }: TypographyProps<E>) => {
-        const Element = as ?? defaultElement;
+    }: TypographyProps<TElement>) => {
+        const Element = (as ?? defaultElement) as TElement;
+        const elementProps = {
+            ...props,
+            className: clsx(baseClassName, className),
+        } as ComponentPropsWithoutRef<TElement>;
 
-        return (
-            <Element
-                {...props}
-                className={clsx(baseClassName, className)}
-            />
-        );
+        return createElement(Element, elementProps);
     };
 
     return Component;

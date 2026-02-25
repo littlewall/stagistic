@@ -9,6 +9,7 @@
 }
 
 .modal {
+    overflow: hidden;
     display: flex;
     flex-direction: column;
     width: min(1080px, 100%);
@@ -18,7 +19,6 @@
     border: 1px solid var(--color-divider);
     border-radius: var(--radius-md);
     box-shadow: var(--shadow-popover);
-    overflow: hidden;
 }
 
 .header {
@@ -37,12 +37,12 @@
 
 .closeButton {
     cursor: pointer;
-    border: 1px solid var(--color-divider);
-    background: var(--color-surface);
-    color: var(--color-ink-muted);
-    border-radius: var(--radius-sm);
     padding: var(--space-2) var(--space-3);
     font-size: .875rem;
+    color: var(--color-ink-muted);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-sm);
 }
 
 .closeButton:hover {
@@ -53,15 +53,15 @@
 .body {
     display: grid;
     grid-template-columns: 280px 1fr;
-    min-height: 0;
     flex: 1 1 auto;
+    min-height: 0;
 }
 
 .sidebar {
-    padding: var(--space-4);
-    border-right: 1px solid var(--color-divider);
     overflow: auto;
+    padding: var(--space-4);
     background: color-mix(in srgb, var(--color-surface) 88%, var(--color-highlight));
+    border-right: 1px solid var(--color-divider);
 }
 
 .group + .group {
@@ -71,16 +71,16 @@
 .groupLabel {
     margin-bottom: var(--space-2);
     font-size: .75rem;
+    color: var(--color-ink-muted);
     text-transform: uppercase;
     letter-spacing: .12em;
-    color: var(--color-ink-muted);
 }
 
 .navList,
 .subList {
-    list-style: none;
     margin: 0;
     padding: 0;
+    list-style: none;
 }
 
 .navItem,
@@ -88,14 +88,14 @@
 .navExpandButton,
 .subItem,
 .subItemActive {
+    cursor: pointer;
     width: 100%;
-    border: 0;
-    border-radius: var(--radius-sm);
-    text-align: left;
-    background: transparent;
     padding: var(--space-2) var(--space-3);
     color: var(--color-ink);
-    cursor: pointer;
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
 }
 
 .navItem:hover,
@@ -106,15 +106,15 @@
 
 .navItemActive,
 .subItemActive {
-    background: color-mix(in srgb, var(--color-ink) 12%, var(--color-surface));
     font-weight: 600;
+    background: color-mix(in srgb, var(--color-ink) 12%, var(--color-surface));
 }
 
 .navExpandButton {
     display: inline-flex;
+    gap: var(--space-2);
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-2);
 }
 
 .expandArrow,
@@ -124,9 +124,9 @@
     color: color-mix(in srgb, var(--color-ink) 86%, var(--color-accent));
     fill: none;
     stroke: currentcolor;
-    stroke-width: 2.2;
     stroke-linecap: round;
     stroke-linejoin: round;
+    stroke-width: 2.2;
     transition: transform 120ms ease, color 120ms ease;
 }
 
@@ -146,8 +146,8 @@
 
 .subItemContent {
     display: inline-flex;
-    align-items: center;
     gap: var(--space-2);
+    align-items: center;
 }
 
 .subItemIcon {
@@ -185,8 +185,8 @@
     }
 
     .sidebar {
+        max-height: 240px;
         border-right: 0;
         border-bottom: 1px solid var(--color-divider);
-        max-height: 240px;
     }
 }

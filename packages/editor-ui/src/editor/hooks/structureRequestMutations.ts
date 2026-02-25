@@ -2,6 +2,9 @@ import {
     buildScriptBlockIndex,
     ELEMENT_ACT,
     type FountainJSONContent,
+    getScriptBlockId,
+    getScriptBlockLegacyType,
+    isScriptBlockNode,
     normalizeScriptStructure,
     type ScriptDocument,
 } from '@stagistic/script-core';
@@ -13,7 +16,6 @@ import type {
     EditorValueChangeMeta,
 } from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
-import {FOUNTAIN_BLOCK_NODE_NAME} from '../tiptap/fountainCore';
 import {type AutosaveSchedulePayload} from './useAutosaveController';
 
 export const setPlainTextContent = (
@@ -32,9 +34,9 @@ export const setPlainTextContent = (
         }
 
         if (
-            node.type === FOUNTAIN_BLOCK_NODE_NAME
-            && node.attrs?.id === blockId
-            && node.attrs?.blockType === ELEMENT_ACT
+            isScriptBlockNode(node)
+            && getScriptBlockId(node) === blockId
+            && getScriptBlockLegacyType(node) === ELEMENT_ACT
         ) {
             const currentText = (node.content ?? [])
                 .map(child => {
@@ -96,9 +98,9 @@ export const removeActBlockById = (
         }
 
         if (
-            node.type === FOUNTAIN_BLOCK_NODE_NAME
-            && node.attrs?.id === blockId
-            && node.attrs?.blockType === ELEMENT_ACT
+            isScriptBlockNode(node)
+            && getScriptBlockId(node) === blockId
+            && getScriptBlockLegacyType(node) === ELEMENT_ACT
         ) {
             didChange = true;
 
@@ -144,8 +146,8 @@ export const insertActBlockBeforeId = (
 
         if (
             !didInsert
-            && node.type === FOUNTAIN_BLOCK_NODE_NAME
-            && node.attrs?.id === beforeBlockId
+            && isScriptBlockNode(node)
+            && getScriptBlockId(node) === beforeBlockId
         ) {
             nextNodes.push(actNode, node);
             didInsert = true;

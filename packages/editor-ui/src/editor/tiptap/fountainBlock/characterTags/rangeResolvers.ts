@@ -4,8 +4,8 @@ import {
 } from '@tiptap/pm/state';
 
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
+    isFountainBlockNodeName,
     normalizeFountainBlockType,
 } from '../../fountainCore';
 import {
@@ -20,7 +20,7 @@ export const findCharacterBlockRangeById = (
     let found: CharacterBlockRange | null = null;
 
     state.doc.descendants((node, pos) => {
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             return true;
         }
 
@@ -56,7 +56,7 @@ export const findCharacterBlockRangeAtPosition = (
     for (let depth = $position.depth; depth > 0; depth -= 1) {
         const node = $position.node(depth);
 
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             continue;
         }
 
@@ -89,13 +89,13 @@ export const getCharacterBlockLeftBySelection = (
         return null;
     }
 
-    const previousBlock = getActiveFountainBlockFromState(oldState, FOUNTAIN_BLOCK_NODE_NAME);
+    const previousBlock = getActiveFountainBlockFromState(oldState);
 
     if (!previousBlock || !isCharacterBlockType(previousBlock.blockType)) {
         return null;
     }
 
-    const nextBlock = getActiveFountainBlockFromState(newState, FOUNTAIN_BLOCK_NODE_NAME);
+    const nextBlock = getActiveFountainBlockFromState(newState);
 
     if (nextBlock?.id === previousBlock.id) {
         return null;

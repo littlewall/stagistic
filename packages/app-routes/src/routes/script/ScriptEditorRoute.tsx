@@ -1,9 +1,13 @@
-import {useScriptRepository} from '@stagistic/app-core';
+import {
+    useScriptRepository,
+    useScriptState,
+} from '@stagistic/app-core';
 import {
     FountainEditor,
     incrementRouteRenderCount,
 } from '@stagistic/editor-ui';
 import {isApplePlatform} from '@stagistic/platform-core';
+import type {ScriptDocument} from '@stagistic/script-core';
 import {
     AppHeader,
     AppLayout,
@@ -11,7 +15,13 @@ import {
     ScriptEditorAppHeader,
     ScriptSettingsModal,
 } from '@stagistic/ui';
-import {useCallback, useMemo} from 'react';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 import {
     useNavigate,
     useParams,
@@ -21,7 +31,10 @@ import {
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
 import {useScriptEditorCharacters} from './editor/characters/useScriptEditorCharacters';
-import {ScriptEditorSettingsPanel} from './editor/settings';
+import {
+    ScriptEditorSettingsPanel,
+    useProductionSettingsController,
+} from './editor/settings';
 import {ScriptStructureSidebar} from './editor/structure';
 import {useStructureSidebarController} from './editor/structure/useStructureSidebarController';
 import styles from './ScriptEditorRoute.module.css';
@@ -136,26 +149,104 @@ export const ScriptEditorRoute = () => {
         characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
-    const sourceIndexForSidebars = initialIndexSnapshot ?? null;
+    const scriptState = useScriptState({
+        enabled: Boolean(currentScriptId),
+        scriptId: currentScriptId,
+        initialValue,
+        repository: scriptRepository,
+        persistLatest: handleAutoSave,
+        waitMs: 400,
+        maxWaitMs: 2000,
+    });
     const {
-        insertActRequest,
-        renameActRequest,
-        deleteActRequest,
-        moveSceneRequest,
-        moveActRequest,
+        editorOverrideValue: scriptStateEditorOverrideValue,
+        indexSnapshot: scriptStateIndexSnapshot,
+        onEditorValueChange: onScriptStateEditorValueChange,
+        onActiveBlockChange: onScriptStateActiveBlockChange,
+        onRenameAct: onScriptStateRenameAct,
+        onDeleteAct: onScriptStateDeleteAct,
+        onInsertAct: onScriptStateInsertAct,
+        onReorderAct: onScriptStateReorderAct,
+        onReorderScene: onScriptStateReorderScene,
+    } = scriptState;
+    const [restoredEditorValue, setRestoredEditorValue] = useState<ScriptDocument | null>(null);
+    const [editorResetToken, setEditorResetToken] = useState(0);
+    const {
         actNamePreviewById,
         handleSidebarRenameAct,
         handleActNamePreview,
         handleSidebarDeleteAct,
-        handleSidebarInsertAct,
-        handleSidebarReorderScene,
-        handleSidebarReorderAct,
-        handleActiveBlockChange,
     } = useStructureSidebarController({
         currentScriptId,
         scriptRepository,
         sourceValue: initialValue,
     });
+    const sourceIndexForSidebars = scriptStateIndexSnapshot ?? initialIndexSnapshot ?? null;
+    const production = useProductionSettingsController({
+        scriptId: currentScriptId,
+        scriptRepository,
+        indexSnapshot: sourceIndexForSidebars,
+        confirmedCharacters: normalizedConfirmedCharacterRecords.map(character => ({
+            id: character.id,
+            key: character.key,
+        })),
+        onRestoredDocument: value => {
+            setRestoredEditorValue(value);
+            setEditorResetToken(previous => previous + 1);
+            onScriptStateEditorValueChange(value);
+        },
+    });
+    const {
+        onEditorValueChange: onProductionEditorValueChange,
+        onActiveBlockChange: onProductionActiveBlockChange,
+    } = production.callbacks;
+    const lastResolvedActiveBlockIdRef = useRef<string | null | undefined>(undefined);
+    const handleResolvedEditorValueChange = useCallback((
+        value: Parameters<typeof handleEditorValueChange>[0],
+        meta?: Parameters<typeof handleEditorValueChange>[1],
+    ) => {
+        handleEditorValueChange(value, meta);
+        onProductionEditorValueChange(value);
+        onScriptStateEditorValueChange(value);
+    }, [
+        handleEditorValueChange,
+        onProductionEditorValueChange,
+        onScriptStateEditorValueChange,
+    ]);
+    const handleResolvedActiveBlockChange = useCallback((blockId: string | null) => {
+        if (lastResolvedActiveBlockIdRef.current === blockId) {
+            return;
+        }
+
+        lastResolvedActiveBlockIdRef.current = blockId;
+        onProductionActiveBlockChange(blockId);
+        onScriptStateActiveBlockChange(blockId);
+    }, [onProductionActiveBlockChange, onScriptStateActiveBlockChange]);
+    const structureSidebarActions = useMemo(() => {
+        return {
+            onRenameAct: (blockId: string, nextName: string) => {
+                handleSidebarRenameAct(blockId, nextName);
+                onScriptStateRenameAct(blockId, nextName);
+            },
+            onActNamePreview: handleActNamePreview,
+            onDeleteAct: (blockId: string) => {
+                handleSidebarDeleteAct(blockId);
+                onScriptStateDeleteAct(blockId);
+            },
+            onInsertAct: onScriptStateInsertAct,
+            onReorderAct: onScriptStateReorderAct,
+            onReorderScene: onScriptStateReorderScene,
+        };
+    }, [
+        handleActNamePreview,
+        handleSidebarDeleteAct,
+        handleSidebarRenameAct,
+        onScriptStateDeleteAct,
+        onScriptStateInsertAct,
+        onScriptStateRenameAct,
+        onScriptStateReorderAct,
+        onScriptStateReorderScene,
+    ]);
 
     const {
         handleSelectScript,
@@ -179,22 +270,17 @@ export const ScriptEditorRoute = () => {
             actNamePreviewById,
         },
         actions: {
-            onRenameAct: handleSidebarRenameAct,
-            onActNamePreview: handleActNamePreview,
-            onDeleteAct: handleSidebarDeleteAct,
-            onInsertAct: handleSidebarInsertAct,
-            onReorderAct: handleSidebarReorderAct,
-            onReorderScene: handleSidebarReorderScene,
+            onRenameAct: structureSidebarActions.onRenameAct,
+            onActNamePreview: structureSidebarActions.onActNamePreview,
+            onDeleteAct: structureSidebarActions.onDeleteAct,
+            onInsertAct: structureSidebarActions.onInsertAct,
+            onReorderAct: structureSidebarActions.onReorderAct,
+            onReorderScene: structureSidebarActions.onReorderScene,
         },
     }), [
         actNamePreviewById,
-        handleActNamePreview,
-        handleSidebarDeleteAct,
-        handleSidebarInsertAct,
-        handleSidebarRenameAct,
-        handleSidebarReorderAct,
-        handleSidebarReorderScene,
         resolvedScriptSettings.structure,
+        structureSidebarActions,
         sourceIndexForSidebars,
     ]);
     const characterSidebarProps = useMemo(() => ({
@@ -249,6 +335,22 @@ export const ScriptEditorRoute = () => {
         openSettingsModal,
         closeSettingsModal,
     });
+    const baseEditorInitialValue = scriptStateEditorOverrideValue ?? editorOverrideValue ?? initialValue;
+    const resolvedEditorInitialValue = restoredEditorValue ?? baseEditorInitialValue;
+
+    useEffect(() => {
+        setRestoredEditorValue(null);
+        setEditorResetToken(0);
+        lastResolvedActiveBlockIdRef.current = undefined;
+    }, [currentScriptId]);
+
+    useEffect(() => {
+        if (!resolvedEditorInitialValue) {
+            return;
+        }
+
+        onProductionEditorValueChange(resolvedEditorInitialValue);
+    }, [onProductionEditorValueChange, resolvedEditorInitialValue]);
 
     const showEditorLoader = editorLoadState.isLoading || !initialValue;
 
@@ -262,6 +364,10 @@ export const ScriptEditorRoute = () => {
                 hint={storageError ?? 'Prosím vyčkejte, připravujeme editor.'}
             />
         );
+    }
+
+    if (!resolvedEditorInitialValue) {
+        return null;
     }
 
     return (
@@ -292,16 +398,18 @@ export const ScriptEditorRoute = () => {
                 </div>
             ) : null}
             <FountainEditor
-                key={currentScript?.id ?? 'editor'}
+                key={`${currentScript?.id ?? 'editor'}:${editorResetToken}`}
                 document={{
-                    initialValue: editorOverrideValue ?? initialValue,
+                    initialValue: resolvedEditorInitialValue,
                     persistentCharacters: normalizedConfirmedCharacterRecords,
+                    annotations: production.editor.annotations,
+                    viewFilter: production.editor.viewFilter,
                 }}
                 settings={{
                     scriptSettings: scriptSettingsDraft,
                 }}
                 save={{
-                    onAutoSave: handleAutoSave,
+                    onAutoSave: undefined,
                     onManualSave: handleManualSave,
                     autoSaveDelayMs: AUTOSAVE_DELAY_MS,
                 }}
@@ -311,16 +419,10 @@ export const ScriptEditorRoute = () => {
                     rightSidebarToggle,
                     sidebarWidth: SIDEBAR_WIDTH,
                 }}
-                requests={{
-                    insertActRequest,
-                    renameActRequest,
-                    deleteActRequest,
-                    moveSceneRequest,
-                    moveActRequest,
-                }}
+                requests={undefined}
                 callbacks={{
-                    onValueChange: handleEditorValueChange,
-                    onActiveBlockChange: handleActiveBlockChange,
+                    onValueChange: handleResolvedEditorValueChange,
+                    onActiveBlockChange: handleResolvedActiveBlockChange,
                 }}
             >
                 <FountainEditor.LeftSidebar>
@@ -345,6 +447,7 @@ export const ScriptEditorRoute = () => {
                     resolvedScriptSettings={resolvedScriptSettings}
                     blockLabelByType={BLOCK_LABEL_BY_TYPE}
                     shortcutPrefix={shortcutPrefix}
+                    production={production.panel}
                     onUpdateBlockSettings={updateBlockSettings}
                     onUpdateCharacterColorSaturation={updateCharacterColorSaturation}
                     onUpdateStructureSettings={updateStructureSettings}

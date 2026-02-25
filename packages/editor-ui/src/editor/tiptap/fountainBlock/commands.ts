@@ -1,6 +1,7 @@
 import {
     createNodeId,
     ELEMENT_ACTION,
+    resolveScriptBlockNodeType,
 } from '@stagistic/script-core';
 import type {NodeType} from '@tiptap/pm/model';
 import {TextSelection, type Transaction} from '@tiptap/pm/state';
@@ -10,6 +11,7 @@ import {
     type ActiveFountainBlock,
     FOUNTAIN_BLOCK_NODE_NAME,
     type FountainBlockType,
+    getActiveFountainBlockFromState,
     normalizeFountainBlockType,
 } from '../fountainCore';
 
@@ -25,6 +27,24 @@ const setSelectionNearBlockStart = (tr: Transaction, blockPos: number) => {
     return tr.setSelection(TextSelection.near(resolved, 1));
 };
 
+const resolveNodeTypeForBlockType = (
+    nodes: Record<string, NodeType>,
+    currentNodeTypeName: string,
+    blockType: FountainBlockType,
+) => {
+    if (currentNodeTypeName === FOUNTAIN_BLOCK_NODE_NAME) {
+        return nodes[FOUNTAIN_BLOCK_NODE_NAME] ?? null;
+    }
+
+    const resolvedNodeTypeName = resolveScriptBlockNodeType(blockType);
+
+    if (!resolvedNodeTypeName) {
+        return null;
+    }
+
+    return nodes[resolvedNodeTypeName] ?? null;
+};
+
 export const insertParenPair = (editor: Editor, from: number, to: number) => {
     let tr = editor.state.tr.insertText('()', from, to);
     const nextSelection = from + 1;
@@ -36,15 +56,32 @@ export const insertParenPair = (editor: Editor, from: number, to: number) => {
 
 export const updateBlockType = (editor: Editor, blockType: FountainBlockType, id?: string) => {
     const normalized = normalizeFountainBlockType(blockType);
-    const attributes: Record<string, unknown> = {
-        blockType: normalized,
-    };
+    const activeBlock = getActiveFountainBlockFromState(editor.state);
 
-    if (id) {
-        attributes.id = id;
+    if (!activeBlock) {
+        return false;
     }
 
-    return editor.commands.updateAttributes(FOUNTAIN_BLOCK_NODE_NAME, attributes);
+    const nodes = editor.schema.nodes as Record<string, NodeType>;
+    const nodeType = resolveNodeTypeForBlockType(nodes, activeBlock.node.type.name, normalized);
+
+    if (!nodeType) {
+        return false;
+    }
+
+    const attributes = {
+        ...activeBlock.node.attrs,
+        blockType: normalized,
+        id: id ?? activeBlock.id,
+    };
+
+    let tr = editor.state.tr.setNodeMarkup(activeBlock.pos, nodeType, attributes);
+
+    tr = setSelectionNearBlockStart(tr, activeBlock.pos);
+    editor.view.dispatch(tr.scrollIntoView());
+    focusEditor(editor);
+
+    return true;
 };
 
 export const splitBlockWithType = (editor: Editor, blockType: FountainBlockType) => {
@@ -59,13 +96,15 @@ export const splitBlockWithType = (editor: Editor, blockType: FountainBlockType)
 
 export const insertActionBefore = (editor: Editor, blockPos: number, blockStart: number) => {
     const nodes = editor.schema.nodes as Record<string, NodeType>;
-    const blockType = nodes[FOUNTAIN_BLOCK_NODE_NAME];
+    const currentBlock = editor.state.doc.nodeAt(blockPos);
+    const currentNodeTypeName = currentBlock?.type.name ?? FOUNTAIN_BLOCK_NODE_NAME;
+    const actionNodeType = resolveNodeTypeForBlockType(nodes, currentNodeTypeName, ELEMENT_ACTION);
 
-    if (!blockType) {
+    if (!actionNodeType) {
         return false;
     }
 
-    const actionBlock = blockType.create({
+    const actionBlock = actionNodeType.create({
         blockType: ELEMENT_ACTION,
         id: createNodeId(),
     });
@@ -86,13 +125,20 @@ export const setBlockTypeWithSelection = (
     blockType: FountainBlockType,
 ) => {
     const normalized = normalizeFountainBlockType(blockType);
+    const nodes = editor.schema.nodes as Record<string, NodeType>;
+    const nodeType = resolveNodeTypeForBlockType(nodes, block.node.type.name, normalized);
+
+    if (!nodeType) {
+        return false;
+    }
+
     const attrs = {
         ...block.node.attrs,
         blockType: normalized,
         id: block.id,
     };
 
-    let tr = editor.state.tr.setNodeMarkup(block.pos, undefined, attrs);
+    let tr = editor.state.tr.setNodeMarkup(block.pos, nodeType, attrs);
 
     tr = setSelectionNearBlockStart(tr, block.pos);
 

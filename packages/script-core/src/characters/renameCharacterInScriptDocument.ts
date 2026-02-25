@@ -1,8 +1,9 @@
 import {splitTrailingParentheticalSuffix} from '@stagistic/shared';
 
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
     type FountainJSONContent,
+    getScriptBlockLegacyType,
+    isScriptBlockNode,
     type ScriptDocument,
 } from '../document';
 import {
@@ -144,9 +145,11 @@ export const renameCharacterInScriptDocument = (
                 return node;
             }
 
-            if (node.type === FOUNTAIN_BLOCK_NODE_NAME && isCharacterBlockType(node.attrs?.blockType)) {
+            const blockType = getScriptBlockLegacyType(node);
+
+            if (isScriptBlockNode(node) && isCharacterBlockType(blockType)) {
                 const sourceLine = getNodeTextContent(node);
-                const replacementName = getCharacterNameForBlockType(toCharacterName, node.attrs?.blockType);
+                const replacementName = getCharacterNameForBlockType(toCharacterName, blockType);
                 const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
                 const {
                     line: renamedLine,

@@ -1,4 +1,7 @@
-import {type ScriptDocument} from '@stagistic/script-core';
+import {
+    normalizeScriptDocumentNodeMode,
+    type ScriptDocument,
+} from '@stagistic/script-core';
 import {useEditor} from '@tiptap/react';
 import {
     Children,
@@ -27,8 +30,8 @@ import {
 import {useEditorLifecycle} from './hooks/useEditorLifecycle';
 import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
-import {EditorLiveStoreProvider} from './live/context';
-import {createEditorLiveStore} from './live/store';
+import {EditorSnapshotStoreProvider} from './live/context';
+import {createEditorSnapshotStore} from './live/store';
 import type {EditorProps} from './types';
 import {useEditorExtensions} from './useEditorExtensions';
 
@@ -53,7 +56,11 @@ const RIGHT_SIDEBAR_SLOT = Symbol('EditorRightSidebar');
 type SlotType = {_slotId: symbol};
 
 const makeSlot = (slotId: symbol) => {
-    const SlotComponent = (_props: {children?: ReactNode}) => null;
+    const SlotComponent = ({children}: {children?: ReactNode}) => {
+        void children;
+
+        return null;
+    };
 
     (SlotComponent as unknown as SlotType)._slotId = slotId;
 
@@ -73,7 +80,11 @@ const extractSidebarSlots = (children: ReactNode) => {
 
         if (slotId === LEFT_SIDEBAR_SLOT) {
             left = (child.props as {children?: ReactNode}).children;
-        } else if (slotId === RIGHT_SIDEBAR_SLOT) {
+
+            return;
+        }
+
+        if (slotId === RIGHT_SIDEBAR_SLOT) {
             right = (child.props as {children?: ReactNode}).children;
         }
     });
@@ -94,7 +105,10 @@ const Editor = ({
 }: EditorProps & {children?: ReactNode}) => {
     const {
         initialValue,
+        nodeMode = 'default',
         persistentCharacters = [],
+        annotations,
+        viewFilter,
     } = document;
     const {
         settings,
@@ -125,12 +139,19 @@ const Editor = ({
         onActiveBlockChange,
         onBlockUiEvent,
     } = callbacks ?? {};
-    const initialSerialized = useMemo(() => serializeDocumentForSave(initialValue), [initialValue]);
+    const resolvedInitialValue = useMemo(
+        () => normalizeScriptDocumentNodeMode(initialValue, nodeMode),
+        [initialValue, nodeMode],
+    );
+    const initialSerialized = useMemo(
+        () => serializeDocumentForSave(resolvedInitialValue),
+        [resolvedInitialValue],
+    );
     const sizeScale = useMemo(() => getSizeScale(), []);
     const rootRef = useRef<HTMLDivElement | null>(null);
     const canvasHostRef = useRef<HTMLDivElement | null>(null);
     const colorByCharacterIdRef = useRef<ReadonlyMap<string, string>>(new Map());
-    const liveStore = useMemo(() => createEditorLiveStore(), []);
+    const liveStore = useMemo(() => createEditorSnapshotStore(), []);
 
     useEffect(() => {
         const colorMap = new Map<string, string>();
@@ -151,11 +172,11 @@ const Editor = ({
     }, [persistentCharacters]);
 
     const resolvedSettings = useMemo(() => {
-        const effectiveScriptSettings = scriptSettings ?? initialValue.attrs?.settings;
+        const effectiveScriptSettings = scriptSettings ?? resolvedInitialValue.attrs?.settings;
 
         return resolveEditorSettings(settings, effectiveScriptSettings);
     }, [
-        initialValue.attrs?.settings,
+        resolvedInitialValue.attrs?.settings,
         scriptSettings,
         settings,
     ]);
@@ -178,15 +199,18 @@ const Editor = ({
         resolvedSettings,
         sizeScale,
         colorByCharacterIdRef,
+        annotations,
+        visibleLayerIds: viewFilter?.visibleLayerIds,
+        visibleBlockTypes: viewFilter?.visibleBlockTypes,
     });
     const initialContentSignature = useMemo(
-        () => JSON.stringify(stripScriptSettings(initialValue)),
-        [initialValue],
+        () => JSON.stringify(stripScriptSettings(resolvedInitialValue)),
+        [resolvedInitialValue],
     );
 
     const initialDoc = useMemo<ScriptDocument>(
-        () => initialValue,
-        [initialContentSignature],
+        () => resolvedInitialValue,
+        [initialContentSignature, resolvedInitialValue],
     );
     const editor = useEditor({
         extensions,
@@ -251,7 +275,7 @@ const Editor = ({
         },
         liveStore,
         document: {
-            initialValue,
+            initialValue: resolvedInitialValue,
             initialSerialized,
             setLatestValue,
             syncInitialValue,
@@ -294,7 +318,7 @@ const Editor = ({
     ]);
 
     return (
-        <EditorLiveStoreProvider store={liveStore}>
+        <EditorSnapshotStoreProvider store={liveStore}>
             <EditorInstanceProvider editor={editor}>
                 <EditorShell
                     canvas={{
@@ -311,14 +335,14 @@ const Editor = ({
                     onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
                 />
             </EditorInstanceProvider>
-        </EditorLiveStoreProvider>
+        </EditorSnapshotStoreProvider>
     );
 };
 
 /**
  * Compound-component slots.
  * Render sidebars as children of FountainEditor so they execute inside
- * EditorLiveStoreProvider + EditorInstanceProvider and can call
+ * EditorSnapshotStoreProvider + EditorInstanceProvider and can call
  * useEditorLiveStructure(), useEditorLiveCharacters(), useEditorInstance(), etc.
  *
  * Usage:

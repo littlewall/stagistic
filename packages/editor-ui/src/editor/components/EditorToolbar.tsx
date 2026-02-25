@@ -11,7 +11,11 @@ import {
 } from 'react';
 
 import {FOUNTAIN_BLOCKS_WITHOUT_ACT} from '../blocks/fountainBlockRegistry';
-import {FOUNTAIN_BLOCK_NODE_NAME} from '../tiptap/fountainCore';
+import {updateBlockType} from '../tiptap/fountainBlock/commands';
+import {
+    isFountainBlockNodeName,
+    normalizeFountainBlockType,
+} from '../tiptap/fountainCore';
 import styles from './EditorToolbar.module.css';
 import {BlockTypeSelect} from './toolbar/BlockTypeSelect';
 import type {
@@ -143,7 +147,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             let didChange = false;
 
             editor.state.doc.nodesBetween(from, to, (node, pos) => {
-                if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+                if (!isFountainBlockNodeName(node.type.name)) {
                     return true;
                 }
 
@@ -174,11 +178,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             return;
         }
 
-        editor
-            .chain()
-            .focus()
-            .updateAttributes(FOUNTAIN_BLOCK_NODE_NAME, {blockType: optionType})
-            .run();
+        updateBlockType(editor, normalizeFountainBlockType(optionType));
     }, [
         activeBlockInfo?.type,
         editor,

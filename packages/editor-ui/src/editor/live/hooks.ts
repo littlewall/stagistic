@@ -1,20 +1,20 @@
-import type {
-    EditorLiveCharacterSnapshot,
-    EditorLiveSnapshot,
-    EditorLiveStructureSnapshot,
-} from '../contracts';
 import {
     useCallback,
     useRef,
     useSyncExternalStore,
 } from 'react';
 
-import {useEditorLiveStore} from './context';
+import type {
+    EditorLiveCharacterSnapshot,
+    EditorLiveSnapshot,
+    EditorLiveStructureSnapshot,
+} from '../contracts';
 import {trackSidebarSelectorDuration} from '../perf/editorPerfMetrics';
+import {useEditorSnapshotStore} from './context';
 
-const identity = <TValue,>(value: TValue) => value;
+const identity = <TValue>(value: TValue) => value;
 
-const defaultIsEqual = <TValue,>(previous: TValue, next: TValue) => Object.is(previous, next);
+const defaultIsEqual = <TValue>(previous: TValue, next: TValue) => Object.is(previous, next);
 const getNow = () => {
     if (typeof performance !== 'undefined') {
         return performance.now();
@@ -23,7 +23,7 @@ const getNow = () => {
     return Date.now();
 };
 
-const useLatestValue = <TValue,>(value: TValue) => {
+const useLatestValue = <TValue>(value: TValue) => {
     const ref = useRef(value);
 
     ref.current = value;
@@ -31,11 +31,11 @@ const useLatestValue = <TValue,>(value: TValue) => {
     return ref;
 };
 
-export const useEditorLiveSelector = <TSelected,>(
+export const useEditorLiveSelector = <TSelected>(
     selector: (snapshot: EditorLiveSnapshot) => TSelected,
     isEqual: (previous: TSelected, next: TSelected) => boolean = defaultIsEqual,
 ) => {
-    const store = useEditorLiveStore();
+    const store = useEditorSnapshotStore();
     const selectorRef = useLatestValue(selector);
     const isEqualRef = useLatestValue(isEqual);
     const selectedRef = useRef<TSelected>(selector(store.getSnapshot()));
@@ -46,6 +46,7 @@ export const useEditorLiveSelector = <TSelected,>(
 
         if (isEqualRef.current(selectedRef.current, nextSelected)) {
             trackSidebarSelectorDuration(getNow() - startedAt);
+
             return;
         }
 

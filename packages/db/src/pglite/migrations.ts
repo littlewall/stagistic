@@ -1,5 +1,6 @@
 import type {PGlite} from '@electric-sql/pglite';
-import {compiledMigrations} from '@stagistic/db';
+
+import {compiledMigrations} from '../migrations.compiled';
 
 const MIGRATIONS_TABLE = '__stagistic_migrations';
 
@@ -17,10 +18,10 @@ const getAppliedMigrationIds = async (client: PGlite) => {
         `SELECT id FROM ${MIGRATIONS_TABLE} ORDER BY id`,
     );
 
-    return new Set(result.rows.map(row => row.id));
+    return new Set(result.rows.map((row: {id: string}) => row.id));
 };
 
-export const runMigrations = async (client: PGlite) => {
+export const runPgliteMigrations = async (client: PGlite) => {
     await ensureMigrationsTable(client);
 
     const applied = await getAppliedMigrationIds(client);

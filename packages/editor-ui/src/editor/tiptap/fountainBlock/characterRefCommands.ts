@@ -2,13 +2,14 @@ import {
     ELEMENT_CHARACTER,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     extractCharacterKeys,
-    FOUNTAIN_BLOCK_NODE_NAME,
     normalizeCharacterKey,
     splitCharacterTokens,
 } from '@stagistic/script-core';
 import type {Node as PMNode} from '@tiptap/pm/model';
 import type {Transaction} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
+
+import {isFountainBlockNodeName} from '../fountainCore';
 
 type CharacterRefByKey = Record<string, string>;
 
@@ -64,7 +65,7 @@ export const linkCharacterRef = (
 
     state.doc.descendants((node, pos) => {
         if (
-            node.type.name !== FOUNTAIN_BLOCK_NODE_NAME
+            !isFountainBlockNodeName(node.type.name)
             || !node.attrs?.blockType
             || !isCharacterBlock(node.attrs.blockType)
         ) {
@@ -124,7 +125,7 @@ export const unlinkCharacterRef = (
 
     state.doc.descendants((node, pos) => {
         if (
-            node.type.name !== FOUNTAIN_BLOCK_NODE_NAME
+            !isFountainBlockNodeName(node.type.name)
             || !node.attrs?.blockType
             || !isCharacterBlock(node.attrs.blockType)
         ) {
@@ -182,7 +183,7 @@ export const replaceCharacterRefId = (
 
     state.doc.descendants((node, pos) => {
         if (
-            node.type.name !== FOUNTAIN_BLOCK_NODE_NAME
+            !isFountainBlockNodeName(node.type.name)
             || !node.attrs?.blockType
             || !isCharacterBlock(node.attrs.blockType)
         ) {
@@ -252,7 +253,7 @@ export const renameCharacterText = (
         }
 
         if (
-            node.type.name !== FOUNTAIN_BLOCK_NODE_NAME
+            !isFountainBlockNodeName(node.type.name)
             || !node.attrs?.blockType
             || !isCharacterBlock(node.attrs.blockType)
         ) {
@@ -279,7 +280,7 @@ export const renameCharacterText = (
 
     state.doc.descendants((node, pos) => {
         if (
-            node.type.name !== FOUNTAIN_BLOCK_NODE_NAME
+            !isFountainBlockNodeName(node.type.name)
             || !node.attrs?.blockType
             || !isCharacterBlock(node.attrs.blockType)
         ) {
@@ -412,7 +413,7 @@ export const focusFirstCharacterBlock = (
         }
 
         if (
-            node.type.name !== FOUNTAIN_BLOCK_NODE_NAME
+            !isFountainBlockNodeName(node.type.name)
             || !node.attrs?.blockType
             || !isCharacterBlock(node.attrs.blockType)
         ) {

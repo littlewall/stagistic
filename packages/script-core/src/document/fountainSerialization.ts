@@ -16,10 +16,11 @@ import {
     normalizeScriptStructure,
 } from '../structure';
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
     FOUNTAIN_COLUMN_NODE_NAME,
     type FountainJSONContent,
+    getScriptBlockLegacyType,
+    isScriptBlockNode,
     type ScriptDocument,
 } from './scriptDocument';
 
@@ -69,9 +70,7 @@ const inlineNodesToLeaves = (nodes: FountainJSONContent[] | undefined): Fountain
 };
 
 const toFountainElement = (node: FountainJSONContent): FountainElement => {
-    const rawBlockType = typeof node.attrs?.blockType === 'string'
-        ? node.attrs.blockType
-        : ELEMENT_ACTION;
+    const rawBlockType = getScriptBlockLegacyType(node, ELEMENT_ACTION);
     const blockType = normalizeEditorSettingsBlockType(rawBlockType) ?? ELEMENT_ACTION;
 
     return {
@@ -113,7 +112,7 @@ const collectFountainElements = (nodes: FountainJSONContent[] | undefined): Foun
                 return;
             }
 
-            if (node.type === FOUNTAIN_BLOCK_NODE_NAME) {
+            if (isScriptBlockNode(node)) {
                 elements.push(toFountainElement(node));
 
                 return;

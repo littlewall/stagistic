@@ -5,12 +5,13 @@
     "type": "module",
     "main": "./src/index.ts",
     "scripts": {
-        "lint": "eslint . --ext ts",
+        "lint": "eslint .",
         "db:generate": "drizzle-kit generate",
         "db:check": "drizzle-kit check",
         "db:compile-migrations": "node ./scripts/compile-migrations.mjs"
     },
     "dependencies": {
+        "@electric-sql/pglite": "^0.3.15",
         "drizzle-orm": "^0.44.0"
     },
     "devDependencies": {

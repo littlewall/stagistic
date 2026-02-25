@@ -4,6 +4,14 @@ export default [
     ...dvdevEslint.configs.base,
     ...dvdevEslint.configs.react,
     {
+        ignores: [
+            '**/scripts/compile-migrations.mjs',
+            '**/scripts/migrate-json-to-blocks.ts',
+            '**/scripts/validate-json-to-blocks.ts',
+            '**/src/migrations.compiled.ts',
+        ],
+    },
+    {
         name: 'stagistic/style-guardrails',
         files: ['apps/**/*.{ts,tsx,js,jsx}', 'packages/**/*.{ts,tsx,js,jsx}'],
         rules: {

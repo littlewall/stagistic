@@ -1,0 +1,169 @@
+import {
+    and,
+    asc,
+    eq,
+    inArray,
+    isNull,
+} from 'drizzle-orm';
+
+import {scriptBlocks} from '../../schema';
+import type {DbClient} from '../types';
+
+export interface ListScriptBlocksOptions {
+    blockType?: string,
+    sceneId?: string | null,
+    actId?: string | null,
+}
+
+export interface ScriptBlockUpsertRow {
+    id: string,
+    scriptId: string,
+    blockType: string,
+    orderNo: number,
+    textContent: string,
+    contentJson: string | null,
+    sceneId: string | null,
+    actId: string | null,
+    columnGroupId: string | null,
+    columnIndex: number | null,
+    createdAt: number,
+    updatedAt: number,
+}
+
+export interface ScriptBlockOrderMove {
+    id: string,
+    orderNo: number,
+    updatedAt: number,
+}
+
+export const listScriptBlocks = async (
+    db: DbClient,
+    scriptId: string,
+    options?: ListScriptBlocksOptions,
+) => {
+    const predicates = [eq(scriptBlocks.scriptId, scriptId)];
+
+    if (options?.blockType) {
+        predicates.push(eq(scriptBlocks.blockType, options.blockType));
+    }
+
+    if (options?.sceneId !== undefined) {
+        predicates.push(
+            options.sceneId === null
+                ? isNull(scriptBlocks.sceneId)
+                : eq(scriptBlocks.sceneId, options.sceneId),
+        );
+    }
+
+    if (options?.actId !== undefined) {
+        predicates.push(
+            options.actId === null
+                ? isNull(scriptBlocks.actId)
+                : eq(scriptBlocks.actId, options.actId),
+        );
+    }
+
+    const whereClause = predicates.length === 1
+        ? predicates[0]
+        : and(...predicates);
+
+    return db
+        .select()
+        .from(scriptBlocks)
+        .where(whereClause)
+        .orderBy(asc(scriptBlocks.orderNo));
+};
+
+export const listScriptBlocksByScene = async (db: DbClient, sceneId: string) => {
+    return db
+        .select()
+        .from(scriptBlocks)
+        .where(eq(scriptBlocks.sceneId, sceneId))
+        .orderBy(asc(scriptBlocks.orderNo));
+};
+
+export const listScriptBlocksByAct = async (db: DbClient, actId: string) => {
+    return db
+        .select()
+        .from(scriptBlocks)
+        .where(eq(scriptBlocks.actId, actId))
+        .orderBy(asc(scriptBlocks.orderNo));
+};
+
+export const getScriptBlockById = async (db: DbClient, blockId: string) => {
+    const rows = await db
+        .select()
+        .from(scriptBlocks)
+        .where(eq(scriptBlocks.id, blockId))
+        .limit(1);
+
+    return rows[0] ?? null;
+};
+
+export const bulkUpsertScriptBlocks = async (db: DbClient, rows: ScriptBlockUpsertRow[]) => {
+    if (rows.length === 0) {
+        return;
+    }
+
+    for (const row of rows) {
+        await db
+            .insert(scriptBlocks)
+            .values({
+                id: row.id,
+                scriptId: row.scriptId,
+                blockType: row.blockType,
+                orderNo: row.orderNo,
+                textContent: row.textContent,
+                contentJson: row.contentJson,
+                sceneId: row.sceneId,
+                actId: row.actId,
+                columnGroupId: row.columnGroupId,
+                columnIndex: row.columnIndex,
+                createdAt: row.createdAt,
+                updatedAt: row.updatedAt,
+            })
+            .onConflictDoUpdate({
+                target: scriptBlocks.id,
+                set: {
+                    blockType: row.blockType,
+                    orderNo: row.orderNo,
+                    textContent: row.textContent,
+                    contentJson: row.contentJson,
+                    sceneId: row.sceneId,
+                    actId: row.actId,
+                    columnGroupId: row.columnGroupId,
+                    columnIndex: row.columnIndex,
+                    updatedAt: row.updatedAt,
+                },
+            });
+    }
+};
+
+export const bulkDeleteScriptBlocks = async (db: DbClient, blockIds: string[]) => {
+    if (blockIds.length === 0) {
+        return;
+    }
+
+    await db.delete(scriptBlocks).where(inArray(scriptBlocks.id, blockIds));
+};
+
+export const reorderScriptBlocks = async (
+    db: DbClient,
+    scriptId: string,
+    moves: ScriptBlockOrderMove[],
+) => {
+    for (const move of moves) {
+        await db
+            .update(scriptBlocks)
+            .set({
+                orderNo: move.orderNo,
+                updatedAt: move.updatedAt,
+            })
+            .where(
+                and(
+                    eq(scriptBlocks.scriptId, scriptId),
+                    eq(scriptBlocks.id, move.id),
+                ),
+            );
+    }
+};

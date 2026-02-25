@@ -15,8 +15,10 @@ export {
 export {
     deleteScriptCharacter,
     touchScriptCharacter,
+    updateScriptCharacterBackstory,
     updateScriptCharacterColor,
     updateScriptCharacterGender,
     updateScriptCharacterKey,
+    updateScriptCharacterNotes,
     upsertScriptCharacter,
 } from './write';

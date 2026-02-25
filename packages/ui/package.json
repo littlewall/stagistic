@@ -5,7 +5,7 @@
     "type": "module",
     "main": "./src/index.ts",
     "scripts": {
-        "lint": "eslint . --ext ts,tsx"
+        "lint": "eslint ."
     },
     "dependencies": {
         "@fontsource-variable/ibm-plex-sans": "^5.2.8",

@@ -2,12 +2,12 @@ import {
     ELEMENT_CHARACTER,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     extractCharacterKeys,
-    FOUNTAIN_BLOCK_NODE_NAME,
     normalizeCharacterKey,
 } from '@stagistic/script-core';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 
 import type {EditorLiveCharacterSnapshot} from '../contracts';
+import {isFountainBlockNodeName} from '../tiptap/fountainCore';
 
 const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
     countsByKey: new Map<string, number>(),
@@ -32,7 +32,7 @@ export const buildCharacterSnapshotFromDoc = (doc: ProseMirrorNode): EditorLiveC
     const keyByCharacterId = new Map<string, string>();
 
     doc.descendants(node => {
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             return true;
         }
 

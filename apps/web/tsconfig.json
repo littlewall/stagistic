@@ -1,14 +1,25 @@
 {
     "extends": "../../tsconfig.base.json",
     "compilerOptions": {
-        "target": "ES2020",
-        "lib": ["ES2020", "DOM", "DOM.Iterable"],
+        "target": "ES2022",
+        "lib": ["ES2022", "DOM", "DOM.Iterable"],
         "jsx": "react-jsx",
         "module": "ESNext",
         "moduleResolution": "bundler",
+        "paths": {
+            "~db": ["./src/db/index.ts"],
+            "~db/*": ["./src/db/*"],
+            "~repo": ["./src/repo/index.ts"],
+            "~repo/*": ["./src/repo/*"]
+        },
         "allowImportingTsExtensions": true,
         "noEmit": true
     },
-    "include": ["src", "vite.config.ts"],
+    "include": [
+        "src",
+        "vite.config.ts",
+        "../desktop/src/db/**/*.ts",
+        "../desktop/src/repo/**/*.ts"
+    ],
     "references": []
 }

@@ -5,15 +5,17 @@
     "type": "module",
     "main": "./src/index.ts",
     "scripts": {
-        "lint": "eslint . --ext ts,tsx"
+        "lint": "eslint ."
     },
     "dependencies": {
+        "@stagistic/platform-core": "workspace:*",
         "@stagistic/script-core": "workspace:*",
+        "@tanstack/react-hotkeys": "^0.3.0",
+        "@tiptap/core": "^3.19.0",
         "@tiptap/extension-bold": "^3.19.0",
+        "@tiptap/extension-document": "^3.19.0",
         "@tiptap/extension-drag-handle": "^3.19.0",
         "@tiptap/extension-drag-handle-react": "^3.19.0",
-        "@tiptap/core": "^3.19.0",
-        "@tiptap/extension-document": "^3.19.0",
         "@tiptap/extension-history": "^3.19.0",
         "@tiptap/extension-italic": "^3.19.0",
         "@tiptap/extension-text": "^3.19.0",
@@ -22,8 +24,7 @@
         "@tiptap/pm": "^3.19.0",
         "@tiptap/react": "^3.19.0",
         "clsx": "^2.1.1",
-        "iconoir-react": "^7.11.0",
-        "@stagistic/platform-core": "workspace:*"
+        "iconoir-react": "^7.11.0"
     },
     "peerDependencies": {
         "react": "^19.0.0",

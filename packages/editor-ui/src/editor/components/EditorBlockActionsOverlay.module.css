@@ -2,10 +2,8 @@
     --block-trigger-size: calc(26px * var(--size-scale));
     --overlay-block-spacing-before-px: 0px;
     --overlay-block-line-height-px: calc(var(--editor-line-height, 1.7) * var(--editor-font-size, 13px));
-    --overlay-row-anchor-offset: calc(
-        var(--overlay-block-spacing-before-px)
-        + (var(--overlay-block-line-height-px) / 2)
-    );
+    --overlay-row-anchor-offset: calc(var(--overlay-block-spacing-before-px)
+    + (var(--overlay-block-line-height-px) / 2));
 
     pointer-events: none;
     position: absolute;
@@ -15,23 +13,20 @@
 .controls {
     pointer-events: auto;
     position: relative;
+    transform: translate(calc(-1 * var(--block-controls-gutter, 32px) - 100% - var(--space-1)), calc(var(--overlay-row-anchor-offset) - 50%));
     display: inline-flex;
     gap: 0;
     align-items: center;
-    transform: translate(
-        calc(-1 * var(--block-controls-gutter, 32px) - 100% - var(--space-1)),
-        calc(var(--overlay-row-anchor-offset) - 50%)
-    );
 }
 
 .trigger {
     cursor: pointer;
     position: relative;
-    box-sizing: border-box;
     display: inline-flex;
     flex: 0 0 var(--block-trigger-size);
     align-items: center;
     justify-content: center;
+    box-sizing: border-box;
     width: var(--block-trigger-size);
     height: var(--block-trigger-size);
     font-size: calc(16px * var(--size-scale));
@@ -77,13 +72,13 @@
 
 .triggerGlyph {
     position: relative;
+    overflow: hidden;
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
     justify-content: center;
     width: calc(16px * var(--size-scale));
     height: calc(16px * var(--size-scale));
-    flex: 0 0 auto;
-    overflow: hidden;
 }
 
 .triggerIcon,
@@ -91,11 +86,11 @@
     position: absolute;
     inset: 0;
     display: inline-flex;
+    flex: 0 0 calc(16px * var(--size-scale));
     align-items: center;
     justify-content: center;
     width: calc(16px * var(--size-scale));
     height: calc(16px * var(--size-scale));
-    flex: 0 0 calc(16px * var(--size-scale));
 }
 
 .triggerIcon {
@@ -104,9 +99,10 @@
 }
 
 .dragGrip {
+    position: relative;
+    color: color-mix(in srgb, var(--color-ink-muted) 64%, var(--color-divider));
     visibility: hidden;
     opacity: 0;
-    position: relative;
 }
 
 .triggerPressing .triggerIcon,
@@ -121,27 +117,18 @@
     opacity: .72;
 }
 
-.dragGrip {
-    color: color-mix(in srgb, var(--color-ink-muted) 64%, var(--color-divider));
-}
-
 .dragGrip::before {
     content: '';
     position: absolute;
-    left: 50%;
     top: 50%;
+    left: 50%;
+    transform: translate(calc(-3px * var(--size-scale)), calc(-5px * var(--size-scale)));
     width: calc(2px * var(--size-scale));
     height: calc(2px * var(--size-scale));
-    border-radius: 999px;
-    background: currentcolor;
-    transform: translate(calc(-3px * var(--size-scale)), calc(-5px * var(--size-scale)));
-    box-shadow:
-        0 calc(4px * var(--size-scale)) 0 currentcolor,
-        0 calc(8px * var(--size-scale)) 0 currentcolor,
-        calc(4px * var(--size-scale)) 0 0 currentcolor,
-        calc(4px * var(--size-scale)) calc(4px * var(--size-scale)) 0 currentcolor,
-        calc(4px * var(--size-scale)) calc(8px * var(--size-scale)) 0 currentcolor;
     opacity: 1;
+    background: currentcolor;
+    border-radius: 999px;
+    box-shadow: 0 calc(4px * var(--size-scale)) 0 currentcolor, 0 calc(8px * var(--size-scale)) 0 currentcolor, calc(4px * var(--size-scale)) 0 0 currentcolor, calc(4px * var(--size-scale)) calc(4px * var(--size-scale)) 0 currentcolor, calc(4px * var(--size-scale)) calc(8px * var(--size-scale)) 0 currentcolor;
 }
 
 .triggerIcon svg,
@@ -159,6 +146,7 @@
     position: absolute;
     top: calc(32px * var(--size-scale));
     left: 0;
+    overflow: hidden;
     display: flex;
     align-items: stretch;
     min-width: calc(200px * var(--size-scale));
@@ -166,7 +154,6 @@
     border: 1px solid var(--color-divider);
     border-radius: calc(12px * var(--size-scale));
     box-shadow: var(--shadow-popover);
-    overflow: hidden;
 }
 
 .menuAbove {
@@ -180,8 +167,8 @@
 
 .menuPrimaryPanel {
     display: grid;
-    align-content: start;
     gap: 0;
+    align-content: start;
     min-width: calc(200px * var(--size-scale));
     padding: var(--space-1);
 }
@@ -190,8 +177,8 @@
     display: grid;
     grid-template-rows: auto 1fr;
     min-width: calc(160px * var(--size-scale));
-    border-left: 1px solid var(--color-divider);
     background: color-mix(in srgb, var(--color-surface) 95%, var(--color-accent) 5%);
+    border-left: 1px solid var(--color-divider);
 }
 
 .menuSecondaryHeader {
@@ -262,7 +249,7 @@
 }
 
 .menuItemCaret {
-    margin-left: auto;
     justify-self: end;
+    margin-left: auto;
     color: var(--color-ink-muted);
 }

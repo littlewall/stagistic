@@ -41,7 +41,7 @@ export const createEmptyEditorLiveSnapshot = (): EditorLiveSnapshot => {
     };
 };
 
-export interface EditorLiveStore {
+export interface EditorSnapshotStore {
     getSnapshot: () => EditorLiveSnapshot,
     setSnapshot: (nextSnapshot: EditorLiveSnapshot) => void,
     patchSnapshot: (patch: Partial<EditorLiveSnapshot>) => void,
@@ -69,7 +69,7 @@ const notifySelectors = (
     });
 };
 
-export const createEditorLiveStore = (initialSnapshot?: EditorLiveSnapshot): EditorLiveStore => {
+export const createEditorSnapshotStore = (initialSnapshot?: EditorLiveSnapshot): EditorSnapshotStore => {
     let snapshot = initialSnapshot ?? createEmptyEditorLiveSnapshot();
     const listeners = new Set<Listener>();
     const selectorListeners = new Set<SelectorListener<unknown>>();

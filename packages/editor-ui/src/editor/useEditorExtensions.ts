@@ -1,6 +1,7 @@
 import {
     createNodeId,
     type EditorSettings,
+    type FountainElementType,
 } from '@stagistic/script-core';
 import Bold from '@tiptap/extension-bold';
 import History from '@tiptap/extension-history';
@@ -17,28 +18,40 @@ import {
     getBlockShortcuts,
 } from './model/blockSettingMaps';
 import {
+    AnnotationDecorationsExtension,
     BlockUiEventsExtension,
+    CharacterTagDecorationsExtension,
     createPaginationExtension,
-    FountainBlockExtension,
+    type EditorBlockAnnotation,
+    FountainBehaviorExtension,
     FountainColumnExtension,
     FountainColumnGroupExtension,
-    ScriptBlockIndexExtension,
-    ScriptSidebarProjectionExtension,
+    FountainDetectionExtension,
+    LayerViewFilterExtension,
+    PlaceholderExtension,
+    StructureMarkerDecorationsExtension,
 } from './tiptap/extensions';
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
-} from './tiptap/fountainCore';
+    FountainBlockNodes,
+    SCRIPT_BLOCK_NODE_NAMES,
+} from './tiptap/nodes';
 
 type UseEditorExtensionsArgs = {
     resolvedSettings: EditorSettings,
     sizeScale: number,
     colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
+    annotations?: readonly EditorBlockAnnotation[],
+    visibleLayerIds?: readonly string[],
+    visibleBlockTypes?: readonly FountainElementType[],
 };
 
 export const useEditorExtensions = ({
     resolvedSettings,
     sizeScale,
     colorByCharacterIdRef,
+    annotations,
+    visibleLayerIds,
+    visibleBlockTypes,
 }: UseEditorExtensionsArgs) => {
     const paginationExtension = useMemo(
         () => createPaginationExtension(resolvedSettings, sizeScale),
@@ -56,27 +69,49 @@ export const useEditorExtensions = ({
         () => getBlockCasing(resolvedSettings),
         [resolvedSettings],
     );
-    const fountainBlockExtension = useMemo(
-        () => FountainBlockExtension.configure({
+    const fountainBehaviorExtension = useMemo(
+        () => FountainBehaviorExtension.configure({
             blockShortcuts,
             blockNextElements,
             blockCasing,
-            characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
-            colorByCharacterIdRef,
-            structureSettings: resolvedSettings.structure,
         }),
         [
             blockCasing,
             blockNextElements,
             blockShortcuts,
-            colorByCharacterIdRef,
-            resolvedSettings.visual.characterColorSaturation,
-            resolvedSettings.structure,
         ],
     );
+    const structureMarkerDecorationsExtension = useMemo(
+        () => StructureMarkerDecorationsExtension.configure({
+            structureSettings: resolvedSettings.structure,
+        }),
+        [resolvedSettings.structure],
+    );
+    const characterTagDecorationsExtension = useMemo(
+        () => CharacterTagDecorationsExtension.configure({
+            characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
+            colorByCharacterIdRef,
+        }),
+        [colorByCharacterIdRef, resolvedSettings.visual.characterColorSaturation],
+    );
+    const annotationDecorationsExtension = useMemo(
+        () => AnnotationDecorationsExtension.configure({
+            annotations,
+            visibleLayerIds,
+        }),
+        [annotations, visibleLayerIds],
+    );
+    const layerViewFilterExtension = useMemo(
+        () => LayerViewFilterExtension.configure({
+            visibleBlockTypes,
+        }),
+        [visibleBlockTypes],
+    );
     const uniqueIdExtension = useMemo(() => {
+        const uniqueIdTypes = [...SCRIPT_BLOCK_NODE_NAMES];
+
         return UniqueID.configure({
-            types: [FOUNTAIN_BLOCK_NODE_NAME],
+            types: uniqueIdTypes,
             attributeName: 'id',
             generateID: () => createNodeId(),
         });
@@ -93,15 +128,24 @@ export const useEditorExtensions = ({
             Underline,
             FountainColumnGroupExtension,
             FountainColumnExtension,
-            fountainBlockExtension,
+            ...FountainBlockNodes,
+            FountainDetectionExtension,
+            PlaceholderExtension,
+            fountainBehaviorExtension,
+            structureMarkerDecorationsExtension,
+            characterTagDecorationsExtension,
+            layerViewFilterExtension,
+            annotationDecorationsExtension,
             uniqueIdExtension,
-            ScriptBlockIndexExtension,
-            ScriptSidebarProjectionExtension,
             BlockUiEventsExtension,
         ];
     }, [
-        fountainBlockExtension,
+        annotationDecorationsExtension,
+        characterTagDecorationsExtension,
+        fountainBehaviorExtension,
+        layerViewFilterExtension,
         paginationExtension,
+        structureMarkerDecorationsExtension,
         uniqueIdExtension,
     ]);
 };

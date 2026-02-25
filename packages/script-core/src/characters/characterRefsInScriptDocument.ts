@@ -1,6 +1,7 @@
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
     type FountainJSONContent,
+    getScriptBlockLegacyType,
+    isScriptBlockNode,
     type ScriptDocument,
 } from '../document';
 import {
@@ -45,7 +46,7 @@ export const linkCharacterRefInScriptDocument = (
                 return node;
             }
 
-            if (node.type === FOUNTAIN_BLOCK_NODE_NAME && isCharacterBlockType(node.attrs?.blockType)) {
+            if (isScriptBlockNode(node) && isCharacterBlockType(getScriptBlockLegacyType(node))) {
                 const text = getNodeTextContent(node);
                 const keys = extractCharacterKeys(text);
 
@@ -133,7 +134,7 @@ export const unlinkCharacterRefInScriptDocument = (
                 return node;
             }
 
-            if (node.type === FOUNTAIN_BLOCK_NODE_NAME && isCharacterBlockType(node.attrs?.blockType)) {
+            if (isScriptBlockNode(node) && isCharacterBlockType(getScriptBlockLegacyType(node))) {
                 const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
                 const nextCharacterRefByKey = Object.entries(sourceCharacterRefByKey).reduce<CharacterRefByKey>(
                     (acc, [key, id]) => {
@@ -226,7 +227,7 @@ export const replaceCharacterRefIdInScriptDocument = (
                 return node;
             }
 
-            if (node.type === FOUNTAIN_BLOCK_NODE_NAME && isCharacterBlockType(node.attrs?.blockType)) {
+            if (isScriptBlockNode(node) && isCharacterBlockType(getScriptBlockLegacyType(node))) {
                 const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
                 let changedCharacterRef = false;
                 const nextCharacterRefByKey = Object.entries(sourceCharacterRefByKey).reduce<CharacterRefByKey>(

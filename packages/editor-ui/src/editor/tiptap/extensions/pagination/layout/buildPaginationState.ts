@@ -9,8 +9,8 @@ import {
 } from '@tiptap/pm/view';
 
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
+    isFountainBlockNodeName,
 } from '../../../fountainCore';
 import {
     MORE_CONTD_BLOCK_TYPES,
@@ -72,7 +72,7 @@ export const buildPaginationState = (
             return;
         }
 
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             return;
         }
 

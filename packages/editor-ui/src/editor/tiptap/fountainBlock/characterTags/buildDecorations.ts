@@ -13,7 +13,7 @@ import {
     getCharacterColorVarName,
 } from '../../../characterColors';
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
+    isFountainBlockNodeName,
     normalizeFountainBlockType,
 } from '../../fountainCore';
 import styles from '../CharacterTagDecorations.module.css';
@@ -27,7 +27,7 @@ export const buildDecorations = (
     const decorations: Decoration[] = [];
 
     doc.descendants((node, pos) => {
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             return true;
         }
 

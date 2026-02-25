@@ -3,11 +3,15 @@ import {
     ELEMENT_ACT,
     ELEMENT_SCENE_HEADING,
     getDefaultActName,
+    resolveScriptBlockNodeType,
 } from '@stagistic/script-core';
 import {TextSelection} from '@tiptap/pm/state';
 import {type MouseEvent as ReactMouseEvent, useCallback} from 'react';
 
-import {FOUNTAIN_BLOCK_NODE_NAME} from '../../tiptap/fountainCore';
+import {
+    FOUNTAIN_BLOCK_NODE_NAME,
+    isFountainBlockNodeName,
+} from '../../tiptap/fountainCore';
 import type {UseActInsertCommandArgs} from './types';
 
 export const useActInsertCommand = ({
@@ -23,7 +27,7 @@ export const useActInsertCommand = ({
         const orderedBlocks: Array<{id: string, blockType: unknown}> = [];
 
         editor.state.doc.descendants(node => {
-            if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+            if (!isFountainBlockNodeName(node.type.name)) {
                 return true;
             }
 
@@ -74,7 +78,7 @@ export const useActInsertCommand = ({
         let count = 0;
 
         editor.state.doc.descendants(node => {
-            if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+            if (!isFountainBlockNodeName(node.type.name)) {
                 return true;
             }
 
@@ -94,14 +98,16 @@ export const useActInsertCommand = ({
         }
 
         let targetPos: number | null = null;
+        let targetNodeTypeName: string | null = null;
 
         editor.state.doc.descendants((node, pos) => {
-            if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+            if (!isFountainBlockNodeName(node.type.name)) {
                 return true;
             }
 
             if (node.attrs.id === blockId) {
                 targetPos = pos;
+                targetNodeTypeName = node.type.name;
 
                 return false;
             }
@@ -113,7 +119,10 @@ export const useActInsertCommand = ({
             return;
         }
 
-        const blockNodeType = editor.state.schema.nodes[FOUNTAIN_BLOCK_NODE_NAME];
+        const nextActNodeTypeName = targetNodeTypeName === FOUNTAIN_BLOCK_NODE_NAME
+            ? FOUNTAIN_BLOCK_NODE_NAME
+            : resolveScriptBlockNodeType(ELEMENT_ACT) ?? FOUNTAIN_BLOCK_NODE_NAME;
+        const blockNodeType = editor.state.schema.nodes[nextActNodeTypeName];
 
         if (!blockNodeType) {
             return;

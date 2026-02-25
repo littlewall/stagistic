@@ -6,7 +6,7 @@ import {
 } from '@tiptap/pm/state';
 
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
+    isFountainBlockNodeName,
     normalizeFountainBlockType,
 } from '../../fountainCore';
 import {
@@ -73,7 +73,7 @@ const collectCharacterBlockIdsInRange = (
     }
 
     state.doc.nodesBetween(safeRange.from, safeRange.to, node => {
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             return true;
         }
 
@@ -106,7 +106,7 @@ const collectCharacterBlockRangesInRange = (
     }
 
     state.doc.nodesBetween(safeRange.from, safeRange.to, (node, pos) => {
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             return true;
         }
 

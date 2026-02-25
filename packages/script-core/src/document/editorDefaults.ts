@@ -2,8 +2,9 @@ import {createNodeId} from '../nodeId';
 import {normalizeScriptStructure} from '../structure';
 import {
     createEmptyScriptDocument,
-    FOUNTAIN_BLOCK_NODE_NAME,
     type FountainJSONContent,
+    getScriptBlockId,
+    isScriptBlockNode,
     type ScriptDocument,
 } from './scriptDocument';
 
@@ -39,7 +40,7 @@ const ensureNodeIds = (node: FountainJSONContent): [FountainJSONContent, boolean
     let changed = false;
     let nextNode = node;
 
-    if (node.type === FOUNTAIN_BLOCK_NODE_NAME) {
+    if (isScriptBlockNode(node)) {
         const attrs = node.attrs && typeof node.attrs === 'object' ? node.attrs : {};
         const id = attrs.id;
 
@@ -79,7 +80,7 @@ const ensureNodeIds = (node: FountainJSONContent): [FountainJSONContent, boolean
     return [nextNode, changed];
 };
 
-export const ensureFountainBlockIds = (value: ScriptDocument): ScriptDocument => {
+export const ensureScriptBlockIds = (value: ScriptDocument): ScriptDocument => {
     if (!value || value.type !== 'doc') {
         return createEmptyScriptDocument();
     }
@@ -105,13 +106,18 @@ export const ensureFountainBlockIds = (value: ScriptDocument): ScriptDocument =>
     };
 };
 
-const findFirstBlockId = (node: FountainJSONContent): string | null => {
-    if (node.type === FOUNTAIN_BLOCK_NODE_NAME) {
-        const id = node.attrs?.id;
+/**
+ * @deprecated Use `ensureScriptBlockIds(...)`.
+ */
+export const ensureFountainBlockIds = (value: ScriptDocument): ScriptDocument => {
+    return ensureScriptBlockIds(value);
+};
 
-        if (typeof id === 'string' && id.length > 0) {
-            return id;
-        }
+const findFirstBlockId = (node: FountainJSONContent): string | null => {
+    const blockId = getScriptBlockId(node);
+
+    if (blockId) {
+        return blockId;
     }
 
     if (Array.isArray(node.content)) {
@@ -144,8 +150,8 @@ export const getFirstBlockId = (value?: ScriptDocument | null) => {
 };
 
 const hasBlockId = (node: FountainJSONContent, blockId: string): boolean => {
-    if (node.type === FOUNTAIN_BLOCK_NODE_NAME) {
-        return node.attrs?.id === blockId;
+    if (isScriptBlockNode(node)) {
+        return getScriptBlockId(node) === blockId;
     }
 
     if (Array.isArray(node.content)) {

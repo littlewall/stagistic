@@ -4,31 +4,31 @@ import {
     useContext,
 } from 'react';
 
-import type {EditorLiveStore} from './store';
+import type {EditorSnapshotStore} from './store';
 
-const EditorLiveStoreContext = createContext<EditorLiveStore | null>(null);
+const EditorSnapshotStoreContext = createContext<EditorSnapshotStore | null>(null);
 
-interface EditorLiveStoreProviderProps {
-    store: EditorLiveStore,
+interface EditorSnapshotStoreProviderProps {
+    store: EditorSnapshotStore,
     children: ReactNode,
 }
 
-export const EditorLiveStoreProvider = ({
+export const EditorSnapshotStoreProvider = ({
     store,
     children,
-}: EditorLiveStoreProviderProps) => {
+}: EditorSnapshotStoreProviderProps) => {
     return (
-        <EditorLiveStoreContext.Provider value={store}>
+        <EditorSnapshotStoreContext.Provider value={store}>
             {children}
-        </EditorLiveStoreContext.Provider>
+        </EditorSnapshotStoreContext.Provider>
     );
 };
 
-export const useEditorLiveStore = () => {
-    const store = useContext(EditorLiveStoreContext);
+export const useEditorSnapshotStore = () => {
+    const store = useContext(EditorSnapshotStoreContext);
 
     if (!store) {
-        throw new Error('useEditorLiveStore must be used within FountainEditor');
+        throw new Error('useEditorSnapshotStore must be used within FountainEditor');
     }
 
     return store;

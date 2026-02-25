@@ -1,11 +1,13 @@
 import {
     getBlockTypeFromElementPanelId,
     isElementSettingsPanelId,
+    SCRIPT_SETTINGS_PANEL_PRODUCTION,
     SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS,
     SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
 } from '../../settings/settingsMenu';
 import {ElementSettingsPanel} from './ElementSettingsPanel';
 import {PlaceholderSettingsPanel} from './PlaceholderSettingsPanel';
+import {ProductionSettingsPanel} from './ProductionSettingsPanel';
 import {StructureMarkersSettingsPanel} from './StructureMarkersSettingsPanel';
 import type {ScriptEditorSettingsPanelProps} from './types';
 import {VisualPreferencesSettingsPanel} from './VisualPreferencesSettingsPanel';
@@ -15,6 +17,7 @@ export const ScriptEditorSettingsPanel = ({
     resolvedScriptSettings,
     blockLabelByType,
     shortcutPrefix,
+    production,
     onUpdateBlockSettings,
     onUpdateCharacterColorSaturation,
     onUpdateStructureSettings,
@@ -33,6 +36,19 @@ export const ScriptEditorSettingsPanel = ({
             <StructureMarkersSettingsPanel
                 structureSettings={resolvedScriptSettings.structure}
                 onUpdateStructureSettings={onUpdateStructureSettings}
+            />
+        );
+    }
+
+    if (panelId === SCRIPT_SETTINGS_PANEL_PRODUCTION) {
+        if (!production) {
+            return <PlaceholderSettingsPanel panelId={panelId} />;
+        }
+
+        return (
+            <ProductionSettingsPanel
+                data={production.data}
+                actions={production.actions}
             />
         );
     }

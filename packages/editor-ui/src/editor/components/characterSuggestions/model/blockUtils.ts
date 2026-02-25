@@ -8,8 +8,8 @@ import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
     type FountainBlockType,
+    isFountainBlockNodeName,
     normalizeFountainBlockType,
 } from '../../../tiptap/fountainCore';
 import type {PersistentCharacterRef} from '../types';
@@ -55,7 +55,7 @@ export const collectCharacterCounts = (
     });
 
     doc.descendants(node => {
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             return true;
         }
 

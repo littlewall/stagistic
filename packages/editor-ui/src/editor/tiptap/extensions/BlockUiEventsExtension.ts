@@ -1,6 +1,7 @@
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
+    buildScriptBlockIndex,
     type ScriptBlockIndexSnapshot,
+    type ScriptDocument,
 } from '@stagistic/script-core';
 import {Extension} from '@tiptap/core';
 import {
@@ -11,8 +12,10 @@ import {
 } from '@tiptap/pm/state';
 
 import type {EditorBlockUiEvent} from '../../contracts';
-import {getActiveFountainBlockFromState} from '../fountainCore';
-import {getScriptBlockIndexSnapshotFromState} from './ScriptBlockIndexExtension';
+import {
+    getActiveFountainBlockFromState,
+    isFountainBlockNodeName,
+} from '../fountainCore';
 
 interface BlockUiEventsPluginState {
     events: EditorBlockUiEvent[],
@@ -25,7 +28,7 @@ const EMPTY_EVENTS: EditorBlockUiEvent[] = [];
 export const blockUiEventsKey = new PluginKey<BlockUiEventsPluginState>('script-block-ui-events');
 
 const getActiveBlockIdFromState = (state: EditorState) => {
-    return getActiveFountainBlockFromState(state, FOUNTAIN_BLOCK_NODE_NAME)?.id ?? null;
+    return getActiveFountainBlockFromState(state)?.id ?? null;
 };
 
 const hasFountainBlockNode = (value: unknown): boolean => {
@@ -43,7 +46,7 @@ const hasFountainBlockNode = (value: unknown): boolean => {
 
     const record = value as Record<string, unknown>;
 
-    if (record.type === FOUNTAIN_BLOCK_NODE_NAME) {
+    if (isFountainBlockNodeName(record.type)) {
         return true;
     }
 
@@ -77,6 +80,10 @@ const shouldDiffBlocks = (
     }
 
     return stepMayAffectBlockStructure(transaction);
+};
+
+const buildIndexSnapshotFromState = (state: EditorState): ScriptBlockIndexSnapshot => {
+    return buildScriptBlockIndex(state.doc.toJSON() as ScriptDocument).snapshot;
 };
 
 const buildBlockDiffEvents = (
@@ -175,8 +182,8 @@ export const BlockUiEventsExtension = Extension.create<undefined, {events: reado
                         }
 
                         if (transaction.docChanged) {
-                            const previousSnapshot = getScriptBlockIndexSnapshotFromState(oldState);
-                            const nextSnapshot = getScriptBlockIndexSnapshotFromState(newState);
+                            const previousSnapshot = buildIndexSnapshotFromState(oldState);
+                            const nextSnapshot = buildIndexSnapshotFromState(newState);
 
                             if (shouldDiffBlocks(transaction, previousSnapshot, nextSnapshot)) {
                                 events.push(...buildBlockDiffEvents(previousSnapshot.blocks, nextSnapshot.blocks));

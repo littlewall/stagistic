@@ -1,7 +1,6 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useEffect, useRef} from 'react';
 
-import {getBlockUiEventsFromState} from '../tiptap/extensions';
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
@@ -27,13 +26,17 @@ export const useEditorActiveBlockSync = ({
     onActiveBlockChange,
 }: UseEditorActiveBlockSyncArgs) => {
     const lastEmittedBlockIdRef = useRef<string | null | undefined>(undefined);
+    const syncedEditorRef = useRef<TiptapEditor | null>(null);
 
     useEffect(() => {
         if (!editor || !onActiveBlockChange) {
             return;
         }
 
-        lastEmittedBlockIdRef.current = undefined;
+        if (syncedEditorRef.current !== editor) {
+            syncedEditorRef.current = editor;
+            lastEmittedBlockIdRef.current = undefined;
+        }
 
         const emitActiveBlock = () => {
             if (isActiveBlockSyncSuppressed(editor)) {
@@ -54,12 +57,6 @@ export const useEditorActiveBlockSync = ({
         emitActiveBlock();
 
         const handleTransaction = () => {
-            const shouldEmit = getBlockUiEventsFromState(editor.state).some(event => event.type === 'activeBlockChange');
-
-            if (!shouldEmit) {
-                return;
-            }
-
             emitActiveBlock();
         };
 
@@ -71,4 +68,13 @@ export const useEditorActiveBlockSync = ({
             editor.off('transaction', handleTransaction);
         };
     }, [editor, onActiveBlockChange]);
+
+    useEffect(() => {
+        if (editor) {
+            return;
+        }
+
+        syncedEditorRef.current = null;
+        lastEmittedBlockIdRef.current = undefined;
+    }, [editor]);
 };
