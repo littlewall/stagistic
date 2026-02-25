@@ -1,4 +1,4 @@
-export {EditorLiveStoreProvider} from './context';
+export {EditorSnapshotStoreProvider} from './context';
 export {
     useEditorLiveActiveBlock,
     useEditorLiveCharacters,
@@ -7,7 +7,7 @@ export {
     useEditorLiveStructure,
 } from './hooks';
 export {
-    createEditorLiveStore,
+    createEditorSnapshotStore,
     createEmptyEditorLiveSnapshot,
-    type EditorLiveStore,
+    type EditorSnapshotStore,
 } from './store';

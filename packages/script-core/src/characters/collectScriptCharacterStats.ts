@@ -1,6 +1,7 @@
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
     type FountainJSONContent,
+    getScriptBlockLegacyType,
+    isScriptBlockNode,
     type ScriptDocument,
 } from '../document';
 import {
@@ -30,8 +31,8 @@ export const collectScriptCharacterStats = (
                 return;
             }
 
-            if (node.type === FOUNTAIN_BLOCK_NODE_NAME) {
-                const blockType = node.attrs?.blockType;
+            if (isScriptBlockNode(node)) {
+                const blockType = getScriptBlockLegacyType(node);
 
                 if (isCharacterBlockType(blockType)) {
                     const text = getNodeTextContent(node);

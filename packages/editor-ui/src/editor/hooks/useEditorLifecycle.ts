@@ -1,7 +1,9 @@
 import {
+    buildScriptBlockIndex,
     normalizeScriptStructure,
     type ScriptDocument,
 } from '@stagistic/script-core';
+import {useHotkey} from '@tanstack/react-hotkeys';
 import {
     type Editor as TiptapEditor,
 } from '@tiptap/react';
@@ -20,19 +22,17 @@ import type {
 } from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
 import {buildCharacterSnapshotFromDoc} from '../live/buildCharacterSnapshotFromDoc';
-import type {EditorLiveStore} from '../live/store';
+import {buildSidebarProjectionFromIndex} from '../live/buildSidebarProjectionFromIndex';
+import type {EditorSnapshotStore} from '../live/store';
 import {trackIndexUpdateDuration} from '../perf/editorPerfMetrics';
 import {
-    buildScriptSidebarProjectionFromIndexSnapshot,
     getBlockUiEventsFromState,
-    getScriptBlockIndexSnapshotFromState,
-    getScriptSidebarProjectionChangeFromState,
-    getScriptSidebarProjectionFromState,
 } from '../tiptap/extensions';
 import {
     ensureFountainBlockId,
     FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
+    isFountainBlockNodeName,
     normalizeFountainBlockType,
 } from '../tiptap/fountainCore';
 import {
@@ -51,6 +51,14 @@ const getNow = () => {
     return Date.now();
 };
 
+const getWindowTarget = () => {
+    if (typeof window === 'undefined') {
+        return null;
+    }
+
+    return window;
+};
+
 type PaginationCommands = {
     forcePaginationRecalc?: () => boolean,
 };
@@ -61,7 +69,7 @@ const sanitizeFountainBlocks = (editor: TiptapEditor) => {
     const seenIds = new Set<string>();
 
     editor.state.doc.descendants((node, pos) => {
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             return true;
         }
 
@@ -102,22 +110,12 @@ const forcePaginationRecalc = (editor: TiptapEditor) => {
     commands.forcePaginationRecalc?.();
 };
 
-const resolveSidebarProjection = (
-    snapshot: EditorIndexSnapshot,
-    targetEditor?: TiptapEditor,
-) => {
-    if (targetEditor) {
-        return {
-            projection: getScriptSidebarProjectionFromState(targetEditor.state),
-            change: getScriptSidebarProjectionChangeFromState(targetEditor.state),
-        };
-    }
-
+const resolveSidebarProjection = (snapshot: EditorIndexSnapshot) => {
     return {
-        projection: buildScriptSidebarProjectionFromIndexSnapshot(snapshot),
+        projection: buildSidebarProjectionFromIndex(snapshot),
         change: {
             structureChanged: true,
-            charactersChanged: false,
+            charactersChanged: true,
             reason: 'fallback' as const,
         },
     };
@@ -128,7 +126,7 @@ interface UseEditorLifecycleArgs {
         instance: TiptapEditor | null,
         autoFocus?: boolean,
     },
-    liveStore: EditorLiveStore,
+    liveStore: EditorSnapshotStore,
     document: {
         initialValue: ScriptDocument,
         initialSerialized: string,
@@ -207,10 +205,7 @@ export const useEditorLifecycle = ({
         targetEditor?: TiptapEditor,
     ) => {
         const hasIndexSubscriber = Boolean(onIndexChangeRef.current);
-        const {
-            projection,
-            change,
-        } = resolveSidebarProjection(snapshot, targetEditor);
+        const {projection, change} = resolveSidebarProjection(snapshot);
         const activeBlockId = targetEditor
             ? getActiveFountainBlockFromState(targetEditor.state, FOUNTAIN_BLOCK_NODE_NAME)?.id ?? null
             : liveStore.getSnapshot().activeBlockId;
@@ -242,8 +237,9 @@ export const useEditorLifecycle = ({
         meta: EditorValueChangeMeta,
     ) => {
         const startedAt = getNow();
+        const snapshot = buildScriptBlockIndex(targetEditor.getJSON() as ScriptDocument).snapshot;
 
-        emitIndexSnapshot(getScriptBlockIndexSnapshotFromState(targetEditor.state), meta, targetEditor);
+        emitIndexSnapshot(snapshot, meta, targetEditor);
         trackIndexUpdateDuration(getNow() - startedAt);
     }, [emitIndexSnapshot]);
 
@@ -422,32 +418,20 @@ export const useEditorLifecycle = ({
         instance.commands.focus('start');
     }, [autoFocus, instance]);
 
-    useEffect(() => {
+    useHotkey('Mod+S', () => {
         if (!instance || !onManualSave) {
             return;
         }
 
-        const onKeyDown = (event: KeyboardEvent) => {
-            if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 's') {
-                event.preventDefault();
-                clearPendingValueSync();
-                forcePaginationRecalc(instance);
-                syncValueFromEditor(instance, {
-                    source: 'typing',
-                    revision: revisionRef.current,
-                });
-                void handleManualSave();
-            }
-        };
-
-        window.addEventListener('keydown', onKeyDown);
-
-        return () => window.removeEventListener('keydown', onKeyDown);
-    }, [
-        clearPendingValueSync,
-        handleManualSave,
-        instance,
-        onManualSave,
-        syncValueFromEditor,
-    ]);
+        clearPendingValueSync();
+        forcePaginationRecalc(instance);
+        syncValueFromEditor(instance, {
+            source: 'typing',
+            revision: revisionRef.current,
+        });
+        void handleManualSave();
+    }, {
+        enabled: Boolean(instance && onManualSave),
+        target: getWindowTarget(),
+    });
 };

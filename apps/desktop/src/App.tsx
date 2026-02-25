@@ -1,4 +1,6 @@
-import {ScriptRepositoryProvider} from '@stagistic/app-core';
+import {
+    ScriptRepositoryProvider,
+} from '@stagistic/app-core';
 import {GlobalModalsProvider} from '@stagistic/app-routes';
 import {
     LoaderOverlay,

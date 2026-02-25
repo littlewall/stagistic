@@ -7,6 +7,7 @@ import {
     ELEMENT_LYRICS,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
+    resolveScriptBlockNodeType,
 } from '@stagistic/script-core';
 import type {NodeType} from '@tiptap/pm/model';
 import {TextSelection} from '@tiptap/pm/state';
@@ -17,6 +18,7 @@ import {
     type FountainBlockType,
     getActiveFountainBlockFromState,
     getNextTypeOnEnter,
+    isFountainBlockNodeName,
     normalizeFountainBlockType,
 } from '../../fountainCore';
 import {
@@ -49,7 +51,7 @@ const collectFountainBlocks = (editor: Editor) => {
     const blocks: FountainBlockEntry[] = [];
 
     editor.state.doc.descendants((node, pos) => {
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             return true;
         }
 
@@ -107,14 +109,17 @@ const insertBlockAfter = (
     blockType: FountainBlockType,
 ) => {
     const nodes = context.editor.schema.nodes as Record<string, NodeType>;
-    const fountainBlockNode = nodes[FOUNTAIN_BLOCK_NODE_NAME];
+    const currentNodeTypeName = context.block.node.type.name;
+    const nextNodeType = currentNodeTypeName === FOUNTAIN_BLOCK_NODE_NAME
+        ? nodes[FOUNTAIN_BLOCK_NODE_NAME]
+        : nodes[resolveScriptBlockNodeType(blockType) ?? ''];
 
-    if (!fountainBlockNode) {
+    if (!nextNodeType) {
         return false;
     }
 
     const insertPos = context.block.pos + context.block.node.nodeSize;
-    const insertedNode = fountainBlockNode.create({
+    const insertedNode = nextNodeType.create({
         blockType,
         id: createNodeId(),
     });

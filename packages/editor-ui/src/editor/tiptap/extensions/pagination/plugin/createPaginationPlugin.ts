@@ -5,6 +5,7 @@ import {
 } from '@tiptap/pm/state';
 import {DecorationSet} from '@tiptap/pm/view';
 
+import {incrementPaginationRecalcCount} from '../../../../perf/editorPerfMetrics';
 import {buildPaginationState} from '../layout/buildPaginationState';
 import {createInitialPaginationState} from '../state/createInitialPaginationState';
 import {
@@ -12,7 +13,6 @@ import {
     type PaginationExtensionAdapter,
     type PaginationPluginState,
 } from '../types';
-import {incrementPaginationRecalcCount} from '../../../../perf/editorPerfMetrics';
 
 export const paginationKey = new PluginKey<PaginationPluginState>('fountain-pagination');
 export const PAGINATION_CONTROL_META_KEY = 'fountain-pagination-control';

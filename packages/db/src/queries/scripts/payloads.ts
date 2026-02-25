@@ -75,33 +75,6 @@ export interface ReplaceScriptConfigBlocksPayload {
     rows: ScriptConfigReplacementRow[],
 }
 
-export interface InsertLatestPayload {
-    scriptId: string,
-    contentJson: string,
-    contentHash: string,
-    contentSize: number,
-    updatedAt: number,
-    schemaVersion: number,
-}
-
-export interface UpsertLatestPayload {
-    scriptId: string,
-    contentJson: string,
-    contentHash: string,
-    contentSize: number,
-    updatedAt: number,
-    schemaVersion: number,
-}
-
-export interface InsertVersionPayload {
-    id: string,
-    scriptId: string,
-    message: string | null,
-    contentJson: string,
-    createdAt: number,
-    schemaVersion: number,
-}
-
 export interface InsertOutboxPayload {
     id: string,
     scriptId: string | null,
@@ -111,40 +84,14 @@ export interface InsertOutboxPayload {
     status: string,
 }
 
-export interface ScriptBlockIndexMetaUpsertPayload {
-    scriptId: string,
-    contentHash: string,
-    indexSchemaVersion: number,
-    status: 'ready' | 'stale' | 'building' | 'failed',
-    updatedAt: number,
-    lastError: string | null,
-}
-
-export interface ScriptBlockIndexRowsReplaceRow {
-    scriptId: string,
-    blockId: string,
-    orderNo: number,
-    blockType: string,
-    textContent: string,
-    actBlockId: string | null,
-    sceneBlockId: string | null,
-    columnGroupOrder: number | null,
-    columnOrder: number | null,
-    characterRefsJson: string | null,
-    updatedAt: number,
-}
-
-export interface ScriptBlockIndexRowsReplacePayload {
-    scriptId: string,
-    rows: ScriptBlockIndexRowsReplaceRow[],
-}
-
 export interface UpsertScriptCharacterPayload {
     id: string,
     scriptId: string,
     characterKey: string,
     colorHex?: string | null,
     genderKey?: string | null,
+    notes?: string | null,
+    backstory?: string | null,
     createdAt: number,
     updatedAt: number,
 }
@@ -178,6 +125,20 @@ export interface UpdateScriptCharacterGenderPayload {
     scriptId: string,
     characterId: string,
     genderKey: string | null,
+    updatedAt: number,
+}
+
+export interface UpdateScriptCharacterNotesPayload {
+    scriptId: string,
+    characterId: string,
+    notes: string | null,
+    updatedAt: number,
+}
+
+export interface UpdateScriptCharacterBackstoryPayload {
+    scriptId: string,
+    characterId: string,
+    backstory: string | null,
     updatedAt: number,
 }
 

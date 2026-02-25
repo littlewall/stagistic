@@ -33,7 +33,11 @@ const hexToRgb = (hexColor: string) => {
     };
 };
 
-const rgbToHsl = ({r, g, b}: {r: number, g: number, b: number}) => {
+const rgbToHsl = ({
+    r, g, b,
+}: {
+    r: number, g: number, b: number,
+}) => {
     const red = r / 255;
     const green = g / 255;
     const blue = b / 255;
@@ -54,18 +58,24 @@ const rgbToHsl = ({r, g, b}: {r: number, g: number, b: number}) => {
         ? delta / (2 - max - min)
         : delta / (max + min);
 
-    let hue = 0;
-
     if (max === red) {
-        hue = (green - blue) / delta + (green < blue ? 6 : 0);
-    } else if (max === green) {
-        hue = (blue - red) / delta + 2;
-    } else {
-        hue = (red - green) / delta + 4;
+        return {
+            hue: ((green - blue) / delta + (green < blue ? 6 : 0)) / 6,
+            saturation,
+            lightness,
+        };
+    }
+
+    if (max === green) {
+        return {
+            hue: ((blue - red) / delta + 2) / 6,
+            saturation,
+            lightness,
+        };
     }
 
     return {
-        hue: hue / 6,
+        hue: ((red - green) / delta + 4) / 6,
         saturation,
         lightness,
     };
@@ -77,15 +87,19 @@ const hueToRgb = (p: number, q: number, t: number): number => {
     if (normalized < 0) {
         normalized += 1;
     }
+
     if (normalized > 1) {
         normalized -= 1;
     }
+
     if (normalized < 1 / 6) {
         return p + (q - p) * 6 * normalized;
     }
+
     if (normalized < 1 / 2) {
         return q;
     }
+
     if (normalized < 2 / 3) {
         return p + (q - p) * (2 / 3 - normalized) * 6;
     }
@@ -147,7 +161,7 @@ export const normalizeCharacterColorHex = (value: string | null | undefined): st
 
     const trimmed = value.trim();
 
-    if (/^#[\da-f]{6}$/iu.test(trimmed)) {
+    if ((/^#[\da-f]{6}$/iu).test(trimmed)) {
         return trimmed.toUpperCase();
     }
 

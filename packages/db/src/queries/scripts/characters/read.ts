@@ -23,6 +23,8 @@ export const listScriptCharacters = async (
             characterKey: scriptCharacters.characterKey,
             colorHex: scriptCharacters.colorHex,
             genderKey: scriptCharacters.genderKey,
+            notes: scriptCharacters.notes,
+            backstory: scriptCharacters.backstory,
         })
         .from(scriptCharacters)
         .where(eq(scriptCharacters.scriptId, scriptId))
@@ -41,6 +43,8 @@ export const getScriptCharacterByKey = async (
             characterKey: scriptCharacters.characterKey,
             colorHex: scriptCharacters.colorHex,
             genderKey: scriptCharacters.genderKey,
+            notes: scriptCharacters.notes,
+            backstory: scriptCharacters.backstory,
         })
         .from(scriptCharacters)
         .where(
@@ -69,6 +73,8 @@ export const getScriptCharacterById = async (
             characterKey: scriptCharacters.characterKey,
             colorHex: scriptCharacters.colorHex,
             genderKey: scriptCharacters.genderKey,
+            notes: scriptCharacters.notes,
+            backstory: scriptCharacters.backstory,
         })
         .from(scriptCharacters)
         .where(

@@ -1,76 +1,115 @@
-import {dbQueries} from '@stagistic/db';
 import {
-    LATEST_SCRIPT_SCHEMA_VERSION,
-    type ScriptDocument,
-} from '@stagistic/script-core';
+    dbQueries,
+    migrateLegacyJsonToBlocksForScript,
+    rebuildScriptDocumentFromBlocks,
+    type RewriteBlocksMigrationAudit,
+} from '@stagistic/db';
+import type {ScriptDocument} from '@stagistic/script-core';
 import {uuidv7} from '@stagistic/shared';
 import type {ScriptRepository} from '@stagistic/sync-core';
 
-import {
-    computeContentHash,
-    parseDocument,
-    serializeDocument,
-} from './documentCodec';
 import type {
     GetDb,
     RecordOutbox,
 } from './types';
 
-type ContentHandlers = Pick<
-    ScriptRepository,
-    'loadLatest' | 'saveLatest' | 'loadVersion' | 'commitVersion' | 'restoreLatestFromVersion'
->;
+type ContentHandlers = {
+    loadLatest: ScriptRepository['loadLatest'],
+    saveLatest: ScriptRepository['saveLatest'],
+    loadVersion: NonNullable<ScriptRepository['loadVersion']>,
+    commitVersion: ScriptRepository['commitVersion'],
+    restoreLatestFromVersion: NonNullable<ScriptRepository['restoreLatestFromVersion']>,
+};
 
 interface CreateContentHandlersArgs {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
-    blockIndex: {
-        rebuildScriptBlockIndexFromDocument: (args: {
-            scriptId: string,
-            value: ScriptDocument,
-            contentHash: string,
-            updatedAt: number,
-        }) => Promise<unknown>,
-        markScriptBlockIndexStale: (scriptId: string, contentHash: string, error: unknown) => Promise<void>,
-    },
 }
+
+const logMigrationAudit = (context: string, audit: RewriteBlocksMigrationAudit) => {
+    const baseMessage = `[db-local] ${context} script=${audit.scriptId} status=${audit.status}`;
+
+    if (audit.status === 'failed') {
+        console.warn(baseMessage, audit.error ?? 'unknown migration error');
+
+        return;
+    }
+
+    console.info(baseMessage);
+
+    audit.warnings.forEach(warning => {
+        console.warn(`[db-local] ${warning}`);
+    });
+};
+
+const loadLatestFromBlocks = async (
+    db: Awaited<ReturnType<GetDb>>,
+    scriptId: string,
+): Promise<ScriptDocument | null> => {
+    const storedBlocks = await dbQueries.listScriptBlocks(db, scriptId);
+
+    if (storedBlocks.length === 0) {
+        return null;
+    }
+
+    const storedCharacterRefs = await dbQueries.listScriptCharacterRefsByScript(db, scriptId);
+    const rebuilt = rebuildScriptDocumentFromBlocks(
+        scriptId,
+        storedBlocks.map(row => ({
+            id: row.id,
+            blockType: row.blockType,
+            orderNo: row.orderNo,
+            textContent: row.textContent,
+            contentJson: row.contentJson,
+            columnGroupId: row.columnGroupId,
+            columnIndex: row.columnIndex,
+        })),
+        storedCharacterRefs.map(ref => ({
+            blockId: ref.blockId,
+            characterKey: ref.characterKey,
+            characterId: ref.characterId,
+        })),
+    );
+
+    rebuilt.warnings.forEach(warning => {
+        console.warn(`[db-local] ${warning}`);
+    });
+
+    return rebuilt.document as ScriptDocument;
+};
+
+const persistBlocksFromDocument = async (
+    db: Awaited<ReturnType<GetDb>>,
+    scriptId: string,
+    value: ScriptDocument,
+    trigger: string,
+) => {
+    const audit = await migrateLegacyJsonToBlocksForScript(db, scriptId, {
+        sourceDocument: value,
+        force: true,
+        trigger,
+    });
+
+    logMigrationAudit(trigger, audit);
+};
 
 export const createContentHandlers = ({
     getDb,
     recordOutbox,
-    blockIndex,
 }: CreateContentHandlersArgs): ContentHandlers => {
     const loadLatest: ContentHandlers['loadLatest'] = async scriptId => {
         const db = await getDb();
-        const contentJson = await dbQueries.getLatestContent(db, scriptId);
 
-        return contentJson ? parseDocument(contentJson) : null;
+        return loadLatestFromBlocks(db, scriptId);
     };
 
     const saveLatest: ContentHandlers['saveLatest'] = async (scriptId, value) => {
         const db = await getDb();
         const now = Date.now();
-        const contentJson = serializeDocument(value);
-        const contentHash = computeContentHash(contentJson);
-        const contentSize = contentJson.length;
-        const latestMeta = await dbQueries.getLatestContentMeta(db, scriptId);
-        const isRedundantWrite = latestMeta?.contentHash === contentHash
-            && latestMeta.contentSize === contentSize;
 
-        if (isRedundantWrite) {
-            return;
-        }
+        await persistBlocksFromDocument(db, scriptId, value, 'save-latest');
 
         await db.transaction(async tx => {
-            await dbQueries.upsertLatest(tx, {
-                scriptId,
-                contentJson,
-                contentHash,
-                contentSize,
-                updatedAt: now,
-                schemaVersion: LATEST_SCRIPT_SCHEMA_VERSION,
-            });
-
             await dbQueries.updateScriptTimestamp(tx, {
                 scriptId,
                 updatedAt: now,
@@ -82,46 +121,19 @@ export const createContentHandlers = ({
                 payloadJson: JSON.stringify({scriptId, updatedAt: now}),
             }, tx);
         });
-
-        try {
-            await blockIndex.rebuildScriptBlockIndexFromDocument({
-                scriptId,
-                value,
-                contentHash,
-                updatedAt: now,
-            });
-        } catch (error) {
-            console.error('Failed to rebuild script block index after saveLatest', error);
-            await blockIndex.markScriptBlockIndexStale(scriptId, contentHash, error);
-        }
     };
 
-    const loadVersion: ContentHandlers['loadVersion'] = async versionId => {
-        const db = await getDb();
-        const contentJson = await dbQueries.getVersionContent(db, versionId);
+    const loadVersion: ContentHandlers['loadVersion'] = versionId => {
+        void versionId;
+        console.warn('[db-local] loadVersion is unavailable after legacy table cleanup.');
 
-        return contentJson ? parseDocument(contentJson) : null;
+        return Promise.resolve(null);
     };
 
     const commitVersion: ContentHandlers['commitVersion'] = async (scriptId, message) => {
         const db = await getDb();
-        const latestContentJson = await dbQueries.getLatestContent(db, scriptId);
-
-        if (!latestContentJson) {
-            throw new Error('Cannot commit version without latest content');
-        }
-
         const versionId = uuidv7();
         const now = Date.now();
-
-        await dbQueries.insertVersion(db, {
-            id: versionId,
-            scriptId,
-            message: message ?? null,
-            contentJson: latestContentJson,
-            createdAt: now,
-            schemaVersion: LATEST_SCRIPT_SCHEMA_VERSION,
-        });
 
         await dbQueries.updateScriptTimestamp(db, {
             scriptId,
@@ -134,65 +146,24 @@ export const createContentHandlers = ({
             payloadJson: JSON.stringify({
                 scriptId,
                 versionId,
+                message: message ?? null,
                 createdAt: now,
+                mode: 'scene_versions_only',
             }),
         });
 
         return versionId;
     };
 
-    const restoreLatestFromVersion: ContentHandlers['restoreLatestFromVersion'] = async (
+    const restoreLatestFromVersion: ContentHandlers['restoreLatestFromVersion'] = (
         scriptId,
         versionId,
     ) => {
-        const db = await getDb();
-        const versionContentJson = await dbQueries.getVersionContent(db, versionId);
+        void scriptId;
+        void versionId;
+        console.warn('[db-local] restoreLatestFromVersion is unavailable after legacy table cleanup.');
 
-        if (!versionContentJson) {
-            return;
-        }
-
-        const now = Date.now();
-        const contentHash = computeContentHash(versionContentJson);
-        const contentSize = versionContentJson.length;
-
-        await db.transaction(async tx => {
-            await dbQueries.upsertLatest(tx, {
-                scriptId,
-                contentJson: versionContentJson,
-                contentHash,
-                contentSize,
-                updatedAt: now,
-                schemaVersion: LATEST_SCRIPT_SCHEMA_VERSION,
-            });
-
-            await dbQueries.updateScriptTimestamp(tx, {
-                scriptId,
-                updatedAt: now,
-            });
-
-            await recordOutbox({
-                scriptId,
-                opType: 'latest.restore-from-version',
-                payloadJson: JSON.stringify({
-                    scriptId,
-                    versionId,
-                    restoredAt: now,
-                }),
-            }, tx);
-        });
-
-        try {
-            await blockIndex.rebuildScriptBlockIndexFromDocument({
-                scriptId,
-                value: parseDocument(versionContentJson),
-                contentHash,
-                updatedAt: now,
-            });
-        } catch (error) {
-            console.error('Failed to rebuild script block index after restoreLatestFromVersion', error);
-            await blockIndex.markScriptBlockIndexStale(scriptId, contentHash, error);
-        }
+        return Promise.resolve();
     };
 
     return {

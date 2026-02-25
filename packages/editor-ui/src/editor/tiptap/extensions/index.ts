@@ -1,21 +1,19 @@
 export {
+    AnnotationDecorationsExtension,
+    type EditorBlockAnnotation,
+} from './AnnotationDecorationsExtension';
+export {
     BlockUiEventsExtension,
     getBlockUiEventsFromState,
 } from './BlockUiEventsExtension';
-export {default as FountainBlockExtension} from './FountainBlockExtension';
+export {CharacterTagDecorationsExtension} from './CharacterTagDecorationsExtension';
+export {FountainBehaviorExtension} from './FountainBehaviorExtension';
 export {
     FountainColumnExtension,
     FountainColumnGroupExtension,
 } from './FountainColumnExtensions';
+export {FountainDetectionExtension} from './FountainDetectionExtension';
+export {LayerViewFilterExtension} from './LayerViewFilterExtension';
 export {createPaginationExtension} from './PaginationExtension';
-export {
-    getScriptBlockIndexChangeFromState,
-    getScriptBlockIndexSnapshotFromState,
-    ScriptBlockIndexExtension,
-} from './ScriptBlockIndexExtension';
-export {
-    buildScriptSidebarProjectionFromIndexSnapshot,
-    getScriptSidebarProjectionChangeFromState,
-    getScriptSidebarProjectionFromState,
-    ScriptSidebarProjectionExtension,
-} from './ScriptSidebarProjectionExtension';
+export {PlaceholderExtension} from './PlaceholderExtension';
+export {StructureMarkerDecorationsExtension} from './StructureMarkerDecorationsExtension';

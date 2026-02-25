@@ -13,6 +13,8 @@ export interface ScriptCharacterRef {
     key: string,
     colorHex: string | null,
     genderKey: string | null,
+    notes: string | null,
+    backstory: string | null,
 }
 
 export interface ScriptCharacterGenderOption {

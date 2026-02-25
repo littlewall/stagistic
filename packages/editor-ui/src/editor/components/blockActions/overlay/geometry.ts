@@ -1,7 +1,9 @@
-import {FOUNTAIN_BLOCK_NODE_NAME} from '@stagistic/script-core';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
-import {findFountainBlockByIdFromState} from '../../../tiptap/fountainCore';
+import {
+    findFountainBlockByIdFromState,
+    isFountainBlockNodeName,
+} from '../../../tiptap/fountainCore';
 import type {TopLevelBlockMetrics} from './types';
 
 export const clamp = (value: number, min: number, max: number) => {
@@ -24,7 +26,7 @@ export const resolveFountainBlockElementById = (
     editor: TiptapEditor,
     blockId: string,
 ): HTMLElement | null => {
-    const block = findFountainBlockByIdFromState(editor.state, blockId, FOUNTAIN_BLOCK_NODE_NAME);
+    const block = findFountainBlockByIdFromState(editor.state, blockId);
 
     if (!block) {
         return null;
@@ -74,7 +76,7 @@ export const collectTopLevelBlockMetrics = (
     const metrics: TopLevelBlockMetrics[] = [];
 
     editor.state.doc.forEach((node, pos) => {
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             return;
         }
 

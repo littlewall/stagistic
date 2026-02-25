@@ -1,6 +1,6 @@
 # Stagistic Desktop (Tauri)
 
-Offline-first desktop shell for the Stagistic editor. This app uses Tauri v2 with a React + Vite frontend and a local SQLite database via the SQL plugin.
+Offline-first desktop shell for the Stagistic editor. This app uses Tauri with a React + Vite frontend and a local SQLite database via the SQL plugin.
 
 ## Prerequisites
 

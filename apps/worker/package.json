@@ -7,7 +7,7 @@
         "dev": "tsc -w --preserveWatchOutput",
         "build": "tsc",
         "start": "node dist/index.js",
-        "lint": "eslint . --ext ts"
+        "lint": "eslint ."
     },
     "dependencies": {
         "dotenv": "^16.4.7"

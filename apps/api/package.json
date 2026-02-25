@@ -7,7 +7,7 @@
         "dev": "tsc -w --preserveWatchOutput",
         "build": "tsc",
         "start": "node dist/index.js",
-        "lint": "eslint . --ext ts"
+        "lint": "eslint ."
     },
     "dependencies": {
         "fastify": "^5.2.0",

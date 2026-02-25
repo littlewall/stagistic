@@ -1,20 +1,22 @@
 import {
     ELEMENT_ACT,
     ELEMENT_SCENE_HEADING,
-    FOUNTAIN_BLOCK_NODE_NAME,
     type FountainJSONContent,
+    getScriptBlockId,
+    getScriptBlockLegacyType,
+    isScriptBlockNode,
 } from '@stagistic/script-core';
 
 type MoveResult = [FountainJSONContent[] | undefined, boolean];
 
-const isFountainBlock = (node: FountainJSONContent) => node.type === FOUNTAIN_BLOCK_NODE_NAME;
+const isFountainBlock = (node: FountainJSONContent) => isScriptBlockNode(node);
 
 const getBlockId = (node: FountainJSONContent): string | null => {
     if (!isFountainBlock(node)) {
         return null;
     }
 
-    return typeof node.attrs?.id === 'string' ? node.attrs.id : null;
+    return getScriptBlockId(node);
 };
 
 const getBlockType = (node: FountainJSONContent): unknown => {
@@ -22,7 +24,7 @@ const getBlockType = (node: FountainJSONContent): unknown => {
         return null;
     }
 
-    return node.attrs?.blockType;
+    return getScriptBlockLegacyType(node);
 };
 
 const isSameOrder = (previous: FountainJSONContent[], next: FountainJSONContent[]) => {

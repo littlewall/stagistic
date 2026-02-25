@@ -8,9 +8,11 @@ import type {DbClient} from '../../types';
 import type {
     DeleteScriptCharacterPayload,
     TouchScriptCharacterPayload,
+    UpdateScriptCharacterBackstoryPayload,
     UpdateScriptCharacterColorPayload,
     UpdateScriptCharacterGenderPayload,
     UpdateScriptCharacterKeyPayload,
+    UpdateScriptCharacterNotesPayload,
     UpsertScriptCharacterPayload,
 } from '../payloads';
 
@@ -26,12 +28,18 @@ export const upsertScriptCharacter = async (
             characterKey: payload.characterKey,
             colorHex: payload.colorHex ?? null,
             genderKey: payload.genderKey ?? null,
+            notes: payload.notes ?? null,
+            backstory: payload.backstory ?? null,
             createdAt: payload.createdAt,
             updatedAt: payload.updatedAt,
         })
         .onConflictDoUpdate({
             target: [scriptCharacters.scriptId, scriptCharacters.characterKey],
             set: {
+                colorHex: payload.colorHex ?? null,
+                genderKey: payload.genderKey ?? null,
+                notes: payload.notes ?? null,
+                backstory: payload.backstory ?? null,
                 updatedAt: payload.updatedAt,
             },
         });
@@ -112,6 +120,42 @@ export const updateScriptCharacterGender = async (
         .update(scriptCharacters)
         .set({
             genderKey: payload.genderKey,
+            updatedAt: payload.updatedAt,
+        })
+        .where(
+            and(
+                eq(scriptCharacters.scriptId, payload.scriptId),
+                eq(scriptCharacters.id, payload.characterId),
+            ),
+        );
+};
+
+export const updateScriptCharacterNotes = async (
+    db: DbClient,
+    payload: UpdateScriptCharacterNotesPayload,
+) => {
+    await db
+        .update(scriptCharacters)
+        .set({
+            notes: payload.notes,
+            updatedAt: payload.updatedAt,
+        })
+        .where(
+            and(
+                eq(scriptCharacters.scriptId, payload.scriptId),
+                eq(scriptCharacters.id, payload.characterId),
+            ),
+        );
+};
+
+export const updateScriptCharacterBackstory = async (
+    db: DbClient,
+    payload: UpdateScriptCharacterBackstoryPayload,
+) => {
+    await db
+        .update(scriptCharacters)
+        .set({
+            backstory: payload.backstory,
             updatedAt: payload.updatedAt,
         })
         .where(

@@ -12,7 +12,6 @@ export const useScriptEditorCharacters = ({
     initialValue,
     resolvedScriptSettings,
     characterColorSaturation,
-    handleAutoSave: _handleAutoSave,
 }: UseScriptEditorCharactersArgs): UseScriptEditorCharactersResult => {
     const {
         editor,

@@ -1,4 +1,6 @@
-
+import {
+    ScriptRepositoryProvider,
+} from '@stagistic/app-core';
 import {
     GlobalModalsProvider,
     HomeRoute,
@@ -11,6 +13,8 @@ import {useEffect, useState} from 'react';
 import {
     Navigate, Route, Routes,
 } from 'react-router-dom';
+
+import {scriptRepository} from './repo';
 
 const App = () => {
     const [bootReady, setBootReady] = useState(false);
@@ -54,17 +58,19 @@ const App = () => {
     }
 
     return (
-        <ToastProvider>
-            <GlobalModalsProvider>
-                <Routes>
-                    <Route path="/" element={<HomeRoute />} />
-                    <Route path="/script/list" element={<ScriptListRoute />} />
-                    <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
-                    <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-            </GlobalModalsProvider>
-        </ToastProvider>
+        <ScriptRepositoryProvider repository={scriptRepository}>
+            <ToastProvider>
+                <GlobalModalsProvider>
+                    <Routes>
+                        <Route path="/" element={<HomeRoute />} />
+                        <Route path="/script/list" element={<ScriptListRoute />} />
+                        <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
+                        <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </GlobalModalsProvider>
+            </ToastProvider>
+        </ScriptRepositoryProvider>
     );
 };
 

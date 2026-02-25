@@ -4,6 +4,8 @@ import {
     ELEMENT_ACT,
     type FountainJSONContent,
     getDefaultActName,
+    isScriptBlockNode,
+    resolveScriptBlockNodeType,
     type ScriptDocument,
 } from '@stagistic/script-core';
 import {type Editor as TiptapEditor} from '@tiptap/react';
@@ -99,8 +101,12 @@ export const useEditorStructureRequests = ({
             .filter(block => block.blockType === ELEMENT_ACT)
             .length;
         const nextActName = getDefaultActName(actCount + 1);
+        const prefersLegacyNodeType = currentValue.content.some(node => isScriptBlockNode(node) && node.type === FOUNTAIN_BLOCK_NODE_NAME);
+        const nextActNodeType = prefersLegacyNodeType
+            ? FOUNTAIN_BLOCK_NODE_NAME
+            : resolveScriptBlockNodeType(ELEMENT_ACT) ?? FOUNTAIN_BLOCK_NODE_NAME;
         const nextActBlock: FountainJSONContent = {
-            type: FOUNTAIN_BLOCK_NODE_NAME,
+            type: nextActNodeType,
             attrs: {
                 id: createNodeId(),
                 blockType: ELEMENT_ACT,

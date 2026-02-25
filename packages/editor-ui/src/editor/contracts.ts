@@ -1,7 +1,9 @@
 import type {
     EditorSettingsOverride,
+    FountainElementType,
     ScriptBlockIndexSnapshot,
     ScriptDocument,
+    ScriptDocumentNodeMode,
 } from '@stagistic/script-core';
 import type {ReactNode} from 'react';
 
@@ -11,6 +13,21 @@ export interface PersistentCharacterRef {
     id: string,
     key: string,
     colorHex?: string | null,
+}
+
+export interface EditorBlockAnnotation {
+    id: string,
+    blockId: string,
+    layerId: string,
+    annotationType: string,
+    startOffset: number | null,
+    endOffset: number | null,
+    status: string,
+}
+
+export interface EditorViewFilterConfig {
+    visibleLayerIds?: readonly string[],
+    visibleBlockTypes?: readonly FountainElementType[],
 }
 
 export interface FocusBlockRequest {
@@ -173,7 +190,10 @@ export interface EditorLayoutProps {
 
 export interface EditorDocumentProps {
     initialValue: ScriptDocument,
+    nodeMode?: ScriptDocumentNodeMode,
     persistentCharacters?: readonly PersistentCharacterRef[],
+    annotations?: readonly EditorBlockAnnotation[],
+    viewFilter?: EditorViewFilterConfig,
 }
 
 export interface EditorProps {

@@ -4,6 +4,8 @@ import {
     FOUNTAIN_BLOCK_NODE_NAME,
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
     FOUNTAIN_COLUMN_NODE_NAME,
+    resolveLegacyFountainBlockType,
+    SCRIPT_BLOCK_NODE_TYPES,
 } from '@stagistic/script-core';
 import type {Node as ProseMirrorNode, ResolvedPos} from '@tiptap/pm/model';
 import type {EditorState} from '@tiptap/pm/state';
@@ -19,6 +21,30 @@ export {
     FOUNTAIN_BLOCK_NODE_NAME,
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
     FOUNTAIN_COLUMN_NODE_NAME,
+};
+
+export const FOUNTAIN_BLOCK_GROUP_NAME = 'fountainBlock';
+
+const FOUNTAIN_BLOCK_NODE_NAME_SET: ReadonlySet<string> = new Set([FOUNTAIN_BLOCK_NODE_NAME, ...SCRIPT_BLOCK_NODE_TYPES]);
+
+const isFountainNodeNameInputArray = (
+    value: string | readonly string[],
+): value is readonly string[] => {
+    return Array.isArray(value);
+};
+
+const resolveNodeNameMatcher = (nodeName: string | readonly string[]) => {
+    if (nodeName === FOUNTAIN_BLOCK_NODE_NAME) {
+        return isFountainBlockNodeName;
+    }
+
+    if (!isFountainNodeNameInputArray(nodeName)) {
+        return (name: string) => name === nodeName;
+    }
+
+    const nodeNameSet = new Set(nodeName);
+
+    return (name: string) => nodeNameSet.has(name);
 };
 
 export {
@@ -43,14 +69,30 @@ export const ensureFountainBlockId = (value: unknown) => {
     return typeof value === 'string' && value.length > 0 ? value : createNodeId();
 };
 
+export const isFountainBlockNodeName = (value: unknown): value is string => {
+    return typeof value === 'string' && FOUNTAIN_BLOCK_NODE_NAME_SET.has(value);
+};
+
+const resolveBlockTypeFromNode = (node: ProseMirrorNode): FountainBlockType => {
+    const resolvedFromNodeName = resolveLegacyFountainBlockType(node.type.name);
+
+    if (resolvedFromNodeName) {
+        return normalizeFountainBlockType(resolvedFromNodeName);
+    }
+
+    return normalizeFountainBlockType(node.attrs.blockType);
+};
+
 const getFountainBlockAtResolvedPosition = (
     $position: ResolvedPos,
-    nodeName: string,
+    nodeName: string | readonly string[],
 ): ActiveFountainBlock | null => {
+    const isMatchingNodeName = resolveNodeNameMatcher(nodeName);
+
     for (let depth = $position.depth; depth > 0; depth -= 1) {
         const node = $position.node(depth);
 
-        if (node.type.name !== nodeName) {
+        if (!isMatchingNodeName(node.type.name)) {
             continue;
         }
 
@@ -61,7 +103,7 @@ const getFountainBlockAtResolvedPosition = (
             from: pos + 1,
             to: pos + node.nodeSize - 1,
             node,
-            blockType: normalizeFountainBlockType(node.attrs.blockType),
+            blockType: resolveBlockTypeFromNode(node),
             id: ensureFountainBlockId(node.attrs.id),
         };
     }
@@ -71,22 +113,23 @@ const getFountainBlockAtResolvedPosition = (
 
 export const getActiveFountainBlockFromState = (
     state: EditorState,
-    nodeName = FOUNTAIN_BLOCK_NODE_NAME,
+    nodeName: string | readonly string[] = FOUNTAIN_BLOCK_NODE_NAME,
 ) => getFountainBlockAtResolvedPosition(state.selection.$from, nodeName);
 
 export const findFountainBlockByIdFromState = (
     state: EditorState,
     blockId: string,
-    nodeName = FOUNTAIN_BLOCK_NODE_NAME,
+    nodeName: string | readonly string[] = FOUNTAIN_BLOCK_NODE_NAME,
 ): ActiveFountainBlock | null => {
     let resolvedBlock: ActiveFountainBlock | null = null;
+    const isMatchingNodeName = resolveNodeNameMatcher(nodeName);
 
     state.doc.descendants((node, pos) => {
         if (resolvedBlock) {
             return false;
         }
 
-        if (node.type.name !== nodeName) {
+        if (!isMatchingNodeName(node.type.name)) {
             return true;
         }
 
@@ -99,7 +142,7 @@ export const findFountainBlockByIdFromState = (
             from: pos + 1,
             to: pos + node.nodeSize - 1,
             node,
-            blockType: normalizeFountainBlockType(node.attrs.blockType),
+            blockType: resolveBlockTypeFromNode(node),
             id: ensureFountainBlockId(node.attrs.id),
         };
 
@@ -112,7 +155,7 @@ export const findFountainBlockByIdFromState = (
 export const findFountainBlockSelectionPosFromState = (
     state: EditorState,
     blockId: string,
-    nodeName = FOUNTAIN_BLOCK_NODE_NAME,
+    nodeName: string | readonly string[] = FOUNTAIN_BLOCK_NODE_NAME,
 ) => {
     const block = findFountainBlockByIdFromState(state, blockId, nodeName);
 
@@ -121,7 +164,7 @@ export const findFountainBlockSelectionPosFromState = (
 
 export const getSelectionBlockEntries = (
     state: EditorState,
-    nodeName = FOUNTAIN_BLOCK_NODE_NAME,
+    nodeName: string | readonly string[] = FOUNTAIN_BLOCK_NODE_NAME,
 ) => ({
     anchor: getFountainBlockAtResolvedPosition(state.selection.$anchor, nodeName),
     head: getFountainBlockAtResolvedPosition(state.selection.$head, nodeName),
@@ -129,7 +172,7 @@ export const getSelectionBlockEntries = (
 
 export const isSelectionAcrossBlocks = (
     state: EditorState,
-    nodeName = FOUNTAIN_BLOCK_NODE_NAME,
+    nodeName: string | readonly string[] = FOUNTAIN_BLOCK_NODE_NAME,
 ) => {
     if (state.selection.empty) {
         return false;
@@ -146,7 +189,7 @@ export const isSelectionAcrossBlocks = (
 
 export const getActiveFountainBlock = (
     editor: TiptapEditor,
-    nodeName = FOUNTAIN_BLOCK_NODE_NAME,
+    nodeName: string | readonly string[] = FOUNTAIN_BLOCK_NODE_NAME,
 ) => getActiveFountainBlockFromState(editor.state, nodeName);
 
 export const isFountainElementType = (value: unknown): value is FountainElementType => isFountainBlockType(value);

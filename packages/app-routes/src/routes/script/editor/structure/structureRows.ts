@@ -3,8 +3,8 @@ import {
     ELEMENT_ACT,
     ELEMENT_SCENE_HEADING,
     type FountainJSONContent,
-    type ScriptBlockIndexSnapshot,
     normalizeActName,
+    type ScriptBlockIndexSnapshot,
 } from '@stagistic/script-core';
 
 export interface StructureActRow {

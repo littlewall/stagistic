@@ -15,7 +15,7 @@ import {
     DecorationSet,
 } from '@tiptap/pm/view';
 
-import {FOUNTAIN_BLOCK_NODE_NAME} from '../fountainCore';
+import {isFountainBlockNodeName} from '../fountainCore';
 import styles from './StructureMarkerDecorations.module.css';
 
 type MarkerKind = 'music-start' | 'music-end';
@@ -116,7 +116,7 @@ const buildStructureMarkerDecorations = (
     const blockPosById = new Map<string, number>();
 
     doc.descendants((node, pos) => {
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             return true;
         }
 

@@ -8,6 +8,8 @@ interface ScriptCharacterRow {
     characterKey: string,
     colorHex: string | null,
     genderKey: string | null,
+    notes: string | null,
+    backstory: string | null,
 }
 
 interface ScriptCharacterGenderRow {
@@ -22,6 +24,8 @@ export const mapCharacterRow = (row: ScriptCharacterRow): ScriptCharacterRef => 
         key: row.characterKey,
         colorHex: row.colorHex,
         genderKey: row.genderKey,
+        notes: row.notes,
+        backstory: row.backstory,
     };
 };
 

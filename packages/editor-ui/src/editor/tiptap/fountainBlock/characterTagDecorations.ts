@@ -7,7 +7,7 @@ import {
 import {DecorationSet} from '@tiptap/pm/view';
 
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
+    isFountainBlockNodeName,
     normalizeFountainBlockType,
 } from '../fountainCore';
 import {buildDecorations} from './characterTags/buildDecorations';
@@ -42,7 +42,7 @@ const hasCharacterBlocksInRange = (
     let hasCharacterBlocks = false;
 
     doc.nodesBetween(safeFrom, safeTo, node => {
-        if (node.type.name !== FOUNTAIN_BLOCK_NODE_NAME) {
+        if (!isFountainBlockNodeName(node.type.name)) {
             return true;
         }
 

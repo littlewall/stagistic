@@ -1,8 +1,5 @@
 .act {
-    padding-top: var(--act-spacing-before, 0);
-    padding-right: var(--act-indent-right, 0);
-    padding-bottom: var(--act-spacing-after, 0);
-    padding-left: var(--act-indent-left, 0);
+    padding: var(--act-spacing-before, 0) var(--act-indent-right, 0) var(--act-spacing-after, 0) var(--act-indent-left, 0);
     font-weight: var(--act-font-weight, 700);
     font-style: var(--act-font-style, normal);
     line-height: var(--act-line-height, inherit);
@@ -14,8 +11,8 @@
 }
 
 .act[data-act-prefix]::before {
-    content: attr(data-act-prefix) " ";
     pointer-events: none;
+    content: attr(data-act-prefix) ' ';
     user-select: none;
     color: inherit;
 }

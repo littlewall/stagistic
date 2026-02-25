@@ -1,6 +1,5 @@
 import {
     ELEMENT_ACT,
-    FOUNTAIN_BLOCK_NODE_NAME,
     type FountainElementType,
 } from '@stagistic/script-core';
 import type {Editor as TiptapEditor} from '@tiptap/react';
@@ -18,6 +17,8 @@ import {
 
 import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
 import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
+import {updateBlockType} from '../tiptap/fountainBlock/commands';
+import {normalizeFountainBlockType} from '../tiptap/fountainCore';
 import {BlockActionsMenu} from './blockActions/BlockActionsMenu';
 import {MENU_DISABLED_BLOCK_TYPES} from './blockActions/overlay/constants';
 import {
@@ -292,14 +293,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             return;
         }
 
-        editor
-            .chain()
-            .focus()
-            .updateAttributes(FOUNTAIN_BLOCK_NODE_NAME, {
-                blockType: optionType,
-                id: visibleOverlayState.blockId,
-            })
-            .run();
+        updateBlockType(editor, normalizeFountainBlockType(optionType), visibleOverlayState.blockId);
     }, [
         closeMenu,
         editor,

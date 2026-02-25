@@ -4,10 +4,12 @@ import {
     isCharacterBlockType,
 } from '../characters/documentHelpers';
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
     FOUNTAIN_COLUMN_NODE_NAME,
     type FountainJSONContent,
+    getScriptBlockId,
+    getScriptBlockLegacyType,
+    isScriptBlockNode,
     type ScriptDocument,
 } from '../document';
 import {
@@ -159,24 +161,17 @@ export const buildScriptBlockIndex = (
                 return;
             }
 
-            if (node.type !== FOUNTAIN_BLOCK_NODE_NAME) {
+            if (!isScriptBlockNode(node)) {
                 walkNodes(node.content, context);
 
                 return;
             }
 
-            const attrs = (node.attrs && typeof node.attrs === 'object')
-                ? node.attrs as Record<string, unknown>
+            const attrs = node.attrs && typeof node.attrs === 'object'
+                ? node.attrs
                 : undefined;
-            const blockType = typeof attrs?.blockType === 'string'
-                ? attrs.blockType
-                : ELEMENT_ACTION;
-            const rawBlockId = typeof attrs?.id === 'string'
-                ? attrs.id.trim()
-                : '';
-            const blockId = rawBlockId.length > 0
-                ? rawBlockId
-                : `missing-block-${orderNo + 1}`;
+            const blockType = getScriptBlockLegacyType(node, ELEMENT_ACTION);
+            const blockId = getScriptBlockId(node) ?? `missing-block-${orderNo + 1}`;
             const textContent = getNodeTextContent(node).trim();
 
             if (blockType === ELEMENT_ACT) {
