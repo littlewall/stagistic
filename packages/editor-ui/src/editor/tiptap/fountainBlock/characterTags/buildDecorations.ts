@@ -8,10 +8,14 @@ import {
     DecorationSet,
 } from '@tiptap/pm/view';
 
+import {getCharacterColorVarName} from '../../../characterColors';
 import {
-    getCharacterColor,
-    getCharacterColorVarName,
-} from '../../../characterColors';
+    buildCharacterDocColorState,
+    getCharacterTokenColorKey,
+    getUnconfirmedCharacterColor,
+    resolveCharacterBlockId,
+} from '../../../characters/colorResolver';
+import type {PersistentCharacterRef} from '../../../contracts';
 import {
     isFountainBlockNodeName,
     normalizeFountainBlockType,
@@ -19,12 +23,35 @@ import {
 import styles from '../CharacterTagDecorations.module.css';
 import {isCharacterBlockType} from './types';
 
-export const buildDecorations = (
+interface BuildDecorationsArgs {
     doc: ProseMirrorNode,
     characterColorSaturation?: number,
     colorByCharacterId?: ReadonlyMap<string, string>,
+    rememberedColorByKey?: ReadonlyMap<string, string>,
+    persistentCharacters?: readonly PersistentCharacterRef[],
+    selectionFrom?: number | null,
+}
+
+export const buildDecorations = (
+    args: BuildDecorationsArgs,
 ) => {
+    const {
+        doc,
+        characterColorSaturation,
+        colorByCharacterId,
+        rememberedColorByKey,
+        persistentCharacters,
+        selectionFrom,
+    } = args;
     const decorations: Decoration[] = [];
+    const colorState = buildCharacterDocColorState({
+        doc,
+        selectionFrom,
+        persistentCharacters,
+        characterColorSaturation,
+        colorByCharacterId,
+        rememberedColorByKey,
+    });
 
     doc.descendants((node, pos) => {
         if (!isFountainBlockNodeName(node.type.name)) {
@@ -40,16 +67,14 @@ export const buildDecorations = (
         const text = node.textContent ?? '';
         const blockStart = pos + 1;
         const tokens = splitCharacterTokens(text);
-        const characterRefs = (node.attrs.characterRefs ?? {}) as Record<string, string>;
+        const blockId = resolveCharacterBlockId(node.attrs.id, pos);
 
         tokens.forEach((token, index) => {
             if (token.valueStart < token.valueEnd) {
                 const key = normalizeCharacterKey(token.value);
-                const characterId = key ? characterRefs[key] ?? null : null;
-                const confirmedColor = characterId && colorByCharacterId
-                    ? colorByCharacterId.get(characterId)
-                    : undefined;
-                const color = confirmedColor ?? getCharacterColor(key, characterColorSaturation);
+                const colorTokenKey = getCharacterTokenColorKey(blockId, index);
+                const color = colorState.colorByToken.get(colorTokenKey)
+                    ?? getUnconfirmedCharacterColor(key, characterColorSaturation);
                 const decorationEnd = Math.max(token.valueEnd, token.end);
 
                 decorations.push(Decoration.inline(
@@ -57,7 +82,7 @@ export const buildDecorations = (
                     blockStart + decorationEnd,
                     {
                         class: styles.characterTag,
-                        style: `--character-tag-color: var(${getCharacterColorVarName(key)}, ${color});`,
+                        style: `--character-tag-color: var(${getCharacterColorVarName(colorTokenKey)}, ${color});`,
                     },
                 ));
             }

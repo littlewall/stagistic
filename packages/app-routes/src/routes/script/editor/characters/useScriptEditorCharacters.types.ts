@@ -37,7 +37,7 @@ export interface UseScriptEditorCharactersResult {
     isCharactersLoading: boolean,
     handleEditorValueChange: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,
     normalizeCharacterNameForInlineInput: (name: string) => string,
-    handleConfirmCharacter: (characterKey: string) => void,
+    handleConfirmCharacter: (characterKey: string, colorHex?: string | null) => void,
     handleDeleteCharacter: (characterId: string) => void,
     handleRenameCharacterPreview: (
         characterId: string,

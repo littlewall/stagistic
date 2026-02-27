@@ -1,22 +1,21 @@
 import {
-    ELEMENT_CHARACTER,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     extractCharacterKeys,
-    normalizeCharacterKey,
 } from '@stagistic/script-core';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 
+import {
+    readNormalizedRefsFromAttrs,
+    visitCharacterBlocks,
+} from '../characters/characterRefUtils';
+import {buildCharacterDocColorState} from '../characters/colorResolver';
+import type {PersistentCharacterRef} from '../contracts';
 import type {EditorLiveCharacterSnapshot} from '../contracts';
-import {isFountainBlockNodeName} from '../tiptap/fountainCore';
 
 const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
     countsByKey: new Map<string, number>(),
     countsByCharacterId: new Map<string, number>(),
     keyByCharacterId: new Map<string, string>(),
-};
-
-const isCharacterBlockType = (blockType: string) => {
-    return blockType === ELEMENT_CHARACTER || blockType === ELEMENT_DUAL_DIALOGUE_CHARACTER;
+    displayColorByKey: new Map<string, string>(),
 };
 
 /**
@@ -26,58 +25,54 @@ const isCharacterBlockType = (blockType: string) => {
  * This is intentionally independent of any ProseMirror plugin state
  * to avoid plugin initialization ordering issues.
  */
-export const buildCharacterSnapshotFromDoc = (doc: ProseMirrorNode): EditorLiveCharacterSnapshot => {
+interface BuildCharacterSnapshotOptions {
+    selectionFrom?: number | null,
+    persistentCharacters?: readonly PersistentCharacterRef[],
+    characterColorSaturation?: number,
+    colorByCharacterId?: ReadonlyMap<string, string>,
+    rememberedColorByKey?: ReadonlyMap<string, string>,
+}
+
+export const buildCharacterSnapshotFromDoc = (
+    doc: ProseMirrorNode,
+    options?: BuildCharacterSnapshotOptions,
+): EditorLiveCharacterSnapshot => {
     const countsByKey = new Map<string, number>();
     const countsByCharacterId = new Map<string, number>();
     const keyByCharacterId = new Map<string, string>();
+    const colorState = buildCharacterDocColorState({
+        doc,
+        selectionFrom: options?.selectionFrom,
+        persistentCharacters: options?.persistentCharacters,
+        characterColorSaturation: options?.characterColorSaturation,
+        colorByCharacterId: options?.colorByCharacterId,
+        rememberedColorByKey: options?.rememberedColorByKey,
+    });
 
-    doc.descendants(node => {
-        if (!isFountainBlockNodeName(node.type.name)) {
-            return true;
-        }
+    visitCharacterBlocks({
+        doc,
+        onCharacterBlock: node => {
+            const textContent = node.textContent.trim();
 
-        const attrs = node.attrs as Record<string, unknown>;
-        const blockType = typeof attrs.blockType === 'string'
-            ? attrs.blockType
-            : '';
-
-        if (!isCharacterBlockType(blockType)) {
-            return false;
-        }
-
-        const textContent = node.textContent.trim();
-
-        if (!textContent) {
-            return false;
-        }
-
-        const refsByKey = new Map<string, string>();
-        const rawRefs = attrs.characterRefs;
-
-        if (rawRefs && typeof rawRefs === 'object') {
-            Object.entries(rawRefs as Record<string, unknown>).forEach(([rawKey, rawCharacterId]) => {
-                const key = normalizeCharacterKey(rawKey);
-
-                if (!key || typeof rawCharacterId !== 'string' || !rawCharacterId) {
-                    return;
-                }
-
-                refsByKey.set(key, rawCharacterId);
-            });
-        }
-
-        extractCharacterKeys(textContent).forEach(key => {
-            countsByKey.set(key, (countsByKey.get(key) ?? 0) + 1);
-
-            const characterId = refsByKey.get(key);
-
-            if (characterId) {
-                countsByCharacterId.set(characterId, (countsByCharacterId.get(characterId) ?? 0) + 1);
-                keyByCharacterId.set(characterId, key);
+            if (!textContent) {
+                return false;
             }
-        });
 
-        return false;
+            const refsByKey = readNormalizedRefsFromAttrs(node.attrs as Record<string, unknown>);
+
+            extractCharacterKeys(textContent).forEach(key => {
+                countsByKey.set(key, (countsByKey.get(key) ?? 0) + 1);
+
+                const characterId = refsByKey[key];
+
+                if (characterId) {
+                    countsByCharacterId.set(characterId, (countsByCharacterId.get(characterId) ?? 0) + 1);
+                    keyByCharacterId.set(characterId, key);
+                }
+            });
+
+            return false;
+        },
     });
 
     if (countsByKey.size === 0 && countsByCharacterId.size === 0) {
@@ -88,5 +83,6 @@ export const buildCharacterSnapshotFromDoc = (doc: ProseMirrorNode): EditorLiveC
         countsByKey,
         countsByCharacterId,
         keyByCharacterId,
+        displayColorByKey: colorState.displayColorByKey,
     };
 };

@@ -1,11 +1,13 @@
 import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {
+    type EditorState,
     Plugin,
     PluginKey,
     type Transaction,
 } from '@tiptap/pm/state';
 import {DecorationSet} from '@tiptap/pm/view';
 
+import type {PersistentCharacterRef} from '../../contracts';
 import {
     isFountainBlockNodeName,
     normalizeFountainBlockType,
@@ -15,6 +17,12 @@ import {cleanupCharacterDelimiters} from './characterTags/cleanup';
 import {isCharacterBlockType} from './characterTags/types';
 
 const characterTagDecorationsKey = new PluginKey<DecorationSet>('fountain-character-tag-decorations');
+
+export const CHARACTER_TAG_DECORATIONS_REFRESH_META_KEY = 'fountain-character-tag-decorations-refresh';
+
+export const createCharacterTagDecorationsRefreshTransaction = (state: EditorState) => {
+    return state.tr.setMeta(CHARACTER_TAG_DECORATIONS_REFRESH_META_KEY, true);
+};
 
 const hasCharacterBlocksInRange = (
     doc: ProseMirrorNode,
@@ -104,17 +112,46 @@ const transactionTouchesCharacterBlocks = (
 export const createCharacterTagDecorationsPlugin = (
     characterColorSaturation?: number,
     colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
+    rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>},
+    persistentCharactersRef?: {current: readonly PersistentCharacterRef[]},
 ) => new Plugin({
     key: characterTagDecorationsKey,
     state: {
-        init: (_config, state) => buildDecorations(
-            state.doc,
+        init: (_config, state) => buildDecorations({
+            doc: state.doc,
             characterColorSaturation,
-            colorByCharacterIdRef?.current,
-        ),
+            colorByCharacterId: colorByCharacterIdRef?.current,
+            rememberedColorByKey: rememberedColorByKeyRef?.current,
+            persistentCharacters: persistentCharactersRef?.current,
+            selectionFrom: state.selection.from,
+        }),
         apply: (tr, pluginState, oldState) => {
+            const shouldRefresh = tr.getMeta(CHARACTER_TAG_DECORATIONS_REFRESH_META_KEY) === true;
+
             if (!tr.docChanged) {
-                return pluginState;
+                if (!shouldRefresh) {
+                    return pluginState;
+                }
+
+                return buildDecorations({
+                    doc: tr.doc,
+                    characterColorSaturation,
+                    colorByCharacterId: colorByCharacterIdRef?.current,
+                    rememberedColorByKey: rememberedColorByKeyRef?.current,
+                    persistentCharacters: persistentCharactersRef?.current,
+                    selectionFrom: tr.selection.from,
+                });
+            }
+
+            if (shouldRefresh) {
+                return buildDecorations({
+                    doc: tr.doc,
+                    characterColorSaturation,
+                    colorByCharacterId: colorByCharacterIdRef?.current,
+                    rememberedColorByKey: rememberedColorByKeyRef?.current,
+                    persistentCharacters: persistentCharactersRef?.current,
+                    selectionFrom: tr.selection.from,
+                });
             }
 
             const mappedDecorations = pluginState.map(tr.mapping, tr.doc);
@@ -123,7 +160,14 @@ export const createCharacterTagDecorationsPlugin = (
                 return mappedDecorations;
             }
 
-            return buildDecorations(tr.doc, characterColorSaturation, colorByCharacterIdRef?.current);
+            return buildDecorations({
+                doc: tr.doc,
+                characterColorSaturation,
+                colorByCharacterId: colorByCharacterIdRef?.current,
+                rememberedColorByKey: rememberedColorByKeyRef?.current,
+                persistentCharacters: persistentCharactersRef?.current,
+                selectionFrom: tr.selection.from,
+            });
         },
     },
     appendTransaction: (transactions, oldState, newState) => cleanupCharacterDelimiters(transactions, oldState, newState),

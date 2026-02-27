@@ -29,7 +29,6 @@ const CharacterSuggestionsOverlay = ({
         suggestionEntries,
         activeSuggestionIndex,
         handleSuggestionMouseDown,
-        handleSuggestionMouseEnter,
     } = useCharacterSuggestions({
         editor,
         canvasRef,
@@ -38,7 +37,7 @@ const CharacterSuggestionsOverlay = ({
         characterColorSaturation,
     });
 
-    if (!overlayState || !editor) {
+    if (!editor || persistentCharacters.length === 0 || !overlayState || suggestionEntries.length === 0) {
         return null;
     }
 
@@ -49,7 +48,6 @@ const CharacterSuggestionsOverlay = ({
             suggestions={suggestionEntries}
             activeSuggestionIndex={activeSuggestionIndex}
             onSuggestionMouseDown={handleSuggestionMouseDown}
-            onSuggestionMouseEnter={handleSuggestionMouseEnter}
         />
     );
 };

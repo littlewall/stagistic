@@ -6,6 +6,7 @@ export {
     BlockUiEventsExtension,
     getBlockUiEventsFromState,
 } from './BlockUiEventsExtension';
+export {CharacterRefSyncExtension} from './CharacterRefSyncExtension';
 export {CharacterTagDecorationsExtension} from './CharacterTagDecorationsExtension';
 export {FountainBehaviorExtension} from './FountainBehaviorExtension';
 export {

@@ -5,14 +5,22 @@ import {
     ELEMENT_SCENE_HEADING,
     type IndexedScriptBlock,
     normalizeActName,
+    normalizeCharacterColorHex,
+    normalizeCharacterKey,
     type ScriptBlockIndexSnapshot,
 } from '@stagistic/script-core';
 
+import {
+    getConfirmedCharacterColor,
+    getUnconfirmedCharacterColor,
+    normalizePersistentCharacterRefs,
+} from '../characters/colorResolver';
 import type {
     EditorLiveCharacterSnapshot,
     EditorLiveStructureRow,
     EditorLiveStructureSnapshot,
 } from '../contracts';
+import type {PersistentCharacterRef} from '../contracts';
 
 const EMPTY_STRUCTURE: EditorLiveStructureSnapshot = {
     rows: [],
@@ -24,7 +32,15 @@ const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
     countsByKey: new Map<string, number>(),
     countsByCharacterId: new Map<string, number>(),
     keyByCharacterId: new Map<string, string>(),
+    displayColorByKey: new Map<string, string>(),
 };
+
+export interface SidebarProjectionColorContext {
+    characterColorSaturation?: number,
+    colorByCharacterId?: ReadonlyMap<string, string>,
+    rememberedColorByKey?: ReadonlyMap<string, string>,
+    persistentCharacters?: readonly PersistentCharacterRef[],
+}
 
 const normalizeText = (value: string) => value.trim();
 
@@ -99,6 +115,7 @@ const applyBlockCharacterRefs = (
     countsByKey: Map<string, number>,
     countsByCharacterId: Map<string, number>,
     keyByCharacterId: Map<string, string>,
+    characterIdByKey: Map<string, string>,
     block: IndexedScriptBlock,
 ) => {
     if (!isCharacterBlockType(block.blockType) || !Array.isArray(block.characterRefs)) {
@@ -106,7 +123,9 @@ const applyBlockCharacterRefs = (
     }
 
     block.characterRefs.forEach(characterRef => {
-        const key = typeof characterRef.key === 'string' ? characterRef.key.trim() : '';
+        const key = typeof characterRef.key === 'string'
+            ? normalizeCharacterKey(characterRef.key)
+            : '';
 
         if (!key) {
             return;
@@ -118,12 +137,19 @@ const applyBlockCharacterRefs = (
             return;
         }
 
+        if (!characterIdByKey.has(key)) {
+            characterIdByKey.set(key, characterRef.characterId);
+        }
+
         incrementCount(countsByCharacterId, characterRef.characterId);
         keyByCharacterId.set(characterRef.characterId, key);
     });
 };
 
-const buildCharacterSnapshot = (indexSnapshot: ScriptBlockIndexSnapshot): EditorLiveCharacterSnapshot => {
+const buildCharacterSnapshot = (
+    indexSnapshot: ScriptBlockIndexSnapshot,
+    colorContext?: SidebarProjectionColorContext,
+): EditorLiveCharacterSnapshot => {
     if (!Array.isArray(indexSnapshot.blocks) || indexSnapshot.blocks.length === 0) {
         return EMPTY_CHARACTERS;
     }
@@ -131,9 +157,57 @@ const buildCharacterSnapshot = (indexSnapshot: ScriptBlockIndexSnapshot): Editor
     const countsByKey = new Map<string, number>();
     const countsByCharacterId = new Map<string, number>();
     const keyByCharacterId = new Map<string, string>();
+    const characterIdByKey = new Map<string, string>();
+    const displayColorByKey = new Map<string, string>();
+    const normalizedPersistentCharacters = normalizePersistentCharacterRefs(colorContext?.persistentCharacters ?? []);
+    const persistentCharacterByKey = new Map(
+        normalizedPersistentCharacters.map(character => [character.key, character] as const),
+    );
+    const persistentCharacterById = new Map(
+        normalizedPersistentCharacters.map(character => [character.id, character] as const),
+    );
+    const resolveConfirmedColorById = (characterId: string) => {
+        const persistentCharacter = persistentCharacterById.get(characterId);
+
+        return getConfirmedCharacterColor(
+            characterId,
+            colorContext?.colorByCharacterId?.get(characterId) ?? persistentCharacter?.colorHex ?? null,
+            colorContext?.characterColorSaturation,
+        );
+    };
 
     indexSnapshot.blocks.forEach(block => {
-        applyBlockCharacterRefs(countsByKey, countsByCharacterId, keyByCharacterId, block);
+        applyBlockCharacterRefs(
+            countsByKey,
+            countsByCharacterId,
+            keyByCharacterId,
+            characterIdByKey,
+            block,
+        );
+    });
+
+    countsByKey.forEach((_count, key) => {
+        const linkedCharacterId = characterIdByKey.get(key);
+        const persistentCharacter = persistentCharacterByKey.get(key);
+        const rememberedColor = normalizeCharacterColorHex(colorContext?.rememberedColorByKey?.get(key));
+
+        if (linkedCharacterId) {
+            displayColorByKey.set(key, resolveConfirmedColorById(linkedCharacterId));
+
+            return;
+        }
+
+        if (persistentCharacter) {
+            displayColorByKey.set(key, resolveConfirmedColorById(persistentCharacter.id));
+
+            return;
+        }
+
+        displayColorByKey.set(
+            key,
+            rememberedColor
+                ?? getUnconfirmedCharacterColor(key, colorContext?.characterColorSaturation),
+        );
     });
 
     if (countsByKey.size === 0 && countsByCharacterId.size === 0) {
@@ -144,12 +218,16 @@ const buildCharacterSnapshot = (indexSnapshot: ScriptBlockIndexSnapshot): Editor
         countsByKey,
         countsByCharacterId,
         keyByCharacterId,
+        displayColorByKey,
     };
 };
 
-export const buildSidebarProjectionFromIndex = (indexSnapshot: ScriptBlockIndexSnapshot) => {
+export const buildSidebarProjectionFromIndex = (
+    indexSnapshot: ScriptBlockIndexSnapshot,
+    colorContext?: SidebarProjectionColorContext,
+) => {
     return {
         structure: buildStructureSnapshot(indexSnapshot),
-        characters: buildCharacterSnapshot(indexSnapshot),
+        characters: buildCharacterSnapshot(indexSnapshot, colorContext),
     };
 };

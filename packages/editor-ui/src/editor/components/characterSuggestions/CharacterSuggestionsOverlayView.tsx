@@ -12,9 +12,8 @@ type CharacterSuggestionsOverlayViewProps = {
     overlayRef: RefObject<HTMLDivElement | null>,
     style: CSSProperties,
     suggestions: SuggestionEntry[],
-    activeSuggestionIndex: number,
+    activeSuggestionIndex: number | null,
     onSuggestionMouseDown: (suggestion: string, event: ReactMouseEvent<HTMLButtonElement>) => void,
-    onSuggestionMouseEnter: (index: number) => void,
 };
 
 export const CharacterSuggestionsOverlayView = ({
@@ -23,7 +22,6 @@ export const CharacterSuggestionsOverlayView = ({
     suggestions,
     activeSuggestionIndex,
     onSuggestionMouseDown,
-    onSuggestionMouseEnter,
 }: CharacterSuggestionsOverlayViewProps) => {
     return (
         <div
@@ -36,13 +34,8 @@ export const CharacterSuggestionsOverlayView = ({
                 role="listbox"
                 aria-label="Character suggestions"
             >
-                {suggestions.length === 0 ? (
-                    <div className={styles.empty}>
-                        No confirmed characters available
-                    </div>
-                ) : null}
                 {suggestions.map((suggestion, index) => {
-                    const isActive = activeSuggestionIndex === index;
+                    const isActive = activeSuggestionIndex !== null && activeSuggestionIndex === index;
 
                     return (
                         <button
@@ -52,7 +45,6 @@ export const CharacterSuggestionsOverlayView = ({
                             role="option"
                             aria-selected={isActive}
                             onMouseDown={event => onSuggestionMouseDown(suggestion.key, event)}
-                            onMouseEnter={() => onSuggestionMouseEnter(index)}
                         >
                             <span className={styles.itemDot} style={{backgroundColor: suggestion.color}} />
                             <span className={styles.itemLabel}>{suggestion.key}</span>

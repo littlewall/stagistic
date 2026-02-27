@@ -32,7 +32,7 @@ interface ScriptCharactersSidebarData {
 }
 
 interface ScriptCharactersSidebarActions {
-    onConfirmCharacter: (characterKey: string, editorCallbacks?: ConfirmEditorCallbacks) => void,
+    onConfirmCharacter: (characterKey: string, colorHex?: string | null, editorCallbacks?: ConfirmEditorCallbacks) => void,
     onDeleteCharacter: (characterId: string, editorCallbacks?: DeleteEditorCallbacks) => void,
     normalizeRenameInput: (value: string) => string,
     onRenameCharacterPreview: (
@@ -90,8 +90,8 @@ export const ScriptCharactersSidebar = ({
         }
     }, [editor]);
 
-    const handleConfirmCharacter = useCallback((characterKey: string) => {
-        actions.onConfirmCharacter(characterKey, {
+    const handleConfirmCharacter = useCallback((characterKey: string, colorHex?: string | null) => {
+        actions.onConfirmCharacter(characterKey, colorHex, {
             onLinkRef: (key, id) => {
                 if (editor) {
                     linkCharacterRef(editor, key, id);
@@ -118,7 +118,13 @@ export const ScriptCharactersSidebar = ({
         actions.onRenameCharacterPreview(characterId, previousCharacterName, nextCharacterName, {
             onRenameText: (charId, newName) => {
                 if (editor) {
-                    renameCharacterText(editor, charId, newName, getCharacterNameForBlockType);
+                    renameCharacterText(
+                        editor,
+                        charId,
+                        newName,
+                        getCharacterNameForBlockType,
+                        previousCharacterName,
+                    );
                 }
             },
         });
@@ -136,7 +142,13 @@ export const ScriptCharactersSidebar = ({
         actions.onRenameCharacter(characterId, previousCharacterName, nextCharacterName, {
             onRenameText: (charId, newName) => {
                 if (editor) {
-                    renameCharacterText(editor, charId, newName, getCharacterNameForBlockType);
+                    renameCharacterText(
+                        editor,
+                        charId,
+                        newName,
+                        getCharacterNameForBlockType,
+                        previousCharacterName,
+                    );
                 }
             },
             onReplaceId: (oldId, newId) => {

@@ -1,4 +1,7 @@
-import {clampCharacterColorSaturation} from '@stagistic/script-core';
+import {
+    clampCharacterColorSaturation,
+    normalizeCharacterColorHex,
+} from '@stagistic/script-core';
 
 const CHARACTER_COLOR_PALETTE = [
     '#E9C6A8',
@@ -154,26 +157,7 @@ const applyCharacterColorSaturation = (hexColor: string, saturationPercent: numb
     return `#${toHexChannel(nextRgb.r)}${toHexChannel(nextRgb.g)}${toHexChannel(nextRgb.b)}`.toUpperCase();
 };
 
-export const normalizeCharacterColorHex = (value: string | null | undefined): string | null => {
-    if (!value) {
-        return null;
-    }
-
-    const trimmed = value.trim();
-
-    if ((/^#[\da-f]{6}$/iu).test(trimmed)) {
-        return trimmed.toUpperCase();
-    }
-
-    const shortHexMatch = trimmed.match(/^#([\da-f])([\da-f])([\da-f])$/iu);
-
-    if (!shortHexMatch) {
-        return null;
-    }
-
-    return `#${shortHexMatch[1]}${shortHexMatch[1]}${shortHexMatch[2]}${shortHexMatch[2]}${shortHexMatch[3]}${shortHexMatch[3]}`
-        .toUpperCase();
-};
+export {normalizeCharacterColorHex};
 
 export const getCharacterColor = (characterKey: string, saturationPercent?: number) => {
     const colorIndex = hashCharacterKey(characterKey) % CHARACTER_COLOR_PALETTE.length;
