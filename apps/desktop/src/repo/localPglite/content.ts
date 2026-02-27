@@ -1,13 +1,15 @@
 import {
     dbQueries,
-    migrateLegacyJsonToBlocksForScript,
     rebuildScriptDocumentFromBlocks,
-    type RewriteBlocksMigrationAudit,
 } from '@stagistic/db';
-import type {ScriptDocument} from '@stagistic/script-core';
+import {type ScriptDocument} from '@stagistic/script-core';
 import {uuidv7} from '@stagistic/shared';
 import type {ScriptRepository} from '@stagistic/sync-core';
 
+import {
+    LEGACY_TO_BLOCKS_TRIGGERS,
+    migrateScriptDocumentToBlocks,
+} from './migration/legacyToBlocks';
 import type {
     GetDb,
     RecordOutbox,
@@ -25,22 +27,6 @@ interface CreateContentHandlersArgs {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
 }
-
-const logMigrationAudit = (context: string, audit: RewriteBlocksMigrationAudit) => {
-    const baseMessage = `[db-local] ${context} script=${audit.scriptId} status=${audit.status}`;
-
-    if (audit.status === 'failed') {
-        console.warn(baseMessage, audit.error ?? 'unknown migration error');
-
-        return;
-    }
-
-    console.info(baseMessage);
-
-    audit.warnings.forEach(warning => {
-        console.warn(`[db-local] ${warning}`);
-    });
-};
 
 const loadLatestFromBlocks = async (
     db: Awaited<ReturnType<GetDb>>,
@@ -82,15 +68,15 @@ const persistBlocksFromDocument = async (
     db: Awaited<ReturnType<GetDb>>,
     scriptId: string,
     value: ScriptDocument,
-    trigger: string,
+    trigger: typeof LEGACY_TO_BLOCKS_TRIGGERS.saveLatest,
 ) => {
-    const audit = await migrateLegacyJsonToBlocksForScript(db, scriptId, {
+    await migrateScriptDocumentToBlocks({
+        db,
+        scriptId,
         sourceDocument: value,
-        force: true,
         trigger,
+        context: trigger,
     });
-
-    logMigrationAudit(trigger, audit);
 };
 
 export const createContentHandlers = ({
@@ -107,7 +93,12 @@ export const createContentHandlers = ({
         const db = await getDb();
         const now = Date.now();
 
-        await persistBlocksFromDocument(db, scriptId, value, 'save-latest');
+        await persistBlocksFromDocument(
+            db,
+            scriptId,
+            value,
+            LEGACY_TO_BLOCKS_TRIGGERS.saveLatest,
+        );
 
         await db.transaction(async tx => {
             await dbQueries.updateScriptTimestamp(tx, {

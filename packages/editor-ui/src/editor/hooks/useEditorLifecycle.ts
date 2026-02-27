@@ -19,10 +19,14 @@ import type {
     EditorLiveSnapshot,
     EditorStructureRequests,
     EditorValueChangeMeta,
+    PersistentCharacterRef,
 } from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
 import {buildCharacterSnapshotFromDoc} from '../live/buildCharacterSnapshotFromDoc';
-import {buildSidebarProjectionFromIndex} from '../live/buildSidebarProjectionFromIndex';
+import {
+    buildSidebarProjectionFromIndex,
+    type SidebarProjectionColorContext,
+} from '../live/buildSidebarProjectionFromIndex';
 import type {EditorSnapshotStore} from '../live/store';
 import {trackIndexUpdateDuration} from '../perf/editorPerfMetrics';
 import {
@@ -110,9 +114,12 @@ const forcePaginationRecalc = (editor: TiptapEditor) => {
     commands.forcePaginationRecalc?.();
 };
 
-const resolveSidebarProjection = (snapshot: EditorIndexSnapshot) => {
+const resolveSidebarProjection = (
+    snapshot: EditorIndexSnapshot,
+    colorContext?: SidebarProjectionColorContext,
+) => {
     return {
-        projection: buildSidebarProjectionFromIndex(snapshot),
+        projection: buildSidebarProjectionFromIndex(snapshot, colorContext),
         change: {
             structureChanged: true,
             charactersChanged: true,
@@ -144,6 +151,12 @@ interface UseEditorLifecycleArgs {
         onActiveBlockChange?: (blockId: string | null) => void,
         onBlockUiEvent?: (event: EditorBlockUiEvent) => void,
     },
+    characters?: {
+        persistentCharactersRef?: {current: readonly PersistentCharacterRef[]},
+        colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
+        rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>},
+        characterColorSaturation?: number,
+    },
     requests?: EditorStructureRequests,
 }
 
@@ -153,6 +166,7 @@ export const useEditorLifecycle = ({
     document,
     save,
     callbacks,
+    characters,
     requests,
 }: UseEditorLifecycleArgs) => {
     const {instance, autoFocus} = editor;
@@ -205,7 +219,12 @@ export const useEditorLifecycle = ({
         targetEditor?: TiptapEditor,
     ) => {
         const hasIndexSubscriber = Boolean(onIndexChangeRef.current);
-        const {projection, change} = resolveSidebarProjection(snapshot);
+        const {projection, change} = resolveSidebarProjection(snapshot, {
+            characterColorSaturation: characters?.characterColorSaturation,
+            colorByCharacterId: characters?.colorByCharacterIdRef?.current,
+            rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
+            persistentCharacters: characters?.persistentCharactersRef?.current,
+        });
         const activeBlockId = targetEditor
             ? getActiveFountainBlockFromState(targetEditor.state, FOUNTAIN_BLOCK_NODE_NAME)?.id ?? null
             : liveStore.getSnapshot().activeBlockId;
@@ -223,7 +242,17 @@ export const useEditorLifecycle = ({
         }
 
         if (targetEditor) {
-            patch.characters = buildCharacterSnapshotFromDoc(targetEditor.state.doc);
+            patch.characters = buildCharacterSnapshotFromDoc(targetEditor.state.doc, {
+                selectionFrom: targetEditor.state.selection.from,
+                persistentCharacters: characters?.persistentCharactersRef?.current,
+                colorByCharacterId: characters?.colorByCharacterIdRef?.current,
+                rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
+                characterColorSaturation: characters?.characterColorSaturation,
+            });
+        }
+
+        if (!targetEditor && (meta.source === 'structure' || change.charactersChanged)) {
+            patch.characters = projection.characters;
         }
 
         liveStore.patchSnapshot(patch);
@@ -231,7 +260,14 @@ export const useEditorLifecycle = ({
         if (hasIndexSubscriber) {
             onIndexChangeRef.current?.(snapshot, meta);
         }
-    }, [liveStore, onIndexChangeRef]);
+    }, [
+        characters?.characterColorSaturation,
+        characters?.colorByCharacterIdRef,
+        characters?.rememberedColorByKeyRef,
+        characters?.persistentCharactersRef,
+        liveStore,
+        onIndexChangeRef,
+    ]);
     const emitIndexFromEditor = useCallback((
         targetEditor: TiptapEditor,
         meta: EditorValueChangeMeta,
@@ -363,6 +399,12 @@ export const useEditorLifecycle = ({
         isApplyingInitialRef.current = true;
         instance.commands.setContent(initialValue, {emitUpdate: false});
         sanitizeFountainBlocks(instance);
+
+        const syncCommands = instance.commands as {
+            syncCharacterRefs?: () => boolean,
+        };
+
+        syncCommands.syncCharacterRefs?.();
         instance.view.dispatch(
             instance.state.tr
                 .setDocAttribute('structure', normalizedStructure)

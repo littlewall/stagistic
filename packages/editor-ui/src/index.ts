@@ -2,8 +2,12 @@ export {BLOCK_ICONS} from './editor/blocks/controls/blockIcons';
 export {
     getCharacterColor,
     getCharacterColorVarName,
-    normalizeCharacterColorHex,
 } from './editor/characterColors';
+export {
+    getConfirmedCharacterColor,
+    getUnconfirmedCharacterColor,
+    normalizePersistentCharacterRefs,
+} from './editor/characters/colorResolver';
 export {EditorCanvas} from './editor/components/EditorCanvas';
 export {default as EditorToolbar} from './editor/components/EditorToolbar';
 export {
@@ -57,3 +61,4 @@ export type {
     PersistentCharacterRef,
     RenameActRequest,
 } from './editor/types';
+export {normalizeCharacterColorHex} from '@stagistic/script-core';

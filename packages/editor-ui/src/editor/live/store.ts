@@ -29,6 +29,7 @@ const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
     countsByKey: new Map<string, number>(),
     countsByCharacterId: new Map<string, number>(),
     keyByCharacterId: new Map<string, string>(),
+    displayColorByKey: new Map<string, string>(),
 };
 
 export const createEmptyEditorLiveSnapshot = (): EditorLiveSnapshot => {

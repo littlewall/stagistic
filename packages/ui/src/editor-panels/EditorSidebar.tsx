@@ -36,7 +36,7 @@ interface EditorSidebarData {
 }
 
 interface EditorSidebarActions {
-    onConfirmCharacter?: (characterKey: string) => void,
+    onConfirmCharacter?: (characterKey: string, colorHex?: string | null) => void,
     onDeleteCharacter?: (characterId: string) => void | Promise<void>,
     onFocusCharacter?: (characterKey: string) => void,
     normalizeRenameInput?: (value: string) => string,

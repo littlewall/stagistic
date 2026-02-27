@@ -15,7 +15,10 @@ import {
 } from 'react';
 
 import {buildEditorRootStyle} from './buildRootStyle';
-import {normalizeCharacterColorHex} from './characterColors';
+import {
+    getConfirmedCharacterColor,
+    normalizePersistentCharacterRefs,
+} from './characters/colorResolver';
 import {EditorShell} from './components/editorShell/EditorShell';
 import {EditorInstanceProvider} from './context';
 import {
@@ -32,7 +35,10 @@ import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
 import {EditorSnapshotStoreProvider} from './live/context';
 import {createEditorSnapshotStore} from './live/store';
-import type {EditorProps} from './types';
+import type {
+    EditorProps,
+    PersistentCharacterRef,
+} from './types';
 import {useEditorExtensions} from './useEditorExtensions';
 
 const getSizeScale = () => {
@@ -151,25 +157,10 @@ const Editor = ({
     const rootRef = useRef<HTMLDivElement | null>(null);
     const canvasHostRef = useRef<HTMLDivElement | null>(null);
     const colorByCharacterIdRef = useRef<ReadonlyMap<string, string>>(new Map());
+    const rememberedColorByKeyRef = useRef<ReadonlyMap<string, string>>(new Map());
+    const rememberedColorSaturationRef = useRef<number | null>(null);
+    const persistentCharactersRef = useRef<readonly PersistentCharacterRef[]>([]);
     const liveStore = useMemo(() => createEditorSnapshotStore(), []);
-
-    useEffect(() => {
-        const colorMap = new Map<string, string>();
-
-        persistentCharacters.forEach(character => {
-            if (!character.id) {
-                return;
-            }
-
-            const normalizedColor = normalizeCharacterColorHex(character.colorHex);
-
-            if (normalizedColor) {
-                colorMap.set(character.id, normalizedColor);
-            }
-        });
-
-        colorByCharacterIdRef.current = colorMap;
-    }, [persistentCharacters]);
 
     const resolvedSettings = useMemo(() => {
         const effectiveScriptSettings = scriptSettings ?? resolvedInitialValue.attrs?.settings;
@@ -195,10 +186,39 @@ const Editor = ({
         () => getEditorCssVars(resolvedSettings, renderScale),
         [renderScale, resolvedSettings],
     );
+
+    useEffect(() => {
+        const normalizedPersistentCharacters = normalizePersistentCharacterRefs(persistentCharacters);
+        const nextColorByCharacterId = new Map(colorByCharacterIdRef.current);
+        const didSaturationChange = rememberedColorSaturationRef.current !== null
+            && rememberedColorSaturationRef.current !== resolvedSettings.visual.characterColorSaturation;
+        const nextRememberedColorByKey = didSaturationChange
+            ? new Map<string, string>()
+            : new Map(rememberedColorByKeyRef.current);
+
+        normalizedPersistentCharacters.forEach(character => {
+            const resolvedColor = getConfirmedCharacterColor(
+                character.id,
+                character.colorHex,
+                resolvedSettings.visual.characterColorSaturation,
+            );
+
+            nextColorByCharacterId.set(character.id, resolvedColor);
+            nextRememberedColorByKey.set(character.key, resolvedColor);
+        });
+
+        persistentCharactersRef.current = normalizedPersistentCharacters;
+        colorByCharacterIdRef.current = nextColorByCharacterId;
+        rememberedColorByKeyRef.current = nextRememberedColorByKey;
+        rememberedColorSaturationRef.current = resolvedSettings.visual.characterColorSaturation;
+    }, [persistentCharacters, resolvedSettings.visual.characterColorSaturation]);
+
     const extensions = useEditorExtensions({
         resolvedSettings,
         sizeScale,
         colorByCharacterIdRef,
+        rememberedColorByKeyRef,
+        persistentCharactersRef,
         annotations,
         visibleLayerIds: viewFilter?.visibleLayerIds,
         visibleBlockTypes: viewFilter?.visibleBlockTypes,
@@ -223,6 +243,35 @@ const Editor = ({
             },
         },
     }, [extensions, initialDoc]);
+
+    useEffect(() => {
+        if (!editor) {
+            return;
+        }
+
+        const commands = editor.commands as {
+            refreshCharacterTagDecorations?: () => boolean,
+        };
+
+        commands.refreshCharacterTagDecorations?.();
+    }, [
+        editor,
+        persistentCharacters,
+        resolvedSettings.visual.characterColorSaturation,
+    ]);
+
+    useEffect(() => {
+        if (!editor) {
+            return;
+        }
+
+        const syncCommands = editor.commands as {
+            syncCharacterRefs?: () => boolean,
+        };
+
+        syncCommands.syncCharacterRefs?.();
+    }, [editor, persistentCharacters]);
+
     const resolveLatestValue = useCallback(() => {
         if (!editor) {
             return null;
@@ -290,6 +339,12 @@ const Editor = ({
             onIndexChange,
             onActiveBlockChange,
             onBlockUiEvent,
+        },
+        characters: {
+            persistentCharactersRef,
+            colorByCharacterIdRef,
+            rememberedColorByKeyRef,
+            characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
         },
         requests,
     });

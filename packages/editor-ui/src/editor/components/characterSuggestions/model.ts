@@ -10,6 +10,10 @@ import {
     normalizeCharacterColorHex,
 } from '../../characterColors';
 import {
+    getConfirmedCharacterColor,
+    normalizePersistentCharacterRefs,
+} from '../../characters/colorResolver';
+import {
     FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
 } from '../../tiptap/fountainCore';
@@ -35,60 +39,29 @@ export type {
     SuppressedSelection,
 } from './types';
 
-const persistentColorMapCache = new WeakMap<readonly PersistentCharacterRef[], Map<string, string>>();
-
 const getPersistentColorByKey = (
     normalizedPersistentCharacters: readonly PersistentCharacterRef[],
+    characterColorSaturation?: number,
 ) => {
-    const cached = persistentColorMapCache.get(normalizedPersistentCharacters);
-
-    if (cached) {
-        return cached;
-    }
-
-    const nextMap = new Map(
-        normalizedPersistentCharacters
-            .filter(character => Boolean(character.colorHex))
-            .map(character => [character.key, character.colorHex as string]),
+    return new Map(
+        normalizedPersistentCharacters.map(character => {
+            return [
+                character.key, getConfirmedCharacterColor(
+                    character.id,
+                    character.colorHex ?? null,
+                    characterColorSaturation,
+                ),
+            ] as const;
+        }),
     );
-
-    persistentColorMapCache.set(normalizedPersistentCharacters, nextMap);
-
-    return nextMap;
 };
 
 export const normalizePersistentCharacters = (persistentCharacters: readonly PersistentCharacterRef[]) => {
-    const seenIds = new Set<string>();
-    const seen = new Set<string>();
-    const result: PersistentCharacterRef[] = [];
-
-    persistentCharacters.forEach(character => {
-        const key = normalizeCharacterKey(character.key);
-        const rawId = typeof character.id === 'string'
-            ? character.id.trim()
-            : '';
-        const normalizedId = rawId.length > 0
-            ? rawId
-            : key;
-
-        if (seenIds.has(normalizedId)) {
-            return;
-        }
-
-        if (key.length === 0 || seen.has(key)) {
-            return;
-        }
-
-        seenIds.add(normalizedId);
-        seen.add(key);
-        result.push({
-            id: normalizedId,
-            key,
-            colorHex: normalizeCharacterColorHex(character.colorHex) ?? null,
-        });
-    });
-
-    return result;
+    return normalizePersistentCharacterRefs(persistentCharacters).map(character => ({
+        id: character.id,
+        key: character.key,
+        colorHex: normalizeCharacterColorHex(character.colorHex) ?? null,
+    }));
 };
 
 export const applyCharacterSuggestion = (editor: TiptapEditor, suggestion: string): SuppressedSelection | null => {
@@ -172,6 +145,7 @@ type OverlayComputationArgs = {
     canvas: HTMLElement,
     normalizedPersistentCharacters: readonly PersistentCharacterRef[],
     suppressedSelection: SuppressedSelection | null,
+    previousOrderByKey?: ReadonlyMap<string, number>,
     characterColorSaturation?: number,
 };
 
@@ -180,6 +154,7 @@ export const computeCharacterSuggestions = ({
     canvas,
     normalizedPersistentCharacters,
     suppressedSelection,
+    previousOrderByKey,
     characterColorSaturation,
 }: OverlayComputationArgs): CharacterSuggestionsResult | null => {
     const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
@@ -212,6 +187,10 @@ export const computeCharacterSuggestions = ({
         return null;
     }
 
+    if (normalizedPersistentCharacters.length === 0) {
+        return null;
+    }
+
     const activeKey = normalizeCharacterKey(activeToken.value);
     const counts = collectCharacterCounts(editor, normalizedPersistentCharacters);
     const countsByConfirmedKey = new Map<string, number>();
@@ -226,13 +205,25 @@ export const computeCharacterSuggestions = ({
         countsByConfirmedKey.set(key, counts.get(key) ?? 0);
     });
 
-    const persistentColorByKey = getPersistentColorByKey(normalizedPersistentCharacters);
+    if (countsByConfirmedKey.size === 0) {
+        return null;
+    }
+
+    const persistentColorByKey = getPersistentColorByKey(
+        normalizedPersistentCharacters,
+        characterColorSaturation,
+    );
 
     const suggestionRows = buildSuggestionRows({
         counts: countsByConfirmedKey,
         activeKey,
-        limit: MAX_SUGGESTIONS,
+        limit: Math.max(countsByConfirmedKey.size, MAX_SUGGESTIONS),
+        previousOrderByKey,
     });
+
+    if (suggestionRows.length === 0) {
+        return null;
+    }
 
     const style = computeOverlayStyle({
         editor,

@@ -5,13 +5,11 @@ import {
     type InsertScriptSceneVersionPayload,
     listScriptBlocks,
     type ListScriptBlocksOptions,
-    migrateLegacyJsonToBlocksForScript,
     reorderScriptBlocks,
     replaceScriptBlockCharacterRefs,
     replaceScriptCueSheetAnnotations,
     replaceScriptSceneCostumes,
     replaceScriptSceneProps,
-    type RewriteBlocksMigrationAudit,
     type ScriptBlockCharacterRefRow,
     type ScriptBlockOrderMove,
     type ScriptBlockUpsertRow,
@@ -43,9 +41,7 @@ import {
     upsertScriptView,
     type UpsertScriptViewPayload,
 } from '@stagistic/db';
-import {
-    type ScriptDocument,
-} from '@stagistic/script-core';
+import {type ScriptDocument} from '@stagistic/script-core';
 import {
     trimOrFallback,
     uuidv7,
@@ -61,24 +57,12 @@ import {getLocalDb} from '~db';
 import {createCharacterHandlers} from './localPglite/characters';
 import {createConfigHandlers} from './localPglite/config';
 import {createContentHandlers} from './localPglite/content';
+import {
+    LEGACY_TO_BLOCKS_TRIGGERS,
+    migrateScriptDocumentToBlocks,
+} from './localPglite/migration/legacyToBlocks';
 import {createOutboxRecorder} from './localPglite/outbox';
 import type {GetDb} from './localPglite/types';
-
-const logMigrationAudit = (context: string, audit: RewriteBlocksMigrationAudit) => {
-    const baseMessage = `[db-local] ${context} script=${audit.scriptId} status=${audit.status}`;
-
-    if (audit.status === 'failed') {
-        console.warn(baseMessage, audit.error ?? 'unknown migration error');
-    }
-
-    if (audit.status !== 'failed') {
-        console.info(baseMessage);
-    }
-
-    audit.warnings.forEach(warning => {
-        console.warn(`[db-local] ${warning}`);
-    });
-};
 
 export const createLocalPgliteDataRepository = (): ScriptDataRepository => {
     const dbPromise = getLocalDb();
@@ -110,13 +94,23 @@ export const createLocalPgliteDataRepository = (): ScriptDataRepository => {
             });
 
             if (initialContent) {
-                const migrationAudit = await migrateLegacyJsonToBlocksForScript(db, id, {
-                    sourceDocument: initialContent,
-                    force: true,
-                    trigger: 'create-script',
-                });
+                try {
+                    await migrateScriptDocumentToBlocks({
+                        db,
+                        scriptId: id,
+                        sourceDocument: initialContent,
+                        trigger: LEGACY_TO_BLOCKS_TRIGGERS.createScript,
+                        context: LEGACY_TO_BLOCKS_TRIGGERS.createScript,
+                    });
+                } catch (error) {
+                    try {
+                        await dbQueries.deleteScript(db, id);
+                    } catch (rollbackError) {
+                        console.error('[db-local] failed to rollback script after create migration error', rollbackError);
+                    }
 
-                logMigrationAudit('create-script', migrationAudit);
+                    throw error;
+                }
             }
 
             return id;

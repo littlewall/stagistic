@@ -12,7 +12,7 @@ interface CharacterRowPendingProps {
         isConfirmPending: boolean,
     },
     actions: {
-        onConfirmCharacter?: (characterKey: string) => void,
+        onConfirmCharacter?: (characterKey: string, colorHex?: string | null) => void,
         onFocusCharacter?: (characterKey: string) => void,
     },
 }
@@ -20,7 +20,7 @@ interface CharacterRowPendingProps {
 const getConfirmTooltipLabel = (
     characterKey: string,
     isConfirmPending: boolean,
-    onConfirmCharacter?: (characterKey: string) => void,
+    onConfirmCharacter?: (characterKey: string, colorHex?: string | null) => void,
 ) => {
     if (isConfirmPending) {
         return `Saving ${characterKey}`;
@@ -60,7 +60,7 @@ export const CharacterRowPending = ({
                             return;
                         }
 
-                        onConfirmCharacter(character.key);
+                        onConfirmCharacter(character.key, character.color);
                     }}
                     aria-disabled={isConfirmActionDisabled}
                     aria-label={isConfirmPending

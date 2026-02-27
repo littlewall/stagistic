@@ -1,13 +1,14 @@
 import {
     type EditorLiveCharacterSnapshot,
     getCharacterColor,
-    normalizeCharacterColorHex,
+    getConfirmedCharacterColor,
 } from '@stagistic/editor-ui';
 import {
     DEFAULT_EDITOR_SETTINGS,
     type EditorSettings,
     ELEMENT_CHARACTER,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
+    normalizeCharacterColorHex,
     normalizeCharacterKey,
 } from '@stagistic/script-core';
 import {
@@ -225,7 +226,11 @@ export const useCharacterComputed = ({
                     count: scriptCharacterStats.countsByCharacterId.get(character.id)
                         ?? scriptCharacterStats.countsByKey.get(character.key)
                         ?? 0,
-                    color: normalizedColorHex ?? getCharacterColor(character.key, characterColorSaturation),
+                    color: getConfirmedCharacterColor(
+                        character.id,
+                        normalizedColorHex,
+                        characterColorSaturation,
+                    ),
                     colorHex: normalizedColorHex ?? null,
                     genderKey: character.genderKey ?? null,
                     isConfirmed: true,
@@ -266,13 +271,15 @@ export const useCharacterComputed = ({
                 .map(([key, count]) => ({
                     key,
                     count,
-                    color: getCharacterColor(key, characterColorSaturation),
+                    color: characterSnapshot?.displayColorByKey.get(key)
+                        ?? getCharacterColor(key, characterColorSaturation),
                     isConfirmed: false,
                     isConfirmPending: confirmingCharacterSet.has(key),
                     isPending: confirmingCharacterSet.has(key),
                 }));
         },
         [
+            characterSnapshot?.displayColorByKey,
             characterColorSaturation,
             confirmedCharacterSet,
             confirmingCharacterSet,

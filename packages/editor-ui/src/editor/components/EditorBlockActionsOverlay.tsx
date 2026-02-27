@@ -47,7 +47,6 @@ interface OverlayAnchorStyle extends CSSProperties {
 const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverlayProps) => {
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
-    const [clickedBlockId, setClickedBlockId] = useState<string | null>(null);
     const [overlayAnchorStyle, setOverlayAnchorStyle] = useState<OverlayAnchorStyle | null>(null);
     const {
         isMenuOpen,
@@ -115,9 +114,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             blockType: activeDrag.sourceBlockType,
         }
         : activeBlockState;
-    const visibleOverlayState = pointerOverlayState && clickedBlockId === pointerOverlayState.blockId
-        ? pointerOverlayState
-        : null;
+    const visibleOverlayState = pointerOverlayState;
     const isOverlayVisible = visibleOverlayState !== null;
     const isMenuDisabledBlock = visibleOverlayState
         ? MENU_DISABLED_BLOCK_TYPES.has(visibleOverlayState.blockType)
@@ -179,58 +176,6 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         editor,
         visibleOverlayState,
     ]);
-
-    useEffect(() => {
-        if (!editor) {
-            return;
-        }
-
-        const editorElement = editor.view.dom;
-        const handleEditorPointerDown = (event: PointerEvent) => {
-            const target = event.target as HTMLElement | null;
-            const blockElement = target?.closest<HTMLElement>('p[data-fountain-block]') ?? null;
-
-            if (!blockElement) {
-                setClickedBlockId(null);
-
-                return;
-            }
-
-            const blockId = blockElement.getAttribute('data-block-id');
-
-            setClickedBlockId(blockId);
-        };
-        const handleDocumentPointerDown = (event: PointerEvent) => {
-            const target = event.target as Node | null;
-
-            if (!target) {
-                return;
-            }
-
-            const isInsideEditor = editorElement.contains(target);
-            const isInsideMenu = menuRef.current?.contains(target) ?? false;
-            const isInsideTrigger = triggerRef.current?.contains(target) ?? false;
-
-            if (isInsideEditor || isInsideMenu || isInsideTrigger) {
-                return;
-            }
-
-            setClickedBlockId(null);
-        };
-        const handleBlur = () => {
-            setClickedBlockId(null);
-        };
-
-        editorElement.addEventListener('pointerdown', handleEditorPointerDown);
-        document.addEventListener('pointerdown', handleDocumentPointerDown);
-        editor.on('blur', handleBlur);
-
-        return () => {
-            editorElement.removeEventListener('pointerdown', handleEditorPointerDown);
-            document.removeEventListener('pointerdown', handleDocumentPointerDown);
-            editor.off('blur', handleBlur);
-        };
-    }, [editor]);
 
     useEffect(() => {
         closeMenu();

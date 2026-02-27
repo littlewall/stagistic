@@ -96,6 +96,8 @@ export interface EditorLiveCharacterSnapshot {
     countsByCharacterId: ReadonlyMap<string, number>,
     /** Maps characterId → the key currently displayed in the editor (from characterRefs). */
     keyByCharacterId: ReadonlyMap<string, string>,
+    /** Effective tag color by key currently shown in the editor (includes active-token draft lock). */
+    displayColorByKey: ReadonlyMap<string, string>,
 }
 
 export interface EditorLiveSnapshot {

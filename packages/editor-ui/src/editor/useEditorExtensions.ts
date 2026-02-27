@@ -20,6 +20,7 @@ import {
 import {
     AnnotationDecorationsExtension,
     BlockUiEventsExtension,
+    CharacterRefSyncExtension,
     CharacterTagDecorationsExtension,
     createPaginationExtension,
     type EditorBlockAnnotation,
@@ -35,11 +36,14 @@ import {
     FountainBlockNodes,
     SCRIPT_BLOCK_NODE_NAMES,
 } from './tiptap/nodes';
+import type {PersistentCharacterRef} from './types';
 
 type UseEditorExtensionsArgs = {
     resolvedSettings: EditorSettings,
     sizeScale: number,
     colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
+    rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>},
+    persistentCharactersRef?: {current: readonly PersistentCharacterRef[]},
     annotations?: readonly EditorBlockAnnotation[],
     visibleLayerIds?: readonly string[],
     visibleBlockTypes?: readonly FountainElementType[],
@@ -49,6 +53,8 @@ export const useEditorExtensions = ({
     resolvedSettings,
     sizeScale,
     colorByCharacterIdRef,
+    rememberedColorByKeyRef,
+    persistentCharactersRef,
     annotations,
     visibleLayerIds,
     visibleBlockTypes,
@@ -91,8 +97,21 @@ export const useEditorExtensions = ({
         () => CharacterTagDecorationsExtension.configure({
             characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
             colorByCharacterIdRef,
+            rememberedColorByKeyRef,
+            persistentCharactersRef,
         }),
-        [colorByCharacterIdRef, resolvedSettings.visual.characterColorSaturation],
+        [
+            colorByCharacterIdRef,
+            rememberedColorByKeyRef,
+            persistentCharactersRef,
+            resolvedSettings.visual.characterColorSaturation,
+        ],
+    );
+    const characterRefSyncExtension = useMemo(
+        () => CharacterRefSyncExtension.configure({
+            persistentCharactersRef,
+        }),
+        [persistentCharactersRef],
     );
     const annotationDecorationsExtension = useMemo(
         () => AnnotationDecorationsExtension.configure({
@@ -133,6 +152,7 @@ export const useEditorExtensions = ({
             PlaceholderExtension,
             fountainBehaviorExtension,
             structureMarkerDecorationsExtension,
+            characterRefSyncExtension,
             characterTagDecorationsExtension,
             layerViewFilterExtension,
             annotationDecorationsExtension,
@@ -141,6 +161,7 @@ export const useEditorExtensions = ({
         ];
     }, [
         annotationDecorationsExtension,
+        characterRefSyncExtension,
         characterTagDecorationsExtension,
         fountainBehaviorExtension,
         layerViewFilterExtension,

@@ -22,7 +22,7 @@ interface UseCharacterActionsArgs {
 }
 
 export interface CharacterActions {
-    handleConfirmCharacter: (characterKey: string, editorCallbacks?: ConfirmEditorCallbacks) => void,
+    handleConfirmCharacter: (characterKey: string, colorHex?: string | null, editorCallbacks?: ConfirmEditorCallbacks) => void,
     handleDeleteCharacter: (characterId: string, editorCallbacks?: DeleteEditorCallbacks) => void,
     handleRenameCharacterPreview: (
         characterId: string,
