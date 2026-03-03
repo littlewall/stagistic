@@ -50,9 +50,26 @@ export type ScriptDocument = {
     attrs?: {
         settings?: EditorSettingsOverride,
         structure?: ScriptStructure,
+        importMeta?: ScriptImportMetadata,
     },
     content: FountainJSONContent[],
 };
+
+export interface ScriptImportedTitlePageField {
+    fieldKey: string,
+    value: string,
+    orderNo: number,
+}
+
+export interface ScriptImportedSceneSynopsis {
+    headingBlockId: string,
+    synopsis: string,
+}
+
+export interface ScriptImportMetadata {
+    titlePageFields?: ScriptImportedTitlePageField[],
+    sceneSynopses?: ScriptImportedSceneSynopsis[],
+}
 
 type TipTapMark = {
     type: string,

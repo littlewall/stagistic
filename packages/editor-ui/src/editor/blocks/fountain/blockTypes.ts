@@ -8,12 +8,14 @@ import {
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_SECTION,
     ELEMENT_TRANSITION,
 } from '@stagistic/script-core';
 import {normalizeEditorSettingsBlockType} from '@stagistic/script-core';
 
 export const FOUNTAIN_BLOCK_TYPES = [
     ELEMENT_ACT,
+    ELEMENT_SECTION,
     ELEMENT_ACTION,
     ELEMENT_CHARACTER,
     ELEMENT_PARENTHETICAL,
@@ -31,6 +33,7 @@ const FOUNTAIN_BLOCK_TYPE_SET = new Set<FountainBlockType>(FOUNTAIN_BLOCK_TYPES)
 
 const ENTER_NEXT_TYPE: Partial<Record<FountainBlockType, FountainBlockType>> = {
     [ELEMENT_ACT]: ELEMENT_SCENE_HEADING,
+    [ELEMENT_SECTION]: ELEMENT_ACTION,
     [ELEMENT_SCENE_HEADING]: ELEMENT_ACTION,
     [ELEMENT_ACTION]: ELEMENT_ACTION,
     [ELEMENT_CHARACTER]: ELEMENT_DIALOGUE,

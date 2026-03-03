@@ -5,6 +5,7 @@ import {
     ELEMENT_LYRICS,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_SECTION,
 } from '@stagistic/script-core';
 
 import {type PaginationOptions} from './types';
@@ -25,7 +26,7 @@ export const MORE_CONTD_BLOCK_TYPES = new Set([
 export const ORPHAN_PUSHDOWN_TYPES = new Set([
     ELEMENT_CHARACTER,
     ELEMENT_SCENE_HEADING,
-    'fountain_section',
+    ELEMENT_SECTION,
 ]);
 
 export const DEFAULT_OPTIONS: PaginationOptions = {

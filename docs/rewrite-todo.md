@@ -117,6 +117,10 @@ Gate: žádné runtime volání do legacy cest, žádné reference na odstraněn
 11. Build a lint gates: `pnpm lint`, `pnpm build`, `pnpm db:check`, `pnpm db:compile-migrations`.
 12. Performance gate: load velkého scriptu splní cílový budget uvedený v docs (`<500ms` end-to-end target).
 
+## Doplňující TODO
+- [ ] `RW-900` Script Info panel: přidat UI pro editaci `script_title_page_fields` (title page metadata z importu).
+- [ ] `RW-901` Přidat UI review/edit toku pro `script_scenes.synopsis` importované z Fountain `=` řádků.
+
 ## Předpoklady a zvolené defaulty
 - Scope je `Full platform`, ale ABAC enforcement je mimo tento rewrite; implementuje se pouze views/layers runtime filtrování.
 - Cloud sync/collaboration se v této vlně neimplementují, outbox zůstává připravený.

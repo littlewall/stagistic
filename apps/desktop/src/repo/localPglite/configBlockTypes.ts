@@ -15,6 +15,7 @@ import {
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_SECTION,
     ELEMENT_TRANSITION,
     type FountainElementType,
 } from '@stagistic/script-core';
@@ -22,6 +23,7 @@ import {
 const FOUNTAIN_ELEMENT_TYPES = new Set<FountainElementType>([
     ELEMENT_SCENE_HEADING,
     ELEMENT_ACT,
+    ELEMENT_SECTION,
     ELEMENT_ACTION,
     ELEMENT_CHARACTER,
     ELEMENT_DUAL_DIALOGUE_CHARACTER,

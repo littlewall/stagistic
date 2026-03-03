@@ -4,7 +4,6 @@ import type {
 } from '@stagistic/script-core';
 
 export interface EditorSidebarCharacter extends Pick<ScriptCharacterRecord, 'key'>, Partial<Pick<ScriptCharacterRecord, 'id' | 'colorHex' | 'genderKey'>> {
-    count: number,
     color: string,
     isConfirmed: boolean,
     isPending?: boolean,

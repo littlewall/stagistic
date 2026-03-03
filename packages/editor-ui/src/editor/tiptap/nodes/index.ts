@@ -12,6 +12,7 @@ import {LyricsNode} from './lyricsNode';
 import {NoteNode} from './noteNode';
 import {ParentheticalNode} from './parentheticalNode';
 import {SceneHeadingNode} from './sceneHeadingNode';
+import {SectionNode} from './sectionNode';
 import {TransitionNode} from './transitionNode';
 
 export const SCRIPT_BLOCK_NODE_NAMES: readonly ScriptBlockNodeType[] = SCRIPT_BLOCK_NODE_TYPES;
@@ -19,6 +20,7 @@ export const SCRIPT_BLOCK_NODE_NAMES: readonly ScriptBlockNodeType[] = SCRIPT_BL
 export const FountainBlockNodes = [
     SceneHeadingNode,
     ActNode,
+    SectionNode,
     ActionNode,
     CharacterNode,
     DialogueNode,

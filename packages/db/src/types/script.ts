@@ -20,6 +20,7 @@ import {
     scriptSceneProps,
     scriptScenes,
     scriptSceneVersions,
+    scriptTitlePageFields,
     scriptViews,
 } from '../schema';
 
@@ -35,6 +36,7 @@ export type ScriptConfigBlock = InferSelectModel<typeof scriptConfigBlocks>;
 export type ScriptBlock = InferSelectModel<typeof scriptBlocks>;
 export type ScriptScene = InferSelectModel<typeof scriptScenes>;
 export type ScriptAct = InferSelectModel<typeof scriptActs>;
+export type ScriptTitlePageField = InferSelectModel<typeof scriptTitlePageFields>;
 export type ScriptLocation = InferSelectModel<typeof scriptLocations>;
 export type ScriptBlockCharacterRef = InferSelectModel<typeof scriptBlockCharacterRefs>;
 

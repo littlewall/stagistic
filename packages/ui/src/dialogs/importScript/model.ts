@@ -1,7 +1,12 @@
+export interface ImportOptions {
+    enableLegacyCapsLyricsHeuristic: boolean,
+}
+
 export interface ImportPayload {
     name: string,
     fileName: string,
     text: string,
+    importOptions: ImportOptions,
 }
 
 export interface SelectedFile {

@@ -96,14 +96,11 @@ export const useStructureSidebarDnd = ({
             return;
         }
 
-        actions.onFocusBlock(sourceRow.blockId);
-
-        if (sourceRow.kind === 'act') {
-            actions.onReorderAct(sourceRow.blockId, beforeBlockId);
-
+        if (sourceRow.kind !== 'scene') {
             return;
         }
 
+        actions.onFocusBlock(sourceRow.blockId);
         actions.onReorderScene(sourceRow.blockId, beforeBlockId);
     }, [
         actions,

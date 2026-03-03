@@ -20,10 +20,6 @@ export const CharacterRowDetails = ({
 
     return (
         <div className={styles.characterDetails}>
-            <div className={styles.characterMetaRow}>
-                <span className={styles.detailLabel}>Occurrences in script</span>
-                <span className={styles.detailValue}>{character.count}</span>
-            </div>
             <div className={styles.characterCardFooter}>
                 <div className={styles.characterFooterLeft}>
                     <CharacterGenderPopover

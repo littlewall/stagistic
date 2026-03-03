@@ -25,5 +25,6 @@ export type {
     ScriptSceneProp,
     ScriptSceneVersion,
     ScriptSummary,
+    ScriptTitlePageField,
     ScriptView,
 } from './script';

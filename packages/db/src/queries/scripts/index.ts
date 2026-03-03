@@ -15,4 +15,5 @@ export * from './permissions';
 export * from './props';
 export * from './scenes';
 export * from './sceneVersions';
+export * from './titlePageFields';
 export * from './views';

@@ -61,7 +61,6 @@ export interface StructureRowSceneProps {
 
 export interface StructureRowActProps {
     act: StructureActRow,
-    rowIndex: number,
     data: Pick<StructureSidebarData, 'structureSettings' | 'actNamePreviewById'>,
     actions: FocusBlockAction & Pick<StructureSidebarActions, 'onRenameAct' | 'onActNamePreview' | 'onDeleteAct'>,
 }
@@ -90,5 +89,5 @@ export interface UseStructureSidebarDndArgs {
     rows: readonly StructureRow[],
     rowByBlockId: ReadonlyMap<string, StructureRow>,
     rowIndexByBlockId: ReadonlyMap<string, number>,
-    actions: FocusBlockAction & Pick<StructureSidebarActions, 'onReorderAct' | 'onReorderScene'>,
+    actions: FocusBlockAction & Pick<StructureSidebarActions, 'onReorderScene'>,
 }

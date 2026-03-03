@@ -1,5 +1,6 @@
 export const ELEMENT_SCENE_HEADING = 'fountain_scene_heading';
 export const ELEMENT_ACT = 'fountain_act';
+export const ELEMENT_SECTION = 'fountain_section';
 export const ELEMENT_ACTION = 'fountain_action';
 export const ELEMENT_CHARACTER = 'fountain_character';
 export const ELEMENT_DUAL_DIALOGUE_CHARACTER = 'fountain_dual_dialogue_character';
@@ -15,6 +16,7 @@ export const ELEMENT_COLUMN = 'column';
 export const FountainNodeType = {
     sceneHeading: ELEMENT_SCENE_HEADING,
     act: ELEMENT_ACT,
+    section: ELEMENT_SECTION,
     action: ELEMENT_ACTION,
     character: ELEMENT_CHARACTER,
     parenthetical: ELEMENT_PARENTHETICAL,
@@ -24,7 +26,6 @@ export const FountainNodeType = {
     transition: ELEMENT_TRANSITION,
     lyric: ELEMENT_LYRICS,
     note: ELEMENT_NOTE,
-    section: 'fountain_section',
     synopsis: 'fountain_synopsis',
     pageBreak: 'fountain_page_break',
     boneyard: 'fountain_boneyard',
@@ -39,6 +40,7 @@ export type FountainNodeTypeValue = (typeof FountainNodeType)[FountainNodeTypeKe
 export type FountainElementType =
     | typeof ELEMENT_SCENE_HEADING
     | typeof ELEMENT_ACT
+    | typeof ELEMENT_SECTION
     | typeof ELEMENT_ACTION
     | typeof ELEMENT_CHARACTER
     | typeof ELEMENT_DUAL_DIALOGUE_CHARACTER

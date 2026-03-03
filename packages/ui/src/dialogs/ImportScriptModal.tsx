@@ -21,8 +21,10 @@ export const ImportScriptModal = ({
         selectedFile,
         fileLabel,
         fileError,
+        enableLegacyCapsLyricsHeuristic,
         handleSubmit,
         handleNameChange,
+        handleEnableLegacyCapsLyricsHeuristicChange,
         handleDrop,
         handleFileSelect,
         handlePickFile,
@@ -83,6 +85,17 @@ export const ImportScriptModal = ({
                         onFileSelect={handleFileSelect}
                         onPickFile={onPickFile ? handlePickFile : undefined}
                     />
+                    <label className={styles.optionRow}>
+                        <input
+                            className={styles.checkbox}
+                            type="checkbox"
+                            checked={enableLegacyCapsLyricsHeuristic}
+                            onChange={handleEnableLegacyCapsLyricsHeuristicChange}
+                        />
+                        <span className={styles.optionText}>
+                            Legacy: convert ALL CAPS lines after character to lyrics
+                        </span>
+                    </label>
                     {fileError ? (
                         <p className={styles.error} role="alert">
                             {fileError}
