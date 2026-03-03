@@ -52,7 +52,12 @@ export interface GlobalModalActions {
     closeImportScript: () => void,
     setPrefilledImport: (value: ScriptImportFile | null) => void,
     handleCreate: (name: string) => void,
-    handleImport: (payload: ScriptImportFile & {name: string}) => void,
+    handleImport: (payload: ScriptImportFile & {
+        name: string,
+        importOptions?: {
+            enableLegacyCapsLyricsHeuristic?: boolean,
+        },
+    }) => void,
     pickImportFile: () => Promise<ScriptImportFile | null>,
 }
 
@@ -133,7 +138,12 @@ export const useGlobalModalActions = ({
         navigate,
     ]);
 
-    const handleImport = useCallback((payload: ScriptImportFile & {name: string}) => {
+    const handleImport = useCallback((payload: ScriptImportFile & {
+        name: string,
+        importOptions?: {
+            enableLegacyCapsLyricsHeuristic?: boolean,
+        },
+    }) => {
         const importAndNavigate = async () => {
             try {
                 if (!isSupportedImportFileName(payload.fileName)) {
@@ -146,7 +156,9 @@ export const useGlobalModalActions = ({
                     return;
                 }
 
-                const normalized = parseImportedFountainScript(payload.text);
+                const normalized = parseImportedFountainScript(payload.text, {
+                    enableLegacyCapsLyricsHeuristic: payload.importOptions?.enableLegacyCapsLyricsHeuristic ?? false,
+                });
                 const resolvedName = resolveImportedScriptName(payload.name, payload.fileName);
                 const scriptId = await createScriptWithActiveBlock(
                     resolvedName,

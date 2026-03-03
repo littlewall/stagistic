@@ -159,11 +159,12 @@ export const usePointerDragInteraction = ({
         });
         pressVisualTimeoutRef.current = window.setTimeout(() => {
             pressVisualTimeoutRef.current = null;
-            setIsPressVisualActive(true);
-
-            if (canStartDrag) {
-                applyDraggedSourceHighlight(sourceBlockId);
+            if (!canStartDrag) {
+                return;
             }
+
+            setIsPressVisualActive(true);
+            applyDraggedSourceHighlight(sourceBlockId);
         }, PRESS_TO_DRAG_VISUAL_DELAY_MS);
 
         const triggerElement = event.currentTarget;

@@ -8,6 +8,7 @@ import {
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_SECTION,
     ELEMENT_TRANSITION,
 } from '@stagistic/script-core';
 
@@ -21,6 +22,7 @@ import lyricsStyles from '../elements/LyricsBlock/LyricsBlock.module.css';
 import noteStyles from '../elements/NoteBlock/NoteBlock.module.css';
 import parentheticalStyles from '../elements/ParentheticalBlock/ParentheticalBlock.module.css';
 import sceneStyles from '../elements/SceneHeadingBlock/SceneHeadingBlock.module.css';
+import sectionStyles from '../elements/SectionBlock/SectionBlock.module.css';
 import transitionStyles from '../elements/TransitionBlock/TransitionBlock.module.css';
 import type {FountainBlockType} from './blockTypes';
 
@@ -31,6 +33,7 @@ const joinClassNames = (...classNames: Array<string | undefined>) => classNames
 const BLOCK_TYPE_CLASS_NAMES: Record<FountainBlockType, string> = {
     [ELEMENT_SCENE_HEADING]: sceneStyles.scene,
     [ELEMENT_ACT]: actStyles.act,
+    [ELEMENT_SECTION]: sectionStyles.section,
     [ELEMENT_ACTION]: actionStyles.action,
     [ELEMENT_CHARACTER]: joinClassNames(characterStyles.characterBlock, characterStyles.character),
     [ELEMENT_DUAL_DIALOGUE_CHARACTER]: joinClassNames(

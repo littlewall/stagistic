@@ -9,6 +9,7 @@ import {
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_SECTION,
     ELEMENT_TRANSITION,
     type FountainElementType,
 } from '@stagistic/script-core';
@@ -36,6 +37,13 @@ export const BLOCK_ICONS: Record<FountainElementType, ReactElement> = {
             <path d="M4 8h16v10H4z" />
             <path d="M4 8l3-3h13l-3 3H4z" />
             <path d="M7 5l2 3M11 5l2 3M15 5l2 3" />
+        </>,
+    ),
+    [ELEMENT_SECTION]: createIcon(
+        <>
+            <path d="M6 6h12" />
+            <path d="M6 12h9" />
+            <path d="M6 18h12" />
         </>,
     ),
     [ELEMENT_ACTION]: createIcon(

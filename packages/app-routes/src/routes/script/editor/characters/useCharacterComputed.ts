@@ -54,25 +54,22 @@ export interface CharacterComputed {
     normalizeCharacterNameForInlineInput: (name: string) => string,
 }
 
-const EMPTY_SCRIPT_CHARACTER_STATS = {
-    countsByKey: new Map<string, number>() as ReadonlyMap<string, number>,
-    countsByCharacterId: new Map<string, number>() as ReadonlyMap<string, number>,
-    unconfirmedCountsByKey: new Map<string, number>(),
-} as const;
+const EMPTY_UNCONFIRMED_CHARACTER_KEYS = new Set<string>();
 
-const collectStatsFromSnapshot = (
+const collectUnconfirmedCharacterKeysFromSnapshot = (
     snapshot: EditorLiveCharacterSnapshot,
     normalizedConfirmedCharacterRecords: ScriptCharacterRecord[],
 ) => {
-    const countsByKey = snapshot.countsByKey;
-    const countsByCharacterId = snapshot.countsByCharacterId;
-    const unconfirmedCountsByKey = new Map<string, number>();
+    const unconfirmedKeys = new Set<string>();
 
-    countsByKey.forEach((count, key) => {
-        if (count > 0) {
-            unconfirmedCountsByKey.set(key, count);
+    snapshot.countsByKey.forEach((_count, key) => {
+        if (!key) {
+            return;
         }
+
+        unconfirmedKeys.add(key);
     });
+
     normalizedConfirmedCharacterRecords.forEach(character => {
         if (!character.id) {
             return;
@@ -89,24 +86,10 @@ const collectStatsFromSnapshot = (
             return;
         }
 
-        const confirmedCount = countsByCharacterId.get(character.id) ?? 0;
-        const currentUnconfirmed = unconfirmedCountsByKey.get(currentKey) ?? 0;
-        const nextUnconfirmed = Math.max(0, currentUnconfirmed - confirmedCount);
-
-        if (nextUnconfirmed <= 0) {
-            unconfirmedCountsByKey.delete(currentKey);
-
-            return;
-        }
-
-        unconfirmedCountsByKey.set(currentKey, nextUnconfirmed);
+        unconfirmedKeys.delete(currentKey);
     });
 
-    return {
-        countsByKey,
-        countsByCharacterId,
-        unconfirmedCountsByKey,
-    };
+    return unconfirmedKeys;
 };
 
 export const useCharacterComputed = ({
@@ -198,12 +181,15 @@ export const useCharacterComputed = ({
         [normalizedConfirmedCharacterRecords],
     );
 
-    const scriptCharacterStats = useMemo(() => {
+    const unconfirmedCharacterKeys = useMemo(() => {
         if (!characterSnapshot) {
-            return EMPTY_SCRIPT_CHARACTER_STATS;
+            return EMPTY_UNCONFIRMED_CHARACTER_KEYS;
         }
 
-        return collectStatsFromSnapshot(characterSnapshot, normalizedConfirmedCharacterRecords);
+        return collectUnconfirmedCharacterKeysFromSnapshot(
+            characterSnapshot,
+            normalizedConfirmedCharacterRecords,
+        );
     }, [characterSnapshot, normalizedConfirmedCharacterRecords]);
 
     const confirmedCharacterSet = useMemo(
@@ -223,9 +209,6 @@ export const useCharacterComputed = ({
                 return {
                     id: character.id,
                     key: character.key,
-                    count: scriptCharacterStats.countsByCharacterId.get(character.id)
-                        ?? scriptCharacterStats.countsByKey.get(character.key)
-                        ?? 0,
                     color: getConfirmedCharacterColor(
                         character.id,
                         normalizedColorHex,
@@ -253,8 +236,6 @@ export const useCharacterComputed = ({
             includeSidebarLists,
             normalizedConfirmedCharacterRecords,
             renamingCharacterIdSet,
-            scriptCharacterStats.countsByCharacterId,
-            scriptCharacterStats.countsByKey,
         ],
     );
 
@@ -264,13 +245,12 @@ export const useCharacterComputed = ({
                 return [];
             }
 
-            return Array.from(scriptCharacterStats.unconfirmedCountsByKey.entries())
-                .filter(([key]) => !confirmedCharacterSet.has(key))
-                .filter(([key]) => !renamingCharacterKeySet.has(key))
-                .sort((a, b) => a[0].localeCompare(b[0]))
-                .map(([key, count]) => ({
+            return Array.from(unconfirmedCharacterKeys.values())
+                .filter(key => !confirmedCharacterSet.has(key))
+                .filter(key => !renamingCharacterKeySet.has(key))
+                .sort((a, b) => a.localeCompare(b))
+                .map(key => ({
                     key,
-                    count,
                     color: characterSnapshot?.displayColorByKey.get(key)
                         ?? getCharacterColor(key, characterColorSaturation),
                     isConfirmed: false,
@@ -285,7 +265,7 @@ export const useCharacterComputed = ({
             confirmingCharacterSet,
             includeSidebarLists,
             renamingCharacterKeySet,
-            scriptCharacterStats.unconfirmedCountsByKey,
+            unconfirmedCharacterKeys,
         ],
     );
 

@@ -89,6 +89,23 @@
     color: var(--color-ink-muted);
 }
 
+.optionRow {
+    cursor: pointer;
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+.checkbox {
+    inline-size: 1rem;
+    block-size: 1rem;
+}
+
+.optionText {
+    font-size: .9rem;
+    color: var(--color-ink);
+}
+
 .error {
     font-size: .9rem;
     color: var(--color-danger);

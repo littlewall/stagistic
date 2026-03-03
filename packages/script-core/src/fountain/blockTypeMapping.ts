@@ -9,6 +9,7 @@ import {
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_SECTION,
     ELEMENT_TRANSITION,
     type FountainElementType,
 } from './types';
@@ -19,6 +20,7 @@ import {
 export const SCRIPT_BLOCK_TYPE_BY_NODE_TYPE = {
     sceneHeading: 'scene_heading',
     act: 'act',
+    section: 'section',
     action: 'action',
     character: 'character',
     dualDialogueCharacter: 'dual_dialogue_character',
@@ -35,6 +37,7 @@ export type ScriptBlockType = (typeof SCRIPT_BLOCK_TYPE_BY_NODE_TYPE)[ScriptBloc
 export const LEGACY_FOUNTAIN_BLOCK_TYPE_BY_NODE_TYPE: Record<ScriptBlockNodeType, FountainElementType> = {
     sceneHeading: ELEMENT_SCENE_HEADING,
     act: ELEMENT_ACT,
+    section: ELEMENT_SECTION,
     action: ELEMENT_ACTION,
     character: ELEMENT_CHARACTER,
     dualDialogueCharacter: ELEMENT_DUAL_DIALOGUE_CHARACTER,
@@ -48,6 +51,7 @@ export const LEGACY_FOUNTAIN_BLOCK_TYPE_BY_NODE_TYPE: Record<ScriptBlockNodeType
 const SCRIPT_BLOCK_NODE_TYPE_BY_BLOCK_TYPE: Record<ScriptBlockType, ScriptBlockNodeType> = {
     scene_heading: 'sceneHeading',
     act: 'act',
+    section: 'section',
     action: 'action',
     character: 'character',
     dual_dialogue_character: 'dualDialogueCharacter',
@@ -61,6 +65,7 @@ const SCRIPT_BLOCK_NODE_TYPE_BY_BLOCK_TYPE: Record<ScriptBlockType, ScriptBlockN
 const SCRIPT_BLOCK_NODE_TYPE_BY_LEGACY_FOUNTAIN_BLOCK_TYPE: Record<FountainElementType, ScriptBlockNodeType> = {
     [ELEMENT_SCENE_HEADING]: 'sceneHeading',
     [ELEMENT_ACT]: 'act',
+    [ELEMENT_SECTION]: 'section',
     [ELEMENT_ACTION]: 'action',
     [ELEMENT_CHARACTER]: 'character',
     [ELEMENT_DUAL_DIALOGUE]: 'dialogue',

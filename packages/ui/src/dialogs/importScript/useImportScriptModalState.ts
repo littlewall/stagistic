@@ -28,12 +28,14 @@ export const useImportScriptModalState = ({
     const [name, setName] = useState('');
     const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
     const [fileError, setFileError] = useState<string | null>(null);
+    const [enableLegacyCapsLyricsHeuristic, setEnableLegacyCapsLyricsHeuristic] = useState(false);
 
     useEffect(() => {
         if (!isOpen) {
             setName('');
             setSelectedFile(null);
             setFileError(null);
+            setEnableLegacyCapsLyricsHeuristic(false);
 
             return;
         }
@@ -112,8 +114,12 @@ export const useImportScriptModalState = ({
             name,
             fileName: selectedFile.name,
             text: fileText,
+            importOptions: {
+                enableLegacyCapsLyricsHeuristic,
+            },
         });
     }, [
+        enableLegacyCapsLyricsHeuristic,
         name,
         onImport,
         selectedFile,
@@ -213,14 +219,20 @@ export const useImportScriptModalState = ({
         }
     }, [onPickFile]);
 
+    const handleEnableLegacyCapsLyricsHeuristicChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+        setEnableLegacyCapsLyricsHeuristic(event.target.checked);
+    }, []);
+
     return {
         inputRef,
         name,
         selectedFile,
         fileLabel,
         fileError,
+        enableLegacyCapsLyricsHeuristic,
         handleSubmit,
         handleNameChange,
+        handleEnableLegacyCapsLyricsHeuristicChange,
         handleDrop,
         handleFileSelect,
         handlePickFile,

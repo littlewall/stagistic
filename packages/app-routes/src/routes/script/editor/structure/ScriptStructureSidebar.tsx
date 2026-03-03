@@ -105,7 +105,6 @@ export const ScriptStructureSidebar = ({
         rowIndexByBlockId,
         actions: {
             onFocusBlock: focusBlock,
-            onReorderAct: actions.onReorderAct,
             onReorderScene: actions.onReorderScene,
         },
     });
@@ -129,7 +128,6 @@ export const ScriptStructureSidebar = ({
                                     <StructureRowAct
                                         key={`${row.kind}-${row.blockId}`}
                                         act={row}
-                                        rowIndex={rowIndex}
                                         data={actRowData}
                                         actions={actRowActions}
                                     />

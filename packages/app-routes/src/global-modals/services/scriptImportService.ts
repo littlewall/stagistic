@@ -3,6 +3,7 @@ import {
     ensureSceneHeading,
     ensureScriptStructure,
     parseFountain,
+    type ParseFountainOptions,
     scriptDocumentFromFountainAst,
     type StructureSettings,
     trimOrFallback,
@@ -22,16 +23,30 @@ export const parseImportedFountainScript = (
     source: string,
     options?: {
         structureSettings?: Partial<StructureSettings>,
+        enableLegacyCapsLyricsHeuristic?: boolean,
     },
 ) => {
     const normalizedSource = normalizeFountainSource(source);
-    const {transformedSource, pendingMarkers} = parseImportedSourceWithMarkers(
+    const {
+        transformedSource,
+        pendingMarkers,
+        pendingSynopsisMarkers,
+        pendingTitlePageFields,
+    } = parseImportedSourceWithMarkers(
         normalizedSource,
         options?.structureSettings,
     );
-    const parsed = parseFountain(transformedSource);
+    const parseOptions: ParseFountainOptions = {
+        enableLegacyCapsLyricsHeuristic: options?.enableLegacyCapsLyricsHeuristic ?? false,
+    };
+    const parsed = parseFountain(transformedSource, parseOptions);
     const doc = scriptDocumentFromFountainAst(parsed);
-    const withStructure = attachStructureFromMarkers(doc, pendingMarkers);
+    const withStructure = attachStructureFromMarkers(
+        doc,
+        pendingMarkers,
+        pendingSynopsisMarkers,
+        pendingTitlePageFields,
+    );
     const withIds = ensureFountainBlockIds(ensureSceneHeading(withStructure));
 
     return ensureScriptStructure(withIds);

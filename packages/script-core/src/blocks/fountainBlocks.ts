@@ -8,6 +8,7 @@ import {
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_SECTION,
     ELEMENT_TRANSITION,
     type FountainElementType,
 } from '../fountain';
@@ -28,6 +29,11 @@ export const FOUNTAIN_BLOCK_ITEMS: FountainBlockMeta[] = [
         id: 'element-act',
         type: ELEMENT_ACT,
         label: 'ACT',
+    },
+    {
+        id: 'element-section',
+        type: ELEMENT_SECTION,
+        label: 'Section',
     },
     {
         id: 'element-action',

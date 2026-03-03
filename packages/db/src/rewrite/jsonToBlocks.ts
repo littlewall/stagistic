@@ -5,6 +5,7 @@ import {
     bulkUpsertScriptBlocks,
     listScriptCharacters,
     replaceScriptBlockCharacterRefs,
+    replaceScriptTitlePageFields,
     upsertScriptAct,
     upsertScriptScene,
 } from '../queries';
@@ -101,10 +102,23 @@ interface ExtractedBlockRow {
     characterRefByKey: Record<string, string>,
 }
 
+interface ExtractedImportTitlePageField {
+    fieldKey: string,
+    fieldValue: string,
+    orderNo: number,
+}
+
+interface ExtractedImportMetadata {
+    titlePageFields: ExtractedImportTitlePageField[] | null,
+    sceneSynopsisByHeadingBlockId: Map<string, string>,
+    warnings: string[],
+}
+
 interface ExtractScriptBlocksResult {
     blocks: ExtractedBlockRow[],
     acts: ExtractedActRow[],
     scenes: ExtractedSceneRow[],
+    importMetadata: ExtractedImportMetadata,
     warnings: string[],
 }
 
@@ -117,6 +131,7 @@ interface PersistExtractedBlocksResult {
 const COLUMN_GROUP_ID_PREFIX = 'rw-column-group';
 const ACT_ID_PREFIX = 'rw-act';
 const SCENE_ID_PREFIX = 'rw-scene';
+const TITLE_PAGE_FIELD_ID_PREFIX = 'rw-title-page-field';
 
 const makeColumnGroupId = (scriptId: string, orderNo: number) => {
     return `${COLUMN_GROUP_ID_PREFIX}:${scriptId}:${orderNo}`;
@@ -128,6 +143,10 @@ const makeActId = (scriptId: string, headingBlockId: string) => {
 
 const makeSceneId = (scriptId: string, headingBlockId: string) => {
     return `${SCENE_ID_PREFIX}:${scriptId}:${headingBlockId}`;
+};
+
+const makeTitlePageFieldId = (scriptId: string, orderNo: number) => {
+    return `${TITLE_PAGE_FIELD_ID_PREFIX}:${scriptId}:${orderNo + 1}`;
 };
 
 const isObjectRecord = (value: unknown): value is Record<string, unknown> => {
@@ -190,6 +209,105 @@ const toCharacterRefByKey = (attrs: Record<string, unknown> | undefined): Record
     });
 
     return characterRefByKey;
+};
+
+const toExtractedImportMetadata = (
+    scriptId: string,
+    sourceDocument: ScriptDocument,
+): ExtractedImportMetadata => {
+    const warnings: string[] = [];
+    const attrs = isObjectRecord(sourceDocument.attrs)
+        ? sourceDocument.attrs
+        : {};
+    const importMeta = isObjectRecord(attrs.importMeta)
+        ? attrs.importMeta
+        : null;
+
+    if (!importMeta) {
+        return {
+            titlePageFields: null,
+            sceneSynopsisByHeadingBlockId: new Map(),
+            warnings,
+        };
+    }
+
+    const titlePageFieldsRaw = importMeta.titlePageFields;
+    const titlePageFields = Array.isArray(titlePageFieldsRaw)
+        ? titlePageFieldsRaw
+            .map((field, index) => {
+                if (!isObjectRecord(field)) {
+                    warnings.push(`Script ${scriptId}: invalid title page field at index ${index}.`);
+
+                    return null;
+                }
+
+                const fieldKey = typeof field.fieldKey === 'string'
+                    ? field.fieldKey.trim()
+                    : '';
+                const fieldValue = typeof field.value === 'string'
+                    ? field.value.trim()
+                    : '';
+                const orderNo = typeof field.orderNo === 'number' && Number.isFinite(field.orderNo)
+                    ? Math.max(0, Math.floor(field.orderNo))
+                    : index;
+
+                if (fieldKey.length === 0) {
+                    warnings.push(`Script ${scriptId}: skipped title page field with empty key at index ${index}.`);
+
+                    return null;
+                }
+
+                return {
+                    fieldKey,
+                    fieldValue,
+                    orderNo,
+                };
+            })
+            .filter((field): field is ExtractedImportTitlePageField => Boolean(field))
+            .sort((a, b) => a.orderNo - b.orderNo)
+            .map((field, index) => ({
+                ...field,
+                orderNo: index,
+            }))
+        : null;
+    const sceneSynopsisByHeadingBlockId = new Map<string, string>();
+
+    if (Array.isArray(importMeta.sceneSynopses)) {
+        importMeta.sceneSynopses.forEach((entry, index) => {
+            if (!isObjectRecord(entry)) {
+                warnings.push(`Script ${scriptId}: invalid scene synopsis at index ${index}.`);
+
+                return;
+            }
+
+            const headingBlockId = typeof entry.headingBlockId === 'string'
+                ? entry.headingBlockId.trim()
+                : '';
+            const synopsis = typeof entry.synopsis === 'string'
+                ? entry.synopsis.trim()
+                : '';
+
+            if (headingBlockId.length === 0 || synopsis.length === 0) {
+                return;
+            }
+
+            const currentSynopsis = sceneSynopsisByHeadingBlockId.get(headingBlockId);
+
+            if (!currentSynopsis) {
+                sceneSynopsisByHeadingBlockId.set(headingBlockId, synopsis);
+
+                return;
+            }
+
+            sceneSynopsisByHeadingBlockId.set(headingBlockId, `${currentSynopsis}\n${synopsis}`);
+        });
+    }
+
+    return {
+        titlePageFields,
+        sceneSynopsisByHeadingBlockId,
+        warnings,
+    };
 };
 
 const sanitizeInlineContentNode = (node: unknown): FountainJSONContent | null => {
@@ -391,6 +509,9 @@ const extractScriptBlocks = (
     sourceDocument: ScriptDocument,
 ): ExtractScriptBlocksResult => {
     const warnings: string[] = [];
+    const importMetadata = toExtractedImportMetadata(scriptId, sourceDocument);
+
+    warnings.push(...importMetadata.warnings);
 
     if (!Array.isArray(sourceDocument.content)) {
         warnings.push(`Script ${scriptId}: source document has no content array.`);
@@ -399,6 +520,7 @@ const extractScriptBlocks = (
             blocks: [],
             acts: [],
             scenes: [],
+            importMetadata,
             warnings,
         };
     }
@@ -530,6 +652,7 @@ const extractScriptBlocks = (
         blocks,
         acts,
         scenes,
+        importMetadata,
         warnings,
     };
 };
@@ -543,9 +666,22 @@ const persistExtractedBlocks = async (
     const warnings: string[] = [];
 
     const scriptCharacters = await listScriptCharacters(db, scriptId);
+    const existingScenes = await db
+        .select()
+        .from(scriptScenes)
+        .where(eq(scriptScenes.scriptId, scriptId));
     const characterIdSet = new Set(scriptCharacters.map(character => character.id));
     const sceneIdByHeadingBlockId = new Map<string, string>();
     const actIdByHeadingBlockId = new Map<string, string>();
+    const existingSceneByHeadingBlockId = new Map<string, typeof existingScenes[number]>();
+
+    existingScenes.forEach(scene => {
+        if (!scene.headingBlockId) {
+            return;
+        }
+
+        existingSceneByHeadingBlockId.set(scene.headingBlockId, scene);
+    });
 
     extracted.scenes.forEach(scene => {
         sceneIdByHeadingBlockId.set(scene.headingBlockId, scene.id);
@@ -606,17 +742,35 @@ const persistExtractedBlocks = async (
         }
 
         for (const scene of extracted.scenes) {
+            const existingScene = existingSceneByHeadingBlockId.get(scene.headingBlockId) ?? null;
+            const importedSynopsis = extracted.importMetadata.sceneSynopsisByHeadingBlockId.get(scene.headingBlockId);
+
             await upsertScriptScene(tx, {
                 id: scene.id,
                 scriptId,
                 headingBlockId: scene.headingBlockId,
-                sceneNumber: null,
-                colorHex: null,
-                synopsis: null,
-                locationId: null,
-                createdAt: migratedAt,
+                sceneNumber: existingScene?.sceneNumber ?? null,
+                colorHex: existingScene?.colorHex ?? null,
+                synopsis: importedSynopsis ?? existingScene?.synopsis ?? null,
+                locationId: existingScene?.locationId ?? null,
+                createdAt: existingScene?.createdAt ?? migratedAt,
                 updatedAt: migratedAt,
             });
+        }
+
+        if (extracted.importMetadata.titlePageFields !== null) {
+            await replaceScriptTitlePageFields(
+                tx,
+                scriptId,
+                extracted.importMetadata.titlePageFields.map(field => ({
+                    id: makeTitlePageFieldId(scriptId, field.orderNo),
+                    fieldKey: field.fieldKey,
+                    fieldValue: field.fieldValue,
+                    orderNo: field.orderNo,
+                    createdAt: migratedAt,
+                    updatedAt: migratedAt,
+                })),
+            );
         }
 
         await bulkUpsertScriptBlocks(tx, extracted.blocks.map(block => ({

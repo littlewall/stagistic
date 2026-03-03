@@ -221,6 +221,12 @@
     cursor: grabbing;
 }
 
+.dragHandleSpacer {
+    display: inline-flex;
+    flex: 0 0 calc(14px * var(--size-scale));
+    min-height: calc(15px * var(--size-scale));
+}
+
 .itemLabel {
     overflow: hidden;
     min-width: 0;

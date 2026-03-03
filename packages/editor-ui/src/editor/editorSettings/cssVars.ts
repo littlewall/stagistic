@@ -9,6 +9,7 @@ import {
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_SECTION,
     ELEMENT_TRANSITION,
 } from '@stagistic/script-core';
 import type {CSSProperties} from 'react';
@@ -112,6 +113,17 @@ export const getEditorCssVars = (settings: EditorSettings, scale = 1): EditorCss
         '--act-font-weight': toFontWeight(blocks[ELEMENT_ACT]?.isBold),
         '--act-font-style': toFontStyle(blocks[ELEMENT_ACT]?.isItalic),
         '--act-underline': toUnderline(blocks[ELEMENT_ACT]?.isUnderline),
+
+        // Section
+        '--section-spacing-before': toEm(blocks[ELEMENT_SECTION]?.spacingBeforeEm),
+        '--section-line-height': String(blocks[ELEMENT_SECTION]?.lineHeight ?? settings.typography.lineHeight),
+        '--section-indent-left': toIndent(blocks[ELEMENT_SECTION]?.indentLeftChars, blocks[ELEMENT_SECTION]?.indentLeftPx),
+        '--section-indent-right': toIndent(blocks[ELEMENT_SECTION]?.indentRightChars, blocks[ELEMENT_SECTION]?.indentRightPx),
+        '--section-align': toTextAlign(blocks[ELEMENT_SECTION]?.textAlign),
+        '--section-casing': toCasing(blocks[ELEMENT_SECTION]?.casing),
+        '--section-font-weight': toFontWeight(blocks[ELEMENT_SECTION]?.isBold),
+        '--section-font-style': toFontStyle(blocks[ELEMENT_SECTION]?.isItalic),
+        '--section-underline': toUnderline(blocks[ELEMENT_SECTION]?.isUnderline),
 
         /*
          * Block specific settings

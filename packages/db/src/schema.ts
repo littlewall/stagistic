@@ -156,6 +156,26 @@ export const scriptScenes = pgTable(
     }),
 );
 
+export const scriptTitlePageFields = pgTable(
+    'script_title_page_fields',
+    {
+        id: text('id').primaryKey(),
+        scriptId: text('script_id')
+            .notNull()
+            .references(() => scripts.id, {onDelete: 'cascade'}),
+        fieldKey: text('field_key').notNull(),
+        fieldValue: text('field_value').notNull(),
+        orderNo: integer('order_no').notNull(),
+        createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+        updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+    },
+    table => ({
+        scriptOrderUniqueIdx: uniqueIndex('script_title_page_fields_script_order_unique_idx')
+            .on(table.scriptId, table.orderNo),
+        scriptIdIdx: index('script_title_page_fields_script_id_idx').on(table.scriptId),
+    }),
+);
+
 export const scriptActs = pgTable(
     'script_acts',
     {

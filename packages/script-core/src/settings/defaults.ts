@@ -9,6 +9,7 @@ import {
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_SECTION,
     ELEMENT_TRANSITION,
 } from '../fountain';
 import {CHARACTER_COLOR_SATURATION_DEFAULT} from './options';
@@ -76,6 +77,16 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
             isBold: true,
             isItalic: false,
             isUnderline: true,
+        },
+        [ELEMENT_SECTION]: {
+            spacingBeforeEm: 1.0,
+            lineHeight: 1.2,
+            nextElement: ELEMENT_ACTION,
+            textAlign: 'left',
+            casing: 'uppercase',
+            isBold: true,
+            isItalic: false,
+            isUnderline: false,
         },
         [ELEMENT_SCENE_HEADING]: {
             spacingBeforeEm: 2.0,

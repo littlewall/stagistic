@@ -1,4 +1,4 @@
-import {useSortable} from '@dnd-kit/react/sortable';
+import {useDroppable} from '@dnd-kit/react';
 import {normalizeActName} from '@stagistic/script-core';
 import {
     memo,
@@ -6,7 +6,8 @@ import {
 } from 'react';
 
 import {
-    ACT_DND_TYPE, SCENE_DND_TYPE, STRUCTURE_SORT_GROUP,
+    ACT_DND_TYPE,
+    SCENE_DND_TYPE,
 } from './dnd';
 import styles from './ScriptStructureSidebar.module.css';
 import type {StructureRowActProps} from './types';
@@ -17,7 +18,6 @@ const joinClassNames = (...classNames: Array<string | false | null | undefined>)
 
 export const StructureRowAct = memo(({
     act,
-    rowIndex,
     data,
     actions,
 }: StructureRowActProps) => {
@@ -30,22 +30,16 @@ export const StructureRowAct = memo(({
     } = actions;
     const {
         ref,
-        handleRef,
         isDropTarget,
-        isDragging,
-    } = useSortable({
+    } = useDroppable({
         id: act.blockId,
-        index: rowIndex,
-        group: STRUCTURE_SORT_GROUP,
         type: ACT_DND_TYPE,
-        accept: [ACT_DND_TYPE, SCENE_DND_TYPE],
-        feedback: 'default',
+        accept: [SCENE_DND_TYPE],
     });
     const actRowClassName = joinClassNames(
         styles.itemRow,
         styles.actRow,
         isDropTarget ? styles.itemRowDropTarget : null,
-        isDragging ? styles.itemButtonDragging : null,
     );
 
     const handleActNameChange = useCallback((value: string, currentName: string) => {
@@ -91,12 +85,7 @@ export const StructureRowAct = memo(({
                 ref={ref}
                 data-structure-act-id={act.blockId}
             >
-                <button
-                    type="button"
-                    ref={handleRef}
-                    className={styles.dragHandle}
-                    aria-label="Drag ACT"
-                />
+                <span className={styles.dragHandleSpacer} aria-hidden="true" />
                 <div className={styles.actTitle}>
                     {structureSettings.actPrefix.trim() ? (
                         <button

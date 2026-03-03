@@ -455,12 +455,6 @@
     border-top: 1px solid color-mix(in srgb, var(--character-color) 22%, var(--color-divider));
 }
 
-.characterMetaRow {
-    display: flex;
-    gap: var(--space-2);
-    justify-content: space-between;
-}
-
 .characterCardFooter {
     display: flex;
     gap: var(--space-2);
@@ -635,15 +629,6 @@
 .deleteIconButton[aria-disabled = 'true'] {
     cursor: default;
     opacity: .65;
-}
-
-.detailLabel {
-    color: var(--color-ink-muted);
-}
-
-.detailValue {
-    font-weight: 700;
-    color: var(--color-ink);
 }
 
 .emptyState {
