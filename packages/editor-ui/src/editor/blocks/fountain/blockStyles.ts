@@ -35,20 +35,16 @@ const BLOCK_TYPE_CLASS_NAMES: Record<FountainBlockType, string> = {
     [ELEMENT_ACT]: actStyles.act,
     [ELEMENT_SECTION]: sectionStyles.section,
     [ELEMENT_ACTION]: actionStyles.action,
-    [ELEMENT_CHARACTER]: joinClassNames(characterStyles.characterBlock, characterStyles.character),
-    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: joinClassNames(
-        dualCharacterStyles.dualCharacterBlock,
-        dualCharacterStyles.dualCharacter,
-    ),
+    [ELEMENT_CHARACTER]: characterStyles.character,
+    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: dualCharacterStyles.dualCharacter,
     [ELEMENT_PARENTHETICAL]: parentheticalStyles.parenthetical,
     [ELEMENT_DIALOGUE]: dialogueStyles.dialogue,
-    [ELEMENT_TRANSITION]: joinClassNames(transitionStyles.transitionBlock, transitionStyles.transition),
+    [ELEMENT_TRANSITION]: transitionStyles.transition,
     [ELEMENT_LYRICS]: lyricsStyles.lyrics,
     [ELEMENT_NOTE]: noteStyles.note,
 };
 
 export const getFountainBlockClassName = (blockType: FountainBlockType) => joinClassNames(
     baseStyles.block,
-    baseStyles.content,
     BLOCK_TYPE_CLASS_NAMES[blockType],
 );

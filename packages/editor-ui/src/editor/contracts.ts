@@ -8,6 +8,7 @@ import type {
 import type {ReactNode} from 'react';
 
 import type {SaveResult} from './hooks/useAutosaveController';
+import type {FountainBlockType} from './tiptap/fountainCore';
 
 export interface PersistentCharacterRef {
     id: string,
@@ -100,12 +101,18 @@ export interface EditorLiveCharacterSnapshot {
     displayColorByKey: ReadonlyMap<string, string>,
 }
 
+export interface EditorLiveActiveBlockInfo {
+    id: string | null,
+    type: FountainBlockType | null,
+}
+
 export interface EditorLiveSnapshot {
     revision: number,
     index: EditorIndexSnapshot,
     structure: EditorLiveStructureSnapshot,
     characters: EditorLiveCharacterSnapshot,
     activeBlockId: string | null,
+    activeBlockType: FountainBlockType | null,
 }
 
 export type EditorBlockUiEventType =

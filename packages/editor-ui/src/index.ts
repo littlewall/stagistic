@@ -18,6 +18,7 @@ export {default as FountainEditor} from './editor/Editor';
 export {useFocusEditorBlock} from './editor/hooks/useFocusEditorBlock';
 export {
     useEditorLiveActiveBlock,
+    useEditorLiveActiveBlockInfo,
     useEditorLiveCharacters,
     useEditorLiveSelector,
     useEditorLiveSnapshot,
@@ -43,6 +44,7 @@ export type {
     EditorIndexSnapshot,
     EditorLayoutProps,
     EditorLifecycleCallbacks,
+    EditorLiveActiveBlockInfo,
     EditorLiveCharacterSnapshot,
     EditorLiveSnapshot,
     EditorLiveStructureRow,

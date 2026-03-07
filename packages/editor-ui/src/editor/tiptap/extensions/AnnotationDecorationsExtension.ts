@@ -1,10 +1,19 @@
 import {Extension} from '@tiptap/core';
-import {Plugin, PluginKey} from '@tiptap/pm/state';
-import {Decoration, DecorationSet} from '@tiptap/pm/view';
+import {
+    type EditorState,
+    Plugin,
+    PluginKey,
+} from '@tiptap/pm/state';
+import {
+    Decoration,
+    DecorationSet,
+} from '@tiptap/pm/view';
 
+import {incrementAnnotationDecorationRebuildCount} from '../../perf/editorPerfMetrics';
+import {transactionMayAffectBlockStructure} from '../../runtime/transactionGuards';
 import {isFountainBlockNodeName} from '../fountainCore';
 
-const annotationDecorationsPluginKey = new PluginKey('annotation-decorations');
+const annotationDecorationsPluginKey = new PluginKey<DecorationSet>('annotation-decorations');
 
 export interface EditorBlockAnnotation {
     id: string,
@@ -55,6 +64,93 @@ const toOffsetRange = (
     };
 };
 
+const buildDecorations = (
+    state: EditorState,
+    annotations?: readonly EditorBlockAnnotation[],
+    visibleLayerIds?: readonly string[],
+) => {
+    try {
+        if (!annotations || annotations.length === 0) {
+            return DecorationSet.empty;
+        }
+
+        const visibleLayerSet = visibleLayerIds
+            ? new Set(visibleLayerIds)
+            : null;
+        const annotationsByBlockId = new Map<string, EditorBlockAnnotation[]>();
+
+        annotations.forEach(annotation => {
+            if (!isVisibleAnnotation(annotation, visibleLayerSet)) {
+                return;
+            }
+
+            const bucket = annotationsByBlockId.get(annotation.blockId) ?? [];
+
+            bucket.push(annotation);
+            annotationsByBlockId.set(annotation.blockId, bucket);
+        });
+
+        if (annotationsByBlockId.size === 0) {
+            return DecorationSet.empty;
+        }
+
+        const decorations: Decoration[] = [];
+
+        state.doc.descendants((node, pos) => {
+            if (!isFountainBlockNodeName(node.type.name)) {
+                return true;
+            }
+
+            const rawBlockId = typeof node.attrs?.id === 'string'
+                ? node.attrs.id.trim()
+                : '';
+
+            if (!rawBlockId) {
+                return false;
+            }
+
+            const blockAnnotations = annotationsByBlockId.get(rawBlockId);
+
+            if (!blockAnnotations || blockAnnotations.length === 0) {
+                return false;
+            }
+
+            const textLength = node.textContent.length;
+
+            blockAnnotations.forEach(annotation => {
+                const offsetRange = toOffsetRange(annotation, textLength);
+
+                if (!offsetRange) {
+                    return;
+                }
+
+                decorations.push(
+                    Decoration.inline(
+                        pos + 1 + offsetRange.fromOffset,
+                        pos + 1 + offsetRange.toOffset,
+                        {
+                            class: 'fountain-annotation-decoration',
+                            'data-annotation-id': annotation.id,
+                            'data-annotation-layer-id': annotation.layerId,
+                            'data-annotation-type': annotation.annotationType,
+                        },
+                    ),
+                );
+            });
+
+            return false;
+        });
+
+        incrementAnnotationDecorationRebuildCount();
+
+        return decorations.length > 0
+            ? DecorationSet.create(state.doc, decorations)
+            : DecorationSet.empty;
+    } catch {
+        return DecorationSet.empty;
+    }
+};
+
 export const AnnotationDecorationsExtension = Extension.create<{
     annotations?: readonly EditorBlockAnnotation[],
     visibleLayerIds?: readonly string[],
@@ -70,89 +166,32 @@ export const AnnotationDecorationsExtension = Extension.create<{
 
     addProseMirrorPlugins() {
         return [
-            new Plugin({
+            new Plugin<DecorationSet>({
                 key: annotationDecorationsPluginKey,
-                props: {
-                    decorations: state => {
-                        const annotations = this.options.annotations;
-
-                        if (!annotations || annotations.length === 0) {
-                            return null;
+                state: {
+                    init: (_config, state) => buildDecorations(
+                        state,
+                        this.options.annotations,
+                        this.options.visibleLayerIds,
+                    ),
+                    apply: (tr, pluginState, _oldState, newState) => {
+                        if (!tr.docChanged) {
+                            return pluginState;
                         }
 
-                        const visibleLayerSet = this.options.visibleLayerIds
-                            ? new Set(this.options.visibleLayerIds)
-                            : null;
-                        const annotationsByBlockId = new Map<string, EditorBlockAnnotation[]>();
-
-                        annotations.forEach(annotation => {
-                            if (!isVisibleAnnotation(annotation, visibleLayerSet)) {
-                                return;
-                            }
-
-                            const bucket = annotationsByBlockId.get(annotation.blockId) ?? [];
-
-                            bucket.push(annotation);
-                            annotationsByBlockId.set(annotation.blockId, bucket);
-                        });
-
-                        if (annotationsByBlockId.size === 0) {
-                            return null;
+                        if (!transactionMayAffectBlockStructure(tr)) {
+                            return pluginState.map(tr.mapping, tr.doc);
                         }
 
-                        const decorations: Decoration[] = [];
-
-                        state.doc.descendants((node, pos) => {
-                            if (!isFountainBlockNodeName(node.type.name)) {
-                                return true;
-                            }
-
-                            const rawBlockId = typeof node.attrs?.id === 'string'
-                                ? node.attrs.id.trim()
-                                : '';
-
-                            if (!rawBlockId) {
-                                return false;
-                            }
-
-                            const blockAnnotations = annotationsByBlockId.get(rawBlockId);
-
-                            if (!blockAnnotations || blockAnnotations.length === 0) {
-                                return false;
-                            }
-
-                            const textLength = node.textContent.length;
-
-                            blockAnnotations.forEach(annotation => {
-                                const offsetRange = toOffsetRange(annotation, textLength);
-
-                                if (!offsetRange) {
-                                    return;
-                                }
-
-                                decorations.push(
-                                    Decoration.inline(
-                                        pos + 1 + offsetRange.fromOffset,
-                                        pos + 1 + offsetRange.toOffset,
-                                        {
-                                            class: 'fountain-annotation-decoration',
-                                            'data-annotation-id': annotation.id,
-                                            'data-annotation-layer-id': annotation.layerId,
-                                            'data-annotation-type': annotation.annotationType,
-                                        },
-                                    ),
-                                );
-                            });
-
-                            return false;
-                        });
-
-                        if (decorations.length === 0) {
-                            return null;
-                        }
-
-                        return DecorationSet.create(state.doc, decorations);
+                        return buildDecorations(
+                            newState,
+                            this.options.annotations,
+                            this.options.visibleLayerIds,
+                        );
                     },
+                },
+                props: {
+                    decorations: state => annotationDecorationsPluginKey.getState(state) ?? DecorationSet.empty,
                 },
             }),
         ];

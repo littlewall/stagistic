@@ -1,4 +1,5 @@
 import {
+    buildScriptBlockIndex,
     normalizeScriptDocumentNodeMode,
     type ScriptDocument,
 } from '@stagistic/script-core';
@@ -33,6 +34,7 @@ import {
 import {useEditorLifecycle} from './hooks/useEditorLifecycle';
 import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
+import {buildSidebarProjectionFromIndex} from './live/buildSidebarProjectionFromIndex';
 import {EditorSnapshotStoreProvider} from './live/context';
 import {createEditorSnapshotStore} from './live/store';
 import type {
@@ -160,7 +162,10 @@ const Editor = ({
     const rememberedColorByKeyRef = useRef<ReadonlyMap<string, string>>(new Map());
     const rememberedColorSaturationRef = useRef<number | null>(null);
     const persistentCharactersRef = useRef<readonly PersistentCharacterRef[]>([]);
-    const liveStore = useMemo(() => createEditorSnapshotStore(), []);
+    const normalizedPersistentCharacters = useMemo(
+        () => normalizePersistentCharacterRefs(persistentCharacters),
+        [persistentCharacters],
+    );
 
     const resolvedSettings = useMemo(() => {
         const effectiveScriptSettings = scriptSettings ?? resolvedInitialValue.attrs?.settings;
@@ -188,7 +193,6 @@ const Editor = ({
     );
 
     useEffect(() => {
-        const normalizedPersistentCharacters = normalizePersistentCharacterRefs(persistentCharacters);
         const nextColorByCharacterId = new Map(colorByCharacterIdRef.current);
         const didSaturationChange = rememberedColorSaturationRef.current !== null
             && rememberedColorSaturationRef.current !== resolvedSettings.visual.characterColorSaturation;
@@ -211,7 +215,45 @@ const Editor = ({
         colorByCharacterIdRef.current = nextColorByCharacterId;
         rememberedColorByKeyRef.current = nextRememberedColorByKey;
         rememberedColorSaturationRef.current = resolvedSettings.visual.characterColorSaturation;
-    }, [persistentCharacters, resolvedSettings.visual.characterColorSaturation]);
+    }, [normalizedPersistentCharacters, resolvedSettings.visual.characterColorSaturation]);
+
+    const initialLiveSnapshot = useMemo(() => {
+        const indexSnapshot = buildScriptBlockIndex(resolvedInitialValue).snapshot;
+        const colorByCharacterId = new Map<string, string>();
+        const rememberedColorByKey = new Map<string, string>();
+
+        normalizedPersistentCharacters.forEach(character => {
+            const resolvedColor = getConfirmedCharacterColor(
+                character.id,
+                character.colorHex,
+                resolvedSettings.visual.characterColorSaturation,
+            );
+
+            colorByCharacterId.set(character.id, resolvedColor);
+            rememberedColorByKey.set(character.key, resolvedColor);
+        });
+
+        const projection = buildSidebarProjectionFromIndex(indexSnapshot, {
+            characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
+            colorByCharacterId,
+            rememberedColorByKey,
+            persistentCharacters: normalizedPersistentCharacters,
+        });
+
+        return {
+            revision: 0,
+            index: indexSnapshot,
+            structure: projection.structure,
+            characters: projection.characters,
+            activeBlockId: null,
+            activeBlockType: null,
+        };
+    }, [
+        normalizedPersistentCharacters,
+        resolvedInitialValue,
+        resolvedSettings.visual.characterColorSaturation,
+    ]);
+    const liveStore = useMemo(() => createEditorSnapshotStore(initialLiveSnapshot), [initialLiveSnapshot]);
 
     const extensions = useEditorExtensions({
         resolvedSettings,
@@ -222,6 +264,7 @@ const Editor = ({
         annotations,
         visibleLayerIds: viewFilter?.visibleLayerIds,
         visibleBlockTypes: viewFilter?.visibleBlockTypes,
+        enableBlockUiEvents: Boolean(onBlockUiEvent),
     });
     const initialContentSignature = useMemo(
         () => JSON.stringify(stripScriptSettings(resolvedInitialValue)),

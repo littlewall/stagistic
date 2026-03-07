@@ -162,24 +162,28 @@ export const ScriptEditorRoute = () => {
         editorOverrideValue: scriptStateEditorOverrideValue,
         indexSnapshot: scriptStateIndexSnapshot,
         onEditorValueChange: onScriptStateEditorValueChange,
-        onActiveBlockChange: onScriptStateActiveBlockChange,
-        onRenameAct: onScriptStateRenameAct,
-        onDeleteAct: onScriptStateDeleteAct,
-        onInsertAct: onScriptStateInsertAct,
-        onReorderAct: onScriptStateReorderAct,
-        onReorderScene: onScriptStateReorderScene,
     } = scriptState;
     const [restoredEditorValue, setRestoredEditorValue] = useState<ScriptDocument | null>(null);
     const [editorResetToken, setEditorResetToken] = useState(0);
+    const structureSourceValue = scriptStateEditorOverrideValue ?? editorOverrideValue ?? initialValue;
     const {
+        insertActRequest,
+        renameActRequest,
+        deleteActRequest,
+        moveSceneRequest,
+        moveActRequest,
         actNamePreviewById,
         handleSidebarRenameAct,
         handleActNamePreview,
         handleSidebarDeleteAct,
+        handleSidebarInsertAct,
+        handleSidebarReorderScene,
+        handleSidebarReorderAct,
+        handleActiveBlockChange,
     } = useStructureSidebarController({
         currentScriptId,
         scriptRepository,
-        sourceValue: initialValue,
+        sourceValue: structureSourceValue,
     });
     const sourceIndexForSidebars = scriptStateIndexSnapshot ?? initialIndexSnapshot ?? null;
     const production = useProductionSettingsController({
@@ -219,33 +223,25 @@ export const ScriptEditorRoute = () => {
         }
 
         lastResolvedActiveBlockIdRef.current = blockId;
+        handleActiveBlockChange(blockId);
         onProductionActiveBlockChange(blockId);
-        onScriptStateActiveBlockChange(blockId);
-    }, [onProductionActiveBlockChange, onScriptStateActiveBlockChange]);
+    }, [handleActiveBlockChange, onProductionActiveBlockChange]);
     const structureSidebarActions = useMemo(() => {
         return {
-            onRenameAct: (blockId: string, nextName: string) => {
-                handleSidebarRenameAct(blockId, nextName);
-                onScriptStateRenameAct(blockId, nextName);
-            },
+            onRenameAct: handleSidebarRenameAct,
             onActNamePreview: handleActNamePreview,
-            onDeleteAct: (blockId: string) => {
-                handleSidebarDeleteAct(blockId);
-                onScriptStateDeleteAct(blockId);
-            },
-            onInsertAct: onScriptStateInsertAct,
-            onReorderAct: onScriptStateReorderAct,
-            onReorderScene: onScriptStateReorderScene,
+            onDeleteAct: handleSidebarDeleteAct,
+            onInsertAct: handleSidebarInsertAct,
+            onReorderAct: handleSidebarReorderAct,
+            onReorderScene: handleSidebarReorderScene,
         };
     }, [
         handleActNamePreview,
         handleSidebarDeleteAct,
+        handleSidebarInsertAct,
+        handleSidebarReorderAct,
+        handleSidebarReorderScene,
         handleSidebarRenameAct,
-        onScriptStateDeleteAct,
-        onScriptStateInsertAct,
-        onScriptStateRenameAct,
-        onScriptStateReorderAct,
-        onScriptStateReorderScene,
     ]);
 
     const {
@@ -419,7 +415,13 @@ export const ScriptEditorRoute = () => {
                     rightSidebarToggle,
                     sidebarWidth: SIDEBAR_WIDTH,
                 }}
-                requests={undefined}
+                requests={{
+                    insertActRequest,
+                    renameActRequest,
+                    deleteActRequest,
+                    moveSceneRequest,
+                    moveActRequest,
+                }}
                 callbacks={{
                     onValueChange: handleResolvedEditorValueChange,
                     onActiveBlockChange: handleResolvedActiveBlockChange,

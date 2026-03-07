@@ -11,9 +11,13 @@ import {
 
 export interface CharacterTokenEntry {
     blockId: string,
+    blockStart: number,
     tokenIndex: number,
     key: string,
     characterId: string | null,
+    valueStart: number,
+    valueEnd: number,
+    end: number,
 }
 
 export interface ActiveCharacterToken {
@@ -79,68 +83,80 @@ export const scanCharacterTokensFromDoc = ({
     const tokenCountByKey = new Map<string, number>();
     let activeToken: ActiveCharacterToken | null = null;
 
-    visitCharacterBlocks({
-        doc,
-        onCharacterBlock: (node, pos) => {
-            const text = node.textContent ?? '';
-            const tokens = splitCharacterTokens(text);
-            const refsByKey = readNormalizedRefsFromAttrs(node.attrs as Record<string, unknown>);
-            const blockStart = pos + 1;
-            const blockId = resolveCharacterBlockId(node.attrs.id, pos);
+    try {
+        visitCharacterBlocks({
+            doc,
+            onCharacterBlock: (node, pos) => {
+                const text = node.textContent ?? '';
+                const tokens = splitCharacterTokens(text);
+                const refsByKey = readNormalizedRefsFromAttrs(node.attrs as Record<string, unknown>);
+                const blockStart = pos + 1;
+                const blockId = resolveCharacterBlockId(node.attrs.id, pos);
 
-            tokens.forEach((token, tokenIndex) => {
+                tokens.forEach((token, tokenIndex) => {
+                    const key = normalizeCharacterKey(token.value);
+                    const characterId = key
+                        ? refsByKey[key] ?? null
+                        : null;
+
+                    tokenEntries.push({
+                        blockId,
+                        blockStart,
+                        tokenIndex,
+                        key,
+                        characterId,
+                        valueStart: token.valueStart,
+                        valueEnd: token.valueEnd,
+                        end: token.end,
+                    });
+
+                    if (!key) {
+                        return;
+                    }
+
+                    tokenCountByKey.set(key, (tokenCountByKey.get(key) ?? 0) + 1);
+                });
+
+                if (activeToken || selectionFrom === undefined || selectionFrom === null) {
+                    return false;
+                }
+
+                const blockEnd = blockStart + text.length;
+
+                if (selectionFrom < blockStart || selectionFrom > blockEnd) {
+                    return false;
+                }
+
+                const activeTokenIndex = getActiveTokenIndex(text, selectionFrom - blockStart);
+
+                if (activeTokenIndex < 0 || activeTokenIndex >= tokens.length) {
+                    return false;
+                }
+
+                const token = tokens[activeTokenIndex];
                 const key = normalizeCharacterKey(token.value);
                 const characterId = key
                     ? refsByKey[key] ?? null
                     : null;
 
-                tokenEntries.push({
+                activeToken = {
+                    id: getCharacterTokenColorKey(blockId, activeTokenIndex),
                     blockId,
-                    tokenIndex,
+                    tokenIndex: activeTokenIndex,
                     key,
                     characterId,
-                });
+                };
 
-                if (!key) {
-                    return;
-                }
-
-                tokenCountByKey.set(key, (tokenCountByKey.get(key) ?? 0) + 1);
-            });
-
-            if (activeToken || selectionFrom === undefined || selectionFrom === null) {
                 return false;
-            }
-
-            const blockEnd = blockStart + text.length;
-
-            if (selectionFrom < blockStart || selectionFrom > blockEnd) {
-                return false;
-            }
-
-            const activeTokenIndex = getActiveTokenIndex(text, selectionFrom - blockStart);
-
-            if (activeTokenIndex < 0 || activeTokenIndex >= tokens.length) {
-                return false;
-            }
-
-            const token = tokens[activeTokenIndex];
-            const key = normalizeCharacterKey(token.value);
-            const characterId = key
-                ? refsByKey[key] ?? null
-                : null;
-
-            activeToken = {
-                id: getCharacterTokenColorKey(blockId, activeTokenIndex),
-                blockId,
-                tokenIndex: activeTokenIndex,
-                key,
-                characterId,
-            };
-
-            return false;
-        },
-    });
+            },
+        });
+    } catch {
+        return {
+            tokenEntries: [],
+            tokenCountByKey: new Map<string, number>(),
+            activeToken: null,
+        };
+    }
 
     return {
         tokenEntries,

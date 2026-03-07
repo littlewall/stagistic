@@ -5,6 +5,7 @@ import {
 } from 'react';
 
 import type {
+    EditorLiveActiveBlockInfo,
     EditorLiveCharacterSnapshot,
     EditorLiveSnapshot,
     EditorLiveStructureSnapshot,
@@ -94,4 +95,13 @@ export const useEditorLiveCharacters = () => {
 
 export const useEditorLiveActiveBlock = () => {
     return useEditorLiveSelector<string | null>(snapshot => snapshot.activeBlockId);
+};
+
+export const useEditorLiveActiveBlockInfo = () => {
+    return useEditorLiveSelector<EditorLiveActiveBlockInfo>(snapshot => ({
+        id: snapshot.activeBlockId,
+        type: snapshot.activeBlockType,
+    }), (previous, next) => {
+        return previous.id === next.id && previous.type === next.type;
+    });
 };

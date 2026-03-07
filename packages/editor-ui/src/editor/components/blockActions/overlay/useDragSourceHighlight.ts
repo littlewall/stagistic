@@ -4,6 +4,11 @@ import {
     useRef,
 } from 'react';
 
+import {
+    FOUNTAIN_BLOCK_DOM_ID_ATTRIBUTE,
+    FOUNTAIN_BLOCK_DOM_SELECTOR,
+} from '../../../tiptap/fountainCore';
+
 const escapeCssAttributeValue = (value: string) => {
     if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
         return CSS.escape(value);
@@ -44,7 +49,7 @@ export const useDragSourceHighlight = () => {
         const escapedBlockId = escapeCssAttributeValue(blockId);
 
         styleElement.textContent = [
-            `[data-fountain-editor="true"] p[data-block-id="${escapedBlockId}"] {`,
+            `[data-fountain-editor="true"] ${FOUNTAIN_BLOCK_DOM_SELECTOR}[${FOUNTAIN_BLOCK_DOM_ID_ATTRIBUTE}="${escapedBlockId}"] {`,
             'background: color-mix(in srgb, var(--color-accent) 22%, transparent) !important;',
             'box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 38%, transparent) !important;',
             'outline: 1px solid color-mix(in srgb, var(--color-accent) 65%, transparent) !important;',

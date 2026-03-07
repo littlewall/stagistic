@@ -1,8 +1,9 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {
-    findFountainBlockByIdFromState,
-    isFountainBlockNodeName,
+    FOUNTAIN_BLOCK_DOM_ID_ATTRIBUTE,
+    FOUNTAIN_BLOCK_DOM_SELECTOR,
+    FOUNTAIN_BLOCK_DOM_TYPE_ATTRIBUTE,
 } from '../../../tiptap/fountainCore';
 import type {TopLevelBlockMetrics} from './types';
 
@@ -10,31 +11,44 @@ export const clamp = (value: number, min: number, max: number) => {
     return Math.max(min, Math.min(max, value));
 };
 
+const escapeCssAttributeValue = (value: string) => {
+    if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+        return CSS.escape(value);
+    }
+
+    return value.replace(/["\\]/g, '\\$&');
+};
+
 export const asFountainBlockElement = (value: Node | null): HTMLElement | null => {
     if (!(value instanceof HTMLElement)) {
         return null;
     }
 
-    if (value.matches('p[data-fountain-block]')) {
+    if (value.matches(FOUNTAIN_BLOCK_DOM_SELECTOR)) {
         return value;
     }
 
-    return value.closest<HTMLElement>('p[data-fountain-block]');
+    return value.closest<HTMLElement>(FOUNTAIN_BLOCK_DOM_SELECTOR);
 };
 
 export const resolveFountainBlockElementById = (
     editor: TiptapEditor,
     blockId: string,
+    blockPos?: number | null,
 ): HTMLElement | null => {
-    const block = findFountainBlockByIdFromState(editor.state, blockId);
+    if (typeof blockPos === 'number') {
+        const blockElementFromPos = asFountainBlockElement(editor.view.nodeDOM(blockPos));
 
-    if (!block) {
-        return null;
+        if (blockElementFromPos) {
+            return blockElementFromPos;
+        }
     }
 
-    const nodeDom = editor.view.nodeDOM(block.pos);
+    const escapedBlockId = escapeCssAttributeValue(blockId);
 
-    return asFountainBlockElement(nodeDom);
+    return editor.view.dom.querySelector<HTMLElement>(
+        `${FOUNTAIN_BLOCK_DOM_SELECTOR}[${FOUNTAIN_BLOCK_DOM_ID_ATTRIBUTE}="${escapedBlockId}"]`,
+    );
 };
 
 export const resolveElementOffsetWithinAncestor = (
@@ -69,27 +83,16 @@ export const resolveElementOffsetWithinAncestor = (
 };
 
 export const collectTopLevelBlockMetrics = (
-    editor: TiptapEditor,
+    _editor: TiptapEditor,
     canvas: HTMLElement,
 ): TopLevelBlockMetrics[] => {
     const canvasRect = canvas.getBoundingClientRect();
     const metrics: TopLevelBlockMetrics[] = [];
 
-    editor.state.doc.forEach((node, pos) => {
-        if (!isFountainBlockNodeName(node.type.name)) {
-            return;
-        }
-
-        const blockId = typeof node.attrs?.id === 'string' ? node.attrs.id : null;
+    canvas.querySelectorAll<HTMLElement>(FOUNTAIN_BLOCK_DOM_SELECTOR).forEach(element => {
+        const blockId = element.getAttribute(FOUNTAIN_BLOCK_DOM_ID_ATTRIBUTE)?.trim() ?? '';
 
         if (!blockId) {
-            return;
-        }
-
-        const nodeDom = editor.view.nodeDOM(pos);
-        const element = asFountainBlockElement(nodeDom);
-
-        if (!element) {
             return;
         }
 
@@ -99,7 +102,7 @@ export const collectTopLevelBlockMetrics = (
 
         metrics.push({
             id: blockId,
-            blockType: node.attrs?.blockType,
+            blockType: element.getAttribute(FOUNTAIN_BLOCK_DOM_TYPE_ATTRIBUTE),
             top,
             bottom,
             midpoint: (top + bottom) / 2,

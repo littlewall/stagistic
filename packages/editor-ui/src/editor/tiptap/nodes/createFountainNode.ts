@@ -1,6 +1,4 @@
 import {
-    DEFAULT_EDITOR_SETTINGS,
-    ELEMENT_ACT,
     type FountainElementType,
 } from '@stagistic/script-core';
 import {mergeAttributes, Node} from '@tiptap/core';
@@ -10,7 +8,11 @@ import {
     getFountainBlockClassName,
     normalizeFountainBlockType,
 } from '../../blocks/fountain';
-import {FOUNTAIN_BLOCK_GROUP_NAME} from '../fountainCore';
+import {
+    FOUNTAIN_BLOCK_DOM_ID_ATTRIBUTE,
+    FOUNTAIN_BLOCK_DOM_TYPE_ATTRIBUTE,
+    FOUNTAIN_BLOCK_GROUP_NAME,
+} from '../fountainCore';
 
 export interface CreateFountainNodeConfig {
     name: string,
@@ -18,9 +20,17 @@ export interface CreateFountainNodeConfig {
 }
 
 const resolveParsedBlockType = (element: HTMLElement, fallback: FountainElementType) => {
-    const rawType = element.getAttribute('data-fountain-type') ?? fallback;
+    const rawType = element.getAttribute(FOUNTAIN_BLOCK_DOM_TYPE_ATTRIBUTE)
+        ?? element.getAttribute('data-fountain-type')
+        ?? fallback;
 
     return normalizeFountainBlockType(rawType);
+};
+
+const resolveParsedBlockId = (element: HTMLElement) => {
+    return element.getAttribute(FOUNTAIN_BLOCK_DOM_ID_ATTRIBUTE)
+        ?? element.getAttribute('data-block-id')
+        ?? element.getAttribute('id');
 };
 
 export const createFountainNode = ({name, legacyType}: CreateFountainNodeConfig) => {
@@ -35,27 +45,32 @@ export const createFountainNode = ({name, legacyType}: CreateFountainNodeConfig)
                 blockType: {
                     default: legacyType,
                     parseHTML: (element: HTMLElement) => resolveParsedBlockType(element, legacyType),
+                    renderHTML: attributes => ({
+                        [FOUNTAIN_BLOCK_DOM_TYPE_ATTRIBUTE]: normalizeFountainBlockType(attributes.blockType ?? legacyType),
+                    }),
                 },
                 id: {
                     default: null,
-                    parseHTML: (element: HTMLElement) => element.getAttribute('data-block-id'),
+                    parseHTML: resolveParsedBlockId,
+                    renderHTML: () => ({}),
                 },
                 characterRefs: {
                     default: null,
+                    renderHTML: () => ({}),
                 },
             };
         },
         parseHTML() {
             return [
                 {
-                    tag: 'p[data-fountain-type]',
+                    tag: `p[${FOUNTAIN_BLOCK_DOM_TYPE_ATTRIBUTE}]`,
                     getAttrs: (element: HTMLElement) => {
                         const blockType = resolveParsedBlockType(element, legacyType);
 
                         return blockType === legacyType ? {} : false;
                     },
                 }, {
-                    tag: 'p[data-fountain-block]',
+                    tag: 'p[data-fountain-type]',
                     getAttrs: (element: HTMLElement) => {
                         const blockType = resolveParsedBlockType(element, legacyType);
 
@@ -64,18 +79,9 @@ export const createFountainNode = ({name, legacyType}: CreateFountainNodeConfig)
                 },
             ];
         },
-        renderHTML({HTMLAttributes}) {
-            const attrs = HTMLAttributes as Record<string, unknown>;
-            const blockType = normalizeFountainBlockType(attrs.blockType ?? legacyType);
-            const actPrefix =
-                DEFAULT_EDITOR_SETTINGS.structure.actPrefix
-                    .trim();
-
+        renderHTML({node, HTMLAttributes}) {
+            const blockType = normalizeFountainBlockType(node.attrs.blockType ?? legacyType);
             const resolvedAttributes = {
-                'data-fountain-block': 'true',
-                'data-fountain-type': blockType,
-                'data-block-id': attrs.id ?? undefined,
-                'data-act-prefix': blockType === ELEMENT_ACT ? actPrefix : undefined,
                 class: getFountainBlockClassName(blockType),
             };
 

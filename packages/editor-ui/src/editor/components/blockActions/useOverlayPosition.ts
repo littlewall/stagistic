@@ -3,11 +3,11 @@ import {
 } from '@tiptap/react';
 import {
     useCallback,
-    useEffect,
+    useLayoutEffect,
+    useRef,
     useState,
 } from 'react';
 
-import {getBlockUiEventsFromState} from '../../tiptap/extensions';
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
@@ -24,110 +24,118 @@ const getSafeHasFocus = (editor: TiptapEditor) => {
     }
 };
 
+const isSameBlockActionsPointerState = (
+    previous: BlockActionsPointerState | null,
+    next: BlockActionsPointerState | null,
+) => {
+    if (previous === next) {
+        return true;
+    }
+
+    if (!previous || !next) {
+        return false;
+    }
+
+    return previous.blockId === next.blockId
+        && previous.blockType === next.blockType
+        && previous.blockPos === next.blockPos;
+};
+
 export const useOverlayPosition = ({
     editor,
     isMenuOpen,
 }: UseOverlayPositionArgs) => {
     const [activeBlockState, setActiveBlockState] = useState<BlockActionsPointerState | null>(null);
+    const activeBlockStateRef = useRef<BlockActionsPointerState | null>(null);
 
-    const updateActiveBlockState = useCallback(() => {
-        if (!editor) {
-            setActiveBlockState(null);
+    const commitActiveBlockState = useCallback((nextState: BlockActionsPointerState | null) => {
+        if (isSameBlockActionsPointerState(activeBlockStateRef.current, nextState)) {
+            return;
+        }
+
+        activeBlockStateRef.current = nextState;
+        setActiveBlockState(nextState);
+    }, []);
+
+    const updateActiveBlockState = useCallback((targetEditor: TiptapEditor | null = editor) => {
+        if (!targetEditor) {
+            commitActiveBlockState(null);
 
             return;
         }
 
-        if (!getSafeHasFocus(editor) && !isMenuOpen) {
-            setActiveBlockState(null);
+        if (!isMenuOpen && !getSafeHasFocus(targetEditor)) {
+            commitActiveBlockState(null);
 
             return;
         }
 
-        if (isSelectionAcrossBlocks(editor.state, FOUNTAIN_BLOCK_NODE_NAME)) {
-            setActiveBlockState(null);
+        if (isSelectionAcrossBlocks(targetEditor.state, FOUNTAIN_BLOCK_NODE_NAME)) {
+            commitActiveBlockState(null);
 
             return;
         }
 
-        const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+        const activeBlock = getActiveFountainBlockFromState(targetEditor.state, FOUNTAIN_BLOCK_NODE_NAME);
 
         if (!activeBlock) {
-            setActiveBlockState(null);
+            commitActiveBlockState(null);
 
             return;
         }
 
-        setActiveBlockState(previous => {
-            const nextState: BlockActionsPointerState = {
-                blockId: activeBlock.id,
-                blockType: activeBlock.blockType,
-            };
-
-            if (
-                previous
-                && previous.blockId === nextState.blockId
-                && previous.blockType === nextState.blockType
-            ) {
-                return previous;
-            }
-
-            return nextState;
+        commitActiveBlockState({
+            blockId: activeBlock.id,
+            blockType: activeBlock.blockType,
+            blockPos: activeBlock.pos,
         });
-    }, [editor, isMenuOpen]);
+    }, [
+        commitActiveBlockState,
+        editor,
+        isMenuOpen,
+    ]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         updateActiveBlockState();
     }, [updateActiveBlockState]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!editor) {
             return;
         }
 
         const handleSelectionUpdate = () => {
-            updateActiveBlockState();
+            updateActiveBlockState(editor);
         };
         const handleFocus = () => {
-            updateActiveBlockState();
+            updateActiveBlockState(editor);
+        };
+        const handleUpdate = () => {
+            updateActiveBlockState(editor);
         };
         const handleBlur = () => {
             if (isMenuOpen) {
+                updateActiveBlockState(editor);
+
                 return;
             }
 
-            setActiveBlockState(null);
-        };
-        const handleTransaction = () => {
-            const events = getBlockUiEventsFromState(editor.state);
-            const shouldRefresh = events.some(event => {
-                return (
-                    event.type === 'activeBlockChange'
-                    || event.type === 'blockTypeChange'
-                    || event.type === 'blockInserted'
-                    || event.type === 'blockRemoved'
-                    || event.type === 'blockReordered'
-                );
-            });
-
-            if (!shouldRefresh) {
-                return;
-            }
-
-            updateActiveBlockState();
+            commitActiveBlockState(null);
         };
 
         editor.on('selectionUpdate', handleSelectionUpdate);
         editor.on('focus', handleFocus);
+        editor.on('update', handleUpdate);
         editor.on('blur', handleBlur);
-        editor.on('transaction', handleTransaction);
 
         return () => {
             editor.off('selectionUpdate', handleSelectionUpdate);
             editor.off('focus', handleFocus);
+            editor.off('update', handleUpdate);
             editor.off('blur', handleBlur);
-            editor.off('transaction', handleTransaction);
         };
     }, [
+        commitActiveBlockState,
         editor,
         isMenuOpen,
         updateActiveBlockState,

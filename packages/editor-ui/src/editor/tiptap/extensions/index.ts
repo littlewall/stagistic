@@ -8,12 +8,15 @@ export {
 } from './BlockUiEventsExtension';
 export {CharacterRefSyncExtension} from './CharacterRefSyncExtension';
 export {CharacterTagDecorationsExtension} from './CharacterTagDecorationsExtension';
+export {
+    EditorRuntimeExtension,
+    getEditorRuntimeFromState,
+} from './EditorRuntimeExtension';
 export {FountainBehaviorExtension} from './FountainBehaviorExtension';
 export {
     FountainColumnExtension,
     FountainColumnGroupExtension,
 } from './FountainColumnExtensions';
-export {FountainDetectionExtension} from './FountainDetectionExtension';
 export {LayerViewFilterExtension} from './LayerViewFilterExtension';
 export {createPaginationExtension} from './PaginationExtension';
 export {PlaceholderExtension} from './PlaceholderExtension';

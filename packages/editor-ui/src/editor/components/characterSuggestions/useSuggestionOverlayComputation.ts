@@ -20,6 +20,7 @@ interface UseSuggestionOverlayComputationArgs {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
     normalizedPersistentCharacters: readonly PersistentCharacterRef[],
+    liveCountsByKey: ReadonlyMap<string, number>,
     characterColorSaturation?: number,
     suppressedSelectionRef: MutableRefObject<SuppressedSelection | null>,
     suggestionOrderByKeyRef: MutableRefObject<ReadonlyMap<string, number>>,
@@ -27,10 +28,19 @@ interface UseSuggestionOverlayComputationArgs {
     setOverlayState: Dispatch<SetStateAction<OverlayState | null>>,
 }
 
+const getSafeIsFocused = (editor: TiptapEditor) => {
+    try {
+        return editor.view.hasFocus();
+    } catch {
+        return false;
+    }
+};
+
 export const useSuggestionOverlayComputation = ({
     editor,
     canvasRef,
     normalizedPersistentCharacters,
+    liveCountsByKey,
     characterColorSaturation,
     suppressedSelectionRef,
     suggestionOrderByKeyRef,
@@ -53,7 +63,7 @@ export const useSuggestionOverlayComputation = ({
             return;
         }
 
-        if (!editor.isFocused) {
+        if (!getSafeIsFocused(editor)) {
             closeOverlay();
 
             return;
@@ -63,6 +73,7 @@ export const useSuggestionOverlayComputation = ({
             editor,
             canvas,
             normalizedPersistentCharacters,
+            liveCountsByKey,
             suppressedSelection: suppressedSelectionRef.current,
             previousOrderByKey: suggestionOrderByKeyRef.current,
             characterColorSaturation,
@@ -110,6 +121,7 @@ export const useSuggestionOverlayComputation = ({
         characterColorSaturation,
         closeOverlay,
         editor,
+        liveCountsByKey,
         normalizedPersistentCharacters,
         setOverlayState,
         suggestionOrderByKeyRef,

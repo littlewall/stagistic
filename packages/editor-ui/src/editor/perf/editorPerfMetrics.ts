@@ -1,6 +1,14 @@
 interface EditorPerfMetricsState {
     indexUpdateDurations: number[],
     sidebarSelectorDurations: number[],
+    fullDocJsonSerializeCount: number,
+    fullIndexBuildCount: number,
+    structureRuntimeRebuildCount: number,
+    characterRuntimeRebuildCount: number,
+    characterDecorationRebuildCount: number,
+    annotationDecorationRebuildCount: number,
+    layerFilterDecorationRebuildCount: number,
+    transactionBridgePatchCount: number,
     paginationRecalcCount: number,
     routeRenderCount: number,
     sidebarProjectionDeltaCount: number,
@@ -14,6 +22,14 @@ const createInitialState = (): EditorPerfMetricsState => {
     return {
         indexUpdateDurations: [],
         sidebarSelectorDurations: [],
+        fullDocJsonSerializeCount: 0,
+        fullIndexBuildCount: 0,
+        structureRuntimeRebuildCount: 0,
+        characterRuntimeRebuildCount: 0,
+        characterDecorationRebuildCount: 0,
+        annotationDecorationRebuildCount: 0,
+        layerFilterDecorationRebuildCount: 0,
+        transactionBridgePatchCount: 0,
         paginationRecalcCount: 0,
         routeRenderCount: 0,
         sidebarProjectionDeltaCount: 0,
@@ -72,6 +88,70 @@ export const incrementPaginationRecalcCount = () => {
     getGlobalState().paginationRecalcCount += 1;
 };
 
+export const incrementFullDocJsonSerializeCount = () => {
+    if (!shouldTrack()) {
+        return;
+    }
+
+    getGlobalState().fullDocJsonSerializeCount += 1;
+};
+
+export const incrementFullIndexBuildCount = () => {
+    if (!shouldTrack()) {
+        return;
+    }
+
+    getGlobalState().fullIndexBuildCount += 1;
+};
+
+export const incrementStructureRuntimeRebuildCount = () => {
+    if (!shouldTrack()) {
+        return;
+    }
+
+    getGlobalState().structureRuntimeRebuildCount += 1;
+};
+
+export const incrementCharacterRuntimeRebuildCount = () => {
+    if (!shouldTrack()) {
+        return;
+    }
+
+    getGlobalState().characterRuntimeRebuildCount += 1;
+};
+
+export const incrementCharacterDecorationRebuildCount = () => {
+    if (!shouldTrack()) {
+        return;
+    }
+
+    getGlobalState().characterDecorationRebuildCount += 1;
+};
+
+export const incrementAnnotationDecorationRebuildCount = () => {
+    if (!shouldTrack()) {
+        return;
+    }
+
+    getGlobalState().annotationDecorationRebuildCount += 1;
+};
+
+export const incrementLayerFilterDecorationRebuildCount = () => {
+    if (!shouldTrack()) {
+        return;
+    }
+
+    getGlobalState().layerFilterDecorationRebuildCount += 1;
+};
+
+export const incrementTransactionBridgePatchCount = () => {
+    if (!shouldTrack()) {
+        return;
+    }
+
+    getGlobalState().transactionBridgePatchCount += 1;
+};
+
 export const incrementRouteRenderCount = () => {
     if (!shouldTrack()) {
         return;
@@ -117,6 +197,14 @@ export const resetEditorPerfMetrics = () => {
 
     state.indexUpdateDurations = [];
     state.sidebarSelectorDurations = [];
+    state.fullDocJsonSerializeCount = 0;
+    state.fullIndexBuildCount = 0;
+    state.structureRuntimeRebuildCount = 0;
+    state.characterRuntimeRebuildCount = 0;
+    state.characterDecorationRebuildCount = 0;
+    state.annotationDecorationRebuildCount = 0;
+    state.layerFilterDecorationRebuildCount = 0;
+    state.transactionBridgePatchCount = 0;
     state.paginationRecalcCount = 0;
     state.routeRenderCount = 0;
     state.sidebarProjectionDeltaCount = 0;

@@ -1,8 +1,4 @@
-import {
-    buildScriptBlockIndex,
-    type ScriptBlockIndexSnapshot,
-    type ScriptDocument,
-} from '@stagistic/script-core';
+import {type ScriptBlockIndexSnapshot} from '@stagistic/script-core';
 import {Extension} from '@tiptap/core';
 import {
     type EditorState,
@@ -12,6 +8,8 @@ import {
 } from '@tiptap/pm/state';
 
 import type {EditorBlockUiEvent} from '../../contracts';
+import {incrementFullIndexBuildCount} from '../../perf/editorPerfMetrics';
+import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
 import {
     getActiveFountainBlockFromState,
     isFountainBlockNodeName,
@@ -83,7 +81,9 @@ const shouldDiffBlocks = (
 };
 
 const buildIndexSnapshotFromState = (state: EditorState): ScriptBlockIndexSnapshot => {
-    return buildScriptBlockIndex(state.doc.toJSON() as ScriptDocument).snapshot;
+    incrementFullIndexBuildCount();
+
+    return buildIndexSnapshotFromPmDoc(state.doc);
 };
 
 const buildBlockDiffEvents = (

@@ -6,6 +6,7 @@ export type {
     EditorIndexSnapshot,
     EditorLayoutProps,
     EditorLifecycleCallbacks,
+    EditorLiveActiveBlockInfo,
     EditorLiveCharacterSnapshot,
     EditorLiveSnapshot,
     EditorLiveStructureRow,
