@@ -1,5 +1,6 @@
 export {
     buildCharacterDocColorState,
+    buildCharacterDocColorStateFromTokenScan,
     type CharacterDocColorState,
 } from './buildCharacterDocColorState';
 export {

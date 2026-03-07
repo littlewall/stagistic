@@ -9,8 +9,3 @@
     text-decoration-line: var(--transition-underline, none);
     text-transform: var(--transition-casing, uppercase);
 }
-
-.transitionBlock {
-    --transition-spacing-before: var(--transition-spacing-before, 1.8em);
-    --block-controls-offset: var(--transition-spacing-before);
-}

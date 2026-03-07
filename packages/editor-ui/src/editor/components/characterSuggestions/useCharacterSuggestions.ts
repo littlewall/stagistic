@@ -8,6 +8,7 @@ import {
     useRef,
 } from 'react';
 
+import {useEditorLiveCharacters} from '../../live';
 import {
     applyCharacterSuggestion,
     normalizePersistentCharacters,
@@ -34,6 +35,7 @@ export const useCharacterSuggestions = ({
     persistentCharacters = [],
     characterColorSaturation,
 }: UseCharacterSuggestionsArgs) => {
+    const liveCharacters = useEditorLiveCharacters();
     const suppressedSelectionRef = useRef<SuppressedSelection | null>(null);
     const pointerSelectionIntentRef = useRef(false);
     const normalizedPersistentCharacters = useMemo(
@@ -58,6 +60,7 @@ export const useCharacterSuggestions = ({
         editor,
         canvasRef,
         normalizedPersistentCharacters,
+        liveCountsByKey: liveCharacters.countsByKey,
         characterColorSaturation,
         suppressedSelectionRef,
         suggestionOrderByKeyRef,

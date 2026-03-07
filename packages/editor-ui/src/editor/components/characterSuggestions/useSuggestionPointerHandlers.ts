@@ -38,6 +38,17 @@ export const useSuggestionPointerHandlers = ({
     runOverlayUpdateNow,
     closeOverlay,
 }: UseSuggestionPointerHandlersArgs) => {
+    const getSafeEditorElement = useCallback(() => {
+        if (!editor) {
+            return null;
+        }
+
+        try {
+            return editor.view.dom;
+        } catch {
+            return null;
+        }
+    }, [editor]);
     const dismissOverlayForCurrentSelection = useCallback(() => {
         if (!editor) {
             closeOverlay();
@@ -67,11 +78,12 @@ export const useSuggestionPointerHandlers = ({
     ]);
 
     useEffect(() => {
-        if (!editor) {
+        const editorElement = getSafeEditorElement();
+
+        if (!editor || !editorElement) {
             return;
         }
 
-        const editorElement = editor.view.dom;
         const handleEditorPointerDown = (event: PointerEvent) => {
             const target = event.target as Node | null;
 
@@ -100,6 +112,7 @@ export const useSuggestionPointerHandlers = ({
         };
     }, [
         editor,
+        getSafeEditorElement,
         pointerSelectionIntentRef,
         runOverlayUpdateNow,
         setActiveSuggestionIndex,

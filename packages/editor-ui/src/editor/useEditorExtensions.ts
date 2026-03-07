@@ -3,6 +3,7 @@ import {
     type EditorSettings,
     type FountainElementType,
 } from '@stagistic/script-core';
+import {type Extensions} from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
 import History from '@tiptap/extension-history';
 import Italic from '@tiptap/extension-italic';
@@ -21,17 +22,17 @@ import {
     AnnotationDecorationsExtension,
     BlockUiEventsExtension,
     CharacterRefSyncExtension,
-    CharacterTagDecorationsExtension,
     createPaginationExtension,
     type EditorBlockAnnotation,
+    EditorRuntimeExtension,
     FountainBehaviorExtension,
     FountainColumnExtension,
     FountainColumnGroupExtension,
-    FountainDetectionExtension,
     LayerViewFilterExtension,
     PlaceholderExtension,
     StructureMarkerDecorationsExtension,
 } from './tiptap/extensions';
+import characterTagStyles from './tiptap/fountainBlock/CharacterTagDecorations.module.css';
 import {
     FountainBlockNodes,
     SCRIPT_BLOCK_NODE_NAMES,
@@ -47,6 +48,7 @@ type UseEditorExtensionsArgs = {
     annotations?: readonly EditorBlockAnnotation[],
     visibleLayerIds?: readonly string[],
     visibleBlockTypes?: readonly FountainElementType[],
+    enableBlockUiEvents?: boolean,
 };
 
 export const useEditorExtensions = ({
@@ -58,7 +60,8 @@ export const useEditorExtensions = ({
     annotations,
     visibleLayerIds,
     visibleBlockTypes,
-}: UseEditorExtensionsArgs) => {
+    enableBlockUiEvents,
+}: UseEditorExtensionsArgs): Extensions => {
     const paginationExtension = useMemo(
         () => createPaginationExtension(resolvedSettings, sizeScale),
         [resolvedSettings, sizeScale],
@@ -93,14 +96,20 @@ export const useEditorExtensions = ({
         }),
         [resolvedSettings.structure],
     );
-    const characterTagDecorationsExtension = useMemo(
-        () => CharacterTagDecorationsExtension.configure({
+    const editorRuntimeExtension = useMemo(
+        () => EditorRuntimeExtension.configure({
             characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
             colorByCharacterIdRef,
             rememberedColorByKeyRef,
             persistentCharactersRef,
+            characterTagClassNames: {
+                tag: characterTagStyles.characterTag,
+                separator: characterTagStyles.characterSeparator,
+            },
         }),
         [
+            characterTagStyles.characterSeparator,
+            characterTagStyles.characterTag,
             colorByCharacterIdRef,
             rememberedColorByKeyRef,
             persistentCharactersRef,
@@ -137,7 +146,7 @@ export const useEditorExtensions = ({
     }, []);
 
     return useMemo(() => {
-        return [
+        const extensions: Extensions = [
             DocumentWithSettings,
             paginationExtension,
             Text,
@@ -148,25 +157,38 @@ export const useEditorExtensions = ({
             FountainColumnGroupExtension,
             FountainColumnExtension,
             ...FountainBlockNodes,
-            FountainDetectionExtension,
             PlaceholderExtension,
             fountainBehaviorExtension,
             structureMarkerDecorationsExtension,
             characterRefSyncExtension,
-            characterTagDecorationsExtension,
-            layerViewFilterExtension,
-            annotationDecorationsExtension,
+            editorRuntimeExtension,
             uniqueIdExtension,
-            BlockUiEventsExtension,
         ];
+
+        if (visibleBlockTypes && visibleBlockTypes.length > 0) {
+            extensions.push(layerViewFilterExtension);
+        }
+
+        if (annotations && annotations.length > 0) {
+            extensions.push(annotationDecorationsExtension);
+        }
+
+        if (enableBlockUiEvents) {
+            extensions.push(BlockUiEventsExtension);
+        }
+
+        return extensions;
     }, [
         annotationDecorationsExtension,
         characterRefSyncExtension,
-        characterTagDecorationsExtension,
+        annotations,
+        editorRuntimeExtension,
+        enableBlockUiEvents,
         fountainBehaviorExtension,
         layerViewFilterExtension,
         paginationExtension,
         structureMarkerDecorationsExtension,
         uniqueIdExtension,
+        visibleBlockTypes,
     ]);
 };

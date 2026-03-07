@@ -17,7 +17,7 @@ import {
     FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
 } from '../../tiptap/fountainCore';
-import {collectCharacterCounts, isCharacterBlockType} from './model/blockUtils';
+import {isCharacterBlockType} from './model/blockUtils';
 import {buildSuggestionRows} from './model/buildSuggestionRows';
 import {
     CHARACTER_TAG_HORIZONTAL_PADDING_PX,
@@ -144,6 +144,7 @@ type OverlayComputationArgs = {
     editor: TiptapEditor,
     canvas: HTMLElement,
     normalizedPersistentCharacters: readonly PersistentCharacterRef[],
+    liveCountsByKey: ReadonlyMap<string, number>,
     suppressedSelection: SuppressedSelection | null,
     previousOrderByKey?: ReadonlyMap<string, number>,
     characterColorSaturation?: number,
@@ -153,6 +154,7 @@ export const computeCharacterSuggestions = ({
     editor,
     canvas,
     normalizedPersistentCharacters,
+    liveCountsByKey,
     suppressedSelection,
     previousOrderByKey,
     characterColorSaturation,
@@ -192,7 +194,6 @@ export const computeCharacterSuggestions = ({
     }
 
     const activeKey = normalizeCharacterKey(activeToken.value);
-    const counts = collectCharacterCounts(editor, normalizedPersistentCharacters);
     const countsByConfirmedKey = new Map<string, number>();
 
     normalizedPersistentCharacters.forEach(character => {
@@ -202,7 +203,7 @@ export const computeCharacterSuggestions = ({
             return;
         }
 
-        countsByConfirmedKey.set(key, counts.get(key) ?? 0);
+        countsByConfirmedKey.set(key, liveCountsByKey.get(key) ?? 0);
     });
 
     if (countsByConfirmedKey.size === 0) {

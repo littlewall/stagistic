@@ -10,6 +10,7 @@ import {
     type RefObject,
     useCallback,
     useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
     useState,
@@ -47,6 +48,7 @@ interface OverlayAnchorStyle extends CSSProperties {
 const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverlayProps) => {
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
+    const overlayAnchorFrameRef = useRef<number | null>(null);
     const [overlayAnchorStyle, setOverlayAnchorStyle] = useState<OverlayAnchorStyle | null>(null);
     const {
         isMenuOpen,
@@ -112,6 +114,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         ? {
             blockId: activeDrag.sourceBlockId,
             blockType: activeDrag.sourceBlockType,
+            blockPos: null,
         }
         : activeBlockState;
     const visibleOverlayState = pointerOverlayState;
@@ -134,7 +137,11 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             return;
         }
 
-        const blockElement = resolveFountainBlockElementById(editor, visibleOverlayState.blockId);
+        const blockElement = resolveFountainBlockElementById(
+            editor,
+            visibleOverlayState.blockId,
+            visibleOverlayState.blockPos,
+        );
 
         if (!blockElement) {
             setOverlayAnchorStyle(null);
@@ -165,17 +172,55 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             resolvedLineHeightPx = `${fontSizeValue * 1.2}px`;
         }
 
-        setOverlayAnchorStyle({
+        const nextAnchorStyle: OverlayAnchorStyle = {
             top: `${offset.top}px`,
             left: `${offset.left}px`,
             '--overlay-block-spacing-before-px': computed.paddingTop,
             '--overlay-block-line-height-px': resolvedLineHeightPx,
+        };
+
+        setOverlayAnchorStyle(previous => {
+            if (
+                previous
+                && previous.top === nextAnchorStyle.top
+                && previous.left === nextAnchorStyle.left
+                && previous['--overlay-block-spacing-before-px'] === nextAnchorStyle['--overlay-block-spacing-before-px']
+                && previous['--overlay-block-line-height-px'] === nextAnchorStyle['--overlay-block-line-height-px']
+            ) {
+                return previous;
+            }
+
+            return nextAnchorStyle;
         });
     }, [
         canvasRef,
         editor,
         visibleOverlayState,
     ]);
+
+    const cancelScheduledOverlayAnchorUpdate = useCallback(() => {
+        if (overlayAnchorFrameRef.current === null) {
+            return;
+        }
+
+        window.cancelAnimationFrame(overlayAnchorFrameRef.current);
+        overlayAnchorFrameRef.current = null;
+    }, []);
+
+    const scheduleOverlayAnchorUpdate = useCallback(() => {
+        cancelScheduledOverlayAnchorUpdate();
+
+        if (typeof window === 'undefined') {
+            updateOverlayAnchor();
+
+            return;
+        }
+
+        overlayAnchorFrameRef.current = window.requestAnimationFrame(() => {
+            overlayAnchorFrameRef.current = null;
+            updateOverlayAnchor();
+        });
+    }, [cancelScheduledOverlayAnchorUpdate, updateOverlayAnchor]);
 
     useEffect(() => {
         closeMenu();
@@ -190,16 +235,33 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         closeMenu,
         isMenuDisabledBlock,
     ]);
-    useEffect(() => {
-        updateOverlayAnchor();
-    }, [updateOverlayAnchor]);
+    useLayoutEffect(() => {
+        if (!visibleOverlayState) {
+            cancelScheduledOverlayAnchorUpdate();
+            updateOverlayAnchor();
+
+            return;
+        }
+
+        scheduleOverlayAnchorUpdate();
+
+        return () => {
+            cancelScheduledOverlayAnchorUpdate();
+        };
+    }, [
+        cancelScheduledOverlayAnchorUpdate,
+        scheduleOverlayAnchorUpdate,
+        updateOverlayAnchor,
+        visibleOverlayState,
+    ]);
+
     useEffect(() => {
         if (!visibleOverlayState) {
             return;
         }
 
         const handleWindowResize = () => {
-            updateOverlayAnchor();
+            scheduleOverlayAnchorUpdate();
         };
 
         window.addEventListener('resize', handleWindowResize);
@@ -207,7 +269,13 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         return () => {
             window.removeEventListener('resize', handleWindowResize);
         };
-    }, [updateOverlayAnchor, visibleOverlayState]);
+    }, [scheduleOverlayAnchorUpdate, visibleOverlayState]);
+
+    useEffect(() => {
+        return () => {
+            cancelScheduledOverlayAnchorUpdate();
+        };
+    }, [cancelScheduledOverlayAnchorUpdate]);
 
     const activeBlockInfo = useMemo(() => {
         if (!visibleOverlayState) {

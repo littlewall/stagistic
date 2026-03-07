@@ -9,6 +9,7 @@ import {
 import {
     type ActiveCharacterToken,
     type CharacterTokenEntry,
+    type CharacterTokenScanResult,
     getCharacterTokenColorKey,
     scanCharacterTokensFromDoc,
 } from './characterTokenScan';
@@ -22,6 +23,14 @@ export interface CharacterDocColorState {
 interface BuildCharacterDocColorStateArgs {
     doc: ProseMirrorNode,
     selectionFrom?: number | null,
+    persistentCharacters?: readonly PersistentCharacterRef[],
+    characterColorSaturation?: number,
+    colorByCharacterId?: ReadonlyMap<string, string>,
+    rememberedColorByKey?: ReadonlyMap<string, string>,
+}
+
+interface BuildCharacterDocColorStateFromTokenScanArgs {
+    tokenScan: CharacterTokenScanResult,
     persistentCharacters?: readonly PersistentCharacterRef[],
     characterColorSaturation?: number,
     colorByCharacterId?: ReadonlyMap<string, string>,
@@ -204,14 +213,13 @@ const buildColorByToken = ({
     return colorByToken;
 };
 
-export const buildCharacterDocColorState = ({
-    doc,
-    selectionFrom,
+export const buildCharacterDocColorStateFromTokenScan = ({
+    tokenScan,
     persistentCharacters = [],
     characterColorSaturation,
     colorByCharacterId,
     rememberedColorByKey,
-}: BuildCharacterDocColorStateArgs): CharacterDocColorState => {
+}: BuildCharacterDocColorStateFromTokenScanArgs): CharacterDocColorState => {
     const normalizedPersistentCharacters = normalizePersistentCharacterRefs(persistentCharacters);
     const resolvers = createCharacterColorResolvers({
         normalizedPersistentCharacters,
@@ -223,10 +231,7 @@ export const buildCharacterDocColorState = ({
         tokenEntries,
         tokenCountByKey,
         activeToken,
-    } = scanCharacterTokensFromDoc({
-        doc,
-        selectionFrom,
-    });
+    } = tokenScan;
     const unconfirmedDraftColorByKey = buildUnconfirmedDraftColorByKey(tokenEntries, resolvers);
     const baseDisplayColorByKey = buildBaseDisplayColorByKey(
         tokenEntries,
@@ -259,4 +264,24 @@ export const buildCharacterDocColorState = ({
         colorByToken,
         displayColorByKey,
     };
+};
+
+export const buildCharacterDocColorState = ({
+    doc,
+    selectionFrom,
+    persistentCharacters = [],
+    characterColorSaturation,
+    colorByCharacterId,
+    rememberedColorByKey,
+}: BuildCharacterDocColorStateArgs): CharacterDocColorState => {
+    return buildCharacterDocColorStateFromTokenScan({
+        tokenScan: scanCharacterTokensFromDoc({
+            doc,
+            selectionFrom,
+        }),
+        persistentCharacters,
+        characterColorSaturation,
+        colorByCharacterId,
+        rememberedColorByKey,
+    });
 };

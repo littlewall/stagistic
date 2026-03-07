@@ -5,8 +5,6 @@ import {
 import {Extension} from '@tiptap/core';
 import {
     type EditorState,
-    Plugin,
-    PluginKey,
     type Transaction,
 } from '@tiptap/pm/state';
 
@@ -28,7 +26,6 @@ declare module '@tiptap/core' {
     }
 }
 
-const characterRefSyncKey = new PluginKey('fountain-character-ref-sync');
 const CHARACTER_REF_SYNC_META_KEY = 'character-ref-sync';
 
 const toConfirmedCharacterIdByKey = (
@@ -104,63 +101,54 @@ const shouldUpdateCharacterRefs = (
 const createCharacterRefSyncTransaction = (
     state: EditorState,
     persistentCharacters: readonly PersistentCharacterRef[],
+    touchedBlockIds?: ReadonlySet<string>,
 ): Transaction | null => {
     const confirmedCharacterIdByKey = toConfirmedCharacterIdByKey(persistentCharacters);
     let tr: Transaction = state.tr;
     let changed = false;
 
-    visitCharacterBlocks({
-        doc: state.doc,
-        onCharacterBlock: (node, pos) => {
-            const text = node.textContent ?? '';
-            const tokenKeys = extractCharacterKeys(text);
-            const attrs = node.attrs as Record<string, unknown>;
-            const rawRefs = attrs.characterRefs;
-            const currentRefs = readNormalizedRefsFromRaw(rawRefs);
-            const nextRefs = buildNextCharacterRefs(
-                tokenKeys,
-                currentRefs,
-                confirmedCharacterIdByKey,
-            );
+    try {
+        visitCharacterBlocks({
+            doc: state.doc,
+            onCharacterBlock: (node, pos) => {
+                const blockId = typeof node.attrs.id === 'string'
+                    ? node.attrs.id.trim()
+                    : '';
 
-            if (!shouldUpdateCharacterRefs(rawRefs, currentRefs, nextRefs)) {
+                if (touchedBlockIds && touchedBlockIds.size > 0 && (!blockId || !touchedBlockIds.has(blockId))) {
+                    return false;
+                }
+
+                const text = node.textContent ?? '';
+                const tokenKeys = extractCharacterKeys(text);
+                const attrs = node.attrs as Record<string, unknown>;
+                const rawRefs = attrs.characterRefs;
+                const currentRefs = readNormalizedRefsFromRaw(rawRefs);
+                const nextRefs = buildNextCharacterRefs(
+                    tokenKeys,
+                    currentRefs,
+                    confirmedCharacterIdByKey,
+                );
+
+                if (!shouldUpdateCharacterRefs(rawRefs, currentRefs, nextRefs)) {
+                    return false;
+                }
+
+                tr = tr.setNodeMarkup(pos, undefined, writeRefsToNodeAttrs(attrs, nextRefs));
+                changed = true;
+
                 return false;
-            }
-
-            tr = tr.setNodeMarkup(pos, undefined, writeRefsToNodeAttrs(attrs, nextRefs));
-            changed = true;
-
-            return false;
-        },
-    });
+            },
+        });
+    } catch {
+        return null;
+    }
 
     if (!changed) {
         return null;
     }
 
     return tr.setMeta(CHARACTER_REF_SYNC_META_KEY, true);
-};
-
-const createCharacterRefSyncPlugin = (
-    persistentCharactersRef?: {current: readonly PersistentCharacterRef[]},
-) => {
-    return new Plugin({
-        key: characterRefSyncKey,
-        appendTransaction: (transactions, _oldState, newState) => {
-            if (!transactions.some(transaction => transaction.docChanged)) {
-                return null;
-            }
-
-            if (transactions.some(transaction => transaction.getMeta(CHARACTER_REF_SYNC_META_KEY) === true)) {
-                return null;
-            }
-
-            return createCharacterRefSyncTransaction(
-                newState,
-                persistentCharactersRef?.current ?? [],
-            );
-        },
-    });
 };
 
 export const CharacterRefSyncExtension = Extension.create<{
@@ -172,6 +160,10 @@ export const CharacterRefSyncExtension = Extension.create<{
         return {
             persistentCharactersRef: undefined,
         };
+    },
+
+    addProseMirrorPlugins() {
+        return [];
     },
 
     addCommands() {
@@ -193,9 +185,5 @@ export const CharacterRefSyncExtension = Extension.create<{
                 return true;
             },
         };
-    },
-
-    addProseMirrorPlugins() {
-        return [createCharacterRefSyncPlugin(this.options.persistentCharactersRef)];
     },
 });

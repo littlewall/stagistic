@@ -34,4 +34,5 @@ export interface DragSessionState {
 export interface BlockActionsPointerState {
     blockId: string,
     blockType: FountainBlockType,
+    blockPos: number | null,
 }

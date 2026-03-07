@@ -1,5 +1,4 @@
 import {type Editor as TiptapEditor, EditorContent} from '@tiptap/react';
-import clsx from 'clsx';
 import {type CSSProperties, useRef} from 'react';
 
 import type {PersistentCharacterRef} from '../types';
@@ -32,7 +31,7 @@ export const EditorCanvas = ({
             style={style}
         >
             <EditorContent
-                className={clsx(styles.content)}
+                className={styles.content}
                 editor={editor}
                 spellCheck={false}
                 autoFocus={autoFocus}

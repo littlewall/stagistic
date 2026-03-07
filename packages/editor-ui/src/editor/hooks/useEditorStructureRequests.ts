@@ -27,13 +27,11 @@ import {
     tryCommitDocument,
 } from './structureRequestMutations';
 import {type AutosaveSchedulePayload} from './useAutosaveController';
-import {useEditorActiveBlockSync} from './useEditorActiveBlockSync';
 import {useEditorMoveRequests} from './useEditorMoveRequests';
 
 interface UseEditorStructureRequestsArgs {
     editor: TiptapEditor | null,
     requests?: EditorStructureRequests,
-    onActiveBlockChange?: (blockId: string | null) => void,
     onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
     onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
     setLatestValue: (value: ScriptDocument, revision?: number) => void,
@@ -50,7 +48,6 @@ const canInsertBeforeExistingBlock = (
 export const useEditorStructureRequests = ({
     editor,
     requests,
-    onActiveBlockChange,
     onValueChangeRef,
     onIndexChangeRef,
     setLatestValue,
@@ -68,10 +65,6 @@ export const useEditorStructureRequests = ({
     const lastRenameActRequestIdRef = useRef<number | null>(null);
     const lastDeleteActRequestIdRef = useRef<number | null>(null);
 
-    useEditorActiveBlockSync({
-        editor,
-        onActiveBlockChange,
-    });
     useEditorMoveRequests({
         editor,
         requests: {

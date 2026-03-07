@@ -39,6 +39,7 @@ export const createEmptyEditorLiveSnapshot = (): EditorLiveSnapshot => {
         structure: EMPTY_STRUCTURE,
         characters: EMPTY_CHARACTERS,
         activeBlockId: null,
+        activeBlockType: null,
     };
 };
 
@@ -104,7 +105,8 @@ export const createEditorSnapshotStore = (initialSnapshot?: EditorLiveSnapshot):
             || !Object.is(snapshot.index, nextSnapshot.index)
             || !Object.is(snapshot.structure, nextSnapshot.structure)
             || !Object.is(snapshot.characters, nextSnapshot.characters)
-            || !Object.is(snapshot.activeBlockId, nextSnapshot.activeBlockId);
+            || !Object.is(snapshot.activeBlockId, nextSnapshot.activeBlockId)
+            || !Object.is(snapshot.activeBlockType, nextSnapshot.activeBlockType);
 
         if (!didChange) {
             return;
