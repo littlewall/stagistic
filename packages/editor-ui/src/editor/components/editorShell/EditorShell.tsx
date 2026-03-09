@@ -8,9 +8,13 @@ import {
     type CSSProperties,
     type MouseEvent as ReactMouseEvent,
     type RefObject,
+    useId,
+    useMemo,
 } from 'react';
 
+import {buildCharacterTagPaletteCss} from '../../characters/buildCharacterTagPaletteCss';
 import styles from '../../Editor.module.css';
+import {useEditorLiveCharacters} from '../../live/hooks';
 import type {
     EditorLayoutProps,
     PersistentCharacterRef,
@@ -31,6 +35,7 @@ interface EditorShellProps {
     rootRef: RefObject<HTMLDivElement | null>,
     canvasHostRef: RefObject<HTMLDivElement | null>,
     rootStyle: CSSProperties,
+    confirmedCharacterColorsById?: ReadonlyMap<string, string>,
     onLeftSidebarToggleMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
     onRightSidebarToggleMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
 }
@@ -41,6 +46,7 @@ export const EditorShell = ({
     rootRef,
     canvasHostRef,
     rootStyle,
+    confirmedCharacterColorsById,
     onLeftSidebarToggleMouseDown,
     onRightSidebarToggleMouseDown,
 }: EditorShellProps) => {
@@ -56,15 +62,37 @@ export const EditorShell = ({
         leftSidebar,
         rightSidebar,
     } = layout ?? {};
+    const rawCharacterTagScopeId = useId();
+    const characterTagScopeId = useMemo(() => {
+        const normalized = rawCharacterTagScopeId.replace(/[^a-zA-Z0-9_-]/g, '');
+
+        return normalized.length > 0 ? normalized : 'editor';
+    }, [rawCharacterTagScopeId]);
+    const liveCharacters = useEditorLiveCharacters();
+    const characterTagPaletteCss = useMemo(() => {
+        return buildCharacterTagPaletteCss({
+            colorByCharacterId: confirmedCharacterColorsById,
+            displayColorByKey: liveCharacters.displayColorByKey,
+            scopeAttributeValue: characterTagScopeId,
+        });
+    }, [
+        characterTagScopeId,
+        confirmedCharacterColorsById,
+        liveCharacters.displayColorByKey,
+    ]);
     const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;
     const isRightSidebarOpen = rightSidebarToggle?.isOpen ?? false;
 
     return (
         <div
             className={styles.root}
+            data-character-tag-scope={characterTagScopeId}
             ref={rootRef}
             style={rootStyle}
         >
+            {characterTagPaletteCss ? (
+                <style data-character-tag-palette>{characterTagPaletteCss}</style>
+            ) : null}
             <div className={styles.toolbarRow}>
                 <div className={styles.toolbarSideLeft}>
                     {leftSidebarToggle ? (

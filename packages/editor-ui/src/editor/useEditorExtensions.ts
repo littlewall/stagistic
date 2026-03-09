@@ -25,6 +25,7 @@ import {
     createPaginationExtension,
     type EditorBlockAnnotation,
     EditorRuntimeExtension,
+    EmptyEnterChooserExtension,
     FountainBehaviorExtension,
     FountainColumnExtension,
     FountainColumnGroupExtension,
@@ -89,6 +90,12 @@ export const useEditorExtensions = ({
             blockNextElements,
             blockShortcuts,
         ],
+    );
+    const emptyEnterChooserExtension = useMemo(
+        () => EmptyEnterChooserExtension.configure({
+            blockNextElements,
+        }),
+        [blockNextElements],
     );
     const structureMarkerDecorationsExtension = useMemo(
         () => StructureMarkerDecorationsExtension.configure({
@@ -158,6 +165,7 @@ export const useEditorExtensions = ({
             FountainColumnExtension,
             ...FountainBlockNodes,
             PlaceholderExtension,
+            emptyEnterChooserExtension,
             fountainBehaviorExtension,
             structureMarkerDecorationsExtension,
             characterRefSyncExtension,
@@ -182,6 +190,7 @@ export const useEditorExtensions = ({
         annotationDecorationsExtension,
         characterRefSyncExtension,
         annotations,
+        emptyEnterChooserExtension,
         editorRuntimeExtension,
         enableBlockUiEvents,
         fountainBehaviorExtension,

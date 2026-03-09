@@ -1,6 +1,7 @@
 import {
     clampCharacterColorSaturation,
     normalizeCharacterColorHex,
+    normalizeCharacterKey,
 } from '@stagistic/script-core';
 
 const CHARACTER_COLOR_PALETTE = [
@@ -14,19 +15,21 @@ const CHARACTER_COLOR_PALETTE = [
     '#C4D2C2',
 ] as const;
 
-const hashCharacterKey = (characterKey: string) => {
-    if (characterKey.length === 0) {
+const hashCharacterToken = (token: string) => {
+    if (token.length === 0) {
         return 0;
     }
 
     let hash = 0;
 
-    for (let index = 0; index < characterKey.length; index += 1) {
-        hash = ((hash << 5) - hash + characterKey.charCodeAt(index)) | 0;
+    for (let index = 0; index < token.length; index += 1) {
+        hash = ((hash << 5) - hash + token.charCodeAt(index)) | 0;
     }
 
     return Math.abs(hash);
 };
+
+const toHashToken = (token: string) => hashCharacterToken(token).toString(36);
 
 const hexToRgb = (hexColor: string) => {
     return {
@@ -160,7 +163,7 @@ const applyCharacterColorSaturation = (hexColor: string, saturationPercent: numb
 export {normalizeCharacterColorHex};
 
 export const getCharacterColor = (characterKey: string, saturationPercent?: number) => {
-    const colorIndex = hashCharacterKey(characterKey) % CHARACTER_COLOR_PALETTE.length;
+    const colorIndex = hashCharacterToken(characterKey) % CHARACTER_COLOR_PALETTE.length;
     const baseColor = CHARACTER_COLOR_PALETTE[colorIndex] ?? CHARACTER_COLOR_PALETTE[0];
 
     if (saturationPercent === undefined) {
@@ -171,5 +174,13 @@ export const getCharacterColor = (characterKey: string, saturationPercent?: numb
 };
 
 export const getCharacterColorVarName = (characterKey: string) => {
-    return `--character-color-key-${hashCharacterKey(characterKey).toString(36)}`;
+    return `--character-color-key-${toHashToken(characterKey)}`;
+};
+
+export const getCharacterTagIdClassName = (characterId: string) => {
+    return `ct-id-${toHashToken(characterId.trim())}`;
+};
+
+export const getCharacterTagKeyClassName = (characterKey: string) => {
+    return `ct-key-${toHashToken(normalizeCharacterKey(characterKey))}`;
 };

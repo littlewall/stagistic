@@ -13,6 +13,7 @@ import type {NodeType} from '@tiptap/pm/model';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
+import {isEmptyEnterChooserWriterType} from '../../extensions/EmptyEnterChooserExtension';
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
     type FountainBlockType,
@@ -191,6 +192,35 @@ export const handleEnter = (
 
     if (!block) {
         return false;
+    }
+
+    const isEmptyBlock = (block.node.textContent ?? '').trim().length === 0;
+
+    if (
+        !event.shiftKey
+        && editor.state.selection.empty
+        && isEmptyBlock
+        && isEmptyEnterChooserWriterType(block.blockType)
+    ) {
+        event.preventDefault();
+
+        const chooserCommands = editor.commands as {
+            openEmptyEnterChooser?: (payload: {
+                blockId: string,
+                blockPos: number,
+                blockType: FountainBlockType,
+                selectedType?: FountainBlockType,
+            }) => boolean,
+        };
+
+        chooserCommands.openEmptyEnterChooser?.({
+            blockId: block.id,
+            blockPos: block.pos,
+            blockType: block.blockType,
+            selectedType: block.blockType,
+        });
+
+        return true;
     }
 
     event.preventDefault();

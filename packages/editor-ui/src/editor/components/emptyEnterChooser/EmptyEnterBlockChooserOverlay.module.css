@@ -1,0 +1,64 @@
+.overlay {
+    pointer-events: none;
+    position: absolute;
+    z-index: 7;
+}
+
+.panel {
+    pointer-events: auto;
+    display: inline-flex;
+    gap: var(--space-1);
+    align-items: center;
+    padding: var(--space-1);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: calc(12px * var(--size-scale));
+    box-shadow: 0 1px 2px color-mix(in srgb, var(--color-ink) 12%, transparent);
+    transform: translate(0, calc(-100% - var(--space-2)));
+}
+
+.button {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(28px * var(--size-scale));
+    height: calc(28px * var(--size-scale));
+    color: var(--color-ink-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: calc(8px * var(--size-scale));
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.button:hover {
+    background: color-mix(in srgb, var(--color-accent) 32%, transparent);
+}
+
+.buttonActive {
+    color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-accent) 62%, transparent);
+    border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-divider));
+}
+
+.buttonActive:hover {
+    background: color-mix(in srgb, var(--color-accent) 62%, transparent);
+}
+
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(16px * var(--size-scale));
+    height: calc(16px * var(--size-scale));
+}
+
+.icon :global(svg) {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
+}

@@ -9,6 +9,7 @@ import {
 } from 'react';
 
 import {useEditorLiveCharacters} from '../../live';
+import {getEmptyEnterChooserFromState} from '../../tiptap/extensions/EmptyEnterChooserExtension';
 import {
     applyCharacterSuggestion,
     normalizePersistentCharacters,
@@ -82,6 +83,16 @@ export const useCharacterSuggestions = ({
         }
 
         const handleTransaction = ({transaction}: {transaction: {docChanged: boolean, selectionSet: boolean}}) => {
+            if (interactionState === 'open_no_selection') {
+                const chooserState = getEmptyEnterChooserFromState(editor.state);
+
+                if (chooserState.isOpen) {
+                    closeOverlay();
+
+                    return;
+                }
+            }
+
             if (transaction.docChanged) {
                 pointerSelectionIntentRef.current = false;
                 runOverlayUpdateNow();
@@ -128,6 +139,7 @@ export const useCharacterSuggestions = ({
         cancelScheduledOverlayUpdate,
         closeOverlay,
         editor,
+        interactionState,
         runOverlayUpdateNow,
     ]);
 

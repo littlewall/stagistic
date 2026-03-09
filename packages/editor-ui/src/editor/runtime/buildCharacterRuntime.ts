@@ -5,18 +5,21 @@ import {
     DecorationSet,
 } from '@tiptap/pm/view';
 
-import {getCharacterColorVarName} from '../characterColors';
+import {
+    getCharacterTagIdClassName,
+    getCharacterTagKeyClassName,
+} from '../characterColors';
 import {
     type CharacterTokenEntry,
     scanCharacterTokensFromDoc,
 } from '../characters/characterTokenScan';
 import {
     buildCharacterDocColorStateFromTokenScan,
-    getCharacterTokenColorKey,
-    getUnconfirmedCharacterColor,
 } from '../characters/colorResolver';
-import type {PersistentCharacterRef} from '../contracts';
-import type {EditorLiveCharacterSnapshot} from '../contracts';
+import type {
+    EditorLiveCharacterSnapshot,
+    PersistentCharacterRef,
+} from '../contracts';
 import type {EditorCharacterRuntime} from './editorRuntimeTypes';
 
 const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
@@ -39,11 +42,45 @@ interface BuildCharacterRuntimeArgs {
     },
 }
 
+const joinClassNames = (...classNames: Array<string | undefined>) => classNames
+    .filter(Boolean)
+    .join(' ');
+
+const resolveCharacterTagDecorationAttributes = (
+    tokenEntry: CharacterTokenEntry,
+    characterTagClassNames?: {
+        tag: string,
+        separator: string,
+    },
+) => {
+    let identityClassName: string | undefined;
+
+    if (tokenEntry.characterId) {
+        identityClassName = getCharacterTagIdClassName(tokenEntry.characterId);
+    }
+
+    if (!identityClassName && tokenEntry.key) {
+        identityClassName = getCharacterTagKeyClassName(tokenEntry.key);
+    }
+
+    const attributes: Record<string, string> = {
+        class: joinClassNames(characterTagClassNames?.tag ?? 'characterTag', identityClassName),
+    };
+
+    if (tokenEntry.characterId) {
+        attributes['data-character-id'] = tokenEntry.characterId;
+    }
+
+    if (tokenEntry.key) {
+        attributes['data-character-key'] = tokenEntry.key;
+    }
+
+    return attributes;
+};
+
 const buildCharacterDecorations = (
     doc: ProseMirrorNode,
     tokenEntries: readonly CharacterTokenEntry[],
-    colorByToken: ReadonlyMap<string, string>,
-    characterColorSaturation?: number,
     characterTagClassNames?: {
         tag: string,
         separator: string,
@@ -57,18 +94,12 @@ const buildCharacterDecorations = (
 
     tokenEntries.forEach((tokenEntry, index) => {
         if (tokenEntry.valueStart < tokenEntry.valueEnd) {
-            const colorTokenKey = getCharacterTokenColorKey(tokenEntry.blockId, tokenEntry.tokenIndex);
-            const color = colorByToken.get(colorTokenKey)
-                ?? getUnconfirmedCharacterColor(tokenEntry.key, characterColorSaturation);
             const decorationEnd = Math.max(tokenEntry.valueEnd, tokenEntry.end);
 
             decorations.push(Decoration.inline(
                 tokenEntry.blockStart + tokenEntry.valueStart,
                 tokenEntry.blockStart + decorationEnd,
-                {
-                    class: characterTagClassNames?.tag ?? 'characterTag',
-                    style: `--character-tag-color: var(${getCharacterColorVarName(colorTokenKey)}, ${color});`,
-                },
+                resolveCharacterTagDecorationAttributes(tokenEntry, characterTagClassNames),
             ));
         }
 
@@ -151,8 +182,6 @@ export const buildCharacterRuntime = ({
         decorations: buildCharacterDecorations(
             doc,
             tokenScan.tokenEntries,
-            colorState.colorByToken,
-            characterColorSaturation,
             characterTagClassNames,
         ),
     };

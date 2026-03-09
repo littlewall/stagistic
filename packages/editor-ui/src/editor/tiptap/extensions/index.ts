@@ -12,6 +12,12 @@ export {
     EditorRuntimeExtension,
     getEditorRuntimeFromState,
 } from './EditorRuntimeExtension';
+export {
+    EMPTY_ENTER_CHOOSER_WRITER_TYPES,
+    EmptyEnterChooserExtension,
+    getEmptyEnterChooserFromState,
+    isEmptyEnterChooserWriterType,
+} from './EmptyEnterChooserExtension';
 export {FountainBehaviorExtension} from './FountainBehaviorExtension';
 export {
     FountainColumnExtension,
