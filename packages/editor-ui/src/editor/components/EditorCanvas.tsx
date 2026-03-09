@@ -5,6 +5,7 @@ import type {PersistentCharacterRef} from '../types';
 import CharacterSuggestionsOverlay from './CharacterSuggestionsOverlay';
 import EditorBlockActionsOverlay from './EditorBlockActionsOverlay';
 import styles from './EditorCanvas.module.css';
+import EmptyEnterBlockChooserOverlay from './emptyEnterChooser/EmptyEnterBlockChooserOverlay';
 
 type EditorCanvasProps = {
     editor: TiptapEditor | null,
@@ -42,6 +43,7 @@ export const EditorCanvas = ({
                 persistentCharacters={persistentCharacters}
                 characterColorSaturation={characterColorSaturation}
             />
+            <EmptyEnterBlockChooserOverlay editor={editor} canvasRef={canvasRef} />
             <EditorBlockActionsOverlay editor={editor} canvasRef={canvasRef} />
         </section>
     );

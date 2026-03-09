@@ -16,14 +16,6 @@ import {
 import type {BlockActionsPointerState} from './overlay/types';
 import type {UseOverlayPositionArgs} from './types';
 
-const getSafeHasFocus = (editor: TiptapEditor) => {
-    try {
-        return editor.view.hasFocus();
-    } catch {
-        return false;
-    }
-};
-
 const isSameBlockActionsPointerState = (
     previous: BlockActionsPointerState | null,
     next: BlockActionsPointerState | null,
@@ -47,6 +39,7 @@ export const useOverlayPosition = ({
 }: UseOverlayPositionArgs) => {
     const [activeBlockState, setActiveBlockState] = useState<BlockActionsPointerState | null>(null);
     const activeBlockStateRef = useRef<BlockActionsPointerState | null>(null);
+    const hasFocusRef = useRef(false);
 
     const commitActiveBlockState = useCallback((nextState: BlockActionsPointerState | null) => {
         if (isSameBlockActionsPointerState(activeBlockStateRef.current, nextState)) {
@@ -64,7 +57,7 @@ export const useOverlayPosition = ({
             return;
         }
 
-        if (!isMenuOpen && !getSafeHasFocus(targetEditor)) {
+        if (!isMenuOpen && !hasFocusRef.current) {
             commitActiveBlockState(null);
 
             return;
@@ -92,6 +85,7 @@ export const useOverlayPosition = ({
     }, [
         commitActiveBlockState,
         editor,
+        hasFocusRef,
         isMenuOpen,
     ]);
 
@@ -104,39 +98,38 @@ export const useOverlayPosition = ({
             return;
         }
 
-        const handleSelectionUpdate = () => {
+        hasFocusRef.current = editor.isFocused;
+
+        const handleTransaction = () => {
             updateActiveBlockState(editor);
         };
         const handleFocus = () => {
-            updateActiveBlockState(editor);
-        };
-        const handleUpdate = () => {
+            hasFocusRef.current = true;
             updateActiveBlockState(editor);
         };
         const handleBlur = () => {
-            if (isMenuOpen) {
-                updateActiveBlockState(editor);
+            hasFocusRef.current = false;
 
+            if (isMenuOpen) {
                 return;
             }
 
             commitActiveBlockState(null);
         };
 
-        editor.on('selectionUpdate', handleSelectionUpdate);
+        editor.on('transaction', handleTransaction);
         editor.on('focus', handleFocus);
-        editor.on('update', handleUpdate);
         editor.on('blur', handleBlur);
 
         return () => {
-            editor.off('selectionUpdate', handleSelectionUpdate);
+            editor.off('transaction', handleTransaction);
             editor.off('focus', handleFocus);
-            editor.off('update', handleUpdate);
             editor.off('blur', handleBlur);
         };
     }, [
         commitActiveBlockState,
         editor,
+        hasFocusRef,
         isMenuOpen,
         updateActiveBlockState,
     ]);

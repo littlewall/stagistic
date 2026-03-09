@@ -45,6 +45,10 @@ interface OverlayAnchorStyle extends CSSProperties {
     '--overlay-block-line-height-px'?: string,
 }
 
+interface AnchorUpdateOptions {
+    allowClearOnMiss?: boolean,
+}
+
 const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverlayProps) => {
     const triggerRef = useRef<HTMLButtonElement | null>(null);
     const menuRef = useRef<HTMLDivElement | null>(null);
@@ -128,13 +132,16 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         closeMenu,
     });
 
-    const updateOverlayAnchor = useCallback(() => {
+    const updateOverlayAnchor = useCallback((options?: AnchorUpdateOptions) => {
+        const allowClearOnMiss = options?.allowClearOnMiss ?? true;
         const canvas = canvasRef.current;
 
         if (!editor || !canvas || !visibleOverlayState) {
-            setOverlayAnchorStyle(null);
+            if (allowClearOnMiss) {
+                setOverlayAnchorStyle(null);
+            }
 
-            return;
+            return false;
         }
 
         const blockElement = resolveFountainBlockElementById(
@@ -144,17 +151,21 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         );
 
         if (!blockElement) {
-            setOverlayAnchorStyle(null);
+            if (allowClearOnMiss) {
+                setOverlayAnchorStyle(null);
+            }
 
-            return;
+            return false;
         }
 
         const offset = resolveElementOffsetWithinAncestor(blockElement, canvas);
 
         if (!offset) {
-            setOverlayAnchorStyle(null);
+            if (allowClearOnMiss) {
+                setOverlayAnchorStyle(null);
+            }
 
-            return;
+            return false;
         }
 
         const computed = window.getComputedStyle(blockElement);
@@ -192,6 +203,8 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
 
             return nextAnchorStyle;
         });
+
+        return true;
     }, [
         canvasRef,
         editor,
@@ -207,18 +220,18 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         overlayAnchorFrameRef.current = null;
     }, []);
 
-    const scheduleOverlayAnchorUpdate = useCallback(() => {
+    const scheduleOverlayAnchorUpdate = useCallback((options?: AnchorUpdateOptions) => {
         cancelScheduledOverlayAnchorUpdate();
 
         if (typeof window === 'undefined') {
-            updateOverlayAnchor();
+            updateOverlayAnchor(options);
 
             return;
         }
 
         overlayAnchorFrameRef.current = window.requestAnimationFrame(() => {
             overlayAnchorFrameRef.current = null;
-            updateOverlayAnchor();
+            updateOverlayAnchor(options);
         });
     }, [cancelScheduledOverlayAnchorUpdate, updateOverlayAnchor]);
 
@@ -238,12 +251,13 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
     useLayoutEffect(() => {
         if (!visibleOverlayState) {
             cancelScheduledOverlayAnchorUpdate();
-            updateOverlayAnchor();
+            updateOverlayAnchor({allowClearOnMiss: true});
 
             return;
         }
 
-        scheduleOverlayAnchorUpdate();
+        updateOverlayAnchor({allowClearOnMiss: false});
+        scheduleOverlayAnchorUpdate({allowClearOnMiss: true});
 
         return () => {
             cancelScheduledOverlayAnchorUpdate();
@@ -332,6 +346,8 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
                     aria-label={`Change block type (current: ${activeBlockInfo?.label ?? 'Block'})`}
                     aria-expanded={isMenuOpen}
                     data-block-actions-trigger="true"
+                    data-block-id={visibleOverlayState.blockId}
+                    data-block-type={visibleOverlayState.blockType}
                     data-drag-pending={pendingPress ? 'true' : undefined}
                     ref={triggerRef}
                     onPointerDown={handleTriggerPointerDown}

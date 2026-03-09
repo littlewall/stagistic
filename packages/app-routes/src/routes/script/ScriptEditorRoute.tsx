@@ -405,7 +405,7 @@ export const ScriptEditorRoute = () => {
                     scriptSettings: scriptSettingsDraft,
                 }}
                 save={{
-                    onAutoSave: undefined,
+                    onAutoSave: handleAutoSave,
                     onManualSave: handleManualSave,
                     autoSaveDelayMs: AUTOSAVE_DELAY_MS,
                 }}

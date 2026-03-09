@@ -27,6 +27,18 @@ interface UseSuggestionPointerHandlersArgs {
     closeOverlay: () => void,
 }
 
+const toTargetNode = (target: EventTarget | null) => {
+    return target instanceof Node ? target : null;
+};
+
+const toTargetElement = (target: Node | null) => {
+    if (!target) {
+        return null;
+    }
+
+    return target instanceof Element ? target : target.parentElement;
+};
+
 export const useSuggestionPointerHandlers = ({
     editor,
     canvasRef,
@@ -84,30 +96,41 @@ export const useSuggestionPointerHandlers = ({
             return;
         }
 
-        const handleEditorPointerDown = (event: PointerEvent) => {
-            const target = event.target as Node | null;
-
-            if (!target || !editorElement.contains(target)) {
+        let clearPointerIntentTimerId: number | null = null;
+        const clearPointerIntentTimer = () => {
+            if (clearPointerIntentTimerId === null) {
                 return;
             }
 
+            window.clearTimeout(clearPointerIntentTimerId);
+            clearPointerIntentTimerId = null;
+        };
+
+        const handleEditorPointerDown = (event: PointerEvent) => {
+            const targetNode = toTargetNode(event.target);
+
+            if (!targetNode || !editorElement.contains(targetNode)) {
+                return;
+            }
+
+            clearPointerIntentTimer();
             suppressedSelectionRef.current = null;
             pointerSelectionIntentRef.current = true;
             setActiveSuggestionIndex(null);
 
             window.requestAnimationFrame(() => {
-                if (!pointerSelectionIntentRef.current) {
-                    return;
-                }
-
-                pointerSelectionIntentRef.current = false;
                 runOverlayUpdateNow();
             });
+            clearPointerIntentTimerId = window.setTimeout(() => {
+                pointerSelectionIntentRef.current = false;
+                clearPointerIntentTimerId = null;
+            }, 250);
         };
 
         editorElement.addEventListener('pointerdown', handleEditorPointerDown, true);
 
         return () => {
+            clearPointerIntentTimer();
             editorElement.removeEventListener('pointerdown', handleEditorPointerDown, true);
         };
     }, [
@@ -125,10 +148,14 @@ export const useSuggestionPointerHandlers = ({
         }
 
         const handlePointerDown = (event: PointerEvent) => {
-            const target = event.target as Node;
-            const targetElement = target instanceof Element
-                ? target
-                : target.parentElement;
+            const targetNode = toTargetNode(event.target);
+            const targetElement = toTargetElement(targetNode);
+
+            if (!targetNode) {
+                dismissOverlayForCurrentSelection();
+
+                return;
+            }
 
             if (targetElement?.closest('[data-block-actions-trigger="true"]')) {
                 dismissOverlayForCurrentSelection();
@@ -136,11 +163,11 @@ export const useSuggestionPointerHandlers = ({
                 return;
             }
 
-            if (overlayRef.current?.contains(target)) {
+            if (overlayRef.current?.contains(targetNode)) {
                 return;
             }
 
-            if (canvasRef.current?.contains(target)) {
+            if (canvasRef.current?.contains(targetNode)) {
                 return;
             }
 

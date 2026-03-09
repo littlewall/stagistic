@@ -176,6 +176,37 @@ const Editor = ({
         scriptSettings,
         settings,
     ]);
+    const confirmedCharacterColorsById = useMemo(() => {
+        const resolvedColors = new Map<string, string>();
+
+        normalizedPersistentCharacters.forEach(character => {
+            resolvedColors.set(
+                character.id,
+                getConfirmedCharacterColor(
+                    character.id,
+                    character.colorHex,
+                    resolvedSettings.visual.characterColorSaturation,
+                ),
+            );
+        });
+
+        return resolvedColors;
+    }, [normalizedPersistentCharacters, resolvedSettings.visual.characterColorSaturation]);
+    const confirmedCharacterColorsByKey = useMemo(() => {
+        const resolvedColors = new Map<string, string>();
+
+        normalizedPersistentCharacters.forEach(character => {
+            const color = confirmedCharacterColorsById.get(character.id);
+
+            if (!color) {
+                return;
+            }
+
+            resolvedColors.set(character.key, color);
+        });
+
+        return resolvedColors;
+    }, [confirmedCharacterColorsById, normalizedPersistentCharacters]);
     const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;
     const isRightSidebarOpen = rightSidebarToggle?.isOpen ?? false;
     const responsiveScale = useResponsiveScale({
@@ -200,43 +231,31 @@ const Editor = ({
             ? new Map<string, string>()
             : new Map(rememberedColorByKeyRef.current);
 
-        normalizedPersistentCharacters.forEach(character => {
-            const resolvedColor = getConfirmedCharacterColor(
-                character.id,
-                character.colorHex,
-                resolvedSettings.visual.characterColorSaturation,
-            );
-
-            nextColorByCharacterId.set(character.id, resolvedColor);
-            nextRememberedColorByKey.set(character.key, resolvedColor);
+        confirmedCharacterColorsById.forEach((color, characterId) => {
+            nextColorByCharacterId.set(characterId, color);
+        });
+        confirmedCharacterColorsByKey.forEach((color, characterKey) => {
+            nextRememberedColorByKey.set(characterKey, color);
         });
 
         persistentCharactersRef.current = normalizedPersistentCharacters;
         colorByCharacterIdRef.current = nextColorByCharacterId;
         rememberedColorByKeyRef.current = nextRememberedColorByKey;
         rememberedColorSaturationRef.current = resolvedSettings.visual.characterColorSaturation;
-    }, [normalizedPersistentCharacters, resolvedSettings.visual.characterColorSaturation]);
+    }, [
+        confirmedCharacterColorsById,
+        confirmedCharacterColorsByKey,
+        normalizedPersistentCharacters,
+        resolvedSettings.visual.characterColorSaturation,
+    ]);
 
     const initialLiveSnapshot = useMemo(() => {
         const indexSnapshot = buildScriptBlockIndex(resolvedInitialValue).snapshot;
-        const colorByCharacterId = new Map<string, string>();
-        const rememberedColorByKey = new Map<string, string>();
-
-        normalizedPersistentCharacters.forEach(character => {
-            const resolvedColor = getConfirmedCharacterColor(
-                character.id,
-                character.colorHex,
-                resolvedSettings.visual.characterColorSaturation,
-            );
-
-            colorByCharacterId.set(character.id, resolvedColor);
-            rememberedColorByKey.set(character.key, resolvedColor);
-        });
 
         const projection = buildSidebarProjectionFromIndex(indexSnapshot, {
             characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
-            colorByCharacterId,
-            rememberedColorByKey,
+            colorByCharacterId: confirmedCharacterColorsById,
+            rememberedColorByKey: confirmedCharacterColorsByKey,
             persistentCharacters: normalizedPersistentCharacters,
         });
 
@@ -249,6 +268,8 @@ const Editor = ({
             activeBlockType: null,
         };
     }, [
+        confirmedCharacterColorsById,
+        confirmedCharacterColorsByKey,
         normalizedPersistentCharacters,
         resolvedInitialValue,
         resolvedSettings.visual.characterColorSaturation,
@@ -429,6 +450,7 @@ const Editor = ({
                     rootRef={rootRef}
                     canvasHostRef={canvasHostRef}
                     rootStyle={rootStyle}
+                    confirmedCharacterColorsById={confirmedCharacterColorsById}
                     onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
                     onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
                 />
