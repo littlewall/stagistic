@@ -1,21 +1,11 @@
-import '@stagistic/ui/styles/base.css';
-import './index.css';
-
-import {isApplePlatform} from '@stagistic/platform-core';
-import {bootstrapAppTheme} from '@stagistic/ui';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 
-import App from './App';
-
-bootstrapAppTheme();
-
-if (isApplePlatform()) {
-    document.body.classList.add('platform-macos');
-}
-
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-        <App />
+        <main style={{padding: '2rem', fontFamily: 'system-ui, sans-serif'}}>
+            <h1>Stagistic Desktop</h1>
+            <p>Placeholder. Desktop build is paused while the web app is being refactored.</p>
+        </main>
     </React.StrictMode>,
 );

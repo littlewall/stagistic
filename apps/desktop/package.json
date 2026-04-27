@@ -11,21 +11,8 @@
         "lint": "eslint ."
     },
     "dependencies": {
-        "@electric-sql/pglite": "^0.3.7",
-        "@react-aria/toast": "^3.0.9",
-        "@react-stately/toast": "^3.1.2",
-        "@stagistic/app-core": "workspace:*",
-        "@stagistic/app-routes": "workspace:*",
-        "@stagistic/db": "workspace:*",
-        "@stagistic/script-core": "workspace:*",
-        "@stagistic/shared": "workspace:*",
-        "@stagistic/sync-core": "workspace:*",
-        "@stagistic/ui": "workspace:*",
-        "drizzle-orm": "^0.44.0",
         "react": "^19.0.0",
-        "react-dom": "^19.0.0",
-        "react-router-dom": "^7.13.0",
-        "@stagistic/platform-core": "workspace:*"
+        "react-dom": "^19.0.0"
     },
     "devDependencies": {
         "@tauri-apps/cli": "^2.0.0",
