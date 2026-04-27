@@ -1,7 +1,6 @@
 import {
     createNodeId,
     type EditorSettings,
-    type FountainElementType,
 } from '@stagistic/script-core';
 import {type Extensions} from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
@@ -19,17 +18,14 @@ import {
     getBlockShortcuts,
 } from './model/blockSettingMaps';
 import {
-    AnnotationDecorationsExtension,
     BlockUiEventsExtension,
     CharacterRefSyncExtension,
     createPaginationExtension,
-    type EditorBlockAnnotation,
     EditorRuntimeExtension,
     EmptyEnterChooserExtension,
     FountainBehaviorExtension,
     FountainColumnExtension,
     FountainColumnGroupExtension,
-    LayerViewFilterExtension,
     PlaceholderExtension,
     StructureMarkerDecorationsExtension,
 } from './tiptap/extensions';
@@ -46,9 +42,6 @@ type UseEditorExtensionsArgs = {
     colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
     rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>},
     persistentCharactersRef?: {current: readonly PersistentCharacterRef[]},
-    annotations?: readonly EditorBlockAnnotation[],
-    visibleLayerIds?: readonly string[],
-    visibleBlockTypes?: readonly FountainElementType[],
     enableBlockUiEvents?: boolean,
 };
 
@@ -58,9 +51,6 @@ export const useEditorExtensions = ({
     colorByCharacterIdRef,
     rememberedColorByKeyRef,
     persistentCharactersRef,
-    annotations,
-    visibleLayerIds,
-    visibleBlockTypes,
     enableBlockUiEvents,
 }: UseEditorExtensionsArgs): Extensions => {
     const paginationExtension = useMemo(
@@ -129,19 +119,6 @@ export const useEditorExtensions = ({
         }),
         [persistentCharactersRef],
     );
-    const annotationDecorationsExtension = useMemo(
-        () => AnnotationDecorationsExtension.configure({
-            annotations,
-            visibleLayerIds,
-        }),
-        [annotations, visibleLayerIds],
-    );
-    const layerViewFilterExtension = useMemo(
-        () => LayerViewFilterExtension.configure({
-            visibleBlockTypes,
-        }),
-        [visibleBlockTypes],
-    );
     const uniqueIdExtension = useMemo(() => {
         const uniqueIdTypes = [...SCRIPT_BLOCK_NODE_NAMES];
 
@@ -173,31 +150,19 @@ export const useEditorExtensions = ({
             uniqueIdExtension,
         ];
 
-        if (visibleBlockTypes && visibleBlockTypes.length > 0) {
-            extensions.push(layerViewFilterExtension);
-        }
-
-        if (annotations && annotations.length > 0) {
-            extensions.push(annotationDecorationsExtension);
-        }
-
         if (enableBlockUiEvents) {
             extensions.push(BlockUiEventsExtension);
         }
 
         return extensions;
     }, [
-        annotationDecorationsExtension,
         characterRefSyncExtension,
-        annotations,
         emptyEnterChooserExtension,
         editorRuntimeExtension,
         enableBlockUiEvents,
         fountainBehaviorExtension,
-        layerViewFilterExtension,
         paginationExtension,
         structureMarkerDecorationsExtension,
         uniqueIdExtension,
-        visibleBlockTypes,
     ]);
 };

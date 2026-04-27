@@ -1,8 +1,4 @@
 export {
-    AnnotationDecorationsExtension,
-    type EditorBlockAnnotation,
-} from './AnnotationDecorationsExtension';
-export {
     BlockUiEventsExtension,
     getBlockUiEventsFromState,
 } from './BlockUiEventsExtension';
@@ -23,7 +19,6 @@ export {
     FountainColumnExtension,
     FountainColumnGroupExtension,
 } from './FountainColumnExtensions';
-export {LayerViewFilterExtension} from './LayerViewFilterExtension';
 export {createPaginationExtension} from './PaginationExtension';
 export {PlaceholderExtension} from './PlaceholderExtension';
 export {StructureMarkerDecorationsExtension} from './StructureMarkerDecorationsExtension';

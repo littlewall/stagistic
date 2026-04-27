@@ -115,8 +115,6 @@ const Editor = ({
         initialValue,
         nodeMode = 'default',
         persistentCharacters = [],
-        annotations,
-        viewFilter,
     } = document;
     const {
         settings,
@@ -282,9 +280,6 @@ const Editor = ({
         colorByCharacterIdRef,
         rememberedColorByKeyRef,
         persistentCharactersRef,
-        annotations,
-        visibleLayerIds: viewFilter?.visibleLayerIds,
-        visibleBlockTypes: viewFilter?.visibleBlockTypes,
         enableBlockUiEvents: Boolean(onBlockUiEvent),
     });
     const initialContentSignature = useMemo(

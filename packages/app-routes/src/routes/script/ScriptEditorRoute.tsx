@@ -398,8 +398,6 @@ export const ScriptEditorRoute = () => {
                 document={{
                     initialValue: resolvedEditorInitialValue,
                     persistentCharacters: normalizedConfirmedCharacterRecords,
-                    annotations: production.editor.annotations,
-                    viewFilter: production.editor.viewFilter,
                 }}
                 settings={{
                     scriptSettings: scriptSettingsDraft,
