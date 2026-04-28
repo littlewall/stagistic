@@ -1,4 +1,4 @@
-import {isApplePlatform} from '@stagistic/platform-core';
+import {isApplePlatform} from '@stagistic/shared';
 import {
     ELEMENT_ACT,
     isBlockShortcut,

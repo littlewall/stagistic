@@ -8,8 +8,8 @@
         "lint": "eslint ."
     },
     "dependencies": {
-        "@stagistic/platform-core": "workspace:*",
         "@stagistic/script-core": "workspace:*",
+        "@stagistic/shared": "workspace:*",
         "@tanstack/react-hotkeys": "^0.3.0",
         "@tiptap/core": "^3.19.0",
         "@tiptap/extension-bold": "^3.19.0",

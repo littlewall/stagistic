@@ -1,4 +1,3 @@
-import type {ScriptImportFile} from '@stagistic/platform-core';
 import {
     createNodeId,
     getFirstBlockId,
@@ -19,6 +18,11 @@ import {
     resolveImportedScriptName,
 } from '../services/scriptImportService';
 
+export interface ScriptImportFile {
+    fileName: string,
+    text: string,
+}
+
 interface ScriptRepositoryAdapter {
     createScript: (name: string, initialContent?: ScriptDocument) => Promise<string>,
     setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,
@@ -36,9 +40,6 @@ interface UseGlobalModalActionsArgs {
     },
     state: {
         refreshScripts: () => void,
-    },
-    requests: {
-        pickFile: () => Promise<ScriptImportFile | null>,
     },
 }
 
@@ -58,7 +59,6 @@ export interface GlobalModalActions {
             enableLegacyCapsLyricsHeuristic?: boolean,
         },
     }) => void,
-    pickImportFile: () => Promise<ScriptImportFile | null>,
 }
 
 export const useGlobalModalActions = ({
@@ -66,13 +66,11 @@ export const useGlobalModalActions = ({
     navigation,
     notifications,
     state,
-    requests,
 }: UseGlobalModalActionsArgs): GlobalModalActions => {
     const {scriptRepository} = repository;
     const {navigate} = navigation;
     const {addToast} = notifications;
     const {refreshScripts} = state;
-    const {pickFile} = requests;
     const [isNewScriptOpen, setIsNewScriptOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [prefilledImport, setPrefilledImport] = useState<ScriptImportFile | null>(null);
@@ -189,10 +187,6 @@ export const useGlobalModalActions = ({
         navigate,
     ]);
 
-    const pickImportFile = useCallback(async () => {
-        return pickFile();
-    }, [pickFile]);
-
     return useMemo(() => ({
         isNewScriptOpen,
         isImportOpen,
@@ -204,7 +198,6 @@ export const useGlobalModalActions = ({
         setPrefilledImport,
         handleCreate,
         handleImport,
-        pickImportFile,
     }), [
         closeImportScript,
         closeNewScript,
@@ -214,7 +207,6 @@ export const useGlobalModalActions = ({
         isNewScriptOpen,
         openImportScript,
         openNewScript,
-        pickImportFile,
         prefilledImport,
     ]);
 };

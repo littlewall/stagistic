@@ -3,13 +3,6 @@ import {
     useScriptsContext,
 } from '@stagistic/app-core';
 import {
-    isTauriRuntime,
-    listenTauriFountainDrop,
-    MENU_EVENT_IMPORT_SCRIPT,
-    MENU_EVENT_NEW_SCRIPT,
-    pickTauriFountainFile,
-} from '@stagistic/platform-core';
-import {
     ImportScriptModal,
     NewScriptModal,
     useToastController,
@@ -19,9 +12,7 @@ import {
     type ReactNode,
     useCallback,
     useContext,
-    useEffect,
     useMemo,
-    useState,
 } from 'react';
 import {useNavigate} from 'react-router-dom';
 
@@ -53,7 +44,6 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
     const scriptRepository = useScriptRepository();
     const {scriptsStore} = useScriptsContext();
     const {addToast} = useToastController();
-    const [isTauri, setIsTauri] = useState(false);
     const refreshScripts = useCallback(() => {
         void scriptsStore.refresh();
     }, [scriptsStore]);
@@ -66,10 +56,8 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         closeNewScript,
         openImportScript,
         closeImportScript,
-        setPrefilledImport,
         handleCreate,
         handleImport,
-        pickImportFile,
     } = useGlobalModalActions({
         repository: {
             scriptRepository,
@@ -83,81 +71,7 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         state: {
             refreshScripts,
         },
-        requests: {
-            pickFile: pickTauriFountainFile,
-        },
     });
-
-    useEffect(() => {
-        let active = true;
-
-        const check = async () => {
-            const result = await isTauriRuntime();
-
-            if (active) {
-                setIsTauri(Boolean(result));
-            }
-        };
-
-        void check();
-
-        return () => {
-            active = false;
-        };
-    }, []);
-
-    useEffect(() => {
-        const handleNewScript = () => {
-            openNewScript();
-        };
-
-        const handleImport = () => {
-            openImportScript();
-        };
-
-        window.addEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
-        window.addEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
-
-        return () => {
-            window.removeEventListener(MENU_EVENT_NEW_SCRIPT, handleNewScript);
-            window.removeEventListener(MENU_EVENT_IMPORT_SCRIPT, handleImport);
-        };
-    }, [openImportScript, openNewScript]);
-
-    useEffect(() => {
-        if (!isTauri) {
-            return;
-        }
-
-        let unlisten: null | (() => void) = null;
-
-        const setup = async () => {
-            const stop = await listenTauriFountainDrop(({fileName, text}) => {
-                setPrefilledImport({fileName, text});
-                openImportScript();
-            });
-
-            if (!stop) {
-                console.error('Failed to listen for file drop events');
-
-                return;
-            }
-
-            unlisten = stop;
-        };
-
-        void setup();
-
-        return () => {
-            if (unlisten) {
-                unlisten();
-            }
-        };
-    }, [
-        isTauri,
-        openImportScript,
-        setPrefilledImport,
-    ]);
 
     const contextValue = useMemo<GlobalModalsController>(() => ({
         openNewScript,
@@ -176,7 +90,6 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
                 isOpen={isImportOpen}
                 onClose={closeImportScript}
                 onImport={handleImport}
-                onPickFile={isTauri ? pickImportFile : undefined}
                 preselectedFile={prefilledImport}
             />
         </GlobalModalsContext.Provider>

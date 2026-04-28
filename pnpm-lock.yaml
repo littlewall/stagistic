@@ -215,12 +215,12 @@ importers:
       '@stagistic/editor-ui':
         specifier: workspace:*
         version: link:../editor-ui
-      '@stagistic/platform-core':
-        specifier: workspace:*
-        version: link:../platform-core
       '@stagistic/script-core':
         specifier: workspace:*
         version: link:../script-core
+      '@stagistic/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@stagistic/ui':
         specifier: workspace:*
         version: link:../ui
@@ -262,12 +262,12 @@ importers:
 
   packages/editor-ui:
     dependencies:
-      '@stagistic/platform-core':
-        specifier: workspace:*
-        version: link:../platform-core
       '@stagistic/script-core':
         specifier: workspace:*
         version: link:../script-core
+      '@stagistic/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@tanstack/react-hotkeys':
         specifier: ^0.3.0
         version: 0.3.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -326,22 +326,6 @@ importers:
       '@types/react-dom':
         specifier: ^19.0.0
         version: 19.2.3(@types/react@19.2.10)
-      typescript:
-        specifier: ^5.9.2
-        version: 5.9.3
-
-  packages/platform-core:
-    dependencies:
-      '@tauri-apps/api':
-        specifier: ^2.0.0
-        version: 2.9.1
-      '@tauri-apps/plugin-dialog':
-        specifier: ^2.0.0
-        version: 2.6.0
-      '@tauri-apps/plugin-fs':
-        specifier: ^2.0.0
-        version: 2.4.5
-    devDependencies:
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
@@ -2100,9 +2084,6 @@ packages:
   '@tanstack/store@0.9.1':
     resolution: {integrity: sha512-+qcNkOy0N1qSGsP7omVCW0SDrXtaDcycPqBDE726yryiA5eTDFpjBReaYjghVJwNf1pcPMyzIwTGlYjCSQR0Fg==}
 
-  '@tauri-apps/api@2.9.1':
-    resolution: {integrity: sha512-IGlhP6EivjXHepbBic618GOmiWe4URJiIeZFlB7x3czM0yDHHYviH1Xvoiv4FefdkQtn6v7TuwWCRfOGdnVUGw==}
-
   '@tauri-apps/cli-darwin-arm64@2.9.6':
     resolution: {integrity: sha512-gf5no6N9FCk1qMrti4lfwP77JHP5haASZgVbBgpZG7BUepB3fhiLCXGUK8LvuOjP36HivXewjg72LTnPDScnQQ==}
     engines: {node: '>= 10'}
@@ -2173,12 +2154,6 @@ packages:
     resolution: {integrity: sha512-3xDdXL5omQ3sPfBfdC8fCtDKcnyV7OqyzQgfyT5P3+zY6lcPqIYKQBvUasNvppi21RSdfhy44ttvJmftb0PCDw==}
     engines: {node: '>= 10'}
     hasBin: true
-
-  '@tauri-apps/plugin-dialog@2.6.0':
-    resolution: {integrity: sha512-q4Uq3eY87TdcYzXACiYSPhmpBA76shgmQswGkSVio4C82Sz2W4iehe9TnKYwbq7weHiL88Yw19XZm7v28+Micg==}
-
-  '@tauri-apps/plugin-fs@2.4.5':
-    resolution: {integrity: sha512-dVxWWGE6VrOxC7/jlhyE+ON/Cc2REJlM35R3PJX3UvFw2XwYhLGQVAIyrehenDdKjotipjYEVc4YjOl3qq90fA==}
 
   '@tiptap/core@3.19.0':
     resolution: {integrity: sha512-bpqELwPW+DG8gWiD8iiFtSl4vIBooG5uVJod92Qxn3rA9nFatyXRr4kNbMJmOZ66ezUvmCjXVe/5/G4i5cyzKA==}
@@ -6658,8 +6633,6 @@ snapshots:
 
   '@tanstack/store@0.9.1': {}
 
-  '@tauri-apps/api@2.9.1': {}
-
   '@tauri-apps/cli-darwin-arm64@2.9.6':
     optional: true
 
@@ -6706,14 +6679,6 @@ snapshots:
       '@tauri-apps/cli-win32-arm64-msvc': 2.9.6
       '@tauri-apps/cli-win32-ia32-msvc': 2.9.6
       '@tauri-apps/cli-win32-x64-msvc': 2.9.6
-
-  '@tauri-apps/plugin-dialog@2.6.0':
-    dependencies:
-      '@tauri-apps/api': 2.9.1
-
-  '@tauri-apps/plugin-fs@2.4.5':
-    dependencies:
-      '@tauri-apps/api': 2.9.1
 
   '@tiptap/core@3.19.0(@tiptap/pm@3.19.0)':
     dependencies:

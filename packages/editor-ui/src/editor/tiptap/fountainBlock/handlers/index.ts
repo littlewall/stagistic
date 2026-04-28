@@ -1,4 +1,4 @@
-import {isApplePlatform} from '@stagistic/platform-core';
+import {isApplePlatform} from '@stagistic/shared';
 import type {Editor} from '@tiptap/react';
 
 import {getEmptyEnterChooserFromState} from '../../extensions/EmptyEnterChooserExtension';

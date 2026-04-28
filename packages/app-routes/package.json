@@ -11,8 +11,8 @@
         "@dnd-kit/react": "^0.3.0",
         "@stagistic/app-core": "workspace:*",
         "@stagistic/editor-ui": "workspace:*",
-        "@stagistic/platform-core": "workspace:*",
         "@stagistic/script-core": "workspace:*",
+        "@stagistic/shared": "workspace:*",
         "@stagistic/ui": "workspace:*"
     },
     "peerDependencies": {
