@@ -1,7 +1,7 @@
 import {
     normalizeCharacterColorHex,
     normalizeCharacterKey,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {useCallback} from 'react';
 
 import type {

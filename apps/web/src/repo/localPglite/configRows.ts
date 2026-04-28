@@ -2,7 +2,7 @@ import {dbQueries} from '@stagistic/db';
 import {
     type EditorSettingsOverride,
     type FountainElementType,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {
     isObjectRecord,
     uuidv7,

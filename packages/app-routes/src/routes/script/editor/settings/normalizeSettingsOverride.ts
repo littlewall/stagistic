@@ -1,12 +1,12 @@
-import {type FountainElementType} from '@stagistic/script-core';
+import {type FountainElementType} from '@stagistic/script';
 import {
     type EditorSettings,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {
     clampCharacterColorSaturation,
     type EditorSettingsOverride,
     normalizeEditorSettingsBlockType,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 import {
     LINE_HEIGHT_OPTIONS,

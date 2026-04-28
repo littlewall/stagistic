@@ -1,4 +1,4 @@
-import {type ScriptDocument} from '@stagistic/script-core';
+import {type ScriptDocument} from '@stagistic/script';
 
 export const addPendingValue = (values: string[], value: string) => {
     if (values.includes(value)) {

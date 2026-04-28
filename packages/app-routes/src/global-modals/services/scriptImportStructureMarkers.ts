@@ -1,4 +1,4 @@
-import type {ScriptDocument} from '@stagistic/script-core';
+import type {ScriptDocument} from '@stagistic/script';
 import {
     createNodeId,
     DEFAULT_EDITOR_SETTINGS,
@@ -10,7 +10,7 @@ import {
     type ScriptImportedSceneSynopsis,
     type ScriptImportedTitlePageField,
     type StructureSettings,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 const STRUCTURE_MARKER_TOKEN_PREFIX = '__STAGISTIC_STRUCTURE_MARKER__:';
 const IMPORT_MARKER_TOKEN_PREFIX = '__STAGISTIC_IMPORT_MARKER__:';

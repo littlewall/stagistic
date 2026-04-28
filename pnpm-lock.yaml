@@ -99,9 +99,9 @@ importers:
       '@stagistic/db':
         specifier: workspace:*
         version: link:../../packages/db
-      '@stagistic/script-core':
+      '@stagistic/script':
         specifier: workspace:*
-        version: link:../../packages/script-core
+        version: link:../../packages/script
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../../packages/shared
@@ -172,9 +172,9 @@ importers:
       '@stagistic/db':
         specifier: workspace:*
         version: link:../db
-      '@stagistic/script-core':
+      '@stagistic/script':
         specifier: workspace:*
-        version: link:../script-core
+        version: link:../script
       '@tanstack/pacer-lite':
         specifier: ^0.2.1
         version: 0.2.1
@@ -206,12 +206,12 @@ importers:
       '@stagistic/app-core':
         specifier: workspace:*
         version: link:../app-core
-      '@stagistic/editor-ui':
+      '@stagistic/editor':
         specifier: workspace:*
-        version: link:../editor-ui
-      '@stagistic/script-core':
+        version: link:../editor
+      '@stagistic/script':
         specifier: workspace:*
-        version: link:../script-core
+        version: link:../script
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../shared
@@ -243,9 +243,9 @@ importers:
       '@electric-sql/pglite':
         specifier: ^0.3.15
         version: 0.3.15
-      '@stagistic/script-core':
+      '@stagistic/script':
         specifier: workspace:*
-        version: link:../script-core
+        version: link:../script
       drizzle-orm:
         specifier: ^0.44.0
         version: 0.44.7(@electric-sql/pglite@0.3.15)
@@ -257,11 +257,11 @@ importers:
         specifier: ^5.9.2
         version: 5.9.3
 
-  packages/editor-ui:
+  packages/editor:
     dependencies:
-      '@stagistic/script-core':
+      '@stagistic/script':
         specifier: workspace:*
-        version: link:../script-core
+        version: link:../script
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../shared
@@ -327,7 +327,7 @@ importers:
         specifier: ^5.9.2
         version: 5.9.3
 
-  packages/script-core:
+  packages/script:
     dependencies:
       '@stagistic/shared':
         specifier: workspace:*
@@ -355,9 +355,9 @@ importers:
       '@fontsource/courier-prime':
         specifier: ^5.2.8
         version: 5.2.8
-      '@stagistic/script-core':
+      '@stagistic/script':
         specifier: workspace:*
-        version: link:../script-core
+        version: link:../script
       clsx:
         specifier: ^2.1.1
         version: 2.1.1

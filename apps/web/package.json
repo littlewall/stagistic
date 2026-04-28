@@ -16,7 +16,7 @@
         "@stagistic/app-core": "workspace:*",
         "@stagistic/app-routes": "workspace:*",
         "@stagistic/db": "workspace:*",
-        "@stagistic/script-core": "workspace:*",
+        "@stagistic/script": "workspace:*",
         "@stagistic/shared": "workspace:*",
         "@stagistic/ui": "workspace:*",
         "clsx": "^2.1.1",

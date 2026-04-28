@@ -3,7 +3,7 @@ import {
     rebuildScriptDocumentFromBlocks,
     type ScriptRepository,
 } from '@stagistic/db';
-import {type ScriptDocument} from '@stagistic/script-core';
+import {type ScriptDocument} from '@stagistic/script';
 
 import {
     LEGACY_TO_BLOCKS_TRIGGERS,

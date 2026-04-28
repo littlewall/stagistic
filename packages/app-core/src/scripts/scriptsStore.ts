@@ -7,7 +7,7 @@ import {
     getFirstBlockId,
     isScriptDocumentEmpty,
     type ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import type {ScriptRepository} from '@stagistic/db';
 import {
     createCollection,

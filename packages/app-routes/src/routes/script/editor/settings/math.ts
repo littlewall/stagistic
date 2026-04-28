@@ -1,4 +1,4 @@
-import {clampNumber} from '@stagistic/script-core';
+import {clampNumber} from '@stagistic/script';
 
 export const formatNumeric = (value: number) => {
     if (Number.isInteger(value)) {

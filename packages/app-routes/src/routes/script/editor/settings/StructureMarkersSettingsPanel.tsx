@@ -1,4 +1,4 @@
-import type {EditorSettings} from '@stagistic/script-core';
+import type {EditorSettings} from '@stagistic/script';
 import type {ChangeEvent} from 'react';
 
 import styles from '../../ScriptEditorRoute.module.css';

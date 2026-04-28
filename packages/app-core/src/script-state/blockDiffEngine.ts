@@ -3,7 +3,7 @@ import type {
     IndexedScriptBlock,
     IndexedScriptCharacterRef,
     ScriptBlockIndexSnapshot,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 import {toScriptBlockRowFromIndexedBlock} from './snapshot';
 import type {

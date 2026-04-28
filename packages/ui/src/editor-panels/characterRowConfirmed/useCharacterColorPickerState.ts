@@ -1,4 +1,4 @@
-import {clampCharacterColorSaturation} from '@stagistic/script-core';
+import {clampCharacterColorSaturation} from '@stagistic/script';
 import {
     useEffect, useMemo, useRef, useState,
 } from 'react';

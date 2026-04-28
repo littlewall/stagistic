@@ -1,7 +1,7 @@
 import {
     type ScriptBlockIndexSnapshot,
     type ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 import {resolveScriptBlockDiff} from './blockDiffEngine';
 import {

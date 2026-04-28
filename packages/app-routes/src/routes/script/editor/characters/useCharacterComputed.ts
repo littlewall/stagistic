@@ -2,7 +2,7 @@ import {
     type EditorLiveCharacterSnapshot,
     getCharacterColor,
     getConfirmedCharacterColor,
-} from '@stagistic/editor-ui';
+} from '@stagistic/editor';
 import {
     DEFAULT_EDITOR_SETTINGS,
     type EditorSettings,
@@ -10,7 +10,7 @@ import {
     ELEMENT_DUAL_DIALOGUE_CHARACTER,
     normalizeCharacterColorHex,
     normalizeCharacterKey,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {
     useCallback,
     useMemo,

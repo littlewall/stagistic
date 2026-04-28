@@ -7,7 +7,7 @@ import {
     scriptDocumentFromFountainAst,
     type StructureSettings,
     trimOrFallback,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 import {
     attachStructureFromMarkers,

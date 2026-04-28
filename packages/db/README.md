@@ -1,19 +1,22 @@
 # @stagistic/db
 
-Shared, platform-agnostic domain types and schema definitions.
+Drizzle schema, PGlite client, queries, and repository interface contracts.
 
 ## Scope
 
-- Domain types (e.g., `ScriptSummary`).
-- Database concepts that are platform-agnostic.
+- Domain types (e.g., `ScriptSummary`)
+- Drizzle schema and migrations
+- PGlite client setup
+- Query helpers
+- `ScriptRepository` interface contracts (storage-agnostic)
 
 ## Non-goals
 
-- No UI code.
-- No Tauri, HTTP, or storage drivers.
-- No persistence logic.
+- No UI code
+- No concrete storage drivers (apps wire those up)
+- No persistence side effects beyond the queries themselves
 
 ## Used by
 
-- `@stagistic/sync-core` for repository interfaces.
-- Apps (desktop/web) for shared types.
+- Apps for repository implementations and shared types
+- `@stagistic/app-core` for repository contracts

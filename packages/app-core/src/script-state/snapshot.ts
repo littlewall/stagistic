@@ -13,7 +13,7 @@ import {
     type IndexedScriptCharacterRef,
     normalizeActName,
     type ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 import type {ScriptStateRows} from './types';
 

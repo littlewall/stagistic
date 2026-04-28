@@ -1,4 +1,4 @@
-import {clampNumber} from '@stagistic/script-core';
+import {clampNumber} from '@stagistic/script';
 import clsx from 'clsx';
 
 import styles from './ProgressBar.module.css';

@@ -2,7 +2,7 @@ import type {
     EditorSettingsOverride,
     ScriptBlockIndexSnapshot,
     ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import type {ScriptSyncState} from '@stagistic/ui';
 
 import type {CurrentScriptItem} from '../types';

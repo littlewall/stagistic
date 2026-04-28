@@ -1,8 +1,8 @@
-import {getCharacterColor} from '@stagistic/editor-ui';
+import {getCharacterColor} from '@stagistic/editor';
 import {
     CHARACTER_COLOR_SATURATION_OPTIONS,
     clampCharacterColorSaturation,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {useMemo} from 'react';
 
 import styles from '../../ScriptEditorRoute.module.css';

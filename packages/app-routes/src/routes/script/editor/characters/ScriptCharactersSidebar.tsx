@@ -1,7 +1,7 @@
 import {
     focusFirstCharacterBlock, linkCharacterRef, renameCharacterText, replaceCharacterRefId, unlinkCharacterRef, useEditorInstance, useEditorLiveCharacters,
-} from '@stagistic/editor-ui';
-import {type EditorSettings} from '@stagistic/script-core';
+} from '@stagistic/editor';
+import {type EditorSettings} from '@stagistic/script';
 import {
     EditorSidebar,
 } from '@stagistic/ui';

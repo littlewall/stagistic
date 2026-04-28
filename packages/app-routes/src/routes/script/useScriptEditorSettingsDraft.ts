@@ -1,4 +1,4 @@
-import {type FountainElementType} from '@stagistic/script-core';
+import {type FountainElementType} from '@stagistic/script';
 import {
     clampCharacterColorSaturation,
     DEFAULT_EDITOR_SETTINGS,
@@ -6,7 +6,7 @@ import {
     type EditorSettingsOverride,
     mergeEditorSettings,
     type StructureSettingsPatch,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {
     useCallback,
     useEffect,

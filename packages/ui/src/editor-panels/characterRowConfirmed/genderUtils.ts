@@ -1,4 +1,4 @@
-import type {CharacterGenderOption} from '@stagistic/script-core';
+import type {CharacterGenderOption} from '@stagistic/script';
 
 import type {CharacterGenderIcon} from './types';
 

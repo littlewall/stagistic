@@ -7,7 +7,7 @@ import {
     isScriptDocumentEmpty,
     type ScriptBlockIndexSnapshot,
     type ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {
     useEffect,
     useState,

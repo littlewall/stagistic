@@ -3,7 +3,7 @@ import type {
     ScriptBlockIndexSnapshot,
     ScriptDocument,
     StructureSettings,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import type {ComponentProps} from 'react';
 
 import type {

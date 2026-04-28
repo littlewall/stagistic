@@ -1,7 +1,7 @@
 import type {
     ScriptBlockIndexSnapshot,
     ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {
     useCallback,
     useEffect,

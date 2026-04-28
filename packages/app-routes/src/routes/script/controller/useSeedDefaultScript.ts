@@ -4,7 +4,7 @@ import {
     ensureScriptStructure,
     getFirstBlockId,
     type ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {
     useCallback,
     useRef,

@@ -1,4 +1,4 @@
-import type {ScriptDocument} from '@stagistic/script-core';
+import type {ScriptDocument} from '@stagistic/script';
 
 export const serializeDocument = (value: ScriptDocument) => JSON.stringify(value);
 

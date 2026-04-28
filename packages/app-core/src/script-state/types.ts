@@ -10,7 +10,7 @@ import type {
     IndexedScriptCharacterRef,
     ScriptBlockIndexSnapshot,
     ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import type {ScriptRepository} from '@stagistic/db';
 import type {Collection} from '@tanstack/react-db';
 import type {Store} from '@tanstack/store';

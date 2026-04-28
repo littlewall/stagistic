@@ -3,7 +3,7 @@ import {
     getFirstBlockId,
     type ScriptDocument,
     trimOrFallback,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {
     useCallback,
     useMemo,

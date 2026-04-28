@@ -12,7 +12,7 @@ import {
     ELEMENT_SECTION,
     ELEMENT_TRANSITION,
     type FountainElementType,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 export const SCREENPLAY_CHARS_PER_INCH = 10;
 export const PX_PER_INCH = 96;

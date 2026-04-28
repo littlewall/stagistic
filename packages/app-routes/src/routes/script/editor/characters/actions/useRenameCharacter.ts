@@ -1,4 +1,4 @@
-import {normalizeCharacterKey} from '@stagistic/script-core';
+import {normalizeCharacterKey} from '@stagistic/script';
 import {useCallback} from 'react';
 
 import {

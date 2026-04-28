@@ -1,7 +1,7 @@
 import type {
     EditorSettingsOverride,
     ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 import type {
     ListScriptBlocksOptions,

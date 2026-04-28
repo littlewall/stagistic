@@ -13,7 +13,7 @@
         "clsx": "^2.1.1",
         "iconoir-react": "^7.11.0",
         "react-aria-components": "^1.10.0",
-        "@stagistic/script-core": "workspace:*"
+        "@stagistic/script": "workspace:*"
     },
     "peerDependencies": {
         "react": "^19.0.0",

@@ -1,7 +1,7 @@
 import type {
     CharacterGenderOption,
     ScriptCharacterRecord,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 export interface EditorSidebarCharacter extends Pick<ScriptCharacterRecord, 'key'>, Partial<Pick<ScriptCharacterRecord, 'id' | 'colorHex' | 'genderKey'>> {
     color: string,

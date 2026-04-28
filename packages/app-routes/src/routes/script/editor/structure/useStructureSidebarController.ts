@@ -4,11 +4,11 @@ import type {
     MoveActRequest,
     MoveSceneRequest,
     RenameActRequest,
-} from '@stagistic/editor-ui';
+} from '@stagistic/editor';
 import {
     collectStructureBlocks,
     ELEMENT_ACT,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {
     useCallback,
     useEffect,

@@ -1,0 +1,8 @@
+import {ELEMENT_DIALOGUE} from '@stagistic/script';
+
+import {createFountainNode} from './createFountainNode';
+
+export const DialogueNode = createFountainNode({
+    name: 'dialogue',
+    legacyType: ELEMENT_DIALOGUE,
+});

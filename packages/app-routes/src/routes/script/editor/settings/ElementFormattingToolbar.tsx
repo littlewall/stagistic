@@ -1,4 +1,4 @@
-import {BLOCK_TEXT_ALIGN_OPTIONS, type FountainElementType} from '@stagistic/script-core';
+import {BLOCK_TEXT_ALIGN_OPTIONS, type FountainElementType} from '@stagistic/script';
 import {clsx} from '@stagistic/ui';
 
 import styles from '../../ScriptEditorRoute.module.css';

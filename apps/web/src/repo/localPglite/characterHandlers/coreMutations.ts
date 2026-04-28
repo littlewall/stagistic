@@ -1,5 +1,5 @@
 import {dbQueries} from '@stagistic/db';
-import {normalizeCharacterKey} from '@stagistic/script-core';
+import {normalizeCharacterKey} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 
 import type {CharacterMutationDeps} from './mutationDeps';

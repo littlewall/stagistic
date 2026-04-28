@@ -17,9 +17,7 @@
     },
     "include": [
         "src",
-        "vite.config.ts",
-        "../desktop/src/db/**/*.ts",
-        "../desktop/src/repo/**/*.ts"
+        "vite.config.ts"
     ],
     "references": []
 }

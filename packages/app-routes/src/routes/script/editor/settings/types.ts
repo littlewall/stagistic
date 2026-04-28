@@ -4,7 +4,7 @@ import type {
     EditorSettings,
     FountainElementType,
     StructureSettingsPatch,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import type {CSSProperties} from 'react';
 
 import type {SettingsSelectOption} from './SettingsSelect';

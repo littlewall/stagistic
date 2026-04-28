@@ -1,5 +1,5 @@
 export type {
     CharacterGenderOption,
     ScriptCharacterRecord,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 export type {EditorSidebarCharacter} from '@stagistic/ui';

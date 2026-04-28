@@ -1,11 +1,11 @@
-import {BLOCK_ICONS} from '@stagistic/editor-ui';
+import {BLOCK_ICONS} from '@stagistic/editor';
 import {
     BLOCK_CASING_OPTIONS,
     BLOCK_SHORTCUT_OPTIONS,
     BLOCK_TEXT_ALIGN_OPTIONS,
     DEFAULT_EDITOR_SETTINGS,
     ELEMENT_PARENTHETICAL,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {type CSSProperties, useMemo} from 'react';
 
 import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from '../../settings/settingsMenu';

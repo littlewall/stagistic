@@ -1,7 +1,7 @@
 import {
     type BlockShortcut,
     type FountainElementType,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 import styles from '../../ScriptEditorRoute.module.css';
 import {

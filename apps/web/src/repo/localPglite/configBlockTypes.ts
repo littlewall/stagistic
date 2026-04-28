@@ -18,7 +18,7 @@ import {
     ELEMENT_SECTION,
     ELEMENT_TRANSITION,
     type FountainElementType,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 const FOUNTAIN_ELEMENT_TYPES = new Set<FountainElementType>([
     ELEMENT_SCENE_HEADING,

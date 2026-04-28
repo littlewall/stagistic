@@ -5,7 +5,7 @@ import {
 import {
     convertDefaultScriptDocumentToLegacy,
     type ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 export const LEGACY_TO_BLOCKS_TRIGGERS = {
     createScript: 'create-script',

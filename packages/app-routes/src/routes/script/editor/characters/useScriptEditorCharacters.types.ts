@@ -1,11 +1,11 @@
 import {type useScriptRepository} from '@stagistic/app-core';
 import {
     type EditorValueChangeMeta,
-} from '@stagistic/editor-ui';
-import {type EditorSettings} from '@stagistic/script-core';
+} from '@stagistic/editor';
+import {type EditorSettings} from '@stagistic/script';
 import {
     type ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 import type {
     CharacterGenderOption,

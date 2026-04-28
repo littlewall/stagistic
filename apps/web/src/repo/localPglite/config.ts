@@ -2,7 +2,7 @@ import {dbQueries} from '@stagistic/db';
 import {
     type EditorSettingsOverride,
     LATEST_SCRIPT_SCHEMA_VERSION,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 import type {ScriptRepository} from '@stagistic/db';
 

@@ -1,5 +1,5 @@
 import {useDroppable} from '@dnd-kit/react';
-import {normalizeActName} from '@stagistic/script-core';
+import {normalizeActName} from '@stagistic/script';
 import {
     memo,
     useCallback,

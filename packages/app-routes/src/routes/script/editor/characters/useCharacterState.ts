@@ -1,9 +1,9 @@
 import {
     type EditorValueChangeMeta,
-} from '@stagistic/editor-ui';
+} from '@stagistic/editor';
 import {
     type ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import {
     type Dispatch,
     type SetStateAction,

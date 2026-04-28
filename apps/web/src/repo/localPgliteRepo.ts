@@ -20,7 +20,7 @@ import {
     upsertScriptScene,
     type UpsertScriptScenePayload,
 } from '@stagistic/db';
-import {type ScriptDocument} from '@stagistic/script-core';
+import {type ScriptDocument} from '@stagistic/script';
 import {
     trimOrFallback,
     uuidv7,

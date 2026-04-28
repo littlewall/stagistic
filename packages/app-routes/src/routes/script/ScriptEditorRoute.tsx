@@ -5,7 +5,7 @@ import {
 import {
     FountainEditor,
     incrementRouteRenderCount,
-} from '@stagistic/editor-ui';
+} from '@stagistic/editor';
 import {isApplePlatform} from '@stagistic/shared';
 import {
     AppHeader,

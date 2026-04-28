@@ -1,8 +1,8 @@
-import {BLOCK_ICONS} from '@stagistic/editor-ui';
+import {BLOCK_ICONS} from '@stagistic/editor';
 import {
     FOUNTAIN_BLOCK_ITEMS,
     type FountainElementType,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 import type {SettingsNavGroup} from '@stagistic/ui';
 
 export const SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO = 'document-info';

@@ -1,0 +1,38 @@
+{
+    "name": "@stagistic/editor",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "main": "./src/index.ts",
+    "scripts": {
+        "lint": "eslint ."
+    },
+    "dependencies": {
+        "@stagistic/script": "workspace:*",
+        "@stagistic/shared": "workspace:*",
+        "@tanstack/react-hotkeys": "^0.3.0",
+        "@tiptap/core": "^3.19.0",
+        "@tiptap/extension-bold": "^3.19.0",
+        "@tiptap/extension-document": "^3.19.0",
+        "@tiptap/extension-drag-handle": "^3.19.0",
+        "@tiptap/extension-drag-handle-react": "^3.19.0",
+        "@tiptap/extension-history": "^3.19.0",
+        "@tiptap/extension-italic": "^3.19.0",
+        "@tiptap/extension-text": "^3.19.0",
+        "@tiptap/extension-underline": "^3.19.0",
+        "@tiptap/extension-unique-id": "^3.19.0",
+        "@tiptap/pm": "^3.19.0",
+        "@tiptap/react": "^3.19.0",
+        "clsx": "^2.1.1",
+        "iconoir-react": "^7.11.0"
+    },
+    "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
+    },
+    "devDependencies": {
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "typescript": "^5.9.2"
+    }
+}

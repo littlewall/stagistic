@@ -3,7 +3,7 @@ import {
     useEditorLiveActiveBlock,
     useEditorLiveStructure,
     useFocusEditorBlock,
-} from '@stagistic/editor-ui';
+} from '@stagistic/editor';
 import {useMemo} from 'react';
 
 import styles from './ScriptStructureSidebar.module.css';

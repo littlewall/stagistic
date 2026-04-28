@@ -12,7 +12,7 @@ import {
     normalizeScriptStructure,
     resolveScriptBlockNodeType,
     type ScriptDocument,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 const cloneDocumentWithContent = (
     value: ScriptDocument,

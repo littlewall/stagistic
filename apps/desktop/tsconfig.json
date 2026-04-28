@@ -6,34 +6,9 @@
         "jsx": "react-jsx",
         "module": "ESNext",
         "moduleResolution": "bundler",
-        "paths": {
-            "~blocks/*": ["../../packages/editor-ui/src/editor/blocks/*"],
-            "~components/*": [
-                "./src/components/*",
-                "../../packages/editor-ui/src/editor/components/*"
-            ],
-            "~db": ["./src/db/index.ts"],
-            "~db/*": ["./src/db/*"],
-            "~helpers/*": [
-                "./src/helpers/*",
-                "../../packages/editor-ui/src/editor/blocks/*"
-            ],
-            "~libs/*": ["./src/libs/*"],
-            "~plugins/*": [
-                "./src/plugins/*",
-                "../../packages/editor-ui/src/editor/plugins/*"
-            ],
-            "~repo": ["./src/repo/index.ts"],
-            "~repo/*": ["./src/repo/*"]
-        },
-        "plugins": [
-            {
-                "name": "typescript-plugin-css-modules"
-            }
-        ],
         "allowImportingTsExtensions": true,
         "noEmit": true
     },
-    "include": ["src", "vite.config.ts"],
+    "include": ["src"],
     "references": []
 }

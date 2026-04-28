@@ -1,4 +1,4 @@
-import type {EditorSettingsOverride, ScriptDocument} from '@stagistic/script-core';
+import type {EditorSettingsOverride, ScriptDocument} from '@stagistic/script';
 import {useCallback} from 'react';
 
 import type {

@@ -5,7 +5,7 @@ import {
     type FountainJSONContent,
     normalizeActName,
     type ScriptBlockIndexSnapshot,
-} from '@stagistic/script-core';
+} from '@stagistic/script';
 
 export interface StructureActRow {
     kind: 'act',
