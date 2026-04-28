@@ -105,9 +105,6 @@ importers:
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../../packages/shared
-      '@stagistic/sync-core':
-        specifier: workspace:*
-        version: link:../../packages/sync-core
       '@stagistic/ui':
         specifier: workspace:*
         version: link:../../packages/ui
@@ -178,9 +175,6 @@ importers:
       '@stagistic/script-core':
         specifier: workspace:*
         version: link:../script-core
-      '@stagistic/sync-core':
-        specifier: workspace:*
-        version: link:../sync-core
       '@tanstack/pacer-lite':
         specifier: ^0.2.1
         version: 0.2.1
@@ -249,6 +243,9 @@ importers:
       '@electric-sql/pglite':
         specifier: ^0.3.15
         version: 0.3.15
+      '@stagistic/script-core':
+        specifier: workspace:*
+        version: link:../script-core
       drizzle-orm:
         specifier: ^0.44.0
         version: 0.44.7(@electric-sql/pglite@0.3.15)
@@ -345,19 +342,6 @@ importers:
       nanoid:
         specifier: ^5.0.7
         version: 5.1.6
-    devDependencies:
-      typescript:
-        specifier: ^5.9.2
-        version: 5.9.3
-
-  packages/sync-core:
-    dependencies:
-      '@stagistic/db':
-        specifier: workspace:*
-        version: link:../db
-      '@stagistic/script-core':
-        specifier: workspace:*
-        version: link:../script-core
     devDependencies:
       typescript:
         specifier: ^5.9.2

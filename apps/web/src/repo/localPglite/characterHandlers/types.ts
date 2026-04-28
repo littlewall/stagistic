@@ -1,4 +1,4 @@
-import type {ScriptRepository} from '@stagistic/sync-core';
+import type {ScriptRepository} from '@stagistic/db';
 
 import type {
     GetDb,

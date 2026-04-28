@@ -8,7 +8,7 @@ import {
     isScriptDocumentEmpty,
     type ScriptDocument,
 } from '@stagistic/script-core';
-import type {ScriptRepository} from '@stagistic/sync-core';
+import type {ScriptRepository} from '@stagistic/db';
 import {
     createCollection,
     localOnlyCollectionOptions,

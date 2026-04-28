@@ -11,7 +11,7 @@ import type {
     ScriptBlockIndexSnapshot,
     ScriptDocument,
 } from '@stagistic/script-core';
-import type {ScriptRepository} from '@stagistic/sync-core';
+import type {ScriptRepository} from '@stagistic/db';
 import type {Collection} from '@tanstack/react-db';
 import type {Store} from '@tanstack/store';
 

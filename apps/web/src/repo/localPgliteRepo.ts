@@ -3,11 +3,14 @@ import {
     dbQueries,
     listScriptBlocks,
     type ListScriptBlocksOptions,
+    type ListScriptsOptions,
     reorderScriptBlocks,
     replaceScriptBlockCharacterRefs,
     type ScriptBlockCharacterRefRow,
     type ScriptBlockOrderMove,
     type ScriptBlockUpsertRow,
+    type ScriptDataRepository,
+    type ScriptRepository,
     updateScriptSceneMetadata,
     type UpdateScriptSceneMetadataPayload,
     upsertScriptAct,
@@ -22,11 +25,6 @@ import {
     trimOrFallback,
     uuidv7,
 } from '@stagistic/shared';
-import {
-    type ListScriptsOptions,
-    type ScriptDataRepository,
-    type ScriptRepository,
-} from '@stagistic/sync-core';
 
 import {getLocalDb} from '~db';
 

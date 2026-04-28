@@ -1,9 +1,9 @@
 import {
     dbQueries,
     rebuildScriptDocumentFromBlocks,
+    type ScriptRepository,
 } from '@stagistic/db';
 import {type ScriptDocument} from '@stagistic/script-core';
-import type {ScriptRepository} from '@stagistic/sync-core';
 
 import {
     LEGACY_TO_BLOCKS_TRIGGERS,

@@ -4,7 +4,7 @@ import {
     LATEST_SCRIPT_SCHEMA_VERSION,
 } from '@stagistic/script-core';
 import {uuidv7} from '@stagistic/shared';
-import type {ScriptRepository} from '@stagistic/sync-core';
+import type {ScriptRepository} from '@stagistic/db';
 
 import {normalizeSettingsBlockType} from './configBlockTypes';
 import {

@@ -6,6 +6,21 @@ export * as dbQueries from './queries';
 export * from './rewrite';
 export * from './schema';
 export type {
+    ListScriptsOptions,
+    ScriptActsRepository,
+    ScriptBlockCharacterRefsRepository,
+    ScriptBlocksRepository,
+    ScriptCharacterGendersRepository,
+    ScriptCharactersRepository,
+    ScriptConfigsRepository,
+    ScriptContentRepository,
+    ScriptCrudRepository,
+    ScriptDataRepository,
+    ScriptLocationsRepository,
+    ScriptRepository,
+    ScriptScenesRepository,
+} from './scriptRepository';
+export type {
     Script,
     ScriptAct,
     ScriptBlock,
