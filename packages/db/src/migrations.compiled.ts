@@ -8,5 +8,9 @@ export const compiledMigrations = [
     {
         "id": "0001_imported_title_page_fields",
         "sql": "CREATE TABLE \"script_title_page_fields\" (\n\t\"id\" text PRIMARY KEY NOT NULL,\n\t\"script_id\" text NOT NULL,\n\t\"field_key\" text NOT NULL,\n\t\"field_value\" text NOT NULL,\n\t\"order_no\" integer NOT NULL,\n\t\"created_at\" bigint NOT NULL,\n\t\"updated_at\" bigint NOT NULL\n);\n--> statement-breakpoint\nALTER TABLE \"script_title_page_fields\" ADD CONSTRAINT \"script_title_page_fields_script_id_scripts_id_fk\" FOREIGN KEY (\"script_id\") REFERENCES \"public\".\"scripts\"(\"id\") ON DELETE cascade ON UPDATE no action;\n--> statement-breakpoint\nCREATE UNIQUE INDEX \"script_title_page_fields_script_order_unique_idx\" ON \"script_title_page_fields\" USING btree (\"script_id\",\"order_no\");\n--> statement-breakpoint\nCREATE INDEX \"script_title_page_fields_script_id_idx\" ON \"script_title_page_fields\" USING btree (\"script_id\");\n"
+    },
+    {
+        "id": "0002_drop_production_tables",
+        "sql": "DROP TABLE IF EXISTS \"script_cue_sheet_annotations\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_cue_sheets\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_block_annotations\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_scene_costumes\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_scene_props\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_scene_versions\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_costumes\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_props\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_members\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_permissions\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_views\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_layers\" CASCADE;\n"
     }
 ] as const;

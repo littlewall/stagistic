@@ -1,44 +1,20 @@
 import type {
-    InsertScriptSceneVersionPayload,
     ListScriptBlocksOptions,
     ScriptAct,
     ScriptBlock,
-    ScriptBlockAnnotation,
     ScriptBlockCharacterRef,
     ScriptBlockCharacterRefRow,
     ScriptBlockOrderMove,
     ScriptBlockUpsertRow,
     ScriptCharacterGenderOption,
     ScriptCharacterRef,
-    ScriptCostume,
-    ScriptCueSheet,
-    ScriptCueSheetAnnotation,
-    ScriptCueSheetAnnotationRow,
-    ScriptLayer,
     ScriptLocation,
-    ScriptMember,
-    ScriptPermission,
-    ScriptProp,
     ScriptScene,
-    ScriptSceneCostume,
-    ScriptSceneCostumeRow,
-    ScriptSceneProp,
-    ScriptScenePropRow,
-    ScriptSceneVersion,
     ScriptSummary,
-    ScriptView,
     UpdateScriptSceneMetadataPayload,
     UpsertScriptActPayload,
-    UpsertScriptBlockAnnotationPayload,
-    UpsertScriptCostumePayload,
-    UpsertScriptCueSheetPayload,
-    UpsertScriptLayerPayload,
     UpsertScriptLocationPayload,
-    UpsertScriptMemberPayload,
-    UpsertScriptPermissionPayload,
-    UpsertScriptPropPayload,
     UpsertScriptScenePayload,
-    UpsertScriptViewPayload,
 } from '@stagistic/db';
 import type {
     EditorSettingsOverride,
@@ -80,12 +56,6 @@ export interface ScriptCharacterGendersRepository {
 export interface ScriptContentRepository {
     loadLatest(scriptId: string): Promise<ScriptDocument | null>,
     saveLatest(scriptId: string, value: ScriptDocument): Promise<void>,
-}
-
-export interface ScriptVersionsRepository {
-    commit(scriptId: string, message?: string): Promise<string>,
-    load(versionId: string): Promise<ScriptDocument | null>,
-    restoreLatest(scriptId: string, versionId: string): Promise<void>,
 }
 
 export interface ScriptConfigsRepository {
@@ -131,74 +101,9 @@ export interface ScriptBlockCharacterRefsRepository {
     deleteByCharacterIds(characterIds: string[]): Promise<void>,
 }
 
-export interface ScriptLayersRepository {
-    list(scriptId: string): Promise<ScriptLayer[]>,
-    upsert(payload: UpsertScriptLayerPayload): Promise<void>,
-    setVisibility(layerId: string, isVisible: boolean, updatedAt: number): Promise<void>,
-    delete(layerId: string): Promise<void>,
-}
-
-export interface ScriptAnnotationsRepository {
-    listByBlock(blockId: string, layerId?: string): Promise<ScriptBlockAnnotation[]>,
-    listByLayer(layerId: string): Promise<ScriptBlockAnnotation[]>,
-    upsert(payload: UpsertScriptBlockAnnotationPayload): Promise<void>,
-    updateStatus(annotationId: string, status: string, updatedAt: number): Promise<void>,
-    delete(annotationId: string): Promise<void>,
-}
-
-export interface ScriptViewsRepository {
-    list(scriptId: string): Promise<ScriptView[]>,
-    getById(viewId: string): Promise<ScriptView | null>,
-    upsert(payload: UpsertScriptViewPayload): Promise<void>,
-    delete(viewId: string): Promise<void>,
-}
-
-export interface ScriptSceneVersionsRepository {
-    list(sceneId: string): Promise<ScriptSceneVersion[]>,
-    getById(versionId: string): Promise<ScriptSceneVersion | null>,
-    insert(payload: InsertScriptSceneVersionPayload): Promise<void>,
-}
-
-export interface ScriptPropsRepository {
-    list(scriptId: string): Promise<ScriptProp[]>,
-    upsert(payload: UpsertScriptPropPayload): Promise<void>,
-    delete(propId: string): Promise<void>,
-    listByScene(sceneId: string): Promise<ScriptSceneProp[]>,
-    replaceSceneRows(sceneId: string, rows: ScriptScenePropRow[]): Promise<void>,
-}
-
-export interface ScriptCostumesRepository {
-    list(scriptId: string): Promise<ScriptCostume[]>,
-    upsert(payload: UpsertScriptCostumePayload): Promise<void>,
-    delete(costumeId: string): Promise<void>,
-    listByScene(sceneId: string): Promise<ScriptSceneCostume[]>,
-    replaceSceneRows(sceneId: string, rows: ScriptSceneCostumeRow[]): Promise<void>,
-}
-
-export interface ScriptCueSheetsRepository {
-    list(scriptId: string): Promise<ScriptCueSheet[]>,
-    upsert(payload: UpsertScriptCueSheetPayload): Promise<void>,
-    delete(cueSheetId: string): Promise<void>,
-    listAnnotations(cueSheetId: string): Promise<ScriptCueSheetAnnotation[]>,
-    replaceAnnotations(cueSheetId: string, rows: ScriptCueSheetAnnotationRow[]): Promise<void>,
-}
-
-export interface ScriptMembersRepository {
-    list(scriptId: string): Promise<ScriptMember[]>,
-    upsert(payload: UpsertScriptMemberPayload): Promise<void>,
-    delete(memberId: string): Promise<void>,
-}
-
-export interface ScriptPermissionsRepository {
-    list(scriptId: string): Promise<ScriptPermission[]>,
-    upsert(payload: UpsertScriptPermissionPayload): Promise<void>,
-    delete(permissionId: string): Promise<void>,
-}
-
 export interface ScriptDataRepository {
     scripts: ScriptCrudRepository,
     content: ScriptContentRepository,
-    versions: ScriptVersionsRepository,
     configs: ScriptConfigsRepository,
     characters: ScriptCharactersRepository,
     characterGenders: ScriptCharacterGendersRepository,
@@ -207,15 +112,6 @@ export interface ScriptDataRepository {
     acts: ScriptActsRepository,
     locations: ScriptLocationsRepository,
     blockCharacterRefs: ScriptBlockCharacterRefsRepository,
-    layers: ScriptLayersRepository,
-    annotations: ScriptAnnotationsRepository,
-    views: ScriptViewsRepository,
-    sceneVersions: ScriptSceneVersionsRepository,
-    props: ScriptPropsRepository,
-    costumes: ScriptCostumesRepository,
-    cueSheets: ScriptCueSheetsRepository,
-    members: ScriptMembersRepository,
-    permissions: ScriptPermissionsRepository,
 }
 
 export interface ScriptRepository extends ScriptDataRepository {
@@ -235,10 +131,7 @@ export interface ScriptRepository extends ScriptDataRepository {
     upsertScriptCharacterGender(scriptId: string, label: string): Promise<ScriptCharacterGenderOption | null>,
     loadLatest(scriptId: string): Promise<ScriptDocument | null>,
     saveLatest(scriptId: string, value: ScriptDocument): Promise<void>,
-    commitVersion(scriptId: string, message?: string): Promise<string>,
     loadScriptConfig(scriptId: string, namespace: string): Promise<EditorSettingsOverride | null>,
     saveScriptConfig(scriptId: string, namespace: string, settings: EditorSettingsOverride): Promise<void>,
     deleteScriptConfig(scriptId: string, namespace: string): Promise<void>,
-    loadVersion?(versionId: string): Promise<ScriptDocument | null>,
-    restoreLatestFromVersion?(scriptId: string, versionId: string): Promise<void>,
 }

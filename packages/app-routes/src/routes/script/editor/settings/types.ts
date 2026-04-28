@@ -7,7 +7,6 @@ import type {
 } from '@stagistic/script-core';
 import type {CSSProperties} from 'react';
 
-import type {ProductionSettingsPanelProps} from './productionTypes';
 import type {SettingsSelectOption} from './SettingsSelect';
 
 export type {
@@ -25,7 +24,6 @@ export interface ScriptEditorSettingsPanelProps {
     resolvedScriptSettings: EditorSettings,
     blockLabelByType: Map<FountainElementType, string>,
     shortcutPrefix: string,
-    production?: ProductionSettingsPanelProps,
     onUpdateBlockSettings: UpdateBlockSettings,
     onUpdateCharacterColorSaturation: (value: number) => void,
     onUpdateStructureSettings: (patch: StructureSettingsPatch) => void,

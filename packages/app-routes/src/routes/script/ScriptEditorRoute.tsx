@@ -7,7 +7,6 @@ import {
     incrementRouteRenderCount,
 } from '@stagistic/editor-ui';
 import {isApplePlatform} from '@stagistic/platform-core';
-import type {ScriptDocument} from '@stagistic/script-core';
 import {
     AppHeader,
     AppLayout,
@@ -20,7 +19,6 @@ import {
     useEffect,
     useMemo,
     useRef,
-    useState,
 } from 'react';
 import {
     useNavigate,
@@ -31,10 +29,7 @@ import {
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
 import {useScriptEditorCharacters} from './editor/characters/useScriptEditorCharacters';
-import {
-    ScriptEditorSettingsPanel,
-    useProductionSettingsController,
-} from './editor/settings';
+import {ScriptEditorSettingsPanel} from './editor/settings';
 import {ScriptStructureSidebar} from './editor/structure';
 import {useStructureSidebarController} from './editor/structure/useStructureSidebarController';
 import styles from './ScriptEditorRoute.module.css';
@@ -163,8 +158,6 @@ export const ScriptEditorRoute = () => {
         indexSnapshot: scriptStateIndexSnapshot,
         onEditorValueChange: onScriptStateEditorValueChange,
     } = scriptState;
-    const [restoredEditorValue, setRestoredEditorValue] = useState<ScriptDocument | null>(null);
-    const [editorResetToken, setEditorResetToken] = useState(0);
     const structureSourceValue = scriptStateEditorOverrideValue ?? editorOverrideValue ?? initialValue;
     const {
         insertActRequest,
@@ -186,35 +179,15 @@ export const ScriptEditorRoute = () => {
         sourceValue: structureSourceValue,
     });
     const sourceIndexForSidebars = scriptStateIndexSnapshot ?? initialIndexSnapshot ?? null;
-    const production = useProductionSettingsController({
-        scriptId: currentScriptId,
-        scriptRepository,
-        indexSnapshot: sourceIndexForSidebars,
-        confirmedCharacters: normalizedConfirmedCharacterRecords.map(character => ({
-            id: character.id,
-            key: character.key,
-        })),
-        onRestoredDocument: value => {
-            setRestoredEditorValue(value);
-            setEditorResetToken(previous => previous + 1);
-            onScriptStateEditorValueChange(value);
-        },
-    });
-    const {
-        onEditorValueChange: onProductionEditorValueChange,
-        onActiveBlockChange: onProductionActiveBlockChange,
-    } = production.callbacks;
     const lastResolvedActiveBlockIdRef = useRef<string | null | undefined>(undefined);
     const handleResolvedEditorValueChange = useCallback((
         value: Parameters<typeof handleEditorValueChange>[0],
         meta?: Parameters<typeof handleEditorValueChange>[1],
     ) => {
         handleEditorValueChange(value, meta);
-        onProductionEditorValueChange(value);
         onScriptStateEditorValueChange(value);
     }, [
         handleEditorValueChange,
-        onProductionEditorValueChange,
         onScriptStateEditorValueChange,
     ]);
     const handleResolvedActiveBlockChange = useCallback((blockId: string | null) => {
@@ -224,8 +197,7 @@ export const ScriptEditorRoute = () => {
 
         lastResolvedActiveBlockIdRef.current = blockId;
         handleActiveBlockChange(blockId);
-        onProductionActiveBlockChange(blockId);
-    }, [handleActiveBlockChange, onProductionActiveBlockChange]);
+    }, [handleActiveBlockChange]);
     const structureSidebarActions = useMemo(() => {
         return {
             onRenameAct: handleSidebarRenameAct,
@@ -331,22 +303,11 @@ export const ScriptEditorRoute = () => {
         openSettingsModal,
         closeSettingsModal,
     });
-    const baseEditorInitialValue = scriptStateEditorOverrideValue ?? editorOverrideValue ?? initialValue;
-    const resolvedEditorInitialValue = restoredEditorValue ?? baseEditorInitialValue;
+    const resolvedEditorInitialValue = scriptStateEditorOverrideValue ?? editorOverrideValue ?? initialValue;
 
     useEffect(() => {
-        setRestoredEditorValue(null);
-        setEditorResetToken(0);
         lastResolvedActiveBlockIdRef.current = undefined;
     }, [currentScriptId]);
-
-    useEffect(() => {
-        if (!resolvedEditorInitialValue) {
-            return;
-        }
-
-        onProductionEditorValueChange(resolvedEditorInitialValue);
-    }, [onProductionEditorValueChange, resolvedEditorInitialValue]);
 
     const showEditorLoader = editorLoadState.isLoading || !initialValue;
 
@@ -394,7 +355,7 @@ export const ScriptEditorRoute = () => {
                 </div>
             ) : null}
             <FountainEditor
-                key={`${currentScript?.id ?? 'editor'}:${editorResetToken}`}
+                key={currentScript?.id ?? 'editor'}
                 document={{
                     initialValue: resolvedEditorInitialValue,
                     persistentCharacters: normalizedConfirmedCharacterRecords,
@@ -447,7 +408,6 @@ export const ScriptEditorRoute = () => {
                     resolvedScriptSettings={resolvedScriptSettings}
                     blockLabelByType={BLOCK_LABEL_BY_TYPE}
                     shortcutPrefix={shortcutPrefix}
-                    production={production.panel}
                     onUpdateBlockSettings={updateBlockSettings}
                     onUpdateCharacterColorSaturation={updateCharacterColorSaturation}
                     onUpdateStructureSettings={updateStructureSettings}

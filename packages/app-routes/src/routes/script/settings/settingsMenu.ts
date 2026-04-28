@@ -8,7 +8,6 @@ import type {SettingsNavGroup} from '@stagistic/ui';
 export const SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO = 'document-info';
 export const SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES = 'visual-preferences';
 export const SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS = 'structure-markers';
-export const SCRIPT_SETTINGS_PANEL_PRODUCTION = 'production';
 export const SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT = 'page-layout';
 export const SCRIPT_SETTINGS_PANEL_HEADERS = 'headers-footers';
 export const SCRIPT_SETTINGS_PANEL_STATUSES = 'document-statuses';
@@ -61,7 +60,6 @@ export type ScriptSettingsPanelId =
     | typeof SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO
     | typeof SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES
     | typeof SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS
-    | typeof SCRIPT_SETTINGS_PANEL_PRODUCTION
     | typeof SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT
     | typeof SCRIPT_SETTINGS_PANEL_HEADERS
     | typeof SCRIPT_SETTINGS_PANEL_STATUSES
@@ -91,12 +89,6 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
                 id: 'structure-markers',
                 label: 'Structure Markers',
                 panelId: SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS,
-            },
-            {
-                kind: 'item',
-                id: 'production',
-                label: 'Production',
-                panelId: SCRIPT_SETTINGS_PANEL_PRODUCTION,
             },
             {
                 kind: 'item',

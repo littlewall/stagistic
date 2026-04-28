@@ -15,7 +15,6 @@ interface SaveIndicatorControls {
 
 interface SaveRepository {
     saveLatest: (scriptId: string, value: ScriptDocument) => Promise<unknown>,
-    commitVersion: (scriptId: string) => Promise<unknown>,
     deleteScriptConfig: (scriptId: string, namespace: string) => Promise<unknown>,
     saveScriptConfig: (
         scriptId: string,
@@ -97,7 +96,6 @@ export const useScriptSaveHandlers = ({
         try {
             startSaveIndicator();
             await scriptRepository.saveLatest(currentScriptId, value);
-            await scriptRepository.commitVersion(currentScriptId);
             addToast({
                 title: 'Script saved',
                 description: currentScript.name,
@@ -107,8 +105,8 @@ export const useScriptSaveHandlers = ({
 
             return true;
         } catch (error) {
-            console.error('Failed to commit script version', error);
-            setStorageError('Failed to commit script version.');
+            console.error('Failed to save script', error);
+            setStorageError('Failed to save script data.');
             addToast({
                 title: 'Failed to save',
                 description: 'Please try again.',
