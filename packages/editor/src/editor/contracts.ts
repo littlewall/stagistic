@@ -1,3 +1,19 @@
+/*
+ * Editor public contract.
+ *
+ * The Editor component takes one EditorProps object grouped by concern:
+ *
+ *   document   — the script document being edited and its character state
+ *   settings   — visual/typography overrides (saturation, structure markers, …)
+ *   save       — autosave and manual save callbacks
+ *   layout     — auto-focus and sidebar slots (also accepted as React children)
+ *   requests   — structural mutations driven from outside (insert/rename/move acts)
+ *   callbacks  — value/index/active-block change notifications and block UI events
+ *
+ * Data flows in via `document` and `settings`; changes flow back out via
+ * `callbacks`. Save callbacks are wired separately so the editor can debounce
+ * autosave without coupling it to value-change notifications.
+ */
 import type {
     EditorSettingsOverride,
     ScriptBlockIndexSnapshot,
