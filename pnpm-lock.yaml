@@ -342,6 +342,9 @@ importers:
       nanoid:
         specifier: ^5.0.7
         version: 5.1.6
+      uuidv7:
+        specifier: ^1.2.1
+        version: 1.2.1
     devDependencies:
       typescript:
         specifier: ^5.9.2
@@ -4490,6 +4493,10 @@ packages:
 
   uuid@10.0.0:
     resolution: {integrity: sha512-8XkAphELsDnEGrDxUOHB3RGvXz6TeuYSGEZBOjtTtPm2lwhGBjLgOzLHB63IUWfBpNucQjND6d3AOudO+H3RWQ==}
+    hasBin: true
+
+  uuidv7@1.2.1:
+    resolution: {integrity: sha512-4kPkK3/XTQW9Hbm4CaqfICn+kY9LJtDVEOfgsRRra/+n2Ofg4NqzRFceAkxvQ/Ud/6BpHOPzj8cirqM7TzTN5Q==}
     hasBin: true
 
   vite-tsconfig-paths@5.1.4:
@@ -9527,6 +9534,8 @@ snapshots:
   util-deprecate@1.0.2: {}
 
   uuid@10.0.0: {}
+
+  uuidv7@1.2.1: {}
 
   vite-tsconfig-paths@5.1.4(typescript@5.9.3)(vite@6.4.1(@types/node@24.10.9)(less@4.5.1)(lightningcss@1.31.1)(sass@1.97.3)(stylus@0.62.0)(tsx@4.21.0)):
     dependencies:

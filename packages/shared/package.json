@@ -8,7 +8,8 @@
         "lint": "eslint ."
     },
     "dependencies": {
-        "nanoid": "^5.0.7"
+        "nanoid": "^5.0.7",
+        "uuidv7": "^1.2.1"
     },
     "devDependencies": {
         "typescript": "^5.9.2"

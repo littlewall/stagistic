@@ -11,6 +11,7 @@ import {
     ELEMENT_SECTION,
     ELEMENT_TRANSITION,
 } from '@stagistic/script';
+import clsx from "clsx";
 
 import baseStyles from '../base/FountainBlock.module.css';
 import actStyles from '../elements/ActBlock/ActBlock.module.css';
@@ -26,10 +27,6 @@ import sectionStyles from '../elements/SectionBlock/SectionBlock.module.css';
 import transitionStyles from '../elements/TransitionBlock/TransitionBlock.module.css';
 import type {FountainBlockType} from './blockTypes';
 
-const joinClassNames = (...classNames: Array<string | undefined>) => classNames
-    .filter(Boolean)
-    .join(' ');
-
 const BLOCK_TYPE_CLASS_NAMES: Record<FountainBlockType, string> = {
     [ELEMENT_SCENE_HEADING]: sceneStyles.scene,
     [ELEMENT_ACT]: actStyles.act,
@@ -44,7 +41,7 @@ const BLOCK_TYPE_CLASS_NAMES: Record<FountainBlockType, string> = {
     [ELEMENT_NOTE]: noteStyles.note,
 };
 
-export const getFountainBlockClassName = (blockType: FountainBlockType) => joinClassNames(
+export const getFountainBlockClassName = (blockType: FountainBlockType) => clsx(
     baseStyles.block,
     BLOCK_TYPE_CLASS_NAMES[blockType],
 );
