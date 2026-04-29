@@ -1,6 +1,6 @@
-import type {StructureSettings} from '../settings';
-import type {MusicType} from './model';
-import {resolveStructureSettings} from './shared';
+import type {StructureSettings} from '../../settings';
+import type {MusicType} from '../../structure/model';
+import {resolveStructureSettings} from '../../structure/structureUtils';
 
 const DEFAULT_STRUCTURE_SETTINGS = resolveStructureSettings();
 

@@ -4,7 +4,7 @@ import {
     getCharacterTagIdClassName,
     getCharacterTagKeyClassName,
     normalizeCharacterColorHex,
-} from '../characterColors';
+} from './characterColors';
 
 interface BuildCharacterTagPaletteCssArgs {
     colorByCharacterId?: ReadonlyMap<string, string>,

@@ -1,3 +1,5 @@
+import {createNodeId} from '@stagistic/shared';
+
 import {
     type ColumnElement,
     type ColumnGroupElement,
@@ -15,11 +17,10 @@ import {
     resolveScriptBlockNodeType,
     type ScriptBlockNodeType,
 } from '../fountain';
-import {createNodeId} from '../nodeId';
 import {
     type EditorSettingsOverride,
     normalizeEditorSettingsBlockType,
-} from '../settings/editorSettings';
+} from '../settings';
 import type {ScriptStructure} from '../structure';
 
 /**

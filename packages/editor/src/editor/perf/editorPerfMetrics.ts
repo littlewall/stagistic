@@ -6,8 +6,6 @@ interface EditorPerfMetricsState {
     structureRuntimeRebuildCount: number,
     characterRuntimeRebuildCount: number,
     characterDecorationRebuildCount: number,
-    annotationDecorationRebuildCount: number,
-    layerFilterDecorationRebuildCount: number,
     transactionBridgePatchCount: number,
     paginationRecalcCount: number,
     routeRenderCount: number,
@@ -27,8 +25,6 @@ const createInitialState = (): EditorPerfMetricsState => {
         structureRuntimeRebuildCount: 0,
         characterRuntimeRebuildCount: 0,
         characterDecorationRebuildCount: 0,
-        annotationDecorationRebuildCount: 0,
-        layerFilterDecorationRebuildCount: 0,
         transactionBridgePatchCount: 0,
         paginationRecalcCount: 0,
         routeRenderCount: 0,
@@ -128,22 +124,6 @@ export const incrementCharacterDecorationRebuildCount = () => {
     getGlobalState().characterDecorationRebuildCount += 1;
 };
 
-export const incrementAnnotationDecorationRebuildCount = () => {
-    if (!shouldTrack()) {
-        return;
-    }
-
-    getGlobalState().annotationDecorationRebuildCount += 1;
-};
-
-export const incrementLayerFilterDecorationRebuildCount = () => {
-    if (!shouldTrack()) {
-        return;
-    }
-
-    getGlobalState().layerFilterDecorationRebuildCount += 1;
-};
-
 export const incrementTransactionBridgePatchCount = () => {
     if (!shouldTrack()) {
         return;
@@ -202,8 +182,6 @@ export const resetEditorPerfMetrics = () => {
     state.structureRuntimeRebuildCount = 0;
     state.characterRuntimeRebuildCount = 0;
     state.characterDecorationRebuildCount = 0;
-    state.annotationDecorationRebuildCount = 0;
-    state.layerFilterDecorationRebuildCount = 0;
     state.transactionBridgePatchCount = 0;
     state.paginationRecalcCount = 0;
     state.routeRenderCount = 0;

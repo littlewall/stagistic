@@ -8,7 +8,7 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
     getCharacterColor,
     normalizeCharacterColorHex,
-} from '../../characterColors';
+} from '../../characters/characterColors';
 import {
     getConfirmedCharacterColor,
     normalizePersistentCharacterRefs,

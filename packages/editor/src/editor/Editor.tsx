@@ -22,6 +22,10 @@ import {
 } from './characters/colorResolver';
 import {EditorShell} from './components/editorShell/EditorShell';
 import {EditorInstanceProvider} from './context';
+import type {
+    EditorProps,
+    PersistentCharacterRef,
+} from './contracts';
 import {
     getEditorCssVars,
     resolveEditorSettings,
@@ -37,10 +41,6 @@ import {useResponsiveScale} from './hooks/useResponsiveScale';
 import {buildSidebarProjectionFromIndex} from './live/buildSidebarProjectionFromIndex';
 import {EditorSnapshotStoreProvider} from './live/context';
 import {createEditorSnapshotStore} from './live/store';
-import type {
-    EditorProps,
-    PersistentCharacterRef,
-} from './types';
 import {useEditorExtensions} from './useEditorExtensions';
 
 const getSizeScale = () => {

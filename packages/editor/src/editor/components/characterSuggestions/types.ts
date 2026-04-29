@@ -1,4 +1,4 @@
-import type {PersistentCharacterRef} from '../../types';
+import type {PersistentCharacterRef} from '../../contracts';
 
 export type {PersistentCharacterRef};
 

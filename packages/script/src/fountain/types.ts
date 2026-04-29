@@ -13,30 +13,6 @@ export const ELEMENT_NOTE = 'fountain_note';
 export const ELEMENT_COLUMN_GROUP = 'column_group';
 export const ELEMENT_COLUMN = 'column';
 
-export const FountainNodeType = {
-    sceneHeading: ELEMENT_SCENE_HEADING,
-    act: ELEMENT_ACT,
-    section: ELEMENT_SECTION,
-    action: ELEMENT_ACTION,
-    character: ELEMENT_CHARACTER,
-    parenthetical: ELEMENT_PARENTHETICAL,
-    dialogue: ELEMENT_DIALOGUE,
-    dualDialogue: ELEMENT_DUAL_DIALOGUE,
-    dualDialogueCharacter: ELEMENT_DUAL_DIALOGUE_CHARACTER,
-    transition: ELEMENT_TRANSITION,
-    lyric: ELEMENT_LYRICS,
-    note: ELEMENT_NOTE,
-    synopsis: 'fountain_synopsis',
-    pageBreak: 'fountain_page_break',
-    boneyard: 'fountain_boneyard',
-    dialogueBlock: 'fountain_dialogue_block',
-    titlePage: 'fountain_title_page',
-    titlePageField: 'fountain_title_page_field',
-} as const;
-
-export type FountainNodeTypeKey = keyof typeof FountainNodeType;
-export type FountainNodeTypeValue = (typeof FountainNodeType)[FountainNodeTypeKey];
-
 export type FountainElementType =
     | typeof ELEMENT_SCENE_HEADING
     | typeof ELEMENT_ACT

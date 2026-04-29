@@ -5,7 +5,7 @@ import {
 } from '../fountain';
 import type {ScriptStructure} from './model';
 import {collectStructureBlocks, normalizeScriptStructure} from './normalize';
-import {getDefaultActName, normalizeActName} from './shared';
+import {getDefaultActName, normalizeActName} from './structureUtils';
 
 export type StructureOutlineSceneItem = {
     kind: 'scene',

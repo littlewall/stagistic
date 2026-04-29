@@ -1,4 +1,5 @@
-import {createNodeId} from '../nodeId';
+import {createNodeId} from '@stagistic/shared';
+
 import {normalizeScriptStructure} from '../structure';
 import {
     createEmptyScriptDocument,

@@ -1,10 +1,9 @@
 import {dbQueries} from '@stagistic/db';
-import {
-    type EditorSettingsOverride,
-    LATEST_SCRIPT_SCHEMA_VERSION,
-} from '@stagistic/script';
-import {uuidv7} from '@stagistic/shared';
 import type {ScriptRepository} from '@stagistic/db';
+import {type EditorSettingsOverride} from '@stagistic/script';
+import {uuidv7} from '@stagistic/shared';
+
+const LATEST_SCRIPT_SCHEMA_VERSION = 2;
 
 import {normalizeSettingsBlockType} from './configBlockTypes';
 import {

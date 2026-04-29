@@ -2,7 +2,7 @@ export {BLOCK_ICONS} from './editor/blocks/controls/blockIcons';
 export {
     getCharacterColor,
     getCharacterColorVarName,
-} from './editor/characterColors';
+} from './editor/characters/characterColors';
 export {
     getConfirmedCharacterColor,
     getUnconfirmedCharacterColor,
@@ -14,28 +14,6 @@ export {
     EditorInstanceProvider,
     useEditorInstance,
 } from './editor/context';
-export {default as FountainEditor} from './editor/Editor';
-export {useFocusEditorBlock} from './editor/hooks/useFocusEditorBlock';
-export {
-    useEditorLiveActiveBlock,
-    useEditorLiveActiveBlockInfo,
-    useEditorLiveCharacters,
-    useEditorLiveSelector,
-    useEditorLiveSnapshot,
-    useEditorLiveStructure,
-} from './editor/live/hooks';
-export {
-    getEditorPerfMetricsSnapshot,
-    incrementRouteRenderCount,
-    resetEditorPerfMetrics,
-} from './editor/perf/editorPerfMetrics';
-export {
-    focusFirstCharacterBlock,
-    linkCharacterRef,
-    renameCharacterText,
-    replaceCharacterRefId,
-    unlinkCharacterRef,
-} from './editor/tiptap/fountainBlock/characterRefCommands';
 export type {
     DeleteActRequest,
     EditorBlockUiEvent,
@@ -62,5 +40,27 @@ export type {
     MoveSceneRequest,
     PersistentCharacterRef,
     RenameActRequest,
-} from './editor/types';
+} from './editor/contracts';
+export {default as FountainEditor} from './editor/Editor';
+export {useFocusEditorBlock} from './editor/hooks/useFocusEditorBlock';
+export {
+    useEditorLiveActiveBlock,
+    useEditorLiveActiveBlockInfo,
+    useEditorLiveCharacters,
+    useEditorLiveSelector,
+    useEditorLiveSnapshot,
+    useEditorLiveStructure,
+} from './editor/live/hooks';
+export {
+    getEditorPerfMetricsSnapshot,
+    incrementRouteRenderCount,
+    resetEditorPerfMetrics,
+} from './editor/perf/editorPerfMetrics';
+export {
+    focusFirstCharacterBlock,
+    linkCharacterRef,
+    renameCharacterText,
+    replaceCharacterRefId,
+    unlinkCharacterRef,
+} from './editor/tiptap/fountainBlock/characterRefCommands';
 export {normalizeCharacterColorHex} from '@stagistic/script';

@@ -11,7 +11,7 @@ import {
     ELEMENT_SECTION,
     ELEMENT_TRANSITION,
     type FountainElementType,
-} from '../fountain';
+} from './types';
 
 export type FountainBlockMeta = {
     id: string,

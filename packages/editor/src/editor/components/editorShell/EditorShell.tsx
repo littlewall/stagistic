@@ -13,12 +13,12 @@ import {
 } from 'react';
 
 import {buildCharacterTagPaletteCss} from '../../characters/buildCharacterTagPaletteCss';
-import styles from '../../Editor.module.css';
-import {useEditorLiveCharacters} from '../../live/hooks';
 import type {
     EditorLayoutProps,
     PersistentCharacterRef,
-} from '../../types';
+} from '../../contracts';
+import styles from '../../Editor.module.css';
+import {useEditorLiveCharacters} from '../../live/hooks';
 import {EditorCanvas} from '../EditorCanvas';
 import EditorToolbar from '../EditorToolbar';
 

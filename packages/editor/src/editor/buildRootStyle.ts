@@ -3,8 +3,8 @@ import type {CSSProperties} from 'react';
 import {
     getCharacterColorVarName,
     normalizeCharacterColorHex,
-} from './characterColors';
-import type {PersistentCharacterRef} from './types';
+} from './characters/characterColors';
+import type {PersistentCharacterRef} from './contracts';
 
 type BuildEditorRootStyleArgs = {
     persistentCharacters: readonly PersistentCharacterRef[],

@@ -11,7 +11,7 @@ import Underline from '@tiptap/extension-underline';
 import UniqueID from '@tiptap/extension-unique-id';
 import {useMemo} from 'react';
 
-import {DocumentWithSettings} from './editorDocument';
+import type {PersistentCharacterRef} from './contracts';
 import {
     getBlockCasing,
     getBlockNextElements,
@@ -29,12 +29,12 @@ import {
     PlaceholderExtension,
     StructureMarkerDecorationsExtension,
 } from './tiptap/extensions';
+import {DocumentWithSettings} from './tiptap/extensions/DocumentExtension';
 import characterTagStyles from './tiptap/fountainBlock/CharacterTagDecorations.module.css';
 import {
     FountainBlockNodes,
     SCRIPT_BLOCK_NODE_NAMES,
 } from './tiptap/nodes';
-import type {PersistentCharacterRef} from './types';
 
 type UseEditorExtensionsArgs = {
     resolvedSettings: EditorSettings,

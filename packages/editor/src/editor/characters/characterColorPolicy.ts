@@ -1,6 +1,6 @@
 import {normalizeCharacterColorHex} from '@stagistic/script';
 
-import {getCharacterColor} from '../characterColors';
+import {getCharacterColor} from './characterColors';
 import type {NormalizedPersistentCharacterRef} from './persistentRefNormalization';
 
 export const getConfirmedCharacterColor = (

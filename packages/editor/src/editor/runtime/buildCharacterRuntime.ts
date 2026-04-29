@@ -8,7 +8,7 @@ import {
 import {
     getCharacterTagIdClassName,
     getCharacterTagKeyClassName,
-} from '../characterColors';
+} from '../characters/characterColors';
 import {
     type CharacterTokenEntry,
     scanCharacterTokensFromDoc,

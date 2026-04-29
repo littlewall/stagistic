@@ -5,13 +5,15 @@ import {
     type FountainText,
 } from '../fountain';
 import {
+    buildMusicEndSectionLine,
+    buildMusicStartSectionLine,
+} from '../fountain';
+import {
     DEFAULT_EDITOR_SETTINGS,
     normalizeEditorSettingsBlockType,
     type StructureSettings,
 } from '../settings';
 import {
-    buildMusicEndSectionLine,
-    buildMusicStartSectionLine,
     collectStructureBlocks,
     normalizeScriptStructure,
 } from '../structure';

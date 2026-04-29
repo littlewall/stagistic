@@ -1,12 +1,3 @@
-import {removeRedundantEmptyActions} from './parser/cleanupBlocks';
-import {parseInlineEmphasis} from './parser/inlineEmphasis';
-import {normalizeParsedLineText} from './parser/lineNormalization';
-import {
-    detectType,
-    hasHardLineBreak,
-    stripHardLineBreak,
-} from './parser/typeDetection';
-import {wrapDualSections} from './parser/wrapDualSections';
 import {
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
@@ -17,7 +8,16 @@ import {
     type FountainDocument,
     type FountainElement,
     type FountainElementType,
-} from './types';
+} from '../types';
+import {removeRedundantEmptyActions} from './cleanupBlocks';
+import {parseInlineEmphasis} from './inlineEmphasis';
+import {normalizeParsedLineText} from './lineNormalization';
+import {
+    detectType,
+    hasHardLineBreak,
+    stripHardLineBreak,
+} from './typeDetection';
+import {wrapDualSections} from './wrapDualSections';
 
 export type ParseFountainOptions = {
     enableLegacyCapsLyricsHeuristic?: boolean,
@@ -77,3 +77,5 @@ export const fountainParser = (
 };
 
 export const parseFountain = fountainParser;
+
+export * from './sectionDetection';

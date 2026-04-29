@@ -1,7 +1,7 @@
 import {type Editor as TiptapEditor, EditorContent} from '@tiptap/react';
 import {type CSSProperties, useRef} from 'react';
 
-import type {PersistentCharacterRef} from '../types';
+import type {PersistentCharacterRef} from '../contracts';
 import CharacterSuggestionsOverlay from './CharacterSuggestionsOverlay';
 import EditorBlockActionsOverlay from './EditorBlockActionsOverlay';
 import styles from './EditorCanvas.module.css';
