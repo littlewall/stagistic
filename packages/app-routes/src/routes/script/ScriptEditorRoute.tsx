@@ -198,24 +198,6 @@ export const ScriptEditorRoute = () => {
         lastResolvedActiveBlockIdRef.current = blockId;
         handleActiveBlockChange(blockId);
     }, [handleActiveBlockChange]);
-    const structureSidebarActions = useMemo(() => {
-        return {
-            onRenameAct: handleSidebarRenameAct,
-            onActNamePreview: handleActNamePreview,
-            onDeleteAct: handleSidebarDeleteAct,
-            onInsertAct: handleSidebarInsertAct,
-            onReorderAct: handleSidebarReorderAct,
-            onReorderScene: handleSidebarReorderScene,
-        };
-    }, [
-        handleActNamePreview,
-        handleSidebarDeleteAct,
-        handleSidebarInsertAct,
-        handleSidebarReorderAct,
-        handleSidebarReorderScene,
-        handleSidebarRenameAct,
-    ]);
-
     const {
         handleSelectScript,
         handleHome,
@@ -238,17 +220,22 @@ export const ScriptEditorRoute = () => {
             actNamePreviewById,
         },
         actions: {
-            onRenameAct: structureSidebarActions.onRenameAct,
-            onActNamePreview: structureSidebarActions.onActNamePreview,
-            onDeleteAct: structureSidebarActions.onDeleteAct,
-            onInsertAct: structureSidebarActions.onInsertAct,
-            onReorderAct: structureSidebarActions.onReorderAct,
-            onReorderScene: structureSidebarActions.onReorderScene,
+            onRenameAct: handleSidebarRenameAct,
+            onActNamePreview: handleActNamePreview,
+            onDeleteAct: handleSidebarDeleteAct,
+            onInsertAct: handleSidebarInsertAct,
+            onReorderAct: handleSidebarReorderAct,
+            onReorderScene: handleSidebarReorderScene,
         },
     }), [
         actNamePreviewById,
+        handleActNamePreview,
+        handleSidebarDeleteAct,
+        handleSidebarInsertAct,
+        handleSidebarReorderAct,
+        handleSidebarReorderScene,
+        handleSidebarRenameAct,
         resolvedScriptSettings.structure,
-        structureSidebarActions,
         sourceIndexForSidebars,
     ]);
     const characterSidebarProps = useMemo(() => ({

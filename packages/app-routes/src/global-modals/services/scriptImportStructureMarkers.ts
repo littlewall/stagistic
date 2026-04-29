@@ -125,7 +125,7 @@ const extractTitlePageFields = (
             ? TITLE_PAGE_CONTINUATION_PATTERN.exec(line)
             : null;
 
-        if (continuationMatch) {
+        if (continuationMatch && currentField) {
             const value = continuationMatch[1]?.trim() ?? '';
 
             if (value.length > 0) {
