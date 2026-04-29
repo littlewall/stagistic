@@ -160,22 +160,6 @@ export const useScriptEditorSettingsDraft = ({
                     ...previous.structure?.actDisplay ?? {},
                     ...patch.actDisplay ?? {},
                 },
-                musicPrefixes: {
-                    ...previous.structure?.musicPrefixes ?? {},
-                    ...patch.musicPrefixes ?? {},
-                    song: {
-                        ...previous.structure?.musicPrefixes?.song ?? {},
-                        ...patch.musicPrefixes?.song ?? {},
-                    },
-                    reprise: {
-                        ...previous.structure?.musicPrefixes?.reprise ?? {},
-                        ...patch.musicPrefixes?.reprise ?? {},
-                    },
-                    underscore: {
-                        ...previous.structure?.musicPrefixes?.underscore ?? {},
-                        ...patch.musicPrefixes?.underscore ?? {},
-                    },
-                },
             },
         }));
     }, []);

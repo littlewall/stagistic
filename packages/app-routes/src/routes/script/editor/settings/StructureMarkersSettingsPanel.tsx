@@ -9,23 +9,6 @@ interface StructureMarkersSettingsPanelProps {
     onUpdateStructureSettings: (patch: StructureSettingsPatch) => void,
 }
 
-type MusicPrefixField = 'start' | 'end';
-
-const MUSIC_TYPES = [
-    {
-        id: 'song',
-        label: 'Song',
-    },
-    {
-        id: 'reprise',
-        label: 'Reprise',
-    },
-    {
-        id: 'underscore',
-        label: 'Underscore',
-    },
-] as const;
-
 export const StructureMarkersSettingsPanel = ({
     structureSettings,
     onUpdateStructureSettings,
@@ -46,20 +29,6 @@ export const StructureMarkersSettingsPanel = ({
     const handleActPrefixChange = (event: ChangeEvent<HTMLInputElement>) => {
         onUpdateStructureSettings({
             actPrefix: event.target.value,
-        });
-    };
-
-    const handleMusicPrefixChange = (
-        musicType: (typeof MUSIC_TYPES)[number]['id'],
-        field: MusicPrefixField,
-        event: ChangeEvent<HTMLInputElement>,
-    ) => {
-        onUpdateStructureSettings({
-            musicPrefixes: {
-                [musicType]: {
-                    [field]: event.target.value,
-                },
-            } as Partial<EditorSettings['structure']['musicPrefixes']>,
         });
     };
 
@@ -109,37 +78,6 @@ export const StructureMarkersSettingsPanel = ({
                         onChange={event => updateActDisplay('linesAfter', event)}
                     />
                 </div>
-            </div>
-            <div className={styles.structurePrefixGrid}>
-                {MUSIC_TYPES.map(musicType => (
-                    <div key={musicType.id} className={styles.structurePrefixCard}>
-                        <h4 className={styles.structurePrefixCardTitle}>{musicType.label}</h4>
-                        <div className={styles.settingsField}>
-                            <label className={styles.fieldLabel} htmlFor={`settings-${musicType.id}-start-prefix`}>
-                                Start Prefix
-                            </label>
-                            <input
-                                id={`settings-${musicType.id}-start-prefix`}
-                                className={styles.structurePrefixInput}
-                                type="text"
-                                value={structureSettings.musicPrefixes[musicType.id].start}
-                                onChange={event => handleMusicPrefixChange(musicType.id, 'start', event)}
-                            />
-                        </div>
-                        <div className={styles.settingsField}>
-                            <label className={styles.fieldLabel} htmlFor={`settings-${musicType.id}-end-prefix`}>
-                                End Prefix
-                            </label>
-                            <input
-                                id={`settings-${musicType.id}-end-prefix`}
-                                className={styles.structurePrefixInput}
-                                type="text"
-                                value={structureSettings.musicPrefixes[musicType.id].end}
-                                onChange={event => handleMusicPrefixChange(musicType.id, 'end', event)}
-                            />
-                        </div>
-                    </div>
-                ))}
             </div>
         </div>
     );

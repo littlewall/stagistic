@@ -21,7 +21,6 @@ import {
     type EditorSettingsOverride,
     normalizeEditorSettingsBlockType,
 } from '../settings';
-import type {ScriptStructure} from '../structure';
 
 /**
  * @deprecated Legacy monolithic block node. Prefer explicit node-per-type names.
@@ -50,7 +49,6 @@ export type ScriptDocument = {
     type: 'doc',
     attrs?: {
         settings?: EditorSettingsOverride,
-        structure?: ScriptStructure,
         importMeta?: ScriptImportMetadata,
     },
     content: FountainJSONContent[],

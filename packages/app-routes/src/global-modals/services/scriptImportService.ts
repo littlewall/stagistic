@@ -29,7 +29,6 @@ export const parseImportedFountainScript = (
     const normalizedSource = normalizeFountainSource(source);
     const {
         transformedSource,
-        pendingMarkers,
         pendingSynopsisMarkers,
         pendingTitlePageFields,
     } = parseImportedSourceWithMarkers(
@@ -43,7 +42,6 @@ export const parseImportedFountainScript = (
     const doc = scriptDocumentFromFountainAst(parsed);
     const withStructure = attachStructureFromMarkers(
         doc,
-        pendingMarkers,
         pendingSynopsisMarkers,
         pendingTitlePageFields,
     );

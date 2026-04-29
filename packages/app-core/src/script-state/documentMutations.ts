@@ -9,7 +9,6 @@ import {
     getScriptBlockId,
     getScriptBlockLegacyType,
     isScriptBlockNode,
-    normalizeScriptStructure,
     resolveScriptBlockNodeType,
     type ScriptDocument,
 } from '@stagistic/script';
@@ -17,16 +16,10 @@ import {
 const cloneDocumentWithContent = (
     value: ScriptDocument,
     content: FountainJSONContent[],
-): ScriptDocument => {
-    return {
-        ...value,
-        content,
-        attrs: {
-            ...value.attrs,
-            structure: normalizeScriptStructure(value.attrs?.structure, {content}),
-        },
-    };
-};
+): ScriptDocument => ({
+    ...value,
+    content,
+});
 
 const setPlainTextContent = (
     nodes: FountainJSONContent[] | undefined,

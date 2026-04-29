@@ -1,5 +1,4 @@
 import {
-    normalizeScriptStructure,
     type ScriptDocument,
 } from '@stagistic/script';
 import {useHotkey} from '@tanstack/react-hotkeys';
@@ -449,10 +448,6 @@ export const useEditorLifecycle = ({
             return;
         }
 
-        const normalizedStructure = normalizeScriptStructure(initialValue.attrs?.structure, {
-            content: initialValue.content,
-        });
-
         isApplyingInitialRef.current = true;
         instance.commands.setContent(initialValue, {emitUpdate: false});
         sanitizeFountainBlocks(instance);
@@ -464,7 +459,6 @@ export const useEditorLifecycle = ({
         syncCommands.syncCharacterRefs?.();
         instance.view.dispatch(
             instance.state.tr
-                .setDocAttribute('structure', normalizedStructure)
                 .setDocAttribute('settings', initialValue.attrs?.settings ?? null)
                 .setMeta('preventUpdate', true),
         );

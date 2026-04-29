@@ -81,7 +81,7 @@ export const panelDescriptions: Record<string, {
     },
     'structure-markers': {
         title: 'Structure Markers',
-        description: 'Configure ACT and music segment prefixes for Fountain import/export.',
+        description: 'Configure ACT prefix and display settings for Fountain import/export.',
     },
     production: {
         title: 'Production',

@@ -27,24 +27,4 @@ export const resolveStructureSettings = (settings?: Partial<StructureSettings>):
         linesBefore: settings?.actDisplay?.linesBefore ?? DEFAULT_EDITOR_SETTINGS.structure.actDisplay.linesBefore,
         linesAfter: settings?.actDisplay?.linesAfter ?? DEFAULT_EDITOR_SETTINGS.structure.actDisplay.linesAfter,
     },
-    musicPrefixes: {
-        song: {
-            start: settings?.musicPrefixes?.song?.start
-                ?? DEFAULT_EDITOR_SETTINGS.structure.musicPrefixes.song.start,
-            end: settings?.musicPrefixes?.song?.end
-                ?? DEFAULT_EDITOR_SETTINGS.structure.musicPrefixes.song.end,
-        },
-        reprise: {
-            start: settings?.musicPrefixes?.reprise?.start
-                ?? DEFAULT_EDITOR_SETTINGS.structure.musicPrefixes.reprise.start,
-            end: settings?.musicPrefixes?.reprise?.end
-                ?? DEFAULT_EDITOR_SETTINGS.structure.musicPrefixes.reprise.end,
-        },
-        underscore: {
-            start: settings?.musicPrefixes?.underscore?.start
-                ?? DEFAULT_EDITOR_SETTINGS.structure.musicPrefixes.underscore.start,
-            end: settings?.musicPrefixes?.underscore?.end
-                ?? DEFAULT_EDITOR_SETTINGS.structure.musicPrefixes.underscore.end,
-        },
-    },
 });

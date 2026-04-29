@@ -5,7 +5,6 @@ import {
     getScriptBlockId,
     getScriptBlockLegacyType,
     isScriptBlockNode,
-    normalizeScriptStructure,
     type ScriptDocument,
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
@@ -189,22 +188,14 @@ const commitDocument = (
     revisionRef: MutableRefObject<number>,
 ) => {
     const currentValue = editor.getJSON() as ScriptDocument;
-    const nextStructure = normalizeScriptStructure(currentValue.attrs?.structure, {
-        content: nextContent,
-    });
     const nextDocument: ScriptDocument = {
         ...currentValue,
         content: nextContent,
-        attrs: {
-            ...currentValue.attrs,
-            structure: nextStructure,
-        },
     };
 
     editor.commands.setContent(nextDocument, {emitUpdate: false});
     editor.view.dispatch(
         editor.state.tr
-            .setDocAttribute('structure', nextStructure)
             .setDocAttribute('settings', currentValue.attrs?.settings ?? null)
             .setMeta('preventUpdate', true),
     );

@@ -1,6 +1,5 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {
-    createNodeId,
     DEFAULT_EDITOR_SETTINGS,
     detectSectionMarker,
     ELEMENT_SCENE_HEADING,
@@ -12,7 +11,6 @@ import {
     type StructureSettings,
 } from '@stagistic/script';
 
-const STRUCTURE_MARKER_TOKEN_PREFIX = '__STAGISTIC_STRUCTURE_MARKER__:';
 const IMPORT_MARKER_TOKEN_PREFIX = '__STAGISTIC_IMPORT_MARKER__:';
 const TITLE_PAGE_FIELD_PATTERN = /^([^:\n][^:\n]*):\s*(.*)$/;
 const TITLE_PAGE_CONTINUATION_PATTERN = /^\s+(.+)$/;
@@ -30,26 +28,11 @@ const KNOWN_TITLE_PAGE_FIELD_KEYS = new Set([
     'copyright',
 ]);
 
-type PendingMarker =
-    {
-        kind: 'music-start',
-        token: string,
-        musicType: 'song' | 'reprise' | 'underscore',
-        name: string,
-    }
-    | {
-        kind: 'music-end',
-        token: string,
-        musicType: 'song' | 'reprise' | 'underscore',
-        name: string,
-    };
-
 type PendingSynopsisMarker = {
     token: string,
     synopsisText: string,
 };
 
-const markerTokenText = (token: string) => `${STRUCTURE_MARKER_TOKEN_PREFIX}${token}`;
 const importTokenText = (token: string) => `${IMPORT_MARKER_TOKEN_PREFIX}${token}`;
 const ACT_IMPORT_PREFIX = DEFAULT_EDITOR_SETTINGS.structure.actPrefix.trim() || 'ACT:';
 const buildNormalizedActImportLine = (name: string) => {
@@ -202,7 +185,6 @@ export const parseImportedSourceWithMarkers = (
     source: string,
     settings?: Partial<StructureSettings>,
 ) => {
-    const pendingMarkers: PendingMarker[] = [];
     const pendingSynopsisMarkers: PendingSynopsisMarker[] = [];
     const transformedLines: string[] = [];
     const sourceLines = source.split('\n');
@@ -231,27 +213,7 @@ export const parseImportedSourceWithMarkers = (
                 continue;
             }
 
-            const token = `m${markerIndex += 1}`;
-
-            if (marker.kind === 'music-start') {
-                pendingMarkers.push({
-                    kind: 'music-start',
-                    musicType: marker.musicType,
-                    name: marker.name,
-                    token,
-                });
-            }
-
-            if (marker.kind === 'music-end') {
-                pendingMarkers.push({
-                    kind: 'music-end',
-                    musicType: marker.musicType,
-                    name: marker.name,
-                    token,
-                });
-            }
-
-            transformedLines.push(`!${markerTokenText(token)}`);
+            transformedLines.push(line);
             continue;
         }
 
@@ -277,7 +239,6 @@ export const parseImportedSourceWithMarkers = (
 
     return {
         transformedSource: transformedLines.join('\n'),
-        pendingMarkers,
         pendingSynopsisMarkers,
         pendingTitlePageFields,
     };
@@ -308,25 +269,19 @@ const resolveNearestSceneHeadingBlockId = (
 
 export const attachStructureFromMarkers = (
     value: ScriptDocument,
-    pendingMarkers: PendingMarker[],
     pendingSynopsisMarkers: PendingSynopsisMarker[],
     pendingTitlePageFields: ScriptImportedTitlePageField[],
 ): ScriptDocument => {
-    const hasPendingMarkers = pendingMarkers.length > 0;
     const hasPendingSynopsis = pendingSynopsisMarkers.length > 0;
     const hasPendingTitlePage = pendingTitlePageFields.length > 0;
 
-    if (!hasPendingMarkers && !hasPendingSynopsis && !hasPendingTitlePage) {
+    if (!hasPendingSynopsis && !hasPendingTitlePage) {
         return value;
     }
 
-    const markerByToken = new Map(pendingMarkers.map(marker => [marker.token, marker]));
     const synopsisByToken = new Map(pendingSynopsisMarkers.map(marker => [marker.token, marker]));
     const filteredContent: ScriptDocument['content'] = [];
     const blockAnchors: Array<{id: string, node: ScriptDocument['content'][number]}> = [];
-    const markerAnchors: Array<{
-        marker: PendingMarker, targetBlockIndex: number, anchorBlockId: string | null,
-    }> = [];
     const synopsisAnchors: Array<{synopsisText: string, targetBlockIndex: number}> = [];
 
     value.content.forEach(node => {
@@ -337,21 +292,6 @@ export const attachStructureFromMarkers = (
         }
 
         const text = getNodeTextContent(node).trim();
-
-        if (text.startsWith(STRUCTURE_MARKER_TOKEN_PREFIX)) {
-            const token = text.slice(STRUCTURE_MARKER_TOKEN_PREFIX.length);
-            const marker = markerByToken.get(token);
-
-            if (marker) {
-                markerAnchors.push({
-                    marker,
-                    targetBlockIndex: blockAnchors.length,
-                    anchorBlockId: null,
-                });
-
-                return;
-            }
-        }
 
         if (text.startsWith(IMPORT_MARKER_TOKEN_PREFIX)) {
             const token = text.slice(IMPORT_MARKER_TOKEN_PREFIX.length);
@@ -378,92 +318,6 @@ export const attachStructureFromMarkers = (
             });
         }
     });
-
-    markerAnchors.forEach(anchor => {
-        const next = blockAnchors[anchor.targetBlockIndex] ?? null;
-
-        if (next) {
-            anchor.anchorBlockId = next.id;
-        }
-    });
-
-    const musicSegments: Array<{
-        id: string,
-        kind: 'music',
-        musicType: 'song' | 'reprise' | 'underscore',
-        name: string,
-        startBlockId: string,
-        end: {
-            anchor: 'block' | 'eof',
-            blockId?: string,
-            source: 'explicit' | 'auto-open-next' | 'auto-scene-boundary' | 'auto-eof',
-        },
-    }> = [];
-    let activeSegment: typeof musicSegments[number] | null = null;
-
-    for (const {marker, anchorBlockId} of markerAnchors) {
-        if (marker.kind === 'music-start') {
-            if (!anchorBlockId) {
-                continue;
-            }
-
-            if (activeSegment) {
-                activeSegment.end = {
-                    anchor: 'block',
-                    blockId: anchorBlockId,
-                    source: 'auto-open-next',
-                };
-            }
-
-            const segment = {
-                id: createNodeId(),
-                kind: 'music' as const,
-                musicType: marker.musicType,
-                name: marker.name,
-                startBlockId: anchorBlockId,
-                end: {
-                    anchor: 'eof' as const,
-                    source: 'auto-eof' as const,
-                },
-            };
-
-            musicSegments.push(segment);
-            activeSegment = segment;
-
-            continue;
-        }
-
-        if (marker.kind === 'music-end') {
-            if (!activeSegment || activeSegment.musicType !== marker.musicType) {
-                continue;
-            }
-
-            if (anchorBlockId) {
-                activeSegment.end = {
-                    anchor: 'block',
-                    blockId: anchorBlockId,
-                    source: 'explicit',
-                };
-
-                activeSegment = null;
-
-                continue;
-            }
-
-            activeSegment.end = {
-                anchor: 'eof',
-                source: 'explicit',
-            };
-            activeSegment = null;
-        }
-    }
-
-    if (activeSegment) {
-        activeSegment.end = {
-            anchor: 'eof',
-            source: 'auto-eof',
-        };
-    }
 
     const synopsisChunksByHeadingBlockId = new Map<string, string[]>();
 
@@ -503,12 +357,6 @@ export const attachStructureFromMarkers = (
         content: filteredContent,
         attrs: {
             ...value.attrs,
-            structure: hasPendingMarkers
-                ? {
-                    version: 1,
-                    musicSegments,
-                }
-                : value.attrs?.structure,
             importMeta,
         },
     };

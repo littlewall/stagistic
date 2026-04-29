@@ -27,7 +27,6 @@ import {
     FountainColumnExtension,
     FountainColumnGroupExtension,
     PlaceholderExtension,
-    StructureMarkerDecorationsExtension,
 } from './tiptap/extensions';
 import {DocumentWithSettings} from './tiptap/extensions/DocumentExtension';
 import characterTagStyles from './tiptap/fountainBlock/CharacterTagDecorations.module.css';
@@ -87,12 +86,6 @@ export const useEditorExtensions = ({
         }),
         [blockNextElements],
     );
-    const structureMarkerDecorationsExtension = useMemo(
-        () => StructureMarkerDecorationsExtension.configure({
-            structureSettings: resolvedSettings.structure,
-        }),
-        [resolvedSettings.structure],
-    );
     const editorRuntimeExtension = useMemo(
         () => EditorRuntimeExtension.configure({
             characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
@@ -144,7 +137,6 @@ export const useEditorExtensions = ({
             PlaceholderExtension,
             emptyEnterChooserExtension,
             fountainBehaviorExtension,
-            structureMarkerDecorationsExtension,
             characterRefSyncExtension,
             editorRuntimeExtension,
             uniqueIdExtension,
@@ -162,7 +154,6 @@ export const useEditorExtensions = ({
         enableBlockUiEvents,
         fountainBehaviorExtension,
         paginationExtension,
-        structureMarkerDecorationsExtension,
         uniqueIdExtension,
     ]);
 };

@@ -5,18 +5,10 @@ import {
     type FountainText,
 } from '../fountain';
 import {
-    buildMusicEndSectionLine,
-    buildMusicStartSectionLine,
-} from '../fountain';
-import {
     DEFAULT_EDITOR_SETTINGS,
     normalizeEditorSettingsBlockType,
     type StructureSettings,
 } from '../settings';
-import {
-    collectStructureBlocks,
-    normalizeScriptStructure,
-} from '../structure';
 import {
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
     FOUNTAIN_COLUMN_NODE_NAME,
@@ -129,66 +121,6 @@ const collectFountainElements = (nodes: FountainJSONContent[] | undefined): Foun
     return elements;
 };
 
-type StructureSectionLines = {
-    endLinesByIndex: Map<number, string[]>,
-    startLinesByIndex: Map<number, string[]>,
-    eofEndLines: string[],
-};
-
-const buildStructureSectionLines = (
-    value: ScriptDocument,
-    settings?: Partial<StructureSettings>,
-): StructureSectionLines => {
-    const normalizedStructure = normalizeScriptStructure(value.attrs?.structure, {
-        content: value.content,
-    });
-    const blocks = collectStructureBlocks(value.content);
-    const blockIndexById = new Map(blocks.filter(block => block.id).map(block => [block.id, block.index]));
-    const endLinesByIndex = new Map<number, string[]>();
-    const startLinesByIndex = new Map<number, string[]>();
-    const eofEndLines: string[] = [];
-    const pushLine = (lineMap: Map<number, string[]>, blockId: string, line: string) => {
-        const blockIndex = blockIndexById.get(blockId);
-
-        if (blockIndex === undefined) {
-            return;
-        }
-
-        const lines = lineMap.get(blockIndex) ?? [];
-
-        lines.push(line);
-        lineMap.set(blockIndex, lines);
-    };
-
-    normalizedStructure.musicSegments.forEach(segment => {
-        pushLine(
-            startLinesByIndex,
-            segment.startBlockId,
-            buildMusicStartSectionLine(segment.musicType, segment.name, settings),
-        );
-
-        const endLine = buildMusicEndSectionLine(segment.musicType, segment.name, settings);
-
-        if (segment.end.anchor === 'eof') {
-            eofEndLines.push(endLine);
-
-            return;
-        }
-
-        if (!segment.end.blockId) {
-            return;
-        }
-
-        pushLine(endLinesByIndex, segment.end.blockId, endLine);
-    });
-
-    return {
-        endLinesByIndex,
-        startLinesByIndex,
-        eofEndLines,
-    };
-};
-
 export type ScriptDocumentFountainSerializationOptions = {
     structureSettings?: Partial<StructureSettings>,
     includeStructureSections?: boolean,
@@ -204,32 +136,7 @@ export const serializeScriptDocumentToFountain = (
         return '';
     }
 
-    const includeStructureSections = options?.includeStructureSections ?? true;
-
-    if (!includeStructureSections) {
-        return fountainSerializer(nodes, {
-            actPrefix: options?.structureSettings?.actPrefix ?? DEFAULT_EDITOR_SETTINGS.structure.actPrefix,
-        });
-    }
-
-    const sectionLines = buildStructureSectionLines(value, options?.structureSettings);
-    const serialized = fountainSerializer(nodes, {
+    return fountainSerializer(nodes, {
         actPrefix: options?.structureSettings?.actPrefix ?? DEFAULT_EDITOR_SETTINGS.structure.actPrefix,
-        beforeNodeLines: ({index}) => {
-            const lines = (sectionLines.endLinesByIndex.get(index) ?? [])
-                .concat(sectionLines.startLinesByIndex.get(index) ?? []);
-
-            return lines.length > 0 ? lines : null;
-        },
     });
-
-    if (sectionLines.eofEndLines.length === 0) {
-        return serialized;
-    }
-
-    if (!serialized) {
-        return sectionLines.eofEndLines.join('\n');
-    }
-
-    return `${serialized}\n${sectionLines.eofEndLines.join('\n')}`;
 };

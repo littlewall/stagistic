@@ -1,5 +1,4 @@
 import type {StructureSettings} from '../../settings';
-import type {MusicType} from '../../structure/model';
 import {resolveStructureSettings} from '../../structure/structureUtils';
 
 const DEFAULT_STRUCTURE_SETTINGS = resolveStructureSettings();
@@ -7,18 +6,6 @@ const DEFAULT_STRUCTURE_SETTINGS = resolveStructureSettings();
 export type DetectedSectionMarker =
     | {
         kind: 'act',
-        name: string,
-        rawLine: string,
-    }
-    | {
-        kind: 'music-start',
-        musicType: MusicType,
-        name: string,
-        rawLine: string,
-    }
-    | {
-        kind: 'music-end',
-        musicType: MusicType,
         name: string,
         rawLine: string,
     }
@@ -126,40 +113,6 @@ export const detectSectionMarker = (
         };
     }
 
-    const musicTypes: MusicType[] = [
-        'song',
-        'reprise',
-        'underscore',
-    ];
-
-    for (const musicType of musicTypes) {
-        const endPrefixes = uniquePrefixes([settings.musicPrefixes[musicType].end, DEFAULT_STRUCTURE_SETTINGS.musicPrefixes[musicType].end]);
-        const endMatch = matchByPrefixes(body, endPrefixes);
-
-        if (endMatch) {
-            return {
-                kind: 'music-end',
-                musicType,
-                name: endMatch.name,
-                rawLine: line,
-            };
-        }
-    }
-
-    for (const musicType of musicTypes) {
-        const startPrefixes = uniquePrefixes([settings.musicPrefixes[musicType].start, DEFAULT_STRUCTURE_SETTINGS.musicPrefixes[musicType].start]);
-        const startMatch = matchByPrefixes(body, startPrefixes);
-
-        if (startMatch) {
-            return {
-                kind: 'music-start',
-                musicType,
-                name: startMatch.name,
-                rawLine: line,
-            };
-        }
-    }
-
     return {
         kind: 'unknown-section',
         depth,
@@ -185,24 +138,4 @@ export const buildActSectionLine = (
     const resolved = resolveStructureSettings(settings);
 
     return `# ${joinPrefixWithName(resolved.actPrefix, name)}`;
-};
-
-export const buildMusicStartSectionLine = (
-    musicType: MusicType,
-    name: string,
-    settings?: Partial<StructureSettings>,
-) => {
-    const resolved = resolveStructureSettings(settings);
-
-    return `## ${joinPrefixWithName(resolved.musicPrefixes[musicType].start, name)}`;
-};
-
-export const buildMusicEndSectionLine = (
-    musicType: MusicType,
-    name: string,
-    settings?: Partial<StructureSettings>,
-) => {
-    const resolved = resolveStructureSettings(settings);
-
-    return `## ${joinPrefixWithName(resolved.musicPrefixes[musicType].end, name)}`;
 };

@@ -1,6 +1,5 @@
 import {createNodeId} from '@stagistic/shared';
 
-import {normalizeScriptStructure} from '../structure';
 import {
     createEmptyScriptDocument,
     type FountainJSONContent,
@@ -184,18 +183,4 @@ export const ensureSceneHeading = (
     return value as ScriptDocument;
 };
 
-export const ensureScriptStructure = (
-    value: ScriptDocument,
-): ScriptDocument => {
-    const normalizedStructure = normalizeScriptStructure(value.attrs?.structure, {
-        content: value.content,
-    });
-
-    return {
-        ...value,
-        attrs: {
-            ...value.attrs,
-            structure: normalizedStructure,
-        },
-    };
-};
+export const ensureScriptStructure = (value: ScriptDocument): ScriptDocument => value;

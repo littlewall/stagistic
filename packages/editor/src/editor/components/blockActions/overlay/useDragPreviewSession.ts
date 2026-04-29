@@ -1,6 +1,5 @@
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
-    normalizeScriptStructure,
     type ScriptDocument,
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
@@ -62,18 +61,10 @@ export const useDragPreviewSession = ({editor}: UseDragPreviewSessionArgs) => {
             };
         }
 
-        const nextStructure = normalizeScriptStructure(baseDocument.attrs?.structure, {
-            content: nextContent,
-        });
-
         return {
             nextDocument: {
                 ...baseDocument,
                 content: nextContent,
-                attrs: {
-                    ...baseDocument.attrs,
-                    structure: nextStructure,
-                },
             },
             didChange: true,
         };

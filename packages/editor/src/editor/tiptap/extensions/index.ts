@@ -7,7 +7,7 @@
  *      FountainBehaviorExtension, EmptyEnterChooserExtension
  *
  *  - Decorations: visual overlays on top of the document
- *      StructureMarkerDecorationsExtension, PlaceholderExtension
+ *      PlaceholderExtension
  *
  *  - Layout: structural pieces that affect document shape and pagination
  *      FountainColumnExtension, FountainColumnGroupExtension,
@@ -35,7 +35,6 @@ export {FountainBehaviorExtension} from './FountainBehaviorExtension';
 // ─── Decorations ─────────────────────────────────────────────────────────────
 
 export {PlaceholderExtension} from './PlaceholderExtension';
-export {StructureMarkerDecorationsExtension} from './StructureMarkerDecorationsExtension';
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
 

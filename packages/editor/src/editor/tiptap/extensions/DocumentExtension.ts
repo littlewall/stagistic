@@ -6,9 +6,6 @@ export const DocumentWithSettings = Document.extend({
             settings: {
                 default: null,
             },
-            structure: {
-                default: null,
-            },
         };
     },
 });

@@ -54,26 +54,14 @@ export interface VisualSettings {
     characterColorSaturation: number,
 }
 
-export interface MusicTypePrefixSettings {
-    start: string,
-    end: string,
-}
-
 export interface StructureActDisplaySettings {
     linesBefore: number,
     linesAfter: number,
 }
 
-export interface StructureMusicPrefixesSettings {
-    song: MusicTypePrefixSettings,
-    reprise: MusicTypePrefixSettings,
-    underscore: MusicTypePrefixSettings,
-}
-
 export interface StructureSettings {
     actPrefix: string,
     actDisplay: StructureActDisplaySettings,
-    musicPrefixes: StructureMusicPrefixesSettings,
 }
 
 export type BlockSettings = Record<FountainElementType, BlockSpacingSettings>;
@@ -88,16 +76,9 @@ export interface EditorSettings {
 
 export type BlockSettingsPatch = Partial<BlockSpacingSettings>;
 
-export interface StructureMusicPrefixesPatch {
-    song?: Partial<MusicTypePrefixSettings>,
-    reprise?: Partial<MusicTypePrefixSettings>,
-    underscore?: Partial<MusicTypePrefixSettings>,
-}
-
 export interface StructureSettingsPatch {
     actPrefix?: string,
     actDisplay?: Partial<StructureActDisplaySettings>,
-    musicPrefixes?: StructureMusicPrefixesPatch,
 }
 
 export interface EditorSettingsOverride {

@@ -41,20 +41,6 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
             linesBefore: 1,
             linesAfter: 1,
         },
-        musicPrefixes: {
-            song: {
-                start: 'SONG:',
-                end: 'SONG END:',
-            },
-            reprise: {
-                start: 'REPRISE:',
-                end: 'REPRISE END:',
-            },
-            underscore: {
-                start: 'UNDERSCORE:',
-                end: 'UNDERSCORE END:',
-            },
-        },
     },
     blocks: {
         [ELEMENT_ACTION]: {

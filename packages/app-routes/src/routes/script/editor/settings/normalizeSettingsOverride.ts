@@ -66,49 +66,6 @@ export const normalizeSettingsOverride = (settings: EditorSettingsOverride): Edi
             }
         }
 
-        if (settings.structure.musicPrefixes) {
-            const nextMusicPrefixes: NonNullable<NonNullable<EditorSettingsOverride['structure']>['musicPrefixes']> = {};
-
-            ([
-                'song',
-                'reprise',
-                'underscore',
-            ] as const).forEach(musicType => {
-                const source = settings.structure?.musicPrefixes?.[musicType];
-
-                if (!source) {
-                    return;
-                }
-
-                const start = typeof source.start === 'string' ? source.start.trim() : '';
-                const end = typeof source.end === 'string' ? source.end.trim() : '';
-
-                if (!start && !end) {
-                    return;
-                }
-
-                const nextTypePrefixes: Partial<NonNullable<NonNullable<EditorSettingsOverride['structure']>['musicPrefixes']>[typeof musicType]> = {};
-
-                if (start) {
-                    nextTypePrefixes.start = start;
-                }
-
-                if (end) {
-                    nextTypePrefixes.end = end;
-                }
-
-                if (Object.keys(nextTypePrefixes).length === 0) {
-                    return;
-                }
-
-                nextMusicPrefixes[musicType] = nextTypePrefixes;
-            });
-
-            if (Object.keys(nextMusicPrefixes).length > 0) {
-                nextStructure.musicPrefixes = nextMusicPrefixes;
-            }
-        }
-
         if (Object.keys(nextStructure).length > 0) {
             nextSettings.structure = nextStructure;
         }
