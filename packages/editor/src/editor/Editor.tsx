@@ -13,6 +13,7 @@ import {
     useEffect,
     useMemo,
     useRef,
+    useState,
 } from 'react';
 
 import {buildEditorRootStyle} from './buildRootStyle';
@@ -272,7 +273,16 @@ const Editor = ({
         resolvedInitialValue,
         resolvedSettings.visual.characterColorSaturation,
     ]);
-    const liveStore = useMemo(() => createEditorSnapshotStore(initialLiveSnapshot), [initialLiveSnapshot]);
+    /*
+     * The live store is created once per editor mount. Re-creating it
+     * when persistent characters change (which is what would happen if
+     * we used `useMemo(..., [initialLiveSnapshot])`) cascades into
+     * `useEditorLifecycle`'s setContent effect re-firing — which replaces
+     * the live editor doc with `initialValue` and wipes any typed-but-
+     * not-yet-saved content. Script switches remount via the
+     * `key={scriptId}` on FountainEditor, so we don't need recreation.
+     */
+    const [liveStore] = useState(() => createEditorSnapshotStore(initialLiveSnapshot));
 
     const extensions = useEditorExtensions({
         resolvedSettings,

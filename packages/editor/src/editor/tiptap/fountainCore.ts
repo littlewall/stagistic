@@ -54,7 +54,6 @@ export {
     FOUNTAIN_BLOCK_TYPES,
     type FountainBlockType,
     getFountainBlockClassName,
-    getNextTypeOnEnter,
     isFountainBlockType,
     normalizeFountainBlockType,
 } from '../blocks/fountain';

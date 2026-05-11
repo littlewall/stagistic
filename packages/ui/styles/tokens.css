@@ -39,9 +39,10 @@
 
     /* ─── Theme knobs (light) ─────────────────────────────────── */
 
-    /* Chroma multipliers */
-    --C-bg: .52;   /* surface backgrounds */
-    --C-block: .72;   /* block-type text */
+    /* Chroma multipliers (low values keep surfaces near-neutral — raise
+       for warmer/cooler tinting; the neutral base hue is ~51° amber). */
+    --C-bg: .15;      /* surface backgrounds — keep close to neutral white */
+    --C-block: .55;   /* block-type text — slight warm tint preserved */
 
     /* Surface lightness */
     --L-paper: .97;
@@ -158,8 +159,8 @@
 }
 
 :root[data-theme = 'dark'] {
-    /* Chroma multipliers */
-    --C-bg: .65;
+    /* Chroma multipliers (dark mode slightly more chroma than light) */
+    --C-bg: .25;
 
     /* Surface lightness */
     --L-paper: .135;

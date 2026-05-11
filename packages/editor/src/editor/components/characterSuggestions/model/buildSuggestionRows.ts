@@ -1,11 +1,19 @@
 export const buildSuggestionRows = ({
     counts,
     activeKey,
+    excludedKeys,
     limit,
     previousOrderByKey,
 }: {
     counts: ReadonlyMap<string, number>,
     activeKey: string,
+    /**
+     * Keys that must not appear in the suggestion list, in addition to
+     * `activeKey`. Used to hide the other characters already present in
+     * the same `+`-joined character group, since adding them again would
+     * be a no-op (the apply step dedupes anyway).
+     */
+    excludedKeys?: ReadonlySet<string>,
     limit: number,
     previousOrderByKey?: ReadonlyMap<string, number>,
 }) => {
@@ -36,7 +44,7 @@ export const buildSuggestionRows = ({
     };
 
     const rows = Array.from(counts.entries())
-        .filter(([key]) => key !== activeKey);
+        .filter(([key]) => key !== activeKey && !excludedKeys?.has(key));
     const hasAnyMatch = query.length > 0 && rows.some(([key]) => getMatchRank(key) > 0);
 
     return rows

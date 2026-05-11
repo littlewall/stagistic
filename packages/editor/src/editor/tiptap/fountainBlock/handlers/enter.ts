@@ -14,11 +14,12 @@ import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
 import {isEmptyEnterChooserWriterType} from '../../extensions/EmptyEnterChooserExtension';
+import {getEnterFallback} from '@stagistic/script';
+
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
     type FountainBlockType,
     getActiveFountainBlockFromState,
-    getNextTypeOnEnter,
     isFountainBlockNodeName,
     normalizeFountainBlockType,
 } from '../../fountainCore';
@@ -99,10 +100,10 @@ export const resolveParentheticalTabTarget = (editor: Editor, blockPos: number):
 const resolveNextTypeOnEnter = (
     blockType: FountainBlockType,
     blockNextElements?: BlockNextElementMap,
-) => {
+): FountainBlockType => {
     const configured = blockNextElements?.[blockType];
 
-    return configured ?? getNextTypeOnEnter(blockType);
+    return configured ?? normalizeFountainBlockType(getEnterFallback(blockType));
 };
 
 const insertBlockAfter = (

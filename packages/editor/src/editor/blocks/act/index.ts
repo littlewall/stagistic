@@ -1,0 +1,1 @@
+export {actBinding} from './binding';

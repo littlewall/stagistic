@@ -1,3 +1,4 @@
+export * from './blocks';
 export * from './characters';
 export * from './document';
 export * from './fountain';

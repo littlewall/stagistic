@@ -1,0 +1,1 @@
+export {noteBinding} from './binding';

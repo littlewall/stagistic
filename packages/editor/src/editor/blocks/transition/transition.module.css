@@ -1,0 +1,11 @@
+.transition {
+    display: block;
+    padding: var(--transition-spacing-before, 1.8em) var(--transition-indent-right, 0) var(--transition-spacing-before, 1.8em) var(--transition-indent-left, 0);
+    font-weight: var(--transition-font-weight, 700);
+    font-style: var(--transition-font-style, normal);
+    line-height: var(--transition-line-height, inherit);
+    color: var(--color-block-transition);
+    text-align: var(--transition-align, right);
+    text-decoration-line: var(--transition-underline, none);
+    text-transform: var(--transition-casing, uppercase);
+}

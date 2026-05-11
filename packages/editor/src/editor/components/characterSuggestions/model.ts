@@ -194,6 +194,26 @@ export const computeCharacterSuggestions = ({
     }
 
     const activeKey = normalizeCharacterKey(activeToken.value);
+    /*
+     * Collect keys of all other tokens in the same character group
+     * (tokens joined by `+` inside one character block). Picking one of
+     * those from the suggestion dropdown would be a no-op — the apply
+     * step dedupes by key — so hide them from the user.
+     */
+    const groupSiblingKeys = new Set<string>();
+
+    tokens.forEach((token, index) => {
+        if (index === activeTokenIndex) {
+            return;
+        }
+
+        const siblingKey = normalizeCharacterKey(token.value);
+
+        if (siblingKey.length > 0) {
+            groupSiblingKeys.add(siblingKey);
+        }
+    });
+
     const countsByConfirmedKey = new Map<string, number>();
 
     normalizedPersistentCharacters.forEach(character => {
@@ -218,6 +238,7 @@ export const computeCharacterSuggestions = ({
     const suggestionRows = buildSuggestionRows({
         counts: countsByConfirmedKey,
         activeKey,
+        excludedKeys: groupSiblingKeys,
         limit: Math.max(countsByConfirmedKey.size, MAX_SUGGESTIONS),
         previousOrderByKey,
     });

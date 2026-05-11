@@ -1,0 +1,1 @@
+export {parentheticalBinding} from './binding';

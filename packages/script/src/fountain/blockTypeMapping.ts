@@ -1,81 +1,77 @@
+import {ALL_BLOCK_SPECS} from '../blocks/specs';
+import type {FountainElementType} from './types';
 import {
-    ELEMENT_ACT,
-    ELEMENT_ACTION,
-    ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_DUAL_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
-    ELEMENT_LYRICS,
-    ELEMENT_NOTE,
-    ELEMENT_PARENTHETICAL,
-    ELEMENT_SCENE_HEADING,
-    ELEMENT_SECTION,
-    ELEMENT_TRANSITION,
-    type FountainElementType,
 } from './types';
 
-/**
- * TipTap node type names for the rewrite schema (D2/D9).
+/*
+ * The identifier types and maps below are derived from FountainBlockSpec
+ * entries (see packages/script/src/blocks/). One spec contributes one
+ * entry to every map. To add a new block type, add a spec — do not edit
+ * the maps directly.
+ *
+ * `ScriptBlockNodeType` / `ScriptBlockType` are derived via indexed
+ * access on the `as const` array: each spec literal preserves its
+ * `nodeType`/`blockType` as a literal type, and the union of those
+ * literal types is the public identifier union.
  */
-export const SCRIPT_BLOCK_TYPE_BY_NODE_TYPE = {
-    sceneHeading: 'scene_heading',
-    act: 'act',
-    section: 'section',
-    action: 'action',
-    character: 'character',
-    dualDialogueCharacter: 'dual_dialogue_character',
-    parenthetical: 'parenthetical',
-    dialogue: 'dialogue',
-    transition: 'transition',
-    lyrics: 'lyrics',
-    note: 'note',
-} as const;
 
-export type ScriptBlockNodeType = keyof typeof SCRIPT_BLOCK_TYPE_BY_NODE_TYPE;
-export type ScriptBlockType = (typeof SCRIPT_BLOCK_TYPE_BY_NODE_TYPE)[ScriptBlockNodeType];
+export type ScriptBlockNodeType = (typeof ALL_BLOCK_SPECS)[number]['nodeType'];
+export type ScriptBlockType = (typeof ALL_BLOCK_SPECS)[number]['blockType'];
 
-export const LEGACY_FOUNTAIN_BLOCK_TYPE_BY_NODE_TYPE: Record<ScriptBlockNodeType, FountainElementType> = {
-    sceneHeading: ELEMENT_SCENE_HEADING,
-    act: ELEMENT_ACT,
-    section: ELEMENT_SECTION,
-    action: ELEMENT_ACTION,
-    character: ELEMENT_CHARACTER,
-    dualDialogueCharacter: ELEMENT_DUAL_DIALOGUE_CHARACTER,
-    parenthetical: ELEMENT_PARENTHETICAL,
-    dialogue: ELEMENT_DIALOGUE,
-    transition: ELEMENT_TRANSITION,
-    lyrics: ELEMENT_LYRICS,
-    note: ELEMENT_NOTE,
+const buildBlockTypeByNodeType = (): Record<ScriptBlockNodeType, ScriptBlockType> => {
+    const map = {} as Record<ScriptBlockNodeType, ScriptBlockType>;
+
+    for (const spec of ALL_BLOCK_SPECS) {
+        map[spec.nodeType as ScriptBlockNodeType] = spec.blockType as ScriptBlockType;
+    }
+
+    return map;
 };
 
-const SCRIPT_BLOCK_NODE_TYPE_BY_BLOCK_TYPE: Record<ScriptBlockType, ScriptBlockNodeType> = {
-    scene_heading: 'sceneHeading',
-    act: 'act',
-    section: 'section',
-    action: 'action',
-    character: 'character',
-    dual_dialogue_character: 'dualDialogueCharacter',
-    parenthetical: 'parenthetical',
-    dialogue: 'dialogue',
-    transition: 'transition',
-    lyrics: 'lyrics',
-    note: 'note',
+const buildLegacyByNodeType = (): Record<ScriptBlockNodeType, FountainElementType> => {
+    const map = {} as Record<ScriptBlockNodeType, FountainElementType>;
+
+    for (const spec of ALL_BLOCK_SPECS) {
+        map[spec.nodeType as ScriptBlockNodeType] = spec.legacyType;
+    }
+
+    return map;
 };
 
-const SCRIPT_BLOCK_NODE_TYPE_BY_LEGACY_FOUNTAIN_BLOCK_TYPE: Record<FountainElementType, ScriptBlockNodeType> = {
-    [ELEMENT_SCENE_HEADING]: 'sceneHeading',
-    [ELEMENT_ACT]: 'act',
-    [ELEMENT_SECTION]: 'section',
-    [ELEMENT_ACTION]: 'action',
-    [ELEMENT_CHARACTER]: 'character',
-    [ELEMENT_DUAL_DIALOGUE]: 'dialogue',
-    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: 'dualDialogueCharacter',
-    [ELEMENT_PARENTHETICAL]: 'parenthetical',
-    [ELEMENT_DIALOGUE]: 'dialogue',
-    [ELEMENT_TRANSITION]: 'transition',
-    [ELEMENT_LYRICS]: 'lyrics',
-    [ELEMENT_NOTE]: 'note',
+const buildNodeTypeByBlockType = (): Record<ScriptBlockType, ScriptBlockNodeType> => {
+    const map = {} as Record<ScriptBlockType, ScriptBlockNodeType>;
+
+    for (const spec of ALL_BLOCK_SPECS) {
+        map[spec.blockType as ScriptBlockType] = spec.nodeType as ScriptBlockNodeType;
+    }
+
+    return map;
 };
+
+const buildNodeTypeByLegacy = (): Record<FountainElementType, ScriptBlockNodeType> => {
+    const map = {} as Record<FountainElementType, ScriptBlockNodeType>;
+
+    for (const spec of ALL_BLOCK_SPECS) {
+        map[spec.legacyType] = spec.nodeType as ScriptBlockNodeType;
+    }
+
+    /*
+     * ELEMENT_DUAL_DIALOGUE is a wrapper type with no spec of its own;
+     * its content is rendered as ordinary dialogue, so we route it to
+     * the 'dialogue' node when resolving from legacy type.
+     */
+    map[ELEMENT_DUAL_DIALOGUE] = map[ELEMENT_DIALOGUE];
+
+    return map;
+};
+
+export const SCRIPT_BLOCK_TYPE_BY_NODE_TYPE = buildBlockTypeByNodeType();
+export const LEGACY_FOUNTAIN_BLOCK_TYPE_BY_NODE_TYPE = buildLegacyByNodeType();
+
+const SCRIPT_BLOCK_NODE_TYPE_BY_BLOCK_TYPE = buildNodeTypeByBlockType();
+const SCRIPT_BLOCK_NODE_TYPE_BY_LEGACY_FOUNTAIN_BLOCK_TYPE = buildNodeTypeByLegacy();
 
 const SCRIPT_BLOCK_NODE_TYPE_SET: ReadonlySet<string> = new Set(Object.keys(SCRIPT_BLOCK_TYPE_BY_NODE_TYPE));
 const SCRIPT_BLOCK_TYPE_SET: ReadonlySet<string> = new Set(Object.values(SCRIPT_BLOCK_TYPE_BY_NODE_TYPE));

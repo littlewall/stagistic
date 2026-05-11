@@ -19,11 +19,12 @@ import {
     updateBlockType,
 } from '../fountainBlock/commands';
 import type {BlockNextElementMap} from '../fountainBlock/handlers/types';
+import {getEnterFallback} from '@stagistic/script';
+
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
     type FountainBlockType,
     getActiveFountainBlockFromState,
-    getNextTypeOnEnter,
     isSelectionAcrossBlocks,
     normalizeFountainBlockType,
 } from '../fountainCore';
@@ -152,10 +153,10 @@ export const getEmptyEnterChooserFromState = (state: EditorState): EmptyEnterCho
 const resolveNextEmptyType = (
     selectedType: FountainBlockType,
     blockNextElements?: BlockNextElementMap,
-) => {
+): FountainBlockType => {
     const configured = blockNextElements?.[selectedType];
 
-    return configured ?? getNextTypeOnEnter(selectedType);
+    return configured ?? normalizeFountainBlockType(getEnterFallback(selectedType));
 };
 
 export const EmptyEnterChooserExtension = Extension.create<{
