@@ -57,15 +57,15 @@
     }
 
     &[data-hovered] {
-        background: color-mix(in srgb, var(--color-accent) 60%, transparent);
+        background: color-mix(in oklch, var(--color-accent) 60%, transparent);
     }
 
     &[data-pressed] {
-        background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
+        background: color-mix(in oklch, var(--color-highlight) 70%, transparent);
     }
 
     &[data-focus-visible] {
-        background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
+        background: color-mix(in oklch, var(--color-highlight) 70%, transparent);
         border-color: transparent;
         outline: none;
         box-shadow: none;
@@ -110,7 +110,7 @@
     gap: calc(2px * var(--size-scale));
     align-items: center;
     padding: calc(2px * var(--size-scale));
-    background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
+    background: color-mix(in oklch, var(--color-highlight) 70%, transparent);
     border: 1px solid var(--color-divider);
     border-radius: 999px;
 }
@@ -135,11 +135,11 @@
     }
 
     &[data-hovered] {
-        background: color-mix(in srgb, var(--color-accent) 40%, transparent);
+        background: color-mix(in oklch, var(--color-accent) 40%, transparent);
     }
 
     &[data-focus-visible] {
-        background: color-mix(in srgb, var(--color-highlight) 70%, transparent);
+        background: color-mix(in oklch, var(--color-highlight) 70%, transparent);
         border-color: transparent;
         outline: none;
         box-shadow: none;
@@ -169,7 +169,7 @@
     height: 8px;
     background: var(--color-ink-muted);
     border-radius: 999px;
-    box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-ink) 8%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in oklch, var(--color-ink) 8%, transparent);
 }
 
 .scriptStatusSaved {
@@ -279,7 +279,7 @@
     width: 100%;
     margin-bottom: var(--space-2);
     padding: var(--space-2) var(--space-3);
-    background: color-mix(in srgb, var(--color-highlight) 75%, transparent);
+    background: color-mix(in oklch, var(--color-highlight) 75%, transparent);
 }
 
 .currentScriptLabel {
@@ -311,7 +311,7 @@
 
     &[data-focused],
     &[data-hovered] {
-        background: color-mix(in srgb, var(--color-accent) 35%, transparent);
+        background: color-mix(in oklch, var(--color-accent) 35%, transparent);
     }
 
     &[data-disabled] {

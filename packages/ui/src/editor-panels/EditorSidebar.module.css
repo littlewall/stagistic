@@ -14,7 +14,7 @@
 
 .tabList {
     display: flex;
-    background: color-mix(in srgb, var(--color-surface) 60%, var(--color-accent));
+    background: color-mix(in oklch, var(--color-surface) 60%, var(--color-accent));
     border-bottom: 1px solid var(--color-divider);
 }
 
@@ -77,7 +77,7 @@
 
 .characterItemUnconfirmed {
     background: transparent;
-    border-color: color-mix(in srgb, var(--character-color) 58%, var(--color-divider));
+    border-color: color-mix(in oklch, var(--character-color) 58%, var(--color-divider));
 }
 
 .characterRow,
@@ -94,16 +94,16 @@
     width: 100%;
     color: inherit;
     text-align: left;
-    background: color-mix(in srgb, var(--character-color) 14%, var(--color-surface));
+    background: color-mix(in oklch, var(--character-color) 14%, var(--color-surface));
     border: none;
 }
 
 .characterRowButton:hover {
-    background: color-mix(in srgb, var(--character-color) 20%, var(--color-surface));
+    background: color-mix(in oklch, var(--character-color) 20%, var(--color-surface));
 }
 
 .characterRowButton:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--character-color) 45%, var(--color-ink));
+    outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-ink));
     outline-offset: -2px;
 }
 
@@ -127,11 +127,11 @@
 }
 
 .expandIndicatorButton:hover {
-    background: color-mix(in srgb, var(--character-color) 18%, transparent);
+    background: color-mix(in oklch, var(--character-color) 18%, transparent);
 }
 
 .expandIndicatorButton:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--character-color) 45%, var(--color-ink));
+    outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-ink));
     outline-offset: 1px;
 }
 
@@ -140,7 +140,7 @@
     width: calc(10px * var(--size-scale));
     height: calc(10px * var(--size-scale));
     background: var(--character-color, var(--color-accent));
-    border: 1px solid color-mix(in srgb, var(--color-ink) 15%, var(--color-surface));
+    border: 1px solid color-mix(in oklch, var(--color-ink) 15%, var(--color-surface));
     border-radius: 999px;
 }
 
@@ -156,7 +156,7 @@
 
 .characterColorInteractive:focus-visible {
     border-radius: 999px;
-    outline: 2px solid color-mix(in srgb, var(--character-color) 45%, var(--color-ink));
+    outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-ink));
     outline-offset: 2px;
 }
 
@@ -179,7 +179,7 @@
 }
 
 .characterColorButton:hover {
-    background: color-mix(in srgb, var(--character-color) 16%, transparent);
+    background: color-mix(in oklch, var(--character-color) 16%, transparent);
 }
 
 .characterColorButton[data-disabled] {
@@ -188,7 +188,7 @@
 }
 
 .characterColorButton:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--character-color) 45%, var(--color-ink));
+    outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-ink));
     outline-offset: 1px;
 }
 
@@ -215,21 +215,8 @@
 .characterColorPreview {
     width: 100%;
     min-height: calc(44px * var(--size-scale));
-    border: 1px solid color-mix(in srgb, var(--color-ink) 16%, var(--color-surface));
+    border: 1px solid color-mix(in oklch, var(--color-ink) 16%, var(--color-surface));
     border-radius: calc(8px * var(--size-scale));
-}
-
-.characterColorWheel {
-    width: calc(110px * var(--size-scale));
-    height: calc(110px * var(--size-scale));
-    margin-inline: auto;
-    border-radius: 999px;
-}
-
-.characterColorWheelTrack {
-    width: 100%;
-    height: 100%;
-    border-radius: 999px;
 }
 
 .characterColorSlider {
@@ -252,26 +239,9 @@
     width: calc(12px * var(--size-scale));
     height: calc(12px * var(--size-scale));
     background: var(--color-surface);
-    border: 2px solid color-mix(in srgb, var(--color-ink) 74%, var(--color-surface));
+    border: 2px solid color-mix(in oklch, var(--color-ink) 74%, var(--color-surface));
     border-radius: 999px;
-    box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-surface) 80%, transparent);
-}
-
-.characterColorField {
-    width: 100%;
-    padding: var(--space-1) var(--space-2);
-    font-size: calc(11px * var(--size-scale));
-    background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: calc(6px * var(--size-scale));
-}
-
-.characterColorLabel {
-    font-size: calc(10px * var(--size-scale));
-    font-weight: 700;
-    color: var(--color-ink-muted);
-    text-transform: uppercase;
-    letter-spacing: .06em;
+    box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-surface) 80%, transparent);
 }
 
 .characterColorSwatches {
@@ -286,7 +256,7 @@
     width: 100%;
     min-height: calc(20px * var(--size-scale));
     padding: 0;
-    border: 1px solid color-mix(in srgb, var(--color-ink) 16%, var(--color-surface));
+    border: 1px solid color-mix(in oklch, var(--color-ink) 16%, var(--color-surface));
     border-radius: calc(6px * var(--size-scale));
 }
 
@@ -297,7 +267,7 @@
 }
 
 .characterColorSwatch[data-selected = 'true'] {
-    outline: 2px solid color-mix(in srgb, var(--color-ink) 55%, var(--color-accent));
+    outline: 2px solid color-mix(in oklch, var(--color-ink) 55%, var(--color-accent));
     outline-offset: 1px;
 }
 
@@ -321,7 +291,7 @@
 
 .characterColorActionButton {
     color: var(--color-surface);
-    background: color-mix(in srgb, var(--color-ink) 85%, var(--color-accent));
+    background: color-mix(in oklch, var(--color-ink) 85%, var(--color-accent));
 }
 
 .characterColorActionButtonSecondary {
@@ -366,7 +336,7 @@
     justify-content: center;
     width: calc(18px * var(--size-scale));
     height: calc(18px * var(--size-scale));
-    color: color-mix(in srgb, var(--color-ink) 84%, var(--character-color));
+    color: color-mix(in oklch, var(--color-ink) 84%, var(--character-color));
     background: transparent;
     border: none;
     border-radius: calc(4px * var(--size-scale));
@@ -374,12 +344,12 @@
 }
 
 .confirmIconButton:hover {
-    color: color-mix(in srgb, var(--character-color) 55%, var(--color-ink));
-    background: color-mix(in srgb, var(--character-color) 18%, transparent);
+    color: color-mix(in oklch, var(--character-color) 55%, var(--color-ink));
+    background: color-mix(in oklch, var(--character-color) 18%, transparent);
 }
 
 .confirmIconButton:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--character-color) 45%, var(--color-ink));
+    outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-ink));
     outline-offset: 1px;
 }
 
@@ -406,11 +376,11 @@
 
 .focusIconButton:hover {
     color: var(--color-ink);
-    background: color-mix(in srgb, var(--color-ink) 8%, transparent);
+    background: color-mix(in oklch, var(--color-ink) 8%, transparent);
 }
 
 .focusIconButton:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--character-color) 45%, var(--color-ink));
+    outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-ink));
     outline-offset: 1px;
 }
 
@@ -427,8 +397,8 @@
 .confirmSpinner {
     width: calc(11px * var(--size-scale));
     height: calc(11px * var(--size-scale));
-    border: 2px solid color-mix(in srgb, var(--color-ink) 25%, transparent);
-    border-top-color: color-mix(in srgb, var(--color-ink) 86%, var(--character-color));
+    border: 2px solid color-mix(in oklch, var(--color-ink) 25%, transparent);
+    border-top-color: color-mix(in oklch, var(--color-ink) 86%, var(--character-color));
     border-radius: 999px;
     animation: characterConfirmSpin .8s linear infinite;
 }
@@ -440,8 +410,8 @@
     font-weight: 700;
     color: var(--color-surface);
     letter-spacing: .02em;
-    background: color-mix(in srgb, var(--color-ink) 92%, rgb(0 0 0));
-    border: 1px solid color-mix(in srgb, var(--color-surface) 15%, var(--color-ink));
+    background: color-mix(in oklch, var(--color-ink) 92%, rgb(0 0 0));
+    border: 1px solid color-mix(in oklch, var(--color-surface) 15%, var(--color-ink));
     border-radius: calc(6px * var(--size-scale));
     box-shadow: var(--shadow-popover);
 }
@@ -452,7 +422,7 @@
     padding: 0 var(--space-2) var(--space-2);
     font-size: calc(10px * var(--size-scale));
     background: transparent;
-    border-top: 1px solid color-mix(in srgb, var(--character-color) 22%, var(--color-divider));
+    border-top: 1px solid color-mix(in oklch, var(--character-color) 22%, var(--color-divider));
 }
 
 .characterCardFooter {
@@ -481,7 +451,7 @@
     justify-content: center;
     width: calc(20px * var(--size-scale));
     height: calc(20px * var(--size-scale));
-    color: color-mix(in srgb, var(--color-ink) 76%, var(--character-color));
+    color: color-mix(in oklch, var(--color-ink) 76%, var(--character-color));
     background: transparent;
     border: none;
     border-radius: calc(4px * var(--size-scale));
@@ -489,12 +459,12 @@
 }
 
 .genderIconButton:hover {
-    color: color-mix(in srgb, var(--character-color) 62%, var(--color-ink));
-    background: color-mix(in srgb, var(--character-color) 14%, transparent);
+    color: color-mix(in oklch, var(--character-color) 62%, var(--color-ink));
+    background: color-mix(in oklch, var(--character-color) 14%, transparent);
 }
 
 .genderIconButton:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--character-color) 48%, var(--color-ink));
+    outline: 2px solid color-mix(in oklch, var(--character-color) 48%, var(--color-ink));
     outline-offset: 1px;
 }
 
@@ -532,13 +502,13 @@
     padding: 0 var(--space-2);
     font-size: calc(11px * var(--size-scale));
     color: var(--color-ink);
-    background: color-mix(in srgb, var(--color-surface) 88%, var(--color-divider));
-    border: 1px solid color-mix(in srgb, var(--character-color) 26%, var(--color-divider));
+    background: color-mix(in oklch, var(--color-surface) 88%, var(--color-divider));
+    border: 1px solid color-mix(in oklch, var(--character-color) 26%, var(--color-divider));
     border-radius: calc(6px * var(--size-scale));
 }
 
 .characterGenderQueryInput:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--character-color) 48%, var(--color-ink));
+    outline: 2px solid color-mix(in oklch, var(--character-color) 48%, var(--color-ink));
     outline-offset: 1px;
 }
 
@@ -552,8 +522,8 @@
     display: grid;
     gap: var(--space-1);
     padding: var(--space-1);
-    background: color-mix(in srgb, var(--color-surface) 92%, var(--color-divider));
-    border: 1px solid color-mix(in srgb, var(--character-color) 20%, var(--color-divider));
+    background: color-mix(in oklch, var(--color-surface) 92%, var(--color-divider));
+    border: 1px solid color-mix(in oklch, var(--character-color) 20%, var(--color-divider));
     border-radius: calc(7px * var(--size-scale));
 }
 
@@ -568,7 +538,7 @@
 }
 
 .characterGenderOption[data-focused = 'true'] {
-    background: color-mix(in srgb, var(--character-color) 24%, transparent);
+    background: color-mix(in oklch, var(--character-color) 24%, transparent);
 }
 
 .characterGenderOption[data-selected = 'true'] {
@@ -591,14 +561,14 @@
     padding: 0 var(--space-2);
     font-size: calc(10px * var(--size-scale));
     font-weight: 700;
-    color: color-mix(in srgb, var(--character-color) 65%, var(--color-ink));
-    background: color-mix(in srgb, var(--character-color) 14%, transparent);
-    border: 1px solid color-mix(in srgb, var(--character-color) 28%, var(--color-divider));
+    color: color-mix(in oklch, var(--character-color) 65%, var(--color-ink));
+    background: color-mix(in oklch, var(--character-color) 14%, transparent);
+    border: 1px solid color-mix(in oklch, var(--character-color) 28%, var(--color-divider));
     border-radius: calc(6px * var(--size-scale));
 }
 
 .characterGenderCreateButton:hover {
-    background: color-mix(in srgb, var(--character-color) 20%, transparent);
+    background: color-mix(in oklch, var(--character-color) 20%, transparent);
 }
 
 .deleteIconButton {
@@ -609,7 +579,7 @@
     justify-content: center;
     width: calc(20px * var(--size-scale));
     height: calc(20px * var(--size-scale));
-    color: color-mix(in srgb, var(--color-danger) 70%, var(--color-ink));
+    color: color-mix(in oklch, var(--color-danger) 70%, var(--color-ink));
     background: transparent;
     border: none;
     border-radius: calc(4px * var(--size-scale));
@@ -618,11 +588,11 @@
 
 .deleteIconButton:hover {
     color: var(--color-danger);
-    background: color-mix(in srgb, var(--color-danger) 16%, transparent);
+    background: color-mix(in oklch, var(--color-danger) 16%, transparent);
 }
 
 .deleteIconButton:focus-visible {
-    outline: 2px solid color-mix(in srgb, var(--color-danger) 55%, var(--color-ink));
+    outline: 2px solid color-mix(in oklch, var(--color-danger) 55%, var(--color-ink));
     outline-offset: 1px;
 }
 

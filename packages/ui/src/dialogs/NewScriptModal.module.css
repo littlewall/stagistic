@@ -52,7 +52,7 @@
 
 .input:focus {
     background: var(--color-surface);
-    border-color: color-mix(in srgb, var(--color-ink) 25%, var(--color-divider));
+    border-color: color-mix(in oklch, var(--color-ink) 25%, var(--color-divider));
     outline: none;
 }
 
@@ -82,7 +82,7 @@
 }
 
 .primaryButton:hover {
-    background: color-mix(in srgb, var(--color-ink) 86%, var(--color-paper));
+    background: color-mix(in oklch, var(--color-ink) 86%, var(--color-paper));
 }
 
 .ghostButton {

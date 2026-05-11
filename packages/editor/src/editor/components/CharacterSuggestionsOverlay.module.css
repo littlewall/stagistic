@@ -38,17 +38,17 @@
 }
 
 .item:hover {
-    background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    background: color-mix(in oklch, var(--color-accent) 45%, transparent);
 }
 
 .itemActive {
-    background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+    background: color-mix(in oklch, var(--color-accent) 45%, transparent);
 }
 
 .itemDot {
     width: calc(9px * var(--size-scale));
     height: calc(9px * var(--size-scale));
-    border: 1px solid color-mix(in srgb, var(--color-ink) 12%, var(--color-surface));
+    border: 1px solid color-mix(in oklch, var(--color-ink) 12%, var(--color-surface));
     border-radius: 999px;
 }
 

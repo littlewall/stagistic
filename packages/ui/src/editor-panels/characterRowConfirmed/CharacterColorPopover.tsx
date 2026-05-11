@@ -94,12 +94,12 @@ export const CharacterColorPopover = ({
                         </SliderTrack>
                     </ColorSlider>
                     <div className={styles.characterColorSwatches}>
-                        {presetColorHexes.map(presetColorHex => (
+                        {presetColorHexes.map((presetColorHex, index) => (
                             <Button
                                 key={presetColorHex}
                                 className={styles.characterColorSwatch}
                                 data-selected={presetColorHex === colorDraftHex || undefined}
-                                aria-label={`Select color ${presetColorHex}`}
+                                aria-label={`Select preset color ${index + 1}`}
                                 onPress={() => {
                                     onHueChange(
                                         getPastelHueFromHex(presetColorHex, resolvedColorSaturation),
@@ -113,7 +113,6 @@ export const CharacterColorPopover = ({
                             </Button>
                         ))}
                     </div>
-                    <span className={styles.characterColorLabel}>{colorDraftHex}</span>
                 </div>
                 <div className={styles.characterColorActions}>
                     <Button className={styles.characterColorActionButton} onPress={onApply}>

@@ -26,7 +26,7 @@
 }
 
 .primary:hover {
-    background: color-mix(in srgb, var(--color-ink) 86%, var(--color-paper));
+    background: color-mix(in oklch, var(--color-ink) 86%, var(--color-paper));
 }
 
 .primary:disabled,
@@ -59,9 +59,9 @@
 .danger {
     color: var(--color-danger);
     background: transparent;
-    border-color: color-mix(in srgb, var(--color-danger) 35%, var(--color-divider));
+    border-color: color-mix(in oklch, var(--color-danger) 35%, var(--color-divider));
 }
 
 .danger:hover {
-    background: color-mix(in srgb, var(--color-danger) 10%, transparent);
+    background: color-mix(in oklch, var(--color-danger) 10%, transparent);
 }

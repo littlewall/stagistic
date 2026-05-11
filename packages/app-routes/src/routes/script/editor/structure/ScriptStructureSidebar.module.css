@@ -33,7 +33,7 @@
 }
 
 .headerIconButton:hover {
-    background: color-mix(in srgb, var(--color-accent) 24%, transparent);
+    background: color-mix(in oklch, var(--color-accent) 24%, transparent);
 }
 
 .headerMenu {
@@ -69,7 +69,7 @@
 }
 
 .headerMenuItem:hover {
-    background: color-mix(in srgb, var(--color-accent) 35%, transparent);
+    background: color-mix(in oklch, var(--color-accent) 35%, transparent);
 }
 
 .empty {
@@ -120,7 +120,7 @@
     margin-left: auto;
     font-size: calc(12px * var(--size-scale));
     line-height: 1;
-    color: color-mix(in srgb, var(--color-ink-muted) 90%, var(--color-divider));
+    color: color-mix(in oklch, var(--color-ink-muted) 90%, var(--color-divider));
     opacity: .72;
     background: transparent;
     border: 1px solid transparent;
@@ -128,9 +128,9 @@
 }
 
 .actDeleteButton:hover {
-    color: color-mix(in srgb, var(--color-danger) 75%, var(--color-ink-muted));
+    color: color-mix(in oklch, var(--color-danger) 75%, var(--color-ink-muted));
     opacity: 1;
-    background: color-mix(in srgb, var(--color-danger) 12%, transparent);
+    background: color-mix(in oklch, var(--color-danger) 12%, transparent);
 }
 
 .itemList {
@@ -150,7 +150,7 @@
 }
 
 .sceneRow:hover:not(.itemRowActive) {
-    background: color-mix(in srgb, var(--color-accent) 35%, transparent);
+    background: color-mix(in oklch, var(--color-accent) 35%, transparent);
 }
 
 .actRow {
@@ -158,14 +158,14 @@
 }
 
 .itemRowActive {
-    background: color-mix(in srgb, var(--color-accent) 80%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 55%, var(--color-divider));
+    background: color-mix(in oklch, var(--color-accent) 80%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-accent) 55%, var(--color-divider));
 }
 
 .itemRowDropTarget {
-    background: color-mix(in srgb, var(--color-accent) 34%, transparent);
+    background: color-mix(in oklch, var(--color-accent) 34%, transparent);
     border-radius: calc(8px * var(--size-scale));
-    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 42%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-accent) 42%, transparent);
 }
 
 .itemButton {
@@ -204,7 +204,7 @@
     min-height: calc(15px * var(--size-scale));
     margin: 0;
     padding-inline: calc(4px * var(--size-scale));
-    color: color-mix(in srgb, var(--color-ink-muted) 55%, var(--color-divider));
+    color: color-mix(in oklch, var(--color-ink-muted) 55%, var(--color-divider));
     appearance: none;
     opacity: .55;
     background-color: transparent;

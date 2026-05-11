@@ -18,7 +18,7 @@
 }
 
 .trackIndeterminate {
-    background: color-mix(in srgb, var(--color-accent) 70%, transparent);
+    background: color-mix(in oklch, var(--color-accent) 70%, transparent);
 }
 
 .fill {

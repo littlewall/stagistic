@@ -20,7 +20,7 @@
 
 .interactive:hover,
 .interactive:focus-visible {
-    border-color: color-mix(in srgb, var(--color-ink) 12%, var(--color-divider));
+    border-color: color-mix(in oklch, var(--color-ink) 12%, var(--color-divider));
     outline: none;
     box-shadow: var(--shadow-card);
 }

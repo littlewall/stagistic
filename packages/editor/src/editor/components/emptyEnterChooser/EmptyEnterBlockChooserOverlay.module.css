@@ -13,7 +13,7 @@
     background: var(--color-surface);
     border: 1px solid var(--color-divider);
     border-radius: calc(12px * var(--size-scale));
-    box-shadow: 0 1px 2px color-mix(in srgb, var(--color-ink) 12%, transparent);
+    box-shadow: 0 1px 2px color-mix(in oklch, var(--color-ink) 12%, transparent);
     transform: translate(0, calc(-100% - var(--space-2)));
 }
 
@@ -32,17 +32,17 @@
 }
 
 .button:hover {
-    background: color-mix(in srgb, var(--color-accent) 32%, transparent);
+    background: color-mix(in oklch, var(--color-accent) 32%, transparent);
 }
 
 .buttonActive {
     color: var(--color-ink);
-    background: color-mix(in srgb, var(--color-accent) 62%, transparent);
-    border-color: color-mix(in srgb, var(--color-accent) 55%, var(--color-divider));
+    background: color-mix(in oklch, var(--color-accent) 62%, transparent);
+    border-color: color-mix(in oklch, var(--color-accent) 55%, var(--color-divider));
 }
 
 .buttonActive:hover {
-    background: color-mix(in srgb, var(--color-accent) 62%, transparent);
+    background: color-mix(in oklch, var(--color-accent) 62%, transparent);
 }
 
 .icon {

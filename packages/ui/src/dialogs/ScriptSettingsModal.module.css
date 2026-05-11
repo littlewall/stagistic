@@ -60,7 +60,7 @@
 .sidebar {
     overflow: auto;
     padding: var(--space-4);
-    background: color-mix(in srgb, var(--color-surface) 88%, var(--color-highlight));
+    background: color-mix(in oklch, var(--color-surface) 88%, var(--color-highlight));
     border-right: 1px solid var(--color-divider);
 }
 
@@ -107,7 +107,7 @@
 .navItemActive,
 .subItemActive {
     font-weight: 600;
-    background: color-mix(in srgb, var(--color-ink) 12%, var(--color-surface));
+    background: color-mix(in oklch, var(--color-ink) 12%, var(--color-surface));
 }
 
 .navExpandButton {
@@ -121,7 +121,7 @@
 .expandArrowOpen {
     width: 14px;
     height: 14px;
-    color: color-mix(in srgb, var(--color-ink) 86%, var(--color-accent));
+    color: color-mix(in oklch, var(--color-ink) 86%, var(--color-accent));
     fill: none;
     stroke: currentcolor;
     stroke-linecap: round;
@@ -156,7 +156,7 @@
     justify-content: center;
     width: 14px;
     height: 14px;
-    color: color-mix(in srgb, var(--color-ink) 84%, var(--color-accent));
+    color: color-mix(in oklch, var(--color-ink) 84%, var(--color-accent));
 }
 
 .subItemIcon svg {

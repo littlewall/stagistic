@@ -71,7 +71,7 @@
     transition: background .15s ease, border-color .15s ease;
 
     &:hover {
-        background: color-mix(in srgb, var(--color-accent) 45%, transparent);
+        background: color-mix(in oklch, var(--color-accent) 45%, transparent);
     }
 
     & svg {

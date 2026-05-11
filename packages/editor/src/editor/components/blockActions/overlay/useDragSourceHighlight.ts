@@ -50,9 +50,9 @@ export const useDragSourceHighlight = () => {
 
         styleElement.textContent = [
             `[data-fountain-editor="true"] ${FOUNTAIN_BLOCK_DOM_SELECTOR}[${FOUNTAIN_BLOCK_DOM_ID_ATTRIBUTE}="${escapedBlockId}"] {`,
-            'background: color-mix(in srgb, var(--color-accent) 22%, transparent) !important;',
-            'box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-accent) 38%, transparent) !important;',
-            'outline: 1px solid color-mix(in srgb, var(--color-accent) 65%, transparent) !important;',
+            'background: color-mix(in oklch, var(--color-accent) 22%, transparent) !important;',
+            'box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-accent) 38%, transparent) !important;',
+            'outline: 1px solid color-mix(in oklch, var(--color-accent) 65%, transparent) !important;',
             'border-radius: calc(4px * var(--size-scale)) !important;',
             '}',
         ].join('');

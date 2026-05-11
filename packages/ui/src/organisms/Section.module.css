@@ -11,8 +11,8 @@
 .danger {
     align-items: flex-start;
     justify-content: space-between;
-    background: color-mix(in srgb, var(--color-highlight) 85%, var(--color-surface));
-    border-color: color-mix(in srgb, var(--color-ink) 12%, var(--color-divider));
+    background: color-mix(in oklch, var(--color-highlight) 85%, var(--color-surface));
+    border-color: color-mix(in oklch, var(--color-ink) 12%, var(--color-divider));
 }
 
 .header {
