@@ -59,6 +59,8 @@ export const EditorShell = ({
     const {
         leftSidebarToggle,
         rightSidebarToggle,
+        leftSidebarHeader,
+        rightSidebarHeader,
         leftSidebar,
         rightSidebar,
     } = layout ?? {};
@@ -95,19 +97,21 @@ export const EditorShell = ({
             ) : null}
             <div className={styles.toolbarRow}>
                 <div className={styles.toolbarSideLeft}>
-                    {leftSidebarToggle ? (
+                    {leftSidebarToggle && isLeftSidebarOpen && leftSidebarHeader
+                        ? leftSidebarHeader
+                        : null}
+                    {leftSidebarToggle && !isLeftSidebarOpen ? (
                         <button
                             className={styles.sidebarToggleButton}
                             type="button"
-                            aria-label={isLeftSidebarOpen ? 'Hide left sidebar' : 'Show left sidebar'}
-                            aria-pressed={isLeftSidebarOpen}
+                            aria-label="Show left sidebar"
                             onMouseDown={onLeftSidebarToggleMouseDown}
                         >
                             <NavArrowLeft
                                 aria-hidden="true"
                                 className={clsx(
                                     styles.sidebarToggleIcon,
-                                    !isLeftSidebarOpen && styles.sidebarToggleIconFlipped,
+                                    styles.sidebarToggleIconFlipped,
                                 )}
                             />
                         </button>
@@ -119,19 +123,21 @@ export const EditorShell = ({
                     </div>
                 </div>
                 <div className={styles.toolbarSideRight}>
-                    {rightSidebarToggle ? (
+                    {rightSidebarToggle && isRightSidebarOpen && rightSidebarHeader
+                        ? rightSidebarHeader
+                        : null}
+                    {rightSidebarToggle && !isRightSidebarOpen ? (
                         <button
                             className={styles.sidebarToggleButton}
                             type="button"
-                            aria-label={isRightSidebarOpen ? 'Hide right sidebar' : 'Show right sidebar'}
-                            aria-pressed={isRightSidebarOpen}
+                            aria-label="Show right sidebar"
                             onMouseDown={onRightSidebarToggleMouseDown}
                         >
                             <NavArrowRight
                                 aria-hidden="true"
                                 className={clsx(
                                     styles.sidebarToggleIcon,
-                                    !isRightSidebarOpen && styles.sidebarToggleIconFlipped,
+                                    styles.sidebarToggleIconFlipped,
                                 )}
                             />
                         </button>

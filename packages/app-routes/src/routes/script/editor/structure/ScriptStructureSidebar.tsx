@@ -14,7 +14,6 @@ import {
     type StructureRow,
 } from './structureRows';
 import {StructureRowScene} from './StructureRowScene';
-import {StructureSidebarHeader} from './StructureSidebarHeader';
 import type {ScriptStructureSidebarProps} from './types';
 import {useStructureSidebarDnd} from './useStructureSidebarDnd';
 
@@ -110,8 +109,7 @@ export const ScriptStructureSidebar = ({
     });
 
     return (
-        <aside className={styles.sidebar}>
-            <StructureSidebarHeader actions={{onInsertAct: actions.onInsertAct}} />
+        <div className={styles.content}>
             <DragDropProvider onDragEnd={handleDragEnd}>
                 {rows.length === 0 ? (
                     <p className={styles.empty}>
@@ -147,6 +145,6 @@ export const ScriptStructureSidebar = ({
                     </ul>
                 ) : null}
             </DragDropProvider>
-        </aside>
+        </div>
     );
 };

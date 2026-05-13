@@ -202,7 +202,48 @@ light/dark split lives here and nowhere else.
 
 ---
 
-## Step 6 — Verify
+## Step 6 — Add the settings-panel preview entries
+
+The script settings modal exposes a per-block panel where the user
+configures spacing, indentation, casing, alignment, etc. The panel's
+menu entry and icon come from the registry automatically (derived from
+`FOUNTAIN_BLOCK_ITEMS` and `BLOCK_ICONS`), but the **preview area** has
+two per-block fields that need a manual entry, both in
+`packages/app-routes/src/routes/script/editor/settings/constants.ts`:
+
+```ts
+export const BLOCK_PREVIEW_TEXT: Record<FountainElementType, string> = {
+    // …existing entries…
+    [ELEMENT_MONTAGE]: 'A series of rapid cuts.',
+};
+
+export const BLOCK_PREVIEW_TEXT_COLOR: Record<FountainElementType, string> = {
+    // …existing entries…
+    [ELEMENT_MONTAGE]: 'var(--color-block-montage)',
+};
+```
+
+Both maps are typed `Record<FountainElementType, string>`, so the
+TypeScript checker will fail the build until the new entry is added —
+the missing piece can't slip through silently.
+
+`BLOCK_PREVIEW_TEXT` is the sample text rendered inside the preview
+strip (e.g. *ALEX* for character, *(quietly)* for parenthetical). Pick
+something that reads naturally in the block's expected casing and
+indentation.
+
+`BLOCK_PREVIEW_TEXT_COLOR` references the CSS variable from step 5 so
+the preview text matches the editor canvas colour. Use a `var()` fallback
+if the variable might be absent in some themes (the note block does this
+with `var(--color-block-note, var(--color-block-action))`).
+
+After this step, opening the settings modal → **Elements settings** →
+your new block shows the full sidebar (spacing, indent, casing, etc.)
+with a live preview using your sample text and colour.
+
+---
+
+## Step 7 — Verify
 
 ```sh
 pnpm exec tsc --noEmit -p packages/script/tsconfig.json
@@ -217,6 +258,9 @@ Manual smoke test:
   it switches to your block.
 - Press Enter on the new block and confirm it lands on `enterFallback`.
 - Toggle light/dark theme and confirm the colour adapts.
+- Open the script settings modal → **Elements settings** → click your
+  block. The panel shows the preview text and live spacing/indent/casing
+  controls. Tweak a value and confirm the editor reflects it.
 
 ---
 
@@ -247,6 +291,8 @@ block was added:
 - `packages/editor/src/editor/blocks/controls/blockIcons.tsx` — icon map
 - `packages/editor/src/editor/editorSettings/cssVars.ts` — CSS-var loop
 - `packages/editor/src/editor/blocks/fountain/blockTypes.ts` — type union
+- `packages/app-routes/src/routes/script/settings/settingsMenu.ts` —
+  settings-modal menu entry (derived from `FOUNTAIN_BLOCK_ITEMS`)
 
 If you find yourself editing any of these to add a block, you've drifted
 off the path — the registry is designed so the answer is always "edit

@@ -155,6 +155,50 @@
     --shadow-panel: 0 12px 32px var(--color-shadow-panel);
     --shadow-canvas: 0 12px 30px var(--color-shadow-canvas);
 
+    /* ─── Select / dropdown design tokens ─────────────────────────
+       Used by SettingsSelect, BlockTypeSelect, SidebarPanelSelect.
+       Override on a parent element to vary per-site (size, border,
+       background, weight). Common look (menu, hover/active states,
+       padding/gap/font) stays unified.                           */
+
+    /* Button (trigger) */
+    --select-button-height: calc(32px * var(--size-scale));
+    --select-button-padding-inline: var(--space-2);
+    --select-button-gap: var(--space-2);
+    --select-button-font-size: calc(12px * var(--size-scale));
+    --select-button-font-weight: 400;
+    --select-button-color: var(--color-ink);
+    --select-button-bg: transparent;
+    --select-button-hover-bg: color-mix(in oklch, var(--color-accent) 45%, transparent);
+    --select-button-border-color: transparent;
+    --select-button-border-width: 1px;
+    --select-button-radius: calc(8px * var(--size-scale));
+
+    /* Icon + chevron */
+    --select-icon-size: 16px;
+    --select-chevron-size: calc(14px * var(--size-scale));
+
+    /* Menu (popover) */
+    --select-menu-bg: var(--color-surface);
+    --select-menu-border: 1px solid var(--color-divider);
+    --select-menu-radius: var(--radius-md);
+    --select-menu-shadow: var(--shadow-popover);
+    --select-menu-padding: var(--space-1);
+    --select-menu-offset: var(--space-2);
+    --select-menu-max-height: calc(280px * var(--size-scale));
+    --select-menu-z-index: 12;
+
+    /* Menu item */
+    --select-menu-item-min-height: calc(32px * var(--size-scale));
+    --select-menu-item-padding: var(--space-2);
+    --select-menu-item-gap: var(--space-2);
+    --select-menu-item-font-size: calc(12px * var(--size-scale));
+    --select-menu-item-color: var(--color-ink);
+    --select-menu-item-radius: calc(8px * var(--size-scale));
+    --select-menu-item-hover-bg: color-mix(in oklch, var(--color-accent) 35%, transparent);
+    --select-menu-item-active-bg: color-mix(in oklch, var(--color-accent) 85%, transparent);
+    --select-menu-item-active-font-weight: 600;
+
     color-scheme: light;
 }
 

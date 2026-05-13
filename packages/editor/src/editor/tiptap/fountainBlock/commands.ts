@@ -27,6 +27,36 @@ const setSelectionNearBlockStart = (tr: Transaction, blockPos: number) => {
     return tr.setSelection(TextSelection.near(resolved, 1));
 };
 
+const countLeadingTabs = (text: string) => {
+    let count = 0;
+
+    while (text.startsWith('\t', count)) {
+        count += 1;
+    }
+
+    return count;
+};
+
+const stripLeadingActionTabs = (
+    tr: Transaction,
+    previousBlockType: FountainBlockType,
+    nextBlockType: FountainBlockType,
+    blockContentStart: number,
+    blockText: string,
+): Transaction => {
+    if (previousBlockType !== ELEMENT_ACTION || nextBlockType === ELEMENT_ACTION) {
+        return tr;
+    }
+
+    const indentCount = countLeadingTabs(blockText);
+
+    if (indentCount === 0) {
+        return tr;
+    }
+
+    return tr.delete(blockContentStart, blockContentStart + indentCount);
+};
+
 const resolveNodeTypeForBlockType = (
     nodes: Record<string, NodeType>,
     currentNodeTypeName: string,
@@ -77,6 +107,13 @@ export const updateBlockType = (editor: Editor, blockType: FountainBlockType, id
 
     let tr = editor.state.tr.setNodeMarkup(activeBlock.pos, nodeType, attributes);
 
+    tr = stripLeadingActionTabs(
+        tr,
+        activeBlock.blockType,
+        normalized,
+        activeBlock.from,
+        activeBlock.node.textContent ?? '',
+    );
     tr = setSelectionNearBlockStart(tr, activeBlock.pos);
     editor.view.dispatch(tr.scrollIntoView());
     focusEditor(editor);
@@ -140,6 +177,13 @@ export const setBlockTypeWithSelection = (
 
     let tr = editor.state.tr.setNodeMarkup(block.pos, nodeType, attrs);
 
+    tr = stripLeadingActionTabs(
+        tr,
+        block.blockType,
+        normalized,
+        block.from,
+        block.node.textContent ?? '',
+    );
     tr = setSelectionNearBlockStart(tr, block.pos);
 
     editor.view.dispatch(tr.scrollIntoView());

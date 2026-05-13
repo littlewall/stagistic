@@ -1,17 +1,10 @@
 import clsx from 'clsx';
-import {List} from 'iconoir-react';
 import {
     type CSSProperties,
     useCallback,
     useMemo,
     useState,
 } from 'react';
-import {
-    Tab,
-    TabList,
-    TabPanel,
-    Tabs,
-} from 'react-aria-components';
 
 import {CharacterRowConfirmed} from './CharacterRowConfirmed';
 import {CharacterRowPending} from './CharacterRowPending';
@@ -127,91 +120,81 @@ export const EditorSidebar = ({
 
     return (
         <aside className={clsx(styles.sidebar, className)}>
-            <Tabs className={styles.tabs} defaultSelectedKey="elements">
-                <TabList className={styles.tabList}>
-                    <Tab id="elements" className={styles.tab}>
-                        <List className={styles.tabIcon} aria-hidden="true" />
-                        Elements
-                    </Tab>
-                </TabList>
-                <TabPanel id="elements" className={styles.tabPanel}>
-                    <section className={styles.section}>
-                        <h3 className={styles.sectionTitle}>Characters</h3>
-                        {isLoading ? (
-                            <p className={styles.emptyState}>Loading characters...</p>
-                        ) : null}
-                        {!isLoading && !hasCharacters ? (
-                            <p className={styles.emptyState}>
-                                No characters yet. Add a Character block to start building your cast.
-                            </p>
-                        ) : null}
-                        {!isLoading && hasCharacters ? (
-                            <ul className={styles.characterList}>
-                                {rows.map(character => {
-                                    const characterIdentityKey = getCharacterIdentityKey(character);
-                                    const isExpanded = character.isConfirmed && expandedKeys.has(characterIdentityKey);
-                                    const isConfirmPending = character.isConfirmPending ?? character.isPending ?? false;
-                                    const isDeletePending = character.isDeletePending ?? false;
-                                    const isRenamePending = character.isRenamePending ?? false;
-                                    const renameDraftKey = getRenameDraftKey(character.id, character.key);
-                                    const renameDraft = renameDraftByKey[renameDraftKey] ?? character.key;
+            <section className={styles.section}>
+                <h3 className={styles.sectionTitle}>Characters</h3>
+                {isLoading ? (
+                    <p className={styles.emptyState}>Loading characters...</p>
+                ) : null}
+                {!isLoading && !hasCharacters ? (
+                    <p className={styles.emptyState}>
+                        No characters yet. Add a Character block to start building your cast.
+                    </p>
+                ) : null}
+                {!isLoading && hasCharacters ? (
+                    <ul className={styles.characterList}>
+                        {rows.map(character => {
+                            const characterIdentityKey = getCharacterIdentityKey(character);
+                            const isExpanded = character.isConfirmed && expandedKeys.has(characterIdentityKey);
+                            const isConfirmPending = character.isConfirmPending ?? character.isPending ?? false;
+                            const isDeletePending = character.isDeletePending ?? false;
+                            const isRenamePending = character.isRenamePending ?? false;
+                            const renameDraftKey = getRenameDraftKey(character.id, character.key);
+                            const renameDraft = renameDraftByKey[renameDraftKey] ?? character.key;
 
-                                    return (
-                                        <li
-                                            key={characterIdentityKey}
-                                            className={clsx(
-                                                styles.characterItem,
-                                                !character.isConfirmed && styles.characterItemUnconfirmed,
-                                            )}
-                                            style={{'--character-color': character.color} as CSSProperties}
-                                        >
-                                            {character.isConfirmed ? (
-                                                <CharacterRowConfirmed
-                                                    model={{
-                                                        character,
-                                                        characterIdentityKey,
-                                                        renameDraft,
-                                                    }}
-                                                    state={{
-                                                        isExpanded,
-                                                        isDeletePending,
-                                                        isRenamePending,
-                                                    }}
-                                                    actions={{
-                                                        onToggleExpanded: toggleExpanded,
-                                                        onRenameDraftChange: handleRenameDraftChange,
-                                                        onCommitRenameDraft: commitRenameDraft,
-                                                        onDeleteCharacter,
-                                                        onRenameCharacter,
-                                                        onSetCharacterColor,
-                                                        onSetCharacterGender,
-                                                        onUpsertCharacterGender,
-                                                    }}
-                                                    options={{
-                                                        characterGenderOptions,
-                                                        characterColorSaturation,
-                                                    }}
-                                                />
-                                            ) : (
-                                                <CharacterRowPending
-                                                    model={{
-                                                        character,
-                                                        isConfirmPending,
-                                                    }}
-                                                    actions={{
-                                                        onConfirmCharacter,
-                                                        onFocusCharacter,
-                                                    }}
-                                                />
-                                            )}
-                                        </li>
-                                    );
-                                })}
-                            </ul>
-                        ) : null}
-                    </section>
-                </TabPanel>
-            </Tabs>
+                            return (
+                                <li
+                                    key={characterIdentityKey}
+                                    className={clsx(
+                                        styles.characterItem,
+                                        !character.isConfirmed && styles.characterItemUnconfirmed,
+                                    )}
+                                    style={{'--character-color': character.color} as CSSProperties}
+                                >
+                                    {character.isConfirmed ? (
+                                        <CharacterRowConfirmed
+                                            model={{
+                                                character,
+                                                characterIdentityKey,
+                                                renameDraft,
+                                            }}
+                                            state={{
+                                                isExpanded,
+                                                isDeletePending,
+                                                isRenamePending,
+                                            }}
+                                            actions={{
+                                                onToggleExpanded: toggleExpanded,
+                                                onRenameDraftChange: handleRenameDraftChange,
+                                                onCommitRenameDraft: commitRenameDraft,
+                                                onDeleteCharacter,
+                                                onRenameCharacter,
+                                                onSetCharacterColor,
+                                                onSetCharacterGender,
+                                                onUpsertCharacterGender,
+                                            }}
+                                            options={{
+                                                characterGenderOptions,
+                                                characterColorSaturation,
+                                            }}
+                                        />
+                                    ) : (
+                                        <CharacterRowPending
+                                            model={{
+                                                character,
+                                                isConfirmPending,
+                                            }}
+                                            actions={{
+                                                onConfirmCharacter,
+                                                onFocusCharacter,
+                                            }}
+                                        />
+                                    )}
+                                </li>
+                            );
+                        })}
+                    </ul>
+                ) : null}
+            </section>
         </aside>
     );
 };

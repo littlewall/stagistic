@@ -1,4 +1,5 @@
 import {useDroppable} from '@dnd-kit/react';
+import {ActIcon} from '@stagistic/editor';
 import {normalizeActName} from '@stagistic/script';
 import {
     memo,
@@ -85,7 +86,9 @@ export const StructureRowAct = memo(({
                 ref={ref}
                 data-structure-act-id={act.blockId}
             >
-                <span className={styles.dragHandleSpacer} aria-hidden="true" />
+                <span className={styles.actIconWrapper} aria-hidden="true">
+                    <ActIcon />
+                </span>
                 <div className={styles.actTitle}>
                     {structureSettings.actPrefix.trim() ? (
                         <button

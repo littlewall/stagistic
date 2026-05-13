@@ -65,9 +65,6 @@ export interface StructureRowActProps {
     actions: FocusBlockAction & Pick<StructureSidebarActions, 'onRenameAct' | 'onActNamePreview' | 'onDeleteAct'>,
 }
 
-export interface StructureSidebarHeaderProps {
-    actions: Pick<StructureSidebarActions, 'onInsertAct'>,
-}
 
 export interface SortableCandidateObject {
     id?: unknown,

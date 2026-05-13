@@ -1,0 +1,39 @@
+.toolbar {
+    display: flex;
+    flex: 1;
+    gap: var(--space-2);
+    align-items: center;
+    min-width: 0;
+}
+
+.closeButton {
+    cursor: pointer;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: calc(26px * var(--size-scale));
+    height: calc(26px * var(--size-scale));
+    padding: 0;
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: calc(7px * var(--size-scale));
+    transition: background .15s ease, border-color .15s ease;
+}
+
+.closeButton:hover {
+    background: color-mix(in oklch, var(--color-accent) 45%, transparent);
+}
+
+.closeButton svg {
+    width: 16px;
+    height: 16px;
+}
+
+.contextActions {
+    display: flex;
+    flex-shrink: 0;
+    gap: var(--space-1);
+    align-items: center;
+}

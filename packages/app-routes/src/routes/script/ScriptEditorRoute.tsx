@@ -30,9 +30,15 @@ import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
 import {useScriptEditorCharacters} from './editor/characters/useScriptEditorCharacters';
 import {ScriptEditorSettingsPanel} from './editor/settings';
-import {ScriptStructureSidebar} from './editor/structure';
+import {
+    type SidebarPanel,
+    useEditorSidebars,
+} from './editor/sidebar';
+import {
+    ScriptStructureSidebar,
+    StructureSidebarContextActions,
+} from './editor/structure';
 import {useStructureSidebarController} from './editor/structure/useStructureSidebarController';
-import styles from './ScriptEditorRoute.module.css';
 import {
     SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS,
     type ScriptSettingsPanelId,
@@ -41,7 +47,6 @@ import {useScriptSettingsModalQuerySync} from './settings/useScriptSettingsModal
 import {useScriptSettingsModalState} from './settings/useScriptSettingsModalState';
 import {useScriptEditorController} from './useScriptEditorController';
 import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
-import {useScriptEditorLayoutState} from './useScriptEditorLayoutState';
 import {useScriptEditorSettingsDraft} from './useScriptEditorSettingsDraft';
 
 const AUTOSAVE_DELAY_MS = 1500;
@@ -99,20 +104,6 @@ export const ScriptEditorRoute = () => {
             handleSaveScriptSettingsOverride,
         },
     });
-    const {
-        isLeftSidebarOpen,
-        isRightSidebarOpen,
-        handleToggleLeftSidebar,
-        handleToggleRightSidebar,
-    } = useScriptEditorLayoutState();
-    const leftSidebarToggle = useMemo(() => ({
-        isOpen: isLeftSidebarOpen,
-        onToggle: handleToggleLeftSidebar,
-    }), [handleToggleLeftSidebar, isLeftSidebarOpen]);
-    const rightSidebarToggle = useMemo(() => ({
-        isOpen: isRightSidebarOpen,
-        onToggle: handleToggleRightSidebar,
-    }), [handleToggleRightSidebar, isRightSidebarOpen]);
     const shortcutPrefix = isApplePlatform() ? 'Cmd' : 'Ctrl';
 
     const {
@@ -251,7 +242,6 @@ export const ScriptEditorRoute = () => {
             resolvedScriptSettings,
             characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
             isLoading: isCharactersLoading,
-            className: styles.sidebarContent,
         },
         actions: {
             onConfirmCharacter: handleConfirmCharacter,
@@ -283,6 +273,37 @@ export const ScriptEditorRoute = () => {
         renamingCharacterKeys,
         resolvedScriptSettings,
     ]);
+    const sidebarPanels = useMemo<readonly SidebarPanel[]>(() => [
+        {
+            id: 'structure',
+            label: 'Structure',
+            renderContent: () => <ScriptStructureSidebar {...structureSidebarProps} />,
+            renderContextActions: () => (
+                <StructureSidebarContextActions onInsertAct={handleSidebarInsertAct} />
+            ),
+        },
+        {
+            id: 'characters',
+            label: 'Characters',
+            renderContent: () => <ScriptCharactersSidebar {...characterSidebarProps} />,
+        },
+    ], [
+        characterSidebarProps,
+        handleSidebarInsertAct,
+        structureSidebarProps,
+    ]);
+    const {
+        leftSidebarToggle,
+        rightSidebarToggle,
+        leftSidebarHeader,
+        rightSidebarHeader,
+        leftSidebar,
+        rightSidebar,
+    } = useEditorSidebars({
+        panels: sidebarPanels,
+        defaultLeftPanelId: 'structure',
+        defaultRightPanelId: 'characters',
+    });
     const handleCloseSettings = useScriptSettingsModalQuerySync({
         queryKey: SETTINGS_MODAL_QUERY_KEY,
         searchParams,
@@ -359,6 +380,8 @@ export const ScriptEditorRoute = () => {
                     autoFocus: shouldAutoFocus,
                     leftSidebarToggle,
                     rightSidebarToggle,
+                    leftSidebarHeader,
+                    rightSidebarHeader,
                     sidebarWidth: SIDEBAR_WIDTH,
                 }}
                 requests={{
@@ -374,10 +397,10 @@ export const ScriptEditorRoute = () => {
                 }}
             >
                 <FountainEditor.LeftSidebar>
-                    <ScriptStructureSidebar {...structureSidebarProps} />
+                    {leftSidebar}
                 </FountainEditor.LeftSidebar>
                 <FountainEditor.RightSidebar>
-                    <ScriptCharactersSidebar {...characterSidebarProps} />
+                    {rightSidebar}
                 </FountainEditor.RightSidebar>
             </FountainEditor>
             <ScriptSettingsModal

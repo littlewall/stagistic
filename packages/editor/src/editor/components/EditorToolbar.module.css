@@ -98,6 +98,10 @@
 }
 
 .dropdown {
+    /* Local overrides for bordered variant */
+    --select-button-border-color: var(--color-divider);
+    --select-button-bg: var(--color-surface);
+
     position: relative;
 }
 
@@ -105,19 +109,21 @@
     cursor: pointer;
     display: grid;
     grid-template-columns: auto 1fr auto;
-    gap: var(--space-2);
+    gap: var(--select-button-gap);
     align-items: center;
     width: calc(200px * var(--size-scale));
-    padding: var(--space-1) var(--space-2);
-    font-size: calc(12px * var(--size-scale));
-    color: var(--color-ink);
-    background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: calc(8px * var(--size-scale));
+    height: var(--select-button-height);
+    padding: 0 var(--select-button-padding-inline);
+    font-size: var(--select-button-font-size);
+    font-weight: var(--select-button-font-weight);
+    color: var(--select-button-color);
+    background: var(--select-button-bg);
+    border: var(--select-button-border-width) solid var(--select-button-border-color);
+    border-radius: var(--select-button-radius);
     transition: background .15s ease;
 
     &:hover {
-        background: color-mix(in oklch, var(--color-accent) 45%, transparent);
+        background: var(--select-button-hover-bg);
     }
 
     &:disabled {
@@ -130,13 +136,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
+    width: var(--select-icon-size);
+    height: var(--select-icon-size);
 }
 
 .selectIcon svg {
-    width: 16px;
-    height: 16px;
+    width: var(--select-icon-size);
+    height: var(--select-icon-size);
     fill: none;
     stroke: currentcolor;
     stroke-linecap: round;
@@ -157,8 +163,8 @@
 }
 
 .chevron {
-    width: calc(14px * var(--size-scale));
-    height: calc(14px * var(--size-scale));
+    width: var(--select-chevron-size);
+    height: var(--select-chevron-size);
     fill: none;
     stroke: currentcolor;
     stroke-linecap: round;
@@ -168,42 +174,43 @@
 
 .menu {
     position: absolute;
-    z-index: 10;
-    top: calc(100% + var(--space-2));
+    z-index: var(--select-menu-z-index);
+    top: calc(100% + var(--select-menu-offset));
     left: 0;
     display: grid;
     min-width: calc(200px * var(--size-scale));
-    padding: var(--space-1);
-    background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-popover);
+    padding: var(--select-menu-padding);
+    background: var(--select-menu-bg);
+    border: var(--select-menu-border);
+    border-radius: var(--select-menu-radius);
+    box-shadow: var(--select-menu-shadow);
 }
 
 .menuItem {
     cursor: pointer;
     display: flex;
-    gap: var(--space-2);
+    gap: var(--select-menu-item-gap);
     align-items: center;
-    padding: var(--space-2) var(--space-2);
-    font-size: calc(12px * var(--size-scale));
-    color: var(--color-ink);
+    min-height: var(--select-menu-item-min-height);
+    padding: var(--select-menu-item-padding);
+    font-size: var(--select-menu-item-font-size);
+    color: var(--select-menu-item-color);
     background: transparent;
     border: none;
-    border-radius: calc(8px * var(--size-scale));
+    border-radius: var(--select-menu-item-radius);
     transition: background .15s ease, box-shadow .15s ease;
 
     &:hover {
-        background: color-mix(in oklch, var(--color-accent) 35%, transparent);
+        background: var(--select-menu-item-hover-bg);
     }
 }
 
 .menuItemActive {
-    font-weight: 600;
-    background: color-mix(in oklch, var(--color-accent) 85%, transparent);
+    font-weight: var(--select-menu-item-active-font-weight);
+    background: var(--select-menu-item-active-bg);
 
     &:hover {
-        background: color-mix(in oklch, var(--color-accent) 85%, transparent);
+        background: var(--select-menu-item-active-bg);
     }
 }
 

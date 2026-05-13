@@ -1,0 +1,20 @@
+.button {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(24px * var(--size-scale));
+    height: calc(24px * var(--size-scale));
+    padding: 0;
+    font-family: inherit;
+    font-size: calc(15px * var(--size-scale));
+    line-height: 1;
+    color: var(--color-ink-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: calc(8px * var(--size-scale));
+}
+
+.button:hover {
+    background: color-mix(in oklch, var(--color-accent) 24%, transparent);
+}
