@@ -184,7 +184,7 @@
     --select-menu-radius: var(--radius-md);
     --select-menu-shadow: var(--shadow-popover);
     --select-menu-padding: var(--space-1);
-    --select-menu-offset: var(--space-2);
+    --select-menu-offset: 0;
     --select-menu-max-height: calc(280px * var(--size-scale));
     --select-menu-z-index: 12;
 

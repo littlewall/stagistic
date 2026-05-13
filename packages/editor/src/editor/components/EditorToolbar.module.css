@@ -120,10 +120,22 @@
     background: var(--select-button-bg);
     border: var(--select-button-border-width) solid var(--select-button-border-color);
     border-radius: var(--select-button-radius);
-    transition: background .15s ease;
+    transition: background .15s ease, border-radius .15s ease;
 
     &:hover {
         background: var(--select-button-hover-bg);
+    }
+
+    &[aria-expanded='true'] {
+        background: var(--select-menu-bg);
+        border-color: var(--color-divider);
+        border-bottom-color: transparent;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+    }
+
+    &[aria-expanded='true']:hover {
+        background: var(--select-menu-bg);
     }
 
     &:disabled {
@@ -179,10 +191,15 @@
     left: 0;
     display: grid;
     min-width: calc(200px * var(--size-scale));
+    margin-top: -1px;
     padding: var(--select-menu-padding);
     background: var(--select-menu-bg);
     border: var(--select-menu-border);
-    border-radius: var(--select-menu-radius);
+    border-top: 0;
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: var(--select-menu-radius);
+    border-bottom-left-radius: var(--select-menu-radius);
     box-shadow: var(--select-menu-shadow);
 }
 
