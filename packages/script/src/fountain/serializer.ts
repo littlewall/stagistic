@@ -10,7 +10,6 @@ import {
     ELEMENT_COLUMN,
     ELEMENT_COLUMN_GROUP,
     ELEMENT_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
@@ -62,10 +61,7 @@ const serializeLine = (
 ): string => {
     let text = serializeLeaves(node);
 
-    if (
-        node.type === ELEMENT_CHARACTER
-        || node.type === ELEMENT_DUAL_DIALOGUE_CHARACTER
-    ) {
+    if (node.type === ELEMENT_CHARACTER) {
         text = uppercaseOutsideParentheses(text);
         text = normalizeCharacterDelimiters(text);
     }
@@ -84,10 +80,6 @@ const serializeLine = (
 
     if (node.type === ELEMENT_PARENTHETICAL) {
         return `(${withLineBreaks})`;
-    }
-
-    if (node.type === ELEMENT_DUAL_DIALOGUE_CHARACTER) {
-        return `${withLineBreaks}^`;
     }
 
     if (node.type === ELEMENT_TRANSITION) {
@@ -225,10 +217,7 @@ export const fountainSerializer = (
             continue;
         }
 
-        if (
-            node.type === ELEMENT_CHARACTER
-            || node.type === ELEMENT_DUAL_DIALOGUE_CHARACTER
-        ) {
+        if (node.type === ELEMENT_CHARACTER) {
             if (outputLines.length > 0 && outputLines[outputLines.length - 1] !== '') {
                 outputLines.push('');
             }

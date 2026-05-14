@@ -1,6 +1,5 @@
 import {
     ELEMENT_CHARACTER,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     extractCharacterKeys,
     normalizeCharacterKey,
 } from '@stagistic/script';
@@ -15,7 +14,7 @@ import {
 import type {PersistentCharacterRef} from '../types';
 
 export const isCharacterBlockType = (value: FountainBlockType) => {
-    return value === ELEMENT_CHARACTER || value === ELEMENT_DUAL_DIALOGUE_CHARACTER;
+    return value === ELEMENT_CHARACTER;
 };
 
 interface CharacterCountsCacheEntry {

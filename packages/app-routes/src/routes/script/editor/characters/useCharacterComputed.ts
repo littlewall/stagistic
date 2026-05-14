@@ -7,7 +7,6 @@ import {
     DEFAULT_EDITOR_SETTINGS,
     type EditorSettings,
     ELEMENT_CHARACTER,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     normalizeCharacterColorHex,
     normalizeCharacterKey,
 } from '@stagistic/script';
@@ -271,7 +270,7 @@ export const useCharacterComputed = ({
 
     const getCharacterNameForBlockType = useCallback((name: string, blockType: unknown) => {
         const normalizedName = normalizeCharacterDisplayName(name);
-        const isCharacterType = blockType === ELEMENT_CHARACTER || blockType === ELEMENT_DUAL_DIALOGUE_CHARACTER;
+        const isCharacterType = blockType === ELEMENT_CHARACTER;
 
         if (!isCharacterType) {
             return normalizedName;

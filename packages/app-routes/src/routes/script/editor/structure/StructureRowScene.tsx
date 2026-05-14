@@ -50,6 +50,9 @@ export const StructureRowScene = memo(({
                 <button
                     type="button"
                     className={styles.itemButton}
+                    onMouseDown={event => {
+                        event.preventDefault();
+                    }}
                     onClick={() => {
                         actions.onFocusBlock(scene.blockId);
                     }}

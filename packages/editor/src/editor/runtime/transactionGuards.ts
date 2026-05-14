@@ -1,7 +1,6 @@
 import {
     ELEMENT_ACT,
     ELEMENT_CHARACTER,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_SCENE_HEADING,
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
@@ -25,7 +24,7 @@ interface ChangedRange {
 }
 
 const isCharacterBlockType = (blockType: FountainBlockType) => {
-    return blockType === ELEMENT_CHARACTER || blockType === ELEMENT_DUAL_DIALOGUE_CHARACTER;
+    return blockType === ELEMENT_CHARACTER;
 };
 
 const isStructureBlockType = (blockType: FountainBlockType) => {

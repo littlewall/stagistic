@@ -10,11 +10,7 @@ import {createFountainNode} from './createFountainNode';
 export const SCRIPT_BLOCK_NODE_NAMES: readonly ScriptBlockNodeType[] = SCRIPT_BLOCK_NODE_TYPES;
 
 /**
- * Tiptap node definitions, one per block binding. Each entry is produced
- * by `createFountainNode({name, legacyType})` from the binding's spec.
- * The legacyType is normalised through `normalizeFountainBlockType` —
- * specs never use ELEMENT_DUAL_DIALOGUE (the wrapper type), but the
- * type system can't see that, so the normaliser narrows the static type.
+ * Tiptap node definitions, one per block binding.
  */
 export const FountainBlockNodes = ALL_BLOCK_BINDINGS.map(binding => createFountainNode({
     name: binding.spec.nodeType,

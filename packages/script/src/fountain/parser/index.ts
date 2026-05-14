@@ -1,8 +1,6 @@
 import {
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
     ELEMENT_PARENTHETICAL,
     type FountainDocument,
@@ -17,7 +15,6 @@ import {
     hasHardLineBreak,
     stripHardLineBreak,
 } from './typeDetection';
-import {wrapDualSections} from './wrapDualSections';
 
 export type ParseFountainOptions = {
     enableLegacyCapsLyricsHeuristic?: boolean,
@@ -25,9 +22,7 @@ export type ParseFountainOptions = {
 
 const LEGACY_CAPS_LYRICS_CHAIN_TYPES = new Set<FountainElementType>([
     ELEMENT_CHARACTER,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_LYRICS,
 ]);
@@ -73,7 +68,7 @@ export const fountainParser = (
 
     const cleaned = removeRedundantEmptyActions(blocks);
 
-    return wrapDualSections(cleaned);
+    return cleaned as FountainDocument;
 };
 
 export const parseFountain = fountainParser;

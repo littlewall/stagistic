@@ -92,7 +92,6 @@
     --L-block-parenthetical: .29;
     --L-block-transition: .21;
     --L-block-centered: .23;
-    --L-block-dual: .3;
 
     /* Character tag */
     --character-tag-tint-strength: 30%;
@@ -146,8 +145,6 @@
     --color-block-transition: oklch(from var(--base-neutral) var(--L-block-transition)    calc(c * var(--C-block)) h);
     --color-block-centered: oklch(from var(--base-neutral) var(--L-block-centered)      calc(c * var(--C-block)) h);
     --color-block-lyrics: var(--color-block-dialogue);
-    --color-block-dual-character: oklch(from var(--base-neutral) var(--L-block-dual)          calc(c * var(--C-block)) h);
-    --color-block-dual-dialogue: var(--color-block-dual-character);
     --radius-sm: calc(6px * var(--size-scale));
     --radius-md: calc(10px * var(--size-scale));
     --shadow-popover: 0 10px 30px var(--color-shadow-popover);
@@ -254,7 +251,6 @@
     --L-block-parenthetical: .82;
     --L-block-transition: .84;
     --L-block-centered: .85;
-    --L-block-dual: .79;
 
     /* Character tag */
     --character-tag-tint-strength: 44%;

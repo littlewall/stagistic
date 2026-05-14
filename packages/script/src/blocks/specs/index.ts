@@ -2,7 +2,6 @@ import {actSpec} from './act';
 import {actionSpec} from './action';
 import {characterSpec} from './character';
 import {dialogueSpec} from './dialogue';
-import {dualDialogueCharacterSpec} from './dualDialogueCharacter';
 import {lyricsSpec} from './lyrics';
 import {noteSpec} from './note';
 import {parentheticalSpec} from './parenthetical';
@@ -31,7 +30,6 @@ export const ALL_BLOCK_SPECS = [
     dialogueSpec,
     lyricsSpec,
     transitionSpec,
-    dualDialogueCharacterSpec,
     noteSpec,
 ] as const;
 
@@ -40,7 +38,6 @@ export {
     actSpec,
     characterSpec,
     dialogueSpec,
-    dualDialogueCharacterSpec,
     lyricsSpec,
     noteSpec,
     parentheticalSpec,

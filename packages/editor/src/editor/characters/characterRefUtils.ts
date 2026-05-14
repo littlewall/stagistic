@@ -1,6 +1,5 @@
 import {
     ELEMENT_CHARACTER,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     normalizeCharacterKey,
 } from '@stagistic/script';
 import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
@@ -10,7 +9,7 @@ import {isFountainBlockNodeName} from '../tiptap/fountainCore';
 export type CharacterRefByKey = Record<string, string>;
 
 export const isCharacterBlockType = (value: unknown): boolean => {
-    return value === ELEMENT_CHARACTER || value === ELEMENT_DUAL_DIALOGUE_CHARACTER;
+    return value === ELEMENT_CHARACTER;
 };
 
 export const readNormalizedRefsFromRaw = (rawRefs: unknown): CharacterRefByKey => {

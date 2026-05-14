@@ -1,9 +1,5 @@
 import {ALL_BLOCK_SPECS} from '../blocks/specs';
 import type {FountainElementType} from './types';
-import {
-    ELEMENT_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE,
-} from './types';
 
 /*
  * The identifier types and maps below are derived from FountainBlockSpec
@@ -56,13 +52,6 @@ const buildNodeTypeByLegacy = (): Record<FountainElementType, ScriptBlockNodeTyp
     for (const spec of ALL_BLOCK_SPECS) {
         map[spec.legacyType] = spec.nodeType as ScriptBlockNodeType;
     }
-
-    /*
-     * ELEMENT_DUAL_DIALOGUE is a wrapper type with no spec of its own;
-     * its content is rendered as ordinary dialogue, so we route it to
-     * the 'dialogue' node when resolving from legacy type.
-     */
-    map[ELEMENT_DUAL_DIALOGUE] = map[ELEMENT_DIALOGUE];
 
     return map;
 };

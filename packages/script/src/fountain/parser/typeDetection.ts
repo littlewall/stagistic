@@ -4,8 +4,6 @@ import {
     ELEMENT_ACTION,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
@@ -24,8 +22,7 @@ const NOTE_PATTERN = /^\[\[.*\]\]$/;
 const SECTION_PATTERN = /^#{1,6}\s*\S/;
 const ACT_PATTERN = /^#\s*ACT:\s*/i;
 
-const isDualCharacterLine = (line: string) => (/\^\s*$/).test(line);
-const stripCharacterExtensions = (line: string) => line.replace(/^@\s*/, '').replace(/\^\s*$/, '').replace(/\s*\(.*?\)\s*/g, ' ')
+const stripCharacterExtensions = (line: string) => line.replace(/^@\s*/, '').replace(/\s*\(.*?\)\s*/g, ' ')
     .trim();
 const isCharacterLine = (line: string) => {
     const stripped = stripCharacterExtensions(line);
@@ -57,7 +54,6 @@ const shouldCoerceLegacyCapsLyrics = (
 
     if (
         detectedType === ELEMENT_DIALOGUE
-        || detectedType === ELEMENT_DUAL_DIALOGUE
         || detectedType === ELEMENT_PARENTHETICAL
         || detectedType === ELEMENT_LYRICS
     ) {
@@ -181,24 +177,8 @@ export const detectType = (
             : detectedType;
     }
 
-    if (FORCED_CHARACTER_PATTERN.test(trimmed) && isDualCharacterLine(trimmed)) {
-        detectedType = ELEMENT_DUAL_DIALOGUE_CHARACTER;
-
-        return shouldCoerceLegacyCapsLyrics(trimmed, detectedType, options)
-            ? ELEMENT_LYRICS
-            : detectedType;
-    }
-
     if (FORCED_CHARACTER_PATTERN.test(trimmed)) {
         detectedType = ELEMENT_CHARACTER;
-
-        return shouldCoerceLegacyCapsLyrics(trimmed, detectedType, options)
-            ? ELEMENT_LYRICS
-            : detectedType;
-    }
-
-    if (isDualCharacterLine(trimmed)) {
-        detectedType = ELEMENT_DUAL_DIALOGUE_CHARACTER;
 
         return shouldCoerceLegacyCapsLyrics(trimmed, detectedType, options)
             ? ELEMENT_LYRICS
@@ -215,11 +195,9 @@ export const detectType = (
 
     if (
         previousType === ELEMENT_CHARACTER
-        || previousType === ELEMENT_DUAL_DIALOGUE_CHARACTER
         || previousType === ELEMENT_PARENTHETICAL
         || previousType === ELEMENT_DIALOGUE
         || (options?.legacyCapsLyricsMode && previousType === ELEMENT_LYRICS)
-        || previousType === ELEMENT_DUAL_DIALOGUE
     ) {
         detectedType = ELEMENT_DIALOGUE;
 

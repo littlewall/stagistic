@@ -1,7 +1,6 @@
 import {
     ELEMENT_ACT,
     ELEMENT_CHARACTER,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_SCENE_HEADING,
     type IndexedScriptBlock,
     normalizeActName,
@@ -45,7 +44,7 @@ export interface SidebarProjectionColorContext {
 const normalizeText = (value: string) => value.trim();
 
 const isCharacterBlockType = (blockType: string) => {
-    return blockType === ELEMENT_CHARACTER || blockType === ELEMENT_DUAL_DIALOGUE_CHARACTER;
+    return blockType === ELEMENT_CHARACTER;
 };
 
 const buildStructureSnapshot = (indexSnapshot: ScriptBlockIndexSnapshot): EditorLiveStructureSnapshot => {

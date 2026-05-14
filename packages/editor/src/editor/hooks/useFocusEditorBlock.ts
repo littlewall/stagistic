@@ -1,12 +1,13 @@
 import {useCallback} from 'react';
 
 import {useEditorInstance} from '../context';
-import {findFountainBlockSelectionPosFromState} from '../tiptap/fountainCore';
+import {findFountainBlockByIdFromState} from '../tiptap/fountainCore';
 
 /**
  * Returns a stable callback that scrolls the editor to a specific block and
- * places the cursor in it. Uses the editor instance from `EditorInstanceContext`
- * directly — no state, no request pattern, no re-renders on the caller.
+ * places the cursor at the end of its content. Uses the editor instance from
+ * `EditorInstanceContext` directly — no state, no request pattern, no re-renders
+ * on the caller.
  */
 export const useFocusEditorBlock = () => {
     const editor = useEditorInstance();
@@ -16,16 +17,16 @@ export const useFocusEditorBlock = () => {
             return;
         }
 
-        const targetPos = findFountainBlockSelectionPosFromState(editor.state, blockId);
+        const block = findFountainBlockByIdFromState(editor.state, blockId);
 
-        if (targetPos === null) {
+        if (!block) {
             return;
         }
 
         editor
             .chain()
             .focus()
-            .setTextSelection(targetPos)
+            .setTextSelection(block.to)
             .run();
     }, [editor]);
 };

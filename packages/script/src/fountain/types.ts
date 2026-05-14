@@ -3,10 +3,8 @@ export const ELEMENT_ACT = 'fountain_act';
 export const ELEMENT_SECTION = 'fountain_section';
 export const ELEMENT_ACTION = 'fountain_action';
 export const ELEMENT_CHARACTER = 'fountain_character';
-export const ELEMENT_DUAL_DIALOGUE_CHARACTER = 'fountain_dual_dialogue_character';
 export const ELEMENT_PARENTHETICAL = 'fountain_parenthetical';
 export const ELEMENT_DIALOGUE = 'fountain_dialogue';
-export const ELEMENT_DUAL_DIALOGUE = 'fountain_dual_dialogue';
 export const ELEMENT_TRANSITION = 'fountain_transition';
 export const ELEMENT_LYRICS = 'fountain_lyrics';
 export const ELEMENT_NOTE = 'fountain_note';
@@ -19,10 +17,8 @@ export type FountainElementType =
     | typeof ELEMENT_SECTION
     | typeof ELEMENT_ACTION
     | typeof ELEMENT_CHARACTER
-    | typeof ELEMENT_DUAL_DIALOGUE_CHARACTER
     | typeof ELEMENT_PARENTHETICAL
     | typeof ELEMENT_DIALOGUE
-    | typeof ELEMENT_DUAL_DIALOGUE
     | typeof ELEMENT_TRANSITION
     | typeof ELEMENT_LYRICS
     | typeof ELEMENT_NOTE;

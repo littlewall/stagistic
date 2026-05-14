@@ -3,8 +3,6 @@ import {
     ELEMENT_ACTION,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
@@ -43,8 +41,6 @@ export const BLOCK_PREVIEW_TEXT: Record<FountainElementType, string> = {
     [ELEMENT_SECTION]: 'MONTAGE',
     [ELEMENT_ACTION]: 'She closes the door and exhales.',
     [ELEMENT_CHARACTER]: 'ALEX',
-    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: 'ALEX',
-    [ELEMENT_DUAL_DIALOGUE]: 'I will answer you on the overlap.',
     [ELEMENT_PARENTHETICAL]: '(quietly)',
     [ELEMENT_DIALOGUE]: 'I think this is where it starts.',
     [ELEMENT_TRANSITION]: 'CUT TO:',
@@ -58,8 +54,6 @@ export const BLOCK_PREVIEW_TEXT_COLOR: Record<FountainElementType, string> = {
     [ELEMENT_SECTION]: 'var(--color-block-scene-heading)',
     [ELEMENT_ACTION]: 'var(--color-block-action)',
     [ELEMENT_CHARACTER]: 'var(--color-block-character)',
-    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: 'var(--color-block-dual-character)',
-    [ELEMENT_DUAL_DIALOGUE]: 'var(--color-block-dual-dialogue)',
     [ELEMENT_PARENTHETICAL]: 'var(--color-block-parenthetical)',
     [ELEMENT_DIALOGUE]: 'var(--color-block-dialogue)',
     [ELEMENT_TRANSITION]: 'var(--color-block-transition)',
@@ -78,10 +72,6 @@ export const panelDescriptions: Record<string, {
     'visual-preferences': {
         title: 'Visual Preferences',
         description: 'Customize character color intensity for better readability.',
-    },
-    'structure-markers': {
-        title: 'Structure Markers',
-        description: 'Configure ACT prefix and display settings for Fountain import/export.',
     },
     production: {
         title: 'Production',

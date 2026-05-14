@@ -2,7 +2,6 @@ import {actBinding} from './act';
 import {actionBinding} from './action';
 import {characterBinding} from './character';
 import {dialogueBinding} from './dialogue';
-import {dualDialogueCharacterBinding} from './dualDialogueCharacter';
 import {lyricsBinding} from './lyrics';
 import {noteBinding} from './note';
 import {parentheticalBinding} from './parenthetical';
@@ -29,7 +28,6 @@ export const ALL_BLOCK_BINDINGS: readonly FountainBlockBinding[] = [
     dialogueBinding,
     lyricsBinding,
     transitionBinding,
-    dualDialogueCharacterBinding,
     noteBinding,
 ];
 
@@ -38,7 +36,6 @@ export {
     actionBinding,
     characterBinding,
     dialogueBinding,
-    dualDialogueCharacterBinding,
     lyricsBinding,
     noteBinding,
     parentheticalBinding,

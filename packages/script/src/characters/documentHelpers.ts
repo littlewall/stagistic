@@ -9,7 +9,6 @@ import {
 } from '../document';
 import {
     ELEMENT_CHARACTER,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     normalizeCharacterKey,
 } from '../fountain';
 
@@ -21,7 +20,7 @@ export type ScriptDocumentChangeResult = {
 };
 
 export const isCharacterBlockType = (value: unknown) => {
-    return value === ELEMENT_CHARACTER || value === ELEMENT_DUAL_DIALOGUE_CHARACTER;
+    return value === ELEMENT_CHARACTER;
 };
 
 export const getNodeTextContent = (node: FountainJSONContent): string => {

@@ -4,7 +4,6 @@ import {
     ELEMENT_ACT,
     ELEMENT_ACTION,
     ELEMENT_CHARACTER,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
@@ -42,13 +41,6 @@ export const normalizeParsedLineText = (type: FountainElementType, line: string)
     if (type === ELEMENT_PARENTHETICAL) {
         text = text.trim().replace(/^\(/, '').replace(/\)$/, '')
             .trim();
-    }
-
-    if (type === ELEMENT_DUAL_DIALOGUE_CHARACTER) {
-        text = text.trim().replace(/^@\s*/, '').replace(/\^\s*$/, '')
-            .trim();
-        text = uppercaseOutsideParentheses(text);
-        text = normalizeCharacterEditorDelimiters(text);
     }
 
     if (type === ELEMENT_CHARACTER) {

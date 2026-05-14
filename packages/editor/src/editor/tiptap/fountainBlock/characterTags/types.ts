@@ -1,12 +1,9 @@
-import {
-    ELEMENT_CHARACTER,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
-} from '@stagistic/script';
+import {ELEMENT_CHARACTER} from '@stagistic/script';
 
 import {type FountainBlockType} from '../../fountainCore';
 
 export const isCharacterBlockType = (value: FountainBlockType) => {
-    return value === ELEMENT_CHARACTER || value === ELEMENT_DUAL_DIALOGUE_CHARACTER;
+    return value === ELEMENT_CHARACTER;
 };
 
 export type CharacterBlockRange = {

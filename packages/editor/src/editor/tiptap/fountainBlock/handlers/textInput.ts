@@ -1,7 +1,6 @@
 import {
     ELEMENT_ACT,
     ELEMENT_CHARACTER,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_PARENTHETICAL,
     normalizeCharacterEditorDelimiters,
 } from '@stagistic/script';
@@ -46,26 +45,12 @@ const keyDownHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) 
 
         return true;
     },
-    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: (context, event) => {
-        if (event.key !== '(') {
-            return false;
-        }
-
-        event.preventDefault();
-        insertParenPair(context.editor, context.editor.state.selection.from, context.editor.state.selection.to);
-
-        return true;
-    },
 };
 
 const normalizeActiveCharacterDelimiters = (editor: Editor) => {
     const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
 
-    if (
-        !block
-        || (block.blockType !== ELEMENT_CHARACTER
-            && block.blockType !== ELEMENT_DUAL_DIALOGUE_CHARACTER)
-    ) {
+    if (!block || block.blockType !== ELEMENT_CHARACTER) {
         return;
     }
 
@@ -178,10 +163,7 @@ export const handleTextInput = (
         return false;
     }
 
-    if (
-        block.blockType === ELEMENT_CHARACTER
-        || block.blockType === ELEMENT_DUAL_DIALOGUE_CHARACTER
-    ) {
+    if (block.blockType === ELEMENT_CHARACTER) {
         const casing = blockCasing?.[block.blockType] ?? 'uppercase';
         const enforceUppercase = casing === 'uppercase';
 

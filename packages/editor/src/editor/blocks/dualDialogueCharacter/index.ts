@@ -1,1 +1,0 @@
-export {dualDialogueCharacterBinding} from './binding';

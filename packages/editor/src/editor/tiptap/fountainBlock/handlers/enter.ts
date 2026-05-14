@@ -3,7 +3,6 @@ import {
     ELEMENT_ACT,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     ELEMENT_LYRICS,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
@@ -155,10 +154,6 @@ const enterHandlers: HandlerMap<(context: BlockContext, blockNextElements?: Bloc
             resolveNextTypeOnEnter(ELEMENT_CHARACTER, blockNextElements),
         );
     },
-    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: (_context, blockNextElements) => splitBlockWithType(
-        _context.editor,
-        resolveNextTypeOnEnter(ELEMENT_DUAL_DIALOGUE_CHARACTER, blockNextElements),
-    ),
     [ELEMENT_DIALOGUE]: (_context, blockNextElements) => splitBlockWithType(
         _context.editor,
         resolveNextTypeOnEnter(ELEMENT_DIALOGUE, blockNextElements),
@@ -175,7 +170,6 @@ const enterHandlers: HandlerMap<(context: BlockContext, blockNextElements?: Bloc
 
 const shiftEnterHandlers: HandlerMap<(context: BlockContext) => boolean> = {
     [ELEMENT_CHARACTER]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
-    [ELEMENT_DUAL_DIALOGUE_CHARACTER]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
     [ELEMENT_DIALOGUE]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
     [ELEMENT_LYRICS]: context => splitBlockWithType(context.editor, ELEMENT_LYRICS),
     [ELEMENT_PARENTHETICAL]: context => splitBlockWithType(

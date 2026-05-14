@@ -7,9 +7,7 @@ import {
 
 /**
  * Editor-local block-type union. Derived from `ALL_BLOCK_SPECS`; this is
- * the set of legacy element identifiers backed by an actual block spec
- * (and therefore a Tiptap node). It excludes ELEMENT_DUAL_DIALOGUE (the
- * wrapper type), which has no node of its own.
+ * the set of legacy element identifiers backed by an actual block spec.
  */
 export const FOUNTAIN_BLOCK_TYPES = ALL_BLOCK_SPECS.map(spec => spec.legacyType);
 

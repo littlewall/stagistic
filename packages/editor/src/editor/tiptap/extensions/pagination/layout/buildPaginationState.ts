@@ -1,6 +1,5 @@
 import {
     ELEMENT_CHARACTER,
-    ELEMENT_DUAL_DIALOGUE_CHARACTER,
     extractCharacterKeys,
 } from '@stagistic/script';
 import {
@@ -240,7 +239,7 @@ export const buildPaginationState = (
             closePage(offset);
         }
 
-        if (blockType === ELEMENT_CHARACTER || blockType === ELEMENT_DUAL_DIALOGUE_CHARACTER) {
+        if (blockType === ELEMENT_CHARACTER) {
             const [name] = extractCharacterKeys(node.textContent);
 
             lastCharacterName = name ?? null;
