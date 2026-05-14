@@ -27,7 +27,6 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         characterColorSaturation: CHARACTER_COLOR_SATURATION_DEFAULT,
     },
     structure: {
-        actPrefix: 'ACT:',
         actDisplay: {
             linesBefore: 1,
             linesAfter: 1,

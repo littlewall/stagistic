@@ -15,7 +15,6 @@ export interface BlockActionsMenuProps {
         optionType: FountainElementType,
         event: ReactMouseEvent<HTMLButtonElement>,
     ) => void,
-    onActMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
 }
 
 export interface UseOverlayPositionArgs {
@@ -37,8 +36,3 @@ export interface UseBlockActionsMenuStateArgs {
     menuRef: RefObject<HTMLDivElement | null>,
 }
 
-export interface UseActInsertCommandArgs {
-    editor: TiptapEditor | null,
-    activeBlockId: string | null,
-    closeMenu: () => void,
-}

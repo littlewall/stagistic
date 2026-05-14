@@ -21,7 +21,7 @@ export const BlockTypeSelect = ({
     return (
         <div className={styles.rightGroup}>
             <div
-                className={clsx(styles.group, styles.dropdown)}
+                className={styles.dropdown}
                 ref={dropdownRef}
             >
                 <button

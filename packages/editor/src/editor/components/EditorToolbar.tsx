@@ -16,6 +16,7 @@ import {
     isFountainBlockNodeName,
     normalizeFountainBlockType,
 } from '../tiptap/fountainCore';
+import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
 import styles from './EditorToolbar.module.css';
 import {BlockTypeSelect} from './toolbar/BlockTypeSelect';
 import type {
@@ -62,6 +63,8 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
         setIsOpen,
         dropdownRef,
     });
+
+    useExclusiveOverlay(isOpen, () => setIsOpen(false));
 
     useEffect(() => {
         setIsOpen(false);

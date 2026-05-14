@@ -1,7 +1,9 @@
+import {useExclusiveOverlay} from '@stagistic/editor';
 import {clsx} from '@stagistic/ui';
 import {
     type ReactNode,
     useEffect,
+    useId,
     useMemo,
     useRef,
     useState,
@@ -32,10 +34,14 @@ export const SettingsSelect = ({
 }: SettingsSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const selectRef = useRef<HTMLDivElement | null>(null);
+    const rawId = useId();
+    const anchorName = `--ss-${rawId.replace(/[^a-zA-Z0-9]/g, '')}` as const;
     const selectedOption = useMemo(
         () => options.find(option => option.value === value) ?? options[0] ?? null,
         [options, value],
     );
+
+    useExclusiveOverlay(isOpen, () => setIsOpen(false));
 
     useEffect(() => {
         if (!isOpen) {
@@ -74,6 +80,7 @@ export const SettingsSelect = ({
                 id={id}
                 type="button"
                 className={styles.settingsSelectButton}
+                style={{anchorName}}
                 aria-label={ariaLabel}
                 aria-haspopup="listbox"
                 aria-expanded={isOpen}
@@ -97,6 +104,7 @@ export const SettingsSelect = ({
             {isOpen ? (
                 <div
                     className={styles.settingsSelectMenu}
+                    style={{positionAnchor: anchorName}}
                     role="listbox"
                     aria-labelledby={id}
                 >

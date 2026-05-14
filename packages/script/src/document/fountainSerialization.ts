@@ -5,9 +5,7 @@ import {
     type FountainText,
 } from '../fountain';
 import {
-    DEFAULT_EDITOR_SETTINGS,
     normalizeEditorSettingsBlockType,
-    type StructureSettings,
 } from '../settings';
 import {
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
@@ -121,14 +119,8 @@ const collectFountainElements = (nodes: FountainJSONContent[] | undefined): Foun
     return elements;
 };
 
-export type ScriptDocumentFountainSerializationOptions = {
-    structureSettings?: Partial<StructureSettings>,
-    includeStructureSections?: boolean,
-};
-
 export const serializeScriptDocumentToFountain = (
     value: ScriptDocument,
-    options?: ScriptDocumentFountainSerializationOptions,
 ): string => {
     const nodes = collectFountainElements(value.content);
 
@@ -136,7 +128,5 @@ export const serializeScriptDocumentToFountain = (
         return '';
     }
 
-    return fountainSerializer(nodes, {
-        actPrefix: options?.structureSettings?.actPrefix ?? DEFAULT_EDITOR_SETTINGS.structure.actPrefix,
-    });
+    return fountainSerializer(nodes);
 };

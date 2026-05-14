@@ -121,6 +121,7 @@
     border: var(--select-button-border-width) solid var(--select-button-border-color);
     border-radius: var(--select-button-radius);
     transition: background .15s ease, border-radius .15s ease;
+    anchor-name: --block-type-select;
 
     &:hover {
         background: var(--select-button-hover-bg);
@@ -185,12 +186,13 @@
 }
 
 .menu {
-    position: absolute;
+    position: fixed;
+    position-anchor: --block-type-select;
     z-index: var(--select-menu-z-index);
-    top: calc(100% + var(--select-menu-offset));
-    left: 0;
+    top: anchor(bottom);
+    left: anchor(left);
     display: grid;
-    min-width: calc(200px * var(--size-scale));
+    min-width: anchor-size(width);
     margin-top: -1px;
     padding: var(--select-menu-padding);
     background: var(--select-menu-bg);

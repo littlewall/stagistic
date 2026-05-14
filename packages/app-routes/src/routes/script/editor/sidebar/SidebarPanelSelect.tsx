@@ -1,5 +1,7 @@
+import {useExclusiveOverlay} from '@stagistic/editor';
 import {
     useEffect,
+    useId,
     useMemo,
     useRef,
     useState,
@@ -29,10 +31,14 @@ export const SidebarPanelSelect = ({
 }: SidebarPanelSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const selectRef = useRef<HTMLDivElement | null>(null);
+    const rawId = useId();
+    const anchorName = `--spa-${rawId.replace(/[^a-zA-Z0-9]/g, '')}` as const;
     const selectedPanel = useMemo(
         () => panels.find(panel => panel.id === selectedPanelId) ?? panels[0] ?? null,
         [panels, selectedPanelId],
     );
+
+    useExclusiveOverlay(isOpen, () => setIsOpen(false));
 
     useEffect(() => {
         if (!isOpen) {
@@ -70,6 +76,7 @@ export const SidebarPanelSelect = ({
             <button
                 type="button"
                 className={styles.button}
+                style={{anchorName}}
                 aria-label={ariaLabel}
                 aria-haspopup="listbox"
                 aria-expanded={isOpen}
@@ -91,6 +98,7 @@ export const SidebarPanelSelect = ({
             {isOpen ? (
                 <div
                     className={side === 'left' ? styles.menuLeft : styles.menuRight}
+                    style={{positionAnchor: anchorName}}
                     role="listbox"
                     aria-label={ariaLabel}
                 >

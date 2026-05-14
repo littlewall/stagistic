@@ -26,27 +26,9 @@ export const StructureMarkersSettingsPanel = ({
         });
     };
 
-    const handleActPrefixChange = (event: ChangeEvent<HTMLInputElement>) => {
-        onUpdateStructureSettings({
-            actPrefix: event.target.value,
-        });
-    };
-
     return (
         <div className={styles.panelStack}>
             <h3 className={styles.panelTitle}>Structure Markers</h3>
-            <div className={styles.settingsField}>
-                <label className={styles.fieldLabel} htmlFor="settings-act-prefix">
-                    ACT Prefix
-                </label>
-                <input
-                    id="settings-act-prefix"
-                    className={styles.structurePrefixInput}
-                    type="text"
-                    value={structureSettings.actPrefix}
-                    onChange={handleActPrefixChange}
-                />
-            </div>
             <div className={styles.settingsFlatGrid}>
                 <div className={styles.settingsField}>
                     <label className={styles.fieldLabel} htmlFor="settings-act-lines-before">

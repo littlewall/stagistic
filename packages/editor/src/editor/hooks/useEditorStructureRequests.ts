@@ -4,6 +4,8 @@ import {
     ELEMENT_ACT,
     type FountainJSONContent,
     getDefaultActName,
+    getScriptBlockId,
+    getScriptBlockLegacyType,
     isScriptBlockNode,
     resolveScriptBlockNodeType,
     type ScriptDocument,
@@ -19,6 +21,20 @@ import type {
     EditorValueChangeMeta,
     InsertActRequest,
 } from '../contracts';
+
+const findFirstActBlockId = (content: FountainJSONContent[] | undefined): string | null => {
+    if (!Array.isArray(content)) {
+        return null;
+    }
+
+    for (const node of content) {
+        if (isScriptBlockNode(node) && getScriptBlockLegacyType(node) === ELEMENT_ACT) {
+            return getScriptBlockId(node);
+        }
+    }
+
+    return null;
+};
 import {FOUNTAIN_BLOCK_NODE_NAME} from '../tiptap/fountainCore';
 import {
     insertActBlockBeforeId,
@@ -59,7 +75,6 @@ export const useEditorStructureRequests = ({
         renameActRequest,
         deleteActRequest,
         moveSceneRequest,
-        moveActRequest,
     } = requests ?? {};
     const lastInsertActRequestIdRef = useRef<number | null>(null);
     const lastRenameActRequestIdRef = useRef<number | null>(null);
@@ -69,7 +84,6 @@ export const useEditorStructureRequests = ({
         editor,
         requests: {
             moveSceneRequest,
-            moveActRequest,
         },
         onValueChangeRef,
         onIndexChangeRef,
@@ -210,6 +224,12 @@ export const useEditorStructureRequests = ({
         }
 
         const currentValue = editor.getJSON() as ScriptDocument;
+        const firstActBlockId = findFirstActBlockId(currentValue.content);
+
+        if (firstActBlockId && deleteActRequest.blockId === firstActBlockId) {
+            return;
+        }
+
         const [nextContent, didChange] = removeActBlockById(
             currentValue.content,
             deleteActRequest.blockId,

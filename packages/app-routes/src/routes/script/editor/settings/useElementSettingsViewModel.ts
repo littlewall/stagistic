@@ -59,6 +59,13 @@ export const useElementSettingsViewModel = ({
             SPACING_BEFORE_OPTIONS,
             blockSettings.spacingBeforeEm ?? blockDefaults.spacingBeforeEm ?? 0,
         );
+        const hasSpacingAfter = blockDefaults.spacingAfterEm !== undefined;
+        const spacingAfterRaw = hasSpacingAfter
+            ? (blockSettings.spacingAfterEm ?? blockDefaults.spacingAfterEm ?? 0)
+            : undefined;
+        const spacingAfter = spacingAfterRaw !== undefined
+            ? getClosestStepValue(SPACING_BEFORE_OPTIONS, spacingAfterRaw)
+            : undefined;
         const lineHeight = getClosestStepValue(
             LINE_HEIGHT_OPTIONS,
             blockSettings.lineHeight ?? blockDefaults.lineHeight ?? fallbackTypographyLineHeight,
@@ -136,6 +143,9 @@ export const useElementSettingsViewModel = ({
         const lineEndPercent = pageStartPercent + ((sliderEnd / previewReferenceChars) * pageContentPercent);
         const previewStyle = {
             '--preview-spacing-before': `${Math.max(0, spacingBefore) * typographyFontSizePx}px`,
+            '--preview-spacing-after': spacingAfter !== undefined
+                ? `${Math.max(0, spacingAfter) * typographyFontSizePx}px`
+                : '0px',
             '--preview-spacing-line-unit': `${typographyFontSizePx}px`,
             '--preview-line-height': String(lineHeight),
             '--preview-line-box-height': `${typographyFontSizePx}px`,
@@ -157,6 +167,13 @@ export const useElementSettingsViewModel = ({
             '--preview-text-color': BLOCK_PREVIEW_TEXT_COLOR[blockType],
         } as CSSProperties;
 
+        const spacingAfterOptions = hasSpacingAfter
+            ? SPACING_BEFORE_OPTIONS.map(option => ({
+                value: option,
+                label: formatLines(option),
+            }))
+            : undefined;
+
         return {
             formatting: {
                 textAlign,
@@ -167,10 +184,12 @@ export const useElementSettingsViewModel = ({
             },
             numeric: {
                 spacingBefore,
+                spacingAfter,
                 lineHeight,
                 shortcut,
                 nextElement,
                 spacingBeforeOptions,
+                spacingAfterOptions,
                 lineHeightOptions,
                 shortcutOptions,
                 nextElementOptions,
@@ -185,6 +204,7 @@ export const useElementSettingsViewModel = ({
                 leftTotalInches,
                 rightTotalInches,
                 contentChars,
+                hasSpacingAfter,
             },
         };
     }, [blockType, resolvedScriptSettings]);

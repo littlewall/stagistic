@@ -4,7 +4,6 @@ export {type ApplyScriptValueResult, BlockSyncController} from './controller';
 export {
     deleteActInDocument,
     insertActInDocument,
-    moveActInDocument,
     moveSceneInDocument,
     renameActInDocument,
 } from './documentMutations';

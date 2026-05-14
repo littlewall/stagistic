@@ -6,7 +6,7 @@ export type FountainBlockSpecDefaults = Required<Pick<
     'spacingBeforeEm' | 'lineHeight' | 'nextElement' | 'textAlign' | 'casing' | 'isBold' | 'isItalic' | 'isUnderline'
 >> & Pick<
     BlockSpacingSettings,
-    'shortcut' | 'indentLeftChars' | 'indentRightChars' | 'indentLeftPx' | 'indentRightPx' | 'fontSizePx'
+    'spacingAfterEm' | 'shortcut' | 'indentLeftChars' | 'indentRightChars' | 'indentLeftPx' | 'indentRightPx' | 'fontSizePx'
 >;
 
 /**

@@ -27,10 +27,12 @@ export const ElementNumericControls = ({
 }: ElementNumericControlsProps) => {
     const {
         spacingBefore,
+        spacingAfter,
         lineHeight,
         shortcut,
         nextElement,
         spacingBeforeOptions,
+        spacingAfterOptions,
         lineHeightOptions,
         shortcutOptions,
         nextElementOptions,
@@ -53,6 +55,22 @@ export const ElementNumericControls = ({
                     }}
                 />
             </div>
+            {spacingAfter !== undefined && spacingAfterOptions ? (
+                <div className={styles.settingsField}>
+                    <span className={styles.fieldLabel}>Spacing after</span>
+                    <SettingsSelect
+                        id="settings-spacing-after"
+                        ariaLabel="Select spacing after"
+                        value={spacingAfter}
+                        options={spacingAfterOptions}
+                        onChange={nextValue => {
+                            onUpdateBlockSettings(blockType, {
+                                spacingAfterEm: Number(nextValue),
+                            });
+                        }}
+                    />
+                </div>
+            ) : null}
             <div className={styles.settingsField}>
                 <span className={styles.fieldLabel}>Line height</span>
                 <SettingsSelect

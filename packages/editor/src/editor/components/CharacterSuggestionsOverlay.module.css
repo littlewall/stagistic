@@ -1,6 +1,6 @@
 .overlay {
     pointer-events: none;
-    position: absolute;
+    position: fixed;
     z-index: 6;
 }
 

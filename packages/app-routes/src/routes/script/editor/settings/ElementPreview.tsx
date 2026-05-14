@@ -38,6 +38,7 @@ export const ElementPreview = ({
         leftTotalInches,
         rightTotalInches,
         contentChars,
+        hasSpacingAfter,
     } = model;
     const defaultSliderStartChars = 0;
     const defaultSliderEndChars = previewReferenceChars;
@@ -51,6 +52,9 @@ export const ElementPreview = ({
                     <span className={styles.previewLineText}>{previewText}</span>
                 </div>
             </div>
+            {hasSpacingAfter ? (
+                <div className={styles.previewSpacingAfterRow} />
+            ) : null}
             <div className={styles.indentSliderTrack}>
                 <span className={styles.indentSliderBase} />
                 <span className={styles.indentSliderMiddleBase} />

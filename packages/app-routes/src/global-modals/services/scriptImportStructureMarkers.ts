@@ -1,6 +1,5 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {
-    DEFAULT_EDITOR_SETTINGS,
     detectSectionMarker,
     ELEMENT_SCENE_HEADING,
     getScriptBlockId,
@@ -8,7 +7,6 @@ import {
     isScriptBlockNode,
     type ScriptImportedSceneSynopsis,
     type ScriptImportedTitlePageField,
-    type StructureSettings,
 } from '@stagistic/script';
 
 const IMPORT_MARKER_TOKEN_PREFIX = '__STAGISTIC_IMPORT_MARKER__:';
@@ -34,15 +32,10 @@ type PendingSynopsisMarker = {
 };
 
 const importTokenText = (token: string) => `${IMPORT_MARKER_TOKEN_PREFIX}${token}`;
-const ACT_IMPORT_PREFIX = DEFAULT_EDITOR_SETTINGS.structure.actPrefix.trim() || 'ACT:';
 const buildNormalizedActImportLine = (name: string) => {
     const trimmedName = name.trim();
 
-    if (!trimmedName) {
-        return `# ${ACT_IMPORT_PREFIX}`;
-    }
-
-    return `# ${ACT_IMPORT_PREFIX} ${trimmedName}`;
+    return trimmedName ? `# ${trimmedName}` : '#';
 };
 
 const getNodeTextContent = (node: unknown): string => {
@@ -183,7 +176,6 @@ const isSynopsisLine = (line: string) => {
 
 export const parseImportedSourceWithMarkers = (
     source: string,
-    settings?: Partial<StructureSettings>,
 ) => {
     const pendingSynopsisMarkers: PendingSynopsisMarker[] = [];
     const transformedLines: string[] = [];
@@ -195,7 +187,7 @@ export const parseImportedSourceWithMarkers = (
     let markerIndex = 0;
 
     for (const line of bodyLines) {
-        const marker = detectSectionMarker(line, {settings});
+        const marker = detectSectionMarker(line);
 
         if (marker) {
             if (marker.kind === 'unknown-section') {

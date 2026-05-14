@@ -39,7 +39,7 @@ export const LINE_HEIGHT_OPTIONS = [
 
 export const BLOCK_PREVIEW_TEXT: Record<FountainElementType, string> = {
     [ELEMENT_SCENE_HEADING]: 'INT. LOREM MANSION - DAY',
-    [ELEMENT_ACT]: 'ACT: ONE',
+    [ELEMENT_ACT]: 'ACT 1',
     [ELEMENT_SECTION]: 'MONTAGE',
     [ELEMENT_ACTION]: 'She closes the door and exhales.',
     [ELEMENT_CHARACTER]: 'ALEX',

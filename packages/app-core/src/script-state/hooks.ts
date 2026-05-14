@@ -14,7 +14,6 @@ import {BlockSyncController} from './controller';
 import {
     deleteActInDocument,
     insertActInDocument,
-    moveActInDocument,
     moveSceneInDocument,
     renameActInDocument,
 } from './documentMutations';
@@ -44,7 +43,6 @@ export interface ScriptStateApi {
     onDeleteAct: (blockId: string) => void,
     onInsertAct: () => void,
     onReorderScene: (sourceSceneBlockId: string, beforeBlockId: string | null) => void,
-    onReorderAct: (sourceActBlockId: string, beforeBlockId: string | null) => void,
     setSidebarTab: (tab: ScriptStateSidebarTab) => void,
     setScrollPosition: (position: number) => void,
     flushNow: () => Promise<void>,
@@ -188,10 +186,6 @@ export const useScriptState = ({
         applyDocumentMutation(value => moveSceneInDocument(value, sourceSceneBlockId, beforeBlockId));
     }, [applyDocumentMutation]);
 
-    const onReorderAct = useCallback((sourceActBlockId: string, beforeBlockId: string | null) => {
-        applyDocumentMutation(value => moveActInDocument(value, sourceActBlockId, beforeBlockId));
-    }, [applyDocumentMutation]);
-
     const setSidebarTab = useCallback((tab: ScriptStateSidebarTab) => {
         if (!controller) {
             return;
@@ -226,7 +220,6 @@ export const useScriptState = ({
         onDeleteAct,
         onInsertAct,
         onReorderScene,
-        onReorderAct,
         setSidebarTab,
         setScrollPosition,
         flushNow,

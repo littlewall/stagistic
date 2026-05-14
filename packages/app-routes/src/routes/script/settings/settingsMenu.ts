@@ -86,12 +86,6 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
             },
             {
                 kind: 'item',
-                id: 'structure-markers',
-                label: 'Structure Markers',
-                panelId: SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS,
-            },
-            {
-                kind: 'item',
                 id: 'page-layout',
                 label: 'Page Layout',
                 panelId: SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,

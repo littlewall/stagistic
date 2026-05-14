@@ -23,7 +23,6 @@ import {
 
 export type FountainSerializerOptions = {
     beforeNodeLines?: (args: {index: number, node: FountainElement}) => string[] | null | undefined,
-    actPrefix?: string,
 };
 
 const serializeLeaves = (node: FountainElement): string => node.children
@@ -60,7 +59,6 @@ const serializeLeaves = (node: FountainElement): string => node.children
 
 const serializeLine = (
     node: FountainElement,
-    options?: Pick<FountainSerializerOptions, 'actPrefix'>,
 ): string => {
     let text = serializeLeaves(node);
 
@@ -103,14 +101,9 @@ const serializeLine = (
     }
 
     if (node.type === ELEMENT_ACT) {
-        const prefix = (options?.actPrefix ?? 'ACT:').trim();
         const name = withLineBreaks.trim();
 
-        if (!name) {
-            return `# ${prefix}`;
-        }
-
-        return `# ${prefix} ${name}`;
+        return name ? `# ${name}` : '#';
     }
 
     if (node.type === ELEMENT_SECTION) {
@@ -228,7 +221,7 @@ export const fountainSerializer = (
             }
 
             pushBeforeNodeLines(i, node);
-            pushSerialized(serializeLine(node, {actPrefix: options?.actPrefix}));
+            pushSerialized(serializeLine(node));
             continue;
         }
 
@@ -248,7 +241,7 @@ export const fountainSerializer = (
         }
 
         pushBeforeNodeLines(i, node);
-        pushSerialized(serializeLine(node, {actPrefix: options?.actPrefix}));
+        pushSerialized(serializeLine(node));
         previousNonEmptyType = node.type;
 
         if (node.type === ELEMENT_TRANSITION) {

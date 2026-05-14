@@ -13,7 +13,9 @@ export const actSpec = {
     enterFallback: ELEMENT_SCENE_HEADING,
     defaultSettings: {
         spacingBeforeEm: 1.0,
+        spacingAfterEm: 1.0,
         lineHeight: 1.2,
+        indentLeftChars: 0,
         nextElement: ELEMENT_SCENE_HEADING,
         textAlign: 'left',
         casing: 'uppercase',

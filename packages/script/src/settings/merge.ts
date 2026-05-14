@@ -18,7 +18,6 @@ export const mergeEditorSettings = (
         typography: {...base.typography},
         visual: {...base.visual},
         structure: {
-            actPrefix: base.structure.actPrefix,
             actDisplay: {
                 linesBefore: base.structure.actDisplay.linesBefore,
                 linesAfter: base.structure.actDisplay.linesAfter,
@@ -82,7 +81,6 @@ export const mergeEditorSettings = (
 
         if (override.structure) {
             next.structure = {
-                actPrefix: override.structure.actPrefix ?? next.structure.actPrefix,
                 actDisplay: {
                     linesBefore: override.structure.actDisplay?.linesBefore
                         ?? next.structure.actDisplay.linesBefore,

@@ -4,6 +4,7 @@ import {
     useState,
 } from 'react';
 
+import {useExclusiveOverlay} from '../../hooks/useExclusiveOverlay';
 import type {UseBlockActionsMenuStateArgs} from './types';
 
 export const useBlockActionsMenuState = ({
@@ -54,6 +55,8 @@ export const useBlockActionsMenuState = ({
     const closeMenu = useCallback(() => {
         setIsMenuOpen(false);
     }, []);
+
+    useExclusiveOverlay(isMenuOpen, closeMenu);
 
     const toggleMenu = useCallback(() => {
         setIsMenuOpen(previous => !previous);

@@ -67,16 +67,8 @@ const toUnderline = (value?: boolean) => {
 
     return value ? 'underline' : 'none';
 };
-const toLineGapEm = (lines?: number, lineHeight = 1) => {
-    if (typeof lines !== 'number' || !Number.isFinite(lines) || lines < 0) {
-        return undefined;
-    }
-
-    return `${lines * lineHeight}em`;
-};
-
 /**
- * Standard per-block CSS variables emitted for every binding. The 9
+ * Standard per-block CSS variables emitted for every binding. The 10
  * variables below are uniform across all block types: padding/indent,
  * line height, alignment, casing, font weight/style, and underline.
  */
@@ -87,6 +79,7 @@ const buildStandardBlockVars = (
 ): Record<string, string | undefined> => {
     return {
         [`--${prefix}-spacing-before`]: toEm(block?.spacingBeforeEm),
+        [`--${prefix}-spacing-after`]: toEm(block?.spacingAfterEm),
         [`--${prefix}-line-height`]: String(block?.lineHeight ?? fallbackLineHeight),
         [`--${prefix}-indent-left`]: toIndent(block?.indentLeftChars, block?.indentLeftPx),
         [`--${prefix}-indent-right`]: toIndent(block?.indentRightChars, block?.indentRightPx),
@@ -124,16 +117,8 @@ export const getEditorCssVars = (settings: EditorSettings, scale = 1): EditorCss
         Object.assign(vars, standard);
     }
 
-    /*
-     * Act-specific override: act spacing comes from structure.actDisplay
-     * (lines, multiplied by the act line-height) rather than the
-     * standard spacingBeforeEm. Act also has an extra --act-spacing-after.
-     */
     const actLineHeight = blocks[ELEMENT_ACT]?.lineHeight ?? baseLineHeight;
-    const actDisplay = settings.structure.actDisplay;
 
-    vars['--act-spacing-before'] = toLineGapEm(actDisplay.linesBefore, actLineHeight);
-    vars['--act-spacing-after'] = toLineGapEm(actDisplay.linesAfter, actLineHeight);
     vars['--act-line-height'] = String(actLineHeight);
 
     return vars as EditorCssVars;

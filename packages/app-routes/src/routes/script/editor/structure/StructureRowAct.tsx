@@ -1,4 +1,3 @@
-import {useDroppable} from '@dnd-kit/react';
 import {ActIcon} from '@stagistic/editor';
 import {normalizeActName} from '@stagistic/script';
 import {
@@ -6,42 +5,21 @@ import {
     useCallback,
 } from 'react';
 
-import {
-    ACT_DND_TYPE,
-    SCENE_DND_TYPE,
-} from './dnd';
 import styles from './ScriptStructureSidebar.module.css';
 import type {StructureRowActProps} from './types';
 
-const joinClassNames = (...classNames: Array<string | false | null | undefined>) => {
-    return classNames.filter(Boolean).join(' ');
-};
-
 export const StructureRowAct = memo(({
     act,
+    isFirstAct,
     data,
     actions,
 }: StructureRowActProps) => {
-    const {structureSettings, actNamePreviewById} = data;
+    const {actNamePreviewById} = data;
     const {
-        onFocusBlock,
         onRenameAct,
         onActNamePreview,
         onDeleteAct,
     } = actions;
-    const {
-        ref,
-        isDropTarget,
-    } = useDroppable({
-        id: act.blockId,
-        type: ACT_DND_TYPE,
-        accept: [SCENE_DND_TYPE],
-    });
-    const actRowClassName = joinClassNames(
-        styles.itemRow,
-        styles.actRow,
-        isDropTarget ? styles.itemRowDropTarget : null,
-    );
 
     const handleActNameChange = useCallback((value: string, currentName: string) => {
         const normalizedValue = normalizeActName(value);
@@ -82,31 +60,18 @@ export const StructureRowAct = memo(({
     return (
         <li>
             <div
-                className={actRowClassName}
-                ref={ref}
+                className={`${styles.itemRow} ${styles.actRow}`}
                 data-structure-act-id={act.blockId}
             >
                 <span className={styles.actIconWrapper} aria-hidden="true">
                     <ActIcon />
                 </span>
                 <div className={styles.actTitle}>
-                    {structureSettings.actPrefix.trim() ? (
-                        <button
-                            type="button"
-                            className={styles.actPrefixButton}
-                            onMouseDown={event => {
-                                event.preventDefault();
-                                onFocusBlock(act.blockId);
-                            }}
-                        >
-                            {`${structureSettings.actPrefix.trim()} `}
-                        </button>
-                    ) : null}
                     <input
                         type="text"
                         className={styles.actTitleInput}
                         value={normalizeActName(actNamePreviewById[act.blockId] ?? act.name)}
-                        aria-label={`Rename ${structureSettings.actPrefix.trim()} ${act.name}`}
+                        aria-label={`Rename act ${act.name}`}
                         onChange={event => {
                             handleActNameChange(event.target.value, act.name);
                         }}
@@ -130,18 +95,20 @@ export const StructureRowAct = memo(({
                             }
                         }}
                     />
-                    <button
-                        type="button"
-                        className={styles.actDeleteButton}
-                        aria-label={`Delete ${structureSettings.actPrefix.trim()} ${act.name}`}
-                        onMouseDown={event => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            onDeleteAct(act.blockId);
-                        }}
-                    >
-                        ×
-                    </button>
+                    {!isFirstAct ? (
+                        <button
+                            type="button"
+                            className={styles.actDeleteButton}
+                            aria-label={`Delete act ${act.name}`}
+                            onMouseDown={event => {
+                                event.preventDefault();
+                                event.stopPropagation();
+                                onDeleteAct(act.blockId);
+                            }}
+                        >
+                            ×
+                        </button>
+                    ) : null}
                 </div>
             </div>
         </li>

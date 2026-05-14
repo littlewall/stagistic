@@ -1,7 +1,6 @@
 import type {
     DeleteActRequest,
     InsertActRequest,
-    MoveActRequest,
     MoveSceneRequest,
     RenameActRequest,
 } from '@stagistic/editor';
@@ -29,14 +28,12 @@ export const useStructureSidebarController = ({
     const [renameActRequest, setRenameActRequest] = useState<RenameActRequest | null>(null);
     const [deleteActRequest, setDeleteActRequest] = useState<DeleteActRequest | null>(null);
     const [moveSceneRequest, setMoveSceneRequest] = useState<MoveSceneRequest | null>(null);
-    const [moveActRequest, setMoveActRequest] = useState<MoveActRequest | null>(null);
     const [actNamePreviewById, setActNamePreviewById] = useState<Record<string, string>>({});
     const activeBlockIdRef = useRef<string | null>(null);
     const insertActRequestCounterRef = useRef(0);
     const renameActRequestCounterRef = useRef(0);
     const deleteActRequestCounterRef = useRef(0);
     const moveSceneRequestCounterRef = useRef(0);
-    const moveActRequestCounterRef = useRef(0);
     const lastPersistedActiveBlockIdRef = useRef<string | null>(null);
     const pendingPersistScriptIdRef = useRef<string | null>(null);
     const pendingPersistBlockIdRef = useRef<string | null>(null);
@@ -75,7 +72,6 @@ export const useStructureSidebarController = ({
         setRenameActRequest(null);
         setDeleteActRequest(null);
         setMoveSceneRequest(null);
-        setMoveActRequest(null);
         setActNamePreviewById({});
         lastPersistedActiveBlockIdRef.current = null;
     }, [currentScriptId, flushPendingActiveBlockPersist]);
@@ -174,7 +170,7 @@ export const useStructureSidebarController = ({
     const handleSidebarInsertAct = useCallback(() => {
         insertActRequestCounterRef.current += 1;
         setInsertActRequest({
-            beforeBlockId: activeBlockIdRef.current,
+            beforeBlockId: null,
             requestId: insertActRequestCounterRef.current,
         });
     }, []);
@@ -188,18 +184,6 @@ export const useStructureSidebarController = ({
             sourceSceneBlockId,
             beforeBlockId,
             requestId: moveSceneRequestCounterRef.current,
-        });
-    }, []);
-
-    const handleSidebarReorderAct = useCallback((
-        sourceActBlockId: string,
-        beforeBlockId: string | null,
-    ) => {
-        moveActRequestCounterRef.current += 1;
-        setMoveActRequest({
-            sourceActBlockId,
-            beforeBlockId,
-            requestId: moveActRequestCounterRef.current,
         });
     }, []);
 
@@ -229,14 +213,12 @@ export const useStructureSidebarController = ({
         renameActRequest,
         deleteActRequest,
         moveSceneRequest,
-        moveActRequest,
         actNamePreviewById,
         handleSidebarRenameAct,
         handleActNamePreview,
         handleSidebarDeleteAct,
         handleSidebarInsertAct,
         handleSidebarReorderScene,
-        handleSidebarReorderAct,
         handleActiveBlockChange,
     };
 };

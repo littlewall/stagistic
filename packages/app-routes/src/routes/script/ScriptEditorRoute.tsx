@@ -155,14 +155,12 @@ export const ScriptEditorRoute = () => {
         renameActRequest,
         deleteActRequest,
         moveSceneRequest,
-        moveActRequest,
         actNamePreviewById,
         handleSidebarRenameAct,
         handleActNamePreview,
         handleSidebarDeleteAct,
         handleSidebarInsertAct,
         handleSidebarReorderScene,
-        handleSidebarReorderAct,
         handleActiveBlockChange,
     } = useStructureSidebarController({
         currentScriptId,
@@ -207,7 +205,6 @@ export const ScriptEditorRoute = () => {
     const structureSidebarProps = useMemo(() => ({
         data: {
             indexSnapshot: sourceIndexForSidebars,
-            structureSettings: resolvedScriptSettings.structure,
             actNamePreviewById,
         },
         actions: {
@@ -215,7 +212,6 @@ export const ScriptEditorRoute = () => {
             onActNamePreview: handleActNamePreview,
             onDeleteAct: handleSidebarDeleteAct,
             onInsertAct: handleSidebarInsertAct,
-            onReorderAct: handleSidebarReorderAct,
             onReorderScene: handleSidebarReorderScene,
         },
     }), [
@@ -223,10 +219,8 @@ export const ScriptEditorRoute = () => {
         handleActNamePreview,
         handleSidebarDeleteAct,
         handleSidebarInsertAct,
-        handleSidebarReorderAct,
         handleSidebarReorderScene,
         handleSidebarRenameAct,
-        resolvedScriptSettings.structure,
         sourceIndexForSidebars,
     ]);
     const characterSidebarProps = useMemo(() => ({
@@ -389,7 +383,6 @@ export const ScriptEditorRoute = () => {
                     renameActRequest,
                     deleteActRequest,
                     moveSceneRequest,
-                    moveActRequest,
                 }}
                 callbacks={{
                     onValueChange: handleResolvedEditorValueChange,

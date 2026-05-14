@@ -37,12 +37,12 @@ export type {
     EditorValueChangeMeta,
     FocusBlockRequest,
     InsertActRequest,
-    MoveActRequest,
     MoveSceneRequest,
     PersistentCharacterRef,
     RenameActRequest,
 } from './editor/contracts';
 export {default as FountainEditor} from './editor/Editor';
+export {useExclusiveOverlay} from './editor/hooks/useExclusiveOverlay';
 export {useFocusEditorBlock} from './editor/hooks/useFocusEditorBlock';
 export {
     useEditorLiveActiveBlock,

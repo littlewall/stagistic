@@ -1,7 +1,4 @@
-import {
-    ELEMENT_ACT,
-    type FountainElementType,
-} from '@stagistic/script';
+import type {FountainElementType} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
 import {
@@ -29,7 +26,6 @@ import {
 import {useDragPreviewSession} from './blockActions/overlay/useDragPreviewSession';
 import {useDragSourceHighlight} from './blockActions/overlay/useDragSourceHighlight';
 import {usePointerDragInteraction} from './blockActions/overlay/usePointerDragInteraction';
-import {useActInsertCommand} from './blockActions/useActInsertCommand';
 import {useBlockActionsMenuState} from './blockActions/useBlockActionsMenuState';
 import {useMenuPlacement} from './blockActions/useMenuPlacement';
 import {useOverlayPosition} from './blockActions/useOverlayPosition';
@@ -126,12 +122,6 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
     const isMenuDisabledBlock = visibleOverlayState
         ? MENU_DISABLED_BLOCK_TYPES.has(visibleOverlayState.blockType)
         : false;
-    const handleActMouseDown = useActInsertCommand({
-        editor,
-        activeBlockId: visibleOverlayState?.blockId ?? null,
-        closeMenu,
-    });
-
     const updateOverlayAnchor = useCallback((options?: AnchorUpdateOptions) => {
         const allowClearOnMiss = options?.allowClearOnMiss ?? true;
         const canvas = canvasRef.current;
@@ -316,7 +306,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             return;
         }
 
-        if (optionType === visibleOverlayState.blockType || visibleOverlayState.blockType === ELEMENT_ACT) {
+        if (optionType === visibleOverlayState.blockType) {
             return;
         }
 
@@ -327,7 +317,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         visibleOverlayState,
     ]);
 
-    if (!editor || !isOverlayVisible || !overlayAnchorStyle || !visibleOverlayState) {
+    if (!editor || !isOverlayVisible || !overlayAnchorStyle || !visibleOverlayState || isMenuDisabledBlock) {
         return null;
     }
 
@@ -373,7 +363,6 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
                         isMenuAbove={isMenuAbove}
                         menuRef={menuRef}
                         onMenuItemMouseDown={handleMenuItemMouseDown}
-                        onActMouseDown={handleActMouseDown}
                     />
                 ) : null}
             </div>

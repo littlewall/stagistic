@@ -8,6 +8,7 @@ import {
     useRef,
 } from 'react';
 
+import {useExclusiveOverlay} from '../../hooks/useExclusiveOverlay';
 import {useEditorLiveCharacters} from '../../live';
 import {getEmptyEnterChooserFromState} from '../../tiptap/extensions/EmptyEnterChooserExtension';
 import {
@@ -182,6 +183,8 @@ export const useCharacterSuggestions = ({
         overlayState,
         scheduleOverlayUpdate,
     ]);
+
+    useExclusiveOverlay(overlayState !== null, closeOverlay);
 
     const selectSuggestion = useCallback((suggestion: string) => {
         if (!editor) {

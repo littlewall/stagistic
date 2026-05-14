@@ -39,7 +39,6 @@ export const ScriptStructureSidebar = ({
 }: ScriptStructureSidebarProps) => {
     const {
         indexSnapshot,
-        structureSettings,
         actNamePreviewById,
     } = data;
     const liveStructure = useEditorLiveStructure();
@@ -80,10 +79,12 @@ export const ScriptStructureSidebar = ({
         rowByBlockId,
         sceneByBlockId,
     ]);
+    const firstActBlockId = useMemo(() => {
+        return rows.find(row => row.kind === 'act')?.blockId ?? null;
+    }, [rows]);
     const actRowData = useMemo(() => ({
-        structureSettings,
         actNamePreviewById,
-    }), [actNamePreviewById, structureSettings]);
+    }), [actNamePreviewById]);
     const actRowActions = useMemo(() => ({
         onFocusBlock: focusBlock,
         onRenameAct: actions.onRenameAct,
@@ -126,6 +127,7 @@ export const ScriptStructureSidebar = ({
                                     <StructureRowAct
                                         key={`${row.kind}-${row.blockId}`}
                                         act={row}
+                                        isFirstAct={row.blockId === firstActBlockId}
                                         data={actRowData}
                                         actions={actRowActions}
                                     />

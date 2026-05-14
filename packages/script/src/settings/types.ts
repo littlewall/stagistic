@@ -8,6 +8,7 @@ import type {
 export interface BlockSpacingSettings {
     // Unitless multiplier of current block font size.
     spacingBeforeEm?: number,
+    spacingAfterEm?: number,
     // Preferred screenplay indentation unit used in the editor.
     indentLeftChars?: number,
     indentRightChars?: number,
@@ -60,7 +61,6 @@ export interface StructureActDisplaySettings {
 }
 
 export interface StructureSettings {
-    actPrefix: string,
     actDisplay: StructureActDisplaySettings,
 }
 
@@ -77,7 +77,6 @@ export interface EditorSettings {
 export type BlockSettingsPatch = Partial<BlockSpacingSettings>;
 
 export interface StructureSettingsPatch {
-    actPrefix?: string,
     actDisplay?: Partial<StructureActDisplaySettings>,
 }
 

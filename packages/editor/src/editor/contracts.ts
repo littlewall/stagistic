@@ -58,12 +58,6 @@ export interface MoveSceneRequest {
     requestId: number,
 }
 
-export interface MoveActRequest {
-    sourceActBlockId: string,
-    beforeBlockId: string | null,
-    requestId: number,
-}
-
 export interface EditorValueChangeMeta {
     source: 'typing' | 'structure',
     revision: number,
@@ -158,7 +152,6 @@ export interface EditorStructureRequests {
     renameActRequest?: RenameActRequest | null,
     deleteActRequest?: DeleteActRequest | null,
     moveSceneRequest?: MoveSceneRequest | null,
-    moveActRequest?: MoveActRequest | null,
 }
 
 export interface EditorLifecycleCallbacks {

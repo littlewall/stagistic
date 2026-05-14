@@ -5,7 +5,6 @@ import {
     parseFountain,
     type ParseFountainOptions,
     scriptDocumentFromFountainAst,
-    type StructureSettings,
     trimOrFallback,
 } from '@stagistic/script';
 
@@ -22,7 +21,6 @@ const normalizeFountainSource = (source: string) => source
 export const parseImportedFountainScript = (
     source: string,
     options?: {
-        structureSettings?: Partial<StructureSettings>,
         enableLegacyCapsLyricsHeuristic?: boolean,
     },
 ) => {
@@ -31,10 +29,7 @@ export const parseImportedFountainScript = (
         transformedSource,
         pendingSynopsisMarkers,
         pendingTitlePageFields,
-    } = parseImportedSourceWithMarkers(
-        normalizedSource,
-        options?.structureSettings,
-    );
+    } = parseImportedSourceWithMarkers(normalizedSource);
     const parseOptions: ParseFountainOptions = {
         enableLegacyCapsLyricsHeuristic: options?.enableLegacyCapsLyricsHeuristic ?? false,
     };

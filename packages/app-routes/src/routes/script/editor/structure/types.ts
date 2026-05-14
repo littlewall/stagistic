@@ -2,7 +2,6 @@ import type {DragDropProvider} from '@dnd-kit/react';
 import type {
     ScriptBlockIndexSnapshot,
     ScriptDocument,
-    StructureSettings,
 } from '@stagistic/script';
 import type {ComponentProps} from 'react';
 
@@ -25,7 +24,6 @@ export interface UseStructureSidebarControllerArgs {
 
 export interface StructureSidebarData {
     indexSnapshot: ScriptBlockIndexSnapshot | null,
-    structureSettings: StructureSettings,
     actNamePreviewById: Record<string, string>,
 }
 
@@ -38,7 +36,6 @@ export interface StructureSidebarActions {
     onActNamePreview: (blockId: string, nextName: string) => void,
     onDeleteAct: (blockId: string) => void,
     onInsertAct: () => void,
-    onReorderAct: (sourceActBlockId: string, beforeBlockId: string | null) => void,
     onReorderScene: (sourceSceneBlockId: string, beforeBlockId: string | null) => void,
 }
 
@@ -61,7 +58,8 @@ export interface StructureRowSceneProps {
 
 export interface StructureRowActProps {
     act: StructureActRow,
-    data: Pick<StructureSidebarData, 'structureSettings' | 'actNamePreviewById'>,
+    isFirstAct: boolean,
+    data: Pick<StructureSidebarData, 'actNamePreviewById'>,
     actions: FocusBlockAction & Pick<StructureSidebarActions, 'onRenameAct' | 'onActNamePreview' | 'onDeleteAct'>,
 }
 

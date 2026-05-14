@@ -15,14 +15,14 @@ import {
     FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
 } from '../tiptap/fountainCore';
-import {moveActMarker, moveSceneSegment} from './structureReorder';
+import {moveSceneSegment} from './structureReorder';
 import {tryCommitDocument} from './structureRequestMutations';
 import {type AutosaveSchedulePayload} from './useAutosaveController';
 import {setActiveBlockSyncSuppressed} from './useEditorActiveBlockSync';
 
 interface UseEditorMoveRequestsArgs {
     editor: TiptapEditor | null,
-    requests?: Pick<EditorStructureRequests, 'moveSceneRequest' | 'moveActRequest'>,
+    requests?: Pick<EditorStructureRequests, 'moveSceneRequest'>,
     onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
     onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
     setLatestValue: (value: ScriptDocument, revision?: number) => void,
@@ -41,10 +41,8 @@ export const useEditorMoveRequests = ({
 }: UseEditorMoveRequestsArgs) => {
     const {
         moveSceneRequest,
-        moveActRequest,
     } = requests ?? {};
     const lastMoveSceneRequestIdRef = useRef<number | null>(null);
-    const lastMoveActRequestIdRef = useRef<number | null>(null);
     const releaseSyncSuppressionFrameRef = useRef<number | null>(null);
 
     useEffect(() => {
@@ -148,58 +146,6 @@ export const useEditorMoveRequests = ({
     }, [
         editor,
         moveSceneRequest,
-        onIndexChangeRef,
-        onValueChangeRef,
-        scheduleAutosave,
-        setLatestValue,
-        revisionRef,
-        withActiveBlockPreserved,
-    ]);
-
-    useEffect(() => {
-        if (!editor || !moveActRequest) {
-            return;
-        }
-
-        if (lastMoveActRequestIdRef.current === moveActRequest.requestId) {
-            return;
-        }
-
-        lastMoveActRequestIdRef.current = moveActRequest.requestId;
-
-        if (
-            !moveActRequest.sourceActBlockId
-            || moveActRequest.sourceActBlockId === moveActRequest.beforeBlockId
-        ) {
-            return;
-        }
-
-        const currentValue = editor.getJSON() as ScriptDocument;
-        const [nextContent, didChange] = moveActMarker(
-            currentValue.content,
-            moveActRequest.sourceActBlockId,
-            moveActRequest.beforeBlockId,
-        );
-
-        if (!didChange || !Array.isArray(nextContent)) {
-            return;
-        }
-
-        withActiveBlockPreserved(() => {
-            tryCommitDocument(
-                editor,
-                nextContent,
-                didChange,
-                setLatestValue,
-                onValueChangeRef,
-                onIndexChangeRef,
-                scheduleAutosave,
-                revisionRef,
-            );
-        });
-    }, [
-        editor,
-        moveActRequest,
         onIndexChangeRef,
         onValueChangeRef,
         scheduleAutosave,

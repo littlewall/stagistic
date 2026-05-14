@@ -52,14 +52,12 @@ export const computeOverlayStyle = ({
         return null;
     }
 
-    const canvasRect = canvas.getBoundingClientRect();
     const sizeScale = getSizeScale(canvas);
     const tagPadding = horizontalPaddingPx * sizeScale;
-    const rawLeft = anchorStartCoords.left - canvasRect.left + canvas.scrollLeft - tagPadding;
-    const minLeft = canvas.scrollLeft;
-    const maxLeft = canvas.scrollLeft + canvas.clientWidth - overlayWidthPx;
-    const left = Math.max(minLeft, Math.min(rawLeft, Math.max(minLeft, maxLeft)));
-    const top = anchorEndCoords.bottom - canvasRect.top + canvas.scrollTop;
+    const rawLeft = anchorStartCoords.left - tagPadding;
+    const maxLeft = window.innerWidth - overlayWidthPx;
+    const left = Math.max(0, Math.min(rawLeft, Math.max(0, maxLeft)));
+    const top = anchorEndCoords.bottom;
 
     return {
         top,

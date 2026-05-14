@@ -30,13 +30,6 @@ export const normalizeSettingsOverride = (settings: EditorSettingsOverride): Edi
         const nextStructure: NonNullable<EditorSettingsOverride['structure']> = {};
         const rawLinesBefore = settings.structure.actDisplay?.linesBefore;
         const rawLinesAfter = settings.structure.actDisplay?.linesAfter;
-        const actPrefix = typeof settings.structure.actPrefix === 'string'
-            ? settings.structure.actPrefix.trim()
-            : undefined;
-
-        if (actPrefix) {
-            nextStructure.actPrefix = actPrefix;
-        }
 
         if (rawLinesBefore !== undefined || rawLinesAfter !== undefined) {
             const normalizeLineCount = (value: number | undefined) => {
