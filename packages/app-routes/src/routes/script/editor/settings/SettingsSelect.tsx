@@ -1,5 +1,6 @@
 import {useExclusiveOverlay} from '@stagistic/editor';
 import {Select, type SelectOption} from '@stagistic/ui';
+import {clsx} from '@stagistic/ui';
 import {useState} from 'react';
 
 import styles from './SettingsSelect.module.css';
@@ -12,6 +13,7 @@ interface SettingsSelectProps {
     options: SettingsSelectOption[],
     ariaLabel: string,
     onChange: (value: number | string) => void,
+    className?: string,
 }
 
 export const SettingsSelect = ({
@@ -20,6 +22,7 @@ export const SettingsSelect = ({
     options,
     ariaLabel,
     onChange,
+    className,
 }: SettingsSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
 
@@ -32,7 +35,7 @@ export const SettingsSelect = ({
             options={options}
             ariaLabel={ariaLabel}
             onChange={onChange}
-            className={styles.root}
+            className={clsx(styles.root, className)}
             isOpen={isOpen}
             onIsOpenChange={setIsOpen}
         />

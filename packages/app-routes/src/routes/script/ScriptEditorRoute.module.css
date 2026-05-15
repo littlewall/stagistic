@@ -44,44 +44,6 @@
     font-weight: 600;
 }
 
-.visualPreferencesInlineRow {
-    display: flex;
-    gap: var(--space-3);
-    align-items: center;
-}
-
-.visualSelectCompact .settingsSelect {
-    width: max-content;
-}
-
-.visualSelectCompact .settingsSelectButton {
-    width: auto;
-    min-height: calc(30px * var(--size-scale));
-    padding: 0 var(--space-2);
-}
-
-.visualSelectCompact .settingsSelectLabel {
-    font-variant-numeric: tabular-nums;
-}
-
-.visualPreviewPrefix {
-    font-size: .875rem;
-    font-weight: 600;
-    color: var(--color-ink-muted);
-}
-
-.visualPreviewDots {
-    display: inline-flex;
-    gap: var(--space-2);
-    align-items: center;
-}
-
-.visualPreviewDot {
-    width: calc(10px * var(--size-scale));
-    height: calc(10px * var(--size-scale));
-    border: 1px solid color-mix(in oklch, var(--color-ink) 14%, var(--color-surface));
-    border-radius: 999px;
-}
 
 .structurePrefixGrid {
     display: grid;
@@ -124,11 +86,6 @@
 
 
 @media (max-width: 900px) {
-    .visualPreferencesInlineRow {
-        flex-wrap: wrap;
-        gap: var(--space-2);
-    }
-
     .structurePrefixGrid {
         grid-template-columns: 1fr;
     }

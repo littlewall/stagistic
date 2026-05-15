@@ -10,7 +10,7 @@ import {PageLayoutSettingsPanel} from './page-layout/PageLayoutSettingsPanel';
 import {PlaceholderSettingsPanel} from './PlaceholderSettingsPanel';
 import {StructureMarkersSettingsPanel} from './StructureMarkersSettingsPanel';
 import type {ScriptEditorSettingsPanelProps} from './types';
-import {VisualPreferencesSettingsPanel} from './VisualPreferencesSettingsPanel';
+import {VisualPreferencesSettingsPanel} from './visual-preferences/VisualPreferencesSettingsPanel';
 
 export const ScriptEditorSettingsPanel = ({
     panelId,
