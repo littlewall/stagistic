@@ -39,6 +39,8 @@ export {
     CardFooter,
     CardHeader,
 } from './molecules/Card';
+export {Select} from './molecules/forms/Select';
+export type {SelectOption} from './molecules/forms/Select';
 export {TextInput} from './molecules/forms/TextInput';
 export {Grid} from './organisms/Grid';
 export {HeroLayout} from './organisms/HeroLayout';
