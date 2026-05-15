@@ -91,8 +91,9 @@ export interface ElementPreviewModel {
     hasSpacingAfter: boolean,
 }
 
-export interface ElementSettingsActions {
-    onUpdateBlockSettings: UpdateBlockSettings,
+export interface ElementPreviewHandlers {
+    onStartChange: (value: number) => void,
+    onEndChange: (value: number) => void,
 }
 
 export interface ElementSettingsViewModel {

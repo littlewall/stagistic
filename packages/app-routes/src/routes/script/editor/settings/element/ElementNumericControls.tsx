@@ -10,21 +10,21 @@ import {
 import styles from './ElementNumericControls.module.css';
 import type {
     ElementNumericModel,
-    ElementSettingsActions,
+    ElementsHandlers,
 } from '../types';
 
 interface ElementNumericControlsProps {
     blockType: FountainElementType,
     shortcutPrefix: string,
     model: ElementNumericModel,
-    actions: ElementSettingsActions,
+    handlers: ElementsHandlers,
 }
 
 export const ElementNumericControls = ({
     blockType,
     shortcutPrefix,
     model,
-    actions,
+    handlers,
 }: ElementNumericControlsProps) => {
     const {
         spacingBefore,
@@ -38,7 +38,7 @@ export const ElementNumericControls = ({
         shortcutOptions,
         nextElementOptions,
     } = model;
-    const {onUpdateBlockSettings} = actions;
+    const {onUpdateBlockSettings} = handlers;
 
     return (
         <div className={sharedStyles.settingsFlatGrid}>

@@ -13,21 +13,21 @@ import {
     formatInches,
     formatNumeric,
 } from '../math';
-import type {ElementPreviewModel} from '../types';
+import type {
+    ElementPreviewHandlers,
+    ElementPreviewModel,
+} from '../types';
 
 interface ElementPreviewProps {
     toolbar?: ReactNode,
     model: ElementPreviewModel,
-    actions: {
-        onStartChange: (value: number) => void,
-        onEndChange: (value: number) => void,
-    },
+    handlers: ElementPreviewHandlers,
 }
 
 export const ElementPreview = ({
     toolbar,
     model,
-    actions,
+    handlers,
 }: ElementPreviewProps) => {
     const {
         previewStyle,
@@ -77,7 +77,7 @@ export const ElementPreview = ({
                         );
                         const nextStart = clamp(rawStart, defaultSliderStartChars, maxStart);
 
-                        actions.onStartChange(nextStart);
+                        handlers.onStartChange(nextStart);
                     }}
                     aria-label="Block start indent"
                 />
@@ -93,7 +93,7 @@ export const ElementPreview = ({
                         const minEnd = sliderStart + minPreviewContentChars;
                         const nextEnd = clamp(rawEnd, minEnd, defaultSliderEndChars);
 
-                        actions.onEndChange(nextEnd);
+                        handlers.onEndChange(nextEnd);
                     }}
                     aria-label="Block end indent"
                 />

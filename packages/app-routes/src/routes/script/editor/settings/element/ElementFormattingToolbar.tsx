@@ -5,22 +5,14 @@ import styles from './ElementFormattingToolbar.module.css';
 import type {
     BlockSettingsPatch,
     ElementFormattingModel,
-    ElementSettingsActions,
+    ElementsHandlers,
 } from '../types';
 
 interface ElementFormattingToolbarProps {
     blockType: FountainElementType,
     model: ElementFormattingModel,
-    actions: ElementSettingsActions,
+    handlers: ElementsHandlers,
 }
-
-const withPatch = (
-    blockType: FountainElementType,
-    onUpdateBlockSettings: ElementSettingsActions['onUpdateBlockSettings'],
-    patch: BlockSettingsPatch,
-) => {
-    onUpdateBlockSettings(blockType, patch);
-};
 
 const getAlignGlyphClassName = (option: 'left' | 'center' | 'right') => {
     if (option === 'left') {
@@ -37,9 +29,9 @@ const getAlignGlyphClassName = (option: 'left' | 'center' | 'right') => {
 export const ElementFormattingToolbar = ({
     blockType,
     model,
-    actions,
+    handlers,
 }: ElementFormattingToolbarProps) => {
-    const {onUpdateBlockSettings} = actions;
+    const update = (patch: BlockSettingsPatch) => handlers.onUpdateBlockSettings(blockType, patch);
     const {
         textAlign,
         casing,
@@ -60,7 +52,7 @@ export const ElementFormattingToolbar = ({
                             option === textAlign && styles.toolbarButtonActive,
                         )}
                         onClick={() => {
-                            withPatch(blockType, onUpdateBlockSettings, {textAlign: option});
+                            update({textAlign: option});
                         }}
                         aria-label={`${option} align`}
                     >
@@ -78,7 +70,7 @@ export const ElementFormattingToolbar = ({
                         casing === 'normal' && styles.toolbarButtonActive,
                     )}
                     onClick={() => {
-                        withPatch(blockType, onUpdateBlockSettings, {casing: 'normal'});
+                        update({casing: 'normal'});
                     }}
                     aria-label="Normal casing"
                 >
@@ -91,7 +83,7 @@ export const ElementFormattingToolbar = ({
                         casing === 'uppercase' && styles.toolbarButtonActive,
                     )}
                     onClick={() => {
-                        withPatch(blockType, onUpdateBlockSettings, {casing: 'uppercase'});
+                        update({casing: 'uppercase'});
                     }}
                     aria-label="Uppercase casing"
                 >
@@ -103,7 +95,7 @@ export const ElementFormattingToolbar = ({
                     type="button"
                     className={clsx(styles.toolbarButton, isBold && styles.toolbarButtonActive)}
                     onClick={() => {
-                        withPatch(blockType, onUpdateBlockSettings, {isBold: !isBold});
+                        update({isBold: !isBold});
                     }}
                     aria-label="Bold"
                 >
@@ -113,7 +105,7 @@ export const ElementFormattingToolbar = ({
                     type="button"
                     className={clsx(styles.toolbarButton, isItalic && styles.toolbarButtonActive)}
                     onClick={() => {
-                        withPatch(blockType, onUpdateBlockSettings, {isItalic: !isItalic});
+                        update({isItalic: !isItalic});
                     }}
                     aria-label="Italic"
                 >
@@ -123,7 +115,7 @@ export const ElementFormattingToolbar = ({
                     type="button"
                     className={clsx(styles.toolbarButton, isUnderline && styles.toolbarButtonActive)}
                     onClick={() => {
-                        withPatch(blockType, onUpdateBlockSettings, {isUnderline: !isUnderline});
+                        update({isUnderline: !isUnderline});
                     }}
                     aria-label="Underline"
                 >

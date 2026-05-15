@@ -22,7 +22,7 @@ export const ElementSettingsPanel = ({
             <h3 className={styles.panelTitle}>{blockLabel}</h3>
             <ElementPreview
                 model={viewModel.preview}
-                actions={{
+                handlers={{
                     onStartChange: nextStart => {
                         onUpdateBlockSettings(blockType, {
                             indentLeftChars: nextStart,
@@ -38,7 +38,7 @@ export const ElementSettingsPanel = ({
                     <ElementFormattingToolbar
                         blockType={blockType}
                         model={viewModel.formatting}
-                        actions={{onUpdateBlockSettings}}
+                        handlers={{onUpdateBlockSettings}}
                     />
                 )}
             />
@@ -46,7 +46,7 @@ export const ElementSettingsPanel = ({
                 blockType={blockType}
                 shortcutPrefix={shortcutPrefix}
                 model={viewModel.numeric}
-                actions={{onUpdateBlockSettings}}
+                handlers={{onUpdateBlockSettings}}
             />
         </div>
     );
