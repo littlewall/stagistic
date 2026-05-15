@@ -6,7 +6,7 @@ import {
     SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
 } from '../../settings/settingsMenu';
 import {ElementSettingsPanel} from './element/ElementSettingsPanel';
-import {PageLayoutSettingsPanel} from './PageLayoutSettingsPanel';
+import {PageLayoutSettingsPanel} from './page-layout/PageLayoutSettingsPanel';
 import {PlaceholderSettingsPanel} from './PlaceholderSettingsPanel';
 import {StructureMarkersSettingsPanel} from './StructureMarkersSettingsPanel';
 import type {ScriptEditorSettingsPanelProps} from './types';

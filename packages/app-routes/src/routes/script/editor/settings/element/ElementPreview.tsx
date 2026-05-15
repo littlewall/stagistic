@@ -3,6 +3,7 @@ import {
     type ReactNode,
 } from 'react';
 
+import sharedStyles from '../shared.module.css';
 import styles from './ElementPreview.module.css';
 import {
     SCREENPLAY_CHARS_PER_INCH,
@@ -44,7 +45,7 @@ export const ElementPreview = ({
     const defaultSliderEndChars = previewReferenceChars;
 
     return (
-        <div className={styles.previewCard} style={previewStyle}>
+        <div className={sharedStyles.previewCard} style={previewStyle}>
             {toolbar}
             <div className={styles.previewSpacingRow} />
             <div className={styles.previewLineCanvas}>
@@ -55,15 +56,15 @@ export const ElementPreview = ({
             {hasSpacingAfter ? (
                 <div className={styles.previewSpacingAfterRow} />
             ) : null}
-            <div className={styles.indentSliderTrack}>
-                <span className={styles.indentSliderBase} />
-                <span className={styles.indentSliderMiddleBase} />
-                <span className={styles.indentSliderSelected} />
-                <span className={styles.indentSliderDefaultStart} />
-                <span className={styles.indentSliderDefaultEnd} />
+            <div className={sharedStyles.indentSliderTrack}>
+                <span className={sharedStyles.indentSliderBase} />
+                <span className={sharedStyles.indentSliderMiddleBase} />
+                <span className={sharedStyles.indentSliderSelected} />
+                <span className={sharedStyles.indentSliderDefaultStart} />
+                <span className={sharedStyles.indentSliderDefaultEnd} />
                 <input
                     type="range"
-                    className={clsx(styles.indentSliderInput, styles.indentSliderInputStart)}
+                    className={clsx(sharedStyles.indentSliderInput, sharedStyles.indentSliderInputStart)}
                     min={0}
                     max={previewReferenceChars}
                     step={1}
@@ -82,7 +83,7 @@ export const ElementPreview = ({
                 />
                 <input
                     type="range"
-                    className={clsx(styles.indentSliderInput, styles.indentSliderInputEnd)}
+                    className={clsx(sharedStyles.indentSliderInput, sharedStyles.indentSliderInputEnd)}
                     min={0}
                     max={previewReferenceChars}
                     step={1}
@@ -97,7 +98,7 @@ export const ElementPreview = ({
                     aria-label="Block end indent"
                 />
             </div>
-            <div className={styles.indentSliderLabels}>
+            <div className={sharedStyles.indentSliderLabels}>
                 <span>{'Start: '}{formatInches(leftTotalInches)}</span>
                 <span>{formatNumeric(contentChars / SCREENPLAY_CHARS_PER_INCH)}&quot; / {contentChars} chars</span>
                 <span>{'End: '}{formatInches(rightTotalInches)}</span>

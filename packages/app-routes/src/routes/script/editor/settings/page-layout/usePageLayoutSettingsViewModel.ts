@@ -5,14 +5,14 @@ import {
     MARGIN_ROW_OPTIONS,
     MIN_PAGE_MARGIN_HORIZONTAL_PX,
     PX_PER_INCH,
-} from './constants';
+} from '../constants';
 import {
     clamp,
     formatInches,
     getClosestStepValue,
-} from './math';
-import type {SettingsSelectOption} from './SettingsSelect';
-import type {ScriptEditorSettingsPanelProps} from './types';
+} from '../math';
+import type {SettingsSelectOption} from '../SettingsSelect';
+import type {ScriptEditorSettingsPanelProps} from '../types';
 
 const MIN_PAGE_CONTENT_WIDTH_PX = 320;
 

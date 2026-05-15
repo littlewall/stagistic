@@ -3,10 +3,11 @@ import {
     type FountainElementType,
 } from '@stagistic/script';
 
-import styles from './ElementNumericControls.module.css';
+import sharedStyles from '../shared.module.css';
 import {
     SettingsSelect,
 } from '../SettingsSelect';
+import styles from './ElementNumericControls.module.css';
 import type {
     ElementNumericModel,
     ElementSettingsActions,
@@ -40,9 +41,9 @@ export const ElementNumericControls = ({
     const {onUpdateBlockSettings} = actions;
 
     return (
-        <div className={styles.settingsFlatGrid}>
-            <div className={styles.settingsField}>
-                <span className={styles.fieldLabel}>Spacing before</span>
+        <div className={sharedStyles.settingsFlatGrid}>
+            <div className={sharedStyles.settingsField}>
+                <span className={sharedStyles.fieldLabel}>Spacing before</span>
                 <SettingsSelect
                     id="settings-spacing-before"
                     ariaLabel="Select spacing before"
@@ -56,8 +57,8 @@ export const ElementNumericControls = ({
                 />
             </div>
             {spacingAfter !== undefined && spacingAfterOptions ? (
-                <div className={styles.settingsField}>
-                    <span className={styles.fieldLabel}>Spacing after</span>
+                <div className={sharedStyles.settingsField}>
+                    <span className={sharedStyles.fieldLabel}>Spacing after</span>
                     <SettingsSelect
                         id="settings-spacing-after"
                         ariaLabel="Select spacing after"
@@ -71,8 +72,8 @@ export const ElementNumericControls = ({
                     />
                 </div>
             ) : null}
-            <div className={styles.settingsField}>
-                <span className={styles.fieldLabel}>Line height</span>
+            <div className={sharedStyles.settingsField}>
+                <span className={sharedStyles.fieldLabel}>Line height</span>
                 <SettingsSelect
                     id="settings-line-height"
                     ariaLabel="Select line height"
@@ -86,8 +87,8 @@ export const ElementNumericControls = ({
                 />
             </div>
             {shortcut !== undefined && shortcutOptions ? (
-                <div className={styles.settingsField}>
-                    <span className={styles.fieldLabel}>Shortcut</span>
+                <div className={sharedStyles.settingsField}>
+                    <span className={sharedStyles.fieldLabel}>Shortcut</span>
                     <div className={styles.shortcutField}>
                         <span className={styles.shortcutPrefix}>{shortcutPrefix} +</span>
                         <SettingsSelect
@@ -104,8 +105,8 @@ export const ElementNumericControls = ({
                 </div>
             ) : null}
             {nextElement !== undefined && nextElementOptions ? (
-                <div className={styles.settingsField}>
-                    <span className={styles.fieldLabel}>Next element</span>
+                <div className={sharedStyles.settingsField}>
+                    <span className={sharedStyles.fieldLabel}>Next element</span>
                     <SettingsSelect
                         id="settings-next-element"
                         ariaLabel="Select next element"

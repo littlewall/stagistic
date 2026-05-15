@@ -1,24 +1,3 @@
-.settingsFlatGrid {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4);
-    margin-top: var(--space-4);
-}
-
-.settingsField {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.fieldLabel {
-    font-size: .85rem;
-    font-weight: 600;
-    color: var(--color-ink-muted);
-    text-transform: uppercase;
-    letter-spacing: .05em;
-}
-
 .shortcutField {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -30,10 +9,4 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     font-size: .875rem;
     color: var(--color-ink-muted);
-}
-
-@media (max-width: 900px) {
-    .settingsFlatGrid {
-        grid-template-columns: 1fr;
-    }
 }

@@ -1,10 +1,11 @@
 import {clsx} from '@stagistic/ui';
 
-import styles from '../../ScriptEditorRoute.module.css';
-import {MIN_PAGE_MARGIN_HORIZONTAL_PX} from './constants';
-import {clamp} from './math';
-import {SettingsSelect} from './SettingsSelect';
-import type {ScriptEditorSettingsPanelProps} from './types';
+import {MIN_PAGE_MARGIN_HORIZONTAL_PX} from '../constants';
+import {clamp} from '../math';
+import {SettingsSelect} from '../SettingsSelect';
+import sharedStyles from '../shared.module.css';
+import type {ScriptEditorSettingsPanelProps} from '../types';
+import styles from './PageLayoutSettingsPanel.module.css';
 import {usePageLayoutSettingsViewModel} from './usePageLayoutSettingsViewModel';
 
 const MIN_PAGE_CONTENT_WIDTH_PX = 320;
@@ -38,10 +39,10 @@ export const PageLayoutSettingsPanel = ({
     const marginSliderStep = 0.05 * 96; // 0.05"
 
     return (
-        <div className={styles.previewCard}>
-            <div className={styles.settingsFlatGrid}>
-                <div className={styles.settingsField}>
-                    <span className={styles.fieldLabel}>Top margin</span>
+        <div className={sharedStyles.previewCard}>
+            <div className={sharedStyles.settingsFlatGrid}>
+                <div className={sharedStyles.settingsField}>
+                    <span className={sharedStyles.fieldLabel}>Top margin</span>
                     <SettingsSelect
                         id="settings-margin-top"
                         ariaLabel="Select top margin rows"
@@ -52,8 +53,8 @@ export const PageLayoutSettingsPanel = ({
                         }}
                     />
                 </div>
-                <div className={styles.settingsField}>
-                    <span className={styles.fieldLabel}>Bottom margin</span>
+                <div className={sharedStyles.settingsField}>
+                    <span className={sharedStyles.fieldLabel}>Bottom margin</span>
                     <SettingsSelect
                         id="settings-margin-bottom"
                         ariaLabel="Select bottom margin rows"
@@ -84,15 +85,15 @@ export const PageLayoutSettingsPanel = ({
                 </div>
                 <div className={styles.pageSchematicMarginBottom} />
             </div>
-            <div className={styles.indentSliderTrack} style={sliderStyle}>
-                <span className={styles.indentSliderBase} />
-                <span className={styles.indentSliderMiddleBase} />
-                <span className={styles.indentSliderSelected} />
-                <span className={styles.indentSliderDefaultStart} />
-                <span className={styles.indentSliderDefaultEnd} />
+            <div className={sharedStyles.indentSliderTrack} style={sliderStyle}>
+                <span className={sharedStyles.indentSliderBase} />
+                <span className={sharedStyles.indentSliderMiddleBase} />
+                <span className={sharedStyles.indentSliderSelected} />
+                <span className={sharedStyles.indentSliderDefaultStart} />
+                <span className={sharedStyles.indentSliderDefaultEnd} />
                 <input
                     type="range"
-                    className={clsx(styles.indentSliderInput, styles.indentSliderInputStart)}
+                    className={clsx(sharedStyles.indentSliderInput, sharedStyles.indentSliderInputStart)}
                     min={0}
                     max={previewReferenceTotal}
                     step={marginSliderStep}
@@ -113,7 +114,7 @@ export const PageLayoutSettingsPanel = ({
                 />
                 <input
                     type="range"
-                    className={clsx(styles.indentSliderInput, styles.indentSliderInputEnd)}
+                    className={clsx(sharedStyles.indentSliderInput, sharedStyles.indentSliderInputEnd)}
                     min={0}
                     max={previewReferenceTotal}
                     step={marginSliderStep}
@@ -136,7 +137,7 @@ export const PageLayoutSettingsPanel = ({
                     aria-label="Right page margin"
                 />
             </div>
-            <div className={styles.indentSliderLabels}>
+            <div className={sharedStyles.indentSliderLabels}>
                 <span>{'Left: '}{leftMarginInches}</span>
                 <span>{contentWidthInches}{' wide'}</span>
                 <span>{'Right: '}{rightMarginInches}</span>
