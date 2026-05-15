@@ -3,7 +3,7 @@ import {
     type ReactNode,
 } from 'react';
 
-import styles from '../../../ScriptEditorRoute.module.css';
+import styles from './ElementPreview.module.css';
 import {
     SCREENPLAY_CHARS_PER_INCH,
 } from '../constants';

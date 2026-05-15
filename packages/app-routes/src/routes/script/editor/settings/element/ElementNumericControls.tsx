@@ -3,7 +3,7 @@ import {
     type FountainElementType,
 } from '@stagistic/script';
 
-import styles from '../../../ScriptEditorRoute.module.css';
+import styles from './ElementNumericControls.module.css';
 import {
     SettingsSelect,
 } from '../SettingsSelect';
