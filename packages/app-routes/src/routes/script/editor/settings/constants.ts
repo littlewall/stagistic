@@ -72,7 +72,7 @@ export const BLOCK_PREVIEW_TEXT_COLOR: Record<FountainElementType, string> = {
     [ELEMENT_NOTE]: 'var(--color-block-note, var(--color-block-action))',
 };
 
-export const panelDescriptions: Record<string, {
+export const PANEL_DESCRIPTIONS: Record<string, {
     title: string,
     description: string,
 }> = {

@@ -1,12 +1,12 @@
 import styles from './ScriptEditorSettingsPanel.module.css';
-import {panelDescriptions} from './constants';
+import {PANEL_DESCRIPTIONS} from './constants';
 
 interface PlaceholderSettingsPanelProps {
     panelId: string,
 }
 
 export const PlaceholderSettingsPanel = ({panelId}: PlaceholderSettingsPanelProps) => {
-    const panel = panelDescriptions[panelId];
+    const panel = PANEL_DESCRIPTIONS[panelId];
 
     if (!panel) {
         return (
