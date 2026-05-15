@@ -1,10 +1,12 @@
 import {
     getBlockTypeFromElementPanelId,
     isElementSettingsPanelId,
+    SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
     SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS,
     SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
 } from '../../settings/settingsMenu';
 import {ElementSettingsPanel} from './ElementSettingsPanel';
+import {PageLayoutSettingsPanel} from './PageLayoutSettingsPanel';
 import {PlaceholderSettingsPanel} from './PlaceholderSettingsPanel';
 import {StructureMarkersSettingsPanel} from './StructureMarkersSettingsPanel';
 import type {ScriptEditorSettingsPanelProps} from './types';
@@ -18,7 +20,17 @@ export const ScriptEditorSettingsPanel = ({
     onUpdateBlockSettings,
     onUpdateCharacterColorSaturation,
     onUpdateStructureSettings,
+    onUpdatePageSettings,
 }: ScriptEditorSettingsPanelProps) => {
+    if (panelId === SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT) {
+        return (
+            <PageLayoutSettingsPanel
+                resolvedScriptSettings={resolvedScriptSettings}
+                onUpdatePageSettings={onUpdatePageSettings}
+            />
+        );
+    }
+
     if (panelId === SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES) {
         return (
             <VisualPreferencesSettingsPanel

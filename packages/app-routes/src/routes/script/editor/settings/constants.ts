@@ -15,6 +15,17 @@ import {
 export const SCREENPLAY_CHARS_PER_INCH = 10;
 export const PX_PER_INCH = 96;
 export const MIN_PREVIEW_CONTENT_CHARS = 30;
+export const MIN_PAGE_MARGIN_HORIZONTAL_PX = 48; // 0.5"
+export const MARGIN_ROW_OPTIONS = [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+] as const;
 
 const INDENT_SPACING_STEPS = Array.from({length: 41}, (_, index) => index);
 

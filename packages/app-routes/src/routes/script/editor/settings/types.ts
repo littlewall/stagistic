@@ -3,6 +3,7 @@ import type {
     BlockShortcut,
     EditorSettings,
     FountainElementType,
+    PageSettings,
     StructureSettingsPatch,
 } from '@stagistic/script';
 import type {CSSProperties} from 'react';
@@ -13,6 +14,8 @@ export type {
     BlockSettingsPatch,
     StructureSettingsPatch,
 };
+
+export type PageSettingsPatch = Partial<PageSettings>;
 
 export type UpdateBlockSettings = (
     blockType: FountainElementType,
@@ -27,6 +30,7 @@ export interface ScriptEditorSettingsPanelProps {
     onUpdateBlockSettings: UpdateBlockSettings,
     onUpdateCharacterColorSaturation: (value: number) => void,
     onUpdateStructureSettings: (patch: StructureSettingsPatch) => void,
+    onUpdatePageSettings: (patch: PageSettingsPatch) => void,
 }
 
 export interface ElementSettingsPanelProps {

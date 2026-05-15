@@ -13,6 +13,7 @@ const MIN_PAGE_CONTENT_WIDTH_PX = 320;
 const MIN_PAGE_CONTENT_HEIGHT_PX = 240;
 const MAX_PAGE_GAP_PX = 240;
 const MAX_CONTENT_MARGIN_PX = 400;
+const MIN_PAGE_MARGIN_HORIZONTAL_PX = 48; // 0.5"
 const MIN_FONT_SIZE_PX = 10;
 const MAX_FONT_SIZE_PX = 36;
 const MIN_LINE_HEIGHT = 0.8;
@@ -43,12 +44,12 @@ const sanitizeResolvedSettings = (settings: EditorSettings): EditorSettings => {
     const maxVerticalMarginsTotal = Math.max(0, pageHeight - MIN_PAGE_CONTENT_HEIGHT_PX);
     let marginLeft = clamp(
         toFiniteNumber(settings.page.marginLeftPx, defaultPage.marginLeftPx),
-        0,
+        MIN_PAGE_MARGIN_HORIZONTAL_PX,
         pageWidth,
     );
     let marginRight = clamp(
         toFiniteNumber(settings.page.marginRightPx, defaultPage.marginRightPx),
-        0,
+        MIN_PAGE_MARGIN_HORIZONTAL_PX,
         pageWidth,
     );
     let marginTop = clamp(

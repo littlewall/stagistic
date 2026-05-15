@@ -95,6 +95,7 @@ export const ScriptEditorRoute = () => {
         updateBlockSettings,
         updateCharacterColorSaturation,
         updateStructureSettings,
+        updatePageSettings,
     } = useScriptEditorSettingsDraft({
         state: {
             currentScriptId,
@@ -414,6 +415,7 @@ export const ScriptEditorRoute = () => {
                     onUpdateBlockSettings={updateBlockSettings}
                     onUpdateCharacterColorSaturation={updateCharacterColorSaturation}
                     onUpdateStructureSettings={updateStructureSettings}
+                    onUpdatePageSettings={updatePageSettings}
                 />
             </ScriptSettingsModal>
         </AppLayout>

@@ -5,6 +5,7 @@ import {
     type EditorSettings,
     type EditorSettingsOverride,
     mergeEditorSettings,
+    type PageSettings,
     type StructureSettingsPatch,
 } from '@stagistic/script';
 import {
@@ -164,11 +165,22 @@ export const useScriptEditorSettingsDraft = ({
         }));
     }, []);
 
+    const updatePageSettings = useCallback((patch: Partial<PageSettings>) => {
+        setScriptSettingsDraft(previous => ({
+            ...previous,
+            page: {
+                ...previous.page ?? {},
+                ...patch,
+            },
+        }));
+    }, []);
+
     return {
         scriptSettingsDraft,
         resolvedScriptSettings,
         updateBlockSettings,
         updateCharacterColorSaturation,
         updateStructureSettings,
+        updatePageSettings,
     };
 };
