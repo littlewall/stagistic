@@ -8,7 +8,7 @@ import {
 import {ElementSettingsPanel} from './element/ElementSettingsPanel';
 import {PageLayoutSettingsPanel} from './page-layout/PageLayoutSettingsPanel';
 import {PlaceholderSettingsPanel} from './PlaceholderSettingsPanel';
-import {StructureMarkersSettingsPanel} from './StructureMarkersSettingsPanel';
+import {StructureMarkersSettingsPanel} from './structure-markers/StructureMarkersSettingsPanel';
 import type {ScriptEditorSettingsPanelProps} from './types';
 import {VisualPreferencesSettingsPanel} from './visual-preferences/VisualPreferencesSettingsPanel';
 

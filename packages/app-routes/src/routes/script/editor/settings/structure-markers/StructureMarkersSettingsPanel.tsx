@@ -1,8 +1,10 @@
 import type {EditorSettings} from '@stagistic/script';
 import type {ChangeEvent} from 'react';
 
-import styles from '../../ScriptEditorRoute.module.css';
-import type {StructureSettingsPatch} from './types';
+import panelStyles from '../../../ScriptEditorRoute.module.css';
+import sharedStyles from '../shared.module.css';
+import type {StructureSettingsPatch} from '../types';
+import styles from './StructureMarkersSettingsPanel.module.css';
 
 interface StructureMarkersSettingsPanelProps {
     structureSettings: EditorSettings['structure'],
@@ -27,16 +29,16 @@ export const StructureMarkersSettingsPanel = ({
     };
 
     return (
-        <div className={styles.panelStack}>
-            <h3 className={styles.panelTitle}>Structure Markers</h3>
-            <div className={styles.settingsFlatGrid}>
-                <div className={styles.settingsField}>
-                    <label className={styles.fieldLabel} htmlFor="settings-act-lines-before">
+        <div className={panelStyles.panelStack}>
+            <h3 className={panelStyles.panelTitle}>Structure Markers</h3>
+            <div className={sharedStyles.settingsFlatGrid}>
+                <div className={sharedStyles.settingsField}>
+                    <label className={sharedStyles.fieldLabel} htmlFor="settings-act-lines-before">
                         ACT Lines Before
                     </label>
                     <input
                         id="settings-act-lines-before"
-                        className={styles.structurePrefixInput}
+                        className={styles.prefixInput}
                         type="number"
                         min={0}
                         max={8}
@@ -45,13 +47,13 @@ export const StructureMarkersSettingsPanel = ({
                         onChange={event => updateActDisplay('linesBefore', event)}
                     />
                 </div>
-                <div className={styles.settingsField}>
-                    <label className={styles.fieldLabel} htmlFor="settings-act-lines-after">
+                <div className={sharedStyles.settingsField}>
+                    <label className={sharedStyles.fieldLabel} htmlFor="settings-act-lines-after">
                         ACT Lines After
                     </label>
                     <input
                         id="settings-act-lines-after"
-                        className={styles.structurePrefixInput}
+                        className={styles.prefixInput}
                         type="number"
                         min={0}
                         max={8}

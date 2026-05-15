@@ -1,0 +1,15 @@
+.prefixInput {
+    width: 100%;
+    min-height: 36px;
+    padding: 0 var(--space-2);
+    font-size: calc(12px * var(--size-scale));
+    color: var(--color-ink);
+    background: var(--color-surface);
+    border: 1px solid var(--color-divider);
+    border-radius: calc(8px * var(--size-scale));
+}
+
+.prefixInput:focus-visible {
+    outline: 2px solid color-mix(in oklch, var(--color-accent) 55%, transparent);
+    outline-offset: 1px;
+}
