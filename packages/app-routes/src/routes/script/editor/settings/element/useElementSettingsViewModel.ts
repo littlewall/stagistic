@@ -9,7 +9,7 @@ import {
 } from '@stagistic/script';
 import {type CSSProperties, useMemo} from 'react';
 
-import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from '../../settings/settingsMenu';
+import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from '../../../settings/settingsMenu';
 import {
     BLOCK_PREVIEW_TEXT,
     BLOCK_PREVIEW_TEXT_COLOR,
@@ -19,17 +19,17 @@ import {
     PX_PER_INCH,
     SCREENPLAY_CHARS_PER_INCH,
     SPACING_BEFORE_OPTIONS,
-} from './constants';
+} from '../constants';
 import {
     clamp,
     formatLines,
     formatNumeric,
     getClosestStepValue,
-} from './math';
+} from '../math';
 import type {
     ElementSettingsPanelProps,
     ElementSettingsViewModel,
-} from './types';
+} from '../types';
 
 export const useElementSettingsViewModel = ({
     blockType,

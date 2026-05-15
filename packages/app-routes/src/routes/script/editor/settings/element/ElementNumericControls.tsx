@@ -3,14 +3,14 @@ import {
     type FountainElementType,
 } from '@stagistic/script';
 
-import styles from '../../ScriptEditorRoute.module.css';
+import styles from '../../../ScriptEditorRoute.module.css';
 import {
     SettingsSelect,
-} from './SettingsSelect';
+} from '../SettingsSelect';
 import type {
     ElementNumericModel,
     ElementSettingsActions,
-} from './types';
+} from '../types';
 
 interface ElementNumericControlsProps {
     blockType: FountainElementType,

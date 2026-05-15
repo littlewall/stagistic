@@ -5,7 +5,7 @@ import {
     SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS,
     SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
 } from '../../settings/settingsMenu';
-import {ElementSettingsPanel} from './ElementSettingsPanel';
+import {ElementSettingsPanel} from './element/ElementSettingsPanel';
 import {PageLayoutSettingsPanel} from './PageLayoutSettingsPanel';
 import {PlaceholderSettingsPanel} from './PlaceholderSettingsPanel';
 import {StructureMarkersSettingsPanel} from './StructureMarkersSettingsPanel';

@@ -3,16 +3,16 @@ import {
     type ReactNode,
 } from 'react';
 
-import styles from '../../ScriptEditorRoute.module.css';
+import styles from '../../../ScriptEditorRoute.module.css';
 import {
     SCREENPLAY_CHARS_PER_INCH,
-} from './constants';
+} from '../constants';
 import {
     clamp,
     formatInches,
     formatNumeric,
-} from './math';
-import type {ElementPreviewModel} from './types';
+} from '../math';
+import type {ElementPreviewModel} from '../types';
 
 interface ElementPreviewProps {
     toolbar?: ReactNode,

@@ -1,12 +1,12 @@
 import {BLOCK_TEXT_ALIGN_OPTIONS, type FountainElementType} from '@stagistic/script';
 import {clsx} from '@stagistic/ui';
 
-import styles from '../../ScriptEditorRoute.module.css';
+import styles from '../../../ScriptEditorRoute.module.css';
 import type {
     BlockSettingsPatch,
     ElementFormattingModel,
     ElementSettingsActions,
-} from './types';
+} from '../types';
 
 interface ElementFormattingToolbarProps {
     blockType: FountainElementType,
