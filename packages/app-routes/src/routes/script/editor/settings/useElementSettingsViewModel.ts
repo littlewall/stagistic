@@ -4,6 +4,7 @@ import {
     BLOCK_SHORTCUT_OPTIONS,
     BLOCK_TEXT_ALIGN_OPTIONS,
     DEFAULT_EDITOR_SETTINGS,
+    ELEMENT_ACT,
     ELEMENT_PARENTHETICAL,
 } from '@stagistic/script';
 import {type CSSProperties, useMemo} from 'react';
@@ -72,8 +73,13 @@ export const useElementSettingsViewModel = ({
         );
         const leftIndent = blockSettings.indentLeftChars ?? blockDefaults.indentLeftChars ?? 0;
         const rightIndent = blockSettings.indentRightChars ?? blockDefaults.indentRightChars ?? 0;
-        const shortcut = blockSettings.shortcut ?? blockDefaults.shortcut ?? BLOCK_SHORTCUT_OPTIONS[0];
-        const nextElement = blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType;
+        const isActBlock = blockType === ELEMENT_ACT;
+        const shortcut = isActBlock
+            ? undefined
+            : (blockSettings.shortcut ?? blockDefaults.shortcut ?? BLOCK_SHORTCUT_OPTIONS[0]);
+        const nextElement = isActBlock
+            ? undefined
+            : (blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType);
         const textAlign = blockSettings.textAlign ?? blockDefaults.textAlign ?? BLOCK_TEXT_ALIGN_OPTIONS[0];
         const casing = blockSettings.casing ?? blockDefaults.casing ?? BLOCK_CASING_OPTIONS[0];
         const isBold = blockSettings.isBold ?? blockDefaults.isBold ?? false;
@@ -89,15 +95,19 @@ export const useElementSettingsViewModel = ({
             value: option,
             label: formatNumeric(option),
         }));
-        const shortcutOptions = BLOCK_SHORTCUT_OPTIONS.map(option => ({
-            value: option,
-            label: option,
-        }));
-        const nextElementOptions = SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => ({
-            value: item.blockType,
-            label: item.label,
-            icon: BLOCK_ICONS[item.blockType],
-        }));
+        const shortcutOptions = isActBlock
+            ? undefined
+            : BLOCK_SHORTCUT_OPTIONS.map(option => ({
+                value: option,
+                label: option,
+            }));
+        const nextElementOptions = isActBlock
+            ? undefined
+            : SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => ({
+                value: item.blockType,
+                label: item.label,
+                icon: BLOCK_ICONS[item.blockType],
+            }));
         const normalizedLeftIndent = clamp(
             Math.round(leftIndent),
             0,

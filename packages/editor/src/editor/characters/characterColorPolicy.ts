@@ -1,6 +1,9 @@
 import {normalizeCharacterColorHex} from '@stagistic/script';
 
-import {getCharacterColor} from './characterColors';
+import {
+    applyCharacterColorSaturation,
+    getCharacterColor,
+} from './characterColors';
 import type {NormalizedPersistentCharacterRef} from './persistentRefNormalization';
 
 export const getConfirmedCharacterColor = (
@@ -11,7 +14,9 @@ export const getConfirmedCharacterColor = (
     const normalizedColor = normalizeCharacterColorHex(colorHex);
 
     if (normalizedColor) {
-        return normalizedColor;
+        return characterColorSaturation !== undefined
+            ? applyCharacterColorSaturation(normalizedColor, characterColorSaturation)
+            : normalizedColor;
     }
 
     return getCharacterColor(`character:${characterId}`, characterColorSaturation);

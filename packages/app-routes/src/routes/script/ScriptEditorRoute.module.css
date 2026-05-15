@@ -368,10 +368,6 @@
     font-variant-numeric: tabular-nums;
 }
 
-.visualSelectCompact .settingsSelectMenu {
-    right: auto;
-    min-width: 100%;
-}
 
 .visualPreviewPrefix {
     font-size: .875rem;

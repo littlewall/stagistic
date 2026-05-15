@@ -101,13 +101,13 @@
 .navItem:hover,
 .navExpandButton:hover,
 .subItem:hover {
-    background: var(--color-highlight);
+    background: var(--select-menu-item-hover-bg);
 }
 
 .navItemActive,
 .subItemActive {
     font-weight: 600;
-    background: color-mix(in oklch, var(--color-ink) 12%, var(--color-surface));
+    background: var(--select-menu-item-active-bg);
 }
 
 .navExpandButton {

@@ -16,7 +16,7 @@ export const lyricsSpec = {
         shortcut: '7',
         nextElement: ELEMENT_LYRICS,
         textAlign: 'left',
-        casing: 'normal',
+        casing: 'uppercase',
         isBold: false,
         isItalic: true,
         isUnderline: false,

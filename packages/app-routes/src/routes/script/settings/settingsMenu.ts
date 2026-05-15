@@ -1,5 +1,6 @@
 import {BLOCK_ICONS} from '@stagistic/editor';
 import {
+    ELEMENT_ACT,
     FOUNTAIN_BLOCK_ITEMS,
     type FountainElementType,
 } from '@stagistic/script';
@@ -10,23 +11,25 @@ export const SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES = 'visual-preferences';
 export const SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS = 'structure-markers';
 export const SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT = 'page-layout';
 export const SCRIPT_SETTINGS_PANEL_HEADERS = 'headers-footers';
-export const SCRIPT_SETTINGS_PANEL_STATUSES = 'document-statuses';
-export const SCRIPT_SETTINGS_PANEL_NOTES = 'notes';
-export const SCRIPT_SETTINGS_PANEL_PROJECT_STATUSES = 'project-statuses';
 
 export const SCRIPT_SETTINGS_EXPANDABLE_ELEMENTS = 'elements-settings';
 
 const SCRIPT_SETTINGS_PANEL_ELEMENT_PREFIX = 'element-settings:';
 
-export const SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS: Array<{
-    id: string,
-    blockType: FountainElementType,
-    label: string,
-}> = FOUNTAIN_BLOCK_ITEMS.map(item => ({
+const rawBlockItems = FOUNTAIN_BLOCK_ITEMS.map(item => ({
     id: item.id,
     blockType: item.type,
     label: item.label,
 }));
+
+export const SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS: Array<{
+    id: string,
+    blockType: FountainElementType,
+    label: string,
+}> = [
+    ...rawBlockItems.filter(item => item.blockType === ELEMENT_ACT),
+    ...rawBlockItems.filter(item => item.blockType !== ELEMENT_ACT),
+];
 
 export type ElementSettingsPanelId = `${typeof SCRIPT_SETTINGS_PANEL_ELEMENT_PREFIX}${FountainElementType}`;
 
@@ -62,9 +65,6 @@ export type ScriptSettingsPanelId =
     | typeof SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS
     | typeof SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT
     | typeof SCRIPT_SETTINGS_PANEL_HEADERS
-    | typeof SCRIPT_SETTINGS_PANEL_STATUSES
-    | typeof SCRIPT_SETTINGS_PANEL_NOTES
-    | typeof SCRIPT_SETTINGS_PANEL_PROJECT_STATUSES
     | ElementSettingsPanelId;
 
 export const scriptSettingsMenu: SettingsNavGroup[] = [
@@ -97,18 +97,6 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
                 panelId: SCRIPT_SETTINGS_PANEL_HEADERS,
             },
             {
-                kind: 'item',
-                id: 'document-statuses',
-                label: 'Statuses',
-                panelId: SCRIPT_SETTINGS_PANEL_STATUSES,
-            },
-            {
-                kind: 'item',
-                id: 'notes',
-                label: 'Notes',
-                panelId: SCRIPT_SETTINGS_PANEL_NOTES,
-            },
-            {
                 kind: 'expandable',
                 id: SCRIPT_SETTINGS_EXPANDABLE_ELEMENTS,
                 label: 'Elements settings',
@@ -118,17 +106,6 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
                     panelId: getElementSettingsPanelId(item.blockType),
                     icon: BLOCK_ICONS[item.blockType],
                 })),
-            },
-        ],
-    }, {
-        id: 'project',
-        label: 'Project',
-        items: [
-            {
-                kind: 'item',
-                id: 'project-statuses',
-                label: 'Statuses',
-                panelId: SCRIPT_SETTINGS_PANEL_PROJECT_STATUSES,
             },
         ],
     },

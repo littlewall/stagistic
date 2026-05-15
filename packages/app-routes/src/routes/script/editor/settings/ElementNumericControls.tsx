@@ -85,36 +85,40 @@ export const ElementNumericControls = ({
                     }}
                 />
             </div>
-            <div className={styles.settingsField}>
-                <span className={styles.fieldLabel}>Shortcut</span>
-                <div className={styles.shortcutField}>
-                    <span className={styles.shortcutPrefix}>{shortcutPrefix} +</span>
+            {shortcut !== undefined && shortcutOptions ? (
+                <div className={styles.settingsField}>
+                    <span className={styles.fieldLabel}>Shortcut</span>
+                    <div className={styles.shortcutField}>
+                        <span className={styles.shortcutPrefix}>{shortcutPrefix} +</span>
+                        <SettingsSelect
+                            ariaLabel="Select block shortcut"
+                            value={shortcut}
+                            options={shortcutOptions}
+                            onChange={nextValue => {
+                                onUpdateBlockSettings(blockType, {
+                                    shortcut: nextValue as BlockShortcut,
+                                });
+                            }}
+                        />
+                    </div>
+                </div>
+            ) : null}
+            {nextElement !== undefined && nextElementOptions ? (
+                <div className={styles.settingsField}>
+                    <span className={styles.fieldLabel}>Next element</span>
                     <SettingsSelect
-                        ariaLabel="Select block shortcut"
-                        value={shortcut}
-                        options={shortcutOptions}
+                        id="settings-next-element"
+                        ariaLabel="Select next element"
+                        value={nextElement}
+                        options={nextElementOptions}
                         onChange={nextValue => {
                             onUpdateBlockSettings(blockType, {
-                                shortcut: nextValue as BlockShortcut,
+                                nextElement: nextValue as FountainElementType,
                             });
                         }}
                     />
                 </div>
-            </div>
-            <div className={styles.settingsField}>
-                <span className={styles.fieldLabel}>Next element</span>
-                <SettingsSelect
-                    id="settings-next-element"
-                    ariaLabel="Select next element"
-                    value={nextElement}
-                    options={nextElementOptions}
-                    onChange={nextValue => {
-                        onUpdateBlockSettings(blockType, {
-                            nextElement: nextValue as FountainElementType,
-                        });
-                    }}
-                />
-            </div>
+            ) : null}
         </div>
     );
 };

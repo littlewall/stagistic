@@ -49,13 +49,13 @@ export interface ElementNumericModel {
     spacingBefore: number,
     spacingAfter?: number,
     lineHeight: number,
-    shortcut: BlockShortcut,
-    nextElement: FountainElementType,
+    shortcut?: BlockShortcut,
+    nextElement?: FountainElementType,
     spacingBeforeOptions: SettingsSelectOption[],
     spacingAfterOptions?: SettingsSelectOption[],
     lineHeightOptions: SettingsSelectOption[],
-    shortcutOptions: SettingsSelectOption[],
-    nextElementOptions: SettingsSelectOption[],
+    shortcutOptions?: SettingsSelectOption[],
+    nextElementOptions?: SettingsSelectOption[],
 }
 
 export interface ElementPreviewModel {

@@ -146,7 +146,7 @@ const toHexChannel = (value: number) => {
         .padStart(2, '0');
 };
 
-const applyCharacterColorSaturation = (hexColor: string, saturationPercent: number) => {
+export const applyCharacterColorSaturation = (hexColor: string, saturationPercent: number) => {
     const normalized = normalizeCharacterColorHex(hexColor);
 
     if (!normalized) {
