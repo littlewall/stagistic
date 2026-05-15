@@ -1,9 +1,5 @@
 .overlay {
     --block-trigger-size: calc(26px * var(--size-scale));
-    --overlay-block-spacing-before-px: 0px;
-    --overlay-block-line-height-px: calc(var(--editor-line-height, 1.7) * var(--editor-font-size, 13px));
-    --overlay-row-anchor-offset: calc(var(--overlay-block-spacing-before-px)
-    + (var(--overlay-block-line-height-px) / 2));
 
     pointer-events: none;
     position: absolute;
@@ -13,7 +9,7 @@
 .controls {
     pointer-events: auto;
     position: relative;
-    transform: translate(calc(-1 * var(--block-controls-gutter, 32px) - 100% - var(--space-1)), calc(var(--overlay-row-anchor-offset) - 50%));
+    transform: translate(calc(-1 * var(--block-controls-gutter, 32px) - 100% - var(--space-1)), -50%);
     display: inline-flex;
     gap: 0;
     align-items: center;
@@ -158,7 +154,6 @@
 
 .menu {
     position: fixed;
-    position-anchor: --block-actions-trigger;
     top: anchor(bottom);
     bottom: auto;
     left: anchor(left);
@@ -170,6 +165,7 @@
     border: 1px solid var(--color-divider);
     border-radius: calc(12px * var(--size-scale));
     box-shadow: var(--shadow-popover);
+    position-anchor: --block-actions-trigger;
 }
 
 .menuAbove {
@@ -182,12 +178,12 @@
 }
 
 .menuPrimaryPanel {
+    overflow-y: auto;
     display: grid;
     gap: 0;
     align-content: start;
     min-width: calc(200px * var(--size-scale));
     max-height: calc(280px * var(--size-scale));
-    overflow-y: auto;
     padding: var(--space-1);
 }
 

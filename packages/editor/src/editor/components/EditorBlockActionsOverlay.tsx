@@ -20,7 +20,6 @@ import {normalizeFountainBlockType} from '../tiptap/fountainCore';
 import {BlockActionsMenu} from './blockActions/BlockActionsMenu';
 import {MENU_DISABLED_BLOCK_TYPES} from './blockActions/overlay/constants';
 import {
-    resolveElementOffsetWithinAncestor,
     resolveFountainBlockElementById,
 } from './blockActions/overlay/geometry';
 import {useDragPreviewSession} from './blockActions/overlay/useDragPreviewSession';
@@ -36,10 +35,7 @@ interface EditorBlockActionsOverlayProps {
     canvasRef: RefObject<HTMLElement | null>,
 }
 
-interface OverlayAnchorStyle extends CSSProperties {
-    '--overlay-block-spacing-before-px'?: string,
-    '--overlay-block-line-height-px'?: string,
-}
+type OverlayAnchorStyle = CSSProperties;
 
 interface AnchorUpdateOptions {
     allowClearOnMiss?: boolean,
@@ -148,9 +144,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             return false;
         }
 
-        const offset = resolveElementOffsetWithinAncestor(blockElement, canvas);
-
-        if (!offset) {
+        if (!canvas.contains(blockElement)) {
             if (allowClearOnMiss) {
                 setOverlayAnchorStyle(null);
             }
@@ -158,26 +152,33 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             return false;
         }
 
+        const canvasRect = canvas.getBoundingClientRect();
+        const blockRect = blockElement.getBoundingClientRect();
         const computed = window.getComputedStyle(blockElement);
+        const paddingTopPx = Number.parseFloat(computed.paddingTop) || 0;
         const lineHeightValue = Number.parseFloat(computed.lineHeight);
         const fontSizeValue = Number.parseFloat(computed.fontSize);
-        let resolvedLineHeightPx = 'calc(var(--editor-line-height, 1.7) * var(--editor-font-size, 13px))';
-        const hasResolvedLineHeight = Number.isFinite(lineHeightValue) && lineHeightValue > 0;
-        const hasResolvedFontSize = Number.isFinite(fontSizeValue) && fontSizeValue > 0;
 
-        if (hasResolvedLineHeight) {
-            resolvedLineHeightPx = `${lineHeightValue}px`;
+        let lineHeightPx: number | undefined;
+
+        if (Number.isFinite(lineHeightValue) && lineHeightValue > 0) {
+            lineHeightPx = lineHeightValue;
         }
 
-        if (!hasResolvedLineHeight && hasResolvedFontSize) {
-            resolvedLineHeightPx = `${fontSizeValue * 1.2}px`;
+        if (Number.isFinite(fontSizeValue) && fontSizeValue > 0) {
+            lineHeightPx = fontSizeValue * 1.2;
         }
+
+        if (lineHeightPx === undefined) {
+            lineHeightPx = 13 * 1.7;
+        }
+
+        const top = blockRect.top - canvasRect.top + canvas.scrollTop + paddingTopPx + lineHeightPx / 2;
+        const left = blockRect.left - canvasRect.left;
 
         const nextAnchorStyle: OverlayAnchorStyle = {
-            top: `${offset.top}px`,
-            left: `${offset.left}px`,
-            '--overlay-block-spacing-before-px': computed.paddingTop,
-            '--overlay-block-line-height-px': resolvedLineHeightPx,
+            top: `${top}px`,
+            left: `${left}px`,
         };
 
         setOverlayAnchorStyle(previous => {
@@ -185,8 +186,6 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
                 previous
                 && previous.top === nextAnchorStyle.top
                 && previous.left === nextAnchorStyle.left
-                && previous['--overlay-block-spacing-before-px'] === nextAnchorStyle['--overlay-block-spacing-before-px']
-                && previous['--overlay-block-line-height-px'] === nextAnchorStyle['--overlay-block-line-height-px']
             ) {
                 return previous;
             }
