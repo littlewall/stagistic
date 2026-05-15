@@ -7,6 +7,7 @@ export type {
     PageLayoutHandlers,
     PageSettingsPatch,
     ScriptEditorSettingsPanelProps,
+    SectionRenderer,
     StructureHandlers,
     StructureSettingsPatch,
     VisualPreferencesHandlers,

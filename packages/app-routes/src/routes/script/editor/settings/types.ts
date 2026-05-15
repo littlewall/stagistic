@@ -6,7 +6,10 @@ import type {
     PageSettings,
     StructureSettingsPatch,
 } from '@stagistic/script';
-import type {CSSProperties} from 'react';
+import type {
+    CSSProperties,
+    ReactElement,
+} from 'react';
 
 import type {SettingsSelectOption} from './SettingsSelect';
 
@@ -48,6 +51,8 @@ export interface ScriptEditorSettingsPanelProps {
     structureHandlers: StructureHandlers,
     pageLayoutHandlers: PageLayoutHandlers,
 }
+
+export type SectionRenderer = (props: ScriptEditorSettingsPanelProps) => ReactElement;
 
 export interface ElementSettingsPanelProps {
     blockType: FountainElementType,

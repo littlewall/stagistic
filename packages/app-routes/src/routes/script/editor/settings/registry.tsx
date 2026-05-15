@@ -5,10 +5,8 @@ import {
 } from '../../settings/settingsMenu';
 import {PageLayoutSettingsPanel} from './page-layout/PageLayoutSettingsPanel';
 import {StructureMarkersSettingsPanel} from './structure-markers/StructureMarkersSettingsPanel';
-import type {ScriptEditorSettingsPanelProps} from './types';
+import type {SectionRenderer} from './types';
 import {VisualPreferencesSettingsPanel} from './visual-preferences/VisualPreferencesSettingsPanel';
-
-type SectionRenderer = (props: ScriptEditorSettingsPanelProps) => React.ReactElement;
 
 export const SECTION_RENDERERS: Partial<Record<string, SectionRenderer>> = {
     [SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT]: props => (
