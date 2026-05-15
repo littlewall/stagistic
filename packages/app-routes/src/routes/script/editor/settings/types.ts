@@ -22,15 +22,31 @@ export type UpdateBlockSettings = (
     patch: BlockSettingsPatch,
 ) => void;
 
+export interface ElementsHandlers {
+    onUpdateBlockSettings: UpdateBlockSettings,
+}
+
+export interface VisualPreferencesHandlers {
+    onUpdateCharacterColorSaturation: (value: number) => void,
+}
+
+export interface StructureHandlers {
+    onUpdateStructureSettings: (patch: StructureSettingsPatch) => void,
+}
+
+export interface PageLayoutHandlers {
+    onUpdatePageSettings: (patch: PageSettingsPatch) => void,
+}
+
 export interface ScriptEditorSettingsPanelProps {
     panelId: string,
     resolvedScriptSettings: EditorSettings,
     blockLabelByType: Map<FountainElementType, string>,
     shortcutPrefix: string,
-    onUpdateBlockSettings: UpdateBlockSettings,
-    onUpdateCharacterColorSaturation: (value: number) => void,
-    onUpdateStructureSettings: (patch: StructureSettingsPatch) => void,
-    onUpdatePageSettings: (patch: PageSettingsPatch) => void,
+    elementsHandlers: ElementsHandlers,
+    visualPreferencesHandlers: VisualPreferencesHandlers,
+    structureHandlers: StructureHandlers,
+    pageLayoutHandlers: PageLayoutHandlers,
 }
 
 export interface ElementSettingsPanelProps {

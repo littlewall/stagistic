@@ -412,10 +412,10 @@ export const ScriptEditorRoute = () => {
                     resolvedScriptSettings={resolvedScriptSettings}
                     blockLabelByType={BLOCK_LABEL_BY_TYPE}
                     shortcutPrefix={shortcutPrefix}
-                    onUpdateBlockSettings={updateBlockSettings}
-                    onUpdateCharacterColorSaturation={updateCharacterColorSaturation}
-                    onUpdateStructureSettings={updateStructureSettings}
-                    onUpdatePageSettings={updatePageSettings}
+                    elementsHandlers={{onUpdateBlockSettings: updateBlockSettings}}
+                    visualPreferencesHandlers={{onUpdateCharacterColorSaturation: updateCharacterColorSaturation}}
+                    structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
+                    pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
                 />
             </ScriptSettingsModal>
         </AppLayout>

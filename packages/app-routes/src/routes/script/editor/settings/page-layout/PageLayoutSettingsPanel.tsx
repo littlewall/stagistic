@@ -4,7 +4,10 @@ import {MIN_PAGE_MARGIN_HORIZONTAL_PX} from '../constants';
 import {clamp} from '../math';
 import {SettingsSelect} from '../SettingsSelect';
 import sharedStyles from '../shared.module.css';
-import type {ScriptEditorSettingsPanelProps} from '../types';
+import type {
+    PageLayoutHandlers,
+    ScriptEditorSettingsPanelProps,
+} from '../types';
 import styles from './PageLayoutSettingsPanel.module.css';
 import {usePageLayoutSettingsViewModel} from './usePageLayoutSettingsViewModel';
 
@@ -12,7 +15,7 @@ const MIN_PAGE_CONTENT_WIDTH_PX = 320;
 
 interface PageLayoutSettingsPanelProps {
     resolvedScriptSettings: ScriptEditorSettingsPanelProps['resolvedScriptSettings'],
-    onUpdatePageSettings: ScriptEditorSettingsPanelProps['onUpdatePageSettings'],
+    onUpdatePageSettings: PageLayoutHandlers['onUpdatePageSettings'],
 }
 
 export const PageLayoutSettingsPanel = ({

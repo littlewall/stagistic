@@ -17,16 +17,16 @@ export const ScriptEditorSettingsPanel = ({
     resolvedScriptSettings,
     blockLabelByType,
     shortcutPrefix,
-    onUpdateBlockSettings,
-    onUpdateCharacterColorSaturation,
-    onUpdateStructureSettings,
-    onUpdatePageSettings,
+    elementsHandlers,
+    visualPreferencesHandlers,
+    structureHandlers,
+    pageLayoutHandlers,
 }: ScriptEditorSettingsPanelProps) => {
     if (panelId === SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT) {
         return (
             <PageLayoutSettingsPanel
                 resolvedScriptSettings={resolvedScriptSettings}
-                onUpdatePageSettings={onUpdatePageSettings}
+                onUpdatePageSettings={pageLayoutHandlers.onUpdatePageSettings}
             />
         );
     }
@@ -35,7 +35,7 @@ export const ScriptEditorSettingsPanel = ({
         return (
             <VisualPreferencesSettingsPanel
                 characterColorSaturation={resolvedScriptSettings.visual.characterColorSaturation}
-                onUpdateCharacterColorSaturation={onUpdateCharacterColorSaturation}
+                onUpdateCharacterColorSaturation={visualPreferencesHandlers.onUpdateCharacterColorSaturation}
             />
         );
     }
@@ -44,7 +44,7 @@ export const ScriptEditorSettingsPanel = ({
         return (
             <StructureMarkersSettingsPanel
                 structureSettings={resolvedScriptSettings.structure}
-                onUpdateStructureSettings={onUpdateStructureSettings}
+                onUpdateStructureSettings={structureHandlers.onUpdateStructureSettings}
             />
         );
     }
@@ -65,7 +65,7 @@ export const ScriptEditorSettingsPanel = ({
             blockLabel={blockLabelByType.get(blockType) ?? 'Element'}
             resolvedScriptSettings={resolvedScriptSettings}
             shortcutPrefix={shortcutPrefix}
-            onUpdateBlockSettings={onUpdateBlockSettings}
+            onUpdateBlockSettings={elementsHandlers.onUpdateBlockSettings}
         />
     );
 };
