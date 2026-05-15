@@ -5,7 +5,7 @@ import {
 } from '@stagistic/script';
 import {useMemo} from 'react';
 
-import panelStyles from '../../../ScriptEditorRoute.module.css';
+import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import sharedStyles from '../shared.module.css';
 import {
     SettingsSelect,

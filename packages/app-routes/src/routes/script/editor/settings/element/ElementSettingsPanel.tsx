@@ -1,4 +1,4 @@
-import styles from '../../../ScriptEditorRoute.module.css';
+import styles from '../ScriptEditorSettingsPanel.module.css';
 import type {ElementSettingsPanelProps} from '../types';
 import {ElementFormattingToolbar} from './ElementFormattingToolbar';
 import {ElementNumericControls} from './ElementNumericControls';

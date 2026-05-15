@@ -1,7 +1,7 @@
 import type {EditorSettings} from '@stagistic/script';
 import type {ChangeEvent} from 'react';
 
-import panelStyles from '../../../ScriptEditorRoute.module.css';
+import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import sharedStyles from '../shared.module.css';
 import type {StructureSettingsPatch} from '../types';
 import styles from './StructureMarkersSettingsPanel.module.css';

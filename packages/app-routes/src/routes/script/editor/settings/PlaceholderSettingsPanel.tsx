@@ -1,4 +1,4 @@
-import styles from '../../ScriptEditorRoute.module.css';
+import styles from './ScriptEditorSettingsPanel.module.css';
 import {panelDescriptions} from './constants';
 
 interface PlaceholderSettingsPanelProps {
