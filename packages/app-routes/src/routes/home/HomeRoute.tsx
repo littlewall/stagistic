@@ -17,7 +17,6 @@ import {
     SectionHeader,
     SectionTitle,
     SubtleText,
-    Tag,
 } from '@stagistic/ui';
 import {
     type KeyboardEvent as ReactKeyboardEvent,
@@ -28,56 +27,22 @@ import {
 import {Link, useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
-import {MOCK_SCRIPT_META} from '../mockScriptMeta';
+import {formatLastEdited} from '../../utils/formatLastEdited';
 import styles from './HomeRoute.module.css';
 
 export const HomeRoute = () => {
     const navigate = useNavigate();
     const {
-        scripts,
         scriptSummaries,
         isLoading: scriptsLoading,
     } = useScripts();
     const {openNewScript} = useGlobalModals();
-    const recentScripts = useMemo(() => scripts.slice(0, 6), [scripts]);
+    const recentScripts = useMemo(() => scriptSummaries.slice(0, 6), [scriptSummaries]);
     const openModal = useCallback(() => {
         openNewScript();
     }, [openNewScript]);
 
-    const latestScript = useMemo(() => {
-        if (scriptSummaries.length === 0) {
-            return null;
-        }
-
-        return scriptSummaries[0];
-    }, [scriptSummaries]);
-
-    const formatLastEdited = useCallback((timestamp: number) => {
-        const now = new Date();
-        const updated = new Date(timestamp);
-        const diffMs = now.getTime() - updated.getTime();
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-        if (diffDays <= 0) {
-            return 'Edited today';
-        }
-
-        if (diffDays === 1) {
-            return 'Edited yesterday';
-        }
-
-        if (diffDays < 7) {
-            return `Edited ${diffDays} days ago`;
-        }
-
-        const dateFormat = new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: updated.getFullYear() === now.getFullYear() ? undefined : 'numeric',
-        });
-
-        return `Edited ${dateFormat.format(updated)}`;
-    }, []);
+    const latestScript = useMemo(() => scriptSummaries[0] ?? null, [scriptSummaries]);
 
     const handleHome = useCallback(() => {
         void navigate('/');
@@ -107,7 +72,7 @@ export const HomeRoute = () => {
         void navigate(`/script/${scriptId}/settings`);
     }, [navigate]);
     const recentScriptCards = useMemo(
-        () => recentScripts.map((script, index) => (
+        () => recentScripts.map(script => (
             <Card
                 key={script.id}
                 className={styles.card}
@@ -117,14 +82,11 @@ export const HomeRoute = () => {
                 onKeyDown={event => handleCardKeyDown(script.id, event)}
             >
                 <CardHeader>
-                    <h3 className={styles.cardTitle}>{script.name}</h3>
-                    <Tag>
-                        {MOCK_SCRIPT_META[index]?.status ?? 'Draft'}
-                    </Tag>
+                    <h3 className={styles.cardTitle}>{script.title}</h3>
                 </CardHeader>
                 <CardContent>
                     <SubtleText>
-                        {MOCK_SCRIPT_META[index]?.updated ?? 'Edited recently'}
+                        {formatLastEdited(script.updatedAt)}
                     </SubtleText>
                 </CardContent>
                 <CardFooter>
@@ -144,8 +106,8 @@ export const HomeRoute = () => {
                     </Button>
                 </CardFooter>
             </Card>
-        ))
-        , [
+        )),
+        [
             handleCardClick,
             handleCardKeyDown,
             handleOpenEditor,
@@ -189,7 +151,6 @@ export const HomeRoute = () => {
             </Card>
         );
     }, [
-        formatLastEdited,
         handleResumeScript,
         latestScript,
         scriptsLoading,
@@ -218,7 +179,7 @@ export const HomeRoute = () => {
                                 <Button onClick={openModal}>
                                     New script
                                 </Button>
-                                {scripts && scripts.length > 6 && (
+                                {scriptSummaries.length > 6 && (
                                     <Button
                                         as={Link}
                                         variant="secondary"

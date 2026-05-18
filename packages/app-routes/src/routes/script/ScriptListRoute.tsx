@@ -13,7 +13,6 @@ import {
     PageTitle,
     ProgressPanel,
     SubtleText,
-    Tag,
 } from '@stagistic/ui';
 import {
     type KeyboardEvent as ReactKeyboardEvent,
@@ -24,12 +23,12 @@ import {
 import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
-import {MOCK_SCRIPT_META} from '../mockScriptMeta';
+import {formatLastEdited} from '../../utils/formatLastEdited';
 import styles from './ScriptListRoute.module.css';
 
 export const ScriptListRoute = () => {
     const navigate = useNavigate();
-    const {scripts, isLoading: scriptsLoading} = useScripts();
+    const {scriptSummaries, isLoading: scriptsLoading} = useScripts();
     const {openNewScript} = useGlobalModals();
     const openModal = useCallback(() => {
         openNewScript();
@@ -55,7 +54,7 @@ export const ScriptListRoute = () => {
         void navigate(`/script/${scriptId}/settings`);
     }, [navigate]);
     const scriptCards = useMemo(
-        () => scripts.map((script, index) => (
+        () => scriptSummaries.map(script => (
             <Card
                 key={script.id}
                 className={styles.card}
@@ -65,14 +64,11 @@ export const ScriptListRoute = () => {
                 onKeyDown={event => handleCardKeyDown(script.id, event)}
             >
                 <CardHeader>
-                    <h2 className={styles.cardTitle}>{script.name}</h2>
-                    <Tag>
-                        {MOCK_SCRIPT_META[index]?.status ?? 'Draft'}
-                    </Tag>
+                    <h2 className={styles.cardTitle}>{script.title}</h2>
                 </CardHeader>
                 <CardContent>
                     <SubtleText>
-                        {MOCK_SCRIPT_META[index]?.updated ?? 'Edited recently'}
+                        {formatLastEdited(script.updatedAt)}
                     </SubtleText>
                 </CardContent>
                 <CardFooter>
@@ -92,13 +88,13 @@ export const ScriptListRoute = () => {
                     </Button>
                 </CardFooter>
             </Card>
-        ))
-        , [
+        )),
+        [
             handleCardClick,
             handleCardKeyDown,
             handleOpenEditor,
             handleOpenSettings,
-            scripts,
+            scriptSummaries,
         ],
     );
 
