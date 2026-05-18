@@ -84,8 +84,8 @@ export const PANEL_DESCRIPTIONS: Record<string, {
     description: string,
 }> = {
     [SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO]: {
-        title: 'Script Info',
-        description: 'Script metadata panel placeholder.',
+        title: 'Title Page',
+        description: 'Title page metadata for PDF and Fountain export.',
     },
     [SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES]: {
         title: 'Visual Preferences',

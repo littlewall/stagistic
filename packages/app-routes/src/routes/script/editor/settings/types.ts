@@ -5,6 +5,7 @@ import type {
     FountainElementType,
     PageSettings,
     StructureSettingsPatch,
+    TitlePageSettings,
 } from '@stagistic/script';
 import type {
     CSSProperties,
@@ -41,6 +42,12 @@ export interface PageLayoutHandlers {
     onUpdatePageSettings: (patch: PageSettingsPatch) => void,
 }
 
+export interface TitlePageHandlers {
+    titlePageSettings: TitlePageSettings,
+    scriptTitle: string,
+    onUpdateTitlePage: (patch: Partial<TitlePageSettings>) => void,
+}
+
 export interface ScriptEditorSettingsPanelProps {
     panelId: string,
     resolvedScriptSettings: EditorSettings,
@@ -50,6 +57,7 @@ export interface ScriptEditorSettingsPanelProps {
     visualPreferencesHandlers: VisualPreferencesHandlers,
     structureHandlers: StructureHandlers,
     pageLayoutHandlers: PageLayoutHandlers,
+    titlePageHandlers: TitlePageHandlers,
 }
 
 export type SectionRenderer = (props: ScriptEditorSettingsPanelProps) => ReactElement;

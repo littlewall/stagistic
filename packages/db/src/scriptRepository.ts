@@ -1,6 +1,7 @@
 import type {
     EditorSettingsOverride,
     ScriptDocument,
+    TitlePageSettings,
 } from '@stagistic/script';
 
 import type {
@@ -104,10 +105,17 @@ export interface ScriptBlockCharacterRefsRepository {
     deleteByCharacterIds(characterIds: string[]): Promise<void>,
 }
 
+export interface ScriptTitlePageRepository {
+    load(scriptId: string): Promise<TitlePageSettings | null>,
+    save(scriptId: string, settings: TitlePageSettings): Promise<void>,
+    delete(scriptId: string): Promise<void>,
+}
+
 export interface ScriptDataRepository {
     scripts: ScriptCrudRepository,
     content: ScriptContentRepository,
     configs: ScriptConfigsRepository,
+    titlePage: ScriptTitlePageRepository,
     characters: ScriptCharactersRepository,
     characterGenders: ScriptCharacterGendersRepository,
     blocks: ScriptBlocksRepository,
@@ -137,4 +145,7 @@ export interface ScriptRepository extends ScriptDataRepository {
     loadScriptConfig(scriptId: string, namespace: string): Promise<EditorSettingsOverride | null>,
     saveScriptConfig(scriptId: string, namespace: string, settings: EditorSettingsOverride): Promise<void>,
     deleteScriptConfig(scriptId: string, namespace: string): Promise<void>,
+    loadTitlePage(scriptId: string): Promise<TitlePageSettings | null>,
+    saveTitlePage(scriptId: string, settings: TitlePageSettings): Promise<void>,
+    deleteTitlePage(scriptId: string): Promise<void>,
 }

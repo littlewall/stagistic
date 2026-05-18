@@ -1,14 +1,23 @@
 import {
+    SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
     SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
     SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS,
     SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
 } from '../../settings/settingsMenu';
+import {TitlePageSettingsPanel} from './document-info/TitlePageSettingsPanel';
 import {PageLayoutSettingsPanel} from './page-layout/PageLayoutSettingsPanel';
 import {StructureMarkersSettingsPanel} from './structure-markers/StructureMarkersSettingsPanel';
 import type {SectionRenderer} from './types';
 import {VisualPreferencesSettingsPanel} from './visual-preferences/VisualPreferencesSettingsPanel';
 
 export const SECTION_RENDERERS: Partial<Record<string, SectionRenderer>> = {
+    [SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO]: props => (
+        <TitlePageSettingsPanel
+            scriptTitle={props.titlePageHandlers.scriptTitle}
+            settings={props.titlePageHandlers.titlePageSettings}
+            onUpdate={props.titlePageHandlers.onUpdateTitlePage}
+        />
+    ),
     [SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT]: props => (
         <PageLayoutSettingsPanel
             resolvedScriptSettings={props.resolvedScriptSettings}

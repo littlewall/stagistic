@@ -31,6 +31,7 @@ import {getLocalDb} from '~db';
 import {createCharacterHandlers} from './localPglite/characters';
 import {createConfigHandlers} from './localPglite/config';
 import {createContentHandlers} from './localPglite/content';
+import {createTitlePageHandlers} from './localPglite/titlePage';
 import {
     LEGACY_TO_BLOCKS_TRIGGERS,
     migrateScriptDocumentToBlocks,
@@ -174,6 +175,11 @@ export const createLocalPgliteDataRepository = (): ScriptDataRepository => {
         delete: deleteScriptConfig,
     };
 
+    const titlePage = createTitlePageHandlers({
+        getDb,
+        recordOutbox,
+    });
+
     const blocks = {
         list: async (scriptId: string, queryOptions?: ListScriptBlocksOptions) => {
             const db = await getDb();
@@ -303,6 +309,7 @@ export const createLocalPgliteDataRepository = (): ScriptDataRepository => {
         scripts,
         content,
         configs,
+        titlePage,
         characters,
         characterGenders,
         blocks,
@@ -349,5 +356,8 @@ export const createLocalPgliteRepository = (): ScriptRepository => {
         loadScriptConfig: (scriptId, namespace) => repositoryData.configs.load(scriptId, namespace),
         saveScriptConfig: (scriptId, namespace, settings) => repositoryData.configs.save(scriptId, namespace, settings),
         deleteScriptConfig: (scriptId, namespace) => repositoryData.configs.delete(scriptId, namespace),
+        loadTitlePage: scriptId => repositoryData.titlePage.load(scriptId),
+        saveTitlePage: (scriptId, settings) => repositoryData.titlePage.save(scriptId, settings),
+        deleteTitlePage: scriptId => repositoryData.titlePage.delete(scriptId),
     };
 };

@@ -7,6 +7,8 @@ import {
 import {
     normalizeEditorSettingsBlockType,
 } from '../settings';
+import type {TitlePageSettings} from '../titlePage';
+import {serializeTitlePageToFountain} from '../titlePage';
 import {
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
     FOUNTAIN_COLUMN_NODE_NAME,
@@ -119,14 +121,30 @@ const collectFountainElements = (nodes: FountainJSONContent[] | undefined): Foun
     return elements;
 };
 
+export interface SerializeScriptDocumentToFountainOptions {
+    titlePage?: TitlePageSettings,
+    scriptTitle?: string,
+}
+
 export const serializeScriptDocumentToFountain = (
     value: ScriptDocument,
+    options?: SerializeScriptDocumentToFountainOptions,
 ): string => {
     const nodes = collectFountainElements(value.content);
+    const body = nodes.length > 0 ? fountainSerializer(nodes) : '';
 
-    if (nodes.length === 0) {
-        return '';
+    if (!options?.titlePage) {
+        return body;
     }
 
-    return fountainSerializer(nodes);
+    const titlePageText = serializeTitlePageToFountain(
+        options.titlePage,
+        options.scriptTitle ?? '',
+    );
+
+    if (!titlePageText) {
+        return body;
+    }
+
+    return body ? `${titlePageText}\n${body}` : titlePageText;
 };

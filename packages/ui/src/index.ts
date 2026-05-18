@@ -42,6 +42,13 @@ export {
 export {Select} from './molecules/forms/Select';
 export type {SelectOption} from './molecules/forms/Select';
 export {TextInput} from './molecules/forms/TextInput';
+export {InputTable} from './molecules/forms/InputTable';
+export type {
+    InputTableColumnDef,
+    InputTableProps,
+    InputTableRow,
+    InputTableRowCount,
+} from './molecules/forms/InputTable';
 export {Grid} from './organisms/Grid';
 export {HeroLayout} from './organisms/HeroLayout';
 export {PageContainer} from './organisms/PageContainer';

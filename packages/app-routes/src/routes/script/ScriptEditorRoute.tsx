@@ -49,6 +49,7 @@ import {useScriptSettingsModalState} from './settings/useScriptSettingsModalStat
 import {useScriptEditorController} from './useScriptEditorController';
 import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
 import {useScriptEditorSettingsDraft} from './useScriptEditorSettingsDraft';
+import {useTitlePageDraft} from './useTitlePageDraft';
 
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'calc(280px * var(--size-scale))';
@@ -104,6 +105,13 @@ export const ScriptEditorRoute = () => {
         requests: {
             handleSaveScriptSettingsOverride,
         },
+    });
+    const {
+        titlePageDraft,
+        updateTitlePage,
+    } = useTitlePageDraft({
+        currentScriptId,
+        repository: scriptRepository,
     });
     const shortcutPrefix = isApplePlatform() ? 'Cmd' : 'Ctrl';
 
@@ -412,6 +420,11 @@ export const ScriptEditorRoute = () => {
                     visualPreferencesHandlers={{onUpdateCharacterColorSaturation: updateCharacterColorSaturation}}
                     structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
                     pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
+                    titlePageHandlers={{
+                        titlePageSettings: titlePageDraft,
+                        scriptTitle: currentScript?.name ?? '',
+                        onUpdateTitlePage: updateTitlePage,
+                    }}
                 />
             </ScriptSettingsModal>
         </AppLayout>

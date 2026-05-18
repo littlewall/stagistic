@@ -16,6 +16,11 @@
     border: none;
 }
 
+/* Restore hidden state — display:grid above overrides the UA stylesheet's dialog:not([open]){display:none} */
+.dialog:not([open]) {
+    display: none;
+}
+
 .dialog::backdrop {
     background: var(--color-backdrop);
 }

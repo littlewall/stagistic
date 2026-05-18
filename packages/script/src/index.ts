@@ -5,6 +5,7 @@ export * from './fountain';
 export * from './indexing';
 export * from './settings';
 export * from './structure';
+export * from './titlePage';
 export {
     clampNumber,
     collapseWhitespace,

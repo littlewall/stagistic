@@ -1,0 +1,164 @@
+.table {
+    width: 100%;
+}
+
+.headerRow {
+    display: grid;
+    column-gap: var(--space-3);
+    padding: 0 0 var(--space-2);
+}
+
+.headerCell {
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--color-ink-muted);
+    text-transform: uppercase;
+    letter-spacing: .07em;
+}
+
+.dataRow {
+    display: grid;
+    column-gap: var(--space-3);
+    padding: var(--space-2) 0;
+}
+
+.dataCell {
+    display: flex;
+    flex-direction: column;
+}
+
+.cellInput {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 3px 6px;
+    font-size: .9rem;
+    background: var(--color-input-bg, var(--color-surface));
+    border: 1px solid var(--color-divider);
+    border-radius: var(--radius-sm);
+    color: var(--color-ink);
+    font-family: inherit;
+}
+
+.cellInput:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.cellInput::placeholder {
+    color: var(--color-ink-muted);
+    opacity: .5;
+}
+
+.cellInputWithDelete {
+    padding-right: 22px;
+}
+
+.arrayCell {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--space-1) * .5);
+}
+
+.arrayEntry {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.arrayEntry:hover .removeEntryButton {
+    opacity: 1;
+}
+
+.removeEntryButton {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 1px 4px;
+    font-size: .8rem;
+    background: transparent;
+    border: none;
+    color: var(--color-ink-muted);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 100ms, color 100ms;
+    line-height: 1;
+}
+
+.removeEntryButton:hover {
+    color: var(--color-error, #c33);
+    opacity: 1;
+}
+
+.addEntryButton {
+    padding: 3px 6px;
+    font-size: .82rem;
+    background: transparent;
+    border: none;
+    color: var(--color-ink-muted);
+    cursor: pointer;
+    text-align: left;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+    margin-top: 2px;
+}
+
+.addEntryButton:hover {
+    background: var(--color-highlight);
+    color: var(--color-ink);
+}
+
+/* Delete column — rightmost grid cell */
+
+.deleteCell {
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 4px;
+}
+
+.dataRow:hover .removeRowButton {
+    opacity: 1;
+}
+
+.removeRowButton {
+    padding: 2px 5px;
+    font-size: .85rem;
+    background: transparent;
+    border: none;
+    color: var(--color-ink-muted);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity 120ms, color 120ms;
+    line-height: 1;
+}
+
+.removeRowButton:hover {
+    color: var(--color-error, #c33);
+    opacity: 1;
+}
+
+.footer {
+    display: grid;
+    column-gap: var(--space-3);
+    padding: var(--space-2) 0;
+}
+
+.addRowButton {
+    grid-column: 1 / -2;
+    padding: 3px 6px;
+    font-size: .85rem;
+    background: transparent;
+    border: none;
+    color: var(--color-ink-muted);
+    cursor: pointer;
+    text-align: left;
+    border-radius: var(--radius-sm);
+    font-family: inherit;
+}
+
+.addRowButton:hover {
+    background: var(--color-highlight);
+    color: var(--color-ink);
+}

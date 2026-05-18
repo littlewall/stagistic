@@ -73,7 +73,7 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
             {
                 kind: 'item',
                 id: SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
-                label: 'Script Info',
+                label: 'Title Page',
                 panelId: SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
             },
             {

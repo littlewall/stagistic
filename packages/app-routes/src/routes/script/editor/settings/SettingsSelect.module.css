@@ -1,4 +1,6 @@
 .root {
     /* Larger trigger height for settings panels */
     --select-button-height: calc(40px * var(--size-scale));
+    --select-button-border-color: var(--color-divider);
+    --select-button-bg: var(--color-input-bg, var(--color-surface));
 }

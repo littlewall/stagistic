@@ -19,6 +19,7 @@ export type {
     ScriptLocationsRepository,
     ScriptRepository,
     ScriptScenesRepository,
+    ScriptTitlePageRepository,
 } from './scriptRepository';
 export type {
     Script,
