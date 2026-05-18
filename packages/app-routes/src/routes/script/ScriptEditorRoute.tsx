@@ -42,6 +42,7 @@ import {useStructureSidebarController} from './editor/structure/useStructureSide
 import {
     SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS,
     type ScriptSettingsPanelId,
+    SETTINGS_MODAL_QUERY_KEY,
 } from './settings/settingsMenu';
 import {useScriptSettingsModalQuerySync} from './settings/useScriptSettingsModalQuerySync';
 import {useScriptSettingsModalState} from './settings/useScriptSettingsModalState';
@@ -51,7 +52,6 @@ import {useScriptEditorSettingsDraft} from './useScriptEditorSettingsDraft';
 
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'calc(280px * var(--size-scale))';
-const SETTINGS_MODAL_QUERY_KEY = 'settingsModal';
 const BLOCK_LABEL_BY_TYPE = new Map(
     SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const),
 );
@@ -176,10 +176,7 @@ export const ScriptEditorRoute = () => {
     ) => {
         handleEditorValueChange(value, meta);
         onScriptStateEditorValueChange(value);
-    }, [
-        handleEditorValueChange,
-        onScriptStateEditorValueChange,
-    ]);
+    }, [handleEditorValueChange, onScriptStateEditorValueChange]);
     const handleResolvedActiveBlockChange = useCallback((blockId: string | null) => {
         if (lastResolvedActiveBlockIdRef.current === blockId) {
             return;
@@ -276,8 +273,7 @@ export const ScriptEditorRoute = () => {
             renderContextActions: () => (
                 <StructureSidebarContextActions onInsertAct={handleSidebarInsertAct} />
             ),
-        },
-        {
+        }, {
             id: 'characters',
             label: 'Characters',
             renderContent: () => <ScriptCharactersSidebar {...characterSidebarProps} />,

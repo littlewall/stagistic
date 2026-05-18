@@ -66,3 +66,5 @@ temp
 apps/api/tsconfig.tsbuildinfo
 apps/web/tsconfig.tsbuildinfo
 packages/app-routes/tsconfig.tsbuildinfo
+# CocoIndex Code (ccc)
+/.cocoindex_code/

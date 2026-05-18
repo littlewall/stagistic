@@ -19,7 +19,6 @@ import type {UseImportScriptModalStateArgs} from './types';
 
 export const useImportScriptModalState = ({
     isOpen,
-    onClose,
     onImport,
     onPickFile,
     preselectedFile,
@@ -65,22 +64,6 @@ export const useImportScriptModalState = ({
             return previous;
         });
     }, [isOpen, preselectedFile]);
-
-    useEffect(() => {
-        if (!isOpen) {
-            return undefined;
-        }
-
-        const handleKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                onClose();
-            }
-        };
-
-        window.addEventListener('keydown', handleKeyDown);
-
-        return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, onClose]);
 
     const fileLabel = useMemo(() => {
         if (!selectedFile) {

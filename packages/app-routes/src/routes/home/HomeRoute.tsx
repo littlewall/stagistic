@@ -28,22 +28,8 @@ import {
 import {Link, useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
+import {MOCK_SCRIPT_META} from '../mockScriptMeta';
 import styles from './HomeRoute.module.css';
-
-const mockUpdates = [
-    {
-        id: '1', updated: 'Edited today', status: 'Draft',
-    },
-    {
-        id: '2', updated: 'Edited yesterday', status: 'In progress',
-    },
-    {
-        id: '3', updated: 'Edited 3 days ago', status: 'Concept',
-    },
-    {
-        id: '4', updated: 'Edited last week', status: 'Outline',
-    },
-];
 
 export const HomeRoute = () => {
     const navigate = useNavigate();
@@ -133,12 +119,12 @@ export const HomeRoute = () => {
                 <CardHeader>
                     <h3 className={styles.cardTitle}>{script.name}</h3>
                     <Tag>
-                        {mockUpdates[index]?.status ?? 'Draft'}
+                        {MOCK_SCRIPT_META[index]?.status ?? 'Draft'}
                     </Tag>
                 </CardHeader>
                 <CardContent>
                     <SubtleText>
-                        {mockUpdates[index]?.updated ?? 'Edited recently'}
+                        {MOCK_SCRIPT_META[index]?.updated ?? 'Edited recently'}
                     </SubtleText>
                 </CardContent>
                 <CardFooter>

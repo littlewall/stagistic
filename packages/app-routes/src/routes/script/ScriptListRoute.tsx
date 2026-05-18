@@ -24,28 +24,8 @@ import {
 import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
+import {MOCK_SCRIPT_META} from '../mockScriptMeta';
 import styles from './ScriptListRoute.module.css';
-
-const mockMeta = [
-    {
-        id: '1', updated: 'Edited today', status: 'Draft',
-    },
-    {
-        id: '2', updated: 'Edited yesterday', status: 'Outline',
-    },
-    {
-        id: '3', updated: 'Edited last week', status: 'In progress',
-    },
-    {
-        id: '4', updated: 'Edited 2 weeks ago', status: 'Concept',
-    },
-    {
-        id: '5', updated: 'Edited this month', status: 'Draft',
-    },
-    {
-        id: '6', updated: 'Edited this month', status: 'Draft',
-    },
-];
 
 export const ScriptListRoute = () => {
     const navigate = useNavigate();
@@ -87,12 +67,12 @@ export const ScriptListRoute = () => {
                 <CardHeader>
                     <h2 className={styles.cardTitle}>{script.name}</h2>
                     <Tag>
-                        {mockMeta[index]?.status ?? 'Draft'}
+                        {MOCK_SCRIPT_META[index]?.status ?? 'Draft'}
                     </Tag>
                 </CardHeader>
                 <CardContent>
                     <SubtleText>
-                        {mockMeta[index]?.updated ?? 'Edited recently'}
+                        {MOCK_SCRIPT_META[index]?.updated ?? 'Edited recently'}
                     </SubtleText>
                 </CardContent>
                 <CardFooter>

@@ -11,7 +11,6 @@ import type {
     EditorSidebarCharacter,
 } from '../types';
 import {
-    DEFAULT_GENDER_LABEL,
     UNSPECIFIED_GENDER_KEY,
     UNSPECIFIED_GENDER_LABEL,
 } from './constants';
@@ -52,7 +51,7 @@ export const useCharacterGenderPickerState = ({
     const selectedGenderLabel = useMemo(
         () => selectedGenderOption
             ? normalizeGenderDisplayLabel(selectedGenderOption.label)
-            : DEFAULT_GENDER_LABEL,
+            : UNSPECIFIED_GENDER_LABEL,
         [selectedGenderOption],
     );
     const selectedGenderIcon = useMemo(

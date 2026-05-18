@@ -12,6 +12,13 @@ import {
     type FountainElementType,
 } from '@stagistic/script';
 
+import {
+    SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
+    SCRIPT_SETTINGS_PANEL_HEADERS,
+    SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
+    SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
+} from '../../settings/settingsMenu';
+
 export const SCREENPLAY_CHARS_PER_INCH = 10;
 export const PX_PER_INCH = 96;
 export const MIN_PREVIEW_CONTENT_CHARS = 30;
@@ -76,36 +83,24 @@ export const PANEL_DESCRIPTIONS: Record<string, {
     title: string,
     description: string,
 }> = {
-    'document-info': {
+    [SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO]: {
         title: 'Script Info',
         description: 'Script metadata panel placeholder.',
     },
-    'visual-preferences': {
+    [SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES]: {
         title: 'Visual Preferences',
         description: 'Customize character color intensity for better readability.',
     },
-    production: {
-        title: 'Production',
-        description: 'Production panel placeholder.',
-    },
-    'page-layout': {
+    [SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT]: {
         title: 'Page Layout',
         description: 'Page size, margins, and typography settings panel placeholder.',
     },
-    'headers-footers': {
+    [SCRIPT_SETTINGS_PANEL_HEADERS]: {
         title: 'Headers and Footers',
         description: 'Header and footer controls placeholder.',
-    },
-    'document-statuses': {
-        title: 'Document Statuses',
-        description: 'Document statuses setup placeholder.',
     },
     notes: {
         title: 'Notes',
         description: 'Document notes configuration placeholder.',
-    },
-    'project-statuses': {
-        title: 'Project Statuses',
-        description: 'Project statuses placeholder.',
     },
 };

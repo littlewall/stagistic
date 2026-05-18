@@ -4,9 +4,9 @@ import {
     useState,
 } from 'react';
 
+import {SIDEBAR_LAYOUT_STORAGE_KEY} from '../../../../storageKeys';
 import type {SidebarPanelId} from './types';
 
-const STORAGE_KEY = 'stagistic.editor.sidebar-layout';
 const OVERLAY_BREAKPOINT_QUERY = '(max-width: 1100px)';
 
 interface SidebarLayoutState {
@@ -58,7 +58,7 @@ const readStored = (): StoredSidebarLayoutState | null => {
     }
 
     try {
-        const raw = window.localStorage.getItem(STORAGE_KEY);
+        const raw = window.localStorage.getItem(SIDEBAR_LAYOUT_STORAGE_KEY);
 
         if (!raw) {
             return null;
@@ -129,7 +129,7 @@ export const useSidebarLayout = ({
         }
 
         try {
-            window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            window.localStorage.setItem(SIDEBAR_LAYOUT_STORAGE_KEY, JSON.stringify(state));
         } catch {
             // Ignore storage write failures in constrained environments.
         }
@@ -151,7 +151,11 @@ export const useSidebarLayout = ({
                 rightPanelId: nextRight,
             };
         });
-    }, [availablePanelIds, defaultLeftPanelId, defaultRightPanelId]);
+    }, [
+        availablePanelIds,
+        defaultLeftPanelId,
+        defaultRightPanelId,
+    ]);
 
     useEffect(() => {
         if (!isOverlayViewport) {

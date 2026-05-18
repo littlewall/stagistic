@@ -17,7 +17,6 @@ export interface ImportDropZoneProps {
 
 export interface UseImportScriptModalStateArgs {
     isOpen: boolean,
-    onClose: () => void,
     onImport: (payload: ImportPayload) => void,
     onPickFile?: () => Promise<ImportScriptFile | null>,
     preselectedFile?: ImportScriptFile | null,

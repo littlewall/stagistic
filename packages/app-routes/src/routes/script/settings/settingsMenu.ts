@@ -6,6 +6,7 @@ import {
 } from '@stagistic/script';
 import type {SettingsNavGroup} from '@stagistic/ui';
 
+export const SETTINGS_MODAL_QUERY_KEY = 'settingsModal';
 export const SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO = 'document-info';
 export const SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES = 'visual-preferences';
 export const SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS = 'structure-markers';
@@ -26,10 +27,7 @@ export const SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS: Array<{
     id: string,
     blockType: FountainElementType,
     label: string,
-}> = [
-    ...rawBlockItems.filter(item => item.blockType === ELEMENT_ACT),
-    ...rawBlockItems.filter(item => item.blockType !== ELEMENT_ACT),
-];
+}> = [...rawBlockItems.filter(item => item.blockType === ELEMENT_ACT), ...rawBlockItems.filter(item => item.blockType !== ELEMENT_ACT)];
 
 export type ElementSettingsPanelId = `${typeof SCRIPT_SETTINGS_PANEL_ELEMENT_PREFIX}${FountainElementType}`;
 
@@ -74,25 +72,25 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
         items: [
             {
                 kind: 'item',
-                id: 'document-info',
+                id: SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
                 label: 'Script Info',
                 panelId: SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
             },
             {
                 kind: 'item',
-                id: 'visual-preferences',
+                id: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
                 label: 'Visual Preferences',
                 panelId: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
             },
             {
                 kind: 'item',
-                id: 'page-layout',
+                id: SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
                 label: 'Page Layout',
                 panelId: SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
             },
             {
                 kind: 'item',
-                id: 'headers-footers',
+                id: SCRIPT_SETTINGS_PANEL_HEADERS,
                 label: 'Headers and Footers',
                 panelId: SCRIPT_SETTINGS_PANEL_HEADERS,
             },

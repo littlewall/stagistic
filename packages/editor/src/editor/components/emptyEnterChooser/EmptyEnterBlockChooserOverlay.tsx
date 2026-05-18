@@ -8,7 +8,6 @@ import {
     useEffect,
     useLayoutEffect,
     useMemo,
-    useRef,
     useState,
 } from 'react';
 
@@ -24,6 +23,7 @@ import {
     resolveElementOffsetWithinAncestor,
     resolveFountainBlockElementById,
 } from '../blockActions/overlay/geometry';
+import {useRafScheduler} from '../blockActions/overlay/useRafScheduler';
 import styles from './EmptyEnterBlockChooserOverlay.module.css';
 
 interface EmptyEnterBlockChooserOverlayProps {
@@ -113,7 +113,7 @@ export const EmptyEnterBlockChooserOverlay = ({
         return getEmptyEnterChooserFromState(editor.state);
     });
     const [anchorStyle, setAnchorStyle] = useState<ChooserAnchorStyle | null>(null);
-    const anchorFrameRef = useRef<number | null>(null);
+    const {cancel: cancelScheduledAnchorUpdate, schedule} = useRafScheduler();
 
     const syncChooserStateFromEditor = useCallback((targetEditor: TiptapEditor | null = editor) => {
         if (!targetEditor) {
@@ -261,29 +261,9 @@ export const EmptyEnterBlockChooserOverlay = ({
         editor,
     ]);
 
-    const cancelScheduledAnchorUpdate = useCallback(() => {
-        if (anchorFrameRef.current === null) {
-            return;
-        }
-
-        window.cancelAnimationFrame(anchorFrameRef.current);
-        anchorFrameRef.current = null;
-    }, []);
-
     const scheduleAnchorUpdate = useCallback(() => {
-        cancelScheduledAnchorUpdate();
-
-        if (typeof window === 'undefined') {
-            updateAnchor();
-
-            return;
-        }
-
-        anchorFrameRef.current = window.requestAnimationFrame(() => {
-            anchorFrameRef.current = null;
-            updateAnchor();
-        });
-    }, [cancelScheduledAnchorUpdate, updateAnchor]);
+        schedule(updateAnchor);
+    }, [schedule, updateAnchor]);
 
     useLayoutEffect(() => {
         if (!chooserState.isOpen) {
@@ -327,12 +307,6 @@ export const EmptyEnterBlockChooserOverlay = ({
             window.removeEventListener('resize', handleWindowResize);
         };
     }, [chooserState.isOpen, scheduleAnchorUpdate]);
-
-    useEffect(() => {
-        return () => {
-            cancelScheduledAnchorUpdate();
-        };
-    }, [cancelScheduledAnchorUpdate]);
 
     const labelByType = useMemo(() => {
         const map = new Map<string, string>();
