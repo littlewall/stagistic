@@ -10,6 +10,12 @@
     transition: border-color 150ms ease, box-shadow 150ms ease;
 }
 
+.compact {
+    min-height: unset;
+    padding: var(--space-3) var(--space-4);
+    gap: var(--space-2);
+}
+
 .interactive {
     cursor: pointer;
 }

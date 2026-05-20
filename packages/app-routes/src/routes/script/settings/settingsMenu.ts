@@ -78,12 +78,6 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
             },
             {
                 kind: 'item',
-                id: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
-                label: 'Visual Preferences',
-                panelId: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
-            },
-            {
-                kind: 'item',
                 id: SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
                 label: 'Page Layout',
                 panelId: SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
@@ -93,6 +87,12 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
                 id: SCRIPT_SETTINGS_PANEL_HEADERS,
                 label: 'Headers and Footers',
                 panelId: SCRIPT_SETTINGS_PANEL_HEADERS,
+            },
+            {
+                kind: 'item',
+                id: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
+                label: 'Visual Preferences',
+                panelId: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
             },
             {
                 kind: 'expandable',

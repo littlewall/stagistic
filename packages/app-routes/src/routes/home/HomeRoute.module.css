@@ -1,60 +1,121 @@
-.hero {
-    padding: var(--space-8);
-    background: var(--color-surface);
-    border-radius: var(--radius-md);
+.columns {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: var(--space-12);
+    align-items: start;
 }
 
-.heroContent {
+/* Left column: script list */
+
+.scriptList {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.scriptListHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.scriptListItems {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.scriptRow {
+    width: 100%;
+}
+
+.scriptRowInner {
+    display: flex;
+    gap: var(--space-4);
+    align-items: center;
+    justify-content: space-between;
+}
+
+.scriptRowInfo {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.scriptRowTitle {
+    overflow: hidden;
+    font-size: 0.925rem;
+    font-weight: 500;
+    color: var(--color-ink);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.scriptRowMeta {
+    font-size: 0.8rem;
+}
+
+.scriptRowActions {
+    display: flex;
+    flex-shrink: 0;
+    gap: var(--space-1);
+    align-items: center;
+}
+
+/* Right column: welcome + continue */
+
+.rightPanel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-8);
+}
+
+.welcome {
     display: flex;
     flex-direction: column;
     gap: var(--space-4);
 }
 
-.subtitle {
+.welcomeSubtitle {
     max-width: 32rem;
     font-size: 1rem;
 }
 
-.actions {
+.welcomeActions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-3);
     margin-top: var(--space-2);
 }
 
-.heroCard {
-    justify-content: center;
-    padding: var(--space-6);
-    border: none;
+.continueSection {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
 }
 
-.heroCardValue {
-    font-size: 1.6rem;
+.continueSectionTitle {
+    font-size: 1rem;
     font-weight: 600;
 }
 
-.heroCardButton {
-    align-self: flex-start;
+.continueCard {
+    cursor: pointer;
+    background: color-mix(in oklch, var(--color-highlight) 55%, var(--color-surface));
 }
 
-.card {
-    min-height: 160px;
+.continueCardTitle {
+    font-size: 1.3rem;
+    font-weight: 600;
 }
 
-.cardTitle {
-    font-size: 1.05rem;
-}
+@media (max-width: 900px) {
+    .columns {
+        grid-template-columns: 1fr;
+    }
 
-.heroCardFooter {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-}
-
-.recentLoading {
-    margin-top: var(--space-4);
-}
-
-.recentSection {
-    border: none;
+    .rightPanel {
+        order: -1;
+    }
 }

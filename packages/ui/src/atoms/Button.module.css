@@ -56,6 +56,16 @@
     background: var(--color-highlight);
 }
 
+.outline {
+    color: var(--color-ink);
+    background: transparent;
+    border-color: var(--color-divider);
+}
+
+.outline:hover {
+    background: var(--color-highlight);
+}
+
 .danger {
     color: var(--color-danger);
     background: transparent;

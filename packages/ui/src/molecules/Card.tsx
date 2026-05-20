@@ -12,6 +12,7 @@ type CardProps<T extends ElementType> = {
     className?: string,
     as?: T,
     variant?: 'default' | 'highlight',
+    compact?: boolean,
 } & Omit<ComponentPropsWithoutRef<T>, 'as' | 'className'>;
 
 const defaultElement = 'article';
@@ -21,6 +22,7 @@ export const Card = <T extends ElementType = typeof defaultElement>({
     className,
     as,
     variant = 'default',
+    compact = false,
     ...props
 }: CardProps<T>) => {
     const Component = as ?? defaultElement;
@@ -34,6 +36,7 @@ export const Card = <T extends ElementType = typeof defaultElement>({
                 {
                     [styles.highlight]: variant === 'highlight',
                     [styles.interactive]: isInteractive,
+                    [styles.compact]: compact,
                 },
                 className,
             )}

@@ -36,6 +36,7 @@ type AppHeaderFrameProps = {
     onMenuAction?: (actionId: string) => void,
     onHome: () => void,
     onNewScript: () => void,
+    isFullWidth?: boolean,
 };
 
 const AppHeaderFrame = ({
@@ -43,6 +44,7 @@ const AppHeaderFrame = ({
     onMenuAction,
     onHome,
     onNewScript,
+    isFullWidth = false,
 }: AppHeaderFrameProps) => {
     const [themeMode, setThemeMode] = useState<AppThemeMode>(() => readPreferredAppThemeMode());
 
@@ -65,31 +67,33 @@ const AppHeaderFrame = ({
                 data-tauri-drag-region
                 aria-hidden="true"
             />
-            <div className={styles.leftControls}>
-                <Button
-                    className={styles.iconButton}
-                    onPress={onHome}
-                    aria-label="Go to home"
-                >
-                    <Home className={styles.iconButtonGlyph} aria-hidden="true" />
-                </Button>
-                <Button
-                    className={styles.iconButton}
-                    onPress={onNewScript}
-                    aria-label="New script"
-                >
-                    <Plus className={styles.iconButtonGlyph} aria-hidden="true" />
-                </Button>
-            </div>
-            <div className={styles.scriptControls}>
-                {scriptControls ? scriptControls : null}
-            </div>
-            <div className={styles.rightControls}>
-                <AccountMenu
-                    themeMode={themeMode}
-                    onThemeChange={setThemeMode}
-                    onAction={onMenuAction}
-                />
+            <div className={clsx(styles.headerInner, isFullWidth && styles.headerInnerFull)}>
+                <div className={styles.leftControls}>
+                    <Button
+                        className={styles.iconButton}
+                        onPress={onHome}
+                        aria-label="Go to home"
+                    >
+                        <Home className={styles.iconButtonGlyph} aria-hidden="true" />
+                    </Button>
+                    <Button
+                        className={styles.iconButton}
+                        onPress={onNewScript}
+                        aria-label="New script"
+                    >
+                        <Plus className={styles.iconButtonGlyph} aria-hidden="true" />
+                    </Button>
+                </div>
+                <div className={styles.scriptControls}>
+                    {scriptControls ? scriptControls : null}
+                </div>
+                <div className={styles.rightControls}>
+                    <AccountMenu
+                        themeMode={themeMode}
+                        onThemeChange={setThemeMode}
+                        onAction={onMenuAction}
+                    />
+                </div>
             </div>
         </header>
     );
@@ -99,17 +103,20 @@ export type AppHeaderProps = {
     onHome: () => void,
     onNewScript: () => void,
     onMenuAction?: (actionId: string) => void,
+    isFullWidth?: boolean,
 };
 
 export const AppHeader = ({
     onMenuAction,
     onHome,
     onNewScript,
+    isFullWidth = false,
 }: AppHeaderProps) => (
     <AppHeaderFrame
         onMenuAction={onMenuAction}
         onHome={onHome}
         onNewScript={onNewScript}
+        isFullWidth={isFullWidth}
     />
 );
 
@@ -123,6 +130,7 @@ export type ScriptEditorAppHeaderProps = {
     onNewScript: () => void,
     onBackToEditor?: () => void,
     backToEditorLabel?: string,
+    isFullWidth?: boolean,
 };
 
 export const ScriptEditorAppHeader = ({
@@ -135,6 +143,7 @@ export const ScriptEditorAppHeader = ({
     onNewScript,
     onBackToEditor,
     backToEditorLabel = 'Back to editor',
+    isFullWidth = true,
 }: ScriptEditorAppHeaderProps) => {
     const handleScriptMenuAction = useCallback((key: string) => {
         if (key.startsWith('script:')) {
@@ -160,6 +169,7 @@ export const ScriptEditorAppHeader = ({
             onMenuAction={onMenuAction}
             onHome={onHome}
             onNewScript={onNewScript}
+            isFullWidth={isFullWidth}
             scriptControls={(
                 <>
                     {onBackToEditor ? (

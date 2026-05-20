@@ -5,16 +5,10 @@ import {
     Button,
     Card,
     CardContent,
-    CardFooter,
-    CardHeader,
-    Grid,
-    HeroLayout,
     Kicker,
     PageContainer,
     PageTitle,
     ProgressPanel,
-    Section,
-    SectionHeader,
     SectionTitle,
     SubtleText,
 } from '@stagistic/ui';
@@ -24,7 +18,7 @@ import {
     useCallback,
     useMemo,
 } from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import {formatLastEdited} from '../../utils/formatLastEdited';
@@ -36,11 +30,7 @@ export const HomeRoute = () => {
         scriptSummaries,
         isLoading: scriptsLoading,
     } = useScripts();
-    const {openNewScript} = useGlobalModals();
-    const recentScripts = useMemo(() => scriptSummaries.slice(0, 6), [scriptSummaries]);
-    const openModal = useCallback(() => {
-        openNewScript();
-    }, [openNewScript]);
+    const {openNewScript, openImportScript} = useGlobalModals();
 
     const latestScript = useMemo(() => scriptSummaries[0] ?? null, [scriptSummaries]);
 
@@ -51,7 +41,6 @@ export const HomeRoute = () => {
         if (!latestScript) {
             return;
         }
-
         void navigate(`/script/${latestScript.id}/editor`);
     }, [latestScript, navigate]);
     const handleCardClick = useCallback((scriptId: string) => {
@@ -71,40 +60,42 @@ export const HomeRoute = () => {
         event.stopPropagation();
         void navigate(`/script/${scriptId}/settings`);
     }, [navigate]);
-    const recentScriptCards = useMemo(
-        () => recentScripts.map(script => (
+
+    const scriptRows = useMemo(
+        () => scriptSummaries.map(script => (
             <Card
                 key={script.id}
-                className={styles.card}
+                compact
+                className={styles.scriptRow}
                 onClick={() => handleCardClick(script.id)}
                 role="button"
                 tabIndex={0}
                 onKeyDown={event => handleCardKeyDown(script.id, event)}
             >
-                <CardHeader>
-                    <h3 className={styles.cardTitle}>{script.title}</h3>
-                </CardHeader>
-                <CardContent>
-                    <SubtleText>
-                        {formatLastEdited(script.updatedAt)}
-                    </SubtleText>
-                </CardContent>
-                <CardFooter>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={event => handleOpenEditor(script.id, event)}
-                    >
-                        Open editor
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={event => handleOpenSettings(script.id, event)}
-                    >
-                        Script settings
-                    </Button>
-                </CardFooter>
+                <div className={styles.scriptRowInner}>
+                    <div className={styles.scriptRowInfo}>
+                        <span className={styles.scriptRowTitle}>{script.title}</span>
+                        <SubtleText className={styles.scriptRowMeta}>
+                            {formatLastEdited(script.updatedAt)}
+                        </SubtleText>
+                    </div>
+                    <div className={styles.scriptRowActions}>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={event => handleOpenEditor(script.id, event)}
+                        >
+                            Open
+                        </Button>
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={event => handleOpenSettings(script.id, event)}
+                        >
+                            Settings
+                        </Button>
+                    </div>
+                </div>
             </Card>
         )),
         [
@@ -112,10 +103,11 @@ export const HomeRoute = () => {
             handleCardKeyDown,
             handleOpenEditor,
             handleOpenSettings,
-            recentScripts,
+            scriptSummaries,
         ],
     );
-    const heroPanel = useMemo(() => {
+
+    const continueCard = useMemo(() => {
         if (scriptsLoading) {
             return (
                 <ProgressPanel
@@ -132,101 +124,86 @@ export const HomeRoute = () => {
         }
 
         return (
-            <Card className={styles.heroCard} variant="highlight">
+            <Card
+                compact
+                className={styles.continueCard}
+                onClick={handleResumeScript}
+                role="button"
+                tabIndex={0}
+                onKeyDown={event => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        handleResumeScript();
+                    }
+                }}
+            >
                 <CardContent>
-                    <Kicker>Continue writing</Kicker>
-                    <h2 className={styles.heroCardValue}>{latestScript.title}</h2>
+                    <h3 className={styles.continueCardTitle}>{latestScript.title}</h3>
                     <SubtleText>
                         {formatLastEdited(latestScript.updatedAt)}
                     </SubtleText>
                 </CardContent>
-                <CardFooter className={styles.heroCardFooter}>
-                    <Button
-                        className={styles.heroCardButton}
-                        onClick={handleResumeScript}
-                    >
-                        Resume script
-                    </Button>
-                </CardFooter>
             </Card>
         );
-    }, [
-        handleResumeScript,
-        latestScript,
-        scriptsLoading,
-    ]);
+    }, [handleResumeScript, latestScript, scriptsLoading]);
 
     return (
         <AppLayout
             header={(
                 <AppHeader
                     onHome={handleHome}
-                    onNewScript={openModal}
+                    onNewScript={openNewScript}
                 />
             )}
         >
             <PageContainer variant="standard">
-                <section className={styles.hero}>
-                    <HeroLayout>
-                        <div className={styles.heroContent}>
-                            <Kicker>Welcome to Stagistic Editor!</Kicker>
-                            <PageTitle>Your script&apos;s next act</PageTitle>
-                            <SubtleText className={styles.subtitle}>
-                                Create new scripts, explore active drafts, and keep your storytelling flow
-                                within a focused workspace.
-                            </SubtleText>
-                            <div className={styles.actions}>
-                                <Button onClick={openModal}>
-                                    New script
-                                </Button>
-                                {scriptSummaries.length > 6 && (
-                                    <Button
-                                        as={Link}
-                                        variant="secondary"
-                                        to="/script/list"
-                                    >
-                                        View all scripts
-                                    </Button>
-                                )}
-                            </div>
+                <div className={styles.columns}>
+                    <div className={styles.scriptList}>
+                        <div className={styles.scriptListHeader}>
+                            <SectionTitle>Scripts</SectionTitle>
                         </div>
-                        {heroPanel}
-                    </HeroLayout>
-                </section>
-                {scriptsLoading ? (
-                    <Section className={styles.recentSection}>
-                        <SectionHeader>
-                            <div>
-                                <SectionTitle>Recent scripts</SectionTitle>
-                                <SubtleText>
-                                    Gathering your latest work.
-                                </SubtleText>
-                            </div>
-                        </SectionHeader>
-                        <div className={styles.recentLoading}>
+                        {scriptsLoading ? (
                             <ProgressPanel
                                 title="Načítám scénáře"
                                 subtitle="Synchronizuji seznam scénářů"
                                 size="sm"
                                 statusText="Načítám seznam scénářů"
                             />
-                        </div>
-                    </Section>
-                ) : recentScripts.length > 0 && (
-                    <Section className={styles.recentSection}>
-                        <SectionHeader>
-                            <div>
-                                <SectionTitle>Recent scripts</SectionTitle>
-                                <SubtleText>
-                                    Jump straight into your latest work.
-                                </SubtleText>
+                        ) : (
+                            <div className={styles.scriptListItems}>
+                                {scriptRows}
                             </div>
-                        </SectionHeader>
-                        <Grid>
-                            {recentScriptCards}
-                        </Grid>
-                    </Section>
-                )}
+                        )}
+                    </div>
+
+                    <div className={styles.rightPanel}>
+                        <section className={styles.welcome}>
+                            <Kicker>Welcome to Stagistic Editor!</Kicker>
+                            <PageTitle>Your script&apos;s next act</PageTitle>
+                            <SubtleText className={styles.welcomeSubtitle}>
+                                Create new scripts, explore active drafts, and keep your storytelling flow
+                                within a focused workspace.
+                            </SubtleText>
+                            <div className={styles.welcomeActions}>
+                                <Button onClick={openNewScript}>
+                                    New script
+                                </Button>
+                                <Button variant="outline" onClick={openImportScript}>
+                                    Import
+                                </Button>
+                            </div>
+                        </section>
+
+                        {continueCard !== null && (
+                            <section className={styles.continueSection}>
+                                <SectionTitle className={styles.continueSectionTitle}>
+                                    Continue writing
+                                </SectionTitle>
+                                {continueCard}
+                            </section>
+                        )}
+                    </div>
+                </div>
             </PageContainer>
         </AppLayout>
     );
