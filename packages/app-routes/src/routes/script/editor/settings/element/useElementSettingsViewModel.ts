@@ -64,9 +64,9 @@ export const useElementSettingsViewModel = ({
         const spacingAfterRaw = hasSpacingAfter
             ? (blockSettings.spacingAfterEm ?? blockDefaults.spacingAfterEm ?? 0)
             : undefined;
-        const spacingAfter = spacingAfterRaw !== undefined
-            ? getClosestStepValue(SPACING_BEFORE_OPTIONS, spacingAfterRaw)
-            : undefined;
+        const spacingAfter = spacingAfterRaw === undefined
+            ? undefined
+            : getClosestStepValue(SPACING_BEFORE_OPTIONS, spacingAfterRaw);
         const lineHeight = getClosestStepValue(
             LINE_HEIGHT_OPTIONS,
             blockSettings.lineHeight ?? blockDefaults.lineHeight ?? fallbackTypographyLineHeight,
@@ -153,9 +153,9 @@ export const useElementSettingsViewModel = ({
         const lineEndPercent = pageStartPercent + ((sliderEnd / previewReferenceChars) * pageContentPercent);
         const previewStyle = {
             '--preview-spacing-before': `${Math.max(0, spacingBefore) * typographyFontSizePx}px`,
-            '--preview-spacing-after': spacingAfter !== undefined
-                ? `${Math.max(0, spacingAfter) * typographyFontSizePx}px`
-                : '0px',
+            '--preview-spacing-after': spacingAfter === undefined
+                ? '0px'
+                : `${Math.max(0, spacingAfter) * typographyFontSizePx}px`,
             '--preview-spacing-line-unit': `${typographyFontSizePx}px`,
             '--preview-line-height': String(lineHeight),
             '--preview-line-box-height': `${typographyFontSizePx}px`,

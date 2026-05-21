@@ -14,9 +14,9 @@ export const getConfirmedCharacterColor = (
     const normalizedColor = normalizeCharacterColorHex(colorHex);
 
     if (normalizedColor) {
-        return characterColorSaturation !== undefined
-            ? applyCharacterColorSaturation(normalizedColor, characterColorSaturation)
-            : normalizedColor;
+        return characterColorSaturation === undefined
+            ? normalizedColor
+            : applyCharacterColorSaturation(normalizedColor, characterColorSaturation);
     }
 
     return getCharacterColor(`character:${characterId}`, characterColorSaturation);

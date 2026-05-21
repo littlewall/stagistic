@@ -54,20 +54,20 @@ export const createTitlePageHandlers = ({
         const configId = currentConfig?.id ?? uuidv7();
         const payloadJson = JSON.stringify(settings);
 
-        if (!currentConfig) {
+        if (currentConfig) {
+            await dbQueries.updateScriptConfig(db, {
+                id: configId,
+                payloadJson,
+                updatedAt: now,
+                schemaVersion: TITLE_PAGE_SCHEMA_VERSION,
+            });
+        } else {
             await dbQueries.insertScriptConfig(db, {
                 id: configId,
                 scriptId,
                 namespace: TITLE_PAGE_NAMESPACE,
                 payloadJson,
                 createdAt: now,
-                updatedAt: now,
-                schemaVersion: TITLE_PAGE_SCHEMA_VERSION,
-            });
-        } else {
-            await dbQueries.updateScriptConfig(db, {
-                id: configId,
-                payloadJson,
                 updatedAt: now,
                 schemaVersion: TITLE_PAGE_SCHEMA_VERSION,
             });
