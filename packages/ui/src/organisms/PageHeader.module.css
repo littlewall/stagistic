@@ -1,4 +1,4 @@
-.header {
+.root {
     display: flex;
     gap: var(--space-3xl);
     align-items: flex-end;
@@ -12,24 +12,4 @@
         flex-direction: column;
         align-items: flex-start;
     }
-}
-
-.title {
-    margin-top: var(--space-md);
-}
-
-.subtitle {
-    max-width: 28rem;
-    margin-top: var(--space-md);
-}
-
-.sectionHint {
-    margin-top: var(--space-sm);
-}
-
-.form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xl);
-    max-width: 420px;
 }

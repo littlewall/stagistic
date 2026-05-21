@@ -15,7 +15,7 @@ export const BlockActionsMenu = ({
         <div
             className={clsx(
                 styles.menu,
-                isMenuAbove && styles.menuAbove,
+                isMenuAbove && styles.above,
             )}
             role="menu"
             ref={menuRef}
@@ -28,7 +28,7 @@ export const BlockActionsMenu = ({
                         role="menuitem"
                         className={clsx(
                             styles.menuItem,
-                            option.type === blockType && styles.menuItemActive,
+                            option.type === blockType && styles.active,
                         )}
                         onMouseDown={event => onMenuItemMouseDown(option.type, event)}
                     >

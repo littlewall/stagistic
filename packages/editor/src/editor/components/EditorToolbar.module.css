@@ -1,23 +1,33 @@
 .toolbar {
     display: flex;
-    gap: var(--space-2);
+    gap: var(--space-md);
     align-items: center;
     justify-content: space-between;
-    padding: var(--space-2) 0;
+    padding: var(--space-md) 0;
     background: transparent;
+
+    @media (max-width: 900px) {
+        flex-wrap: wrap;
+    }
 }
 
 .group {
     display: inline-flex;
-    gap: var(--space-2);
+    gap: var(--space-md);
     align-items: center;
 }
 
 .rightGroup {
     display: inline-flex;
-    gap: var(--space-2);
+    gap: var(--space-md);
     align-items: center;
     margin-left: auto;
+
+    @media (max-width: 900px) {
+        justify-content: flex-end;
+        width: 100%;
+        margin-left: 0;
+    }
 }
 
 .iconButton {
@@ -26,16 +36,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(26px * var(--size-scale));
-    height: calc(26px * var(--size-scale));
-    color: var(--color-ink);
+    width: var(--control-height-sm);
+    height: var(--control-height-sm);
+    color: var(--color-text);
     background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: calc(7px * var(--size-scale));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     transition: background .15s ease, border-color .15s ease;
 
     &:hover {
-        background: color-mix(in oklch, var(--color-accent) 45%, transparent);
+        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
     }
 
     &:disabled {
@@ -52,43 +62,43 @@
         stroke-linejoin: round;
         stroke-width: 1.6;
     }
-}
 
-.iconButtonActive {
-    color: var(--color-ink);
-    background: var(--color-highlight);
-    border-color: color-mix(in oklch, var(--color-ink) 28%, var(--color-divider));
-    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-ink) 16%, transparent);
+    &.active {
+        color: var(--color-text);
+        background: var(--color-surface-raised);
+        border-color: color-mix(in oklch, var(--color-text) 28%, var(--color-border));
+        box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-text) 16%, transparent);
 
-    &:hover {
-        background: color-mix(in oklch, var(--color-highlight) 82%, var(--color-surface));
+        &:hover {
+            background: color-mix(in oklch, var(--color-surface-raised) 82%, var(--color-surface));
+        }
     }
 }
 
 .icon {
     width: 16px;
     height: 16px;
-}
 
-.icon svg {
-    width: 16px;
-    height: 16px;
-    fill: none;
-    stroke: currentcolor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 1.6;
+    & svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
 }
 
 .textIcon {
-    font-family: var(--font-mono);
-    font-size: calc(12px * var(--size-scale));
-    font-weight: 700;
-    letter-spacing: .02em;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-sm);
 }
 
 .textIconItalic {
-    font-weight: 600;
+    font-weight: var(--font-weight-semibold);
     font-style: italic;
 }
 
@@ -126,26 +136,26 @@
 
     &:hover {
         background: var(--select-button-hover-bg);
-    }
 
-    &:hover .selectIcon {
-        opacity: 1;
+        & .selectIcon {
+            opacity: 1;
+        }
     }
 
     &[aria-expanded='true'] {
         background: var(--select-menu-bg);
-        border-color: var(--color-divider);
+        border-color: var(--color-border);
         border-bottom-color: transparent;
         border-bottom-right-radius: 0;
         border-bottom-left-radius: 0;
-    }
 
-    &[aria-expanded='true'] .selectIcon {
-        opacity: 1;
-    }
+        & .selectIcon {
+            opacity: 1;
+        }
 
-    &[aria-expanded='true']:hover {
-        background: var(--select-menu-bg);
+        &:hover {
+            background: var(--select-menu-bg);
+        }
     }
 
     &:disabled {
@@ -160,20 +170,20 @@
     justify-content: center;
     width: var(--select-icon-size);
     height: var(--select-icon-size);
-}
 
-.selectIcon svg {
-    width: var(--select-icon-size);
-    height: var(--select-icon-size);
-    fill: none;
-    stroke: currentcolor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 1.6;
+    & svg {
+        width: var(--select-icon-size);
+        height: var(--select-icon-size);
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
 }
 
 .selectIconMuted {
-    color: var(--color-ink-muted);
+    color: var(--color-text-muted);
 }
 
 .selectLabel {
@@ -231,34 +241,22 @@
     &:hover {
         background: var(--select-menu-item-hover-bg);
     }
-}
 
-.menuItemActive {
-    font-weight: var(--select-menu-item-active-font-weight);
-    background: var(--select-menu-item-active-bg);
-
-    &:hover {
+    &.active {
+        font-weight: var(--select-menu-item-active-font-weight);
         background: var(--select-menu-item-active-bg);
+
+        &:hover {
+            background: var(--select-menu-item-active-bg);
+        }
     }
 }
 
 .menuItemLabel {
-    line-height: 1.2;
+    line-height: var(--line-height-snug);
 }
 
 .menuLabel {
-    line-height: 1.2;
+    line-height: var(--line-height-snug);
     white-space: nowrap;
-}
-
-@media (max-width: 900px) {
-    .toolbar {
-        flex-wrap: wrap;
-    }
-
-    .rightGroup {
-        justify-content: flex-end;
-        width: 100%;
-        margin-left: 0;
-    }
 }

@@ -52,6 +52,7 @@ export type {
 export {Grid} from './organisms/Grid';
 export {HeroLayout} from './organisms/HeroLayout';
 export {PageContainer} from './organisms/PageContainer';
+export {PageHeader} from './organisms/PageHeader';
 export {Section, SectionHeader} from './organisms/Section';
 export {
     APP_THEME_STORAGE_KEY,

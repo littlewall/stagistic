@@ -26,31 +26,31 @@ export const ThemeModeToggle = ({
                 aria-label="Theme mode"
             >
                 <Button
-                    className={clsx(styles.themeButton, themeMode === 'light' && styles.themeButtonActive)}
+                    className={clsx(styles.themeButton, themeMode === 'light' && styles.active)}
                     onPress={() => {
                         onChange('light');
                     }}
                     aria-label="Light theme"
                 >
-                    <SunLight className={styles.themeButtonIcon} aria-hidden="true" />
+                    <SunLight className={styles.icon} aria-hidden="true" />
                 </Button>
                 <Button
-                    className={clsx(styles.themeButton, themeMode === 'dark' && styles.themeButtonActive)}
+                    className={clsx(styles.themeButton, themeMode === 'dark' && styles.active)}
                     onPress={() => {
                         onChange('dark');
                     }}
                     aria-label="Dark theme"
                 >
-                    <HalfMoon className={styles.themeButtonIcon} aria-hidden="true" />
+                    <HalfMoon className={styles.icon} aria-hidden="true" />
                 </Button>
                 <Button
-                    className={clsx(styles.themeButton, themeMode === 'auto' && styles.themeButtonActive)}
+                    className={clsx(styles.themeButton, themeMode === 'auto' && styles.active)}
                     onPress={() => {
                         onChange('auto');
                     }}
                     aria-label="System theme"
                 >
-                    <Computer className={styles.themeButtonIcon} aria-hidden="true" />
+                    <Computer className={styles.icon} aria-hidden="true" />
                 </Button>
             </div>
         </div>

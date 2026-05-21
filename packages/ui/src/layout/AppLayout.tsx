@@ -19,7 +19,7 @@ export const AppLayout = ({
             {header ? (
                 <div className={styles.header}>{header}</div>
             ) : null}
-            <div className={clsx(styles.body, sidebar ? null : styles.bodySingle)}>
+            <div className={clsx(styles.body, sidebar ? null : styles.single)}>
                 <main className={styles.main}>{children}</main>
                 {sidebar ? (
                     <aside className={clsx(styles.sidebar)}>{sidebar}</aside>

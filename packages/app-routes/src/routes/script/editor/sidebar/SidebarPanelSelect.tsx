@@ -108,7 +108,7 @@ export const SidebarPanelSelect = ({
                             type="button"
                             role="option"
                             aria-selected={panel.id === selectedPanelId}
-                            className={panel.id === selectedPanelId ? styles.itemActive : styles.item}
+                            className={panel.id === selectedPanelId ? `${styles.item} ${styles.active}` : styles.item}
                             onMouseDown={event => {
                                 event.preventDefault();
                                 onSelectPanel(panel.id);

@@ -4,15 +4,15 @@
     height: var(--preview-spacing-before, 0);
     min-height: 2px;
     margin-inline-start: var(--preview-line-start-percent, 10%);
-}
 
-.previewSpacingRow::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    inset-inline: 0;
-    height: var(--preview-spacing-before, 0);
-    background: var(--color-preview-spacing-soft);
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        inset-inline: 0;
+        height: var(--preview-spacing-before, 0);
+        background: var(--color-preview-spacing-soft);
+    }
 }
 
 .previewSpacingAfterRow {
@@ -21,15 +21,15 @@
     height: var(--preview-spacing-after, 0);
     min-height: 2px;
     margin-inline-start: var(--preview-line-start-percent, 10%);
-}
 
-.previewSpacingAfterRow::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    inset-inline: 0;
-    height: var(--preview-spacing-after, 0);
-    background: var(--color-preview-spacing-soft);
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        inset-inline: 0;
+        height: var(--preview-spacing-after, 0);
+        background: var(--color-preview-spacing-soft);
+    }
 }
 
 .previewLineCanvas {
@@ -47,12 +47,12 @@
 
 .previewLineText {
     width: 100%;
-    font-family: var(--font-mono);
+    font-family: var(--font-family-mono);
     font-size: var(--preview-font-size, 16px);
     font-weight: var(--preview-font-weight, 400);
     font-style: var(--preview-font-style, normal);
     line-height: var(--preview-line-height, 1);
-    color: var(--preview-text-color, var(--color-ink));
+    color: var(--preview-text-color, var(--color-text));
     text-align: var(--preview-text-align, left);
     text-decoration: var(--preview-text-decoration, none);
     text-indent: calc(var(--preview-text-offset-ch, 0) * 1ch);

@@ -1,9 +1,9 @@
 .select {
     /* Borderless, small trigger; font-weight 600 for the panel label */
-    --select-button-height: calc(26px * var(--size-scale));
-    --select-button-font-weight: 600;
-    --select-button-radius: calc(7px * var(--size-scale));
-    --select-button-hover-bg: color-mix(in oklch, var(--color-accent) 24%, transparent);
+    --select-button-height: var(--control-height-sm);
+    --select-button-font-weight: var(--font-weight-semibold);
+    --select-button-radius: var(--radius-md);
+    --select-button-hover-bg: color-mix(in oklch, var(--color-surface-accent) 24%, transparent);
 
     position: relative;
     flex: 1;
@@ -28,22 +28,22 @@
     border: var(--select-button-border-width) solid var(--select-button-border-color);
     border-radius: var(--select-button-radius);
     transition: background .15s ease, border-radius .15s ease;
-}
 
-.button:hover {
-    background: var(--select-button-hover-bg);
-}
+    &:hover {
+        background: var(--select-button-hover-bg);
+    }
 
-.button[aria-expanded = 'true'] {
-    background: var(--select-menu-bg);
-    border-color: var(--color-divider);
-    border-bottom-color: transparent;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
-}
+    &[aria-expanded='true'] {
+        background: var(--select-menu-bg);
+        border-color: var(--color-border);
+        border-bottom-color: transparent;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
 
-.button[aria-expanded = 'true']:hover {
-    background: var(--select-menu-bg);
+        &:hover {
+            background: var(--select-menu-bg);
+        }
+    }
 }
 
 .label {
@@ -89,8 +89,7 @@
     right: anchor(right);
 }
 
-.item,
-.itemActive {
+.item {
     cursor: pointer;
     display: flex;
     gap: var(--select-menu-item-gap);
@@ -105,17 +104,17 @@
     border: none;
     border-radius: var(--select-menu-item-radius);
     transition: background .15s ease;
-}
 
-.item:hover {
-    background: var(--select-menu-item-hover-bg);
-}
+    &:hover {
+        background: var(--select-menu-item-hover-bg);
+    }
 
-.itemActive {
-    font-weight: var(--select-menu-item-active-font-weight);
-    background: var(--select-menu-item-active-bg);
-}
+    &.active {
+        font-weight: var(--select-menu-item-active-font-weight);
+        background: var(--select-menu-item-active-bg);
 
-.itemActive:hover {
-    background: var(--select-menu-item-active-bg);
+        &:hover {
+            background: var(--select-menu-item-active-bg);
+        }
+    }
 }

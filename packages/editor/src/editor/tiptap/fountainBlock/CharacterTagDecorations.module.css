@@ -6,10 +6,10 @@
      * zero and hue becomes imperceptible, making every character's tag
      * look identical. srgb keeps the per-character tint visible.
      */
-    background: color-mix(in srgb, var(--character-tag-color, var(--color-accent)) var(--character-tag-tint-strength, 30%), var(--color-surface));
-    border-radius: 999px;
+    background: color-mix(in srgb, var(--character-tag-color, var(--color-surface-accent)) var(--character-tag-tint-strength, 30%), var(--color-surface));
+    border-radius: var(--radius-full);
 }
 
 .characterSeparator {
-    color: var(--color-ink-muted);
+    color: var(--color-text-muted);
 }

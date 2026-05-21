@@ -33,9 +33,9 @@ export const StructureRowScene = memo(({
     const sceneRowClassName = joinClassNames(
         styles.itemRow,
         styles.sceneRow,
-        isActive ? styles.itemRowActive : null,
-        isDropTarget ? styles.itemRowDropTarget : null,
-        isDragging ? styles.itemButtonDragging : null,
+        isActive ? styles.active : null,
+        isDropTarget ? styles.dropTarget : null,
+        isDragging ? styles.dragging : null,
     );
 
     return (

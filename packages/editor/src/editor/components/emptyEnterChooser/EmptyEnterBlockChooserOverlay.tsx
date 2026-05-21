@@ -355,7 +355,7 @@ export const EmptyEnterBlockChooserOverlay = ({
                         <button
                             key={optionType}
                             type="button"
-                            className={clsx(styles.button, isActive && styles.buttonActive)}
+                            className={clsx(styles.button, isActive && styles.active)}
                             aria-label={`Set block type to ${label}`}
                             title={label}
                             onMouseDown={event => handleTypeMouseDown(optionType, event)}

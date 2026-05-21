@@ -1,7 +1,7 @@
 .toolbar {
     display: flex;
     flex: 1;
-    gap: var(--space-2);
+    gap: var(--space-md);
     align-items: center;
     min-width: 0;
 }
@@ -12,28 +12,28 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: calc(26px * var(--size-scale));
-    height: calc(26px * var(--size-scale));
+    width: var(--control-height-sm);
+    height: var(--control-height-sm);
     padding: 0;
-    color: var(--color-ink);
+    color: var(--color-text);
     background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: calc(7px * var(--size-scale));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     transition: background .15s ease, border-color .15s ease;
-}
 
-.closeButton:hover {
-    background: color-mix(in oklch, var(--color-accent) 45%, transparent);
-}
+    &:hover {
+        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+    }
 
-.closeButton svg {
-    width: 16px;
-    height: 16px;
+    & svg {
+        width: 16px;
+        height: 16px;
+    }
 }
 
 .contextActions {
     display: flex;
     flex-shrink: 0;
-    gap: var(--space-1);
+    gap: var(--space-sm);
     align-items: center;
 }

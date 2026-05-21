@@ -326,10 +326,10 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
                 <button
                     className={clsx(
                         styles.trigger,
-                        isMenuOpen && styles.triggerOpen,
-                        isMenuDisabledBlock && styles.triggerNoHover,
-                        isPressVisualActive && styles.triggerPressing,
-                        activeDrag && styles.triggerDragging,
+                        isMenuOpen && styles.open,
+                        isMenuDisabledBlock && styles.noHover,
+                        isPressVisualActive && styles.pressing,
+                        activeDrag && styles.dragging,
                     )}
                     type="button"
                     aria-label={`Change block type (current: ${activeBlockInfo?.label ?? 'Block'})`}

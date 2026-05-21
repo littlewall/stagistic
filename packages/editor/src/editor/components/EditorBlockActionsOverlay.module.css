@@ -1,5 +1,5 @@
 .overlay {
-    --block-trigger-size: calc(26px * var(--size-scale));
+    --block-trigger-size: var(--control-height-sm);
 
     pointer-events: none;
     position: absolute;
@@ -9,7 +9,7 @@
 .controls {
     pointer-events: auto;
     position: relative;
-    transform: translate(calc(-1 * var(--block-controls-gutter, 32px) - 100% - var(--space-1)), -50%);
+    transform: translate(calc(-1 * var(--block-controls-gutter, 32px) - 100% - var(--space-sm)), -50%);
     display: inline-flex;
     gap: 0;
     align-items: center;
@@ -25,46 +25,74 @@
     box-sizing: border-box;
     width: var(--block-trigger-size);
     height: var(--block-trigger-size);
-    font-size: calc(16px * var(--size-scale));
-    line-height: 1;
-    color: var(--color-ink);
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-none);
+    color: var(--color-text);
     background: transparent;
     border: 1px solid transparent;
-    border-radius: calc(8px * var(--size-scale));
+    border-radius: var(--radius-md);
     anchor-name: --block-actions-trigger;
-}
 
-.trigger:hover {
-    background: color-mix(in oklch, var(--color-accent) 30%, transparent);
-}
+    &:hover {
+        background: color-mix(in oklch, var(--color-surface-accent) 30%, transparent);
 
-.triggerNoHover {
-    cursor: default;
-}
+        & .triggerIcon {
+            opacity: 1;
+        }
+    }
 
-.triggerNoHover:hover {
-    background: transparent;
-    border-color: transparent;
-}
+    &.open {
+        background: color-mix(in oklch, var(--color-surface-accent) 50%, transparent);
+        border-color: color-mix(in oklch, var(--color-surface-accent) 55%, var(--color-border));
 
-.triggerOpen {
-    background: color-mix(in oklch, var(--color-accent) 50%, transparent);
-    border-color: color-mix(in oklch, var(--color-accent) 55%, var(--color-divider));
-}
+        & .triggerIcon {
+            opacity: 1;
+        }
+    }
 
-.triggerPressing,
-.triggerPressing:hover {
-    background: transparent;
-    border-color: transparent;
-    box-shadow: none;
-}
+    &.noHover {
+        cursor: default;
 
-.triggerDragging,
-.triggerDragging:hover {
-    cursor: move;
-    background: transparent;
-    border-color: transparent;
-    box-shadow: none;
+        &:hover {
+            background: transparent;
+            border-color: transparent;
+
+            & .triggerIcon {
+                opacity: .5;
+            }
+        }
+    }
+
+    &.pressing,
+    &.dragging {
+        background: transparent;
+        border-color: transparent;
+        box-shadow: none;
+
+        &:hover {
+            background: transparent;
+            border-color: transparent;
+            box-shadow: none;
+        }
+
+        & .triggerIcon {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        & .dragGrip {
+            visibility: visible;
+            opacity: .72;
+        }
+    }
+
+    &.dragging {
+        cursor: move;
+
+        &:hover {
+            cursor: move;
+        }
+    }
 }
 
 .triggerGlyph {
@@ -94,54 +122,39 @@
     visibility: visible;
     opacity: .5;
     transition: opacity .15s ease;
-}
 
-.trigger:hover .triggerIcon {
-    opacity: 1;
-}
-
-.triggerOpen .triggerIcon {
-    opacity: 1;
-}
-
-.triggerNoHover:hover .triggerIcon {
-    opacity: .5;
+    & svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
 }
 
 .dragGrip {
     position: relative;
-    color: color-mix(in oklch, var(--color-ink-muted) 64%, var(--color-divider));
+    color: color-mix(in oklch, var(--color-text-muted) 64%, var(--color-border));
     visibility: hidden;
     opacity: 0;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(calc(-3px * var(--size-scale)), calc(-5px * var(--size-scale)));
+        width: calc(2px * var(--size-scale));
+        height: calc(2px * var(--size-scale));
+        opacity: 1;
+        background: currentcolor;
+        border-radius: var(--radius-full);
+        box-shadow: 0 calc(4px * var(--size-scale)) 0 currentcolor, 0 calc(8px * var(--size-scale)) 0 currentcolor, calc(4px * var(--size-scale)) 0 0 currentcolor, calc(4px * var(--size-scale)) calc(4px * var(--size-scale)) 0 currentcolor, calc(4px * var(--size-scale)) calc(8px * var(--size-scale)) 0 currentcolor;
+    }
 }
 
-.triggerPressing .triggerIcon,
-.triggerDragging .triggerIcon {
-    visibility: hidden;
-    opacity: 0;
-}
-
-.triggerPressing .dragGrip,
-.triggerDragging .dragGrip {
-    visibility: visible;
-    opacity: .72;
-}
-
-.dragGrip::before {
-    content: '';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(calc(-3px * var(--size-scale)), calc(-5px * var(--size-scale)));
-    width: calc(2px * var(--size-scale));
-    height: calc(2px * var(--size-scale));
-    opacity: 1;
-    background: currentcolor;
-    border-radius: 999px;
-    box-shadow: 0 calc(4px * var(--size-scale)) 0 currentcolor, 0 calc(8px * var(--size-scale)) 0 currentcolor, calc(4px * var(--size-scale)) 0 0 currentcolor, calc(4px * var(--size-scale)) calc(4px * var(--size-scale)) 0 currentcolor, calc(4px * var(--size-scale)) calc(8px * var(--size-scale)) 0 currentcolor;
-}
-
-.triggerIcon svg,
 .menuItemIcon svg {
     width: 16px;
     height: 16px;
@@ -162,19 +175,19 @@
     align-items: stretch;
     min-width: calc(200px * var(--size-scale));
     background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: calc(12px * var(--size-scale));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
     box-shadow: var(--shadow-popover);
     position-anchor: --block-actions-trigger;
-}
 
-.menuAbove {
-    top: auto;
-    bottom: anchor(top);
-}
+    &.above {
+        top: auto;
+        bottom: anchor(top);
+    }
 
-.menuWithSubmenu {
-    min-width: calc(360px * var(--size-scale));
+    &.withSubmenu {
+        min-width: calc(360px * var(--size-scale));
+    }
 }
 
 .menuPrimaryPanel {
@@ -184,50 +197,63 @@
     align-content: start;
     min-width: calc(200px * var(--size-scale));
     max-height: calc(280px * var(--size-scale));
-    padding: var(--space-1);
+    padding: var(--space-sm);
 }
 
 .menuSecondaryPanel {
     display: grid;
     grid-template-rows: auto 1fr;
     min-width: calc(160px * var(--size-scale));
-    background: color-mix(in oklch, var(--color-surface) 95%, var(--color-accent) 5%);
-    border-left: 1px solid var(--color-divider);
+    background: color-mix(in oklch, var(--color-surface) 95%, var(--color-surface-accent) 5%);
+    border-left: 1px solid var(--color-border);
 }
 
 .menuSecondaryHeader {
-    padding: var(--space-2);
-    font-size: calc(11px * var(--size-scale));
-    line-height: 1.2;
-    color: var(--color-ink-muted);
-    border-bottom: 1px solid var(--color-divider);
+    padding: var(--space-md);
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-snug);
+    color: var(--color-text-muted);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .menuSecondaryContent {
     display: grid;
     align-content: start;
-    padding: var(--space-1);
+    padding: var(--space-sm);
 }
 
 .menuItem {
     cursor: pointer;
     display: grid;
     grid-template-columns: 20px 1fr;
-    gap: var(--space-2);
+    gap: var(--space-md);
     align-items: center;
-    padding: var(--space-1) var(--space-2);
+    padding: var(--space-sm) var(--space-md);
     font-family: inherit;
-    font-size: calc(12px * var(--size-scale));
-    color: var(--color-ink);
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
     text-align: left;
     background: transparent;
     border: 1px solid transparent;
-    border-radius: calc(10px * var(--size-scale));
+    border-radius: var(--radius-lg);
     transition: background .15s ease, box-shadow .15s ease;
-}
 
-.menuItem:hover {
-    background: color-mix(in oklch, var(--color-accent) 45%, transparent);
+    &:hover {
+        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+    }
+
+    &.active {
+        font-weight: var(--font-weight-semibold);
+        background: color-mix(in oklch, var(--color-surface-accent) 70%, transparent);
+
+        &:hover {
+            background: color-mix(in oklch, var(--color-surface-accent) 70%, transparent);
+        }
+    }
+
+    &.submenu {
+        grid-template-columns: 20px 1fr auto;
+    }
 }
 
 .menuItemIcon {
@@ -236,34 +262,21 @@
     justify-content: center;
     width: calc(18px * var(--size-scale));
     height: calc(18px * var(--size-scale));
-    color: var(--color-ink-muted);
+    color: var(--color-text-muted);
 }
 
 .menuItemLabel {
-    line-height: 1.2;
-}
-
-.menuItemActive {
-    font-weight: 600;
-    background: color-mix(in oklch, var(--color-accent) 70%, transparent);
-}
-
-.menuItemActive:hover {
-    background: color-mix(in oklch, var(--color-accent) 70%, transparent);
+    line-height: var(--line-height-snug);
 }
 
 .menuSeparator {
     height: 1px;
-    margin: var(--space-1) var(--space-2);
-    background: var(--color-divider);
-}
-
-.menuItemSubmenu {
-    grid-template-columns: 20px 1fr auto;
+    margin: var(--space-sm) var(--space-md);
+    background: var(--color-border);
 }
 
 .menuItemCaret {
     justify-self: end;
     margin-left: auto;
-    color: var(--color-ink-muted);
+    color: var(--color-text-muted);
 }

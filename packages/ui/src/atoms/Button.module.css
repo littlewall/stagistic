@@ -1,77 +1,77 @@
 .button {
     cursor: pointer;
     display: inline-flex;
-    gap: var(--space-2);
+    gap: var(--space-md);
     align-items: center;
     justify-content: center;
-    font-weight: 500;
+    font-weight: var(--font-weight-medium);
     text-decoration: none;
     background: transparent;
     border: 1px solid transparent;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
-}
 
-.md {
-    padding: var(--space-2) var(--space-5);
-}
+    &.md {
+        padding: var(--space-md) var(--space-2xl);
+    }
 
-.sm {
-    padding: var(--space-2) var(--space-4);
-}
+    &.sm {
+        padding: var(--space-md) var(--space-xl);
+    }
 
-.primary {
-    color: var(--color-surface);
-    background: var(--color-ink);
-}
+    &.primary {
+        color: var(--color-surface);
+        background: var(--color-text);
 
-.primary:hover {
-    background: color-mix(in oklch, var(--color-ink) 86%, var(--color-paper));
-}
+        &:hover {
+            background: color-mix(in oklch, var(--color-text) 86%, var(--color-bg));
+        }
 
-.primary:disabled,
-.primary[aria-disabled = 'true'] {
-    cursor: not-allowed;
-    opacity: .6;
-}
+        &:disabled,
+        &[aria-disabled='true'] {
+            cursor: not-allowed;
+            opacity: .6;
+        }
+    }
 
-.secondary {
-    color: var(--color-ink);
-    background: var(--color-surface);
-    border-color: var(--color-divider);
-}
+    &.secondary {
+        color: var(--color-text);
+        background: var(--color-surface);
+        border-color: var(--color-border);
 
-.secondary:hover {
-    background: var(--color-highlight);
-}
+        &:hover {
+            background: var(--color-surface-raised);
+        }
+    }
 
-.ghost {
-    color: var(--color-ink-muted);
-    background: transparent;
-    border-color: transparent;
-}
+    &.ghost {
+        color: var(--color-text-muted);
+        background: transparent;
+        border-color: transparent;
 
-.ghost:hover {
-    color: var(--color-ink);
-    background: var(--color-highlight);
-}
+        &:hover {
+            color: var(--color-text);
+            background: var(--color-surface-raised);
+        }
+    }
 
-.outline {
-    color: var(--color-ink);
-    background: transparent;
-    border-color: var(--color-divider);
-}
+    &.outline {
+        color: var(--color-text);
+        background: transparent;
+        border-color: var(--color-border);
 
-.outline:hover {
-    background: var(--color-highlight);
-}
+        &:hover {
+            background: var(--color-surface-raised);
+        }
+    }
 
-.danger {
-    color: var(--color-danger);
-    background: transparent;
-    border-color: color-mix(in oklch, var(--color-danger) 35%, var(--color-divider));
-}
+    &.danger {
+        color: var(--color-status-danger);
+        background: transparent;
+        border-color: color-mix(in oklch, var(--color-status-danger) 35%, var(--color-border));
 
-.danger:hover {
-    background: color-mix(in oklch, var(--color-danger) 10%, transparent);
+        &:hover {
+            background: color-mix(in oklch, var(--color-status-danger) 10%, transparent);
+        }
+    }
 }

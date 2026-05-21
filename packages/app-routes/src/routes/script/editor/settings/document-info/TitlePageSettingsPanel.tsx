@@ -95,7 +95,7 @@ export const TitlePageSettingsPanel = ({
             <h3 className={panelStyles.panelTitle}>Title Page</h3>
             <div className={styles.section}>
                 <div className={styles.field}>
-                    <label className={styles.fieldLabel} htmlFor="tp-title">Title</label>
+                    <label className={styles.label} htmlFor="tp-title">Title</label>
                     <input
                         id="tp-title"
                         type="text"
@@ -108,7 +108,7 @@ export const TitlePageSettingsPanel = ({
                     />
                 </div>
                 <div className={styles.field}>
-                    <label className={styles.fieldLabel} htmlFor="tp-subtitle">Subtitle</label>
+                    <label className={styles.label} htmlFor="tp-subtitle">Subtitle</label>
                     <input
                         id="tp-subtitle"
                         type="text"
@@ -132,7 +132,7 @@ export const TitlePageSettingsPanel = ({
             </div>
             <div className={styles.section}>
                 <div className={styles.field}>
-                    <label className={styles.fieldLabel} htmlFor="tp-source">Source</label>
+                    <label className={styles.label} htmlFor="tp-source">Source</label>
                     <input
                         id="tp-source"
                         type="text"
@@ -146,7 +146,7 @@ export const TitlePageSettingsPanel = ({
                 </div>
             </div>
             <div className={styles.section}>
-                <div className={styles.sectionTitle}>Draft Date</div>
+                <div className={styles.title}>Draft Date</div>
                 <div className={styles.draftDateRow}>
                     <div className={styles.draftDateField}>
                         <label className={styles.subFieldLabel} htmlFor="tp-date-format">Date format</label>
@@ -193,7 +193,7 @@ export const TitlePageSettingsPanel = ({
             </div>
             <div className={styles.section}>
                 <div className={styles.field}>
-                    <label className={styles.fieldLabel} htmlFor="tp-copyright">Copyright</label>
+                    <label className={styles.label} htmlFor="tp-copyright">Copyright</label>
                     <input
                         id="tp-copyright"
                         type="text"
@@ -208,7 +208,7 @@ export const TitlePageSettingsPanel = ({
             </div>
             <div className={styles.section}>
                 <div className={styles.field}>
-                    <label className={styles.fieldLabel} htmlFor="tp-contact">Contact</label>
+                    <label className={styles.label} htmlFor="tp-contact">Contact</label>
                     <textarea
                         id="tp-contact"
                         className={styles.textarea}
@@ -218,7 +218,7 @@ export const TitlePageSettingsPanel = ({
                             handleContactChange(e.target.value);
                         }}
                     />
-                    <span className={styles.fieldHint}>No blank lines between lines of text.</span>
+                    <span className={styles.hint}>No blank lines between lines of text.</span>
                 </div>
             </div>
         </div>

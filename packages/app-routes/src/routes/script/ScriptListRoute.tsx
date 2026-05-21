@@ -10,6 +10,7 @@ import {
     Grid,
     Kicker,
     PageContainer,
+    PageHeader,
     PageTitle,
     ProgressPanel,
     SubtleText,
@@ -108,7 +109,7 @@ export const ScriptListRoute = () => {
             )}
         >
             <PageContainer variant="standard">
-                <section className={styles.header}>
+                <PageHeader>
                     <div>
                         <Kicker>Scripts</Kicker>
                         <PageTitle className={styles.title}>All scenarios</PageTitle>
@@ -119,7 +120,7 @@ export const ScriptListRoute = () => {
                     <Button onClick={openModal}>
                         New script
                     </Button>
-                </section>
+                </PageHeader>
                 {scriptsLoading ? (
                     <div className={styles.listLoading}>
                         <ProgressPanel

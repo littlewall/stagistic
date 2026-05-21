@@ -15,20 +15,20 @@ const getSyncMeta = (state: ScriptSyncState) => {
     if (state === 'saving') {
         return {
             label: 'Saving',
-            className: styles.scriptStatusSaving,
+            className: styles.saving,
         };
     }
 
     if (state === 'error') {
         return {
             label: 'Error',
-            className: styles.scriptStatusError,
+            className: styles.error,
         };
     }
 
     return {
         label: 'Saved',
-        className: styles.scriptStatusSaved,
+        className: styles.saved,
     };
 };
 
@@ -44,7 +44,7 @@ export const SyncIndicator = ({state = 'saved'}: SyncIndicatorProps) => {
                 tabIndex={0}
             >
                 <span
-                    className={clsx(styles.scriptStatusDot, syncMeta.className)}
+                    className={clsx(styles.dot, syncMeta.className)}
                     aria-hidden="true"
                 />
             </span>

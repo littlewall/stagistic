@@ -31,7 +31,7 @@ export const ScriptMenu = ({
     return (
         <MenuTrigger>
             <Button className={styles.menuTrigger}>
-                <span className={styles.menuTriggerLabel}>{script.name}</span>
+                <span className={styles.label}>{script.name}</span>
                 <NavArrowDown className={styles.caret} aria-hidden="true" />
             </Button>
             <Popover className={styles.menuPopover} placement="bottom">
@@ -47,8 +47,8 @@ export const ScriptMenu = ({
                 >
                     <MenuSection className={styles.menuSection}>
                         <MenuItem className={styles.currentScriptBlock} isDisabled>
-                            <span className={styles.currentScriptLabel}>Current script</span>
-                            <span className={styles.currentScriptName}>{script.name}</span>
+                            <span className={styles.label}>Current script</span>
+                            <span className={styles.name}>{script.name}</span>
                         </MenuItem>
                         <MenuItem className={styles.menuItem} id="settings">
                             Script settings

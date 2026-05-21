@@ -77,7 +77,7 @@ const StringArrayCell = ({
                     type="text"
                     className={clsx(
                         styles.cellInput,
-                        values.length > 1 ? styles.cellInputWithDelete : null,
+                        values.length > 1 ? styles.withDelete : null,
                     )}
                     value={val}
                     placeholder={placeholder}

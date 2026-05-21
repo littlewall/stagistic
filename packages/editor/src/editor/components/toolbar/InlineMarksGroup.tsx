@@ -50,7 +50,7 @@ export const InlineMarksGroup = ({
                 <Redo aria-hidden="true" />
             </button>
             <button
-                className={clsx(styles.iconButton, isBoldActive && styles.iconButtonActive)}
+                className={clsx(styles.iconButton, isBoldActive && styles.active)}
                 type="button"
                 aria-label="Bold"
                 aria-pressed={isBoldActive}
@@ -59,7 +59,7 @@ export const InlineMarksGroup = ({
                 <Bold aria-hidden="true" />
             </button>
             <button
-                className={clsx(styles.iconButton, isItalicActive && styles.iconButtonActive)}
+                className={clsx(styles.iconButton, isItalicActive && styles.active)}
                 type="button"
                 aria-label="Italic"
                 aria-pressed={isItalicActive}
@@ -68,7 +68,7 @@ export const InlineMarksGroup = ({
                 <Italic aria-hidden="true" />
             </button>
             <button
-                className={clsx(styles.iconButton, isUnderlineActive && styles.iconButtonActive)}
+                className={clsx(styles.iconButton, isUnderlineActive && styles.active)}
                 type="button"
                 aria-label="Underline"
                 aria-pressed={isUnderlineActive}

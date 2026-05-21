@@ -3,32 +3,80 @@
 @import '@fontsource/courier-prime/700.css';
 
 :root {
-    --font-sans: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
-    --font-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
+    /* ── Font families ─────────────────────────────────────────── */
+    --font-family-sans: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-family-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
 
-    /* Media query variables */
+    /* ── Media query variables ─────────────────────────────────── */
     /* stylelint-disable-next-line csstree/validator */
     --media-tablet: (max-width: 1024px);
     /* stylelint-disable-next-line csstree/validator */
     --media-mobile: (max-width: 900px);
 
-    /* Size scale: default is medium; override with .size-sm or .size-lg on body/root. */
+    /* ── Size scale ────────────────────────────────────────────── */
+    /* Default is medium; override with .size-sm or .size-lg on body/root. */
     --size-scale: 1.08;
-    --app-header-height: 44px;
-    --traffic-light-space: 76px;
-    --space-unit: 4px;
-    --space-1: calc(var(--space-unit) * 1 * var(--size-scale));
-    --space-2: calc(var(--space-unit) * 2 * var(--size-scale));
-    --space-3: calc(var(--space-unit) * 3 * var(--size-scale));
-    --space-4: calc(var(--space-unit) * 4 * var(--size-scale));
-    --space-5: calc(var(--space-unit) * 5 * var(--size-scale));
-    --space-6: calc(var(--space-unit) * 6 * var(--size-scale));
-    --space-7: calc(var(--space-unit) * 7 * var(--size-scale));
-    --space-8: calc(var(--space-unit) * 8 * var(--size-scale));
-    --space-10: calc(var(--space-unit) * 10 * var(--size-scale));
-    --space-12: calc(var(--space-unit) * 12 * var(--size-scale));
 
-    /* ─── Base palette (OKLCH) ────────────────────────────────── */
+    /* ── Space ─────────────────────────────────────────────────── */
+    --space-none: 0px;
+    --space-px: 1px;
+    --space-xs: calc(2px * var(--size-scale));
+    --space-sm: calc(4px * var(--size-scale));
+    --space-md: calc(8px * var(--size-scale));
+    --space-lg: calc(12px * var(--size-scale));
+    --space-xl: calc(16px * var(--size-scale));
+    --space-2xl: calc(20px * var(--size-scale));
+    --space-3xl: calc(24px * var(--size-scale));
+    --space-4xl: calc(28px * var(--size-scale));
+    --space-5xl: calc(32px * var(--size-scale));
+    --space-6xl: calc(40px * var(--size-scale));
+    --space-7xl: calc(48px * var(--size-scale));
+
+    /* ── Radius ────────────────────────────────────────────────── */
+    --radius-none: 0px;
+    --radius-xs: calc(4px * var(--size-scale));
+    --radius-sm: calc(6px * var(--size-scale));
+    --radius-md: calc(8px * var(--size-scale));
+    --radius-lg: calc(10px * var(--size-scale));
+    --radius-xl: calc(12px * var(--size-scale));
+    --radius-full: 9999px;
+
+    /* ── Typography ────────────────────────────────────────────── */
+    --font-size-xxs: calc(10px * var(--size-scale));
+    --font-size-xs: calc(11px * var(--size-scale));
+    --font-size-sm: calc(12px * var(--size-scale));
+    --font-size-md: calc(13px * var(--size-scale));
+    --font-size-lg: calc(15px * var(--size-scale));
+    --font-size-xl: calc(16px * var(--size-scale));
+    --font-size-2xl: calc(18px * var(--size-scale));
+    --font-size-3xl: calc(22px * var(--size-scale));
+    --font-size-4xl: calc(35px * var(--size-scale));
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-semibold: 600;
+    --font-weight-bold: 700;
+
+    --line-height-none: 1;
+    --line-height-tight: 1.1;
+    --line-height-snug: 1.2;
+    --line-height-normal: 1.5;
+    --line-height-relaxed: 1.7;
+
+    --letter-spacing-tight: -.02em;
+    --letter-spacing-normal: 0em;
+    --letter-spacing-sm: .02em;
+    --letter-spacing-md: .05em;
+    --letter-spacing-lg: .08em;
+    --letter-spacing-xl: .12em;
+
+    /* ── Control heights ───────────────────────────────────────── */
+    --control-height-xs: calc(24px * var(--size-scale));
+    --control-height-sm: calc(26px * var(--size-scale));
+    --control-height-md: calc(32px * var(--size-scale));
+    --control-height-lg: calc(40px * var(--size-scale));
+
+    /* ── Base palette (OKLCH) ──────────────────────────────────── */
     --base-neutral: oklch(.461 .0257 51);
     --base-amber: oklch(.762 .0979 53.1);
     --base-blue: oklch(.636 .0999 239);
@@ -37,139 +85,95 @@
     --base-red: oklch(.554 .1273 14.8);
     --base-shadow: oklch(.177 .0062 41.5);
 
-    /* ─── Theme knobs (light) ─────────────────────────────────── */
+    /* ── Theme knobs (light) ───────────────────────────────────── */
+    --C-bg: .15;
+    --C-block: .55;
 
-    /* Chroma multipliers (low values keep surfaces near-neutral — raise
-       for warmer/cooler tinting; the neutral base hue is ~51° amber). */
-    --C-bg: .15;      /* surface backgrounds — keep close to neutral white */
-    --C-block: .55;   /* block-type text — slight warm tint preserved */
-
-    /* Surface lightness */
-    --L-paper: .97;
+    --L-bg: .97;
     --L-surface: .985;
     --L-accent: .908;
     --L-highlight: .952;
+    --L-text: .155;
+    --L-text-muted: .465;
+    --L-border: .875;
 
-    /* Text lightness */
-    --L-ink: .155;
-    --L-ink-muted: .465;
-
-    /* Separator */
-    --L-divider: .875;
-
-    /* Status lightness */
     --L-success: .48;
     --L-warning: .56;
     --L-danger: .54;
 
-    /* Shadow & backdrop alpha */
     --A-backdrop: .45;
     --A-shadow-popover: .18;
     --A-shadow-card: .08;
     --A-shadow-panel: .08;
     --A-shadow-canvas: .06;
 
-    /* Preview amber */
-    --L-preview-amber: .64;
-    --A-preview-amber: .72;
-    --A-preview-amber-soft: .2;
-    --A-preview-amber-strong: .42;
-
-    /* Preview blue */
-    --L-preview-blue: .58;
-    --A-preview-blue: .95;
-
-    /* Progress */
     --L-progress-start: .525;
     --L-progress-mid: .625;
     --L-progress-end: .78;
 
-    /* Block color lightness — all use --base-neutral (light mode: dark text) */
-    --L-block-scene-heading: .165;
-    --L-block-action: .12;
-    --L-block-character: .19;
-    --L-block-dialogue: .13;
-    --L-block-parenthetical: .29;
-    --L-block-transition: .21;
-    --L-block-centered: .23;
-
-    /* Character tag */
-    --character-tag-tint-strength: 30%;
-
-    /* ─── Semantic tokens ─────────────────────────────────────── */
+    /* ── Semantic tokens ───────────────────────────────────────── */
 
     /* Surfaces */
-    --color-paper: oklch(from var(--base-neutral) var(--L-paper)     calc(c * var(--C-bg)) h);
-    --color-surface: oklch(from var(--base-neutral) var(--L-surface)   calc(c * var(--C-bg)) h);
-    --color-accent: oklch(from var(--base-neutral) var(--L-accent)    calc(c * var(--C-block)) h);
-    --color-highlight: oklch(from var(--base-neutral) var(--L-highlight) calc(c * var(--C-bg)) h);
+    --color-bg: oklch(from var(--base-neutral) var(--L-bg) calc(c * var(--C-bg)) h);
+    --color-surface: oklch(from var(--base-neutral) var(--L-surface) calc(c * var(--C-bg)) h);
+    --color-surface-raised: oklch(from var(--base-neutral) var(--L-highlight) calc(c * var(--C-bg)) h);
+    --color-surface-accent: oklch(from var(--base-neutral) var(--L-accent) calc(c * var(--C-block)) h);
 
     /* Text */
-    --color-ink: oklch(from var(--base-neutral) var(--L-ink)       calc(c * var(--C-block)) h);
-    --color-ink-muted: oklch(from var(--base-neutral) var(--L-ink-muted) calc(c * var(--C-block)) h);
+    --color-text: oklch(from var(--base-neutral) var(--L-text) calc(c * var(--C-block)) h);
+    --color-text-muted: oklch(from var(--base-neutral) var(--L-text-muted) calc(c * var(--C-block)) h);
+    --color-text-link: oklch(from var(--base-blue) .58 c h);
 
-    /* Separator */
-    --color-divider: oklch(from var(--base-neutral) var(--L-divider)   calc(c * var(--C-block)) h);
+    /* Borders */
+    --color-border-subtle: oklch(from var(--base-neutral) .93 calc(c * var(--C-block)) h);
+    --color-border: oklch(from var(--base-neutral) var(--L-border) calc(c * var(--C-block)) h);
+    --color-border-strong: oklch(from var(--base-neutral) .79 calc(c * var(--C-block)) h);
+
+    /* Focus */
+    --color-focus-ring: oklch(from var(--base-blue) .58 c h);
+
+    /* Overlay */
+    --color-overlay-scrim: oklch(from var(--base-shadow) .13 c h / var(--A-backdrop));
 
     /* Status */
-    --color-success: oklch(from var(--base-green)  var(--L-success) c h);
-    --color-warning: oklch(from var(--base-yellow) var(--L-warning) c h);
-    --color-danger: oklch(from var(--base-red)    var(--L-danger)  c h);
+    --color-status-success: oklch(from var(--base-green) var(--L-success) c h);
+    --color-status-warning: oklch(from var(--base-yellow) var(--L-warning) c h);
+    --color-status-danger: oklch(from var(--base-red) var(--L-danger) c h);
 
-    /* Shadows & backdrop */
-    --color-backdrop: oklch(from var(--base-shadow) .13 c h / var(--A-backdrop));
+    /* Shadows */
+    --shadow-none: none;
     --color-shadow-popover: oklch(from var(--base-shadow) .13 c h / var(--A-shadow-popover));
     --color-shadow-card: oklch(from var(--base-shadow) .14 c h / var(--A-shadow-card));
     --color-shadow-panel: oklch(from var(--base-shadow) .14 c h / var(--A-shadow-panel));
     --color-shadow-canvas: oklch(from var(--base-shadow) .13 c h / var(--A-shadow-canvas));
-
-    /* Preview */
-    --color-preview-indent-rail: oklch(from var(--base-amber) var(--L-preview-amber) calc(c * .95) h / var(--A-preview-amber));
-    --color-preview-spacing-soft: oklch(from var(--base-amber) var(--L-preview-amber) calc(c * .9) h / var(--A-preview-amber-soft));
-    --color-preview-spacing-strong: oklch(from var(--base-amber) var(--L-preview-amber) calc(c * .95) h / var(--A-preview-amber-strong));
-    --color-preview-slider-selected: oklch(from var(--base-blue) var(--L-preview-blue) c h / .32);
-    --color-preview-slider-handle: oklch(from var(--base-blue) var(--L-preview-blue) c h / var(--A-preview-blue));
-    --color-preview-slider-boundary: oklch(from var(--base-neutral) .52 calc(c * .45) h / .55);
-
-    /* Progress */
-    --color-progress-start: oklch(from var(--base-amber) var(--L-progress-start) c h);
-    --color-progress-middle: oklch(from var(--base-amber) var(--L-progress-mid)   c h);
-    --color-progress-end: oklch(from var(--base-amber) var(--L-progress-end)   calc(c * .8) h);
-
-    /* Block text colors — all use --base-neutral, differ only in lightness */
-    --color-block-scene-heading: oklch(from var(--base-neutral) var(--L-block-scene-heading) calc(c * var(--C-block)) h);
-    --color-block-action: oklch(from var(--base-neutral) var(--L-block-action)        calc(c * var(--C-block)) h);
-    --color-block-character: oklch(from var(--base-neutral) var(--L-block-character)     calc(c * var(--C-block)) h);
-    --color-block-dialogue: oklch(from var(--base-neutral) var(--L-block-dialogue)      calc(c * var(--C-block)) h);
-    --color-block-parenthetical: oklch(from var(--base-neutral) var(--L-block-parenthetical) calc(c * var(--C-block)) h);
-    --color-block-transition: oklch(from var(--base-neutral) var(--L-block-transition)    calc(c * var(--C-block)) h);
-    --color-block-centered: oklch(from var(--base-neutral) var(--L-block-centered)      calc(c * var(--C-block)) h);
-    --color-block-lyrics: var(--color-block-dialogue);
-    --radius-sm: calc(6px * var(--size-scale));
-    --radius-md: calc(10px * var(--size-scale));
     --shadow-popover: 0 10px 30px var(--color-shadow-popover);
     --shadow-card: 0 10px 20px var(--color-shadow-card);
     --shadow-panel: 0 12px 32px var(--color-shadow-panel);
     --shadow-canvas: 0 12px 30px var(--color-shadow-canvas);
 
-    /* ─── Select / dropdown design tokens ─────────────────────────
+    /* Progress */
+    --color-progress-start: oklch(from var(--base-amber) var(--L-progress-start) c h);
+    --color-progress-middle: oklch(from var(--base-amber) var(--L-progress-mid) c h);
+    --color-progress-end: oklch(from var(--base-amber) var(--L-progress-end) calc(c * .8) h);
+
+    /* ── Select / dropdown design tokens ───────────────────────────
        Used by SettingsSelect, BlockTypeSelect, SidebarPanelSelect.
        Override on a parent element to vary per-site (size, border,
        background, weight). Common look (menu, hover/active states,
-       padding/gap/font) stays unified.                           */
+       padding/gap/font) stays unified.                            */
 
     /* Button (trigger) */
-    --select-button-height: calc(32px * var(--size-scale));
-    --select-button-padding-inline: var(--space-2);
-    --select-button-gap: var(--space-2);
-    --select-button-font-size: calc(12px * var(--size-scale));
-    --select-button-font-weight: 400;
-    --select-button-color: var(--color-ink);
+    --select-button-height: var(--control-height-md);
+    --select-button-padding-inline: var(--space-md);
+    --select-button-gap: var(--space-md);
+    --select-button-font-size: var(--font-size-sm);
+    --select-button-font-weight: var(--font-weight-normal);
+    --select-button-color: var(--color-text);
     --select-button-bg: transparent;
-    --select-button-hover-bg: color-mix(in oklch, var(--color-accent) 45%, transparent);
+    --select-button-hover-bg: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
     --select-button-border-color: transparent;
     --select-button-border-width: 1px;
-    --select-button-radius: calc(8px * var(--size-scale));
+    --select-button-radius: var(--radius-md);
 
     /* Icon + chevron */
     --select-icon-size: 16px;
@@ -177,83 +181,60 @@
 
     /* Menu (popover) */
     --select-menu-bg: var(--color-surface);
-    --select-menu-border: 1px solid var(--color-divider);
+    --select-menu-border: 1px solid var(--color-border);
     --select-menu-radius: var(--radius-md);
     --select-menu-shadow: var(--shadow-popover);
-    --select-menu-padding: var(--space-1);
+    --select-menu-padding: var(--space-sm);
     --select-menu-offset: 0;
     --select-menu-max-height: calc(280px * var(--size-scale));
     --select-menu-z-index: 12;
 
     /* Menu item */
     --select-menu-item-min-height: calc(32px * var(--size-scale));
-    --select-menu-item-padding: var(--space-2);
-    --select-menu-item-gap: var(--space-2);
-    --select-menu-item-font-size: calc(12px * var(--size-scale));
-    --select-menu-item-color: var(--color-ink);
-    --select-menu-item-radius: calc(8px * var(--size-scale));
-    --select-menu-item-hover-bg: color-mix(in oklch, var(--color-accent) 35%, transparent);
-    --select-menu-item-active-bg: color-mix(in oklch, var(--color-accent) 85%, transparent);
-    --select-menu-item-active-font-weight: 600;
+    --select-menu-item-padding: var(--space-md);
+    --select-menu-item-gap: var(--space-md);
+    --select-menu-item-font-size: var(--font-size-sm);
+    --select-menu-item-color: var(--color-text);
+    --select-menu-item-radius: var(--radius-md);
+    --select-menu-item-hover-bg: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
+    --select-menu-item-active-bg: color-mix(in oklch, var(--color-surface-accent) 85%, transparent);
+    --select-menu-item-active-font-weight: var(--font-weight-semibold);
 
     color-scheme: light;
 }
 
 :root[data-theme = 'dark'] {
-    /* Chroma multipliers (dark mode slightly more chroma than light) */
     --C-bg: .25;
 
-    /* Surface lightness */
-    --L-paper: .135;
+    --L-bg: .135;
     --L-surface: .17;
     --L-accent: .278;
     --L-highlight: .33;
 
-    /* Text lightness */
-    --L-ink: .92;
-    --L-ink-muted: .73;
+    --L-text: .92;
+    --L-text-muted: .73;
 
-    /* Separator */
-    --L-divider: .36;
+    --L-border: .36;
 
-    /* Status lightness */
     --L-success: .57;
     --L-warning: .63;
     --L-danger: .62;
 
-    /* Shadow & backdrop alpha */
     --A-backdrop: .6;
     --A-shadow-popover: .5;
     --A-shadow-card: .24;
     --A-shadow-panel: .3;
     --A-shadow-canvas: .22;
 
-    /* Preview amber */
-    --L-preview-amber: .6;
-    --A-preview-amber: .62;
-    --A-preview-amber-soft: .24;
-    --A-preview-amber-strong: .46;
-
-    /* Preview blue */
-    --L-preview-blue: .64;
-    --A-preview-blue: .96;
-
-    /* Progress */
     --L-progress-start: .575;
     --L-progress-mid: .67;
     --L-progress-end: .755;
 
-    /* Block color lightness — dark mode: light text on dark backgrounds */
-    --L-block-scene-heading: .87;
-    --L-block-action: .88;
-    --L-block-character: .86;
-    --L-block-dialogue: .89;
-    --L-block-parenthetical: .82;
-    --L-block-transition: .84;
-    --L-block-centered: .85;
-
-    /* Character tag */
-    --character-tag-tint-strength: 44%;
+    /* dark mode overrides */
+    --color-border-subtle: oklch(from var(--base-neutral) .28 calc(c * var(--C-block)) h);
+    --color-border-strong: oklch(from var(--base-neutral) .52 calc(c * var(--C-block)) h);
+    --color-text-link: oklch(from var(--base-blue) .68 c h);
+    --color-focus-ring: oklch(from var(--base-blue) .68 c h);
 
     color-scheme: dark;
 }

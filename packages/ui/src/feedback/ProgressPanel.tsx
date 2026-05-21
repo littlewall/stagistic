@@ -22,7 +22,7 @@ export const ProgressPanel = ({
     size = 'md',
 }: ProgressPanelProps) => {
     return (
-        <div className={clsx(styles.panel, size === 'sm' && styles.panelSmall)}>
+        <div className={clsx(styles.panel, size === 'sm' && styles.small)}>
             <div>
                 <div className={styles.title}>{title}</div>
                 {subtitle ? <div className={styles.subtitle}>{subtitle}</div> : null}

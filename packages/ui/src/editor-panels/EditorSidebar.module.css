@@ -14,31 +14,31 @@
 
 .tabList {
     display: flex;
-    background: color-mix(in oklch, var(--color-surface) 60%, var(--color-accent));
-    border-bottom: 1px solid var(--color-divider);
+    background: color-mix(in oklch, var(--color-surface) 60%, var(--color-surface-accent));
+    border-bottom: 1px solid var(--color-border);
 }
 
 .tab {
     cursor: pointer;
     display: inline-flex;
     flex: 1;
-    gap: var(--space-2);
+    gap: var(--space-md);
     align-items: center;
     justify-content: center;
-    padding: var(--space-2) 0 calc(var(--space-2) - 1px);
-    font-size: calc(10px * var(--size-scale));
-    color: var(--color-ink);
+    padding: var(--space-md) 0 calc(var(--space-md) - 1px);
+    font-size: var(--font-size-xxs);
+    color: var(--color-text);
     text-transform: uppercase;
-    letter-spacing: .16em;
+    letter-spacing: var(--letter-spacing-xl);
     background: var(--color-surface);
     border: none;
-    border-bottom: 2px solid var(--color-ink);
-}
+    border-bottom: 2px solid var(--color-text);
 
-.tabIcon {
-    width: calc(14px * var(--size-scale));
-    height: calc(14px * var(--size-scale));
-    color: currentcolor;
+    & .icon {
+        width: calc(14px * var(--size-scale));
+        height: calc(14px * var(--size-scale));
+        color: currentcolor;
+    }
 }
 
 .tabPanel {
@@ -50,43 +50,43 @@
 .section {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
-    padding: var(--space-3);
-}
+    gap: var(--space-lg);
+    padding: var(--space-lg);
 
-.sectionTitle {
-    font-size: calc(12px * var(--size-scale));
-    font-weight: 700;
-    color: var(--color-ink-muted);
-    text-transform: uppercase;
-    letter-spacing: .08em;
+    & .title {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-muted);
+        text-transform: uppercase;
+        letter-spacing: var(--letter-spacing-lg);
+    }
 }
 
 .characterList {
     display: grid;
-    gap: var(--space-2);
+    gap: var(--space-md);
     list-style: none;
 }
 
 .characterItem {
     overflow: hidden;
     background: transparent;
-    border: 1px solid var(--color-divider);
-    border-radius: calc(8px * var(--size-scale));
-}
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
 
-.characterItemUnconfirmed {
-    background: transparent;
-    border-color: color-mix(in oklch, var(--character-color) 58%, var(--color-divider));
+    &.unconfirmed {
+        background: transparent;
+        border-color: color-mix(in oklch, var(--character-color) 58%, var(--color-border));
+    }
 }
 
 .characterRow,
 .characterRowButton {
     display: flex;
-    gap: var(--space-2);
+    gap: var(--space-md);
     align-items: center;
     min-height: calc(30px * var(--size-scale));
-    padding: var(--space-1) var(--space-2);
+    padding: var(--space-sm) var(--space-md);
 }
 
 .characterRowButton {
@@ -103,15 +103,15 @@
      */
     background: color-mix(in srgb, var(--character-color) 12%, var(--color-surface));
     border: none;
-}
 
-.characterRowButton:hover {
-    background: color-mix(in srgb, var(--character-color) 22%, var(--color-surface));
-}
+    &:hover {
+        background: color-mix(in srgb, var(--character-color) 22%, var(--color-surface));
+    }
 
-.characterRowButton:focus-visible {
-    outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-ink));
-    outline-offset: -2px;
+    &:focus-visible {
+        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
+        outline-offset: -2px;
+    }
 }
 
 .expandIcon {
@@ -127,28 +127,28 @@
     justify-content: center;
     width: calc(18px * var(--size-scale));
     height: calc(18px * var(--size-scale));
-    color: var(--color-ink-muted);
+    color: var(--color-text-muted);
     background: transparent;
     border: none;
-    border-radius: calc(4px * var(--size-scale));
-}
+    border-radius: var(--radius-xs);
 
-.expandIndicatorButton:hover {
-    background: color-mix(in oklch, var(--character-color) 18%, transparent);
-}
+    &:hover {
+        background: color-mix(in oklch, var(--character-color) 18%, transparent);
+    }
 
-.expandIndicatorButton:focus-visible {
-    outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-ink));
-    outline-offset: 1px;
+    &:focus-visible {
+        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
+        outline-offset: 1px;
+    }
 }
 
 .characterColor {
     flex-shrink: 0;
     width: calc(10px * var(--size-scale));
     height: calc(10px * var(--size-scale));
-    background: var(--character-color, var(--color-accent));
-    border: 1px solid color-mix(in oklch, var(--color-ink) 15%, var(--color-surface));
-    border-radius: 999px;
+    background: var(--character-color, var(--color-surface-accent));
+    border: 1px solid color-mix(in oklch, var(--color-text) 15%, var(--color-surface));
+    border-radius: var(--radius-full);
 }
 
 .characterColorInteractive {
@@ -159,17 +159,17 @@
     justify-content: center;
     width: calc(10px * var(--size-scale));
     height: calc(10px * var(--size-scale));
-}
 
-.characterColorInteractive:focus-visible {
-    border-radius: 999px;
-    outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-ink));
-    outline-offset: 2px;
-}
+    &:focus-visible {
+        border-radius: var(--radius-full);
+        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
+        outline-offset: 2px;
+    }
 
-.characterColorInteractive[aria-disabled = 'true'] {
-    cursor: default;
-    opacity: .55;
+    &[aria-disabled='true'] {
+        cursor: default;
+        opacity: .55;
+    }
 }
 
 .characterColorButton {
@@ -182,48 +182,48 @@
     padding: 0;
     background: transparent;
     border: none;
-    border-radius: calc(4px * var(--size-scale));
-}
+    border-radius: var(--radius-xs);
 
-.characterColorButton:hover {
-    background: color-mix(in oklch, var(--character-color) 16%, transparent);
-}
+    &:hover {
+        background: color-mix(in oklch, var(--character-color) 16%, transparent);
+    }
 
-.characterColorButton[data-disabled] {
-    cursor: default;
-    opacity: .55;
-}
+    &[data-disabled] {
+        cursor: default;
+        opacity: .55;
+    }
 
-.characterColorButton:focus-visible {
-    outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-ink));
-    outline-offset: 1px;
+    &:focus-visible {
+        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
+        outline-offset: 1px;
+    }
 }
 
 .characterColorPopover {
     z-index: 20;
     background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: calc(10px * var(--size-scale));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-popover);
 }
 
 .characterColorDialog {
     display: grid;
-    gap: var(--space-2);
+    gap: var(--space-md);
     min-width: calc(190px * var(--size-scale));
-    padding: var(--space-2);
+    padding: var(--space-md);
 }
 
 .characterColorPickerLayout {
     display: grid;
-    gap: var(--space-2);
+    gap: var(--space-md);
 }
 
 .characterColorPreview {
     width: 100%;
     min-height: calc(44px * var(--size-scale));
-    border: 1px solid color-mix(in oklch, var(--color-ink) 16%, var(--color-surface));
-    border-radius: calc(8px * var(--size-scale));
+    border: 1px solid color-mix(in oklch, var(--color-text) 16%, var(--color-surface));
+    border-radius: var(--radius-md);
 }
 
 .characterColorSlider {
@@ -235,8 +235,8 @@
     overflow: hidden;
     width: 100%;
     height: calc(18px * var(--size-scale));
-    border: 1px solid var(--color-divider);
-    border-radius: calc(999px * var(--size-scale));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
 }
 
 .characterColorThumb {
@@ -246,15 +246,15 @@
     width: calc(12px * var(--size-scale));
     height: calc(12px * var(--size-scale));
     background: var(--color-surface);
-    border: 2px solid color-mix(in oklch, var(--color-ink) 74%, var(--color-surface));
-    border-radius: 999px;
+    border: 2px solid color-mix(in oklch, var(--color-text) 74%, var(--color-surface));
+    border-radius: var(--radius-full);
     box-shadow: 0 0 0 1px color-mix(in oklch, var(--color-surface) 80%, transparent);
 }
 
 .characterColorSwatches {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
-    gap: var(--space-1);
+    gap: var(--space-sm);
 }
 
 .characterColorSwatch {
@@ -263,8 +263,13 @@
     width: 100%;
     min-height: calc(20px * var(--size-scale));
     padding: 0;
-    border: 1px solid color-mix(in oklch, var(--color-ink) 16%, var(--color-surface));
-    border-radius: calc(6px * var(--size-scale));
+    border: 1px solid color-mix(in oklch, var(--color-text) 16%, var(--color-surface));
+    border-radius: var(--radius-sm);
+
+    &[data-selected='true'] {
+        outline: 2px solid color-mix(in oklch, var(--color-text) 55%, var(--color-surface-accent));
+        outline-offset: 1px;
+    }
 }
 
 .characterColorSwatchFill {
@@ -273,14 +278,9 @@
     border-radius: inherit;
 }
 
-.characterColorSwatch[data-selected = 'true'] {
-    outline: 2px solid color-mix(in oklch, var(--color-ink) 55%, var(--color-accent));
-    outline-offset: 1px;
-}
-
 .characterColorActions {
     display: flex;
-    gap: var(--space-1);
+    gap: var(--space-sm);
     justify-content: flex-end;
 }
 
@@ -291,28 +291,28 @@
     align-items: center;
     justify-content: center;
     min-height: calc(22px * var(--size-scale));
-    padding: 0 var(--space-2);
+    padding: 0 var(--space-md);
     border: 1px solid transparent;
-    border-radius: calc(6px * var(--size-scale));
+    border-radius: var(--radius-sm);
 }
 
 .characterColorActionButton {
     color: var(--color-surface);
-    background: color-mix(in oklch, var(--color-ink) 85%, var(--color-accent));
+    background: color-mix(in oklch, var(--color-text) 85%, var(--color-surface-accent));
 }
 
 .characterColorActionButtonSecondary {
-    color: var(--color-ink-muted);
+    color: var(--color-text-muted);
     background: transparent;
-    border-color: var(--color-divider);
+    border-color: var(--color-border);
 }
 
 .characterName {
     overflow: hidden;
     flex: 1;
     min-width: 0;
-    font-size: calc(12px * var(--size-scale));
-    color: var(--color-ink);
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
@@ -321,18 +321,18 @@
     width: 100%;
     min-width: 0;
     padding: 0;
-    font-size: calc(12px * var(--size-scale));
-    color: var(--color-ink);
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
     background: transparent;
     border: none;
-}
 
-.characterInlineRenameInput:focus-visible {
-    outline: none;
-}
+    &:focus-visible {
+        outline: none;
+    }
 
-.characterInlineRenameInput:disabled {
-    opacity: .68;
+    &:disabled {
+        opacity: .68;
+    }
 }
 
 .confirmIconButton {
@@ -343,26 +343,26 @@
     justify-content: center;
     width: calc(18px * var(--size-scale));
     height: calc(18px * var(--size-scale));
-    color: color-mix(in oklch, var(--color-ink) 84%, var(--character-color));
+    color: color-mix(in oklch, var(--color-text) 84%, var(--character-color));
     background: transparent;
     border: none;
-    border-radius: calc(4px * var(--size-scale));
+    border-radius: var(--radius-xs);
     transition: color .15s ease, background .15s ease;
-}
 
-.confirmIconButton:hover {
-    color: color-mix(in oklch, var(--character-color) 55%, var(--color-ink));
-    background: color-mix(in oklch, var(--character-color) 18%, transparent);
-}
+    &:hover {
+        color: color-mix(in oklch, var(--character-color) 55%, var(--color-text));
+        background: color-mix(in oklch, var(--character-color) 18%, transparent);
+    }
 
-.confirmIconButton:focus-visible {
-    outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-ink));
-    outline-offset: 1px;
-}
+    &:focus-visible {
+        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
+        outline-offset: 1px;
+    }
 
-.confirmIconButton[aria-disabled = 'true'] {
-    cursor: default;
-    opacity: .65;
+    &[aria-disabled='true'] {
+        cursor: default;
+        opacity: .65;
+    }
 }
 
 .focusIconButton {
@@ -374,21 +374,21 @@
     width: calc(18px * var(--size-scale));
     height: calc(18px * var(--size-scale));
     margin-left: auto;
-    color: var(--color-ink-muted);
+    color: var(--color-text-muted);
     background: transparent;
     border: none;
-    border-radius: calc(4px * var(--size-scale));
+    border-radius: var(--radius-xs);
     transition: color .15s ease, background .15s ease;
-}
 
-.focusIconButton:hover {
-    color: var(--color-ink);
-    background: color-mix(in oklch, var(--color-ink) 8%, transparent);
-}
+    &:hover {
+        color: var(--color-text);
+        background: color-mix(in oklch, var(--color-text) 8%, transparent);
+    }
 
-.focusIconButton:focus-visible {
-    outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-ink));
-    outline-offset: 1px;
+    &:focus-visible {
+        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
+        outline-offset: 1px;
+    }
 }
 
 .iconGlyph {
@@ -404,37 +404,37 @@
 .confirmSpinner {
     width: calc(11px * var(--size-scale));
     height: calc(11px * var(--size-scale));
-    border: 2px solid color-mix(in oklch, var(--color-ink) 25%, transparent);
-    border-top-color: color-mix(in oklch, var(--color-ink) 86%, var(--character-color));
-    border-radius: 999px;
+    border: 2px solid color-mix(in oklch, var(--color-text) 25%, transparent);
+    border-top-color: color-mix(in oklch, var(--color-text) 86%, var(--character-color));
+    border-radius: var(--radius-full);
     animation: characterConfirmSpin .8s linear infinite;
 }
 
 .confirmTooltip {
     z-index: 1000;
-    padding: var(--space-1) var(--space-2);
-    font-size: calc(10px * var(--size-scale));
-    font-weight: 700;
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-bold);
     color: var(--color-surface);
-    letter-spacing: .02em;
-    background: color-mix(in oklch, var(--color-ink) 92%, rgb(0 0 0));
-    border: 1px solid color-mix(in oklch, var(--color-surface) 15%, var(--color-ink));
-    border-radius: calc(6px * var(--size-scale));
+    letter-spacing: var(--letter-spacing-sm);
+    background: color-mix(in oklch, var(--color-text) 92%, rgb(0 0 0));
+    border: 1px solid color-mix(in oklch, var(--color-surface) 15%, var(--color-text));
+    border-radius: var(--radius-sm);
     box-shadow: var(--shadow-popover);
 }
 
 .characterDetails {
     display: grid;
-    gap: var(--space-2);
-    padding: 0 var(--space-2) var(--space-2);
-    font-size: calc(10px * var(--size-scale));
+    gap: var(--space-md);
+    padding: 0 var(--space-md) var(--space-md);
+    font-size: var(--font-size-xxs);
     background: transparent;
-    border-top: 1px solid color-mix(in oklch, var(--character-color) 22%, var(--color-divider));
+    border-top: 1px solid color-mix(in oklch, var(--character-color) 22%, var(--color-border));
 }
 
 .characterCardFooter {
     display: flex;
-    gap: var(--space-2);
+    gap: var(--space-md);
     align-items: center;
     justify-content: space-between;
 }
@@ -458,98 +458,98 @@
     justify-content: center;
     width: calc(20px * var(--size-scale));
     height: calc(20px * var(--size-scale));
-    color: color-mix(in oklch, var(--color-ink) 76%, var(--character-color));
+    color: color-mix(in oklch, var(--color-text) 76%, var(--character-color));
     background: transparent;
     border: none;
-    border-radius: calc(4px * var(--size-scale));
+    border-radius: var(--radius-xs);
     transition: color .15s ease, background .15s ease;
-}
 
-.genderIconButton:hover {
-    color: color-mix(in oklch, var(--character-color) 62%, var(--color-ink));
-    background: color-mix(in oklch, var(--character-color) 14%, transparent);
-}
+    &:hover {
+        color: color-mix(in oklch, var(--character-color) 62%, var(--color-text));
+        background: color-mix(in oklch, var(--character-color) 14%, transparent);
+    }
 
-.genderIconButton:focus-visible {
-    outline: 2px solid color-mix(in oklch, var(--character-color) 48%, var(--color-ink));
-    outline-offset: 1px;
-}
+    &:focus-visible {
+        outline: 2px solid color-mix(in oklch, var(--character-color) 48%, var(--color-text));
+        outline-offset: 1px;
+    }
 
-.genderIconButton[data-disabled] {
-    cursor: default;
-    opacity: .55;
+    &[data-disabled] {
+        cursor: default;
+        opacity: .55;
+    }
 }
 
 .characterGenderPickerPopover {
     z-index: 20;
     min-width: calc(220px * var(--size-scale));
     background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: calc(8px * var(--size-scale));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     box-shadow: var(--shadow-popover);
 }
 
 .characterGenderPickerDialog {
     display: grid;
-    gap: var(--space-2);
-    padding: var(--space-2);
+    gap: var(--space-md);
+    padding: var(--space-md);
 }
 
 .characterGenderPickerHeading {
-    font-size: calc(10px * var(--size-scale));
-    font-weight: 700;
-    color: var(--color-ink-muted);
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-muted);
     text-transform: uppercase;
-    letter-spacing: .06em;
+    letter-spacing: var(--letter-spacing-md);
 }
 
 .characterGenderQueryInput {
     min-width: 0;
     min-height: calc(28px * var(--size-scale));
-    padding: 0 var(--space-2);
-    font-size: calc(11px * var(--size-scale));
-    color: var(--color-ink);
-    background: color-mix(in oklch, var(--color-surface) 88%, var(--color-divider));
-    border: 1px solid color-mix(in oklch, var(--character-color) 26%, var(--color-divider));
-    border-radius: calc(6px * var(--size-scale));
-}
+    padding: 0 var(--space-md);
+    font-size: var(--font-size-xs);
+    color: var(--color-text);
+    background: color-mix(in oklch, var(--color-surface) 88%, var(--color-border));
+    border: 1px solid color-mix(in oklch, var(--character-color) 26%, var(--color-border));
+    border-radius: var(--radius-sm);
 
-.characterGenderQueryInput:focus-visible {
-    outline: 2px solid color-mix(in oklch, var(--character-color) 48%, var(--color-ink));
-    outline-offset: 1px;
+    &:focus-visible {
+        outline: 2px solid color-mix(in oklch, var(--character-color) 48%, var(--color-text));
+        outline-offset: 1px;
+    }
 }
 
 .characterGenderHint {
-    font-size: calc(10px * var(--size-scale));
-    font-weight: 700;
-    color: var(--color-ink-muted);
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-muted);
 }
 
 .characterGenderListBox {
     display: grid;
-    gap: var(--space-1);
-    padding: var(--space-1);
-    background: color-mix(in oklch, var(--color-surface) 92%, var(--color-divider));
-    border: 1px solid color-mix(in oklch, var(--character-color) 20%, var(--color-divider));
-    border-radius: calc(7px * var(--size-scale));
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+    background: color-mix(in oklch, var(--color-surface) 92%, var(--color-border));
+    border: 1px solid color-mix(in oklch, var(--character-color) 20%, var(--color-border));
+    border-radius: var(--radius-md);
 }
 
 .characterGenderOption {
     cursor: pointer;
     display: flex;
-    gap: var(--space-2);
+    gap: var(--space-md);
     align-items: center;
-    padding: var(--space-1) var(--space-2);
-    font-size: calc(11px * var(--size-scale));
-    border-radius: calc(6px * var(--size-scale));
-}
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-xs);
+    border-radius: var(--radius-sm);
 
-.characterGenderOption[data-focused = 'true'] {
-    background: color-mix(in oklch, var(--character-color) 24%, transparent);
-}
+    &[data-focused='true'] {
+        background: color-mix(in oklch, var(--character-color) 24%, transparent);
+    }
 
-.characterGenderOption[data-selected = 'true'] {
-    font-weight: 700;
+    &[data-selected='true'] {
+        font-weight: var(--font-weight-bold);
+    }
 }
 
 .characterGenderCheckmark {
@@ -565,17 +565,17 @@
     cursor: pointer;
     justify-self: start;
     min-height: calc(22px * var(--size-scale));
-    padding: 0 var(--space-2);
-    font-size: calc(10px * var(--size-scale));
-    font-weight: 700;
-    color: color-mix(in oklch, var(--character-color) 65%, var(--color-ink));
+    padding: 0 var(--space-md);
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-bold);
+    color: color-mix(in oklch, var(--character-color) 65%, var(--color-text));
     background: color-mix(in oklch, var(--character-color) 14%, transparent);
-    border: 1px solid color-mix(in oklch, var(--character-color) 28%, var(--color-divider));
-    border-radius: calc(6px * var(--size-scale));
-}
+    border: 1px solid color-mix(in oklch, var(--character-color) 28%, var(--color-border));
+    border-radius: var(--radius-sm);
 
-.characterGenderCreateButton:hover {
-    background: color-mix(in oklch, var(--character-color) 20%, transparent);
+    &:hover {
+        background: color-mix(in oklch, var(--character-color) 20%, transparent);
+    }
 }
 
 .deleteIconButton {
@@ -586,31 +586,31 @@
     justify-content: center;
     width: calc(20px * var(--size-scale));
     height: calc(20px * var(--size-scale));
-    color: color-mix(in oklch, var(--color-danger) 70%, var(--color-ink));
+    color: color-mix(in oklch, var(--color-status-danger) 70%, var(--color-text));
     background: transparent;
     border: none;
-    border-radius: calc(4px * var(--size-scale));
+    border-radius: var(--radius-xs);
     transition: color .15s ease, background .15s ease;
-}
 
-.deleteIconButton:hover {
-    color: var(--color-danger);
-    background: color-mix(in oklch, var(--color-danger) 16%, transparent);
-}
+    &:hover {
+        color: var(--color-status-danger);
+        background: color-mix(in oklch, var(--color-status-danger) 16%, transparent);
+    }
 
-.deleteIconButton:focus-visible {
-    outline: 2px solid color-mix(in oklch, var(--color-danger) 55%, var(--color-ink));
-    outline-offset: 1px;
-}
+    &:focus-visible {
+        outline: 2px solid color-mix(in oklch, var(--color-status-danger) 55%, var(--color-text));
+        outline-offset: 1px;
+    }
 
-.deleteIconButton[aria-disabled = 'true'] {
-    cursor: default;
-    opacity: .65;
+    &[aria-disabled='true'] {
+        cursor: default;
+        opacity: .65;
+    }
 }
 
 .emptyState {
-    font-size: calc(12px * var(--size-scale));
-    color: var(--color-ink-muted);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
 }
 
 @keyframes characterConfirmSpin {

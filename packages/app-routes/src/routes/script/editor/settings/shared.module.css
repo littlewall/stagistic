@@ -2,15 +2,19 @@
 
 .previewCard {
     display: grid;
-    gap: var(--space-2);
-    padding: var(--space-2) 0;
+    gap: var(--space-md);
+    padding: var(--space-md) 0;
 }
 
 .settingsFlatGrid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: var(--space-4);
-    margin-top: var(--space-4);
+    gap: var(--space-xl);
+    margin-top: var(--space-xl);
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+    }
 }
 
 .settingsField {
@@ -20,11 +24,11 @@
 }
 
 .fieldLabel {
-    font-size: .85rem;
-    font-weight: 600;
-    color: var(--color-ink-muted);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-muted);
     text-transform: uppercase;
-    letter-spacing: .05em;
+    letter-spacing: var(--letter-spacing-md);
 }
 
 /* Dual-range indent / margin slider */
@@ -32,7 +36,7 @@
 .indentSliderTrack {
     position: relative;
     height: 28px;
-    margin-top: var(--space-1);
+    margin-top: var(--space-sm);
 }
 
 .indentSliderBase,
@@ -42,7 +46,7 @@
     top: 50%;
     transform: translateY(-50%);
     height: 4px;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
 }
 
 .indentSliderBase {
@@ -90,84 +94,82 @@
     appearance: none;
     background: transparent;
     border: 0;
+
+    &:focus {
+        outline: none;
+    }
+
+    &::-webkit-slider-runnable-track {
+        height: 28px;
+        background: transparent;
+    }
+
+    &::-webkit-slider-thumb {
+        pointer-events: auto;
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+        margin-top: 6px;
+        appearance: none;
+        border: 2px solid var(--color-surface);
+        border-radius: 50%;
+    }
+
+    &::-moz-range-track {
+        height: 28px;
+        background: transparent;
+        border: 0;
+    }
+
+    &::-moz-range-thumb {
+        pointer-events: auto;
+        cursor: pointer;
+        width: 16px;
+        height: 16px;
+        border: 2px solid var(--color-surface);
+        border-radius: 50%;
+    }
 }
 
-.indentSliderInput:focus {
-    outline: none;
+.indentSliderInputStart {
+    &::-webkit-slider-thumb,
+    &::-moz-range-thumb {
+        background: var(--color-preview-slider-handle);
+    }
 }
 
-.indentSliderInput::-webkit-slider-runnable-track {
-    height: 28px;
-    background: transparent;
-}
-
-.indentSliderInput::-webkit-slider-thumb {
-    pointer-events: auto;
-    cursor: pointer;
-    width: 16px;
-    height: 16px;
-    margin-top: 6px;
-    appearance: none;
-    border: 2px solid var(--color-surface);
-    border-radius: 50%;
-}
-
-.indentSliderInput::-moz-range-track {
-    height: 28px;
-    background: transparent;
-    border: 0;
-}
-
-.indentSliderInput::-moz-range-thumb {
-    pointer-events: auto;
-    cursor: pointer;
-    width: 16px;
-    height: 16px;
-    border: 2px solid var(--color-surface);
-    border-radius: 50%;
-}
-
-.indentSliderInputStart::-webkit-slider-thumb,
-.indentSliderInputStart::-moz-range-thumb {
-    background: var(--color-preview-slider-handle);
-}
-
-.indentSliderInputEnd::-webkit-slider-thumb,
-.indentSliderInputEnd::-moz-range-thumb {
-    background: var(--color-preview-slider-handle);
+.indentSliderInputEnd {
+    &::-webkit-slider-thumb,
+    &::-moz-range-thumb {
+        background: var(--color-preview-slider-handle);
+    }
 }
 
 .indentSliderLabels {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-2);
-    margin-top: var(--space-1);
+    gap: var(--space-md);
+    margin-top: var(--space-sm);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    font-size: .76rem;
-    color: var(--color-ink-muted);
-}
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
 
-.indentSliderLabels span:nth-child(2) {
-    font-weight: 700;
-    color: var(--color-ink);
-    text-align: center;
-}
-
-.indentSliderLabels span:last-child {
-    text-align: right;
-}
-
-@media (max-width: 900px) {
-    .settingsFlatGrid {
-        grid-template-columns: 1fr;
+    & span:nth-child(2) {
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text);
+        text-align: center;
     }
 
-    .indentSliderLabels {
-        grid-template-columns: 1fr;
+    & span:last-child {
+        text-align: right;
     }
 
-    .indentSliderLabels span:nth-child(2),
-    .indentSliderLabels span:last-child {
-        text-align: left;
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+
+        & span:nth-child(2),
+        & span:last-child {
+            text-align: left;
+        }
     }
 }

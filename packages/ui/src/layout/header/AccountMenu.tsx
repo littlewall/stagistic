@@ -26,7 +26,7 @@ export const AccountMenu = ({
     return (
         <MenuTrigger>
             <Button className={styles.avatarTrigger} aria-label="Open account menu">
-                <UserCircle className={styles.avatarIcon} aria-hidden="true" />
+                <UserCircle className={styles.icon} aria-hidden="true" />
             </Button>
             <Popover className={styles.menuPopover} placement="bottom end">
                 <div className={styles.accountPopoverContent}>

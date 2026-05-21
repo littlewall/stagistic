@@ -1,146 +1,146 @@
 .modal {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-lg);
     /* stylelint-disable-next-line csstree/validator */
     width: min(560px, 100%);
-    padding: var(--space-7);
+    padding: var(--space-4xl);
     background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-popover);
-}
 
-.title {
-    font-size: 1.4rem;
-}
+    & .title {
+        font-size: var(--font-size-3xl);
+    }
 
-.subtitle {
-    color: var(--color-ink-muted);
-}
+    & .subtitle {
+        color: var(--color-text-muted);
+    }
 
-.form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    margin-top: var(--space-2);
-}
+    & .form {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xl);
+        margin-top: var(--space-md);
 
-.label {
-    font-size: .8rem;
-    color: var(--color-ink-muted);
-    text-transform: uppercase;
-    letter-spacing: .12em;
-}
+        & .label {
+            font-size: var(--font-size-sm);
+            color: var(--color-text-muted);
+            text-transform: uppercase;
+            letter-spacing: var(--letter-spacing-xl);
+        }
 
-.input {
-    padding: var(--space-3) var(--space-4);
-    background: var(--color-highlight);
-    border: 1px solid var(--color-divider);
-    border-radius: var(--radius-sm);
-}
+        & .input {
+            padding: var(--space-lg) var(--space-xl);
+            background: var(--color-surface-raised);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
 
-.input:focus {
-    background: var(--color-surface);
-    border-color: color-mix(in oklch, var(--color-ink) 25%, var(--color-divider));
-    outline: none;
-}
+            &:focus {
+                background: var(--color-surface);
+                border-color: color-mix(in oklch, var(--color-text) 25%, var(--color-border));
+                outline: none;
+            }
+        }
 
-.dropZone {
-    cursor: pointer;
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    padding: var(--space-5);
-    text-align: center;
-    background: var(--color-highlight);
-    border: 1px dashed var(--color-divider);
-    border-radius: var(--radius-sm);
-    transition: border-color 150ms ease, background 150ms ease;
-}
+        & .dropZone {
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+            padding: var(--space-2xl);
+            text-align: center;
+            background: var(--color-surface-raised);
+            border: 1px dashed var(--color-border);
+            border-radius: var(--radius-sm);
+            transition: border-color 150ms ease, background 150ms ease;
 
-.dropZone[data-hovered],
-.dropZone[data-drop-target] {
-    background: var(--color-surface);
-    border-color: color-mix(in oklch, var(--color-ink) 35%, var(--color-divider));
-}
+            &[data-hovered],
+            &[data-drop-target] {
+                background: var(--color-surface);
+                border-color: color-mix(in oklch, var(--color-text) 35%, var(--color-border));
+            }
 
-.dropZone[data-focus-visible] {
-    outline: 2px solid color-mix(in oklch, var(--color-ink) 60%, var(--color-divider));
-    outline-offset: 2px;
-}
+            &[data-focus-visible] {
+                outline: 2px solid color-mix(in oklch, var(--color-text) 60%, var(--color-border));
+                outline-offset: 2px;
+            }
 
-.dropZoneLabel {
-    font-weight: 600;
-}
+            & .dropZoneLabel {
+                font-weight: var(--font-weight-semibold);
+            }
 
-.dropZoneHint {
-    font-size: .9rem;
-    color: var(--color-ink-muted);
-}
+            & .dropZoneHint {
+                font-size: var(--font-size-sm);
+                color: var(--color-text-muted);
+            }
+        }
 
-.optionRow {
-    cursor: pointer;
-    display: flex;
-    gap: var(--space-2);
-    align-items: center;
-}
+        & .optionRow {
+            cursor: pointer;
+            display: flex;
+            gap: var(--space-md);
+            align-items: center;
 
-.checkbox {
-    inline-size: 1rem;
-    block-size: 1rem;
-}
+            & .checkbox {
+                inline-size: 1rem;
+                block-size: 1rem;
+            }
 
-.optionText {
-    font-size: .9rem;
-    color: var(--color-ink);
-}
+            & .optionText {
+                font-size: var(--font-size-sm);
+                color: var(--color-text);
+            }
+        }
 
-.error {
-    font-size: .9rem;
-    color: var(--color-danger);
-}
+        & .error {
+            font-size: var(--font-size-sm);
+            color: var(--color-status-danger);
+        }
 
-.actions {
-    display: flex;
-    gap: var(--space-2);
-    justify-content: flex-end;
+        & .actions {
+            display: flex;
+            gap: var(--space-md);
+            justify-content: flex-end;
+        }
+    }
 }
 
 .primaryButton,
 .ghostButton {
     cursor: pointer;
     display: inline-flex;
-    gap: var(--space-2);
+    gap: var(--space-md);
     align-items: center;
     justify-content: center;
-    padding: var(--space-2) var(--space-5);
-    font-weight: 500;
+    padding: var(--space-md) var(--space-2xl);
+    font-weight: var(--font-weight-medium);
     border: 1px solid transparent;
-    border-radius: 999px;
+    border-radius: var(--radius-full);
     transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 
 .primaryButton {
     color: var(--color-surface);
-    background: var(--color-ink);
-}
+    background: var(--color-text);
 
-.primaryButton:hover {
-    background: color-mix(in oklch, var(--color-ink) 86%, var(--color-paper));
-}
+    &:hover {
+        background: color-mix(in oklch, var(--color-text) 86%, var(--color-bg));
+    }
 
-.primaryButton:disabled {
-    cursor: not-allowed;
-    opacity: .6;
+    &:disabled {
+        cursor: not-allowed;
+        opacity: .6;
+    }
 }
 
 .ghostButton {
-    color: var(--color-ink-muted);
+    color: var(--color-text-muted);
     background: transparent;
-}
 
-.ghostButton:hover {
-    color: var(--color-ink);
-    background: var(--color-highlight);
+    &:hover {
+        color: var(--color-text);
+        background: var(--color-surface-raised);
+    }
 }

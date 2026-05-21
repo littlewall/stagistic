@@ -106,7 +106,6 @@ export const useCharacterSuggestions = ({
             }
 
             if (pointerSelectionIntentRef.current) {
-                pointerSelectionIntentRef.current = false;
                 runOverlayUpdateNow();
 
                 return;

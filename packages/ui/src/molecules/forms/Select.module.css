@@ -21,22 +21,22 @@
     border: var(--select-button-border-width) solid var(--select-button-border-color);
     border-radius: var(--select-button-radius);
     transition: background .15s ease, border-radius .15s ease;
-}
 
-.button:hover {
-    background: var(--select-button-hover-bg);
-}
+    &:hover {
+        background: var(--select-button-hover-bg);
+    }
 
-.button[aria-expanded = 'true'] {
-    background: var(--select-menu-bg);
-    border-color: var(--color-divider);
-    border-bottom-color: transparent;
-    border-bottom-right-radius: 0;
-    border-bottom-left-radius: 0;
-}
+    &[aria-expanded='true'] {
+        background: var(--select-menu-bg);
+        border-color: var(--color-border);
+        border-bottom-color: transparent;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
 
-.button[aria-expanded = 'true']:hover {
-    background: var(--select-menu-bg);
+        &:hover {
+            background: var(--select-menu-bg);
+        }
+    }
 }
 
 .value {
@@ -60,16 +60,16 @@
     justify-content: center;
     width: var(--select-icon-size);
     height: var(--select-icon-size);
-}
 
-.icon svg {
-    width: var(--select-icon-size);
-    height: var(--select-icon-size);
-    fill: none;
-    stroke: currentcolor;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    stroke-width: 1.6;
+    & svg {
+        width: var(--select-icon-size);
+        height: var(--select-icon-size);
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
 }
 
 .chevron {
@@ -117,22 +117,24 @@
     transition: background .15s ease;
 }
 
-.item:hover {
-    background: var(--select-menu-item-hover-bg);
+.item {
+    &:hover {
+        background: var(--select-menu-item-hover-bg);
+    }
 }
 
 .itemActive {
     font-weight: var(--select-menu-item-active-font-weight);
     background: var(--select-menu-item-active-bg);
-}
 
-.itemActive:hover {
-    background: var(--select-menu-item-active-bg);
+    &:hover {
+        background: var(--select-menu-item-active-bg);
+    }
 }
 
 .itemValue {
     display: inline-flex;
-    gap: var(--space-2);
+    gap: var(--space-md);
     align-items: center;
     min-width: 0;
 }

@@ -64,7 +64,7 @@ export const BlockTypeSelect = ({
                                 role="menuitem"
                                 className={clsx(
                                     styles.menuItem,
-                                    option.type === activeBlockInfo?.type && styles.menuItemActive,
+                                    option.type === activeBlockInfo?.type && styles.active,
                                 )}
                                 aria-label={`Set block type to ${option.label}`}
                                 onMouseDown={event => onMenuItemMouseDown(option.type, event)}

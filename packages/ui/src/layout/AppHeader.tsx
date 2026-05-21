@@ -67,21 +67,21 @@ const AppHeaderFrame = ({
                 data-tauri-drag-region
                 aria-hidden="true"
             />
-            <div className={clsx(styles.headerInner, isFullWidth && styles.headerInnerFull)}>
+            <div className={clsx(styles.inner, isFullWidth && styles.full)}>
                 <div className={styles.leftControls}>
                     <Button
                         className={styles.iconButton}
                         onPress={onHome}
                         aria-label="Go to home"
                     >
-                        <Home className={styles.iconButtonGlyph} aria-hidden="true" />
+                        <Home className={styles.icon} aria-hidden="true" />
                     </Button>
                     <Button
                         className={styles.iconButton}
                         onPress={onNewScript}
                         aria-label="New script"
                     >
-                        <Plus className={styles.iconButtonGlyph} aria-hidden="true" />
+                        <Plus className={styles.icon} aria-hidden="true" />
                     </Button>
                 </div>
                 <div className={styles.scriptControls}>

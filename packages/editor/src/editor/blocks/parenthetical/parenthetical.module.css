@@ -10,29 +10,35 @@
     text-align: var(--parenthetical-align, left);
     text-decoration-line: var(--parenthetical-underline, none);
     text-transform: var(--parenthetical-casing, none);
-}
 
-.parenthetical::before,
-.parenthetical::after {
-    pointer-events: none;
-    user-select: none;
-    color: inherit;
-}
+    &::before,
+    &::after {
+        pointer-events: none;
+        user-select: none;
+        color: inherit;
+    }
 
-.parenthetical::before {
-    content: '(';
-    position: absolute;
-    left: var(--parenthetical-indent-left, 40px);
-}
+    &::before {
+        content: '(';
+        position: absolute;
+        left: var(--parenthetical-indent-left, 40px);
+    }
 
-.parenthetical::after {
-    content: ')';
-}
+    &::after {
+        content: ')';
+    }
 
-.parenthetical > :global(.ProseMirror-trailingBreak:only-child) {
-    pointer-events: none;
-    position: absolute;
-    overflow: hidden;
-    width: 0;
-    height: 0;
+    & > :global(.ProseMirror-trailingBreak:only-child) {
+        pointer-events: none;
+        position: absolute;
+        overflow: hidden;
+        width: 0;
+        height: 0;
+    }
+
+    &:has(> :global(.ProseMirror-trailingBreak:only-child))::after {
+        position: absolute;
+        top: var(--parenthetical-spacing-before, 0);
+        left: calc(var(--parenthetical-indent-left, 40px) + 1ch);
+    }
 }

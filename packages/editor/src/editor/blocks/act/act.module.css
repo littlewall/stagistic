@@ -7,12 +7,12 @@
     text-align: var(--act-align, left);
     text-decoration-line: var(--act-underline, underline);
     text-transform: var(--act-casing, uppercase);
-    letter-spacing: .02em;
-}
+    letter-spacing: var(--letter-spacing-sm);
 
-.act[data-act-prefix]::before {
-    pointer-events: none;
-    content: attr(data-act-prefix) ' ';
-    user-select: none;
-    color: inherit;
+    &[data-act-prefix]::before {
+        pointer-events: none;
+        content: attr(data-act-prefix) ' ';
+        user-select: none;
+        color: inherit;
+    }
 }

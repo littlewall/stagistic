@@ -72,14 +72,14 @@ export const HomeRoute = () => {
                 tabIndex={0}
                 onKeyDown={event => handleCardKeyDown(script.id, event)}
             >
-                <div className={styles.scriptRowInner}>
-                    <div className={styles.scriptRowInfo}>
-                        <span className={styles.scriptRowTitle}>{script.title}</span>
-                        <SubtleText className={styles.scriptRowMeta}>
+                <div className={styles.inner}>
+                    <div className={styles.info}>
+                        <span className={styles.title}>{script.title}</span>
+                        <SubtleText className={styles.meta}>
                             {formatLastEdited(script.updatedAt)}
                         </SubtleText>
                     </div>
-                    <div className={styles.scriptRowActions}>
+                    <div className={styles.actions}>
                         <Button
                             variant="ghost"
                             size="sm"
@@ -138,7 +138,7 @@ export const HomeRoute = () => {
                 }}
             >
                 <CardContent>
-                    <h3 className={styles.continueCardTitle}>{latestScript.title}</h3>
+                    <h3 className={styles.title}>{latestScript.title}</h3>
                     <SubtleText>
                         {formatLastEdited(latestScript.updatedAt)}
                     </SubtleText>
@@ -159,7 +159,7 @@ export const HomeRoute = () => {
             <PageContainer variant="standard">
                 <div className={styles.columns}>
                     <div className={styles.scriptList}>
-                        <div className={styles.scriptListHeader}>
+                        <div className={styles.header}>
                             <SectionTitle>Scripts</SectionTitle>
                         </div>
                         {scriptsLoading ? (
@@ -170,7 +170,7 @@ export const HomeRoute = () => {
                                 statusText="Načítám seznam scénářů"
                             />
                         ) : (
-                            <div className={styles.scriptListItems}>
+                            <div className={styles.items}>
                                 {scriptRows}
                             </div>
                         )}
@@ -180,11 +180,11 @@ export const HomeRoute = () => {
                         <section className={styles.welcome}>
                             <Kicker>Welcome to Stagistic Editor!</Kicker>
                             <PageTitle>Your script&apos;s next act</PageTitle>
-                            <SubtleText className={styles.welcomeSubtitle}>
+                            <SubtleText className={styles.subtitle}>
                                 Create new scripts, explore active drafts, and keep your storytelling flow
                                 within a focused workspace.
                             </SubtleText>
-                            <div className={styles.welcomeActions}>
+                            <div className={styles.actions}>
                                 <Button onClick={openNewScript}>
                                     New script
                                 </Button>
@@ -196,7 +196,7 @@ export const HomeRoute = () => {
 
                         {continueCard !== null && (
                             <section className={styles.continueSection}>
-                                <SectionTitle className={styles.continueSectionTitle}>
+                                <SectionTitle className={styles.title}>
                                     Continue writing
                                 </SectionTitle>
                                 {continueCard}

@@ -9,5 +9,5 @@
     text-align: var(--section-align, left);
     text-decoration-line: var(--section-underline, none);
     text-transform: var(--section-casing, uppercase);
-    letter-spacing: .01em;
+    letter-spacing: var(--letter-spacing-sm);
 }

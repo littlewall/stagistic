@@ -40,7 +40,7 @@ export const CharacterSuggestionsOverlayView = ({
                     return (
                         <button
                             key={suggestion.key}
-                            className={clsx(styles.item, isActive && styles.itemActive)}
+                            className={clsx(styles.item, isActive && styles.active)}
                             type="button"
                             role="option"
                             aria-selected={isActive}

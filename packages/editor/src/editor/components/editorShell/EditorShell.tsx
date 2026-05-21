@@ -111,7 +111,7 @@ export const EditorShell = ({
                                 aria-hidden="true"
                                 className={clsx(
                                     styles.sidebarToggleIcon,
-                                    styles.sidebarToggleIconFlipped,
+                                    styles.flipped,
                                 )}
                             />
                         </button>
@@ -137,7 +137,7 @@ export const EditorShell = ({
                                 aria-hidden="true"
                                 className={clsx(
                                     styles.sidebarToggleIcon,
-                                    styles.sidebarToggleIconFlipped,
+                                    styles.flipped,
                                 )}
                             />
                         </button>

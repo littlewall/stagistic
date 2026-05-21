@@ -24,16 +24,16 @@ export const ProgressBar = ({
 
     return (
         <div
-            className={clsx(styles.bar, size === 'sm' && styles.barSmall)}
+            className={clsx(styles.bar, size === 'sm' && styles.small)}
             role="progressbar"
             aria-valuenow={ariaValue}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-label={label}
         >
-            <div className={clsx(styles.track, !hasValue && styles.trackIndeterminate)}>
+            <div className={clsx(styles.track, !hasValue && styles.indeterminate)}>
                 <div
-                    className={clsx(styles.fill, !hasValue && styles.fillIndeterminate)}
+                    className={clsx(styles.fill, !hasValue && styles.indeterminate)}
                     style={progressStyle}
                 />
             </div>

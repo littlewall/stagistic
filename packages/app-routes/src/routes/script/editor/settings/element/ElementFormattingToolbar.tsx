@@ -49,7 +49,7 @@ export const ElementFormattingToolbar = ({
                         type="button"
                         className={clsx(
                             styles.toolbarButton,
-                            option === textAlign && styles.toolbarButtonActive,
+                            option === textAlign && styles.active,
                         )}
                         onClick={() => {
                             update({textAlign: option});
@@ -67,7 +67,7 @@ export const ElementFormattingToolbar = ({
                     type="button"
                     className={clsx(
                         styles.toolbarButton,
-                        casing === 'normal' && styles.toolbarButtonActive,
+                        casing === 'normal' && styles.active,
                     )}
                     onClick={() => {
                         update({casing: 'normal'});
@@ -80,7 +80,7 @@ export const ElementFormattingToolbar = ({
                     type="button"
                     className={clsx(
                         styles.toolbarButton,
-                        casing === 'uppercase' && styles.toolbarButtonActive,
+                        casing === 'uppercase' && styles.active,
                     )}
                     onClick={() => {
                         update({casing: 'uppercase'});
@@ -93,7 +93,7 @@ export const ElementFormattingToolbar = ({
             <div className={styles.toolbarGroup}>
                 <button
                     type="button"
-                    className={clsx(styles.toolbarButton, isBold && styles.toolbarButtonActive)}
+                    className={clsx(styles.toolbarButton, isBold && styles.active)}
                     onClick={() => {
                         update({isBold: !isBold});
                     }}
@@ -103,7 +103,7 @@ export const ElementFormattingToolbar = ({
                 </button>
                 <button
                     type="button"
-                    className={clsx(styles.toolbarButton, isItalic && styles.toolbarButtonActive)}
+                    className={clsx(styles.toolbarButton, isItalic && styles.active)}
                     onClick={() => {
                         update({isItalic: !isItalic});
                     }}
@@ -113,7 +113,7 @@ export const ElementFormattingToolbar = ({
                 </button>
                 <button
                     type="button"
-                    className={clsx(styles.toolbarButton, isUnderline && styles.toolbarButtonActive)}
+                    className={clsx(styles.toolbarButton, isUnderline && styles.active)}
                     onClick={() => {
                         update({isUnderline: !isUnderline});
                     }}

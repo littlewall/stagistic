@@ -4,22 +4,22 @@
     flex: 1;
     flex-direction: column;
     min-height: 0;
-}
 
-.inner {
-    width: 100%;
-    max-width: 1400px;
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-}
+    & .inner {
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
 
-.standard {
-    gap: var(--space-10);
-    padding: calc(var(--space-8) + var(--space-2));
-}
+        &.standard {
+            gap: var(--space-6xl);
+            padding: calc(var(--space-5xl) + var(--space-md));
+        }
 
-.compact {
-    gap: var(--space-6);
-    padding: calc(var(--space-8) + var(--space-2));
+        &.compact {
+            gap: var(--space-3xl);
+            padding: calc(var(--space-5xl) + var(--space-md));
+        }
+    }
 }

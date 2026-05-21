@@ -1,4 +1,21 @@
 .root {
+    /* Block-type color tokens (editor-scoped) */
+    --L-block-scene-heading: .165;
+    --L-block-action: .12;
+    --L-block-character: .19;
+    --L-block-dialogue: .13;
+    --L-block-parenthetical: .29;
+    --L-block-transition: .21;
+    --L-block-centered: .23;
+    --character-tag-tint-strength: 30%;
+    --color-block-scene-heading: oklch(from var(--base-neutral) var(--L-block-scene-heading) calc(c * var(--C-block)) h);
+    --color-block-action: oklch(from var(--base-neutral) var(--L-block-action) calc(c * var(--C-block)) h);
+    --color-block-character: oklch(from var(--base-neutral) var(--L-block-character) calc(c * var(--C-block)) h);
+    --color-block-dialogue: oklch(from var(--base-neutral) var(--L-block-dialogue) calc(c * var(--C-block)) h);
+    --color-block-parenthetical: oklch(from var(--base-neutral) var(--L-block-parenthetical) calc(c * var(--C-block)) h);
+    --color-block-transition: oklch(from var(--base-neutral) var(--L-block-transition) calc(c * var(--C-block)) h);
+    --color-block-centered: oklch(from var(--base-neutral) var(--L-block-centered) calc(c * var(--C-block)) h);
+    --color-block-lyrics: var(--color-block-dialogue);
     overflow: hidden;
     display: flex;
     flex: 1;
@@ -8,12 +25,27 @@
     background: var(--color-surface);
 }
 
+:global(:root[data-theme='dark']) .root {
+    --L-block-scene-heading: .87;
+    --L-block-action: .88;
+    --L-block-character: .86;
+    --L-block-dialogue: .89;
+    --L-block-parenthetical: .82;
+    --L-block-transition: .84;
+    --L-block-centered: .85;
+    --character-tag-tint-strength: 44%;
+}
+
 .toolbarRow {
     display: grid;
     grid-template-columns: var(--left-toolbar-size) minmax(0, 1fr) var(--right-toolbar-size);
     background: var(--color-surface);
-    border-bottom: 1px solid var(--color-divider);
+    border-bottom: 1px solid var(--color-border);
     transition: grid-template-columns .24s ease;
+
+    @media (max-width: 1100px) {
+        grid-template-columns: var(--toolbar-toggle-width) minmax(0, 1fr) var(--toolbar-toggle-width);
+    }
 }
 
 .toolbarSideLeft {
@@ -23,19 +55,19 @@
     align-items: center;
     justify-content: flex-start;
     min-width: 0;
-    padding: var(--space-2) var(--space-3);
-}
+    padding: var(--space-md) var(--space-lg);
 
-.toolbarSideLeft::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
-    width: 1px;
-    opacity: var(--left-toolbar-divider-opacity, 0);
-    background: var(--color-divider);
-    transition: opacity .24s ease;
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 1px;
+        opacity: var(--left-toolbar-divider-opacity, 0);
+        background: var(--color-border);
+        transition: opacity .24s ease;
+    }
 }
 
 .toolbarSideRight {
@@ -45,19 +77,19 @@
     align-items: center;
     justify-content: flex-end;
     min-width: 0;
-    padding: var(--space-2) var(--space-3);
-}
+    padding: var(--space-md) var(--space-lg);
 
-.toolbarSideRight::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    width: 1px;
-    opacity: var(--right-toolbar-divider-opacity, 0);
-    background: var(--color-divider);
-    transition: opacity .24s ease;
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 1px;
+        opacity: var(--right-toolbar-divider-opacity, 0);
+        background: var(--color-border);
+        transition: opacity .24s ease;
+    }
 }
 
 .sidebarToggleButton {
@@ -65,16 +97,16 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(26px * var(--size-scale));
-    height: calc(26px * var(--size-scale));
-    color: var(--color-ink);
+    width: var(--control-height-sm);
+    height: var(--control-height-sm);
+    color: var(--color-text);
     background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: calc(7px * var(--size-scale));
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
     transition: background .15s ease, border-color .15s ease;
 
     &:hover {
-        background: color-mix(in oklch, var(--color-accent) 45%, transparent);
+        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
     }
 
     & svg {
@@ -91,16 +123,20 @@
 .sidebarToggleIcon {
     transform-origin: center;
     transform: rotate(0deg);
-}
 
-.sidebarToggleIconFlipped {
-    transform: rotate(180deg);
+    &.flipped {
+        transform: rotate(180deg);
+    }
 }
 
 .toolbarCenter {
     overflow: visible;
     min-width: 0;
-    padding: 0 var(--space-6);
+    padding: 0 var(--space-3xl);
+
+    @media (max-width: 1100px) {
+        padding: 0 var(--space-xl);
+    }
 }
 
 .toolbarCenterInner {
@@ -115,6 +151,11 @@
     flex: 1;
     min-height: 0;
     transition: grid-template-columns .24s ease;
+
+    @media (max-width: 1100px) {
+        position: relative;
+        grid-template-columns: var(--toolbar-toggle-width) minmax(0, 1fr) var(--toolbar-toggle-width);
+    }
 }
 
 .canvasHost {
@@ -124,7 +165,11 @@
     flex-direction: column;
     min-width: 0;
     min-height: 0;
-    padding: 0 var(--space-6);
+    padding: 0 var(--space-3xl);
+
+    @media (max-width: 1100px) {
+        padding: 0 var(--space-xl);
+    }
 }
 
 .sidebarLeftHidden,
@@ -148,36 +193,19 @@
 
 .sidebarLeftHidden,
 .sidebarLeftOpen {
-    border-right: 1px solid var(--color-divider);
+    border-right: 1px solid var(--color-border);
 }
 
 .sidebarRightHidden,
 .sidebarRightOpen {
-    border-left: 1px solid var(--color-divider);
+    border-left: 1px solid var(--color-border);
 }
 
-@media (max-width: 1100px) {
-    .toolbarRow {
-        grid-template-columns: var(--toolbar-toggle-width) minmax(0, 1fr) var(--toolbar-toggle-width);
-    }
-
-    .toolbarCenter {
-        padding: 0 var(--space-4);
-    }
-
-    .contentRow {
-        position: relative;
-        grid-template-columns: var(--toolbar-toggle-width) minmax(0, 1fr) var(--toolbar-toggle-width);
-    }
-
-    .canvasHost {
-        padding: 0 var(--space-4);
-    }
-
-    .sidebarLeftHidden,
-    .sidebarLeftOpen,
-    .sidebarRightHidden,
-    .sidebarRightOpen {
+.sidebarLeftHidden,
+.sidebarLeftOpen,
+.sidebarRightHidden,
+.sidebarRightOpen {
+    @media (max-width: 1100px) {
         position: absolute;
         z-index: 2;
         top: 0;
@@ -185,27 +213,37 @@
         width: var(--editor-sidebar-width);
         transition: transform .24s ease, opacity .24s ease, visibility .24s ease;
     }
+}
 
-    .sidebarLeftHidden,
-    .sidebarLeftOpen {
+.sidebarLeftHidden,
+.sidebarLeftOpen {
+    @media (max-width: 1100px) {
         left: 0;
     }
+}
 
-    .sidebarRightHidden,
-    .sidebarRightOpen {
+.sidebarRightHidden,
+.sidebarRightOpen {
+    @media (max-width: 1100px) {
         right: 0;
     }
+}
 
-    .sidebarLeftHidden {
+.sidebarLeftHidden {
+    @media (max-width: 1100px) {
         transform: translateX(-100%);
     }
+}
 
-    .sidebarRightHidden {
+.sidebarRightHidden {
+    @media (max-width: 1100px) {
         transform: translateX(100%);
     }
+}
 
-    .sidebarLeftOpen,
-    .sidebarRightOpen {
+.sidebarLeftOpen,
+.sidebarRightOpen {
+    @media (max-width: 1100px) {
         transform: translateX(0);
         box-shadow: var(--shadow-panel);
     }

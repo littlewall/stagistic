@@ -91,7 +91,7 @@ export const ScriptSettingsModal = ({
                                                         type="button"
                                                         className={clsx(
                                                             styles.navItem,
-                                                            isActive && styles.navItemActive,
+                                                            isActive && styles.active,
                                                         )}
                                                         onClick={() => onSelectPanel(item.panelId)}
                                                     >
@@ -102,7 +102,7 @@ export const ScriptSettingsModal = ({
                                         }
 
                                         const isExpanded = expandedItemIds.includes(item.id);
-                                        const arrowClass = isExpanded ? styles.expandArrowOpen : styles.expandArrow;
+                                        const arrowClass = clsx(styles.expandArrow, isExpanded && styles.open);
 
                                         return (
                                             <li key={item.id}>
@@ -133,7 +133,7 @@ export const ScriptSettingsModal = ({
                                                                         type="button"
                                                                         className={clsx(
                                                                             styles.subItem,
-                                                                            isSubActive && styles.subItemActive,
+                                                                            isSubActive && styles.active,
                                                                         )}
                                                                         onClick={() => onSelectPanel(subItem.panelId)}
                                                                     >

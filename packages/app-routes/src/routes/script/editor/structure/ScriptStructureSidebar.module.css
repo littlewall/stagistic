@@ -4,78 +4,78 @@
     overflow-x: hidden;
     overflow-y: auto;
     min-height: 0;
-    padding: var(--space-3);
-}
+    padding: var(--space-lg);
 
-.sidebarHeader {
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    margin-bottom: var(--space-2);
-}
+    & .header {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        margin-bottom: var(--space-md);
 
-.headerIconButton {
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: calc(24px * var(--size-scale));
-    height: calc(24px * var(--size-scale));
-    padding: 0;
-    font-family: inherit;
-    font-size: calc(13px * var(--size-scale));
-    line-height: 1;
-    color: var(--color-ink-muted);
-    text-decoration: none;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: calc(8px * var(--size-scale));
-}
+        & .iconButton {
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: var(--control-height-xs);
+            height: var(--control-height-xs);
+            padding: 0;
+            font-family: inherit;
+            font-size: var(--font-size-md);
+            line-height: var(--line-height-none);
+            color: var(--color-text-muted);
+            text-decoration: none;
+            background: transparent;
+            border: 1px solid transparent;
+            border-radius: var(--radius-md);
 
-.headerIconButton:hover {
-    background: color-mix(in oklch, var(--color-accent) 24%, transparent);
-}
+            &:hover {
+                background: color-mix(in oklch, var(--color-surface-accent) 24%, transparent);
+            }
+        }
 
-.headerMenu {
-    position: absolute;
-    z-index: 3;
-    top: calc(100% + var(--space-1));
-    left: 0;
-    display: grid;
-    min-width: calc(140px * var(--size-scale));
-    padding: var(--space-1);
-    background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: calc(10px * var(--size-scale));
-    box-shadow: var(--shadow-popover);
-}
+        & .menu {
+            position: absolute;
+            z-index: 3;
+            top: calc(100% + var(--space-sm));
+            left: 0;
+            display: grid;
+            min-width: calc(140px * var(--size-scale));
+            padding: var(--space-sm);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-popover);
 
-.headerMenuRight {
-    right: 0;
-    left: auto;
-}
+            &.right {
+                right: 0;
+                left: auto;
+            }
 
-.headerMenuItem {
-    cursor: pointer;
-    width: 100%;
-    min-height: calc(28px * var(--size-scale));
-    padding: 0 var(--space-2);
-    font-size: calc(12px * var(--size-scale));
-    color: var(--color-ink);
-    text-align: left;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: calc(8px * var(--size-scale));
-}
+            & .item {
+                cursor: pointer;
+                width: 100%;
+                min-height: calc(28px * var(--size-scale));
+                padding: 0 var(--space-md);
+                font-size: var(--font-size-sm);
+                color: var(--color-text);
+                text-align: left;
+                background: transparent;
+                border: 1px solid transparent;
+                border-radius: var(--radius-md);
 
-.headerMenuItem:hover {
-    background: color-mix(in oklch, var(--color-accent) 35%, transparent);
+                &:hover {
+                    background: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
+                }
+            }
+        }
+    }
 }
 
 .empty {
-    font-size: calc(12px * var(--size-scale));
-    color: var(--color-ink-muted);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
 }
 
 .actTitle {
@@ -85,10 +85,10 @@
     width: 100%;
     min-height: 28px;
     margin: 0;
-    padding-left: var(--space-2);
-    font-size: calc(12px * var(--size-scale));
-    font-weight: 700;
-    color: var(--color-ink-muted);
+    padding-left: var(--space-md);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text-muted);
 }
 
 .actPrefixButton {
@@ -120,23 +120,19 @@
     width: calc(16px * var(--size-scale));
     height: calc(16px * var(--size-scale));
     margin-left: auto;
-    font-size: calc(12px * var(--size-scale));
-    line-height: 1;
-    color: color-mix(in oklch, var(--color-ink-muted) 90%, var(--color-divider));
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-none);
+    color: color-mix(in oklch, var(--color-text-muted) 90%, var(--color-border));
     opacity: 0;
     background: transparent;
     border: 1px solid transparent;
     border-radius: calc(5px * var(--size-scale));
-}
 
-.actRow:hover .actDeleteButton {
-    opacity: .72;
-}
-
-.actDeleteButton:hover {
-    color: color-mix(in oklch, var(--color-danger) 75%, var(--color-ink-muted));
-    opacity: 1;
-    background: color-mix(in oklch, var(--color-danger) 12%, transparent);
+    &:hover {
+        color: color-mix(in oklch, var(--color-status-danger) 75%, var(--color-text-muted));
+        opacity: 1;
+        background: color-mix(in oklch, var(--color-status-danger) 12%, transparent);
+    }
 }
 
 .itemList {
@@ -151,26 +147,38 @@
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: center;
-    border-radius: calc(8px * var(--size-scale));
-}
+    border-radius: var(--radius-md);
 
-.sceneRow:hover:not(.itemRowActive) {
-    background: color-mix(in oklch, var(--color-accent) 35%, transparent);
+    &.active {
+        background: color-mix(in oklch, var(--color-surface-accent) 80%, transparent);
+        box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-surface-accent) 55%, var(--color-border));
+
+        & .itemButton {
+            background: transparent;
+        }
+    }
+
+    &.dropTarget {
+        background: color-mix(in oklch, var(--color-surface-accent) 34%, transparent);
+        border-radius: var(--radius-md);
+        box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-surface-accent) 42%, transparent);
+    }
 }
 
 .actRow {
     min-height: 28px;
+
+    &:hover {
+        & .actDeleteButton {
+            opacity: .72;
+        }
+    }
 }
 
-.itemRowActive {
-    background: color-mix(in oklch, var(--color-accent) 80%, transparent);
-    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-accent) 55%, var(--color-divider));
-}
-
-.itemRowDropTarget {
-    background: color-mix(in oklch, var(--color-accent) 34%, transparent);
-    border-radius: calc(8px * var(--size-scale));
-    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-accent) 42%, transparent);
+.sceneRow {
+    &:hover:not(.active) {
+        background: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
+    }
 }
 
 .itemButton {
@@ -179,21 +187,17 @@
     align-items: center;
     width: 100%;
     min-height: 28px;
-    padding: 0 var(--space-2);
-    font-size: calc(12px * var(--size-scale));
-    color: var(--color-ink);
+    padding: 0 var(--space-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
     text-align: left;
     background: transparent;
     border: 1px solid transparent;
-    border-radius: calc(8px * var(--size-scale));
-}
+    border-radius: var(--radius-md);
 
-.itemRowActive .itemButton {
-    background: transparent;
-}
-
-.itemButtonDragging {
-    opacity: .52;
+    &.dragging {
+        opacity: .52;
+    }
 }
 
 .dragHandle {
@@ -209,7 +213,7 @@
     min-height: calc(15px * var(--size-scale));
     margin: 0;
     padding-inline: calc(4px * var(--size-scale));
-    color: color-mix(in oklch, var(--color-ink-muted) 55%, var(--color-divider));
+    color: color-mix(in oklch, var(--color-text-muted) 55%, var(--color-border));
     appearance: none;
     opacity: .55;
     background-color: transparent;
@@ -220,10 +224,10 @@
     background-size: calc(3px * var(--size-scale)) calc(4px * var(--size-scale));
     border: 0;
     border-radius: calc(3px * var(--size-scale));
-}
 
-.dragHandle:active {
-    cursor: grabbing;
+    &:active {
+        cursor: grabbing;
+    }
 }
 
 .dragHandleSpacer {
@@ -239,19 +243,19 @@
     justify-content: center;
     width: calc(14px * var(--size-scale));
     overflow: visible;
-    color: color-mix(in oklch, var(--color-ink-muted) 55%, var(--color-divider));
-}
+    color: color-mix(in oklch, var(--color-text-muted) 55%, var(--color-border));
 
-.actIconWrapper svg {
-    flex-shrink: 0;
-    width: calc(16px * var(--size-scale));
-    height: calc(16px * var(--size-scale));
-    stroke: currentcolor;
-    stroke-width: 1.75;
-    fill: none;
-    stroke-linecap: round;
-    stroke-linejoin: round;
-    overflow: visible;
+    & svg {
+        flex-shrink: 0;
+        width: calc(16px * var(--size-scale));
+        height: calc(16px * var(--size-scale));
+        stroke: currentcolor;
+        stroke-width: 1.75;
+        fill: none;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        overflow: visible;
+    }
 }
 
 .itemLabel {

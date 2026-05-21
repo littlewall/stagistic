@@ -121,7 +121,7 @@ export const EditorSidebar = ({
     return (
         <aside className={clsx(styles.sidebar, className)}>
             <section className={styles.section}>
-                <h3 className={styles.sectionTitle}>Characters</h3>
+                <h3 className={styles.title}>Characters</h3>
                 {isLoading ? (
                     <p className={styles.emptyState}>Loading characters...</p>
                 ) : null}
@@ -146,7 +146,7 @@ export const EditorSidebar = ({
                                     key={characterIdentityKey}
                                     className={clsx(
                                         styles.characterItem,
-                                        !character.isConfirmed && styles.characterItemUnconfirmed,
+                                        !character.isConfirmed && styles.unconfirmed,
                                     )}
                                     style={{'--character-color': character.color} as CSSProperties}
                                 >
