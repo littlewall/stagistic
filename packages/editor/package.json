@@ -10,6 +10,7 @@
     "dependencies": {
         "@stagistic/script": "workspace:*",
         "@stagistic/shared": "workspace:*",
+        "@stagistic/ui": "workspace:*",
         "@tanstack/react-hotkeys": "^0.3.0",
         "@tiptap/core": "^3.19.0",
         "@tiptap/extension-bold": "^3.19.0",
@@ -23,8 +24,7 @@
         "@tiptap/extension-unique-id": "^3.19.0",
         "@tiptap/pm": "^3.19.0",
         "@tiptap/react": "^3.19.0",
-        "clsx": "^2.1.1",
-        "iconoir-react": "^7.11.0"
+        "clsx": "^2.1.1"
     },
     "peerDependencies": {
         "react": "^19.0.0",
