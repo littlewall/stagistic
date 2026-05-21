@@ -22,8 +22,14 @@ export const PageLayoutSettingsPanel = ({
     resolvedScriptSettings,
     onUpdatePageSettings,
 }: PageLayoutSettingsPanelProps) => {
-    const {preview, slider, numeric} = usePageLayoutSettingsViewModel({resolvedScriptSettings});
-    const {pagePreviewStyle, headerRows, footerRows, contentRows} = preview;
+    const {
+        preview,
+        slider,
+        numeric,
+    } = usePageLayoutSettingsViewModel({resolvedScriptSettings});
+    const {
+        pagePreviewStyle, headerRows, footerRows, contentRows,
+    } = preview;
     const {
         sliderStyle,
         sliderStart,
@@ -35,7 +41,11 @@ export const PageLayoutSettingsPanel = ({
         rightMarginInches,
         contentWidthInches,
     } = slider;
-    const {topMarginRows, bottomMarginRows, marginRowOptions} = numeric;
+    const {
+        topMarginRows,
+        bottomMarginRows,
+        marginRowOptions,
+    } = numeric;
 
     const fontSizePx = resolvedScriptSettings.typography.fontSizePx;
 
@@ -72,7 +82,7 @@ export const PageLayoutSettingsPanel = ({
             <div className={styles.pageSchematic} style={pagePreviewStyle}>
                 <div className={styles.pageSchematicMarginTop} />
                 <div className={styles.pageSchematicMiddle}>
-                    <div className={styles.pageSchematicMarginLeft} />
+                    <div className={clsx(styles.pageSchematicMargin, styles.pageSchematicMarginLeft)} />
                     <div className={styles.pageSchematicCenter}>
                         <div className={styles.pageSchematicZone}>
                             {`Header: ${headerRows} row${headerRows === 1 ? '' : 's'}`}
@@ -84,7 +94,7 @@ export const PageLayoutSettingsPanel = ({
                             {`Footer: ${footerRows} row${footerRows === 1 ? '' : 's'}`}
                         </div>
                     </div>
-                    <div className={styles.pageSchematicMarginRight} />
+                    <div className={clsx(styles.pageSchematicMargin, styles.pageSchematicMarginRight)} />
                 </div>
                 <div className={styles.pageSchematicMarginBottom} />
             </div>

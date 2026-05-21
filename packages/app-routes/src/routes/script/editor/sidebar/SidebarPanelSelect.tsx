@@ -1,5 +1,5 @@
 import {useExclusiveOverlay} from '@stagistic/editor';
-import {ChevronDownIcon} from '@stagistic/ui';
+import {ChevronDownIcon, clsx} from '@stagistic/ui';
 import {
     useEffect,
     useId,
@@ -94,7 +94,10 @@ export const SidebarPanelSelect = ({
             </button>
             {isOpen ? (
                 <div
-                    className={side === 'left' ? styles.menuLeft : styles.menuRight}
+                    className={clsx(
+                        styles.menu,
+                        side === 'right' && styles.right,
+                    )}
                     style={{positionAnchor: anchorName}}
                     role="listbox"
                     aria-label={ariaLabel}
@@ -105,7 +108,7 @@ export const SidebarPanelSelect = ({
                             type="button"
                             role="option"
                             aria-selected={panel.id === selectedPanelId}
-                            className={panel.id === selectedPanelId ? `${styles.item} ${styles.active}` : styles.item}
+                            className={clsx(styles.item, panel.id === selectedPanelId && styles.active)}
                             onMouseDown={event => {
                                 event.preventDefault();
                                 onSelectPanel(panel.id);

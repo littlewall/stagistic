@@ -1,5 +1,5 @@
 import {normalizeActName} from '@stagistic/script';
-import {ActBlockIcon} from '@stagistic/ui';
+import {ActBlockIcon, clsx} from '@stagistic/ui';
 import {
     memo,
     useCallback,
@@ -60,7 +60,7 @@ export const StructureRowAct = memo(({
     return (
         <li>
             <div
-                className={`${styles.itemRow} ${styles.actRow}`}
+                className={clsx(styles.itemRow, styles.actRow)}
                 data-structure-act-id={act.blockId}
             >
                 <span className={styles.actIconWrapper} aria-hidden="true">
@@ -95,7 +95,7 @@ export const StructureRowAct = memo(({
                             }
                         }}
                     />
-                    {!isFirstAct ? (
+                    {!isFirstAct && (
                         <button
                             type="button"
                             className={styles.actDeleteButton}
@@ -108,7 +108,7 @@ export const StructureRowAct = memo(({
                         >
                             ×
                         </button>
-                    ) : null}
+                    )}
                 </div>
             </div>
         </li>

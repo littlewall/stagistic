@@ -54,18 +54,16 @@
     height: 12px;
     color: currentcolor;
     background: linear-gradient(currentcolor 0 0) left 0 top 0 / var(--line-one) 2px no-repeat, linear-gradient(currentcolor 0 0) left 0 center / var(--line-two) 2px no-repeat, linear-gradient(currentcolor 0 0) left 0 bottom / var(--line-three) 2px no-repeat;
-}
 
-.alignGlyphLeft {
-    background-position: left 0 top 0, left 0 center, left 0 bottom;
-}
-
-.alignGlyphCenter {
-    background-position: center top 0, center center, center bottom;
-}
-
-.alignGlyphRight {
-    background-position: right 0 top 0, right 0 center, right 0 bottom;
+    &.left {
+        background-position: left 0 top 0, left 0 center, left 0 bottom;
+    }
+    &.center {
+        background-position: center top 0, center center, center bottom;
+    }
+    &.right {
+        background-position: right 0 top 0, right 0 center, right 0 bottom;
+    }
 }
 
 .textIcon {

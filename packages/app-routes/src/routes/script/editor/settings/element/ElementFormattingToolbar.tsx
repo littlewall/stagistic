@@ -1,30 +1,18 @@
 import {BLOCK_TEXT_ALIGN_OPTIONS, type FountainElementType} from '@stagistic/script';
 import {clsx} from '@stagistic/ui';
 
-import styles from './ElementFormattingToolbar.module.css';
 import type {
     BlockSettingsPatch,
     ElementFormattingModel,
     ElementsHandlers,
 } from '../types';
+import styles from './ElementFormattingToolbar.module.css';
 
 interface ElementFormattingToolbarProps {
     blockType: FountainElementType,
     model: ElementFormattingModel,
     handlers: ElementsHandlers,
 }
-
-const getAlignGlyphClassName = (option: 'left' | 'center' | 'right') => {
-    if (option === 'left') {
-        return styles.alignGlyphLeft;
-    }
-
-    if (option === 'center') {
-        return styles.alignGlyphCenter;
-    }
-
-    return styles.alignGlyphRight;
-};
 
 export const ElementFormattingToolbar = ({
     blockType,
@@ -57,7 +45,7 @@ export const ElementFormattingToolbar = ({
                         aria-label={`${option} align`}
                     >
                         <span
-                            className={clsx(styles.alignGlyph, getAlignGlyphClassName(option))}
+                            className={clsx(styles.alignGlyph, styles[option])}
                         />
                     </button>
                 ))}

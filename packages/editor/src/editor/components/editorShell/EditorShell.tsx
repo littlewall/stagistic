@@ -93,7 +93,7 @@ export const EditorShell = ({
                 <style data-character-tag-palette>{characterTagPaletteCss}</style>
             ) : null}
             <div className={styles.toolbarRow}>
-                <div className={styles.toolbarSideLeft}>
+                <div className={clsx(styles.toolbarSide, styles.toolbarSideLeft)}>
                     {leftSidebarToggle && isLeftSidebarOpen && leftSidebarHeader
                         ? leftSidebarHeader
                         : null}
@@ -119,7 +119,7 @@ export const EditorShell = ({
                         <EditorToolbar editor={editor} />
                     </div>
                 </div>
-                <div className={styles.toolbarSideRight}>
+                <div className={clsx(styles.toolbarSide, styles.toolbarSideRight)}>
                     {rightSidebarToggle && isRightSidebarOpen && rightSidebarHeader
                         ? rightSidebarHeader
                         : null}
@@ -144,8 +144,8 @@ export const EditorShell = ({
             <div className={styles.contentRow}>
                 <aside
                     className={clsx(
-                        isLeftSidebarOpen && styles.sidebarLeftOpen,
-                        !isLeftSidebarOpen && styles.sidebarLeftHidden,
+                        styles.sidebarLeft,
+                        isLeftSidebarOpen ? styles.sidebarOpen : styles.sidebarHidden,
                     )}
                     aria-hidden={!isLeftSidebarOpen}
                 >
@@ -164,8 +164,8 @@ export const EditorShell = ({
                 </div>
                 <aside
                     className={clsx(
-                        isRightSidebarOpen && styles.sidebarRightOpen,
-                        !isRightSidebarOpen && styles.sidebarRightHidden,
+                        styles.sidebarRight,
+                        isRightSidebarOpen ? styles.sidebarOpen : styles.sidebarHidden,
                     )}
                     aria-hidden={!isRightSidebarOpen}
                 >
