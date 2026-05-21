@@ -1,3 +1,4 @@
+import {ArrowLeftIcon, ArrowRightIcon} from '@stagistic/ui';
 import {type ReactNode} from 'react';
 
 import styles from './EditorSidebarToolbar.module.css';
@@ -7,36 +8,6 @@ import type {
     SidebarPanelId,
     SidebarSide,
 } from './types';
-
-const ArrowLeftIcon = () => (
-    <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-        focusable="false"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <path d="M15 6l-6 6 6 6" />
-    </svg>
-);
-
-const ArrowRightIcon = () => (
-    <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-        focusable="false"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.6"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-    >
-        <path d="M9 6l6 6-6 6" />
-    </svg>
-);
 
 interface EditorSidebarToolbarProps {
     side: SidebarSide,

@@ -1,11 +1,5 @@
 import clsx from 'clsx';
-import {
-    Bold,
-    Italic,
-    Redo,
-    Underline,
-    Undo,
-} from 'iconoir-react';
+import {BoldIcon, ItalicIcon, RedoIcon, UnderlineIcon, UndoIcon} from '@stagistic/ui';
 
 import styles from '../EditorToolbar.module.css';
 import type {InlineMarksGroupProps} from './contracts';
@@ -38,7 +32,7 @@ export const InlineMarksGroup = ({
                 disabled={!canUndo}
                 onMouseDown={onUndoMouseDown}
             >
-                <Undo aria-hidden="true" />
+                <UndoIcon aria-hidden="true" />
             </button>
             <button
                 className={styles.iconButton}
@@ -47,7 +41,7 @@ export const InlineMarksGroup = ({
                 disabled={!canRedo}
                 onMouseDown={onRedoMouseDown}
             >
-                <Redo aria-hidden="true" />
+                <RedoIcon aria-hidden="true" />
             </button>
             <button
                 className={clsx(styles.iconButton, isBoldActive && styles.active)}
@@ -56,7 +50,7 @@ export const InlineMarksGroup = ({
                 aria-pressed={isBoldActive}
                 onMouseDown={onBoldMouseDown}
             >
-                <Bold aria-hidden="true" />
+                <BoldIcon aria-hidden="true" />
             </button>
             <button
                 className={clsx(styles.iconButton, isItalicActive && styles.active)}
@@ -65,7 +59,7 @@ export const InlineMarksGroup = ({
                 aria-pressed={isItalicActive}
                 onMouseDown={onItalicMouseDown}
             >
-                <Italic aria-hidden="true" />
+                <ItalicIcon aria-hidden="true" />
             </button>
             <button
                 className={clsx(styles.iconButton, isUnderlineActive && styles.active)}
@@ -74,7 +68,7 @@ export const InlineMarksGroup = ({
                 aria-pressed={isUnderlineActive}
                 onMouseDown={onUnderlineMouseDown}
             >
-                <Underline aria-hidden="true" />
+                <UnderlineIcon aria-hidden="true" />
             </button>
         </div>
     );

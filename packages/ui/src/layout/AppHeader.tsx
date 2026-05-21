@@ -1,8 +1,5 @@
 import clsx from 'clsx';
-import {
-    Home,
-    Plus,
-} from 'iconoir-react';
+import {HomeIcon, PlusIcon} from '../icons/ui';
 import {
     type ReactNode,
     useCallback,
@@ -74,14 +71,14 @@ const AppHeaderFrame = ({
                         onPress={onHome}
                         aria-label="Go to home"
                     >
-                        <Home className={styles.icon} aria-hidden="true" />
+                        <HomeIcon className={styles.icon} aria-hidden="true" />
                     </Button>
                     <Button
                         className={styles.iconButton}
                         onPress={onNewScript}
                         aria-label="New script"
                     >
-                        <Plus className={styles.icon} aria-hidden="true" />
+                        <PlusIcon className={styles.icon} aria-hidden="true" />
                     </Button>
                 </div>
                 <div className={styles.scriptControls}>

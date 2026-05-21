@@ -1,4 +1,3 @@
-export {ActIcon} from './editor/blocks/act/icon';
 export {BLOCK_ICONS} from './editor/blocks/controls/blockIcons';
 export {
     getCharacterColor,

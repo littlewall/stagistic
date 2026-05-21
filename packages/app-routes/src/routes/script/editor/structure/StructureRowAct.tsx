@@ -1,5 +1,5 @@
-import {ActIcon} from '@stagistic/editor';
 import {normalizeActName} from '@stagistic/script';
+import {ActBlockIcon} from '@stagistic/ui';
 import {
     memo,
     useCallback,
@@ -64,7 +64,7 @@ export const StructureRowAct = memo(({
                 data-structure-act-id={act.blockId}
             >
                 <span className={styles.actIconWrapper} aria-hidden="true">
-                    <ActIcon />
+                    <ActBlockIcon />
                 </span>
                 <div className={styles.actTitle}>
                     <input

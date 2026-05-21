@@ -1,3 +1,4 @@
+export * from './icons';
 export {Button} from './atoms/Button';
 export {Tag} from './atoms/Tag';
 export {

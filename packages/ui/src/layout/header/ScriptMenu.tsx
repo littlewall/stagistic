@@ -1,8 +1,4 @@
-import {
-    Folder,
-    NavArrowDown,
-    Plus,
-} from 'iconoir-react';
+import {ChevronDownIcon, FolderIcon, PlusIcon} from '../../icons/ui';
 import {
     Button,
     Header as MenuHeader,
@@ -32,7 +28,7 @@ export const ScriptMenu = ({
         <MenuTrigger>
             <Button className={styles.menuTrigger}>
                 <span className={styles.label}>{script.name}</span>
-                <NavArrowDown className={styles.caret} aria-hidden="true" />
+                <ChevronDownIcon className={styles.caret} aria-hidden="true" />
             </Button>
             <Popover className={styles.menuPopover} placement="bottom">
                 <Menu
@@ -77,11 +73,11 @@ export const ScriptMenu = ({
                     <Separator className={styles.menuSeparator} />
                     <MenuSection className={styles.menuSection}>
                         <MenuItem className={styles.menuItem} id="scripts">
-                            <Folder className={styles.menuIcon} aria-hidden="true" />
+                            <FolderIcon className={styles.menuIcon} aria-hidden="true" />
                             All scripts
                         </MenuItem>
                         <MenuItem className={styles.menuItem} id="new-script">
-                            <Plus className={styles.menuIcon} aria-hidden="true" />
+                            <PlusIcon className={styles.menuIcon} aria-hidden="true" />
                             New script
                         </MenuItem>
                     </MenuSection>

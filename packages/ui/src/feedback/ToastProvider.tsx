@@ -1,4 +1,4 @@
-import {Xmark} from 'iconoir-react';
+import {CloseIcon} from '../icons/ui';
 import {
     createContext,
     type ReactNode,
@@ -55,7 +55,7 @@ const ToastItem = ({toast}: {toast: QueuedToast<ToastContent>}) => {
                 )}
             </ToastContent>
             <Button slot="close" className={styles.closeButton}>
-                <Xmark />
+                <CloseIcon />
             </Button>
         </Toast>
     );

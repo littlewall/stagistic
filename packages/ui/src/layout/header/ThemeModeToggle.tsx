@@ -1,9 +1,5 @@
 import clsx from 'clsx';
-import {
-    Computer,
-    HalfMoon,
-    SunLight,
-} from 'iconoir-react';
+import {DarkThemeIcon, LightThemeIcon, SystemThemeIcon} from '../../icons/ui';
 import {Button} from 'react-aria-components';
 
 import {type AppThemeMode} from '../../theme';
@@ -32,7 +28,7 @@ export const ThemeModeToggle = ({
                     }}
                     aria-label="Light theme"
                 >
-                    <SunLight className={styles.icon} aria-hidden="true" />
+                    <LightThemeIcon className={styles.icon} aria-hidden="true" />
                 </Button>
                 <Button
                     className={clsx(styles.themeButton, themeMode === 'dark' && styles.active)}
@@ -41,7 +37,7 @@ export const ThemeModeToggle = ({
                     }}
                     aria-label="Dark theme"
                 >
-                    <HalfMoon className={styles.icon} aria-hidden="true" />
+                    <DarkThemeIcon className={styles.icon} aria-hidden="true" />
                 </Button>
                 <Button
                     className={clsx(styles.themeButton, themeMode === 'auto' && styles.active)}
@@ -50,7 +46,7 @@ export const ThemeModeToggle = ({
                     }}
                     aria-label="System theme"
                 >
-                    <Computer className={styles.icon} aria-hidden="true" />
+                    <SystemThemeIcon className={styles.icon} aria-hidden="true" />
                 </Button>
             </div>
         </div>

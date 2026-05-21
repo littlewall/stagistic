@@ -1,4 +1,4 @@
-import {NavArrowDown, NavArrowRight} from 'iconoir-react';
+import {ArrowRightIcon, ChevronDownIcon} from '../../icons/ui';
 import {Tooltip, TooltipTrigger} from 'react-aria-components';
 
 import styles from '../EditorSidebar.module.css';
@@ -72,9 +72,9 @@ export const CharacterRowHeader = ({
                 }}
             >
                 {isExpanded ? (
-                    <NavArrowDown className={styles.expandIcon} aria-hidden="true" />
+                    <ChevronDownIcon className={styles.expandIcon} aria-hidden="true" />
                 ) : (
-                    <NavArrowRight className={styles.expandIcon} aria-hidden="true" />
+                    <ArrowRightIcon className={styles.expandIcon} aria-hidden="true" />
                 )}
             </button>
             {isExpanded ? (

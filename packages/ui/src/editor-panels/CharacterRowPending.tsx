@@ -1,4 +1,4 @@
-import {Eye} from 'iconoir-react';
+import {EyeIcon} from '../icons/ui';
 import {
     Button, Tooltip, TooltipTrigger,
 } from 'react-aria-components';
@@ -96,7 +96,7 @@ export const CharacterRowPending = ({
                         onPress={() => onFocusCharacter(character.key)}
                         aria-label={`Focus ${character.key}`}
                     >
-                        <Eye className={styles.iconGlyph} strokeWidth={2} />
+                        <EyeIcon className={styles.iconGlyph} strokeWidth={2} />
                     </Button>
                     <Tooltip
                         className={styles.confirmTooltip}

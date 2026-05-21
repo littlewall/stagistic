@@ -1,7 +1,7 @@
 .pageSchematic {
+    overflow: hidden;
     display: flex;
     flex-direction: column;
-    overflow: hidden;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xs);
 }
@@ -26,14 +26,15 @@
 }
 
 .pageSchematicCenter {
-    flex: 1;
     display: flex;
+    flex: 1;
     flex-direction: column;
     min-width: 0;
 }
 
 .pageSchematicZone,
 .pageSchematicContent {
+    overflow: hidden;
     display: flex;
     align-items: center;
     padding-inline: var(--space-lg);
@@ -41,7 +42,6 @@
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);
     white-space: nowrap;
-    overflow: hidden;
 }
 
 .pageSchematicMarginTop {
@@ -62,8 +62,8 @@
     border-bottom: 1px solid var(--color-border);
 
     &:last-child {
-        border-bottom: none;
         border-top: 1px solid var(--color-border);
+        border-bottom: none;
     }
 }
 

@@ -1,4 +1,5 @@
 import {useExclusiveOverlay} from '@stagistic/editor';
+import {ChevronDownIcon} from '@stagistic/ui';
 import {
     useEffect,
     useId,
@@ -86,14 +87,10 @@ export const SidebarPanelSelect = ({
                 }}
             >
                 <span className={styles.label}>{selectedPanel?.label ?? ''}</span>
-                <svg
-                    viewBox="0 0 24 24"
+                <ChevronDownIcon
                     aria-hidden="true"
-                    focusable="false"
                     className={styles.chevron}
-                >
-                    <path d="m6 9 6 6 6-6" />
-                </svg>
+                />
             </button>
             {isOpen ? (
                 <div

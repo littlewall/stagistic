@@ -1,9 +1,6 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
-import {
-    NavArrowLeft,
-    NavArrowRight,
-} from 'iconoir-react';
+import {ArrowLeftIcon, ArrowRightIcon} from '@stagistic/ui';
 import {
     type CSSProperties,
     type MouseEvent as ReactMouseEvent,
@@ -107,7 +104,7 @@ export const EditorShell = ({
                             aria-label="Show left sidebar"
                             onMouseDown={onLeftSidebarToggleMouseDown}
                         >
-                            <NavArrowLeft
+                            <ArrowLeftIcon
                                 aria-hidden="true"
                                 className={clsx(
                                     styles.sidebarToggleIcon,
@@ -133,7 +130,7 @@ export const EditorShell = ({
                             aria-label="Show right sidebar"
                             onMouseDown={onRightSidebarToggleMouseDown}
                         >
-                            <NavArrowRight
+                            <ArrowRightIcon
                                 aria-hidden="true"
                                 className={clsx(
                                     styles.sidebarToggleIcon,

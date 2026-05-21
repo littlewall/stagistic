@@ -1,12 +1,12 @@
 import {parentheticalSpec} from '@stagistic/script';
+import {ParentheticalBlockIcon} from '@stagistic/ui';
 
 import type {FountainBlockBinding} from '../types';
 import styles from './parenthetical.module.css';
-import {ParentheticalIcon} from './icon';
 
 export const parentheticalBinding: FountainBlockBinding = {
     spec: parentheticalSpec,
     cssClass: styles.parenthetical,
     cssVarPrefix: 'parenthetical',
-    icon: ParentheticalIcon,
+    icon: ParentheticalBlockIcon,
 };
