@@ -128,6 +128,7 @@
     --color-border-subtle: oklch(from var(--base-neutral) .93 calc(c * var(--C-block)) h);
     --color-border: oklch(from var(--base-neutral) var(--L-border) calc(c * var(--C-block)) h);
     --color-border-strong: oklch(from var(--base-neutral) .79 calc(c * var(--C-block)) h);
+    --color-divider: var(--color-border);
 
     /* Focus */
     --color-focus-ring: oklch(from var(--base-blue) .58 c h);
