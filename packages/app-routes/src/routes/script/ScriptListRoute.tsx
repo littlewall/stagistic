@@ -30,7 +30,7 @@ import styles from './ScriptListRoute.module.css';
 export const ScriptListRoute = () => {
     const navigate = useNavigate();
     const {scriptSummaries, isLoading: scriptsLoading} = useScripts();
-    const {openNewScript} = useGlobalModals();
+    const {openNewScript, openImportScript} = useGlobalModals();
     const openModal = useCallback(() => {
         openNewScript();
     }, [openNewScript]);
@@ -105,6 +105,7 @@ export const ScriptListRoute = () => {
                 <AppHeader
                     onHome={handleHome}
                     onNewScript={openModal}
+                    onImportScript={openImportScript}
                 />
             )}
         >

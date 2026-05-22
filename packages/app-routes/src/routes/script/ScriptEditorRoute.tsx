@@ -64,7 +64,7 @@ export const ScriptEditorRoute = () => {
     const {scriptId} = useParams();
     const scriptRepository = useScriptRepository();
     const [searchParams, setSearchParams] = useSearchParams();
-    const {openNewScript} = useGlobalModals();
+    const {openNewScript, openImportScript} = useGlobalModals();
     const {
         isOpen: isSettingsOpen,
         activePanelId,
@@ -344,6 +344,7 @@ export const ScriptEditorRoute = () => {
                         onSelectScript={handleSelectScript}
                         onHome={handleHome}
                         onNewScript={handleNewScript}
+                        onImportScript={openImportScript}
                         scriptSyncState={saveIndicator}
                         onMenuAction={handleMenuAction}
                     />
@@ -351,6 +352,7 @@ export const ScriptEditorRoute = () => {
                     <AppHeader
                         onHome={handleHome}
                         onNewScript={handleNewScript}
+                        onImportScript={openImportScript}
                         onMenuAction={handleMenuAction}
                     />
                 )

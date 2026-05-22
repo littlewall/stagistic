@@ -153,6 +153,7 @@ export const HomeRoute = () => {
                 <AppHeader
                     onHome={handleHome}
                     onNewScript={openNewScript}
+                    onImportScript={openImportScript}
                 />
             )}
         >

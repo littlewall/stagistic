@@ -63,8 +63,6 @@ Thumbs.db
 tmp
 temp
 *.tmp
-apps/api/tsconfig.tsbuildinfo
-apps/web/tsconfig.tsbuildinfo
-packages/app-routes/tsconfig.tsbuildinfo
+tsconfig.tsbuildinfo
 # CocoIndex Code (ccc)
 /.cocoindex_code/

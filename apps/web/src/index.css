@@ -34,7 +34,7 @@ select {
 }
 
 ::selection {
-    background: var(--color-highlight);
+    background: var(--color-surface-accent);
 }
 
 ::-webkit-scrollbar {

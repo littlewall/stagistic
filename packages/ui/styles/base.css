@@ -45,7 +45,7 @@ select {
 }
 
 ::selection {
-    background: var(--color-surface-raised);
+    background: var(--color-surface-accent);
 }
 
 ::-webkit-scrollbar {

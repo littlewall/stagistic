@@ -1,7 +1,7 @@
 import {
+    Button,
     DropZone,
     FileTrigger,
-    Text,
 } from 'react-aria-components';
 
 import styles from '../ImportScriptModal.module.css';
@@ -19,35 +19,33 @@ export const ImportDropZone = ({
                 className={styles.dropZone}
                 getDropOperation={() => 'copy'}
                 onDrop={onDrop}
-                onClick={onPickFile}
             >
-                <Text slot="label" className={styles.dropZoneLabel}>
-                    {fileLabel}
-                </Text>
-                <Text slot="description" className={styles.dropZoneHint}>
-                    Drop a .fountain file or click to browse.
-                </Text>
+                <Button
+                    className={styles.dropZoneTrigger}
+                    onPress={() => { void onPickFile(); }}
+                >
+                    <span className={styles.dropZoneLabel}>{fileLabel}</span>
+                    <span className={styles.dropZoneHint}>Drop a .fountain file or click to browse.</span>
+                </Button>
             </DropZone>
         );
     }
 
     return (
-        <FileTrigger
-            acceptedFileTypes={['.fountain']}
-            onSelect={onFileSelect}
+        <DropZone
+            className={styles.dropZone}
+            getDropOperation={() => 'copy'}
+            onDrop={onDrop}
         >
-            <DropZone
-                className={styles.dropZone}
-                getDropOperation={() => 'copy'}
-                onDrop={onDrop}
+            <FileTrigger
+                acceptedFileTypes={['.fountain']}
+                onSelect={onFileSelect}
             >
-                <Text slot="label" className={styles.dropZoneLabel}>
-                    {fileLabel}
-                </Text>
-                <Text slot="description" className={styles.dropZoneHint}>
-                    Drop a .fountain file or click to browse.
-                </Text>
-            </DropZone>
-        </FileTrigger>
+                <Button className={styles.dropZoneTrigger}>
+                    <span className={styles.dropZoneLabel}>{fileLabel}</span>
+                    <span className={styles.dropZoneHint}>Drop a .fountain file or click to browse.</span>
+                </Button>
+            </FileTrigger>
+        </DropZone>
     );
 };

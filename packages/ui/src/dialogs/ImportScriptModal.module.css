@@ -67,6 +67,16 @@
                 outline-offset: 2px;
             }
 
+            & .dropZoneTrigger {
+                all: unset;
+                display: flex;
+                flex-direction: column;
+                gap: var(--space-sm);
+                width: 100%;
+                text-align: center;
+                cursor: pointer;
+            }
+
             & .dropZoneLabel {
                 font-weight: var(--font-weight-semibold);
             }

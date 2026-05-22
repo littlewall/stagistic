@@ -9,4 +9,5 @@ export {HomeIcon} from './HomeIcon';
 export {LightThemeIcon} from './LightThemeIcon';
 export {PlusIcon} from './PlusIcon';
 export {SystemThemeIcon} from './SystemThemeIcon';
+export {UploadIcon} from './UploadIcon';
 export {UserCircleIcon} from './UserCircleIcon';

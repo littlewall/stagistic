@@ -1,24 +1,18 @@
 {
   "editor.defaultFormatter": "oxc.oxc-vscode",
-  "editor.formatOnSave": true,
-  "editor.codeActionsOnSave": {
-    "source.format.oxc": "always",
-    "source.fixAll.oxc": "always"
-  },
-  "oxc.enable.oxfmt": true,
-  "oxc.enable.oxlint": true,
-  "oxc.lint.run": "onSave",
+  "[javascript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[javascriptreact]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[typescript]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
+  "[typescriptreact]": { "editor.defaultFormatter": "oxc.oxc-vscode" },
   "oxc.fmt.configPath": "./vite.config.ts",
-  "[javascript]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
+  "editor.formatOnSave": true,
+  "editor.formatOnSaveMode": "file",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "explicit",
+    "source.fixAll.eslint": "never",
+    "source.fixAll.stylelint": "never",
+    "source.fixAll": "never"
   },
-  "[javascriptreact]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
-  },
-  "[typescript]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
-  },
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "oxc.oxc-vscode"
-  }
+  "eslint.format.enable": false,
+  "npm.scriptRunner": "vp"
 }

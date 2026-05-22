@@ -43,13 +43,22 @@ export const ModalDialog = ({
         }
     }, [isOpen]);
 
+    const mouseDownTargetRef = useRef<EventTarget | null>(null);
+
     const handleCancel = useCallback((event: SyntheticEvent) => {
         event.preventDefault();
         onClose();
     }, [onClose]);
 
+    const handleMouseDown = useCallback((event: ReactMouseEvent<HTMLDialogElement>) => {
+        mouseDownTargetRef.current = event.target;
+    }, []);
+
     const handleClick = useCallback((event: ReactMouseEvent<HTMLDialogElement>) => {
-        if (event.target === dialogRef.current) {
+        if (
+            event.target === dialogRef.current &&
+            mouseDownTargetRef.current === dialogRef.current
+        ) {
             onClose();
         }
     }, [onClose]);
@@ -60,6 +69,7 @@ export const ModalDialog = ({
             className={styles.dialog}
             aria-label={ariaLabel}
             onCancel={handleCancel}
+            onMouseDown={handleMouseDown}
             onClick={handleClick}
         >
             <div className={clsx(panelClassName, styles.panel)}>
