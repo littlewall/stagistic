@@ -1,118 +1,103 @@
 import {normalizeActName} from '@stagistic/script';
 import {ActBlockIcon, clsx} from '@stagistic/ui';
-import {
-    memo,
-    useCallback,
-} from 'react';
+import {memo, useCallback} from 'react';
 
-import styles from './ScriptStructureSidebar.module.css';
 import type {StructureRowActProps} from './types';
 
-export const StructureRowAct = memo(({
-    act,
-    isFirstAct,
-    data,
-    actions,
-}: StructureRowActProps) => {
-    const {actNamePreviewById} = data;
-    const {
-        onRenameAct,
-        onActNamePreview,
-        onDeleteAct,
-    } = actions;
+import styles from './ScriptStructureSidebar.module.css';
 
-    const handleActNameChange = useCallback((value: string, currentName: string) => {
-        const normalizedValue = normalizeActName(value);
-        const trimmedValue = normalizedValue.trim();
-        const normalizedCurrentName = normalizeActName(currentName).trim();
+export const StructureRowAct = memo(
+    ({
+        blockId,
+        name,
+        isFirstAct,
+        namePreview,
+        onRename,
+        onNamePreview,
+        onDelete,
+    }: StructureRowActProps) => {
+        const handleNameChange = useCallback(
+            (value: string) => {
+                const normalizedValue = normalizeActName(value);
+                const trimmedValue = normalizedValue.trim();
+                const normalizedCurrentName = normalizeActName(name).trim();
 
-        onActNamePreview(act.blockId, normalizedValue);
+                onNamePreview(blockId, normalizedValue);
 
-        if (trimmedValue === normalizedCurrentName) {
-            return;
-        }
+                if (trimmedValue === normalizedCurrentName) {
+                    return;
+                }
 
-        onRenameAct(act.blockId, trimmedValue);
-    }, [
-        act.blockId,
-        onActNamePreview,
-        onRenameAct,
-    ]);
+                onRename(blockId, trimmedValue);
+            },
+            [blockId, name, onNamePreview, onRename],
+        );
 
-    const handleActNameBlur = useCallback((currentName: string) => {
-        const normalizedCurrentName = normalizeActName(currentName).trim();
-        const draftValue = (actNamePreviewById[act.blockId] ?? normalizedCurrentName).trim();
+        const handleBlur = useCallback(() => {
+            const normalizedCurrentName = normalizeActName(name).trim();
+            const draftValue = (namePreview ?? normalizedCurrentName).trim();
 
-        onActNamePreview(act.blockId, draftValue);
+            onNamePreview(blockId, draftValue);
 
-        if (draftValue === normalizedCurrentName) {
-            return;
-        }
+            if (draftValue === normalizedCurrentName) {
+                return;
+            }
 
-        onRenameAct(act.blockId, draftValue);
-    }, [
-        act.blockId,
-        actNamePreviewById,
-        onActNamePreview,
-        onRenameAct,
-    ]);
+            onRename(blockId, draftValue);
+        }, [blockId, name, namePreview, onNamePreview, onRename]);
 
-    return (
-        <li>
-            <div
-                className={clsx(styles.itemRow, styles.actRow)}
-                data-structure-act-id={act.blockId}
-            >
-                <span className={styles.actIconWrapper} aria-hidden="true">
-                    <ActBlockIcon />
-                </span>
-                <div className={styles.actTitle}>
-                    <input
-                        type="text"
-                        className={styles.actTitleInput}
-                        value={normalizeActName(actNamePreviewById[act.blockId] ?? act.name)}
-                        aria-label={`Rename act ${act.name}`}
-                        onChange={event => {
-                            handleActNameChange(event.target.value, act.name);
-                        }}
-                        onBlur={() => {
-                            handleActNameBlur(act.name);
-                        }}
-                        onMouseDown={event => {
-                            event.stopPropagation();
-                        }}
-                        onKeyDown={event => {
-                            if (event.key === 'Enter') {
-                                event.preventDefault();
-                                handleActNameBlur(act.name);
-                                event.currentTarget.blur();
-                            }
-
-                            if (event.key === 'Escape') {
-                                event.preventDefault();
-                                onActNamePreview(act.blockId, normalizeActName(act.name));
-                                event.currentTarget.blur();
-                            }
-                        }}
-                    />
-                    {!isFirstAct && (
-                        <button
-                            type="button"
-                            className={styles.actDeleteButton}
-                            aria-label={`Delete act ${act.name}`}
-                            onMouseDown={event => {
-                                event.preventDefault();
-                                event.stopPropagation();
-                                onDeleteAct(act.blockId);
+        return (
+            <li data-structure-act-id={blockId}>
+                <div className={clsx(styles.itemRow, styles.actRow)}>
+                    <span className={styles.actIconWrapper} aria-hidden="true">
+                        <ActBlockIcon />
+                    </span>
+                    <div className={styles.actTitle}>
+                        <input
+                            type="text"
+                            className={styles.actTitleInput}
+                            value={normalizeActName(namePreview ?? name)}
+                            aria-label={`Rename act ${name}`}
+                            onChange={event => {
+                                handleNameChange(event.target.value);
                             }}
-                        >
-                            ×
-                        </button>
-                    )}
+                            onBlur={handleBlur}
+                            onMouseDown={event => {
+                                event.stopPropagation();
+                            }}
+                            onKeyDown={event => {
+                                if (event.key === 'Enter') {
+                                    event.preventDefault();
+                                    handleBlur();
+                                    event.currentTarget.blur();
+                                }
+
+                                if (event.key === 'Escape') {
+                                    event.preventDefault();
+                                    onNamePreview(blockId, normalizeActName(name));
+                                    event.currentTarget.blur();
+                                }
+                            }}
+                        />
+                        {!isFirstAct && (
+                            <button
+                                type="button"
+                                className={styles.actDeleteButton}
+                                aria-label={`Delete act ${name}`}
+                                onMouseDown={event => {
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    onDelete(blockId);
+                                }}
+                            >
+                                ×
+                            </button>
+                        )}
+                    </div>
                 </div>
-            </div>
-        </li>
-    );
-});
+            </li>
+        );
+    },
+);
 
 StructureRowAct.displayName = 'StructureRowAct';

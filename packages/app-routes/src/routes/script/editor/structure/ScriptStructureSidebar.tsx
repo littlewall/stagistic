@@ -1,151 +1,148 @@
+import {Accessibility, PointerSensor} from '@dnd-kit/dom';
 import {DragDropProvider} from '@dnd-kit/react';
 import {
     useEditorLiveActiveBlock,
     useEditorLiveStructure,
     useFocusEditorBlock,
 } from '@stagistic/editor';
-import {useMemo} from 'react';
+import {Fragment, useCallback, useMemo} from 'react';
 
-import styles from './ScriptStructureSidebar.module.css';
+import {
+    buildAccessibilityPlugin,
+    configuredPointerSensor,
+} from './structureDndConfig';
 import {StructureRowAct} from './StructureRowAct';
 import {
-    deriveStructureRowsBaseFromIndex,
+    deriveStructureStateFromIndex,
+    deriveStructureStateFromLive,
+    ROOT_ACT_GROUP,
     resolveActiveSceneBlockId,
-    type StructureRow,
+    type SceneItem,
 } from './structureRows';
 import {StructureRowScene} from './StructureRowScene';
 import type {ScriptStructureSidebarProps} from './types';
 import {useStructureSidebarDnd} from './useStructureSidebarDnd';
 
-const liveRowByBlockIdCache = new WeakMap<readonly StructureRow[], ReadonlyMap<string, StructureRow>>();
+import styles from './ScriptStructureSidebar.module.css';
 
-const getLiveRowByBlockId = (rows: readonly StructureRow[]) => {
-    const cached = liveRowByBlockIdCache.get(rows);
-
-    if (cached) {
-        return cached;
-    }
-
-    const map = new Map(rows.map(row => [row.blockId, row] as const));
-
-    liveRowByBlockIdCache.set(rows, map);
-
-    return map;
-};
-
-export const ScriptStructureSidebar = ({
-    data,
-    actions,
-}: ScriptStructureSidebarProps) => {
-    const {
-        indexSnapshot,
-        actNamePreviewById,
-    } = data;
+export const ScriptStructureSidebar = ({data, actions}: ScriptStructureSidebarProps) => {
+    const {indexSnapshot, actNamePreviewById} = data;
     const liveStructure = useEditorLiveStructure();
     const liveActiveBlockId = useEditorLiveActiveBlock();
-    // Direct editor API — no request/state/prop cascade needed
     const focusBlock = useFocusEditorBlock();
-    const {
-        rows,
-        rowByBlockId,
-        rowIndexByBlockId,
-        sceneByBlockId,
-    } = useMemo(() => {
+
+    const state = useMemo(() => {
         if (liveStructure.rows.length > 0) {
-            const rows = liveStructure.rows as readonly StructureRow[];
-
-            return {
-                rows,
-                rowByBlockId: getLiveRowByBlockId(rows),
-                rowIndexByBlockId: liveStructure.rowIndexByBlockId,
-                sceneByBlockId: liveStructure.sceneByBlockId,
-            };
+            return deriveStructureStateFromLive(liveStructure);
         }
 
-        if (indexSnapshot) {
-            return deriveStructureRowsBaseFromIndex(indexSnapshot);
-        }
-
-        return deriveStructureRowsBaseFromIndex(null);
+        return deriveStructureStateFromIndex(indexSnapshot);
     }, [indexSnapshot, liveStructure]);
-    const resolvedActiveBlockId = liveActiveBlockId;
-    const activeSceneBlockId = useMemo(() => {
-        return resolveActiveSceneBlockId({
-            rowByBlockId,
-            sceneByBlockId,
-        }, resolvedActiveBlockId);
-    }, [
-        resolvedActiveBlockId,
-        rowByBlockId,
-        sceneByBlockId,
-    ]);
+
+    const {groups} = state;
+
+    const activeSceneBlockId = useMemo(
+        () => resolveActiveSceneBlockId(state, liveActiveBlockId),
+        [liveActiveBlockId, state],
+    );
+
     const firstActBlockId = useMemo(() => {
-        return rows.find(row => row.kind === 'act')?.blockId ?? null;
-    }, [rows]);
-    const actRowData = useMemo(() => ({
-        actNamePreviewById,
-    }), [actNamePreviewById]);
-    const actRowActions = useMemo(() => ({
-        onFocusBlock: focusBlock,
-        onRenameAct: actions.onRenameAct,
-        onActNamePreview: actions.onActNamePreview,
-        onDeleteAct: actions.onDeleteAct,
-    }), [
-        actions.onActNamePreview,
-        actions.onDeleteAct,
-        actions.onRenameAct,
-        focusBlock,
-    ]);
-    const sceneRowActions = useMemo(() => ({
-        onFocusBlock: focusBlock,
-    }), [focusBlock]);
+        for (const group of groups) {
+            if (group.groupId !== ROOT_ACT_GROUP) {
+                return group.groupId;
+            }
+        }
+
+        return null;
+    }, [groups]);
+
     const handleDragEnd = useStructureSidebarDnd({
-        rows,
-        rowByBlockId,
-        rowIndexByBlockId,
-        actions: {
-            onFocusBlock: focusBlock,
-            onReorderScene: actions.onReorderScene,
-        },
+        groups,
+        onReorderScene: actions.onReorderScene,
     });
+
+    const handleSceneFocus = useCallback((blockId: string) => focusBlock(blockId), [focusBlock]);
+
+    // Map every scene block id → scene row (for accessibility announcements).
+    const sceneByBlockId = useMemo(() => {
+        const map = new Map<string, SceneItem>();
+
+        for (const group of groups) {
+            for (const scene of group.scenes) {
+                map.set(scene.blockId, scene);
+            }
+        }
+
+        return map;
+    }, [groups]);
+
+    const accessibilityPlugin = useMemo(
+        () => buildAccessibilityPlugin(sceneByBlockId),
+        [sceneByBlockId],
+    );
+
+    // Replace the default Accessibility plugin (class) with our configured descriptor.
+    const plugins = useCallback(
+        (defaults: readonly unknown[]) => [
+            ...defaults.filter(p => p !== Accessibility),
+            accessibilityPlugin,
+        ],
+        [accessibilityPlugin],
+    );
+
+    // Replace default PointerSensor (class) with our distance-constrained descriptor.
+    // KeyboardSensor stays at defaults (Space/Enter, arrows, Escape).
+    const sensors = useCallback(
+        (defaults: readonly unknown[]) => [
+            ...defaults.filter(s => s !== PointerSensor),
+            configuredPointerSensor,
+        ],
+        [],
+    );
+
+    const hasContent = groups.some(g => g.groupId !== ROOT_ACT_GROUP || g.scenes.length > 0);
 
     return (
         <div className={styles.content}>
-            <DragDropProvider onDragEnd={handleDragEnd}>
-                {rows.length === 0 ? (
+            <DragDropProvider
+                onDragEnd={handleDragEnd}
+                plugins={plugins as never}
+                sensors={sensors as never}
+            >
+                {!hasContent ? (
                     <p className={styles.empty}>
                         Structure outline will appear after adding Scene headings or ACT blocks.
                     </p>
-                ) : null}
-                {rows.length > 0 ? (
+                ) : (
                     <ul className={styles.itemList}>
-                        {rows.map(row => {
-                            const rowIndex = rowIndexByBlockId.get(row.blockId) ?? row.index;
-
-                            if (row.kind === 'act') {
-                                return (
+                        {groups.map(group => (
+                            <Fragment key={group.groupId}>
+                                {group.groupId !== ROOT_ACT_GROUP ? (
                                     <StructureRowAct
-                                        key={`${row.kind}-${row.blockId}`}
-                                        act={row}
-                                        isFirstAct={row.blockId === firstActBlockId}
-                                        data={actRowData}
-                                        actions={actRowActions}
+                                        blockId={group.groupId}
+                                        name={group.actName ?? ''}
+                                        isFirstAct={group.groupId === firstActBlockId}
+                                        namePreview={actNamePreviewById[group.groupId]}
+                                        onRename={actions.onRenameAct}
+                                        onNamePreview={actions.onActNamePreview}
+                                        onDelete={actions.onDeleteAct}
                                     />
-                                );
-                            }
-
-                            return (
-                                <StructureRowScene
-                                    key={`${row.kind}-${row.blockId}`}
-                                    scene={row}
-                                    rowIndex={rowIndex}
-                                    isActive={row.blockId === activeSceneBlockId}
-                                    actions={sceneRowActions}
-                                />
-                            );
-                        })}
+                                ) : null}
+                                {group.scenes.map((scene, idx) => (
+                                    <StructureRowScene
+                                        key={scene.blockId}
+                                        blockId={scene.blockId}
+                                        title={scene.title}
+                                        index={idx}
+                                        groupId={group.groupId}
+                                        isActive={scene.blockId === activeSceneBlockId}
+                                        onFocus={() => handleSceneFocus(scene.blockId)}
+                                    />
+                                ))}
+                            </Fragment>
+                        ))}
                     </ul>
-                ) : null}
+                )}
             </DragDropProvider>
         </div>
     );

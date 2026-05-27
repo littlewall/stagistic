@@ -8,6 +8,8 @@
         "lint": "eslint ."
     },
     "dependencies": {
+        "@dnd-kit/abstract": "^0.3.0",
+        "@dnd-kit/dom": "^0.3.0",
         "@dnd-kit/react": "^0.3.0",
         "@stagistic/app-core": "workspace:*",
         "@stagistic/editor": "workspace:*",

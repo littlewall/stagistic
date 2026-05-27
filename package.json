@@ -23,6 +23,7 @@
         "docker:logs": "docker compose logs -f"
     },
     "devDependencies": {
+        "@dvdevcz/eslint": "^0.4.0",
         "@dvdevcz/stylelint": "^0.1.0",
         "@types/node": "^24.0.0",
         "stylelint": "^16.10.0",

@@ -1,111 +1,111 @@
+import {isSortableOperation} from '@dnd-kit/react/sortable';
 import {useCallback} from 'react';
 
-import type {
-    DragEndEvent,
-    SortableCandidate,
-    SortableMeta,
-    UseStructureSidebarDndArgs,
-} from './types';
-
-const toFiniteNumber = (value: unknown): number | null => {
-    if (typeof value !== 'number' || !Number.isFinite(value)) {
-        return null;
-    }
-
-    return Math.trunc(value);
-};
-
-const toBlockId = (value: unknown): string | null => {
-    if (typeof value === 'string') {
-        const trimmed = value.trim();
-
-        return trimmed.length > 0 ? trimmed : null;
-    }
-
-    if (typeof value === 'number' && Number.isFinite(value)) {
-        return String(value);
-    }
-
-    return null;
-};
-
-const getSortableMeta = (candidate: SortableCandidate): SortableMeta => {
-    if (!candidate) {
-        return {
-            index: null,
-        };
-    }
-
-    return {
-        index: toFiniteNumber(candidate.sortable?.index) ?? toFiniteNumber(candidate.index),
-    };
-};
+import {ROOT_ACT_GROUP, type StructureGroup} from './structureRows';
+import type {DragEndEvent, UseStructureSidebarDndArgs} from './types';
 
 export const useStructureSidebarDnd = ({
-    rows,
-    rowByBlockId,
-    rowIndexByBlockId,
-    actions,
+    groups,
+    onReorderScene,
 }: UseStructureSidebarDndArgs) => {
     return useCallback((event: DragEndEvent) => {
         if (event.canceled) {
             return;
         }
 
-        const sourceCandidate = event.operation.source;
-        const targetCandidate = event.operation.target;
-        const sourceBlockId = toBlockId(sourceCandidate?.id);
-
-        if (!sourceBlockId) {
+        if (!isSortableOperation(event.operation)) {
             return;
         }
 
-        const sourceRow = rowByBlockId.get(sourceBlockId);
-        const sourceIndex = rowIndexByBlockId.get(sourceBlockId);
+        const source = event.operation.source;
 
-        if (!sourceRow || sourceIndex === undefined) {
+        if (!source) {
             return;
         }
 
-        const rowsWithoutSource = rows.filter(row => row.blockId !== sourceBlockId);
-        const sourceSortableMeta = getSortableMeta(sourceCandidate);
-        const targetSortableMeta = getSortableMeta(targetCandidate);
-        const targetBlockId = toBlockId(targetCandidate?.id);
-        let destinationIndex = targetSortableMeta.index ?? sourceSortableMeta.index;
+        const sourceId = String(source.id);
+        const targetGroupId = source.group != null ? String(source.group) : ROOT_ACT_GROUP;
+        const targetIndex = typeof source.index === 'number' ? source.index : 0;
 
-        if (destinationIndex === null && targetBlockId) {
-            const targetRowIndex = rowsWithoutSource.findIndex(row => row.blockId === targetBlockId);
+        const newBeforeBlockId = computeBeforeBlockId(groups, sourceId, targetGroupId, targetIndex);
+        const currentBeforeBlockId = computeCurrentBeforeBlockId(groups, sourceId);
 
-            if (targetRowIndex >= 0) {
-                destinationIndex = targetRowIndex;
+        if (newBeforeBlockId === currentBeforeBlockId) {
+            return;
+        }
+
+        if (newBeforeBlockId === sourceId) {
+            return;
+        }
+
+        onReorderScene(sourceId, newBeforeBlockId);
+    }, [groups, onReorderScene]);
+};
+
+/**
+ * Find what `beforeBlockId` should be for `sourceId` if it ends up at `targetIndex`
+ * inside group `targetGroupId` (post-drag position from dnd-kit's sortable state).
+ *
+ * The target group's scenes are filtered to exclude the source. Then:
+ *   - position < length → that scene's id
+ *   - position === length (source ends up last) → next non-ROOT group's id
+ *   - no further groups → null (append at end)
+ */
+const computeBeforeBlockId = (
+    groups: readonly StructureGroup[],
+    sourceId: string,
+    targetGroupId: string,
+    targetIndex: number,
+): string | null => {
+    const targetGroup = groups.find(g => g.groupId === targetGroupId);
+
+    if (!targetGroup) {
+        return null;
+    }
+
+    const targetScenes = targetGroup.scenes.filter(s => s.blockId !== sourceId);
+
+    if (targetIndex < targetScenes.length) {
+        return targetScenes[targetIndex].blockId;
+    }
+
+    // Source is last in target group — find next non-ROOT group
+    const targetGroupIdx = groups.findIndex(g => g.groupId === targetGroupId);
+
+    for (let i = targetGroupIdx + 1; i < groups.length; i++) {
+        if (groups[i].groupId !== ROOT_ACT_GROUP) {
+            return groups[i].groupId;
+        }
+    }
+
+    return null;
+};
+
+/** Find the current `beforeBlockId` for `sourceId` in the existing groups (pre-drag state). */
+const computeCurrentBeforeBlockId = (
+    groups: readonly StructureGroup[],
+    sourceId: string,
+): string | null => {
+    for (let gi = 0; gi < groups.length; gi++) {
+        const group = groups[gi];
+        const idx = group.scenes.findIndex(s => s.blockId === sourceId);
+
+        if (idx === -1) {
+            continue;
+        }
+
+        if (idx + 1 < group.scenes.length) {
+            return group.scenes[idx + 1].blockId;
+        }
+
+        for (let ni = gi + 1; ni < groups.length; ni++) {
+            if (groups[ni].groupId !== ROOT_ACT_GROUP) {
+                return groups[ni].groupId;
             }
         }
 
-        if (destinationIndex === null) {
-            return;
-        }
+        return null;
+    }
 
-        const clampedDestinationIndex = Math.max(
-            0,
-            Math.min(destinationIndex, rowsWithoutSource.length),
-        );
-        const beforeBlockId = rowsWithoutSource[clampedDestinationIndex]?.blockId ?? null;
-        const currentBeforeBlockId = rows[sourceIndex + 1]?.blockId ?? null;
-
-        if (beforeBlockId === currentBeforeBlockId) {
-            return;
-        }
-
-        if (sourceRow.kind !== 'scene') {
-            return;
-        }
-
-        actions.onFocusBlock(sourceRow.blockId);
-        actions.onReorderScene(sourceRow.blockId, beforeBlockId);
-    }, [
-        actions,
-        rowByBlockId,
-        rowIndexByBlockId,
-        rows,
-    ]);
+    return null;
 };

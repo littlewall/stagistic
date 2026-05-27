@@ -170,7 +170,7 @@ export const useStructureSidebarController = ({
     const handleSidebarInsertAct = useCallback(() => {
         insertActRequestCounterRef.current += 1;
         setInsertActRequest({
-            beforeBlockId: null,
+            beforeBlockId: activeBlockIdRef.current,
             requestId: insertActRequestCounterRef.current,
         });
     }, []);

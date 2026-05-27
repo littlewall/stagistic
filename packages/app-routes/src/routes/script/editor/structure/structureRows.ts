@@ -1,238 +1,162 @@
+import type {EditorLiveStructureSnapshot} from '@stagistic/editor';
 import {
-    collectStructureBlocks,
     ELEMENT_ACT,
     ELEMENT_SCENE_HEADING,
-    type FountainJSONContent,
     normalizeActName,
     type ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
 
-export interface StructureActRow {
-    kind: 'act',
-    blockId: string,
-    name: string,
-    index: number,
+export const ROOT_ACT_GROUP = '__root__' as const;
+
+export interface SceneItem {
+    blockId: string;
+    title: string;
 }
 
-export interface StructureSceneRow {
-    kind: 'scene',
-    blockId: string,
-    title: string,
-    index: number,
+export interface StructureGroup {
+    /** ROOT_ACT_GROUP for scenes before any act, or the act block id. */
+    groupId: string;
+    /** null for ROOT_ACT_GROUP, otherwise the act name. */
+    actName: string | null;
+    scenes: SceneItem[];
 }
 
-export type StructureRow = StructureActRow | StructureSceneRow;
-
-export interface StructureRowsState {
-    rows: readonly StructureRow[],
-    rowByBlockId: ReadonlyMap<string, StructureRow>,
-    rowIndexByBlockId: ReadonlyMap<string, number>,
-    activeSceneBlockId: string | null,
+export interface StructureState {
+    groups: StructureGroup[];
+    /** Maps any block id → the scene block id it belongs to (used for active highlight). */
+    sceneAncestorByBlockId: ReadonlyMap<string, string>;
 }
 
-export interface StructureRowsDerived {
-    rows: readonly StructureRow[],
-    rowByBlockId: ReadonlyMap<string, StructureRow>,
-    rowIndexByBlockId: ReadonlyMap<string, number>,
-    sceneByBlockId: ReadonlyMap<string, string>,
-}
-
-const EMPTY_STRUCTURE_ROWS_DERIVED: StructureRowsDerived = {
-    rows: [],
-    rowByBlockId: new Map<string, StructureRow>(),
-    rowIndexByBlockId: new Map<string, number>(),
-    sceneByBlockId: new Map<string, string>(),
+const EMPTY_STATE: StructureState = {
+    groups: [{groupId: ROOT_ACT_GROUP, actName: null, scenes: []}],
+    sceneAncestorByBlockId: new Map(),
 };
 
-const structureRowsCache = new WeakMap<FountainJSONContent[], StructureRowsDerived>();
-const structureRowsIndexCache = new WeakMap<ScriptBlockIndexSnapshot, StructureRowsDerived>();
+// Identity-stable caches
+const liveCache = new WeakMap<EditorLiveStructureSnapshot, StructureState>();
+const indexCache = new WeakMap<ScriptBlockIndexSnapshot, StructureState>();
 
-const buildStructureRows = (
-    content: FountainJSONContent[] | undefined,
-): StructureRowsDerived => {
-    if (!Array.isArray(content) || content.length === 0) {
-        return EMPTY_STRUCTURE_ROWS_DERIVED;
-    }
+interface RawBlock {
+    blockId: string;
+    blockType: string;
+    text: string;
+    sceneBlockId?: string | null;
+}
 
-    const cached = structureRowsCache.get(content);
-
-    if (cached) {
-        return cached;
-    }
-
-    const blocks = collectStructureBlocks(content).filter(block => block.id.length > 0);
-    const rows: StructureRow[] = [];
-    const rowByBlockId = new Map<string, StructureRow>();
-    const rowIndexByBlockId = new Map<string, number>();
-    const sceneByBlockId = new Map<string, string>();
+const buildState = (blocks: RawBlock[]): StructureState => {
+    const groups: StructureGroup[] = [{groupId: ROOT_ACT_GROUP, actName: null, scenes: []}];
+    const sceneAncestorByBlockId = new Map<string, string>();
     let currentSceneBlockId: string | null = null;
 
-    blocks.forEach(block => {
+    for (const block of blocks) {
+        if (!block.blockId) {
+            continue;
+        }
+
         if (block.blockType === ELEMENT_ACT) {
-            const actRow: StructureActRow = {
-                kind: 'act',
-                blockId: block.id,
-                name: normalizeActName(block.text),
-                index: rows.length,
-            };
-
-            rows.push(actRow);
-            rowByBlockId.set(block.id, actRow);
-            rowIndexByBlockId.set(block.id, actRow.index);
-
-            return;
+            groups.push({
+                groupId: block.blockId,
+                actName: normalizeActName(block.text),
+                scenes: [],
+            });
+            currentSceneBlockId = null;
+            continue;
         }
 
         if (block.blockType === ELEMENT_SCENE_HEADING) {
-            currentSceneBlockId = block.id;
-            sceneByBlockId.set(block.id, block.id);
-
-            const sceneRow: StructureSceneRow = {
-                kind: 'scene',
-                blockId: block.id,
+            groups[groups.length - 1].scenes.push({
+                blockId: block.blockId,
                 title: block.text || 'Untitled scene',
-                index: rows.length,
-            };
-
-            rows.push(sceneRow);
-            rowByBlockId.set(block.id, sceneRow);
-            rowIndexByBlockId.set(block.id, sceneRow.index);
-
-            return;
+            });
+            currentSceneBlockId = block.blockId;
+            sceneAncestorByBlockId.set(block.blockId, block.blockId);
+            continue;
         }
 
         if (currentSceneBlockId) {
-            sceneByBlockId.set(block.id, currentSceneBlockId);
+            sceneAncestorByBlockId.set(block.blockId, currentSceneBlockId);
+        } else if (block.sceneBlockId) {
+            sceneAncestorByBlockId.set(block.blockId, block.sceneBlockId);
         }
-    });
-
-    const result: StructureRowsDerived = {
-        rows,
-        rowByBlockId,
-        rowIndexByBlockId,
-        sceneByBlockId,
-    };
-
-    structureRowsCache.set(content, result);
-
-    return result;
-};
-
-const buildStructureRowsFromIndex = (
-    indexSnapshot: ScriptBlockIndexSnapshot | null,
-): StructureRowsDerived => {
-    if (!indexSnapshot || !Array.isArray(indexSnapshot.blocks) || indexSnapshot.blocks.length === 0) {
-        return EMPTY_STRUCTURE_ROWS_DERIVED;
     }
 
-    const cached = structureRowsIndexCache.get(indexSnapshot);
+    return {groups, sceneAncestorByBlockId};
+};
+
+export const deriveStructureStateFromLive = (live: EditorLiveStructureSnapshot): StructureState => {
+    if (live.rows.length === 0) {
+        return EMPTY_STATE;
+    }
+
+    const cached = liveCache.get(live);
 
     if (cached) {
         return cached;
     }
 
-    const rows: StructureRow[] = [];
-    const rowByBlockId = new Map<string, StructureRow>();
-    const rowIndexByBlockId = new Map<string, number>();
-    const sceneByBlockId = new Map<string, string>();
+    const blocks: RawBlock[] = live.rows.map(row => ({
+        blockId: row.blockId,
+        blockType: row.kind === 'act' ? ELEMENT_ACT : ELEMENT_SCENE_HEADING,
+        text: row.kind === 'act' ? row.name : row.title,
+    }));
 
-    indexSnapshot.blocks.forEach(block => {
-        if (!block.blockId) {
-            return;
-        }
+    const result = buildState(blocks);
 
-        if (block.blockType === ELEMENT_ACT) {
-            const actRow: StructureActRow = {
-                kind: 'act',
-                blockId: block.blockId,
-                name: normalizeActName(block.textContent),
-                index: rows.length,
-            };
-
-            rows.push(actRow);
-            rowByBlockId.set(block.blockId, actRow);
-            rowIndexByBlockId.set(block.blockId, actRow.index);
-
-            return;
-        }
-
-        if (block.blockType === ELEMENT_SCENE_HEADING) {
-            const sceneRow: StructureSceneRow = {
-                kind: 'scene',
-                blockId: block.blockId,
-                title: block.textContent || 'Untitled scene',
-                index: rows.length,
-            };
-
-            rows.push(sceneRow);
-            rowByBlockId.set(block.blockId, sceneRow);
-            rowIndexByBlockId.set(block.blockId, sceneRow.index);
-            sceneByBlockId.set(block.blockId, block.blockId);
-
-            return;
-        }
-
-        if (block.sceneBlockId) {
-            sceneByBlockId.set(block.blockId, block.sceneBlockId);
-        }
-    });
-
-    const result: StructureRowsDerived = {
-        rows,
-        rowByBlockId,
-        rowIndexByBlockId,
-        sceneByBlockId,
-    };
-
-    structureRowsIndexCache.set(indexSnapshot, result);
+    liveCache.set(live, result);
 
     return result;
 };
 
-export const deriveStructureRowsBase = (
-    content: FountainJSONContent[] | undefined,
-): StructureRowsDerived => {
-    return buildStructureRows(content);
-};
+export const deriveStructureStateFromIndex = (
+    snap: ScriptBlockIndexSnapshot | null,
+): StructureState => {
+    if (!snap || !Array.isArray(snap.blocks) || snap.blocks.length === 0) {
+        return EMPTY_STATE;
+    }
 
-export const deriveStructureRowsBaseFromIndex = (
-    indexSnapshot: ScriptBlockIndexSnapshot | null,
-): StructureRowsDerived => {
-    return buildStructureRowsFromIndex(indexSnapshot);
+    const cached = indexCache.get(snap);
+
+    if (cached) {
+        return cached;
+    }
+
+    const blocks: RawBlock[] = snap.blocks
+        .filter(b => b.blockId)
+        .map(b => ({
+            blockId: b.blockId,
+            blockType: b.blockType,
+            text: b.textContent,
+            sceneBlockId: b.sceneBlockId,
+        }));
+
+    const result = buildState(blocks);
+
+    indexCache.set(snap, result);
+
+    return result;
 };
 
 export const resolveActiveSceneBlockId = (
-    rowsState: Pick<StructureRowsDerived, 'sceneByBlockId' | 'rowByBlockId'>,
+    state: Pick<StructureState, 'sceneAncestorByBlockId' | 'groups'>,
     activeBlockId: string | null,
-) => {
+): string | null => {
     if (!activeBlockId) {
         return null;
     }
 
-    const mappedSceneId = rowsState.sceneByBlockId.get(activeBlockId);
+    const ancestor = state.sceneAncestorByBlockId.get(activeBlockId);
 
-    if (mappedSceneId) {
-        return mappedSceneId;
+    if (ancestor) {
+        return ancestor;
     }
 
-    const directRow = rowsState.rowByBlockId.get(activeBlockId);
+    for (const group of state.groups) {
+        for (const scene of group.scenes) {
+            if (scene.blockId === activeBlockId) {
+                return activeBlockId;
+            }
+        }
+    }
 
-    return directRow?.kind === 'scene'
-        ? activeBlockId
-        : null;
-};
-
-export const deriveStructureRows = (
-    content: FountainJSONContent[] | undefined,
-    activeBlockId: string | null,
-): StructureRowsState => {
-    const baseState = deriveStructureRowsBase(content);
-    const activeSceneBlockId = resolveActiveSceneBlockId(baseState, activeBlockId);
-
-    return {
-        rows: baseState.rows,
-        rowByBlockId: baseState.rowByBlockId,
-        rowIndexByBlockId: baseState.rowIndexByBlockId,
-        activeSceneBlockId,
-    };
+    return null;
 };

@@ -39,4 +39,5 @@ export const DEFAULT_OPTIONS: PaginationOptions = {
     lineHeightPx: 22,
     dividerColor: 'var(--color-divider)',
     dividerThickness: 1,
+    dividerInsetPx: 96,
 };

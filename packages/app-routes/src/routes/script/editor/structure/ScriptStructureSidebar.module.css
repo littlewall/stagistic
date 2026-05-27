@@ -1,8 +1,7 @@
 .content {
     position: relative;
+    overflow: hidden auto;
     flex: 1;
-    overflow-x: hidden;
-    overflow-y: auto;
     min-height: 0;
     padding: var(--space-lg);
 
@@ -79,7 +78,7 @@
 }
 
 .actTitle {
-    display: inline-flex;
+    display: flex;
     gap: calc(4px * var(--size-scale));
     align-items: center;
     width: 100%;
@@ -102,7 +101,8 @@
 }
 
 .actTitleInput {
-    min-width: calc(10ch * var(--size-scale));
+    flex: 1;
+    min-width: 0;
     font: inherit;
     color: inherit;
     text-transform: uppercase;
@@ -144,6 +144,7 @@
 }
 
 .itemRow {
+    position: relative;
     display: grid;
     grid-template-columns: auto 1fr;
     align-items: center;
@@ -158,10 +159,8 @@
         }
     }
 
-    &.dropTarget {
-        background: color-mix(in oklch, var(--color-surface-accent) 34%, transparent);
-        border-radius: var(--radius-md);
-        box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-surface-accent) 42%, transparent);
+    &.actDropTarget {
+        background: color-mix(in oklch, var(--color-surface-accent) 22%, transparent);
     }
 }
 
@@ -178,6 +177,24 @@
 .sceneRow {
     &:hover:not(.active) {
         background: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
+    }
+
+    /* dnd-kit Feedback plugin: visible clone shown at the drop position during drag.
+       Lower opacity so it reads as a ghost/preview, not a real row. */
+    &[data-dnd-placeholder = 'clone'] {
+        pointer-events: none;
+        opacity: .3;
+    }
+
+    /* dnd-kit: the original row while it follows the cursor (data-dnd-dragging)
+       and during the drop animation (data-dnd-dropping). Give it a card-like
+       background + shadow so it visually separates from the rest of the page. */
+    &[data-dnd-dragging],
+    &[data-dnd-dropping] {
+        padding-block: var(--space-sm);
+        background: var(--color-surface);
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-card);
     }
 }
 
@@ -237,30 +254,42 @@
 }
 
 .actIconWrapper {
+    overflow: visible;
     display: inline-flex;
     flex: 0 0 calc(14px * var(--size-scale));
     align-items: center;
     justify-content: center;
     width: calc(14px * var(--size-scale));
-    overflow: visible;
     color: color-mix(in oklch, var(--color-text-muted) 55%, var(--color-border));
 
     & svg {
+        overflow: visible;
         flex-shrink: 0;
         width: calc(16px * var(--size-scale));
         height: calc(16px * var(--size-scale));
-        stroke: currentcolor;
-        stroke-width: 1.75;
         fill: none;
+        stroke: currentcolor;
         stroke-linecap: round;
         stroke-linejoin: round;
-        overflow: visible;
+        stroke-width: 1.75;
     }
 }
 
 .itemLabel {
-    overflow: hidden;
     min-width: 0;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow-wrap: break-word;
+}
+
+.scenePlaceholder {
+    min-height: 28px;
+    background: color-mix(in oklch, var(--color-surface-accent) 40%, transparent);
+    border: 1.5px dashed color-mix(in oklch, var(--color-border) 80%, var(--color-surface-accent));
+    border-radius: var(--radius-md);
+}
+
+.dragOverlayRow {
+    opacity: .96;
+    background: var(--color-surface);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-card);
 }

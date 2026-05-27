@@ -37,6 +37,7 @@ export interface PaginationOptions {
     lineHeightPx: number,
     dividerColor: string,
     dividerThickness: number,
+    dividerInsetPx: number,
 }
 
 export interface PaginationStorage {

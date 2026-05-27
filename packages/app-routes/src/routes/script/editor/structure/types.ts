@@ -5,11 +5,7 @@ import type {
 } from '@stagistic/script';
 import type {ComponentProps} from 'react';
 
-import type {
-    StructureActRow,
-    StructureRow,
-    StructureSceneRow,
-} from './structureRows';
+import type {StructureGroup} from './structureRows';
 
 export interface ActiveBlockRepository {
     setActiveBlock: (scriptId: string, blockId: string | null) => Promise<unknown>,
@@ -27,10 +23,6 @@ export interface StructureSidebarData {
     actNamePreviewById: Record<string, string>,
 }
 
-/**
- * External actions provided by the route to the structure sidebar.
- * Note: block focus is NOT here — the sidebar calls useFocusEditorBlock() directly.
- */
 export interface StructureSidebarActions {
     onRenameAct: (blockId: string, nextName: string) => void,
     onActNamePreview: (blockId: string, nextName: string) => void,
@@ -39,50 +31,33 @@ export interface StructureSidebarActions {
     onReorderScene: (sourceSceneBlockId: string, beforeBlockId: string | null) => void,
 }
 
-/** Shared internal focus action used by row components and DnD. */
-export interface FocusBlockAction {
-    onFocusBlock: (blockId: string) => void,
-}
-
 export interface ScriptStructureSidebarProps {
     data: StructureSidebarData,
     actions: StructureSidebarActions,
 }
 
 export interface StructureRowSceneProps {
-    scene: StructureSceneRow,
-    rowIndex: number,
+    blockId: string,
+    title: string,
+    index: number,
+    groupId: string,
     isActive: boolean,
-    actions: FocusBlockAction,
+    onFocus: () => void,
 }
 
 export interface StructureRowActProps {
-    act: StructureActRow,
+    blockId: string,
+    name: string,
     isFirstAct: boolean,
-    data: Pick<StructureSidebarData, 'actNamePreviewById'>,
-    actions: FocusBlockAction & Pick<StructureSidebarActions, 'onRenameAct' | 'onActNamePreview' | 'onDeleteAct'>,
-}
-
-
-export interface SortableCandidateObject {
-    id?: unknown,
-    index?: unknown,
-    sortable?: {
-        index?: unknown,
-    } | null,
-}
-
-export type SortableCandidate = SortableCandidateObject | null | undefined;
-
-export interface SortableMeta {
-    index: number | null,
+    namePreview: string | undefined,
+    onRename: (blockId: string, nextName: string) => void,
+    onNamePreview: (blockId: string, nextName: string) => void,
+    onDelete: (blockId: string) => void,
 }
 
 export type DragEndEvent = Parameters<NonNullable<ComponentProps<typeof DragDropProvider>['onDragEnd']>>[0];
 
 export interface UseStructureSidebarDndArgs {
-    rows: readonly StructureRow[],
-    rowByBlockId: ReadonlyMap<string, StructureRow>,
-    rowIndexByBlockId: ReadonlyMap<string, number>,
-    actions: FocusBlockAction & Pick<StructureSidebarActions, 'onReorderScene'>,
+    groups: readonly StructureGroup[],
+    onReorderScene: (sourceBlockId: string, beforeBlockId: string | null) => void,
 }

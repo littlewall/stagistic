@@ -19,22 +19,7 @@ import type {
     EditorIndexSnapshot,
     EditorStructureRequests,
     EditorValueChangeMeta,
-    InsertActRequest,
 } from '../contracts';
-
-const findFirstActBlockId = (content: FountainJSONContent[] | undefined): string | null => {
-    if (!Array.isArray(content)) {
-        return null;
-    }
-
-    for (const node of content) {
-        if (isScriptBlockNode(node) && getScriptBlockLegacyType(node) === ELEMENT_ACT) {
-            return getScriptBlockId(node);
-        }
-    }
-
-    return null;
-};
 import {FOUNTAIN_BLOCK_NODE_NAME} from '../tiptap/fountainCore';
 import {
     insertActBlockBeforeId,
@@ -54,12 +39,6 @@ interface UseEditorStructureRequestsArgs {
     scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
     revisionRef: MutableRefObject<number>,
 }
-
-const canInsertBeforeExistingBlock = (
-    request: InsertActRequest,
-): request is InsertActRequest & {beforeBlockId: string} => {
-    return typeof request.beforeBlockId === 'string' && request.beforeBlockId.length > 0;
-};
 
 export const useEditorStructureRequests = ({
     editor,
@@ -128,10 +107,27 @@ export const useEditorStructureRequests = ({
         let nextContent = [...currentValue.content, nextActBlock];
         let didChange = true;
 
-        if (canInsertBeforeExistingBlock(insertActRequest)) {
+        /*
+         * When the script has no acts yet, the very first act must go to the TOP
+         * (before the first existing block), so that the resulting structure is either
+         * "scenes only" or "act-at-start". Subsequent acts use the requested beforeBlockId
+         * (typically the currently active block) or fall back to appending at the end.
+         */
+        let resolvedBeforeBlockId: string | null = insertActRequest.beforeBlockId;
+
+        if (actCount === 0) {
+            const firstBlock = currentValue.content.find(node => isScriptBlockNode(node));
+            const firstBlockId = firstBlock ? getScriptBlockId(firstBlock) : null;
+
+            if (firstBlockId) {
+                resolvedBeforeBlockId = firstBlockId;
+            }
+        }
+
+        if (typeof resolvedBeforeBlockId === 'string' && resolvedBeforeBlockId.length > 0) {
             const [insertedContent, didInsert] = insertActBlockBeforeId(
                 currentValue.content,
-                insertActRequest.beforeBlockId,
+                resolvedBeforeBlockId,
                 nextActBlock,
             );
 
@@ -224,9 +220,14 @@ export const useEditorStructureRequests = ({
         }
 
         const currentValue = editor.getJSON() as ScriptDocument;
-        const firstActBlockId = findFirstActBlockId(currentValue.content);
+        const firstNode = currentValue.content?.[0];
 
-        if (firstActBlockId && deleteActRequest.blockId === firstActBlockId) {
+        if (
+            firstNode &&
+            isScriptBlockNode(firstNode) &&
+            getScriptBlockLegacyType(firstNode) === ELEMENT_ACT &&
+            getScriptBlockId(firstNode) === deleteActRequest.blockId
+        ) {
             return;
         }
 

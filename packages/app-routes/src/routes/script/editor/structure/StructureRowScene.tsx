@@ -1,65 +1,49 @@
 import {useSortable} from '@dnd-kit/react/sortable';
 import {memo} from 'react';
 
-import {
-    ACT_DND_TYPE, SCENE_DND_TYPE, STRUCTURE_SORT_GROUP,
-} from './dnd';
+import {SCENE_DND_TYPE} from './dnd';
 import styles from './ScriptStructureSidebar.module.css';
 import type {StructureRowSceneProps} from './types';
 
-const joinClassNames = (...classNames: Array<string | false | null | undefined>) => {
-    return classNames.filter(Boolean).join(' ');
-};
-
 export const StructureRowScene = memo(({
-    scene,
-    rowIndex,
+    blockId,
+    title,
+    index,
+    groupId,
     isActive,
-    actions,
+    onFocus,
 }: StructureRowSceneProps) => {
-    const {
-        ref,
-        handleRef,
-        isDropTarget,
-        isDragging,
-    } = useSortable({
-        id: scene.blockId,
-        index: rowIndex,
-        group: STRUCTURE_SORT_GROUP,
+    const {ref, handleRef} = useSortable({
+        id: blockId,
+        index,
+        group: groupId,
         type: SCENE_DND_TYPE,
-        accept: [ACT_DND_TYPE, SCENE_DND_TYPE],
-        feedback: 'default',
+        accept: [SCENE_DND_TYPE],
+        // Visible clone at the drop position; original element follows the cursor.
+        feedback: 'clone',
     });
-    const sceneRowClassName = joinClassNames(
-        styles.itemRow,
-        styles.sceneRow,
-        isActive ? styles.active : null,
-        isDropTarget ? styles.dropTarget : null,
-        isDragging ? styles.dragging : null,
-    );
 
     return (
-        <li>
-            <div className={sceneRowClassName} ref={ref}>
-                <button
-                    type="button"
-                    ref={handleRef}
-                    className={styles.dragHandle}
-                    aria-label="Drag scene"
-                />
-                <button
-                    type="button"
-                    className={styles.itemButton}
-                    onMouseDown={event => {
-                        event.preventDefault();
-                    }}
-                    onClick={() => {
-                        actions.onFocusBlock(scene.blockId);
-                    }}
-                >
-                    <span className={styles.itemLabel}>{scene.title}</span>
-                </button>
-            </div>
+        <li
+            ref={ref}
+            className={`${styles.itemRow} ${styles.sceneRow}${isActive ? ` ${styles.active}` : ''}`}
+        >
+            <button
+                type="button"
+                ref={handleRef}
+                className={styles.dragHandle}
+                aria-label="Drag scene"
+            />
+            <button
+                type="button"
+                className={styles.itemButton}
+                onMouseDown={event => {
+                    event.preventDefault();
+                }}
+                onClick={onFocus}
+            >
+                <span className={styles.itemLabel}>{title}</span>
+            </button>
         </li>
     );
 });

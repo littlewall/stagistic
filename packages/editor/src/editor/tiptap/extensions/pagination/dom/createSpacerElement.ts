@@ -30,10 +30,11 @@ export const createSpacerElement = (
         const divider = document.createElement('div');
 
         divider.dataset.paginationDivider = 'true';
+        const inset = options.dividerInsetPx ?? 0;
         divider.style.position = 'absolute';
-        divider.style.left = `${-options.marginLeft}px`;
+        divider.style.left = `${-options.marginLeft + inset}px`;
         divider.style.top = `${Math.max(0, dividerOffset)}px`;
-        divider.style.width = `calc(100% + ${options.marginLeft + options.marginRight}px)`;
+        divider.style.width = `calc(100% + ${options.marginLeft + options.marginRight - inset * 2}px)`;
         divider.style.borderTop = `${Math.max(1, options.dividerThickness)}px solid ${options.dividerColor}`;
         divider.style.pointerEvents = 'none';
 

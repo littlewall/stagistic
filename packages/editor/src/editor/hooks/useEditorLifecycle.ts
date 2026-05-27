@@ -2,6 +2,7 @@ import {
     type ScriptDocument,
 } from '@stagistic/script';
 import {useHotkey} from '@tanstack/react-hotkeys';
+import {TextSelection} from '@tiptap/pm/state';
 import {
     type Editor as TiptapEditor,
 } from '@tiptap/react';
@@ -465,6 +466,13 @@ export const useEditorLifecycle = ({
         isApplyingInitialRef.current = false;
         revisionRef.current = 0;
         lastEmittedActiveBlockIdRef.current = undefined;
+
+        instance.view.dispatch(
+            instance.state.tr
+                .setSelection(TextSelection.atStart(instance.state.doc))
+                .setMeta('preventUpdate', true)
+                .setMeta('addToHistory', false),
+        );
 
         incrementFullDocJsonSerializeCount();
 

@@ -35,6 +35,7 @@ export const usePaginationSettings = ({
                 lineHeightPx: number,
                 dividerColor: string,
                 dividerThickness: number,
+                dividerInsetPx: number,
             }) => boolean,
         };
 
@@ -48,6 +49,7 @@ export const usePaginationSettings = ({
             lineHeightPx,
             dividerColor: 'var(--color-divider)',
             dividerThickness: 1,
+            dividerInsetPx: scaleValue(96),
         });
     }, [
         editor,
