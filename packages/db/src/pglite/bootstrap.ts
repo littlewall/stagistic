@@ -1,4 +1,5 @@
 import {PGlite} from '@electric-sql/pglite';
+import {PGliteWorker} from '@electric-sql/pglite/worker';
 import {drizzle, type PgliteDatabase} from 'drizzle-orm/pglite';
 
 import {dbSchema} from '../schema';
@@ -18,6 +19,7 @@ interface CreatePgliteBootstrapOptions {
     fsBundleUrl: string,
     wasmUrl: string,
     dataDir?: string,
+    workerFactory?: () => Worker,
 }
 
 interface PgliteBootstrap {
@@ -33,7 +35,56 @@ export const createPgliteBootstrap = ({
     fsBundleUrl,
     wasmUrl,
     dataDir = DEFAULT_DATA_DIR,
+    workerFactory,
 }: CreatePgliteBootstrapOptions): PgliteBootstrap => {
+    if (workerFactory) {
+        let dbPromise: Promise<LocalDb> | null = null;
+
+        const getLocalDb = async (): Promise<LocalDb> => {
+            if (!dbPromise) {
+                dbPromise = (async () => {
+                    const workerInstance = await PGliteWorker.create(
+                        workerFactory(),
+                        {dataDir},
+                    );
+
+                    return drizzle({
+                        client: workerInstance as unknown as PGlite,
+                        schema: dbSchema,
+                    });
+                })();
+            }
+
+            return dbPromise;
+        };
+
+        return {
+            getLocalDb,
+            runMigrations: async () => {
+                await getLocalDb();
+            },
+            prepareLocalDb: async () => {
+                await getLocalDb();
+            },
+            prepareLocalDbWithProgress: async onProgress => {
+                onProgress({
+                    step: 'client',
+                    label: 'Spouštím lokální databázi',
+                    progress: 0.1,
+                });
+
+                await getLocalDb();
+
+                onProgress({
+                    step: 'ready',
+                    label: 'Databáze připravena',
+                    progress: 1,
+                });
+            },
+        };
+    }
+
+    // ── Direct (main-thread) path ─────────────────────────────────────────────
     let clientPromise: Promise<PGlite> | null = null;
     let dbPromise: Promise<LocalDb> | null = null;
     let migrationsPromise: Promise<void> | null = null;

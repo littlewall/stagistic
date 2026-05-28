@@ -1,29 +1,37 @@
-import {Accessibility, PointerSensor} from '@dnd-kit/dom';
+import {
+    Accessibility,
+    Feedback,
+    PointerSensor,
+} from '@dnd-kit/dom';
 import {DragDropProvider} from '@dnd-kit/react';
 import {
     useEditorLiveActiveBlock,
     useEditorLiveStructure,
     useFocusEditorBlock,
 } from '@stagistic/editor';
-import {Fragment, useCallback, useMemo} from 'react';
+import {
+    Fragment,
+    useCallback,
+    useMemo,
+} from 'react';
 
+import styles from './ScriptStructureSidebar.module.css';
 import {
     buildAccessibilityPlugin,
     configuredPointerSensor,
+    feedbackWithoutDropAnimation,
 } from './structureDndConfig';
 import {StructureRowAct} from './StructureRowAct';
 import {
     deriveStructureStateFromIndex,
     deriveStructureStateFromLive,
-    ROOT_ACT_GROUP,
     resolveActiveSceneBlockId,
+    ROOT_ACT_GROUP,
     type SceneItem,
 } from './structureRows';
 import {StructureRowScene} from './StructureRowScene';
 import type {ScriptStructureSidebarProps} from './types';
 import {useStructureSidebarDnd} from './useStructureSidebarDnd';
-
-import styles from './ScriptStructureSidebar.module.css';
 
 export const ScriptStructureSidebar = ({data, actions}: ScriptStructureSidebarProps) => {
     const {indexSnapshot, actNamePreviewById} = data;
@@ -81,22 +89,17 @@ export const ScriptStructureSidebar = ({data, actions}: ScriptStructureSidebarPr
         [sceneByBlockId],
     );
 
-    // Replace the default Accessibility plugin (class) with our configured descriptor.
     const plugins = useCallback(
         (defaults: readonly unknown[]) => [
-            ...defaults.filter(p => p !== Accessibility),
+            ...defaults.filter(p => p !== Accessibility && p !== Feedback),
             accessibilityPlugin,
+            feedbackWithoutDropAnimation,
         ],
         [accessibilityPlugin],
     );
 
-    // Replace default PointerSensor (class) with our distance-constrained descriptor.
-    // KeyboardSensor stays at defaults (Space/Enter, arrows, Escape).
     const sensors = useCallback(
-        (defaults: readonly unknown[]) => [
-            ...defaults.filter(s => s !== PointerSensor),
-            configuredPointerSensor,
-        ],
+        (defaults: readonly unknown[]) => [...defaults.filter(s => s !== PointerSensor), configuredPointerSensor],
         [],
     );
 

@@ -8,9 +8,14 @@ import {
 } from '@stagistic/db/pglite';
 
 const bootstrap = createPgliteBootstrap({
+
     fsBundleUrl: pgliteDataUrl,
     wasmUrl: pgliteWasmUrl,
     dataDir: 'idb://stagistic-main',
+    workerFactory: () => new Worker(
+        new URL('./pglite.worker.ts', import.meta.url),
+        {type: 'module'},
+    ),
 });
 
 export {

@@ -1,4 +1,11 @@
+import type {
+    ScriptAct,
+    ScriptBlock,
+    ScriptLocation,
+    ScriptScene,
+} from '@stagistic/db';
 import {
+    buildScriptBlockIndex,
     type ScriptBlockIndexSnapshot,
     type ScriptDocument,
 } from '@stagistic/script';
@@ -7,6 +14,7 @@ import {resolveScriptBlockDiff} from './blockDiffEngine';
 import {
     createScriptStateCollections,
     replaceCollectionRows,
+    syncCollectionRows,
 } from './collections';
 import {ScriptStatePacer} from './pacer';
 import {
@@ -17,7 +25,6 @@ import type {
     PersistLatestFn,
     ScriptBlockChange,
     ScriptStateRepository,
-    ScriptStateRows,
     ScriptStateSidebarTab,
     ScriptStateUiSnapshot,
 } from './types';
@@ -40,19 +47,23 @@ const EMPTY_INDEX: ScriptBlockIndexSnapshot = {
     blocks: [],
 };
 
-const toPreviousRowsMaps = (
-    rows: ScriptStateRows | null,
-) => {
-    if (!rows) {
-        return {};
-    }
+const areScenesEqual = (a: ScriptScene, b: ScriptScene): boolean => {
+    return a.id === b.id
+        && a.scriptId === b.scriptId
+        && a.headingBlockId === b.headingBlockId
+        && a.sceneNumber === b.sceneNumber
+        && a.colorHex === b.colorHex
+        && a.synopsis === b.synopsis
+        && a.locationId === b.locationId
+        && a.createdAt === b.createdAt;
+};
 
-    return {
-        previousBlocksById: new Map(rows.blocks.map(row => [row.id, row] as const)),
-        previousScenesById: new Map(rows.scenes.map(row => [row.id, row] as const)),
-        previousActsById: new Map(rows.acts.map(row => [row.id, row] as const)),
-        previousLocationsById: new Map(rows.locations.map(row => [row.id, row] as const)),
-    };
+const areActsEqual = (a: ScriptAct, b: ScriptAct): boolean => {
+    return a.id === b.id
+        && a.scriptId === b.scriptId
+        && a.headingBlockId === b.headingBlockId
+        && a.name === b.name
+        && a.createdAt === b.createdAt;
 };
 
 const serializeScriptDocument = (value: ScriptDocument | null) => {
@@ -78,9 +89,15 @@ export class BlockSyncController {
 
     private currentValue: ScriptDocument | null = null;
 
-    private currentRows: ScriptStateRows | null = null;
-
     private currentIndex: ScriptBlockIndexSnapshot = EMPTY_INDEX;
+
+    private previousBlocksById = new Map<string, ScriptBlock>();
+
+    private previousScenesById = new Map<string, ScriptScene>();
+
+    private previousActsById = new Map<string, ScriptAct>();
+
+    private previousLocationsById = new Map<string, ScriptLocation>();
 
     private pendingChangesByBlockId = new Map<string, ScriptBlockChange>();
 
@@ -104,8 +121,11 @@ export class BlockSyncController {
     hydrate(value: ScriptDocument | null | undefined) {
         if (!value) {
             this.currentValue = null;
-            this.currentRows = null;
             this.currentIndex = EMPTY_INDEX;
+            this.previousBlocksById.clear();
+            this.previousScenesById.clear();
+            this.previousActsById.clear();
+            this.previousLocationsById.clear();
             this.pendingChangesByBlockId.clear();
             this.isDocumentDirty = false;
             this.lastPersistedSerialized = '';
@@ -118,15 +138,19 @@ export class BlockSyncController {
             return;
         }
 
-        const nextRows = buildScriptStateRowsFromDocument(
-            this.scriptId,
-            value,
-            toPreviousRowsMaps(this.currentRows),
-        );
+        const nextRows = buildScriptStateRowsFromDocument(this.scriptId, value, {
+            previousBlocksById: this.previousBlocksById,
+            previousScenesById: this.previousScenesById,
+            previousActsById: this.previousActsById,
+            previousLocationsById: this.previousLocationsById,
+        });
 
         this.currentValue = value;
-        this.currentRows = nextRows;
         this.currentIndex = nextRows.indexSnapshot;
+        this.previousBlocksById = new Map(nextRows.blocks.map(row => [row.id, row]));
+        this.previousScenesById = new Map(nextRows.scenes.map(row => [row.id, row]));
+        this.previousActsById = new Map(nextRows.acts.map(row => [row.id, row]));
+        this.previousLocationsById = new Map(nextRows.locations.map(row => [row.id, row]));
         this.pendingChangesByBlockId.clear();
         this.isDocumentDirty = false;
         this.lastPersistedSerialized = serializeScriptDocument(value);
@@ -151,7 +175,7 @@ export class BlockSyncController {
     }
 
     applyEditorValue(nextValue: ScriptDocument): ApplyScriptValueResult {
-        if (!this.currentValue || !this.currentRows) {
+        if (!this.currentValue) {
             this.hydrate(nextValue);
 
             return {
@@ -160,27 +184,57 @@ export class BlockSyncController {
             };
         }
 
-        const nextRows = buildScriptStateRowsFromDocument(
-            this.scriptId,
-            nextValue,
-            toPreviousRowsMaps(this.currentRows),
-        );
-        const previousBlocksById = new Map(this.currentRows.blocks.map(row => [row.id, row] as const));
+        const indexResult = buildScriptBlockIndex(nextValue);
         const diff = resolveScriptBlockDiff({
             scriptId: this.scriptId,
             previousSnapshot: this.currentIndex,
-            nextSnapshot: nextRows.indexSnapshot,
-            previousBlocksById,
+            nextSnapshot: indexResult.snapshot,
+            previousBlocksById: this.previousBlocksById,
         });
 
         this.applyOptimisticBlockChanges(diff.changes);
-        replaceCollectionRows(this.collections.scenes, nextRows.scenes);
-        replaceCollectionRows(this.collections.acts, nextRows.acts);
-        replaceCollectionRows(this.collections.locations, nextRows.locations);
-        replaceCollectionRows(this.collections.blockCharacterRefs, nextRows.blockCharacterRefs);
+
+        if (diff.path === 'fast') {
+            diff.changes.forEach(change => {
+                if (change.type === 'delete') {
+                    this.previousBlocksById.delete(change.blockId);
+                } else {
+                    this.previousBlocksById.set(change.blockId, change.data.block);
+                }
+            });
+        } else {
+            const nextRows = buildScriptStateRowsFromDocument(this.scriptId, nextValue, {
+                previousBlocksById: this.previousBlocksById,
+                previousScenesById: this.previousScenesById,
+                previousActsById: this.previousActsById,
+                previousLocationsById: this.previousLocationsById,
+                precomputedIndexSnapshot: indexResult.snapshot,
+            });
+
+            syncCollectionRows(
+                this.collections.scenes,
+                nextRows.scenes,
+                row => row.id,
+                this.previousScenesById,
+                areScenesEqual,
+            );
+            syncCollectionRows(
+                this.collections.acts,
+                nextRows.acts,
+                row => row.id,
+                this.previousActsById,
+                areActsEqual,
+            );
+            replaceCollectionRows(this.collections.locations, nextRows.locations);
+            replaceCollectionRows(this.collections.blockCharacterRefs, nextRows.blockCharacterRefs);
+
+            this.previousBlocksById = new Map(nextRows.blocks.map(row => [row.id, row]));
+            this.previousScenesById = new Map(nextRows.scenes.map(row => [row.id, row]));
+            this.previousActsById = new Map(nextRows.acts.map(row => [row.id, row]));
+            this.previousLocationsById = new Map(nextRows.locations.map(row => [row.id, row]));
+        }
 
         this.currentValue = nextValue;
-        this.currentRows = nextRows;
         this.currentIndex = diff.nextSnapshot;
         this.isDocumentDirty = true;
 

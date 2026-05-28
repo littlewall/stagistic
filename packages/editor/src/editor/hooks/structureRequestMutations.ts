@@ -19,8 +19,12 @@ import type {
     EditorValueChangeMeta,
 } from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
+import {PAGINATION_CONTROL_META_KEY} from '../tiptap/extensions/pagination/plugin/createPaginationPlugin';
 import {isFountainBlockNodeName} from '../tiptap/fountainCore';
 import {type AutosaveSchedulePayload} from './useAutosaveController';
+
+let paginationRecalcToken = 0;
+const nextPaginationRecalcToken = () => ++paginationRecalcToken;
 
 export const setPlainTextContent = (
     nodes: FountainJSONContent[] | undefined,
@@ -183,10 +187,6 @@ export const insertActBlockBeforeId = (
     return [didInsert ? nextNodes : nodes, didInsert];
 };
 
-// ---------------------------------------------------------------------------
-// Surgical ProseMirror transaction for scene reorder
-// ---------------------------------------------------------------------------
-
 interface TopLevelBlockInfo {
     pos: number,
     nodeSize: number,
@@ -202,11 +202,6 @@ const getBlockTypeFromPmNode = (node: ProseMirrorNode): string | null => {
     return resolveLegacyFountainBlockType(node.type.name) ?? null;
 };
 
-/**
- * Collect all direct children of the doc that are fountain block nodes.
- * Returns null when non-fountain nodes (e.g. column groups) are detected,
- * which signals the caller to fall back to the setContent path.
- */
 const collectTopLevelBlocks = (doc: ProseMirrorNode): TopLevelBlockInfo[] | null => {
     const blocks: TopLevelBlockInfo[] = [];
     let hasUnexpected = false;
@@ -231,14 +226,6 @@ const collectTopLevelBlocks = (doc: ProseMirrorNode): TopLevelBlockInfo[] | null
     return hasUnexpected ? null : blocks;
 };
 
-/**
- * Build a surgical ProseMirror Transaction that moves a scene segment
- * (scene heading + its body blocks) to a new position, without replacing
- * the entire document.
- *
- * Returns null when the transaction cannot be built (unknown doc structure,
- * missing block IDs, etc.) — the caller must fall back to setContent.
- */
 const buildSceneReorderTransaction = (
     editor: TiptapEditor,
     sourceSceneBlockId: string,
@@ -284,7 +271,6 @@ const buildSceneReorderTransaction = (
         targetPos = targetBlock.pos;
     }
 
-    // Guard: target inside or equal to source (no-op or impossible)
     if (targetPos > sourceStart && targetPos <= sourceEnd) {
         return null;
     }
@@ -311,12 +297,9 @@ const buildSceneReorderTransaction = (
     const tr = state.tr;
 
     if (targetPos > sourceEnd) {
-        // Moving DOWN: delete source first, then insert at adjusted target position.
         tr.delete(sourceStart, sourceEnd);
         tr.insert(targetPos - movedSize, movedFragment);
     } else {
-        // Moving UP (targetPos ≤ sourceStart): insert at target, then delete the
-        // original range which has shifted by movedSize due to the insertion.
         tr.insert(targetPos, movedFragment);
         tr.delete(sourceStart + movedSize, sourceEnd + movedSize);
     }
@@ -324,10 +307,6 @@ const buildSceneReorderTransaction = (
     return tr;
 };
 
-/**
- * Commit a scene reorder using a surgical PM transaction when possible,
- * with automatic fallback to the full-document-replace path.
- */
 export const tryCommitSceneReorder = (
     editor: TiptapEditor,
     sourceSceneBlockId: string,
@@ -355,19 +334,18 @@ export const tryCommitSceneReorder = (
 
     const revision = revisionRef.current;
 
-    // Try surgical PM transaction; fall back to setContent if it can't be built.
     const surgicalTr = buildSceneReorderTransaction(editor, sourceSceneBlockId, beforeBlockId);
 
     if (surgicalTr) {
         surgicalTr.setMeta('preventUpdate', true);
         editor.view.dispatch(surgicalTr);
 
-        /*
-         * The sidebar structure is already updated synchronously via the
-         * EditorRuntimeExtension → `transaction` event → syncRuntimeSnapshotFromEditor.
-         * Defer the heavy BlockSyncController work (full index rebuild + DB collection
-         * updates) so the browser can process user interactions before blocking again.
-         */
+        editor.view.dispatch(
+            editor.state.tr
+                .setMeta('preventUpdate', true)
+                .setMeta(PAGINATION_CONTROL_META_KEY, {forceRecalcToken: nextPaginationRecalcToken()}),
+        );
+
         setLatestValue(savedValue, revision);
 
         window.setTimeout(() => {
@@ -388,7 +366,6 @@ export const tryCommitSceneReorder = (
         return;
     }
 
-    // Fallback: full document replace (setContent path).
     const nextDocument: ScriptDocument = {
         type: 'doc',
         attrs: currentDocAttrs,
@@ -417,8 +394,6 @@ export const tryCommitSceneReorder = (
     });
 };
 
-// ---------------------------------------------------------------------------
-
 const commitDocument = (
     editor: TiptapEditor,
     nextContent: FountainJSONContent[],
@@ -442,6 +417,12 @@ const commitDocument = (
             .setMeta('preventUpdate', true),
     );
 
+    editor.view.dispatch(
+        editor.state.tr
+            .setMeta('preventUpdate', true)
+            .setMeta(PAGINATION_CONTROL_META_KEY, {forceRecalcToken: nextPaginationRecalcToken()}),
+    );
+
     const savedValue = stripScriptSettings(nextDocument);
 
     revisionRef.current += 1;
@@ -449,18 +430,21 @@ const commitDocument = (
     const revision = revisionRef.current;
 
     setLatestValue(savedValue, revision);
-    onValueChangeRef.current?.(savedValue, {
-        source: 'structure',
-        revision,
-    });
-    onIndexChangeRef.current?.(buildScriptBlockIndex(savedValue).snapshot, {
-        source: 'structure',
-        revision,
-    });
-    scheduleAutosave({
-        value: savedValue,
-        revision,
-    });
+
+    window.setTimeout(() => {
+        onValueChangeRef.current?.(savedValue, {
+            source: 'structure',
+            revision,
+        });
+        onIndexChangeRef.current?.(buildScriptBlockIndex(savedValue).snapshot, {
+            source: 'structure',
+            revision,
+        });
+        scheduleAutosave({
+            value: savedValue,
+            revision,
+        });
+    }, 0);
 };
 
 export const tryCommitDocument = (

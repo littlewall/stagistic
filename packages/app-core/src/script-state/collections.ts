@@ -97,6 +97,50 @@ export const replaceCollectionRows = <TRow extends object, TKey extends string |
     collection.insert(rows);
 };
 
+export const syncCollectionRows = <TRow extends object>(
+    collection: Collection<TRow, string>,
+    nextRows: TRow[],
+    getKey: (row: TRow) => string,
+    previousRowsById: ReadonlyMap<string, TRow>,
+    isEqual: (previous: TRow, next: TRow) => boolean,
+) => {
+    const nextIds = new Set(nextRows.map(getKey));
+
+    // Delete rows that no longer exist
+    const keysToDelete: string[] = [];
+
+    for (const key of previousRowsById.keys()) {
+        if (!nextIds.has(key)) {
+            keysToDelete.push(key);
+        }
+    }
+
+    if (keysToDelete.length > 0) {
+        collection.delete(keysToDelete);
+    }
+
+    // Insert new rows or update changed rows
+    const toInsert: TRow[] = [];
+
+    for (const nextRow of nextRows) {
+        const key = getKey(nextRow);
+        const previousRow = previousRowsById.get(key);
+
+        if (!previousRow) {
+            toInsert.push(nextRow);
+        } else if (!isEqual(previousRow, nextRow)) {
+            collection.update(key, draft => {
+                Object.assign(draft, nextRow);
+            });
+        }
+        // isEqual → skip, no collection mutation
+    }
+
+    if (toInsert.length > 0) {
+        collection.insert(toInsert);
+    }
+};
+
 export const createScriptStateCollections = (): ScriptStateCollections => {
     return {
         blocks: createBlocksCollection(),

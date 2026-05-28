@@ -12,6 +12,7 @@ import {
     type IndexedScriptBlock,
     type IndexedScriptCharacterRef,
     normalizeActName,
+    type ScriptBlockIndexSnapshot,
     type ScriptDocument,
 } from '@stagistic/script';
 
@@ -22,6 +23,7 @@ interface BuildScriptStateRowsOptions {
     previousScenesById?: ReadonlyMap<string, ScriptScene>,
     previousActsById?: ReadonlyMap<string, ScriptAct>,
     previousLocationsById?: ReadonlyMap<string, ScriptLocation>,
+    precomputedIndexSnapshot?: ScriptBlockIndexSnapshot,
 }
 
 const toColumnGroupId = (columnGroupOrder: number | null): string | null => {
@@ -176,8 +178,8 @@ export const buildScriptStateRowsFromDocument = (
     options?: BuildScriptStateRowsOptions,
 ): ScriptStateRows => {
     const now = Date.now();
-    const indexResult = buildScriptBlockIndex(value);
-    const indexedBlocks = indexResult.snapshot.blocks;
+    const indexSnapshot = options?.precomputedIndexSnapshot ?? buildScriptBlockIndex(value).snapshot;
+    const indexedBlocks = indexSnapshot.blocks;
     const previousLocationsById = options?.previousLocationsById;
     const locations = previousLocationsById
         ? Array.from(previousLocationsById.values()).map(location => ({
@@ -187,7 +189,7 @@ export const buildScriptStateRowsFromDocument = (
         : [];
 
     return {
-        indexSnapshot: indexResult.snapshot,
+        indexSnapshot,
         blocks: indexedBlocks.map(block => toScriptBlockRow(
             scriptId,
             block,
