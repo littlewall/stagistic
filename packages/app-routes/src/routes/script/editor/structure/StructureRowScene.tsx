@@ -40,7 +40,9 @@ export const StructureRowScene = memo(({
                 onMouseDown={event => {
                     event.preventDefault();
                 }}
-                onClick={onFocus}
+                onClick={() => {
+                    onFocus(blockId);
+                }}
             >
                 <span className={styles.itemLabel}>{title}</span>
             </button>

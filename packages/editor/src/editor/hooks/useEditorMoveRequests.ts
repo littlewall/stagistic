@@ -16,7 +16,7 @@ import {
     getActiveFountainBlockFromState,
 } from '../tiptap/fountainCore';
 import {moveSceneSegment} from './structureReorder';
-import {tryCommitDocument} from './structureRequestMutations';
+import {tryCommitSceneReorder} from './structureRequestMutations';
 import {type AutosaveSchedulePayload} from './useAutosaveController';
 import {setActiveBlockSyncSuppressed} from './useEditorActiveBlockSync';
 
@@ -132,10 +132,13 @@ export const useEditorMoveRequests = ({
         }
 
         withActiveBlockPreserved(() => {
-            tryCommitDocument(
+            tryCommitSceneReorder(
                 editor,
+                moveSceneRequest.sourceSceneBlockId,
+                moveSceneRequest.beforeBlockId,
                 nextContent,
                 didChange,
+                currentValue.attrs,
                 setLatestValue,
                 onValueChangeRef,
                 onIndexChangeRef,

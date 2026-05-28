@@ -42,7 +42,7 @@ export interface StructureRowSceneProps {
     index: number,
     groupId: string,
     isActive: boolean,
-    onFocus: () => void,
+    onFocus: (blockId: string) => void,
 }
 
 export interface StructureRowActProps {

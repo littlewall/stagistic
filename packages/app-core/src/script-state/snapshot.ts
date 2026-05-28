@@ -66,7 +66,8 @@ const toScriptSceneRows = (
     now: number,
     previousRowsById?: ReadonlyMap<string, ScriptScene>,
 ): ScriptScene[] => {
-    const byId = new Map<string, ScriptScene>();
+    const orderByBlockId = new Map<string, number>(blocks.map(block => [block.blockId, block.orderNo]));
+    const rows: ScriptScene[] = [];
 
     blocks.forEach(block => {
         if (block.blockType !== ELEMENT_SCENE_HEADING) {
@@ -75,7 +76,7 @@ const toScriptSceneRows = (
 
         const previousRow = previousRowsById?.get(block.blockId);
 
-        byId.set(block.blockId, {
+        rows.push({
             id: block.blockId,
             scriptId,
             headingBlockId: block.blockId,
@@ -88,13 +89,9 @@ const toScriptSceneRows = (
         });
     });
 
-    return Array.from(byId.values())
-        .sort((a, b) => {
-            const leftOrder = blocks.find(entry => entry.blockId === a.headingBlockId)?.orderNo ?? 0;
-            const rightOrder = blocks.find(entry => entry.blockId === b.headingBlockId)?.orderNo ?? 0;
-
-            return leftOrder - rightOrder;
-        });
+    return rows.sort((a, b) => {
+        return (orderByBlockId.get(a.headingBlockId ?? '') ?? 0) - (orderByBlockId.get(b.headingBlockId ?? '') ?? 0);
+    });
 };
 
 const toScriptActRows = (
@@ -103,7 +100,8 @@ const toScriptActRows = (
     now: number,
     previousRowsById?: ReadonlyMap<string, ScriptAct>,
 ): ScriptAct[] => {
-    const byId = new Map<string, ScriptAct>();
+    const orderByBlockId = new Map<string, number>(blocks.map(block => [block.blockId, block.orderNo]));
+    const rows: ScriptAct[] = [];
 
     blocks.forEach(block => {
         if (block.blockType !== ELEMENT_ACT) {
@@ -112,7 +110,7 @@ const toScriptActRows = (
 
         const previousRow = previousRowsById?.get(block.blockId);
 
-        byId.set(block.blockId, {
+        rows.push({
             id: block.blockId,
             scriptId,
             headingBlockId: block.blockId,
@@ -122,13 +120,9 @@ const toScriptActRows = (
         });
     });
 
-    return Array.from(byId.values())
-        .sort((a, b) => {
-            const leftOrder = blocks.find(entry => entry.blockId === a.headingBlockId)?.orderNo ?? 0;
-            const rightOrder = blocks.find(entry => entry.blockId === b.headingBlockId)?.orderNo ?? 0;
-
-            return leftOrder - rightOrder;
-        });
+    return rows.sort((a, b) => {
+        return (orderByBlockId.get(a.headingBlockId ?? '') ?? 0) - (orderByBlockId.get(b.headingBlockId ?? '') ?? 0);
+    });
 };
 
 const toScriptBlockCharacterRefRows = (

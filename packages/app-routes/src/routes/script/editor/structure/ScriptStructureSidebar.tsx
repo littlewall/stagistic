@@ -61,7 +61,7 @@ export const ScriptStructureSidebar = ({data, actions}: ScriptStructureSidebarPr
         onReorderScene: actions.onReorderScene,
     });
 
-    const handleSceneFocus = useCallback((blockId: string) => focusBlock(blockId), [focusBlock]);
+    const handleSceneFocus = useCallback((id: string) => focusBlock(id), [focusBlock]);
 
     // Map every scene block id → scene row (for accessibility announcements).
     const sceneByBlockId = useMemo(() => {
@@ -136,7 +136,7 @@ export const ScriptStructureSidebar = ({data, actions}: ScriptStructureSidebarPr
                                         index={idx}
                                         groupId={group.groupId}
                                         isActive={scene.blockId === activeSceneBlockId}
-                                        onFocus={() => handleSceneFocus(scene.blockId)}
+                                        onFocus={handleSceneFocus}
                                     />
                                 ))}
                             </Fragment>
