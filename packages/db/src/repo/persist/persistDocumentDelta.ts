@@ -28,6 +28,35 @@ import {diffExtractedBlocks} from './diffExtractedBlocks';
  */
 const INSERT_TEMP_OFFSET = 1_000_000;
 
+const serializeRefByKey = (refByKey: Record<string, string>): string => {
+    return Object.entries(refByKey)
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([key, id]) => `${key}:${id}`)
+        .join('|');
+};
+
+const nonOrderFieldsDiffer = (prev: ExtractedBlockRow | undefined, next: ExtractedBlockRow): boolean => {
+    if (!prev) {
+        return true;
+    }
+
+    return prev.blockType !== next.blockType
+        || prev.textContent !== next.textContent
+        || prev.contentJson !== next.contentJson
+        || prev.sceneHeadingBlockId !== next.sceneHeadingBlockId
+        || prev.actHeadingBlockId !== next.actHeadingBlockId
+        || prev.columnGroupId !== next.columnGroupId
+        || prev.columnIndex !== next.columnIndex;
+};
+
+const refsDiffer = (prev: ExtractedBlockRow | undefined, next: ExtractedBlockRow): boolean => {
+    if (!prev) {
+        return true;
+    }
+
+    return serializeRefByKey(prev.characterRefByKey) !== serializeRefByKey(next.characterRefByKey);
+};
+
 const toCharacterRefRows = (block: ExtractedBlockRow, knownCharacterIds: Set<string>) => {
     return Object.entries(block.characterRefByKey)
         .filter(([, characterId]) => knownCharacterIds.has(characterId))
@@ -95,11 +124,21 @@ export const createDocumentPersister = (scriptId: string) => {
                 .where(and(eq(scriptBlocks.scriptId, scriptId), eq(scriptBlocks.id, row.id)));
         };
 
+        const fieldChangedUpdated = diff.updated.filter(
+            block => nonOrderFieldsDiffer(lastSavedBlocks.get(block.blockId), block),
+        );
+        const refChangedUpdated = diff.updated.filter(
+            block => refsDiffer(lastSavedBlocks.get(block.blockId), block),
+        );
+
         await db.transaction(async tx => {
             if (!diff.structural) {
-                // Case A: content-only updates of existing blocks (typing, body type change).
-                for (const block of diff.updated) {
+                // Case A: content-only edits — touch only blocks whose fields/refs actually changed.
+                for (const block of fieldChangedUpdated) {
                     await updateBlockFields(tx, block);
+                }
+
+                for (const block of refChangedUpdated) {
                     await replaceScriptBlockCharacterRefs(tx, block.blockId, toCharacterRefRows(block, knownCharacterIds));
                 }
 
@@ -164,27 +203,32 @@ export const createDocumentPersister = (scriptId: string) => {
             // 3. Delete removed blocks (their character refs cascade).
             await bulkDeleteScriptBlocks(tx, diff.deletedIds);
 
-            // 4. Insert new blocks at a collision-free temporary negative order.
-            for (const block of diff.inserted) {
-                const row = toDbBlock(block);
-
-                await tx.insert(scriptBlocks).values({...row, blockOrder: -INSERT_TEMP_OFFSET - row.blockOrder});
+            // 4. Bulk-insert new blocks at collision-free temporary negative orders.
+            if (diff.inserted.length > 0) {
+                await tx.insert(scriptBlocks).values(diff.inserted.map(block => ({
+                    ...toDbBlock(block),
+                    blockOrder: -INSERT_TEMP_OFFSET - block.orderNo,
+                })));
             }
 
-            // 5. Update changed blocks' non-order fields.
-            for (const block of diff.updated) {
+            /*
+             * 5. Update non-order fields ONLY for blocks that actually changed them.
+             * A pure reorder changes order only -> zero per-row field writes here;
+             * all ordering is applied by the single bulk statement in step 6.
+             */
+            for (const block of fieldChangedUpdated) {
                 await updateBlockFields(tx, block);
             }
 
-            // 6. Assign final orders for every block in the new document (collision-safe).
+            // 6. Assign all final orders in one bulk statement (collision-safe).
             await writeFinalBlockOrders(
                 tx,
                 scriptId,
                 extracted.blocks.map(block => ({id: block.blockId, blockOrder: block.orderNo})),
             );
 
-            // 7. Refs for inserted + updated blocks.
-            for (const block of [...diff.inserted, ...diff.updated]) {
+            // 7. Rewrite refs only for inserted + blocks whose refs changed.
+            for (const block of [...diff.inserted, ...refChangedUpdated]) {
                 await replaceScriptBlockCharacterRefs(tx, block.blockId, toCharacterRefRows(block, knownCharacterIds));
             }
         });

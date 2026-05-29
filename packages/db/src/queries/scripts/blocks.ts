@@ -199,13 +199,24 @@ export const writeFinalBlockOrders = async (
         .set({blockOrder: sql`(-${scriptBlocks.blockOrder} - 1)`})
         .where(eq(scriptBlocks.scriptId, scriptId));
 
-    // Phase 2: set final orders. Unprocessed rows are negative; targets unique.
+    /*
+     * Phase 2: set all final orders in a SINGLE bulk statement. A reorder of one
+     * scene in a feature-length script shifts hundreds of rows; doing per-row
+     * awaited UPDATEs (one worker round-trip each) is pathologically slow and
+     * the transaction may not finish before a page refresh. UPDATE ... FROM
+     * (VALUES ...) applies the whole permutation at once; the unique index is
+     * evaluated at statement end against the final (valid) set.
+     */
     const now = Date.now();
+    const valueTuples = sql.join(
+        assignments.map(assignment => sql`(${assignment.id}, ${assignment.blockOrder})`),
+        sql`, `,
+    );
 
-    for (const assignment of assignments) {
-        await db
-            .update(scriptBlocks)
-            .set({blockOrder: assignment.blockOrder, updatedAt: now})
-            .where(and(eq(scriptBlocks.scriptId, scriptId), eq(scriptBlocks.id, assignment.id)));
-    }
+    await db.execute(sql`
+        UPDATE ${scriptBlocks} AS b
+        SET block_order = v.ord::int, updated_at = ${now}
+        FROM (VALUES ${valueTuples}) AS v(id, ord)
+        WHERE b.id = v.id AND b.script_id = ${scriptId}
+    `);
 };
