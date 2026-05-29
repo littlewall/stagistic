@@ -4,6 +4,7 @@ import {
     eq,
     inArray,
     isNull,
+    sql,
 } from 'drizzle-orm';
 
 import {scriptBlocks} from '../../schema';
@@ -165,5 +166,44 @@ export const reorderScriptBlocks = async (
                     eq(scriptBlocks.id, move.id),
                 ),
             );
+    }
+};
+
+export interface BlockOrderAssignment {
+    id: string,
+    blockOrder: number,
+}
+
+/**
+ * Assign final block_order values without violating the (script_id, block_order)
+ * unique index. Phase 1: negate every surviving row of this script into a
+ * collision-free temporary range. Phase 2: set the requested final orders
+ * (targets are a 0..N permutation, so no final collision). Must run inside a
+ * transaction.
+ */
+export const writeFinalBlockOrders = async (
+    db: DbClient,
+    scriptId: string,
+    assignments: BlockOrderAssignment[],
+) => {
+    if (assignments.length === 0) {
+        return;
+    }
+
+    // Phase 1: move every existing row to negative space (preserves uniqueness,
+    // cannot collide with the positive final targets).
+    await db
+        .update(scriptBlocks)
+        .set({blockOrder: sql`(-${scriptBlocks.blockOrder} - 1)`})
+        .where(eq(scriptBlocks.scriptId, scriptId));
+
+    // Phase 2: set final orders. Unprocessed rows are negative; targets unique.
+    const now = Date.now();
+
+    for (const assignment of assignments) {
+        await db
+            .update(scriptBlocks)
+            .set({blockOrder: assignment.blockOrder, updatedAt: now})
+            .where(and(eq(scriptBlocks.scriptId, scriptId), eq(scriptBlocks.id, assignment.id)));
     }
 };
