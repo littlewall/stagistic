@@ -1,13 +1,10 @@
-import {type ScriptDocument} from '@stagistic/script';
+import {convertDefaultScriptDocumentToLegacy, type ScriptDocument} from '@stagistic/script';
 
 import * as dbQueries from '../queries';
-import {rebuildScriptDocumentFromBlocks} from '../rewrite';
+import {extractScriptBlocks, rebuildScriptDocumentFromBlocks} from '../rewrite';
 import type {ScriptRepository} from '../scriptRepository';
 
-import {
-    LEGACY_TO_BLOCKS_TRIGGERS,
-    migrateScriptDocumentToBlocks,
-} from './migration/legacyToBlocks';
+import {createDocumentPersister} from './persist/persistDocumentDelta';
 import type {
     GetDb,
     RecordOutbox,
@@ -61,42 +58,46 @@ const loadLatestFromBlocks = async (
     return rebuilt.document as ScriptDocument;
 };
 
-const persistBlocksFromDocument = async (
-    db: Awaited<ReturnType<GetDb>>,
-    scriptId: string,
-    value: ScriptDocument,
-    trigger: typeof LEGACY_TO_BLOCKS_TRIGGERS.saveLatest,
-) => {
-    await migrateScriptDocumentToBlocks({
-        db,
-        scriptId,
-        sourceDocument: value,
-        trigger,
-        context: trigger,
-    });
-};
-
 export const createContentHandlers = ({
     getDb,
     recordOutbox,
     syncDb,
 }: CreateContentHandlersArgs): ContentHandlers => {
+    const persisters = new Map<string, ReturnType<typeof createDocumentPersister>>();
+
+    const getPersister = (scriptId: string) => {
+        let persister = persisters.get(scriptId);
+
+        if (!persister) {
+            persister = createDocumentPersister(scriptId);
+            persisters.set(scriptId, persister);
+        }
+
+        return persister;
+    };
+
     const loadLatest: ContentHandlers['loadLatest'] = async scriptId => {
         const db = await getDb();
+        const document = await loadLatestFromBlocks(db, scriptId);
 
-        return loadLatestFromBlocks(db, scriptId);
+        if (document) {
+            // Seed the diff baseline so the first autosave writes only the
+            // editor's normalization delta (benign), not the whole document.
+            const baseline = extractScriptBlocks(scriptId, convertDefaultScriptDocumentToLegacy(document));
+
+            getPersister(scriptId).setBaseline(baseline.blocks);
+        }
+
+        return document;
     };
 
     const saveLatest: ContentHandlers['saveLatest'] = async (scriptId, value) => {
         const db = await getDb();
         const now = Date.now();
 
-        await persistBlocksFromDocument(
-            db,
-            scriptId,
-            value,
-            LEGACY_TO_BLOCKS_TRIGGERS.saveLatest,
-        );
+        // Granular persist: diff the document against the last-saved blocks and
+        // write only the delta (Case A content-only UPDATEs; Case B structural).
+        await getPersister(scriptId).persist(db, convertDefaultScriptDocumentToLegacy(value));
 
         await db.transaction(async tx => {
             await dbQueries.updateScriptTimestamp(tx, {
