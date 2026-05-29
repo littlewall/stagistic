@@ -1,8 +1,8 @@
-import * as dbQueries from '../queries';
-import type {ScriptTitlePageRepository} from '../scriptRepository';
 import type {TitlePageSettings} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 
+import * as dbQueries from '../queries';
+import type {ScriptTitlePageRepository} from '../scriptRepository';
 import type {
     GetDb,
     RecordOutbox,
@@ -24,7 +24,7 @@ export const createTitlePageHandlers = ({
     getDb,
     recordOutbox,
 }: CreateTitlePageHandlersArgs): ScriptTitlePageRepository => {
-    const load: ScriptTitlePageRepository['load'] = async (scriptId) => {
+    const load: ScriptTitlePageRepository['load'] = async scriptId => {
         const db = await getDb();
         const config = await dbQueries.getScriptConfigMeta(db, {
             scriptId,
@@ -80,7 +80,7 @@ export const createTitlePageHandlers = ({
         });
     };
 
-    const deleteTitlePage: ScriptTitlePageRepository['delete'] = async (scriptId) => {
+    const deleteTitlePage: ScriptTitlePageRepository['delete'] = async scriptId => {
         const db = await getDb();
 
         await dbQueries.deleteScriptConfig(db, {

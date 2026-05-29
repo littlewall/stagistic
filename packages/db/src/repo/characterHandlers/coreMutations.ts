@@ -1,7 +1,7 @@
-import * as dbQueries from '../../queries';
 import {normalizeCharacterKey} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 
+import * as dbQueries from '../../queries';
 import type {CharacterMutationDeps} from './mutationDeps';
 import {
     buildCharacterColorPayload,

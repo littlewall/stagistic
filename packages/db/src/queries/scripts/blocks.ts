@@ -190,8 +190,10 @@ export const writeFinalBlockOrders = async (
         return;
     }
 
-    // Phase 1: move every existing row to negative space (preserves uniqueness,
-    // cannot collide with the positive final targets).
+    /*
+     * Phase 1: move every existing row to negative space (preserves uniqueness,
+     * cannot collide with the positive final targets).
+     */
     await db
         .update(scriptBlocks)
         .set({blockOrder: sql`(-${scriptBlocks.blockOrder} - 1)`})

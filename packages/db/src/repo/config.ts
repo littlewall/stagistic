@@ -1,7 +1,8 @@
-import * as dbQueries from '../queries';
-import type {ScriptRepository} from '../scriptRepository';
 import {type EditorSettingsOverride} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
+
+import * as dbQueries from '../queries';
+import type {ScriptRepository} from '../scriptRepository';
 
 const LATEST_SCRIPT_SCHEMA_VERSION = 2;
 

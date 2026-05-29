@@ -12,23 +12,29 @@ import {
     writeFinalBlockOrders,
 } from '../../queries';
 import {
-    extractScriptBlocks,
     type ExtractedBlockRow,
+    extractScriptBlocks,
     type RewriteScriptDocument,
 } from '../../rewrite/jsonToBlocks';
-import {scriptActs, scriptBlocks, scriptScenes} from '../../schema';
+import {
+    scriptActs, scriptBlocks, scriptScenes,
+} from '../../schema';
 import {diffExtractedBlocks} from './diffExtractedBlocks';
 
-// Temp order offset for freshly-inserted rows during a structural write. Larger
-// than any realistic block count, so temp values never collide with surviving
-// rows (0..M) before writeFinalBlockOrders reassigns everything.
+/*
+ * Temp order offset for freshly-inserted rows during a structural write. Larger
+ * than any realistic block count, so temp values never collide with surviving
+ * rows (0..M) before writeFinalBlockOrders reassigns everything.
+ */
 const INSERT_TEMP_OFFSET = 1_000_000;
 
 const toCharacterRefRows = (block: ExtractedBlockRow, knownCharacterIds: Set<string>) => {
     return Object.entries(block.characterRefByKey)
         .filter(([, characterId]) => knownCharacterIds.has(characterId))
         .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([characterKey, characterId]) => ({characterId, characterKey, isConfirmed: true}));
+        .map(([characterKey, characterId]) => ({
+            characterId, characterKey, isConfirmed: true,
+        }));
 };
 
 /**
@@ -100,8 +106,10 @@ export const createDocumentPersister = (scriptId: string) => {
                 return;
             }
 
-            // Case B: structural change (insert/delete/reorder/heading edit).
-            // 1. Reconcile acts.
+            /*
+             * Case B: structural change (insert/delete/reorder/heading edit).
+             * 1. Reconcile acts.
+             */
             const existingActs = await tx.select({id: scriptActs.id}).from(scriptActs).where(eq(scriptActs.scriptId, scriptId));
             const nextActIds = new Set(extracted.acts.map(act => act.id));
 
@@ -115,6 +123,7 @@ export const createDocumentPersister = (scriptId: string) => {
                     updatedAt: now,
                 });
             }
+
             for (const act of existingActs) {
                 if (!nextActIds.has(act.id)) {
                     await deleteScriptAct(tx, act.id);
@@ -145,6 +154,7 @@ export const createDocumentPersister = (scriptId: string) => {
                     updatedAt: now,
                 });
             }
+
             for (const scene of existingScenes) {
                 if (!nextSceneIds.has(scene.id)) {
                     await deleteScriptScene(tx, scene.id);

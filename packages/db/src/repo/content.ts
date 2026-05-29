@@ -3,7 +3,6 @@ import {convertDefaultScriptDocumentToLegacy, type ScriptDocument} from '@stagis
 import * as dbQueries from '../queries';
 import {extractScriptBlocks, rebuildScriptDocumentFromBlocks} from '../rewrite';
 import type {ScriptRepository} from '../scriptRepository';
-
 import {createDocumentPersister} from './persist/persistDocumentDelta';
 import type {
     GetDb,
@@ -81,8 +80,10 @@ export const createContentHandlers = ({
         const document = await loadLatestFromBlocks(db, scriptId);
 
         if (document) {
-            // Seed the diff baseline so the first autosave writes only the
-            // editor's normalization delta (benign), not the whole document.
+            /*
+             * Seed the diff baseline so the first autosave writes only the
+             * editor's normalization delta (benign), not the whole document.
+             */
             const baseline = extractScriptBlocks(scriptId, convertDefaultScriptDocumentToLegacy(document));
 
             getPersister(scriptId).setBaseline(baseline.blocks);
@@ -95,8 +96,10 @@ export const createContentHandlers = ({
         const db = await getDb();
         const now = Date.now();
 
-        // Granular persist: diff the document against the last-saved blocks and
-        // write only the delta (Case A content-only UPDATEs; Case B structural).
+        /*
+         * Granular persist: diff the document against the last-saved blocks and
+         * write only the delta (Case A content-only UPDATEs; Case B structural).
+         */
         await getPersister(scriptId).persist(db, convertDefaultScriptDocumentToLegacy(value));
 
         await db.transaction(async tx => {
@@ -112,9 +115,11 @@ export const createContentHandlers = ({
             }, tx);
         });
 
-        // PGlite does not call syncToFs() after transaction COMMIT — the WAL
-        // stays in memory until explicitly flushed. Without this, data is lost
-        // on page refresh (the worker dies and the unflushed WAL disappears).
+        /*
+         * PGlite does not call syncToFs() after transaction COMMIT — the WAL
+         * stays in memory until explicitly flushed. Without this, data is lost
+         * on page refresh (the worker dies and the unflushed WAL disappears).
+         */
         await syncDb();
     };
 

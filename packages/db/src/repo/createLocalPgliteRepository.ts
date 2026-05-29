@@ -32,12 +32,12 @@ import type {
 import {createCharacterHandlers} from './characters';
 import {createConfigHandlers} from './config';
 import {createContentHandlers} from './content';
-import {createTitlePageHandlers} from './titlePage';
 import {
     LEGACY_TO_BLOCKS_TRIGGERS,
     migrateScriptDocumentToBlocks,
 } from './migration/legacyToBlocks';
 import {createOutboxRecorder} from './outbox';
+import {createTitlePageHandlers} from './titlePage';
 import type {GetDb} from './types';
 
 export interface LocalPgliteRepositoryDeps {

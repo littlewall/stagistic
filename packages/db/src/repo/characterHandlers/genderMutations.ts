@@ -1,6 +1,6 @@
-import * as dbQueries from '../../queries';
 import {uuidv7} from '@stagistic/shared';
 
+import * as dbQueries from '../../queries';
 import type {CharacterMutationDeps} from './mutationDeps';
 import {
     DEFAULT_GENDER_LABEL_BY_KEY,

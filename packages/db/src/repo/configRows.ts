@@ -1,4 +1,3 @@
-import * as dbQueries from '../queries';
 import {
     type EditorSettingsOverride,
     type FountainElementType,
@@ -8,6 +7,7 @@ import {
     uuidv7,
 } from '@stagistic/shared';
 
+import * as dbQueries from '../queries';
 import {
     isBlockCasing,
     isBlockShortcut,

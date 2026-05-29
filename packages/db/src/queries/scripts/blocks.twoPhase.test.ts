@@ -1,8 +1,12 @@
 import {asc, eq} from 'drizzle-orm';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {scriptBlocks} from '../../schema';
-import {createTestDb, seedScript, type TestDb} from '../../testing/createTestDb';
+import {
+    createTestDb, seedScript, type TestDb,
+} from '../../testing/createTestDb';
 import {writeFinalBlockOrders} from './blocks';
 
 const insertBlock = async (db: TestDb, scriptId: string, id: string, blockOrder: number) => {
@@ -51,7 +55,11 @@ describe('writeFinalBlockOrders', () => {
             ]);
         });
 
-        expect(await readOrder(db, 's1')).toEqual(['c', 'b', 'a']);
+        expect(await readOrder(db, 's1')).toEqual([
+            'c',
+            'b',
+            'a',
+        ]);
     });
 
     it('handles a single swap of adjacent rows', async () => {
@@ -62,10 +70,7 @@ describe('writeFinalBlockOrders', () => {
         await insertBlock(db, 's1', 'b', 1);
 
         await db.transaction(async tx => {
-            await writeFinalBlockOrders(tx, 's1', [
-                {id: 'b', blockOrder: 0},
-                {id: 'a', blockOrder: 1},
-            ]);
+            await writeFinalBlockOrders(tx, 's1', [{id: 'b', blockOrder: 0}, {id: 'a', blockOrder: 1}]);
         });
 
         expect(await readOrder(db, 's1')).toEqual(['b', 'a']);

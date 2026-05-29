@@ -1,11 +1,12 @@
 import {
-    migrateLegacyJsonToBlocksForScript,
-    type RewriteBlocksMigrationAudit,
-} from '../../rewrite';
-import {
     convertDefaultScriptDocumentToLegacy,
     type ScriptDocument,
 } from '@stagistic/script';
+
+import {
+    migrateLegacyJsonToBlocksForScript,
+    type RewriteBlocksMigrationAudit,
+} from '../../rewrite';
 
 export const LEGACY_TO_BLOCKS_TRIGGERS = {
     createScript: 'create-script',

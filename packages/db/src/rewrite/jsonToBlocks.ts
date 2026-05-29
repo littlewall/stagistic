@@ -813,10 +813,12 @@ const persistExtractedBlocks = async (
             );
         }
 
-        // Delete blocks, scenes and acts that no longer exist in the document.
-        // Blocks first: their character refs are cascade-deleted via FK.
-        // Scene/act deletion triggers FK set-null on scriptBlocks.sceneId/actId,
-        // but those blocks were already upserted with correct references above.
+        /*
+         * Delete blocks, scenes and acts that no longer exist in the document.
+         * Blocks first: their character refs are cascade-deleted via FK.
+         * Scene/act deletion triggers FK set-null on scriptBlocks.sceneId/actId,
+         * but those blocks were already upserted with correct references above.
+         */
         await bulkDeleteScriptBlocks(tx, orphanBlockIds);
 
         for (const sceneId of orphanSceneIds) {

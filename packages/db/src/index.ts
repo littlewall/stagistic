@@ -3,12 +3,12 @@ export * from './pglite';
 export type {DbClient} from './queries';
 export * from './queries';
 export * as dbQueries from './queries';
-export * from './rewrite';
 export {
     createLocalPgliteDataRepository,
     createLocalPgliteRepository,
     type LocalPgliteRepositoryDeps,
 } from './repo/createLocalPgliteRepository';
+export * from './rewrite';
 export * from './schema';
 export type {
     ListScriptsOptions,

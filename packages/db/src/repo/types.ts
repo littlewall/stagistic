@@ -1,6 +1,5 @@
-import type {DbClient} from '../queries';
-
 import type {LocalDb} from '../pglite';
+import type {DbClient} from '../queries';
 
 export type GetDb = () => Promise<LocalDb>;
 

@@ -61,9 +61,11 @@ export const diffExtractedBlocks = (
 
         updated.push(row);
 
-        // Structural when order changed, boundary-ness toggled, OR the block is
-        // (or was) a boundary heading — a heading edit must reconcile the
-        // scene/act rows (e.g. act rename updates scriptActs.name).
+        /*
+         * Structural when order changed, boundary-ness toggled, OR the block is
+         * (or was) a boundary heading — a heading edit must reconcile the
+         * scene/act rows (e.g. act rename updates scriptActs.name).
+         */
         if (
             prev.orderNo !== row.orderNo
             || isBoundary(prev.blockType)
@@ -80,5 +82,7 @@ export const diffExtractedBlocks = (
         }
     });
 
-    return {inserted, updated, deletedIds, structural};
+    return {
+        inserted, updated, deletedIds, structural,
+    };
 };

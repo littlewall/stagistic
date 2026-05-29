@@ -1,4 +1,6 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {scripts} from '../schema';
 import {createTestDb, seedScript} from './createTestDb';

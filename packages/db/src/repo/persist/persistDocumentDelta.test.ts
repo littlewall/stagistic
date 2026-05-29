@@ -1,12 +1,18 @@
 import {asc, eq} from 'drizzle-orm';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {rebuildScriptDocumentFromBlocks, type RewriteScriptDocument} from '../../rewrite/jsonToBlocks';
 import {scriptBlocks} from '../../schema';
-import {createTestDb, seedScript, type TestDb} from '../../testing/createTestDb';
+import {
+    createTestDb, seedScript, type TestDb,
+} from '../../testing/createTestDb';
 import {createDocumentPersister} from './persistDocumentDelta';
 
-const doc = (blocks: {id: string, type?: string, text: string}[]): RewriteScriptDocument => ({
+const doc = (blocks: {
+    id: string, type?: string, text: string,
+}[]): RewriteScriptDocument => ({
     type: 'doc',
     content: blocks.map(b => ({
         type: 'fountainBlock',
@@ -22,7 +28,9 @@ const readBlocks = async (db: TestDb, scriptId: string) => {
         .where(eq(scriptBlocks.scriptId, scriptId))
         .orderBy(asc(scriptBlocks.blockOrder));
 
-    return rows.map(r => ({id: r.id, type: r.blockType, text: r.textContent, order: r.blockOrder}));
+    return rows.map(r => ({
+        id: r.id, type: r.blockType, text: r.textContent, order: r.blockOrder,
+    }));
 };
 
 describe('persistDocumentDelta', () => {
@@ -34,13 +42,17 @@ describe('persistDocumentDelta', () => {
         const persister = createDocumentPersister('s1');
 
         await persister.persist(db, doc([
-            {id: 'h1', type: 'fountain_scene_heading', text: 'INT. ROOM'},
-            {id: 'a1', text: 'Action one.'},
+            {
+                id: 'h1', type: 'fountain_scene_heading', text: 'INT. ROOM',
+            }, {id: 'a1', text: 'Action one.'},
         ]));
 
         expect(await readBlocks(db, 's1')).toEqual([
-            {id: 'h1', type: 'fountain_scene_heading', text: 'INT. ROOM', order: 0},
-            {id: 'a1', type: 'fountain_action', text: 'Action one.', order: 1},
+            {
+                id: 'h1', type: 'fountain_scene_heading', text: 'INT. ROOM', order: 0,
+            }, {
+                id: 'a1', type: 'fountain_action', text: 'Action one.', order: 1,
+            },
         ]);
     });
 
@@ -54,7 +66,11 @@ describe('persistDocumentDelta', () => {
         await persister.persist(db, doc([{id: 'a1', text: 'hi'}]));
         await persister.persist(db, doc([{id: 'a1', text: 'hello'}]));
 
-        expect(await readBlocks(db, 's1')).toEqual([{id: 'a1', type: 'fountain_action', text: 'hello', order: 0}]);
+        expect(await readBlocks(db, 's1')).toEqual([
+            {
+                id: 'a1', type: 'fountain_action', text: 'hello', order: 0,
+            },
+        ]);
     });
 
     it('reorder survives (no unique violation) and round-trips in new order', async () => {
@@ -65,20 +81,33 @@ describe('persistDocumentDelta', () => {
         const persister = createDocumentPersister('s1');
 
         await persister.persist(db, doc([
-            {id: 'h1', type: 'fountain_scene_heading', text: 'A'},
+            {
+                id: 'h1', type: 'fountain_scene_heading', text: 'A',
+            },
             {id: 'x', text: 'x'},
-            {id: 'h2', type: 'fountain_scene_heading', text: 'B'},
+            {
+                id: 'h2', type: 'fountain_scene_heading', text: 'B',
+            },
             {id: 'y', text: 'y'},
         ]));
 
         await persister.persist(db, doc([
-            {id: 'h2', type: 'fountain_scene_heading', text: 'B'},
+            {
+                id: 'h2', type: 'fountain_scene_heading', text: 'B',
+            },
             {id: 'y', text: 'y'},
-            {id: 'h1', type: 'fountain_scene_heading', text: 'A'},
+            {
+                id: 'h1', type: 'fountain_scene_heading', text: 'A',
+            },
             {id: 'x', text: 'x'},
         ]));
 
-        expect((await readBlocks(db, 's1')).map(b => b.id)).toEqual(['h2', 'y', 'h1', 'x']);
+        expect((await readBlocks(db, 's1')).map(b => b.id)).toEqual([
+            'h2',
+            'y',
+            'h1',
+            'x',
+        ]);
     });
 
     it('block type change persists', async () => {
@@ -88,8 +117,16 @@ describe('persistDocumentDelta', () => {
 
         const persister = createDocumentPersister('s1');
 
-        await persister.persist(db, doc([{id: 'a1', type: 'fountain_action', text: 'X'}]));
-        await persister.persist(db, doc([{id: 'a1', type: 'fountain_character', text: 'X'}]));
+        await persister.persist(db, doc([
+            {
+                id: 'a1', type: 'fountain_action', text: 'X',
+            },
+        ]));
+        await persister.persist(db, doc([
+            {
+                id: 'a1', type: 'fountain_character', text: 'X',
+            },
+        ]));
 
         expect((await readBlocks(db, 's1'))[0].type).toBe('fountain_character');
     });
@@ -102,11 +139,14 @@ describe('persistDocumentDelta', () => {
         const persister = createDocumentPersister('s1');
 
         await persister.persist(db, doc([
-            {id: 'h1', type: 'fountain_scene_heading', text: 'A'},
-            {id: 'a1', text: 'one'},
+            {
+                id: 'h1', type: 'fountain_scene_heading', text: 'A',
+            }, {id: 'a1', text: 'one'},
         ]));
         await persister.persist(db, doc([
-            {id: 'h1', type: 'fountain_scene_heading', text: 'A'},
+            {
+                id: 'h1', type: 'fountain_scene_heading', text: 'A',
+            },
         ]));
 
         expect((await readBlocks(db, 's1')).map(b => b.id)).toEqual(['h1']);
@@ -120,8 +160,9 @@ describe('persistDocumentDelta', () => {
         const persister = createDocumentPersister('s1');
 
         await persister.persist(db, doc([
-            {id: 'h1', type: 'fountain_scene_heading', text: 'INT. ROOM'},
-            {id: 'a1', text: 'Action.'},
+            {
+                id: 'h1', type: 'fountain_scene_heading', text: 'INT. ROOM',
+            }, {id: 'a1', text: 'Action.'},
         ]));
 
         const storedBlocks = await db

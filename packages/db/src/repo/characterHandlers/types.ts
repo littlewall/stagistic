@@ -1,5 +1,4 @@
 import type {ScriptRepository} from '../../scriptRepository';
-
 import type {
     GetDb,
     RecordOutbox,
