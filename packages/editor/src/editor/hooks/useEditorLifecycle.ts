@@ -2,7 +2,7 @@ import {
     type ScriptDocument,
 } from '@stagistic/script';
 import {useHotkey} from '@tanstack/react-hotkeys';
-import {TextSelection} from '@tiptap/pm/state';
+import {TextSelection, type Transaction} from '@tiptap/pm/state';
 import {
     type Editor as TiptapEditor,
 } from '@tiptap/react';
@@ -21,6 +21,7 @@ import type {
     PersistentCharacterRef,
 } from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
+import {IMMEDIATE_SAVE_META_KEY} from '../saveMeta';
 import {
     buildSidebarProjectionFromIndex,
     type SidebarProjectionColorContext,
@@ -387,7 +388,7 @@ export const useEditorLifecycle = ({
             return;
         }
 
-        const handleUpdate = ({editor: updatedEditor}: {editor: TiptapEditor}) => {
+        const handleUpdate = ({editor: updatedEditor, transaction}: {editor: TiptapEditor, transaction: Transaction}) => {
             if (isApplyingInitialRef.current) {
                 return;
             }
@@ -407,8 +408,12 @@ export const useEditorLifecycle = ({
             /*
              * Keep ProseMirror as the live source of truth while typing.
              * Full document serialization is reserved for structural edits and save flows.
+             * Discrete commands (e.g. block-type change) tag their transaction to
+             * persist immediately; plain typing stays debounced.
              */
-            scheduleAutosave({revision});
+            const immediate = Boolean(transaction.getMeta(IMMEDIATE_SAVE_META_KEY));
+
+            scheduleAutosave({revision, immediate});
         };
 
         instance.on('update', handleUpdate);

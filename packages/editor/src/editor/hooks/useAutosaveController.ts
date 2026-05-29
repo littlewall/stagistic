@@ -15,6 +15,12 @@ export type SaveResult = boolean | void | Promise<boolean | void>;
 export interface AutosaveSchedulePayload {
     value?: ScriptDocument,
     revision?: number,
+    /**
+     * Persist immediately, bypassing the debounce. Used for discrete, intentional
+     * actions (scene reorder, act insert/delete/rename, block-type change) where
+     * coalescing makes no sense — only continuous typing needs the debounce.
+     */
+    immediate?: boolean,
 }
 
 type UseAutosaveControllerArgs = {
@@ -44,7 +50,7 @@ const isAutosaveSchedulePayload = (value: unknown): value is AutosaveSchedulePay
         return false;
     }
 
-    return 'value' in value || 'revision' in value;
+    return 'value' in value || 'revision' in value || 'immediate' in value;
 };
 
 const resolveSchedulePayload = (
@@ -142,6 +148,45 @@ export const useAutosaveController = ({
         clearAutosaveTimer();
     }, [clearAutosaveTimer, updateDirty]);
 
+    /*
+     * Run the pending save right now (if dirty), bypassing the debounce. Shared
+     * by the debounce timer, immediate saves, and the page-hide/unmount flush.
+     */
+    const runSaveNow = useCallback(() => {
+        const autoSaveHandler = onAutoSaveRef.current;
+
+        if (!autoSaveHandler) {
+            return;
+        }
+
+        const latestValue = resolveLatestValueNow();
+
+        if (!latestValue) {
+            return;
+        }
+
+        const revisionToSave = latestRevisionRef.current;
+
+        if (revisionToSave <= lastSavedRevisionRef.current) {
+            return;
+        }
+
+        void (async () => {
+            try {
+                const result = await autoSaveHandler(latestValue);
+
+                if (result === false) {
+                    return;
+                }
+
+                lastSavedRevisionRef.current = Math.max(lastSavedRevisionRef.current, revisionToSave);
+                updateDirty(latestRevisionRef.current > lastSavedRevisionRef.current);
+            } catch {
+                // onAutoSave should handle reporting errors.
+            }
+        })();
+    }, [onAutoSaveRef, resolveLatestValueNow, updateDirty]);
+
     const scheduleAutosave = useCallback((input?: ScriptDocument | AutosaveSchedulePayload) => {
         const payload = resolveSchedulePayload(input);
         const normalizedRevision = toRevision(payload.revision);
@@ -168,45 +213,24 @@ export const useAutosaveController = ({
 
         clearAutosaveTimer();
 
+        // Discrete actions persist now; only continuous typing waits the debounce.
+        if (payload.immediate) {
+            runSaveNow();
+
+            return;
+        }
+
         const delay = autoSaveDelayMs ?? DEFAULT_AUTOSAVE_DELAY_MS;
 
         autosaveTimerRef.current = window.setTimeout(() => {
             autosaveTimerRef.current = null;
-
-            const latestValue = resolveLatestValueNow();
-
-            if (!latestValue) {
-                return;
-            }
-
-            const revisionToSave = latestRevisionRef.current;
-
-            if (revisionToSave <= lastSavedRevisionRef.current) {
-                return;
-            }
-
-            const run = async () => {
-                try {
-                    const result = await autoSaveHandler(latestValue);
-
-                    if (result === false) {
-                        return;
-                    }
-
-                    lastSavedRevisionRef.current = Math.max(lastSavedRevisionRef.current, revisionToSave);
-                    updateDirty(latestRevisionRef.current > lastSavedRevisionRef.current);
-                } catch {
-                    // onAutoSave should handle reporting errors.
-                }
-            };
-
-            void run();
+            runSaveNow();
         }, delay);
     }, [
         autoSaveDelayMs,
         clearAutosaveTimer,
         onAutoSaveRef,
-        resolveLatestValueNow,
+        runSaveNow,
         updateDirty,
     ]);
 
@@ -257,46 +281,9 @@ export const useAutosaveController = ({
      * routes through the autosave handler, not the manual-save handler.
      */
     const flushPendingSave = useCallback(() => {
-        const autoSaveHandler = onAutoSaveRef.current;
-
-        if (!autoSaveHandler) {
-            return;
-        }
-
-        const revisionToSave = latestRevisionRef.current;
-
-        if (revisionToSave <= lastSavedRevisionRef.current) {
-            return;
-        }
-
         clearAutosaveTimer();
-
-        const latestValue = resolveLatestValueNow();
-
-        if (!latestValue) {
-            return;
-        }
-
-        void (async () => {
-            try {
-                const result = await autoSaveHandler(latestValue);
-
-                if (result === false) {
-                    return;
-                }
-
-                lastSavedRevisionRef.current = Math.max(lastSavedRevisionRef.current, revisionToSave);
-                updateDirty(latestRevisionRef.current > lastSavedRevisionRef.current);
-            } catch {
-                // onAutoSave reports its own errors.
-            }
-        })();
-    }, [
-        clearAutosaveTimer,
-        onAutoSaveRef,
-        resolveLatestValueNow,
-        updateDirty,
-    ]);
+        runSaveNow();
+    }, [clearAutosaveTimer, runSaveNow]);
 
     useEffect(() => {
         const handleVisibilityChange = () => {

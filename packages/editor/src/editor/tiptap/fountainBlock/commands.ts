@@ -7,6 +7,7 @@ import type {NodeType} from '@tiptap/pm/model';
 import {TextSelection, type Transaction} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
+import {IMMEDIATE_SAVE_META_KEY} from '../../saveMeta';
 import {
     type ActiveFountainBlock,
     FOUNTAIN_BLOCK_NODE_NAME,
@@ -115,6 +116,7 @@ export const updateBlockType = (editor: Editor, blockType: FountainBlockType, id
         activeBlock.node.textContent ?? '',
     );
     tr = setSelectionNearBlockStart(tr, activeBlock.pos);
+    tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
     editor.view.dispatch(tr.scrollIntoView());
     focusEditor(editor);
 
@@ -185,6 +187,7 @@ export const setBlockTypeWithSelection = (
         block.node.textContent ?? '',
     );
     tr = setSelectionNearBlockStart(tr, block.pos);
+    tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
 
     editor.view.dispatch(tr.scrollIntoView());
     focusEditor(editor);

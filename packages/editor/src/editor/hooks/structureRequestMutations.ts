@@ -360,6 +360,7 @@ export const tryCommitSceneReorder = (
             scheduleAutosave({
                 value: savedValue,
                 revision,
+                immediate: true,
             });
         }, 0);
 
@@ -391,6 +392,7 @@ export const tryCommitSceneReorder = (
     scheduleAutosave({
         value: savedValue,
         revision,
+        immediate: true,
     });
 };
 
@@ -443,6 +445,7 @@ const commitDocument = (
         scheduleAutosave({
             value: savedValue,
             revision,
+            immediate: true,
         });
     }, 0);
 };
