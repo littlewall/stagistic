@@ -88,10 +88,11 @@ Aplikace bude žít jako web **i** desktop (Tauri; `apps/desktop` dnes placehold
 
 Nahradit `migrateLegacyJsonToBlocksForScript(force:true)`-on-save za `persistDocumentDelta`:
 
-- Drží `lastSavedSnapshot` (block index posledního uloženého stavu).
+- Drží `lastSavedBlocks` (mapa `blockId → ExtractedBlockRow` posledního uloženého stavu) + sady scén/aktů.
+- **Pozor — proč ne app-core `blockDiffEngine`:** app-core index snapshot (`IndexedScriptBlock`) **neobsahuje `contentJson`** (inline formátování bold/italic), má jen `textContent`. Naopak `extractScriptBlocks` (`jsonToBlocks.ts`) `contentJson` počítá. Persist diff proto běží nad **extrahovanými řádky**, ne nad index snapshotem. (Index snapshot zůstává jen pro live store / sidebary, kde contentJson netřeba.) `blockDiffEngine.ts` se tedy **maže** s mrtvým BlockSyncController stackem, ne přesouvá.
 - `saveLatest(scriptId, doc)`:
-  1. Postav `currentSnapshot` z `doc` (reuse `buildScriptBlockIndex` / `buildIndexSnapshotFromPmDoc` — editor ho stejně už staví pro live store).
-  2. `diff(currentSnapshot, lastSavedSnapshot)` → `{inserted[], updated[], deleted[]}` (recyklovaný `blockDiffEngine`).
+  1. `extracted = extractScriptBlocks(scriptId, doc)` (existující, autoritativní — text, contentJson, sceneId/actId přes heading tracking, columnGroup, characterRefByKey).
+  2. `diff(extracted.blocks, lastSavedBlocks)` → `{inserted[], updated[], deleted[]}` (nový malý diff nad `ExtractedBlockRow`, porovnává všechna pole vč. contentJson, blockType, order, sceneId/actId, characterRefs).
   3. Větvení:
      - **Případ A — jen obsah existujících bloků** (stejná množina id, stejný order, beze změny „boundary-ness"): `UPDATE` jen dirty bloky (text/contentJson/typ). Žádná rekonciliace scén/aktů, žádná dvoufáze. Pokrývá psaní a změnu typu mezi ne-hraničními typy (action ↔ dialogue ↔ …).
      - **Případ B — strukturální změna:** změnila se množina id bloků (insert/delete), nebo order (reorder), **nebo se u bloku změnila „boundary-ness"** (stal se / přestal být scene-heading nebo act → scéna/akt vzniká/zaniká). V jedné transakci:
@@ -113,8 +114,8 @@ Nahradit `migrateLegacyJsonToBlocksForScript(force:true)`-on-save za `persistDoc
 
 ### 3. Smazat / zredukovat (`packages/app-core/src/script-state/`)
 
-- Smazat `BlockSyncController` (`controller.ts`), `collections.ts`, controller `pacer.ts`, `snapshot.ts` (pokud jen pro kolekce), TanStack DB závislost v tomto modulu.
-- `blockDiffEngine.ts` → **přesunout do `@stagistic/db`** (persist vrstva ho potřebuje; závisí jen na `@stagistic/script` index snapshotu + db typech).
+- Smazat `BlockSyncController` (`controller.ts`), `collections.ts`, controller `pacer.ts`, `blockDiffEngine.ts`, `snapshot.ts` (pokud jen pro kolekce), TanStack DB závislost v tomto modulu.
+- Persist diff je **nová** funkce nad `ExtractedBlockRow` v `@stagistic/db` (ne přesun app-core `blockDiffEngine` — ten nemá `contentJson`, viz Komponenta 1).
 - `useScriptState` zredukovat na tenkou vrstvu (drží `scriptId`, předává autosave), nebo zrušit a `ScriptEditorRoute` volá repo přímo.
 - `ScriptEditorRoute.tsx`: odstranit dvojí `onValueChange` → controller větev; `structureSourceValue`/`scriptStateIndexSnapshot` napojit jen na editor live + initial.
 
@@ -168,8 +169,7 @@ Než se postaví cokoli dalšího, dokázat v izolaci, že zápis přežije relo
 - `packages/db/src/schema.ts` — rename `order_no` → `block_order`.
 - `packages/db/src/queries/scripts/blocks.ts` — `block_order`, dvoufázový order writer, granulární helpery.
 - `packages/db/src/rewrite/jsonToBlocks.ts` — `migrateLegacyJsonToBlocksForScript` zůstává jen pro import; extrakce snapshotu sdílená s diffem.
-- `packages/db/src/repo/**` — **nový modul** (přesun z `apps/web/src/repo/`): `createLocalPgliteRepository({getDb, syncToFs})`, `persistDocumentDelta`, `lastSavedSnapshot`, content/character/config/titlePage handlery, `loadLatest` baseline.
-- `packages/db/src/blockDiffEngine.ts` — **přesun** z `@stagistic/app-core`.
+- `packages/db/src/repo/**` — **nový modul** (přesun z `apps/web/src/repo/`): `createLocalPgliteRepository({getDb, syncToFs})`, `persistDocumentDelta` (diff nad `ExtractedBlockRow`), `lastSavedBlocks`, content/character/config/titlePage handlery, `loadLatest` baseline.
 - `packages/db/src/pglite/bootstrap.ts` — `syncToFs` (hotovo) + případná oprava worker configu po Kroku 0.
 
 **`apps/web` (jen seam):**
@@ -177,7 +177,7 @@ Než se postaví cokoli dalšího, dokázat v izolaci, že zápis přežije relo
 - `apps/web/src/repo/index.ts` — tenké instancování `createLocalPgliteRepository({getLocalDb, syncToFs})`.
 
 **Ostatní balíky:**
-- `packages/app-core/src/script-state/*` — smazat controller/kolekce/pacer; `blockDiffEngine` přesunut do db.
+- `packages/app-core/src/script-state/*` — smazat controller/kolekce/pacer/blockDiffEngine (mrtvý stack).
 - `packages/app-routes/src/routes/script/ScriptEditorRoute.tsx` + `useScriptEditorController` — odstranit dvojí save cestu.
 - `packages/editor/src/editor/hooks/useEditorStructureRequests.ts` — zobecnit request kanál.
 
