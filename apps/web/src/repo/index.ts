@@ -1,6 +1,6 @@
-import type {ScriptRepository} from '@stagistic/db';
+import {createLocalPgliteRepository, type ScriptRepository} from '@stagistic/db';
 
-import {createLocalPgliteRepository} from './localPgliteRepo';
+import {getLocalDb, syncToFs} from '~db';
 
-export const scriptRepository: ScriptRepository = createLocalPgliteRepository();
+export const scriptRepository: ScriptRepository = createLocalPgliteRepository({getLocalDb, syncToFs});
 export type {ScriptRepository} from '@stagistic/db';

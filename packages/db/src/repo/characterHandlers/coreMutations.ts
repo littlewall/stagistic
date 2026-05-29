@@ -1,4 +1,4 @@
-import {dbQueries} from '@stagistic/db';
+import * as dbQueries from '../../queries';
 import {normalizeCharacterKey} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 

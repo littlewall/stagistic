@@ -1,8 +1,10 @@
-import type {DbClient} from '@stagistic/db';
+import type {DbClient} from '../queries';
 
-import type {LocalDb} from '~db';
+import type {LocalDb} from '../pglite';
 
 export type GetDb = () => Promise<LocalDb>;
+
+export type SyncDb = () => Promise<void>;
 
 export interface OutboxPayload {
     scriptId: string,

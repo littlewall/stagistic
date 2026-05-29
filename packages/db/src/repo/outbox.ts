@@ -1,4 +1,4 @@
-import {dbQueries} from '@stagistic/db';
+import * as dbQueries from '../queries';
 import {uuidv7} from '@stagistic/shared';
 
 import type {

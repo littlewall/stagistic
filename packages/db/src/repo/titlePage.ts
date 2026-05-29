@@ -1,5 +1,5 @@
-import {dbQueries} from '@stagistic/db';
-import type {ScriptTitlePageRepository} from '@stagistic/db';
+import * as dbQueries from '../queries';
+import type {ScriptTitlePageRepository} from '../scriptRepository';
 import type {TitlePageSettings} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 

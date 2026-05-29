@@ -4,6 +4,11 @@ export type {DbClient} from './queries';
 export * from './queries';
 export * as dbQueries from './queries';
 export * from './rewrite';
+export {
+    createLocalPgliteDataRepository,
+    createLocalPgliteRepository,
+    type LocalPgliteRepositoryDeps,
+} from './repo/createLocalPgliteRepository';
 export * from './schema';
 export type {
     ListScriptsOptions,

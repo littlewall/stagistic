@@ -24,6 +24,7 @@ interface CreatePgliteBootstrapOptions {
 
 interface PgliteBootstrap {
     getLocalDb: () => Promise<LocalDb>,
+    syncToFs: () => Promise<void>,
     runMigrations: () => Promise<void>,
     prepareLocalDb: () => Promise<void>,
     prepareLocalDbWithProgress: (onProgress: (update: DbBootstrapUpdate) => void) => Promise<void>,
@@ -39,6 +40,7 @@ export const createPgliteBootstrap = ({
 }: CreatePgliteBootstrapOptions): PgliteBootstrap => {
     if (workerFactory) {
         let dbPromise: Promise<LocalDb> | null = null;
+        let workerInstanceRef: PGliteWorker | null = null;
 
         const getLocalDb = async (): Promise<LocalDb> => {
             if (!dbPromise) {
@@ -47,6 +49,8 @@ export const createPgliteBootstrap = ({
                         workerFactory(),
                         {dataDir},
                     );
+
+                    workerInstanceRef = workerInstance;
 
                     return drizzle({
                         client: workerInstance as unknown as PGlite,
@@ -58,8 +62,17 @@ export const createPgliteBootstrap = ({
             return dbPromise;
         };
 
+        const syncToFs = async () => {
+            if (!workerInstanceRef) {
+                await getLocalDb();
+            }
+
+            await workerInstanceRef?.syncToFs();
+        };
+
         return {
             getLocalDb,
+            syncToFs,
             runMigrations: async () => {
                 await getLocalDb();
             },
@@ -171,6 +184,12 @@ export const createPgliteBootstrap = ({
         await getLocalDb();
     };
 
+    const syncToFs = async () => {
+        const client = await getClient();
+
+        await client.syncToFs();
+    };
+
     const prepareLocalDbWithProgress = async (
         onProgress: (update: DbBootstrapUpdate) => void,
     ) => {
@@ -212,6 +231,7 @@ export const createPgliteBootstrap = ({
 
     return {
         getLocalDb,
+        syncToFs,
         runMigrations,
         prepareLocalDb,
         prepareLocalDbWithProgress,

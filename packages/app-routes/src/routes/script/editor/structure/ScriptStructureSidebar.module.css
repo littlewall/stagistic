@@ -179,18 +179,12 @@
         background: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
     }
 
-    /* dnd-kit Feedback plugin: visible clone shown at the drop position during drag.
-       Lower opacity so it reads as a ghost/preview, not a real row. */
     &[data-dnd-placeholder = 'clone'] {
         pointer-events: none;
         opacity: .3;
     }
 
-    /* dnd-kit: the original row while it follows the cursor (data-dnd-dragging)
-       and during the drop animation (data-dnd-dropping). Give it a card-like
-       background + shadow so it visually separates from the rest of the page. */
-    &[data-dnd-dragging],
-    &[data-dnd-dropping] {
+    &[data-dnd-dragging] {
         padding-block: var(--space-sm);
         background: var(--color-surface);
         border-radius: var(--radius-md);

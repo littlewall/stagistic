@@ -1,7 +1,7 @@
 import {
     migrateLegacyJsonToBlocksForScript,
     type RewriteBlocksMigrationAudit,
-} from '@stagistic/db';
+} from '../../rewrite';
 import {
     convertDefaultScriptDocumentToLegacy,
     type ScriptDocument,

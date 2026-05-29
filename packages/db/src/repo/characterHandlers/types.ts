@@ -1,4 +1,4 @@
-import type {ScriptRepository} from '@stagistic/db';
+import type {ScriptRepository} from '../../scriptRepository';
 
 import type {
     GetDb,

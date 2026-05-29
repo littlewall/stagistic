@@ -1,4 +1,4 @@
-import {dbQueries} from '@stagistic/db';
+import * as dbQueries from '../queries';
 import {
     type EditorSettingsOverride,
     type FountainElementType,

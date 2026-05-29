@@ -1,5 +1,5 @@
-import {dbQueries} from '@stagistic/db';
-import type {ScriptRepository} from '@stagistic/db';
+import * as dbQueries from '../queries';
+import type {ScriptRepository} from '../scriptRepository';
 import {type EditorSettingsOverride} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 

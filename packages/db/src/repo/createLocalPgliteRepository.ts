@@ -1,16 +1,20 @@
+import {type ScriptDocument} from '@stagistic/script';
+import {
+    trimOrFallback,
+    uuidv7,
+} from '@stagistic/shared';
+
+import type {LocalDb} from '../pglite';
+import * as dbQueries from '../queries';
 import {
     bulkUpsertScriptBlocks,
-    dbQueries,
     listScriptBlocks,
     type ListScriptBlocksOptions,
-    type ListScriptsOptions,
     reorderScriptBlocks,
     replaceScriptBlockCharacterRefs,
     type ScriptBlockCharacterRefRow,
     type ScriptBlockOrderMove,
     type ScriptBlockUpsertRow,
-    type ScriptDataRepository,
-    type ScriptRepository,
     updateScriptSceneMetadata,
     type UpdateScriptSceneMetadataPayload,
     upsertScriptAct,
@@ -19,27 +23,32 @@ import {
     type UpsertScriptLocationPayload,
     upsertScriptScene,
     type UpsertScriptScenePayload,
-} from '@stagistic/db';
-import {type ScriptDocument} from '@stagistic/script';
-import {
-    trimOrFallback,
-    uuidv7,
-} from '@stagistic/shared';
-
-import {getLocalDb} from '~db';
-
-import {createCharacterHandlers} from './localPglite/characters';
-import {createConfigHandlers} from './localPglite/config';
-import {createContentHandlers} from './localPglite/content';
-import {createTitlePageHandlers} from './localPglite/titlePage';
+} from '../queries';
+import type {
+    ListScriptsOptions,
+    ScriptDataRepository,
+    ScriptRepository,
+} from '../scriptRepository';
+import {createCharacterHandlers} from './characters';
+import {createConfigHandlers} from './config';
+import {createContentHandlers} from './content';
+import {createTitlePageHandlers} from './titlePage';
 import {
     LEGACY_TO_BLOCKS_TRIGGERS,
     migrateScriptDocumentToBlocks,
-} from './localPglite/migration/legacyToBlocks';
-import {createOutboxRecorder} from './localPglite/outbox';
-import type {GetDb} from './localPglite/types';
+} from './migration/legacyToBlocks';
+import {createOutboxRecorder} from './outbox';
+import type {GetDb} from './types';
 
-export const createLocalPgliteDataRepository = (): ScriptDataRepository => {
+export interface LocalPgliteRepositoryDeps {
+    getLocalDb: () => Promise<LocalDb>,
+    syncToFs: () => Promise<void>,
+}
+
+export const createLocalPgliteDataRepository = ({
+    getLocalDb,
+    syncToFs,
+}: LocalPgliteRepositoryDeps): ScriptDataRepository => {
     const dbPromise = getLocalDb();
 
     const getDb: GetDb = async () => dbPromise;
@@ -153,6 +162,7 @@ export const createLocalPgliteDataRepository = (): ScriptDataRepository => {
     } = createContentHandlers({
         getDb,
         recordOutbox,
+        syncDb: syncToFs,
     });
 
     const content = {
@@ -320,8 +330,8 @@ export const createLocalPgliteDataRepository = (): ScriptDataRepository => {
     } satisfies ScriptDataRepository;
 };
 
-export const createLocalPgliteRepository = (): ScriptRepository => {
-    const repositoryData = createLocalPgliteDataRepository();
+export const createLocalPgliteRepository = (deps: LocalPgliteRepositoryDeps): ScriptRepository => {
+    const repositoryData = createLocalPgliteDataRepository(deps);
 
     return {
         ...repositoryData,
