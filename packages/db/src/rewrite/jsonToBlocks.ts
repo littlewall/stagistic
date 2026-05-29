@@ -2,7 +2,10 @@ import {eq} from 'drizzle-orm';
 
 import type {DbClient} from '../queries';
 import {
+    bulkDeleteScriptBlocks,
     bulkUpsertScriptBlocks,
+    deleteScriptAct,
+    deleteScriptScene,
     listScriptCharacters,
     replaceScriptBlockCharacterRefs,
     replaceScriptTitlePageFields,
@@ -59,7 +62,7 @@ export interface RewriteBlocksMigrationAudit {
 export interface RewriteStoredBlockRow {
     id: string,
     blockType: string,
-    orderNo: number,
+    blockOrder: number,
     textContent: string,
     contentJson: string | null,
     columnGroupId: string | null,
@@ -670,6 +673,14 @@ const persistExtractedBlocks = async (
         .select()
         .from(scriptScenes)
         .where(eq(scriptScenes.scriptId, scriptId));
+    const existingBlocks = await db
+        .select({id: scriptBlocks.id})
+        .from(scriptBlocks)
+        .where(eq(scriptBlocks.scriptId, scriptId));
+    const existingActs = await db
+        .select({id: scriptActs.id})
+        .from(scriptActs)
+        .where(eq(scriptActs.scriptId, scriptId));
     const characterIdSet = new Set(scriptCharacters.map(character => character.id));
     const sceneIdByHeadingBlockId = new Map<string, string>();
     const actIdByHeadingBlockId = new Map<string, string>();
@@ -717,19 +728,14 @@ const persistExtractedBlocks = async (
         validCharacterRefsByBlockId.set(block.blockId, refs);
     });
 
+    const newBlockIds = new Set(extracted.blocks.map(b => b.blockId));
+    const newSceneIds = new Set(extracted.scenes.map(s => s.id));
+    const newActIds = new Set(extracted.acts.map(a => a.id));
+    const orphanBlockIds = existingBlocks.map(b => b.id).filter(id => !newBlockIds.has(id));
+    const orphanSceneIds = existingScenes.map(s => s.id).filter(id => !newSceneIds.has(id));
+    const orphanActIds = existingActs.map(a => a.id).filter(id => !newActIds.has(id));
+
     await db.transaction(async tx => {
-        await tx
-            .delete(scriptBlocks)
-            .where(eq(scriptBlocks.scriptId, scriptId));
-
-        await tx
-            .delete(scriptScenes)
-            .where(eq(scriptScenes.scriptId, scriptId));
-
-        await tx
-            .delete(scriptActs)
-            .where(eq(scriptActs.scriptId, scriptId));
-
         for (const act of extracted.acts) {
             await upsertScriptAct(tx, {
                 id: act.id,
@@ -777,7 +783,7 @@ const persistExtractedBlocks = async (
             id: block.blockId,
             scriptId,
             blockType: block.blockType,
-            orderNo: block.orderNo,
+            blockOrder: block.orderNo,
             textContent: block.textContent,
             contentJson: block.contentJson,
             sceneId: block.sceneHeadingBlockId
@@ -802,6 +808,20 @@ const persistExtractedBlocks = async (
                     isConfirmed: true,
                 })),
             );
+        }
+
+        // Delete blocks, scenes and acts that no longer exist in the document.
+        // Blocks first: their character refs are cascade-deleted via FK.
+        // Scene/act deletion triggers FK set-null on scriptBlocks.sceneId/actId,
+        // but those blocks were already upserted with correct references above.
+        await bulkDeleteScriptBlocks(tx, orphanBlockIds);
+
+        for (const sceneId of orphanSceneIds) {
+            await deleteScriptScene(tx, sceneId);
+        }
+
+        for (const actId of orphanActIds) {
+            await deleteScriptAct(tx, actId);
         }
     });
 
@@ -857,7 +877,7 @@ const toScriptDocumentFromStoredRows = (
     });
 
     const blockRowsSorted = [...blockRows]
-        .sort((a, b) => a.orderNo - b.orderNo);
+        .sort((a, b) => a.blockOrder - b.blockOrder);
 
     const createBlockNode = (row: RewriteStoredBlockRow): FountainJSONContent => {
         const attrs: Record<string, unknown> = {

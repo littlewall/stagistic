@@ -12,5 +12,9 @@ export const compiledMigrations = [
     {
         "id": "0002_drop_production_tables",
         "sql": "DROP TABLE IF EXISTS \"script_cue_sheet_annotations\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_cue_sheets\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_block_annotations\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_scene_costumes\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_scene_props\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_scene_versions\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_costumes\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_props\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_members\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_permissions\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_views\" CASCADE;--> statement-breakpoint\nDROP TABLE IF EXISTS \"script_layers\" CASCADE;\n"
+    },
+    {
+        "id": "0003_rename_block_order",
+        "sql": "ALTER TABLE \"script_blocks\" RENAME COLUMN \"order_no\" TO \"block_order\";\n"
     }
 ] as const;

@@ -50,7 +50,7 @@ const toScriptBlockRow = (
         id: block.blockId,
         scriptId,
         blockType: block.blockType,
-        orderNo: block.orderNo,
+        blockOrder: block.orderNo,
         textContent: block.textContent,
         contentJson: previousRow?.contentJson ?? null,
         sceneId: block.sceneBlockId,

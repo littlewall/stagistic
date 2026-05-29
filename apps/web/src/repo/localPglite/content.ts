@@ -12,6 +12,7 @@ import {
 import type {
     GetDb,
     RecordOutbox,
+    SyncDb,
 } from './types';
 
 type ContentHandlers = {
@@ -22,6 +23,7 @@ type ContentHandlers = {
 interface CreateContentHandlersArgs {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
+    syncDb: SyncDb,
 }
 
 const loadLatestFromBlocks = async (
@@ -40,7 +42,7 @@ const loadLatestFromBlocks = async (
         storedBlocks.map(row => ({
             id: row.id,
             blockType: row.blockType,
-            orderNo: row.orderNo,
+            blockOrder: row.blockOrder,
             textContent: row.textContent,
             contentJson: row.contentJson,
             columnGroupId: row.columnGroupId,
@@ -78,6 +80,7 @@ const persistBlocksFromDocument = async (
 export const createContentHandlers = ({
     getDb,
     recordOutbox,
+    syncDb,
 }: CreateContentHandlersArgs): ContentHandlers => {
     const loadLatest: ContentHandlers['loadLatest'] = async scriptId => {
         const db = await getDb();
@@ -108,6 +111,11 @@ export const createContentHandlers = ({
                 payloadJson: JSON.stringify({scriptId, updatedAt: now}),
             }, tx);
         });
+
+        // PGlite does not call syncToFs() after transaction COMMIT — the WAL
+        // stays in memory until explicitly flushed. Without this, data is lost
+        // on page refresh (the worker dies and the unflushed WAL disappears).
+        await syncDb();
     };
 
     return {

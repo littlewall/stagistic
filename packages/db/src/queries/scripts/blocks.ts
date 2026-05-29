@@ -19,7 +19,7 @@ export interface ScriptBlockUpsertRow {
     id: string,
     scriptId: string,
     blockType: string,
-    orderNo: number,
+    blockOrder: number,
     textContent: string,
     contentJson: string | null,
     sceneId: string | null,
@@ -32,7 +32,7 @@ export interface ScriptBlockUpsertRow {
 
 export interface ScriptBlockOrderMove {
     id: string,
-    orderNo: number,
+    blockOrder: number,
     updatedAt: number,
 }
 
@@ -71,7 +71,7 @@ export const listScriptBlocks = async (
         .select()
         .from(scriptBlocks)
         .where(whereClause)
-        .orderBy(asc(scriptBlocks.orderNo));
+        .orderBy(asc(scriptBlocks.blockOrder));
 };
 
 export const listScriptBlocksByScene = async (db: DbClient, sceneId: string) => {
@@ -79,7 +79,7 @@ export const listScriptBlocksByScene = async (db: DbClient, sceneId: string) => 
         .select()
         .from(scriptBlocks)
         .where(eq(scriptBlocks.sceneId, sceneId))
-        .orderBy(asc(scriptBlocks.orderNo));
+        .orderBy(asc(scriptBlocks.blockOrder));
 };
 
 export const listScriptBlocksByAct = async (db: DbClient, actId: string) => {
@@ -87,7 +87,7 @@ export const listScriptBlocksByAct = async (db: DbClient, actId: string) => {
         .select()
         .from(scriptBlocks)
         .where(eq(scriptBlocks.actId, actId))
-        .orderBy(asc(scriptBlocks.orderNo));
+        .orderBy(asc(scriptBlocks.blockOrder));
 };
 
 export const getScriptBlockById = async (db: DbClient, blockId: string) => {
@@ -112,7 +112,7 @@ export const bulkUpsertScriptBlocks = async (db: DbClient, rows: ScriptBlockUpse
                 id: row.id,
                 scriptId: row.scriptId,
                 blockType: row.blockType,
-                orderNo: row.orderNo,
+                blockOrder: row.blockOrder,
                 textContent: row.textContent,
                 contentJson: row.contentJson,
                 sceneId: row.sceneId,
@@ -126,7 +126,7 @@ export const bulkUpsertScriptBlocks = async (db: DbClient, rows: ScriptBlockUpse
                 target: scriptBlocks.id,
                 set: {
                     blockType: row.blockType,
-                    orderNo: row.orderNo,
+                    blockOrder: row.blockOrder,
                     textContent: row.textContent,
                     contentJson: row.contentJson,
                     sceneId: row.sceneId,
@@ -156,7 +156,7 @@ export const reorderScriptBlocks = async (
         await db
             .update(scriptBlocks)
             .set({
-                orderNo: move.orderNo,
+                blockOrder: move.blockOrder,
                 updatedAt: move.updatedAt,
             })
             .where(
