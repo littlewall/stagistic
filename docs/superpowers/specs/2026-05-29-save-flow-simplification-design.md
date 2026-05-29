@@ -56,6 +56,7 @@ Jeden zdroj pravdy, jedna save cesta, granulární zápis jen změněných blok�
    - Sloupec `order_no` → **`block_order`**, property `orderNo` → **`blockOrder`** (`order` je SQL rezervované slovo).
 7. **Order zápisy přes dvoufázový temp-offset** — eliminuje unique kolizi (root cause #1).
 8. **Obousměrný sync** dvouvrstvě: data v dokumentu přes editor request kanál; metadata mimo dokument přes DB + stávající query/event. Žádná nová reaktivní DB vrstva.
+9. **Umístění kódu: persist/repo implementace patří do `@stagistic/db`** (sdíleno web ↔ desktop), ne do `apps/web`. Viz sekce níže.
 
 ## Non-goals (záměrně teď neřešíme)
 
@@ -64,9 +65,26 @@ Jeden zdroj pravdy, jedna save cesta, granulární zápis jen změněných blok�
 - Multi-tab konkurenční editace.
 - Znovuzapnutí outboxu.
 
+## Umístění kódu (sdílení web ↔ desktop)
+
+Aplikace bude žít jako web **i** desktop (Tauri; `apps/desktop` dnes placeholder, „paused while the web app is being refactored"). Co nejvíc kódu musí být sdílené. `apps/web` (a `apps/desktop`) obsahují **jen** to, co se mezi platformami liší.
+
+**Dnešní stav:** `@stagistic/db` už vlastní schéma, queries, `rewrite`, `createPgliteBootstrap` (sdílený přes DI) i interface `ScriptRepository`/`ScriptDataRepository`. Ale **implementace** repo vrstvy (`createLocalPgliteRepository`, content/character/config/titlePage handlery, outbox, migration wrapper) leží v `apps/web/src/repo/` — přestože je to čistá logika nad `LocalDb`, nic web-specifického.
+
+**Cíl:**
+
+| Vrstva | Kde | Web-specifické? |
+|---|---|---|
+| Schéma, queries, rewrite, bootstrap, interface | `@stagistic/db` | ne |
+| **Repo/persist implementace** (`createLocalPgliteRepository`, `persistDocumentDelta`, handlery, diff engine) | **`@stagistic/db`** (přesun z `apps/web`) | ne |
+| Bootstrap seam: `pglite.worker.ts`, `db/index.ts` (worker factory + asset URLs), instancování repo | `apps/web` | **ano** |
+| React entrypoint, routes wiring | `apps/web` | ano |
+
+**Dependency injection:** `createLocalPgliteRepository({getDb, syncToFs})` žije v `@stagistic/db`. Factory je sdílená; **instancování** s platform-specifickými `getDb`/`syncToFs` zůstává v appce (`apps/web/src/repo/index.ts` zůstane tenký: `createLocalPgliteRepository({getLocalDb, syncToFs})`). Stejný vzor, jaký už `createPgliteBootstrap` používá pro worker factory. Desktop později injektuje svůj bootstrap.
+
 ## Architektura po komponentách
 
-### 1. Persist vrstva (`apps/web/src/repo/localPglite/content.ts` + nové)
+### 1. Persist vrstva (`@stagistic/db`, modul `repo/` — přesun z `apps/web/src/repo/localPglite/content.ts`)
 
 Nahradit `migrateLegacyJsonToBlocksForScript(force:true)`-on-save za `persistDocumentDelta`:
 
@@ -96,7 +114,7 @@ Nahradit `migrateLegacyJsonToBlocksForScript(force:true)`-on-save za `persistDoc
 ### 3. Smazat / zredukovat (`packages/app-core/src/script-state/`)
 
 - Smazat `BlockSyncController` (`controller.ts`), `collections.ts`, controller `pacer.ts`, `snapshot.ts` (pokud jen pro kolekce), TanStack DB závislost v tomto modulu.
-- `blockDiffEngine.ts` → přesunout/recyklovat do persist vrstvy (`@stagistic/db` nebo repo).
+- `blockDiffEngine.ts` → **přesunout do `@stagistic/db`** (persist vrstva ho potřebuje; závisí jen na `@stagistic/script` index snapshotu + db typech).
 - `useScriptState` zredukovat na tenkou vrstvu (drží `scriptId`, předává autosave), nebo zrušit a `ScriptEditorRoute` volá repo přímo.
 - `ScriptEditorRoute.tsx`: odstranit dvojí `onValueChange` → controller větev; `structureSourceValue`/`scriptStateIndexSnapshot` napojit jen na editor live + initial.
 
@@ -117,7 +135,7 @@ sidebar edit ─▶ repo zápis do DB ─▶ refetch/event ─▶ sidebar
 ```
 Stávající mechanismus (repo query + event), bez nové reaktivní vrstvy.
 
-### 5. Load (`content.ts::loadLatest` — beze změny logiky)
+### 5. Load (`@stagistic/db` repo `loadLatest` — beze změny logiky)
 
 ```
 listScriptBlocks (ORDER BY block_order) + listBlockCharacterRefs
@@ -146,12 +164,20 @@ Než se postaví cokoli dalšího, dokázat v izolaci, že zápis přežije relo
 
 ## Dotčené soubory (orientačně)
 
+**`@stagistic/db` (sdílené):**
 - `packages/db/src/schema.ts` — rename `order_no` → `block_order`.
 - `packages/db/src/queries/scripts/blocks.ts` — `block_order`, dvoufázový order writer, granulární helpery.
 - `packages/db/src/rewrite/jsonToBlocks.ts` — `migrateLegacyJsonToBlocksForScript` zůstává jen pro import; extrakce snapshotu sdílená s diffem.
-- `apps/web/src/repo/localPglite/content.ts` — `persistDocumentDelta`, `lastSavedSnapshot`, `loadLatest` baseline.
-- `apps/web/src/db/index.ts`, `packages/db/src/pglite/bootstrap.ts` — `syncToFs` (hotovo) + případná oprava worker configu po Kroku 0.
-- `packages/app-core/src/script-state/*` — smazat controller/kolekce/pacer; recyklovat diff engine.
+- `packages/db/src/repo/**` — **nový modul** (přesun z `apps/web/src/repo/`): `createLocalPgliteRepository({getDb, syncToFs})`, `persistDocumentDelta`, `lastSavedSnapshot`, content/character/config/titlePage handlery, `loadLatest` baseline.
+- `packages/db/src/blockDiffEngine.ts` — **přesun** z `@stagistic/app-core`.
+- `packages/db/src/pglite/bootstrap.ts` — `syncToFs` (hotovo) + případná oprava worker configu po Kroku 0.
+
+**`apps/web` (jen seam):**
+- `apps/web/src/db/index.ts`, `apps/web/src/db/pglite.worker.ts` — bootstrap + worker factory + asset URLs.
+- `apps/web/src/repo/index.ts` — tenké instancování `createLocalPgliteRepository({getLocalDb, syncToFs})`.
+
+**Ostatní balíky:**
+- `packages/app-core/src/script-state/*` — smazat controller/kolekce/pacer; `blockDiffEngine` přesunut do db.
 - `packages/app-routes/src/routes/script/ScriptEditorRoute.tsx` + `useScriptEditorController` — odstranit dvojí save cestu.
 - `packages/editor/src/editor/hooks/useEditorStructureRequests.ts` — zobecnit request kanál.
 
