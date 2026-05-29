@@ -1,6 +1,5 @@
 import {
     useScriptRepository,
-    useScriptState,
 } from '@stagistic/app-core';
 import {
     FountainEditor,
@@ -144,21 +143,7 @@ export const ScriptEditorRoute = () => {
         characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
-    const scriptState = useScriptState({
-        enabled: Boolean(currentScriptId),
-        scriptId: currentScriptId,
-        initialValue,
-        repository: scriptRepository,
-        persistLatest: handleAutoSave,
-        waitMs: 400,
-        maxWaitMs: 2000,
-    });
-    const {
-        editorOverrideValue: scriptStateEditorOverrideValue,
-        indexSnapshot: scriptStateIndexSnapshot,
-        onEditorValueChange: onScriptStateEditorValueChange,
-    } = scriptState;
-    const structureSourceValue = scriptStateEditorOverrideValue ?? editorOverrideValue ?? initialValue;
+    const structureSourceValue = editorOverrideValue ?? initialValue;
     const {
         insertActRequest,
         renameActRequest,
@@ -176,15 +161,14 @@ export const ScriptEditorRoute = () => {
         scriptRepository,
         sourceValue: structureSourceValue,
     });
-    const sourceIndexForSidebars = scriptStateIndexSnapshot ?? initialIndexSnapshot ?? null;
+    const sourceIndexForSidebars = initialIndexSnapshot ?? null;
     const lastResolvedActiveBlockIdRef = useRef<string | null | undefined>(undefined);
     const handleResolvedEditorValueChange = useCallback((
         value: Parameters<typeof handleEditorValueChange>[0],
         meta?: Parameters<typeof handleEditorValueChange>[1],
     ) => {
         handleEditorValueChange(value, meta);
-        onScriptStateEditorValueChange(value);
-    }, [handleEditorValueChange, onScriptStateEditorValueChange]);
+    }, [handleEditorValueChange]);
     const handleResolvedActiveBlockChange = useCallback((blockId: string | null) => {
         if (lastResolvedActiveBlockIdRef.current === blockId) {
             return;
@@ -310,7 +294,7 @@ export const ScriptEditorRoute = () => {
         openSettingsModal,
         closeSettingsModal,
     });
-    const resolvedEditorInitialValue = scriptStateEditorOverrideValue ?? editorOverrideValue ?? initialValue;
+    const resolvedEditorInitialValue = editorOverrideValue ?? initialValue;
 
     useEffect(() => {
         lastResolvedActiveBlockIdRef.current = undefined;
