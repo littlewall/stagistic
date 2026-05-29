@@ -134,7 +134,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ## Task 1: Wire viteplus test scripts + in-memory test DB helper
 
-**Context:** This repo's toolchain is **viteplus** (`vp`), already configured in the root `vite.config.ts` with `test: {include: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}']}`. `vp test` IS the test runner (vitest under the hood) and auto-discovers `*.test.ts` monorepo-wide. **Do NOT add a raw `vitest` dependency or a per-package `vitest.config.ts`** — that would shadow the root config. Verified working: `vp test run` (whole monorepo), `vp test run --dir packages/db` (per package), and `import {expect, test} from 'vitest'` resolves at runtime.
+**Context:** This repo's toolchain is **viteplus** (`vp`), already configured in the root `vite.config.ts` with `test: {include: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}']}`. `vp test` IS the test runner (vitest under the hood) and auto-discovers `*.test.ts` monorepo-wide. **Do NOT add a raw `vitest` dependency or a per-package `vitest.config.ts`** — that would shadow the root config. **Test files MUST import the test API from `vite-plus/test`** (NOT `'vitest'`): `vitest` is bundled inside vite-plus and is not tsc-resolvable as a bare specifier, whereas `vite-plus/test` ships types. Verified: `vp test run` (whole monorepo), `vp test run --dir packages/db` (per package), `pnpm --filter @stagistic/db exec tsc --noEmit` clean.
 
 **Files:**
 - Create: `packages/db/src/testing/createTestDb.ts`
@@ -213,7 +213,7 @@ export const seedScript = async (db: TestDb, scriptId: string): Promise<void> =>
 - [ ] **Step 6: Write a smoke test `packages/db/src/testing/createTestDb.smoke.test.ts`**
 
 ```ts
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it} from 'vite-plus/test';
 
 import {scripts} from '../schema';
 import {createTestDb, seedScript} from './createTestDb';
@@ -358,7 +358,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ```ts
 import {asc, eq} from 'drizzle-orm';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it} from 'vite-plus/test';
 
 import {scriptBlocks} from '../../schema';
 import {createTestDb, seedScript} from '../../testing/createTestDb';
@@ -670,7 +670,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 - [ ] **Step 1: Write the failing test `packages/db/src/repo/persist/diffExtractedBlocks.test.ts`**
 
 ```ts
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it} from 'vite-plus/test';
 
 import type {ExtractedBlockRow} from '../../rewrite/jsonToBlocks';
 import {diffExtractedBlocks} from './diffExtractedBlocks';
@@ -887,7 +887,7 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ```ts
 import {asc, eq} from 'drizzle-orm';
-import {describe, expect, it} from 'vitest';
+import {describe, expect, it} from 'vite-plus/test';
 
 import {rebuildScriptDocumentFromBlocks} from '../../rewrite/jsonToBlocks';
 import {scriptBlocks} from '../../schema';

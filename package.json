@@ -13,6 +13,8 @@
     "packageManager": "pnpm@9.15.0",
     "scripts": {
         "lint": "vp lint && stylelint \"**/*.{css,scss}\"",
+        "test": "vp test run",
+        "test:watch": "vp test watch",
         "db:generate": "pnpm -C packages/db db:generate",
         "db:compile-migrations": "pnpm -C packages/db db:compile-migrations",
         "db:check": "pnpm -C packages/db db:check",
