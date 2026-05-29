@@ -10,10 +10,7 @@
     "dependencies": {
         "@stagistic/db": "workspace:*",
         "@stagistic/script": "workspace:*",
-        "@tanstack/pacer-lite": "^0.2.1",
-        "@tanstack/react-db": "^0.1.69",
-        "@tanstack/react-store": "^0.9.1",
-        "@tanstack/store": "^0.9.1"
+        "@tanstack/react-db": "^0.1.69"
     },
     "peerDependencies": {
         "react": "^19.0.0"
