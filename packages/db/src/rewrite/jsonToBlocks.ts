@@ -37,6 +37,9 @@ type ScriptDocument = {
     content: FountainJSONContent[],
 };
 
+/** Public alias of the rewrite-layer document shape consumed by extractScriptBlocks. */
+export type RewriteScriptDocument = ScriptDocument;
+
 const ELEMENT_SCENE_HEADING = 'fountain_scene_heading';
 const ELEMENT_ACT = 'fountain_act';
 const ELEMENT_ACTION = 'fountain_action';
@@ -81,18 +84,18 @@ export interface MigrateLegacyJsonToBlocksForScriptOptions {
     trigger?: string,
 }
 
-interface ExtractedActRow {
+export interface ExtractedActRow {
     id: string,
     headingBlockId: string,
     name: string,
 }
 
-interface ExtractedSceneRow {
+export interface ExtractedSceneRow {
     id: string,
     headingBlockId: string,
 }
 
-interface ExtractedBlockRow {
+export interface ExtractedBlockRow {
     blockId: string,
     blockType: string,
     orderNo: number,
@@ -117,7 +120,7 @@ interface ExtractedImportMetadata {
     warnings: string[],
 }
 
-interface ExtractScriptBlocksResult {
+export interface ExtractScriptBlocksResult {
     blocks: ExtractedBlockRow[],
     acts: ExtractedActRow[],
     scenes: ExtractedSceneRow[],
@@ -507,7 +510,7 @@ const resolveStatus = (warnings: string[], error: string | null): RewriteMigrati
     return 'success';
 };
 
-const extractScriptBlocks = (
+export const extractScriptBlocks = (
     scriptId: string,
     sourceDocument: ScriptDocument,
 ): ExtractScriptBlocksResult => {
