@@ -6,7 +6,7 @@
 
 **Architecture:** TipTap document is the single source of truth; the live snapshot store feeds sidebars (kept). One debounced autosave calls `saveLatest`, which diffs the extracted document against the last-saved blocks and writes only the delta. Block order is a flat global integer (`block_order`); structural changes write order via a collision-safe two-phase update (negate-all then re-assign) to avoid the `(script_id, block_order)` unique-index violation that was aborting reorder saves. The repo/persist implementation lives in `@stagistic/db` (shared web+desktop) and is injected with `getDb`/`syncToFs`.
 
-**Tech Stack:** PGlite (`@electric-sql/pglite`) in a web worker, Drizzle ORM, TipTap/ProseMirror, React, pnpm monorepo, Vitest (introduced for `@stagistic/db` in Task 1).
+**Tech Stack:** PGlite (`@electric-sql/pglite`) in a web worker, Drizzle ORM, TipTap/ProseMirror, React, pnpm monorepo. Tests run via **viteplus** (`vp test`, vitest under the hood) — already configured in the root `vite.config.ts`; Task 1 only adds run scripts.
 
 **Spec:** `docs/superpowers/specs/2026-05-29-save-flow-simplification-design.md`
 
@@ -27,7 +27,7 @@ After each task: typecheck the touched package(s) and commit. `pnpm -w typecheck
 ## File structure (created / modified)
 
 **`@stagistic/db` (shared):**
-- `packages/db/vitest.config.ts` — Create (Task 1).
+- root `package.json` + `packages/db/package.json` — Modify (Task 1): add `vp test` scripts (monorepo + per-package). No `vitest.config.ts` (viteplus root config handles discovery).
 - `packages/db/src/testing/createTestDb.ts` — Create: in-memory PGlite + migrations helper for tests.
 - `packages/db/src/schema.ts` — Modify: `order_no` → `block_order`.
 - `packages/db/drizzle/0003_rename_block_order.sql` — Create: rename migration.
@@ -132,12 +132,14 @@ Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 
 ---
 
-## Task 1: Introduce Vitest in `@stagistic/db` + in-memory test DB helper
+## Task 1: Wire viteplus test scripts + in-memory test DB helper
+
+**Context:** This repo's toolchain is **viteplus** (`vp`), already configured in the root `vite.config.ts` with `test: {include: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}']}`. `vp test` IS the test runner (vitest under the hood) and auto-discovers `*.test.ts` monorepo-wide. **Do NOT add a raw `vitest` dependency or a per-package `vitest.config.ts`** — that would shadow the root config. Verified working: `vp test run` (whole monorepo), `vp test run --dir packages/db` (per package), and `import {expect, test} from 'vitest'` resolves at runtime.
 
 **Files:**
-- Create: `packages/db/vitest.config.ts`
 - Create: `packages/db/src/testing/createTestDb.ts`
-- Modify: `packages/db/package.json` (add `test` script + `vitest` devDep)
+- Modify: root `package.json` (add `test` scripts)
+- Modify: `packages/db/package.json` (add per-package `test` script)
 
 - [ ] **Step 1: Confirm the typecheck command**
 
@@ -147,36 +149,28 @@ pnpm --filter <package-name> exec tsc --noEmit
 ```
 Throughout this plan, **`<TYPECHECK> for X`** means `pnpm --filter @stagistic/X exec tsc --noEmit` (for the app use `pnpm --filter web exec tsc --noEmit`). Verify now: `pnpm --filter @stagistic/db exec tsc --noEmit` → expected exit 0.
 
-- [ ] **Step 2: Add vitest devDependency**
+- [ ] **Step 2: Add monorepo-wide test scripts to the ROOT `package.json`**
 
-Run:
-```bash
-pnpm --filter @stagistic/db add -D vitest
+In the root `"scripts"` block add:
+```json
+"test": "vp test run",
+"test:watch": "vp test watch"
 ```
-Expected: `vitest` added to `packages/db/package.json` devDependencies.
+Whole-monorepo runs: `pnpm test`.
 
-- [ ] **Step 3: Add the `test` script to `packages/db/package.json`**
+- [ ] **Step 3: Add a per-package `test` script to `packages/db/package.json`**
 
 In the `"scripts"` block add:
 ```json
-"test": "vitest run",
-"test:watch": "vitest"
+"test": "vp test run --dir ."
 ```
+Per-package runs: `pnpm --filter @stagistic/db test` (cwd = package dir, so `--dir .` scopes to it). Passing a filter (e.g. `pnpm --filter @stagistic/db test blocks.twoPhase`) forwards the positional filter to `vp test run`.
 
-- [ ] **Step 4: Create `packages/db/vitest.config.ts`**
+> Replicate this `"test": "vp test run --dir ."` script in any other package that gains tests later. No config files needed — the root `vite.config.ts` test `include` covers discovery.
 
-```ts
-import {defineConfig} from 'vitest/config';
+- [ ] **Step 4: (removed — no vitest.config needed; see Step 3 context)**
 
-export default defineConfig({
-    test: {
-        environment: 'node',
-        include: ['src/**/*.test.ts'],
-        globals: false,
-        testTimeout: 20000,
-    },
-});
-```
+Skip. viteplus handles discovery via the root config.
 
 - [ ] **Step 5: Create the in-memory test DB helper `packages/db/src/testing/createTestDb.ts`**
 
@@ -246,8 +240,11 @@ Expected: 1 passing test. If PGlite fails to load wasm in node, it auto-resolves
 - [ ] **Step 8: Commit**
 
 ```bash
-git add packages/db/vitest.config.ts packages/db/src/testing packages/db/package.json pnpm-lock.yaml
-git commit -m "test(db): add vitest + in-memory PGlite test harness
+git add package.json packages/db/package.json packages/db/src/testing
+git commit -m "test(db): viteplus test scripts + in-memory PGlite test harness
+
+vp test (viteplus) is the runner; root config already discovers *.test.ts.
+Adds root + per-package test scripts and a node PGlite test-db helper.
 
 Co-Authored-By: Claude Opus 4.8 <noreply@anthropic.com>"
 ```
