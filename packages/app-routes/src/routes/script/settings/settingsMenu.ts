@@ -12,6 +12,7 @@ export const SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES = 'visual-preferences';
 export const SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS = 'structure-markers';
 export const SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT = 'page-layout';
 export const SCRIPT_SETTINGS_PANEL_HEADERS = 'headers-footers';
+export const SCRIPT_SETTINGS_PANEL_DANGER_ZONE = 'danger-zone';
 
 export const SCRIPT_SETTINGS_EXPANDABLE_ELEMENTS = 'elements-settings';
 
@@ -63,6 +64,7 @@ export type ScriptSettingsPanelId =
     | typeof SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS
     | typeof SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT
     | typeof SCRIPT_SETTINGS_PANEL_HEADERS
+    | typeof SCRIPT_SETTINGS_PANEL_DANGER_ZONE
     | ElementSettingsPanelId;
 
 export const scriptSettingsMenu: SettingsNavGroup[] = [
@@ -104,6 +106,12 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
                     panelId: getElementSettingsPanelId(item.blockType),
                     icon: BLOCK_ICONS[item.blockType],
                 })),
+            },
+            {
+                kind: 'item',
+                id: SCRIPT_SETTINGS_PANEL_DANGER_ZONE,
+                label: 'Danger zone',
+                panelId: SCRIPT_SETTINGS_PANEL_DANGER_ZONE,
             },
         ],
     },

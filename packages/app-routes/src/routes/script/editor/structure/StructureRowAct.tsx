@@ -2,9 +2,8 @@ import {normalizeActName} from '@stagistic/script';
 import {ActBlockIcon, clsx} from '@stagistic/ui';
 import {memo, useCallback} from 'react';
 
-import type {StructureRowActProps} from './types';
-
 import styles from './ScriptStructureSidebar.module.css';
+import type {StructureRowActProps} from './types';
 
 export const StructureRowAct = memo(
     ({
@@ -30,7 +29,12 @@ export const StructureRowAct = memo(
 
                 onRename(blockId, trimmedValue);
             },
-            [blockId, name, onNamePreview, onRename],
+            [
+                blockId,
+                name,
+                onNamePreview,
+                onRename,
+            ],
         );
 
         const handleBlur = useCallback(() => {
@@ -44,7 +48,13 @@ export const StructureRowAct = memo(
             }
 
             onRename(blockId, draftValue);
-        }, [blockId, name, namePreview, onNamePreview, onRename]);
+        }, [
+            blockId,
+            name,
+            namePreview,
+            onNamePreview,
+            onRename,
+        ]);
 
         return (
             <li data-structure-act-id={blockId}>
