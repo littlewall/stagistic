@@ -228,6 +228,9 @@ importers:
       drizzle-orm:
         specifier: ^0.44.0
         version: 0.44.7(@electric-sql/pglite@0.3.15)
+      fractional-indexing:
+        specifier: ^3.2.0
+        version: 3.2.0
     devDependencies:
       drizzle-kit:
         specifier: ^0.31.4

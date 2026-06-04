@@ -201,7 +201,7 @@ export const scriptBlocks = pgTable(
             .notNull()
             .references(() => scripts.id, {onDelete: 'cascade'}),
         blockType: text('block_type').notNull(),
-        blockOrder: integer('block_order').notNull(),
+        blockOrder: text('block_order').notNull(),
         textContent: text('text_content').notNull().default(''),
         contentJson: text('content_json'),
         sceneId: text('scene_id').references(() => scriptScenes.id, {onDelete: 'set null'}),
@@ -212,7 +212,7 @@ export const scriptBlocks = pgTable(
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },
     table => ({
-        scriptOrderUniqueIdx: uniqueIndex('script_blocks_script_order_unique_idx')
+        scriptOrderIdx: index('script_blocks_script_order_idx')
             .on(table.scriptId, table.blockOrder),
         scriptTypeIdx: index('script_blocks_script_type_idx').on(table.scriptId, table.blockType),
         scriptSceneIdx: index('script_blocks_script_scene_idx').on(table.scriptId, table.sceneId),

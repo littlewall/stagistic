@@ -17,4 +17,8 @@ export const compiledMigrations = [
         id: '0003_rename_block_order',
         sql: 'ALTER TABLE "script_blocks" RENAME COLUMN "order_no" TO "block_order";\n',
     },
+    {
+        id: '0004_fractional_block_order',
+        sql: '-- Convert block_order from integer to text for fractional indexing.\n-- Existing integer values become text representations; the first structural\n-- save will reassign proper fractional index keys to all blocks.\n\nDROP INDEX IF EXISTS "script_blocks_script_order_unique_idx";\nALTER TABLE "script_blocks" ALTER COLUMN "block_order" TYPE text USING "block_order"::text;\nCREATE INDEX "script_blocks_script_order_idx" ON "script_blocks" ("script_id", "block_order");\n',
+    },
 ] as const;

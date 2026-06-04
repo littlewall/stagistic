@@ -15,6 +15,7 @@ type ButtonProps<T extends ElementType> = {
     as?: T,
     variant?: ButtonVariant,
     size?: ButtonSize,
+    loading?: boolean,
     className?: string,
 } & Omit<ComponentPropsWithoutRef<T>, 'as' | 'className'>;
 
@@ -24,19 +25,26 @@ export const Button = <T extends ElementType = typeof defaultElement>({
     as,
     variant = 'primary',
     size = 'md',
+    loading = false,
     className,
+    disabled,
+    children,
     ...props
 }: ButtonProps<T>) => {
     const Component = useMemo(() => as ?? defaultElement, [as]);
     const componentProps = useMemo(() => {
         return {
             ...props,
-            className: clsx(styles.button, styles[variant], styles[size], className),
+            disabled: disabled || loading,
+            'aria-busy': loading || undefined,
+            className: clsx(styles.button, styles[variant], styles[size], loading && styles.loading, className),
         } as ComponentPropsWithoutRef<T>;
     }, [
         props,
         variant,
         size,
+        loading,
+        disabled,
         className,
     ]);
 
@@ -44,5 +52,14 @@ export const Button = <T extends ElementType = typeof defaultElement>({
         (componentProps as ComponentPropsWithoutRef<'button'>).type = 'button';
     }
 
-    return <Component {...componentProps} />;
+    return (
+        <Component {...componentProps}>
+            {loading ? (
+                <>
+                    <span className={styles.spinner} aria-hidden="true" />
+                    <span className={styles.loadingLabel}>{children}</span>
+                </>
+            ) : children}
+        </Component>
+    );
 };

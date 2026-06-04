@@ -1,3 +1,4 @@
+import {Button} from '../atoms/Button';
 import {ImportDropZone} from './importScript/ImportDropZone';
 import {useImportScriptModalState} from './importScript/useImportScriptModalState';
 import styles from './ImportScriptModal.module.css';
@@ -17,6 +18,7 @@ export const ImportScriptModal = ({
         selectedFile,
         fileLabel,
         fileError,
+        isProcessing,
         enableLegacyCapsLyricsHeuristic,
         handleSubmit,
         handleNameChange,
@@ -79,20 +81,22 @@ export const ImportScriptModal = ({
                     </p>
                 ) : null}
                 <div className={styles.actions}>
-                    <button
-                        className={styles.ghostButton}
+                    <Button
+                        variant="ghost"
                         type="button"
                         onClick={onClose}
+                        disabled={isProcessing}
                     >
                         Cancel
-                    </button>
-                    <button
-                        className={styles.primaryButton}
+                    </Button>
+                    <Button
+                        variant="primary"
                         type="submit"
                         disabled={!selectedFile}
+                        loading={isProcessing}
                     >
                         Import script
-                    </button>
+                    </Button>
                 </div>
             </form>
         </ModalDialog>

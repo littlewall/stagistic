@@ -58,7 +58,7 @@ export interface GlobalModalActions {
         importOptions?: {
             enableLegacyCapsLyricsHeuristic?: boolean,
         },
-    }) => void,
+    }) => Promise<void>,
 }
 
 export const useGlobalModalActions = ({
@@ -136,51 +136,47 @@ export const useGlobalModalActions = ({
         navigate,
     ]);
 
-    const handleImport = useCallback((payload: ScriptImportFile & {
+    const handleImport = useCallback(async (payload: ScriptImportFile & {
         name: string,
         importOptions?: {
             enableLegacyCapsLyricsHeuristic?: boolean,
         },
     }) => {
-        const importAndNavigate = async () => {
-            try {
-                if (!isSupportedImportFileName(payload.fileName)) {
-                    addToast({
-                        title: 'Unsupported file',
-                        description: 'Only .fountain files can be imported.',
-                        variant: 'error',
-                    });
-
-                    return;
-                }
-
-                const normalized = parseImportedFountainScript(payload.text, {
-                    enableLegacyCapsLyricsHeuristic: payload.importOptions?.enableLegacyCapsLyricsHeuristic ?? false,
-                });
-                const resolvedName = resolveImportedScriptName(payload.name, payload.fileName);
-                const scriptId = await createScriptWithActiveBlock(
-                    resolvedName,
-                    normalized,
-                );
-
-                setIsImportOpen(false);
-                void navigate(`/script/${scriptId}/editor`);
+        try {
+            if (!isSupportedImportFileName(payload.fileName)) {
                 addToast({
-                    title: 'Script imported',
-                    description: resolvedName,
-                    variant: 'success',
-                });
-            } catch (error) {
-                console.error('Failed to import script', error);
-                addToast({
-                    title: 'Failed to import script',
-                    description: 'Please try again.',
+                    title: 'Unsupported file',
+                    description: 'Only .fountain files can be imported.',
                     variant: 'error',
                 });
-            }
-        };
 
-        void importAndNavigate();
+                return;
+            }
+
+            const normalized = parseImportedFountainScript(payload.text, {
+                enableLegacyCapsLyricsHeuristic: payload.importOptions?.enableLegacyCapsLyricsHeuristic ?? false,
+            });
+            const resolvedName = resolveImportedScriptName(payload.name, payload.fileName);
+            const scriptId = await createScriptWithActiveBlock(
+                resolvedName,
+                normalized,
+            );
+
+            setIsImportOpen(false);
+            void navigate(`/script/${scriptId}/editor`);
+            addToast({
+                title: 'Script imported',
+                description: resolvedName,
+                variant: 'success',
+            });
+        } catch (error) {
+            console.error('Failed to import script', error);
+            addToast({
+                title: 'Failed to import script',
+                description: 'Please try again.',
+                variant: 'error',
+            });
+        }
     }, [
         addToast,
         createScriptWithActiveBlock,

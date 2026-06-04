@@ -27,6 +27,7 @@ export const useImportScriptModalState = ({
     const [name, setName] = useState('');
     const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
     const [fileError, setFileError] = useState<string | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
     const [enableLegacyCapsLyricsHeuristic, setEnableLegacyCapsLyricsHeuristic] = useState(false);
 
     useEffect(() => {
@@ -34,6 +35,7 @@ export const useImportScriptModalState = ({
             setName('');
             setSelectedFile(null);
             setFileError(null);
+            setIsProcessing(false);
             setEnableLegacyCapsLyricsHeuristic(false);
 
             return;
@@ -76,7 +78,7 @@ export const useImportScriptModalState = ({
     const handleSubmit = useCallback(async (event: FormEvent) => {
         event.preventDefault();
 
-        if (!selectedFile) {
+        if (!selectedFile || isProcessing) {
             setFileError('Please drop a .fountain file first.');
 
             return;
@@ -93,16 +95,23 @@ export const useImportScriptModalState = ({
         }
 
         setFileError(null);
-        onImport({
-            name,
-            fileName: selectedFile.name,
-            text: fileText,
-            importOptions: {
-                enableLegacyCapsLyricsHeuristic,
-            },
-        });
+        setIsProcessing(true);
+
+        try {
+            await onImport({
+                name,
+                fileName: selectedFile.name,
+                text: fileText,
+                importOptions: {
+                    enableLegacyCapsLyricsHeuristic,
+                },
+            });
+        } finally {
+            setIsProcessing(false);
+        }
     }, [
         enableLegacyCapsLyricsHeuristic,
+        isProcessing,
         name,
         onImport,
         selectedFile,
@@ -212,6 +221,7 @@ export const useImportScriptModalState = ({
         selectedFile,
         fileLabel,
         fileError,
+        isProcessing,
         enableLegacyCapsLyricsHeuristic,
         handleSubmit,
         handleNameChange,

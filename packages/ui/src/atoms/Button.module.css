@@ -19,6 +19,11 @@
         padding: var(--space-md) var(--space-xl);
     }
 
+    &.loading {
+        cursor: not-allowed;
+        opacity: .8;
+    }
+
     &.primary {
         color: var(--color-surface);
         background: var(--color-text);
@@ -28,7 +33,7 @@
         }
 
         &:disabled,
-        &[aria-disabled='true'] {
+        &[aria-disabled = 'true'] {
             cursor: not-allowed;
             opacity: .6;
         }
@@ -41,6 +46,12 @@
 
         &:hover {
             background: var(--color-surface-raised);
+        }
+
+        &:disabled,
+        &[aria-disabled = 'true'] {
+            cursor: not-allowed;
+            opacity: .6;
         }
     }
 
@@ -73,5 +84,25 @@
         &:hover {
             background: color-mix(in oklch, var(--color-status-danger) 10%, transparent);
         }
+    }
+}
+
+.spinner {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    border: 2px solid currentcolor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 600ms linear infinite;
+}
+
+.loadingLabel {
+    opacity: .7;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
     }
 }
