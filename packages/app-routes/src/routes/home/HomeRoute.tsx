@@ -41,6 +41,7 @@ export const HomeRoute = () => {
         if (!latestScript) {
             return;
         }
+
         void navigate(`/script/${latestScript.id}/editor`);
     }, [latestScript, navigate]);
     const handleCardClick = useCallback((scriptId: string) => {
@@ -145,7 +146,11 @@ export const HomeRoute = () => {
                 </CardContent>
             </Card>
         );
-    }, [handleResumeScript, latestScript, scriptsLoading]);
+    }, [
+        handleResumeScript,
+        latestScript,
+        scriptsLoading,
+    ]);
 
     return (
         <AppLayout
@@ -176,7 +181,6 @@ export const HomeRoute = () => {
                             </div>
                         )}
                     </div>
-
                     <div className={styles.rightPanel}>
                         <section className={styles.welcome}>
                             <Kicker>Welcome to Stagistic Editor!</Kicker>
@@ -194,7 +198,6 @@ export const HomeRoute = () => {
                                 </Button>
                             </div>
                         </section>
-
                         {continueCard !== null && (
                             <section className={styles.continueSection}>
                                 <SectionTitle className={styles.title}>

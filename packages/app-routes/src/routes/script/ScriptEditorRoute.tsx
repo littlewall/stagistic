@@ -1,5 +1,6 @@
 import {
     useScriptRepository,
+    useScripts,
 } from '@stagistic/app-core';
 import {
     FountainEditor,
@@ -62,6 +63,7 @@ export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
     const {scriptId} = useParams();
     const scriptRepository = useScriptRepository();
+    const {deleteScript} = useScripts();
     const [searchParams, setSearchParams] = useSearchParams();
     const {openNewScript, openImportScript} = useGlobalModals();
     const {
@@ -192,6 +194,18 @@ export const ScriptEditorRoute = () => {
     const handleSelectSettingsPanel = useCallback((panelId: string) => {
         selectPanel(panelId as ScriptSettingsPanelId);
     }, [selectPanel]);
+    const handleDeleteScript = useCallback(async () => {
+        if (!currentScriptId) {
+            return;
+        }
+
+        await deleteScript(currentScriptId);
+        void navigate('/');
+    }, [
+        currentScriptId,
+        deleteScript,
+        navigate,
+    ]);
     const structureSidebarProps = useMemo(() => ({
         data: {
             indexSnapshot: sourceIndexForSidebars,
@@ -410,6 +424,10 @@ export const ScriptEditorRoute = () => {
                         titlePageSettings: titlePageDraft,
                         scriptTitle: currentScript?.name ?? '',
                         onUpdateTitlePage: updateTitlePage,
+                    }}
+                    dangerZoneHandlers={{
+                        scriptTitle: currentScript?.name ?? '',
+                        onDeleteScript: handleDeleteScript,
                     }}
                 />
             </ScriptSettingsModal>

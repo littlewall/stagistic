@@ -48,6 +48,11 @@ export interface TitlePageHandlers {
     onUpdateTitlePage: (patch: Partial<TitlePageSettings>) => void,
 }
 
+export interface DangerZoneHandlers {
+    scriptTitle: string,
+    onDeleteScript: () => void | Promise<void>,
+}
+
 export interface ScriptEditorSettingsPanelProps {
     panelId: string,
     resolvedScriptSettings: EditorSettings,
@@ -58,6 +63,7 @@ export interface ScriptEditorSettingsPanelProps {
     structureHandlers: StructureHandlers,
     pageLayoutHandlers: PageLayoutHandlers,
     titlePageHandlers: TitlePageHandlers,
+    dangerZoneHandlers: DangerZoneHandlers,
 }
 
 export type SectionRenderer = (props: ScriptEditorSettingsPanelProps) => ReactElement;
