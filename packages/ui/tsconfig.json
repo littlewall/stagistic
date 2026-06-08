@@ -10,9 +10,7 @@
             {
                 "name": "typescript-plugin-css-modules"
             }
-        ],
-        "allowImportingTsExtensions": true,
-        "noEmit": true
+        ]
     },
     "include": ["src"],
     "references": []

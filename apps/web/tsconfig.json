@@ -11,9 +11,7 @@
             "~db/*": ["./src/db/*"],
             "~repo": ["./src/repo/index.ts"],
             "~repo/*": ["./src/repo/*"]
-        },
-        "allowImportingTsExtensions": true,
-        "noEmit": true
+        }
     },
     "include": [
         "src",

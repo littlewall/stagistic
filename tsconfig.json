@@ -1,21 +1,19 @@
 {
     "extends": "./tsconfig.base.json",
     "files": [],
-    "compilerOptions": {
-        "noEmit": true
-    },
     "references": [
         {"path": "./packages/shared"},
         {"path": "./packages/app-core"},
         {"path": "./packages/app-routes"},
         {"path": "./packages/db"},
-        {"path": "./packages/script-core"},
-        {"path": "./packages/editor-ui"},
-        {"path": "./packages/sync-core"},
-        {"path": "./packages/auth"},
-        {"path": "./packages/config"},
-        {"path": "./packages/music"},
-        {"path": "./apps/api"},
-        {"path": "./apps/worker"}
+        {"path": "./packages/ui"},
+        {"path": "./packages/editor"},
+        {"path": "./packages/script"},
+        {"path": "./apps/desktop"},
+        {"path": "./apps/landing"},
+        {"path": "./apps/web"}
+    ],
+    "include": [
+        "vite.config.ts"
     ]
 }

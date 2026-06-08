@@ -5,9 +5,7 @@
         "lib": ["ES2022", "DOM", "DOM.Iterable"],
         "jsx": "react-jsx",
         "module": "ESNext",
-        "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
-        "noEmit": true
+        "moduleResolution": "bundler"
     },
     "include": ["src"],
     "references": []
