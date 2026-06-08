@@ -47,6 +47,7 @@ export interface GlobalModalActions {
     isNewScriptOpen: boolean,
     isImportOpen: boolean,
     prefilledImport: ScriptImportFile | null,
+    isImportLoading: boolean,
     openNewScript: () => void,
     closeNewScript: () => void,
     openImportScript: () => void,
@@ -73,6 +74,7 @@ export const useGlobalModalActions = ({
     const {refreshScripts} = state;
     const [isNewScriptOpen, setIsNewScriptOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
+    const [isImportLoading, setIsImportLoading] = useState(false);
     const [prefilledImport, setPrefilledImport] = useState<ScriptImportFile | null>(null);
 
     const openNewScript = useCallback(() => {
@@ -144,12 +146,15 @@ export const useGlobalModalActions = ({
     }) => {
         const importAndNavigate = async () => {
             try {
+                setIsImportLoading(true);
                 if (!isSupportedImportFileName(payload.fileName)) {
                     addToast({
                         title: 'Unsupported file',
                         description: 'Only .fountain files can be imported.',
                         variant: 'error',
                     });
+
+                    setIsImportLoading(false);
 
                     return;
                 }
@@ -177,6 +182,9 @@ export const useGlobalModalActions = ({
                     description: 'Please try again.',
                     variant: 'error',
                 });
+                setIsImportLoading(false);
+            } finally {
+                setIsImportLoading(false);
             }
         };
 
@@ -191,6 +199,7 @@ export const useGlobalModalActions = ({
         isNewScriptOpen,
         isImportOpen,
         prefilledImport,
+        isImportLoading,
         openNewScript,
         closeNewScript,
         openImportScript,
@@ -203,6 +212,7 @@ export const useGlobalModalActions = ({
         closeNewScript,
         handleCreate,
         handleImport,
+        isImportLoading,
         isImportOpen,
         isNewScriptOpen,
         openImportScript,

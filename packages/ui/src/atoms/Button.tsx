@@ -1,9 +1,10 @@
 import clsx from 'clsx';
+import {useCallback} from 'react';
 import {
-    type ComponentPropsWithoutRef,
-    type ElementType,
-    useMemo,
-} from 'react';
+    Button as RACButton,
+    type ButtonProps as RACButtonProps,
+    type PressEvent,
+} from 'react-aria-components';
 
 import styles from './Button.module.css';
 
@@ -11,38 +12,38 @@ type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
 
 type ButtonSize = 'sm' | 'md';
 
-type ButtonProps<T extends ElementType> = {
-    as?: T,
+type ButtonProps = {
     variant?: ButtonVariant,
     size?: ButtonSize,
     className?: string,
-} & Omit<ComponentPropsWithoutRef<T>, 'as' | 'className'>;
+    isLoading?: boolean,
+    onPress?: (event: PressEvent) => void,
+} & Omit<RACButtonProps, 'className' | 'onPress'>;
 
-const defaultElement = 'button';
-
-export const Button = <T extends ElementType = typeof defaultElement>({
-    as,
+export const Button = ({
     variant = 'primary',
     size = 'md',
     className,
+    isLoading,
+    onPress,
     ...props
-}: ButtonProps<T>) => {
-    const Component = useMemo(() => as ?? defaultElement, [as]);
-    const componentProps = useMemo(() => {
-        return {
-            ...props,
-            className: clsx(styles.button, styles[variant], styles[size], className),
-        } as ComponentPropsWithoutRef<T>;
-    }, [
-        props,
-        variant,
-        size,
-        className,
-    ]);
+}: ButtonProps) => {
+    const handlePress = useCallback((event: PressEvent) => {
+        if (isLoading) {
+            return;
+        }
 
-    if (Component === 'button' && !('type' in componentProps)) {
-        (componentProps as ComponentPropsWithoutRef<'button'>).type = 'button';
-    }
+        onPress?.(event);
+    }, [isLoading, onPress]);
 
-    return <Component {...componentProps} />;
+    const isDisabled = isLoading ?? props.isDisabled;
+
+    return (
+        <RACButton
+            className={clsx(styles.button, styles[variant], styles[size], className)}
+            isDisabled={isDisabled}
+            onPress={handlePress}
+            {...props}
+        />
+    );
 };

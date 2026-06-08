@@ -40,22 +40,8 @@
 }
 
 .confirmInput {
-    width: 100%;
     max-width: 280px;
-    padding: var(--space-sm) var(--space-md);
-    color: var(--color-text);
-    background: var(--color-surface);
-    border: 1px solid color-mix(in oklch, var(--color-status-danger) 30%, var(--color-border));
-    border-radius: var(--radius-md);
-
-    &:focus-visible {
-        outline: 2px solid color-mix(in oklch, var(--color-status-danger) 55%, var(--color-text));
-        outline-offset: 1px;
-    }
-
-    &::placeholder {
-        color: var(--color-text-muted);
-    }
+    border-color: color-mix(in oklch, var(--color-status-danger) 30%, var(--color-border));
 }
 
 .deleteButton {

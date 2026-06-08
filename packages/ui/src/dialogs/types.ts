@@ -15,6 +15,7 @@ export interface ImportScriptModalProps {
     onImport: (payload: ImportPayload) => void,
     onPickFile?: () => Promise<ImportScriptFile | null>,
     preselectedFile?: ImportScriptFile | null,
+    isLoading?: boolean,
 }
 
 export interface SettingsNavSubItem {

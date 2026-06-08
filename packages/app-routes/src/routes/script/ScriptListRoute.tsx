@@ -17,7 +17,6 @@ import {
 } from '@stagistic/ui';
 import {
     type KeyboardEvent as ReactKeyboardEvent,
-    type MouseEvent as ReactMouseEvent,
     useCallback,
     useMemo,
 } from 'react';
@@ -30,7 +29,9 @@ import styles from './ScriptListRoute.module.css';
 export const ScriptListRoute = () => {
     const navigate = useNavigate();
     const {scriptSummaries, isLoading: scriptsLoading} = useScripts();
-    const {openNewScript, openImportScript} = useGlobalModals();
+    const {
+        openNewScript, openImportScript, isImportLoading,
+    } = useGlobalModals();
     const openModal = useCallback(() => {
         openNewScript();
     }, [openNewScript]);
@@ -46,12 +47,10 @@ export const ScriptListRoute = () => {
             void navigate(`/script/${scriptId}/editor`);
         }
     }, [navigate]);
-    const handleOpenEditor = useCallback((scriptId: string, event: ReactMouseEvent<HTMLElement>) => {
-        event.stopPropagation();
+    const handleOpenEditor = useCallback((scriptId: string) => {
         void navigate(`/script/${scriptId}/editor`);
     }, [navigate]);
-    const handleOpenSettings = useCallback((scriptId: string, event: ReactMouseEvent<HTMLElement>) => {
-        event.stopPropagation();
+    const handleOpenSettings = useCallback((scriptId: string) => {
         void navigate(`/script/${scriptId}/settings`);
     }, [navigate]);
     const scriptCards = useMemo(
@@ -76,14 +75,14 @@ export const ScriptListRoute = () => {
                     <Button
                         variant="secondary"
                         size="sm"
-                        onClick={event => handleOpenEditor(script.id, event)}
+                        onPress={() => handleOpenEditor(script.id)}
                     >
                         Open editor
                     </Button>
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={event => handleOpenSettings(script.id, event)}
+                        onPress={() => handleOpenSettings(script.id)}
                     >
                         Settings
                     </Button>
@@ -106,6 +105,7 @@ export const ScriptListRoute = () => {
                     onHome={handleHome}
                     onNewScript={openModal}
                     onImportScript={openImportScript}
+                    isImportLoading={isImportLoading}
                 />
             )}
         >
@@ -118,7 +118,7 @@ export const ScriptListRoute = () => {
                             Keep drafts, outlines, and finished scripts in one consistent view.
                         </SubtleText>
                     </div>
-                    <Button onClick={openModal}>
+                    <Button onPress={openModal}>
                         New script
                     </Button>
                 </PageHeader>

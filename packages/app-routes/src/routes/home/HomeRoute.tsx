@@ -14,7 +14,6 @@ import {
 } from '@stagistic/ui';
 import {
     type KeyboardEvent as ReactKeyboardEvent,
-    type MouseEvent as ReactMouseEvent,
     useCallback,
     useMemo,
 } from 'react';
@@ -30,7 +29,9 @@ export const HomeRoute = () => {
         scriptSummaries,
         isLoading: scriptsLoading,
     } = useScripts();
-    const {openNewScript, openImportScript} = useGlobalModals();
+    const {
+        openNewScript, openImportScript, isImportLoading,
+    } = useGlobalModals();
 
     const latestScript = useMemo(() => scriptSummaries[0] ?? null, [scriptSummaries]);
 
@@ -53,12 +54,10 @@ export const HomeRoute = () => {
             void navigate(`/script/${scriptId}/editor`);
         }
     }, [navigate]);
-    const handleOpenEditor = useCallback((scriptId: string, event: ReactMouseEvent<HTMLElement>) => {
-        event.stopPropagation();
+    const handleOpenEditor = useCallback((scriptId: string) => {
         void navigate(`/script/${scriptId}/editor`);
     }, [navigate]);
-    const handleOpenSettings = useCallback((scriptId: string, event: ReactMouseEvent<HTMLElement>) => {
-        event.stopPropagation();
+    const handleOpenSettings = useCallback((scriptId: string) => {
         void navigate(`/script/${scriptId}/settings`);
     }, [navigate]);
 
@@ -84,14 +83,14 @@ export const HomeRoute = () => {
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={event => handleOpenEditor(script.id, event)}
+                            onPress={() => handleOpenEditor(script.id)}
                         >
                             Open
                         </Button>
                         <Button
                             variant="ghost"
                             size="sm"
-                            onClick={event => handleOpenSettings(script.id, event)}
+                            onPress={() => handleOpenSettings(script.id)}
                         >
                             Settings
                         </Button>
@@ -159,6 +158,7 @@ export const HomeRoute = () => {
                     onHome={handleHome}
                     onNewScript={openNewScript}
                     onImportScript={openImportScript}
+                    isImportLoading={isImportLoading}
                 />
             )}
         >
@@ -190,10 +190,14 @@ export const HomeRoute = () => {
                                 within a focused workspace.
                             </SubtleText>
                             <div className={styles.actions}>
-                                <Button onClick={openNewScript}>
+                                <Button onPress={openNewScript}>
                                     New script
                                 </Button>
-                                <Button variant="outline" onClick={openImportScript}>
+                                <Button
+                                    variant="outline"
+                                    onPress={openImportScript}
+                                    isLoading={isImportLoading}
+                                >
                                     Import
                                 </Button>
                             </div>

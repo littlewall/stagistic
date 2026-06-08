@@ -7,6 +7,7 @@ import {
     useState,
 } from 'react';
 
+import {Button} from '../atoms/Button';
 import {ModalDialog} from './ModalDialog';
 import styles from './NewScriptModal.module.css';
 import type {NewScriptModalProps} from './types';
@@ -65,16 +66,15 @@ export const NewScriptModal = ({
                     placeholder="Untitled scenario"
                 />
                 <div className={styles.actions}>
-                    <button
-                        className={styles.ghostButton}
-                        type="button"
-                        onClick={onClose}
+                    <Button
+                        variant="ghost"
+                        onPress={onClose}
                     >
                         Cancel
-                    </button>
-                    <button className={styles.primaryButton} type="submit">
+                    </Button>
+                    <Button type="submit">
                         Create script
-                    </button>
+                    </Button>
                 </div>
             </form>
         </ModalDialog>

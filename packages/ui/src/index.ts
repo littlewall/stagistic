@@ -1,5 +1,5 @@
-export * from './icons';
 export {Button} from './atoms/Button';
+export {Input} from './atoms/Input';
 export {Tag} from './atoms/Tag';
 export {
     Kicker,
@@ -23,6 +23,7 @@ export {
     ToastProvider,
     useToastController,
 } from './feedback/ToastProvider';
+export * from './icons';
 export {
     AppHeader,
     type AppHeaderProps,
@@ -40,16 +41,16 @@ export {
     CardFooter,
     CardHeader,
 } from './molecules/Card';
-export {Select} from './molecules/forms/Select';
-export type {SelectOption} from './molecules/forms/Select';
-export {TextInput} from './molecules/forms/TextInput';
-export {InputTable} from './molecules/forms/InputTable';
 export type {
     InputTableColumnDef,
     InputTableProps,
     InputTableRow,
     InputTableRowCount,
 } from './molecules/forms/InputTable';
+export {InputTable} from './molecules/forms/InputTable';
+export type {SelectOption} from './molecules/forms/Select';
+export {Select} from './molecules/forms/Select';
+export {TextInput} from './molecules/forms/TextInput';
 export {Grid} from './organisms/Grid';
 export {HeroLayout} from './organisms/HeroLayout';
 export {PageContainer} from './organisms/PageContainer';

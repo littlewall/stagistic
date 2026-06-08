@@ -1,0 +1,7 @@
+tools:
+    shell:
+        allow:
+            - cd *
+            - pnpm exec tsc *
+            - head *
+            - pnpm test *

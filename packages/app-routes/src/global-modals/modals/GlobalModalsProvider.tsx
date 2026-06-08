@@ -21,6 +21,7 @@ import {useGlobalModalActions} from './useGlobalModalActions';
 type GlobalModalsController = {
     openNewScript: () => void,
     openImportScript: () => void,
+    isImportLoading?: boolean,
 };
 
 const GlobalModalsContext = createContext<GlobalModalsController | null>(null);
@@ -52,6 +53,7 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         isNewScriptOpen,
         isImportOpen,
         prefilledImport,
+        isImportLoading,
         openNewScript,
         closeNewScript,
         openImportScript,
@@ -76,7 +78,12 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
     const contextValue = useMemo<GlobalModalsController>(() => ({
         openNewScript,
         openImportScript,
-    }), [openImportScript, openNewScript]);
+        isImportLoading,
+    }), [
+        openImportScript,
+        openNewScript,
+        isImportLoading,
+    ]);
 
     return (
         <GlobalModalsContext.Provider value={contextValue}>
@@ -91,6 +98,7 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
                 onClose={closeImportScript}
                 onImport={handleImport}
                 preselectedFile={prefilledImport}
+                isLoading={isImportLoading}
             />
         </GlobalModalsContext.Provider>
     );

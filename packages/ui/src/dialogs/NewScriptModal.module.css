@@ -38,36 +38,3 @@
         justify-content: flex-end;
     }
 }
-
-.primaryButton,
-.ghostButton {
-    cursor: pointer;
-    display: inline-flex;
-    gap: var(--space-md);
-    align-items: center;
-    justify-content: center;
-    padding: var(--space-md) var(--space-2xl);
-    font-weight: var(--font-weight-medium);
-    border: 1px solid transparent;
-    border-radius: var(--radius-full);
-    transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
-}
-
-.primaryButton {
-    color: var(--color-surface);
-    background: var(--color-text);
-
-    &:hover {
-        background: color-mix(in oklch, var(--color-text) 86%, var(--color-bg));
-    }
-}
-
-.ghostButton {
-    color: var(--color-text-muted);
-    background: transparent;
-
-    &:hover {
-        color: var(--color-text);
-        background: var(--color-surface-raised);
-    }
-}

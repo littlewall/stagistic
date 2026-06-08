@@ -65,7 +65,9 @@ export const ScriptEditorRoute = () => {
     const scriptRepository = useScriptRepository();
     const {deleteScript} = useScripts();
     const [searchParams, setSearchParams] = useSearchParams();
-    const {openNewScript, openImportScript} = useGlobalModals();
+    const {
+        openNewScript, openImportScript, isImportLoading,
+    } = useGlobalModals();
     const {
         isOpen: isSettingsOpen,
         activePanelId,
@@ -343,6 +345,7 @@ export const ScriptEditorRoute = () => {
                         onHome={handleHome}
                         onNewScript={handleNewScript}
                         onImportScript={openImportScript}
+                        isImportLoading={isImportLoading}
                         scriptSyncState={saveIndicator}
                         onMenuAction={handleMenuAction}
                     />
@@ -351,6 +354,7 @@ export const ScriptEditorRoute = () => {
                         onHome={handleHome}
                         onNewScript={handleNewScript}
                         onImportScript={openImportScript}
+                        isImportLoading={isImportLoading}
                         onMenuAction={handleMenuAction}
                     />
                 )

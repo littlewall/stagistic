@@ -1,4 +1,4 @@
-import {Button} from '@stagistic/ui';
+import {Button, Input} from '@stagistic/ui';
 import {useToastController} from '@stagistic/ui';
 import {
     useCallback,
@@ -57,7 +57,7 @@ export const DangerZoneSettingsPanel = ({
 
     return (
         <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Danger zone</h3>
+            <h3 className={panelStyles.panelTitle}>Delete script</h3>
             <section className={styles.dangerCard}>
                 <div className={styles.dangerHeader}>
                     <h4 className={styles.dangerTitle}>Delete script</h4>
@@ -71,7 +71,7 @@ export const DangerZoneSettingsPanel = ({
                     <span className={styles.confirmLabel}>
                         Type <code className={styles.confirmPhrase}>{CONFIRM_PHRASE}</code> to confirm
                     </span>
-                    <input
+                    <Input
                         id="danger-zone-confirm"
                         type="text"
                         className={styles.confirmInput}
@@ -86,8 +86,9 @@ export const DangerZoneSettingsPanel = ({
                 <Button
                     variant="danger"
                     className={styles.deleteButton}
-                    disabled={!isUnlocked || isDeleting}
-                    onClick={handleDelete}
+                    isDisabled={!isUnlocked}
+                    isLoading={isDeleting}
+                    onPress={handleDelete}
                 >
                     {isDeleting ? 'Deleting…' : 'Delete script'}
                 </Button>
