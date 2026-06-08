@@ -15,6 +15,7 @@ type ButtonSize = 'sm' | 'md';
 type ButtonProps = {
     variant?: ButtonVariant,
     size?: ButtonSize,
+    loading?: boolean,
     className?: string,
     isLoading?: boolean,
     onPress?: (event: PressEvent) => void,
@@ -23,6 +24,7 @@ type ButtonProps = {
 export const Button = ({
     variant = 'primary',
     size = 'md',
+    loading = false,
     className,
     isLoading,
     onPress,

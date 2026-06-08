@@ -1,10 +1,11 @@
-import {and, eq} from 'drizzle-orm';
+import {and, eq, sql} from 'drizzle-orm';
 
 import {
     bulkDeleteScriptBlocks,
     type DbClient,
     deleteScriptAct,
     deleteScriptScene,
+    generateBlockOrderKeys,
     listScriptCharacters,
     replaceScriptBlockCharacterRefs,
     upsertScriptAct,
@@ -20,13 +21,6 @@ import {
     scriptActs, scriptBlocks, scriptScenes,
 } from '../../schema';
 import {diffExtractedBlocks} from './diffExtractedBlocks';
-
-/*
- * Temp order offset for freshly-inserted rows during a structural write. Larger
- * than any realistic block count, so temp values never collide with surviving
- * rows (0..M) before writeFinalBlockOrders reassigns everything.
- */
-const INSERT_TEMP_OFFSET = 1_000_000;
 
 const serializeRefByKey = (refByKey: Record<string, string>): string => {
     return Object.entries(refByKey)
@@ -70,15 +64,20 @@ const toCharacterRefRows = (block: ExtractedBlockRow, knownCharacterIds: Set<str
  * Stateful per-script persister. Holds the last-saved extracted blocks as the
  * diff baseline. Create one per loaded script. `persist` writes only the delta
  * and is safe to call repeatedly.
+ *
+ * Calls to `persist` are serialized internally — if a second call arrives while
+ * the first is still running, it waits for the first to finish so it sees the
+ * updated baseline. This prevents duplicate-key errors from racing inserts.
  */
 export const createDocumentPersister = (scriptId: string) => {
     let lastSavedBlocks = new Map<string, ExtractedBlockRow>();
+    let queue: Promise<void> = Promise.resolve();
 
     const setBaseline = (blocks: ExtractedBlockRow[]) => {
         lastSavedBlocks = new Map(blocks.map(block => [block.blockId, block]));
     };
 
-    const persist = async (db: DbClient, document: RewriteScriptDocument): Promise<void> => {
+    const persistImpl = async (db: DbClient, document: RewriteScriptDocument): Promise<void> => {
         const now = Date.now();
         const extracted = extractScriptBlocks(scriptId, document);
         const diff = diffExtractedBlocks(Array.from(lastSavedBlocks.values()), extracted.blocks);
@@ -93,11 +92,14 @@ export const createDocumentPersister = (scriptId: string) => {
         const sceneIdByHeading = new Map(extracted.scenes.map(scene => [scene.headingBlockId, scene.id]));
         const actIdByHeading = new Map(extracted.acts.map(act => [act.headingBlockId, act.id]));
 
+        // Generate fractional index keys for all blocks based on their document position.
+        const orderKeys = generateBlockOrderKeys(extracted.blocks.length);
+
         const toDbBlock = (block: ExtractedBlockRow) => ({
             id: block.blockId,
             scriptId,
             blockType: block.blockType,
-            blockOrder: block.orderNo,
+            blockOrder: orderKeys[block.orderNo],
             textContent: block.textContent,
             contentJson: block.contentJson,
             sceneId: block.sceneHeadingBlockId ? sceneIdByHeading.get(block.sceneHeadingBlockId) ?? null : null,
@@ -203,12 +205,26 @@ export const createDocumentPersister = (scriptId: string) => {
             // 3. Delete removed blocks (their character refs cascade).
             await bulkDeleteScriptBlocks(tx, diff.deletedIds);
 
-            // 4. Bulk-insert new blocks at collision-free temporary negative orders.
+            // 4. Insert new blocks with their fractional index orders.
+            //    Uses ON CONFLICT as a safety net — if a prior persist already
+            //    inserted the same block (serialization edge case), update it.
             if (diff.inserted.length > 0) {
                 await tx.insert(scriptBlocks).values(diff.inserted.map(block => ({
                     ...toDbBlock(block),
-                    blockOrder: -INSERT_TEMP_OFFSET - block.orderNo,
-                })));
+                }))).onConflictDoUpdate({
+                    target: scriptBlocks.id,
+                    set: {
+                        blockType: sql`excluded."block_type"`,
+                        blockOrder: sql`excluded."block_order"`,
+                        textContent: sql`excluded."text_content"`,
+                        contentJson: sql`excluded."content_json"`,
+                        sceneId: sql`excluded."scene_id"`,
+                        actId: sql`excluded."act_id"`,
+                        columnGroupId: sql`excluded."column_group_id"`,
+                        columnIndex: sql`excluded."column_index"`,
+                        updatedAt: sql`excluded."updated_at"`,
+                    },
+                });
             }
 
             /*
@@ -220,11 +236,11 @@ export const createDocumentPersister = (scriptId: string) => {
                 await updateBlockFields(tx, block);
             }
 
-            // 6. Assign all final orders in one bulk statement (collision-safe).
+            // 6. Assign all final orders in one bulk statement.
             await writeFinalBlockOrders(
                 tx,
                 scriptId,
-                extracted.blocks.map(block => ({id: block.blockId, blockOrder: block.orderNo})),
+                extracted.blocks.map(block => ({id: block.blockId, blockOrder: orderKeys[block.orderNo]})),
             );
 
             // 7. Rewrite refs only for inserted + blocks whose refs changed.
@@ -234,6 +250,16 @@ export const createDocumentPersister = (scriptId: string) => {
         });
 
         setBaseline(extracted.blocks);
+    };
+
+    const persist = (db: DbClient, document: RewriteScriptDocument): Promise<void> => {
+        const result = queue.then(() => persistImpl(db, document));
+
+        // Keep the chain alive even if persistImpl rejects — the next call
+        // must still wait for this one to settle before reading baseline.
+        queue = result.catch(() => {});
+
+        return result;
     };
 
     return {persist, setBaseline};

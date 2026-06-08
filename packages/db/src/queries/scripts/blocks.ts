@@ -6,6 +6,7 @@ import {
     isNull,
     sql,
 } from 'drizzle-orm';
+import {generateKeyBetween, generateNKeysBetween} from 'fractional-indexing';
 
 import {scriptBlocks} from '../../schema';
 import type {DbClient} from '../types';
@@ -20,7 +21,7 @@ export interface ScriptBlockUpsertRow {
     id: string,
     scriptId: string,
     blockType: string,
-    blockOrder: number,
+    blockOrder: string,
     textContent: string,
     contentJson: string | null,
     sceneId: string | null,
@@ -33,7 +34,7 @@ export interface ScriptBlockUpsertRow {
 
 export interface ScriptBlockOrderMove {
     id: string,
-    blockOrder: number,
+    blockOrder: string,
     updatedAt: number,
 }
 
@@ -101,15 +102,19 @@ export const getScriptBlockById = async (db: DbClient, blockId: string) => {
     return rows[0] ?? null;
 };
 
+const BULK_UPSERT_BATCH_SIZE = 500;
+
 export const bulkUpsertScriptBlocks = async (db: DbClient, rows: ScriptBlockUpsertRow[]) => {
     if (rows.length === 0) {
         return;
     }
 
-    for (const row of rows) {
+    for (let i = 0; i < rows.length; i += BULK_UPSERT_BATCH_SIZE) {
+        const batch = rows.slice(i, i + BULK_UPSERT_BATCH_SIZE);
+
         await db
             .insert(scriptBlocks)
-            .values({
+            .values(batch.map(row => ({
                 id: row.id,
                 scriptId: row.scriptId,
                 blockType: row.blockType,
@@ -122,19 +127,19 @@ export const bulkUpsertScriptBlocks = async (db: DbClient, rows: ScriptBlockUpse
                 columnIndex: row.columnIndex,
                 createdAt: row.createdAt,
                 updatedAt: row.updatedAt,
-            })
+            })))
             .onConflictDoUpdate({
                 target: scriptBlocks.id,
                 set: {
-                    blockType: row.blockType,
-                    blockOrder: row.blockOrder,
-                    textContent: row.textContent,
-                    contentJson: row.contentJson,
-                    sceneId: row.sceneId,
-                    actId: row.actId,
-                    columnGroupId: row.columnGroupId,
-                    columnIndex: row.columnIndex,
-                    updatedAt: row.updatedAt,
+                    blockType: sql`excluded."block_type"`,
+                    blockOrder: sql`excluded."block_order"`,
+                    textContent: sql`excluded."text_content"`,
+                    contentJson: sql`excluded."content_json"`,
+                    sceneId: sql`excluded."scene_id"`,
+                    actId: sql`excluded."act_id"`,
+                    columnGroupId: sql`excluded."column_group_id"`,
+                    columnIndex: sql`excluded."column_index"`,
+                    updatedAt: sql`excluded."updated_at"`,
                 },
             });
     }
@@ -171,15 +176,13 @@ export const reorderScriptBlocks = async (
 
 export interface BlockOrderAssignment {
     id: string,
-    blockOrder: number,
+    blockOrder: string,
 }
 
 /**
- * Assign final block_order values without violating the (script_id, block_order)
- * unique index. Phase 1: negate every surviving row of this script into a
- * collision-free temporary range. Phase 2: set the requested final orders
- * (targets are a 0..N permutation, so no final collision). Must run inside a
- * transaction.
+ * Assign final block_order values using fractional index strings.
+ * Since there is no unique constraint on block_order, this is a single
+ * bulk UPDATE statement — no collision-avoidance phases needed.
  */
 export const writeFinalBlockOrders = async (
     db: DbClient,
@@ -190,23 +193,6 @@ export const writeFinalBlockOrders = async (
         return;
     }
 
-    /*
-     * Phase 1: move every existing row to negative space (preserves uniqueness,
-     * cannot collide with the positive final targets).
-     */
-    await db
-        .update(scriptBlocks)
-        .set({blockOrder: sql`(-${scriptBlocks.blockOrder} - 1)`})
-        .where(eq(scriptBlocks.scriptId, scriptId));
-
-    /*
-     * Phase 2: set all final orders in a SINGLE bulk statement. A reorder of one
-     * scene in a feature-length script shifts hundreds of rows; doing per-row
-     * awaited UPDATEs (one worker round-trip each) is pathologically slow and
-     * the transaction may not finish before a page refresh. UPDATE ... FROM
-     * (VALUES ...) applies the whole permutation at once; the unique index is
-     * evaluated at statement end against the final (valid) set.
-     */
     const now = Date.now();
     const valueTuples = sql.join(
         assignments.map(assignment => sql`(${assignment.id}, ${assignment.blockOrder})`),
@@ -215,8 +201,31 @@ export const writeFinalBlockOrders = async (
 
     await db.execute(sql`
         UPDATE ${scriptBlocks} AS b
-        SET block_order = v.ord::int, updated_at = ${now}
+        SET block_order = v.ord, updated_at = ${now}
         FROM (VALUES ${valueTuples}) AS v(id, ord)
         WHERE b.id = v.id AND b.script_id = ${scriptId}
     `);
+};
+
+/**
+ * Generate evenly-spaced fractional index keys for N blocks.
+ * Used when assigning fresh orders to all blocks in a script (e.g. on structural save).
+ */
+export const generateBlockOrderKeys = (count: number): string[] => {
+    if (count === 0) {
+        return [];
+    }
+
+    return generateNKeysBetween(null, null, count);
+};
+
+/**
+ * Compute a fractional index key between two adjacent blocks.
+ * Used for single-block moves (insert between neighbors).
+ */
+export const generateBlockOrderBetween = (
+    before: string | null,
+    after: string | null,
+): string => {
+    return generateKeyBetween(before, after);
 };

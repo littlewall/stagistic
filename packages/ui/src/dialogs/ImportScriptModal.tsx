@@ -1,4 +1,5 @@
 import {Button} from '../atoms/Button';
+import {Button} from '../atoms/Button';
 import {ImportDropZone} from './importScript/ImportDropZone';
 import {useImportScriptModalState} from './importScript/useImportScriptModalState';
 import styles from './ImportScriptModal.module.css';
@@ -19,6 +20,7 @@ export const ImportScriptModal = ({
         selectedFile,
         fileLabel,
         fileError,
+        isProcessing,
         enableLegacyCapsLyricsHeuristic,
         handleSubmit,
         handleNameChange,
@@ -89,11 +91,15 @@ export const ImportScriptModal = ({
                     </Button>
                     <Button
                         variant="primary"
+                    </Button>
+                    <Button
+                        variant="primary"
                         type="submit"
                         isDisabled={!selectedFile}
                         isLoading={isLoading}
                     >
                         Import script
+                    </Button>
                     </Button>
                 </div>
             </form>

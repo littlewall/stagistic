@@ -49,9 +49,9 @@ describe('persistDocumentDelta', () => {
 
         expect(await readBlocks(db, 's1')).toEqual([
             {
-                id: 'h1', type: 'fountain_scene_heading', text: 'INT. ROOM', order: 0,
+                id: 'h1', type: 'fountain_scene_heading', text: 'INT. ROOM', order: 'a0',
             }, {
-                id: 'a1', type: 'fountain_action', text: 'Action one.', order: 1,
+                id: 'a1', type: 'fountain_action', text: 'Action one.', order: 'a1',
             },
         ]);
     });
@@ -68,7 +68,7 @@ describe('persistDocumentDelta', () => {
 
         expect(await readBlocks(db, 's1')).toEqual([
             {
-                id: 'a1', type: 'fountain_action', text: 'hello', order: 0,
+                id: 'a1', type: 'fountain_action', text: 'hello', order: 'a0',
             },
         ]);
     });

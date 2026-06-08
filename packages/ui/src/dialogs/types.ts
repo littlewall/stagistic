@@ -12,7 +12,7 @@ export interface NewScriptModalProps {
 export interface ImportScriptModalProps {
     isOpen: boolean,
     onClose: () => void,
-    onImport: (payload: ImportPayload) => void,
+    onImport: (payload: ImportPayload) => void | Promise<void>,
     onPickFile?: () => Promise<ImportScriptFile | null>,
     preselectedFile?: ImportScriptFile | null,
     isLoading?: boolean,

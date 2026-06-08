@@ -70,31 +70,30 @@ export const createLocalPgliteDataRepository = ({
             const id = uuidv7();
             const now = Date.now();
 
-            await dbQueries.insertScript(db, {
-                id,
-                title: trimOrFallback(title, 'Untitled script'),
-                createdAt: now,
-                updatedAt: now,
-            });
-
             if (initialContent) {
-                try {
+                await db.transaction(async tx => {
+                    await dbQueries.insertScript(tx, {
+                        id,
+                        title: trimOrFallback(title, 'Untitled script'),
+                        createdAt: now,
+                        updatedAt: now,
+                    });
+
                     await migrateScriptDocumentToBlocks({
-                        db,
+                        db: tx,
                         scriptId: id,
                         sourceDocument: initialContent,
                         trigger: LEGACY_TO_BLOCKS_TRIGGERS.createScript,
                         context: LEGACY_TO_BLOCKS_TRIGGERS.createScript,
                     });
-                } catch (error) {
-                    try {
-                        await dbQueries.deleteScript(db, id);
-                    } catch (rollbackError) {
-                        console.error('[db-local] failed to rollback script after create migration error', rollbackError);
-                    }
-
-                    throw error;
-                }
+                });
+            } else {
+                await dbQueries.insertScript(db, {
+                    id,
+                    title: trimOrFallback(title, 'Untitled script'),
+                    createdAt: now,
+                    updatedAt: now,
+                });
             }
 
             return id;

@@ -1,6 +1,7 @@
 import {
     asc,
     eq,
+    sql,
 } from 'drizzle-orm';
 
 import {scriptScenes} from '../../schema';
@@ -58,6 +59,37 @@ export const upsertScriptScene = async (db: DbClient, payload: UpsertScriptScene
                 synopsis: payload.synopsis,
                 locationId: payload.locationId,
                 updatedAt: payload.updatedAt,
+            },
+        });
+};
+
+export const bulkUpsertScriptScenes = async (db: DbClient, rows: UpsertScriptScenePayload[]) => {
+    if (rows.length === 0) {
+        return;
+    }
+
+    await db
+        .insert(scriptScenes)
+        .values(rows.map(row => ({
+            id: row.id,
+            scriptId: row.scriptId,
+            headingBlockId: row.headingBlockId,
+            sceneNumber: row.sceneNumber,
+            colorHex: row.colorHex,
+            synopsis: row.synopsis,
+            locationId: row.locationId,
+            createdAt: row.createdAt,
+            updatedAt: row.updatedAt,
+        })))
+        .onConflictDoUpdate({
+            target: scriptScenes.id,
+            set: {
+                headingBlockId: sql`excluded."heading_block_id"`,
+                sceneNumber: sql`excluded."scene_number"`,
+                colorHex: sql`excluded."color_hex"`,
+                synopsis: sql`excluded."synopsis"`,
+                locationId: sql`excluded."location_id"`,
+                updatedAt: sql`excluded."updated_at"`,
             },
         });
 };

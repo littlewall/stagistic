@@ -1,19 +1,20 @@
-import {eq} from 'drizzle-orm';
+import {eq, inArray} from 'drizzle-orm';
+import {generateNKeysBetween} from 'fractional-indexing';
 
 import type {DbClient} from '../queries';
 import {
     bulkDeleteScriptBlocks,
+    bulkUpsertScriptActs,
     bulkUpsertScriptBlocks,
+    bulkUpsertScriptScenes,
     deleteScriptAct,
     deleteScriptScene,
     listScriptCharacters,
-    replaceScriptBlockCharacterRefs,
     replaceScriptTitlePageFields,
-    upsertScriptAct,
-    upsertScriptScene,
 } from '../queries';
 import {
     scriptActs,
+    scriptBlockCharacterRefs,
     scriptBlocks,
     scriptScenes,
 } from '../schema';
@@ -65,7 +66,7 @@ export interface RewriteBlocksMigrationAudit {
 export interface RewriteStoredBlockRow {
     id: string,
     blockType: string,
-    blockOrder: number,
+    blockOrder: string,
     textContent: string,
     contentJson: string | null,
     columnGroupId: string | null,
@@ -739,22 +740,20 @@ const persistExtractedBlocks = async (
     const orphanActIds = existingActs.map(a => a.id).filter(id => !newActIds.has(id));
 
     await db.transaction(async tx => {
-        for (const act of extracted.acts) {
-            await upsertScriptAct(tx, {
-                id: act.id,
-                scriptId,
-                headingBlockId: act.headingBlockId,
-                name: act.name,
-                createdAt: migratedAt,
-                updatedAt: migratedAt,
-            });
-        }
+        await bulkUpsertScriptActs(tx, extracted.acts.map(act => ({
+            id: act.id,
+            scriptId,
+            headingBlockId: act.headingBlockId,
+            name: act.name,
+            createdAt: migratedAt,
+            updatedAt: migratedAt,
+        })));
 
-        for (const scene of extracted.scenes) {
+        const scenePayloads = extracted.scenes.map(scene => {
             const existingScene = existingSceneByHeadingBlockId.get(scene.headingBlockId) ?? null;
             const importedSynopsis = extracted.importMetadata.sceneSynopsisByHeadingBlockId.get(scene.headingBlockId);
 
-            await upsertScriptScene(tx, {
+            return {
                 id: scene.id,
                 scriptId,
                 headingBlockId: scene.headingBlockId,
@@ -764,8 +763,10 @@ const persistExtractedBlocks = async (
                 locationId: existingScene?.locationId ?? null,
                 createdAt: existingScene?.createdAt ?? migratedAt,
                 updatedAt: migratedAt,
-            });
-        }
+            };
+        });
+
+        await bulkUpsertScriptScenes(tx, scenePayloads);
 
         if (extracted.importMetadata.titlePageFields !== null) {
             await replaceScriptTitlePageFields(
@@ -782,11 +783,13 @@ const persistExtractedBlocks = async (
             );
         }
 
-        await bulkUpsertScriptBlocks(tx, extracted.blocks.map(block => ({
+        const orderKeys = generateNKeysBetween(null, null, extracted.blocks.length);
+
+        await bulkUpsertScriptBlocks(tx, extracted.blocks.map((block, index) => ({
             id: block.blockId,
             scriptId,
             blockType: block.blockType,
-            blockOrder: block.orderNo,
+            blockOrder: orderKeys[index],
             textContent: block.textContent,
             contentJson: block.contentJson,
             sceneId: block.sceneHeadingBlockId
@@ -801,16 +804,21 @@ const persistExtractedBlocks = async (
             updatedAt: migratedAt,
         })));
 
-        for (const block of extracted.blocks) {
-            await replaceScriptBlockCharacterRefs(
-                tx,
-                block.blockId,
-                (validCharacterRefsByBlockId.get(block.blockId) ?? []).map(ref => ({
-                    characterId: ref.characterId,
-                    characterKey: ref.characterKey,
-                    isConfirmed: true,
-                })),
-            );
+        const allCharacterRefs = extracted.blocks.flatMap(block => (validCharacterRefsByBlockId.get(block.blockId) ?? []).map(ref => ({
+            blockId: block.blockId,
+            characterId: ref.characterId,
+            characterKey: ref.characterKey,
+            isConfirmed: true,
+        })));
+
+        if (newBlockIds.size > 0) {
+            await tx
+                .delete(scriptBlockCharacterRefs)
+                .where(inArray(scriptBlockCharacterRefs.blockId, [...newBlockIds]));
+        }
+
+        if (allCharacterRefs.length > 0) {
+            await tx.insert(scriptBlockCharacterRefs).values(allCharacterRefs);
         }
 
         /*
@@ -882,7 +890,7 @@ const toScriptDocumentFromStoredRows = (
     });
 
     const blockRowsSorted = [...blockRows]
-        .sort((a, b) => a.blockOrder - b.blockOrder);
+        .sort((a, b) => a.blockOrder < b.blockOrder ? -1 : a.blockOrder > b.blockOrder ? 1 : 0);
 
     const createBlockNode = (row: RewriteStoredBlockRow): FountainJSONContent => {
         const attrs: Record<string, unknown> = {

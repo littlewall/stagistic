@@ -59,7 +59,7 @@ export interface GlobalModalActions {
         importOptions?: {
             enableLegacyCapsLyricsHeuristic?: boolean,
         },
-    }) => void,
+    }) => Promise<void>,
 }
 
 export const useGlobalModalActions = ({
@@ -138,7 +138,7 @@ export const useGlobalModalActions = ({
         navigate,
     ]);
 
-    const handleImport = useCallback((payload: ScriptImportFile & {
+    const handleImport = useCallback(async (payload: ScriptImportFile & {
         name: string,
         importOptions?: {
             enableLegacyCapsLyricsHeuristic?: boolean,
