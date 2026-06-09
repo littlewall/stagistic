@@ -1,0 +1,153 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-06-09T00:00:00Z",
+  "title": "Design System: Stagistic",
+  "extensions": {
+    "colorMeta": {
+      "script-paper":     { "role": "neutral",   "displayName": "Script Paper",     "canonical": "oklch(0.97 0.004 51)",   "tonalRamp": ["oklch(0.15 0.014 51)", "oklch(0.25 0.014 51)", "oklch(0.4 0.014 51)", "oklch(0.55 0.014 51)", "oklch(0.7 0.014 51)", "oklch(0.82 0.014 51)", "oklch(0.92 0.008 51)", "oklch(0.97 0.004 51)"] },
+      "working-surface":  { "role": "neutral",   "displayName": "Working Surface",   "canonical": "oklch(0.985 0.004 51)",  "tonalRamp": ["oklch(0.15 0.014 51)", "oklch(0.25 0.014 51)", "oklch(0.4 0.014 51)", "oklch(0.55 0.014 51)", "oklch(0.7 0.014 51)", "oklch(0.82 0.014 51)", "oklch(0.92 0.008 51)", "oklch(0.985 0.004 51)"] },
+      "surface-raised":   { "role": "neutral",   "displayName": "Surface Raised",    "canonical": "oklch(0.952 0.004 51)",  "tonalRamp": ["oklch(0.15 0.014 51)", "oklch(0.25 0.014 51)", "oklch(0.4 0.014 51)", "oklch(0.55 0.014 51)", "oklch(0.7 0.014 51)", "oklch(0.82 0.014 51)", "oklch(0.9 0.008 51)", "oklch(0.952 0.004 51)"] },
+      "surface-tint":     { "role": "neutral",   "displayName": "Surface Tint",      "canonical": "oklch(0.908 0.014 51)",  "tonalRamp": ["oklch(0.15 0.025 51)", "oklch(0.25 0.025 51)", "oklch(0.4 0.025 51)", "oklch(0.55 0.025 51)", "oklch(0.65 0.025 51)", "oklch(0.75 0.02 51)", "oklch(0.85 0.018 51)", "oklch(0.908 0.014 51)"] },
+      "manuscript":       { "role": "neutral",   "displayName": "Manuscript",        "canonical": "oklch(0.155 0.014 51)",  "tonalRamp": ["oklch(0.10 0.014 51)", "oklch(0.155 0.014 51)", "oklch(0.25 0.014 51)", "oklch(0.4 0.014 51)", "oklch(0.55 0.014 51)", "oklch(0.7 0.014 51)", "oklch(0.85 0.014 51)", "oklch(0.95 0.008 51)"] },
+      "marginalia":       { "role": "neutral",   "displayName": "Marginalia",        "canonical": "oklch(0.465 0.014 51)",  "tonalRamp": ["oklch(0.15 0.014 51)", "oklch(0.25 0.014 51)", "oklch(0.35 0.014 51)", "oklch(0.465 0.014 51)", "oklch(0.58 0.014 51)", "oklch(0.7 0.014 51)", "oklch(0.82 0.014 51)", "oklch(0.94 0.008 51)"] },
+      "folded-edge":      { "role": "neutral",   "displayName": "Folded Edge",       "canonical": "oklch(0.875 0.014 51)",  "tonalRamp": ["oklch(0.15 0.014 51)", "oklch(0.3 0.014 51)", "oklch(0.45 0.014 51)", "oklch(0.6 0.014 51)", "oklch(0.72 0.014 51)", "oklch(0.8 0.014 51)", "oklch(0.875 0.014 51)", "oklch(0.94 0.008 51)"] },
+      "folded-edge-strong": { "role": "neutral", "displayName": "Folded Edge Strong", "canonical": "oklch(0.79 0.014 51)",  "tonalRamp": ["oklch(0.15 0.014 51)", "oklch(0.28 0.014 51)", "oklch(0.4 0.014 51)", "oklch(0.55 0.014 51)", "oklch(0.67 0.014 51)", "oklch(0.79 0.014 51)", "oklch(0.88 0.014 51)", "oklch(0.94 0.008 51)"] },
+      "working-amber":    { "role": "primary",   "displayName": "Working Amber",     "canonical": "oklch(0.762 0.098 53.1)","tonalRamp": ["oklch(0.22 0.098 53.1)", "oklch(0.32 0.098 53.1)", "oklch(0.42 0.098 53.1)", "oklch(0.525 0.098 53.1)", "oklch(0.625 0.098 53.1)", "oklch(0.762 0.098 53.1)", "oklch(0.87 0.055 53.1)", "oklch(0.95 0.02 53.1)"] },
+      "note-blue":        { "role": "secondary", "displayName": "Note Blue",         "canonical": "oklch(0.58 0.1 239)",    "tonalRamp": ["oklch(0.2 0.1 239)", "oklch(0.3 0.1 239)", "oklch(0.4 0.1 239)", "oklch(0.5 0.1 239)", "oklch(0.58 0.1 239)", "oklch(0.7 0.1 239)", "oklch(0.84 0.06 239)", "oklch(0.95 0.02 239)"] },
+      "cleared-green":    { "role": "tertiary",  "displayName": "Cleared Green",     "canonical": "oklch(0.48 0.097 165.2)","tonalRamp": ["oklch(0.18 0.097 165.2)", "oklch(0.28 0.097 165.2)", "oklch(0.38 0.097 165.2)", "oklch(0.48 0.097 165.2)", "oklch(0.58 0.097 165.2)", "oklch(0.68 0.097 165.2)", "oklch(0.82 0.055 165.2)", "oklch(0.94 0.02 165.2)"] },
+      "cut-red":          { "role": "tertiary",  "displayName": "Cut Red",           "canonical": "oklch(0.54 0.127 14.8)", "tonalRamp": ["oklch(0.2 0.127 14.8)", "oklch(0.3 0.127 14.8)", "oklch(0.4 0.127 14.8)", "oklch(0.54 0.127 14.8)", "oklch(0.64 0.127 14.8)", "oklch(0.74 0.1 14.8)", "oklch(0.86 0.065 14.8)", "oklch(0.95 0.025 14.8)"] },
+      "dark-stage":       { "role": "neutral",   "displayName": "Dark Stage",        "canonical": "oklch(0.135 0.006 51)",  "tonalRamp": ["oklch(0.06 0.006 51)", "oklch(0.095 0.006 51)", "oklch(0.135 0.006 51)", "oklch(0.17 0.006 51)", "oklch(0.22 0.006 51)", "oklch(0.32 0.008 51)", "oklch(0.5 0.01 51)", "oklch(0.7 0.012 51)"] },
+      "backstage-flat":   { "role": "neutral",   "displayName": "Backstage Flat",    "canonical": "oklch(0.17 0.006 51)",   "tonalRamp": ["oklch(0.06 0.006 51)", "oklch(0.1 0.006 51)", "oklch(0.135 0.006 51)", "oklch(0.17 0.006 51)", "oklch(0.22 0.006 51)", "oklch(0.35 0.008 51)", "oklch(0.55 0.01 51)", "oklch(0.75 0.012 51)"] },
+      "illuminated-script": { "role": "neutral", "displayName": "Illuminated Script", "canonical": "oklch(0.92 0.014 51)", "tonalRamp": ["oklch(0.15 0.014 51)", "oklch(0.3 0.014 51)", "oklch(0.45 0.014 51)", "oklch(0.6 0.014 51)", "oklch(0.72 0.014 51)", "oklch(0.82 0.014 51)", "oklch(0.92 0.014 51)", "oklch(0.97 0.008 51)"] }
+    },
+    "typographyMeta": {
+      "display":  { "displayName": "Display",  "purpose": "Page titles and modal headlines. Used sparingly at the largest scale." },
+      "headline": { "displayName": "Headline", "purpose": "Section headings, card titles, sidebar panel headers." },
+      "title":    { "displayName": "Title",    "purpose": "Sub-section labels, dialog section titles." },
+      "body":     { "displayName": "Body",     "purpose": "Default interface text. All readable prose, form labels, descriptions." },
+      "label":    { "displayName": "Label / Mono (Courier Prime)", "purpose": "Tags, structural markers, script element names, shortcut indicators. The mono voice — signals theatrical script structure." }
+    },
+    "shadows": [
+      { "name": "popover", "value": "0 10px 30px oklch(.177 .006 41.5 / .18)",    "purpose": "Dropdown menus, select panels, tooltips, command palettes." },
+      { "name": "panel",   "value": "0 12px 32px oklch(.177 .006 41.5 / .08)",    "purpose": "Floating sidebars and detached panels." },
+      { "name": "card",    "value": "0 10px 20px oklch(.177 .006 41.5 / .08)",    "purpose": "Interactive card on hover only — not at rest." },
+      { "name": "canvas",  "value": "0 12px 30px oklch(.177 .006 41.5 / .06)",    "purpose": "Editor canvas elevated over the app background." }
+    ],
+    "motion": [
+      { "name": "transition-fast",     "value": "150ms ease",                         "purpose": "Button states, border color changes, icon color changes." },
+      { "name": "transition-standard", "value": "200ms ease",                         "purpose": "Color transitions for links and muted-to-full text." },
+      { "name": "ease-out-smooth",     "value": "cubic-bezier(0.22, 1, 0.36, 1)",    "purpose": "Panel entrances, dropdown opens, slide-ins." },
+      { "name": "spin",                "value": "animation: spin 600ms linear infinite", "purpose": "Button loading spinner, progress circle." }
+    ],
+    "breakpoints": [
+      { "name": "tablet", "value": "1024px", "purpose": "Sidebar collapses; app switches to single-column layout." },
+      { "name": "mobile", "value": "900px",  "purpose": "Additional mobile adaptations." }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The main call-to-action. Manuscript ink background, script paper text, pill radius.",
+      "html": "<button class=\"ds-btn-primary\">Save changes</button>",
+      "css": ".ds-btn-primary { cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 20px; font-family: 'IBM Plex Sans Variable', system-ui, sans-serif; font-size: 13px; font-weight: 500; color: oklch(0.97 0.004 51); background: oklch(0.155 0.014 51); border: 1px solid transparent; border-radius: 9999px; transition: background 150ms ease; text-decoration: none; } .ds-btn-primary:hover { background: oklch(0.22 0.014 51); } .ds-btn-primary:focus-visible { outline: 2px solid oklch(0.58 0.1 239); outline-offset: 2px; } .ds-btn-primary:disabled { cursor: not-allowed; opacity: 0.6; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Bordered utility button for secondary actions. Transparent with border.",
+      "html": "<button class=\"ds-btn-secondary\">Cancel</button>",
+      "css": ".ds-btn-secondary { cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 20px; font-family: 'IBM Plex Sans Variable', system-ui, sans-serif; font-size: 13px; font-weight: 500; color: oklch(0.155 0.014 51); background: oklch(0.985 0.004 51); border: 1px solid oklch(0.875 0.014 51); border-radius: 9999px; transition: background 150ms ease, border-color 150ms ease; text-decoration: none; } .ds-btn-secondary:hover { background: oklch(0.952 0.004 51); } .ds-btn-secondary:focus-visible { outline: 2px solid oklch(0.58 0.1 239); outline-offset: 2px; } .ds-btn-secondary:disabled { cursor: not-allowed; opacity: 0.6; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Lowest visual weight. Toolbar actions, icon buttons, secondary nav items.",
+      "html": "<button class=\"ds-btn-ghost\">Settings</button>",
+      "css": ".ds-btn-ghost { cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 20px; font-family: 'IBM Plex Sans Variable', system-ui, sans-serif; font-size: 13px; font-weight: 500; color: oklch(0.465 0.014 51); background: transparent; border: 1px solid transparent; border-radius: 9999px; transition: background 150ms ease, color 150ms ease; text-decoration: none; } .ds-btn-ghost:hover { color: oklch(0.155 0.014 51); background: oklch(0.952 0.004 51); } .ds-btn-ghost:focus-visible { outline: 2px solid oklch(0.58 0.1 239); outline-offset: 2px; } .ds-btn-ghost:disabled { cursor: not-allowed; opacity: 0.6; }"
+    },
+    {
+      "name": "Danger Button",
+      "kind": "button",
+      "refersTo": "button-danger",
+      "description": "Destructive actions. Transparent with red text and partial red border.",
+      "html": "<button class=\"ds-btn-danger\">Delete project</button>",
+      "css": ".ds-btn-danger { cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 8px 20px; font-family: 'IBM Plex Sans Variable', system-ui, sans-serif; font-size: 13px; font-weight: 500; color: oklch(0.54 0.127 14.8); background: transparent; border: 1px solid color-mix(in oklch, oklch(0.54 0.127 14.8) 35%, oklch(0.875 0.014 51)); border-radius: 9999px; transition: background 150ms ease, border-color 150ms ease; } .ds-btn-danger:hover { background: color-mix(in oklch, oklch(0.54 0.127 14.8) 10%, transparent); } .ds-btn-danger:focus-visible { outline: 2px solid oklch(0.54 0.127 14.8); outline-offset: 2px; } .ds-btn-danger:disabled { cursor: not-allowed; opacity: 0.6; }"
+    },
+    {
+      "name": "Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "Default structural container. Flat at rest; border lifts toward Manuscript on hover.",
+      "html": "<article class=\"ds-card\"><div class=\"ds-card-header\"><h3 class=\"ds-card-title\">Script title</h3></div><div class=\"ds-card-content\"><p class=\"ds-card-body\">Act 1 · Scene 3 · 24 pages</p></div></article>",
+      "css": ".ds-card { display: flex; flex-direction: column; gap: 16px; min-height: 160px; padding: 20px; background: oklch(0.985 0.004 51); border: 1px solid oklch(0.875 0.014 51); border-radius: 10px; transition: border-color 150ms ease, box-shadow 150ms ease; cursor: pointer; } .ds-card:hover { border-color: color-mix(in oklch, oklch(0.155 0.014 51) 12%, oklch(0.875 0.014 51)); box-shadow: 0 10px 20px oklch(.177 .006 41.5 / .08); } .ds-card:focus-visible { outline: 2px solid oklch(0.58 0.1 239); outline-offset: 2px; } .ds-card-header { display: flex; align-items: center; justify-content: space-between; } .ds-card-title { font-family: 'IBM Plex Sans Variable', system-ui, sans-serif; font-size: 15px; font-weight: 500; color: oklch(0.155 0.014 51); } .ds-card-body { font-family: 'IBM Plex Sans Variable', system-ui, sans-serif; font-size: 12px; color: oklch(0.465 0.014 51); line-height: 1.5; }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Standard text field. Rounded small, subtle border, focus shifts border to accent tint.",
+      "html": "<input class=\"ds-input\" type=\"text\" placeholder=\"Script title\" value=\"\" />",
+      "css": ".ds-input { box-sizing: border-box; width: 100%; padding: 6px 10px; font-family: 'IBM Plex Sans Variable', system-ui, sans-serif; font-size: 12px; color: oklch(0.155 0.014 51); background: oklch(0.985 0.004 51); border: 1px solid oklch(0.875 0.014 51); border-radius: 6px; transition: border-color 150ms ease; } .ds-input::placeholder { color: oklch(0.465 0.014 51); opacity: 0.6; } .ds-input:focus { border-color: oklch(0.908 0.014 51); outline: none; } .ds-input:disabled { cursor: not-allowed; opacity: 0.4; }"
+    },
+    {
+      "name": "Tag / Chip",
+      "kind": "chip",
+      "refersTo": "tag",
+      "description": "Structural label using the mono voice. Uppercase, letter-spaced, pill radius.",
+      "html": "<span class=\"ds-tag\">Act I</span>",
+      "css": ".ds-tag { display: inline-flex; align-items: center; justify-content: center; padding: 2px 8px; font-family: 'Courier Prime', 'Courier New', monospace; font-size: 11px; font-weight: 400; color: oklch(0.465 0.014 51); text-transform: uppercase; letter-spacing: 0.08em; background: oklch(0.908 0.014 51); border-radius: 9999px; }"
+    },
+    {
+      "name": "App Header",
+      "kind": "nav",
+      "refersTo": null,
+      "description": "Sticky top navigation bar. Script Paper background, border-bottom divider, ghost icon buttons for tools.",
+      "html": "<header class=\"ds-header\"><div class=\"ds-header-inner\"><span class=\"ds-header-logo\">stagistic</span><nav class=\"ds-header-nav\"><button class=\"ds-header-action\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><circle cx=\"11\" cy=\"11\" r=\"8\"/><path d=\"m21 21-4.35-4.35\"/></svg></button></nav></div></header>",
+      "css": ".ds-header { position: sticky; top: 0; z-index: 10; background: oklch(0.97 0.004 51); border-bottom: 1px solid oklch(0.875 0.014 51); } .ds-header-inner { display: flex; align-items: center; justify-content: space-between; padding: 0 16px; height: 40px; } .ds-header-logo { font-family: 'Courier Prime', monospace; font-size: 13px; font-weight: 500; color: oklch(0.155 0.014 51); letter-spacing: -0.01em; } .ds-header-nav { display: flex; align-items: center; gap: 4px; } .ds-header-action { cursor: pointer; display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; color: oklch(0.465 0.014 51); background: transparent; border: none; border-radius: 8px; transition: background 150ms ease, color 150ms ease; } .ds-header-action:hover { color: oklch(0.155 0.014 51); background: oklch(0.952 0.004 51); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Dark Stage",
+    "overview": "The theatre before the house lights come up. Attention belongs to the work on the page, not to the tool holding it. Stagistic's design system exists in the wings: disciplined, unobtrusive, and exactly where it needs to be when the playwright needs it. The interface never interrupts a line of dialogue or a blocking note to announce itself.\n\nThe palette begins from a warm near-neutral — manuscript ink, script paper, stage lamp amber — and operates in restraint. The density is app-appropriate: compact, information-rich, never cluttered. In dark mode the whole system reads as the dark stage: near-black warm surfaces, warm near-white text, the amber accent rising like a working light. In light mode, the same warmth reads as a freshly turned page. Both modes share identical structure; only the lightness levels shift.\n\nThis system explicitly rejects three things. Heavy SaaS dashboard patterns belong to project management tools, not to a playwright's instrument. Gamified or visually loud apps pull attention from the script; nothing here earns its place through decoration. Loud marketing aesthetics — feature-grid carousels, hero-metric numbers, purple gradients — are forbidden on both app and landing surfaces.",
+    "keyCharacteristics": [
+      "Warm neutrals rooted in a single amber-tinted base; no arbitrary cool gray injection",
+      "Two complementary typefaces: IBM Plex Sans Variable for the interface, Courier Prime for scripted labels and the script canvas",
+      "Flat surfaces at rest; structural shadows only on floating elements",
+      "Full light/dark theme parity — same tokens, same structure, only lightness levels change",
+      "A size-scale system that lets users shift the entire UI density without layout reflow",
+      "OKLCH throughout, relative-color-syntax for derived tokens — the system never drifts out of hue cohesion"
+    ],
+    "rules": [
+      { "name": "The One Accent Rule",        "body": "Working Amber appears on ≤5% of any given screen. It carries meaning: something is in progress, something is selected. Diluting it with decorative use destroys its signal value.", "section": "colors" },
+      { "name": "The Hue Cohesion Rule",      "body": "All neutrals are derived from --base-neutral via relative-color-syntax. A new surface color is always oklch(from var(--base-neutral) <L> calc(c * <factor>) h). Never introduce an independent gray hex.", "section": "colors" },
+      { "name": "The Two-Voice Rule",         "body": "Courier Prime is the script's voice; IBM Plex Sans is the tool's voice. They don't overlap. Body copy is always sans. Script-canvas text and structural labels are always mono. Mixing them on the same element is prohibited.", "section": "typography" },
+      { "name": "The Size-Scale Rule",        "body": "All font sizes, spacing values, and control heights are multiplied by --size-scale. New values must follow this pattern. Never define a fixed-pixel font size that bypasses the scale.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule",   "body": "No element carries a shadow at rest unless it is a floating overlay. If it's in the document flow, it uses tonal layering. If it's floating (popover, modal, drawer), it uses shadow.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do keep the script canvas as the highest-contrast, most visually prominent element on any editor screen.",
+      "Do use the OKLCH relative-color-syntax pattern for all new surface colors.",
+      "Do derive all spacing and font sizes through --size-scale.",
+      "Do use Courier Prime for any label, marker, or element that belongs to the theatrical script structure.",
+      "Do keep Working Amber rare — progress bars and active selection highlights only.",
+      "Do apply shadows only to floating elements that break the document flow.",
+      "Do support prefers-reduced-motion with zero-duration or fade-only fallbacks.",
+      "Do use color-mix(in oklch, ...) for all hover/state color derivations."
+    ],
+    "donts": [
+      "Don't introduce heavy SaaS dashboard patterns: dense sidebars, data tables as default, enterprise navigation.",
+      "Don't add gamified or colorful elements: badges, reward animations, visual busy-ness that pulls focus from the script.",
+      "Don't use loud marketing aesthetics on any surface: gradients, hero-metric numbers, feature-card grids, buzzword copy, eyebrow-on-every-section pattern.",
+      "Don't use border-left or border-right greater than 1px as a colored accent stripe.",
+      "Don't use background-clip: text with a gradient for decorative text.",
+      "Don't mix IBM Plex Sans and Courier Prime on the same text element.",
+      "Don't add nested cards.",
+      "Don't introduce a new gray color that doesn't derive from --base-neutral hue 51°.",
+      "Don't use z-index values above 20 in component CSS."
+    ]
+  }
+}
