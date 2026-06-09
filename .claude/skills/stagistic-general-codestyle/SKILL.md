@@ -1,6 +1,6 @@
 ---
 name: stagistic-general-codestyle
-description: Personal code style preferences. Use when writing or reviewing TypeScript/React code.
+description: Personal code style preferences used when writing or reviewing TypeScript/React code.
 ---
 
 ## Code Style Rules
@@ -31,3 +31,10 @@ description: Personal code style preferences. Use when writing or reviewing Type
   // ✅ <div className={clsx(styles.base, condition && styles.active)}>
   ```
 - **Use React Aria components for accessibility** (e.g. `Button`, `Tooltip`, `TooltipTrigger`), and avoid custom implementations of common UI patterns when possible. Never use React Aria directly - create a wrapper component in the `ui` package that re-exports the React Aria component with your preferred styling and behavior.
+- **Use `pnpm` workspace protocol for internal package imports**:
+  ```ts
+  // ❌ import { Button } from '../../ui/Button';
+  // ✅ import { Button } from '@stagistic/ui';
+  ```
+- **Use `pnpm` instead of `npm` or `yarn`** for package management, and follow the workspace conventions for adding dependencies (e.g. `pnpm add -w` for root dependencies, `pnpm add -F <package>` for package-specific dependencies).
+- **Use `pnpm` scripts for dev, build, lint, and test commands**, and avoid using custom scripts or aliases that deviate from the standard `pnpm` commands.
