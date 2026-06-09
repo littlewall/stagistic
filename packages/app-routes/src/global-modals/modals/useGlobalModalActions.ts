@@ -53,7 +53,7 @@ export interface GlobalModalActions {
     openImportScript: () => void,
     closeImportScript: () => void,
     setPrefilledImport: (value: ScriptImportFile | null) => void,
-    handleCreate: (name: string) => void,
+    handleCreate: (name: string) => Promise<void>,
     handleImport: (payload: ScriptImportFile & {
         name: string,
         importOptions?: {
@@ -109,7 +109,7 @@ export const useGlobalModalActions = ({
         return scriptId;
     }, [refreshScripts, scriptRepository]);
 
-    const handleCreate = useCallback((name: string) => {
+    const handleCreate = useCallback((name: string): Promise<void> => {
         const createAndNavigate = async () => {
             try {
                 const scriptId = await createScriptWithActiveBlock(name);
@@ -131,7 +131,7 @@ export const useGlobalModalActions = ({
             }
         };
 
-        void createAndNavigate();
+        return createAndNavigate();
     }, [
         addToast,
         createScriptWithActiveBlock,
@@ -188,7 +188,7 @@ export const useGlobalModalActions = ({
             }
         };
 
-        void importAndNavigate();
+        await importAndNavigate();
     }, [
         addToast,
         createScriptWithActiveBlock,

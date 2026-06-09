@@ -1,6 +1,5 @@
 import {useScripts} from '@stagistic/app-core';
 import {
-    AppHeader,
     AppLayout,
     Button,
     Card,
@@ -15,53 +14,33 @@ import {
     ProgressPanel,
     SubtleText,
 } from '@stagistic/ui';
-import {
-    type KeyboardEvent as ReactKeyboardEvent,
-    useCallback,
-    useMemo,
-} from 'react';
+import {type KeyboardEvent as ReactKeyboardEvent, useMemo} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
+import {AppHeader} from '../../layout/AppHeader';
 import {formatLastEdited} from '../../utils/formatLastEdited';
 import styles from './ScriptListRoute.module.css';
 
 export const ScriptListRoute = () => {
     const navigate = useNavigate();
     const {scriptSummaries, isLoading: scriptsLoading} = useScripts();
-    const {
-        openNewScript, openImportScript, isImportLoading,
-    } = useGlobalModals();
-    const openModal = useCallback(() => {
-        openNewScript();
-    }, [openNewScript]);
-    const handleHome = useCallback(() => {
-        void navigate('/');
-    }, [navigate]);
-    const handleCardClick = useCallback((scriptId: string) => {
-        void navigate(`/script/${scriptId}/editor`);
-    }, [navigate]);
-    const handleCardKeyDown = useCallback((scriptId: string, event: ReactKeyboardEvent<HTMLElement>) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            void navigate(`/script/${scriptId}/editor`);
-        }
-    }, [navigate]);
-    const handleOpenEditor = useCallback((scriptId: string) => {
-        void navigate(`/script/${scriptId}/editor`);
-    }, [navigate]);
-    const handleOpenSettings = useCallback((scriptId: string) => {
-        void navigate(`/script/${scriptId}/settings`);
-    }, [navigate]);
+    const {openNewScript} = useGlobalModals();
+
     const scriptCards = useMemo(
         () => scriptSummaries.map(script => (
             <Card
                 key={script.id}
                 className={styles.card}
-                onClick={() => handleCardClick(script.id)}
+                onClick={() => void navigate(`/script/${script.id}/editor`)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={event => handleCardKeyDown(script.id, event)}
+                onKeyDown={(event: ReactKeyboardEvent<HTMLElement>) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        void navigate(`/script/${script.id}/editor`);
+                    }
+                }}
             >
                 <CardHeader>
                     <h2 className={styles.cardTitle}>{script.title}</h2>
@@ -75,40 +54,25 @@ export const ScriptListRoute = () => {
                     <Button
                         variant="secondary"
                         size="sm"
-                        onPress={() => handleOpenEditor(script.id)}
+                        onPress={() => void navigate(`/script/${script.id}/editor`)}
                     >
                         Open editor
                     </Button>
                     <Button
                         variant="ghost"
                         size="sm"
-                        onPress={() => handleOpenSettings(script.id)}
+                        onPress={() => void navigate(`/script/${script.id}/settings`)}
                     >
                         Settings
                     </Button>
                 </CardFooter>
             </Card>
         )),
-        [
-            handleCardClick,
-            handleCardKeyDown,
-            handleOpenEditor,
-            handleOpenSettings,
-            scriptSummaries,
-        ],
+        [navigate, scriptSummaries],
     );
 
     return (
-        <AppLayout
-            header={(
-                <AppHeader
-                    onHome={handleHome}
-                    onNewScript={openModal}
-                    onImportScript={openImportScript}
-                    isImportLoading={isImportLoading}
-                />
-            )}
-        >
+        <AppLayout header={<AppHeader />}>
             <PageContainer variant="standard">
                 <PageHeader>
                     <div>
@@ -118,7 +82,7 @@ export const ScriptListRoute = () => {
                             Keep drafts, outlines, and finished scripts in one consistent view.
                         </SubtleText>
                     </div>
-                    <Button onPress={openModal}>
+                    <Button onPress={openNewScript}>
                         New script
                     </Button>
                 </PageHeader>

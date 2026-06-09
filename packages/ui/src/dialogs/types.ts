@@ -6,7 +6,7 @@ import type {ImportScriptFile} from './importScript/types';
 export interface NewScriptModalProps {
     isOpen: boolean,
     onClose: () => void,
-    onCreate: (name: string) => void,
+    onCreate: (name: string) => void | Promise<void>,
 }
 
 export interface ImportScriptModalProps {

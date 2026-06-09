@@ -87,10 +87,10 @@ export const DangerZoneSettingsPanel = ({
                     variant="danger"
                     className={styles.deleteButton}
                     isDisabled={!isUnlocked}
-                    isLoading={isDeleting}
+                    isPending={isDeleting}
                     onPress={handleDelete}
                 >
-                    {isDeleting ? 'Deleting…' : 'Delete script'}
+                    Delete script
                 </Button>
             </section>
         </div>

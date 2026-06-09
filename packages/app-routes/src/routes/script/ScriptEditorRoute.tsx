@@ -8,10 +8,8 @@ import {
 } from '@stagistic/editor';
 import {isApplePlatform} from '@stagistic/shared';
 import {
-    AppHeader,
     AppLayout,
     LoaderOverlay,
-    ScriptEditorAppHeader,
     ScriptSettingsModal,
 } from '@stagistic/ui';
 import {
@@ -26,7 +24,7 @@ import {
     useSearchParams,
 } from 'react-router-dom';
 
-import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
+import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
 import {useScriptEditorCharacters} from './editor/characters/useScriptEditorCharacters';
 import {ScriptEditorSettingsPanel} from './editor/settings';
@@ -65,9 +63,6 @@ export const ScriptEditorRoute = () => {
     const scriptRepository = useScriptRepository();
     const {deleteScript} = useScripts();
     const [searchParams, setSearchParams] = useSearchParams();
-    const {
-        openNewScript, openImportScript, isImportLoading,
-    } = useGlobalModals();
     const {
         isOpen: isSettingsOpen,
         activePanelId,
@@ -181,16 +176,10 @@ export const ScriptEditorRoute = () => {
         lastResolvedActiveBlockIdRef.current = blockId;
         handleActiveBlockChange(blockId);
     }, [handleActiveBlockChange]);
-    const {
-        handleSelectScript,
-        handleHome,
-        handleNewScript,
-        handleMenuAction,
-    } = useScriptEditorHeaderActions({
+    const {handleMenuAction} = useScriptEditorHeaderActions({
         navigate,
         currentScript,
         openSettingsModal,
-        openNewScript,
     });
 
     const handleSelectSettingsPanel = useCallback((panelId: string) => {
@@ -341,22 +330,11 @@ export const ScriptEditorRoute = () => {
                     <ScriptEditorAppHeader
                         currentScript={currentScript}
                         recentScripts={recentScripts}
-                        onSelectScript={handleSelectScript}
-                        onHome={handleHome}
-                        onNewScript={handleNewScript}
-                        onImportScript={openImportScript}
-                        isImportLoading={isImportLoading}
                         scriptSyncState={saveIndicator}
                         onMenuAction={handleMenuAction}
                     />
                 ) : (
-                    <AppHeader
-                        onHome={handleHome}
-                        onNewScript={handleNewScript}
-                        onImportScript={openImportScript}
-                        isImportLoading={isImportLoading}
-                        onMenuAction={handleMenuAction}
-                    />
+                    <AppHeader onMenuAction={handleMenuAction} />
                 )
             )}
         >

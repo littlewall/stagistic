@@ -1,6 +1,5 @@
 import {useScripts} from '@stagistic/app-core';
 import {
-    AppHeader,
     AppLayout,
     Button,
     Card,
@@ -12,54 +11,20 @@ import {
     SectionTitle,
     SubtleText,
 } from '@stagistic/ui';
-import {
-    type KeyboardEvent as ReactKeyboardEvent,
-    useCallback,
-    useMemo,
-} from 'react';
+import {type KeyboardEvent as ReactKeyboardEvent, useMemo} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
+import {AppHeader} from '../../layout/AppHeader';
 import {formatLastEdited} from '../../utils/formatLastEdited';
 import styles from './HomeRoute.module.css';
 
 export const HomeRoute = () => {
     const navigate = useNavigate();
-    const {
-        scriptSummaries,
-        isLoading: scriptsLoading,
-    } = useScripts();
-    const {
-        openNewScript, openImportScript, isImportLoading,
-    } = useGlobalModals();
+    const {scriptSummaries, isLoading: scriptsLoading} = useScripts();
+    const {openNewScript, openImportScript} = useGlobalModals();
 
     const latestScript = useMemo(() => scriptSummaries[0] ?? null, [scriptSummaries]);
-
-    const handleHome = useCallback(() => {
-        void navigate('/');
-    }, [navigate]);
-    const handleResumeScript = useCallback(() => {
-        if (!latestScript) {
-            return;
-        }
-
-        void navigate(`/script/${latestScript.id}/editor`);
-    }, [latestScript, navigate]);
-    const handleCardClick = useCallback((scriptId: string) => {
-        void navigate(`/script/${scriptId}/editor`);
-    }, [navigate]);
-    const handleCardKeyDown = useCallback((scriptId: string, event: ReactKeyboardEvent<HTMLElement>) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            void navigate(`/script/${scriptId}/editor`);
-        }
-    }, [navigate]);
-    const handleOpenEditor = useCallback((scriptId: string) => {
-        void navigate(`/script/${scriptId}/editor`);
-    }, [navigate]);
-    const handleOpenSettings = useCallback((scriptId: string) => {
-        void navigate(`/script/${scriptId}/settings`);
-    }, [navigate]);
 
     const scriptRows = useMemo(
         () => scriptSummaries.map(script => (
@@ -67,10 +32,15 @@ export const HomeRoute = () => {
                 key={script.id}
                 compact
                 className={styles.scriptRow}
-                onClick={() => handleCardClick(script.id)}
+                onClick={() => void navigate(`/script/${script.id}/editor`)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={event => handleCardKeyDown(script.id, event)}
+                onKeyDown={(event: ReactKeyboardEvent<HTMLElement>) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        void navigate(`/script/${script.id}/editor`);
+                    }
+                }}
             >
                 <div className={styles.inner}>
                     <div className={styles.info}>
@@ -83,14 +53,14 @@ export const HomeRoute = () => {
                         <Button
                             variant="ghost"
                             size="sm"
-                            onPress={() => handleOpenEditor(script.id)}
+                            onPress={() => void navigate(`/script/${script.id}/editor`)}
                         >
                             Open
                         </Button>
                         <Button
                             variant="ghost"
                             size="sm"
-                            onPress={() => handleOpenSettings(script.id)}
+                            onPress={() => void navigate(`/script/${script.id}/settings`)}
                         >
                             Settings
                         </Button>
@@ -98,13 +68,7 @@ export const HomeRoute = () => {
                 </div>
             </Card>
         )),
-        [
-            handleCardClick,
-            handleCardKeyDown,
-            handleOpenEditor,
-            handleOpenSettings,
-            scriptSummaries,
-        ],
+        [navigate, scriptSummaries],
     );
 
     const continueCard = useMemo(() => {
@@ -127,13 +91,13 @@ export const HomeRoute = () => {
             <Card
                 compact
                 className={styles.continueCard}
-                onClick={handleResumeScript}
+                onClick={() => void navigate(`/script/${latestScript.id}/editor`)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={event => {
+                onKeyDown={(event: ReactKeyboardEvent<HTMLElement>) => {
                     if (event.key === 'Enter' || event.key === ' ') {
                         event.preventDefault();
-                        handleResumeScript();
+                        void navigate(`/script/${latestScript.id}/editor`);
                     }
                 }}
             >
@@ -146,22 +110,13 @@ export const HomeRoute = () => {
             </Card>
         );
     }, [
-        handleResumeScript,
         latestScript,
+        navigate,
         scriptsLoading,
     ]);
 
     return (
-        <AppLayout
-            header={(
-                <AppHeader
-                    onHome={handleHome}
-                    onNewScript={openNewScript}
-                    onImportScript={openImportScript}
-                    isImportLoading={isImportLoading}
-                />
-            )}
-        >
+        <AppLayout header={<AppHeader />}>
             <PageContainer variant="standard">
                 <div className={styles.columns}>
                     <div className={styles.scriptList}>
@@ -196,7 +151,6 @@ export const HomeRoute = () => {
                                 <Button
                                     variant="outline"
                                     onPress={openImportScript}
-                                    isLoading={isImportLoading}
                                 >
                                     Import
                                 </Button>

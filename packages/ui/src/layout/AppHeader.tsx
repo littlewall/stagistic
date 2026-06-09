@@ -32,25 +32,23 @@ export type {
     ScriptSyncState,
 };
 
-type AppHeaderFrameProps = {
+export type AppHeaderProps = {
     scriptControls?: ReactNode,
     onMenuAction?: (actionId: string) => void,
     onHome: () => void,
     onNewScript: () => void,
     onImportScript?: () => void,
-    isImportLoading?: boolean,
     isFullWidth?: boolean,
 };
 
-const AppHeaderFrame = ({
+export const AppHeader = ({
     scriptControls,
     onMenuAction,
     onHome,
     onNewScript,
     onImportScript,
-    isImportLoading,
     isFullWidth = false,
-}: AppHeaderFrameProps) => {
+}: AppHeaderProps) => {
     const [themeMode, setThemeMode] = useState<AppThemeMode>(() => readPreferredAppThemeMode());
 
     useEffect(() => {
@@ -93,14 +91,13 @@ const AppHeaderFrame = ({
                             className={styles.iconButton}
                             onPress={onImportScript}
                             aria-label="Import script"
-                            isDisabled={isImportLoading}
                         >
                             <UploadIcon className={styles.icon} aria-hidden="true" />
                         </Button>
                     ) : null}
                 </div>
                 <div className={styles.scriptControls}>
-                    {scriptControls ? scriptControls : null}
+                    {scriptControls ?? null}
                 </div>
                 <div className={styles.rightControls}>
                     <AccountMenu
@@ -114,33 +111,6 @@ const AppHeaderFrame = ({
     );
 };
 
-export type AppHeaderProps = {
-    onHome: () => void,
-    onNewScript: () => void,
-    onImportScript?: () => void,
-    onMenuAction?: (actionId: string) => void,
-    isImportLoading?: boolean,
-    isFullWidth?: boolean,
-};
-
-export const AppHeader = ({
-    onMenuAction,
-    onHome,
-    onNewScript,
-    onImportScript,
-    isImportLoading,
-    isFullWidth = false,
-}: AppHeaderProps) => (
-    <AppHeaderFrame
-        onMenuAction={onMenuAction}
-        onHome={onHome}
-        onNewScript={onNewScript}
-        onImportScript={onImportScript}
-        isImportLoading={isImportLoading}
-        isFullWidth={isFullWidth}
-    />
-);
-
 export type ScriptEditorAppHeaderProps = {
     currentScript: ScriptListItem,
     recentScripts?: ScriptListItem[],
@@ -152,7 +122,6 @@ export type ScriptEditorAppHeaderProps = {
     onImportScript?: () => void,
     onBackToEditor?: () => void,
     backToEditorLabel?: string,
-    isImportLoading?: boolean,
     isFullWidth?: boolean,
 };
 
@@ -167,7 +136,6 @@ export const ScriptEditorAppHeader = ({
     onImportScript,
     onBackToEditor,
     backToEditorLabel = 'Back to editor',
-    isImportLoading,
     isFullWidth = true,
 }: ScriptEditorAppHeaderProps) => {
     const handleScriptMenuAction = useCallback((key: string) => {
@@ -190,12 +158,11 @@ export const ScriptEditorAppHeader = ({
     ]);
 
     return (
-        <AppHeaderFrame
+        <AppHeader
             onMenuAction={onMenuAction}
             onHome={onHome}
             onNewScript={onNewScript}
             onImportScript={onImportScript}
-            isImportLoading={isImportLoading}
             isFullWidth={isFullWidth}
             scriptControls={(
                 <>

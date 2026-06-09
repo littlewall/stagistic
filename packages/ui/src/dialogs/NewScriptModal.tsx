@@ -19,6 +19,7 @@ export const NewScriptModal = ({
 }: NewScriptModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
+    const [isPending, setIsPending] = useState(false);
 
     useEffect(() => {
         if (!isOpen) {
@@ -34,10 +35,15 @@ export const NewScriptModal = ({
         return () => window.clearTimeout(focusTimer);
     }, [isOpen]);
 
-    const handleSubmit = useCallback((event: FormEvent) => {
+    const handleSubmit = useCallback(async (event: FormEvent) => {
         event.preventDefault();
-        onCreate(name);
-        setName('');
+        setIsPending(true);
+
+        try {
+            await onCreate(name);
+        } finally {
+            setIsPending(false);
+        }
     }, [name, onCreate]);
     const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
@@ -72,7 +78,10 @@ export const NewScriptModal = ({
                     >
                         Cancel
                     </Button>
-                    <Button type="submit">
+                    <Button
+                        type="submit"
+                        isPending={isPending}
+                    >
                         Create script
                     </Button>
                 </div>
