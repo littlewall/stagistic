@@ -17,17 +17,17 @@
         opacity: .6;
     }
 
+    &[data-pending] {
+        cursor: not-allowed;
+        opacity: .8;
+    }
+
     &.md {
         padding: var(--space-md) var(--space-2xl);
     }
 
     &.sm {
         padding: var(--space-md) var(--space-xl);
-    }
-
-    &.loading {
-        cursor: not-allowed;
-        opacity: .8;
     }
 
     &.primary {

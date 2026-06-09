@@ -1,6 +1,6 @@
-import {ArrowRightIcon, ChevronDownIcon} from '../../icons/ui';
 import {Tooltip, TooltipTrigger} from 'react-aria-components';
 
+import {ArrowRightIcon, ChevronDownIcon} from '../../icons/ui';
 import styles from '../EditorSidebar.module.css';
 import {isInlineInteractiveTarget} from '../utils';
 import {CharacterColorPopover} from './CharacterColorPopover';

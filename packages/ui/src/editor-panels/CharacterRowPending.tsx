@@ -1,8 +1,8 @@
-import {EyeIcon} from '../icons/ui';
 import {
     Button, Tooltip, TooltipTrigger,
 } from 'react-aria-components';
 
+import {EyeIcon} from '../icons/ui';
 import styles from './EditorSidebar.module.css';
 import type {EditorSidebarCharacter} from './types';
 

@@ -91,7 +91,7 @@ export const ImportScriptModal = ({
                         variant="primary"
                         type="submit"
                         isDisabled={!selectedFile}
-                        isLoading={isLoading}
+                        isPending={isLoading}
                     >
                         Import script
                     </Button>

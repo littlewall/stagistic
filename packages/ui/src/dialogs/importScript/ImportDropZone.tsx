@@ -22,7 +22,9 @@ export const ImportDropZone = ({
             >
                 <Button
                     className={styles.dropZoneTrigger}
-                    onPress={() => { void onPickFile(); }}
+                    onPress={() => {
+                        void onPickFile();
+                    }}
                 >
                     <span className={styles.dropZoneLabel}>{fileLabel}</span>
                     <span className={styles.dropZoneHint}>Drop a .fountain file or click to browse.</span>

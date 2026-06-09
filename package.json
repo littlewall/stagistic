@@ -12,7 +12,7 @@
     },
     "packageManager": "pnpm@9.15.0",
     "scripts": {
-        "lint": "vp lint && stylelint \"**/*.{css,scss}\"",
+        "lint": "eslint . && stylelint \"**/*.{css,scss}\"",
         "test": "vp test run",
         "test:watch": "vp test watch",
         "db:generate": "pnpm -C packages/db db:generate",

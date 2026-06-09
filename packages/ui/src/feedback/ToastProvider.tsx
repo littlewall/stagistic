@@ -1,4 +1,3 @@
-import {CloseIcon} from '../icons/ui';
 import {
     createContext,
     type ReactNode,
@@ -18,6 +17,7 @@ import {
     UNSTABLE_ToastRegion as ToastRegion,
 } from 'react-aria-components';
 
+import {CloseIcon} from '../icons/ui';
 import styles from './ToastProvider.module.css';
 
 export type ToastVariant = 'success' | 'error' | 'info';

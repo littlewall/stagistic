@@ -1,4 +1,5 @@
 import type {ScriptSummary} from '@stagistic/db';
+import type {ScriptRepository} from '@stagistic/db';
 import {
     createNodeId,
     ensureFountainBlockIds,
@@ -8,7 +9,6 @@ import {
     isScriptDocumentEmpty,
     type ScriptDocument,
 } from '@stagistic/script';
-import type {ScriptRepository} from '@stagistic/db';
 import {
     createCollection,
     localOnlyCollectionOptions,
@@ -96,7 +96,6 @@ export const createScriptsStore = (repository: ScriptRepository): ScriptsStoreSt
             setMeta({error: null, isLoading: false});
             emitScriptsInvalidated();
         } catch (error) {
-            console.error('Failed to refresh scripts collection', error);
             setMeta({error: error as Error, isLoading: false});
             throw error;
         }

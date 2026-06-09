@@ -1,9 +1,7 @@
 .dialog {
-    /* Fill viewport to serve as the centering layout container */
     position: fixed;
     inset: 0;
     overflow: auto;
-    /* Center panel */
     display: grid;
     place-items: center;
     width: 100%;
@@ -15,7 +13,6 @@
     background: transparent;
     border: none;
 
-    /* Restore hidden state — display:grid above overrides the UA stylesheet's dialog:not([open]){display:none} */
     &:not([open]) {
         display: none;
     }

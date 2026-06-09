@@ -1,12 +1,12 @@
 import clsx from 'clsx';
-import {useCallback} from 'react';
 import {
     Button as RACButton,
     type ButtonProps as RACButtonProps,
-    type PressEvent,
+    composeRenderProps,
 } from 'react-aria-components';
 
 import styles from './Button.module.css';
+import {ProgressCircle} from './ProgressCircle';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
 
@@ -15,37 +15,24 @@ type ButtonSize = 'sm' | 'md';
 type ButtonProps = {
     variant?: ButtonVariant,
     size?: ButtonSize,
-    loading?: boolean,
     className?: string,
-    isLoading?: boolean,
-    onPress?: (event: PressEvent) => void,
-} & Omit<RACButtonProps, 'className' | 'onPress'>;
+} & Omit<RACButtonProps, 'className'>;
 
 export const Button = ({
     variant = 'primary',
     size = 'md',
-    loading = false,
     className,
-    isLoading,
-    onPress,
     ...props
-}: ButtonProps) => {
-    const handlePress = useCallback((event: PressEvent) => {
-        if (isLoading) {
-            return;
-        }
-
-        onPress?.(event);
-    }, [isLoading, onPress]);
-
-    const isDisabled = isLoading ?? props.isDisabled;
-
-    return (
-        <RACButton
-            className={clsx(styles.button, styles[variant], styles[size], className)}
-            isDisabled={isDisabled}
-            onPress={handlePress}
-            {...props}
-        />
-    );
-};
+}: ButtonProps) => (
+    <RACButton
+        {...props}
+        className={clsx(styles.button, styles[variant], styles[size], className)}
+    >
+        {composeRenderProps(props.children, (children, {isPending}) => (
+            <>
+                {isPending && <ProgressCircle aria-label="Loading..." isIndeterminate />}
+                {children}
+            </>
+        ))}
+    </RACButton>
+);

@@ -1,6 +1,9 @@
 import {clampCharacterColorSaturation} from '@stagistic/script';
 import {
-    useEffect, useMemo, useRef, useState,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
 } from 'react';
 
 import styles from '../EditorSidebar.module.css';

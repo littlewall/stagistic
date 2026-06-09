@@ -9,5 +9,20 @@
       "mcp__codegraph__codegraph_node",
       "mcp__codegraph__codegraph_status"
     ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "jq -r '.tool_input.file_path // empty' | { read -r f && case \"$f\" in *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs) d=$(dirname \"$f\"); while [ ! -f \"$d/package.json\" ] && [ \"$d\" != \"/\" ]; do d=$(dirname \"$d\"); done; cd \"$d\" && npx eslint --fix \"$f\" 2>/dev/null || true;; *.css|*.scss) npx stylelint --fix \"$f\" 2>/dev/null || true;; esac; }",
+            "statusMessage": "Linting...",
+            "timeout": 30
+          }
+        ]
+      }
+    ]
   }
 }
