@@ -16,6 +16,7 @@ import {
     useState,
 } from 'react';
 
+import {EditorActCommandsProvider} from './actCommands/context';
 import {buildEditorRootStyle} from './buildRootStyle';
 import {
     getConfirmedCharacterColor,
@@ -386,7 +387,7 @@ const Editor = ({
         renderScale,
     });
 
-    useEditorLifecycle({
+    const {actCommands} = useEditorLifecycle({
         editor: {
             instance: editor,
             autoFocus,
@@ -444,21 +445,23 @@ const Editor = ({
     return (
         <EditorSnapshotStoreProvider store={liveStore}>
             <EditorInstanceProvider editor={editor}>
-                <EditorShell
-                    canvas={{
-                        autoFocus,
-                        characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
-                        editor,
-                        persistentCharacters,
-                    }}
-                    layout={resolvedLayout}
-                    rootRef={rootRef}
-                    canvasHostRef={canvasHostRef}
-                    rootStyle={rootStyle}
-                    confirmedCharacterColorsById={confirmedCharacterColorsById}
-                    onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
-                    onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
-                />
+                <EditorActCommandsProvider value={actCommands}>
+                    <EditorShell
+                        canvas={{
+                            autoFocus,
+                            characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
+                            editor,
+                            persistentCharacters,
+                        }}
+                        layout={resolvedLayout}
+                        rootRef={rootRef}
+                        canvasHostRef={canvasHostRef}
+                        rootStyle={rootStyle}
+                        confirmedCharacterColorsById={confirmedCharacterColorsById}
+                        onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
+                        onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
+                    />
+                </EditorActCommandsProvider>
             </EditorInstanceProvider>
         </EditorSnapshotStoreProvider>
     );

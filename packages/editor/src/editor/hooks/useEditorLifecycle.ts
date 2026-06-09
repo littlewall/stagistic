@@ -12,6 +12,8 @@ import {
     useRef,
 } from 'react';
 
+import type {EditorActCommands} from '../actCommands/context';
+import {useBuildActCommands} from '../actCommands/useBuildActCommands';
 import type {
     EditorBlockUiEvent,
     EditorIndexSnapshot,
@@ -21,7 +23,6 @@ import type {
     PersistentCharacterRef,
 } from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
-import {IMMEDIATE_SAVE_META_KEY} from '../saveMeta';
 import {
     buildSidebarProjectionFromIndex,
     type SidebarProjectionColorContext,
@@ -34,6 +35,7 @@ import {
     trackIndexUpdateDuration,
 } from '../perf/editorPerfMetrics';
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
+import {IMMEDIATE_SAVE_META_KEY} from '../saveMeta';
 import {
     getBlockUiEventsFromState,
     getEditorRuntimeFromState,
@@ -181,7 +183,7 @@ export const useEditorLifecycle = ({
     callbacks,
     characters,
     requests,
-}: UseEditorLifecycleArgs) => {
+}: UseEditorLifecycleArgs): {actCommands: EditorActCommands} => {
     const {instance, autoFocus} = editor;
     const {
         initialValue,
@@ -383,6 +385,15 @@ export const useEditorLifecycle = ({
         revisionRef,
     });
 
+    const actCommands = useBuildActCommands({
+        instance,
+        onValueChangeRef,
+        onIndexChangeRef: structureOnIndexChangeRef,
+        setLatestValue,
+        scheduleAutosave,
+        revisionRef,
+    });
+
     useEffect(() => {
         if (!instance) {
             return;
@@ -547,4 +558,6 @@ export const useEditorLifecycle = ({
         enabled: Boolean(instance && onManualSave),
         target: getWindowTarget(),
     });
+
+    return {actCommands};
 };

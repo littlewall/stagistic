@@ -64,6 +64,6 @@ tmp
 temp
 *.tmp
 tsconfig.tsbuildinfo
-# CocoIndex Code (ccc)
-/.cocoindex_code/
+
+# Codegraph
 .codegraph/daemon.pid

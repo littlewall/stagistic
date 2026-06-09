@@ -1,7 +1,7 @@
 .content {
     position: relative;
     overflow: hidden auto;
-    height: 100%;
+    flex: 1;
     min-height: 0;
     padding: var(--space-lg);
 

@@ -35,7 +35,7 @@ export const buildEditorRootStyle = ({
         }, {}),
         ...editorStyle,
         '--editor-sidebar-width': sidebarWidth ?? 'calc(280px * var(--size-scale))',
-        '--toolbar-toggle-width': 'calc(calc(26px * var(--size-scale)) + (var(--space-3) * 2))',
+        '--toolbar-toggle-width': 'calc(var(--control-height-sm) + (var(--space-lg) * 2))',
         '--left-toolbar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
         '--right-toolbar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
         '--left-toolbar-divider-opacity': isLeftSidebarOpen ? '1' : '0',

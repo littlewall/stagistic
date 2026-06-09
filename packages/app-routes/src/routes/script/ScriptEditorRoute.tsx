@@ -14,9 +14,7 @@ import {
 } from '@stagistic/ui';
 import {
     useCallback,
-    useEffect,
     useMemo,
-    useRef,
 } from 'react';
 import {
     useNavigate,
@@ -36,7 +34,8 @@ import {
     ScriptStructureSidebar,
     StructureSidebarContextActions,
 } from './editor/structure';
-import {useStructureSidebarController} from './editor/structure/useStructureSidebarController';
+import {ScriptCharactersProvider} from './ScriptCharactersContext';
+import {ScriptSessionProvider} from './ScriptSessionContext';
 import {
     SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS,
     type ScriptSettingsPanelId,
@@ -142,40 +141,12 @@ export const ScriptEditorRoute = () => {
         characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
-    const structureSourceValue = editorOverrideValue ?? initialValue;
-    const {
-        insertActRequest,
-        renameActRequest,
-        deleteActRequest,
-        moveSceneRequest,
-        actNamePreviewById,
-        handleSidebarRenameAct,
-        handleActNamePreview,
-        handleSidebarDeleteAct,
-        handleSidebarInsertAct,
-        handleSidebarReorderScene,
-        handleActiveBlockChange,
-    } = useStructureSidebarController({
-        currentScriptId,
-        scriptRepository,
-        sourceValue: structureSourceValue,
-    });
-    const sourceIndexForSidebars = initialIndexSnapshot ?? null;
-    const lastResolvedActiveBlockIdRef = useRef<string | null | undefined>(undefined);
     const handleResolvedEditorValueChange = useCallback((
         value: Parameters<typeof handleEditorValueChange>[0],
         meta?: Parameters<typeof handleEditorValueChange>[1],
     ) => {
         handleEditorValueChange(value, meta);
     }, [handleEditorValueChange]);
-    const handleResolvedActiveBlockChange = useCallback((blockId: string | null) => {
-        if (lastResolvedActiveBlockIdRef.current === blockId) {
-            return;
-        }
-
-        lastResolvedActiveBlockIdRef.current = blockId;
-        handleActiveBlockChange(blockId);
-    }, [handleActiveBlockChange]);
     const {handleMenuAction} = useScriptEditorHeaderActions({
         navigate,
         currentScript,
@@ -197,59 +168,51 @@ export const ScriptEditorRoute = () => {
         deleteScript,
         navigate,
     ]);
-    const structureSidebarProps = useMemo(() => ({
-        data: {
-            indexSnapshot: sourceIndexForSidebars,
-            actNamePreviewById,
-        },
-        actions: {
-            onRenameAct: handleSidebarRenameAct,
-            onActNamePreview: handleActNamePreview,
-            onDeleteAct: handleSidebarDeleteAct,
-            onInsertAct: handleSidebarInsertAct,
-            onReorderScene: handleSidebarReorderScene,
-        },
+    const sessionContextValue = useMemo(() => ({
+        currentScriptId,
+        scriptRepository,
+        resolvedScriptSettings,
+        indexSnapshot: initialIndexSnapshot ?? null,
+        handleAutoSave,
     }), [
-        actNamePreviewById,
-        handleActNamePreview,
-        handleSidebarDeleteAct,
-        handleSidebarInsertAct,
-        handleSidebarReorderScene,
-        handleSidebarRenameAct,
-        sourceIndexForSidebars,
+        currentScriptId,
+        handleAutoSave,
+        initialIndexSnapshot,
+        resolvedScriptSettings,
+        scriptRepository,
     ]);
-    const characterSidebarProps = useMemo(() => ({
-        data: {
-            confirmedCharacterRecords,
-            pendingCharacterKeys,
-            deletingCharacterIds,
-            renamingCharacterIds,
-            renamingCharacterKeys,
-            colorUpdatingCharacterIds,
-            genderUpdatingCharacterIds,
-            characterGenderOptions,
-            resolvedScriptSettings,
-            characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
-            isLoading: isCharactersLoading,
-        },
-        actions: {
-            onConfirmCharacter: handleConfirmCharacter,
-            onDeleteCharacter: handleDeleteCharacter,
-            normalizeRenameInput: normalizeCharacterNameForInlineInput,
-            onRenameCharacterPreview: handleRenameCharacterPreview,
-            onRenameCharacter: handleRenameCharacter,
-            onSetCharacterColor: handleSetCharacterColor,
-            onSetCharacterGender: handleSetCharacterGender,
-            onUpsertCharacterGender: handleUpsertCharacterGender,
-        },
-    }), [
+
+    const charactersContextValue = useMemo(() => ({
+        editorOverrideValue,
+        normalizedConfirmedCharacterRecords,
+        handleEditorValueChange,
+        confirmedCharacterRecords,
+        pendingCharacterKeys,
+        deletingCharacterIds,
+        renamingCharacterIds,
+        renamingCharacterKeys,
         colorUpdatingCharacterIds,
+        genderUpdatingCharacterIds,
         characterGenderOptions,
+        isCharactersLoading,
+        normalizeCharacterNameForInlineInput,
+        handleConfirmCharacter,
+        handleDeleteCharacter,
+        handleRenameCharacterPreview,
+        handleRenameCharacter,
+        handleSetCharacterColor,
+        handleSetCharacterGender,
+        handleUpsertCharacterGender,
+    }), [
+        characterGenderOptions,
+        colorUpdatingCharacterIds,
         confirmedCharacterRecords,
         deletingCharacterIds,
+        editorOverrideValue,
         genderUpdatingCharacterIds,
         handleConfirmCharacter,
         handleDeleteCharacter,
+        handleEditorValueChange,
         handleRenameCharacter,
         handleRenameCharacterPreview,
         handleSetCharacterColor,
@@ -257,29 +220,24 @@ export const ScriptEditorRoute = () => {
         handleUpsertCharacterGender,
         isCharactersLoading,
         normalizeCharacterNameForInlineInput,
+        normalizedConfirmedCharacterRecords,
         pendingCharacterKeys,
         renamingCharacterIds,
         renamingCharacterKeys,
-        resolvedScriptSettings,
     ]);
+
     const sidebarPanels = useMemo<readonly SidebarPanel[]>(() => [
         {
             id: 'structure',
             label: 'Structure',
-            renderContent: () => <ScriptStructureSidebar {...structureSidebarProps} />,
-            renderContextActions: () => (
-                <StructureSidebarContextActions onInsertAct={handleSidebarInsertAct} />
-            ),
+            renderContent: () => <ScriptStructureSidebar />,
+            renderContextActions: () => <StructureSidebarContextActions />,
         }, {
             id: 'characters',
             label: 'Characters',
-            renderContent: () => <ScriptCharactersSidebar {...characterSidebarProps} />,
+            renderContent: () => <ScriptCharactersSidebar />,
         },
-    ], [
-        characterSidebarProps,
-        handleSidebarInsertAct,
-        structureSidebarProps,
-    ]);
+    ], []);
     const {
         leftSidebarToggle,
         rightSidebarToggle,
@@ -301,10 +259,6 @@ export const ScriptEditorRoute = () => {
     });
     const resolvedEditorInitialValue = editorOverrideValue ?? initialValue;
 
-    useEffect(() => {
-        lastResolvedActiveBlockIdRef.current = undefined;
-    }, [currentScriptId]);
-
     const showEditorLoader = editorLoadState.isLoading || !initialValue;
 
     if (showEditorLoader) {
@@ -324,95 +278,92 @@ export const ScriptEditorRoute = () => {
     }
 
     return (
-        <AppLayout
-            header={(
-                currentScript ? (
-                    <ScriptEditorAppHeader
-                        currentScript={currentScript}
-                        recentScripts={recentScripts}
-                        scriptSyncState={saveIndicator}
-                        onMenuAction={handleMenuAction}
-                    />
-                ) : (
-                    <AppHeader onMenuAction={handleMenuAction} />
-                )
-            )}
-        >
-            {storageError ? (
-                <div role="alert" style={{padding: '12px 20px'}}>
-                    {storageError}
-                </div>
-            ) : null}
-            <FountainEditor
-                key={currentScript?.id ?? 'editor'}
-                document={{
-                    initialValue: resolvedEditorInitialValue,
-                    persistentCharacters: normalizedConfirmedCharacterRecords,
-                }}
-                settings={{
-                    scriptSettings: scriptSettingsDraft,
-                }}
-                save={{
-                    onAutoSave: handleAutoSave,
-                    onManualSave: handleManualSave,
-                    autoSaveDelayMs: AUTOSAVE_DELAY_MS,
-                }}
-                layout={{
-                    autoFocus: shouldAutoFocus,
-                    leftSidebarToggle,
-                    rightSidebarToggle,
-                    leftSidebarHeader,
-                    rightSidebarHeader,
-                    sidebarWidth: SIDEBAR_WIDTH,
-                }}
-                requests={{
-                    insertActRequest,
-                    renameActRequest,
-                    deleteActRequest,
-                    moveSceneRequest,
-                }}
-                callbacks={{
-                    onValueChange: handleResolvedEditorValueChange,
-                    onActiveBlockChange: handleResolvedActiveBlockChange,
-                }}
-            >
-                <FountainEditor.LeftSidebar>
-                    {leftSidebar}
-                </FountainEditor.LeftSidebar>
-                <FountainEditor.RightSidebar>
-                    {rightSidebar}
-                </FountainEditor.RightSidebar>
-            </FountainEditor>
-            <ScriptSettingsModal
-                isOpen={isSettingsOpen}
-                title="Settings"
-                groups={groups}
-                activePanelId={activePanelId}
-                expandedItemIds={expandedItemIds}
-                onClose={handleCloseSettings}
-                onSelectPanel={handleSelectSettingsPanel}
-                onToggleExpand={toggleExpanded}
-            >
-                <ScriptEditorSettingsPanel
-                    panelId={activePanelId}
-                    resolvedScriptSettings={resolvedScriptSettings}
-                    blockLabelByType={BLOCK_LABEL_BY_TYPE}
-                    shortcutPrefix={shortcutPrefix}
-                    elementsHandlers={{onUpdateBlockSettings: updateBlockSettings}}
-                    visualPreferencesHandlers={{onUpdateCharacterColorSaturation: updateCharacterColorSaturation}}
-                    structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
-                    pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
-                    titlePageHandlers={{
-                        titlePageSettings: titlePageDraft,
-                        scriptTitle: currentScript?.name ?? '',
-                        onUpdateTitlePage: updateTitlePage,
-                    }}
-                    dangerZoneHandlers={{
-                        scriptTitle: currentScript?.name ?? '',
-                        onDeleteScript: handleDeleteScript,
-                    }}
-                />
-            </ScriptSettingsModal>
-        </AppLayout>
+        <ScriptSessionProvider value={sessionContextValue}>
+            <ScriptCharactersProvider value={charactersContextValue}>
+                <AppLayout
+                    header={(
+                        currentScript ? (
+                            <ScriptEditorAppHeader
+                                currentScript={currentScript}
+                                recentScripts={recentScripts}
+                                scriptSyncState={saveIndicator}
+                                onMenuAction={handleMenuAction}
+                            />
+                        ) : (
+                            <AppHeader onMenuAction={handleMenuAction} />
+                        )
+                    )}
+                >
+                    {storageError ? (
+                        <div role="alert" style={{padding: '12px 20px'}}>
+                            {storageError}
+                        </div>
+                    ) : null}
+                    <FountainEditor
+                        key={currentScript?.id ?? 'editor'}
+                        document={{
+                            initialValue: resolvedEditorInitialValue,
+                            persistentCharacters: normalizedConfirmedCharacterRecords,
+                        }}
+                        settings={{
+                            scriptSettings: scriptSettingsDraft,
+                        }}
+                        save={{
+                            onAutoSave: handleAutoSave,
+                            onManualSave: handleManualSave,
+                            autoSaveDelayMs: AUTOSAVE_DELAY_MS,
+                        }}
+                        layout={{
+                            autoFocus: shouldAutoFocus,
+                            leftSidebarToggle,
+                            rightSidebarToggle,
+                            leftSidebarHeader,
+                            rightSidebarHeader,
+                            sidebarWidth: SIDEBAR_WIDTH,
+                        }}
+                        callbacks={{
+                            onValueChange: handleResolvedEditorValueChange,
+                        }}
+                    >
+                        <FountainEditor.LeftSidebar>
+                            {leftSidebar}
+                        </FountainEditor.LeftSidebar>
+                        <FountainEditor.RightSidebar>
+                            {rightSidebar}
+                        </FountainEditor.RightSidebar>
+                    </FountainEditor>
+                    <ScriptSettingsModal
+                        isOpen={isSettingsOpen}
+                        title="Settings"
+                        groups={groups}
+                        activePanelId={activePanelId}
+                        expandedItemIds={expandedItemIds}
+                        onClose={handleCloseSettings}
+                        onSelectPanel={handleSelectSettingsPanel}
+                        onToggleExpand={toggleExpanded}
+                    >
+                        <ScriptEditorSettingsPanel
+                            panelId={activePanelId}
+                            resolvedScriptSettings={resolvedScriptSettings}
+                            blockLabelByType={BLOCK_LABEL_BY_TYPE}
+                            shortcutPrefix={shortcutPrefix}
+                            elementsHandlers={{onUpdateBlockSettings: updateBlockSettings}}
+                            visualPreferencesHandlers={{onUpdateCharacterColorSaturation: updateCharacterColorSaturation}}
+                            structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
+                            pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
+                            titlePageHandlers={{
+                                titlePageSettings: titlePageDraft,
+                                scriptTitle: currentScript?.name ?? '',
+                                onUpdateTitlePage: updateTitlePage,
+                            }}
+                            dangerZoneHandlers={{
+                                scriptTitle: currentScript?.name ?? '',
+                                onDeleteScript: handleDeleteScript,
+                            }}
+                        />
+                    </ScriptSettingsModal>
+                </AppLayout>
+            </ScriptCharactersProvider>
+        </ScriptSessionProvider>
     );
 };

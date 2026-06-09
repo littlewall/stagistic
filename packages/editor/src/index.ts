@@ -1,3 +1,5 @@
+export type {EditorActCommands} from './editor/actCommands/context';
+export {useEditorActCommands} from './editor/actCommands/context';
 export {BLOCK_ICONS} from './editor/blocks/controls/blockIcons';
 export {
     getCharacterColor,

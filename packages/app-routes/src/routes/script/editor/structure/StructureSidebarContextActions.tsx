@@ -1,13 +1,15 @@
+import {useEditorActCommands} from '@stagistic/editor';
+import {useCallback} from 'react';
+
 import {SidebarContextButton} from '../sidebar';
 
-interface StructureSidebarContextActionsProps {
-    onInsertAct: () => void,
-}
+export const StructureSidebarContextActions = () => {
+    const {insertAct} = useEditorActCommands();
+    const handleClick = useCallback(() => insertAct(null), [insertAct]);
 
-export const StructureSidebarContextActions = ({
-    onInsertAct,
-}: StructureSidebarContextActionsProps) => (
-    <SidebarContextButton ariaLabel="Insert ACT" onClick={onInsertAct}>
-        +
-    </SidebarContextButton>
-);
+    return (
+        <SidebarContextButton ariaLabel="Insert ACT" onClick={handleClick}>
+            +
+        </SidebarContextButton>
+    );
+};

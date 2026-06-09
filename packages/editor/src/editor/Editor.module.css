@@ -193,6 +193,10 @@
 }
 
 .sidebarLeft {
+    display: flex;
+    grid-column: 1;
+    flex-direction: column;
+    min-height: 0;
     border-right: 1px solid var(--color-border);
 
     &.sidebarHidden {
@@ -208,6 +212,10 @@
 }
 
 .sidebarRight {
+    display: flex;
+    grid-column: 3;
+    flex-direction: column;
+    min-height: 0;
     border-left: 1px solid var(--color-border);
 
     &.sidebarHidden {
