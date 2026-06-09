@@ -1,117 +1,72 @@
 ---
-import { clsx } from "clsx";
-import "../styles/global.css";
-import s from "./index.module.css";
+import {clsx} from 'clsx';
+import '../styles/global.css';
+import s from './index.module.css';
 
 const features = [
     {
-        label: "Acts & scenes",
+        label: 'Stage directions',
         description:
-            "Your script is structured as theatre structures it — acts containing scenes. The sidebar mirrors your show's hierarchy and lets you jump anywhere instantly.",
+            'A first-class element, not an afterthought. Blocking, lighting cues, and set descriptions have dedicated formatting that keeps them visually distinct from dialogue.',
     },
     {
-        label: "Stage directions",
+        label: 'Musical numbers',
         description:
-            "Stage directions are a first-class element, not an afterthought. Write blocking, lighting cues, and set descriptions with dedicated formatting that keeps them visually distinct from dialogue.",
+            'Tag songs and sequences directly within the script. See how they sit in the show\'s structure, track reprise relationships, and understand the pacing of your score alongside your story.',
     },
     {
-        label: "Character tracking",
+        label: 'Lyric formatting',
         description:
-            "Every character is tracked across the entire script. See at a glance who appears in each scene, how much stage time each role has, and find any character's lines in seconds.",
+            'Lyrics have their own formatting mode, distinct from spoken dialogue and stage directions. Write verses, choruses, and bridges with the clarity a musical score demands.',
     },
     {
-        label: "Musical numbers",
+        label: 'Character tracking',
         description:
-            "Tag songs and musical sequences directly within the script. See how numbers sit within the show's structure, track reprise relationships, and understand the pacing of your score alongside your story.",
+            'Every character tracked across the entire script. See who appears in each scene, how much stage time each role has, and find any character\'s lines in seconds.',
     },
     {
-        label: "Lyric formatting",
+        label: 'Dramatis personae',
         description:
-            "Lyrics have their own formatting mode — distinct from spoken dialogue and stage directions. Write verses, choruses, and bridges with the visual clarity that a musical score demands.",
+            'The cast list writes itself. As you write, Stagistic builds a live dramatis personae with descriptions, first appearance, and scene count, ready to include at the front of any draft.',
     },
     {
-        label: "Scene breakdown",
+        label: 'Script export',
         description:
-            "Generate a scene-by-scene breakdown at any time: which characters appear, which numbers are performed, how long the scene runs. A production overview built into the writing process.",
-    },
-    {
-        label: "Dramatis personae",
-        description:
-            "The cast list writes itself. As you write, Stagistic builds a live dramatis personae — with descriptions, first appearance, and scene count — ready to include at the front of any draft.",
-    },
-    {
-        label: "Revision history",
-        description:
-            "Track changes between drafts with theatre in mind. Mark pages as revised, see what changed since the last read-through, and keep a clear record as the script evolves through rehearsal.",
-    },
-    {
-        label: "Script export",
-        description:
-            "Export your script as a clean, properly formatted PDF — laid out to standard theatrical conventions. Hand it to a director, dramaturg, or cast without any extra formatting work.",
-    },
-    {
-        label: "Running time estimate",
-        description:
-            "Get a live estimate of your show's running time as you write — broken down by act and scene. Spot pacing issues early and keep the production within practical limits.",
-    },
-    {
-        label: "Scene & line search",
-        description:
-            "Find any line, stage direction, or cue across the entire script instantly. Search by character, keyword, or scene — essential when a script reaches full length.",
-    },
-    {
-        label: "Dramaturgical notes",
-        description:
-            "Attach notes to any scene, line, or character — separate from the script text. Keep dramaturgical thinking, director feedback, and your own questions visible but out of the way.",
-    },
-    {
-        label: "Understudy mapping",
-        description:
-            "Assign understudies to roles directly in the script. See any scene through the lens of a particular cast configuration — useful from first read to final production.",
-    },
-    {
-        label: "Focus mode",
-        description:
-            "Strip the interface down to just the page. No sidebars, no panels — only the scene you're working on. For the moments when the writing needs to come first.",
-    },
-    {
-        label: "Multiple scripts",
-        description:
-            "Manage an entire season or a body of work from one place. Switch between projects without losing context, and keep all your scripts organised under one roof.",
+            'Export your script as a clean, properly formatted PDF, laid out to standard theatrical conventions. Ready to hand to a director, dramaturg, or cast.',
     },
 ];
 
 const faqs = [
     {
-        q: "Is Stagistic Editor really free?",
-        a: "Yes. The editor — writing, structuring, exporting — is free to use, now and in the future. No subscription, no trial, no paywall. It's also open source. Some production management features built on top of the editor may become paid later, but the core writing tool will never be.",
+        q: 'Is Stagistic Editor really free?',
+        a: 'Yes. Writing, structuring, and exporting are free, now and in the future. No subscription, no trial, no paywall. Open source too. Some production management features may become paid later, but the core writing tool will not.',
     },
     {
-        q: "Is this really built for theatre, not screenwriting?",
-        a: "Yes, and the distinction matters. Theatrical scripts have acts and scenes structured differently from screenplays. Stage directions serve directors differently. Musical numbers, lyrics, and vocal notation don't exist in screenwriting at all. Stagistic is built around how theatre actually works — not adapted from a film tool.",
+        q: 'Is this really built for theatre, not screenwriting?',
+        a: 'Yes, and the distinction matters. Theatrical scripts have acts and scenes structured differently from screenplays. Stage directions serve directors differently. Musical numbers, lyrics, and vocal notation don\'t exist in screenwriting at all. Stagistic is built around how theatre actually works, not adapted from a film tool.',
     },
     {
-        q: "Does it work for both plays and musicals?",
-        a: "Yes. For plays, you get all the structural tools — acts, scenes, stage directions, character tracking, dramatis personae. For musicals, those are joined by musical number sequencing, lyric formatting, reprise tracking, and running time estimates that factor in your score. You can write a one-act play or a full three-act musical in the same editor.",
+        q: 'Does it work for both plays and musicals?',
+        a: 'Yes. For plays, you get all the structural tools: acts, scenes, stage directions, character tracking, dramatis personae. For musicals, those are joined by musical number sequencing, lyric formatting, reprise tracking, and running time estimates that factor in your score. You can write a one-act play or a full three-act musical in the same editor.',
     },
     {
-        q: "Where is my data stored?",
-        a: "Locally, by default — your script lives on your machine. The browser version stores data in your browser. There's no cloud sync unless you opt into it. No account is required to write.",
+        q: 'Where is my data stored?',
+        a: 'Locally, by default. Your script lives on your machine. The browser version stores data in your browser. There\'s no cloud sync unless you opt into it. No account is required to write.',
     },
     {
-        q: "Can I use it for a commercial production?",
-        a: "Yes. There are no restrictions on how you use scripts you write in Stagistic — for professional theatre companies, touring productions, or any commercial context.",
+        q: 'Can I use it for a commercial production?',
+        a: 'Yes. There are no restrictions on how you use scripts you write in Stagistic, for professional theatre companies, touring productions, or any commercial context.',
     },
     {
-        q: "Is Stagistic Editor open source?",
-        a: "Yes. The editor is open source. You can self-host it, inspect the code, and contribute. The repository will be linked publicly once the alpha stabilises.",
+        q: 'Is Stagistic Editor open source?',
+        a: 'Yes. The editor is open source. You can self-host it, inspect the code, and contribute. The repository will be linked publicly once the alpha stabilises.',
     },
     {
-        q: "What platforms does it run on?",
-        a: "The editor runs in any modern browser without installation. A native macOS app is available in alpha. Windows and Linux desktop builds are on the roadmap.",
+        q: 'What platforms does it run on?',
+        a: 'The editor runs in any modern browser without installation. A native macOS app is available in alpha. Windows and Linux desktop builds are on the roadmap.',
     },
     {
-        q: "Is this stable enough to use for real work?",
+        q: 'Is this stable enough to use for real work?',
         a: "It's an experimental alpha. The core writing experience is functional, but expect rough edges. We recommend keeping backups of important scripts. Feedback and bug reports are very welcome — they directly shape what gets fixed first.",
     },
 ];
@@ -130,12 +85,14 @@ const faqs = [
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
         <link
-            href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+            href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
             rel="stylesheet"
         />
+        <script is:inline>document.documentElement.classList.add('js');</script>
     </head>
     <body>
         <div class={s.page}>
+
             <!-- Nav -->
             <header class={s.nav}>
                 <div class={s.navInner}>
@@ -143,68 +100,88 @@ const faqs = [
                         <span class={s.logoText}>Stagistic</span>
                         <span class={s.logoBadge}>Editor</span>
                     </div>
-                    <span class={s.navBadge}>Experimental Preview</span>
+                    <nav class={s.navLinks}>
+                        <a href="#features" class={s.navLink}>Features</a>
+                        <a href="#faq" class={s.navLink}>FAQ</a>
+                        <a href="#alpha" class={s.navLink}>Get started</a>
+                    </nav>
+                    <span class={s.navBadge}>Early access</span>
                 </div>
             </header>
 
             <!-- Hero -->
             <section class={s.hero}>
                 <div class={s.heroInner}>
-                    <div class={s.heroContent}>
-                        <p class={clsx(s.heroLabel, s.fadeUp)}>
-                            Alpha — Available for web & macOS
-                        </p>
 
-                        <h1 class={clsx(s.heroTitle, s.fadeUp, s.fadeUpDelay1)}>
-                            The editor built<br />for theatre.
+                    <div class={s.heroContent}>
+                        <div class={clsx(s.heroStatus, s.fadeUp)}>
+                            <span class={s.heroDot}></span>
+                            <span>Live on web &amp; macOS</span>
+                        </div>
+
+                        <h1 class={clsx(s.heroTitle, s.fadeUp, s.fadeUpD1)}>
+                            The editor built for theatre.
                         </h1>
 
-                        <p
-                            class={clsx(
-                                s.heroDescription,
-                                s.fadeUp,
-                                s.fadeUpDelay2,
-                            )}
-                        >
+                        <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD2)}>
                             Stagistic is a script editor built specifically for
                             theatrical plays and musicals. Not screenwriting. Not
                             prose. The stage.
                         </p>
 
-                        <div
-                            class={clsx(s.heroCtas, s.fadeUp, s.fadeUpDelay3)}
-                        >
+                        <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD3)}>
                             <a href="#" class={s.btnPrimary}>Open in browser</a>
-                            <a href="#" class={s.btnSecondary}
-                                >Download for macOS</a
-                            >
+                            <a href="#" class={s.btnSecondary}>Download for macOS</a>
                         </div>
                     </div>
 
-                    <div class={clsx(s.heroPreview, s.fadeUp, s.fadeUpDelay4)}>
-                        <div class={s.previewWindow}>
-                            <div class={s.previewTitlebar}>
-                                <span class={s.dot}></span>
-                                <span class={s.dot}></span>
-                                <span class={s.dot}></span>
-                                <span class={s.previewTitle}
-                                    >Stagistic Editor</span
-                                >
+                    <div class={clsx(s.heroScript, s.fadeUp, s.fadeUpD4)}>
+                        <div class={s.scriptExcerpt}>
+                            <div class={s.scriptExcerptBar}>
+                                <span>Act Two — Scene One</span>
+                                <span>stagistic editor</span>
                             </div>
-                            <img
-                                src="/editor-preview.png"
-                                alt="Stagistic Editor – script editing interface"
-                                class={s.previewImage}
-                                draggable="false"
-                            />
+                            <div class={s.scriptBody}>
+                                <p class={s.sAct}>ACT TWO, SCENE ONE</p>
+
+                                <p class={s.sDir}>
+                                    An empty rehearsal room. Piano, lid open.
+                                    MARA stands at the window. JONAS enters.
+                                </p>
+
+                                <p class={s.sChar}>JONAS</p>
+                                <div class={s.sSpeech}>
+                                    <p>I know you're not ready.</p>
+                                </div>
+
+                                <p class={s.sDir}>MARA doesn't turn around.</p>
+
+                                <p class={s.sChar}>MARA</p>
+                                <div class={s.sSpeech}>
+                                    <p>I'm always ready.</p>
+                                    <p class={s.sParen}>(a beat)</p>
+                                    <p>That's the problem.</p>
+                                </div>
+
+                                <p class={s.sChar}>JONAS</p>
+                                <div class={s.sSpeech}>
+                                    <p>The director wants the number</p>
+                                    <p>from the top of Act One.</p>
+                                </div>
+
+                                <p class={s.sMusicCue}>
+                                    Musical number: FIRST LIGHT (reprise, bar 23)
+                                </p>
+                            </div>
                         </div>
                     </div>
+
                 </div>
             </section>
 
             <!-- For Theatre -->
             <section class={s.forTheatre}>
-                <div class={clsx(s.forTheatreInner, s.scrollReveal)}>
+                <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
                     <div>
                         <h2 class={s.forTheatreTitle}>
                             Every decision made<br />for stage writing.
@@ -212,7 +189,7 @@ const faqs = [
                     </div>
                     <div>
                         <p class={s.forTheatreText}>
-                            Stagistic understands the craft of theatre — how a
+                            Stagistic understands the craft of theatre: how a
                             scene builds, how a musical number interrupts and
                             transforms dialogue, how stage directions serve the
                             director as much as the story. These aren't
@@ -229,24 +206,15 @@ const faqs = [
             </section>
 
             <!-- Features -->
-            <section class={s.features}>
-                <div class={s.featuresInner}>
-                    <p class={clsx(s.featuresLabel, s.scrollReveal)}>
-                        Built for theatre
-                    </p>
-                    <div class={s.featuresGrid}>
+            <section class={s.features} id="features">
+                <div class={clsx(s.featuresInner, s.reveal)} data-reveal>
+                    <h2 class={s.featuresTitle}>What it includes.</h2>
+                    <div class={s.featuresList}>
                         {
                             features.map((f) => (
-                                <div
-                                    class={clsx(
-                                        s.featureCard,
-                                        s.scrollReveal,
-                                    )}
-                                >
-                                    <h3 class={s.featureTitle}>{f.label}</h3>
-                                    <p class={s.featureDescription}>
-                                        {f.description}
-                                    </p>
+                                <div class={s.featureItem}>
+                                    <span class={s.featureLabel}>{f.label}</span>
+                                    <p class={s.featureDesc}>{f.description}</p>
                                 </div>
                             ))
                         }
@@ -255,10 +223,9 @@ const faqs = [
             </section>
 
             <!-- FAQ -->
-            <section class={s.faq}>
-                <div class={s.faqInner}>
+            <section class={s.faq} id="faq">
+                <div class={clsx(s.faqInner, s.reveal)} data-reveal>
                     <div>
-                        <p class={s.faqLabel}>FAQ</p>
                         <h2 class={s.faqTitle}>Common<br />questions.</h2>
                     </div>
                     <div class={s.faqList}>
@@ -267,7 +234,7 @@ const faqs = [
                                 <details class={s.faqItem}>
                                     <summary>
                                         <span>{faq.q}</span>
-                                        <span class={s.faqIcon}>+</span>
+                                        <span class={s.faqIcon} aria-hidden="true">+</span>
                                     </summary>
                                     <p class={s.faqAnswer}>{faq.a}</p>
                                 </details>
@@ -277,29 +244,28 @@ const faqs = [
                 </div>
             </section>
 
-            <!-- Alpha -->
+            <!-- Alpha / CTA -->
             <section class={s.alpha} id="alpha">
-                <div class={clsx(s.alphaInner, s.scrollReveal)}>
+                <div class={clsx(s.alphaInner, s.reveal)} data-reveal>
                     <div>
-                        <span class={s.alphaLabel}>Experimental Preview</span>
                         <h2 class={s.alphaTitle}>
                             The editor is free.<br />Always.
                         </h2>
                         <p class={s.alphaText}>
-                            Writing in Stagistic is free — locally, in the
+                            Writing in Stagistic is free: locally, in the
                             browser, or self-hosted. No account, no paywall.
                             Open source.
                         </p>
                         <p class={s.alphaTextSecondary}>
-                            Some production features may be paid in the future —
-                            the editor never will be.
+                            Some production features may be paid in the future.
+                            The editor never will be.
                         </p>
                     </div>
                     <div class={s.alphaCard}>
                         <div class={s.alphaChecks}>
                             <div class={s.alphaCheckItem}>
                                 <span class={s.alphaCheckMark}>✓</span>
-                                <span>Free & open source</span>
+                                <span>Free &amp; open source</span>
                             </div>
                             <div class={s.alphaCheckItem}>
                                 <span class={s.alphaCheckMark}>✓</span>
@@ -307,14 +273,12 @@ const faqs = [
                             </div>
                             <div class={s.alphaCheckItem}>
                                 <span class={s.alphaCheckMark}>✓</span>
-                                <span>Browser & macOS app</span>
+                                <span>Browser &amp; macOS app</span>
                             </div>
                         </div>
                         <div class={s.alphaCtas}>
                             <a href="#" class={s.btnPrimary}>Open in browser</a>
-                            <a href="#" class={s.btnSecondary}
-                                >Download for macOS</a
-                            >
+                            <a href="#" class={s.btnSecondary}>Download for macOS</a>
                         </div>
                     </div>
                 </div>
@@ -325,18 +289,14 @@ const faqs = [
                 <div class={s.footerInner}>
                     <div class={s.footerLeft}>
                         <span class={s.footerLogo}>Stagistic</span>
-                        <span class={s.footerTagline}
-                            >Building tools for theatre.</span
-                        >
+                        <span class={s.footerTagline}>Building tools for theatre.</span>
                     </div>
-                    <div>
-                        <a
-                            href="mailto:hello@stagistic.app"
-                            class={s.footerLink}>hello@stagistic.app</a
-                        >
-                    </div>
+                    <a href="mailto:hello@stagistic.app" class={s.footerLink}>
+                        hello@stagistic.app
+                    </a>
                 </div>
             </footer>
+
         </div>
 
         <script>
@@ -344,15 +304,15 @@ const faqs = [
                 (entries) => {
                     for (const entry of entries) {
                         if (entry.isIntersecting) {
-                            entry.target.setAttribute("data-visible", "");
+                            entry.target.setAttribute('data-visible', '');
                             observer.unobserve(entry.target);
                         }
                     }
                 },
-                { threshold: 0.1 },
+                {threshold: 0.06, rootMargin: '-20px'},
             );
 
-            document.querySelectorAll("[class*='scrollReveal']").forEach((el) => {
+            document.querySelectorAll('[data-reveal]').forEach((el) => {
                 observer.observe(el);
             });
         </script>
