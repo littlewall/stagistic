@@ -9,10 +9,7 @@ import type {
     SetCharacterGenderOptionsState,
     SetStringArrayState,
 } from './types';
-import {
-    addPendingValue,
-    removePendingValue,
-} from './utils';
+import {runCharacterFieldUpdate} from './utils';
 
 interface UseSetCharacterGenderArgs extends CharacterActionSharedArgs {
     confirmedCharactersById: ReadonlyMap<string, ScriptCharacterRecord>,
@@ -57,48 +54,15 @@ export const useSetCharacterGender = ({
             return;
         }
 
-        setGenderUpdatingCharacterIds(previous => addPendingValue(previous, characterId));
-
-        const run = async () => {
-            try {
-                const updatedCharacter = await scriptRepository.setScriptCharacterGender(
-                    currentScriptId,
-                    characterId,
-                    genderKey,
-                );
-
-                if (!updatedCharacter) {
-                    const storedCharacters = await scriptRepository.listScriptCharacters(currentScriptId);
-
-                    setConfirmedCharacterRecords(storedCharacters);
-
-                    return;
-                }
-
-                setConfirmedCharacterRecords(previous => {
-                    const next = previous
-                        .filter(character => character.id !== characterId && character.id !== updatedCharacter.id);
-
-                    next.push(updatedCharacter);
-
-                    return next;
-                });
-            } catch (error) {
-                console.error('Failed to set character gender', error);
-
-                try {
-                    const storedCharacters = await scriptRepository.listScriptCharacters(currentScriptId);
-
-                    setConfirmedCharacterRecords(storedCharacters);
-                } catch (refreshError) {
-                    console.error('Failed to refresh script characters after gender update failure', refreshError);
-                }
-            } finally {
-                setGenderUpdatingCharacterIds(previous => removePendingValue(previous, characterId));
-            }
-        };
-
-        void run();
+        void runCharacterFieldUpdate({
+            characterId,
+            currentScriptId,
+            scriptRepository,
+            setConfirmedCharacterRecords,
+            setPendingIds: setGenderUpdatingCharacterIds,
+            apiCall: () => scriptRepository.setScriptCharacterGender(currentScriptId, characterId, genderKey),
+            errorLabel: 'Failed to set character gender',
+        });
     }, [
         confirmedCharactersById,
         currentScriptId,

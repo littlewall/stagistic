@@ -161,6 +161,9 @@
     display: flex;
     grid-column: 2;
     flex-direction: column;
+    /* Keeps the fixed-width page centered so that, when open sidebars make
+       the host narrower than the page, both edges clip symmetrically. */
+    align-items: center;
     min-width: 0;
     min-height: 0;
     padding: 0 var(--space-3xl);
@@ -196,8 +199,15 @@
     display: flex;
     grid-column: 1;
     flex-direction: column;
+    align-items: flex-start;
     min-height: 0;
     border-right: 1px solid var(--color-border);
+
+    /* Pin content to the final sidebar width so the opening animation
+       reveals it instead of re-wrapping text on every frame. */
+    & > * {
+        width: calc(var(--editor-sidebar-width) - 1px);
+    }
 
     &.sidebarHidden {
 
@@ -215,8 +225,15 @@
     display: flex;
     grid-column: 3;
     flex-direction: column;
+    align-items: flex-end;
     min-height: 0;
     border-left: 1px solid var(--color-border);
+
+    /* Pin content to the final sidebar width so the opening animation
+       reveals it instead of re-wrapping text on every frame. */
+    & > * {
+        width: calc(var(--editor-sidebar-width) - 1px);
+    }
 
     &.sidebarHidden {
 

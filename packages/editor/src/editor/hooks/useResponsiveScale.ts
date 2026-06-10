@@ -9,8 +9,27 @@ type UseResponsiveScaleArgs = {
     canvasHostRef: RefObject<HTMLDivElement | null>,
     pageWidthPx: number,
     sizeScale: number,
-    isLeftSidebarOpen: boolean,
-    isRightSidebarOpen: boolean,
+};
+
+/**
+ * Resolves the toggle-rail width in px by measuring a probe element, since
+ * `--toolbar-toggle-width` is a calc() expression that cannot be parsed
+ * from getComputedStyle directly.
+ */
+const measureToggleRailWidth = (rootElement: HTMLElement) => {
+    const probe = document.createElement('div');
+
+    probe.style.position = 'absolute';
+    probe.style.visibility = 'hidden';
+    probe.style.pointerEvents = 'none';
+    probe.style.width = 'var(--toolbar-toggle-width, 0px)';
+    rootElement.appendChild(probe);
+
+    const width = probe.getBoundingClientRect().width;
+
+    probe.remove();
+
+    return width;
 };
 
 export const useResponsiveScale = ({
@@ -18,8 +37,6 @@ export const useResponsiveScale = ({
     canvasHostRef,
     pageWidthPx,
     sizeScale,
-    isLeftSidebarOpen,
-    isRightSidebarOpen,
 }: UseResponsiveScaleArgs) => {
     const [responsiveScale, setResponsiveScale] = useState(1);
 
@@ -39,8 +56,21 @@ export const useResponsiveScale = ({
             return;
         }
 
+        /*
+         * The scale must not react to sidebars opening or closing: it is
+         * derived from the sidebar-independent closed-state width (root minus
+         * the two toggle rails minus the canvas padding) instead of the live
+         * canvas host width, which shrinks while sidebars are open.
+         */
         const updateScale = () => {
-            const availableWidth = Math.max(0, canvasHostElement.clientWidth);
+            const toggleRailWidth = measureToggleRailWidth(rootElement);
+            const canvasHostStyle = window.getComputedStyle(canvasHostElement);
+            const horizontalPadding = (Number.parseFloat(canvasHostStyle.paddingLeft) || 0)
+                + (Number.parseFloat(canvasHostStyle.paddingRight) || 0);
+            const availableWidth = Math.max(
+                0,
+                rootElement.clientWidth - (2 * toggleRailWidth) - horizontalPadding,
+            );
 
             if (availableWidth <= 1) {
                 return;
@@ -85,7 +115,6 @@ export const useResponsiveScale = ({
             });
 
         observer?.observe(rootElement);
-        observer?.observe(canvasHostElement);
 
         return () => {
             window.removeEventListener('resize', scheduleUpdate);
@@ -98,8 +127,6 @@ export const useResponsiveScale = ({
         };
     }, [
         canvasHostRef,
-        isLeftSidebarOpen,
-        isRightSidebarOpen,
         pageWidthPx,
         rootRef,
         sizeScale,

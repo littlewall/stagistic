@@ -1,66 +1,38 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {TextSelection} from '@tiptap/pm/state';
-import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type MutableRefObject, useCallback, useEffect, useRef,
+    useCallback, useEffect, useRef,
 } from 'react';
 
-import type {
-    EditorIndexSnapshot,
-    EditorStructureRequests,
-    EditorValueChangeMeta,
-} from '../contracts';
+import type {EditorStructureRequests} from '../contracts';
 import {
     findFountainBlockSelectionPosFromState,
     FOUNTAIN_BLOCK_NODE_NAME,
     getActiveFountainBlockFromState,
 } from '../tiptap/fountainCore';
 import {moveSceneSegment} from './structureReorder';
-import {tryCommitSceneReorder} from './structureRequestMutations';
-import {type AutosaveSchedulePayload} from './useAutosaveController';
-import {setActiveBlockSyncSuppressed} from './useEditorActiveBlockSync';
+import {type CommitContext, tryCommitSceneReorder} from './structureRequestMutations';
 
 interface UseEditorMoveRequestsArgs {
-    editor: TiptapEditor | null,
+    commitContext: CommitContext | null,
     requests?: Pick<EditorStructureRequests, 'moveSceneRequest'>,
-    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
-    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
-    setLatestValue: (value: ScriptDocument, revision?: number) => void,
-    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
-    revisionRef: MutableRefObject<number>,
 }
 
 export const useEditorMoveRequests = ({
-    editor,
+    commitContext,
     requests,
-    onValueChangeRef,
-    onIndexChangeRef,
-    setLatestValue,
-    scheduleAutosave,
-    revisionRef,
 }: UseEditorMoveRequestsArgs) => {
     const {
         moveSceneRequest,
     } = requests ?? {};
     const lastMoveSceneRequestIdRef = useRef<number | null>(null);
-    const releaseSyncSuppressionFrameRef = useRef<number | null>(null);
-
-    useEffect(() => {
-        return () => {
-            if (releaseSyncSuppressionFrameRef.current === null) {
-                return;
-            }
-
-            window.cancelAnimationFrame(releaseSyncSuppressionFrameRef.current);
-            releaseSyncSuppressionFrameRef.current = null;
-        };
-    }, []);
 
     const restoreSelectionForBlock = useCallback((blockId: string | null) => {
-        if (!editor || !blockId) {
+        if (!commitContext || !blockId) {
             return;
         }
 
+        const {editor} = commitContext;
         const selectionPos = findFountainBlockSelectionPosFromState(editor.state, blockId);
 
         if (selectionPos === null) {
@@ -73,37 +45,25 @@ export const useEditorMoveRequests = ({
             .scrollIntoView();
 
         editor.view.dispatch(tr);
-    }, [editor]);
+    }, [commitContext]);
 
     const withActiveBlockPreserved = useCallback((
         callback: () => void,
     ) => {
-        if (!editor) {
+        if (!commitContext) {
             return;
         }
 
+        const {editor} = commitContext;
         const activeBlockAtStart = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
         const preservedBlockId = activeBlockAtStart?.id ?? null;
 
-        setActiveBlockSyncSuppressed(editor, true);
-
-        try {
-            callback();
-            restoreSelectionForBlock(preservedBlockId);
-        } finally {
-            if (releaseSyncSuppressionFrameRef.current !== null) {
-                window.cancelAnimationFrame(releaseSyncSuppressionFrameRef.current);
-            }
-
-            releaseSyncSuppressionFrameRef.current = window.requestAnimationFrame(() => {
-                releaseSyncSuppressionFrameRef.current = null;
-                setActiveBlockSyncSuppressed(editor, false);
-            });
-        }
-    }, [editor, restoreSelectionForBlock]);
+        callback();
+        restoreSelectionForBlock(preservedBlockId);
+    }, [commitContext, restoreSelectionForBlock]);
 
     useEffect(() => {
-        if (!editor || !moveSceneRequest) {
+        if (!commitContext || !moveSceneRequest) {
             return;
         }
 
@@ -120,7 +80,7 @@ export const useEditorMoveRequests = ({
             return;
         }
 
-        const currentValue = editor.getJSON() as ScriptDocument;
+        const currentValue = commitContext.editor.getJSON() as ScriptDocument;
         const [nextContent, didChange] = moveSceneSegment(
             currentValue.content,
             moveSceneRequest.sourceSceneBlockId,
@@ -133,27 +93,17 @@ export const useEditorMoveRequests = ({
 
         withActiveBlockPreserved(() => {
             tryCommitSceneReorder(
-                editor,
+                commitContext,
                 moveSceneRequest.sourceSceneBlockId,
                 moveSceneRequest.beforeBlockId,
                 nextContent,
                 didChange,
                 currentValue.attrs,
-                setLatestValue,
-                onValueChangeRef,
-                onIndexChangeRef,
-                scheduleAutosave,
-                revisionRef,
             );
         });
     }, [
-        editor,
+        commitContext,
         moveSceneRequest,
-        onIndexChangeRef,
-        onValueChangeRef,
-        scheduleAutosave,
-        setLatestValue,
-        revisionRef,
         withActiveBlockPreserved,
     ]);
 };

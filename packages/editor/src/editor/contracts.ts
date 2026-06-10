@@ -18,7 +18,6 @@ import type {
     EditorSettingsOverride,
     ScriptBlockIndexSnapshot,
     ScriptDocument,
-    ScriptDocumentNodeMode,
 } from '@stagistic/script';
 import type {ReactNode} from 'react';
 
@@ -194,7 +193,6 @@ export interface EditorLayoutProps {
 
 export interface EditorDocumentProps {
     initialValue: ScriptDocument,
-    nodeMode?: ScriptDocumentNodeMode,
     persistentCharacters?: readonly PersistentCharacterRef[],
 }
 

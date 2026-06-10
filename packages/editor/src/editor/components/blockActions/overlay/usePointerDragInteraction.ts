@@ -6,7 +6,6 @@ import {
     useEffect,
 } from 'react';
 
-import {setActiveBlockSyncSuppressed} from '../../../hooks/useEditorActiveBlockSync';
 import {
     DRAG_DISABLED_BLOCK_TYPES,
     DRAG_START_THRESHOLD_PX,
@@ -214,7 +213,6 @@ export const usePointerDragInteraction = ({
                 closeMenu();
                 setPendingPress(null);
                 clearPressVisualState();
-                setActiveBlockSyncSuppressed(editor, true);
                 beginDragPreviewSession(sourceBlockId);
                 applyDraggedSourceHighlight(sourceBlockId);
                 updateActiveDragState(pointerId, sourceBlockId, sourceBlockType, moveEvent.clientY);

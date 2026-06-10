@@ -1,8 +1,8 @@
 import {
     buildScriptBlockIndex,
     type EditorSettingsOverride,
-    ensureFountainBlockIds,
     ensureSceneHeading,
+    ensureScriptBlockIds,
     ensureScriptStructure,
     isScriptDocumentEmpty,
     type ScriptBlockIndexSnapshot,
@@ -83,7 +83,7 @@ export const useScriptLoader = (
                 }
 
                 const needsFocus = isScriptDocumentEmpty(stored);
-                const withIds = ensureFountainBlockIds(stored);
+                const withIds = ensureScriptBlockIds(stored);
                 const withScene = ensureSceneHeading(withIds);
                 const normalized = ensureScriptStructure(withScene);
                 const fallbackIndex = buildScriptBlockIndex(normalized).snapshot;

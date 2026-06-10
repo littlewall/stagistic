@@ -1,6 +1,6 @@
 import {
     buildScriptBlockIndex,
-    normalizeScriptDocumentNodeMode,
+    convertLegacyScriptDocumentToDefault,
     type ScriptDocument,
 } from '@stagistic/script';
 import {useEditor} from '@tiptap/react';
@@ -115,7 +115,6 @@ const Editor = ({
 }: EditorProps & {children?: ReactNode}) => {
     const {
         initialValue,
-        nodeMode = 'default',
         persistentCharacters = [],
     } = document;
     const {
@@ -148,8 +147,8 @@ const Editor = ({
         onBlockUiEvent,
     } = callbacks ?? {};
     const resolvedInitialValue = useMemo(
-        () => normalizeScriptDocumentNodeMode(initialValue, nodeMode),
-        [initialValue, nodeMode],
+        () => convertLegacyScriptDocumentToDefault(initialValue),
+        [initialValue],
     );
     const initialSerialized = useMemo(
         () => serializeDocumentForSave(resolvedInitialValue),
@@ -214,8 +213,6 @@ const Editor = ({
         canvasHostRef,
         pageWidthPx: resolvedSettings.page.widthPx,
         sizeScale,
-        isLeftSidebarOpen,
-        isRightSidebarOpen,
     });
     const renderScale = useMemo(() => sizeScale * responsiveScale, [responsiveScale, sizeScale]);
     const editorStyle = useMemo(

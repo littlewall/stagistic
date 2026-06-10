@@ -1,3 +1,4 @@
+import {collapseWhitespace, isObjectRecord} from '@stagistic/shared';
 import {eq, inArray} from 'drizzle-orm';
 import {generateNKeysBetween} from 'fractional-indexing';
 
@@ -154,14 +155,6 @@ const makeSceneId = (scriptId: string, headingBlockId: string) => {
 
 const makeTitlePageFieldId = (scriptId: string, orderNo: number) => {
     return `${TITLE_PAGE_FIELD_ID_PREFIX}:${scriptId}:${orderNo + 1}`;
-};
-
-const isObjectRecord = (value: unknown): value is Record<string, unknown> => {
-    return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
-};
-
-const collapseWhitespace = (value: string): string => {
-    return value.trim().replace(/\s+/g, ' ');
 };
 
 const normalizeCharacterKey = (rawValue: string): string => {

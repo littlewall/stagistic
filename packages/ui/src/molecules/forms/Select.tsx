@@ -1,7 +1,6 @@
 import clsx from 'clsx';
 import {
     type ReactNode,
-    useEffect,
     useId,
     useMemo,
     useRef,
@@ -9,6 +8,7 @@ import {
 } from 'react';
 
 import styles from './Select.module.css';
+import {useDropdownDismiss} from './useDropdownDismiss';
 
 export interface SelectOption {
     value: number | string,
@@ -56,36 +56,7 @@ export const Select = ({
         [options, value],
     );
 
-    useEffect(() => {
-        if (!isOpen) {
-            return;
-        }
-
-        const onPointerDown = (event: MouseEvent | PointerEvent) => {
-            if (!selectRef.current) {
-                return;
-            }
-
-            if (selectRef.current.contains(event.target as Node)) {
-                return;
-            }
-
-            setIsOpen(false);
-        };
-        const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                setIsOpen(false);
-            }
-        };
-
-        document.addEventListener('pointerdown', onPointerDown);
-        document.addEventListener('keydown', onKeyDown);
-
-        return () => {
-            document.removeEventListener('pointerdown', onPointerDown);
-            document.removeEventListener('keydown', onKeyDown);
-        };
-    }, [isOpen]);
+    useDropdownDismiss(isOpen, setIsOpen, selectRef);
 
     return (
         <div className={clsx(styles.select, className)} ref={selectRef}>

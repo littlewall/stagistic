@@ -27,7 +27,7 @@ const LEGACY_CAPS_LYRICS_CHAIN_TYPES = new Set<FountainElementType>([
     ELEMENT_LYRICS,
 ]);
 
-export const fountainParser = (
+export const parseFountain = (
     source: string,
     options?: ParseFountainOptions,
 ): FountainDocument => {
@@ -70,7 +70,5 @@ export const fountainParser = (
 
     return cleaned as FountainDocument;
 };
-
-export const parseFountain = fountainParser;
 
 export * from './sectionDetection';
