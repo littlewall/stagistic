@@ -3,11 +3,8 @@ import {
     AppLayout,
     Button,
     Card,
-    CardContent,
-    Kicker,
     PageContainer,
     PageTitle,
-    ProgressPanel,
     SectionTitle,
     SubtleText,
 } from '@stagistic/ui';
@@ -21,150 +18,133 @@ import styles from './HomeRoute.module.css';
 
 export const HomeRoute = () => {
     const navigate = useNavigate();
-    const {scriptSummaries, isLoading: scriptsLoading} = useScripts();
+    const {
+        scriptSummaries, isLoading: scriptsLoading, error, refreshScripts,
+    } = useScripts();
     const {openNewScript, openImportScript} = useGlobalModals();
 
     const latestScript = useMemo(() => scriptSummaries[0] ?? null, [scriptSummaries]);
 
-    const scriptRows = useMemo(
-        () => scriptSummaries.map(script => (
-            <Card
-                key={script.id}
-                compact
-                className={styles.scriptRow}
-                onClick={() => void navigate(`/script/${script.id}/editor`)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(event: ReactKeyboardEvent<HTMLElement>) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        void navigate(`/script/${script.id}/editor`);
-                    }
-                }}
-            >
-                <div className={styles.inner}>
-                    <div className={styles.info}>
-                        <span className={styles.title}>{script.title}</span>
-                        <SubtleText className={styles.meta}>
-                            {formatLastEdited(script.updatedAt)}
-                        </SubtleText>
-                    </div>
-                    <div className={styles.actions}>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onPress={() => void navigate(`/script/${script.id}/editor`)}
-                        >
-                            Open
-                        </Button>
-                        <Button
-                            variant="ghost"
-                            size="sm"
-                            onPress={() => void navigate(`/script/${script.id}/settings`)}
-                        >
-                            Settings
-                        </Button>
-                    </div>
-                </div>
-            </Card>
-        )),
-        [navigate, scriptSummaries],
-    );
-
-    const continueCard = useMemo(() => {
-        if (scriptsLoading) {
-            return (
-                <ProgressPanel
-                    title="Načítám poslední scénář"
-                    subtitle="Zjišťuji naposledy otevřený scénář"
-                    size="sm"
-                    statusText="Načítám poslední scénář"
-                />
-            );
-        }
-
-        if (!latestScript) {
-            return null;
-        }
-
+    if (scriptsLoading) {
         return (
-            <Card
-                compact
-                className={styles.continueCard}
-                onClick={() => void navigate(`/script/${latestScript.id}/editor`)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(event: ReactKeyboardEvent<HTMLElement>) => {
-                    if (event.key === 'Enter' || event.key === ' ') {
-                        event.preventDefault();
-                        void navigate(`/script/${latestScript.id}/editor`);
-                    }
-                }}
-            >
-                <CardContent>
-                    <h3 className={styles.title}>{latestScript.title}</h3>
-                    <SubtleText>
-                        {formatLastEdited(latestScript.updatedAt)}
-                    </SubtleText>
-                </CardContent>
-            </Card>
+            <AppLayout header={<AppHeader />}>
+                <PageContainer variant="standard">
+                    <div className={styles.skeleton}>
+                        <div className={styles.skeletonHero} />
+                        <div className={styles.skeletonList}>
+                            <div className={styles.skeletonRow} />
+                            <div className={styles.skeletonRow} />
+                            <div className={styles.skeletonRow} />
+                        </div>
+                    </div>
+                </PageContainer>
+            </AppLayout>
         );
-    }, [
-        latestScript,
-        navigate,
-        scriptsLoading,
-    ]);
+    }
+
+    if (error) {
+        return (
+            <AppLayout header={<AppHeader />}>
+                <PageContainer variant="standard">
+                    <div className={styles.errorState}>
+                        <SubtleText>Couldn&apos;t load your scripts.</SubtleText>
+                        <Button variant="outline" onPress={() => void refreshScripts()}>
+                            Try again
+                        </Button>
+                    </div>
+                </PageContainer>
+            </AppLayout>
+        );
+    }
+
+    if (scriptSummaries.length === 0) {
+        return (
+            <AppLayout header={<AppHeader />}>
+                <PageContainer variant="standard">
+                    <div className={styles.emptyState}>
+                        <PageTitle>Your script&apos;s next act.</PageTitle>
+                        <SubtleText className={styles.emptySubtitle}>
+                            A script editor for theatrical plays and musicals.
+                            Create your first script to get started.
+                        </SubtleText>
+                        <div className={styles.emptyActions}>
+                            <Button onPress={openNewScript}>New script</Button>
+                            <Button variant="outline" onPress={openImportScript}>Import script</Button>
+                        </div>
+                    </div>
+                </PageContainer>
+            </AppLayout>
+        );
+    }
 
     return (
         <AppLayout header={<AppHeader />}>
             <PageContainer variant="standard">
-                <div className={styles.columns}>
-                    <div className={styles.scriptList}>
-                        <div className={styles.header}>
-                            <SectionTitle>Scripts</SectionTitle>
-                        </div>
-                        {scriptsLoading ? (
-                            <ProgressPanel
-                                title="Načítám scénáře"
-                                subtitle="Synchronizuji seznam scénářů"
-                                size="sm"
-                                statusText="Načítám seznam scénářů"
-                            />
-                        ) : (
-                            <div className={styles.items}>
-                                {scriptRows}
-                            </div>
-                        )}
-                    </div>
-                    <div className={styles.rightPanel}>
-                        <section className={styles.welcome}>
-                            <Kicker>Welcome to Stagistic Editor!</Kicker>
-                            <PageTitle>Your script&apos;s next act</PageTitle>
-                            <SubtleText className={styles.subtitle}>
-                                Create new scripts, explore active drafts, and keep your storytelling flow
-                                within a focused workspace.
-                            </SubtleText>
-                            <div className={styles.actions}>
-                                <Button onPress={openNewScript}>
-                                    New script
-                                </Button>
-                                <Button
-                                    variant="outline"
-                                    onPress={openImportScript}
-                                >
-                                    Import
-                                </Button>
-                            </div>
+                <div className={styles.content}>
+                    {latestScript !== null && (
+                        <section className={styles.continueSection}>
+                            <Card
+                                variant="highlight"
+                                className={styles.continueCard}
+                                onClick={() => void navigate(`/script/${latestScript.id}/editor`)}
+                                role="button"
+                                tabIndex={0}
+                                onKeyDown={(event: ReactKeyboardEvent<HTMLElement>) => {
+                                    if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault();
+                                        void navigate(`/script/${latestScript.id}/editor`);
+                                    }
+                                }}
+                            >
+                                <div className={styles.continueBody}>
+                                    <span className={styles.continueLabel}>Continue writing</span>
+                                    <h2 className={styles.continueTitle}>{latestScript.title}</h2>
+                                </div>
+                                <SubtleText className={styles.continueMeta}>
+                                    {formatLastEdited(latestScript.updatedAt)}
+                                </SubtleText>
+                            </Card>
                         </section>
-                        {continueCard !== null && (
-                            <section className={styles.continueSection}>
-                                <SectionTitle className={styles.title}>
-                                    Continue writing
-                                </SectionTitle>
-                                {continueCard}
-                            </section>
-                        )}
-                    </div>
+                    )}
+                    <section className={styles.scriptListSection}>
+                        <SectionTitle>Scripts</SectionTitle>
+                        <div className={styles.items}>
+                            {scriptSummaries.map(script => (
+                                <div
+                                    key={script.id}
+                                    className={styles.scriptRow}
+                                    onClick={() => void navigate(`/script/${script.id}/editor`)}
+                                    role="button"
+                                    tabIndex={0}
+                                    onKeyDown={(event: ReactKeyboardEvent<HTMLElement>) => {
+                                        if (event.key === 'Enter' || event.key === ' ') {
+                                            event.preventDefault();
+                                            void navigate(`/script/${script.id}/editor`);
+                                        }
+                                    }}
+                                >
+                                    <div className={styles.scriptInfo}>
+                                        <span className={styles.scriptTitle}>{script.title}</span>
+                                        <SubtleText className={styles.scriptMeta}>
+                                            {formatLastEdited(script.updatedAt)}
+                                        </SubtleText>
+                                    </div>
+                                    <div
+                                        className={styles.scriptActions}
+                                        onClick={e => e.stopPropagation()}
+                                    >
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            onPress={() => void navigate(`/script/${script.id}/settings`)}
+                                        >
+                                            Settings
+                                        </Button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+                    </section>
                 </div>
             </PageContainer>
         </AppLayout>

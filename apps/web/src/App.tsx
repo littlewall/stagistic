@@ -19,13 +19,13 @@ import {scriptRepository} from './repo';
 const App = () => {
     const [bootReady, setBootReady] = useState(false);
     const [bootProgress, setBootProgress] = useState(0);
-    const [bootStatus, setBootStatus] = useState('Připravuji aplikaci');
+    const [bootStatus, setBootStatus] = useState('Preparing');
 
     useEffect(() => {
         let isActive = true;
 
         const boot = async () => {
-            setBootStatus('Načítám UI assety');
+            setBootStatus('Loading fonts');
             if (document?.fonts) {
                 await document.fonts.ready;
             }
@@ -35,7 +35,7 @@ const App = () => {
             }
 
             setBootProgress(1);
-            setBootStatus('Hotovo');
+            setBootStatus('Ready');
             setBootReady(true);
         };
 
@@ -49,10 +49,10 @@ const App = () => {
     if (!bootReady) {
         return (
             <LoaderOverlay
-                title="Inicializuji Stagistic"
+                title="Starting Stagistic"
                 subtitle={bootStatus}
                 progress={bootProgress}
-                hint="Prosím vyčkejte, připravujeme prostředí."
+                hint="Please wait while we set up your environment."
             />
         );
     }
