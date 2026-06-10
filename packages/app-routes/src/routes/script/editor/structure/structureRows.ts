@@ -6,29 +6,30 @@ import {
     type ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
 
-export const ROOT_ACT_GROUP = '__root__' as const;
+export const ROOT_ACT_GROUP = '__root__';
 
 export interface SceneItem {
-    blockId: string;
-    title: string;
+    blockId: string,
+    title: string,
 }
 
 export interface StructureGroup {
-    /** ROOT_ACT_GROUP for scenes before any act, or the act block id. */
-    groupId: string;
-    /** null for ROOT_ACT_GROUP, otherwise the act name. */
-    actName: string | null;
-    scenes: SceneItem[];
+    groupId: string,
+    actName: string | null,
+    scenes: SceneItem[],
 }
 
 export interface StructureState {
-    groups: StructureGroup[];
-    /** Maps any block id → the scene block id it belongs to (used for active highlight). */
-    sceneAncestorByBlockId: ReadonlyMap<string, string>;
+    groups: StructureGroup[],
+    sceneAncestorByBlockId: ReadonlyMap<string, string>,
 }
 
 const EMPTY_STATE: StructureState = {
-    groups: [{groupId: ROOT_ACT_GROUP, actName: null, scenes: []}],
+    groups: [
+        {
+            groupId: ROOT_ACT_GROUP, actName: null, scenes: [],
+        },
+    ],
     sceneAncestorByBlockId: new Map(),
 };
 
@@ -37,14 +38,18 @@ const liveCache = new WeakMap<EditorLiveStructureSnapshot, StructureState>();
 const indexCache = new WeakMap<ScriptBlockIndexSnapshot, StructureState>();
 
 interface RawBlock {
-    blockId: string;
-    blockType: string;
-    text: string;
-    sceneBlockId?: string | null;
+    blockId: string,
+    blockType: string,
+    text: string,
+    sceneBlockId?: string | null,
 }
 
 const buildState = (blocks: RawBlock[]): StructureState => {
-    const groups: StructureGroup[] = [{groupId: ROOT_ACT_GROUP, actName: null, scenes: []}];
+    const groups: StructureGroup[] = [
+        {
+            groupId: ROOT_ACT_GROUP, actName: null, scenes: [],
+        },
+    ];
     const sceneAncestorByBlockId = new Map<string, string>();
     let currentSceneBlockId: string | null = null;
 
@@ -101,6 +106,18 @@ export const deriveStructureStateFromLive = (live: EditorLiveStructureSnapshot):
     }));
 
     const result = buildState(blocks);
+
+    if (live.sceneByBlockId.size > 0) {
+        const mergedSceneAncestorByBlockId = new Map<string, string>(result.sceneAncestorByBlockId);
+
+        live.sceneByBlockId.forEach((sceneBlockId, blockId) => {
+            mergedSceneAncestorByBlockId.set(blockId, sceneBlockId);
+        });
+
+        liveCache.set(live, {...result, sceneAncestorByBlockId: mergedSceneAncestorByBlockId});
+
+        return {...result, sceneAncestorByBlockId: mergedSceneAncestorByBlockId};
+    }
 
     liveCache.set(live, result);
 
