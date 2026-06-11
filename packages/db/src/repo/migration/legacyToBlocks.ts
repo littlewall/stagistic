@@ -6,7 +6,7 @@ import {
 import {
     migrateLegacyJsonToBlocksForScript,
     type RewriteBlocksMigrationAudit,
-} from '../../rewrite';
+} from '../../blocks';
 
 export const LEGACY_TO_BLOCKS_TRIGGERS = {
     createScript: 'create-script',

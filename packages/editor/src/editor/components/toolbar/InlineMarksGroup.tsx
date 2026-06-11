@@ -1,5 +1,7 @@
+import {
+    BoldIcon, ItalicIcon, RedoIcon, UnderlineIcon, UndoIcon,
+} from '@stagistic/ui';
 import clsx from 'clsx';
-import {BoldIcon, ItalicIcon, RedoIcon, UnderlineIcon, UndoIcon} from '@stagistic/ui';
 
 import styles from '../EditorToolbar.module.css';
 import type {InlineMarksGroupProps} from './contracts';

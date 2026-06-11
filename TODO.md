@@ -1,99 +1,87 @@
-# TODO — Code Quality Findings
+# TODO — úklid před dalšími featurami
 
-Generated from a repo-wide analysis (knip dead-code scan, jscpd clone detection, manual verification). Levels: `low` | `medium` | `high` | `urgent`.
+Sloučeno z repo-wide auditu (2026-06-11, tříproudý audit + ruční verifikace) a předchozí analýzy (knip dead-code scan, jscpd clone detection). Body se odškrtávají průběžně, hned po dokončení.
 
-## Dead code
+## Fáze 1 — Rychlé výhry
 
-- [x] **[high]** Resolve the orphaned active-block sync hook
-  `useEditorActiveBlockSync` ([packages/editor/src/editor/hooks/useEditorActiveBlockSync.ts](packages/editor/src/editor/hooks/useEditorActiveBlockSync.ts)) is never mounted, yet `usePointerDragInteraction.ts`, `usePointerDragState.ts`, and `useEditorMoveRequests.ts` still call its `setActiveBlockSyncSuppressed` — they suppress a sync that never runs. Possible regression.
-  **Fix:** Deleted the hook and all suppression call sites (drag/move operations work without suppression since `useEditorLifecycle` already handles `onActiveBlockChange` via the runtime extension).
+- [x] z-index narovnání na škálu (max 20): `LoaderOverlay.module.css` (999→20), `EditorSidebar.module.css:413` (1000→19), `ToastProvider.module.css` (30→18), `ScriptSettingsModal.module.css` (45→15), `apps/landing/.../index.module.css` (50→10, sticky); + character popovery v `EditorSidebar` (20→12, popover slot — jinak by překryly modal backdrop)
+- [x] clsx místo template-literal className: [StructureRowAct.tsx:67](packages/app-routes/src/routes/script/editor/structure/StructureRowAct.tsx:67), [StructureRowScene.tsx:28,46](packages/app-routes/src/routes/script/editor/structure/StructureRowScene.tsx:28)
+- [x] Dedup `EMPTY_STRUCTURE` (3× identické) — exportovat z `editor/live/store.ts`, importovat v `buildStructureRuntime.ts` a `buildSidebarProjectionFromIndex.ts` (dedupnut i `EMPTY_CHARACTERS`, 2×)
+- [x] Extrakce selection helperů (`restoreSelectionForBlock`, `withActiveBlockPreserved`) z `useEditorMoveRequests.ts` + `useBuildActCommands.ts` do `editor/hooks/selectionHelpers.ts` (čisté funkce, ~60 ř. duplicity pryč; cestou opraven pre-existing TS error v `renameAct` — sahal na nullable `instance` místo `commitCtx.editor`)
+- [x] Sdílený character SELECT helper v [characters/read.ts](packages/db/src/queries/scripts/characters/read.ts) (3× opakovaných 6 polí; pokrývá i klon read.ts:38-53 vs 68-83 z předchozí analýzy — `characterSelectFields` + `getScriptCharacterWhere`)
+- [x] Smazat duplicitní typy `FountainJSONContent`/`ScriptDocument` v `jsonToBlocks.ts:23–43`, importovat z `@stagistic/script`
+- [x] `InputTable.module.css:53,118` — hex fallback `#c33` → status token (`--color-error` nikde neexistoval, vždy padal na hex; nahrazeno `--color-status-danger`)
 
-- [x] **[medium]** Delete the dead `characterTags` cluster (~580 lines)
-  [characterTagDecorations.ts](packages/editor/src/editor/tiptap/fountainBlock/characterTagDecorations.ts) is unreferenced and is the sole consumer of `packages/editor/src/editor/tiptap/fountainBlock/characterTags/` (`cleanup.ts`, `rangeResolvers.ts`, `buildDecorations.ts`, `types.ts`). The live logic was extracted to `runtime/transactionGuards.ts`; originals were never removed.
-  **Fix:** Deleted `characterTagDecorations.ts` and the entire `characterTags/` directory.
+### Neplánované opravy odhalené při verifikaci Fáze 1
 
-- [x] **[low]** Delete small verified-dead files
-  [buildCharacterSnapshotFromDoc.ts](packages/editor/src/editor/live/buildCharacterSnapshotFromDoc.ts) (43 L), [useCanvasScrollLock.ts](packages/editor/src/editor/components/blockActions/useCanvasScrollLock.ts) (40 L), [scriptTypes.ts](packages/db/src/scriptTypes.ts) (16 L), empty dirs `apps/desktop/src/store/` and `apps/desktop/src/utils/`.
-  **Fix:** Removed the files and directories.
+- [x] **Oprava rozbitého eslintu** — preset mířil typed-lint na root solution-style tsconfig (`files: []`) → 521 parsing errors a žádný soubor se reálně nelintoval; `eslint.config.js` nově stripuje `parserOptions.project` a používá `projectService`; ignorovány `.claude/`, `.impeccable/`, tauri target a generovaný `migrations.compiled.ts`
+- [x] **Runtime bug v [structureRows.ts](packages/app-routes/src/routes/script/editor/structure/structureRows.ts)** — po odstranění WeakMap cache zůstal mrtvý `liveCache.set(...)` (ReferenceError kdykoli `sceneByBlockId.size > 0`) a poslední return referencoval neexistující `groups`; obnovena původní sémantika (odhaleno opraveným lintem)
+- [x] **ESLint autofix napříč repem** (~45 souborů: import sort, jsx-props-per-line, object-curly-newline, …) + ručně: nepoužitý import `FountainBlockType` v `tiptap/nodes/index.ts`
+- [x] **Stylelint config** — csstree validátor nezná moderní CSS: ignorovány `anchor-name`/`position-anchor`/`text-wrap` a hodnoty `oklch()`/`anchor()`; vypnut `custom-property-empty-line-before` (prázdné řádky záměrně oddělují skupiny tokenů)
+- [x] **Stylelint fixy** — zploštění >3-class selektorů (`ImportScriptModal`, `ScriptSettingsModal`, `ScriptStructureSidebar` — CSS modules zanoření nepotřebují), inline disable pro záměrný `html.js` no-JS fallback v landing
+- [x] **Oprava `tsc -b`** — `app-core` bez DOM lib si stahoval `db` zdroje (Worker/WebAssembly errors) → přidána DOM lib; `apps/landing` vyřazen z root references (Astro preset `allowImportingTsExtensions` je nekompatibilní s `composite`; staví ho `astro build`)
 
-- [ ] **[medium]** Prune ~70 unused exports and 52 unused exported types
-  Highlights: most of the `packages/editor/src/editor/live/index.ts` barrel; `serializeDocument`/`parseDocument`/`computeContentHash` in [documentCodec.ts](packages/db/src/repo/documentCodec.ts); all ten `*Binding` exports in [registry.ts](packages/editor/src/editor/blocks/registry.ts); `collectChangedRanges`/`transactionMayAffectBlockStructure` in [transactionGuards.ts](packages/editor/src/editor/runtime/transactionGuards.ts); `runMigrations`/`prepareLocalDb`/`prepareLocalDbWithProgress` in `apps/web/src/db/index.ts`.
-  **Fix:** Run `npx knip --include exports,types`, delete or un-export each confirmed hit (some resolve themselves via the duplication fixes below).
+## Fáze 2 — `rewrite/` vrstva (největší soubor v repu)
 
-- [x] **[medium]** Remove deprecated legacy exports in `@stagistic/script`
-  Legacy `fountainBlock` node type ([scriptDocument.ts:26](packages/script/src/document/scriptDocument.ts:26)) and the deprecated helper in [scriptDocumentHelpers.ts:110](packages/script/src/document/scriptDocumentHelpers.ts:110) are still exported post-cutover.
-  **Fix:** Removed `ensureFountainBlockIds` (replaced with `ensureScriptBlockIds` in 4 call sites). Removed `nodeMode` prop from `EditorDocumentProps` and simplified `Editor.tsx` to always call `convertLegacyScriptDocumentToDefault` directly. Note: `ScriptDocumentNodeMode`/`convertDefaultScriptDocumentToLegacy` retained — still used in DB persistence layer.
+- [x] Přesun `packages/db/src/rewrite/` → `packages/db/src/blocks/` a rozdělení `jsonToBlocks.ts` (1066 ř.) na `types.ts` / `extract.ts` / `rebuild.ts` / `migrate.ts` / `index.ts` *(řeší i bod „Split jsonToBlocks.ts and move it out of rewrite/" z předchozí analýzy)*
+- [x] Aktualizace importů (`src/index.ts`, `repo/content.ts`, `repo/migration/legacyToBlocks.ts`, `repo/persist/*`)
 
-## Dependencies & tooling
+## Fáze 3 — Rozdělení nadlimitních souborů (>300 ř.)
 
-- [x] **[high]** Remove broken `.eslintrc.json` files
-  [apps/web/.eslintrc.json](apps/web/.eslintrc.json) and [apps/desktop/.eslintrc.json](apps/desktop/.eslintrc.json) both extend `../../.eslintrc.json`, which does not exist (root uses flat [eslint.config.js](eslint.config.js)). They are dead at best, misleading at worst.
-  **Fix:** Deleted both files; `react-hooks` rules are covered by `@dvdevcz/eslint` react config.
+- [x] `useEditorLifecycle.ts` (563) → `editorLifecycleTypes.ts` (interface) + `editorLifecycleSync.ts` (sanitize + 5 callbacks + fallback strategie comment) + `useEditorLifecycle.ts` (294 ř.)
+- [x] `structureRequestMutations.ts` (525) → rozdělit blokové mutace / scene-reorder; vyčistit zbylé self-clones
+- [x] `Editor.tsx` (488) → extrahovat slot infrastrukturu a sidebar prop resolution
+- [x] `scriptDocument.ts` (448) → types / nodeHelpers / nodeFactory / conversion / fountainParsing (zachovat re-exporty)
+- [x] `EmptyEnterChooserExtension.ts` (381) → extrahovat state buildery
+- [x] `EmptyEnterBlockChooserOverlay.tsx` (373) → extrahovat item-row komponentu
+- [x] `EditorBlockActionsOverlay.tsx` (372) → extrahovat pointer/drag logiku
+- [x] `createLocalPgliteRepository.ts` (372) → rozdělit sub-repozitáře po doménách (bez generických wrapper factories)
+- [x] `ScriptEditorRoute.tsx` (369) → extrahovat settings-modal hook + character-sidebar wiring
+- [x] `scriptImportStructureMarkers.ts` (355) → rozdělit detekci markerů / normalizaci struktury
+- [x] `useAutosaveController.ts` (314) → extrahovat autosave stavový automat
 
-- [x] **[medium]** Drop unused dependencies
-  `apps/web`: `platejs`, `@platejs/basic-nodes`, `@platejs/slate` (abandoned Plate.js experiment), `react-aria-components`, `clsx`, `drizzle-orm`, `@stagistic/script`, `@stagistic/shared`. `packages/editor`: `@tiptap/extension-drag-handle`, `@tiptap/extension-drag-handle-react`.
-  **Fix:** Removed from `apps/web/package.json` and `packages/editor/package.json`. Removed matching `declare module` shims from `tiptapExtensionsCompat.d.ts`. Run `pnpm install` to update lockfile.
+## Fáze 4 — Deduplikace napříč balíčky + CSS + landing
 
-- [x] **[low]** Remove stale `apps/web/prettier.config.js`
-  No prettier dependency exists anywhere in the workspace.
-  **Fix:** Deleted the file.
+- [ ] Sdílená funkce stavby struktury (jádro `buildStructureRuntime` / `buildSidebarProjectionFromIndex`)
+- [ ] **[z předchozí analýzy]** Cross-package klony: character color math ([script/color.ts](packages/script/src/characters/color.ts) ≡ [ui/colorUtils.ts](packages/ui/src/editor-panels/characterRowConfirmed/colorUtils.ts)), block indexing ([scriptBlockIndex.ts:175-194](packages/script/src/indexing/scriptBlockIndex.ts:175) ≡ [buildIndexSnapshotFromPmDoc.ts:144-166](packages/editor/src/editor/runtime/buildIndexSnapshotFromPmDoc.ts:144)), token scanning ([characterTokenScan.ts:42-64](packages/editor/src/editor/characters/characterTokenScan.ts:42) ≡ [tokenUtils.ts:8-30](packages/editor/src/editor/components/characterSuggestions/model/tokenUtils.ts:8)) — přesunout do nejnižšího vlastnícího balíčku
+- [ ] **[z předchozí analýzy]** Zbylé self-clones: `structureReorder.ts:71-84 vs 161-174`, `useImportScriptModalState.ts:135-156 vs 163-184`, `characterSuggestions/model.ts:75-88 vs 179-192`, `coreMutations.ts:132-158 vs 162-186`, `createPaginationPlugin.ts:108-119 vs 221-231`
+- [ ] Sdílený `dialogForm.module.css` pro `NewScriptModal` + `ImportScriptModal`
+- [ ] **[z předchozí analýzy]** Config/CSS klony: `apps/desktop/vite.config.ts` ≡ `apps/web/vite.config.ts`, `PageHeader.module.css` zkopírovaný do `ScriptSettingsRoute.module.css`, 12řádkový self-clone v landing `index.module.css`
+- [ ] Landing: lokální CSS tokeny v `global.css`, nahradit hardcoded `oklch()` v `index.module.css`
 
-## Duplication
+## Fáze 5 — Dead code, dokumentace, schema hygiena
 
-- [x] **[high]** Extract a shared document-walk helper in `packages/script/src/characters/`
-  [characterRefsInScriptDocument.ts](packages/script/src/characters/characterRefsInScriptDocument.ts) and [renameCharacterInScriptDocument.ts](packages/script/src/characters/renameCharacterInScriptDocument.ts) contain six near-identical copies of the recursive `replaceNodes` scaffold (200+ duplicated lines) in safety-critical document mutations.
-  **Fix:** Added `mapCharacterBlockNodes(nodes, visitor)` to `documentHelpers.ts`; rewrote all four mutation functions (`link`, `unlink`, `replace`, `rename`) as single-pass visitors. Removed ~200 lines of boilerplate.
+- [ ] **[z předchozí analýzy]** Prune ~70 unused exports a 52 unused exported types (`npx knip --include exports,types`): `editor/live/index.ts` barrel, `documentCodec.ts` (`serializeDocument`/`parseDocument`/`computeContentHash`), `blocks/registry.ts` (`*Binding` exporty), `transactionGuards.ts`, `apps/web/src/db/index.ts` (`runMigrations`/`prepareLocalDb*`)
+- [ ] **[z předchozí analýzy]** Boot loader: napojit `prepareLocalDbWithProgress` na `LoaderOverlay` (progress teď skáče 0→1), nebo progress UI zjednodušit
+- [ ] Komentář k fractional-ordering strategii v `persistDocumentDelta.ts` (klíče z `fractional-indexing`, unique constraint záměrně odstraněn migrací 0004/0005)
+- [ ] Test na duplicitní `block_order` po reorderu (vitest + PGlite)
+- [ ] Schema komentáře: `scriptBlocks.contentJson` (účel), `syncOutbox` nullable sloupce (záměr)
+- [ ] Zdůvodnění existence `packages/shared` a `packages/app-core` (komentář/README)
 
-- [x] **[medium]** Deduplicate transaction guards in `BlockUiEventsExtension`
-  [BlockUiEventsExtension.ts:29-67](packages/editor/src/editor/tiptap/extensions/BlockUiEventsExtension.ts:29) contains 39 lines identical to [transactionGuards.ts:101-143](packages/editor/src/editor/runtime/transactionGuards.ts:101).
-  **Fix:** Replaced local `hasFountainBlockNode` + `stepMayAffectBlockStructure` with imported `transactionMayAffectBlockStructure` from `runtime/transactionGuards`.
+## Verifikace (po každé fázi)
 
-- [x] **[medium]** Re-share insert-act logic between act commands and structure requests
-  [useBuildActCommands.ts:130-158](packages/editor/src/editor/actCommands/useBuildActCommands.ts:130) ≡ [useEditorStructureRequests.ts:116-144](packages/editor/src/editor/hooks/useEditorStructureRequests.ts:116) (29 L), plus a 9-line preamble also cloned into `useEditorMoveRequests.ts` — left behind by the "decouple act commands" refactor.
-  **Fix:** Extracted `buildInsertActContent(currentValue, beforeBlockId)` into `structureRequestMutations.ts`; both hooks now delegate to it.
+- [x] Fáze 1: `pnpm lint` ✓ + `pnpm test` (19/19) ✓ + `tsc -b` ✓; vrstvení modal/sidebar ověřeno, toast/tooltip/loader otestuje uživatel ručně
+- [x] Fáze 2: lint ✓ + testy (19/19) ✓; smoke test editoru otestuje uživatel ručně
+- [x] Fáze 3: lint + testy + smoke test editoru; `wc -l` kontrola — žádný zdrojový soubor >300 ř.
+- [ ] Fáze 4: lint + testy + build `apps/landing`
+- [ ] Fáze 5: lint + testy + `pnpm db:check`
 
-- [ ] **[medium]** Unify cross-package clones before they drift
-  Character color math: [color.ts:1-20](packages/script/src/characters/color.ts:1) ≡ [colorUtils.ts:8-27](packages/ui/src/editor-panels/characterRowConfirmed/colorUtils.ts:8). Block indexing: [scriptBlockIndex.ts:175-194](packages/script/src/indexing/scriptBlockIndex.ts:175) ≡ [buildIndexSnapshotFromPmDoc.ts:144-166](packages/editor/src/editor/runtime/buildIndexSnapshotFromPmDoc.ts:144). Token scanning: [characterTokenScan.ts:42-64](packages/editor/src/editor/characters/characterTokenScan.ts:42) ≡ [tokenUtils.ts:8-30](packages/editor/src/editor/components/characterSuggestions/model/tokenUtils.ts:8).
-  **Fix:** Move each algorithm to its lowest-level owning package (`@stagistic/script` or `@stagistic/shared`) and import everywhere else.
+---
 
-- [x] **[medium]** Stop re-implementing the dropdown in `SidebarPanelSelect`
-  [SidebarPanelSelect.tsx:42-78](packages/app-routes/src/routes/script/editor/sidebar/SidebarPanelSelect.tsx:42) duplicates 36 lines of open/close/outside-click/Escape logic from [Select.tsx:57-93](packages/ui/src/molecules/forms/Select.tsx:57).
-  **Fix:** Extracted `useDropdownDismiss(isOpen, setIsOpen, containerRef)` into `packages/ui` (exported from `@stagistic/ui`); both components now call it.
+## Dokončeno (předchozí analýza — knip/jscpd)
 
-- [x] **[medium]** Collapse `useSetCharacterColor` / `useSetCharacterGender`
-  21-line identical block between [useSetCharacterColor.ts:48-68](packages/app-routes/src/routes/script/editor/characters/actions/useSetCharacterColor.ts:48) and [useSetCharacterGender.ts:67-87](packages/app-routes/src/routes/script/editor/characters/actions/useSetCharacterGender.ts:67).
-  **Fix:** Extracted `runCharacterFieldUpdate` helper into `utils.ts`; both hooks now delegate the async update/error/refresh pattern to it.
-
-- [x] **[low]** Use `@stagistic/shared` utilities in `jsonToBlocks.ts`
-  [jsonToBlocks.ts](packages/db/src/rewrite/jsonToBlocks.ts) re-implements `isObjectRecord` and `collapseWhitespace` locally.
-  **Fix:** Imported from `@stagistic/shared`, deleted local copies.
-
-- [ ] **[low]** Clean up remaining self-clones
-  `structureRequestMutations.ts` (3 clones, see param-drilling item below), [structureReorder.ts:71-84 vs 161-174](packages/editor/src/editor/hooks/structureReorder.ts:161), [useImportScriptModalState.ts:135-156 vs 163-184](packages/ui/src/dialogs/importScript/useImportScriptModalState.ts:163), [characterSuggestions/model.ts:75-88 vs 179-192](packages/editor/src/editor/components/characterSuggestions/model.ts:179), [characters/read.ts:38-53 vs 68-83](packages/db/src/queries/scripts/characters/read.ts:68), [coreMutations.ts:132-158 vs 162-186](packages/db/src/repo/characterHandlers/coreMutations.ts:162), [createPaginationPlugin.ts:108-119 vs 221-231](packages/editor/src/editor/tiptap/extensions/pagination/plugin/createPaginationPlugin.ts:221).
-  **Fix:** Extract a local helper per file; each clone pair shares an obvious seam.
-
-- [ ] **[low]** Deduplicate config/CSS clones
-  `apps/desktop/vite.config.ts` ≡ `apps/web/vite.config.ts` (22 L); [PageHeader.module.css:1-15](packages/ui/src/organisms/PageHeader.module.css:1) cloned into `ScriptSettingsRoute.module.css`; 12-line self-clone in `apps/landing/src/pages/index.module.css`.
-  **Fix:** Shared vite config fragment in the workspace root; reuse the `PageHeader` styles via the component instead of copying the CSS; landing self-clone → shared class.
-
-## Antipatterns & overcomplication
-
-- [x] **[high]** Introduce a commit context in `structureRequestMutations.ts`
-  Module functions take 10–12 positional args including four `MutableRefObject`s ([structureRequestMutations.ts:310-330](packages/editor/src/editor/hooks/structureRequestMutations.ts:310)); the arg bundle is re-threaded through every call site, which produced the file's three self-clones.
-  **Fix:** Introduced `CommitContext` interface; `commitDocument`/`tryCommitDocument`/`tryCommitSceneReorder` each take `ctx` as first arg. Both hooks build `CommitContext | null` via `useMemo`; each `useCallback`/`useEffect` dep array shrinks from 5–6 items to 1–2. `useEditorMoveRequests` now accepts `commitContext` directly instead of 6 individual args.
-
-- [ ] **[medium]** Split `jsonToBlocks.ts` and move it out of `rewrite/`
-  [jsonToBlocks.ts](packages/db/src/rewrite/jsonToBlocks.ts) is 1,073 lines mixing extraction, sanitization, ID resolution, persistence, audit, and rebuild — and it is now core pipeline code (used by `repo/content.ts` and the persist layer), not migration scaffolding, despite the `rewrite/` directory name.
-  **Fix:** Rename the directory (e.g. `blocksCodec/`) and split into `extract`, `sanitize`, `persist`, `rebuild` modules.
-
-- [ ] **[medium]** Make the web boot loader report real progress (or simplify it)
-  [App.tsx:24-58](apps/web/src/App.tsx:24) shows progress jumping 0 → 1 after `document.fonts.ready`, while the expensive PGlite WASM + migrations bootstrap runs lazily after "Ready". `prepareLocalDbWithProgress` exists for exactly this and is never called.
-  **Fix:** Call `prepareLocalDbWithProgress` during boot and feed its updates to `LoaderOverlay` — or drop the progress UI and the unused bootstrap API.
-
-- [ ] **[medium]** Break up the `useEditorLifecycle` god-hook
-  [useEditorLifecycle.ts](packages/editor/src/editor/hooks/useEditorLifecycle.ts) (563 L) handles block sanitization, ID dedup, hotkeys, autosave bridging, sidebar projection rebuilds, and perf metrics in one hook.
-  **Fix:** Split into focused hooks (`useBlockSanitizer`, `useEditorHotkeys`, `useSidebarProjectionSync`) composed by a thin lifecycle hook.
-
-- [x] **[low]** Remove duplicate export aliases
-  `fountainParser` + `parseFountain` ([parser/index.ts:74](packages/script/src/fountain/parser/index.ts:74)), `fountainSerializer` + `serializeFountain` ([serializer.ts](packages/script/src/fountain/serializer.ts)), `EmptyEnterBlockChooserOverlay` exported both default and named, settings types exported from both `settings/types.ts` and `settings/index.ts`.
-  **Fix:** Renamed `fountainParser` → `parseFountain` (removed alias). Removed unused `serializeFountain` alias. Removed redundant `export default` from `EmptyEnterBlockChooserOverlay` and updated the import in `EditorCanvas.tsx`.
+- [x] **[high]** Smazán orphaned `useEditorActiveBlockSync` hook + suppression call sites
+- [x] **[medium]** Smazán dead `characterTags` cluster (~580 ř.)
+- [x] **[low]** Smazány malé dead soubory (`buildCharacterSnapshotFromDoc.ts`, `useCanvasScrollLock.ts`, `scriptTypes.ts`, prázdné desktop adresáře)
+- [x] **[medium]** Odstraněny deprecated legacy exporty v `@stagistic/script` (`ensureFountainBlockIds` → `ensureScriptBlockIds`, `nodeMode` prop)
+- [x] **[high]** Smazány rozbité `.eslintrc.json` v apps/web + apps/desktop
+- [x] **[medium]** Odstraněny nepoužité dependencies (platejs experiment, tiptap drag-handle, …)
+- [x] **[low]** Smazán stale `apps/web/prettier.config.js`
+- [x] **[high]** Sdílený document-walk helper `mapCharacterBlockNodes` (~200 ř. boilerplate pryč)
+- [x] **[medium]** Dedup transaction guards v `BlockUiEventsExtension`
+- [x] **[medium]** Sdílený `buildInsertActContent` mezi act commands a structure requests
+- [x] **[medium]** `useDropdownDismiss` hook v `@stagistic/ui` (dedup `SidebarPanelSelect` vs `Select`)
+- [x] **[medium]** `runCharacterFieldUpdate` helper (dedup color/gender hooks)
+- [x] **[low]** `jsonToBlocks.ts` používá `@stagistic/shared` utility
+- [x] **[high]** `CommitContext` v `structureRequestMutations.ts` (konec 10–12 pozičních argů)
+- [x] **[low]** Odstraněny duplicitní export aliasy (`fountainParser`→`parseFountain`, …)

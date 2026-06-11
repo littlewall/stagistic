@@ -3,7 +3,7 @@ import {
     describe, expect, it,
 } from 'vite-plus/test';
 
-import {migrateLegacyJsonToBlocksForScript, rebuildScriptDocumentFromBlocks} from '../../rewrite/jsonToBlocks';
+import {migrateLegacyJsonToBlocksForScript, rebuildScriptDocumentFromBlocks} from '../../blocks';
 import {scriptBlocks} from '../../schema';
 import {createTestDb, seedScript} from '../../testing/createTestDb';
 

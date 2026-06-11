@@ -105,12 +105,10 @@ export const deriveStructureStateFromLive = (
             mergedSceneAncestorByBlockId.set(blockId, sceneBlockId);
         });
 
-        liveCache.set(live, {...result, sceneAncestorByBlockId: mergedSceneAncestorByBlockId});
-
         return {...result, sceneAncestorByBlockId: mergedSceneAncestorByBlockId};
     }
 
-    return {groups, sceneAncestorByBlockId: live.sceneByBlockId};
+    return result;
 };
 
 export const deriveStructureStateFromIndex = (

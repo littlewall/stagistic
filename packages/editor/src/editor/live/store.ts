@@ -19,13 +19,13 @@ const EMPTY_INDEX: EditorIndexSnapshot = {
     blocks: [],
 };
 
-const EMPTY_STRUCTURE: EditorLiveStructureSnapshot = {
+export const EMPTY_STRUCTURE: EditorLiveStructureSnapshot = {
     rows: [],
     rowIndexByBlockId: new Map<string, number>(),
     sceneByBlockId: new Map<string, string>(),
 };
 
-const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
+export const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
     countsByKey: new Map<string, number>(),
     countsByCharacterId: new Map<string, number>(),
     keyByCharacterId: new Map<string, string>(),

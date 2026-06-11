@@ -1,4 +1,5 @@
 import {useSortable} from '@dnd-kit/react/sortable';
+import {clsx} from '@stagistic/ui';
 import {memo} from 'react';
 
 import {SCENE_DND_TYPE} from './dnd';
@@ -25,7 +26,7 @@ export const StructureRowScene = memo(({
     return (
         <li
             ref={ref}
-            className={`${styles.itemRow} ${styles.sceneRow}${isActive ? ` ${styles.active}` : ''}`}
+            className={clsx(styles.itemRow, styles.sceneRow, isActive && styles.active)}
         >
             <button
                 type="button"
@@ -43,7 +44,7 @@ export const StructureRowScene = memo(({
                     onFocus(blockId);
                 }}
             >
-                <span className={`${styles.itemLabel} ${styles.sceneTitle}`}>{title}</span>
+                <span className={clsx(styles.itemLabel, styles.sceneTitle)}>{title}</span>
             </button>
         </li>
     );

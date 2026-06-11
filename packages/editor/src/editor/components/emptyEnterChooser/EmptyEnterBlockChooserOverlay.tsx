@@ -1,7 +1,5 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
-import clsx from 'clsx';
 import {
-    type CSSProperties,
     type MouseEvent as ReactMouseEvent,
     type RefObject,
     useCallback,
@@ -11,7 +9,6 @@ import {
     useState,
 } from 'react';
 
-import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
 import {FOUNTAIN_BLOCKS} from '../../blocks/fountainBlockRegistry';
 import {
     EMPTY_ENTER_CHOOSER_WRITER_TYPES,
@@ -19,21 +16,13 @@ import {
     getEmptyEnterChooserFromState,
 } from '../../tiptap/extensions/EmptyEnterChooserExtension';
 import type {FountainBlockType} from '../../tiptap/fountainCore';
-import {
-    resolveElementOffsetWithinAncestor,
-    resolveFountainBlockElementById,
-} from '../blockActions/overlay/geometry';
-import {useRafScheduler} from '../blockActions/overlay/useRafScheduler';
+import {ChooserTypeButton} from './ChooserTypeButton';
 import styles from './EmptyEnterBlockChooserOverlay.module.css';
+import {useChooserAnchor} from './useChooserAnchor';
 
 interface EmptyEnterBlockChooserOverlayProps {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
-}
-
-interface ChooserAnchorStyle extends CSSProperties {
-    top: string,
-    left: string,
 }
 
 const CLOSED_CHOOSER_STATE: EmptyEnterChooserState = {
@@ -54,53 +43,6 @@ const isSameChooserState = (previous: EmptyEnterChooserState, next: EmptyEnterCh
         && previous.openedByEmptyEnter === next.openedByEmptyEnter;
 };
 
-const isSameAnchorStyle = (
-    previous: ChooserAnchorStyle | null,
-    next: ChooserAnchorStyle | null,
-) => {
-    if (previous === next) {
-        return true;
-    }
-
-    if (!previous || !next) {
-        return false;
-    }
-
-    return previous.top === next.top && previous.left === next.left;
-};
-
-const escapeCssAttributeValue = (value: string) => {
-    if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
-        return CSS.escape(value);
-    }
-
-    return value.replace(/["\\]/g, '\\$&');
-};
-
-const resolveBlockActionsTriggerElement = (
-    canvas: HTMLElement,
-    blockId: string,
-) => {
-    const escapedBlockId = escapeCssAttributeValue(blockId);
-
-    return canvas.querySelector<HTMLButtonElement>(
-        `[data-block-actions-trigger="true"][data-block-id="${escapedBlockId}"]`,
-    );
-};
-
-const resolveElementRectOffsetWithinAncestor = (
-    element: HTMLElement,
-    ancestor: HTMLElement,
-) => {
-    const elementRect = element.getBoundingClientRect();
-    const ancestorRect = ancestor.getBoundingClientRect();
-
-    return {
-        top: elementRect.top - ancestorRect.top + ancestor.scrollTop,
-        left: elementRect.left - ancestorRect.left + ancestor.scrollLeft,
-    };
-};
-
 export const EmptyEnterBlockChooserOverlay = ({
     editor,
     canvasRef,
@@ -112,8 +54,6 @@ export const EmptyEnterBlockChooserOverlay = ({
 
         return getEmptyEnterChooserFromState(editor.state);
     });
-    const [anchorStyle, setAnchorStyle] = useState<ChooserAnchorStyle | null>(null);
-    const {cancel: cancelScheduledAnchorUpdate, schedule} = useRafScheduler();
 
     const syncChooserStateFromEditor = useCallback((targetEditor: TiptapEditor | null = editor) => {
         if (!targetEditor) {
@@ -174,139 +114,9 @@ export const EmptyEnterBlockChooserOverlay = ({
         };
     }, [editor, syncChooserStateFromEditor]);
 
-    const updateAnchor = useCallback(() => {
-        const canvas = canvasRef.current;
-
-        if (!editor || !canvas || !chooserState.isOpen || !chooserState.blockId) {
-            setAnchorStyle(previous => {
-                if (previous === null) {
-                    return previous;
-                }
-
-                return null;
-            });
-
-            return;
-        }
-
-        const triggerElement = resolveBlockActionsTriggerElement(canvas, chooserState.blockId);
-        let anchorTop = 0;
-        let anchorLeft = 0;
-        let hasAnchorFromTrigger = false;
-
-        if (triggerElement) {
-            const triggerOffset = resolveElementRectOffsetWithinAncestor(triggerElement, canvas);
-
-            if (triggerOffset) {
-                anchorTop = triggerOffset.top;
-                anchorLeft = triggerOffset.left;
-                hasAnchorFromTrigger = true;
-            }
-        }
-
-        if (!hasAnchorFromTrigger) {
-            const blockElement = resolveFountainBlockElementById(
-                editor,
-                chooserState.blockId,
-                chooserState.blockPos,
-            );
-
-            if (!blockElement) {
-                setAnchorStyle(previous => {
-                    if (previous === null) {
-                        return previous;
-                    }
-
-                    return null;
-                });
-
-                return;
-            }
-
-            const offset = resolveElementOffsetWithinAncestor(blockElement, canvas);
-
-            if (!offset) {
-                setAnchorStyle(previous => {
-                    if (previous === null) {
-                        return previous;
-                    }
-
-                    return null;
-                });
-
-                return;
-            }
-
-            anchorTop = offset.top;
-            anchorLeft = offset.left;
-        }
-
-        const nextAnchorStyle: ChooserAnchorStyle = {
-            top: `${anchorTop}px`,
-            left: `${anchorLeft}px`,
-        };
-
-        setAnchorStyle(previous => {
-            if (isSameAnchorStyle(previous, nextAnchorStyle)) {
-                return previous;
-            }
-
-            return nextAnchorStyle;
-        });
-    }, [
-        canvasRef,
-        chooserState.blockId,
-        chooserState.blockPos,
-        chooserState.isOpen,
-        editor,
-    ]);
-
-    const scheduleAnchorUpdate = useCallback(() => {
-        schedule(updateAnchor);
-    }, [schedule, updateAnchor]);
-
-    useLayoutEffect(() => {
-        if (!chooserState.isOpen) {
-            cancelScheduledAnchorUpdate();
-            setAnchorStyle(previous => {
-                if (previous === null) {
-                    return previous;
-                }
-
-                return null;
-            });
-
-            return;
-        }
-
-        scheduleAnchorUpdate();
-
-        return () => {
-            cancelScheduledAnchorUpdate();
-        };
-    }, [
-        cancelScheduledAnchorUpdate,
-        chooserState.isOpen,
-        chooserState.blockId,
-        chooserState.blockPos,
-        scheduleAnchorUpdate,
-    ]);
-
-    useEffect(() => {
-        if (!chooserState.isOpen) {
-            return;
-        }
-
-        const handleWindowResize = () => {
-            scheduleAnchorUpdate();
-        };
-
-        window.addEventListener('resize', handleWindowResize);
-
-        return () => {
-            window.removeEventListener('resize', handleWindowResize);
-        };
-    }, [chooserState.isOpen, scheduleAnchorUpdate]);
+    const anchorStyle = useChooserAnchor({
+        canvasRef, editor, chooserState,
+    });
 
     const labelByType = useMemo(() => {
         const map = new Map<string, string>();
@@ -347,27 +157,16 @@ export const EmptyEnterBlockChooserOverlay = ({
                 role="toolbar"
                 aria-label="Empty block type chooser"
             >
-                {EMPTY_ENTER_CHOOSER_WRITER_TYPES.map(optionType => {
-                    const label = labelByType.get(optionType) ?? 'Block';
-                    const isActive = chooserState.selectedType === optionType;
-
-                    return (
-                        <button
-                            key={optionType}
-                            type="button"
-                            className={clsx(styles.button, isActive && styles.active)}
-                            aria-label={`Set block type to ${label}`}
-                            title={label}
-                            onMouseDown={event => handleTypeMouseDown(optionType, event)}
-                        >
-                            <span className={styles.icon}>
-                                {BLOCK_ICONS[optionType]}
-                            </span>
-                        </button>
-                    );
-                })}
+                {EMPTY_ENTER_CHOOSER_WRITER_TYPES.map(optionType => (
+                    <ChooserTypeButton
+                        key={optionType}
+                        optionType={optionType}
+                        label={labelByType.get(optionType) ?? 'Block'}
+                        isActive={chooserState.selectedType === optionType}
+                        onMouseDown={handleTypeMouseDown}
+                    />
+                ))}
             </div>
         </div>
     );
 };
-

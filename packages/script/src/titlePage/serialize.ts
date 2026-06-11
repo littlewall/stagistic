@@ -5,13 +5,17 @@ import type {
 } from './types';
 
 const formatDate = (isoDate: string, format: TitlePageDateFormat): string => {
-    const match = /^(\d{4})-(\d{2})-(\d{2})/.exec(isoDate);
+    const match = (/^(\d{4})-(\d{2})-(\d{2})/).exec(isoDate);
 
     if (!match) {
         return isoDate;
     }
 
-    const [, year, month, day] = match;
+    const [
+        , year,
+        month,
+        day,
+    ] = match;
 
     return format === 'dmy'
         ? `${day}/${month}/${year}`
@@ -73,7 +77,7 @@ export const serializeTitlePageToFountain = (
 
     const title = settings.titleOverride?.trim() || scriptTitle.trim() || 'Untitled';
     const subtitle = settings.subtitle?.trim();
-    const titleLines = [`**${title}**`, ...(subtitle ? [`**${subtitle}**`] : [])];
+    const titleLines = [`**${title}**`, ...subtitle ? [`**${subtitle}**`] : []];
 
     lines.push(serializeMultilineField('Title', titleLines));
 

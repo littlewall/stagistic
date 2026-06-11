@@ -1,8 +1,8 @@
-import {isApplePlatform} from '@stagistic/shared';
 import {
     ELEMENT_ACT,
     isBlockShortcut,
 } from '@stagistic/script';
+import {isApplePlatform} from '@stagistic/shared';
 import type {Editor} from '@tiptap/react';
 
 import {FOUNTAIN_BLOCK_TYPES} from '../../../blocks/fountain';

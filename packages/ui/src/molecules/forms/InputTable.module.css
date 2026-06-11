@@ -50,7 +50,7 @@
         transition: opacity 120ms, color 120ms;
 
         &:hover {
-            color: var(--color-error, #c33);
+            color: var(--color-status-danger);
             opacity: 1;
         }
     }
@@ -115,7 +115,7 @@
             transition: opacity 100ms, color 100ms;
 
             &:hover {
-                color: var(--color-error, #c33);
+                color: var(--color-status-danger);
                 opacity: 1;
             }
         }

@@ -19,19 +19,10 @@ import type {
     EditorLiveStructureSnapshot,
 } from '../contracts';
 import type {PersistentCharacterRef} from '../contracts';
-
-const EMPTY_STRUCTURE: EditorLiveStructureSnapshot = {
-    rows: [],
-    rowIndexByBlockId: new Map<string, number>(),
-    sceneByBlockId: new Map<string, string>(),
-};
-
-const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
-    countsByKey: new Map<string, number>(),
-    countsByCharacterId: new Map<string, number>(),
-    keyByCharacterId: new Map<string, string>(),
-    displayColorByKey: new Map<string, string>(),
-};
+import {
+    EMPTY_CHARACTERS,
+    EMPTY_STRUCTURE,
+} from './store';
 
 export interface SidebarProjectionColorContext {
     characterColorSaturation?: number,

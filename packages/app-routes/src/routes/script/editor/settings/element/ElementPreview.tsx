@@ -3,8 +3,6 @@ import {
     type ReactNode,
 } from 'react';
 
-import sharedStyles from '../shared.module.css';
-import styles from './ElementPreview.module.css';
 import {
     SCREENPLAY_CHARS_PER_INCH,
 } from '../constants';
@@ -13,10 +11,12 @@ import {
     formatInches,
     formatNumeric,
 } from '../math';
+import sharedStyles from '../shared.module.css';
 import type {
     ElementPreviewHandlers,
     ElementPreviewModel,
 } from '../types';
+import styles from './ElementPreview.module.css';
 
 interface ElementPreviewProps {
     toolbar?: ReactNode,

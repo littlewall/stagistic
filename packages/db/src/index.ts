@@ -1,3 +1,4 @@
+export * from './blocks';
 export {compiledMigrations} from './migrations.compiled';
 export * from './pglite';
 export type {DbClient} from './queries';
@@ -8,7 +9,6 @@ export {
     createLocalPgliteRepository,
     type LocalPgliteRepositoryDeps,
 } from './repo/createLocalPgliteRepository';
-export * from './rewrite';
 export * from './schema';
 export type {
     ListScriptsOptions,

@@ -20,7 +20,7 @@ const buildBlockTypeByNodeType = (): Record<ScriptBlockNodeType, ScriptBlockType
     const map = {} as Record<ScriptBlockNodeType, ScriptBlockType>;
 
     for (const spec of ALL_BLOCK_SPECS) {
-        map[spec.nodeType as ScriptBlockNodeType] = spec.blockType as ScriptBlockType;
+        map[spec.nodeType] = spec.blockType;
     }
 
     return map;
@@ -30,7 +30,7 @@ const buildLegacyByNodeType = (): Record<ScriptBlockNodeType, FountainElementTyp
     const map = {} as Record<ScriptBlockNodeType, FountainElementType>;
 
     for (const spec of ALL_BLOCK_SPECS) {
-        map[spec.nodeType as ScriptBlockNodeType] = spec.legacyType;
+        map[spec.nodeType] = spec.legacyType;
     }
 
     return map;
@@ -40,7 +40,7 @@ const buildNodeTypeByBlockType = (): Record<ScriptBlockType, ScriptBlockNodeType
     const map = {} as Record<ScriptBlockType, ScriptBlockNodeType>;
 
     for (const spec of ALL_BLOCK_SPECS) {
-        map[spec.blockType as ScriptBlockType] = spec.nodeType as ScriptBlockNodeType;
+        map[spec.blockType] = spec.nodeType;
     }
 
     return map;
@@ -50,7 +50,7 @@ const buildNodeTypeByLegacy = (): Record<FountainElementType, ScriptBlockNodeTyp
     const map = {} as Record<FountainElementType, ScriptBlockNodeType>;
 
     for (const spec of ALL_BLOCK_SPECS) {
-        map[spec.legacyType] = spec.nodeType as ScriptBlockNodeType;
+        map[spec.legacyType] = spec.nodeType;
     }
 
     return map;

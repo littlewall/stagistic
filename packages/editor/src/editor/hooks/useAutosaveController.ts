@@ -1,6 +1,4 @@
-import {
-    type ScriptDocument,
-} from '@stagistic/script';
+import type {ScriptDocument} from '@stagistic/script';
 import {
     useCallback,
     useEffect,
@@ -8,20 +6,17 @@ import {
 } from 'react';
 
 import {stripScriptSettings} from '../editorSettings';
+import {
+    type AutosaveSchedulePayload,
+    DEFAULT_AUTOSAVE_DELAY_MS,
+    resolveSchedulePayload,
+    type SaveResult,
+    toRevision,
+} from './autosaveControllerHelpers';
 import {useLatestRef} from './useLatestRef';
 
-export type SaveResult = boolean | void | Promise<boolean | void>;
-
-export interface AutosaveSchedulePayload {
-    value?: ScriptDocument,
-    revision?: number,
-    /**
-     * Persist immediately, bypassing the debounce. Used for discrete, intentional
-     * actions (scene reorder, act insert/delete/rename, block-type change) where
-     * coalescing makes no sense — only continuous typing needs the debounce.
-     */
-    immediate?: boolean,
-}
+export type {AutosaveSchedulePayload, SaveResult} from './autosaveControllerHelpers';
+export {serializeDocumentForSave} from './autosaveControllerHelpers';
 
 type UseAutosaveControllerArgs = {
     onAutoSave?: (value: ScriptDocument) => SaveResult,
@@ -29,44 +24,6 @@ type UseAutosaveControllerArgs = {
     onDirtyChange?: (isDirty: boolean) => void,
     autoSaveDelayMs?: number,
     resolveLatestValue?: () => ScriptDocument | null,
-};
-
-const DEFAULT_AUTOSAVE_DELAY_MS = 1500;
-
-export const serializeDocumentForSave = (value: ScriptDocument) => {
-    return JSON.stringify(stripScriptSettings(value));
-};
-
-const toRevision = (value: unknown) => {
-    if (typeof value !== 'number' || !Number.isFinite(value)) {
-        return null;
-    }
-
-    return Math.max(0, Math.trunc(value));
-};
-
-const isAutosaveSchedulePayload = (value: unknown): value is AutosaveSchedulePayload => {
-    if (!value || typeof value !== 'object') {
-        return false;
-    }
-
-    return 'value' in value || 'revision' in value || 'immediate' in value;
-};
-
-const resolveSchedulePayload = (
-    input?: ScriptDocument | AutosaveSchedulePayload,
-): AutosaveSchedulePayload => {
-    if (!input) {
-        return {};
-    }
-
-    if (isAutosaveSchedulePayload(input)) {
-        return input;
-    }
-
-    return {
-        value: input,
-    };
 };
 
 export const useAutosaveController = ({
@@ -185,7 +142,11 @@ export const useAutosaveController = ({
                 // onAutoSave should handle reporting errors.
             }
         })();
-    }, [onAutoSaveRef, resolveLatestValueNow, updateDirty]);
+    }, [
+        onAutoSaveRef,
+        resolveLatestValueNow,
+        updateDirty,
+    ]);
 
     const scheduleAutosave = useCallback((input?: ScriptDocument | AutosaveSchedulePayload) => {
         const payload = resolveSchedulePayload(input);

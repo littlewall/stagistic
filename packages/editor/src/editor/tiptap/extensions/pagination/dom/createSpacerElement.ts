@@ -30,7 +30,9 @@ export const createSpacerElement = (
         const divider = document.createElement('div');
 
         divider.dataset.paginationDivider = 'true';
+
         const inset = options.dividerInsetPx ?? 0;
+
         divider.style.position = 'absolute';
         divider.style.left = `${-options.marginLeft + inset}px`;
         divider.style.top = `${Math.max(0, dividerOffset)}px`;

@@ -5,7 +5,8 @@
         "lib": ["ES2022", "DOM", "DOM.Iterable"],
         "jsx": "react-jsx",
         "module": "ESNext",
-        "moduleResolution": "bundler"
+        "moduleResolution": "bundler",
+        "outDir": "./dist"
     },
     "include": ["src"],
     "references": []

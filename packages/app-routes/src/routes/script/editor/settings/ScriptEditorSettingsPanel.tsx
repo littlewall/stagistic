@@ -8,7 +8,9 @@ import {SECTION_RENDERERS} from './registry';
 import type {ScriptEditorSettingsPanelProps} from './types';
 
 export const ScriptEditorSettingsPanel = (props: ScriptEditorSettingsPanelProps) => {
-    const {panelId, resolvedScriptSettings, blockLabelByType, shortcutPrefix, elementsHandlers} = props;
+    const {
+        panelId, resolvedScriptSettings, blockLabelByType, shortcutPrefix, elementsHandlers,
+    } = props;
 
     const renderer = SECTION_RENDERERS[panelId];
 

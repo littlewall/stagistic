@@ -1,9 +1,13 @@
 import {asc, eq} from 'drizzle-orm';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
-import type {RewriteScriptDocument} from '../../rewrite/jsonToBlocks';
+import type {RewriteScriptDocument} from '../../blocks';
 import {scriptBlocks} from '../../schema';
-import {createTestDb, seedScript, type TestDb} from '../../testing/createTestDb';
+import {
+    createTestDb, seedScript, type TestDb,
+} from '../../testing/createTestDb';
 import {createDocumentPersister} from './persistDocumentDelta';
 
 interface Scene {
@@ -19,8 +23,7 @@ const docFromScenes = (scenes: Scene[]): RewriteScriptDocument => ({
             type: 'fountainBlock',
             attrs: {id: scene.headingId, blockType: 'fountain_scene_heading'},
             content: [{type: 'text', text: scene.headingId.toUpperCase()}],
-        },
-        ...scene.blockIds.map(id => ({
+        }, ...scene.blockIds.map(id => ({
             type: 'fountainBlock',
             attrs: {id, blockType: 'fountain_action'},
             content: [{type: 'text', text: id}],
@@ -70,8 +73,10 @@ describe('persistDocumentDelta at scale', () => {
         const elapsed = Date.now() - startedAt;
 
         expect(await readIds(db, 's1')).toEqual(expectedFlatIds(reordered));
-        // Bulk write must be well under a second even for hundreds of blocks.
-        // (Per-row round-trips would take many seconds.)
+        /*
+         * Bulk write must be well under a second even for hundreds of blocks.
+         * (Per-row round-trips would take many seconds.)
+         */
         expect(elapsed).toBeLessThan(2000);
     });
 });

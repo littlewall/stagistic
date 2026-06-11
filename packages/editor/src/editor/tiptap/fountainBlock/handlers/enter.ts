@@ -8,13 +8,12 @@ import {
     ELEMENT_SCENE_HEADING,
     resolveScriptBlockNodeType,
 } from '@stagistic/script';
+import {getEnterFallback} from '@stagistic/script';
 import type {NodeType} from '@tiptap/pm/model';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
 import {isEmptyEnterChooserWriterType} from '../../extensions/EmptyEnterChooserExtension';
-import {getEnterFallback} from '@stagistic/script';
-
 import {
     FOUNTAIN_BLOCK_NODE_NAME,
     type FountainBlockType,

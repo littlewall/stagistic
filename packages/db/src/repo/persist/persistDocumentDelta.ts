@@ -1,5 +1,12 @@
-import {and, eq, sql} from 'drizzle-orm';
+import {
+    and, eq, sql,
+} from 'drizzle-orm';
 
+import {
+    type ExtractedBlockRow,
+    extractScriptBlocks,
+    type RewriteScriptDocument,
+} from '../../blocks';
 import {
     bulkDeleteScriptBlocks,
     type DbClient,
@@ -12,11 +19,6 @@ import {
     upsertScriptScene,
     writeFinalBlockOrders,
 } from '../../queries';
-import {
-    type ExtractedBlockRow,
-    extractScriptBlocks,
-    type RewriteScriptDocument,
-} from '../../rewrite/jsonToBlocks';
 import {
     scriptActs, scriptBlocks, scriptScenes,
 } from '../../schema';
@@ -205,9 +207,11 @@ export const createDocumentPersister = (scriptId: string) => {
             // 3. Delete removed blocks (their character refs cascade).
             await bulkDeleteScriptBlocks(tx, diff.deletedIds);
 
-            // 4. Insert new blocks with their fractional index orders.
-            //    Uses ON CONFLICT as a safety net — if a prior persist already
-            //    inserted the same block (serialization edge case), update it.
+            /*
+             * 4. Insert new blocks with their fractional index orders.
+             *    Uses ON CONFLICT as a safety net — if a prior persist already
+             *    inserted the same block (serialization edge case), update it.
+             */
             if (diff.inserted.length > 0) {
                 await tx.insert(scriptBlocks).values(diff.inserted.map(block => ({
                     ...toDbBlock(block),
@@ -255,8 +259,10 @@ export const createDocumentPersister = (scriptId: string) => {
     const persist = (db: DbClient, document: RewriteScriptDocument): Promise<void> => {
         const result = queue.then(() => persistImpl(db, document));
 
-        // Keep the chain alive even if persistImpl rejects — the next call
-        // must still wait for this one to settle before reading baseline.
+        /*
+         * Keep the chain alive even if persistImpl rejects — the next call
+         * must still wait for this one to settle before reading baseline.
+         */
         queue = result.catch(() => {});
 
         return result;

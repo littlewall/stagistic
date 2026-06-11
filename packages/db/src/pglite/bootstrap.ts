@@ -147,6 +147,7 @@ export const createPgliteBootstrap = ({
                     dataDir,
                     fsBundle,
                     wasmModule,
+                    relaxedDurability: true,
                 });
             })();
         }

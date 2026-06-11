@@ -2,7 +2,7 @@ import {
     describe, expect, it,
 } from 'vite-plus/test';
 
-import type {ExtractedBlockRow} from '../../rewrite/jsonToBlocks';
+import type {ExtractedBlockRow} from '../../blocks';
 import {diffExtractedBlocks} from './diffExtractedBlocks';
 
 const block = (over: Partial<ExtractedBlockRow> & {blockId: string, orderNo: number}): ExtractedBlockRow => ({

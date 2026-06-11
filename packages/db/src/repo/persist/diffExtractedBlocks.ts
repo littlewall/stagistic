@@ -1,6 +1,6 @@
 import {ELEMENT_ACT, ELEMENT_SCENE_HEADING} from '@stagistic/script';
 
-import type {ExtractedBlockRow} from '../../rewrite/jsonToBlocks';
+import type {ExtractedBlockRow} from '../../blocks';
 
 export interface ExtractedBlocksDiff {
     inserted: ExtractedBlockRow[],

@@ -8,16 +8,11 @@ import type {
     EditorLiveStructureRow,
     EditorLiveStructureSnapshot,
 } from '../contracts';
+import {EMPTY_STRUCTURE} from '../live/store';
 import {
     isFountainBlockNodeName,
     normalizeFountainBlockType,
 } from '../tiptap/fountainCore';
-
-const EMPTY_STRUCTURE: EditorLiveStructureSnapshot = {
-    rows: [],
-    rowIndexByBlockId: new Map<string, number>(),
-    sceneByBlockId: new Map<string, string>(),
-};
 
 const normalizeText = (value: string) => value.trim();
 

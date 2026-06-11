@@ -12,7 +12,7 @@
     --color-border: oklch(.92 .012 51 / .1);
 
     position: sticky;
-    z-index: 50;
+    z-index: 10;
     top: 0;
     background: oklch(.105 .006 51 / .94);
     backdrop-filter: blur(12px);
@@ -590,6 +590,8 @@
 }
 
 @media (prefers-reduced-motion: no-preference) {
+    /* html.js gates the hidden state so content stays visible without JS. */
+    /* stylelint-disable-next-line selector-no-qualifying-type */
     :global(html.js) .reveal:not([data-visible]) {
         transform: translateY(12px);
         opacity: 0;
@@ -601,6 +603,7 @@
         transition: opacity .3s ease;
     }
 
+    /* stylelint-disable-next-line selector-no-qualifying-type */
     :global(html.js) .reveal:not([data-visible]) {
         opacity: 0;
     }

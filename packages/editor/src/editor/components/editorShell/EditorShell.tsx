@@ -1,6 +1,6 @@
+import {ArrowLeftIcon, ArrowRightIcon} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
-import {ArrowLeftIcon, ArrowRightIcon} from '@stagistic/ui';
 import {
     type CSSProperties,
     type MouseEvent as ReactMouseEvent,

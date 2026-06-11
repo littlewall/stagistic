@@ -10,7 +10,6 @@
         {"path": "./packages/editor"},
         {"path": "./packages/script"},
         {"path": "./apps/desktop"},
-        {"path": "./apps/landing"},
         {"path": "./apps/web"}
     ],
     "include": [

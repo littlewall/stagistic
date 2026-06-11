@@ -64,7 +64,7 @@ export const StructureRowAct = memo(({
                 <div className={styles.actTitle}>
                     <input
                         type="text"
-                        className={`${styles.actTitleInput} ${styles.actTitleDisplay}`}
+                        className={clsx(styles.actTitleInput, styles.actTitleDisplay)}
                         value={namePreview ?? name}
                         aria-label={`Rename act ${name}`}
                         onChange={event => {

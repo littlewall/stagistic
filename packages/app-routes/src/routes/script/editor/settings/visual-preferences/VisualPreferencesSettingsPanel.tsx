@@ -6,11 +6,11 @@ import {
 import {useMemo} from 'react';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
-import sharedStyles from '../shared.module.css';
 import {
     SettingsSelect,
     type SettingsSelectOption,
 } from '../SettingsSelect';
+import sharedStyles from '../shared.module.css';
 import styles from './VisualPreferencesSettingsPanel.module.css';
 
 const PREVIEW_CHARACTER_KEYS = [

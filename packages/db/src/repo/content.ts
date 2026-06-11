@@ -1,7 +1,7 @@
 import {convertDefaultScriptDocumentToLegacy, type ScriptDocument} from '@stagistic/script';
 
+import {extractScriptBlocks, rebuildScriptDocumentFromBlocks} from '../blocks';
 import * as dbQueries from '../queries';
-import {extractScriptBlocks, rebuildScriptDocumentFromBlocks} from '../rewrite';
 import type {ScriptRepository} from '../scriptRepository';
 import {createDocumentPersister} from './persist/persistDocumentDelta';
 import type {
@@ -54,7 +54,7 @@ const loadLatestFromBlocks = async (
         console.warn(`[db-local] ${warning}`);
     });
 
-    return rebuilt.document as ScriptDocument;
+    return rebuilt.document;
 };
 
 export const createContentHandlers = ({

@@ -62,7 +62,7 @@ export const useElementSettingsViewModel = ({
         );
         const hasSpacingAfter = blockDefaults.spacingAfterEm !== undefined;
         const spacingAfterRaw = hasSpacingAfter
-            ? (blockSettings.spacingAfterEm ?? blockDefaults.spacingAfterEm ?? 0)
+            ? blockSettings.spacingAfterEm ?? blockDefaults.spacingAfterEm ?? 0
             : undefined;
         const spacingAfter = spacingAfterRaw === undefined
             ? undefined
@@ -76,10 +76,10 @@ export const useElementSettingsViewModel = ({
         const isActBlock = blockType === ELEMENT_ACT;
         const shortcut = isActBlock
             ? undefined
-            : (blockSettings.shortcut ?? blockDefaults.shortcut ?? BLOCK_SHORTCUT_OPTIONS[0]);
+            : blockSettings.shortcut ?? blockDefaults.shortcut ?? BLOCK_SHORTCUT_OPTIONS[0];
         const nextElement = isActBlock
             ? undefined
-            : (blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType);
+            : blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType;
         const textAlign = blockSettings.textAlign ?? blockDefaults.textAlign ?? BLOCK_TEXT_ALIGN_OPTIONS[0];
         const casing = blockSettings.casing ?? blockDefaults.casing ?? BLOCK_CASING_OPTIONS[0];
         const isBold = blockSettings.isBold ?? blockDefaults.isBold ?? false;

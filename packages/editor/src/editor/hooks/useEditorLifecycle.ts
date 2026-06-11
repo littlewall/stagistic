@@ -1,64 +1,28 @@
-import {
-    type ScriptDocument,
-} from '@stagistic/script';
+import type {ScriptDocument} from '@stagistic/script';
 import {useHotkey} from '@tanstack/react-hotkeys';
 import {TextSelection, type Transaction} from '@tiptap/pm/state';
+import {type Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type Editor as TiptapEditor,
-} from '@tiptap/react';
-import {
-    useCallback,
     useEffect,
     useRef,
 } from 'react';
 
 import type {EditorActCommands} from '../actCommands/context';
 import {useBuildActCommands} from '../actCommands/useBuildActCommands';
-import type {
-    EditorBlockUiEvent,
-    EditorIndexSnapshot,
-    EditorLiveSnapshot,
-    EditorStructureRequests,
-    EditorValueChangeMeta,
-    PersistentCharacterRef,
-} from '../contracts';
+import type {EditorIndexSnapshot, EditorValueChangeMeta} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
-import {
-    buildSidebarProjectionFromIndex,
-    type SidebarProjectionColorContext,
-} from '../live/buildSidebarProjectionFromIndex';
-import type {EditorSnapshotStore} from '../live/store';
-import {
-    incrementFullDocJsonSerializeCount,
-    incrementFullIndexBuildCount,
-    incrementTransactionBridgePatchCount,
-    trackIndexUpdateDuration,
-} from '../perf/editorPerfMetrics';
+import {incrementFullDocJsonSerializeCount, incrementFullIndexBuildCount} from '../perf/editorPerfMetrics';
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
 import {IMMEDIATE_SAVE_META_KEY} from '../saveMeta';
 import {
-    getBlockUiEventsFromState,
-    getEditorRuntimeFromState,
-} from '../tiptap/extensions';
-import {
-    ensureFountainBlockId,
-    isFountainBlockNodeName,
-    normalizeFountainBlockType,
-} from '../tiptap/fountainCore';
-import {
-    type AutosaveSchedulePayload,
-    type SaveResult,
-} from './useAutosaveController';
+    sanitizeFountainBlocks,
+    type UseEditorLifecycleArgs,
+    useEditorLifecycleSync,
+} from './editorLifecycleSync';
 import {useEditorStructureRequests} from './useEditorStructureRequests';
 import {useLatestRef} from './useLatestRef';
 
-const getNow = () => {
-    if (typeof performance !== 'undefined') {
-        return performance.now();
-    }
-
-    return Date.now();
-};
+export type {UseEditorLifecycleArgs};
 
 const getWindowTarget = () => {
     if (typeof window === 'undefined') {
@@ -68,112 +32,10 @@ const getWindowTarget = () => {
     return window;
 };
 
-type PaginationCommands = {
-    forcePaginationRecalc?: () => boolean,
-};
-
-const sanitizeFountainBlocks = (editor: TiptapEditor) => {
-    let tr = editor.state.tr;
-    let changed = false;
-    const seenIds = new Set<string>();
-
-    editor.state.doc.descendants((node, pos) => {
-        if (!isFountainBlockNodeName(node.type.name)) {
-            return true;
-        }
-
-        const attrs = node.attrs as Record<string, unknown>;
-        let id = ensureFountainBlockId(attrs.id);
-        const blockType = normalizeFountainBlockType(attrs.blockType);
-
-        while (seenIds.has(id)) {
-            id = ensureFountainBlockId(null);
-        }
-
-        seenIds.add(id);
-
-        if (id === attrs.id && blockType === attrs.blockType) {
-            return false;
-        }
-
-        tr = tr.setNodeMarkup(pos, undefined, {
-            ...attrs,
-            id,
-            blockType,
-        });
-        changed = true;
-
-        return false;
-    });
-
-    if (!changed) {
-        return;
-    }
-
-    editor.view.dispatch(tr.setMeta('preventUpdate', true));
-};
-
 const forcePaginationRecalc = (editor: TiptapEditor) => {
-    const commands = editor.commands as PaginationCommands;
-
-    commands.forcePaginationRecalc?.();
+    type PaginationCommands = {forcePaginationRecalc?: () => boolean};
+    (editor.commands as PaginationCommands).forcePaginationRecalc?.();
 };
-
-const resolveSidebarProjection = (
-    snapshot: EditorIndexSnapshot,
-    colorContext?: SidebarProjectionColorContext,
-) => {
-    return {
-        projection: buildSidebarProjectionFromIndex(snapshot, colorContext),
-        change: {
-            structureChanged: true,
-            charactersChanged: true,
-            reason: 'fallback' as const,
-        },
-    };
-};
-
-const hasStructureRows = (snapshot: EditorLiveSnapshot['structure']) => {
-    return snapshot.rows.length > 0 || snapshot.sceneByBlockId.size > 0;
-};
-
-const hasCharacterRows = (snapshot: EditorLiveSnapshot['characters']) => {
-    return snapshot.countsByKey.size > 0
-        || snapshot.countsByCharacterId.size > 0
-        || snapshot.keyByCharacterId.size > 0;
-};
-
-interface UseEditorLifecycleArgs {
-    editor: {
-        instance: TiptapEditor | null,
-        autoFocus?: boolean,
-    },
-    liveStore: EditorSnapshotStore,
-    document: {
-        initialValue: ScriptDocument,
-        initialSerialized: string,
-        setLatestValue: (value: ScriptDocument, revision?: number) => void,
-        syncInitialValue: (value: ScriptDocument, initialSerialized: string, revision?: number) => void,
-        scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
-    },
-    save: {
-        onManualSave?: (value: ScriptDocument) => SaveResult,
-        handleManualSave: () => Promise<void>,
-    },
-    callbacks: {
-        onValueChange?: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,
-        onIndexChange?: (snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void,
-        onActiveBlockChange?: (blockId: string | null) => void,
-        onBlockUiEvent?: (event: EditorBlockUiEvent) => void,
-    },
-    characters?: {
-        persistentCharactersRef?: {current: readonly PersistentCharacterRef[]},
-        colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
-        rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>},
-        characterColorSaturation?: number,
-    },
-    requests?: EditorStructureRequests,
-}
 
 export const useEditorLifecycle = ({
     editor,
@@ -192,160 +54,32 @@ export const useEditorLifecycle = ({
         syncInitialValue,
         scheduleAutosave,
     } = document;
-    const {
-        onManualSave,
-        handleManualSave,
-    } = save;
-    const {
-        onValueChange,
-        onIndexChange,
-        onActiveBlockChange,
-        onBlockUiEvent,
-    } = callbacks;
+    const {onManualSave, handleManualSave} = save;
     const isApplyingInitialRef = useRef(false);
     const revisionRef = useRef(0);
     const lastEmittedActiveBlockIdRef = useRef<string | null | undefined>(undefined);
-    const onValueChangeRef = useLatestRef(onValueChange);
-    const onIndexChangeRef = useLatestRef(onIndexChange);
-    const onActiveBlockChangeRef = useLatestRef(onActiveBlockChange);
-    const onBlockUiEventRef = useLatestRef(onBlockUiEvent);
+    const onValueChangeRef = useLatestRef(callbacks.onValueChange);
+    const onIndexChangeRef = useLatestRef(callbacks.onIndexChange);
+    const onActiveBlockChangeRef = useLatestRef(callbacks.onActiveBlockChange);
+    const onBlockUiEventRef = useLatestRef(callbacks.onBlockUiEvent);
 
-    const syncValueFromEditor = useCallback((
-        targetEditor: TiptapEditor,
-        meta: EditorValueChangeMeta,
-    ) => {
-        incrementFullDocJsonSerializeCount();
-
-        const nextValue = stripScriptSettings(targetEditor.getJSON() as ScriptDocument);
-
-        setLatestValue(nextValue, meta.revision);
-        onValueChangeRef.current?.(nextValue, meta);
-    }, [onValueChangeRef, setLatestValue]);
-
-    const patchFallbackSnapshot = useCallback((
-        snapshot: EditorIndexSnapshot,
-        meta: EditorValueChangeMeta,
-    ) => {
-        const hasIndexSubscriber = Boolean(onIndexChangeRef.current);
-        const {projection, change} = resolveSidebarProjection(snapshot, {
-            characterColorSaturation: characters?.characterColorSaturation,
-            colorByCharacterId: characters?.colorByCharacterIdRef?.current,
-            rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
-            persistentCharacters: characters?.persistentCharactersRef?.current,
-        });
-        const patch: Partial<EditorLiveSnapshot> = {
-            revision: meta.revision,
-            activeBlockId: liveStore.getSnapshot().activeBlockId,
-            activeBlockType: liveStore.getSnapshot().activeBlockType,
-        };
-
-        if (hasIndexSubscriber) {
-            patch.index = snapshot;
-        }
-
-        if (meta.source === 'structure' || change.structureChanged) {
-            patch.structure = projection.structure;
-        }
-
-        if (meta.source === 'structure' || change.charactersChanged) {
-            patch.characters = projection.characters;
-        }
-
-        liveStore.patchSnapshot(patch);
-
-        if (hasIndexSubscriber) {
-            onIndexChangeRef.current?.(snapshot, meta);
-        }
-    }, [
-        characters?.characterColorSaturation,
-        characters?.colorByCharacterIdRef,
-        characters?.rememberedColorByKeyRef,
-        characters?.persistentCharactersRef,
+    const {
+        syncValueFromEditor,
+        patchFallbackSnapshot,
+        syncRuntimeSnapshotFromEditor,
+        emitIndexFromEditor,
+        emitBlockUiEventsFromEditor,
+    } = useEditorLifecycleSync({
         liveStore,
+        setLatestValue,
+        characters,
+        lastEmittedActiveBlockIdRef,
+        onValueChangeRef,
         onIndexChangeRef,
-    ]);
-    const syncRuntimeSnapshotFromEditor = useCallback((
-        targetEditor: TiptapEditor,
-        snapshot?: EditorIndexSnapshot,
-    ) => {
-        const runtime = getEditorRuntimeFromState(targetEditor.state);
-
-        if (!runtime) {
-            return;
-        }
-
-        const currentSnapshot = liveStore.getSnapshot();
-        const fallbackProjection = snapshot
-            ? buildSidebarProjectionFromIndex(snapshot, {
-                characterColorSaturation: characters?.characterColorSaturation,
-                colorByCharacterId: characters?.colorByCharacterIdRef?.current,
-                rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
-                persistentCharacters: characters?.persistentCharactersRef?.current,
-            })
-            : null;
-        const nextStructure = hasStructureRows(runtime.structure)
-            ? runtime.structure
-            : fallbackProjection?.structure ?? currentSnapshot.structure;
-        const nextCharacters = hasCharacterRows(runtime.characters)
-            ? runtime.characters
-            : fallbackProjection?.characters ?? currentSnapshot.characters;
-
-        incrementTransactionBridgePatchCount();
-        liveStore.patchSnapshot({
-            revision: runtime.revision,
-            activeBlockId: runtime.activeBlockId,
-            activeBlockType: runtime.activeBlockType,
-            structure: nextStructure,
-            characters: nextCharacters,
-            ...snapshot ? {index: snapshot} : {},
-        });
-
-        if (lastEmittedActiveBlockIdRef.current !== runtime.activeBlockId) {
-            lastEmittedActiveBlockIdRef.current = runtime.activeBlockId;
-            onActiveBlockChangeRef.current?.(runtime.activeBlockId);
-        }
-    }, [
-        characters?.characterColorSaturation,
-        characters?.colorByCharacterIdRef,
-        characters?.persistentCharactersRef,
-        characters?.rememberedColorByKeyRef,
-        liveStore,
         onActiveBlockChangeRef,
-    ]);
-    const emitIndexFromEditor = useCallback((
-        targetEditor: TiptapEditor,
-        meta: EditorValueChangeMeta,
-    ) => {
-        if (!onIndexChangeRef.current) {
-            return;
-        }
+        onBlockUiEventRef,
+    });
 
-        const startedAt = getNow();
-
-        incrementFullIndexBuildCount();
-
-        const snapshot = buildIndexSnapshotFromPmDoc(targetEditor.state.doc);
-
-        syncRuntimeSnapshotFromEditor(targetEditor, snapshot);
-        onIndexChangeRef.current?.(snapshot, meta);
-        trackIndexUpdateDuration(getNow() - startedAt);
-    }, [onIndexChangeRef, syncRuntimeSnapshotFromEditor]);
-
-    const emitBlockUiEventsFromEditor = useCallback((targetEditor: TiptapEditor) => {
-        if (!onBlockUiEventRef.current) {
-            return;
-        }
-
-        const events = getBlockUiEventsFromState(targetEditor.state);
-
-        if (events.length === 0) {
-            return;
-        }
-
-        events.forEach(event => {
-            onBlockUiEventRef.current?.(event);
-        });
-    }, [onBlockUiEventRef]);
     const structureOnIndexChangeRef = useLatestRef((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => {
         if (!meta) {
             const resolvedMeta: EditorValueChangeMeta = {
@@ -407,10 +141,7 @@ export const useEditorLifecycle = ({
             revisionRef.current += 1;
 
             const revision = revisionRef.current;
-            const meta: EditorValueChangeMeta = {
-                source: 'typing',
-                revision,
-            };
+            const meta: EditorValueChangeMeta = {source: 'typing', revision};
 
             if (onIndexChangeRef.current) {
                 emitIndexFromEditor(updatedEditor, meta);
@@ -469,9 +200,7 @@ export const useEditorLifecycle = ({
         instance.commands.setContent(initialValue, {emitUpdate: false});
         sanitizeFountainBlocks(instance);
 
-        const syncCommands = instance.commands as {
-            syncCharacterRefs?: () => boolean,
-        };
+        const syncCommands = instance.commands as {syncCharacterRefs?: () => boolean};
 
         syncCommands.syncCharacterRefs?.();
         instance.view.dispatch(
@@ -495,6 +224,7 @@ export const useEditorLifecycle = ({
         const syncedValue = stripScriptSettings(instance.getJSON() as ScriptDocument);
 
         syncInitialValue(syncedValue, initialSerialized, revisionRef.current);
+
         if (!onIndexChangeRef.current) {
             syncRuntimeSnapshotFromEditor(instance);
 

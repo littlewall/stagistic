@@ -1,7 +1,3 @@
 {
-    "extends": "astro/tsconfigs/strict",
-    "compilerOptions": {
-        "noEmit": false,
-        "composite": true
-    },
+    "extends": "astro/tsconfigs/strict"
 }

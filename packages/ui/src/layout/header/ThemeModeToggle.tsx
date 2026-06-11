@@ -1,7 +1,9 @@
 import clsx from 'clsx';
-import {DarkThemeIcon, LightThemeIcon, SystemThemeIcon} from '../../icons/ui';
 import {Button} from 'react-aria-components';
 
+import {
+    DarkThemeIcon, LightThemeIcon, SystemThemeIcon,
+} from '../../icons/ui';
 import {type AppThemeMode} from '../../theme';
 import styles from '../AppHeader.module.css';
 

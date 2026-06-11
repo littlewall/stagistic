@@ -1,42 +1,21 @@
-import {type ScriptDocument} from '@stagistic/script';
-import {
-    trimOrFallback,
-    uuidv7,
-} from '@stagistic/shared';
-
 import type {LocalDb} from '../pglite';
 import * as dbQueries from '../queries';
-import {
-    bulkUpsertScriptBlocks,
-    listScriptBlocks,
-    type ListScriptBlocksOptions,
-    reorderScriptBlocks,
-    replaceScriptBlockCharacterRefs,
-    type ScriptBlockCharacterRefRow,
-    type ScriptBlockOrderMove,
-    type ScriptBlockUpsertRow,
-    updateScriptSceneMetadata,
-    type UpdateScriptSceneMetadataPayload,
-    upsertScriptAct,
-    type UpsertScriptActPayload,
-    upsertScriptLocation,
-    type UpsertScriptLocationPayload,
-    upsertScriptScene,
-    type UpsertScriptScenePayload,
-} from '../queries';
 import type {
-    ListScriptsOptions,
     ScriptDataRepository,
     ScriptRepository,
 } from '../scriptRepository';
+import {createBlockCharacterRefsHandlers} from './blockCharacterRefs';
+import {createBlocksHandlers} from './blocks';
 import {createCharacterHandlers} from './characters';
 import {createConfigHandlers} from './config';
 import {createContentHandlers} from './content';
-import {
-    LEGACY_TO_BLOCKS_TRIGGERS,
-    migrateScriptDocumentToBlocks,
-} from './migration/legacyToBlocks';
 import {createOutboxRecorder} from './outbox';
+import {createScriptsHandlers} from './scripts';
+import {
+    createActsHandlers,
+    createLocationsHandlers,
+    createScenesHandlers,
+} from './structure';
 import {createTitlePageHandlers} from './titlePage';
 import type {GetDb} from './types';
 
@@ -54,75 +33,7 @@ export const createLocalPgliteDataRepository = ({
     const getDb: GetDb = async () => dbPromise;
     const recordOutbox = createOutboxRecorder(getDb);
 
-    const scripts = {
-        list: async (options?: ListScriptsOptions) => {
-            const db = await getDb();
-
-            return dbQueries.listScripts(db, options);
-        },
-        getSummary: async (scriptId: string) => {
-            const db = await getDb();
-
-            return dbQueries.getScriptSummary(db, scriptId);
-        },
-        create: async (title: string, initialContent?: ScriptDocument) => {
-            const db = await getDb();
-            const id = uuidv7();
-            const now = Date.now();
-
-            if (initialContent) {
-                await db.transaction(async tx => {
-                    await dbQueries.insertScript(tx, {
-                        id,
-                        title: trimOrFallback(title, 'Untitled script'),
-                        createdAt: now,
-                        updatedAt: now,
-                    });
-
-                    await migrateScriptDocumentToBlocks({
-                        db: tx,
-                        scriptId: id,
-                        sourceDocument: initialContent,
-                        trigger: LEGACY_TO_BLOCKS_TRIGGERS.createScript,
-                        context: LEGACY_TO_BLOCKS_TRIGGERS.createScript,
-                    });
-                });
-            } else {
-                await dbQueries.insertScript(db, {
-                    id,
-                    title: trimOrFallback(title, 'Untitled script'),
-                    createdAt: now,
-                    updatedAt: now,
-                });
-            }
-
-            return id;
-        },
-        rename: async (scriptId: string, title: string) => {
-            const db = await getDb();
-            const now = Date.now();
-            const nextTitle = trimOrFallback(title, 'Untitled script');
-
-            await dbQueries.updateScriptTitle(db, {
-                id: scriptId,
-                title: nextTitle,
-                updatedAt: now,
-            });
-        },
-        delete: async (scriptId: string) => {
-            const db = await getDb();
-
-            await dbQueries.deleteScript(db, scriptId);
-        },
-        setActiveBlock: async (scriptId: string, blockId: string | null) => {
-            const db = await getDb();
-
-            await dbQueries.updateActiveBlock(db, {
-                scriptId,
-                activeBlockId: blockId,
-            });
-        },
-    };
+    const scripts = createScriptsHandlers({getDb});
 
     const {
         listScriptCharacterGenders,
@@ -189,130 +100,11 @@ export const createLocalPgliteDataRepository = ({
         recordOutbox,
     });
 
-    const blocks = {
-        list: async (scriptId: string, queryOptions?: ListScriptBlocksOptions) => {
-            const db = await getDb();
-
-            return listScriptBlocks(db, scriptId, queryOptions);
-        },
-        listByScene: async (sceneId: string) => {
-            const db = await getDb();
-
-            return dbQueries.listScriptBlocksByScene(db, sceneId);
-        },
-        listByAct: async (actId: string) => {
-            const db = await getDb();
-
-            return dbQueries.listScriptBlocksByAct(db, actId);
-        },
-        getById: async (blockId: string) => {
-            const db = await getDb();
-
-            return dbQueries.getScriptBlockById(db, blockId);
-        },
-        bulkUpsert: async (rows: ScriptBlockUpsertRow[]) => {
-            const db = await getDb();
-
-            await bulkUpsertScriptBlocks(db, rows);
-        },
-        bulkDelete: async (blockIds: string[]) => {
-            const db = await getDb();
-
-            await dbQueries.bulkDeleteScriptBlocks(db, blockIds);
-        },
-        reorder: async (scriptId: string, moves: ScriptBlockOrderMove[]) => {
-            const db = await getDb();
-
-            await reorderScriptBlocks(db, scriptId, moves);
-        },
-    };
-
-    const scenes = {
-        list: async (scriptId: string) => {
-            const db = await getDb();
-
-            return dbQueries.listScriptScenes(db, scriptId);
-        },
-        upsert: async (payload: UpsertScriptScenePayload) => {
-            const db = await getDb();
-
-            await upsertScriptScene(db, payload);
-        },
-        delete: async (sceneId: string) => {
-            const db = await getDb();
-
-            await dbQueries.deleteScriptScene(db, sceneId);
-        },
-        updateMetadata: async (payload: UpdateScriptSceneMetadataPayload) => {
-            const db = await getDb();
-
-            await updateScriptSceneMetadata(db, payload);
-        },
-    };
-
-    const acts = {
-        list: async (scriptId: string) => {
-            const db = await getDb();
-
-            return dbQueries.listScriptActs(db, scriptId);
-        },
-        upsert: async (payload: UpsertScriptActPayload) => {
-            const db = await getDb();
-
-            await upsertScriptAct(db, payload);
-        },
-        delete: async (actId: string) => {
-            const db = await getDb();
-
-            await dbQueries.deleteScriptAct(db, actId);
-        },
-    };
-
-    const locations = {
-        list: async (scriptId: string) => {
-            const db = await getDb();
-
-            return dbQueries.listScriptLocations(db, scriptId);
-        },
-        upsert: async (payload: UpsertScriptLocationPayload) => {
-            const db = await getDb();
-
-            await upsertScriptLocation(db, payload);
-        },
-        delete: async (locationId: string) => {
-            const db = await getDb();
-
-            await dbQueries.deleteScriptLocation(db, locationId);
-        },
-    };
-
-    const blockCharacterRefs = {
-        listByBlock: async (blockId: string) => {
-            const db = await getDb();
-
-            return dbQueries.listScriptBlockCharacterRefs(db, blockId);
-        },
-        listByScript: async (scriptId: string) => {
-            const db = await getDb();
-
-            return dbQueries.listScriptCharacterRefsByScript(db, scriptId);
-        },
-        listByCharacter: async (characterId: string) => {
-            const db = await getDb();
-
-            return dbQueries.listScriptCharacterRefsByCharacter(db, characterId);
-        },
-        replaceForBlock: async (blockId: string, rows: ScriptBlockCharacterRefRow[]) => {
-            const db = await getDb();
-
-            await replaceScriptBlockCharacterRefs(db, blockId, rows);
-        },
-        deleteByCharacterIds: async (characterIds: string[]) => {
-            const db = await getDb();
-
-            await dbQueries.deleteScriptBlockRefsByCharacterIds(db, characterIds);
-        },
-    };
+    const blocks = createBlocksHandlers({getDb});
+    const scenes = createScenesHandlers({getDb});
+    const acts = createActsHandlers({getDb});
+    const locations = createLocationsHandlers({getDb});
+    const blockCharacterRefs = createBlockCharacterRefsHandlers({getDb});
 
     return {
         scripts,

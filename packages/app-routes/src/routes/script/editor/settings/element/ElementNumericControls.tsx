@@ -3,15 +3,15 @@ import {
     type FountainElementType,
 } from '@stagistic/script';
 
-import sharedStyles from '../shared.module.css';
 import {
     SettingsSelect,
 } from '../SettingsSelect';
-import styles from './ElementNumericControls.module.css';
+import sharedStyles from '../shared.module.css';
 import type {
     ElementNumericModel,
     ElementsHandlers,
 } from '../types';
+import styles from './ElementNumericControls.module.css';
 
 interface ElementNumericControlsProps {
     blockType: FountainElementType,

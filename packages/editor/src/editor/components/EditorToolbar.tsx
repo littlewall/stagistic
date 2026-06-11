@@ -11,12 +11,12 @@ import {
 } from 'react';
 
 import {FOUNTAIN_BLOCKS_WITHOUT_ACT} from '../blocks/fountainBlockRegistry';
+import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
 import {updateBlockType} from '../tiptap/fountainBlock/commands';
 import {
     isFountainBlockNodeName,
     normalizeFountainBlockType,
 } from '../tiptap/fountainCore';
-import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
 import styles from './EditorToolbar.module.css';
 import {BlockTypeSelect} from './toolbar/BlockTypeSelect';
 import type {

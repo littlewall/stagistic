@@ -6,6 +6,7 @@
         "jsx": "react-jsx",
         "module": "ESNext",
         "moduleResolution": "bundler",
+        "outDir": "./dist",
         "paths": {
             "~db": ["./src/db/index.ts"],
             "~db/*": ["./src/db/*"],

@@ -11,6 +11,12 @@
     text-decoration-line: var(--parenthetical-underline, none);
     text-transform: var(--parenthetical-casing, none);
 
+    &:has(> :global(.ProseMirror-trailingBreak:only-child))::after {
+        position: absolute;
+        top: var(--parenthetical-spacing-before, 0);
+        left: calc(var(--parenthetical-indent-left, 40px) + 1ch);
+    }
+
     &::before,
     &::after {
         pointer-events: none;
@@ -34,11 +40,5 @@
         overflow: hidden;
         width: 0;
         height: 0;
-    }
-
-    &:has(> :global(.ProseMirror-trailingBreak:only-child))::after {
-        position: absolute;
-        top: var(--parenthetical-spacing-before, 0);
-        left: calc(var(--parenthetical-indent-left, 40px) + 1ch);
     }
 }

@@ -5,13 +5,13 @@ import {
     isScriptBlockNode,
     type ScriptDocument,
 } from '@stagistic/script';
-import {TextSelection} from '@tiptap/pm/state';
 import {type Editor as TiptapEditor} from '@tiptap/react';
 import {
     type MutableRefObject, useCallback, useMemo,
 } from 'react';
 
 import type {EditorIndexSnapshot, EditorValueChangeMeta} from '../contracts';
+import {withActiveBlockPreserved} from '../hooks/selectionHelpers';
 import {moveSceneSegment} from '../hooks/structureReorder';
 import {
     buildInsertActContent,
@@ -22,11 +22,6 @@ import {
     tryCommitSceneReorder,
 } from '../hooks/structureRequestMutations';
 import {type AutosaveSchedulePayload} from '../hooks/useAutosaveController';
-import {
-    findFountainBlockSelectionPosFromState,
-    FOUNTAIN_BLOCK_NODE_NAME,
-    getActiveFountainBlockFromState,
-} from '../tiptap/fountainCore';
 import type {EditorActCommands} from './context';
 
 interface UseBuildActCommandsArgs {
@@ -63,39 +58,6 @@ export const useBuildActCommands = ({
         revisionRef,
     ]);
 
-    const restoreSelectionForBlock = useCallback((blockId: string | null) => {
-        if (!commitCtx || !blockId) {
-            return;
-        }
-
-        const {editor} = commitCtx;
-        const selectionPos = findFountainBlockSelectionPosFromState(editor.state, blockId);
-
-        if (selectionPos === null) {
-            return;
-        }
-
-        const tr = editor.state.tr
-            .setSelection(TextSelection.near(editor.state.doc.resolve(selectionPos), 1))
-            .setMeta('preventUpdate', true)
-            .scrollIntoView();
-
-        editor.view.dispatch(tr);
-    }, [commitCtx]);
-
-    const withActiveBlockPreserved = useCallback((callback: () => void) => {
-        if (!commitCtx) {
-            return;
-        }
-
-        const {editor} = commitCtx;
-        const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
-        const preservedBlockId = activeBlock?.id ?? null;
-
-        callback();
-        restoreSelectionForBlock(preservedBlockId);
-    }, [commitCtx, restoreSelectionForBlock]);
-
     const insertAct = useCallback((beforeBlockId: string | null) => {
         if (!commitCtx) {
             return;
@@ -112,7 +74,7 @@ export const useBuildActCommands = ({
             return;
         }
 
-        const currentValue = instance.getJSON() as ScriptDocument;
+        const currentValue = commitCtx.editor.getJSON() as ScriptDocument;
         const [nextContent, didChange] = setPlainTextContent(currentValue.content, blockId, nextName.trim());
 
         tryCommitDocument(commitCtx, nextContent, didChange, currentValue.attrs);
@@ -156,7 +118,7 @@ export const useBuildActCommands = ({
             return;
         }
 
-        withActiveBlockPreserved(() => {
+        withActiveBlockPreserved(commitCtx.editor, () => {
             tryCommitSceneReorder(
                 commitCtx,
                 sourceSceneBlockId,
@@ -166,7 +128,7 @@ export const useBuildActCommands = ({
                 currentValue.attrs,
             );
         });
-    }, [commitCtx, withActiveBlockPreserved]);
+    }, [commitCtx]);
 
     return {
         insertAct, renameAct, deleteAct, moveScene,

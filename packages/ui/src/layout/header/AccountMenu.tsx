@@ -1,4 +1,3 @@
-import {UserCircleIcon} from '../../icons/ui';
 import {
     Button,
     Menu,
@@ -8,6 +7,7 @@ import {
     Separator,
 } from 'react-aria-components';
 
+import {UserCircleIcon} from '../../icons/ui';
 import {type AppThemeMode} from '../../theme';
 import styles from '../AppHeader.module.css';
 import {ThemeModeToggle} from './ThemeModeToggle';

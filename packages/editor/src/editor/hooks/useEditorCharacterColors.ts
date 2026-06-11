@@ -1,0 +1,143 @@
+import {
+    buildScriptBlockIndex,
+    type ScriptDocument,
+} from '@stagistic/script';
+import {
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
+
+import {
+    getConfirmedCharacterColor,
+    normalizePersistentCharacterRefs,
+} from '../characters/colorResolver';
+import type {PersistentCharacterRef} from '../contracts';
+import {buildSidebarProjectionFromIndex} from '../live/buildSidebarProjectionFromIndex';
+import {createEditorSnapshotStore} from '../live/store';
+
+interface UseEditorCharacterColorsArgs {
+    persistentCharacters: readonly PersistentCharacterRef[],
+    characterColorSaturation: number | undefined,
+    resolvedInitialValue: ScriptDocument,
+}
+
+export const useEditorCharacterColors = ({
+    persistentCharacters,
+    characterColorSaturation,
+    resolvedInitialValue,
+}: UseEditorCharacterColorsArgs) => {
+    const colorByCharacterIdRef = useRef<ReadonlyMap<string, string>>(new Map());
+    const rememberedColorByKeyRef = useRef<ReadonlyMap<string, string>>(new Map());
+    const rememberedColorSaturationRef = useRef<number | null>(null);
+    const persistentCharactersRef = useRef<readonly PersistentCharacterRef[]>([]);
+
+    const normalizedPersistentCharacters = useMemo(
+        () => normalizePersistentCharacterRefs(persistentCharacters),
+        [persistentCharacters],
+    );
+
+    const confirmedCharacterColorsById = useMemo(() => {
+        const resolvedColors = new Map<string, string>();
+
+        normalizedPersistentCharacters.forEach(character => {
+            resolvedColors.set(
+                character.id,
+                getConfirmedCharacterColor(
+                    character.id,
+                    character.colorHex,
+                    characterColorSaturation,
+                ),
+            );
+        });
+
+        return resolvedColors;
+    }, [normalizedPersistentCharacters, characterColorSaturation]);
+
+    const confirmedCharacterColorsByKey = useMemo(() => {
+        const resolvedColors = new Map<string, string>();
+
+        normalizedPersistentCharacters.forEach(character => {
+            const color = confirmedCharacterColorsById.get(character.id);
+
+            if (!color) {
+                return;
+            }
+
+            resolvedColors.set(character.key, color);
+        });
+
+        return resolvedColors;
+    }, [confirmedCharacterColorsById, normalizedPersistentCharacters]);
+
+    useEffect(() => {
+        const nextColorByCharacterId = new Map(colorByCharacterIdRef.current);
+        const didSaturationChange = rememberedColorSaturationRef.current !== null
+            && rememberedColorSaturationRef.current !== characterColorSaturation;
+        const nextRememberedColorByKey = didSaturationChange
+            ? new Map<string, string>()
+            : new Map(rememberedColorByKeyRef.current);
+
+        confirmedCharacterColorsById.forEach((color, characterId) => {
+            nextColorByCharacterId.set(characterId, color);
+        });
+        confirmedCharacterColorsByKey.forEach((color, characterKey) => {
+            nextRememberedColorByKey.set(characterKey, color);
+        });
+
+        persistentCharactersRef.current = normalizedPersistentCharacters;
+        colorByCharacterIdRef.current = nextColorByCharacterId;
+        rememberedColorByKeyRef.current = nextRememberedColorByKey;
+        rememberedColorSaturationRef.current = characterColorSaturation ?? null;
+    }, [
+        confirmedCharacterColorsById,
+        confirmedCharacterColorsByKey,
+        normalizedPersistentCharacters,
+        characterColorSaturation,
+    ]);
+
+    const initialLiveSnapshot = useMemo(() => {
+        const indexSnapshot = buildScriptBlockIndex(resolvedInitialValue).snapshot;
+        const projection = buildSidebarProjectionFromIndex(indexSnapshot, {
+            characterColorSaturation,
+            colorByCharacterId: confirmedCharacterColorsById,
+            rememberedColorByKey: confirmedCharacterColorsByKey,
+            persistentCharacters: normalizedPersistentCharacters,
+        });
+
+        return {
+            revision: 0,
+            index: indexSnapshot,
+            structure: projection.structure,
+            characters: projection.characters,
+            activeBlockId: null,
+            activeBlockType: null,
+        };
+    }, [
+        confirmedCharacterColorsById,
+        confirmedCharacterColorsByKey,
+        normalizedPersistentCharacters,
+        resolvedInitialValue,
+        characterColorSaturation,
+    ]);
+
+    /*
+     * The live store is created once per editor mount. Re-creating it
+     * when persistent characters change (which is what would happen if
+     * we used `useMemo(..., [initialLiveSnapshot])`) cascades into
+     * `useEditorLifecycle`'s setContent effect re-firing — which replaces
+     * the live editor doc with `initialValue` and wipes any typed-but-
+     * not-yet-saved content. Script switches remount via the
+     * `key={scriptId}` on FountainEditor, so we don't need recreation.
+     */
+    const [liveStore] = useState(() => createEditorSnapshotStore(initialLiveSnapshot));
+
+    return {
+        colorByCharacterIdRef,
+        rememberedColorByKeyRef,
+        persistentCharactersRef,
+        confirmedCharacterColorsById,
+        liveStore,
+    };
+};

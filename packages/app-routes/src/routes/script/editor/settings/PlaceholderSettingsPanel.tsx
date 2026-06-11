@@ -1,5 +1,5 @@
-import styles from './ScriptEditorSettingsPanel.module.css';
 import {PANEL_DESCRIPTIONS} from './constants';
+import styles from './ScriptEditorSettingsPanel.module.css';
 
 interface PlaceholderSettingsPanelProps {
     panelId: string,

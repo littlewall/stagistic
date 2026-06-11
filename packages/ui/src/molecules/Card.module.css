@@ -10,9 +10,9 @@
     transition: border-color 150ms ease, box-shadow 150ms ease;
 
     &.compact {
+        gap: var(--space-md);
         min-height: unset;
         padding: var(--space-lg) var(--space-xl);
-        gap: var(--space-md);
     }
 
     &.interactive {

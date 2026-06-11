@@ -1,4 +1,3 @@
-import {ChevronDownIcon, FolderIcon, PlusIcon} from '../../icons/ui';
 import {
     Button,
     Header as MenuHeader,
@@ -10,6 +9,9 @@ import {
     Separator,
 } from 'react-aria-components';
 
+import {
+    ChevronDownIcon, FolderIcon, PlusIcon,
+} from '../../icons/ui';
 import styles from '../AppHeader.module.css';
 import type {ScriptListItem} from './types';
 

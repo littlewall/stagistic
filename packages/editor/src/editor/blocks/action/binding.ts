@@ -1,8 +1,8 @@
 import {actionSpec} from '@stagistic/script';
+import {ActionBlockIcon} from '@stagistic/ui';
 
 import type {FountainBlockBinding} from '../types';
 import styles from './action.module.css';
-import {ActionBlockIcon} from '@stagistic/ui';
 
 export const actionBinding: FountainBlockBinding = {
     spec: actionSpec,

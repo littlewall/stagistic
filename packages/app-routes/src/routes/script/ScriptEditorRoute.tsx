@@ -12,10 +12,7 @@ import {
     LoaderOverlay,
     ScriptSettingsModal,
 } from '@stagistic/ui';
-import {
-    useCallback,
-    useMemo,
-} from 'react';
+import {useMemo} from 'react';
 import {
     useNavigate,
     useParams,
@@ -24,7 +21,6 @@ import {
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
-import {useScriptEditorCharacters} from './editor/characters/useScriptEditorCharacters';
 import {ScriptEditorSettingsPanel} from './editor/settings';
 import {
     type SidebarPanel,
@@ -36,16 +32,12 @@ import {
 } from './editor/structure';
 import {ScriptCharactersProvider} from './ScriptCharactersContext';
 import {ScriptSessionProvider} from './ScriptSessionContext';
-import {
-    SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS,
-    type ScriptSettingsPanelId,
-    SETTINGS_MODAL_QUERY_KEY,
-} from './settings/settingsMenu';
-import {useScriptSettingsModalQuerySync} from './settings/useScriptSettingsModalQuerySync';
-import {useScriptSettingsModalState} from './settings/useScriptSettingsModalState';
+import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settings/settingsMenu';
+import {useScriptCharactersContextValue} from './useScriptCharactersContextValue';
 import {useScriptEditorController} from './useScriptEditorController';
 import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
 import {useScriptEditorSettingsDraft} from './useScriptEditorSettingsDraft';
+import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
 import {useTitlePageDraft} from './useTitlePageDraft';
 
 const AUTOSAVE_DELAY_MS = 1500;
@@ -62,16 +54,6 @@ export const ScriptEditorRoute = () => {
     const scriptRepository = useScriptRepository();
     const {deleteScript} = useScripts();
     const [searchParams, setSearchParams] = useSearchParams();
-    const {
-        isOpen: isSettingsOpen,
-        activePanelId,
-        expandedItemIds,
-        groups,
-        open: openSettingsModal,
-        close: closeSettingsModal,
-        selectPanel,
-        toggleExpanded,
-    } = useScriptSettingsModalState();
     const {
         currentScript,
         currentScriptId,
@@ -113,27 +95,29 @@ export const ScriptEditorRoute = () => {
     const shortcutPrefix = isApplePlatform() ? 'Cmd' : 'Ctrl';
 
     const {
+        isSettingsOpen,
+        activePanelId,
+        expandedItemIds,
+        groups,
+        openSettingsModal,
+        handleCloseSettings,
+        handleSelectSettingsPanel,
+        handleDeleteScript,
+        toggleExpanded,
+    } = useScriptEditorSettingsModal({
+        currentScriptId,
+        navigate,
+        searchParams,
+        setSearchParams,
+        deleteScript,
+    });
+
+    const {
         editorOverrideValue,
-        confirmedCharacterRecords,
         normalizedConfirmedCharacterRecords,
-        pendingCharacterKeys,
-        deletingCharacterIds,
-        renamingCharacterIds,
-        renamingCharacterKeys,
-        colorUpdatingCharacterIds,
-        genderUpdatingCharacterIds,
-        characterGenderOptions,
-        isCharactersLoading,
-        handleEditorValueChange,
-        normalizeCharacterNameForInlineInput,
-        handleConfirmCharacter,
-        handleDeleteCharacter,
-        handleRenameCharacterPreview,
-        handleRenameCharacter,
-        handleSetCharacterColor,
-        handleSetCharacterGender,
-        handleUpsertCharacterGender,
-    } = useScriptEditorCharacters({
+        handleResolvedEditorValueChange,
+        contextValue: charactersContextValue,
+    } = useScriptCharactersContextValue({
         currentScriptId,
         scriptRepository,
         initialValue,
@@ -141,33 +125,13 @@ export const ScriptEditorRoute = () => {
         characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
-    const handleResolvedEditorValueChange = useCallback((
-        value: Parameters<typeof handleEditorValueChange>[0],
-        meta?: Parameters<typeof handleEditorValueChange>[1],
-    ) => {
-        handleEditorValueChange(value, meta);
-    }, [handleEditorValueChange]);
+
     const {handleMenuAction} = useScriptEditorHeaderActions({
         navigate,
         currentScript,
         openSettingsModal,
     });
 
-    const handleSelectSettingsPanel = useCallback((panelId: string) => {
-        selectPanel(panelId as ScriptSettingsPanelId);
-    }, [selectPanel]);
-    const handleDeleteScript = useCallback(async () => {
-        if (!currentScriptId) {
-            return;
-        }
-
-        await deleteScript(currentScriptId);
-        void navigate('/');
-    }, [
-        currentScriptId,
-        deleteScript,
-        navigate,
-    ]);
     const sessionContextValue = useMemo(() => ({
         currentScriptId,
         scriptRepository,
@@ -180,50 +144,6 @@ export const ScriptEditorRoute = () => {
         initialIndexSnapshot,
         resolvedScriptSettings,
         scriptRepository,
-    ]);
-
-    const charactersContextValue = useMemo(() => ({
-        editorOverrideValue,
-        normalizedConfirmedCharacterRecords,
-        handleEditorValueChange,
-        confirmedCharacterRecords,
-        pendingCharacterKeys,
-        deletingCharacterIds,
-        renamingCharacterIds,
-        renamingCharacterKeys,
-        colorUpdatingCharacterIds,
-        genderUpdatingCharacterIds,
-        characterGenderOptions,
-        isCharactersLoading,
-        normalizeCharacterNameForInlineInput,
-        handleConfirmCharacter,
-        handleDeleteCharacter,
-        handleRenameCharacterPreview,
-        handleRenameCharacter,
-        handleSetCharacterColor,
-        handleSetCharacterGender,
-        handleUpsertCharacterGender,
-    }), [
-        characterGenderOptions,
-        colorUpdatingCharacterIds,
-        confirmedCharacterRecords,
-        deletingCharacterIds,
-        editorOverrideValue,
-        genderUpdatingCharacterIds,
-        handleConfirmCharacter,
-        handleDeleteCharacter,
-        handleEditorValueChange,
-        handleRenameCharacter,
-        handleRenameCharacterPreview,
-        handleSetCharacterColor,
-        handleSetCharacterGender,
-        handleUpsertCharacterGender,
-        isCharactersLoading,
-        normalizeCharacterNameForInlineInput,
-        normalizedConfirmedCharacterRecords,
-        pendingCharacterKeys,
-        renamingCharacterIds,
-        renamingCharacterKeys,
     ]);
 
     const sidebarPanels = useMemo<readonly SidebarPanel[]>(() => [
@@ -249,13 +169,6 @@ export const ScriptEditorRoute = () => {
         panels: sidebarPanels,
         defaultLeftPanelId: 'structure',
         defaultRightPanelId: 'characters',
-    });
-    const handleCloseSettings = useScriptSettingsModalQuerySync({
-        queryKey: SETTINGS_MODAL_QUERY_KEY,
-        searchParams,
-        setSearchParams,
-        openSettingsModal,
-        closeSettingsModal,
     });
     const resolvedEditorInitialValue = editorOverrideValue ?? initialValue;
 

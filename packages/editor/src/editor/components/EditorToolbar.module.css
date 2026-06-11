@@ -129,11 +129,6 @@
     transition: background .15s ease, border-radius .15s ease;
     anchor-name: --block-type-select;
 
-    & .selectIcon {
-        opacity: .5;
-        transition: opacity .15s ease;
-    }
-
     &:hover {
         background: var(--select-button-hover-bg);
 
@@ -142,25 +137,30 @@
         }
     }
 
-    &[aria-expanded='true'] {
+    &:disabled {
+        cursor: not-allowed;
+        opacity: .5;
+    }
+
+    &[aria-expanded = 'true'] {
         background: var(--select-menu-bg);
         border-color: var(--color-border);
         border-bottom-color: transparent;
         border-bottom-right-radius: 0;
         border-bottom-left-radius: 0;
 
-        & .selectIcon {
-            opacity: 1;
-        }
-
         &:hover {
             background: var(--select-menu-bg);
         }
+
+        & .selectIcon {
+            opacity: 1;
+        }
     }
 
-    &:disabled {
-        cursor: not-allowed;
+    & .selectIcon {
         opacity: .5;
+        transition: opacity .15s ease;
     }
 }
 
@@ -206,7 +206,6 @@
 
 .menu {
     position: fixed;
-    position-anchor: --block-type-select;
     z-index: var(--select-menu-z-index);
     top: anchor(bottom);
     left: anchor(left);
@@ -217,11 +216,9 @@
     background: var(--select-menu-bg);
     border: var(--select-menu-border);
     border-top: 0;
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-right-radius: var(--select-menu-radius);
-    border-bottom-left-radius: var(--select-menu-radius);
+    border-radius: 0 0 var(--select-menu-radius) var(--select-menu-radius);
     box-shadow: var(--select-menu-shadow);
+    position-anchor: --block-type-select;
 }
 
 .menuItem {
