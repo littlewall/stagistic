@@ -1,9 +1,4 @@
-import {
-    type FountainJSONContent,
-    getScriptBlockLegacyType,
-    isScriptBlockNode,
-    type ScriptDocument,
-} from '../document';
+import {type ScriptDocument} from '../document';
 import {
     extractCharacterKeys,
     normalizeCharacterKey,
@@ -12,11 +7,25 @@ import {
     type CharacterRefByKey,
     getCharacterRefByKey,
     getNodeTextContent,
-    isCharacterBlockType,
+    mapCharacterBlockNodes,
     type ScriptDocumentChangeResult,
     unchangedScriptDocument,
     withCharacterRefByKey,
 } from './documentHelpers';
+
+const applyMapResult = (
+    value: ScriptDocument,
+    nodes: ReturnType<typeof mapCharacterBlockNodes>,
+): ScriptDocumentChangeResult => {
+    if (!nodes.changed || !nodes.nodes) {
+        return unchangedScriptDocument(value);
+    }
+
+    return {
+        value: {...value, content: nodes.nodes},
+        changed: true,
+    };
+};
 
 export const linkCharacterRefInScriptDocument = (
     value: ScriptDocument,
@@ -29,84 +38,28 @@ export const linkCharacterRefInScriptDocument = (
         return unchangedScriptDocument(value);
     }
 
-    const replaceNodes = (nodes: FountainJSONContent[] | undefined): {
-        nodes: FountainJSONContent[] | undefined,
-        changed: boolean,
-    } => {
-        if (!Array.isArray(nodes)) {
-            return {
-                nodes,
-                changed: false,
-            };
-        }
+    return applyMapResult(
+        value,
+        mapCharacterBlockNodes(value.content, node => {
+            const text = getNodeTextContent(node);
+            const keys = extractCharacterKeys(text);
 
-        let didChange = false;
-        const nextNodes = nodes.map(node => {
-            if (!node || typeof node !== 'object') {
+            if (!keys.includes(normalizedCharacterKey)) {
                 return node;
             }
 
-            if (isScriptBlockNode(node) && isCharacterBlockType(getScriptBlockLegacyType(node))) {
-                const text = getNodeTextContent(node);
-                const keys = extractCharacterKeys(text);
+            const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
 
-                if (!keys.includes(normalizedCharacterKey)) {
-                    return node;
-                }
-
-                const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
-
-                if (sourceCharacterRefByKey[normalizedCharacterKey] === characterId) {
-                    return node;
-                }
-
-                didChange = true;
-
-                return withCharacterRefByKey(node, {
-                    ...sourceCharacterRefByKey,
-                    [normalizedCharacterKey]: characterId,
-                });
-            }
-
-            const {
-                nodes: nextContent,
-                changed: didChangeChildren,
-            } = replaceNodes(node.content);
-
-            if (!didChangeChildren) {
+            if (sourceCharacterRefByKey[normalizedCharacterKey] === characterId) {
                 return node;
             }
 
-            didChange = true;
-
-            return {
-                ...node,
-                content: nextContent,
-            };
-        });
-
-        return {
-            nodes: didChange ? nextNodes : nodes,
-            changed: didChange,
-        };
-    };
-
-    const {
-        nodes: nextContent,
-        changed,
-    } = replaceNodes(value.content);
-
-    if (!changed || !nextContent) {
-        return unchangedScriptDocument(value);
-    }
-
-    return {
-        value: {
-            ...value,
-            content: nextContent,
-        },
-        changed: true,
-    };
+            return withCharacterRefByKey(node, {
+                ...sourceCharacterRefByKey,
+                [normalizedCharacterKey]: characterId,
+            });
+        }),
+    );
 };
 
 export const unlinkCharacterRefInScriptDocument = (
@@ -117,84 +70,28 @@ export const unlinkCharacterRefInScriptDocument = (
         return unchangedScriptDocument(value);
     }
 
-    const replaceNodes = (nodes: FountainJSONContent[] | undefined): {
-        nodes: FountainJSONContent[] | undefined,
-        changed: boolean,
-    } => {
-        if (!Array.isArray(nodes)) {
-            return {
-                nodes,
-                changed: false,
-            };
-        }
+    return applyMapResult(
+        value,
+        mapCharacterBlockNodes(value.content, node => {
+            const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
+            const nextCharacterRefByKey = Object.entries(sourceCharacterRefByKey).reduce<CharacterRefByKey>(
+                (acc, [key, id]) => {
+                    if (id !== characterId) {
+                        acc[key] = id;
+                    }
 
-        let didChange = false;
-        const nextNodes = nodes.map(node => {
-            if (!node || typeof node !== 'object') {
+                    return acc;
+                },
+                {},
+            );
+
+            if (Object.keys(nextCharacterRefByKey).length === Object.keys(sourceCharacterRefByKey).length) {
                 return node;
             }
 
-            if (isScriptBlockNode(node) && isCharacterBlockType(getScriptBlockLegacyType(node))) {
-                const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
-                const nextCharacterRefByKey = Object.entries(sourceCharacterRefByKey).reduce<CharacterRefByKey>(
-                    (acc, [key, id]) => {
-                        if (id !== characterId) {
-                            acc[key] = id;
-                        }
-
-                        return acc;
-                    },
-                    {},
-                );
-
-                if (Object.keys(nextCharacterRefByKey).length === Object.keys(sourceCharacterRefByKey).length) {
-                    return node;
-                }
-
-                didChange = true;
-
-                return withCharacterRefByKey(node, nextCharacterRefByKey);
-            }
-
-            const {
-                nodes: nextContent,
-                changed: didChangeChildren,
-            } = replaceNodes(node.content);
-
-            if (!didChangeChildren) {
-                return node;
-            }
-
-            didChange = true;
-
-            return {
-                ...node,
-                content: nextContent,
-            };
-        });
-
-        return {
-            nodes: didChange ? nextNodes : nodes,
-            changed: didChange,
-        };
-    };
-
-    const {
-        nodes: nextContent,
-        changed,
-    } = replaceNodes(value.content);
-
-    if (!changed || !nextContent) {
-        return unchangedScriptDocument(value);
-    }
-
-    return {
-        value: {
-            ...value,
-            content: nextContent,
-        },
-        changed: true,
-    };
+            return withCharacterRefByKey(node, nextCharacterRefByKey);
+        }),
+    );
 };
 
 export const replaceCharacterRefIdInScriptDocument = (
@@ -210,88 +107,32 @@ export const replaceCharacterRefIdInScriptDocument = (
         return unchangedScriptDocument(value);
     }
 
-    const replaceNodes = (nodes: FountainJSONContent[] | undefined): {
-        nodes: FountainJSONContent[] | undefined,
-        changed: boolean,
-    } => {
-        if (!Array.isArray(nodes)) {
-            return {
-                nodes,
-                changed: false,
-            };
-        }
-
-        let didChange = false;
-        const nextNodes = nodes.map(node => {
-            if (!node || typeof node !== 'object') {
-                return node;
-            }
-
-            if (isScriptBlockNode(node) && isCharacterBlockType(getScriptBlockLegacyType(node))) {
-                const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
-                let changedCharacterRef = false;
-                const nextCharacterRefByKey = Object.entries(sourceCharacterRefByKey).reduce<CharacterRefByKey>(
-                    (acc, [key, id]) => {
-                        if (id === sourceCharacterId) {
-                            acc[key] = targetCharacterId;
-                            changedCharacterRef = true;
-
-                            return acc;
-                        }
-
-                        acc[key] = id;
+    return applyMapResult(
+        value,
+        mapCharacterBlockNodes(value.content, node => {
+            const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
+            let changedCharacterRef = false;
+            const nextCharacterRefByKey = Object.entries(sourceCharacterRefByKey).reduce<CharacterRefByKey>(
+                (acc, [key, id]) => {
+                    if (id === sourceCharacterId) {
+                        acc[key] = targetCharacterId;
+                        changedCharacterRef = true;
 
                         return acc;
-                    },
-                    {},
-                );
+                    }
 
-                if (!changedCharacterRef) {
-                    return node;
-                }
+                    acc[key] = id;
 
-                didChange = true;
+                    return acc;
+                },
+                {},
+            );
 
-                return withCharacterRefByKey(node, nextCharacterRefByKey);
-            }
-
-            const {
-                nodes: nextContent,
-                changed: didChangeChildren,
-            } = replaceNodes(node.content);
-
-            if (!didChangeChildren) {
+            if (!changedCharacterRef) {
                 return node;
             }
 
-            didChange = true;
-
-            return {
-                ...node,
-                content: nextContent,
-            };
-        });
-
-        return {
-            nodes: didChange ? nextNodes : nodes,
-            changed: didChange,
-        };
-    };
-
-    const {
-        nodes: nextContent,
-        changed,
-    } = replaceNodes(value.content);
-
-    if (!changed || !nextContent) {
-        return unchangedScriptDocument(value);
-    }
-
-    return {
-        value: {
-            ...value,
-            content: nextContent,
-        },
-        changed: true,
-    };
+            return withCharacterRefByKey(node, nextCharacterRefByKey);
+        }),
+    );
 };

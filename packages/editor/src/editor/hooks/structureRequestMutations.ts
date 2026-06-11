@@ -1,12 +1,16 @@
 import {
     buildScriptBlockIndex,
+    collectStructureBlocks,
+    createNodeId,
     ELEMENT_ACT,
     ELEMENT_SCENE_HEADING,
     type FountainJSONContent,
+    getDefaultActName,
     getScriptBlockId,
     getScriptBlockLegacyType,
     isScriptBlockNode,
     resolveLegacyFountainBlockType,
+    resolveScriptBlockNodeType,
     type ScriptDocument,
 } from '@stagistic/script';
 import {Fragment, type Node as ProseMirrorNode} from '@tiptap/pm/model';
@@ -20,11 +24,20 @@ import type {
 } from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
 import {PAGINATION_CONTROL_META_KEY} from '../tiptap/extensions/pagination/plugin/createPaginationPlugin';
-import {isFountainBlockNodeName} from '../tiptap/fountainCore';
+import {FOUNTAIN_BLOCK_NODE_NAME, isFountainBlockNodeName} from '../tiptap/fountainCore';
 import {type AutosaveSchedulePayload} from './useAutosaveController';
 
 let paginationRecalcToken = 0;
 const nextPaginationRecalcToken = () => ++paginationRecalcToken;
+
+export interface CommitContext {
+    editor: TiptapEditor,
+    setLatestValue: (value: ScriptDocument, revision?: number) => void,
+    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
+    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
+    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
+    revisionRef: MutableRefObject<number>,
+}
 
 export const setPlainTextContent = (
     nodes: FountainJSONContent[] | undefined,
@@ -131,6 +144,58 @@ export const removeActBlockById = (
     });
 
     return [didChange ? nextNodes : nodes, didChange];
+};
+
+export const buildInsertActContent = (
+    currentValue: ScriptDocument,
+    beforeBlockId: string | null,
+): {nextContent: FountainJSONContent[], didChange: boolean} => {
+    const actCount = collectStructureBlocks(currentValue.content)
+        .filter(block => block.blockType === ELEMENT_ACT)
+        .length;
+    const nextActName = getDefaultActName(actCount + 1);
+    const prefersLegacyNodeType = currentValue.content.some(
+        node => isScriptBlockNode(node) && node.type === FOUNTAIN_BLOCK_NODE_NAME,
+    );
+    const nextActNodeType = prefersLegacyNodeType
+        ? FOUNTAIN_BLOCK_NODE_NAME
+        : resolveScriptBlockNodeType(ELEMENT_ACT) ?? FOUNTAIN_BLOCK_NODE_NAME;
+    const nextActBlock: FountainJSONContent = {
+        type: nextActNodeType,
+        attrs: {id: createNodeId(), blockType: ELEMENT_ACT},
+        content: [{type: 'text', text: nextActName}],
+    };
+
+    let nextContent = [...currentValue.content, nextActBlock];
+    let didChange = true;
+    let resolvedBeforeBlockId = beforeBlockId;
+
+    if (actCount === 0) {
+        const firstBlock = currentValue.content.find(node => isScriptBlockNode(node));
+        const firstBlockId = firstBlock ? getScriptBlockId(firstBlock) : null;
+
+        if (firstBlockId) {
+            resolvedBeforeBlockId = firstBlockId;
+        }
+    }
+
+    if (typeof resolvedBeforeBlockId === 'string' && resolvedBeforeBlockId.length > 0) {
+        const [insertedContent, didInsert] = insertActBlockBeforeId(
+            currentValue.content,
+            resolvedBeforeBlockId,
+            nextActBlock,
+        );
+
+        if (didInsert && Array.isArray(insertedContent)) {
+            nextContent = insertedContent;
+        }
+
+        if (!didInsert) {
+            didChange = false;
+        }
+    }
+
+    return {nextContent, didChange};
 };
 
 export const insertActBlockBeforeId = (
@@ -307,19 +372,69 @@ const buildSceneReorderTransaction = (
     return tr;
 };
 
+const commitDocument = (
+    {
+        editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef,
+    }: CommitContext,
+    nextContent: FountainJSONContent[],
+    currentDocAttrs: ScriptDocument['attrs'],
+) => {
+    const nextDocument: ScriptDocument = {
+        type: 'doc',
+        attrs: currentDocAttrs,
+        content: nextContent,
+    };
+
+    editor.commands.setContent(nextDocument, {emitUpdate: false});
+    editor.view.dispatch(
+        editor.state.tr
+            .setDocAttribute('settings', currentDocAttrs?.settings ?? null)
+            .setMeta('preventUpdate', true),
+    );
+
+    editor.view.dispatch(
+        editor.state.tr
+            .setMeta('preventUpdate', true)
+            .setMeta(PAGINATION_CONTROL_META_KEY, {forceRecalcToken: nextPaginationRecalcToken()}),
+    );
+
+    const savedValue = stripScriptSettings(nextDocument);
+
+    revisionRef.current += 1;
+
+    const revision = revisionRef.current;
+
+    setLatestValue(savedValue, revision);
+
+    window.setTimeout(() => {
+        onValueChangeRef.current?.(savedValue, {
+            source: 'structure',
+            revision,
+        });
+        onIndexChangeRef.current?.(buildScriptBlockIndex(savedValue).snapshot, {
+            source: 'structure',
+            revision,
+        });
+        scheduleAutosave({
+            value: savedValue,
+            revision,
+            immediate: true,
+        });
+    }, 0);
+};
+
 export const tryCommitSceneReorder = (
-    editor: TiptapEditor,
+    ctx: CommitContext,
     sourceSceneBlockId: string,
     beforeBlockId: string | null,
     nextContent: FountainJSONContent[],
     didChange: boolean,
     currentDocAttrs: ScriptDocument['attrs'],
-    setLatestValue: (value: ScriptDocument, revision?: number) => void,
-    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
-    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
-    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
-    revisionRef: MutableRefObject<number>,
 ) => {
+    const {
+        editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef,
+    } = ctx;
+
     if (!didChange || !Array.isArray(nextContent)) {
         return;
     }
@@ -396,83 +511,15 @@ export const tryCommitSceneReorder = (
     });
 };
 
-const commitDocument = (
-    editor: TiptapEditor,
-    nextContent: FountainJSONContent[],
-    currentDocAttrs: ScriptDocument['attrs'],
-    setLatestValue: (value: ScriptDocument, revision?: number) => void,
-    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
-    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
-    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
-    revisionRef: MutableRefObject<number>,
-) => {
-    const nextDocument: ScriptDocument = {
-        type: 'doc',
-        attrs: currentDocAttrs,
-        content: nextContent,
-    };
-
-    editor.commands.setContent(nextDocument, {emitUpdate: false});
-    editor.view.dispatch(
-        editor.state.tr
-            .setDocAttribute('settings', currentDocAttrs?.settings ?? null)
-            .setMeta('preventUpdate', true),
-    );
-
-    editor.view.dispatch(
-        editor.state.tr
-            .setMeta('preventUpdate', true)
-            .setMeta(PAGINATION_CONTROL_META_KEY, {forceRecalcToken: nextPaginationRecalcToken()}),
-    );
-
-    const savedValue = stripScriptSettings(nextDocument);
-
-    revisionRef.current += 1;
-
-    const revision = revisionRef.current;
-
-    setLatestValue(savedValue, revision);
-
-    window.setTimeout(() => {
-        onValueChangeRef.current?.(savedValue, {
-            source: 'structure',
-            revision,
-        });
-        onIndexChangeRef.current?.(buildScriptBlockIndex(savedValue).snapshot, {
-            source: 'structure',
-            revision,
-        });
-        scheduleAutosave({
-            value: savedValue,
-            revision,
-            immediate: true,
-        });
-    }, 0);
-};
-
 export const tryCommitDocument = (
-    editor: TiptapEditor,
+    ctx: CommitContext,
     nextContent: FountainJSONContent[] | undefined,
     didChange: boolean,
     currentDocAttrs: ScriptDocument['attrs'],
-    setLatestValue: (value: ScriptDocument, revision?: number) => void,
-    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
-    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
-    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
-    revisionRef: MutableRefObject<number>,
 ) => {
     if (!didChange || !Array.isArray(nextContent)) {
         return;
     }
 
-    commitDocument(
-        editor,
-        nextContent,
-        currentDocAttrs,
-        setLatestValue,
-        onValueChangeRef,
-        onIndexChangeRef,
-        scheduleAutosave,
-        revisionRef,
-    );
+    commitDocument(ctx, nextContent, currentDocAttrs);
 };

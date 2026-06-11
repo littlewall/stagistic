@@ -1,7 +1,8 @@
 import {useExclusiveOverlay} from '@stagistic/editor';
-import {ChevronDownIcon, clsx} from '@stagistic/ui';
 import {
-    useEffect,
+    ChevronDownIcon, clsx, useDropdownDismiss,
+} from '@stagistic/ui';
+import {
     useId,
     useMemo,
     useRef,
@@ -40,37 +41,7 @@ export const SidebarPanelSelect = ({
     );
 
     useExclusiveOverlay(isOpen, () => setIsOpen(false));
-
-    useEffect(() => {
-        if (!isOpen) {
-            return;
-        }
-
-        const onPointerDown = (event: MouseEvent | PointerEvent) => {
-            if (!selectRef.current) {
-                return;
-            }
-
-            if (selectRef.current.contains(event.target as Node)) {
-                return;
-            }
-
-            setIsOpen(false);
-        };
-        const onKeyDown = (event: KeyboardEvent) => {
-            if (event.key === 'Escape') {
-                setIsOpen(false);
-            }
-        };
-
-        document.addEventListener('pointerdown', onPointerDown);
-        document.addEventListener('keydown', onKeyDown);
-
-        return () => {
-            document.removeEventListener('pointerdown', onPointerDown);
-            document.removeEventListener('keydown', onKeyDown);
-        };
-    }, [isOpen]);
+    useDropdownDismiss(isOpen, setIsOpen, selectRef);
 
     return (
         <div className={styles.select} ref={selectRef}>

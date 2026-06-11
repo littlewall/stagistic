@@ -39,7 +39,7 @@ interface ScanCharacterTokensArgs {
     selectionFrom?: number | null,
 }
 
-const getActiveTokenIndex = (line: string, offset: number) => {
+export const getActiveTokenIndex = (line: string, offset: number) => {
     const tokens = splitCharacterTokens(line);
 
     if (tokens.length === 0) {

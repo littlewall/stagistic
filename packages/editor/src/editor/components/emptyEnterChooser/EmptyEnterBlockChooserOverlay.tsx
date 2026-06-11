@@ -371,4 +371,3 @@ export const EmptyEnterBlockChooserOverlay = ({
     );
 };
 
-export default EmptyEnterBlockChooserOverlay;

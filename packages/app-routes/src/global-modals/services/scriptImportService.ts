@@ -1,6 +1,6 @@
 import {
-    ensureFountainBlockIds,
     ensureSceneHeading,
+    ensureScriptBlockIds,
     ensureScriptStructure,
     parseFountain,
     type ParseFountainOptions,
@@ -40,7 +40,7 @@ export const parseImportedFountainScript = (
         pendingSynopsisMarkers,
         pendingTitlePageFields,
     );
-    const withIds = ensureFountainBlockIds(ensureSceneHeading(withStructure));
+    const withIds = ensureScriptBlockIds(ensureSceneHeading(withStructure));
 
     return ensureScriptStructure(withIds);
 };

@@ -1,32 +1,27 @@
 import {
-    collectStructureBlocks,
-    createNodeId,
     ELEMENT_ACT,
-    type FountainJSONContent,
-    getDefaultActName,
     getScriptBlockId,
     getScriptBlockLegacyType,
     isScriptBlockNode,
-    resolveScriptBlockNodeType,
     type ScriptDocument,
 } from '@stagistic/script';
 import {TextSelection} from '@tiptap/pm/state';
 import {type Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type MutableRefObject, useCallback, useEffect, useRef,
+    type MutableRefObject, useCallback, useMemo,
 } from 'react';
 
 import type {EditorIndexSnapshot, EditorValueChangeMeta} from '../contracts';
 import {moveSceneSegment} from '../hooks/structureReorder';
 import {
-    insertActBlockBeforeId,
+    buildInsertActContent,
+    type CommitContext,
     removeActBlockById,
     setPlainTextContent,
     tryCommitDocument,
     tryCommitSceneReorder,
 } from '../hooks/structureRequestMutations';
 import {type AutosaveSchedulePayload} from '../hooks/useAutosaveController';
-import {setActiveBlockSyncSuppressed} from '../hooks/useEditorActiveBlockSync';
 import {
     findFountainBlockSelectionPosFromState,
     FOUNTAIN_BLOCK_NODE_NAME,
@@ -51,163 +46,84 @@ export const useBuildActCommands = ({
     scheduleAutosave,
     revisionRef,
 }: UseBuildActCommandsArgs): EditorActCommands => {
-    const releaseSyncSuppressionFrameRef = useRef<number | null>(null);
-
-    useEffect(() => () => {
-        if (releaseSyncSuppressionFrameRef.current !== null) {
-            window.cancelAnimationFrame(releaseSyncSuppressionFrameRef.current);
+    const commitCtx = useMemo<CommitContext | null>(() => {
+        if (!instance) {
+            return null;
         }
-    }, []);
+
+        return {
+            editor: instance, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef,
+        };
+    }, [
+        instance,
+        setLatestValue,
+        onValueChangeRef,
+        onIndexChangeRef,
+        scheduleAutosave,
+        revisionRef,
+    ]);
 
     const restoreSelectionForBlock = useCallback((blockId: string | null) => {
-        if (!instance || !blockId) {
+        if (!commitCtx || !blockId) {
             return;
         }
 
-        const selectionPos = findFountainBlockSelectionPosFromState(instance.state, blockId);
+        const {editor} = commitCtx;
+        const selectionPos = findFountainBlockSelectionPosFromState(editor.state, blockId);
 
         if (selectionPos === null) {
             return;
         }
 
-        const tr = instance.state.tr
-            .setSelection(TextSelection.near(instance.state.doc.resolve(selectionPos), 1))
+        const tr = editor.state.tr
+            .setSelection(TextSelection.near(editor.state.doc.resolve(selectionPos), 1))
             .setMeta('preventUpdate', true)
             .scrollIntoView();
 
-        instance.view.dispatch(tr);
-    }, [instance]);
+        editor.view.dispatch(tr);
+    }, [commitCtx]);
 
     const withActiveBlockPreserved = useCallback((callback: () => void) => {
-        if (!instance) {
+        if (!commitCtx) {
             return;
         }
 
-        const activeBlock = getActiveFountainBlockFromState(instance.state, FOUNTAIN_BLOCK_NODE_NAME);
+        const {editor} = commitCtx;
+        const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
         const preservedBlockId = activeBlock?.id ?? null;
 
-        setActiveBlockSyncSuppressed(instance, true);
-
-        try {
-            callback();
-            restoreSelectionForBlock(preservedBlockId);
-        } finally {
-            if (releaseSyncSuppressionFrameRef.current !== null) {
-                window.cancelAnimationFrame(releaseSyncSuppressionFrameRef.current);
-            }
-
-            releaseSyncSuppressionFrameRef.current = window.requestAnimationFrame(() => {
-                releaseSyncSuppressionFrameRef.current = null;
-                setActiveBlockSyncSuppressed(instance, false);
-            });
-        }
-    }, [instance, restoreSelectionForBlock]);
+        callback();
+        restoreSelectionForBlock(preservedBlockId);
+    }, [commitCtx, restoreSelectionForBlock]);
 
     const insertAct = useCallback((beforeBlockId: string | null) => {
-        if (!instance) {
+        if (!commitCtx) {
             return;
         }
 
-        const currentValue = instance.getJSON() as ScriptDocument;
-        const actCount = collectStructureBlocks(currentValue.content)
-            .filter(block => block.blockType === ELEMENT_ACT)
-            .length;
-        const nextActName = getDefaultActName(actCount + 1);
-        const prefersLegacyNodeType = currentValue.content.some(
-            node => isScriptBlockNode(node) && node.type === FOUNTAIN_BLOCK_NODE_NAME,
-        );
-        const nextActNodeType = prefersLegacyNodeType
-            ? FOUNTAIN_BLOCK_NODE_NAME
-            : resolveScriptBlockNodeType(ELEMENT_ACT) ?? FOUNTAIN_BLOCK_NODE_NAME;
-        const nextActBlock: FountainJSONContent = {
-            type: nextActNodeType,
-            attrs: {id: createNodeId(), blockType: ELEMENT_ACT},
-            content: [{type: 'text', text: nextActName}],
-        };
+        const currentValue = commitCtx.editor.getJSON() as ScriptDocument;
+        const {nextContent, didChange} = buildInsertActContent(currentValue, beforeBlockId);
 
-        let nextContent = [...currentValue.content, nextActBlock];
-        let didChange = true;
-        let resolvedBeforeBlockId = beforeBlockId;
-
-        if (actCount === 0) {
-            const firstBlock = currentValue.content.find(node => isScriptBlockNode(node));
-            const firstBlockId = firstBlock ? getScriptBlockId(firstBlock) : null;
-
-            if (firstBlockId) {
-                resolvedBeforeBlockId = firstBlockId;
-            }
-        }
-
-        if (typeof resolvedBeforeBlockId === 'string' && resolvedBeforeBlockId.length > 0) {
-            const [insertedContent, didInsert] = insertActBlockBeforeId(
-                currentValue.content,
-                resolvedBeforeBlockId,
-                nextActBlock,
-            );
-
-            if (didInsert && Array.isArray(insertedContent)) {
-                nextContent = insertedContent;
-            }
-
-            if (!didInsert) {
-                didChange = false;
-            }
-        }
-
-        tryCommitDocument(
-            instance,
-            nextContent,
-            didChange,
-            currentValue.attrs,
-            setLatestValue,
-            onValueChangeRef,
-            onIndexChangeRef,
-            scheduleAutosave,
-            revisionRef,
-        );
-    }, [
-        instance,
-        onIndexChangeRef,
-        onValueChangeRef,
-        revisionRef,
-        scheduleAutosave,
-        setLatestValue,
-    ]);
+        tryCommitDocument(commitCtx, nextContent, didChange, currentValue.attrs);
+    }, [commitCtx]);
 
     const renameAct = useCallback((blockId: string, nextName: string) => {
-        if (!instance || !blockId) {
+        if (!commitCtx || !blockId) {
             return;
         }
 
         const currentValue = instance.getJSON() as ScriptDocument;
         const [nextContent, didChange] = setPlainTextContent(currentValue.content, blockId, nextName.trim());
 
-        tryCommitDocument(
-            instance,
-            nextContent,
-            didChange,
-            currentValue.attrs,
-            setLatestValue,
-            onValueChangeRef,
-            onIndexChangeRef,
-            scheduleAutosave,
-            revisionRef,
-        );
-    }, [
-        instance,
-        onIndexChangeRef,
-        onValueChangeRef,
-        revisionRef,
-        scheduleAutosave,
-        setLatestValue,
-    ]);
+        tryCommitDocument(commitCtx, nextContent, didChange, currentValue.attrs);
+    }, [commitCtx]);
 
     const deleteAct = useCallback((blockId: string) => {
-        if (!instance || !blockId) {
+        if (!commitCtx || !blockId) {
             return;
         }
 
-        const currentValue = instance.getJSON() as ScriptDocument;
+        const currentValue = commitCtx.editor.getJSON() as ScriptDocument;
         const firstNode = currentValue.content?.[0];
 
         if (
@@ -221,33 +137,20 @@ export const useBuildActCommands = ({
 
         const [nextContent, didChange] = removeActBlockById(currentValue.content, blockId);
 
-        tryCommitDocument(
-            instance,
-            nextContent,
-            didChange,
-            currentValue.attrs,
-            setLatestValue,
-            onValueChangeRef,
-            onIndexChangeRef,
-            scheduleAutosave,
-            revisionRef,
-        );
-    }, [
-        instance,
-        onIndexChangeRef,
-        onValueChangeRef,
-        revisionRef,
-        scheduleAutosave,
-        setLatestValue,
-    ]);
+        tryCommitDocument(commitCtx, nextContent, didChange, currentValue.attrs);
+    }, [commitCtx]);
 
     const moveScene = useCallback((sourceSceneBlockId: string, beforeBlockId: string | null) => {
-        if (!instance || !sourceSceneBlockId || sourceSceneBlockId === beforeBlockId) {
+        if (!commitCtx || !sourceSceneBlockId || sourceSceneBlockId === beforeBlockId) {
             return;
         }
 
-        const currentValue = instance.getJSON() as ScriptDocument;
-        const [nextContent, didChange] = moveSceneSegment(currentValue.content, sourceSceneBlockId, beforeBlockId);
+        const currentValue = commitCtx.editor.getJSON() as ScriptDocument;
+        const [nextContent, didChange] = moveSceneSegment(
+            currentValue.content,
+            sourceSceneBlockId,
+            beforeBlockId,
+        );
 
         if (!didChange || !Array.isArray(nextContent)) {
             return;
@@ -255,28 +158,15 @@ export const useBuildActCommands = ({
 
         withActiveBlockPreserved(() => {
             tryCommitSceneReorder(
-                instance,
+                commitCtx,
                 sourceSceneBlockId,
                 beforeBlockId,
                 nextContent,
                 didChange,
                 currentValue.attrs,
-                setLatestValue,
-                onValueChangeRef,
-                onIndexChangeRef,
-                scheduleAutosave,
-                revisionRef,
             );
         });
-    }, [
-        instance,
-        onIndexChangeRef,
-        onValueChangeRef,
-        revisionRef,
-        scheduleAutosave,
-        setLatestValue,
-        withActiveBlockPreserved,
-    ]);
+    }, [commitCtx, withActiveBlockPreserved]);
 
     return {
         insertAct, renameAct, deleteAct, moveScene,

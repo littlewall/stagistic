@@ -10,10 +10,8 @@ import {
 import type {EditorBlockUiEvent} from '../../contracts';
 import {incrementFullIndexBuildCount} from '../../perf/editorPerfMetrics';
 import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
-import {
-    getActiveFountainBlockFromState,
-    isFountainBlockNodeName,
-} from '../fountainCore';
+import {transactionMayAffectBlockStructure} from '../../runtime/transactionGuards';
+import {getActiveFountainBlockFromState} from '../fountainCore';
 
 interface BlockUiEventsPluginState {
     events: EditorBlockUiEvent[],
@@ -29,41 +27,6 @@ const getActiveBlockIdFromState = (state: EditorState) => {
     return getActiveFountainBlockFromState(state)?.id ?? null;
 };
 
-const hasFountainBlockNode = (value: unknown): boolean => {
-    if (!value) {
-        return false;
-    }
-
-    if (Array.isArray(value)) {
-        return value.some(item => hasFountainBlockNode(item));
-    }
-
-    if (typeof value !== 'object') {
-        return false;
-    }
-
-    const record = value as Record<string, unknown>;
-
-    if (isFountainBlockNodeName(record.type)) {
-        return true;
-    }
-
-    return hasFountainBlockNode(record.content) || hasFountainBlockNode(record.slice);
-};
-
-const stepMayAffectBlockStructure = (transaction: Transaction) => {
-    return transaction.steps.some(step => {
-        const serialized = step.toJSON() as Record<string, unknown>;
-        const stepType = typeof serialized.stepType === 'string' ? serialized.stepType : null;
-
-        if (stepType !== 'replace' && stepType !== 'replaceAround') {
-            return false;
-        }
-
-        return hasFountainBlockNode(serialized.slice);
-    });
-};
-
 const shouldDiffBlocks = (
     transaction: Transaction,
     previousSnapshot: ScriptBlockIndexSnapshot,
@@ -77,7 +40,7 @@ const shouldDiffBlocks = (
         return true;
     }
 
-    return stepMayAffectBlockStructure(transaction);
+    return transactionMayAffectBlockStructure(transaction);
 };
 
 const buildIndexSnapshotFromState = (state: EditorState): ScriptBlockIndexSnapshot => {

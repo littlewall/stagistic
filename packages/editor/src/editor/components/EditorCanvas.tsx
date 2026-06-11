@@ -5,7 +5,7 @@ import type {PersistentCharacterRef} from '../contracts';
 import CharacterSuggestionsOverlay from './CharacterSuggestionsOverlay';
 import EditorBlockActionsOverlay from './EditorBlockActionsOverlay';
 import styles from './EditorCanvas.module.css';
-import EmptyEnterBlockChooserOverlay from './emptyEnterChooser/EmptyEnterBlockChooserOverlay';
+import {EmptyEnterBlockChooserOverlay} from './emptyEnterChooser/EmptyEnterBlockChooserOverlay';
 
 type EditorCanvasProps = {
     editor: TiptapEditor | null,

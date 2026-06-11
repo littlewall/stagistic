@@ -2,8 +2,8 @@ import type {ScriptSummary} from '@stagistic/db';
 import type {ScriptRepository} from '@stagistic/db';
 import {
     createNodeId,
-    ensureFountainBlockIds,
     ensureSceneHeading,
+    ensureScriptBlockIds,
     ensureScriptStructure,
     getFirstBlockId,
     isScriptDocumentEmpty,
@@ -115,7 +115,7 @@ export const createScriptsStore = (repository: ScriptRepository): ScriptsStoreSt
 
         if (initialContent && !isScriptDocumentEmpty(initialContent)) {
             const normalized = ensureSceneHeading(initialContent);
-            const withIds = ensureScriptStructure(ensureFountainBlockIds(normalized));
+            const withIds = ensureScriptStructure(ensureScriptBlockIds(normalized));
 
             normalizedContent = withIds;
             activeBlockId = getFirstBlockId(withIds) ?? activeBlockId;

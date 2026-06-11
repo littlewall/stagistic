@@ -106,13 +106,6 @@ export const ensureScriptBlockIds = (value: ScriptDocument): ScriptDocument => {
     };
 };
 
-/**
- * @deprecated Use `ensureScriptBlockIds(...)`.
- */
-export const ensureFountainBlockIds = (value: ScriptDocument): ScriptDocument => {
-    return ensureScriptBlockIds(value);
-};
-
 const findFirstBlockId = (node: FountainJSONContent): string | null => {
     const blockId = getScriptBlockId(node);
 

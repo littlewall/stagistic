@@ -1,6 +1,6 @@
 import {
-    ensureFountainBlockIds,
     ensureSceneHeading,
+    ensureScriptBlockIds,
     ensureScriptStructure,
     getFirstBlockId,
     type ScriptDocument,
@@ -49,7 +49,7 @@ export const useSeedDefaultScript = (
         seedStateRef.current.pending = true;
 
         try {
-            const seedValue = ensureScriptStructure(ensureFountainBlockIds(ensureSceneHeading(null)));
+            const seedValue = ensureScriptStructure(ensureScriptBlockIds(ensureSceneHeading(null)));
             const newScriptId = await scriptRepository.createScript(DEFAULT_SCRIPT_TITLE, seedValue);
             const activeBlockId = getFirstBlockId(seedValue);
 

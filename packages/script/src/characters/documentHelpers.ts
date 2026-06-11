@@ -5,6 +5,8 @@ import {
 
 import {
     type FountainJSONContent,
+    getScriptBlockLegacyType,
+    isScriptBlockNode,
     type ScriptDocument,
 } from '../document';
 import {
@@ -91,3 +93,52 @@ export const unchangedScriptDocument = (value: ScriptDocument): ScriptDocumentCh
     value,
     changed: false,
 });
+
+type MapNodesResult = {
+    nodes: FountainJSONContent[] | undefined,
+    changed: boolean,
+};
+
+export const mapCharacterBlockNodes = (
+    nodes: FountainJSONContent[] | undefined,
+    visitor: (node: FountainJSONContent) => FountainJSONContent,
+): MapNodesResult => {
+    if (!Array.isArray(nodes)) {
+        return {nodes, changed: false};
+    }
+
+    let didChange = false;
+    const nextNodes = nodes.map(node => {
+        if (!node || typeof node !== 'object') {
+            return node;
+        }
+
+        if (isScriptBlockNode(node) && isCharacterBlockType(getScriptBlockLegacyType(node))) {
+            const next = visitor(node);
+
+            if (next !== node) {
+                didChange = true;
+            }
+
+            return next;
+        }
+
+        const {nodes: nextContent, changed: didChangeChildren} = mapCharacterBlockNodes(node.content, visitor);
+
+        if (!didChangeChildren) {
+            return node;
+        }
+
+        didChange = true;
+
+        return {
+            ...node,
+            content: nextContent,
+        };
+    });
+
+    return {
+        nodes: didChange ? nextNodes : nodes,
+        changed: didChange,
+    };
+};

@@ -13,16 +13,13 @@ export interface SceneItem {
 }
 
 export interface StructureGroup {
-    /** ROOT_ACT_GROUP for scenes before any act, or the act block id. */
     groupId: string,
-    /** null for ROOT_ACT_GROUP, otherwise the act name. */
     actName: string | null,
     scenes: SceneItem[],
 }
 
 export interface StructureState {
     groups: StructureGroup[],
-    /** Maps any block id → the scene block id it belongs to (used for active highlight). */
     sceneAncestorByBlockId: ReadonlyMap<string, string>,
 }
 
@@ -42,9 +39,7 @@ interface RawBlock {
     sceneBlockId?: string | null,
 }
 
-const buildState = (
-    blocks: RawBlock[],
-): StructureState => {
+const buildState = (blocks: RawBlock[]): StructureState => {
     const groups: StructureGroup[] = [
         {
             groupId: ROOT_ACT_GROUP, actName: null, scenes: [],
@@ -101,7 +96,19 @@ export const deriveStructureStateFromLive = (
         text: row.kind === 'act' ? row.name : row.title,
     }));
 
-    const {groups} = buildState(blocks);
+    const result = buildState(blocks);
+
+    if (live.sceneByBlockId.size > 0) {
+        const mergedSceneAncestorByBlockId = new Map<string, string>(result.sceneAncestorByBlockId);
+
+        live.sceneByBlockId.forEach((sceneBlockId, blockId) => {
+            mergedSceneAncestorByBlockId.set(blockId, sceneBlockId);
+        });
+
+        liveCache.set(live, {...result, sceneAncestorByBlockId: mergedSceneAncestorByBlockId});
+
+        return {...result, sceneAncestorByBlockId: mergedSceneAncestorByBlockId};
+    }
 
     return {groups, sceneAncestorByBlockId: live.sceneByBlockId};
 };

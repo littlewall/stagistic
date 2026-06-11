@@ -1,3 +1,4 @@
+import {normalizeCharacterColorHex} from '@stagistic/script';
 import {parseColor} from 'react-aria-components';
 
 import {
@@ -5,26 +6,7 @@ import {
     PASTEL_LIGHTNESS,
 } from './constants';
 
-export const normalizeHexColor = (value: string | null | undefined) => {
-    if (!value) {
-        return null;
-    }
-
-    const trimmed = value.trim();
-
-    if ((/^#[\da-f]{6}$/iu).test(trimmed)) {
-        return trimmed.toUpperCase();
-    }
-
-    const shortHexMatch = trimmed.match(/^#([\da-f])([\da-f])([\da-f])$/iu);
-
-    if (!shortHexMatch) {
-        return null;
-    }
-
-    return `#${shortHexMatch[1]}${shortHexMatch[1]}${shortHexMatch[2]}${shortHexMatch[2]}${shortHexMatch[3]}${shortHexMatch[3]}`
-        .toUpperCase();
-};
+export {normalizeCharacterColorHex as normalizeHexColor};
 
 export const getPickerColorValue = (hexColor: string, saturationPercent: number) => {
     try {
@@ -46,5 +28,5 @@ export const getPastelHexFromHue = (hueValue: number, saturationPercent: number)
     const normalizedHue = Math.max(0, Math.min(359.99, hueValue));
     const pastelColor = parseColor(`hsl(${normalizedHue}, ${saturationPercent}%, ${PASTEL_LIGHTNESS}%)`);
 
-    return normalizeHexColor(pastelColor.toString('hex')) ?? DEFAULT_COLOR_HEX;
+    return normalizeCharacterColorHex(pastelColor.toString('hex')) ?? DEFAULT_COLOR_HEX;
 };

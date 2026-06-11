@@ -8,10 +8,10 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    width: 100%;
-    max-width: var(--editor-page-width, 960px);
+    /* Fixed page width: when sidebars narrow the host below this, the page
+       is clipped at the edges instead of reflowing its text. */
+    width: var(--editor-page-width, 960px);
     min-height: 0;
-    margin: 0 auto;
     padding: var(--space-3xl) 0 var(--space-5xl);
     background-color: var(--editor-page-break-background, var(--color-surface));
     box-shadow: var(--shadow-canvas);

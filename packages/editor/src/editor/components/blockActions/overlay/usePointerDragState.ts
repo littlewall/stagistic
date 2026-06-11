@@ -3,7 +3,6 @@ import {
     type RefObject, useCallback, useRef, useState,
 } from 'react';
 
-import {setActiveBlockSyncSuppressed} from '../../../hooks/useEditorActiveBlockSync';
 import type {FountainBlockType} from '../../../tiptap/fountainCore';
 import {DRAG_DISABLED_BLOCK_TYPES} from './constants';
 import {resolveDropLocation} from './geometry';
@@ -51,10 +50,6 @@ export const usePointerDragState = ({
     }, []);
 
     const clearDragState = useCallback(() => {
-        if (editor) {
-            setActiveBlockSyncSuppressed(editor, false);
-        }
-
         activeDragRef.current = null;
         dragPointerYRef.current = null;
         setActiveDrag(null);

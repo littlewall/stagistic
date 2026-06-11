@@ -1,9 +1,7 @@
 import {splitTrailingParentheticalSuffix} from '@stagistic/shared';
 
 import {
-    type FountainJSONContent,
     getScriptBlockLegacyType,
-    isScriptBlockNode,
     type ScriptDocument,
 } from '../document';
 import {
@@ -14,7 +12,7 @@ import {
     type CharacterRefByKey,
     getCharacterRefByKey,
     getNodeTextContent,
-    isCharacterBlockType,
+    mapCharacterBlockNodes,
     normalizeCharacterDisplayName,
     type ScriptDocumentChangeResult,
     unchangedScriptDocument,
@@ -128,92 +126,42 @@ export const renameCharacterInScriptDocument = (
     getCharacterNameForBlockType: (name: string, blockType: unknown) => string,
     options?: {characterId?: string},
 ): ScriptDocumentChangeResult => {
-    const replaceNodes = (nodes: FountainJSONContent[] | undefined): {
-        nodes: FountainJSONContent[] | undefined,
-        changed: boolean,
-    } => {
-        if (!Array.isArray(nodes)) {
-            return {
-                nodes,
-                changed: false,
-            };
+    const {nodes: nextContent, changed} = mapCharacterBlockNodes(value.content, node => {
+        const blockType = getScriptBlockLegacyType(node);
+        const sourceLine = getNodeTextContent(node);
+        const replacementName = getCharacterNameForBlockType(toCharacterName, blockType);
+        const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
+        const {
+            line: renamedLine,
+            changed: didRenameLine,
+            characterRefByKey: nextCharacterRefByKey,
+        } = renameCharacterLine(
+            sourceLine,
+            fromCharacterKey,
+            replacementName,
+            sourceCharacterRefByKey,
+            options?.characterId,
+        );
+
+        if (!didRenameLine) {
+            return node;
         }
 
-        let didChange = false;
-        const nextNodes = nodes.map(node => {
-            if (!node || typeof node !== 'object') {
-                return node;
-            }
-
-            const blockType = getScriptBlockLegacyType(node);
-
-            if (isScriptBlockNode(node) && isCharacterBlockType(blockType)) {
-                const sourceLine = getNodeTextContent(node);
-                const replacementName = getCharacterNameForBlockType(toCharacterName, blockType);
-                const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
-                const {
-                    line: renamedLine,
-                    changed: didRenameLine,
-                    characterRefByKey: nextCharacterRefByKey,
-                } = renameCharacterLine(
-                    sourceLine,
-                    fromCharacterKey,
-                    replacementName,
-                    sourceCharacterRefByKey,
-                    options?.characterId,
-                );
-
-                if (!didRenameLine) {
-                    return node;
-                }
-
-                didChange = true;
-
-                return withCharacterRefByKey({
-                    ...node,
-                    content: renamedLine.length > 0
-                        ? [{type: 'text', text: renamedLine}]
-                        : [],
-                }, nextCharacterRefByKey);
-            }
-
-            const {
-                nodes: nextContent,
-                changed: didChangeChildren,
-            } = replaceNodes(node.content);
-
-            if (!didChangeChildren) {
-                return node;
-            }
-
-            didChange = true;
-
-            return {
+        return withCharacterRefByKey(
+            {
                 ...node,
-                content: nextContent,
-            };
-        });
-
-        return {
-            nodes: didChange ? nextNodes : nodes,
-            changed: didChange,
-        };
-    };
-
-    const {
-        nodes: nextContent,
-        changed,
-    } = replaceNodes(value.content);
+                content: renamedLine.length > 0 ? [{type: 'text', text: renamedLine}] : [],
+            },
+            nextCharacterRefByKey,
+        );
+    });
 
     if (!changed || !nextContent) {
         return unchangedScriptDocument(value);
     }
 
     return {
-        value: {
-            ...value,
-            content: nextContent,
-        },
+        value: {...value, content: nextContent},
         changed: true,
     };
 };

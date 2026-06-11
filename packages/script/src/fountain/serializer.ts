@@ -240,5 +240,3 @@ export const fountainSerializer = (
 
     return outputLines.join('\n');
 };
-
-export const serializeFountain = fountainSerializer;
