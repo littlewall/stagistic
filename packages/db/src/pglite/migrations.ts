@@ -34,16 +34,27 @@ export const runPgliteMigrations = async (client: PGlite) => {
         const safeId = migration.id.replace(/'/gu, '\'\'');
 
         try {
+            /*
+             * Run the migration SQL and the tracking INSERT inside a single
+             * exec() call. Wrapping in BEGIN/COMMIT means PGlite treats the
+             * whole block as one transaction — if anything fails, the ROLLBACK
+             * that follows leaves the DB clean and the migration un-marked.
+             *
+             * Note: DDL in PGlite is transactional (PostgreSQL 16 semantics),
+             * so ALTER TABLE / CREATE INDEX roll back correctly on failure.
+             */
             await client.exec(
                 `BEGIN;\n${migration.sql}\n`
                 + `INSERT INTO ${MIGRATIONS_TABLE} (id, applied_at) VALUES ('${safeId}', ${Date.now()});\n`
                 + 'COMMIT;',
             );
         } catch (error) {
+            console.error(`[db] Migration ${migration.id} failed:`, error);
+
             try {
                 await client.exec('ROLLBACK;');
             } catch (rollbackError) {
-                console.warn('Failed to rollback migration', rollbackError);
+                console.warn('[db] Failed to rollback migration', rollbackError);
             }
 
             throw error;

@@ -1,7 +1,6 @@
 import {
     ELEMENT_ACT,
     ELEMENT_SCENE_HEADING,
-    normalizeActName,
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 
@@ -47,7 +46,7 @@ export const buildStructureRuntime = (doc: ProseMirrorNode): EditorLiveStructure
                 const row: EditorLiveStructureRow = {
                     kind: 'act',
                     blockId,
-                    name: normalizeActName(node.textContent),
+                    name: node.textContent.trim(),
                     index: rows.length,
                 };
 

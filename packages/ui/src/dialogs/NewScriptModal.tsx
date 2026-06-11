@@ -57,7 +57,7 @@ export const NewScriptModal = ({
         >
             <h2 className={styles.title}>Create new script</h2>
             <p className={styles.subtitle}>
-                Give your new scenario a working title. You can change it later.
+                Give your new script a working title. You can change it later.
             </p>
             <form className={styles.form} onSubmit={handleSubmit}>
                 <label className={styles.label} htmlFor="script-name">
@@ -69,7 +69,7 @@ export const NewScriptModal = ({
                     className={styles.input}
                     value={name}
                     onChange={handleNameChange}
-                    placeholder="Untitled scenario"
+                    placeholder="Untitled script"
                 />
                 <div className={styles.actions}>
                     <Button

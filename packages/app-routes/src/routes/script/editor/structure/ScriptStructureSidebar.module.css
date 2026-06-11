@@ -105,7 +105,6 @@
     min-width: 0;
     font: inherit;
     color: inherit;
-    text-transform: uppercase;
     background: transparent;
     border: none;
     border-radius: 0;
@@ -272,6 +271,14 @@
 .itemLabel {
     min-width: 0;
     overflow-wrap: break-word;
+}
+
+.sceneTitle {
+    text-transform: var(--scene-heading-casing, uppercase);
+}
+
+.actTitleDisplay {
+    text-transform: var(--act-casing, uppercase);
 }
 
 .scenePlaceholder {

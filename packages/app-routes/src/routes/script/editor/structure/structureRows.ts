@@ -2,49 +2,54 @@ import type {EditorLiveStructureSnapshot} from '@stagistic/editor';
 import {
     ELEMENT_ACT,
     ELEMENT_SCENE_HEADING,
-    normalizeActName,
     type ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
 
-export const ROOT_ACT_GROUP = '__root__' as const;
+export const ROOT_ACT_GROUP = '__root__';
 
 export interface SceneItem {
-    blockId: string;
-    title: string;
+    blockId: string,
+    title: string,
 }
 
 export interface StructureGroup {
     /** ROOT_ACT_GROUP for scenes before any act, or the act block id. */
-    groupId: string;
+    groupId: string,
     /** null for ROOT_ACT_GROUP, otherwise the act name. */
-    actName: string | null;
-    scenes: SceneItem[];
+    actName: string | null,
+    scenes: SceneItem[],
 }
 
 export interface StructureState {
-    groups: StructureGroup[];
+    groups: StructureGroup[],
     /** Maps any block id → the scene block id it belongs to (used for active highlight). */
-    sceneAncestorByBlockId: ReadonlyMap<string, string>;
+    sceneAncestorByBlockId: ReadonlyMap<string, string>,
 }
 
 const EMPTY_STATE: StructureState = {
-    groups: [{groupId: ROOT_ACT_GROUP, actName: null, scenes: []}],
+    groups: [
+        {
+            groupId: ROOT_ACT_GROUP, actName: null, scenes: [],
+        },
+    ],
     sceneAncestorByBlockId: new Map(),
 };
 
-// Identity-stable caches
-const liveCache = new WeakMap<EditorLiveStructureSnapshot, StructureState>();
-const indexCache = new WeakMap<ScriptBlockIndexSnapshot, StructureState>();
-
 interface RawBlock {
-    blockId: string;
-    blockType: string;
-    text: string;
-    sceneBlockId?: string | null;
+    blockId: string,
+    blockType: string,
+    text: string,
+    sceneBlockId?: string | null,
 }
 
-const buildState = (blocks: RawBlock[]): StructureState => {
-    const groups: StructureGroup[] = [{groupId: ROOT_ACT_GROUP, actName: null, scenes: []}];
+const buildState = (
+    blocks: RawBlock[],
+): StructureState => {
+    const groups: StructureGroup[] = [
+        {
+            groupId: ROOT_ACT_GROUP, actName: null, scenes: [],
+        },
+    ];
     const sceneAncestorByBlockId = new Map<string, string>();
     let currentSceneBlockId: string | null = null;
 
@@ -56,7 +61,7 @@ const buildState = (blocks: RawBlock[]): StructureState => {
         if (block.blockType === ELEMENT_ACT) {
             groups.push({
                 groupId: block.blockId,
-                actName: normalizeActName(block.text),
+                actName: block.text,
                 scenes: [],
             });
             currentSceneBlockId = null;
@@ -83,15 +88,11 @@ const buildState = (blocks: RawBlock[]): StructureState => {
     return {groups, sceneAncestorByBlockId};
 };
 
-export const deriveStructureStateFromLive = (live: EditorLiveStructureSnapshot): StructureState => {
+export const deriveStructureStateFromLive = (
+    live: EditorLiveStructureSnapshot,
+): StructureState => {
     if (live.rows.length === 0) {
         return EMPTY_STATE;
-    }
-
-    const cached = liveCache.get(live);
-
-    if (cached) {
-        return cached;
     }
 
     const blocks: RawBlock[] = live.rows.map(row => ({
@@ -100,11 +101,9 @@ export const deriveStructureStateFromLive = (live: EditorLiveStructureSnapshot):
         text: row.kind === 'act' ? row.name : row.title,
     }));
 
-    const result = buildState(blocks);
+    const {groups} = buildState(blocks);
 
-    liveCache.set(live, result);
-
-    return result;
+    return {groups, sceneAncestorByBlockId: live.sceneByBlockId};
 };
 
 export const deriveStructureStateFromIndex = (
@@ -112,12 +111,6 @@ export const deriveStructureStateFromIndex = (
 ): StructureState => {
     if (!snap || !Array.isArray(snap.blocks) || snap.blocks.length === 0) {
         return EMPTY_STATE;
-    }
-
-    const cached = indexCache.get(snap);
-
-    if (cached) {
-        return cached;
     }
 
     const blocks: RawBlock[] = snap.blocks
@@ -129,11 +122,7 @@ export const deriveStructureStateFromIndex = (
             sceneBlockId: b.sceneBlockId,
         }));
 
-    const result = buildState(blocks);
-
-    indexCache.set(snap, result);
-
-    return result;
+    return buildState(blocks);
 };
 
 export const resolveActiveSceneBlockId = (

@@ -172,7 +172,7 @@ export const useEditorStructureRequests = ({
 
         lastRenameActRequestIdRef.current = renameActRequest.requestId;
 
-        const normalizedName = renameActRequest.nextName.trim().toLocaleUpperCase();
+        const normalizedName = renameActRequest.nextName.trim();
 
         if (!renameActRequest.blockId) {
             return;

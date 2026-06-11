@@ -29,9 +29,8 @@
     justify-content: center;
     padding: var(--space-md) 0 calc(var(--space-md) - 1px);
     font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-medium);
     color: var(--color-text);
-    text-transform: uppercase;
-    letter-spacing: var(--letter-spacing-xl);
     background: var(--color-surface);
     border: none;
     border-bottom: 2px solid var(--color-text);
@@ -59,8 +58,6 @@
         font-size: var(--font-size-sm);
         font-weight: var(--font-weight-bold);
         color: var(--color-text-muted);
-        text-transform: uppercase;
-        letter-spacing: var(--letter-spacing-lg);
     }
 }
 
@@ -501,8 +498,6 @@
     font-size: var(--font-size-xxs);
     font-weight: var(--font-weight-bold);
     color: var(--color-text-muted);
-    text-transform: uppercase;
-    letter-spacing: var(--letter-spacing-md);
 }
 
 .characterGenderQueryInput {

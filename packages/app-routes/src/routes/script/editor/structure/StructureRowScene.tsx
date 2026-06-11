@@ -19,7 +19,6 @@ export const StructureRowScene = memo(({
         group: groupId,
         type: SCENE_DND_TYPE,
         accept: [SCENE_DND_TYPE],
-        // Visible clone at the drop position; original element follows the cursor.
         feedback: 'clone',
     });
 
@@ -44,7 +43,7 @@ export const StructureRowScene = memo(({
                     onFocus(blockId);
                 }}
             >
-                <span className={styles.itemLabel}>{title}</span>
+                <span className={`${styles.itemLabel} ${styles.sceneTitle}`}>{title}</span>
             </button>
         </li>
     );

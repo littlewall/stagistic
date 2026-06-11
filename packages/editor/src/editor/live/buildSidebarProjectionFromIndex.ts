@@ -3,7 +3,6 @@ import {
     ELEMENT_CHARACTER,
     ELEMENT_SCENE_HEADING,
     type IndexedScriptBlock,
-    normalizeActName,
     normalizeCharacterColorHex,
     normalizeCharacterKey,
     type ScriptBlockIndexSnapshot,
@@ -65,7 +64,7 @@ const buildStructureSnapshot = (indexSnapshot: ScriptBlockIndexSnapshot): Editor
             const row: EditorLiveStructureRow = {
                 kind: 'act',
                 blockId: block.blockId,
-                name: normalizeActName(block.textContent),
+                name: normalizeText(block.textContent),
                 index: rows.length,
             };
 

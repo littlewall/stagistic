@@ -264,11 +264,11 @@ export const ScriptEditorRoute = () => {
     if (showEditorLoader) {
         return (
             <LoaderOverlay
-                title="Připravuji editor"
-                subtitle="Načítám scénář a editorové prostředí"
+                title="Preparing editor"
+                subtitle="Loading your script"
                 progress={editorLoadState.progress}
                 statusText={editorLoadState.statusText}
-                hint={storageError ?? 'Prosím vyčkejte, připravujeme editor.'}
+                hint={storageError ?? 'Please wait while we set up the editor.'}
             />
         );
     }

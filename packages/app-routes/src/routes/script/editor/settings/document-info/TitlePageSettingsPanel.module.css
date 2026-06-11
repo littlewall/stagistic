@@ -7,8 +7,6 @@
         font-size: var(--font-size-sm);
         font-weight: var(--font-weight-bold);
         color: var(--color-text-muted);
-        text-transform: uppercase;
-        letter-spacing: var(--letter-spacing-md);
     }
 }
 
@@ -21,8 +19,6 @@
         font-size: var(--font-size-sm);
         font-weight: var(--font-weight-semibold);
         color: var(--color-text-muted);
-        text-transform: uppercase;
-        letter-spacing: var(--letter-spacing-md);
     }
 
     & .hint {
@@ -33,18 +29,18 @@
 }
 
 .textInput {
+    box-sizing: border-box;
+    width: 100%;
     padding: 6px 10px;
     font-size: var(--font-size-sm);
+    color: var(--color-text);
     background: var(--color-input-bg, var(--color-surface));
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    color: var(--color-text);
-    width: 100%;
-    box-sizing: border-box;
 
     &:focus {
-        outline: none;
         border-color: var(--color-surface-accent);
+        outline: none;
     }
 
     &::placeholder {
@@ -54,22 +50,22 @@
 }
 
 .textarea {
+    resize: vertical;
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 72px;
     padding: 6px 10px;
+    font-family: inherit;
     font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
     background: var(--color-input-bg, var(--color-surface));
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    color: var(--color-text);
-    width: 100%;
-    box-sizing: border-box;
-    resize: vertical;
-    min-height: 72px;
-    font-family: inherit;
-    line-height: var(--line-height-normal);
 
     &:focus {
-        outline: none;
         border-color: var(--color-surface-accent);
+        outline: none;
     }
 }
 
@@ -94,54 +90,54 @@
 }
 
 .checkboxLabel {
+    cursor: pointer;
     display: flex;
-    align-items: center;
     gap: var(--space-md);
+    align-items: center;
+    padding-bottom: 7px;
     font-size: var(--font-size-sm);
     color: var(--color-text);
-    cursor: pointer;
-    padding-bottom: 7px;
 }
 
 .dateInput {
+    box-sizing: border-box;
+    width: 100%;
     padding: 6px 10px;
     font-size: var(--font-size-sm);
+    color: var(--color-text);
     background: var(--color-input-bg, var(--color-surface));
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    color: var(--color-text);
-    width: 100%;
-    box-sizing: border-box;
 
     &:focus {
-        outline: none;
         border-color: var(--color-surface-accent);
+        outline: none;
     }
 
     &:disabled {
-        opacity: .4;
         cursor: not-allowed;
+        opacity: .4;
     }
 }
 
 .draftDatePreview {
+    padding: 4px 0 5px;
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
     white-space: nowrap;
-    padding: 4px 0 5px;
 }
 
 .select {
+    cursor: pointer;
     padding: 6px 10px;
     font-size: var(--font-size-sm);
+    color: var(--color-text);
     background: var(--color-input-bg, var(--color-surface));
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
-    color: var(--color-text);
-    cursor: pointer;
 
     &:focus {
-        outline: none;
         border-color: var(--color-surface-accent);
+        outline: none;
     }
 }

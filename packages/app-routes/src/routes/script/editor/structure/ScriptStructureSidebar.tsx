@@ -144,14 +144,14 @@ export const ScriptStructureSidebar = () => {
 
     // ── Actions ───────────────────────────────────────────────────────────────
     const handleRenameAct = useCallback((blockId: string, nextName: string) => {
-        const normalizedName = nextName.toLocaleUpperCase().trim();
+        const trimmedName = nextName.trim();
 
-        setActNamePreviewById(prev => ({...prev, [blockId]: normalizedName}));
-        actCommands.renameAct(blockId, normalizedName);
+        setActNamePreviewById(prev => ({...prev, [blockId]: trimmedName}));
+        actCommands.renameAct(blockId, trimmedName);
     }, [actCommands]);
 
     const handleActNamePreview = useCallback((blockId: string, nextName: string) => {
-        setActNamePreviewById(prev => ({...prev, [blockId]: nextName.toLocaleUpperCase()}));
+        setActNamePreviewById(prev => ({...prev, [blockId]: nextName.trim()}));
     }, []);
 
     const handleDeleteAct = useCallback((blockId: string) => {

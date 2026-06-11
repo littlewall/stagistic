@@ -1,7 +1,7 @@
 import {DEFAULT_EDITOR_SETTINGS, type StructureSettings} from '../settings';
 
 export const normalizeActName = (value: string) => {
-    return value.trim().toLocaleUpperCase();
+    return value.trim();
 };
 
 export const getDefaultActName = (index: number) => {

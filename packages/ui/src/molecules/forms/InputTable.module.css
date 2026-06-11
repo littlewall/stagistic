@@ -11,8 +11,6 @@
         font-size: var(--font-size-sm);
         font-weight: var(--font-weight-bold);
         color: var(--color-text-muted);
-        text-transform: uppercase;
-        letter-spacing: var(--letter-spacing-md);
     }
 }
 
@@ -40,15 +38,15 @@
     }
 
     & .removeRowButton {
+        cursor: pointer;
         padding: 2px 5px;
         font-size: var(--font-size-sm);
+        line-height: var(--line-height-none);
         color: var(--color-text-muted);
+        opacity: 0;
         background: transparent;
         border: none;
         border-radius: var(--radius-sm);
-        cursor: pointer;
-        opacity: 0;
-        line-height: var(--line-height-none);
         transition: opacity 120ms, color 120ms;
 
         &:hover {
@@ -102,18 +100,18 @@
         }
 
         & .removeEntryButton {
+            cursor: pointer;
             position: absolute;
             top: 50%;
             right: 4px;
+            transform: translateY(-50%);
             padding: 1px 4px;
             font-size: var(--font-size-sm);
             line-height: var(--line-height-none);
             color: var(--color-text-muted);
+            opacity: 0;
             background: transparent;
             border: none;
-            cursor: pointer;
-            opacity: 0;
-            transform: translateY(-50%);
             transition: opacity 100ms, color 100ms;
 
             &:hover {
@@ -124,6 +122,8 @@
     }
 
     & .addEntryButton {
+        cursor: pointer;
+        margin-top: 2px;
         padding: 3px 6px;
         font-family: inherit;
         font-size: var(--font-size-sm);
@@ -132,8 +132,6 @@
         background: transparent;
         border: none;
         border-radius: var(--radius-sm);
-        cursor: pointer;
-        margin-top: 2px;
 
         &:hover {
             color: var(--color-text);
@@ -148,6 +146,7 @@
     padding: var(--space-md) 0;
 
     & .addRowButton {
+        cursor: pointer;
         grid-column: 1 / -2;
         padding: 3px 6px;
         font-family: inherit;
@@ -157,7 +156,6 @@
         background: transparent;
         border: none;
         border-radius: var(--radius-sm);
-        cursor: pointer;
 
         &:hover {
             color: var(--color-text);

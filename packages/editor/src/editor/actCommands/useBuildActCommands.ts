@@ -180,7 +180,7 @@ export const useBuildActCommands = ({
         }
 
         const currentValue = instance.getJSON() as ScriptDocument;
-        const [nextContent, didChange] = setPlainTextContent(currentValue.content, blockId, nextName.trim().toLocaleUpperCase());
+        const [nextContent, didChange] = setPlainTextContent(currentValue.content, blockId, nextName.trim());
 
         tryCommitDocument(
             instance,

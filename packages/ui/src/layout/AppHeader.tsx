@@ -5,7 +5,11 @@ import {
     useEffect,
     useState,
 } from 'react';
-import {Button} from 'react-aria-components';
+import {
+    Button,
+    Tooltip,
+    TooltipTrigger,
+} from 'react-aria-components';
 
 import {
     HomeIcon,
@@ -72,28 +76,37 @@ export const AppHeader = ({
             />
             <div className={clsx(styles.inner, isFullWidth && styles.full)}>
                 <div className={styles.leftControls}>
-                    <Button
-                        className={styles.iconButton}
-                        onPress={onHome}
-                        aria-label="Go to home"
-                    >
-                        <HomeIcon className={styles.icon} aria-hidden="true" />
-                    </Button>
-                    <Button
-                        className={styles.iconButton}
-                        onPress={onNewScript}
-                        aria-label="New script"
-                    >
-                        <PlusIcon className={styles.icon} aria-hidden="true" />
-                    </Button>
-                    {onImportScript ? (
+                    <TooltipTrigger delay={600}>
                         <Button
                             className={styles.iconButton}
-                            onPress={onImportScript}
-                            aria-label="Import script"
+                            onPress={onHome}
+                            aria-label="Go to home"
                         >
-                            <UploadIcon className={styles.icon} aria-hidden="true" />
+                            <HomeIcon className={styles.icon} aria-hidden="true" />
                         </Button>
+                        <Tooltip className={styles.tooltip} placement="bottom">Home</Tooltip>
+                    </TooltipTrigger>
+                    <TooltipTrigger delay={600}>
+                        <Button
+                            className={styles.iconButton}
+                            onPress={onNewScript}
+                            aria-label="New script"
+                        >
+                            <PlusIcon className={styles.icon} aria-hidden="true" />
+                        </Button>
+                        <Tooltip className={styles.tooltip} placement="bottom">New script</Tooltip>
+                    </TooltipTrigger>
+                    {onImportScript ? (
+                        <TooltipTrigger delay={600}>
+                            <Button
+                                className={styles.iconButton}
+                                onPress={onImportScript}
+                                aria-label="Import script"
+                            >
+                                <UploadIcon className={styles.icon} aria-hidden="true" />
+                            </Button>
+                            <Tooltip className={styles.tooltip} placement="bottom">Import script</Tooltip>
+                        </TooltipTrigger>
                     ) : null}
                 </div>
                 <div className={styles.scriptControls}>

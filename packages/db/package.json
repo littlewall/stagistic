@@ -7,7 +7,7 @@
     "scripts": {
         "lint": "eslint .",
         "test": "vp test run --dir .",
-        "db:generate": "drizzle-kit generate",
+        "db:generate": "drizzle-kit generate && node ./scripts/compile-migrations.mjs",
         "db:check": "drizzle-kit check",
         "db:compile-migrations": "node ./scripts/compile-migrations.mjs"
     },

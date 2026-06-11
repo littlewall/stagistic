@@ -26,9 +26,8 @@
 
         & .label {
             font-size: var(--font-size-sm);
-            color: var(--color-text-muted);
-            text-transform: uppercase;
-            letter-spacing: var(--letter-spacing-xl);
+            font-weight: var(--font-weight-medium);
+            color: var(--color-text);
         }
 
         & .input {

@@ -77,7 +77,7 @@ export const ScriptListRoute = () => {
                 <PageHeader>
                     <div>
                         <Kicker>Scripts</Kicker>
-                        <PageTitle className={styles.title}>All scenarios</PageTitle>
+                        <PageTitle className={styles.title}>All scripts</PageTitle>
                         <SubtleText className={styles.subtitle}>
                             Keep drafts, outlines, and finished scripts in one consistent view.
                         </SubtleText>
@@ -89,10 +89,10 @@ export const ScriptListRoute = () => {
                 {scriptsLoading ? (
                     <div className={styles.listLoading}>
                         <ProgressPanel
-                            title="Načítám scénáře"
-                            subtitle="Synchronizuji seznam scénářů"
+                            title="Loading scripts"
+                            subtitle="Syncing your scripts"
                             size="sm"
-                            statusText="Načítám seznam scénářů"
+                            statusText="Loading script list"
                         />
                     </div>
                 ) : (

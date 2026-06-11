@@ -82,7 +82,7 @@ export const createPgliteBootstrap = ({
             prepareLocalDbWithProgress: async onProgress => {
                 onProgress({
                     step: 'client',
-                    label: 'Spouštím lokální databázi',
+                    label: 'Starting local database',
                     progress: 0.1,
                 });
 
@@ -90,7 +90,7 @@ export const createPgliteBootstrap = ({
 
                 onProgress({
                     step: 'ready',
-                    label: 'Databáze připravena',
+                    label: 'Database ready',
                     progress: 1,
                 });
             },
@@ -195,35 +195,35 @@ export const createPgliteBootstrap = ({
     ) => {
         onProgress({
             step: 'fs-bundle',
-            label: 'Načítám PGlite datový balík',
+            label: 'Loading data bundle',
             progress: 0.1,
         });
         await loadFsBundle();
 
         onProgress({
             step: 'wasm',
-            label: 'Načítám PGlite wasm modul',
+            label: 'Loading WASM module',
             progress: 0.35,
         });
         await loadWasmModule();
 
         onProgress({
             step: 'client',
-            label: 'Spouštím lokální databázi',
+            label: 'Starting local database',
             progress: 0.6,
         });
         await getClient();
 
         onProgress({
             step: 'migrations',
-            label: 'Aplikuji migrace',
+            label: 'Applying migrations',
             progress: 0.8,
         });
         await runMigrations();
 
         onProgress({
             step: 'ready',
-            label: 'Finalizuji databázi',
+            label: 'Finalizing database',
             progress: 1,
         });
         await getLocalDb();

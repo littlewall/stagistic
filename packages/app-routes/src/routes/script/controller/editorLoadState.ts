@@ -57,7 +57,7 @@ export const deriveEditorLoadState = ({
 }: DeriveEditorLoadStateArgs): EditorLoadState => {
     const items = [
         {
-            label: 'Načítám seznam scénářů',
+            label: 'Loading scripts',
             status: resolveEditorLoadItemStatus({
                 hasError: Boolean(recentScriptsError),
                 isActive: recentScriptsLoading,
@@ -65,7 +65,7 @@ export const deriveEditorLoadState = ({
             }),
         },
         {
-            label: 'Načítám metadata scénáře',
+            label: 'Loading script metadata',
             status: resolveEditorLoadItemStatus({
                 hasError: Boolean(currentScriptError),
                 isActive: currentScriptLoading,
@@ -73,7 +73,7 @@ export const deriveEditorLoadState = ({
             }),
         },
         {
-            label: 'Načítám obsah scénáře',
+            label: 'Loading script content',
             status: resolveEditorLoadItemStatus({
                 hasError: Boolean(storageError),
                 isActive: isContentLoading,
@@ -81,7 +81,7 @@ export const deriveEditorLoadState = ({
             }),
         },
         {
-            label: 'Načítám editor settings',
+            label: 'Loading editor settings',
             status: resolveEditorLoadItemStatus({
                 hasError: Boolean(storageError),
                 isActive: !scriptSettingsLoaded,
@@ -104,7 +104,7 @@ export const deriveEditorLoadState = ({
     const progress = items.reduce((sum, item) => sum + score(item.status), 0) / items.length;
     const statusText = items.find(item => item.status === 'active')?.label
         ?? items.find(item => item.status === 'error')?.label
-        ?? 'Připravuji editor';
+        ?? 'Preparing editor';
 
     return {
         progress,
