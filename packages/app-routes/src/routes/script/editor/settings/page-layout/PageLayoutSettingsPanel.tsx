@@ -1,7 +1,10 @@
 import {clsx} from '@stagistic/ui';
+import {
+    useEffect, useRef, useState,
+} from 'react';
 
-import {MIN_PAGE_MARGIN_HORIZONTAL_PX} from '../constants';
-import {clamp} from '../math';
+import {MIN_PAGE_MARGIN_HORIZONTAL_PX, PX_PER_INCH} from '../constants';
+import {clamp, formatInches} from '../math';
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import {SettingsSelect} from '../SettingsSelect';
 import sharedStyles from '../shared.module.css';
@@ -38,9 +41,6 @@ export const PageLayoutSettingsPanel = ({
         previewReferenceTotal,
         minSliderStart,
         maxSliderEnd,
-        leftMarginInches,
-        rightMarginInches,
-        contentWidthInches,
     } = slider;
     const {
         topMarginRows,
@@ -51,6 +51,36 @@ export const PageLayoutSettingsPanel = ({
     const fontSizePx = resolvedScriptSettings.typography.fontSizePx;
 
     const marginSliderStep = 0.05 * 96; // 0.05"
+
+    const [localSliderStart, setLocalSliderStart] = useState(sliderStart);
+    const [localSliderEnd, setLocalSliderEnd] = useState(sliderEnd);
+    const latestStart = useRef(sliderStart);
+    const latestEnd = useRef(sliderEnd);
+
+    useEffect(() => {
+        setLocalSliderStart(sliderStart);
+        latestStart.current = sliderStart;
+    }, [sliderStart]);
+    useEffect(() => {
+        setLocalSliderEnd(sliderEnd);
+        latestEnd.current = sliderEnd;
+    }, [sliderEnd]);
+
+    const safeTotal = Math.max(1, previewReferenceTotal);
+    const localMarginRightPx = previewReferenceTotal - localSliderEnd;
+    const localLeftMarginInches = formatInches(localSliderStart / PX_PER_INCH);
+    const localRightMarginInches = formatInches(localMarginRightPx / PX_PER_INCH);
+    const localContentWidthInches = formatInches(
+        Math.max(0, previewReferenceTotal - localSliderStart - localMarginRightPx) / PX_PER_INCH,
+    );
+    const localSliderStyleOverride = {
+        '--preview-indent-start-percent': `${(localSliderStart / safeTotal) * 100}%`,
+        '--preview-indent-end-percent': `${(localSliderEnd / safeTotal) * 100}%`,
+    } as React.CSSProperties;
+    const localSchematicOverride = {
+        '--page-margin-left-percent': `${clamp((localSliderStart / safeTotal) * 100, 0, 50)}%`,
+        '--page-margin-right-percent': `${clamp((localMarginRightPx / safeTotal) * 100, 0, 50)}%`,
+    } as React.CSSProperties;
 
     return (
         <div className={panelStyles.panelStack}>
@@ -82,7 +112,7 @@ export const PageLayoutSettingsPanel = ({
                         />
                     </div>
                 </div>
-                <div className={styles.pageSchematic} style={pagePreviewStyle}>
+                <div className={styles.pageSchematic} style={{...pagePreviewStyle, ...localSchematicOverride}}>
                     <div className={styles.pageSchematicMarginTop} />
                     <div className={styles.pageSchematicMiddle}>
                         <div className={clsx(styles.pageSchematicMargin, styles.pageSchematicMarginLeft)} />
@@ -101,7 +131,7 @@ export const PageLayoutSettingsPanel = ({
                     </div>
                     <div className={styles.pageSchematicMarginBottom} />
                 </div>
-                <div className={sharedStyles.indentSliderTrack} style={sliderStyle}>
+                <div className={sharedStyles.indentSliderTrack} style={{...sliderStyle, ...localSliderStyleOverride}}>
                     <span className={sharedStyles.indentSliderBase} />
                     <span className={sharedStyles.indentSliderMiddleBase} />
                     <span className={sharedStyles.indentSliderSelected} />
@@ -113,18 +143,23 @@ export const PageLayoutSettingsPanel = ({
                         min={0}
                         max={previewReferenceTotal}
                         step={marginSliderStep}
-                        value={sliderStart}
+                        value={localSliderStart}
                         onChange={event => {
                             const rawStart = Number.parseFloat(event.target.value);
                             const maxStart = clamp(
-                                sliderEnd - MIN_PAGE_CONTENT_WIDTH_PX,
+                                latestEnd.current - MIN_PAGE_CONTENT_WIDTH_PX,
                                 minSliderStart,
                                 previewReferenceTotal,
                             );
-                            const nextLeft = clamp(rawStart, minSliderStart, maxStart);
-                            const nextRightPx = previewReferenceTotal - sliderEnd;
+                            const next = clamp(rawStart, minSliderStart, maxStart);
 
-                            onUpdatePageSettings({marginLeftPx: nextLeft, marginRightPx: nextRightPx});
+                            latestStart.current = next;
+                            setLocalSliderStart(next);
+                        }}
+                        onPointerUp={() => {
+                            const nextRightPx = previewReferenceTotal - latestEnd.current;
+
+                            onUpdatePageSettings({marginLeftPx: latestStart.current, marginRightPx: nextRightPx});
                         }}
                         aria-label="Left page margin"
                     />
@@ -134,19 +169,24 @@ export const PageLayoutSettingsPanel = ({
                         min={0}
                         max={previewReferenceTotal}
                         step={marginSliderStep}
-                        value={sliderEnd}
+                        value={localSliderEnd}
                         onChange={event => {
                             const rawEnd = Number.parseFloat(event.target.value);
                             const minEnd = clamp(
-                                sliderStart + MIN_PAGE_CONTENT_WIDTH_PX,
+                                latestStart.current + MIN_PAGE_CONTENT_WIDTH_PX,
                                 0,
                                 maxSliderEnd,
                             );
-                            const nextEnd = clamp(rawEnd, minEnd, maxSliderEnd);
-                            const nextRightPx = previewReferenceTotal - nextEnd;
+                            const next = clamp(rawEnd, minEnd, maxSliderEnd);
+
+                            latestEnd.current = next;
+                            setLocalSliderEnd(next);
+                        }}
+                        onPointerUp={() => {
+                            const nextRightPx = previewReferenceTotal - latestEnd.current;
 
                             onUpdatePageSettings({
-                                marginLeftPx: sliderStart,
+                                marginLeftPx: latestStart.current,
                                 marginRightPx: clamp(nextRightPx, MIN_PAGE_MARGIN_HORIZONTAL_PX, previewReferenceTotal),
                             });
                         }}
@@ -154,9 +194,9 @@ export const PageLayoutSettingsPanel = ({
                     />
                 </div>
                 <div className={sharedStyles.indentSliderLabels}>
-                    <span>{'Left: '}{leftMarginInches}</span>
-                    <span>{contentWidthInches}{' wide'}</span>
-                    <span>{'Right: '}{rightMarginInches}</span>
+                    <span>{'Left: '}{localLeftMarginInches}</span>
+                    <span>{localContentWidthInches}{' wide'}</span>
+                    <span>{'Right: '}{localRightMarginInches}</span>
                 </div>
             </div>
         </div>

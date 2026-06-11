@@ -104,6 +104,8 @@ export interface ElementPreviewModel {
     sliderEnd: number,
     previewReferenceChars: number,
     minPreviewContentChars: number,
+    zoneStartPercent: number,
+    zoneEndPercent: number,
     leftTotalInches: number,
     rightTotalInches: number,
     contentChars: number,

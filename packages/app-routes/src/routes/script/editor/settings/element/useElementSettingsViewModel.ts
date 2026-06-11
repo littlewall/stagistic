@@ -211,6 +211,8 @@ export const useElementSettingsViewModel = ({
                 sliderEnd,
                 previewReferenceChars,
                 minPreviewContentChars,
+                zoneStartPercent: pageStartPercent,
+                zoneEndPercent: pageEndPercent,
                 leftTotalInches,
                 rightTotalInches,
                 contentChars,

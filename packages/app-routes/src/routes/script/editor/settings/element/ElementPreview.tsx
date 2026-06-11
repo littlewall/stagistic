@@ -1,6 +1,9 @@
 import {clsx} from '@stagistic/ui';
 import {
     type ReactNode,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import {
@@ -36,16 +39,43 @@ export const ElementPreview = ({
         sliderEnd,
         previewReferenceChars,
         minPreviewContentChars,
+        zoneStartPercent,
+        zoneEndPercent,
         leftTotalInches,
         rightTotalInches,
-        contentChars,
         hasSpacingAfter,
     } = model;
     const defaultSliderStartChars = 0;
     const defaultSliderEndChars = previewReferenceChars;
 
+    const [localStart, setLocalStart] = useState(sliderStart);
+    const [localEnd, setLocalEnd] = useState(sliderEnd);
+    const latestStart = useRef(sliderStart);
+    const latestEnd = useRef(sliderEnd);
+
+    useEffect(() => {
+        setLocalStart(sliderStart);
+        latestStart.current = sliderStart;
+    }, [sliderStart]);
+    useEffect(() => {
+        setLocalEnd(sliderEnd);
+        latestEnd.current = sliderEnd;
+    }, [sliderEnd]);
+
+    const zoneWidth = zoneEndPercent - zoneStartPercent;
+    const safeRef = Math.max(1, previewReferenceChars);
+    const localContentChars = Math.max(minPreviewContentChars, localEnd - localStart);
+    const localLeftTotalInches = leftTotalInches + (localStart - sliderStart) / SCREENPLAY_CHARS_PER_INCH;
+    const localRightTotalInches = rightTotalInches + (sliderEnd - localEnd) / SCREENPLAY_CHARS_PER_INCH;
+    const localSliderStyleOverride = {
+        '--preview-indent-start-percent': `${zoneStartPercent + (localStart / safeRef) * zoneWidth}%`,
+        '--preview-indent-end-percent': `${zoneStartPercent + (localEnd / safeRef) * zoneWidth}%`,
+        '--preview-line-start-percent': `${zoneStartPercent + (localStart / safeRef) * zoneWidth}%`,
+        '--preview-line-width': `${Math.max(6, (localEnd - localStart) / safeRef * zoneWidth)}%`,
+    } as React.CSSProperties;
+
     return (
-        <div className={sharedStyles.previewCard} style={previewStyle}>
+        <div className={sharedStyles.previewCard} style={{...previewStyle, ...localSliderStyleOverride}}>
             {toolbar}
             <div className={styles.previewSpacingRow} />
             <div className={styles.previewLineCanvas}>
@@ -68,17 +98,19 @@ export const ElementPreview = ({
                     min={0}
                     max={previewReferenceChars}
                     step={1}
-                    value={sliderStart}
+                    value={localStart}
                     onChange={event => {
                         const rawStart = Number.parseInt(event.target.value, 10);
                         const maxStart = Math.max(
                             defaultSliderStartChars,
-                            sliderEnd - minPreviewContentChars,
+                            latestEnd.current - minPreviewContentChars,
                         );
-                        const nextStart = clamp(rawStart, defaultSliderStartChars, maxStart);
+                        const next = clamp(rawStart, defaultSliderStartChars, maxStart);
 
-                        handlers.onStartChange(nextStart);
+                        latestStart.current = next;
+                        setLocalStart(next);
                     }}
+                    onPointerUp={() => handlers.onStartChange(latestStart.current)}
                     aria-label="Block start indent"
                 />
                 <input
@@ -87,21 +119,23 @@ export const ElementPreview = ({
                     min={0}
                     max={previewReferenceChars}
                     step={1}
-                    value={sliderEnd}
+                    value={localEnd}
                     onChange={event => {
                         const rawEnd = Number.parseInt(event.target.value, 10);
-                        const minEnd = sliderStart + minPreviewContentChars;
-                        const nextEnd = clamp(rawEnd, minEnd, defaultSliderEndChars);
+                        const minEnd = latestStart.current + minPreviewContentChars;
+                        const next = clamp(rawEnd, minEnd, defaultSliderEndChars);
 
-                        handlers.onEndChange(nextEnd);
+                        latestEnd.current = next;
+                        setLocalEnd(next);
                     }}
+                    onPointerUp={() => handlers.onEndChange(latestEnd.current)}
                     aria-label="Block end indent"
                 />
             </div>
             <div className={sharedStyles.indentSliderLabels}>
-                <span>{'Start: '}{formatInches(leftTotalInches)}</span>
-                <span>{formatNumeric(contentChars / SCREENPLAY_CHARS_PER_INCH)}&quot; / {contentChars} chars</span>
-                <span>{'End: '}{formatInches(rightTotalInches)}</span>
+                <span>{'Start: '}{formatInches(localLeftTotalInches)}</span>
+                <span>{formatNumeric(localContentChars / SCREENPLAY_CHARS_PER_INCH)}&quot; / {localContentChars} chars</span>
+                <span>{'End: '}{formatInches(localRightTotalInches)}</span>
             </div>
         </div>
     );
