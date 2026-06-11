@@ -20,7 +20,17 @@
 
     /* Accent */
     --color-amber: oklch(.762 .098 53.1);
+    --color-amber-hover: oklch(.8 .11 53.1);
     --color-blue: oklch(.58  .1   239);
+
+    /* Dark stage sections */
+    --color-stage-bg: oklch(.135 .006 51);
+    --color-stage-nav-bg: oklch(.105 .006 51 / .94);
+    --color-stage-nav-text: oklch(.92 .012 51);
+    --color-stage-text: oklch(.96 .008 51);
+    --color-stage-text-muted: oklch(.66 .012 51);
+    --color-stage-border: oklch(.92 .012 51 / .11);
+    --color-stage-btn-fg: oklch(.13 .006 51);
 }
 
 *,

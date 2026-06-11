@@ -17,6 +17,12 @@ export const scripts = pgTable('scripts', {
     activeBlockId: text('active_block_id'),
 });
 
+/*
+ * syncOutbox: scriptId/opType/payloadJson/createdAt are intentionally nullable
+ * so that INSERT never fails on partial records written by forward-compatible
+ * schema versions (a future migration may add new op types with different fields).
+ * Only `status` is NOT NULL because it drives queue polling.
+ */
 export const syncOutbox = pgTable('sync_outbox', {
     id: text('id').primaryKey(),
     scriptId: text('script_id'),
@@ -203,6 +209,10 @@ export const scriptBlocks = pgTable(
         blockType: text('block_type').notNull(),
         blockOrder: text('block_order').notNull(),
         textContent: text('text_content').notNull().default(''),
+        /*
+         * null for plain-text blocks; populated only when inline content has marks,
+         * non-text nodes, or attrs — i.e., when textContent alone can't round-trip.
+         */
         contentJson: text('content_json'),
         sceneId: text('scene_id').references(() => scriptScenes.id, {onDelete: 'set null'}),
         actId: text('act_id').references(() => scriptActs.id, {onDelete: 'set null'}),

@@ -44,6 +44,33 @@ const resolveInsertionIndex = (
     return index >= 0 ? index : null;
 };
 
+const recurseIntoChildren = (
+    nodes: FountainJSONContent[],
+    moveFn: (children: FountainJSONContent[] | undefined) => MoveResult,
+): MoveResult => {
+    let didChange = false;
+    const nextNodes = nodes.map(node => {
+        if (!Array.isArray(node.content) || node.content.length === 0) {
+            return node;
+        }
+
+        const [nextContent, childChanged] = moveFn(node.content);
+
+        if (!childChanged) {
+            return node;
+        }
+
+        didChange = true;
+
+        return {
+            ...node,
+            content: nextContent,
+        };
+    });
+
+    return didChange ? [nextNodes, true] : [nodes, false];
+};
+
 const moveActMarkerInNodeList = (
     nodes: FountainJSONContent[] | undefined,
     sourceActBlockId: string,
@@ -75,31 +102,7 @@ const moveActMarkerInNodeList = (
             : [nextNodes, true];
     }
 
-    let didChange = false;
-    const nextNodes = nodes.map(node => {
-        if (!Array.isArray(node.content) || node.content.length === 0) {
-            return node;
-        }
-
-        const [nextContent, childChanged] = moveActMarkerInNodeList(
-            node.content,
-            sourceActBlockId,
-            beforeBlockId,
-        );
-
-        if (!childChanged) {
-            return node;
-        }
-
-        didChange = true;
-
-        return {
-            ...node,
-            content: nextContent,
-        };
-    });
-
-    return didChange ? [nextNodes, true] : [nodes, false];
+    return recurseIntoChildren(nodes, children => moveActMarkerInNodeList(children, sourceActBlockId, beforeBlockId));
 };
 
 type SceneRange = {
@@ -165,31 +168,7 @@ const moveSceneSegmentInNodeList = (
             : [nextNodes, true];
     }
 
-    let didChange = false;
-    const nextNodes = nodes.map(node => {
-        if (!Array.isArray(node.content) || node.content.length === 0) {
-            return node;
-        }
-
-        const [nextContent, childChanged] = moveSceneSegmentInNodeList(
-            node.content,
-            sourceSceneBlockId,
-            beforeBlockId,
-        );
-
-        if (!childChanged) {
-            return node;
-        }
-
-        didChange = true;
-
-        return {
-            ...node,
-            content: nextContent,
-        };
-    });
-
-    return didChange ? [nextNodes, true] : [nodes, false];
+    return recurseIntoChildren(nodes, children => moveSceneSegmentInNodeList(children, sourceSceneBlockId, beforeBlockId));
 };
 
 export const moveActMarker = (

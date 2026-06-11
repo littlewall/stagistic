@@ -1,39 +1,23 @@
 .title {
-    font-size: var(--font-size-3xl);
+    composes: title from './dialogForm.module.css';
 }
 
 .subtitle {
-    color: var(--color-text-muted);
+    composes: subtitle from './dialogForm.module.css';
 }
 
 .form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xl);
-    margin-top: var(--space-md);
+    composes: form from './dialogForm.module.css';
+}
 
-    & .label {
-        font-size: var(--font-size-sm);
-        font-weight: var(--font-weight-medium);
-        color: var(--color-text);
-    }
+.label {
+    composes: label from './dialogForm.module.css';
+}
 
-    & .input {
-        padding: var(--space-lg) var(--space-xl);
-        background: var(--color-surface-raised);
-        border: 1px solid var(--color-border);
-        border-radius: var(--radius-sm);
+.input {
+    composes: input from './dialogForm.module.css';
+}
 
-        &:focus {
-            background: var(--color-surface);
-            border-color: color-mix(in oklch, var(--color-text) 25%, var(--color-border));
-            outline: none;
-        }
-    }
-
-    & .actions {
-        display: flex;
-        gap: var(--space-md);
-        justify-content: flex-end;
-    }
+.actions {
+    composes: actions from './dialogForm.module.css';
 }

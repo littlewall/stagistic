@@ -94,7 +94,15 @@ export const createDocumentPersister = (scriptId: string) => {
         const sceneIdByHeading = new Map(extracted.scenes.map(scene => [scene.headingBlockId, scene.id]));
         const actIdByHeading = new Map(extracted.acts.map(act => [act.headingBlockId, act.id]));
 
-        // Generate fractional index keys for all blocks based on their document position.
+        /*
+         * Fractional-indexing strategy: generate N evenly-spaced lexicographic keys
+         * (from the `fractional-indexing` library) for every block on each structural
+         * save. This means a reorder is a single bulk UPDATE — no gaps, no renumbering.
+         * The unique constraint on (script_id, block_order) was intentionally removed
+         * by migrations 0004/0005: PostgreSQL checks uniqueness row-by-row inside a
+         * single UPDATE, so swapping keys between two blocks always triggers a
+         * spurious violation before both rows are committed.
+         */
         const orderKeys = generateBlockOrderKeys(extracted.blocks.length);
 
         const toDbBlock = (block: ExtractedBlockRow) => ({

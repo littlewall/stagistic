@@ -71,7 +71,7 @@ export const ElementPreview = ({
         '--preview-indent-start-percent': `${zoneStartPercent + (localStart / safeRef) * zoneWidth}%`,
         '--preview-indent-end-percent': `${zoneStartPercent + (localEnd / safeRef) * zoneWidth}%`,
         '--preview-line-start-percent': `${zoneStartPercent + (localStart / safeRef) * zoneWidth}%`,
-        '--preview-line-width': `${Math.max(6, (localEnd - localStart) / safeRef * zoneWidth)}%`,
+        '--preview-line-width': `${Math.max(6, ((localEnd - localStart) / safeRef) * zoneWidth)}%`,
     } as React.CSSProperties;
 
     return (

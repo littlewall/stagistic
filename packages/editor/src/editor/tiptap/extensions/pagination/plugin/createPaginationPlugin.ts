@@ -19,6 +19,17 @@ export const PAGINATION_CONTROL_META_KEY = 'fountain-pagination-control';
 
 const TYPING_RECALC_DELAY_MS = 250;
 
+const computeLayoutMetrics = (extension: PaginationExtensionAdapter, view: {dom: {clientWidth: number}}) => {
+    const heightKey = `${extension.options.pageWidth}|${extension.options.marginLeft}|`
+        + `${extension.options.marginRight}|${extension.options.lineHeightPx}`;
+    const contentWidth = Math.max(
+        0,
+        view.dom.clientWidth - extension.options.marginLeft - extension.options.marginRight,
+    );
+
+    return {heightKey, contentWidth};
+};
+
 export const createPaginationPlugin = (extension: PaginationExtensionAdapter) => {
     let lastOptionsVersion = -1;
     let lastContentWidth = 0;
@@ -106,14 +117,7 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                     needsRecalc = false;
 
                     const optionsVersion = extension.storage.optionsVersion;
-                    const heightKey = `${extension.options.pageWidth}|${extension.options.marginLeft}|`
-                        + `${extension.options.marginRight}|${extension.options.lineHeightPx}`;
-
-                    const contentWidth = Math.max(
-                        0,
-                        view.dom.clientWidth - extension.options.marginLeft - extension.options.marginRight,
-                    );
-
+                    const {heightKey, contentWidth} = computeLayoutMetrics(extension, view);
                     const layoutChanged = heightKey !== lastHeightKey || contentWidth !== lastContentWidth;
 
                     lastOptionsVersion = optionsVersion;
@@ -219,14 +223,7 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                 update: (view, prevState) => {
                     const optionsVersion = extension.storage.optionsVersion;
                     const docChanged = !prevState.doc.eq(view.state.doc);
-                    const heightKey = `${extension.options.pageWidth}|${extension.options.marginLeft}|`
-                        + `${extension.options.marginRight}|${extension.options.lineHeightPx}`;
-
-                    const contentWidth = Math.max(
-                        0,
-                        view.dom.clientWidth - extension.options.marginLeft - extension.options.marginRight,
-                    );
-
+                    const {heightKey, contentWidth} = computeLayoutMetrics(extension, view);
                     const layoutChanged = heightKey !== lastHeightKey || contentWidth !== lastContentWidth;
                     const previousPluginState = paginationKey.getState(prevState);
                     const currentPluginState = paginationKey.getState(view.state);

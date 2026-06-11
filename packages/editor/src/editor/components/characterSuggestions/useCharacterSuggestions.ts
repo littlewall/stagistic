@@ -9,7 +9,7 @@ import {
 } from 'react';
 
 import {useExclusiveOverlay} from '../../hooks/useExclusiveOverlay';
-import {useEditorLiveCharacters} from '../../live';
+import {useEditorLiveCharacters} from '../../live/hooks';
 import {getEmptyEnterChooserFromState} from '../../tiptap/extensions/EmptyEnterChooserExtension';
 import {
     applyCharacterSuggestion,

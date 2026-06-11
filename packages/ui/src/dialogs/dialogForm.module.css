@@ -1,0 +1,39 @@
+.title {
+    font-size: var(--font-size-3xl);
+}
+
+.subtitle {
+    color: var(--color-text-muted);
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    margin-top: var(--space-md);
+}
+
+.label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+}
+
+.input {
+    padding: var(--space-lg) var(--space-xl);
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+
+    &:focus {
+        background: var(--color-surface);
+        border-color: color-mix(in oklch, var(--color-text) 25%, var(--color-border));
+        outline: none;
+    }
+}
+
+.actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-end;
+}

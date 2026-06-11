@@ -89,6 +89,36 @@ export const createCoreCharacterMutations = ({
         });
     };
 
+    const finalizeRename = async (
+        db: Awaited<ReturnType<typeof getDb>>,
+        scriptId: string,
+        currentCharacter: {id: string, key: string},
+        normalizedNextKey: string,
+        now: number,
+    ) => {
+        await dbQueries.updateScriptTimestamp(db, {
+            scriptId,
+            updatedAt: now,
+        });
+
+        await recordOutbox({
+            scriptId,
+            opType: 'character.rename',
+            payloadJson: buildCharacterRenamePayload(
+                scriptId,
+                currentCharacter.id,
+                currentCharacter.key,
+                normalizedNextKey,
+                now,
+            ),
+        });
+
+        return dbQueries.getScriptCharacterByKey(db, {
+            scriptId,
+            characterKey: normalizedNextKey,
+        });
+    };
+
     const renameScriptCharacter: CharacterHandlers['renameScriptCharacter'] = async (
         scriptId,
         characterId,
@@ -132,27 +162,7 @@ export const createCoreCharacterMutations = ({
                 characterId: currentCharacter.id,
             });
 
-            await dbQueries.updateScriptTimestamp(db, {
-                scriptId,
-                updatedAt: now,
-            });
-
-            await recordOutbox({
-                scriptId,
-                opType: 'character.rename',
-                payloadJson: buildCharacterRenamePayload(
-                    scriptId,
-                    currentCharacter.id,
-                    currentCharacter.key,
-                    normalizedNextKey,
-                    now,
-                ),
-            });
-
-            return dbQueries.getScriptCharacterByKey(db, {
-                scriptId,
-                characterKey: normalizedNextKey,
-            });
+            return finalizeRename(db, scriptId, currentCharacter, normalizedNextKey, now);
         }
 
         await dbQueries.updateScriptCharacterKey(db, {
@@ -162,27 +172,7 @@ export const createCoreCharacterMutations = ({
             updatedAt: now,
         });
 
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-
-        await recordOutbox({
-            scriptId,
-            opType: 'character.rename',
-            payloadJson: buildCharacterRenamePayload(
-                scriptId,
-                currentCharacter.id,
-                currentCharacter.key,
-                normalizedNextKey,
-                now,
-            ),
-        });
-
-        return dbQueries.getScriptCharacterByKey(db, {
-            scriptId,
-            characterKey: normalizedNextKey,
-        });
+        return finalizeRename(db, scriptId, currentCharacter, normalizedNextKey, now);
     };
 
     const setScriptCharacterColor: CharacterHandlers['setScriptCharacterColor'] = async (

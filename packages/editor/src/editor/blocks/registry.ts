@@ -31,15 +31,3 @@ export const ALL_BLOCK_BINDINGS: readonly FountainBlockBinding[] = [
     noteBinding,
 ];
 
-export {
-    actBinding,
-    actionBinding,
-    characterBinding,
-    dialogueBinding,
-    lyricsBinding,
-    noteBinding,
-    parentheticalBinding,
-    sceneHeadingBinding,
-    sectionBinding,
-    transitionBinding,
-};

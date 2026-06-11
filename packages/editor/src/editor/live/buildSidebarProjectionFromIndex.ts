@@ -37,18 +37,22 @@ const isCharacterBlockType = (blockType: string) => {
     return blockType === ELEMENT_CHARACTER;
 };
 
-const buildStructureSnapshot = (indexSnapshot: ScriptBlockIndexSnapshot): EditorLiveStructureSnapshot => {
-    if (!Array.isArray(indexSnapshot.blocks) || indexSnapshot.blocks.length === 0) {
-        return EMPTY_STRUCTURE;
-    }
+interface StructureBlockEntry {
+    blockId: string,
+    blockType: string,
+    textContent: string,
+    sceneBlockId?: string | null,
+}
 
+export const buildStructureSnapshotFromBlocks = (blocks: readonly StructureBlockEntry[]): EditorLiveStructureSnapshot => {
     const rows: EditorLiveStructureRow[] = [];
     const rowIndexByBlockId = new Map<string, number>();
     const sceneByBlockId = new Map<string, string>();
+    let currentSceneBlockId: string | null = null;
 
-    indexSnapshot.blocks.forEach(block => {
+    for (const block of blocks) {
         if (!block.blockId) {
-            return;
+            continue;
         }
 
         if (block.blockType === ELEMENT_ACT) {
@@ -61,8 +65,8 @@ const buildStructureSnapshot = (indexSnapshot: ScriptBlockIndexSnapshot): Editor
 
             rows.push(row);
             rowIndexByBlockId.set(block.blockId, row.index);
-
-            return;
+            currentSceneBlockId = null;
+            continue;
         }
 
         if (block.blockType === ELEMENT_SCENE_HEADING) {
@@ -76,14 +80,16 @@ const buildStructureSnapshot = (indexSnapshot: ScriptBlockIndexSnapshot): Editor
             rows.push(row);
             rowIndexByBlockId.set(block.blockId, row.index);
             sceneByBlockId.set(block.blockId, block.blockId);
-
-            return;
+            currentSceneBlockId = block.blockId;
+            continue;
         }
 
-        if (block.sceneBlockId) {
-            sceneByBlockId.set(block.blockId, block.sceneBlockId);
+        const ancestorSceneId = block.sceneBlockId ?? currentSceneBlockId;
+
+        if (ancestorSceneId) {
+            sceneByBlockId.set(block.blockId, ancestorSceneId);
         }
-    });
+    }
 
     if (rows.length === 0 && sceneByBlockId.size === 0) {
         return EMPTY_STRUCTURE;
@@ -94,6 +100,14 @@ const buildStructureSnapshot = (indexSnapshot: ScriptBlockIndexSnapshot): Editor
         rowIndexByBlockId,
         sceneByBlockId,
     };
+};
+
+const buildStructureSnapshot = (indexSnapshot: ScriptBlockIndexSnapshot): EditorLiveStructureSnapshot => {
+    if (!Array.isArray(indexSnapshot.blocks) || indexSnapshot.blocks.length === 0) {
+        return EMPTY_STRUCTURE;
+    }
+
+    return buildStructureSnapshotFromBlocks(indexSnapshot.blocks);
 };
 
 const incrementCount = (counts: Map<string, number>, key: string) => {

@@ -64,6 +64,29 @@ export const normalizePersistentCharacters = (persistentCharacters: readonly Per
     }));
 };
 
+type ActiveTokenResult = {
+    text: string,
+    tokens: ReturnType<typeof splitCharacterTokens>,
+    offset: number,
+    activeTokenIndex: number,
+    activeToken: NonNullable<ReturnType<typeof splitCharacterTokens>[number]>,
+};
+
+const resolveActiveToken = (
+    editor: TiptapEditor,
+    block: NonNullable<ReturnType<typeof getActiveFountainBlockFromState>>,
+): ActiveTokenResult | null => {
+    const text = block.node.textContent ?? '';
+    const tokens = splitCharacterTokens(text);
+    const offset = Math.max(0, editor.state.selection.from - block.from);
+    const activeTokenIndex = getActiveTokenIndex(text, offset);
+    const activeToken = tokens[activeTokenIndex];
+
+    return activeToken ? {
+        text, tokens, offset, activeTokenIndex, activeToken,
+    } : null;
+};
+
 export const applyCharacterSuggestion = (editor: TiptapEditor, suggestion: string): SuppressedSelection | null => {
     const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
 
@@ -75,15 +98,15 @@ export const applyCharacterSuggestion = (editor: TiptapEditor, suggestion: strin
         return null;
     }
 
-    const text = block.node.textContent ?? '';
-    const tokens = splitCharacterTokens(text);
-    const offset = Math.max(0, editor.state.selection.from - block.from);
-    const activeTokenIndex = getActiveTokenIndex(text, offset);
-    const activeToken = tokens[activeTokenIndex];
+    const tokenResult = resolveActiveToken(editor, block);
 
-    if (!activeToken) {
+    if (!tokenResult) {
         return null;
     }
+
+    const {
+        tokens, activeTokenIndex, activeToken,
+    } = tokenResult;
 
     const {suffix} = splitBaseAndSuffix(activeToken.value);
     const replacement = suffix.length > 0
@@ -179,13 +202,9 @@ export const computeCharacterSuggestions = ({
         };
     }
 
-    const text = block.node.textContent ?? '';
-    const tokens = splitCharacterTokens(text);
-    const offset = Math.max(0, editor.state.selection.from - block.from);
-    const activeTokenIndex = getActiveTokenIndex(text, offset);
-    const activeToken = tokens[activeTokenIndex];
+    const tokenResult = resolveActiveToken(editor, block);
 
-    if (!activeToken) {
+    if (!tokenResult) {
         return null;
     }
 
@@ -193,6 +212,9 @@ export const computeCharacterSuggestions = ({
         return null;
     }
 
+    const {
+        tokens, activeTokenIndex, activeToken,
+    } = tokenResult;
     const activeKey = normalizeCharacterKey(activeToken.value);
     /*
      * Collect keys of all other tokens in the same character group

@@ -14,6 +14,7 @@ import {
     Navigate, Route, Routes,
 } from 'react-router-dom';
 
+import {prepareLocalDbWithProgress} from './db';
 import {scriptRepository} from './repo';
 
 const App = () => {
@@ -25,7 +26,6 @@ const App = () => {
         let isActive = true;
 
         const boot = async () => {
-            setBootStatus('Loading fonts');
             if (document?.fonts) {
                 await document.fonts.ready;
             }
@@ -34,8 +34,19 @@ const App = () => {
                 return;
             }
 
-            setBootProgress(1);
-            setBootStatus('Ready');
+            await prepareLocalDbWithProgress(update => {
+                if (!isActive) {
+                    return;
+                }
+
+                setBootProgress(update.progress);
+                setBootStatus(update.label);
+            });
+
+            if (!isActive) {
+                return;
+            }
+
             setBootReady(true);
         };
 

@@ -84,4 +84,55 @@ describe('writeFinalBlockOrders', () => {
 
         expect(await readOrder(db, 's1')).toEqual(['b', 'a']);
     });
+
+    it('leaves no duplicate block_order values after a full shuffle', async () => {
+        const {db} = await createTestDb();
+        const ids = [
+            'a',
+            'b',
+            'c',
+            'd',
+            'e',
+        ];
+        const keys = generateNKeysBetween(null, null, ids.length);
+
+        await seedScript(db, 's1');
+
+        for (const [index, id] of ids.entries()) {
+            await insertBlock(db, 's1', id, keys[index]);
+        }
+
+        /*
+         * Assign fresh keys in a shuffled order — this previously violated the
+         * unique constraint on (script_id, block_order) before migration 0005
+         * removed it (PostgreSQL checks uniqueness row-by-row mid-UPDATE).
+         */
+        const newKeys = generateNKeysBetween(null, null, ids.length);
+
+        await db.transaction(async tx => {
+            await writeFinalBlockOrders(tx, 's1', [
+                {id: 'e', blockOrder: newKeys[0]},
+                {id: 'c', blockOrder: newKeys[1]},
+                {id: 'a', blockOrder: newKeys[2]},
+                {id: 'd', blockOrder: newKeys[3]},
+                {id: 'b', blockOrder: newKeys[4]},
+            ]);
+        });
+
+        const rows = await db
+            .select({blockOrder: scriptBlocks.blockOrder})
+            .from(scriptBlocks)
+            .where(eq(scriptBlocks.scriptId, 's1'));
+
+        const uniqueOrders = new Set(rows.map(row => row.blockOrder));
+
+        expect(uniqueOrders.size).toBe(ids.length);
+        expect(await readOrder(db, 's1')).toEqual([
+            'e',
+            'c',
+            'a',
+            'd',
+            'b',
+        ]);
+    });
 });

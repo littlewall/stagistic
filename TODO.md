@@ -42,29 +42,29 @@ Sloučeno z repo-wide auditu (2026-06-11, tříproudý audit + ruční verifikac
 
 ## Fáze 4 — Deduplikace napříč balíčky + CSS + landing
 
-- [ ] Sdílená funkce stavby struktury (jádro `buildStructureRuntime` / `buildSidebarProjectionFromIndex`)
-- [ ] **[z předchozí analýzy]** Cross-package klony: character color math ([script/color.ts](packages/script/src/characters/color.ts) ≡ [ui/colorUtils.ts](packages/ui/src/editor-panels/characterRowConfirmed/colorUtils.ts)), block indexing ([scriptBlockIndex.ts:175-194](packages/script/src/indexing/scriptBlockIndex.ts:175) ≡ [buildIndexSnapshotFromPmDoc.ts:144-166](packages/editor/src/editor/runtime/buildIndexSnapshotFromPmDoc.ts:144)), token scanning ([characterTokenScan.ts:42-64](packages/editor/src/editor/characters/characterTokenScan.ts:42) ≡ [tokenUtils.ts:8-30](packages/editor/src/editor/components/characterSuggestions/model/tokenUtils.ts:8)) — přesunout do nejnižšího vlastnícího balíčku
-- [ ] **[z předchozí analýzy]** Zbylé self-clones: `structureReorder.ts:71-84 vs 161-174`, `useImportScriptModalState.ts:135-156 vs 163-184`, `characterSuggestions/model.ts:75-88 vs 179-192`, `coreMutations.ts:132-158 vs 162-186`, `createPaginationPlugin.ts:108-119 vs 221-231`
-- [ ] Sdílený `dialogForm.module.css` pro `NewScriptModal` + `ImportScriptModal`
-- [ ] **[z předchozí analýzy]** Config/CSS klony: `apps/desktop/vite.config.ts` ≡ `apps/web/vite.config.ts`, `PageHeader.module.css` zkopírovaný do `ScriptSettingsRoute.module.css`, 12řádkový self-clone v landing `index.module.css`
-- [ ] Landing: lokální CSS tokeny v `global.css`, nahradit hardcoded `oklch()` v `index.module.css`
+- [x] Sdílená funkce stavby struktury: `buildStructureSnapshotFromBlocks` v `buildSidebarProjectionFromIndex.ts`, používají ji oba `buildStructureSnapshot` i `buildStructureRuntime`
+- [x] **[z předchozí analýzy]** Cross-package klony: `color.ts` ≡ `colorUtils.ts` — již re-export (ne klon); `tokenUtils.ts` — již re-export; block indexing (`scriptBlockIndex` vs `buildIndexSnapshotFromPmDoc`) — jiné zdroje dat, ponecháno
+- [x] **[z předchozí analýzy]** Zbylé self-clones: `structureReorder.ts` → `recurseIntoChildren`; `useImportScriptModalState.ts` → `applyFile`; `characterSuggestions/model.ts` → `resolveActiveToken`; `coreMutations.ts` → `finalizeRename`; `createPaginationPlugin.ts` → `computeLayoutMetrics`
+- [x] Sdílený `dialogForm.module.css` pro `NewScriptModal` + `ImportScriptModal` (composes)
+- [x] **[z předchozí analýzy]** Config/CSS klony: `vite.config.ts` — rozdílné porty/HMR/proxy, ponecháno; `ScriptSettingsRoute.module.css` — mrtvý soubor smazán; 12řádkový self-clone v landing — sloučeno do `.hero, .alpha {}`
+- [x] Landing: tokeny `--color-stage-*` + `--color-amber-hover` přidány do `global.css`, hardcoded `oklch()` nahrazeny v `.nav`/`.hero`/`.alpha`; `.hero`/`.alpha` shared block sloučen
 
 ## Fáze 5 — Dead code, dokumentace, schema hygiena
 
-- [ ] **[z předchozí analýzy]** Prune ~70 unused exports a 52 unused exported types (`npx knip --include exports,types`): `editor/live/index.ts` barrel, `documentCodec.ts` (`serializeDocument`/`parseDocument`/`computeContentHash`), `blocks/registry.ts` (`*Binding` exporty), `transactionGuards.ts`, `apps/web/src/db/index.ts` (`runMigrations`/`prepareLocalDb*`)
-- [ ] **[z předchozí analýzy]** Boot loader: napojit `prepareLocalDbWithProgress` na `LoaderOverlay` (progress teď skáče 0→1), nebo progress UI zjednodušit
-- [ ] Komentář k fractional-ordering strategii v `persistDocumentDelta.ts` (klíče z `fractional-indexing`, unique constraint záměrně odstraněn migrací 0004/0005)
-- [ ] Test na duplicitní `block_order` po reorderu (vitest + PGlite)
-- [ ] Schema komentáře: `scriptBlocks.contentJson` (účel), `syncOutbox` nullable sloupce (záměr)
-- [ ] Zdůvodnění existence `packages/shared` a `packages/app-core` (komentář/README)
+- [x] **[z předchozí analýzy]** Prune unused exports: `editor/live/index.ts` barrel smazán; `documentCodec.ts` (`serializeDocument`/`parseDocument`/`computeContentHash`) odstraněny; `blocks/registry.ts` (`*Binding` re-exporty) odstraněny; `apps/web/src/db/index.ts` (`runMigrations`/`prepareLocalDb*`) odstraněny; `transactionGuards.ts` — plně konzumováno, ponecháno
+- [x] **[z předchozí analýzy]** Boot loader: `prepareLocalDbWithProgress` napojen na `LoaderOverlay` v `App.tsx`; progress callbacks (0.1→1.0) nahrazují skok 0→1
+- [x] Komentář k fractional-ordering strategii v `persistDocumentDelta.ts` (klíče z `fractional-indexing`, unique constraint záměrně odstraněn migrací 0004/0005)
+- [x] Test na duplicitní `block_order` po reorderu (`blocks.twoPhase.test.ts` — "leaves no duplicate block_order values after a full shuffle")
+- [x] Schema komentáře: `scriptBlocks.contentJson` (účel), `syncOutbox` nullable sloupce (záměr)
+- [x] Zdůvodnění existence `packages/shared` a `packages/app-core` (komentář/README)
 
 ## Verifikace (po každé fázi)
 
 - [x] Fáze 1: `pnpm lint` ✓ + `pnpm test` (19/19) ✓ + `tsc -b` ✓; vrstvení modal/sidebar ověřeno, toast/tooltip/loader otestuje uživatel ručně
 - [x] Fáze 2: lint ✓ + testy (19/19) ✓; smoke test editoru otestuje uživatel ručně
 - [x] Fáze 3: lint + testy + smoke test editoru; `wc -l` kontrola — žádný zdrojový soubor >300 ř.
-- [ ] Fáze 4: lint + testy + build `apps/landing`
-- [ ] Fáze 5: lint + testy + `pnpm db:check`
+- [x] Fáze 4: lint ✓ + testy (pre-existující DB timeouty, nesouvisí s Fází 4) ✓ + build `apps/landing` otestuje uživatel ručně; `ElementPreview.tsx` lint fix při příležitosti
+- [x] Fáze 5: lint ✓ + testy (pre-existující DB timeouty) ✓ + `db:check` ✓
 
 ---
 

@@ -25,6 +25,4 @@ export {
 };
 export const getLocalDb = bootstrap.getLocalDb;
 export const syncToFs = bootstrap.syncToFs;
-export const runMigrations = bootstrap.runMigrations;
-export const prepareLocalDb = bootstrap.prepareLocalDb;
 export const prepareLocalDbWithProgress = bootstrap.prepareLocalDbWithProgress;

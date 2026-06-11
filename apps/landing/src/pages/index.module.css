@@ -7,14 +7,14 @@
 /* ── Nav (Proscenium arch) ───────────────────────────────── */
 
 .nav {
-    --color-text: oklch(.92 .012 51);
+    --color-text: var(--color-stage-nav-text);
     --color-text-muted: oklch(.92 .012 51 / .5);
     --color-border: oklch(.92 .012 51 / .1);
 
     position: sticky;
     z-index: 10;
     top: 0;
-    background: oklch(.105 .006 51 / .94);
+    background: var(--color-stage-nav-bg);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid oklch(.92 .012 51 / .07);
 }
@@ -80,19 +80,23 @@
 
 /* ── Hero (The Stage) ────────────────────────────────────── */
 
-.hero {
-    --color-text: oklch(.96 .008 51);
-    --color-text-muted: oklch(.66 .012 51);
-    --color-border: oklch(.92 .012 51 / .11);
+.hero,
+.alpha {
+    --color-text: var(--color-stage-text);
+    --color-text-muted: var(--color-stage-text-muted);
+    --color-border: var(--color-stage-border);
     --btn-primary-bg: var(--color-amber);
-    --btn-primary-fg: oklch(.13 .006 51);
-    --btn-primary-hover: oklch(.8 .11 53.1);
-    --btn-secondary-fg: oklch(.92 .012 51);
+    --btn-primary-fg: var(--color-stage-btn-fg);
+    --btn-primary-hover: var(--color-amber-hover);
+    --btn-secondary-fg: var(--color-stage-nav-text);
     --btn-secondary-border: oklch(.92 .012 51 / .2);
     --btn-secondary-hover-bg: oklch(.92 .012 51 / .07);
 
+    background: var(--color-stage-bg);
+}
+
+.hero {
     padding: 9rem 1.5rem 7rem;
-    background: oklch(.135 .006 51);
 }
 
 .heroInner {
@@ -457,18 +461,7 @@
 /* ── Alpha / CTA (Curtain call) ──────────────────────────── */
 
 .alpha {
-    --color-text: oklch(.96 .008 51);
-    --color-text-muted: oklch(.66 .012 51);
-    --color-border: oklch(.92 .012 51 / .11);
-    --btn-primary-bg: var(--color-amber);
-    --btn-primary-fg: oklch(.13 .006 51);
-    --btn-primary-hover: oklch(.8 .11 53.1);
-    --btn-secondary-fg: oklch(.92 .012 51);
-    --btn-secondary-border: oklch(.92 .012 51 / .2);
-    --btn-secondary-hover-bg: oklch(.92 .012 51 / .07);
-
     padding: 8.5rem 1.5rem;
-    background: oklch(.135 .006 51);
     border-top: 1px solid oklch(.92 .012 51 / .06);
 }
 

@@ -117,6 +117,18 @@ export const useImportScriptModalState = ({
         selectedFile,
     ]);
 
+    const applyFile = useCallback((file: SelectedFile) => {
+        setSelectedFile(file);
+        setFileError(null);
+        setName(previous => {
+            if (previous.trim() === '') {
+                return getFileBaseName(file.name);
+            }
+
+            return previous;
+        });
+    }, []);
+
     const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
     }, []);
@@ -139,19 +151,8 @@ export const useImportScriptModalState = ({
             return;
         }
 
-        setSelectedFile({
-            name: file.name,
-            file,
-        });
-        setFileError(null);
-        setName(previous => {
-            if (previous.trim() === '') {
-                return getFileBaseName(file.name);
-            }
-
-            return previous;
-        });
-    }, []);
+        applyFile({name: file.name, file});
+    }, [applyFile]);
 
     const handleFileSelect = useCallback((files: FileList | null) => {
         if (!files || files.length === 0) {
@@ -167,19 +168,8 @@ export const useImportScriptModalState = ({
             return;
         }
 
-        setSelectedFile({
-            name: file.name,
-            file,
-        });
-        setFileError(null);
-        setName(previous => {
-            if (previous.trim() === '') {
-                return getFileBaseName(file.name);
-            }
-
-            return previous;
-        });
-    }, []);
+        applyFile({name: file.name, file});
+    }, [applyFile]);
 
     const handlePickFile = useCallback(async () => {
         if (!onPickFile) {
@@ -193,23 +183,12 @@ export const useImportScriptModalState = ({
                 return;
             }
 
-            setSelectedFile({
-                name: picked.fileName,
-                text: picked.text,
-            });
-            setFileError(null);
-            setName(previous => {
-                if (previous.trim() === '') {
-                    return getFileBaseName(picked.fileName);
-                }
-
-                return previous;
-            });
+            applyFile({name: picked.fileName, text: picked.text});
         } catch (error) {
             console.error('Failed to pick file', error);
             setFileError('Failed to open the file picker.');
         }
-    }, [onPickFile]);
+    }, [applyFile, onPickFile]);
 
     const handleEnableLegacyCapsLyricsHeuristicChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setEnableLegacyCapsLyricsHeuristic(event.target.checked);
