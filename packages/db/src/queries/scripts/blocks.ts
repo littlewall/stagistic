@@ -229,3 +229,15 @@ export const generateBlockOrderBetween = (
 ): string => {
     return generateKeyBetween(before, after);
 };
+
+/**
+ * Compute N fractional index keys between two anchor blocks.
+ * Used when re-keying a run of moved/inserted blocks between stable neighbors.
+ */
+export const generateBlockOrdersBetween = (
+    before: string | null,
+    after: string | null,
+    count: number,
+): string[] => {
+    return generateNKeysBetween(before, after, count);
+};

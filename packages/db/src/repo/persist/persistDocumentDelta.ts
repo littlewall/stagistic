@@ -23,6 +23,7 @@ import {
     scriptActs, scriptBlocks, scriptScenes,
 } from '../../schema';
 import {diffExtractedBlocks} from './diffExtractedBlocks';
+import {computeOrderKeyAssignments} from './minimalOrderKeys';
 
 const serializeRefByKey = (refByKey: Record<string, string>): string => {
     return Object.entries(refByKey)
@@ -73,10 +74,12 @@ const toCharacterRefRows = (block: ExtractedBlockRow, knownCharacterIds: Set<str
  */
 export const createDocumentPersister = (scriptId: string) => {
     let lastSavedBlocks = new Map<string, ExtractedBlockRow>();
+    let baselineOrderKeys = new Map<string, string>();
     let queue: Promise<void> = Promise.resolve();
 
-    const setBaseline = (blocks: ExtractedBlockRow[]) => {
+    const setBaseline = (blocks: ExtractedBlockRow[], orderKeys?: Map<string, string>) => {
         lastSavedBlocks = new Map(blocks.map(block => [block.blockId, block]));
+        baselineOrderKeys = orderKeys ?? new Map();
     };
 
     const persistImpl = async (db: DbClient, document: RewriteScriptDocument): Promise<void> => {
@@ -92,21 +95,46 @@ export const createDocumentPersister = (scriptId: string) => {
         const actIdByHeading = new Map(extracted.acts.map(act => [act.headingBlockId, act.id]));
 
         /*
-         * Fractional-indexing strategy: generate N evenly-spaced lexicographic keys
-         * (from the `fractional-indexing` library) for every block on each structural
-         * save. This means a reorder is a single bulk UPDATE — no gaps, no renumbering.
+         * Fractional-indexing strategy: keys are lexicographic strings from the
+         * `fractional-indexing` library. On a structural save we re-key minimally —
+         * blocks on the longest increasing subsequence of baseline keys keep them,
+         * only moved/inserted blocks get fresh keys between the stable anchors. Full
+         * re-key (evenly spaced keys for all blocks) is the fallback when no usable
+         * baseline exists, which also bounds key-length growth over time.
          * The unique constraint on (script_id, block_order) was intentionally removed
          * by migrations 0004/0005: PostgreSQL checks uniqueness row-by-row inside a
          * single UPDATE, so swapping keys between two blocks always triggers a
          * spurious violation before both rows are committed.
          */
-        const orderKeys = generateBlockOrderKeys(extracted.blocks.length);
+        let orderKeyById = baselineOrderKeys;
+        let changedOrders: {id: string, blockOrder: string}[] = [];
 
+        if (diff.structural) {
+            const minimal = computeOrderKeyAssignments(
+                extracted.blocks.map(block => block.blockId),
+                baselineOrderKeys,
+            );
+
+            if (minimal) {
+                orderKeyById = minimal.keyById;
+                changedOrders = minimal.changed;
+            } else {
+                const fullKeys = generateBlockOrderKeys(extracted.blocks.length);
+
+                orderKeyById = new Map(extracted.blocks.map(block => [block.blockId, fullKeys[block.orderNo]]));
+                changedOrders = extracted.blocks.map(block => ({id: block.blockId, blockOrder: fullKeys[block.orderNo]}));
+            }
+        }
+
+        /*
+         * blockOrder fallback is never written: Case A skips order writes entirely
+         * and the structural path always has complete orderKeyById coverage.
+         */
         const toDbBlock = (block: ExtractedBlockRow) => ({
             id: block.blockId,
             scriptId,
             blockType: block.blockType,
-            blockOrder: orderKeys[block.orderNo],
+            blockOrder: orderKeyById.get(block.blockId) ?? '',
             textContent: block.textContent,
             contentJson: block.contentJson,
             sceneId: block.sceneHeadingBlockId ? sceneIdByHeading.get(block.sceneHeadingBlockId) ?? null : null,
@@ -174,13 +202,8 @@ export const createDocumentPersister = (scriptId: string) => {
             }
 
             if (isPureReorder) {
-                // Case B-fast: pure reorder — only block orders (and refs) change.
-                await writeFinalBlockOrders(
-                    tx,
-                    scriptId,
-                    extracted.blocks.map(block => ({id: block.blockId, blockOrder: orderKeys[block.orderNo]})),
-                );
-
+                // Case B-fast: pure reorder — only the moved blocks' orders (and refs) change.
+                await writeFinalBlockOrders(tx, scriptId, changedOrders);
                 await replaceRefs(tx, refChangedUpdated);
 
                 return;
@@ -267,18 +290,23 @@ export const createDocumentPersister = (scriptId: string) => {
                 await updateBlockFields(tx, block);
             }
 
-            // 6. Assign all final orders in one bulk statement.
+            /*
+             * 6. Assign changed orders in one bulk statement. Inserted blocks
+             * already carry their key from step 4.
+             */
+            const insertedIds = new Set(diff.inserted.map(block => block.blockId));
+
             await writeFinalBlockOrders(
                 tx,
                 scriptId,
-                extracted.blocks.map(block => ({id: block.blockId, blockOrder: orderKeys[block.orderNo]})),
+                changedOrders.filter(assignment => !insertedIds.has(assignment.id)),
             );
 
             // 7. Rewrite refs only for inserted + blocks whose refs changed.
             await replaceRefs(tx, [...diff.inserted, ...refChangedUpdated]);
         });
 
-        setBaseline(extracted.blocks);
+        setBaseline(extracted.blocks, orderKeyById);
     };
 
     const persist = (db: DbClient, document: RewriteScriptDocument): Promise<void> => {

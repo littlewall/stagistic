@@ -24,7 +24,7 @@ interface CreateContentHandlersArgs {
 const loadLatestFromBlocks = async (
     db: Awaited<ReturnType<GetDb>>,
     scriptId: string,
-): Promise<ScriptDocument | null> => {
+): Promise<{document: ScriptDocument, orderKeyByBlockId: Map<string, string>} | null> => {
     const storedBlocks = await dbQueries.listScriptBlocks(db, scriptId);
 
     if (storedBlocks.length === 0) {
@@ -54,7 +54,10 @@ const loadLatestFromBlocks = async (
         console.warn(`[db-local] ${warning}`);
     });
 
-    return rebuilt.document;
+    return {
+        document: rebuilt.document,
+        orderKeyByBlockId: new Map(storedBlocks.map(row => [row.id, row.blockOrder])),
+    };
 };
 
 export const createContentHandlers = ({
@@ -77,19 +80,23 @@ export const createContentHandlers = ({
 
     const loadLatest: ContentHandlers['loadLatest'] = async scriptId => {
         const db = await getDb();
-        const document = await loadLatestFromBlocks(db, scriptId);
+        const loaded = await loadLatestFromBlocks(db, scriptId);
 
-        if (document) {
-            /*
-             * Seed the diff baseline so the first autosave writes only the
-             * editor's normalization delta (benign), not the whole document.
-             */
-            const baseline = extractScriptBlocks(scriptId, convertDefaultScriptDocumentToLegacy(document));
-
-            getPersister(scriptId).setBaseline(baseline.blocks);
+        if (!loaded) {
+            return null;
         }
 
-        return document;
+        /*
+         * Seed the diff baseline so the first autosave writes only the
+         * editor's normalization delta (benign), not the whole document.
+         * Stored block orders seed the re-key baseline so a structural save
+         * right after load touches only the moved blocks.
+         */
+        const baseline = extractScriptBlocks(scriptId, convertDefaultScriptDocumentToLegacy(loaded.document));
+
+        getPersister(scriptId).setBaseline(baseline.blocks, loaded.orderKeyByBlockId);
+
+        return loaded.document;
     };
 
     const saveLatest: ContentHandlers['saveLatest'] = async (scriptId, value) => {
