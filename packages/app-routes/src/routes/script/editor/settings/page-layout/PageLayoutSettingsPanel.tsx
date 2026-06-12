@@ -1,6 +1,6 @@
 import {clsx} from '@stagistic/ui';
 import {
-    useEffect, useRef, useState,
+    startTransition, useEffect, useRef, useState,
 } from 'react';
 
 import {MIN_PAGE_MARGIN_HORIZONTAL_PX, PX_PER_INCH} from '../constants';
@@ -52,6 +52,16 @@ export const PageLayoutSettingsPanel = ({
 
     const marginSliderStep = 0.05 * 96; // 0.05"
 
+    const [localTopMarginRows, setLocalTopMarginRows] = useState(topMarginRows);
+    const [localBottomMarginRows, setLocalBottomMarginRows] = useState(bottomMarginRows);
+
+    useEffect(() => {
+        setLocalTopMarginRows(topMarginRows);
+    }, [topMarginRows]);
+    useEffect(() => {
+        setLocalBottomMarginRows(bottomMarginRows);
+    }, [bottomMarginRows]);
+
     const [localSliderStart, setLocalSliderStart] = useState(sliderStart);
     const [localSliderEnd, setLocalSliderEnd] = useState(sliderEnd);
     const latestStart = useRef(sliderStart);
@@ -80,6 +90,8 @@ export const PageLayoutSettingsPanel = ({
     const localSchematicOverride = {
         '--page-margin-left-percent': `${clamp((localSliderStart / safeTotal) * 100, 0, 50)}%`,
         '--page-margin-right-percent': `${clamp((localMarginRightPx / safeTotal) * 100, 0, 50)}%`,
+        '--page-margin-top-height': `${localTopMarginRows * 4}px`,
+        '--page-margin-bottom-height': `${localBottomMarginRows * 4}px`,
     } as React.CSSProperties;
 
     return (
@@ -92,10 +104,13 @@ export const PageLayoutSettingsPanel = ({
                         <SettingsSelect
                             id="settings-margin-top"
                             ariaLabel="Select top margin rows"
-                            value={topMarginRows}
+                            value={localTopMarginRows}
                             options={marginRowOptions}
                             onChange={nextValue => {
-                                onUpdatePageSettings({marginTopPx: Number(nextValue) * fontSizePx});
+                                setLocalTopMarginRows(Number(nextValue));
+                                startTransition(() => {
+                                    onUpdatePageSettings({marginTopPx: Number(nextValue) * fontSizePx});
+                                });
                             }}
                         />
                     </div>
@@ -104,10 +119,13 @@ export const PageLayoutSettingsPanel = ({
                         <SettingsSelect
                             id="settings-margin-bottom"
                             ariaLabel="Select bottom margin rows"
-                            value={bottomMarginRows}
+                            value={localBottomMarginRows}
                             options={marginRowOptions}
                             onChange={nextValue => {
-                                onUpdatePageSettings({marginBottomPx: Number(nextValue) * fontSizePx});
+                                setLocalBottomMarginRows(Number(nextValue));
+                                startTransition(() => {
+                                    onUpdatePageSettings({marginBottomPx: Number(nextValue) * fontSizePx});
+                                });
                             }}
                         />
                     </div>
