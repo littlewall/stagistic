@@ -63,6 +63,41 @@ export const replaceScriptBlockCharacterRefs = async (
     })));
 };
 
+export interface ScriptBlockCharacterRefReplacement {
+    blockId: string,
+    rows: ScriptBlockCharacterRefRow[],
+}
+
+const REF_INSERT_BATCH_SIZE = 500;
+
+/**
+ * Replace refs for many blocks at once: one DELETE over all block ids,
+ * then batched INSERTs — instead of two statements per block.
+ */
+export const bulkReplaceScriptBlockCharacterRefs = async (
+    db: DbClient,
+    replacements: ScriptBlockCharacterRefReplacement[],
+) => {
+    if (replacements.length === 0) {
+        return;
+    }
+
+    await db
+        .delete(scriptBlockCharacterRefs)
+        .where(inArray(scriptBlockCharacterRefs.blockId, replacements.map(entry => entry.blockId)));
+
+    const values = replacements.flatMap(entry => entry.rows.map(row => ({
+        blockId: entry.blockId,
+        characterId: row.characterId,
+        characterKey: row.characterKey,
+        isConfirmed: row.isConfirmed,
+    })));
+
+    for (let i = 0; i < values.length; i += REF_INSERT_BATCH_SIZE) {
+        await db.insert(scriptBlockCharacterRefs).values(values.slice(i, i + REF_INSERT_BATCH_SIZE));
+    }
+};
+
 export const deleteScriptBlockRefsByCharacterIds = async (db: DbClient, characterIds: string[]) => {
     if (characterIds.length === 0) {
         return;

@@ -3,8 +3,8 @@
 Plán: `~/.claude/plans/p-esouv-n-sc-n-na-novou-quiet-nova.md`. Bottleneck: chybějící `relaxedDurability` ve workeru, per-row dotazy ve strukturálním persistu, full re-key všech bloků při každé strukturální změně.
 
 - [x] 1.1 `relaxedDurability: true` pro worker (bootstrap.ts + pglite.worker.ts)
-- [ ] 1.2 Reorder fast path v `persistImpl` (čistý reorder přeskočí rekonsiliaci scén/aktů)
-- [ ] 1.3 Batching smyček (bulk upserty/delety scén+aktů, bulk character refs, lazy `listScriptCharacters`)
+- [x] 1.2 Reorder fast path v `persistImpl` (čistý reorder přeskočí rekonsiliaci scén/aktů)
+- [x] 1.3 Batching smyček (bulk upserty/delety scén+aktů, bulk character refs, lazy `listScriptCharacters`)
 - [ ] 2.1 `minimalOrderKeys.ts` — LIS minimální re-keying
 - [ ] 2.2 Baseline persisteru drží persistované order klíče
 - [ ] 2.3 Seed klíčů při `loadLatest`

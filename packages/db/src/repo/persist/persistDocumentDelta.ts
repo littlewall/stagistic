@@ -8,15 +8,15 @@ import {
     type RewriteScriptDocument,
 } from '../../blocks';
 import {
+    bulkDeleteScriptActs,
     bulkDeleteScriptBlocks,
+    bulkDeleteScriptScenes,
+    bulkReplaceScriptBlockCharacterRefs,
+    bulkUpsertScriptActs,
+    bulkUpsertScriptScenes,
     type DbClient,
-    deleteScriptAct,
-    deleteScriptScene,
     generateBlockOrderKeys,
     listScriptCharacters,
-    replaceScriptBlockCharacterRefs,
-    upsertScriptAct,
-    upsertScriptScene,
     writeFinalBlockOrders,
 } from '../../queries';
 import {
@@ -88,9 +88,6 @@ export const createDocumentPersister = (scriptId: string) => {
             return;
         }
 
-        const characters = await listScriptCharacters(db, scriptId);
-        const knownCharacterIds = new Set(characters.map(character => character.id));
-
         const sceneIdByHeading = new Map(extracted.scenes.map(scene => [scene.headingBlockId, scene.id]));
         const actIdByHeading = new Map(extracted.acts.map(act => [act.headingBlockId, act.id]));
 
@@ -143,6 +140,27 @@ export const createDocumentPersister = (scriptId: string) => {
             block => refsDiffer(lastSavedBlocks.get(block.blockId), block),
         );
 
+        const knownCharacterIds = diff.inserted.length > 0 || refChangedUpdated.length > 0
+            ? new Set((await listScriptCharacters(db, scriptId)).map(character => character.id))
+            : new Set<string>();
+
+        const replaceRefs = async (tx: DbClient, blocks: ExtractedBlockRow[]) => {
+            await bulkReplaceScriptBlockCharacterRefs(tx, blocks.map(block => ({
+                blockId: block.blockId,
+                rows: toCharacterRefRows(block, knownCharacterIds),
+            })));
+        };
+
+        /*
+         * A pure reorder changes only orderNo (and possibly refs). Block→scene/act
+         * membership is intact and scene/act ids derive from heading block ids,
+         * so the scriptScenes/scriptActs tables are guaranteed unchanged —
+         * reconciliation can be skipped entirely.
+         */
+        const isPureReorder = diff.inserted.length === 0
+            && diff.deletedIds.length === 0
+            && fieldChangedUpdated.length === 0;
+
         await db.transaction(async tx => {
             if (!diff.structural) {
                 // Case A: content-only edits — touch only blocks whose fields/refs actually changed.
@@ -150,36 +168,41 @@ export const createDocumentPersister = (scriptId: string) => {
                     await updateBlockFields(tx, block);
                 }
 
-                for (const block of refChangedUpdated) {
-                    await replaceScriptBlockCharacterRefs(tx, block.blockId, toCharacterRefRows(block, knownCharacterIds));
-                }
+                await replaceRefs(tx, refChangedUpdated);
+
+                return;
+            }
+
+            if (isPureReorder) {
+                // Case B-fast: pure reorder — only block orders (and refs) change.
+                await writeFinalBlockOrders(
+                    tx,
+                    scriptId,
+                    extracted.blocks.map(block => ({id: block.blockId, blockOrder: orderKeys[block.orderNo]})),
+                );
+
+                await replaceRefs(tx, refChangedUpdated);
 
                 return;
             }
 
             /*
-             * Case B: structural change (insert/delete/reorder/heading edit).
+             * Case B: structural change (insert/delete/heading edit).
              * 1. Reconcile acts.
              */
             const existingActs = await tx.select({id: scriptActs.id}).from(scriptActs).where(eq(scriptActs.scriptId, scriptId));
             const nextActIds = new Set(extracted.acts.map(act => act.id));
 
-            for (const act of extracted.acts) {
-                await upsertScriptAct(tx, {
-                    id: act.id,
-                    scriptId,
-                    headingBlockId: act.headingBlockId,
-                    name: act.name,
-                    createdAt: now,
-                    updatedAt: now,
-                });
-            }
+            await bulkUpsertScriptActs(tx, extracted.acts.map(act => ({
+                id: act.id,
+                scriptId,
+                headingBlockId: act.headingBlockId,
+                name: act.name,
+                createdAt: now,
+                updatedAt: now,
+            })));
 
-            for (const act of existingActs) {
-                if (!nextActIds.has(act.id)) {
-                    await deleteScriptAct(tx, act.id);
-                }
-            }
+            await bulkDeleteScriptActs(tx, existingActs.filter(act => !nextActIds.has(act.id)).map(act => act.id));
 
             // 2. Reconcile scenes (preserve existing metadata).
             const existingScenes = await tx.select().from(scriptScenes).where(eq(scriptScenes.scriptId, scriptId));
@@ -190,10 +213,10 @@ export const createDocumentPersister = (scriptId: string) => {
             );
             const nextSceneIds = new Set(extracted.scenes.map(scene => scene.id));
 
-            for (const scene of extracted.scenes) {
+            await bulkUpsertScriptScenes(tx, extracted.scenes.map(scene => {
                 const prev = existingSceneByHeading.get(scene.headingBlockId) ?? null;
 
-                await upsertScriptScene(tx, {
+                return {
                     id: scene.id,
                     scriptId,
                     headingBlockId: scene.headingBlockId,
@@ -203,14 +226,10 @@ export const createDocumentPersister = (scriptId: string) => {
                     locationId: prev?.locationId ?? null,
                     createdAt: prev?.createdAt ?? now,
                     updatedAt: now,
-                });
-            }
+                };
+            }));
 
-            for (const scene of existingScenes) {
-                if (!nextSceneIds.has(scene.id)) {
-                    await deleteScriptScene(tx, scene.id);
-                }
-            }
+            await bulkDeleteScriptScenes(tx, existingScenes.filter(scene => !nextSceneIds.has(scene.id)).map(scene => scene.id));
 
             // 3. Delete removed blocks (their character refs cascade).
             await bulkDeleteScriptBlocks(tx, diff.deletedIds);
@@ -256,9 +275,7 @@ export const createDocumentPersister = (scriptId: string) => {
             );
 
             // 7. Rewrite refs only for inserted + blocks whose refs changed.
-            for (const block of [...diff.inserted, ...refChangedUpdated]) {
-                await replaceScriptBlockCharacterRefs(tx, block.blockId, toCharacterRefRows(block, knownCharacterIds));
-            }
+            await replaceRefs(tx, [...diff.inserted, ...refChangedUpdated]);
         });
 
         setBaseline(extracted.blocks);
