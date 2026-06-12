@@ -169,7 +169,7 @@ export const useElementSettingsViewModel = ({
             '--preview-indent-default-start-percent': `${pageStartPercent}%`,
             '--preview-indent-default-end-percent': `${pageEndPercent}%`,
             '--preview-text-align': textAlign,
-            '--preview-text-transform': casing === 'uppercase' ? 'uppercase' : 'none',
+            '--preview-text-transform': casing === 'uppercase' || casing === 'lowercase' ? casing : 'none',
             '--preview-font-weight': isBold ? '700' : '400',
             '--preview-font-style': isItalic ? 'italic' : 'normal',
             '--preview-text-decoration': isUnderline ? 'underline' : 'none',

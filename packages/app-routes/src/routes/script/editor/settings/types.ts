@@ -1,4 +1,5 @@
 import type {
+    BlockCasing,
     BlockSettingsPatch,
     BlockShortcut,
     EditorSettings,
@@ -78,7 +79,7 @@ export interface ElementSettingsPanelProps {
 
 export interface ElementFormattingModel {
     textAlign: 'left' | 'center' | 'right',
-    casing: 'normal' | 'uppercase',
+    casing: BlockCasing,
     isBold: boolean,
     isItalic: boolean,
     isUnderline: boolean,

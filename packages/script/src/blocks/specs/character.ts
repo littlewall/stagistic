@@ -14,7 +14,7 @@ export const characterSpec = {
     defaultSettings: {
         spacingBeforeEm: 1.0,
         lineHeight: 1.2,
-        indentLeftChars: 20,
+        indentLeftChars: 30,
         indentRightChars: 3,
         shortcut: '3',
         nextElement: ELEMENT_DIALOGUE,

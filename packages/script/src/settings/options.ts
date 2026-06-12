@@ -26,7 +26,11 @@ export const BLOCK_TEXT_ALIGN_OPTIONS = [
 
 export type BlockTextAlign = (typeof BLOCK_TEXT_ALIGN_OPTIONS)[number];
 
-export const BLOCK_CASING_OPTIONS = ['normal', 'uppercase'] as const;
+export const BLOCK_CASING_OPTIONS = [
+    'normal',
+    'uppercase',
+    'lowercase',
+] as const;
 
 export type BlockCasing = (typeof BLOCK_CASING_OPTIONS)[number];
 

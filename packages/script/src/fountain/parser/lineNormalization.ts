@@ -8,7 +8,6 @@ import {
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
-    ELEMENT_SECTION,
     ELEMENT_TRANSITION,
     type FountainElementType,
 } from '../types';
@@ -32,10 +31,6 @@ export const normalizeParsedLineText = (type: FountainElementType, line: string)
             .replace(/^#\s*/i, '')
             .replace(/^ACT:\s*/i, '')
             .trim();
-    }
-
-    if (type === ELEMENT_SECTION) {
-        text = text.trim().replace(/^#+\s*/, '').trim();
     }
 
     if (type === ELEMENT_PARENTHETICAL) {

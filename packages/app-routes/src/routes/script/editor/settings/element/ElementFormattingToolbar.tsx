@@ -77,6 +77,19 @@ export const ElementFormattingToolbar = ({
                 >
                     <span className={styles.textIcon}>AA</span>
                 </button>
+                <button
+                    type="button"
+                    className={clsx(
+                        styles.toolbarButton,
+                        casing === 'lowercase' && styles.active,
+                    )}
+                    onClick={() => {
+                        update({casing: 'lowercase'});
+                    }}
+                    aria-label="Lowercase casing"
+                >
+                    <span className={styles.textIcon}>aa</span>
+                </button>
             </div>
             <div className={styles.toolbarGroup}>
                 <button

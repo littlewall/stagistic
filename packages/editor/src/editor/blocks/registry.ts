@@ -6,7 +6,6 @@ import {lyricsBinding} from './lyrics';
 import {noteBinding} from './note';
 import {parentheticalBinding} from './parenthetical';
 import {sceneHeadingBinding} from './sceneHeading';
-import {sectionBinding} from './section';
 import {transitionBinding} from './transition';
 import type {FountainBlockBinding} from './types';
 
@@ -21,7 +20,6 @@ import type {FountainBlockBinding} from './types';
 export const ALL_BLOCK_BINDINGS: readonly FountainBlockBinding[] = [
     sceneHeadingBinding,
     actBinding,
-    sectionBinding,
     actionBinding,
     characterBinding,
     parentheticalBinding,

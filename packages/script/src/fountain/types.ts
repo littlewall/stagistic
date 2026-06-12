@@ -1,6 +1,5 @@
 export const ELEMENT_SCENE_HEADING = 'fountain_scene_heading';
 export const ELEMENT_ACT = 'fountain_act';
-export const ELEMENT_SECTION = 'fountain_section';
 export const ELEMENT_ACTION = 'fountain_action';
 export const ELEMENT_CHARACTER = 'fountain_character';
 export const ELEMENT_PARENTHETICAL = 'fountain_parenthetical';
@@ -14,7 +13,6 @@ export const ELEMENT_COLUMN = 'column';
 export type FountainElementType =
     | typeof ELEMENT_SCENE_HEADING
     | typeof ELEMENT_ACT
-    | typeof ELEMENT_SECTION
     | typeof ELEMENT_ACTION
     | typeof ELEMENT_CHARACTER
     | typeof ELEMENT_PARENTHETICAL

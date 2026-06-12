@@ -8,7 +8,6 @@ import {
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
-    ELEMENT_SECTION,
     ELEMENT_TRANSITION,
     type FountainElementType,
 } from '../types';
@@ -63,7 +62,6 @@ const shouldCoerceLegacyCapsLyrics = (
     if (
         detectedType === ELEMENT_SCENE_HEADING
         || detectedType === ELEMENT_ACT
-        || detectedType === ELEMENT_SECTION
         || detectedType === ELEMENT_TRANSITION
         || detectedType === ELEMENT_NOTE
     ) {
@@ -121,12 +119,13 @@ export const detectType = (
             : detectedType;
     }
 
+    /*
+     * Fountain '#' headings (other than acts) have no dedicated block since
+     * the Section block was removed — treat them as stage directions and
+     * keep the raw line text. The parser rewrite (phase 2) will revisit.
+     */
     if (SECTION_PATTERN.test(trimmed)) {
-        detectedType = ELEMENT_SECTION;
-
-        return shouldCoerceLegacyCapsLyrics(trimmed, detectedType, options)
-            ? ELEMENT_LYRICS
-            : detectedType;
+        return ELEMENT_ACTION;
     }
 
     if (LEGACY_CENTERED_PATTERN.test(trimmed)) {

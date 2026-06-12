@@ -9,7 +9,14 @@ export type CharacterToken = {
     valueEnd: number,
 };
 
-type CharacterDelimiter = '+' | ' + ';
+/*
+ * '/' is the canonical multi-character delimiter (NMI/Samuel French format).
+ * '+' is accepted on input forever — legacy documents and pasted text may
+ * still contain it — but every writer emits '/'.
+ */
+type CharacterDelimiter = '/' | ' / ';
+
+const isCharacterDelimiterChar = (char: string) => char === '/' || char === '+';
 
 export const splitCharacterTokens = (line: string): CharacterToken[] => {
     const source = typeof line === 'string' ? line : '';
@@ -52,7 +59,7 @@ export const splitCharacterTokens = (line: string): CharacterToken[] => {
             continue;
         }
 
-        if (char === '+' && depth === 0) {
+        if (isCharacterDelimiterChar(char) && depth === 0) {
             pushToken(index);
             segmentStart = index + 1;
         }
@@ -81,7 +88,7 @@ export const normalizeCharacterKey = (token: string): string => {
     return collapseWhitespace(base).toUpperCase();
 };
 
-export const normalizeCharacterDelimiters = (line: string, delimiter: CharacterDelimiter = ' + '): string => {
+export const normalizeCharacterDelimiters = (line: string, delimiter: CharacterDelimiter = ' / '): string => {
     const parts = splitCharacterTokens(line)
         .map(token => token.value)
         .filter(value => value.length > 0);
@@ -99,7 +106,7 @@ export const normalizeCharacterEditorDelimiters = (line: string): string => {
     let result = parts[0] ?? '';
 
     for (let index = 1; index < parts.length; index += 1) {
-        result += '+';
+        result += '/';
         result += parts[index] ?? '';
     }
 

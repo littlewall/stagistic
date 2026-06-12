@@ -13,7 +13,6 @@ import {
     ELEMENT_LYRICS,
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
-    ELEMENT_SECTION,
     ELEMENT_TRANSITION,
     type FountainDocument,
     type FountainElement,
@@ -96,16 +95,6 @@ const serializeLine = (
         const name = withLineBreaks.trim();
 
         return name ? `# ${name}` : '#';
-    }
-
-    if (node.type === ELEMENT_SECTION) {
-        const name = withLineBreaks.trim();
-
-        if (!name) {
-            return '#';
-        }
-
-        return `# ${name}`;
     }
 
     if (node.type === ELEMENT_ACTION) {

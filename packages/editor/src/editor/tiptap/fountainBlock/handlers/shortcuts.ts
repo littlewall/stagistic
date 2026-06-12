@@ -39,6 +39,36 @@ const findBlockTypeByShortcut = (
     return null;
 };
 
+/*
+ * Alt+Enter cycles the active block to the next type (Shift reverses).
+ * Alt+Enter is the same physical chord on macOS (Option+Enter) and
+ * Windows, and is not reserved by either OS or by browsers.
+ */
+export const handleBlockTypeCycle = (editor: Editor, event: KeyboardEvent) => {
+    const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+
+    if (!block) {
+        return false;
+    }
+
+    event.preventDefault();
+
+    // Acts are structural; they are managed via act commands, not cycling.
+    if (block.blockType === ELEMENT_ACT) {
+        return true;
+    }
+
+    const cycleTypes = FOUNTAIN_BLOCK_TYPES.filter(type => type !== ELEMENT_ACT);
+    const currentIndex = cycleTypes.findIndex(type => type === block.blockType);
+    const direction = event.shiftKey ? -1 : 1;
+    const nextIndex = currentIndex === -1
+        ? 0
+        : (currentIndex + direction + cycleTypes.length) % cycleTypes.length;
+    const nextType = normalizeFountainBlockType(cycleTypes[nextIndex]);
+
+    return updateBlockType(editor, nextType, block.id);
+};
+
 export const handleBlockShortcut = (
     editor: Editor,
     event: KeyboardEvent,

@@ -1,5 +1,8 @@
 import {useCallback} from 'react';
-import type {NavigateFunction} from 'react-router-dom';
+import type {
+    NavigateFunction,
+    SetURLSearchParams,
+} from 'react-router-dom';
 
 import {
     type ScriptSettingsPanelId,
@@ -12,7 +15,7 @@ interface UseScriptEditorSettingsModalArgs {
     currentScriptId: string | null | undefined,
     navigate: NavigateFunction,
     searchParams: URLSearchParams,
-    setSearchParams: (updater: URLSearchParams | ((prev: URLSearchParams) => URLSearchParams)) => void,
+    setSearchParams: SetURLSearchParams,
     deleteScript: (scriptId: string) => Promise<void>,
 }
 

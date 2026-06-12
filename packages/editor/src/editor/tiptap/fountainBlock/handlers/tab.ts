@@ -1,9 +1,6 @@
 import {
     ELEMENT_ACTION,
-    ELEMENT_CHARACTER,
-    ELEMENT_DIALOGUE,
     ELEMENT_LYRICS,
-    ELEMENT_PARENTHETICAL,
 } from '@stagistic/script';
 import type {Editor} from '@tiptap/react';
 
@@ -12,18 +9,21 @@ import {
     getActiveFountainBlockFromState,
 } from '../../fountainCore';
 import {
-    updateBlockType,
-} from '../commands';
-import {
     type BlockContext,
     createBlockContext,
 } from '../context';
-import {resolveParentheticalTabTarget} from './enter';
 import {type HandlerMap} from './types';
 
+/*
+ * Tab and Shift-Tab are reserved for indentation only (block type changes
+ * live on Cmd/Ctrl+digit shortcuts and Alt+Enter cycling). Indentation is
+ * stored as literal leading tabs; one tab renders 0.5" (tab-size: 5 with
+ * the monospace font).
+ */
 const MAX_ACTION_INDENT = 3;
+const MAX_LYRICS_INDENT = 4;
 
-const handleActionTab = (context: BlockContext, event: KeyboardEvent) => {
+const createIndentTabHandler = (maxIndent: number) => (context: BlockContext, event: KeyboardEvent) => {
     event.preventDefault();
 
     const text = context.block.node.textContent ?? '';
@@ -45,7 +45,7 @@ const handleActionTab = (context: BlockContext, event: KeyboardEvent) => {
         return true;
     }
 
-    if (indentCount >= MAX_ACTION_INDENT) {
+    if (indentCount >= maxIndent) {
         return true;
     }
 
@@ -57,30 +57,8 @@ const handleActionTab = (context: BlockContext, event: KeyboardEvent) => {
 };
 
 const tabHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => boolean> = {
-    [ELEMENT_CHARACTER]: (context, event) => {
-        event.preventDefault();
-
-        return updateBlockType(context.editor, ELEMENT_ACTION);
-    },
-    [ELEMENT_DIALOGUE]: (context, event) => {
-        event.preventDefault();
-
-        return updateBlockType(context.editor, ELEMENT_PARENTHETICAL);
-    },
-    [ELEMENT_LYRICS]: (context, event) => {
-        event.preventDefault();
-
-        return updateBlockType(context.editor, ELEMENT_PARENTHETICAL);
-    },
-    [ELEMENT_PARENTHETICAL]: (context, event) => {
-        event.preventDefault();
-
-        return updateBlockType(
-            context.editor,
-            resolveParentheticalTabTarget(context.editor, context.block.pos),
-        );
-    },
-    [ELEMENT_ACTION]: handleActionTab,
+    [ELEMENT_ACTION]: createIndentTabHandler(MAX_ACTION_INDENT),
+    [ELEMENT_LYRICS]: createIndentTabHandler(MAX_LYRICS_INDENT),
 };
 
 export const handleTab = (editor: Editor, event: KeyboardEvent) => {

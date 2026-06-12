@@ -8,6 +8,53 @@ Status legend: ✅ compliant · 🔧 adjust existing · 🆕 not implemented yet
 
 ---
 
+## Implementation — Round 1 (approved scope)
+
+Scope locked to adjustments of existing behavior; no new pages, page furniture, or song entities in this round. Values below are the product decisions for Stagistic and deliberately deviate from NMI where noted.
+
+- [x] **R1-1 Page size choice — A4 / US Letter**
+  Add a "Page size" preset select to the page layout settings panel: A4 (`794×1123 px`) and US Letter (`816×1056 px`). Preselect from the script's current dimensions; show "Custom" when they match neither. Default for new scripts stays A4.
+  Touches: `PageLayoutSettingsPanel` + its view model. `EditorSettings.page` already carries `widthPx`/`heightPx`, so no schema change.
+
+- [x] **R1-2 Rename blocks (UI labels only)**
+  `Parenthetical` → **"Aside"**, `Action` → **"Stage directions"**. Internal identifiers (`parenthetical`, `action` node/block types) and stored documents stay unchanged — label-only change in the block specs plus any settings-panel preview strings.
+  Touches: [parenthetical.ts](../packages/script/src/blocks/specs/parenthetical.ts), [action.ts](../packages/script/src/blocks/specs/action.ts), [settings/constants.ts](../packages/app-routes/src/routes/script/editor/settings/constants.ts).
+
+- [x] **R1-3 Block indent defaults — confirmed values**
+  Final values (deliberate deviations from NMI noted):
+  | Block | Value | Change made |
+  |---|---|---|
+  | Character | 3" (30 ch) — per NMI | changed from 20 ch |
+  | Dialogue | 1" (10 ch) — deviation (NMI: flush left) | none (already 10 ch) |
+  | Aside | 1.6" (16 ch) — deviation (NMI: 1") | none (already 16 ch) |
+  | Stage directions | full width — deviation (NMI: 1" both sides) | none (already 0) |
+  | Lyrics | 1" (10 ch) — deviation (NMI: 0.5") | none (already 10 ch) |
+
+- [x] **R1-4 Aside casing — add `lowercase` option**
+  `'lowercase'` added to [BLOCK_CASING_OPTIONS](../packages/script/src/settings/options.ts) (rendered via `text-transform: lowercase`), made the Aside default; `normal`/`uppercase`/`lowercase` all selectable in the element formatting toolbar.
+
+- [x] **R1-5 Multi-character separator — canonical `/`, `+` still typeable**
+  Tokenizer ([characterNames.ts](../packages/script/src/fountain/characterNames.ts)) accepts both `+` and `/` forever; all writers (editor normalization, Fountain import line normalization, serializer) emit `/`. Typing `+` in a character block triggers immediate normalization to `/`.
+  Legacy data: a **TEMPORARY one-shot migration** in [useScriptLoader.ts](../packages/app-routes/src/routes/script/controller/useScriptLoader.ts) (+ [migrateCharacterDelimiters.ts](../packages/script/src/characters/migrateCharacterDelimiters.ts)) rewrites `+` → `/` on editor load and saves immediately. **Remove both after all local scripts have been opened once.**
+
+- [x] **R1-6 Remove the Section block**
+  `section` removed from `ALL_BLOCK_SPECS`, editor bindings, settings panel constants, pagination sets, and DB config block types; `ELEMENT_SECTION` deleted from the type union. Fountain `#` headings (other than `# ACT:`) now parse as Stage directions with the raw line kept. Stored documents containing `section` blocks coerce to Stage directions on load (`resolveScriptBlockNodeType` falls back to the default `action` node) — no data migration, per decision.
+
+- [x] **R1-7 Lyrics nesting via Tab**
+  Tab on a lyrics block inserts a leading literal tab (max 4), Shift-Tab removes one — same mechanism as Stage directions (max 3). `tab-size: 5` on the editor content renders one tab as a 0.5" step. Tab/Shift-Tab no longer change block types anywhere (the old Tab conversions on character/dialogue/lyrics/aside were removed).
+
+- [x] **R1-8 Block type switching shortcuts**
+  Type changes live on Cmd/Ctrl+digit (existing per-type shortcuts) and the new **Alt+Enter** cycle (Shift+Alt+Enter reverses) — same physical chord on macOS and Windows, not reserved by either OS or browsers (Cmd+Tab and Alt+Tab are OS app switchers and unusable). Acts are excluded from cycling (structural, managed via act commands).
+
+### Resolved decisions (former Q1–Q4)
+
+1. **Character indent:** 3" (NMI value) — default changed from 20 ch to 30 ch.
+2. **Section removal:** existing `section` blocks and Fountain `#` headings behave as Stage directions; no data conversion (affects test scripts only). Parser rewrite in phase 2 will revisit.
+3. **Lyrics nesting:** literal leading tabs, same as Stage directions.
+4. **Legacy `+`:** one-shot load-time migration rewrites stored documents to `/` and saves immediately; migration code is temporary and gets deleted (not flagged) after running. Tokenizer accepts `+` on input permanently.
+
+---
+
 ## 1. Page & typography
 
 - [ ] 🔧 **Margins — 1" on all four sides**

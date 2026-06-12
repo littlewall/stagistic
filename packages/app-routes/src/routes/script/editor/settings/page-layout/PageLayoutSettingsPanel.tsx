@@ -1,3 +1,4 @@
+import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
 import {clsx} from '@stagistic/ui';
 import {
     useEffect, useRef, useState,
@@ -16,6 +17,29 @@ import styles from './PageLayoutSettingsPanel.module.css';
 import {usePageLayoutSettingsViewModel} from './usePageLayoutSettingsViewModel';
 
 const MIN_PAGE_CONTENT_WIDTH_PX = 320;
+
+// 96 dpi: A4 = 8.27" × 11.69", US Letter = 8.5" × 11".
+const PAGE_SIZE_PRESETS = [
+    {
+        id: 'a4',
+        label: 'A4',
+        widthPx: 794,
+        heightPx: 1123,
+    }, {
+        id: 'letter',
+        label: 'US Letter',
+        widthPx: 816,
+        heightPx: 1056,
+    },
+] as const;
+
+const resolvePageSizePresetId = (widthPx: number, heightPx: number): string => {
+    const preset = PAGE_SIZE_PRESETS.find(
+        candidate => candidate.widthPx === widthPx && candidate.heightPx === heightPx,
+    );
+
+    return preset?.id ?? 'custom';
+};
 
 interface PageLayoutSettingsPanelProps {
     resolvedScriptSettings: ScriptEditorSettingsPanelProps['resolvedScriptSettings'],
@@ -49,6 +73,18 @@ export const PageLayoutSettingsPanel = ({
     } = numeric;
 
     const fontSizePx = resolvedScriptSettings.typography.fontSizePx;
+
+    const pageWidthPx = resolvedScriptSettings.page.widthPx ?? DEFAULT_EDITOR_SETTINGS.page.widthPx;
+    const pageHeightPx = resolvedScriptSettings.page.heightPx ?? DEFAULT_EDITOR_SETTINGS.page.heightPx;
+    const pageSizePresetId = resolvePageSizePresetId(pageWidthPx, pageHeightPx);
+    const pageSizeOptions = [
+        ...PAGE_SIZE_PRESETS.map(preset => ({
+            value: preset.id,
+            label: preset.label,
+        })), ...pageSizePresetId === 'custom'
+            ? [{value: 'custom', label: 'Custom'}]
+            : [],
+    ];
 
     const marginSliderStep = 0.05 * 96; // 0.05"
 
@@ -87,6 +123,27 @@ export const PageLayoutSettingsPanel = ({
             <h3 className={panelStyles.panelTitle}>Page Layout</h3>
             <div className={sharedStyles.previewCard}>
                 <div className={sharedStyles.settingsFlatGrid}>
+                    <div className={sharedStyles.settingsField}>
+                        <span className={sharedStyles.fieldLabel}>Page size</span>
+                        <SettingsSelect
+                            id="settings-page-size"
+                            ariaLabel="Select page size"
+                            value={pageSizePresetId}
+                            options={pageSizeOptions}
+                            onChange={nextValue => {
+                                const preset = PAGE_SIZE_PRESETS.find(candidate => candidate.id === nextValue);
+
+                                if (!preset) {
+                                    return;
+                                }
+
+                                onUpdatePageSettings({
+                                    widthPx: preset.widthPx,
+                                    heightPx: preset.heightPx,
+                                });
+                            }}
+                        />
+                    </div>
                     <div className={sharedStyles.settingsField}>
                         <span className={sharedStyles.fieldLabel}>Top margin</span>
                         <SettingsSelect

@@ -8,7 +8,7 @@ export const parentheticalSpec = {
     nodeType: 'parenthetical',
     blockType: 'parenthetical',
     legacyType: ELEMENT_PARENTHETICAL,
-    label: 'Parenthetical',
+    label: 'Aside',
     listId: 'element-parenthetical',
     enterFallback: ELEMENT_CHARACTER,
     defaultSettings: {
@@ -19,7 +19,7 @@ export const parentheticalSpec = {
         shortcut: '4',
         nextElement: ELEMENT_CHARACTER,
         textAlign: 'left',
-        casing: 'normal',
+        casing: 'lowercase',
         isBold: false,
         isItalic: true,
         isUnderline: false,

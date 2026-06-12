@@ -5,7 +5,7 @@ export const actionSpec = {
     nodeType: 'action',
     blockType: 'action',
     legacyType: ELEMENT_ACTION,
-    label: 'Action',
+    label: 'Stage directions',
     listId: 'element-action',
     enterFallback: ELEMENT_ACTION,
     defaultSettings: {

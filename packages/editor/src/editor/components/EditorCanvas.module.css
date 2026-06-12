@@ -27,6 +27,8 @@
     font-size: var(--editor-font-size, calc(13px * var(--size-scale)));
     line-height: var(--editor-line-height, 1.7);
     color: var(--color-text);
+    /* One leading tab = one 0.5" indent step (5 monospace chars). */
+    tab-size: 5;
     outline: none;
 
     & :global(.ProseMirror),

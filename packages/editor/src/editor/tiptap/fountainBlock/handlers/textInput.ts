@@ -85,8 +85,9 @@ const handleCharacterInput = (
     const blockText = context.block.node.textContent ?? '';
     const insideParens = isInsideParentheses(blockText, offset);
 
-    if (text === '+') {
-        const tr = context.editor.state.tr.insertText('+', from, to);
+    // '/' is the canonical delimiter; a typed '+' is normalized to '/' too.
+    if (text === '/' || text === '+') {
+        const tr = context.editor.state.tr.insertText(text, from, to);
 
         context.editor.view.dispatch(tr);
         normalizeActiveCharacterDelimiters(context.editor);
@@ -98,7 +99,7 @@ const handleCharacterInput = (
         const previous = offset > 0 ? blockText[offset - 1] : '';
         const next = blockText[offset] ?? '';
 
-        if (previous === '+' || next === '+') {
+        if (previous === '/' || next === '/' || previous === '+' || next === '+') {
             return true;
         }
     }

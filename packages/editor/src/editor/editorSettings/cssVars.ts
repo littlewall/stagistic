@@ -34,9 +34,9 @@ const toIndent = (chars?: number, px?: number) => {
 
     return toPx(px);
 };
-const toCasing = (value?: 'normal' | 'uppercase') => {
-    if (value === 'uppercase') {
-        return 'uppercase';
+const toCasing = (value?: 'normal' | 'uppercase' | 'lowercase') => {
+    if (value === 'uppercase' || value === 'lowercase') {
+        return value;
     }
 
     if (value === 'normal') {

@@ -6,7 +6,6 @@ import {lyricsSpec} from './lyrics';
 import {noteSpec} from './note';
 import {parentheticalSpec} from './parenthetical';
 import {sceneHeadingSpec} from './sceneHeading';
-import {sectionSpec} from './section';
 import {transitionSpec} from './transition';
 
 /**
@@ -23,7 +22,6 @@ import {transitionSpec} from './transition';
 export const ALL_BLOCK_SPECS = [
     sceneHeadingSpec,
     actSpec,
-    sectionSpec,
     actionSpec,
     characterSpec,
     parentheticalSpec,
@@ -42,6 +40,5 @@ export {
     noteSpec,
     parentheticalSpec,
     sceneHeadingSpec,
-    sectionSpec,
     transitionSpec,
 };

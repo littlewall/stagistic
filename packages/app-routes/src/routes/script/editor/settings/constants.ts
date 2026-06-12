@@ -7,7 +7,6 @@ import {
     ELEMENT_NOTE,
     ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
-    ELEMENT_SECTION,
     ELEMENT_TRANSITION,
     type FountainElementType,
 } from '@stagistic/script';
@@ -56,7 +55,6 @@ export const LINE_HEIGHT_OPTIONS = [
 export const BLOCK_PREVIEW_TEXT: Record<FountainElementType, string> = {
     [ELEMENT_SCENE_HEADING]: 'INT. LOREM MANSION - DAY',
     [ELEMENT_ACT]: 'ACT 1',
-    [ELEMENT_SECTION]: 'MONTAGE',
     [ELEMENT_ACTION]: 'She closes the door and exhales.',
     [ELEMENT_CHARACTER]: 'ALEX',
     [ELEMENT_PARENTHETICAL]: '(quietly)',
@@ -69,7 +67,6 @@ export const BLOCK_PREVIEW_TEXT: Record<FountainElementType, string> = {
 export const BLOCK_PREVIEW_TEXT_COLOR: Record<FountainElementType, string> = {
     [ELEMENT_SCENE_HEADING]: 'var(--color-block-scene-heading)',
     [ELEMENT_ACT]: 'var(--color-block-scene-heading)',
-    [ELEMENT_SECTION]: 'var(--color-block-scene-heading)',
     [ELEMENT_ACTION]: 'var(--color-block-action)',
     [ELEMENT_CHARACTER]: 'var(--color-block-character)',
     [ELEMENT_PARENTHETICAL]: 'var(--color-block-parenthetical)',

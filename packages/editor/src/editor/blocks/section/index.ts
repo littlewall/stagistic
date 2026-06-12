@@ -1,1 +1,0 @@
-export {sectionBinding} from './binding';

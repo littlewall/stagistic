@@ -6,7 +6,7 @@ import {FOUNTAIN_BLOCK_NODE_NAME, getActiveFountainBlockFromState} from '../../f
 import {createBlockContext} from '../context';
 import {enterHandlerMaps, handleEnter} from './enter';
 import {handlePaste, pasteHandlerMaps} from './paste';
-import {handleBlockShortcut} from './shortcuts';
+import {handleBlockShortcut, handleBlockTypeCycle} from './shortcuts';
 import {handleTab, tabHandlerMaps} from './tab';
 import {handleTextInput, textInputHandlerMaps} from './textInput';
 import {
@@ -101,6 +101,10 @@ export const handleKeyDown = (
 
     if (handleBlockShortcut(editor, event, blockShortcuts)) {
         return true;
+    }
+
+    if (event.key === 'Enter' && event.altKey && !event.metaKey && !event.ctrlKey) {
+        return handleBlockTypeCycle(editor, event);
     }
 
     if (event.key === 'Enter') {
