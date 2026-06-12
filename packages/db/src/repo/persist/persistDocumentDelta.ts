@@ -82,12 +82,22 @@ export const createDocumentPersister = (scriptId: string) => {
         baselineOrderKeys = orderKeys ?? new Map();
     };
 
-    const persistImpl = async (db: DbClient, document: RewriteScriptDocument): Promise<void> => {
+    const persistImpl = async (
+        db: DbClient,
+        document: RewriteScriptDocument,
+        afterPersist?: (tx: DbClient) => Promise<void>,
+    ): Promise<void> => {
         const now = Date.now();
         const extracted = extractScriptBlocks(scriptId, document);
         const diff = diffExtractedBlocks(Array.from(lastSavedBlocks.values()), extracted.blocks);
 
         if (diff.inserted.length === 0 && diff.updated.length === 0 && diff.deletedIds.length === 0) {
+            if (afterPersist) {
+                await db.transaction(async tx => {
+                    await afterPersist(tx);
+                });
+            }
+
             return;
         }
 
@@ -189,7 +199,7 @@ export const createDocumentPersister = (scriptId: string) => {
             && diff.deletedIds.length === 0
             && fieldChangedUpdated.length === 0;
 
-        await db.transaction(async tx => {
+        const writeDelta = async (tx: DbClient) => {
             if (!diff.structural) {
                 // Case A: content-only edits — touch only blocks whose fields/refs actually changed.
                 for (const block of fieldChangedUpdated) {
@@ -304,13 +314,25 @@ export const createDocumentPersister = (scriptId: string) => {
 
             // 7. Rewrite refs only for inserted + blocks whose refs changed.
             await replaceRefs(tx, [...diff.inserted, ...refChangedUpdated]);
+        };
+
+        await db.transaction(async tx => {
+            await writeDelta(tx);
+
+            if (afterPersist) {
+                await afterPersist(tx);
+            }
         });
 
         setBaseline(extracted.blocks, orderKeyById);
     };
 
-    const persist = (db: DbClient, document: RewriteScriptDocument): Promise<void> => {
-        const result = queue.then(() => persistImpl(db, document));
+    const persist = (
+        db: DbClient,
+        document: RewriteScriptDocument,
+        afterPersist?: (tx: DbClient) => Promise<void>,
+    ): Promise<void> => {
+        const result = queue.then(() => persistImpl(db, document, afterPersist));
 
         /*
          * Keep the chain alive even if persistImpl rejects — the next call

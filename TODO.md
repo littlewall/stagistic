@@ -5,11 +5,11 @@ Plán: `~/.claude/plans/p-esouv-n-sc-n-na-novou-quiet-nova.md`. Bottleneck: chyb
 - [x] 1.1 `relaxedDurability: true` pro worker (bootstrap.ts + pglite.worker.ts)
 - [x] 1.2 Reorder fast path v `persistImpl` (čistý reorder přeskočí rekonsiliaci scén/aktů)
 - [x] 1.3 Batching smyček (bulk upserty/delety scén+aktů, bulk character refs, lazy `listScriptCharacters`)
-- [ ] 2.1 `minimalOrderKeys.ts` — LIS minimální re-keying
-- [ ] 2.2 Baseline persisteru drží persistované order klíče
-- [ ] 2.3 Seed klíčů při `loadLatest`
-- [ ] 3. Sloučení timestamp/outbox transakce do persist transakce
-- [ ] Testy (fast path, fallback, insert mezi kotvami, seed, scale)
+- [x] 2.1 `minimalOrderKeys.ts` — LIS minimální re-keying
+- [x] 2.2 Baseline persisteru drží persistované order klíče
+- [x] 2.3 Seed klíčů při `loadLatest`
+- [x] 3. Sloučení timestamp/outbox transakce do persist transakce
+- [x] Testy (fast path, fallback, insert mezi kotvami, seed, scale)
 - [ ] Perf instrumentace v `saveLatest` (za `stagistic:perf` flagem)
 - [ ] Lint + typecheck/build
 

@@ -106,10 +106,9 @@ export const createContentHandlers = ({
         /*
          * Granular persist: diff the document against the last-saved blocks and
          * write only the delta (Case A content-only UPDATEs; Case B structural).
+         * Timestamp + outbox ride in the same transaction as the delta.
          */
-        await getPersister(scriptId).persist(db, convertDefaultScriptDocumentToLegacy(value));
-
-        await db.transaction(async tx => {
+        await getPersister(scriptId).persist(db, convertDefaultScriptDocumentToLegacy(value), async tx => {
             await dbQueries.updateScriptTimestamp(tx, {
                 scriptId,
                 updatedAt: now,
