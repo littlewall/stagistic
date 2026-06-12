@@ -25,12 +25,14 @@ interface ElementPreviewProps {
     toolbar?: ReactNode,
     model: ElementPreviewModel,
     handlers: ElementPreviewHandlers,
+    previewStyleOverride?: React.CSSProperties,
 }
 
 export const ElementPreview = ({
     toolbar,
     model,
     handlers,
+    previewStyleOverride,
 }: ElementPreviewProps) => {
     const {
         previewStyle,
@@ -75,7 +77,12 @@ export const ElementPreview = ({
     } as React.CSSProperties;
 
     return (
-        <div className={sharedStyles.previewCard} style={{...previewStyle, ...localSliderStyleOverride}}>
+        <div
+            className={sharedStyles.previewCard}
+            style={{
+                ...previewStyle, ...previewStyleOverride, ...localSliderStyleOverride,
+            }}
+        >
             {toolbar}
             <div className={styles.previewSpacingRow} />
             <div className={styles.previewLineCanvas}>

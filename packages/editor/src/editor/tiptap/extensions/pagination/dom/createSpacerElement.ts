@@ -22,7 +22,13 @@ export const createSpacerElement = (
     spacer.style.height = `${Math.max(0, height)}px`;
     spacer.style.pointerEvents = 'none';
     if (isInlineBreak) {
-        spacer.style.display = 'inline-block';
+        /*
+         * block, not inline-block: an inline-block participates in a line box
+         * and inflates the block by the line-strut descent, so the decorated
+         * height would disagree with the spacer-free measurement and the
+         * pagination would never reach a fixed point.
+         */
+        spacer.style.display = 'block';
         spacer.style.width = '100%';
     }
 

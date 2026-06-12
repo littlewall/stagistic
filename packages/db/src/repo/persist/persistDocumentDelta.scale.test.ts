@@ -45,6 +45,15 @@ const readIds = async (db: TestDb, scriptId: string): Promise<string[]> => {
     return rows.map(row => row.id);
 };
 
+const readOrders = async (db: TestDb, scriptId: string): Promise<Map<string, string>> => {
+    const rows = await db
+        .select({id: scriptBlocks.id, blockOrder: scriptBlocks.blockOrder})
+        .from(scriptBlocks)
+        .where(eq(scriptBlocks.scriptId, scriptId));
+
+    return new Map(rows.map(row => [row.id, row.blockOrder]));
+};
+
 describe('persistDocumentDelta at scale', () => {
     it('reorders a scene in a ~400-block script correctly and quickly', async () => {
         const {db} = await createTestDb();
@@ -66,6 +75,7 @@ describe('persistDocumentDelta at scale', () => {
         // Move the last scene to the front (shifts every other block's order).
         const reordered = [scenes[sceneCount - 1], ...scenes.slice(0, sceneCount - 1)];
 
+        const ordersBefore = await readOrders(db, 's1');
         const startedAt = Date.now();
 
         await persister.persist(db, docFromScenes(reordered));
@@ -73,10 +83,24 @@ describe('persistDocumentDelta at scale', () => {
         const elapsed = Date.now() - startedAt;
 
         expect(await readIds(db, 's1')).toEqual(expectedFlatIds(reordered));
+
+        /*
+         * Minimal re-keying: every block outside the moved scene keeps its
+         * block_order byte-identical — a scene move writes M keys, not N.
+         */
+        const ordersAfter = await readOrders(db, 's1');
+        const movedIds = new Set(expectedFlatIds([scenes[sceneCount - 1]]));
+
+        for (const [id, order] of ordersBefore) {
+            if (!movedIds.has(id)) {
+                expect(ordersAfter.get(id)).toBe(order);
+            }
+        }
+
         /*
          * Bulk write must be well under a second even for hundreds of blocks.
          * (Per-row round-trips would take many seconds.)
          */
-        expect(elapsed).toBeLessThan(2000);
+        expect(elapsed).toBeLessThan(1000);
     });
 });

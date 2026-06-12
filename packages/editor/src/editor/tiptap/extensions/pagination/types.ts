@@ -46,6 +46,19 @@ export interface PaginationStorage {
     forceRecalcToken: number,
 }
 
+export interface BlockLine {
+    /** ProseMirror position of the first content on this visual line */
+    startPos: number,
+    /** line top relative to the block's border-box top (includes padding-top) */
+    topRel: number,
+}
+
+export interface BlockLineMap {
+    lines: BlockLine[],
+    /** block height measured with inline-break spacers hidden */
+    cleanHeight: number,
+}
+
 export interface BlockCacheEntry {
     node: ProseMirrorNode,
     height: number,
@@ -64,6 +77,11 @@ export interface BuildPaginationStateResult {
     nextCache: Map<string, BlockCacheEntry>,
     hasInlineBreaks: boolean,
     usedFallbackMeasurements: boolean,
+    /**
+     * Stable fingerprint of the computed layout (spacers + page boundaries).
+     * An unchanged signature means dispatching would only churn widget DOM.
+     */
+    signature: string,
 }
 
 export interface PaginationExtensionAdapter {

@@ -46,9 +46,22 @@ export const useScriptEditorSettingsDraft = ({
     const settingsSaveTimerRef = useRef<number | null>(null);
     const hydratedSettingsScriptIdRef = useRef<string | null>(null);
 
+    const effectiveScriptSettingsDraft = useMemo<EditorSettingsOverride>(() => {
+        const hasHydratedForCurrentScript = currentScriptId !== null
+            && hydratedSettingsScriptIdRef.current === currentScriptId;
+
+        return !hasHydratedForCurrentScript && scriptSettingsOverride != null
+            ? normalizeSettingsOverride(scriptSettingsOverride)
+            : scriptSettingsDraft;
+    }, [
+        currentScriptId,
+        scriptSettingsDraft,
+        scriptSettingsOverride,
+    ]);
+
     const resolvedScriptSettings = useMemo<EditorSettings>(
-        () => mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, scriptSettingsDraft),
-        [scriptSettingsDraft],
+        () => mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, effectiveScriptSettingsDraft),
+        [effectiveScriptSettingsDraft],
     );
 
     const draftSerialized = useMemo(
@@ -177,6 +190,7 @@ export const useScriptEditorSettingsDraft = ({
 
     return {
         scriptSettingsDraft,
+        effectiveScriptSettingsDraft,
         resolvedScriptSettings,
         updateBlockSettings,
         updateCharacterColorSaturation,

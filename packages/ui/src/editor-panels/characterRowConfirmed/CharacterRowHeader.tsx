@@ -77,77 +77,71 @@ export const CharacterRowHeader = ({
                     <ArrowRightIcon className={styles.expandIcon} aria-hidden="true" />
                 )}
             </button>
-            {isExpanded ? (
-                <>
-                    <TooltipTrigger
-                        trigger="hover"
-                        delay={0}
-                        closeDelay={120}
-                    >
-                        <span
-                            ref={color.refs.triggerRef}
-                            role="button"
-                            tabIndex={color.state.isActionDisabled ? -1 : 0}
-                            aria-label={`Choose color for ${character.key}`}
-                            aria-disabled={color.state.isActionDisabled || undefined}
-                            className={styles.characterColorInteractive}
-                            onClick={event => {
-                                event.stopPropagation();
-                                color.actions.togglePicker();
-                            }}
-                            onKeyDown={event => {
-                                event.stopPropagation();
+            <TooltipTrigger
+                trigger="hover"
+                delay={0}
+                closeDelay={120}
+            >
+                <span
+                    ref={color.refs.triggerRef}
+                    role="button"
+                    tabIndex={color.state.isActionDisabled ? -1 : 0}
+                    aria-label={`Choose color for ${character.key}`}
+                    aria-disabled={color.state.isActionDisabled || undefined}
+                    className={styles.characterColorInteractive}
+                    onClick={event => {
+                        event.stopPropagation();
+                        color.actions.togglePicker();
+                    }}
+                    onKeyDown={event => {
+                        event.stopPropagation();
 
-                                if (color.state.isActionDisabled) {
-                                    return;
-                                }
+                        if (color.state.isActionDisabled) {
+                            return;
+                        }
 
-                                if (event.key === 'Enter' || event.key === ' ') {
-                                    event.preventDefault();
-                                    color.actions.togglePicker();
-                                }
+                        if (event.key === 'Enter' || event.key === ' ') {
+                            event.preventDefault();
+                            color.actions.togglePicker();
+                        }
 
-                                if (event.key === 'Escape') {
-                                    event.preventDefault();
-                                    color.actions.setPickerOpen(false);
-                                }
-                            }}
-                        >
-                            <span className={styles.characterColor} aria-hidden="true" />
-                        </span>
-                        <Tooltip
-                            className={styles.confirmTooltip}
-                            placement="right"
-                            offset={8}
-                        >
-                            Choose color
-                        </Tooltip>
-                    </TooltipTrigger>
-                    <CharacterColorPopover
-                        refs={{
-                            triggerRef: color.refs.triggerRef,
-                        }}
-                        model={{
-                            characterKey: character.key,
-                            colorDraftHex: color.state.colorDraftHex,
-                            pickerColorValue: color.state.pickerColorValue,
-                            presetColorHexes: color.state.presetColorHexes,
-                            resolvedColorSaturation: color.state.resolvedColorSaturation,
-                        }}
-                        state={{
-                            isOpen: color.state.isPickerOpen,
-                        }}
-                        actions={{
-                            onOpenChange: color.actions.setPickerOpen,
-                            onHueChange: color.actions.setDraftHue,
-                            onApply: color.actions.applyColor,
-                            onReset: color.actions.resetColor,
-                        }}
-                    />
-                </>
-            ) : (
-                <span className={styles.characterColor} aria-hidden="true" />
-            )}
+                        if (event.key === 'Escape') {
+                            event.preventDefault();
+                            color.actions.setPickerOpen(false);
+                        }
+                    }}
+                >
+                    <span className={styles.characterColor} aria-hidden="true" />
+                </span>
+                <Tooltip
+                    className={styles.confirmTooltip}
+                    placement="right"
+                    offset={8}
+                >
+                    Choose color
+                </Tooltip>
+            </TooltipTrigger>
+            <CharacterColorPopover
+                refs={{
+                    triggerRef: color.refs.triggerRef,
+                }}
+                model={{
+                    characterKey: character.key,
+                    colorDraftHex: color.state.colorDraftHex,
+                    pickerColorValue: color.state.pickerColorValue,
+                    presetColorHexes: color.state.presetColorHexes,
+                    resolvedColorSaturation: color.state.resolvedColorSaturation,
+                }}
+                state={{
+                    isOpen: color.state.isPickerOpen,
+                }}
+                actions={{
+                    onOpenChange: color.actions.setPickerOpen,
+                    onHueChange: color.actions.setDraftHue,
+                    onApply: color.actions.applyColor,
+                    onReset: color.actions.resetColor,
+                }}
+            />
             {isExpanded ? (
                 <input
                     type="text"

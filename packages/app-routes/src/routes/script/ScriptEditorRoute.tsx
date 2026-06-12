@@ -70,7 +70,7 @@ export const ScriptEditorRoute = () => {
         handleSaveScriptSettingsOverride,
     } = useScriptEditorController(scriptId);
     const {
-        scriptSettingsDraft,
+        effectiveScriptSettingsDraft,
         resolvedScriptSettings,
         updateBlockSettings,
         updateCharacterColorSaturation,
@@ -219,7 +219,7 @@ export const ScriptEditorRoute = () => {
                             persistentCharacters: normalizedConfirmedCharacterRecords,
                         }}
                         settings={{
-                            scriptSettings: scriptSettingsDraft,
+                            scriptSettings: effectiveScriptSettingsDraft,
                         }}
                         save={{
                             onAutoSave: handleAutoSave,

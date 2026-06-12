@@ -12,14 +12,18 @@ import {
     isFountainBlockNodeName,
 } from '../../../fountainCore';
 import {
+    FIT_EPSILON_PX,
+    MIN_SPLIT_LINES_AFTER,
+    MIN_SPLIT_LINES_BEFORE,
     MORE_CONTD_BLOCK_TYPES,
     ORPHAN_PUSHDOWN_TYPES,
     SPLITTABLE_BLOCK_TYPES,
 } from '../constants';
 import {createSpacerElement} from '../dom/createSpacerElement';
-import {resolveBreakPos} from '../measure/resolveBreakPos';
+import {buildLineMap} from '../measure/buildLineMap';
 import {
     type BlockCacheEntry,
+    type BlockLineMap,
     type BuildPaginationStateResult,
     type PaginationOptions,
     type PaginationState,
@@ -29,6 +33,7 @@ import {
     buildEmptyPaginationStateResult,
     buildFinalPaginationStateResult,
 } from './resultBuilders';
+import {selectSplitPoint} from './selectSplitPoint';
 
 export const buildPaginationState = (
     view: EditorView,
@@ -153,74 +158,106 @@ export const buildPaginationState = (
         }
 
         let blockRemaining = blockHeight;
+        let lineMap: BlockLineMap | null = null;
+
+        const pushDownToNextPage = (spaceLeftNow: number, anchorPos: number) => {
+            const spacerHeight = spaceLeftNow + bottomSpacing + topSpacing;
+            const dividerOffset = spaceLeftNow + bottomSpacing;
+
+            decorations.push(Decoration.widget(
+                anchorPos,
+                () => createSpacerElement(spacerHeight, options, dividerOffset),
+                {side: 1},
+            ));
+            offsetCursor += spacerHeight;
+            closePage();
+        };
+
+        const placeRemainder = () => {
+            currentHeight += blockRemaining;
+            offsetCursor += blockRemaining;
+            blockRemaining = 0;
+            lastBlockEndPos = offset + node.nodeSize;
+        };
 
         while (blockRemaining > 0) {
             ensurePageStart();
 
             const spaceLeft = Math.max(0, contentHeight - currentHeight);
-            const breakBuffer = Math.max(
-                1,
-                Math.round(options.lineHeightPx * 0.25),
-            );
-            const bufferedSpaceLeft = Math.max(0, spaceLeft - breakBuffer);
-            const fits = currentHeight === 0 || blockRemaining <= bufferedSpaceLeft;
 
-            if (fits) {
-                currentHeight += blockRemaining;
-                offsetCursor += blockRemaining;
-                blockRemaining = 0;
-                lastBlockEndPos = offset + node.nodeSize;
+            if (blockRemaining <= spaceLeft + FIT_EPSILON_PX) {
+                placeRemainder();
                 break;
             }
 
+            const pushAnchor = currentHeight > 0 ? lastBlockEndPos : null;
             const domForSplit = getBlockDom();
 
             if (!isSplittable || !domForSplit) {
-                if (lastBlockEndPos !== null) {
-                    const remaining = Math.max(0, contentHeight - currentHeight);
-                    const spacerHeight = remaining + bottomSpacing + topSpacing;
-                    const dividerOffset = remaining + bottomSpacing;
-
-                    decorations.push(Decoration.widget(
-                        lastBlockEndPos,
-                        () => createSpacerElement(spacerHeight, options, dividerOffset),
-                        {side: 1},
-                    ));
-                    offsetCursor += spacerHeight;
-                    closePage();
+                if (pushAnchor !== null) {
+                    pushDownToNextPage(spaceLeft, pushAnchor);
                     continue;
                 }
 
-                currentHeight += blockRemaining;
-                offsetCursor += blockRemaining;
-                blockRemaining = 0;
-                lastBlockEndPos = offset + node.nodeSize;
+                placeRemainder();
                 break;
             }
 
-            const remaining = Math.max(0, contentHeight - currentHeight);
-            const breakY = offsetCursor + remaining;
-            const breakPos = resolveBreakPos(view, offset, node, domForSplit, breakY);
-            const spacerHeight = bottomSpacing + topSpacing;
-            const dividerOffset = bottomSpacing;
+            if (!lineMap) {
+                const consumed = Math.max(0, blockHeight - blockRemaining);
+
+                lineMap = buildLineMap(view, offset, node, domForSplit);
+                blockRemaining = Math.max(0, lineMap.cleanHeight - consumed);
+
+                if (blockRemaining <= 0) {
+                    placeRemainder();
+                    break;
+                }
+
+                // re-run the fit check against the spacer-free height
+                continue;
+            }
+
+            const decision = selectSplitPoint({
+                lines: lineMap.lines,
+                consumedHeight: Math.max(0, lineMap.cleanHeight - blockRemaining),
+                spaceLeft,
+                minLinesBefore: MIN_SPLIT_LINES_BEFORE,
+                minLinesAfter: MIN_SPLIT_LINES_AFTER,
+                epsilonPx: FIT_EPSILON_PX,
+                canPushDown: pushAnchor !== null,
+            });
+
+            if (decision.kind !== 'split') {
+                if (decision.kind === 'pushDown' && pushAnchor !== null) {
+                    pushDownToNextPage(spaceLeft, pushAnchor);
+                    continue;
+                }
+
+                placeRemainder();
+                break;
+            }
+
+            const {breakPos, fragmentHeight} = decision;
+            const leftover = Math.max(0, spaceLeft - fragmentHeight);
+            const spacerHeight = leftover + bottomSpacing + topSpacing;
+            const dividerOffset = leftover + bottomSpacing;
             let overlay: {
                 moreText: string,
                 contdText?: string,
             } | undefined;
 
-            if (needsMoreContd && lastCharacterName) {
-                overlay = {
-                    moreText: '(MORE)',
-                    contdText: `${lastCharacterName} (CONT'D)`,
-                };
+            if (needsMoreContd) {
+                overlay = lastCharacterName
+                    ? {
+                        moreText: '(MORE)',
+                        contdText: `${lastCharacterName} (CONT'D)`,
+                    }
+                    : {moreText: '(MORE)'};
             }
 
-            if (needsMoreContd && !lastCharacterName) {
-                overlay = {moreText: '(MORE)'};
-            }
-
-            currentHeight += remaining;
-            offsetCursor += remaining;
+            currentHeight += fragmentHeight;
+            offsetCursor += fragmentHeight;
             decorations.push(Decoration.widget(
                 breakPos,
                 () => createSpacerElement(spacerHeight, options, dividerOffset, overlay, true),
@@ -235,7 +272,7 @@ export const buildPaginationState = (
             }
 
             offsetCursor += spacerHeight;
-            blockRemaining -= remaining;
+            blockRemaining = Math.max(0, blockRemaining - fragmentHeight);
             closePage(offset);
         }
 

@@ -1,6 +1,7 @@
 import {
     asc,
     eq,
+    inArray,
     sql,
 } from 'drizzle-orm';
 
@@ -72,4 +73,12 @@ export const bulkUpsertScriptActs = async (db: DbClient, rows: UpsertScriptActPa
 
 export const deleteScriptAct = async (db: DbClient, actId: string) => {
     await db.delete(scriptActs).where(eq(scriptActs.id, actId));
+};
+
+export const bulkDeleteScriptActs = async (db: DbClient, actIds: string[]) => {
+    if (actIds.length === 0) {
+        return;
+    }
+
+    await db.delete(scriptActs).where(inArray(scriptActs.id, actIds));
 };

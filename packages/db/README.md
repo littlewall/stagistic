@@ -2,6 +2,9 @@
 
 Drizzle schema, PGlite client, queries, and repository interface contracts.
 
+How saves work (persist pipeline, block ordering, durability, perf
+invariants): see [docs/persistence.md](../../docs/persistence.md).
+
 ## Scope
 
 - Domain types (e.g., `ScriptSummary`)

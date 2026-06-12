@@ -50,9 +50,7 @@ export const ElementNumericControls = ({
                     value={spacingBefore}
                     options={spacingBeforeOptions}
                     onChange={nextValue => {
-                        onUpdateBlockSettings(blockType, {
-                            spacingBeforeEm: Number(nextValue),
-                        });
+                        onUpdateBlockSettings(blockType, {spacingBeforeEm: Number(nextValue)});
                     }}
                 />
             </div>
@@ -65,9 +63,7 @@ export const ElementNumericControls = ({
                         value={spacingAfter}
                         options={spacingAfterOptions}
                         onChange={nextValue => {
-                            onUpdateBlockSettings(blockType, {
-                                spacingAfterEm: Number(nextValue),
-                            });
+                            onUpdateBlockSettings(blockType, {spacingAfterEm: Number(nextValue)});
                         }}
                     />
                 </div>
@@ -80,9 +76,7 @@ export const ElementNumericControls = ({
                     value={lineHeight}
                     options={lineHeightOptions}
                     onChange={nextValue => {
-                        onUpdateBlockSettings(blockType, {
-                            lineHeight: Number(nextValue),
-                        });
+                        onUpdateBlockSettings(blockType, {lineHeight: Number(nextValue)});
                     }}
                 />
             </div>
