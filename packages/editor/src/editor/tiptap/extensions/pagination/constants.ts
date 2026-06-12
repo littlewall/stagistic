@@ -29,6 +29,15 @@ export const ORPHAN_PUSHDOWN_TYPES = new Set([
     ELEMENT_SECTION,
 ]);
 
+/** A block splits only when at least this many lines stay on the ending page… */
+export const MIN_SPLIT_LINES_BEFORE = 2;
+
+/** …and at least this many lines carry over to the next page (Final Draft convention). */
+export const MIN_SPLIT_LINES_AFTER = 2;
+
+/** Tolerance for sub-pixel measurement noise in fit checks. */
+export const FIT_EPSILON_PX = 1;
+
 export const DEFAULT_OPTIONS: PaginationOptions = {
     pageHeight: 1123,
     pageWidth: 794,
