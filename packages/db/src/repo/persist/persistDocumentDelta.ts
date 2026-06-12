@@ -79,7 +79,7 @@ export const createDocumentPersister = (scriptId: string) => {
 
     const setBaseline = (blocks: ExtractedBlockRow[], orderKeys?: Map<string, string>) => {
         lastSavedBlocks = new Map(blocks.map(block => [block.blockId, block]));
-        baselineOrderKeys = orderKeys ?? new Map();
+        baselineOrderKeys = orderKeys ?? new Map<string, string>();
     };
 
     const persistImpl = async (

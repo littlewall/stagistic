@@ -15,6 +15,18 @@ type ContentHandlers = {
     saveLatest: ScriptRepository['saveLatest'],
 };
 
+/*
+ * Opt-in save timing: localStorage.setItem('stagistic:perf', '1').
+ * Evaluated lazily — this module also runs in node tests without localStorage.
+ */
+const isPerfLoggingEnabled = (): boolean => {
+    try {
+        return typeof localStorage !== 'undefined' && localStorage.getItem('stagistic:perf') === '1';
+    } catch {
+        return false;
+    }
+};
+
 interface CreateContentHandlersArgs {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
@@ -102,6 +114,8 @@ export const createContentHandlers = ({
     const saveLatest: ContentHandlers['saveLatest'] = async (scriptId, value) => {
         const db = await getDb();
         const now = Date.now();
+        const perfEnabled = isPerfLoggingEnabled();
+        const startedAt = perfEnabled ? performance.now() : 0;
 
         /*
          * Granular persist: diff the document against the last-saved blocks and
@@ -121,12 +135,23 @@ export const createContentHandlers = ({
             }, tx);
         });
 
+        const persistDoneAt = perfEnabled ? performance.now() : 0;
+
         /*
          * PGlite does not call syncToFs() after transaction COMMIT — the WAL
          * stays in memory until explicitly flushed. Without this, data is lost
          * on page refresh (the worker dies and the unflushed WAL disappears).
          */
         await syncDb();
+
+        if (perfEnabled) {
+            const syncDoneAt = performance.now();
+
+            console.debug(
+                `[db-local] saveLatest ${scriptId}: persist ${Math.round(persistDoneAt - startedAt)}ms, `
+                + `syncToFs ${Math.round(syncDoneAt - persistDoneAt)}ms, total ${Math.round(syncDoneAt - startedAt)}ms`,
+            );
+        }
     };
 
     return {

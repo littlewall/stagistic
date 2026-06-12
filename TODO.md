@@ -10,8 +10,8 @@ Plán: `~/.claude/plans/p-esouv-n-sc-n-na-novou-quiet-nova.md`. Bottleneck: chyb
 - [x] 2.3 Seed klíčů při `loadLatest`
 - [x] 3. Sloučení timestamp/outbox transakce do persist transakce
 - [x] Testy (fast path, fallback, insert mezi kotvami, seed, scale)
-- [ ] Perf instrumentace v `saveLatest` (za `stagistic:perf` flagem)
-- [ ] Lint + typecheck/build
+- [x] Perf instrumentace v `saveLatest` (za `stagistic:perf` flagem)
+- [x] Lint + typecheck/build
 
 ---
 
