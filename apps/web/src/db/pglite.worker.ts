@@ -22,10 +22,16 @@ void worker({
         const wasmBytes = await wasmResponse.arrayBuffer();
         const wasmModule = await WebAssembly.compile(wasmBytes);
 
+        /*
+         * relaxedDurability: without it, PGlite with the IndexedDB VFS awaits a
+         * full flush after EVERY query. Durability for content saves is handled
+         * by the explicit syncToFs() call in saveLatest.
+         */
         const db = await PGlite.create({
             dataDir,
             fsBundle,
             wasmModule,
+            relaxedDurability: options.relaxedDurability ?? true,
         });
 
         await runPgliteMigrations(db);

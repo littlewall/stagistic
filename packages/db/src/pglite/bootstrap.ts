@@ -47,7 +47,10 @@ export const createPgliteBootstrap = ({
                 dbPromise = (async () => {
                     const workerInstance = await PGliteWorker.create(
                         workerFactory(),
-                        {dataDir},
+                        {
+                            dataDir,
+                            relaxedDurability: true,
+                        },
                     );
 
                     workerInstanceRef = workerInstance;

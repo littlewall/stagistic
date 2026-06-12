@@ -1,3 +1,20 @@
+# TODO — zrychlení persistence při přesunu scény (2026-06-12)
+
+Plán: `~/.claude/plans/p-esouv-n-sc-n-na-novou-quiet-nova.md`. Bottleneck: chybějící `relaxedDurability` ve workeru, per-row dotazy ve strukturálním persistu, full re-key všech bloků při každé strukturální změně.
+
+- [x] 1.1 `relaxedDurability: true` pro worker (bootstrap.ts + pglite.worker.ts)
+- [ ] 1.2 Reorder fast path v `persistImpl` (čistý reorder přeskočí rekonsiliaci scén/aktů)
+- [ ] 1.3 Batching smyček (bulk upserty/delety scén+aktů, bulk character refs, lazy `listScriptCharacters`)
+- [ ] 2.1 `minimalOrderKeys.ts` — LIS minimální re-keying
+- [ ] 2.2 Baseline persisteru drží persistované order klíče
+- [ ] 2.3 Seed klíčů při `loadLatest`
+- [ ] 3. Sloučení timestamp/outbox transakce do persist transakce
+- [ ] Testy (fast path, fallback, insert mezi kotvami, seed, scale)
+- [ ] Perf instrumentace v `saveLatest` (za `stagistic:perf` flagem)
+- [ ] Lint + typecheck/build
+
+---
+
 # TODO — úklid před dalšími featurami
 
 Sloučeno z repo-wide auditu (2026-06-11, tříproudý audit + ruční verifikace) a předchozí analýzy (knip dead-code scan, jscpd clone detection). Body se odškrtávají průběžně, hned po dokončení.
