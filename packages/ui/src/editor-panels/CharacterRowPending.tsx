@@ -83,7 +83,7 @@ export const CharacterRowPending = ({
                     {confirmTooltipLabel}
                 </Tooltip>
             </TooltipTrigger>
-            <span className={styles.characterColor} aria-hidden="true" />
+            <span className={styles.characterColorOutline} aria-hidden="true" />
             <span className={styles.characterName}>{character.key}</span>
             {onFocusCharacter && (
                 <TooltipTrigger

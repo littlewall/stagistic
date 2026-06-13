@@ -3,7 +3,6 @@
     --select-button-height: var(--control-height-sm);
     --select-button-font-weight: var(--font-weight-semibold);
     --select-button-radius: var(--radius-md);
-    --select-button-hover-bg: color-mix(in oklch, var(--color-surface-accent) 24%, transparent);
 
     position: relative;
     flex: 1;
@@ -41,7 +40,7 @@
         border-bottom-left-radius: 0;
 
         &:hover {
-            background: var(--select-menu-bg);
+            background: var(--select-menu-hover-bg);
         }
     }
 }

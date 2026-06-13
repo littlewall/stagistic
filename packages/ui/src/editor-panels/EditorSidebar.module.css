@@ -93,18 +93,11 @@
     width: 100%;
     color: inherit;
     text-align: left;
-    /*
-     * srgb mix here (not oklch) so the per-character hue stays visible.
-     * The character color is a pastel hex; mixed with the near-white
-     * surface in oklch the chroma collapses near zero and rows look
-     * uniformly off-white. srgb keeps the hue perceptible at low
-     * mix percentages.
-     */
-    background: color-mix(in srgb, var(--character-color) 12%, var(--color-surface));
+    background: transparent;
     border: none;
 
     &:hover {
-        background: color-mix(in srgb, var(--character-color) 22%, var(--color-surface));
+        background: var(--select-button-hover-bg);
     }
 
     &:focus-visible {
@@ -147,6 +140,15 @@
     height: calc(10px * var(--size-scale));
     background: var(--character-color, var(--color-surface-accent));
     border: 1px solid color-mix(in oklch, var(--color-text) 15%, var(--color-surface));
+    border-radius: var(--radius-full);
+}
+
+.characterColorOutline {
+    flex-shrink: 0;
+    width: calc(10px * var(--size-scale));
+    height: calc(10px * var(--size-scale));
+    background: transparent;
+    border: 1.5px solid color-mix(in oklch, var(--color-text) 30%, transparent);
     border-radius: var(--radius-full);
 }
 
