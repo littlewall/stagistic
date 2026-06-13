@@ -13,19 +13,22 @@ export const useStructureSidebarDnd = ({
             return;
         }
 
-        if (!isSortableOperation(event.operation)) {
+        const {operation} = event;
+
+        if (!isSortableOperation(operation) || !operation.source) {
             return;
         }
 
-        const source = event.operation.source;
+        const sourceId = String(operation.source.id);
 
-        if (!source) {
+        const isScene = groups.some(group => group.scenes.some(s => s.blockId === sourceId));
+
+        if (!isScene) {
             return;
         }
 
-        const sourceId = String(source.id);
-        const targetGroupId = source.group != null ? String(source.group) : ROOT_ACT_GROUP;
-        const targetIndex = typeof source.index === 'number' ? source.index : 0;
+        const targetGroupId = operation.source.group != null ? String(operation.source.group) : ROOT_ACT_GROUP;
+        const targetIndex = typeof operation.source.index === 'number' ? operation.source.index : 0;
 
         const newBeforeBlockId = computeBeforeBlockId(groups, sourceId, targetGroupId, targetIndex);
         const currentBeforeBlockId = computeCurrentBeforeBlockId(groups, sourceId);
@@ -42,15 +45,10 @@ export const useStructureSidebarDnd = ({
     }, [groups, onReorderScene]);
 };
 
-/**
- * Find what `beforeBlockId` should be for `sourceId` if it ends up at `targetIndex`
- * inside group `targetGroupId` (post-drag position from dnd-kit's sortable state).
- *
- * The target group's scenes are filtered to exclude the source. Then:
- *   - position < length → that scene's id
- *   - position === length (source ends up last) → next non-ROOT group's id
- *   - no further groups → null (append at end)
- */
+const getFirstActGroupId = (groups: readonly StructureGroup[]): string | null => {
+    return groups.find(g => g.groupId !== ROOT_ACT_GROUP)?.groupId ?? null;
+};
+
 const computeBeforeBlockId = (
     groups: readonly StructureGroup[],
     sourceId: string,
@@ -63,13 +61,16 @@ const computeBeforeBlockId = (
         return null;
     }
 
-    const targetScenes = targetGroup.scenes.filter(s => s.blockId !== sourceId);
+    const hasActAnchor = targetGroupId !== ROOT_ACT_GROUP && targetGroupId !== getFirstActGroupId(groups);
+    const sceneIds = targetGroup.scenes
+        .filter(s => s.blockId !== sourceId)
+        .map(s => s.blockId);
+    const targetItems = hasActAnchor ? [targetGroupId, ...sceneIds] : sceneIds;
 
-    if (targetIndex < targetScenes.length) {
-        return targetScenes[targetIndex].blockId;
+    if (targetIndex < targetItems.length) {
+        return targetItems[targetIndex];
     }
 
-    // Source is last in target group — find next non-ROOT group
     const targetGroupIdx = groups.findIndex(g => g.groupId === targetGroupId);
 
     for (let i = targetGroupIdx + 1; i < groups.length; i++) {
@@ -81,7 +82,6 @@ const computeBeforeBlockId = (
     return null;
 };
 
-/** Find the current `beforeBlockId` for `sourceId` in the existing groups (pre-drag state). */
 const computeCurrentBeforeBlockId = (
     groups: readonly StructureGroup[],
     sourceId: string,

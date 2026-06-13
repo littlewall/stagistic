@@ -26,7 +26,7 @@ import {
     configuredPointerSensor,
     feedbackWithoutDropAnimation,
 } from './structureDndConfig';
-import {StructureRowAct} from './StructureRowAct';
+import {StructureRowAct, StructureRowActStatic} from './StructureRowAct';
 import {
     deriveStructureStateFromIndex,
     deriveStructureStateFromLive,
@@ -223,32 +223,52 @@ export const ScriptStructureSidebar = () => {
                     </p>
                 ) : (
                     <ul className={styles.itemList}>
-                        {groups.map(group => (
-                            <Fragment key={group.groupId}>
-                                {group.groupId !== ROOT_ACT_GROUP ? (
-                                    <StructureRowAct
-                                        blockId={group.groupId}
-                                        name={group.actName ?? ''}
-                                        isFirstAct={group.groupId === firstActBlockId}
-                                        namePreview={actNamePreviewById[group.groupId]}
-                                        onRename={handleRenameAct}
-                                        onNamePreview={handleActNamePreview}
-                                        onDelete={handleDeleteAct}
-                                    />
-                                ) : null}
-                                {group.scenes.map((scene, idx) => (
-                                    <StructureRowScene
-                                        key={scene.blockId}
-                                        blockId={scene.blockId}
-                                        title={scene.title}
-                                        index={idx}
-                                        groupId={group.groupId}
-                                        isActive={scene.blockId === activeSceneBlockId}
-                                        onFocus={handleSceneFocus}
-                                    />
-                                ))}
-                            </Fragment>
-                        ))}
+                        {groups.map(group => {
+                            const isActGroup = group.groupId !== ROOT_ACT_GROUP;
+                            const isFirstAct = group.groupId === firstActBlockId;
+                            const hasActAnchor = isActGroup && !isFirstAct;
+                            const sceneIndexOffset = hasActAnchor ? 1 : 0;
+
+                            return (
+                                <Fragment key={group.groupId}>
+                                    {isActGroup && (
+                                        isFirstAct ? (
+                                            <StructureRowActStatic
+                                                blockId={group.groupId}
+                                                name={group.actName ?? ''}
+                                                isFirstAct
+                                                namePreview={actNamePreviewById[group.groupId]}
+                                                onRename={handleRenameAct}
+                                                onNamePreview={handleActNamePreview}
+                                                onDelete={handleDeleteAct}
+                                            />
+                                        ) : (
+                                            <StructureRowAct
+                                                blockId={group.groupId}
+                                                index={0}
+                                                name={group.actName ?? ''}
+                                                isFirstAct={false}
+                                                namePreview={actNamePreviewById[group.groupId]}
+                                                onRename={handleRenameAct}
+                                                onNamePreview={handleActNamePreview}
+                                                onDelete={handleDeleteAct}
+                                            />
+                                        )
+                                    )}
+                                    {group.scenes.map((scene, idx) => (
+                                        <StructureRowScene
+                                            key={scene.blockId}
+                                            blockId={scene.blockId}
+                                            title={scene.title}
+                                            index={idx + sceneIndexOffset}
+                                            groupId={group.groupId}
+                                            isActive={scene.blockId === activeSceneBlockId}
+                                            onFocus={handleSceneFocus}
+                                        />
+                                    ))}
+                                </Fragment>
+                            );
+                        })}
                     </ul>
                 )}
             </DragDropProvider>

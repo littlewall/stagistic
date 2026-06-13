@@ -12,7 +12,7 @@ export interface StructureRowSceneProps {
     onFocus: (blockId: string) => void,
 }
 
-export interface StructureRowActProps {
+export interface StructureRowActContentProps {
     blockId: string,
     name: string,
     isFirstAct: boolean,
@@ -20,6 +20,10 @@ export interface StructureRowActProps {
     onRename: (blockId: string, nextName: string) => void,
     onNamePreview: (blockId: string, nextName: string) => void,
     onDelete: (blockId: string) => void,
+}
+
+export interface StructureRowActProps extends StructureRowActContentProps {
+    index: number,
 }
 
 export type DragEndEvent = Parameters<NonNullable<ComponentProps<typeof DragDropProvider>['onDragEnd']>>[0];
