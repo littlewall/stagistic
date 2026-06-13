@@ -17,10 +17,6 @@ const getNodeTextContent = (node: {textContent?: string | null}): string => {
     return node.textContent ?? '';
 };
 
-/**
- * Links a character key to a character ID across all matching character blocks in the document.
- * This is used when confirming a character.
- */
 export const linkCharacterRef = (
     editor: Editor,
     characterKey: string,
@@ -74,10 +70,6 @@ export const linkCharacterRef = (
     return true;
 };
 
-/**
- * Unlinks a character ID from all character blocks in the document.
- * This is used when deleting a character.
- */
 export const unlinkCharacterRef = (
     editor: Editor,
     characterId: string,
@@ -125,10 +117,6 @@ export const unlinkCharacterRef = (
     return true;
 };
 
-/**
- * Replaces one character ID with another across all character blocks.
- * This is used when renaming results in a different character ID.
- */
 export const replaceCharacterRefId = (
     editor: Editor,
     oldCharacterId: string,
@@ -175,11 +163,6 @@ export const replaceCharacterRefId = (
     return true;
 };
 
-/**
- * Renames a confirmed character's text across all matching character blocks.
- * Matches blocks primarily by characterId in refs, then falls back to canonical key matching.
- * Updates both text content and refs in one transaction.
- */
 export const renameCharacterText = (
     editor: Editor,
     characterId: string,
@@ -196,10 +179,6 @@ export const renameCharacterText = (
     });
 };
 
-/**
- * Focuses the first character block matching the given key.
- * Returns true if a block was found and focused.
- */
 export const focusFirstCharacterBlock = (
     editor: Editor,
     characterKey: string,
@@ -237,7 +216,11 @@ export const focusFirstCharacterBlock = (
     const focusPos = Number(targetPos) + 1;
 
     editor.commands.focus(focusPos);
-    editor.commands.scrollIntoView();
+
+    const {node} = editor.view.domAtPos(focusPos);
+    const element = node instanceof Element ? node : node.parentElement;
+
+    element?.scrollIntoView({block: 'center'});
 
     return true;
 };
