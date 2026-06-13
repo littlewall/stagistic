@@ -1,0 +1,44 @@
+.aside {
+    position: relative;
+    padding-top: var(--aside-spacing-before, 0);
+    padding-right: var(--aside-indent-right, 24px);
+    padding-left: calc(var(--aside-indent-left, 40px) + 1ch);
+    font-weight: var(--aside-font-weight, 400);
+    font-style: var(--aside-font-style, italic);
+    line-height: var(--aside-line-height, inherit);
+    color: var(--color-block-aside);
+    text-align: var(--aside-align, left);
+    text-decoration-line: var(--aside-underline, none);
+    text-transform: var(--aside-casing, none);
+
+    &:has(> :global(.ProseMirror-trailingBreak:only-child))::after {
+        position: absolute;
+        top: var(--aside-spacing-before, 0);
+        left: calc(var(--aside-indent-left, 40px) + 1ch);
+    }
+
+    &::before,
+    &::after {
+        pointer-events: none;
+        user-select: none;
+        color: inherit;
+    }
+
+    &::before {
+        content: '(';
+        position: absolute;
+        left: var(--aside-indent-left, 40px);
+    }
+
+    &::after {
+        content: ')';
+    }
+
+    & > :global(.ProseMirror-trailingBreak:only-child) {
+        pointer-events: none;
+        position: absolute;
+        overflow: hidden;
+        width: 0;
+        height: 0;
+    }
+}

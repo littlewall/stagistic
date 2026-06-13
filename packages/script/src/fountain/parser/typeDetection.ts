@@ -1,14 +1,13 @@
 import {isAllCaps} from '../sharedText';
 import {
     ELEMENT_ACT,
-    ELEMENT_ACTION,
+    ELEMENT_ASIDE,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_LYRICS,
     ELEMENT_NOTE,
-    ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
-    ELEMENT_TRANSITION,
+    ELEMENT_STAGE_DIRECTIONS,
     type FountainElementType,
 } from '../types';
 
@@ -53,7 +52,7 @@ const shouldCoerceLegacyCapsLyrics = (
 
     if (
         detectedType === ELEMENT_DIALOGUE
-        || detectedType === ELEMENT_PARENTHETICAL
+        || detectedType === ELEMENT_ASIDE
         || detectedType === ELEMENT_LYRICS
     ) {
         return false;
@@ -62,7 +61,6 @@ const shouldCoerceLegacyCapsLyrics = (
     if (
         detectedType === ELEMENT_SCENE_HEADING
         || detectedType === ELEMENT_ACT
-        || detectedType === ELEMENT_TRANSITION
         || detectedType === ELEMENT_NOTE
     ) {
         return false;
@@ -84,7 +82,7 @@ export const detectType = (
     let detectedType: FountainElementType;
 
     if (trimmed.startsWith('!')) {
-        detectedType = ELEMENT_ACTION;
+        detectedType = ELEMENT_STAGE_DIRECTIONS;
 
         return shouldCoerceLegacyCapsLyrics(trimmed, detectedType, options)
             ? ELEMENT_LYRICS
@@ -92,7 +90,7 @@ export const detectType = (
     }
 
     if (trimmed.length === 0) {
-        return ELEMENT_ACTION;
+        return ELEMENT_STAGE_DIRECTIONS;
     }
 
     if (FORCED_SCENE_PATTERN.test(trimmed)) {
@@ -125,11 +123,11 @@ export const detectType = (
      * keep the raw line text. The parser rewrite (phase 2) will revisit.
      */
     if (SECTION_PATTERN.test(trimmed)) {
-        return ELEMENT_ACTION;
+        return ELEMENT_STAGE_DIRECTIONS;
     }
 
     if (LEGACY_CENTERED_PATTERN.test(trimmed)) {
-        detectedType = ELEMENT_ACTION;
+        detectedType = ELEMENT_STAGE_DIRECTIONS;
 
         return shouldCoerceLegacyCapsLyrics(trimmed, detectedType, options)
             ? ELEMENT_LYRICS
@@ -137,7 +135,7 @@ export const detectType = (
     }
 
     if (trimmed.startsWith('>')) {
-        detectedType = ELEMENT_TRANSITION;
+        detectedType = ELEMENT_STAGE_DIRECTIONS;
 
         return shouldCoerceLegacyCapsLyrics(trimmed, detectedType, options)
             ? ELEMENT_LYRICS
@@ -145,7 +143,7 @@ export const detectType = (
     }
 
     if (TRANSITION_PATTERN.test(trimmed) && isAllCaps(trimmed)) {
-        detectedType = ELEMENT_TRANSITION;
+        detectedType = ELEMENT_STAGE_DIRECTIONS;
 
         return shouldCoerceLegacyCapsLyrics(trimmed, detectedType, options)
             ? ELEMENT_LYRICS
@@ -153,7 +151,7 @@ export const detectType = (
     }
 
     if (trimmed.startsWith('(') && trimmed.endsWith(')')) {
-        detectedType = ELEMENT_PARENTHETICAL;
+        detectedType = ELEMENT_ASIDE;
 
         return shouldCoerceLegacyCapsLyrics(trimmed, detectedType, options)
             ? ELEMENT_LYRICS
@@ -194,7 +192,7 @@ export const detectType = (
 
     if (
         previousType === ELEMENT_CHARACTER
-        || previousType === ELEMENT_PARENTHETICAL
+        || previousType === ELEMENT_ASIDE
         || previousType === ELEMENT_DIALOGUE
         || (options?.legacyCapsLyricsMode && previousType === ELEMENT_LYRICS)
     ) {
@@ -205,7 +203,7 @@ export const detectType = (
             : detectedType;
     }
 
-    detectedType = ELEMENT_ACTION;
+    detectedType = ELEMENT_STAGE_DIRECTIONS;
 
     return shouldCoerceLegacyCapsLyrics(trimmed, detectedType, options)
         ? ELEMENT_LYRICS

@@ -14,8 +14,8 @@ import {
 } from '../document';
 import {
     ELEMENT_ACT,
-    ELEMENT_ACTION,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_STAGE_DIRECTIONS,
     extractCharacterKeys,
 } from '../fountain';
 
@@ -170,7 +170,7 @@ export const buildScriptBlockIndex = (
             const attrs = node.attrs && typeof node.attrs === 'object'
                 ? node.attrs
                 : undefined;
-            const blockType = getScriptBlockLegacyType(node, ELEMENT_ACTION);
+            const blockType = getScriptBlockLegacyType(node, ELEMENT_STAGE_DIRECTIONS);
             const blockId = getScriptBlockId(node) ?? `missing-block-${orderNo + 1}`;
             const textContent = getNodeTextContent(node).trim();
 

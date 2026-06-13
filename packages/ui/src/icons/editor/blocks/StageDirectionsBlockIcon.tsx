@@ -1,13 +1,12 @@
 import type {SVGProps} from 'react';
 
-export const TransitionBlockIcon = (props: SVGProps<SVGSVGElement>) => (
+export const StageDirectionsBlockIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg
         viewBox="0 0 24 24"
         aria-hidden="true"
         focusable={false}
         {...props}
     >
-        <path d="M5 12h12" />
-        <path d="M13 8l4 4-4 4" />
+        <path d="M5 7h14M5 12h14M5 17h10" />
     </svg>
 );

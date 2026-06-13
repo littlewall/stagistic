@@ -1,7 +1,7 @@
 import {
     ELEMENT_ACT,
+    ELEMENT_ASIDE,
     ELEMENT_CHARACTER,
-    ELEMENT_PARENTHETICAL,
     normalizeCharacterEditorDelimiters,
 } from '@stagistic/script';
 import {TextSelection} from '@tiptap/pm/state';
@@ -26,7 +26,7 @@ import {
 } from './types';
 
 const keyDownHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => boolean> = {
-    [ELEMENT_PARENTHETICAL]: (_context, event) => {
+    [ELEMENT_ASIDE]: (_context, event) => {
         if (event.key === '(' || event.key === ')') {
             event.preventDefault();
 
@@ -148,7 +148,7 @@ const textInputHandlers: HandlerMap<(
     to: number,
     text: string,
 ) => boolean> = {
-    [ELEMENT_PARENTHETICAL]: handleParentheticalInput,
+    [ELEMENT_ASIDE]: handleParentheticalInput,
 };
 
 export const handleTextInput = (

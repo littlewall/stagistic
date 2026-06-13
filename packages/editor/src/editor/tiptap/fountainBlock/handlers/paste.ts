@@ -1,6 +1,6 @@
 import {
     ELEMENT_ACT,
-    ELEMENT_PARENTHETICAL,
+    ELEMENT_ASIDE,
 } from '@stagistic/script';
 import type {Editor} from '@tiptap/react';
 
@@ -32,7 +32,7 @@ const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) =
 
         return true;
     },
-    [ELEMENT_PARENTHETICAL]: (context, event) => {
+    [ELEMENT_ASIDE]: (context, event) => {
         const text = event.clipboardData?.getData('text/plain');
 
         if (text === undefined) {

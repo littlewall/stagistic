@@ -1,6 +1,6 @@
 import type {SVGProps} from 'react';
 
-export const ParentheticalBlockIcon = (props: SVGProps<SVGSVGElement>) => (
+export const AsideBlockIcon = (props: SVGProps<SVGSVGElement>) => (
     <svg
         viewBox="0 0 24 24"
         aria-hidden="true"

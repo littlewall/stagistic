@@ -2,8 +2,8 @@ import {createNodeId} from '@stagistic/shared';
 
 import {
     ELEMENT_ACT,
-    ELEMENT_ACTION,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_STAGE_DIRECTIONS,
     type FountainElementType,
     isScriptBlockNodeType,
     resolveLegacyFountainBlockType,
@@ -97,7 +97,7 @@ export const getScriptBlockNodeType = (
 
 export const getScriptBlockLegacyType = (
     node: FountainJSONContent,
-    fallback: FountainElementType = ELEMENT_ACTION,
+    fallback: FountainElementType = ELEMENT_STAGE_DIRECTIONS,
 ): FountainElementType => {
     const nodeType = getScriptBlockNodeTypeFromNode(node);
 
@@ -122,10 +122,10 @@ export const getScriptBlockId = (node: FountainJSONContent): string | null => {
 };
 
 export const createLegacyScriptBlockNode = (
-    rawBlockType: unknown = ELEMENT_ACTION,
+    rawBlockType: unknown = ELEMENT_STAGE_DIRECTIONS,
     id?: string,
 ): FountainJSONContent => {
-    const blockType = resolveLegacyFountainBlockType(rawBlockType) ?? ELEMENT_ACTION;
+    const blockType = resolveLegacyFountainBlockType(rawBlockType) ?? ELEMENT_STAGE_DIRECTIONS;
 
     return {
         type: FOUNTAIN_BLOCK_NODE_NAME,
@@ -138,7 +138,7 @@ export const createLegacyScriptBlockNode = (
 };
 
 export const createDefaultScriptBlockNode = (
-    rawBlockType: unknown = ELEMENT_ACTION,
+    rawBlockType: unknown = ELEMENT_STAGE_DIRECTIONS,
     id?: string,
 ): FountainJSONContent => {
     const nodeType = resolveScriptBlockNodeType(rawBlockType) ?? DEFAULT_SCRIPT_BLOCK_NODE_TYPE;
@@ -153,7 +153,7 @@ export const createDefaultScriptBlockNode = (
 };
 
 export const createEmptyScriptBlockNode = (
-    rawBlockType: unknown = ELEMENT_ACTION,
+    rawBlockType: unknown = ELEMENT_STAGE_DIRECTIONS,
     id?: string,
     nodeMode: ScriptDocumentNodeMode = DEFAULT_SCRIPT_DOCUMENT_NODE_MODE,
 ): FountainJSONContent => {

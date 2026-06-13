@@ -1,10 +1,10 @@
 import {
     createNodeId,
     ELEMENT_ACT,
+    ELEMENT_ASIDE,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_LYRICS,
-    ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
     resolveScriptBlockNodeType,
 } from '@stagistic/script';
@@ -161,9 +161,9 @@ const enterHandlers: HandlerMap<(context: BlockContext, blockNextElements?: Bloc
         _context.editor,
         resolveNextTypeOnEnter(ELEMENT_LYRICS, blockNextElements),
     ),
-    [ELEMENT_PARENTHETICAL]: (_context, blockNextElements) => splitBlockWithType(
+    [ELEMENT_ASIDE]: (_context, blockNextElements) => splitBlockWithType(
         _context.editor,
-        resolveNextTypeOnEnter(ELEMENT_PARENTHETICAL, blockNextElements),
+        resolveNextTypeOnEnter(ELEMENT_ASIDE, blockNextElements),
     ),
 };
 
@@ -171,7 +171,7 @@ const shiftEnterHandlers: HandlerMap<(context: BlockContext) => boolean> = {
     [ELEMENT_CHARACTER]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
     [ELEMENT_DIALOGUE]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
     [ELEMENT_LYRICS]: context => splitBlockWithType(context.editor, ELEMENT_LYRICS),
-    [ELEMENT_PARENTHETICAL]: context => splitBlockWithType(
+    [ELEMENT_ASIDE]: context => splitBlockWithType(
         context.editor,
         resolveParentheticalTabTarget(context.editor, context.block.pos),
     ),
@@ -224,7 +224,7 @@ export const handleEnter = (
     }
 
     if (
-        block.blockType === ELEMENT_PARENTHETICAL
+        block.blockType === ELEMENT_ASIDE
         && (block.node.textContent ?? '').trim().length === 0
     ) {
         return setBlockTypeWithSelection(editor, block, ELEMENT_CHARACTER);

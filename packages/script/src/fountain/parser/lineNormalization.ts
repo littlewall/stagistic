@@ -2,26 +2,25 @@ import {normalizeCharacterEditorDelimiters} from '../characterNames';
 import {uppercaseOutsideParentheses} from '../sharedText';
 import {
     ELEMENT_ACT,
-    ELEMENT_ACTION,
+    ELEMENT_ASIDE,
     ELEMENT_CHARACTER,
     ELEMENT_LYRICS,
     ELEMENT_NOTE,
-    ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
-    ELEMENT_TRANSITION,
+    ELEMENT_STAGE_DIRECTIONS,
     type FountainElementType,
 } from '../types';
-
-const LEGACY_CENTERED_PATTERN = /^>.*<$/;
 
 export const normalizeParsedLineText = (type: FountainElementType, line: string) => {
     let text = type === ELEMENT_LYRICS ? line.trim().replace(/^~\s?/, '') : line;
 
-    if (type === ELEMENT_ACTION) {
+    if (type === ELEMENT_STAGE_DIRECTIONS) {
         text = text.replace(/^\s*!\s*/, '');
 
-        if (LEGACY_CENTERED_PATTERN.test(text.trim())) {
-            text = text.trim().replace(/^>/, '').replace(/<$/, '')
+        const trimmedText = text.trim();
+
+        if (trimmedText.startsWith('>')) {
+            text = trimmedText.replace(/^>\s*/, '').replace(/<$/, '')
                 .trim();
         }
     }
@@ -33,7 +32,7 @@ export const normalizeParsedLineText = (type: FountainElementType, line: string)
             .trim();
     }
 
-    if (type === ELEMENT_PARENTHETICAL) {
+    if (type === ELEMENT_ASIDE) {
         text = text.trim().replace(/^\(/, '').replace(/\)$/, '')
             .trim();
     }
@@ -46,11 +45,6 @@ export const normalizeParsedLineText = (type: FountainElementType, line: string)
 
     if (type === ELEMENT_SCENE_HEADING) {
         text = text.trim().replace(/^\.\s*/, '').trim();
-    }
-
-    if (type === ELEMENT_TRANSITION) {
-        text = text.trim().replace(/^>\s*/, '').trim()
-            .toUpperCase();
     }
 
     if (type === ELEMENT_NOTE) {

@@ -1,1 +1,0 @@
-export {transitionBinding} from './binding';

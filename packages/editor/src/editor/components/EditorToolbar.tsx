@@ -1,8 +1,8 @@
 import {
     ELEMENT_ACT,
-    ELEMENT_ACTION,
     ELEMENT_DIALOGUE,
     ELEMENT_LYRICS,
+    ELEMENT_STAGE_DIRECTIONS,
     type FountainElementType,
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
@@ -34,7 +34,7 @@ interface EditorToolbarProps {
 }
 
 const MULTI_BLOCK_ALLOWED_TYPES = new Set<FountainElementType>([
-    ELEMENT_ACTION,
+    ELEMENT_STAGE_DIRECTIONS,
     ELEMENT_DIALOGUE,
     ELEMENT_LYRICS,
 ]);

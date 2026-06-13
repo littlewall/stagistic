@@ -1,5 +1,5 @@
 import {
-    ELEMENT_ACTION,
+    ELEMENT_STAGE_DIRECTIONS,
     type FountainElement,
     fountainSerializer,
     type FountainText,
@@ -64,8 +64,8 @@ const inlineNodesToLeaves = (nodes: FountainJSONContent[] | undefined): Fountain
 };
 
 const toFountainElement = (node: FountainJSONContent): FountainElement => {
-    const rawBlockType = getScriptBlockLegacyType(node, ELEMENT_ACTION);
-    const blockType = normalizeEditorSettingsBlockType(rawBlockType) ?? ELEMENT_ACTION;
+    const rawBlockType = getScriptBlockLegacyType(node, ELEMENT_STAGE_DIRECTIONS);
+    const blockType = normalizeEditorSettingsBlockType(rawBlockType) ?? ELEMENT_STAGE_DIRECTIONS;
 
     return {
         type: blockType,

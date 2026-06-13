@@ -5,15 +5,14 @@ import {
 } from './sharedText';
 import {
     ELEMENT_ACT,
-    ELEMENT_ACTION,
+    ELEMENT_ASIDE,
     ELEMENT_CHARACTER,
     ELEMENT_COLUMN,
     ELEMENT_COLUMN_GROUP,
     ELEMENT_DIALOGUE,
     ELEMENT_LYRICS,
     ELEMENT_NOTE,
-    ELEMENT_PARENTHETICAL,
-    ELEMENT_TRANSITION,
+    ELEMENT_STAGE_DIRECTIONS,
     type FountainDocument,
     type FountainElement,
     type FountainNode,
@@ -77,14 +76,8 @@ const serializeLine = (
         .map((line, index) => `${line}${index < lines.length - 1 ? '  ' : ''}`)
         .join('\n');
 
-    if (node.type === ELEMENT_PARENTHETICAL) {
+    if (node.type === ELEMENT_ASIDE) {
         return `(${withLineBreaks})`;
-    }
-
-    if (node.type === ELEMENT_TRANSITION) {
-        const upper = withLineBreaks.toUpperCase();
-
-        return upper.endsWith('TO:') ? upper : `>${upper}`;
     }
 
     if (node.type === ELEMENT_NOTE) {
@@ -97,7 +90,7 @@ const serializeLine = (
         return name ? `# ${name}` : '#';
     }
 
-    if (node.type === ELEMENT_ACTION) {
+    if (node.type === ELEMENT_STAGE_DIRECTIONS) {
         return isAllCaps(withLineBreaks.trim())
             ? `!${withLineBreaks}`
             : withLineBreaks;
@@ -151,7 +144,7 @@ export const fountainSerializer = (
     const flatNodes = flattenNodes(nodes);
 
     const getText = (node: FountainElement) => serializeLeaves(node);
-    const isEmptyAction = (node: FountainElement) => node.type === ELEMENT_ACTION && getText(node).trim().length === 0;
+    const isEmptyAction = (node: FountainElement) => node.type === ELEMENT_STAGE_DIRECTIONS && getText(node).trim().length === 0;
     const nextNonEmptyType = (startIndex: number) => {
         for (let i = startIndex; i < flatNodes.length; i += 1) {
             if (!isEmptyAction(flatNodes[i])) {
@@ -187,16 +180,9 @@ export const fountainSerializer = (
 
             if (
                 previousNonEmptyType === ELEMENT_CHARACTER
-                && (nextType === ELEMENT_PARENTHETICAL
+                && (nextType === ELEMENT_ASIDE
                     || nextType === ELEMENT_DIALOGUE
                     || nextType === ELEMENT_LYRICS)
-            ) {
-                continue;
-            }
-
-            if (
-                previousNonEmptyType === ELEMENT_TRANSITION
-                || nextType === ELEMENT_TRANSITION
             ) {
                 continue;
             }
@@ -212,19 +198,9 @@ export const fountainSerializer = (
             }
         }
 
-        if (node.type === ELEMENT_TRANSITION) {
-            if (outputLines.length > 0 && outputLines[outputLines.length - 1] !== '') {
-                outputLines.push('');
-            }
-        }
-
         pushBeforeNodeLines(i, node);
         pushSerialized(serializeLine(node));
         previousNonEmptyType = node.type;
-
-        if (node.type === ELEMENT_TRANSITION) {
-            outputLines.push('');
-        }
     }
 
     return outputLines.join('\n');

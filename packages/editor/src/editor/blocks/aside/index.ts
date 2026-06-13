@@ -1,0 +1,1 @@
+export {asideBinding} from './binding';

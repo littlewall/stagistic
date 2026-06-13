@@ -5,7 +5,7 @@ export type RewriteScriptDocument = ScriptDocument;
 
 export const ELEMENT_SCENE_HEADING = 'fountain_scene_heading';
 export const ELEMENT_ACT = 'fountain_act';
-export const ELEMENT_ACTION = 'fountain_action';
+export const ELEMENT_STAGE_DIRECTIONS = 'fountain_action';
 
 export const FOUNTAIN_BLOCK_NODE_NAME = 'fountainBlock';
 export const FOUNTAIN_COLUMN_GROUP_NODE_NAME = 'fountainColumnGroup';

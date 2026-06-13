@@ -1,6 +1,6 @@
 import {
-    ELEMENT_ACTION,
     ELEMENT_LYRICS,
+    ELEMENT_STAGE_DIRECTIONS,
 } from '@stagistic/script';
 import type {Editor} from '@tiptap/react';
 
@@ -57,7 +57,7 @@ const createIndentTabHandler = (maxIndent: number) => (context: BlockContext, ev
 };
 
 const tabHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => boolean> = {
-    [ELEMENT_ACTION]: createIndentTabHandler(MAX_ACTION_INDENT),
+    [ELEMENT_STAGE_DIRECTIONS]: createIndentTabHandler(MAX_ACTION_INDENT),
     [ELEMENT_LYRICS]: createIndentTabHandler(MAX_LYRICS_INDENT),
 };
 

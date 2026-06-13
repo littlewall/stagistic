@@ -15,8 +15,8 @@ import type {
 } from './types';
 import {
     ELEMENT_ACT,
-    ELEMENT_ACTION,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_STAGE_DIRECTIONS,
     FOUNTAIN_BLOCK_NODE_NAME,
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
     FOUNTAIN_COLUMN_NODE_NAME,
@@ -65,14 +65,14 @@ const toContentJsonForStorage = (node: FountainJSONContent): string | null => {
 
 const normalizeBlockType = (attrs: Record<string, unknown> | undefined): string => {
     if (!attrs) {
-        return ELEMENT_ACTION;
+        return ELEMENT_STAGE_DIRECTIONS;
     }
 
     if (typeof attrs.blockType === 'string' && attrs.blockType.trim().length > 0) {
         return attrs.blockType;
     }
 
-    return ELEMENT_ACTION;
+    return ELEMENT_STAGE_DIRECTIONS;
 };
 
 const resolveUniqueBlockId = (

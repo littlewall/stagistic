@@ -1,11 +1,10 @@
 import {
-    ELEMENT_ACTION,
+    ELEMENT_ASIDE,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_LYRICS,
-    ELEMENT_PARENTHETICAL,
     ELEMENT_SCENE_HEADING,
-    ELEMENT_TRANSITION,
+    ELEMENT_STAGE_DIRECTIONS,
     getEnterFallback,
 } from '@stagistic/script';
 import {
@@ -43,12 +42,11 @@ const CLOSED_EMPTY_ENTER_CHOOSER_STATE: EmptyEnterChooserState = {
 
 export const EMPTY_ENTER_CHOOSER_WRITER_TYPES: readonly FountainBlockType[] = [
     ELEMENT_SCENE_HEADING,
-    ELEMENT_ACTION,
+    ELEMENT_STAGE_DIRECTIONS,
     ELEMENT_CHARACTER,
-    ELEMENT_PARENTHETICAL,
+    ELEMENT_ASIDE,
     ELEMENT_DIALOGUE,
     ELEMENT_LYRICS,
-    ELEMENT_TRANSITION,
 ];
 
 const EMPTY_ENTER_CHOOSER_WRITER_TYPE_SET = new Set(EMPTY_ENTER_CHOOSER_WRITER_TYPES);
@@ -71,7 +69,7 @@ export const normalizeWriterType = (value: unknown): FountainBlockType => {
         return normalized;
     }
 
-    return ELEMENT_ACTION;
+    return ELEMENT_STAGE_DIRECTIONS;
 };
 
 const isCollapsedSingleBlockSelection = (state: EditorState) => {

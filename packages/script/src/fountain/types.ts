@@ -1,10 +1,9 @@
 export const ELEMENT_SCENE_HEADING = 'fountain_scene_heading';
 export const ELEMENT_ACT = 'fountain_act';
-export const ELEMENT_ACTION = 'fountain_action';
+export const ELEMENT_STAGE_DIRECTIONS = 'fountain_action';
 export const ELEMENT_CHARACTER = 'fountain_character';
-export const ELEMENT_PARENTHETICAL = 'fountain_parenthetical';
+export const ELEMENT_ASIDE = 'fountain_parenthetical';
 export const ELEMENT_DIALOGUE = 'fountain_dialogue';
-export const ELEMENT_TRANSITION = 'fountain_transition';
 export const ELEMENT_LYRICS = 'fountain_lyrics';
 export const ELEMENT_NOTE = 'fountain_note';
 export const ELEMENT_COLUMN_GROUP = 'column_group';
@@ -13,11 +12,10 @@ export const ELEMENT_COLUMN = 'column';
 export type FountainElementType =
     | typeof ELEMENT_SCENE_HEADING
     | typeof ELEMENT_ACT
-    | typeof ELEMENT_ACTION
+    | typeof ELEMENT_STAGE_DIRECTIONS
     | typeof ELEMENT_CHARACTER
-    | typeof ELEMENT_PARENTHETICAL
+    | typeof ELEMENT_ASIDE
     | typeof ELEMENT_DIALOGUE
-    | typeof ELEMENT_TRANSITION
     | typeof ELEMENT_LYRICS
     | typeof ELEMENT_NOTE;
 

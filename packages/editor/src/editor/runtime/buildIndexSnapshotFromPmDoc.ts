@@ -1,7 +1,7 @@
 import {
     ELEMENT_ACT,
-    ELEMENT_ACTION,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_STAGE_DIRECTIONS,
     extractCharacterKeys,
     type IndexedScriptBlock,
     type IndexedScriptCharacterRef,
@@ -82,7 +82,7 @@ const resolveBlockType = (node: ProseMirrorNode) => {
     const attrs = node.attrs as Record<string, unknown>;
     const resolvedBlockType = resolveLegacyFountainBlockType(node.type.name)
         ?? attrs.blockType
-        ?? ELEMENT_ACTION;
+        ?? ELEMENT_STAGE_DIRECTIONS;
 
     return normalizeFountainBlockType(resolvedBlockType);
 };

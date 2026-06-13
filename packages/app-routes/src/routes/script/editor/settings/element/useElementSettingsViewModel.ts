@@ -5,7 +5,7 @@ import {
     BLOCK_TEXT_ALIGN_OPTIONS,
     DEFAULT_EDITOR_SETTINGS,
     ELEMENT_ACT,
-    ELEMENT_PARENTHETICAL,
+    ELEMENT_ASIDE,
 } from '@stagistic/script';
 import {type CSSProperties, useMemo} from 'react';
 
@@ -86,7 +86,7 @@ export const useElementSettingsViewModel = ({
         const isItalic = blockSettings.isItalic ?? blockDefaults.isItalic ?? false;
         const isUnderline = blockSettings.isUnderline ?? blockDefaults.isUnderline ?? false;
         const previewText = BLOCK_PREVIEW_TEXT[blockType];
-        const previewTextOffsetChars = blockType === ELEMENT_PARENTHETICAL ? 1 : 0;
+        const previewTextOffsetChars = blockType === ELEMENT_ASIDE ? 1 : 0;
         const spacingBeforeOptions = SPACING_BEFORE_OPTIONS.map(option => ({
             value: option,
             label: formatLines(option),

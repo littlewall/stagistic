@@ -1,6 +1,6 @@
 import {
     ALL_BLOCK_SPECS,
-    ELEMENT_ACTION,
+    ELEMENT_STAGE_DIRECTIONS,
     type FountainElementType,
     normalizeEditorSettingsBlockType,
 } from '@stagistic/script';
@@ -15,7 +15,7 @@ export type FountainBlockType = (typeof ALL_BLOCK_SPECS)[number]['legacyType'];
 
 const FOUNTAIN_BLOCK_TYPE_SET = new Set<FountainElementType>(FOUNTAIN_BLOCK_TYPES);
 
-const DEFAULT_BLOCK_TYPE: FountainBlockType = ELEMENT_ACTION;
+const DEFAULT_BLOCK_TYPE: FountainBlockType = ELEMENT_STAGE_DIRECTIONS;
 
 export const isFountainBlockType = (value: unknown): value is FountainBlockType => {
     return typeof value === 'string' && FOUNTAIN_BLOCK_TYPE_SET.has(value as FountainElementType);

@@ -1,8 +1,8 @@
 import {
+    ELEMENT_ASIDE,
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
     ELEMENT_LYRICS,
-    ELEMENT_PARENTHETICAL,
     type FountainDocument,
     type FountainElement,
     type FountainElementType,
@@ -23,7 +23,7 @@ export type ParseFountainOptions = {
 const LEGACY_CAPS_LYRICS_CHAIN_TYPES = new Set<FountainElementType>([
     ELEMENT_CHARACTER,
     ELEMENT_DIALOGUE,
-    ELEMENT_PARENTHETICAL,
+    ELEMENT_ASIDE,
     ELEMENT_LYRICS,
 ]);
 

@@ -1,16 +1,15 @@
 import {actSpec} from './act';
-import {actionSpec} from './action';
+import {asideSpec} from './aside';
 import {characterSpec} from './character';
 import {dialogueSpec} from './dialogue';
 import {lyricsSpec} from './lyrics';
 import {noteSpec} from './note';
-import {parentheticalSpec} from './parenthetical';
 import {sceneHeadingSpec} from './sceneHeading';
-import {transitionSpec} from './transition';
+import {stageDirectionsSpec} from './stageDirections';
 
 /**
- * The canonical list of all block specs. Order matters where it affects
- * UI lists (FOUNTAIN_BLOCK_ITEMS, toolbar menus); keep it stable.
+ * The canonical list of all block specs. Order follows ALL_BLOCK_SPECS
+ * for stable derivation.
  *
  * `as const` preserves literal types so that ScriptBlockNodeType and
  * ScriptBlockType (defined in fountain/blockTypeMapping.ts) can be
@@ -22,23 +21,21 @@ import {transitionSpec} from './transition';
 export const ALL_BLOCK_SPECS = [
     sceneHeadingSpec,
     actSpec,
-    actionSpec,
+    stageDirectionsSpec,
     characterSpec,
-    parentheticalSpec,
+    asideSpec,
     dialogueSpec,
     lyricsSpec,
-    transitionSpec,
     noteSpec,
 ] as const;
 
 export {
-    actionSpec,
     actSpec,
+    asideSpec,
     characterSpec,
     dialogueSpec,
     lyricsSpec,
     noteSpec,
-    parentheticalSpec,
     sceneHeadingSpec,
-    transitionSpec,
+    stageDirectionsSpec,
 };

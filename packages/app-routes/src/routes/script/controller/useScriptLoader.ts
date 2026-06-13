@@ -1,11 +1,11 @@
 import {
     buildScriptBlockIndex,
+    coerceUnknownBlocksToStageDirections,
     type EditorSettingsOverride,
     ensureSceneHeading,
     ensureScriptBlockIds,
     ensureScriptStructure,
     isScriptDocumentEmpty,
-    migrateCharacterDelimitersInScriptDocument,
     type ScriptBlockIndexSnapshot,
     type ScriptDocument,
 } from '@stagistic/script';
@@ -86,19 +86,13 @@ export const useScriptLoader = (
 
                 const needsFocus = isScriptDocumentEmpty(stored);
 
-                /*
-                 * TEMPORARY — one-shot '+' → '/' character delimiter
-                 * migration; persists immediately so each script is
-                 * rewritten on first open. Remove this block (and the
-                 * migrate module) once all local scripts are migrated.
-                 */
-                const delimiterMigration = migrateCharacterDelimitersInScriptDocument(stored);
+                const coerced = coerceUnknownBlocksToStageDirections(stored);
 
-                if (delimiterMigration.changed) {
-                    await scriptRepository.saveLatest(currentScriptId, delimiterMigration.value);
+                if (coerced.changed) {
+                    await scriptRepository.saveLatest(currentScriptId, coerced.value);
                 }
 
-                const withIds = ensureScriptBlockIds(delimiterMigration.value);
+                const withIds = ensureScriptBlockIds(coerced.value);
                 const withScene = ensureSceneHeading(withIds);
                 const normalized = ensureScriptStructure(withScene);
                 const fallbackIndex = buildScriptBlockIndex(normalized).snapshot;

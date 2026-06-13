@@ -1,13 +1,13 @@
 import {
+    ELEMENT_ASIDE,
     ELEMENT_CHARACTER,
-    ELEMENT_PARENTHETICAL,
 } from '../../fountain/types';
 import type {FountainBlockSpec} from '../types';
 
-export const parentheticalSpec = {
+export const asideSpec = {
     nodeType: 'parenthetical',
     blockType: 'parenthetical',
-    legacyType: ELEMENT_PARENTHETICAL,
+    legacyType: ELEMENT_ASIDE,
     label: 'Aside',
     listId: 'element-parenthetical',
     enterFallback: ELEMENT_CHARACTER,

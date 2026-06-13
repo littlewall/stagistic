@@ -1,6 +1,6 @@
 import {
     createNodeId,
-    ELEMENT_ACTION,
+    ELEMENT_STAGE_DIRECTIONS,
     resolveScriptBlockNodeType,
 } from '@stagistic/script';
 import type {NodeType} from '@tiptap/pm/model';
@@ -45,7 +45,7 @@ const stripLeadingActionTabs = (
     blockContentStart: number,
     blockText: string,
 ): Transaction => {
-    if (previousBlockType !== ELEMENT_ACTION || nextBlockType === ELEMENT_ACTION) {
+    if (previousBlockType !== ELEMENT_STAGE_DIRECTIONS || nextBlockType === ELEMENT_STAGE_DIRECTIONS) {
         return tr;
     }
 
@@ -137,14 +137,14 @@ export const insertActionBefore = (editor: Editor, blockPos: number, blockStart:
     const nodes = editor.schema.nodes as Record<string, NodeType>;
     const currentBlock = editor.state.doc.nodeAt(blockPos);
     const currentNodeTypeName = currentBlock?.type.name ?? FOUNTAIN_BLOCK_NODE_NAME;
-    const actionNodeType = resolveNodeTypeForBlockType(nodes, currentNodeTypeName, ELEMENT_ACTION);
+    const actionNodeType = resolveNodeTypeForBlockType(nodes, currentNodeTypeName, ELEMENT_STAGE_DIRECTIONS);
 
     if (!actionNodeType) {
         return false;
     }
 
     const actionBlock = actionNodeType.create({
-        blockType: ELEMENT_ACTION,
+        blockType: ELEMENT_STAGE_DIRECTIONS,
         id: createNodeId(),
     });
 

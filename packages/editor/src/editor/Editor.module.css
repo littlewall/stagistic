@@ -1,19 +1,17 @@
 .root {
     /* Block-type color tokens (editor-scoped) */
     --L-block-scene-heading: .165;
-    --L-block-action: .12;
+    --L-block-stage-directions: .12;
     --L-block-character: .19;
     --L-block-dialogue: .13;
-    --L-block-parenthetical: .29;
-    --L-block-transition: .21;
+    --L-block-aside: .29;
     --L-block-centered: .23;
     --character-tag-tint-strength: 30%;
     --color-block-scene-heading: oklch(from var(--base-neutral) var(--L-block-scene-heading) calc(c * var(--C-block)) h);
-    --color-block-action: oklch(from var(--base-neutral) var(--L-block-action) calc(c * var(--C-block)) h);
+    --color-block-stage-directions: oklch(from var(--base-neutral) var(--L-block-stage-directions) calc(c * var(--C-block)) h);
     --color-block-character: oklch(from var(--base-neutral) var(--L-block-character) calc(c * var(--C-block)) h);
     --color-block-dialogue: oklch(from var(--base-neutral) var(--L-block-dialogue) calc(c * var(--C-block)) h);
-    --color-block-parenthetical: oklch(from var(--base-neutral) var(--L-block-parenthetical) calc(c * var(--C-block)) h);
-    --color-block-transition: oklch(from var(--base-neutral) var(--L-block-transition) calc(c * var(--C-block)) h);
+    --color-block-aside: oklch(from var(--base-neutral) var(--L-block-aside) calc(c * var(--C-block)) h);
     --color-block-centered: oklch(from var(--base-neutral) var(--L-block-centered) calc(c * var(--C-block)) h);
     --color-block-lyrics: var(--color-block-dialogue);
 
@@ -28,11 +26,10 @@
 
 :global(:root[data-theme = 'dark']) .root {
     --L-block-scene-heading: .87;
-    --L-block-action: .88;
+    --L-block-stage-directions: .88;
     --L-block-character: .86;
     --L-block-dialogue: .89;
-    --L-block-parenthetical: .82;
-    --L-block-transition: .84;
+    --L-block-aside: .82;
     --L-block-centered: .85;
     --character-tag-tint-strength: 44%;
 }

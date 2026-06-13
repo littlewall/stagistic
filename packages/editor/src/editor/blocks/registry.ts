@@ -1,12 +1,11 @@
 import {actBinding} from './act';
-import {actionBinding} from './action';
+import {asideBinding} from './aside';
 import {characterBinding} from './character';
 import {dialogueBinding} from './dialogue';
 import {lyricsBinding} from './lyrics';
 import {noteBinding} from './note';
-import {parentheticalBinding} from './parenthetical';
 import {sceneHeadingBinding} from './sceneHeading';
-import {transitionBinding} from './transition';
+import {stageDirectionsBinding} from './stageDirections';
 import type {FountainBlockBinding} from './types';
 
 /**
@@ -20,12 +19,10 @@ import type {FountainBlockBinding} from './types';
 export const ALL_BLOCK_BINDINGS: readonly FountainBlockBinding[] = [
     sceneHeadingBinding,
     actBinding,
-    actionBinding,
+    stageDirectionsBinding,
     characterBinding,
-    parentheticalBinding,
+    asideBinding,
     dialogueBinding,
     lyricsBinding,
-    transitionBinding,
     noteBinding,
 ];
-

@@ -3,10 +3,10 @@ import {createNodeId} from '@stagistic/shared';
 import {
     type ColumnElement,
     type ColumnGroupElement,
-    ELEMENT_ACTION,
     ELEMENT_COLUMN,
     ELEMENT_COLUMN_GROUP,
     ELEMENT_SCENE_HEADING,
+    ELEMENT_STAGE_DIRECTIONS,
     type FountainDocument as FountainAst,
     type FountainElement,
     type FountainText,
@@ -90,8 +90,8 @@ const toScriptBlockNode = (
     block: FountainElement,
     nodeMode: ScriptDocumentNodeMode = DEFAULT_SCRIPT_DOCUMENT_NODE_MODE,
 ): FountainJSONContent => {
-    const rawType = typeof block.type === 'string' ? block.type : ELEMENT_ACTION;
-    const blockType = normalizeEditorSettingsBlockType(rawType) ?? ELEMENT_ACTION;
+    const rawType = typeof block.type === 'string' ? block.type : ELEMENT_STAGE_DIRECTIONS;
+    const blockType = normalizeEditorSettingsBlockType(rawType) ?? ELEMENT_STAGE_DIRECTIONS;
     const blockNode = createEmptyScriptBlockNode(blockType, createNodeId(), nodeMode);
 
     return {
@@ -113,7 +113,7 @@ const toFountainColumnNode = (
         attrs: {
             width,
         },
-        content: content.length > 0 ? content : [createEmptyScriptBlockNode(ELEMENT_ACTION, undefined, nodeMode)],
+        content: content.length > 0 ? content : [createEmptyScriptBlockNode(ELEMENT_STAGE_DIRECTIONS, undefined, nodeMode)],
     };
 };
 
@@ -131,10 +131,10 @@ const toFountainColumnGroupNode = (
             : [
                 {
                     type: FOUNTAIN_COLUMN_NODE_NAME,
-                    content: [createEmptyScriptBlockNode(ELEMENT_ACTION, undefined, nodeMode)],
+                    content: [createEmptyScriptBlockNode(ELEMENT_STAGE_DIRECTIONS, undefined, nodeMode)],
                 }, {
                     type: FOUNTAIN_COLUMN_NODE_NAME,
-                    content: [createEmptyScriptBlockNode(ELEMENT_ACTION, undefined, nodeMode)],
+                    content: [createEmptyScriptBlockNode(ELEMENT_STAGE_DIRECTIONS, undefined, nodeMode)],
                 },
             ],
     };
@@ -199,7 +199,7 @@ const convertDefaultNodeToLegacy = (node: FountainJSONContent): FountainJSONCont
 
     const attrs = {
         ...getNodeAttrs(node) ?? {},
-        blockType: resolveLegacyFountainBlockType(node.type) ?? ELEMENT_ACTION,
+        blockType: resolveLegacyFountainBlockType(node.type) ?? ELEMENT_STAGE_DIRECTIONS,
     };
 
     return {
