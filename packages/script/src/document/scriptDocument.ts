@@ -117,7 +117,7 @@ export const createEmptyScriptDocument = (
         content: [
             {
                 ...actBlock,
-                content: [{type: 'text', text: 'ONE'}],
+                content: [{type: 'text', text: 'ACT ONE'}],
             }, createScriptBlockNode('scene', blockId),
         ],
     };
