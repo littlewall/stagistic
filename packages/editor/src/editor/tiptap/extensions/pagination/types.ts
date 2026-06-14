@@ -72,7 +72,6 @@ export interface BuildPaginationStateResult {
     nextCache: Map<string, BlockCacheEntry>,
     hasInlineBreaks: boolean,
     usedFallbackMeasurements: boolean,
-    signature: string,
 }
 
 export interface PaginationExtensionAdapter {
