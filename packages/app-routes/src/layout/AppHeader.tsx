@@ -12,14 +12,17 @@ type AppHeaderProps = Pick<UIAppHeaderProps, 'onMenuAction' | 'isFullWidth'>;
 
 export const AppHeader = (props: AppHeaderProps) => {
     const navigate = useNavigate();
-    const {openNewScript, openImportScript} = useGlobalModals();
+    const {openNewScript} = useGlobalModals();
 
+    /*
+     * Script import is disabled (phase 2). The menu entry is omitted by not
+     * passing onImportScript; the modal itself remains wired but unreachable.
+     */
     return (
         <UIAppHeader
             {...props}
             onHome={() => void navigate('/')}
             onNewScript={openNewScript}
-            onImportScript={openImportScript}
         />
     );
 };
@@ -31,14 +34,14 @@ type ScriptEditorAppHeaderProps = Omit<
 
 export const ScriptEditorAppHeader = (props: ScriptEditorAppHeaderProps) => {
     const navigate = useNavigate();
-    const {openNewScript, openImportScript} = useGlobalModals();
+    const {openNewScript} = useGlobalModals();
 
+    // Script import is disabled (phase 2) — onImportScript is intentionally omitted.
     return (
         <UIScriptEditorAppHeader
             {...props}
             onHome={() => void navigate('/')}
             onNewScript={openNewScript}
-            onImportScript={openImportScript}
             onSelectScript={script => void navigate(`/script/${script.id}/editor`)}
         />
     );

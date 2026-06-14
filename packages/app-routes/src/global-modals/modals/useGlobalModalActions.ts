@@ -12,11 +12,6 @@ import {
 import {type NavigateFunction} from 'react-router-dom';
 
 import type {AppToastPayload} from '../../routes/script/types';
-import {
-    isSupportedImportFileName,
-    parseImportedFountainScript,
-    resolveImportedScriptName,
-} from '../services/scriptImportService';
 
 export interface ScriptImportFile {
     fileName: string,
@@ -138,62 +133,28 @@ export const useGlobalModalActions = ({
         navigate,
     ]);
 
-    const handleImport = useCallback(async (payload: ScriptImportFile & {
+    const handleImport = useCallback((payload: ScriptImportFile & {
         name: string,
         importOptions?: {
             enableLegacyCapsLyricsHeuristic?: boolean,
         },
-    }) => {
-        const importAndNavigate = async () => {
-            try {
-                setIsImportLoading(true);
-                if (!isSupportedImportFileName(payload.fileName)) {
-                    addToast({
-                        title: 'Unsupported file',
-                        description: 'Only .fountain files can be imported.',
-                        variant: 'error',
-                    });
+    }): Promise<void> => {
+        /*
+         * Import parsing returns in phase 2 (new Stagistic syntax parser).
+         * The import modal UI is preserved but the parse step is intentionally
+         * a no-op until the parser is wired back in.
+         */
+        void payload;
+        setIsImportLoading(false);
+        setIsImportOpen(false);
+        addToast({
+            title: 'Import temporarily unavailable',
+            description: 'Script import is being rebuilt and will return soon.',
+            variant: 'error',
+        });
 
-                    setIsImportLoading(false);
-
-                    return;
-                }
-
-                const normalized = parseImportedFountainScript(payload.text, {
-                    enableLegacyCapsLyricsHeuristic: payload.importOptions?.enableLegacyCapsLyricsHeuristic ?? false,
-                });
-                const resolvedName = resolveImportedScriptName(payload.name, payload.fileName);
-                const scriptId = await createScriptWithActiveBlock(
-                    resolvedName,
-                    normalized,
-                );
-
-                setIsImportOpen(false);
-                void navigate(`/script/${scriptId}/editor`);
-                addToast({
-                    title: 'Script imported',
-                    description: resolvedName,
-                    variant: 'success',
-                });
-            } catch (error) {
-                console.error('Failed to import script', error);
-                addToast({
-                    title: 'Failed to import script',
-                    description: 'Please try again.',
-                    variant: 'error',
-                });
-                setIsImportLoading(false);
-            } finally {
-                setIsImportLoading(false);
-            }
-        };
-
-        await importAndNavigate();
-    }, [
-        addToast,
-        createScriptWithActiveBlock,
-        navigate,
-    ]);
+        return Promise.resolve();
+    }, [addToast]);
 
     return useMemo(() => ({
         isNewScriptOpen,

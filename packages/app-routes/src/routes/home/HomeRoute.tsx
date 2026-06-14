@@ -21,7 +21,7 @@ export const HomeRoute = () => {
     const {
         scriptSummaries, isLoading: scriptsLoading, error, refreshScripts,
     } = useScripts();
-    const {openNewScript, openImportScript} = useGlobalModals();
+    const {openNewScript} = useGlobalModals();
 
     const latestScript = useMemo(() => scriptSummaries[0] ?? null, [scriptSummaries]);
 
@@ -69,7 +69,6 @@ export const HomeRoute = () => {
                         </SubtleText>
                         <div className={styles.emptyActions}>
                             <Button onPress={openNewScript}>New script</Button>
-                            <Button variant="outline" onPress={openImportScript}>Import script</Button>
                         </div>
                     </div>
                 </PageContainer>
