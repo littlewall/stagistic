@@ -1,8 +1,7 @@
 import {BLOCK_ICONS} from '@stagistic/editor';
 import {
-    ELEMENT_ACT,
-    FOUNTAIN_BLOCK_ITEMS,
-    type FountainElementType,
+    BLOCK_ITEMS,
+    type ScriptBlockNodeType,
 } from '@stagistic/script';
 import type {SettingsNavGroup} from '@stagistic/ui';
 
@@ -18,22 +17,22 @@ export const SCRIPT_SETTINGS_EXPANDABLE_ELEMENTS = 'elements-settings';
 
 const SCRIPT_SETTINGS_PANEL_ELEMENT_PREFIX = 'element-settings:';
 
-const rawBlockItems = FOUNTAIN_BLOCK_ITEMS.map(item => ({
+const rawBlockItems = BLOCK_ITEMS.map(item => ({
     id: item.id,
-    blockType: item.type,
+    blockType: item.nodeType,
     label: item.label,
 }));
 
 export const SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS: Array<{
     id: string,
-    blockType: FountainElementType,
+    blockType: ScriptBlockNodeType,
     label: string,
-}> = [...rawBlockItems.filter(item => item.blockType === ELEMENT_ACT), ...rawBlockItems.filter(item => item.blockType !== ELEMENT_ACT)];
+}> = [...rawBlockItems.filter(item => item.blockType === 'act'), ...rawBlockItems.filter(item => item.blockType !== 'act')];
 
-export type ElementSettingsPanelId = `${typeof SCRIPT_SETTINGS_PANEL_ELEMENT_PREFIX}${FountainElementType}`;
+export type ElementSettingsPanelId = `${typeof SCRIPT_SETTINGS_PANEL_ELEMENT_PREFIX}${ScriptBlockNodeType}`;
 
 export const getElementSettingsPanelId = (
-    blockType: FountainElementType,
+    blockType: ScriptBlockNodeType,
 ): ElementSettingsPanelId => `${SCRIPT_SETTINGS_PANEL_ELEMENT_PREFIX}${blockType}`;
 
 const ELEMENT_SETTINGS_PANEL_IDS = new Set(
@@ -46,15 +45,15 @@ const ELEMENT_BLOCK_TYPE_SET = new Set(
 export const isElementSettingsPanelId = (
     panelId: string,
 ): panelId is ElementSettingsPanelId => ELEMENT_SETTINGS_PANEL_IDS.has(panelId as ElementSettingsPanelId);
-export const getBlockTypeFromElementPanelId = (panelId: string): FountainElementType | null => {
+export const getBlockTypeFromElementPanelId = (panelId: string): ScriptBlockNodeType | null => {
     if (!isElementSettingsPanelId(panelId)) {
         return null;
     }
 
     const blockType = panelId.slice(SCRIPT_SETTINGS_PANEL_ELEMENT_PREFIX.length);
 
-    return ELEMENT_BLOCK_TYPE_SET.has(blockType as FountainElementType)
-        ? blockType as FountainElementType
+    return ELEMENT_BLOCK_TYPE_SET.has(blockType as ScriptBlockNodeType)
+        ? blockType as ScriptBlockNodeType
         : null;
 };
 

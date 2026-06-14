@@ -1,13 +1,5 @@
 import {
-    ELEMENT_ACT,
-    ELEMENT_ASIDE,
-    ELEMENT_CHARACTER,
-    ELEMENT_DIALOGUE,
-    ELEMENT_LYRICS,
-    ELEMENT_NOTE,
-    ELEMENT_SCENE_HEADING,
-    ELEMENT_STAGE_DIRECTIONS,
-    type FountainElementType,
+    type ScriptBlockNodeType,
 } from '@stagistic/script';
 
 import {
@@ -51,26 +43,26 @@ export const LINE_HEIGHT_OPTIONS = [
     2,
 ] as const;
 
-export const BLOCK_PREVIEW_TEXT: Record<FountainElementType, string> = {
-    [ELEMENT_SCENE_HEADING]: 'INT. LOREM MANSION - DAY',
-    [ELEMENT_ACT]: 'ACT 1',
-    [ELEMENT_STAGE_DIRECTIONS]: 'She closes the door and exhales.',
-    [ELEMENT_CHARACTER]: 'ALEX',
-    [ELEMENT_ASIDE]: '(quietly)',
-    [ELEMENT_DIALOGUE]: 'I think this is where it starts.',
-    [ELEMENT_LYRICS]: 'Sing me a line for the morning.',
-    [ELEMENT_NOTE]: '[[Production note goes here.]]',
+export const BLOCK_PREVIEW_TEXT: Record<ScriptBlockNodeType, string> = {
+    scene: 'INT. LOREM MANSION - DAY',
+    act: 'ACT 1',
+    stageDirection: 'She closes the door and exhales.',
+    character: 'ALEX',
+    aside: '(quietly)',
+    dialogue: 'I think this is where it starts.',
+    lyrics: 'Sing me a line for the morning.',
+    note: '[[Production note goes here.]]',
 };
 
-export const BLOCK_PREVIEW_TEXT_COLOR: Record<FountainElementType, string> = {
-    [ELEMENT_SCENE_HEADING]: 'var(--color-block-scene-heading)',
-    [ELEMENT_ACT]: 'var(--color-block-scene-heading)',
-    [ELEMENT_STAGE_DIRECTIONS]: 'var(--color-block-stage-directions)',
-    [ELEMENT_CHARACTER]: 'var(--color-block-character)',
-    [ELEMENT_ASIDE]: 'var(--color-block-aside)',
-    [ELEMENT_DIALOGUE]: 'var(--color-block-dialogue)',
-    [ELEMENT_LYRICS]: 'var(--color-block-lyrics)',
-    [ELEMENT_NOTE]: 'var(--color-block-note, var(--color-block-stage-directions))',
+export const BLOCK_PREVIEW_TEXT_COLOR: Record<ScriptBlockNodeType, string> = {
+    scene: 'var(--color-block-scene-heading)',
+    act: 'var(--color-block-scene-heading)',
+    stageDirection: 'var(--color-block-stage-directions)',
+    character: 'var(--color-block-character)',
+    aside: 'var(--color-block-aside)',
+    dialogue: 'var(--color-block-dialogue)',
+    lyrics: 'var(--color-block-lyrics)',
+    note: 'var(--color-block-note, var(--color-block-stage-directions))',
 };
 
 export const PANEL_DESCRIPTIONS: Record<string, {

@@ -3,8 +3,8 @@ import type {
     BlockSettingsPatch,
     BlockShortcut,
     EditorSettings,
-    FountainElementType,
     PageSettings,
+    ScriptBlockNodeType,
     StructureSettingsPatch,
     TitlePageSettings,
 } from '@stagistic/script';
@@ -23,7 +23,7 @@ export type {
 export type PageSettingsPatch = Partial<PageSettings>;
 
 export type UpdateBlockSettings = (
-    blockType: FountainElementType,
+    blockType: ScriptBlockNodeType,
     patch: BlockSettingsPatch,
 ) => void;
 
@@ -57,7 +57,7 @@ export interface DangerZoneHandlers {
 export interface ScriptEditorSettingsPanelProps {
     panelId: string,
     resolvedScriptSettings: EditorSettings,
-    blockLabelByType: Map<FountainElementType, string>,
+    blockLabelByType: Map<ScriptBlockNodeType, string>,
     shortcutPrefix: string,
     elementsHandlers: ElementsHandlers,
     visualPreferencesHandlers: VisualPreferencesHandlers,
@@ -70,7 +70,7 @@ export interface ScriptEditorSettingsPanelProps {
 export type SectionRenderer = (props: ScriptEditorSettingsPanelProps) => ReactElement;
 
 export interface ElementSettingsPanelProps {
-    blockType: FountainElementType,
+    blockType: ScriptBlockNodeType,
     blockLabel: string,
     resolvedScriptSettings: EditorSettings,
     shortcutPrefix: string,
@@ -90,7 +90,7 @@ export interface ElementNumericModel {
     spacingAfter?: number,
     lineHeight: number,
     shortcut?: BlockShortcut,
-    nextElement?: FountainElementType,
+    nextElement?: ScriptBlockNodeType,
     spacingBeforeOptions: SettingsSelectOption[],
     spacingAfterOptions?: SettingsSelectOption[],
     lineHeightOptions: SettingsSelectOption[],

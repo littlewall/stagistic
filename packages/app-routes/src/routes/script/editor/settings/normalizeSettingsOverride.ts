@@ -1,4 +1,3 @@
-import {type FountainElementType} from '@stagistic/script';
 import {
     type EditorSettings,
 } from '@stagistic/script';
@@ -107,7 +106,7 @@ export const normalizeSettingsOverride = (settings: EditorSettingsOverride): Edi
 
             const compactedBlockSettings = Object.fromEntries(
                 Object.entries(normalizedBlockSettings).filter(([, value]) => value !== undefined),
-            ) as Partial<EditorSettings['blocks'][FountainElementType]>;
+            ) as Partial<EditorSettings['blocks'][string]>;
 
             if (Object.keys(compactedBlockSettings).length === 0) {
                 return acc;

@@ -1,6 +1,6 @@
 import {
     type BlockShortcut,
-    type FountainElementType,
+    type ScriptBlockNodeType,
 } from '@stagistic/script';
 
 import {
@@ -14,7 +14,7 @@ import type {
 import styles from './ElementNumericControls.module.css';
 
 interface ElementNumericControlsProps {
-    blockType: FountainElementType,
+    blockType: ScriptBlockNodeType,
     shortcutPrefix: string,
     model: ElementNumericModel,
     handlers: ElementsHandlers,
@@ -108,7 +108,7 @@ export const ElementNumericControls = ({
                         options={nextElementOptions}
                         onChange={nextValue => {
                             onUpdateBlockSettings(blockType, {
-                                nextElement: nextValue as FountainElementType,
+                                nextElement: nextValue as ScriptBlockNodeType,
                             });
                         }}
                     />

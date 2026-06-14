@@ -1,4 +1,4 @@
-import {type FountainElementType} from '@stagistic/script';
+import {type ScriptBlockNodeType} from '@stagistic/script';
 import {
     clampCharacterColorSaturation,
     DEFAULT_EDITOR_SETTINGS,
@@ -137,7 +137,7 @@ export const useScriptEditorSettingsDraft = ({
     }, [clearSettingsSaveTimer]);
 
     const updateBlockSettings = useCallback((
-        blockType: FountainElementType,
+        blockType: ScriptBlockNodeType,
         patch: BlockSettingsPatch,
     ) => {
         setScriptSettingsDraft(previous => ({

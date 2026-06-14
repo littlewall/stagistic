@@ -13,7 +13,7 @@ import type {
 import type {CharacterGenderOption, ScriptCharacterRecord} from './editor/characters/types';
 
 export interface ScriptCharactersContextValue {
-    // Consumed by FountainEditor (via route)
+    // Consumed by ScriptEditor (via route)
     editorOverrideValue: ScriptDocument | null,
     normalizedConfirmedCharacterRecords: ScriptCharacterRecord[],
     handleEditorValueChange: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,

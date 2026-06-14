@@ -1,9 +1,10 @@
 import type {EditorLiveStructureSnapshot} from '@stagistic/editor';
 import {
-    ELEMENT_ACT,
-    ELEMENT_SCENE_HEADING,
     type ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
+
+const ACT_BLOCK_TYPE = 'act';
+const SCENE_BLOCK_TYPE = 'scene';
 
 export const ROOT_ACT_GROUP = '__root__';
 
@@ -53,7 +54,7 @@ const buildState = (blocks: RawBlock[]): StructureState => {
             continue;
         }
 
-        if (block.blockType === ELEMENT_ACT) {
+        if (block.blockType === ACT_BLOCK_TYPE) {
             groups.push({
                 groupId: block.blockId,
                 actName: block.text,
@@ -63,7 +64,7 @@ const buildState = (blocks: RawBlock[]): StructureState => {
             continue;
         }
 
-        if (block.blockType === ELEMENT_SCENE_HEADING) {
+        if (block.blockType === SCENE_BLOCK_TYPE) {
             groups[groups.length - 1].scenes.push({
                 blockId: block.blockId,
                 title: block.text || 'Untitled scene',
@@ -92,7 +93,7 @@ export const deriveStructureStateFromLive = (
 
     const blocks: RawBlock[] = live.rows.map(row => ({
         blockId: row.blockId,
-        blockType: row.kind === 'act' ? ELEMENT_ACT : ELEMENT_SCENE_HEADING,
+        blockType: row.kind === 'act' ? ACT_BLOCK_TYPE : SCENE_BLOCK_TYPE,
         text: row.kind === 'act' ? row.name : row.title,
     }));
 

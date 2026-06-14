@@ -6,7 +6,6 @@ import {
 import {
     DEFAULT_EDITOR_SETTINGS,
     type EditorSettings,
-    ELEMENT_CHARACTER,
     normalizeCharacterColorHex,
     normalizeCharacterKey,
 } from '@stagistic/script';
@@ -236,7 +235,7 @@ export const useCharacterComputed = ({
 
     const getCharacterNameForBlockType = useCallback((name: string, blockType: unknown) => {
         const normalizedName = normalizeCharacterDisplayName(name);
-        const isCharacterType = blockType === ELEMENT_CHARACTER;
+        const isCharacterType = blockType === 'character';
 
         if (!isCharacterType) {
             return normalizedName;
@@ -252,7 +251,7 @@ export const useCharacterComputed = ({
     }, [resolvedScriptSettings.blocks]);
 
     const normalizeCharacterNameForInlineInput = useCallback((name: string) => {
-        return getCharacterNameForBlockType(name, ELEMENT_CHARACTER);
+        return getCharacterNameForBlockType(name, 'character');
     }, [getCharacterNameForBlockType]);
 
     return {

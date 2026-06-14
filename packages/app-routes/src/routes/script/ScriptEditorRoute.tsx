@@ -3,8 +3,8 @@ import {
     useScripts,
 } from '@stagistic/app-core';
 import {
-    FountainEditor,
     incrementRouteRenderCount,
+    ScriptEditor,
 } from '@stagistic/editor';
 import {isApplePlatform} from '@stagistic/shared';
 import {
@@ -212,7 +212,7 @@ export const ScriptEditorRoute = () => {
                             {storageError}
                         </div>
                     ) : null}
-                    <FountainEditor
+                    <ScriptEditor
                         key={currentScript?.id ?? 'editor'}
                         document={{
                             initialValue: resolvedEditorInitialValue,
@@ -238,13 +238,13 @@ export const ScriptEditorRoute = () => {
                             onValueChange: handleResolvedEditorValueChange,
                         }}
                     >
-                        <FountainEditor.LeftSidebar>
+                        <ScriptEditor.LeftSidebar>
                             {leftSidebar}
-                        </FountainEditor.LeftSidebar>
-                        <FountainEditor.RightSidebar>
+                        </ScriptEditor.LeftSidebar>
+                        <ScriptEditor.RightSidebar>
                             {rightSidebar}
-                        </FountainEditor.RightSidebar>
-                    </FountainEditor>
+                        </ScriptEditor.RightSidebar>
+                    </ScriptEditor>
                     <ScriptSettingsModal
                         isOpen={isSettingsOpen}
                         title="Settings"

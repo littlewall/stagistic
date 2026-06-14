@@ -1,4 +1,4 @@
-import {BLOCK_TEXT_ALIGN_OPTIONS, type FountainElementType} from '@stagistic/script';
+import {BLOCK_TEXT_ALIGN_OPTIONS, type ScriptBlockNodeType} from '@stagistic/script';
 import {clsx} from '@stagistic/ui';
 
 import type {
@@ -9,7 +9,7 @@ import type {
 import styles from './ElementFormattingToolbar.module.css';
 
 interface ElementFormattingToolbarProps {
-    blockType: FountainElementType,
+    blockType: ScriptBlockNodeType,
     model: ElementFormattingModel,
     handlers: ElementsHandlers,
 }

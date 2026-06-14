@@ -4,8 +4,6 @@ import {
     BLOCK_SHORTCUT_OPTIONS,
     BLOCK_TEXT_ALIGN_OPTIONS,
     DEFAULT_EDITOR_SETTINGS,
-    ELEMENT_ACT,
-    ELEMENT_ASIDE,
 } from '@stagistic/script';
 import {type CSSProperties, useMemo} from 'react';
 
@@ -73,7 +71,7 @@ export const useElementSettingsViewModel = ({
         );
         const leftIndent = blockSettings.indentLeftChars ?? blockDefaults.indentLeftChars ?? 0;
         const rightIndent = blockSettings.indentRightChars ?? blockDefaults.indentRightChars ?? 0;
-        const isActBlock = blockType === ELEMENT_ACT;
+        const isActBlock = blockType === 'act';
         const shortcut = isActBlock
             ? undefined
             : blockSettings.shortcut ?? blockDefaults.shortcut ?? BLOCK_SHORTCUT_OPTIONS[0];
@@ -86,7 +84,7 @@ export const useElementSettingsViewModel = ({
         const isItalic = blockSettings.isItalic ?? blockDefaults.isItalic ?? false;
         const isUnderline = blockSettings.isUnderline ?? blockDefaults.isUnderline ?? false;
         const previewText = BLOCK_PREVIEW_TEXT[blockType];
-        const previewTextOffsetChars = blockType === ELEMENT_ASIDE ? 1 : 0;
+        const previewTextOffsetChars = blockType === 'aside' ? 1 : 0;
         const spacingBeforeOptions = SPACING_BEFORE_OPTIONS.map(option => ({
             value: option,
             label: formatLines(option),
