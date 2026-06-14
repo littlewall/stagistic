@@ -5,38 +5,21 @@ import {
     type BlockCasing,
     type BlockShortcut,
     type BlockTextAlign,
-    ELEMENT_ACT,
-    ELEMENT_ASIDE,
-    ELEMENT_CHARACTER,
-    ELEMENT_DIALOGUE,
-    ELEMENT_LYRICS,
-    ELEMENT_NOTE,
-    ELEMENT_SCENE_HEADING,
-    ELEMENT_STAGE_DIRECTIONS,
-    type FountainElementType,
+    isScriptBlockType,
+    resolveScriptBlockType,
+    type ScriptBlockType,
 } from '@stagistic/script';
 
-const FOUNTAIN_ELEMENT_TYPES = new Set<FountainElementType>([
-    ELEMENT_SCENE_HEADING,
-    ELEMENT_ACT,
-    ELEMENT_STAGE_DIRECTIONS,
-    ELEMENT_CHARACTER,
-    ELEMENT_ASIDE,
-    ELEMENT_DIALOGUE,
-    ELEMENT_LYRICS,
-    ELEMENT_NOTE,
-]);
-
-const isFountainElementType = (value: unknown): value is FountainElementType => {
-    return typeof value === 'string' && FOUNTAIN_ELEMENT_TYPES.has(value as FountainElementType);
-};
-
-export const normalizeSettingsBlockType = (value: unknown): FountainElementType | null => {
+export const normalizeSettingsBlockType = (value: unknown): ScriptBlockType | null => {
     if (value === 'fountain_lyric' || value === 'lyrics') {
-        return ELEMENT_LYRICS;
+        return resolveScriptBlockType('lyrics');
     }
 
-    return isFountainElementType(value) ? value : null;
+    return typeof value === 'string' ? resolveScriptBlockType(value) : null;
+};
+
+export const isKnownBlockType = (value: unknown): value is ScriptBlockType => {
+    return isScriptBlockType(value);
 };
 
 export const isBlockTextAlign = (value: unknown): value is BlockTextAlign => {

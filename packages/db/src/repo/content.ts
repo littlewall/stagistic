@@ -1,4 +1,4 @@
-import {convertDefaultScriptDocumentToLegacy, type ScriptDocument} from '@stagistic/script';
+import type {ScriptDocument} from '@stagistic/script';
 
 import {extractScriptBlocks, rebuildScriptDocumentFromBlocks} from '../blocks';
 import * as dbQueries from '../queries';
@@ -104,7 +104,7 @@ export const createContentHandlers = ({
          * Stored block orders seed the re-key baseline so a structural save
          * right after load touches only the moved blocks.
          */
-        const baseline = extractScriptBlocks(scriptId, convertDefaultScriptDocumentToLegacy(loaded.document));
+        const baseline = extractScriptBlocks(scriptId, loaded.document);
 
         getPersister(scriptId).setBaseline(baseline.blocks, loaded.orderKeyByBlockId);
 
@@ -122,7 +122,7 @@ export const createContentHandlers = ({
          * write only the delta (Case A content-only UPDATEs; Case B structural).
          * Timestamp + outbox ride in the same transaction as the delta.
          */
-        await getPersister(scriptId).persist(db, convertDefaultScriptDocumentToLegacy(value), async tx => {
+        await getPersister(scriptId).persist(db, value, async tx => {
             await dbQueries.updateScriptTimestamp(tx, {
                 scriptId,
                 updatedAt: now,

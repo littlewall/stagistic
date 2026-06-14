@@ -21,8 +21,8 @@ const doc = (blocks: {
 }[]): RewriteScriptDocument => ({
     type: 'doc',
     content: blocks.map(b => ({
-        type: 'fountainBlock',
-        attrs: {id: b.id, blockType: b.type ?? 'fountain_action'},
+        type: b.type ?? 'stageDirection',
+        attrs: {id: b.id},
         content: b.text ? [{type: 'text', text: b.text}] : [],
     })),
 });
@@ -49,15 +49,15 @@ describe('persistDocumentDelta', () => {
 
         await persister.persist(db, doc([
             {
-                id: 'h1', type: 'fountain_scene_heading', text: 'INT. ROOM',
+                id: 'h1', type: 'scene', text: 'INT. ROOM',
             }, {id: 'a1', text: 'Action one.'},
         ]));
 
         expect(await readBlocks(db, 's1')).toEqual([
             {
-                id: 'h1', type: 'fountain_scene_heading', text: 'INT. ROOM', order: 'a0',
+                id: 'h1', type: 'scene', text: 'INT. ROOM', order: 'a0',
             }, {
-                id: 'a1', type: 'fountain_action', text: 'Action one.', order: 'a1',
+                id: 'a1', type: 'stage_direction', text: 'Action one.', order: 'a1',
             },
         ]);
     });
@@ -74,7 +74,7 @@ describe('persistDocumentDelta', () => {
 
         expect(await readBlocks(db, 's1')).toEqual([
             {
-                id: 'a1', type: 'fountain_action', text: 'hello', order: 'a0',
+                id: 'a1', type: 'stage_direction', text: 'hello', order: 'a0',
             },
         ]);
     });
@@ -88,22 +88,22 @@ describe('persistDocumentDelta', () => {
 
         await persister.persist(db, doc([
             {
-                id: 'h1', type: 'fountain_scene_heading', text: 'A',
+                id: 'h1', type: 'scene', text: 'A',
             },
             {id: 'x', text: 'x'},
             {
-                id: 'h2', type: 'fountain_scene_heading', text: 'B',
+                id: 'h2', type: 'scene', text: 'B',
             },
             {id: 'y', text: 'y'},
         ]));
 
         await persister.persist(db, doc([
             {
-                id: 'h2', type: 'fountain_scene_heading', text: 'B',
+                id: 'h2', type: 'scene', text: 'B',
             },
             {id: 'y', text: 'y'},
             {
-                id: 'h1', type: 'fountain_scene_heading', text: 'A',
+                id: 'h1', type: 'scene', text: 'A',
             },
             {id: 'x', text: 'x'},
         ]));
@@ -125,16 +125,16 @@ describe('persistDocumentDelta', () => {
 
         await persister.persist(db, doc([
             {
-                id: 'a1', type: 'fountain_action', text: 'X',
+                id: 'a1', type: 'stageDirection', text: 'X',
             },
         ]));
         await persister.persist(db, doc([
             {
-                id: 'a1', type: 'fountain_character', text: 'X',
+                id: 'a1', type: 'character', text: 'X',
             },
         ]));
 
-        expect((await readBlocks(db, 's1'))[0].type).toBe('fountain_character');
+        expect((await readBlocks(db, 's1'))[0].type).toBe('character');
     });
 
     it('delete removes the block and round-trips', async () => {
@@ -146,12 +146,12 @@ describe('persistDocumentDelta', () => {
 
         await persister.persist(db, doc([
             {
-                id: 'h1', type: 'fountain_scene_heading', text: 'A',
+                id: 'h1', type: 'scene', text: 'A',
             }, {id: 'a1', text: 'one'},
         ]));
         await persister.persist(db, doc([
             {
-                id: 'h1', type: 'fountain_scene_heading', text: 'A',
+                id: 'h1', type: 'scene', text: 'A',
             },
         ]));
 
@@ -166,14 +166,14 @@ describe('persistDocumentDelta', () => {
         const persister = createDocumentPersister('s1');
         const sceneA = [
             {
-                id: 'h1', type: 'fountain_scene_heading', text: 'A',
+                id: 'h1', type: 'scene', text: 'A',
             },
             {id: 'a1', text: 'one'},
             {id: 'a2', text: 'two'},
         ];
         const sceneB = [
             {
-                id: 'h2', type: 'fountain_scene_heading', text: 'B',
+                id: 'h2', type: 'scene', text: 'B',
             }, {id: 'b1', text: 'bee'},
         ];
 
@@ -247,12 +247,12 @@ describe('persistDocumentDelta', () => {
 
         await persister.persist(db, doc([
             {
-                id: 'act1', type: 'fountain_act', text: 'ACT ONE',
+                id: 'act1', type: 'act', text: 'ACT ONE',
             }, {id: 'a1', text: 'one'},
         ]));
         await persister.persist(db, doc([
             {
-                id: 'act1', type: 'fountain_act', text: 'ACT 1 RENAMED',
+                id: 'act1', type: 'act', text: 'ACT 1 RENAMED',
             }, {id: 'a1', text: 'one'},
         ]));
 
@@ -303,7 +303,7 @@ describe('persistDocumentDelta', () => {
 
         await persister.persist(db, doc([
             {
-                id: 'h1', type: 'fountain_scene_heading', text: 'INT. ROOM',
+                id: 'h1', type: 'scene', text: 'INT. ROOM',
             }, {id: 'a1', text: 'Action.'},
         ]));
 

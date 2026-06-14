@@ -1,6 +1,6 @@
 import {
     type EditorSettingsOverride,
-    type FountainElementType,
+    type ScriptBlockType,
 } from '@stagistic/script';
 import {
     isObjectRecord,
@@ -112,7 +112,7 @@ export const buildConfigRows = (
     settings: EditorSettingsOverride,
     now: number,
 ): ScriptConfigReplacementRow[] => {
-    const normalizedRows = new Map<FountainElementType, ScriptConfigReplacementRow>();
+    const normalizedRows = new Map<ScriptBlockType, ScriptConfigReplacementRow>();
 
     Object.entries(settings.blocks ?? {}).forEach(([blockType, blockSettings]) => {
         const normalizedBlockType = normalizeSettingsBlockType(blockType);

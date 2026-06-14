@@ -1,5 +1,3 @@
-import {ELEMENT_ACT, ELEMENT_SCENE_HEADING} from '@stagistic/script';
-
 import type {ExtractedBlockRow} from '../../blocks';
 
 export interface ExtractedBlocksDiff {
@@ -11,7 +9,7 @@ export interface ExtractedBlocksDiff {
 }
 
 const isBoundary = (blockType: string): boolean => {
-    return blockType === ELEMENT_SCENE_HEADING || blockType === ELEMENT_ACT;
+    return blockType === 'scene' || blockType === 'act';
 };
 
 const serializeRefs = (refByKey: Record<string, string>): string => {

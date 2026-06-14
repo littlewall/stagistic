@@ -1,4 +1,8 @@
-import type {FountainJSONContent, ScriptDocument} from '@stagistic/script';
+import type {ScriptDocument, ScriptNode} from '@stagistic/script';
+import {
+    getScriptBlockTypeFromNodeType,
+    isScriptBlockNodeType,
+} from '@stagistic/script';
 import {isObjectRecord} from '@stagistic/shared';
 
 import {
@@ -14,10 +18,6 @@ import type {
     ExtractScriptBlocksResult,
 } from './types';
 import {
-    ELEMENT_ACT,
-    ELEMENT_SCENE_HEADING,
-    ELEMENT_STAGE_DIRECTIONS,
-    FOUNTAIN_BLOCK_NODE_NAME,
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
     FOUNTAIN_COLUMN_NODE_NAME,
     makeActId,
@@ -27,7 +27,7 @@ import {
 
 export {sanitizeInlineContentNode} from './extractHelpers';
 
-const shouldPersistInlineContentJson = (content: FountainJSONContent[]): boolean => {
+const shouldPersistInlineContentJson = (content: ScriptNode[]): boolean => {
     if (content.length === 0) {
         return false;
     }
@@ -49,11 +49,11 @@ const shouldPersistInlineContentJson = (content: FountainJSONContent[]): boolean
     return false;
 };
 
-const toContentJsonForStorage = (node: FountainJSONContent): string | null => {
+const toContentJsonForStorage = (node: ScriptNode): string | null => {
     const content = Array.isArray(node.content)
         ? node.content
             .map(sanitizeInlineContentNode)
-            .filter((item): item is FountainJSONContent => Boolean(item))
+            .filter((item): item is ScriptNode => Boolean(item))
         : [];
 
     if (!shouldPersistInlineContentJson(content)) {
@@ -61,18 +61,6 @@ const toContentJsonForStorage = (node: FountainJSONContent): string | null => {
     }
 
     return JSON.stringify(content);
-};
-
-const normalizeBlockType = (attrs: Record<string, unknown> | undefined): string => {
-    if (!attrs) {
-        return ELEMENT_STAGE_DIRECTIONS;
-    }
-
-    if (typeof attrs.blockType === 'string' && attrs.blockType.trim().length > 0) {
-        return attrs.blockType;
-    }
-
-    return ELEMENT_STAGE_DIRECTIONS;
 };
 
 const resolveUniqueBlockId = (
@@ -146,12 +134,12 @@ export const extractScriptBlocks = (
     let currentActHeadingBlockId: string | null = null;
     let currentSceneHeadingBlockId: string | null = null;
 
-    const walk = (nodes: FountainJSONContent[] | undefined, context: {columnGroupId: string | null, columnIndex: number | null}) => {
+    const walk = (nodes: ScriptNode[] | undefined, context: {columnGroupId: string | null, columnIndex: number | null}) => {
         if (!Array.isArray(nodes) || nodes.length === 0) {
             return;
         }
 
-        nodes.forEach(node => {
+        nodes.forEach((node: ScriptNode) => {
             if (!node || typeof node !== 'object') {
                 return;
             }
@@ -165,7 +153,7 @@ export const extractScriptBlocks = (
                     ? node.content
                     : [];
 
-                columns.forEach((columnNode, columnIndex) => {
+                columns.forEach((columnNode: ScriptNode, columnIndex: number) => {
                     if (!columnNode || typeof columnNode !== 'object') {
                         return;
                     }
@@ -189,7 +177,7 @@ export const extractScriptBlocks = (
                 return;
             }
 
-            if (node.type !== FOUNTAIN_BLOCK_NODE_NAME) {
+            if (!isScriptBlockNodeType(node.type)) {
                 walk(node.content, context);
 
                 return;
@@ -198,13 +186,13 @@ export const extractScriptBlocks = (
             const attrs = isObjectRecord(node.attrs)
                 ? node.attrs
                 : undefined;
-            const blockType = normalizeBlockType(attrs);
+            const blockType = getScriptBlockTypeFromNodeType(node.type);
             const blockId = resolveUniqueBlockId(scriptId, attrs?.id, orderNo, usedBlockIds, warnings);
             const textContent = getNodeTextContent(node).trim();
             const contentJson = toContentJsonForStorage(node);
             const characterRefByKey = toCharacterRefByKey(attrs);
 
-            if (blockType === ELEMENT_ACT) {
+            if (blockType === 'act') {
                 currentActHeadingBlockId = blockId;
 
                 if (!actByHeadingBlockId.has(blockId)) {
@@ -221,7 +209,7 @@ export const extractScriptBlocks = (
                 }
             }
 
-            if (blockType === ELEMENT_SCENE_HEADING) {
+            if (blockType === 'scene') {
                 currentSceneHeadingBlockId = blockId;
 
                 if (!sceneByHeadingBlockId.has(blockId)) {

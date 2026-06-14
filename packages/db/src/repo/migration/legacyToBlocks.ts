@@ -1,7 +1,4 @@
-import {
-    convertDefaultScriptDocumentToLegacy,
-    type ScriptDocument,
-} from '@stagistic/script';
+import type {ScriptDocument} from '@stagistic/script';
 
 import {
     migrateLegacyJsonToBlocksForScript,
@@ -46,9 +43,8 @@ export const migrateScriptDocumentToBlocks = async ({
     trigger,
     context,
 }: MigrateScriptDocumentToBlocksArgs) => {
-    const legacyDocument = convertDefaultScriptDocumentToLegacy(sourceDocument);
     const audit = await migrateLegacyJsonToBlocksForScript(db, scriptId, {
-        sourceDocument: legacyDocument,
+        sourceDocument,
         force: true,
         trigger,
     });

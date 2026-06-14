@@ -17,23 +17,23 @@ describe('script import with fractional indexing', () => {
             type: 'doc' as const,
             content: [
                 {
-                    type: 'fountainBlock',
-                    attrs: {id: 'h1', blockType: 'fountain_scene_heading'},
+                    type: 'scene',
+                    attrs: {id: 'h1'},
                     content: [{type: 'text', text: 'INT. ROOM - DAY'}],
                 },
                 {
-                    type: 'fountainBlock',
-                    attrs: {id: 'a1', blockType: 'fountain_action'},
+                    type: 'stageDirection',
+                    attrs: {id: 'a1'},
                     content: [{type: 'text', text: 'A dark room.'}],
                 },
                 {
-                    type: 'fountainBlock',
-                    attrs: {id: 'c1', blockType: 'fountain_character'},
+                    type: 'character',
+                    attrs: {id: 'c1'},
                     content: [{type: 'text', text: 'JOHN'}],
                 },
                 {
-                    type: 'fountainBlock',
-                    attrs: {id: 'd1', blockType: 'fountain_dialogue'},
+                    type: 'dialogue',
+                    attrs: {id: 'd1'},
                     content: [{type: 'text', text: 'Hello world.'}],
                 },
             ],
@@ -83,12 +83,12 @@ describe('script import with fractional indexing', () => {
             type: 'doc' as const,
             content: [
                 {
-                    type: 'fountainBlock',
-                    attrs: {id: 'scene1', blockType: 'fountain_scene_heading'},
+                    type: 'scene',
+                    attrs: {id: 'scene1'},
                     content: [{type: 'text', text: 'EXT. PARK - NIGHT'}],
                 }, {
-                    type: 'fountainBlock',
-                    attrs: {id: 'action1', blockType: 'fountain_action'},
+                    type: 'stageDirection',
+                    attrs: {id: 'action1'},
                     content: [{type: 'text', text: 'Trees sway in the wind.'}],
                 },
             ],

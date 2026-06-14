@@ -6,7 +6,7 @@ import type {ExtractedBlockRow} from '../../blocks';
 import {diffExtractedBlocks} from './diffExtractedBlocks';
 
 const block = (over: Partial<ExtractedBlockRow> & {blockId: string, orderNo: number}): ExtractedBlockRow => ({
-    blockType: 'fountain_action',
+    blockType: 'stage_direction',
     textContent: '',
     contentJson: null,
     sceneHeadingBlockId: null,
@@ -67,15 +67,15 @@ describe('diffExtractedBlocks', () => {
         expect(result.structural).toBe(true);
     });
 
-    it('flags boundary-ness change (action -> scene heading) as structural', () => {
+    it('flags boundary-ness change (stage direction -> scene heading) as structural', () => {
         const prev = [
             block({
-                blockId: 'a', orderNo: 0, blockType: 'fountain_action',
+                blockId: 'a', orderNo: 0, blockType: 'stage_direction',
             }),
         ];
         const next = [
             block({
-                blockId: 'a', orderNo: 0, blockType: 'fountain_scene_heading',
+                blockId: 'a', orderNo: 0, blockType: 'scene',
             }),
         ];
 
@@ -88,12 +88,12 @@ describe('diffExtractedBlocks', () => {
     it('flags a text edit of an existing act heading as structural (act-row name must reconcile)', () => {
         const prev = [
             block({
-                blockId: 'h', orderNo: 0, blockType: 'fountain_act', textContent: 'ACT ONE',
+                blockId: 'h', orderNo: 0, blockType: 'act', textContent: 'ACT ONE',
             }),
         ];
         const next = [
             block({
-                blockId: 'h', orderNo: 0, blockType: 'fountain_act', textContent: 'ACT TWO',
+                blockId: 'h', orderNo: 0, blockType: 'act', textContent: 'ACT TWO',
             }),
         ];
 

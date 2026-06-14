@@ -15,17 +15,17 @@ interface Scene {
     blockIds: string[],
 }
 
-// Build a doc from an ordered list of scenes (heading + action blocks).
+// Build a doc from an ordered list of scenes (heading + stage direction blocks).
 const docFromScenes = (scenes: Scene[]): RewriteScriptDocument => ({
     type: 'doc',
     content: scenes.flatMap(scene => [
         {
-            type: 'fountainBlock',
-            attrs: {id: scene.headingId, blockType: 'fountain_scene_heading'},
+            type: 'scene',
+            attrs: {id: scene.headingId},
             content: [{type: 'text', text: scene.headingId.toUpperCase()}],
         }, ...scene.blockIds.map(id => ({
-            type: 'fountainBlock',
-            attrs: {id, blockType: 'fountain_action'},
+            type: 'stageDirection',
+            attrs: {id},
             content: [{type: 'text', text: id}],
         })),
     ]),

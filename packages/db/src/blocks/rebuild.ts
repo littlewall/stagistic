@@ -1,14 +1,14 @@
-import type {FountainJSONContent, ScriptDocument} from '@stagistic/script';
+import type {ScriptDocument, ScriptNode} from '@stagistic/script';
+import {getScriptBlockNodeTypeFromBlockType, isScriptBlockType} from '@stagistic/script';
 
 import {sanitizeInlineContentNode} from './extract';
 import type {RewriteStoredBlockCharacterRefRow, RewriteStoredBlockRow} from './types';
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
     FOUNTAIN_COLUMN_GROUP_NODE_NAME,
     FOUNTAIN_COLUMN_NODE_NAME,
 } from './types';
 
-const toFallbackTextInlineContent = (textContent: string): FountainJSONContent[] => {
+const toFallbackTextInlineContent = (textContent: string): ScriptNode[] => {
     if (textContent.length === 0) {
         return [];
     }
@@ -27,7 +27,7 @@ const parseStoredContentJson = (
     contentJson: string | null,
     textContent: string,
     warnings: string[],
-): FountainJSONContent[] => {
+): ScriptNode[] => {
     if (!contentJson || contentJson.trim().length === 0) {
         return toFallbackTextInlineContent(textContent);
     }
@@ -43,7 +43,7 @@ const parseStoredContentJson = (
 
         return parsed
             .map(sanitizeInlineContentNode)
-            .filter((item): item is FountainJSONContent => Boolean(item));
+            .filter((item): item is ScriptNode => Boolean(item));
     } catch (error) {
         warnings.push(
             `Script ${scriptId}: block ${blockId} has unparsable content_json (${error instanceof Error ? error.message : String(error)}).`,
@@ -72,10 +72,12 @@ const toScriptDocumentFromStoredRows = (
     const blockRowsSorted = [...blockRows]
         .sort((a, b) => a.blockOrder < b.blockOrder ? -1 : a.blockOrder > b.blockOrder ? 1 : 0);
 
-    const createBlockNode = (row: RewriteStoredBlockRow): FountainJSONContent => {
+    const createBlockNode = (row: RewriteStoredBlockRow): ScriptNode => {
+        const nodeType = isScriptBlockType(row.blockType)
+            ? getScriptBlockNodeTypeFromBlockType(row.blockType)
+            : 'stageDirection';
         const attrs: Record<string, unknown> = {
             id: row.id,
-            blockType: row.blockType,
         };
         const characterRefByKey = characterRefsByBlockId.get(row.id);
 
@@ -84,7 +86,7 @@ const toScriptDocumentFromStoredRows = (
         }
 
         return {
-            type: FOUNTAIN_BLOCK_NODE_NAME,
+            type: nodeType,
             attrs,
             content: parseStoredContentJson(
                 scriptId,
@@ -96,7 +98,7 @@ const toScriptDocumentFromStoredRows = (
         };
     };
 
-    const content: FountainJSONContent[] = [];
+    const content: ScriptNode[] = [];
 
     let cursor = 0;
 
@@ -121,7 +123,7 @@ const toScriptDocumentFromStoredRows = (
             continue;
         }
 
-        const blocksByColumn = new Map<number, FountainJSONContent[]>();
+        const blocksByColumn = new Map<number, ScriptNode[]>();
 
         groupedRows.forEach(groupRow => {
             const columnIndex = typeof groupRow.columnIndex === 'number'
@@ -143,7 +145,7 @@ const toScriptDocumentFromStoredRows = (
         const columnIndexes = Array.from(blocksByColumn.keys())
             .sort((a, b) => a - b);
 
-        const columns: FountainJSONContent[] = columnIndexes.map(columnIndex => {
+        const columns: ScriptNode[] = columnIndexes.map(columnIndex => {
             return {
                 type: FOUNTAIN_COLUMN_NODE_NAME,
                 content: blocksByColumn.get(columnIndex) ?? [],

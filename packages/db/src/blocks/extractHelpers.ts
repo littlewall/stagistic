@@ -1,4 +1,4 @@
-import type {FountainJSONContent, ScriptDocument} from '@stagistic/script';
+import type {ScriptDocument, ScriptNode} from '@stagistic/script';
 import {collapseWhitespace, isObjectRecord} from '@stagistic/shared';
 
 import type {
@@ -24,7 +24,7 @@ export const normalizeCharacterKey = (rawValue: string): string => {
     return collapseWhitespace(base).toUpperCase();
 };
 
-export const getNodeTextContent = (node: FountainJSONContent): string => {
+export const getNodeTextContent = (node: ScriptNode): string => {
     if (typeof node.text === 'string') {
         return node.text;
     }
@@ -159,12 +159,12 @@ export const toExtractedImportMetadata = (
     };
 };
 
-export const sanitizeInlineContentNode = (node: unknown): FountainJSONContent | null => {
+export const sanitizeInlineContentNode = (node: unknown): ScriptNode | null => {
     if (!isObjectRecord(node)) {
         return null;
     }
 
-    const result: FountainJSONContent = {};
+    const result: ScriptNode = {};
 
     if (typeof node.type === 'string') {
         result.type = node.type;
@@ -181,7 +181,7 @@ export const sanitizeInlineContentNode = (node: unknown): FountainJSONContent | 
     if (Array.isArray(node.content)) {
         const sanitizedChildren = node.content
             .map(sanitizeInlineContentNode)
-            .filter((item): item is FountainJSONContent => Boolean(item));
+            .filter((item): item is ScriptNode => Boolean(item));
 
         result.content = sanitizedChildren;
     }

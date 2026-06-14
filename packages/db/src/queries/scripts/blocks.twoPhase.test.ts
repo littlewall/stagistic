@@ -16,7 +16,7 @@ const insertBlock = async (db: TestDb, scriptId: string, id: string, blockOrder:
     await db.insert(scriptBlocks).values({
         id,
         scriptId,
-        blockType: 'fountain_action',
+        blockType: 'stage_direction',
         blockOrder,
         textContent: id,
         contentJson: null,
