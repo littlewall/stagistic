@@ -1,27 +1,22 @@
-import {
-    ELEMENT_CHARACTER,
-    ELEMENT_DIALOGUE,
-} from '../../fountain/types';
-import type {FountainBlockSpec} from '../types';
+import type {BlockSpec} from '../types';
 
 export const characterSpec = {
     nodeType: 'character',
     blockType: 'character',
-    legacyType: ELEMENT_CHARACTER,
     label: 'Character',
     listId: 'element-character',
-    enterFallback: ELEMENT_DIALOGUE,
+    enterFallback: 'dialogue',
     defaultSettings: {
         spacingBeforeEm: 1.0,
         lineHeight: 1.2,
         indentLeftChars: 30,
         indentRightChars: 3,
         shortcut: '3',
-        nextElement: ELEMENT_DIALOGUE,
+        nextElement: 'dialogue',
         textAlign: 'left',
         casing: 'uppercase',
         isBold: true,
         isItalic: false,
         isUnderline: false,
     },
-} as const satisfies FountainBlockSpec;
+} as const satisfies BlockSpec;

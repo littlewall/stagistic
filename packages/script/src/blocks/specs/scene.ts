@@ -1,19 +1,19 @@
 import type {BlockSpec} from '../types';
 
-export const noteSpec = {
-    nodeType: 'note',
-    blockType: 'note',
-    label: 'Notes',
-    listId: 'element-note',
+export const sceneSpec = {
+    nodeType: 'scene',
+    blockType: 'scene',
+    label: 'Scene',
+    listId: 'element-scene',
     enterFallback: 'stageDirection',
     defaultSettings: {
-        spacingBeforeEm: 1.0,
+        spacingBeforeEm: 2.0,
         lineHeight: 1.2,
-        shortcut: '0',
+        shortcut: '1',
         nextElement: 'stageDirection',
         textAlign: 'left',
-        casing: 'normal',
-        isBold: false,
+        casing: 'uppercase',
+        isBold: true,
         isItalic: false,
         isUnderline: false,
     },

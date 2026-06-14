@@ -1,7 +1,6 @@
-import type {FountainElementType} from '../fountain/types';
 import type {BlockSpacingSettings} from '../settings';
 
-export type FountainBlockSpecDefaults = Required<Pick<
+export type BlockSpecDefaults = Required<Pick<
     BlockSpacingSettings,
     'spacingBeforeEm' | 'lineHeight' | 'nextElement' | 'textAlign' | 'casing' | 'isBold' | 'isItalic' | 'isUnderline'
 >> & Pick<
@@ -10,7 +9,7 @@ export type FountainBlockSpecDefaults = Required<Pick<
 >;
 
 /**
- * A FountainBlockSpec is the single source of truth for one block type's
+ * A BlockSpec is the single source of truth for one block type's
  * data-model facts: how it's identified, what it's called, and what its
  * default settings are.
  *
@@ -20,20 +19,18 @@ export type FountainBlockSpecDefaults = Required<Pick<
  * this array — no hand-maintained sync.
  *
  * The string-typed `nodeType` / `blockType` fields let each spec assert
- * its identifiers as literal types via `as const satisfies FountainBlockSpec`.
+ * its identifiers as literal types via `as const satisfies BlockSpec`.
  * The precise `ScriptBlockNodeType` / `ScriptBlockType` unions are derived
  * from the assembled `ALL_BLOCK_SPECS` array, avoiding a definition cycle.
  *
  * Presentation facts (CSS class, icon, CSS var prefix) live in the editor
- * package as a `FountainBlockBinding` that references the spec by import.
+ * package as a `BlockBinding` that references the spec by import.
  */
-export interface FountainBlockSpec {
+export interface BlockSpec {
     /** Tiptap node name (camelCase). */
     readonly nodeType: string,
     /** Stored block type identifier (snake_case). */
     readonly blockType: string,
-    /** Legacy `ELEMENT_X` element constant. */
-    readonly legacyType: FountainElementType,
     /** Human-readable label used in toolbars and menus. */
     readonly label: string,
     /** Stable list id (used for keys in UI lists). */
@@ -42,7 +39,7 @@ export interface FountainBlockSpec {
      * Hardcoded default for the block type a user lands on after pressing
      * Enter from this block, when no user setting overrides it.
      */
-    readonly enterFallback: FountainElementType,
+    readonly enterFallback: string,
     /** Default settings for this block, contributed to DEFAULT_EDITOR_SETTINGS.blocks. */
-    readonly defaultSettings: FountainBlockSpecDefaults,
+    readonly defaultSettings: BlockSpecDefaults,
 }
