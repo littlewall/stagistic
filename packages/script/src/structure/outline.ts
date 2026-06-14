@@ -1,8 +1,4 @@
-import type {FountainJSONContent} from '../document';
-import {
-    ELEMENT_ACT,
-    ELEMENT_SCENE_HEADING,
-} from '../fountain';
+import type {ScriptNode} from '../document';
 import {collectStructureBlocks} from './collectStructureBlocks';
 import {getDefaultActName, normalizeActName} from './structureUtils';
 
@@ -40,7 +36,7 @@ const createActGroup = (
 });
 
 export const buildScriptStructureOutline = (
-    content: FountainJSONContent[] | undefined,
+    content: ScriptNode[] | undefined,
 ): ScriptStructureOutline => {
     const blocks = collectStructureBlocks(content);
 
@@ -50,7 +46,7 @@ export const buildScriptStructureOutline = (
         };
     }
 
-    const firstActBlock = blocks.find(block => block.blockType === ELEMENT_ACT && block.id);
+    const firstActBlock = blocks.find(block => block.blockType === 'act' && block.id);
     const fallbackAnchorBlockId = firstActBlock?.id ?? blocks[0].id;
     const fallbackActName = firstActBlock?.text
         ? normalizeActName(firstActBlock.text)
@@ -71,7 +67,7 @@ export const buildScriptStructureOutline = (
             return;
         }
 
-        if (block.blockType === ELEMENT_ACT) {
+        if (block.blockType === 'act') {
             actCounter += 1;
 
             const actName = normalizeActName(block.text) || getDefaultActName(actCounter);
@@ -92,7 +88,7 @@ export const buildScriptStructureOutline = (
             outlineActs.push(currentGroup);
         }
 
-        if (block.blockType === ELEMENT_SCENE_HEADING) {
+        if (block.blockType === 'scene') {
             currentGroup.items.push({
                 kind: 'scene',
                 blockId: block.id,

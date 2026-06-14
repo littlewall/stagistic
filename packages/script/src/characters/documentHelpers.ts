@@ -4,15 +4,14 @@ import {
 } from '@stagistic/shared';
 
 import {
-    type FountainJSONContent,
-    getScriptBlockLegacyType,
+    getScriptBlockNodeType,
     isScriptBlockNode,
     type ScriptDocument,
+    type ScriptNode,
 } from '../document';
 import {
-    ELEMENT_CHARACTER,
     normalizeCharacterKey,
-} from '../fountain';
+} from '../syntax';
 
 export type CharacterRefByKey = Record<string, string>;
 
@@ -22,10 +21,10 @@ export type ScriptDocumentChangeResult = {
 };
 
 export const isCharacterBlockType = (value: unknown) => {
-    return value === ELEMENT_CHARACTER;
+    return value === 'character';
 };
 
-export const getNodeTextContent = (node: FountainJSONContent): string => {
+export const getNodeTextContent = (node: ScriptNode): string => {
     if (typeof node.text === 'string') {
         return node.text;
     }
@@ -64,9 +63,9 @@ export const getCharacterRefByKey = (attrs: Record<string, unknown> | undefined)
 };
 
 export const withCharacterRefByKey = (
-    node: FountainJSONContent,
+    node: ScriptNode,
     characterRefByKey: CharacterRefByKey,
-): FountainJSONContent => {
+): ScriptNode => {
     const attrs = isObjectRecord(node.attrs) ? node.attrs : {};
     const nextAttrs = {
         ...attrs,
@@ -95,13 +94,13 @@ export const unchangedScriptDocument = (value: ScriptDocument): ScriptDocumentCh
 });
 
 type MapNodesResult = {
-    nodes: FountainJSONContent[] | undefined,
+    nodes: ScriptNode[] | undefined,
     changed: boolean,
 };
 
 export const mapCharacterBlockNodes = (
-    nodes: FountainJSONContent[] | undefined,
-    visitor: (node: FountainJSONContent) => FountainJSONContent,
+    nodes: ScriptNode[] | undefined,
+    visitor: (node: ScriptNode) => ScriptNode,
 ): MapNodesResult => {
     if (!Array.isArray(nodes)) {
         return {nodes, changed: false};
@@ -113,7 +112,7 @@ export const mapCharacterBlockNodes = (
             return node;
         }
 
-        if (isScriptBlockNode(node) && isCharacterBlockType(getScriptBlockLegacyType(node))) {
+        if (isScriptBlockNode(node) && isCharacterBlockType(getScriptBlockNodeType(node))) {
             const next = visitor(node);
 
             if (next !== node) {

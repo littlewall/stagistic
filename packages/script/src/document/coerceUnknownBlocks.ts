@@ -1,12 +1,8 @@
-import {
-    isScriptBlockNodeType,
-    resolveScriptBlockNodeType,
-} from '../fountain';
+import {isScriptBlockNodeType} from '../syntax';
 import {
     DEFAULT_SCRIPT_BLOCK_NODE_TYPE,
-    FOUNTAIN_BLOCK_NODE_NAME,
-    type FountainJSONContent,
     type ScriptDocument,
+    type ScriptNode,
 } from './scriptDocument';
 
 export type ScriptDocumentCoerceResult = {
@@ -14,27 +10,7 @@ export type ScriptDocumentCoerceResult = {
     changed: boolean,
 };
 
-const coerceNode = (node: FountainJSONContent): {node: FountainJSONContent, changed: boolean} => {
-    if (node.type === FOUNTAIN_BLOCK_NODE_NAME) {
-        const blockType = node.attrs?.blockType;
-        const resolved = resolveScriptBlockNodeType(blockType);
-
-        if (!resolved) {
-            return {
-                node: {
-                    ...node,
-                    attrs: {
-                        ...node.attrs,
-                        blockType: DEFAULT_SCRIPT_BLOCK_NODE_TYPE,
-                    },
-                },
-                changed: true,
-            };
-        }
-
-        return {node, changed: false};
-    }
-
+const coerceNode = (node: ScriptNode): {node: ScriptNode, changed: boolean} => {
     if (typeof node.type === 'string' && node.type !== 'doc' && node.type !== 'text'
         && !node.type.startsWith('fountainColumn')
         && !isScriptBlockNodeType(node.type)

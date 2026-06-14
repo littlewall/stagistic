@@ -2,7 +2,7 @@ import {type ScriptDocument} from '../document';
 import {
     extractCharacterKeys,
     normalizeCharacterKey,
-} from '../fountain';
+} from '../syntax';
 import {
     type CharacterRefByKey,
     getCharacterRefByKey,

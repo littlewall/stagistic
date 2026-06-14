@@ -1,25 +1,22 @@
 import {
-    FOUNTAIN_COLUMN_GROUP_NODE_NAME,
-    FOUNTAIN_COLUMN_NODE_NAME,
-    type FountainJSONContent,
+    COLUMN_GROUP_NODE_NAME,
+    COLUMN_NODE_NAME,
     getScriptBlockId,
-    getScriptBlockLegacyType,
+    getScriptBlockNodeType,
     isScriptBlockNode,
+    type ScriptNode,
 } from '../document';
-import {
-    ELEMENT_SCENE_HEADING,
-    type FountainElementType,
-} from '../fountain';
+import type {ScriptBlockNodeType} from '../syntax';
 
 export type StructureBlockEntry = {
     id: string,
-    blockType: FountainElementType,
+    blockType: ScriptBlockNodeType,
     text: string,
     index: number,
     sceneIndex: number,
 };
 
-const getNodeTextContent = (node: FountainJSONContent): string => {
+const getNodeTextContent = (node: ScriptNode): string => {
     if (typeof node.text === 'string') {
         return node.text;
     }
@@ -31,10 +28,10 @@ const getNodeTextContent = (node: FountainJSONContent): string => {
     return node.content.map(getNodeTextContent).join('');
 };
 
-const collectBlocks = (nodes: FountainJSONContent[] | undefined): FountainJSONContent[] => {
-    const blocks: FountainJSONContent[] = [];
+const collectBlocks = (nodes: ScriptNode[] | undefined): ScriptNode[] => {
+    const blocks: ScriptNode[] = [];
 
-    const walk = (nodeList?: FountainJSONContent[]) => {
+    const walk = (nodeList?: ScriptNode[]) => {
         if (!Array.isArray(nodeList)) {
             return;
         }
@@ -44,21 +41,21 @@ const collectBlocks = (nodes: FountainJSONContent[] | undefined): FountainJSONCo
                 continue;
             }
 
-            if (node.type === FOUNTAIN_COLUMN_GROUP_NODE_NAME) {
+            if (node.type === COLUMN_GROUP_NODE_NAME) {
                 const columns = Array.isArray(node.content) ? node.content : [];
 
-                if (columns[0]?.type === FOUNTAIN_COLUMN_NODE_NAME) {
+                if (columns[0]?.type === COLUMN_NODE_NAME) {
                     walk(columns[0].content);
                 }
 
-                if (columns[1]?.type === FOUNTAIN_COLUMN_NODE_NAME) {
+                if (columns[1]?.type === COLUMN_NODE_NAME) {
                     walk(columns[1].content);
                 }
 
                 continue;
             }
 
-            if (node.type === FOUNTAIN_COLUMN_NODE_NAME) {
+            if (node.type === COLUMN_NODE_NAME) {
                 walk(node.content);
                 continue;
             }
@@ -77,14 +74,14 @@ const collectBlocks = (nodes: FountainJSONContent[] | undefined): FountainJSONCo
     return blocks;
 };
 
-export const collectStructureBlocks = (nodes: FountainJSONContent[] | undefined): StructureBlockEntry[] => {
+export const collectStructureBlocks = (nodes: ScriptNode[] | undefined): StructureBlockEntry[] => {
     const blocks = collectBlocks(nodes);
     let currentSceneIndex = -1;
 
     return blocks.map((block, index) => {
-        const blockType = getScriptBlockLegacyType(block);
+        const blockType = getScriptBlockNodeType(block);
 
-        if (blockType === ELEMENT_SCENE_HEADING) {
+        if (blockType === 'scene') {
             currentSceneIndex += 1;
         }
 

@@ -1,4 +1,3 @@
-import type {FountainElementType} from '../fountain';
 import type {
     BlockCasing,
     BlockShortcut,
@@ -20,7 +19,7 @@ export interface BlockSpacingSettings {
     // Unitless line-height multiplier.
     lineHeight?: number,
     shortcut?: BlockShortcut,
-    nextElement?: FountainElementType,
+    nextElement?: string,
     textAlign?: BlockTextAlign,
     casing?: BlockCasing,
     isBold?: boolean,
@@ -64,7 +63,7 @@ export interface StructureSettings {
     actDisplay: StructureActDisplaySettings,
 }
 
-export type BlockSettings = Record<FountainElementType, BlockSpacingSettings>;
+export type BlockSettings = Record<string, BlockSpacingSettings>;
 
 export interface EditorSettings {
     page: PageSettings,
@@ -85,5 +84,5 @@ export interface EditorSettingsOverride {
     typography?: Partial<TypographySettings>,
     visual?: Partial<VisualSettings>,
     structure?: StructureSettingsPatch,
-    blocks?: Partial<Record<FountainElementType, BlockSettingsPatch>>,
+    blocks?: Partial<Record<string, BlockSettingsPatch>>,
 }

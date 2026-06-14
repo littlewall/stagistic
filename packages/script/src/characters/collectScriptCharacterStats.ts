@@ -1,12 +1,12 @@
 import {
-    type FountainJSONContent,
-    getScriptBlockLegacyType,
+    type ScriptNode,
+    getScriptBlockNodeType,
     isScriptBlockNode,
     type ScriptDocument,
 } from '../document';
 import {
     extractCharacterKeys,
-} from '../fountain';
+} from '../syntax';
 import {
     getCharacterRefByKey,
     getNodeTextContent,
@@ -21,7 +21,7 @@ export const collectScriptCharacterStats = (
     const countsByKey = new Map<string, number>();
     const confirmedCountsById = new Map<string, number>();
     const unconfirmedCountsByKey = new Map<string, number>();
-    const walkNodes = (nodes?: FountainJSONContent[]) => {
+    const walkNodes = (nodes?: ScriptNode[]) => {
         if (!Array.isArray(nodes)) {
             return;
         }
@@ -32,7 +32,7 @@ export const collectScriptCharacterStats = (
             }
 
             if (isScriptBlockNode(node)) {
-                const blockType = getScriptBlockLegacyType(node);
+                const blockType = getScriptBlockNodeType(node);
 
                 if (isCharacterBlockType(blockType)) {
                     const text = getNodeTextContent(node);

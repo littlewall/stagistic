@@ -1,4 +1,3 @@
-export {serializeTitlePageToFountain} from './serialize';
 export type {
     TitlePageCredit,
     TitlePageDateFormat,

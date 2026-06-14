@@ -1,13 +1,13 @@
 import {splitTrailingParentheticalSuffix} from '@stagistic/shared';
 
 import {
-    getScriptBlockLegacyType,
+    getScriptBlockNodeType,
     type ScriptDocument,
 } from '../document';
 import {
     normalizeCharacterKey,
     splitCharacterTokens,
-} from '../fountain';
+} from '../syntax';
 import {
     type CharacterRefByKey,
     getCharacterRefByKey,
@@ -127,7 +127,7 @@ export const renameCharacterInScriptDocument = (
     options?: {characterId?: string},
 ): ScriptDocumentChangeResult => {
     const {nodes: nextContent, changed} = mapCharacterBlockNodes(value.content, node => {
-        const blockType = getScriptBlockLegacyType(node);
+        const blockType = getScriptBlockNodeType(node);
         const sourceLine = getNodeTextContent(node);
         const replacementName = getCharacterNameForBlockType(toCharacterName, blockType);
         const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);

@@ -1,10 +1,10 @@
 export * from './blocks';
 export * from './characters';
 export * from './document';
-export * from './fountain';
 export * from './indexing';
 export * from './settings';
 export * from './structure';
+export * from './syntax';
 export * from './titlePage';
 export {
     clampNumber,

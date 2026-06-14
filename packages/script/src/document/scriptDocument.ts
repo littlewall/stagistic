@@ -1,33 +1,21 @@
 import {createNodeId} from '@stagistic/shared';
 
+import type {EditorSettingsOverride} from '../settings';
 import {
-    ELEMENT_ACT,
-    ELEMENT_SCENE_HEADING,
-    ELEMENT_STAGE_DIRECTIONS,
-    type FountainElementType,
     isScriptBlockNodeType,
-    resolveLegacyFountainBlockType,
     resolveScriptBlockNodeType,
     type ScriptBlockNodeType,
-} from '../fountain';
-import type {EditorSettingsOverride} from '../settings';
+} from '../syntax';
 
-/**
- * @deprecated Legacy monolithic block node. Prefer explicit node-per-type names.
- */
-export const FOUNTAIN_BLOCK_NODE_NAME = 'fountainBlock';
-export const FOUNTAIN_COLUMN_GROUP_NODE_NAME = 'fountainColumnGroup';
-export const FOUNTAIN_COLUMN_NODE_NAME = 'fountainColumn';
+export const COLUMN_GROUP_NODE_NAME = 'fountainColumnGroup';
+export const COLUMN_NODE_NAME = 'fountainColumn';
 
-export const DEFAULT_SCRIPT_BLOCK_NODE_TYPE: ScriptBlockNodeType = 'action';
-export const DEFAULT_SCRIPT_DOCUMENT_NODE_MODE = 'default';
+export const DEFAULT_SCRIPT_BLOCK_NODE_TYPE: ScriptBlockNodeType = 'stageDirection';
 
-export type ScriptDocumentNodeMode = 'legacy' | 'default';
-
-export type FountainJSONContent = {
+export type ScriptNode = {
     type?: string,
     attrs?: Record<string, unknown>,
-    content?: FountainJSONContent[],
+    content?: ScriptNode[],
     marks?: Array<{
         type: string,
         attrs?: Record<string, unknown>,
@@ -41,7 +29,7 @@ export type ScriptDocument = {
         settings?: EditorSettingsOverride,
         importMeta?: ScriptImportMetadata,
     },
-    content: FountainJSONContent[],
+    content: ScriptNode[],
 };
 
 export interface ScriptImportedTitlePageField {
@@ -60,55 +48,36 @@ export interface ScriptImportMetadata {
     sceneSynopses?: ScriptImportedSceneSynopsis[],
 }
 
-export const getNodeAttrs = (node: FountainJSONContent): Record<string, unknown> | undefined => {
+export const getNodeAttrs = (node: ScriptNode): Record<string, unknown> | undefined => {
     return node.attrs && typeof node.attrs === 'object'
         ? node.attrs
         : undefined;
 };
 
-export const hasNodeChildren = (node: FountainJSONContent): node is FountainJSONContent & {content: FountainJSONContent[]} => {
+export const hasNodeChildren = (node: ScriptNode): node is ScriptNode & {content: ScriptNode[]} => {
     return Array.isArray(node.content);
 };
 
-const getScriptBlockNodeTypeFromNode = (node: FountainJSONContent): ScriptBlockNodeType | null => {
+const getScriptBlockNodeTypeFromNode = (node: ScriptNode): ScriptBlockNodeType | null => {
     if (isScriptBlockNodeType(node.type)) {
         return node.type;
     }
 
-    if (node.type !== FOUNTAIN_BLOCK_NODE_NAME) {
-        return null;
-    }
-
-    const attrs = getNodeAttrs(node);
-
-    return resolveScriptBlockNodeType(attrs?.blockType);
+    return null;
 };
 
-export const isScriptBlockNode = (node: FountainJSONContent): boolean => {
+export const isScriptBlockNode = (node: ScriptNode): boolean => {
     return getScriptBlockNodeTypeFromNode(node) !== null;
 };
 
 export const getScriptBlockNodeType = (
-    node: FountainJSONContent,
+    node: ScriptNode,
     fallback: ScriptBlockNodeType = DEFAULT_SCRIPT_BLOCK_NODE_TYPE,
 ): ScriptBlockNodeType => {
     return getScriptBlockNodeTypeFromNode(node) ?? fallback;
 };
 
-export const getScriptBlockLegacyType = (
-    node: FountainJSONContent,
-    fallback: FountainElementType = ELEMENT_STAGE_DIRECTIONS,
-): FountainElementType => {
-    const nodeType = getScriptBlockNodeTypeFromNode(node);
-
-    if (!nodeType) {
-        return fallback;
-    }
-
-    return resolveLegacyFountainBlockType(nodeType) ?? fallback;
-};
-
-export const getScriptBlockId = (node: FountainJSONContent): string | null => {
+export const getScriptBlockId = (node: ScriptNode): string | null => {
     if (!isScriptBlockNode(node)) {
         return null;
     }
@@ -121,26 +90,10 @@ export const getScriptBlockId = (node: FountainJSONContent): string | null => {
     return rawId.length > 0 ? rawId : null;
 };
 
-export const createLegacyScriptBlockNode = (
-    rawBlockType: unknown = ELEMENT_STAGE_DIRECTIONS,
+export const createScriptBlockNode = (
+    rawBlockType: unknown = DEFAULT_SCRIPT_BLOCK_NODE_TYPE,
     id?: string,
-): FountainJSONContent => {
-    const blockType = resolveLegacyFountainBlockType(rawBlockType) ?? ELEMENT_STAGE_DIRECTIONS;
-
-    return {
-        type: FOUNTAIN_BLOCK_NODE_NAME,
-        attrs: {
-            blockType,
-            id: id ?? createNodeId(),
-        },
-        content: [],
-    };
-};
-
-export const createDefaultScriptBlockNode = (
-    rawBlockType: unknown = ELEMENT_STAGE_DIRECTIONS,
-    id?: string,
-): FountainJSONContent => {
+): ScriptNode => {
     const nodeType = resolveScriptBlockNodeType(rawBlockType) ?? DEFAULT_SCRIPT_BLOCK_NODE_TYPE;
 
     return {
@@ -152,25 +105,11 @@ export const createDefaultScriptBlockNode = (
     };
 };
 
-export const createEmptyScriptBlockNode = (
-    rawBlockType: unknown = ELEMENT_STAGE_DIRECTIONS,
-    id?: string,
-    nodeMode: ScriptDocumentNodeMode = DEFAULT_SCRIPT_DOCUMENT_NODE_MODE,
-): FountainJSONContent => {
-    if (nodeMode === 'default') {
-        return createDefaultScriptBlockNode(rawBlockType, id);
-    }
-
-    return createLegacyScriptBlockNode(rawBlockType, id);
-};
-
 export const createEmptyScriptDocument = (
     blockId?: string,
     settings?: EditorSettingsOverride,
-    options?: {nodeMode?: ScriptDocumentNodeMode},
 ): ScriptDocument => {
-    const nodeMode = options?.nodeMode ?? DEFAULT_SCRIPT_DOCUMENT_NODE_MODE;
-    const actBlock = createEmptyScriptBlockNode(ELEMENT_ACT, createNodeId(), nodeMode);
+    const actBlock = createScriptBlockNode('act', createNodeId());
 
     return {
         type: 'doc',
@@ -179,7 +118,7 @@ export const createEmptyScriptDocument = (
             {
                 ...actBlock,
                 content: [{type: 'text', text: 'ONE'}],
-            }, createEmptyScriptBlockNode(ELEMENT_SCENE_HEADING, blockId, nodeMode),
+            }, createScriptBlockNode('scene', blockId),
         ],
     };
 };
@@ -188,5 +127,5 @@ export const createDefaultScriptDocument = (
     blockId?: string,
     settings?: EditorSettingsOverride,
 ): ScriptDocument => {
-    return createEmptyScriptDocument(blockId, settings, {nodeMode: 'default'});
+    return createEmptyScriptDocument(blockId, settings);
 };

@@ -4,20 +4,17 @@ import {
     isCharacterBlockType,
 } from '../characters/documentHelpers';
 import {
-    FOUNTAIN_COLUMN_GROUP_NODE_NAME,
-    FOUNTAIN_COLUMN_NODE_NAME,
-    type FountainJSONContent,
+    COLUMN_GROUP_NODE_NAME,
+    COLUMN_NODE_NAME,
     getScriptBlockId,
-    getScriptBlockLegacyType,
+    getScriptBlockNodeType,
     isScriptBlockNode,
     type ScriptDocument,
+    type ScriptNode,
 } from '../document';
 import {
-    ELEMENT_ACT,
-    ELEMENT_SCENE_HEADING,
-    ELEMENT_STAGE_DIRECTIONS,
     extractCharacterKeys,
-} from '../fountain';
+} from '../syntax';
 
 export const SCRIPT_BLOCK_INDEX_SCHEMA_VERSION = 1;
 
@@ -118,7 +115,7 @@ export const buildScriptBlockIndex = (
     let currentSceneBlockId: string | null = null;
 
     const walkNodes = (
-        nodes: FountainJSONContent[] | undefined,
+        nodes: ScriptNode[] | undefined,
         context: WalkerContext,
     ) => {
         if (!Array.isArray(nodes) || nodes.length === 0) {
@@ -130,7 +127,7 @@ export const buildScriptBlockIndex = (
                 return;
             }
 
-            if (node.type === FOUNTAIN_COLUMN_GROUP_NODE_NAME) {
+            if (node.type === COLUMN_GROUP_NODE_NAME) {
                 const nextGroupOrder = columnGroupOrderCursor;
 
                 columnGroupOrderCursor += 1;
@@ -142,7 +139,7 @@ export const buildScriptBlockIndex = (
                         return;
                     }
 
-                    if (columnNode.type !== FOUNTAIN_COLUMN_NODE_NAME) {
+                    if (columnNode.type !== COLUMN_NODE_NAME) {
                         return;
                     }
 
@@ -155,7 +152,7 @@ export const buildScriptBlockIndex = (
                 return;
             }
 
-            if (node.type === FOUNTAIN_COLUMN_NODE_NAME) {
+            if (node.type === COLUMN_NODE_NAME) {
                 walkNodes(node.content, context);
 
                 return;
@@ -170,15 +167,15 @@ export const buildScriptBlockIndex = (
             const attrs = node.attrs && typeof node.attrs === 'object'
                 ? node.attrs
                 : undefined;
-            const blockType = getScriptBlockLegacyType(node, ELEMENT_STAGE_DIRECTIONS);
+            const blockType = getScriptBlockNodeType(node, 'stageDirection');
             const blockId = getScriptBlockId(node) ?? `missing-block-${orderNo + 1}`;
             const textContent = getNodeTextContent(node).trim();
 
-            if (blockType === ELEMENT_ACT) {
+            if (blockType === 'act') {
                 currentActBlockId = blockId;
             }
 
-            if (blockType === ELEMENT_SCENE_HEADING) {
+            if (blockType === 'scene') {
                 currentSceneBlockId = blockId;
             }
 

@@ -2,7 +2,7 @@ import {createNodeId} from '@stagistic/shared';
 
 import {
     createEmptyScriptDocument,
-    type FountainJSONContent,
+    type ScriptNode,
     getScriptBlockId,
     isScriptBlockNode,
     type ScriptDocument,
@@ -36,7 +36,7 @@ export const isScriptDocumentEmpty = (value?: ScriptDocument | null) => {
     return !value.content.some(hasTextContent);
 };
 
-const ensureNodeIds = (node: FountainJSONContent): [FountainJSONContent, boolean] => {
+const ensureNodeIds = (node: ScriptNode): [ScriptNode, boolean] => {
     let changed = false;
     let nextNode = node;
 
@@ -106,7 +106,7 @@ export const ensureScriptBlockIds = (value: ScriptDocument): ScriptDocument => {
     };
 };
 
-const findFirstBlockId = (node: FountainJSONContent): string | null => {
+const findFirstBlockId = (node: ScriptNode): string | null => {
     const blockId = getScriptBlockId(node);
 
     if (blockId) {
@@ -142,7 +142,7 @@ export const getFirstBlockId = (value?: ScriptDocument | null) => {
     return null;
 };
 
-const hasBlockId = (node: FountainJSONContent, blockId: string): boolean => {
+const hasBlockId = (node: ScriptNode, blockId: string): boolean => {
     if (isScriptBlockNode(node)) {
         return getScriptBlockId(node) === blockId;
     }
