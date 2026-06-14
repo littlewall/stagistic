@@ -156,13 +156,7 @@ export const useCharacterSuggestions = ({
     });
 
     useEffect(() => {
-        const canvas = canvasRef.current;
-
-        if (!canvas) {
-            return;
-        }
-
-        const handleScroll = () => {
+        const handleResize = () => {
             if (!overlayState) {
                 return;
             }
@@ -170,18 +164,12 @@ export const useCharacterSuggestions = ({
             scheduleOverlayUpdate();
         };
 
-        canvas.addEventListener('scroll', handleScroll);
-        window.addEventListener('resize', handleScroll);
+        window.addEventListener('resize', handleResize);
 
         return () => {
-            canvas.removeEventListener('scroll', handleScroll);
-            window.removeEventListener('resize', handleScroll);
+            window.removeEventListener('resize', handleResize);
         };
-    }, [
-        canvasRef,
-        overlayState,
-        scheduleOverlayUpdate,
-    ]);
+    }, [overlayState, scheduleOverlayUpdate]);
 
     useExclusiveOverlay(overlayState !== null, closeOverlay);
 
