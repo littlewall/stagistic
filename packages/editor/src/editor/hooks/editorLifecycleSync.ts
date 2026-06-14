@@ -22,31 +22,31 @@ import {
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
 import {getBlockUiEventsFromState, getEditorRuntimeFromState} from '../tiptap/extensions';
 import {
-    ensureFountainBlockId,
-    isFountainBlockNodeName,
-    normalizeFountainBlockType,
-} from '../tiptap/fountainCore';
+    ensureScriptBlockId,
+    isScriptBlockNodeName,
+    normalizeBlockNodeType,
+} from '../tiptap/scriptCore';
 import type {UseEditorLifecycleArgs} from './editorLifecycleTypes';
 import type {useLatestRef} from './useLatestRef';
 
 export type {UseEditorLifecycleArgs};
 
-export const sanitizeFountainBlocks = (editor: TiptapEditor) => {
+export const sanitizeScriptBlocks = (editor: TiptapEditor) => {
     let tr = editor.state.tr;
     let changed = false;
     const seenIds = new Set<string>();
 
     editor.state.doc.descendants((node, pos) => {
-        if (!isFountainBlockNodeName(node.type.name)) {
+        if (!isScriptBlockNodeName(node.type.name)) {
             return true;
         }
 
         const attrs = node.attrs as Record<string, unknown>;
-        let id = ensureFountainBlockId(attrs.id);
-        const blockType = normalizeFountainBlockType(attrs.blockType);
+        let id = ensureScriptBlockId(attrs.id);
+        const blockType = normalizeBlockNodeType(attrs.blockType);
 
         while (seenIds.has(id)) {
-            id = ensureFountainBlockId(null);
+            id = ensureScriptBlockId(null);
         }
 
         seenIds.add(id);

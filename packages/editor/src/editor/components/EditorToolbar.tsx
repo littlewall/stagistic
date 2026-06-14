@@ -1,22 +1,18 @@
 import {
-    ELEMENT_ACT,
-    ELEMENT_DIALOGUE,
-    ELEMENT_LYRICS,
-    ELEMENT_STAGE_DIRECTIONS,
-    type FountainElementType,
+    type ScriptBlockNodeType,
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
     type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState,
 } from 'react';
 
-import {FOUNTAIN_BLOCKS_WITHOUT_ACT} from '../blocks/fountainBlockRegistry';
+import {BLOCKS_WITHOUT_ACT} from '../blocks/blockRegistry';
 import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
-import {updateBlockType} from '../tiptap/fountainBlock/commands';
+import {updateBlockType} from '../tiptap/scriptBlock/commands';
 import {
-    isFountainBlockNodeName,
-    normalizeFountainBlockType,
-} from '../tiptap/fountainCore';
+    isScriptBlockNodeName,
+    normalizeBlockNodeType,
+} from '../tiptap/scriptCore';
 import styles from './EditorToolbar.module.css';
 import {BlockTypeSelect} from './toolbar/BlockTypeSelect';
 import type {
@@ -33,13 +29,13 @@ interface EditorToolbarProps {
     editor: TiptapEditor | null,
 }
 
-const MULTI_BLOCK_ALLOWED_TYPES = new Set<FountainElementType>([
-    ELEMENT_STAGE_DIRECTIONS,
-    ELEMENT_DIALOGUE,
-    ELEMENT_LYRICS,
+const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
+    "stageDirection",
+    "dialogue",
+    "lyrics",
 ]);
 
-const MULTI_BLOCK_OPTIONS = FOUNTAIN_BLOCKS_WITHOUT_ACT.filter(option => MULTI_BLOCK_ALLOWED_TYPES.has(option.type));
+const MULTI_BLOCK_OPTIONS = BLOCKS_WITHOUT_ACT.filter(option => MULTI_BLOCK_ALLOWED_TYPES.has(option.type));
 
 const EditorToolbar = ({editor}: EditorToolbarProps) => {
     const dropdownRef = useRef<HTMLDivElement | null>(null);
@@ -135,7 +131,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
         setIsOpen(prev => !prev);
     }, [canChangeBlockType]);
     const handleMenuItemMouseDown = useCallback((
-        optionType: FountainElementType,
+        optionType: ScriptBlockNodeType,
         event: ReactMouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault();
@@ -150,11 +146,11 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             let didChange = false;
 
             editor.state.doc.nodesBetween(from, to, (node, pos) => {
-                if (!isFountainBlockNodeName(node.type.name)) {
+                if (!isScriptBlockNodeName(node.type.name)) {
                     return true;
                 }
 
-                if (node.attrs.blockType === ELEMENT_ACT || node.attrs.blockType === optionType) {
+                if (node.attrs.blockType === "act" || node.attrs.blockType === optionType) {
                     return false;
                 }
 
@@ -177,11 +173,11 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             return;
         }
 
-        if (optionType === activeBlockInfo?.type || activeBlockInfo?.type === ELEMENT_ACT) {
+        if (optionType === activeBlockInfo?.type || activeBlockInfo?.type === "act") {
             return;
         }
 
-        updateBlockType(editor, normalizeFountainBlockType(optionType));
+        updateBlockType(editor, normalizeBlockNodeType(optionType));
     }, [
         activeBlockInfo?.type,
         editor,
@@ -224,7 +220,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
                 actions={inlineMarksActions}
             />
             <BlockTypeSelect
-                options={isMultiBlockSelection ? MULTI_BLOCK_OPTIONS : FOUNTAIN_BLOCKS_WITHOUT_ACT}
+                options={isMultiBlockSelection ? MULTI_BLOCK_OPTIONS : BLOCKS_WITHOUT_ACT}
                 dropdownRef={dropdownRef}
                 state={blockTypeState}
                 actions={blockTypeActions}

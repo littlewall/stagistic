@@ -1,4 +1,4 @@
-import type {FountainElementType} from '@stagistic/script';
+import type {ScriptBlockNodeType} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
 import {
@@ -11,9 +11,9 @@ import {
 } from 'react';
 
 import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
-import {FOUNTAIN_BLOCKS} from '../blocks/fountainBlockRegistry';
-import {updateBlockType} from '../tiptap/fountainBlock/commands';
-import {normalizeFountainBlockType} from '../tiptap/fountainCore';
+import {BLOCKS} from '../blocks/blockRegistry';
+import {updateBlockType} from '../tiptap/scriptBlock/commands';
+import {normalizeBlockNodeType} from '../tiptap/scriptCore';
 import {BlockActionsMenu} from './blockActions/BlockActionsMenu';
 import {MENU_DISABLED_BLOCK_TYPES} from './blockActions/overlay/constants';
 import {useDragPreviewSession} from './blockActions/overlay/useDragPreviewSession';
@@ -131,7 +131,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             return null;
         }
 
-        const option = FOUNTAIN_BLOCKS.find(block => block.type === visibleOverlayState.blockType);
+        const option = BLOCKS.find(block => block.type === visibleOverlayState.blockType);
 
         return {
             label: option?.label ?? 'Block',
@@ -140,7 +140,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
     }, [visibleOverlayState]);
 
     const handleMenuItemMouseDown = useCallback((
-        optionType: FountainElementType,
+        optionType: ScriptBlockNodeType,
         event: ReactMouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault();
@@ -155,7 +155,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
             return;
         }
 
-        updateBlockType(editor, normalizeFountainBlockType(optionType), visibleOverlayState.blockId);
+        updateBlockType(editor, normalizeBlockNodeType(optionType), visibleOverlayState.blockId);
     }, [
         closeMenu,
         editor,

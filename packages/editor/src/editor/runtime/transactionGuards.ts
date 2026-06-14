@@ -1,8 +1,3 @@
-import {
-    ELEMENT_ACT,
-    ELEMENT_CHARACTER,
-    ELEMENT_SCENE_HEADING,
-} from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {
     EditorState,
@@ -10,11 +5,11 @@ import type {
 } from '@tiptap/pm/state';
 
 import {
-    type FountainBlockType,
-    getActiveFountainBlockFromState,
-    isFountainBlockNodeName,
-    normalizeFountainBlockType,
-} from '../tiptap/fountainCore';
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+    isScriptBlockNodeName,
+    normalizeBlockNodeType,
+} from '../tiptap/scriptCore';
 
 interface ChangedRange {
     oldFrom: number,
@@ -23,12 +18,12 @@ interface ChangedRange {
     newTo: number,
 }
 
-const isCharacterBlockType = (blockType: FountainBlockType) => {
-    return blockType === ELEMENT_CHARACTER;
+const isCharacterBlockType = (blockType: BlockNodeType) => {
+    return blockType === 'character';
 };
 
-const isStructureBlockType = (blockType: FountainBlockType) => {
-    return blockType === ELEMENT_ACT || blockType === ELEMENT_SCENE_HEADING;
+const isStructureBlockType = (blockType: BlockNodeType) => {
+    return blockType === 'act' || blockType === 'scene';
 };
 
 const resolveSafeRange = (maxPos: number, from: number, to: number) => {
@@ -76,7 +71,7 @@ const hasMatchingBlocksInRange = (
     doc: ProseMirrorNode,
     from: number,
     to: number,
-    predicate: (blockType: FountainBlockType) => boolean,
+    predicate: (blockType: BlockNodeType) => boolean,
 ) => {
     const safeRange = resolveSafeRange(doc.content.size, from, to);
 
@@ -87,11 +82,11 @@ const hasMatchingBlocksInRange = (
     let found = false;
 
     doc.nodesBetween(safeRange.from, safeRange.to, node => {
-        if (!isFountainBlockNodeName(node.type.name)) {
+        if (!isScriptBlockNodeName(node.type.name)) {
             return true;
         }
 
-        if (predicate(normalizeFountainBlockType(node.attrs.blockType))) {
+        if (predicate(normalizeBlockNodeType(node.attrs.blockType))) {
             found = true;
         }
 
@@ -101,13 +96,13 @@ const hasMatchingBlocksInRange = (
     return found;
 };
 
-const hasFountainBlockNode = (value: unknown): boolean => {
+const hasScriptBlockNode = (value: unknown): boolean => {
     if (!value) {
         return false;
     }
 
     if (Array.isArray(value)) {
-        return value.some(item => hasFountainBlockNode(item));
+        return value.some(item => hasScriptBlockNode(item));
     }
 
     if (typeof value !== 'object') {
@@ -116,11 +111,11 @@ const hasFountainBlockNode = (value: unknown): boolean => {
 
     const record = value as Record<string, unknown>;
 
-    if (isFountainBlockNodeName(record.type)) {
+    if (isScriptBlockNodeName(record.type)) {
         return true;
     }
 
-    return hasFountainBlockNode(record.content) || hasFountainBlockNode(record.slice);
+    return hasScriptBlockNode(record.content) || hasScriptBlockNode(record.slice);
 };
 
 export const transactionMayAffectBlockStructure = (transaction: Transaction) => {
@@ -136,7 +131,7 @@ export const transactionMayAffectBlockStructure = (transaction: Transaction) => 
             return false;
         }
 
-        return hasFountainBlockNode(serialized.slice);
+        return hasScriptBlockNode(serialized.slice);
     });
 };
 
@@ -183,8 +178,8 @@ export const selectionTouchesCharacterBlock = (
         return false;
     }
 
-    const previousBlock = getActiveFountainBlockFromState(oldState);
-    const nextBlock = getActiveFountainBlockFromState(newState);
+    const previousBlock = getActiveScriptBlockFromState(oldState);
+    const nextBlock = getActiveScriptBlockFromState(newState);
 
     return Boolean(
         (previousBlock && isCharacterBlockType(previousBlock.blockType))

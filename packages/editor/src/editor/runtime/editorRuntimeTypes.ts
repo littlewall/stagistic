@@ -4,7 +4,7 @@ import type {
     EditorLiveCharacterSnapshot,
     EditorLiveStructureSnapshot,
 } from '../contracts';
-import type {FountainBlockType} from '../tiptap/fountainCore';
+import type {BlockNodeType} from '../tiptap/scriptCore';
 
 export interface EditorCharacterRuntime {
     snapshot: EditorLiveCharacterSnapshot,
@@ -14,7 +14,7 @@ export interface EditorCharacterRuntime {
 export interface EditorRuntimeState {
     revision: number,
     activeBlockId: string | null,
-    activeBlockType: FountainBlockType | null,
+    activeBlockType: BlockNodeType | null,
     structure: EditorLiveStructureSnapshot,
     characters: EditorLiveCharacterSnapshot,
     characterDecorations: DecorationSet,

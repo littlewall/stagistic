@@ -1,23 +1,20 @@
 import {
     collectStructureBlocks,
     createNodeId,
-    ELEMENT_ACT,
-    type FountainJSONContent,
     getDefaultActName,
     getScriptBlockId,
-    getScriptBlockLegacyType,
+    getScriptBlockNodeType,
     isScriptBlockNode,
     resolveScriptBlockNodeType,
     type ScriptDocument,
+    type ScriptNode,
 } from '@stagistic/script';
 
-import {FOUNTAIN_BLOCK_NODE_NAME} from '../tiptap/fountainCore';
-
 export const setPlainTextContent = (
-    nodes: FountainJSONContent[] | undefined,
+    nodes: ScriptNode[] | undefined,
     blockId: string,
     nextName: string,
-): [FountainJSONContent[] | undefined, boolean] => {
+): [ScriptNode[] | undefined, boolean] => {
     if (!Array.isArray(nodes) || nodes.length === 0) {
         return [nodes, false];
     }
@@ -31,7 +28,7 @@ export const setPlainTextContent = (
         if (
             isScriptBlockNode(node)
             && getScriptBlockId(node) === blockId
-            && getScriptBlockLegacyType(node) === ELEMENT_ACT
+            && getScriptBlockNodeType(node) === 'act'
         ) {
             const currentText = (node.content ?? [])
                 .map(child => {
@@ -75,15 +72,15 @@ export const setPlainTextContent = (
 };
 
 export const removeActBlockById = (
-    nodes: FountainJSONContent[] | undefined,
+    nodes: ScriptNode[] | undefined,
     blockId: string,
-): [FountainJSONContent[] | undefined, boolean] => {
+): [ScriptNode[] | undefined, boolean] => {
     if (!Array.isArray(nodes) || nodes.length === 0) {
         return [nodes, false];
     }
 
     let didChange = false;
-    const nextNodes: FountainJSONContent[] = [];
+    const nextNodes: ScriptNode[] = [];
 
     nodes.forEach(node => {
         if (!node || typeof node !== 'object') {
@@ -95,7 +92,7 @@ export const removeActBlockById = (
         if (
             isScriptBlockNode(node)
             && getScriptBlockId(node) === blockId
-            && getScriptBlockLegacyType(node) === ELEMENT_ACT
+            && getScriptBlockNodeType(node) === 'act'
         ) {
             didChange = true;
 
@@ -121,16 +118,16 @@ export const removeActBlockById = (
 };
 
 export const insertActBlockBeforeId = (
-    nodes: FountainJSONContent[] | undefined,
+    nodes: ScriptNode[] | undefined,
     beforeBlockId: string,
-    actNode: FountainJSONContent,
-): [FountainJSONContent[] | undefined, boolean] => {
+    actNode: ScriptNode,
+): [ScriptNode[] | undefined, boolean] => {
     if (!Array.isArray(nodes) || nodes.length === 0) {
         return [nodes, false];
     }
 
     let didInsert = false;
-    const nextNodes: FountainJSONContent[] = [];
+    const nextNodes: ScriptNode[] = [];
 
     nodes.forEach(node => {
         if (!node || typeof node !== 'object') {
@@ -177,20 +174,15 @@ export const insertActBlockBeforeId = (
 export const buildInsertActContent = (
     currentValue: ScriptDocument,
     beforeBlockId: string | null,
-): {nextContent: FountainJSONContent[], didChange: boolean} => {
+): {nextContent: ScriptNode[], didChange: boolean} => {
     const actCount = collectStructureBlocks(currentValue.content)
-        .filter(block => block.blockType === ELEMENT_ACT)
+        .filter(block => block.blockType === 'act')
         .length;
     const nextActName = getDefaultActName(actCount + 1);
-    const prefersLegacyNodeType = currentValue.content.some(
-        node => isScriptBlockNode(node) && node.type === FOUNTAIN_BLOCK_NODE_NAME,
-    );
-    const nextActNodeType = prefersLegacyNodeType
-        ? FOUNTAIN_BLOCK_NODE_NAME
-        : resolveScriptBlockNodeType(ELEMENT_ACT) ?? FOUNTAIN_BLOCK_NODE_NAME;
-    const nextActBlock: FountainJSONContent = {
+    const nextActNodeType = resolveScriptBlockNodeType('act') ?? 'act';
+    const nextActBlock: ScriptNode = {
         type: nextActNodeType,
-        attrs: {id: createNodeId(), blockType: ELEMENT_ACT},
+        attrs: {id: createNodeId(), blockType: 'act'},
         content: [{type: 'text', text: nextActName}],
     };
 

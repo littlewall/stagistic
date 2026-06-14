@@ -1,11 +1,5 @@
 import {
     createNodeId,
-    ELEMENT_ACT,
-    ELEMENT_ASIDE,
-    ELEMENT_CHARACTER,
-    ELEMENT_DIALOGUE,
-    ELEMENT_LYRICS,
-    ELEMENT_SCENE_HEADING,
     resolveScriptBlockNodeType,
 } from '@stagistic/script';
 import {getEnterFallback} from '@stagistic/script';
@@ -15,12 +9,12 @@ import type {Editor} from '@tiptap/react';
 
 import {isEmptyEnterChooserWriterType} from '../../extensions/EmptyEnterChooserExtension';
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
-    type FountainBlockType,
-    getActiveFountainBlockFromState,
-    isFountainBlockNodeName,
-    normalizeFountainBlockType,
-} from '../../fountainCore';
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+    isScriptBlockNodeName,
+    normalizeBlockNodeType,
+    SCRIPT_BLOCK_NODE_NAMES,
+} from '../../scriptCore';
 import {
     insertActionBefore,
     setBlockTypeWithSelection,
@@ -36,28 +30,28 @@ import {
     type HandlerMap,
 } from './types';
 
-type DialogueLikeBlockType = typeof ELEMENT_DIALOGUE | typeof ELEMENT_LYRICS;
+type DialogueLikeBlockType = 'dialogue' | 'lyrics';
 
-type FountainBlockEntry = {
+type ScriptBlockEntry = {
     pos: number,
-    blockType: FountainBlockType,
+    blockType: BlockNodeType,
 };
 
-const isDialogueLikeType = (blockType: FountainBlockType): blockType is DialogueLikeBlockType => {
-    return blockType === ELEMENT_DIALOGUE || blockType === ELEMENT_LYRICS;
+const isDialogueLikeType = (blockType: BlockNodeType): blockType is DialogueLikeBlockType => {
+    return blockType === 'dialogue' || blockType === 'lyrics';
 };
 
-const collectFountainBlocks = (editor: Editor) => {
-    const blocks: FountainBlockEntry[] = [];
+const collectScriptBlocks = (editor: Editor) => {
+    const blocks: ScriptBlockEntry[] = [];
 
     editor.state.doc.descendants((node, pos) => {
-        if (!isFountainBlockNodeName(node.type.name)) {
+        if (!isScriptBlockNodeName(node.type.name)) {
             return true;
         }
 
         blocks.push({
             pos,
-            blockType: normalizeFountainBlockType(node.attrs.blockType),
+            blockType: normalizeBlockNodeType(node.attrs.blockType),
         });
 
         return false;
@@ -67,7 +61,7 @@ const collectFountainBlocks = (editor: Editor) => {
 };
 
 const findNearestDialogueLikeType = (
-    blocks: FountainBlockEntry[],
+    blocks: ScriptBlockEntry[],
     blockIndex: number,
     direction: -1 | 1,
 ): DialogueLikeBlockType | null => {
@@ -83,36 +77,33 @@ const findNearestDialogueLikeType = (
 };
 
 export const resolveParentheticalTabTarget = (editor: Editor, blockPos: number): DialogueLikeBlockType => {
-    const blocks = collectFountainBlocks(editor);
+    const blocks = collectScriptBlocks(editor);
     const blockIndex = blocks.findIndex(({pos}) => pos === blockPos);
 
     if (blockIndex < 0) {
-        return ELEMENT_DIALOGUE;
+        return 'dialogue';
     }
 
     return findNearestDialogueLikeType(blocks, blockIndex, -1)
         ?? findNearestDialogueLikeType(blocks, blockIndex, 1)
-        ?? ELEMENT_DIALOGUE;
+        ?? 'dialogue';
 };
 
 const resolveNextTypeOnEnter = (
-    blockType: FountainBlockType,
+    blockType: BlockNodeType,
     blockNextElements?: BlockNextElementMap,
-): FountainBlockType => {
+): BlockNodeType => {
     const configured = blockNextElements?.[blockType];
 
-    return configured ?? normalizeFountainBlockType(getEnterFallback(blockType));
+    return configured ?? normalizeBlockNodeType(getEnterFallback(blockType));
 };
 
 const insertBlockAfter = (
     context: BlockContext,
-    blockType: FountainBlockType,
+    blockType: BlockNodeType,
 ) => {
     const nodes = context.editor.schema.nodes as Record<string, NodeType>;
-    const currentNodeTypeName = context.block.node.type.name;
-    const nextNodeType = currentNodeTypeName === FOUNTAIN_BLOCK_NODE_NAME
-        ? nodes[FOUNTAIN_BLOCK_NODE_NAME]
-        : nodes[resolveScriptBlockNodeType(blockType) ?? ''];
+    const nextNodeType = nodes[resolveScriptBlockNodeType(blockType) ?? ''];
 
     if (!nextNodeType) {
         return false;
@@ -134,8 +125,8 @@ const insertBlockAfter = (
 };
 
 const enterHandlers: HandlerMap<(context: BlockContext, blockNextElements?: BlockNextElementMap) => boolean> = {
-    [ELEMENT_ACT]: (context, blockNextElements) => {
-        const nextType = blockNextElements?.[ELEMENT_ACT] ?? ELEMENT_SCENE_HEADING;
+    ['act']: (context, blockNextElements) => {
+        const nextType = blockNextElements?.['act'] ?? 'scene';
 
         if (context.isAtEnd) {
             return insertBlockAfter(context, nextType);
@@ -143,35 +134,35 @@ const enterHandlers: HandlerMap<(context: BlockContext, blockNextElements?: Bloc
 
         return splitBlockWithType(context.editor, nextType);
     },
-    [ELEMENT_CHARACTER]: (context, blockNextElements) => {
+    ['character']: (context, blockNextElements) => {
         if (context.isAtStart) {
             return insertActionBefore(context.editor, context.block.pos, context.block.from);
         }
 
         return splitBlockWithType(
             context.editor,
-            resolveNextTypeOnEnter(ELEMENT_CHARACTER, blockNextElements),
+            resolveNextTypeOnEnter('character', blockNextElements),
         );
     },
-    [ELEMENT_DIALOGUE]: (_context, blockNextElements) => splitBlockWithType(
+    ['dialogue']: (_context, blockNextElements) => splitBlockWithType(
         _context.editor,
-        resolveNextTypeOnEnter(ELEMENT_DIALOGUE, blockNextElements),
+        resolveNextTypeOnEnter('dialogue', blockNextElements),
     ),
-    [ELEMENT_LYRICS]: (_context, blockNextElements) => splitBlockWithType(
+    ['lyrics']: (_context, blockNextElements) => splitBlockWithType(
         _context.editor,
-        resolveNextTypeOnEnter(ELEMENT_LYRICS, blockNextElements),
+        resolveNextTypeOnEnter('lyrics', blockNextElements),
     ),
-    [ELEMENT_ASIDE]: (_context, blockNextElements) => splitBlockWithType(
+    ['aside']: (_context, blockNextElements) => splitBlockWithType(
         _context.editor,
-        resolveNextTypeOnEnter(ELEMENT_ASIDE, blockNextElements),
+        resolveNextTypeOnEnter('aside', blockNextElements),
     ),
 };
 
 const shiftEnterHandlers: HandlerMap<(context: BlockContext) => boolean> = {
-    [ELEMENT_CHARACTER]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
-    [ELEMENT_DIALOGUE]: context => splitBlockWithType(context.editor, ELEMENT_DIALOGUE),
-    [ELEMENT_LYRICS]: context => splitBlockWithType(context.editor, ELEMENT_LYRICS),
-    [ELEMENT_ASIDE]: context => splitBlockWithType(
+    ['character']: context => splitBlockWithType(context.editor, 'dialogue'),
+    ['dialogue']: context => splitBlockWithType(context.editor, 'dialogue'),
+    ['lyrics']: context => splitBlockWithType(context.editor, 'lyrics'),
+    ['aside']: context => splitBlockWithType(
         context.editor,
         resolveParentheticalTabTarget(context.editor, context.block.pos),
     ),
@@ -182,7 +173,7 @@ export const handleEnter = (
     event: KeyboardEvent,
     blockNextElements?: BlockNextElementMap,
 ) => {
-    const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+    const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
     if (!block) {
         return false;
@@ -202,8 +193,8 @@ export const handleEnter = (
             openEmptyEnterChooser?: (payload: {
                 blockId: string,
                 blockPos: number,
-                blockType: FountainBlockType,
-                selectedType?: FountainBlockType,
+                blockType: BlockNodeType,
+                selectedType?: BlockNodeType,
             }) => boolean,
         };
 
@@ -224,14 +215,14 @@ export const handleEnter = (
     }
 
     if (
-        block.blockType === ELEMENT_ASIDE
+        block.blockType === 'aside'
         && (block.node.textContent ?? '').trim().length === 0
     ) {
-        return setBlockTypeWithSelection(editor, block, ELEMENT_CHARACTER);
+        return setBlockTypeWithSelection(editor, block, 'character');
     }
 
     if (isEmptyDialogueLikeBlock(block)) {
-        return setBlockTypeWithSelection(editor, block, ELEMENT_CHARACTER);
+        return setBlockTypeWithSelection(editor, block, 'character');
     }
 
     const context = createBlockContext(editor, block);

@@ -1,20 +1,16 @@
-import {
-    ELEMENT_DIALOGUE,
-    ELEMENT_LYRICS,
-} from '@stagistic/script';
 import type {Editor} from '@tiptap/react';
 
-import type {ActiveFountainBlock} from '../fountainCore';
+import type {ActiveScriptBlock} from '../scriptCore';
 
 export type BlockContext = {
     editor: Editor,
-    block: ActiveFountainBlock,
+    block: ActiveScriptBlock,
     isCollapsed: boolean,
     isAtStart: boolean,
     isAtEnd: boolean,
 };
 
-export const createBlockContext = (editor: Editor, block: ActiveFountainBlock): BlockContext => {
+export const createBlockContext = (editor: Editor, block: ActiveScriptBlock): BlockContext => {
     const selection = editor.state.selection;
     const isCollapsed = selection.empty;
     const isAtStart = isCollapsed && selection.from === block.from;
@@ -43,7 +39,7 @@ export const isInsideParentheses = (text: string, offset: number) => {
     return lastOpen > lastClose;
 };
 
-export const isEmptyDialogueLikeBlock = (block: ActiveFountainBlock) => (
-    block.blockType === ELEMENT_DIALOGUE
-    || block.blockType === ELEMENT_LYRICS
+export const isEmptyDialogueLikeBlock = (block: ActiveScriptBlock) => (
+    block.blockType === "dialogue"
+    || block.blockType === "lyrics"
 ) && (block.node.textContent ?? '').trim().length === 0;

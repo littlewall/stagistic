@@ -1,10 +1,10 @@
 import {asideSpec} from '@stagistic/script';
 import {AsideBlockIcon} from '@stagistic/ui';
 
-import type {FountainBlockBinding} from '../types';
+import type {BlockBinding} from '../types';
 import styles from './aside.module.css';
 
-export const asideBinding: FountainBlockBinding = {
+export const asideBinding: BlockBinding = {
     spec: asideSpec,
     cssClass: styles.aside,
     cssVarPrefix: 'aside',

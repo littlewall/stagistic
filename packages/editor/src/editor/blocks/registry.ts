@@ -4,9 +4,9 @@ import {characterBinding} from './character';
 import {dialogueBinding} from './dialogue';
 import {lyricsBinding} from './lyrics';
 import {noteBinding} from './note';
-import {sceneHeadingBinding} from './sceneHeading';
-import {stageDirectionsBinding} from './stageDirections';
-import type {FountainBlockBinding} from './types';
+import {sceneBinding} from './scene';
+import {stageDirectionBinding} from './stageDirection';
+import type {BlockBinding} from './types';
 
 /**
  * The canonical list of all block bindings. Order follows ALL_BLOCK_SPECS
@@ -16,10 +16,10 @@ import type {FountainBlockBinding} from './types';
  * and icon files, then append the binding here. See
  * docs/adding-a-block-type.md.
  */
-export const ALL_BLOCK_BINDINGS: readonly FountainBlockBinding[] = [
-    sceneHeadingBinding,
+export const ALL_BLOCK_BINDINGS: readonly BlockBinding[] = [
+    sceneBinding,
     actBinding,
-    stageDirectionsBinding,
+    stageDirectionBinding,
     characterBinding,
     asideBinding,
     dialogueBinding,

@@ -15,7 +15,7 @@ import {incrementFullDocJsonSerializeCount, incrementFullIndexBuildCount} from '
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
 import {IMMEDIATE_SAVE_META_KEY} from '../saveMeta';
 import {
-    sanitizeFountainBlocks,
+    sanitizeScriptBlocks,
     type UseEditorLifecycleArgs,
     useEditorLifecycleSync,
 } from './editorLifecycleSync';
@@ -198,7 +198,7 @@ export const useEditorLifecycle = ({
 
         isApplyingInitialRef.current = true;
         instance.commands.setContent(initialValue, {emitUpdate: false});
-        sanitizeFountainBlocks(instance);
+        sanitizeScriptBlocks(instance);
 
         const syncCommands = instance.commands as {syncCharacterRefs?: () => boolean};
 

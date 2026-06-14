@@ -11,7 +11,7 @@ import {
 import type {EmptyEnterChooserState} from '../../tiptap/extensions/EmptyEnterChooserExtension';
 import {
     resolveElementOffsetWithinAncestor,
-    resolveFountainBlockElementById,
+    resolveScriptBlockElementById,
 } from '../blockActions/overlay/geometry';
 import {useRafScheduler} from '../blockActions/overlay/useRafScheduler';
 
@@ -102,7 +102,7 @@ export const useChooserAnchor = ({
         }
 
         if (!hasAnchorFromTrigger) {
-            const blockElement = resolveFountainBlockElementById(
+            const blockElement = resolveScriptBlockElementById(
                 editor,
                 chooserState.blockId,
                 chooserState.blockPos,

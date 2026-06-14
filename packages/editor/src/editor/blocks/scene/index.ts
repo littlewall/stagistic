@@ -1,0 +1,1 @@
+export {sceneBinding} from './binding';

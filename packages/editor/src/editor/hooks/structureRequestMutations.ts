@@ -1,6 +1,6 @@
 import {
     buildScriptBlockIndex,
-    type FountainJSONContent,
+    type ScriptNode,
     type ScriptDocument,
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
@@ -38,7 +38,7 @@ const commitDocument = (
     {
         editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef,
     }: CommitContext,
-    nextContent: FountainJSONContent[],
+    nextContent: ScriptNode[],
     currentDocAttrs: ScriptDocument['attrs'],
 ) => {
     const nextDocument: ScriptDocument = {
@@ -89,7 +89,7 @@ export const tryCommitSceneReorder = (
     ctx: CommitContext,
     sourceSceneBlockId: string,
     beforeBlockId: string | null,
-    nextContent: FountainJSONContent[],
+    nextContent: ScriptNode[],
     didChange: boolean,
     currentDocAttrs: ScriptDocument['attrs'],
 ) => {
@@ -175,7 +175,7 @@ export const tryCommitSceneReorder = (
 
 export const tryCommitDocument = (
     ctx: CommitContext,
-    nextContent: FountainJSONContent[] | undefined,
+    nextContent: ScriptNode[] | undefined,
     didChange: boolean,
     currentDocAttrs: ScriptDocument['attrs'],
 ) => {

@@ -9,9 +9,9 @@ import {
 } from 'react';
 
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
-    getActiveFountainBlockFromState,
-} from '../../tiptap/fountainCore';
+    SCRIPT_BLOCK_NODE_NAMES,
+    getActiveScriptBlockFromState,
+} from '../../tiptap/scriptCore';
 import type {SuppressedSelection} from './types';
 import type {OverlayState} from './useSuggestionInteractionState';
 
@@ -68,7 +68,7 @@ export const useSuggestionPointerHandlers = ({
             return;
         }
 
-        const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+        const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
         if (!block || !editor.state.selection.empty) {
             suppressedSelectionRef.current = null;

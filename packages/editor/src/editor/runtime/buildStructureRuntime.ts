@@ -4,9 +4,9 @@ import type {EditorLiveStructureSnapshot} from '../contracts';
 import {buildStructureSnapshotFromBlocks} from '../live/buildSidebarProjectionFromIndex';
 import {EMPTY_STRUCTURE} from '../live/store';
 import {
-    isFountainBlockNodeName,
-    normalizeFountainBlockType,
-} from '../tiptap/fountainCore';
+    isScriptBlockNodeName,
+    normalizeBlockNodeType,
+} from '../tiptap/scriptCore';
 
 export const buildStructureRuntime = (doc: ProseMirrorNode): EditorLiveStructureSnapshot => {
     const blocks: {
@@ -15,11 +15,11 @@ export const buildStructureRuntime = (doc: ProseMirrorNode): EditorLiveStructure
 
     try {
         doc.descendants(node => {
-            if (!isFountainBlockNodeName(node.type.name)) {
+            if (!isScriptBlockNodeName(node.type.name)) {
                 return true;
             }
 
-            const blockType = normalizeFountainBlockType(node.attrs.blockType);
+            const blockType = normalizeBlockNodeType(node.attrs.blockType);
             const blockId = typeof node.attrs.id === 'string'
                 ? node.attrs.id.trim()
                 : '';

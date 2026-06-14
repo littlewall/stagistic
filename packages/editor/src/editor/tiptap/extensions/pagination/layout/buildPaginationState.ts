@@ -4,9 +4,9 @@ import {
 } from '@tiptap/pm/view';
 
 import {
-    FOUNTAIN_COLUMN_GROUP_NODE_NAME,
-    isFountainBlockNodeName,
-} from '../../../fountainCore';
+    COLUMN_GROUP_NODE_NAME,
+    isScriptBlockNodeName,
+} from '../../../scriptCore';
 import {
     FIT_EPSILON_PX,
     MIN_SPLIT_LINES_AFTER,
@@ -66,11 +66,11 @@ export const buildPaginationState = (
     }
 
     view.state.doc.forEach((node, offset) => {
-        if (node.type.name === FOUNTAIN_COLUMN_GROUP_NODE_NAME) {
+        if (node.type.name === COLUMN_GROUP_NODE_NAME) {
             return;
         }
 
-        if (!isFountainBlockNodeName(node.type.name)) {
+        if (!isScriptBlockNodeName(node.type.name)) {
             return;
         }
 

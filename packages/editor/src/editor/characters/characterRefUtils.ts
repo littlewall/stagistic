@@ -1,15 +1,14 @@
 import {
-    ELEMENT_CHARACTER,
     normalizeCharacterKey,
 } from '@stagistic/script';
 import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
 
-import {isFountainBlockNodeName} from '../tiptap/fountainCore';
+import {isScriptBlockNodeName} from '../tiptap/scriptCore';
 
 export type CharacterRefByKey = Record<string, string>;
 
 export const isCharacterBlockType = (value: unknown): boolean => {
-    return value === ELEMENT_CHARACTER;
+    return value === "character";
 };
 
 export const readNormalizedRefsFromRaw = (rawRefs: unknown): CharacterRefByKey => {
@@ -101,7 +100,7 @@ export const visitCharacterBlocks = ({
     onCharacterBlock,
 }: VisitCharacterBlocksArgs) => {
     doc.descendants((node, pos) => {
-        if (!isFountainBlockNodeName(node.type.name)) {
+        if (!isScriptBlockNodeName(node.type.name)) {
             return true;
         }
 

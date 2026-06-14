@@ -5,17 +5,17 @@ import {
     isBlockShortcut,
 } from '@stagistic/script';
 
-import {FOUNTAIN_BLOCK_TYPES, type FountainBlockType} from '../blocks/fountain';
-import {normalizeFountainBlockType} from '../tiptap/fountainCore';
+import {BLOCK_NODE_TYPES, type BlockNodeType} from '../blocks/script';
+import {normalizeBlockNodeType} from '../tiptap/scriptCore';
 
-type BlockShortcutOptions = Partial<Record<FountainBlockType, BlockShortcut>>;
-type BlockNextElementOptions = Partial<Record<FountainBlockType, FountainBlockType>>;
-type BlockCasingOptions = Partial<Record<FountainBlockType, BlockCasing>>;
+type BlockShortcutOptions = Partial<Record<BlockNodeType, BlockShortcut>>;
+type BlockNextElementOptions = Partial<Record<BlockNodeType, BlockNodeType>>;
+type BlockCasingOptions = Partial<Record<BlockNodeType, BlockCasing>>;
 
 export const getBlockShortcuts = (resolvedSettings: EditorSettings): BlockShortcutOptions => {
     const shortcuts: BlockShortcutOptions = {};
 
-    for (const blockType of FOUNTAIN_BLOCK_TYPES) {
+    for (const blockType of BLOCK_NODE_TYPES) {
         const shortcut = resolvedSettings.blocks[blockType]?.shortcut;
 
         if (isBlockShortcut(shortcut)) {
@@ -29,11 +29,11 @@ export const getBlockShortcuts = (resolvedSettings: EditorSettings): BlockShortc
 export const getBlockNextElements = (resolvedSettings: EditorSettings): BlockNextElementOptions => {
     const nextElements: BlockNextElementOptions = {};
 
-    for (const blockType of FOUNTAIN_BLOCK_TYPES) {
+    for (const blockType of BLOCK_NODE_TYPES) {
         const nextElement = resolvedSettings.blocks[blockType]?.nextElement;
 
         if (typeof nextElement === 'string') {
-            nextElements[blockType] = normalizeFountainBlockType(nextElement);
+            nextElements[blockType] = normalizeBlockNodeType(nextElement);
         }
     }
 
@@ -43,7 +43,7 @@ export const getBlockNextElements = (resolvedSettings: EditorSettings): BlockNex
 export const getBlockCasing = (resolvedSettings: EditorSettings): BlockCasingOptions => {
     const blockCasing: BlockCasingOptions = {};
 
-    for (const blockType of FOUNTAIN_BLOCK_TYPES) {
+    for (const blockType of BLOCK_NODE_TYPES) {
         const casing = resolvedSettings.blocks[blockType]?.casing;
 
         if (casing === 'normal' || casing === 'uppercase') {

@@ -1,5 +1,4 @@
 import {
-    ELEMENT_CHARACTER,
     extractCharacterKeys,
     normalizeCharacterKey,
 } from '@stagistic/script';
@@ -7,14 +6,14 @@ import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {
-    type FountainBlockType,
-    isFountainBlockNodeName,
-    normalizeFountainBlockType,
-} from '../../../tiptap/fountainCore';
+    type BlockNodeType,
+    isScriptBlockNodeName,
+    normalizeBlockNodeType,
+} from '../../../tiptap/scriptCore';
 import type {PersistentCharacterRef} from '../types';
 
-export const isCharacterBlockType = (value: FountainBlockType) => {
-    return value === ELEMENT_CHARACTER;
+export const isCharacterBlockType = (value: BlockNodeType) => {
+    return value === "character";
 };
 
 interface CharacterCountsCacheEntry {
@@ -54,11 +53,11 @@ export const collectCharacterCounts = (
     });
 
     doc.descendants(node => {
-        if (!isFountainBlockNodeName(node.type.name)) {
+        if (!isScriptBlockNodeName(node.type.name)) {
             return true;
         }
 
-        const blockType = normalizeFountainBlockType(node.attrs.blockType);
+        const blockType = normalizeBlockNodeType(node.attrs.blockType);
 
         if (!isCharacterBlockType(blockType)) {
             return false;

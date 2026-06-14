@@ -3,7 +3,7 @@ import {
     type RefObject, useCallback, useRef, useState,
 } from 'react';
 
-import type {FountainBlockType} from '../../../tiptap/fountainCore';
+import type {BlockNodeType} from '../../../tiptap/scriptCore';
 import {DRAG_DISABLED_BLOCK_TYPES} from './constants';
 import {resolveDropLocation} from './geometry';
 import type {
@@ -59,7 +59,7 @@ export const usePointerDragState = ({
     const updateActiveDragState = useCallback((
         pointerId: number,
         sourceBlockId: string,
-        sourceBlockType: FountainBlockType,
+        sourceBlockType: BlockNodeType,
         pointerClientY: number,
     ) => {
         const canvas = canvasRef.current;

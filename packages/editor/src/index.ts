@@ -64,5 +64,5 @@ export {
     renameCharacterText,
     replaceCharacterRefId,
     unlinkCharacterRef,
-} from './editor/tiptap/fountainBlock/characterRefCommands';
+} from './editor/tiptap/scriptBlock/characterRefCommands';
 export {normalizeCharacterColorHex} from '@stagistic/script';

@@ -1,10 +1,4 @@
 import {
-    ELEMENT_ASIDE,
-    ELEMENT_CHARACTER,
-    ELEMENT_DIALOGUE,
-    ELEMENT_LYRICS,
-    ELEMENT_SCENE_HEADING,
-    ELEMENT_STAGE_DIRECTIONS,
     getEnterFallback,
 } from '@stagistic/script';
 import {
@@ -13,21 +7,21 @@ import {
     PluginKey,
 } from '@tiptap/pm/state';
 
-import type {BlockNextElementMap} from '../fountainBlock/handlers/types';
+import type {BlockNextElementMap} from '../scriptBlock/handlers/types';
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
-    type FountainBlockType,
-    getActiveFountainBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
     isSelectionAcrossBlocks,
-    normalizeFountainBlockType,
-} from '../fountainCore';
+    normalizeBlockNodeType,
+} from '../scriptCore';
 
 export interface EmptyEnterChooserState {
     isOpen: boolean,
     blockId: string | null,
     blockPos: number | null,
-    blockType: FountainBlockType | null,
-    selectedType: FountainBlockType | null,
+    blockType: BlockNodeType | null,
+    selectedType: BlockNodeType | null,
     openedByEmptyEnter: boolean,
 }
 
@@ -40,13 +34,13 @@ const CLOSED_EMPTY_ENTER_CHOOSER_STATE: EmptyEnterChooserState = {
     openedByEmptyEnter: false,
 };
 
-export const EMPTY_ENTER_CHOOSER_WRITER_TYPES: readonly FountainBlockType[] = [
-    ELEMENT_SCENE_HEADING,
-    ELEMENT_STAGE_DIRECTIONS,
-    ELEMENT_CHARACTER,
-    ELEMENT_ASIDE,
-    ELEMENT_DIALOGUE,
-    ELEMENT_LYRICS,
+export const EMPTY_ENTER_CHOOSER_WRITER_TYPES: readonly BlockNodeType[] = [
+    "scene",
+    "stageDirection",
+    "character",
+    "aside",
+    "dialogue",
+    "lyrics",
 ];
 
 const EMPTY_ENTER_CHOOSER_WRITER_TYPE_SET = new Set(EMPTY_ENTER_CHOOSER_WRITER_TYPES);
@@ -58,18 +52,18 @@ export const SELECT_META_KEY = 'empty-enter-chooser-select';
 export interface OpenMetaPayload {
     blockId: string,
     blockPos: number,
-    blockType: FountainBlockType,
-    selectedType?: FountainBlockType,
+    blockType: BlockNodeType,
+    selectedType?: BlockNodeType,
 }
 
-export const normalizeWriterType = (value: unknown): FountainBlockType => {
-    const normalized = normalizeFountainBlockType(value);
+export const normalizeWriterType = (value: unknown): BlockNodeType => {
+    const normalized = normalizeBlockNodeType(value);
 
     if (EMPTY_ENTER_CHOOSER_WRITER_TYPE_SET.has(normalized)) {
         return normalized;
     }
 
-    return ELEMENT_STAGE_DIRECTIONS;
+    return "stageDirection";
 };
 
 const isCollapsedSingleBlockSelection = (state: EditorState) => {
@@ -77,7 +71,7 @@ const isCollapsedSingleBlockSelection = (state: EditorState) => {
         return false;
     }
 
-    if (isSelectionAcrossBlocks(state, FOUNTAIN_BLOCK_NODE_NAME)) {
+    if (isSelectionAcrossBlocks(state, SCRIPT_BLOCK_NODE_NAMES)) {
         return false;
     }
 
@@ -99,7 +93,7 @@ const isBlockTextEmpty = (state: EditorState, blockPos: number | null) => {
 };
 
 export const createOpenStateFromPayload = (payload: OpenMetaPayload): EmptyEnterChooserState => {
-    const normalizedBlockType = normalizeFountainBlockType(payload.blockType);
+    const normalizedBlockType = normalizeBlockNodeType(payload.blockType);
     const selectedType = normalizeWriterType(payload.selectedType ?? normalizedBlockType);
 
     return {
@@ -112,8 +106,8 @@ export const createOpenStateFromPayload = (payload: OpenMetaPayload): EmptyEnter
     };
 };
 
-export const isEmptyEnterChooserWriterType = (value: unknown): value is FountainBlockType => {
-    const normalized = normalizeFountainBlockType(value);
+export const isEmptyEnterChooserWriterType = (value: unknown): value is BlockNodeType => {
+    const normalized = normalizeBlockNodeType(value);
 
     return EMPTY_ENTER_CHOOSER_WRITER_TYPE_SET.has(normalized);
 };
@@ -125,12 +119,12 @@ export const getEmptyEnterChooserFromState = (state: EditorState): EmptyEnterCho
 };
 
 export const resolveNextEmptyType = (
-    selectedType: FountainBlockType,
+    selectedType: BlockNodeType,
     blockNextElements?: BlockNextElementMap,
-): FountainBlockType => {
+): BlockNodeType => {
     const configured = blockNextElements?.[selectedType];
 
-    return configured ?? normalizeFountainBlockType(getEnterFallback(selectedType));
+    return configured ?? normalizeBlockNodeType(getEnterFallback(selectedType));
 };
 
 export const createEmptyEnterChooserPlugin = (): Plugin<EmptyEnterChooserState> => {
@@ -169,7 +163,7 @@ export const createEmptyEnterChooserPlugin = (): Plugin<EmptyEnterChooserState> 
                     return CLOSED_EMPTY_ENTER_CHOOSER_STATE;
                 }
 
-                const activeBlock = getActiveFountainBlockFromState(newState, FOUNTAIN_BLOCK_NODE_NAME);
+                const activeBlock = getActiveScriptBlockFromState(newState, SCRIPT_BLOCK_NODE_NAMES);
 
                 if (!activeBlock || activeBlock.id !== nextState.blockId) {
                     return CLOSED_EMPTY_ENTER_CHOOSER_STATE;
@@ -179,7 +173,7 @@ export const createEmptyEnterChooserPlugin = (): Plugin<EmptyEnterChooserState> 
                     return CLOSED_EMPTY_ENTER_CHOOSER_STATE;
                 }
 
-                const normalizedBlockType = normalizeFountainBlockType(activeBlock.blockType);
+                const normalizedBlockType = normalizeBlockNodeType(activeBlock.blockType);
                 const selectedType = normalizeWriterType(nextState.selectedType ?? normalizedBlockType);
 
                 if (

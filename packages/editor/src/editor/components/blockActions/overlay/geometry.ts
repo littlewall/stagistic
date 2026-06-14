@@ -1,10 +1,10 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {
-    FOUNTAIN_BLOCK_DOM_ID_ATTRIBUTE,
-    FOUNTAIN_BLOCK_DOM_SELECTOR,
-    FOUNTAIN_BLOCK_DOM_TYPE_ATTRIBUTE,
-} from '../../../tiptap/fountainCore';
+    SCRIPT_BLOCK_DOM_ID_ATTRIBUTE,
+    SCRIPT_BLOCK_DOM_SELECTOR,
+    SCRIPT_BLOCK_DOM_TYPE_ATTRIBUTE,
+} from '../../../tiptap/scriptCore';
 import type {TopLevelBlockMetrics} from './types';
 
 export const clamp = (value: number, min: number, max: number) => {
@@ -19,25 +19,25 @@ const escapeCssAttributeValue = (value: string) => {
     return value.replace(/["\\]/g, '\\$&');
 };
 
-export const asFountainBlockElement = (value: Node | null): HTMLElement | null => {
+export const asScriptBlockElement = (value: Node | null): HTMLElement | null => {
     if (!(value instanceof HTMLElement)) {
         return null;
     }
 
-    if (value.matches(FOUNTAIN_BLOCK_DOM_SELECTOR)) {
+    if (value.matches(SCRIPT_BLOCK_DOM_SELECTOR)) {
         return value;
     }
 
-    return value.closest<HTMLElement>(FOUNTAIN_BLOCK_DOM_SELECTOR);
+    return value.closest<HTMLElement>(SCRIPT_BLOCK_DOM_SELECTOR);
 };
 
-export const resolveFountainBlockElementById = (
+export const resolveScriptBlockElementById = (
     editor: TiptapEditor,
     blockId: string,
     blockPos?: number | null,
 ): HTMLElement | null => {
     if (typeof blockPos === 'number') {
-        const blockElementFromPos = asFountainBlockElement(editor.view.nodeDOM(blockPos));
+        const blockElementFromPos = asScriptBlockElement(editor.view.nodeDOM(blockPos));
 
         if (blockElementFromPos) {
             return blockElementFromPos;
@@ -47,7 +47,7 @@ export const resolveFountainBlockElementById = (
     const escapedBlockId = escapeCssAttributeValue(blockId);
 
     return editor.view.dom.querySelector<HTMLElement>(
-        `${FOUNTAIN_BLOCK_DOM_SELECTOR}[${FOUNTAIN_BLOCK_DOM_ID_ATTRIBUTE}="${escapedBlockId}"]`,
+        `${SCRIPT_BLOCK_DOM_SELECTOR}[${SCRIPT_BLOCK_DOM_ID_ATTRIBUTE}="${escapedBlockId}"]`,
     );
 };
 
@@ -89,8 +89,8 @@ export const collectTopLevelBlockMetrics = (
     const canvasRect = canvas.getBoundingClientRect();
     const metrics: TopLevelBlockMetrics[] = [];
 
-    canvas.querySelectorAll<HTMLElement>(FOUNTAIN_BLOCK_DOM_SELECTOR).forEach(element => {
-        const blockId = element.getAttribute(FOUNTAIN_BLOCK_DOM_ID_ATTRIBUTE)?.trim() ?? '';
+    canvas.querySelectorAll<HTMLElement>(SCRIPT_BLOCK_DOM_SELECTOR).forEach(element => {
+        const blockId = element.getAttribute(SCRIPT_BLOCK_DOM_ID_ATTRIBUTE)?.trim() ?? '';
 
         if (!blockId) {
             return;
@@ -102,7 +102,7 @@ export const collectTopLevelBlockMetrics = (
 
         metrics.push({
             id: blockId,
-            blockType: element.getAttribute(FOUNTAIN_BLOCK_DOM_TYPE_ATTRIBUTE),
+            blockType: element.getAttribute(SCRIPT_BLOCK_DOM_TYPE_ATTRIBUTE),
             top,
             bottom,
             midpoint: (top + bottom) / 2,

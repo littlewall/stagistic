@@ -1,8 +1,8 @@
-import type {FountainBlockSpec} from '@stagistic/script';
+import type {BlockSpec} from '@stagistic/script';
 import type {ComponentType} from 'react';
 
 /**
- * A FountainBlockBinding pairs a script-package block spec with its
+ * A BlockBinding pairs a script-package block spec with its
  * editor-package presentation facts: CSS class, CSS-var prefix, and icon.
  *
  * Bindings live in `packages/editor/src/editor/blocks/<blockName>/binding.ts`
@@ -15,11 +15,11 @@ import type {ComponentType} from 'react';
  * component. Append the binding to `ALL_BLOCK_BINDINGS`. See
  * docs/adding-a-block-type.md.
  */
-export interface FountainBlockBinding {
-    readonly spec: FountainBlockSpec,
+export interface BlockBinding {
+    readonly spec: BlockSpec,
     /** Block-level CSS class applied by Tiptap to <p> elements. */
     readonly cssClass: string,
-    /** Prefix for the block's CSS variables (e.g. 'scene-heading' → '--scene-heading-*'). */
+    /** Prefix for the block's CSS variables (e.g. 'scene' → '--scene-*'). */
     readonly cssVarPrefix: string,
     /** React component rendering an SVG icon for toolbar/menu UI. */
     readonly icon: ComponentType,

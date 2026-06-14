@@ -11,7 +11,7 @@ import type {EditorBlockUiEvent} from '../../contracts';
 import {incrementFullIndexBuildCount} from '../../perf/editorPerfMetrics';
 import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
 import {transactionMayAffectBlockStructure} from '../../runtime/transactionGuards';
-import {getActiveFountainBlockFromState} from '../fountainCore';
+import {getActiveScriptBlockFromState} from '../scriptCore';
 
 interface BlockUiEventsPluginState {
     events: EditorBlockUiEvent[],
@@ -24,7 +24,7 @@ const EMPTY_EVENTS: EditorBlockUiEvent[] = [];
 export const blockUiEventsKey = new PluginKey<BlockUiEventsPluginState>('script-block-ui-events');
 
 const getActiveBlockIdFromState = (state: EditorState) => {
-    return getActiveFountainBlockFromState(state)?.id ?? null;
+    return getActiveScriptBlockFromState(state)?.id ?? null;
 };
 
 const shouldDiffBlocks = (

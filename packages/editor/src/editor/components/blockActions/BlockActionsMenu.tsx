@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 
 import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
-import {FOUNTAIN_BLOCKS_WITHOUT_ACT} from '../../blocks/fountainBlockRegistry';
+import {BLOCKS_WITHOUT_ACT} from '../../blocks/blockRegistry';
 import styles from '../EditorBlockActionsOverlay.module.css';
 import type {BlockActionsMenuProps} from './types';
 
@@ -21,7 +21,7 @@ export const BlockActionsMenu = ({
             ref={menuRef}
         >
             <div className={styles.menuPrimaryPanel}>
-                {FOUNTAIN_BLOCKS_WITHOUT_ACT.map(option => (
+                {BLOCKS_WITHOUT_ACT.map(option => (
                     <button
                         key={option.type}
                         type="button"

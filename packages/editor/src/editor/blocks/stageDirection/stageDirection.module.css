@@ -1,0 +1,12 @@
+.stageDirection {
+    padding-top: var(--stage-direction-spacing-before, 0);
+    padding-right: var(--stage-direction-indent-right, 0);
+    padding-left: var(--stage-direction-indent-left, 0);
+    font-weight: var(--stage-direction-font-weight, 400);
+    font-style: var(--stage-direction-font-style, normal);
+    line-height: var(--stage-direction-line-height, inherit);
+    color: var(--color-block-stage-direction);
+    text-align: var(--stage-direction-align, left);
+    text-decoration-line: var(--stage-direction-underline, none);
+    text-transform: var(--stage-direction-casing, none);
+}

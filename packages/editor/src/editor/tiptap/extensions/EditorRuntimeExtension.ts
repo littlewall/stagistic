@@ -23,9 +23,9 @@ import {
     transactionTouchesStructureBlocks,
 } from '../../runtime/transactionGuards';
 import {
-    type FountainBlockType,
-    getActiveFountainBlockFromState,
-} from '../fountainCore';
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+} from '../scriptCore';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
@@ -54,9 +54,9 @@ const EDITOR_RUNTIME_REFRESH_META_KEY = 'editor-runtime-refresh';
 
 const resolveActiveBlock = (state: EditorState): {
     activeBlockId: string | null,
-    activeBlockType: FountainBlockType | null,
+    activeBlockType: BlockNodeType | null,
 } => {
-    const activeBlock = getActiveFountainBlockFromState(state);
+    const activeBlock = getActiveScriptBlockFromState(state);
 
     return {
         activeBlockId: activeBlock?.id ?? null,

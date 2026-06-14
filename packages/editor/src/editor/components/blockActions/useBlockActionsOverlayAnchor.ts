@@ -8,7 +8,7 @@ import {
     useState,
 } from 'react';
 
-import {resolveFountainBlockElementById} from './overlay/geometry';
+import {resolveScriptBlockElementById} from './overlay/geometry';
 
 export type OverlayAnchorStyle = CSSProperties;
 
@@ -48,7 +48,7 @@ export const useBlockActionsOverlayAnchor = ({
             return false;
         }
 
-        const blockElement = resolveFountainBlockElementById(
+        const blockElement = resolveScriptBlockElementById(
             editor,
             visibleOverlayState.blockId,
             visibleOverlayState.blockPos,

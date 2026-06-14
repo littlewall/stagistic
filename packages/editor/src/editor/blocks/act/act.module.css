@@ -3,7 +3,7 @@
     font-weight: var(--act-font-weight, 700);
     font-style: var(--act-font-style, normal);
     line-height: var(--act-line-height, inherit);
-    color: var(--color-block-scene-heading);
+    color: var(--color-block-scene);
     text-align: var(--act-align, left);
     text-decoration-line: var(--act-underline, underline);
     text-transform: var(--act-casing, uppercase);

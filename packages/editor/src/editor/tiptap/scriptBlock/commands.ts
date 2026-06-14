@@ -1,6 +1,5 @@
 import {
     createNodeId,
-    ELEMENT_STAGE_DIRECTIONS,
     resolveScriptBlockNodeType,
 } from '@stagistic/script';
 import type {NodeType} from '@tiptap/pm/model';
@@ -9,12 +8,11 @@ import type {Editor} from '@tiptap/react';
 
 import {IMMEDIATE_SAVE_META_KEY} from '../../saveMeta';
 import {
-    type ActiveFountainBlock,
-    FOUNTAIN_BLOCK_NODE_NAME,
-    type FountainBlockType,
-    getActiveFountainBlockFromState,
-    normalizeFountainBlockType,
-} from '../fountainCore';
+    type ActiveScriptBlock,
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+    normalizeBlockNodeType,
+} from '../scriptCore';
 
 const focusEditor = (editor: Editor) => {
     editor.view.focus();
@@ -40,12 +38,12 @@ const countLeadingTabs = (text: string) => {
 
 const stripLeadingActionTabs = (
     tr: Transaction,
-    previousBlockType: FountainBlockType,
-    nextBlockType: FountainBlockType,
+    previousBlockType: BlockNodeType,
+    nextBlockType: BlockNodeType,
     blockContentStart: number,
     blockText: string,
 ): Transaction => {
-    if (previousBlockType !== ELEMENT_STAGE_DIRECTIONS || nextBlockType === ELEMENT_STAGE_DIRECTIONS) {
+    if (previousBlockType !== 'stageDirection' || nextBlockType === 'stageDirection') {
         return tr;
     }
 
@@ -60,13 +58,8 @@ const stripLeadingActionTabs = (
 
 const resolveNodeTypeForBlockType = (
     nodes: Record<string, NodeType>,
-    currentNodeTypeName: string,
-    blockType: FountainBlockType,
+    blockType: BlockNodeType,
 ) => {
-    if (currentNodeTypeName === FOUNTAIN_BLOCK_NODE_NAME) {
-        return nodes[FOUNTAIN_BLOCK_NODE_NAME] ?? null;
-    }
-
     const resolvedNodeTypeName = resolveScriptBlockNodeType(blockType);
 
     if (!resolvedNodeTypeName) {
@@ -85,16 +78,16 @@ export const insertParenPair = (editor: Editor, from: number, to: number) => {
     focusEditor(editor);
 };
 
-export const updateBlockType = (editor: Editor, blockType: FountainBlockType, id?: string) => {
-    const normalized = normalizeFountainBlockType(blockType);
-    const activeBlock = getActiveFountainBlockFromState(editor.state);
+export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: string) => {
+    const normalized = normalizeBlockNodeType(blockType);
+    const activeBlock = getActiveScriptBlockFromState(editor.state);
 
     if (!activeBlock) {
         return false;
     }
 
     const nodes = editor.schema.nodes as Record<string, NodeType>;
-    const nodeType = resolveNodeTypeForBlockType(nodes, activeBlock.node.type.name, normalized);
+    const nodeType = resolveNodeTypeForBlockType(nodes, normalized);
 
     if (!nodeType) {
         return false;
@@ -123,7 +116,7 @@ export const updateBlockType = (editor: Editor, blockType: FountainBlockType, id
     return true;
 };
 
-export const splitBlockWithType = (editor: Editor, blockType: FountainBlockType) => {
+export const splitBlockWithType = (editor: Editor, blockType: BlockNodeType) => {
     const didSplit = editor.commands.splitBlock();
 
     if (!didSplit) {
@@ -135,16 +128,14 @@ export const splitBlockWithType = (editor: Editor, blockType: FountainBlockType)
 
 export const insertActionBefore = (editor: Editor, blockPos: number, blockStart: number) => {
     const nodes = editor.schema.nodes as Record<string, NodeType>;
-    const currentBlock = editor.state.doc.nodeAt(blockPos);
-    const currentNodeTypeName = currentBlock?.type.name ?? FOUNTAIN_BLOCK_NODE_NAME;
-    const actionNodeType = resolveNodeTypeForBlockType(nodes, currentNodeTypeName, ELEMENT_STAGE_DIRECTIONS);
+    const actionNodeType = resolveNodeTypeForBlockType(nodes, 'stageDirection');
 
     if (!actionNodeType) {
         return false;
     }
 
     const actionBlock = actionNodeType.create({
-        blockType: ELEMENT_STAGE_DIRECTIONS,
+        blockType: 'stageDirection',
         id: createNodeId(),
     });
 
@@ -160,12 +151,12 @@ export const insertActionBefore = (editor: Editor, blockPos: number, blockStart:
 
 export const setBlockTypeWithSelection = (
     editor: Editor,
-    block: ActiveFountainBlock,
-    blockType: FountainBlockType,
+    block: ActiveScriptBlock,
+    blockType: BlockNodeType,
 ) => {
-    const normalized = normalizeFountainBlockType(blockType);
+    const normalized = normalizeBlockNodeType(blockType);
     const nodes = editor.schema.nodes as Record<string, NodeType>;
-    const nodeType = resolveNodeTypeForBlockType(nodes, block.node.type.name, normalized);
+    const nodeType = resolveNodeTypeForBlockType(nodes, normalized);
 
     if (!nodeType) {
         return false;

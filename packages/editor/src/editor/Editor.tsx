@@ -1,5 +1,5 @@
 import {
-    convertLegacyScriptDocumentToDefault,
+    coerceUnknownBlocksToStageDirections,
     type ScriptDocument,
 } from '@stagistic/script';
 import {useEditor} from '@tiptap/react';
@@ -73,7 +73,7 @@ const Editor = ({
     } = callbacks ?? {};
 
     const resolvedInitialValue = useMemo(
-        () => convertLegacyScriptDocumentToDefault(initialValue),
+        () => coerceUnknownBlocksToStageDirections(initialValue).value,
         [initialValue],
     );
     const initialSerialized = useMemo(

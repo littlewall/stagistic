@@ -22,7 +22,7 @@ import type {
 import type {ReactNode} from 'react';
 
 import type {SaveResult} from './hooks/useAutosaveController';
-import type {FountainBlockType} from './tiptap/fountainCore';
+import type {BlockNodeType} from './tiptap/scriptCore';
 
 export interface PersistentCharacterRef {
     id: string,
@@ -96,7 +96,7 @@ export interface EditorLiveCharacterSnapshot {
 
 export interface EditorLiveActiveBlockInfo {
     id: string | null,
-    type: FountainBlockType | null,
+    type: BlockNodeType | null,
 }
 
 export interface EditorLiveSnapshot {
@@ -105,7 +105,7 @@ export interface EditorLiveSnapshot {
     structure: EditorLiveStructureSnapshot,
     characters: EditorLiveCharacterSnapshot,
     activeBlockId: string | null,
-    activeBlockType: FountainBlockType | null,
+    activeBlockType: BlockNodeType | null,
 }
 
 export type EditorBlockUiEventType =

@@ -1,6 +1,6 @@
 import type {ScriptDocument} from '@stagistic/script';
 
-import type {FountainBlockType} from '../../../tiptap/fountainCore';
+import type {BlockNodeType} from '../../../tiptap/scriptCore';
 
 export interface TopLevelBlockMetrics {
     id: string,
@@ -20,7 +20,7 @@ export interface PendingPressState {
 export interface ActiveDragState {
     pointerId: number,
     sourceBlockId: string,
-    sourceBlockType: FountainBlockType,
+    sourceBlockType: BlockNodeType,
     beforeBlockId: string | null,
 }
 
@@ -33,6 +33,6 @@ export interface DragSessionState {
 
 export interface BlockActionsPointerState {
     blockId: string,
-    blockType: FountainBlockType,
+    blockType: BlockNodeType,
     blockPos: number | null,
 }

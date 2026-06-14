@@ -9,10 +9,10 @@ import {
 } from 'react';
 
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
-    getActiveFountainBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
+    getActiveScriptBlockFromState,
     isSelectionAcrossBlocks,
-} from '../../tiptap/fountainCore';
+} from '../../tiptap/scriptCore';
 import type {BlockActionsPointerState} from './overlay/types';
 import type {UseOverlayPositionArgs} from './types';
 
@@ -63,13 +63,13 @@ export const useOverlayPosition = ({
             return;
         }
 
-        if (isSelectionAcrossBlocks(targetEditor.state, FOUNTAIN_BLOCK_NODE_NAME)) {
+        if (isSelectionAcrossBlocks(targetEditor.state, SCRIPT_BLOCK_NODE_NAMES)) {
             commitActiveBlockState(null);
 
             return;
         }
 
-        const activeBlock = getActiveFountainBlockFromState(targetEditor.state, FOUNTAIN_BLOCK_NODE_NAME);
+        const activeBlock = getActiveScriptBlockFromState(targetEditor.state, SCRIPT_BLOCK_NODE_NAMES);
 
         if (!activeBlock) {
             commitActiveBlockState(null);

@@ -1,10 +1,10 @@
 import {characterSpec} from '@stagistic/script';
 import {CharacterBlockIcon} from '@stagistic/ui';
 
-import type {FountainBlockBinding} from '../types';
+import type {BlockBinding} from '../types';
 import styles from './character.module.css';
 
-export const characterBinding: FountainBlockBinding = {
+export const characterBinding: BlockBinding = {
     spec: characterSpec,
     cssClass: styles.character,
     cssVarPrefix: 'character',

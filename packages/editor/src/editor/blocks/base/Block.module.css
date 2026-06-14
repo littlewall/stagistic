@@ -1,5 +1,5 @@
 /*
- * Base reset for all fountain block elements. Per-block CSS modules
+ * Base reset for all script block elements. Per-block CSS modules
  * (loaded after this file in the bundle) set padding via longhand
  * properties; do NOT use the `padding` shorthand here — equal-specificity
  * cascade would let this reset win over per-block padding-top/-left/-right

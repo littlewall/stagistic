@@ -1,7 +1,6 @@
 import {
-    ELEMENT_ACT,
     getScriptBlockId,
-    getScriptBlockLegacyType,
+    getScriptBlockNodeType,
     isScriptBlockNode,
     type ScriptDocument,
 } from '@stagistic/script';
@@ -91,7 +90,7 @@ export const useBuildActCommands = ({
         if (
             firstNode
             && isScriptBlockNode(firstNode)
-            && getScriptBlockLegacyType(firstNode) === ELEMENT_ACT
+            && getScriptBlockNodeType(firstNode) === "act"
             && getScriptBlockId(firstNode) === blockId
         ) {
             return;

@@ -14,9 +14,9 @@ import {
     normalizePersistentCharacterRefs,
 } from '../../characters/colorResolver';
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
-    getActiveFountainBlockFromState,
-} from '../../tiptap/fountainCore';
+    SCRIPT_BLOCK_NODE_NAMES,
+    getActiveScriptBlockFromState,
+} from '../../tiptap/scriptCore';
 import {isCharacterBlockType} from './model/blockUtils';
 import {buildSuggestionRows} from './model/buildSuggestionRows';
 import {
@@ -74,7 +74,7 @@ type ActiveTokenResult = {
 
 const resolveActiveToken = (
     editor: TiptapEditor,
-    block: NonNullable<ReturnType<typeof getActiveFountainBlockFromState>>,
+    block: NonNullable<ReturnType<typeof getActiveScriptBlockFromState>>,
 ): ActiveTokenResult | null => {
     const text = block.node.textContent ?? '';
     const tokens = splitCharacterTokens(text);
@@ -88,7 +88,7 @@ const resolveActiveToken = (
 };
 
 export const applyCharacterSuggestion = (editor: TiptapEditor, suggestion: string): SuppressedSelection | null => {
-    const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+    const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
     if (
         !block
@@ -151,7 +151,7 @@ export const applyCharacterSuggestion = (editor: TiptapEditor, suggestion: strin
     editor.view.dispatch(tr.scrollIntoView());
     editor.commands.focus(nextSelection);
 
-    const nextBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+    const nextBlock = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
     if (!nextBlock) {
         return null;
@@ -182,7 +182,7 @@ export const computeCharacterSuggestions = ({
     previousOrderByKey,
     characterColorSaturation,
 }: OverlayComputationArgs): CharacterSuggestionsResult | null => {
-    const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+    const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
     if (
         !block

@@ -1,5 +1,4 @@
 import type {BlockSpacingSettings, EditorSettings} from '@stagistic/script';
-import {ELEMENT_ACT} from '@stagistic/script';
 import type {CSSProperties} from 'react';
 
 import {ALL_BLOCK_BINDINGS} from '../blocks/registry';
@@ -111,13 +110,13 @@ export const getEditorCssVars = (settings: EditorSettings, scale = 1): EditorCss
      * Standard 9 vars per block, emitted from each binding's cssVarPrefix.
      */
     for (const binding of ALL_BLOCK_BINDINGS) {
-        const blockSettings = blocks[binding.spec.legacyType];
+        const blockSettings = blocks[binding.spec.nodeType];
         const standard = buildStandardBlockVars(binding.cssVarPrefix, blockSettings, baseLineHeight);
 
         Object.assign(vars, standard);
     }
 
-    const actLineHeight = blocks[ELEMENT_ACT]?.lineHeight ?? baseLineHeight;
+    const actLineHeight = blocks.act?.lineHeight ?? baseLineHeight;
 
     vars['--act-line-height'] = String(actLineHeight);
 

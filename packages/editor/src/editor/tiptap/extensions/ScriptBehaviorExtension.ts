@@ -9,7 +9,7 @@ import {
     handleKeyDown,
     handlePaste,
     handleTextInput,
-} from '../fountainBlock/handlers';
+} from '../scriptBlock/handlers';
 
 const createInputHandlersPlugin = (
     editor: Editor,
@@ -26,12 +26,12 @@ const createInputHandlersPlugin = (
     });
 };
 
-export const FountainBehaviorExtension = Extension.create<{
+export const ScriptBehaviorExtension = Extension.create<{
     blockShortcuts?: BlockShortcutMap,
     blockNextElements?: BlockNextElementMap,
     blockCasing?: BlockCasingMap,
 }>({
-    name: 'FountainBehavior',
+    name: 'ScriptBehavior',
 
     addOptions() {
         return {

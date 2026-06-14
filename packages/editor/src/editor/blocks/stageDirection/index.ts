@@ -1,0 +1,1 @@
+export {stageDirectionBinding} from './binding';

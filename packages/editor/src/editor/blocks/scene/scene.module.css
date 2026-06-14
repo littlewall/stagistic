@@ -1,0 +1,12 @@
+.scene {
+    padding-top: var(--scene-spacing-before, 0);
+    padding-right: var(--scene-indent-right, 0);
+    padding-left: var(--scene-indent-left, 0);
+    font-weight: var(--scene-font-weight, 700);
+    font-style: var(--scene-font-style, normal);
+    line-height: var(--scene-line-height, inherit);
+    color: var(--color-block-scene);
+    text-align: var(--scene-align, left);
+    text-decoration-line: var(--scene-underline, none);
+    text-transform: var(--scene-casing, uppercase);
+}

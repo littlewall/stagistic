@@ -1,4 +1,4 @@
-import {type FountainElementType} from '@stagistic/script';
+import {type ScriptBlockNodeType} from '@stagistic/script';
 import type {
     MouseEvent as ReactMouseEvent,
     ReactNode,
@@ -27,7 +27,7 @@ export interface InlineMarksGroupProps {
 }
 
 export interface BlockTypeSelectOption {
-    type: FountainElementType,
+    type: ScriptBlockNodeType,
     label: string,
 }
 
@@ -37,7 +37,7 @@ export interface VisibleBlockInfo {
 }
 
 export interface ActiveBlockInfo {
-    type: FountainElementType,
+    type: ScriptBlockNodeType,
 }
 
 export interface BlockTypeSelectState {
@@ -50,7 +50,7 @@ export interface BlockTypeSelectState {
 export interface BlockTypeSelectActions {
     onSelectMouseDown: (event: ReactMouseEvent<HTMLButtonElement>) => void,
     onMenuItemMouseDown: (
-        optionType: FountainElementType,
+        optionType: ScriptBlockNodeType,
         event: ReactMouseEvent<HTMLButtonElement>,
     ) => void,
 }

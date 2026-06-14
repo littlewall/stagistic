@@ -1,16 +1,13 @@
 import {
-    ELEMENT_ACT,
-    ELEMENT_ASIDE,
-    ELEMENT_CHARACTER,
     normalizeCharacterEditorDelimiters,
 } from '@stagistic/script';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
-    getActiveFountainBlockFromState,
-} from '../../fountainCore';
+    SCRIPT_BLOCK_NODE_NAMES,
+    getActiveScriptBlockFromState,
+} from '../../scriptCore';
 import {
     insertParenPair,
 } from '../commands';
@@ -26,7 +23,7 @@ import {
 } from './types';
 
 const keyDownHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => boolean> = {
-    [ELEMENT_ASIDE]: (_context, event) => {
+    ["aside"]: (_context, event) => {
         if (event.key === '(' || event.key === ')') {
             event.preventDefault();
 
@@ -35,7 +32,7 @@ const keyDownHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) 
 
         return false;
     },
-    [ELEMENT_CHARACTER]: (context, event) => {
+    ["character"]: (context, event) => {
         if (event.key !== '(') {
             return false;
         }
@@ -48,9 +45,9 @@ const keyDownHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) 
 };
 
 const normalizeActiveCharacterDelimiters = (editor: Editor) => {
-    const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+    const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
-    if (!block || block.blockType !== ELEMENT_CHARACTER) {
+    if (!block || block.blockType !== "character") {
         return;
     }
 
@@ -148,7 +145,7 @@ const textInputHandlers: HandlerMap<(
     to: number,
     text: string,
 ) => boolean> = {
-    [ELEMENT_ASIDE]: handleParentheticalInput,
+    ["aside"]: handleParentheticalInput,
 };
 
 export const handleTextInput = (
@@ -158,20 +155,20 @@ export const handleTextInput = (
     text: string,
     blockCasing?: BlockCasingMap,
 ) => {
-    const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+    const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
     if (!block) {
         return false;
     }
 
-    if (block.blockType === ELEMENT_CHARACTER) {
+    if (block.blockType === "character") {
         const casing = blockCasing?.[block.blockType] ?? 'uppercase';
         const enforceUppercase = casing === 'uppercase';
 
         return handleCharacterInput(createBlockContext(editor, block), from, to, text, enforceUppercase);
     }
 
-    if (block.blockType === ELEMENT_ACT) {
+    if (block.blockType === "act") {
         const upper = text.toLocaleUpperCase();
 
         if (upper !== text) {

@@ -9,13 +9,13 @@ import {
     DecorationSet,
 } from '@tiptap/pm/view';
 
-import {getActiveFountainBlockFromState} from '../fountainCore';
+import {getActiveScriptBlockFromState} from '../scriptCore';
 
 const placeholderPluginKey = new PluginKey<DecorationSet>('fountain-placeholder');
 
 const buildPlaceholderDecorations = (state: EditorState, placeholder: string) => {
     try {
-        const activeBlock = getActiveFountainBlockFromState(state);
+        const activeBlock = getActiveScriptBlockFromState(state);
 
         if (!activeBlock || (activeBlock.node.textContent ?? '').trim().length > 0) {
             return DecorationSet.empty;

@@ -1,7 +1,4 @@
 import {
-    ELEMENT_ACT,
-    ELEMENT_CHARACTER,
-    ELEMENT_SCENE_HEADING,
     type IndexedScriptBlock,
     normalizeCharacterColorHex,
     normalizeCharacterKey,
@@ -34,7 +31,7 @@ export interface SidebarProjectionColorContext {
 const normalizeText = (value: string) => value.trim();
 
 const isCharacterBlockType = (blockType: string) => {
-    return blockType === ELEMENT_CHARACTER;
+    return blockType === "character";
 };
 
 interface StructureBlockEntry {
@@ -55,7 +52,7 @@ export const buildStructureSnapshotFromBlocks = (blocks: readonly StructureBlock
             continue;
         }
 
-        if (block.blockType === ELEMENT_ACT) {
+        if (block.blockType === "act") {
             const row: EditorLiveStructureRow = {
                 kind: 'act',
                 blockId: block.blockId,
@@ -69,7 +66,7 @@ export const buildStructureSnapshotFromBlocks = (blocks: readonly StructureBlock
             continue;
         }
 
-        if (block.blockType === ELEMENT_SCENE_HEADING) {
+        if (block.blockType === "scene") {
             const row: EditorLiveStructureRow = {
                 kind: 'scene',
                 blockId: block.blockId,

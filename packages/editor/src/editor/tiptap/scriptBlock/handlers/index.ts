@@ -2,7 +2,7 @@ import {isApplePlatform} from '@stagistic/shared';
 import type {Editor} from '@tiptap/react';
 
 import {getEmptyEnterChooserFromState} from '../../extensions/EmptyEnterChooserExtension';
-import {FOUNTAIN_BLOCK_NODE_NAME, getActiveFountainBlockFromState} from '../../fountainCore';
+import {SCRIPT_BLOCK_NODE_NAMES, getActiveScriptBlockFromState} from '../../scriptCore';
 import {createBlockContext} from '../context';
 import {enterHandlerMaps, handleEnter} from './enter';
 import {handlePaste, pasteHandlerMaps} from './paste';
@@ -115,7 +115,7 @@ export const handleKeyDown = (
         return handleTab(editor, event);
     }
 
-    const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+    const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
     if (!block) {
         return false;
@@ -137,7 +137,7 @@ export {
     handleTextInput,
 };
 
-export const fountainBlockHandlerMaps = {
+export const scriptBlockHandlerMaps = {
     ...enterHandlerMaps,
     ...tabHandlerMaps,
     ...textInputHandlerMaps,

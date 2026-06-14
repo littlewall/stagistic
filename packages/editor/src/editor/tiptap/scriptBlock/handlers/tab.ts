@@ -1,13 +1,9 @@
-import {
-    ELEMENT_LYRICS,
-    ELEMENT_STAGE_DIRECTIONS,
-} from '@stagistic/script';
 import type {Editor} from '@tiptap/react';
 
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
-    getActiveFountainBlockFromState,
-} from '../../fountainCore';
+    SCRIPT_BLOCK_NODE_NAMES,
+    getActiveScriptBlockFromState,
+} from '../../scriptCore';
 import {
     type BlockContext,
     createBlockContext,
@@ -57,12 +53,12 @@ const createIndentTabHandler = (maxIndent: number) => (context: BlockContext, ev
 };
 
 const tabHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => boolean> = {
-    [ELEMENT_STAGE_DIRECTIONS]: createIndentTabHandler(MAX_ACTION_INDENT),
-    [ELEMENT_LYRICS]: createIndentTabHandler(MAX_LYRICS_INDENT),
+    ["stageDirection"]: createIndentTabHandler(MAX_ACTION_INDENT),
+    ["lyrics"]: createIndentTabHandler(MAX_LYRICS_INDENT),
 };
 
 export const handleTab = (editor: Editor, event: KeyboardEvent) => {
-    const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+    const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
     if (!block) {
         return false;

@@ -9,13 +9,13 @@ import {
     useState,
 } from 'react';
 
-import {FOUNTAIN_BLOCKS} from '../../blocks/fountainBlockRegistry';
+import {BLOCKS} from '../../blocks/blockRegistry';
 import {
     EMPTY_ENTER_CHOOSER_WRITER_TYPES,
     type EmptyEnterChooserState,
     getEmptyEnterChooserFromState,
 } from '../../tiptap/extensions/EmptyEnterChooserExtension';
-import type {FountainBlockType} from '../../tiptap/fountainCore';
+import type {BlockNodeType} from '../../tiptap/scriptCore';
 import {ChooserTypeButton} from './ChooserTypeButton';
 import styles from './EmptyEnterBlockChooserOverlay.module.css';
 import {useChooserAnchor} from './useChooserAnchor';
@@ -121,7 +121,7 @@ export const EmptyEnterBlockChooserOverlay = ({
     const labelByType = useMemo(() => {
         const map = new Map<string, string>();
 
-        FOUNTAIN_BLOCKS.forEach(option => {
+        BLOCKS.forEach(option => {
             map.set(option.type, option.label);
         });
 
@@ -129,7 +129,7 @@ export const EmptyEnterBlockChooserOverlay = ({
     }, []);
 
     const handleTypeMouseDown = useCallback((
-        optionType: FountainBlockType,
+        optionType: BlockNodeType,
         event: ReactMouseEvent<HTMLButtonElement>,
     ) => {
         event.preventDefault();
@@ -140,7 +140,7 @@ export const EmptyEnterBlockChooserOverlay = ({
         }
 
         const commands = editor.commands as {
-            confirmEmptyEnterChooserType?: (type?: FountainBlockType) => boolean,
+            confirmEmptyEnterChooserType?: (type?: BlockNodeType) => boolean,
         };
 
         commands.confirmEmptyEnterChooserType?.(optionType);

@@ -1,7 +1,7 @@
 import {useCallback} from 'react';
 
 import {useEditorInstance} from '../context';
-import {findFountainBlockByIdFromState} from '../tiptap/fountainCore';
+import {findScriptBlockByIdFromState} from '../tiptap/scriptCore';
 
 export const useFocusEditorBlock = () => {
     const editor = useEditorInstance();
@@ -11,7 +11,7 @@ export const useFocusEditorBlock = () => {
             return;
         }
 
-        const block = findFountainBlockByIdFromState(editor.state, blockId);
+        const block = findScriptBlockByIdFromState(editor.state, blockId);
 
         if (!block) {
             return;

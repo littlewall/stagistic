@@ -1,13 +1,11 @@
 import {
-    ELEMENT_ACT,
-    ELEMENT_SCENE_HEADING,
-    resolveLegacyFountainBlockType,
+    resolveScriptBlockNodeType,
 } from '@stagistic/script';
 import {Fragment, type Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {Transaction} from '@tiptap/pm/state';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
-import {isFountainBlockNodeName} from '../tiptap/fountainCore';
+import {isScriptBlockNodeName} from '../tiptap/scriptCore';
 
 interface TopLevelBlockInfo {
     pos: number,
@@ -18,10 +16,10 @@ interface TopLevelBlockInfo {
 
 const getBlockTypeFromPmNode = (node: ProseMirrorNode): string | null => {
     if (typeof node.attrs?.blockType === 'string' && node.attrs.blockType.length > 0) {
-        return node.attrs.blockType;
+        return resolveScriptBlockNodeType(node.attrs.blockType) ?? node.attrs.blockType;
     }
 
-    return resolveLegacyFountainBlockType(node.type.name) ?? null;
+    return resolveScriptBlockNodeType(node.type.name) ?? null;
 };
 
 const collectTopLevelBlocks = (doc: ProseMirrorNode): TopLevelBlockInfo[] | null => {
@@ -29,7 +27,7 @@ const collectTopLevelBlocks = (doc: ProseMirrorNode): TopLevelBlockInfo[] | null
     let hasUnexpected = false;
 
     doc.forEach((node, offset) => {
-        if (!isFountainBlockNodeName(node.type.name)) {
+        if (!isScriptBlockNodeName(node.type.name)) {
             hasUnexpected = true;
 
             return;
@@ -41,7 +39,7 @@ const collectTopLevelBlocks = (doc: ProseMirrorNode): TopLevelBlockInfo[] | null
             pos: offset,
             nodeSize: node.nodeSize,
             blockId: typeof node.attrs?.id === 'string' ? node.attrs.id : null,
-            isBoundary: blockType === ELEMENT_SCENE_HEADING || blockType === ELEMENT_ACT,
+            isBoundary: blockType === 'scene' || blockType === 'act',
         });
     });
 

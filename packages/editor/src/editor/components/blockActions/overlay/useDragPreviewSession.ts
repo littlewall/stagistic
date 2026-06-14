@@ -1,5 +1,4 @@
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
     type ScriptDocument,
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
@@ -9,7 +8,7 @@ import {
 } from 'react';
 
 import {moveTopLevelNonStructuralBlock} from '../../../hooks/structureReorder';
-import {findFountainBlockSelectionPosFromState} from '../../../tiptap/fountainCore';
+import {findScriptBlockSelectionPosFromState} from '../../../tiptap/scriptCore';
 import type {DragSessionState} from './types';
 
 interface UseDragPreviewSessionArgs {
@@ -24,10 +23,9 @@ export const useDragPreviewSession = ({editor}: UseDragPreviewSessionArgs) => {
             return;
         }
 
-        const selectionPos = findFountainBlockSelectionPosFromState(
+        const selectionPos = findScriptBlockSelectionPosFromState(
             editor.state,
             blockId,
-            FOUNTAIN_BLOCK_NODE_NAME,
         );
 
         if (selectionPos === null) {

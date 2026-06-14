@@ -3,13 +3,13 @@ import {Extension} from '@tiptap/core';
 import {
     splitBlockWithType,
     updateBlockType,
-} from '../fountainBlock/commands';
-import type {BlockNextElementMap} from '../fountainBlock/handlers/types';
+} from '../scriptBlock/commands';
+import type {BlockNextElementMap} from '../scriptBlock/handlers/types';
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
-    type FountainBlockType,
-    getActiveFountainBlockFromState,
-} from '../fountainCore';
+    SCRIPT_BLOCK_NODE_NAMES,
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+} from '../scriptCore';
 import {
     CLOSE_META_KEY,
     createEmptyEnterChooserPlugin,
@@ -35,13 +35,13 @@ declare module '@tiptap/core' {
             openEmptyEnterChooser: (payload: {
                 blockId: string,
                 blockPos: number,
-                blockType: FountainBlockType,
-                selectedType?: FountainBlockType,
+                blockType: BlockNodeType,
+                selectedType?: BlockNodeType,
             }) => ReturnType,
             closeEmptyEnterChooser: () => ReturnType,
-            selectEmptyEnterChooserType: (type: FountainBlockType) => ReturnType,
+            selectEmptyEnterChooserType: (type: BlockNodeType) => ReturnType,
             moveEmptyEnterChooserSelection: (direction: -1 | 1) => ReturnType,
-            confirmEmptyEnterChooserType: (type?: FountainBlockType) => ReturnType,
+            confirmEmptyEnterChooserType: (type?: BlockNodeType) => ReturnType,
             insertNextEmptyFromEmptyEnterChooser: () => ReturnType,
         },
     }
@@ -133,7 +133,7 @@ export const EmptyEnterChooserExtension = Extension.create<{
                 }
 
                 const selectedType = normalizeWriterType(type ?? chooserState.selectedType ?? chooserState.blockType);
-                const activeBlock = getActiveFountainBlockFromState(this.editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+                const activeBlock = getActiveScriptBlockFromState(this.editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
                 if (!activeBlock || activeBlock.id !== chooserState.blockId) {
                     closeChooser();
@@ -169,7 +169,7 @@ export const EmptyEnterChooserExtension = Extension.create<{
                 }
 
                 const selectedType = normalizeWriterType(chooserState.selectedType ?? chooserState.blockType);
-                const activeBlock = getActiveFountainBlockFromState(this.editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+                const activeBlock = getActiveScriptBlockFromState(this.editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
                 if (!activeBlock || activeBlock.id !== chooserState.blockId) {
                     closeChooser();

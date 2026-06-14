@@ -2,15 +2,15 @@ import {mergeAttributes, Node} from '@tiptap/core';
 
 import columnStyles from '../../blocks/layout/ColumnGroup.module.css';
 import {
-    FOUNTAIN_BLOCK_GROUP_NAME,
-    FOUNTAIN_COLUMN_GROUP_NODE_NAME,
-    FOUNTAIN_COLUMN_NODE_NAME,
-} from '../fountainCore';
+    SCRIPT_BLOCK_GROUP_NAME,
+    COLUMN_GROUP_NODE_NAME,
+    COLUMN_NODE_NAME,
+} from '../scriptCore';
 
-export const FountainColumnGroupExtension = Node.create({
-    name: FOUNTAIN_COLUMN_GROUP_NODE_NAME,
+export const ScriptColumnGroupExtension = Node.create({
+    name: COLUMN_GROUP_NODE_NAME,
     group: 'block',
-    content: `${FOUNTAIN_COLUMN_NODE_NAME}{1,}`,
+    content: `${COLUMN_NODE_NAME}{1,}`,
     isolating: true,
     parseHTML() {
         return [
@@ -31,9 +31,9 @@ export const FountainColumnGroupExtension = Node.create({
     },
 });
 
-export const FountainColumnExtension = Node.create({
-    name: FOUNTAIN_COLUMN_NODE_NAME,
-    content: `${FOUNTAIN_BLOCK_GROUP_NAME}+`,
+export const ScriptColumnExtension = Node.create({
+    name: COLUMN_NODE_NAME,
+    content: `${SCRIPT_BLOCK_GROUP_NAME}+`,
     defining: true,
     parseHTML() {
         return [

@@ -1,13 +1,9 @@
-import {
-    ELEMENT_ACT,
-    ELEMENT_ASIDE,
-} from '@stagistic/script';
 import type {Editor} from '@tiptap/react';
 
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
-    getActiveFountainBlockFromState,
-} from '../../fountainCore';
+    SCRIPT_BLOCK_NODE_NAMES,
+    getActiveScriptBlockFromState,
+} from '../../scriptCore';
 import {
     type BlockContext,
     createBlockContext,
@@ -15,7 +11,7 @@ import {
 import {type HandlerMap} from './types';
 
 const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) => boolean> = {
-    [ELEMENT_ACT]: (context, event) => {
+    ["act"]: (context, event) => {
         const text = event.clipboardData?.getData('text/plain');
 
         if (text === undefined) {
@@ -32,7 +28,7 @@ const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) =
 
         return true;
     },
-    [ELEMENT_ASIDE]: (context, event) => {
+    ["aside"]: (context, event) => {
         const text = event.clipboardData?.getData('text/plain');
 
         if (text === undefined) {
@@ -52,7 +48,7 @@ const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) =
 };
 
 export const handlePaste = (editor: Editor, event: ClipboardEvent) => {
-    const block = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+    const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
     if (!block) {
         return false;

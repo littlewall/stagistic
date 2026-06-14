@@ -2,17 +2,17 @@ import {TextSelection} from '@tiptap/pm/state';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {
-    findFountainBlockSelectionPosFromState,
-    FOUNTAIN_BLOCK_NODE_NAME,
-    getActiveFountainBlockFromState,
-} from '../tiptap/fountainCore';
+    findScriptBlockSelectionPosFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
+    getActiveScriptBlockFromState,
+} from '../tiptap/scriptCore';
 
 export const restoreSelectionForBlock = (editor: TiptapEditor, blockId: string | null) => {
     if (!blockId) {
         return;
     }
 
-    const selectionPos = findFountainBlockSelectionPosFromState(editor.state, blockId);
+    const selectionPos = findScriptBlockSelectionPosFromState(editor.state, blockId);
 
     if (selectionPos === null) {
         return;
@@ -27,7 +27,7 @@ export const restoreSelectionForBlock = (editor: TiptapEditor, blockId: string |
 };
 
 export const withActiveBlockPreserved = (editor: TiptapEditor, callback: () => void) => {
-    const activeBlock = getActiveFountainBlockFromState(editor.state, FOUNTAIN_BLOCK_NODE_NAME);
+    const activeBlock = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
     const preservedBlockId = activeBlock?.id ?? null;
 
     callback();

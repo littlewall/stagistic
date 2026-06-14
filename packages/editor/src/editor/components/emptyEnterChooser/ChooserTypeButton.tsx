@@ -2,14 +2,14 @@ import clsx from 'clsx';
 import type {MouseEvent as ReactMouseEvent} from 'react';
 
 import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
-import type {FountainBlockType} from '../../tiptap/fountainCore';
+import type {BlockNodeType} from '../../tiptap/scriptCore';
 import styles from './EmptyEnterBlockChooserOverlay.module.css';
 
 interface ChooserTypeButtonProps {
-    optionType: FountainBlockType,
+    optionType: BlockNodeType,
     label: string,
     isActive: boolean,
-    onMouseDown: (optionType: FountainBlockType, event: ReactMouseEvent<HTMLButtonElement>) => void,
+    onMouseDown: (optionType: BlockNodeType, event: ReactMouseEvent<HTMLButtonElement>) => void,
 }
 
 export const ChooserTypeButton = ({

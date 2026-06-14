@@ -1,38 +1,36 @@
 import {
-    ELEMENT_ACT,
-    ELEMENT_SCENE_HEADING,
-    type FountainJSONContent,
     getScriptBlockId,
-    getScriptBlockLegacyType,
+    getScriptBlockNodeType,
     isScriptBlockNode,
+    type ScriptNode,
 } from '@stagistic/script';
 
-type MoveResult = [FountainJSONContent[] | undefined, boolean];
+type MoveResult = [ScriptNode[] | undefined, boolean];
 
-const isFountainBlock = (node: FountainJSONContent) => isScriptBlockNode(node);
+const isScriptBlock = (node: ScriptNode) => isScriptBlockNode(node);
 
-const getBlockId = (node: FountainJSONContent): string | null => {
-    if (!isFountainBlock(node)) {
+const getBlockId = (node: ScriptNode): string | null => {
+    if (!isScriptBlock(node)) {
         return null;
     }
 
     return getScriptBlockId(node);
 };
 
-const getBlockType = (node: FountainJSONContent): unknown => {
-    if (!isFountainBlock(node)) {
+const getBlockType = (node: ScriptNode): unknown => {
+    if (!isScriptBlock(node)) {
         return null;
     }
 
-    return getScriptBlockLegacyType(node);
+    return getScriptBlockNodeType(node);
 };
 
-const isSameOrder = (previous: FountainJSONContent[], next: FountainJSONContent[]) => {
+const isSameOrder = (previous: ScriptNode[], next: ScriptNode[]) => {
     return previous.length === next.length && previous.every((node, index) => node === next[index]);
 };
 
 const resolveInsertionIndex = (
-    nodes: FountainJSONContent[],
+    nodes: ScriptNode[],
     beforeBlockId: string | null,
 ): number | null => {
     if (!beforeBlockId) {
@@ -45,8 +43,8 @@ const resolveInsertionIndex = (
 };
 
 const recurseIntoChildren = (
-    nodes: FountainJSONContent[],
-    moveFn: (children: FountainJSONContent[] | undefined) => MoveResult,
+    nodes: ScriptNode[],
+    moveFn: (children: ScriptNode[] | undefined) => MoveResult,
 ): MoveResult => {
     let didChange = false;
     const nextNodes = nodes.map(node => {
@@ -72,7 +70,7 @@ const recurseIntoChildren = (
 };
 
 const moveActMarkerInNodeList = (
-    nodes: FountainJSONContent[] | undefined,
+    nodes: ScriptNode[] | undefined,
     sourceActBlockId: string,
     beforeBlockId: string | null,
 ): MoveResult => {
@@ -81,7 +79,7 @@ const moveActMarkerInNodeList = (
     }
 
     const sourceIndex = nodes.findIndex(node => {
-        return getBlockType(node) === ELEMENT_ACT && getBlockId(node) === sourceActBlockId;
+        return getBlockType(node) === 'act' && getBlockId(node) === sourceActBlockId;
     });
 
     if (sourceIndex >= 0) {
@@ -111,11 +109,11 @@ type SceneRange = {
 };
 
 const findSceneRangeByBlockId = (
-    nodes: FountainJSONContent[],
+    nodes: ScriptNode[],
     sceneBlockId: string,
 ): SceneRange | null => {
     const start = nodes.findIndex(node => {
-        return getBlockType(node) === ELEMENT_SCENE_HEADING && getBlockId(node) === sceneBlockId;
+        return getBlockType(node) === 'scene' && getBlockId(node) === sceneBlockId;
     });
 
     if (start < 0) {
@@ -127,7 +125,7 @@ const findSceneRangeByBlockId = (
     for (let index = start + 1; index < nodes.length; index += 1) {
         const blockType = getBlockType(nodes[index]);
 
-        if (blockType === ELEMENT_SCENE_HEADING || blockType === ELEMENT_ACT) {
+        if (blockType === 'scene' || blockType === 'act') {
             end = index;
             break;
         }
@@ -140,7 +138,7 @@ const findSceneRangeByBlockId = (
 };
 
 const moveSceneSegmentInNodeList = (
-    nodes: FountainJSONContent[] | undefined,
+    nodes: ScriptNode[] | undefined,
     sourceSceneBlockId: string,
     beforeBlockId: string | null,
 ): MoveResult => {
@@ -172,7 +170,7 @@ const moveSceneSegmentInNodeList = (
 };
 
 export const moveActMarker = (
-    content: FountainJSONContent[] | undefined,
+    content: ScriptNode[] | undefined,
     sourceActBlockId: string,
     beforeBlockId: string | null,
 ): MoveResult => {
@@ -180,7 +178,7 @@ export const moveActMarker = (
 };
 
 export const moveSceneSegment = (
-    content: FountainJSONContent[] | undefined,
+    content: ScriptNode[] | undefined,
     sourceSceneBlockId: string,
     beforeBlockId: string | null,
 ): MoveResult => {
@@ -188,11 +186,11 @@ export const moveSceneSegment = (
 };
 
 const isStructureBlockType = (blockType: unknown) => {
-    return blockType === ELEMENT_ACT || blockType === ELEMENT_SCENE_HEADING;
+    return blockType === 'act' || blockType === 'scene';
 };
 
 export const moveTopLevelNonStructuralBlock = (
-    content: FountainJSONContent[] | undefined,
+    content: ScriptNode[] | undefined,
     sourceBlockId: string,
     beforeBlockId: string | null,
 ): MoveResult => {

@@ -1,18 +1,18 @@
-import type {FountainElementType} from '@stagistic/script';
+import type {ScriptBlockNodeType} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import type {
     MouseEvent as ReactMouseEvent,
     RefObject,
 } from 'react';
 
-import type {FountainBlockType} from '../../tiptap/fountainCore';
+import type {BlockNodeType} from '../../tiptap/scriptCore';
 
 export interface BlockActionsMenuProps {
-    blockType: FountainBlockType,
+    blockType: BlockNodeType,
     isMenuAbove: boolean,
     menuRef: RefObject<HTMLDivElement | null>,
     onMenuItemMouseDown: (
-        optionType: FountainElementType,
+        optionType: ScriptBlockNodeType,
         event: ReactMouseEvent<HTMLButtonElement>,
     ) => void,
 }

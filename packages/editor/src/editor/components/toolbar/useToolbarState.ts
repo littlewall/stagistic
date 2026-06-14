@@ -1,4 +1,3 @@
-import {ELEMENT_ACT} from '@stagistic/script';
 import {redoDepth, undoDepth} from '@tiptap/pm/history';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useEditorState} from '@tiptap/react';
@@ -8,13 +7,13 @@ import {
     useState,
 } from 'react';
 
+import {BLOCKS} from '../../blocks/blockRegistry';
 import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
-import {FOUNTAIN_BLOCKS} from '../../blocks/fountainBlockRegistry';
 import {
-    FOUNTAIN_BLOCK_NODE_NAME,
-    getActiveFountainBlockFromState,
+    getActiveScriptBlockFromState,
     isSelectionAcrossBlocks,
-} from '../../tiptap/fountainCore';
+    SCRIPT_BLOCK_NODE_NAMES,
+} from '../../tiptap/scriptCore';
 
 interface UseToolbarStateArgs {
     editor: TiptapEditor | null,
@@ -37,13 +36,13 @@ export const useToolbarState = ({editor}: UseToolbarStateArgs) => {
                 };
             }
 
-            const activeBlock = getActiveFountainBlockFromState(
+            const activeBlock = getActiveScriptBlockFromState(
                 stateEditor.state,
-                FOUNTAIN_BLOCK_NODE_NAME,
+                SCRIPT_BLOCK_NODE_NAMES,
             );
             const isMultiBlockSelection = isSelectionAcrossBlocks(
                 stateEditor.state,
-                FOUNTAIN_BLOCK_NODE_NAME,
+                SCRIPT_BLOCK_NODE_NAMES,
             );
 
             return {
@@ -82,7 +81,7 @@ export const useToolbarState = ({editor}: UseToolbarStateArgs) => {
             return null;
         }
 
-        const option = FOUNTAIN_BLOCKS.find(block => block.type === activeType);
+        const option = BLOCKS.find(block => block.type === activeType);
 
         return {
             type: activeType,
@@ -93,7 +92,7 @@ export const useToolbarState = ({editor}: UseToolbarStateArgs) => {
 
     const canChangeBlockType = hasEditorFocus && (
         isMultiBlockSelection
-        || (Boolean(activeBlockInfo) && activeType !== ELEMENT_ACT)
+        || (Boolean(activeBlockInfo) && activeType !== 'act')
     );
     const visibleBlockInfo = useMemo(() => {
         if (!canChangeBlockType) {

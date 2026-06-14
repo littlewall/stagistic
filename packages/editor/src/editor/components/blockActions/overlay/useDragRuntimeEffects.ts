@@ -2,7 +2,7 @@ import {
     type MutableRefObject, type RefObject, useEffect,
 } from 'react';
 
-import type {FountainBlockType} from '../../../tiptap/fountainCore';
+import type {BlockNodeType} from '../../../tiptap/scriptCore';
 import {
     AUTO_SCROLL_EDGE_THRESHOLD_PX,
     AUTO_SCROLL_MAX_SPEED_PX,
@@ -22,7 +22,7 @@ interface UseDragRuntimeEffectsArgs {
         updateActiveDragState: (
             pointerId: number,
             sourceBlockId: string,
-            sourceBlockType: FountainBlockType,
+            sourceBlockType: BlockNodeType,
             pointerClientY: number,
         ) => void,
         stopPointerInteraction: () => void,

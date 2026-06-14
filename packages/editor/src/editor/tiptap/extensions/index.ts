@@ -4,13 +4,13 @@
  * Tiptap extensions plug into the editor. They fall into a few categories:
  *
  *  - Behaviour: handle keyboard input, paste, smart Enter
- *      FountainBehaviorExtension, EmptyEnterChooserExtension
+ *      ScriptBehaviorExtension, EmptyEnterChooserExtension
  *
  *  - Decorations: visual overlays on top of the document
  *      PlaceholderExtension
  *
  *  - Layout: structural pieces that affect document shape and pagination
- *      FountainColumnExtension, FountainColumnGroupExtension,
+ *      ScriptColumnExtension, ScriptColumnGroupExtension,
  *      createPaginationExtension
  *
  *  - Runtime: build derived indexes that other parts of the app read
@@ -30,7 +30,7 @@ export {
     getEmptyEnterChooserFromState,
     isEmptyEnterChooserWriterType,
 } from './EmptyEnterChooserExtension';
-export {FountainBehaviorExtension} from './FountainBehaviorExtension';
+export {ScriptBehaviorExtension} from './ScriptBehaviorExtension';
 
 // ─── Decorations ─────────────────────────────────────────────────────────────
 
@@ -39,9 +39,9 @@ export {PlaceholderExtension} from './PlaceholderExtension';
 // ─── Layout ──────────────────────────────────────────────────────────────────
 
 export {
-    FountainColumnExtension,
-    FountainColumnGroupExtension,
-} from './FountainColumnExtensions';
+    ScriptColumnExtension,
+    ScriptColumnGroupExtension,
+} from './ScriptColumnExtensions';
 export {createPaginationExtension, PaginationExtension} from './PaginationExtension';
 
 // ─── Runtime indexes ─────────────────────────────────────────────────────────

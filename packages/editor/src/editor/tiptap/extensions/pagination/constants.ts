@@ -1,22 +1,14 @@
-import {
-    ELEMENT_ASIDE,
-    ELEMENT_CHARACTER,
-    ELEMENT_DIALOGUE,
-    ELEMENT_LYRICS,
-    ELEMENT_SCENE_HEADING,
-    ELEMENT_STAGE_DIRECTIONS,
-} from '@stagistic/script';
 
 import {type PaginationOptions} from './types';
 
 export const SPLITTABLE_BLOCK_TYPES = new Set([
-    ELEMENT_STAGE_DIRECTIONS,
-    ELEMENT_DIALOGUE,
-    ELEMENT_LYRICS,
-    ELEMENT_ASIDE,
+    "stageDirection",
+    "dialogue",
+    "lyrics",
+    "aside",
 ]);
 
-export const ORPHAN_PUSHDOWN_TYPES = new Set([ELEMENT_CHARACTER, ELEMENT_SCENE_HEADING]);
+export const ORPHAN_PUSHDOWN_TYPES = new Set(["character", "scene"]);
 
 export const MIN_SPLIT_LINES_BEFORE = 2;
 

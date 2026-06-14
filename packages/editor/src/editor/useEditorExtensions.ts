@@ -23,15 +23,15 @@ import {
     createPaginationExtension,
     EditorRuntimeExtension,
     EmptyEnterChooserExtension,
-    FountainBehaviorExtension,
-    FountainColumnExtension,
-    FountainColumnGroupExtension,
+    ScriptBehaviorExtension,
+    ScriptColumnExtension,
+    ScriptColumnGroupExtension,
     PlaceholderExtension,
 } from './tiptap/extensions';
 import {DocumentWithSettings} from './tiptap/extensions/DocumentExtension';
-import characterTagStyles from './tiptap/fountainBlock/CharacterTagDecorations.module.css';
+import characterTagStyles from './tiptap/scriptBlock/CharacterTagDecorations.module.css';
 import {
-    FountainBlockNodes,
+    ScriptBlockNodes,
     SCRIPT_BLOCK_NODE_NAMES,
 } from './tiptap/nodes';
 
@@ -68,8 +68,8 @@ export const useEditorExtensions = ({
         () => getBlockCasing(resolvedSettings),
         [resolvedSettings],
     );
-    const fountainBehaviorExtension = useMemo(
-        () => FountainBehaviorExtension.configure({
+    const scriptBehaviorExtension = useMemo(
+        () => ScriptBehaviorExtension.configure({
             blockShortcuts,
             blockNextElements,
             blockCasing,
@@ -131,12 +131,12 @@ export const useEditorExtensions = ({
             Bold,
             Italic,
             Underline,
-            FountainColumnGroupExtension,
-            FountainColumnExtension,
-            ...FountainBlockNodes,
+            ScriptColumnGroupExtension,
+            ScriptColumnExtension,
+            ...ScriptBlockNodes,
             PlaceholderExtension,
             emptyEnterChooserExtension,
-            fountainBehaviorExtension,
+            scriptBehaviorExtension,
             characterRefSyncExtension,
             editorRuntimeExtension,
             uniqueIdExtension,
@@ -152,7 +152,7 @@ export const useEditorExtensions = ({
         emptyEnterChooserExtension,
         editorRuntimeExtension,
         enableBlockUiEvents,
-        fountainBehaviorExtension,
+        scriptBehaviorExtension,
         paginationExtension,
         uniqueIdExtension,
     ]);

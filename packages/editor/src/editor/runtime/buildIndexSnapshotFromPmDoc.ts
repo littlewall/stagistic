@@ -1,11 +1,8 @@
 import {
-    ELEMENT_ACT,
-    ELEMENT_SCENE_HEADING,
-    ELEMENT_STAGE_DIRECTIONS,
     extractCharacterKeys,
     type IndexedScriptBlock,
     type IndexedScriptCharacterRef,
-    resolveLegacyFountainBlockType,
+    resolveScriptBlockNodeType,
     type ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
@@ -15,11 +12,11 @@ import {
     readNormalizedRefsFromAttrs,
 } from '../characters/characterRefUtils';
 import {
-    FOUNTAIN_COLUMN_GROUP_NODE_NAME,
-    FOUNTAIN_COLUMN_NODE_NAME,
-    isFountainBlockNodeName,
-    normalizeFountainBlockType,
-} from '../tiptap/fountainCore';
+    COLUMN_GROUP_NODE_NAME,
+    COLUMN_NODE_NAME,
+    isScriptBlockNodeName,
+    normalizeBlockNodeType,
+} from '../tiptap/scriptCore';
 
 interface WalkerContext {
     columnGroupOrder: number | null,
@@ -80,11 +77,11 @@ const toCharacterRefs = (
 
 const resolveBlockType = (node: ProseMirrorNode) => {
     const attrs = node.attrs as Record<string, unknown>;
-    const resolvedBlockType = resolveLegacyFountainBlockType(node.type.name)
+    const resolvedBlockType = resolveScriptBlockNodeType(node.type.name)
         ?? attrs.blockType
-        ?? ELEMENT_STAGE_DIRECTIONS;
+        ?? 'stageDirection';
 
-    return normalizeFountainBlockType(resolvedBlockType);
+    return normalizeBlockNodeType(resolvedBlockType);
 };
 
 export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIndexSnapshot => {
@@ -98,14 +95,14 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
         node: ProseMirrorNode,
         context: WalkerContext,
     ) => {
-        if (node.type.name === FOUNTAIN_COLUMN_GROUP_NODE_NAME) {
+        if (node.type.name === COLUMN_GROUP_NODE_NAME) {
             const nextGroupOrder = columnGroupOrderCursor;
             let columnOrder = 0;
 
             columnGroupOrderCursor += 1;
 
             node.forEach(columnNode => {
-                if (columnNode.type.name !== FOUNTAIN_COLUMN_NODE_NAME) {
+                if (columnNode.type.name !== COLUMN_NODE_NAME) {
                     return;
                 }
 
@@ -119,7 +116,7 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
             return;
         }
 
-        if (node.type.name === FOUNTAIN_COLUMN_NODE_NAME) {
+        if (node.type.name === COLUMN_NODE_NAME) {
             node.forEach(childNode => {
                 visitNode(childNode, context);
             });
@@ -127,7 +124,7 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
             return;
         }
 
-        if (!isFountainBlockNodeName(node.type.name)) {
+        if (!isScriptBlockNodeName(node.type.name)) {
             if (node.childCount > 0) {
                 node.forEach(childNode => {
                     visitNode(childNode, context);
@@ -143,11 +140,11 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
             : `missing-block-${orderNo + 1}`;
         const textContent = node.textContent.trim();
 
-        if (blockType === ELEMENT_ACT) {
+        if (blockType === 'act') {
             currentActBlockId = blockId;
         }
 
-        if (blockType === ELEMENT_SCENE_HEADING) {
+        if (blockType === 'scene') {
             currentSceneBlockId = blockId;
         }
 
