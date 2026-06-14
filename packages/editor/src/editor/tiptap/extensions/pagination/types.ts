@@ -66,21 +66,12 @@ export interface BlockCacheEntry {
     hasInlineBreaks: boolean,
 }
 
-export interface SpacerOverlay {
-    moreText?: string,
-    contdText?: string,
-}
-
 export interface BuildPaginationStateResult {
     decorations: DecorationSet,
     pagination: PaginationState,
     nextCache: Map<string, BlockCacheEntry>,
     hasInlineBreaks: boolean,
     usedFallbackMeasurements: boolean,
-    /**
-     * Stable fingerprint of the computed layout (spacers + page boundaries).
-     * An unchanged signature means dispatching would only churn widget DOM.
-     */
     signature: string,
 }
 

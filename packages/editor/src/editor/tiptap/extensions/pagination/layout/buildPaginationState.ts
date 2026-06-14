@@ -1,8 +1,4 @@
 import {
-    ELEMENT_CHARACTER,
-    extractCharacterKeys,
-} from '@stagistic/script';
-import {
     Decoration,
     type EditorView,
 } from '@tiptap/pm/view';
@@ -15,7 +11,6 @@ import {
     FIT_EPSILON_PX,
     MIN_SPLIT_LINES_AFTER,
     MIN_SPLIT_LINES_BEFORE,
-    MORE_CONTD_BLOCK_TYPES,
     ORPHAN_PUSHDOWN_TYPES,
     SPLITTABLE_BLOCK_TYPES,
 } from '../constants';
@@ -58,7 +53,6 @@ export const buildPaginationState = (
     let pageStartOffset = 0;
     let offsetCursor = 0;
     let lastBlockEndPos: number | null = null;
-    let lastCharacterName: string | null = null;
 
     if (contentHeight <= 0) {
         return buildEmptyPaginationStateResult({
@@ -83,7 +77,6 @@ export const buildPaginationState = (
         const attrs = node.attrs as Record<string, unknown>;
         const blockType = attrs.blockType as string | undefined;
         const isSplittable = blockType ? SPLITTABLE_BLOCK_TYPES.has(blockType) : false;
-        const needsMoreContd = blockType ? MORE_CONTD_BLOCK_TYPES.has(blockType) : false;
         const isOrphanCandidate = blockType ? ORPHAN_PUSHDOWN_TYPES.has(blockType) : false;
         let blockDom: HTMLElement | null | undefined;
         const getBlockDom = () => {
@@ -214,7 +207,6 @@ export const buildPaginationState = (
                     break;
                 }
 
-                // re-run the fit check against the spacer-free height
                 continue;
             }
 
@@ -242,25 +234,12 @@ export const buildPaginationState = (
             const leftover = Math.max(0, spaceLeft - fragmentHeight);
             const spacerHeight = leftover + bottomSpacing + topSpacing;
             const dividerOffset = leftover + bottomSpacing;
-            let overlay: {
-                moreText: string,
-                contdText?: string,
-            } | undefined;
-
-            if (needsMoreContd) {
-                overlay = lastCharacterName
-                    ? {
-                        moreText: '(MORE)',
-                        contdText: `${lastCharacterName} (CONT'D)`,
-                    }
-                    : {moreText: '(MORE)'};
-            }
 
             currentHeight += fragmentHeight;
             offsetCursor += fragmentHeight;
             decorations.push(Decoration.widget(
                 breakPos,
-                () => createSpacerElement(spacerHeight, options, dividerOffset, overlay, true),
+                () => createSpacerElement(spacerHeight, options, dividerOffset, true),
                 {side: 1},
             ));
             hasInlineBreaks = true;
@@ -274,12 +253,6 @@ export const buildPaginationState = (
             offsetCursor += spacerHeight;
             blockRemaining = Math.max(0, blockRemaining - fragmentHeight);
             closePage(offset);
-        }
-
-        if (blockType === ELEMENT_CHARACTER) {
-            const [name] = extractCharacterKeys(node.textContent);
-
-            lastCharacterName = name ?? null;
         }
     });
 

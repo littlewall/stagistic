@@ -1,13 +1,11 @@
 import {
     type PaginationOptions,
-    type SpacerOverlay,
 } from '../types';
 
 export const createSpacerElement = (
     height: number,
     options: PaginationOptions,
     dividerOffset?: number,
-    overlay?: SpacerOverlay,
     isInlineBreak = false,
 ): HTMLElement => {
     const spacer = document.createElement(isInlineBreak ? 'span' : 'div');
@@ -21,13 +19,8 @@ export const createSpacerElement = (
     spacer.style.position = 'relative';
     spacer.style.height = `${Math.max(0, height)}px`;
     spacer.style.pointerEvents = 'none';
+
     if (isInlineBreak) {
-        /*
-         * block, not inline-block: an inline-block participates in a line box
-         * and inflates the block by the line-strut descent, so the decorated
-         * height would disagree with the spacer-free measurement and the
-         * pagination would never reach a fixed point.
-         */
         spacer.style.display = 'block';
         spacer.style.width = '100%';
     }
@@ -47,56 +40,6 @@ export const createSpacerElement = (
         divider.style.pointerEvents = 'none';
 
         spacer.appendChild(divider);
-    }
-
-    const bottomSpacing = Math.max(0, dividerOffset ?? 0);
-    const topSpacing = Math.max(0, height - bottomSpacing);
-    const lineHeight = Math.max(1, options.lineHeightPx);
-    const textGap = Math.max(2, Math.round(lineHeight * 0.25));
-    const moreTop = Math.min(Math.max(0, bottomSpacing - lineHeight), textGap);
-    const contdTop = Math.max(
-        bottomSpacing,
-        bottomSpacing + topSpacing - lineHeight - textGap,
-    );
-
-    if (overlay?.moreText) {
-        const moreEl = document.createElement('div');
-
-        moreEl.dataset.paginationOverlay = 'more';
-        moreEl.textContent = overlay.moreText;
-        moreEl.style.position = 'absolute';
-        moreEl.style.right = '0';
-        moreEl.style.top = `${moreTop}px`;
-        moreEl.style.fontFamily = 'inherit';
-        moreEl.style.fontSize = '0.9em';
-        moreEl.style.lineHeight = `${options.lineHeightPx}px`;
-        moreEl.style.letterSpacing = '0.02em';
-        moreEl.style.textTransform = 'uppercase';
-        moreEl.style.color = 'var(--color-ink-muted)';
-        moreEl.style.opacity = '0.75';
-        moreEl.style.userSelect = 'none';
-
-        spacer.appendChild(moreEl);
-    }
-
-    if (overlay?.contdText) {
-        const contdEl = document.createElement('div');
-
-        contdEl.dataset.paginationOverlay = 'contd';
-        contdEl.textContent = overlay.contdText;
-        contdEl.style.position = 'absolute';
-        contdEl.style.left = 'var(--character-indent-left, 56px)';
-        contdEl.style.top = `${contdTop}px`;
-        contdEl.style.fontFamily = 'inherit';
-        contdEl.style.fontSize = '0.9em';
-        contdEl.style.lineHeight = `${options.lineHeightPx}px`;
-        contdEl.style.letterSpacing = '0.02em';
-        contdEl.style.textTransform = 'uppercase';
-        contdEl.style.color = 'var(--color-ink-muted)';
-        contdEl.style.opacity = '0.75';
-        contdEl.style.userSelect = 'none';
-
-        spacer.appendChild(contdEl);
     }
 
     return spacer;
