@@ -42,7 +42,7 @@ export type {
     PersistentCharacterRef,
     RenameActRequest,
 } from './editor/contracts';
-export {default as FountainEditor} from './editor/Editor';
+export {default as ScriptEditor} from './editor/Editor';
 export {useExclusiveOverlay} from './editor/hooks/useExclusiveOverlay';
 export {useFocusEditorBlock} from './editor/hooks/useFocusEditorBlock';
 export {
