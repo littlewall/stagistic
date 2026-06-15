@@ -2,12 +2,14 @@ import {splitTrailingParentheticalSuffix} from '@stagistic/shared';
 
 import {
     getScriptBlockNodeType,
+    isScriptBlockNode,
     type ScriptDocument,
 } from '../document';
 import {
     normalizeCharacterKey,
     splitCharacterTokens,
 } from '../syntax';
+import {renameCharacterTagsInNode} from './characterTagMarks';
 import {
     type CharacterRefByKey,
     getCharacterRefByKey,
@@ -156,12 +158,34 @@ export const renameCharacterInScriptDocument = (
         );
     });
 
-    if (!changed || !nextContent) {
+    const fromKey = normalizeCharacterKey(fromCharacterKey);
+    let tagsChanged = false;
+
+    const withTags = (nextContent ?? value.content).map(node => {
+        if (!isScriptBlockNode(node)) {
+            return node;
+        }
+
+        const replacementName = getCharacterNameForBlockType(toCharacterName, getScriptBlockNodeType(node));
+        const renamed = renameCharacterTagsInNode(node, {
+            fromKey,
+            newName: replacementName,
+            characterId: options?.characterId,
+        });
+
+        if (renamed !== node) {
+            tagsChanged = true;
+        }
+
+        return renamed;
+    });
+
+    if (!changed && !tagsChanged) {
         return unchangedScriptDocument(value);
     }
 
     return {
-        value: {...value, content: nextContent},
+        value: {...value, content: withTags},
         changed: true,
     };
 };

@@ -1,8 +1,13 @@
-import {type ScriptDocument} from '../document';
+import {
+    isScriptBlockNode,
+    type ScriptDocument,
+    type ScriptNode,
+} from '../document';
 import {
     extractCharacterKeys,
     normalizeCharacterKey,
 } from '../syntax';
+import {mapCharacterTagMarks} from './characterTagMarks';
 import {
     type CharacterRefByKey,
     getCharacterRefByKey,
@@ -12,6 +17,42 @@ import {
     unchangedScriptDocument,
     withCharacterRefByKey,
 } from './documentHelpers';
+
+const mapAllNodesTagMarks = (
+    value: ScriptDocument,
+    patch: Parameters<typeof mapCharacterTagMarks>[1],
+): ScriptDocumentChangeResult => {
+    let changed = false;
+
+    const walk = (nodes: ScriptNode[]): ScriptNode[] => nodes.map(node => {
+        let next = node;
+
+        if (isScriptBlockNode(node)) {
+            const mapped = mapCharacterTagMarks(node, patch);
+
+            if (mapped !== node) {
+                changed = true;
+                next = mapped;
+            }
+        }
+
+        if (Array.isArray(next.content) && next.content.some(isScriptBlockNode)) {
+            const childContent = walk(next.content);
+
+            if (childContent !== next.content) {
+                next = {...next, content: childContent};
+            }
+        }
+
+        return next;
+    });
+
+    const content = walk(value.content);
+
+    return changed
+        ? {value: {...value, content}, changed: true}
+        : unchangedScriptDocument(value);
+};
 
 const applyMapResult = (
     value: ScriptDocument,
@@ -38,7 +79,7 @@ export const linkCharacterRefInScriptDocument = (
         return unchangedScriptDocument(value);
     }
 
-    return applyMapResult(
+    const cueResult = applyMapResult(
         value,
         mapCharacterBlockNodes(value.content, node => {
             const text = getNodeTextContent(node);
@@ -60,6 +101,12 @@ export const linkCharacterRefInScriptDocument = (
             });
         }),
     );
+
+    const tagResult = mapAllNodesTagMarks(cueResult.value, tag => tag.key === normalizedCharacterKey && tag.characterId !== characterId
+            ? {characterId}
+            : null);
+
+    return {value: tagResult.value, changed: cueResult.changed || tagResult.changed};
 };
 
 export const unlinkCharacterRefInScriptDocument = (
@@ -70,7 +117,7 @@ export const unlinkCharacterRefInScriptDocument = (
         return unchangedScriptDocument(value);
     }
 
-    return applyMapResult(
+    const cueResult = applyMapResult(
         value,
         mapCharacterBlockNodes(value.content, node => {
             const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
@@ -92,6 +139,10 @@ export const unlinkCharacterRefInScriptDocument = (
             return withCharacterRefByKey(node, nextCharacterRefByKey);
         }),
     );
+
+    const tagResult = mapAllNodesTagMarks(cueResult.value, tag => tag.characterId === characterId ? {characterId: null} : null);
+
+    return {value: tagResult.value, changed: cueResult.changed || tagResult.changed};
 };
 
 export const replaceCharacterRefIdInScriptDocument = (
@@ -107,7 +158,7 @@ export const replaceCharacterRefIdInScriptDocument = (
         return unchangedScriptDocument(value);
     }
 
-    return applyMapResult(
+    const cueResult = applyMapResult(
         value,
         mapCharacterBlockNodes(value.content, node => {
             const sourceCharacterRefByKey = getCharacterRefByKey(node.attrs);
@@ -135,4 +186,8 @@ export const replaceCharacterRefIdInScriptDocument = (
             return withCharacterRefByKey(node, nextCharacterRefByKey);
         }),
     );
+
+    const tagResult = mapAllNodesTagMarks(cueResult.value, tag => tag.characterId === sourceCharacterId ? {characterId: targetCharacterId} : null);
+
+    return {value: tagResult.value, changed: cueResult.changed || tagResult.changed};
 };

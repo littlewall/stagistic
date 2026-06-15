@@ -12,6 +12,7 @@ export {
     collectCharacterTags,
     countCharacterTagsByKey,
     mapCharacterTagMarks,
+    renameCharacterTagsInNode,
 } from './characterTagMarks';
 export {collectScriptCharacterStats} from './collectScriptCharacterStats';
 export {normalizeCharacterColorHex} from './color';

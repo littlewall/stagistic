@@ -147,3 +147,61 @@ export const mapCharacterTagMarks = (
 
     return changed ? {...blockNode, content: nextContent} : blockNode;
 };
+
+interface RenameCharacterTagsArgs {
+    /** Normalized old key. */
+    fromKey: string,
+    /** Display name to write into the matching spans. */
+    newName: string,
+    /** When set, match confirmed tags by id (and unconfirmed ones by key). */
+    characterId?: string,
+}
+
+/**
+ * Rewrites the text + key of characterTag-marked spans that match the
+ * renamed character. The editor commits each tag as one contiguous marked
+ * text node, so a per-text-node rewrite is correct. Immutable.
+ */
+export const renameCharacterTagsInNode = (
+    blockNode: ScriptNode,
+    {
+        fromKey, newName, characterId,
+    }: RenameCharacterTagsArgs,
+): ScriptNode => {
+    if (!Array.isArray(blockNode.content) || newName.length === 0) {
+        return blockNode;
+    }
+
+    const newKey = normalizeCharacterKey(newName);
+    let changed = false;
+
+    const nextContent = blockNode.content.map(child => {
+        const mark = findTagMark(child);
+
+        if (!mark || typeof child.text !== 'string') {
+            return child;
+        }
+
+        const tagCharacterId = readTagCharacterId(mark);
+        const tagKey = normalizeCharacterKey(child.text);
+        const matches = characterId
+            ? tagCharacterId === characterId || (!tagCharacterId && tagKey === fromKey)
+            : tagKey === fromKey;
+
+        if (!matches) {
+            return child;
+        }
+
+        changed = true;
+
+        const nextMarks = (child.marks ?? []).map(existing => (existing.type === CHARACTER_TAG_MARK_NAME
+            ? {...existing, attrs: {...existing.attrs, [CHARACTER_TAG_KEY_ATTR]: newKey}}
+            : existing));
+
+        return {
+            ...child, text: newName, marks: nextMarks,
+        };
+    });
+
+    return changed ? {...blockNode, content: nextContent} : blockNode;
+};
