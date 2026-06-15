@@ -27,6 +27,7 @@ import {
     ScriptBehaviorExtension,
 } from './tiptap/extensions';
 import {DocumentWithSettings} from './tiptap/extensions/DocumentExtension';
+import {CharacterTagMark} from './tiptap/marks';
 import {
     SCRIPT_BLOCK_NODE_NAMES,
     ScriptBlockNodes,
@@ -110,6 +111,10 @@ export const useEditorExtensions = ({
         }),
         [persistentCharactersRef],
     );
+    const characterTagMark = useMemo(
+        () => CharacterTagMark.configure({tagClassName: characterTagStyles.characterTag}),
+        [],
+    );
     const uniqueIdExtension = useMemo(() => {
         const uniqueIdTypes = [...SCRIPT_BLOCK_NODE_NAMES];
 
@@ -129,6 +134,7 @@ export const useEditorExtensions = ({
             Bold,
             Italic,
             Underline,
+            characterTagMark,
             ...ScriptBlockNodes,
             PlaceholderExtension,
             emptyEnterChooserExtension,
@@ -145,6 +151,7 @@ export const useEditorExtensions = ({
         return extensions;
     }, [
         characterRefSyncExtension,
+        characterTagMark,
         emptyEnterChooserExtension,
         editorRuntimeExtension,
         enableBlockUiEvents,
