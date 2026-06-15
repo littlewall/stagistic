@@ -13,9 +13,10 @@ import {
     getConfirmedCharacterColor,
     normalizePersistentCharacterRefs,
 } from '../../characters/colorResolver';
+import {getCharacterTagComposeFromState} from '../../tiptap/extensions/CharacterTagInputExtension';
 import {
-    SCRIPT_BLOCK_NODE_NAMES,
     getActiveScriptBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../../tiptap/scriptCore';
 import {isCharacterBlockType} from './model/blockUtils';
 import {buildSuggestionRows} from './model/buildSuggestionRows';
@@ -173,6 +174,92 @@ type OverlayComputationArgs = {
     characterColorSaturation?: number,
 };
 
+const buildSuggestionEntries = (
+    suggestionRows: ReturnType<typeof buildSuggestionRows>,
+    persistentColorByKey: ReadonlyMap<string, string>,
+    characterColorSaturation?: number,
+) => {
+    return suggestionRows.map(([key]) => ({
+        key,
+        color: persistentColorByKey.get(key) ?? getCharacterColor(key, characterColorSaturation),
+    }));
+};
+
+/**
+ * Confirmed-cast suggestions for an active `@` character-tag compose region in
+ * a stage direction. The overlay positions over the forming pill and filters
+ * the cast by the live query (spec §5: "offering confirmed cast only").
+ */
+const computeCharacterTagComposeSuggestions = ({
+    editor,
+    canvas,
+    normalizedPersistentCharacters,
+    liveCountsByKey,
+    previousOrderByKey,
+    characterColorSaturation,
+    compose,
+}: OverlayComputationArgs & {
+    compose: NonNullable<ReturnType<typeof getCharacterTagComposeFromState>>,
+}): CharacterSuggestionsResult | null => {
+    const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
+
+    if (!block || normalizedPersistentCharacters.length === 0) {
+        return null;
+    }
+
+    const activeKey = normalizeCharacterKey(compose.query);
+    const countsByConfirmedKey = new Map<string, number>();
+
+    normalizedPersistentCharacters.forEach(character => {
+        if (countsByConfirmedKey.has(character.key)) {
+            return;
+        }
+
+        countsByConfirmedKey.set(character.key, liveCountsByKey.get(character.key) ?? 0);
+    });
+
+    if (countsByConfirmedKey.size === 0) {
+        return null;
+    }
+
+    const suggestionRows = buildSuggestionRows({
+        counts: countsByConfirmedKey,
+        activeKey,
+        limit: Math.max(countsByConfirmedKey.size, MAX_SUGGESTIONS),
+        previousOrderByKey,
+    });
+
+    if (suggestionRows.length === 0) {
+        return null;
+    }
+
+    const style = computeOverlayStyle({
+        editor,
+        canvas,
+        blockFrom: block.from,
+        blockTo: block.to,
+        valueStart: compose.from - block.from,
+        valueEnd: compose.to - block.from,
+        overlayWidthPx: OVERLAY_WIDTH_PX,
+        horizontalPaddingPx: CHARACTER_TAG_HORIZONTAL_PADDING_PX,
+    });
+
+    if (!style) {
+        return null;
+    }
+
+    const persistentColorByKey = getPersistentColorByKey(
+        normalizedPersistentCharacters,
+        characterColorSaturation,
+    );
+
+    return {
+        shouldKeepSuppressedSelection: false,
+        style,
+        suggestions: buildSuggestionEntries(suggestionRows, persistentColorByKey, characterColorSaturation),
+    };
+};
+
 export const computeCharacterSuggestions = ({
     editor,
     canvas,
@@ -182,6 +269,21 @@ export const computeCharacterSuggestions = ({
     previousOrderByKey,
     characterColorSaturation,
 }: OverlayComputationArgs): CharacterSuggestionsResult | null => {
+    const compose = getCharacterTagComposeFromState(editor.state);
+
+    if (compose) {
+        return computeCharacterTagComposeSuggestions({
+            editor,
+            canvas,
+            normalizedPersistentCharacters,
+            liveCountsByKey,
+            suppressedSelection,
+            previousOrderByKey,
+            characterColorSaturation,
+            compose,
+        });
+    }
+
     const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
     if (
@@ -284,14 +386,9 @@ export const computeCharacterSuggestions = ({
         return null;
     }
 
-    const suggestions = suggestionRows.map(([key]) => ({
-        key,
-        color: persistentColorByKey.get(key) ?? getCharacterColor(key, characterColorSaturation),
-    }));
-
     return {
         shouldKeepSuppressedSelection: false,
         style,
-        suggestions,
+        suggestions: buildSuggestionEntries(suggestionRows, persistentColorByKey, characterColorSaturation),
     };
 };

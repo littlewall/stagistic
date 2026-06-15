@@ -10,6 +10,7 @@ import {
 
 import {useExclusiveOverlay} from '../../hooks/useExclusiveOverlay';
 import {useEditorLiveCharacters} from '../../live/hooks';
+import {getCharacterTagComposeFromState} from '../../tiptap/extensions/CharacterTagInputExtension';
 import {getEmptyEnterChooserFromState} from '../../tiptap/extensions/EmptyEnterChooserExtension';
 import {
     applyCharacterSuggestion,
@@ -175,6 +176,13 @@ export const useCharacterSuggestions = ({
 
     const selectSuggestion = useCallback((suggestion: string) => {
         if (!editor) {
+            return;
+        }
+
+        if (getCharacterTagComposeFromState(editor.state)) {
+            editor.commands.commitCharacterTag({name: suggestion});
+            closeOverlay();
+
             return;
         }
 

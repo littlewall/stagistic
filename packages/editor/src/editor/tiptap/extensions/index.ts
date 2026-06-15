@@ -24,6 +24,11 @@
 // ─── Behaviour ───────────────────────────────────────────────────────────────
 
 export {
+    characterTagComposeKey,
+    CharacterTagInputExtension,
+    getCharacterTagComposeFromState,
+} from './CharacterTagInputExtension';
+export {
     EMPTY_ENTER_CHOOSER_WRITER_TYPES,
     EmptyEnterChooserExtension,
     getEmptyEnterChooserFromState,

@@ -20,6 +20,7 @@ import {
 import {
     BlockUiEventsExtension,
     CharacterRefSyncExtension,
+    CharacterTagInputExtension,
     createPaginationExtension,
     EditorRuntimeExtension,
     EmptyEnterChooserExtension,
@@ -115,6 +116,13 @@ export const useEditorExtensions = ({
         () => CharacterTagMark.configure({tagClassName: characterTagStyles.characterTag}),
         [],
     );
+    const characterTagInputExtension = useMemo(
+        () => CharacterTagInputExtension.configure({
+            tagClassName: characterTagStyles.characterTag,
+            persistentCharactersRef,
+        }),
+        [characterTagStyles.characterTag, persistentCharactersRef],
+    );
     const uniqueIdExtension = useMemo(() => {
         const uniqueIdTypes = [...SCRIPT_BLOCK_NODE_NAMES];
 
@@ -135,6 +143,7 @@ export const useEditorExtensions = ({
             Italic,
             Underline,
             characterTagMark,
+            characterTagInputExtension,
             ...ScriptBlockNodes,
             PlaceholderExtension,
             emptyEnterChooserExtension,
@@ -152,6 +161,7 @@ export const useEditorExtensions = ({
     }, [
         characterRefSyncExtension,
         characterTagMark,
+        characterTagInputExtension,
         emptyEnterChooserExtension,
         editorRuntimeExtension,
         enableBlockUiEvents,
