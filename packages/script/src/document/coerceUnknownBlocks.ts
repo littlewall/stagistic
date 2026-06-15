@@ -12,7 +12,6 @@ export type ScriptDocumentCoerceResult = {
 
 const coerceNode = (node: ScriptNode): {node: ScriptNode, changed: boolean} => {
     if (typeof node.type === 'string' && node.type !== 'doc' && node.type !== 'text'
-        && !node.type.startsWith('fountainColumn')
         && !isScriptBlockNodeType(node.type)
     ) {
         return {

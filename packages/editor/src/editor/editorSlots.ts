@@ -46,18 +46,5 @@ export const extractSidebarSlots = (children: ReactNode) => {
     return {left, right};
 };
 
-/**
- * Compound-component slots. Render sidebars as children of FountainEditor so they
- * execute inside EditorSnapshotStoreProvider + EditorInstanceProvider and can call
- * useEditorLiveStructure(), useEditorLiveCharacters(), useEditorInstance(), etc.
- *
- * Usage:
- * ```tsx
- * <FountainEditor ...>
- *   <FountainEditor.LeftSidebar><MyStructureSidebar /></FountainEditor.LeftSidebar>
- *   <FountainEditor.RightSidebar><MyCharactersSidebar /></FountainEditor.RightSidebar>
- * </FountainEditor>
- * ```
- */
 export const LeftSidebar = makeSlot(LEFT_SIDEBAR_SLOT);
 export const RightSidebar = makeSlot(RIGHT_SIDEBAR_SLOT);

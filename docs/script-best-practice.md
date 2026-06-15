@@ -1,184 +1,255 @@
-# Script Formatting Best Practice — NMI Comparison
+# Script Editor — Best Practices & Design Decisions
 
-Source: [NMI Format Guidelines 2017](https://nmi.org/wp-content/uploads/2017/09/Format-Guidelines-2017.pdf), Part Two: The Script (pages 13–16, "Samuel French Broadway format"). Each item compares the guideline with the current Stagistic implementation and proposes what to change.
-
-**Unit mapping used below:** the editor renders at 96 dpi with Courier (10 cpi at 12 pt), so `1" = 96 px = 10 ch`. Block indents are defined in `ch` (`indentLeftChars`) in [packages/script/src/blocks/specs/](../packages/script/src/blocks/specs), page geometry in px in [defaults.ts](../packages/script/src/settings/defaults.ts).
-
-Status legend: ✅ compliant · 🔧 adjust existing · 🆕 not implemented yet
+> Specifikace chování muzikálového script editoru (SaaS).
+> Vychází z ANMT *A Crash Course in Writing Musicals* a z rozhodnutí učiněných během návrhu.
+> Princip: **jeden obsah, mnoho views**. Editor drží sémantiku, sazbu řeší export.
 
 ---
 
-## Implementation — Round 1 (approved scope)
+## 0. Základní principy
 
-Scope locked to adjustments of existing behavior; no new pages, page furniture, or song entities in this round. Values below are the product decisions for Stagistic and deliberately deviate from NMI where noted.
-
-- [x] **R1-1 Page size choice — A4 / US Letter**
-  Add a "Page size" preset select to the page layout settings panel: A4 (`794×1123 px`) and US Letter (`816×1056 px`). Preselect from the script's current dimensions; show "Custom" when they match neither. Default for new scripts stays A4.
-  Touches: `PageLayoutSettingsPanel` + its view model. `EditorSettings.page` already carries `widthPx`/`heightPx`, so no schema change.
-
-- [x] **R1-2 Rename blocks (UI labels only)**
-  `Parenthetical` → **"Aside"**, `Action` → **"Stage directions"**. Internal identifiers (`parenthetical`, `action` node/block types) and stored documents stay unchanged — label-only change in the block specs plus any settings-panel preview strings.
-  Touches: [parenthetical.ts](../packages/script/src/blocks/specs/parenthetical.ts), [action.ts](../packages/script/src/blocks/specs/action.ts), [settings/constants.ts](../packages/app-routes/src/routes/script/editor/settings/constants.ts).
-
-- [x] **R1-3 Block indent defaults — confirmed values**
-  Final values (deliberate deviations from NMI noted):
-  | Block | Value | Change made |
-  |---|---|---|
-  | Character | 3" (30 ch) — per NMI | changed from 20 ch |
-  | Dialogue | 1" (10 ch) — deviation (NMI: flush left) | none (already 10 ch) |
-  | Aside | 1.6" (16 ch) — deviation (NMI: 1") | none (already 16 ch) |
-  | Stage directions | full width — deviation (NMI: 1" both sides) | none (already 0) |
-  | Lyrics | 1" (10 ch) — deviation (NMI: 0.5") | none (already 10 ch) |
-
-- [x] **R1-4 Aside casing — add `lowercase` option**
-  `'lowercase'` added to [BLOCK_CASING_OPTIONS](../packages/script/src/settings/options.ts) (rendered via `text-transform: lowercase`), made the Aside default; `normal`/`uppercase`/`lowercase` all selectable in the element formatting toolbar.
-
-- [x] **R1-5 Multi-character separator — canonical `/`, `+` still typeable**
-  Tokenizer ([characterNames.ts](../packages/script/src/fountain/characterNames.ts)) accepts both `+` and `/` forever; all writers (editor normalization, Fountain import line normalization, serializer) emit `/`. Typing `+` in a character block triggers immediate normalization to `/`.
-  Legacy data: a **TEMPORARY one-shot migration** in [useScriptLoader.ts](../packages/app-routes/src/routes/script/controller/useScriptLoader.ts) (+ [migrateCharacterDelimiters.ts](../packages/script/src/characters/migrateCharacterDelimiters.ts)) rewrites `+` → `/` on editor load and saves immediately. **Remove both after all local scripts have been opened once.**
-
-- [x] **R1-6 Remove the Section block**
-  `section` removed from `ALL_BLOCK_SPECS`, editor bindings, settings panel constants, pagination sets, and DB config block types; `ELEMENT_SECTION` deleted from the type union. Fountain `#` headings (other than `# ACT:`) now parse as Stage directions with the raw line kept. Stored documents containing `section` blocks coerce to Stage directions on load (`resolveScriptBlockNodeType` falls back to the default `action` node) — no data migration, per decision.
-
-- [x] **R1-7 Lyrics nesting via Tab**
-  Tab on a lyrics block inserts a leading literal tab (max 4), Shift-Tab removes one — same mechanism as Stage directions (max 3). `tab-size: 5` on the editor content renders one tab as a 0.5" step. Tab/Shift-Tab no longer change block types anywhere (the old Tab conversions on character/dialogue/lyrics/aside were removed).
-
-- [x] **R1-8 Block type switching shortcuts**
-  Type changes live on Cmd/Ctrl+digit (existing per-type shortcuts) and the new **Alt+Enter** cycle (Shift+Alt+Enter reverses) — same physical chord on macOS and Windows, not reserved by either OS or browsers (Cmd+Tab and Alt+Tab are OS app switchers and unusable). Acts are excluded from cycling (structural, managed via act commands).
-
-### Resolved decisions (former Q1–Q4)
-
-1. **Character indent:** 3" (NMI value) — default changed from 20 ch to 30 ch.
-2. **Section removal:** existing `section` blocks and Fountain `#` headings behave as Stage directions; no data conversion (affects test scripts only). Parser rewrite in phase 2 will revisit.
-3. **Lyrics nesting:** literal leading tabs, same as Stage directions.
-4. **Legacy `+`:** one-shot load-time migration rewrites stored documents to `/` and saves immediately; migration code is temporary and gets deleted (not flagged) after running. Tokenizer accepts `+` on input permanently.
+1. **Jeden obsah, mnoho views** — Outline, Song spotting, Edit, Cue/Sync view a exporty jsou pohledy nad jednou datovou strukturou.
+2. **Sémantika v editoru, sazba v exportu** — co je v editoru dekorace/struktura, se do pagination a page breaků promítá až při exportu. V editoru je plynulý tok.
+3. **Vlastní interní specifikace** (serializovatelná do textu).
+4. **Computed číslo, stabilní `id`** — pořadová čísla (scény, cues, stránky) se počítají; identita entit je stabilní, aby odkazy nepadaly.
+5. **Warningy, ne tvrdé bloky** — kontrola konvencí nesmí blokovat kreativní psaní. Lint upozorňuje, nezakazuje (až na případy, které by porušily integritu dat).
 
 ---
 
-## 1. Page & typography
+## 1. Struktura dokumentu
 
-- [ ] 🔧 **Margins — 1" on all four sides**
-  Guideline: 1" top, bottom, right, left.
-  Current: top/right/bottom `96px` (1" ✅) but left `144px` (1.5" — screenplay binding margin).
-  Proposed: change `marginLeftPx` default to `96`. Keep the 1.5" value available as a preset for users who bind scripts.
+- Hierarchie **Akt → Scéna** je nadřazená číslování i formátování.
+- **Nová scéna = nová strana** (v exportu).
+- **Cue nikdy nepřesahuje hranici scény** — ani fallback „do konce scény". Scéna je tvrdá hranice pro spany i číslování.
+- Automatické stránkování ve formátu **Akt–Scéna–strana**.
 
-- [ ] 🔧 **Page size — US Letter for this format**
-  Guideline: implied US Letter (Samuel French/Broadway submission format).
-  Current: default page is `794×1123px` = A4.
-  Proposed: add a page-size preset (A4 / US Letter `816×1056px`) in page settings; the "NMI/Broadway" preset should select Letter. Keep A4 default for European users, but make the choice explicit.
+---
 
-- [x] ✅ **Courier 12 pt**
-  Guideline: Courier, 12 point.
-  Current: `--font-family-mono: 'Courier Prime', 'Courier New', …` and `typography.fontSizePx: 16` (16 px = 12 pt at 96 dpi). Compliant.
+## 2. Sémantické bloky
 
-## 2. Front matter
+### 2.1 Stage direction
+Automatické formátování podle pozice ve scéně:
+- **Initial** (první ve scéně): odsazení 3", bez závorek.
+- **Subsequent** (následné): 1" z obou stran, v závorkách.
 
-- [ ] 🆕 **Cover page — title and authors**
-  Guideline: cover page with title and authors, ordered bookwriter → composer → lyricist.
-  Current: title-page fields exist in the DB (`script_title_page_fields`) and in the settings panel (`TitlePageSettingsPanel`), but no cover page is rendered in the editor canvas or pagination.
-  Proposed: render a generated cover page as page 1 (pagination decoration or a dedicated read-only first page) from the title-page fields. Add structured author roles (bookwriter / composer / lyricist) so the ordering rule can be applied automatically.
+### 2.2 Aside
+- Sémanticky vázaný k replice (mezi Character a Dialogue).
+- Pokud je to celá věta, editor nabídne **povýšení na Stage direction**.
 
-- [ ] 🆕 **Second page — cast, time, place**
-  Guideline: second page lists cast of characters, time, and place.
-  Current: not rendered. The data largely exists — `script_characters` already holds the cast (with genders); time/place fields do not exist yet.
-  Proposed: auto-generate a "Cast / Time / Place" page from `script_characters` (optionally with vocal ranges later, per the score checklist) plus new `time` and `place` title-page fields. Editable overrides per script.
+### 2.3 Lyrics
+- Úrovně zanoření (A, B, C) přes `Tab` / `Shift+Tab`.
+- Vizualizace struktury písně (AABA) jako `sectionLevel`.
 
-## 3. Book (dialogue) layout
+### 2.4 Simultánní zpěv
+- Datový model umožňuje seskupení stop (Character + Lyrics) pod sebou.
+- Při exportu/renderu se transformuje do **tabulkových sloupců** (dle normy).
 
-- [ ] 🔧 **Character names indented 3"**
-  Guideline: 3" from left margin.
-  Current: `character.indentLeftChars: 20` = 2".
-  Proposed: change default to `30` (3"). Keep per-script overrides as today.
+### 2.5 Postavy
+- Registrace přes `@` ve stage directions → indexace přítomnosti postavy na scéně (i bez repliky).
+- Základ pro budoucí kontrolu kapitalizace jmen („HE kisses…").
 
-- [ ] 🔧 **Dialogue flush left**
-  Guideline: dialogue starts at the left margin (stage format, unlike screenplay).
-  Current: `dialogue.indentLeftChars: 10` (1") + `indentRightChars: 3`.
-  Proposed: change defaults to `indentLeftChars: 0`, `indentRightChars: 0`.
+---
 
-- [ ] 🔧 **Asides (parentheticals) — indented 1", lowercase, in parentheses**
-  Guideline: 1" indent, lowercase, wrapped in parentheses; asides must not be full sentences (full sentences belong in stage directions).
-  Current: `parenthetical.indentLeftChars: 16` (1.6"), `casing: 'normal'`, italic by default. No `lowercase` casing option exists (`BLOCK_CASING_OPTIONS = ['normal', 'uppercase']`).
-  Proposed: set indent default to `10` (1"); add `'lowercase'` to `BLOCK_CASING_OPTIONS` ([options.ts](../packages/script/src/settings/options.ts)) and make it the parenthetical default; drop default italics. Nice-to-have: a soft lint that flags asides ending in sentence punctuation ("promote to stage direction").
+## 3. Cue systém
 
-- [ ] 🆕 **No "cont'd" — currently violated**
-  Guideline: do **not** use "cont'd", neither at page bottoms nor after stage directions.
-  Current: pagination actively renders `(MORE)` and `CHARACTER (CONT'D)` overlays ([buildPaginationState.ts:213-214](../packages/editor/src/editor/tiptap/extensions/pagination/layout/buildPaginationState.ts)).
-  Proposed: add a pagination option `continuationMarkers: 'screenplay' | 'none'` and default the stage/musical format to `'none'`. (Screenplay users may still want it, so keep it switchable rather than deleting.)
+### 3.1 Mentální model
+- **Cue je interval (span), ne bod** — časová vrstva nad textem.
+- **Trigger je textová reference**, ne kopie textu.
+- **Konec je dramatická akce** (např. *grinding halt*) označená uživatelem, ne neviditelný tag.
 
-## 4. Stage directions
+### 3.2 Anatomie cue
+| Vlastnost | Význam |
+|---|---|
+| `id` | stabilní identita (drží odkazy) |
+| `track` | music / lights / sfx / … (určuje barvu a vlastní lane) |
+| `type` | `song` \| `reprise` \| `underscore` \| `incidental` \| `sfx` |
+| `duration` | **rozsah** (span) nebo **okamžik** (zero-duration) |
+| `status` | `open` (nedokončeno) \| `complete` |
+| `start` | inline kotva — bold titul v textu (poslední prvek bloku) |
+| `end` | kotva konce — tichá (dekorace na bloku) nebo textová (`##`) |
+| `trigger` | text-range odkaz na předchozí blok (zdroj `CUE:` ve score) |
+| `songRef` | u reprízy odkaz na původní píseň-entitu |
+| `number` | **computed** pořadové číslo v rámci tracku |
 
-- [ ] 🔧 **Subsequent stage directions — indented 1" from left AND right**
-  Guideline: stage directions inside a scene indent 1" on both sides.
-  Current: the `action` block is full width (`indentLeftChars: 0`, no right indent).
-  Proposed: change `action` defaults to `indentLeftChars: 10`, `indentRightChars: 10`.
+### 3.3 Dvě nezávislé osy: typ × trvání
+- **Typ** = *co to je* (určuje barvu, ikonu, chování v exportu, jestli má lyrics).
+- **Trvání** = *jak dlouho zabírá na lince* (rozsah vs. okamžik).
+- Nemíchat! „Single-line" není typ, je to *okamžik*. `underscore` je vždy rozsah; `sfx` bývá okamžik (ale nevynucovat natvrdo).
+- Default trvání lze odvodit z typu, uživatel může přepnout.
 
-- [ ] 🆕 **Initial stage direction of a scene — indented to center, no parentheses**
-  Guideline: the first stage direction of each scene starts at the page center and is not parenthesized.
-  Current: no concept of an "initial" stage direction; all action blocks share one style.
-  Proposed: two options — (a) automatic: style the first `action` block following a `sceneHeading` with `indentLeftChars: ~30` via a derived style (no new block type, works on reorder); or (b) explicit: a `sceneDirection` block spec with its own defaults. Recommend (a) for zero authoring overhead; the renderer already styles per block type, so this needs a "first-after-scene-heading" flag in the block index.
+### 3.4 Single Source of Truth (book ↔ score)
+- Dialog v řádku `CUE:` partitury je **generován z triggeru** (odkaz na text).
+- Změna textu v knize → partitura se synchronizuje.
+- Splňuje pravidlo: text ve score musí být **identický** se scriptem.
 
-- [ ] 🆕 **Capitalize the character who acts**
-  Guideline: in stage directions, capitalize names/pronouns of whoever performs the action, not the recipient ("HE kisses Maria").
-  Current: character tagging exists for character/dialogue blocks (`script_block_character_refs`), but no caps rendering of tagged names in action blocks.
-  Proposed: when a tagged character mention appears in an `action`/`note` block, render it uppercase via a decoration (data unchanged). Pronoun capitalization stays authorial — document it as a writing hint rather than automating.
+### 3.5 Underscoring
+- Bloky dialogu uvnitř `underscore` spanu dostanou **odvozený příznak** `underscored` (ne ruční flag).
+- Renderer/export je ošetří jako „lyric" (page break, vlastní stránka v integrovaném modu).
+- V editoru zůstávají běžně editovatelné.
 
-## 5. Page furniture
+### 3.6 Pravidla překryvu
+- **Mezi tracky: překryv povolen** (smysl oddělených lanes — pod písní zhasne světlo, cinkne telefon).
+- **Uvnitř hudebního tracku: překryv zakázán** — jeden klavír, hudba se **řetězí** (segue / attacca / 6 → 6A → 6B), ne paralelně.
+- Datově: překryv je vlastnost *mezi* tracky; v rámci tracku jsou cue **disjunktní intervaly**.
+- Dva hudební zdroje (orchestr + kapela na jevišti) = **další track**, ne překryv. Dveře otevřené.
 
-- [ ] 🆕 **Page numbers — Act-Scene-Page, upper right**
-  Guideline: `2-3-67` or `II-3-67` in the upper right of each page.
-  Current: pagination renders no page numbers at all.
-  Proposed: pagination already knows page boundaries and the block index knows act/scene per block — add a per-page header decoration that resolves the act/scene at the top of the page and formats `act-scene-page`, with a setting for arabic vs roman act numerals.
+### 3.7 Vrstvy (lanes)
+- Cue patří do **lane** podle tracku: *Music* (default při psaní knihy), později *Lights*, *SFX*, …
+- Vrstvy lze skrýt/zobrazit (vizuální filtr; data i integrita zůstávají).
 
-- [ ] 🆕 **Draft date footer — bottom left, 8–9 pt**
-  Guideline: every page footer carries the draft date (`4.26.05`, `4/26/05`, or `April 26, 2005`).
-  Current: not implemented; no draft-date field exists.
-  Proposed: add a `draftDate` script setting (default: last manual-save date, overridable), render it as a small footer decoration in pagination and in exports.
+---
 
-- [ ] 🆕 **New scene begins a new page**
-  Guideline: each scene starts on a fresh page.
-  Current: pagination flows scenes continuously; no forced break on `sceneHeading`.
-  Proposed: pagination option `breakBeforeSceneHeading: boolean` (default on for this format) — force a page boundary before every `sceneHeading` block in `buildPaginationState`.
+## 4. Interakce v editoru (UI/UX)
 
-## 6. Songs & lyrics
+### 4.1 Vkládání
+- **`#`** v stage direction → inline picker → založení/výběr cue (start).
+- **`##`** v stage direction → textová kotva **konce** (navázaná na konkrétní poznámku, např. „Music comes to a grinding halt.").
+- Start = **bold titul**, poslední prvek bloku, před ním netučný text („bold = první tón").
+- `##` konec **není bold** a **nemusí** být poslední prvek bloku.
 
-- [ ] 🔧 **Lyrics in caps, indented 0.5"**
-  Guideline: lyric lines in capitals, indented 0.5" (A-sections).
-  Current: `lyrics.casing: 'uppercase'` ✅, but `indentLeftChars: 10` (1") and italic by default (not part of the guideline).
-  Proposed: change default indent to `5` (0.5"); reconsider default `isItalic: true` — the Samuel French sample uses plain caps. Italics could remain a house-style toggle.
+### 4.2 Vertikální linka (cue lane)
+- Napravo od editoru, jedna linka **na track** (barva = identita tracku).
+- Start → **barevný puntík** na řádku bloku.
+- Nedokončené cue → linka **přerušovaná + gradient do ztracena** do konce scény.
+- Po zadání konce → **plná čára s uzavřeným koncem**, obarvený rozsah.
 
-- [ ] 🆕 **Lyric section levels — B/C/intro indents**
-  Guideline: B-sections indent 1.0", C-sections 1.5", each further section +0.5"; intro sections indent 1.5"+ so they aren't mistaken for A-sections.
-  Current: a single flat `lyrics` block; no section concept.
-  Proposed: add an `indentLevel` (0–n) attribute to the lyrics block; Tab/Shift-Tab adjusts the level in the editor; rendered indent = `5 + level × 5` ch. Serializer/parser round-trips the level (e.g. Fountain `~` lyrics with leading tabs/spaces).
+### 4.3 Stav cue — vizuální kódování
+- **Barva = track** (hudba/světla/efekty). Barvu nelze „spotřebovat" na stav.
+- **Stav (open/complete) = styl čáry** (přerušovaná vs. plná) **+ gradient do ztracena** u nedokončené.
+- Plošná opacity jako jediný nositel stavu **NE** (špatně čitelná u světlých barev).
 
-- [ ] 🆕 **Hanging indent for wrapped lyric lines**
-  Guideline: long lyric lines get a 0.5" hanging indent on wrap.
-  Current: wrapped lyric lines align to the block's left edge.
-  Proposed: CSS-only — `padding-left: +5ch; text-indent: -5ch` on lyric blocks (added to the per-block vars in [cssVars.ts](../packages/editor/src/editor/editorSettings/cssVars.ts)). Also apply in print/PDF export.
+### 4.4 Nastavení konce
+Dvě rovnocenné cesty (objevitelnost + flexibilita):
+1. **Tichý konec** — hover na linku → světlé puntíky u řádků + **náhled rozsahu** → klik. Žádný text, jen dekorace na hranici bloku.
+2. **Textový konec** — `##` uvnitř stage direction.
+3. Alternativa k hoveru: na startovním puntíku menu „Nastavit konec…".
 
-- [ ] 🆕 **Song cue — bolded title as the last thing before the lyric**
-  Guideline: the song title (with its number) appears bolded at the end of a stage direction immediately before the lyric page, preceded by some non-bolded direction text ("HE smiles. **6. Bite the Apple.**").
-  Current: no song/musical-number concept; lyrics blocks are free-floating.
-  Proposed: introduce a lightweight "song" entity (number + title) or a `songCue` inline mark/block: a stage-direction block whose trailing song-title span renders bold. Minimal version: a "Song cue" toggle on an action block that bolds its trailing `N. Title.` segment; fuller version ties into a future musical-numbers table for the score side.
+### 4.5 Úpravy přes startovní puntík
+- Klik na startovní puntík → panel: přepínač **okamžik / rozsah** + výběr **typu**.
+- Přetažení koncového puntíku → posun konce (revalidace nepřekryvu).
 
-## 7. Multiple characters singing
+### 4.6 Co editor vynucuje
+- Bold titul = **poslední prvek bloku** (nový text za titul se posune před něj; titul je „sticky").
+- Před bold titulem musí být netučný text.
+- Konec < start nesmí persistovat.
+- V hudebním tracku: žádné dvě cue na stejné pozici / žádný překryv.
 
-- [ ] 🔧 **Multi-character separator — "/" instead of "+"**
-  Guideline: simultaneous singers are joined with `/` on the character line (`THEODORE/GINGER`), with `and` + a second line when the list is long.
-  Current: the delimiter is `+` ([characterNames.ts](../packages/script/src/fountain/characterNames.ts) — `CharacterDelimiter = '+' | ' + '`, splitter checks `char === '+'`, joiner emits `+`).
-  Proposed: switch the canonical delimiter to `/`: update `splitCharacterTokens`, the join helper, character suggestions, rename logic, and the Fountain serializer/parser. Accept both `+` and `/` on input (and in import) for backwards compatibility; normalize to `/` on write. Note `/` cannot appear inside parenthetical extensions — the existing paren-depth guard in the splitter already covers that.
+---
 
-- [x] ✅ **Alternating solo/unison lines**
-  Guideline: mark each solo with its own character line; unison lines use the combined `NAME/NAME` line.
-  Current: already expressible with separate character + lyric blocks; works once the `/` separator lands. No extra work beyond the item above.
+## 5. Export (pozdější fáze, dveře otevřené)
 
-- [ ] 🆕 **Simultaneous different lyrics — side-by-side columns**
-  Guideline: when characters sing different words at the same time, lay the parts out side by side (tables; 0.3" hanging indent and 10 pt font allowed to help wrapping). The "(simultaneous with X, above)" note is explicitly called a poor fallback.
-  Current: no column layout in the editor — but the DB schema is already prepared: `script_blocks.column_group_id` / `column_index` exist ([schema.ts:209-210](../packages/db/src/schema.ts)) and the block extractor walks column groups.
-  Proposed: implement the editor surface for column groups: a two-column container node that pairs character+lyrics stacks, rendered side by side, serialized through the existing `column_group_id`/`column_index` columns. Pagination must treat a column group as one unsplittable (or row-wise splittable) unit. Until then, do not promote the "(simultaneous with…)" workaround in UI copy.
+- **Žádné „cue na nové stránce" v editoru** — čistě export concern.
+- Pagination pravidla: book → lyric → music, page breaky.
+- **Exportní profily**: Working Draft, Reading, Producer Submission.
+- Patička s **datem draftu** (navázaná na checkpointy/verze).
+- **Musical Numbers** tabulka do front matter (generovaná z cue listu).
 
-## 8. Out of scope for the editor (noted for later)
+---
 
-- **Underscoring & score integration** (page 16): cue-per-page, "singer never flips backwards", dialogue duplicated into the score, segue/attacca markers — these concern the score document. Relevant to Stagistic only when a score/export module exists; the script-side rule it implies is to place underscored dialogue *before* the lyric/cue that follows it, which the current block order already allows.
-- **Double-sided collated script/score with running page numbers** (page 13): an export/print concern — when PDF export lands, support a running page number at the bottom in addition to the act-scene-page header.
-- **No copyright notices** (page 13): nothing to implement — just avoid adding a copyright field to generated cover pages.
+## 6. User Stories
+
+Formát: *chci → udělám → na pozadí*.
+
+### Epic A — Založení cue
+- **A1 Hudební cue (píseň):** `#` → picker → titul. Vznik `Cue {track: music, type: song, duration: range, status: open}`, bold titul na konec bloku, puntík na lince, přerušovaná linka do konce scény, computed číslo, uložení triggeru (předchozí blok).
+- **A2 Jiný track (světlo/SFX):** `#` → přepnout track. Jako A1, ale jiná barva + vlastní lane; číslování per track.
+- **A3 Okamžik (SFX cinknutí):** `#` → typ `sfx` → trvání `instant`, `status: complete` rovnou, jen puntík, žádný warning o konci.
+- **A4 Repríza:** `#` → vyber existující píseň → „Reprise". Nové cue, `type: reprise`, `songRef` na originál, titul „<Titul> – Reprise".
+
+### Epic B — Ukončení cue
+- **B1 Tichý konec:** hover na linku → náhled → klik. End kotva na hranici bloku, `status: complete`, plná čára.
+- **B2 Textový konec:** `##` v stage direction; při více otevřených cue dotaz „konec čeho".
+- **B3 Fallback (do konce scény):** neuzavřu. `status: open`, přerušovaná/vybledlá, tichý warning. Export = do konce scény.
+- **B4 Nové hudební cue bez zavření předchozího:** `#`. **Auto-close** předchozího těsně před startem + toast „Předchozí cue uzavřeno zde – upravit?". Napříč tracky se nezavírá nic.
+
+### Epic C — Úpravy a typy
+- **C1 Změna typu:** klik na puntík → osa typ. Přepočet barvy/ikony/exportu; `underscore` vynutí rozsah.
+- **C2 Přepnutí okamžik ↔ rozsah:** přepínač na puntíku. Okamžik→rozsah nastaví `open`; rozsah→okamžik zahodí end kotvu.
+- **C3 Underscored dialogue:** píšu dialog uvnitř `underscore` spanu → odvozený `underscored` → export jako lyric.
+- **C4 Posun konce:** drag koncového puntíku nebo přepis `##`. Revalidace nepřekryvu.
+
+### Epic D — Struktura, číslování, integrita
+- **D1 Přesun scény:** čísla cues computed → přečíslování; stabilní `id` drží odkazy.
+- **D2 Skupina 6/6A/6B:** výběr → „seskupit". Validace: všechny ve stejné scéně.
+- **D3 Lint:** chybějící konec, bold titul není poslední, chybí netučný text před titulem, skupina přesahuje scénu, hudební překryv — vše jako nenápadné warningy.
+
+### Epic E — Vrstvy a views
+- **E1 Zapnout/vypnout vrstvu:** filtr vykreslení; data zůstávají. Default při psaní: jen Music.
+- **E2 Skladatelský sync view (`CUE:`):** pro každé cue aktuální `CUE:` text z triggeru + příznak „změněno od verze X".
+- **E3 Cue list napříč show:** computed tabulka (číslo, titul, track, typ, scéna, status) → základ Musical Numbers.
+
+### Epic F — Export
+- **F1 Profily:** dekorace z editoru → pagination pravidla; v editoru plynulý tok.
+
+---
+
+## 7. Edge Cases
+
+Formát: *situace → chování editoru → pozadí/proč*.
+
+### 7.1 Mazání bloků s cue
+- **EC1 Smazání bloku se startem** = smazání celé cue (start = identita). Potvrzení; kaskáda + přečíslování; reprise viz EC15.
+- **EC2 Smazání bloku s tichým koncem** → cue zpět na `open` + warning, nepadá.
+- **EC3 Smazání stage direction s `##`** → jako EC2 (kotva uvolněna).
+- **EC4 Smazání bloku uvnitř spanu** → span se zkrátí, kotvy drží; přepočet `underscored`.
+
+### 7.2 Scény
+- **EC5 Smazání scény s kompletním cue** → smaže i cues (potvrzení s výpisem), přečíslování.
+- **EC6 Cue z fallbacku** → cue je vždy ohraničené scénou; nikdy nepřesáhne hranici. Smazání scény smaže i cue.
+- **EC7 Přesun scény mezi akty** → přečíslování cue i stránek; stabilní `id` drží odkazy; pozor na EC12.
+- **EC8 Split scény uprostřed spanu** → detekovat protnuté cue, nabídnout *ukončit na konci první scény* (default) nebo *přesunout celé do druhé*. Nikdy tiše přes hranici.
+
+### 7.3 Anchoring a editace textu
+- **EC9 Smazání jen znaků `#`/`##`** → kotva žije dál (znak je trigger vzniku, ne perzistence). Start (bold titul) je viditelná reprezentace → smazání = EC1. Konec: viditelný end marker pro cílené zrušení.
+- **EC10 Text za bold titul** → auto-posun textu před titul (titul sticky na konci).
+- **EC11 Enter v bloku se startem** → titul drží na konci; Enter před titul → titul jde do nového bloku i s kotvou.
+
+### 7.4 Číslování a skupiny
+- **EC12 Rozpad skupiny přes scény** → auto-rozpuštění (6B vlastní číslo) + warning.
+- **EC13 Vložení cue doprostřed řady** → přečíslování (computed). Ve views ukázat i stabilní `id`/titul (lidská paměť na čísla).
+- **EC14 Dvě cue na stejném řádku v hudebním tracku** → odmítnout s vysvětlením (jeden klavír).
+
+### 7.5 Reprise
+- **EC15 Smazání originálu s referencemi** → varování + volby: *povýšit první reprízu na originál* (default) / *smazat reprízy* / *zrušit*.
+- **EC16 Repríza dřív než originál** → warning (dramaturgicky chyba), ale nezakazovat.
+
+### 7.6 Underscore / odvozené příznaky
+- **EC17 Změna `underscore` → `song` s dialogy uvnitř** → dialogy ztratí `underscored`; ukázat náhled dopadu („3 dialogy se přestanou sázet jako lyric").
+- **EC18 `underscore` bez textu uvnitř** → legitimní instrumentální podkres, žádný warning.
+
+### 7.7 Undo / redo
+- **EC19 Undo po vytvoření cue** → jedna atomická transakce (entita + kotva + dekorace + číslo) se vrátí celá.
+- **EC20 Undo po auto-close** → auto-close je součást téže transakce → vrací se konzistentně.
+- **EC21 Redo posunu + mezitím editace** → kotvy **relativní** (mark/decoration mapování), ne absolutní offsety.
+
+### 7.8 Copy / paste
+- **EC22 Kopie bloku se startem** → paste **nevytvoří duplikát cue**; vloží se jen plain text titulu. (Pokročilá alternativa: „vložit jako nové cue" s novým `id`.)
+- **EC23 Duplikace celé scény s cues** → klony s novými `id` a číslováním; reprise: uvnitř kopie přepojit na klon, mimo ponechat na originál. Explicitně ošetřit.
+
+### 7.9 Mezitrackové situace
+- **EC24 Stejný řádek = start hudby i světla** → legitimní, dvě linky/barvy, žádný konflikt.
+- **EC25 `##` při více otevřených cue** → dialog vypíše **všechna** otevřená cue (i ve skrytých vrstvách) s označením tracku.
+- **EC26 Vypnutí vrstvy s nedokončeným cue** → warning zůstává v panelu problémů (integrita se kontroluje i u skrytých vrstev).
+
+### 7.10 Degenerované stavy
+- **EC27 Start i konec ve stejném bloku** → nabídnout „přepnout na okamžikové cue?".
+- **EC28 Konec před startem** → nevalidní; drag se zastaví na startu, nikdy nepersistovat.
+- **EC29 Cue v prázdné scéně (kotvy zůstaly)** → bez startu = EC1; prázdný blok s bold titulem = legitimní rozepsané cue, jen warning „chybí konec".
+
+---
+
+## 8. Tři principy, které řeší většinu edge cases
+
+1. **Start = identita cue** (smazání startu = smazání cue, po potvrzení); **konec = uvolnitelná kotva** (smazání = degradace na `open`, ne pád).
+2. **Kotvy jsou relativní** (mark/decoration mapování přes TipTap transakce), ne absolutní offsety → řeší undo/redo, paste, editaci kolem.
+3. **Číslo je computed, `id` je stabilní** → řeší přesuny, vkládání, reprise odkazy. Ve views ukazovat i stabilní identitu, ne jen pořadové číslo.
+
+---
+
+## 9. Otevřené / odložené (dveře nechané otevřené)
+
+- Plný datový model (JSON) bloků, cue-spanů a paginace kompatibilní s TipTap.
+- Stavový automat vkládání cue (`#` → open → `##`/puntík → complete + auto-close).
+- Akceptační kritéria (Given/When/Then) pro rizikové edge cases (EC1, EC8, EC15, EC22/23).
+- Další lanes (Lights, SFX) jako plnohodnotné tracky.
+- Více hudebních zdrojů (orchestr + jevištní kapela) jako oddělené music tracky.

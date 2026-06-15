@@ -14,10 +14,6 @@ export const AppHeader = (props: AppHeaderProps) => {
     const navigate = useNavigate();
     const {openNewScript} = useGlobalModals();
 
-    /*
-     * Script import is disabled (phase 2). The menu entry is omitted by not
-     * passing onImportScript; the modal itself remains wired but unreachable.
-     */
     return (
         <UIAppHeader
             {...props}
@@ -36,7 +32,6 @@ export const ScriptEditorAppHeader = (props: ScriptEditorAppHeaderProps) => {
     const navigate = useNavigate();
     const {openNewScript} = useGlobalModals();
 
-    // Script import is disabled (phase 2) — onImportScript is intentionally omitted.
     return (
         <UIScriptEditorAppHeader
             {...props}

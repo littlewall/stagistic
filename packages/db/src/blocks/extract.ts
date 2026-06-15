@@ -18,10 +18,7 @@ import type {
     ExtractScriptBlocksResult,
 } from './types';
 import {
-    FOUNTAIN_COLUMN_GROUP_NODE_NAME,
-    FOUNTAIN_COLUMN_NODE_NAME,
     makeActId,
-    makeColumnGroupId,
     makeSceneId,
 } from './types';
 
@@ -130,11 +127,10 @@ export const extractScriptBlocks = (
     const sceneByHeadingBlockId = new Map<string, ExtractedSceneRow>();
 
     let orderNo = 0;
-    let columnGroupOrder = 0;
     let currentActHeadingBlockId: string | null = null;
     let currentSceneHeadingBlockId: string | null = null;
 
-    const walk = (nodes: ScriptNode[] | undefined, context: {columnGroupId: string | null, columnIndex: number | null}) => {
+    const walk = (nodes: ScriptNode[] | undefined) => {
         if (!Array.isArray(nodes) || nodes.length === 0) {
             return;
         }
@@ -144,41 +140,8 @@ export const extractScriptBlocks = (
                 return;
             }
 
-            if (node.type === FOUNTAIN_COLUMN_GROUP_NODE_NAME) {
-                const groupId = makeColumnGroupId(scriptId, columnGroupOrder);
-
-                columnGroupOrder += 1;
-
-                const columns = Array.isArray(node.content)
-                    ? node.content
-                    : [];
-
-                columns.forEach((columnNode: ScriptNode, columnIndex: number) => {
-                    if (!columnNode || typeof columnNode !== 'object') {
-                        return;
-                    }
-
-                    if (columnNode.type !== FOUNTAIN_COLUMN_NODE_NAME) {
-                        return;
-                    }
-
-                    walk(columnNode.content, {
-                        columnGroupId: groupId,
-                        columnIndex,
-                    });
-                });
-
-                return;
-            }
-
-            if (node.type === FOUNTAIN_COLUMN_NODE_NAME) {
-                walk(node.content, context);
-
-                return;
-            }
-
             if (!isScriptBlockNodeType(node.type)) {
-                walk(node.content, context);
+                walk(node.content);
 
                 return;
             }
@@ -231,8 +194,6 @@ export const extractScriptBlocks = (
                 contentJson,
                 sceneHeadingBlockId: currentSceneHeadingBlockId,
                 actHeadingBlockId: currentActHeadingBlockId,
-                columnGroupId: context.columnGroupId,
-                columnIndex: context.columnIndex,
                 characterRefByKey,
             });
 
@@ -240,10 +201,7 @@ export const extractScriptBlocks = (
         });
     };
 
-    walk(sourceDocument.content, {
-        columnGroupId: null,
-        columnIndex: null,
-    });
+    walk(sourceDocument.content);
 
     return {
         blocks,

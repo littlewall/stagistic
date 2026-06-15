@@ -112,10 +112,8 @@ export const useRenameCharacter = ({
 
         const run = async () => {
             try {
-                // Rename in the editor immediately for responsiveness
                 callOnRenameText(editorCallbacks, characterId, normalizedNextName);
 
-                // Update the database
                 const renamedCharacter = await scriptRepository.renameScriptCharacter(
                     currentScriptId,
                     characterId,
@@ -126,7 +124,6 @@ export const useRenameCharacter = ({
                     const storedCharacters = await scriptRepository.listScriptCharacters(currentScriptId);
 
                     setConfirmedCharacterRecords(storedCharacters);
-                    // Revert editor text
                     callOnRenameText(editorCallbacks, characterId, characterRecord.key);
 
                     return;
@@ -141,7 +138,6 @@ export const useRenameCharacter = ({
                     return next;
                 });
 
-                // If the character ID changed, update refs
                 if (renamedCharacter.id !== characterId) {
                     callOnReplaceId(editorCallbacks, characterId, renamedCharacter.id);
                 }
@@ -152,7 +148,6 @@ export const useRenameCharacter = ({
                     const storedCharacters = await scriptRepository.listScriptCharacters(currentScriptId);
 
                     setConfirmedCharacterRecords(storedCharacters);
-                    // Revert editor text
                     callOnRenameText(editorCallbacks, characterId, characterRecord.key);
                 } catch (refreshError) {
                     console.error('Failed to refresh script characters after rename failure', refreshError);

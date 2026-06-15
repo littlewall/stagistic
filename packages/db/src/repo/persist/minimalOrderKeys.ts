@@ -1,19 +1,10 @@
 import {type BlockOrderAssignment, generateBlockOrdersBetween} from '../../queries';
 
 export interface OrderKeyAssignments {
-    /** Final key for every block id in the new document order. */
     keyById: Map<string, string>,
-    /** Only the blocks whose key differs from the baseline (moved + inserted). */
     changed: BlockOrderAssignment[],
 }
 
-/**
- * Indexes (into `orderedBlockIds`) of blocks that keep their baseline key:
- * the longest strictly-increasing subsequence of existing keys in the new
- * document order (patience sort, O(n log n)). Everything off the LIS gets
- * re-keyed between the kept anchors — for a scene move of M blocks the
- * N−M unmoved blocks form the LIS, so only M keys change.
- */
 const findKeptIndexes = (keys: (string | null)[]): Set<number> => {
     const tails: number[] = [];
     const predecessor = new Map<number, number>();

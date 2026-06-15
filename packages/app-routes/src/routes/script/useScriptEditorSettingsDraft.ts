@@ -143,9 +143,9 @@ export const useScriptEditorSettingsDraft = ({
         setScriptSettingsDraft(previous => ({
             ...previous,
             blocks: {
-                ...previous.blocks ?? {},
+                ...previous.blocks,
                 [blockType]: {
-                    ...previous.blocks?.[blockType] ?? {},
+                    ...previous.blocks?.[blockType],
                     ...patch,
                 },
             },
@@ -158,7 +158,7 @@ export const useScriptEditorSettingsDraft = ({
         setScriptSettingsDraft(previous => ({
             ...previous,
             visual: {
-                ...previous.visual ?? {},
+                ...previous.visual,
                 characterColorSaturation: nextSaturation,
             },
         }));
@@ -168,11 +168,11 @@ export const useScriptEditorSettingsDraft = ({
         setScriptSettingsDraft(previous => ({
             ...previous,
             structure: {
-                ...previous.structure ?? {},
+                ...previous.structure,
                 ...patch,
                 actDisplay: {
-                    ...previous.structure?.actDisplay ?? {},
-                    ...patch.actDisplay ?? {},
+                    ...previous.structure?.actDisplay,
+                    ...patch.actDisplay,
                 },
             },
         }));
@@ -182,7 +182,7 @@ export const useScriptEditorSettingsDraft = ({
         setScriptSettingsDraft(previous => ({
             ...previous,
             page: {
-                ...previous.page ?? {},
+                ...previous.page,
                 ...patch,
             },
         }));

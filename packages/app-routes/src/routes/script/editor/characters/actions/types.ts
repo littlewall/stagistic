@@ -14,7 +14,6 @@ export type SetScriptCharacterRecordsState = Dispatch<SetStateAction<ScriptChara
 export type SetCharacterGenderOptionsState = Dispatch<SetStateAction<CharacterGenderOption[]>>;
 export type SetStringArrayState = Dispatch<SetStateAction<string[]>>;
 
-/** Editor mutation callbacks injected by ScriptCharactersSidebar (inside EditorInstanceProvider). */
 export interface ConfirmEditorCallbacks {
     onLinkRef: (characterKey: string, characterId: string) => void,
 }

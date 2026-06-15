@@ -2,7 +2,9 @@ import {useCallback} from 'react';
 
 import type {ScriptCharacterRecord} from '../types';
 import type {
-    CharacterActionSharedArgs, DeleteEditorCallbacks, SetStringArrayState,
+    CharacterActionSharedArgs,
+    DeleteEditorCallbacks,
+    SetStringArrayState,
 } from './types';
 import {
     addPendingValue,

@@ -14,8 +14,8 @@ import {
     type PaginationPluginState,
 } from '../types';
 
-export const paginationKey = new PluginKey<PaginationPluginState>('fountain-pagination');
-export const PAGINATION_CONTROL_META_KEY = 'fountain-pagination-control';
+export const paginationKey = new PluginKey<PaginationPluginState>('script-pagination');
+export const PAGINATION_CONTROL_META_KEY = 'script-pagination-control';
 
 const TYPING_RECALC_DELAY_MS = 250;
 

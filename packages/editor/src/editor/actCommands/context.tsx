@@ -22,15 +22,11 @@ export const EditorActCommandsProvider = ({value, children}: EditorActCommandsPr
     </EditorActCommandsContext.Provider>
 );
 
-/**
- * Returns imperative act/scene command functions from within a FountainEditor tree.
- * Throws if called outside of a FountainEditor.
- */
 export const useEditorActCommands = (): EditorActCommands => {
     const context = useContext(EditorActCommandsContext);
 
     if (!context) {
-        throw new Error('useEditorActCommands must be called inside a FountainEditor');
+        throw new Error('useEditorActCommands must be called inside a EditorActCommandsProvider');
     }
 
     return context;

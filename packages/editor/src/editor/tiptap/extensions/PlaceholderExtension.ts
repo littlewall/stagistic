@@ -11,7 +11,7 @@ import {
 
 import {getActiveScriptBlockFromState} from '../scriptCore';
 
-const placeholderPluginKey = new PluginKey<DecorationSet>('fountain-placeholder');
+const placeholderPluginKey = new PluginKey<DecorationSet>('script-placeholder');
 
 const buildPlaceholderDecorations = (state: EditorState, placeholder: string) => {
     try {

@@ -41,9 +41,7 @@ const nonOrderFieldsDiffer = (prev: ExtractedBlockRow | undefined, next: Extract
         || prev.textContent !== next.textContent
         || prev.contentJson !== next.contentJson
         || prev.sceneHeadingBlockId !== next.sceneHeadingBlockId
-        || prev.actHeadingBlockId !== next.actHeadingBlockId
-        || prev.columnGroupId !== next.columnGroupId
-        || prev.columnIndex !== next.columnIndex;
+        || prev.actHeadingBlockId !== next.actHeadingBlockId;
 };
 
 const refsDiffer = (prev: ExtractedBlockRow | undefined, next: ExtractedBlockRow): boolean => {
@@ -149,8 +147,6 @@ export const createDocumentPersister = (scriptId: string) => {
             contentJson: block.contentJson,
             sceneId: block.sceneHeadingBlockId ? sceneIdByHeading.get(block.sceneHeadingBlockId) ?? null : null,
             actId: block.actHeadingBlockId ? actIdByHeading.get(block.actHeadingBlockId) ?? null : null,
-            columnGroupId: block.columnGroupId,
-            columnIndex: block.columnIndex,
             createdAt: now,
             updatedAt: now,
         });
@@ -284,8 +280,6 @@ export const createDocumentPersister = (scriptId: string) => {
                         contentJson: sql`excluded."content_json"`,
                         sceneId: sql`excluded."scene_id"`,
                         actId: sql`excluded."act_id"`,
-                        columnGroupId: sql`excluded."column_group_id"`,
-                        columnIndex: sql`excluded."column_index"`,
                         updatedAt: sql`excluded."updated_at"`,
                     },
                 });

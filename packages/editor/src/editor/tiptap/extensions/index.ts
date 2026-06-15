@@ -10,7 +10,6 @@
  *      PlaceholderExtension
  *
  *  - Layout: structural pieces that affect document shape and pagination
- *      ScriptColumnExtension, ScriptColumnGroupExtension,
  *      createPaginationExtension
  *
  *  - Runtime: build derived indexes that other parts of the app read
@@ -38,10 +37,6 @@ export {PlaceholderExtension} from './PlaceholderExtension';
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
 
-export {
-    ScriptColumnExtension,
-    ScriptColumnGroupExtension,
-} from './ScriptColumnExtensions';
 export {createPaginationExtension, PaginationExtension} from './PaginationExtension';
 
 // ─── Runtime indexes ─────────────────────────────────────────────────────────

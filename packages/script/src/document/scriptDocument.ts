@@ -7,9 +7,6 @@ import {
     type ScriptBlockNodeType,
 } from '../syntax';
 
-export const COLUMN_GROUP_NODE_NAME = 'fountainColumnGroup';
-export const COLUMN_NODE_NAME = 'fountainColumn';
-
 export const DEFAULT_SCRIPT_BLOCK_NODE_TYPE: ScriptBlockNodeType = 'stageDirection';
 
 export type ScriptNode = {

@@ -4,8 +4,6 @@ import {
     isCharacterBlockType,
 } from '../characters/documentHelpers';
 import {
-    COLUMN_GROUP_NODE_NAME,
-    COLUMN_NODE_NAME,
     getScriptBlockId,
     getScriptBlockNodeType,
     isScriptBlockNode,
@@ -30,8 +28,6 @@ export interface IndexedScriptBlock {
     textContent: string,
     actBlockId: string | null,
     sceneBlockId: string | null,
-    columnGroupOrder: number | null,
-    columnOrder: number | null,
     characterRefs: IndexedScriptCharacterRef[] | null,
 }
 
@@ -43,16 +39,6 @@ export interface BuildScriptBlockIndexResult {
     snapshot: ScriptBlockIndexSnapshot,
     blockCount: number,
 }
-
-interface WalkerContext {
-    columnGroupOrder: number | null,
-    columnOrder: number | null,
-}
-
-const EMPTY_CONTEXT: WalkerContext = {
-    columnGroupOrder: null,
-    columnOrder: null,
-};
 
 const toCharacterRefs = (
     blockType: string,
@@ -110,14 +96,10 @@ export const buildScriptBlockIndex = (
 
     const blocks: IndexedScriptBlock[] = [];
     let orderNo = 0;
-    let columnGroupOrderCursor = 0;
     let currentActBlockId: string | null = null;
     let currentSceneBlockId: string | null = null;
 
-    const walkNodes = (
-        nodes: ScriptNode[] | undefined,
-        context: WalkerContext,
-    ) => {
+    const walkNodes = (nodes: ScriptNode[] | undefined) => {
         if (!Array.isArray(nodes) || nodes.length === 0) {
             return;
         }
@@ -127,39 +109,8 @@ export const buildScriptBlockIndex = (
                 return;
             }
 
-            if (node.type === COLUMN_GROUP_NODE_NAME) {
-                const nextGroupOrder = columnGroupOrderCursor;
-
-                columnGroupOrderCursor += 1;
-
-                const columns = Array.isArray(node.content) ? node.content : [];
-
-                columns.forEach((columnNode, columnOrder) => {
-                    if (!columnNode || typeof columnNode !== 'object') {
-                        return;
-                    }
-
-                    if (columnNode.type !== COLUMN_NODE_NAME) {
-                        return;
-                    }
-
-                    walkNodes(columnNode.content, {
-                        columnGroupOrder: nextGroupOrder,
-                        columnOrder,
-                    });
-                });
-
-                return;
-            }
-
-            if (node.type === COLUMN_NODE_NAME) {
-                walkNodes(node.content, context);
-
-                return;
-            }
-
             if (!isScriptBlockNode(node)) {
-                walkNodes(node.content, context);
+                walkNodes(node.content);
 
                 return;
             }
@@ -186,8 +137,6 @@ export const buildScriptBlockIndex = (
                 textContent,
                 actBlockId: currentActBlockId,
                 sceneBlockId: currentSceneBlockId,
-                columnGroupOrder: context.columnGroupOrder,
-                columnOrder: context.columnOrder,
                 characterRefs: toCharacterRefs(blockType, textContent, attrs),
             });
 
@@ -195,7 +144,7 @@ export const buildScriptBlockIndex = (
         });
     };
 
-    walkNodes(value.content, EMPTY_CONTEXT);
+    walkNodes(value.content);
 
     return {
         snapshot: {

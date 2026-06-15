@@ -1,6 +1,4 @@
 import {
-    COLUMN_GROUP_NODE_NAME,
-    COLUMN_NODE_NAME,
     getScriptBlockId,
     getScriptBlockNodeType,
     isScriptBlockNode,
@@ -38,25 +36,6 @@ const collectBlocks = (nodes: ScriptNode[] | undefined): ScriptNode[] => {
 
         for (const node of nodeList) {
             if (!node || typeof node !== 'object') {
-                continue;
-            }
-
-            if (node.type === COLUMN_GROUP_NODE_NAME) {
-                const columns = Array.isArray(node.content) ? node.content : [];
-
-                if (columns[0]?.type === COLUMN_NODE_NAME) {
-                    walk(columns[0].content);
-                }
-
-                if (columns[1]?.type === COLUMN_NODE_NAME) {
-                    walk(columns[1].content);
-                }
-
-                continue;
-            }
-
-            if (node.type === COLUMN_NODE_NAME) {
-                walk(node.content);
                 continue;
             }
 

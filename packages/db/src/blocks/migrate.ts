@@ -163,8 +163,6 @@ const persistExtractedBlocks = async (
             actId: block.actHeadingBlockId
                 ? actIdByHeadingBlockId.get(block.actHeadingBlockId) ?? null
                 : null,
-            columnGroupId: block.columnGroupId,
-            columnIndex: block.columnIndex,
             createdAt: migratedAt,
             updatedAt: migratedAt,
         })));

@@ -52,8 +52,6 @@ const loadLatestFromBlocks = async (
             blockOrder: row.blockOrder,
             textContent: row.textContent,
             contentJson: row.contentJson,
-            columnGroupId: row.columnGroupId,
-            columnIndex: row.columnIndex,
         })),
         storedCharacterRefs.map(ref => ({
             blockId: ref.blockId,

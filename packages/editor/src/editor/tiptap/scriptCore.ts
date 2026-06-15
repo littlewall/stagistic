@@ -1,6 +1,4 @@
 import {
-    COLUMN_GROUP_NODE_NAME,
-    COLUMN_NODE_NAME,
     createNodeId,
     resolveScriptBlockNodeType,
     SCRIPT_BLOCK_NODE_TYPES,
@@ -13,11 +11,6 @@ import {
     type BlockNodeType,
     normalizeBlockNodeType,
 } from '../blocks/script';
-
-export {
-    COLUMN_GROUP_NODE_NAME,
-    COLUMN_NODE_NAME,
-};
 
 /**
  * The set of per-type block node names. Used as the default `nodeName`

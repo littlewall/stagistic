@@ -19,7 +19,10 @@ import styles from './HomeRoute.module.css';
 export const HomeRoute = () => {
     const navigate = useNavigate();
     const {
-        scriptSummaries, isLoading: scriptsLoading, error, refreshScripts,
+        scriptSummaries,
+        isLoading: scriptsLoading,
+        error,
+        refreshScripts,
     } = useScripts();
     const {openNewScript} = useGlobalModals();
 

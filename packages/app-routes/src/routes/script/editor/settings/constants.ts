@@ -71,11 +71,11 @@ export const PANEL_DESCRIPTIONS: Record<string, {
 }> = {
     [SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO]: {
         title: 'Title Page',
-        description: 'Title page metadata for PDF and Fountain export.',
+        description: 'Title page metadata',
     },
     [SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES]: {
         title: 'Visual Preferences',
-        description: 'Customize character color intensity for better readability.',
+        description: 'Customize appearance in script editor.',
     },
     [SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT]: {
         title: 'Page Layout',
@@ -83,10 +83,6 @@ export const PANEL_DESCRIPTIONS: Record<string, {
     },
     [SCRIPT_SETTINGS_PANEL_HEADERS]: {
         title: 'Headers and Footers',
-        description: 'Header and footer controls placeholder.',
-    },
-    notes: {
-        title: 'Notes',
-        description: 'Document notes configuration placeholder.',
+        description: 'Header and footer controls.',
     },
 };

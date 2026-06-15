@@ -3,17 +3,9 @@ import type {ScriptDocument} from '@stagistic/script';
 /** Public alias of the blocks-layer document shape consumed by extractScriptBlocks. */
 export type RewriteScriptDocument = ScriptDocument;
 
-export const FOUNTAIN_COLUMN_GROUP_NODE_NAME = 'fountainColumnGroup';
-export const FOUNTAIN_COLUMN_NODE_NAME = 'fountainColumn';
-
-const COLUMN_GROUP_ID_PREFIX = 'rw-column-group';
 const ACT_ID_PREFIX = 'rw-act';
 const SCENE_ID_PREFIX = 'rw-scene';
 const TITLE_PAGE_FIELD_ID_PREFIX = 'rw-title-page-field';
-
-export const makeColumnGroupId = (scriptId: string, orderNo: number) => {
-    return `${COLUMN_GROUP_ID_PREFIX}:${scriptId}:${orderNo}`;
-};
 
 export const makeActId = (scriptId: string, headingBlockId: string) => {
     return `${ACT_ID_PREFIX}:${scriptId}:${headingBlockId}`;
@@ -47,8 +39,6 @@ export interface RewriteStoredBlockRow {
     blockOrder: string,
     textContent: string,
     contentJson: string | null,
-    columnGroupId: string | null,
-    columnIndex: number | null,
 }
 
 export interface RewriteStoredBlockCharacterRefRow {
@@ -82,8 +72,6 @@ export interface ExtractedBlockRow {
     contentJson: string | null,
     sceneHeadingBlockId: string | null,
     actHeadingBlockId: string | null,
-    columnGroupId: string | null,
-    columnIndex: number | null,
     characterRefByKey: Record<string, string>,
 }
 

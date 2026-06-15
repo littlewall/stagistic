@@ -216,8 +216,6 @@ export const scriptBlocks = pgTable(
         contentJson: text('content_json'),
         sceneId: text('scene_id').references(() => scriptScenes.id, {onDelete: 'set null'}),
         actId: text('act_id').references(() => scriptActs.id, {onDelete: 'set null'}),
-        columnGroupId: text('column_group_id'),
-        columnIndex: integer('column_index'),
         createdAt: bigint('created_at', {mode: 'number'}).notNull(),
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },

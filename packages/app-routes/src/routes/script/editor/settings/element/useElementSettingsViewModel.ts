@@ -75,9 +75,19 @@ export const useElementSettingsViewModel = ({
         const shortcut = isActBlock
             ? undefined
             : blockSettings.shortcut ?? blockDefaults.shortcut ?? BLOCK_SHORTCUT_OPTIONS[0];
+        const isValidNextElement = (
+            value: unknown,
+        ): value is ElementSettingsViewModel['numeric']['nextElement'] => {
+            return typeof value === 'string'
+                && SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.some(item => item.blockType === value);
+        };
         const nextElement = isActBlock
             ? undefined
-            : blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType;
+            : (() => {
+                const candidate = blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType;
+
+                return isValidNextElement(candidate) ? candidate : blockType;
+            })();
         const textAlign = blockSettings.textAlign ?? blockDefaults.textAlign ?? BLOCK_TEXT_ALIGN_OPTIONS[0];
         const casing = blockSettings.casing ?? blockDefaults.casing ?? BLOCK_CASING_OPTIONS[0];
         const isBold = blockSettings.isBold ?? blockDefaults.isBold ?? false;

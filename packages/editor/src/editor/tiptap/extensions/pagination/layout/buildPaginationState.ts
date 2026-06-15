@@ -4,7 +4,6 @@ import {
 } from '@tiptap/pm/view';
 
 import {
-    COLUMN_GROUP_NODE_NAME,
     isScriptBlockNodeName,
 } from '../../../scriptCore';
 import {
@@ -66,10 +65,6 @@ export const buildPaginationState = (
     }
 
     view.state.doc.forEach((node, offset) => {
-        if (node.type.name === COLUMN_GROUP_NODE_NAME) {
-            return;
-        }
-
         if (!isScriptBlockNodeName(node.type.name)) {
             return;
         }

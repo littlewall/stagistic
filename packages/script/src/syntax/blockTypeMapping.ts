@@ -31,7 +31,9 @@ export const isScriptBlockType = (v: unknown): v is ScriptBlockType => typeof v 
 export const getScriptBlockNodeTypeFromBlockType = (b: ScriptBlockType): ScriptBlockNodeType => SCRIPT_BLOCK_NODE_TYPE_BY_BLOCK_TYPE[b];
 export const getScriptBlockTypeFromNodeType = (n: ScriptBlockNodeType): ScriptBlockType => SCRIPT_BLOCK_TYPE_BY_NODE_TYPE[n];
 
-export const resolveScriptBlockNodeType = (v: unknown): ScriptBlockNodeType | null => (isScriptBlockNodeType(v) ? v : isScriptBlockType(v) ? SCRIPT_BLOCK_NODE_TYPE_BY_BLOCK_TYPE[v] : null);
+export const resolveScriptBlockNodeType = (v: unknown): ScriptBlockNodeType | null => {
+    return isScriptBlockNodeType(v) ? v : isScriptBlockType(v) ? SCRIPT_BLOCK_NODE_TYPE_BY_BLOCK_TYPE[v] : null;
+};
 
 export const resolveScriptBlockType = (v: unknown): ScriptBlockType | null => {
     const n = resolveScriptBlockNodeType(v);

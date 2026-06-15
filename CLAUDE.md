@@ -1,12 +1,12 @@
-## DB schema changes
-After any change to `packages/db/src/` schema or `drizzle/*.sql` files, run:
-`pnpm --filter @stagistic/db db:compile-migrations`
-(`db:generate` does this automatically; manual SQL edits do not.)
-
 ## Code navigation
 Use `mcp__codegraph__codegraph_context` FIRST for any architecture/flow/symbol question.
 Use `mcp__codegraph__codegraph_trace` for call-path questions.
 Only fall back to grep/Read for details codegraph didn't cover.
+
+## DB schema changes
+After any change to `packages/db/src/` schema or `drizzle/*.sql` files, run:
+`pnpm --filter @stagistic/db db:compile-migrations`
+(`db:generate` does this automatically; manual SQL edits do not.)
 
 ## Design context
 See [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md) before any UI work.

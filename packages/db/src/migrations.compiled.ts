@@ -24,5 +24,9 @@ export const compiledMigrations = [
     {
         "id": "0005_drop_block_order_unique_constraint",
         "sql": "-- Ensure the unique index on (script_id, block_order) is gone.\n-- Migration 0004 was supposed to drop it, but on some databases it\n-- survived — either because 0004 failed mid-transaction (DDL + exec quirk\n-- in PGlite) or because the DB was in a state between 0003 and 0004.\n-- A unique constraint on block_order breaks fractional-index reorders:\n-- PostgreSQL checks uniqueness row-by-row inside a single UPDATE, so\n-- swapping keys between two blocks always triggers a violation.\nDROP INDEX IF EXISTS \"script_blocks_script_order_unique_idx\";\n"
+    },
+    {
+        "id": "0006_drop_column_group",
+        "sql": "ALTER TABLE \"script_blocks\" DROP COLUMN IF EXISTS \"column_group_id\";\nALTER TABLE \"script_blocks\" DROP COLUMN IF EXISTS \"column_index\";\n"
     }
 ] as const;

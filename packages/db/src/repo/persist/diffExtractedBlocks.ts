@@ -26,8 +26,6 @@ const rowsEqual = (a: ExtractedBlockRow, b: ExtractedBlockRow): boolean => {
         && a.contentJson === b.contentJson
         && a.sceneHeadingBlockId === b.sceneHeadingBlockId
         && a.actHeadingBlockId === b.actHeadingBlockId
-        && a.columnGroupId === b.columnGroupId
-        && a.columnIndex === b.columnIndex
         && serializeRefs(a.characterRefByKey) === serializeRefs(b.characterRefByKey);
 };
 
@@ -59,11 +57,6 @@ export const diffExtractedBlocks = (
 
         updated.push(row);
 
-        /*
-         * Structural when order changed, boundary-ness toggled, OR the block is
-         * (or was) a boundary heading — a heading edit must reconcile the
-         * scene/act rows (e.g. act rename updates scriptActs.name).
-         */
         if (
             prev.orderNo !== row.orderNo
             || isBoundary(prev.blockType)
@@ -81,6 +74,9 @@ export const diffExtractedBlocks = (
     });
 
     return {
-        inserted, updated, deletedIds, structural,
+        inserted,
+        updated,
+        deletedIds,
+        structural,
     };
 };

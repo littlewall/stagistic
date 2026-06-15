@@ -1,6 +1,0 @@
-{
-  "files": ["apps/web/index.html", "apps/landing/src/pages/index.astro"],
-  "insertBefore": "</body>",
-  "commentSyntax": "html",
-  "cspChecked": true
-}

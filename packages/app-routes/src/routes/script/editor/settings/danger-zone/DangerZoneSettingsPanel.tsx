@@ -57,7 +57,7 @@ export const DangerZoneSettingsPanel = ({
 
     return (
         <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Delete script</h3>
+            <h3 className={panelStyles.panelTitle}>Danger zone</h3>
             <section className={styles.dangerCard}>
                 <div className={styles.dangerHeader}>
                     <h4 className={styles.dangerTitle}>Delete script</h4>

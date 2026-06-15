@@ -318,8 +318,6 @@ describe('persistDocumentDelta', () => {
             blockOrder: r.blockOrder,
             textContent: r.textContent,
             contentJson: r.contentJson,
-            columnGroupId: r.columnGroupId,
-            columnIndex: r.columnIndex,
         })), []);
 
         expect(rebuilt.document.content.map(n => n.attrs?.id)).toEqual(['h1', 'a1']);

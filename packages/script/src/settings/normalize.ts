@@ -5,9 +5,5 @@ export const normalizeEditorSettingsBlockType = (value: unknown): string | null 
         return null;
     }
 
-    if (value === 'fountain_lyric' || value === 'fountain_lyrics') {
-        return 'lyrics';
-    }
-
     return isScriptBlockNodeType(value) ? value : null;
 };

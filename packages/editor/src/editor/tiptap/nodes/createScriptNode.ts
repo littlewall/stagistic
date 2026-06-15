@@ -21,7 +21,7 @@ export interface CreateScriptNodeConfig {
 
 const resolveParsedBlockType = (element: HTMLElement, fallback: ScriptBlockNodeType) => {
     const rawType = element.getAttribute(SCRIPT_BLOCK_DOM_TYPE_ATTRIBUTE)
-        ?? element.getAttribute('data-fountain-type')
+        ?? element.getAttribute('data-block-type')
         ?? fallback;
 
     return normalizeBlockNodeType(rawType);
@@ -70,7 +70,7 @@ export const createScriptNode = ({name, blockType: defaultBlockType}: CreateScri
                         return blockType === defaultBlockType ? {} : false;
                     },
                 }, {
-                    tag: 'p[data-fountain-type]',
+                    tag: 'p[data-block-type]',
                     getAttrs: (element: HTMLElement) => {
                         const blockType = resolveParsedBlockType(element, defaultBlockType);
 

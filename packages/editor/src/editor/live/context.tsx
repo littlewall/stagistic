@@ -28,7 +28,7 @@ export const useEditorSnapshotStore = () => {
     const store = useContext(EditorSnapshotStoreContext);
 
     if (!store) {
-        throw new Error('useEditorSnapshotStore must be used within FountainEditor');
+        throw new Error('useEditorSnapshotStore must be used within an EditorSnapshotStoreProvider');
     }
 
     return store;

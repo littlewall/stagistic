@@ -3,10 +3,6 @@ import {getScriptBlockNodeTypeFromBlockType, isScriptBlockType} from '@stagistic
 
 import {sanitizeInlineContentNode} from './extract';
 import type {RewriteStoredBlockCharacterRefRow, RewriteStoredBlockRow} from './types';
-import {
-    FOUNTAIN_COLUMN_GROUP_NODE_NAME,
-    FOUNTAIN_COLUMN_NODE_NAME,
-} from './types';
 
 const toFallbackTextInlineContent = (textContent: string): ScriptNode[] => {
     if (textContent.length === 0) {
@@ -103,59 +99,8 @@ const toScriptDocumentFromStoredRows = (
     let cursor = 0;
 
     while (cursor < blockRowsSorted.length) {
-        const row = blockRowsSorted[cursor];
-
-        if (!row.columnGroupId) {
-            content.push(createBlockNode(row));
-            cursor += 1;
-            continue;
-        }
-
-        const groupId = row.columnGroupId;
-        const groupedRows: RewriteStoredBlockRow[] = [];
-
-        while (cursor < blockRowsSorted.length && blockRowsSorted[cursor].columnGroupId === groupId) {
-            groupedRows.push(blockRowsSorted[cursor]);
-            cursor += 1;
-        }
-
-        if (groupedRows.length === 0) {
-            continue;
-        }
-
-        const blocksByColumn = new Map<number, ScriptNode[]>();
-
-        groupedRows.forEach(groupRow => {
-            const columnIndex = typeof groupRow.columnIndex === 'number'
-                ? groupRow.columnIndex
-                : 0;
-
-            if (groupRow.columnIndex === null) {
-                warnings.push(
-                    `Script ${scriptId}: block ${groupRow.id} had null column_index in group ${groupId}; treated as column 0.`,
-                );
-            }
-
-            const currentColumn = blocksByColumn.get(columnIndex) ?? [];
-
-            currentColumn.push(createBlockNode(groupRow));
-            blocksByColumn.set(columnIndex, currentColumn);
-        });
-
-        const columnIndexes = Array.from(blocksByColumn.keys())
-            .sort((a, b) => a - b);
-
-        const columns: ScriptNode[] = columnIndexes.map(columnIndex => {
-            return {
-                type: FOUNTAIN_COLUMN_NODE_NAME,
-                content: blocksByColumn.get(columnIndex) ?? [],
-            };
-        });
-
-        content.push({
-            type: FOUNTAIN_COLUMN_GROUP_NODE_NAME,
-            content: columns,
-        });
+        content.push(createBlockNode(blockRowsSorted[cursor]));
+        cursor += 1;
     }
 
     return {

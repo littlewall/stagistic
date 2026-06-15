@@ -26,8 +26,6 @@ export interface ScriptBlockUpsertRow {
     contentJson: string | null,
     sceneId: string | null,
     actId: string | null,
-    columnGroupId: string | null,
-    columnIndex: number | null,
     createdAt: number,
     updatedAt: number,
 }
@@ -123,8 +121,6 @@ export const bulkUpsertScriptBlocks = async (db: DbClient, rows: ScriptBlockUpse
                 contentJson: row.contentJson,
                 sceneId: row.sceneId,
                 actId: row.actId,
-                columnGroupId: row.columnGroupId,
-                columnIndex: row.columnIndex,
                 createdAt: row.createdAt,
                 updatedAt: row.updatedAt,
             })))
@@ -137,8 +133,6 @@ export const bulkUpsertScriptBlocks = async (db: DbClient, rows: ScriptBlockUpse
                     contentJson: sql`excluded."content_json"`,
                     sceneId: sql`excluded."scene_id"`,
                     actId: sql`excluded."act_id"`,
-                    columnGroupId: sql`excluded."column_group_id"`,
-                    columnIndex: sql`excluded."column_index"`,
                     updatedAt: sql`excluded."updated_at"`,
                 },
             });

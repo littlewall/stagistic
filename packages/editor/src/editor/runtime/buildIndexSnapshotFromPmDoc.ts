@@ -12,21 +12,9 @@ import {
     readNormalizedRefsFromAttrs,
 } from '../characters/characterRefUtils';
 import {
-    COLUMN_GROUP_NODE_NAME,
-    COLUMN_NODE_NAME,
     isScriptBlockNodeName,
     normalizeBlockNodeType,
 } from '../tiptap/scriptCore';
-
-interface WalkerContext {
-    columnGroupOrder: number | null,
-    columnOrder: number | null,
-}
-
-const EMPTY_CONTEXT: WalkerContext = {
-    columnGroupOrder: null,
-    columnOrder: null,
-};
 
 const toCharacterRefs = (
     blockType: string,
@@ -87,47 +75,14 @@ const resolveBlockType = (node: ProseMirrorNode) => {
 export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIndexSnapshot => {
     const blocks: IndexedScriptBlock[] = [];
     let orderNo = 0;
-    let columnGroupOrderCursor = 0;
     let currentActBlockId: string | null = null;
     let currentSceneBlockId: string | null = null;
 
-    const visitNode = (
-        node: ProseMirrorNode,
-        context: WalkerContext,
-    ) => {
-        if (node.type.name === COLUMN_GROUP_NODE_NAME) {
-            const nextGroupOrder = columnGroupOrderCursor;
-            let columnOrder = 0;
-
-            columnGroupOrderCursor += 1;
-
-            node.forEach(columnNode => {
-                if (columnNode.type.name !== COLUMN_NODE_NAME) {
-                    return;
-                }
-
-                visitNode(columnNode, {
-                    columnGroupOrder: nextGroupOrder,
-                    columnOrder,
-                });
-                columnOrder += 1;
-            });
-
-            return;
-        }
-
-        if (node.type.name === COLUMN_NODE_NAME) {
-            node.forEach(childNode => {
-                visitNode(childNode, context);
-            });
-
-            return;
-        }
-
+    const visitNode = (node: ProseMirrorNode) => {
         if (!isScriptBlockNodeName(node.type.name)) {
             if (node.childCount > 0) {
                 node.forEach(childNode => {
-                    visitNode(childNode, context);
+                    visitNode(childNode);
                 });
             }
 
@@ -155,8 +110,6 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
             textContent,
             actBlockId: currentActBlockId,
             sceneBlockId: currentSceneBlockId,
-            columnGroupOrder: context.columnGroupOrder,
-            columnOrder: context.columnOrder,
             characterRefs: toCharacterRefs(
                 blockType,
                 textContent,
@@ -169,7 +122,7 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
 
     try {
         doc.forEach(node => {
-            visitNode(node, EMPTY_CONTEXT);
+            visitNode(node);
         });
     } catch {
         return {

@@ -139,11 +139,6 @@ export const useGlobalModalActions = ({
             enableLegacyCapsLyricsHeuristic?: boolean,
         },
     }): Promise<void> => {
-        /*
-         * Import parsing returns in phase 2 (new Stagistic syntax parser).
-         * The import modal UI is preserved but the parse step is intentionally
-         * a no-op until the parser is wired back in.
-         */
         void payload;
         setIsImportLoading(false);
         setIsImportOpen(false);

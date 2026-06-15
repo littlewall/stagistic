@@ -114,8 +114,6 @@ describe('script import with fractional indexing', () => {
                 blockOrder: r.blockOrder,
                 textContent: r.textContent,
                 contentJson: r.contentJson,
-                columnGroupId: r.columnGroupId,
-                columnIndex: r.columnIndex,
             })),
             [],
         );

@@ -1,7 +1,10 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
 import {clsx} from '@stagistic/ui';
 import {
-    startTransition, useEffect, useRef, useState,
+    startTransition,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import {MIN_PAGE_MARGIN_HORIZONTAL_PX, PX_PER_INCH} from '../constants';

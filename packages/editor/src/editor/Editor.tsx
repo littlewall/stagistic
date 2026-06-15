@@ -161,7 +161,7 @@ const Editor = ({
         shouldRerenderOnTransaction: false,
         editorProps: {
             attributes: {
-                'data-fountain-editor': 'true',
+                'data-editor': 'true',
             },
         },
     }, [extensions, initialDoc]);

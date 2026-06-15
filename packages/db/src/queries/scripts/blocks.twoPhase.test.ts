@@ -22,8 +22,6 @@ const insertBlock = async (db: TestDb, scriptId: string, id: string, blockOrder:
         contentJson: null,
         sceneId: null,
         actId: null,
-        columnGroupId: null,
-        columnIndex: null,
         createdAt: now,
         updatedAt: now,
     });

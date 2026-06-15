@@ -23,17 +23,15 @@ import {
     createPaginationExtension,
     EditorRuntimeExtension,
     EmptyEnterChooserExtension,
-    ScriptBehaviorExtension,
-    ScriptColumnExtension,
-    ScriptColumnGroupExtension,
     PlaceholderExtension,
+    ScriptBehaviorExtension,
 } from './tiptap/extensions';
 import {DocumentWithSettings} from './tiptap/extensions/DocumentExtension';
-import characterTagStyles from './tiptap/scriptBlock/CharacterTagDecorations.module.css';
 import {
-    ScriptBlockNodes,
     SCRIPT_BLOCK_NODE_NAMES,
+    ScriptBlockNodes,
 } from './tiptap/nodes';
+import characterTagStyles from './tiptap/scriptBlock/CharacterTagDecorations.module.css';
 
 type UseEditorExtensionsArgs = {
     resolvedSettings: EditorSettings,
@@ -131,8 +129,6 @@ export const useEditorExtensions = ({
             Bold,
             Italic,
             Underline,
-            ScriptColumnGroupExtension,
-            ScriptColumnExtension,
             ...ScriptBlockNodes,
             PlaceholderExtension,
             emptyEnterChooserExtension,

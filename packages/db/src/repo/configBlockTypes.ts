@@ -11,10 +11,6 @@ import {
 } from '@stagistic/script';
 
 export const normalizeSettingsBlockType = (value: unknown): ScriptBlockType | null => {
-    if (value === 'fountain_lyric' || value === 'lyrics') {
-        return resolveScriptBlockType('lyrics');
-    }
-
     return typeof value === 'string' ? resolveScriptBlockType(value) : null;
 };
 

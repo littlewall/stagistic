@@ -11,8 +11,6 @@ const block = (over: Partial<ExtractedBlockRow> & {blockId: string, orderNo: num
     contentJson: null,
     sceneHeadingBlockId: null,
     actHeadingBlockId: null,
-    columnGroupId: null,
-    columnIndex: null,
     characterRefByKey: {},
     ...over,
 });

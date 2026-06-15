@@ -23,11 +23,6 @@ export const EditorInstanceProvider = ({
     );
 };
 
-/**
- * Returns the Tiptap editor instance from within a FountainEditor tree.
- * Can be used by sidebars, toolbars, and other editor-aware components to
- * call editor commands directly without prop drilling.
- */
 export const useEditorInstance = (): TiptapEditor | null => {
     return useContext(EditorInstanceContext);
 };

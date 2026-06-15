@@ -24,10 +24,6 @@ export const collectUnconfirmedCharacterKeysFromSnapshot = (
             return;
         }
 
-        /*
-         * Use the key currently shown in the editor (via refs) if available.
-         * During preview rename, this will be the new name rather than the stale DB key.
-         */
         const currentKey = snapshot.keyByCharacterId.get(character.id)
             ?? normalizeCharacterKey(character.key);
 
