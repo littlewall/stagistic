@@ -1,12 +1,13 @@
 import {
-    type ScriptNode,
     getScriptBlockNodeType,
     isScriptBlockNode,
     type ScriptDocument,
+    type ScriptNode,
 } from '../document';
 import {
     extractCharacterKeys,
 } from '../syntax';
+import {collectCharacterTags} from './characterTagMarks';
 import {
     getCharacterRefByKey,
     getNodeTextContent,
@@ -50,6 +51,21 @@ export const collectScriptCharacterStats = (
                         }
 
                         unconfirmedCountsByKey.set(key, (unconfirmedCountsByKey.get(key) ?? 0) + 1);
+                    });
+                } else {
+                    collectCharacterTags(node).forEach(tag => {
+                        countsByKey.set(tag.key, (countsByKey.get(tag.key) ?? 0) + 1);
+
+                        if (tag.characterId && confirmedCharacterIdSet.has(tag.characterId)) {
+                            confirmedCountsById.set(
+                                tag.characterId,
+                                (confirmedCountsById.get(tag.characterId) ?? 0) + 1,
+                            );
+
+                            return;
+                        }
+
+                        unconfirmedCountsByKey.set(tag.key, (unconfirmedCountsByKey.get(tag.key) ?? 0) + 1);
                     });
                 }
             }
