@@ -93,6 +93,11 @@ const buildCharacterDecorations = (
     const decorations: Decoration[] = [];
 
     tokenEntries.forEach((tokenEntry, index) => {
+        if (tokenEntry.source === 'tag') {
+            // characterTag marks render their own DOM; never decorate them.
+            return;
+        }
+
         if (tokenEntry.valueStart < tokenEntry.valueEnd) {
             const decorationEnd = Math.max(tokenEntry.valueEnd, tokenEntry.end);
 

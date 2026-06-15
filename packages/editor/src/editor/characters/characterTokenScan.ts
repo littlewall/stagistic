@@ -1,9 +1,12 @@
 import {
+    collectCharacterTags,
     normalizeCharacterKey,
+    type ScriptNode,
     splitCharacterTokens,
 } from '@stagistic/script';
 import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
 
+import {isScriptBlockNodeName} from '../tiptap/scriptCore';
 import {
     readNormalizedRefsFromAttrs,
     visitCharacterBlocks,
@@ -18,6 +21,13 @@ export interface CharacterTokenEntry {
     valueStart: number,
     valueEnd: number,
     end: number,
+    /**
+     * 'cue' = a token inside a character (cue) block, decorated via the
+     * runtime. 'tag' = a characterTag mark in a stage direction, which
+     * renders its own DOM — it contributes colors/counts but is skipped by
+     * the decoration builder.
+     */
+    source: 'cue' | 'tag',
 }
 
 export interface ActiveCharacterToken {
@@ -108,6 +118,7 @@ export const scanCharacterTokensFromDoc = ({
                         valueStart: token.valueStart,
                         valueEnd: token.valueEnd,
                         end: token.end,
+                        source: 'cue',
                     });
 
                     if (!key) {
@@ -149,6 +160,50 @@ export const scanCharacterTokensFromDoc = ({
 
                 return false;
             },
+        });
+
+        /*
+         * Second pass: characterTag marks in non-cue blocks (stage
+         * directions). These contribute keys/ids to the color palette and
+         * live counts; their on-screen rendering is the mark's own DOM, so
+         * they carry zero positions and source:'tag' to be skipped by the
+         * decoration builder.
+         */
+        doc.descendants((node, pos) => {
+            if (!isScriptBlockNodeName(node.type.name)) {
+                return true;
+            }
+
+            if (node.type.name === 'character') {
+                return false;
+            }
+
+            const tags = collectCharacterTags(node.toJSON() as ScriptNode);
+
+            if (tags.length === 0) {
+                return false;
+            }
+
+            const blockStart = pos + 1;
+            const blockId = resolveCharacterBlockId(node.attrs.id, pos);
+
+            tags.forEach((tag, tokenIndex) => {
+                tokenEntries.push({
+                    blockId,
+                    blockStart,
+                    tokenIndex,
+                    key: tag.key,
+                    characterId: tag.characterId,
+                    valueStart: 0,
+                    valueEnd: 0,
+                    end: 0,
+                    source: 'tag',
+                });
+
+                tokenCountByKey.set(tag.key, (tokenCountByKey.get(tag.key) ?? 0) + 1);
+            });
+
+            return false;
         });
     } catch {
         return {
