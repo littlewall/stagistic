@@ -6,7 +6,6 @@ import {
     ensureScriptBlockIds,
     ensureScriptStructure,
     isScriptDocumentEmpty,
-    migrateLegacyDocument,
     type ScriptBlockIndexSnapshot,
     type ScriptDocument,
 } from '@stagistic/script';
@@ -87,12 +86,9 @@ export const useScriptLoader = (
 
                 const needsFocus = isScriptDocumentEmpty(stored);
 
-                // TEMPORARY one-shot upgrade of the pre-Stagistic test script. Remove with migrateLegacyDocument.
-                const migrated = migrateLegacyDocument(stored);
+                const coerced = coerceUnknownBlocksToStageDirections(stored);
 
-                const coerced = coerceUnknownBlocksToStageDirections(migrated.document);
-
-                if (migrated.changed || coerced.changed) {
+                if (coerced.changed) {
                     await scriptRepository.saveLatest(currentScriptId, coerced.value);
                 }
 
