@@ -8,7 +8,7 @@ import {isObjectRecord} from '@stagistic/shared';
 import {
     getNodeTextContent,
     sanitizeInlineContentNode,
-    toCharacterRefByKey,
+    toCharacterRefByKeyWithTags,
     toExtractedImportMetadata,
 } from './extractHelpers';
 import type {
@@ -153,7 +153,7 @@ export const extractScriptBlocks = (
             const blockId = resolveUniqueBlockId(scriptId, attrs?.id, orderNo, usedBlockIds, warnings);
             const textContent = getNodeTextContent(node).trim();
             const contentJson = toContentJsonForStorage(node);
-            const characterRefByKey = toCharacterRefByKey(attrs);
+            const characterRefByKey = toCharacterRefByKeyWithTags(node);
 
             if (blockType === 'act') {
                 currentActHeadingBlockId = blockId;

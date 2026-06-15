@@ -1,4 +1,5 @@
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
+import {collectCharacterTagRefByKey} from '@stagistic/script';
 import {collapseWhitespace, isObjectRecord} from '@stagistic/shared';
 
 import type {
@@ -58,6 +59,18 @@ export const toCharacterRefByKey = (attrs: Record<string, unknown> | undefined):
     });
 
     return characterRefByKey;
+};
+
+/**
+ * Confirmed character refs for a block, merging cue-block attr refs with
+ * stage-direction characterTag mark refs. Attr refs win on key collisions.
+ */
+export const toCharacterRefByKeyWithTags = (node: ScriptNode): Record<string, string> => {
+    const attrs = isObjectRecord(node.attrs) ? node.attrs : undefined;
+    const fromAttrs = toCharacterRefByKey(attrs);
+    const fromTags = collectCharacterTagRefByKey(node);
+
+    return {...fromTags, ...fromAttrs};
 };
 
 export const toExtractedImportMetadata = (
