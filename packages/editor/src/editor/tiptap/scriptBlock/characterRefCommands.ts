@@ -12,6 +12,10 @@ import {
     writeRefsToNodeAttrs,
 } from '../../characters/characterRefUtils';
 import {runCharacterRefRenameCommand} from './characterRefRenameCommand';
+import {
+    applyTagMarkIdChange,
+    getCharacterTagMarkType,
+} from './characterTagMarkCommands';
 
 const getNodeTextContent = (node: {textContent?: string | null}): string => {
     return node.textContent ?? '';
@@ -61,6 +65,20 @@ export const linkCharacterRef = (
         },
     });
 
+    const tagMarkType = getCharacterTagMarkType(state.schema);
+
+    if (tagMarkType) {
+        const tagsChanged = applyTagMarkIdChange(tr, state.doc, tagMarkType, span => {
+            if (span.key === normalizedKey && span.characterId !== characterId) {
+                return characterId;
+            }
+
+            return undefined;
+        });
+
+        hasChanges = hasChanges || tagsChanged;
+    }
+
     if (!hasChanges) {
         return false;
     }
@@ -108,6 +126,16 @@ export const unlinkCharacterRef = (
         },
     });
 
+    const tagMarkType = getCharacterTagMarkType(state.schema);
+
+    if (tagMarkType) {
+        const tagsChanged = applyTagMarkIdChange(tr, state.doc, tagMarkType, span => {
+            return span.characterId === characterId ? null : undefined;
+        });
+
+        hasChanges = hasChanges || tagsChanged;
+    }
+
     if (!hasChanges) {
         return false;
     }
@@ -153,6 +181,16 @@ export const replaceCharacterRefId = (
             return false;
         },
     });
+
+    const tagMarkType = getCharacterTagMarkType(state.schema);
+
+    if (tagMarkType) {
+        const tagsChanged = applyTagMarkIdChange(tr, state.doc, tagMarkType, span => {
+            return span.characterId === oldCharacterId ? newCharacterId : undefined;
+        });
+
+        hasChanges = hasChanges || tagsChanged;
+    }
 
     if (!hasChanges) {
         return false;

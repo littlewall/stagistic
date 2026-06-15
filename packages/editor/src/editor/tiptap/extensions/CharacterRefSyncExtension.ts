@@ -17,6 +17,10 @@ import {
     writeRefsToNodeAttrs,
 } from '../../characters/characterRefUtils';
 import type {PersistentCharacterRef} from '../../contracts';
+import {
+    applyTagMarkIdChange,
+    getCharacterTagMarkType,
+} from '../scriptBlock/characterTagMarkCommands';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
@@ -142,6 +146,18 @@ const createCharacterRefSyncTransaction = (
         });
     } catch {
         return null;
+    }
+
+    const tagMarkType = getCharacterTagMarkType(state.schema);
+
+    if (tagMarkType) {
+        const tagsChanged = applyTagMarkIdChange(tr, state.doc, tagMarkType, span => {
+            const desired = confirmedCharacterIdByKey.get(span.key) ?? null;
+
+            return desired === span.characterId ? undefined : desired;
+        });
+
+        changed = changed || tagsChanged;
     }
 
     if (!changed) {

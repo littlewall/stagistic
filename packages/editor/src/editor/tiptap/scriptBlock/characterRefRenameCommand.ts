@@ -11,6 +11,10 @@ import {
     visitCharacterBlocks,
     writeRefsToNodeAttrs,
 } from '../../characters/characterRefUtils';
+import {
+    applyTagMarkRename,
+    getCharacterTagMarkType,
+} from './characterTagMarkCommands';
 
 /** Splits "NAME (V.O.)" into { base: "NAME", suffix: "(V.O.)" }. */
 const splitTrailingParenthetical = (value: string): {base: string, suffix: string} => {
@@ -212,10 +216,6 @@ export const runCharacterRefRenameCommand = ({
         },
     });
 
-    if (changes.length === 0) {
-        return false;
-    }
-
     let tr: Transaction = state.tr;
 
     for (let index = changes.length - 1; index >= 0; index -= 1) {
@@ -231,6 +231,26 @@ export const runCharacterRefRenameCommand = ({
         const to = change.pos + 1 + change.contentSize;
 
         tr = tr.replaceWith(from, to, state.schema.text(change.newText));
+    }
+
+    let changed = changes.length > 0;
+    const tagMarkType = getCharacterTagMarkType(state.schema);
+
+    if (tagMarkType) {
+        const tagName = getCharacterNameForBlockType
+            ? getCharacterNameForBlockType(normalizedNewName, 'stageDirection')
+            : normalizedNewName;
+        const tagsChanged = applyTagMarkRename(tr, state.doc, state.schema, tagMarkType, {
+            characterId,
+            canonicalOldKey,
+            newName: tagName,
+        });
+
+        changed = changed || tagsChanged;
+    }
+
+    if (!changed) {
+        return false;
     }
 
     editor.view.dispatch(tr);
