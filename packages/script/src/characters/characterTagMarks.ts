@@ -5,6 +5,20 @@ export const CHARACTER_TAG_MARK_NAME = 'characterTag';
 export const CHARACTER_TAG_KEY_ATTR = 'characterKey';
 export const CHARACTER_TAG_ID_ATTR = 'characterId';
 
+/**
+ * Block types whose inline content can carry `characterTag` marks. Tags are
+ * authored only in stage directions today; character blocks contribute to the
+ * roster via cue refs (text + `characterRefs`), not tag marks. Extend this list
+ * if tag authoring opens up to other block types.
+ */
+export const CHARACTER_TAG_BLOCK_TYPES = ['stageDirection'] as const;
+
+const CHARACTER_TAG_BLOCK_TYPE_SET: ReadonlySet<string> = new Set(CHARACTER_TAG_BLOCK_TYPES);
+
+export const canBlockTypeHaveCharacterTags = (blockType: string): boolean => {
+    return CHARACTER_TAG_BLOCK_TYPE_SET.has(blockType);
+};
+
 export interface CharacterTagRef {
     key: string,
     characterId: string | null,
@@ -138,9 +152,13 @@ export const mapCharacterTagMarks = (
 
         changed = true;
 
-        const nextMarks = (child.marks ?? []).map(existing => existing.type === CHARACTER_TAG_MARK_NAME
-                ? {...existing, attrs: {...existing.attrs, [CHARACTER_TAG_ID_ATTR]: result.characterId}}
-                : existing);
+        const nextMarks = (child.marks ?? []).map(existing => {
+            if (existing.type !== CHARACTER_TAG_MARK_NAME) {
+                return existing;
+            }
+
+            return {...existing, attrs: {...existing.attrs, [CHARACTER_TAG_ID_ATTR]: result.characterId}};
+        });
 
         return {...child, marks: nextMarks};
     });
@@ -194,9 +212,13 @@ export const renameCharacterTagsInNode = (
 
         changed = true;
 
-        const nextMarks = (child.marks ?? []).map(existing => (existing.type === CHARACTER_TAG_MARK_NAME
-            ? {...existing, attrs: {...existing.attrs, [CHARACTER_TAG_KEY_ATTR]: newKey}}
-            : existing));
+        const nextMarks = (child.marks ?? []).map(existing => {
+            if (existing.type !== CHARACTER_TAG_MARK_NAME) {
+                return existing;
+            }
+
+            return {...existing, attrs: {...existing.attrs, [CHARACTER_TAG_KEY_ATTR]: newKey}};
+        });
 
         return {
             ...child, text: newName, marks: nextMarks,

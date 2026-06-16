@@ -1,7 +1,11 @@
 import {
+    canBlockTypeHaveCharacterTags,
+    CHARACTER_TAG_ID_ATTR,
+    CHARACTER_TAG_MARK_NAME,
     extractCharacterKeys,
     type IndexedScriptBlock,
     type IndexedScriptCharacterRef,
+    normalizeCharacterKey,
     resolveScriptBlockNodeType,
     type ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
@@ -16,13 +20,52 @@ import {
     normalizeBlockNodeType,
 } from '../tiptap/scriptCore';
 
+const toTagCharacterRefs = (node: ProseMirrorNode): IndexedScriptCharacterRef[] | null => {
+    const idByKey = new Map<string, string | null>();
+
+    node.descendants(child => {
+        if (!child.isText) {
+            return;
+        }
+
+        const mark = child.marks.find(candidate => candidate.type.name === CHARACTER_TAG_MARK_NAME);
+
+        if (!mark) {
+            return;
+        }
+
+        const key = normalizeCharacterKey(child.text ?? '');
+
+        if (!key) {
+            return;
+        }
+
+        const rawId: unknown = mark.attrs[CHARACTER_TAG_ID_ATTR];
+        const characterId = typeof rawId === 'string' && rawId.length > 0 ? rawId : null;
+        const existing = idByKey.get(key);
+
+        if (existing === undefined || (existing === null && characterId)) {
+            idByKey.set(key, characterId);
+        }
+    });
+
+    if (idByKey.size === 0) {
+        return null;
+    }
+
+    return Array.from(idByKey.entries())
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([key, characterId]) => ({key, characterId}));
+};
+
 const toCharacterRefs = (
+    node: ProseMirrorNode,
     blockType: string,
     textContent: string,
     attrs: Record<string, unknown> | null | undefined,
 ): IndexedScriptCharacterRef[] | null => {
     if (!isCharacterBlockType(blockType)) {
-        return null;
+        return canBlockTypeHaveCharacterTags(blockType) ? toTagCharacterRefs(node) : null;
     }
 
     const refsByKey = readNormalizedRefsFromAttrs(attrs);
@@ -111,6 +154,7 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
             actBlockId: currentActBlockId,
             sceneBlockId: currentSceneBlockId,
             characterRefs: toCharacterRefs(
+                node,
                 blockType,
                 textContent,
                 node.attrs as Record<string, unknown>,

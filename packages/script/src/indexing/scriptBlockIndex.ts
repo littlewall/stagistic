@@ -1,4 +1,8 @@
 import {
+    canBlockTypeHaveCharacterTags,
+    collectCharacterTags,
+} from '../characters/characterTagMarks';
+import {
     getCharacterRefByKey,
     getNodeTextContent,
     isCharacterBlockType,
@@ -40,13 +44,34 @@ export interface BuildScriptBlockIndexResult {
     blockCount: number,
 }
 
+const toTagCharacterRefs = (node: ScriptNode): IndexedScriptCharacterRef[] | null => {
+    const idByKey = new Map<string, string | null>();
+
+    collectCharacterTags(node).forEach(tag => {
+        const existing = idByKey.get(tag.key);
+
+        if (existing === undefined || (existing === null && tag.characterId)) {
+            idByKey.set(tag.key, tag.characterId);
+        }
+    });
+
+    if (idByKey.size === 0) {
+        return null;
+    }
+
+    return Array.from(idByKey.entries())
+        .sort((a, b) => a[0].localeCompare(b[0]))
+        .map(([key, characterId]) => ({key, characterId}));
+};
+
 const toCharacterRefs = (
+    node: ScriptNode,
     blockType: string,
     textContent: string,
     attrs: Record<string, unknown> | undefined,
 ): IndexedScriptCharacterRef[] | null => {
     if (!isCharacterBlockType(blockType)) {
-        return null;
+        return canBlockTypeHaveCharacterTags(blockType) ? toTagCharacterRefs(node) : null;
     }
 
     const characterRefByKey = getCharacterRefByKey(attrs);
@@ -137,7 +162,7 @@ export const buildScriptBlockIndex = (
                 textContent,
                 actBlockId: currentActBlockId,
                 sceneBlockId: currentSceneBlockId,
-                characterRefs: toCharacterRefs(blockType, textContent, attrs),
+                characterRefs: toCharacterRefs(node, blockType, textContent, attrs),
             });
 
             orderNo += 1;

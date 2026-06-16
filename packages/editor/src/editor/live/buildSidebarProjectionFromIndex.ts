@@ -30,10 +30,6 @@ export interface SidebarProjectionColorContext {
 
 const normalizeText = (value: string) => value.trim();
 
-const isCharacterBlockType = (blockType: string) => {
-    return blockType === "character";
-};
-
 interface StructureBlockEntry {
     blockId: string,
     blockType: string,
@@ -52,7 +48,7 @@ export const buildStructureSnapshotFromBlocks = (blocks: readonly StructureBlock
             continue;
         }
 
-        if (block.blockType === "act") {
+        if (block.blockType === 'act') {
             const row: EditorLiveStructureRow = {
                 kind: 'act',
                 blockId: block.blockId,
@@ -66,7 +62,7 @@ export const buildStructureSnapshotFromBlocks = (blocks: readonly StructureBlock
             continue;
         }
 
-        if (block.blockType === "scene") {
+        if (block.blockType === 'scene') {
             const row: EditorLiveStructureRow = {
                 kind: 'scene',
                 blockId: block.blockId,
@@ -118,7 +114,7 @@ const applyBlockCharacterRefs = (
     characterIdByKey: Map<string, string>,
     block: IndexedScriptBlock,
 ) => {
-    if (!isCharacterBlockType(block.blockType) || !Array.isArray(block.characterRefs)) {
+    if (!Array.isArray(block.characterRefs)) {
         return;
     }
 

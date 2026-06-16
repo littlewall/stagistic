@@ -5,6 +5,8 @@ export {
 } from './characterRefsInScriptDocument';
 export type {CharacterTagRef} from './characterTagMarks';
 export {
+    canBlockTypeHaveCharacterTags,
+    CHARACTER_TAG_BLOCK_TYPES,
     CHARACTER_TAG_ID_ATTR,
     CHARACTER_TAG_KEY_ATTR,
     CHARACTER_TAG_MARK_NAME,
