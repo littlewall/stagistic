@@ -44,6 +44,20 @@ export const getCharacterTagComposeFromState = (state: EditorState): CharacterTa
     };
 };
 
+type ComposeBlock = NonNullable<ReturnType<typeof getActiveScriptBlockFromState>>;
+
+const getComposeBlock = (state: EditorState): ComposeBlock | null => {
+    const block = getActiveScriptBlockFromState(state);
+
+    return block && block.blockType === STAGE_DIRECTION_BLOCK_TYPE ? block : null;
+};
+
+const isWordBoundaryBefore = (state: EditorState, block: ComposeBlock, from: number): boolean => {
+    const charBefore = from > block.from ? charAt(state, from - 1) : '';
+
+    return charBefore.length === 0 || (/\s/).test(charBefore);
+};
+
 export const isComposeValid = (state: EditorState, from: number): boolean => {
     const markType = state.schema.marks[CHARACTER_TAG_MARK_NAME];
 
@@ -51,9 +65,9 @@ export const isComposeValid = (state: EditorState, from: number): boolean => {
         return false;
     }
 
-    const block = getActiveScriptBlockFromState(state);
+    const block = getComposeBlock(state);
 
-    if (!block || block.blockType !== STAGE_DIRECTION_BLOCK_TYPE || from < block.from) {
+    if (!block || from < block.from) {
         return false;
     }
 
@@ -63,28 +77,24 @@ export const isComposeValid = (state: EditorState, from: number): boolean => {
 };
 
 export const detectCompose = (state: EditorState): CharacterTagComposeRawState | null => {
-    const {selection} = state;
-
-    if (!selection.empty) {
+    if (!state.selection.empty) {
         return null;
     }
 
-    const block = getActiveScriptBlockFromState(state);
+    const block = getComposeBlock(state);
 
-    if (!block || block.blockType !== STAGE_DIRECTION_BLOCK_TYPE) {
+    if (!block) {
         return null;
     }
 
-    const from = selection.from - 1;
+    const from = state.selection.from - 1;
     const markType = state.schema.marks[CHARACTER_TAG_MARK_NAME];
 
     if (!markType || from < block.from || !isCharacterTagMarkedAt(state, from, markType)) {
         return null;
     }
 
-    const charBefore = from > block.from ? charAt(state, from - 1) : '';
-
-    if (charBefore.length > 0 && !(/\s/).test(charBefore)) {
+    if (!isWordBoundaryBefore(state, block, from)) {
         return null;
     }
 
@@ -96,13 +106,11 @@ export const canOpenCompose = (state: EditorState, from: number): boolean => {
         return false;
     }
 
-    const block = getActiveScriptBlockFromState(state);
+    const block = getComposeBlock(state);
 
-    if (!block || block.blockType !== STAGE_DIRECTION_BLOCK_TYPE || from < block.from) {
+    if (!block || from < block.from) {
         return false;
     }
 
-    const charBefore = from > block.from ? charAt(state, from - 1) : '';
-
-    return charBefore.length === 0 || (/\s/).test(charBefore);
+    return isWordBoundaryBefore(state, block, from);
 };

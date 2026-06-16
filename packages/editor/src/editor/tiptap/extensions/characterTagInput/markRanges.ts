@@ -1,4 +1,3 @@
-import {CHARACTER_TAG_ID_ATTR} from '@stagistic/script';
 import {getMarkRange} from '@tiptap/core';
 import type {
     Mark,
@@ -6,6 +5,7 @@ import type {
 } from '@tiptap/pm/model';
 import type {EditorState} from '@tiptap/pm/state';
 
+import {readCharacterTagId} from '../../scriptBlock/characterTagMarkCommands';
 import {isPendingTagSpaceGap} from './text';
 
 export interface EndTypingTagRange {
@@ -62,9 +62,7 @@ export const readCommittedTagCharacterId = (
         const mark = child.marks.find(candidate => candidate.type === markType);
 
         if (mark) {
-            const rawId: unknown = mark.attrs[CHARACTER_TAG_ID_ATTR];
-
-            characterId = typeof rawId === 'string' && rawId.length > 0 ? rawId : null;
+            characterId = readCharacterTagId(mark);
         }
     });
 

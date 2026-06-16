@@ -1,12 +1,3 @@
-/*
- * Live-editor mutations of `characterTag` marks, mirroring the document-level
- * ref-ops in `@stagistic/script` so a sidebar link / unlink / replace / rename
- * updates the open editor's stage-direction tag pills immediately.
- *
- * All helpers map their collected (original-doc) positions through
- * `tr.mapping`, so they compose safely with character-block edits already
- * staged on the same transaction regardless of order.
- */
 import {
     CHARACTER_TAG_ID_ATTR,
     CHARACTER_TAG_KEY_ATTR,
@@ -34,7 +25,7 @@ export const getCharacterTagMarkType = (schema: Schema): MarkType | null => {
     return schema.marks[CHARACTER_TAG_MARK_NAME] ?? null;
 };
 
-const readTagCharacterId = (mark: Mark): string | null => {
+export const readCharacterTagId = (mark: Mark): string | null => {
     const raw: unknown = mark.attrs[CHARACTER_TAG_ID_ATTR];
 
     return typeof raw === 'string' && raw.length > 0 ? raw : null;
@@ -59,7 +50,7 @@ const collectTagSpans = (doc: ProseMirrorNode, markType: MarkType): TagSpan[] =>
         }
 
         const text = node.text ?? '';
-        const characterId = readTagCharacterId(mark);
+        const characterId = readCharacterTagId(mark);
         const previous = spans[spans.length - 1];
 
         if (previous && previous.end === pos && previous.characterId === characterId) {
@@ -85,12 +76,6 @@ const collectTagSpans = (doc: ProseMirrorNode, markType: MarkType): TagSpan[] =>
     return spans;
 };
 
-/**
- * Rewrites the `characterId` attr of matching tag marks. `resolveNextId`
- * returns the new id (or null to clear), or `undefined` to leave the span
- * unchanged. Attr-only, so doc size is unchanged. Returns whether anything
- * changed.
- */
 export const applyTagMarkIdChange = (
     tr: Transaction,
     doc: ProseMirrorNode,
@@ -126,12 +111,6 @@ interface ApplyTagMarkRenameArgs {
     newName: string,
 }
 
-/**
- * Rewrites the text and key of tag marks belonging to `characterId` (confirmed
- * tags) or, for unconfirmed tags, those whose key matches `canonicalOldKey`.
- * Each tag's existing confirmation state (its `characterId`) is preserved,
- * matching the script-side `renameCharacterTagsInNode`.
- */
 export const applyTagMarkRename = (
     tr: Transaction,
     doc: ProseMirrorNode,

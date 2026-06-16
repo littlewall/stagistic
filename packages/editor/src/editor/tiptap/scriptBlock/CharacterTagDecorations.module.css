@@ -1,17 +1,21 @@
 .characterTag {
+    /* A more saturated shade of the character colour (chroma boosted via oklch). */
+    --character-tag-vivid-color: oklch(from var(--character-tag-color, var(--color-border)) l calc(c * var(--character-tag-chroma-boost, 1.4)) h);
+
     padding: 0 calc(7px * var(--size-scale));
     text-transform: uppercase;
     white-space: nowrap;
     border: 1px solid transparent;
     border-radius: var(--radius-full);
 }
+
 .characterTag[data-character-id] {
-    background: color-mix(in srgb, var(--character-tag-color, var(--color-surface-accent)) var(--character-tag-tint-strength, 30%), var(--color-surface));
+    background: color-mix(in srgb, var(--character-tag-vivid-color) var(--character-tag-tint-strength, 30%), var(--color-surface));
 }
 
 .characterTag:not([data-character-id]) {
     background: transparent;
-    border: 1px dashed var(--character-tag-color, var(--color-border));
+    border: 1px solid var(--character-tag-vivid-color);
 }
 
 .characterSeparator {

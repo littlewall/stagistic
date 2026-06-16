@@ -93,6 +93,32 @@ const resolveConfirmedCharacterId = (
     return id.length > 0 ? id : null;
 };
 
+const buildCommittedTagInsertion = (
+    state: EditorState,
+    markType: MarkType,
+    from: number,
+    to: number,
+    name: string,
+    characterId: string | null,
+    trailingSpace: boolean,
+): Transaction => {
+    const mark = markType.create({
+        [CHARACTER_TAG_KEY_ATTR]: normalizeCharacterKey(name),
+        [CHARACTER_TAG_ID_ATTR]: characterId,
+    });
+    let tr = state.tr.replaceWith(from, to, state.schema.text(name, [mark]));
+    let caret = from + name.length;
+
+    if (trailingSpace) {
+        tr = tr.insertText(' ', caret);
+        caret += 1;
+    }
+
+    return tr
+        .setSelection(TextSelection.create(tr.doc, caret))
+        .removeStoredMark(markType);
+};
+
 export const buildCommittedTagExitTransaction = (
     state: EditorState,
     markType: MarkType,
@@ -101,25 +127,11 @@ export const buildCommittedTagExitTransaction = (
     name: string,
     characterId: string | null,
 ): Transaction | null => {
-    const key = normalizeCharacterKey(name);
-
-    if (key.length === 0) {
+    if (normalizeCharacterKey(name).length === 0) {
         return null;
     }
 
-    const node = state.schema.text(name, [
-        markType.create({
-            [CHARACTER_TAG_KEY_ATTR]: key,
-            [CHARACTER_TAG_ID_ATTR]: characterId,
-        }),
-    ]);
-    const tr = state.tr.replaceWith(from, to, node);
-    const caret = from + name.length;
-
-    return tr
-        .insertText(' ', caret)
-        .setSelection(TextSelection.create(tr.doc, caret + 1))
-        .removeStoredMark(markType);
+    return buildCommittedTagInsertion(state, markType, from, to, name, characterId, true);
 };
 
 export const buildCommitTransaction = (
@@ -147,22 +159,16 @@ export const buildCommitTransaction = (
     }
 
     const characterId = resolveConfirmedCharacterId(key, persistentCharacters);
-    const mark = markType.create({
-        [CHARACTER_TAG_KEY_ATTR]: key,
-        [CHARACTER_TAG_ID_ATTR]: characterId,
-    });
-    const textNode = state.schema.text(rawName, [mark]);
-    let tr = state.tr.replaceWith(compose.from, compose.to, textNode);
-    let caret = compose.from + rawName.length;
 
-    if (payload?.trailingSpace) {
-        tr = tr.insertText(' ', caret);
-        caret += 1;
-    }
-
-    return tr
-        .setSelection(TextSelection.create(tr.doc, caret))
-        .removeStoredMark(markType)
+    return buildCommittedTagInsertion(
+        state,
+        markType,
+        compose.from,
+        compose.to,
+        rawName,
+        characterId,
+        Boolean(payload?.trailingSpace),
+    )
         .setMeta(CLOSE_META_KEY, true)
         .scrollIntoView();
 };

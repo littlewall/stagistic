@@ -10,12 +10,13 @@ import {
     isComposeValid,
 } from './composeState';
 import {CLOSE_META_KEY} from './constants';
-import {createCharacterTagInputHandlers} from './eventHandlers';
+import {createCharacterTagKeyDownHandler} from './keyDownHandlers';
 import {
     findCommittedTagBeforeCursor,
     readCommittedTagCharacterId,
 } from './markRanges';
 import {resolveDoubleSpaceCommitName} from './text';
+import {createCharacterTagTextInputHandler} from './textInputHandlers';
 import {
     buildAbandonComposeTransaction,
     buildCommittedTagExitTransaction,
@@ -31,10 +32,6 @@ export const createCharacterTagComposePlugin = (
     options: CharacterTagInputExtensionOptions,
 ): Plugin<CharacterTagComposeRawState | null> => {
     const getPersistentCharacters = () => options.persistentCharactersRef?.current ?? [];
-    const handlers = createCharacterTagInputHandlers({
-        editor,
-        getPersistentCharacters,
-    });
 
     return new Plugin<CharacterTagComposeRawState | null>({
         key: characterTagComposeKey,
@@ -141,8 +138,8 @@ export const createCharacterTagComposePlugin = (
                     return false;
                 },
             },
-            handleTextInput: handlers.handleTextInput,
-            handleKeyDown: handlers.handleKeyDown,
+            handleTextInput: createCharacterTagTextInputHandler(getPersistentCharacters),
+            handleKeyDown: createCharacterTagKeyDownHandler(editor),
         },
     });
 };
