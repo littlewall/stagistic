@@ -7,7 +7,6 @@ import {selectSplitPoint} from './selectSplitPoint';
 
 const LINE_HEIGHT = 22;
 
-/** uniform lines: line i starts at paddingTop + i * LINE_HEIGHT, startPos 100 + i * 10 */
 const uniformLines = (count: number, paddingTop = 0): BlockLine[] => Array.from({length: count}, (_, index) => ({
     startPos: 100 + index * 10,
     topRel: paddingTop + index * LINE_HEIGHT,

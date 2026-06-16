@@ -1,12 +1,8 @@
-/* ── Page layout ─────────────────────────────────────────── */
-
 .content {
     display: flex;
     flex-direction: column;
     gap: var(--space-5xl);
 }
-
-/* ── Continue writing hero ───────────────────────────────── */
 
 .continueSection {
     display: flex;
@@ -49,8 +45,6 @@
     margin-top: var(--space-xs);
     font-size: var(--font-size-sm);
 }
-
-/* ── Scripts list ────────────────────────────────────────── */
 
 .scriptListSection {
     display: flex;
@@ -119,8 +113,6 @@
     }
 }
 
-/* ── Empty state ─────────────────────────────────────────── */
-
 .emptyState {
     display: flex;
     flex-direction: column;
@@ -141,8 +133,6 @@
     gap: var(--space-lg);
 }
 
-/* ── Error state ─────────────────────────────────────────── */
-
 .errorState {
     display: flex;
     flex-direction: column;
@@ -150,8 +140,6 @@
     align-items: flex-start;
     padding-top: var(--space-5xl);
 }
-
-/* ── Skeleton loading ────────────────────────────────────── */
 
 @keyframes shimmer {
     0% {

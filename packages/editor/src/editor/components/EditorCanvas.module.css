@@ -8,8 +8,6 @@
     display: flex;
     flex: 1;
     flex-direction: column;
-    /* Fixed page width: when sidebars narrow the host below this, the page
-       is clipped at the edges instead of reflowing its text. */
     width: var(--editor-page-width, 960px);
     min-height: 0;
     padding: var(--space-3xl) 0 var(--space-5xl);
@@ -21,13 +19,11 @@
     box-sizing: border-box;
     width: 100%;
     min-height: 100%;
-    /* Margins */
     padding: var(--editor-margin-top, 96px) var(--editor-margin-right, 96px) var(--editor-margin-bottom, 96px) var(--editor-margin-left, 96px);
     font-family: var(--font-family-mono);
     font-size: var(--editor-font-size, calc(13px * var(--size-scale)));
     line-height: var(--editor-line-height, 1.7);
     color: var(--color-text);
-    /* One leading tab = one 0.5" indent step (5 monospace chars). */
     tab-size: 5;
     outline: none;
 

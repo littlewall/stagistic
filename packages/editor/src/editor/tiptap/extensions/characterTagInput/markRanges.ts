@@ -71,11 +71,6 @@ export const readCommittedTagCharacterId = (
     return characterId;
 };
 
-/**
- * Finds a `characterTag` mark range ending at (or just before) the cursor.
- * Probes a few positions back so it still finds the mark when a double space
- * or the macOS substitution left a couple of prose chars after it.
- */
 export const findCommittedTagBeforeCursor = (
     state: EditorState,
     markType: MarkType,

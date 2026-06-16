@@ -1,5 +1,3 @@
-/* Shared styles used across multiple settings panels */
-
 .previewCard {
     display: grid;
     gap: var(--space-md);

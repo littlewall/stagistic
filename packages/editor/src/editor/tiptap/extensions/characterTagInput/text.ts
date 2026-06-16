@@ -28,12 +28,6 @@ export const renderPendingTagText = (value: string): string => {
         : value;
 };
 
-/**
- * Returns the name to commit when the compose query was ended by a double
- * space, or null otherwise. Handles plain spaces, NBSPs that browsers may use
- * for trailing inline whitespace, and the macOS "double-space -> '. '"
- * substitution (a trailing `". "`).
- */
 export const resolveDoubleSpaceCommitName = (query: string): string | null => {
     if ((/[\u00a0 ]{2}$/).test(query)) {
         return query.trim() || null;

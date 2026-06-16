@@ -1,19 +1,14 @@
 .characterTag {
     padding: 0 calc(7px * var(--size-scale));
-    /* Tags always render uppercase (spec §8); stage-direction blocks are
-       casing:normal, so the tag forces its own uppercasing. */
     text-transform: uppercase;
     white-space: nowrap;
     border: 1px solid transparent;
     border-radius: var(--radius-full);
 }
-
-/* Confirmed (linked to a cast character): filled tint in the character color. */
 .characterTag[data-character-id] {
     background: color-mix(in srgb, var(--character-tag-color, var(--color-surface-accent)) var(--character-tag-tint-strength, 30%), var(--color-surface));
 }
 
-/* Unconfirmed (key only, no characterId): no fill, dashed border. */
 .characterTag:not([data-character-id]) {
     background: transparent;
     border: 1px dashed var(--character-tag-color, var(--color-border));

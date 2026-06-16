@@ -1,5 +1,3 @@
-/* ---- Header frame ---- */
-
 .header {
     --app-header-height: 44px;
     --traffic-light-space: 76px;
@@ -63,8 +61,6 @@
 :global(.platform-macos) .inner {
     padding-left: calc(var(--space-xl) + var(--traffic-light-space));
 }
-
-/* ---- Shared button / trigger base ---- */
 
 .menuTrigger,
 .avatarTrigger,
@@ -147,8 +143,6 @@
     height: calc(14px * var(--size-scale));
     color: var(--color-text-muted);
 }
-
-/* ---- Menu popover ---- */
 
 .menuPopover {
     padding: 0;
@@ -249,14 +243,10 @@
     }
 }
 
-/* ---- Account popover ---- */
-
 .accountPopoverContent {
     display: flex;
     flex-direction: column;
 }
-
-/* ---- Theme toggle ---- */
 
 .themeControlsContainer {
     display: flex;
@@ -316,8 +306,6 @@
     }
 }
 
-/* ---- Script status ---- */
-
 .scriptStatus {
     display: inline-flex;
     align-items: center;
@@ -344,8 +332,6 @@
         }
     }
 }
-
-/* ---- Tooltip ---- */
 
 .tooltip {
     padding: var(--space-sm) var(--space-md);

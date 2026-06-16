@@ -1,5 +1,4 @@
 .select {
-    /* Borderless, small trigger; font-weight 600 for the panel label */
     --select-button-height: var(--control-height-sm);
     --select-button-font-weight: var(--font-weight-semibold);
     --select-button-radius: var(--radius-md);

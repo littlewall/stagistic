@@ -1,13 +1,3 @@
-/*
- * CharacterTagInputExtension — the `@`-triggered authoring lifecycle for
- * inline character tags inside stage-direction blocks.
- *
- * The implementation lives in `characterTagInput/`:
- *   - composeState: plugin state and compose detection
- *   - transactions: document mutations
- *   - eventHandlers: DOM/key input paths
- *   - plugin: ProseMirror plugin assembly
- */
 import {Extension} from '@tiptap/core';
 
 import {
@@ -38,10 +28,6 @@ declare module '@tiptap/core' {
 
 export const CharacterTagInputExtension = Extension.create<CharacterTagInputExtensionOptions>({
     name: 'CharacterTagInput',
-    /*
-     * Run before block-behaviour extensions so Enter/Tab terminators are handled
-     * while composing instead of triggering block navigation.
-     */
     priority: 1000,
 
     addOptions() {
