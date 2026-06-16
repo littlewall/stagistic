@@ -1,4 +1,4 @@
-## Goldern rules for working on Claude
+## Goldern rules for working on Codex
 - Be brief. Use the fewest words possible to get your point across.
 - Be specific. Avoid vague language; provide concrete details.
 - Be direct. Say what you mean without unnecessary qualifiers or hedging.
