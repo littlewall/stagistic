@@ -20,6 +20,7 @@ import type {EditorRuntimeState} from '../../runtime/editorRuntimeTypes';
 import {
     selectionTouchesCharacterBlock,
     transactionTouchesCharacterBlocks,
+    transactionTouchesCharacterTags,
     transactionTouchesStructureBlocks,
 } from '../../runtime/transactionGuards';
 import {
@@ -146,6 +147,7 @@ export const EditorRuntimeExtension = Extension.create<EditorRuntimeOptions>({
                     apply: (tr, pluginState, oldState, newState) => {
                         const shouldRefreshCharacters = tr.getMeta(EDITOR_RUNTIME_REFRESH_META_KEY) === true
                             || transactionTouchesCharacterBlocks(tr, oldState.doc, tr.doc)
+                            || transactionTouchesCharacterTags(tr, oldState.doc, tr.doc)
                             || selectionTouchesCharacterBlock(oldState, newState, tr);
                         const shouldRefreshStructure = transactionTouchesStructureBlocks(
                             tr,

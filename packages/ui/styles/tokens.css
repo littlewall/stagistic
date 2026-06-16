@@ -157,12 +157,6 @@
     --color-progress-middle: oklch(from var(--base-amber) var(--L-progress-mid) c h);
     --color-progress-end: oklch(from var(--base-amber) var(--L-progress-end) calc(c * .8) h);
 
-    /* ── Select / dropdown design tokens ───────────────────────────
-       Used by SettingsSelect, BlockTypeSelect, SidebarPanelSelect.
-       Override on a parent element to vary per-site (size, border,
-       background, weight). Common look (menu, hover/active states,
-       padding/gap/font) stays unified.                            */
-
     /* Button (trigger) */
     --select-button-height: var(--control-height-md);
     --select-button-padding-inline: var(--space-md);

@@ -1,3 +1,4 @@
+import {CHARACTER_TAG_MARK_NAME} from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {
     EditorState,
@@ -147,6 +148,47 @@ export const transactionTouchesCharacterBlocks = (
     return collectChangedRanges(transaction).some(range => {
         return hasMatchingBlocksInRange(oldDoc, range.oldFrom, range.oldTo, isCharacterBlockType)
             || hasMatchingBlocksInRange(newDoc, range.newFrom, range.newTo, isCharacterBlockType);
+    });
+};
+
+const rangeHasCharacterTagMark = (
+    doc: ProseMirrorNode,
+    from: number,
+    to: number,
+) => {
+    const markType = doc.type.schema.marks[CHARACTER_TAG_MARK_NAME];
+
+    if (!markType) {
+        return false;
+    }
+
+    const safeRange = resolveSafeRange(doc.content.size, from, to);
+
+    if (!safeRange) {
+        return false;
+    }
+
+    return doc.rangeHasMark(safeRange.from, safeRange.to, markType);
+};
+
+/**
+ * True when a transaction adds, removes, or edits a `characterTag` mark.
+ * Character tags live in stage directions (not character blocks), so the
+ * character-block guards miss them — the sidebar roster needs this to refresh
+ * on tag commit / edit / unlink.
+ */
+export const transactionTouchesCharacterTags = (
+    transaction: Transaction,
+    oldDoc: ProseMirrorNode,
+    newDoc: ProseMirrorNode,
+) => {
+    if (!transaction.docChanged) {
+        return false;
+    }
+
+    return collectChangedRanges(transaction).some(range => {
+        return rangeHasCharacterTagMark(oldDoc, range.oldFrom, range.oldTo)
+            || rangeHasCharacterTagMark(newDoc, range.newFrom, range.newTo);
     });
 };
 

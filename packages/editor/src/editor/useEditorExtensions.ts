@@ -118,10 +118,9 @@ export const useEditorExtensions = ({
     );
     const characterTagInputExtension = useMemo(
         () => CharacterTagInputExtension.configure({
-            tagClassName: characterTagStyles.characterTag,
             persistentCharactersRef,
         }),
-        [characterTagStyles.characterTag, persistentCharactersRef],
+        [persistentCharactersRef],
     );
     const uniqueIdExtension = useMemo(() => {
         const uniqueIdTypes = [...SCRIPT_BLOCK_NODE_NAMES];

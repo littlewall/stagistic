@@ -1,10 +1,6 @@
-/* ── Page shell ─────────────────────────────────────────── */
-
 .page {
     min-height: 100vh;
 }
-
-/* ── Nav (Proscenium arch) ───────────────────────────────── */
 
 .nav {
     --color-text: var(--color-stage-nav-text);
@@ -77,8 +73,6 @@
     border: 1px solid var(--color-border);
     border-radius: 9999px;
 }
-
-/* ── Hero (The Stage) ────────────────────────────────────── */
 
 .hero,
 .alpha {
@@ -154,8 +148,6 @@
     flex-wrap: wrap;
     gap: .75rem;
 }
-
-/* ── Script excerpt (The Spotlight) ─────────────────────── */
 
 .heroScript {
     position: relative;
@@ -240,8 +232,6 @@
     border-top: 1px solid var(--color-border);
 }
 
-/* ── Shared CTAs ────────────────────────────────────────── */
-
 .btnPrimary {
     display: inline-flex;
     gap: .5rem;
@@ -294,8 +284,6 @@
     }
 }
 
-/* ── For Theatre ────────────────────────────────────────── */
-
 .forTheatre {
     padding: 7rem 1.5rem;
     border-top: 1px solid var(--color-border);
@@ -327,8 +315,6 @@
         margin-top: 1.125rem;
     }
 }
-
-/* ── Features ───────────────────────────────────────────── */
 
 .features {
     padding: 7rem 1.5rem;
@@ -373,8 +359,6 @@
     line-height: 1.7;
     color: var(--color-text-muted);
 }
-
-/* ── FAQ ────────────────────────────────────────────────── */
 
 .faq {
     padding: 7rem 1.5rem;
@@ -458,8 +442,6 @@
     color: var(--color-text-muted);
 }
 
-/* ── Alpha / CTA (Curtain call) ──────────────────────────── */
-
 .alpha {
     padding: 8.5rem 1.5rem;
     border-top: 1px solid oklch(.92 .012 51 / .06);
@@ -530,8 +512,6 @@
     gap: .625rem;
 }
 
-/* ── Footer ─────────────────────────────────────────────── */
-
 .footer {
     padding: 2.5rem 1.5rem;
     border-top: 1px solid var(--color-border);
@@ -576,14 +556,11 @@
     }
 }
 
-/* ── Scroll reveal ──────────────────────────────────────── */
-
 .reveal {
     transition: opacity .55s cubic-bezier(.22, 1, .36, 1), transform .55s cubic-bezier(.22, 1, .36, 1);
 }
 
 @media (prefers-reduced-motion: no-preference) {
-    /* html.js gates the hidden state so content stays visible without JS. */
     /* stylelint-disable-next-line selector-no-qualifying-type */
     :global(html.js) .reveal:not([data-visible]) {
         transform: translateY(12px);
@@ -601,8 +578,6 @@
         opacity: 0;
     }
 }
-
-/* ── Hero entrance ──────────────────────────────────────── */
 
 .fadeUp {
     animation: fadeUpIn .6s cubic-bezier(.22, 1, .36, 1) both;
@@ -653,8 +628,6 @@
         animation: none;
     }
 }
-
-/* ── Responsive ─────────────────────────────────────────── */
 
 @media (max-width: 860px) {
     .hero {

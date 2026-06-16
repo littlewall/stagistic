@@ -5,6 +5,7 @@ import {
 import {Extension} from '@tiptap/core';
 import {
     type EditorState,
+    Plugin,
     type Transaction,
 } from '@tiptap/pm/state';
 
@@ -17,6 +18,10 @@ import {
     writeRefsToNodeAttrs,
 } from '../../characters/characterRefUtils';
 import type {PersistentCharacterRef} from '../../contracts';
+import {
+    transactionTouchesCharacterBlocks,
+    transactionTouchesCharacterTags,
+} from '../../runtime/transactionGuards';
 import {
     applyTagMarkIdChange,
     getCharacterTagMarkType,
@@ -34,6 +39,7 @@ const CHARACTER_REF_SYNC_META_KEY = 'character-ref-sync';
 
 const toConfirmedCharacterIdByKey = (
     persistentCharacters: readonly PersistentCharacterRef[],
+    state: EditorState,
 ) => {
     const result = new Map<string, string>();
 
@@ -48,6 +54,32 @@ const toConfirmedCharacterIdByKey = (
         }
 
         result.set(key, id);
+    });
+
+    visitCharacterBlocks({
+        doc: state.doc,
+        onCharacterBlock: node => {
+            const text = node.textContent ?? '';
+            const tokenKeys = extractCharacterKeys(text);
+
+            if (tokenKeys.length === 0) {
+                return false;
+            }
+
+            const currentRefs = readNormalizedRefsFromRaw(node.attrs.characterRefs);
+
+            tokenKeys.forEach(tokenKey => {
+                const characterId = currentRefs[tokenKey];
+
+                if (!characterId || result.has(tokenKey)) {
+                    return;
+                }
+
+                result.set(tokenKey, characterId);
+            });
+
+            return false;
+        },
     });
 
     return result;
@@ -107,7 +139,7 @@ const createCharacterRefSyncTransaction = (
     persistentCharacters: readonly PersistentCharacterRef[],
     touchedBlockIds?: ReadonlySet<string>,
 ): Transaction | null => {
-    const confirmedCharacterIdByKey = toConfirmedCharacterIdByKey(persistentCharacters);
+    const confirmedCharacterIdByKey = toConfirmedCharacterIdByKey(persistentCharacters, state);
     let tr: Transaction = state.tr;
     let changed = false;
 
@@ -179,7 +211,31 @@ export const CharacterRefSyncExtension = Extension.create<{
     },
 
     addProseMirrorPlugins() {
-        return [];
+        const options = this.options;
+
+        return [
+            new Plugin({
+                appendTransaction: (transactions, oldState, newState) => {
+                    if (transactions.some(transaction => transaction.getMeta(CHARACTER_REF_SYNC_META_KEY) === true)) {
+                        return null;
+                    }
+
+                    const shouldSync = transactions.some(transaction => {
+                        return transactionTouchesCharacterBlocks(transaction, oldState.doc, newState.doc)
+                            || transactionTouchesCharacterTags(transaction, oldState.doc, newState.doc);
+                    });
+
+                    if (!shouldSync) {
+                        return null;
+                    }
+
+                    return createCharacterRefSyncTransaction(
+                        newState,
+                        options.persistentCharactersRef?.current ?? [],
+                    );
+                },
+            }),
+        ];
     },
 
     addCommands() {

@@ -9,22 +9,14 @@ export type SplitDecision =
 
 export interface SelectSplitPointArgs {
     lines: BlockLine[],
-    /** height of the block already placed on previous pages */
     consumedHeight: number,
-    /** vertical space left on the current page */
     spaceLeft: number,
     minLinesBefore: number,
     minLinesAfter: number,
     epsilonPx: number,
-    /** whether the current page has content the block could be pushed below */
     canPushDown: boolean,
 }
 
-/*
- * Picks where to split a block across a page boundary, in whole visual
- * lines. A split at line index `s` keeps lines [firstUnplaced, s) on the
- * current page and carries lines [s, …] over.
- */
 export const selectSplitPoint = ({
     lines,
     consumedHeight,
@@ -73,10 +65,6 @@ export const selectSplitPoint = ({
         return {kind: 'pushDown'};
     }
 
-    /*
-     * The page is empty, so pushing down cannot free more space — relax the
-     * minimums before falling back to overflowing the page.
-     */
     const relaxed = findSplitIndex(1, 1);
 
     if (relaxed !== null) {

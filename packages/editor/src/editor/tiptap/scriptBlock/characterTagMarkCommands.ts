@@ -23,9 +23,11 @@ import type {Transaction} from '@tiptap/pm/state';
 
 interface TagSpan {
     pos: number,
-    node: ProseMirrorNode,
+    end: number,
+    text: string,
     key: string,
     characterId: string | null,
+    otherMarks: Mark[],
 }
 
 export const getCharacterTagMarkType = (schema: Schema): MarkType | null => {
@@ -38,6 +40,10 @@ const readTagCharacterId = (mark: Mark): string | null => {
     return typeof raw === 'string' && raw.length > 0 ? raw : null;
 };
 
+const getCharacterTagMark = (node: ProseMirrorNode, markType: MarkType): Mark | undefined => {
+    return node.marks.find(candidate => candidate.type === markType);
+};
+
 const collectTagSpans = (doc: ProseMirrorNode, markType: MarkType): TagSpan[] => {
     const spans: TagSpan[] = [];
 
@@ -46,17 +52,31 @@ const collectTagSpans = (doc: ProseMirrorNode, markType: MarkType): TagSpan[] =>
             return true;
         }
 
-        const mark = node.marks.find(candidate => candidate.type === markType);
+        const mark = getCharacterTagMark(node, markType);
 
         if (!mark) {
             return true;
         }
 
+        const text = node.text ?? '';
+        const characterId = readTagCharacterId(mark);
+        const previous = spans[spans.length - 1];
+
+        if (previous && previous.end === pos && previous.characterId === characterId) {
+            previous.end = pos + node.nodeSize;
+            previous.text += text;
+            previous.key = normalizeCharacterKey(previous.text);
+
+            return true;
+        }
+
         spans.push({
             pos,
-            node,
-            key: normalizeCharacterKey(node.text ?? ''),
-            characterId: readTagCharacterId(mark),
+            end: pos + node.nodeSize,
+            text,
+            key: normalizeCharacterKey(text),
+            characterId,
+            otherMarks: node.marks.filter(candidate => candidate.type !== markType),
         });
 
         return true;
@@ -87,7 +107,7 @@ export const applyTagMarkIdChange = (
         }
 
         const from = tr.mapping.map(span.pos);
-        const to = tr.mapping.map(span.pos + span.node.nodeSize);
+        const to = tr.mapping.map(span.end);
 
         tr.removeMark(from, to, markType);
         tr.addMark(from, to, markType.create({
@@ -134,19 +154,18 @@ export const applyTagMarkRename = (
         const matches = span.characterId === characterId
             || (!span.characterId && canonicalOldKey !== null && span.key === canonicalOldKey);
 
-        if (!matches || (span.node.text === normalizedNewName && span.key === newKey)) {
+        if (!matches || (span.text === normalizedNewName && span.key === newKey)) {
             return;
         }
 
         const from = tr.mapping.map(span.pos);
-        const to = tr.mapping.map(span.pos + span.node.nodeSize);
-        const otherMarks = span.node.marks.filter(mark => mark.type !== markType);
+        const to = tr.mapping.map(span.end);
         const nextTagMark = markType.create({
             [CHARACTER_TAG_KEY_ATTR]: newKey,
             [CHARACTER_TAG_ID_ATTR]: span.characterId,
         });
 
-        tr.replaceWith(from, to, schema.text(normalizedNewName, [...otherMarks, nextTagMark]));
+        tr.replaceWith(from, to, schema.text(normalizedNewName, [...span.otherMarks, nextTagMark]));
         changed = true;
     });
 
