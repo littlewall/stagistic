@@ -227,5 +227,6 @@ export default defineConfig({
     fmt: fmtConfig,
     test: {
         include: ['**/*.test.{ts,tsx}', '**/*.spec.{ts,tsx}'],
+        exclude: ['**/*.browser.{test,spec}.{ts,tsx}'],
     },
 });

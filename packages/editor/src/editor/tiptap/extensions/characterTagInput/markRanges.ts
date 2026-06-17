@@ -27,19 +27,25 @@ export const readCharacterTagMarkAt = (
     pos: number,
     markType: MarkType,
 ): Mark | null => {
-    let result: Mark | null = null;
+    if (pos < 0 || pos > state.doc.content.size) {
+        return null;
+    }
 
-    state.doc.nodesBetween(pos, pos + 1, child => {
-        const mark = child.marks.find(candidate => candidate.type === markType);
+    const readMark = (marks: readonly Mark[] | undefined) => {
+        return marks?.find(candidate => candidate.type === markType) ?? null;
+    };
+    const resolved = state.doc.resolve(pos);
+    const nodeAfterMark = readMark(resolved.nodeAfter?.marks);
 
-        if (mark) {
-            result = mark;
-        }
+    if (nodeAfterMark) {
+        return nodeAfterMark;
+    }
 
-        return false;
-    });
+    if (pos + 1 > state.doc.content.size) {
+        return null;
+    }
 
-    return result;
+    return readMark(state.doc.resolve(pos + 1).nodeBefore?.marks);
 };
 
 export const isCharacterTagMarkedAt = (

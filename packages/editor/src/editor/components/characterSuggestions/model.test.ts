@@ -1,4 +1,7 @@
-import {CHARACTER_TAG_MARK_NAME} from '@stagistic/script';
+import {
+    CHARACTER_TAG_KEY_ATTR,
+    CHARACTER_TAG_MARK_NAME,
+} from '@stagistic/script';
 import {Schema} from '@tiptap/pm/model';
 import {
     EditorState,
@@ -123,6 +126,22 @@ const createComposeFlowState = () => {
     });
 };
 
+const createMultiBlockComposeFlowState = () => {
+    const plugin = createCharacterTagComposePlugin({} as TiptapEditor, {
+        persistentCharactersRef: {current: []},
+    });
+    const firstBlock = schema.node('stageDirection', {id: 'block-1'});
+    const secondBlock = schema.node('stageDirection', {id: 'block-2'}, [schema.text('Other')]);
+    const doc = schema.node('doc', null, [firstBlock, secondBlock]);
+
+    return EditorState.create({
+        schema,
+        doc,
+        selection: TextSelection.create(doc, 1),
+        plugins: [plugin],
+    });
+};
+
 const createView = (initialState: EditorState) => {
     const view = {
         state: initialState,
@@ -134,6 +153,35 @@ const createView = (initialState: EditorState) => {
     } as unknown as EditorView & {state: EditorState};
 
     return view;
+};
+
+const readFirstCharacterTag = (state: EditorState) => {
+    const markType = state.schema.marks[CHARACTER_TAG_MARK_NAME];
+
+    if (!markType) {
+        throw new Error('Missing character tag mark type');
+    }
+
+    let text = '';
+    let key = '';
+
+    state.doc.nodesBetween(0, state.doc.content.size, child => {
+        const mark = child.marks.find(candidate => candidate.type === markType);
+
+        if (!mark || typeof child.text !== 'string') {
+            return;
+        }
+
+        text = child.text;
+        key = String(mark.attrs[CHARACTER_TAG_KEY_ATTR] ?? '');
+
+        return false;
+    });
+
+    return {
+        text,
+        key,
+    };
 };
 
 afterEach(() => {
@@ -242,5 +290,62 @@ describe('computeCharacterSuggestions', () => {
         }
 
         expect(result.suggestions.map(entry => entry.key)).toEqual(['JOHNY']);
+    });
+
+    it('keeps compose state across no-op transactions after opening a tag', () => {
+        const view = createView(createComposeFlowState());
+        const openComposeTransaction = buildOpenComposeTransaction(
+            view.state,
+            view.state.selection.from,
+            view.state.selection.from,
+        );
+
+        if (!openComposeTransaction) {
+            throw new Error('Expected open compose transaction');
+        }
+
+        view.dispatch(openComposeTransaction);
+        expect(getCharacterTagComposeFromState(view.state)?.query).toBe('');
+
+        view.dispatch(view.state.tr);
+
+        expect(getCharacterTagComposeFromState(view.state)?.query).toBe('');
+    });
+
+    it('preserves a typed compose tag when selection moves to another block', () => {
+        const view = createView(createMultiBlockComposeFlowState());
+        const openComposeTransaction = buildOpenComposeTransaction(
+            view.state,
+            view.state.selection.from,
+            view.state.selection.from,
+        );
+
+        if (!openComposeTransaction) {
+            throw new Error('Expected open compose transaction');
+        }
+
+        view.dispatch(openComposeTransaction);
+
+        const handleTextInput = view.state.plugins[0]?.props.handleTextInput;
+
+        if (!handleTextInput) {
+            throw new Error('Expected text input handler');
+        }
+
+        const from = view.state.selection.from;
+        const handled = handleTextInput(view, from, from, 'J');
+
+        expect(handled).toBe(true);
+        expect(getCharacterTagComposeFromState(view.state)?.query).toBe('J');
+
+        const secondBlockSelection = 4;
+
+        view.dispatch(view.state.tr.setSelection(TextSelection.create(view.state.doc, secondBlockSelection)));
+
+        expect(getCharacterTagComposeFromState(view.state)).toBeNull();
+        expect(readFirstCharacterTag(view.state)).toEqual({
+            text: 'J',
+            key: 'J',
+        });
     });
 });

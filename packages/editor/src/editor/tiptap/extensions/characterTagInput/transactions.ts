@@ -91,9 +91,7 @@ export const buildAbandonComposeTransaction = (
     }
 
     const text = state.doc.textBetween(range.from, range.to, '\n', '\n');
-    const tr = isPlaceholderText(text)
-        ? state.tr.delete(range.from, range.to)
-        : state.tr.removeMark(range.from, range.to, markType);
+    const tr = isPlaceholderText(text) ? state.tr.delete(range.from, range.to) : state.tr;
 
     return tr.setMeta(CLOSE_META_KEY, true);
 };
