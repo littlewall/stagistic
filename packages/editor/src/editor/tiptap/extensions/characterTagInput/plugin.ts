@@ -9,7 +9,7 @@ import {
     getCharacterTagComposeFromState,
     isComposeValid,
 } from './composeState';
-import {CLOSE_META_KEY} from './constants';
+import {CLOSE_META_KEY, OPEN_META_KEY} from './constants';
 import {createCharacterTagKeyDownHandler} from './keyDownHandlers';
 import {
     findCommittedTagBeforeCursor,
@@ -40,6 +40,12 @@ export const createCharacterTagComposePlugin = (
             apply: (tr, value, _oldState, newState) => {
                 if (tr.getMeta(CLOSE_META_KEY) === true) {
                     return null;
+                }
+
+                const openedFrom: unknown = tr.getMeta(OPEN_META_KEY);
+
+                if (typeof openedFrom === 'number') {
+                    return {from: tr.mapping.map(openedFrom, -1)};
                 }
 
                 if (value) {
@@ -139,7 +145,7 @@ export const createCharacterTagComposePlugin = (
                 },
             },
             handleTextInput: createCharacterTagTextInputHandler(getPersistentCharacters),
-            handleKeyDown: createCharacterTagKeyDownHandler(editor),
+            handleKeyDown: createCharacterTagKeyDownHandler(editor, getPersistentCharacters),
         },
     });
 };

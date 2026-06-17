@@ -8,22 +8,31 @@ import {TextSelection} from '@tiptap/pm/state';
 import type {EditorView} from '@tiptap/pm/view';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
+import type {PersistentCharacterRef} from '../../../contracts';
 import {getCharacterTagComposeFromState} from './composeState';
 import {CLOSE_META_KEY} from './constants';
 import {
+    findProtectedTagSeparator,
     findTagRangeForConfirm,
     findTagRangeForEndTyping,
-    readCommittedTagCharacterId,
 } from './markRanges';
 import {
+    normalizeCommittedTagName,
     normalizeTagTextSpaces,
+    normalizeVisibleTagText,
     renderPendingTagText,
     resolveDoubleSpaceCommitName,
     stripLeadingPlaceholder,
 } from './text';
-import {buildCommittedTagExitTransaction} from './transactions';
+import {
+    buildCommittedTagExitTransaction,
+    resolveConfirmedCharacterIdForName,
+} from './transactions';
 
-const handleBackspaceOutsideCompose = (view: EditorView) => {
+const handleBackspaceOutsideCompose = (
+    view: EditorView,
+    getPersistentCharacters: () => readonly PersistentCharacterRef[],
+) => {
     const {state} = view;
     const markType = state.schema.marks[CHARACTER_TAG_MARK_NAME];
     const range = markType ? findTagRangeForEndTyping(state, markType) : null;
@@ -47,10 +56,9 @@ const handleBackspaceOutsideCompose = (view: EditorView) => {
         return true;
     }
 
-    const characterId = readCommittedTagCharacterId(state, range.from, range.to, markType);
     const nextMark = markType.create({
         [CHARACTER_TAG_KEY_ATTR]: normalizeCharacterKey(nextText),
-        [CHARACTER_TAG_ID_ATTR]: characterId,
+        [CHARACTER_TAG_ID_ATTR]: resolveConfirmedCharacterIdForName(nextText, getPersistentCharacters()),
     });
     const nextTo = range.from + nextText.length;
     const tr = state.tr.replaceWith(
@@ -66,7 +74,32 @@ const handleBackspaceOutsideCompose = (view: EditorView) => {
     return true;
 };
 
-const handleSpaceOutsideCompose = (view: EditorView) => {
+const handleBackspaceProtectedTagSeparator = (view: EditorView) => {
+    const {state} = view;
+    const markType = state.schema.marks[CHARACTER_TAG_MARK_NAME];
+
+    if (!markType || !state.selection.empty) {
+        return false;
+    }
+
+    return findProtectedTagSeparator(state, markType, state.selection.from - 1) !== null;
+};
+
+const handleDeleteProtectedTagSeparator = (view: EditorView) => {
+    const {state} = view;
+    const markType = state.schema.marks[CHARACTER_TAG_MARK_NAME];
+
+    if (!markType || !state.selection.empty) {
+        return false;
+    }
+
+    return findProtectedTagSeparator(state, markType, state.selection.from) !== null;
+};
+
+const handleSpaceOutsideCompose = (
+    view: EditorView,
+    getPersistentCharacters: () => readonly PersistentCharacterRef[],
+) => {
     const {state} = view;
     const markType = state.schema.marks[CHARACTER_TAG_MARK_NAME];
     const range = markType ? findTagRangeForEndTyping(state, markType) : null;
@@ -75,9 +108,19 @@ const handleSpaceOutsideCompose = (view: EditorView) => {
         return false;
     }
 
-    const characterId = readCommittedTagCharacterId(state, range.from, range.to, markType);
     const markedText = state.doc.textBetween(range.from, range.replaceTo);
-    const normalizedMarkedText = stripLeadingPlaceholder(markedText);
+    const normalizedMarkedText = normalizeVisibleTagText(stripLeadingPlaceholder(markedText));
+
+    if (normalizedMarkedText.length === 0) {
+        const tr = state.tr.insertText(' ', range.from, range.replaceTo);
+
+        tr.setSelection(TextSelection.create(tr.doc, range.from + 1));
+        tr.removeStoredMark(markType);
+        view.dispatch(tr.setMeta(CLOSE_META_KEY, true));
+
+        return true;
+    }
+
     const nextText = renderPendingTagText(`${normalizeTagTextSpaces(normalizedMarkedText)} `);
     const commitName = resolveDoubleSpaceCommitName(nextText);
 
@@ -88,7 +131,7 @@ const handleSpaceOutsideCompose = (view: EditorView) => {
             range.from,
             range.replaceTo,
             commitName,
-            characterId,
+            resolveConfirmedCharacterIdForName(commitName, getPersistentCharacters()),
         );
 
         if (tr) {
@@ -100,7 +143,10 @@ const handleSpaceOutsideCompose = (view: EditorView) => {
 
     const nextMark = markType.create({
         [CHARACTER_TAG_KEY_ATTR]: normalizeCharacterKey(nextText),
-        [CHARACTER_TAG_ID_ATTR]: characterId,
+        [CHARACTER_TAG_ID_ATTR]: resolveConfirmedCharacterIdForName(
+            normalizeCommittedTagName(nextText),
+            getPersistentCharacters(),
+        ),
     });
     const nextTo = range.from + nextText.length;
     const tr = state.tr.replaceWith(
@@ -117,7 +163,10 @@ const handleSpaceOutsideCompose = (view: EditorView) => {
     return true;
 };
 
-const handleConfirmOutsideCompose = (view: EditorView) => {
+const handleConfirmOutsideCompose = (
+    view: EditorView,
+    getPersistentCharacters: () => readonly PersistentCharacterRef[],
+) => {
     const {state} = view;
     const markType = state.schema.marks[CHARACTER_TAG_MARK_NAME];
     const range = markType ? findTagRangeForConfirm(state, markType) : null;
@@ -126,15 +175,24 @@ const handleConfirmOutsideCompose = (view: EditorView) => {
         return false;
     }
 
-    const characterId = readCommittedTagCharacterId(state, range.from, range.to, markType);
-    const name = normalizeTagTextSpaces(state.doc.textBetween(range.from, range.to)).trim();
+    const name = normalizeCommittedTagName(state.doc.textBetween(range.from, range.to));
+
+    if (name.length === 0) {
+        view.dispatch(state.tr
+            .delete(range.from, range.to)
+            .setMeta(CLOSE_META_KEY, true)
+            .scrollIntoView());
+
+        return true;
+    }
+
     const tr = buildCommittedTagExitTransaction(
         state,
         markType,
         range.from,
         range.to,
         name,
-        characterId,
+        resolveConfirmedCharacterIdForName(name, getPersistentCharacters()),
     );
 
     if (!tr) {
@@ -146,21 +204,32 @@ const handleConfirmOutsideCompose = (view: EditorView) => {
     return true;
 };
 
-export const createCharacterTagKeyDownHandler = (editor: TiptapEditor) => {
+export const createCharacterTagKeyDownHandler = (
+    editor: TiptapEditor,
+    getPersistentCharacters: () => readonly PersistentCharacterRef[] = () => [],
+) => {
     return (view: EditorView, event: KeyboardEvent) => {
         const compose = getCharacterTagComposeFromState(view.state);
 
         if (!compose) {
             if (event.key === 'Backspace') {
-                return handleBackspaceOutsideCompose(view);
+                if (handleBackspaceProtectedTagSeparator(view)) {
+                    return true;
+                }
+
+                return handleBackspaceOutsideCompose(view, getPersistentCharacters);
+            }
+
+            if (event.key === 'Delete') {
+                return handleDeleteProtectedTagSeparator(view);
             }
 
             if (event.key === ' ') {
-                return handleSpaceOutsideCompose(view);
+                return handleSpaceOutsideCompose(view, getPersistentCharacters);
             }
 
             if (event.key === 'Enter' || event.key === 'Tab') {
-                return handleConfirmOutsideCompose(view);
+                return handleConfirmOutsideCompose(view, getPersistentCharacters);
             }
 
             return false;
@@ -175,7 +244,7 @@ export const createCharacterTagKeyDownHandler = (editor: TiptapEditor) => {
         }
 
         if (event.key === 'Enter' || event.key === 'Tab') {
-            if (compose.query.trim().length === 0) {
+            if (normalizeCommittedTagName(compose.query).length === 0) {
                 view.dispatch(view.state.tr
                     .delete(compose.from, compose.to)
                     .setMeta(CLOSE_META_KEY, true));
@@ -183,7 +252,7 @@ export const createCharacterTagKeyDownHandler = (editor: TiptapEditor) => {
                 return true;
             }
 
-            editor.commands.commitCharacterTag();
+            editor.commands.commitCharacterTag({trailingSpace: true});
 
             return true;
         }

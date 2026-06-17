@@ -145,3 +145,29 @@ export const findTagRangeForConfirm = (
 
     return null;
 };
+
+export const findProtectedTagSeparator = (
+    state: EditorState,
+    markType: MarkType,
+    spaceFrom: number,
+): {from: number, to: number} | null => {
+    if (spaceFrom < 0 || charAt(state, spaceFrom) !== ' ') {
+        return null;
+    }
+
+    const previousRange = getMarkRange(state.doc.resolve(spaceFrom), markType);
+    const nextRange = spaceFrom + 1 <= state.doc.content.size
+        ? getMarkRange(state.doc.resolve(spaceFrom + 1), markType)
+        : null;
+
+    if (!previousRange || !nextRange) {
+        return null;
+    }
+
+    return previousRange.to === spaceFrom && nextRange.from === spaceFrom + 1
+        ? {
+            from: spaceFrom,
+            to: spaceFrom + 1,
+        }
+        : null;
+};

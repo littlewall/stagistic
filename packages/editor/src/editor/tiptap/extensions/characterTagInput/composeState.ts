@@ -58,6 +58,20 @@ const isWordBoundaryBefore = (state: EditorState, block: ComposeBlock, from: num
     return charBefore.length === 0 || (/\s/).test(charBefore);
 };
 
+export const getOpenComposeOptions = (state: EditorState, from: number): {insertLeadingSpace: boolean} | null => {
+    if (!state.selection.empty) {
+        return null;
+    }
+
+    const block = getComposeBlock(state);
+
+    if (!block || from < block.from) {
+        return null;
+    }
+
+    return {insertLeadingSpace: !isWordBoundaryBefore(state, block, from)};
+};
+
 export const isComposeValid = (state: EditorState, from: number): boolean => {
     const markType = state.schema.marks[CHARACTER_TAG_MARK_NAME];
 
@@ -102,15 +116,5 @@ export const detectCompose = (state: EditorState): CharacterTagComposeRawState |
 };
 
 export const canOpenCompose = (state: EditorState, from: number): boolean => {
-    if (!state.selection.empty) {
-        return false;
-    }
-
-    const block = getComposeBlock(state);
-
-    if (!block || from < block.from) {
-        return false;
-    }
-
-    return isWordBoundaryBefore(state, block, from);
+    return getOpenComposeOptions(state, from) !== null;
 };

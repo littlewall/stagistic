@@ -27,6 +27,12 @@ export interface CharacterTagRef {
 
 type InlineMark = NonNullable<ScriptNode['marks']>[number];
 
+const EMPTY_TAG_PLACEHOLDER_PATTERN = /\u200b/gu;
+
+const normalizeCharacterTagKey = (value: string) => {
+    return normalizeCharacterKey(value.replace(EMPTY_TAG_PLACEHOLDER_PATTERN, ''));
+};
+
 const findTagMark = (node: ScriptNode): InlineMark | undefined => {
     if (!Array.isArray(node.marks)) {
         return undefined;
@@ -59,7 +65,7 @@ export const collectCharacterTags = (blockNode: ScriptNode): CharacterTagRef[] =
             return;
         }
 
-        const key = normalizeCharacterKey(runText);
+        const key = normalizeCharacterTagKey(runText);
 
         if (key.length > 0) {
             tags.push({
@@ -140,7 +146,7 @@ export const mapCharacterTagMarks = (
         }
 
         const tag: CharacterTagRef = {
-            key: normalizeCharacterKey(child.text),
+            key: normalizeCharacterTagKey(child.text),
             characterId: readTagCharacterId(mark),
             text: child.text,
         };
@@ -201,7 +207,7 @@ export const renameCharacterTagsInNode = (
         }
 
         const tagCharacterId = readTagCharacterId(mark);
-        const tagKey = normalizeCharacterKey(child.text);
+        const tagKey = normalizeCharacterTagKey(child.text);
         const matches = characterId
             ? tagCharacterId === characterId || (!tagCharacterId && tagKey === fromKey)
             : tagKey === fromKey;

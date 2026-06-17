@@ -1,6 +1,6 @@
 import {
     describe, expect, it,
-} from 'vitest';
+} from 'vite-plus/test';
 
 import type {ScriptNode} from '../document';
 import {
@@ -69,8 +69,28 @@ describe('characterTagMarks', () => {
         expect(collectCharacterTagRefByKey(block())).toEqual({ANNA: 'char-anna'});
     });
 
+    it('ignores placeholder-only tags from pending editor state', () => {
+        const node: ScriptNode = {
+            type: 'stageDirection',
+            attrs: {id: 'b3'},
+            content: [
+                {
+                    type: 'text',
+                    text: '\u200b',
+                    marks: [tagMark('', null)],
+                },
+            ],
+        };
+
+        expect(collectCharacterTags(node)).toEqual([]);
+        expect(countCharacterTagsByKey(node)).toEqual(new Map());
+        expect(collectCharacterTagRefByKey(node)).toEqual({});
+    });
+
     it('mapCharacterTagMarks rewrites matching mark attrs immutably', () => {
-        const next = mapCharacterTagMarks(block(), tag => tag.characterId === 'char-anna' ? {characterId: 'char-anna-2'} : null);
+        const next = mapCharacterTagMarks(block(), tag => {
+            return tag.characterId === 'char-anna' ? {characterId: 'char-anna-2'} : null;
+        });
 
         expect(collectCharacterTagRefByKey(next)).toEqual({ANNA: 'char-anna-2'});
         // original untouched

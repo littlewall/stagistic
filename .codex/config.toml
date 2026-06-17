@@ -7,3 +7,12 @@ args = [
 
 [mcp_servers.codegraph.tools.codegraph_context]
 approval_mode = "approve"
+
+[mcp_servers.codegraph.tools.codegraph_search]
+approval_mode = "approve"
+
+[mcp_servers.codegraph.tools.codegraph_node]
+approval_mode = "approve"
+
+[mcp_servers.codegraph.tools.codegraph_explore]
+approval_mode = "approve"

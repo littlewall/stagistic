@@ -1,13 +1,12 @@
 import {
     canBlockTypeHaveCharacterTags,
-    CHARACTER_TAG_ID_ATTR,
-    CHARACTER_TAG_MARK_NAME,
+    collectCharacterTags,
     extractCharacterKeys,
     type IndexedScriptBlock,
     type IndexedScriptCharacterRef,
-    normalizeCharacterKey,
     resolveScriptBlockNodeType,
     type ScriptBlockIndexSnapshot,
+    type ScriptNode,
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 
@@ -22,30 +21,13 @@ import {
 
 const toTagCharacterRefs = (node: ProseMirrorNode): IndexedScriptCharacterRef[] | null => {
     const idByKey = new Map<string, string | null>();
+    const tags = collectCharacterTags(node.toJSON() as ScriptNode);
 
-    node.descendants(child => {
-        if (!child.isText) {
-            return;
-        }
+    tags.forEach(tag => {
+        const existing = idByKey.get(tag.key);
 
-        const mark = child.marks.find(candidate => candidate.type.name === CHARACTER_TAG_MARK_NAME);
-
-        if (!mark) {
-            return;
-        }
-
-        const key = normalizeCharacterKey(child.text ?? '');
-
-        if (!key) {
-            return;
-        }
-
-        const rawId: unknown = mark.attrs[CHARACTER_TAG_ID_ATTR];
-        const characterId = typeof rawId === 'string' && rawId.length > 0 ? rawId : null;
-        const existing = idByKey.get(key);
-
-        if (existing === undefined || (existing === null && characterId)) {
-            idByKey.set(key, characterId);
+        if (existing === undefined || (existing === null && tag.characterId)) {
+            idByKey.set(tag.key, tag.characterId);
         }
     });
 

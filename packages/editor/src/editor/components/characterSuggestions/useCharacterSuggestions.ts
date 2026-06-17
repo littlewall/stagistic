@@ -18,6 +18,7 @@ import {
     type PersistentCharacterRef,
     type SuppressedSelection,
 } from './model';
+import {resolveOverlayTransactionAction} from './transactionOverlayPolicy';
 import {useSuggestionInteractionState} from './useSuggestionInteractionState';
 import {useSuggestionKeyboardHandlers} from './useSuggestionKeyboardHandlers';
 import {useSuggestionOverlayComputation} from './useSuggestionOverlayComputation';
@@ -40,7 +41,6 @@ export const useCharacterSuggestions = ({
 }: UseCharacterSuggestionsArgs) => {
     const liveCharacters = useEditorLiveCharacters();
     const suppressedSelectionRef = useRef<SuppressedSelection | null>(null);
-    const pointerSelectionIntentRef = useRef(false);
     const normalizedPersistentCharacters = useMemo(
         () => normalizePersistentCharacters(persistentCharacters),
         [persistentCharacters],
@@ -58,7 +58,6 @@ export const useCharacterSuggestions = ({
     const {
         cancelScheduledOverlayUpdate,
         scheduleOverlayUpdate,
-        runOverlayUpdateNow,
     } = useSuggestionOverlayComputation({
         editor,
         canvasRef,
@@ -85,37 +84,28 @@ export const useCharacterSuggestions = ({
         }
 
         const handleTransaction = ({transaction}: {transaction: {docChanged: boolean, selectionSet: boolean}}) => {
-            if (interactionState === 'open_no_selection') {
-                const chooserState = getEmptyEnterChooserFromState(editor.state);
+            const chooserState = getEmptyEnterChooserFromState(editor.state);
+            const action = resolveOverlayTransactionAction({
+                transaction,
+                interactionState,
+                isComposeActive: getCharacterTagComposeFromState(editor.state) !== null,
+                isEmptyEnterChooserOpen: chooserState.isOpen,
+            });
 
-                if (chooserState.isOpen) {
-                    closeOverlay();
-
-                    return;
-                }
-            }
-
-            if (transaction.docChanged) {
-                pointerSelectionIntentRef.current = false;
-                runOverlayUpdateNow();
+            if (action === 'schedule') {
+                scheduleOverlayUpdate();
 
                 return;
             }
 
-            if (!transaction.selectionSet) {
-                return;
+            if (action === 'close') {
+                closeOverlay();
             }
-
-            if (pointerSelectionIntentRef.current) {
-                runOverlayUpdateNow();
-
-                return;
-            }
-
-            closeOverlay();
         };
         const handleFocus = () => {
-            if (pointerSelectionIntentRef.current) {
+            if (getCharacterTagComposeFromState(editor.state)) {
+                scheduleOverlayUpdate();
+
                 return;
             }
 
@@ -123,7 +113,6 @@ export const useCharacterSuggestions = ({
         };
         const handleBlur = () => {
             cancelScheduledOverlayUpdate();
-            pointerSelectionIntentRef.current = false;
             closeOverlay();
         };
 
@@ -141,7 +130,7 @@ export const useCharacterSuggestions = ({
         closeOverlay,
         editor,
         interactionState,
-        runOverlayUpdateNow,
+        scheduleOverlayUpdate,
     ]);
 
     useSuggestionPointerHandlers({
@@ -150,9 +139,6 @@ export const useCharacterSuggestions = ({
         overlayRef,
         overlayState,
         suppressedSelectionRef,
-        pointerSelectionIntentRef,
-        setActiveSuggestionIndex,
-        runOverlayUpdateNow,
         closeOverlay,
     });
 

@@ -1,16 +1,13 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type Dispatch,
     type MutableRefObject,
     type RefObject,
-    type SetStateAction,
-    useCallback,
     useEffect,
 } from 'react';
 
 import {
-    SCRIPT_BLOCK_NODE_NAMES,
     getActiveScriptBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../../tiptap/scriptCore';
 import type {SuppressedSelection} from './types';
 import type {OverlayState} from './useSuggestionInteractionState';
@@ -21,9 +18,6 @@ interface UseSuggestionPointerHandlersArgs {
     overlayRef: RefObject<HTMLDivElement | null>,
     overlayState: OverlayState | null,
     suppressedSelectionRef: MutableRefObject<SuppressedSelection | null>,
-    pointerSelectionIntentRef: MutableRefObject<boolean>,
-    setActiveSuggestionIndex: Dispatch<SetStateAction<number | null>>,
-    runOverlayUpdateNow: () => void,
     closeOverlay: () => void,
 }
 
@@ -45,23 +39,9 @@ export const useSuggestionPointerHandlers = ({
     overlayRef,
     overlayState,
     suppressedSelectionRef,
-    pointerSelectionIntentRef,
-    setActiveSuggestionIndex,
-    runOverlayUpdateNow,
     closeOverlay,
 }: UseSuggestionPointerHandlersArgs) => {
-    const getSafeEditorElement = useCallback(() => {
-        if (!editor) {
-            return null;
-        }
-
-        try {
-            return editor.view.dom;
-        } catch {
-            return null;
-        }
-    }, [editor]);
-    const dismissOverlayForCurrentSelection = useCallback(() => {
+    const dismissOverlayForCurrentSelection = () => {
         if (!editor) {
             closeOverlay();
 
@@ -83,64 +63,7 @@ export const useSuggestionPointerHandlers = ({
         };
 
         closeOverlay();
-    }, [
-        closeOverlay,
-        editor,
-        suppressedSelectionRef,
-    ]);
-
-    useEffect(() => {
-        const editorElement = getSafeEditorElement();
-
-        if (!editor || !editorElement) {
-            return;
-        }
-
-        let clearPointerIntentTimerId: number | null = null;
-        const clearPointerIntentTimer = () => {
-            if (clearPointerIntentTimerId === null) {
-                return;
-            }
-
-            window.clearTimeout(clearPointerIntentTimerId);
-            clearPointerIntentTimerId = null;
-        };
-
-        const handleEditorPointerDown = (event: PointerEvent) => {
-            const targetNode = toTargetNode(event.target);
-
-            if (!targetNode || !editorElement.contains(targetNode)) {
-                return;
-            }
-
-            clearPointerIntentTimer();
-            suppressedSelectionRef.current = null;
-            pointerSelectionIntentRef.current = true;
-            setActiveSuggestionIndex(null);
-
-            window.requestAnimationFrame(() => {
-                runOverlayUpdateNow();
-            });
-            clearPointerIntentTimerId = window.setTimeout(() => {
-                pointerSelectionIntentRef.current = false;
-                clearPointerIntentTimerId = null;
-            }, 250);
-        };
-
-        editorElement.addEventListener('pointerdown', handleEditorPointerDown, true);
-
-        return () => {
-            clearPointerIntentTimer();
-            editorElement.removeEventListener('pointerdown', handleEditorPointerDown, true);
-        };
-    }, [
-        editor,
-        getSafeEditorElement,
-        pointerSelectionIntentRef,
-        runOverlayUpdateNow,
-        setActiveSuggestionIndex,
-        suppressedSelectionRef,
-    ]);
+    };
 
     useEffect(() => {
         if (!overlayState) {

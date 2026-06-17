@@ -9,6 +9,7 @@ import {
     useRef,
 } from 'react';
 
+import {getCharacterTagComposeFromState} from '../../tiptap/extensions/CharacterTagInputExtension';
 import {
     computeCharacterSuggestions,
     type PersistentCharacterRef,
@@ -29,6 +30,10 @@ interface UseSuggestionOverlayComputationArgs {
 }
 
 const getSafeIsFocused = (editor: TiptapEditor) => {
+    if (editor.isFocused) {
+        return true;
+    }
+
     try {
         return editor.view.hasFocus();
     } catch {
@@ -63,7 +68,9 @@ export const useSuggestionOverlayComputation = ({
             return;
         }
 
-        if (!getSafeIsFocused(editor)) {
+        const compose = getCharacterTagComposeFromState(editor.state);
+
+        if (!compose && !getSafeIsFocused(editor)) {
             closeOverlay();
 
             return;

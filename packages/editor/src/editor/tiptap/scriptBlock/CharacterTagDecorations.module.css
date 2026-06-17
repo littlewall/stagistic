@@ -13,6 +13,10 @@
     background: color-mix(in srgb, var(--character-tag-vivid-color) var(--character-tag-tint-strength, 30%), var(--color-surface));
 }
 
+[blocktype = 'stageDirection'] .characterTag[data-character-id] {
+    background: oklch(from var(--character-tag-vivid-color) l c h / 15%);
+}
+
 .characterTag:not([data-character-id]) {
     background: transparent;
     border: 1px solid var(--character-tag-vivid-color);

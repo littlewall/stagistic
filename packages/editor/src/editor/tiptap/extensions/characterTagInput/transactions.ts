@@ -14,11 +14,12 @@ import {
 
 import type {PersistentCharacterRef} from '../../../contracts';
 import {
-    canOpenCompose,
     getCharacterTagComposeFromState,
+    getOpenComposeOptions,
 } from './composeState';
 import {
     CLOSE_META_KEY,
+    OPEN_META_KEY,
     PLACEHOLDER_CHARACTER,
 } from './constants';
 import {
@@ -26,6 +27,7 @@ import {
 } from './markRanges';
 import {
     isPlaceholderText,
+    normalizeCommittedTagName,
 } from './text';
 import type {CommitCharacterTagPayload} from './types';
 
@@ -35,19 +37,36 @@ export const buildOpenComposeTransaction = (
     to: number,
 ): Transaction | null => {
     const markType = state.schema.marks[CHARACTER_TAG_MARK_NAME];
+    const openComposeOptions = getOpenComposeOptions(state, from);
 
-    if (!markType || !canOpenCompose(state, from)) {
+    if (!markType || !openComposeOptions) {
         return null;
     }
 
+    const {
+        insertLeadingSpace,
+    } = openComposeOptions;
     const mark = markType.create({
         [CHARACTER_TAG_KEY_ATTR]: '',
         [CHARACTER_TAG_ID_ATTR]: null,
     });
-    const tr = state.tr.replaceWith(from, to, state.schema.text(PLACEHOLDER_CHARACTER, [mark]));
+    let tr = state.tr;
+    let composeFrom = from;
+
+    if (insertLeadingSpace) {
+        tr = tr.insertText(' ', from);
+        composeFrom += 1;
+    }
+
+    tr = tr.replaceWith(
+        composeFrom,
+        composeFrom + (to - from),
+        state.schema.text(PLACEHOLDER_CHARACTER, [mark]),
+    );
 
     return tr
-        .setSelection(TextSelection.create(tr.doc, from + 1))
+        .setMeta(OPEN_META_KEY, composeFrom)
+        .setSelection(TextSelection.create(tr.doc, composeFrom + 1))
         .scrollIntoView();
 };
 
@@ -91,6 +110,13 @@ const resolveConfirmedCharacterId = (
     const id = typeof match?.id === 'string' ? match.id.trim() : '';
 
     return id.length > 0 ? id : null;
+};
+
+export const resolveConfirmedCharacterIdForName = (
+    name: string,
+    persistentCharacters: readonly PersistentCharacterRef[],
+) => {
+    return resolveConfirmedCharacterId(normalizeCharacterKey(name), persistentCharacters);
 };
 
 const buildCommittedTagInsertion = (
@@ -151,7 +177,7 @@ export const buildCommitTransaction = (
         return null;
     }
 
-    const rawName = (payload?.name ?? compose.query).trim();
+    const rawName = normalizeCommittedTagName(payload?.name ?? compose.query);
     const key = normalizeCharacterKey(rawName);
 
     if (rawName.length === 0 || key.length === 0) {
