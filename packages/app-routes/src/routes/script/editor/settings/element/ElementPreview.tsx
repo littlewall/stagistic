@@ -1,7 +1,7 @@
 import {clsx} from '@stagistic/ui';
 import {
     type ReactNode,
-    useEffect,
+    useLayoutEffect,
     useRef,
     useState,
 } from 'react';
@@ -55,11 +55,11 @@ export const ElementPreview = ({
     const latestStart = useRef(sliderStart);
     const latestEnd = useRef(sliderEnd);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         setLocalStart(sliderStart);
         latestStart.current = sliderStart;
     }, [sliderStart]);
-    useEffect(() => {
+    useLayoutEffect(() => {
         setLocalEnd(sliderEnd);
         latestEnd.current = sliderEnd;
     }, [sliderEnd]);

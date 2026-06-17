@@ -1,7 +1,8 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
 import {UndoIcon} from '@stagistic/ui';
 import {
-    startTransition, useEffect, useState,
+    useLayoutEffect,
+    useState,
 } from 'react';
 
 import styles from '../ScriptEditorSettingsPanel.module.css';
@@ -39,13 +40,13 @@ export const ElementSettingsPanel = ({
     const [localSpacingAfter, setLocalSpacingAfter] = useState(numeric.spacingAfter);
     const [localLineHeight, setLocalLineHeight] = useState(numeric.lineHeight);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         setLocalSpacingBefore(numeric.spacingBefore);
     }, [numeric.spacingBefore]);
-    useEffect(() => {
+    useLayoutEffect(() => {
         setLocalSpacingAfter(numeric.spacingAfter);
     }, [numeric.spacingAfter]);
-    useEffect(() => {
+    useLayoutEffect(() => {
         setLocalLineHeight(numeric.lineHeight);
     }, [numeric.lineHeight]);
 
@@ -71,7 +72,7 @@ export const ElementSettingsPanel = ({
 
         if (patch.lineHeight !== undefined) setLocalLineHeight(patch.lineHeight);
 
-        startTransition(() => onUpdateBlockSettings(bt, patch));
+        onUpdateBlockSettings(bt, patch);
     };
 
     return (

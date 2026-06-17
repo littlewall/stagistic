@@ -30,6 +30,7 @@ export const ScriptEditorSettingsPanel = (props: ScriptEditorSettingsPanelProps)
 
     return (
         <ElementSettingsPanel
+            key={blockType}
             blockType={blockType}
             blockLabel={blockLabelByType.get(blockType) ?? 'Element'}
             resolvedScriptSettings={resolvedScriptSettings}
