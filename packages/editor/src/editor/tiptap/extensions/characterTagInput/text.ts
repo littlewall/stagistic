@@ -37,6 +37,16 @@ export const normalizeVisibleTagText = (value: string): string => {
     return stripPlaceholderCharacters(normalizeTagTextSpaces(value));
 };
 
+export const trimTrailingTagSpaces = (value: string): string => {
+    const characters = Array.from(value);
+
+    while (characters.length > 0 && isTagSpaceCharacter(characters[characters.length - 1] ?? '')) {
+        characters.pop();
+    }
+
+    return characters.join('');
+};
+
 export const normalizeCommittedTagName = (value: string): string => {
     return normalizeVisibleTagText(stripLeadingPlaceholder(value)).trim();
 };

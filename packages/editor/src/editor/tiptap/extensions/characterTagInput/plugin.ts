@@ -21,6 +21,7 @@ import {
     buildAbandonComposeTransaction,
     buildCommittedTagExitTransaction,
     buildCommitTransaction,
+    buildTrailingTagSpaceCleanupTransaction,
 } from './transactions';
 import type {
     CharacterTagComposeRawState,
@@ -114,7 +115,11 @@ export const createCharacterTagComposePlugin = (
 
             const previous = characterTagComposeKey.getState(oldState);
 
-            if (!previous || characterTagComposeKey.getState(newState)) {
+            if (!previous) {
+                return buildTrailingTagSpaceCleanupTransaction(oldState, newState);
+            }
+
+            if (characterTagComposeKey.getState(newState)) {
                 return null;
             }
 

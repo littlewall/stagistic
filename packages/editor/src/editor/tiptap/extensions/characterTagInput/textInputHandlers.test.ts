@@ -16,7 +16,10 @@ import {
 } from 'vite-plus/test';
 
 import {characterTagComposeKey} from './composeState';
-import {PLACEHOLDER_CHARACTER} from './constants';
+import {
+    PENDING_TAG_SPACE_CHARACTER,
+    PLACEHOLDER_CHARACTER,
+} from './constants';
 import {createCharacterTagTextInputHandler} from './textInputHandlers';
 
 const schema = new Schema({
@@ -197,6 +200,27 @@ describe('createCharacterTagTextInputHandler', () => {
         expect(readOnlyTagIdentity(view.state)).toEqual({
             text: 'JOHNNYS',
             characterKey: 'JOHNNYS',
+            characterId: null,
+        });
+    });
+
+    it('keeps @ text inside an active character tag instead of opening a second tag', () => {
+        const pendingText = `JOHNNY${PENDING_TAG_SPACE_CHARACTER}`;
+        const view = createView(createState(pendingText, {
+            characterKey: 'JOHNNY',
+            characterId: 'johnny-id',
+            trailingSpace: false,
+        }));
+        const handler = createCharacterTagTextInputHandler(() => [{id: 'johnny-id', key: 'JOHNNY'}]);
+
+        const handledAt = handler(view, view.state.selection.from, view.state.selection.from, '@');
+        const handledQuery = handler(view, view.state.selection.from, view.state.selection.from, 'E');
+
+        expect(handledAt).toBe(true);
+        expect(handledQuery).toBe(true);
+        expect(readOnlyTagIdentity(view.state)).toEqual({
+            text: 'JOHNNY @E',
+            characterKey: 'JOHNNY @E',
             characterId: null,
         });
     });

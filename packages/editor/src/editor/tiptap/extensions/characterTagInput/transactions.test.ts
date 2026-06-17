@@ -11,8 +11,15 @@ import {
     describe, expect, it,
 } from 'vite-plus/test';
 
-import {PLACEHOLDER_CHARACTER} from './constants';
-import {buildOpenComposeTransaction} from './transactions';
+import {
+    PENDING_TAG_SPACE_CHARACTER,
+    PLACEHOLDER_CHARACTER,
+} from './constants';
+import {
+    buildAbandonComposeTransaction,
+    buildOpenComposeTransaction,
+    buildTrailingTagSpaceCleanupTransaction,
+} from './transactions';
 
 const schema = new Schema({
     nodes: {
@@ -57,6 +64,44 @@ const createState = (text: string) => {
     });
 };
 
+const createMarkedState = (text: string) => {
+    const mark = schema.mark(CHARACTER_TAG_MARK_NAME, {
+        characterKey: text,
+        characterId: null,
+    });
+    const block = schema.node('stageDirection', null, [schema.text(text, [mark])]);
+    const doc = schema.node('doc', null, [block]);
+
+    return EditorState.create({
+        schema,
+        doc,
+        selection: TextSelection.create(doc, 1 + text.length),
+    });
+};
+
+const createTwoBlockMarkedStates = (text: string) => {
+    const mark = schema.mark(CHARACTER_TAG_MARK_NAME, {
+        characterKey: text,
+        characterId: null,
+    });
+    const firstBlock = schema.node('stageDirection', null, [schema.text(text, [mark])]);
+    const secondBlock = schema.node('stageDirection', null, [schema.text('NEXT')]);
+    const doc = schema.node('doc', null, [firstBlock, secondBlock]);
+
+    return {
+        oldState: EditorState.create({
+            schema,
+            doc,
+            selection: TextSelection.create(doc, 1 + text.length),
+        }),
+        newState: EditorState.create({
+            schema,
+            doc,
+            selection: TextSelection.create(doc, firstBlock.nodeSize + 1),
+        }),
+    };
+};
+
 const getStageDirectionText = (doc: ProseMirrorNode) => {
     return doc.firstChild?.textContent ?? '';
 };
@@ -97,5 +142,61 @@ describe('buildOpenComposeTransaction', () => {
         expect(nextState.selection.from).toBe(8);
         expect(nodeBeforeSelection?.text).toBe(PLACEHOLDER_CHARACTER);
         expect(nodeBeforeSelection?.marks.some(mark => mark.type.name === CHARACTER_TAG_MARK_NAME)).toBe(true);
+    });
+
+    it('does not open compose at the end of an active character tag', () => {
+        const state = createMarkedState(`JOHNNY${PENDING_TAG_SPACE_CHARACTER}`);
+        const tr = buildOpenComposeTransaction(state, state.selection.from, state.selection.from);
+
+        expect(tr).toBeNull();
+    });
+
+    it('trims a regular trailing space when compose is abandoned', () => {
+        const state = createMarkedState('JOHNNY ');
+        const tr = buildAbandonComposeTransaction(state, 1);
+
+        if (!tr) {
+            throw new Error('Expected abandon transaction');
+        }
+
+        const nextState = state.apply(tr);
+
+        expect(getStageDirectionText(nextState.doc)).toBe('JOHNNY');
+    });
+
+    it('trims a pending trailing space when compose is abandoned', () => {
+        const state = createMarkedState(`JOHNNY${PENDING_TAG_SPACE_CHARACTER}`);
+        const tr = buildAbandonComposeTransaction(state, 1);
+
+        if (!tr) {
+            throw new Error('Expected abandon transaction');
+        }
+
+        const nextState = state.apply(tr);
+
+        expect(getStageDirectionText(nextState.doc)).toBe('JOHNNY');
+    });
+
+    it('trims a pending trailing space when selection leaves an existing tag', () => {
+        const {
+            oldState,
+            newState,
+        } = createTwoBlockMarkedStates(`JOHNNY${PENDING_TAG_SPACE_CHARACTER}`);
+        const tr = buildTrailingTagSpaceCleanupTransaction(oldState, newState);
+
+        if (!tr) {
+            throw new Error('Expected cleanup transaction');
+        }
+
+        const nextState = newState.apply(tr);
+
+        expect(getStageDirectionText(nextState.doc)).toBe('JOHNNY');
+    });
+
+    it('keeps a pending trailing space while selection stays in the existing tag', () => {
+        const state = createMarkedState(`JOHNNY${PENDING_TAG_SPACE_CHARACTER}`);
+        const tr = buildTrailingTagSpaceCleanupTransaction(state, state);
+
+        expect(tr).toBeNull();
     });
 });

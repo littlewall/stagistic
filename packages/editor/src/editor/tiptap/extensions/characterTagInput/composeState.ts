@@ -1,4 +1,6 @@
 import {CHARACTER_TAG_MARK_NAME} from '@stagistic/script';
+import {getMarkRange} from '@tiptap/core';
+import type {MarkType} from '@tiptap/pm/model';
 import type {EditorState} from '@tiptap/pm/state';
 import {PluginKey} from '@tiptap/pm/state';
 
@@ -58,6 +60,12 @@ const isWordBoundaryBefore = (state: EditorState, block: ComposeBlock, from: num
     return charBefore.length === 0 || (/\s/).test(charBefore);
 };
 
+const isAtCharacterTagRangeStart = (state: EditorState, from: number, markType: MarkType): boolean => {
+    const range = getMarkRange(state.doc.resolve(from), markType);
+
+    return range?.from === from;
+};
+
 export const getOpenComposeOptions = (state: EditorState, from: number): {insertLeadingSpace: boolean} | null => {
     if (!state.selection.empty) {
         return null;
@@ -105,6 +113,10 @@ export const detectCompose = (state: EditorState): CharacterTagComposeRawState |
     const markType = state.schema.marks[CHARACTER_TAG_MARK_NAME];
 
     if (!markType || from < block.from || !isCharacterTagMarkedAt(state, from, markType)) {
+        return null;
+    }
+
+    if (!isAtCharacterTagRangeStart(state, from, markType)) {
         return null;
     }
 

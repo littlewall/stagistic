@@ -23,11 +23,13 @@ import {
     PLACEHOLDER_CHARACTER,
 } from './constants';
 import {
+    findTagRangeForEndTyping,
     isCharacterTagMarkedAt,
 } from './markRanges';
 import {
     isPlaceholderText,
     normalizeCommittedTagName,
+    trimTrailingTagSpaces,
 } from './text';
 import type {CommitCharacterTagPayload} from './types';
 
@@ -40,6 +42,12 @@ export const buildOpenComposeTransaction = (
     const openComposeOptions = getOpenComposeOptions(state, from);
 
     if (!markType || !openComposeOptions) {
+        return null;
+    }
+
+    const activeTagRange = findTagRangeForEndTyping(state, markType);
+
+    if (activeTagRange && from === to && from === activeTagRange.replaceTo) {
         return null;
     }
 
@@ -91,9 +99,64 @@ export const buildAbandonComposeTransaction = (
     }
 
     const text = state.doc.textBetween(range.from, range.to, '\n', '\n');
-    const tr = isPlaceholderText(text) ? state.tr.delete(range.from, range.to) : state.tr;
+    const trimmedText = trimTrailingTagSpaces(text);
 
-    return tr.setMeta(CLOSE_META_KEY, true);
+    if (isPlaceholderText(text) || trimmedText.length === 0) {
+        return state.tr
+            .delete(range.from, range.to)
+            .setMeta(CLOSE_META_KEY, true);
+    }
+
+    if (trimmedText.length < text.length) {
+        return state.tr
+            .delete(range.from + trimmedText.length, range.to)
+            .setMeta(CLOSE_META_KEY, true);
+    }
+
+    return state.tr.setMeta(CLOSE_META_KEY, true);
+};
+
+const isSelectionInsideRange = (
+    state: EditorState,
+    from: number,
+    to: number,
+) => {
+    const {selection} = state;
+
+    return selection.from >= from && selection.to <= to;
+};
+
+export const buildTrailingTagSpaceCleanupTransaction = (
+    oldState: EditorState,
+    newState: EditorState,
+): Transaction | null => {
+    if (!oldState.selection.empty || !oldState.doc.eq(newState.doc)) {
+        return null;
+    }
+
+    const markType = oldState.schema.marks[CHARACTER_TAG_MARK_NAME];
+    const range = markType ? findTagRangeForEndTyping(oldState, markType) : null;
+
+    if (!range || isSelectionInsideRange(newState, range.from, range.replaceTo)) {
+        return null;
+    }
+
+    const text = oldState.doc.textBetween(range.from, range.replaceTo, '\n', '\n');
+    const trimmedText = trimTrailingTagSpaces(text);
+
+    if (trimmedText.length === text.length) {
+        return null;
+    }
+
+    if (trimmedText.length === 0) {
+        return newState.tr
+            .delete(range.from, range.replaceTo)
+            .setMeta(CLOSE_META_KEY, true);
+    }
+
+    return newState.tr
+        .delete(range.from + trimmedText.length, range.replaceTo)
+        .setMeta(CLOSE_META_KEY, true);
 };
 
 const resolveConfirmedCharacterId = (
