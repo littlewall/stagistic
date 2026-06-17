@@ -40,8 +40,10 @@
 }
 
 .confirmInput {
+    --input-height: var(--control-height-lg);
+    --input-border-color: color-mix(in oklch, var(--color-status-danger) 30%, var(--color-border));
+
     max-width: 280px;
-    border-color: color-mix(in oklch, var(--color-status-danger) 30%, var(--color-border));
 }
 
 .deleteButton {

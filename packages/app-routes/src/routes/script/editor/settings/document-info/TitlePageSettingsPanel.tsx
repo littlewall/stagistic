@@ -19,6 +19,7 @@ import {
     SettingsSelect,
     type SettingsSelectOption,
 } from '../SettingsSelect';
+import sharedStyles from '../shared.module.css';
 import styles from './TitlePageSettingsPanel.module.css';
 
 const formatDatePreview = (isoDate: string, format: TitlePageDateFormat): string => {
@@ -124,7 +125,7 @@ export const TitlePageSettingsPanel = ({
                     <input
                         id="tp-title"
                         type="text"
-                        className={styles.textInput}
+                        className={sharedStyles.settingsInput}
                         placeholder={scriptTitle || 'Untitled'}
                         value={settings.titleOverride ?? ''}
                         onChange={e => {
@@ -137,7 +138,7 @@ export const TitlePageSettingsPanel = ({
                     <input
                         id="tp-subtitle"
                         type="text"
-                        className={styles.textInput}
+                        className={sharedStyles.settingsInput}
                         placeholder="Optional subtitle"
                         value={settings.subtitle ?? ''}
                         onChange={e => {
@@ -161,7 +162,7 @@ export const TitlePageSettingsPanel = ({
                     <input
                         id="tp-source"
                         type="text"
-                        className={styles.textInput}
+                        className={sharedStyles.settingsInput}
                         placeholder="Based on…"
                         value={settings.source ?? ''}
                         onChange={e => {
@@ -193,7 +194,7 @@ export const TitlePageSettingsPanel = ({
                         <input
                             id="tp-date"
                             type="date"
-                            className={styles.dateInput}
+                            className={sharedStyles.settingsInput}
                             disabled={localDraftDateMode === 'auto'}
                             value={localDraftDate}
                             onChange={e => {
@@ -229,7 +230,7 @@ export const TitlePageSettingsPanel = ({
                     <input
                         id="tp-copyright"
                         type="text"
-                        className={styles.textInput}
+                        className={sharedStyles.settingsInput}
                         placeholder="© 2026 Author Name"
                         value={settings.copyright ?? ''}
                         onChange={e => {
@@ -243,7 +244,7 @@ export const TitlePageSettingsPanel = ({
                     <label className={styles.label} htmlFor="tp-contact">Contact</label>
                     <textarea
                         id="tp-contact"
-                        className={styles.textarea}
+                        className={sharedStyles.settingsTextarea}
                         placeholder={'Name\nAddress\nPhone / Email'}
                         value={settings.contact ?? ''}
                         onChange={e => {

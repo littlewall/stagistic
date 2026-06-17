@@ -28,47 +28,6 @@
     }
 }
 
-.textInput {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 6px 10px;
-    font-size: var(--font-size-sm);
-    color: var(--color-text);
-    background: var(--color-input-bg, var(--color-surface));
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-
-    &:focus {
-        border-color: var(--color-surface-accent);
-        outline: none;
-    }
-
-    &::placeholder {
-        color: var(--color-ink-subtle, var(--color-text-muted));
-        opacity: .6;
-    }
-}
-
-.textarea {
-    resize: vertical;
-    box-sizing: border-box;
-    width: 100%;
-    min-height: 72px;
-    padding: 6px 10px;
-    font-family: inherit;
-    font-size: var(--font-size-sm);
-    line-height: var(--line-height-normal);
-    color: var(--color-text);
-    background: var(--color-input-bg, var(--color-surface));
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-
-    &:focus {
-        border-color: var(--color-surface-accent);
-        outline: none;
-    }
-}
-
 .draftDateRow {
     display: grid;
     grid-template-columns: auto auto 1fr auto;
@@ -97,27 +56,6 @@
     padding-bottom: 7px;
     font-size: var(--font-size-sm);
     color: var(--color-text);
-}
-
-.dateInput {
-    box-sizing: border-box;
-    width: 100%;
-    padding: 6px 10px;
-    font-size: var(--font-size-sm);
-    color: var(--color-text);
-    background: var(--color-input-bg, var(--color-surface));
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-
-    &:focus {
-        border-color: var(--color-surface-accent);
-        outline: none;
-    }
-
-    &:disabled {
-        cursor: not-allowed;
-        opacity: .4;
-    }
 }
 
 .draftDatePreview {

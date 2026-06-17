@@ -27,6 +27,51 @@
     color: var(--color-text-muted);
 }
 
+.settingsInput,
+.settingsTextarea {
+    box-sizing: border-box;
+    width: 100%;
+    font-family: inherit;
+    font-size: var(--select-button-font-size);
+    font-weight: var(--select-button-font-weight);
+    color: var(--select-button-color);
+    background: var(--color-input-bg, var(--color-surface));
+    border: var(--select-button-border-width) solid var(--color-border);
+    border-radius: var(--select-button-radius);
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+
+    &:hover {
+        background: var(--select-button-hover-bg);
+    }
+
+    &:focus {
+        border-color: var(--color-surface-accent);
+        outline: none;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: .4;
+    }
+
+    &::placeholder {
+        color: var(--color-ink-subtle, var(--color-text-muted));
+        opacity: .6;
+    }
+}
+
+.settingsInput {
+    height: var(--control-height-lg);
+    padding: 0 var(--select-button-padding-inline);
+}
+
+.settingsTextarea {
+    resize: vertical;
+    min-height: calc(var(--control-height-lg) * 2);
+    padding: var(--space-md) var(--select-button-padding-inline);
+    line-height: var(--line-height-normal);
+}
+
 /* Dual-range indent / margin slider */
 
 .indentSliderTrack {

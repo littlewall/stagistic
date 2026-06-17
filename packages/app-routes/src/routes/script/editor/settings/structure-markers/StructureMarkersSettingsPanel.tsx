@@ -4,7 +4,6 @@ import type {ChangeEvent} from 'react';
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import sharedStyles from '../shared.module.css';
 import type {StructureSettingsPatch} from '../types';
-import styles from './StructureMarkersSettingsPanel.module.css';
 
 interface StructureMarkersSettingsPanelProps {
     structureSettings: EditorSettings['structure'],
@@ -38,7 +37,7 @@ export const StructureMarkersSettingsPanel = ({
                     </label>
                     <input
                         id="settings-act-lines-before"
-                        className={styles.prefixInput}
+                        className={sharedStyles.settingsInput}
                         type="number"
                         min={0}
                         max={8}
@@ -53,7 +52,7 @@ export const StructureMarkersSettingsPanel = ({
                     </label>
                     <input
                         id="settings-act-lines-after"
-                        className={styles.prefixInput}
+                        className={sharedStyles.settingsInput}
                         type="number"
                         min={0}
                         max={8}

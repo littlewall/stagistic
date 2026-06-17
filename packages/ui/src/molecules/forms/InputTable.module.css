@@ -60,13 +60,20 @@
     display: block;
     box-sizing: border-box;
     width: 100%;
-    padding: 3px 6px;
+    height: var(--control-height-lg);
+    padding: 0 var(--select-button-padding-inline);
     font-family: inherit;
-    font-size: var(--font-size-sm);
-    color: var(--color-text);
+    font-size: var(--select-button-font-size);
+    font-weight: var(--select-button-font-weight);
+    color: var(--select-button-color);
     background: var(--color-input-bg, var(--color-surface));
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
+    border: var(--select-button-border-width) solid var(--color-border);
+    border-radius: var(--select-button-radius);
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+
+    &:hover {
+        background: var(--select-button-hover-bg);
+    }
 
     &:focus {
         border-color: var(--color-surface-accent);
@@ -79,7 +86,7 @@
     }
 
     &.withDelete {
-        padding-right: 22px;
+        padding-right: calc(var(--select-button-padding-inline) + var(--control-height-sm));
     }
 }
 
