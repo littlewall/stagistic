@@ -1,6 +1,6 @@
 import {useExclusiveOverlay} from '@stagistic/editor';
 import {
-    ChevronDownIcon, clsx, useDropdownDismiss,
+    ChevronDownIcon, clsx, useAnchoredMenuHeight, useDropdownDismiss,
 } from '@stagistic/ui';
 import {
     useId,
@@ -39,6 +39,10 @@ export const SidebarPanelSelect = ({
         () => panels.find(panel => panel.id === selectedPanelId) ?? panels[0] ?? null,
         [panels, selectedPanelId],
     );
+    const menuHeightStyle = useAnchoredMenuHeight({
+        anchorRef: selectRef,
+        isOpen,
+    });
 
     useExclusiveOverlay(isOpen, () => setIsOpen(false));
     useDropdownDismiss(isOpen, setIsOpen, selectRef);
@@ -69,7 +73,10 @@ export const SidebarPanelSelect = ({
                         styles.menu,
                         side === 'right' && styles.right,
                     )}
-                    style={{positionAnchor: anchorName}}
+                    style={{
+                        positionAnchor: anchorName,
+                        ...menuHeightStyle,
+                    }}
                     role="listbox"
                     aria-label={ariaLabel}
                 >

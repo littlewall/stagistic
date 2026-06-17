@@ -10,8 +10,8 @@ import {
     useRef,
 } from 'react';
 
-import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
 import {BLOCKS} from '../blocks/blockRegistry';
+import {BLOCK_ICONS} from '../blocks/controls/blockIcons';
 import {updateBlockType} from '../tiptap/scriptBlock/commands';
 import {normalizeBlockNodeType} from '../tiptap/scriptCore';
 import {BlockActionsMenu} from './blockActions/BlockActionsMenu';
@@ -47,7 +47,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         canvasRef,
         isMenuOpen,
     });
-    const {isMenuAbove} = useMenuPlacement({
+    const {isMenuAbove, menuStyle} = useMenuPlacement({
         isMenuOpen,
         canvasRef,
         triggerRef,
@@ -207,6 +207,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
                         blockType={visibleOverlayState.blockType}
                         isMenuAbove={isMenuAbove}
                         menuRef={menuRef}
+                        menuStyle={menuStyle}
                         onMenuItemMouseDown={handleMenuItemMouseDown}
                     />
                 ) : null}

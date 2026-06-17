@@ -1,9 +1,14 @@
 import {
+    type CSSProperties,
     useLayoutEffect,
     useState,
 } from 'react';
 
 import type {UseMenuPlacementArgs} from './types';
+
+type AnchoredMenuStyle = CSSProperties & {
+    '--anchored-menu-max-height'?: string,
+};
 
 export const useMenuPlacement = ({
     isMenuOpen,
@@ -12,9 +17,13 @@ export const useMenuPlacement = ({
     menuRef,
 }: UseMenuPlacementArgs) => {
     const [isMenuAbove, setIsMenuAbove] = useState(false);
+    const [menuStyle, setMenuStyle] = useState<AnchoredMenuStyle | undefined>();
 
     useLayoutEffect(() => {
         if (!isMenuOpen) {
+            setIsMenuAbove(false);
+            setMenuStyle(undefined);
+
             return;
         }
 
@@ -36,9 +45,19 @@ export const useMenuPlacement = ({
             const spaceAbove = containerRect
                 ? triggerRect.top - containerRect.top
                 : triggerRect.top;
-            const shouldFlip = spaceBelow < menuRect.height + 8 && spaceAbove > spaceBelow;
+            const menuHeight = menu.scrollHeight || menuRect.height;
+            const shouldFlip = spaceBelow < menuHeight + 8 && spaceAbove > spaceBelow;
+            const availableHeight = Math.max(0, Math.floor((shouldFlip ? spaceAbove : spaceBelow) - 8));
+            const nextHeight = `${availableHeight}px`;
 
             setIsMenuAbove(shouldFlip);
+            setMenuStyle(previous => {
+                if (previous?.['--anchored-menu-max-height'] === nextHeight) {
+                    return previous;
+                }
+
+                return {'--anchored-menu-max-height': nextHeight};
+            });
         };
 
         const schedule = () => {
@@ -81,5 +100,6 @@ export const useMenuPlacement = ({
 
     return {
         isMenuAbove,
+        menuStyle,
     };
 };

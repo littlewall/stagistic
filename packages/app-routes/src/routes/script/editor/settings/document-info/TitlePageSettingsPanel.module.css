@@ -126,18 +126,3 @@
     color: var(--color-text-muted);
     white-space: nowrap;
 }
-
-.select {
-    cursor: pointer;
-    padding: 6px 10px;
-    font-size: var(--font-size-sm);
-    color: var(--color-text);
-    background: var(--color-input-bg, var(--color-surface));
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-sm);
-
-    &:focus {
-        border-color: var(--color-surface-accent);
-        outline: none;
-    }
-}

@@ -73,6 +73,7 @@ export const ScriptEditorRoute = () => {
         effectiveScriptSettingsDraft,
         resolvedScriptSettings,
         updateBlockSettings,
+        resetBlockSettings,
         updateCharacterColorSaturation,
         updateStructureSettings,
         updatePageSettings,
@@ -260,7 +261,10 @@ export const ScriptEditorRoute = () => {
                             resolvedScriptSettings={resolvedScriptSettings}
                             blockLabelByType={BLOCK_LABEL_BY_TYPE}
                             shortcutPrefix={shortcutPrefix}
-                            elementsHandlers={{onUpdateBlockSettings: updateBlockSettings}}
+                            elementsHandlers={{
+                                onResetBlockSettings: resetBlockSettings,
+                                onUpdateBlockSettings: updateBlockSettings,
+                            }}
                             visualPreferencesHandlers={{onUpdateCharacterColorSaturation: updateCharacterColorSaturation}}
                             structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
                             pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}

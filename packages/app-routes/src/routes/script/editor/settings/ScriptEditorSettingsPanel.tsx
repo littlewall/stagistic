@@ -34,6 +34,7 @@ export const ScriptEditorSettingsPanel = (props: ScriptEditorSettingsPanelProps)
             blockLabel={blockLabelByType.get(blockType) ?? 'Element'}
             resolvedScriptSettings={resolvedScriptSettings}
             shortcutPrefix={shortcutPrefix}
+            onResetBlockSettings={elementsHandlers.onResetBlockSettings}
             onUpdateBlockSettings={elementsHandlers.onUpdateBlockSettings}
         />
     );

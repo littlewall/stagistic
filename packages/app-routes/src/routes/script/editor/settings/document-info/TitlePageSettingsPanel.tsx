@@ -7,7 +7,19 @@ import {
     type InputTableColumnDef,
     type InputTableRow,
 } from '@stagistic/ui';
-import {useCallback, useMemo} from 'react';
+import {
+    useCallback,
+    useEffect,
+    useMemo,
+    useState,
+} from 'react';
+
+import panelStyles from '../ScriptEditorSettingsPanel.module.css';
+import {
+    SettingsSelect,
+    type SettingsSelectOption,
+} from '../SettingsSelect';
+import styles from './TitlePageSettingsPanel.module.css';
 
 const formatDatePreview = (isoDate: string, format: TitlePageDateFormat): string => {
     const match = (/^(\d{4})-(\d{2})-(\d{2})/).exec(isoDate);
@@ -35,9 +47,6 @@ const getTodayIso = (): string => {
     return `${y}-${m}-${day}`;
 };
 
-import panelStyles from '../ScriptEditorSettingsPanel.module.css';
-import styles from './TitlePageSettingsPanel.module.css';
-
 const CREDITS_COLUMNS: readonly InputTableColumnDef[] = [
     {
         key: 'credit', label: 'Credit', type: 'string', placeholder: 'Written by',
@@ -47,6 +56,8 @@ const CREDITS_COLUMNS: readonly InputTableColumnDef[] = [
 ];
 
 const CREDITS_ROW_COUNT = {type: 'dynamic' as const, min: 1};
+
+const DATE_FORMAT_OPTIONS: SettingsSelectOption[] = [{value: 'dmy', label: 'dd/mm/yyyy'}, {value: 'mdy', label: 'mm/dd/yyyy'}];
 
 interface TitlePageSettingsPanelProps {
     scriptTitle: string,
@@ -61,12 +72,26 @@ export const TitlePageSettingsPanel = ({
 }: TitlePageSettingsPanelProps) => {
     const draftDateMode = settings.draftDateMode ?? 'auto';
     const dateFormat = settings.dateFormat ?? 'mdy';
+    const [localDraftDateMode, setLocalDraftDateMode] = useState(draftDateMode);
+    const [localDraftDate, setLocalDraftDate] = useState(settings.draftDate ?? '');
+    const [localDateFormat, setLocalDateFormat] = useState(dateFormat);
+
+    useEffect(() => {
+        setLocalDraftDateMode(draftDateMode);
+    }, [draftDateMode]);
+    useEffect(() => {
+        setLocalDraftDate(settings.draftDate ?? '');
+    }, [settings.draftDate]);
+    useEffect(() => {
+        setLocalDateFormat(dateFormat);
+    }, [dateFormat]);
+
     const draftDatePreview = (() => {
-        if (draftDateMode === 'auto') {
-            return formatDatePreview(getTodayIso(), dateFormat);
+        if (localDraftDateMode === 'auto') {
+            return formatDatePreview(getTodayIso(), localDateFormat);
         }
 
-        return settings.draftDate ? formatDatePreview(settings.draftDate, dateFormat) : '';
+        return localDraftDate ? formatDatePreview(localDraftDate, localDateFormat) : '';
     })();
 
     const creditRows = useMemo<InputTableRow[]>(
@@ -150,17 +175,18 @@ export const TitlePageSettingsPanel = ({
                 <div className={styles.draftDateRow}>
                     <div className={styles.draftDateField}>
                         <label className={styles.subFieldLabel} htmlFor="tp-date-format">Date format</label>
-                        <select
+                        <SettingsSelect
                             id="tp-date-format"
-                            className={styles.select}
-                            value={dateFormat}
-                            onChange={e => {
-                                onUpdate({dateFormat: e.target.value as TitlePageDateFormat});
+                            value={localDateFormat}
+                            options={DATE_FORMAT_OPTIONS}
+                            ariaLabel="Select date format"
+                            onChange={nextValue => {
+                                const nextDateFormat = nextValue as TitlePageDateFormat;
+
+                                setLocalDateFormat(nextDateFormat);
+                                onUpdate({dateFormat: nextDateFormat});
                             }}
-                        >
-                            <option value="dmy">dd/mm/yyyy</option>
-                            <option value="mdy">mm/dd/yyyy</option>
-                        </select>
+                        />
                     </div>
                     <div className={styles.draftDateField}>
                         <label className={styles.subFieldLabel} htmlFor="tp-date">Date</label>
@@ -168,19 +194,25 @@ export const TitlePageSettingsPanel = ({
                             id="tp-date"
                             type="date"
                             className={styles.dateInput}
-                            disabled={draftDateMode === 'auto'}
-                            value={settings.draftDate ?? ''}
+                            disabled={localDraftDateMode === 'auto'}
+                            value={localDraftDate}
                             onChange={e => {
-                                onUpdate({draftDate: e.target.value || undefined});
+                                const nextDraftDate = e.target.value;
+
+                                setLocalDraftDate(nextDraftDate);
+                                onUpdate({draftDate: nextDraftDate || undefined});
                             }}
                         />
                     </div>
                     <label className={styles.checkboxLabel}>
                         <input
                             type="checkbox"
-                            checked={draftDateMode === 'auto'}
+                            checked={localDraftDateMode === 'auto'}
                             onChange={e => {
-                                onUpdate({draftDateMode: e.target.checked ? 'auto' : 'manual'});
+                                const nextDraftDateMode = e.target.checked ? 'auto' : 'manual';
+
+                                setLocalDraftDateMode(nextDraftDateMode);
+                                onUpdate({draftDateMode: nextDraftDateMode});
                             }}
                         />
                         Automatic date of export

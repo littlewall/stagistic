@@ -34,6 +34,9 @@ export const useElementSettingsViewModel = ({
     resolvedScriptSettings,
 }: Pick<ElementSettingsPanelProps, 'blockType' | 'resolvedScriptSettings'>): ElementSettingsViewModel => {
     return useMemo(() => {
+        const nextElementItems = SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.filter(
+            item => item.blockType !== 'act' && item.blockType !== 'scene' && item.blockType !== 'note',
+        );
         const blockDefaults = DEFAULT_EDITOR_SETTINGS.blocks[blockType];
         const blockSettings = resolvedScriptSettings.blocks[blockType];
         const pageWidthPx = resolvedScriptSettings.page.widthPx ?? DEFAULT_EDITOR_SETTINGS.page.widthPx;
@@ -79,14 +82,14 @@ export const useElementSettingsViewModel = ({
             value: unknown,
         ): value is ElementSettingsViewModel['numeric']['nextElement'] => {
             return typeof value === 'string'
-                && SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.some(item => item.blockType === value);
+                && nextElementItems.some(item => item.blockType === value);
         };
         const nextElement = isActBlock
             ? undefined
             : (() => {
                 const candidate = blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType;
 
-                return isValidNextElement(candidate) ? candidate : blockType;
+                return isValidNextElement(candidate) ? candidate : nextElementItems[0]?.blockType;
             })();
         const textAlign = blockSettings.textAlign ?? blockDefaults.textAlign ?? BLOCK_TEXT_ALIGN_OPTIONS[0];
         const casing = blockSettings.casing ?? blockDefaults.casing ?? BLOCK_CASING_OPTIONS[0];
@@ -111,7 +114,7 @@ export const useElementSettingsViewModel = ({
             }));
         const nextElementOptions = isActBlock
             ? undefined
-            : SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => ({
+            : nextElementItems.map(item => ({
                 value: item.blockType,
                 label: item.label,
                 icon: BLOCK_ICONS[item.blockType],

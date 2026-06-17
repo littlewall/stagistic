@@ -51,6 +51,7 @@ export {InputTable} from './molecules/forms/InputTable';
 export type {SelectOption} from './molecules/forms/Select';
 export {Select} from './molecules/forms/Select';
 export {TextInput} from './molecules/forms/TextInput';
+export {useAnchoredMenuHeight} from './molecules/forms/useAnchoredMenuHeight';
 export {useDropdownDismiss} from './molecules/forms/useDropdownDismiss';
 export {Grid} from './organisms/Grid';
 export {HeroLayout} from './organisms/HeroLayout';

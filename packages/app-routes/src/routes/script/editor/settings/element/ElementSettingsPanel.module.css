@@ -1,0 +1,44 @@
+.panelHeader {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: space-between;
+}
+
+.resetButton {
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--space-sm);
+    align-items: center;
+    min-height: var(--control-height-xs);
+    padding: 0 var(--space-md);
+    font-family: inherit;
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+
+    &:hover {
+        color: var(--color-text);
+        background: var(--color-surface-raised);
+        border-color: var(--color-border-strong);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-focus-ring, var(--color-link));
+        outline-offset: 2px;
+    }
+
+    & svg {
+        width: calc(13px * var(--size-scale));
+        height: calc(13px * var(--size-scale));
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.8;
+    }
+}

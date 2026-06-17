@@ -1,3 +1,4 @@
+import {useAnchoredMenuHeight} from '@stagistic/ui';
 import clsx from 'clsx';
 
 import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
@@ -17,6 +18,10 @@ export const BlockTypeSelect = ({
         activeBlockInfo,
     } = state;
     const {onSelectMouseDown, onMenuItemMouseDown} = actions;
+    const menuHeightStyle = useAnchoredMenuHeight({
+        anchorRef: dropdownRef,
+        isOpen,
+    });
 
     return (
         <div className={styles.rightGroup}>
@@ -56,7 +61,11 @@ export const BlockTypeSelect = ({
                     </svg>
                 </button>
                 {isOpen ? (
-                    <div className={styles.menu} role="menu">
+                    <div
+                        className={styles.menu}
+                        role="menu"
+                        style={menuHeightStyle}
+                    >
                         {options.map(option => (
                             <button
                                 key={option.type}

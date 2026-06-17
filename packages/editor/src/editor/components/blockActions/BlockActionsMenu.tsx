@@ -1,7 +1,7 @@
 import clsx from 'clsx';
 
-import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
 import {BLOCKS_WITHOUT_ACT} from '../../blocks/blockRegistry';
+import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
 import styles from '../EditorBlockActionsOverlay.module.css';
 import type {BlockActionsMenuProps} from './types';
 
@@ -9,6 +9,7 @@ export const BlockActionsMenu = ({
     blockType,
     isMenuAbove,
     menuRef,
+    menuStyle,
     onMenuItemMouseDown,
 }: BlockActionsMenuProps) => {
     return (
@@ -19,6 +20,7 @@ export const BlockActionsMenu = ({
             )}
             role="menu"
             ref={menuRef}
+            style={menuStyle}
         >
             <div className={styles.menuPrimaryPanel}>
                 {BLOCKS_WITHOUT_ACT.map(option => (

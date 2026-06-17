@@ -192,11 +192,12 @@
 
 .menuPrimaryPanel {
     overflow-y: auto;
+    overscroll-behavior: contain;
     display: grid;
     gap: 0;
     align-content: start;
     min-width: calc(200px * var(--size-scale));
-    max-height: calc(280px * var(--size-scale));
+    max-height: min(calc(280px * var(--size-scale)), var(--anchored-menu-max-height, calc(280px * var(--size-scale))));
     padding: var(--space-sm);
 }
 

@@ -31,6 +31,10 @@ export interface ElementsHandlers {
     onUpdateBlockSettings: UpdateBlockSettings,
 }
 
+interface ElementResetHandlers {
+    onResetBlockSettings: (blockType: ScriptBlockNodeType) => void,
+}
+
 export interface VisualPreferencesHandlers {
     onUpdateCharacterColorSaturation: (value: number) => void,
 }
@@ -59,7 +63,7 @@ export interface ScriptEditorSettingsPanelProps {
     resolvedScriptSettings: EditorSettings,
     blockLabelByType: Map<ScriptBlockNodeType, string>,
     shortcutPrefix: string,
-    elementsHandlers: ElementsHandlers,
+    elementsHandlers: ElementsHandlers & ElementResetHandlers,
     visualPreferencesHandlers: VisualPreferencesHandlers,
     structureHandlers: StructureHandlers,
     pageLayoutHandlers: PageLayoutHandlers,
@@ -74,6 +78,7 @@ export interface ElementSettingsPanelProps {
     blockLabel: string,
     resolvedScriptSettings: EditorSettings,
     shortcutPrefix: string,
+    onResetBlockSettings: ElementResetHandlers['onResetBlockSettings'],
     onUpdateBlockSettings: UpdateBlockSettings,
 }
 

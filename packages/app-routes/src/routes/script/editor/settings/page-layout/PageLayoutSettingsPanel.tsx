@@ -137,7 +137,7 @@ export const PageLayoutSettingsPanel = ({
         <div className={panelStyles.panelStack}>
             <h3 className={panelStyles.panelTitle}>Page Layout</h3>
             <div className={sharedStyles.previewCard}>
-                <div className={sharedStyles.settingsFlatGrid}>
+                <div className={styles.pageSettingsGrid}>
                     <div className={sharedStyles.settingsField}>
                         <span className={sharedStyles.fieldLabel}>Page size</span>
                         <SettingsSelect

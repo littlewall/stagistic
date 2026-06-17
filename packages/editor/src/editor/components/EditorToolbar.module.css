@@ -209,8 +209,11 @@
     z-index: var(--select-menu-z-index);
     top: anchor(bottom);
     left: anchor(left);
+    overflow: auto;
+    overscroll-behavior: contain;
     display: grid;
     min-width: anchor-size(width);
+    max-height: min(var(--select-menu-max-height), var(--anchored-menu-max-height, var(--select-menu-max-height)));
     margin-top: -1px;
     padding: var(--select-menu-padding);
     background: var(--select-menu-bg);

@@ -152,6 +152,19 @@ export const useScriptEditorSettingsDraft = ({
         }));
     }, []);
 
+    const resetBlockSettings = useCallback((blockType: ScriptBlockNodeType) => {
+        setScriptSettingsDraft(previous => {
+            const nextBlocks = {...previous.blocks};
+
+            delete nextBlocks[blockType];
+
+            return {
+                ...previous,
+                blocks: Object.keys(nextBlocks).length > 0 ? nextBlocks : undefined,
+            };
+        });
+    }, []);
+
     const updateCharacterColorSaturation = useCallback((value: number) => {
         const nextSaturation = clampCharacterColorSaturation(value);
 
@@ -193,6 +206,7 @@ export const useScriptEditorSettingsDraft = ({
         effectiveScriptSettingsDraft,
         resolvedScriptSettings,
         updateBlockSettings,
+        resetBlockSettings,
         updateCharacterColorSaturation,
         updateStructureSettings,
         updatePageSettings,

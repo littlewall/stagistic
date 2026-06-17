@@ -1,6 +1,7 @@
 import type {ScriptBlockNodeType} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import type {
+    CSSProperties,
     MouseEvent as ReactMouseEvent,
     RefObject,
 } from 'react';
@@ -11,6 +12,7 @@ export interface BlockActionsMenuProps {
     blockType: BlockNodeType,
     isMenuAbove: boolean,
     menuRef: RefObject<HTMLDivElement | null>,
+    menuStyle: CSSProperties | undefined,
     onMenuItemMouseDown: (
         optionType: ScriptBlockNodeType,
         event: ReactMouseEvent<HTMLButtonElement>,
@@ -35,4 +37,3 @@ export interface UseBlockActionsMenuStateArgs {
     triggerRef: RefObject<HTMLButtonElement | null>,
     menuRef: RefObject<HTMLDivElement | null>,
 }
-

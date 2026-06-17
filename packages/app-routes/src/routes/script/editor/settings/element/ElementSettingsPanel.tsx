@@ -1,4 +1,5 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
+import {UndoIcon} from '@stagistic/ui';
 import {
     startTransition, useEffect, useState,
 } from 'react';
@@ -12,6 +13,7 @@ import type {
 import {ElementFormattingToolbar} from './ElementFormattingToolbar';
 import {ElementNumericControls} from './ElementNumericControls';
 import {ElementPreview} from './ElementPreview';
+import elementStyles from './ElementSettingsPanel.module.css';
 import {useElementSettingsViewModel} from './useElementSettingsViewModel';
 
 export const ElementSettingsPanel = ({
@@ -19,6 +21,7 @@ export const ElementSettingsPanel = ({
     blockLabel,
     resolvedScriptSettings,
     shortcutPrefix,
+    onResetBlockSettings,
     onUpdateBlockSettings,
 }: ElementSettingsPanelProps) => {
     const viewModel = useElementSettingsViewModel({
@@ -73,7 +76,18 @@ export const ElementSettingsPanel = ({
 
     return (
         <div className={styles.panelStack}>
-            <h3 className={styles.panelTitle}>{blockLabel}</h3>
+            <div className={elementStyles.panelHeader}>
+                <h3 className={styles.panelTitle}>{blockLabel}</h3>
+                <button
+                    type="button"
+                    className={elementStyles.resetButton}
+                    onClick={() => onResetBlockSettings(blockType)}
+                    aria-label={`Reset ${blockLabel} settings to defaults`}
+                >
+                    <UndoIcon aria-hidden="true" />
+                    <span>Reset</span>
+                </button>
+            </div>
             <ElementPreview
                 model={preview}
                 handlers={{

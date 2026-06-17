@@ -1,3 +1,14 @@
+.pageSettingsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-xl);
+    margin-top: var(--space-xl);
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+    }
+}
+
 .pageSchematic {
     overflow: hidden;
     display: flex;

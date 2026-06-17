@@ -10,7 +10,7 @@ export const stageDirectionSpec = {
         spacingBeforeEm: 1.0,
         lineHeight: 1.2,
         shortcut: '2',
-        nextElement: 'stageDirection',
+        nextElement: 'character',
         textAlign: 'left',
         casing: 'normal',
         isBold: false,

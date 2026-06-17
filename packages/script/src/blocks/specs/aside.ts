@@ -12,7 +12,7 @@ export const asideSpec = {
         indentLeftChars: 16,
         indentRightChars: 21,
         shortcut: '4',
-        nextElement: 'character',
+        nextElement: 'dialogue',
         textAlign: 'left',
         casing: 'lowercase',
         isBold: false,

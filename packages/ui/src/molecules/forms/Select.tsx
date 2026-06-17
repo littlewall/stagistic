@@ -8,6 +8,7 @@ import {
 } from 'react';
 
 import styles from './Select.module.css';
+import {useAnchoredMenuHeight} from './useAnchoredMenuHeight';
 import {useDropdownDismiss} from './useDropdownDismiss';
 
 export interface SelectOption {
@@ -55,6 +56,10 @@ export const Select = ({
         () => options.find(option => option.value === value) ?? options[0] ?? null,
         [options, value],
     );
+    const menuHeightStyle = useAnchoredMenuHeight({
+        anchorRef: selectRef,
+        isOpen,
+    });
 
     useDropdownDismiss(isOpen, setIsOpen, selectRef);
 
@@ -88,7 +93,10 @@ export const Select = ({
             {isOpen ? (
                 <div
                     className={styles.menu}
-                    style={{positionAnchor: anchorName}}
+                    style={{
+                        positionAnchor: anchorName,
+                        ...menuHeightStyle,
+                    }}
                     role="listbox"
                     aria-labelledby={id}
                 >
