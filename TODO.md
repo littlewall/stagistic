@@ -10,8 +10,8 @@ Run a single package: `pnpm --filter @stagistic/<pkg> test`.
 - [x] `structure/structureUtils.ts` — `normalizeActName`, `getDefaultActName`, `resolveStructureSettings`
 - [x] `structure/collectStructureBlocks.ts` — `collectStructureBlocks`
 - [x] `structure/outline.ts` — `buildScriptStructureOutline`
-- [ ] `indexing/scriptBlockIndex.ts`
-- [ ] `document/coerceUnknownBlocks.ts`
+- [x] `indexing/scriptBlockIndex.ts`
+- [x] `document/coerceUnknownBlocks.ts`
 
 Also normalized all `script` test imports from `vitest` → `vite-plus/test` (type-aware lint
 sees the bundled types; raw `vitest` is not a package dep). Pre-existing source lint debt
