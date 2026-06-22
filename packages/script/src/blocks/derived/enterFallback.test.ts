@@ -1,6 +1,6 @@
 import {
     describe, expect, it,
-} from 'vitest';
+} from 'vite-plus/test';
 
 import {getEnterFallback} from './enterFallback';
 

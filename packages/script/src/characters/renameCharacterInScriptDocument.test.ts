@@ -1,6 +1,6 @@
 import {
     describe, expect, it,
-} from 'vitest';
+} from 'vite-plus/test';
 
 import type {ScriptDocument} from '../document';
 import {renameCharacterInScriptDocument} from './renameCharacterInScriptDocument';
