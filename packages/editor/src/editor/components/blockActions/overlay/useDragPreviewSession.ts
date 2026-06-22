@@ -7,6 +7,7 @@ import {
     useRef,
 } from 'react';
 
+import {useEditorActCommands} from '../../../actCommands/context';
 import {moveTopLevelNonStructuralBlock} from '../../../hooks/structureReorder';
 import {findScriptBlockSelectionPosFromState} from '../../../tiptap/scriptCore';
 import type {DragSessionState} from './types';
@@ -17,6 +18,7 @@ interface UseDragPreviewSessionArgs {
 
 export const useDragPreviewSession = ({editor}: UseDragPreviewSessionArgs) => {
     const dragSessionRef = useRef<DragSessionState | null>(null);
+    const {moveBlock} = useEditorActCommands();
 
     const focusBlockById = useCallback((blockId: string) => {
         if (!editor) {
@@ -142,7 +144,7 @@ export const useDragPreviewSession = ({editor}: UseDragPreviewSessionArgs) => {
             return;
         }
 
-        const {nextDocument, didChange} = buildMovedDocument(
+        const {didChange} = buildMovedDocument(
             session.baseDocument,
             session.sourceBlockId,
             beforeBlockId,
@@ -159,16 +161,20 @@ export const useDragPreviewSession = ({editor}: UseDragPreviewSessionArgs) => {
             return;
         }
 
-        editor.commands.setContent(nextDocument, {emitUpdate: true});
-
         const sourceBlockId = session.sourceBlockId;
 
+        if (session.hasPreviewChange) {
+            editor.commands.setContent(session.baseDocument, {emitUpdate: false});
+        }
+
         dragSessionRef.current = null;
+        moveBlock(sourceBlockId, beforeBlockId);
         focusBlockById(sourceBlockId);
     }, [
         buildMovedDocument,
         editor,
         focusBlockById,
+        moveBlock,
     ]);
 
     return {

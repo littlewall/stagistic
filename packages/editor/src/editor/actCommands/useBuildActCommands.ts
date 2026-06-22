@@ -11,7 +11,10 @@ import {
 
 import type {EditorIndexSnapshot, EditorValueChangeMeta} from '../contracts';
 import {withActiveBlockPreserved} from '../hooks/selectionHelpers';
-import {moveSceneSegment} from '../hooks/structureReorder';
+import {
+    moveSceneSegment,
+    moveTopLevelNonStructuralBlock,
+} from '../hooks/structureReorder';
 import {
     buildInsertActContent,
     type CommitContext,
@@ -90,7 +93,7 @@ export const useBuildActCommands = ({
         if (
             firstNode
             && isScriptBlockNode(firstNode)
-            && getScriptBlockNodeType(firstNode) === "act"
+            && getScriptBlockNodeType(firstNode) === 'act'
             && getScriptBlockId(firstNode) === blockId
         ) {
             return;
@@ -129,7 +132,28 @@ export const useBuildActCommands = ({
         });
     }, [commitCtx]);
 
+    const moveBlock = useCallback((sourceBlockId: string, beforeBlockId: string | null) => {
+        if (!commitCtx || !sourceBlockId || sourceBlockId === beforeBlockId) {
+            return;
+        }
+
+        const currentValue = commitCtx.editor.getJSON() as ScriptDocument;
+        const [nextContent, didChange] = moveTopLevelNonStructuralBlock(
+            currentValue.content,
+            sourceBlockId,
+            beforeBlockId,
+        );
+
+        withActiveBlockPreserved(commitCtx.editor, () => {
+            tryCommitDocument(commitCtx, nextContent, didChange, currentValue.attrs);
+        });
+    }, [commitCtx]);
+
     return {
-        insertAct, renameAct, deleteAct, moveScene,
+        insertAct,
+        renameAct,
+        deleteAct,
+        moveBlock,
+        moveScene,
     };
 };

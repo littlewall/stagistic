@@ -1,11 +1,14 @@
 import {
-    createContext, type ReactNode, useContext,
+    createContext,
+    type ReactNode,
+    useContext,
 } from 'react';
 
 export interface EditorActCommands {
     insertAct: (beforeBlockId: string | null) => void,
     renameAct: (blockId: string, nextName: string) => void,
     deleteAct: (blockId: string) => void,
+    moveBlock: (sourceBlockId: string, beforeBlockId: string | null) => void,
     moveScene: (sourceSceneBlockId: string, beforeBlockId: string | null) => void,
 }
 
