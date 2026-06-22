@@ -18,10 +18,16 @@ sees the bundled types; raw `vitest` is not a package dep). Pre-existing source 
 remains in `characterRefsInScriptDocument.ts` and `scriptDocumentHelpers.ts` (autofixable).
 
 ## Tier 2 — `db` (data integrity, pglite infra exists)
-- [ ] `repo/persist/minimalOrderKeys.ts` — fractional-indexing ordering
-- [ ] `repo/documentCodec.ts` — encode/decode
-- [ ] `repo/characterHandlers/normalization.ts`
-- [ ] character read/write queries
+- [x] `repo/persist/minimalOrderKeys.ts` — fractional-indexing ordering
+- [x] `repo/documentCodec.ts` — encode/decode
+- [x] `repo/characterHandlers/normalization.ts`
+- [ ] character read/write queries (pglite integration via createTestDb)
+
+Fixed per-package isolation: `db`/`script` lacked a `vite.config.ts`, so
+`vp test` followed workspace symlinks in node_modules and ran dependency
+packages' tests too (db pulled in all of script's). Added scoped configs
+(`include: ['src/**/*.test...']`) mirroring editor; registered both in
+`eslint.config.js` allowDefaultProject. Now db runs 10 files, not 24.
 
 ## Tier 3 — `shared` (quick wins, wire up `test` script)
 - [ ] `ids/nodeId.ts`, `ids/uuidv7.ts`
