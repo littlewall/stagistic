@@ -42,4 +42,11 @@ packages' tests too (db pulled in all of script's). Added scoped configs
       verified via mutation that a single page produces none)
 
 ## Later — React (`ui`, `app-routes`, `app-core`)
-- [ ] needs per-package browser config + setup
+- [x] per-package test infra prepared (configs only — tests deferred):
+      `vite.config.ts` (unit, scoped) + `vitest.browser.config.ts` (browser)
+      with `passWithNoTests: true`; `test`/`test:watch`/`test:browser`
+      scripts; registered in `eslint.config.js`. `pnpm --filter <pkg> test`
+      is green with no tests.
+- [ ] write the actual unit/component tests
+- [ ] add `playwright` to each package's devDependencies before running
+      `test:browser` (browser config is green without it only while empty)
