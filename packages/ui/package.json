@@ -5,7 +5,10 @@
     "type": "module",
     "main": "./src/index.ts",
     "scripts": {
-        "lint": "eslint ."
+        "lint": "eslint .",
+        "test": "vp test run",
+        "test:watch": "vp test watch",
+        "test:browser": "vp test run -c vitest.browser.config.ts"
     },
     "dependencies": {
         "@fontsource-variable/ibm-plex-sans": "^5.2.8",
