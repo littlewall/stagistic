@@ -1,0 +1,662 @@
+---
+import {clsx} from 'clsx';
+import '../styles/global.css';
+import s from './syntax.module.css';
+
+// --- Table of contents -----------------------------------------------------
+const toc = [
+    {id: 'core', n: '01', title: 'The core idea'},
+    {id: 'frontmatter', n: '02', title: 'Frontmatter'},
+    {id: 'structure', n: '03', title: 'Acts & scenes'},
+    {id: 'dialogue', n: '04', title: 'Cues & dialogue'},
+    {id: 'asides', n: '05', title: 'Asides'},
+    {id: 'lyrics', n: '06', title: 'Lyrics'},
+    {id: 'soft-break', n: '07', title: 'Soft breaks'},
+    {id: 'stage-directions', n: '08', title: 'Stage directions'},
+    {id: 'cues', n: '09', title: 'Structural cues'},
+    {id: 'quoting', n: '10', title: 'Quoting'},
+    {id: 'inline', n: '11', title: 'Inline marks'},
+    {id: 'example', n: '12', title: 'Full example'},
+    {id: 'reference', n: '13', title: 'Marker reference'},
+];
+
+// --- Example sources (rendered as plain text) ------------------------------
+const exFrontmatter = `---
+title: When Night Falls
+authors:
+  book: Jane Smith
+  music: Peter Gray
+  lyrics: Jane Smith
+---`;
+
+const exStructure = `# Act One
+
+## 1 — A garden. Dusk.`;
+
+const exDialogue = `PETER
+(from the doorway)
+Sorry I'm late.
+
+ANNA
+It's fine. I was waiting.`;
+
+const exUnison = `ANNA / PETER
+AND THE WORLD WILL STOP`;
+
+const exInlineCue = `JANE: I told you already.`;
+
+const exAside = `ANNA
+(quietly)
+You shouldn't have come.
+(she turns away)
+Not tonight.`;
+
+const exLyrics = `ANNA
+WHEN NIGHT FALLS AND THE LIGHTS GO DOWN
+\tAND I'LL BE STANDING HERE`;
+
+const exSoftBreak = `PETER
+FIRST LINE OF THE SONG
+SECOND LINE OF THE SONG
+~
+A LATER LINE — STILL PETER, NOT A NEW CHARACTER`;
+
+const exStageDir = `Anna stands at the window. @Peter enters quietly from behind.`;
+
+const exCue = `The lights slowly fade. @@cue 1 "When Night Falls"
+
+ANNA
+WHEN NIGHT FALLS AND THE LIGHTS GO DOWN
+
+The lights come up. @@out 1`;
+
+const exQuoting = `"Mrs. Washington"
+@"Mrs. Washington"
+@@cue 1 "Overture"`;
+
+const exMarks = `*italic*  **bold**  _underline_
+
+[[ a note to self — never printed ]]`;
+
+const exFull = `---
+title: When Night Falls
+authors:
+  book: Jane Smith
+  music: Peter Gray
+---
+
+# Act One
+
+## 1 — A garden. Dusk.
+
+Anna stands at the window. @Peter enters quietly from behind.
+
+PETER
+(from the doorway)
+Sorry I'm late.
+
+ANNA
+It's fine. I was waiting.
+
+The lights slowly fade. @@cue 1 "When Night Falls"
+
+ANNA
+WHEN NIGHT FALLS AND THE LIGHTS GO DOWN
+\tAND I'LL BE STANDING HERE
+
+PETER
+SO I'LL COME CLOSER
+
+ANNA / PETER
+AND THE WORLD WILL STOP
+
+The lights come up. @@out 1
+
+[[ still need to reconsider the transition into scene 2 ]]`;
+
+// --- Marker reference ------------------------------------------------------
+const markers = [
+    ['--- … ---', 'Frontmatter block (file start)'],
+    ['#  /  ##', 'Act / scene'],
+    ['@name', 'Forced character cue (at the start of a block)'],
+    ['@Name  /  @"Name"', 'Character tag (inside a stage direction)'],
+    ['/', 'Unison separator on a cue line'],
+    ['@@cue N "title"  /  @@out N', 'Structural cue — start / end'],
+    ['(...)', 'Aside (in a speech) or parenthetical stage direction (at block start)'],
+    ['[[ ... ]]', 'Author note (never printed)'],
+    ['*   **   _', 'Italic / bold / underline'],
+    ['leading tab(s)', 'Lyric section level'],
+    ['~ (alone on a line)', 'Soft break — empty in-speech block, no cue reset'],
+    ['"..."', 'Literal name or title (the quoting rule)'],
+];
+---
+
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <title>Stagistic — Syntax</title>
+        <meta
+            name="description"
+            content="The Stagistic syntax: a plain-text format for theatre and musical scripts. Acts, scenes, dialogue, lyrics, stage directions, and musical cues."
+        />
+        <meta property="og:image" content="/opengraph.jpg" />
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
+            rel="stylesheet"
+        />
+    </head>
+    <body>
+        <div class={s.page}>
+
+            <!-- Nav -->
+            <header class={s.nav}>
+                <div class={s.navInner}>
+                    <a href="/" class={s.navLogo}>
+                        <span class={s.logoText}>Stagistic</span>
+                        <span class={s.logoBadge}>Syntax</span>
+                    </a>
+                    <nav class={s.navLinks}>
+                        <a href="/#features" class={s.navLink}>Features</a>
+                        <a href="/" class={s.navLink}>Back to site</a>
+                    </nav>
+                </div>
+            </header>
+
+            <main class={s.main}>
+                <div class={s.shell}>
+
+                    <!-- Table of contents -->
+                    <aside class={s.toc}>
+                        <p class={s.tocTitle}>On this page</p>
+                        <ul class={s.tocList}>
+                            {
+                                toc.map((item) => (
+                                    <li>
+                                        <a href={`#${item.id}`} class={s.tocLink}>
+                                            <span class={s.tocNum}>{item.n}</span>
+                                            {item.title}
+                                        </a>
+                                    </li>
+                                ))
+                            }
+                        </ul>
+                    </aside>
+
+                    <!-- Content -->
+                    <div class={s.content}>
+
+                        <header class={s.lede}>
+                            <p class={s.eyebrow}>The format</p>
+                            <h1 class={s.docTitle}>Stagistic syntax</h1>
+                            <p class={s.docIntro}>
+                                A plain-text format for theatrical plays and
+                                musicals. You can draft a whole script in any
+                                text editor and import it — or read what the
+                                editor writes out. It is rooted in Fountain, but
+                                it speaks theatre: acts and scenes, spoken and
+                                sung, stage directions, and musical cues.
+                            </p>
+                            <p class={s.docIntroSecondary}>
+                                The guiding rule is <em>implicit where it reads
+                                naturally, explicit only where ambiguity would
+                                otherwise hurt</em>. Most of what you write needs
+                                no markup at all.
+                            </p>
+                        </header>
+
+                        <!-- Core idea -->
+                        <section id="core" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>01</span>
+                                The core idea
+                            </h2>
+                            <p class={s.prose}>
+                                Two things decide what every line is:
+                                <strong> where it sits</strong> and
+                                <strong> its letter case</strong>. A blank line
+                                ends a speech, so the parser knows whether it is
+                                waiting for a new character or reading the lines
+                                under one.
+                            </p>
+                            <ul class={s.bullets}>
+                                <li>
+                                    Right after a blank line, an
+                                    <span class={s.code}>UPPERCASE</span> line is
+                                    a <strong>character cue</strong>.
+                                </li>
+                                <li>
+                                    Inside a speech, an
+                                    <span class={s.code}>UPPERCASE</span> line is
+                                    <strong> lyrics</strong> (sung); a
+                                    normal-case line is <strong>dialogue</strong>
+                                    (spoken).
+                                </li>
+                                <li>
+                                    A line in normal case at the start of a block
+                                    is a <strong>stage direction</strong>.
+                                </li>
+                            </ul>
+                            <p class={s.prose}>
+                                So <span class={s.code}>ANNA</span> on its own
+                                line after a blank line is a cue, while
+                                <span class={s.code}>PASS ME THE SUGAR</span>
+                                inside a speech is a lyric — identical casing, the
+                                position decides. To shout, use bold
+                                (<span class={s.code}>**Stop!**</span>); caps
+                                inside a speech always mean singing.
+                            </p>
+                        </section>
+
+                        <!-- Frontmatter -->
+                        <section id="frontmatter" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>02</span>
+                                Frontmatter
+                            </h2>
+                            <p class={s.prose}>
+                                Optional. If the file opens with a
+                                <span class={s.code}>---</span> line, everything
+                                up to the next <span class={s.code}>---</span> is
+                                a YAML metadata block. The script begins after it.
+                            </p>
+                            <div class={s.exampleSolo}>
+                                <p class={s.exampleLabel}>You type</p>
+                                <pre class={s.codeBlock}>{exFrontmatter}</pre>
+                            </div>
+                        </section>
+
+                        <!-- Acts & scenes -->
+                        <section id="structure" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>03</span>
+                                Acts & scenes
+                            </h2>
+                            <p class={s.prose}>
+                                Markdown-style headings:
+                                <span class={s.code}>#</span> is an act,
+                                <span class={s.code}>##</span> is a scene. The
+                                text after the marker is free — location, time,
+                                anything; the editor handles numbering.
+                            </p>
+                            <p class={s.prose}>
+                                Scenes are the base unit; acts are an optional
+                                layer above. If a script has no
+                                <span class={s.code}>##</span> anywhere, a
+                                <span class={s.code}>#</span> is treated as a
+                                scene — so a one-act play just uses
+                                <span class={s.code}>#</span> per scene.
+                            </p>
+                            <div class={s.example}>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>You type</p>
+                                    <pre class={s.codeBlock}>{exStructure}</pre>
+                                </div>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>Renders as</p>
+                                    <div class={s.rendered}>
+                                        <p class={s.rAct}>Act One</p>
+                                        <p class={s.rScene}>1 — A garden. Dusk.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Cues & dialogue -->
+                        <section id="dialogue" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>04</span>
+                                Character cues & dialogue
+                            </h2>
+                            <p class={s.prose}>
+                                A character cue is the name in caps on its own
+                                line; the lines below it, up to the next blank
+                                line, are that character's speech.
+                            </p>
+                            <div class={s.example}>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>You type</p>
+                                    <pre class={s.codeBlock}>{exDialogue}</pre>
+                                </div>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>Renders as</p>
+                                    <div class={s.rendered}>
+                                        <p class={s.rChar}>PETER</p>
+                                        <p class={s.rAside}>(from the doorway)</p>
+                                        <p class={s.rLine}>Sorry I'm late.</p>
+                                        <p class={s.rChar}>ANNA</p>
+                                        <p class={s.rLine}>It's fine. I was waiting.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class={s.prose}>
+                                For two characters speaking or singing the same
+                                words at once, join the names with
+                                <span class={s.code}>/</span> (spaces optional).
+                                The shared content follows once.
+                            </p>
+                            <div class={s.exampleSolo}>
+                                <p class={s.exampleLabel}>You type</p>
+                                <pre class={s.codeBlock}>{exUnison}</pre>
+                            </div>
+                            <p class={s.prose}>
+                                As a convenience the parser also accepts inline
+                                dialogue — <span class={s.code}>NAME: text</span>
+                                on one line — but the editor always writes it back
+                                out stacked, with the cue on its own line.
+                            </p>
+                            <div class={s.exampleSolo}>
+                                <p class={s.exampleLabel}>You type</p>
+                                <pre class={s.codeBlock}>{exInlineCue}</pre>
+                            </div>
+                        </section>
+
+                        <!-- Asides -->
+                        <section id="asides" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>05</span>
+                                Asides
+                            </h2>
+                            <p class={s.prose}>
+                                A short parenthetical delivery note inside a
+                                speech — <span class={s.code}>(quietly)</span>,
+                                <span class={s.code}>(to himself)</span>. It can
+                                sit on the name line, on its own line under the
+                                cue, or between lines, and may appear more than
+                                once in a speech.
+                            </p>
+                            <div class={s.example}>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>You type</p>
+                                    <pre class={s.codeBlock}>{exAside}</pre>
+                                </div>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>Renders as</p>
+                                    <div class={s.rendered}>
+                                        <p class={s.rChar}>ANNA</p>
+                                        <p class={s.rAside}>(quietly)</p>
+                                        <p class={s.rLine}>You shouldn't have come.</p>
+                                        <p class={s.rAside}>(she turns away)</p>
+                                        <p class={s.rLine}>Not tonight.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <p class={s.note}>
+                                A <span class={s.code}>(...)</span> line at the
+                                start of a block — not inside a speech — is a
+                                parenthetical stage direction instead. Position
+                                tells them apart.
+                            </p>
+                        </section>
+
+                        <!-- Lyrics -->
+                        <section id="lyrics" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>06</span>
+                                Lyrics
+                            </h2>
+                            <p class={s.prose}>
+                                Inside a speech, an uppercase line is sung. Set
+                                the section level with leading tabs: no tab is the
+                                A-section, one tab the B-section, two the
+                                C-section, and so on.
+                            </p>
+                            <div class={s.example}>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>You type</p>
+                                    <pre class={s.codeBlock}>{exLyrics}</pre>
+                                </div>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>Renders as</p>
+                                    <div class={s.rendered}>
+                                        <p class={s.rChar}>ANNA</p>
+                                        <p class={s.rLyric}>WHEN NIGHT FALLS AND THE LIGHTS GO DOWN</p>
+                                        <p class={clsx(s.rLyric, s.rLyricB)}>AND I'LL BE STANDING HERE</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Soft breaks -->
+                        <section id="soft-break" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>07</span>
+                                Soft breaks
+                            </h2>
+                            <p class={s.prose}>
+                                A real blank line ends a speech. For a breathing
+                                gap inside one — between verses of a song, or in a
+                                long spoken passage — use a
+                                <span class={s.code}>~</span> alone on its line.
+                                It adds the gap without starting a new character.
+                            </p>
+                            <div class={s.exampleSolo}>
+                                <p class={s.exampleLabel}>You type</p>
+                                <pre class={s.codeBlock}>{exSoftBreak}</pre>
+                            </div>
+                        </section>
+
+                        <!-- Stage directions -->
+                        <section id="stage-directions" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>08</span>
+                                Stage directions
+                            </h2>
+                            <p class={s.prose}>
+                                Any normal-case line at the start of a block is a
+                                stage direction. To mark the character
+                                <em> performing</em> the action, tag them with
+                                <span class={s.code}>@</span> — it is capitalised
+                                and linked to the cast. Only the actor is tagged,
+                                never the recipient, so it is always explicit.
+                            </p>
+                            <div class={s.example}>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>You type</p>
+                                    <pre class={s.codeBlock}>{exStageDir}</pre>
+                                </div>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>Renders as</p>
+                                    <div class={s.rendered}>
+                                        <p class={s.rDir}>
+                                            Anna stands at the window.
+                                            <span class={s.rTag}> PETER</span>
+                                            enters quietly from behind.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Structural cues -->
+                        <section id="cues" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>09</span>
+                                Structural cues
+                            </h2>
+                            <p class={s.prose}>
+                                A cue fires something with a duration — most often
+                                a song, but also an instrumental or a sound. Write
+                                it inline inside a stage direction:
+                                <span class={s.code}>@@cue N "title"</span> to fire
+                                it, <span class={s.code}>@@out N</span> to end it.
+                                The number ties the two together. With no
+                                <span class={s.code}>@@out</span>, the cue runs to
+                                the end of the scene.
+                            </p>
+                            <div class={s.example}>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>You type</p>
+                                    <pre class={s.codeBlock}>{exCue}</pre>
+                                </div>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>Renders as</p>
+                                    <div class={s.rendered}>
+                                        <p class={s.rDir}>
+                                            The lights slowly fade.
+                                            <span class={s.rCue}> ♪ 1 — When Night Falls</span>
+                                        </p>
+                                        <p class={s.rChar}>ANNA</p>
+                                        <p class={s.rLyric}>WHEN NIGHT FALLS AND THE LIGHTS GO DOWN</p>
+                                        <p class={s.rDir}>
+                                            The lights come up.
+                                            <span class={s.rCue}> ♪ out 1</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Quoting -->
+                        <section id="quoting" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>10</span>
+                                The quoting rule
+                            </h2>
+                            <p class={s.prose}>
+                                Double quotes delimit a literal name or title
+                                anywhere a space, period, or special character
+                                (<span class={s.code}>@</span>,
+                                <span class={s.code}>/</span>) would otherwise
+                                break parsing. A bare <span class={s.code}>@Name</span>
+                                tags only one word — once a name has a space or a
+                                dot, quote it.
+                            </p>
+                            <div class={s.exampleSolo}>
+                                <p class={s.exampleLabel}>You type</p>
+                                <pre class={s.codeBlock}>{exQuoting}</pre>
+                            </div>
+                        </section>
+
+                        <!-- Inline marks -->
+                        <section id="inline" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>11</span>
+                                Inline marks & notes
+                            </h2>
+                            <p class={s.prose}>
+                                Emphasis carries over from Fountain:
+                                <span class={s.code}>*italic*</span>,
+                                <span class={s.code}>**bold**</span>,
+                                <span class={s.code}>_underline_</span>. A note in
+                                <span class={s.code}>[[ double brackets ]]</span>
+                                is for you only — it never prints.
+                            </p>
+                            <div class={s.example}>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>You type</p>
+                                    <pre class={s.codeBlock}>{exMarks}</pre>
+                                </div>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>Renders as</p>
+                                    <div class={s.rendered}>
+                                        <p class={s.rLine}>
+                                            <em>italic</em>
+                                            <strong> bold</strong>
+                                            <u> underline</u>
+                                        </p>
+                                        <p class={s.rNote}>(the note is not printed)</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Full example -->
+                        <section id="example" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>12</span>
+                                A full example
+                            </h2>
+                            <p class={s.prose}>
+                                Everything together: frontmatter, an act and
+                                scene, a stage direction with a tagged character,
+                                spoken dialogue, a sung number bracketed by a cue,
+                                unison singing, and an author note.
+                            </p>
+                            <div class={s.example}>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>You type</p>
+                                    <pre class={s.codeBlock}>{exFull}</pre>
+                                </div>
+                                <div class={s.exampleCol}>
+                                    <p class={s.exampleLabel}>Renders as</p>
+                                    <div class={s.rendered}>
+                                        <p class={s.rAct}>Act One</p>
+                                        <p class={s.rScene}>1 — A garden. Dusk.</p>
+                                        <p class={s.rDir}>
+                                            Anna stands at the window.
+                                            <span class={s.rTag}> PETER</span>
+                                            enters quietly from behind.
+                                        </p>
+                                        <p class={s.rChar}>PETER</p>
+                                        <p class={s.rAside}>(from the doorway)</p>
+                                        <p class={s.rLine}>Sorry I'm late.</p>
+                                        <p class={s.rChar}>ANNA</p>
+                                        <p class={s.rLine}>It's fine. I was waiting.</p>
+                                        <p class={s.rDir}>
+                                            The lights slowly fade.
+                                            <span class={s.rCue}> ♪ 1 — When Night Falls</span>
+                                        </p>
+                                        <p class={s.rChar}>ANNA</p>
+                                        <p class={s.rLyric}>WHEN NIGHT FALLS AND THE LIGHTS GO DOWN</p>
+                                        <p class={clsx(s.rLyric, s.rLyricB)}>AND I'LL BE STANDING HERE</p>
+                                        <p class={s.rChar}>PETER</p>
+                                        <p class={s.rLyric}>SO I'LL COME CLOSER</p>
+                                        <p class={s.rChar}>ANNA / PETER</p>
+                                        <p class={s.rLyric}>AND THE WORLD WILL STOP</p>
+                                        <p class={s.rDir}>
+                                            The lights come up.
+                                            <span class={s.rCue}> ♪ out 1</span>
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- Marker reference -->
+                        <section id="reference" class={s.section}>
+                            <h2 class={s.sectionTitle}>
+                                <span class={s.sectionNum}>13</span>
+                                Marker reference
+                            </h2>
+                            <p class={s.prose}>
+                                The complete set of explicit markers. Everything
+                                else is implicit, by position and letter case.
+                            </p>
+                            <div class={s.refTable}>
+                                {
+                                    markers.map((m) => (
+                                        <div class={s.refRow}>
+                                            <code class={s.refMarker}>{m[0]}</code>
+                                            <span class={s.refDesc}>{m[1]}</span>
+                                        </div>
+                                    ))
+                                }
+                            </div>
+                        </section>
+
+                    </div>
+                </div>
+            </main>
+
+            <!-- Footer -->
+            <footer class={s.footer}>
+                <div class={s.footerInner}>
+                    <div class={s.footerLeft}>
+                        <span class={s.footerLogo}>Stagistic</span>
+                        <span class={s.footerTagline}>Building tools for theatre.</span>
+                    </div>
+                    <div class={s.footerRight}>
+                        <a href="/" class={s.footerLink}>Home</a>
+                        <a href="mailto:hello@stagistic.app" class={s.footerLink}>
+                            hello@stagistic.app
+                        </a>
+                    </div>
+                </div>
+            </footer>
+
+        </div>
+    </body>
+</html>
