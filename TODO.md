@@ -34,9 +34,12 @@ packages' tests too (db pulled in all of script's). Added scoped configs
 - [x] `utils/number.ts`, `object.ts`, `string.ts`, `platform.ts`
 - [x] added `test` script + scoped `vite.config.ts` (registered in eslint.config.js)
 
-## Tier 4 — `editor` browser tests
-- [ ] `characterTagInput` interactions
-- [ ] pagination split
+## Tier 4 — `editor` browser tests ✅
+- [x] `characterTagInput` — confirm-on-select (linked pill) + Escape closes overlay
+      (existing overlay test already covered typing/filtering/blur persistence)
+- [x] pagination split — divider appears when content overflows a page
+      (asserts `[data-pagination-divider]`, not the always-present trailing spacer;
+      verified via mutation that a single page produces none)
 
 ## Later — React (`ui`, `app-routes`, `app-core`)
 - [ ] needs per-package browser config + setup
