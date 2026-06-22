@@ -21,7 +21,7 @@ remains in `characterRefsInScriptDocument.ts` and `scriptDocumentHelpers.ts` (au
 - [x] `repo/persist/minimalOrderKeys.ts` — fractional-indexing ordering
 - [x] `repo/documentCodec.ts` — encode/decode
 - [x] `repo/characterHandlers/normalization.ts`
-- [ ] character read/write queries (pglite integration via createTestDb)
+- [x] character read/write queries (pglite integration via createTestDb)
 
 Fixed per-package isolation: `db`/`script` lacked a `vite.config.ts`, so
 `vp test` followed workspace symlinks in node_modules and ran dependency
