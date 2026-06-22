@@ -29,9 +29,10 @@ packages' tests too (db pulled in all of script's). Added scoped configs
 (`include: ['src/**/*.test...']`) mirroring editor; registered both in
 `eslint.config.js` allowDefaultProject. Now db runs 10 files, not 24.
 
-## Tier 3 — `shared` (quick wins, wire up `test` script)
-- [ ] `ids/nodeId.ts`, `ids/uuidv7.ts`
-- [ ] `utils/number.ts`, `object.ts`, `string.ts`, `platform.ts`
+## Tier 3 — `shared` (quick wins, wire up `test` script) ✅
+- [x] `ids/nodeId.ts`, `ids/uuidv7.ts`
+- [x] `utils/number.ts`, `object.ts`, `string.ts`, `platform.ts`
+- [x] added `test` script + scoped `vite.config.ts` (registered in eslint.config.js)
 
 ## Tier 4 — `editor` browser tests
 - [ ] `characterTagInput` interactions

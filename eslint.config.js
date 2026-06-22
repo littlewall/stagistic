@@ -46,6 +46,7 @@ export default [
                         'packages/db/vite.config.ts',
                         'packages/editor/vite.config.ts',
                         'packages/script/vite.config.ts',
+                        'packages/shared/vite.config.ts',
                         'packages/editor/vitest.browser.config.ts',
                         'packages/editor/vitest.browser.debug.config.ts',
                     ],
