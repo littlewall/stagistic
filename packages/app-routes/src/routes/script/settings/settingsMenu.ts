@@ -98,7 +98,7 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
             {
                 kind: 'expandable',
                 id: SCRIPT_SETTINGS_EXPANDABLE_ELEMENTS,
-                label: 'Elements settings',
+                label: 'Blocks settings',
                 subItems: SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => ({
                     id: item.id,
                     label: item.label,

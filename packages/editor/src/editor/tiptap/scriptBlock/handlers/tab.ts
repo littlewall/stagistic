@@ -1,9 +1,10 @@
 import type {Editor} from '@tiptap/react';
 
 import {
-    SCRIPT_BLOCK_NODE_NAMES,
     getActiveScriptBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../../scriptCore';
+import {setBlockTypeWithSelection} from '../commands';
 import {
     type BlockContext,
     createBlockContext,
@@ -11,16 +12,24 @@ import {
 import {type HandlerMap} from './types';
 
 /*
- * Tab and Shift-Tab are reserved for indentation only (block type changes
- * live on Cmd/Ctrl+digit shortcuts and Alt+Enter cycling). Indentation is
- * stored as literal leading tabs; one tab renders 0.5" (tab-size: 5 with
- * the monospace font).
+ * Stage directions and lyrics use literal leading tabs for indentation; one
+ * tab renders 0.5" (tab-size: 5 with the monospace font).
  */
-const MAX_ACTION_INDENT = 3;
-const MAX_LYRICS_INDENT = 4;
+const MAX_ACTION_INDENT = 2;
+const MAX_LYRICS_INDENT = 3;
+
+const hasAnyTabModifier = (event: KeyboardEvent) => event.altKey || event.ctrlKey || event.metaKey;
+
+const isLyricsShortcut = (event: KeyboardEvent) => {
+    return event.altKey && !event.shiftKey && !event.metaKey;
+};
 
 const createIndentTabHandler = (maxIndent: number) => (context: BlockContext, event: KeyboardEvent) => {
     event.preventDefault();
+
+    if (hasAnyTabModifier(event)) {
+        return true;
+    }
 
     const text = context.block.node.textContent ?? '';
     let indentCount = 0;
@@ -52,9 +61,33 @@ const createIndentTabHandler = (maxIndent: number) => (context: BlockContext, ev
     return true;
 };
 
+const toggleLyricsTarget = (blockType: BlockContext['block']['blockType']) => {
+    if (blockType === 'dialogue') {
+        return 'lyrics';
+    }
+
+    if (blockType === 'lyrics') {
+        return 'dialogue';
+    }
+
+    return null;
+};
+
+const handleLyricsShortcut = (context: BlockContext, event: KeyboardEvent) => {
+    event.preventDefault();
+
+    const nextBlockType = toggleLyricsTarget(context.block.blockType);
+
+    if (!nextBlockType) {
+        return true;
+    }
+
+    return setBlockTypeWithSelection(context.editor, context.block, nextBlockType);
+};
+
 const tabHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => boolean> = {
-    ["stageDirection"]: createIndentTabHandler(MAX_ACTION_INDENT),
-    ["lyrics"]: createIndentTabHandler(MAX_LYRICS_INDENT),
+    ['stageDirection']: createIndentTabHandler(MAX_ACTION_INDENT),
+    ['lyrics']: createIndentTabHandler(MAX_LYRICS_INDENT),
 };
 
 export const handleTab = (editor: Editor, event: KeyboardEvent) => {
@@ -65,6 +98,11 @@ export const handleTab = (editor: Editor, event: KeyboardEvent) => {
     }
 
     const context = createBlockContext(editor, block);
+
+    if ((block.blockType === 'dialogue' || block.blockType === 'lyrics') && isLyricsShortcut(event)) {
+        return handleLyricsShortcut(context, event);
+    }
+
     const handler = tabHandlers[block.blockType];
 
     if (handler) {

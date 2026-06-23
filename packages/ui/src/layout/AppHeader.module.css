@@ -161,8 +161,7 @@
     flex-direction: column;
     gap: var(--space-md);
     min-width: calc(240px * var(--size-scale));
-    padding: 0;
-    padding-bottom: var(--space-md);
+    padding: var(--space-md) 0;
     font-size: var(--font-size-md);
 
     &:focus-visible {

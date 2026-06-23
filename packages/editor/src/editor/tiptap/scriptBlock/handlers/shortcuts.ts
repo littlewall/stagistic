@@ -6,19 +6,34 @@ import type {Editor} from '@tiptap/react';
 
 import {BLOCK_NODE_TYPES} from '../../../blocks/script';
 import {
-    SCRIPT_BLOCK_NODE_NAMES,
     getActiveScriptBlockFromState,
     normalizeBlockNodeType,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../../scriptCore';
 import {updateBlockType} from '../commands';
 import {type BlockShortcutMap} from './types';
 
-const hasShortcutModifier = (event: KeyboardEvent) => {
-    if (isApplePlatform()) {
-        return event.metaKey && !event.ctrlKey;
+const hasBlockShortcutModifier = (event: KeyboardEvent) => {
+    if (!event.altKey || event.shiftKey || event.metaKey) {
+        return false;
     }
 
-    return event.ctrlKey && !event.metaKey;
+    if (isApplePlatform()) {
+        return !event.ctrlKey;
+    }
+
+    return true;
+};
+
+const getShortcutFromEvent = (event: KeyboardEvent) => {
+    if (isBlockShortcut(event.key)) {
+        return event.key;
+    }
+
+    const digitMatch = (/^Digit([0-9])$/).exec(event.code);
+    const digit = digitMatch?.[1];
+
+    return isBlockShortcut(digit) ? digit : null;
 };
 
 const findBlockTypeByShortcut = (
@@ -53,11 +68,11 @@ export const handleBlockTypeCycle = (editor: Editor, event: KeyboardEvent) => {
     event.preventDefault();
 
     // Acts are structural; they are managed via act commands, not cycling.
-    if (block.blockType === "act") {
+    if (block.blockType === 'act') {
         return true;
     }
 
-    const cycleTypes = BLOCK_NODE_TYPES.filter(type => type !== "act");
+    const cycleTypes = BLOCK_NODE_TYPES.filter(type => type !== 'act');
     const currentIndex = cycleTypes.findIndex(type => type === block.blockType);
     const direction = event.shiftKey ? -1 : 1;
     const nextIndex = currentIndex === -1
@@ -73,11 +88,13 @@ export const handleBlockShortcut = (
     event: KeyboardEvent,
     blockShortcuts?: BlockShortcutMap,
 ) => {
-    if (event.altKey || event.shiftKey || !hasShortcutModifier(event)) {
+    if (!hasBlockShortcutModifier(event)) {
         return false;
     }
 
-    if (!isBlockShortcut(event.key)) {
+    const shortcut = getShortcutFromEvent(event);
+
+    if (!shortcut) {
         return false;
     }
 
@@ -87,7 +104,7 @@ export const handleBlockShortcut = (
         return false;
     }
 
-    const nextType = findBlockTypeByShortcut(event.key, blockShortcuts);
+    const nextType = findBlockTypeByShortcut(shortcut, blockShortcuts);
 
     if (!nextType) {
         return false;
@@ -95,7 +112,7 @@ export const handleBlockShortcut = (
 
     event.preventDefault();
 
-    if (block.blockType === "act" && nextType !== "act") {
+    if (block.blockType === 'act' && nextType !== 'act') {
         return true;
     }
 
