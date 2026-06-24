@@ -1,0 +1,30 @@
+.pill {
+    cursor: pointer;
+    user-select: none;
+    display: inline-flex;
+    gap: .25em;
+    align-items: baseline;
+    padding: 0 .4em;
+    font-size: .85em;
+    line-height: 1.4;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: .4em;
+}
+
+.open {
+    background: rgba(125 145 255 / 16%);
+}
+
+.hit {
+    background: rgba(255 180 90 / 18%);
+    border: 1px dashed rgba(255 180 90 / 50%);
+}
+
+.out {
+    background: rgba(125 145 255 / 9%);
+}
+
+.label {
+    font-variant-numeric: tabular-nums;
+}

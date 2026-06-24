@@ -22,6 +22,7 @@ import {
     CharacterRefSyncExtension,
     CharacterTagInputExtension,
     createPaginationExtension,
+    CueCommandsExtension,
     EditorRuntimeExtension,
     EmptyEnterChooserExtension,
     PlaceholderExtension,
@@ -30,6 +31,8 @@ import {
 import {DocumentWithSettings} from './tiptap/extensions/DocumentExtension';
 import {CharacterTagMark} from './tiptap/marks';
 import {
+    CueOutNode,
+    CueStartNode,
     SCRIPT_BLOCK_NODE_NAMES,
     ScriptBlockNodes,
 } from './tiptap/nodes';
@@ -144,6 +147,9 @@ export const useEditorExtensions = ({
             characterTagMark,
             characterTagInputExtension,
             ...ScriptBlockNodes,
+            CueStartNode,
+            CueOutNode,
+            CueCommandsExtension,
             PlaceholderExtension,
             emptyEnterChooserExtension,
             scriptBehaviorExtension,

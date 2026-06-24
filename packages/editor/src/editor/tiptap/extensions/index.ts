@@ -28,6 +28,7 @@ export {
     CharacterTagInputExtension,
     getCharacterTagComposeFromState,
 } from './CharacterTagInputExtension';
+export {CueCommandsExtension} from './cue/CueCommandsExtension';
 export {
     EMPTY_ENTER_CHOOSER_WRITER_TYPES,
     EmptyEnterChooserExtension,
