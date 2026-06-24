@@ -75,6 +75,16 @@ export interface ExtractedBlockRow {
     characterRefByKey: Record<string, string>,
 }
 
+export interface ExtractedCueRow {
+    id: string,
+    cueNumber: number,
+    mode: string,
+    title: string,
+    kind: string | null,
+    startBlockId: string,
+    endBlockId: string | null,
+}
+
 export interface ExtractedImportTitlePageField {
     fieldKey: string,
     fieldValue: string,
@@ -91,6 +101,7 @@ export interface ExtractScriptBlocksResult {
     blocks: ExtractedBlockRow[],
     acts: ExtractedActRow[],
     scenes: ExtractedSceneRow[],
+    cues: ExtractedCueRow[],
     importMetadata: ExtractedImportMetadata,
     warnings: string[],
 }

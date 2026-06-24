@@ -6,6 +6,7 @@ import {
     scriptBlocks,
     scriptConfigBlocks,
     scriptConfigs,
+    scriptCues,
     scriptLocations,
     scripts,
     scriptScenes,
@@ -27,3 +28,4 @@ export type ScriptAct = InferSelectModel<typeof scriptActs>;
 export type ScriptTitlePageField = InferSelectModel<typeof scriptTitlePageFields>;
 export type ScriptLocation = InferSelectModel<typeof scriptLocations>;
 export type ScriptBlockCharacterRef = InferSelectModel<typeof scriptBlockCharacterRefs>;
+export type ScriptCue = InferSelectModel<typeof scriptCues>;

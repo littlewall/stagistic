@@ -10,9 +10,11 @@ import {
 import {
     bulkDeleteScriptActs,
     bulkDeleteScriptBlocks,
+    bulkDeleteScriptCues,
     bulkDeleteScriptScenes,
     bulkReplaceScriptBlockCharacterRefs,
     bulkUpsertScriptActs,
+    bulkUpsertScriptCues,
     bulkUpsertScriptScenes,
     type DbClient,
     generateBlockOrderKeys,
@@ -20,7 +22,7 @@ import {
     writeFinalBlockOrders,
 } from '../../queries';
 import {
-    scriptActs, scriptBlocks, scriptScenes,
+    scriptActs, scriptBlocks, scriptCues, scriptScenes,
 } from '../../schema';
 import {diffExtractedBlocks} from './diffExtractedBlocks';
 import {computeOrderKeyAssignments} from './minimalOrderKeys';
@@ -73,11 +75,13 @@ const toCharacterRefRows = (block: ExtractedBlockRow, knownCharacterIds: Set<str
 export const createDocumentPersister = (scriptId: string) => {
     let lastSavedBlocks = new Map<string, ExtractedBlockRow>();
     let baselineOrderKeys = new Map<string, string>();
+    let lastSavedCueSignature = '';
     let queue: Promise<void> = Promise.resolve();
 
     const setBaseline = (blocks: ExtractedBlockRow[], orderKeys?: Map<string, string>) => {
         lastSavedBlocks = new Map(blocks.map(block => [block.blockId, block]));
         baselineOrderKeys = orderKeys ?? new Map<string, string>();
+        lastSavedCueSignature = '';
     };
 
     const persistImpl = async (
@@ -87,14 +91,50 @@ export const createDocumentPersister = (scriptId: string) => {
     ): Promise<void> => {
         const now = Date.now();
         const extracted = extractScriptBlocks(scriptId, document);
+
+        const cueSignature = extracted.cues
+            .map(cue => `${cue.id}:${cue.cueNumber}:${cue.mode}:${cue.title}:${cue.kind ?? ''}:${cue.startBlockId}:${cue.endBlockId ?? ''}`)
+            .join('|');
+        const reconcileCues = async (tx: DbClient) => {
+            if (cueSignature === lastSavedCueSignature) {
+                return;
+            }
+
+            const existingCues = await tx
+                .select({id: scriptCues.id})
+                .from(scriptCues)
+                .where(eq(scriptCues.scriptId, scriptId));
+            const nextCueIds = new Set(extracted.cues.map(cue => cue.id));
+
+            await bulkUpsertScriptCues(tx, extracted.cues.map(cue => ({
+                id: cue.id,
+                scriptId,
+                cueNumber: cue.cueNumber,
+                mode: cue.mode,
+                title: cue.title,
+                kind: cue.kind,
+                startBlockId: cue.startBlockId,
+                endBlockId: cue.endBlockId,
+                createdAt: now,
+                updatedAt: now,
+            })));
+            await bulkDeleteScriptCues(tx, existingCues.filter(row => !nextCueIds.has(row.id)).map(row => row.id));
+        };
+
         const diff = diffExtractedBlocks(Array.from(lastSavedBlocks.values()), extracted.blocks);
 
         if (diff.inserted.length === 0 && diff.updated.length === 0 && diff.deletedIds.length === 0) {
-            if (afterPersist) {
+            if (afterPersist || cueSignature !== lastSavedCueSignature) {
                 await db.transaction(async tx => {
-                    await afterPersist(tx);
+                    await reconcileCues(tx);
+
+                    if (afterPersist) {
+                        await afterPersist(tx);
+                    }
                 });
             }
+
+            lastSavedCueSignature = cueSignature;
 
             return;
         }
@@ -312,6 +352,7 @@ export const createDocumentPersister = (scriptId: string) => {
 
         await db.transaction(async tx => {
             await writeDelta(tx);
+            await reconcileCues(tx);
 
             if (afterPersist) {
                 await afterPersist(tx);
@@ -319,6 +360,7 @@ export const createDocumentPersister = (scriptId: string) => {
         });
 
         setBaseline(extracted.blocks, orderKeyById);
+        lastSavedCueSignature = cueSignature;
     };
 
     const persist = (

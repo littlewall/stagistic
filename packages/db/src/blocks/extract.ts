@@ -1,5 +1,8 @@
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
 import {
+    collectCueAtoms,
+    type CueBlockInput,
+    deriveCues,
     getScriptBlockTypeFromNodeType,
     isScriptBlockNodeType,
 } from '@stagistic/script';
@@ -14,6 +17,7 @@ import {
 import type {
     ExtractedActRow,
     ExtractedBlockRow,
+    ExtractedCueRow,
     ExtractedSceneRow,
     ExtractScriptBlocksResult,
 } from './types';
@@ -114,6 +118,7 @@ export const extractScriptBlocks = (
             blocks: [],
             acts: [],
             scenes: [],
+            cues: [],
             importMetadata,
             warnings,
         };
@@ -122,6 +127,7 @@ export const extractScriptBlocks = (
     const blocks: ExtractedBlockRow[] = [];
     const acts: ExtractedActRow[] = [];
     const scenes: ExtractedSceneRow[] = [];
+    const cueBlockInputs: CueBlockInput[] = [];
     const usedBlockIds = new Set<string>();
     const actByHeadingBlockId = new Map<string, ExtractedActRow>();
     const sceneByHeadingBlockId = new Map<string, ExtractedSceneRow>();
@@ -197,16 +203,33 @@ export const extractScriptBlocks = (
                 characterRefByKey,
             });
 
+            cueBlockInputs.push({
+                blockId,
+                blockType,
+                cueAtoms: collectCueAtoms(node),
+            });
+
             orderNo += 1;
         });
     };
 
     walk(sourceDocument.content);
 
+    const cues: ExtractedCueRow[] = deriveCues(cueBlockInputs).map(cue => ({
+        id: cue.cueId,
+        cueNumber: cue.number,
+        mode: cue.mode,
+        title: cue.title,
+        kind: cue.kind,
+        startBlockId: cue.startBlockId,
+        endBlockId: cue.endBlockId,
+    }));
+
     return {
         blocks,
         acts,
         scenes,
+        cues,
         importMetadata,
         warnings,
     };

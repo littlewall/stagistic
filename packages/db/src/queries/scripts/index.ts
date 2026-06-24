@@ -4,6 +4,7 @@ export * from './blocks';
 export * from './characters';
 export * from './config';
 export * from './crud';
+export * from './cues';
 export * from './locations';
 export * from './outbox';
 export * from './scenes';
