@@ -1,5 +1,6 @@
 export * from './blocks';
 export * from './characters';
+export * from './cues';
 export * from './document';
 export * from './indexing';
 export * from './settings';
