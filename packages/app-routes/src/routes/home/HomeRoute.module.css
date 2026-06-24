@@ -14,8 +14,18 @@
     padding: var(--space-5xl);
     transition: transform 220ms cubic-bezier(.16, 1, .3, 1), border-color 150ms ease, box-shadow 150ms ease;
 
-    &:hover {
-        transform: translateY(-2px);
+    @media (hover: hover) and (pointer: fine) {
+        &:hover {
+            transform: translateY(-2px);
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: border-color 150ms ease, box-shadow 150ms ease;
+
+        &:hover {
+            transform: none;
+        }
     }
 }
 

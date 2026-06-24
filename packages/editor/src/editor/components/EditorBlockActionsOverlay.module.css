@@ -139,6 +139,7 @@
     color: color-mix(in oklch, var(--color-text-muted) 64%, var(--color-border));
     visibility: hidden;
     opacity: 0;
+    transition: opacity .15s ease;
 
     &::before {
         content: '';

@@ -27,10 +27,18 @@
         transition: width 200ms ease;
 
         &.indeterminate {
+            will-change: transform, opacity;
             position: absolute;
-            left: -35%;
+            left: 0;
+            transform: translateX(-100%);
             width: 35%;
-            animation: progress-wave 1.2s ease-in-out infinite;
+            animation: progress-wave 1.2s linear infinite;
+
+            @media (prefers-reduced-motion: reduce) {
+                transform: translateX(0);
+                opacity: .75;
+                animation: none;
+            }
         }
     }
 
@@ -45,14 +53,14 @@
 
 @keyframes progress-wave {
     0% {
-        left: -35%;
+        transform: translateX(-100%);
         opacity: .5;
     }
     50% {
         opacity: 1;
     }
     100% {
-        left: 100%;
+        transform: translateX(285.714%);
         opacity: .5;
     }
 }
