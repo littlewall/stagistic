@@ -8,6 +8,12 @@ import {
     isCharacterBlockType,
 } from '../characters/documentHelpers';
 import {
+    collectCueAtoms,
+    type CueBlockInput,
+    deriveCues,
+    type DerivedCue,
+} from '../cues';
+import {
     getScriptBlockId,
     getScriptBlockNodeType,
     isScriptBlockNode,
@@ -37,6 +43,7 @@ export interface IndexedScriptBlock {
 
 export interface ScriptBlockIndexSnapshot {
     blocks: IndexedScriptBlock[],
+    cues: DerivedCue[],
 }
 
 export interface BuildScriptBlockIndexResult {
@@ -114,12 +121,14 @@ export const buildScriptBlockIndex = (
         return {
             snapshot: {
                 blocks: [],
+                cues: [],
             },
             blockCount: 0,
         };
     }
 
     const blocks: IndexedScriptBlock[] = [];
+    const cueBlockInputs: CueBlockInput[] = [];
     let orderNo = 0;
     let currentActBlockId: string | null = null;
     let currentSceneBlockId: string | null = null;
@@ -165,6 +174,12 @@ export const buildScriptBlockIndex = (
                 characterRefs: toCharacterRefs(node, blockType, textContent, attrs),
             });
 
+            cueBlockInputs.push({
+                blockId,
+                blockType,
+                cueAtoms: collectCueAtoms(node),
+            });
+
             orderNo += 1;
         });
     };
@@ -174,6 +189,7 @@ export const buildScriptBlockIndex = (
     return {
         snapshot: {
             blocks,
+            cues: deriveCues(cueBlockInputs),
         },
         blockCount: blocks.length,
     };

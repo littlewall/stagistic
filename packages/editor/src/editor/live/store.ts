@@ -17,6 +17,7 @@ type SelectorListener<TSelected> = {
 
 const EMPTY_INDEX: EditorIndexSnapshot = {
     blocks: [],
+    cues: [],
 };
 
 export const EMPTY_STRUCTURE: EditorLiveStructureSnapshot = {

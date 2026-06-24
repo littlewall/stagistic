@@ -20,7 +20,7 @@ const doc = (content: ScriptNode[]): ScriptDocument => ({type: 'doc', content});
 
 describe('buildScriptBlockIndex', () => {
     it('returns an empty snapshot for nullish or empty documents', () => {
-        const empty = {snapshot: {blocks: []}, blockCount: 0};
+        const empty = {snapshot: {blocks: [], cues: []}, blockCount: 0};
 
         expect(buildScriptBlockIndex(null)).toEqual(empty);
         expect(buildScriptBlockIndex(undefined)).toEqual(empty);
@@ -127,5 +127,30 @@ describe('buildScriptBlockIndex', () => {
         ]));
 
         expect(snapshot.blocks[0].characterRefs).toEqual([{key: 'ANNA', characterId: 'char-anna'}]);
+    });
+
+    it('projects cues from stage-direction cue atoms', () => {
+        const {snapshot} = buildScriptBlockIndex(doc([
+            {
+                type: 'stageDirection',
+                attrs: {id: 'b1'},
+                content: [
+                    {type: 'text', text: 'Lights fade.'}, {
+                        type: 'cueStart',
+                        attrs: {
+                            cueId: 'c1', mode: 'open', title: 'Night', kind: null,
+                        },
+                    },
+                ],
+            }, {
+                type: 'stageDirection', attrs: {id: 'b2'}, content: [{type: 'cueOut'}],
+            },
+        ]));
+
+        expect(snapshot.cues).toEqual([
+            {
+                cueId: 'c1', number: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2',
+            },
+        ]);
     });
 });
