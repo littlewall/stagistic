@@ -5,15 +5,15 @@
 /* ---- Nav (dark, consistent with home) ----------------------------------- */
 .nav {
     --color-text: var(--color-stage-nav-text);
-    --color-text-muted: oklch(.92 .012 51 / .5);
-    --color-border: oklch(.92 .012 51 / .1);
+    --color-text-muted: oklch(from var(--color-stage-nav-text) l c h / .54);
+    --color-border: var(--color-stage-border);
 
     position: sticky;
     z-index: 10;
     top: 0;
     background: var(--color-stage-nav-bg);
     backdrop-filter: blur(12px);
-    border-bottom: 1px solid oklch(.92 .012 51 / .07);
+    border-bottom: 1px solid oklch(from var(--color-stage-nav-text) l c h / .08);
 }
 
 .navInner {
@@ -45,8 +45,8 @@
     padding: .125rem .375rem;
     font-family: var(--font-mono);
     font-size: .6875rem;
-    color: oklch(.92 .012 51 / .5);
-    border: 1px solid oklch(.92 .012 51 / .1);
+    color: var(--color-text-muted);
+    border: 1px solid var(--color-border);
     border-radius: .25rem;
 }
 
@@ -58,7 +58,7 @@
 
 .navLink {
     font-size: .8125rem;
-    color: oklch(.92 .012 51 / .5);
+    color: var(--color-text-muted);
     text-decoration: none;
     transition: color .15s ease;
 
@@ -215,22 +215,22 @@
     max-width: 64ch;
     margin-top: 1rem;
     padding-left: 1.1rem;
+}
 
-    & li {
-        margin-bottom: .5rem;
-        font-size: .9375rem;
-        line-height: 1.7;
-        color: var(--color-text-muted);
+.bullets li {
+    margin-bottom: .5rem;
+    font-size: .9375rem;
+    line-height: 1.7;
+    color: var(--color-text-muted);
+}
 
-        &::marker {
-            color: var(--color-border-strong);
-        }
+.bullets li::marker {
+    color: var(--color-border-strong);
+}
 
-        & strong {
-            font-weight: 600;
-            color: var(--color-text);
-        }
-    }
+.bullets strong {
+    font-weight: 600;
+    color: var(--color-text);
 }
 
 .note {
@@ -371,7 +371,7 @@
 .rNote {
     margin-top: .5rem;
     font-style: italic;
-    color: oklch(.465 .014 51 / .55);
+    color: color-mix(in oklch, var(--color-text-muted) 72%, transparent);
 }
 
 /* ---- Marker reference --------------------------------------------------- */
@@ -432,7 +432,7 @@
 
 .footerTagline {
     font-size: .8125rem;
-    color: oklch(.465 .014 51 / .5);
+    color: color-mix(in oklch, var(--color-text-muted) 72%, transparent);
 }
 
 .footerRight {

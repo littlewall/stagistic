@@ -93,7 +93,7 @@ export const ScriptEditorRoute = () => {
         currentScriptId,
         repository: scriptRepository,
     });
-    const shortcutPrefix = isApplePlatform() ? 'Cmd' : 'Ctrl';
+    const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
 
     const {
         isSettingsOpen,

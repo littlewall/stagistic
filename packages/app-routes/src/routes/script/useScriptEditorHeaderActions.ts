@@ -18,20 +18,10 @@ export const useScriptEditorHeaderActions = ({
     const {openNewScript} = useGlobalModals();
 
     const handleMenuAction = useCallback((actionId: string) => {
-        if (actionId === 'scripts') {
-            void navigate('/script/list');
-
-            return;
-        }
-
         if (actionId === 'settings' && currentScript) {
             openSettingsModal();
 
             return;
-        }
-
-        if (actionId === 'new-script') {
-            openNewScript();
         }
     }, [
         currentScript,

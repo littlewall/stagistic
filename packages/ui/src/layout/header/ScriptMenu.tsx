@@ -44,10 +44,6 @@ export const ScriptMenu = ({
                     }}
                 >
                     <MenuSection className={styles.menuSection}>
-                        <MenuItem className={styles.currentScriptBlock} isDisabled>
-                            <span className={styles.label}>Current script</span>
-                            <span className={styles.name}>{script.name}</span>
-                        </MenuItem>
                         <MenuItem className={styles.menuItem} id="settings">
                             Script settings
                         </MenuItem>
@@ -72,17 +68,6 @@ export const ScriptMenu = ({
                             </MenuSection>
                         </>
                     ) : null}
-                    <Separator className={styles.menuSeparator} />
-                    <MenuSection className={styles.menuSection}>
-                        <MenuItem className={styles.menuItem} id="scripts">
-                            <FolderIcon className={styles.menuIcon} aria-hidden="true" />
-                            All scripts
-                        </MenuItem>
-                        <MenuItem className={styles.menuItem} id="new-script">
-                            <PlusIcon className={styles.menuIcon} aria-hidden="true" />
-                            New script
-                        </MenuItem>
-                    </MenuSection>
                 </Menu>
             </Popover>
         </MenuTrigger>

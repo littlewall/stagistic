@@ -76,10 +76,17 @@
     --control-height-md: calc(32px * var(--size-scale));
     --control-height-lg: calc(40px * var(--size-scale));
 
+    /* ── Brand palette (OKLCH) ─────────────────────────────────── */
+    --palette-lavender: oklch(.6251 .0699 277.48); /* #7d84b2 */
+    --palette-copper: oklch(.6622 .1479 62.72); /* #d17b0f */
+    --palette-paper: oklch(.9591 .0074 80.72); /* #f4f1ec */
+    --palette-umber: oklch(.2557 .0382 56.44); /* #311e10 */
+    --palette-aubergine: oklch(.333 .0203 13.4); /* #403233 */
+
     /* ── Base palette (OKLCH) ──────────────────────────────────── */
     --base-neutral: oklch(.461 .0257 51);
-    --base-amber: oklch(.762 .0979 53.1);
-    --base-blue: oklch(.636 .0999 239);
+    --base-amber: var(--palette-copper);
+    --base-blue: var(--palette-lavender);
     --base-green: oklch(.52 .0971 165.2);
     --base-yellow: oklch(.769 .1006 56.1);
     --base-red: oklch(.554 .1273 14.8);
@@ -117,12 +124,13 @@
     --color-bg: oklch(from var(--base-neutral) var(--L-bg) calc(c * var(--C-bg)) h);
     --color-surface: oklch(from var(--base-neutral) var(--L-surface) calc(c * var(--C-bg)) h);
     --color-surface-raised: oklch(from var(--base-neutral) var(--L-highlight) calc(c * var(--C-bg)) h);
-    --color-surface-accent: oklch(from var(--base-neutral) var(--L-accent) calc(c * var(--C-block)) h);
+    --color-surface-accent: color-mix(in oklch, var(--base-blue) 16%, var(--color-surface));
 
     /* Text */
     --color-text: oklch(from var(--base-neutral) var(--L-text) calc(c * var(--C-block)) h);
     --color-text-muted: oklch(from var(--base-neutral) var(--L-text-muted) calc(c * var(--C-block)) h);
     --color-text-link: oklch(from var(--base-blue) .58 c h);
+    --color-accent: var(--base-amber);
 
     /* Borders */
     --color-border-subtle: oklch(from var(--base-neutral) .93 calc(c * var(--C-block)) h);
@@ -226,6 +234,7 @@
     --L-progress-end: .755;
 
     /* dark mode overrides */
+    --color-surface-accent: color-mix(in oklch, var(--base-blue) 26%, var(--color-surface));
     --color-border-subtle: oklch(from var(--base-neutral) .28 calc(c * var(--C-block)) h);
     --color-border-strong: oklch(from var(--base-neutral) .52 calc(c * var(--C-block)) h);
     --color-text-link: oklch(from var(--base-blue) .68 c h);
