@@ -22,7 +22,7 @@ export const CueStartNode = Node.create({
     group: 'inline',
     inline: true,
     atom: true,
-    selectable: true,
+    selectable: false,
     draggable: false,
 
     addAttributes() {

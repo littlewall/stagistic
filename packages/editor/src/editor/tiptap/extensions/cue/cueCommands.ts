@@ -34,22 +34,23 @@ export const resolveCueTargetBlock = (
     return block && block.blockType === STAGE_DIRECTION_NODE_TYPE ? block : null;
 };
 
-const firstCueStartPos = (block: ActiveScriptBlock): number | null => {
-    let result: number | null = null;
-    let offset = 0;
+/**
+ * True when the block already holds a cue atom. A stage direction carries at
+ * most one cue marker — a start OR an out, never both (§4.1).
+ */
+export const blockHasCueAtom = (block: ActiveScriptBlock): boolean => {
+    let found = false;
 
     block.node.forEach(child => {
-        if (result === null && child.type.name === CUE_START_NODE_NAME) {
-            result = block.from + offset;
+        if (child.type.name === CUE_START_NODE_NAME || child.type.name === CUE_OUT_NODE_NAME) {
+            found = true;
         }
-
-        offset += child.nodeSize;
     });
 
-    return result;
+    return found;
 };
 
-/** A new cue start always appends at the very end of the block (§4.1, §5.3). */
+/** The single cue atom always sits at the end of the block (§4.1, §5.3). */
 export const buildInsertCueStart = (
     state: EditorState,
     block: ActiveScriptBlock,
@@ -66,13 +67,11 @@ export const buildInsertCueStart = (
     return state.tr.insert(block.to, node);
 };
 
-/** An out goes before any trailing cue start (close-then-open ordering, §4.1). */
 export const buildInsertCueOut = (
     state: EditorState,
     block: ActiveScriptBlock,
 ): Transaction => {
     const node = state.schema.nodes[CUE_OUT_NODE_NAME].create();
-    const insertAt = firstCueStartPos(block) ?? block.to;
 
-    return state.tr.insert(insertAt, node);
+    return state.tr.insert(block.to, node);
 };

@@ -2,6 +2,7 @@ import type {CueMode} from '@stagistic/script';
 import {Extension} from '@tiptap/core';
 
 import {
+    blockHasCueAtom,
     buildInsertCueOut,
     buildInsertCueStart,
     resolveCueTargetBlock,
@@ -24,7 +25,7 @@ export const CueCommandsExtension = Extension.create({
             insertCueStart: (blockId, title, mode = 'open') => ({state, dispatch}) => {
                 const block = resolveCueTargetBlock(state, blockId);
 
-                if (!block) {
+                if (!block || blockHasCueAtom(block)) {
                     return false;
                 }
 
@@ -37,7 +38,7 @@ export const CueCommandsExtension = Extension.create({
             insertCueOut: blockId => ({state, dispatch}) => {
                 const block = resolveCueTargetBlock(state, blockId);
 
-                if (!block) {
+                if (!block || blockHasCueAtom(block)) {
                     return false;
                 }
 

@@ -33,14 +33,25 @@ const createDocument = (): ScriptDocument => ({
     type: 'doc',
     content: [
         {
-            type: 'stageDirection', attrs: {id: 'stage-direction-1'}, content: [],
+            type: 'stageDirection', attrs: {id: 'sd-1'}, content: [],
+        },
+    ],
+});
+
+const createTwoBlockDocument = (): ScriptDocument => ({
+    type: 'doc',
+    content: [
+        {
+            type: 'stageDirection', attrs: {id: 'sd-1'}, content: [],
+        }, {
+            type: 'stageDirection', attrs: {id: 'sd-2'}, content: [],
         },
     ],
 });
 
 const mountedRoots: Root[] = [];
 
-const renderEditor = () => {
+const renderEditor = (initialValue: ScriptDocument = createDocument()) => {
     const host = document.createElement('div');
 
     host.style.width = '1024px';
@@ -50,7 +61,7 @@ const renderEditor = () => {
     const root = createRoot(host);
 
     root.render(
-        <ScriptEditor document={{initialValue: createDocument()}} layout={{autoFocus: true}}>
+        <ScriptEditor document={{initialValue}} layout={{autoFocus: true}}>
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
             </ScriptEditor.LeftSidebar>
@@ -92,27 +103,41 @@ describe('cue pill node views', () => {
 
         const editor = await getEditor();
 
-        editor.commands.insertCueStart('stage-direction-1', 'Night');
+        expect(editor.commands.insertCueStart('sd-1', 'Night')).toBe(true);
 
         const pill = await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
 
         expect(pill.textContent).toContain('Night');
     });
 
-    it('inserts an out before a trailing start (close-then-open order)', async () => {
+    it('allows at most one cue atom per stage direction block', async () => {
         renderEditor();
 
         const editor = await getEditor();
 
-        editor.commands.insertCueStart('stage-direction-1', 'Night');
+        expect(editor.commands.insertCueStart('sd-1', 'Night')).toBe(true);
         await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
 
-        editor.commands.insertCueOut('stage-direction-1');
-        await poll(() => document.querySelector('[data-cue-pill="out"]'), 'cue out pill');
+        expect(editor.commands.insertCueStart('sd-1', 'Second')).toBe(false);
+        expect(editor.commands.insertCueOut('sd-1')).toBe(false);
 
-        const block = document.querySelector('[data-id="stage-direction-1"]');
-        const pills = Array.from(block?.querySelectorAll('[data-cue-pill]') ?? []);
+        const block = document.querySelector('[data-id="sd-1"]');
 
-        expect(pills.map(pill => pill.getAttribute('data-cue-pill'))).toEqual(['out', 'start']);
+        expect(block?.querySelectorAll('[data-cue-pill]').length).toBe(1);
+    });
+
+    it('inserts an out into its own empty block', async () => {
+        renderEditor(createTwoBlockDocument());
+
+        const editor = await getEditor();
+
+        expect(editor.commands.insertCueOut('sd-2')).toBe(true);
+
+        const out = await poll(
+            () => document.querySelector('[data-id="sd-2"] [data-cue-pill="out"]'),
+            'cue out pill',
+        );
+
+        expect(out.getAttribute('data-cue-pill')).toBe('out');
     });
 });

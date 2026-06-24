@@ -170,16 +170,17 @@ in the sentence) and `@@out` carries **no text** to mark. So cues are
 
 ### 4.1 End-of-block invariant
 
-Within a `stageDirection` block, all cue atoms are **contiguous at the
-very end** of the block; prose always precedes them. Enforcement:
+Within a `stageDirection` block, the single cue atom sits at the **very
+end** of the block; prose always precedes it. Enforcement:
 
-- A cue atom is only ever inserted at the end of the block's inline
+- A stage direction carries **at most one cue atom** — a start OR an out,
+  never both. (To close one cue and open another at the same beat, the
+  writer uses two stage directions.) Insertion is rejected when the block
+  already holds a cue atom.
+- The cue atom is only ever inserted at the end of the block's inline
   content (§5.3).
-- Prose insertion (typing, paste) that would land at or after a trailing
-  cue atom is redirected to **before** the first trailing cue atom.
-- When a block carries both an out and a start (e.g. close cue 1, then
-  open cue 2 in one direction), the trailing order is **out before
-  start** (close-then-open).
+- Prose insertion (typing, paste) that would land after the trailing cue
+  atom is redirected to **before** it.
 
 Because cue atoms are non-text nodes, a block that contains any cue is
 serialized to `content_json` (the existing rule: `text_content` alone
@@ -238,9 +239,9 @@ Stage-direction items:
 ### 5.3 Insertion policy (structural-cue-specific)
 
 Regardless of where in the block the `@@` was typed or the right-click
-happened, the cue atom is appended at the **end of the block**, respecting
-§4.1 ordering. This snap-to-end is the structural cue's policy; future
-position-bound cues (§3.2) will not use it.
+happened, the cue atom is appended at the **end of the block**, per the
+§4.1 one-per-block rule. This snap-to-end is the structural cue's policy;
+future position-bound cues (§3.2) will not use it.
 
 ## 6. Editing and deletion
 
@@ -358,6 +359,9 @@ This spec defines the **target**, not the parser/serializer code.
 - **Kind inference (future exporter):** a cue is a song if lyrics fall
   within its interval, otherwise generic — derivation only, never written
   into the `@@cue` line.
+- **One cue atom per block (editor constraint, §4.1):** a source line with
+  more than one `@@` marker is split on import into one stage direction per
+  marker; export emits each cue/out on its own stage-direction line.
 
 ## 9. Architecture / file layout
 
