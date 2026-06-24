@@ -256,11 +256,13 @@ same mechanism that already powers the live sidebar projections
 the cue model from that live projection (exact read-plumbing is a plan
 detail).
 
-The pairing algorithm (§3.1) is specified once but, like the rest of the
-index, exists in **two builders that must agree**: `buildScriptBlockIndex`
-over the `ScriptNode` JSON model (`packages/script`) and
-`buildIndexSnapshotFromPmDoc` over the live PM document (`packages/editor`).
-Shared test vectors keep them in parity (§10).
+The pairing algorithm (§3.1) is implemented **once** as a pure helper in
+`@stagistic/script` (`deriveCues`), consumed by every derivation site so
+they cannot drift: `buildScriptBlockIndex` (JSON, live sidebar) and
+`buildIndexSnapshotFromPmDoc` (PM doc, live editor) for the UI, and
+`extractScriptBlocks` (`@stagistic/db`) for persistence (§7.1). Each site
+only extracts cue atoms from its own representation, then calls
+`deriveCues`; shared test vectors cover the helper (§10).
 
 ### 6.2 Pill context menu
 
@@ -318,20 +320,23 @@ change, run `pnpm --filter @stagistic/db db:compile-migrations` (or
 
 ### 7.1 Derivation and sync
 
-- `ScriptBlockIndexSnapshot` gains a `cues: IndexedCue[]` field, produced
-  by the §3.1 pass during the existing single document walk (which already
-  tracks the current scene block). It is added to **both** snapshot
-  builders (§6.1). `IndexedCue = { cueId, number, mode, title, kind,
-  startBlockId, endBlockId }`.
-- A `ScriptCuesRepository` is added to
-  `packages/db/src/scriptRepository.ts` with queries under
-  `packages/db/src/queries/scripts/`, and the existing path that persists
-  the relational projection to the DB (the same one writing `script_blocks`
-  / `script_block_character_refs`) is extended to upsert / delete
-  `script_cues` for the script. Pinning that exact persistence call site is
-  a plan task. (`CharacterRefSyncExtension` is **not** that path — it only
-  resolves character refs inside the document node attrs.)
-- Orphan outs (§3.1) never produce a row.
+- **Live UI:** `ScriptBlockIndexSnapshot` gains a `cues: IndexedCue[]`
+  field, produced via `deriveCues` (§6.1) in both `buildScriptBlockIndex`
+  and `buildIndexSnapshotFromPmDoc`. `IndexedCue = { cueId, number, mode,
+  title, kind, startBlockId, endBlockId }`.
+- **Persistence:** the DB projection is built by a *separate* pipeline —
+  `extractScriptBlocks` (`packages/db/src/blocks/extract.ts`) feeds the diff
+  in `createDocumentPersister`
+  (`packages/db/src/repo/persist/persistDocumentDelta.ts`), which already
+  reconciles `script_blocks` / `script_scenes` / `script_acts` /
+  `script_block_character_refs`. `extractScriptBlocks` gains a
+  `cues: ExtractedCueRow[]` (via `deriveCues`), and the persister gains a
+  scene/act-style upsert+delete reconciliation of `script_cues` through a
+  new `ScriptCuesRepository` (`packages/db/src/scriptRepository.ts`, queries
+  in `packages/db/src/queries/scripts/cues.ts`). (`CharacterRefSyncExtension`
+  is **not** a DB path — it only resolves refs inside the document.)
+- Orphan outs (§3.1) never produce a row; a cue's stable `cueId` node attr
+  is its `script_cues.id`.
 
 ## 8. Serialization contract (target for the import/export spec)
 
@@ -359,9 +364,9 @@ This spec defines the **target**, not the parser/serializer code.
 Mirrors `characterTagInput` deliberately.
 
 **`packages/script/src/`** (domain, JSON model):
-- Cue node-name and attr constants; helpers to collect cue atoms from a
-  node and the §3.1 pairing (`buildCueModel` / equivalent), beside
-  `characters/characterTagMarks.ts`.
+- `cues/` — node-name and attr constants, `collectCueAtoms(blockNode)`, and
+  the §3.1 pairing helper `deriveCues(orderedBlocks)`, beside
+  `characters/`.
 - `indexing/scriptBlockIndex.ts`: the `cues` snapshot field (§7.1).
 
 **`packages/editor/src/editor/`**:
@@ -380,8 +385,10 @@ Mirrors `characterTagInput` deliberately.
   `characterSuggestions` pattern) and the generic `BlockContextMenu`.
 
 **`packages/db/src/`**:
-- `schema.ts` (+ `dbSchema`), `scriptRepository.ts`, `queries/scripts/`,
-  and the generated migration.
+- `schema.ts` (+ `dbSchema`) and the generated migration; `blocks/extract.ts`
+  (+ `blocks/types.ts`) for `ExtractedCueRow` / `cues`;
+  `repo/persist/persistDocumentDelta.ts` for `script_cues` reconciliation;
+  `queries/scripts/cues.ts` + `scriptRepository.ts` for the repository.
 
 ## 10. Key technical risks
 
@@ -395,9 +402,11 @@ Mirrors `characterTagInput` deliberately.
 - **End-of-block invariant enforcement (§4.1)** — redirecting prose
   insertion to before trailing cue atoms, and keeping out-before-start
   order, across typing, paste, and Enter/Backspace at block edges.
-- **JSON/PM parity (§6.1)** — the pairing algorithm runs in two snapshot
-  builders (`buildScriptBlockIndex` over JSON, `buildIndexSnapshotFromPmDoc`
-  over the PM doc); they must agree. Cover with shared test vectors.
+- **Derivation parity (§6.1)** — three sites extract cue atoms
+  (`buildScriptBlockIndex`, `buildIndexSnapshotFromPmDoc`,
+  `extractScriptBlocks`) but share the single `deriveCues` helper, so only
+  the mechanical atom-extraction can drift. Cover `deriveCues` and each
+  extractor with shared test vectors.
 
 ## 11. What this enables / downstream
 
