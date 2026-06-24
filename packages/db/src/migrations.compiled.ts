@@ -28,5 +28,9 @@ export const compiledMigrations = [
     {
         "id": "0006_drop_column_group",
         "sql": "ALTER TABLE \"script_blocks\" DROP COLUMN IF EXISTS \"column_group_id\";\nALTER TABLE \"script_blocks\" DROP COLUMN IF EXISTS \"column_index\";\n"
+    },
+    {
+        "id": "0007_add_script_cues",
+        "sql": "CREATE TABLE \"script_cues\" (\n\t\"id\" text PRIMARY KEY NOT NULL,\n\t\"script_id\" text NOT NULL,\n\t\"cue_number\" integer NOT NULL,\n\t\"mode\" text DEFAULT 'open' NOT NULL,\n\t\"title\" text DEFAULT '' NOT NULL,\n\t\"kind\" text,\n\t\"start_block_id\" text NOT NULL,\n\t\"end_block_id\" text,\n\t\"created_at\" bigint NOT NULL,\n\t\"updated_at\" bigint NOT NULL\n);\n--> statement-breakpoint\nALTER TABLE \"script_cues\" ADD CONSTRAINT \"script_cues_script_id_scripts_id_fk\" FOREIGN KEY (\"script_id\") REFERENCES \"public\".\"scripts\"(\"id\") ON DELETE cascade ON UPDATE no action;\n--> statement-breakpoint\nCREATE INDEX \"script_cues_script_id_idx\" ON \"script_cues\" USING btree (\"script_id\");\n"
     }
 ] as const;

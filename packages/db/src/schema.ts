@@ -249,6 +249,27 @@ export const scriptBlockCharacterRefs = pgTable(
     }),
 );
 
+export const scriptCues = pgTable(
+    'script_cues',
+    {
+        id: text('id').primaryKey(),
+        scriptId: text('script_id')
+            .notNull()
+            .references(() => scripts.id, {onDelete: 'cascade'}),
+        cueNumber: integer('cue_number').notNull(),
+        mode: text('mode').notNull().default('open'),
+        title: text('title').notNull().default(''),
+        kind: text('kind'),
+        startBlockId: text('start_block_id').notNull(),
+        endBlockId: text('end_block_id'),
+        createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+        updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+    },
+    table => ({
+        scriptIdIdx: index('script_cues_script_id_idx').on(table.scriptId),
+    }),
+);
+
 export const dbSchema = {
     scripts,
     syncOutbox,
@@ -262,4 +283,5 @@ export const dbSchema = {
     scriptActs,
     scriptBlocks,
     scriptBlockCharacterRefs,
+    scriptCues,
 };
