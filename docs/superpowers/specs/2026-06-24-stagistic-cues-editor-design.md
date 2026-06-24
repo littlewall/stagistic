@@ -15,10 +15,11 @@ feature.
 
 ## 1. Motivation
 
-The syntax (§10) defines a **structural cue**: a generic firing point for
-a song / instrumental / sound, written inline at the end of a stage
-direction as `@@cue N "title"`, optionally closed later by `@@out N`. The
-data model (§8) reserved how this would be stored but built nothing.
+The syntax (§10) defines a **structural cue**: a firing point for a
+**musical** number (a song or instrumental), written inline at the end of
+a stage direction as `@@cue N "title"`, optionally closed later by `@@out
+N`. The data model (§8) reserved how this would be stored but built
+nothing. (Sound / light / vfx cues are a separate, future kind — §3.2.)
 
 This spec designs the built feature: how a cue is represented in the
 editor document, how the writer enters and edits it, how it projects to a
@@ -33,10 +34,12 @@ precedent and the structural template for most of this work.
 **This spec covers (built now):**
 
 - The editor document representation of cue start and cue end (inline
-  atom nodes).
+  atom nodes), in two shapes: a durational **open** cue (default) and a
+  rare zero-duration **hit** (§3).
 - Two entry paths: an inline `@@` compose and a new generic right-click
   **block context menu** (scoped to the stage direction block, for now).
-- Editing and deletion UX (pill popover; no destructive keystroke).
+- Editing and deletion UX via a **pill context menu**; no destructive
+  keystroke.
 - The relational `script_cues` entity and its derivation/sync from the
   document.
 - The **serialization contract** (the target shape) for the downstream
@@ -48,8 +51,11 @@ precedent and the structural template for most of this work.
 - A rendered "ghost" implicit-end marker at its computed position (only
   the *rule* is specified here; only the *chip's open/closed state* is
   rendered).
-- Choosing the cue **kind** (song/instrumental/sound) in the UI — the
-  field is reserved, set by nothing now.
+- Choosing the cue **kind** (song / instrumental) in the UI — the field
+  is reserved, set by nothing now.
+- Sound / light / vfx cues — not this (musical) cue; they are separate
+  future cues (§3.2). A sound effect over music is written into the music
+  or becomes a future fx cue.
 - Drag-and-drop reordering of cues.
 - The import and export **code** (this spec defines only the target).
 - Visual polish of the cue pills.
@@ -57,46 +63,68 @@ precedent and the structural template for most of this work.
 **Principle (carried from the data-model spec):** build only what the
 editor can display and work with now; reserve — don't build — the rest.
 
-## 3. Domain rules — the structural cue is non-overlapping
+## 3. Domain rules — open cues, hits, and non-overlap
 
 This is the core of the model and the reason most of the UI simplifies.
+These are **musical** cues; they come in two shapes.
 
-- **At most one structural cue is open at any point in the document.**
-- A cue is opened by a `cueStart`. It is closed by **either**:
+**Open cue (default) — durational.**
+
+- **At most one open cue is in progress at any point in the document.**
+- An open cue is started by a `cueStart` (mode `open`). It is closed by
+  **either**:
   - an explicit `cueOut`, **or**
-  - implicitly, by the **next `cueStart` in the same scene**, **or**
+  - implicitly, by the **next open `cueStart` in the same scene**, **or**
   - implicitly, by the **end of its scene** (a cue never crosses a scene
     boundary).
-- Therefore cues **cannot overlap or nest**. Opening a new cue while one
-  is open implicitly ends the previous one at the new cue's position.
-- **Pairing is positional and recomputed on every edit — never stored by
-  id.** An `cueOut` closes *whatever cue is open at its position*, not a
-  cue it remembers. Moving a `cueStart` in front of an existing `cueOut`
-  re-pairs that out to the newly-open cue — the whole model is
+- Therefore open cues **cannot overlap or nest as intervals**. Starting a
+  new open cue while one is in progress implicitly ends the previous one at
+  the new cue's position.
+
+**Hit cue — zero duration (rare).**
+
+- A `cueStart` with mode `hit` is a **point**: its end is its start. It has
+  **no `cueOut`** and **no implicit end**.
+- A hit is not an interval, so it **does not** open a durational interval
+  and **does not** close or interrupt an open cue — a hit may fire *within*
+  an open cue (e.g. a musical stinger during a song). Non-overlap is about
+  durational intervals; a point trivially doesn't overlap. (Sound effects
+  over music are not this — §3.2.)
+
+**Pairing (both shapes).**
+
+- **Positional and recomputed on every edit — never stored by id.** A
+  `cueOut` closes *whatever open cue is in progress at its position*, not a
+  cue it remembers. Moving an open `cueStart` in front of an existing
+  `cueOut` re-pairs that out to the newly-open cue — the whole model is
   recomputed, not patched.
-- An `cueOut` with no open cue at its position (e.g. after a scene
+- A `cueOut` with no open cue in progress at its position (after a scene
   boundary, or after an explicit out already closed the cue) is an
   **orphan**: ignored by the projection and cleaned up by the editor.
 
 ### 3.1 Pairing algorithm (single deterministic pass)
 
-Walk the document in order. Maintain `openCue` (none, or the current open
-cue) and a running `number`.
+Walk the document in order. Maintain `openCue` (none, or the open cue in
+progress) and a running `number`.
 
-1. On a **scene** block: set `openCue = none` (the previous cue's implicit
-   end is the end of the scene just left).
-2. On a **`cueStart`**: `number += 1`; emit a cue
-   `{ cueId, number, title, kind, startBlockId = current block, endBlockId
-   = null }`; set `openCue` to it. (If a cue was already open, it is left
-   with `endBlockId = null` — i.e. an implicit end at this point.)
-3. On a **`cueOut`**: if `openCue` is set, set its `endBlockId = current
+1. On a **scene** block: set `openCue = none` (the previous open cue's
+   implicit end is the end of the scene just left).
+2. On a **`cueStart` with mode `open`**: `number += 1`; emit
+   `{ cueId, number, mode: 'open', title, kind, startBlockId = current
+   block, endBlockId = null }`; set `openCue` to it. (If a cue was already
+   open, it keeps `endBlockId = null` — an implicit end at this point.)
+3. On a **`cueStart` with mode `hit`**: `number += 1`; emit
+   `{ cueId, number, mode: 'hit', title, kind, startBlockId = current
+   block, endBlockId = current block }`; **do not touch `openCue`** (a hit
+   neither opens an interval nor closes the open cue).
+4. On a **`cueOut`**: if `openCue` is set, set its `endBlockId = current
    block` and `openCue = none`; otherwise the out is an **orphan** (drop
    it).
 
-`endBlockId = null` means "no explicit out — relies on the implicit end."
-The implicit end **position** is *not* stored; consumers (export, future
-duration UI) compute it as "start of the next cue in the same scene, else
-end of scene."
+For an open cue, `endBlockId = null` means "no explicit out — relies on the
+implicit end"; consumers (export, future duration UI) compute that position
+as "start of the next open cue in the same scene, else end of scene." For a
+hit, `endBlockId = startBlockId` (end = start).
 
 ### 3.2 Forward-compatibility seam (do not lock out production cues)
 
@@ -126,8 +154,8 @@ in the sentence) and `@@out` carries **no text** to mark. So cues are
 
 | Node | `nodeType` | Atom | Attrs |
 |---|---|---|---|
-| Cue start | `cueStart` | yes (inline, atomic) | `cueId` (stable), `title` (string), `kind` (string \| null, reserved) |
-| Cue end | `cueOut` | yes (inline, atomic) | *(none)* |
+| Cue start | `cueStart` | yes (inline, atomic) | `cueId` (stable), `mode` (`'open'` \| `'hit'`, default `'open'`), `title` (string), `kind` (string \| null, reserved) |
+| Cue end | `cueOut` | yes (inline, atomic) | *(none)* — only an open cue has one; a hit never does |
 
 - **Identity** lives on `cueStart` as `cueId` (generated like a block id).
   It is the `script_cues` row key and the handle for title editing. It is
@@ -137,6 +165,8 @@ in the sentence) and `@@out` carries **no text** to mark. So cues are
   recompute-on-move behavior correct by construction.
 - **Number `N`** is the derived ordinal from §3.1 — never stored on a
   node (numbering is data; "structure is a first-class feature").
+- **Mode** (`open` default, or `hit`) lives on `cueStart` and is toggled
+  from the pill menu (§6.2). A hit has no `cueOut` node.
 
 ### 4.1 End-of-block invariant
 
@@ -159,10 +189,10 @@ can't round-trip non-text nodes).
 
 Each atom renders via a NodeView as a small pill (visual polish deferred):
 
-- `cueStart`: shows `N` and the title; its state distinguishes **has an
-  explicit out** vs **relies on its implicit end**, with a tooltip on the
-  latter ("ends at end of scene / next cue"). State is read live from the
-  cue model plugin (§6.1), not stored.
+- `cueStart`: shows `N` and the title. Its state distinguishes three cases
+  — **hit** (a point), **open with an explicit out**, and **open relying on
+  its implicit end** — the last with a tooltip ("ends at end of scene /
+  next cue"). State is read live from the cue model (§6.1), not stored.
 - `cueOut`: shows it closes cue `N` (number read live).
 
 ## 5. Entry
@@ -180,8 +210,9 @@ Mirrors the existing single-`@` character-tag compose
   overlay pattern). It does **not** insert at the caret; on commit it
   appends to the end of the block (§5.3).
 - Two modes in one overlay:
-  - **Create:** type a title → commit inserts a `cueStart` (number
-    auto-assigned).
+  - **Create:** type a title → commit inserts a `cueStart` (open by
+    default, number auto-assigned; switch to a hit later via the pill
+    menu, §6.2).
   - **Close:** if a cue is open at the block end, the overlay offers a
     single "close cue N" action → inserts a `cueOut`. (At most one cue is
     ever open, so there is never a picker.)
@@ -215,8 +246,9 @@ position-bound cues (§3.2) will not use it.
 
 ### 6.1 Live cue model (rides the existing index snapshot)
 
-The cue model — numbers, each start's open/closed state, and the open cue
-at a position — is derived as a field of the **live index snapshot**, the
+The cue model — numbers, each start's shape (hit / open-with-explicit-out /
+open-implicit-end), and the open cue in progress at a position — is derived
+as a field of the **live index snapshot**, the
 same mechanism that already powers the live sidebar projections
 (`buildIndexSnapshotFromPmDoc` rebuilt by `BlockUiEventsExtension`, fed to
 `buildSidebarProjectionFromIndex`). No bespoke plugin is needed; the
@@ -230,28 +262,38 @@ over the `ScriptNode` JSON model (`packages/script`) and
 `buildIndexSnapshotFromPmDoc` over the live PM document (`packages/editor`).
 Shared test vectors keep them in parity (§10).
 
-### 6.2 Editing the title
+### 6.2 Pill context menu
 
-Clicking a `cueStart` pill opens a small popover with the title field
-(and the delete action below). Clicking a `cueOut` pill opens a popover
-showing "closes cue N" (and its delete action).
+Clicking a cue pill opens a context menu — the same generic context-menu
+component as the block menu (§5.2), anchored to the pill with its own items
+(*compose, don't sprawl*). All per-cue actions live here, labelled in
+English (the editor UI is English):
 
-### 6.3 Deletion (no destructive keystroke)
+- `cueStart`:
+  - **Edit title** — opens the title input.
+  - **Switch to hit** / **Switch to open** — toggles `mode` (§4).
+    Switching to a hit removes the cue's explicit `cueOut` if it has one (a
+    hit has no end node); switching back to open leaves it on its implicit
+    end.
+  - **Delete cue** — see §6.3.
+- `cueOut`:
+  - **Delete end** — see §6.3.
+
+### 6.3 Deletion (no destructive keystroke, no one-click delete)
 
 - **Backspace / Delete never removes a cue atom.** The handler intercepts
-  it next to a cue atom (at most selecting the pill). This prevents
-  accidental loss. (Deleting the *whole* stage-direction block still takes
-  its cues with it — that is a deliberate action, not a single slip.)
-- Deletion is only via the pill popover:
-  - `cueStart` → **"Delete cue"**: removes the start **and its paired
+  it next to a cue atom (at most selecting the pill). (Deleting the *whole*
+  stage-direction block still takes its cues with it — a deliberate action,
+  not a single slip.)
+- **Deletion is only via the pill context menu (§6.2)** — never a hover
+  close-button. The safeguard is the two deliberate steps (open the menu,
+  then click delete), so there is **no inline confirm**.
+  - `cueStart` → **Delete cue**: removes the start **and its paired
     explicit out** (if any), so the cue goes as a unit and no orphan is
-    left. The confirm notes "…also removes its end" when an out exists.
-  - `cueOut` → **"Delete end"**: removes only the out; the cue reverts to
-    its implicit end. Pairing recomputes.
-- **Confirm inline, no modal:** clicking "Delete" swaps the button to
-  "Really delete?"; a second click confirms, a click elsewhere cancels.
-
-Any deletion triggers the §3.1 recompute (live plugin and projection).
+    left.
+  - `cueOut` → **Delete end**: removes only the out; the open cue reverts
+    to its implicit end.
+- Any deletion triggers the §3.1 recompute (live snapshot and projection).
 
 ## 7. Relational projection — `script_cues`
 
@@ -263,10 +305,11 @@ A dedicated relational entity, mirroring `script_scenes` /
 | `id` | text PK | = `cueId` |
 | `scriptId` | text, not null → `scripts.id` cascade | |
 | `cueNumber` | integer, not null | derived ordinal (§3.1) |
+| `mode` | text, not null default `'open'` | `'open'` \| `'hit'` |
 | `title` | text, not null default `''` | |
 | `kind` | text, nullable | **reserved**; set by nothing now |
 | `startBlockId` | text, not null | block holding the `cueStart` |
-| `endBlockId` | text, nullable | block holding the explicit `cueOut`; null = implicit end |
+| `endBlockId` | text, nullable | open: explicit `cueOut` block, null = implicit end · hit: = `startBlockId` |
 | `createdAt` / `updatedAt` | bigint (mode `'number'`), not null | |
 
 Index on `scriptId` (mirroring the other entities). After the schema
@@ -278,7 +321,7 @@ change, run `pnpm --filter @stagistic/db db:compile-migrations` (or
 - `ScriptBlockIndexSnapshot` gains a `cues: IndexedCue[]` field, produced
   by the §3.1 pass during the existing single document walk (which already
   tracks the current scene block). It is added to **both** snapshot
-  builders (§6.1). `IndexedCue = { cueId, number, title, kind,
+  builders (§6.1). `IndexedCue = { cueId, number, mode, title, kind,
   startBlockId, endBlockId }`.
 - A `ScriptCuesRepository` is added to
   `packages/db/src/scriptRepository.ts` with queries under
@@ -294,11 +337,15 @@ change, run `pnpm --filter @stagistic/db db:compile-migrations` (or
 
 This spec defines the **target**, not the parser/serializer code.
 
-- `cueStart{ title }` ↔ `@@cue N "title"`, where `N` is the derived
-  ordinal. The title is wrapped in double quotes per the syntax quoting
-  rule (§12); `kind` is **not** serialized (the syntax has no kind token).
-- `cueOut` ↔ `@@out N`, where `N` is the number of the cue it closes
-  positionally.
+- **Open cue:** `cueStart{ title }` ↔ `@@cue N "title"`, where `N` is the
+  derived ordinal. The title is wrapped in double quotes per the syntax
+  quoting rule (§12); `kind` is **not** serialized (the syntax has no kind
+  token). Its `cueOut` ↔ `@@out N` (`N` = the number of the cue it closes
+  positionally); if absent, the open cue relies on its implicit end.
+- **Hit cue:** ↔ `@@cue N "title"` immediately followed by `@@out N`
+  (nothing between them — end = start), so it stays within the existing
+  syntax with no new marker. On import, an `@@cue` immediately followed by
+  its `@@out` (no content between) is read back as a hit.
 - **Implicit end rule (canonical):** a cue with no explicit out ends at
   the **start of the next cue in the same scene**, otherwise at the **end
   of its scene**. (Recorded here because the exporter and any future
