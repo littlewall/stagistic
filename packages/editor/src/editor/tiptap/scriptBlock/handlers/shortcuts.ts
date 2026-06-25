@@ -14,15 +14,25 @@ import {updateBlockType} from '../commands';
 import {type BlockShortcutMap} from './types';
 
 const hasBlockShortcutModifier = (event: KeyboardEvent) => {
-    if (!event.altKey || event.shiftKey || event.metaKey) {
+    if (event.shiftKey || event.metaKey) {
         return false;
     }
 
     if (isApplePlatform()) {
-        return !event.ctrlKey;
+        /*
+         * macOS: Control + digit. Option (⌥) is the character-composition
+         * modifier — ⌥2 is "@", ⌥3 is "#", etc. on many layouts — so it must
+         * NOT trigger block shortcuts, or those characters become untypable.
+         * Cmd+digit is reserved by browsers (tab switching); Ctrl+digit is free.
+         */
+        return event.ctrlKey && !event.altKey;
     }
 
-    return true;
+    /*
+     * Windows/Linux: Alt + digit. Exclude AltGr (reported as Ctrl+Alt), which
+     * is the character-composition modifier (AltGr+V = "@" on Czech layouts).
+     */
+    return event.altKey && !event.ctrlKey;
 };
 
 const getShortcutFromEvent = (event: KeyboardEvent) => {

@@ -115,45 +115,68 @@ const createEditor = (blockType: BlockNodeType, text: string) => {
 };
 
 describe('handleBlockShortcut', () => {
-    it('converts using Alt digit shortcuts', () => {
-        const {editor, getBlock} = createEditor('stageDirection', 'Sing this');
-        const event = createShortcutEvent('2', 'Digit2', {altKey: true});
-
-        expect(handleBlockShortcut(editor, event, blockShortcuts)).toBe(true);
-        expect(event.wasPrevented()).toBe(true);
-        expect(getBlock()?.type.name).toBe('dialogue');
-        expect(getBlock()?.attrs.blockType).toBe('dialogue');
-    });
-
-    it('uses physical digit code when Option changes the produced key', () => {
-        const {editor, getBlock} = createEditor('stageDirection', 'Sing this');
-        const event = createShortcutEvent('™', 'Digit2', {altKey: true});
-
-        expect(handleBlockShortcut(editor, event, blockShortcuts)).toBe(true);
-        expect(event.wasPrevented()).toBe(true);
-        expect(getBlock()?.type.name).toBe('dialogue');
-        expect(getBlock()?.attrs.blockType).toBe('dialogue');
-    });
-
-    it('supports Ctrl Alt digit as a Windows fallback', () => {
-        withNavigatorPlatform('Win32', () => {
-            const {editor, getBlock} = createEditor('dialogue', 'Sing this');
-            const event = createShortcutEvent('3', 'Digit3', {altKey: true, ctrlKey: true});
+    it('macOS: Ctrl+digit converts the block', () => {
+        withNavigatorPlatform('MacIntel', () => {
+            const {editor, getBlock} = createEditor('stageDirection', 'Sing this');
+            const event = createShortcutEvent('2', 'Digit2', {ctrlKey: true});
 
             expect(handleBlockShortcut(editor, event, blockShortcuts)).toBe(true);
             expect(event.wasPrevented()).toBe(true);
-            expect(getBlock()?.type.name).toBe('lyrics');
-            expect(getBlock()?.attrs.blockType).toBe('lyrics');
+            expect(getBlock()?.type.name).toBe('dialogue');
+            expect(getBlock()?.attrs.blockType).toBe('dialogue');
         });
     });
 
-    it('does not use browser-reserved Ctrl digit shortcuts', () => {
-        const {editor, getBlock} = createEditor('stageDirection', 'Sing this');
-        const event = createShortcutEvent('2', 'Digit2', {ctrlKey: true});
+    it('macOS: Option+digit is left for typing characters (⌥2 = @)', () => {
+        withNavigatorPlatform('MacIntel', () => {
+            const {editor, getBlock} = createEditor('stageDirection', 'Sing this');
+            const event = createShortcutEvent('@', 'Digit2', {altKey: true});
 
-        expect(handleBlockShortcut(editor, event, blockShortcuts)).toBe(false);
-        expect(event.wasPrevented()).toBe(false);
-        expect(getBlock()?.type.name).toBe('stageDirection');
-        expect(getBlock()?.attrs.blockType).toBe('stageDirection');
+            expect(handleBlockShortcut(editor, event, blockShortcuts)).toBe(false);
+            expect(event.wasPrevented()).toBe(false);
+            expect(getBlock()?.type.name).toBe('stageDirection');
+        });
+    });
+
+    it('macOS: Ctrl+digit converts even when other keys vary (physical code)', () => {
+        withNavigatorPlatform('MacIntel', () => {
+            const {editor, getBlock} = createEditor('stageDirection', 'Sing this');
+            const event = createShortcutEvent('@', 'Digit2', {ctrlKey: true});
+
+            expect(handleBlockShortcut(editor, event, blockShortcuts)).toBe(true);
+            expect(getBlock()?.attrs.blockType).toBe('dialogue');
+        });
+    });
+
+    it('Windows: Alt+digit converts the block', () => {
+        withNavigatorPlatform('Win32', () => {
+            const {editor, getBlock} = createEditor('stageDirection', 'Sing this');
+            const event = createShortcutEvent('2', 'Digit2', {altKey: true});
+
+            expect(handleBlockShortcut(editor, event, blockShortcuts)).toBe(true);
+            expect(event.wasPrevented()).toBe(true);
+            expect(getBlock()?.attrs.blockType).toBe('dialogue');
+        });
+    });
+
+    it('Windows: AltGr (Ctrl+Alt)+digit is left for typing characters', () => {
+        withNavigatorPlatform('Win32', () => {
+            const {editor, getBlock} = createEditor('stageDirection', 'Sing this');
+            const event = createShortcutEvent('@', 'Digit2', {altKey: true, ctrlKey: true});
+
+            expect(handleBlockShortcut(editor, event, blockShortcuts)).toBe(false);
+            expect(event.wasPrevented()).toBe(false);
+            expect(getBlock()?.type.name).toBe('stageDirection');
+        });
+    });
+
+    it('Cmd/Meta+digit never converts', () => {
+        withNavigatorPlatform('MacIntel', () => {
+            const {editor, getBlock} = createEditor('stageDirection', 'Sing this');
+            const event = createShortcutEvent('2', 'Digit2', {metaKey: true});
+
+            expect(handleBlockShortcut(editor, event, blockShortcuts)).toBe(false);
+            expect(getBlock()?.type.name).toBe('stageDirection');
+        });
     });
 });
