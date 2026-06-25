@@ -53,12 +53,10 @@ export const CueCommandsExtension = Extension.create({
 
     addKeyboardShortcuts() {
         /*
-         * TEMPORARY (Batch A manual verification only): the real entry points
-         * are the @@ compose and the block context menu (later batches). Remove
-         * these shortcuts once those land.
+         * TEMPORARY: cue creation now uses the `@@` compose; only the out
+         * shortcut remains until the block context menu (next batch) lands.
          */
         return {
-            'Mod-Alt-c': ({editor}) => editor.commands.insertCueStart(null, 'Test cue', 'open'),
             'Mod-Alt-o': ({editor}) => editor.commands.insertCueOut(null),
         };
     },

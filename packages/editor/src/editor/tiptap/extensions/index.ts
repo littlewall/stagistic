@@ -30,6 +30,12 @@ export {
 } from './CharacterTagInputExtension';
 export {CueCommandsExtension} from './cue/CueCommandsExtension';
 export {
+    cueComposeKey,
+    type CueComposeState,
+    CueInputExtension,
+    getCueComposeFromState,
+} from './CueInputExtension';
+export {
     EMPTY_ENTER_CHOOSER_WRITER_TYPES,
     EmptyEnterChooserExtension,
     getEmptyEnterChooserFromState,
