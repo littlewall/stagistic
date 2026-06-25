@@ -1,3 +1,11 @@
+/*
+ * Cue title compose is triggered by a single '#' inside a stage direction.
+ * (A deliberate divergence from the `@@cue` on-disk syntax: `@@` collided with
+ * the character-tag `@` and was fragile; `#` is a robust single-key trigger.
+ * Import/export maps `#`-cues to `@@cue` per the syntax — that is the next spec.)
+ */
+export const CUE_TRIGGER_CHARACTER = '#';
+
 export const CUE_COMPOSE_OPEN_META = 'cue-compose-open';
 export const CUE_COMPOSE_CLOSE_META = 'cue-compose-close';
 

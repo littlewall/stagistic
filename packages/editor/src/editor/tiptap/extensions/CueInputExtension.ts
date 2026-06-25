@@ -14,8 +14,10 @@ export {
 };
 
 /**
- * Cue title compose. Higher priority than CharacterTagInputExtension (1000)
- * so a second `@` is intercepted before the character-tag compose consumes it.
+ * Cue title compose, triggered by a single `#` inside a stage direction
+ * (see cueInput/constants.ts for why `#` rather than `@@`). Priority 1100 so
+ * its Enter/Escape handlers run before the block-split Enter handler while a
+ * title is being composed.
  */
 export const CueInputExtension = Extension.create({
     name: 'cueInput',

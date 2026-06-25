@@ -13,7 +13,6 @@ import {
 } from '@tiptap/pm/state';
 
 import type {ActiveScriptBlock} from '../../scriptCore';
-import type {CharacterTagComposeState} from '../CharacterTagInputExtension';
 import type {CueComposeState} from './composeState';
 import {
     CUE_COMPOSE_CLOSE_META,
@@ -22,18 +21,16 @@ import {
 } from './constants';
 
 /**
- * Escalation `@` → `@@`: drop the character-tag placeholder, move to the end
- * of the block, and anchor a cue-title compose there.
+ * `#` trigger: anchor a cue-title compose at the end of the stage-direction
+ * block (the '#' itself is swallowed, not inserted).
  */
 export const buildOpenCueCompose = (
     state: EditorState,
-    characterTagCompose: CharacterTagComposeState,
     block: ActiveScriptBlock,
 ): Transaction => {
-    const tr = state.tr.delete(characterTagCompose.from, characterTagCompose.to);
-    const blockEnd = tr.mapping.map(block.to);
+    const blockEnd = block.to;
+    const tr = state.tr.insertText(CUE_COMPOSE_PLACEHOLDER, blockEnd);
 
-    tr.insertText(CUE_COMPOSE_PLACEHOLDER, blockEnd);
     tr.setSelection(TextSelection.create(tr.doc, blockEnd + 1));
     tr.setMeta(CUE_COMPOSE_OPEN_META, blockEnd);
 

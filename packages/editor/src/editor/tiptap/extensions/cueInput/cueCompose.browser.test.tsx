@@ -106,15 +106,15 @@ afterEach(() => {
     document.body.innerHTML = '';
 });
 
-describe('cue @@ compose', () => {
-    it('turns @@ + title + Enter into a titled cue at the block end', async () => {
+describe('cue # compose', () => {
+    it('turns # + title + Enter into a titled cue at the block end', async () => {
         renderEditor();
 
         const editor = await getEditor();
         const el = page.elementLocator(await poll(() => document.querySelector('[contenteditable="true"]'), 'editor'));
 
         await el.click();
-        await userEvent.type(el, '@@Night');
+        await userEvent.type(el, '#Night');
         await userEvent.keyboard('{Enter}');
 
         const pill = await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
@@ -135,7 +135,7 @@ describe('cue @@ compose', () => {
         const el = page.elementLocator(await poll(() => document.querySelector('[contenteditable="true"]'), 'editor'));
 
         await el.click();
-        await userEvent.type(el, '@@Song');
+        await userEvent.type(el, '#Song');
         await userEvent.keyboard('{Escape}');
 
         await poll(() => document.querySelector('[data-cue-pill]') ? null : true, 'no cue pill');
@@ -152,7 +152,7 @@ describe('cue @@ compose', () => {
         const firstBlock = page.elementLocator(await poll(() => document.querySelector('[data-id="sd-1"]'), 'first block'));
 
         await firstBlock.click();
-        await userEvent.type(firstBlock, '@@Half');
+        await userEvent.type(firstBlock, '#Half');
 
         const secondBlock = page.elementLocator(await poll(() => document.querySelector('[data-id="sd-2"]'), 'second block'));
 

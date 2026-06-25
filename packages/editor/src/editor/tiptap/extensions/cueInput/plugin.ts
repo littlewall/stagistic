@@ -1,7 +1,6 @@
 import {Plugin} from '@tiptap/pm/state';
 
 import {getActiveScriptBlockFromState} from '../../scriptCore';
-import {getCharacterTagComposeFromState} from '../CharacterTagInputExtension';
 import {blockHasCueAtom} from '../cue/cueCommands';
 import {
     cueComposeKey,
@@ -12,6 +11,7 @@ import {
 import {
     CUE_COMPOSE_CLOSE_META,
     CUE_COMPOSE_OPEN_META,
+    CUE_TRIGGER_CHARACTER,
     STAGE_DIRECTION_NODE_TYPE,
 } from './constants';
 import {
@@ -77,26 +77,14 @@ export const createCueComposePlugin = (): Plugin<CueComposeRawState | null> => {
         },
         props: {
             handleTextInput: (view, _from, _to, text) => {
+                if (text !== CUE_TRIGGER_CHARACTER) {
+                    return false;
+                }
+
                 const {state} = view;
 
                 if (getCueComposeFromState(state)) {
-                    // Keep a literal '@' from re-triggering the character-tag compose mid-title.
-                    if (text === '@') {
-                        view.dispatch(state.tr.insertText('@'));
-
-                        return true;
-                    }
-
-                    return false;
-                }
-
-                if (text !== '@') {
-                    return false;
-                }
-
-                const characterTagCompose = getCharacterTagComposeFromState(state);
-
-                if (!characterTagCompose || characterTagCompose.query.length !== 0) {
+                    // Already composing a title — let '#' type into it literally.
                     return false;
                 }
 
@@ -106,7 +94,7 @@ export const createCueComposePlugin = (): Plugin<CueComposeRawState | null> => {
                     return false;
                 }
 
-                view.dispatch(buildOpenCueCompose(state, characterTagCompose, block));
+                view.dispatch(buildOpenCueCompose(state, block));
 
                 return true;
             },
