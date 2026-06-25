@@ -49,6 +49,17 @@ const createTwoBlockDocument = (): ScriptDocument => ({
     ],
 });
 
+const createDocumentWithText = (): ScriptDocument => ({
+    type: 'doc',
+    content: [
+        {
+            type: 'stageDirection',
+            attrs: {id: 'sd-1'},
+            content: [{type: 'text', text: 'Lights fade slowly across the empty stage'}],
+        },
+    ],
+});
+
 const mountedRoots: Root[] = [];
 
 const renderEditor = (initialValue: ScriptDocument = createDocument()) => {
@@ -139,5 +150,20 @@ describe('cue pill node views', () => {
         );
 
         expect(out.getAttribute('data-cue-pill')).toBe('out');
+    });
+
+    it('does not grow the stage-direction line height when a cue is inserted', async () => {
+        renderEditor(createDocumentWithText());
+
+        const editor = await getEditor();
+        const block = await poll(() => document.querySelector('[data-id="sd-1"]'), 'stage direction block');
+        const before = (block as HTMLElement).getBoundingClientRect().height;
+
+        expect(editor.commands.insertCueStart('sd-1', 'Night')).toBe(true);
+        await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+
+        const after = (block as HTMLElement).getBoundingClientRect().height;
+
+        expect(after).toBeCloseTo(before, 0);
     });
 });
