@@ -118,8 +118,9 @@ describe('cue # compose', () => {
         await userEvent.keyboard('{Enter}');
 
         const pill = await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+        const input = pill.querySelector<HTMLInputElement>('[data-cue-title-input="start"]');
 
-        expect(pill.textContent).toContain('Night');
+        expect(input?.value).toBe('Night');
 
         const stageDirection = getStageDirection(editor);
         const cueStart = stageDirection?.content?.find(node => node.type === 'cueStart');

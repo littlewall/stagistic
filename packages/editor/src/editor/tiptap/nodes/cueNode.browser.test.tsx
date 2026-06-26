@@ -1,6 +1,7 @@
 import '@stagistic/ui/styles/base.css';
 
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
+import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {
@@ -18,6 +19,9 @@ import ScriptEditor from '../../Editor';
 
 type CueTestWindow = Window & {__cueTestEditor?: Editor | null};
 
+const createStageDirection = (id: string, content: ScriptNode[] = []): ScriptNode => ({
+    type: 'stageDirection', attrs: {id}, content,
+});
 const EditorProbe = () => {
     const editor = useEditorInstance();
 
@@ -34,33 +38,17 @@ const EditorProbe = () => {
 
 const createDocument = (): ScriptDocument => ({
     type: 'doc',
-    content: [
-        {
-            type: 'stageDirection', attrs: {id: 'sd-1'}, content: [],
-        },
-    ],
+    content: [createStageDirection('sd-1')],
 });
 
 const createTwoBlockDocument = (): ScriptDocument => ({
     type: 'doc',
-    content: [
-        {
-            type: 'stageDirection', attrs: {id: 'sd-1'}, content: [],
-        }, {
-            type: 'stageDirection', attrs: {id: 'sd-2'}, content: [],
-        },
-    ],
+    content: [createStageDirection('sd-1'), createStageDirection('sd-2')],
 });
 
 const createDocumentWithText = (): ScriptDocument => ({
     type: 'doc',
-    content: [
-        {
-            type: 'stageDirection',
-            attrs: {id: 'sd-1'},
-            content: [{type: 'text', text: 'Lights fade slowly across the empty stage'}],
-        },
-    ],
+    content: [createStageDirection('sd-1', [{type: 'text', text: 'Lights fade slowly across the empty stage'}])],
 });
 
 const mountedRoots: Root[] = [];
@@ -120,8 +108,10 @@ describe('cue pill node views', () => {
         expect(editor.commands.insertCueStart('sd-1', 'Night')).toBe(true);
 
         const pill = await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+        const input = pill.querySelector('input');
 
-        expect(pill.textContent).toContain('Night');
+        expect(input).toBeInstanceOf(HTMLInputElement);
+        expect((input as HTMLInputElement).value).toBe('Night');
     });
 
     it('allows at most one cue atom per stage direction block', async () => {
@@ -179,7 +169,7 @@ describe('cue pill node views', () => {
 
     const clickMenuButton = async (label: string) => {
         const button = Array.from(document.querySelectorAll('[data-cue-menu] button'))
-            .find(candidate => candidate.textContent?.trim() === label);
+            .find(candidate => candidate.getAttribute('aria-label') === label);
 
         if (!button) {
             throw new Error(`Menu button "${label}" not found`);
@@ -188,7 +178,16 @@ describe('cue pill node views', () => {
         await page.elementLocator(button).click();
     };
 
-    it('opens the pill menu and switches open↔hit', async () => {
+    const clickMenuTrigger = async (type: 'start' | 'out') => {
+        const trigger = await poll(
+            () => document.querySelector(`[data-cue-menu-trigger="${type}"]`),
+            'cue menu trigger',
+        );
+
+        await page.elementLocator(trigger).click();
+    };
+
+    it('activates the pill first, then opens the menu from the trigger and switches open↔hit', async () => {
         renderEditor();
 
         const editor = await getEditor();
@@ -198,13 +197,16 @@ describe('cue pill node views', () => {
         const pill = await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
 
         await page.elementLocator(pill).click();
+        expect(document.querySelector('[data-cue-menu="start"]')).toBeNull();
+
+        await clickMenuTrigger('start');
         await poll(() => document.querySelector('[data-cue-menu="start"]'), 'pill menu');
-        await clickMenuButton('Switch to hit');
+        await clickMenuButton('Switch cue to hit');
 
         expect(cueStartAttrs(editor)?.mode).toBe('hit');
     });
 
-    it('edits the cue title via the menu', async () => {
+    it('edits the cue title inline in the pill', async () => {
         renderEditor();
 
         const editor = await getEditor();
@@ -212,16 +214,35 @@ describe('cue pill node views', () => {
         editor.commands.insertCueStart('sd-1', '');
 
         const pill = await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+        const input = await poll(
+            () => pill.querySelector('[data-cue-title-input="start"]'),
+            'title input',
+        );
 
-        await page.elementLocator(pill).click();
-        await clickMenuButton('Edit title');
-
-        const input = await poll(() => document.querySelector('[data-cue-menu="start"] input'), 'title input');
-
+        await page.elementLocator(input).click();
         await userEvent.type(page.elementLocator(input), 'Renamed');
-        await userEvent.keyboard('{Enter}');
 
         expect(cueStartAttrs(editor)?.title).toBe('Renamed');
+    });
+
+    it('keeps an empty confirmed cue title editable without deleting the cue', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+
+        const input = await poll(
+            () => document.querySelector<HTMLInputElement>('[data-cue-title-input="start"]'),
+            'title input',
+        );
+
+        await page.elementLocator(input).click();
+        input.setSelectionRange(0, input.value.length);
+        await userEvent.keyboard('{Backspace}');
+
+        expect(cueStartAttrs(editor)?.title).toBe('');
+        expect(document.querySelector('[data-cue-pill="start"]')).toBeTruthy();
     });
 
     it('deletes a cue from the menu', async () => {
@@ -234,6 +255,7 @@ describe('cue pill node views', () => {
         const pill = await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
 
         await page.elementLocator(pill).click();
+        await clickMenuTrigger('start');
         await clickMenuButton('Delete cue');
         await poll(() => document.querySelector('[data-cue-pill="start"]') ? null : true, 'pill removed');
 
@@ -251,6 +273,28 @@ describe('cue pill node views', () => {
         editor.commands.focus('end');
         await userEvent.keyboard('{Backspace}');
 
+        expect(document.querySelector('[data-cue-pill="start"]')).toBeTruthy();
+    });
+
+    it('keeps a cue when deleting selected stage-direction content around it', async () => {
+        renderEditor(createDocumentWithText());
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+        await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+
+        const block = editor.state.doc.firstChild;
+        const contentEnd = 1 + (block?.content.size ?? 0);
+
+        editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, 1, contentEnd)));
+        await userEvent.keyboard('{Backspace}');
+
+        const content = editor.getJSON().content as ScriptNode[] | undefined;
+        const stageDirection = content?.find(node => node.attrs?.id === 'sd-1');
+
+        expect(stageDirection?.content?.map(node => node.type)).toEqual(['cueStart']);
+        expect(stageDirection?.content?.[0]?.attrs).toEqual(cueStartAttrs(editor));
         expect(document.querySelector('[data-cue-pill="start"]')).toBeTruthy();
     });
 });

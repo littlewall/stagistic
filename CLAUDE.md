@@ -13,6 +13,9 @@ After any change to `packages/db/src/` schema or `drizzle/*.sql` files, run:
 `pnpm --filter @stagistic/db db:compile-migrations`
 (`db:generate` does this automatically; manual SQL edits do not.)
 
+## Testing
+- import { describe, it, expect } from "vite-plus/test"
+
 ## Design context
 See [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md) before any UI work.
 

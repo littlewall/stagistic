@@ -36,8 +36,9 @@ precedent and the structural template for most of this work.
 - The editor document representation of cue start and cue end (inline
   atom nodes), in two shapes: a durational **open** cue (default) and a
   rare zero-duration **hit** (§3).
-- Two entry paths: an inline `@@` compose and a new generic right-click
-  **block context menu** (scoped to the stage direction block, for now).
+- Inline cue entry via a single-`#` compose (an editor-vs-syntax divergence
+  — §5.1). The generic right-click **block context menu** (§5.2) is planned,
+  not built yet.
 - Editing and deletion UX via a **pill context menu**; no destructive
   keystroke.
 - The relational `script_cues` entity and its derivation/sync from the
@@ -138,8 +139,8 @@ model:
   end of the block.
 
 What this spec keeps reusable for them: the inline-atom-node
-representation (any position is expressible), the `@@`-style input
-coordination, the suggestion overlay pattern, the NodeView pill pattern,
+representation (any position is expressible), the `#`-trigger compose
+machinery, the NodeView pill pattern,
 and the block-context-menu registry. What stays specific to the
 structural cue: the end-of-block insertion policy (§5.3), the
 non-overlap positional pairing (§3.1), and the `script_cues` projection
@@ -186,39 +187,50 @@ Because cue atoms are non-text nodes, a block that contains any cue is
 serialized to `content_json` (the existing rule: `text_content` alone
 can't round-trip non-text nodes).
 
-### 4.2 Rendering (minimal)
+### 4.2 Rendering
 
-Each atom renders via a NodeView as a small pill (visual polish deferred):
+Each atom renders via a React NodeView as an inline pill:
 
-- `cueStart`: shows `N` and the title. Its state distinguishes three cases
-  — **hit** (a point), **open with an explicit out**, and **open relying on
-  its implicit end** — the last with a tooltip ("ends at end of scene /
-  next cue"). State is read live from the cue model (§6.1), not stored.
-- `cueOut`: shows it closes cue `N` (number read live).
+- `cueStart`: the title is an **inline editable input** in the pill body
+  (always editable; commits on blur / Enter, Escape reverts; an empty title
+  is allowed and does **not** delete the cue). Focusing the pill marks it
+  **active**, highlighting the border and revealing a kebab (⋮) **menu
+  trigger** (§6.2).
+- `cueOut`: shows "out"; same active → kebab → menu affordance.
+
+**Deferred:** the live number `N` and the visual distinction between
+open-with-explicit-out / open-implicit-end / hit are not rendered on the
+pill yet (the cue model §6.1 already exposes them; wiring is a later
+refinement).
 
 ## 5. Entry
 
-### 5.1 `@@` inline compose
+### 5.1 `#` inline compose
 
-Mirrors the existing single-`@` character-tag compose
-(`characterTagInput/`), but for `@@`:
+The editor trigger is a single **`#`** inside a `stageDirection` — a
+**deliberate divergence from the `@@cue` on-disk syntax**. (The original
+`@@` escalation had to coordinate with the character-tag `@` compose and
+proved fragile; `#` is a robust single-key trigger with no such coupling.
+Import/export maps `#`-cues to `@@cue` / `@@out` per the syntax — the next
+spec.)
 
-- Inside a `stageDirection`, a **second `@`** (so the user has typed
-  `@@`) abandons the just-opened character-tag compose and opens the
-  **cue compose** instead. The typed `@@` characters are not left in the
-  prose.
-- The compose is a transient overlay (reusing the `characterSuggestions`
-  overlay pattern). It does **not** insert at the caret; on commit it
-  appends to the end of the block (§5.3).
-- Two modes in one overlay:
-  - **Create:** type a title → commit inserts a `cueStart` (open by
-    default, number auto-assigned; switch to a hit later via the pill
-    menu, §6.2).
-  - **Close:** if a cue is open at the block end, the overlay offers a
-    single "close cue N" action → inserts a `cueOut`. (At most one cue is
-    ever open, so there is never a picker.)
+- Typing `#` (when not already composing, in a stage direction with no cue
+  atom) opens a **cue-title compose** anchored at the **end of the block**:
+  the caret jumps there and the in-progress title is wrapped in an
+  (initially empty) compose pill (a decoration). The `#` itself is swallowed.
+- **Commit:** Enter turns the typed title into a `cueStart` (open by
+  default; switch to a hit later via the pill menu, §6.2). **Discard:**
+  Escape, Backspace on an empty title, or leaving the block/editor — Enter is
+  the only commit path.
+
+**Out / close — not yet built:** an out is currently inserted via a temp
+`Mod-Alt-o` command; the real "close cue N" entry lands with the block
+context menu (§5.2).
 
 ### 5.2 Right-click block context menu (new, generic)
+
+*Status: not built yet — planned. Until it lands, an out is inserted via the
+temp `Mod-Alt-o` command and a cue via `#` (§5.1).*
 
 A new generic `BlockContextMenu` component: right-click within a script
 block opens a small menu whose items come from a per-block-type registry
@@ -238,10 +250,10 @@ Stage-direction items:
 
 ### 5.3 Insertion policy (structural-cue-specific)
 
-Regardless of where in the block the `@@` was typed or the right-click
-happened, the cue atom is appended at the **end of the block**, per the
-§4.1 one-per-block rule. This snap-to-end is the structural cue's policy;
-future position-bound cues (§3.2) will not use it.
+Regardless of where in the block `#` was typed (or, in future, where a
+right-click happened), the cue atom is committed at the **end of the
+block**, per the §4.1 one-per-block rule. This snap-to-end is the structural
+cue's policy; future position-bound cues (§3.2) will not use it.
 
 ## 6. Editing and deletion
 
@@ -253,7 +265,7 @@ as a field of the **live index snapshot**, the
 same mechanism that already powers the live sidebar projections
 (`buildIndexSnapshotFromPmDoc` rebuilt by `BlockUiEventsExtension`, fed to
 `buildSidebarProjectionFromIndex`). No bespoke plugin is needed; the
-`cueStart`/`cueOut` NodeViews, the context menu, and the `@@` overlay read
+`cueStart`/`cueOut` NodeViews (and, in future, the block context menu) read
 the cue model from that live projection (exact read-plumbing is a plan
 detail).
 
@@ -265,37 +277,35 @@ they cannot drift: `buildScriptBlockIndex` (JSON, live sidebar) and
 only extracts cue atoms from its own representation, then calls
 `deriveCues`; shared test vectors cover the helper (§10).
 
-### 6.2 Pill context menu
+### 6.2 Pill menu
 
-Clicking a cue pill opens a context menu — the same generic context-menu
-component as the block menu (§5.2), anchored to the pill with its own items
-(*compose, don't sprawl*). All per-cue actions live here, labelled in
-English (the editor UI is English):
+The pill is **self-contained** — a React NodeView using its own
+`updateAttributes` / `deleteNode`, not the generic block menu:
 
-- `cueStart`:
-  - **Edit title** — opens the title input.
-  - **Switch to hit** / **Switch to open** — toggles `mode` (§4).
-    Switching to a hit removes the cue's explicit `cueOut` if it has one (a
-    hit has no end node); switching back to open leaves it on its implicit
-    end.
-  - **Delete cue** — see §6.3.
-- `cueOut`:
-  - **Delete end** — see §6.3.
+- **Title** is edited inline in the pill input (§4.2), not via a menu item.
+- **Menu:** focusing the pill reveals a kebab (⋮) trigger; clicking it opens
+  a small **icon** menu:
+  - `cueStart`: **toggle open ↔ hit** (open/hit icon) and **delete cue**
+    (trash icon, danger-styled).
+  - `cueOut`: **delete end** (trash icon).
 
-### 6.3 Deletion (no destructive keystroke, no one-click delete)
+Switching to a hit sets `mode='hit'` (the cue becomes a point); any
+positionally-paired out then derives as an orphan and is dropped (§3.1).
 
-- **Backspace / Delete never removes a cue atom.** The handler intercepts
-  it next to a cue atom (at most selecting the pill). (Deleting the *whole*
-  stage-direction block still takes its cues with it — a deliberate action,
-  not a single slip.)
-- **Deletion is only via the pill context menu (§6.2)** — never a hover
-  close-button. The safeguard is the two deliberate steps (open the menu,
-  then click delete), so there is **no inline confirm**.
-  - `cueStart` → **Delete cue**: removes the start **and its paired
-    explicit out** (if any), so the cue goes as a unit and no orphan is
-    left.
-  - `cueOut` → **Delete end**: removes only the out; the open cue reverts
-    to its implicit end.
+### 6.3 Deletion (no destructive keystroke, no one-click)
+
+- **Backspace / Delete never removes a cue atom by keystroke.** The guard
+  intercepts Backspace/Delete adjacent to a cue atom; and when a **range
+  selection spans cue atoms**, the surrounding text is deleted but the cue
+  atoms are **preserved**. (Deleting the *whole* stage-direction block still
+  takes its cues with it — a deliberate action, not a single slip.)
+- **Deletion is only via the pill menu (§6.2)** — `deleteNode()` removes the
+  cue atom. No inline confirm; the kebab-then-trash steps are the safeguard.
+  - `cueStart` → **Delete cue**: removes the start node. A positionally-
+    paired explicit out (if any) is left to derive as an orphan and drop
+    (§3.1) — outs are rare and block-separate, so no cascading delete.
+  - `cueOut` → **Delete end**: removes the out; the open cue reverts to its
+    implicit end.
 - Any deletion triggers the §3.1 recompute (live snapshot and projection).
 
 ## 7. Relational projection — `script_cues`
@@ -396,16 +406,17 @@ Mirrors `characterTagInput` deliberately.
 
 ## 10. Key technical risks
 
-- **`@@` vs `@` coordination.** Typing the first `@` opens the
-  character-tag compose (it replaces `@` with a zero-width placeholder).
-  The cue feature must detect the second `@` while that compose is
-  freshly open (empty query), abandon it cleanly (remove the
-  placeholder/mark), and open the cue compose. Resolve via extension
-  priority and the existing compose-state predicates. This is the main
-  interaction to get right; details in the plan.
-- **End-of-block invariant enforcement (§4.1)** — redirecting prose
-  insertion to before trailing cue atoms, and keeping out-before-start
-  order, across typing, paste, and Enter/Backspace at block edges.
+- **Trigger choice (resolved).** The original `@@` trigger had to
+  coordinate with the character-tag `@` compose and was unreliable; it was
+  replaced by a single `#` trigger with no such coupling (§5.1). The
+  keyboard-independent block context menu (§5.2) is the planned alternative.
+- **Block-shortcut ↔ character collision (resolved).** Block-type shortcuts
+  used bare Option/AltGr + digit, which on macOS / Czech layouts *is* how
+  `@ # &` are typed (⌥2 = `@`, etc.), so those characters were swallowed.
+  Fixed: shortcuts use Ctrl + digit on macOS and exclude AltGr on Windows.
+- **End-of-block invariant enforcement (§4.1)** — the single cue atom stays
+  at the block end; prose insertion is kept before it across typing, paste,
+  and Enter/Backspace at block edges.
 - **Derivation parity (§6.1)** — three sites extract cue atoms
   (`buildScriptBlockIndex`, `buildIndexSnapshotFromPmDoc`,
   `extractScriptBlocks`) but share the single `deriveCues` helper, so only
