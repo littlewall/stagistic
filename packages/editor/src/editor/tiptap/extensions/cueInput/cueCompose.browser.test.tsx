@@ -164,4 +164,40 @@ describe('cue # compose', () => {
 
         expect((stageDirection?.content ?? []).some(node => node.type === 'text' && (node.text ?? '').includes('Half'))).toBe(false);
     });
+
+    it('shows an (initially empty) compose pill right after #', async () => {
+        renderEditor();
+
+        await getEditor();
+
+        const el = page.elementLocator(await poll(() => document.querySelector('[contenteditable="true"]'), 'editor'));
+
+        await el.click();
+        await userEvent.type(el, '#');
+
+        const composePill = await poll(() => document.querySelector('[data-cue-compose]'), 'compose pill');
+
+        expect(composePill).toBeTruthy();
+    });
+
+    it('Backspace on an empty title cancels the compose and # re-triggers', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+        const el = page.elementLocator(await poll(() => document.querySelector('[contenteditable="true"]'), 'editor'));
+
+        await el.click();
+        await userEvent.type(el, '#');
+        await poll(() => document.querySelector('[data-cue-compose]'), 'compose pill');
+
+        await userEvent.keyboard('{Backspace}');
+        await poll(() => document.querySelector('[data-cue-compose]') ? null : true, 'compose cleared');
+
+        await userEvent.type(el, '#');
+        await poll(() => document.querySelector('[data-cue-compose]'), 'compose pill again');
+
+        const stageDirection = getStageDirection(editor);
+
+        expect((stageDirection?.content ?? []).some(node => node.type === 'text' && (node.text ?? '').includes('#'))).toBe(false);
+    });
 });

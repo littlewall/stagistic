@@ -1,4 +1,8 @@
 import {Plugin} from '@tiptap/pm/state';
+import {
+    Decoration,
+    DecorationSet,
+} from '@tiptap/pm/view';
 
 import {getActiveScriptBlockFromState} from '../../scriptCore';
 import {blockHasCueAtom} from '../cue/cueCommands';
@@ -14,6 +18,7 @@ import {
     CUE_TRIGGER_CHARACTER,
     STAGE_DIRECTION_NODE_TYPE,
 } from './constants';
+import styles from './cueCompose.module.css';
 import {
     buildAbandonCue,
     buildCommitCue,
@@ -119,6 +124,17 @@ export const createCueComposePlugin = (): Plugin<CueComposeRawState | null> => {
                     return true;
                 }
 
+                if (event.key === 'Backspace' && compose.query.length === 0) {
+                    /*
+                     * Backspace on an empty title cancels the compose (rather than
+                     * leaving a stranded placeholder that swallows the next '#').
+                     */
+                    event.preventDefault();
+                    view.dispatch(buildAbandonCue(view.state, compose));
+
+                    return true;
+                }
+
                 return false;
             },
             handleDOMEvents: {
@@ -136,6 +152,20 @@ export const createCueComposePlugin = (): Plugin<CueComposeRawState | null> => {
 
                     return false;
                 },
+            },
+            decorations: state => {
+                const compose = getCueComposeFromState(state);
+
+                if (!compose) {
+                    return null;
+                }
+
+                return DecorationSet.create(state.doc, [
+                    Decoration.inline(compose.from, Math.max(compose.to, compose.from + 1), {
+                        class: styles.composePill,
+                        'data-cue-compose': 'active',
+                    }),
+                ]);
             },
         },
     });
