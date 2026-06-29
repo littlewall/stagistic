@@ -105,14 +105,27 @@ const handleMenuTriggerMouseDown = (
     };
 };
 
+const readDecorationLabel = (decorations: NodeViewProps['decorations'], key: string): string => {
+    for (const decoration of decorations) {
+        const value = (decoration.spec as Record<string, unknown> | undefined)?.[key];
+
+        if (typeof value === 'string') {
+            return value;
+        }
+    }
+
+    return '';
+};
+
 export const CueStartPill = ({
-    node, updateAttributes, deleteNode,
+    node, updateAttributes, deleteNode, decorations,
 }: NodeViewProps) => {
     const {
         active, open, setActive, setOpen, rootRef,
     } = usePillActivation();
     const mode: CueMode = node.attrs[CUE_MODE_ATTR] === 'hit' ? 'hit' : 'open';
     const title = normalizeTitle(node.attrs[CUE_TITLE_ATTR]);
+    const cueNumber = readDecorationLabel(decorations, 'cueNumber');
     const [draftTitle, setDraftTitle] = useState(title);
 
     useEffect(() => {
@@ -155,6 +168,12 @@ export const CueStartPill = ({
             onBlur={handleBlurWithin(rootRef, setActive, setOpen)}
         >
             <span className={styles.tagBody}>
+                <span
+                    className={styles.number}
+                    data-cue-number
+                    aria-hidden
+                >{cueNumber}
+                </span>
                 <input
                     className={styles.titleInput}
                     data-cue-title-input="start"
@@ -218,10 +237,13 @@ export const CueStartPill = ({
     );
 };
 
-export const CueOutPill = ({deleteNode}: NodeViewProps) => {
+export const CueOutPill = ({deleteNode, decorations}: NodeViewProps) => {
     const {
         active, open, setActive, setOpen, rootRef,
     } = usePillActivation();
+    const outLabel = readDecorationLabel(decorations, 'outLabel') || 'out';
+    const outNumber = readDecorationLabel(decorations, 'outNumber');
+    const outTitle = readDecorationLabel(decorations, 'outTitle');
 
     return (
         <NodeViewWrapper
@@ -235,9 +257,11 @@ export const CueOutPill = ({deleteNode}: NodeViewProps) => {
         >
             <span
                 className={clsx(styles.tagBody, styles.outLabel)}
+                aria-label={outLabel}
                 onClick={() => setActive(true)}
             >
-                out
+                <span className={styles.outStrong} data-cue-out-primary>{outNumber ? `${outNumber} out` : 'out'}</span>
+                {outTitle ? <span className={styles.outTitle} data-cue-out-title>{` (${outTitle})`}</span> : null}
                 {active ? (
                     <button
                         type="button"

@@ -11,6 +11,7 @@ export const ROOT_ACT_GROUP = '__root__';
 export interface SceneItem {
     blockId: string,
     title: string,
+    sceneNumber: number,
 }
 
 export interface StructureGroup {
@@ -48,6 +49,7 @@ const buildState = (blocks: RawBlock[]): StructureState => {
     ];
     const sceneAncestorByBlockId = new Map<string, string>();
     let currentSceneBlockId: string | null = null;
+    let sceneNumber = 0;
 
     for (const block of blocks) {
         if (!block.blockId) {
@@ -65,9 +67,11 @@ const buildState = (blocks: RawBlock[]): StructureState => {
         }
 
         if (block.blockType === SCENE_BLOCK_TYPE) {
+            sceneNumber += 1;
             groups[groups.length - 1].scenes.push({
                 blockId: block.blockId,
                 title: block.text || 'Untitled scene',
+                sceneNumber,
             });
             currentSceneBlockId = block.blockId;
             sceneAncestorByBlockId.set(block.blockId, block.blockId);

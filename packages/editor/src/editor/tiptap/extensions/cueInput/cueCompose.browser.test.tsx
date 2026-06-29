@@ -53,6 +53,28 @@ const createTwoBlockDocument = (): ScriptDocument => ({
     ],
 });
 
+const createNumberedCueDocument = (): ScriptDocument => ({
+    type: 'doc',
+    content: [
+        {
+            type: 'stageDirection',
+            attrs: {id: 'sd-1'},
+            content: [
+                {
+                    type: 'cueStart',
+                    attrs: {
+                        cueId: 'cue-1', mode: 'open', title: 'Night', kind: null,
+                    },
+                },
+            ],
+        }, {
+            type: 'stageDirection',
+            attrs: {id: 'sd-2'},
+            content: [{type: 'cueOut'}],
+        },
+    ],
+});
+
 const mountedRoots: Root[] = [];
 
 const renderEditor = (initialValue: ScriptDocument = createDocument()) => {
@@ -122,6 +144,12 @@ describe('cue # compose', () => {
         const input = pill.querySelector<HTMLInputElement>('[data-cue-title-input="start"]');
 
         expect(input?.value).toBe('Night');
+
+        const number = pill.querySelector<HTMLElement>('[data-cue-number]');
+
+        expect(number?.textContent).toBe('0.');
+        expect(getComputedStyle(number as HTMLElement).fontWeight).toBe('700');
+        expect(getComputedStyle(number as HTMLElement).color).toBe(getComputedStyle(input as HTMLElement).color);
 
         const stageDirection = getStageDirection(editor);
         const cueStart = stageDirection?.content?.find(node => node.type === 'cueStart');
@@ -235,5 +263,46 @@ describe('cue # compose', () => {
         await userEvent.type(el, '@');
 
         expect(getCharacterTagComposeFromState(editor.state)).not.toBeNull();
+    });
+
+    it('renders the closed cue number and title on the out pill', async () => {
+        renderEditor(createTwoBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+        await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+
+        editor.commands.insertCueOut('sd-2');
+
+        const outPill = await poll(() => document.querySelector('[data-cue-pill="out"]'), 'cue out pill');
+
+        await poll(() => (outPill.textContent ?? '').includes('out (Night)') ? true : null, 'out label');
+
+        expect(outPill.textContent).toContain('0. out (Night)');
+
+        const primary = outPill.querySelector<HTMLElement>('[data-cue-out-primary]');
+        const title = outPill.querySelector<HTMLElement>('[data-cue-out-title]');
+
+        expect(primary?.textContent).toBe('0. out');
+        expect(getComputedStyle(primary as HTMLElement).fontWeight).toBe('700');
+        expect(getComputedStyle(title as HTMLElement).fontWeight).toBe('400');
+        expect(getComputedStyle(title as HTMLElement).color).not.toBe(getComputedStyle(primary as HTMLElement).color);
+    });
+
+    it('keeps cue labels after the document is loaded again', async () => {
+        renderEditor(createNumberedCueDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.setContent(editor.getJSON(), {emitUpdate: false});
+
+        await new Promise(resolve => window.requestAnimationFrame(resolve));
+
+        const number = document.querySelector<HTMLElement>('[data-cue-number]');
+        const outPrimary = document.querySelector<HTMLElement>('[data-cue-out-primary]');
+
+        expect(number?.textContent).toBe('0.');
+        expect(outPrimary?.textContent).toBe('0. out');
     });
 });

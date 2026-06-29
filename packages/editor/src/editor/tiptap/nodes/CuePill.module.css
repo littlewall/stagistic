@@ -76,6 +76,7 @@
     padding: 0;
     color: inherit;
     font: inherit;
+    font-weight: 700;
     font-variant-numeric: tabular-nums;
     line-height: inherit;
     text-align: center;
@@ -88,6 +89,13 @@
         color: color-mix(in oklch, var(--color-text-muted) 42%, transparent);
         opacity: 1;
     }
+}
+
+.number {
+    margin-inline-end: .35em;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: inherit;
 }
 
 .open {
@@ -103,12 +111,21 @@
 }
 
 .out {
-    color: var(--color-text-muted);
+    color: var(--color-text);
 }
 
 .outLabel {
     cursor: pointer;
     font-variant-numeric: tabular-nums;
+}
+
+.outStrong {
+    font-weight: 700;
+}
+
+.outTitle {
+    font-weight: 400;
+    color: var(--color-text-muted);
 }
 
 .menuTrigger {
@@ -176,11 +193,6 @@
         stroke-linejoin: round;
         stroke-width: 1.6;
     }
-}
-
-.iconDot {
-    fill: currentcolor;
-    stroke: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

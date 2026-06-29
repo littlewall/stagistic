@@ -131,6 +131,13 @@ const findMenuItem = (label: string) => {
         .find(item => item.textContent?.trim() === label) ?? null;
 };
 
+const getCueStartAttrs = (editor: Editor, blockId: string): Record<string, unknown> | undefined => {
+    const content = editor.getJSON().content as ScriptNode[] | undefined;
+    const block = content?.find(node => node.attrs?.id === blockId);
+
+    return block?.content?.find(node => node.type === 'cueStart')?.attrs;
+};
+
 const openCuesSubmenu = async () => {
     const cuesItem = await poll(() => findMenuItem('Cues'), 'Cues item');
 
@@ -168,6 +175,42 @@ describe('block action menu', () => {
         expect(document.querySelector('[data-block-action-trigger="true"]')).toBeNull();
     });
 
+    it('adds a hit cue without an out marker', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        await openActionMenu('sd-1');
+        await openCuesSubmenu();
+
+        const addHitCue = await poll(() => findMenuItem('Add hit cue'), 'Add hit cue item');
+
+        await page.elementLocator(addHitCue).click();
+
+        expect(getCueStartAttrs(editor, 'sd-1')).toMatchObject({mode: 'hit'});
+        expect(editor.getJSON().content?.[0]?.content?.some(node => node.type === 'cueOut')).toBe(false);
+    });
+
+    it('uses range, hit, and emphasized endpoint cue icons', async () => {
+        renderEditor(createDocument(2));
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+        focusBlock(editor, 'sd-2');
+        await openActionMenu('sd-2');
+
+        const cues = await openCuesSubmenu();
+        const addCue = await poll(() => findMenuItem('Add cue'), 'Add cue item');
+        const addHitCue = await poll(() => findMenuItem('Add hit cue'), 'Add hit cue item');
+        const addOut = await poll(() => findMenuItem('Add out (Night)'), 'Add out item');
+
+        expect(cues.querySelector('[data-cue-icon="range"]')).toBeTruthy();
+        expect(addCue.querySelector('[data-cue-point="start"][data-cue-point-style="hollow"]')).toBeTruthy();
+        expect(addHitCue.querySelector('[data-cue-icon="hit"] [data-cue-point="center"]')).toBeTruthy();
+        expect(addOut.querySelector('[data-cue-point="end"][data-cue-point-style="hollow"]')).toBeTruthy();
+    });
+
     it('shows Add out with the live open-cue title and inserts the out', async () => {
         renderEditor(createDocument(2));
 
@@ -199,7 +242,7 @@ describe('block action menu', () => {
         await openCuesSubmenu();
 
         expect(await poll(
-            () => findMenuItem('Add out (Cue 1)'),
+            () => findMenuItem('Add out (Cue 0.)'),
             'untitled Add out item',
         )).toBeTruthy();
     });

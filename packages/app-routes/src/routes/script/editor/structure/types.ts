@@ -6,6 +6,7 @@ import type {StructureGroup} from './structureRows';
 export interface StructureRowSceneProps {
     blockId: string,
     title: string,
+    sceneNumber: number,
     index: number,
     groupId: string,
     isActive: boolean,

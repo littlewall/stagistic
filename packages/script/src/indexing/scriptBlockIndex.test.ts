@@ -149,7 +149,7 @@ describe('buildScriptBlockIndex', () => {
 
         expect(snapshot.cues).toEqual([
             {
-                cueId: 'c1', number: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2',
+                cueId: 'c1', sceneNumber: 0, indexInScene: 0, sceneCueCount: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2',
             },
         ]);
     });

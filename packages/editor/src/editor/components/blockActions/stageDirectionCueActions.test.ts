@@ -23,12 +23,14 @@ const block = (
 
 const cue = (
     cueId: string,
-    number: number,
+    indexInScene: number,
     startBlockId: string,
     endBlockId: string | null = null,
 ): ScriptBlockIndexSnapshot['cues'][number] => ({
     cueId,
-    number,
+    sceneNumber: 1,
+    indexInScene,
+    sceneCueCount: 2,
     mode: 'open',
     title: cueId,
     kind: null,

@@ -9,6 +9,10 @@ import {
     useState,
 } from 'react';
 
+import {
+    CueHitIcon,
+    CueRangeIcon,
+} from '../CueIcons';
 import styles from '../EditorBlockActionsOverlay.module.css';
 import type {
     BlockActionCommand,
@@ -34,30 +38,13 @@ const MenuCaret = () => (
 
 const CueIcon = ({icon}: {icon: BlockActionIcon}) => {
     const paths: Record<BlockActionIcon, ReactNode> = {
-        cue: (
-            <>
-                <path d="M9 5v10.5a2.5 2.5 0 1 1-2-2.45V7l9-2v8.5a2.5 2.5 0 1 1-2-2.45V3.8L9 5Z" />
-            </>
-        ),
-        cueStart: (
-            <>
-                <path d="M12 5v10.5a2.5 2.5 0 1 1-2-2.45V7l7-2v3" />
-                <path d="M17 12v6M14 15h6" />
-            </>
-        ),
-        cueOut: (
-            <>
-                <path d="M9 5v10.5a2.5 2.5 0 1 1-2-2.45V7l8-2v5" />
-                <path d="m14 14 3 3 3-3M17 11v6" />
-            </>
-        ),
+        cue: <CueRangeIcon />,
+        cueStart: <CueRangeIcon hollowEndpoint="start" />,
+        cueHit: <CueHitIcon />,
+        cueOut: <CueRangeIcon hollowEndpoint="end" />,
     };
 
-    return (
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-            {paths[icon]}
-        </svg>
-    );
+    return paths[icon];
 };
 
 const getPanelItems = (target: HTMLElement) => {

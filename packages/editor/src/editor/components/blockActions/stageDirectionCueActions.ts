@@ -1,6 +1,7 @@
-import type {
-    DerivedCue,
-    ScriptBlockIndexSnapshot,
+import {
+    type DerivedCue,
+    formatCueNumber,
+    type ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
@@ -87,6 +88,16 @@ const runAddCue = (editor: TiptapEditor, blockId: string) => {
     }
 };
 
+const runAddHitCue = (editor: TiptapEditor, blockId: string) => {
+    if (!resolveCueAvailability(editor, blockId)) {
+        return;
+    }
+
+    if (editor.commands.insertCueStart(blockId, '', 'hit')) {
+        focusCueTitle(editor, blockId);
+    }
+};
+
 const runAddOut = (editor: TiptapEditor, blockId: string) => {
     if (!resolveCueAvailability(editor, blockId)?.openCue) {
         return;
@@ -97,7 +108,7 @@ const runAddOut = (editor: TiptapEditor, blockId: string) => {
 };
 
 const getOpenCueDisplayName = (cue: DerivedCue) => {
-    return cue.title.trim() || `Cue ${cue.number}`;
+    return cue.title.trim() || `Cue ${formatCueNumber(cue)}`;
 };
 
 export const resolveStageDirectionCueActions = ({
@@ -117,6 +128,12 @@ export const resolveStageDirectionCueActions = ({
             label: 'Add cue',
             icon: 'cueStart',
             run: () => runAddCue(editor, blockId),
+        }, {
+            kind: 'command',
+            id: 'add-hit-cue',
+            label: 'Add hit cue',
+            icon: 'cueHit',
+            run: () => runAddHitCue(editor, blockId),
         },
     ];
 

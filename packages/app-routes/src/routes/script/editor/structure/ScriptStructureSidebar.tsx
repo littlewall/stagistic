@@ -260,6 +260,7 @@ export const ScriptStructureSidebar = () => {
                                             key={scene.blockId}
                                             blockId={scene.blockId}
                                             title={scene.title}
+                                            sceneNumber={scene.sceneNumber}
                                             index={idx + sceneIndexOffset}
                                             groupId={group.groupId}
                                             isActive={scene.blockId === activeSceneBlockId}

@@ -9,6 +9,7 @@ import type {StructureRowSceneProps} from './types';
 export const StructureRowScene = memo(({
     blockId,
     title,
+    sceneNumber,
     index,
     groupId,
     isActive,
@@ -44,7 +45,7 @@ export const StructureRowScene = memo(({
                     onFocus(blockId);
                 }}
             >
-                <span className={clsx(styles.itemLabel, styles.sceneTitle)}>{title}</span>
+                <span className={clsx(styles.itemLabel, styles.sceneTitle)}>{`${sceneNumber}. ${title}`}</span>
             </button>
         </li>
     );

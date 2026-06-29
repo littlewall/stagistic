@@ -62,6 +62,7 @@ export interface ExtractedActRow {
 export interface ExtractedSceneRow {
     id: string,
     headingBlockId: string,
+    sceneNumber: string,
 }
 
 export interface ExtractedBlockRow {
@@ -77,7 +78,8 @@ export interface ExtractedBlockRow {
 
 export interface ExtractedCueRow {
     id: string,
-    cueNumber: number,
+    sceneNumber: number,
+    indexInScene: number,
     mode: string,
     title: string,
     kind: string | null,

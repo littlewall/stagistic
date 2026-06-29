@@ -185,6 +185,7 @@ export const extractScriptBlocks = (
                     const sceneRow: ExtractedSceneRow = {
                         id: makeSceneId(scriptId, blockId),
                         headingBlockId: blockId,
+                        sceneNumber: String(scenes.length + 1),
                     };
 
                     sceneByHeadingBlockId.set(blockId, sceneRow);
@@ -217,7 +218,8 @@ export const extractScriptBlocks = (
 
     const cues: ExtractedCueRow[] = deriveCues(cueBlockInputs).map(cue => ({
         id: cue.cueId,
-        cueNumber: cue.number,
+        sceneNumber: cue.sceneNumber,
+        indexInScene: cue.indexInScene,
         mode: cue.mode,
         title: cue.title,
         kind: cue.kind,

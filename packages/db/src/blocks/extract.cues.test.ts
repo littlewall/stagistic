@@ -30,7 +30,7 @@ describe('extractScriptBlocks cues', () => {
 
         expect(cues).toEqual([
             {
-                id: 'c1', cueNumber: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2',
+                id: 'c1', sceneNumber: 0, indexInScene: 0, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2',
             },
         ]);
     });
@@ -60,7 +60,7 @@ describe('extractScriptBlocks cues', () => {
 
         expect(cues).toEqual([
             {
-                id: 'h1', cueNumber: 1, mode: 'hit', title: 'Sting', kind: null, startBlockId: 'b1', endBlockId: 'b1',
+                id: 'h1', sceneNumber: 0, indexInScene: 0, mode: 'hit', title: 'Sting', kind: null, startBlockId: 'b1', endBlockId: 'b1',
             },
         ]);
     });

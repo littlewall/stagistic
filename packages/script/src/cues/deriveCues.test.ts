@@ -24,7 +24,7 @@ describe('deriveCues', () => {
 
         expect(cues).toEqual([
             {
-                cueId: 'c1', number: 1, mode: 'open', title: 'Song', kind: null, startBlockId: 'b1', endBlockId: 'b2',
+                cueId: 'c1', sceneNumber: 0, indexInScene: 0, sceneCueCount: 1, mode: 'open', title: 'Song', kind: null, startBlockId: 'b1', endBlockId: 'b2',
             },
         ]);
     });
@@ -89,10 +89,95 @@ describe('deriveCues', () => {
 
         expect(cues).toEqual([
             {
-                cueId: 'c1', number: 1, mode: 'open', title: 'Song', kind: null, startBlockId: 'b1', endBlockId: 'b3',
+                cueId: 'c1', sceneNumber: 0, indexInScene: 0, sceneCueCount: 2, mode: 'open', title: 'Song', kind: null, startBlockId: 'b1', endBlockId: 'b3',
             }, {
-                cueId: 'h1', number: 2, mode: 'hit', title: 'Sting', kind: null, startBlockId: 'b2', endBlockId: 'b2',
+                cueId: 'h1', sceneNumber: 0, indexInScene: 1, sceneCueCount: 2, mode: 'hit', title: 'Sting', kind: null, startBlockId: 'b2', endBlockId: 'b2',
             },
         ]);
+    });
+
+    it('numbers cues per scene: one start gets index 0 / count 1', () => {
+        const cues = deriveCues([
+            scene('s1'), sd('b1', [
+                {
+                    role: 'start', cueId: 'c1', mode: 'open', title: 'A', kind: null,
+                },
+            ]),
+        ]);
+
+        expect(cues[0]).toMatchObject({
+            sceneNumber: 1, indexInScene: 0, sceneCueCount: 1,
+        });
+    });
+
+    it('numbers two cues in the same scene as 0/1 with count 2', () => {
+        const cues = deriveCues([
+            scene('s1'),
+            sd('b1', [
+                {
+                    role: 'start', cueId: 'c1', mode: 'open', title: 'A', kind: null,
+                },
+            ]),
+            sd('b2', [{role: 'out'}]),
+            sd('b3', [
+                {
+                    role: 'start', cueId: 'c2', mode: 'open', title: 'B', kind: null,
+                },
+            ]),
+        ]);
+
+        expect(cues.map(c => [
+            c.sceneNumber,
+            c.indexInScene,
+            c.sceneCueCount,
+        ]))
+            .toEqual([
+                [
+                    1,
+                    0,
+                    2,
+                ], [
+                    1,
+                    1,
+                    2,
+                ],
+            ]);
+    });
+
+    it('increments the scene number across scenes and counts a hit', () => {
+        const cues = deriveCues([
+            scene('s1'),
+            sd('b1', [
+                {
+                    role: 'start', cueId: 'c1', mode: 'open', title: 'A', kind: null,
+                },
+            ]),
+            scene('s2'),
+            sd('b2', [
+                {
+                    role: 'start', cueId: 'h1', mode: 'hit', title: 'Sting', kind: null,
+                },
+            ]),
+        ]);
+
+        expect(cues.map(c => [
+            c.cueId,
+            c.sceneNumber,
+            c.indexInScene,
+            c.sceneCueCount,
+        ]))
+            .toEqual([
+                [
+                    'c1',
+                    1,
+                    0,
+                    1,
+                ], [
+                    'h1',
+                    2,
+                    0,
+                    1,
+                ],
+            ]);
     });
 });

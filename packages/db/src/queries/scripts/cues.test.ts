@@ -16,9 +16,9 @@ describe('script cues queries', () => {
         await seedScript(db, 's1');
         await bulkUpsertScriptCues(db, [
             {
-                id: 'c2', scriptId: 's1', cueNumber: 2, mode: 'hit', title: 'Sting', kind: null, startBlockId: 'b3', endBlockId: 'b3', createdAt: 1, updatedAt: 1,
+                id: 'c2', scriptId: 's1', sceneNumber: 1, indexInScene: 1, mode: 'hit', title: 'Sting', kind: null, startBlockId: 'b3', endBlockId: 'b3', createdAt: 1, updatedAt: 1,
             }, {
-                id: 'c1', scriptId: 's1', cueNumber: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2', createdAt: 1, updatedAt: 1,
+                id: 'c1', scriptId: 's1', sceneNumber: 1, indexInScene: 0, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2', createdAt: 1, updatedAt: 1,
             },
         ]);
 
@@ -26,7 +26,7 @@ describe('script cues queries', () => {
 
         expect(rows.map(row => row.id)).toEqual(['c1', 'c2']);
         expect(rows[0]).toMatchObject({
-            cueNumber: 1, mode: 'open', title: 'Night', startBlockId: 'b1', endBlockId: 'b2',
+            sceneNumber: 1, indexInScene: 0, mode: 'open', title: 'Night', startBlockId: 'b1', endBlockId: 'b2',
         });
     });
 
@@ -36,12 +36,12 @@ describe('script cues queries', () => {
         await seedScript(db, 's1');
         await bulkUpsertScriptCues(db, [
             {
-                id: 'c1', scriptId: 's1', cueNumber: 1, mode: 'open', title: 'A', kind: null, startBlockId: 'b1', endBlockId: null, createdAt: 1, updatedAt: 1,
+                id: 'c1', scriptId: 's1', sceneNumber: 1, indexInScene: 0, mode: 'open', title: 'A', kind: null, startBlockId: 'b1', endBlockId: null, createdAt: 1, updatedAt: 1,
             },
         ]);
         await bulkUpsertScriptCues(db, [
             {
-                id: 'c1', scriptId: 's1', cueNumber: 1, mode: 'hit', title: 'B', kind: null, startBlockId: 'b1', endBlockId: 'b1', createdAt: 1, updatedAt: 2,
+                id: 'c1', scriptId: 's1', sceneNumber: 1, indexInScene: 0, mode: 'hit', title: 'B', kind: null, startBlockId: 'b1', endBlockId: 'b1', createdAt: 1, updatedAt: 2,
             },
         ]);
 
@@ -59,7 +59,7 @@ describe('script cues queries', () => {
         await seedScript(db, 's1');
         await bulkUpsertScriptCues(db, [
             {
-                id: 'c1', scriptId: 's1', cueNumber: 1, mode: 'open', title: 'N', kind: null, startBlockId: 'b1', endBlockId: null, createdAt: 1, updatedAt: 1,
+                id: 'c1', scriptId: 's1', sceneNumber: 1, indexInScene: 0, mode: 'open', title: 'N', kind: null, startBlockId: 'b1', endBlockId: null, createdAt: 1, updatedAt: 1,
             },
         ]);
         await bulkDeleteScriptCues(db, ['c1']);

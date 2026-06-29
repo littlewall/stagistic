@@ -35,6 +35,7 @@ export {
     CueInputExtension,
     getCueComposeFromState,
 } from './CueInputExtension';
+export {CueNumberingExtension} from './CueNumberingExtension';
 export {
     EMPTY_ENTER_CHOOSER_WRITER_TYPES,
     EmptyEnterChooserExtension,

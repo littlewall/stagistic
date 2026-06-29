@@ -11,7 +11,8 @@ import type {DbClient} from '../types';
 export interface ScriptCueUpsertRow {
     id: string,
     scriptId: string,
-    cueNumber: number,
+    sceneNumber: number,
+    indexInScene: number,
     mode: string,
     title: string,
     kind: string | null,
@@ -26,7 +27,7 @@ export const listScriptCues = async (db: DbClient, scriptId: string) => {
         .select()
         .from(scriptCues)
         .where(eq(scriptCues.scriptId, scriptId))
-        .orderBy(asc(scriptCues.cueNumber));
+        .orderBy(asc(scriptCues.sceneNumber), asc(scriptCues.indexInScene));
 };
 
 export const bulkUpsertScriptCues = async (db: DbClient, rows: ScriptCueUpsertRow[]) => {
@@ -40,7 +41,8 @@ export const bulkUpsertScriptCues = async (db: DbClient, rows: ScriptCueUpsertRo
         .onConflictDoUpdate({
             target: scriptCues.id,
             set: {
-                cueNumber: sql`excluded."cue_number"`,
+                sceneNumber: sql`excluded."scene_number"`,
+                indexInScene: sql`excluded."index_in_scene"`,
                 mode: sql`excluded."mode"`,
                 title: sql`excluded."title"`,
                 kind: sql`excluded."kind"`,

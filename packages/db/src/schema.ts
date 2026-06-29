@@ -256,7 +256,8 @@ export const scriptCues = pgTable(
         scriptId: text('script_id')
             .notNull()
             .references(() => scripts.id, {onDelete: 'cascade'}),
-        cueNumber: integer('cue_number').notNull(),
+        sceneNumber: integer('scene_number').notNull().default(0),
+        indexInScene: integer('index_in_scene').notNull().default(0),
         mode: text('mode').notNull().default('open'),
         title: text('title').notNull().default(''),
         kind: text('kind'),

@@ -93,7 +93,7 @@ export const createDocumentPersister = (scriptId: string) => {
         const extracted = extractScriptBlocks(scriptId, document);
 
         const cueSignature = extracted.cues
-            .map(cue => `${cue.id}:${cue.cueNumber}:${cue.mode}:${cue.title}:${cue.kind ?? ''}:${cue.startBlockId}:${cue.endBlockId ?? ''}`)
+            .map(cue => `${cue.id}:${cue.sceneNumber}:${cue.indexInScene}:${cue.mode}:${cue.title}:${cue.kind ?? ''}:${cue.startBlockId}:${cue.endBlockId ?? ''}`)
             .join('|');
         const reconcileCues = async (tx: DbClient) => {
             if (cueSignature === lastSavedCueSignature) {
@@ -109,7 +109,8 @@ export const createDocumentPersister = (scriptId: string) => {
             await bulkUpsertScriptCues(tx, extracted.cues.map(cue => ({
                 id: cue.id,
                 scriptId,
-                cueNumber: cue.cueNumber,
+                sceneNumber: cue.sceneNumber,
+                indexInScene: cue.indexInScene,
                 mode: cue.mode,
                 title: cue.title,
                 kind: cue.kind,
@@ -289,7 +290,7 @@ export const createDocumentPersister = (scriptId: string) => {
                     id: scene.id,
                     scriptId,
                     headingBlockId: scene.headingBlockId,
-                    sceneNumber: prev?.sceneNumber ?? null,
+                    sceneNumber: scene.sceneNumber,
                     colorHex: prev?.colorHex ?? null,
                     synopsis: prev?.synopsis ?? null,
                     locationId: prev?.locationId ?? null,
