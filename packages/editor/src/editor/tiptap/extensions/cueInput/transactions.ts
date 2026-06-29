@@ -3,6 +3,7 @@ import {
     CUE_ID_ATTR,
     CUE_KIND_ATTR,
     CUE_MODE_ATTR,
+    CUE_OUT_NODE_NAME,
     CUE_START_NODE_NAME,
     CUE_TITLE_ATTR,
 } from '@stagistic/script';
@@ -18,6 +19,7 @@ import {
     CUE_COMPOSE_CLOSE_META,
     CUE_COMPOSE_OPEN_META,
     CUE_COMPOSE_PLACEHOLDER,
+    CUE_OUT_KEYWORD,
 } from './constants';
 
 /**
@@ -44,9 +46,10 @@ export const buildAbandonCue = (state: EditorState, compose: CueComposeState): T
 };
 
 /**
- * Commit: replace the placeholder + typed title with a `cueStart` whose title
- * attr holds the text. Empty title → abandon. The caret lands before the pill
- * so further prose stays ahead of the cue (§4.1).
+ * Commit: replace the placeholder + typed title with a cue atom. Empty title →
+ * abandon. The literal title "out" (case-insensitive) commits a `cueOut`;
+ * anything else a `cueStart` carrying the title. The caret lands before the
+ * pill so further prose stays ahead of the cue (§4.1).
  */
 export const buildCommitCue = (state: EditorState, compose: CueComposeState): Transaction => {
     const title = compose.query.trim();
@@ -55,12 +58,14 @@ export const buildCommitCue = (state: EditorState, compose: CueComposeState): Tr
         return buildAbandonCue(state, compose);
     }
 
-    const node = state.schema.nodes[CUE_START_NODE_NAME].create({
-        [CUE_ID_ATTR]: createNodeId(),
-        [CUE_MODE_ATTR]: 'open',
-        [CUE_TITLE_ATTR]: title,
-        [CUE_KIND_ATTR]: null,
-    });
+    const node = title.toLowerCase() === CUE_OUT_KEYWORD
+        ? state.schema.nodes[CUE_OUT_NODE_NAME].create()
+        : state.schema.nodes[CUE_START_NODE_NAME].create({
+            [CUE_ID_ATTR]: createNodeId(),
+            [CUE_MODE_ATTR]: 'open',
+            [CUE_TITLE_ATTR]: title,
+            [CUE_KIND_ATTR]: null,
+        });
     const tr = state.tr.replaceWith(compose.from, compose.to, node);
 
     return tr

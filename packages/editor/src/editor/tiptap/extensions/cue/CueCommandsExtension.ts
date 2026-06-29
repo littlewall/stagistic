@@ -144,16 +144,6 @@ export const CueCommandsExtension = Extension.create({
         };
     },
 
-    addKeyboardShortcuts() {
-        /*
-         * TEMPORARY: cue creation uses the `#` compose; only the out shortcut
-         * remains until the block context menu lands.
-         */
-        return {
-            'Mod-Alt-o': ({editor}) => editor.commands.insertCueOut(null),
-        };
-    },
-
     addProseMirrorPlugins() {
         /*
          * Deletion guard: a cue atom is only removed via its pill menu, never

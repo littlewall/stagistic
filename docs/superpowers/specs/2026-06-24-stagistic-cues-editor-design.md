@@ -223,14 +223,16 @@ spec.)
   Escape, Backspace on an empty title, or leaving the block/editor — Enter is
   the only commit path.
 
-**Out / close — not yet built:** an out is currently inserted via a temp
-`Mod-Alt-o` command; the real "close cue N" entry lands with the block
-context menu (§5.2).
+- **Out:** typing the literal title **`out`** (case-insensitive) commits a
+  `cueOut` instead of a titled cue — i.e. `#` `out` ⏎. (A deliberate
+  stand-in: no open-cue validation yet, so an out with nothing to close
+  derives as an orphan and is dropped — §3.1. The block context menu §5.2
+  will add the validated "close cue N" entry.)
 
 ### 5.2 Right-click block context menu (new, generic)
 
-*Status: not built yet — planned. Until it lands, an out is inserted via the
-temp `Mod-Alt-o` command and a cue via `#` (§5.1).*
+*Status: not built yet — planned. Until it lands, both cues and outs are
+entered via the `#` compose (`#`title for a cue, `#out` for an out — §5.1).*
 
 A new generic `BlockContextMenu` component: right-click within a script
 block opens a small menu whose items come from a per-block-type registry

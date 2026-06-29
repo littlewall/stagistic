@@ -6,6 +6,9 @@
  */
 export const CUE_TRIGGER_CHARACTER = '#';
 
+/** Typing this as the cue title (case-insensitive) commits a `cueOut` instead. */
+export const CUE_OUT_KEYWORD = 'out';
+
 export const CUE_COMPOSE_OPEN_META = 'cue-compose-open';
 export const CUE_COMPOSE_CLOSE_META = 'cue-compose-close';
 

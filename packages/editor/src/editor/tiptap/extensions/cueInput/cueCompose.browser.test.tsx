@@ -201,4 +201,22 @@ describe('cue # compose', () => {
 
         expect((stageDirection?.content ?? []).some(node => node.type === 'text' && (node.text ?? '').includes('#'))).toBe(false);
     });
+
+    it('# + "out" + Enter commits a cueOut instead of a titled cue', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+        const el = page.elementLocator(await poll(() => document.querySelector('[contenteditable="true"]'), 'editor'));
+
+        await el.click();
+        await userEvent.type(el, '#out');
+        await userEvent.keyboard('{Enter}');
+
+        await poll(() => document.querySelector('[data-cue-pill="out"]'), 'cue out pill');
+
+        const stageDirection = getStageDirection(editor);
+
+        expect((stageDirection?.content ?? []).some(node => node.type === 'cueOut')).toBe(true);
+        expect((stageDirection?.content ?? []).some(node => node.type === 'cueStart')).toBe(false);
+    });
 });
