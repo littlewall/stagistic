@@ -8,7 +8,7 @@ import type {
 
 import type {BlockNodeType} from '../../tiptap/scriptCore';
 
-export interface BlockActionsMenuProps {
+export interface BlockTypeMenuProps {
     blockType: BlockNodeType,
     isMenuAbove: boolean,
     menuRef: RefObject<HTMLDivElement | null>,

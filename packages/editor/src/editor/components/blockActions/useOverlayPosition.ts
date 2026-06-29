@@ -9,9 +9,9 @@ import {
 } from 'react';
 
 import {
-    SCRIPT_BLOCK_NODE_NAMES,
     getActiveScriptBlockFromState,
     isSelectionAcrossBlocks,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../../tiptap/scriptCore';
 import type {BlockActionsPointerState} from './overlay/types';
 import type {UseOverlayPositionArgs} from './types';
@@ -31,6 +31,13 @@ const isSameBlockActionsPointerState = (
     return previous.blockId === next.blockId
         && previous.blockType === next.blockType
         && previous.blockPos === next.blockPos;
+};
+
+const hasBlockActionsOverlayFocus = () => {
+    const activeElement = document.activeElement;
+
+    return activeElement instanceof Element
+        && Boolean(activeElement.closest('[data-block-actions-overlay="true"]'));
 };
 
 export const useOverlayPosition = ({
@@ -57,7 +64,7 @@ export const useOverlayPosition = ({
             return;
         }
 
-        if (!isMenuOpen && !hasFocusRef.current) {
+        if (!isMenuOpen && !hasFocusRef.current && !hasBlockActionsOverlayFocus()) {
             commitActiveBlockState(null);
 
             return;
@@ -114,7 +121,11 @@ export const useOverlayPosition = ({
                 return;
             }
 
-            commitActiveBlockState(null);
+            window.requestAnimationFrame(() => {
+                if (!editor.isFocused && !hasBlockActionsOverlayFocus()) {
+                    commitActiveBlockState(null);
+                }
+            });
         };
 
         editor.on('transaction', handleTransaction);
@@ -132,6 +143,30 @@ export const useOverlayPosition = ({
         hasFocusRef,
         isMenuOpen,
         updateActiveBlockState,
+    ]);
+
+    useLayoutEffect(() => {
+        if (!editor) {
+            return;
+        }
+
+        const handleDocumentFocusIn = () => {
+            if (editor.isFocused || isMenuOpen || hasBlockActionsOverlayFocus()) {
+                return;
+            }
+
+            commitActiveBlockState(null);
+        };
+
+        document.addEventListener('focusin', handleDocumentFocusIn);
+
+        return () => {
+            document.removeEventListener('focusin', handleDocumentFocusIn);
+        };
+    }, [
+        commitActiveBlockState,
+        editor,
+        isMenuOpen,
     ]);
 
     return {

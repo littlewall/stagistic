@@ -36,6 +36,7 @@ export const useBlockActionsMenuState = ({
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
                 setIsMenuOpen(false);
+                window.requestAnimationFrame(() => triggerRef.current?.focus());
             }
         };
 

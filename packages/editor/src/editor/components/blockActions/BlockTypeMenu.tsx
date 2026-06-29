@@ -3,26 +3,28 @@ import clsx from 'clsx';
 import {BLOCKS_WITHOUT_ACT} from '../../blocks/blockRegistry';
 import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
 import styles from '../EditorBlockActionsOverlay.module.css';
-import type {BlockActionsMenuProps} from './types';
+import type {BlockTypeMenuProps} from './types';
 
-export const BlockActionsMenu = ({
+export const BlockTypeMenu = ({
     blockType,
     isMenuAbove,
     menuRef,
     menuStyle,
     onMenuItemMouseDown,
-}: BlockActionsMenuProps) => {
+}: BlockTypeMenuProps) => {
     return (
         <div
             className={clsx(
                 styles.menu,
+                styles.typeMenu,
                 isMenuAbove && styles.above,
             )}
+            data-block-type-menu="true"
             role="menu"
             ref={menuRef}
             style={menuStyle}
         >
-            <div className={styles.menuPrimaryPanel}>
+            <div className={styles.menuPrimaryPanel} data-block-menu-panel="primary">
                 {BLOCKS_WITHOUT_ACT.map(option => (
                     <button
                         key={option.type}

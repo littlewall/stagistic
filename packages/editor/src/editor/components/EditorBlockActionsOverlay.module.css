@@ -31,7 +31,6 @@
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--radius-md);
-    anchor-name: --block-actions-trigger;
 
     &:hover {
         background: color-mix(in oklch, var(--color-surface-accent) 30%, transparent);
@@ -93,6 +92,24 @@
             cursor: move;
         }
     }
+}
+
+.actionTrigger {
+    transition: transform 140ms cubic-bezier(.23, 1, .32, 1);
+    anchor-name: --block-action-trigger;
+
+    &:active {
+        transform: scale(.97);
+    }
+
+    & circle {
+        fill: currentcolor;
+        stroke: none;
+    }
+}
+
+.typeTrigger {
+    anchor-name: --block-type-trigger;
 }
 
 .triggerGlyph {
@@ -179,7 +196,6 @@
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
     box-shadow: var(--shadow-popover);
-    position-anchor: --block-actions-trigger;
 
     &.above {
         top: auto;
@@ -187,8 +203,16 @@
     }
 
     &.withSubmenu {
-        min-width: calc(360px * var(--size-scale));
+        min-width: calc(400px * var(--size-scale));
     }
+}
+
+.actionMenu {
+    position-anchor: --block-action-trigger;
+}
+
+.typeMenu {
+    position-anchor: --block-type-trigger;
 }
 
 .menuPrimaryPanel {
@@ -204,18 +228,10 @@
 
 .menuSecondaryPanel {
     display: grid;
-    grid-template-rows: auto 1fr;
-    min-width: calc(160px * var(--size-scale));
+    align-content: start;
+    min-width: calc(200px * var(--size-scale));
     background: color-mix(in oklch, var(--color-surface) 95%, var(--color-surface-accent) 5%);
     border-left: 1px solid var(--color-border);
-}
-
-.menuSecondaryHeader {
-    padding: var(--space-md);
-    font-size: var(--font-size-xs);
-    line-height: var(--line-height-snug);
-    color: var(--color-text-muted);
-    border-bottom: 1px solid var(--color-border);
 }
 
 .menuSecondaryContent {
@@ -268,7 +284,11 @@
 }
 
 .menuItemLabel {
+    overflow: hidden;
+    min-width: 0;
     line-height: var(--line-height-snug);
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .menuSeparator {
@@ -281,4 +301,20 @@
     justify-self: end;
     margin-left: auto;
     color: var(--color-text-muted);
+
+    & svg {
+        width: calc(14px * var(--size-scale));
+        height: calc(14px * var(--size-scale));
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.5;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .actionTrigger {
+        transition-duration: 0ms;
+    }
 }

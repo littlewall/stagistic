@@ -37,8 +37,8 @@ precedent and the structural template for most of this work.
   atom nodes), in two shapes: a durational **open** cue (default) and a
   rare zero-duration **hit** (§3).
 - Inline cue entry via a single-`#` compose (an editor-vs-syntax divergence
-  — §5.1). The generic right-click **block context menu** (§5.2) is planned,
-  not built yet.
+  — §5.1). The dedicated **block action menu** (§5.2) is planned, not built
+  yet.
 - Editing and deletion UX via a **pill context menu**; no destructive
   keystroke.
 - The relational `script_cues` entity and its derivation/sync from the
@@ -141,7 +141,7 @@ model:
 What this spec keeps reusable for them: the inline-atom-node
 representation (any position is expressible), the `#`-trigger compose
 machinery, the NodeView pill pattern,
-and the block-context-menu registry. What stays specific to the
+and the block-action-menu registry. What stays specific to the
 structural cue: the end-of-block insertion policy (§5.3), the
 non-overlap positional pairing (§3.1), and the `script_cues` projection
 (§7). The atom node is inherently position-capable; "snap to end of
@@ -226,34 +226,28 @@ spec.)
 - **Out:** typing the literal title **`out`** (case-insensitive) commits a
   `cueOut` instead of a titled cue — i.e. `#` `out` ⏎. (A deliberate
   stand-in: no open-cue validation yet, so an out with nothing to close
-  derives as an orphan and is dropped — §3.1. The block context menu §5.2
-  will add the validated "close cue N" entry.)
+  derives as an orphan and is dropped — §3.1. The block action menu §5.2
+  adds the validated alternative.)
 
-### 5.2 Right-click block context menu (new, generic)
+### 5.2 Block action menu (separate spec)
 
 *Status: not built yet — planned. Until it lands, both cues and outs are
 entered via the `#` compose (`#`title for a cue, `#out` for an out — §5.1).*
 
-A new generic `BlockContextMenu` component: right-click within a script
-block opens a small menu whose items come from a per-block-type registry
-(`items(blockType)`). This is the foundation for future per-block menus;
-**for now only the `stageDirection` block contributes items**, and other
-blocks fall through to the native browser menu.
+Stagistic preserves the native OS/browser right-click menu. Block commands
+are opened instead from a dedicated ellipsis trigger beside the existing
+block type control. The generic provider contract, conditional trigger,
+submenu behavior, and stage-direction cue items are defined in
+[Stagistic Block Action Menu — Editor Design](2026-06-29-stagistic-block-action-menu-design.md).
 
-Stage-direction items:
-
-- **Always:** "Add cue" → inserts a `cueStart` at the block end and opens
-  its title for editing (same compose as §5.1, create mode).
-- **Conditionally:** "Add out *(closes cue N)*" — shown **iff a cue is
-  open at the end of this block** (§3.1). Closes that one cue; the label
-  includes its number `N` (number only, computed live). Never shown when
-  the position is already past a closed interval (nothing open) — this is
-  exactly "don't offer an out between an existing start and its out."
+For cues, that menu exposes `Cues` → `Add cue` and conditionally
+`Add out (<open cue title>)`. Cue availability and command execution remain
+governed by §3.1 and §4.1 of this spec.
 
 ### 5.3 Insertion policy (structural-cue-specific)
 
-Regardless of where in the block `#` was typed (or, in future, where a
-right-click happened), the cue atom is committed at the **end of the
+Regardless of where in the block `#` was typed (or whether insertion came
+from the block action menu), the cue atom is committed at the **end of the
 block**, per the §4.1 one-per-block rule. This snap-to-end is the structural
 cue's policy; future position-bound cues (§3.2) will not use it.
 
@@ -267,7 +261,7 @@ as a field of the **live index snapshot**, the
 same mechanism that already powers the live sidebar projections
 (`buildIndexSnapshotFromPmDoc` rebuilt by `BlockUiEventsExtension`, fed to
 `buildSidebarProjectionFromIndex`). No bespoke plugin is needed; the
-`cueStart`/`cueOut` NodeViews (and, in future, the block context menu) read
+`cueStart`/`cueOut` NodeViews (and, in future, the block action menu) read
 the cue model from that live projection (exact read-plumbing is a plan
 detail).
 
@@ -398,7 +392,8 @@ Mirrors `characterTagInput` deliberately.
   with the `cues` field (§6.1), the PM-side mirror of
   `scriptBlockIndex.ts`.
 - `components/` — the cue compose overlay (reusing the
-  `characterSuggestions` pattern) and the generic `BlockContextMenu`.
+  `characterSuggestions` pattern) and the block action menu integration
+  defined by the separate menu spec (§5.2).
 
 **`packages/db/src/`**:
 - `schema.ts` (+ `dbSchema`) and the generated migration; `blocks/extract.ts`
@@ -411,7 +406,7 @@ Mirrors `characterTagInput` deliberately.
 - **Trigger choice (resolved).** The original `@@` trigger had to
   coordinate with the character-tag `@` compose and was unreliable; it was
   replaced by a single `#` trigger with no such coupling (§5.1). The
-  keyboard-independent block context menu (§5.2) is the planned alternative.
+  keyboard-independent block action menu (§5.2) is the planned alternative.
 - **Block-shortcut ↔ character collision (resolved).** Block-type shortcuts
   used bare Option/AltGr + digit, which on macOS / Czech layouts *is* how
   `@ # &` are typed (⌥2 = `@`, etc.), so those characters were swallowed.
