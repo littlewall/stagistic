@@ -15,6 +15,7 @@ import {
 
 import {useEditorInstance} from '../../../context';
 import ScriptEditor from '../../../Editor';
+import {getCharacterTagComposeFromState} from '../CharacterTagInputExtension';
 
 type CueTestWindow = Window & {__cueComposeEditor?: Editor | null};
 
@@ -218,5 +219,21 @@ describe('cue # compose', () => {
 
         expect((stageDirection?.content ?? []).some(node => node.type === 'cueOut')).toBe(true);
         expect((stageDirection?.content ?? []).some(node => node.type === 'cueStart')).toBe(false);
+    });
+
+    it('@ still opens the character-tag compose in a stage direction that has a cue', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+        const el = page.elementLocator(await poll(() => document.querySelector('[contenteditable="true"]'), 'editor'));
+
+        await el.click();
+        await userEvent.type(el, '#Night');
+        await userEvent.keyboard('{Enter}');
+        await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+
+        await userEvent.type(el, '@');
+
+        expect(getCharacterTagComposeFromState(editor.state)).not.toBeNull();
     });
 });
