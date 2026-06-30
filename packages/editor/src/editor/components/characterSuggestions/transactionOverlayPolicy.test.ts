@@ -31,6 +31,18 @@ describe('resolveOverlayTransactionAction', () => {
         })).toBe('schedule');
     });
 
+    it('opens suggestions for selection-only updates that start compose', () => {
+        expect(resolveOverlayTransactionAction({
+            transaction: {
+                docChanged: false,
+                selectionSet: true,
+            },
+            interactionState: 'closed',
+            isComposeActive: true,
+            isEmptyEnterChooserOpen: false,
+        })).toBe('schedule');
+    });
+
     it('closes the overlay for selection-only updates without compose', () => {
         expect(resolveOverlayTransactionAction({
             transaction: {

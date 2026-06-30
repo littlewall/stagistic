@@ -17,6 +17,7 @@ import {
 } from './constants';
 import {
     buildAbandonComposeTransaction,
+    buildEditCommittedTagTransaction,
     buildOpenComposeTransaction,
     buildTrailingTagSpaceCleanupTransaction,
 } from './transactions';
@@ -198,5 +199,27 @@ describe('buildOpenComposeTransaction', () => {
         const tr = buildTrailingTagSpaceCleanupTransaction(state, state);
 
         expect(tr).toBeNull();
+    });
+});
+
+describe('buildEditCommittedTagTransaction', () => {
+    it('opens compose over the complete existing character tag', () => {
+        const state = createMarkedState('JOHNY');
+        const tr = buildEditCommittedTagTransaction(state, 3);
+
+        if (!tr) {
+            throw new Error('Expected edit transaction');
+        }
+
+        const nextState = state.apply(tr);
+
+        expect(nextState.selection.from).toBe(6);
+        expect(tr.getMeta('character-tag-compose-open')).toBe(1);
+    });
+
+    it('ignores clicks outside a character tag', () => {
+        const state = createState('Plain text');
+
+        expect(buildEditCommittedTagTransaction(state, 3)).toBeNull();
     });
 });

@@ -32,7 +32,7 @@ export const resolveOverlayTransactionAction = ({
         return 'noop';
     }
 
-    if (interactionState !== 'closed' && isComposeActive) {
+    if (isComposeActive) {
         return 'schedule';
     }
 

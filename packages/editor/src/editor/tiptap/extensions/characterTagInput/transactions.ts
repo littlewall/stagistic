@@ -78,6 +78,28 @@ export const buildOpenComposeTransaction = (
         .scrollIntoView();
 };
 
+export const buildEditCommittedTagTransaction = (
+    state: EditorState,
+    pos: number,
+): Transaction | null => {
+    const markType = state.schema.marks[CHARACTER_TAG_MARK_NAME];
+
+    if (!markType || pos < 0 || pos > state.doc.content.size) {
+        return null;
+    }
+
+    const range = getMarkRange(state.doc.resolve(pos), markType);
+
+    if (!range) {
+        return null;
+    }
+
+    return state.tr
+        .setSelection(TextSelection.create(state.doc, range.to))
+        .setMeta(OPEN_META_KEY, range.from)
+        .scrollIntoView();
+};
+
 export const buildAbandonComposeTransaction = (
     state: EditorState,
     from: number,

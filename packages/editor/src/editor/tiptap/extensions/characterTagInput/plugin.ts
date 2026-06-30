@@ -21,6 +21,7 @@ import {
     buildAbandonComposeTransaction,
     buildCommittedTagExitTransaction,
     buildCommitTransaction,
+    buildEditCommittedTagTransaction,
     buildTrailingTagSpaceCleanupTransaction,
 } from './transactions';
 import type {
@@ -132,6 +133,17 @@ export const createCharacterTagComposePlugin = (
             return buildAbandonComposeTransaction(newState, from);
         },
         props: {
+            handleClick: (view, pos) => {
+                const tr = buildEditCommittedTagTransaction(view.state, pos);
+
+                if (!tr) {
+                    return false;
+                }
+
+                view.dispatch(tr);
+
+                return true;
+            },
             handleDOMEvents: {
                 blur: view => {
                     const compose = getCharacterTagComposeFromState(view.state);

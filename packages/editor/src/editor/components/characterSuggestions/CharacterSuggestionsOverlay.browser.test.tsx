@@ -1,6 +1,11 @@
 import '@stagistic/ui/styles/base.css';
 
-import type {ScriptDocument} from '@stagistic/script';
+import {
+    CHARACTER_TAG_ID_ATTR,
+    CHARACTER_TAG_KEY_ATTR,
+    CHARACTER_TAG_MARK_NAME,
+    type ScriptDocument,
+} from '@stagistic/script';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
@@ -70,6 +75,33 @@ const createTwoStageDirectionDocument = (): ScriptDocument => ({
                 {
                     type: 'text',
                     text: 'Other block',
+                },
+            ],
+        },
+    ],
+});
+
+const createStageDirectionWithCharacterTag = (): ScriptDocument => ({
+    type: 'doc',
+    content: [
+        {
+            type: 'stageDirection',
+            attrs: {
+                id: 'stage-direction-1',
+            },
+            content: [
+                {
+                    type: 'text',
+                    text: 'Johny',
+                    marks: [
+                        {
+                            type: CHARACTER_TAG_MARK_NAME,
+                            attrs: {
+                                [CHARACTER_TAG_KEY_ATTR]: 'JOHNY',
+                                [CHARACTER_TAG_ID_ATTR]: 'johny-id',
+                            },
+                        },
+                    ],
                 },
             ],
         },
@@ -316,6 +348,22 @@ describe('CharacterSuggestionsOverlay browser behavior', () => {
         await waitForVisibleOption('JOHNY');
         await waitForVisibleOption('JOSEF');
         expect(getOptionByName('VACLAV')).toBeNull();
+        await expectSuggestionsVisuallyReachable();
+    });
+
+    it('shows character suggestions when editing an existing stage-direction pill', async () => {
+        renderEditor(createStageDirectionWithCharacterTag());
+
+        const tag = page.elementLocator(await waitForElement('[data-character-key="JOHNY"]'));
+
+        await tag.click();
+        await waitForVisibleListbox();
+        await waitForVisibleOption('JOHNY');
+
+        await userEvent.keyboard('{Backspace}{Backspace}{Backspace}');
+        await waitForAnimationFrame();
+        await waitForVisibleOption('JOHNY');
+        await waitForVisibleOption('JOSEF');
         await expectSuggestionsVisuallyReachable();
     });
 
