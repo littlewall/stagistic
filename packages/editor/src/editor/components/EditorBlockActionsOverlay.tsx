@@ -41,18 +41,18 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
     const {
         isMenuOpen: isTypeMenuOpen,
         closeMenu: closeTypeMenu,
+        closeMenuAndRestoreFocus: closeTypeMenuAndRestoreFocus,
         toggleMenu: toggleTypeMenu,
     } = useBlockActionsMenuState({
-        editor,
         triggerRef: typeTriggerRef,
         menuRef: typeMenuRef,
     });
     const {
         isMenuOpen: isActionMenuOpen,
         closeMenu: closeActionMenu,
+        closeMenuAndRestoreFocus: closeActionMenuAndRestoreFocus,
         toggleMenu: toggleActionMenu,
     } = useBlockActionsMenuState({
-        editor,
         triggerRef: actionTriggerRef,
         menuRef: actionMenuRef,
     });
@@ -99,10 +99,8 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
         handleKeyboardTypeTriggerKeyDown,
         handleKeyboardActionTriggerKeyDown,
         handleBlockAction,
-        closeActionMenuAndRestoreFocus,
     } = useGutterMenuInteractions({
         editor,
-        actionTriggerRef,
         closeActionMenu,
         closeTypeMenu,
         toggleActionMenu,
@@ -276,6 +274,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
                     isDragging: Boolean(activeDrag),
                     isDisabled: isMenuDisabledBlock,
                     isDragPending: Boolean(pendingPress),
+                    onClose: closeTypeMenuAndRestoreFocus,
                     onPointerDown: handleTriggerPointerDown,
                     onKeyboardKeyDown: handleKeyboardTypeTriggerKeyDown,
                     onMenuItemMouseDown: handleMenuItemMouseDown,

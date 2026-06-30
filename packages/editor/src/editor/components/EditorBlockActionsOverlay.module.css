@@ -223,7 +223,7 @@
     align-content: start;
     min-width: calc(200px * var(--size-scale));
     max-height: min(calc(280px * var(--size-scale)), var(--anchored-menu-max-height, calc(280px * var(--size-scale))));
-    padding: var(--space-sm);
+    padding: var(--space-sm) 0;
 }
 
 .menuSecondaryPanel {
@@ -237,41 +237,54 @@
 .menuSecondaryContent {
     display: grid;
     align-content: start;
-    padding: var(--space-sm);
+    padding: var(--space-sm) 0;
 }
 
 .menuItem {
     cursor: pointer;
-    display: grid;
-    grid-template-columns: 20px 1fr;
-    gap: var(--space-md);
-    align-items: center;
-    padding: var(--space-sm) var(--space-md);
+    display: block;
+    width: 100%;
+    padding: 0 var(--space-sm);
     font-family: inherit;
     font-size: var(--font-size-sm);
     color: var(--color-text);
     text-align: left;
     background: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--radius-lg);
-    transition: background .15s ease, box-shadow .15s ease;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
 
-    &:hover {
+    &:hover .menuItemSurface {
         background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+    }
+
+    &:focus-visible .menuItemSurface {
+        box-shadow: 0 0 0 2px var(--color-focus-ring);
     }
 
     &.active {
         font-weight: var(--font-weight-semibold);
-        background: color-mix(in oklch, var(--color-surface-accent) 70%, transparent);
 
-        &:hover {
+        & .menuItemSurface,
+        &:hover .menuItemSurface {
             background: color-mix(in oklch, var(--color-surface-accent) 70%, transparent);
         }
     }
 
-    &.submenu {
+    &.submenu .menuItemSurface {
         grid-template-columns: 20px 1fr auto;
     }
+}
+
+.menuItemSurface {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: var(--space-md);
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    transition: background .15s ease, box-shadow .15s ease;
 }
 
 .menuItemIcon {

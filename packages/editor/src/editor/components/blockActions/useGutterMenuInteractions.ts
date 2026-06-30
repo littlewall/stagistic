@@ -2,7 +2,6 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
     type KeyboardEvent as ReactKeyboardEvent,
     type PointerEvent as ReactPointerEvent,
-    type RefObject,
     useCallback,
 } from 'react';
 
@@ -10,7 +9,6 @@ import type {BlockActionCommand} from './actionTypes';
 
 interface UseGutterMenuInteractionsArgs {
     editor: TiptapEditor | null,
-    actionTriggerRef: RefObject<HTMLButtonElement | null>,
     closeActionMenu: () => void,
     closeTypeMenu: () => void,
     toggleActionMenu: () => void,
@@ -19,7 +17,6 @@ interface UseGutterMenuInteractionsArgs {
 
 export const useGutterMenuInteractions = ({
     editor,
-    actionTriggerRef,
     closeActionMenu,
     closeTypeMenu,
     toggleActionMenu,
@@ -67,17 +64,18 @@ export const useGutterMenuInteractions = ({
 
         event.preventDefault();
         event.stopPropagation();
+        editor?.commands.focus();
         closeTypeMenu();
         toggleActionMenu();
-    }, [closeTypeMenu, toggleActionMenu]);
+    }, [
+        closeTypeMenu,
+        editor,
+        toggleActionMenu,
+    ]);
     const handleBlockAction = useCallback((command: BlockActionCommand) => {
         closeActionMenu();
         command.run();
     }, [closeActionMenu]);
-    const closeActionMenuAndRestoreFocus = useCallback(() => {
-        closeActionMenu();
-        window.requestAnimationFrame(() => actionTriggerRef.current?.focus());
-    }, [actionTriggerRef, closeActionMenu]);
 
     return {
         closeGutterMenus,
@@ -86,6 +84,5 @@ export const useGutterMenuInteractions = ({
         handleKeyboardTypeTriggerKeyDown,
         handleKeyboardActionTriggerKeyDown,
         handleBlockAction,
-        closeActionMenuAndRestoreFocus,
     };
 };

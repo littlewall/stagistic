@@ -265,15 +265,26 @@ describe('block action menu', () => {
         renderEditor();
 
         await getEditor();
+        await poll(
+            () => document.activeElement?.matches('[data-editor="true"]') ? true : null,
+            'editor autofocus',
+        );
 
         const trigger = await getActionTrigger('sd-1');
 
         trigger.focus();
-        await userEvent.keyboard('{Enter}');
+        trigger.dispatchEvent(new KeyboardEvent('keydown', {
+            key: 'Enter',
+            bubbles: true,
+            cancelable: true,
+        }));
 
         const cuesItem = await poll(() => findMenuItem('Cues'), 'Cues item');
 
-        expect(document.activeElement).toBe(cuesItem);
+        await poll(
+            () => document.activeElement === cuesItem ? cuesItem : null,
+            'Cues item focus',
+        );
 
         await userEvent.keyboard('{ArrowRight}');
 
@@ -310,6 +321,30 @@ describe('block action menu', () => {
         await page.elementLocator(typeTrigger).hover();
 
         expect(document.querySelector('[data-block-submenu-panel="cues"]')).toBeNull();
+    });
+
+    it('extends the menu-item hit target to the panel edge while keeping its surface inset', async () => {
+        renderEditor();
+
+        await getEditor();
+
+        const menu = await openActionMenu('sd-1');
+        const cuesItem = await poll(() => findMenuItem('Cues'), 'Cues item');
+        const panel = menu.querySelector<HTMLElement>('[data-block-menu-panel="primary"]');
+        const surface = cuesItem.querySelector<HTMLElement>('[data-menu-item-surface]');
+
+        if (!panel || !surface) {
+            throw new Error('Menu panel or item surface not found');
+        }
+
+        const panelRect = panel.getBoundingClientRect();
+        const itemRect = cuesItem.getBoundingClientRect();
+        const surfaceRect = surface.getBoundingClientRect();
+
+        expect(itemRect.left).toBeCloseTo(panelRect.left, 1);
+        expect(itemRect.right).toBeCloseTo(panelRect.right, 1);
+        expect(surfaceRect.left).toBeGreaterThan(itemRect.left);
+        expect(surfaceRect.right).toBeLessThan(itemRect.right);
     });
 
     it('preserves the native contextmenu event', async () => {

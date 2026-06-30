@@ -7,12 +7,26 @@ import type {
 } from 'react';
 
 import type {BlockNodeType} from '../../tiptap/scriptCore';
+import type {
+    BlockActionCommand,
+    BlockActionItem,
+} from './actionTypes';
+
+export interface BlockActionMenuProps {
+    items: readonly BlockActionItem[],
+    isMenuAbove: boolean,
+    menuRef: RefObject<HTMLDivElement | null>,
+    menuStyle: CSSProperties | undefined,
+    onClose: () => void,
+    onExecute: (command: BlockActionCommand) => void,
+}
 
 export interface BlockTypeMenuProps {
     blockType: BlockNodeType,
     isMenuAbove: boolean,
     menuRef: RefObject<HTMLDivElement | null>,
     menuStyle: CSSProperties | undefined,
+    onClose: () => void,
     onMenuItemMouseDown: (
         optionType: ScriptBlockNodeType,
         event: ReactMouseEvent<HTMLButtonElement>,
@@ -33,7 +47,6 @@ export interface UseMenuPlacementArgs {
 }
 
 export interface UseBlockActionsMenuStateArgs {
-    editor: TiptapEditor | null,
     triggerRef: RefObject<HTMLButtonElement | null>,
     menuRef: RefObject<HTMLDivElement | null>,
 }

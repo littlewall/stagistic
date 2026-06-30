@@ -1,8 +1,7 @@
-import clsx from 'clsx';
-
 import {BLOCKS_WITHOUT_ACT} from '../../blocks/blockRegistry';
 import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
 import styles from '../EditorBlockActionsOverlay.module.css';
+import {ContextMenu} from './ContextMenu';
 import type {BlockTypeMenuProps} from './types';
 
 export const BlockTypeMenu = ({
@@ -10,39 +9,26 @@ export const BlockTypeMenu = ({
     isMenuAbove,
     menuRef,
     menuStyle,
+    onClose,
     onMenuItemMouseDown,
 }: BlockTypeMenuProps) => {
     return (
-        <div
-            className={clsx(
-                styles.menu,
-                styles.typeMenu,
-                isMenuAbove && styles.above,
-            )}
-            data-block-type-menu="true"
-            role="menu"
-            ref={menuRef}
-            style={menuStyle}
-        >
-            <div className={styles.menuPrimaryPanel} data-block-menu-panel="primary">
-                {BLOCKS_WITHOUT_ACT.map(option => (
-                    <button
-                        key={option.type}
-                        type="button"
-                        role="menuitem"
-                        className={clsx(
-                            styles.menuItem,
-                            option.type === blockType && styles.active,
-                        )}
-                        onMouseDown={event => onMenuItemMouseDown(option.type, event)}
-                    >
-                        <span className={styles.menuItemIcon}>
-                            {BLOCK_ICONS[option.type]}
-                        </span>
-                        <span className={styles.menuItemLabel}>{option.label}</span>
-                    </button>
-                ))}
-            </div>
-        </div>
+        <ContextMenu
+            ariaLabel="Block types"
+            items={BLOCKS_WITHOUT_ACT.map(option => ({
+                kind: 'command',
+                id: option.type,
+                label: option.label,
+                icon: BLOCK_ICONS[option.type],
+                isActive: option.type === blockType,
+                onMouseDown: event => onMenuItemMouseDown(option.type, event),
+            }))}
+            isMenuAbove={isMenuAbove}
+            menuRef={menuRef}
+            menuStyle={menuStyle}
+            positionClassName={styles.typeMenu}
+            rootDataAttributes={{'data-block-type-menu': 'true'}}
+            onClose={onClose}
+        />
     );
 };

@@ -47,6 +47,7 @@ interface BlockGutterControlsProps {
         isDragging: boolean,
         isDisabled: boolean,
         isDragPending: boolean,
+        onClose: () => void,
         onPointerDown: (event: ReactPointerEvent<HTMLButtonElement>) => void,
         onKeyboardKeyDown: (event: ReactKeyboardEvent<HTMLButtonElement>) => void,
         onMenuItemMouseDown: (
@@ -132,6 +133,7 @@ export const BlockGutterControls = ({
                     isMenuAbove={typeMenu.isAbove}
                     menuRef={typeMenu.menuRef}
                     menuStyle={typeMenu.style}
+                    onClose={typeMenu.onClose}
                     onMenuItemMouseDown={typeMenu.onMenuItemMouseDown}
                 />
             ) : null}

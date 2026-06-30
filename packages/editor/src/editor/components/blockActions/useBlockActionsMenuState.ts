@@ -8,11 +8,17 @@ import {useExclusiveOverlay} from '../../hooks/useExclusiveOverlay';
 import type {UseBlockActionsMenuStateArgs} from './types';
 
 export const useBlockActionsMenuState = ({
-    editor,
     triggerRef,
     menuRef,
 }: UseBlockActionsMenuStateArgs) => {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const closeMenu = useCallback(() => {
+        setIsMenuOpen(false);
+    }, []);
+    const closeMenuAndRestoreFocus = useCallback(() => {
+        triggerRef.current?.focus();
+        setIsMenuOpen(false);
+    }, [triggerRef]);
 
     useEffect(() => {
         if (!isMenuOpen) {
@@ -35,8 +41,7 @@ export const useBlockActionsMenuState = ({
 
         const onKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
-                setIsMenuOpen(false);
-                window.requestAnimationFrame(() => triggerRef.current?.focus());
+                closeMenuAndRestoreFocus();
             }
         };
 
@@ -48,25 +53,22 @@ export const useBlockActionsMenuState = ({
             document.removeEventListener('keydown', onKeyDown);
         };
     }, [
+        closeMenuAndRestoreFocus,
         isMenuOpen,
         menuRef,
         triggerRef,
     ]);
 
-    const closeMenu = useCallback(() => {
-        setIsMenuOpen(false);
-    }, []);
-
     useExclusiveOverlay(isMenuOpen, closeMenu);
 
     const toggleMenu = useCallback(() => {
         setIsMenuOpen(previous => !previous);
-        editor?.commands.focus();
-    }, [editor]);
+    }, []);
 
     return {
         isMenuOpen,
         closeMenu,
+        closeMenuAndRestoreFocus,
         toggleMenu,
     };
 };
