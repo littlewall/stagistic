@@ -1,0 +1,10 @@
+.tooltip {
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-surface);
+    letter-spacing: var(--letter-spacing-sm);
+    background: var(--color-text);
+    border-radius: var(--radius-full);
+    box-shadow: var(--shadow-popover);
+}

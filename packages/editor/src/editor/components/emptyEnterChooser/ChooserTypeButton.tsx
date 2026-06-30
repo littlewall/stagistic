@@ -1,3 +1,4 @@
+import {Tooltip} from '@stagistic/ui';
 import clsx from 'clsx';
 import type {MouseEvent as ReactMouseEvent} from 'react';
 
@@ -19,16 +20,17 @@ export const ChooserTypeButton = ({
     onMouseDown,
 }: ChooserTypeButtonProps) => {
     return (
-        <button
-            type="button"
-            className={clsx(styles.button, isActive && styles.active)}
-            aria-label={`Set block type to ${label}`}
-            title={label}
-            onMouseDown={event => onMouseDown(optionType, event)}
-        >
-            <span className={styles.icon}>
-                {BLOCK_ICONS[optionType]}
-            </span>
-        </button>
+        <Tooltip label={label}>
+            <button
+                type="button"
+                className={clsx(styles.button, isActive && styles.active)}
+                aria-label={`Set block type to ${label}`}
+                onMouseDown={event => onMouseDown(optionType, event)}
+            >
+                <span className={styles.icon}>
+                    {BLOCK_ICONS[optionType]}
+                </span>
+            </button>
+        </Tooltip>
     );
 };

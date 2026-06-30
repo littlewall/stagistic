@@ -8,13 +8,13 @@
     pointer-events: auto;
     transform: translate(0, calc(-100% - var(--space-md)));
     display: inline-flex;
-    gap: var(--space-sm);
+    gap: var(--bubble-menu-gap);
     align-items: center;
-    padding: var(--space-sm);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-xl);
-    box-shadow: 0 1px 2px color-mix(in oklch, var(--color-text) 12%, transparent);
+    padding: var(--bubble-menu-padding);
+    background: var(--bubble-menu-bg);
+    border: var(--bubble-menu-border);
+    border-radius: var(--bubble-menu-radius);
+    box-shadow: var(--bubble-menu-shadow);
 }
 
 .button {
@@ -22,12 +22,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(28px * var(--size-scale));
-    height: calc(28px * var(--size-scale));
+    width: var(--bubble-menu-button-size);
+    height: var(--bubble-menu-button-size);
     color: var(--color-text-muted);
     background: transparent;
     border: 1px solid transparent;
-    border-radius: var(--radius-md);
+    border-radius: var(--bubble-menu-button-radius);
     transition: background .15s ease, border-color .15s ease, color .15s ease;
 
     &:hover {
@@ -49,12 +49,12 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(16px * var(--size-scale));
-    height: calc(16px * var(--size-scale));
+    width: var(--bubble-menu-icon-size);
+    height: var(--bubble-menu-icon-size);
 
     & :global(svg) {
-        width: 16px;
-        height: 16px;
+        width: var(--bubble-menu-icon-size);
+        height: var(--bubble-menu-icon-size);
         fill: none;
         stroke: currentcolor;
         stroke-linecap: round;

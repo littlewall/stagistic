@@ -1,4 +1,4 @@
-import {TrashIcon} from '@stagistic/ui';
+import {Tooltip, TrashIcon} from '@stagistic/ui';
 import clsx from 'clsx';
 import type {ReactNode} from 'react';
 
@@ -29,47 +29,25 @@ export const CueModeIcon = ({mode}: {mode: CueMode}) => {
     return <CueRangeIcon />;
 };
 
-export const MoreVerticalIcon = () => (
-    <svg
-        viewBox="0 0 24 24"
-        aria-hidden="true"
-    >
-        <circle
-            cx="12"
-            cy="6.5"
-            r="1.35"
-        />
-        <circle
-            cx="12"
-            cy="12"
-            r="1.35"
-        />
-        <circle
-            cx="12"
-            cy="17.5"
-            r="1.35"
-        />
-    </svg>
-);
-
 export const CueMenuButton = ({
     label,
     isDanger = false,
     onClick,
     children,
 }: CueMenuButtonProps) => (
-    <button
-        type="button"
-        className={clsx(styles.menuButton, isDanger && styles.dangerButton)}
-        aria-label={label}
-        title={label}
-        onMouseDown={keepEditorFocus}
-        onClick={onClick}
-    >
-        <span className={styles.icon}>
-            {children}
-        </span>
-    </button>
+    <Tooltip label={label}>
+        <button
+            type="button"
+            className={clsx(styles.menuButton, isDanger && styles.dangerButton)}
+            aria-label={label}
+            onMouseDown={keepEditorFocus}
+            onClick={onClick}
+        >
+            <span className={styles.icon}>
+                {children}
+            </span>
+        </button>
+    </Tooltip>
 );
 
 export const CueDeleteIcon = () => <TrashIcon aria-hidden="true" />;

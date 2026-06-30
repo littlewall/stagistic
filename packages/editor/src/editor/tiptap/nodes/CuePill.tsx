@@ -10,7 +10,6 @@ import clsx from 'clsx';
 import {
     type CSSProperties,
     type FocusEvent,
-    type MouseEvent as ReactMouseEvent,
     type RefObject,
     useEffect,
     useRef,
@@ -24,25 +23,22 @@ import {
     type CueMode,
     CueModeIcon,
     getModeButtonLabel,
-    MoreVerticalIcon,
 } from './CuePillControls';
 
 type CueTitleInputStyle = CSSProperties & {'--cue-title-width': string};
 
 const usePillActivation = () => {
     const [active, setActive] = useState(false);
-    const [open, setOpen] = useState(false);
     const rootRef = useRef<HTMLSpanElement>(null);
 
     useEffect(() => {
-        if (!active && !open) {
+        if (!active) {
             return undefined;
         }
 
         const onPointerDown = (event: MouseEvent) => {
             if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
                 setActive(false);
-                setOpen(false);
             }
         };
 
@@ -51,13 +47,11 @@ const usePillActivation = () => {
         return () => {
             document.removeEventListener('mousedown', onPointerDown);
         };
-    }, [active, open]);
+    }, [active]);
 
     return {
         active,
-        open,
         setActive,
-        setOpen,
         rootRef,
     };
 };
@@ -67,7 +61,9 @@ const normalizeTitle = (value: unknown) => {
 };
 
 const getTitleInputStyle = (title: string): CueTitleInputStyle => {
-    const width = Math.max(title.length, 3);
+    // Empty: reserve 3ch for the "cue" placeholder. Otherwise grow exactly with
+    // the typed text so the field hugs the content from the first character.
+    const width = title.length === 0 ? 3 : title.length;
 
     return {'--cue-title-width': `${width}ch`};
 };
@@ -79,7 +75,6 @@ const handleFocusWithin = (setActive: (active: boolean) => void) => {
 const handleBlurWithin = (
     rootRef: RefObject<HTMLSpanElement | null>,
     setActive: (active: boolean) => void,
-    setOpen: (open: boolean) => void,
 ) => {
     return (event: FocusEvent<HTMLSpanElement>) => {
         const nextTarget = event.relatedTarget;
@@ -89,19 +84,6 @@ const handleBlurWithin = (
         }
 
         setActive(false);
-        setOpen(false);
-    };
-};
-
-const handleMenuTriggerMouseDown = (
-    setActive: (active: boolean) => void,
-    setOpen: (open: boolean | ((open: boolean) => boolean)) => void,
-) => {
-    return (event: ReactMouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        event.stopPropagation();
-        setActive(true);
-        setOpen(previous => !previous);
     };
 };
 
@@ -121,8 +103,9 @@ export const CueStartPill = ({
     node, updateAttributes, deleteNode, decorations,
 }: NodeViewProps) => {
     const {
-        active, open, setActive, setOpen, rootRef,
+        active, setActive, rootRef,
     } = usePillActivation();
+    const inputRef = useRef<HTMLInputElement>(null);
     const mode: CueMode = node.attrs[CUE_MODE_ATTR] === 'hit' ? 'hit' : 'open';
     const title = normalizeTitle(node.attrs[CUE_TITLE_ATTR]);
     const cueNumber = readDecorationLabel(decorations, 'cueNumber');
@@ -150,7 +133,6 @@ export const CueStartPill = ({
 
     const toggleMode = () => {
         updateAttributes({[CUE_MODE_ATTR]: mode === 'hit' ? 'open' : 'hit'});
-        setOpen(false);
     };
 
     const deleteCue = () => {
@@ -165,9 +147,17 @@ export const CueStartPill = ({
             data-cue-pill="start"
             contentEditable={false}
             onFocus={handleFocusWithin(setActive)}
-            onBlur={handleBlurWithin(rootRef, setActive, setOpen)}
+            onBlur={handleBlurWithin(rootRef, setActive)}
         >
-            <span className={styles.tagBody}>
+            <span
+                className={styles.tagBody}
+                onMouseDown={event => {
+                    if (event.target !== inputRef.current) {
+                        event.preventDefault();
+                        inputRef.current?.focus();
+                    }
+                }}
+            >
                 <span
                     className={styles.number}
                     data-cue-number
@@ -175,6 +165,7 @@ export const CueStartPill = ({
                 >{cueNumber}
                 </span>
                 <input
+                    ref={inputRef}
                     className={styles.titleInput}
                     data-cue-title-input="start"
                     aria-label="Cue title"
@@ -201,22 +192,8 @@ export const CueStartPill = ({
                         }
                     }}
                 />
-                {active ? (
-                    <button
-                        type="button"
-                        className={styles.menuTrigger}
-                        data-cue-menu-trigger="start"
-                        aria-label="Open cue menu"
-                        title="Cue menu"
-                        onMouseDown={handleMenuTriggerMouseDown(setActive, setOpen)}
-                    >
-                        <span className={styles.triggerIcon}>
-                            <MoreVerticalIcon />
-                        </span>
-                    </button>
-                ) : null}
             </span>
-            {open ? (
+            {active ? (
                 <span
                     className={styles.menu}
                     data-cue-menu="start"
@@ -239,7 +216,7 @@ export const CueStartPill = ({
 
 export const CueOutPill = ({deleteNode, decorations}: NodeViewProps) => {
     const {
-        active, open, setActive, setOpen, rootRef,
+        active, setActive, rootRef,
     } = usePillActivation();
     const outLabel = readDecorationLabel(decorations, 'outLabel') || 'out';
     const outNumber = readDecorationLabel(decorations, 'outNumber');
@@ -253,31 +230,19 @@ export const CueOutPill = ({deleteNode, decorations}: NodeViewProps) => {
             data-cue-pill="out"
             contentEditable={false}
             onFocus={handleFocusWithin(setActive)}
-            onBlur={handleBlurWithin(rootRef, setActive, setOpen)}
+            onBlur={handleBlurWithin(rootRef, setActive)}
         >
             <span
                 className={clsx(styles.tagBody, styles.outLabel)}
+                role="button"
+                tabIndex={-1}
                 aria-label={outLabel}
                 onClick={() => setActive(true)}
             >
                 <span className={styles.outStrong} data-cue-out-primary>{outNumber ? `${outNumber} out` : 'out'}</span>
                 {outTitle ? <span className={styles.outTitle} data-cue-out-title>{` (${outTitle})`}</span> : null}
-                {active ? (
-                    <button
-                        type="button"
-                        className={styles.menuTrigger}
-                        data-cue-menu-trigger="out"
-                        aria-label="Open cue end menu"
-                        title="Cue end menu"
-                        onMouseDown={handleMenuTriggerMouseDown(setActive, setOpen)}
-                    >
-                        <span className={styles.triggerIcon}>
-                            <MoreVerticalIcon />
-                        </span>
-                    </button>
-                ) : null}
             </span>
-            {open ? (
+            {active ? (
                 <span
                     className={styles.menu}
                     data-cue-menu="out"

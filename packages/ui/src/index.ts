@@ -1,6 +1,7 @@
 export {Button} from './atoms/Button';
 export {Input} from './atoms/Input';
 export {Tag} from './atoms/Tag';
+export {Tooltip, type TooltipProps} from './atoms/Tooltip';
 export {
     Kicker,
     PageTitle,

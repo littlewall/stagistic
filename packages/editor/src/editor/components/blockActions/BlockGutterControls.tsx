@@ -1,4 +1,5 @@
 import type {ScriptBlockNodeType} from '@stagistic/script';
+import {Tooltip} from '@stagistic/ui';
 import clsx from 'clsx';
 import type {
     CSSProperties,
@@ -65,58 +66,65 @@ export const BlockGutterControls = ({
     return (
         <div className={styles.controls}>
             {actionMenu.items.length > 0 ? (
+                <Tooltip label="Block actions" isDisabled={actionMenu.isOpen}>
+                    <button
+                        className={clsx(
+                            styles.trigger,
+                            styles.actionTrigger,
+                            actionMenu.isOpen && styles.open,
+                        )}
+                        type="button"
+                        aria-label="Block actions"
+                        aria-haspopup="menu"
+                        aria-expanded={actionMenu.isOpen}
+                        data-block-action-trigger="true"
+                        data-block-id={block.id}
+                        data-block-type={block.type}
+                        ref={actionMenu.triggerRef}
+                        onPointerDown={actionMenu.onPointerDown}
+                        onKeyDown={actionMenu.onKeyboardKeyDown}
+                    >
+                        <span className={styles.triggerGlyph} aria-hidden="true">
+                            <span className={styles.triggerIcon}>
+                                <MoreHorizontalIcon />
+                            </span>
+                        </span>
+                    </button>
+                </Tooltip>
+            ) : null}
+            <Tooltip
+                label="Change block type"
+                isDisabled={typeMenu.isDisabled || typeMenu.isOpen || typeMenu.isDragging}
+            >
                 <button
                     className={clsx(
                         styles.trigger,
-                        styles.actionTrigger,
-                        actionMenu.isOpen && styles.open,
+                        styles.typeTrigger,
+                        typeMenu.isOpen && styles.open,
+                        typeMenu.isDisabled && styles.noHover,
+                        typeMenu.isPressVisualActive && styles.pressing,
+                        typeMenu.isDragging && styles.dragging,
                     )}
                     type="button"
-                    aria-label="Block actions"
+                    aria-label={`Change block type (current: ${block.label})`}
                     aria-haspopup="menu"
-                    aria-expanded={actionMenu.isOpen}
-                    data-block-action-trigger="true"
+                    aria-expanded={typeMenu.isOpen}
+                    data-block-actions-trigger="true"
                     data-block-id={block.id}
                     data-block-type={block.type}
-                    ref={actionMenu.triggerRef}
-                    onPointerDown={actionMenu.onPointerDown}
-                    onKeyDown={actionMenu.onKeyboardKeyDown}
+                    data-drag-pending={typeMenu.isDragPending ? 'true' : undefined}
+                    ref={typeMenu.triggerRef}
+                    onPointerDown={typeMenu.onPointerDown}
+                    onKeyDown={typeMenu.onKeyboardKeyDown}
                 >
                     <span className={styles.triggerGlyph} aria-hidden="true">
                         <span className={styles.triggerIcon}>
-                            <MoreHorizontalIcon />
+                            {block.icon}
                         </span>
+                        <span className={styles.dragGrip} />
                     </span>
                 </button>
-            ) : null}
-            <button
-                className={clsx(
-                    styles.trigger,
-                    styles.typeTrigger,
-                    typeMenu.isOpen && styles.open,
-                    typeMenu.isDisabled && styles.noHover,
-                    typeMenu.isPressVisualActive && styles.pressing,
-                    typeMenu.isDragging && styles.dragging,
-                )}
-                type="button"
-                aria-label={`Change block type (current: ${block.label})`}
-                aria-haspopup="menu"
-                aria-expanded={typeMenu.isOpen}
-                data-block-actions-trigger="true"
-                data-block-id={block.id}
-                data-block-type={block.type}
-                data-drag-pending={typeMenu.isDragPending ? 'true' : undefined}
-                ref={typeMenu.triggerRef}
-                onPointerDown={typeMenu.onPointerDown}
-                onKeyDown={typeMenu.onKeyboardKeyDown}
-            >
-                <span className={styles.triggerGlyph} aria-hidden="true">
-                    <span className={styles.triggerIcon}>
-                        {block.icon}
-                    </span>
-                    <span className={styles.dragGrip} />
-                </span>
-            </button>
+            </Tooltip>
             {actionMenu.isOpen && !typeMenu.isDragging ? (
                 <BlockActionMenu
                     items={actionMenu.items}

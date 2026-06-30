@@ -9,8 +9,11 @@ import {
 } from 'react';
 
 import {
+    findScriptBlockByIdFromState,
     getActiveScriptBlockFromState,
     isSelectionAcrossBlocks,
+    SCRIPT_BLOCK_DOM_ID_ATTRIBUTE,
+    SCRIPT_BLOCK_DOM_SELECTOR,
     SCRIPT_BLOCK_NODE_NAMES,
 } from '../../tiptap/scriptCore';
 import type {BlockActionsPointerState} from './overlay/types';
@@ -40,6 +43,21 @@ const hasBlockActionsOverlayFocus = () => {
         && Boolean(activeElement.closest('[data-block-actions-overlay="true"]'));
 };
 
+// A focused cue pill steals DOM focus from the editor, so the selection-based
+// active block resolves to null. Resolve the block that owns the focused pill
+// from the DOM instead, so clicking a cue tag activates its block.
+const resolveFocusedCuePillBlockId = () => {
+    const activeElement = document.activeElement;
+
+    if (!(activeElement instanceof Element) || !activeElement.closest('[data-cue-pill]')) {
+        return null;
+    }
+
+    const blockElement = activeElement.closest<HTMLElement>(SCRIPT_BLOCK_DOM_SELECTOR);
+
+    return blockElement?.getAttribute(SCRIPT_BLOCK_DOM_ID_ATTRIBUTE) || null;
+};
+
 export const useOverlayPosition = ({
     editor,
     isMenuOpen,
@@ -62,6 +80,22 @@ export const useOverlayPosition = ({
             commitActiveBlockState(null);
 
             return;
+        }
+
+        const focusedCuePillBlockId = resolveFocusedCuePillBlockId();
+
+        if (focusedCuePillBlockId) {
+            const cueBlock = findScriptBlockByIdFromState(targetEditor.state, focusedCuePillBlockId);
+
+            if (cueBlock) {
+                commitActiveBlockState({
+                    blockId: cueBlock.id,
+                    blockType: cueBlock.blockType,
+                    blockPos: cueBlock.pos,
+                });
+
+                return;
+            }
         }
 
         if (!isMenuOpen && !hasFocusRef.current && !hasBlockActionsOverlayFocus()) {
@@ -122,6 +156,12 @@ export const useOverlayPosition = ({
             }
 
             window.requestAnimationFrame(() => {
+                if (resolveFocusedCuePillBlockId()) {
+                    updateActiveBlockState(editor);
+
+                    return;
+                }
+
                 if (!editor.isFocused && !hasBlockActionsOverlayFocus()) {
                     commitActiveBlockState(null);
                 }
@@ -151,6 +191,12 @@ export const useOverlayPosition = ({
         }
 
         const handleDocumentFocusIn = () => {
+            if (resolveFocusedCuePillBlockId()) {
+                updateActiveBlockState(editor);
+
+                return;
+            }
+
             if (editor.isFocused || isMenuOpen || hasBlockActionsOverlayFocus()) {
                 return;
             }
@@ -167,6 +213,7 @@ export const useOverlayPosition = ({
         commitActiveBlockState,
         editor,
         isMenuOpen,
+        updateActiveBlockState,
     ]);
 
     return {

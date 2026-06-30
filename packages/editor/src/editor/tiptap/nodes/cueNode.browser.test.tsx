@@ -178,32 +178,76 @@ describe('cue pill node views', () => {
         await page.elementLocator(button).click();
     };
 
-    const clickMenuTrigger = async (type: 'start' | 'out') => {
-        const trigger = await poll(
-            () => document.querySelector(`[data-cue-menu-trigger="${type}"]`),
-            'cue menu trigger',
+    const activatePill = async () => {
+        const input = await poll(
+            () => document.querySelector('[data-cue-title-input="start"]'),
+            'title input',
         );
 
-        await page.elementLocator(trigger).click();
+        await page.elementLocator(input).click();
     };
 
-    it('activates the pill first, then opens the menu from the trigger and switches open↔hit', async () => {
+    it('shows the menu whenever the pill is active and switches open↔hit', async () => {
         renderEditor();
 
         const editor = await getEditor();
 
         editor.commands.insertCueStart('sd-1', 'Night');
 
-        const pill = await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
-
-        await page.elementLocator(pill).click();
+        await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
         expect(document.querySelector('[data-cue-menu="start"]')).toBeNull();
 
-        await clickMenuTrigger('start');
+        await activatePill();
         await poll(() => document.querySelector('[data-cue-menu="start"]'), 'pill menu');
         await clickMenuButton('Switch cue to hit');
 
         expect(cueStartAttrs(editor)?.mode).toBe('hit');
+    });
+
+    it('activates the pill when clicking anywhere on the tag, not just the input', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+
+        const number = await poll(
+            () => document.querySelector('[data-cue-number]'),
+            'cue number',
+        );
+
+        await page.elementLocator(number).click();
+
+        await poll(() => document.querySelector('[data-cue-menu="start"]'), 'pill menu');
+        expect(document.activeElement).toBe(document.querySelector('[data-cue-title-input="start"]'));
+    });
+
+    it('activates the enclosing block when the cue tag is focused', async () => {
+        renderEditor(createTwoBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-2', 'Night');
+
+        const input = await poll(
+            () => document.querySelector<HTMLInputElement>('[data-cue-title-input="start"]'),
+            'cue title input',
+        );
+
+        await page.elementLocator(input).click();
+
+        // Focus is on the cue input (editor is blurred), yet the block overlay
+        // should anchor to sd-2 — the block that owns the focused cue tag.
+        expect(document.activeElement).toBe(input);
+
+        const trigger = await poll(
+            () => document.querySelector(
+                '[data-block-actions-overlay="true"] [data-block-id="sd-2"]',
+            ),
+            'block actions overlay for sd-2',
+        );
+
+        expect(trigger).toBeTruthy();
     });
 
     it('edits the cue title inline in the pill', async () => {
@@ -252,10 +296,10 @@ describe('cue pill node views', () => {
 
         editor.commands.insertCueStart('sd-1', 'Night');
 
-        const pill = await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+        await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
 
-        await page.elementLocator(pill).click();
-        await clickMenuTrigger('start');
+        await activatePill();
+        await poll(() => document.querySelector('[data-cue-menu="start"]'), 'pill menu');
         await clickMenuButton('Delete cue');
         await poll(() => document.querySelector('[data-cue-pill="start"]') ? null : true, 'pill removed');
 
