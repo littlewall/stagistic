@@ -1,0 +1,53 @@
+.layer {
+    pointer-events: none;
+    user-select: none;
+    position: absolute;
+    z-index: 1;
+}
+
+.band {
+    position: absolute;
+    display: flex;
+    align-items: center;
+    font-family: var(--font-family-mono);
+    font-size: var(--editor-font-size, calc(13px * var(--size-scale)));
+    line-height: 1.2;
+    color: var(--color-text);
+    white-space: nowrap;
+    opacity: .6;
+}
+
+.cell {
+    position: absolute;
+    overflow: hidden;
+    max-width: 40%;
+    text-overflow: ellipsis;
+}
+
+.left {
+    left: 0;
+    text-align: left;
+}
+
+.center {
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+}
+
+.right {
+    right: 0;
+    text-align: right;
+}
+
+.bold {
+    font-weight: 700;
+}
+
+.italic {
+    font-style: italic;
+}
+
+.underline {
+    text-decoration: underline;
+}
