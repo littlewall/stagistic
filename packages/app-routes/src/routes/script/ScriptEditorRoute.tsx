@@ -77,6 +77,7 @@ export const ScriptEditorRoute = () => {
         updateCharacterColorSaturation,
         updateStructureSettings,
         updatePageSettings,
+        updateHeaderFooterSettings,
     } = useScriptEditorSettingsDraft({
         state: {
             currentScriptId,
@@ -271,6 +272,7 @@ export const ScriptEditorRoute = () => {
                             visualPreferencesHandlers={{onUpdateCharacterColorSaturation: updateCharacterColorSaturation}}
                             structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
                             pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
+                            headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
                             titlePageHandlers={{
                                 titlePageSettings: titlePageDraft,
                                 scriptTitle: currentScript?.name ?? '',

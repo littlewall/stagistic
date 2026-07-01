@@ -141,6 +141,7 @@ const persistExtractedBlocks = async (
                     id: makeTitlePageFieldId(scriptId, field.orderNo),
                     fieldKey: field.fieldKey,
                     fieldValue: field.fieldValue,
+                    groupNo: null,
                     orderNo: field.orderNo,
                     createdAt: migratedAt,
                     updatedAt: migratedAt,

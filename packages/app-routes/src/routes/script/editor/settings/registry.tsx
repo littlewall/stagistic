@@ -1,12 +1,14 @@
 import {
     SCRIPT_SETTINGS_PANEL_DANGER_ZONE,
     SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
+    SCRIPT_SETTINGS_PANEL_HEADERS,
     SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
     SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS,
     SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
 } from '../../settings/settingsMenu';
 import {DangerZoneSettingsPanel} from './danger-zone/DangerZoneSettingsPanel';
 import {TitlePageSettingsPanel} from './document-info/TitlePageSettingsPanel';
+import {HeaderFooterSettingsPanel} from './header-footer/HeaderFooterSettingsPanel';
 import {PageLayoutSettingsPanel} from './page-layout/PageLayoutSettingsPanel';
 import {StructureMarkersSettingsPanel} from './structure-markers/StructureMarkersSettingsPanel';
 import type {SectionRenderer} from './types';
@@ -24,6 +26,13 @@ export const SECTION_RENDERERS: Partial<Record<string, SectionRenderer>> = {
         <PageLayoutSettingsPanel
             resolvedScriptSettings={props.resolvedScriptSettings}
             onUpdatePageSettings={props.pageLayoutHandlers.onUpdatePageSettings}
+        />
+    ),
+    [SCRIPT_SETTINGS_PANEL_HEADERS]: props => (
+        <HeaderFooterSettingsPanel
+            settings={props.resolvedScriptSettings.headerFooter}
+            scriptTitle={props.titlePageHandlers.scriptTitle}
+            onUpdate={props.headerFooterHandlers.onUpdateHeaderFooterSettings}
         />
     ),
     [SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES]: props => (

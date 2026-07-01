@@ -1,0 +1,129 @@
+.composer {
+    display: grid;
+    gap: var(--space-2xl);
+}
+
+.previewSection {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.previewLabel {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.previewRow {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    min-height: 104px;
+    padding: var(--space-xl);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}
+
+.previewCell {
+    min-width: 0;
+    min-height: 62px;
+    padding: var(--space-lg);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    border: 1px solid transparent;
+    border-radius: var(--radius-xs);
+
+    &:hover {
+        color: var(--color-text);
+        background: var(--color-surface-raised);
+    }
+}
+
+.activeCell {
+    color: var(--color-text);
+    background: color-mix(in oklch, var(--color-surface-accent) 20%, transparent);
+    border-color: color-mix(in oklch, var(--color-surface-accent) 65%, var(--color-border));
+}
+
+.left {
+    justify-content: flex-start;
+    text-align: left;
+}
+.center {
+    justify-content: center;
+    text-align: center;
+}
+.right {
+    justify-content: flex-end;
+    text-align: right;
+}
+
+.previewText {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    &[data-bold] {
+        font-weight: var(--font-weight-bold);
+    }
+    &[data-italic] {
+        font-style: italic;
+    }
+    &[data-underline] {
+        text-decoration: underline;
+        text-underline-offset: 2px;
+    }
+}
+
+.editor {
+    display: grid;
+    gap: var(--space-lg);
+    padding: var(--space-xl);
+    background: var(--color-surface-raised);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+
+.editorToolbar {
+    display: flex;
+    gap: var(--space-xl);
+    align-items: center;
+    justify-content: space-between;
+}
+
+.formattingGroup {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.formatButton.formatButton {
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: var(--radius-sm);
+
+    & svg {
+        width: 16px;
+        height: 16px;
+    }
+}
+
+.activeFormat {
+    color: var(--color-text);
+    background: color-mix(in oklch, var(--color-surface-accent) 42%, transparent);
+}
+
+.variables {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+}
+
+.variableButton {
+    padding: 5px var(--space-lg);
+    font-size: var(--font-size-xs);
+}

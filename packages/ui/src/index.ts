@@ -1,5 +1,6 @@
 export {Button} from './atoms/Button';
 export {Input} from './atoms/Input';
+export {Switch} from './atoms/Switch';
 export {Tag} from './atoms/Tag';
 export {Tooltip, type TooltipProps} from './atoms/Tooltip';
 export {

@@ -23,6 +23,18 @@ export const mergeEditorSettings = (
                 linesAfter: base.structure.actDisplay.linesAfter,
             },
         },
+        headerFooter: {
+            header: {
+                left: {...base.headerFooter.header.left},
+                center: {...base.headerFooter.header.center},
+                right: {...base.headerFooter.header.right},
+            },
+            footer: {
+                left: {...base.headerFooter.footer.left},
+                center: {...base.headerFooter.footer.center},
+                right: {...base.headerFooter.footer.right},
+            },
+        },
         blocks: {...base.blocks},
     };
 
@@ -86,6 +98,21 @@ export const mergeEditorSettings = (
                         ?? next.structure.actDisplay.linesBefore,
                     linesAfter: override.structure.actDisplay?.linesAfter
                         ?? next.structure.actDisplay.linesAfter,
+                },
+            };
+        }
+
+        if (override.headerFooter) {
+            next.headerFooter = {
+                header: {
+                    left: {...next.headerFooter.header.left, ...override.headerFooter.header?.left},
+                    center: {...next.headerFooter.header.center, ...override.headerFooter.header?.center},
+                    right: {...next.headerFooter.header.right, ...override.headerFooter.header?.right},
+                },
+                footer: {
+                    left: {...next.headerFooter.footer.left, ...override.headerFooter.footer?.left},
+                    center: {...next.headerFooter.footer.center, ...override.headerFooter.footer?.center},
+                    right: {...next.headerFooter.footer.right, ...override.headerFooter.footer?.right},
                 },
             };
         }

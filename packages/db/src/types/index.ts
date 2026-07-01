@@ -9,10 +9,9 @@ export type {
     ScriptAct,
     ScriptBlock,
     ScriptBlockCharacterRef,
-    ScriptConfig,
-    ScriptConfigBlock,
     ScriptLocation,
     ScriptScene,
+    ScriptSettingsBlock,
     ScriptSummary,
     ScriptTitlePageField,
 } from './script';

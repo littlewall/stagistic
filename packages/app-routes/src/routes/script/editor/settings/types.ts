@@ -3,6 +3,7 @@ import type {
     BlockSettingsPatch,
     BlockShortcut,
     EditorSettings,
+    HeaderFooterSettingsPatch,
     PageSettings,
     ScriptBlockNodeType,
     StructureSettingsPatch,
@@ -47,6 +48,10 @@ export interface PageLayoutHandlers {
     onUpdatePageSettings: (patch: PageSettingsPatch) => void,
 }
 
+export interface HeaderFooterHandlers {
+    onUpdateHeaderFooterSettings: (patch: HeaderFooterSettingsPatch) => void,
+}
+
 export interface TitlePageHandlers {
     titlePageSettings: TitlePageSettings,
     scriptTitle: string,
@@ -67,6 +72,7 @@ export interface ScriptEditorSettingsPanelProps {
     visualPreferencesHandlers: VisualPreferencesHandlers,
     structureHandlers: StructureHandlers,
     pageLayoutHandlers: PageLayoutHandlers,
+    headerFooterHandlers: HeaderFooterHandlers,
     titlePageHandlers: TitlePageHandlers,
     dangerZoneHandlers: DangerZoneHandlers,
 }

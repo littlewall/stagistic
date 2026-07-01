@@ -63,6 +63,28 @@ export interface StructureSettings {
     actDisplay: StructureActDisplaySettings,
 }
 
+export type HeaderFooterAlignment = 'left' | 'center' | 'right';
+
+export interface HeaderFooterCellSettings {
+    text: string,
+    isBold: boolean,
+    isItalic: boolean,
+    isUnderline: boolean,
+    isHiddenInEditor: boolean,
+}
+
+export type HeaderFooterRowSettings = Record<HeaderFooterAlignment, HeaderFooterCellSettings>;
+
+export interface HeaderFooterSettings {
+    header: HeaderFooterRowSettings,
+    footer: HeaderFooterRowSettings,
+}
+
+export interface HeaderFooterSettingsPatch {
+    header?: Partial<Record<HeaderFooterAlignment, Partial<HeaderFooterCellSettings>>>,
+    footer?: Partial<Record<HeaderFooterAlignment, Partial<HeaderFooterCellSettings>>>,
+}
+
 export type BlockSettings = Record<string, BlockSpacingSettings>;
 
 export interface EditorSettings {
@@ -70,6 +92,7 @@ export interface EditorSettings {
     typography: TypographySettings,
     visual: VisualSettings,
     structure: StructureSettings,
+    headerFooter: HeaderFooterSettings,
     blocks: BlockSettings,
 }
 
@@ -84,5 +107,6 @@ export interface EditorSettingsOverride {
     typography?: Partial<TypographySettings>,
     visual?: Partial<VisualSettings>,
     structure?: StructureSettingsPatch,
+    headerFooter?: HeaderFooterSettingsPatch,
     blocks?: Partial<Record<string, BlockSettingsPatch>>,
 }

@@ -13,6 +13,7 @@ describe('mergeEditorSettings', () => {
         expect(result).not.toBe(DEFAULT_EDITOR_SETTINGS);
         expect(result.page).not.toBe(DEFAULT_EDITOR_SETTINGS.page);
         expect(result.structure.actDisplay).not.toBe(DEFAULT_EDITOR_SETTINGS.structure.actDisplay);
+        expect(result.headerFooter.header.left).not.toBe(DEFAULT_EDITOR_SETTINGS.headerFooter.header.left);
     });
 
     it('skips null and undefined overrides', () => {
@@ -57,6 +58,19 @@ describe('mergeEditorSettings', () => {
         expect(result.structure.actDisplay.linesBefore).toBe(5);
         expect(result.structure.actDisplay.linesAfter)
             .toBe(DEFAULT_EDITOR_SETTINGS.structure.actDisplay.linesAfter);
+    });
+
+    it('merges a partial header and footer patch', () => {
+        const result = mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, {
+            headerFooter: {
+                header: {right: {text: '{{page}}', isHiddenInEditor: true}},
+            },
+        });
+
+        expect(result.headerFooter.header.right.text).toBe('{{page}}');
+        expect(result.headerFooter.header.right.isHiddenInEditor).toBe(true);
+        expect(result.headerFooter.header.right.isBold).toBe(false);
+        expect(result.headerFooter.footer.left).toEqual(DEFAULT_EDITOR_SETTINGS.headerFooter.footer.left);
     });
 
     it('merges per-block settings for valid node-type keys', () => {

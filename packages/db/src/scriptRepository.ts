@@ -62,10 +62,10 @@ export interface ScriptContentRepository {
     saveLatest(scriptId: string, value: ScriptDocument): Promise<void>,
 }
 
-export interface ScriptConfigsRepository {
-    load(scriptId: string, namespace: string): Promise<EditorSettingsOverride | null>,
-    save(scriptId: string, namespace: string, settings: EditorSettingsOverride): Promise<void>,
-    delete(scriptId: string, namespace: string): Promise<void>,
+export interface ScriptSettingsRepository {
+    load(scriptId: string): Promise<EditorSettingsOverride | null>,
+    save(scriptId: string, settings: EditorSettingsOverride): Promise<void>,
+    delete(scriptId: string): Promise<void>,
 }
 
 export interface ScriptBlocksRepository {
@@ -114,7 +114,7 @@ export interface ScriptTitlePageRepository {
 export interface ScriptDataRepository {
     scripts: ScriptCrudRepository,
     content: ScriptContentRepository,
-    configs: ScriptConfigsRepository,
+    settings: ScriptSettingsRepository,
     titlePage: ScriptTitlePageRepository,
     characters: ScriptCharactersRepository,
     characterGenders: ScriptCharacterGendersRepository,
@@ -142,9 +142,9 @@ export interface ScriptRepository extends ScriptDataRepository {
     upsertScriptCharacterGender(scriptId: string, label: string): Promise<ScriptCharacterGenderOption | null>,
     loadLatest(scriptId: string): Promise<ScriptDocument | null>,
     saveLatest(scriptId: string, value: ScriptDocument): Promise<void>,
-    loadScriptConfig(scriptId: string, namespace: string): Promise<EditorSettingsOverride | null>,
-    saveScriptConfig(scriptId: string, namespace: string, settings: EditorSettingsOverride): Promise<void>,
-    deleteScriptConfig(scriptId: string, namespace: string): Promise<void>,
+    loadScriptSettings(scriptId: string): Promise<EditorSettingsOverride | null>,
+    saveScriptSettings(scriptId: string, settings: EditorSettingsOverride): Promise<void>,
+    deleteScriptSettings(scriptId: string): Promise<void>,
     loadTitlePage(scriptId: string): Promise<TitlePageSettings | null>,
     saveTitlePage(scriptId: string, settings: TitlePageSettings): Promise<void>,
     deleteTitlePage(scriptId: string): Promise<void>,

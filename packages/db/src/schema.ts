@@ -5,6 +5,7 @@ import {
     integer,
     pgTable,
     primaryKey,
+    real,
     text,
     uniqueIndex,
 } from 'drizzle-orm/pg-core';
@@ -32,33 +33,76 @@ export const syncOutbox = pgTable('sync_outbox', {
     status: text('status').notNull().default('pending'),
 });
 
-export const scriptConfigs = pgTable(
-    'script_configs',
+export const scriptSettingsPageLayout = pgTable('script_settings_page_layout', {
+    scriptId: text('script_id')
+        .primaryKey()
+        .references(() => scripts.id, {onDelete: 'cascade'}),
+    widthPx: real('width_px'),
+    heightPx: real('height_px'),
+    marginTopPx: real('margin_top_px'),
+    marginRightPx: real('margin_right_px'),
+    marginBottomPx: real('margin_bottom_px'),
+    marginLeftPx: real('margin_left_px'),
+    pageGapPx: real('page_gap_px'),
+    pageBreakBackground: text('page_break_background'),
+    contentMarginTopPx: real('content_margin_top_px'),
+    contentMarginBottomPx: real('content_margin_bottom_px'),
+    fontSizePx: real('font_size_px'),
+    lineHeight: real('line_height'),
+    createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+    updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+});
+
+export const scriptSettingsVisualPreferences = pgTable('script_settings_visual_preferences', {
+    scriptId: text('script_id')
+        .primaryKey()
+        .references(() => scripts.id, {onDelete: 'cascade'}),
+    characterColorSaturation: real('character_color_saturation'),
+    createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+    updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+});
+
+export const scriptSettingsStructure = pgTable('script_settings_structure', {
+    scriptId: text('script_id')
+        .primaryKey()
+        .references(() => scripts.id, {onDelete: 'cascade'}),
+    actLinesBefore: integer('act_lines_before'),
+    actLinesAfter: integer('act_lines_after'),
+    createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+    updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+});
+
+export const scriptSettingsHeadersFooters = pgTable(
+    'script_settings_headers_footers',
     {
         id: text('id').primaryKey(),
         scriptId: text('script_id')
             .notNull()
             .references(() => scripts.id, {onDelete: 'cascade'}),
-        namespace: text('namespace').notNull(),
-        payloadJson: text('payload_json'),
+        area: text('area').notNull(),
+        alignment: text('alignment').notNull(),
+        textContent: text('text_content').notNull().default(''),
+        isBold: boolean('is_bold').notNull().default(false),
+        isItalic: boolean('is_italic').notNull().default(false),
+        isUnderline: boolean('is_underline').notNull().default(false),
+        isHiddenInEditor: boolean('is_hidden_in_editor').notNull().default(false),
         createdAt: bigint('created_at', {mode: 'number'}).notNull(),
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
-        schemaVersion: integer('schema_version').notNull().default(1),
     },
     table => ({
-        scriptNamespaceUniqueIdx: uniqueIndex('script_configs_script_namespace_unique_idx')
-            .on(table.scriptId, table.namespace),
-        scriptIdIdx: index('script_configs_script_id_idx').on(table.scriptId),
+        scriptAreaAlignmentUniqueIdx: uniqueIndex('script_settings_headers_footers_cell_unique_idx')
+            .on(table.scriptId, table.area, table.alignment),
+        scriptIdIdx: index('script_settings_headers_footers_script_id_idx').on(table.scriptId),
     }),
 );
 
-export const scriptConfigBlocks = pgTable(
-    'script_config_blocks',
+export const scriptSettingsBlocks = pgTable(
+    'script_settings_blocks',
     {
         id: text('id').primaryKey(),
-        configId: text('config_id')
+        scriptId: text('script_id')
             .notNull()
-            .references(() => scriptConfigs.id, {onDelete: 'cascade'}),
+            .references(() => scripts.id, {onDelete: 'cascade'}),
         blockType: text('block_type').notNull(),
         spacingBeforeMillis: integer('spacing_before_millis'),
         lineHeightMillis: integer('line_height_millis'),
@@ -75,9 +119,9 @@ export const scriptConfigBlocks = pgTable(
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },
     table => ({
-        configBlockTypeUniqueIdx: uniqueIndex('script_config_blocks_config_block_type_unique_idx')
-            .on(table.configId, table.blockType),
-        configIdIdx: index('script_config_blocks_config_id_idx').on(table.configId),
+        scriptBlockTypeUniqueIdx: uniqueIndex('script_settings_blocks_script_block_type_unique_idx')
+            .on(table.scriptId, table.blockType),
+        scriptIdIdx: index('script_settings_blocks_script_id_idx').on(table.scriptId),
     }),
 );
 
@@ -162,8 +206,8 @@ export const scriptScenes = pgTable(
     }),
 );
 
-export const scriptTitlePageFields = pgTable(
-    'script_title_page_fields',
+export const scriptSettingsTitlePage = pgTable(
+    'script_settings_title_page',
     {
         id: text('id').primaryKey(),
         scriptId: text('script_id')
@@ -171,14 +215,15 @@ export const scriptTitlePageFields = pgTable(
             .references(() => scripts.id, {onDelete: 'cascade'}),
         fieldKey: text('field_key').notNull(),
         fieldValue: text('field_value').notNull(),
+        groupNo: integer('group_no'),
         orderNo: integer('order_no').notNull(),
         createdAt: bigint('created_at', {mode: 'number'}).notNull(),
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },
     table => ({
-        scriptOrderUniqueIdx: uniqueIndex('script_title_page_fields_script_order_unique_idx')
+        scriptOrderUniqueIdx: uniqueIndex('script_settings_title_page_script_order_unique_idx')
             .on(table.scriptId, table.orderNo),
-        scriptIdIdx: index('script_title_page_fields_script_id_idx').on(table.scriptId),
+        scriptIdIdx: index('script_settings_title_page_script_id_idx').on(table.scriptId),
     }),
 );
 
@@ -274,13 +319,16 @@ export const scriptCues = pgTable(
 export const dbSchema = {
     scripts,
     syncOutbox,
-    scriptConfigs,
-    scriptConfigBlocks,
+    scriptSettingsPageLayout,
+    scriptSettingsVisualPreferences,
+    scriptSettingsStructure,
+    scriptSettingsHeadersFooters,
+    scriptSettingsBlocks,
     scriptCharacters,
     scriptCharacterGenders,
     scriptLocations,
     scriptScenes,
-    scriptTitlePageFields,
+    scriptSettingsTitlePage,
     scriptActs,
     scriptBlocks,
     scriptBlockCharacterRefs,

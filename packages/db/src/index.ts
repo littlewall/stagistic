@@ -17,13 +17,13 @@ export type {
     ScriptBlocksRepository,
     ScriptCharacterGendersRepository,
     ScriptCharactersRepository,
-    ScriptConfigsRepository,
     ScriptContentRepository,
     ScriptCrudRepository,
     ScriptDataRepository,
     ScriptLocationsRepository,
     ScriptRepository,
     ScriptScenesRepository,
+    ScriptSettingsRepository,
     ScriptTitlePageRepository,
 } from './scriptRepository';
 export type {
@@ -35,10 +35,9 @@ export type {
     ScriptCharacterGender,
     ScriptCharacterGenderOption,
     ScriptCharacterRef,
-    ScriptConfig,
-    ScriptConfigBlock,
     ScriptLocation,
     ScriptScene,
+    ScriptSettingsBlock,
     ScriptSummary,
     ScriptTitlePageField,
 } from './types';

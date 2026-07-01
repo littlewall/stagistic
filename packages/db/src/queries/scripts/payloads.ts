@@ -66,12 +66,13 @@ export interface ScriptConfigReplacementRow {
     isBold: boolean | null,
     isItalic: boolean | null,
     isUnderline: boolean | null,
+    scriptId: string,
     createdAt: number,
     updatedAt: number,
 }
 
 export interface ReplaceScriptConfigBlocksPayload {
-    configId: string,
+    scriptId: string,
     rows: ScriptConfigReplacementRow[],
 }
 

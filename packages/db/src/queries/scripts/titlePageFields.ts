@@ -3,13 +3,14 @@ import {
     eq,
 } from 'drizzle-orm';
 
-import {scriptTitlePageFields} from '../../schema';
+import {scriptSettingsTitlePage} from '../../schema';
 import type {DbClient} from '../types';
 
 export interface ScriptTitlePageFieldRow {
     id: string,
     fieldKey: string,
     fieldValue: string,
+    groupNo?: number | null,
     orderNo: number,
     createdAt: number,
     updatedAt: number,
@@ -18,9 +19,9 @@ export interface ScriptTitlePageFieldRow {
 export const listScriptTitlePageFields = async (db: DbClient, scriptId: string) => {
     return db
         .select()
-        .from(scriptTitlePageFields)
-        .where(eq(scriptTitlePageFields.scriptId, scriptId))
-        .orderBy(asc(scriptTitlePageFields.orderNo));
+        .from(scriptSettingsTitlePage)
+        .where(eq(scriptSettingsTitlePage.scriptId, scriptId))
+        .orderBy(asc(scriptSettingsTitlePage.orderNo));
 };
 
 export const replaceScriptTitlePageFields = async (
@@ -29,18 +30,19 @@ export const replaceScriptTitlePageFields = async (
     rows: ScriptTitlePageFieldRow[],
 ) => {
     await db
-        .delete(scriptTitlePageFields)
-        .where(eq(scriptTitlePageFields.scriptId, scriptId));
+        .delete(scriptSettingsTitlePage)
+        .where(eq(scriptSettingsTitlePage.scriptId, scriptId));
 
     if (rows.length === 0) {
         return;
     }
 
-    await db.insert(scriptTitlePageFields).values(rows.map(row => ({
+    await db.insert(scriptSettingsTitlePage).values(rows.map(row => ({
         id: row.id,
         scriptId,
         fieldKey: row.fieldKey,
         fieldValue: row.fieldValue,
+        groupNo: row.groupNo ?? null,
         orderNo: row.orderNo,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,

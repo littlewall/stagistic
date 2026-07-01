@@ -7,7 +7,7 @@ import type {
 import {createBlockCharacterRefsHandlers} from './blockCharacterRefs';
 import {createBlocksHandlers} from './blocks';
 import {createCharacterHandlers} from './characters';
-import {createConfigHandlers} from './config';
+import {createSettingsHandlers} from './config';
 import {createContentHandlers} from './content';
 import {createOutboxRecorder} from './outbox';
 import {createScriptsHandlers} from './scripts';
@@ -81,18 +81,18 @@ export const createLocalPgliteDataRepository = ({
     };
 
     const {
-        loadScriptConfig,
-        saveScriptConfig,
-        deleteScriptConfig,
-    } = createConfigHandlers({
+        loadScriptSettings,
+        saveScriptSettings,
+        deleteScriptSettings,
+    } = createSettingsHandlers({
         getDb,
         recordOutbox,
     });
 
-    const configs = {
-        load: loadScriptConfig,
-        save: saveScriptConfig,
-        delete: deleteScriptConfig,
+    const settings = {
+        load: loadScriptSettings,
+        save: saveScriptSettings,
+        delete: deleteScriptSettings,
     };
 
     const titlePage = createTitlePageHandlers({
@@ -109,7 +109,7 @@ export const createLocalPgliteDataRepository = ({
     return {
         scripts,
         content,
-        configs,
+        settings,
         titlePage,
         characters,
         characterGenders,
@@ -154,9 +154,9 @@ export const createLocalPgliteRepository = (deps: LocalPgliteRepositoryDeps): Sc
         upsertScriptCharacterGender: (scriptId, label) => repositoryData.characterGenders.upsert(scriptId, label),
         loadLatest: scriptId => repositoryData.content.loadLatest(scriptId),
         saveLatest: (scriptId, value) => repositoryData.content.saveLatest(scriptId, value),
-        loadScriptConfig: (scriptId, namespace) => repositoryData.configs.load(scriptId, namespace),
-        saveScriptConfig: (scriptId, namespace, settings) => repositoryData.configs.save(scriptId, namespace, settings),
-        deleteScriptConfig: (scriptId, namespace) => repositoryData.configs.delete(scriptId, namespace),
+        loadScriptSettings: scriptId => repositoryData.settings.load(scriptId),
+        saveScriptSettings: (scriptId, settings) => repositoryData.settings.save(scriptId, settings),
+        deleteScriptSettings: scriptId => repositoryData.settings.delete(scriptId),
         loadTitlePage: scriptId => repositoryData.titlePage.load(scriptId),
         saveTitlePage: (scriptId, settings) => repositoryData.titlePage.save(scriptId, settings),
         deleteTitlePage: scriptId => repositoryData.titlePage.delete(scriptId),

@@ -14,8 +14,6 @@ import {
     useState,
 } from 'react';
 
-import {EDITOR_SETTINGS_NAMESPACE} from './constants';
-
 type ScriptLoaderResult = {
     initialValue: ScriptDocument | null | undefined,
     initialIndexSnapshot: ScriptBlockIndexSnapshot | null | undefined,
@@ -28,7 +26,7 @@ type ScriptLoaderResult = {
 
 type ScriptLoaderRepository = {
     loadLatest: (scriptId: string) => Promise<ScriptDocument | null>,
-    loadScriptConfig: (scriptId: string, namespace: string) => Promise<EditorSettingsOverride | null>,
+    loadScriptSettings: (scriptId: string) => Promise<EditorSettingsOverride | null>,
     saveLatest: (scriptId: string, value: ScriptDocument) => Promise<unknown>,
 };
 
@@ -59,10 +57,7 @@ export const useScriptLoader = (
         const loadLatest = async () => {
             try {
                 const loadLatestPromise = scriptRepository.loadLatest(currentScriptId);
-                const loadSettingsPromise = scriptRepository.loadScriptConfig(
-                    currentScriptId,
-                    EDITOR_SETTINGS_NAMESPACE,
-                );
+                const loadSettingsPromise = scriptRepository.loadScriptSettings(currentScriptId);
                 const [stored, storedSettings] = await Promise.all([loadLatestPromise, loadSettingsPromise]);
 
                 if (!isActive) {

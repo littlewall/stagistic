@@ -1,96 +1,94 @@
-import {and, eq} from 'drizzle-orm';
+import {eq} from 'drizzle-orm';
 
 import {
-    scriptConfigBlocks,
-    scriptConfigs,
+    scriptSettingsBlocks,
+    scriptSettingsHeadersFooters,
+    scriptSettingsPageLayout,
+    scriptSettingsStructure,
+    scriptSettingsVisualPreferences,
 } from '../../schema';
 import type {DbClient} from '../types';
-import type {
-    DeleteScriptConfigPayload,
-    InsertScriptConfigPayload,
-    ReplaceScriptConfigBlocksPayload,
-    ScriptConfigLookupPayload,
-    UpdateScriptConfigPayload,
-} from './payloads';
+import type {ReplaceScriptConfigBlocksPayload} from './payloads';
 
-export const getScriptConfigMeta = async (
-    db: DbClient,
-    payload: ScriptConfigLookupPayload,
-) => {
-    const rows = await db
-        .select()
-        .from(scriptConfigs)
-        .where(and(
-            eq(scriptConfigs.scriptId, payload.scriptId),
-            eq(scriptConfigs.namespace, payload.namespace),
-        ))
+export const getScriptPageLayoutSettings = async (db: DbClient, scriptId: string) => {
+    const rows = await db.select().from(scriptSettingsPageLayout)
+        .where(eq(scriptSettingsPageLayout.scriptId, scriptId))
         .limit(1);
 
     return rows[0] ?? null;
 };
 
-export const insertScriptConfig = async (db: DbClient, payload: InsertScriptConfigPayload) => {
-    await db.insert(scriptConfigs).values({
-        id: payload.id,
-        scriptId: payload.scriptId,
-        namespace: payload.namespace,
-        payloadJson: payload.payloadJson,
-        createdAt: payload.createdAt,
-        updatedAt: payload.updatedAt,
-        schemaVersion: payload.schemaVersion,
-    });
+export const getScriptVisualPreferences = async (db: DbClient, scriptId: string) => {
+    const rows = await db.select().from(scriptSettingsVisualPreferences)
+        .where(eq(scriptSettingsVisualPreferences.scriptId, scriptId))
+        .limit(1);
+
+    return rows[0] ?? null;
 };
 
-export const updateScriptConfig = async (db: DbClient, payload: UpdateScriptConfigPayload) => {
-    await db
-        .update(scriptConfigs)
-        .set({
-            payloadJson: payload.payloadJson,
-            updatedAt: payload.updatedAt,
-            schemaVersion: payload.schemaVersion,
-        })
-        .where(eq(scriptConfigs.id, payload.id));
+export const getScriptStructureSettings = async (db: DbClient, scriptId: string) => {
+    const rows = await db.select().from(scriptSettingsStructure)
+        .where(eq(scriptSettingsStructure.scriptId, scriptId))
+        .limit(1);
+
+    return rows[0] ?? null;
 };
 
-export const deleteScriptConfig = async (db: DbClient, payload: DeleteScriptConfigPayload) => {
-    await db
-        .delete(scriptConfigs)
-        .where(and(
-            eq(scriptConfigs.scriptId, payload.scriptId),
-            eq(scriptConfigs.namespace, payload.namespace),
-        ));
+export const listScriptHeaderFooterSettings = (db: DbClient, scriptId: string) => db
+    .select()
+    .from(scriptSettingsHeadersFooters)
+    .where(eq(scriptSettingsHeadersFooters.scriptId, scriptId));
+
+export const listScriptBlockSettings = (db: DbClient, scriptId: string) => db
+    .select()
+    .from(scriptSettingsBlocks)
+    .where(eq(scriptSettingsBlocks.scriptId, scriptId));
+
+export const deleteScriptSettings = async (db: DbClient, scriptId: string) => {
+    await db.delete(scriptSettingsPageLayout).where(eq(scriptSettingsPageLayout.scriptId, scriptId));
+    await db.delete(scriptSettingsVisualPreferences).where(eq(scriptSettingsVisualPreferences.scriptId, scriptId));
+    await db.delete(scriptSettingsStructure).where(eq(scriptSettingsStructure.scriptId, scriptId));
+    await db.delete(scriptSettingsHeadersFooters).where(eq(scriptSettingsHeadersFooters.scriptId, scriptId));
+    await db.delete(scriptSettingsBlocks).where(eq(scriptSettingsBlocks.scriptId, scriptId));
 };
 
-export const listScriptConfigBlocks = async (db: DbClient, configId: string) => {
-    return db
-        .select()
-        .from(scriptConfigBlocks)
-        .where(eq(scriptConfigBlocks.configId, configId));
+export const insertScriptPageLayoutSettings = async (
+    db: DbClient,
+    values: typeof scriptSettingsPageLayout.$inferInsert,
+) => {
+    await db.insert(scriptSettingsPageLayout).values(values);
 };
 
-export const replaceScriptConfigBlocks = async (db: DbClient, payload: ReplaceScriptConfigBlocksPayload) => {
-    await db.delete(scriptConfigBlocks).where(eq(scriptConfigBlocks.configId, payload.configId));
+export const insertScriptVisualPreferences = async (
+    db: DbClient,
+    values: typeof scriptSettingsVisualPreferences.$inferInsert,
+) => {
+    await db.insert(scriptSettingsVisualPreferences).values(values);
+};
 
-    if (payload.rows.length === 0) {
-        return;
+export const insertScriptStructureSettings = async (
+    db: DbClient,
+    values: typeof scriptSettingsStructure.$inferInsert,
+) => {
+    await db.insert(scriptSettingsStructure).values(values);
+};
+
+export const insertScriptHeaderFooterSettings = async (
+    db: DbClient,
+    rows: Array<typeof scriptSettingsHeadersFooters.$inferInsert>,
+) => {
+    if (rows.length > 0) {
+        await db.insert(scriptSettingsHeadersFooters).values(rows);
     }
+};
 
-    await db.insert(scriptConfigBlocks).values(payload.rows.map(row => ({
-        id: row.id,
-        configId: payload.configId,
-        blockType: row.blockType,
-        spacingBeforeMillis: row.spacingBeforeMillis,
-        lineHeightMillis: row.lineHeightMillis,
-        indentLeftChars: row.indentLeftChars,
-        indentRightChars: row.indentRightChars,
-        shortcut: row.shortcut,
-        nextElement: row.nextElement,
-        textAlign: row.textAlign,
-        casing: row.casing,
-        isBold: row.isBold,
-        isItalic: row.isItalic,
-        isUnderline: row.isUnderline,
-        createdAt: row.createdAt,
-        updatedAt: row.updatedAt,
-    })));
+export const replaceScriptConfigBlocks = async (
+    db: DbClient,
+    payload: ReplaceScriptConfigBlocksPayload,
+) => {
+    await db.delete(scriptSettingsBlocks).where(eq(scriptSettingsBlocks.scriptId, payload.scriptId));
+
+    if (payload.rows.length > 0) {
+        await db.insert(scriptSettingsBlocks).values(payload.rows);
+    }
 };

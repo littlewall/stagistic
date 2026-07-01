@@ -2,6 +2,18 @@ import {buildDefaultBlockSettings} from '../blocks/derived/defaultBlockSettings'
 import {CHARACTER_COLOR_SATURATION_DEFAULT} from './options';
 import type {EditorSettings} from './types';
 
+const buildEmptyHeaderFooterRow = () => ({
+    left: {
+        text: '', isBold: false, isItalic: false, isUnderline: false, isHiddenInEditor: false,
+    },
+    center: {
+        text: '', isBold: false, isItalic: false, isUnderline: false, isHiddenInEditor: false,
+    },
+    right: {
+        text: '', isBold: false, isItalic: false, isUnderline: false, isHiddenInEditor: false,
+    },
+});
+
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
     page: {
         widthPx: 794,
@@ -27,6 +39,10 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
             linesBefore: 1,
             linesAfter: 1,
         },
+    },
+    headerFooter: {
+        header: buildEmptyHeaderFooterRow(),
+        footer: buildEmptyHeaderFooterRow(),
     },
     blocks: buildDefaultBlockSettings(),
 };

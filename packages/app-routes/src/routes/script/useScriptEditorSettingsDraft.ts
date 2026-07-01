@@ -4,6 +4,8 @@ import {
     DEFAULT_EDITOR_SETTINGS,
     type EditorSettings,
     type EditorSettingsOverride,
+    type HeaderFooterAlignment,
+    type HeaderFooterSettingsPatch,
     mergeEditorSettings,
     type PageSettings,
     type StructureSettingsPatch,
@@ -22,6 +24,27 @@ import {
 } from './editor/settings';
 
 const SETTINGS_SAVE_DEBOUNCE_MS = 450;
+
+type HeaderFooterRowPatch = NonNullable<HeaderFooterSettingsPatch['header']>;
+
+const mergeHeaderFooterRow = (
+    previous: HeaderFooterRowPatch | undefined,
+    patch: HeaderFooterRowPatch | undefined,
+): HeaderFooterRowPatch | undefined => {
+    if (!patch) {
+        return previous;
+    }
+
+    const next = {...previous};
+
+    Object.entries(patch).forEach(([alignment, cell]) => {
+        const key = alignment as HeaderFooterAlignment;
+
+        next[key] = {...previous?.[key], ...cell};
+    });
+
+    return next;
+};
 
 interface UseScriptEditorSettingsDraftArgs {
     state: {
@@ -201,6 +224,18 @@ export const useScriptEditorSettingsDraft = ({
         }));
     }, []);
 
+    const updateHeaderFooterSettings = useCallback((patch: HeaderFooterSettingsPatch) => {
+        setScriptSettingsDraft(previous => ({
+            ...previous,
+            headerFooter: {
+                ...previous.headerFooter,
+                ...patch,
+                header: mergeHeaderFooterRow(previous.headerFooter?.header, patch.header),
+                footer: mergeHeaderFooterRow(previous.headerFooter?.footer, patch.footer),
+            },
+        }));
+    }, []);
+
     return {
         scriptSettingsDraft,
         effectiveScriptSettingsDraft,
@@ -210,5 +245,6 @@ export const useScriptEditorSettingsDraft = ({
         updateCharacterColorSaturation,
         updateStructureSettings,
         updatePageSettings,
+        updateHeaderFooterSettings,
     };
 };

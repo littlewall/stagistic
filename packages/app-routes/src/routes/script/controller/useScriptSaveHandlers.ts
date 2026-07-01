@@ -5,7 +5,6 @@ import type {
     AppToastPayload,
     CurrentScriptItem,
 } from '../types';
-import {EDITOR_SETTINGS_NAMESPACE} from './constants';
 import {isEditorSettingsOverrideEmpty} from './types';
 
 interface SaveIndicatorControls {
@@ -15,10 +14,9 @@ interface SaveIndicatorControls {
 
 interface SaveRepository {
     saveLatest: (scriptId: string, value: ScriptDocument) => Promise<unknown>,
-    deleteScriptConfig: (scriptId: string, namespace: string) => Promise<unknown>,
-    saveScriptConfig: (
+    deleteScriptSettings: (scriptId: string) => Promise<unknown>,
+    saveScriptSettings: (
         scriptId: string,
-        namespace: string,
         value: EditorSettingsOverride,
     ) => Promise<unknown>,
 }
@@ -139,7 +137,7 @@ export const useScriptSaveHandlers = ({
             const nextSettings = settings ?? {};
 
             if (isEditorSettingsOverrideEmpty(nextSettings)) {
-                await scriptRepository.deleteScriptConfig(currentScriptId, EDITOR_SETTINGS_NAMESPACE);
+                await scriptRepository.deleteScriptSettings(currentScriptId);
 
                 if (requestId === settingsSaveRequestRef.current) {
                     setScriptSettingsOverride(null);
@@ -148,7 +146,7 @@ export const useScriptSaveHandlers = ({
                 return true;
             }
 
-            await scriptRepository.saveScriptConfig(currentScriptId, EDITOR_SETTINGS_NAMESPACE, nextSettings);
+            await scriptRepository.saveScriptSettings(currentScriptId, nextSettings);
 
             if (requestId === settingsSaveRequestRef.current) {
                 setScriptSettingsOverride(nextSettings);
