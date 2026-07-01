@@ -22,6 +22,7 @@ import {
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
 import {ScriptEditorSettingsPanel} from './editor/settings';
+import {resolveDraftDate} from './editor/settings/draftDate';
 import {
     type SidebarPanel,
     useEditorSidebars,
@@ -222,6 +223,8 @@ export const ScriptEditorRoute = () => {
                         document={{
                             initialValue: resolvedEditorInitialValue,
                             persistentCharacters: normalizedConfirmedCharacterRecords,
+                            scriptTitle: currentScript?.name ?? '',
+                            draftDate: resolveDraftDate(titlePageDraft),
                         }}
                         settings={{
                             scriptSettings: effectiveScriptSettingsDraft,
