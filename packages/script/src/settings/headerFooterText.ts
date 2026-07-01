@@ -50,3 +50,19 @@ export const buildPageMark = ({
 
     return `${toRoman(actIndex)}-${scene}-${pageNumber}`;
 };
+
+export interface HeaderFooterTextContext {
+    scriptTitle: string,
+    draftDate: string,
+    pageMark: string,
+    pageNumber: number,
+}
+
+export const resolveHeaderFooterText = (
+    text: string,
+    ctx: HeaderFooterTextContext,
+): string => text
+    .replaceAll('{{page_number}}', `${ctx.pageNumber}.`)
+    .replaceAll('{{page}}', ctx.pageMark)
+    .replaceAll('{{script_title}}', ctx.scriptTitle || 'Untitled')
+    .replaceAll('{{draft_date}}', ctx.draftDate);

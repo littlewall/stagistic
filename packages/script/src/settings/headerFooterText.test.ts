@@ -4,6 +4,7 @@ import {
 
 import {
     buildPageMark,
+    resolveHeaderFooterText,
     toRoman,
 } from './headerFooterText';
 
@@ -45,5 +46,30 @@ describe('buildPageMark', () => {
         expect(buildPageMark({
             actIndex: null, sceneNumber: 0, pageNumber: 3,
         })).toBe('1-3');
+    });
+});
+
+describe('resolveHeaderFooterText', () => {
+    const ctx = {
+        scriptTitle: 'Hamlet',
+        draftDate: '07/01/2026',
+        pageMark: 'I-1-1',
+        pageNumber: 1,
+    };
+
+    it('replaces all tokens', () => {
+        expect(resolveHeaderFooterText('{{script_title}} — {{draft_date}}', ctx))
+            .toBe('Hamlet — 07/01/2026');
+        expect(resolveHeaderFooterText('{{page}}', ctx)).toBe('I-1-1');
+        expect(resolveHeaderFooterText('{{page_number}}', ctx)).toBe('1.');
+    });
+
+    it('does not treat {{page}} as part of {{page_number}}', () => {
+        expect(resolveHeaderFooterText('{{page_number}}', {...ctx, pageMark: 'X'})).toBe('1.');
+    });
+
+    it('falls back to Untitled for an empty title', () => {
+        expect(resolveHeaderFooterText('{{script_title}}', {...ctx, scriptTitle: ''}))
+            .toBe('Untitled');
     });
 });
