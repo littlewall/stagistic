@@ -91,6 +91,27 @@
     justify-content: space-between;
 }
 
+.fixedNote {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    min-height: var(--control-height-lg);
+    padding: 0 var(--select-button-padding-inline);
+    font-size: var(--font-size-sm);
+    background: var(--color-surface);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--select-button-radius);
+}
+
+.fixedNoteLabel {
+    font-weight: var(--font-weight-bold);
+    color: var(--color-text);
+}
+
+.fixedNoteExample {
+    color: var(--color-text-muted);
+}
+
 .formattingGroup {
     display: flex;
     gap: var(--space-sm);

@@ -46,9 +46,29 @@ const VARIABLES = [
 
 // The page mark is `act-scene-page`: Roman act number, scene number, page number.
 const PAGE_MARK_PREVIEW = 'I-1-1';
+// The integrated page number uses the `#.` format (page number + dot).
+const PAGE_NUMBER_TOKEN = '{{page_number}}';
+const PAGE_NUMBER_PREVIEW = '1.';
+
+// These cells have fixed content — only their style (B/I/U) and editor visibility can change.
+const getFixedCell = (
+    area: Area,
+    alignment: HeaderFooterAlignment,
+): {label: string, example: string} | null => {
+    if (area === 'header' && alignment === 'right') {
+        return {label: 'Page number', example: PAGE_MARK_PREVIEW};
+    }
+
+    if (area === 'footer' && alignment === 'center') {
+        return {label: 'Integrated page number', example: PAGE_NUMBER_PREVIEW};
+    }
+
+    return null;
+};
 
 const resolvePreview = (text: string, scriptTitle: string, draftDate: string) => text
     .replaceAll('{{page}}', PAGE_MARK_PREVIEW)
+    .replaceAll(PAGE_NUMBER_TOKEN, PAGE_NUMBER_PREVIEW)
     .replaceAll('{{script_title}}', scriptTitle || 'Untitled')
     .replaceAll('{{draft_date}}', draftDate);
 
@@ -62,6 +82,7 @@ export const HeaderFooterSettingsPanel = ({
     const [selection, setSelection] = useState<Selection | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const activeCell = selection ? settings[selection.area][selection.alignment] : null;
+    const activeFixed = selection ? getFixedCell(selection.area, selection.alignment) : null;
 
     const selectCell = (nextSelection: Selection) => {
         setSelection(nextSelection);
@@ -173,29 +194,40 @@ export const HeaderFooterSettingsPanel = ({
                         >Hide in editor
                         </Switch>
                     </div>
-                    <input
-                        ref={inputRef}
-                        type="text"
-                        className={sharedStyles.settingsInput}
-                        disabled={!activeCell}
-                        value={activeCell?.text ?? ''}
-                        placeholder={selection ? 'Enter text or add a variable' : 'Select a header or footer area'}
-                        onChange={event => updateActiveCell({text: event.target.value})}
-                        aria-label="Header or footer content"
-                    />
-                    <div className={styles.variables} aria-label="Variables">
-                        {VARIABLES.map(variable => (
-                            <Button
-                                key={variable.token}
-                                variant="outline"
-                                size="sm"
-                                className={styles.variableButton}
-                                isDisabled={!activeCell}
-                                onPress={() => insertVariable(variable.token)}
-                            >{variable.label}
-                            </Button>
-                        ))}
-                    </div>
+                    {activeFixed
+                        ? (
+                            <div className={styles.fixedNote}>
+                                <span className={styles.fixedNoteLabel}>{activeFixed.label}</span>
+                                <span className={styles.fixedNoteExample}>{activeFixed.example}</span>
+                            </div>
+                        )
+                        : (
+                            <>
+                                <input
+                                    ref={inputRef}
+                                    type="text"
+                                    className={sharedStyles.settingsInput}
+                                    disabled={!activeCell}
+                                    value={activeCell?.text ?? ''}
+                                    placeholder={selection ? 'Enter text or add a variable' : 'Select a header or footer area'}
+                                    onChange={event => updateActiveCell({text: event.target.value})}
+                                    aria-label="Header or footer content"
+                                />
+                                <div className={styles.variables} aria-label="Variables">
+                                    {VARIABLES.map(variable => (
+                                        <Button
+                                            key={variable.token}
+                                            variant="outline"
+                                            size="sm"
+                                            className={styles.variableButton}
+                                            isDisabled={!activeCell}
+                                            onPress={() => insertVariable(variable.token)}
+                                        >{variable.label}
+                                        </Button>
+                                    ))}
+                                </div>
+                            </>
+                        )}
                 </div>
                 {renderRow('footer')}
             </div>

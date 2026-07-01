@@ -6,11 +6,15 @@ import type {
     HeaderFooterCellSettings,
 } from './types';
 
-const buildHeaderFooterCell = (text = ''): HeaderFooterCellSettings => ({
-    text, isBold: false, isItalic: false, isUnderline: false, isHiddenInEditor: false,
+const buildHeaderFooterCell = (
+    overrides: Partial<HeaderFooterCellSettings> = {},
+): HeaderFooterCellSettings => ({
+    text: '', isBold: false, isItalic: false, isUnderline: false, isHiddenInEditor: false, ...overrides,
 });
 
-const buildHeaderFooterRow = (cells: Partial<Record<HeaderFooterAlignment, string>> = {}) => ({
+const buildHeaderFooterRow = (
+    cells: Partial<Record<HeaderFooterAlignment, Partial<HeaderFooterCellSettings>>> = {},
+) => ({
     left: buildHeaderFooterCell(cells.left),
     center: buildHeaderFooterCell(cells.center),
     right: buildHeaderFooterCell(cells.right),
@@ -43,8 +47,12 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         },
     },
     headerFooter: {
-        header: buildHeaderFooterRow({right: '{{page}}'}),
-        footer: buildHeaderFooterRow(),
+        /*
+         * Top-right page mark and bottom-center integrated page number are fixed cells:
+         * only their style and editor visibility are user-configurable.
+         */
+        header: buildHeaderFooterRow({right: {text: '{{page}}', isHiddenInEditor: true}}),
+        footer: buildHeaderFooterRow({center: {text: '{{page_number}}', isBold: true}}),
     },
     blocks: buildDefaultBlockSettings(),
 };
