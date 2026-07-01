@@ -32,3 +32,21 @@ export const toRoman = (value: number): string => {
 
     return result;
 };
+
+export interface PageMarkParts {
+    actIndex: number | null,
+    sceneNumber: number,
+    pageNumber: number,
+}
+
+export const buildPageMark = ({
+    actIndex, sceneNumber, pageNumber,
+}: PageMarkParts): string => {
+    const scene = Math.max(1, sceneNumber);
+
+    if (actIndex == null || actIndex <= 0) {
+        return `${scene}-${pageNumber}`;
+    }
+
+    return `${toRoman(actIndex)}-${scene}-${pageNumber}`;
+};
