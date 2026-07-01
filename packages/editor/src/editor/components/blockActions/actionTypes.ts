@@ -8,6 +8,7 @@ export interface BlockActionCommand {
     kind: 'command',
     id: string,
     label: string,
+    detail?: string,
     icon: BlockActionIcon,
     run: () => void,
 }

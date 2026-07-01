@@ -9,7 +9,8 @@
         "test": "vp test run --dir ."
     },
     "dependencies": {
-        "@stagistic/shared": "workspace:*"
+        "@stagistic/shared": "workspace:*",
+        "yaml": "2.8.1"
     },
     "devDependencies": {
         "typescript": "^5.9.2"

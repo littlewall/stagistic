@@ -16,6 +16,7 @@ export interface ContextMenuCommand {
     kind: 'command',
     id: string,
     label: string,
+    detail?: string,
     icon: ReactNode,
     isActive?: boolean,
     onClick?: MouseEventHandler<HTMLButtonElement>,
@@ -167,25 +168,37 @@ export const ContextMenu = ({
     const renderCommand = (
         command: ContextMenuCommand,
         panel: 'primary' | 'secondary',
-    ) => (
-        <button
-            key={command.id}
-            type="button"
-            role="menuitem"
-            className={clsx(styles.menuItem, command.isActive && styles.active)}
-            title={command.label}
-            onFocus={() => panel === 'primary' && setActiveSubmenuId(null)}
-            onMouseEnter={() => panel === 'primary' && setActiveSubmenuId(null)}
-            onKeyDown={event => handleKeyDown(event, command, panel)}
-            onClick={command.onClick}
-            onMouseDown={command.onMouseDown}
-        >
-            <span className={styles.menuItemSurface} data-menu-item-surface>
-                <span className={styles.menuItemIcon}>{command.icon}</span>
-                <span className={styles.menuItemLabel}>{command.label}</span>
-            </span>
-        </button>
-    );
+    ) => {
+        const accessibleLabel = command.detail
+            ? `${command.label} ${command.detail}`
+            : command.label;
+
+        return (
+            <button
+                key={command.id}
+                type="button"
+                role="menuitem"
+                className={clsx(styles.menuItem, command.isActive && styles.active)}
+                aria-label={accessibleLabel}
+                title={accessibleLabel}
+                onFocus={() => panel === 'primary' && setActiveSubmenuId(null)}
+                onMouseEnter={() => panel === 'primary' && setActiveSubmenuId(null)}
+                onKeyDown={event => handleKeyDown(event, command, panel)}
+                onClick={command.onClick}
+                onMouseDown={command.onMouseDown}
+            >
+                <span className={styles.menuItemSurface} data-menu-item-surface>
+                    <span className={styles.menuItemIcon}>{command.icon}</span>
+                    <span className={styles.menuItemLabel}>
+                        <span>{command.label}</span>
+                        {command.detail && (
+                            <span className={styles.menuItemDetail}>{command.detail}</span>
+                        )}
+                    </span>
+                </span>
+            </button>
+        );
+    };
 
     return (
         <div

@@ -95,12 +95,7 @@
 }
 
 .actionTrigger {
-    transition: transform 140ms cubic-bezier(.23, 1, .32, 1);
     anchor-name: --block-action-trigger;
-
-    &:active {
-        transform: scale(.97);
-    }
 
     & circle {
         fill: currentcolor;
@@ -298,10 +293,17 @@
 
 .menuItemLabel {
     overflow: hidden;
+    display: flex;
+    gap: var(--space-sm);
     min-width: 0;
     line-height: var(--line-height-snug);
-    text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.menuItemDetail {
+    overflow: hidden;
+    color: var(--color-text-muted);
+    text-overflow: ellipsis;
 }
 
 .menuSeparator {
@@ -323,11 +325,5 @@
         stroke-linecap: round;
         stroke-linejoin: round;
         stroke-width: 1.5;
-    }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .actionTrigger {
-        transition-duration: 0ms;
     }
 }

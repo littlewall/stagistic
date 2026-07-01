@@ -114,6 +114,7 @@ export const ScriptEditorRoute = () => {
     });
 
     const {
+        getEditorValue,
         editorOverrideValue,
         normalizedConfirmedCharacterRecords,
         handleResolvedEditorValueChange,
@@ -131,6 +132,8 @@ export const ScriptEditorRoute = () => {
         navigate,
         currentScript,
         openSettingsModal,
+        getEditorValue,
+        titlePage: titlePageDraft,
     });
 
     const sessionContextValue = useMemo(() => ({

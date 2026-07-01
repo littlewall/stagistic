@@ -5,7 +5,11 @@ import {
     it,
 } from 'vite-plus/test';
 
-import {resolveOpenCueAtBlock} from './stageDirectionCueActions';
+import {
+    formatOpenCueDisplayName,
+    resolveNewCueNumber,
+    resolveOpenCueAtBlock,
+} from './stageDirectionCueActions';
 
 const block = (
     blockId: string,
@@ -36,6 +40,14 @@ const cue = (
     kind: null,
     startBlockId,
     endBlockId,
+});
+
+const sceneBlock = (
+    blockId: string,
+    orderNo: number,
+): ScriptBlockIndexSnapshot['blocks'][number] => ({
+    ...block(blockId, orderNo, blockId),
+    blockType: 'scene',
 });
 
 describe('resolveOpenCueAtBlock', () => {
@@ -72,5 +84,54 @@ describe('resolveOpenCueAtBlock', () => {
         };
 
         expect(resolveOpenCueAtBlock(snapshot, 'target')).toBeNull();
+    });
+});
+
+describe('resolveNewCueNumber', () => {
+    it('previews a single cue with the scene number', () => {
+        const snapshot: ScriptBlockIndexSnapshot = {
+            blocks: [sceneBlock('scene-1', 0), block('target', 1)],
+            cues: [],
+        };
+
+        expect(resolveNewCueNumber(snapshot, 'target')).toBe('1.');
+    });
+
+    it('previews the cue letter at its insertion position', () => {
+        const snapshot: ScriptBlockIndexSnapshot = {
+            blocks: [
+                sceneBlock('scene-1', 0),
+                block('first', 1),
+                block('target', 2),
+                block('last', 3),
+            ],
+            cues: [cue('first-cue', 0, 'first'), cue('last-cue', 1, 'last')],
+        };
+
+        expect(resolveNewCueNumber(snapshot, 'target')).toBe('1.B');
+    });
+
+    it('returns null for an unknown block', () => {
+        expect(resolveNewCueNumber({blocks: [], cues: []}, 'missing')).toBeNull();
+    });
+});
+
+describe('formatOpenCueDisplayName', () => {
+    it('includes the cue number and title', () => {
+        expect(formatOpenCueDisplayName(cue('cue', 0, 'start'))).toBe('1.A cue');
+    });
+
+    it('truncates titles after ten characters', () => {
+        expect(formatOpenCueDisplayName({
+            ...cue('cue', 0, 'start'),
+            title: 'Long title name',
+        })).toBe('1.A Long title…');
+    });
+
+    it('uses only the cue number when the title is empty', () => {
+        expect(formatOpenCueDisplayName({
+            ...cue('cue', 0, 'start'),
+            title: ' ',
+        })).toBe('1.A');
     });
 });

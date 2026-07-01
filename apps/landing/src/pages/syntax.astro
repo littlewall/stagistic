@@ -23,10 +23,22 @@ const toc = [
 // --- Example sources (rendered as plain text) ------------------------------
 const exFrontmatter = `---
 title: When Night Falls
-authors:
-  book: Jane Smith
-  music: Peter Gray
-  lyrics: Jane Smith
+subtitle: A musical in two acts
+credits:
+  - credit: Book
+    authors:
+      - Jane Smith
+  - credit: Music
+    authors:
+      - Peter Gray
+  - credit: Lyrics
+    authors:
+      - Jane Smith
+      - Alex Green
+source: Based on the novel by Sam Gray
+draftDate: 2026-07-01
+contact: jane@example.com
+copyright: © 2026 Jane Smith
 ---`;
 
 const exStructure = `# Act One
@@ -63,6 +75,14 @@ A LATER LINE — STILL PETER, NOT A NEW CHARACTER`;
 
 const exStageDir = `Anna stands at the window. @Peter enters quietly from behind.`;
 
+const exForcedStageDir = `!ALL LIGHTS SNAP OUT
+
+!@MICHAEL`;
+
+const exForcedStageDirInSpeech = `MICHAEL
+!He pauses, listening.
+AND THEN HE SINGS AGAIN`;
+
 const exCue = `The lights slowly fade. @@cue 1 "When Night Falls"
 
 ANNA
@@ -70,9 +90,9 @@ WHEN NIGHT FALLS AND THE LIGHTS GO DOWN
 
 The lights come up. @@out 1`;
 
-const exQuoting = `"Mrs. Washington"
+const exQuoting = String.raw`"Mrs. Washington"
 @"Mrs. Washington"
-@@cue 1 "Overture"`;
+@@cue 1 "She Said \"Yes\""`;
 
 const exMarks = `*italic*  **bold**  _underline_
 
@@ -80,9 +100,14 @@ const exMarks = `*italic*  **bold**  _underline_
 
 const exFull = `---
 title: When Night Falls
-authors:
-  book: Jane Smith
-  music: Peter Gray
+credits:
+  - credit: Book
+    authors:
+      - Jane Smith
+  - credit: Music
+    authors:
+      - Peter Gray
+draftDate: 2026-07-01
 ---
 
 # Act One
@@ -117,6 +142,7 @@ The lights come up. @@out 1
 // --- Marker reference ------------------------------------------------------
 const markers = [
     ['--- … ---', 'Frontmatter block (file start)'],
+    ['!text', 'Forced stage direction (block start: tie-breaker; in a speech: only way)'],
     ['#  /  ##', 'Act / scene'],
     ['@name', 'Forced character cue (at the start of a block)'],
     ['@Name  /  @"Name"', 'Character tag (inside a stage direction)'],
@@ -248,6 +274,10 @@ const markers = [
                                 (<span class={s.code}>**Stop!**</span>); caps
                                 inside a speech always mean singing.
                             </p>
+                            <p class={s.prose}>
+                                To make an uppercase line a stage direction, force it with
+                                <span class={s.code}>!</span>.
+                            </p>
                         </section>
 
                         <!-- Frontmatter -->
@@ -261,6 +291,20 @@ const markers = [
                                 <span class={s.code}>---</span> line, everything
                                 up to the next <span class={s.code}>---</span> is
                                 a YAML metadata block. The script begins after it.
+                            </p>
+                            <p class={s.prose}>
+                                The supported fields mirror the title page:
+                                <span class={s.code}>title</span>,
+                                <span class={s.code}>subtitle</span>,
+                                <span class={s.code}>credits</span>,
+                                <span class={s.code}>source</span>,
+                                <span class={s.code}>draftDate</span>,
+                                <span class={s.code}>contact</span>, and
+                                <span class={s.code}>copyright</span>.
+                                A credit always contains an
+                                <span class={s.code}>authors</span> list, even for
+                                one author. Draft dates use
+                                <span class={s.code}>YYYY-MM-DD</span>.
                             </p>
                             <div class={s.exampleSolo}>
                                 <p class={s.exampleLabel}>You type</p>
@@ -468,6 +512,31 @@ const markers = [
                                     </div>
                                 </div>
                             </div>
+                            <p class={s.prose}>
+                                The force prefix also resolves a tag-only stage
+                                direction. <span class={s.code}>@MICHAEL</span>
+                                alone is a forced character cue;
+                                <span class={s.code}>!@MICHAEL</span> is a stage
+                                direction containing one character tag. Write
+                                <span class={s.code}>!!</span> to preserve a
+                                literal leading exclamation point.
+                            </p>
+                            <div class={s.exampleSolo}>
+                                <p class={s.exampleLabel}>Forced stage directions</p>
+                                <pre class={s.codeBlock}>{exForcedStageDir}</pre>
+                            </div>
+                            <p class={s.prose}>
+                                Inside a speech there is no implicit form for a
+                                stage direction — normal case is always dialogue,
+                                UPPERCASE is always lyrics — so
+                                <span class={s.code}>!text</span> is the only way
+                                to write one there. Like a soft break, it does not
+                                end the speech.
+                            </p>
+                            <div class={s.exampleSolo}>
+                                <p class={s.exampleLabel}>You type</p>
+                                <pre class={s.codeBlock}>{exForcedStageDirInSpeech}</pre>
+                            </div>
                         </section>
 
                         <!-- Structural cues -->
@@ -523,6 +592,12 @@ const markers = [
                                 break parsing. A bare <span class={s.code}>@Name</span>
                                 tags only one word — once a name has a space or a
                                 dot, quote it.
+                            </p>
+                            <p class={s.prose}>
+                                Inside quotes, use
+                                <span class={s.code}>\"</span> for a literal
+                                double quote and <span class={s.code}>\\</span>
+                                for a literal backslash.
                             </p>
                             <div class={s.exampleSolo}>
                                 <p class={s.exampleLabel}>You type</p>

@@ -100,7 +100,7 @@ const readDecorationLabel = (decorations: NodeViewProps['decorations'], key: str
 };
 
 export const CueStartPill = ({
-    node, updateAttributes, deleteNode, decorations,
+    node, updateAttributes, deleteNode, decorations, editor, getPos,
 }: NodeViewProps) => {
     const {
         active, setActive, rootRef,
@@ -136,7 +136,11 @@ export const CueStartPill = ({
     };
 
     const deleteCue = () => {
-        deleteNode();
+        const pos = getPos();
+
+        if (typeof pos !== 'number' || !editor.commands.deleteCueStart(pos)) {
+            deleteNode();
+        }
     };
 
     return (

@@ -12,13 +12,14 @@ type AppHeaderProps = Pick<UIAppHeaderProps, 'onMenuAction' | 'isFullWidth'>;
 
 export const AppHeader = (props: AppHeaderProps) => {
     const navigate = useNavigate();
-    const {openNewScript} = useGlobalModals();
+    const {openNewScript, openImportScript} = useGlobalModals();
 
     return (
         <UIAppHeader
             {...props}
             onHome={() => void navigate('/')}
             onNewScript={openNewScript}
+            onImportScript={openImportScript}
         />
     );
 };
@@ -30,13 +31,14 @@ type ScriptEditorAppHeaderProps = Omit<
 
 export const ScriptEditorAppHeader = (props: ScriptEditorAppHeaderProps) => {
     const navigate = useNavigate();
-    const {openNewScript} = useGlobalModals();
+    const {openNewScript, openImportScript} = useGlobalModals();
 
     return (
         <UIScriptEditorAppHeader
             {...props}
             onHome={() => void navigate('/')}
             onNewScript={openNewScript}
+            onImportScript={openImportScript}
             onSelectScript={script => void navigate(`/script/${script.id}/editor`)}
         />
     );

@@ -24,6 +24,7 @@ type UseAutosaveControllerArgs = {
     onDirtyChange?: (isDirty: boolean) => void,
     autoSaveDelayMs?: number,
     resolveLatestValue?: () => ScriptDocument | null,
+    onValueSynced?: (value: ScriptDocument, revision: number) => void,
 };
 
 export const useAutosaveController = ({
@@ -32,6 +33,7 @@ export const useAutosaveController = ({
     onDirtyChange,
     autoSaveDelayMs,
     resolveLatestValue,
+    onValueSynced,
 }: UseAutosaveControllerArgs) => {
     const latestValueRef = useRef<ScriptDocument | null>(null);
     const latestRevisionRef = useRef(0);
@@ -42,6 +44,7 @@ export const useAutosaveController = ({
     const onManualSaveRef = useLatestRef(onManualSave);
     const onDirtyChangeRef = useLatestRef(onDirtyChange);
     const resolveLatestValueRef = useLatestRef(resolveLatestValue);
+    const onValueSyncedRef = useLatestRef(onValueSynced);
 
     const updateDirty = useCallback((nextDirty: boolean) => {
         if (dirtyRef.current === nextDirty) {
@@ -128,6 +131,8 @@ export const useAutosaveController = ({
             return;
         }
 
+        onValueSyncedRef.current?.(latestValue, revisionToSave);
+
         void (async () => {
             try {
                 const result = await autoSaveHandler(latestValue);
@@ -174,7 +179,6 @@ export const useAutosaveController = ({
 
         clearAutosaveTimer();
 
-        // Discrete actions persist now; only continuous typing waits the debounce.
         if (payload.immediate) {
             runSaveNow();
 
@@ -216,6 +220,8 @@ export const useAutosaveController = ({
             return;
         }
 
+        onValueSyncedRef.current?.(currentValue, revisionToSave);
+
         try {
             const result = await manualSaveHandler(currentValue);
 
@@ -235,12 +241,6 @@ export const useAutosaveController = ({
         updateDirty,
     ]);
 
-    /*
-     * Flush any pending (debounced) edit immediately, bypassing the wait timer.
-     * Used on page-hide / unmount so the last edits before a refresh or
-     * navigation are not lost inside the debounce window. Silent (no toast):
-     * routes through the autosave handler, not the manual-save handler.
-     */
     const flushPendingSave = useCallback(() => {
         clearAutosaveTimer();
         runSaveNow();
@@ -259,7 +259,6 @@ export const useAutosaveController = ({
         return () => {
             window.removeEventListener('pagehide', flushPendingSave);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
-            // Flush on unmount (SPA navigation) instead of dropping pending edits.
             flushPendingSave();
             clearAutosaveTimer();
         };

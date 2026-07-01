@@ -2,6 +2,7 @@ import {
     createNodeId,
     getFirstBlockId,
     type ScriptDocument,
+    type TitlePageSettings,
     trimOrFallback,
 } from '@stagistic/script';
 import {
@@ -12,6 +13,7 @@ import {
 import {type NavigateFunction} from 'react-router-dom';
 
 import type {AppToastPayload} from '../../routes/script/types';
+import {importStagisticFile} from './importStagisticFile';
 
 export interface ScriptImportFile {
     fileName: string,
@@ -20,6 +22,8 @@ export interface ScriptImportFile {
 
 interface ScriptRepositoryAdapter {
     createScript: (name: string, initialContent?: ScriptDocument) => Promise<string>,
+    deleteScript: (scriptId: string) => Promise<void>,
+    saveTitlePage: (scriptId: string, settings: TitlePageSettings) => Promise<void>,
     setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,
 }
 
@@ -49,12 +53,7 @@ export interface GlobalModalActions {
     closeImportScript: () => void,
     setPrefilledImport: (value: ScriptImportFile | null) => void,
     handleCreate: (name: string) => Promise<void>,
-    handleImport: (payload: ScriptImportFile & {
-        name: string,
-        importOptions?: {
-            enableLegacyCapsLyricsHeuristic?: boolean,
-        },
-    }) => Promise<void>,
+    handleImport: (payload: ScriptImportFile & {name: string}) => Promise<void>,
 }
 
 export const useGlobalModalActions = ({
@@ -133,23 +132,49 @@ export const useGlobalModalActions = ({
         navigate,
     ]);
 
-    const handleImport = useCallback((payload: ScriptImportFile & {
-        name: string,
-        importOptions?: {
-            enableLegacyCapsLyricsHeuristic?: boolean,
-        },
-    }): Promise<void> => {
-        void payload;
-        setIsImportLoading(false);
-        setIsImportOpen(false);
-        addToast({
-            title: 'Import temporarily unavailable',
-            description: 'Script import is being rebuilt and will return soon.',
-            variant: 'error',
-        });
+    const handleImport = useCallback((payload: ScriptImportFile & {name: string}): Promise<void> => {
+        const importAndNavigate = async () => {
+            setIsImportLoading(true);
 
-        return Promise.resolve();
-    }, [addToast]);
+            try {
+                const {scriptId, scriptName} = await importStagisticFile({
+                    ...payload,
+                    createScript: createScriptWithActiveBlock,
+                    saveTitlePage: scriptRepository.saveTitlePage,
+                    rollbackScript: async id => {
+                        await scriptRepository.deleteScript(id);
+                        refreshScripts();
+                    },
+                });
+
+                setIsImportOpen(false);
+                setPrefilledImport(null);
+                void navigate(`/script/${scriptId}/editor`);
+                addToast({
+                    title: 'Script imported',
+                    description: scriptName,
+                    variant: 'success',
+                });
+            } catch (error) {
+                console.error('Failed to import script', error);
+                addToast({
+                    title: 'Failed to import script',
+                    description: error instanceof Error ? error.message : 'Please check the file and try again.',
+                    variant: 'error',
+                });
+            } finally {
+                setIsImportLoading(false);
+            }
+        };
+
+        return importAndNavigate();
+    }, [
+        addToast,
+        createScriptWithActiveBlock,
+        navigate,
+        refreshScripts,
+        scriptRepository,
+    ]);
 
     return useMemo(() => ({
         isNewScriptOpen,

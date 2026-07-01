@@ -1,12 +1,7 @@
-export interface ImportOptions {
-    enableLegacyCapsLyricsHeuristic: boolean,
-}
-
 export interface ImportPayload {
     name: string,
     fileName: string,
     text: string,
-    importOptions: ImportOptions,
 }
 
 export interface SelectedFile {
@@ -37,10 +32,10 @@ export const isFileDropItem = (item: unknown): item is FileDropItem => {
         && typeof candidate.getFile === 'function';
 };
 
-export const isFountainFileName = (name: string) => {
-    return name.toLowerCase().endsWith('.fountain');
+export const isStagisticFileName = (name: string) => {
+    return name.toLowerCase().endsWith('.stagistic');
 };
 
 export const getFileBaseName = (name: string) => {
-    return name.replace(/\.fountain$/i, '');
+    return name.replace(/\.stagistic$/i, '');
 };

@@ -1,5 +1,6 @@
 import {
     createNodeId,
+    normalizeCharacterEditorDelimiters,
     resolveScriptBlockNodeType,
 } from '@stagistic/script';
 import type {NodeType} from '@tiptap/pm/model';
@@ -56,6 +57,34 @@ const stripLeadingActionTabs = (
     return tr.delete(blockContentStart, blockContentStart + indentCount);
 };
 
+const normalizeCharacterCueText = (
+    tr: Transaction,
+    nextBlockType: BlockNodeType,
+    blockPos: number,
+): Transaction => {
+    if (nextBlockType !== 'character') {
+        return tr;
+    }
+
+    const mappedPos = tr.mapping.map(blockPos);
+    const node = tr.doc.nodeAt(mappedPos);
+
+    if (!node) {
+        return tr;
+    }
+
+    const contentStart = mappedPos + 1;
+    const contentEnd = contentStart + node.content.size;
+    const text = node.textContent;
+    const normalized = normalizeCharacterEditorDelimiters(text);
+
+    if (normalized === text) {
+        return tr;
+    }
+
+    return tr.insertText(normalized, contentStart, contentEnd);
+};
+
 const resolveNodeTypeForBlockType = (
     nodes: Record<string, NodeType>,
     blockType: BlockNodeType,
@@ -108,6 +137,7 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
         activeBlock.from,
         activeBlock.node.textContent ?? '',
     );
+    tr = normalizeCharacterCueText(tr, normalized, activeBlock.pos);
     tr = setSelectionNearBlockStart(tr, activeBlock.pos);
     tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
     editor.view.dispatch(tr.scrollIntoView());

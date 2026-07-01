@@ -70,6 +70,7 @@ export const useScriptEditorCharacters = ({
     });
 
     return {
+        getEditorValue: editor.getEditorValue,
         editorOverrideValue: editor.editorOverrideValue,
         confirmedCharacterRecords: characters.confirmedCharacterRecords,
         normalizedConfirmedCharacterRecords,

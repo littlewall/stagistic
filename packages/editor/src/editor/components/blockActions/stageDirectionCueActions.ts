@@ -26,6 +26,56 @@ const focusCueTitle = (editor: TiptapEditor, blockId: string) => {
     });
 };
 
+const CUE_TITLE_PREVIEW_LENGTH = 10;
+
+const truncateCueTitle = (title: string) => {
+    const characters = Array.from(title.trim());
+
+    if (characters.length <= CUE_TITLE_PREVIEW_LENGTH) {
+        return characters.join('');
+    }
+
+    return `${characters.slice(0, CUE_TITLE_PREVIEW_LENGTH).join('')}…`;
+};
+
+export const formatOpenCueDisplayName = (cue: DerivedCue) => {
+    const number = formatCueNumber(cue);
+    const title = truncateCueTitle(cue.title);
+
+    return title ? `${number} ${title}` : number;
+};
+
+export const resolveNewCueNumber = (
+    snapshot: ScriptBlockIndexSnapshot,
+    blockId: string,
+): string | null => {
+    const blocksById = new Map(snapshot.blocks.map(block => [block.blockId, block] as const));
+    const targetBlock = blocksById.get(blockId);
+
+    if (!targetBlock) {
+        return null;
+    }
+
+    const sceneCues = snapshot.cues.filter(cue => {
+        return blocksById.get(cue.startBlockId)?.sceneBlockId === targetBlock.sceneBlockId;
+    });
+    const sceneNumber = sceneCues[0]?.sceneNumber
+        ?? snapshot.blocks.filter(block => {
+            return block.blockType === 'scene' && block.orderNo <= targetBlock.orderNo;
+        }).length;
+    const indexInScene = sceneCues.filter(cue => {
+        const startBlock = blocksById.get(cue.startBlockId);
+
+        return startBlock !== undefined && startBlock.orderNo < targetBlock.orderNo;
+    }).length;
+
+    return formatCueNumber({
+        sceneNumber,
+        indexInScene,
+        sceneCueCount: sceneCues.length + 1,
+    });
+};
+
 export const resolveOpenCueAtBlock = (
     snapshot: ScriptBlockIndexSnapshot,
     blockId: string,
@@ -72,9 +122,15 @@ const resolveCueAvailability = (editor: TiptapEditor, blockId: string) => {
     }
 
     const snapshot = buildIndexSnapshotFromPmDoc(editor.state.doc);
+    const newCueNumber = resolveNewCueNumber(snapshot, blockId);
+
+    if (!newCueNumber) {
+        return null;
+    }
 
     return {
         openCue: resolveOpenCueAtBlock(snapshot, blockId),
+        newCueNumber,
     };
 };
 
@@ -107,10 +163,6 @@ const runAddOut = (editor: TiptapEditor, blockId: string) => {
     editor.commands.focus();
 };
 
-const getOpenCueDisplayName = (cue: DerivedCue) => {
-    return cue.title.trim() || `Cue ${formatCueNumber(cue)}`;
-};
-
 export const resolveStageDirectionCueActions = ({
     editor,
     blockId,
@@ -126,12 +178,14 @@ export const resolveStageDirectionCueActions = ({
             kind: 'command',
             id: 'add-cue',
             label: 'Add cue',
+            detail: `(${availability.newCueNumber})`,
             icon: 'cueStart',
             run: () => runAddCue(editor, blockId),
         }, {
             kind: 'command',
             id: 'add-hit-cue',
             label: 'Add hit cue',
+            detail: `(${availability.newCueNumber})`,
             icon: 'cueHit',
             run: () => runAddHitCue(editor, blockId),
         },
@@ -141,7 +195,8 @@ export const resolveStageDirectionCueActions = ({
         items.push({
             kind: 'command',
             id: 'add-out',
-            label: `Add out (${getOpenCueDisplayName(availability.openCue)})`,
+            label: 'Add out',
+            detail: `(${formatOpenCueDisplayName(availability.openCue)})`,
             icon: 'cueOut',
             run: () => runAddOut(editor, blockId),
         });

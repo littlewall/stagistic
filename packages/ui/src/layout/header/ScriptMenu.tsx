@@ -10,7 +10,7 @@ import {
 } from 'react-aria-components';
 
 import {
-    ChevronDownIcon, FolderIcon, PlusIcon,
+    ChevronDownIcon,
 } from '../../icons/ui';
 import styles from '../AppHeader.module.css';
 import type {ScriptListItem} from './types';
@@ -49,6 +49,12 @@ export const ScriptMenu = ({
                         </MenuItem>
                         <MenuItem className={styles.menuItem} id="attributes">
                             Attribute manager
+                        </MenuItem>
+                    </MenuSection>
+                    <Separator className={styles.menuSeparator} />
+                    <MenuSection className={styles.menuSection}>
+                        <MenuItem className={styles.menuItem} id="export-stagistic">
+                            Export to .stagistic
                         </MenuItem>
                     </MenuSection>
                     {recentScripts.length > 0 ? (

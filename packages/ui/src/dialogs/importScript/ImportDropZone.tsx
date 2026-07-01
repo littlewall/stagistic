@@ -27,7 +27,7 @@ export const ImportDropZone = ({
                     }}
                 >
                     <span className={styles.dropZoneLabel}>{fileLabel}</span>
-                    <span className={styles.dropZoneHint}>Drop a .fountain file or click to browse.</span>
+                    <span className={styles.dropZoneHint}>Drop a .stagistic file or click to browse.</span>
                 </Button>
             </DropZone>
         );
@@ -40,12 +40,12 @@ export const ImportDropZone = ({
             onDrop={onDrop}
         >
             <FileTrigger
-                acceptedFileTypes={['.fountain']}
+                acceptedFileTypes={['.stagistic']}
                 onSelect={onFileSelect}
             >
                 <Button className={styles.dropZoneTrigger}>
                     <span className={styles.dropZoneLabel}>{fileLabel}</span>
-                    <span className={styles.dropZoneHint}>Drop a .fountain file or click to browse.</span>
+                    <span className={styles.dropZoneHint}>Drop a .stagistic file or click to browse.</span>
                 </Button>
             </FileTrigger>
         </DropZone>

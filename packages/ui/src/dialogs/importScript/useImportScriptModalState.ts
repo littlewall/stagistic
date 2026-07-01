@@ -12,7 +12,7 @@ import {
     type DropEvent,
     getFileBaseName,
     isFileDropItem,
-    isFountainFileName,
+    isStagisticFileName,
     type SelectedFile,
 } from './model';
 import type {UseImportScriptModalStateArgs} from './types';
@@ -28,7 +28,6 @@ export const useImportScriptModalState = ({
     const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
     const [fileError, setFileError] = useState<string | null>(null);
     const [isProcessing, setIsProcessing] = useState(false);
-    const [enableLegacyCapsLyricsHeuristic, setEnableLegacyCapsLyricsHeuristic] = useState(false);
 
     useEffect(() => {
         if (!isOpen) {
@@ -36,7 +35,6 @@ export const useImportScriptModalState = ({
             setSelectedFile(null);
             setFileError(null);
             setIsProcessing(false);
-            setEnableLegacyCapsLyricsHeuristic(false);
 
             return;
         }
@@ -69,7 +67,7 @@ export const useImportScriptModalState = ({
 
     const fileLabel = useMemo(() => {
         if (!selectedFile) {
-            return 'Drop your .fountain file here';
+            return 'Drop your .stagistic file here';
         }
 
         return selectedFile.name;
@@ -79,7 +77,7 @@ export const useImportScriptModalState = ({
         event.preventDefault();
 
         if (!selectedFile || isProcessing) {
-            setFileError('Please drop a .fountain file first.');
+            setFileError('Please drop a .stagistic file first.');
 
             return;
         }
@@ -89,7 +87,7 @@ export const useImportScriptModalState = ({
             : null);
 
         if (!fileText) {
-            setFileError('Please drop a .fountain file first.');
+            setFileError('Please drop a .stagistic file first.');
 
             return;
         }
@@ -102,15 +100,11 @@ export const useImportScriptModalState = ({
                 name,
                 fileName: selectedFile.name,
                 text: fileText,
-                importOptions: {
-                    enableLegacyCapsLyricsHeuristic,
-                },
             });
         } finally {
             setIsProcessing(false);
         }
     }, [
-        enableLegacyCapsLyricsHeuristic,
         isProcessing,
         name,
         onImport,
@@ -137,15 +131,15 @@ export const useImportScriptModalState = ({
         const item = event.items.find(isFileDropItem);
 
         if (!item) {
-            setFileError('Please drop a .fountain file.');
+            setFileError('Please drop a .stagistic file.');
 
             return;
         }
 
         const file = await item.getFile();
 
-        if (!isFountainFileName(file.name)) {
-            setFileError('Only .fountain files are supported.');
+        if (!isStagisticFileName(file.name)) {
+            setFileError('Only .stagistic files are supported.');
             setSelectedFile(null);
 
             return;
@@ -161,8 +155,8 @@ export const useImportScriptModalState = ({
 
         const file = files[0];
 
-        if (!file || !isFountainFileName(file.name)) {
-            setFileError('Only .fountain files are supported.');
+        if (!file || !isStagisticFileName(file.name)) {
+            setFileError('Only .stagistic files are supported.');
             setSelectedFile(null);
 
             return;
@@ -190,10 +184,6 @@ export const useImportScriptModalState = ({
         }
     }, [applyFile, onPickFile]);
 
-    const handleEnableLegacyCapsLyricsHeuristicChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-        setEnableLegacyCapsLyricsHeuristic(event.target.checked);
-    }, []);
-
     return {
         inputRef,
         name,
@@ -201,10 +191,8 @@ export const useImportScriptModalState = ({
         fileLabel,
         fileError,
         isProcessing,
-        enableLegacyCapsLyricsHeuristic,
         handleSubmit,
         handleNameChange,
-        handleEnableLegacyCapsLyricsHeuristicChange,
         handleDrop,
         handleFileSelect,
         handlePickFile,

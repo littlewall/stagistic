@@ -1,7 +1,7 @@
 # Stagistic Syntax — Design
 
 **Date:** 2026-06-14
-**Status:** Approved (design); implementation pending
+**Status:** Approved; `.stagistic` parser and serializer implemented
 **Scope:** The plain-text *syntax* only — what a writer types in a text
 editor and imports. The data model, parser/serializer, editor surfaces,
 and migration of existing documents are **separate downstream specs**.
@@ -81,22 +81,37 @@ parentheses), Act-Scene-Page page numbers, lyric hanging indent,
 
 A YAML block fenced by `---`, at the very start of the file
 (Astro/Vue-style frontmatter, *not* Fountain's `Key:` object style). The
-script body follows.
+script body follows. It mirrors the editor's title-page settings and accepts
+these keys:
+
+- `title`, `subtitle`, `source`, `contact`, and `copyright` are strings.
+- `draftDate` is an ISO calendar date in the exact `YYYY-MM-DD` format.
+- `credits` is a list of credit/author pairs. `credit` is a free-form string
+  and `authors` is always a list, including when the credit has one author.
+
+All keys are optional. Unknown keys are reserved for future versions.
 
 ````
 ---
 title: Až přijde noc
-authors:
-  book: Jan Novák
-  music: Petr Svoboda
-  lyrics: Jan Novák
+subtitle: Muzikál o dvou dějstvích
+credits:
+  - credit: Book
+    authors:
+      - Jan Novák
+  - credit: Music
+    authors:
+      - Petr Svoboda
+  - credit: Lyrics
+    authors:
+      - Jan Novák
+      - Eva Malá
+source: Based on the novel by Karel Černý
+draftDate: 2026-07-01
+contact: jan@example.com
+copyright: © 2026 Jan Novák
 ---
 ````
-
-The frontmatter is optional. Its internal schema (which keys are
-recognized) is a downstream concern; the syntax rule is only: *if the
-file begins with a `---` line, everything up to the next `---` line is a
-YAML frontmatter block, and the body begins after it.*
 
 ## 5. Structure — acts and scenes
 
@@ -147,11 +162,40 @@ blank lines inside.
 
 | Line | Type |
 |---|---|
+| `!text` | **stage direction**, forced; the leading `!` is removed |
 | `#` / `##` | act / scene |
-| UPPERCASE, short | **character cue** (may contain `/` for unison) |
+| UPPERCASE | **character cue** (may contain `/` for unison) |
 | `@name` | **character cue**, forced (for non-caps names) |
 | normal case | **stage direction** |
 | `(...)` | **stage direction** (parenthetical form) |
+
+There is no length heuristic. At block start, an uppercase line is always a
+character cue unless `!` explicitly forces it to be a stage direction. The
+parser never guesses authorial intent.
+
+### Forced stage direction — `!`
+
+`!` follows Fountain's forced Action rule. At block start it takes precedence
+over every implicit detector, is removed during import, and forces the rest of
+the line to a stage direction.
+
+```
+!VŠECHNA SVĚTLA NÁHLE ZHASNOU
+```
+
+This is also required when a stage direction consists only of a character tag.
+Without `!`, `@MICHAEL` is a forced character cue; with it, the line is a stage
+direction containing one character tag:
+
+```
+!@MICHAEL
+```
+
+To preserve a literal leading exclamation point in a stage direction, write two:
+`!!BANG` imports as the stage-direction text `!BANG`. Canonical export adds the
+force prefix whenever a stage direction would otherwise be detected as another
+block type, including uppercase directions, a tag-only direction, headings,
+notes, and text beginning with a literal `!`.
 
 ### Tie-break: `@name` at block start (forced cue vs. leading tag)
 
@@ -175,6 +219,7 @@ Inside a stage direction (not at block start) `@name` is always a tag.
 | normal case | **dialogue** (spoken) |
 | `(...)` | **aside** (may appear multiple times in one speech) |
 | `~` (alone on the line) | **soft break** — empty block, continues the speech (see below) |
+| `!text` | **forced stage direction**, continues the speech (see below) |
 
 ### Key rule
 
@@ -228,6 +273,24 @@ pořád ještě mluví
 
 On export, an empty in-speech block serializes back to `~` so the gap
 round-trips.
+
+### Forced stage direction inside a speech — `!`
+
+Unlike at block start, where `!` only breaks a tie against an implicit
+detector, **inside a speech `!` is the only way to write a stage
+direction** — there is no implicit form, since normal case is always
+dialogue and UPPERCASE is always lyrics. Like `~`, it does **not** reset
+to "expecting a cue"; the speech continues on the line after it with the
+normal in-speech rules.
+
+```
+MICHAEL
+!Odmlčí se, poslouchá.
+A PAK ZASE ZPÍVÁ
+```
+
+The same `!!` → literal `!` escape (§6, "Forced stage direction") applies
+here too.
 
 ### Why this resolves the central ambiguity
 
@@ -382,6 +445,15 @@ A bare `@Name` tags exactly one whitespace-delimited token; once a name
 contains a space, a period, or a special character, it **must** be
 quoted.
 
+Inside a quoted literal, backslash escapes the two delimiter characters:
+`\"` represents a literal double quote and `\\` represents a literal
+backslash. No other backslash escape has special meaning.
+
+```
+@@cue 1 "Řekl \"Ano\""
+@"Doktor \"X\""
+```
+
 ## 13. Inline marks and author notes
 
 Carried over from Fountain unchanged:
@@ -394,9 +466,14 @@ Carried over from Fountain unchanged:
 ```
 ---
 title: Až přijde noc
-authors:
-  book: Jan Novák
-  music: Petr Svoboda
+credits:
+  - credit: Book
+    authors:
+      - Jan Novák
+  - credit: Music
+    authors:
+      - Petr Svoboda
+draftDate: 2026-07-01
 ---
 
 # Akt první
@@ -437,6 +514,7 @@ position + case):
 | Marker | Meaning |
 |---|---|
 | `--- … ---` | frontmatter block (file start) |
+| `!text` | forced stage direction (block start: tie-breaker; in speech: only way, §6) |
 | `#` / `##` | act / scene |
 | `@name` | forced character cue (block start) |
 | `@Name` / `@"Name"` | character tag (inside stage direction) |
@@ -449,11 +527,11 @@ position + case):
 | `~` (alone on line) | soft break — empty in-speech block, no cue reset (§6) |
 | `"..."` | literal name/title (quoting rule, §12) |
 
-## 16. Downstream specs (not this document)
+## 16. Implementation layers
 
-1. **Data model** — what the syntax parses into (blocks, refs, cue
-   entities, structure).
-2. **Parser + serializer** — text ↔ document, including the
-   whole-document pre-scan and canonical stacked serialization.
-3. **Editor + import** — the import flow and editing surfaces.
-4. **Migration** — existing stored (Fountain-based) documents.
+1. **Data model** — implemented: blocks, refs, cue entities, and structure.
+2. **Parser + serializer** — implemented: text ↔ document, including the
+   whole-document pre-scan, forced stage directions, and canonical stacked
+   serialization.
+3. **Editor + `.stagistic` import/export** — implemented. Imports from other
+   formats remain a future, mapping-driven workflow.

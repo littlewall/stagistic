@@ -196,6 +196,9 @@ const Editor = ({
         onDirtyChange,
         autoSaveDelayMs,
         resolveLatestValue,
+        onValueSynced: (value, revision) => {
+            onValueChange?.(value, {source: 'typing', revision});
+        },
     });
     const rootStyle = useMemo(() => buildEditorRootStyle({
         persistentCharacters,

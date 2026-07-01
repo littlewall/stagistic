@@ -306,6 +306,24 @@ describe('cue pill node views', () => {
         expect(document.querySelector('[data-cue-pill="start"]')).toBeNull();
     });
 
+    it('deletes the paired cue-out when deleting an open cue from the menu', async () => {
+        renderEditor(createTwoBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+        editor.commands.insertCueOut('sd-2');
+
+        await poll(() => document.querySelector('[data-id="sd-2"] [data-cue-pill="out"]'), 'cue out pill');
+        await activatePill();
+        await poll(() => document.querySelector('[data-cue-menu="start"]'), 'pill menu');
+        await clickMenuButton('Delete cue');
+        await poll(() => document.querySelector('[data-cue-pill="start"]') ? null : true, 'pill removed');
+
+        expect(document.querySelector('[data-cue-pill="start"]')).toBeNull();
+        expect(document.querySelector('[data-id="sd-2"] [data-cue-pill="out"]')).toBeNull();
+    });
+
     it('does not delete a cue via Backspace', async () => {
         renderEditor();
 

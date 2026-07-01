@@ -24,6 +24,7 @@ export interface UseScriptEditorCharactersArgs {
 }
 
 export interface UseScriptEditorCharactersResult {
+    getEditorValue: () => ScriptDocument | null,
     editorOverrideValue: ScriptDocument | null,
     confirmedCharacterRecords: ScriptCharacterRecord[],
     normalizedConfirmedCharacterRecords: ScriptCharacterRecord[],

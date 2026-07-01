@@ -8,8 +8,10 @@ import {
     CUE_TITLE_ATTR,
     type CueMode,
 } from '@stagistic/script';
+import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {EditorState, Transaction} from '@tiptap/pm/state';
 
+import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
 import {
     type ActiveScriptBlock,
     findScriptBlockByIdFromState,
@@ -74,4 +76,48 @@ export const buildInsertCueOut = (
     const node = state.schema.nodes[CUE_OUT_NODE_NAME].create();
 
     return state.tr.insert(block.to, node);
+};
+
+type PositionRange = {
+    from: number,
+    to: number,
+};
+
+const findCueOutRange = (state: EditorState, block: ActiveScriptBlock): PositionRange | null => {
+    let range: PositionRange | null = null;
+
+    state.doc.nodesBetween(block.from, block.to, (child, childPos) => {
+        if (child.type.name === CUE_OUT_NODE_NAME) {
+            range = {from: childPos, to: childPos + child.nodeSize};
+        }
+    });
+
+    return range;
+};
+
+/**
+ * Deletes a cue-start atom. When it's an open cue with a paired cue-out
+ * later in the doc (§3.1 pairing), both atoms are removed in one
+ * transaction so a single undo restores both.
+ */
+export const buildDeleteCueStart = (
+    state: EditorState,
+    pos: number,
+    node: ProseMirrorNode,
+): Transaction => {
+    const cueId = node.attrs[CUE_ID_ATTR];
+    const snapshot = buildIndexSnapshotFromPmDoc(state.doc);
+    const cue = snapshot.cues.find(candidate => candidate.cueId === cueId);
+    const tr = state.tr;
+
+    if (cue?.mode === 'open' && cue.endBlockId && cue.endBlockId !== cue.startBlockId) {
+        const endBlock = findScriptBlockByIdFromState(state, cue.endBlockId);
+        const outRange = endBlock ? findCueOutRange(state, endBlock) : null;
+
+        if (outRange) {
+            tr.delete(outRange.from, outRange.to);
+        }
+    }
+
+    return tr.delete(pos, pos + node.nodeSize);
 };

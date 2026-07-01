@@ -10,6 +10,7 @@ import {Plugin, TextSelection} from '@tiptap/pm/state';
 
 import {
     blockHasCueAtom,
+    buildDeleteCueStart,
     buildInsertCueOut,
     buildInsertCueStart,
     resolveCueTargetBlock,
@@ -17,6 +18,51 @@ import {
 
 const isCueAtom = (node: ProseMirrorNode | null | undefined): boolean => {
     return node?.type.name === CUE_START_NODE_NAME || node?.type.name === CUE_OUT_NODE_NAME;
+};
+
+const isCuePillTarget = (target: EventTarget | null) => {
+    return target instanceof Element && target.closest('[data-cue-pill]') !== null;
+};
+
+const resolveTrailingCueClickPosition = (
+    state: EditorState,
+    event: MouseEvent,
+): number | null => {
+    const target = event.target;
+    const blockElement = target instanceof Element
+        ? target.closest<HTMLElement>('[data-id]')
+        : null;
+    const cuePill = blockElement?.querySelector<HTMLElement>('[data-cue-pill]');
+
+    if (!blockElement || !cuePill) {
+        return null;
+    }
+
+    const cueRect = cuePill.getBoundingClientRect();
+    const isAfterCue = event.clientX > cueRect.right
+        && event.clientY >= cueRect.top
+        && event.clientY <= cueRect.bottom;
+
+    if (!isAfterCue) {
+        return null;
+    }
+
+    return resolveCueTargetBlock(state, blockElement.dataset.id)?.to ?? null;
+};
+
+const moveCaretBeforeTrailingCue = (state: EditorState, pos: number): Transaction | null => {
+    const resolvedPos = state.doc.resolve(pos);
+    const cue = resolvedPos.nodeBefore;
+
+    if (!cue || !isCueAtom(cue) || resolvedPos.parentOffset !== resolvedPos.parent.content.size) {
+        return null;
+    }
+
+    const cuePos = pos - cue.nodeSize;
+
+    return state.tr
+        .setSelection(TextSelection.near(state.doc.resolve(cuePos), -1))
+        .scrollIntoView();
 };
 
 type PositionRange = {
@@ -106,6 +152,7 @@ declare module '@tiptap/core' {
         cue: {
             insertCueStart: (blockId: string | null, title: string, mode?: CueMode) => ReturnType,
             insertCueOut: (blockId: string | null) => ReturnType,
+            deleteCueStart: (pos: number) => ReturnType,
         },
     }
 }
@@ -141,6 +188,19 @@ export const CueCommandsExtension = Extension.create({
 
                 return true;
             },
+            deleteCueStart: pos => ({state, dispatch}) => {
+                const node = state.doc.nodeAt(pos);
+
+                if (!node || node.type.name !== CUE_START_NODE_NAME) {
+                    return false;
+                }
+
+                if (dispatch) {
+                    dispatch(buildDeleteCueStart(state, pos, node));
+                }
+
+                return true;
+            },
         };
     },
 
@@ -152,6 +212,28 @@ export const CueCommandsExtension = Extension.create({
         return [
             new Plugin({
                 props: {
+                    handleDOMEvents: {
+                        mousedown: (view, event) => {
+                            if (event.button !== 0 || isCuePillTarget(event.target)) {
+                                return false;
+                            }
+
+                            const clickPosition = resolveTrailingCueClickPosition(view.state, event);
+                            const tr = clickPosition !== null
+                                ? moveCaretBeforeTrailingCue(view.state, clickPosition)
+                                : null;
+
+                            if (!tr) {
+                                return false;
+                            }
+
+                            event.preventDefault();
+                            view.dispatch(tr);
+                            view.focus();
+
+                            return true;
+                        },
+                    },
                     handleKeyDown: (view, event) => {
                         const {selection} = view.state;
 

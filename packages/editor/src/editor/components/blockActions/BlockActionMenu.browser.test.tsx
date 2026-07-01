@@ -128,7 +128,11 @@ const openActionMenu = async (blockId: string) => {
 
 const findMenuItem = (label: string) => {
     return Array.from(document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'))
-        .find(item => item.textContent?.trim() === label) ?? null;
+        .find(item => {
+            const accessibleLabel = item.getAttribute('aria-label') ?? item.textContent?.trim();
+
+            return accessibleLabel === label || accessibleLabel?.startsWith(`${label} (`);
+        }) ?? null;
 };
 
 const getCueStartAttrs = (editor: Editor, blockId: string): Record<string, unknown> | undefined => {
@@ -203,7 +207,7 @@ describe('block action menu', () => {
         const cues = await openCuesSubmenu();
         const addCue = await poll(() => findMenuItem('Add cue'), 'Add cue item');
         const addHitCue = await poll(() => findMenuItem('Add hit cue'), 'Add hit cue item');
-        const addOut = await poll(() => findMenuItem('Add out (Night)'), 'Add out item');
+        const addOut = await poll(() => findMenuItem('Add out (0. Night)'), 'Add out item');
 
         expect(cues.querySelector('[data-cue-icon="range"]')).toBeTruthy();
         expect(addCue.querySelector('[data-cue-point="start"][data-cue-point-style="hollow"]')).toBeTruthy();
@@ -222,7 +226,7 @@ describe('block action menu', () => {
         await openCuesSubmenu();
 
         const addOut = await poll(
-            () => findMenuItem('Add out (Night)'),
+            () => findMenuItem('Add out (0. Night)'),
             'Add out item',
         );
 
@@ -242,7 +246,7 @@ describe('block action menu', () => {
         await openCuesSubmenu();
 
         expect(await poll(
-            () => findMenuItem('Add out (Cue 0.)'),
+            () => findMenuItem('Add out (0.)'),
             'untitled Add out item',
         )).toBeTruthy();
     });
@@ -258,7 +262,7 @@ describe('block action menu', () => {
         await openCuesSubmenu();
 
         expect(findMenuItem('Add cue')).toBeTruthy();
-        expect(findMenuItem('Add out (Hit)')).toBeNull();
+        expect(findMenuItem('Add out')).toBeNull();
     });
 
     it('supports keyboard submenu navigation and restores trigger focus', async () => {
@@ -345,6 +349,36 @@ describe('block action menu', () => {
         expect(itemRect.right).toBeCloseTo(panelRect.right, 1);
         expect(surfaceRect.left).toBeGreaterThan(itemRect.left);
         expect(surfaceRect.right).toBeLessThan(itemRect.right);
+    });
+
+    it('keeps the action trigger and anchored menu stationary after opening', async () => {
+        renderEditor();
+
+        await getEditor();
+
+        const trigger = await getActionTrigger('sd-1');
+        const typeTrigger = await poll(
+            () => document.querySelector<HTMLButtonElement>('[data-block-actions-trigger="true"]'),
+            'block type trigger',
+        );
+
+        expect(window.getComputedStyle(trigger).transitionDuration)
+            .toBe(window.getComputedStyle(typeTrigger).transitionDuration);
+
+        const menu = await openActionMenu('sd-1');
+        const triggerRect = trigger.getBoundingClientRect();
+        const menuRect = menu.getBoundingClientRect();
+
+        await new Promise(resolve => window.setTimeout(resolve, 180));
+
+        const settledTriggerRect = trigger.getBoundingClientRect();
+        const settledMenuRect = menu.getBoundingClientRect();
+
+        expect(settledTriggerRect.left).toBeCloseTo(triggerRect.left, 2);
+        expect(settledTriggerRect.top).toBeCloseTo(triggerRect.top, 2);
+        expect(settledTriggerRect.width).toBeCloseTo(triggerRect.width, 2);
+        expect(settledMenuRect.left).toBeCloseTo(menuRect.left, 2);
+        expect(settledMenuRect.top).toBeCloseTo(menuRect.top, 2);
     });
 
     it('preserves the native contextmenu event', async () => {

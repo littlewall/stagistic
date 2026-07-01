@@ -19,10 +19,8 @@ export const ImportScriptModal = ({
         selectedFile,
         fileLabel,
         fileError,
-        enableLegacyCapsLyricsHeuristic,
         handleSubmit,
         handleNameChange,
-        handleEnableLegacyCapsLyricsHeuristicChange,
         handleDrop,
         handleFileSelect,
         handlePickFile,
@@ -42,7 +40,7 @@ export const ImportScriptModal = ({
         >
             <h2 className={styles.title}>Import script</h2>
             <p className={styles.subtitle}>
-                Bring in a Fountain file and keep working where you left off.
+                Bring in a Stagistic file and continue working in the editor.
             </p>
             <form className={styles.form} onSubmit={handleSubmit}>
                 <label className={styles.label} htmlFor="import-script-name">
@@ -64,17 +62,6 @@ export const ImportScriptModal = ({
                     onFileSelect={handleFileSelect}
                     onPickFile={onPickFile ? handlePickFile : undefined}
                 />
-                <label className={styles.optionRow}>
-                    <input
-                        className={styles.checkbox}
-                        type="checkbox"
-                        checked={enableLegacyCapsLyricsHeuristic}
-                        onChange={handleEnableLegacyCapsLyricsHeuristicChange}
-                    />
-                    <span className={styles.optionText}>
-                        Legacy: convert ALL CAPS lines after character to lyrics
-                    </span>
-                </label>
                 {fileError ? (
                     <p className={styles.error} role="alert">
                         {fileError}

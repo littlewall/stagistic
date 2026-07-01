@@ -11,7 +11,9 @@ import {
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {useEffect, useState} from 'react';
 import {
-    Navigate, Route, Routes,
+    Navigate,
+    Route, 
+    Routes,
 } from 'react-router-dom';
 
 import {prepareLocalDbWithProgress} from './db';

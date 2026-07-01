@@ -99,11 +99,9 @@ const buildCharacterDecorations = (
         }
 
         if (tokenEntry.valueStart < tokenEntry.valueEnd) {
-            const decorationEnd = Math.max(tokenEntry.valueEnd, tokenEntry.end);
-
             decorations.push(Decoration.inline(
                 tokenEntry.blockStart + tokenEntry.valueStart,
-                tokenEntry.blockStart + decorationEnd,
+                tokenEntry.blockStart + tokenEntry.valueEnd,
                 resolveCharacterTagDecorationAttributes(tokenEntry, characterTagClassNames),
             ));
         }
