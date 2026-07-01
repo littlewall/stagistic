@@ -18,9 +18,9 @@
 
 .previewRow {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    min-height: 104px;
-    padding: var(--space-xl);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) minmax(0, 1fr);
+    gap: var(--space-xs);
+    padding: var(--space-xs);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
@@ -28,12 +28,13 @@
 
 .previewCell {
     min-width: 0;
-    min-height: 62px;
-    padding: var(--space-lg);
+    min-height: 0;
+    padding: var(--space-sm) var(--space-md);
     font-family: var(--font-family-mono);
     font-size: var(--font-size-sm);
+    line-height: var(--line-height-snug);
     color: var(--color-text-muted);
-    border: 1px solid transparent;
+    border: 1px dotted transparent;
     border-radius: var(--radius-xs);
 
     &:hover {
@@ -42,10 +43,10 @@
     }
 }
 
-.activeCell {
+.activeCell.activeCell.activeCell {
     color: var(--color-text);
-    background: color-mix(in oklch, var(--color-surface-accent) 20%, transparent);
-    border-color: color-mix(in oklch, var(--color-surface-accent) 65%, var(--color-border));
+    border-color: color-mix(in oklch, var(--color-text) 45%, transparent);
+    border-style: dotted;
 }
 
 .left {
@@ -81,10 +82,6 @@
 .editor {
     display: grid;
     gap: var(--space-lg);
-    padding: var(--space-xl);
-    background: var(--color-surface-raised);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
 }
 
 .editorToolbar {
@@ -100,11 +97,24 @@
 }
 
 .formatButton.formatButton {
-    width: 32px;
-    min-width: 32px;
-    height: 32px;
+    width: var(--control-height-sm);
+    min-width: var(--control-height-sm);
+    height: var(--control-height-sm);
     padding: 0;
-    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: background .15s ease, border-color .15s ease;
+
+    &:not([data-disabled]):hover {
+        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+    }
+
+    &[data-disabled]:hover {
+        background: var(--color-surface);
+        border-color: var(--color-border);
+    }
 
     & svg {
         width: 16px;
@@ -112,9 +122,15 @@
     }
 }
 
-.activeFormat {
+.formatButton.activeFormat {
     color: var(--color-text);
-    background: color-mix(in oklch, var(--color-surface-accent) 42%, transparent);
+    background: var(--color-surface-raised);
+    border-color: color-mix(in oklch, var(--color-text) 28%, var(--color-border));
+    box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-text) 16%, transparent);
+
+    &:not([data-disabled]):hover {
+        background: color-mix(in oklch, var(--color-surface-raised) 82%, var(--color-surface));
+    }
 }
 
 .variables {
@@ -126,4 +142,8 @@
 .variableButton {
     padding: 5px var(--space-lg);
     font-size: var(--font-size-xs);
+}
+
+.variableButton.variableButton[data-disabled]:hover {
+    background: transparent;
 }

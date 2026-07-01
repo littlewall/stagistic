@@ -1,17 +1,19 @@
 import {buildDefaultBlockSettings} from '../blocks/derived/defaultBlockSettings';
 import {CHARACTER_COLOR_SATURATION_DEFAULT} from './options';
-import type {EditorSettings} from './types';
+import type {
+    EditorSettings,
+    HeaderFooterAlignment,
+    HeaderFooterCellSettings,
+} from './types';
 
-const buildEmptyHeaderFooterRow = () => ({
-    left: {
-        text: '', isBold: false, isItalic: false, isUnderline: false, isHiddenInEditor: false,
-    },
-    center: {
-        text: '', isBold: false, isItalic: false, isUnderline: false, isHiddenInEditor: false,
-    },
-    right: {
-        text: '', isBold: false, isItalic: false, isUnderline: false, isHiddenInEditor: false,
-    },
+const buildHeaderFooterCell = (text = ''): HeaderFooterCellSettings => ({
+    text, isBold: false, isItalic: false, isUnderline: false, isHiddenInEditor: false,
+});
+
+const buildHeaderFooterRow = (cells: Partial<Record<HeaderFooterAlignment, string>> = {}) => ({
+    left: buildHeaderFooterCell(cells.left),
+    center: buildHeaderFooterCell(cells.center),
+    right: buildHeaderFooterCell(cells.right),
 });
 
 export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
@@ -41,8 +43,8 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
         },
     },
     headerFooter: {
-        header: buildEmptyHeaderFooterRow(),
-        footer: buildEmptyHeaderFooterRow(),
+        header: buildHeaderFooterRow({right: '{{page}}'}),
+        footer: buildHeaderFooterRow(),
     },
     blocks: buildDefaultBlockSettings(),
 };

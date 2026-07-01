@@ -14,6 +14,10 @@ import {
     useState,
 } from 'react';
 
+import {
+    formatDatePreview,
+    getTodayIso,
+} from '../draftDate';
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import {
     SettingsSelect,
@@ -21,32 +25,6 @@ import {
 } from '../SettingsSelect';
 import sharedStyles from '../shared.module.css';
 import styles from './TitlePageSettingsPanel.module.css';
-
-const formatDatePreview = (isoDate: string, format: TitlePageDateFormat): string => {
-    const match = (/^(\d{4})-(\d{2})-(\d{2})/).exec(isoDate);
-
-    if (!match) {
-        return '';
-    }
-
-    const [
-        ,
-        year,
-        month,
-        day,
-    ] = match;
-
-    return format === 'dmy' ? `${day}/${month}/${year}` : `${month}/${day}/${year}`;
-};
-
-const getTodayIso = (): string => {
-    const d = new Date();
-    const y = String(d.getFullYear());
-    const m = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
-
-    return `${y}-${m}-${day}`;
-};
 
 const CREDITS_COLUMNS: readonly InputTableColumnDef[] = [
     {

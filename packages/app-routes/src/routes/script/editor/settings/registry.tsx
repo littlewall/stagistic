@@ -32,6 +32,7 @@ export const SECTION_RENDERERS: Partial<Record<string, SectionRenderer>> = {
         <HeaderFooterSettingsPanel
             settings={props.resolvedScriptSettings.headerFooter}
             scriptTitle={props.titlePageHandlers.scriptTitle}
+            titlePageSettings={props.titlePageHandlers.titlePageSettings}
             onUpdate={props.headerFooterHandlers.onUpdateHeaderFooterSettings}
         />
     ),

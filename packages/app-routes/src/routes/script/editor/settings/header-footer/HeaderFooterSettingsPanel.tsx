@@ -3,6 +3,7 @@ import {
     type HeaderFooterCellSettings,
     type HeaderFooterSettings,
     type HeaderFooterSettingsPatch,
+    type TitlePageSettings,
 } from '@stagistic/script';
 import {
     BoldIcon,
@@ -17,6 +18,7 @@ import {
     useState,
 } from 'react';
 
+import {resolveDraftDate} from '../draftDate';
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import sharedStyles from '../shared.module.css';
 import styles from './HeaderFooterSettingsPanel.module.css';
@@ -27,6 +29,7 @@ type Selection = {area: Area, alignment: HeaderFooterAlignment};
 interface HeaderFooterSettingsPanelProps {
     settings: HeaderFooterSettings,
     scriptTitle: string,
+    titlePageSettings: TitlePageSettings,
     onUpdate: (patch: HeaderFooterSettingsPatch) => void,
 }
 
@@ -36,21 +39,26 @@ const ALIGNMENTS: HeaderFooterAlignment[] = [
     'right',
 ];
 const VARIABLES = [
-    {label: 'Current page', token: '{{page}}'},
+    {label: 'Page mark', token: '{{page}}'},
     {label: 'Script title', token: '{{script_title}}'},
     {label: 'Draft date', token: '{{draft_date}}'},
 ] as const;
 
-const resolvePreview = (text: string, scriptTitle: string) => text
-    .replaceAll('{{page}}', '1')
+// The page mark is `act-scene-page`: Roman act number, scene number, page number.
+const PAGE_MARK_PREVIEW = 'I-1-1';
+
+const resolvePreview = (text: string, scriptTitle: string, draftDate: string) => text
+    .replaceAll('{{page}}', PAGE_MARK_PREVIEW)
     .replaceAll('{{script_title}}', scriptTitle || 'Untitled')
-    .replaceAll('{{draft_date}}', new Intl.DateTimeFormat(undefined, {dateStyle: 'medium'}).format(new Date()));
+    .replaceAll('{{draft_date}}', draftDate);
 
 export const HeaderFooterSettingsPanel = ({
     settings,
     scriptTitle,
+    titlePageSettings,
     onUpdate,
 }: HeaderFooterSettingsPanelProps) => {
+    const draftDate = resolveDraftDate(titlePageSettings);
     const [selection, setSelection] = useState<Selection | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
     const activeCell = selection ? settings[selection.area][selection.alignment] : null;
@@ -96,7 +104,7 @@ export const HeaderFooterSettingsPanel = ({
                 {ALIGNMENTS.map(alignment => {
                     const cell = settings[area][alignment];
                     const isActive = selection?.area === area && selection.alignment === alignment;
-                    const displayText = resolvePreview(cell.text, scriptTitle);
+                    const displayText = resolvePreview(cell.text, scriptTitle, draftDate);
 
                     return (
                         <Button
