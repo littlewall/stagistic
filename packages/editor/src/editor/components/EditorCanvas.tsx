@@ -1,3 +1,4 @@
+import type {HeaderFooterSettings} from '@stagistic/script';
 import {type Editor as TiptapEditor, EditorContent} from '@tiptap/react';
 import {type CSSProperties, useRef} from 'react';
 
@@ -6,6 +7,7 @@ import CharacterSuggestionsOverlay from './CharacterSuggestionsOverlay';
 import EditorBlockActionsOverlay from './EditorBlockActionsOverlay';
 import styles from './EditorCanvas.module.css';
 import {EmptyEnterBlockChooserOverlay} from './emptyEnterChooser/EmptyEnterBlockChooserOverlay';
+import {HeaderFooterOverlay} from './HeaderFooterOverlay';
 
 type EditorCanvasProps = {
     editor: TiptapEditor | null,
@@ -13,6 +15,9 @@ type EditorCanvasProps = {
     characterColorSaturation?: number,
     autoFocus?: boolean,
     style?: CSSProperties,
+    headerFooter: HeaderFooterSettings,
+    scriptTitle?: string,
+    draftDate?: string,
 };
 
 export const EditorCanvas = ({
@@ -21,6 +26,9 @@ export const EditorCanvas = ({
     characterColorSaturation,
     autoFocus,
     style,
+    headerFooter,
+    scriptTitle = '',
+    draftDate = '',
 }: EditorCanvasProps) => {
     const canvasRef = useRef<HTMLElement | null>(null);
 
@@ -45,6 +53,13 @@ export const EditorCanvas = ({
             />
             <EmptyEnterBlockChooserOverlay editor={editor} canvasRef={canvasRef} />
             <EditorBlockActionsOverlay editor={editor} canvasRef={canvasRef} />
+            <HeaderFooterOverlay
+                editor={editor}
+                canvasRef={canvasRef}
+                headerFooter={headerFooter}
+                scriptTitle={scriptTitle}
+                draftDate={draftDate}
+            />
         </section>
     );
 };

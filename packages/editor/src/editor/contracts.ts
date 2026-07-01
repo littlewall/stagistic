@@ -194,6 +194,8 @@ export interface EditorLayoutProps {
 export interface EditorDocumentProps {
     initialValue: ScriptDocument,
     persistentCharacters?: readonly PersistentCharacterRef[],
+    scriptTitle?: string,
+    draftDate?: string,
 }
 
 export interface EditorProps {

@@ -48,6 +48,8 @@ const Editor = ({
     const {
         initialValue,
         persistentCharacters = [],
+        scriptTitle,
+        draftDate,
     } = document;
     const {
         settings,
@@ -262,6 +264,9 @@ const Editor = ({
                             characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
                             editor,
                             persistentCharacters,
+                            headerFooter: resolvedSettings.headerFooter,
+                            scriptTitle,
+                            draftDate,
                         }}
                         layout={resolvedLayout}
                         rootRef={rootRef}

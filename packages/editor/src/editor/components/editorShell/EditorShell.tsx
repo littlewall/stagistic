@@ -1,3 +1,4 @@
+import type {HeaderFooterSettings} from '@stagistic/script';
 import {ArrowLeftIcon, ArrowRightIcon} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
@@ -24,6 +25,9 @@ interface EditorShellCanvasProps {
     autoFocus?: boolean,
     persistentCharacters?: readonly PersistentCharacterRef[],
     characterColorSaturation?: number,
+    headerFooter: HeaderFooterSettings,
+    scriptTitle?: string,
+    draftDate?: string,
 }
 
 interface EditorShellProps {
@@ -52,6 +56,9 @@ export const EditorShell = ({
         autoFocus,
         persistentCharacters,
         characterColorSaturation,
+        headerFooter,
+        scriptTitle,
+        draftDate,
     } = canvas;
     const {
         leftSidebarToggle,
@@ -160,6 +167,9 @@ export const EditorShell = ({
                         persistentCharacters={persistentCharacters}
                         characterColorSaturation={characterColorSaturation}
                         autoFocus={autoFocus}
+                        headerFooter={headerFooter}
+                        scriptTitle={scriptTitle}
+                        draftDate={draftDate}
                     />
                 </div>
                 <aside
