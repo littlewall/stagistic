@@ -21,6 +21,8 @@ import {
     SELECT_META_KEY,
 } from './emptyEnterChooserState';
 
+const PREVENT_DISPATCH_META_KEY = 'preventDispatch';
+
 export type {EmptyEnterChooserState} from './emptyEnterChooserState';
 export {
     EMPTY_ENTER_CHOOSER_WRITER_TYPES,
@@ -125,7 +127,9 @@ export const EmptyEnterChooserExtension = Extension.create<{
 
                 return true;
             },
-            confirmEmptyEnterChooserType: type => () => {
+            confirmEmptyEnterChooserType: type => ({tr}) => {
+                tr.setMeta(PREVENT_DISPATCH_META_KEY, true);
+
                 const chooserState = getEmptyEnterChooserFromState(this.editor.state);
 
                 if (!chooserState.isOpen || !chooserState.blockId) {
@@ -161,7 +165,9 @@ export const EmptyEnterChooserExtension = Extension.create<{
 
                 return didUpdate;
             },
-            insertNextEmptyFromEmptyEnterChooser: () => () => {
+            insertNextEmptyFromEmptyEnterChooser: () => ({tr}) => {
+                tr.setMeta(PREVENT_DISPATCH_META_KEY, true);
+
                 const chooserState = getEmptyEnterChooserFromState(this.editor.state);
 
                 if (!chooserState.isOpen || !chooserState.blockId) {

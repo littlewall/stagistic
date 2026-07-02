@@ -226,6 +226,7 @@ const computeCharacterTagComposeSuggestions = ({
     const suggestionRows = buildSuggestionRows({
         counts: countsByConfirmedKey,
         activeKey,
+        includeActiveKey: true,
         limit: Math.max(countsByConfirmedKey.size, MAX_SUGGESTIONS),
         previousOrderByKey,
     });

@@ -1,12 +1,14 @@
 export const buildSuggestionRows = ({
     counts,
     activeKey,
+    includeActiveKey = false,
     excludedKeys,
     limit,
     previousOrderByKey,
 }: {
     counts: ReadonlyMap<string, number>,
     activeKey: string,
+    includeActiveKey?: boolean,
     /**
      * Keys that must not appear in the suggestion list, in addition to
      * `activeKey`. Used to hide the other characters already present in
@@ -20,7 +22,7 @@ export const buildSuggestionRows = ({
     const query = activeKey.trim();
     const rows = Array.from(counts.entries())
         .filter(([key]) => {
-            if (key === activeKey || excludedKeys?.has(key)) {
+            if ((!includeActiveKey && key === activeKey) || excludedKeys?.has(key)) {
                 return false;
             }
 

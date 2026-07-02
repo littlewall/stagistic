@@ -95,7 +95,6 @@
         border-bottom: none;
     }
 
-    &:focus-within,
     &:hover {
         background: var(--color-surface-raised);
     }

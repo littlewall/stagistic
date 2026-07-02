@@ -72,4 +72,15 @@ describe('buildSuggestionRows', () => {
 
         expect(keys(rows)).toEqual([]);
     });
+
+    it('can include the exact active character when editing a tag', () => {
+        const rows = buildSuggestionRows({
+            counts: new Map([['jan', 1], ['josef', 3]]),
+            activeKey: 'josef',
+            includeActiveKey: true,
+            limit: 10,
+        });
+
+        expect(keys(rows)).toEqual(['josef']);
+    });
 });
