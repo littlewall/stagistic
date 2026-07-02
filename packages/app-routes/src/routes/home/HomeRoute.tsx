@@ -35,7 +35,7 @@ export const HomeRoute = () => {
         error,
         refreshScripts,
     } = useScripts();
-    const {openNewScript} = useGlobalModals();
+    const {openNewScript, openDeleteScript} = useGlobalModals();
     const [query, setQuery] = useState('');
     const [sort, setSort] = useState<ScriptSort>('newest');
 
@@ -51,6 +51,9 @@ export const HomeRoute = () => {
     const openScript = useCallback((scriptId: string) => {
         void navigate(`/script/${scriptId}/editor`);
     }, [navigate]);
+    const deleteScript = useCallback((script: {id: string, title: string}) => {
+        openDeleteScript({id: script.id, title: script.title});
+    }, [openDeleteScript]);
 
     if (scriptsLoading) {
         return (
@@ -125,11 +128,13 @@ export const HomeRoute = () => {
                             title="Continue writing"
                             scripts={dashboard.continueWriting}
                             onOpenScript={openScript}
+                            onDeleteScript={deleteScript}
                         />
                         <ScriptListSection
                             title="Recently edited"
                             scripts={dashboard.recentlyEdited}
                             onOpenScript={openScript}
+                            onDeleteScript={deleteScript}
                         />
                         <ScriptListSection
                             title="All scripts"
@@ -144,6 +149,7 @@ export const HomeRoute = () => {
                                 />
                             )}
                             onOpenScript={openScript}
+                            onDeleteScript={deleteScript}
                         />
                         {dashboard.allScripts.length === 0 ? (
                             <SubtleText className={styles.noResults}>

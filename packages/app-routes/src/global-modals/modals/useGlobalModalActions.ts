@@ -20,6 +20,11 @@ export interface ScriptImportFile {
     text: string,
 }
 
+export interface ScriptToDelete {
+    id: string,
+    title: string,
+}
+
 interface ScriptRepositoryAdapter {
     createScript: (name: string, initialContent?: ScriptDocument) => Promise<string>,
     deleteScript: (scriptId: string) => Promise<void>,
@@ -47,13 +52,19 @@ export interface GlobalModalActions {
     isImportOpen: boolean,
     prefilledImport: ScriptImportFile | null,
     isImportLoading: boolean,
+    scriptToDelete: ScriptToDelete | null,
+    isDeleteScriptOpen: boolean,
+    isDeleting: boolean,
     openNewScript: () => void,
     closeNewScript: () => void,
     openImportScript: () => void,
     closeImportScript: () => void,
+    openDeleteScript: (script: ScriptToDelete) => void,
+    closeDeleteScript: () => void,
     setPrefilledImport: (value: ScriptImportFile | null) => void,
     handleCreate: (name: string) => Promise<void>,
     handleImport: (payload: ScriptImportFile & {name: string}) => Promise<void>,
+    handleDelete: () => Promise<void>,
 }
 
 export const useGlobalModalActions = ({
@@ -70,6 +81,8 @@ export const useGlobalModalActions = ({
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [isImportLoading, setIsImportLoading] = useState(false);
     const [prefilledImport, setPrefilledImport] = useState<ScriptImportFile | null>(null);
+    const [scriptToDelete, setScriptToDelete] = useState<ScriptToDelete | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
 
     const openNewScript = useCallback(() => {
         setIsNewScriptOpen(true);
@@ -87,6 +100,18 @@ export const useGlobalModalActions = ({
         setIsImportOpen(false);
         setPrefilledImport(null);
     }, []);
+
+    const openDeleteScript = useCallback((script: ScriptToDelete) => {
+        setScriptToDelete(script);
+    }, []);
+
+    const closeDeleteScript = useCallback(() => {
+        if (isDeleting) {
+            return;
+        }
+
+        setScriptToDelete(null);
+    }, [isDeleting]);
 
     const createScriptWithActiveBlock = useCallback(async (name: string, initialContent?: ScriptDocument) => {
         const scriptId = await scriptRepository.createScript(name, initialContent);
@@ -176,28 +201,76 @@ export const useGlobalModalActions = ({
         scriptRepository,
     ]);
 
+    const handleDelete = useCallback((): Promise<void> => {
+        const deleteAndRefresh = async () => {
+            if (!scriptToDelete) {
+                return;
+            }
+
+            setIsDeleting(true);
+
+            try {
+                await scriptRepository.deleteScript(scriptToDelete.id);
+                refreshScripts();
+                setScriptToDelete(null);
+                addToast({
+                    title: 'Script deleted',
+                    description: `"${scriptToDelete.title}" has been permanently deleted.`,
+                    variant: 'success',
+                });
+            } catch (error) {
+                console.error('Failed to delete script', error);
+                addToast({
+                    title: 'Failed to delete script',
+                    description: error instanceof Error ? error.message : 'An unexpected error occurred.',
+                    variant: 'error',
+                });
+            } finally {
+                setIsDeleting(false);
+            }
+        };
+
+        return deleteAndRefresh();
+    }, [
+        addToast,
+        refreshScripts,
+        scriptRepository,
+        scriptToDelete,
+    ]);
+
     return useMemo(() => ({
         isNewScriptOpen,
         isImportOpen,
         prefilledImport,
         isImportLoading,
+        scriptToDelete,
+        isDeleteScriptOpen: scriptToDelete !== null,
+        isDeleting,
         openNewScript,
         closeNewScript,
         openImportScript,
         closeImportScript,
+        openDeleteScript,
+        closeDeleteScript,
         setPrefilledImport,
         handleCreate,
         handleImport,
+        handleDelete,
     }), [
+        closeDeleteScript,
         closeImportScript,
         closeNewScript,
         handleCreate,
+        handleDelete,
         handleImport,
+        isDeleting,
         isImportLoading,
         isImportOpen,
         isNewScriptOpen,
+        openDeleteScript,
         openImportScript,
         openNewScript,
         prefilledImport,
+        scriptToDelete,
     ]);
 };

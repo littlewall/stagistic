@@ -3,6 +3,7 @@ import {
     useScriptsContext,
 } from '@stagistic/app-core';
 import {
+    DeleteScriptModal,
     ImportScriptModal,
     NewScriptModal,
     useToastController,
@@ -16,11 +17,15 @@ import {
 } from 'react';
 import {useNavigate} from 'react-router-dom';
 
-import {useGlobalModalActions} from './useGlobalModalActions';
+import {
+    type ScriptToDelete,
+    useGlobalModalActions,
+} from './useGlobalModalActions';
 
 type GlobalModalsController = {
     openNewScript: () => void,
     openImportScript: () => void,
+    openDeleteScript: (script: ScriptToDelete) => void,
 };
 
 const GlobalModalsContext = createContext<GlobalModalsController | null>(null);
@@ -53,12 +58,18 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         isImportOpen,
         prefilledImport,
         isImportLoading,
+        scriptToDelete,
+        isDeleteScriptOpen,
+        isDeleting,
         openNewScript,
         closeNewScript,
         openImportScript,
         closeImportScript,
+        openDeleteScript,
+        closeDeleteScript,
         handleCreate,
         handleImport,
+        handleDelete,
     } = useGlobalModalActions({
         repository: {
             scriptRepository,
@@ -77,7 +88,12 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
     const contextValue = useMemo<GlobalModalsController>(() => ({
         openNewScript,
         openImportScript,
-    }), [openImportScript, openNewScript]);
+        openDeleteScript,
+    }), [
+        openDeleteScript,
+        openImportScript,
+        openNewScript,
+    ]);
 
     return (
         <GlobalModalsContext.Provider value={contextValue}>
@@ -93,6 +109,13 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
                 onImport={handleImport}
                 preselectedFile={prefilledImport}
                 isLoading={isImportLoading}
+            />
+            <DeleteScriptModal
+                isOpen={isDeleteScriptOpen}
+                scriptTitle={scriptToDelete?.title}
+                isDeleting={isDeleting}
+                onClose={closeDeleteScript}
+                onConfirm={handleDelete}
             />
         </GlobalModalsContext.Provider>
     );

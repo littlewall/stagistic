@@ -14,6 +14,7 @@ interface ScriptListSectionProps {
     scripts: ScriptSummary[],
     action?: ReactNode,
     onOpenScript: (scriptId: string) => void,
+    onDeleteScript: (script: ScriptSummary) => void,
 }
 
 export const ScriptListSection = ({
@@ -21,6 +22,7 @@ export const ScriptListSection = ({
     scripts,
     action,
     onOpenScript,
+    onDeleteScript,
 }: ScriptListSectionProps) => {
     if (scripts.length === 0) {
         return null;
@@ -52,7 +54,10 @@ export const ScriptListSection = ({
                             </SubtleText>
                         </button>
                         <div className={styles.actionsMenu}>
-                            <ScriptActionsMenu scriptTitle={script.title} />
+                            <ScriptActionsMenu
+                                scriptTitle={script.title}
+                                onDelete={() => onDeleteScript(script)}
+                            />
                         </div>
                     </div>
                 ))}

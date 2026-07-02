@@ -19,33 +19,3 @@
 .dangerDescription {
     color: var(--color-text-muted);
 }
-
-.confirmField {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-xs);
-}
-
-.confirmLabel {
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
-}
-
-.confirmPhrase {
-    padding: 1px 6px;
-    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-    color: var(--color-status-danger);
-    background: color-mix(in oklch, var(--color-status-danger) 12%, transparent);
-    border-radius: var(--radius-sm);
-}
-
-.confirmInput {
-    --input-height: var(--control-height-lg);
-    --input-border-color: color-mix(in oklch, var(--color-status-danger) 30%, var(--color-border));
-
-    max-width: 280px;
-}
-
-.deleteButton {
-    align-self: flex-start;
-}

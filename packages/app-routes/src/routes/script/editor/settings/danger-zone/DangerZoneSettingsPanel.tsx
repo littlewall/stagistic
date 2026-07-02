@@ -1,4 +1,4 @@
-import {Button, Input} from '@stagistic/ui';
+import {DeleteScriptConfirm} from '@stagistic/ui';
 import {useToastController} from '@stagistic/ui';
 import {
     useCallback,
@@ -9,24 +9,16 @@ import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import type {DangerZoneHandlers} from '../types';
 import styles from './DangerZoneSettingsPanel.module.css';
 
-const CONFIRM_PHRASE = 'delete me';
-
 type DangerZoneSettingsPanelProps = DangerZoneHandlers;
 
 export const DangerZoneSettingsPanel = ({
     scriptTitle,
     onDeleteScript,
 }: DangerZoneSettingsPanelProps) => {
-    const [confirmText, setConfirmText] = useState('');
     const [isDeleting, setIsDeleting] = useState(false);
-    const isUnlocked = confirmText.trim() === CONFIRM_PHRASE;
     const {addToast} = useToastController();
 
     const handleDelete = useCallback(async () => {
-        if (!isUnlocked || isDeleting) {
-            return;
-        }
-
         setIsDeleting(true);
 
         try {
@@ -48,8 +40,6 @@ export const DangerZoneSettingsPanel = ({
             setIsDeleting(false);
         }
     }, [
-        isDeleting,
-        isUnlocked,
         onDeleteScript,
         addToast,
         scriptTitle,
@@ -67,31 +57,11 @@ export const DangerZoneSettingsPanel = ({
                         and all of its content. This action cannot be undone.
                     </p>
                 </div>
-                <label className={styles.confirmField} htmlFor="danger-zone-confirm">
-                    <span className={styles.confirmLabel}>
-                        Type <code className={styles.confirmPhrase}>{CONFIRM_PHRASE}</code> to confirm
-                    </span>
-                    <Input
-                        id="danger-zone-confirm"
-                        type="text"
-                        className={styles.confirmInput}
-                        value={confirmText}
-                        autoComplete="off"
-                        spellCheck={false}
-                        placeholder={CONFIRM_PHRASE}
-                        disabled={isDeleting}
-                        onChange={event => setConfirmText(event.target.value)}
-                    />
-                </label>
-                <Button
-                    variant="danger"
-                    className={styles.deleteButton}
-                    isDisabled={!isUnlocked}
-                    isPending={isDeleting}
-                    onPress={handleDelete}
-                >
-                    Delete script
-                </Button>
+                <DeleteScriptConfirm
+                    scriptTitle={scriptTitle}
+                    isDeleting={isDeleting}
+                    onConfirm={handleDelete}
+                />
             </section>
         </div>
     );

@@ -9,6 +9,12 @@ export {
     SectionTitle,
     SubtleText,
 } from './atoms/typography/Typography';
+export {
+    DELETE_SCRIPT_CONFIRM_PHRASE,
+    DeleteScriptConfirm,
+    type DeleteScriptConfirmProps,
+} from './dialogs/DeleteScriptConfirm';
+export {DeleteScriptModal} from './dialogs/DeleteScriptModal';
 export {ImportScriptModal} from './dialogs/ImportScriptModal';
 export {NewScriptModal} from './dialogs/NewScriptModal';
 export {
