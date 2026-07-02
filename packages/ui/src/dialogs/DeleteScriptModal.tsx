@@ -31,6 +31,7 @@ export const DeleteScriptModal = ({
         </p>
         <div className={styles.body}>
             <DeleteScriptConfirm
+                key={isOpen ? 'open' : 'closed'}
                 scriptTitle={scriptTitle}
                 isDeleting={isDeleting}
                 secondaryAction={(

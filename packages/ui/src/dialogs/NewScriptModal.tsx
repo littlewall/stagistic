@@ -73,16 +73,16 @@ export const NewScriptModal = ({
                 />
                 <div className={styles.actions}>
                     <Button
-                        variant="ghost"
-                        onPress={onClose}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
                         type="submit"
                         isPending={isPending}
                     >
                         Create script
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        onPress={onClose}
+                    >
+                        Cancel
                     </Button>
                 </div>
             </form>

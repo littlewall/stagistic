@@ -133,6 +133,7 @@ export const createLocalPgliteRepository = (deps: LocalPgliteRepositoryDeps): Sc
         createScript: (title, initialContent) => repositoryData.scripts.create(title, initialContent),
         renameScript: (scriptId, input) => repositoryData.scripts.rename(scriptId, input),
         renameScriptTitle: (scriptId, title) => repositoryData.scripts.renameTitle(scriptId, title),
+        duplicateScript: (sourceScriptId, input) => repositoryData.scripts.duplicate(sourceScriptId, input),
         deleteScript: scriptId => repositoryData.scripts.delete(scriptId),
         setActiveBlock: (scriptId, blockId) => repositoryData.scripts.setActiveBlock(scriptId, blockId),
         confirmScriptCharacter: (scriptId, characterKey) => repositoryData.characters.confirm(scriptId, characterKey),

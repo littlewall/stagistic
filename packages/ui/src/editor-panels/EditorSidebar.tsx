@@ -121,13 +121,13 @@ export const EditorSidebar = ({
     return (
         <aside className={clsx(styles.sidebar, className)}>
             <section className={styles.section}>
-                <h3 className={styles.title}>Characters</h3>
+                <h3 className={styles.title}>On-stage</h3>
                 {isLoading ? (
                     <p className={styles.emptyState}>Loading characters...</p>
                 ) : null}
                 {!isLoading && !hasCharacters ? (
                     <p className={styles.emptyState}>
-                        No characters yet. Add a Character block to start building your cast.
+                        No characters on stage yet. Add a Character block to start building your cast.
                     </p>
                 ) : null}
                 {!isLoading && hasCharacters ? (

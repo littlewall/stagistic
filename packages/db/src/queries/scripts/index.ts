@@ -5,6 +5,7 @@ export * from './characters';
 export * from './config';
 export * from './crud';
 export * from './cues';
+export * from './duplicate';
 export * from './locations';
 export * from './outbox';
 export * from './scenes';

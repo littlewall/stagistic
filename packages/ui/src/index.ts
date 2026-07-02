@@ -15,6 +15,11 @@ export {
     type DeleteScriptConfirmProps,
 } from './dialogs/DeleteScriptConfirm';
 export {DeleteScriptModal} from './dialogs/DeleteScriptModal';
+export {
+    DuplicateScriptModal,
+    type DuplicateScriptModalProps,
+    type DuplicateScriptSubmit,
+} from './dialogs/DuplicateScriptModal';
 export {ImportScriptModal} from './dialogs/ImportScriptModal';
 export {NewScriptModal} from './dialogs/NewScriptModal';
 export {

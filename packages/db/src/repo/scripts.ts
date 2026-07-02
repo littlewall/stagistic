@@ -81,6 +81,27 @@ export const createScriptsHandlers = ({getDb}: CreateScriptsHandlersArgs) => ({
             updatedAt: Date.now(),
         });
     },
+    duplicate: async (
+        sourceScriptId: string,
+        input: {title: string, copySettings: boolean, copyAttributes: boolean},
+    ) => {
+        const db = await getDb();
+        const targetScriptId = uuidv7();
+        const now = Date.now();
+
+        await db.transaction(async tx => {
+            await dbQueries.duplicateScriptRows(tx, {
+                sourceScriptId,
+                targetScriptId,
+                title: trimOrFallback(input.title, 'Untitled script'),
+                now,
+                copySettings: input.copySettings,
+                copyAttributes: input.copyAttributes,
+            });
+        });
+
+        return targetScriptId;
+    },
     delete: async (scriptId: string) => {
         const db = await getDb();
 

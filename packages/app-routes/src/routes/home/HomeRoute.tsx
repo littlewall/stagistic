@@ -35,7 +35,12 @@ export const HomeRoute = () => {
         error,
         refreshScripts,
     } = useScripts();
-    const {openNewScript, openDeleteScript, openRenameScript} = useGlobalModals();
+    const {
+        openNewScript,
+        openDeleteScript,
+        openRenameScript,
+        openDuplicateScript,
+    } = useGlobalModals();
     const [query, setQuery] = useState('');
     const [sort, setSort] = useState<ScriptSort>('newest');
 
@@ -57,6 +62,9 @@ export const HomeRoute = () => {
     const renameScript = useCallback((script: {id: string, title: string, subtitle: string | null}) => {
         openRenameScript({id: script.id, title: script.title, subtitle: script.subtitle ?? ''});
     }, [openRenameScript]);
+    const duplicateScript = useCallback((script: {id: string, title: string}) => {
+        openDuplicateScript({id: script.id, title: script.title});
+    }, [openDuplicateScript]);
 
     if (scriptsLoading) {
         return (
@@ -133,6 +141,7 @@ export const HomeRoute = () => {
                             onOpenScript={openScript}
                             onDeleteScript={deleteScript}
                             onRenameScript={renameScript}
+                            onDuplicateScript={duplicateScript}
                         />
                         <ScriptListSection
                             title="Recently edited"
@@ -140,6 +149,7 @@ export const HomeRoute = () => {
                             onOpenScript={openScript}
                             onDeleteScript={deleteScript}
                             onRenameScript={renameScript}
+                            onDuplicateScript={duplicateScript}
                         />
                         <ScriptListSection
                             title="All scripts"
@@ -156,6 +166,7 @@ export const HomeRoute = () => {
                             onOpenScript={openScript}
                             onDeleteScript={deleteScript}
                             onRenameScript={renameScript}
+                            onDuplicateScript={duplicateScript}
                         />
                         {dashboard.allScripts.length === 0 ? (
                             <SubtleText className={styles.noResults}>

@@ -144,7 +144,8 @@ export const applyCharacterSuggestion = (editor: TiptapEditor, suggestion: strin
         dedupedValues.push(normalized);
     });
 
-    const nextLine = dedupedValues.join('+');
+    // '/' is the canonical multi-character delimiter; '+' is legacy input only.
+    const nextLine = dedupedValues.join('/');
     let tr = editor.state.tr.insertText(nextLine, block.from, block.to);
     const nextSelection = block.from + nextLine.length;
 

@@ -81,6 +81,19 @@ const createTwoStageDirectionDocument = (): ScriptDocument => ({
     ],
 });
 
+const createCharacterBlockDocument = (): ScriptDocument => ({
+    type: 'doc',
+    content: [
+        {
+            type: 'character',
+            attrs: {
+                id: 'character-1',
+            },
+            content: [],
+        },
+    ],
+});
+
 const createStageDirectionWithCharacterTag = (): ScriptDocument => ({
     type: 'doc',
     content: [
@@ -365,6 +378,29 @@ describe('CharacterSuggestionsOverlay browser behavior', () => {
         await waitForVisibleOption('JOHNY');
         await waitForVisibleOption('JOSEF');
         await expectSuggestionsVisuallyReachable();
+    });
+
+    it('keeps the "/" delimiter when confirming a suggestion for a second character in a cue block', async () => {
+        renderEditor(createCharacterBlockDocument());
+
+        const block = page.elementLocator(await waitForElement('[data-id="character-1"]'));
+
+        await block.click();
+
+        // First character, then the multi-character delimiter, then start the second.
+        await userEvent.keyboard('JOHNY+JO');
+        await waitForVisibleListbox();
+        const option = page.elementLocator(await waitForVisibleOption('JOSEF'));
+
+        expect(document.querySelector('[data-id="character-1"]')?.textContent).toContain('JOHNY/JO');
+
+        await option.click();
+        await waitForAnimationFrame();
+
+        const text = document.querySelector('[data-id="character-1"]')?.textContent ?? '';
+
+        expect(text).toContain('JOHNY/JOSEF');
+        expect(text).not.toContain('+');
     });
 
     it('keeps a typed stage-direction character pill when focus moves to another block', async () => {

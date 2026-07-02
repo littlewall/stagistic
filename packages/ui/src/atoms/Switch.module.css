@@ -28,6 +28,7 @@
 
 .track {
     display: flex;
+    flex-shrink: 0;
     align-items: center;
     width: 30px;
     height: 18px;

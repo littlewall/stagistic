@@ -4,6 +4,7 @@ import {
 } from '@stagistic/app-core';
 import {
     DeleteScriptModal,
+    DuplicateScriptModal,
     ImportScriptModal,
     NewScriptModal,
     RenameScriptModal,
@@ -20,6 +21,7 @@ import {useNavigate} from 'react-router-dom';
 
 import {
     type ScriptToDelete,
+    type ScriptToDuplicate,
     type ScriptToRename,
     useGlobalModalActions,
 } from './useGlobalModalActions';
@@ -29,6 +31,7 @@ type GlobalModalsController = {
     openImportScript: () => void,
     openDeleteScript: (script: ScriptToDelete) => void,
     openRenameScript: (script: ScriptToRename) => void,
+    openDuplicateScript: (script: ScriptToDuplicate) => void,
 };
 
 const GlobalModalsContext = createContext<GlobalModalsController | null>(null);
@@ -67,6 +70,9 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         scriptToRename,
         isRenameScriptOpen,
         isRenaming,
+        scriptToDuplicate,
+        isDuplicateScriptOpen,
+        isDuplicating,
         openNewScript,
         closeNewScript,
         openImportScript,
@@ -75,10 +81,13 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         closeDeleteScript,
         openRenameScript,
         closeRenameScript,
+        openDuplicateScript,
+        closeDuplicateScript,
         handleCreate,
         handleImport,
         handleDelete,
         handleRename,
+        handleDuplicate,
     } = useGlobalModalActions({
         repository: {
             scriptRepository,
@@ -99,8 +108,10 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         openImportScript,
         openDeleteScript,
         openRenameScript,
+        openDuplicateScript,
     }), [
         openDeleteScript,
+        openDuplicateScript,
         openImportScript,
         openNewScript,
         openRenameScript,
@@ -135,6 +146,13 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
                 isPending={isRenaming}
                 onClose={closeRenameScript}
                 onSubmit={handleRename}
+            />
+            <DuplicateScriptModal
+                isOpen={isDuplicateScriptOpen}
+                initialTitle={scriptToDuplicate ? `${scriptToDuplicate.title} - copy` : ''}
+                isPending={isDuplicating}
+                onClose={closeDuplicateScript}
+                onSubmit={handleDuplicate}
             />
         </GlobalModalsContext.Provider>
     );

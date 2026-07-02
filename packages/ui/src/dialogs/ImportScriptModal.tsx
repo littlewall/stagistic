@@ -69,18 +69,18 @@ export const ImportScriptModal = ({
                 ) : null}
                 <div className={styles.actions}>
                     <Button
-                        variant="ghost"
-                        onPress={onClose}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
                         variant="primary"
                         type="submit"
                         isDisabled={!selectedFile}
                         isPending={isLoading}
                     >
                         Import script
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        onPress={onClose}
+                    >
+                        Cancel
                     </Button>
                 </div>
             </form>

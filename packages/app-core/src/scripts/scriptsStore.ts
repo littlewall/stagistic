@@ -1,5 +1,6 @@
 import type {ScriptSummary} from '@stagistic/db';
 import type {
+    DuplicateScriptInput,
     RenameScriptInput,
     ScriptRepository,
 } from '@stagistic/db';
@@ -46,6 +47,7 @@ export type ScriptsStoreState = {
         createScript: (title: string, initialContent?: ScriptDocument) => Promise<string>,
         renameScript: (scriptId: string, input: RenameScriptInput) => Promise<void>,
         renameScriptTitle: (scriptId: string, title: string) => Promise<void>,
+        duplicateScript: (sourceScriptId: string, input: DuplicateScriptInput) => Promise<string>,
         deleteScript: (scriptId: string) => Promise<void>,
         setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,
     },
@@ -144,6 +146,14 @@ export const createScriptsStore = (repository: ScriptRepository): ScriptsStoreSt
         await refresh();
     };
 
+    const duplicateScript = async (sourceScriptId: string, input: DuplicateScriptInput) => {
+        const newScriptId = await repository.duplicateScript(sourceScriptId, input);
+
+        await refresh();
+
+        return newScriptId;
+    };
+
     const deleteScript = async (scriptId: string) => {
         await repository.deleteScript(scriptId);
         await refresh();
@@ -171,6 +181,7 @@ export const createScriptsStore = (repository: ScriptRepository): ScriptsStoreSt
             createScript,
             renameScript,
             renameScriptTitle,
+            duplicateScript,
             deleteScript,
             setActiveBlock,
         },

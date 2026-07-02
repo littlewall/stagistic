@@ -16,6 +16,7 @@ interface ScriptListSectionProps {
     onOpenScript: (scriptId: string) => void,
     onDeleteScript: (script: ScriptSummary) => void,
     onRenameScript: (script: ScriptSummary) => void,
+    onDuplicateScript: (script: ScriptSummary) => void,
 }
 
 export const ScriptListSection = ({
@@ -25,6 +26,7 @@ export const ScriptListSection = ({
     onOpenScript,
     onDeleteScript,
     onRenameScript,
+    onDuplicateScript,
 }: ScriptListSectionProps) => {
     if (scripts.length === 0) {
         return null;
@@ -59,6 +61,7 @@ export const ScriptListSection = ({
                             <ScriptActionsMenu
                                 scriptTitle={script.title}
                                 onRename={() => onRenameScript(script)}
+                                onDuplicate={() => onDuplicateScript(script)}
                                 onDelete={() => onDeleteScript(script)}
                             />
                         </div>

@@ -26,5 +26,4 @@
 
 .actions {
     composes: actions from './dialogForm.module.css';
-    justify-content: flex-start;
 }

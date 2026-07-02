@@ -1,4 +1,5 @@
 import type {
+    DuplicateScriptInput,
     RenameScriptInput,
     ScriptSummary,
 } from '@stagistic/db';
@@ -64,6 +65,11 @@ export const useScripts = () => {
         [scriptsStore],
     );
 
+    const duplicateScript = useCallback(
+        (sourceScriptId: string, input: DuplicateScriptInput) => scriptsStore.duplicateScript(sourceScriptId, input),
+        [scriptsStore],
+    );
+
     const deleteScript = useCallback(
         (scriptId: string) => scriptsStore.deleteScript(scriptId),
         [scriptsStore],
@@ -80,6 +86,7 @@ export const useScripts = () => {
         createScript,
         renameScript,
         renameScriptTitle,
+        duplicateScript,
         deleteScript,
         setActiveBlock,
         refreshScripts: scriptsStore.refresh,

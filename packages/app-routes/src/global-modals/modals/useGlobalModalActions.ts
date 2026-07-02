@@ -31,9 +31,18 @@ export interface ScriptToRename {
     subtitle: string,
 }
 
+export interface ScriptToDuplicate {
+    id: string,
+    title: string,
+}
+
 interface ScriptRepositoryAdapter {
     createScript: (name: string, initialContent?: ScriptDocument) => Promise<string>,
     renameScript: (scriptId: string, input: {title: string, subtitle: string | null}) => Promise<void>,
+    duplicateScript: (
+        sourceScriptId: string,
+        input: {title: string, copySettings: boolean, copyAttributes: boolean},
+    ) => Promise<string>,
     deleteScript: (scriptId: string) => Promise<void>,
     saveTitlePage: (scriptId: string, settings: TitlePageSettings) => Promise<void>,
     setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,
@@ -65,6 +74,9 @@ export interface GlobalModalActions {
     scriptToRename: ScriptToRename | null,
     isRenameScriptOpen: boolean,
     isRenaming: boolean,
+    scriptToDuplicate: ScriptToDuplicate | null,
+    isDuplicateScriptOpen: boolean,
+    isDuplicating: boolean,
     openNewScript: () => void,
     closeNewScript: () => void,
     openImportScript: () => void,
@@ -73,11 +85,19 @@ export interface GlobalModalActions {
     closeDeleteScript: () => void,
     openRenameScript: (script: ScriptToRename) => void,
     closeRenameScript: () => void,
+    openDuplicateScript: (script: ScriptToDuplicate) => void,
+    closeDuplicateScript: () => void,
     setPrefilledImport: (value: ScriptImportFile | null) => void,
     handleCreate: (name: string) => Promise<void>,
     handleImport: (payload: ScriptImportFile & {name: string}) => Promise<void>,
     handleDelete: () => Promise<void>,
     handleRename: (values: {title: string, subtitle: string}) => Promise<void>,
+    handleDuplicate: (values: {
+        title: string,
+        copySettings: boolean,
+        copyAttributes: boolean,
+        openInEditor: boolean,
+    }) => Promise<void>,
 }
 
 export const useGlobalModalActions = ({
@@ -98,6 +118,8 @@ export const useGlobalModalActions = ({
     const [isDeleting, setIsDeleting] = useState(false);
     const [scriptToRename, setScriptToRename] = useState<ScriptToRename | null>(null);
     const [isRenaming, setIsRenaming] = useState(false);
+    const [scriptToDuplicate, setScriptToDuplicate] = useState<ScriptToDuplicate | null>(null);
+    const [isDuplicating, setIsDuplicating] = useState(false);
 
     const openNewScript = useCallback(() => {
         setIsNewScriptOpen(true);
@@ -139,6 +161,18 @@ export const useGlobalModalActions = ({
 
         setScriptToRename(null);
     }, [isRenaming]);
+
+    const openDuplicateScript = useCallback((script: ScriptToDuplicate) => {
+        setScriptToDuplicate(script);
+    }, []);
+
+    const closeDuplicateScript = useCallback(() => {
+        if (isDuplicating) {
+            return;
+        }
+
+        setScriptToDuplicate(null);
+    }, [isDuplicating]);
 
     const createScriptWithActiveBlock = useCallback(async (name: string, initialContent?: ScriptDocument) => {
         const scriptId = await scriptRepository.createScript(name, initialContent);
@@ -305,6 +339,58 @@ export const useGlobalModalActions = ({
         scriptToRename,
     ]);
 
+    const handleDuplicate = useCallback((values: {
+        title: string,
+        copySettings: boolean,
+        copyAttributes: boolean,
+        openInEditor: boolean,
+    }): Promise<void> => {
+        const duplicateAndRefresh = async () => {
+            if (!scriptToDuplicate) {
+                return;
+            }
+
+            setIsDuplicating(true);
+
+            try {
+                const newScriptId = await scriptRepository.duplicateScript(scriptToDuplicate.id, {
+                    title: values.title,
+                    copySettings: values.copySettings,
+                    copyAttributes: values.copyAttributes,
+                });
+
+                refreshScripts();
+                setScriptToDuplicate(null);
+                addToast({
+                    title: 'Script duplicated',
+                    description: trimOrFallback(values.title, 'Untitled script'),
+                    variant: 'success',
+                });
+
+                if (values.openInEditor) {
+                    void navigate(`/script/${newScriptId}/editor`);
+                }
+            } catch (error) {
+                console.error('Failed to duplicate script', error);
+                addToast({
+                    title: 'Failed to duplicate script',
+                    description: error instanceof Error ? error.message : 'An unexpected error occurred.',
+                    variant: 'error',
+                });
+            } finally {
+                setIsDuplicating(false);
+            }
+        };
+
+        return duplicateAndRefresh();
+    }, [
+        addToast,
+        navigate,
+        refreshScripts,
+        scriptRepository,
+        scriptToDuplicate,
+    ]);
+
     return useMemo(() => ({
         isNewScriptOpen,
         isImportOpen,
@@ -316,6 +402,9 @@ export const useGlobalModalActions = ({
         scriptToRename,
         isRenameScriptOpen: scriptToRename !== null,
         isRenaming,
+        scriptToDuplicate,
+        isDuplicateScriptOpen: scriptToDuplicate !== null,
+        isDuplicating,
         openNewScript,
         closeNewScript,
         openImportScript,
@@ -324,29 +413,37 @@ export const useGlobalModalActions = ({
         closeDeleteScript,
         openRenameScript,
         closeRenameScript,
+        openDuplicateScript,
+        closeDuplicateScript,
         setPrefilledImport,
         handleCreate,
         handleImport,
         handleDelete,
         handleRename,
+        handleDuplicate,
     }), [
         closeDeleteScript,
+        closeDuplicateScript,
         closeImportScript,
         closeNewScript,
         closeRenameScript,
         handleCreate,
         handleDelete,
+        handleDuplicate,
         handleImport,
         handleRename,
         isDeleting,
+        isDuplicating,
         isImportLoading,
         isImportOpen,
         isNewScriptOpen,
         isRenaming,
         openDeleteScript,
+        openDuplicateScript,
         openImportScript,
         openNewScript,
         openRenameScript,
+        scriptToDuplicate,
         scriptToRename,
         prefilledImport,
         scriptToDelete,

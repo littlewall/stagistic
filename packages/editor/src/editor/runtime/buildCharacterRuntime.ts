@@ -78,9 +78,35 @@ const resolveCharacterTagDecorationAttributes = (
     return attributes;
 };
 
+/**
+ * While the caret sits in a token's trailing-whitespace gap (`valueEnd..end`,
+ * e.g. mid-typing "THOMAS "), the space should read as still inside the pill —
+ * mirroring the stage-direction tag. We extend the decoration up to the caret
+ * (never past `end`), but only for the token the caret is trailing. Trailing
+ * whitespace before a delimiter (or when the caret is elsewhere) stays out of
+ * the pill and is trimmed on commit.
+ */
+const resolveNameDecorationEnd = (
+    tokenEntry: CharacterTokenEntry,
+    selectionFrom: number | null | undefined,
+): number => {
+    if (typeof selectionFrom !== 'number' || tokenEntry.end <= tokenEntry.valueEnd) {
+        return tokenEntry.valueEnd;
+    }
+
+    const caretOffset = selectionFrom - tokenEntry.blockStart;
+
+    if (caretOffset <= tokenEntry.valueEnd || caretOffset > tokenEntry.end) {
+        return tokenEntry.valueEnd;
+    }
+
+    return caretOffset;
+};
+
 const buildCharacterDecorations = (
     doc: ProseMirrorNode,
     tokenEntries: readonly CharacterTokenEntry[],
+    selectionFrom: number | null | undefined,
     characterTagClassNames?: {
         tag: string,
         separator: string,
@@ -98,10 +124,12 @@ const buildCharacterDecorations = (
             return;
         }
 
-        if (tokenEntry.valueStart < tokenEntry.valueEnd) {
+        const nameDecorationEnd = resolveNameDecorationEnd(tokenEntry, selectionFrom);
+
+        if (tokenEntry.valueStart < nameDecorationEnd) {
             decorations.push(Decoration.inline(
                 tokenEntry.blockStart + tokenEntry.valueStart,
-                tokenEntry.blockStart + tokenEntry.valueEnd,
+                tokenEntry.blockStart + nameDecorationEnd,
                 resolveCharacterTagDecorationAttributes(tokenEntry, characterTagClassNames),
             ));
         }
@@ -185,6 +213,7 @@ export const buildCharacterRuntime = ({
         decorations: buildCharacterDecorations(
             doc,
             tokenScan.tokenEntries,
+            selectionFrom,
             characterTagClassNames,
         ),
     };
