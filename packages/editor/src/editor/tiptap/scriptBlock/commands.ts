@@ -16,6 +16,7 @@ import {
     getActiveScriptBlockFromState,
     normalizeBlockNodeType,
 } from '../scriptCore';
+import {normalizeFormerStageDirectionContent} from './normalizeStageDirectionContent';
 
 const focusEditor = (editor: Editor) => {
     editor.view.focus();
@@ -87,10 +88,7 @@ const normalizeCharacterCueText = (
     return tr.insertText(normalized, contentStart, contentEnd);
 };
 
-const resolveNodeTypeForBlockType = (
-    nodes: Record<string, NodeType>,
-    blockType: BlockNodeType,
-) => {
+const resolveNodeTypeForBlockType = (nodes: Record<string, NodeType>, blockType: BlockNodeType) => {
     const resolvedNodeTypeName = resolveScriptBlockNodeType(blockType);
 
     if (!resolvedNodeTypeName) {
@@ -128,6 +126,10 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
         ...activeBlock.node.attrs,
         blockType: normalized,
         id: id ?? activeBlock.id,
+        characterRefs:
+            activeBlock.blockType === 'stageDirection' && normalized !== 'stageDirection'
+                ? null
+                : activeBlock.node.attrs.characterRefs,
     };
 
     let tr = editor.state.tr.setNodeMarkup(activeBlock.pos, nodeType, attributes);
@@ -138,6 +140,14 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
         normalized,
         activeBlock.from,
         activeBlock.node.textContent ?? '',
+    );
+    tr = normalizeFormerStageDirectionContent(
+        tr,
+        editor.schema,
+        activeBlock.blockType,
+        normalized,
+        activeBlock.pos,
+        activeBlock.node,
     );
     tr = normalizeCharacterCueText(tr, normalized, activeBlock.pos);
     tr = setSelectionNearBlockStart(tr, activeBlock.pos);
@@ -256,6 +266,10 @@ export const setBlockTypeWithSelection = (
         ...block.node.attrs,
         blockType: normalized,
         id: block.id,
+        characterRefs:
+            block.blockType === 'stageDirection' && normalized !== 'stageDirection'
+                ? null
+                : block.node.attrs.characterRefs,
     };
 
     let tr = editor.state.tr.setNodeMarkup(block.pos, nodeType, attrs);
@@ -266,6 +280,14 @@ export const setBlockTypeWithSelection = (
         normalized,
         block.from,
         block.node.textContent ?? '',
+    );
+    tr = normalizeFormerStageDirectionContent(
+        tr,
+        editor.schema,
+        block.blockType,
+        normalized,
+        block.pos,
+        block.node,
     );
     tr = setSelectionNearBlockStart(tr, block.pos);
     tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
