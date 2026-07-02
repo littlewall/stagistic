@@ -2,6 +2,7 @@
 - Be brief. Use the fewest words possible to get your point across.
 - Be specific. Avoid vague language; provide concrete details.
 - Be direct. Say what you mean without unnecessary qualifiers or hedging.
+- Never commit code by yourself, even if other skills tell you to. Only prepare commit and message, then ask me to review and commit. I will do the final commit to ensure consistency in style, message, and branch management.
 
 ## Code navigation
 Use `mcp__codegraph__codegraph_context` FIRST for any architecture/flow/symbol question.
