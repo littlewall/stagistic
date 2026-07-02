@@ -7,7 +7,6 @@ export interface TitlePageCredit {
 }
 
 export interface TitlePageSettings {
-    titleOverride?: string,
     subtitle?: string,
     credits?: TitlePageCredit[],
     source?: string,

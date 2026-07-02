@@ -41,12 +41,14 @@ const DATE_FORMAT_OPTIONS: SettingsSelectOption[] = [{value: 'dmy', label: 'dd/m
 interface TitlePageSettingsPanelProps {
     scriptTitle: string,
     settings: TitlePageSettings,
+    onUpdateScriptTitle: (title: string) => void,
     onUpdate: (patch: Partial<TitlePageSettings>) => void,
 }
 
 export const TitlePageSettingsPanel = ({
     scriptTitle,
     settings,
+    onUpdateScriptTitle,
     onUpdate,
 }: TitlePageSettingsPanelProps) => {
     const draftDateMode = settings.draftDateMode ?? 'auto';
@@ -104,11 +106,9 @@ export const TitlePageSettingsPanel = ({
                         id="tp-title"
                         type="text"
                         className={sharedStyles.settingsInput}
-                        placeholder={scriptTitle || 'Untitled'}
-                        value={settings.titleOverride ?? ''}
-                        onChange={e => {
-                            onUpdate({titleOverride: e.target.value || undefined});
-                        }}
+                        placeholder="Untitled script"
+                        value={scriptTitle}
+                        onChange={event => onUpdateScriptTitle(event.target.value)}
                     />
                 </div>
                 <div className={styles.field}>

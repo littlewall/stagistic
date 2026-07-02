@@ -18,3 +18,4 @@ export type {
 export {useRecentScripts} from './useRecentScripts';
 export {useScripts} from './useScripts';
 export {useScriptSummary} from './useScriptSummary';
+export type {ScriptSummary} from '@stagistic/db';

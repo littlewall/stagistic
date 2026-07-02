@@ -55,6 +55,7 @@ export interface HeaderFooterHandlers {
 export interface TitlePageHandlers {
     titlePageSettings: TitlePageSettings,
     scriptTitle: string,
+    onUpdateScriptTitle: (title: string) => void,
     onUpdateTitlePage: (patch: Partial<TitlePageSettings>) => void,
 }
 

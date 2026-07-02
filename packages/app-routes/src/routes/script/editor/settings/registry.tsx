@@ -19,6 +19,7 @@ export const SECTION_RENDERERS: Partial<Record<string, SectionRenderer>> = {
         <TitlePageSettingsPanel
             scriptTitle={props.titlePageHandlers.scriptTitle}
             settings={props.titlePageHandlers.titlePageSettings}
+            onUpdateScriptTitle={props.titlePageHandlers.onUpdateScriptTitle}
             onUpdate={props.titlePageHandlers.onUpdateTitlePage}
         />
     ),

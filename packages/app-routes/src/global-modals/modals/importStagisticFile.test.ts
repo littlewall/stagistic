@@ -30,7 +30,6 @@ draftDate: 2026-07-01
             expect.objectContaining({type: 'doc'}),
         );
         expect(saveTitlePage).toHaveBeenCalledWith('script-1', expect.objectContaining({
-            titleOverride: 'When Night Falls',
             draftDate: '2026-07-01',
         }));
         expect(rollbackScript).not.toHaveBeenCalled();
@@ -45,6 +44,7 @@ draftDate: 2026-07-01
             name: 'Night',
             text: `---
 title: Night
+subtitle: A play
 ---
 # Scene
 `,

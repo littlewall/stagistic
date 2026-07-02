@@ -17,6 +17,7 @@ const FRONTMATTER_KEYS = new Set([
 export interface ParsedFrontmatter {
     body: string,
     bodyStartLine: number,
+    title?: string,
     titlePage: TitlePageSettings,
 }
 
@@ -98,7 +99,6 @@ const toTitlePageSettings = (value: unknown): TitlePageSettings => {
     }
 
     return {
-        titleOverride: readOptionalString(value, 'title'),
         subtitle: readOptionalString(value, 'subtitle'),
         credits: readCredits(value.credits),
         source: readOptionalString(value, 'source'),
@@ -114,7 +114,11 @@ export const parseStagisticFrontmatter = (source: string): ParsedFrontmatter => 
     const lines = normalized.split('\n');
 
     if (lines[0] !== '---') {
-        return {body: normalized, bodyStartLine: 1, titlePage: {}};
+        return {
+            body: normalized,
+            bodyStartLine: 1,
+            titlePage: {},
+        };
     }
 
     const closingIndex = lines.findIndex((line, index) => index > 0 && line === '---');
@@ -130,9 +134,12 @@ export const parseStagisticFrontmatter = (source: string): ParsedFrontmatter => 
         throw new StagisticParseError(`Invalid YAML frontmatter: ${yamlDocument.errors[0].message}`);
     }
 
+    const parsed: unknown = yamlDocument.toJS();
+
     return {
         body: lines.slice(closingIndex + 1).join('\n'),
         bodyStartLine: closingIndex + 2,
-        titlePage: toTitlePageSettings(yamlDocument.toJS()),
+        title: isObjectRecord(parsed) ? readOptionalString(parsed, 'title') : undefined,
+        titlePage: toTitlePageSettings(parsed),
     };
 };

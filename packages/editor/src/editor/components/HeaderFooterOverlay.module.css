@@ -14,7 +14,7 @@
     line-height: 1.2;
     color: var(--color-text);
     white-space: nowrap;
-    opacity: .6;
+    opacity: .5;
 }
 
 .cell {

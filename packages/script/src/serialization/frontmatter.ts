@@ -24,7 +24,7 @@ export const serializeStagisticFrontmatter = ({
     exportDate = new Date(),
 }: StagisticFrontmatterOptions): string => {
     const lines = ['---'];
-    const title = trimValue(titlePage.titleOverride) || trimValue(scriptTitle);
+    const title = trimValue(scriptTitle);
 
     if (title) {
         lines.push(`title: ${yamlString(title)}`);

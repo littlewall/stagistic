@@ -18,12 +18,13 @@ export const useRecentScripts = (limit = 3): RecentScriptsState => {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
     const requestIdRef = useRef(0);
+    const hasCompletedLoadRef = useRef(false);
 
     const load = useCallback(async () => {
         const requestId = requestIdRef.current + 1;
 
         requestIdRef.current = requestId;
-        setIsLoading(true);
+        setIsLoading(!hasCompletedLoadRef.current);
 
         try {
             const scripts = await repository.listScripts({limit});
@@ -42,6 +43,7 @@ export const useRecentScripts = (limit = 3): RecentScriptsState => {
             setError(err as Error);
         } finally {
             if (requestIdRef.current === requestId) {
+                hasCompletedLoadRef.current = true;
                 setIsLoading(false);
             }
         }

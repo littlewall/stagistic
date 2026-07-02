@@ -39,6 +39,7 @@ import {useScriptEditorController} from './useScriptEditorController';
 import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
 import {useScriptEditorSettingsDraft} from './useScriptEditorSettingsDraft';
 import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
+import {useScriptTitleDraft} from './useScriptTitleDraft';
 import {useTitlePageDraft} from './useTitlePageDraft';
 
 const AUTOSAVE_DELAY_MS = 1500;
@@ -53,7 +54,7 @@ export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
     const {scriptId} = useParams();
     const scriptRepository = useScriptRepository();
-    const {deleteScript} = useScripts();
+    const {deleteScript, renameScript} = useScripts();
     const [searchParams, setSearchParams] = useSearchParams();
     const {
         currentScript,
@@ -95,6 +96,18 @@ export const ScriptEditorRoute = () => {
         currentScriptId,
         repository: scriptRepository,
     });
+    const {
+        scriptTitleDraft,
+        updateScriptTitle,
+    } = useScriptTitleDraft({
+        currentScriptId,
+        currentScriptTitle: currentScript?.name ?? '',
+        renameScript,
+    });
+    const displayedCurrentScript = useMemo(
+        () => currentScript ? {...currentScript, name: scriptTitleDraft} : null,
+        [currentScript, scriptTitleDraft],
+    );
     const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
 
     const {
@@ -132,7 +145,7 @@ export const ScriptEditorRoute = () => {
 
     const {handleMenuAction} = useScriptEditorHeaderActions({
         navigate,
-        currentScript,
+        currentScript: displayedCurrentScript,
         openSettingsModal,
         getEditorValue,
         titlePage: titlePageDraft,
@@ -201,9 +214,9 @@ export const ScriptEditorRoute = () => {
             <ScriptCharactersProvider value={charactersContextValue}>
                 <AppLayout
                     header={(
-                        currentScript ? (
+                        displayedCurrentScript ? (
                             <ScriptEditorAppHeader
-                                currentScript={currentScript}
+                                currentScript={displayedCurrentScript}
                                 recentScripts={recentScripts}
                                 scriptSyncState={saveIndicator}
                                 onMenuAction={handleMenuAction}
@@ -223,7 +236,7 @@ export const ScriptEditorRoute = () => {
                         document={{
                             initialValue: resolvedEditorInitialValue,
                             persistentCharacters: normalizedConfirmedCharacterRecords,
-                            scriptTitle: currentScript?.name ?? '',
+                            scriptTitle: scriptTitleDraft,
                             draftDate: resolveDraftDate(titlePageDraft),
                         }}
                         settings={{
@@ -278,11 +291,12 @@ export const ScriptEditorRoute = () => {
                             headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
                             titlePageHandlers={{
                                 titlePageSettings: titlePageDraft,
-                                scriptTitle: currentScript?.name ?? '',
+                                scriptTitle: scriptTitleDraft,
+                                onUpdateScriptTitle: updateScriptTitle,
                                 onUpdateTitlePage: updateTitlePage,
                             }}
                             dangerZoneHandlers={{
-                                scriptTitle: currentScript?.name ?? '',
+                                scriptTitle: scriptTitleDraft,
                                 onDeleteScript: handleDeleteScript,
                             }}
                         />

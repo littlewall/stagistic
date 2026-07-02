@@ -36,7 +36,7 @@ export const importStagisticFile = async ({
     }
 
     const parsed = parseStagistic(text);
-    const fallbackName = parsed.titlePage.titleOverride ?? 'Untitled script';
+    const fallbackName = parsed.title ?? 'Untitled script';
     const scriptName = trimOrFallback(name, fallbackName);
     const scriptId = await createScript(scriptName, parsed.document);
 

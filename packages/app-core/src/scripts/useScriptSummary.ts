@@ -21,9 +21,11 @@ export const useScriptSummary = (scriptId?: string | null): ScriptSummaryState =
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState<Error | null>(null);
     const requestIdRef = useRef(0);
+    const loadedScriptIdRef = useRef<string | null>(null);
 
     const load = useCallback(async () => {
         if (!scriptId) {
+            loadedScriptIdRef.current = null;
             setSummary(null);
             setIsLoading(false);
             setError(null);
@@ -32,9 +34,10 @@ export const useScriptSummary = (scriptId?: string | null): ScriptSummaryState =
         }
 
         const requestId = requestIdRef.current + 1;
+        const isInitialLoad = loadedScriptIdRef.current !== scriptId;
 
         requestIdRef.current = requestId;
-        setIsLoading(true);
+        setIsLoading(isInitialLoad);
 
         try {
             const data = await repository.getScriptSummary(scriptId);
@@ -54,6 +57,7 @@ export const useScriptSummary = (scriptId?: string | null): ScriptSummaryState =
             setError(err as Error);
         } finally {
             if (requestIdRef.current === requestId) {
+                loadedScriptIdRef.current = scriptId;
                 setIsLoading(false);
             }
         }

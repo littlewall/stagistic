@@ -17,7 +17,6 @@ interface CreateTitlePageHandlersArgs {
 }
 
 const STRING_FIELDS = [
-    'titleOverride',
     'subtitle',
     'source',
     'draftDateMode',

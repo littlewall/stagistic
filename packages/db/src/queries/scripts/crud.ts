@@ -1,6 +1,13 @@
-import {desc, eq} from 'drizzle-orm';
+import {
+    and,
+    desc,
+    eq,
+} from 'drizzle-orm';
 
-import {scripts} from '../../schema';
+import {
+    scripts,
+    scriptSettingsTitlePage,
+} from '../../schema';
 import type {ScriptSummary} from '../../types';
 import type {DbClient} from '../types';
 import type {
@@ -11,6 +18,15 @@ import type {
     UpdateScriptTitlePayload,
 } from './payloads';
 
+const scriptSummarySelection = {
+    id: scripts.id,
+    title: scripts.title,
+    subtitle: scriptSettingsTitlePage.fieldValue,
+    createdAt: scripts.createdAt,
+    updatedAt: scripts.updatedAt,
+    activeBlockId: scripts.activeBlockId,
+};
+
 /**
  * List all scripts ordered by last update.
  */
@@ -19,8 +35,15 @@ export const listScripts = async (
     options?: ListScriptsOptions,
 ): Promise<ScriptSummary[]> => {
     const baseQuery = db
-        .select()
+        .select(scriptSummarySelection)
         .from(scripts)
+        .leftJoin(
+            scriptSettingsTitlePage,
+            and(
+                eq(scriptSettingsTitlePage.scriptId, scripts.id),
+                eq(scriptSettingsTitlePage.fieldKey, 'subtitle'),
+            ),
+        )
         .orderBy(desc(scripts.updatedAt));
     const rows = options?.limit
         ? await baseQuery.limit(options.limit)
@@ -29,6 +52,7 @@ export const listScripts = async (
     return rows.map(row => ({
         id: row.id,
         title: row.title,
+        subtitle: row.subtitle,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         activeBlockId: row.activeBlockId ?? null,
@@ -43,8 +67,15 @@ export const getScriptSummary = async (
     scriptId: string,
 ): Promise<ScriptSummary | null> => {
     const rows = await db
-        .select()
+        .select(scriptSummarySelection)
         .from(scripts)
+        .leftJoin(
+            scriptSettingsTitlePage,
+            and(
+                eq(scriptSettingsTitlePage.scriptId, scripts.id),
+                eq(scriptSettingsTitlePage.fieldKey, 'subtitle'),
+            ),
+        )
         .where(eq(scripts.id, scriptId))
         .limit(1);
 
@@ -57,6 +88,7 @@ export const getScriptSummary = async (
     return {
         id: row.id,
         title: row.title,
+        subtitle: row.subtitle,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         activeBlockId: row.activeBlockId ?? null,

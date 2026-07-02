@@ -37,15 +37,17 @@ export type {
 };
 
 export type AppHeaderProps = {
+    leftControls?: ReactNode,
     scriptControls?: ReactNode,
     onMenuAction?: (actionId: string) => void,
     onHome: () => void,
-    onNewScript: () => void,
+    onNewScript?: () => void,
     onImportScript?: () => void,
     isFullWidth?: boolean,
 };
 
 export const AppHeader = ({
+    leftControls,
     scriptControls,
     onMenuAction,
     onHome,
@@ -86,16 +88,18 @@ export const AppHeader = ({
                         </Button>
                         <Tooltip className={styles.tooltip} placement="bottom">Home</Tooltip>
                     </TooltipTrigger>
-                    <TooltipTrigger delay={600}>
-                        <Button
-                            className={styles.iconButton}
-                            onPress={onNewScript}
-                            aria-label="New script"
-                        >
-                            <PlusIcon className={styles.icon} aria-hidden="true" />
-                        </Button>
-                        <Tooltip className={styles.tooltip} placement="bottom">New script</Tooltip>
-                    </TooltipTrigger>
+                    {onNewScript ? (
+                        <TooltipTrigger delay={600}>
+                            <Button
+                                className={styles.iconButton}
+                                onPress={onNewScript}
+                                aria-label="New script"
+                            >
+                                <PlusIcon className={styles.icon} aria-hidden="true" />
+                            </Button>
+                            <Tooltip className={styles.tooltip} placement="bottom">New script</Tooltip>
+                        </TooltipTrigger>
+                    ) : null}
                     {onImportScript ? (
                         <TooltipTrigger delay={600}>
                             <Button
@@ -108,6 +112,7 @@ export const AppHeader = ({
                             <Tooltip className={styles.tooltip} placement="bottom">Import script</Tooltip>
                         </TooltipTrigger>
                     ) : null}
+                    {leftControls ?? null}
                 </div>
                 <div className={styles.scriptControls}>
                     {scriptControls ?? null}
@@ -131,8 +136,6 @@ export type ScriptEditorAppHeaderProps = {
     onMenuAction?: (actionId: string) => void,
     scriptSyncState?: ScriptSyncState,
     onHome: () => void,
-    onNewScript: () => void,
-    onImportScript?: () => void,
     onBackToEditor?: () => void,
     backToEditorLabel?: string,
     isFullWidth?: boolean,
@@ -145,8 +148,6 @@ export const ScriptEditorAppHeader = ({
     onMenuAction,
     scriptSyncState,
     onHome,
-    onNewScript,
-    onImportScript,
     onBackToEditor,
     backToEditorLabel = 'Back to editor',
     isFullWidth = true,
@@ -174,10 +175,8 @@ export const ScriptEditorAppHeader = ({
         <AppHeader
             onMenuAction={onMenuAction}
             onHome={onHome}
-            onNewScript={onNewScript}
-            onImportScript={onImportScript}
             isFullWidth={isFullWidth}
-            scriptControls={(
+            leftControls={(
                 <>
                     {onBackToEditor ? (
                         <Button

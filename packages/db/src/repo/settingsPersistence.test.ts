@@ -6,6 +6,7 @@ import {
 
 import {createTestDb, seedScript} from '../testing/createTestDb';
 import {createSettingsHandlers} from './config';
+import {createScriptsHandlers} from './scripts';
 import {createTitlePageHandlers} from './titlePage';
 
 describe('settings persistence', () => {
@@ -57,13 +58,16 @@ describe('settings persistence', () => {
         });
 
         await handlers.save('script-title-page', {
-            titleOverride: 'The Test',
+            subtitle: 'A play',
             credits: [{credit: 'Written by', authors: ['Ada', 'Grace']}],
         });
 
         const stored = await handlers.load('script-title-page');
+        const scriptHandlers = createScriptsHandlers({getDb: () => Promise.resolve(db)});
+        const summary = await scriptHandlers.getSummary('script-title-page');
 
-        expect(stored?.titleOverride).toBe('The Test');
+        expect(stored?.subtitle).toBe('A play');
         expect(stored?.credits).toEqual([{credit: 'Written by', authors: ['Ada', 'Grace']}]);
+        expect(summary?.subtitle).toBe('A play');
     });
 });

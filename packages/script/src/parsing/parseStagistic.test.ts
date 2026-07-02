@@ -63,8 +63,8 @@ The lights return. @@out 1
 [[ revise **this** ]]
 `);
 
+        expect(result.title).toBe('When Night Falls');
         expect(result.titlePage).toEqual({
-            titleOverride: 'When Night Falls',
             subtitle: 'A musical',
             credits: [
                 {credit: 'Music', authors: ['Peter Gray']},

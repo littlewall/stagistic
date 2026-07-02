@@ -180,7 +180,12 @@ const resolveCueModes = (blocks: ParsedBlock[]): ScriptNode[] => {
 };
 
 export const parseStagistic = (source: string): ParseStagisticResult => {
-    const {body, bodyStartLine, titlePage} = parseStagisticFrontmatter(source);
+    const {
+        body,
+        bodyStartLine,
+        title,
+        titlePage,
+    } = parseStagisticFrontmatter(source);
     const lines = body.split('\n');
     const hasActs = lines.some(line => /^##\s+/u.test(line));
     const blocks: ParsedBlock[] = [];
@@ -296,5 +301,9 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
         content: resolveCueModes(blocks),
     };
 
-    return {document, titlePage};
+    return {
+        document,
+        title,
+        titlePage,
+    };
 };

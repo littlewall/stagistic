@@ -13,7 +13,6 @@ describe('serializeStagistic', () => {
             scriptTitle: 'Stored title',
             exportDate: new Date(2026, 6, 1),
             titlePage: {
-                titleOverride: 'When Night Falls',
                 subtitle: 'A musical',
                 credits: [
                     {credit: 'Music', authors: ['Peter Gray']},
@@ -27,7 +26,7 @@ describe('serializeStagistic', () => {
         });
 
         expect(result).toBe(`---
-title: "When Night Falls"
+title: "Stored title"
 subtitle: "A musical"
 credits:
   - credit: "Music"

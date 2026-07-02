@@ -26,19 +26,16 @@ export const AppHeader = (props: AppHeaderProps) => {
 
 type ScriptEditorAppHeaderProps = Omit<
     UIScriptEditorAppHeaderProps,
-    'onHome' | 'onNewScript' | 'onImportScript' | 'onSelectScript'
+    'onHome' | 'onSelectScript'
 >;
 
 export const ScriptEditorAppHeader = (props: ScriptEditorAppHeaderProps) => {
     const navigate = useNavigate();
-    const {openNewScript, openImportScript} = useGlobalModals();
 
     return (
         <UIScriptEditorAppHeader
             {...props}
             onHome={() => void navigate('/')}
-            onNewScript={openNewScript}
-            onImportScript={openImportScript}
             onSelectScript={script => void navigate(`/script/${script.id}/editor`)}
         />
     );

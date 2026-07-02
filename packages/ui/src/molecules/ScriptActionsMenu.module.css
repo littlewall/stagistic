@@ -1,0 +1,66 @@
+.trigger {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(32px * var(--size-scale));
+    height: calc(32px * var(--size-scale));
+    padding: 0;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
+    outline: none;
+
+    &[data-hovered],
+    &[data-pressed],
+    &[data-focus-visible] {
+        color: var(--color-text);
+        background: var(--color-surface-raised);
+    }
+}
+
+.icon {
+    width: calc(18px * var(--size-scale));
+    height: calc(18px * var(--size-scale));
+}
+
+.popover {
+    padding: 0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-popover);
+
+    &:focus-visible {
+        outline: none;
+    }
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: calc(184px * var(--size-scale));
+    padding: var(--space-md);
+    font-size: var(--font-size-md);
+    outline: none;
+}
+
+.item,
+.dangerItem {
+    cursor: pointer;
+    padding: var(--space-md) var(--space-lg);
+    color: var(--color-text);
+    border-radius: var(--radius-md);
+    outline: none;
+
+    &[data-focused],
+    &[data-hovered] {
+        background: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
+    }
+}
+
+.dangerItem {
+    color: var(--color-status-danger);
+}

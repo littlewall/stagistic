@@ -3,6 +3,7 @@ import type {TitlePageSettings} from '../titlePage';
 
 export interface ParseStagisticResult {
     document: ScriptDocument,
+    title?: string,
     titlePage: TitlePageSettings,
 }
 
