@@ -338,6 +338,55 @@ describe('cue pill node views', () => {
         expect(document.querySelector('[data-cue-pill="start"]')).toBeTruthy();
     });
 
+    const cueOwnerBlockId = (editor: Editor): string | undefined => {
+        const content = editor.getJSON().content as ScriptNode[] | undefined;
+
+        return content?.find(node => node.content?.some(child => child.type === 'cueStart'))?.attrs?.id as
+            | string
+            | undefined;
+    };
+
+    it('keeps a cue in its block when splitting an otherwise-empty block with Enter', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+        await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+
+        // Caret before the cue (block has no text besides the cue).
+        editor.commands.focus('start');
+        // Empty block → Enter opens the next-block chooser; a second Enter confirms.
+        await userEvent.keyboard('{Enter}');
+        await userEvent.keyboard('{Enter}');
+
+        const content = editor.getJSON().content as ScriptNode[] | undefined;
+
+        expect(content?.length).toBe(2);
+        expect(cueOwnerBlockId(editor)).toBe('sd-1');
+    });
+
+    it('keeps a cue in its block when splitting at the end of block text with Enter', async () => {
+        renderEditor(createDocumentWithText());
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+        await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+
+        // Caret at the end of the text but before the trailing cue atom.
+        const block = editor.state.doc.firstChild;
+        const textEnd = 1 + (block?.content.firstChild?.nodeSize ?? 0);
+
+        editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, textEnd)));
+        await userEvent.keyboard('{Enter}');
+
+        const content = editor.getJSON().content as ScriptNode[] | undefined;
+
+        expect(content?.length).toBe(2);
+        expect(cueOwnerBlockId(editor)).toBe('sd-1');
+    });
+
     it('keeps a cue when deleting selected stage-direction content around it', async () => {
         renderEditor(createDocumentWithText());
 

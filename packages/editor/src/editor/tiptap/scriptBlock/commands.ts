@@ -1,9 +1,11 @@
 import {
     createNodeId,
+    CUE_OUT_NODE_NAME,
+    CUE_START_NODE_NAME,
     normalizeCharacterEditorDelimiters,
     resolveScriptBlockNodeType,
 } from '@stagistic/script';
-import type {NodeType} from '@tiptap/pm/model';
+import type {Node as ProseMirrorNode, NodeType} from '@tiptap/pm/model';
 import {TextSelection, type Transaction} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
@@ -146,7 +148,65 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
     return true;
 };
 
+const isCueAtomNodeName = (name: string | undefined): boolean => {
+    return name === CUE_START_NODE_NAME || name === CUE_OUT_NODE_NAME;
+};
+
+const blockNodeHasCueAtom = (node: ProseMirrorNode): boolean => {
+    let found = false;
+
+    node.forEach(child => {
+        if (isCueAtomNodeName(child.type.name)) {
+            found = true;
+        }
+    });
+
+    return found;
+};
+
+/**
+ * A cue atom is bound to its block and always sits at the block end (§4.1).
+ * A block split moves everything after the caret into the new block, so a
+ * cue would migrate with it (or, when splitting an otherwise-empty block, be
+ * stranded in the wrong sibling). Rather than split a cue-bearing block, keep
+ * it (with its cue and any text) intact and insert an empty typed block right
+ * after it, moving the caret there.
+ */
+const insertEmptyBlockAfterCueBlock = (editor: Editor, blockType: BlockNodeType): boolean => {
+    const nodes = editor.schema.nodes as Record<string, NodeType>;
+    const nextNodeType = resolveNodeTypeForBlockType(nodes, blockType);
+
+    if (!nextNodeType) {
+        return false;
+    }
+
+    const block = getActiveScriptBlockFromState(editor.state);
+
+    if (!block) {
+        return false;
+    }
+
+    const insertPos = block.pos + block.node.nodeSize;
+    const insertedNode = nextNodeType.create({blockType, id: createNodeId()});
+    let tr = editor.state.tr.insert(insertPos, insertedNode);
+    // The inserted block opens at insertPos; its content starts one past that.
+    const selectionPos = insertPos + 1;
+
+    tr = tr.setSelection(TextSelection.near(tr.doc.resolve(selectionPos), 1));
+    tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
+    editor.view.dispatch(tr.scrollIntoView());
+    focusEditor(editor);
+
+    return true;
+};
+
 export const splitBlockWithType = (editor: Editor, blockType: BlockNodeType) => {
+    const activeBlock = getActiveScriptBlockFromState(editor.state);
+
+    if (activeBlock && blockNodeHasCueAtom(activeBlock.node)) {
+        return insertEmptyBlockAfterCueBlock(editor, blockType);
+    }
+
     const didSplit = editor.commands.splitBlock();
 
     if (!didSplit) {
