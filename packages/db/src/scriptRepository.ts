@@ -34,11 +34,17 @@ export interface ListScriptsOptions {
     limit?: number,
 }
 
+export interface RenameScriptInput {
+    title: string,
+    subtitle: string | null,
+}
+
 export interface ScriptCrudRepository {
     list(options?: ListScriptsOptions): Promise<ScriptSummary[]>,
     getSummary(scriptId: string): Promise<ScriptSummary | null>,
     create(title: string, initialContent?: ScriptDocument): Promise<string>,
-    rename(scriptId: string, title: string): Promise<void>,
+    rename(scriptId: string, input: RenameScriptInput): Promise<void>,
+    renameTitle(scriptId: string, title: string): Promise<void>,
     delete(scriptId: string): Promise<void>,
     setActiveBlock(scriptId: string, blockId: string | null): Promise<void>,
 }
@@ -131,7 +137,8 @@ export interface ScriptRepository extends ScriptDataRepository {
     listScriptCharacters(scriptId: string): Promise<ScriptCharacterRef[]>,
     listScriptCharacterGenders(scriptId: string): Promise<ScriptCharacterGenderOption[]>,
     createScript(title: string, initialContent?: ScriptDocument): Promise<string>,
-    renameScript(scriptId: string, title: string): Promise<void>,
+    renameScript(scriptId: string, input: RenameScriptInput): Promise<void>,
+    renameScriptTitle(scriptId: string, title: string): Promise<void>,
     deleteScript(scriptId: string): Promise<void>,
     setActiveBlock(scriptId: string, blockId: string | null): Promise<void>,
     confirmScriptCharacter(scriptId: string, characterKey: string): Promise<ScriptCharacterRef | null>,

@@ -44,5 +44,9 @@ export const compiledMigrations = [
     {
         "id": "0010_unify_script_title",
         "sql": "UPDATE \"scripts\"\nSET \"title\" = btrim(legacy_title.\"field_value\")\nFROM \"script_settings_title_page\" AS legacy_title\nWHERE legacy_title.\"script_id\" = \"scripts\".\"id\"\n\tAND legacy_title.\"field_key\" = 'titleOverride'\n\tAND btrim(legacy_title.\"field_value\") <> '';--> statement-breakpoint\nDELETE FROM \"script_settings_title_page\"\nWHERE \"field_key\" = 'titleOverride';\n"
+    },
+    {
+        "id": "0011_add_script_subtitle",
+        "sql": "ALTER TABLE \"scripts\" ADD COLUMN \"subtitle\" text;--> statement-breakpoint\nUPDATE \"scripts\"\nSET \"subtitle\" = btrim(legacy_subtitle.\"field_value\")\nFROM \"script_settings_title_page\" AS legacy_subtitle\nWHERE legacy_subtitle.\"script_id\" = \"scripts\".\"id\"\n\tAND legacy_subtitle.\"field_key\" = 'subtitle'\n\tAND btrim(legacy_subtitle.\"field_value\") <> '';--> statement-breakpoint\nDELETE FROM \"script_settings_title_page\"\nWHERE \"field_key\" = 'subtitle';\n"
     }
 ] as const;

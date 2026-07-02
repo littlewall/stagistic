@@ -59,15 +59,26 @@ export const createScriptsHandlers = ({getDb}: CreateScriptsHandlersArgs) => ({
 
         return id;
     },
-    rename: async (scriptId: string, title: string) => {
+    rename: async (scriptId: string, input: {title: string, subtitle: string | null}) => {
         const db = await getDb();
         const now = Date.now();
-        const nextTitle = trimOrFallback(title, 'Untitled script');
+        const nextTitle = trimOrFallback(input.title, 'Untitled script');
+        const trimmedSubtitle = input.subtitle?.trim() ?? '';
+
+        await dbQueries.updateScript(db, {
+            id: scriptId,
+            title: nextTitle,
+            subtitle: trimmedSubtitle.length > 0 ? trimmedSubtitle : null,
+            updatedAt: now,
+        });
+    },
+    renameTitle: async (scriptId: string, title: string) => {
+        const db = await getDb();
 
         await dbQueries.updateScriptTitle(db, {
             id: scriptId,
-            title: nextTitle,
-            updatedAt: now,
+            title: trimOrFallback(title, 'Untitled script'),
+            updatedAt: Date.now(),
         });
     },
     delete: async (scriptId: string) => {

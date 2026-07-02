@@ -17,6 +17,7 @@ export type {
     ScriptBlocksRepository,
     ScriptCharacterGendersRepository,
     ScriptCharactersRepository,
+    RenameScriptInput,
     ScriptContentRepository,
     ScriptCrudRepository,
     ScriptDataRepository,

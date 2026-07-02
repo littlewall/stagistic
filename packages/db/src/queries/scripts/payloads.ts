@@ -9,9 +9,22 @@ export interface InsertScriptPayload {
     updatedAt: number,
 }
 
+export interface UpdateScriptPayload {
+    id: string,
+    title: string,
+    subtitle: string | null,
+    updatedAt: number,
+}
+
 export interface UpdateScriptTitlePayload {
     id: string,
     title: string,
+    updatedAt: number,
+}
+
+export interface UpdateScriptSubtitlePayload {
+    id: string,
+    subtitle: string | null,
     updatedAt: number,
 }
 

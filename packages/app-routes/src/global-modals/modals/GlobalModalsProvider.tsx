@@ -6,6 +6,7 @@ import {
     DeleteScriptModal,
     ImportScriptModal,
     NewScriptModal,
+    RenameScriptModal,
     useToastController,
 } from '@stagistic/ui';
 import {
@@ -19,6 +20,7 @@ import {useNavigate} from 'react-router-dom';
 
 import {
     type ScriptToDelete,
+    type ScriptToRename,
     useGlobalModalActions,
 } from './useGlobalModalActions';
 
@@ -26,6 +28,7 @@ type GlobalModalsController = {
     openNewScript: () => void,
     openImportScript: () => void,
     openDeleteScript: (script: ScriptToDelete) => void,
+    openRenameScript: (script: ScriptToRename) => void,
 };
 
 const GlobalModalsContext = createContext<GlobalModalsController | null>(null);
@@ -61,15 +64,21 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         scriptToDelete,
         isDeleteScriptOpen,
         isDeleting,
+        scriptToRename,
+        isRenameScriptOpen,
+        isRenaming,
         openNewScript,
         closeNewScript,
         openImportScript,
         closeImportScript,
         openDeleteScript,
         closeDeleteScript,
+        openRenameScript,
+        closeRenameScript,
         handleCreate,
         handleImport,
         handleDelete,
+        handleRename,
     } = useGlobalModalActions({
         repository: {
             scriptRepository,
@@ -89,10 +98,12 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         openNewScript,
         openImportScript,
         openDeleteScript,
+        openRenameScript,
     }), [
         openDeleteScript,
         openImportScript,
         openNewScript,
+        openRenameScript,
     ]);
 
     return (
@@ -116,6 +127,14 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
                 isDeleting={isDeleting}
                 onClose={closeDeleteScript}
                 onConfirm={handleDelete}
+            />
+            <RenameScriptModal
+                isOpen={isRenameScriptOpen}
+                initialTitle={scriptToRename?.title ?? ''}
+                initialSubtitle={scriptToRename?.subtitle ?? ''}
+                isPending={isRenaming}
+                onClose={closeRenameScript}
+                onSubmit={handleRename}
             />
         </GlobalModalsContext.Provider>
     );

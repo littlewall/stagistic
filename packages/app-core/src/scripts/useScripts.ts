@@ -1,4 +1,7 @@
-import type {ScriptSummary} from '@stagistic/db';
+import type {
+    RenameScriptInput,
+    ScriptSummary,
+} from '@stagistic/db';
 import type {ScriptDocument} from '@stagistic/script';
 import {useLiveQuery} from '@tanstack/react-db';
 import {
@@ -52,7 +55,12 @@ export const useScripts = () => {
     );
 
     const renameScript = useCallback(
-        (scriptId: string, name: string) => scriptsStore.renameScript(scriptId, name),
+        (scriptId: string, input: RenameScriptInput) => scriptsStore.renameScript(scriptId, input),
+        [scriptsStore],
+    );
+
+    const renameScriptTitle = useCallback(
+        (scriptId: string, title: string) => scriptsStore.renameScriptTitle(scriptId, title),
         [scriptsStore],
     );
 
@@ -71,6 +79,7 @@ export const useScripts = () => {
         scriptSummaries,
         createScript,
         renameScript,
+        renameScriptTitle,
         deleteScript,
         setActiveBlock,
         refreshScripts: scriptsStore.refresh,

@@ -18,6 +18,11 @@ export {DeleteScriptModal} from './dialogs/DeleteScriptModal';
 export {ImportScriptModal} from './dialogs/ImportScriptModal';
 export {NewScriptModal} from './dialogs/NewScriptModal';
 export {
+    RenameScriptModal,
+    type RenameScriptModalProps,
+    type RenameScriptSubmit,
+} from './dialogs/RenameScriptModal';
+export {
     ScriptSettingsModal,
     type SettingsNavGroup,
     type SettingsNavItem,

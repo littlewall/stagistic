@@ -54,7 +54,7 @@ export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
     const {scriptId} = useParams();
     const scriptRepository = useScriptRepository();
-    const {deleteScript, renameScript} = useScripts();
+    const {deleteScript, renameScriptTitle} = useScripts();
     const [searchParams, setSearchParams] = useSearchParams();
     const {
         currentScript,
@@ -102,7 +102,7 @@ export const ScriptEditorRoute = () => {
     } = useScriptTitleDraft({
         currentScriptId,
         currentScriptTitle: currentScript?.name ?? '',
-        renameScript,
+        renameScriptTitle,
     });
     const displayedCurrentScript = useMemo(
         () => currentScript ? {...currentScript, name: scriptTitleDraft} : null,

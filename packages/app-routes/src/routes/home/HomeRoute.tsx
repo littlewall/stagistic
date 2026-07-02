@@ -35,7 +35,7 @@ export const HomeRoute = () => {
         error,
         refreshScripts,
     } = useScripts();
-    const {openNewScript, openDeleteScript} = useGlobalModals();
+    const {openNewScript, openDeleteScript, openRenameScript} = useGlobalModals();
     const [query, setQuery] = useState('');
     const [sort, setSort] = useState<ScriptSort>('newest');
 
@@ -54,6 +54,9 @@ export const HomeRoute = () => {
     const deleteScript = useCallback((script: {id: string, title: string}) => {
         openDeleteScript({id: script.id, title: script.title});
     }, [openDeleteScript]);
+    const renameScript = useCallback((script: {id: string, title: string, subtitle: string | null}) => {
+        openRenameScript({id: script.id, title: script.title, subtitle: script.subtitle ?? ''});
+    }, [openRenameScript]);
 
     if (scriptsLoading) {
         return (
@@ -129,12 +132,14 @@ export const HomeRoute = () => {
                             scripts={dashboard.continueWriting}
                             onOpenScript={openScript}
                             onDeleteScript={deleteScript}
+                            onRenameScript={renameScript}
                         />
                         <ScriptListSection
                             title="Recently edited"
                             scripts={dashboard.recentlyEdited}
                             onOpenScript={openScript}
                             onDeleteScript={deleteScript}
+                            onRenameScript={renameScript}
                         />
                         <ScriptListSection
                             title="All scripts"
@@ -150,6 +155,7 @@ export const HomeRoute = () => {
                             )}
                             onOpenScript={openScript}
                             onDeleteScript={deleteScript}
+                            onRenameScript={renameScript}
                         />
                         {dashboard.allScripts.length === 0 ? (
                             <SubtleText className={styles.noResults}>

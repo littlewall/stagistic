@@ -16,8 +16,12 @@ interface CreateTitlePageHandlersArgs {
     recordOutbox: RecordOutbox,
 }
 
+/*
+ * `subtitle` is intentionally NOT here: it lives on the `scripts` table
+ * (so the script list can read it without a join) and is bridged in
+ * load()/save() below. The remaining fields live in scriptSettingsTitlePage.
+ */
 const STRING_FIELDS = [
-    'subtitle',
     'source',
     'draftDateMode',
     'draftDate',
@@ -77,8 +81,14 @@ export const createTitlePageHandlers = ({
 }: CreateTitlePageHandlersArgs): ScriptTitlePageRepository => {
     const load: ScriptTitlePageRepository['load'] = async scriptId => {
         const db = await getDb();
+        const settings = toTitlePageSettings(await dbQueries.listScriptTitlePageFields(db, scriptId));
+        const subtitle = await dbQueries.getScriptSubtitle(db, scriptId);
 
-        return toTitlePageSettings(await dbQueries.listScriptTitlePageFields(db, scriptId));
+        if (subtitle === null || subtitle.length === 0) {
+            return settings;
+        }
+
+        return {...settings, subtitle};
     };
 
     const save: ScriptTitlePageRepository['save'] = async (scriptId, settings) => {
@@ -112,6 +122,14 @@ export const createTitlePageHandlers = ({
         });
 
         await dbQueries.replaceScriptTitlePageFields(db, scriptId, rows);
+
+        const subtitle = typeof settings.subtitle === 'string' ? settings.subtitle.trim() : '';
+
+        await dbQueries.updateScriptSubtitle(db, {
+            id: scriptId,
+            subtitle: subtitle.length > 0 ? subtitle : null,
+            updatedAt: now,
+        });
         await recordOutbox({
             scriptId,
             opType: 'title-page.save',
@@ -121,12 +139,14 @@ export const createTitlePageHandlers = ({
 
     const deleteTitlePage: ScriptTitlePageRepository['delete'] = async scriptId => {
         const db = await getDb();
+        const now = Date.now();
 
         await dbQueries.replaceScriptTitlePageFields(db, scriptId, []);
+        await dbQueries.updateScriptSubtitle(db, {id: scriptId, subtitle: null, updatedAt: now});
         await recordOutbox({
             scriptId,
             opType: 'title-page.delete',
-            payloadJson: JSON.stringify({scriptId, deletedAt: Date.now()}),
+            payloadJson: JSON.stringify({scriptId, deletedAt: now}),
         });
     };
 

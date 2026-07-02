@@ -1,5 +1,8 @@
 import type {ScriptSummary} from '@stagistic/db';
-import type {ScriptRepository} from '@stagistic/db';
+import type {
+    RenameScriptInput,
+    ScriptRepository,
+} from '@stagistic/db';
 import {
     createNodeId,
     ensureSceneHeading,
@@ -41,7 +44,8 @@ export type ScriptsStoreState = {
         init: () => Promise<void>,
         refresh: () => Promise<void>,
         createScript: (title: string, initialContent?: ScriptDocument) => Promise<string>,
-        renameScript: (scriptId: string, title: string) => Promise<void>,
+        renameScript: (scriptId: string, input: RenameScriptInput) => Promise<void>,
+        renameScriptTitle: (scriptId: string, title: string) => Promise<void>,
         deleteScript: (scriptId: string) => Promise<void>,
         setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,
     },
@@ -130,8 +134,13 @@ export const createScriptsStore = (repository: ScriptRepository): ScriptsStoreSt
         return id;
     };
 
-    const renameScript = async (scriptId: string, title: string) => {
-        await repository.renameScript(scriptId, title);
+    const renameScript = async (scriptId: string, input: RenameScriptInput) => {
+        await repository.renameScript(scriptId, input);
+        await refresh();
+    };
+
+    const renameScriptTitle = async (scriptId: string, title: string) => {
+        await repository.renameScriptTitle(scriptId, title);
         await refresh();
     };
 
@@ -161,6 +170,7 @@ export const createScriptsStore = (repository: ScriptRepository): ScriptsStoreSt
             refresh,
             createScript,
             renameScript,
+            renameScriptTitle,
             deleteScript,
             setActiveBlock,
         },

@@ -1,19 +1,17 @@
 import {
-    and,
     desc,
     eq,
 } from 'drizzle-orm';
 
-import {
-    scripts,
-    scriptSettingsTitlePage,
-} from '../../schema';
+import {scripts} from '../../schema';
 import type {ScriptSummary} from '../../types';
 import type {DbClient} from '../types';
 import type {
     InsertScriptPayload,
     ListScriptsOptions,
     UpdateActiveBlockPayload,
+    UpdateScriptPayload,
+    UpdateScriptSubtitlePayload,
     UpdateScriptTimestampPayload,
     UpdateScriptTitlePayload,
 } from './payloads';
@@ -21,7 +19,7 @@ import type {
 const scriptSummarySelection = {
     id: scripts.id,
     title: scripts.title,
-    subtitle: scriptSettingsTitlePage.fieldValue,
+    subtitle: scripts.subtitle,
     createdAt: scripts.createdAt,
     updatedAt: scripts.updatedAt,
     activeBlockId: scripts.activeBlockId,
@@ -37,13 +35,6 @@ export const listScripts = async (
     const baseQuery = db
         .select(scriptSummarySelection)
         .from(scripts)
-        .leftJoin(
-            scriptSettingsTitlePage,
-            and(
-                eq(scriptSettingsTitlePage.scriptId, scripts.id),
-                eq(scriptSettingsTitlePage.fieldKey, 'subtitle'),
-            ),
-        )
         .orderBy(desc(scripts.updatedAt));
     const rows = options?.limit
         ? await baseQuery.limit(options.limit)
@@ -69,13 +60,6 @@ export const getScriptSummary = async (
     const rows = await db
         .select(scriptSummarySelection)
         .from(scripts)
-        .leftJoin(
-            scriptSettingsTitlePage,
-            and(
-                eq(scriptSettingsTitlePage.scriptId, scripts.id),
-                eq(scriptSettingsTitlePage.fieldKey, 'subtitle'),
-            ),
-        )
         .where(eq(scripts.id, scriptId))
         .limit(1);
 
@@ -108,12 +92,45 @@ export const insertScript = async (db: DbClient, payload: InsertScriptPayload) =
 };
 
 /**
- * Update script title and updatedAt.
+ * Update script title, subtitle, and updatedAt.
+ */
+export const updateScript = async (db: DbClient, payload: UpdateScriptPayload) => {
+    await db
+        .update(scripts)
+        .set({title: payload.title, subtitle: payload.subtitle, updatedAt: payload.updatedAt})
+        .where(eq(scripts.id, payload.id));
+};
+
+/**
+ * Update script title and updatedAt, leaving subtitle untouched.
  */
 export const updateScriptTitle = async (db: DbClient, payload: UpdateScriptTitlePayload) => {
     await db
         .update(scripts)
         .set({title: payload.title, updatedAt: payload.updatedAt})
+        .where(eq(scripts.id, payload.id));
+};
+
+/**
+ * Read a script's subtitle.
+ */
+export const getScriptSubtitle = async (db: DbClient, scriptId: string): Promise<string | null> => {
+    const rows = await db
+        .select({subtitle: scripts.subtitle})
+        .from(scripts)
+        .where(eq(scripts.id, scriptId))
+        .limit(1);
+
+    return rows[0]?.subtitle ?? null;
+};
+
+/**
+ * Update a script's subtitle and updatedAt.
+ */
+export const updateScriptSubtitle = async (db: DbClient, payload: UpdateScriptSubtitlePayload) => {
+    await db
+        .update(scripts)
+        .set({subtitle: payload.subtitle, updatedAt: payload.updatedAt})
         .where(eq(scripts.id, payload.id));
 };
 

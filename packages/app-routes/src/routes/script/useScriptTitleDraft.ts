@@ -10,13 +10,13 @@ const SCRIPT_TITLE_SAVE_DEBOUNCE_MS = 450;
 interface UseScriptTitleDraftArgs {
     currentScriptId: string | null,
     currentScriptTitle: string,
-    renameScript: (scriptId: string, title: string) => Promise<void>,
+    renameScriptTitle: (scriptId: string, title: string) => Promise<void>,
 }
 
 export const useScriptTitleDraft = ({
     currentScriptId,
     currentScriptTitle,
-    renameScript,
+    renameScriptTitle,
 }: UseScriptTitleDraftArgs) => {
     const [scriptTitleDraft, setScriptTitleDraft] = useState(currentScriptTitle);
     const loadedScriptIdRef = useRef<string | null>(null);
@@ -64,14 +64,14 @@ export const useScriptTitleDraft = ({
 
         saveTimerRef.current = window.setTimeout(() => {
             persistedTitleRef.current = snapshot;
-            void renameScript(currentScriptId, snapshot);
+            void renameScriptTitle(currentScriptId, snapshot);
         }, SCRIPT_TITLE_SAVE_DEBOUNCE_MS);
 
         return clearSaveTimer;
     }, [
         clearSaveTimer,
         currentScriptId,
-        renameScript,
+        renameScriptTitle,
         scriptTitleDraft,
     ]);
 

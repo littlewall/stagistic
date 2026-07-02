@@ -25,8 +25,15 @@ export interface ScriptToDelete {
     title: string,
 }
 
+export interface ScriptToRename {
+    id: string,
+    title: string,
+    subtitle: string,
+}
+
 interface ScriptRepositoryAdapter {
     createScript: (name: string, initialContent?: ScriptDocument) => Promise<string>,
+    renameScript: (scriptId: string, input: {title: string, subtitle: string | null}) => Promise<void>,
     deleteScript: (scriptId: string) => Promise<void>,
     saveTitlePage: (scriptId: string, settings: TitlePageSettings) => Promise<void>,
     setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,
@@ -55,16 +62,22 @@ export interface GlobalModalActions {
     scriptToDelete: ScriptToDelete | null,
     isDeleteScriptOpen: boolean,
     isDeleting: boolean,
+    scriptToRename: ScriptToRename | null,
+    isRenameScriptOpen: boolean,
+    isRenaming: boolean,
     openNewScript: () => void,
     closeNewScript: () => void,
     openImportScript: () => void,
     closeImportScript: () => void,
     openDeleteScript: (script: ScriptToDelete) => void,
     closeDeleteScript: () => void,
+    openRenameScript: (script: ScriptToRename) => void,
+    closeRenameScript: () => void,
     setPrefilledImport: (value: ScriptImportFile | null) => void,
     handleCreate: (name: string) => Promise<void>,
     handleImport: (payload: ScriptImportFile & {name: string}) => Promise<void>,
     handleDelete: () => Promise<void>,
+    handleRename: (values: {title: string, subtitle: string}) => Promise<void>,
 }
 
 export const useGlobalModalActions = ({
@@ -83,6 +96,8 @@ export const useGlobalModalActions = ({
     const [prefilledImport, setPrefilledImport] = useState<ScriptImportFile | null>(null);
     const [scriptToDelete, setScriptToDelete] = useState<ScriptToDelete | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
+    const [scriptToRename, setScriptToRename] = useState<ScriptToRename | null>(null);
+    const [isRenaming, setIsRenaming] = useState(false);
 
     const openNewScript = useCallback(() => {
         setIsNewScriptOpen(true);
@@ -112,6 +127,18 @@ export const useGlobalModalActions = ({
 
         setScriptToDelete(null);
     }, [isDeleting]);
+
+    const openRenameScript = useCallback((script: ScriptToRename) => {
+        setScriptToRename(script);
+    }, []);
+
+    const closeRenameScript = useCallback(() => {
+        if (isRenaming) {
+            return;
+        }
+
+        setScriptToRename(null);
+    }, [isRenaming]);
 
     const createScriptWithActiveBlock = useCallback(async (name: string, initialContent?: ScriptDocument) => {
         const scriptId = await scriptRepository.createScript(name, initialContent);
@@ -238,6 +265,46 @@ export const useGlobalModalActions = ({
         scriptToDelete,
     ]);
 
+    const handleRename = useCallback((values: {title: string, subtitle: string}): Promise<void> => {
+        const renameAndRefresh = async () => {
+            if (!scriptToRename) {
+                return;
+            }
+
+            setIsRenaming(true);
+
+            try {
+                await scriptRepository.renameScript(scriptToRename.id, {
+                    title: values.title,
+                    subtitle: values.subtitle,
+                });
+                refreshScripts();
+                setScriptToRename(null);
+                addToast({
+                    title: 'Script renamed',
+                    description: trimOrFallback(values.title, 'Untitled script'),
+                    variant: 'success',
+                });
+            } catch (error) {
+                console.error('Failed to rename script', error);
+                addToast({
+                    title: 'Failed to rename script',
+                    description: error instanceof Error ? error.message : 'An unexpected error occurred.',
+                    variant: 'error',
+                });
+            } finally {
+                setIsRenaming(false);
+            }
+        };
+
+        return renameAndRefresh();
+    }, [
+        addToast,
+        refreshScripts,
+        scriptRepository,
+        scriptToRename,
+    ]);
+
     return useMemo(() => ({
         isNewScriptOpen,
         isImportOpen,
@@ -246,30 +313,41 @@ export const useGlobalModalActions = ({
         scriptToDelete,
         isDeleteScriptOpen: scriptToDelete !== null,
         isDeleting,
+        scriptToRename,
+        isRenameScriptOpen: scriptToRename !== null,
+        isRenaming,
         openNewScript,
         closeNewScript,
         openImportScript,
         closeImportScript,
         openDeleteScript,
         closeDeleteScript,
+        openRenameScript,
+        closeRenameScript,
         setPrefilledImport,
         handleCreate,
         handleImport,
         handleDelete,
+        handleRename,
     }), [
         closeDeleteScript,
         closeImportScript,
         closeNewScript,
+        closeRenameScript,
         handleCreate,
         handleDelete,
         handleImport,
+        handleRename,
         isDeleting,
         isImportLoading,
         isImportOpen,
         isNewScriptOpen,
+        isRenaming,
         openDeleteScript,
         openImportScript,
         openNewScript,
+        openRenameScript,
+        scriptToRename,
         prefilledImport,
         scriptToDelete,
     ]);
