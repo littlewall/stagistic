@@ -29,11 +29,14 @@ import {SyncIndicator} from './header/SyncIndicator';
 import type {
     ScriptListItem,
     ScriptSyncState,
+    ScriptView,
 } from './header/types';
+import {ViewSwitcher} from './header/ViewSwitcher';
 
 export type {
     ScriptListItem,
     ScriptSyncState,
+    ScriptView,
 };
 
 export type AppHeaderProps = {
@@ -139,6 +142,8 @@ export type ScriptEditorAppHeaderProps = {
     onBackToEditor?: () => void,
     backToEditorLabel?: string,
     isFullWidth?: boolean,
+    activeView: ScriptView,
+    onSelectView: (view: ScriptView) => void,
 };
 
 export const ScriptEditorAppHeader = ({
@@ -151,6 +156,8 @@ export const ScriptEditorAppHeader = ({
     onBackToEditor,
     backToEditorLabel = 'Back to editor',
     isFullWidth = true,
+    activeView,
+    onSelectView,
 }: ScriptEditorAppHeaderProps) => {
     const handleScriptMenuAction = useCallback((key: string) => {
         if (key.startsWith('script:')) {
@@ -176,6 +183,7 @@ export const ScriptEditorAppHeader = ({
             onMenuAction={onMenuAction}
             onHome={onHome}
             isFullWidth={isFullWidth}
+            scriptControls={<ViewSwitcher activeView={activeView} onSelectView={onSelectView} />}
             leftControls={(
                 <>
                     {onBackToEditor ? (

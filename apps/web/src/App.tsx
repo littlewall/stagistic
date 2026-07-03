@@ -5,8 +5,10 @@ import {
     GlobalModalsProvider,
     HomeRoute,
     ScriptEditorRoute,
+    ScriptExportRoute,
     ScriptListRoute,
     ScriptSettingsRoute,
+    ScriptWorkspaceRoute,
 } from '@stagistic/app-routes';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {useEffect, useState} from 'react';
@@ -77,7 +79,11 @@ const App = () => {
                     <Routes>
                         <Route path="/" element={<HomeRoute />} />
                         <Route path="/script/list" element={<ScriptListRoute />} />
-                        <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
+                        <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
+                            <Route index element={<Navigate to="editor" replace />} />
+                            <Route path="editor" element={<ScriptEditorRoute />} />
+                            <Route path="export" element={<ScriptExportRoute />} />
+                        </Route>
                         <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>

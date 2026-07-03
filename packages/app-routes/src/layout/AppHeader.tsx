@@ -3,10 +3,13 @@ import {
     type AppHeaderProps as UIAppHeaderProps,
     ScriptEditorAppHeader as UIScriptEditorAppHeader,
     type ScriptEditorAppHeaderProps as UIScriptEditorAppHeaderProps,
+    type ScriptView,
 } from '@stagistic/ui';
 import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../global-modals/GlobalModalsProvider';
+// TEMP: perf investigation
+import {markViewSwitch} from '../routes/script/perfInstrumentation';
 
 type AppHeaderProps = Pick<UIAppHeaderProps, 'onMenuAction' | 'isFullWidth'>;
 
@@ -26,7 +29,7 @@ export const AppHeader = (props: AppHeaderProps) => {
 
 type ScriptEditorAppHeaderProps = Omit<
     UIScriptEditorAppHeaderProps,
-    'onHome' | 'onSelectScript'
+    'onHome' | 'onSelectScript' | 'onSelectView'
 >;
 
 export const ScriptEditorAppHeader = (props: ScriptEditorAppHeaderProps) => {
@@ -37,6 +40,11 @@ export const ScriptEditorAppHeader = (props: ScriptEditorAppHeaderProps) => {
             {...props}
             onHome={() => void navigate('/')}
             onSelectScript={script => void navigate(`/script/${script.id}/editor`)}
+            onSelectView={(view: ScriptView) => {
+                markViewSwitch(view); // TEMP: perf investigation
+
+                void navigate(`/script/${props.currentScript.id}/${view}`);
+            }}
         />
     );
 };

@@ -49,6 +49,7 @@ export {
     type ScriptEditorAppHeaderProps,
     type ScriptListItem,
     type ScriptSyncState,
+    type ScriptView,
 } from './layout/AppHeader';
 export {AppLayout} from './layout/AppLayout';
 export {LoaderOverlay} from './LoaderOverlay';

@@ -9,13 +9,11 @@ import {
 import {isApplePlatform} from '@stagistic/shared';
 import {
     AppLayout,
-    LoaderOverlay,
     ScriptSettingsModal,
 } from '@stagistic/ui';
-import {useMemo} from 'react';
+import {useEffect, useMemo} from 'react';
 import {
     useNavigate,
-    useParams,
     useSearchParams,
 } from 'react-router-dom';
 
@@ -33,9 +31,11 @@ import {
 } from './editor/structure';
 import {ScriptCharactersProvider} from './ScriptCharactersContext';
 import {ScriptSessionProvider} from './ScriptSessionContext';
+import {useScriptWorkspace} from './ScriptWorkspaceContext';
+// TEMP: perf investigation
+import {reportEditorMountPerf} from './perfInstrumentation';
 import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settings/settingsMenu';
 import {useScriptCharactersContextValue} from './useScriptCharactersContextValue';
-import {useScriptEditorController} from './useScriptEditorController';
 import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
 import {useScriptEditorSettingsDraft} from './useScriptEditorSettingsDraft';
 import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
@@ -51,8 +51,12 @@ const BLOCK_LABEL_BY_TYPE = new Map(
 export const ScriptEditorRoute = () => {
     incrementRouteRenderCount();
 
+    // TEMP: perf investigation
+    useEffect(() => {
+        reportEditorMountPerf();
+    }, []);
+
     const navigate = useNavigate();
-    const {scriptId} = useParams();
     const scriptRepository = useScriptRepository();
     const {deleteScript, renameScriptTitle} = useScripts();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -66,11 +70,10 @@ export const ScriptEditorRoute = () => {
         storageError,
         shouldAutoFocus,
         saveIndicator,
-        editorLoadState,
         handleAutoSave,
         handleManualSave,
         handleSaveScriptSettingsOverride,
-    } = useScriptEditorController(scriptId);
+    } = useScriptWorkspace();
     const {
         effectiveScriptSettingsDraft,
         resolvedScriptSettings,
@@ -191,20 +194,6 @@ export const ScriptEditorRoute = () => {
     });
     const resolvedEditorInitialValue = editorOverrideValue ?? initialValue;
 
-    const showEditorLoader = editorLoadState.isLoading || !initialValue;
-
-    if (showEditorLoader) {
-        return (
-            <LoaderOverlay
-                title="Preparing editor"
-                subtitle="Loading your script"
-                progress={editorLoadState.progress}
-                statusText={editorLoadState.statusText}
-                hint={storageError ?? 'Please wait while we set up the editor.'}
-            />
-        );
-    }
-
     if (!resolvedEditorInitialValue) {
         return null;
     }
@@ -220,6 +209,7 @@ export const ScriptEditorRoute = () => {
                                 recentScripts={recentScripts}
                                 scriptSyncState={saveIndicator}
                                 onMenuAction={handleMenuAction}
+                                activeView="editor"
                             />
                         ) : (
                             <AppHeader onMenuAction={handleMenuAction} />
