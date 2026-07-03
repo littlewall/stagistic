@@ -16,22 +16,37 @@ import {
 import type {PersistentCharacterRef} from '../contracts';
 import {buildSidebarProjectionFromIndex} from '../live/buildSidebarProjectionFromIndex';
 import {createEditorSnapshotStore} from '../live/store';
+import {
+    type CharacterColorRefsBundle,
+    createCharacterColorRefsBundle,
+} from '../surface/editorSurfaceCache';
 
 interface UseEditorCharacterColorsArgs {
     persistentCharacters: readonly PersistentCharacterRef[],
     characterColorSaturation: number | undefined,
     resolvedInitialValue: ScriptDocument,
+    /** Externally-owned containers (cached editor surface); falls back to per-mount ones. */
+    refs?: CharacterColorRefsBundle,
 }
 
 export const useEditorCharacterColors = ({
     persistentCharacters,
     characterColorSaturation,
     resolvedInitialValue,
+    refs,
 }: UseEditorCharacterColorsArgs) => {
-    const colorByCharacterIdRef = useRef<ReadonlyMap<string, string>>(new Map());
-    const rememberedColorByKeyRef = useRef<ReadonlyMap<string, string>>(new Map());
-    const rememberedColorSaturationRef = useRef<number | null>(null);
-    const persistentCharactersRef = useRef<readonly PersistentCharacterRef[]>([]);
+    const localRefs = useRef<CharacterColorRefsBundle | null>(null);
+
+    if (!localRefs.current) {
+        localRefs.current = createCharacterColorRefsBundle();
+    }
+
+    const {
+        colorByCharacterIdRef,
+        rememberedColorByKeyRef,
+        rememberedColorSaturationRef,
+        persistentCharactersRef,
+    } = refs ?? localRefs.current;
 
     const normalizedPersistentCharacters = useMemo(
         () => normalizePersistentCharacterRefs(persistentCharacters),

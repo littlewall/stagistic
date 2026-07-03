@@ -9,6 +9,7 @@ import {
     createPaginationPlugin,
     PAGINATION_CONTROL_META_KEY,
 } from './pagination/plugin/createPaginationPlugin';
+import {arePaginationSettingsApplied} from './pagination/settingsEqual';
 import {createInitialPaginationState} from './pagination/state/createInitialPaginationState';
 import {
     type PaginationOptions,
@@ -33,6 +34,10 @@ export const PaginationExtension = Extension.create<PaginationOptions, Paginatio
     addCommands() {
         return {
             updatePaginationSettings: (settings: Partial<PaginationOptions>) => () => {
+                if (arePaginationSettingsApplied(this.options, settings)) {
+                    return true;
+                }
+
                 this.options = {
                     ...this.options,
                     ...settings,
