@@ -54,6 +54,12 @@ export const PaginationExtension = Extension.create<PaginationOptions, Paginatio
                 return true;
             },
             forcePaginationRecalc: () => () => {
+                // A detached view has no layout to measure — recalc would corrupt
+                // the preserved pagination state of a cached surface.
+                if (!this.editor.view.dom.isConnected) {
+                    return true;
+                }
+
                 this.storage.forceRecalcToken += 1;
 
                 this.editor.view.dispatch(

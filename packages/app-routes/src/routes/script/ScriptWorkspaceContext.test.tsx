@@ -1,10 +1,13 @@
 import {renderToStaticMarkup} from 'react-dom/server';
 import {describe, expect, it} from 'vite-plus/test';
 
-import type {ScriptEditorController} from './controller/types';
-import {ScriptWorkspaceProvider, useScriptWorkspace} from './ScriptWorkspaceContext';
+import {
+    ScriptWorkspaceProvider,
+    type ScriptWorkspaceValue,
+    useScriptWorkspace,
+} from './ScriptWorkspaceContext';
 
-const stubController = {currentScriptId: 's1'} as unknown as ScriptEditorController;
+const stubController = {currentScriptId: 's1'} as unknown as ScriptWorkspaceValue;
 
 const Probe = () => {
     const {currentScriptId} = useScriptWorkspace();

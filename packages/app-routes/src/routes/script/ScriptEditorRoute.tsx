@@ -11,7 +11,7 @@ import {
     AppLayout,
     ScriptSettingsModal,
 } from '@stagistic/ui';
-import {useEffect, useMemo} from 'react';
+import {useMemo} from 'react';
 import {
     useNavigate,
     useSearchParams,
@@ -32,8 +32,6 @@ import {
 import {ScriptCharactersProvider} from './ScriptCharactersContext';
 import {ScriptSessionProvider} from './ScriptSessionContext';
 import {useScriptWorkspace} from './ScriptWorkspaceContext';
-// TEMP: perf investigation
-import {reportEditorMountPerf} from './perfInstrumentation';
 import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settings/settingsMenu';
 import {useScriptCharactersContextValue} from './useScriptCharactersContextValue';
 import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
@@ -50,11 +48,6 @@ const BLOCK_LABEL_BY_TYPE = new Map(
 
 export const ScriptEditorRoute = () => {
     incrementRouteRenderCount();
-
-    // TEMP: perf investigation
-    useEffect(() => {
-        reportEditorMountPerf();
-    }, []);
 
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
@@ -73,6 +66,7 @@ export const ScriptEditorRoute = () => {
         handleAutoSave,
         handleManualSave,
         handleSaveScriptSettingsOverride,
+        editorSurfaceCache,
     } = useScriptWorkspace();
     const {
         effectiveScriptSettingsDraft,
@@ -223,6 +217,7 @@ export const ScriptEditorRoute = () => {
                     ) : null}
                     <ScriptEditor
                         key={currentScript?.id ?? 'editor'}
+                        surfaceCache={editorSurfaceCache}
                         document={{
                             initialValue: resolvedEditorInitialValue,
                             persistentCharacters: normalizedConfirmedCharacterRecords,

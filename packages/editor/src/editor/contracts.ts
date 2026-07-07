@@ -22,6 +22,7 @@ import type {
 import type {ReactNode} from 'react';
 
 import type {SaveResult} from './hooks/useAutosaveController';
+import type {EditorSurfaceCache} from './surface/editorSurfaceCache';
 import type {BlockNodeType} from './tiptap/scriptCore';
 
 export interface PersistentCharacterRef {
@@ -205,4 +206,6 @@ export interface EditorProps {
     layout?: EditorLayoutProps,
     requests?: EditorStructureRequests,
     callbacks?: EditorLifecycleCallbacks,
+    /** Workspace-owned cache keeping the live editor surface alive across view switches. */
+    surfaceCache?: EditorSurfaceCache,
 }

@@ -37,6 +37,13 @@ const forcePaginationRecalc = (editor: TiptapEditor) => {
     (editor.commands as PaginationCommands).forcePaginationRecalc?.();
 };
 
+/*
+ * Tracks which initial content each editor instance already applied. A cached
+ * surface re-attached on a later mount must NOT re-apply the load-time initial
+ * value — it would wipe newer live content and re-pay setContent + pagination.
+ */
+const appliedInitialByEditor = new WeakMap<TiptapEditor, string>();
+
 export const useEditorLifecycle = ({
     editor,
     liveStore,
@@ -196,31 +203,44 @@ export const useEditorLifecycle = ({
             return;
         }
 
-        isApplyingInitialRef.current = true;
-        instance.commands.setContent(initialValue, {emitUpdate: false});
-        sanitizeScriptBlocks(instance);
+        const isRestoredSurface = appliedInitialByEditor.get(instance) === initialSerialized;
 
-        const syncCommands = instance.commands as {syncCharacterRefs?: () => boolean};
+        if (!isRestoredSurface) {
+            isApplyingInitialRef.current = true;
+            instance.commands.setContent(initialValue, {emitUpdate: false});
+            sanitizeScriptBlocks(instance);
 
-        syncCommands.syncCharacterRefs?.();
-        instance.view.dispatch(
-            instance.state.tr
-                .setDocAttribute('settings', initialValue.attrs?.settings ?? null)
-                .setMeta('preventUpdate', true),
-        );
-        isApplyingInitialRef.current = false;
+            const syncCommands = instance.commands as {syncCharacterRefs?: () => boolean};
+
+            syncCommands.syncCharacterRefs?.();
+            instance.view.dispatch(
+                instance.state.tr
+                    .setDocAttribute('settings', initialValue.attrs?.settings ?? null)
+                    .setMeta('preventUpdate', true),
+            );
+            isApplyingInitialRef.current = false;
+            appliedInitialByEditor.set(instance, initialSerialized);
+        }
+
         revisionRef.current = 0;
         lastEmittedActiveBlockIdRef.current = undefined;
 
-        instance.view.dispatch(
-            instance.state.tr
-                .setSelection(TextSelection.atStart(instance.state.doc))
-                .setMeta('preventUpdate', true)
-                .setMeta('addToHistory', false),
-        );
+        if (!isRestoredSurface) {
+            instance.view.dispatch(
+                instance.state.tr
+                    .setSelection(TextSelection.atStart(instance.state.doc))
+                    .setMeta('preventUpdate', true)
+                    .setMeta('addToHistory', false),
+            );
+        }
 
         incrementFullDocJsonSerializeCount();
 
+        /*
+         * A restored surface keeps its live content (potentially newer than the
+         * load-time initial value) — the baseline and snapshot below are seeded
+         * from the current document either way.
+         */
         const syncedValue = stripScriptSettings(instance.getJSON() as ScriptDocument);
 
         syncInitialValue(syncedValue, initialSerialized, revisionRef.current);

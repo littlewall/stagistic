@@ -119,15 +119,15 @@ export const useAutosaveController = ({
             return;
         }
 
-        const latestValue = resolveLatestValueNow();
-
-        if (!latestValue) {
-            return;
-        }
-
         const revisionToSave = latestRevisionRef.current;
 
         if (revisionToSave <= lastSavedRevisionRef.current) {
+            return;
+        }
+
+        const latestValue = resolveLatestValueNow();
+
+        if (!latestValue) {
             return;
         }
 

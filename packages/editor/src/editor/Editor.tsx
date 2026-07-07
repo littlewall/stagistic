@@ -2,7 +2,6 @@ import {
     coerceUnknownBlocksToStageDirections,
     type ScriptDocument,
 } from '@stagistic/script';
-import {useEditor} from '@tiptap/react';
 import {
     type ReactNode,
     useCallback,
@@ -32,6 +31,11 @@ import {useEditorSidebarLayout} from './hooks/useEditorSidebarLayout';
 import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
 import {EditorSnapshotStoreProvider} from './live/context';
+import {
+    type CharacterColorRefsBundle,
+    createCharacterColorRefsBundle,
+} from './surface/editorSurfaceCache';
+import {useScriptEditorInstance} from './surface/useScriptEditorInstance';
 import {useEditorExtensions} from './useEditorExtensions';
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -43,6 +47,7 @@ const Editor = ({
     layout,
     requests,
     callbacks,
+    surfaceCache,
     children,
 }: EditorProps & {children?: ReactNode}) => {
     const {
@@ -107,6 +112,33 @@ const Editor = ({
         settings,
     ]);
 
+    const initialContentSignature = useMemo(
+        () => JSON.stringify(stripScriptSettings(resolvedInitialValue)),
+        [resolvedInitialValue],
+    );
+    const surfaceSignature = useMemo(() => JSON.stringify({
+        content: initialContentSignature,
+        settings: resolvedSettings,
+        sizeScale,
+        blockUi: Boolean(onBlockUiEvent),
+    }), [
+        initialContentSignature,
+        onBlockUiEvent,
+        resolvedSettings,
+        sizeScale,
+    ]);
+    /*
+     * The color refs are captured by editor extensions via closure, so a
+     * restored cached surface must keep using the bundle its extensions hold.
+     * Resolved once per mount, before extensions are built.
+     */
+    const surfaceRefsRef = useRef<CharacterColorRefsBundle | null>(null);
+
+    if (!surfaceRefsRef.current) {
+        surfaceRefsRef.current = surfaceCache?.acquire(surfaceSignature)?.characterColorRefs
+            ?? createCharacterColorRefsBundle();
+    }
+
     const {
         colorByCharacterIdRef,
         rememberedColorByKeyRef,
@@ -117,6 +149,7 @@ const Editor = ({
         persistentCharacters,
         characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
         resolvedInitialValue,
+        refs: surfaceRefsRef.current,
     });
 
     const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;
@@ -146,27 +179,19 @@ const Editor = ({
         persistentCharactersRef,
         enableBlockUiEvents: Boolean(onBlockUiEvent),
     });
-    const initialContentSignature = useMemo(
-        () => JSON.stringify(stripScriptSettings(resolvedInitialValue)),
-        [resolvedInitialValue],
-    );
-
     const initialDoc = useMemo<ScriptDocument>(
         () => resolvedInitialValue,
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [initialContentSignature],
     );
-    const editor = useEditor({
+    const {editor} = useScriptEditorInstance({
+        surfaceCache,
+        signature: surfaceSignature,
         extensions,
         content: initialDoc,
-        autofocus: autoFocus ? 'start' : false,
-        shouldRerenderOnTransaction: false,
-        editorProps: {
-            attributes: {
-                'data-editor': 'true',
-            },
-        },
-    }, [extensions, initialDoc]);
+        autoFocus,
+        characterColorRefs: surfaceRefsRef.current,
+    });
 
     useEditorCharacterSync(
         editor,

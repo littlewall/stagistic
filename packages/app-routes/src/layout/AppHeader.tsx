@@ -8,8 +8,6 @@ import {
 import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../global-modals/GlobalModalsProvider';
-// TEMP: perf investigation
-import {markViewSwitch} from '../routes/script/perfInstrumentation';
 
 type AppHeaderProps = Pick<UIAppHeaderProps, 'onMenuAction' | 'isFullWidth'>;
 
@@ -40,11 +38,7 @@ export const ScriptEditorAppHeader = (props: ScriptEditorAppHeaderProps) => {
             {...props}
             onHome={() => void navigate('/')}
             onSelectScript={script => void navigate(`/script/${script.id}/editor`)}
-            onSelectView={(view: ScriptView) => {
-                markViewSwitch(view); // TEMP: perf investigation
-
-                void navigate(`/script/${props.currentScript.id}/${view}`);
-            }}
+            onSelectView={(view: ScriptView) => void navigate(`/script/${props.currentScript.id}/${view}`)}
         />
     );
 };

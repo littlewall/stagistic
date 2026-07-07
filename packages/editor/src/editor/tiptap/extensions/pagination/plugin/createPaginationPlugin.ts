@@ -105,6 +105,17 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                     return;
                 }
 
+                /*
+                 * A detached or not-yet-laid-out view (cached surface parked
+                 * between mounts, or freshly re-attached before layout) has no
+                 * geometry to measure — recalc would corrupt the preserved
+                 * state. The ResizeObserver fires again once the view has real
+                 * dimensions and reschedules.
+                 */
+                if (!view.dom.isConnected || view.dom.clientWidth === 0) {
+                    return;
+                }
+
                 if (isRecalcRunning) {
                     needsRecalc = true;
 

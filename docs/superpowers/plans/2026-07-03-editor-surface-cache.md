@@ -13,7 +13,13 @@
 - ✅ **Task 12 done** — `settingsEqual.ts` + guard in `PaginationExtension.ts`; unit + pagination browser tests green.
 - ✅ **Task 13 done** — `surface/editorSurfaceCache.ts` + unit tests green.
 - ✅ **Task 14 done** — `useEditorCharacterColors` accepts optional `refs` bundle; full editor suite green (101 unit + 48 browser).
-- ⬜ **Tasks 15–18 remaining.**
+- ✅ **Task 15 done** — `useScriptEditorInstance` (deviation: destruction deferred one tick + cancelled on effect re-run, else StrictMode's simulated remount kills the instance — tiptap v2 useEditor approach); lifecycle guard implemented via module-level `WeakMap<Editor, initialSerialized>` instead of an `isRestored` param (self-healing under StrictMode, no API change); `Editor.tsx` resolves the refs bundle once per mount via `surfaceCache.acquire` before building extensions; `contracts.ts` + `index.ts` exports done. Full editor suite green.
+- ✅ **Task 16 done** — `surfaceReuse.browser.test.tsx`: same DOM node re-attached + typed content preserved; no-cache control; signature-miss rebuild. 3/3 green.
+- ✅ **Task 17 done** — workspace creates the cache (destroy deferred one tick + cancelled on effect re-run, StrictMode-safe; script switches handled by signature, not explicit destroy); `ScriptWorkspaceValue = ScriptEditorController & {editorSurfaceCache}`; editor route passes `surfaceCache` to `ScriptEditor`.
+- ✅ **Task 18 done** — harness extended (2000 blocks ≈ 90 pages, cached remount measured). Two extra root-cause fixes landed during verification:
+  - `runSaveNow` checks the revision **before** serializing (an unmount flush with nothing to save no longer forces a pagination recalc);
+  - pagination plugin `runRecalc` + `forcePaginationRecalc` skip detached / zero-width views (a parked cached surface's state was being corrupted by ResizeObserver-scheduled recalcs measuring a detached DOM).
+  Harness results (prod-ish, 90 pages): cached remount content visible ~95ms, dividers settled ~150ms (one brief 117→90 settle pass under just-attached styles); pre-fix remounts were 300–650ms. All suites green (315 unit + 62 browser). **In-app verification (user's ~87-page script, dev):** editor route committed **147ms** after switch (baseline 543ms); content visible and editable immediately; pagination settles in the background in ~480ms (baseline: 1452ms with blank surface). TEMP instrumentation and perf harness deleted; final suites green (315 unit + 61 browser), tsc clean.
 
 Resumption notes:
 - Everything is **uncommitted** in the working tree (user commits at the end; two earlier completed plans included: view-switcher, script-workspace-shared-load).
@@ -201,7 +207,7 @@ The update effect and return value stay unchanged (plain `{current}` containers 
 - Create: `packages/editor/src/editor/surface/useScriptEditorInstance.ts`
 - Modify: `packages/editor/src/editor/Editor.tsx`, `packages/editor/src/editor/hooks/useEditorLifecycle.ts`, `packages/editor/src/editor/contracts.ts`, `packages/editor/src/index.ts`
 
-- [ ] **Step 1: `useScriptEditorInstance`** — replaces `useEditor`:
+- [x] **Step 1: `useScriptEditorInstance`** — replaces `useEditor`:
 
 ```ts
 import {Editor as TiptapEditor} from '@tiptap/core';
@@ -215,7 +221,7 @@ Behavior:
 - StrictMode note: double-invoked initializer self-heals with cache (second call hits the just-stored entry → same instance). No-cache dev double-create matches historical tiptap behavior; tests unaffected.
 - Returns `{editor, isRestored}`.
 
-- [ ] **Step 2: Signature in `Editor.tsx`:**
+- [x] **Step 2: Signature in `Editor.tsx`:**
 
 ```ts
 const surfaceSignature = useMemo(() => JSON.stringify({
@@ -241,7 +247,7 @@ const characterColorRefs = surfaceEntryRef.current?.characterColorRefs ?? /* fre
 
 Replace `useEditor(...)` call with the new hook; delete the `useEditor` import; pass `isRestored` to `useEditorLifecycle`.
 
-- [ ] **Step 3: `useEditorLifecycle` restored light path** — add `isRestored: boolean` to the `editor` arg group. In the initial-apply effect:
+- [x] **Step 3: `useEditorLifecycle` restored light path** — add `isRestored: boolean` to the `editor` arg group. In the initial-apply effect:
 
 ```ts
 const hasAppliedInitialRef = useRef(false);
@@ -270,8 +276,8 @@ useEffect(() => {
 
 Rationale: skip only the first effect run of a restored mount; later `initialValue` prop changes (e.g. character-confirm override) re-run the full apply as today.
 
-- [ ] **Step 4: `contracts.ts`** — add optional top-level prop `surfaceCache?: EditorSurfaceCache` to `EditorProps`; export cache API from `packages/editor/src/index.ts` (`createEditorSurfaceCache`, types).
-- [ ] **Step 5:** Typecheck editor package; run editor unit + browser suites — all pass with **no cache** (unchanged behavior).
+- [x] **Step 4: `contracts.ts`** — add optional top-level prop `surfaceCache?: EditorSurfaceCache` to `EditorProps`; export cache API from `packages/editor/src/index.ts` (`createEditorSurfaceCache`, types).
+- [x] **Step 5:** Typecheck editor package; run editor unit + browser suites — all pass with **no cache** (unchanged behavior).
 
 ---
 
@@ -280,7 +286,7 @@ Rationale: skip only the first effect run of a restored mount; later `initialVal
 **Files:**
 - Create: `packages/editor/src/editor/surface/surfaceReuse.browser.test.tsx`
 
-- [ ] **Step 1:** Test plan (structure mirrors `pagination.browser.test.tsx` helpers):
+- [x] **Step 1:** Test plan (structure mirrors `pagination.browser.test.tsx` helpers):
 1. `const cache = createEditorSurfaceCache()`; mount `ScriptEditor` with `surfaceCache={cache}` and a multi-page doc; wait for `[contenteditable]`; capture `const dom1 = document.querySelector('[data-editor]')`.
 2. Type into the editor (dispatch an insertText transaction via the instance obtained from a test-only `onBlockUiEvent`? simpler: locate the ProseMirror view DOM and use `userEvent.type` after focusing) — or assert content preservation by dispatching through `document.querySelector` + `execCommand` is flaky; preferred: read the editor from `cache` via a test helper — add `acquirePeek?`: NOT needed — the test can hold its own reference: after first mount, `cache.acquire(signature)` cannot be called without the signature; instead capture the instance via `onValueChange` callback (fires with editor value) or via typing + DOM assertion:
    - `await userEvent.click(editorDom)`; `await userEvent.keyboard('XYZQ')`; assert `editorDom.textContent` contains `XYZQ`.
@@ -290,7 +296,7 @@ Rationale: skip only the first effect run of a restored mount; later `initialVal
    - `XYZQ` is still present (no stale reset),
    - pagination dividers present without full re-measure wait (count > 0 quickly).
 5. Control: remount WITHOUT cache → different DOM node, `XYZQ` gone (documents old behavior as baseline).
-- [ ] **Step 2:** Run; iterate until green. Run the whole editor browser suite.
+- [x] **Step 2:** Run; iterate until green. Run the whole editor browser suite.
 
 ---
 
@@ -299,7 +305,7 @@ Rationale: skip only the first effect run of a restored mount; later `initialVal
 **Files:**
 - Modify: `packages/app-routes/src/routes/script/ScriptWorkspaceContext.tsx`, `ScriptWorkspaceRoute.tsx`, `ScriptEditorRoute.tsx`
 
-- [ ] **Step 1: Context value type:**
+- [x] **Step 1: Context value type:**
 
 ```ts
 export type ScriptWorkspaceValue = ScriptEditorController & {
@@ -309,7 +315,7 @@ export type ScriptWorkspaceValue = ScriptEditorController & {
 
 Provider/hook generics update accordingly (import `EditorSurfaceCache` from `@stagistic/editor`). Update the context unit test stub.
 
-- [ ] **Step 2: Workspace route:**
+- [x] **Step 2: Workspace route:**
 
 ```ts
 const editorSurfaceCache = useMemo(() => createEditorSurfaceCache(), []);
@@ -326,16 +332,16 @@ const workspaceValue = useMemo(
 
 (`scriptId` in deps: switching scripts within the mounted workspace destroys the stale surface; signature would also miss, but explicit destroy frees memory promptly.)
 
-- [ ] **Step 3: Editor route:** `const {editorSurfaceCache, ...} = useScriptWorkspace();` → `<ScriptEditor surfaceCache={editorSurfaceCache} ...>`.
-- [ ] **Step 4:** Typecheck app-routes + web; `pnpm test`; app-routes + editor + ui browser suites.
+- [x] **Step 3: Editor route:** `const {editorSurfaceCache, ...} = useScriptWorkspace();` → `<ScriptEditor surfaceCache={editorSurfaceCache} ...>`.
+- [x] **Step 4:** Typecheck app-routes + web; `pnpm test`; app-routes + editor + ui browser suites.
 
 ---
 
 ### Task 18: Perf verification + cleanup
 
-- [ ] **Step 1:** Extend `perfMount.browser.test.tsx`: cached remount measurement (mount with cache → unmount → remount with same cache; log timings). Expect editor-visible in tens of ms; pagination stable without full re-measure.
-- [ ] **Step 2:** User verifies in-app with the TEMP instrumentation: switch Export → Editor; `[perf] editor visible + pagination stable` should drop from ~1450ms to well under ~200ms.
-- [ ] **Step 3:** After confirmation: delete TEMP instrumentation (`perfInstrumentation.ts`, marks in `AppHeader.tsx`, Profiler in `ScriptWorkspaceRoute.tsx`, effect in `ScriptEditorRoute.tsx`) and delete `perfMount.browser.test.tsx`. Final full verification run.
+- [x] **Step 1:** Extend `perfMount.browser.test.tsx`: cached remount measurement (mount with cache → unmount → remount with same cache; log timings). Expect editor-visible in tens of ms; pagination stable without full re-measure.
+- [x] **Step 2:** User verifies in-app with the TEMP instrumentation: switch Export → Editor; `[perf] editor visible + pagination stable` should drop from ~1450ms to well under ~200ms.
+- [x] **Step 3:** After confirmation: delete TEMP instrumentation (`perfInstrumentation.ts`, marks in `AppHeader.tsx`, Profiler in `ScriptWorkspaceRoute.tsx`, effect in `ScriptEditorRoute.tsx`) and delete `perfMount.browser.test.tsx`. Final full verification run.
 
 ---
 

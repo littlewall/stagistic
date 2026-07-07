@@ -1,20 +1,46 @@
+import {createEditorSurfaceCache} from '@stagistic/editor';
 import {LoaderOverlay} from '@stagistic/ui';
-import {Profiler, type ProfilerOnRenderCallback} from 'react';
+import {
+    useEffect,
+    useMemo,
+    useRef,
+} from 'react';
 import {Outlet, useParams} from 'react-router-dom';
 
-import {ScriptWorkspaceProvider} from './ScriptWorkspaceContext';
+import {ScriptWorkspaceProvider, type ScriptWorkspaceValue} from './ScriptWorkspaceContext';
 import {useScriptEditorController} from './useScriptEditorController';
-
-// TEMP: perf investigation
-const logRender: ProfilerOnRenderCallback = (id, phase, actualDuration) => {
-    // eslint-disable-next-line no-console
-    console.log(`[perf] render ${id} (${phase}): ${Math.round(actualDuration)}ms`);
-};
 
 export const ScriptWorkspaceRoute = () => {
     const {scriptId} = useParams();
     const controller = useScriptEditorController(scriptId);
     const {editorLoadState, initialValue, storageError} = controller;
+    const editorSurfaceCache = useMemo(() => createEditorSurfaceCache(), []);
+    const pendingCacheDestroyRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        /*
+         * Deferred + cancellable, so StrictMode's simulated remount does not
+         * destroy the surface a mounted editor keeps using. Script switches
+         * need no handling here: the next acquire() destroys the stale entry
+         * (content is part of the surface signature).
+         */
+        if (pendingCacheDestroyRef.current !== null) {
+            window.clearTimeout(pendingCacheDestroyRef.current);
+            pendingCacheDestroyRef.current = null;
+        }
+
+        return () => {
+            pendingCacheDestroyRef.current = window.setTimeout(() => {
+                pendingCacheDestroyRef.current = null;
+                editorSurfaceCache.destroy();
+            }, 0);
+        };
+    }, [editorSurfaceCache]);
+
+    const workspaceValue = useMemo<ScriptWorkspaceValue>(
+        () => ({...controller, editorSurfaceCache}),
+        [controller, editorSurfaceCache],
+    );
 
     if (editorLoadState.isLoading || !initialValue) {
         return (
@@ -29,11 +55,8 @@ export const ScriptWorkspaceRoute = () => {
     }
 
     return (
-        <ScriptWorkspaceProvider value={controller}>
-            {/* TEMP: perf investigation */}
-            <Profiler id="script-view" onRender={logRender}>
-                <Outlet />
-            </Profiler>
+        <ScriptWorkspaceProvider value={workspaceValue}>
+            <Outlet />
         </ScriptWorkspaceProvider>
     );
 };
