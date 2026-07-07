@@ -11,6 +11,10 @@ import {
 } from 'react';
 
 import {buildCharacterTagPaletteCss} from '../../characters/buildCharacterTagPaletteCss';
+import {
+    CHARACTER_HIGHLIGHT_ATTR,
+    DEFAULT_CHARACTER_HIGHLIGHT,
+} from '../../characters/characterHighlight';
 import type {
     EditorLayoutProps,
     PersistentCharacterRef,
@@ -93,6 +97,7 @@ export const EditorShell = ({
         <div
             className={styles.root}
             data-character-tag-scope={characterTagScopeId}
+            {...{[CHARACTER_HIGHLIGHT_ATTR]: DEFAULT_CHARACTER_HIGHLIGHT}}
             ref={rootRef}
             style={rootStyle}
         >

@@ -1,0 +1,42 @@
+.panel {
+    overflow: auto;
+    display: grid;
+    gap: var(--space-2xl);
+    align-content: start;
+    width: min(380px, 34vw);
+    min-width: 320px;
+    padding: var(--space-2xl);
+    background: var(--color-surface);
+}
+
+.header {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: space-between;
+}
+
+.title {
+    margin: 0;
+    font-size: var(--font-size-xl);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+}
+
+.description {
+    max-width: 34ch;
+    margin: var(--space-xs) 0 0;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+}
+
+.templateField {
+    display: grid;
+    gap: var(--space-sm);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}

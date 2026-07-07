@@ -1,25 +1,39 @@
+/*
+ * Mode-agnostic base shared by both render paths (CharacterTagMark for
+ * confirmed characters, buildCharacterRuntime decorations for unconfirmed
+ * tokens). Deliberately carries NO layout-width properties (no padding, border,
+ * or background): the per-mode visual is scoped by the editor root's
+ * `data-character-highlight` attribute so the active treatment never shifts the
+ * monospace grid. See characterHighlight.ts.
+ */
 .characterTag {
     /* A more saturated shade of the character colour (chroma boosted via oklch). */
     --character-tag-vivid-color: oklch(from var(--character-tag-color, var(--color-border)) l calc(c * var(--character-tag-chroma-boost, 1.4)) h);
 
-    padding: 0 calc(7px * var(--size-scale));
     text-transform: uppercase;
     white-space: nowrap;
-    border: 1px solid transparent;
-    border-radius: var(--radius-full);
 }
 
-.characterTag[data-character-id] {
-    background: color-mix(in srgb, var(--character-tag-vivid-color) var(--character-tag-tint-strength, 30%), var(--color-surface));
+/*
+ * Underline mode (default). Zero layout-width decoration: character names sit
+ * on the exact monospace grid, so the editor wraps character lines identically
+ * to the PDF export. The name text keeps the script ink colour; only the
+ * underline carries the character colour. Solid = confirmed, dashed = a
+ * recognised-but-unconfirmed name (mirrors the old fill-vs-outline semantic).
+ */
+:global([data-character-highlight = 'underline']) .characterTag {
+    text-decoration-color: var(--character-tag-vivid-color);
+    text-decoration-line: underline;
+    text-decoration-thickness: .09em;
+    text-underline-offset: .16em;
 }
 
-[blocktype = 'stageDirection'] .characterTag[data-character-id] {
-    background: oklch(from var(--character-tag-vivid-color) l c h / 15%);
+:global([data-character-highlight = 'underline']) .characterTag[data-character-id] {
+    text-decoration-style: solid;
 }
 
-.characterTag:not([data-character-id]) {
-    background: transparent;
-    border: 1px solid var(--character-tag-vivid-color);
+:global([data-character-highlight = 'underline']) .characterTag:not([data-character-id]) {
+    text-decoration-style: dashed;
 }
 
 .characterSeparator {

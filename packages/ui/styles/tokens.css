@@ -1,6 +1,8 @@
 @import '@fontsource-variable/ibm-plex-sans';
 @import '@fontsource/courier-prime/400.css';
 @import '@fontsource/courier-prime/700.css';
+@import '@fontsource/courier-prime/400-italic.css';
+@import '@fontsource/courier-prime/700-italic.css';
 
 :root {
     /* ── Font families ─────────────────────────────────────────── */

@@ -36,6 +36,7 @@ export {
 export {EditorSidebar, type EditorSidebarCharacter} from './editor-panels/EditorSidebar';
 export {ProgressBar} from './feedback/ProgressBar';
 export {ProgressPanel} from './feedback/ProgressPanel';
+export {ExportPanel} from './export/ExportPanel';
 export {
     type ToastContent,
     ToastProvider,

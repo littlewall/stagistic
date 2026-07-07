@@ -1,0 +1,40 @@
+.module {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.title {
+    margin: 0;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+}
+
+.description {
+    margin: var(--space-xs) 0 0;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+}
+
+.checkList {
+    display: grid;
+    gap: var(--space-sm);
+}
+
+.checkRow,
+.field {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+}
+
+.field {
+    justify-content: space-between;
+}
+
+.field input {
+    width: 82px;
+}
