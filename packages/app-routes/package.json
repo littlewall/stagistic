@@ -16,9 +16,11 @@
         "@dnd-kit/react": "^0.3.0",
         "@stagistic/app-core": "workspace:*",
         "@stagistic/editor": "workspace:*",
+        "@stagistic/export": "workspace:*",
         "@stagistic/script": "workspace:*",
         "@stagistic/shared": "workspace:*",
-        "@stagistic/ui": "workspace:*"
+        "@stagistic/ui": "workspace:*",
+        "pdfjs-dist": "^5.4.394"
     },
     "peerDependencies": {
         "react": "^19.0.0",
