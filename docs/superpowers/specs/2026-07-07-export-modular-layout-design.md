@@ -31,9 +31,33 @@ character filter) are a **layer on top of** the editor pagination — applied
 decorations, so the paginated DOM already reflects them **before** anything
 reaches the PDF layer.
 
+### Clean render mode — editor decorations excluded
+
+The editor renders editor-only visual affordances that are **not** part of the
+printed script: character-name chips/decorators, the frame/box around cues, and
+similar ornaments. Export shows **clean text only** (barring a deliberate
+exception).
+
+Because we transcribe the DOM, the `ExportMeasureSurface` must render in a
+**clean/export mode** with these editor-only decorations disabled — otherwise
+the transcriber would capture them.
+
+**Decorations must be layout-neutral.** These ornaments are purely visual and
+must not affect layout — they must add **zero** height/width to a block or shift
+line positions. Given that, removing them for export changes nothing about
+pagination: `editor == clean == preview == export`, unconditionally. If a
+decoration *does* currently alter block height (e.g. a cue frame adding
+border/padding to the flow), that is a **defect to fix first** — see
+*Prerequisite (step 0)*. We do not design around it; we fix it.
+
+Clean mode is a toggleable set, so keeping a specific decoration in export later
+is an explicit, additive exception rather than a rewrite.
+
 ## Scope
 
 **In scope (phase 1 — "Basic" template)**
+- **Step 0** — audit + fix editor decorations to be layout-neutral (see
+  *Prerequisite*). Gates everything else.
 - Export shell: `ExportProvider`, `ExportControlPanel`, `ExportPreview`,
   `ExportMeasureSurface`.
 - Template registry + one template: **Basic** (script as-is).
@@ -45,6 +69,24 @@ reaches the PDF layer.
 - **Integrated script + score** template: per-cue PDF upload, merged/repaginated
   output via `pdf-lib`. The pipeline must accommodate a post-step without change.
 - Saving/reusing export configs. Non-PDF output formats.
+
+## Prerequisite (step 0) — decorations must be layout-neutral
+
+Before building any export code, audit the editor-only decorations
+(character-name chips/decorators, cue frames, and any similar ornaments) and
+**confirm each adds zero height/width and does not shift line positions**. The
+whole fidelity guarantee rests on this: only if decorations are layout-neutral
+does clean mode produce the *same* pagination as the editor.
+
+- Measure a block with vs. without each decoration; heights must be identical.
+- Any decoration that alters flow (border/padding/margin in-flow, inline size
+  that reflows text) is a **bug** — reimplement it as an overlay/inset that does
+  not participate in layout (absolute/overlay decoration, negative-margin inset,
+  or `box-decoration` that doesn't grow the box).
+- Add a regression test asserting layout-neutrality per decoration.
+
+This step gates the rest of the work — it is cheap, and doing it first prevents
+an entire class of editor↔export drift.
 
 ## Approach — chosen render engine
 
@@ -214,8 +256,9 @@ Single control panel beside a dominant preview ("script is the spotlight"):
 - `ExportPreview` — pure pdf.js display of the Blob + navigation.
 - `ExportMeasureSurface` — invisible but **laid out** (measurement needs real
   layout, not `display:none`); reuses the editor extensions + resolved settings +
-  `EditorSurfaceCache`. Its only job is to provide a measurable paginated DOM for
-  the transformed doc.
+  `EditorSurfaceCache`. Renders in **clean/export mode** (editor-only decorations
+  off — see *Clean render mode*). Its only job is to provide a measurable, clean
+  paginated DOM for the transformed doc.
 
 **Preview states (debounced auto-regen)**
 - *Regenerating* — subtle overlay over the previous render; never blank (no
@@ -256,6 +299,9 @@ starting the next.
   sentinels at expected positions, run coordinates monotonic per page).
 - **Fidelity guard** — browser test asserting the measure surface's page breaks
   match the transcribed page-break sentinels (editor == export invariant).
+- **Clean mode** — browser test: a doc with character chips / cue frames renders
+  on the measure surface with those ornaments absent, and the transcription
+  contains only clean text (no decoration artifacts).
 - **Shell** — browser test: switch template resets config; debounced regen
   cancels prior cycle; empty-filter and error states render.
 
