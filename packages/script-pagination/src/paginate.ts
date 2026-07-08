@@ -1,14 +1,22 @@
 import {selectSplitPoint} from './selectSplitPoint';
 import type {
-    BlockLine,
+    BlockLineMap,
     PageBreak,
     PageInfo,
     PaginationPlan,
     PaginatorBlock,
     PaginatorMetrics,
-    PlacedFragment,
 } from './types';
 
+/*
+ * Height-agnostic pagination. A faithful port of the editor's original
+ * buildPaginationState loop: it never measures or renders — each consumer feeds
+ * block heights + clean line maps (editor from the DOM, export from math) and
+ * renders the returned `breaks` into its own output (spacer decorations / PDF
+ * page breaks). The block `height` is the "dirty" fit height (may include
+ * already-rendered spacers); once a split is needed, `getLineMap().cleanHeight`
+ * takes over, exactly as the editor did.
+ */
 export const paginate = (
     blocks: PaginatorBlock[],
     metrics: PaginatorMetrics,
@@ -23,13 +31,12 @@ export const paginate = (
         epsilonPx,
     } = metrics;
 
-    const fragments: PlacedFragment[] = [];
     const breaks: PageBreak[] = [];
     const pages: PageInfo[] = [];
 
     if (contentHeight <= 0) {
         return {
-            pageCount: 1, pages: [], fragments: [], breaks: [], endSpacer: null,
+            pageCount: 1, pages: [], breaks: [], endSpacer: null,
         };
     }
 
@@ -64,24 +71,26 @@ export const paginate = (
         }
     };
 
+    const emitWholeBreak = (kind: PageBreak['kind'], block: PaginatorBlock, leftover: number) => {
+        breaks.push({
+            kind,
+            atBlockKey: block.key,
+            afterBlockKey: lastBlockEndKey,
+            breakPos: null,
+            spacerHeight: leftover + bottomSpacing + topSpacing,
+            dividerOffset: leftover + bottomSpacing,
+            isInlineBreak: false,
+        });
+        offsetCursor += leftover + bottomSpacing + topSpacing;
+        closePage();
+    };
+
     blocks.forEach(block => {
         // --- Forced breaks (export only; editor blocks never set forcedBreak) ---
         if (block.forcedBreak && pageStartKey !== null) {
-            const leftover = Math.max(0, contentHeight - currentHeight);
+            emitWholeBreak('forced', block, Math.max(0, contentHeight - currentHeight));
 
-            breaks.push({
-                kind: 'forced',
-                atBlockKey: block.key,
-                afterBlockKey: lastBlockEndKey,
-                breakPos: null,
-                spacerHeight: leftover + bottomSpacing + topSpacing,
-                dividerOffset: leftover + bottomSpacing,
-                isInlineBreak: false,
-            });
-            offsetCursor += leftover + bottomSpacing + topSpacing;
-            closePage();
-
-            // odd-page: if we would resume on an even page number, insert a blank page.
+            // odd-page: if the block would resume on an even page, insert a blank page.
             if (block.forcedBreak === 'odd-page' && (pageIndex + 1) % 2 === 0) {
                 breaks.push({
                     kind: 'oddBlank',
@@ -97,14 +106,14 @@ export const paginate = (
                     index: pageIndex + 1,
                     startKey: block.key,
                     endKey: block.key,
-                    startOffset: pageStartOffset,
+                    startOffset: offsetCursor,
                     endOffset: offsetCursor,
                 });
                 pageIndex += 1;
             }
         }
 
-        // --- Orphan pushdown for heading-like blocks ---
+        // --- Orphan pushdown: keep a heading with the content beneath it. ---
         const remainingBefore = Math.max(0, contentHeight - currentHeight);
         const remainingAfter = Math.max(0, remainingBefore - block.height);
         const shouldPushDown = block.orphanCandidate
@@ -113,25 +122,19 @@ export const paginate = (
             && lastBlockEndKey !== null;
 
         if (shouldPushDown) {
-            const leftover = remainingBefore;
-
-            breaks.push({
-                kind: 'pushDown',
-                atBlockKey: block.key,
-                afterBlockKey: lastBlockEndKey,
-                breakPos: null,
-                spacerHeight: leftover + bottomSpacing + topSpacing,
-                dividerOffset: leftover + bottomSpacing,
-                isInlineBreak: false,
-            });
-            offsetCursor += leftover + bottomSpacing + topSpacing;
-            closePage();
+            emitWholeBreak('pushDown', block, remainingBefore);
         }
 
-        // --- Place the block, splitting only if splittable ---
+        // --- Place the block, splitting only if splittable. ---
         let blockRemaining = block.height;
-        let lineMapConsumed = 0;
-        let lines: BlockLine[] | null | undefined = block.getLines ? null : undefined; // undefined = never splittable
+        let lineMap: BlockLineMap | null = null;
+
+        const placeRemainder = () => {
+            currentHeight += blockRemaining;
+            offsetCursor += blockRemaining;
+            blockRemaining = 0;
+            lastBlockEndKey = block.endKey;
+        };
 
         while (blockRemaining > 0) {
             ensurePageStart(block.key);
@@ -139,74 +142,39 @@ export const paginate = (
             const spaceLeft = Math.max(0, contentHeight - currentHeight);
 
             if (blockRemaining <= spaceLeft + epsilonPx) {
-                const totalLines = block.getLines ? block.getLines().length : 1;
-                const consumedLines = block.height <= 0
-                    ? 0
-                    : Math.round((block.height - blockRemaining) / (block.height / totalLines));
-
-                fragments.push({
-                    blockKey: block.key,
-                    pageIndex,
-                    contentTop: topSpacing + currentHeight - lineMapConsumed,
-                    fromLine: consumedLines,
-                    toLine: totalLines,
-                    isBlockStart: consumedLines === 0,
-                    isBlockEnd: true,
-                });
-                currentHeight += blockRemaining;
-                offsetCursor += blockRemaining;
-                blockRemaining = 0;
-                lastBlockEndKey = block.key;
+                placeRemainder();
                 break;
             }
 
             const canPushDown = currentHeight > 0;
 
-            if (!block.splittable || !block.getLines) {
+            if (!block.splittable || !block.getLineMap) {
                 if (canPushDown) {
-                    const leftover = spaceLeft;
-
-                    breaks.push({
-                        kind: 'pushDown',
-                        atBlockKey: block.key,
-                        afterBlockKey: lastBlockEndKey,
-                        breakPos: null,
-                        spacerHeight: leftover + bottomSpacing + topSpacing,
-                        dividerOffset: leftover + bottomSpacing,
-                        isInlineBreak: false,
-                    });
-                    offsetCursor += leftover + bottomSpacing + topSpacing;
-                    closePage();
+                    emitWholeBreak('pushDown', block, spaceLeft);
                     continue;
                 }
 
-                // force-place an over-tall non-splittable block
-                const totalLines = block.getLines ? block.getLines().length : 1;
-
-                fragments.push({
-                    blockKey: block.key,
-                    pageIndex,
-                    contentTop: topSpacing + currentHeight,
-                    fromLine: 0,
-                    toLine: totalLines,
-                    isBlockStart: true,
-                    isBlockEnd: true,
-                });
-                currentHeight += blockRemaining;
-                offsetCursor += blockRemaining;
-                blockRemaining = 0;
-                lastBlockEndKey = block.key;
+                placeRemainder();
                 break;
             }
 
-            if (!lines) {
-                lines = block.getLines();
+            if (!lineMap) {
+                const consumed = Math.max(0, block.height - blockRemaining);
+
+                lineMap = block.getLineMap();
+                blockRemaining = Math.max(0, lineMap.cleanHeight - consumed);
+
+                if (blockRemaining <= 0) {
+                    placeRemainder();
+                    break;
+                }
+
+                continue;
             }
 
-            const consumedHeight = block.height - blockRemaining;
             const decision = selectSplitPoint({
-                lines,
-                consumedHeight,
+                lines: lineMap.lines,
+                consumedHeight: Math.max(0, lineMap.cleanHeight - blockRemaining),
                 spaceLeft,
                 minLinesBefore,
                 minLinesAfter,
@@ -216,55 +184,16 @@ export const paginate = (
 
             if (decision.kind !== 'split') {
                 if (decision.kind === 'pushDown' && canPushDown) {
-                    const leftover = spaceLeft;
-
-                    breaks.push({
-                        kind: 'pushDown',
-                        atBlockKey: block.key,
-                        afterBlockKey: lastBlockEndKey,
-                        breakPos: null,
-                        spacerHeight: leftover + bottomSpacing + topSpacing,
-                        dividerOffset: leftover + bottomSpacing,
-                        isInlineBreak: false,
-                    });
-                    offsetCursor += leftover + bottomSpacing + topSpacing;
-                    closePage();
+                    emitWholeBreak('pushDown', block, spaceLeft);
                     continue;
                 }
 
-                const totalLines = lines.length;
-                const consumedLines = lines.findIndex(line => line.topRel >= consumedHeight - epsilonPx);
-
-                fragments.push({
-                    blockKey: block.key,
-                    pageIndex,
-                    contentTop: topSpacing + currentHeight - consumedHeight,
-                    fromLine: consumedLines < 0 ? 0 : consumedLines,
-                    toLine: totalLines,
-                    isBlockStart: consumedLines <= 0,
-                    isBlockEnd: true,
-                });
-                currentHeight += blockRemaining;
-                offsetCursor += blockRemaining;
-                blockRemaining = 0;
-                lastBlockEndKey = block.key;
+                placeRemainder();
                 break;
             }
 
             const {breakPos, fragmentHeight} = decision;
             const leftover = Math.max(0, spaceLeft - fragmentHeight);
-            const fromLine = lines.findIndex(line => line.topRel >= consumedHeight - epsilonPx);
-            const toLine = lines.findIndex(line => line.startPos === breakPos);
-
-            fragments.push({
-                blockKey: block.key,
-                pageIndex,
-                contentTop: topSpacing + currentHeight - consumedHeight,
-                fromLine: fromLine < 0 ? 0 : fromLine,
-                toLine: toLine < 0 ? lines.length : toLine,
-                isBlockStart: consumedHeight <= 0,
-                isBlockEnd: false,
-            });
 
             currentHeight += fragmentHeight;
             offsetCursor += fragmentHeight;
@@ -279,7 +208,6 @@ export const paginate = (
             });
             offsetCursor += leftover + bottomSpacing + topSpacing;
             blockRemaining = Math.max(0, blockRemaining - fragmentHeight);
-            lineMapConsumed = consumedHeight + fragmentHeight;
             closePage(block.key);
         }
     });
@@ -288,8 +216,12 @@ export const paginate = (
     const endSpacerHeight = remaining + bottomSpacing;
 
     if (pageStartKey === null) {
-        pageStartKey = lastBlockEndKey ?? '';
-        pageStartOffset = offsetCursor;
+        /*
+         * Degenerate final page (everything closed a page exactly): mirror the
+         * editor's startPos/startOffset = 0. Number('') === 0.
+         */
+        pageStartKey = '';
+        pageStartOffset = 0;
     }
 
     offsetCursor += endSpacerHeight;
@@ -304,7 +236,6 @@ export const paginate = (
     return {
         pageCount: pages.length,
         pages,
-        fragments,
         breaks,
         endSpacer: {afterBlockKey: lastBlockEndKey, height: endSpacerHeight},
     };

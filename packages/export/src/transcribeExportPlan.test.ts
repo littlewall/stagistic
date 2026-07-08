@@ -90,4 +90,21 @@ describe('transcribeExportPlan', () => {
 
         expect(transcript.items.some(item => 'type' in item && item.type === '__page_break__')).toBe(true);
     });
+
+    it('pushes a non-splittable heading whole to the next page instead of tearing it', () => {
+        const fillers = Array.from({length: 40}, (_unused, index) => block('stageDirection', `sd${index}`, `Line number ${index} on the page.`));
+        const transcript = transcribeExportPlan(plan([
+            block('scene', 's1', 'Scene one'),
+            ...fillers,
+            block('character', 'lastHeading', 'ISABELLA'),
+            block('dialogue', 'd1', 'A closing line of dialogue.'),
+        ]), DEFAULT_EDITOR_SETTINGS);
+
+        const breakIndex = transcript.items.findIndex(item => 'type' in item && item.type === '__page_break__');
+        const headingIndex = transcript.items.findIndex(item => !('type' in item) && item.runs.some(run => run.text === 'ISABELLA'));
+
+        // The heading lands AFTER the page break (kept with its dialogue), not before.
+        expect(breakIndex).toBeGreaterThan(-1);
+        expect(headingIndex).toBeGreaterThan(breakIndex);
+    });
 });

@@ -12,6 +12,7 @@
     },
     "dependencies": {
         "@stagistic/script": "workspace:*",
+        "@stagistic/script-pagination": "workspace:*",
         "jspdf": "^2.5.2"
     },
     "devDependencies": {

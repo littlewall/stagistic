@@ -15,8 +15,17 @@ import {
     type ScriptDocument,
     type ScriptNode,
 } from '@stagistic/script';
+import {
+    FIT_EPSILON_PX,
+    isOrphanCandidateBlockType,
+    isSplittableBlockType,
+    MIN_SPLIT_LINES_AFTER,
+    MIN_SPLIT_LINES_BEFORE,
+    paginate,
+    type PaginatorBlock,
+} from '@stagistic/script-pagination';
 
-import type {ExportPlan, ForcedBreak} from './plan';
+import type {ExportPlan} from './plan';
 import type {
     PageItem,
     TranscriptResult,
@@ -28,12 +37,6 @@ const PAGE_BREAK_ITEM: PageItem = {type: '__page_break__'};
 const MONO_FONT_FAMILY = 'Courier Prime';
 const DEFAULT_BLOCK_TYPE = 'stageDirection';
 const CHAR_WIDTH_EM = 0.6;
-
-type LayoutCursor = {
-    pageNumber: number,
-    y: number,
-    items: PageItem[],
-};
 
 const getNodeText = (node: ScriptNode): string => {
     const ownText = typeof node.text === 'string' ? node.text : '';
@@ -186,49 +189,6 @@ const wrapText = (
     });
 };
 
-const pushPageBreak = (cursor: LayoutCursor, marginTopPx: number) => {
-    if (cursor.items.at(-1) !== PAGE_BREAK_ITEM) {
-        cursor.items.push(PAGE_BREAK_ITEM);
-    }
-
-    cursor.pageNumber += 1;
-    cursor.y = marginTopPx;
-};
-
-const ensureLineFits = (
-    cursor: LayoutCursor,
-    settings: EditorSettings,
-    lineHeightPx: number,
-) => {
-    const pageBottom = settings.page.heightPx - settings.page.marginBottomPx;
-
-    if (cursor.y + lineHeightPx <= pageBottom || cursor.items.length === 0) {
-        return;
-    }
-
-    pushPageBreak(cursor, settings.page.marginTopPx);
-};
-
-const applyForcedBreak = (
-    cursor: LayoutCursor,
-    settings: EditorSettings,
-    forcedBreak: ForcedBreak | undefined,
-) => {
-    if (!forcedBreak || cursor.items.length === 0) {
-        return;
-    }
-
-    pushPageBreak(cursor, settings.page.marginTopPx);
-
-    if (forcedBreak.kind !== 'odd-page') {
-        return;
-    }
-
-    if (cursor.pageNumber % 2 === 0) {
-        pushPageBreak(cursor, settings.page.marginTopPx);
-    }
-};
-
 const makeRun = (
     text: string,
     x: number,
@@ -270,20 +230,28 @@ const resolveLineX = ({
     return baseX;
 };
 
+interface PreparedBlock {
+    blockType: string,
+    block: NonNullable<EditorSettings['blocks'][string]>,
+    fontSizePx: number,
+    lineHeightPx: number,
+    spacingBeforePx: number,
+    spacingAfterPx: number,
+    baseX: number,
+    availableWidthPx: number,
+    charWidthPx: number,
+    wrapped: string[],
+}
+
 export const transcribeExportPlan = (
     plan: ExportPlan,
     settings: EditorSettings,
 ): TranscriptResult => {
     const forcedBreakByBlockId = new Map(plan.pagination.forcedBreaks.map(item => [item.blockId, item]));
-    const cursor: LayoutCursor = {
-        pageNumber: 1,
-        y: settings.page.marginTopPx,
-        items: [],
-    };
     const contentWidthPx = settings.page.widthPx - settings.page.marginLeftPx - settings.page.marginRightPx;
     const cueLabels = buildCueLabels(plan.doc);
 
-    plan.doc.content.forEach(node => {
+    const prepared: PreparedBlock[] = plan.doc.content.map(node => {
         const blockType = getScriptBlockNodeType(node, DEFAULT_BLOCK_TYPE);
         const block = settings.blocks[blockType] ?? settings.blocks[DEFAULT_BLOCK_TYPE] ?? {};
         const blockId = getScriptBlockId(node);
@@ -298,36 +266,124 @@ export const transcribeExportPlan = (
             : block.indentRightPx ?? 0;
         const availableWidthPx = Math.max(charWidthPx, contentWidthPx - indentLeftPx - indentRightPx);
         const maxChars = Math.max(1, Math.floor(availableWidthPx / charWidthPx));
-        const baseX = settings.page.marginLeftPx + indentLeftPx;
         const rawText = getBlockRawText(node, blockId ?? '', cueLabels);
         const text = normalizeBlockText(rawText, blockType, block.casing);
-        const lines = wrapText(text, maxChars);
 
-        applyForcedBreak(cursor, settings, blockId ? forcedBreakByBlockId.get(blockId) : undefined);
+        return {
+            blockType,
+            block,
+            fontSizePx,
+            lineHeightPx,
+            spacingBeforePx: (block.spacingBeforeEm ?? 0) * fontSizePx,
+            spacingAfterPx: (block.spacingAfterEm ?? 0) * fontSizePx,
+            baseX: settings.page.marginLeftPx + indentLeftPx,
+            availableWidthPx,
+            charWidthPx,
+            wrapped: wrapText(text, maxChars),
+        };
+    });
 
-        cursor.y += (block.spacingBeforeEm ?? 0) * fontSizePx;
+    const paginatorBlocks: PaginatorBlock[] = prepared.map((item, index) => {
+        const blockId = getScriptBlockId(plan.doc.content[index]) ?? '';
+        const forcedBreak = forcedBreakByBlockId.get(blockId)?.kind;
+        const height = item.spacingBeforePx + item.wrapped.length * item.lineHeightPx + item.spacingAfterPx;
+        const key = String(index);
 
-        lines.forEach(line => {
-            ensureLineFits(cursor, settings, lineHeightPx);
+        return {
+            key,
+            endKey: key,
+            height,
+            splittable: isSplittableBlockType(item.blockType),
+            orphanCandidate: isOrphanCandidateBlockType(item.blockType),
+            forcedBreak,
+            getLineMap: () => ({
+                lines: item.wrapped.map((_line, lineIndex) => ({
+                    startPos: lineIndex,
+                    topRel: item.spacingBeforePx + lineIndex * item.lineHeightPx,
+                })),
+                cleanHeight: height,
+            }),
+        };
+    });
+
+    const layout = paginate(paginatorBlocks, {
+        contentHeight: settings.page.heightPx - settings.page.marginTopPx - settings.page.marginBottomPx,
+        topSpacing: settings.page.marginTopPx,
+        bottomSpacing: settings.page.marginBottomPx,
+        orphanThreshold: 2 * settings.typography.fontSizePx * settings.typography.lineHeight,
+        minLinesBefore: MIN_SPLIT_LINES_BEFORE,
+        minLinesAfter: MIN_SPLIT_LINES_AFTER,
+        epsilonPx: FIT_EPSILON_PX,
+    });
+
+    const wholeBreaksBefore = new Map<string, number>();
+    const splitsByKey = new Map<string, number[]>();
+
+    layout.breaks.forEach(item => {
+        if (item.isInlineBreak && item.breakPos !== null) {
+            const positions = splitsByKey.get(item.atBlockKey) ?? [];
+
+            positions.push(item.breakPos);
+            splitsByKey.set(item.atBlockKey, positions);
+
+            return;
+        }
+
+        wholeBreaksBefore.set(item.atBlockKey, (wholeBreaksBefore.get(item.atBlockKey) ?? 0) + 1);
+    });
+
+    const items: PageItem[] = [];
+    let y = settings.page.marginTopPx;
+
+    const pushBreak = () => {
+        /*
+         * Collapse consecutive breaks (mirrors the previous cursor behaviour):
+         * an odd-page blank page advances numbering without an empty PDF page.
+         */
+        if (items.at(-1) !== PAGE_BREAK_ITEM) {
+            items.push(PAGE_BREAK_ITEM);
+        }
+
+        y = settings.page.marginTopPx;
+    };
+
+    prepared.forEach((item, index) => {
+        const key = String(index);
+        const wholeBreaks = wholeBreaksBefore.get(key) ?? 0;
+
+        for (let breakCount = 0; breakCount < wholeBreaks; breakCount += 1) {
+            pushBreak();
+        }
+
+        y += item.spacingBeforePx;
+
+        const splits = (splitsByKey.get(key) ?? []).sort((left, right) => left - right);
+        let splitIndex = 0;
+
+        item.wrapped.forEach((line, lineIndex) => {
+            if (splitIndex < splits.length && splits[splitIndex] === lineIndex) {
+                pushBreak();
+                splitIndex += 1;
+            }
 
             const visualLine: VisualLine = {
-                y: cursor.y,
+                y,
                 runs: [
                     makeRun(line, resolveLineX({
-                        block,
+                        block: item.block,
                         line,
-                        baseX,
-                        availableWidthPx,
-                        charWidthPx,
-                    }), block, fontSizePx),
+                        baseX: item.baseX,
+                        availableWidthPx: item.availableWidthPx,
+                        charWidthPx: item.charWidthPx,
+                    }), item.block, item.fontSizePx),
                 ],
             };
 
-            cursor.items.push(visualLine);
-            cursor.y += lineHeightPx;
+            items.push(visualLine);
+            y += item.lineHeightPx;
         });
 
-        cursor.y += (block.spacingAfterEm ?? 0) * fontSizePx;
+        y += item.spacingAfterPx;
     });
 
     return {
@@ -335,6 +391,6 @@ export const transcribeExportPlan = (
         pageHeightPx: settings.page.heightPx,
         marginLeftPx: settings.page.marginLeftPx,
         marginTopPx: settings.page.marginTopPx,
-        items: cursor.items,
+        items,
     };
 };

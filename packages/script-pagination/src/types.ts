@@ -5,13 +5,28 @@ export interface BlockLine {
     topRel: number,
 }
 
+export interface BlockLineMap {
+    lines: BlockLine[],
+    /** Block height measured with inline-break spacers hidden (clean geometry). */
+    cleanHeight: number,
+}
+
 export interface PaginatorBlock {
+    /** Start-position identifier; becomes a page's startKey and a split's page endKey. */
     key: string,
-    height: number, // total incl. spacing-before/after
+    /** End-position identifier; tracked as lastBlockEnd, a whole page's endKey, and a pushdown anchor. */
+    endKey: string,
+    /**
+     * Measured height used for the initial fit check. May include already-rendered
+     * inline-break spacers (the editor's "dirty" height); once a split is actually
+     * needed, `getLineMap().cleanHeight` takes over — mirroring the editor exactly.
+     */
+    height: number,
     splittable: boolean,
     orphanCandidate: boolean,
     forcedBreak?: 'new-page' | 'odd-page',
-    getLines?: () => BlockLine[], // only consulted for splittable blocks
+    /** Clean line geometry; consulted only for splittable blocks when a split is needed. */
+    getLineMap?: () => BlockLineMap,
 }
 
 export interface PaginatorMetrics {
@@ -24,24 +39,20 @@ export interface PaginatorMetrics {
     epsilonPx: number,
 }
 
-export interface PlacedFragment {
-    blockKey: string,
-    pageIndex: number, // 0-based
-    contentTop: number, // y of this fragment's first line, from page top
-    fromLine: number, // inclusive index into getLines() (0 for whole blocks)
-    toLine: number, // exclusive
-    isBlockStart: boolean,
-    isBlockEnd: boolean,
-}
-
 export interface PageBreak {
     kind: 'pushDown' | 'split' | 'forced' | 'oddBlank',
+    /** The block whose placement caused the break. */
     atBlockKey: string,
-    afterBlockKey: string | null, // block whose end anchors a whole-block spacer (null at doc start)
-    breakPos: number | null, // BlockLine.startPos for splits, else null
-    spacerHeight: number, // leftover + bottomSpacing + topSpacing (editor spacer height)
-    dividerOffset: number, // leftover + bottomSpacing
-    isInlineBreak: boolean, // true for splits
+    /** End identifier of the last fully-placed block (spacer anchor); null at doc start. */
+    afterBlockKey: string | null,
+    /** BlockLine.startPos where a splittable block is cut; null for whole-block breaks. */
+    breakPos: number | null,
+    /** Editor spacer height = leftover + bottomSpacing + topSpacing. */
+    spacerHeight: number,
+    /** Editor divider offset = leftover + bottomSpacing. */
+    dividerOffset: number,
+    /** True for mid-block splits (inline-break spacer), false for whole-block breaks. */
+    isInlineBreak: boolean,
 }
 
 export interface PageInfo {
@@ -55,7 +66,6 @@ export interface PageInfo {
 export interface PaginationPlan {
     pageCount: number,
     pages: PageInfo[],
-    fragments: PlacedFragment[],
     breaks: PageBreak[],
     endSpacer: {afterBlockKey: string | null, height: number} | null,
 }

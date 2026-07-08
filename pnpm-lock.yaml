@@ -296,6 +296,9 @@ importers:
       '@stagistic/script':
         specifier: workspace:*
         version: link:../script
+      '@stagistic/script-pagination':
+        specifier: workspace:*
+        version: link:../script-pagination
       jspdf:
         specifier: ^2.5.2
         version: 2.5.2

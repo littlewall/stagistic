@@ -13,6 +13,7 @@ import {
 
 import {useEditorInstance} from '../../../../context';
 import ScriptEditor from '../../../../Editor';
+import {paginationKey} from '../plugin/createPaginationPlugin';
 
 /*
  * Regression oracle for the pagination refactor: the editor must drive the
@@ -47,12 +48,12 @@ const createGoldenDocument = (): ScriptDocument => ({
     content: [
         block('scene', 'scene-1', 'Scene One'),
         block('character', 'char-1', 'ALICE'),
-        block('dialogue', 'dlg-1', paragraph(40)),
+        block('dialogue', 'dlg-1', paragraph(80)),
         block('character', 'char-2', 'BOB'),
-        block('dialogue', 'dlg-2', paragraph(40)),
+        block('dialogue', 'dlg-2', paragraph(80)),
         block('scene', 'scene-2', 'Scene Two'),
         block('character', 'char-3', 'CAROL'),
-        block('dialogue', 'dlg-3', paragraph(20)),
+        block('dialogue', 'dlg-3', paragraph(60)),
     ],
 });
 
@@ -116,9 +117,7 @@ const getEditor = async (): Promise<Editor> => {
 };
 
 const readPages = (editor: Editor): PageInfoLike[] | null => {
-    const storage = editor.storage as Record<string, {state?: {pages?: PageInfoLike[]}}>;
-
-    return storage.Pagination?.state?.pages ?? null;
+    return paginationKey.getState(editor.state)?.pagination?.pages ?? null;
 };
 
 /*
@@ -170,16 +169,46 @@ describe('pagination golden', () => {
 
         const editor = await getEditor();
 
-        await sleep(2000);
+        const dividerDeadline = Date.now() + 3000;
 
-        const storage = editor.storage as Record<string, {state?: {pages?: PageInfoLike[], pageCount?: number}}>;
-
-        throw new Error(`DIAGNOSTIC storageKeys=${JSON.stringify(Object.keys(editor.storage))} `
-            + `paginationState=${JSON.stringify(storage.Pagination?.state ?? null)}`);
+        while (Date.now() < dividerDeadline && !document.querySelector('[data-pagination-divider="true"]')) {
+            await sleep(25);
+        }
 
         const pages = await pollStablePages(editor);
 
         expect(pages.length).toBeGreaterThanOrEqual(3);
-        expect(pages).toMatchInlineSnapshot();
+        expect(pages).toMatchInlineSnapshot(`
+          [
+            {
+              "endOffset": 1212.8400000000001,
+              "endPos": 18,
+              "index": 1,
+              "startOffset": 0,
+              "startPos": 0,
+            },
+            {
+              "endOffset": 2425.7000000000003,
+              "endPos": 3624,
+              "index": 2,
+              "startOffset": 1212.8400000000001,
+              "startPos": 18,
+            },
+            {
+              "endOffset": 3638.5400000000004,
+              "endPos": 7243,
+              "index": 3,
+              "startOffset": 2425.7000000000003,
+              "startPos": 3624,
+            },
+            {
+              "endOffset": 4747.700000000001,
+              "endPos": 9944,
+              "index": 4,
+              "startOffset": 3638.5400000000004,
+              "startPos": 7243,
+            },
+          ]
+        `);
     });
 });
