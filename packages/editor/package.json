@@ -13,6 +13,7 @@
     },
     "dependencies": {
         "@stagistic/script": "workspace:*",
+        "@stagistic/script-pagination": "workspace:*",
         "@stagistic/shared": "workspace:*",
         "@stagistic/ui": "workspace:*",
         "@tanstack/react-hotkeys": "^0.3.0",

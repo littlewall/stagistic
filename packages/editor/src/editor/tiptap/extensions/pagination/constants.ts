@@ -1,20 +1,14 @@
-
 import {type PaginationOptions} from './types';
 
-export const SPLITTABLE_BLOCK_TYPES = new Set([
-    "stageDirection",
-    "dialogue",
-    "lyrics",
-    "aside",
-]);
-
-export const ORPHAN_PUSHDOWN_TYPES = new Set(["character", "scene"]);
-
-export const MIN_SPLIT_LINES_BEFORE = 2;
-
-export const MIN_SPLIT_LINES_AFTER = 2;
-
-export const FIT_EPSILON_PX = 1;
+export {
+    FIT_EPSILON_PX,
+    isOrphanCandidateBlockType,
+    isSplittableBlockType,
+    MIN_SPLIT_LINES_AFTER,
+    MIN_SPLIT_LINES_BEFORE,
+    ORPHAN_PUSHDOWN_TYPES,
+    SPLITTABLE_BLOCK_TYPES,
+} from '@stagistic/script-pagination';
 
 export const DEFAULT_OPTIONS: PaginationOptions = {
     pageHeight: 1123,

@@ -1,0 +1,15 @@
+{
+    "name": "@stagistic/script-pagination",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "main": "./src/index.ts",
+    "scripts": {
+        "lint": "eslint .",
+        "test": "vp test run",
+        "test:watch": "vp test watch"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.2"
+    }
+}
