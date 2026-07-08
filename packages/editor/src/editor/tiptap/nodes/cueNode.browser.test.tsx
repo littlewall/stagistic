@@ -236,8 +236,10 @@ describe('cue pill node views', () => {
 
         await page.elementLocator(input).click();
 
-        // Focus is on the cue input (editor is blurred), yet the block overlay
-        // should anchor to sd-2 — the block that owns the focused cue tag.
+        /*
+         * Focus is on the cue input (editor is blurred), yet the block overlay
+         * should anchor to sd-2 — the block that owns the focused cue tag.
+         */
         expect(document.activeElement).toBe(input);
 
         const trigger = await poll(
@@ -263,10 +265,60 @@ describe('cue pill node views', () => {
             'title input',
         );
 
-        await page.elementLocator(input).click();
+        /*
+         * An empty cue collapses to just its number at rest, so the edit target is
+         * the tag (number); clicking it focuses and expands the input.
+         */
+        const number = await poll(() => pill.querySelector('[data-cue-number]'), 'cue number');
+
+        await page.elementLocator(number).click();
         await userEvent.type(page.elementLocator(input), 'Renamed');
 
         expect(cueStartAttrs(editor)?.title).toBe('Renamed');
+    });
+
+    it('boxes the cue with an outline and no horizontal padding or border (export width parity)', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+
+        const numberEl = await poll(
+            () => document.querySelector<HTMLElement>('[data-cue-number]'),
+            'cue number',
+        );
+        const tagBody = numberEl.parentElement as HTMLElement;
+        const cs = getComputedStyle(tagBody);
+
+        /*
+         * The box is drawn with outline (zero layout) instead of border + padding,
+         * so the cue occupies exactly the export's character cells.
+         */
+        expect(cs.paddingLeft).toBe('0px');
+        expect(cs.paddingRight).toBe('0px');
+        expect(cs.borderLeftWidth).toBe('0px');
+        expect(cs.borderRightWidth).toBe('0px');
+        expect(cs.outlineStyle).toBe('solid');
+    });
+
+    it('collapses a title-less cue to just its number at rest', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', '');
+
+        const input = await poll(
+            () => document.querySelector<HTMLInputElement>('[data-cue-title-input="start"]'),
+            'title input',
+        );
+
+        /*
+         * Empty + inactive → the title field collapses to 0 width so the cue is
+         * just its number, matching the export string `" number "`.
+         */
+        expect(getComputedStyle(input).width).toBe('0px');
     });
 
     it('keeps an empty confirmed cue title editable without deleting the cue', async () => {

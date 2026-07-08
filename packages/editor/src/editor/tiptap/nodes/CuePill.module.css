@@ -1,8 +1,14 @@
 /*
  * Inline model (mirrors .characterTag): no display/line-height/font-size
- * overrides, so vertical border + padding do NOT grow the line box and the
- * pill stays baseline-centred with the surrounding text. Distinct from
- * character tags: no fill, no border-radius.
+ * overrides, so the highlight never grows the line box and the pill stays
+ * baseline-centred with the surrounding text.
+ *
+ * Cell parity with the PDF export: the export renders a cue as bold text
+ * `" number title "` and wraps by character count (0.6em/1ch per cell, see
+ * transcribeExportPlan). So the pill must occupy the same cells and add ZERO
+ * layout width of its own — hence `outline` (not `border`) for the box and
+ * `1ch` (one export space) for the leading/trailing/gap spacing instead of
+ * padding. Distinct from character tags: boxed, no fill, no border-radius.
  */
 .pill {
     --cue-active-border-color: rgba(125 145 255 / 80%);
@@ -10,7 +16,7 @@
 
     user-select: none;
     position: relative;
-    margin: 0 .2em;
+    margin: 0 1ch;
     color: var(--color-text);
     white-space: nowrap;
 }
@@ -35,9 +41,10 @@
 }
 
 .tagBody {
+    /* outline (not border) keeps the box out of layout so it adds no width. */
     position: relative;
-    padding: 0 .35em;
-    border: 1px solid var(--cue-border-color);
+    outline: 1px solid var(--cue-border-color);
+    outline-offset: .1em;
 }
 
 .active {
@@ -65,9 +72,15 @@
 }
 
 .titleInput {
+    /*
+     * Leading gap = the export's space between number and title (1ch). Collapses
+     * to 0 for an empty title at rest so a title-less cue is just the number,
+     * matching the export string `" number "`. See getTitleInputStyle.
+     */
     width: var(--cue-title-width);
     min-width: 0;
     max-width: 18ch;
+    margin-inline-start: var(--cue-title-gap, 1ch);
     padding: 0;
     font: inherit;
     font-weight: 700;
@@ -87,7 +100,6 @@
 }
 
 .number {
-    margin-inline-end: .35em;
     font-weight: 700;
     font-variant-numeric: tabular-nums;
     color: inherit;
@@ -95,13 +107,13 @@
 
 .open {
     .tagBody {
-        border-style: solid;
+        outline-style: solid;
     }
 }
 
 .hit {
     .tagBody {
-        border-style: dashed;
+        outline-style: dashed;
     }
 }
 

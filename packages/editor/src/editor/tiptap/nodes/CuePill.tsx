@@ -25,7 +25,10 @@ import {
     getModeButtonLabel,
 } from './CuePillControls';
 
-type CueTitleInputStyle = CSSProperties & {'--cue-title-width': string};
+type CueTitleInputStyle = CSSProperties & {
+    '--cue-title-width': string,
+    '--cue-title-gap': string,
+};
 
 const usePillActivation = () => {
     const [active, setActive] = useState(false);
@@ -60,12 +63,25 @@ const normalizeTitle = (value: unknown) => {
     return typeof value === 'string' ? value : '';
 };
 
-const getTitleInputStyle = (title: string): CueTitleInputStyle => {
-    // Empty: reserve 3ch for the "cue" placeholder. Otherwise grow exactly with
-    // the typed text so the field hugs the content from the first character.
-    const width = title.length === 0 ? 3 : title.length;
+const getTitleInputStyle = (title: string, active: boolean): CueTitleInputStyle => {
+    /*
+     * Widths are in `ch` to stay on the export's character grid.
+     * - With a title: hug the text exactly (matches export `" number title "`).
+     * - Empty + active (being edited): reserve 3ch + gap for the "cue"
+     *   placeholder so there's an edit target. This is a transient editing state,
+     *   not what the export measures.
+     * - Empty + at rest: collapse to zero width/gap so a title-less cue is just
+     *   the number, matching the export string `" number "`.
+     */
+    if (title.length > 0) {
+        return {'--cue-title-width': `${title.length}ch`, '--cue-title-gap': '1ch'};
+    }
 
-    return {'--cue-title-width': `${width}ch`};
+    if (active) {
+        return {'--cue-title-width': '3ch', '--cue-title-gap': '1ch'};
+    }
+
+    return {'--cue-title-width': '0ch', '--cue-title-gap': '0'};
 };
 
 const handleFocusWithin = (setActive: (active: boolean) => void) => {
@@ -176,7 +192,7 @@ export const CueStartPill = ({
                     value={draftTitle}
                     placeholder="cue"
                     spellCheck={false}
-                    style={getTitleInputStyle(draftTitle)}
+                    style={getTitleInputStyle(draftTitle, active)}
                     onChange={event => updateTitle(event.currentTarget.value)}
                     onBlur={commitTitle}
                     onKeyDown={event => {
