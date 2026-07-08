@@ -4,7 +4,6 @@ export interface CharacterFilterValue {
 }
 
 export interface PageBreakValue {
-    actOnNewPage: boolean,
     sceneOnNewPage: boolean,
     sceneOnOddPage: boolean,
 }
@@ -27,8 +26,7 @@ export interface BasicExportConfig {
 export const BASIC_DEFAULTS: BasicExportConfig = {
     characterFilter: {mode: 'all', characterIds: []},
     pageBreaks: {
-        actOnNewPage: false,
-        sceneOnNewPage: false,
+        sceneOnNewPage: true,
         sceneOnOddPage: false,
     },
     blankPages: {betweenTitleAndScript: {count: 0, countsInNumbering: false}},

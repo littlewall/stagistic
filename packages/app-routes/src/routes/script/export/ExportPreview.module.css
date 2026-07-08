@@ -46,9 +46,13 @@
     padding: var(--space-2xl);
 }
 
+.preview[aria-busy = 'true'] .pages {
+    pointer-events: none;
+}
+
 .page {
     overflow: hidden;
-    background: white;
+    background: oklch(1 0 0);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-sm);
     box-shadow: var(--shadow-canvas);
@@ -64,19 +68,46 @@
     color: var(--color-text-muted);
 }
 
-.overlay,
-.error {
+.overlay {
     position: absolute;
-    right: var(--space-xl);
-    bottom: var(--space-xl);
-    padding: var(--space-sm) var(--space-md);
+    z-index: 2;
+    inset: var(--control-height-lg) 0 0;
+    display: grid;
+    place-items: center;
+    padding: var(--space-2xl);
+    color: var(--color-text);
+    background: color-mix(in oklch, var(--color-surface) 72%, transparent);
+    backdrop-filter: blur(2px);
+}
+
+.busyPanel {
+    display: inline-flex;
+    gap: var(--space-md);
+    align-items: center;
+    padding: var(--space-md) var(--space-lg);
     font-size: var(--font-size-sm);
     color: var(--color-text);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-full);
+    box-shadow: var(--shadow-popover);
+}
+
+.busyPanel [role = 'progressbar'] {
+    width: 1.15rem;
+    height: 1.15rem;
+    color: var(--color-text-muted);
 }
 
 .error {
+    position: absolute;
+    z-index: 3;
+    right: var(--space-xl);
+    bottom: var(--space-xl);
+    padding: var(--space-sm) var(--space-md);
+    font-size: var(--font-size-sm);
     color: var(--color-status-danger);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
 }

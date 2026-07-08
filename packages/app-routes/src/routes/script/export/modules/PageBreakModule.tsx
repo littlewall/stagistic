@@ -13,14 +13,8 @@ export const PageBreakModule = ({
     <div className={styles.module}>
         <div>
             <h3 className={styles.title}>Page breaks</h3>
-            <p className={styles.description}>Control where acts and scenes begin.</p>
+            <p className={styles.description}>Control where scenes begin.</p>
         </div>
-        <Switch
-            isSelected={value.actOnNewPage}
-            onChange={actOnNewPage => onChange({...value, actOnNewPage})}
-        >
-            Acts start on a new page
-        </Switch>
         <Switch
             isSelected={value.sceneOnNewPage || value.sceneOnOddPage}
             isDisabled={value.sceneOnOddPage}

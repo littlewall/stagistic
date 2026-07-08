@@ -9,7 +9,10 @@ import {
     type BasicExportConfig,
 } from './config';
 import {deriveBasicExportPlan} from './deriveBasicExportPlan';
-import {sampleDoc} from './testUtils';
+import {
+    block,
+    sampleDoc,
+} from './testUtils';
 
 const script = {
     doc: sampleDoc(),
@@ -25,13 +28,8 @@ const withConfig = (patch: Partial<BasicExportConfig>): BasicExportConfig => ({
 });
 
 describe('deriveBasicExportPlan', () => {
-    it('adds scene page breaks', () => {
-        const plan = deriveBasicExportPlan(withConfig({
-            pageBreaks: {
-                ...BASIC_DEFAULTS.pageBreaks,
-                sceneOnNewPage: true,
-            },
-        }), script);
+    it('adds scene page breaks by default', () => {
+        const plan = deriveBasicExportPlan(BASIC_DEFAULTS, script);
 
         expect(plan.pagination.forcedBreaks).toEqual([{blockId: 'sceneA', kind: 'new-page'}, {blockId: 'sceneB', kind: 'new-page'}]);
     });
@@ -39,13 +37,33 @@ describe('deriveBasicExportPlan', () => {
     it('uses odd-page scene breaks when requested', () => {
         const plan = deriveBasicExportPlan(withConfig({
             pageBreaks: {
-                actOnNewPage: false,
                 sceneOnNewPage: true,
                 sceneOnOddPage: true,
             },
         }), script);
 
         expect(plan.pagination.forcedBreaks.every(item => item.kind === 'odd-page')).toBe(true);
+    });
+
+    it('starts later acts on new pages automatically', () => {
+        const plan = deriveBasicExportPlan(BASIC_DEFAULTS, {
+            ...script,
+            doc: {
+                type: 'doc',
+                content: [
+                    block('act', 'actA', 'Act One'),
+                    block('scene', 'sceneA', 'Scene A'),
+                    block('act', 'actB', 'Act Two'),
+                    block('scene', 'sceneB', 'Scene B'),
+                ],
+            },
+        });
+
+        expect(plan.pagination.forcedBreaks).toEqual([
+            {blockId: 'sceneA', kind: 'new-page'},
+            {blockId: 'actB', kind: 'new-page'},
+            {blockId: 'sceneB', kind: 'new-page'},
+        ]);
     });
 
     it('carries the title page and script title through', () => {

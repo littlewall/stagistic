@@ -1,4 +1,6 @@
 import {
+    buildPageMark,
+    CHARACTER_TAG_MARK_NAME,
     collectCueAtoms,
     CUE_ID_ATTR,
     CUE_OUT_NODE_NAME,
@@ -12,6 +14,11 @@ import {
     getScriptBlockId,
     getScriptBlockNodeType,
     hasNodeChildren,
+    type HeaderFooterAlignment,
+    type HeaderFooterCellSettings,
+    type HeaderFooterRowSettings,
+    resolveDraftDate,
+    resolveHeaderFooterText,
     type ScriptDocument,
     type ScriptNode,
 } from '@stagistic/script';
@@ -21,6 +28,7 @@ import {
     isSplittableBlockType,
     MIN_SPLIT_LINES_AFTER,
     MIN_SPLIT_LINES_BEFORE,
+    type PageBreak,
     paginate,
     type PaginatorBlock,
 } from '@stagistic/script-pagination';
@@ -38,6 +46,12 @@ const PAGE_BREAK_ITEM: PageItem = {type: '__page_break__'};
 const MONO_FONT_FAMILY = 'Courier Prime';
 const DEFAULT_BLOCK_TYPE = 'stageDirection';
 const CHAR_WIDTH_EM = 0.6;
+const HEADER_FOOTER_MAX_WIDTH_RATIO = 0.4;
+const HEADER_FOOTER_ALIGNMENTS: HeaderFooterAlignment[] = [
+    'left',
+    'center',
+    'right',
+];
 
 const getNodeText = (node: ScriptNode): string => {
     const ownText = typeof node.text === 'string' ? node.text : '';
@@ -51,6 +65,28 @@ const getNodeText = (node: ScriptNode): string => {
 interface CueLabels {
     numberByCueId: Map<string, string>,
     outLabelByBlockId: Map<string, string>,
+}
+
+interface InlineStyle {
+    bold?: boolean,
+    italic?: boolean,
+    underline?: boolean,
+    characterTag?: boolean,
+}
+
+interface TextSegment {
+    text: string,
+    style: InlineStyle,
+}
+
+interface WrappedLine {
+    text: string,
+    segments: TextSegment[],
+}
+
+interface TextWord {
+    segments: TextSegment[],
+    spaceStyle: InlineStyle,
 }
 
 const readAttrString = (
@@ -87,29 +123,71 @@ const buildCueLabels = (doc: ScriptDocument): CueLabels => {
     return {numberByCueId, outLabelByBlockId};
 };
 
-const getBlockRawText = (
+const markStyle = (node: ScriptNode): InlineStyle => ({
+    bold: node.marks?.some(mark => mark.type === 'bold') ?? false,
+    italic: node.marks?.some(mark => mark.type === 'italic') ?? false,
+    underline: node.marks?.some(mark => mark.type === 'underline') ?? false,
+});
+
+const hasCharacterTagMark = (node: ScriptNode): boolean => {
+    return node.marks?.some(mark => mark.type === CHARACTER_TAG_MARK_NAME) ?? false;
+};
+
+const pushSegment = (
+    segments: TextSegment[],
+    text: string,
+    style: InlineStyle = {},
+) => {
+    if (text.length === 0) {
+        return;
+    }
+
+    const previous = segments[segments.length - 1];
+
+    if (previous
+        && Boolean(previous.style.bold) === Boolean(style.bold)
+        && Boolean(previous.style.italic) === Boolean(style.italic)
+        && Boolean(previous.style.underline) === Boolean(style.underline)
+        && Boolean(previous.style.characterTag) === Boolean(style.characterTag)) {
+        previous.text = `${previous.text}${text}`;
+
+        return;
+    }
+
+    segments.push({text, style});
+};
+
+const getBlockRawSegments = (
     node: ScriptNode,
     blockId: string,
     cues: CueLabels,
-): string => {
+): TextSegment[] => {
     if (!hasNodeChildren(node)) {
-        return getNodeText(node);
+        return [{text: getNodeText(node), style: {...markStyle(node), characterTag: hasCharacterTagMark(node)}}];
     }
 
-    return node.content.map(child => {
+    const segments: TextSegment[] = [];
+
+    node.content.forEach(child => {
         if (child.type === CUE_START_NODE_NAME) {
             const number = cues.numberByCueId.get(readAttrString(child.attrs, CUE_ID_ATTR)) ?? '';
             const title = readAttrString(child.attrs, CUE_TITLE_ATTR).trim();
 
-            return ` ${title.length > 0 ? `${number} ${title}` : number} `;
+            pushSegment(segments, ` ${title.length > 0 ? `${number} ${title}` : number} `, {bold: true});
+
+            return;
         }
 
         if (child.type === CUE_OUT_NODE_NAME) {
-            return ` ${cues.outLabelByBlockId.get(blockId) ?? 'out'} `;
+            pushSegment(segments, ` ${cues.outLabelByBlockId.get(blockId) ?? 'out'} `, {bold: true});
+
+            return;
         }
 
-        return getNodeText(child);
-    }).join('');
+        pushSegment(segments, getNodeText(child), {...markStyle(child), characterTag: hasCharacterTagMark(child)});
+    });
+
+    return segments;
 };
 
 const applyCasing = (
@@ -127,67 +205,163 @@ const applyCasing = (
     return text;
 };
 
-const normalizeBlockText = (
-    rawText: string,
+const normalizeBlockSegments = (
+    rawSegments: TextSegment[],
     blockType: string,
     casing: string | undefined,
 ) => {
-    const collapsed = rawText.replace(/\s+/gu, ' ').trim();
-    const cased = applyCasing(collapsed, casing);
+    const segments: TextSegment[] = [];
+    let pendingSpace = false;
 
-    if (blockType === 'aside' && cased.length > 0) {
-        return `(${cased})`;
+    rawSegments.forEach(segment => {
+        const isCharacterTag = blockType === 'stageDirection'
+            && segment.style.characterTag === true;
+        const casedText = isCharacterTag
+            ? segment.text.toLocaleUpperCase()
+            : applyCasing(segment.text, casing);
+
+        Array.from(casedText).forEach(character => {
+            if ((/\s/u).test(character)) {
+                pendingSpace = segments.length > 0;
+
+                return;
+            }
+
+            if (pendingSpace) {
+                pushSegment(segments, ' ', segment.style);
+                pendingSpace = false;
+            }
+
+            pushSegment(segments, character, segment.style);
+        });
+    });
+
+    if (blockType === 'aside' && segments.length > 0) {
+        pushSegment(segments, ')', segments.at(-1)?.style);
+        segments.unshift({text: '(', style: segments[0].style});
     }
 
-    return cased;
+    return segments;
 };
 
-const wrapText = (
-    text: string,
+const splitLongWord = (
+    word: TextSegment[],
+    maxChars: number,
+): TextSegment[][] => {
+    const chunks: TextSegment[][] = [];
+    let chunk: TextSegment[] = [];
+    let chunkLength = 0;
+
+    word.forEach(segment => {
+        Array.from(segment.text).forEach(character => {
+            if (chunkLength === maxChars) {
+                chunks.push(chunk);
+                chunk = [];
+                chunkLength = 0;
+            }
+
+            pushSegment(chunk, character, segment.style);
+            chunkLength += 1;
+        });
+    });
+
+    if (chunk.length > 0) {
+        chunks.push(chunk);
+    }
+
+    return chunks;
+};
+
+const lineText = (segments: TextSegment[]): string => segments.map(segment => segment.text).join('');
+
+const toWrappedLine = (segments: TextSegment[]): WrappedLine => ({
+    text: lineText(segments),
+    segments,
+});
+
+const splitWords = (segments: TextSegment[]): TextWord[] => {
+    const words: TextWord[] = [];
+    let current: TextSegment[] = [];
+    let pendingSpaceStyle: InlineStyle = {};
+
+    segments.forEach(segment => {
+        Array.from(segment.text).forEach(character => {
+            if (character === ' ') {
+                if (current.length > 0) {
+                    words.push({segments: current, spaceStyle: pendingSpaceStyle});
+                    current = [];
+                }
+
+                pendingSpaceStyle = segment.style;
+
+                return;
+            }
+
+            pushSegment(current, character, segment.style);
+        });
+    });
+
+    if (current.length > 0) {
+        words.push({segments: current, spaceStyle: pendingSpaceStyle});
+    }
+
+    return words;
+};
+
+const wrapSegments = (
+    segments: TextSegment[],
     maxChars: number,
 ) => {
-    if (text.length === 0) {
-        return [''];
+    if (segments.length === 0) {
+        return [toWrappedLine([])];
     }
 
-    const words = text.split(/\s+/u);
-    const lines: string[] = [];
-    let line = '';
+    const lines: WrappedLine[] = [];
+    let current: TextSegment[] = [];
+    let currentLength = 0;
 
-    words.forEach(word => {
-        if (line.length === 0) {
-            line = word;
+    splitWords(segments).forEach(word => {
+        const wordLength = lineText(word.segments).length;
+
+        if (wordLength > maxChars) {
+            if (current.length > 0) {
+                lines.push(toWrappedLine(current));
+                current = [];
+                currentLength = 0;
+            }
+
+            splitLongWord(word.segments, maxChars).forEach(chunk => {
+                lines.push(toWrappedLine(chunk));
+            });
 
             return;
         }
 
-        if (`${line} ${word}`.length <= maxChars) {
-            line = `${line} ${word}`;
+        if (current.length === 0) {
+            current = [...word.segments];
+            currentLength = wordLength;
 
             return;
         }
 
-        lines.push(line);
-        line = word;
+        if (currentLength + 1 + wordLength <= maxChars) {
+            pushSegment(current, ' ', word.spaceStyle);
+            word.segments.forEach(segment => pushSegment(current, segment.text, segment.style));
+            currentLength += 1 + wordLength;
+
+            return;
+        }
+
+        lines.push(toWrappedLine(current));
+        current = [...word.segments];
+        currentLength = wordLength;
     });
 
-    if (line.length > 0) {
-        lines.push(line);
+    if (current.length > 0) {
+        lines.push(toWrappedLine(current));
     }
 
-    return lines.flatMap(item => {
-        if (item.length <= maxChars) {
-            return [item];
-        }
-
-        const chunks: string[] = [];
-
-        for (let index = 0; index < item.length; index += maxChars) {
-            chunks.push(item.slice(index, index + maxChars));
-        }
-
-        return chunks;
-    });
+    return lines;
 };
 
 const makeRun = (
@@ -195,13 +369,14 @@ const makeRun = (
     x: number,
     block: NonNullable<EditorSettings['blocks'][string]>,
     fontSizePx: number,
+    style: InlineStyle = {},
 ): VisualRun => ({
     text,
     x,
     fontSizePx,
-    bold: block.isBold ?? false,
-    italic: block.isItalic ?? false,
-    underline: block.isUnderline ?? false,
+    bold: (block.isBold ?? false) || (style.bold ?? false),
+    italic: (block.isItalic ?? false) || (style.italic ?? false),
+    underline: (block.isUnderline ?? false) || (style.underline ?? false),
     fontFamily: MONO_FONT_FAMILY,
 });
 
@@ -241,8 +416,204 @@ interface PreparedBlock {
     baseX: number,
     availableWidthPx: number,
     charWidthPx: number,
-    wrapped: string[],
+    wrapped: WrappedLine[],
 }
+
+interface PageStructureMark {
+    actIndex: number | null,
+    sceneNumber: number,
+}
+
+interface ScriptPage {
+    items: VisualLine[],
+    mark: PageStructureMark | null,
+    isInsertedBlank: boolean,
+}
+
+const buildStructureMarks = (doc: ScriptDocument): PageStructureMark[] => {
+    let actIndex = 0;
+    let sceneNumber = 0;
+
+    return doc.content.map(node => {
+        const blockType = getScriptBlockNodeType(node, DEFAULT_BLOCK_TYPE);
+
+        if (blockType === 'act') {
+            actIndex += 1;
+        }
+
+        if (blockType === 'scene') {
+            sceneNumber += 1;
+        }
+
+        return {
+            actIndex: actIndex > 0 ? actIndex : null,
+            sceneNumber,
+        };
+    });
+};
+
+const makeHeaderFooterRun = (
+    text: string,
+    x: number,
+    cell: HeaderFooterCellSettings,
+    fontSizePx: number,
+): VisualRun => ({
+    text,
+    x,
+    fontSizePx,
+    bold: cell.isBold,
+    italic: cell.isItalic,
+    underline: cell.isUnderline,
+    fontFamily: MONO_FONT_FAMILY,
+});
+
+const resolveHeaderFooterX = ({
+    alignment,
+    text,
+    settings,
+    fontSizePx,
+}: {
+    alignment: HeaderFooterAlignment,
+    text: string,
+    settings: EditorSettings,
+    fontSizePx: number,
+}) => {
+    const charWidthPx = fontSizePx * CHAR_WIDTH_EM;
+    const textWidthPx = text.length * charWidthPx;
+    const contentWidthPx = settings.page.widthPx - settings.page.marginLeftPx - settings.page.marginRightPx;
+    const maxWidthPx = contentWidthPx * HEADER_FOOTER_MAX_WIDTH_RATIO;
+    const clampedWidthPx = Math.min(textWidthPx, maxWidthPx);
+
+    if (alignment === 'center') {
+        return settings.page.marginLeftPx + (contentWidthPx - clampedWidthPx) / 2;
+    }
+
+    if (alignment === 'right') {
+        return settings.page.widthPx - settings.page.marginRightPx - clampedWidthPx;
+    }
+
+    return settings.page.marginLeftPx;
+};
+
+const shouldRenderInsertedBlankCell = (
+    area: 'header' | 'footer',
+    cell: HeaderFooterCellSettings,
+): boolean => {
+    return area === 'footer' && cell.text.includes('{{page_number}}');
+};
+
+const buildHeaderFooterLine = ({
+    area,
+    row,
+    y,
+    page,
+    pageNumber,
+    pageMarkNumber,
+    draftDate,
+    plan,
+    settings,
+}: {
+    area: 'header' | 'footer',
+    row: HeaderFooterRowSettings,
+    y: number,
+    page: ScriptPage,
+    pageNumber: number,
+    pageMarkNumber: number,
+    draftDate: string,
+    plan: ExportPlan,
+    settings: EditorSettings,
+}): VisualLine | null => {
+    const mark = page.mark ?? {actIndex: null, sceneNumber: 0};
+    const pageMark = page.isInsertedBlank
+        ? ''
+        : buildPageMark({
+            actIndex: mark.actIndex,
+            sceneNumber: mark.sceneNumber,
+            pageNumber: pageMarkNumber,
+        });
+    const runs = HEADER_FOOTER_ALIGNMENTS.flatMap(alignment => {
+        const cell = row[alignment];
+
+        if (page.isInsertedBlank && !shouldRenderInsertedBlankCell(area, cell)) {
+            return [];
+        }
+
+        const text = resolveHeaderFooterText(cell.text, {
+            scriptTitle: plan.scriptTitle,
+            draftDate,
+            pageMark,
+            pageNumber,
+        });
+
+        if (text.length === 0) {
+            return [];
+        }
+
+        const fontSizePx = settings.typography.fontSizePx;
+        const x = resolveHeaderFooterX({
+            alignment,
+            text,
+            settings,
+            fontSizePx,
+        });
+
+        return [makeHeaderFooterRun(text, x, cell, fontSizePx)];
+    });
+
+    return runs.length > 0 ? {y, runs} : null;
+};
+
+const withHeaderFooter = (
+    pages: ScriptPage[],
+    plan: ExportPlan,
+    settings: EditorSettings,
+): PageItem[] => {
+    const fontSizePx = settings.typography.fontSizePx;
+    const lineHeightPx = fontSizePx * settings.typography.lineHeight;
+    const headerY = Math.max(0, (settings.page.marginTopPx - lineHeightPx) / 2);
+    const footerY = settings.page.heightPx - settings.page.marginBottomPx
+        + Math.max(0, (settings.page.marginBottomPx - lineHeightPx) / 2);
+    const draftDate = plan.titlePage ? resolveDraftDate(plan.titlePage) : '';
+    let pageMarkNumber = 0;
+
+    return pages.flatMap((page, index) => {
+        const pageNumber = index + 1;
+
+        if (!page.isInsertedBlank) {
+            pageMarkNumber += 1;
+        }
+
+        const header = buildHeaderFooterLine({
+            area: 'header',
+            row: settings.headerFooter.header,
+            y: headerY,
+            page,
+            pageNumber,
+            pageMarkNumber,
+            draftDate,
+            plan,
+            settings,
+        });
+        const footer = buildHeaderFooterLine({
+            area: 'footer',
+            row: settings.headerFooter.footer,
+            y: footerY,
+            page,
+            pageNumber,
+            pageMarkNumber,
+            draftDate,
+            plan,
+            settings,
+        });
+        const pageItems: PageItem[] = [
+            ...header ? [header] : [],
+            ...page.items,
+            ...footer ? [footer] : [],
+        ];
+
+        return index === pages.length - 1 ? pageItems : [...pageItems, PAGE_BREAK_ITEM];
+    });
+};
 
 export const transcribeExportPlan = (
     plan: ExportPlan,
@@ -251,6 +622,7 @@ export const transcribeExportPlan = (
     const forcedBreakByBlockId = new Map(plan.pagination.forcedBreaks.map(item => [item.blockId, item]));
     const contentWidthPx = settings.page.widthPx - settings.page.marginLeftPx - settings.page.marginRightPx;
     const cueLabels = buildCueLabels(plan.doc);
+    const structureMarks = buildStructureMarks(plan.doc);
 
     const prepared: PreparedBlock[] = plan.doc.content.map(node => {
         const blockType = getScriptBlockNodeType(node, DEFAULT_BLOCK_TYPE);
@@ -267,8 +639,8 @@ export const transcribeExportPlan = (
             : block.indentRightPx ?? 0;
         const availableWidthPx = Math.max(charWidthPx, contentWidthPx - indentLeftPx - indentRightPx);
         const maxChars = Math.max(1, Math.floor(availableWidthPx / charWidthPx));
-        const rawText = getBlockRawText(node, blockId ?? '', cueLabels);
-        const text = normalizeBlockText(rawText, blockType, block.casing);
+        const rawSegments = getBlockRawSegments(node, blockId ?? '', cueLabels);
+        const segments = normalizeBlockSegments(rawSegments, blockType, block.casing);
 
         return {
             blockType,
@@ -280,7 +652,7 @@ export const transcribeExportPlan = (
             baseX: settings.page.marginLeftPx + indentLeftPx,
             availableWidthPx,
             charWidthPx,
-            wrapped: wrapText(text, maxChars),
+            wrapped: wrapSegments(segments, maxChars),
         };
     });
 
@@ -317,7 +689,7 @@ export const transcribeExportPlan = (
         epsilonPx: FIT_EPSILON_PX,
     });
 
-    const wholeBreaksBefore = new Map<string, number>();
+    const wholeBreaksBefore = new Map<string, PageBreak['kind'][]>();
     const splitsByKey = new Map<string, number[]>();
 
     layout.breaks.forEach(item => {
@@ -330,31 +702,36 @@ export const transcribeExportPlan = (
             return;
         }
 
-        wholeBreaksBefore.set(item.atBlockKey, (wholeBreaksBefore.get(item.atBlockKey) ?? 0) + 1);
+        const breaks = wholeBreaksBefore.get(item.atBlockKey) ?? [];
+
+        wholeBreaksBefore.set(item.atBlockKey, [...breaks, item.kind]);
     });
 
-    const items: PageItem[] = [];
+    const pages: ScriptPage[] = [
+        {
+            items: [], mark: null, isInsertedBlank: false,
+        },
+    ];
+    let currentPage = pages[0];
     let y = settings.page.marginTopPx;
 
-    const pushBreak = () => {
-        /*
-         * Collapse consecutive breaks (mirrors the previous cursor behaviour):
-         * an odd-page blank page advances numbering without an empty PDF page.
-         */
-        if (items.at(-1) !== PAGE_BREAK_ITEM) {
-            items.push(PAGE_BREAK_ITEM);
+    const pushBreak = (kind: PageBreak['kind']) => {
+        if (kind === 'oddBlank') {
+            currentPage.isInsertedBlank = true;
         }
 
+        currentPage = {
+            items: [], mark: null, isInsertedBlank: false,
+        };
+        pages.push(currentPage);
         y = settings.page.marginTopPx;
     };
 
     prepared.forEach((item, index) => {
         const key = String(index);
-        const wholeBreaks = wholeBreaksBefore.get(key) ?? 0;
+        const wholeBreaks = wholeBreaksBefore.get(key) ?? [];
 
-        for (let breakCount = 0; breakCount < wholeBreaks; breakCount += 1) {
-            pushBreak();
-        }
+        wholeBreaks.forEach(pushBreak);
 
         y += item.spacingBeforePx;
 
@@ -363,24 +740,31 @@ export const transcribeExportPlan = (
 
         item.wrapped.forEach((line, lineIndex) => {
             if (splitIndex < splits.length && splits[splitIndex] === lineIndex) {
-                pushBreak();
+                pushBreak('split');
                 splitIndex += 1;
             }
 
+            const lineX = resolveLineX({
+                block: item.block,
+                line: line.text,
+                baseX: item.baseX,
+                availableWidthPx: item.availableWidthPx,
+                charWidthPx: item.charWidthPx,
+            });
+            let runX = lineX;
             const visualLine: VisualLine = {
                 y,
-                runs: [
-                    makeRun(line, resolveLineX({
-                        block: item.block,
-                        line,
-                        baseX: item.baseX,
-                        availableWidthPx: item.availableWidthPx,
-                        charWidthPx: item.charWidthPx,
-                    }), item.block, item.fontSizePx),
-                ],
+                runs: line.segments.map(segment => {
+                    const run = makeRun(segment.text, runX, item.block, item.fontSizePx, segment.style);
+
+                    runX += segment.text.length * item.charWidthPx;
+
+                    return run;
+                }),
             };
 
-            items.push(visualLine);
+            currentPage.mark ??= structureMarks[index] ?? {actIndex: null, sceneNumber: 0};
+            currentPage.items.push(visualLine);
             y += item.lineHeightPx;
         });
 
@@ -392,9 +776,11 @@ export const transcribeExportPlan = (
      * script. Everything is one flat item stream: N page breaks after the title
      * = the title→next boundary plus (count − 1) blank-page boundaries.
      */
+    const scriptPages = pages.filter(page => page.items.length > 0 || page.isInsertedBlank);
+    const scriptItems = withHeaderFooter(scriptPages, plan, settings);
     const titleItems = buildTitlePageItems(plan.titlePage, plan.scriptTitle, settings);
     const blankCount = plan.pagination.blankPagesBeforeScript.count;
-    const breaksAfterTitle = blankCount + (items.length > 0 ? 1 : 0);
+    const breaksAfterTitle = blankCount + (scriptItems.length > 0 ? 1 : 0);
     const leadingItems: PageItem[] = [...titleItems, ...Array.from({length: breaksAfterTitle}, () => PAGE_BREAK_ITEM)];
 
     return {
@@ -402,6 +788,6 @@ export const transcribeExportPlan = (
         pageHeightPx: settings.page.heightPx,
         marginLeftPx: settings.page.marginLeftPx,
         marginTopPx: settings.page.marginTopPx,
-        items: [...leadingItems, ...items],
+        items: [...leadingItems, ...scriptItems],
     };
 };

@@ -1,8 +1,5 @@
 import type {BlankPagesValue} from '@stagistic/export';
-import {
-    Input,
-    Switch,
-} from '@stagistic/ui';
+import {Input} from '@stagistic/ui';
 
 import styles from './modules.module.css';
 
@@ -34,21 +31,11 @@ export const BlankPagesModule = ({
                         betweenTitleAndScript: {
                             ...spec,
                             count: clampCount(event.currentTarget.valueAsNumber || 0),
+                            countsInNumbering: false,
                         },
                     })}
                 />
             </label>
-            <Switch
-                isSelected={spec.countsInNumbering}
-                onChange={countsInNumbering => onChange({
-                    betweenTitleAndScript: {
-                        ...spec,
-                        countsInNumbering,
-                    },
-                })}
-            >
-                Count blank pages in numbering
-            </Switch>
         </div>
     );
 };

@@ -17,6 +17,7 @@ export const deriveBasicExportPlan = (
 ): ExportPlan => {
     const doc = filterScriptByCharacter(script.doc, config.characterFilter, script.characters);
     const forcedBreaks: ForcedBreak[] = [];
+    let hasPreviousGroup = false;
 
     groupScenes(doc).forEach(group => {
         const heading = group.blocks[0];
@@ -26,18 +27,28 @@ export const deriveBasicExportPlan = (
             return;
         }
 
+        if (group.sceneBlockId === null && group.actBlockId !== null) {
+            if (hasPreviousGroup) {
+                forcedBreaks.push({blockId, kind: 'new-page'});
+            }
+
+            hasPreviousGroup = true;
+
+            return;
+        }
+
         if (group.sceneBlockId !== null && (config.pageBreaks.sceneOnNewPage || config.pageBreaks.sceneOnOddPage)) {
             forcedBreaks.push({
                 blockId,
                 kind: config.pageBreaks.sceneOnOddPage ? 'odd-page' : 'new-page',
             });
 
+            hasPreviousGroup = true;
+
             return;
         }
 
-        if (group.sceneBlockId === null && group.actBlockId !== null && config.pageBreaks.actOnNewPage) {
-            forcedBreaks.push({blockId, kind: 'new-page'});
-        }
+        hasPreviousGroup = true;
     });
 
     return {
