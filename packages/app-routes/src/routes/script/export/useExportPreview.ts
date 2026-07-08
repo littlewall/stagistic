@@ -1,8 +1,8 @@
 import {
-    renderPdfInWorker,
-    transcribeExportPlan,
     type ExportPlan,
+    renderPdfInWorker,
     type ScriptData,
+    transcribeExportPlan,
 } from '@stagistic/export';
 import {
     useEffect,
@@ -19,7 +19,7 @@ interface UseExportPreviewArgs<TConfig> {
     onArtifact?: (artifact: Blob) => void,
 }
 
-export const useExportPreview = <TConfig, >({
+export const useExportPreview = <TConfig >({
     config,
     derive,
     onArtifact,
@@ -49,9 +49,7 @@ export const useExportPreview = <TConfig, >({
                         return;
                     }
 
-                    const blob = await renderPdfInWorker(transcript, {
-                        blankPagesBeforeScript: plan.pagination.blankPagesBeforeScript.count,
-                    }, controller.signal);
+                    const blob = await renderPdfInWorker(transcript, controller.signal);
 
                     if (controller.signal.aborted || runRef.current !== runId) {
                         return;

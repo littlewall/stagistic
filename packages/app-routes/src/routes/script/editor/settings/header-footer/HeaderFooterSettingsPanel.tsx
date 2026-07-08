@@ -3,6 +3,7 @@ import {
     type HeaderFooterCellSettings,
     type HeaderFooterSettings,
     type HeaderFooterSettingsPatch,
+    resolveDraftDate,
     type TitlePageSettings,
 } from '@stagistic/script';
 import {
@@ -18,7 +19,6 @@ import {
     useState,
 } from 'react';
 
-import {resolveDraftDate} from '../draftDate';
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import sharedStyles from '../shared.module.css';
 import styles from './HeaderFooterSettingsPanel.module.css';

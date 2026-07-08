@@ -1,7 +1,7 @@
 import type {
     TitlePageDateFormat,
     TitlePageSettings,
-} from '@stagistic/script';
+} from './types';
 
 export const getTodayIso = (): string => {
     const d = new Date();

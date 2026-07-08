@@ -14,6 +14,7 @@ import {
 import type {
     GetDb,
     RecordOutbox,
+    SyncDb,
 } from './types';
 
 type SettingsHandlers = Pick<
@@ -24,6 +25,7 @@ type SettingsHandlers = Pick<
 interface CreateSettingsHandlersArgs {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
+    syncDb: SyncDb,
 }
 
 const ALIGNMENTS: HeaderFooterAlignment[] = [
@@ -41,6 +43,7 @@ const toDefined = <T extends Record<string, unknown>>(value: T): DefinedFields<T
 export const createSettingsHandlers = ({
     getDb,
     recordOutbox,
+    syncDb,
 }: CreateSettingsHandlersArgs): SettingsHandlers => {
     const loadScriptSettings: SettingsHandlers['loadScriptSettings'] = async scriptId => {
         const db = await getDb();
@@ -192,6 +195,12 @@ export const createSettingsHandlers = ({
             opType: 'config.save',
             payloadJson: JSON.stringify({scriptId, updatedAt: now}),
         });
+
+        /*
+         * Flush the in-memory PGlite WAL to the filesystem; without this the
+         * write is lost on page refresh (see content.ts saveLatest).
+         */
+        await syncDb();
     };
 
     const deleteScriptSettings: SettingsHandlers['deleteScriptSettings'] = async scriptId => {
@@ -203,6 +212,8 @@ export const createSettingsHandlers = ({
             opType: 'config.delete',
             payloadJson: JSON.stringify({scriptId, deletedAt: Date.now()}),
         });
+
+        await syncDb();
     };
 
     return {

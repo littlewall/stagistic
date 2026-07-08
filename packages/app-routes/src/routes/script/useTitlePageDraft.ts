@@ -56,7 +56,6 @@ export const useTitlePageDraft = ({
 
         let isActive = true;
 
-        loadedScriptIdRef.current = currentScriptId;
         setLoadedTitlePage(undefined);
 
         const load = async () => {
@@ -71,10 +70,21 @@ export const useTitlePageDraft = ({
 
                 setTitlePageDraft(resolved);
                 setLoadedTitlePage(resolved);
+
+                /*
+                 * Mark as loaded only after the async load actually applies its
+                 * result. Setting it before the await lets React StrictMode's
+                 * mount→cleanup→mount cycle skip the second load (ref already
+                 * matches) while the first load's result is discarded
+                 * (isActive=false) — leaving loadedTitlePage stuck at undefined,
+                 * which permanently blocks the save effect.
+                 */
+                loadedScriptIdRef.current = currentScriptId;
             } catch {
                 if (isActive) {
                     setTitlePageDraft(EMPTY_TITLE_PAGE);
                     setLoadedTitlePage(EMPTY_TITLE_PAGE);
+                    loadedScriptIdRef.current = currentScriptId;
                 }
             }
         };
@@ -109,7 +119,9 @@ export const useTitlePageDraft = ({
         const snapshot = titlePageDraft;
 
         saveTimerRef.current = window.setTimeout(() => {
-            void repository.saveTitlePage(currentScriptId, snapshot);
+            repository.saveTitlePage(currentScriptId, snapshot).catch((error: unknown) => {
+                console.error('[title-page] save failed', error);
+            });
         }, TITLE_PAGE_SAVE_DEBOUNCE_MS);
 
         return () => {

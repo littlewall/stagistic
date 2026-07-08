@@ -8,8 +8,8 @@ import type {
     ExportPlan,
     ForcedBreak,
 } from './plan';
-import type {ScriptData} from './scriptData';
 import {groupScenes} from './scenes';
+import type {ScriptData} from './scriptData';
 
 export const deriveBasicExportPlan = (
     config: BasicExportConfig,
@@ -31,6 +31,7 @@ export const deriveBasicExportPlan = (
                 blockId,
                 kind: config.pageBreaks.sceneOnOddPage ? 'odd-page' : 'new-page',
             });
+
             return;
         }
 
@@ -41,6 +42,8 @@ export const deriveBasicExportPlan = (
 
     return {
         doc,
+        titlePage: script.titlePage,
+        scriptTitle: script.scriptTitle,
         pagination: {
             forcedBreaks,
             blankPagesBeforeScript: config.blankPages.betweenTitleAndScript,

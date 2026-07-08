@@ -4,11 +4,11 @@ type WorkerResponse = {type: 'DONE', blob: Blob} | {type: 'ERROR', message: stri
 
 export const renderPdfInWorker = (
     transcript: TranscriptResult,
-    opts: {blankPagesBeforeScript: number},
     signal?: AbortSignal,
 ): Promise<Blob> => new Promise((resolve, reject) => {
     if (signal?.aborted) {
         reject(new DOMException('Export aborted', 'AbortError'));
+
         return;
     }
 
@@ -28,6 +28,7 @@ export const renderPdfInWorker = (
 
         if (event.data.type === 'ERROR') {
             reject(new Error(event.data.message));
+
             return;
         }
 
@@ -42,6 +43,5 @@ export const renderPdfInWorker = (
     worker.postMessage({
         type: 'START',
         transcript,
-        blankPagesBeforeScript: opts.blankPagesBeforeScript,
     });
 });

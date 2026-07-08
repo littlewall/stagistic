@@ -1,26 +1,15 @@
-import {
-    useScriptRepository,
-    useScripts,
-} from '@stagistic/app-core';
+import {useScriptRepository} from '@stagistic/app-core';
 import {
     incrementRouteRenderCount,
     ScriptEditor,
 } from '@stagistic/editor';
-import {isApplePlatform} from '@stagistic/shared';
-import {
-    AppLayout,
-    ScriptSettingsModal,
-} from '@stagistic/ui';
+import {resolveDraftDate} from '@stagistic/script';
+import {AppLayout} from '@stagistic/ui';
 import {useMemo} from 'react';
-import {
-    useNavigate,
-    useSearchParams,
-} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
-import {ScriptEditorSettingsPanel} from './editor/settings';
-import {resolveDraftDate} from './editor/settings/draftDate';
 import {
     type SidebarPanel,
     useEditorSidebars,
@@ -32,98 +21,43 @@ import {
 import {ScriptCharactersProvider} from './ScriptCharactersContext';
 import {ScriptSessionProvider} from './ScriptSessionContext';
 import {useScriptWorkspace} from './ScriptWorkspaceContext';
-import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settings/settingsMenu';
+import {useScriptSettingsModal} from './settings/ScriptSettingsModalProvider';
 import {useScriptCharactersContextValue} from './useScriptCharactersContextValue';
 import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
-import {useScriptEditorSettingsDraft} from './useScriptEditorSettingsDraft';
-import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
-import {useScriptTitleDraft} from './useScriptTitleDraft';
-import {useTitlePageDraft} from './useTitlePageDraft';
 
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'calc(280px * var(--size-scale))';
-const BLOCK_LABEL_BY_TYPE = new Map(
-    SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const),
-);
 
 export const ScriptEditorRoute = () => {
     incrementRouteRenderCount();
 
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
-    const {deleteScript, renameScriptTitle} = useScripts();
-    const [searchParams, setSearchParams] = useSearchParams();
     const {
         currentScript,
         currentScriptId,
         recentScripts,
         initialValue,
         initialIndexSnapshot,
-        scriptSettingsOverride,
         storageError,
         shouldAutoFocus,
         saveIndicator,
         handleAutoSave,
         handleManualSave,
-        handleSaveScriptSettingsOverride,
         editorSurfaceCache,
     } = useScriptWorkspace();
     const {
-        effectiveScriptSettingsDraft,
         resolvedScriptSettings,
-        updateBlockSettings,
-        resetBlockSettings,
-        updateCharacterColorSaturation,
-        updateStructureSettings,
-        updatePageSettings,
-        updateHeaderFooterSettings,
-    } = useScriptEditorSettingsDraft({
-        state: {
-            currentScriptId,
-            scriptSettingsOverride,
-        },
-        requests: {
-            handleSaveScriptSettingsOverride,
-        },
-    });
-    const {
+        effectiveScriptSettingsDraft,
         titlePageDraft,
-        updateTitlePage,
-    } = useTitlePageDraft({
-        currentScriptId,
-        repository: scriptRepository,
-    });
-    const {
         scriptTitleDraft,
-        updateScriptTitle,
-    } = useScriptTitleDraft({
-        currentScriptId,
-        currentScriptTitle: currentScript?.name ?? '',
-        renameScriptTitle,
-    });
+        openSettingsModal,
+    } = useScriptSettingsModal();
+
     const displayedCurrentScript = useMemo(
         () => currentScript ? {...currentScript, name: scriptTitleDraft} : null,
         [currentScript, scriptTitleDraft],
     );
-    const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
-
-    const {
-        isSettingsOpen,
-        activePanelId,
-        expandedItemIds,
-        groups,
-        openSettingsModal,
-        handleCloseSettings,
-        handleSelectSettingsPanel,
-        handleDeleteScript,
-        toggleExpanded,
-    } = useScriptEditorSettingsModal({
-        currentScriptId,
-        navigate,
-        searchParams,
-        setSearchParams,
-        deleteScript,
-    });
 
     const {
         getEditorValue,
@@ -251,41 +185,6 @@ export const ScriptEditorRoute = () => {
                             {rightSidebar}
                         </ScriptEditor.RightSidebar>
                     </ScriptEditor>
-                    <ScriptSettingsModal
-                        isOpen={isSettingsOpen}
-                        title="Settings"
-                        groups={groups}
-                        activePanelId={activePanelId}
-                        expandedItemIds={expandedItemIds}
-                        onClose={handleCloseSettings}
-                        onSelectPanel={handleSelectSettingsPanel}
-                        onToggleExpand={toggleExpanded}
-                    >
-                        <ScriptEditorSettingsPanel
-                            panelId={activePanelId}
-                            resolvedScriptSettings={resolvedScriptSettings}
-                            blockLabelByType={BLOCK_LABEL_BY_TYPE}
-                            shortcutPrefix={shortcutPrefix}
-                            elementsHandlers={{
-                                onResetBlockSettings: resetBlockSettings,
-                                onUpdateBlockSettings: updateBlockSettings,
-                            }}
-                            visualPreferencesHandlers={{onUpdateCharacterColorSaturation: updateCharacterColorSaturation}}
-                            structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
-                            pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
-                            headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
-                            titlePageHandlers={{
-                                titlePageSettings: titlePageDraft,
-                                scriptTitle: scriptTitleDraft,
-                                onUpdateScriptTitle: updateScriptTitle,
-                                onUpdateTitlePage: updateTitlePage,
-                            }}
-                            dangerZoneHandlers={{
-                                scriptTitle: scriptTitleDraft,
-                                onDeleteScript: handleDeleteScript,
-                            }}
-                        />
-                    </ScriptSettingsModal>
                 </AppLayout>
             </ScriptCharactersProvider>
         </ScriptSessionProvider>

@@ -8,12 +8,15 @@ import {
 import {Outlet, useParams} from 'react-router-dom';
 
 import {ScriptWorkspaceProvider, type ScriptWorkspaceValue} from './ScriptWorkspaceContext';
+import {ScriptSettingsModalProvider} from './settings/ScriptSettingsModalProvider';
 import {useScriptEditorController} from './useScriptEditorController';
 
 export const ScriptWorkspaceRoute = () => {
     const {scriptId} = useParams();
     const controller = useScriptEditorController(scriptId);
-    const {editorLoadState, initialValue, storageError} = controller;
+    const {
+        editorLoadState, initialValue, storageError,
+    } = controller;
     const editorSurfaceCache = useMemo(() => createEditorSurfaceCache(), []);
     const pendingCacheDestroyRef = useRef<number | null>(null);
 
@@ -56,7 +59,9 @@ export const ScriptWorkspaceRoute = () => {
 
     return (
         <ScriptWorkspaceProvider value={workspaceValue}>
-            <Outlet />
+            <ScriptSettingsModalProvider>
+                <Outlet />
+            </ScriptSettingsModalProvider>
         </ScriptWorkspaceProvider>
     );
 };

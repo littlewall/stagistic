@@ -9,11 +9,13 @@ import type {ScriptTitlePageRepository} from '../scriptRepository';
 import type {
     GetDb,
     RecordOutbox,
+    SyncDb,
 } from './types';
 
 interface CreateTitlePageHandlersArgs {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
+    syncDb: SyncDb,
 }
 
 /*
@@ -78,6 +80,7 @@ const toTitlePageSettings = (
 export const createTitlePageHandlers = ({
     getDb,
     recordOutbox,
+    syncDb,
 }: CreateTitlePageHandlersArgs): ScriptTitlePageRepository => {
     const load: ScriptTitlePageRepository['load'] = async scriptId => {
         const db = await getDb();
@@ -135,6 +138,12 @@ export const createTitlePageHandlers = ({
             opType: 'title-page.save',
             payloadJson: JSON.stringify({scriptId, updatedAt: now}),
         });
+
+        /*
+         * Flush the in-memory PGlite WAL to the filesystem; without this the
+         * write is lost on page refresh (see content.ts saveLatest).
+         */
+        await syncDb();
     };
 
     const deleteTitlePage: ScriptTitlePageRepository['delete'] = async scriptId => {
@@ -142,12 +151,16 @@ export const createTitlePageHandlers = ({
         const now = Date.now();
 
         await dbQueries.replaceScriptTitlePageFields(db, scriptId, []);
-        await dbQueries.updateScriptSubtitle(db, {id: scriptId, subtitle: null, updatedAt: now});
+        await dbQueries.updateScriptSubtitle(db, {
+            id: scriptId, subtitle: null, updatedAt: now,
+        });
         await recordOutbox({
             scriptId,
             opType: 'title-page.delete',
             payloadJson: JSON.stringify({scriptId, deletedAt: now}),
         });
+
+        await syncDb();
     };
 
     return {

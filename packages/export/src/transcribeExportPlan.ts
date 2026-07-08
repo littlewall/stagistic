@@ -26,6 +26,7 @@ import {
 } from '@stagistic/script-pagination';
 
 import type {ExportPlan} from './plan';
+import {buildTitlePageItems} from './titlePage/buildTitlePageItems';
 import type {
     PageItem,
     TranscriptResult,
@@ -386,11 +387,21 @@ export const transcribeExportPlan = (
         y += item.spacingAfterPx;
     });
 
+    /*
+     * The title page is always page 1, followed by any blank pages, then the
+     * script. Everything is one flat item stream: N page breaks after the title
+     * = the title→next boundary plus (count − 1) blank-page boundaries.
+     */
+    const titleItems = buildTitlePageItems(plan.titlePage, plan.scriptTitle, settings);
+    const blankCount = plan.pagination.blankPagesBeforeScript.count;
+    const breaksAfterTitle = blankCount + (items.length > 0 ? 1 : 0);
+    const leadingItems: PageItem[] = [...titleItems, ...Array.from({length: breaksAfterTitle}, () => PAGE_BREAK_ITEM)];
+
     return {
         pageWidthPx: settings.page.widthPx,
         pageHeightPx: settings.page.heightPx,
         marginLeftPx: settings.page.marginLeftPx,
         marginTopPx: settings.page.marginTopPx,
-        items,
+        items: [...leadingItems, ...items],
     };
 };

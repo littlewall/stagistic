@@ -18,6 +18,7 @@ describe('settings persistence', () => {
         const handlers = createSettingsHandlers({
             getDb: () => Promise.resolve(db),
             recordOutbox: () => Promise.resolve(),
+            syncDb: () => Promise.resolve(),
         });
 
         await handlers.saveScriptSettings('script-settings', {
@@ -55,6 +56,7 @@ describe('settings persistence', () => {
         const handlers = createTitlePageHandlers({
             getDb: () => Promise.resolve(db),
             recordOutbox: () => Promise.resolve(),
+            syncDb: () => Promise.resolve(),
         });
 
         await handlers.save('script-title-page', {
@@ -69,5 +71,51 @@ describe('settings persistence', () => {
         expect(stored?.subtitle).toBe('A play');
         expect(stored?.credits).toEqual([{credit: 'Written by', authors: ['Ada', 'Grace']}]);
         expect(summary?.subtitle).toBe('A play');
+    });
+
+    it('flushes to the filesystem on save and delete so writes survive a refresh', async () => {
+        const {db} = await createTestDb();
+
+        await seedScript(db, 'script-title-page-sync');
+
+        let syncCount = 0;
+        const handlers = createTitlePageHandlers({
+            getDb: () => Promise.resolve(db),
+            recordOutbox: () => Promise.resolve(),
+            syncDb: () => {
+                syncCount += 1;
+
+                return Promise.resolve();
+            },
+        });
+
+        await handlers.save('script-title-page-sync', {subtitle: 'A play'});
+        expect(syncCount).toBe(1);
+
+        await handlers.delete('script-title-page-sync');
+        expect(syncCount).toBe(2);
+    });
+
+    it('flushes editor settings to the filesystem on save and delete', async () => {
+        const {db} = await createTestDb();
+
+        await seedScript(db, 'script-settings-sync');
+
+        let syncCount = 0;
+        const handlers = createSettingsHandlers({
+            getDb: () => Promise.resolve(db),
+            recordOutbox: () => Promise.resolve(),
+            syncDb: () => {
+                syncCount += 1;
+
+                return Promise.resolve();
+            },
+        });
+
+        await handlers.saveScriptSettings('script-settings-sync', {page: {marginTopPx: 72}});
+        expect(syncCount).toBe(1);
+
+        await handlers.deleteScriptSettings('script-settings-sync');
+        expect(syncCount).toBe(2);
     });
 });

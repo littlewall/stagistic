@@ -18,6 +18,8 @@ const plan = (blocks: ExportPlan['doc']['content']): ExportPlan => ({
         type: 'doc',
         content: blocks,
     },
+    titlePage: null,
+    scriptTitle: '',
     pagination: {
         forcedBreaks: [],
         blankPagesBeforeScript: {
@@ -29,6 +31,8 @@ const plan = (blocks: ExportPlan['doc']['content']): ExportPlan => ({
 });
 
 const isVisualLine = (item: PageItem): item is VisualLine => !('type' in item);
+const isPageBreak = (item: PageItem): boolean => 'type' in item && item.type === '__page_break__';
+const indexOfText = (items: PageItem[], text: string): number => items.findIndex(item => isVisualLine(item) && item.runs.some(run => run.text === text));
 
 describe('transcribeExportPlan', () => {
     it('creates text PDF lines from script document content', () => {
@@ -89,6 +93,39 @@ describe('transcribeExportPlan', () => {
         }, DEFAULT_EDITOR_SETTINGS);
 
         expect(transcript.items.some(item => 'type' in item && item.type === '__page_break__')).toBe(true);
+    });
+
+    it('prepends the title page as page one, before the script content', () => {
+        const transcript = transcribeExportPlan(
+            {...plan([block('scene', 's1', 'Scene one')]), scriptTitle: 'My Play'},
+            DEFAULT_EDITOR_SETTINGS,
+        );
+
+        const titleIndex = indexOfText(transcript.items, 'My Play');
+        const firstBreak = transcript.items.findIndex(isPageBreak);
+        const sceneIndex = indexOfText(transcript.items, 'SCENE ONE');
+
+        expect(titleIndex).toBe(0);
+        expect(firstBreak).toBeGreaterThan(titleIndex);
+        expect(sceneIndex).toBeGreaterThan(firstBreak);
+    });
+
+    it('inserts blank pages between the title page and the script', () => {
+        const base = plan([block('scene', 's1', 'Scene one')]);
+        const transcript = transcribeExportPlan({
+            ...base,
+            scriptTitle: 'My Play',
+            pagination: {
+                ...base.pagination,
+                blankPagesBeforeScript: {count: 2, countsInNumbering: false},
+            },
+        }, DEFAULT_EDITOR_SETTINGS);
+
+        const sceneIndex = indexOfText(transcript.items, 'SCENE ONE');
+        const breaksBeforeScene = transcript.items.slice(0, sceneIndex).filter(isPageBreak).length;
+
+        // title → blank1 → blank2 → script = three page breaks.
+        expect(breaksBeforeScene).toBe(3);
     });
 
     it('pushes a non-splittable heading whole to the next page instead of tearing it', () => {

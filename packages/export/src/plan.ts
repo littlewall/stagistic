@@ -1,4 +1,7 @@
-import type {ScriptDocument} from '@stagistic/script';
+import type {
+    ScriptDocument,
+    TitlePageSettings,
+} from '@stagistic/script';
 
 export interface ForcedBreak {
     blockId: string,
@@ -21,6 +24,8 @@ export interface ExportPostStep {
 
 export interface ExportPlan {
     doc: ScriptDocument,
+    titlePage: TitlePageSettings | null,
+    scriptTitle: string,
     pagination: PaginationOverrides,
     postSteps: ExportPostStep[],
 }

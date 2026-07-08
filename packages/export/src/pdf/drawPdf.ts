@@ -13,10 +13,7 @@ import {
 
 const PX_TO_PT = 72 / 96;
 
-const isPageBreak = (item: PageItem): item is {type: '__page_break__'} => (
-    'type' in item && item.type === '__page_break__'
-);
-
+const isPageBreak = (item: PageItem): item is {type: '__page_break__'} => 'type' in item && item.type === '__page_break__';
 const getFontStyle = (run: VisualRun) => {
     if (run.bold && run.italic) {
         return 'bolditalic';
@@ -62,7 +59,6 @@ const drawLine = (
 
 export const drawPdf = async (
     transcript: TranscriptResult,
-    opts: {blankPagesBeforeScript: number},
 ): Promise<Blob> => {
     const pageWidthPt = transcript.pageWidthPx * PX_TO_PT;
     const pageHeightPt = transcript.pageHeightPx * PX_TO_PT;
@@ -70,16 +66,6 @@ export const drawPdf = async (
         unit: 'pt',
         format: [pageWidthPt, pageHeightPt],
     });
-
-    for (let index = 0; index < opts.blankPagesBeforeScript; index += 1) {
-        if (index > 0) {
-            doc.addPage();
-        }
-    }
-
-    if (opts.blankPagesBeforeScript > 0) {
-        doc.addPage();
-    }
 
     let monoFontFamily = 'Courier';
 
@@ -93,6 +79,7 @@ export const drawPdf = async (
     transcript.items.forEach(item => {
         if (isPageBreak(item)) {
             doc.addPage();
+
             return;
         }
 

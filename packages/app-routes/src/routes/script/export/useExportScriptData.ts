@@ -1,17 +1,18 @@
-import {
-    buildScriptBlockIndex,
-    DEFAULT_EDITOR_SETTINGS,
-    mergeEditorSettings,
-    normalizeCharacterKey,
-    type EditorSettings,
-} from '@stagistic/script';
 import type {
     ExportCharacter,
     ScriptData,
 } from '@stagistic/export';
+import {
+    buildScriptBlockIndex,
+    DEFAULT_EDITOR_SETTINGS,
+    type EditorSettings,
+    mergeEditorSettings,
+    normalizeCharacterKey,
+} from '@stagistic/script';
 import {useMemo} from 'react';
 
 import {useScriptWorkspace} from '../ScriptWorkspaceContext';
+import {useScriptSettingsModal} from '../settings/ScriptSettingsModalProvider';
 
 const toDisplayName = (key: string) => key
     .toLowerCase()
@@ -55,6 +56,7 @@ export const useExportScriptData = (): {
         initialIndexSnapshot,
         scriptSettingsOverride,
     } = useScriptWorkspace();
+    const {titlePageDraft} = useScriptSettingsModal();
 
     const settings = useMemo(
         () => mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, scriptSettingsOverride ?? undefined),
@@ -72,12 +74,13 @@ export const useExportScriptData = (): {
             doc: initialValue,
             characters: collectCharacters(snapshot),
             scriptTitle: currentScript.name,
-            titlePage: null,
+            titlePage: titlePageDraft,
         };
     }, [
         currentScript,
         initialIndexSnapshot,
         initialValue,
+        titlePageDraft,
     ]);
 
     return {script, settings};

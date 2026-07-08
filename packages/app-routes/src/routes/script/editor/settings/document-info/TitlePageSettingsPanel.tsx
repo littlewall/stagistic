@@ -1,6 +1,8 @@
-import type {
-    TitlePageDateFormat,
-    TitlePageSettings,
+import {
+    formatDatePreview,
+    getTodayIso,
+    type TitlePageDateFormat,
+    type TitlePageSettings,
 } from '@stagistic/script';
 import {
     InputTable,
@@ -14,10 +16,6 @@ import {
     useState,
 } from 'react';
 
-import {
-    formatDatePreview,
-    getTodayIso,
-} from '../draftDate';
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import {
     SettingsSelect,

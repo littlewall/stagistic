@@ -87,6 +87,7 @@ export const createLocalPgliteDataRepository = ({
     } = createSettingsHandlers({
         getDb,
         recordOutbox,
+        syncDb: syncToFs,
     });
 
     const settings = {
@@ -98,6 +99,7 @@ export const createLocalPgliteDataRepository = ({
     const titlePage = createTitlePageHandlers({
         getDb,
         recordOutbox,
+        syncDb: syncToFs,
     });
 
     const blocks = createBlocksHandlers({getDb});

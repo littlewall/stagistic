@@ -127,6 +127,7 @@
     --color-surface: oklch(from var(--base-neutral) var(--L-surface) calc(c * var(--C-bg)) h);
     --color-surface-raised: oklch(from var(--base-neutral) var(--L-highlight) calc(c * var(--C-bg)) h);
     --color-surface-accent: color-mix(in oklch, var(--base-blue) 16%, var(--color-surface));
+    --color-surface-paper: oklch(from var(--base-neutral) var(--L-surface) calc(c * .1) h);
 
     /* Text */
     --color-text: oklch(from var(--base-neutral) var(--L-text) calc(c * var(--C-block)) h);

@@ -33,10 +33,7 @@ describe('deriveBasicExportPlan', () => {
             },
         }), script);
 
-        expect(plan.pagination.forcedBreaks).toEqual([
-            {blockId: 'sceneA', kind: 'new-page'},
-            {blockId: 'sceneB', kind: 'new-page'},
-        ]);
+        expect(plan.pagination.forcedBreaks).toEqual([{blockId: 'sceneA', kind: 'new-page'}, {blockId: 'sceneB', kind: 'new-page'}]);
     });
 
     it('uses odd-page scene breaks when requested', () => {
@@ -49,6 +46,17 @@ describe('deriveBasicExportPlan', () => {
         }), script);
 
         expect(plan.pagination.forcedBreaks.every(item => item.kind === 'odd-page')).toBe(true);
+    });
+
+    it('carries the title page and script title through', () => {
+        const plan = deriveBasicExportPlan(BASIC_DEFAULTS, {
+            ...script,
+            scriptTitle: 'My Play',
+            titlePage: {subtitle: 'A Comedy'},
+        });
+
+        expect(plan.scriptTitle).toBe('My Play');
+        expect(plan.titlePage).toEqual({subtitle: 'A Comedy'});
     });
 
     it('carries blank-page settings through', () => {
