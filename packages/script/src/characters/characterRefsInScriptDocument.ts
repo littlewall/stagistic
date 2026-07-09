@@ -102,9 +102,13 @@ export const linkCharacterRefInScriptDocument = (
         }),
     );
 
-    const tagResult = mapAllNodesTagMarks(cueResult.value, tag => tag.key === normalizedCharacterKey && tag.characterId !== characterId
-            ? {characterId}
-            : null);
+    const tagResult = mapAllNodesTagMarks(cueResult.value, tag => {
+        if (tag.key === normalizedCharacterKey && tag.characterId !== characterId) {
+            return {characterId};
+        }
+
+        return null;
+    });
 
     return {value: tagResult.value, changed: cueResult.changed || tagResult.changed};
 };
@@ -140,7 +144,13 @@ export const unlinkCharacterRefInScriptDocument = (
         }),
     );
 
-    const tagResult = mapAllNodesTagMarks(cueResult.value, tag => tag.characterId === characterId ? {characterId: null} : null);
+    const tagResult = mapAllNodesTagMarks(cueResult.value, tag => {
+        if (tag.characterId === characterId) {
+            return {characterId: null};
+        }
+
+        return null;
+    });
 
     return {value: tagResult.value, changed: cueResult.changed || tagResult.changed};
 };
@@ -187,7 +197,13 @@ export const replaceCharacterRefIdInScriptDocument = (
         }),
     );
 
-    const tagResult = mapAllNodesTagMarks(cueResult.value, tag => tag.characterId === sourceCharacterId ? {characterId: targetCharacterId} : null);
+    const tagResult = mapAllNodesTagMarks(cueResult.value, tag => {
+        if (tag.characterId === sourceCharacterId) {
+            return {characterId: targetCharacterId};
+        }
+
+        return null;
+    });
 
     return {value: tagResult.value, changed: cueResult.changed || tagResult.changed};
 };

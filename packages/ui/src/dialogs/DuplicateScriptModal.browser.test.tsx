@@ -8,7 +8,6 @@ import {
 } from 'vite-plus/test';
 import {
     page,
-    userEvent,
 } from 'vite-plus/test/browser';
 
 import {
@@ -89,13 +88,15 @@ describe('DuplicateScriptModal', () => {
 
         await waitForElement('#duplicate-script-title');
 
-        // react-aria renders the switch input inside a <label>; the visible track
-        // intercepts pointer events, so click the wrapping label instead.
+        /*
+         * react-aria renders the switch input inside a <label>; the visible track
+         * intercepts pointer events, so click the wrapping label instead.
+         */
         const switchInputs = Array.from(document.querySelectorAll<HTMLInputElement>('[role="switch"]'));
         const switchLabels = switchInputs.map(input => input.closest('label')!);
 
-        await page.elementLocator(switchLabels[0]!).click();
-        await page.elementLocator(switchLabels[1]!).click();
+        await page.elementLocator(switchLabels[0]).click();
+        await page.elementLocator(switchLabels[1]).click();
 
         const checkbox = page.elementLocator(await waitForElement('input[type="checkbox"]:not([role])'));
 

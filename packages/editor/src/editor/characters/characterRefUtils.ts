@@ -8,7 +8,7 @@ import {isScriptBlockNodeName} from '../tiptap/scriptCore';
 export type CharacterRefByKey = Record<string, string>;
 
 export const isCharacterBlockType = (value: unknown): boolean => {
-    return value === "character";
+    return value === 'character';
 };
 
 export const readNormalizedRefsFromRaw = (rawRefs: unknown): CharacterRefByKey => {

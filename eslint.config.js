@@ -30,6 +30,11 @@ export default [
             '**/*.d.ts',
             '**/*.d.mts',
             'apps/landing/**',
+            /*
+             * vite-plus compiles vite.config.ts -> vite.config.js on each run;
+             * it is a gitignored build artifact, not a source file.
+             */
+            'vite.config.js',
         ],
     },
     ...withoutParserProject(dvdevEslint.configs.base),
@@ -38,6 +43,11 @@ export default [
         languageOptions: {
             parserOptions: {
                 projectService: {
+                    /*
+                     * These tooling files aren't part of any package tsconfig, so they fall
+                     * to the default project. There are >8 of them, so raise tseslint's cap.
+                     */
+                    maximumDefaultProjectFileMatchCount_THIS_WILL_SLOW_DOWN_LINTING: 30,
                     allowDefaultProject: [
                         'eslint.config.js',
                         'stylelint.config.js',

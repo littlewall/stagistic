@@ -21,9 +21,9 @@
     font-family: var(--font-family-mono);
     font-size: var(--font-size-xs);
     font-weight: var(--font-weight-medium);
-    letter-spacing: .08em;
     color: var(--color-text-muted);
     text-transform: uppercase;
+    letter-spacing: .08em;
 }
 
 .body {

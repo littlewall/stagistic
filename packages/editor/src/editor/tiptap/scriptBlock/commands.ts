@@ -129,7 +129,7 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
         characterRefs:
             activeBlock.blockType === 'stageDirection' && normalized !== 'stageDirection'
                 ? null
-                : activeBlock.node.attrs.characterRefs,
+                : (activeBlock.node.attrs.characterRefs as Record<string, string> | null),
     };
 
     let tr = editor.state.tr.setNodeMarkup(activeBlock.pos, nodeType, attributes);
@@ -269,7 +269,7 @@ export const setBlockTypeWithSelection = (
         characterRefs:
             block.blockType === 'stageDirection' && normalized !== 'stageDirection'
                 ? null
-                : block.node.attrs.characterRefs,
+                : (block.node.attrs.characterRefs as Record<string, string> | null),
     };
 
     let tr = editor.state.tr.setNodeMarkup(block.pos, nodeType, attrs);

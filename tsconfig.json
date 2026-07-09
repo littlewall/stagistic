@@ -9,6 +9,8 @@
         {"path": "./packages/ui"},
         {"path": "./packages/editor"},
         {"path": "./packages/script"},
+        {"path": "./packages/script-pagination"},
+        {"path": "./packages/export"},
         {"path": "./apps/desktop"},
         {"path": "./apps/web"}
     ],

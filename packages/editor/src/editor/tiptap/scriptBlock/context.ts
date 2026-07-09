@@ -40,6 +40,6 @@ export const isInsideParentheses = (text: string, offset: number) => {
 };
 
 export const isEmptyDialogueLikeBlock = (block: ActiveScriptBlock) => (
-    block.blockType === "dialogue"
-    || block.blockType === "lyrics"
+    block.blockType === 'dialogue'
+    || block.blockType === 'lyrics'
 ) && (block.node.textContent ?? '').trim().length === 0;

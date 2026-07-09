@@ -59,8 +59,12 @@ export const HomeRoute = () => {
     const deleteScript = useCallback((script: {id: string, title: string}) => {
         openDeleteScript({id: script.id, title: script.title});
     }, [openDeleteScript]);
-    const renameScript = useCallback((script: {id: string, title: string, subtitle: string | null}) => {
-        openRenameScript({id: script.id, title: script.title, subtitle: script.subtitle ?? ''});
+    const renameScript = useCallback((script: {
+        id: string, title: string, subtitle: string | null,
+    }) => {
+        openRenameScript({
+            id: script.id, title: script.title, subtitle: script.subtitle ?? '',
+        });
     }, [openRenameScript]);
     const duplicateScript = useCallback((script: {id: string, title: string}) => {
         openDuplicateScript({id: script.id, title: script.title});

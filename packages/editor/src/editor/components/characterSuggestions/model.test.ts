@@ -194,7 +194,7 @@ describe('computeCharacterSuggestions', () => {
             getComputedStyle: () => ({
                 getPropertyValue: () => '',
             }),
-        } as Window & typeof globalThis;
+        } as unknown as Window & typeof globalThis;
 
         const result = computeCharacterSuggestions({
             editor: createEditor('J'),
@@ -232,7 +232,7 @@ describe('computeCharacterSuggestions', () => {
             getComputedStyle: () => ({
                 getPropertyValue: () => '',
             }),
-        } as Window & typeof globalThis;
+        } as unknown as Window & typeof globalThis;
 
         const view = createView(createComposeFlowState());
         const openComposeTransaction = buildOpenComposeTransaction(
@@ -255,7 +255,13 @@ describe('computeCharacterSuggestions', () => {
         }
 
         const from = view.state.selection.from;
-        const handled = handleTextInput(view, from, from, 'J');
+        const handled = (handleTextInput as OmitThisParameter<typeof handleTextInput>)(
+            view,
+            from,
+            from,
+            'J',
+            () => view.state.tr,
+        );
 
         expect(handled).toBe(true);
         expect(getCharacterTagComposeFromState(view.state)?.query).toBe('J');
@@ -333,7 +339,13 @@ describe('computeCharacterSuggestions', () => {
         }
 
         const from = view.state.selection.from;
-        const handled = handleTextInput(view, from, from, 'J');
+        const handled = (handleTextInput as OmitThisParameter<typeof handleTextInput>)(
+            view,
+            from,
+            from,
+            'J',
+            () => view.state.tr,
+        );
 
         expect(handled).toBe(true);
         expect(getCharacterTagComposeFromState(view.state)?.query).toBe('J');

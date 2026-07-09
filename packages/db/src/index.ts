@@ -11,14 +11,14 @@ export {
 } from './repo/createLocalPgliteRepository';
 export * from './schema';
 export type {
+    DuplicateScriptInput,
     ListScriptsOptions,
+    RenameScriptInput,
     ScriptActsRepository,
     ScriptBlockCharacterRefsRepository,
     ScriptBlocksRepository,
     ScriptCharacterGendersRepository,
     ScriptCharactersRepository,
-    DuplicateScriptInput,
-    RenameScriptInput,
     ScriptContentRepository,
     ScriptCrudRepository,
     ScriptDataRepository,

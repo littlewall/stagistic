@@ -24,10 +24,10 @@ export const ExportPanel = ({children}: ExportPanelProps) => (
     <div className={styles.panel}>{children}</div>
 );
 
-ExportPanel.Input = ({children}: ExportPanelSectionProps) => (
-    <Section title="Input">{children}</Section>
-);
+ExportPanel.Input = function ExportPanelInput({children}: ExportPanelSectionProps) {
+    return <Section title="Input">{children}</Section>;
+};
 
-ExportPanel.Options = ({children}: ExportPanelSectionProps) => (
-    <Section title="Options">{children}</Section>
-);
+ExportPanel.Options = function ExportPanelOptions({children}: ExportPanelSectionProps) {
+    return <Section title="Options">{children}</Section>;
+};

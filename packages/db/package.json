@@ -6,6 +6,7 @@
     "main": "./src/index.ts",
     "scripts": {
         "lint": "eslint .",
+        "typecheck": "tsc -b",
         "test": "vp test run --dir .",
         "db:generate": "drizzle-kit generate && node ./scripts/compile-migrations.mjs",
         "db:check": "drizzle-kit check",

@@ -41,6 +41,7 @@ const appendText = (nodes: ScriptNode[], text: string, marks?: InlineMark[]) => 
 
     if (previous?.type === 'text' && sameMarks(previous.marks, marks)) {
         previous.text = `${previous.text ?? ''}${text}`;
+
         return;
     }
 
@@ -52,7 +53,11 @@ const appendText = (nodes: ScriptNode[], text: string, marks?: InlineMark[]) => 
 };
 
 const getEmphasisMarks = (activeMarks: Set<string>): InlineMark[] => {
-    return ['bold', 'italic', 'underline']
+    return [
+        'bold',
+        'italic',
+        'underline',
+    ]
         .filter(mark => activeMarks.has(mark))
         .map(type => ({type}));
 };
@@ -81,11 +86,16 @@ export const parseInlineText = (source: string, line: number): ScriptNode[] => {
             } else {
                 activeMarks.add(emphasis.mark);
             }
+
             index += emphasis.marker.length;
             continue;
         }
 
-        if (source[index] === '\\' && ['*', '_', '\\'].includes(source[index + 1] ?? '')) {
+        if (source[index] === '\\' && [
+            '*',
+            '_',
+            '\\',
+        ].includes(source[index + 1] ?? '')) {
             appendText(nodes, source[index + 1], getEmphasisMarks(activeMarks));
             index += 2;
             continue;
@@ -105,13 +115,13 @@ export const parseInlineText = (source: string, line: number): ScriptNode[] => {
                 while (tagEnd < source.length && !(/\s/u).test(source[tagEnd])) {
                     tagEnd += 1;
                 }
+
                 tagText = source.slice(tagStart, tagEnd);
             }
 
             if (tagText) {
                 const marks = [
-                    ...getEmphasisMarks(activeMarks),
-                    {
+                    ...getEmphasisMarks(activeMarks), {
                         type: CHARACTER_TAG_MARK_NAME,
                         attrs: {
                             [CHARACTER_TAG_KEY_ATTR]: normalizeCharacterKey(tagText),
@@ -134,7 +144,7 @@ export const parseInlineText = (source: string, line: number): ScriptNode[] => {
 };
 
 const readCueMarker = (source: string, start: number, line: number) => {
-    const cueMatch = /^@@cue\s+(\d+)\s+/u.exec(source.slice(start));
+    const cueMatch = (/^@@cue\s+(\d+)\s+/u).exec(source.slice(start));
 
     if (cueMatch) {
         const titleStart = start + cueMatch[0].length;
@@ -156,7 +166,7 @@ const readCueMarker = (source: string, start: number, line: number) => {
         };
     }
 
-    const outMatch = /^@@out\s+(\d+)/u.exec(source.slice(start));
+    const outMatch = (/^@@out\s+(\d+)/u).exec(source.slice(start));
 
     if (outMatch) {
         return {
@@ -193,6 +203,7 @@ export const parseStageDirectionLine = (source: string, line: number): ParsedSta
         }
 
         plainText += source.slice(cursor, markerStart);
+
         const marker = readCueMarker(source, markerStart, line);
 
         if (!marker) {
@@ -206,7 +217,9 @@ export const parseStageDirectionLine = (source: string, line: number): ParsedSta
         content.push(marker.node);
         blocks.push({
             node: {type: 'stageDirection', content},
-            cue: {role: marker.role, number: marker.number, line},
+            cue: {
+                role: marker.role, number: marker.number, line,
+            },
         });
         plainText = '';
         cursor = marker.end;

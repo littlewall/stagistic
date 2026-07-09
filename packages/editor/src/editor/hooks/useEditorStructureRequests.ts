@@ -142,7 +142,7 @@ export const useEditorStructureRequests = ({
         if (
             firstNode &&
             isScriptBlockNode(firstNode) &&
-            getScriptBlockNodeType(firstNode) === "act" &&
+            getScriptBlockNodeType(firstNode) === 'act' &&
             getScriptBlockId(firstNode) === deleteActRequest.blockId
         ) {
             return;

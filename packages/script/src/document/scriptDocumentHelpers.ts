@@ -2,10 +2,10 @@ import {createNodeId} from '@stagistic/shared';
 
 import {
     createEmptyScriptDocument,
-    type ScriptNode,
     getScriptBlockId,
     isScriptBlockNode,
     type ScriptDocument,
+    type ScriptNode,
 } from './scriptDocument';
 
 const hasTextContent = (node: unknown): boolean => {

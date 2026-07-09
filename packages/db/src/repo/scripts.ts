@@ -83,7 +83,9 @@ export const createScriptsHandlers = ({getDb}: CreateScriptsHandlersArgs) => ({
     },
     duplicate: async (
         sourceScriptId: string,
-        input: {title: string, copySettings: boolean, copyAttributes: boolean},
+        input: {
+            title: string, copySettings: boolean, copyAttributes: boolean,
+        },
     ) => {
         const db = await getDb();
         const targetScriptId = uuidv7();

@@ -9,11 +9,11 @@ import {
 
 import type {BlockNextElementMap} from '../scriptBlock/handlers/types';
 import {
-    SCRIPT_BLOCK_NODE_NAMES,
     type BlockNodeType,
     getActiveScriptBlockFromState,
     isSelectionAcrossBlocks,
     normalizeBlockNodeType,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../scriptCore';
 
 export interface EmptyEnterChooserState {
@@ -35,12 +35,12 @@ const CLOSED_EMPTY_ENTER_CHOOSER_STATE: EmptyEnterChooserState = {
 };
 
 export const EMPTY_ENTER_CHOOSER_WRITER_TYPES: readonly BlockNodeType[] = [
-    "scene",
-    "stageDirection",
-    "character",
-    "aside",
-    "dialogue",
-    "lyrics",
+    'scene',
+    'stageDirection',
+    'character',
+    'aside',
+    'dialogue',
+    'lyrics',
 ];
 
 const EMPTY_ENTER_CHOOSER_WRITER_TYPE_SET = new Set(EMPTY_ENTER_CHOOSER_WRITER_TYPES);
@@ -63,7 +63,7 @@ export const normalizeWriterType = (value: unknown): BlockNodeType => {
         return normalized;
     }
 
-    return "stageDirection";
+    return 'stageDirection';
 };
 
 const isCollapsedSingleBlockSelection = (state: EditorState) => {

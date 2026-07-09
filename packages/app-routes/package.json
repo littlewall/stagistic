@@ -6,6 +6,7 @@
     "main": "./src/index.ts",
     "scripts": {
         "lint": "eslint .",
+        "typecheck": "tsc -b",
         "test": "vp test run",
         "test:watch": "vp test watch",
         "test:browser": "vp test run -c vitest.browser.config.ts"

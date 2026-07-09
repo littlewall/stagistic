@@ -27,10 +27,7 @@ const createStageDirection = (id: string, content: ScriptNode[] = []): ScriptNod
 
 const createDocument = (): ScriptDocument => ({
     type: 'doc',
-    content: [
-        createStageDirection('sd-1', [{type: 'text', text: 'Fade'}]),
-        createStageDirection('sd-2'),
-    ],
+    content: [createStageDirection('sd-1', [{type: 'text', text: 'Fade'}]), createStageDirection('sd-2')],
 });
 
 const EditorProbe = () => {

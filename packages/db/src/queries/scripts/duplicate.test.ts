@@ -9,11 +9,6 @@ import {
 } from 'vite-plus/test';
 
 import {
-    createTestDb,
-    seedScript,
-    type TestDb,
-} from '../../testing/createTestDb';
-import {
     scriptActs,
     scriptBlockCharacterRefs,
     scriptBlocks,
@@ -21,6 +16,11 @@ import {
     scriptScenes,
     scriptSettingsStructure,
 } from '../../schema';
+import {
+    createTestDb,
+    seedScript,
+    type TestDb,
+} from '../../testing/createTestDb';
 import {duplicateScriptRows} from './duplicate';
 
 const SOURCE_ID = 'source-script';
@@ -60,8 +60,7 @@ const seedSource = async (db: TestDb): Promise<void> => {
             actId: 'act-1',
             createdAt: 1,
             updatedAt: 1,
-        },
-        {
+        }, {
             id: 'block-2',
             scriptId: SOURCE_ID,
             blockType: 'dialogue',
@@ -195,7 +194,7 @@ describe('duplicateScriptRows', () => {
             .from(scriptBlockCharacterRefs)
             .where(and(
                 eq(scriptBlockCharacterRefs.blockId, dialogueBlock!.id),
-                eq(scriptBlockCharacterRefs.characterId, characters[0]!.id),
+                eq(scriptBlockCharacterRefs.characterId, characters[0].id),
             ));
 
         expect(refs).toHaveLength(1);

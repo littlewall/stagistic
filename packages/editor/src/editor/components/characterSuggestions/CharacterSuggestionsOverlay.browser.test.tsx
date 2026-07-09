@@ -390,6 +390,7 @@ describe('CharacterSuggestionsOverlay browser behavior', () => {
         // First character, then the multi-character delimiter, then start the second.
         await userEvent.keyboard('JOHNY+JO');
         await waitForVisibleListbox();
+
         const option = page.elementLocator(await waitForVisibleOption('JOSEF'));
 
         expect(document.querySelector('[data-id="character-1"]')?.textContent).toContain('JOHNY/JO');

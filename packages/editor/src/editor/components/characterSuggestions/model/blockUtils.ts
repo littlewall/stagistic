@@ -13,7 +13,7 @@ import {
 import type {PersistentCharacterRef} from '../types';
 
 export const isCharacterBlockType = (value: BlockNodeType) => {
-    return value === "character";
+    return value === 'character';
 };
 
 interface CharacterCountsCacheEntry {

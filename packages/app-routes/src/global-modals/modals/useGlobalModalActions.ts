@@ -41,7 +41,9 @@ interface ScriptRepositoryAdapter {
     renameScript: (scriptId: string, input: {title: string, subtitle: string | null}) => Promise<void>,
     duplicateScript: (
         sourceScriptId: string,
-        input: {title: string, copySettings: boolean, copyAttributes: boolean},
+        input: {
+            title: string, copySettings: boolean, copyAttributes: boolean,
+        },
     ) => Promise<string>,
     deleteScript: (scriptId: string) => Promise<void>,
     saveTitlePage: (scriptId: string, settings: TitlePageSettings) => Promise<void>,

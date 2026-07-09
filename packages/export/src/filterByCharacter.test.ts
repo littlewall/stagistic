@@ -8,12 +8,15 @@ import {filterScriptByCharacter} from './filterByCharacter';
 import {sampleDoc} from './testUtils';
 
 const characters = [
-    {id: 'alice', key: 'ALICE', displayName: 'Alice'},
-    {id: 'bob', key: 'BOB', displayName: 'Bob'},
+    {
+        id: 'alice', key: 'ALICE', displayName: 'Alice',
+    }, {
+        id: 'bob', key: 'BOB', displayName: 'Bob',
+    },
 ];
 
 describe('filterScriptByCharacter', () => {
-    it("mode 'all' returns the same document reference", () => {
+    it('mode \'all\' returns the same document reference', () => {
         const doc = sampleDoc();
 
         expect(filterScriptByCharacter(doc, {mode: 'all', characterIds: []}, characters)).toBe(doc);

@@ -14,7 +14,11 @@ describe('groupScenes', () => {
     it('splits content into act and scene groups', () => {
         const groups = groupScenes(sampleDoc());
 
-        expect(groups.map(group => group.sceneBlockId)).toEqual([null, 'sceneA', 'sceneB']);
+        expect(groups.map(group => group.sceneBlockId)).toEqual([
+            null,
+            'sceneA',
+            'sceneB',
+        ]);
     });
 });
 

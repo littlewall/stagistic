@@ -36,7 +36,11 @@ export const DeleteScriptConfirm = ({
         }
 
         void onConfirm();
-    }, [isUnlocked, isDeleting, onConfirm]);
+    }, [
+        isUnlocked,
+        isDeleting,
+        onConfirm,
+    ]);
 
     return (
         <div className={styles.stack}>

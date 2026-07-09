@@ -1,6 +1,6 @@
 import {
-    serializeStagistic,
     type ScriptDocument,
+    serializeStagistic,
     type TitlePageSettings,
 } from '@stagistic/script';
 import {useCallback} from 'react';

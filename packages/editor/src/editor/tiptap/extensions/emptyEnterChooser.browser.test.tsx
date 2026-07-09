@@ -18,10 +18,12 @@ type TestWindow = Window & {__emptyEnterChooserTestEditor?: Editor | null};
 
 const initialValue: ScriptDocument = {
     type: 'doc',
-    content: [{
-        type: 'stageDirection',
-        attrs: {id: 'stage-direction-1'},
-    }],
+    content: [
+        {
+            type: 'stageDirection',
+            attrs: {id: 'stage-direction-1'},
+        },
+    ],
 };
 
 const EditorProbe = () => {

@@ -1,4 +1,6 @@
-import type {ComponentProps, ReactElement, ReactNode} from 'react';
+import type {
+    ComponentProps, ReactElement, ReactNode,
+} from 'react';
 import {
     Focusable,
     Tooltip as AriaTooltip,
@@ -38,7 +40,11 @@ export const Tooltip = ({
 }: TooltipProps) => (
     <TooltipTrigger delay={delay} isDisabled={isDisabled}>
         <Focusable isDisabled={isDisabled}>{children as FocusableChild}</Focusable>
-        <AriaTooltip className={styles.tooltip} placement={placement} offset={6}>
+        <AriaTooltip
+            className={styles.tooltip}
+            placement={placement}
+            offset={6}
+        >
             {label}
         </AriaTooltip>
     </TooltipTrigger>

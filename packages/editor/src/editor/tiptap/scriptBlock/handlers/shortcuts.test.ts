@@ -21,7 +21,7 @@ const createBlockSpec = (blockType: BlockNodeType) => ({
         id: {default: 'block-1'},
         blockType: {default: blockType},
     },
-    toDOM: () => ['p', 0],
+    toDOM: () => ['p', 0] as const,
     parseDOM: [{tag: 'p'}],
 });
 

@@ -6,6 +6,7 @@
     "main": "./src/index.ts",
     "scripts": {
         "lint": "eslint .",
+        "typecheck": "tsc -b",
         "test": "vp test run --dir ."
     },
     "dependencies": {

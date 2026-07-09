@@ -6,7 +6,7 @@ import {importStagisticFile} from './importStagisticFile';
 
 describe('importStagisticFile', () => {
     it('creates a script and persists imported title-page settings', async () => {
-        const createScript = vi.fn(async () => 'script-1');
+        const createScript = vi.fn(() => Promise.resolve('script-1'));
         const saveTitlePage = vi.fn(async () => {});
         const rollbackScript = vi.fn(async () => {});
 
@@ -48,7 +48,7 @@ subtitle: A play
 ---
 # Scene
 `,
-            createScript: async () => 'script-2',
+            createScript: () => Promise.resolve('script-2'),
             saveTitlePage: async () => Promise.reject(failure),
             rollbackScript,
         })).rejects.toThrow('Storage failed');
@@ -56,7 +56,7 @@ subtitle: A play
     });
 
     it('rejects other file extensions before creating anything', async () => {
-        const createScript = vi.fn(async () => 'script-3');
+        const createScript = vi.fn(() => Promise.resolve('script-3'));
 
         await expect(importStagisticFile({
             fileName: 'night.fountain',

@@ -105,7 +105,7 @@ export const buildDeleteCueStart = (
     pos: number,
     node: ProseMirrorNode,
 ): Transaction => {
-    const cueId = node.attrs[CUE_ID_ATTR];
+    const cueId = node.attrs[CUE_ID_ATTR] as string;
     const snapshot = buildIndexSnapshotFromPmDoc(state.doc);
     const cue = snapshot.cues.find(candidate => candidate.cueId === cueId);
     const tr = state.tr;

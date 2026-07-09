@@ -1,4 +1,6 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {CHARACTER_TAG_MARK_NAME, type ScriptDocument} from '..';
 import {parseStagistic} from '../parsing/parseStagistic';
@@ -14,10 +16,7 @@ describe('serializeStagistic', () => {
             exportDate: new Date(2026, 6, 1),
             titlePage: {
                 subtitle: 'A musical',
-                credits: [
-                    {credit: 'Music', authors: ['Peter Gray']},
-                    {credit: 'Lyrics', authors: ['Jane Smith', 'Alex Green']},
-                ],
+                credits: [{credit: 'Music', authors: ['Peter Gray']}, {credit: 'Lyrics', authors: ['Jane Smith', 'Alex Green']}],
                 source: 'Based on the novel',
                 draftDateMode: 'auto',
                 contact: 'Jane Smith\njane@example.com',
@@ -65,7 +64,9 @@ copyright: "© 2026 Jane Smith"
                         text(' enters.'),
                         {
                             type: 'cueStart',
-                            attrs: {cueId: 'cue-1', mode: 'open', title: 'She said "Yes"'},
+                            attrs: {
+                                cueId: 'cue-1', mode: 'open', title: 'She said "Yes"',
+                            },
                         },
                     ],
                 },
@@ -136,7 +137,10 @@ LYRICS TWO`);
         const reparsed = parseStagistic(result);
 
         expect(reparsed.document.content.map(node => node.type)).toEqual([
-            'character', 'stageDirection', 'lyrics', 'lyrics',
+            'character',
+            'stageDirection',
+            'lyrics',
+            'lyrics',
         ]);
     });
 
@@ -157,11 +161,13 @@ LYRICS TWO`);
     it('forces ambiguous stage directions with !', () => {
         const stageDirection = (value: string, tagged = false) => ({
             type: 'stageDirection',
-            content: [{
-                type: 'text',
-                text: value,
-                marks: tagged ? [{type: CHARACTER_TAG_MARK_NAME}] : undefined,
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: value,
+                    marks: tagged ? [{type: CHARACTER_TAG_MARK_NAME}] : undefined,
+                },
+            ],
         });
         const document: ScriptDocument = {
             type: 'doc',
@@ -190,10 +196,7 @@ Michael enters`);
     it('forces mixed-case character names without changing their case', () => {
         const document: ScriptDocument = {
             type: 'doc',
-            content: [
-                {type: 'character', content: [text('McCLANE')]},
-                {type: 'dialogue', content: [text('Yippie ki-yay.')]},
-            ],
+            content: [{type: 'character', content: [text('McCLANE')]}, {type: 'dialogue', content: [text('Yippie ki-yay.')]}],
         };
 
         const result = serializeStagistic(document, {

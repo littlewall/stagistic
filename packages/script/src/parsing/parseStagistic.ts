@@ -16,8 +16,8 @@ import {
 } from '../syntax';
 import {parseStagisticFrontmatter} from './frontmatter';
 import {
-    parseInlineText,
     type ParsedStageBlock,
+    parseInlineText,
     parseStageDirectionLine,
 } from './inline';
 import {
@@ -82,14 +82,17 @@ const splitInlineDialogue = (source: string) => {
             escaped = false;
             continue;
         }
+
         if (character === '\\' && inQuotes) {
             escaped = true;
             continue;
         }
+
         if (character === '"') {
             inQuotes = !inQuotes;
             continue;
         }
+
         if (character !== ':') {
             continue;
         }
@@ -141,6 +144,7 @@ const resolveCueModes = (blocks: ParsedBlock[]): ScriptNode[] => {
             if (seenCueNumbers.has(block.cue.number)) {
                 throw new StagisticParseError(`Cue ${block.cue.number} is declared more than once.`, block.cue.line);
             }
+
             seenCueNumbers.add(block.cue.number);
 
             const next = blocks[index + 1];
@@ -155,6 +159,7 @@ const resolveCueModes = (blocks: ParsedBlock[]): ScriptNode[] => {
                 if (cueNode?.attrs) {
                     cueNode.attrs[CUE_MODE_ATTR] = 'hit';
                 }
+
                 result.push(block.node);
                 index += 1;
                 continue;
@@ -187,7 +192,7 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
         titlePage,
     } = parseStagisticFrontmatter(source);
     const lines = body.split('\n');
-    const hasActs = lines.some(line => /^##\s+/u.test(line));
+    const hasActs = lines.some(line => (/^##\s+/u).test(line));
     const blocks: ParsedBlock[] = [];
     let inSpeech = false;
     let lastSpeechType: SpeechBlockType = 'dialogue';
@@ -200,6 +205,7 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
         if (!trimmed) {
             inSpeech = false;
             lastWasSoftBreak = false;
+
             return;
         }
 
@@ -209,6 +215,7 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
                     blocks.push({line: lineNumber, node: createBlock(lastSpeechType)});
                     lastWasSoftBreak = true;
                 }
+
                 return;
             }
 
@@ -217,11 +224,13 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
             if (rawLine.startsWith('!')) {
                 parseStageDirectionLine(rawLine.slice(1), lineNumber)
                     .forEach(block => blocks.push({...block, line: lineNumber}));
+
                 return;
             }
 
             if (isParenthetical(rawLine)) {
                 blocks.push({line: lineNumber, node: createBlock('aside', parseInlineText(trimmed, lineNumber))});
+
                 return;
             }
 
@@ -230,16 +239,18 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
                 line: lineNumber,
                 node: createBlock(lastSpeechType, parseInlineText(rawLine, lineNumber)),
             });
+
             return;
         }
 
         if (rawLine.startsWith('!')) {
             parseStageDirectionLine(rawLine.slice(1), lineNumber)
                 .forEach(block => blocks.push({...block, line: lineNumber}));
+
             return;
         }
 
-        const headingMatch = /^(#{1,2})\s+(.*)$/u.exec(rawLine);
+        const headingMatch = (/^(#{1,2})\s+(.*)$/u).exec(rawLine);
 
         if (headingMatch) {
             const type = headingMatch[1] === '##' || !hasActs ? 'scene' : 'act';
@@ -248,6 +259,7 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
                 line: lineNumber,
                 node: createBlock(type, parseInlineText(headingMatch[2], lineNumber)),
             });
+
             return;
         }
 
@@ -255,6 +267,7 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
             const note = trimmed.slice(2, -2).trim();
 
             blocks.push({line: lineNumber, node: createBlock('note', parseInlineText(note, lineNumber))});
+
             return;
         }
 
@@ -263,6 +276,7 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
                 line: lineNumber,
                 node: createBlock('stageDirection', parseInlineText(trimmed, lineNumber)),
             });
+
             return;
         }
 
@@ -277,6 +291,7 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
             });
             inSpeech = true;
             lastSpeechType = 'dialogue';
+
             return;
         }
 
@@ -285,6 +300,7 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
                 .forEach(node => blocks.push({line: lineNumber, node}));
             inSpeech = true;
             lastSpeechType = 'dialogue';
+
             return;
         }
 

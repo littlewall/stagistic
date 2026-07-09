@@ -1,5 +1,4 @@
 import type {ScriptDocument} from '@stagistic/script';
-import {useRef} from 'react';
 import {
     createRoot,
     type Root,
@@ -45,7 +44,9 @@ interface FixtureProps {
     resolveLatestValue: () => ScriptDocument | null,
 }
 
-const AutosaveFixture = ({controllerRef, onAutoSave, onValueSynced, resolveLatestValue}: FixtureProps) => {
+const AutosaveFixture = ({
+    controllerRef, onAutoSave, onValueSynced, resolveLatestValue,
+}: FixtureProps) => {
     const controller = useAutosaveController({
         onAutoSave,
         resolveLatestValue,

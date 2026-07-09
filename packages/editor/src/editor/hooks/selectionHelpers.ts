@@ -3,8 +3,8 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {
     findScriptBlockSelectionPosFromState,
-    SCRIPT_BLOCK_NODE_NAMES,
     getActiveScriptBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../tiptap/scriptCore';
 
 export const restoreSelectionForBlock = (editor: TiptapEditor, blockId: string | null) => {

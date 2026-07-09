@@ -5,6 +5,8 @@ import {useExportContext} from './ExportProvider';
 const sanitizeFileName = (value: string) => {
     const normalized = value
         .trim()
+        // Control chars are intentionally stripped from file names.
+        // eslint-disable-next-line no-control-regex
         .replace(/[<>:"/\\|?*\u0000-\u001f]/gu, '-')
         .replace(/[. ]+$/u, '');
 

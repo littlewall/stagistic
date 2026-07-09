@@ -1,6 +1,10 @@
 import {CHARACTER_TAG_MARK_NAME} from '../characters';
-import {CUE_MODE_ATTR, CUE_OUT_NODE_NAME, CUE_START_NODE_NAME, CUE_TITLE_ATTR} from '../cues';
-import {getScriptBlockNodeType, type ScriptDocument, type ScriptNode} from '../document';
+import {
+    CUE_MODE_ATTR, CUE_OUT_NODE_NAME, CUE_START_NODE_NAME, CUE_TITLE_ATTR,
+} from '../cues';
+import {
+    getScriptBlockNodeType, type ScriptDocument, type ScriptNode,
+} from '../document';
 import {
     isQuotedCharacterCueLine,
     isUppercaseSyntaxLine,
@@ -11,14 +15,14 @@ import type {TitlePageSettings} from '../titlePage';
 import {serializeStagisticFrontmatter} from './frontmatter';
 
 export interface SerializeStagisticOptions {
-    scriptTitle: string;
-    titlePage?: TitlePageSettings;
-    exportDate?: Date;
+    scriptTitle: string,
+    titlePage?: TitlePageSettings,
+    exportDate?: Date,
 }
 
 type SerializationState = {
-    cueNumber: number;
-    openCueNumber: number | null;
+    cueNumber: number,
+    openCueNumber: number | null,
 };
 
 const getText = (node: ScriptNode): string => {
@@ -34,7 +38,7 @@ const escapeQuotedLiteral = (value: string) => value.replace(/\\/gu, '\\\\').rep
 const quoteLiteral = (value: string) => `"${escapeQuotedLiteral(value)}"`;
 
 const quoteNameWhenRequired = (value: string, force = false) => {
-    return force || /[\s.@/"\\]/u.test(value) ? quoteLiteral(value) : value;
+    return force || (/[\s.@/"\\]/u).test(value) ? quoteLiteral(value) : value;
 };
 
 const applyEmphasisMarks = (value: string, node: ScriptNode) => {
@@ -44,9 +48,11 @@ const applyEmphasisMarks = (value: string, node: ScriptNode) => {
     if (markTypes.has('underline')) {
         result = `_${result}_`;
     }
+
     if (markTypes.has('italic')) {
         result = `*${result}*`;
     }
+
     if (markTypes.has('bold')) {
         result = `**${result}**`;
     }
@@ -83,7 +89,7 @@ const serializeTextNode = (node: ScriptNode) => {
 const serializeInlineContent = (
     nodes: ScriptNode[] | undefined,
     state: SerializationState,
-): {text: string; hitOut: string | null} => {
+): {text: string, hitOut: string | null} => {
     let text = '';
     let hitOut: string | null = null;
 
@@ -94,6 +100,7 @@ const serializeInlineContent = (
 
         if (node.type === CUE_START_NODE_NAME) {
             state.cueNumber += 1;
+
             const number = state.cueNumber;
             const title =
                 typeof node.attrs?.[CUE_TITLE_ATTR] === 'string' ? node.attrs[CUE_TITLE_ATTR] : '';
@@ -200,7 +207,7 @@ const serializeSpeechBlock = (node: ScriptNode, state: SerializationState) => {
     }
 
     if (blockType === 'lyrics') {
-        const match = /^(\t*)(.*)$/su.exec(text);
+        const match = (/^(\t*)(.*)$/su).exec(text);
 
         return `${match?.[1] ?? ''}${(match?.[2] ?? '').toUpperCase()}`;
     }
@@ -208,7 +215,11 @@ const serializeSpeechBlock = (node: ScriptNode, state: SerializationState) => {
     return text;
 };
 
-const SPEECH_CONTINUATION_TYPES = ['aside', 'dialogue', 'lyrics'];
+const SPEECH_CONTINUATION_TYPES = [
+    'aside',
+    'dialogue',
+    'lyrics',
+];
 
 const stageDirectionRunContinuesSpeech = (content: ScriptNode[], fromIndex: number): boolean => {
     let index = fromIndex;

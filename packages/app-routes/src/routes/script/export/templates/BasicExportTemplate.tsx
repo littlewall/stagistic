@@ -10,10 +10,10 @@ import {
 } from 'react';
 
 import {useExportContext} from '../ExportProvider';
-import {useExportPreview} from '../useExportPreview';
 import {BlankPagesModule} from '../modules/BlankPagesModule';
 import {CharacterFilterModule} from '../modules/CharacterFilterModule';
 import {PageBreakModule} from '../modules/PageBreakModule';
+import {useExportPreview} from '../useExportPreview';
 
 const cloneDefaults = (): BasicExportConfig => ({
     characterFilter: {

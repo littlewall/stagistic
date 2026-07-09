@@ -66,10 +66,7 @@ The lights return. @@out 1
         expect(result.title).toBe('When Night Falls');
         expect(result.titlePage).toEqual({
             subtitle: 'A musical',
-            credits: [
-                {credit: 'Music', authors: ['Peter Gray']},
-                {credit: 'Lyrics', authors: ['Jane Smith', 'Alex Green']},
-            ],
+            credits: [{credit: 'Music', authors: ['Peter Gray']}, {credit: 'Lyrics', authors: ['Jane Smith', 'Alex Green']}],
             source: 'Based on the novel',
             draftDateMode: 'manual',
             draftDate: '2026-07-01',
@@ -152,7 +149,13 @@ Hello.
 `);
 
         expect(result.document.content.map(node => node.type)).toEqual([
-            'scene', 'character', 'dialogue', 'stageDirection', 'character', 'aside', 'dialogue',
+            'scene',
+            'character',
+            'dialogue',
+            'stageDirection',
+            'character',
+            'aside',
+            'dialogue',
         ]);
         expect(getText(result.document.content[1])).toBe('JANE');
         expect(getText(result.document.content[3])).toBe('MICHAEL ENTERS');

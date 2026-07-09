@@ -5,8 +5,8 @@ import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
 import {
-    SCRIPT_BLOCK_NODE_NAMES,
     getActiveScriptBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../../scriptCore';
 import {
     insertParenPair,
@@ -23,7 +23,7 @@ import {
 } from './types';
 
 const keyDownHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => boolean> = {
-    ["aside"]: (_context, event) => {
+    ['aside']: (_context, event) => {
         if (event.key === '(' || event.key === ')') {
             event.preventDefault();
 
@@ -32,7 +32,7 @@ const keyDownHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) 
 
         return false;
     },
-    ["character"]: (context, event) => {
+    ['character']: (context, event) => {
         if (event.key !== '(') {
             return false;
         }
@@ -47,7 +47,7 @@ const keyDownHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) 
 const normalizeActiveCharacterDelimiters = (editor: Editor) => {
     const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
-    if (!block || block.blockType !== "character") {
+    if (!block || block.blockType !== 'character') {
         return;
     }
 
@@ -145,7 +145,7 @@ const textInputHandlers: HandlerMap<(
     to: number,
     text: string,
 ) => boolean> = {
-    ["aside"]: handleParentheticalInput,
+    ['aside']: handleParentheticalInput,
 };
 
 export const handleTextInput = (
@@ -161,14 +161,14 @@ export const handleTextInput = (
         return false;
     }
 
-    if (block.blockType === "character") {
+    if (block.blockType === 'character') {
         const casing = blockCasing?.[block.blockType] ?? 'uppercase';
         const enforceUppercase = casing === 'uppercase';
 
         return handleCharacterInput(createBlockContext(editor, block), from, to, text, enforceUppercase);
     }
 
-    if (block.blockType === "act") {
+    if (block.blockType === 'act') {
         const upper = text.toLocaleUpperCase();
 
         if (upper !== text) {

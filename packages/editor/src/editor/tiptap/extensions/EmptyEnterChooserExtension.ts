@@ -6,9 +6,9 @@ import {
 } from '../scriptBlock/commands';
 import type {BlockNextElementMap} from '../scriptBlock/handlers/types';
 import {
-    SCRIPT_BLOCK_NODE_NAMES,
     type BlockNodeType,
     getActiveScriptBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../scriptCore';
 import {
     CLOSE_META_KEY,

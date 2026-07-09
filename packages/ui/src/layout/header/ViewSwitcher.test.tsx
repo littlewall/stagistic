@@ -1,7 +1,9 @@
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
-import {ViewSwitcher, VIEW_SWITCHER_ITEMS} from './ViewSwitcher';
+import {VIEW_SWITCHER_ITEMS, ViewSwitcher} from './ViewSwitcher';
 
 describe('VIEW_SWITCHER_ITEMS', () => {
     it('lists editor then export', () => {

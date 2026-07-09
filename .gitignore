@@ -68,3 +68,7 @@ tsconfig.tsbuildinfo
 
 # Codegraph
 .codegraph/daemon.pid
+
+# vite-plus compiled config artifact (source is vite.config.ts)
+vite.config.js
+vite.config.js.map

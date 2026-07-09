@@ -5,10 +5,12 @@ import {
     CUE_OUT_NODE_NAME,
     CUE_START_NODE_NAME,
 } from '@stagistic/script';
-import {Schema, type Node as ProseMirrorNode} from '@tiptap/pm/model';
+import {type Node as ProseMirrorNode, Schema} from '@tiptap/pm/model';
 import {EditorState, TextSelection} from '@tiptap/pm/state';
 import type {Editor as TiptapEditor} from '@tiptap/react';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import type {BlockNodeType} from '../scriptCore';
 import {getActiveScriptBlockFromState} from '../scriptCore';
@@ -36,7 +38,9 @@ const schema = new Schema({
             atom: true,
             attrs: {title: {default: ''}},
         },
-        [CUE_OUT_NODE_NAME]: {group: 'inline', inline: true, atom: true},
+        [CUE_OUT_NODE_NAME]: {
+            group: 'inline', inline: true, atom: true,
+        },
         character: createBlockSpec('character'),
         stageDirection: createBlockSpec('stageDirection'),
         dialogue: createBlockSpec('dialogue'),

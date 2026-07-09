@@ -7,7 +7,8 @@
         "dev": "vp dev",
         "build": "vp build",
         "preview": "vp preview",
-        "lint": "vp lint"
+        "lint": "eslint .",
+        "typecheck": "tsc -b"
     },
     "dependencies": {
         "@electric-sql/pglite": "^0.3.7",

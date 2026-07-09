@@ -43,9 +43,11 @@ const hasBlockActionsOverlayFocus = () => {
         && Boolean(activeElement.closest('[data-block-actions-overlay="true"]'));
 };
 
-// A focused cue pill steals DOM focus from the editor, so the selection-based
-// active block resolves to null. Resolve the block that owns the focused pill
-// from the DOM instead, so clicking a cue tag activates its block.
+/*
+ * A focused cue pill steals DOM focus from the editor, so the selection-based
+ * active block resolves to null. Resolve the block that owns the focused pill
+ * from the DOM instead, so clicking a cue tag activates its block.
+ */
 const resolveFocusedCuePillBlockId = () => {
     const activeElement = document.activeElement;
 

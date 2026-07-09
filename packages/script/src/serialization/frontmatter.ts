@@ -1,9 +1,9 @@
 import type {TitlePageSettings} from '../titlePage';
 
 export interface StagisticFrontmatterOptions {
-    scriptTitle: string;
-    titlePage?: TitlePageSettings;
-    exportDate?: Date;
+    scriptTitle: string,
+    titlePage?: TitlePageSettings,
+    exportDate?: Date,
 }
 
 const yamlString = (value: string) => JSON.stringify(value);
@@ -65,14 +65,11 @@ export const serializeStagisticFrontmatter = ({
             ? trimValue(titlePage.draftDate)
             : toLocalIsoDate(exportDate);
 
-    if (/^\d{4}-\d{2}-\d{2}$/u.test(draftDate)) {
+    if ((/^\d{4}-\d{2}-\d{2}$/u).test(draftDate)) {
         lines.push(`draftDate: ${draftDate}`);
     }
 
-    const trailingScalarFields = [
-        ['contact', titlePage.contact],
-        ['copyright', titlePage.copyright],
-    ] as const;
+    const trailingScalarFields = [['contact', titlePage.contact], ['copyright', titlePage.copyright]] as const;
 
     trailingScalarFields.forEach(([key, rawValue]) => {
         const value = trimValue(rawValue);

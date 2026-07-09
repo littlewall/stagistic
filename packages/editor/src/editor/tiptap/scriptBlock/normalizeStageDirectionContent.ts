@@ -31,8 +31,8 @@ const cueNodeToText = (
     }
 
     const prefix =
-        previousNode && !/\s$/u.test(previousNode.textContent) && !/^\s/u.test(text) ? ' ' : '';
-    const suffix = nextNode && !/^\s/u.test(nextNode.textContent) && !/\s$/u.test(text) ? ' ' : '';
+        previousNode && !(/\s$/u).test(previousNode.textContent) && !(/^\s/u).test(text) ? ' ' : '';
+    const suffix = nextNode && !(/^\s/u).test(nextNode.textContent) && !(/\s$/u).test(text) ? ' ' : '';
 
     return `${prefix}${text}${suffix}`;
 };

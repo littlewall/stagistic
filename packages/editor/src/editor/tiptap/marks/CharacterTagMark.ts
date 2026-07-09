@@ -53,7 +53,7 @@ export const CharacterTagMark = Mark.create<CharacterTagMarkOptions>({
 
     renderHTML({HTMLAttributes, mark}) {
         const characterKey = String(mark.attrs[CHARACTER_TAG_KEY_ATTR] ?? '');
-        const rawId = mark.attrs[CHARACTER_TAG_ID_ATTR];
+        const rawId: unknown = mark.attrs[CHARACTER_TAG_ID_ATTR];
         const characterId = typeof rawId === 'string' && rawId.length > 0 ? rawId : null;
         const identityClassName = resolveIdentityClassName(characterKey, characterId);
         const className = [this.options.tagClassName, identityClassName].filter(Boolean).join(' ');

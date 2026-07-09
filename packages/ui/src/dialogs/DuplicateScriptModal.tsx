@@ -9,8 +9,8 @@ import {
 
 import {Button} from '../atoms/Button';
 import {Switch} from '../atoms/Switch';
-import {ModalDialog} from './ModalDialog';
 import styles from './DuplicateScriptModal.module.css';
+import {ModalDialog} from './ModalDialog';
 
 export interface DuplicateScriptSubmit {
     title: string,

@@ -1,7 +1,7 @@
 import {
     buildScriptBlockIndex,
-    type ScriptNode,
     type ScriptDocument,
+    type ScriptNode,
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import type {MutableRefObject} from 'react';

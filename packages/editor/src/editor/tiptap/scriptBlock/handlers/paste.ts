@@ -1,8 +1,8 @@
 import type {Editor} from '@tiptap/react';
 
 import {
-    SCRIPT_BLOCK_NODE_NAMES,
     getActiveScriptBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
 } from '../../scriptCore';
 import {
     type BlockContext,
@@ -11,7 +11,7 @@ import {
 import {type HandlerMap} from './types';
 
 const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) => boolean> = {
-    ["act"]: (context, event) => {
+    ['act']: (context, event) => {
         const text = event.clipboardData?.getData('text/plain');
 
         if (text === undefined) {
@@ -28,7 +28,7 @@ const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) =
 
         return true;
     },
-    ["aside"]: (context, event) => {
+    ['aside']: (context, event) => {
         const text = event.clipboardData?.getData('text/plain');
 
         if (text === undefined) {

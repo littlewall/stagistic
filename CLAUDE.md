@@ -14,8 +14,18 @@ After any change to `packages/db/src/` schema or `drizzle/*.sql` files, run:
 `pnpm --filter @stagistic/db db:compile-migrations`
 (`db:generate` does this automatically; manual SQL edits do not.)
 
-## Testing
-- import { describe, it, expect } from "vite-plus/test"
+## Checks (clean-shield toolchain)
+Canonical checks — run these, not `vp lint`/`vp fmt` (oxlint/oxfmt are NOT used here):
+- Typecheck: `npx tsc -b` (whole graph) or `pnpm --filter @stagistic/<pkg> typecheck`.
+- Lint: `pnpm lint` = `eslint . && stylelint`. Auto-fix: `npx eslint . --fix` then `npx stylelint "**/*.{css,scss}" --fix`. Formatting is owned by eslint's `@stylistic/*` rules — `eslint --fix` IS the formatter.
+- Node tests: `pnpm test` (`vp test run`). Test imports: `import {describe, it, expect} from "vite-plus/test"`.
+- Browser tests: `pnpm --filter @stagistic/<pkg> test:browser` (app-core/app-routes/editor/ui). They pin no viewport → layout/caret asserts are env-sensitive; editor has known pre-existing reds (overlay viewport-fit, cueCaret off-by-one, tied to WIP).
+- Root `vite.config.ts` only configures the test runner; `vite.config.js` is a gitignored compiled artifact — never edit or commit it.
+
+## Handling test/lint/ts failures
+- Don't spend turns proving a failure isn't from your change. Establish a baseline ONCE (`git stash` → run → `git stash pop`, or check a file you didn't touch), then move on.
+- A failure in code you didn't touch: fix it only if the cause is clear and the fix is local. Do NOT mutate golden snapshots, loosen assertions, or change a viewport to make a red go green — that masks WIP bugs. Flag it instead (`spawn_task`) and keep going.
+- For a self-contained pre-existing failure worth fixing now, dispatch a subagent to fix it in isolation so it doesn't derail the current task.
 
 ## Design context
 See [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md) before any UI work.

@@ -1,7 +1,7 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {
     describe, expect, it,
-} from 'vitest';
+} from 'vite-plus/test';
 
 import {extractScriptBlocks} from './extract';
 

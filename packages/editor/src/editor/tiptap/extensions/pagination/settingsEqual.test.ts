@@ -1,4 +1,6 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {DEFAULT_OPTIONS} from './constants';
 import {arePaginationSettingsApplied} from './settingsEqual';

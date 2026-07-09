@@ -1,9 +1,8 @@
+import {uuidv7} from '@stagistic/shared';
 import {
     eq,
     inArray,
 } from 'drizzle-orm';
-
-import {uuidv7} from '@stagistic/shared';
 
 import {
     scriptActs,
@@ -13,13 +12,13 @@ import {
     scriptCharacters,
     scriptCues,
     scriptLocations,
+    scripts,
     scriptScenes,
     scriptSettingsBlocks,
     scriptSettingsHeadersFooters,
     scriptSettingsPageLayout,
     scriptSettingsStructure,
     scriptSettingsVisualPreferences,
-    scripts,
 } from '../../schema';
 import type {DbClient} from '../types';
 
@@ -36,8 +35,7 @@ export interface DuplicateScriptQueryPayload {
  * Remaps a nullable foreign key through an id map. Unknown ids fall back to null
  * (the referenced row was not copied), matching the `on delete set null` behavior.
  */
-const remapNullable = (map: Map<string, string>, id: string | null): string | null =>
-    (id === null ? null : map.get(id) ?? null);
+const remapNullable = (map: Map<string, string>, id: string | null): string | null => id === null ? null : map.get(id) ?? null;
 
 /**
  * Copy every row of a script into a fresh script within a single transaction.

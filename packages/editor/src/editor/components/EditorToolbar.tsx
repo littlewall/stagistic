@@ -30,9 +30,9 @@ interface EditorToolbarProps {
 }
 
 const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
-    "stageDirection",
-    "dialogue",
-    "lyrics",
+    'stageDirection',
+    'dialogue',
+    'lyrics',
 ]);
 
 const MULTI_BLOCK_OPTIONS = BLOCKS_WITHOUT_ACT.filter(option => MULTI_BLOCK_ALLOWED_TYPES.has(option.type));
@@ -150,7 +150,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
                     return true;
                 }
 
-                if (node.attrs.blockType === "act" || node.attrs.blockType === optionType) {
+                if (node.attrs.blockType === 'act' || node.attrs.blockType === optionType) {
                     return false;
                 }
 
@@ -173,7 +173,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             return;
         }
 
-        if (optionType === activeBlockInfo?.type || activeBlockInfo?.type === "act") {
+        if (optionType === activeBlockInfo?.type || activeBlockInfo?.type === 'act') {
             return;
         }
 

@@ -1,11 +1,11 @@
 import type {ScriptDocument} from '@stagistic/script';
 
 import type {CharacterFilterValue} from './config';
-import type {ExportCharacter} from './scriptData';
 import {
     groupScenes,
     sceneMentionsCharacter,
 } from './scenes';
+import type {ExportCharacter} from './scriptData';
 
 export const filterScriptByCharacter = (
     doc: ScriptDocument,
