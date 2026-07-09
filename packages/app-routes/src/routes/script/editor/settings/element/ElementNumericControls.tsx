@@ -2,11 +2,10 @@ import {
     type BlockShortcut,
     type ScriptBlockNodeType,
 } from '@stagistic/script';
-
 import {
-    SettingsSelect,
-} from '../SettingsSelect';
-import sharedStyles from '../shared.module.css';
+    FormSelect,
+    formControlStyles,
+} from '@stagistic/ui';
 import type {
     ElementNumericModel,
     ElementsHandlers,
@@ -41,10 +40,10 @@ export const ElementNumericControls = ({
     const {onUpdateBlockSettings} = handlers;
 
     return (
-        <div className={sharedStyles.settingsFlatGrid}>
-            <div className={sharedStyles.settingsField}>
-                <span className={sharedStyles.fieldLabel}>Spacing before</span>
-                <SettingsSelect
+        <div className={formControlStyles.flatGrid}>
+            <div className={formControlStyles.field}>
+                <span className={formControlStyles.label}>Spacing before</span>
+                <FormSelect
                     id="settings-spacing-before"
                     ariaLabel="Select spacing before"
                     value={spacingBefore}
@@ -55,9 +54,9 @@ export const ElementNumericControls = ({
                 />
             </div>
             {spacingAfter !== undefined && spacingAfterOptions ? (
-                <div className={sharedStyles.settingsField}>
-                    <span className={sharedStyles.fieldLabel}>Spacing after</span>
-                    <SettingsSelect
+                <div className={formControlStyles.field}>
+                    <span className={formControlStyles.label}>Spacing after</span>
+                    <FormSelect
                         id="settings-spacing-after"
                         ariaLabel="Select spacing after"
                         value={spacingAfter}
@@ -68,9 +67,9 @@ export const ElementNumericControls = ({
                     />
                 </div>
             ) : null}
-            <div className={sharedStyles.settingsField}>
-                <span className={sharedStyles.fieldLabel}>Line height</span>
-                <SettingsSelect
+            <div className={formControlStyles.field}>
+                <span className={formControlStyles.label}>Line height</span>
+                <FormSelect
                     id="settings-line-height"
                     ariaLabel="Select line height"
                     value={lineHeight}
@@ -81,11 +80,11 @@ export const ElementNumericControls = ({
                 />
             </div>
             {shortcut !== undefined && shortcutOptions ? (
-                <div className={sharedStyles.settingsField}>
-                    <span className={sharedStyles.fieldLabel}>Shortcut</span>
+                <div className={formControlStyles.field}>
+                    <span className={formControlStyles.label}>Shortcut</span>
                     <div className={styles.shortcutField}>
                         <span className={styles.shortcutPrefix}>{shortcutPrefix} +</span>
-                        <SettingsSelect
+                        <FormSelect
                             ariaLabel="Select block shortcut"
                             value={shortcut}
                             options={shortcutOptions}
@@ -99,9 +98,9 @@ export const ElementNumericControls = ({
                 </div>
             ) : null}
             {nextElement !== undefined && nextElementOptions ? (
-                <div className={sharedStyles.settingsField}>
-                    <span className={sharedStyles.fieldLabel}>Next element</span>
-                    <SettingsSelect
+                <div className={formControlStyles.field}>
+                    <span className={formControlStyles.label}>Next element</span>
+                    <FormSelect
                         id="settings-next-element"
                         ariaLabel="Select next element"
                         value={nextElement}

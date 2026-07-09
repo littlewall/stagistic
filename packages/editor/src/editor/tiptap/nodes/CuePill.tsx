@@ -1,4 +1,5 @@
 import {
+    CUE_ID_ATTR,
     CUE_MODE_ATTR,
     CUE_TITLE_ATTR,
 } from '@stagistic/script';
@@ -17,6 +18,7 @@ import {
 } from 'react';
 
 import styles from './CuePill.module.css';
+import type {EditorCueRemoveRequest} from '../../contracts';
 import {
     CueDeleteIcon,
     CueMenuButton,
@@ -115,9 +117,19 @@ const readDecorationLabel = (decorations: NodeViewProps['decorations'], key: str
     return '';
 };
 
+interface CueStartPillProps extends NodeViewProps {
+    onRequestRemoveCue?: (request: EditorCueRemoveRequest) => void,
+}
+
 export const CueStartPill = ({
-    node, updateAttributes, deleteNode, decorations, editor, getPos,
-}: NodeViewProps) => {
+    node,
+    updateAttributes,
+    deleteNode,
+    decorations,
+    editor,
+    getPos,
+    onRequestRemoveCue,
+}: CueStartPillProps) => {
     const {
         active, setActive, rootRef,
     } = usePillActivation();
@@ -152,6 +164,18 @@ export const CueStartPill = ({
     };
 
     const deleteCue = () => {
+        const cueId = String(node.attrs[CUE_ID_ATTR] ?? '');
+
+        if (cueId && onRequestRemoveCue) {
+            onRequestRemoveCue({
+                cueId,
+                title,
+                complete: () => editor.commands.unassignCue(cueId),
+            });
+
+            return;
+        }
+
         const pos = getPos();
 
         if (typeof pos !== 'number' || !editor.commands.deleteCueStart(pos)) {
@@ -222,7 +246,7 @@ export const CueStartPill = ({
                         <CueModeIcon mode={mode} />
                     </CueMenuButton>
                     <CueMenuButton
-                        label="Delete cue"
+                        label="Remove cue"
                         isDanger
                         onClick={deleteCue}
                     >

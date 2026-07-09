@@ -52,5 +52,9 @@ export const compiledMigrations = [
     {
         "id": "0012_add_character_outline",
         "sql": "ALTER TABLE \"script_characters\" ADD COLUMN \"outline\" text;"
+    },
+    {
+        "id": "0013_nullable_cue_assignment",
+        "sql": "ALTER TABLE \"script_cues\" ALTER COLUMN \"start_block_id\" DROP NOT NULL;\n"
     }
 ] as const;

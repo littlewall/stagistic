@@ -1,5 +1,9 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
-import {clsx} from '@stagistic/ui';
+import {
+    clsx,
+    FormSelect,
+    formControlStyles,
+} from '@stagistic/ui';
 import {
     startTransition,
     useEffect,
@@ -10,7 +14,6 @@ import {
 import {MIN_PAGE_MARGIN_HORIZONTAL_PX, PX_PER_INCH} from '../constants';
 import {clamp, formatInches} from '../math';
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
-import {SettingsSelect} from '../SettingsSelect';
 import sharedStyles from '../shared.module.css';
 import type {
     PageLayoutHandlers,
@@ -136,11 +139,11 @@ export const PageLayoutSettingsPanel = ({
     return (
         <div className={panelStyles.panelStack}>
             <h3 className={panelStyles.panelTitle}>Page Layout</h3>
-            <div className={sharedStyles.previewCard}>
+            <div className={formControlStyles.previewCard}>
                 <div className={styles.pageSettingsGrid}>
-                    <div className={sharedStyles.settingsField}>
-                        <span className={sharedStyles.fieldLabel}>Page size</span>
-                        <SettingsSelect
+                    <div className={formControlStyles.field}>
+                        <span className={formControlStyles.label}>Page size</span>
+                        <FormSelect
                             id="settings-page-size"
                             ariaLabel="Select page size"
                             value={pageSizePresetId}
@@ -159,9 +162,9 @@ export const PageLayoutSettingsPanel = ({
                             }}
                         />
                     </div>
-                    <div className={sharedStyles.settingsField}>
-                        <span className={sharedStyles.fieldLabel}>Top margin</span>
-                        <SettingsSelect
+                    <div className={formControlStyles.field}>
+                        <span className={formControlStyles.label}>Top margin</span>
+                        <FormSelect
                             id="settings-margin-top"
                             ariaLabel="Select top margin rows"
                             value={localTopMarginRows}
@@ -174,9 +177,9 @@ export const PageLayoutSettingsPanel = ({
                             }}
                         />
                     </div>
-                    <div className={sharedStyles.settingsField}>
-                        <span className={sharedStyles.fieldLabel}>Bottom margin</span>
-                        <SettingsSelect
+                    <div className={formControlStyles.field}>
+                        <span className={formControlStyles.label}>Bottom margin</span>
+                        <FormSelect
                             id="settings-margin-bottom"
                             ariaLabel="Select bottom margin rows"
                             value={localBottomMarginRows}

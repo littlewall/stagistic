@@ -31,6 +31,27 @@ export interface PersistentCharacterRef {
     colorHex?: string | null,
 }
 
+export type PersistentCueKind = 'song' | 'instrumental';
+
+export interface PersistentCueRef {
+    id: string,
+    title: string,
+    kind: PersistentCueKind,
+    assignmentLabel?: string | null,
+}
+
+export interface EditorCueCreateRequest {
+    title: string,
+    blockId: string,
+    complete: (cue: PersistentCueRef) => boolean,
+}
+
+export interface EditorCueRemoveRequest {
+    cueId: string,
+    title: string,
+    complete: () => boolean,
+}
+
 export interface FocusBlockRequest {
     blockId: string,
     requestId: number,
@@ -159,6 +180,10 @@ export interface EditorLifecycleCallbacks {
     onIndexChange?: (snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void,
     onActiveBlockChange?: (blockId: string | null) => void,
     onBlockUiEvent?: (event: EditorBlockUiEvent) => void,
+    onRequestCreateCue?: (request: EditorCueCreateRequest) => void,
+    onRequestRemoveCue?: (request: EditorCueRemoveRequest) => void,
+    onCueAssigned?: (cueId: string) => void,
+    onCueUnassigned?: (cueId: string) => void,
 }
 
 export interface EditorSaveCallbacks {
@@ -195,6 +220,7 @@ export interface EditorLayoutProps {
 export interface EditorDocumentProps {
     initialValue: ScriptDocument,
     persistentCharacters?: readonly PersistentCharacterRef[],
+    persistentCues?: readonly PersistentCueRef[],
     scriptTitle?: string,
     draftDate?: string,
 }

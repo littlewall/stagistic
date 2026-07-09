@@ -5,7 +5,10 @@ import {
     type TitlePageSettings,
 } from '@stagistic/script';
 import {
+    FormSelect,
+    formControlStyles,
     InputTable,
+    type FormSelectOption,
     type InputTableColumnDef,
     type InputTableRow,
 } from '@stagistic/ui';
@@ -17,11 +20,6 @@ import {
 } from 'react';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
-import {
-    SettingsSelect,
-    type SettingsSelectOption,
-} from '../SettingsSelect';
-import sharedStyles from '../shared.module.css';
 import styles from './TitlePageSettingsPanel.module.css';
 
 const CREDITS_COLUMNS: readonly InputTableColumnDef[] = [
@@ -34,7 +32,7 @@ const CREDITS_COLUMNS: readonly InputTableColumnDef[] = [
 
 const CREDITS_ROW_COUNT = {type: 'dynamic' as const, min: 1};
 
-const DATE_FORMAT_OPTIONS: SettingsSelectOption[] = [{value: 'dmy', label: 'dd/mm/yyyy'}, {value: 'mdy', label: 'mm/dd/yyyy'}];
+const DATE_FORMAT_OPTIONS: FormSelectOption[] = [{value: 'dmy', label: 'dd/mm/yyyy'}, {value: 'mdy', label: 'mm/dd/yyyy'}];
 
 interface TitlePageSettingsPanelProps {
     scriptTitle: string,
@@ -103,7 +101,7 @@ export const TitlePageSettingsPanel = ({
                     <input
                         id="tp-title"
                         type="text"
-                        className={sharedStyles.settingsInput}
+                        className={formControlStyles.input}
                         placeholder="Untitled script"
                         value={scriptTitle}
                         onChange={event => onUpdateScriptTitle(event.target.value)}
@@ -114,7 +112,7 @@ export const TitlePageSettingsPanel = ({
                     <input
                         id="tp-subtitle"
                         type="text"
-                        className={sharedStyles.settingsInput}
+                        className={formControlStyles.input}
                         placeholder="Optional subtitle"
                         value={settings.subtitle ?? ''}
                         onChange={e => {
@@ -138,7 +136,7 @@ export const TitlePageSettingsPanel = ({
                     <input
                         id="tp-source"
                         type="text"
-                        className={sharedStyles.settingsInput}
+                        className={formControlStyles.input}
                         placeholder="Based on…"
                         value={settings.source ?? ''}
                         onChange={e => {
@@ -152,7 +150,7 @@ export const TitlePageSettingsPanel = ({
                 <div className={styles.draftDateRow}>
                     <div className={styles.draftDateField}>
                         <label className={styles.subFieldLabel} htmlFor="tp-date-format">Date format</label>
-                        <SettingsSelect
+                        <FormSelect
                             id="tp-date-format"
                             value={localDateFormat}
                             options={DATE_FORMAT_OPTIONS}
@@ -170,7 +168,7 @@ export const TitlePageSettingsPanel = ({
                         <input
                             id="tp-date"
                             type="date"
-                            className={sharedStyles.settingsInput}
+                            className={formControlStyles.input}
                             disabled={localDraftDateMode === 'auto'}
                             value={localDraftDate}
                             onChange={e => {
@@ -206,7 +204,7 @@ export const TitlePageSettingsPanel = ({
                     <input
                         id="tp-copyright"
                         type="text"
-                        className={sharedStyles.settingsInput}
+                        className={formControlStyles.input}
                         placeholder="© 2026 Author Name"
                         value={settings.copyright ?? ''}
                         onChange={e => {
@@ -220,7 +218,7 @@ export const TitlePageSettingsPanel = ({
                     <label className={styles.label} htmlFor="tp-contact">Contact</label>
                     <textarea
                         id="tp-contact"
-                        className={sharedStyles.settingsTextarea}
+                        className={formControlStyles.textarea}
                         placeholder={'Name\nAddress\nPhone / Email'}
                         value={settings.contact ?? ''}
                         onChange={e => {

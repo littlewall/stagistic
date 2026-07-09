@@ -3,14 +3,14 @@ import {
     CHARACTER_COLOR_SATURATION_OPTIONS,
     clampCharacterColorSaturation,
 } from '@stagistic/script';
+import {
+    FormSelect,
+    formControlStyles,
+    type FormSelectOption,
+} from '@stagistic/ui';
 import {useMemo} from 'react';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
-import {
-    SettingsSelect,
-    type SettingsSelectOption,
-} from '../SettingsSelect';
-import sharedStyles from '../shared.module.css';
 import styles from './VisualPreferencesSettingsPanel.module.css';
 
 const PREVIEW_CHARACTER_KEYS = [
@@ -21,7 +21,7 @@ const PREVIEW_CHARACTER_KEYS = [
     'nora',
 ] as const;
 
-const SATURATION_OPTIONS: SettingsSelectOption[] = CHARACTER_COLOR_SATURATION_OPTIONS.map(value => ({
+const SATURATION_OPTIONS: FormSelectOption[] = CHARACTER_COLOR_SATURATION_OPTIONS.map(value => ({
     value,
     label: `${value}%`,
 }));
@@ -44,12 +44,12 @@ export const VisualPreferencesSettingsPanel = ({
     return (
         <div className={panelStyles.panelStack}>
             <h3 className={panelStyles.panelTitle}>Visual Preferences</h3>
-            <div className={sharedStyles.settingsField}>
-                <label className={sharedStyles.fieldLabel} htmlFor="character-color-saturation">
+            <div className={formControlStyles.field}>
+                <label className={formControlStyles.label} htmlFor="character-color-saturation">
                     Character Color Saturation
                 </label>
                 <div className={styles.inlineRow}>
-                    <SettingsSelect
+                    <FormSelect
                         id="character-color-saturation"
                         value={normalizedSaturation}
                         options={SATURATION_OPTIONS}

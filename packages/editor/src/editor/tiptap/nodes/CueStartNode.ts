@@ -10,14 +10,20 @@ import {
     Node,
 } from '@tiptap/core';
 import {ReactNodeViewRenderer} from '@tiptap/react';
+import {createElement} from 'react';
 
+import type {EditorCueRemoveRequest} from '../../contracts';
 import {CueStartPill} from './CuePill';
 
 const readMode = (value: unknown) => {
     return value === 'hit' ? 'hit' : 'open';
 };
 
-export const CueStartNode = Node.create({
+interface CueStartNodeOptions {
+    onRequestRemoveCue?: (request: EditorCueRemoveRequest) => void,
+}
+
+export const CueStartNode = Node.create<CueStartNodeOptions>({
     name: CUE_START_NODE_NAME,
     group: 'inline',
     inline: true,
@@ -62,7 +68,16 @@ export const CueStartNode = Node.create({
         return ['span', mergeAttributes(HTMLAttributes, {'data-cue-pill': 'start'})];
     },
 
+    addOptions() {
+        return {};
+    },
+
     addNodeView() {
-        return ReactNodeViewRenderer(CueStartPill);
+        return ReactNodeViewRenderer(props => (
+            createElement(CueStartPill, {
+                ...props,
+                onRequestRemoveCue: this.options.onRequestRemoveCue,
+            })
+        ));
     },
 });

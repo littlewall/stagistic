@@ -58,12 +58,16 @@ export const buildInsertCueStart = (
     block: ActiveScriptBlock,
     title: string,
     mode: CueMode,
+    options: {
+        cueId?: string,
+        kind?: string | null,
+    } = {},
 ): Transaction => {
     const node = state.schema.nodes[CUE_START_NODE_NAME].create({
-        [CUE_ID_ATTR]: createNodeId(),
+        [CUE_ID_ATTR]: options.cueId ?? createNodeId(),
         [CUE_MODE_ATTR]: mode,
         [CUE_TITLE_ATTR]: title,
-        [CUE_KIND_ATTR]: null,
+        [CUE_KIND_ATTR]: options.kind ?? null,
     });
 
     return state.tr.insert(block.to, node);

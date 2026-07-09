@@ -10,9 +10,9 @@ import {
 import {
     bulkDeleteScriptActs,
     bulkDeleteScriptBlocks,
-    bulkDeleteScriptCues,
     bulkDeleteScriptScenes,
     bulkReplaceScriptBlockCharacterRefs,
+    bulkUnassignScriptCues,
     bulkUpsertScriptActs,
     bulkUpsertScriptCues,
     bulkUpsertScriptScenes,
@@ -104,9 +104,11 @@ export const createDocumentPersister = (scriptId: string) => {
                 .select({id: scriptCues.id})
                 .from(scriptCues)
                 .where(eq(scriptCues.scriptId, scriptId));
-            const nextCueIds = new Set(extracted.cues.map(cue => cue.id));
+            const existingCueIds = new Set(existingCues.map(cue => cue.id));
+            const assignableCues = extracted.cues.filter(cue => existingCueIds.has(cue.id));
+            const nextCueIds = new Set(assignableCues.map(cue => cue.id));
 
-            await bulkUpsertScriptCues(tx, extracted.cues.map(cue => ({
+            await bulkUpsertScriptCues(tx, assignableCues.map(cue => ({
                 id: cue.id,
                 scriptId,
                 sceneNumber: cue.sceneNumber,
@@ -119,7 +121,11 @@ export const createDocumentPersister = (scriptId: string) => {
                 createdAt: now,
                 updatedAt: now,
             })));
-            await bulkDeleteScriptCues(tx, existingCues.filter(row => !nextCueIds.has(row.id)).map(row => row.id));
+            await bulkUnassignScriptCues(
+                tx,
+                existingCues.filter(row => !nextCueIds.has(row.id)).map(row => row.id),
+                now,
+            );
         };
 
         const diff = diffExtractedBlocks(Array.from(lastSavedBlocks.values()), extracted.blocks);

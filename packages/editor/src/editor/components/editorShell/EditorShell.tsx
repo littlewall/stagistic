@@ -18,6 +18,7 @@ import {
 import type {
     EditorLayoutProps,
     PersistentCharacterRef,
+    PersistentCueRef,
 } from '../../contracts';
 import styles from '../../Editor.module.css';
 import {useEditorLiveCharacters} from '../../live/hooks';
@@ -28,6 +29,8 @@ interface EditorShellCanvasProps {
     editor: TiptapEditor | null,
     autoFocus?: boolean,
     persistentCharacters?: readonly PersistentCharacterRef[],
+    persistentCues?: readonly PersistentCueRef[],
+    onCueAssigned?: (cueId: string) => void,
     characterColorSaturation?: number,
     headerFooter: HeaderFooterSettings,
     scriptTitle?: string,
@@ -59,6 +62,8 @@ export const EditorShell = ({
         editor,
         autoFocus,
         persistentCharacters,
+        persistentCues,
+        onCueAssigned,
         characterColorSaturation,
         headerFooter,
         scriptTitle,
@@ -170,6 +175,8 @@ export const EditorShell = ({
                     <EditorCanvas
                         editor={editor}
                         persistentCharacters={persistentCharacters}
+                        persistentCues={persistentCues}
+                        onCueAssigned={onCueAssigned}
                         characterColorSaturation={characterColorSaturation}
                         autoFocus={autoFocus}
                         headerFooter={headerFooter}

@@ -36,10 +36,14 @@ export type {
     EditorSidebarToggle,
     EditorStructureRequests,
     EditorValueChangeMeta,
+    EditorCueCreateRequest,
+    EditorCueRemoveRequest,
     FocusBlockRequest,
     InsertActRequest,
     MoveSceneRequest,
     PersistentCharacterRef,
+    PersistentCueKind,
+    PersistentCueRef,
     RenameActRequest,
 } from './editor/contracts';
 export {default as ScriptEditor} from './editor/Editor';

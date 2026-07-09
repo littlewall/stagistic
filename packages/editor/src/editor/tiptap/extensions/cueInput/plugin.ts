@@ -4,8 +4,16 @@ import {
     DecorationSet,
 } from '@tiptap/pm/view';
 
+import type {
+    EditorCueCreateRequest,
+    PersistentCueRef,
+} from '../../../contracts';
 import {getActiveScriptBlockFromState} from '../../scriptCore';
-import {blockHasCueAtom} from '../cue/cueCommands';
+import {
+    blockHasCueAtom,
+    buildInsertCueStart,
+    resolveCueTargetBlock,
+} from '../cue/cueCommands';
 import {
     cueComposeKey,
     type CueComposeRawState,
@@ -15,6 +23,7 @@ import {
 import {
     CUE_COMPOSE_CLOSE_META,
     CUE_COMPOSE_OPEN_META,
+    CUE_OUT_KEYWORD,
     CUE_TRIGGER_CHARACTER,
     STAGE_DIRECTION_NODE_TYPE,
 } from './constants';
@@ -25,7 +34,33 @@ import {
     buildOpenCueCompose,
 } from './transactions';
 
-export const createCueComposePlugin = (): Plugin<CueComposeRawState | null> => {
+export interface CueComposePluginOptions {
+    persistentCuesRef?: {current: readonly PersistentCueRef[]},
+    onRequestCreateCue?: (request: EditorCueCreateRequest) => void,
+    onCueAssigned?: (cueId: string) => void,
+}
+
+const normalizeCueTitle = (value: string) => {
+    return value.trim().replace(/\s+/gu, ' ').toLocaleLowerCase();
+};
+
+const findExactUnassignedCue = (
+    cues: readonly PersistentCueRef[],
+    title: string,
+): PersistentCueRef | null => {
+    const normalizedTitle = normalizeCueTitle(title);
+
+    if (!normalizedTitle) {
+        return null;
+    }
+
+    return cues.find(cue => !cue.assignmentLabel
+        && normalizeCueTitle(cue.title) === normalizedTitle) ?? null;
+};
+
+export const createCueComposePlugin = (
+    options: CueComposePluginOptions = {},
+): Plugin<CueComposeRawState | null> => {
     return new Plugin<CueComposeRawState | null>({
         key: cueComposeKey,
         state: {
@@ -112,7 +147,62 @@ export const createCueComposePlugin = (): Plugin<CueComposeRawState | null> => {
 
                 if (event.key === 'Enter') {
                     event.preventDefault();
-                    view.dispatch(buildCommitCue(view.state, compose));
+                    const title = compose.query.trim();
+
+                    if (title.length === 0 || title.toLocaleLowerCase() === CUE_OUT_KEYWORD) {
+                        view.dispatch(buildCommitCue(view.state, compose));
+
+                        return true;
+                    }
+
+                    const existingCue = findExactUnassignedCue(
+                        options.persistentCuesRef?.current ?? [],
+                        title,
+                    );
+
+                    if (existingCue) {
+                        view.dispatch(buildCommitCue(view.state, compose, {
+                            cueId: existingCue.id,
+                            kind: existingCue.kind,
+                            title: existingCue.title,
+                        }));
+                        options.onCueAssigned?.(existingCue.id);
+
+                        return true;
+                    }
+
+                    const block = getActiveScriptBlockFromState(view.state);
+
+                    if (!options.onRequestCreateCue || !block) {
+                        view.dispatch(buildCommitCue(view.state, compose));
+
+                        return true;
+                    }
+
+                    const blockId = block.id;
+                    const request: EditorCueCreateRequest = {
+                        title,
+                        blockId,
+                        complete: cue => {
+                            const targetBlock = resolveCueTargetBlock(view.state, blockId);
+
+                            if (!targetBlock || blockHasCueAtom(targetBlock)) {
+                                return false;
+                            }
+
+                            view.dispatch(buildInsertCueStart(view.state, targetBlock, cue.title, 'open', {
+                                cueId: cue.id,
+                                kind: cue.kind,
+                            }).scrollIntoView());
+                            options.onCueAssigned?.(cue.id);
+                            view.focus();
+
+                            return true;
+                        },
+                    };
+
+                    view.dispatch(buildAbandonCue(view.state, compose));
+                    options.onRequestCreateCue(request);
 
                     return true;
                 }

@@ -5,7 +5,10 @@ import {
     type CueComposeState,
     getCueComposeFromState,
 } from './cueInput/composeState';
-import {createCueComposePlugin} from './cueInput/plugin';
+import {
+    createCueComposePlugin,
+    type CueComposePluginOptions,
+} from './cueInput/plugin';
 
 export {
     cueComposeKey,
@@ -19,11 +22,15 @@ export {
  * its Enter/Escape handlers run before the block-split Enter handler while a
  * title is being composed.
  */
-export const CueInputExtension = Extension.create({
+export const CueInputExtension = Extension.create<CueComposePluginOptions>({
     name: 'cueInput',
     priority: 1100,
 
+    addOptions() {
+        return {};
+    },
+
     addProseMirrorPlugins() {
-        return [createCueComposePlugin()];
+        return [createCueComposePlugin(this.options)];
     },
 });

@@ -22,6 +22,12 @@ import {
     CUE_OUT_KEYWORD,
 } from './constants';
 
+export interface CueStartCommitOptions {
+    cueId?: string,
+    kind?: string | null,
+    title?: string,
+}
+
 /**
  * `#` trigger: anchor a cue-title compose at the end of the stage-direction
  * block (the '#' itself is swallowed, not inserted).
@@ -51,20 +57,27 @@ export const buildAbandonCue = (state: EditorState, compose: CueComposeState): T
  * anything else a `cueStart` carrying the title. The caret lands before the
  * pill so further prose stays ahead of the cue (§4.1).
  */
-export const buildCommitCue = (state: EditorState, compose: CueComposeState): Transaction => {
-    const title = compose.query.trim();
+export const buildCommitCue = (
+    state: EditorState,
+    compose: CueComposeState,
+    options: CueStartCommitOptions = {},
+): Transaction => {
+    const title = (options.title ?? compose.query).trim();
 
     if (title.length === 0) {
         return buildAbandonCue(state, compose);
     }
 
-    const node = title.toLowerCase() === CUE_OUT_KEYWORD
+    const shouldCommitOut = options.cueId === undefined
+        && options.title === undefined
+        && title.toLowerCase() === CUE_OUT_KEYWORD;
+    const node = shouldCommitOut
         ? state.schema.nodes[CUE_OUT_NODE_NAME].create()
         : state.schema.nodes[CUE_START_NODE_NAME].create({
-            [CUE_ID_ATTR]: createNodeId(),
+            [CUE_ID_ATTR]: options.cueId ?? createNodeId(),
             [CUE_MODE_ATTR]: 'open',
             [CUE_TITLE_ATTR]: title,
-            [CUE_KIND_ATTR]: null,
+            [CUE_KIND_ATTR]: options.kind ?? null,
         });
     const tr = state.tr.replaceWith(compose.from, compose.to, node);
 

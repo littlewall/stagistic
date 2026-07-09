@@ -143,7 +143,7 @@ export const duplicateScriptRows = async (
             ...row,
             id: uuidv7(),
             scriptId: targetScriptId,
-            startBlockId: blockMap.get(row.startBlockId) ?? row.startBlockId,
+            startBlockId: remapNullable(blockMap, row.startBlockId),
             endBlockId: remapNullable(blockMap, row.endBlockId),
             createdAt: now,
             updatedAt: now,

@@ -2,7 +2,10 @@ import {
     describe, expect, it,
 } from 'vite-plus/test';
 
-import {listScriptCues} from '../../queries';
+import {
+    insertScriptCue,
+    listScriptCues,
+} from '../../queries';
 import {
     createTestDb, seedScript,
 } from '../../testing/createTestDb';
@@ -42,10 +45,23 @@ const docWithoutCue = () => ({
 });
 
 describe('persist cues', () => {
-    it('writes a cue, updates its title, then removes it', async () => {
+    it('assigns an existing cue, updates its title, then unassigns it', async () => {
         const {db} = await createTestDb();
 
         await seedScript(db, SCRIPT_ID);
+        await insertScriptCue(db, {
+            id: 'c1',
+            scriptId: SCRIPT_ID,
+            sceneNumber: 0,
+            indexInScene: 0,
+            mode: 'open',
+            title: 'Night',
+            kind: 'song',
+            startBlockId: null,
+            endBlockId: null,
+            createdAt: 1,
+            updatedAt: 1,
+        });
 
         const persister = createDocumentPersister(SCRIPT_ID);
 
@@ -66,6 +82,23 @@ describe('persist cues', () => {
         expect(afterRename[0]).toMatchObject({id: 'c1', title: 'Dawn'});
 
         await persister.persist(db, docWithoutCue() as never);
+
+        const afterUnassign = await listScriptCues(db, SCRIPT_ID);
+
+        expect(afterUnassign).toHaveLength(1);
+        expect(afterUnassign[0]).toMatchObject({
+            id: 'c1', title: 'Dawn', startBlockId: null, endBlockId: null,
+        });
+    });
+
+    it('does not create uncatalogued cues from the document', async () => {
+        const {db} = await createTestDb();
+
+        await seedScript(db, SCRIPT_ID);
+
+        const persister = createDocumentPersister(SCRIPT_ID);
+
+        await persister.persist(db, docWithCue('Night') as never);
 
         expect(await listScriptCues(db, SCRIPT_ID)).toHaveLength(0);
     });

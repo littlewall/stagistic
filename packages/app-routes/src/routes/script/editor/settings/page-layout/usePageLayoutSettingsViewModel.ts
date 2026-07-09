@@ -1,4 +1,5 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
+import type {FormSelectOption} from '@stagistic/ui';
 import {type CSSProperties, useMemo} from 'react';
 
 import {
@@ -11,7 +12,6 @@ import {
     formatInches,
     getClosestStepValue,
 } from '../math';
-import type {SettingsSelectOption} from '../SettingsSelect';
 import type {ScriptEditorSettingsPanelProps} from '../types';
 
 const MIN_PAGE_CONTENT_WIDTH_PX = 320;
@@ -40,7 +40,7 @@ export interface PageLayoutSliderModel {
 export interface PageLayoutNumericModel {
     topMarginRows: number,
     bottomMarginRows: number,
-    marginRowOptions: SettingsSelectOption[],
+    marginRowOptions: FormSelectOption[],
 }
 
 export interface PageLayoutViewModel {
@@ -120,7 +120,7 @@ export const usePageLayoutSettingsViewModel = ({
         const contentWidthInches = formatInches(contentWidthPx / PX_PER_INCH);
 
         // T/B margin row options
-        const marginRowOptions: SettingsSelectOption[] = MARGIN_ROW_OPTIONS.map(rows => ({
+        const marginRowOptions: FormSelectOption[] = MARGIN_ROW_OPTIONS.map(rows => ({
             value: rows,
             label: `${rows} row${rows === 1 ? '' : 's'}`,
         }));

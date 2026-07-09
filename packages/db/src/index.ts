@@ -23,6 +23,7 @@ export {
 } from './repo/documentProjection';
 export * from './schema';
 export type {
+    CreateScriptCueInput,
     DuplicateScriptInput,
     ListScriptsOptions,
     RenameScriptInput,
@@ -33,6 +34,7 @@ export type {
     ScriptCharactersRepository,
     ScriptContentRepository,
     ScriptCrudRepository,
+    ScriptCuesRepository,
     ScriptDataRepository,
     ScriptLocationsRepository,
     ScriptRepository,
@@ -49,6 +51,7 @@ export type {
     ScriptCharacterGender,
     ScriptCharacterGenderOption,
     ScriptCharacterRef,
+    ScriptCue,
     ScriptLocation,
     ScriptScene,
     ScriptSettingsBlock,

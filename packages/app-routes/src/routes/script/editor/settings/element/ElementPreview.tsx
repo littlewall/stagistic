@@ -1,4 +1,7 @@
-import {clsx} from '@stagistic/ui';
+import {
+    clsx,
+    formControlStyles,
+} from '@stagistic/ui';
 import {
     type ReactNode,
     useLayoutEffect,
@@ -78,7 +81,7 @@ export const ElementPreview = ({
 
     return (
         <div
-            className={sharedStyles.previewCard}
+            className={formControlStyles.previewCard}
             style={{
                 ...previewStyle, ...previewStyleOverride, ...localSliderStyleOverride,
             }}

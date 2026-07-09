@@ -9,6 +9,7 @@ export type {
     ScriptAct,
     ScriptBlock,
     ScriptBlockCharacterRef,
+    ScriptCue,
     ScriptLocation,
     ScriptScene,
     ScriptSettingsBlock,

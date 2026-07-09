@@ -3,18 +3,29 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--control-height-xs);
-    height: var(--control-height-xs);
+    width: calc(22px * var(--size-scale));
+    height: calc(22px * var(--size-scale));
     padding: 0;
     font-family: inherit;
-    font-size: var(--font-size-lg);
+    font-size: var(--font-size-md);
     line-height: var(--line-height-none);
     color: var(--color-text-muted);
     background: transparent;
     border: 1px solid transparent;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-sm);
+    transition: background .15s ease, color .15s ease, transform .12s ease-out;
 
     &:hover {
+        color: var(--color-text);
         background: color-mix(in oklch, var(--color-surface-accent) 24%, transparent);
+    }
+
+    &:active {
+        transform: scale(.96);
+    }
+
+    & svg {
+        width: calc(13px * var(--size-scale));
+        height: calc(13px * var(--size-scale));
     }
 }

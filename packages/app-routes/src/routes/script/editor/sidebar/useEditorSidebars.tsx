@@ -70,7 +70,6 @@ export const useEditorSidebars = ({
                 selectedPanelId={layout.leftPanelId}
                 onSelectPanel={layout.selectLeft}
                 onClose={layout.toggleLeft}
-                contextActions={leftPanel?.renderContextActions?.()}
             />
         ),
         rightSidebarHeader: (
@@ -80,7 +79,6 @@ export const useEditorSidebars = ({
                 selectedPanelId={layout.rightPanelId}
                 onSelectPanel={layout.selectRight}
                 onClose={layout.toggleRight}
-                contextActions={rightPanel?.renderContextActions?.()}
             />
         ),
         leftSidebar: leftPanel?.renderContent() ?? null,

@@ -5,6 +5,7 @@ import {
 import {
     type ReactNode,
     useCallback,
+    useEffect,
     useMemo,
     useRef,
 } from 'react';
@@ -53,6 +54,7 @@ const Editor = ({
     const {
         initialValue,
         persistentCharacters = [],
+        persistentCues = [],
         scriptTitle,
         draftDate,
     } = document;
@@ -77,6 +79,10 @@ const Editor = ({
         onIndexChange,
         onActiveBlockChange,
         onBlockUiEvent,
+        onRequestCreateCue,
+        onRequestRemoveCue,
+        onCueAssigned,
+        onCueUnassigned,
     } = callbacks ?? {};
 
     const resolvedInitialValue = useMemo(
@@ -139,6 +145,12 @@ const Editor = ({
             ?? createCharacterColorRefsBundle();
     }
 
+    const persistentCuesRef = useRef(persistentCues);
+
+    useEffect(() => {
+        persistentCuesRef.current = persistentCues;
+    }, [persistentCues]);
+
     const {
         colorByCharacterIdRef,
         rememberedColorByKeyRef,
@@ -177,6 +189,11 @@ const Editor = ({
         colorByCharacterIdRef,
         rememberedColorByKeyRef,
         persistentCharactersRef,
+        persistentCuesRef,
+        onRequestCreateCue,
+        onRequestRemoveCue,
+        onCueAssigned,
+        onCueUnassigned,
         enableBlockUiEvents: Boolean(onBlockUiEvent),
     });
     const initialDoc = useMemo<ScriptDocument>(
@@ -289,6 +306,8 @@ const Editor = ({
                             characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
                             editor,
                             persistentCharacters,
+                            persistentCues,
+                            onCueAssigned,
                             headerFooter: resolvedSettings.headerFooter,
                             scriptTitle,
                             draftDate,

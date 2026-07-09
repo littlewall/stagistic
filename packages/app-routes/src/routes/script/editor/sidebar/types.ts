@@ -6,7 +6,6 @@ export interface SidebarPanel {
     readonly id: SidebarPanelId,
     readonly label: string,
     readonly renderContent: () => ReactNode,
-    readonly renderContextActions?: () => ReactNode,
 }
 
 export interface SidebarToggle {

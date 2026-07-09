@@ -200,9 +200,11 @@ export const rebuildScriptProjection = async ({
             rows: toCharacterRefRows(block, knownCharacterIds),
         })));
 
-        const nextCueIds = new Set(extracted.cues.map(cue => cue.id));
+        const existingCueIds = new Set(existingCues.map(cue => cue.id));
+        const assignableCues = extracted.cues.filter(cue => existingCueIds.has(cue.id));
+        const nextCueIds = new Set(assignableCues.map(cue => cue.id));
 
-        await dbQueries.bulkUpsertScriptCues(tx, extracted.cues.map(cue => ({
+        await dbQueries.bulkUpsertScriptCues(tx, assignableCues.map(cue => ({
             id: cue.id,
             scriptId,
             sceneNumber: cue.sceneNumber,
@@ -215,9 +217,10 @@ export const rebuildScriptProjection = async ({
             createdAt: now,
             updatedAt: now,
         })));
-        await dbQueries.bulkDeleteScriptCues(
+        await dbQueries.bulkUnassignScriptCues(
             tx,
             existingCues.filter(cue => !nextCueIds.has(cue.id)).map(cue => cue.id),
+            now,
         );
 
         if (afterPersist) {

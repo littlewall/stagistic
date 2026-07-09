@@ -9,6 +9,7 @@ import {createBlocksHandlers} from './blocks';
 import {createCharacterHandlers} from './characters';
 import {createSettingsHandlers} from './config';
 import {createContentHandlers} from './content';
+import {createCueHandlers} from './cues';
 import {createOutboxRecorder} from './outbox';
 import {createScriptsHandlers} from './scripts';
 import {
@@ -110,6 +111,11 @@ export const createLocalPgliteDataRepository = ({
     const acts = createActsHandlers({getDb});
     const locations = createLocationsHandlers({getDb});
     const blockCharacterRefs = createBlockCharacterRefsHandlers({getDb});
+    const cues = createCueHandlers({
+        getDb,
+        recordOutbox,
+        syncDb: syncToFs,
+    });
 
     return {
         scripts,
@@ -123,6 +129,7 @@ export const createLocalPgliteDataRepository = ({
         acts,
         locations,
         blockCharacterRefs,
+        cues,
     } satisfies ScriptDataRepository;
 };
 
@@ -135,6 +142,10 @@ export const createLocalPgliteRepository = (deps: LocalPgliteRepositoryDeps): Sc
         getScriptSummary: scriptId => repositoryData.scripts.getSummary(scriptId),
         listScriptCharacters: scriptId => repositoryData.characters.list(scriptId),
         listScriptCharacterGenders: scriptId => repositoryData.characterGenders.list(scriptId),
+        listScriptCues: scriptId => repositoryData.cues.list(scriptId),
+        createScriptCue: (scriptId, input) => repositoryData.cues.create(scriptId, input),
+        deleteScriptCue: (scriptId, cueId) => repositoryData.cues.delete(scriptId, cueId),
+        unassignScriptCue: (scriptId, cueId) => repositoryData.cues.unassign(scriptId, cueId),
         createScript: (title, initialContent) => repositoryData.scripts.create(title, initialContent),
         renameScript: (scriptId, input) => repositoryData.scripts.rename(scriptId, input),
         renameScriptTitle: (scriptId, title) => repositoryData.scripts.renameTitle(scriptId, title),

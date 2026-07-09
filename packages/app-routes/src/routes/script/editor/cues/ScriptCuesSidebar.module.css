@@ -1,0 +1,122 @@
+.content {
+    overflow: hidden auto;
+    flex: 1;
+    min-height: 0;
+    padding: 0;
+}
+
+.section + .section {
+    margin-top: var(--space-2xl);
+}
+
+.section {
+    padding-inline: var(--space-lg);
+}
+
+.sectionTitle {
+    margin: 0 0 var(--space-md);
+    padding-inline: var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: 400;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.itemList {
+    display: grid;
+    gap: 2px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.item {
+    display: grid;
+    grid-template-columns: calc(18px * var(--size-scale)) minmax(0, 1fr) auto;
+    gap: var(--space-md);
+    align-items: center;
+    min-height: calc(30px * var(--size-scale));
+    padding: 0 var(--space-md);
+    color: var(--color-text);
+    border-radius: var(--radius-md);
+
+    &:hover {
+        background: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
+    }
+
+    &:hover .actions,
+    &:focus-within .actions {
+        opacity: 1;
+    }
+}
+
+.kindIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(18px * var(--size-scale));
+    height: calc(18px * var(--size-scale));
+    color: var(--color-text-muted);
+}
+
+.kindGlyph {
+    width: calc(13px * var(--size-scale));
+    height: calc(13px * var(--size-scale));
+}
+
+.title {
+    overflow: hidden;
+    min-width: 0;
+    font-size: var(--font-size-sm);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.actions {
+    display: inline-flex;
+    gap: 1px;
+    opacity: .38;
+    transition: opacity .15s ease;
+}
+
+.rowAction {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(22px * var(--size-scale));
+    height: calc(22px * var(--size-scale));
+    padding: 0;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: background .15s ease, color .15s ease, transform .12s ease-out;
+
+    &:hover {
+        color: var(--color-text);
+        background: color-mix(in oklch, var(--color-surface-accent) 30%, transparent);
+    }
+
+    &:active {
+        transform: scale(.96);
+    }
+
+    & svg {
+        width: calc(13px * var(--size-scale));
+        height: calc(13px * var(--size-scale));
+    }
+}
+
+.empty {
+    margin: 0;
+    padding-inline: var(--space-md);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+}
+
+.compactEmpty {
+    margin-bottom: var(--space-lg);
+}

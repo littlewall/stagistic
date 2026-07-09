@@ -9,12 +9,11 @@ import type {
     StructureSettingsPatch,
     TitlePageSettings,
 } from '@stagistic/script';
+import type {FormSelectOption} from '@stagistic/ui';
 import type {
     CSSProperties,
     ReactElement,
 } from 'react';
-
-import type {SettingsSelectOption} from './SettingsSelect';
 
 export type {
     BlockSettingsPatch,
@@ -103,11 +102,11 @@ export interface ElementNumericModel {
     lineHeight: number,
     shortcut?: BlockShortcut,
     nextElement?: ScriptBlockNodeType,
-    spacingBeforeOptions: SettingsSelectOption[],
-    spacingAfterOptions?: SettingsSelectOption[],
-    lineHeightOptions: SettingsSelectOption[],
-    shortcutOptions?: SettingsSelectOption[],
-    nextElementOptions?: SettingsSelectOption[],
+    spacingBeforeOptions: FormSelectOption[],
+    spacingAfterOptions?: FormSelectOption[],
+    lineHeightOptions: FormSelectOption[],
+    shortcutOptions?: FormSelectOption[],
+    nextElementOptions?: FormSelectOption[],
 }
 
 export interface ElementPreviewModel {

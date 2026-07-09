@@ -1,8 +1,8 @@
 import type {EditorSettings} from '@stagistic/script';
+import {formControlStyles} from '@stagistic/ui';
 import type {ChangeEvent} from 'react';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
-import sharedStyles from '../shared.module.css';
 import type {StructureSettingsPatch} from '../types';
 
 interface StructureMarkersSettingsPanelProps {
@@ -30,14 +30,14 @@ export const StructureMarkersSettingsPanel = ({
     return (
         <div className={panelStyles.panelStack}>
             <h3 className={panelStyles.panelTitle}>Structure Markers</h3>
-            <div className={sharedStyles.settingsFlatGrid}>
-                <div className={sharedStyles.settingsField}>
-                    <label className={sharedStyles.fieldLabel} htmlFor="settings-act-lines-before">
+            <div className={formControlStyles.flatGrid}>
+                <div className={formControlStyles.field}>
+                    <label className={formControlStyles.label} htmlFor="settings-act-lines-before">
                         ACT Lines Before
                     </label>
                     <input
                         id="settings-act-lines-before"
-                        className={sharedStyles.settingsInput}
+                        className={formControlStyles.input}
                         type="number"
                         min={0}
                         max={8}
@@ -46,13 +46,13 @@ export const StructureMarkersSettingsPanel = ({
                         onChange={event => updateActDisplay('linesBefore', event)}
                     />
                 </div>
-                <div className={sharedStyles.settingsField}>
-                    <label className={sharedStyles.fieldLabel} htmlFor="settings-act-lines-after">
+                <div className={formControlStyles.field}>
+                    <label className={formControlStyles.label} htmlFor="settings-act-lines-after">
                         ACT Lines After
                     </label>
                     <input
                         id="settings-act-lines-after"
-                        className={sharedStyles.settingsInput}
+                        className={formControlStyles.input}
                         type="number"
                         min={0}
                         max={8}

@@ -7,13 +7,17 @@ import {
     createRoot, type Root,
 } from 'react-dom/client';
 import {
-    afterEach, describe, expect, it,
+    afterEach, describe, expect, it, vi,
 } from 'vite-plus/test';
 import {
     page, userEvent,
 } from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../../../context';
+import type {
+    EditorCueRemoveRequest,
+    EditorProps,
+} from '../../../contracts';
 import ScriptEditor from '../../../Editor';
 import {getCharacterTagComposeFromState} from '../CharacterTagInputExtension';
 
@@ -77,7 +81,15 @@ const createNumberedCueDocument = (): ScriptDocument => ({
 
 const mountedRoots: Root[] = [];
 
-const renderEditor = (initialValue: ScriptDocument = createDocument()) => {
+type RenderEditorOptions = {
+    document?: Partial<Omit<EditorProps['document'], 'initialValue'>>,
+    callbacks?: EditorProps['callbacks'],
+};
+
+const renderEditor = (
+    initialValue: ScriptDocument = createDocument(),
+    options: RenderEditorOptions = {},
+) => {
     const host = document.createElement('div');
 
     host.style.width = '1024px';
@@ -87,7 +99,14 @@ const renderEditor = (initialValue: ScriptDocument = createDocument()) => {
     const root = createRoot(host);
 
     root.render(
-        <ScriptEditor document={{initialValue}} layout={{autoFocus: true}}>
+        <ScriptEditor
+            document={{
+                initialValue,
+                ...options.document,
+            }}
+            layout={{autoFocus: true}}
+            callbacks={options.callbacks}
+        >
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
             </ScriptEditor.LeftSidebar>
@@ -123,6 +142,26 @@ const getStageDirection = (editor: Editor): ScriptNode | undefined => {
     return content?.find(node => node.attrs?.id === 'sd-1');
 };
 
+const findCueStartPosition = (editor: Editor): number | null => {
+    let position: number | null = null;
+
+    editor.state.doc.descendants((node, pos) => {
+        if (position !== null) {
+            return false;
+        }
+
+        if (node.type.name === 'cueStart') {
+            position = pos;
+
+            return false;
+        }
+
+        return true;
+    });
+
+    return position;
+};
+
 afterEach(() => {
     mountedRoots.forEach(root => root.unmount());
     mountedRoots.length = 0;
@@ -156,6 +195,137 @@ describe('cue # compose', () => {
 
         expect(cueStart?.attrs?.title).toBe('Night');
         expect((stageDirection?.content ?? []).some(node => node.type === 'text' && (node.text ?? '').includes('Night'))).toBe(false);
+    });
+
+    it('suggests unassigned persistent cues after # and inserts the selected cue id', async () => {
+        const onCueAssigned = vi.fn();
+
+        renderEditor(createDocument(), {
+            document: {
+                persistentCues: [
+                    {
+                        id: 'cue-existing',
+                        title: 'Overture',
+                        kind: 'instrumental',
+                        assignmentLabel: null,
+                    },
+                ],
+            },
+            callbacks: {
+                onCueAssigned,
+            },
+        });
+
+        const editor = await getEditor();
+        const el = page.elementLocator(await poll(() => document.querySelector('[contenteditable="true"]'), 'editor'));
+
+        await el.click();
+        await userEvent.type(el, '#');
+
+        const listbox = await poll(() => document.querySelector('[role="listbox"][aria-label="Cue suggestions"]'), 'cue suggestions');
+
+        expect(listbox.textContent).toContain('Overture');
+
+        await userEvent.keyboard('{ArrowDown}');
+        await new Promise(resolve => window.requestAnimationFrame(resolve));
+        await userEvent.keyboard('{Enter}');
+
+        await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+
+        const stageDirection = getStageDirection(editor);
+        const cueStart = stageDirection?.content?.find(node => node.type === 'cueStart');
+
+        expect(cueStart?.attrs).toMatchObject({
+            cueId: 'cue-existing',
+            title: 'Overture',
+            kind: 'instrumental',
+        });
+        expect(onCueAssigned).toHaveBeenCalledWith('cue-existing');
+    });
+
+    it('notifies the app when an editor cue start is removed', async () => {
+        const onCueUnassigned = vi.fn();
+
+        renderEditor(createDocument(), {
+            document: {
+                persistentCues: [
+                    {
+                        id: 'cue-existing',
+                        title: 'Overture',
+                        kind: 'instrumental',
+                        assignmentLabel: null,
+                    },
+                ],
+            },
+            callbacks: {
+                onCueUnassigned,
+            },
+        });
+
+        const editor = await getEditor();
+        const el = page.elementLocator(await poll(() => document.querySelector('[contenteditable="true"]'), 'editor'));
+
+        await el.click();
+        await userEvent.type(el, '#Overture');
+        await userEvent.keyboard('{Enter}');
+        await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+
+        const cuePosition = findCueStartPosition(editor);
+
+        expect(cuePosition).not.toBeNull();
+        expect(editor.commands.deleteCueStart(cuePosition as number)).toBe(true);
+        expect(onCueUnassigned).toHaveBeenCalledWith('cue-existing');
+    });
+
+    it('requests confirmation before removing a cue from the editor pill menu', async () => {
+        const removeRequestRef: {current: EditorCueRemoveRequest | null} = {current: null};
+        const onCueUnassigned = vi.fn();
+
+        renderEditor(createDocument(), {
+            document: {
+                persistentCues: [
+                    {
+                        id: 'cue-existing',
+                        title: 'Overture',
+                        kind: 'instrumental',
+                        assignmentLabel: null,
+                    },
+                ],
+            },
+            callbacks: {
+                onRequestRemoveCue: request => {
+                    removeRequestRef.current = request;
+                },
+                onCueUnassigned,
+            },
+        });
+
+        const el = page.elementLocator(await poll(() => document.querySelector('[contenteditable="true"]'), 'editor'));
+
+        await el.click();
+        await userEvent.type(el, '#Overture');
+        await userEvent.keyboard('{Enter}');
+
+        const pill = await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
+
+        await page.elementLocator(pill).click();
+
+        const removeButton = await poll(() => document.querySelector('button[aria-label="Remove cue"]'), 'remove cue button');
+
+        await page.elementLocator(removeButton).click();
+
+        const removeRequest = removeRequestRef.current;
+
+        if (!removeRequest) {
+            throw new Error('Expected remove cue request');
+        }
+
+        expect(removeRequest.cueId).toBe('cue-existing');
+        expect(removeRequest.title).toBe('Overture');
+        expect(document.querySelector('[data-cue-pill="start"]')).toBeTruthy();
+        expect(removeRequest.complete()).toBe(true);
+        expect(onCueUnassigned).toHaveBeenCalledWith('cue-existing');
+        await poll(() => document.querySelector('[data-cue-pill="start"]') ? null : true, 'cue removed');
     });
 
     it('cancels on Escape, leaving no cue and no stray title text', async () => {

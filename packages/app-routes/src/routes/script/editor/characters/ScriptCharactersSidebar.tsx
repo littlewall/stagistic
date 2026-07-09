@@ -7,11 +7,20 @@ import {
     useEditorInstance,
     useEditorLiveCharacters,
 } from '@stagistic/editor';
+import {normalizeCharacterKey} from '@stagistic/script';
 import {EditorSidebar} from '@stagistic/ui';
-import {useCallback} from 'react';
+import {
+    useCallback,
+    useMemo,
+    useState,
+} from 'react';
 
 import {useScriptCharacters} from '../../ScriptCharactersContext';
 import {useScriptSession} from '../../ScriptSessionContext';
+import {SidebarMiniHeader} from '../sidebar';
+import {AddCharacterModal} from './AddCharacterModal';
+import {CharactersSidebarContextActions} from './CharactersSidebarContextActions';
+import styles from './ScriptCharactersSidebar.module.css';
 import {useCharacterComputed} from './useCharacterComputed';
 
 export const ScriptCharactersSidebar = () => {
@@ -19,6 +28,9 @@ export const ScriptCharactersSidebar = () => {
     const characters = useScriptCharacters();
     const editor = useEditorInstance();
     const liveCharacters = useEditorLiveCharacters();
+    const [isAddCharacterOpen, setIsAddCharacterOpen] = useState(false);
+    const openAddCharacterModal = useCallback(() => setIsAddCharacterOpen(true), []);
+    const closeAddCharacterModal = useCallback(() => setIsAddCharacterOpen(false), []);
 
     const {
         confirmedCharacters,
@@ -56,6 +68,18 @@ export const ScriptCharactersSidebar = () => {
             },
         });
     }, [characters, editor]);
+    const handleAddCharacter = useCallback((characterKey: string) => {
+        characters.handleConfirmCharacter(characterKey, undefined, {
+            onLinkRef: (key, id) => {
+                if (editor) {
+                    linkCharacterRef(editor, key, id);
+                }
+            },
+        });
+    }, [characters, editor]);
+    const confirmedCharacterKeys = useMemo(() => {
+        return new Set(characters.confirmedCharacterRecords.map(character => normalizeCharacterKey(character.key)));
+    }, [characters.confirmedCharacterRecords]);
 
     const handleDeleteCharacter = useCallback((characterId: string) => {
         characters.handleDeleteCharacter(characterId, {
@@ -121,25 +145,39 @@ export const ScriptCharactersSidebar = () => {
     ]);
 
     return (
-        <EditorSidebar
-            data={{
-                confirmedCharacters,
-                unconfirmedCharacters,
-                isLoading: characters.isCharactersLoading,
-            }}
-            actions={{
-                onConfirmCharacter: handleConfirmCharacter,
-                onDeleteCharacter: handleDeleteCharacter,
-                onFocusCharacter: handleFocusCharacter,
-                normalizeRenameInput: characters.normalizeCharacterNameForInlineInput,
-                onRenameCharacterPreview: handleRenameCharacterPreview,
-                onRenameCharacter: handleRenameCharacter,
-                onSetCharacterColor: characters.handleSetCharacterColor,
-                onSetCharacterOutline: characters.handleSetCharacterOutline,
-            }}
-            options={{
-                characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
-            }}
-        />
+        <div className={styles.content}>
+            <SidebarMiniHeader
+                actions={(
+                    <CharactersSidebarContextActions onAddCharacter={openAddCharacterModal} />
+                )}
+            />
+            <EditorSidebar
+                data={{
+                    confirmedCharacters,
+                    unconfirmedCharacters,
+                    isLoading: characters.isCharactersLoading,
+                }}
+                actions={{
+                    onConfirmCharacter: handleConfirmCharacter,
+                    onDeleteCharacter: handleDeleteCharacter,
+                    onFocusCharacter: handleFocusCharacter,
+                    normalizeRenameInput: characters.normalizeCharacterNameForInlineInput,
+                    onRenameCharacterPreview: handleRenameCharacterPreview,
+                    onRenameCharacter: handleRenameCharacter,
+                    onSetCharacterColor: characters.handleSetCharacterColor,
+                    onSetCharacterOutline: characters.handleSetCharacterOutline,
+                }}
+                options={{
+                    characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
+                    className: styles.sidebar,
+                }}
+            />
+            <AddCharacterModal
+                isOpen={isAddCharacterOpen}
+                existingCharacterKeys={confirmedCharacterKeys}
+                onClose={closeAddCharacterModal}
+                onCreate={handleAddCharacter}
+            />
+        </div>
     );
 };

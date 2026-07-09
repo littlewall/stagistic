@@ -1,4 +1,5 @@
 import {
+    and,
     asc,
     eq,
     inArray,
@@ -16,11 +17,13 @@ export interface ScriptCueUpsertRow {
     mode: string,
     title: string,
     kind: string | null,
-    startBlockId: string,
+    startBlockId: string | null,
     endBlockId: string | null,
     createdAt: number,
     updatedAt: number,
 }
+
+export type InsertScriptCueRow = ScriptCueUpsertRow;
 
 export const listScriptCues = async (db: DbClient, scriptId: string) => {
     return db
@@ -51,6 +54,72 @@ export const bulkUpsertScriptCues = async (db: DbClient, rows: ScriptCueUpsertRo
                 updatedAt: sql`excluded."updated_at"`,
             },
         });
+};
+
+export const insertScriptCue = async (db: DbClient, row: InsertScriptCueRow) => {
+    await db
+        .insert(scriptCues)
+        .values(row);
+};
+
+export const getScriptCueById = async (
+    db: DbClient,
+    payload: {scriptId: string, cueId: string},
+) => {
+    const rows = await db
+        .select()
+        .from(scriptCues)
+        .where(and(
+            eq(scriptCues.scriptId, payload.scriptId),
+            eq(scriptCues.id, payload.cueId),
+        ))
+        .limit(1);
+
+    return rows[0] ?? null;
+};
+
+export const bulkUnassignScriptCues = async (db: DbClient, cueIds: string[], updatedAt: number) => {
+    if (cueIds.length === 0) {
+        return;
+    }
+
+    await db
+        .update(scriptCues)
+        .set({
+            startBlockId: null,
+            endBlockId: null,
+            updatedAt,
+        })
+        .where(inArray(scriptCues.id, cueIds));
+};
+
+export const unassignScriptCue = async (
+    db: DbClient,
+    payload: {scriptId: string, cueId: string, updatedAt: number},
+) => {
+    await db
+        .update(scriptCues)
+        .set({
+            startBlockId: null,
+            endBlockId: null,
+            updatedAt: payload.updatedAt,
+        })
+        .where(and(
+            eq(scriptCues.scriptId, payload.scriptId),
+            eq(scriptCues.id, payload.cueId),
+        ));
+};
+
+export const deleteScriptCue = async (
+    db: DbClient,
+    payload: {scriptId: string, cueId: string},
+) => {
+    await db
+        .delete(scriptCues)
+        .where(and(
+            eq(scriptCues.scriptId, payload.scriptId),
+            eq(scriptCues.id, payload.cueId),
+        ));
 };
 
 export const bulkDeleteScriptCues = async (db: DbClient, cueIds: string[]) => {

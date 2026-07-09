@@ -20,6 +20,7 @@ import {
 } from 'react';
 
 import {useScriptSession} from '../../ScriptSessionContext';
+import {SidebarMiniHeader} from '../sidebar';
 import styles from './ScriptStructureSidebar.module.css';
 import {
     buildAccessibilityPlugin,
@@ -35,6 +36,7 @@ import {
     type SceneItem,
 } from './structureRows';
 import {StructureRowScene} from './StructureRowScene';
+import {StructureSidebarContextActions} from './StructureSidebarContextActions';
 import {useStructureSidebarDnd} from './useStructureSidebarDnd';
 
 const ACTIVE_BLOCK_PERSIST_DELAY_MS = 250;
@@ -212,6 +214,7 @@ export const ScriptStructureSidebar = () => {
 
     return (
         <div className={styles.content}>
+            <SidebarMiniHeader actions={<StructureSidebarContextActions />} />
             <DragDropProvider
                 onDragEnd={handleDragEnd}
                 plugins={plugins as never}

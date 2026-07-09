@@ -1,22 +1,33 @@
 import {useScriptRepository} from '@stagistic/app-core';
 import {
+    type EditorCueCreateRequest,
+    type EditorCueRemoveRequest,
     incrementRouteRenderCount,
     ScriptEditor,
 } from '@stagistic/editor';
 import {resolveDraftDate} from '@stagistic/script';
 import {AppLayout} from '@stagistic/ui';
-import {useMemo} from 'react';
+import {
+    useCallback,
+    useMemo,
+    useState,
+} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
+import {
+    AddCueModal,
+    ScriptCuesSidebar,
+    UnassignCueModal,
+    useScriptCuesState,
+} from './editor/cues';
 import {
     type SidebarPanel,
     useEditorSidebars,
 } from './editor/sidebar';
 import {
     ScriptStructureSidebar,
-    StructureSidebarContextActions,
 } from './editor/structure';
 import {ScriptCharactersProvider} from './ScriptCharactersContext';
 import {ScriptSessionProvider} from './ScriptSessionContext';
@@ -27,6 +38,10 @@ import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
 
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'calc(280px * var(--size-scale))';
+
+type AddCueModalState =
+    | {source: 'sidebar'}
+    | {source: 'editor', request: EditorCueCreateRequest};
 
 export const ScriptEditorRoute = () => {
     incrementRouteRenderCount();
@@ -53,6 +68,16 @@ export const ScriptEditorRoute = () => {
         scriptTitleDraft,
         openSettingsModal,
     } = useScriptSettingsModal();
+    const [addCueModalState, setAddCueModalState] = useState<AddCueModalState | null>(null);
+    const [removeCueRequest, setRemoveCueRequest] = useState<EditorCueRemoveRequest | null>(null);
+    const {
+        cues,
+        createCue,
+        deleteCue,
+        markCueAssigned,
+        markCueUnassigned,
+        unassignCue,
+    } = useScriptCuesState(currentScriptId, scriptRepository);
 
     const displayedCurrentScript = useMemo(
         () => currentScript ? {...currentScript, name: scriptTitleDraft} : null,
@@ -81,6 +106,47 @@ export const ScriptEditorRoute = () => {
         getEditorValue,
         titlePage: titlePageDraft,
     });
+    const openAddCueModal = useCallback(() => {
+        setAddCueModalState({source: 'sidebar'});
+    }, []);
+    const closeAddCueModal = useCallback(() => {
+        setAddCueModalState(null);
+    }, []);
+    const handleRequestCreateCue = useCallback((request: EditorCueCreateRequest) => {
+        setAddCueModalState({
+            source: 'editor',
+            request,
+        });
+    }, []);
+    const handleRequestRemoveCue = useCallback((request: EditorCueRemoveRequest) => {
+        setRemoveCueRequest(request);
+    }, []);
+    const handleCreateCue = useCallback(async (input: Parameters<typeof createCue>[0]) => {
+        const createdCue = await createCue(input);
+
+        if (createdCue && addCueModalState?.source === 'editor') {
+            addCueModalState.request.complete(createdCue);
+        }
+
+        return createdCue;
+    }, [
+        addCueModalState,
+        createCue,
+    ]);
+    const handleConfirmRemoveCue = useCallback(async () => {
+        if (!removeCueRequest) {
+            return;
+        }
+
+        if (removeCueRequest.complete()) {
+            await unassignCue(removeCueRequest.cueId);
+        }
+
+        setRemoveCueRequest(null);
+    }, [
+        removeCueRequest,
+        unassignCue,
+    ]);
 
     const sessionContextValue = useMemo(() => ({
         currentScriptId,
@@ -101,13 +167,28 @@ export const ScriptEditorRoute = () => {
             id: 'structure',
             label: 'Structure',
             renderContent: () => <ScriptStructureSidebar />,
-            renderContextActions: () => <StructureSidebarContextActions />,
         }, {
             id: 'characters',
             label: 'Characters',
             renderContent: () => <ScriptCharactersSidebar />,
+        }, {
+            id: 'cues',
+            label: 'Cues',
+            renderContent: () => (
+                <ScriptCuesSidebar
+                    cues={cues}
+                    onAddCue={openAddCueModal}
+                    onDeleteCue={deleteCue}
+                    onUnassignCue={unassignCue}
+                />
+            ),
         },
-    ], []);
+    ], [
+        cues,
+        deleteCue,
+        openAddCueModal,
+        unassignCue,
+    ]);
     const {
         leftSidebarToggle,
         rightSidebarToggle,
@@ -155,6 +236,7 @@ export const ScriptEditorRoute = () => {
                         document={{
                             initialValue: resolvedEditorInitialValue,
                             persistentCharacters: normalizedConfirmedCharacterRecords,
+                            persistentCues: cues,
                             scriptTitle: scriptTitleDraft,
                             draftDate: resolveDraftDate(titlePageDraft),
                         }}
@@ -176,6 +258,10 @@ export const ScriptEditorRoute = () => {
                         }}
                         callbacks={{
                             onValueChange: handleResolvedEditorValueChange,
+                            onRequestCreateCue: handleRequestCreateCue,
+                            onRequestRemoveCue: handleRequestRemoveCue,
+                            onCueAssigned: markCueAssigned,
+                            onCueUnassigned: markCueUnassigned,
                         }}
                     >
                         <ScriptEditor.LeftSidebar>
@@ -185,6 +271,20 @@ export const ScriptEditorRoute = () => {
                             {rightSidebar}
                         </ScriptEditor.RightSidebar>
                     </ScriptEditor>
+                    <AddCueModal
+                        isOpen={addCueModalState !== null}
+                        initialTitle={addCueModalState?.source === 'editor'
+                            ? addCueModalState.request.title
+                            : undefined}
+                        onClose={closeAddCueModal}
+                        onCreate={handleCreateCue}
+                    />
+                    <UnassignCueModal
+                        isOpen={removeCueRequest !== null}
+                        cueTitle={removeCueRequest?.title}
+                        onClose={() => setRemoveCueRequest(null)}
+                        onConfirm={handleConfirmRemoveCue}
+                    />
                 </AppLayout>
             </ScriptCharactersProvider>
         </ScriptSessionProvider>

@@ -1,4 +1,5 @@
 import {
+    CUE_ID_ATTR,
     CUE_OUT_NODE_NAME,
     CUE_START_NODE_NAME,
     type CueMode,
@@ -147,22 +148,56 @@ const buildDeleteSelectionPreservingCueAtoms = (state: EditorState): Transaction
         .scrollIntoView();
 };
 
+const findCueStartPositionById = (state: EditorState, cueId: string): number | null => {
+    let position: number | null = null;
+
+    state.doc.descendants((node, pos) => {
+        if (position !== null) {
+            return false;
+        }
+
+        if (node.type.name === CUE_START_NODE_NAME && node.attrs[CUE_ID_ATTR] === cueId) {
+            position = pos;
+
+            return false;
+        }
+
+        return true;
+    });
+
+    return position;
+};
+
+interface CueCommandsExtensionOptions {
+    onCueUnassigned?: (cueId: string) => void,
+}
+
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         cue: {
-            insertCueStart: (blockId: string | null, title: string, mode?: CueMode) => ReturnType,
+            insertCueStart: (
+                blockId: string | null,
+                title: string,
+                mode?: CueMode,
+                options?: {cueId?: string, kind?: string | null},
+            ) => ReturnType,
             insertCueOut: (blockId: string | null) => ReturnType,
             deleteCueStart: (pos: number) => ReturnType,
+            unassignCue: (cueId: string) => ReturnType,
         },
     }
 }
 
-export const CueCommandsExtension = Extension.create({
+export const CueCommandsExtension = Extension.create<CueCommandsExtensionOptions>({
     name: 'cueCommands',
+
+    addOptions() {
+        return {};
+    },
 
     addCommands() {
         return {
-            insertCueStart: (blockId, title, mode = 'open') => ({state, dispatch}) => {
+            insertCueStart: (blockId, title, mode = 'open', options) => ({state, dispatch}) => {
                 const block = resolveCueTargetBlock(state, blockId);
 
                 if (!block || blockHasCueAtom(block)) {
@@ -170,7 +205,7 @@ export const CueCommandsExtension = Extension.create({
                 }
 
                 if (dispatch) {
-                    dispatch(buildInsertCueStart(state, block, title, mode));
+                    dispatch(buildInsertCueStart(state, block, title, mode, options));
                 }
 
                 return true;
@@ -197,6 +232,31 @@ export const CueCommandsExtension = Extension.create({
 
                 if (dispatch) {
                     dispatch(buildDeleteCueStart(state, pos, node));
+                    const cueId = String(node.attrs[CUE_ID_ATTR] ?? '');
+
+                    if (cueId) {
+                        this.options.onCueUnassigned?.(cueId);
+                    }
+                }
+
+                return true;
+            },
+            unassignCue: cueId => ({state, dispatch}) => {
+                const pos = findCueStartPositionById(state, cueId);
+
+                if (pos === null) {
+                    return false;
+                }
+
+                const node = state.doc.nodeAt(pos);
+
+                if (!node || node.type.name !== CUE_START_NODE_NAME) {
+                    return false;
+                }
+
+                if (dispatch) {
+                    dispatch(buildDeleteCueStart(state, pos, node));
+                    this.options.onCueUnassigned?.(cueId);
                 }
 
                 return true;

@@ -311,8 +311,9 @@ export const scriptBlockCharacterRefs = pgTable(
 );
 
 /*
- * Projection-owned cue intervals derived from cue marks/atoms in the script
- * document. Safe to delete and rebuild from the document source.
+ * Script cue catalog. Cue markers in the document assign existing cue rows to
+ * block intervals by setting start/end block ids; removing a marker only clears
+ * that assignment.
  */
 export const scriptCues = pgTable(
     'script_cues',
@@ -326,7 +327,7 @@ export const scriptCues = pgTable(
         mode: text('mode').notNull().default('open'),
         title: text('title').notNull().default(''),
         kind: text('kind'),
-        startBlockId: text('start_block_id').notNull(),
+        startBlockId: text('start_block_id'),
         endBlockId: text('end_block_id'),
         createdAt: bigint('created_at', {mode: 'number'}).notNull(),
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),

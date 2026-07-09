@@ -11,7 +11,12 @@ import Underline from '@tiptap/extension-underline';
 import UniqueID from '@tiptap/extension-unique-id';
 import {useMemo} from 'react';
 
-import type {PersistentCharacterRef} from './contracts';
+import type {
+    EditorCueCreateRequest,
+    EditorCueRemoveRequest,
+    PersistentCharacterRef,
+    PersistentCueRef,
+} from './contracts';
 import {
     getBlockCasing,
     getBlockNextElements,
@@ -46,6 +51,11 @@ type UseEditorExtensionsArgs = {
     colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
     rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>},
     persistentCharactersRef?: {current: readonly PersistentCharacterRef[]},
+    persistentCuesRef?: {current: readonly PersistentCueRef[]},
+    onRequestCreateCue?: (request: EditorCueCreateRequest) => void,
+    onRequestRemoveCue?: (request: EditorCueRemoveRequest) => void,
+    onCueAssigned?: (cueId: string) => void,
+    onCueUnassigned?: (cueId: string) => void,
     enableBlockUiEvents?: boolean,
 };
 
@@ -55,6 +65,11 @@ export const useEditorExtensions = ({
     colorByCharacterIdRef,
     rememberedColorByKeyRef,
     persistentCharactersRef,
+    persistentCuesRef,
+    onRequestCreateCue,
+    onRequestRemoveCue,
+    onCueAssigned,
+    onCueUnassigned,
     enableBlockUiEvents,
 }: UseEditorExtensionsArgs): Extensions => {
     const paginationExtension = useMemo(
@@ -127,6 +142,30 @@ export const useEditorExtensions = ({
         }),
         [persistentCharactersRef],
     );
+    const cueInputExtension = useMemo(
+        () => CueInputExtension.configure({
+            persistentCuesRef,
+            onRequestCreateCue,
+            onCueAssigned,
+        }),
+        [
+            onCueAssigned,
+            onRequestCreateCue,
+            persistentCuesRef,
+        ],
+    );
+    const cueCommandsExtension = useMemo(
+        () => CueCommandsExtension.configure({
+            onCueUnassigned,
+        }),
+        [onCueUnassigned],
+    );
+    const cueStartNode = useMemo(
+        () => CueStartNode.configure({
+            onRequestRemoveCue,
+        }),
+        [onRequestRemoveCue],
+    );
     const uniqueIdExtension = useMemo(() => {
         const uniqueIdTypes = [...SCRIPT_BLOCK_NODE_NAMES];
 
@@ -149,10 +188,10 @@ export const useEditorExtensions = ({
             characterTagMark,
             characterTagInputExtension,
             ...ScriptBlockNodes,
-            CueStartNode,
+            cueStartNode,
             CueOutNode,
-            CueCommandsExtension,
-            CueInputExtension,
+            cueCommandsExtension,
+            cueInputExtension,
             CueNumberingExtension,
             PlaceholderExtension,
             emptyEnterChooserExtension,
@@ -171,6 +210,9 @@ export const useEditorExtensions = ({
         characterRefSyncExtension,
         characterTagMark,
         characterTagInputExtension,
+        cueCommandsExtension,
+        cueInputExtension,
+        cueStartNode,
         emptyEnterChooserExtension,
         editorRuntimeExtension,
         enableBlockUiEvents,

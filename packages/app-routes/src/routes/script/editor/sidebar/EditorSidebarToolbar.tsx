@@ -1,5 +1,4 @@
 import {ArrowLeftIcon, ArrowRightIcon} from '@stagistic/ui';
-import {type ReactNode} from 'react';
 
 import styles from './EditorSidebarToolbar.module.css';
 import {SidebarPanelSelect} from './SidebarPanelSelect';
@@ -15,7 +14,6 @@ interface EditorSidebarToolbarProps {
     selectedPanelId: SidebarPanelId,
     onSelectPanel: (panelId: SidebarPanelId) => void,
     onClose: () => void,
-    contextActions?: ReactNode,
 }
 
 export const EditorSidebarToolbar = ({
@@ -24,7 +22,6 @@ export const EditorSidebarToolbar = ({
     selectedPanelId,
     onSelectPanel,
     onClose,
-    contextActions,
 }: EditorSidebarToolbarProps) => {
     const closeButton = (
         <button
@@ -50,25 +47,17 @@ export const EditorSidebarToolbar = ({
         />
     );
 
-    const contextActionsEl = contextActions ? (
-        <div className={styles.contextActions}>
-            {contextActions}
-        </div>
-    ) : null;
-
     if (side === 'left') {
         return (
             <div className={styles.toolbar}>
                 {closeButton}
                 {panelSelect}
-                {contextActionsEl}
             </div>
         );
     }
 
     return (
         <div className={styles.toolbar}>
-            {contextActionsEl}
             {panelSelect}
             {closeButton}
         </div>

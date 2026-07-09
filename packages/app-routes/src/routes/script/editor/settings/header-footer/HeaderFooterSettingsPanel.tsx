@@ -10,6 +10,7 @@ import {
     BoldIcon,
     Button,
     clsx,
+    formControlStyles,
     ItalicIcon,
     Switch,
     UnderlineIcon,
@@ -20,7 +21,6 @@ import {
 } from 'react';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
-import sharedStyles from '../shared.module.css';
 import styles from './HeaderFooterSettingsPanel.module.css';
 
 type Area = 'header' | 'footer';
@@ -206,7 +206,7 @@ export const HeaderFooterSettingsPanel = ({
                                 <input
                                     ref={inputRef}
                                     type="text"
-                                    className={sharedStyles.settingsInput}
+                                    className={formControlStyles.input}
                                     disabled={!activeCell}
                                     value={activeCell?.text ?? ''}
                                     placeholder={selection ? 'Enter text or add a variable' : 'Select a header or footer area'}

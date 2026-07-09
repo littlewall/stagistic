@@ -20,6 +20,7 @@ import type {
     ScriptBlockCharacterRef,
     ScriptCharacterGenderOption,
     ScriptCharacterRef,
+    ScriptCue,
     ScriptLocation,
     ScriptScene,
     ScriptSummary,
@@ -43,6 +44,11 @@ export interface DuplicateScriptInput {
     title: string,
     copySettings: boolean,
     copyAttributes: boolean,
+}
+
+export interface CreateScriptCueInput {
+    title: string,
+    kind: 'song' | 'instrumental',
 }
 
 export interface ScriptCrudRepository {
@@ -119,6 +125,13 @@ export interface ScriptBlockCharacterRefsRepository {
     deleteByCharacterIds(characterIds: string[]): Promise<void>,
 }
 
+export interface ScriptCuesRepository {
+    list(scriptId: string): Promise<ScriptCue[]>,
+    create(scriptId: string, input: CreateScriptCueInput): Promise<ScriptCue | null>,
+    delete(scriptId: string, cueId: string): Promise<void>,
+    unassign(scriptId: string, cueId: string): Promise<ScriptCue | null>,
+}
+
 export interface ScriptTitlePageRepository {
     load(scriptId: string): Promise<TitlePageSettings | null>,
     save(scriptId: string, settings: TitlePageSettings): Promise<void>,
@@ -137,6 +150,7 @@ export interface ScriptDataRepository {
     acts: ScriptActsRepository,
     locations: ScriptLocationsRepository,
     blockCharacterRefs: ScriptBlockCharacterRefsRepository,
+    cues: ScriptCuesRepository,
 }
 
 export interface ScriptRepository extends ScriptDataRepository {
@@ -144,6 +158,10 @@ export interface ScriptRepository extends ScriptDataRepository {
     getScriptSummary(scriptId: string): Promise<ScriptSummary | null>,
     listScriptCharacters(scriptId: string): Promise<ScriptCharacterRef[]>,
     listScriptCharacterGenders(scriptId: string): Promise<ScriptCharacterGenderOption[]>,
+    listScriptCues(scriptId: string): Promise<ScriptCue[]>,
+    createScriptCue(scriptId: string, input: CreateScriptCueInput): Promise<ScriptCue | null>,
+    deleteScriptCue(scriptId: string, cueId: string): Promise<void>,
+    unassignScriptCue(scriptId: string, cueId: string): Promise<ScriptCue | null>,
     createScript(title: string, initialContent?: ScriptDocument): Promise<string>,
     renameScript(scriptId: string, input: RenameScriptInput): Promise<void>,
     renameScriptTitle(scriptId: string, title: string): Promise<void>,

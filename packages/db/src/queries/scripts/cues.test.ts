@@ -6,7 +6,13 @@ import {
     createTestDb, seedScript,
 } from '../../testing/createTestDb';
 import {
-    bulkDeleteScriptCues, bulkUpsertScriptCues, listScriptCues,
+    bulkDeleteScriptCues,
+    bulkUnassignScriptCues,
+    bulkUpsertScriptCues,
+    deleteScriptCue,
+    insertScriptCue,
+    listScriptCues,
+    unassignScriptCue,
 } from './cues';
 
 describe('script cues queries', () => {
@@ -65,5 +71,83 @@ describe('script cues queries', () => {
         await bulkDeleteScriptCues(db, ['c1']);
 
         expect(await listScriptCues(db, 's1')).toHaveLength(0);
+    });
+
+    it('stores unassigned cues', async () => {
+        const {db} = await createTestDb();
+
+        await seedScript(db, 's1');
+        await insertScriptCue(db, {
+            id: 'c1', scriptId: 's1', sceneNumber: 0, indexInScene: 0, mode: 'open', title: 'Opening', kind: 'song', startBlockId: null, endBlockId: null, createdAt: 1, updatedAt: 1,
+        });
+
+        const rows = await listScriptCues(db, 's1');
+
+        expect(rows).toHaveLength(1);
+        expect(rows[0]).toMatchObject({
+            id: 'c1', title: 'Opening', kind: 'song', startBlockId: null, endBlockId: null,
+        });
+    });
+
+    it('unassigns cues without deleting them', async () => {
+        const {db} = await createTestDb();
+
+        await seedScript(db, 's1');
+        await bulkUpsertScriptCues(db, [
+            {
+                id: 'c1', scriptId: 's1', sceneNumber: 1, indexInScene: 0, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2', createdAt: 1, updatedAt: 1,
+            },
+        ]);
+
+        await bulkUnassignScriptCues(db, ['c1'], 2);
+
+        const rows = await listScriptCues(db, 's1');
+
+        expect(rows).toHaveLength(1);
+        expect(rows[0]).toMatchObject({
+            id: 'c1', title: 'Night', startBlockId: null, endBlockId: null, updatedAt: 2,
+        });
+    });
+
+    it('unassigns one cue scoped to its script', async () => {
+        const {db} = await createTestDb();
+
+        await seedScript(db, 's1');
+        await seedScript(db, 's2');
+        await bulkUpsertScriptCues(db, [
+            {
+                id: 'c1', scriptId: 's1', sceneNumber: 1, indexInScene: 0, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2', createdAt: 1, updatedAt: 1,
+            }, {
+                id: 'c2', scriptId: 's2', sceneNumber: 1, indexInScene: 0, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2', createdAt: 1, updatedAt: 1,
+            },
+        ]);
+
+        await unassignScriptCue(db, {scriptId: 's1', cueId: 'c1', updatedAt: 2});
+
+        expect((await listScriptCues(db, 's1'))[0]).toMatchObject({
+            id: 'c1', startBlockId: null, endBlockId: null,
+        });
+        expect((await listScriptCues(db, 's2'))[0]).toMatchObject({
+            id: 'c2', startBlockId: 'b1', endBlockId: 'b2',
+        });
+    });
+
+    it('deletes one cue scoped to its script', async () => {
+        const {db} = await createTestDb();
+
+        await seedScript(db, 's1');
+        await seedScript(db, 's2');
+        await bulkUpsertScriptCues(db, [
+            {
+                id: 'c1', scriptId: 's1', sceneNumber: 1, indexInScene: 0, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: null, createdAt: 1, updatedAt: 1,
+            }, {
+                id: 'c2', scriptId: 's2', sceneNumber: 1, indexInScene: 0, mode: 'open', title: 'Dawn', kind: null, startBlockId: null, endBlockId: null, createdAt: 1, updatedAt: 1,
+            },
+        ]);
+
+        await deleteScriptCue(db, {scriptId: 's1', cueId: 'c1'});
+
+        expect(await listScriptCues(db, 's1')).toHaveLength(0);
+        expect(await listScriptCues(db, 's2')).toHaveLength(1);
     });
 });

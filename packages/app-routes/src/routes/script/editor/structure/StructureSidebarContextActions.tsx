@@ -1,4 +1,5 @@
 import {useEditorActCommands} from '@stagistic/editor';
+import {PlusIcon} from '@stagistic/ui';
 import {useCallback} from 'react';
 
 import {SidebarContextButton} from '../sidebar';
@@ -8,8 +9,12 @@ export const StructureSidebarContextActions = () => {
     const handleClick = useCallback(() => insertAct(null), [insertAct]);
 
     return (
-        <SidebarContextButton ariaLabel="Insert ACT" onClick={handleClick}>
-            +
+        <SidebarContextButton
+            ariaLabel="Add act"
+            tooltipLabel="Add act"
+            onClick={handleClick}
+        >
+            <PlusIcon aria-hidden="true" />
         </SidebarContextButton>
     );
 };
