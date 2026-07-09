@@ -14,6 +14,12 @@ After any change to `packages/db/src/` schema or `drizzle/*.sql` files, run:
 `pnpm --filter @stagistic/db db:compile-migrations`
 (`db:generate` does this automatically; manual SQL edits do not.)
 
+## Document schema version
+`SCRIPT_DOCUMENT_SCHEMA_VERSION` changes only when the stored `ScriptDocument`
+shape or meaning changes: node/mark types, attrs, cue/character-tag representation,
+or document-to-projection semantics. Do not bump it for DB-only projection changes,
+metadata columns, UI, autosave internals, or export layout changes.
+
 ## Checks (clean-shield toolchain)
 Canonical checks — run these, not `vp lint`/`vp fmt` (oxlint/oxfmt are NOT used here):
 - Typecheck: `npx tsc -b` (whole graph) or `pnpm --filter @stagistic/<pkg> typecheck`.

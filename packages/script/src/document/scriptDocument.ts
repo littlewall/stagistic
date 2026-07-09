@@ -8,6 +8,7 @@ import {
 } from '../syntax';
 
 export const DEFAULT_SCRIPT_BLOCK_NODE_TYPE: ScriptBlockNodeType = 'stageDirection';
+export const SCRIPT_DOCUMENT_SCHEMA_VERSION = 1;
 
 export type ScriptNode = {
     type?: string,
@@ -23,6 +24,11 @@ export type ScriptNode = {
 export type ScriptDocument = {
     type: 'doc',
     attrs?: {
+        /*
+         * Keep user/domain metadata out of the script body when possible.
+         * Settings/import metadata are transitional document attributes; persisted
+         * saves strip editor settings before writing the content projection.
+         */
         settings?: EditorSettingsOverride,
         importMeta?: ScriptImportMetadata,
     },

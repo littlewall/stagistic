@@ -187,6 +187,11 @@ export const scriptLocations = pgTable(
     }),
 );
 
+/*
+ * User-authored scene metadata shares a row with projection-owned scene
+ * identity. Projection writers may refresh headingBlockId / sceneNumber, but
+ * must preserve colorHex, synopsis, and locationId for surviving scenes.
+ */
 export const scriptScenes = pgTable(
     'script_scenes',
     {
@@ -246,6 +251,11 @@ export const scriptActs = pgTable(
     }),
 );
 
+/*
+ * Projection-owned block rows materialize the current script body for fast
+ * queries/export. The authoritative document source may change in the future;
+ * this table should remain rebuildable from that source.
+ */
 export const scriptBlocks = pgTable(
     'script_blocks',
     {
@@ -275,6 +285,10 @@ export const scriptBlocks = pgTable(
     }),
 );
 
+/*
+ * Projection-owned references derived from the current document plus confirmed
+ * character metadata. Safe to delete and rebuild from the document source.
+ */
 export const scriptBlockCharacterRefs = pgTable(
     'script_block_character_refs',
     {
@@ -296,6 +310,10 @@ export const scriptBlockCharacterRefs = pgTable(
     }),
 );
 
+/*
+ * Projection-owned cue intervals derived from cue marks/atoms in the script
+ * document. Safe to delete and rebuild from the document source.
+ */
 export const scriptCues = pgTable(
     'script_cues',
     {

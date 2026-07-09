@@ -8,10 +8,25 @@ the ordering strategy, the durability model, and the performance
 invariants that keep a save under the "saving" indicator threshold
 (600 ms, `useSaveIndicator.ts`).
 
+Terminology:
+
+- **Document source**: the authoritative script body source exposed through
+  `ScriptDocumentSource`. Today this is still backed by the local block-table
+  projection; a future server build can replace it with Yjs/Hocuspocus storage.
+- **Projection**: relational read models (`script_blocks`, `script_scenes`,
+  `script_cues`, character refs) materialized from the script document for fast
+  local queries, sidebars, export, and future production surfaces.
+
+The current local source and projection share the same PGlite tables, but the
+code treats them as separate responsibilities so the source can change later
+without rewriting the projection writer.
+
 ## Save pipeline
 
 ```
 editor change → autosave → saveLatest (packages/db/src/repo/content.ts)
+  → ScriptDocumentSource.save()
+  → ScriptDocumentProjectionWriter.updateFromDocument()
   → createDocumentPersister(scriptId).persist(db, document, afterPersist)
       → extractScriptBlocks()        walk the doc, assign sequential orderNo
       → diffExtractedBlocks()        inserted / updated / deleted / structural

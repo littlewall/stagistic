@@ -9,6 +9,18 @@ export {
     createLocalPgliteRepository,
     type LocalPgliteRepositoryDeps,
 } from './repo/createLocalPgliteRepository';
+export {
+    createProjectedTableDocumentSource,
+    createSqlScriptDocumentProjectionWriter,
+    loadScriptDocumentFromProjection,
+    rebuildScriptProjection,
+    type LoadedProjectionDocument,
+    type LoadedScriptDocument,
+    type RebuildScriptProjectionArgs,
+    type SaveScriptDocumentOptions,
+    type ScriptDocumentProjectionWriter,
+    type ScriptDocumentSource,
+} from './repo/documentProjection';
 export * from './schema';
 export type {
     DuplicateScriptInput,
