@@ -2,6 +2,9 @@ import {playwright} from 'vite-plus/test/browser-playwright';
 import {defineConfig} from 'vite-plus/test/config';
 
 export default defineConfig({
+    resolve: {
+        dedupe: ['react', 'react-dom'],
+    },
     test: {
         include: ['src/**/*.browser.{test,spec}.{ts,tsx}'],
         passWithNoTests: true,

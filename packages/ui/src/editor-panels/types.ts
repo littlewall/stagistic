@@ -3,7 +3,7 @@ import type {
     ScriptCharacterRecord,
 } from '@stagistic/script';
 
-export interface EditorSidebarCharacter extends Pick<ScriptCharacterRecord, 'key'>, Partial<Pick<ScriptCharacterRecord, 'id' | 'colorHex' | 'genderKey'>> {
+export interface EditorSidebarCharacter extends Pick<ScriptCharacterRecord, 'key'>, Partial<Pick<ScriptCharacterRecord, 'id' | 'colorHex' | 'genderKey' | 'outline'>> {
     color: string,
     isConfirmed: boolean,
     isPending?: boolean,

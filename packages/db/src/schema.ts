@@ -138,6 +138,7 @@ export const scriptCharacters = pgTable(
         genderKey: text('gender_key'),
         notes: text('notes'),
         backstory: text('backstory'),
+        outline: text('outline'),
         createdAt: bigint('created_at', {mode: 'number'}).notNull(),
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },

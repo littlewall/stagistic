@@ -39,6 +39,7 @@ export const useScriptCharactersContextValue = (
         handleRenameCharacter,
         handleSetCharacterColor,
         handleSetCharacterGender,
+        handleSetCharacterOutline,
         handleUpsertCharacterGender,
     } = useScriptEditorCharacters(args);
 
@@ -69,6 +70,7 @@ export const useScriptCharactersContextValue = (
         handleRenameCharacter,
         handleSetCharacterColor,
         handleSetCharacterGender,
+        handleSetCharacterOutline,
         handleUpsertCharacterGender,
     }), [
         characterGenderOptions,
@@ -84,6 +86,7 @@ export const useScriptCharactersContextValue = (
         handleRenameCharacterPreview,
         handleSetCharacterColor,
         handleSetCharacterGender,
+        handleSetCharacterOutline,
         handleUpsertCharacterGender,
         isCharactersLoading,
         normalizeCharacterNameForInlineInput,

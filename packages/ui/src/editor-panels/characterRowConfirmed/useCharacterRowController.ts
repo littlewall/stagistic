@@ -5,9 +5,23 @@ import type {
     CharacterRowControllerArgs,
     CharacterRowControllerResult,
 } from './contracts';
-import {getDeleteTooltipLabel} from './genderUtils';
 import {useCharacterColorPickerState} from './useCharacterColorPickerState';
-import {useCharacterGenderPickerState} from './useCharacterGenderPickerState';
+
+const getDeleteTooltipLabel = (
+    characterKey: string,
+    isDeletePending: boolean,
+    canDelete: boolean,
+) => {
+    if (isDeletePending) {
+        return `Removing ${characterKey}`;
+    }
+
+    if (!canDelete) {
+        return 'Removal unavailable';
+    }
+
+    return `Remove ${characterKey}`;
+};
 
 export const useCharacterRowController = ({
     model,
@@ -18,7 +32,7 @@ export const useCharacterRowController = ({
     const isDeleteActionDisabled = state.isDeletePending
         || state.isRenamePending
         || !model.character.id
-        || !actions.onDeleteCharacter;
+        || !actions.onRequestDeleteCharacter;
     const isRenameActionDisabled = state.isRenamePending
         || state.isDeletePending
         || !model.character.id
@@ -27,15 +41,25 @@ export const useCharacterRowController = ({
         || state.isRenamePending
         || !model.character.id
         || !actions.onSetCharacterColor;
-    const isGenderActionDisabled = state.isDeletePending
-        || state.isRenamePending
-        || !model.character.id
-        || !actions.onSetCharacterGender;
     const deleteTooltipLabel = getDeleteTooltipLabel(
         model.character.key,
         state.isDeletePending,
-        actions.onDeleteCharacter,
+        Boolean(model.character.id && actions.onRequestDeleteCharacter),
     );
+
+    const requestDeleteCharacter = useCallback(() => {
+        if (state.isDeletePending || state.isRenamePending) {
+            return;
+        }
+
+        actions.onRequestDeleteCharacter?.(model.character.id ?? '', model.character.key);
+    }, [
+        actions,
+        model.character.id,
+        model.character.key,
+        state.isDeletePending,
+        state.isRenamePending,
+    ]);
 
     const {
         resolvedColorSaturation,
@@ -56,28 +80,6 @@ export const useCharacterRowController = ({
         characterColorSaturation: options.characterColorSaturation,
     });
 
-    const {
-        effectiveGenderKey,
-        selectedGenderLabel,
-        selectedGenderIcon,
-        genderQuery,
-        setGenderQuery,
-        isGenderPickerOpen,
-        setIsGenderPickerOpen,
-        genderListOptions,
-        normalizedGenderInputLabel,
-        canCreateCustomGender,
-        shouldCloseGenderPopover,
-        commitGenderQuery,
-        handleGenderSelection,
-    } = useCharacterGenderPickerState({
-        character: model.character,
-        characterGenderOptions: options.characterGenderOptions,
-        isGenderActionDisabled,
-        onSetCharacterGender: actions.onSetCharacterGender,
-        onUpsertCharacterGender: actions.onUpsertCharacterGender,
-    });
-
     const isCharacterOverlayTarget = useCallback((target: EventTarget | null) => {
         if (!(target instanceof Node)) {
             return false;
@@ -91,10 +93,7 @@ export const useCharacterRowController = ({
             return false;
         }
 
-        return Boolean(
-            element.closest(`.${styles.characterColorPopover}`)
-            || element.closest(`.${styles.characterGenderPickerPopover}`),
-        );
+        return Boolean(element.closest(`.${styles.characterColorPopover}`));
     }, []);
 
     return {
@@ -129,6 +128,12 @@ export const useCharacterRowController = ({
                     setDraftHue: setColorDraftHue,
                 },
             },
+            delete: {
+                isDeletePending: state.isDeletePending,
+                isDeleteActionDisabled,
+                deleteTooltipLabel,
+                onRequestDelete: requestDeleteCharacter,
+            },
             overlay: {
                 isCharacterOverlayTarget,
             },
@@ -139,34 +144,9 @@ export const useCharacterRowController = ({
             },
             state: {
                 isExpanded: state.isExpanded,
-                isDeletePending: state.isDeletePending,
-                isDeleteActionDisabled,
-                deleteTooltipLabel,
             },
             actions: {
-                onDeleteCharacter: actions.onDeleteCharacter,
-            },
-            gender: {
-                state: {
-                    isActionDisabled: isGenderActionDisabled,
-                    isPickerOpen: isGenderPickerOpen,
-                    selectedGenderLabel,
-                    selectedGenderIcon,
-                    genderQuery,
-                    effectiveGenderKey,
-                    normalizedGenderInputLabel,
-                    canCreateCustomGender,
-                },
-                data: {
-                    genderListOptions,
-                },
-                actions: {
-                    setPickerOpen: setIsGenderPickerOpen,
-                    setGenderQuery,
-                    shouldClosePopover: shouldCloseGenderPopover,
-                    commitGenderQuery,
-                    selectGender: handleGenderSelection,
-                },
+                onSetCharacterOutline: actions.onSetCharacterOutline,
             },
         },
     };

@@ -1,4 +1,6 @@
-import {Tooltip, TooltipTrigger} from 'react-aria-components';
+import {
+    Button, Tooltip, TooltipTrigger,
+} from 'react-aria-components';
 
 import {ArrowRightIcon, ChevronDownIcon} from '../../icons/ui';
 import styles from '../EditorSidebar.module.css';
@@ -11,6 +13,7 @@ export const CharacterRowHeader = ({
     state,
     actions,
     color,
+    delete: deleteControls,
     overlay,
 }: CharacterRowHeaderProps) => {
     const {
@@ -177,6 +180,45 @@ export const CharacterRowHeader = ({
             ) : (
                 <span className={styles.characterName}>{character.key}</span>
             )}
+            {isExpanded ? (
+                <TooltipTrigger
+                    trigger="hover"
+                    delay={0}
+                    closeDelay={120}
+                >
+                    <Button
+                        className={styles.characterHeaderDeleteButton}
+                        aria-disabled={deleteControls.isDeleteActionDisabled}
+                        aria-label={deleteControls.deleteTooltipLabel}
+                        onPress={() => {
+                            if (deleteControls.isDeleteActionDisabled) {
+                                return;
+                            }
+
+                            deleteControls.onRequestDelete();
+                        }}
+                    >
+                        {deleteControls.isDeletePending ? (
+                            <span className={styles.confirmSpinner} aria-hidden="true" />
+                        ) : (
+                            <svg viewBox="0 0 24 24" className={styles.iconGlyph}>
+                                <path d="M4 7h16" />
+                                <path d="M10 11v6" />
+                                <path d="M14 11v6" />
+                                <path d="M6 7v11a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V7" />
+                                <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                            </svg>
+                        )}
+                    </Button>
+                    <Tooltip
+                        className={styles.confirmTooltip}
+                        placement="right"
+                        offset={8}
+                    >
+                        {deleteControls.deleteTooltipLabel}
+                    </Tooltip>
+                </TooltipTrigger>
+            ) : null}
         </div>
     );
 };

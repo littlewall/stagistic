@@ -106,6 +106,7 @@ export interface UpsertScriptCharacterPayload {
     genderKey?: string | null,
     notes?: string | null,
     backstory?: string | null,
+    outline?: string | null,
     createdAt: number,
     updatedAt: number,
 }
@@ -153,6 +154,13 @@ export interface UpdateScriptCharacterBackstoryPayload {
     scriptId: string,
     characterId: string,
     backstory: string | null,
+    updatedAt: number,
+}
+
+export interface UpdateScriptCharacterOutlinePayload {
+    scriptId: string,
+    characterId: string,
+    outline: string | null,
     updatedAt: number,
 }
 

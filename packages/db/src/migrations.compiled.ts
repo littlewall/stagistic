@@ -48,5 +48,9 @@ export const compiledMigrations = [
     {
         "id": "0011_add_script_subtitle",
         "sql": "ALTER TABLE \"scripts\" ADD COLUMN \"subtitle\" text;--> statement-breakpoint\nUPDATE \"scripts\"\nSET \"subtitle\" = btrim(legacy_subtitle.\"field_value\")\nFROM \"script_settings_title_page\" AS legacy_subtitle\nWHERE legacy_subtitle.\"script_id\" = \"scripts\".\"id\"\n\tAND legacy_subtitle.\"field_key\" = 'subtitle'\n\tAND btrim(legacy_subtitle.\"field_value\") <> '';--> statement-breakpoint\nDELETE FROM \"script_settings_title_page\"\nWHERE \"field_key\" = 'subtitle';\n"
+    },
+    {
+        "id": "0012_add_character_outline",
+        "sql": "ALTER TABLE \"script_characters\" ADD COLUMN \"outline\" text;"
     }
 ] as const;

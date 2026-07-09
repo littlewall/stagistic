@@ -21,6 +21,7 @@ const characterSelectFields = {
     genderKey: scriptCharacters.genderKey,
     notes: scriptCharacters.notes,
     backstory: scriptCharacters.backstory,
+    outline: scriptCharacters.outline,
 };
 
 const getScriptCharacterWhere = async (

@@ -10,6 +10,7 @@ interface ScriptCharacterRow {
     genderKey: string | null,
     notes: string | null,
     backstory: string | null,
+    outline: string | null,
 }
 
 interface ScriptCharacterGenderRow {
@@ -26,6 +27,7 @@ export const mapCharacterRow = (row: ScriptCharacterRow): ScriptCharacterRef => 
         genderKey: row.genderKey,
         notes: row.notes,
         backstory: row.backstory,
+        outline: row.outline,
     };
 };
 

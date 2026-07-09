@@ -6,13 +6,11 @@ import {
     useState,
 } from 'react';
 
+import {RemoveCharacterModal} from '../dialogs/RemoveCharacterModal';
 import {CharacterRowConfirmed} from './CharacterRowConfirmed';
 import {CharacterRowPending} from './CharacterRowPending';
 import styles from './EditorSidebar.module.css';
-import type {
-    CharacterGenderOption,
-    EditorSidebarCharacter,
-} from './types';
+import type {EditorSidebarCharacter} from './types';
 import {useRenameDrafts} from './useRenameDrafts';
 import {
     getCharacterIdentityKey,
@@ -24,7 +22,6 @@ export type {EditorSidebarCharacter};
 interface EditorSidebarData {
     confirmedCharacters: EditorSidebarCharacter[],
     unconfirmedCharacters: EditorSidebarCharacter[],
-    characterGenderOptions?: CharacterGenderOption[],
     isLoading?: boolean,
 }
 
@@ -44,8 +41,7 @@ interface EditorSidebarActions {
         nextCharacterName: string,
     ) => void | Promise<void>,
     onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
-    onSetCharacterGender?: (characterId: string, genderKey: string | null) => void,
-    onUpsertCharacterGender?: (label: string) => Promise<CharacterGenderOption | null>,
+    onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
 }
 
 interface EditorSidebarOptions {
@@ -67,7 +63,6 @@ export const EditorSidebar = ({
     const {
         confirmedCharacters,
         unconfirmedCharacters,
-        characterGenderOptions = [],
         isLoading,
     } = data;
     const {
@@ -78,15 +73,28 @@ export const EditorSidebar = ({
         onRenameCharacterPreview,
         onRenameCharacter,
         onSetCharacterColor,
-        onSetCharacterGender,
-        onUpsertCharacterGender,
+        onSetCharacterOutline,
     } = actions ?? {};
     const {
         characterColorSaturation,
         className,
     } = options ?? {};
     const [expandedKeys, setExpandedKeys] = useState<Set<string>>(new Set());
+    const [deleteTarget, setDeleteTarget] = useState<{id: string, key: string} | null>(null);
     const hasCharacters = confirmedCharacters.length > 0 || unconfirmedCharacters.length > 0;
+
+    const handleRequestDeleteCharacter = useCallback((characterId: string, characterKey: string) => {
+        setDeleteTarget({id: characterId, key: characterKey});
+    }, []);
+
+    const handleConfirmDeleteCharacter = useCallback(() => {
+        if (!deleteTarget) {
+            return;
+        }
+
+        void onDeleteCharacter?.(deleteTarget.id);
+        setDeleteTarget(null);
+    }, [deleteTarget, onDeleteCharacter]);
     const rows = useMemo(
         () => [...confirmedCharacters, ...unconfirmedCharacters],
         [confirmedCharacters, unconfirmedCharacters],
@@ -166,14 +174,14 @@ export const EditorSidebar = ({
                                                 onToggleExpanded: toggleExpanded,
                                                 onRenameDraftChange: handleRenameDraftChange,
                                                 onCommitRenameDraft: commitRenameDraft,
-                                                onDeleteCharacter,
+                                                onRequestDeleteCharacter: onDeleteCharacter
+                                                    ? handleRequestDeleteCharacter
+                                                    : undefined,
                                                 onRenameCharacter,
                                                 onSetCharacterColor,
-                                                onSetCharacterGender,
-                                                onUpsertCharacterGender,
+                                                onSetCharacterOutline,
                                             }}
                                             options={{
-                                                characterGenderOptions,
                                                 characterColorSaturation,
                                             }}
                                         />
@@ -195,6 +203,12 @@ export const EditorSidebar = ({
                     </ul>
                 ) : null}
             </section>
+            <RemoveCharacterModal
+                isOpen={deleteTarget !== null}
+                characterKey={deleteTarget?.key}
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={handleConfirmDeleteCharacter}
+            />
         </aside>
     );
 };

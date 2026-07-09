@@ -47,6 +47,7 @@ export interface ScriptCharactersContextValue {
     ) => void,
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
+    handleSetCharacterOutline: (characterId: string, outline: string | null) => void,
     handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,
 }
 

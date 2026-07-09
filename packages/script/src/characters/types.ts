@@ -3,6 +3,7 @@ export interface ScriptCharacterRecord {
     key: string,
     colorHex?: string | null,
     genderKey?: string | null,
+    outline?: string | null,
 }
 
 export interface CharacterGenderOption {

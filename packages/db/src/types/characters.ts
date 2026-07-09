@@ -15,6 +15,7 @@ export interface ScriptCharacterRef {
     genderKey: string | null,
     notes: string | null,
     backstory: string | null,
+    outline: string | null,
 }
 
 export interface ScriptCharacterGenderOption {

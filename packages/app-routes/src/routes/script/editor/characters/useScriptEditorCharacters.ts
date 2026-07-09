@@ -56,6 +56,7 @@ export const useScriptEditorCharacters = ({
         handleRenameCharacter,
         handleSetCharacterColor,
         handleSetCharacterGender,
+        handleSetCharacterOutline,
         handleUpsertCharacterGender,
     } = useCharacterActions({
         context: {
@@ -90,6 +91,7 @@ export const useScriptEditorCharacters = ({
         handleRenameCharacter,
         handleSetCharacterColor,
         handleSetCharacterGender,
+        handleSetCharacterOutline,
         handleUpsertCharacterGender,
     };
 };

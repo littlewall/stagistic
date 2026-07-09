@@ -132,6 +132,7 @@ export const useCharacterComputed = ({
                 key,
                 colorHex: character.colorHex ?? null,
                 genderKey: character.genderKey ?? null,
+                outline: character.outline ?? null,
             });
         });
 
@@ -180,6 +181,7 @@ export const useCharacterComputed = ({
                     ),
                     colorHex: normalizedColorHex ?? null,
                     genderKey: character.genderKey ?? null,
+                    outline: character.outline ?? null,
                     isConfirmed: true,
                     isDeletePending: deletingCharacterIdSet.has(character.id),
                     isRenamePending: renamingCharacterIdSet.has(character.id),

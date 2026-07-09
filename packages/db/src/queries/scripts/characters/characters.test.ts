@@ -15,6 +15,7 @@ import {
     deleteScriptCharacter,
     updateScriptCharacterColor,
     updateScriptCharacterKey,
+    updateScriptCharacterOutline,
     upsertScriptCharacter,
 } from './write';
 
@@ -46,6 +47,7 @@ describe('script character read/write', () => {
             genderKey: 'female',
             notes: 'a note',
             backstory: 'a backstory',
+            outline: 'a short outline',
         });
 
         const expected = {
@@ -55,6 +57,7 @@ describe('script character read/write', () => {
             genderKey: 'female',
             notes: 'a note',
             backstory: 'a backstory',
+            outline: 'a short outline',
         };
 
         expect(await getScriptCharacterByKey(db, {scriptId: SCRIPT_ID, characterKey: 'ANNA'}))
@@ -137,6 +140,19 @@ describe('script character read/write', () => {
         const row = await getScriptCharacterById(db, {scriptId: SCRIPT_ID, characterId: 'c1'});
 
         expect(row).toMatchObject({colorHex: '#999999', notes: 'unchanged'});
+    });
+
+    it('updateScriptCharacterOutline changes only the outline', async () => {
+        const db = await setup();
+
+        await upsert(db, {colorHex: '#111111', outline: null});
+        await updateScriptCharacterOutline(db, {
+            scriptId: SCRIPT_ID, characterId: 'c1', outline: 'brooding rival', updatedAt: 2,
+        });
+
+        const row = await getScriptCharacterById(db, {scriptId: SCRIPT_ID, characterId: 'c1'});
+
+        expect(row).toMatchObject({colorHex: '#111111', outline: 'brooding rival'});
     });
 
     it('updateScriptCharacterKey renames the lookup key', async () => {

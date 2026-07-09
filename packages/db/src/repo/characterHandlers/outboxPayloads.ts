@@ -64,6 +64,20 @@ export const buildCharacterGenderPayload = (
     });
 };
 
+export const buildCharacterOutlinePayload = (
+    scriptId: string,
+    characterId: string,
+    outline: string | null,
+    updatedAt: number,
+) => {
+    return JSON.stringify({
+        scriptId,
+        characterId,
+        outline,
+        updatedAt,
+    });
+};
+
 export const buildCharacterGenderUpsertPayload = (
     scriptId: string,
     genderKey: string,

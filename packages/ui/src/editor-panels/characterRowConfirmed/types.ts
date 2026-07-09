@@ -1,10 +1,8 @@
 import type {
-    CharacterGenderIcon,
     CharacterRowActions,
     CharacterRowModel,
     CharacterRowOptions,
     CharacterRowState,
-    GenderListOption,
 } from './contracts';
 
 export interface CharacterRowConfirmedProps {
@@ -13,7 +11,3 @@ export interface CharacterRowConfirmedProps {
     actions: CharacterRowActions,
     options: CharacterRowOptions,
 }
-export type {
-    CharacterGenderIcon,
-    GenderListOption,
-};

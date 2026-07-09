@@ -12,10 +12,12 @@ export type CharacterHandlers = Pick<
     | 'renameScriptCharacter'
     | 'setScriptCharacterColor'
     | 'setScriptCharacterGender'
+    | 'setScriptCharacterOutline'
     | 'upsertScriptCharacterGender'
 >;
 
 export interface CreateCharacterHandlersArgs {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
+    syncDb: () => Promise<void>,
 }

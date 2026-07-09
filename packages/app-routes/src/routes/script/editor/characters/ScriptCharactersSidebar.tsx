@@ -125,7 +125,6 @@ export const ScriptCharactersSidebar = () => {
             data={{
                 confirmedCharacters,
                 unconfirmedCharacters,
-                characterGenderOptions: characters.characterGenderOptions,
                 isLoading: characters.isCharactersLoading,
             }}
             actions={{
@@ -136,8 +135,7 @@ export const ScriptCharactersSidebar = () => {
                 onRenameCharacterPreview: handleRenameCharacterPreview,
                 onRenameCharacter: handleRenameCharacter,
                 onSetCharacterColor: characters.handleSetCharacterColor,
-                onSetCharacterGender: characters.handleSetCharacterGender,
-                onUpsertCharacterGender: characters.handleUpsertCharacterGender,
+                onSetCharacterOutline: characters.handleSetCharacterOutline,
             }}
             options={{
                 characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,

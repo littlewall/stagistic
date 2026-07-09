@@ -63,6 +63,7 @@ export interface ScriptCharactersRepository {
     rename(scriptId: string, characterId: string, nextCharacterKey: string): Promise<ScriptCharacterRef | null>,
     setColor(scriptId: string, characterId: string, colorHex: string | null): Promise<ScriptCharacterRef | null>,
     setGender(scriptId: string, characterId: string, genderKey: string | null): Promise<ScriptCharacterRef | null>,
+    setOutline(scriptId: string, characterId: string, outline: string | null): Promise<ScriptCharacterRef | null>,
 }
 
 export interface ScriptCharacterGendersRepository {
@@ -154,6 +155,7 @@ export interface ScriptRepository extends ScriptDataRepository {
     renameScriptCharacter(scriptId: string, characterId: string, nextCharacterKey: string): Promise<ScriptCharacterRef | null>,
     setScriptCharacterColor(scriptId: string, characterId: string, colorHex: string | null): Promise<ScriptCharacterRef | null>,
     setScriptCharacterGender(scriptId: string, characterId: string, genderKey: string | null): Promise<ScriptCharacterRef | null>,
+    setScriptCharacterOutline(scriptId: string, characterId: string, outline: string | null): Promise<ScriptCharacterRef | null>,
     upsertScriptCharacterGender(scriptId: string, label: string): Promise<ScriptCharacterGenderOption | null>,
     loadLatest(scriptId: string): Promise<ScriptDocument | null>,
     saveLatest(scriptId: string, value: ScriptDocument): Promise<void>,

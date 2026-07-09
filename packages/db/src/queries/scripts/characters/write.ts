@@ -13,6 +13,7 @@ import type {
     UpdateScriptCharacterGenderPayload,
     UpdateScriptCharacterKeyPayload,
     UpdateScriptCharacterNotesPayload,
+    UpdateScriptCharacterOutlinePayload,
     UpsertScriptCharacterPayload,
 } from '../payloads';
 
@@ -30,6 +31,7 @@ export const upsertScriptCharacter = async (
             genderKey: payload.genderKey ?? null,
             notes: payload.notes ?? null,
             backstory: payload.backstory ?? null,
+            outline: payload.outline ?? null,
             createdAt: payload.createdAt,
             updatedAt: payload.updatedAt,
         })
@@ -40,6 +42,7 @@ export const upsertScriptCharacter = async (
                 genderKey: payload.genderKey ?? null,
                 notes: payload.notes ?? null,
                 backstory: payload.backstory ?? null,
+                outline: payload.outline ?? null,
                 updatedAt: payload.updatedAt,
             },
         });
@@ -156,6 +159,24 @@ export const updateScriptCharacterBackstory = async (
         .update(scriptCharacters)
         .set({
             backstory: payload.backstory,
+            updatedAt: payload.updatedAt,
+        })
+        .where(
+            and(
+                eq(scriptCharacters.scriptId, payload.scriptId),
+                eq(scriptCharacters.id, payload.characterId),
+            ),
+        );
+};
+
+export const updateScriptCharacterOutline = async (
+    db: DbClient,
+    payload: UpdateScriptCharacterOutlinePayload,
+) => {
+    await db
+        .update(scriptCharacters)
+        .set({
+            outline: payload.outline,
             updatedAt: payload.updatedAt,
         })
         .where(

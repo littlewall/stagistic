@@ -1,16 +1,7 @@
 import type {ComponentProps, RefObject} from 'react';
 import type {ColorSlider} from 'react-aria-components';
 
-import type {
-    CharacterGenderOption,
-    EditorSidebarCharacter,
-} from '../types';
-
-export type CharacterGenderIcon = 'male' | 'female' | 'neutral';
-
-export interface GenderListOption extends CharacterGenderOption {
-    isUnspecified?: boolean,
-}
+import type {EditorSidebarCharacter} from '../types';
 
 export interface CharacterRowModel {
     character: EditorSidebarCharacter,
@@ -28,19 +19,17 @@ export interface CharacterRowActions {
     onToggleExpanded: (key: string) => void,
     onRenameDraftChange: (characterId: string, characterKey: string, value: string) => void,
     onCommitRenameDraft: (characterId: string, characterKey: string) => void,
-    onDeleteCharacter?: (characterId: string) => void | Promise<void>,
+    onRequestDeleteCharacter?: (characterId: string, characterKey: string) => void,
     onRenameCharacter?: (
         characterId: string,
         previousCharacterName: string,
         nextCharacterName: string,
     ) => void | Promise<void>,
     onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
-    onSetCharacterGender?: (characterId: string, genderKey: string | null) => void,
-    onUpsertCharacterGender?: (label: string) => Promise<CharacterGenderOption | null>,
+    onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
 }
 
 export interface CharacterRowOptions {
-    characterGenderOptions: CharacterGenderOption[],
     characterColorSaturation?: number,
 }
 
@@ -65,27 +54,11 @@ export interface CharacterRowColorControls {
     },
 }
 
-export interface CharacterRowGenderControls {
-    state: {
-        isActionDisabled: boolean,
-        isPickerOpen: boolean,
-        selectedGenderLabel: string,
-        selectedGenderIcon: CharacterGenderIcon,
-        genderQuery: string,
-        effectiveGenderKey: string | null,
-        normalizedGenderInputLabel: string,
-        canCreateCustomGender: boolean,
-    },
-    data: {
-        genderListOptions: GenderListOption[],
-    },
-    actions: {
-        setPickerOpen: (nextOpen: boolean) => void,
-        setGenderQuery: (value: string) => void,
-        shouldClosePopover: (target: Element) => boolean,
-        commitGenderQuery: () => Promise<boolean>,
-        selectGender: (nextKey: string) => void,
-    },
+export interface CharacterRowDeleteControls {
+    isDeletePending: boolean,
+    isDeleteActionDisabled: boolean,
+    deleteTooltipLabel: string,
+    onRequestDelete: () => void,
 }
 
 export interface CharacterRowHeaderProps {
@@ -100,6 +73,7 @@ export interface CharacterRowHeaderProps {
         onCommitRenameDraft: (characterId: string, characterKey: string) => void,
     },
     color: CharacterRowColorControls,
+    delete: CharacterRowDeleteControls,
     overlay: {
         isCharacterOverlayTarget: (target: EventTarget | null) => boolean,
     },
@@ -109,14 +83,10 @@ export interface CharacterRowDetailsProps {
     model: Pick<CharacterRowModel, 'character'>,
     state: {
         isExpanded: boolean,
-        isDeletePending: boolean,
-        isDeleteActionDisabled: boolean,
-        deleteTooltipLabel: string,
     },
     actions: {
-        onDeleteCharacter?: (characterId: string) => void | Promise<void>,
+        onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
     },
-    gender: CharacterRowGenderControls,
 }
 
 export interface CharacterRowControllerArgs {

@@ -4,6 +4,7 @@ import {
     useRenameCharacter,
     useSetCharacterColor,
     useSetCharacterGender,
+    useSetCharacterOutline,
 } from './actions';
 import type {
     CharacterActionContext, ConfirmEditorCallbacks, DeleteEditorCallbacks, RenameEditorCallbacks, RenamePreviewEditorCallbacks,
@@ -38,6 +39,7 @@ export interface CharacterActions {
     ) => void,
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
+    handleSetCharacterOutline: (characterId: string, outline: string | null) => void,
     handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,
 }
 
@@ -85,6 +87,10 @@ export const useCharacterActions = ({
         confirmedCharactersById,
         setColorUpdatingCharacterIds: setters.setColorUpdatingCharacterIds,
     });
+    const handleSetCharacterOutline = useSetCharacterOutline({
+        ...baseArgs,
+        confirmedCharactersById,
+    });
     const {
         handleSetCharacterGender,
         handleUpsertCharacterGender,
@@ -102,6 +108,7 @@ export const useCharacterActions = ({
         handleRenameCharacter,
         handleSetCharacterColor,
         handleSetCharacterGender,
+        handleSetCharacterOutline,
         handleUpsertCharacterGender,
     };
 };

@@ -42,10 +42,12 @@ export const createLocalPgliteDataRepository = ({
         renameScriptCharacter,
         setScriptCharacterColor,
         setScriptCharacterGender,
+        setScriptCharacterOutline,
         upsertScriptCharacterGender,
     } = createCharacterHandlers({
         getDb,
         recordOutbox,
+        syncDb: syncToFs,
     });
 
     const characters = {
@@ -59,6 +61,7 @@ export const createLocalPgliteDataRepository = ({
         rename: renameScriptCharacter,
         setColor: setScriptCharacterColor,
         setGender: setScriptCharacterGender,
+        setOutline: setScriptCharacterOutline,
     };
 
     const characterGenders = {
@@ -154,6 +157,11 @@ export const createLocalPgliteRepository = (deps: LocalPgliteRepositoryDeps): Sc
             scriptId,
             characterId,
             genderKey,
+        ),
+        setScriptCharacterOutline: (scriptId, characterId, outline) => repositoryData.characters.setOutline(
+            scriptId,
+            characterId,
+            outline,
         ),
         upsertScriptCharacterGender: (scriptId, label) => repositoryData.characterGenders.upsert(scriptId, label),
         loadLatest: scriptId => repositoryData.content.loadLatest(scriptId),

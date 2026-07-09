@@ -20,5 +20,6 @@ export {
     updateScriptCharacterGender,
     updateScriptCharacterKey,
     updateScriptCharacterNotes,
+    updateScriptCharacterOutline,
     upsertScriptCharacter,
 } from './write';
