@@ -129,7 +129,6 @@ export const EditorSidebar = ({
     return (
         <aside className={clsx(styles.sidebar, className)}>
             <section className={styles.section}>
-                <h3 className={styles.title}>On-stage</h3>
                 {isLoading ? (
                     <p className={styles.emptyState}>Loading characters...</p>
                 ) : null}

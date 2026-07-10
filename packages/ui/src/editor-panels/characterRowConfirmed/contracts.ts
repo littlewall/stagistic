@@ -37,6 +37,7 @@ export interface CharacterRowColorControls {
     state: {
         isActionDisabled: boolean,
         isPickerOpen: boolean,
+        currentColorHex: string,
         colorDraftHex: string,
         pickerColorValue: ComponentProps<typeof ColorSlider>['value'],
         presetColorHexes: string[],

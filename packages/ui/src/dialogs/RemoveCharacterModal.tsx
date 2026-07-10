@@ -27,9 +27,12 @@ export const RemoveCharacterModal = ({
             {characterKey ? ` ${characterKey}` : ' character'}?
         </h2>
         <p className={styles.subtitle}>
-            This takes
+            This only deletes the character record:
             {characterKey ? <strong>{` ${characterKey} `}</strong> : ' the character '}
-            out of your confirmed cast and clears its outline. You can confirm it again later.
+            stops being confirmed and its color, outline, and other metadata are cleared.
+        </p>
+        <p className={styles.subtitleSecondary}>
+            Its lines and blocks stay in the script — nothing is removed from the screenplay.
         </p>
         <div className={styles.actions}>
             <Button

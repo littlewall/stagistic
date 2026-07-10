@@ -51,6 +51,7 @@ export const useScriptCharactersContextValue = (
     }, [handleEditorValueChange]);
 
     const contextValue: ScriptCharactersContextValue = useMemo(() => ({
+        getEditorValue,
         editorOverrideValue,
         normalizedConfirmedCharacterRecords,
         handleEditorValueChange,
@@ -78,6 +79,7 @@ export const useScriptCharactersContextValue = (
         confirmedCharacterRecords,
         deletingCharacterIds,
         editorOverrideValue,
+        getEditorValue,
         genderUpdatingCharacterIds,
         handleConfirmCharacter,
         handleDeleteCharacter,

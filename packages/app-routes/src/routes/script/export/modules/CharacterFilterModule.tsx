@@ -22,7 +22,6 @@ export const CharacterFilterModule = ({
         <div className={styles.module}>
             <div>
                 <h3 className={styles.title}>Characters</h3>
-                <p className={styles.description}>Limit the export to scenes that mention selected characters.</p>
             </div>
             <Switch
                 isSelected={onlySelected}

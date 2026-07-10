@@ -14,6 +14,7 @@ import type {CharacterGenderOption, ScriptCharacterRecord} from './editor/charac
 
 export interface ScriptCharactersContextValue {
     // Consumed by ScriptEditor (via route)
+    getEditorValue: () => ScriptDocument | null,
     editorOverrideValue: ScriptDocument | null,
     normalizedConfirmedCharacterRecords: ScriptCharacterRecord[],
     handleEditorValueChange: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,

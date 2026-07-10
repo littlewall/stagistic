@@ -1,9 +1,6 @@
 import clsx from 'clsx';
-import {
-    Tooltip,
-    TooltipTrigger,
-} from 'react-aria-components';
 
+import {Tooltip} from '../../atoms/Tooltip';
 import styles from '../AppHeader.module.css';
 import type {ScriptSyncState} from './types';
 
@@ -36,7 +33,7 @@ export const SyncIndicator = ({state = 'saved'}: SyncIndicatorProps) => {
     const syncMeta = getSyncMeta(state);
 
     return (
-        <TooltipTrigger>
+        <Tooltip label={syncMeta.label}>
             <span
                 className={styles.scriptStatus}
                 aria-label={syncMeta.label}
@@ -48,9 +45,6 @@ export const SyncIndicator = ({state = 'saved'}: SyncIndicatorProps) => {
                     aria-hidden="true"
                 />
             </span>
-            <Tooltip className={styles.tooltip}>
-                {syncMeta.label}
-            </Tooltip>
-        </TooltipTrigger>
+        </Tooltip>
     );
 };

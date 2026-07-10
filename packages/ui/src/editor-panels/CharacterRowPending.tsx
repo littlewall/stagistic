@@ -1,7 +1,6 @@
-import {
-    Button, Tooltip, TooltipTrigger,
-} from 'react-aria-components';
+import {Button} from 'react-aria-components';
 
+import {Tooltip} from '../atoms/Tooltip';
 import {EyeIcon} from '../icons/ui';
 import styles from './EditorSidebar.module.css';
 import type {EditorSidebarCharacter} from './types';
@@ -48,10 +47,10 @@ export const CharacterRowPending = ({
 
     return (
         <div className={styles.characterRow}>
-            <TooltipTrigger
-                trigger="hover"
-                delay={0}
-                closeDelay={120}
+            <Tooltip
+                label={confirmTooltipLabel}
+                placement="right"
+                isDisabled={isConfirmActionDisabled}
             >
                 <Button
                     className={styles.confirmIconButton}
@@ -75,21 +74,13 @@ export const CharacterRowPending = ({
                         </svg>
                     )}
                 </Button>
-                <Tooltip
-                    className={styles.confirmTooltip}
-                    placement="right"
-                    offset={8}
-                >
-                    {confirmTooltipLabel}
-                </Tooltip>
-            </TooltipTrigger>
+            </Tooltip>
             <span className={styles.characterColorOutline} aria-hidden="true" />
             <span className={styles.characterName}>{character.key}</span>
             {onFocusCharacter && (
-                <TooltipTrigger
-                    trigger="hover"
-                    delay={0}
-                    closeDelay={120}
+                <Tooltip
+                    label="Focus first occurrence"
+                    placement="left"
                 >
                     <Button
                         className={styles.focusIconButton}
@@ -98,14 +89,7 @@ export const CharacterRowPending = ({
                     >
                         <EyeIcon className={styles.iconGlyph} strokeWidth={2} />
                     </Button>
-                    <Tooltip
-                        className={styles.confirmTooltip}
-                        placement="left"
-                        offset={8}
-                    >
-                        Focus first occurrence
-                    </Tooltip>
-                </TooltipTrigger>
+                </Tooltip>
             )}
         </div>
     );

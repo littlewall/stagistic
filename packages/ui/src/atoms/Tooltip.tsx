@@ -17,8 +17,10 @@ export interface TooltipProps {
     label: ReactNode,
     /** Placement relative to the trigger. Defaults to 'top'. */
     placement?: AriaTooltipProps['placement'],
-    /** Hover open delay in ms. Defaults to 600. */
+    /** Hover open delay in ms. Defaults to 0 (no delay). */
     delay?: number,
+    /** Delay before closing after hover leaves the trigger. Defaults to 0 (no delay). */
+    closeDelay?: number,
     /** Disable the tooltip (e.g. when the trigger button is disabled). */
     isDisabled?: boolean,
     /** A single focusable trigger element (e.g. a native <button>). */
@@ -34,11 +36,16 @@ export interface TooltipProps {
 export const Tooltip = ({
     label,
     placement = 'top',
-    delay = 600,
+    delay = 0,
+    closeDelay = 0,
     isDisabled = false,
     children,
 }: TooltipProps) => (
-    <TooltipTrigger delay={delay} isDisabled={isDisabled}>
+    <TooltipTrigger
+        delay={delay}
+        closeDelay={closeDelay}
+        isDisabled={isDisabled}
+    >
         <Focusable isDisabled={isDisabled}>{children as FocusableChild}</Focusable>
         <AriaTooltip
             className={styles.tooltip}

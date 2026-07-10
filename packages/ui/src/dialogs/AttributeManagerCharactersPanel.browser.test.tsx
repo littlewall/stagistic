@@ -1,0 +1,164 @@
+import {createRoot, type Root} from 'react-dom/client';
+import {
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
+} from 'vite-plus/test';
+import {page} from 'vite-plus/test/browser';
+
+import {AttributeManagerCharactersPanel} from './AttributeManagerCharactersPanel';
+
+const mountedRoots: Root[] = [];
+
+const waitForElement = async <T extends Element>(selector: string): Promise<T> => {
+    const deadline = Date.now() + 1000;
+
+    while (Date.now() < deadline) {
+        const element = document.querySelector<T>(selector);
+
+        if (element) {
+            return element;
+        }
+
+        await new Promise(resolve => {
+            window.setTimeout(resolve, 10);
+        });
+    }
+
+    throw new Error(`Expected element matching ${selector}`);
+};
+
+const findButtonByText = (label: string): HTMLButtonElement => {
+    const button = Array.from(document.querySelectorAll('button'))
+        .find(candidate => candidate.textContent?.trim() === label);
+
+    if (!button) {
+        throw new Error(`Expected a button labelled ${label}`);
+    }
+
+    return button;
+};
+
+const renderPanel = () => {
+    const host = document.createElement('div');
+    const onSetCharacterColor = vi.fn();
+    const onSetCharacterOutline = vi.fn();
+    const onDeleteCharacter = vi.fn();
+    const onCreateCharacter = vi.fn();
+
+    host.style.width = '900px';
+    host.style.height = '600px';
+    host.style.setProperty('--size-scale', '1');
+    document.body.appendChild(host);
+
+    const root = createRoot(host);
+
+    root.render(
+        <AttributeManagerCharactersPanel
+            characters={[
+                {
+                    id: 'char-1',
+                    name: 'ANNA',
+                    color: '#8899aa',
+                    outline: 'existing outline',
+                },
+            ]}
+            onSetCharacterColor={onSetCharacterColor}
+            onSetCharacterOutline={onSetCharacterOutline}
+            onDeleteCharacter={onDeleteCharacter}
+            onCreateCharacter={onCreateCharacter}
+        />,
+    );
+    mountedRoots.push(root);
+
+    return {
+        onSetCharacterColor,
+        onSetCharacterOutline,
+        onDeleteCharacter,
+        onCreateCharacter,
+    };
+};
+
+afterEach(() => {
+    mountedRoots.forEach(root => root.unmount());
+    mountedRoots.length = 0;
+    document.body.innerHTML = '';
+});
+
+describe('AttributeManagerCharactersPanel character actions', () => {
+    it('applies a character color through the shared picker', async () => {
+        const {onSetCharacterColor} = renderPanel();
+        const colorButton = page.elementLocator(
+            await waitForElement('[aria-label="Choose color for ANNA"]'),
+        );
+
+        await colorButton.click();
+        await waitForElement('[aria-label="Color picker for ANNA"]');
+
+        const applyButton = page.elementLocator(findButtonByText('Apply'));
+
+        await applyButton.click();
+
+        expect(onSetCharacterColor).toHaveBeenCalledWith('char-1', expect.any(String));
+    });
+
+    it('deletes only after confirming in the modal', async () => {
+        const {onDeleteCharacter} = renderPanel();
+        const deleteButton = page.elementLocator(
+            await waitForElement('[aria-label="Remove ANNA"]'),
+        );
+
+        await deleteButton.click();
+        await waitForElement('dialog[aria-label="Remove character"]');
+        expect(onDeleteCharacter).not.toHaveBeenCalled();
+
+        const confirmButton = page.elementLocator(findButtonByText('Remove'));
+
+        await confirmButton.click();
+
+        expect(onDeleteCharacter).toHaveBeenCalledWith('char-1');
+    });
+
+    it('creates a confirmed character through the add button', async () => {
+        const {onCreateCharacter} = renderPanel();
+        const addButton = page.elementLocator(
+            await waitForElement<HTMLButtonElement>('[aria-label="Create characters"]'),
+        );
+
+        expect(
+            document.querySelector<HTMLButtonElement>('[aria-label="Create characters"]')?.disabled,
+        ).toBe(false);
+
+        await addButton.click();
+
+        const nameInput = await waitForElement<HTMLInputElement>('#create-character-name');
+
+        await page.elementLocator(nameInput).fill('Rebecca');
+
+        const createButton = page.elementLocator(findButtonByText('Create character'));
+
+        await createButton.click();
+
+        expect(onCreateCharacter).toHaveBeenCalledWith('REBECCA');
+    });
+
+    it('persists the edited outline on blur', async () => {
+        const {onSetCharacterOutline} = renderPanel();
+        const inputElement = await waitForElement<HTMLInputElement>(
+            '[aria-label="Outline for ANNA"]',
+        );
+
+        expect(inputElement.tagName).toBe('INPUT');
+
+        const input = page.elementLocator(inputElement);
+
+        expect(inputElement.value).toBe('existing outline');
+
+        await input.fill('brooding rival');
+        inputElement.blur();
+
+        expect(onSetCharacterOutline).toHaveBeenCalledWith('char-1', 'brooding rival');
+    });
+});

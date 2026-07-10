@@ -5,12 +5,9 @@ import {
     useEffect,
     useState,
 } from 'react';
-import {
-    Button,
-    Tooltip,
-    TooltipTrigger,
-} from 'react-aria-components';
+import {Button} from 'react-aria-components';
 
+import {Tooltip} from '../atoms/Tooltip';
 import {
     HomeIcon,
     PlusIcon,
@@ -81,7 +78,7 @@ export const AppHeader = ({
             />
             <div className={clsx(styles.inner, isFullWidth && styles.full)}>
                 <div className={styles.leftControls}>
-                    <TooltipTrigger delay={600}>
+                    <Tooltip label="Home" placement="bottom">
                         <Button
                             className={styles.iconButton}
                             onPress={onHome}
@@ -89,10 +86,9 @@ export const AppHeader = ({
                         >
                             <HomeIcon className={styles.icon} aria-hidden="true" />
                         </Button>
-                        <Tooltip className={styles.tooltip} placement="bottom">Home</Tooltip>
-                    </TooltipTrigger>
+                    </Tooltip>
                     {onNewScript ? (
-                        <TooltipTrigger delay={600}>
+                        <Tooltip label="New script" placement="bottom">
                             <Button
                                 className={styles.iconButton}
                                 onPress={onNewScript}
@@ -100,11 +96,10 @@ export const AppHeader = ({
                             >
                                 <PlusIcon className={styles.icon} aria-hidden="true" />
                             </Button>
-                            <Tooltip className={styles.tooltip} placement="bottom">New script</Tooltip>
-                        </TooltipTrigger>
+                        </Tooltip>
                     ) : null}
                     {onImportScript ? (
-                        <TooltipTrigger delay={600}>
+                        <Tooltip label="Import script" placement="bottom">
                             <Button
                                 className={styles.iconButton}
                                 onPress={onImportScript}
@@ -112,8 +107,7 @@ export const AppHeader = ({
                             >
                                 <UploadIcon className={styles.icon} aria-hidden="true" />
                             </Button>
-                            <Tooltip className={styles.tooltip} placement="bottom">Import script</Tooltip>
-                        </TooltipTrigger>
+                        </Tooltip>
                     ) : null}
                     {leftControls ?? null}
                 </div>

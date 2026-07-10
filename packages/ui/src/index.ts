@@ -11,10 +11,23 @@ export {
     SubtleText,
 } from './atoms/typography/Typography';
 export {
+    type AttributeManagerCharacter,
+    AttributeManagerCharactersPanel,
+    type AttributeManagerCharactersPanelProps,
+} from './dialogs/AttributeManagerCharactersPanel';
+export {
+    type AttributeManagerDetailTab,
+    AttributeManagerDetailTabs,
+} from './dialogs/AttributeManagerDetailTabs';
+export {
     AttributeManagerModal,
     type AttributeManagerModalProps,
     type AttributeManagerTab,
 } from './dialogs/AttributeManagerModal';
+export {
+    CreateCharacterModal,
+    type CreateCharacterModalProps,
+} from './dialogs/CreateCharacterModal';
 export {
     DELETE_SCRIPT_CONFIRM_PHRASE,
     DeleteScriptConfirm,

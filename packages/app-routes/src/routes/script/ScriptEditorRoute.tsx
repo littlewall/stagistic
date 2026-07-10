@@ -29,11 +29,10 @@ import {
 import {
     ScriptStructureSidebar,
 } from './editor/structure';
-import {ScriptCharactersProvider} from './ScriptCharactersContext';
+import {useScriptCharacters} from './ScriptCharactersContext';
 import {ScriptSessionProvider} from './ScriptSessionContext';
 import {useScriptWorkspace} from './ScriptWorkspaceContext';
 import {useScriptSettingsModal} from './settings/ScriptSettingsModalProvider';
-import {useScriptCharactersContextValue} from './useScriptCharactersContextValue';
 import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
 
 const AUTOSAVE_DELAY_MS = 1500;
@@ -89,16 +88,8 @@ export const ScriptEditorRoute = () => {
         getEditorValue,
         editorOverrideValue,
         normalizedConfirmedCharacterRecords,
-        handleResolvedEditorValueChange,
-        contextValue: charactersContextValue,
-    } = useScriptCharactersContextValue({
-        currentScriptId,
-        scriptRepository,
-        initialValue,
-        resolvedScriptSettings,
-        characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
-        handleAutoSave,
-    });
+        handleEditorValueChange: handleResolvedEditorValueChange,
+    } = useScriptCharacters();
 
     const {handleMenuAction} = useScriptEditorHeaderActions({
         navigate,
@@ -207,84 +198,82 @@ export const ScriptEditorRoute = () => {
 
     return (
         <ScriptSessionProvider value={sessionContextValue}>
-            <ScriptCharactersProvider value={charactersContextValue}>
-                <AppLayout
-                    header={(
-                        displayedCurrentScript ? (
-                            <ScriptEditorAppHeader
-                                currentScript={displayedCurrentScript}
-                                recentScripts={recentScripts}
-                                scriptSyncState={saveIndicator}
-                                onMenuAction={handleMenuAction}
-                                activeView="editor"
-                            />
-                        ) : (
-                            <AppHeader onMenuAction={handleMenuAction} />
-                        )
-                    )}
+            <AppLayout
+                header={(
+                    displayedCurrentScript ? (
+                        <ScriptEditorAppHeader
+                            currentScript={displayedCurrentScript}
+                            recentScripts={recentScripts}
+                            scriptSyncState={saveIndicator}
+                            onMenuAction={handleMenuAction}
+                            activeView="editor"
+                        />
+                    ) : (
+                        <AppHeader onMenuAction={handleMenuAction} />
+                    )
+                )}
+            >
+                {storageError ? (
+                    <div role="alert" style={{padding: '12px 20px'}}>
+                        {storageError}
+                    </div>
+                ) : null}
+                <ScriptEditor
+                    key={currentScript?.id ?? 'editor'}
+                    surfaceCache={editorSurfaceCache}
+                    document={{
+                        initialValue: resolvedEditorInitialValue,
+                        persistentCharacters: normalizedConfirmedCharacterRecords,
+                        persistentCues: cues,
+                        scriptTitle: scriptTitleDraft,
+                        draftDate: resolveDraftDate(titlePageDraft),
+                    }}
+                    settings={{
+                        scriptSettings: effectiveScriptSettingsDraft,
+                    }}
+                    save={{
+                        onAutoSave: handleAutoSave,
+                        onManualSave: handleManualSave,
+                        autoSaveDelayMs: AUTOSAVE_DELAY_MS,
+                    }}
+                    layout={{
+                        autoFocus: shouldAutoFocus,
+                        leftSidebarToggle,
+                        rightSidebarToggle,
+                        leftSidebarHeader,
+                        rightSidebarHeader,
+                        sidebarWidth: SIDEBAR_WIDTH,
+                    }}
+                    callbacks={{
+                        onValueChange: handleResolvedEditorValueChange,
+                        onRequestCreateCue: handleRequestCreateCue,
+                        onRequestRemoveCue: handleRequestRemoveCue,
+                        onCueAssigned: markCueAssigned,
+                        onCueUnassigned: markCueUnassigned,
+                    }}
                 >
-                    {storageError ? (
-                        <div role="alert" style={{padding: '12px 20px'}}>
-                            {storageError}
-                        </div>
-                    ) : null}
-                    <ScriptEditor
-                        key={currentScript?.id ?? 'editor'}
-                        surfaceCache={editorSurfaceCache}
-                        document={{
-                            initialValue: resolvedEditorInitialValue,
-                            persistentCharacters: normalizedConfirmedCharacterRecords,
-                            persistentCues: cues,
-                            scriptTitle: scriptTitleDraft,
-                            draftDate: resolveDraftDate(titlePageDraft),
-                        }}
-                        settings={{
-                            scriptSettings: effectiveScriptSettingsDraft,
-                        }}
-                        save={{
-                            onAutoSave: handleAutoSave,
-                            onManualSave: handleManualSave,
-                            autoSaveDelayMs: AUTOSAVE_DELAY_MS,
-                        }}
-                        layout={{
-                            autoFocus: shouldAutoFocus,
-                            leftSidebarToggle,
-                            rightSidebarToggle,
-                            leftSidebarHeader,
-                            rightSidebarHeader,
-                            sidebarWidth: SIDEBAR_WIDTH,
-                        }}
-                        callbacks={{
-                            onValueChange: handleResolvedEditorValueChange,
-                            onRequestCreateCue: handleRequestCreateCue,
-                            onRequestRemoveCue: handleRequestRemoveCue,
-                            onCueAssigned: markCueAssigned,
-                            onCueUnassigned: markCueUnassigned,
-                        }}
-                    >
-                        <ScriptEditor.LeftSidebar>
-                            {leftSidebar}
-                        </ScriptEditor.LeftSidebar>
-                        <ScriptEditor.RightSidebar>
-                            {rightSidebar}
-                        </ScriptEditor.RightSidebar>
-                    </ScriptEditor>
-                    <AddCueModal
-                        isOpen={addCueModalState !== null}
-                        initialTitle={addCueModalState?.source === 'editor'
-                            ? addCueModalState.request.title
-                            : undefined}
-                        onClose={closeAddCueModal}
-                        onCreate={handleCreateCue}
-                    />
-                    <UnassignCueModal
-                        isOpen={removeCueRequest !== null}
-                        cueTitle={removeCueRequest?.title}
-                        onClose={() => setRemoveCueRequest(null)}
-                        onConfirm={handleConfirmRemoveCue}
-                    />
-                </AppLayout>
-            </ScriptCharactersProvider>
+                    <ScriptEditor.LeftSidebar>
+                        {leftSidebar}
+                    </ScriptEditor.LeftSidebar>
+                    <ScriptEditor.RightSidebar>
+                        {rightSidebar}
+                    </ScriptEditor.RightSidebar>
+                </ScriptEditor>
+                <AddCueModal
+                    isOpen={addCueModalState !== null}
+                    initialTitle={addCueModalState?.source === 'editor'
+                        ? addCueModalState.request.title
+                        : undefined}
+                    onClose={closeAddCueModal}
+                    onCreate={handleCreateCue}
+                />
+                <UnassignCueModal
+                    isOpen={removeCueRequest !== null}
+                    cueTitle={removeCueRequest?.title}
+                    onClose={() => setRemoveCueRequest(null)}
+                    onConfirm={handleConfirmRemoveCue}
+                />
+            </AppLayout>
         </ScriptSessionProvider>
     );
 };

@@ -63,6 +63,7 @@ export const useCharacterRowController = ({
 
     const {
         resolvedColorSaturation,
+        currentCharacterColorHex,
         colorTriggerRef,
         isColorPickerOpen,
         setIsColorPickerOpen,
@@ -112,6 +113,7 @@ export const useCharacterRowController = ({
                 state: {
                     isActionDisabled: isColorActionDisabled,
                     isPickerOpen: isColorPickerOpen,
+                    currentColorHex: currentCharacterColorHex,
                     colorDraftHex,
                     pickerColorValue,
                     presetColorHexes,

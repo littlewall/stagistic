@@ -9,6 +9,8 @@ import type {
 } from '@stagistic/script';
 import {isApplePlatform} from '@stagistic/shared';
 import {
+    type AttributeManagerCharacter,
+    AttributeManagerCharactersPanel,
     AttributeManagerModal,
     ScriptSettingsModal,
 } from '@stagistic/ui';
@@ -23,9 +25,12 @@ import {
     useSearchParams,
 } from 'react-router-dom';
 
+import {ATTRIBUTE_MANAGER_PANEL_CHARACTERS} from '../attributes/attributeManagerMenu';
 import {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
 import {ScriptEditorSettingsPanel} from '../editor/settings';
+import {ScriptCharactersProvider} from '../ScriptCharactersContext';
 import {useScriptWorkspace} from '../ScriptWorkspaceContext';
+import {useScriptCharactersContextValue} from '../useScriptCharactersContextValue';
 import {useScriptEditorSettingsDraft} from '../useScriptEditorSettingsDraft';
 import {useScriptEditorSettingsModal} from '../useScriptEditorSettingsModal';
 import {useScriptTitleDraft} from '../useScriptTitleDraft';
@@ -75,7 +80,9 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     const {
         currentScript,
         currentScriptId,
+        initialValue,
         scriptSettingsOverride,
+        handleAutoSave,
         handleSaveScriptSettingsOverride,
     } = useScriptWorkspace();
 
@@ -138,6 +145,24 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         close: closeAttributeManagerModal,
         selectPanel: selectAttributeManagerPanel,
     } = useAttributeManagerModalState();
+    const {
+        contextValue: charactersContextValue,
+    } = useScriptCharactersContextValue({
+        currentScriptId,
+        scriptRepository,
+        initialValue,
+        resolvedScriptSettings,
+        characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
+        handleAutoSave,
+    });
+    const attributeManagerCharacters = useMemo<AttributeManagerCharacter[]>(() => {
+        return charactersContextValue.confirmedCharacterRecords.map(character => ({
+            id: character.id,
+            name: character.key,
+            color: character.colorHex ?? null,
+            outline: character.outline ?? null,
+        })).sort((left, right) => left.name.localeCompare(right.name));
+    }, [charactersContextValue.confirmedCharacterRecords]);
 
     const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
 
@@ -159,49 +184,65 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
 
     return (
         <ScriptSettingsModalContext.Provider value={contextValue}>
-            {children}
-            <ScriptSettingsModal
-                isOpen={isSettingsOpen}
-                title="Settings"
-                groups={groups}
-                activePanelId={activePanelId}
-                expandedItemIds={expandedItemIds}
-                onClose={handleCloseSettings}
-                onSelectPanel={handleSelectSettingsPanel}
-                onToggleExpand={toggleExpanded}
-            >
-                <ScriptEditorSettingsPanel
-                    panelId={activePanelId}
-                    resolvedScriptSettings={resolvedScriptSettings}
-                    blockLabelByType={BLOCK_LABEL_BY_TYPE}
-                    shortcutPrefix={shortcutPrefix}
-                    elementsHandlers={{
-                        onResetBlockSettings: resetBlockSettings,
-                        onUpdateBlockSettings: updateBlockSettings,
-                    }}
-                    visualPreferencesHandlers={{onUpdateCharacterColorSaturation: updateCharacterColorSaturation}}
-                    structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
-                    pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
-                    headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
-                    titlePageHandlers={{
-                        titlePageSettings: titlePageDraft,
-                        scriptTitle: scriptTitleDraft,
-                        onUpdateScriptTitle: updateScriptTitle,
-                        onUpdateTitlePage: updateTitlePage,
-                    }}
-                    dangerZoneHandlers={{
-                        scriptTitle: scriptTitleDraft,
-                        onDeleteScript: handleDeleteScript,
-                    }}
-                />
-            </ScriptSettingsModal>
-            <AttributeManagerModal
-                isOpen={isAttributeManagerOpen}
-                tabs={attributeManagerTabs}
-                activeTabId={activeAttributeManagerPanelId}
-                onClose={closeAttributeManagerModal}
-                onSelectTab={selectAttributeManagerPanel}
-            />
+            <ScriptCharactersProvider value={charactersContextValue}>
+                {children}
+                <ScriptSettingsModal
+                    isOpen={isSettingsOpen}
+                    title="Settings"
+                    groups={groups}
+                    activePanelId={activePanelId}
+                    expandedItemIds={expandedItemIds}
+                    onClose={handleCloseSettings}
+                    onSelectPanel={handleSelectSettingsPanel}
+                    onToggleExpand={toggleExpanded}
+                >
+                    <ScriptEditorSettingsPanel
+                        panelId={activePanelId}
+                        resolvedScriptSettings={resolvedScriptSettings}
+                        blockLabelByType={BLOCK_LABEL_BY_TYPE}
+                        shortcutPrefix={shortcutPrefix}
+                        elementsHandlers={{
+                            onResetBlockSettings: resetBlockSettings,
+                            onUpdateBlockSettings: updateBlockSettings,
+                        }}
+                        visualPreferencesHandlers={{onUpdateCharacterColorSaturation: updateCharacterColorSaturation}}
+                        structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
+                        pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
+                        headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
+                        titlePageHandlers={{
+                            titlePageSettings: titlePageDraft,
+                            scriptTitle: scriptTitleDraft,
+                            onUpdateScriptTitle: updateScriptTitle,
+                            onUpdateTitlePage: updateTitlePage,
+                        }}
+                        dangerZoneHandlers={{
+                            scriptTitle: scriptTitleDraft,
+                            onDeleteScript: handleDeleteScript,
+                        }}
+                    />
+                </ScriptSettingsModal>
+                <AttributeManagerModal
+                    isOpen={isAttributeManagerOpen}
+                    tabs={attributeManagerTabs}
+                    activeTabId={activeAttributeManagerPanelId}
+                    onClose={closeAttributeManagerModal}
+                    onSelectTab={selectAttributeManagerPanel}
+                >
+                    {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_CHARACTERS ? (
+                        <AttributeManagerCharactersPanel
+                            characters={attributeManagerCharacters}
+                            isLoading={charactersContextValue.isCharactersLoading}
+                            characterColorSaturation={resolvedScriptSettings.visual.characterColorSaturation}
+                            deletingCharacterIds={charactersContextValue.deletingCharacterIds}
+                            colorUpdatingCharacterIds={charactersContextValue.colorUpdatingCharacterIds}
+                            onSetCharacterColor={charactersContextValue.handleSetCharacterColor}
+                            onSetCharacterOutline={charactersContextValue.handleSetCharacterOutline}
+                            onDeleteCharacter={charactersContextValue.handleDeleteCharacter}
+                            onCreateCharacter={charactersContextValue.handleConfirmCharacter}
+                        />
+                    ) : null}
+                </AttributeManagerModal>
+            </ScriptCharactersProvider>
         </ScriptSettingsModalContext.Provider>
     );
 };

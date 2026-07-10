@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import {
     type MouseEvent as ReactMouseEvent,
+    type ReactNode,
     useCallback,
     useEffect,
 } from 'react';
@@ -19,6 +20,7 @@ export interface AttributeManagerModalProps {
     activeTabId: string,
     onClose: () => void,
     onSelectTab: (tabId: string) => void,
+    children?: ReactNode,
 }
 
 export const AttributeManagerModal = ({
@@ -28,6 +30,7 @@ export const AttributeManagerModal = ({
     activeTabId,
     onClose,
     onSelectTab,
+    children,
 }: AttributeManagerModalProps) => {
     useEffect(() => {
         if (!isOpen) {
@@ -82,7 +85,7 @@ export const AttributeManagerModal = ({
                     </button>
                 </header>
                 <nav className={styles.tabs} aria-label="Attribute manager sections">
-                    <div className={styles.tabList}>
+                    <div className={styles.tabList} role="tablist">
                         {tabs.map(tab => {
                             const isActive = tab.id === activeTabId;
 
@@ -92,7 +95,9 @@ export const AttributeManagerModal = ({
                                     type="button"
                                     id={`attribute-manager-tab-${tab.id}`}
                                     className={clsx(styles.tab, isActive && styles.active)}
-                                    aria-current={isActive ? 'page' : undefined}
+                                    role="tab"
+                                    aria-selected={isActive}
+                                    aria-controls={`attribute-manager-panel-${tab.id}`}
                                     onClick={() => onSelectTab(tab.id)}
                                 >
                                     {tab.label}
@@ -104,8 +109,11 @@ export const AttributeManagerModal = ({
                 <section
                     id={`attribute-manager-panel-${activeTab.id}`}
                     className={styles.content}
+                    role="tabpanel"
                     aria-labelledby={`attribute-manager-tab-${activeTab.id}`}
-                />
+                >
+                    {children}
+                </section>
             </div>
         </div>
     );

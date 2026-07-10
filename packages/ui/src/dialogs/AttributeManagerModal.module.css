@@ -57,10 +57,9 @@
     }
 
     & .content {
-        overflow: auto;
+        overflow: hidden;
         flex: 1 1 auto;
         min-height: 0;
-        padding: var(--space-3xl);
     }
 
     @media (max-width: 900px) {

@@ -18,7 +18,6 @@ export const BlankPagesModule = ({
         <div className={styles.module}>
             <div>
                 <h3 className={styles.title}>Blank pages</h3>
-                <p className={styles.description}>Insert blank pages before the script body.</p>
             </div>
             <label className={styles.field}>
                 <span>Between title page and script</span>

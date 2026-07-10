@@ -52,7 +52,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-lg);
-    padding: var(--space-lg);
+    padding: var(--space-sm) var(--space-lg) var(--space-lg);
 
     & .title {
         font-size: var(--font-size-sm);
@@ -409,19 +409,6 @@
     border-top-color: color-mix(in oklch, var(--color-text) 86%, var(--character-color));
     border-radius: var(--radius-full);
     animation: characterConfirmSpin .8s linear infinite;
-}
-
-.confirmTooltip {
-    z-index: 19;
-    padding: var(--space-sm) var(--space-md);
-    font-size: var(--font-size-xxs);
-    font-weight: var(--font-weight-bold);
-    color: var(--color-surface);
-    letter-spacing: var(--letter-spacing-sm);
-    background: color-mix(in oklch, var(--color-text) 92%, rgb(0 0 0));
-    border: 1px solid color-mix(in oklch, var(--color-surface) 15%, var(--color-text));
-    border-radius: var(--radius-sm);
-    box-shadow: var(--shadow-popover);
 }
 
 .characterDetails {

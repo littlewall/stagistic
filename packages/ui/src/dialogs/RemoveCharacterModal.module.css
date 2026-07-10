@@ -6,6 +6,11 @@
     composes: subtitle from './dialogForm.module.css';
 }
 
+.subtitleSecondary {
+    composes: subtitle from './dialogForm.module.css';
+    margin-top: var(--space-md);
+}
+
 .actions {
     composes: actions from './dialogForm.module.css';
     margin-top: var(--space-lg);

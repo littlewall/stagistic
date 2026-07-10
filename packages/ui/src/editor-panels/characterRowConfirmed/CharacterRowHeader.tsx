@@ -1,11 +1,10 @@
-import {
-    Button, Tooltip, TooltipTrigger,
-} from 'react-aria-components';
+import {Button} from 'react-aria-components';
 
+import {Tooltip} from '../../atoms/Tooltip';
 import {ArrowRightIcon, ChevronDownIcon} from '../../icons/ui';
 import styles from '../EditorSidebar.module.css';
 import {isInlineInteractiveTarget} from '../utils';
-import {CharacterColorPopover} from './CharacterColorPopover';
+import {CharacterColorControl} from './CharacterColorControl';
 import type {CharacterRowHeaderProps} from './contracts';
 
 export const CharacterRowHeader = ({
@@ -80,71 +79,7 @@ export const CharacterRowHeader = ({
                     <ArrowRightIcon className={styles.expandIcon} aria-hidden="true" />
                 )}
             </button>
-            <TooltipTrigger
-                trigger="hover"
-                delay={0}
-                closeDelay={120}
-            >
-                <span
-                    ref={color.refs.triggerRef}
-                    role="button"
-                    tabIndex={color.state.isActionDisabled ? -1 : 0}
-                    aria-label={`Choose color for ${character.key}`}
-                    aria-disabled={color.state.isActionDisabled || undefined}
-                    className={styles.characterColorInteractive}
-                    onClick={event => {
-                        event.stopPropagation();
-                        color.actions.togglePicker();
-                    }}
-                    onKeyDown={event => {
-                        event.stopPropagation();
-
-                        if (color.state.isActionDisabled) {
-                            return;
-                        }
-
-                        if (event.key === 'Enter' || event.key === ' ') {
-                            event.preventDefault();
-                            color.actions.togglePicker();
-                        }
-
-                        if (event.key === 'Escape') {
-                            event.preventDefault();
-                            color.actions.setPickerOpen(false);
-                        }
-                    }}
-                >
-                    <span className={styles.characterColor} aria-hidden="true" />
-                </span>
-                <Tooltip
-                    className={styles.confirmTooltip}
-                    placement="right"
-                    offset={8}
-                >
-                    Choose color
-                </Tooltip>
-            </TooltipTrigger>
-            <CharacterColorPopover
-                refs={{
-                    triggerRef: color.refs.triggerRef,
-                }}
-                model={{
-                    characterKey: character.key,
-                    colorDraftHex: color.state.colorDraftHex,
-                    pickerColorValue: color.state.pickerColorValue,
-                    presetColorHexes: color.state.presetColorHexes,
-                    resolvedColorSaturation: color.state.resolvedColorSaturation,
-                }}
-                state={{
-                    isOpen: color.state.isPickerOpen,
-                }}
-                actions={{
-                    onOpenChange: color.actions.setPickerOpen,
-                    onHueChange: color.actions.setDraftHue,
-                    onApply: color.actions.applyColor,
-                    onReset: color.actions.resetColor,
-                }}
-            />
+            <CharacterColorControl characterKey={character.key} color={color} />
             {isExpanded ? (
                 <input
                     type="text"
@@ -181,20 +116,17 @@ export const CharacterRowHeader = ({
                 <span className={styles.characterName}>{character.key}</span>
             )}
             {isExpanded ? (
-                <TooltipTrigger
-                    trigger="hover"
-                    delay={0}
+                <Tooltip
+                    label={deleteControls.deleteTooltipLabel}
+                    placement="right"
                     closeDelay={120}
+                    isDisabled={deleteControls.isDeleteActionDisabled}
                 >
                     <Button
                         className={styles.characterHeaderDeleteButton}
                         aria-disabled={deleteControls.isDeleteActionDisabled}
                         aria-label={deleteControls.deleteTooltipLabel}
                         onPress={() => {
-                            if (deleteControls.isDeleteActionDisabled) {
-                                return;
-                            }
-
                             deleteControls.onRequestDelete();
                         }}
                     >
@@ -210,14 +142,7 @@ export const CharacterRowHeader = ({
                             </svg>
                         )}
                     </Button>
-                    <Tooltip
-                        className={styles.confirmTooltip}
-                        placement="right"
-                        offset={8}
-                    >
-                        {deleteControls.deleteTooltipLabel}
-                    </Tooltip>
-                </TooltipTrigger>
+                </Tooltip>
             ) : null}
         </div>
     );
