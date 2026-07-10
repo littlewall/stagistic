@@ -5,7 +5,6 @@ export type {DbClient} from './queries';
 export * from './queries';
 export * as dbQueries from './queries';
 export {
-    createLocalPgliteDataRepository,
     createLocalPgliteRepository,
     type LocalPgliteRepositoryDeps,
 } from './repo/createLocalPgliteRepository';
@@ -27,19 +26,8 @@ export type {
     DuplicateScriptInput,
     ListScriptsOptions,
     RenameScriptInput,
-    ScriptActsRepository,
-    ScriptBlockCharacterRefsRepository,
-    ScriptBlocksRepository,
-    ScriptCharacterGendersRepository,
-    ScriptCharactersRepository,
-    ScriptContentRepository,
-    ScriptCrudRepository,
     ScriptCuesRepository,
-    ScriptDataRepository,
-    ScriptLocationsRepository,
     ScriptRepository,
-    ScriptScenesRepository,
-    ScriptSettingsRepository,
     ScriptTitlePageRepository,
 } from './scriptRepository';
 export type {

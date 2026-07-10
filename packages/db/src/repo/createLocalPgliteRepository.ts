@@ -1,22 +1,12 @@
 import type {LocalDb} from '../pglite';
 import * as dbQueries from '../queries';
-import type {
-    ScriptDataRepository,
-    ScriptRepository,
-} from '../scriptRepository';
-import {createBlockCharacterRefsHandlers} from './blockCharacterRefs';
-import {createBlocksHandlers} from './blocks';
+import type {ScriptRepository} from '../scriptRepository';
 import {createCharacterHandlers} from './characters';
 import {createSettingsHandlers} from './config';
 import {createContentHandlers} from './content';
 import {createCueHandlers} from './cues';
 import {createOutboxRecorder} from './outbox';
 import {createScriptsHandlers} from './scripts';
-import {
-    createActsHandlers,
-    createLocationsHandlers,
-    createScenesHandlers,
-} from './structure';
 import {createTitlePageHandlers} from './titlePage';
 import type {GetDb} from './types';
 
@@ -25,163 +15,93 @@ export interface LocalPgliteRepositoryDeps {
     syncToFs: () => Promise<void>,
 }
 
-export const createLocalPgliteDataRepository = ({
+export const createLocalPgliteRepository = ({
     getLocalDb,
     syncToFs,
-}: LocalPgliteRepositoryDeps): ScriptDataRepository => {
+}: LocalPgliteRepositoryDeps): ScriptRepository => {
     const dbPromise = getLocalDb();
 
     const getDb: GetDb = async () => dbPromise;
     const recordOutbox = createOutboxRecorder(getDb);
 
     const scripts = createScriptsHandlers({getDb});
-
-    const {
-        listScriptCharacterGenders,
-        confirmScriptCharacter,
-        deleteScriptCharacter,
-        renameScriptCharacter,
-        setScriptCharacterColor,
-        setScriptCharacterGender,
-        setScriptCharacterOutline,
-        upsertScriptCharacterGender,
-    } = createCharacterHandlers({
+    const characterHandlers = createCharacterHandlers({
         getDb,
         recordOutbox,
         syncDb: syncToFs,
     });
-
-    const characters = {
-        list: async (scriptId: string) => {
-            const db = await getDb();
-
-            return dbQueries.listScriptCharacters(db, scriptId);
-        },
-        confirm: confirmScriptCharacter,
-        delete: deleteScriptCharacter,
-        rename: renameScriptCharacter,
-        setColor: setScriptCharacterColor,
-        setGender: setScriptCharacterGender,
-        setOutline: setScriptCharacterOutline,
-    };
-
-    const characterGenders = {
-        list: listScriptCharacterGenders,
-        upsert: upsertScriptCharacterGender,
-    };
-
-    const {
-        loadLatest,
-        saveLatest,
-    } = createContentHandlers({
+    const content = createContentHandlers({
         getDb,
         recordOutbox,
         syncDb: syncToFs,
     });
-
-    const content = {
-        loadLatest,
-        saveLatest,
-    };
-
-    const {
-        loadScriptSettings,
-        saveScriptSettings,
-        deleteScriptSettings,
-    } = createSettingsHandlers({
+    const settingsHandlers = createSettingsHandlers({
         getDb,
         recordOutbox,
         syncDb: syncToFs,
     });
-
-    const settings = {
-        load: loadScriptSettings,
-        save: saveScriptSettings,
-        delete: deleteScriptSettings,
-    };
-
-    const titlePage = createTitlePageHandlers({
+    const titlePageHandlers = createTitlePageHandlers({
         getDb,
         recordOutbox,
         syncDb: syncToFs,
     });
-
-    const blocks = createBlocksHandlers({getDb});
-    const scenes = createScenesHandlers({getDb});
-    const acts = createActsHandlers({getDb});
-    const locations = createLocationsHandlers({getDb});
-    const blockCharacterRefs = createBlockCharacterRefsHandlers({getDb});
     const cues = createCueHandlers({
         getDb,
         recordOutbox,
         syncDb: syncToFs,
     });
 
-    return {
-        scripts,
-        content,
-        settings,
-        titlePage,
-        characters,
-        characterGenders,
-        blocks,
-        scenes,
-        acts,
-        locations,
-        blockCharacterRefs,
-        cues,
-    } satisfies ScriptDataRepository;
-};
+    const listScriptCharacters = async (scriptId: string) => {
+        const db = await getDb();
 
-export const createLocalPgliteRepository = (deps: LocalPgliteRepositoryDeps): ScriptRepository => {
-    const repositoryData = createLocalPgliteDataRepository(deps);
+        return dbQueries.listScriptCharacters(db, scriptId);
+    };
 
     return {
-        ...repositoryData,
-        listScripts: options => repositoryData.scripts.list(options),
-        getScriptSummary: scriptId => repositoryData.scripts.getSummary(scriptId),
-        listScriptCharacters: scriptId => repositoryData.characters.list(scriptId),
-        listScriptCharacterGenders: scriptId => repositoryData.characterGenders.list(scriptId),
-        listScriptCues: scriptId => repositoryData.cues.list(scriptId),
-        createScriptCue: (scriptId, input) => repositoryData.cues.create(scriptId, input),
-        deleteScriptCue: (scriptId, cueId) => repositoryData.cues.delete(scriptId, cueId),
-        unassignScriptCue: (scriptId, cueId) => repositoryData.cues.unassign(scriptId, cueId),
-        createScript: (title, initialContent) => repositoryData.scripts.create(title, initialContent),
-        renameScript: (scriptId, input) => repositoryData.scripts.rename(scriptId, input),
-        renameScriptTitle: (scriptId, title) => repositoryData.scripts.renameTitle(scriptId, title),
-        duplicateScript: (sourceScriptId, input) => repositoryData.scripts.duplicate(sourceScriptId, input),
-        deleteScript: scriptId => repositoryData.scripts.delete(scriptId),
-        setActiveBlock: (scriptId, blockId) => repositoryData.scripts.setActiveBlock(scriptId, blockId),
-        confirmScriptCharacter: (scriptId, characterKey) => repositoryData.characters.confirm(scriptId, characterKey),
-        deleteScriptCharacter: (scriptId, characterId) => repositoryData.characters.delete(scriptId, characterId),
-        renameScriptCharacter: (scriptId, characterId, nextCharacterKey) => repositoryData.characters.rename(
+        listScripts: options => scripts.list(options),
+        getScriptSummary: scriptId => scripts.getSummary(scriptId),
+        listScriptCharacters: scriptId => listScriptCharacters(scriptId),
+        listScriptCharacterGenders: scriptId => characterHandlers.listScriptCharacterGenders(scriptId),
+        listScriptCues: scriptId => cues.list(scriptId),
+        createScriptCue: (scriptId, input) => cues.create(scriptId, input),
+        deleteScriptCue: (scriptId, cueId) => cues.delete(scriptId, cueId),
+        unassignScriptCue: (scriptId, cueId) => cues.unassign(scriptId, cueId),
+        createScript: (title, initialContent) => scripts.create(title, initialContent),
+        renameScript: (scriptId, input) => scripts.rename(scriptId, input),
+        renameScriptTitle: (scriptId, title) => scripts.renameTitle(scriptId, title),
+        duplicateScript: (sourceScriptId, input) => scripts.duplicate(sourceScriptId, input),
+        deleteScript: scriptId => scripts.delete(scriptId),
+        setActiveBlock: (scriptId, blockId) => scripts.setActiveBlock(scriptId, blockId),
+        confirmScriptCharacter: (scriptId, characterKey) => characterHandlers.confirmScriptCharacter(scriptId, characterKey),
+        deleteScriptCharacter: (scriptId, characterId) => characterHandlers.deleteScriptCharacter(scriptId, characterId),
+        renameScriptCharacter: (scriptId, characterId, nextCharacterKey) => characterHandlers.renameScriptCharacter(
             scriptId,
             characterId,
             nextCharacterKey,
         ),
-        setScriptCharacterColor: (scriptId, characterId, colorHex) => repositoryData.characters.setColor(
+        setScriptCharacterColor: (scriptId, characterId, colorHex) => characterHandlers.setScriptCharacterColor(
             scriptId,
             characterId,
             colorHex,
         ),
-        setScriptCharacterGender: (scriptId, characterId, genderKey) => repositoryData.characters.setGender(
+        setScriptCharacterGender: (scriptId, characterId, genderKey) => characterHandlers.setScriptCharacterGender(
             scriptId,
             characterId,
             genderKey,
         ),
-        setScriptCharacterOutline: (scriptId, characterId, outline) => repositoryData.characters.setOutline(
+        setScriptCharacterOutline: (scriptId, characterId, outline) => characterHandlers.setScriptCharacterOutline(
             scriptId,
             characterId,
             outline,
         ),
-        upsertScriptCharacterGender: (scriptId, label) => repositoryData.characterGenders.upsert(scriptId, label),
-        loadLatest: scriptId => repositoryData.content.loadLatest(scriptId),
-        saveLatest: (scriptId, value) => repositoryData.content.saveLatest(scriptId, value),
-        loadScriptSettings: scriptId => repositoryData.settings.load(scriptId),
-        saveScriptSettings: (scriptId, settings) => repositoryData.settings.save(scriptId, settings),
-        deleteScriptSettings: scriptId => repositoryData.settings.delete(scriptId),
-        loadTitlePage: scriptId => repositoryData.titlePage.load(scriptId),
-        saveTitlePage: (scriptId, settings) => repositoryData.titlePage.save(scriptId, settings),
-        deleteTitlePage: scriptId => repositoryData.titlePage.delete(scriptId),
+        upsertScriptCharacterGender: (scriptId, label) => characterHandlers.upsertScriptCharacterGender(scriptId, label),
+        loadLatest: scriptId => content.loadLatest(scriptId),
+        saveLatest: (scriptId, value) => content.saveLatest(scriptId, value),
+        loadScriptSettings: scriptId => settingsHandlers.loadScriptSettings(scriptId),
+        saveScriptSettings: (scriptId, settings) => settingsHandlers.saveScriptSettings(scriptId, settings),
+        deleteScriptSettings: scriptId => settingsHandlers.deleteScriptSettings(scriptId),
+        loadTitlePage: scriptId => titlePageHandlers.load(scriptId),
+        saveTitlePage: (scriptId, settings) => titlePageHandlers.save(scriptId, settings),
+        deleteTitlePage: scriptId => titlePageHandlers.delete(scriptId),
     };
 };
