@@ -146,14 +146,26 @@ export const ScriptStructureSidebar = () => {
 
     // ── Actions ───────────────────────────────────────────────────────────────
     const handleRenameAct = useCallback((blockId: string, nextName: string) => {
-        const trimmedName = nextName.trim();
-
-        setActNamePreviewById(prev => ({...prev, [blockId]: trimmedName}));
-        actCommands.renameAct(blockId, trimmedName);
+        actCommands.renameAct(blockId, nextName.trim());
     }, [actCommands]);
 
     const handleActNamePreview = useCallback((blockId: string, nextName: string) => {
-        setActNamePreviewById(prev => ({...prev, [blockId]: nextName.trim()}));
+        // Store the draft verbatim — trimming here would eat spaces mid-typing.
+        setActNamePreviewById(prev => ({...prev, [blockId]: nextName}));
+    }, []);
+
+    const handleActNamePreviewClear = useCallback((blockId: string) => {
+        setActNamePreviewById(prev => {
+            if (!(blockId in prev)) {
+                return prev;
+            }
+
+            const next = {...prev};
+
+            delete next[blockId];
+
+            return next;
+        });
     }, []);
 
     const handleDeleteAct = useCallback((blockId: string) => {
@@ -243,6 +255,7 @@ export const ScriptStructureSidebar = () => {
                                                 namePreview={actNamePreviewById[group.groupId]}
                                                 onRename={handleRenameAct}
                                                 onNamePreview={handleActNamePreview}
+                                                onNamePreviewClear={handleActNamePreviewClear}
                                                 onDelete={handleDeleteAct}
                                             />
                                         ) : (
@@ -254,6 +267,7 @@ export const ScriptStructureSidebar = () => {
                                                 namePreview={actNamePreviewById[group.groupId]}
                                                 onRename={handleRenameAct}
                                                 onNamePreview={handleActNamePreview}
+                                                onNamePreviewClear={handleActNamePreviewClear}
                                                 onDelete={handleDeleteAct}
                                             />
                                         )

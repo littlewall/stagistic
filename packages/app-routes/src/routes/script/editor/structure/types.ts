@@ -20,6 +20,7 @@ export interface StructureRowActContentProps {
     namePreview: string | undefined,
     onRename: (blockId: string, nextName: string) => void,
     onNamePreview: (blockId: string, nextName: string) => void,
+    onNamePreviewClear: (blockId: string) => void,
     onDelete: (blockId: string) => void,
 }
 

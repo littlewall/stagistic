@@ -1,7 +1,7 @@
 import {useSortable} from '@dnd-kit/react/sortable';
 import {ActBlockIcon, clsx} from '@stagistic/ui';
 import {
-    memo, useCallback,
+    memo, useCallback, useRef,
 } from 'react';
 
 import {ACT_DND_TYPE, SCENE_DND_TYPE} from './dnd';
@@ -15,20 +15,23 @@ const ActRowContent = memo(({
     namePreview,
     onRename,
     onNamePreview,
+    onNamePreviewClear,
     onDelete,
 }: StructureRowActContentProps) => {
+    // Set by Escape so the following blur discards the draft instead of committing.
+    const revertOnBlurRef = useRef(false);
+
     const handleNameChange = useCallback(
         (value: string) => {
-            const trimmedValue = value.trim();
-            const normalizedCurrentName = name.trim();
+            // Keep the draft raw (untrimmed) so trailing spaces survive and the
+            // user can keep typing; only the committed name is trimmed.
+            onNamePreview(blockId, value);
 
-            onNamePreview(blockId, trimmedValue);
-
-            if (trimmedValue === normalizedCurrentName) {
+            if (value.trim() === name.trim()) {
                 return;
             }
 
-            onRename(blockId, trimmedValue);
+            onRename(blockId, value.trim());
         },
         [
             blockId,
@@ -39,21 +42,28 @@ const ActRowContent = memo(({
     );
 
     const handleBlur = useCallback(() => {
-        const normalizedCurrentName = name.trim();
-        const draftValue = (namePreview ?? normalizedCurrentName).trim();
+        if (revertOnBlurRef.current) {
+            revertOnBlurRef.current = false;
+            onNamePreviewClear(blockId);
 
-        onNamePreview(blockId, draftValue);
-
-        if (draftValue === normalizedCurrentName) {
             return;
         }
 
-        onRename(blockId, draftValue);
+        const normalizedCurrentName = name.trim();
+        const draftValue = (namePreview ?? normalizedCurrentName).trim();
+
+        if (draftValue !== normalizedCurrentName) {
+            onRename(blockId, draftValue);
+        }
+
+        // Drop the draft so the canonical name takes over — this lets edits made
+        // in the editor propagate back into the sidebar.
+        onNamePreviewClear(blockId);
     }, [
         blockId,
         name,
         namePreview,
-        onNamePreview,
+        onNamePreviewClear,
         onRename,
     ]);
 
@@ -78,13 +88,12 @@ const ActRowContent = memo(({
                     onKeyDown={event => {
                         if (event.key === 'Enter') {
                             event.preventDefault();
-                            handleBlur();
                             event.currentTarget.blur();
                         }
 
                         if (event.key === 'Escape') {
                             event.preventDefault();
-                            onNamePreview(blockId, name);
+                            revertOnBlurRef.current = true;
                             event.currentTarget.blur();
                         }
                     }}
