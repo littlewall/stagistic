@@ -1,4 +1,5 @@
 import {
+    CHARACTER_TAG_MARK_NAME,
     normalizeCharacterKey,
     splitCharacterTokens,
 } from '@stagistic/script';
@@ -13,6 +14,10 @@ import {
     getConfirmedCharacterColor,
     normalizePersistentCharacterRefs,
 } from '../../characters/colorResolver';
+import {
+    isCaretAtCharacterTagEnd,
+    readCommittedTagCharacterId,
+} from '../../tiptap/extensions/characterTagInput/markRanges';
 import {getCharacterTagComposeFromState} from '../../tiptap/extensions/CharacterTagInputExtension';
 import {
     getActiveScriptBlockFromState,
@@ -208,6 +213,14 @@ const computeCharacterTagComposeSuggestions = ({
         return null;
     }
 
+    const markType = editor.state.schema.marks[CHARACTER_TAG_MARK_NAME];
+
+    // Only suggest when the caret is at the end of the pill — never while
+    // editing in its middle (e.g. a backspace inside a committed name).
+    if (!markType || !isCaretAtCharacterTagEnd(editor.state, compose.to, markType)) {
+        return null;
+    }
+
     const activeKey = normalizeCharacterKey(compose.query);
     const countsByConfirmedKey = new Map<string, number>();
 
@@ -223,10 +236,34 @@ const computeCharacterTagComposeSuggestions = ({
         return null;
     }
 
+    /*
+     * When the compose region is an already-confirmed pill, its own character
+     * is redundant in the list — it is exactly what is in the pill. Hide it so
+     * the overlay only offers alternatives (spec §5).
+     */
+    const committedCharacterId = readCommittedTagCharacterId(
+        editor.state,
+        compose.from,
+        compose.to,
+        markType,
+    );
+    const excludedKeys = new Set<string>();
+
+    if (committedCharacterId) {
+        const confirmedCharacter = normalizedPersistentCharacters.find(
+            character => character.id === committedCharacterId,
+        );
+
+        if (confirmedCharacter) {
+            excludedKeys.add(confirmedCharacter.key);
+        }
+    }
+
     const suggestionRows = buildSuggestionRows({
         counts: countsByConfirmedKey,
         activeKey,
         includeActiveKey: true,
+        excludedKeys,
         limit: Math.max(countsByConfirmedKey.size, MAX_SUGGESTIONS),
         previousOrderByKey,
     });

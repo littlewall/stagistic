@@ -92,6 +92,41 @@ const createEditor = (query: string) => {
     } as unknown as TiptapEditor;
 };
 
+const createConfirmedTagEditor = (name: string, characterId: string, caret = 1 + name.length) => {
+    const committedMark = schema.mark(CHARACTER_TAG_MARK_NAME, {
+        characterKey: name.toLowerCase(),
+        characterId,
+    });
+    const block = schema.node('stageDirection', null, [schema.text(name, [committedMark])]);
+    const doc = schema.node('doc', null, [block]);
+    const state = EditorState.create({
+        schema,
+        doc,
+        selection: TextSelection.create(doc, caret),
+        plugins: [
+            new Plugin({
+                key: characterTagComposeKey,
+                state: {
+                    init: () => ({from: 1}),
+                    apply: (_, value) => value,
+                },
+            }),
+        ],
+    });
+
+    return {
+        state,
+        view: {
+            coordsAtPos: (pos: number) => ({
+                left: pos * 10,
+                right: pos * 10,
+                top: 12,
+                bottom: 28,
+            }),
+        },
+    } as unknown as TiptapEditor;
+};
+
 const createCanvas = () => {
     return {
         clientWidth: 480,
@@ -225,6 +260,64 @@ describe('computeCharacterSuggestions', () => {
         }
 
         expect(result.suggestions.map(entry => entry.key)).toEqual(['JAN', 'JOSEF']);
+    });
+
+    it('hides the already-confirmed character of a committed pill from its own suggestions', () => {
+        globalThis.window = {
+            getComputedStyle: () => ({
+                getPropertyValue: () => '',
+            }),
+        } as unknown as Window & typeof globalThis;
+
+        const result = computeCharacterSuggestions({
+            editor: createConfirmedTagEditor('Jan', 'jan-id'),
+            canvas: createCanvas(),
+            normalizedPersistentCharacters: normalizePersistentCharacters([
+                {
+                    id: 'jan-id',
+                    key: 'Jan',
+                    colorHex: null,
+                },
+                {
+                    id: 'jana-id',
+                    key: 'Jana',
+                    colorHex: null,
+                },
+            ]),
+            liveCountsByKey: new Map(),
+            suppressedSelection: null,
+        });
+
+        if (!result || result.shouldKeepSuppressedSelection) {
+            throw new Error('Expected compose suggestions');
+        }
+
+        expect(result.suggestions.map(entry => entry.key)).toEqual(['JANA']);
+    });
+
+    it('does not suggest while editing in the middle of a committed pill', () => {
+        globalThis.window = {
+            getComputedStyle: () => ({
+                getPropertyValue: () => '',
+            }),
+        } as unknown as Window & typeof globalThis;
+
+        // Caret sits inside "TOMMY" (between the two M's), not at the pill end.
+        const result = computeCharacterSuggestions({
+            editor: createConfirmedTagEditor('TOMMY', 'tommy-id', 4),
+            canvas: createCanvas(),
+            normalizedPersistentCharacters: normalizePersistentCharacters([
+                {
+                    id: 'tommy-id',
+                    key: 'Tommy',
+                    colorHex: null,
+                },
+            ]),
+            liveCountsByKey: new Map(),
+            suppressedSelection: null,
+        });
+
+        expect(result).toBeNull();
     });
 
     it('keeps compose state and suggestions through the real @ -> J typing flow', () => {

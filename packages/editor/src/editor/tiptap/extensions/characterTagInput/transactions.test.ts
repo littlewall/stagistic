@@ -203,7 +203,7 @@ describe('buildOpenComposeTransaction', () => {
 });
 
 describe('buildEditCommittedTagTransaction', () => {
-    it('opens compose over the complete existing character tag', () => {
+    it('opens compose but keeps the caret where the tag was clicked', () => {
         const state = createMarkedState('JOHNY');
         const tr = buildEditCommittedTagTransaction(state, 3);
 
@@ -213,8 +213,34 @@ describe('buildEditCommittedTagTransaction', () => {
 
         const nextState = state.apply(tr);
 
-        expect(nextState.selection.from).toBe(6);
+        expect(nextState.selection.from).toBe(3);
         expect(tr.getMeta('character-tag-compose-open')).toBe(1);
+    });
+
+    it('clamps a click at the tag start to inside the tag so compose stays valid', () => {
+        const state = createMarkedState('JOHNY');
+        const tr = buildEditCommittedTagTransaction(state, 1);
+
+        if (!tr) {
+            throw new Error('Expected edit transaction');
+        }
+
+        const nextState = state.apply(tr);
+
+        expect(nextState.selection.from).toBe(2);
+    });
+
+    it('keeps the caret at the tag end when clicked at the end', () => {
+        const state = createMarkedState('JOHNY');
+        const tr = buildEditCommittedTagTransaction(state, 6);
+
+        if (!tr) {
+            throw new Error('Expected edit transaction');
+        }
+
+        const nextState = state.apply(tr);
+
+        expect(nextState.selection.from).toBe(6);
     });
 
     it('ignores clicks outside a character tag', () => {

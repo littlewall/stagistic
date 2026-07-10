@@ -56,6 +56,29 @@ export const isCharacterTagMarkedAt = (
     return readCharacterTagMarkAt(state, pos, markType) !== null;
 };
 
+/**
+ * True when `pos` sits at the trailing edge of a character-tag run: the text
+ * immediately before carries the mark and the text immediately after does not.
+ * Used to gate compose suggestions so they only appear at the end of a pill,
+ * never while editing in its middle.
+ */
+export const isCaretAtCharacterTagEnd = (
+    state: EditorState,
+    pos: number,
+    markType: MarkType,
+): boolean => {
+    if (pos < 0 || pos > state.doc.content.size) {
+        return false;
+    }
+
+    const resolved = state.doc.resolve(pos);
+    const hasMark = (marks: readonly Mark[] | undefined) => {
+        return marks?.some(mark => mark.type === markType) ?? false;
+    };
+
+    return hasMark(resolved.nodeBefore?.marks) && !hasMark(resolved.nodeAfter?.marks);
+};
+
 export const readCommittedTagCharacterId = (
     state: EditorState,
     from: number,
