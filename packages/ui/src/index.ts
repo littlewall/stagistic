@@ -20,6 +20,11 @@ export {
     AttributeManagerDetailTabs,
 } from './dialogs/AttributeManagerDetailTabs';
 export {
+    type AttributeManagerListItem,
+    AttributeManagerListPanel,
+    type AttributeManagerListPanelProps,
+} from './dialogs/AttributeManagerListPanel';
+export {
     AttributeManagerModal,
     type AttributeManagerModalProps,
     type AttributeManagerTab,

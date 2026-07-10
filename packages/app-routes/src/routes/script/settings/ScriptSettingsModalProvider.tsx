@@ -2,16 +2,21 @@ import {
     useScriptRepository,
     useScripts,
 } from '@stagistic/app-core';
-import type {
-    EditorSettings,
-    EditorSettingsOverride,
-    TitlePageSettings,
+import {
+    buildScriptStructureOutline,
+    type EditorSettings,
+    type EditorSettingsOverride,
+    type TitlePageSettings,
 } from '@stagistic/script';
 import {isApplePlatform} from '@stagistic/shared';
 import {
     type AttributeManagerCharacter,
     AttributeManagerCharactersPanel,
+    type AttributeManagerListItem,
+    AttributeManagerListPanel,
     AttributeManagerModal,
+    MicrophoneIcon,
+    MusicDoubleNoteIcon,
     ScriptSettingsModal,
 } from '@stagistic/ui';
 import {
@@ -25,8 +30,13 @@ import {
     useSearchParams,
 } from 'react-router-dom';
 
-import {ATTRIBUTE_MANAGER_PANEL_CHARACTERS} from '../attributes/attributeManagerMenu';
+import {
+    ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
+    ATTRIBUTE_MANAGER_PANEL_CUES,
+    ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
+} from '../attributes/attributeManagerMenu';
 import {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
+import {useScriptCuesState} from '../editor/cues';
 import {ScriptEditorSettingsPanel} from '../editor/settings';
 import {ScriptCharactersProvider} from '../ScriptCharactersContext';
 import {useScriptWorkspace} from '../ScriptWorkspaceContext';
@@ -163,6 +173,27 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
             outline: character.outline ?? null,
         })).sort((left, right) => left.name.localeCompare(right.name));
     }, [charactersContextValue.confirmedCharacterRecords]);
+    const {getEditorValue} = charactersContextValue;
+    const attributeManagerScenes = useMemo<AttributeManagerListItem[]>(() => {
+        if (!isAttributeManagerOpen) {
+            return [];
+        }
+
+        const outline = buildScriptStructureOutline(getEditorValue()?.content);
+
+        return outline.acts.flatMap(act => act.items.map(scene => ({
+            id: scene.blockId,
+            title: scene.title,
+        })));
+    }, [getEditorValue, isAttributeManagerOpen]);
+    const {cues} = useScriptCuesState(currentScriptId, scriptRepository);
+    const attributeManagerCues = useMemo<AttributeManagerListItem[]>(() => {
+        return cues.map(cue => ({
+            id: cue.id,
+            title: cue.title,
+            icon: cue.kind === 'instrumental' ? <MusicDoubleNoteIcon /> : <MicrophoneIcon />,
+        }));
+    }, [cues]);
 
     const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
 
@@ -228,6 +259,15 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     onClose={closeAttributeManagerModal}
                     onSelectTab={selectAttributeManagerPanel}
                 >
+                    {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_STRUCTURE ? (
+                        <AttributeManagerListPanel
+                            items={attributeManagerScenes}
+                            detailTypeLabel="Scene"
+                            emptyListLabel="No scenes yet"
+                            emptyDetailLabel="Select a scene"
+                            detailPlaceholder="Scene details are coming soon."
+                        />
+                    ) : null}
                     {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_CHARACTERS ? (
                         <AttributeManagerCharactersPanel
                             characters={attributeManagerCharacters}
@@ -239,6 +279,15 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                             onSetCharacterOutline={charactersContextValue.handleSetCharacterOutline}
                             onDeleteCharacter={charactersContextValue.handleDeleteCharacter}
                             onCreateCharacter={charactersContextValue.handleConfirmCharacter}
+                        />
+                    ) : null}
+                    {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_CUES ? (
+                        <AttributeManagerListPanel
+                            items={attributeManagerCues}
+                            detailTypeLabel="Cue"
+                            emptyListLabel="No cues yet"
+                            emptyDetailLabel="Select a cue"
+                            detailPlaceholder="Cue details are coming soon."
                         />
                     ) : null}
                 </AttributeManagerModal>
