@@ -11,6 +11,11 @@ export {
     SubtleText,
 } from './atoms/typography/Typography';
 export {
+    AttributeManagerModal,
+    type AttributeManagerModalProps,
+    type AttributeManagerTab,
+} from './dialogs/AttributeManagerModal';
+export {
     DELETE_SCRIPT_CONFIRM_PHRASE,
     DeleteScriptConfirm,
     type DeleteScriptConfirmProps,
@@ -63,17 +68,17 @@ export {
     CardFooter,
     CardHeader,
 } from './molecules/Card';
+export {formControlStyles} from './molecules/forms/formControlStyles';
+export {
+    FormSelect,
+    type FormSelectOption,
+} from './molecules/forms/FormSelect';
 export type {
     InputTableColumnDef,
     InputTableProps,
     InputTableRow,
     InputTableRowCount,
 } from './molecules/forms/InputTable';
-export {
-    FormSelect,
-    type FormSelectOption,
-} from './molecules/forms/FormSelect';
-export {formControlStyles} from './molecules/forms/formControlStyles';
 export {InputTable} from './molecules/forms/InputTable';
 export type {SelectOption} from './molecules/forms/Select';
 export {Select} from './molecules/forms/Select';

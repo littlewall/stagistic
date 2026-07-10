@@ -67,6 +67,7 @@ export const ScriptEditorRoute = () => {
         titlePageDraft,
         scriptTitleDraft,
         openSettingsModal,
+        openAttributeManagerModal,
     } = useScriptSettingsModal();
     const [addCueModalState, setAddCueModalState] = useState<AddCueModalState | null>(null);
     const [removeCueRequest, setRemoveCueRequest] = useState<EditorCueRemoveRequest | null>(null);
@@ -103,6 +104,7 @@ export const ScriptEditorRoute = () => {
         navigate,
         currentScript: displayedCurrentScript,
         openSettingsModal,
+        openAttributeManagerModal,
         getEditorValue,
         titlePage: titlePageDraft,
     });
@@ -129,10 +131,7 @@ export const ScriptEditorRoute = () => {
         }
 
         return createdCue;
-    }, [
-        addCueModalState,
-        createCue,
-    ]);
+    }, [addCueModalState, createCue]);
     const handleConfirmRemoveCue = useCallback(async () => {
         if (!removeCueRequest) {
             return;
@@ -143,10 +142,7 @@ export const ScriptEditorRoute = () => {
         }
 
         setRemoveCueRequest(null);
-    }, [
-        removeCueRequest,
-        unassignCue,
-    ]);
+    }, [removeCueRequest, unassignCue]);
 
     const sessionContextValue = useMemo(() => ({
         currentScriptId,
@@ -167,11 +163,13 @@ export const ScriptEditorRoute = () => {
             id: 'structure',
             label: 'Structure',
             renderContent: () => <ScriptStructureSidebar />,
-        }, {
+        },
+        {
             id: 'characters',
             label: 'Characters',
             renderContent: () => <ScriptCharactersSidebar />,
-        }, {
+        },
+        {
             id: 'cues',
             label: 'Cues',
             renderContent: () => (

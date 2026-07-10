@@ -13,13 +13,22 @@ import {useScriptSettingsModal} from './settings/ScriptSettingsModalProvider';
 export const ScriptExportRoute = () => {
     const {currentScript, recentScripts} = useScriptWorkspace();
     const {script, settings} = useExportScriptData();
-    const {openSettingsModal} = useScriptSettingsModal();
+    const {
+        openSettingsModal,
+        openAttributeManagerModal,
+    } = useScriptSettingsModal();
 
     const handleMenuAction = useCallback((actionId: string) => {
         if (actionId === 'settings') {
             openSettingsModal();
+
+            return;
         }
-    }, [openSettingsModal]);
+
+        if (actionId === 'attributes') {
+            openAttributeManagerModal();
+        }
+    }, [openAttributeManagerModal, openSettingsModal]);
 
     return (
         <AppLayout

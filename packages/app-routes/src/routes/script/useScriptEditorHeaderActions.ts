@@ -14,6 +14,7 @@ interface HeaderActionsParams {
     navigate: NavigateFunction,
     currentScript: CurrentScriptItem | null,
     openSettingsModal: () => void,
+    openAttributeManagerModal: () => void,
     getEditorValue: () => ScriptDocument | null,
     titlePage: TitlePageSettings,
 }
@@ -22,6 +23,7 @@ export const useScriptEditorHeaderActions = ({
     navigate,
     currentScript,
     openSettingsModal,
+    openAttributeManagerModal,
     getEditorValue,
     titlePage,
 }: HeaderActionsParams) => {
@@ -30,6 +32,12 @@ export const useScriptEditorHeaderActions = ({
     const handleMenuAction = useCallback((actionId: string) => {
         if (actionId === 'settings' && currentScript) {
             openSettingsModal();
+
+            return;
+        }
+
+        if (actionId === 'attributes' && currentScript) {
+            openAttributeManagerModal();
 
             return;
         }
@@ -53,6 +61,7 @@ export const useScriptEditorHeaderActions = ({
         getEditorValue,
         navigate,
         openNewScript,
+        openAttributeManagerModal,
         openSettingsModal,
         titlePage,
     ]);

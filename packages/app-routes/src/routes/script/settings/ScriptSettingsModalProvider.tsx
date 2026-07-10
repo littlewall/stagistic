@@ -8,7 +8,10 @@ import type {
     TitlePageSettings,
 } from '@stagistic/script';
 import {isApplePlatform} from '@stagistic/shared';
-import {ScriptSettingsModal} from '@stagistic/ui';
+import {
+    AttributeManagerModal,
+    ScriptSettingsModal,
+} from '@stagistic/ui';
 import {
     createContext,
     type ReactNode,
@@ -20,6 +23,7 @@ import {
     useSearchParams,
 } from 'react-router-dom';
 
+import {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
 import {ScriptEditorSettingsPanel} from '../editor/settings';
 import {useScriptWorkspace} from '../ScriptWorkspaceContext';
 import {useScriptEditorSettingsDraft} from '../useScriptEditorSettingsDraft';
@@ -35,7 +39,7 @@ const BLOCK_LABEL_BY_TYPE = new Map(
 /*
  * Values every script view (editor, export, future ones) reads from the shared
  * settings host: the resolved settings that drive the view, plus the drafts and
- * the single `openSettingsModal` entry point wired to the app header.
+ * the workspace modal entry points wired to the app header.
  */
 interface ScriptSettingsModalContextValue {
     resolvedScriptSettings: EditorSettings,
@@ -43,6 +47,7 @@ interface ScriptSettingsModalContextValue {
     titlePageDraft: TitlePageSettings,
     scriptTitleDraft: string,
     openSettingsModal: () => void,
+    openAttributeManagerModal: () => void,
 }
 
 const ScriptSettingsModalContext = createContext<ScriptSettingsModalContextValue | null>(null);
@@ -125,6 +130,14 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         setSearchParams,
         deleteScript,
     });
+    const {
+        isOpen: isAttributeManagerOpen,
+        activePanelId: activeAttributeManagerPanelId,
+        tabs: attributeManagerTabs,
+        open: openAttributeManagerModal,
+        close: closeAttributeManagerModal,
+        selectPanel: selectAttributeManagerPanel,
+    } = useAttributeManagerModalState();
 
     const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
 
@@ -134,8 +147,10 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         titlePageDraft,
         scriptTitleDraft,
         openSettingsModal,
+        openAttributeManagerModal,
     }), [
         effectiveScriptSettingsDraft,
+        openAttributeManagerModal,
         openSettingsModal,
         resolvedScriptSettings,
         scriptTitleDraft,
@@ -180,6 +195,13 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     }}
                 />
             </ScriptSettingsModal>
+            <AttributeManagerModal
+                isOpen={isAttributeManagerOpen}
+                tabs={attributeManagerTabs}
+                activeTabId={activeAttributeManagerPanelId}
+                onClose={closeAttributeManagerModal}
+                onSelectTab={selectAttributeManagerPanel}
+            />
         </ScriptSettingsModalContext.Provider>
     );
 };
