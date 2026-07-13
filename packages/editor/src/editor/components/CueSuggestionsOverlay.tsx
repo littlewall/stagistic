@@ -14,8 +14,8 @@ import {
     useState,
 } from 'react';
 
-import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
 import type {PersistentCueRef} from '../contracts';
+import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
 import {getCueComposeFromState} from '../tiptap/extensions';
 import {buildCommitCue} from '../tiptap/extensions/cueInput/transactions';
 import {getActiveScriptBlockFromState} from '../tiptap/scriptCore';
@@ -38,7 +38,7 @@ const normalizeCueTitle = (value: string) => {
     return value.trim().replace(/\s+/gu, ' ').toLocaleLowerCase();
 };
 
-const getCueSuggestions = (
+export const getCueSuggestions = (
     cues: readonly PersistentCueRef[],
     query: string,
 ) => {
@@ -67,7 +67,6 @@ const getCueSuggestions = (
 
             return a.cue.title.localeCompare(b.cue.title);
         })
-        .slice(0, 8)
         .map(entry => entry.cue);
 };
 
@@ -288,9 +287,9 @@ const CueSuggestionsOverlay = ({
             if (event.key === 'ArrowDown') {
                 event.preventDefault();
                 event.stopPropagation();
-                setActiveSuggestionIndex(previous => previous === null
-                    ? 0
-                    : (previous + 1) % suggestions.length);
+                setActiveSuggestionIndex(previous => {
+                    return previous === null ? 0 : (previous + 1) % suggestions.length;
+                });
 
                 return;
             }
@@ -298,9 +297,11 @@ const CueSuggestionsOverlay = ({
             if (event.key === 'ArrowUp') {
                 event.preventDefault();
                 event.stopPropagation();
-                setActiveSuggestionIndex(previous => previous === null
-                    ? suggestions.length - 1
-                    : (previous + suggestions.length - 1) % suggestions.length);
+                setActiveSuggestionIndex(previous => {
+                    return previous === null
+                        ? suggestions.length - 1
+                        : (previous + suggestions.length - 1) % suggestions.length;
+                });
 
                 return;
             }
@@ -345,10 +346,7 @@ const CueSuggestionsOverlay = ({
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, [
-        overlayState,
-        scheduleOverlayUpdate,
-    ]);
+    }, [overlayState, scheduleOverlayUpdate]);
 
     useExclusiveOverlay(overlayState !== null, closeOverlay);
 

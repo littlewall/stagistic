@@ -19,6 +19,10 @@ export const useAttributeManagerModalState = () => {
     const open = useCallback(() => {
         setIsOpen(true);
     }, []);
+    const openWithPanel = useCallback((panelId: AttributeManagerPanelId) => {
+        setActivePanelId(panelId);
+        setIsOpen(true);
+    }, []);
     const close = useCallback(() => {
         setIsOpen(false);
     }, []);
@@ -32,6 +36,7 @@ export const useAttributeManagerModalState = () => {
         activePanelId,
         tabs,
         open,
+        openWithPanel,
         close,
         selectPanel,
     };

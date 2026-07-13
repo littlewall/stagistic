@@ -17,7 +17,7 @@ describe('buildCueLabelMap', () => {
             }),
         ]);
 
-        expect(byCueId.get('c1')).toBe('3.B');
+        expect(byCueId.get('c1')).toBe('3.B)');
     });
 
     it('maps an explicit out (by its block) to the out label', () => {
@@ -27,7 +27,7 @@ describe('buildCueLabelMap', () => {
             }),
         ]);
 
-        expect(outByEndBlockId.get('b2')).toBe('3. out (Night)');
+        expect(outByEndBlockId.get('b2')).toBe('3) out (Night)');
     });
 
     it('does not map a hit as an out', () => {

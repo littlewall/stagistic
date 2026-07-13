@@ -15,6 +15,7 @@ export {PlusIcon} from './PlusIcon';
 export {ScriptIcon} from './ScriptIcon';
 export {SearchIcon} from './SearchIcon';
 export {SystemThemeIcon} from './SystemThemeIcon';
+export {TableIcon} from './TableIcon';
 export {TrashIcon} from './TrashIcon';
 export {UploadIcon} from './UploadIcon';
 export {UserCircleIcon} from './UserCircleIcon';

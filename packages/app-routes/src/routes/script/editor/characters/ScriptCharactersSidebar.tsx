@@ -15,9 +15,12 @@ import {
     useState,
 } from 'react';
 
+import {ATTRIBUTE_MANAGER_PANEL_CHARACTERS} from '../../attributes/attributeManagerMenu';
 import {useScriptCharacters} from '../../ScriptCharactersContext';
 import {useScriptSession} from '../../ScriptSessionContext';
 import {SidebarMiniHeader} from '../sidebar';
+import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
+import {SidebarActionsGroup} from '../sidebar/SidebarActionsGroup';
 import {AddCharacterModal} from './AddCharacterModal';
 import {CharactersSidebarContextActions} from './CharactersSidebarContextActions';
 import styles from './ScriptCharactersSidebar.module.css';
@@ -147,8 +150,11 @@ export const ScriptCharactersSidebar = () => {
     return (
         <div className={styles.content}>
             <SidebarMiniHeader
-                actions={(
-                    <CharactersSidebarContextActions onAddCharacter={openAddCharacterModal} />
+                actions={<CharactersSidebarContextActions onAddCharacter={openAddCharacterModal} />}
+                controls={(
+                    <SidebarActionsGroup>
+                        <AttributeManagerSidebarButton panelId={ATTRIBUTE_MANAGER_PANEL_CHARACTERS} />
+                    </SidebarActionsGroup>
                 )}
             />
             <EditorSidebar

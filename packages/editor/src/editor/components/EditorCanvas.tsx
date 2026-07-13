@@ -7,6 +7,7 @@ import type {
     PersistentCueRef,
 } from '../contracts';
 import CharacterSuggestionsOverlay from './CharacterSuggestionsOverlay';
+import CueDraftSuggestionsOverlay from './CueDraftSuggestionsOverlay';
 import CueSuggestionsOverlay from './CueSuggestionsOverlay';
 import EditorBlockActionsOverlay from './EditorBlockActionsOverlay';
 import styles from './EditorCanvas.module.css';
@@ -60,6 +61,12 @@ export const EditorCanvas = ({
                 characterColorSaturation={characterColorSaturation}
             />
             <CueSuggestionsOverlay
+                editor={editor}
+                canvasRef={canvasRef}
+                persistentCues={persistentCues}
+                onCueAssigned={onCueAssigned}
+            />
+            <CueDraftSuggestionsOverlay
                 editor={editor}
                 canvasRef={canvasRef}
                 persistentCues={persistentCues}

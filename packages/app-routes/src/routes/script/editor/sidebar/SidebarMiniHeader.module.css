@@ -16,6 +16,12 @@
     align-items: center;
 }
 
+.actionsGroup {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
 .controls {
     display: flex;
     flex: 1;

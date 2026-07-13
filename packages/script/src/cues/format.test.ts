@@ -10,16 +10,16 @@ describe('cue formatters', () => {
     it('formats a lone cue in a scene as the scene number', () => {
         expect(formatCueNumber({
             sceneNumber: 3, indexInScene: 0, sceneCueCount: 1,
-        })).toBe('3.');
+        })).toBe('3)');
     });
 
     it('appends a letter when a scene holds more than one cue', () => {
         expect(formatCueNumber({
             sceneNumber: 3, indexInScene: 0, sceneCueCount: 2,
-        })).toBe('3.A');
+        })).toBe('3.A)');
         expect(formatCueNumber({
             sceneNumber: 3, indexInScene: 1, sceneCueCount: 2,
-        })).toBe('3.B');
+        })).toBe('3.B)');
     });
 
     it('continues letters past Z', () => {
@@ -30,9 +30,9 @@ describe('cue formatters', () => {
     it('formats an out as "<number> out (title)", dropping empty parens', () => {
         expect(formatOutLabel({
             sceneNumber: 3, indexInScene: 0, sceneCueCount: 2, title: 'Night',
-        })).toBe('3.A out (Night)');
+        })).toBe('3.A) out (Night)');
         expect(formatOutLabel({
             sceneNumber: 3, indexInScene: 0, sceneCueCount: 1, title: '',
-        })).toBe('3. out');
+        })).toBe('3) out');
     });
 });

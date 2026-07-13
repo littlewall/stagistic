@@ -1,6 +1,6 @@
 import {
-    CUE_ID_ATTR,
     CUE_DRAFT_ATTR,
+    CUE_ID_ATTR,
     CUE_KIND_ATTR,
     CUE_MODE_ATTR,
     CUE_TITLE_ATTR,
@@ -19,11 +19,11 @@ import {
     useState,
 } from 'react';
 
-import styles from './CuePill.module.css';
 import type {
     EditorCueCreateRequest,
     EditorCueRemoveRequest,
 } from '../../contracts';
+import styles from './CuePill.module.css';
 import {
     CueDeleteIcon,
     CueMenuButton,
@@ -34,7 +34,6 @@ import {
 
 type CueTitleInputStyle = CSSProperties & {
     '--cue-title-width': string,
-    '--cue-title-gap': string,
 };
 
 const usePillActivation = () => {
@@ -74,21 +73,21 @@ const getTitleInputStyle = (title: string, active: boolean): CueTitleInputStyle 
     /*
      * Widths are in `ch` to stay on the export's character grid.
      * - With a title: hug the text exactly (matches export `" number title "`).
-     * - Empty + active (being edited): reserve 3ch + gap for the "cue"
+     * - Empty + active (being edited): reserve 3ch for the "cue"
      *   placeholder so there's an edit target. This is a transient editing state,
      *   not what the export measures.
-     * - Empty + at rest: collapse to zero width/gap so a title-less cue is just
+     * - Empty + at rest: collapse to zero width so a title-less cue is just
      *   the number, matching the export string `" number "`.
      */
     if (title.length > 0) {
-        return {'--cue-title-width': `${title.length}ch`, '--cue-title-gap': '1ch'};
+        return {'--cue-title-width': `${title.length}ch`};
     }
 
     if (active) {
-        return {'--cue-title-width': '3ch', '--cue-title-gap': '1ch'};
+        return {'--cue-title-width': '3ch'};
     }
 
-    return {'--cue-title-width': '0ch', '--cue-title-gap': '0'};
+    return {'--cue-title-width': '0ch'};
 };
 
 const handleFocusWithin = (setActive: (active: boolean) => void) => {
@@ -200,15 +199,15 @@ export const CueStartPill = ({
             return;
         }
 
-        const blockId = editor.state.doc.resolve(pos).parent.attrs.id;
+        const candidateBlockId: unknown = editor.state.doc.resolve(pos).parent.attrs.id;
 
-        if (typeof blockId !== 'string' || !blockId) {
+        if (typeof candidateBlockId !== 'string' || !candidateBlockId) {
             return;
         }
 
         onRequestCreateCue({
             title: nextTitle,
-            blockId,
+            blockId: candidateBlockId,
             complete: cue => {
                 updateAttributes({
                     [CUE_ID_ATTR]: cue.id,
@@ -233,6 +232,7 @@ export const CueStartPill = ({
             onFocus={handleFocusWithin(setActive)}
             onBlur={handleBlurWithin(rootRef, setActive)}
         >
+            {' '}
             <span
                 className={styles.tagBody}
                 onMouseDown={event => {
@@ -248,10 +248,13 @@ export const CueStartPill = ({
                     aria-hidden
                 >{cueNumber}
                 </span>
+                {draftTitle.length > 0 || active ? '\u00A0' : null}
                 <input
                     ref={inputRef}
                     className={styles.titleInput}
                     data-cue-title-input="start"
+                    data-cue-draft={isDraft ? 'true' : undefined}
+                    data-cue-id={String(node.attrs[CUE_ID_ATTR] ?? '')}
                     aria-label="Cue title"
                     value={draftTitle}
                     placeholder="cue"
@@ -295,6 +298,7 @@ export const CueStartPill = ({
                     </CueMenuButton>
                 </span>
             ) : null}
+            {' '}
         </NodeViewWrapper>
     );
 };

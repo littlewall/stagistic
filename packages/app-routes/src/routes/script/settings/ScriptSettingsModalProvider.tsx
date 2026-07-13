@@ -32,6 +32,7 @@ import {
     ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
     ATTRIBUTE_MANAGER_PANEL_CUES,
     ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
+    type AttributeManagerPanelId,
 } from '../attributes/attributeManagerMenu';
 import {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
 import {useScriptCuesState} from '../editor/cues';
@@ -43,8 +44,8 @@ import {useScriptEditorSettingsDraft} from '../useScriptEditorSettingsDraft';
 import {useScriptEditorSettingsModal} from '../useScriptEditorSettingsModal';
 import {useScriptTitleDraft} from '../useScriptTitleDraft';
 import {useTitlePageDraft} from '../useTitlePageDraft';
-import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
 import {buildAttributeManagerCueItems} from './attributeManagerCueItems';
+import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
 
 const BLOCK_LABEL_BY_TYPE = new Map(
     SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const),
@@ -63,6 +64,7 @@ interface ScriptSettingsModalContextValue {
     cueState: ReturnType<typeof useScriptCuesState>,
     openSettingsModal: () => void,
     openAttributeManagerModal: () => void,
+    openAttributeManagerModalWithPanel: (panelId: AttributeManagerPanelId) => void,
 }
 
 const ScriptSettingsModalContext = createContext<ScriptSettingsModalContextValue | null>(null);
@@ -150,9 +152,11 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         activePanelId: activeAttributeManagerPanelId,
         tabs: attributeManagerTabs,
         open: openAttributeManagerModal,
+        openWithPanel: openAttributeManagerModalWithPanel,
         close: closeAttributeManagerModal,
         selectPanel: selectAttributeManagerPanel,
     } = useAttributeManagerModalState();
+
     const {
         contextValue: charactersContextValue,
     } = useScriptCharactersContextValue({
@@ -200,10 +204,12 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         cueState,
         openSettingsModal,
         openAttributeManagerModal,
+        openAttributeManagerModalWithPanel,
     }), [
         cueState,
         effectiveScriptSettingsDraft,
         openAttributeManagerModal,
+        openAttributeManagerModalWithPanel,
         openSettingsModal,
         resolvedScriptSettings,
         scriptTitleDraft,

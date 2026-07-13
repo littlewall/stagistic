@@ -18,10 +18,10 @@ export const cueLetter = (index: number): string => {
 
 export const formatCueNumber = (cue: CueNumberInput): string => {
     if (cue.sceneCueCount <= 1) {
-        return `${cue.sceneNumber}.`;
+        return `${cue.sceneNumber})`;
     }
 
-    return `${cue.sceneNumber}.${cueLetter(cue.indexInScene)}`;
+    return `${cue.sceneNumber}.${cueLetter(cue.indexInScene)})`;
 };
 
 export const formatOutLabel = (cue: OutLabelInput): string => {

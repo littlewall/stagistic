@@ -19,8 +19,11 @@ import {
     useState,
 } from 'react';
 
+import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attributes/attributeManagerMenu';
 import {useScriptSession} from '../../ScriptSessionContext';
 import {SidebarMiniHeader} from '../sidebar';
+import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
+import {SidebarActionsGroup} from '../sidebar/SidebarActionsGroup';
 import styles from './ScriptStructureSidebar.module.css';
 import {
     buildAccessibilityPlugin,
@@ -226,7 +229,14 @@ export const ScriptStructureSidebar = () => {
 
     return (
         <div className={styles.content}>
-            <SidebarMiniHeader actions={<StructureSidebarContextActions />} />
+            <SidebarMiniHeader
+                actions={<StructureSidebarContextActions />}
+                controls={(
+                    <SidebarActionsGroup>
+                        <AttributeManagerSidebarButton panelId={ATTRIBUTE_MANAGER_PANEL_STRUCTURE} />
+                    </SidebarActionsGroup>
+                )}
+            />
             <DragDropProvider
                 onDragEnd={handleDragEnd}
                 plugins={plugins as never}

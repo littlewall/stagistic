@@ -16,6 +16,7 @@ import {
     describe,
     expect,
     it,
+    vi,
 } from 'vite-plus/test';
 import {
     page,
@@ -23,6 +24,7 @@ import {
 } from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../../context';
+import type {EditorProps} from '../../contracts';
 import ScriptEditor from '../../Editor';
 import {findScriptBlockByIdFromState} from '../../tiptap/scriptCore';
 
@@ -55,7 +57,15 @@ const EditorProbe = () => {
 
 const mountedRoots: Root[] = [];
 
-const renderEditor = (initialValue: ScriptDocument = createDocument()) => {
+type RenderEditorOptions = {
+    document?: Partial<Omit<EditorProps['document'], 'initialValue'>>,
+    callbacks?: EditorProps['callbacks'],
+};
+
+const renderEditor = (
+    initialValue: ScriptDocument = createDocument(),
+    options: RenderEditorOptions = {},
+) => {
     const host = document.createElement('div');
 
     host.style.width = '1024px';
@@ -65,7 +75,14 @@ const renderEditor = (initialValue: ScriptDocument = createDocument()) => {
     const root = createRoot(host);
 
     root.render(
-        <ScriptEditor document={{initialValue}} layout={{autoFocus: true}}>
+        <ScriptEditor
+            document={{
+                initialValue,
+                ...options.document,
+            }}
+            callbacks={options.callbacks}
+            layout={{autoFocus: true}}
+        >
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
             </ScriptEditor.LeftSidebar>
@@ -131,7 +148,7 @@ const findMenuItem = (label: string) => {
         .find(item => {
             const accessibleLabel = item.getAttribute('aria-label') ?? item.textContent?.trim();
 
-            return accessibleLabel === label || accessibleLabel?.startsWith(`${label} (`);
+            return accessibleLabel === label || accessibleLabel?.startsWith(`${label} `);
         }) ?? null;
 };
 
@@ -169,8 +186,81 @@ describe('block action menu', () => {
         );
 
         expect(document.activeElement).toBe(input);
-        expect(document.querySelector('[data-cue-number]')?.textContent).toBe('0.');
+        expect(document.querySelector('[data-cue-number]')?.textContent).toBe('0)');
         expect(document.querySelector('[data-block-action-trigger="true"]')).toBeNull();
+    });
+
+    it('suggests and assigns an unassigned cue from a new cue pill', async () => {
+        const onCueAssigned = vi.fn();
+
+        renderEditor(createDocument(), {
+            document: {
+                persistentCues: [
+                    {
+                        id: 'cue-overture',
+                        title: 'Overture',
+                        kind: 'instrumental',
+                        assignmentLabel: null,
+                    },
+                    {
+                        id: 'cue-finale',
+                        title: 'Finale',
+                        kind: 'song',
+                        assignmentLabel: null,
+                    },
+                    ...Array.from({length: 9}, (_, index) => ({
+                        id: `cue-${index + 1}`,
+                        title: `Cue ${index + 1}`,
+                        kind: 'song' as const,
+                        assignmentLabel: null,
+                    })),
+                ],
+            },
+            callbacks: {onCueAssigned},
+        });
+
+        const editor = await getEditor();
+
+        await openActionMenu('sd-1');
+        await openCuesSubmenu();
+
+        const addCue = await poll(() => findMenuItem('Add cue'), 'Add cue item');
+
+        await page.elementLocator(addCue).click();
+
+        const input = await poll(
+            () => document.querySelector<HTMLInputElement>('[data-cue-draft="true"]'),
+            'draft cue title input',
+        );
+        const listbox = await poll(
+            () => document.querySelector<HTMLElement>('[role="listbox"][aria-label="Cue suggestions"]'),
+            'cue suggestions',
+        );
+
+        expect(listbox.textContent).toContain('Overture');
+        expect(listbox.textContent).toContain('Finale');
+        expect(listbox.textContent).toContain('Cue 9');
+
+        await userEvent.type(input, 'Over');
+        await poll(
+            () => listbox.textContent?.includes('Overture') && !listbox.textContent.includes('Finale')
+                ? true
+                : null,
+            'filtered cue suggestions',
+        );
+        await userEvent.keyboard('{ArrowDown}{Enter}');
+
+        const cueStart = editor.getJSON().content?.[0]?.content
+            ?.find(node => node.type === 'cueStart') as ScriptNode | undefined;
+
+        expect(cueStart?.attrs).toMatchObject({
+            cueId: 'cue-overture',
+            title: 'Overture',
+            kind: 'instrumental',
+            draft: false,
+        });
+        expect(onCueAssigned).toHaveBeenCalledWith('cue-overture');
+        expect(document.querySelector('[data-cue-draft="true"]')).toBeNull();
     });
 
     it('uses range, start, and emphasized endpoint cue icons', async () => {
@@ -184,7 +274,7 @@ describe('block action menu', () => {
 
         const cues = await openCuesSubmenu();
         const addCue = await poll(() => findMenuItem('Add cue'), 'Add cue item');
-        const addOut = await poll(() => findMenuItem('Add out (0. Night)'), 'Add out item');
+        const addOut = await poll(() => findMenuItem('Add out 0) Night'), 'Add out item');
 
         expect(cues.querySelector('[data-cue-icon="range"]')).toBeTruthy();
         expect(addCue.querySelector('[data-cue-point="start"][data-cue-point-style="hollow"]')).toBeTruthy();
@@ -202,7 +292,7 @@ describe('block action menu', () => {
         await openCuesSubmenu();
 
         const addOut = await poll(
-            () => findMenuItem('Add out (0. Night)'),
+            () => findMenuItem('Add out 0) Night'),
             'Add out item',
         );
 
@@ -222,7 +312,7 @@ describe('block action menu', () => {
         await openCuesSubmenu();
 
         expect(await poll(
-            () => findMenuItem('Add out (0.)'),
+            () => findMenuItem('Add out 0)'),
             'untitled Add out item',
         )).toBeTruthy();
     });

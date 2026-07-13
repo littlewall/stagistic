@@ -186,7 +186,19 @@ describe('cue # compose', () => {
 
         const number = pill.querySelector<HTMLElement>('[data-cue-number]');
 
-        expect(number?.textContent).toBe('0.');
+        expect(number?.textContent).toBe('0)');
+        expect(number?.nextSibling?.textContent).toBe('\u00A0');
+        expect(getComputedStyle(input as HTMLElement).maxWidth).toBe('none');
+        expect(getComputedStyle(input as HTMLElement).textOverflow).not.toBe('ellipsis');
+
+        const tagBody = number?.parentElement;
+        const pillStyle = getComputedStyle(pill);
+
+        expect(getComputedStyle(tagBody as HTMLElement).display).toBe('inline-block');
+        expect(getComputedStyle(tagBody as HTMLElement).whiteSpace).toBe('nowrap');
+        expect(pillStyle.marginInlineStart).toBe('0px');
+        expect(pill.firstChild?.textContent).toBe(' ');
+        expect(pill.lastChild?.textContent).toBe(' ');
         expect(getComputedStyle(number as HTMLElement).fontWeight).toBe('700');
         expect(getComputedStyle(number as HTMLElement).color).toBe(getComputedStyle(input as HTMLElement).color);
 
@@ -378,7 +390,7 @@ describe('cue # compose', () => {
         const composePill = await poll(() => document.querySelector('[data-cue-compose]'), 'compose pill');
 
         expect(composePill).toBeTruthy();
-        expect(composePill?.getAttribute('data-cue-number')).toBe('0.');
+        expect(composePill?.getAttribute('data-cue-number')).toBe('0)');
     });
 
     it('Backspace on an empty title cancels the compose and # re-triggers', async () => {
@@ -450,12 +462,12 @@ describe('cue # compose', () => {
 
         await poll(() => (outPill.textContent ?? '').includes('out (Night)') ? true : null, 'out label');
 
-        expect(outPill.textContent).toContain('0. out (Night)');
+        expect(outPill.textContent).toContain('0) out (Night)');
 
         const primary = outPill.querySelector<HTMLElement>('[data-cue-out-primary]');
         const title = outPill.querySelector<HTMLElement>('[data-cue-out-title]');
 
-        expect(primary?.textContent).toBe('0. out');
+        expect(primary?.textContent).toBe('0) out');
         expect(getComputedStyle(primary as HTMLElement).fontWeight).toBe('700');
         expect(getComputedStyle(title as HTMLElement).fontWeight).toBe('400');
         expect(getComputedStyle(title as HTMLElement).color).not.toBe(getComputedStyle(primary as HTMLElement).color);
@@ -473,7 +485,7 @@ describe('cue # compose', () => {
         const number = document.querySelector<HTMLElement>('[data-cue-number]');
         const outPrimary = document.querySelector<HTMLElement>('[data-cue-out-primary]');
 
-        expect(number?.textContent).toBe('0.');
-        expect(outPrimary?.textContent).toBe('0. out');
+        expect(number?.textContent).toBe('0)');
+        expect(outPrimary?.textContent).toBe('0) out');
     });
 });

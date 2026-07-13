@@ -7,8 +7,9 @@
  * `" number title "` and wraps by character count (0.6em/1ch per cell, see
  * transcribeExportPlan). So the pill must occupy the same cells and add ZERO
  * layout width of its own — hence `outline` (not `border`) for the box and
- * `1ch` (one export space) for the leading/trailing/gap spacing instead of
- * padding. Distinct from character tags: boxed, no fill, no border-radius.
+ * Collapsible text spaces in the node view provide the export's leading and
+ * trailing spaces. Unlike margins, the browser discards them at a wrapped
+ * line start. Distinct from character tags: boxed, no fill, no border-radius.
  */
 .pill {
     --cue-active-border-color: rgba(125 145 255 / 80%);
@@ -16,9 +17,7 @@
 
     user-select: none;
     position: relative;
-    margin: 0 1ch;
     color: var(--color-text);
-    white-space: nowrap;
 }
 
 .menu {
@@ -43,6 +42,8 @@
 .tagBody {
     /* outline (not border) keeps the box out of layout so it adds no width. */
     position: relative;
+    display: inline-block;
+    white-space: nowrap;
     outline: 1px solid var(--cue-border-color);
     outline-offset: .1em;
 }
@@ -73,14 +74,11 @@
 
 .titleInput {
     /*
-     * Leading gap = the export's space between number and title (1ch). Collapses
-     * to 0 for an empty title at rest so a title-less cue is just the number,
-     * matching the export string `" number "`. See getTitleInputStyle.
+     * The number/title gap is a non-breaking space in the node view so the
+     * number can never be stranded at the end of a line.
      */
     width: var(--cue-title-width);
     min-width: 0;
-    max-width: 18ch;
-    margin-inline-start: var(--cue-title-gap, 1ch);
     padding: 0;
     font: inherit;
     font-weight: 700;
@@ -88,7 +86,6 @@
     line-height: inherit;
     color: inherit;
     text-align: start;
-    text-overflow: ellipsis;
     background: transparent;
     border: 0;
     outline: 0;

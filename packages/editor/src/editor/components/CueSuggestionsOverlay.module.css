@@ -8,6 +8,8 @@
     pointer-events: auto;
     display: grid;
     min-width: calc(220px * var(--size-scale));
+    max-height: min(calc(320px * var(--size-scale)), 50vh);
+    overflow-y: auto;
     padding: var(--space-sm);
     background: var(--color-surface);
     border: 1px solid var(--color-border);

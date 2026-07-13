@@ -8,8 +8,8 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
 import {
     blockHasCueAtom,
-    resolveNewCueNumber,
     resolveCueTargetBlock,
+    resolveNewCueNumber,
 } from '../../tiptap/extensions/cue/cueCommands';
 import type {
     BlockActionCommand,
@@ -140,7 +140,7 @@ export const resolveStageDirectionCueActions = ({
             kind: 'command',
             id: 'add-cue',
             label: 'Add cue',
-            detail: `(${availability.newCueNumber})`,
+            detail: availability.newCueNumber,
             icon: 'cueStart',
             run: () => runAddCue(editor, blockId),
         },
@@ -151,7 +151,7 @@ export const resolveStageDirectionCueActions = ({
             kind: 'command',
             id: 'add-out',
             label: 'Add out',
-            detail: `(${formatOpenCueDisplayName(availability.openCue)})`,
+            detail: formatOpenCueDisplayName(availability.openCue),
             icon: 'cueOut',
             run: () => runAddOut(editor, blockId),
         });

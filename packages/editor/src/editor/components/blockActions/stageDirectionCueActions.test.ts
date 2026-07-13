@@ -94,7 +94,7 @@ describe('resolveNewCueNumber', () => {
             cues: [],
         };
 
-        expect(resolveNewCueNumber(snapshot, 'target')).toBe('1.');
+        expect(resolveNewCueNumber(snapshot, 'target')).toBe('1)');
     });
 
     it('previews the cue letter at its insertion position', () => {
@@ -108,7 +108,7 @@ describe('resolveNewCueNumber', () => {
             cues: [cue('first-cue', 0, 'first'), cue('last-cue', 1, 'last')],
         };
 
-        expect(resolveNewCueNumber(snapshot, 'target')).toBe('1.B');
+        expect(resolveNewCueNumber(snapshot, 'target')).toBe('1.B)');
     });
 
     it('returns null for an unknown block', () => {
@@ -118,20 +118,20 @@ describe('resolveNewCueNumber', () => {
 
 describe('formatOpenCueDisplayName', () => {
     it('includes the cue number and title', () => {
-        expect(formatOpenCueDisplayName(cue('cue', 0, 'start'))).toBe('1.A cue');
+        expect(formatOpenCueDisplayName(cue('cue', 0, 'start'))).toBe('1.A) cue');
     });
 
     it('truncates titles after ten characters', () => {
         expect(formatOpenCueDisplayName({
             ...cue('cue', 0, 'start'),
             title: 'Long title name',
-        })).toBe('1.A Long title…');
+        })).toBe('1.A) Long title…');
     });
 
     it('uses only the cue number when the title is empty', () => {
         expect(formatOpenCueDisplayName({
             ...cue('cue', 0, 'start'),
             title: ' ',
-        })).toBe('1.A');
+        })).toBe('1.A)');
     });
 });
