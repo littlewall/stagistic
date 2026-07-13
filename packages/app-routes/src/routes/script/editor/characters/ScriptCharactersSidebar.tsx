@@ -4,6 +4,7 @@ import {
     renameCharacterText,
     replaceCharacterRefId,
     unlinkCharacterRef,
+    useEditorElementSelection,
     useEditorInstance,
     useEditorLiveCharacters,
 } from '@stagistic/editor';
@@ -30,6 +31,7 @@ export const ScriptCharactersSidebar = () => {
     const {resolvedScriptSettings} = useScriptSession();
     const characters = useScriptCharacters();
     const editor = useEditorInstance();
+    const elementSelection = useEditorElementSelection();
     const liveCharacters = useEditorLiveCharacters();
     const [isAddCharacterOpen, setIsAddCharacterOpen] = useState(false);
     const openAddCharacterModal = useCallback(() => setIsAddCharacterOpen(true), []);
@@ -174,6 +176,12 @@ export const ScriptCharactersSidebar = () => {
                     onSetCharacterOutline: characters.handleSetCharacterOutline,
                 }}
                 options={{
+                    activeCharacterId: elementSelection?.type === 'character'
+                        ? elementSelection.characterId
+                        : null,
+                    activeCharacterKey: elementSelection?.type === 'character'
+                        ? elementSelection.characterKey
+                        : null,
                     characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
                     className: styles.sidebar,
                 }}

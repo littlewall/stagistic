@@ -34,7 +34,7 @@ interface CueDraftSuggestionsOverlayProps {
 
 interface DraftTarget {
     draftCueId: string,
-    input: HTMLInputElement,
+    editable: HTMLElement,
     query: string,
 }
 interface OverlayState {
@@ -44,31 +44,31 @@ interface OverlayState {
 }
 
 const getDraftTarget = (): DraftTarget | null => {
-    const input = document.activeElement;
+    const editable = document.activeElement;
 
-    if (!(input instanceof HTMLInputElement) || input.dataset.cueDraft !== 'true') {
+    if (!(editable instanceof HTMLElement) || editable.dataset.cueDraft !== 'true') {
         return null;
     }
 
-    const draftCueId = input.dataset.cueId;
+    const draftCueId = editable.dataset.cueId;
 
     return draftCueId ? {
-        draftCueId, input, query: input.value,
+        draftCueId, editable, query: editable.textContent ?? '',
     } : null;
 };
 
 const getOverlayStyle = (
     canvas: HTMLElement,
-    input: HTMLInputElement,
+    editable: HTMLElement,
 ): CSSProperties => {
     const canvasRect = canvas.getBoundingClientRect();
-    const inputRect = input.getBoundingClientRect();
-    const left = inputRect.left - canvasRect.left + canvas.scrollLeft;
+    const editableRect = editable.getBoundingClientRect();
+    const left = editableRect.left - canvasRect.left + canvas.scrollLeft;
     const maxLeft = Math.max(8, canvas.clientWidth - 236);
 
     return {
         left: Math.min(Math.max(8, left), maxLeft),
-        top: inputRect.bottom - canvasRect.top + canvas.scrollTop + 8,
+        top: editableRect.bottom - canvasRect.top + canvas.scrollTop + 8,
     };
 };
 
@@ -142,7 +142,7 @@ const CueDraftSuggestionsOverlay = ({
         }
 
         setOverlayState({
-            style: getOverlayStyle(canvas, target.input),
+            style: getOverlayStyle(canvas, target.editable),
             target,
             suggestions: nextSuggestions,
         });

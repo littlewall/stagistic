@@ -45,6 +45,8 @@ interface EditorSidebarActions {
 }
 
 interface EditorSidebarOptions {
+    activeCharacterId?: string | null,
+    activeCharacterKey?: string | null,
     characterColorSaturation?: number,
     className?: string,
 }
@@ -76,6 +78,8 @@ export const EditorSidebar = ({
         onSetCharacterOutline,
     } = actions ?? {};
     const {
+        activeCharacterId,
+        activeCharacterKey,
         characterColorSaturation,
         className,
     } = options ?? {};
@@ -147,6 +151,9 @@ export const EditorSidebar = ({
                             const isRenamePending = character.isRenamePending ?? false;
                             const renameDraftKey = getRenameDraftKey(character.id, character.key);
                             const renameDraft = renameDraftByKey[renameDraftKey] ?? character.key;
+                            const isActive = activeCharacterId
+                                ? character.id === activeCharacterId
+                                : character.key === activeCharacterKey;
 
                             return (
                                 <li
@@ -154,7 +161,9 @@ export const EditorSidebar = ({
                                     className={clsx(
                                         styles.characterItem,
                                         !character.isConfirmed && styles.unconfirmed,
+                                        isActive && styles.active,
                                     )}
+                                    aria-current={isActive ? 'true' : undefined}
                                     style={{'--character-color': character.color} as CSSProperties}
                                 >
                                     {character.isConfirmed ? (

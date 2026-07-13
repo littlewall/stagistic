@@ -21,7 +21,7 @@ const focusCueTitle = (editor: TiptapEditor, blockId: string) => {
     window.requestAnimationFrame(() => {
         const block = Array.from(editor.view.dom.querySelectorAll<HTMLElement>('[data-id]'))
             .find(candidate => candidate.dataset.id === blockId);
-        const input = block?.querySelector<HTMLInputElement>('[data-cue-title-input="start"]');
+        const input = block?.querySelector<HTMLElement>('[data-cue-title-input="start"]');
 
         input?.focus();
     });

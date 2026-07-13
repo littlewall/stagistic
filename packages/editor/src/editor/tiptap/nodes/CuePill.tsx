@@ -11,7 +11,6 @@ import {
 } from '@tiptap/react';
 import clsx from 'clsx';
 import {
-    type CSSProperties,
     type FocusEvent,
     type RefObject,
     useEffect,
@@ -31,10 +30,6 @@ import {
     CueModeIcon,
     getModeButtonLabel,
 } from './CuePillControls';
-
-type CueTitleInputStyle = CSSProperties & {
-    '--cue-title-width': string,
-};
 
 const usePillActivation = () => {
     const [active, setActive] = useState(false);
@@ -67,27 +62,6 @@ const usePillActivation = () => {
 
 const normalizeTitle = (value: unknown) => {
     return typeof value === 'string' ? value : '';
-};
-
-const getTitleInputStyle = (title: string, active: boolean): CueTitleInputStyle => {
-    /*
-     * Widths are in `ch` to stay on the export's character grid.
-     * - With a title: hug the text exactly (matches export `" number title "`).
-     * - Empty + active (being edited): reserve 3ch for the "cue"
-     *   placeholder so there's an edit target. This is a transient editing state,
-     *   not what the export measures.
-     * - Empty + at rest: collapse to zero width so a title-less cue is just
-     *   the number, matching the export string `" number "`.
-     */
-    if (title.length > 0) {
-        return {'--cue-title-width': `${title.length}ch`};
-    }
-
-    if (active) {
-        return {'--cue-title-width': '3ch'};
-    }
-
-    return {'--cue-title-width': '0ch'};
 };
 
 const handleFocusWithin = (setActive: (active: boolean) => void) => {
@@ -141,7 +115,7 @@ export const CueStartPill = ({
     const {
         active, setActive, rootRef,
     } = usePillActivation();
-    const inputRef = useRef<HTMLInputElement>(null);
+    const titleRef = useRef<HTMLSpanElement>(null);
     const mode: CueMode = node.attrs[CUE_MODE_ATTR] === 'hit' ? 'hit' : 'open';
     const isDraft = node.attrs[CUE_DRAFT_ATTR] === true;
     const title = normalizeTitle(node.attrs[CUE_TITLE_ATTR]);
@@ -150,10 +124,14 @@ export const CueStartPill = ({
 
     useEffect(() => {
         setDraftTitle(title);
+
+        if (titleRef.current && titleRef.current.textContent !== title) {
+            titleRef.current.textContent = title;
+        }
     }, [title]);
 
-    const commitTitle = () => {
-        const next = draftTitle.trim();
+    const commitTitle = (value = titleRef.current?.textContent ?? draftTitle) => {
+        const next = value.trim();
 
         if (next === title) {
             return;
@@ -191,8 +169,8 @@ export const CueStartPill = ({
             deleteNode();
         }
     };
-    const requestCueCreation = () => {
-        const nextTitle = draftTitle.trim();
+    const requestCueCreation = (value = titleRef.current?.textContent ?? draftTitle) => {
+        const nextTitle = value.trim();
         const pos = getPos();
 
         if (!nextTitle || !isDraft || !onRequestCreateCue || typeof pos !== 'number') {
@@ -236,9 +214,9 @@ export const CueStartPill = ({
             <span
                 className={styles.tagBody}
                 onMouseDown={event => {
-                    if (event.target !== inputRef.current) {
+                    if (event.target !== titleRef.current) {
                         event.preventDefault();
-                        inputRef.current?.focus();
+                        titleRef.current?.focus();
                     }
                 }}
             >
@@ -249,32 +227,38 @@ export const CueStartPill = ({
                 >{cueNumber}
                 </span>
                 {draftTitle.length > 0 || active ? '\u00A0' : null}
-                <input
-                    ref={inputRef}
+                <span
+                    ref={titleRef}
                     className={styles.titleInput}
                     data-cue-title-input="start"
                     data-cue-draft={isDraft ? 'true' : undefined}
                     data-cue-id={String(node.attrs[CUE_ID_ATTR] ?? '')}
+                    data-placeholder={active ? 'cue' : undefined}
+                    role="textbox"
                     aria-label="Cue title"
-                    value={draftTitle}
-                    placeholder="cue"
+                    aria-multiline="false"
+                    contentEditable
+                    tabIndex={-1}
+                    suppressContentEditableWarning
                     spellCheck={false}
-                    style={getTitleInputStyle(draftTitle, active)}
-                    onChange={event => updateTitle(event.currentTarget.value)}
-                    onBlur={commitTitle}
+                    onInput={event => updateTitle(event.currentTarget.textContent ?? '')}
+                    onBlur={event => commitTitle(event.currentTarget.textContent ?? '')}
                     onKeyDown={event => {
                         event.stopPropagation();
 
                         if (event.key === 'Enter') {
+                            const currentTitle = event.currentTarget.textContent ?? '';
+
                             event.preventDefault();
-                            commitTitle();
-                            requestCueCreation();
+                            commitTitle(currentTitle);
+                            requestCueCreation(currentTitle);
                             event.currentTarget.blur();
                         }
 
                         if (event.key === 'Escape') {
                             event.preventDefault();
                             setDraftTitle(title);
+                            event.currentTarget.textContent = title;
                             updateAttributes({[CUE_TITLE_ATTR]: title});
                             event.currentTarget.blur();
                         }
@@ -307,6 +291,7 @@ export const CueOutPill = ({deleteNode, decorations}: NodeViewProps) => {
     const {
         active, setActive, rootRef,
     } = usePillActivation();
+    const cueId = readDecorationLabel(decorations, 'cueId');
     const outLabel = readDecorationLabel(decorations, 'outLabel') || 'out';
     const outNumber = readDecorationLabel(decorations, 'outNumber');
     const outTitle = readDecorationLabel(decorations, 'outTitle');
@@ -317,6 +302,7 @@ export const CueOutPill = ({deleteNode, decorations}: NodeViewProps) => {
             as="span"
             className={clsx(styles.pill, styles.out, active && styles.active)}
             data-cue-pill="out"
+            data-cue-id={cueId || undefined}
             contentEditable={false}
             onFocus={handleFocusWithin(setActive)}
             onBlur={handleBlurWithin(rootRef, setActive)}

@@ -180,22 +180,21 @@ describe('cue # compose', () => {
         await userEvent.keyboard('{Enter}');
 
         const pill = await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
-        const input = pill.querySelector<HTMLInputElement>('[data-cue-title-input="start"]');
+        const input = pill.querySelector<HTMLElement>('[data-cue-title-input="start"]');
 
-        expect(input?.value).toBe('Night');
+        expect(input?.textContent).toBe('Night');
 
         const number = pill.querySelector<HTMLElement>('[data-cue-number]');
 
         expect(number?.textContent).toBe('0)');
         expect(number?.nextSibling?.textContent).toBe('\u00A0');
         expect(getComputedStyle(input as HTMLElement).maxWidth).toBe('none');
-        expect(getComputedStyle(input as HTMLElement).textOverflow).not.toBe('ellipsis');
+        expect(getComputedStyle(input as HTMLElement).whiteSpace).not.toBe('nowrap');
 
         const tagBody = number?.parentElement;
         const pillStyle = getComputedStyle(pill);
 
-        expect(getComputedStyle(tagBody as HTMLElement).display).toBe('inline-block');
-        expect(getComputedStyle(tagBody as HTMLElement).whiteSpace).toBe('nowrap');
+        expect(getComputedStyle(tagBody as HTMLElement).display).toBe('inline');
         expect(pillStyle.marginInlineStart).toBe('0px');
         expect(pill.firstChild?.textContent).toBe(' ');
         expect(pill.lastChild?.textContent).toBe(' ');

@@ -1,7 +1,10 @@
 import '@stagistic/ui/styles/base.css';
 
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
-import type {Transaction} from '@tiptap/pm/state';
+import {
+    TextSelection,
+    type Transaction,
+} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
@@ -104,7 +107,7 @@ const clickAfterPill = async (pill: Element) => {
     });
 };
 
-const findCuePosition = (editor: Editor) => {
+const findCuePosition = (editor: Editor): number | null => {
     let cuePos: number | null = null;
 
     editor.state.doc.descendants((node, pos) => {
@@ -118,6 +121,22 @@ const findCuePosition = (editor: Editor) => {
     });
 
     return cuePos;
+};
+
+const findBlockStart = (editor: Editor, blockId: string): number | null => {
+    let blockStart: number | null = null;
+
+    editor.state.doc.descendants((node, pos) => {
+        if (node.attrs.id === blockId) {
+            blockStart = pos + 1;
+
+            return false;
+        }
+
+        return true;
+    });
+
+    return blockStart;
 };
 
 afterEach(() => {
@@ -180,5 +199,130 @@ describe('cue pill caret placement', () => {
 
         expect(editor.state.selection.from).toBe(cuePos);
         expect(document.querySelector('[data-cue-menu="out"]')).toBeNull();
+    });
+
+    it('moves ArrowRight from before a cue to the next block', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+
+        const cuePos = findCuePosition(editor);
+        const nextBlockStart = findBlockStart(editor, 'sd-2');
+
+        if (cuePos === null || nextBlockStart === null) {
+            throw new Error('Cue or next block not found');
+        }
+
+        editor.view.dispatch(editor.state.tr.setSelection(
+            TextSelection.create(editor.state.doc, cuePos),
+        ));
+        editor.commands.focus();
+
+        await userEvent.keyboard('{ArrowRight}');
+
+        expect(editor.state.selection.from).toBe(nextBlockStart);
+        expect(editor.state.selection.empty).toBe(true);
+        expect(document.activeElement).toBe(editor.view.dom);
+    });
+
+    it('keeps ArrowRight before a cue in the final block', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-2', 'Night');
+
+        const cuePos = findCuePosition(editor);
+
+        if (cuePos === null) {
+            throw new Error('Cue not found');
+        }
+
+        editor.view.dispatch(editor.state.tr.setSelection(
+            TextSelection.create(editor.state.doc, cuePos),
+        ));
+        editor.commands.focus();
+
+        await userEvent.keyboard('{ArrowRight}');
+
+        expect(editor.state.selection.from).toBe(cuePos);
+        expect(document.activeElement).toBe(editor.view.dom);
+    });
+
+    it('normalizes a programmatic caret after a cue to before the pill', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+
+        const cuePos = findCuePosition(editor);
+
+        if (cuePos === null) {
+            throw new Error('Cue not found');
+        }
+
+        const cue = editor.state.doc.nodeAt(cuePos);
+
+        if (!cue) {
+            throw new Error('Cue node not found');
+        }
+
+        editor.view.dispatch(editor.state.tr.setSelection(
+            TextSelection.create(editor.state.doc, cuePos + cue.nodeSize),
+        ));
+
+        expect(editor.state.selection.from).toBe(cuePos);
+    });
+
+    it('moves ArrowLeft directly before a cue in the previous block', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+
+        const cuePos = findCuePosition(editor);
+        const nextBlockStart = findBlockStart(editor, 'sd-2');
+
+        if (cuePos === null || nextBlockStart === null) {
+            throw new Error('Cue or next block not found');
+        }
+
+        editor.view.dispatch(editor.state.tr.setSelection(
+            TextSelection.create(editor.state.doc, nextBlockStart),
+        ));
+        editor.commands.focus();
+
+        const selectionPositions: number[] = [];
+        const handleTransaction = ({transaction}: {transaction: Transaction}) => {
+            if (transaction.selectionSet) {
+                selectionPositions.push(transaction.selection.from);
+            }
+        };
+
+        editor.on('transaction', handleTransaction);
+        await userEvent.keyboard('{ArrowLeft}');
+        editor.off('transaction', handleTransaction);
+
+        expect(editor.state.selection.from).toBe(cuePos);
+        expect(selectionPositions).toEqual([cuePos]);
+    });
+
+    it('keeps the cue title out of sequential keyboard focus', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+
+        const title = await poll(
+            () => document.querySelector<HTMLElement>('[data-cue-title-input="start"]'),
+            'cue title',
+        );
+
+        expect(title.tabIndex).toBe(-1);
     });
 });

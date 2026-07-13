@@ -123,6 +123,31 @@ afterEach(() => {
 });
 
 describe('ScriptCuesSidebar', () => {
+    it('highlights a cue clicked in the editor and clears it on the next outside click', async () => {
+        mountSidebar();
+
+        const pill = await poll(
+            () => document.querySelector<HTMLElement>('[data-cue-pill="start"]'),
+            'cue pill',
+        );
+        const navigationButton = await poll(
+            () => document.querySelector<HTMLButtonElement>('[data-cue-navigation="true"]'),
+            'cue navigation button',
+        );
+
+        pill.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true}));
+        await poll(
+            () => navigationButton.getAttribute('aria-current') === 'true' ? true : null,
+            'active cue row',
+        );
+
+        document.body.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true}));
+        await poll(
+            () => navigationButton.hasAttribute('aria-current') ? null : true,
+            'cleared cue row',
+        );
+    });
+
     it('focuses and scrolls to an assigned cue block when its label is clicked', async () => {
         const scrollIntoView = vi.spyOn(Element.prototype, 'scrollIntoView');
 
@@ -140,7 +165,7 @@ describe('ScriptCuesSidebar', () => {
 
         editor.state.doc.descendants((node, position) => {
             if (node.attrs.id === 'cue-block') {
-                expectedPosition = position + node.nodeSize - 1;
+                expectedPosition = position + 1;
 
                 return false;
             }
@@ -148,10 +173,7 @@ describe('ScriptCuesSidebar', () => {
             return true;
         });
 
-        navigationButton.dispatchEvent(new MouseEvent('click', {
-            bubbles: true,
-            cancelable: true,
-        }));
+        navigationButton.click();
         await poll(
             () => editor.state.selection.from === expectedPosition ? true : null,
             'cue block selection',

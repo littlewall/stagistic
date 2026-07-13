@@ -108,10 +108,62 @@ describe('cue pill node views', () => {
         expect(editor.commands.insertCueStart('sd-1', 'Night')).toBe(true);
 
         const pill = await poll(() => document.querySelector('[data-cue-pill="start"]'), 'cue start pill');
-        const input = pill.querySelector('input');
+        const input = pill.querySelector('[data-cue-title-input="start"]');
 
-        expect(input).toBeInstanceOf(HTMLInputElement);
-        expect((input as HTMLInputElement).value).toBe('Night');
+        expect(input).toBeInstanceOf(HTMLSpanElement);
+        expect(input?.textContent).toBe('Night');
+    });
+
+    it('keeps the number with the first word while later title words wrap', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'První super song');
+
+        const pill = await poll(
+            () => document.querySelector<HTMLElement>('[data-cue-pill="start"]'),
+            'cue pill',
+        );
+        const fixture = document.createElement('div');
+
+        fixture.style.position = 'fixed';
+        fixture.style.inset = '0 auto auto 0';
+        fixture.style.width = '12ch';
+        fixture.style.font = getComputedStyle(pill).font;
+        fixture.style.whiteSpace = 'pre-wrap';
+        fixture.appendChild(pill.cloneNode(true));
+        document.body.appendChild(fixture);
+
+        const number = await poll(
+            () => fixture.querySelector<HTMLElement>('[data-cue-number]'),
+            'cue number',
+        );
+        const title = await poll(
+            () => fixture.querySelector<HTMLElement>('[data-cue-title-input="start"]'),
+            'cue title',
+        );
+
+        const titleNode = title.firstChild;
+
+        if (!(titleNode instanceof Text)) {
+            throw new Error('Cue title text node not found');
+        }
+
+        const firstWordRange = document.createRange();
+        const lastWordRange = document.createRange();
+
+        firstWordRange.setStart(titleNode, 0);
+        firstWordRange.setEnd(titleNode, 5);
+        lastWordRange.setStart(titleNode, 12);
+        lastWordRange.setEnd(titleNode, 16);
+
+        const numberTop = number.getBoundingClientRect().top;
+        const firstWordTop = firstWordRange.getBoundingClientRect().top;
+        const lastWordTop = lastWordRange.getBoundingClientRect().top;
+
+        expect(firstWordTop).toBeCloseTo(numberTop, 1);
+        expect(lastWordTop).toBeGreaterThan(firstWordTop);
     });
 
     it('allows at most one cue atom per stage direction block', async () => {
@@ -230,7 +282,7 @@ describe('cue pill node views', () => {
         editor.commands.insertCueStart('sd-2', 'Night');
 
         const input = await poll(
-            () => document.querySelector<HTMLInputElement>('[data-cue-title-input="start"]'),
+            () => document.querySelector<HTMLElement>('[data-cue-title-input="start"]'),
             'cue title input',
         );
 
@@ -310,15 +362,16 @@ describe('cue pill node views', () => {
         editor.commands.insertCueStart('sd-1', '');
 
         const input = await poll(
-            () => document.querySelector<HTMLInputElement>('[data-cue-title-input="start"]'),
+            () => document.querySelector<HTMLElement>('[data-cue-title-input="start"]'),
             'title input',
         );
 
         /*
-         * Empty + inactive → the title field collapses to 0 width so the cue is
-         * just its number, matching the export string `" number "`.
+         * Empty + inactive has no placeholder, so the cue is just its number,
+         * matching the export string `" number "`.
          */
-        expect(getComputedStyle(input).width).toBe('0px');
+        expect(input.textContent).toBe('');
+        expect(input.hasAttribute('data-placeholder')).toBe(false);
     });
 
     it('keeps an empty confirmed cue title editable without deleting the cue', async () => {
@@ -329,12 +382,18 @@ describe('cue pill node views', () => {
         editor.commands.insertCueStart('sd-1', 'Night');
 
         const input = await poll(
-            () => document.querySelector<HTMLInputElement>('[data-cue-title-input="start"]'),
+            () => document.querySelector<HTMLElement>('[data-cue-title-input="start"]'),
             'title input',
         );
 
         await page.elementLocator(input).click();
-        input.setSelectionRange(0, input.value.length);
+
+        const selection = window.getSelection();
+        const range = document.createRange();
+
+        range.selectNodeContents(input);
+        selection?.removeAllRanges();
+        selection?.addRange(range);
         await userEvent.keyboard('{Backspace}');
 
         expect(cueStartAttrs(editor)?.title).toBe('');
@@ -352,7 +411,7 @@ describe('cue pill node views', () => {
 
         await activatePill();
         await poll(() => document.querySelector('[data-cue-menu="start"]'), 'pill menu');
-        await clickMenuButton('Delete cue');
+        await clickMenuButton('Remove cue');
         await poll(() => document.querySelector('[data-cue-pill="start"]') ? null : true, 'pill removed');
 
         expect(document.querySelector('[data-cue-pill="start"]')).toBeNull();
@@ -369,7 +428,7 @@ describe('cue pill node views', () => {
         await poll(() => document.querySelector('[data-id="sd-2"] [data-cue-pill="out"]'), 'cue out pill');
         await activatePill();
         await poll(() => document.querySelector('[data-cue-menu="start"]'), 'pill menu');
-        await clickMenuButton('Delete cue');
+        await clickMenuButton('Remove cue');
         await poll(() => document.querySelector('[data-cue-pill="start"]') ? null : true, 'pill removed');
 
         expect(document.querySelector('[data-cue-pill="start"]')).toBeNull();

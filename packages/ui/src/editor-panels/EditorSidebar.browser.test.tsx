@@ -50,7 +50,10 @@ const confirmedCharacter: EditorSidebarCharacter = {
     outline: null,
 };
 
-const renderSidebar = (onDeleteCharacter = vi.fn()) => {
+const renderSidebar = (
+    onDeleteCharacter = vi.fn(),
+    activeCharacterId?: string,
+) => {
     const host = document.createElement('div');
 
     document.body.appendChild(host);
@@ -64,6 +67,7 @@ const renderSidebar = (onDeleteCharacter = vi.fn()) => {
                 unconfirmedCharacters: [],
             }}
             actions={{onDeleteCharacter}}
+            options={{activeCharacterId}}
         />,
     );
     mountedRoots.push(root);
@@ -78,6 +82,14 @@ afterEach(() => {
 });
 
 describe('EditorSidebar delete confirmation', () => {
+    it('marks the matching character as active', async () => {
+        renderSidebar(undefined, 'char-1');
+
+        const activeRow = await waitForElement('[aria-current="true"]');
+
+        expect(activeRow.textContent).toContain('ANNA');
+    });
+
     it('reveals the delete button only once a character is expanded', async () => {
         renderSidebar();
 

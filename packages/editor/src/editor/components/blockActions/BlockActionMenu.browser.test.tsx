@@ -179,7 +179,7 @@ describe('block action menu', () => {
         await page.elementLocator(addCue).click();
 
         const input = await poll(
-            () => document.querySelector<HTMLInputElement>(
+            () => document.querySelector<HTMLElement>(
                 '[data-id="sd-1"] [data-cue-title-input="start"]',
             ),
             'new cue title input',
@@ -229,7 +229,7 @@ describe('block action menu', () => {
         await page.elementLocator(addCue).click();
 
         const input = await poll(
-            () => document.querySelector<HTMLInputElement>('[data-cue-draft="true"]'),
+            () => document.querySelector<HTMLElement>('[data-cue-draft="true"]'),
             'draft cue title input',
         );
         const listbox = await poll(

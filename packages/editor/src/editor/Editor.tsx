@@ -21,6 +21,7 @@ import {
     stripScriptSettings,
 } from './editorSettings';
 import {LeftSidebar, RightSidebar} from './editorSlots';
+import {EditorElementSelectionProvider} from './elementSelection/context';
 import {
     serializeDocumentForSave,
     useAutosaveController,
@@ -299,28 +300,30 @@ const Editor = ({
     return (
         <EditorSnapshotStoreProvider store={liveStore}>
             <EditorInstanceProvider editor={editor}>
-                <EditorActCommandsProvider value={actCommands}>
-                    <EditorShell
-                        canvas={{
-                            autoFocus,
-                            characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
-                            editor,
-                            persistentCharacters,
-                            persistentCues,
-                            onCueAssigned,
-                            headerFooter: resolvedSettings.headerFooter,
-                            scriptTitle,
-                            draftDate,
-                        }}
-                        layout={resolvedLayout}
-                        rootRef={rootRef}
-                        canvasHostRef={canvasHostRef}
-                        rootStyle={rootStyle}
-                        confirmedCharacterColorsById={confirmedCharacterColorsById}
-                        onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
-                        onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
-                    />
-                </EditorActCommandsProvider>
+                <EditorElementSelectionProvider editor={editor} rootRef={rootRef}>
+                    <EditorActCommandsProvider value={actCommands}>
+                        <EditorShell
+                            canvas={{
+                                autoFocus,
+                                characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
+                                editor,
+                                persistentCharacters,
+                                persistentCues,
+                                onCueAssigned,
+                                headerFooter: resolvedSettings.headerFooter,
+                                scriptTitle,
+                                draftDate,
+                            }}
+                            layout={resolvedLayout}
+                            rootRef={rootRef}
+                            canvasHostRef={canvasHostRef}
+                            rootStyle={rootStyle}
+                            confirmedCharacterColorsById={confirmedCharacterColorsById}
+                            onLeftSidebarToggleMouseDown={handleLeftSidebarToggleMouseDown}
+                            onRightSidebarToggleMouseDown={handleRightSidebarToggleMouseDown}
+                        />
+                    </EditorActCommandsProvider>
+                </EditorElementSelectionProvider>
             </EditorInstanceProvider>
         </EditorSnapshotStoreProvider>
     );

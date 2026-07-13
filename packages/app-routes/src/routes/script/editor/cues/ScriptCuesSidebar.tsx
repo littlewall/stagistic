@@ -1,4 +1,5 @@
 import {
+    useEditorElementSelection,
     useEditorInstance,
     useFocusEditorBlock,
 } from '@stagistic/editor';
@@ -8,6 +9,7 @@ import {
     type ScriptDocument,
 } from '@stagistic/script';
 import {
+    clsx,
     LinkSlashIcon,
     Tooltip,
     TrashIcon,
@@ -69,6 +71,7 @@ const RowActionButton = ({
 
 interface CueRowProps {
     cue: ScriptCueListItem,
+    isActive: boolean,
     number: string | null,
     startBlockId: string | null,
     onFocus: (blockId: string) => void,
@@ -78,6 +81,7 @@ interface CueRowProps {
 
 const CueRow = ({
     cue,
+    isActive,
     number,
     startBlockId,
     onFocus,
@@ -98,13 +102,14 @@ const CueRow = ({
     );
 
     return (
-        <li className={styles.item}>
+        <li className={clsx(styles.item, isActive && styles.active)}>
             {startBlockId ? (
                 <button
                     type="button"
                     className={`${styles.label} ${styles.navigableLabel}`}
                     data-cue-navigation="true"
                     data-cue-id={cue.id}
+                    aria-current={isActive ? 'true' : undefined}
                     onMouseDown={event => {
                         event.preventDefault();
                     }}
@@ -142,6 +147,7 @@ export const ScriptCuesSidebar = ({
     onUnassignCue,
 }: ScriptCuesSidebarProps) => {
     const editor = useEditorInstance();
+    const elementSelection = useEditorElementSelection();
     const focusBlock = useFocusEditorBlock();
     const [documentCues, setDocumentCues] = useState(() => {
         return editor ? buildScriptBlockIndex(editor.getJSON() as ScriptDocument).snapshot.cues : [];
@@ -213,6 +219,7 @@ export const ScriptCuesSidebar = ({
                 <CueRow
                     key={cue.id}
                     cue={cue}
+                    isActive={elementSelection?.type === 'cue' && elementSelection.cueId === cue.id}
                     number={cueMetadataById.get(cue.id)?.number ?? null}
                     startBlockId={cueMetadataById.get(cue.id)?.startBlockId ?? null}
                     onFocus={focusBlock}

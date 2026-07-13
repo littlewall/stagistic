@@ -76,6 +76,7 @@ const buildDecorations = (doc: ProseMirrorNode): DecorationSet => {
     doc.descendants((node, pos) => {
         if (isScriptBlockNodeName(node.type.name)) {
             currentBlockId = readBlockId(node);
+
             const cueAtoms = collectCueAtoms(node.toJSON() as ScriptNode);
 
             node.forEach(child => {
@@ -121,6 +122,7 @@ const buildDecorations = (doc: ProseMirrorNode): DecorationSet => {
         const outParts = labels.outPartsByEndBlockId.get(site.blockId);
 
         return Decoration.node(site.pos, site.pos + site.size, {}, {
+            cueId: outParts?.cueId ?? '',
             outLabel: labels.outByEndBlockId.get(site.blockId) ?? 'out',
             outNumber: outParts?.number ?? '',
             outTitle: outParts?.title ?? '',

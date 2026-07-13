@@ -5,7 +5,9 @@ import {
 export interface CueLabelMap {
     byCueId: Map<string, string>,
     outByEndBlockId: Map<string, string>,
-    outPartsByEndBlockId: Map<string, {number: string, title: string}>,
+    outPartsByEndBlockId: Map<string, {
+        cueId: string, number: string, title: string,
+    }>,
 }
 
 /**
@@ -16,7 +18,9 @@ export interface CueLabelMap {
 export const buildCueLabelMap = (cues: DerivedCue[]): CueLabelMap => {
     const byCueId = new Map<string, string>();
     const outByEndBlockId = new Map<string, string>();
-    const outPartsByEndBlockId = new Map<string, {number: string, title: string}>();
+    const outPartsByEndBlockId = new Map<string, {
+        cueId: string, number: string, title: string,
+    }>();
 
     cues.forEach(cue => {
         byCueId.set(cue.cueId, formatCueNumber(cue));
@@ -24,6 +28,7 @@ export const buildCueLabelMap = (cues: DerivedCue[]): CueLabelMap => {
         if (cue.mode === 'open' && cue.endBlockId) {
             outByEndBlockId.set(cue.endBlockId, formatOutLabel(cue));
             outPartsByEndBlockId.set(cue.endBlockId, {
+                cueId: cue.cueId,
                 number: formatCueNumber(cue),
                 title: cue.title.trim(),
             });
