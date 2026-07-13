@@ -135,13 +135,6 @@ const findMenuItem = (label: string) => {
         }) ?? null;
 };
 
-const getCueStartAttrs = (editor: Editor, blockId: string): Record<string, unknown> | undefined => {
-    const content = editor.getJSON().content as ScriptNode[] | undefined;
-    const block = content?.find(node => node.attrs?.id === blockId);
-
-    return block?.content?.find(node => node.type === 'cueStart')?.attrs;
-};
-
 const openCuesSubmenu = async () => {
     const cuesItem = await poll(() => findMenuItem('Cues'), 'Cues item');
 
@@ -176,26 +169,11 @@ describe('block action menu', () => {
         );
 
         expect(document.activeElement).toBe(input);
+        expect(document.querySelector('[data-cue-number]')?.textContent).toBe('0.');
         expect(document.querySelector('[data-block-action-trigger="true"]')).toBeNull();
     });
 
-    it('adds a hit cue without an out marker', async () => {
-        renderEditor();
-
-        const editor = await getEditor();
-
-        await openActionMenu('sd-1');
-        await openCuesSubmenu();
-
-        const addHitCue = await poll(() => findMenuItem('Add hit cue'), 'Add hit cue item');
-
-        await page.elementLocator(addHitCue).click();
-
-        expect(getCueStartAttrs(editor, 'sd-1')).toMatchObject({mode: 'hit'});
-        expect(editor.getJSON().content?.[0]?.content?.some(node => node.type === 'cueOut')).toBe(false);
-    });
-
-    it('uses range, hit, and emphasized endpoint cue icons', async () => {
+    it('uses range, start, and emphasized endpoint cue icons', async () => {
         renderEditor(createDocument(2));
 
         const editor = await getEditor();
@@ -206,12 +184,10 @@ describe('block action menu', () => {
 
         const cues = await openCuesSubmenu();
         const addCue = await poll(() => findMenuItem('Add cue'), 'Add cue item');
-        const addHitCue = await poll(() => findMenuItem('Add hit cue'), 'Add hit cue item');
         const addOut = await poll(() => findMenuItem('Add out (0. Night)'), 'Add out item');
 
         expect(cues.querySelector('[data-cue-icon="range"]')).toBeTruthy();
         expect(addCue.querySelector('[data-cue-point="start"][data-cue-point-style="hollow"]')).toBeTruthy();
-        expect(addHitCue.querySelector('[data-cue-icon="hit"] [data-cue-point="center"]')).toBeTruthy();
         expect(addOut.querySelector('[data-cue-point="end"][data-cue-point-style="hollow"]')).toBeTruthy();
     });
 

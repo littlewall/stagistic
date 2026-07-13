@@ -1,12 +1,15 @@
 import {
     createNodeId,
     CUE_ID_ATTR,
+    CUE_DRAFT_ATTR,
     CUE_KIND_ATTR,
     CUE_MODE_ATTR,
     CUE_OUT_NODE_NAME,
     CUE_START_NODE_NAME,
     CUE_TITLE_ATTR,
     type CueMode,
+    formatCueNumber,
+    type ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {EditorState, Transaction} from '@tiptap/pm/state';
@@ -61,6 +64,7 @@ export const buildInsertCueStart = (
     options: {
         cueId?: string,
         kind?: string | null,
+        isDraft?: boolean,
     } = {},
 ): Transaction => {
     const node = state.schema.nodes[CUE_START_NODE_NAME].create({
@@ -68,9 +72,37 @@ export const buildInsertCueStart = (
         [CUE_MODE_ATTR]: mode,
         [CUE_TITLE_ATTR]: title,
         [CUE_KIND_ATTR]: options.kind ?? null,
+        [CUE_DRAFT_ATTR]: options.isDraft === true,
     });
 
     return state.tr.insert(block.to, node);
+};
+
+export const resolveNewCueNumber = (
+    snapshot: ScriptBlockIndexSnapshot,
+    blockId: string,
+): string | null => {
+    const blocksById = new Map(snapshot.blocks.map(block => [block.blockId, block] as const));
+    const targetBlock = blocksById.get(blockId);
+
+    if (!targetBlock) {
+        return null;
+    }
+
+    const sceneCues = snapshot.cues.filter(cue => {
+        return blocksById.get(cue.startBlockId)?.sceneBlockId === targetBlock.sceneBlockId;
+    });
+    const sceneNumber = sceneCues[0]?.sceneNumber
+        ?? snapshot.blocks.filter(block => block.blockType === 'scene' && block.orderNo <= targetBlock.orderNo).length;
+    const indexInScene = sceneCues.filter(cue => {
+        return (blocksById.get(cue.startBlockId)?.orderNo ?? -1) < targetBlock.orderNo;
+    }).length;
+
+    return formatCueNumber({
+        sceneNumber,
+        indexInScene,
+        sceneCueCount: sceneCues.length + 1,
+    });
 };
 
 export const buildInsertCueOut = (

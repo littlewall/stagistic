@@ -179,7 +179,7 @@ declare module '@tiptap/core' {
                 blockId: string | null,
                 title: string,
                 mode?: CueMode,
-                options?: {cueId?: string, kind?: string | null},
+                options?: {cueId?: string, kind?: string | null, isDraft?: boolean},
             ) => ReturnType,
             insertCueOut: (blockId: string | null) => ReturnType,
             deleteCueStart: (pos: number) => ReturnType,

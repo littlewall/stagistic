@@ -8,6 +8,7 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
 import {
     blockHasCueAtom,
+    resolveNewCueNumber,
     resolveCueTargetBlock,
 } from '../../tiptap/extensions/cue/cueCommands';
 import type {
@@ -45,36 +46,7 @@ export const formatOpenCueDisplayName = (cue: DerivedCue) => {
     return title ? `${number} ${title}` : number;
 };
 
-export const resolveNewCueNumber = (
-    snapshot: ScriptBlockIndexSnapshot,
-    blockId: string,
-): string | null => {
-    const blocksById = new Map(snapshot.blocks.map(block => [block.blockId, block] as const));
-    const targetBlock = blocksById.get(blockId);
-
-    if (!targetBlock) {
-        return null;
-    }
-
-    const sceneCues = snapshot.cues.filter(cue => {
-        return blocksById.get(cue.startBlockId)?.sceneBlockId === targetBlock.sceneBlockId;
-    });
-    const sceneNumber = sceneCues[0]?.sceneNumber
-        ?? snapshot.blocks.filter(block => {
-            return block.blockType === 'scene' && block.orderNo <= targetBlock.orderNo;
-        }).length;
-    const indexInScene = sceneCues.filter(cue => {
-        const startBlock = blocksById.get(cue.startBlockId);
-
-        return startBlock !== undefined && startBlock.orderNo < targetBlock.orderNo;
-    }).length;
-
-    return formatCueNumber({
-        sceneNumber,
-        indexInScene,
-        sceneCueCount: sceneCues.length + 1,
-    });
-};
+export {resolveNewCueNumber} from '../../tiptap/extensions/cue/cueCommands';
 
 export const resolveOpenCueAtBlock = (
     snapshot: ScriptBlockIndexSnapshot,
@@ -139,17 +111,7 @@ const runAddCue = (editor: TiptapEditor, blockId: string) => {
         return;
     }
 
-    if (editor.commands.insertCueStart(blockId, '')) {
-        focusCueTitle(editor, blockId);
-    }
-};
-
-const runAddHitCue = (editor: TiptapEditor, blockId: string) => {
-    if (!resolveCueAvailability(editor, blockId)) {
-        return;
-    }
-
-    if (editor.commands.insertCueStart(blockId, '', 'hit')) {
+    if (editor.commands.insertCueStart(blockId, '', 'open', {isDraft: true})) {
         focusCueTitle(editor, blockId);
     }
 };
@@ -181,13 +143,6 @@ export const resolveStageDirectionCueActions = ({
             detail: `(${availability.newCueNumber})`,
             icon: 'cueStart',
             run: () => runAddCue(editor, blockId),
-        }, {
-            kind: 'command',
-            id: 'add-hit-cue',
-            label: 'Add hit cue',
-            detail: `(${availability.newCueNumber})`,
-            icon: 'cueHit',
-            run: () => runAddHitCue(editor, blockId),
         },
     ];
 

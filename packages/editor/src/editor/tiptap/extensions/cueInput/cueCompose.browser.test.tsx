@@ -378,6 +378,7 @@ describe('cue # compose', () => {
         const composePill = await poll(() => document.querySelector('[data-cue-compose]'), 'compose pill');
 
         expect(composePill).toBeTruthy();
+        expect(composePill?.getAttribute('data-cue-number')).toBe('0.');
     });
 
     it('Backspace on an empty title cancels the compose and # re-triggers', async () => {

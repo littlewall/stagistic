@@ -9,9 +9,11 @@ import type {
     PersistentCueRef,
 } from '../../../contracts';
 import {getActiveScriptBlockFromState} from '../../scriptCore';
+import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
 import {
     blockHasCueAtom,
     buildInsertCueStart,
+    resolveNewCueNumber,
     resolveCueTargetBlock,
 } from '../cue/cueCommands';
 import {
@@ -254,6 +256,13 @@ export const createCueComposePlugin = (
                     Decoration.inline(compose.from, Math.max(compose.to, compose.from + 1), {
                         class: styles.composePill,
                         'data-cue-compose': 'active',
+                        'data-cue-number': (() => {
+                            const block = getActiveScriptBlockFromState(state);
+
+                            return block
+                                ? resolveNewCueNumber(buildIndexSnapshotFromPmDoc(state.doc), block.id) ?? ''
+                                : '';
+                        })(),
                     }),
                 ]);
             },

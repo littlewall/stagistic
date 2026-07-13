@@ -64,13 +64,16 @@ afterEach(() => {
 
 describe('AttributeManagerListPanel', () => {
     it('lists items and opens a placeholder detail on click', async () => {
-        const host = renderPanel([{id: 's1', title: 'Opening'}, {id: 's2', title: 'The reveal'}]);
+        const host = renderPanel([
+            {id: 's1', number: '1.', title: 'Opening'},
+            {id: 's2', number: '2.', title: 'The reveal'},
+        ]);
 
         await waitForElement('[aria-label="Scene list"]');
 
         const buttons = Array.from(host.querySelectorAll('[aria-label="Scene list"] button'));
 
-        expect(buttons.map(button => button.textContent)).toEqual(['Opening', 'The reveal']);
+        expect(buttons.map(button => button.textContent)).toEqual(['1.Opening', '2.The reveal']);
 
         const secondItem = page.elementLocator(buttons[1] as HTMLButtonElement);
 
@@ -92,5 +95,23 @@ describe('AttributeManagerListPanel', () => {
         const detail = await waitForElement('[aria-label="Scene detail"]');
 
         expect(detail.textContent).toContain('Select a scene');
+    });
+
+    it('places the number before the title and the icon after it', async () => {
+        const host = renderPanel([{
+            id: 'c1',
+            number: '1.',
+            title: 'Overture',
+            icon: <span>Cue kind</span>,
+        }]);
+
+        const button = await waitForElement<HTMLButtonElement>('[aria-label="Scene list"] button');
+
+        expect(Array.from(button.children).map(child => child.textContent)).toEqual([
+            '1.',
+            'Overture',
+            'Cue kind',
+        ]);
+        expect(host.contains(button)).toBe(true);
     });
 });

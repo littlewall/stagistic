@@ -1,5 +1,6 @@
 import {
     CUE_ID_ATTR,
+    CUE_DRAFT_ATTR,
     CUE_KIND_ATTR,
     CUE_MODE_ATTR,
     CUE_START_NODE_NAME,
@@ -12,7 +13,10 @@ import {
 import {ReactNodeViewRenderer} from '@tiptap/react';
 import {createElement} from 'react';
 
-import type {EditorCueRemoveRequest} from '../../contracts';
+import type {
+    EditorCueCreateRequest,
+    EditorCueRemoveRequest,
+} from '../../contracts';
 import {CueStartPill} from './CuePill';
 
 const readMode = (value: unknown) => {
@@ -20,7 +24,9 @@ const readMode = (value: unknown) => {
 };
 
 interface CueStartNodeOptions {
+    onCueAssigned?: (cueId: string) => void,
     onRequestRemoveCue?: (request: EditorCueRemoveRequest) => void,
+    onRequestCreateCue?: (request: EditorCueCreateRequest) => void,
 }
 
 export const CueStartNode = Node.create<CueStartNodeOptions>({
@@ -57,6 +63,11 @@ export const CueStartNode = Node.create<CueStartNodeOptions>({
                     return typeof kind === 'string' && kind.length > 0 ? {'data-cue-kind': kind} : {};
                 },
             },
+            [CUE_DRAFT_ATTR]: {
+                default: false,
+                parseHTML: element => element.getAttribute('data-cue-draft') === 'true',
+                renderHTML: attributes => attributes[CUE_DRAFT_ATTR] === true ? {'data-cue-draft': 'true'} : {},
+            },
         };
     },
 
@@ -76,6 +87,8 @@ export const CueStartNode = Node.create<CueStartNodeOptions>({
         return ReactNodeViewRenderer(props => (
             createElement(CueStartPill, {
                 ...props,
+                onCueAssigned: this.options.onCueAssigned,
+                onRequestCreateCue: this.options.onRequestCreateCue,
                 onRequestRemoveCue: this.options.onRequestRemoveCue,
             })
         ));

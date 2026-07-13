@@ -1,6 +1,8 @@
 import {
     collectCueAtoms,
+    CUE_DRAFT_ATTR,
     CUE_ID_ATTR,
+    CUE_KIND_ATTR,
     CUE_MODE_ATTR,
     CUE_OUT_NODE_NAME,
     CUE_START_NODE_NAME,
@@ -74,10 +76,26 @@ const buildDecorations = (doc: ProseMirrorNode): DecorationSet => {
     doc.descendants((node, pos) => {
         if (isScriptBlockNodeName(node.type.name)) {
             currentBlockId = readBlockId(node);
+            const cueAtoms = collectCueAtoms(node.toJSON() as ScriptNode);
+
+            node.forEach(child => {
+                if (child.type.name !== CUE_START_NODE_NAME || child.attrs[CUE_DRAFT_ATTR] !== true) {
+                    return;
+                }
+
+                cueAtoms.push({
+                    role: 'start',
+                    cueId: String(child.attrs[CUE_ID_ATTR] ?? ''),
+                    mode: child.attrs[CUE_MODE_ATTR] === 'hit' ? 'hit' : 'open',
+                    title: String(child.attrs[CUE_TITLE_ATTR] ?? ''),
+                    kind: typeof child.attrs[CUE_KIND_ATTR] === 'string' ? child.attrs[CUE_KIND_ATTR] : null,
+                });
+            });
+
             cueBlockInputs.push({
                 blockId: currentBlockId,
                 blockType: resolveBlockType(node),
-                cueAtoms: collectCueAtoms(node.toJSON() as ScriptNode),
+                cueAtoms,
             });
         }
 

@@ -1,4 +1,9 @@
 import {
+    buildScriptBlockIndex,
+    formatCueNumber,
+    type ScriptDocument,
+} from '@stagistic/script';
+import {
     useEditorInstance,
 } from '@stagistic/editor';
 import {
@@ -14,6 +19,7 @@ import {
     type ReactNode,
     type SVGProps,
     useCallback,
+    useEffect,
     useMemo,
     useState,
 } from 'react';
@@ -78,12 +84,14 @@ const RowActionButton = ({
 
 interface CueRowProps {
     cue: ScriptCueListItem,
+    number: string | null,
     onRequestDelete: (cue: ScriptCueListItem) => void,
     onRequestUnassign: (cue: ScriptCueListItem) => void,
 }
 
 const CueRow = ({
     cue,
+    number,
     onRequestDelete,
     onRequestUnassign,
 }: CueRowProps) => {
@@ -95,6 +103,7 @@ const CueRow = ({
 
     return (
         <li className={styles.item}>
+            <span className={styles.number}>{number}</span>
             <Tooltip label={label} placement="bottom">
                 <span className={styles.kindIcon} aria-label={label}>
                     <Icon aria-hidden className={styles.kindGlyph} />
@@ -130,15 +139,43 @@ export const ScriptCuesSidebar = ({
     onUnassignCue,
 }: ScriptCuesSidebarProps) => {
     const editor = useEditorInstance();
+    const [documentCues, setDocumentCues] = useState(() => {
+        return editor ? buildScriptBlockIndex(editor.getJSON() as ScriptDocument).snapshot.cues : [];
+    });
     const [deleteTarget, setDeleteTarget] = useState<ScriptCueListItem | null>(null);
     const [unassignTarget, setUnassignTarget] = useState<ScriptCueListItem | null>(null);
+    useEffect(() => {
+        if (!editor) {
+            setDocumentCues([]);
+
+            return undefined;
+        }
+
+        const updateDocumentCues = () => {
+            setDocumentCues(buildScriptBlockIndex(editor.getJSON() as ScriptDocument).snapshot.cues);
+        };
+
+        updateDocumentCues();
+        editor.on('transaction', updateDocumentCues);
+
+        return () => {
+            editor.off('transaction', updateDocumentCues);
+        };
+    }, [editor]);
+    const cueMetadataById = useMemo(() => new Map(documentCues.map((cue, index) => [cue.cueId, {
+        number: formatCueNumber(cue),
+        order: index,
+    }] as const)), [documentCues]);
     const {
         assignedCues,
         unassignedCues,
     } = useMemo(() => ({
-        assignedCues: cues.filter(cue => cue.assignmentLabel),
+        assignedCues: cues.filter(cue => cue.assignmentLabel).sort((left, right) => {
+            return (cueMetadataById.get(left.id)?.order ?? Number.MAX_SAFE_INTEGER)
+                - (cueMetadataById.get(right.id)?.order ?? Number.MAX_SAFE_INTEGER);
+        }),
         unassignedCues: cues.filter(cue => !cue.assignmentLabel),
-    }), [cues]);
+    }), [cueMetadataById, cues]);
     const handleConfirmDelete = useCallback(async () => {
         if (!deleteTarget) {
             return;
@@ -176,6 +213,7 @@ export const ScriptCuesSidebar = ({
                         <CueRow
                             key={cue.id}
                             cue={cue}
+                            number={cueMetadataById.get(cue.id)?.number ?? null}
                             onRequestDelete={setDeleteTarget}
                             onRequestUnassign={setUnassignTarget}
                         />

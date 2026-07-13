@@ -91,7 +91,7 @@ describe('persist cues', () => {
         });
     });
 
-    it('does not create uncatalogued cues from the document', async () => {
+    it('creates catalog entries for cues restored from the document', async () => {
         const {db} = await createTestDb();
 
         await seedScript(db, SCRIPT_ID);
@@ -100,6 +100,11 @@ describe('persist cues', () => {
 
         await persister.persist(db, docWithCue('Night') as never);
 
-        expect(await listScriptCues(db, SCRIPT_ID)).toHaveLength(0);
+        expect(await listScriptCues(db, SCRIPT_ID)).toMatchObject([{
+            id: 'c1',
+            title: 'Night',
+            startBlockId: 'b1',
+            endBlockId: null,
+        }]);
     });
 });

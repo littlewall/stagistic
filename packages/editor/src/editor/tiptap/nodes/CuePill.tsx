@@ -1,5 +1,7 @@
 import {
     CUE_ID_ATTR,
+    CUE_DRAFT_ATTR,
+    CUE_KIND_ATTR,
     CUE_MODE_ATTR,
     CUE_TITLE_ATTR,
 } from '@stagistic/script';
@@ -18,7 +20,10 @@ import {
 } from 'react';
 
 import styles from './CuePill.module.css';
-import type {EditorCueRemoveRequest} from '../../contracts';
+import type {
+    EditorCueCreateRequest,
+    EditorCueRemoveRequest,
+} from '../../contracts';
 import {
     CueDeleteIcon,
     CueMenuButton,
@@ -118,6 +123,8 @@ const readDecorationLabel = (decorations: NodeViewProps['decorations'], key: str
 };
 
 interface CueStartPillProps extends NodeViewProps {
+    onCueAssigned?: (cueId: string) => void,
+    onRequestCreateCue?: (request: EditorCueCreateRequest) => void,
     onRequestRemoveCue?: (request: EditorCueRemoveRequest) => void,
 }
 
@@ -128,6 +135,8 @@ export const CueStartPill = ({
     decorations,
     editor,
     getPos,
+    onCueAssigned,
+    onRequestCreateCue,
     onRequestRemoveCue,
 }: CueStartPillProps) => {
     const {
@@ -135,6 +144,7 @@ export const CueStartPill = ({
     } = usePillActivation();
     const inputRef = useRef<HTMLInputElement>(null);
     const mode: CueMode = node.attrs[CUE_MODE_ATTR] === 'hit' ? 'hit' : 'open';
+    const isDraft = node.attrs[CUE_DRAFT_ATTR] === true;
     const title = normalizeTitle(node.attrs[CUE_TITLE_ATTR]);
     const cueNumber = readDecorationLabel(decorations, 'cueNumber');
     const [draftTitle, setDraftTitle] = useState(title);
@@ -182,6 +192,36 @@ export const CueStartPill = ({
             deleteNode();
         }
     };
+    const requestCueCreation = () => {
+        const nextTitle = draftTitle.trim();
+        const pos = getPos();
+
+        if (!nextTitle || !isDraft || !onRequestCreateCue || typeof pos !== 'number') {
+            return;
+        }
+
+        const blockId = editor.state.doc.resolve(pos).parent.attrs.id;
+
+        if (typeof blockId !== 'string' || !blockId) {
+            return;
+        }
+
+        onRequestCreateCue({
+            title: nextTitle,
+            blockId,
+            complete: cue => {
+                updateAttributes({
+                    [CUE_ID_ATTR]: cue.id,
+                    [CUE_TITLE_ATTR]: cue.title,
+                    [CUE_KIND_ATTR]: cue.kind,
+                    [CUE_DRAFT_ATTR]: false,
+                });
+                onCueAssigned?.(cue.id);
+
+                return true;
+            },
+        });
+    };
 
     return (
         <NodeViewWrapper
@@ -225,6 +265,7 @@ export const CueStartPill = ({
                         if (event.key === 'Enter') {
                             event.preventDefault();
                             commitTitle();
+                            requestCueCreation();
                             event.currentTarget.blur();
                         }
 

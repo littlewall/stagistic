@@ -15,8 +15,6 @@ import {
     type AttributeManagerListItem,
     AttributeManagerListPanel,
     AttributeManagerModal,
-    MicrophoneIcon,
-    MusicDoubleNoteIcon,
     ScriptSettingsModal,
 } from '@stagistic/ui';
 import {
@@ -46,6 +44,7 @@ import {useScriptEditorSettingsModal} from '../useScriptEditorSettingsModal';
 import {useScriptTitleDraft} from '../useScriptTitleDraft';
 import {useTitlePageDraft} from '../useTitlePageDraft';
 import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
+import {buildAttributeManagerCueItems} from './attributeManagerCueItems';
 
 const BLOCK_LABEL_BY_TYPE = new Map(
     SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const),
@@ -61,6 +60,7 @@ interface ScriptSettingsModalContextValue {
     effectiveScriptSettingsDraft: EditorSettingsOverride,
     titlePageDraft: TitlePageSettings,
     scriptTitleDraft: string,
+    cueState: ReturnType<typeof useScriptCuesState>,
     openSettingsModal: () => void,
     openAttributeManagerModal: () => void,
 }
@@ -95,7 +95,6 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         handleAutoSave,
         handleSaveScriptSettingsOverride,
     } = useScriptWorkspace();
-
     const {
         effectiveScriptSettingsDraft,
         resolvedScriptSettings,
@@ -129,7 +128,6 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         currentScriptTitle: currentScript?.name ?? '',
         renameScriptTitle,
     });
-
     const {
         isSettingsOpen,
         activePanelId,
@@ -165,6 +163,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
+    const cueState = useScriptCuesState(currentScriptId, scriptRepository);
     const attributeManagerCharacters = useMemo<AttributeManagerCharacter[]>(() => {
         return charactersContextValue.confirmedCharacterRecords.map(character => ({
             id: character.id,
@@ -181,20 +180,16 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
 
         const outline = buildScriptStructureOutline(getEditorValue()?.content);
 
-        return outline.acts.flatMap(act => act.items.map(scene => ({
+        return outline.acts.flatMap(act => act.items).map((scene, index) => ({
             id: scene.blockId,
+            number: `${index + 1}.`,
             title: scene.title,
-        })));
-    }, [getEditorValue, isAttributeManagerOpen]);
-    const {cues} = useScriptCuesState(currentScriptId, scriptRepository);
-    const attributeManagerCues = useMemo<AttributeManagerListItem[]>(() => {
-        return cues.map(cue => ({
-            id: cue.id,
-            title: cue.title,
-            icon: cue.kind === 'instrumental' ? <MusicDoubleNoteIcon /> : <MicrophoneIcon />,
         }));
-    }, [cues]);
-
+    }, [getEditorValue, isAttributeManagerOpen]);
+    const {cues} = cueState;
+    const attributeManagerCues = useMemo<AttributeManagerListItem[]>(() => {
+        return buildAttributeManagerCueItems(getEditorValue(), cues);
+    }, [cues, getEditorValue]);
     const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
 
     const contextValue = useMemo<ScriptSettingsModalContextValue>(() => ({
@@ -202,9 +197,11 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         effectiveScriptSettingsDraft,
         titlePageDraft,
         scriptTitleDraft,
+        cueState,
         openSettingsModal,
         openAttributeManagerModal,
     }), [
+        cueState,
         effectiveScriptSettingsDraft,
         openAttributeManagerModal,
         openSettingsModal,

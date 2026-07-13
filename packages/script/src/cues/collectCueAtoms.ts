@@ -1,6 +1,7 @@
 import type {ScriptNode} from '../document';
 import {
     CUE_ID_ATTR,
+    CUE_DRAFT_ATTR,
     CUE_KIND_ATTR,
     CUE_MODE_ATTR,
     CUE_OUT_NODE_NAME,
@@ -35,6 +36,10 @@ export const collectCueAtoms = (blockNode: ScriptNode): CueAtom[] => {
 
         if (child.type === CUE_START_NODE_NAME) {
             const attrs = child.attrs && typeof child.attrs === 'object' ? child.attrs : {};
+
+            if (attrs[CUE_DRAFT_ATTR] === true) {
+                return;
+            }
 
             atoms.push({
                 role: 'start',

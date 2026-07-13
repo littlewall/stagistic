@@ -49,13 +49,13 @@
     }
 }
 
-.itemDot {
+.itemNumber {
     flex: 0 0 auto;
-    width: .625rem;
-    height: .625rem;
-    background: var(--color-border-strong);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-full);
+    min-width: 2ch;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    text-align: right;
 }
 
 .itemIcon {

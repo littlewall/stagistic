@@ -34,7 +34,7 @@
 
 .item {
     display: grid;
-    grid-template-columns: calc(18px * var(--size-scale)) minmax(0, 1fr) auto;
+    grid-template-columns: minmax(2ch, auto) calc(18px * var(--size-scale)) minmax(0, 1fr) auto;
     gap: var(--space-md);
     align-items: center;
     min-height: calc(30px * var(--size-scale));
@@ -50,6 +50,13 @@
     &:focus-within .actions {
         opacity: 1;
     }
+}
+
+.number {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    text-align: right;
 }
 
 .kindIcon {

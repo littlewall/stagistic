@@ -104,11 +104,9 @@ export const createDocumentPersister = (scriptId: string) => {
                 .select({id: scriptCues.id})
                 .from(scriptCues)
                 .where(eq(scriptCues.scriptId, scriptId));
-            const existingCueIds = new Set(existingCues.map(cue => cue.id));
-            const assignableCues = extracted.cues.filter(cue => existingCueIds.has(cue.id));
-            const nextCueIds = new Set(assignableCues.map(cue => cue.id));
+            const nextCueIds = new Set(extracted.cues.map(cue => cue.id));
 
-            await bulkUpsertScriptCues(tx, assignableCues.map(cue => ({
+            await bulkUpsertScriptCues(tx, extracted.cues.map(cue => ({
                 id: cue.id,
                 scriptId,
                 sceneNumber: cue.sceneNumber,

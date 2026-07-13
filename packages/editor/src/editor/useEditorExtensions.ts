@@ -162,9 +162,11 @@ export const useEditorExtensions = ({
     );
     const cueStartNode = useMemo(
         () => CueStartNode.configure({
+            onCueAssigned,
+            onRequestCreateCue,
             onRequestRemoveCue,
         }),
-        [onRequestRemoveCue],
+        [onCueAssigned, onRequestCreateCue, onRequestRemoveCue],
     );
     const uniqueIdExtension = useMemo(() => {
         const uniqueIdTypes = [...SCRIPT_BLOCK_NODE_NAMES];

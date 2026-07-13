@@ -9,10 +9,10 @@ import styles from './AttributeManagerListPanel.module.css';
 
 export interface AttributeManagerListItem {
     id: string,
+    number: string,
     title: string,
     subtitle?: string | null,
-    color?: string | null,
-    /** Leading glyph shown instead of the color dot (e.g. a cue-kind icon). */
+    /** Trailing glyph, e.g. a cue-kind icon. */
     icon?: ReactNode,
 }
 
@@ -67,20 +67,15 @@ export const AttributeManagerListPanel = ({
                                 aria-pressed={isSelected}
                                 onClick={() => setSelectedItemId(item.id)}
                             >
+                                <span className={styles.itemNumber}>{item.number}</span>
+                                <span className={styles.itemTitle}>{item.title}</span>
+                                {item.subtitle ? (
+                                    <span className={styles.itemSubtitle}>{item.subtitle}</span>
+                                ) : null}
                                 {item.icon ? (
                                     <span className={styles.itemIcon} aria-hidden="true">
                                         {item.icon}
                                     </span>
-                                ) : (
-                                    <span
-                                        className={styles.itemDot}
-                                        style={item.color ? {backgroundColor: item.color} : undefined}
-                                        aria-hidden="true"
-                                    />
-                                )}
-                                <span className={styles.itemTitle}>{item.title}</span>
-                                {item.subtitle ? (
-                                    <span className={styles.itemSubtitle}>{item.subtitle}</span>
                                 ) : null}
                             </button>
                         );

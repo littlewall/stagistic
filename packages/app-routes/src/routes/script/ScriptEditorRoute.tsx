@@ -20,7 +20,6 @@ import {
     AddCueModal,
     ScriptCuesSidebar,
     UnassignCueModal,
-    useScriptCuesState,
 } from './editor/cues';
 import {
     type SidebarPanel,
@@ -65,6 +64,7 @@ export const ScriptEditorRoute = () => {
         effectiveScriptSettingsDraft,
         titlePageDraft,
         scriptTitleDraft,
+        cueState,
         openSettingsModal,
         openAttributeManagerModal,
     } = useScriptSettingsModal();
@@ -77,7 +77,7 @@ export const ScriptEditorRoute = () => {
         markCueAssigned,
         markCueUnassigned,
         unassignCue,
-    } = useScriptCuesState(currentScriptId, scriptRepository);
+    } = cueState;
 
     const displayedCurrentScript = useMemo(
         () => currentScript ? {...currentScript, name: scriptTitleDraft} : null,
