@@ -41,7 +41,7 @@ const findButtonByText = (label: string): HTMLButtonElement => {
     return button;
 };
 
-const renderPanel = () => {
+const renderPanel = (initialSelectedCharacterId?: string) => {
     const host = document.createElement('div');
     const onSetCharacterColor = vi.fn();
     const onSetCharacterOutline = vi.fn();
@@ -63,8 +63,14 @@ const renderPanel = () => {
                     name: 'ANNA',
                     color: '#8899aa',
                     outline: 'existing outline',
+                }, {
+                    id: 'char-2',
+                    name: 'BORIS',
+                    color: '#aa9988',
+                    outline: 'selected outline',
                 },
             ]}
+            initialSelectedCharacterId={initialSelectedCharacterId}
             onSetCharacterColor={onSetCharacterColor}
             onSetCharacterOutline={onSetCharacterOutline}
             onDeleteCharacter={onDeleteCharacter}
@@ -88,6 +94,14 @@ afterEach(() => {
 });
 
 describe('AttributeManagerCharactersPanel character actions', () => {
+    it('opens with the requested character selected', async () => {
+        renderPanel('char-2');
+
+        await waitForElement('[aria-label="Outline for BORIS"]');
+
+        expect(document.querySelector('[aria-label="Outline for ANNA"]')).toBeNull();
+    });
+
     it('applies a character color through the shared picker', async () => {
         const {onSetCharacterColor} = renderPanel();
         const colorButton = page.elementLocator(

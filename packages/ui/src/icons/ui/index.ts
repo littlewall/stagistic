@@ -3,6 +3,7 @@ export {ArrowRightIcon} from './ArrowRightIcon';
 export {ChevronDownIcon} from './ChevronDownIcon';
 export {CloseIcon} from './CloseIcon';
 export {DarkThemeIcon} from './DarkThemeIcon';
+export {EditPencilIcon} from './EditPencilIcon';
 export {EyeIcon} from './EyeIcon';
 export {FolderIcon} from './FolderIcon';
 export {HomeIcon} from './HomeIcon';

@@ -25,6 +25,7 @@ export interface AttributeManagerCharacter {
 
 export interface AttributeManagerCharactersPanelProps {
     characters: AttributeManagerCharacter[],
+    initialSelectedCharacterId?: string | null,
     isLoading?: boolean,
     characterColorSaturation?: number,
     deletingCharacterIds?: string[],
@@ -51,6 +52,7 @@ const EMPTY_LABELS: Record<WorkspaceId, string> = {
 
 export const AttributeManagerCharactersPanel = ({
     characters,
+    initialSelectedCharacterId,
     isLoading = false,
     characterColorSaturation,
     deletingCharacterIds = [],
@@ -61,7 +63,9 @@ export const AttributeManagerCharactersPanel = ({
     onCreateCharacter,
 }: AttributeManagerCharactersPanelProps) => {
     const [activeWorkspaceId, setActiveWorkspaceId] = useState<WorkspaceId>('characters');
-    const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
+    const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(
+        initialSelectedCharacterId ?? null,
+    );
     const [searchQuery, setSearchQuery] = useState('');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const activeWorkspace = WORKSPACES.find(item => item.id === activeWorkspaceId) ?? WORKSPACES[0];
@@ -83,8 +87,16 @@ export const AttributeManagerCharactersPanel = ({
             return;
         }
 
-        setSelectedCharacterId(characters[0]?.id ?? null);
-    }, [characters, selectedCharacterId]);
+        const initialSelectionExists = characters.some(character => character.id === initialSelectedCharacterId);
+
+        setSelectedCharacterId(initialSelectionExists
+            ? initialSelectedCharacterId ?? null
+            : characters[0]?.id ?? null);
+    }, [
+        characters,
+        initialSelectedCharacterId,
+        selectedCharacterId,
+    ]);
 
     const handleSelectWorkspace = (workspaceId: WorkspaceId) => {
         setActiveWorkspaceId(workspaceId);

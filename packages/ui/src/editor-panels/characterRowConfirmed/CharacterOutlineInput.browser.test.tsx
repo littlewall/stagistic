@@ -9,8 +9,7 @@ import {
 import {page} from 'vite-plus/test/browser';
 
 import type {EditorSidebarCharacter} from '../types';
-import {CharacterRowDetails} from './CharacterRowDetails';
-import type {CharacterRowDetailsProps} from './contracts';
+import {CharacterOutlineInput} from './CharacterOutlineInput';
 
 const mountedRoots: Root[] = [];
 
@@ -40,7 +39,7 @@ const character: EditorSidebarCharacter = {
     outline: 'existing outline',
 };
 
-const renderDetails = (overrides: Partial<CharacterRowDetailsProps['actions']> = {}) => {
+const renderInput = (onSetCharacterOutline?: (characterId: string, outline: string | null) => void) => {
     const host = document.createElement('div');
 
     document.body.appendChild(host);
@@ -48,10 +47,9 @@ const renderDetails = (overrides: Partial<CharacterRowDetailsProps['actions']> =
     const root = createRoot(host);
 
     root.render(
-        <CharacterRowDetails
-            model={{character}}
-            state={{isExpanded: true}}
-            actions={{...overrides}}
+        <CharacterOutlineInput
+            character={character}
+            onSetCharacterOutline={onSetCharacterOutline}
         />,
     );
     mountedRoots.push(root);
@@ -63,28 +61,25 @@ afterEach(() => {
     document.body.innerHTML = '';
 });
 
-describe('CharacterRowDetails outline', () => {
-    it('renders the outline textarea seeded with the persisted value and no controls', async () => {
-        renderDetails();
+describe('CharacterOutlineInput', () => {
+    it('renders the persisted outline', async () => {
+        renderInput();
 
         const textarea = await waitForElement<HTMLTextAreaElement>('textarea');
 
         expect(textarea.value).toBe('existing outline');
         expect(textarea.placeholder).toBe('Outline');
-        // The details area holds only the outline — no gender picker, no delete button.
-        expect(document.querySelectorAll('button')).toHaveLength(0);
     });
 
     it('persists the edited outline on blur', async () => {
         const onSetCharacterOutline = vi.fn();
 
-        renderDetails({onSetCharacterOutline});
+        renderInput(onSetCharacterOutline);
 
-        const textareaEl = await waitForElement<HTMLTextAreaElement>('textarea');
-        const textarea = page.elementLocator(textareaEl);
+        const textareaElement = await waitForElement<HTMLTextAreaElement>('textarea');
 
-        await textarea.fill('brooding rival');
-        textareaEl.blur();
+        await page.elementLocator(textareaElement).fill('brooding rival');
+        textareaElement.blur();
 
         expect(onSetCharacterOutline).toHaveBeenCalledWith('char-1', 'brooding rival');
     });
@@ -92,13 +87,12 @@ describe('CharacterRowDetails outline', () => {
     it('persists null when the outline is cleared', async () => {
         const onSetCharacterOutline = vi.fn();
 
-        renderDetails({onSetCharacterOutline});
+        renderInput(onSetCharacterOutline);
 
-        const textareaEl = await waitForElement<HTMLTextAreaElement>('textarea');
-        const textarea = page.elementLocator(textareaEl);
+        const textareaElement = await waitForElement<HTMLTextAreaElement>('textarea');
 
-        await textarea.fill('');
-        textareaEl.blur();
+        await page.elementLocator(textareaElement).fill('');
+        textareaElement.blur();
 
         expect(onSetCharacterOutline).toHaveBeenCalledWith('char-1', null);
     });

@@ -1,9 +1,6 @@
 import {
     focusFirstCharacterBlock,
     linkCharacterRef,
-    renameCharacterText,
-    replaceCharacterRefId,
-    unlinkCharacterRef,
     useEditorElementSelection,
     useEditorInstance,
     useEditorLiveCharacters,
@@ -19,6 +16,7 @@ import {
 import {ATTRIBUTE_MANAGER_PANEL_CHARACTERS} from '../../attributes/attributeManagerMenu';
 import {useScriptCharacters} from '../../ScriptCharactersContext';
 import {useScriptSession} from '../../ScriptSessionContext';
+import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalProvider';
 import {SidebarMiniHeader} from '../sidebar';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import {SidebarActionsGroup} from '../sidebar/SidebarActionsGroup';
@@ -29,6 +27,7 @@ import {useCharacterComputed} from './useCharacterComputed';
 
 export const ScriptCharactersSidebar = () => {
     const {resolvedScriptSettings} = useScriptSession();
+    const {openAttributeManagerCharacter} = useScriptSettingsModal();
     const characters = useScriptCharacters();
     const editor = useEditorInstance();
     const elementSelection = useEditorElementSelection();
@@ -40,7 +39,6 @@ export const ScriptCharactersSidebar = () => {
     const {
         confirmedCharacters,
         unconfirmedCharacters,
-        getCharacterNameForBlockType,
     } = useCharacterComputed({
         data: {
             confirmedCharacterRecords: characters.confirmedCharacterRecords,
@@ -86,69 +84,6 @@ export const ScriptCharactersSidebar = () => {
         return new Set(characters.confirmedCharacterRecords.map(character => normalizeCharacterKey(character.key)));
     }, [characters.confirmedCharacterRecords]);
 
-    const handleDeleteCharacter = useCallback((characterId: string) => {
-        characters.handleDeleteCharacter(characterId, {
-            onUnlinkRef: id => {
-                if (editor) {
-                    unlinkCharacterRef(editor, id);
-                }
-            },
-        });
-    }, [characters, editor]);
-
-    const handleRenameCharacterPreview = useCallback((
-        characterId: string,
-        previousCharacterName: string,
-        nextCharacterName: string,
-    ) => {
-        characters.handleRenameCharacterPreview(characterId, previousCharacterName, nextCharacterName, {
-            onRenameText: (charId, newName) => {
-                if (editor) {
-                    renameCharacterText(
-                        editor,
-                        charId,
-                        newName,
-                        getCharacterNameForBlockType,
-                        previousCharacterName,
-                    );
-                }
-            },
-        });
-    }, [
-        characters,
-        editor,
-        getCharacterNameForBlockType,
-    ]);
-
-    const handleRenameCharacter = useCallback((
-        characterId: string,
-        previousCharacterName: string,
-        nextCharacterName: string,
-    ) => {
-        characters.handleRenameCharacter(characterId, previousCharacterName, nextCharacterName, {
-            onRenameText: (charId, newName) => {
-                if (editor) {
-                    renameCharacterText(
-                        editor,
-                        charId,
-                        newName,
-                        getCharacterNameForBlockType,
-                        previousCharacterName,
-                    );
-                }
-            },
-            onReplaceId: (oldId, newId) => {
-                if (editor) {
-                    replaceCharacterRefId(editor, oldId, newId);
-                }
-            },
-        });
-    }, [
-        characters,
-        editor,
-        getCharacterNameForBlockType,
-    ]);
-
     return (
         <div className={styles.content}>
             <SidebarMiniHeader
@@ -167,13 +102,8 @@ export const ScriptCharactersSidebar = () => {
                 }}
                 actions={{
                     onConfirmCharacter: handleConfirmCharacter,
-                    onDeleteCharacter: handleDeleteCharacter,
+                    onEditCharacter: openAttributeManagerCharacter,
                     onFocusCharacter: handleFocusCharacter,
-                    normalizeRenameInput: characters.normalizeCharacterNameForInlineInput,
-                    onRenameCharacterPreview: handleRenameCharacterPreview,
-                    onRenameCharacter: handleRenameCharacter,
-                    onSetCharacterColor: characters.handleSetCharacterColor,
-                    onSetCharacterOutline: characters.handleSetCharacterOutline,
                 }}
                 options={{
                     activeCharacterId: elementSelection?.type === 'character'
@@ -182,7 +112,6 @@ export const ScriptCharactersSidebar = () => {
                     activeCharacterKey: elementSelection?.type === 'character'
                         ? elementSelection.characterKey
                         : null,
-                    characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
                     className: styles.sidebar,
                 }}
             />

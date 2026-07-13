@@ -31,17 +31,6 @@ const waitForElement = async <T extends Element>(selector: string): Promise<T> =
     throw new Error(`Expected element matching ${selector}`);
 };
 
-const findButtonByText = (label: string): HTMLButtonElement => {
-    const button = Array.from(document.querySelectorAll('button'))
-        .find(candidate => candidate.textContent?.trim() === label);
-
-    if (!button) {
-        throw new Error(`Expected a button labelled ${label}`);
-    }
-
-    return button;
-};
-
 const confirmedCharacter: EditorSidebarCharacter = {
     id: 'char-1',
     key: 'ANNA',
@@ -51,7 +40,7 @@ const confirmedCharacter: EditorSidebarCharacter = {
 };
 
 const renderSidebar = (
-    onDeleteCharacter = vi.fn(),
+    onEditCharacter = vi.fn(),
     activeCharacterId?: string,
 ) => {
     const host = document.createElement('div');
@@ -66,13 +55,13 @@ const renderSidebar = (
                 confirmedCharacters: [confirmedCharacter],
                 unconfirmedCharacters: [],
             }}
-            actions={{onDeleteCharacter}}
+            actions={{onEditCharacter}}
             options={{activeCharacterId}}
         />,
     );
     mountedRoots.push(root);
 
-    return {onDeleteCharacter};
+    return {onEditCharacter};
 };
 
 afterEach(() => {
@@ -81,7 +70,7 @@ afterEach(() => {
     document.body.innerHTML = '';
 });
 
-describe('EditorSidebar delete confirmation', () => {
+describe('EditorSidebar character rows', () => {
     it('marks the matching character as active', async () => {
         renderSidebar(undefined, 'char-1');
 
@@ -90,59 +79,49 @@ describe('EditorSidebar delete confirmation', () => {
         expect(activeRow.textContent).toContain('ANNA');
     });
 
-    it('reveals the delete button only once a character is expanded', async () => {
+    it('renders confirmed characters as static rows with an edit action', async () => {
         renderSidebar();
 
-        await waitForElement('[aria-label="Expand ANNA"]');
-
+        await waitForElement('[aria-label="Edit ANNA"]');
+        expect(document.querySelector('[aria-label="Expand ANNA"]')).toBeNull();
         expect(document.querySelector('[aria-label="Remove ANNA"]')).toBeNull();
-
-        const row = page.elementLocator(await waitForElement('[aria-label="Expand ANNA"]'));
-
-        await row.click();
-
-        await waitForElement('[aria-label="Remove ANNA"]');
     });
 
-    it('deletes only after confirming in the modal', async () => {
-        const {onDeleteCharacter} = renderSidebar();
+    it('opens the selected character for editing', async () => {
+        const {onEditCharacter} = renderSidebar();
+        const editButton = page.elementLocator(await waitForElement('[aria-label="Edit ANNA"]'));
 
-        const row = page.elementLocator(await waitForElement('[aria-label="Expand ANNA"]'));
+        await editButton.click();
 
-        await row.click();
-
-        const deleteButton = page.elementLocator(await waitForElement('[aria-label="Remove ANNA"]'));
-
-        await deleteButton.click();
-
-        // Modal is open; deletion has not fired yet.
-        await waitForElement('dialog[aria-label="Remove character"]');
-        expect(onDeleteCharacter).not.toHaveBeenCalled();
-
-        const confirm = page.elementLocator(findButtonByText('Remove'));
-
-        await confirm.click();
-
-        expect(onDeleteCharacter).toHaveBeenCalledWith('char-1');
+        expect(onEditCharacter).toHaveBeenCalledWith('char-1');
     });
 
-    it('does not delete when the modal is cancelled', async () => {
-        const {onDeleteCharacter} = renderSidebar();
+    it('places the pending confirmation action at the far right', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
 
-        const row = page.elementLocator(await waitForElement('[aria-label="Expand ANNA"]'));
+        document.body.appendChild(host);
+        root.render(
+            <EditorSidebar
+                data={{
+                    confirmedCharacters: [],
+                    unconfirmedCharacters: [
+                        {
+                            key: 'BORIS',
+                            color: '#aa9988',
+                            isConfirmed: false,
+                        },
+                    ],
+                }}
+                actions={{onConfirmCharacter: vi.fn()}}
+            />,
+        );
+        mountedRoots.push(root);
 
-        await row.click();
+        const confirmButton = await waitForElement<HTMLButtonElement>('[aria-label="Confirm BORIS"]');
+        const row = confirmButton.closest('div');
 
-        const deleteButton = page.elementLocator(await waitForElement('[aria-label="Remove ANNA"]'));
-
-        await deleteButton.click();
-
-        await waitForElement('dialog[aria-label="Remove character"]');
-
-        const cancel = page.elementLocator(findButtonByText('Cancel'));
-
-        await cancel.click();
-
-        expect(onDeleteCharacter).not.toHaveBeenCalled();
+        expect(row?.lastElementChild).toBe(confirmButton);
+        expect(row?.firstElementChild?.className).toContain('characterColorOutline');
     });
 });

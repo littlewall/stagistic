@@ -65,6 +65,7 @@ interface ScriptSettingsModalContextValue {
     openSettingsModal: () => void,
     openAttributeManagerModal: () => void,
     openAttributeManagerModalWithPanel: (panelId: AttributeManagerPanelId) => void,
+    openAttributeManagerCharacter: (characterId: string) => void,
 }
 
 const ScriptSettingsModalContext = createContext<ScriptSettingsModalContextValue | null>(null);
@@ -150,9 +151,11 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     const {
         isOpen: isAttributeManagerOpen,
         activePanelId: activeAttributeManagerPanelId,
+        selectedCharacterId: selectedAttributeManagerCharacterId,
         tabs: attributeManagerTabs,
         open: openAttributeManagerModal,
         openWithPanel: openAttributeManagerModalWithPanel,
+        openCharacter: openAttributeManagerCharacter,
         close: closeAttributeManagerModal,
         selectPanel: selectAttributeManagerPanel,
     } = useAttributeManagerModalState();
@@ -205,11 +208,13 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         openSettingsModal,
         openAttributeManagerModal,
         openAttributeManagerModalWithPanel,
+        openAttributeManagerCharacter,
     }), [
         cueState,
         effectiveScriptSettingsDraft,
         openAttributeManagerModal,
         openAttributeManagerModalWithPanel,
+        openAttributeManagerCharacter,
         openSettingsModal,
         resolvedScriptSettings,
         scriptTitleDraft,
@@ -274,6 +279,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_CHARACTERS ? (
                         <AttributeManagerCharactersPanel
                             characters={attributeManagerCharacters}
+                            initialSelectedCharacterId={selectedAttributeManagerCharacterId}
                             isLoading={charactersContextValue.isCharactersLoading}
                             characterColorSaturation={resolvedScriptSettings.visual.characterColorSaturation}
                             deletingCharacterIds={charactersContextValue.deletingCharacterIds}

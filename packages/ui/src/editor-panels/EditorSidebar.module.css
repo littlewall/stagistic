@@ -76,10 +76,6 @@
     &.active {
         background: color-mix(in oklch, var(--color-surface-accent) 80%, transparent);
         box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-surface-accent) 55%, var(--color-border));
-
-        & .characterRowButton:hover {
-            background: transparent;
-        }
     }
 
     &.unconfirmed {
@@ -88,59 +84,12 @@
     }
 }
 
-.characterRow,
-.characterRowButton {
+.characterRow {
     display: flex;
     gap: var(--space-md);
     align-items: center;
     min-height: calc(30px * var(--size-scale));
     padding: var(--space-sm) var(--space-md);
-}
-
-.characterRowButton {
-    cursor: pointer;
-    width: 100%;
-    color: inherit;
-    text-align: left;
-    background: transparent;
-    border: none;
-
-    &:hover {
-        background: var(--select-button-hover-bg);
-    }
-
-    &:focus-visible {
-        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
-        outline-offset: -2px;
-    }
-}
-
-.expandIcon {
-    width: calc(14px * var(--size-scale));
-    height: calc(14px * var(--size-scale));
-}
-
-.expandIndicatorButton {
-    cursor: pointer;
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    width: calc(18px * var(--size-scale));
-    height: calc(18px * var(--size-scale));
-    color: var(--color-text-muted);
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-xs);
-
-    &:hover {
-        background: color-mix(in oklch, var(--character-color) 18%, transparent);
-    }
-
-    &:focus-visible {
-        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
-        outline-offset: 1px;
-    }
 }
 
 .characterColor {
@@ -327,24 +276,6 @@
     white-space: nowrap;
 }
 
-.characterInlineRenameInput {
-    width: 100%;
-    min-width: 0;
-    padding: 0;
-    font-size: var(--font-size-sm);
-    color: var(--color-text);
-    background: transparent;
-    border: none;
-
-    &:focus-visible {
-        outline: none;
-    }
-
-    &:disabled {
-        opacity: .68;
-    }
-}
-
 .confirmIconButton {
     cursor: pointer;
     display: inline-flex;
@@ -362,6 +293,37 @@
     &:hover {
         color: color-mix(in oklch, var(--character-color) 55%, var(--color-text));
         background: color-mix(in oklch, var(--character-color) 18%, transparent);
+    }
+
+    &:focus-visible {
+        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
+        outline-offset: 1px;
+    }
+
+    &[aria-disabled = 'true'] {
+        cursor: default;
+        opacity: .65;
+    }
+}
+
+.editIconButton {
+    cursor: pointer;
+    display: inline-flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: calc(18px * var(--size-scale));
+    height: calc(18px * var(--size-scale));
+    margin-left: auto;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: none;
+    border-radius: var(--radius-xs);
+    transition: color .15s ease, background .15s ease;
+
+    &:hover {
+        color: var(--color-text);
+        background: color-mix(in oklch, var(--color-text) 8%, transparent);
     }
 
     &:focus-visible {
@@ -420,15 +382,6 @@
     animation: characterConfirmSpin .8s linear infinite;
 }
 
-.characterDetails {
-    display: grid;
-    gap: var(--space-md);
-    padding: var(--space-sm) var(--space-md) var(--space-md);
-    font-size: var(--font-size-xxs);
-    background: transparent;
-    border-top: 1px solid color-mix(in oklch, var(--character-color) 22%, var(--color-border));
-}
-
 .characterOutlineInput {
     resize: none;
     overflow-y: auto;
@@ -452,37 +405,6 @@
 
     &::placeholder {
         color: var(--color-text-muted);
-    }
-}
-
-.characterHeaderDeleteButton {
-    cursor: pointer;
-    display: inline-flex;
-    flex-shrink: 0;
-    align-items: center;
-    justify-content: center;
-    width: calc(20px * var(--size-scale));
-    height: calc(20px * var(--size-scale));
-    margin-inline-start: var(--space-xs);
-    color: color-mix(in oklch, var(--color-status-danger) 70%, var(--color-text));
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-xs);
-    transition: color .15s ease, background .15s ease;
-
-    &:hover {
-        color: var(--color-status-danger);
-        background: color-mix(in oklch, var(--color-status-danger) 16%, transparent);
-    }
-
-    &:focus-visible {
-        outline: 2px solid color-mix(in oklch, var(--color-status-danger) 55%, var(--color-text));
-        outline-offset: 1px;
-    }
-
-    &[aria-disabled = 'true'] {
-        cursor: default;
-        opacity: .65;
     }
 }
 

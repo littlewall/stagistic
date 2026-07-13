@@ -47,9 +47,25 @@ export const CharacterRowPending = ({
 
     return (
         <div className={styles.characterRow}>
+            <span className={styles.characterColorOutline} aria-hidden="true" />
+            <span className={styles.characterName}>{character.key}</span>
+            {onFocusCharacter && (
+                <Tooltip
+                    label="Focus first occurrence"
+                    placement="left"
+                >
+                    <Button
+                        className={styles.focusIconButton}
+                        onPress={() => onFocusCharacter(character.key)}
+                        aria-label={`Focus ${character.key}`}
+                    >
+                        <EyeIcon className={styles.iconGlyph} strokeWidth={2} />
+                    </Button>
+                </Tooltip>
+            )}
             <Tooltip
                 label={confirmTooltipLabel}
-                placement="right"
+                placement="left"
                 isDisabled={isConfirmActionDisabled}
             >
                 <Button
@@ -75,22 +91,6 @@ export const CharacterRowPending = ({
                     )}
                 </Button>
             </Tooltip>
-            <span className={styles.characterColorOutline} aria-hidden="true" />
-            <span className={styles.characterName}>{character.key}</span>
-            {onFocusCharacter && (
-                <Tooltip
-                    label="Focus first occurrence"
-                    placement="left"
-                >
-                    <Button
-                        className={styles.focusIconButton}
-                        onPress={() => onFocusCharacter(character.key)}
-                        aria-label={`Focus ${character.key}`}
-                    >
-                        <EyeIcon className={styles.iconGlyph} strokeWidth={2} />
-                    </Button>
-                </Tooltip>
-            )}
         </div>
     );
 };
