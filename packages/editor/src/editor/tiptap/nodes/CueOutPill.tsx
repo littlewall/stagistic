@@ -90,14 +90,14 @@ export const CueOutPill = ({
                     className={styles.menu}
                     data-cue-menu="out"
                 >
-                    {cueId && onOpenCueManager ? (
-                        <CueMenuButton label="Manage cue" onClick={openCueManager}>
-                            <EditPencilIcon aria-hidden="true" />
-                        </CueMenuButton>
-                    ) : null}
                     {hasStartCue ? (
                         <CueMenuButton label="Go to cue start" onClick={goToStartCue}>
                             <ArrowLeftIcon aria-hidden="true" />
+                        </CueMenuButton>
+                    ) : null}
+                    {cueId && onOpenCueManager ? (
+                        <CueMenuButton label="Manage cue" onClick={openCueManager}>
+                            <EditPencilIcon aria-hidden="true" />
                         </CueMenuButton>
                     ) : null}
                     <CueMenuButton

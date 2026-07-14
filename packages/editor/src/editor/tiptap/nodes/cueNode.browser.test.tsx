@@ -284,7 +284,7 @@ describe('cue pill node views', () => {
     });
 
     it('navigates from the cue start to its end and back', async () => {
-        renderEditor(createTwoBlockDocument());
+        renderEditor(createTwoBlockDocument(), {onOpenCueManager: vi.fn()});
 
         const editor = await getEditor();
 
@@ -306,7 +306,18 @@ describe('cue pill node views', () => {
         startPill.scrollIntoView = scrollToStart;
 
         await activatePill();
-        await poll(() => document.querySelector('[data-cue-menu="start"]'), 'start pill menu');
+
+        const startMenu = await poll(
+            () => document.querySelector('[data-cue-menu="start"]'),
+            'start pill menu',
+        );
+
+        expect([...startMenu.querySelectorAll('button')].map(button => button.ariaLabel)).toEqual([
+            'Go to cue end',
+            'Manage cue',
+            'Remove cue',
+        ]);
+
         await clickMenuButton('Go to cue end');
 
         expect(scrollToEnd).toHaveBeenCalledWith({
@@ -321,7 +332,18 @@ describe('cue pill node views', () => {
         }
 
         await page.elementLocator(outLabel).click();
-        await poll(() => document.querySelector('[data-cue-menu="out"]'), 'out pill menu');
+
+        const outMenu = await poll(
+            () => document.querySelector('[data-cue-menu="out"]'),
+            'out pill menu',
+        );
+
+        expect([...outMenu.querySelectorAll('button')].map(button => button.ariaLabel)).toEqual([
+            'Go to cue start',
+            'Manage cue',
+            'Delete end',
+        ]);
+
         await clickMenuButton('Go to cue start');
 
         expect(scrollToStart).toHaveBeenCalledWith({
