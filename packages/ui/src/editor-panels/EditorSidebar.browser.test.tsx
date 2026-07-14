@@ -79,17 +79,17 @@ describe('EditorSidebar character rows', () => {
         expect(activeRow.textContent).toContain('ANNA');
     });
 
-    it('renders confirmed characters as static rows with an edit action', async () => {
+    it('renders confirmed characters as static rows with a manage action', async () => {
         renderSidebar();
 
-        await waitForElement('[aria-label="Edit ANNA"]');
+        await waitForElement('[aria-label="Manage ANNA"]');
         expect(document.querySelector('[aria-label="Expand ANNA"]')).toBeNull();
         expect(document.querySelector('[aria-label="Remove ANNA"]')).toBeNull();
     });
 
-    it('opens the selected character for editing', async () => {
+    it('opens the selected character manager', async () => {
         const {onEditCharacter} = renderSidebar();
-        const editButton = page.elementLocator(await waitForElement('[aria-label="Edit ANNA"]'));
+        const editButton = page.elementLocator(await waitForElement('[aria-label="Manage ANNA"]'));
 
         await editButton.click();
 

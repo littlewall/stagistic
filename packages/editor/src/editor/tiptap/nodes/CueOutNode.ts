@@ -4,10 +4,15 @@ import {
     Node,
 } from '@tiptap/core';
 import {ReactNodeViewRenderer} from '@tiptap/react';
+import {createElement} from 'react';
 
-import {CueOutPill} from './CuePill';
+import {CueOutPill} from './CueOutPill';
 
-export const CueOutNode = Node.create({
+interface CueOutNodeOptions {
+    onOpenCueManager?: (cueId: string) => void,
+}
+
+export const CueOutNode = Node.create<CueOutNodeOptions>({
     name: CUE_OUT_NODE_NAME,
     group: 'inline',
     inline: true,
@@ -23,7 +28,14 @@ export const CueOutNode = Node.create({
         return ['span', mergeAttributes(HTMLAttributes, {'data-cue-pill': 'out'})];
     },
 
+    addOptions() {
+        return {};
+    },
+
     addNodeView() {
-        return ReactNodeViewRenderer(CueOutPill);
+        return ReactNodeViewRenderer(props => createElement(CueOutPill, {
+            ...props,
+            onOpenCueManager: this.options.onOpenCueManager,
+        }));
     },
 });

@@ -82,6 +82,7 @@ const Editor = ({
         onBlockUiEvent,
         onRequestCreateCue,
         onRequestRemoveCue,
+        onOpenCueManager,
         onCueAssigned,
         onCueUnassigned,
     } = callbacks ?? {};
@@ -193,6 +194,7 @@ const Editor = ({
         persistentCuesRef,
         onRequestCreateCue,
         onRequestRemoveCue,
+        onOpenCueManager,
         onCueAssigned,
         onCueUnassigned,
         enableBlockUiEvents: Boolean(onBlockUiEvent),

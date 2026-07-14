@@ -6,13 +6,15 @@ import {
     CUE_TITLE_ATTR,
 } from '@stagistic/script';
 import {
+    ArrowRightIcon,
+    EditPencilIcon,
+} from '@stagistic/ui';
+import {
     type NodeViewProps,
     NodeViewWrapper,
 } from '@tiptap/react';
 import clsx from 'clsx';
 import {
-    type FocusEvent,
-    type RefObject,
     useEffect,
     useRef,
     useState,
@@ -27,76 +29,20 @@ import {
     CueDeleteIcon,
     CueMenuButton,
     type CueMode,
-    CueModeIcon,
-    getModeButtonLabel,
 } from './CuePillControls';
-
-const usePillActivation = () => {
-    const [active, setActive] = useState(false);
-    const rootRef = useRef<HTMLSpanElement>(null);
-
-    useEffect(() => {
-        if (!active) {
-            return undefined;
-        }
-
-        const onPointerDown = (event: MouseEvent) => {
-            if (rootRef.current && !rootRef.current.contains(event.target as Node)) {
-                setActive(false);
-            }
-        };
-
-        document.addEventListener('mousedown', onPointerDown);
-
-        return () => {
-            document.removeEventListener('mousedown', onPointerDown);
-        };
-    }, [active]);
-
-    return {
-        active,
-        setActive,
-        rootRef,
-    };
-};
-
-const normalizeTitle = (value: unknown) => {
-    return typeof value === 'string' ? value : '';
-};
-
-const handleFocusWithin = (setActive: (active: boolean) => void) => {
-    return () => setActive(true);
-};
-
-const handleBlurWithin = (
-    rootRef: RefObject<HTMLSpanElement | null>,
-    setActive: (active: boolean) => void,
-) => {
-    return (event: FocusEvent<HTMLSpanElement>) => {
-        const nextTarget = event.relatedTarget;
-
-        if (nextTarget instanceof Node && rootRef.current?.contains(nextTarget)) {
-            return;
-        }
-
-        setActive(false);
-    };
-};
-
-const readDecorationLabel = (decorations: NodeViewProps['decorations'], key: string): string => {
-    for (const decoration of decorations) {
-        const value = (decoration.spec as Record<string, unknown> | undefined)?.[key];
-
-        if (typeof value === 'string') {
-            return value;
-        }
-    }
-
-    return '';
-};
+import {
+    findCuePillElement,
+    handleBlurWithin,
+    handleFocusWithin,
+    normalizeCueTitle,
+    readDecorationLabel,
+    scrollToCuePill,
+    usePillActivation,
+} from './cuePillHelpers';
 
 interface CueStartPillProps extends NodeViewProps {
     onCueAssigned?: (cueId: string) => void,
+    onOpenCueManager?: (cueId: string) => void,
     onRequestCreateCue?: (request: EditorCueCreateRequest) => void,
     onRequestRemoveCue?: (request: EditorCueRemoveRequest) => void,
 }
@@ -109,6 +55,7 @@ export const CueStartPill = ({
     editor,
     getPos,
     onCueAssigned,
+    onOpenCueManager,
     onRequestCreateCue,
     onRequestRemoveCue,
 }: CueStartPillProps) => {
@@ -118,9 +65,11 @@ export const CueStartPill = ({
     const titleRef = useRef<HTMLSpanElement>(null);
     const mode: CueMode = node.attrs[CUE_MODE_ATTR] === 'hit' ? 'hit' : 'open';
     const isDraft = node.attrs[CUE_DRAFT_ATTR] === true;
-    const title = normalizeTitle(node.attrs[CUE_TITLE_ATTR]);
+    const cueId = String(node.attrs[CUE_ID_ATTR] ?? '');
+    const title = normalizeCueTitle(node.attrs[CUE_TITLE_ATTR]);
     const cueNumber = readDecorationLabel(decorations, 'cueNumber');
     const [draftTitle, setDraftTitle] = useState(title);
+    const hasEndCue = Boolean(cueId && findCuePillElement(editor, 'out', cueId));
 
     useEffect(() => {
         setDraftTitle(title);
@@ -146,13 +95,7 @@ export const CueStartPill = ({
         updateAttributes({[CUE_TITLE_ATTR]: value});
     };
 
-    const toggleMode = () => {
-        updateAttributes({[CUE_MODE_ATTR]: mode === 'hit' ? 'open' : 'hit'});
-    };
-
     const deleteCue = () => {
-        const cueId = String(node.attrs[CUE_ID_ATTR] ?? '');
-
         if (cueId && onRequestRemoveCue) {
             onRequestRemoveCue({
                 cueId,
@@ -168,6 +111,18 @@ export const CueStartPill = ({
         if (typeof pos !== 'number' || !editor.commands.deleteCueStart(pos)) {
             deleteNode();
         }
+    };
+    const openCueManager = () => {
+        if (!cueId) {
+            return;
+        }
+
+        setActive(false);
+        onOpenCueManager?.(cueId);
+    };
+    const goToEndCue = () => {
+        setActive(false);
+        scrollToCuePill(editor, 'out', cueId);
     };
     const requestCueCreation = (value = titleRef.current?.textContent ?? draftTitle) => {
         const nextTitle = value.trim();
@@ -206,6 +161,7 @@ export const CueStartPill = ({
             as="span"
             className={clsx(styles.pill, styles[mode], active && styles.active)}
             data-cue-pill="start"
+            data-cue-id={cueId || undefined}
             contentEditable={false}
             onFocus={handleFocusWithin(setActive)}
             onBlur={handleBlurWithin(rootRef, setActive)}
@@ -270,9 +226,16 @@ export const CueStartPill = ({
                     className={styles.menu}
                     data-cue-menu="start"
                 >
-                    <CueMenuButton label={getModeButtonLabel(mode)} onClick={toggleMode}>
-                        <CueModeIcon mode={mode} />
-                    </CueMenuButton>
+                    {cueId && onOpenCueManager ? (
+                        <CueMenuButton label="Manage cue" onClick={openCueManager}>
+                            <EditPencilIcon aria-hidden="true" />
+                        </CueMenuButton>
+                    ) : null}
+                    {hasEndCue ? (
+                        <CueMenuButton label="Go to cue end" onClick={goToEndCue}>
+                            <ArrowRightIcon aria-hidden="true" />
+                        </CueMenuButton>
+                    ) : null}
                     <CueMenuButton
                         label="Remove cue"
                         isDanger
@@ -283,54 +246,6 @@ export const CueStartPill = ({
                 </span>
             ) : null}
             {' '}
-        </NodeViewWrapper>
-    );
-};
-
-export const CueOutPill = ({deleteNode, decorations}: NodeViewProps) => {
-    const {
-        active, setActive, rootRef,
-    } = usePillActivation();
-    const cueId = readDecorationLabel(decorations, 'cueId');
-    const outLabel = readDecorationLabel(decorations, 'outLabel') || 'out';
-    const outNumber = readDecorationLabel(decorations, 'outNumber');
-    const outTitle = readDecorationLabel(decorations, 'outTitle');
-
-    return (
-        <NodeViewWrapper
-            ref={rootRef}
-            as="span"
-            className={clsx(styles.pill, styles.out, active && styles.active)}
-            data-cue-pill="out"
-            data-cue-id={cueId || undefined}
-            contentEditable={false}
-            onFocus={handleFocusWithin(setActive)}
-            onBlur={handleBlurWithin(rootRef, setActive)}
-        >
-            <span
-                className={clsx(styles.tagBody, styles.outLabel)}
-                role="button"
-                tabIndex={-1}
-                aria-label={outLabel}
-                onClick={() => setActive(true)}
-            >
-                <span className={styles.outStrong} data-cue-out-primary>{outNumber ? `${outNumber} out` : 'out'}</span>
-                {outTitle ? <span className={styles.outTitle} data-cue-out-title>{` (${outTitle})`}</span> : null}
-            </span>
-            {active ? (
-                <span
-                    className={styles.menu}
-                    data-cue-menu="out"
-                >
-                    <CueMenuButton
-                        label="Delete end"
-                        isDanger
-                        onClick={() => deleteNode()}
-                    >
-                        <CueDeleteIcon />
-                    </CueMenuButton>
-                </span>
-            ) : null}
         </NodeViewWrapper>
     );
 };

@@ -21,14 +21,14 @@ export const CharacterRowConfirmed = ({
             <span className={styles.characterColor} aria-hidden="true" />
             <span className={styles.characterName}>{character.key}</span>
             <Tooltip
-                label={`Edit ${character.key}`}
+                label={`Manage ${character.key}`}
                 placement="left"
                 isDisabled={isEditDisabled}
             >
                 <Button
                     className={styles.editIconButton}
                     aria-disabled={isEditDisabled}
-                    aria-label={`Edit ${character.key}`}
+                    aria-label={`Manage ${character.key}`}
                     onPress={() => {
                         if (!character.id || isEditDisabled) {
                             return;

@@ -18,6 +18,7 @@ export interface AttributeManagerListItem {
 
 export interface AttributeManagerListPanelProps {
     items: AttributeManagerListItem[],
+    initialSelectedItemId?: string | null,
     isLoading?: boolean,
     /** Singular label shown above the selected item's title, e.g. "Scene". */
     detailTypeLabel: string,
@@ -31,13 +32,16 @@ export interface AttributeManagerListPanelProps {
 
 export const AttributeManagerListPanel = ({
     items,
+    initialSelectedItemId,
     isLoading = false,
     detailTypeLabel,
     emptyListLabel,
     emptyDetailLabel,
     detailPlaceholder,
 }: AttributeManagerListPanelProps) => {
-    const [selectedItemId, setSelectedItemId] = useState<string | null>(null);
+    const [selectedItemId, setSelectedItemId] = useState<string | null>(
+        initialSelectedItemId ?? null,
+    );
     const selectedItem = items.find(item => item.id === selectedItemId) ?? null;
 
     useEffect(() => {
@@ -47,8 +51,16 @@ export const AttributeManagerListPanel = ({
             return;
         }
 
-        setSelectedItemId(items[0]?.id ?? null);
-    }, [items, selectedItemId]);
+        const initialSelectionExists = items.some(item => item.id === initialSelectedItemId);
+
+        setSelectedItemId(initialSelectionExists
+            ? initialSelectedItemId ?? null
+            : items[0]?.id ?? null);
+    }, [
+        initialSelectedItemId,
+        items,
+        selectedItemId,
+    ]);
 
     const listStatus = isLoading ? 'Loading...' : emptyListLabel;
 

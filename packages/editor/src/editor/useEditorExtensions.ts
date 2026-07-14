@@ -54,6 +54,7 @@ type UseEditorExtensionsArgs = {
     persistentCuesRef?: {current: readonly PersistentCueRef[]},
     onRequestCreateCue?: (request: EditorCueCreateRequest) => void,
     onRequestRemoveCue?: (request: EditorCueRemoveRequest) => void,
+    onOpenCueManager?: (cueId: string) => void,
     onCueAssigned?: (cueId: string) => void,
     onCueUnassigned?: (cueId: string) => void,
     enableBlockUiEvents?: boolean,
@@ -68,6 +69,7 @@ export const useEditorExtensions = ({
     persistentCuesRef,
     onRequestCreateCue,
     onRequestRemoveCue,
+    onOpenCueManager,
     onCueAssigned,
     onCueUnassigned,
     enableBlockUiEvents,
@@ -163,10 +165,20 @@ export const useEditorExtensions = ({
     const cueStartNode = useMemo(
         () => CueStartNode.configure({
             onCueAssigned,
+            onOpenCueManager,
             onRequestCreateCue,
             onRequestRemoveCue,
         }),
-        [onCueAssigned, onRequestCreateCue, onRequestRemoveCue],
+        [
+            onCueAssigned,
+            onOpenCueManager,
+            onRequestCreateCue,
+            onRequestRemoveCue,
+        ],
+    );
+    const cueOutNode = useMemo(
+        () => CueOutNode.configure({onOpenCueManager}),
+        [onOpenCueManager],
     );
     const uniqueIdExtension = useMemo(() => {
         const uniqueIdTypes = [...SCRIPT_BLOCK_NODE_NAMES];
@@ -191,7 +203,7 @@ export const useEditorExtensions = ({
             characterTagInputExtension,
             ...ScriptBlockNodes,
             cueStartNode,
-            CueOutNode,
+            cueOutNode,
             cueCommandsExtension,
             cueInputExtension,
             CueNumberingExtension,
@@ -214,6 +226,7 @@ export const useEditorExtensions = ({
         characterTagInputExtension,
         cueCommandsExtension,
         cueInputExtension,
+        cueOutNode,
         cueStartNode,
         emptyEnterChooserExtension,
         editorRuntimeExtension,

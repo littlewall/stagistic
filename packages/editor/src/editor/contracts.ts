@@ -182,6 +182,7 @@ export interface EditorLifecycleCallbacks {
     onBlockUiEvent?: (event: EditorBlockUiEvent) => void,
     onRequestCreateCue?: (request: EditorCueCreateRequest) => void,
     onRequestRemoveCue?: (request: EditorCueRemoveRequest) => void,
+    onOpenCueManager?: (cueId: string) => void,
     onCueAssigned?: (cueId: string) => void,
     onCueUnassigned?: (cueId: string) => void,
 }

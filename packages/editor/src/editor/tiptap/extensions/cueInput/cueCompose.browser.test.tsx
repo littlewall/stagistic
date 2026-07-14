@@ -459,14 +459,17 @@ describe('cue # compose', () => {
 
         const outPill = await poll(() => document.querySelector('[data-cue-pill="out"]'), 'cue out pill');
 
-        await poll(() => (outPill.textContent ?? '').includes('out (Night)') ? true : null, 'out label');
+        await poll(() => (outPill.textContent ?? '').includes('Night (end)') ? true : null, 'out label');
 
-        expect(outPill.textContent).toContain('0) out (Night)');
+        expect(outPill.textContent).toContain('0) Night (end)');
 
         const primary = outPill.querySelector<HTMLElement>('[data-cue-out-primary]');
         const title = outPill.querySelector<HTMLElement>('[data-cue-out-title]');
+        const suffix = outPill.querySelector<HTMLElement>('[data-cue-out-suffix]');
 
-        expect(primary?.textContent).toBe('0) out');
+        expect(primary?.textContent).toBe('0)');
+        expect(title?.textContent).toBe(' Night');
+        expect(suffix?.textContent).toBe(' (end)');
         expect(getComputedStyle(primary as HTMLElement).fontWeight).toBe('700');
         expect(getComputedStyle(title as HTMLElement).fontWeight).toBe('400');
         expect(getComputedStyle(title as HTMLElement).color).not.toBe(getComputedStyle(primary as HTMLElement).color);
@@ -485,6 +488,6 @@ describe('cue # compose', () => {
         const outPrimary = document.querySelector<HTMLElement>('[data-cue-out-primary]');
 
         expect(number?.textContent).toBe('0)');
-        expect(outPrimary?.textContent).toBe('0) out');
+        expect(outPrimary?.textContent).toBe('0)');
     });
 });

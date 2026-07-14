@@ -8,13 +8,14 @@ import {
     createRoot, type Root,
 } from 'react-dom/client';
 import {
-    afterEach, describe, expect, it,
+    afterEach, describe, expect, it, vi,
 } from 'vite-plus/test';
 import {
     page, userEvent,
 } from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../../context';
+import type {EditorLifecycleCallbacks} from '../../contracts';
 import ScriptEditor from '../../Editor';
 
 type CueTestWindow = Window & {__cueTestEditor?: Editor | null};
@@ -53,7 +54,10 @@ const createDocumentWithText = (): ScriptDocument => ({
 
 const mountedRoots: Root[] = [];
 
-const renderEditor = (initialValue: ScriptDocument = createDocument()) => {
+const renderEditor = (
+    initialValue: ScriptDocument = createDocument(),
+    callbacks?: EditorLifecycleCallbacks,
+) => {
     const host = document.createElement('div');
 
     host.style.width = '1024px';
@@ -63,7 +67,11 @@ const renderEditor = (initialValue: ScriptDocument = createDocument()) => {
     const root = createRoot(host);
 
     root.render(
-        <ScriptEditor document={{initialValue}} layout={{autoFocus: true}}>
+        <ScriptEditor
+            document={{initialValue}}
+            layout={{autoFocus: true}}
+            callbacks={callbacks}
+        >
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
             </ScriptEditor.LeftSidebar>
@@ -239,7 +247,7 @@ describe('cue pill node views', () => {
         await page.elementLocator(input).click();
     };
 
-    it('shows the menu whenever the pill is active and switches open↔hit', async () => {
+    it('shows the menu without cue type controls', async () => {
         renderEditor();
 
         const editor = await getEditor();
@@ -250,10 +258,76 @@ describe('cue pill node views', () => {
         expect(document.querySelector('[data-cue-menu="start"]')).toBeNull();
 
         await activatePill();
-        await poll(() => document.querySelector('[data-cue-menu="start"]'), 'pill menu');
-        await clickMenuButton('Switch cue to hit');
 
-        expect(cueStartAttrs(editor)?.mode).toBe('hit');
+        const menu = await poll(
+            () => document.querySelector('[data-cue-menu="start"]'),
+            'pill menu',
+        );
+
+        expect(menu.querySelector('[aria-label^="Switch cue to"]')).toBeNull();
+        expect(cueStartAttrs(editor)?.mode).toBe('open');
+    });
+
+    it('opens the cue manager with the cue selected', async () => {
+        const onOpenCueManager = vi.fn();
+
+        renderEditor(createDocument(), {onOpenCueManager});
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+        await activatePill();
+        await poll(() => document.querySelector('[data-cue-menu="start"]'), 'pill menu');
+        await clickMenuButton('Manage cue');
+
+        expect(onOpenCueManager).toHaveBeenCalledWith(cueStartAttrs(editor)?.cueId);
+    });
+
+    it('navigates from the cue start to its end and back', async () => {
+        renderEditor(createTwoBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night');
+        editor.commands.insertCueOut('sd-2');
+
+        const outPill = await poll(
+            () => document.querySelector<HTMLElement>('[data-cue-pill="out"]'),
+            'cue out pill',
+        );
+        const startPill = await poll(
+            () => document.querySelector<HTMLElement>('[data-cue-pill="start"]'),
+            'cue start pill',
+        );
+        const scrollToEnd = vi.fn();
+        const scrollToStart = vi.fn();
+
+        outPill.scrollIntoView = scrollToEnd;
+        startPill.scrollIntoView = scrollToStart;
+
+        await activatePill();
+        await poll(() => document.querySelector('[data-cue-menu="start"]'), 'start pill menu');
+        await clickMenuButton('Go to cue end');
+
+        expect(scrollToEnd).toHaveBeenCalledWith({
+            block: 'center',
+            inline: 'nearest',
+        });
+
+        const outLabel = outPill.querySelector<HTMLElement>('[role="button"]');
+
+        if (!outLabel) {
+            throw new Error('Cue out label not found');
+        }
+
+        await page.elementLocator(outLabel).click();
+        await poll(() => document.querySelector('[data-cue-menu="out"]'), 'out pill menu');
+        await clickMenuButton('Go to cue start');
+
+        expect(scrollToStart).toHaveBeenCalledWith({
+            block: 'center',
+            inline: 'nearest',
+        });
     });
 
     it('activates the pill when clicking anywhere on the tag, not just the input', async () => {

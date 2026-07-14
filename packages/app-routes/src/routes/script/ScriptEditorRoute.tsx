@@ -67,6 +67,7 @@ export const ScriptEditorRoute = () => {
         cueState,
         openSettingsModal,
         openAttributeManagerModal,
+        openAttributeManagerCue,
     } = useScriptSettingsModal();
     const [addCueModalState, setAddCueModalState] = useState<AddCueModalState | null>(null);
     const [removeCueRequest, setRemoveCueRequest] = useState<EditorCueRemoveRequest | null>(null);
@@ -248,6 +249,7 @@ export const ScriptEditorRoute = () => {
                         onValueChange: handleResolvedEditorValueChange,
                         onRequestCreateCue: handleRequestCreateCue,
                         onRequestRemoveCue: handleRequestRemoveCue,
+                        onOpenCueManager: openAttributeManagerCue,
                         onCueAssigned: markCueAssigned,
                         onCueUnassigned: markCueUnassigned,
                     }}

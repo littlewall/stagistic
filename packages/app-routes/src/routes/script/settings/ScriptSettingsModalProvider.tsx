@@ -66,6 +66,7 @@ interface ScriptSettingsModalContextValue {
     openAttributeManagerModal: () => void,
     openAttributeManagerModalWithPanel: (panelId: AttributeManagerPanelId) => void,
     openAttributeManagerCharacter: (characterId: string) => void,
+    openAttributeManagerCue: (cueId: string) => void,
 }
 
 const ScriptSettingsModalContext = createContext<ScriptSettingsModalContextValue | null>(null);
@@ -152,10 +153,12 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         isOpen: isAttributeManagerOpen,
         activePanelId: activeAttributeManagerPanelId,
         selectedCharacterId: selectedAttributeManagerCharacterId,
+        selectedCueId: selectedAttributeManagerCueId,
         tabs: attributeManagerTabs,
         open: openAttributeManagerModal,
         openWithPanel: openAttributeManagerModalWithPanel,
         openCharacter: openAttributeManagerCharacter,
+        openCue: openAttributeManagerCue,
         close: closeAttributeManagerModal,
         selectPanel: selectAttributeManagerPanel,
     } = useAttributeManagerModalState();
@@ -209,12 +212,14 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         openAttributeManagerModal,
         openAttributeManagerModalWithPanel,
         openAttributeManagerCharacter,
+        openAttributeManagerCue,
     }), [
         cueState,
         effectiveScriptSettingsDraft,
         openAttributeManagerModal,
         openAttributeManagerModalWithPanel,
         openAttributeManagerCharacter,
+        openAttributeManagerCue,
         openSettingsModal,
         resolvedScriptSettings,
         scriptTitleDraft,
@@ -293,6 +298,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_CUES ? (
                         <AttributeManagerListPanel
                             items={attributeManagerCues}
+                            initialSelectedItemId={selectedAttributeManagerCueId}
                             detailTypeLabel="Cue"
                             emptyListLabel="No cues yet"
                             emptyDetailLabel="Select a cue"

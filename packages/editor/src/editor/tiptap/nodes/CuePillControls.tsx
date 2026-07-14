@@ -2,10 +2,6 @@ import {Tooltip, TrashIcon} from '@stagistic/ui';
 import clsx from 'clsx';
 import type {ReactNode} from 'react';
 
-import {
-    CueHitIcon,
-    CueRangeIcon,
-} from '../../components/CueIcons';
 import styles from './CuePill.module.css';
 
 export type CueMode = 'open' | 'hit';
@@ -19,14 +15,6 @@ type CueMenuButtonProps = {
 
 export const keepEditorFocus = (event: {preventDefault: () => void}) => {
     event.preventDefault();
-};
-
-export const CueModeIcon = ({mode}: {mode: CueMode}) => {
-    if (mode === 'hit') {
-        return <CueHitIcon />;
-    }
-
-    return <CueRangeIcon />;
 };
 
 export const CueMenuButton = ({
@@ -51,7 +39,3 @@ export const CueMenuButton = ({
 );
 
 export const CueDeleteIcon = () => <TrashIcon aria-hidden="true" />;
-
-export const getModeButtonLabel = (mode: CueMode) => {
-    return mode === 'hit' ? 'Switch cue to open' : 'Switch cue to hit';
-};

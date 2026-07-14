@@ -62,7 +62,11 @@
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--bubble-menu-button-radius);
-    transition: background .15s ease, border-color .15s ease, color .15s ease;
+    transition: transform 160ms cubic-bezier(.23, 1, .32, 1), background .15s ease, border-color .15s ease, color .15s ease;
+
+    &:active {
+        transform: scale(.97);
+    }
 
     &:hover {
         color: var(--color-text);
@@ -120,6 +124,11 @@
 }
 
 .outTitle {
+    font-weight: 400;
+    color: var(--color-text-muted);
+}
+
+.outSuffix {
     font-weight: 400;
     color: var(--color-text-muted);
 }

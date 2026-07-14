@@ -1,6 +1,6 @@
 import {
-    CUE_ID_ATTR,
     CUE_DRAFT_ATTR,
+    CUE_ID_ATTR,
     CUE_KIND_ATTR,
     CUE_MODE_ATTR,
     CUE_START_NODE_NAME,
@@ -25,6 +25,7 @@ const readMode = (value: unknown) => {
 
 interface CueStartNodeOptions {
     onCueAssigned?: (cueId: string) => void,
+    onOpenCueManager?: (cueId: string) => void,
     onRequestRemoveCue?: (request: EditorCueRemoveRequest) => void,
     onRequestCreateCue?: (request: EditorCueCreateRequest) => void,
 }
@@ -66,7 +67,9 @@ export const CueStartNode = Node.create<CueStartNodeOptions>({
             [CUE_DRAFT_ATTR]: {
                 default: false,
                 parseHTML: element => element.getAttribute('data-cue-draft') === 'true',
-                renderHTML: attributes => attributes[CUE_DRAFT_ATTR] === true ? {'data-cue-draft': 'true'} : {},
+                renderHTML: attributes => {
+                    return attributes[CUE_DRAFT_ATTR] === true ? {'data-cue-draft': 'true'} : {};
+                },
             },
         };
     },
@@ -84,13 +87,12 @@ export const CueStartNode = Node.create<CueStartNodeOptions>({
     },
 
     addNodeView() {
-        return ReactNodeViewRenderer(props => (
-            createElement(CueStartPill, {
-                ...props,
-                onCueAssigned: this.options.onCueAssigned,
-                onRequestCreateCue: this.options.onRequestCreateCue,
-                onRequestRemoveCue: this.options.onRequestRemoveCue,
-            })
-        ));
+        return ReactNodeViewRenderer(props => createElement(CueStartPill, {
+            ...props,
+            onCueAssigned: this.options.onCueAssigned,
+            onOpenCueManager: this.options.onOpenCueManager,
+            onRequestCreateCue: this.options.onRequestCreateCue,
+            onRequestRemoveCue: this.options.onRequestRemoveCue,
+        }));
     },
 });

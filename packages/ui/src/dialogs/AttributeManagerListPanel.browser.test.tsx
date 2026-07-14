@@ -32,7 +32,10 @@ const waitForElement = async <T extends Element>(selector: string): Promise<T> =
     throw new Error(`Expected element matching ${selector}`);
 };
 
-const renderPanel = (items: AttributeManagerListItem[]) => {
+const renderPanel = (
+    items: AttributeManagerListItem[],
+    initialSelectedItemId?: string,
+) => {
     const host = document.createElement('div');
 
     host.style.width = '900px';
@@ -45,6 +48,7 @@ const renderPanel = (items: AttributeManagerListItem[]) => {
     root.render(
         <AttributeManagerListPanel
             items={items}
+            initialSelectedItemId={initialSelectedItemId}
             detailTypeLabel="Scene"
             emptyListLabel="No scenes yet"
             emptyDetailLabel="Select a scene"
@@ -65,8 +69,11 @@ afterEach(() => {
 describe('AttributeManagerListPanel', () => {
     it('lists items and opens a placeholder detail on click', async () => {
         const host = renderPanel([
-            {id: 's1', number: '1.', title: 'Opening'},
-            {id: 's2', number: '2.', title: 'The reveal'},
+            {
+                id: 's1', number: '1.', title: 'Opening',
+            }, {
+                id: 's2', number: '2.', title: 'The reveal',
+            },
         ]);
 
         await waitForElement('[aria-label="Scene list"]');
@@ -97,13 +104,31 @@ describe('AttributeManagerListPanel', () => {
         expect(detail.textContent).toContain('Select a scene');
     });
 
+    it('opens the requested item detail initially', async () => {
+        renderPanel([
+            {
+                id: 'c1', number: '1.', title: 'Opening',
+            }, {
+                id: 'c2', number: '2.', title: 'Finale',
+            },
+        ], 'c2');
+
+        const detail = await waitForElement('[aria-label="Scene detail"]');
+
+        expect(detail.textContent).toContain('Finale');
+        expect(document.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.textContent)
+            .toContain('Finale');
+    });
+
     it('places the number before the title and the icon after it', async () => {
-        const host = renderPanel([{
-            id: 'c1',
-            number: '1.',
-            title: 'Overture',
-            icon: <span>Cue kind</span>,
-        }]);
+        const host = renderPanel([
+            {
+                id: 'c1',
+                number: '1.',
+                title: 'Overture',
+                icon: <span>Cue kind</span>,
+            },
+        ]);
 
         const button = await waitForElement<HTMLButtonElement>('[aria-label="Scene list"] button');
 
