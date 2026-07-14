@@ -78,6 +78,29 @@ export const getScriptCueById = async (
     return rows[0] ?? null;
 };
 
+export const updateScriptCue = async (
+    db: DbClient,
+    payload: {
+        scriptId: string,
+        cueId: string,
+        title: string,
+        kind: 'song' | 'instrumental',
+        updatedAt: number,
+    },
+) => {
+    await db
+        .update(scriptCues)
+        .set({
+            title: payload.title,
+            kind: payload.kind,
+            updatedAt: payload.updatedAt,
+        })
+        .where(and(
+            eq(scriptCues.scriptId, payload.scriptId),
+            eq(scriptCues.id, payload.cueId),
+        ));
+};
+
 export const bulkUnassignScriptCues = async (db: DbClient, cueIds: string[], updatedAt: number) => {
     if (cueIds.length === 0) {
         return;
@@ -95,7 +118,9 @@ export const bulkUnassignScriptCues = async (db: DbClient, cueIds: string[], upd
 
 export const unassignScriptCue = async (
     db: DbClient,
-    payload: {scriptId: string, cueId: string, updatedAt: number},
+    payload: {
+        scriptId: string, cueId: string, updatedAt: number,
+    },
 ) => {
     await db
         .update(scriptCues)

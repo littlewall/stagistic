@@ -72,6 +72,46 @@ export const createCueHandlers = ({
         });
     };
 
+    const update: ScriptCuesRepository['update'] = async (scriptId, cueId, input) => {
+        const title = input.title.trim();
+
+        if (!cueId || !title) {
+            return null;
+        }
+
+        const db = await getDb();
+        const now = Date.now();
+
+        await dbQueries.updateScriptCue(db, {
+            scriptId,
+            cueId,
+            title,
+            kind: input.kind,
+            updatedAt: now,
+        });
+        await dbQueries.updateScriptTimestamp(db, {
+            scriptId,
+            updatedAt: now,
+        });
+        await recordOutbox({
+            scriptId,
+            opType: 'cue.update',
+            payloadJson: JSON.stringify({
+                scriptId,
+                cueId,
+                title,
+                kind: input.kind,
+                updatedAt: now,
+            }),
+        });
+        await syncDb();
+
+        return dbQueries.getScriptCueById(db, {
+            scriptId,
+            cueId,
+        });
+    };
+
     const deleteCue: ScriptCuesRepository['delete'] = async (scriptId, cueId) => {
         if (!cueId) {
             return;
@@ -137,6 +177,7 @@ export const createCueHandlers = ({
     return {
         list,
         create,
+        update,
         delete: deleteCue,
         unassign,
     };

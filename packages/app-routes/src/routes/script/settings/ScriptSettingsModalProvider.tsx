@@ -16,6 +16,7 @@ import {
     AttributeManagerListPanel,
     AttributeManagerModal,
     AttributeManagerPlacesPanel,
+    AttributeManagerSceneDetail,
     ScriptSettingsModal,
 } from '@stagistic/ui';
 import {
@@ -36,7 +37,9 @@ import {
     ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
     type AttributeManagerPanelId,
 } from '../attributes/attributeManagerMenu';
+import {CueAttachmentsDetail} from '../attributes/CueAttachmentsDetail';
 import {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
+import {useCueAttachmentsState} from '../attributes/useCueAttachmentsState';
 import {useScriptPlacesState} from '../attributes/useScriptPlacesState';
 import {useScriptCuesState} from '../editor/cues';
 import {ScriptEditorSettingsPanel} from '../editor/settings';
@@ -178,6 +181,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     });
     const cueState = useScriptCuesState(currentScriptId, scriptRepository);
     const placeState = useScriptPlacesState(currentScriptId, scriptRepository);
+    const cueAttachmentsState = useCueAttachmentsState(currentScriptId, scriptRepository);
     const attributeManagerCharacters = useMemo<AttributeManagerCharacter[]>(() => {
         return charactersContextValue.confirmedCharacterRecords.map(character => ({
             id: character.id,
@@ -283,6 +287,15 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                             emptyListLabel="No scenes yet"
                             emptyDetailLabel="Select a scene"
                             detailPlaceholder="Scene details are coming soon."
+                            renderDetail={item => (
+                                <AttributeManagerSceneDetail
+                                    places={placeState.places}
+                                    selectedPlaceIds={placeState.scenePlaceIds[item.id] ?? []}
+                                    onChangePlaceIds={placeIds => {
+                                        void placeState.setScenePlaces(item.id, placeIds);
+                                    }}
+                                />
+                            )}
                         />
                     ) : null}
                     {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_CHARACTERS ? (
@@ -307,6 +320,17 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                             emptyListLabel="No cues yet"
                             emptyDetailLabel="Select a cue"
                             detailPlaceholder="Cue details are coming soon."
+                            renderDetail={item => {
+                                const cue = cues.find(candidate => candidate.id === item.id);
+
+                                return cue ? (
+                                    <CueAttachmentsDetail
+                                        cue={cue}
+                                        state={cueAttachmentsState}
+                                        onUpdateCue={cueState.updateCue}
+                                    />
+                                ) : null;
+                            }}
                         />
                     ) : null}
                     {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_PLACES ? (

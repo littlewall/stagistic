@@ -25,6 +25,12 @@ export const createLocationHandlers = ({
         return dbQueries.listScriptLocations(db, scriptId);
     };
 
+    const listSceneAssignments: ScriptLocationsRepository['listSceneAssignments'] = async scriptId => {
+        const db = await getDb();
+
+        return dbQueries.listScriptSceneLocations(db, scriptId);
+    };
+
     const create: ScriptLocationsRepository['create'] = async (scriptId, input) => {
         const name = input.name.trim();
 
@@ -132,10 +138,48 @@ export const createLocationHandlers = ({
         await syncDb();
     };
 
+    const replaceSceneAssignments: ScriptLocationsRepository['replaceSceneAssignments'] = async (
+        scriptId,
+        sceneHeadingBlockId,
+        locationIds,
+    ) => {
+        if (!sceneHeadingBlockId) {
+            return [];
+        }
+
+        const db = await getDb();
+        const now = Date.now();
+        const assignedLocationIds = await dbQueries.replaceScriptSceneLocations(db, {
+            scriptId,
+            sceneHeadingBlockId,
+            locationIds,
+        });
+
+        await dbQueries.updateScriptTimestamp(db, {
+            scriptId,
+            updatedAt: now,
+        });
+        await recordOutbox({
+            scriptId,
+            opType: 'scene.locations.replace',
+            payloadJson: JSON.stringify({
+                scriptId,
+                sceneHeadingBlockId,
+                locationIds: assignedLocationIds,
+                updatedAt: now,
+            }),
+        });
+        await syncDb();
+
+        return assignedLocationIds;
+    };
+
     return {
         list,
+        listSceneAssignments,
         create,
         rename,
         delete: deleteLocation,
+        replaceSceneAssignments,
     };
 };

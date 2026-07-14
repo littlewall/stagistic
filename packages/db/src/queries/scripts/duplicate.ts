@@ -13,6 +13,7 @@ import {
     scriptCues,
     scriptLocations,
     scripts,
+    scriptSceneLocations,
     scriptScenes,
     scriptSettingsBlocks,
     scriptSettingsHeadersFooters,
@@ -87,6 +88,13 @@ export const duplicateScriptRows = async (
         .select()
         .from(scriptCues)
         .where(eq(scriptCues.scriptId, sourceScriptId));
+    const sceneIds = sceneRows.map(row => row.id);
+    const sceneLocationRows = sceneIds.length > 0
+        ? await db
+            .select()
+            .from(scriptSceneLocations)
+            .where(inArray(scriptSceneLocations.sceneId, sceneIds))
+        : [];
 
     const locationMap = new Map(locationRows.map(row => [row.id, uuidv7()]));
     const actMap = new Map(actRows.map(row => [row.id, uuidv7()]));
@@ -123,6 +131,13 @@ export const duplicateScriptRows = async (
             locationId: remapNullable(locationMap, row.locationId),
             createdAt: now,
             updatedAt: now,
+        })));
+    }
+
+    if (sceneLocationRows.length > 0) {
+        await db.insert(scriptSceneLocations).values(sceneLocationRows.map(row => ({
+            sceneId: sceneMap.get(row.sceneId)!,
+            locationId: locationMap.get(row.locationId)!,
         })));
     }
 

@@ -1,9 +1,16 @@
 import {type useScriptRepository} from '@stagistic/app-core';
-import {useCallback, useEffect, useState} from 'react';
+import type {UpdateCueRequest} from '@stagistic/editor';
+import {
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
 
 import type {
     CreateScriptCueInput,
     ScriptCueListItem,
+    UpdateScriptCueInput,
 } from './types';
 
 type ScriptRepository = ReturnType<typeof useScriptRepository>;
@@ -21,6 +28,8 @@ export const useScriptCuesState = (
     scriptRepository: ScriptRepository,
 ) => {
     const [cues, setCues] = useState<ScriptCueListItem[]>([]);
+    const [updateCueRequest, setUpdateCueRequest] = useState<UpdateCueRequest | null>(null);
+    const updateCueRequestIdRef = useRef(0);
 
     useEffect(() => {
         if (!scriptId) {
@@ -68,24 +77,71 @@ export const useScriptCuesState = (
 
         const listItem = toScriptCueListItem(createdCue);
 
-        setCues(previous => [
-            ...previous,
-            listItem,
-        ]);
+        setCues(previous => [...previous, listItem]);
 
         return listItem;
     }, [scriptId, scriptRepository]);
 
     const markCueAssigned = useCallback((cueId: string) => {
-        setCues(previous => previous.map(cue => cue.id === cueId
-            ? {...cue, assignmentLabel: 'Assigned'}
-            : cue));
+        setCues(previous => previous.map(cue => {
+            return cue.id === cueId ? {...cue, assignmentLabel: 'Assigned'} : cue;
+        }));
     }, []);
 
+    const updateCue = useCallback(async (cueId: string, input: UpdateScriptCueInput) => {
+        if (!scriptId || !cueId) {
+            return null;
+        }
+
+        const title = input.title.trim();
+
+        if (!title) {
+            return null;
+        }
+
+        const requestId = updateCueRequestIdRef.current + 1;
+
+        updateCueRequestIdRef.current = requestId;
+        setCues(previous => previous.map(cue => {
+            return cue.id === cueId ? {
+                ...cue,
+                title,
+                kind: input.kind,
+            } : cue;
+        }));
+        setUpdateCueRequest({
+            cueId,
+            title,
+            kind: input.kind,
+            requestId,
+        });
+
+        const updatedCue = await scriptRepository.updateScriptCue(scriptId, cueId, {
+            title,
+            kind: input.kind,
+        });
+
+        if (!updatedCue) {
+            const storedCues = await scriptRepository.listScriptCues(scriptId);
+
+            setCues(storedCues.map(toScriptCueListItem));
+
+            return null;
+        }
+
+        const listItem = toScriptCueListItem(updatedCue);
+
+        setCues(previous => previous.map(cue => {
+            return cue.id === cueId ? listItem : cue;
+        }));
+
+        return listItem;
+    }, [scriptId, scriptRepository]);
+
     const markCueUnassigned = useCallback((cueId: string) => {
-        setCues(previous => previous.map(cue => cue.id === cueId
-            ? {...cue, assignmentLabel: null}
-            : cue));
+        setCues(previous => previous.map(cue => {
+            return cue.id === cueId ? {...cue, assignmentLabel: null} : cue;
+        }));
     }, []);
 
     const deleteCue = useCallback(async (cueId: string) => {
@@ -108,9 +164,9 @@ export const useScriptCuesState = (
             return;
         }
 
-        setCues(previous => previous.map(cue => cue.id === cueId
-            ? toScriptCueListItem(updatedCue)
-            : cue));
+        setCues(previous => previous.map(cue => {
+            return cue.id === cueId ? toScriptCueListItem(updatedCue) : cue;
+        }));
     }, [scriptId, scriptRepository]);
 
     return {
@@ -119,6 +175,8 @@ export const useScriptCuesState = (
         deleteCue,
         markCueAssigned,
         markCueUnassigned,
+        updateCue,
+        updateCueRequest,
         unassignCue,
     };
 };

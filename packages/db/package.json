@@ -6,11 +6,14 @@
     "main": "./src/index.ts",
     "scripts": {
         "lint": "eslint .",
+        "pretypecheck": "pnpm db:check-migrations",
         "typecheck": "tsc -b",
+        "pretest": "pnpm db:check-migrations",
         "test": "vp test run --dir .",
         "db:generate": "drizzle-kit generate && node ./scripts/compile-migrations.mjs",
         "db:check": "drizzle-kit check",
-        "db:compile-migrations": "node ./scripts/compile-migrations.mjs"
+        "db:compile-migrations": "node ./scripts/compile-migrations.mjs",
+        "db:check-migrations": "node ./scripts/compile-migrations.mjs --check"
     },
     "dependencies": {
         "@electric-sql/pglite": "^0.3.15",

@@ -11,3 +11,5 @@ export interface CreateScriptCueInput {
     readonly title: string,
     readonly kind: ScriptCueKind,
 }
+
+export type UpdateScriptCueInput = CreateScriptCueInput;

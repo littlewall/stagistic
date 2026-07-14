@@ -1,6 +1,8 @@
 import {
     CUE_ID_ATTR,
+    CUE_KIND_ATTR,
     CUE_START_NODE_NAME,
+    CUE_TITLE_ATTR,
     type CueMode,
 } from '@stagistic/script';
 import {Extension} from '@tiptap/core';
@@ -11,6 +13,7 @@ import {
     type Transaction,
 } from '@tiptap/pm/state';
 
+import {IMMEDIATE_SAVE_META_KEY} from '../../../saveMeta';
 import {
     isCaretBeforeTrailingCue,
     isCueAtom,
@@ -178,6 +181,11 @@ declare module '@tiptap/core' {
             insertCueOut: (blockId: string | null) => ReturnType,
             deleteCueStart: (pos: number) => ReturnType,
             unassignCue: (cueId: string) => ReturnType,
+            updateCueMetadata: (
+                cueId: string,
+                title: string,
+                kind: 'song' | 'instrumental',
+            ) => ReturnType,
         },
     }
 }
@@ -252,6 +260,30 @@ export const CueCommandsExtension = Extension.create<CueCommandsExtensionOptions
                 if (dispatch) {
                     dispatch(buildDeleteCueStart(state, pos, node));
                     this.options.onCueUnassigned?.(cueId);
+                }
+
+                return true;
+            },
+            updateCueMetadata: (cueId, title, kind) => ({state, dispatch}) => {
+                const pos = findCueStartPositionById(state, cueId);
+                const normalizedTitle = title.trim();
+
+                if (pos === null || !normalizedTitle) {
+                    return false;
+                }
+
+                const node = state.doc.nodeAt(pos);
+
+                if (!node || node.type.name !== CUE_START_NODE_NAME) {
+                    return false;
+                }
+
+                if (dispatch) {
+                    dispatch(state.tr.setNodeMarkup(pos, undefined, {
+                        ...node.attrs,
+                        [CUE_TITLE_ATTR]: normalizedTitle,
+                        [CUE_KIND_ATTR]: kind,
+                    }).setMeta(IMMEDIATE_SAVE_META_KEY, true));
                 }
 
                 return true;

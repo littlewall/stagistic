@@ -48,10 +48,12 @@ export const useEditorStructureRequests = ({
         renameActRequest,
         deleteActRequest,
         moveSceneRequest,
+        updateCueRequest,
     } = requests ?? {};
     const lastInsertActRequestIdRef = useRef<number | null>(null);
     const lastRenameActRequestIdRef = useRef<number | null>(null);
     const lastDeleteActRequestIdRef = useRef<number | null>(null);
+    const lastUpdateCueRequestIdRef = useRef<number | null>(null);
 
     const commitContext = useMemo<CommitContext | null>(() => {
         if (!editor) {
@@ -76,6 +78,23 @@ export const useEditorStructureRequests = ({
             moveSceneRequest,
         },
     });
+
+    useEffect(() => {
+        if (!editor || !updateCueRequest) {
+            return;
+        }
+
+        if (lastUpdateCueRequestIdRef.current === updateCueRequest.requestId) {
+            return;
+        }
+
+        lastUpdateCueRequestIdRef.current = updateCueRequest.requestId;
+        editor.commands.updateCueMetadata(
+            updateCueRequest.cueId,
+            updateCueRequest.title,
+            updateCueRequest.kind,
+        );
+    }, [editor, updateCueRequest]);
 
     useEffect(() => {
         if (!commitContext || !insertActRequest) {

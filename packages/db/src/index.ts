@@ -1,4 +1,5 @@
 export * from './blocks';
+export {type FileStorage, InMemoryFileStorage} from './fileStorage';
 export {compiledMigrations} from './migrations.compiled';
 export * from './pglite';
 export type {DbClient} from './queries';
@@ -30,11 +31,15 @@ export type {
     ScriptCuesRepository,
     ScriptLocationsRepository,
     ScriptRepository,
+    ScriptSceneLocationAssignment,
     ScriptTitlePageRepository,
+    UpdateScriptCueInput,
 } from './scriptRepository';
 export type {
+    CueAttachmentRole,
     Script,
     ScriptAct,
+    ScriptAttachment,
     ScriptBlock,
     ScriptBlockCharacterRef,
     ScriptCharacter,
@@ -42,9 +47,11 @@ export type {
     ScriptCharacterGenderOption,
     ScriptCharacterRef,
     ScriptCue,
+    ScriptCueAttachment,
     ScriptLocation,
     ScriptScene,
     ScriptSettingsBlock,
     ScriptSummary,
     ScriptTitlePageField,
 } from './types';
+export {CUE_ATTACHMENT_ROLES} from './types';

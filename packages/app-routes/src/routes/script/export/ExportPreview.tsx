@@ -1,6 +1,4 @@
 import {ProgressCircle} from '@stagistic/ui';
-import * as pdfjs from 'pdfjs-dist';
-import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.mjs?url';
 import {
     useEffect,
     useRef,
@@ -9,34 +7,7 @@ import {
 
 import styles from './ExportPreview.module.css';
 import {useExportContext} from './ExportProvider';
-
-pdfjs.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
-
-const renderPage = async (
-    page: pdfjs.PDFPageProxy,
-    scale: number,
-): Promise<HTMLCanvasElement> => {
-    const viewport = page.getViewport({scale});
-    const canvas = document.createElement('canvas');
-    const context = canvas.getContext('2d');
-
-    if (!context) {
-        throw new Error('Canvas context unavailable');
-    }
-
-    canvas.width = Math.ceil(viewport.width);
-    canvas.height = Math.ceil(viewport.height);
-    canvas.style.width = `${viewport.width}px`;
-    canvas.style.height = `${viewport.height}px`;
-
-    await page.render({
-        canvas,
-        canvasContext: context,
-        viewport,
-    }).promise;
-
-    return canvas;
-};
+import {renderPdfToCanvases} from './renderPdfToCanvases';
 
 export const ExportPreview = () => {
     const {artifact, status} = useExportContext();
@@ -62,15 +33,7 @@ export const ExportPreview = () => {
 
         const render = async () => {
             const data = await artifact.arrayBuffer();
-            const documentTask = pdfjs.getDocument({data});
-            const pdf = await documentTask.promise;
-            const canvases: HTMLCanvasElement[] = [];
-
-            for (let pageNumber = 1; pageNumber <= pdf.numPages; pageNumber += 1) {
-                const page = await pdf.getPage(pageNumber);
-
-                canvases.push(await renderPage(page, zoom));
-            }
+            const canvases = await renderPdfToCanvases(data, zoom);
 
             if (cancelled || !pagesRef.current) {
                 return;
@@ -86,7 +49,7 @@ export const ExportPreview = () => {
 
                 return frame;
             }));
-            setPageCount(pdf.numPages);
+            setPageCount(canvases.length);
             setRenderedArtifact(artifact);
             setIsRenderingPreview(false);
         };

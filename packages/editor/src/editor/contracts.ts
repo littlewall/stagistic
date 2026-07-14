@@ -52,6 +52,13 @@ export interface EditorCueRemoveRequest {
     complete: () => boolean,
 }
 
+export interface UpdateCueRequest {
+    cueId: string,
+    title: string,
+    kind: PersistentCueKind,
+    requestId: number,
+}
+
 export interface FocusBlockRequest {
     blockId: string,
     requestId: number,
@@ -173,6 +180,7 @@ export interface EditorStructureRequests {
     renameActRequest?: RenameActRequest | null,
     deleteActRequest?: DeleteActRequest | null,
     moveSceneRequest?: MoveSceneRequest | null,
+    updateCueRequest?: UpdateCueRequest | null,
 }
 
 export interface EditorLifecycleCallbacks {

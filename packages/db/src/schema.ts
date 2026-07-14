@@ -213,6 +213,23 @@ export const scriptScenes = pgTable(
     }),
 );
 
+/* Many-to-many assignment of catalogued places to scenes. */
+export const scriptSceneLocations = pgTable(
+    'script_scene_locations',
+    {
+        sceneId: text('scene_id')
+            .notNull()
+            .references(() => scriptScenes.id, {onDelete: 'cascade'}),
+        locationId: text('location_id')
+            .notNull()
+            .references(() => scriptLocations.id, {onDelete: 'cascade'}),
+    },
+    table => ({
+        pk: primaryKey({columns: [table.sceneId, table.locationId]}),
+        locationIdIdx: index('script_scene_locations_location_id_idx').on(table.locationId),
+    }),
+);
+
 export const scriptSettingsTitlePage = pgTable(
     'script_settings_title_page',
     {
@@ -337,6 +354,52 @@ export const scriptCues = pgTable(
     }),
 );
 
+/*
+ * Attachment file records (metadata only). Binaries live outside Postgres in a
+ * FileStorage (IndexedDB in the browser); storage_key is the FileStorage key.
+ */
+export const scriptAttachments = pgTable(
+    'script_attachments',
+    {
+        id: text('id').primaryKey(),
+        scriptId: text('script_id')
+            .notNull()
+            .references(() => scripts.id, {onDelete: 'cascade'}),
+        filename: text('filename').notNull(),
+        mimeType: text('mime_type').notNull(),
+        sizeBytes: bigint('size_bytes', {mode: 'number'}).notNull(),
+        storageKey: text('storage_key').notNull(),
+        createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+        updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+    },
+    table => ({
+        scriptIdIdx: index('script_attachments_script_id_idx').on(table.scriptId),
+    }),
+);
+
+/* Join between a cue and an attachment. Both sides cascade-delete. */
+export const scriptCueAttachments = pgTable(
+    'script_cue_attachments',
+    {
+        cueId: text('cue_id')
+            .notNull()
+            .references(() => scriptCues.id, {onDelete: 'cascade'}),
+        attachmentId: text('attachment_id')
+            .notNull()
+            .references(() => scriptAttachments.id, {onDelete: 'cascade'}),
+        role: text('role').notNull().default('integrated_score'),
+        sortOrder: bigint('sort_order', {mode: 'number'}).notNull().default(0),
+        createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+    },
+    table => ({
+        pk: primaryKey({columns: [table.cueId, table.attachmentId]}),
+        cueRoleUniqueIdx: uniqueIndex('script_cue_attachments_cue_role_unique_idx')
+            .on(table.cueId, table.role),
+        cueIdIdx: index('script_cue_attachments_cue_id_idx').on(table.cueId),
+        attachmentIdIdx: index('script_cue_attachments_attachment_id_idx').on(table.attachmentId),
+    }),
+);
+
 export const dbSchema = {
     scripts,
     syncOutbox,
@@ -349,9 +412,12 @@ export const dbSchema = {
     scriptCharacterGenders,
     scriptLocations,
     scriptScenes,
+    scriptSceneLocations,
     scriptSettingsTitlePage,
     scriptActs,
     scriptBlocks,
     scriptBlockCharacterRefs,
     scriptCues,
+    scriptAttachments,
+    scriptCueAttachments,
 };

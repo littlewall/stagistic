@@ -14,6 +14,10 @@ export interface AttributeManagerListItem {
     subtitle?: string | null,
     /** Trailing glyph, e.g. a cue-kind icon. */
     icon?: ReactNode,
+    detailMetadata?: Array<{
+        label: string,
+        value: string,
+    }>,
 }
 
 export interface AttributeManagerListPanelProps {
@@ -28,6 +32,8 @@ export interface AttributeManagerListPanelProps {
     emptyDetailLabel: string,
     /** Muted placeholder in the detail body while its contents are not built yet. */
     detailPlaceholder: string,
+    /** When provided, renders custom detail-body content for the selected item instead of the placeholder. */
+    renderDetail?: (item: AttributeManagerListItem) => ReactNode,
 }
 
 export const AttributeManagerListPanel = ({
@@ -38,6 +44,7 @@ export const AttributeManagerListPanel = ({
     emptyListLabel,
     emptyDetailLabel,
     detailPlaceholder,
+    renderDetail,
 }: AttributeManagerListPanelProps) => {
     const [selectedItemId, setSelectedItemId] = useState<string | null>(
         initialSelectedItemId ?? null,
@@ -101,11 +108,25 @@ export const AttributeManagerListPanel = ({
                 {selectedItem ? (
                     <>
                         <header className={styles.detailHeader}>
-                            <p className={styles.detailType}>{detailTypeLabel}</p>
-                            <h3 className={styles.detailTitle}>{selectedItem.title}</h3>
+                            <div className={styles.detailIdentity}>
+                                <p className={styles.detailType}>{detailTypeLabel}</p>
+                                <h3 className={styles.detailTitle}>{selectedItem.title}</h3>
+                            </div>
+                            {selectedItem.detailMetadata?.length ? (
+                                <dl className={styles.detailMetadata}>
+                                    {selectedItem.detailMetadata.map(metadata => (
+                                        <div key={metadata.label} className={styles.detailMetadataRow}>
+                                            <dt>{metadata.label}:</dt>
+                                            <dd>{metadata.value}</dd>
+                                        </div>
+                                    ))}
+                                </dl>
+                            ) : null}
                         </header>
                         <div className={styles.detailBody}>
-                            <p className={styles.detailPlaceholder}>{detailPlaceholder}</p>
+                            {renderDetail
+                                ? renderDetail(selectedItem)
+                                : <p className={styles.detailPlaceholder}>{detailPlaceholder}</p>}
                         </div>
                     </>
                 ) : (

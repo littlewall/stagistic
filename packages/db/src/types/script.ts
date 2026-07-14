@@ -2,6 +2,7 @@ import type {InferSelectModel} from 'drizzle-orm';
 
 import {
     scriptActs,
+    scriptAttachments,
     scriptBlockCharacterRefs,
     scriptBlocks,
     scriptCues,
@@ -11,6 +12,7 @@ import {
     scriptSettingsBlocks,
     scriptSettingsTitlePage,
 } from '../schema';
+import type {CueAttachmentRole} from './cueAttachments';
 
 export type Script = InferSelectModel<typeof scripts>;
 
@@ -28,3 +30,8 @@ export type ScriptTitlePageField = InferSelectModel<typeof scriptSettingsTitlePa
 export type ScriptLocation = InferSelectModel<typeof scriptLocations>;
 export type ScriptBlockCharacterRef = InferSelectModel<typeof scriptBlockCharacterRefs>;
 export type ScriptCue = InferSelectModel<typeof scriptCues>;
+export type ScriptAttachment = InferSelectModel<typeof scriptAttachments>;
+
+export interface ScriptCueAttachment extends ScriptAttachment {
+    role: CueAttachmentRole,
+}

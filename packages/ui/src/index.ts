@@ -16,6 +16,13 @@ export {
     type AttributeManagerCharactersPanelProps,
 } from './dialogs/AttributeManagerCharactersPanel';
 export {
+    AttributeManagerCueDetail,
+    type AttributeManagerCueDetailProps,
+    type CueAttachmentSlotView,
+    type CueAttachmentView,
+    type CueKind,
+} from './dialogs/AttributeManagerCueDetail';
+export {
     type AttributeManagerDetailTab,
     AttributeManagerDetailTabs,
 } from './dialogs/AttributeManagerDetailTabs';
@@ -34,6 +41,10 @@ export {
     AttributeManagerPlacesPanel,
     type AttributeManagerPlacesPanelProps,
 } from './dialogs/AttributeManagerPlacesPanel';
+export {
+    AttributeManagerSceneDetail,
+    type AttributeManagerSceneDetailProps,
+} from './dialogs/AttributeManagerSceneDetail';
 export {
     CreateCharacterModal,
     type CreateCharacterModalProps,
@@ -56,6 +67,10 @@ export {
 export {ImportScriptModal} from './dialogs/ImportScriptModal';
 export {ModalDialog} from './dialogs/ModalDialog';
 export {NewScriptModal} from './dialogs/NewScriptModal';
+export {
+    RemoveAttachmentModal,
+    type RemoveAttachmentModalProps,
+} from './dialogs/RemoveAttachmentModal';
 export {
     RenameScriptModal,
     type RenameScriptModalProps,
@@ -107,6 +122,10 @@ export type {
     InputTableRowCount,
 } from './molecules/forms/InputTable';
 export {InputTable} from './molecules/forms/InputTable';
+export {
+    MultiComboBox,
+    type MultiComboBoxOption,
+} from './molecules/forms/MultiComboBox';
 export type {SelectOption} from './molecules/forms/Select';
 export {Select} from './molecules/forms/Select';
 export {TextInput} from './molecules/forms/TextInput';

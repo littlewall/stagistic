@@ -4,7 +4,9 @@
     "private": true,
     "type": "module",
     "scripts": {
+        "predev": "pnpm --filter @stagistic/db db:compile-migrations",
         "dev": "vp dev",
+        "prebuild": "pnpm --filter @stagistic/db db:compile-migrations",
         "build": "vp build",
         "preview": "vp preview",
         "lint": "eslint .",
@@ -14,6 +16,7 @@
         "@electric-sql/pglite": "^0.3.7",
         "@stagistic/app-core": "workspace:*",
         "@stagistic/app-routes": "workspace:*",
+        "@stagistic/shared": "workspace:*",
         "@stagistic/db": "workspace:*",
         "@stagistic/ui": "workspace:*",
         "react": "^19.0.0",

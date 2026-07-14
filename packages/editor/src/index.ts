@@ -45,6 +45,7 @@ export type {
     PersistentCueKind,
     PersistentCueRef,
     RenameActRequest,
+    UpdateCueRequest,
 } from './editor/contracts';
 export {default as ScriptEditor} from './editor/Editor';
 export {

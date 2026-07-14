@@ -122,6 +122,30 @@ describe('cue pill node views', () => {
         expect(input?.textContent).toBe('Night');
     });
 
+    it('updates cue title and kind by id', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.insertCueStart('sd-1', 'Night', 'open', {
+            cueId: 'cue-1',
+            kind: 'song',
+        });
+
+        expect(editor.commands.updateCueMetadata('cue-1', 'Overture', 'instrumental')).toBe(true);
+
+        const titleInput = await poll(
+            () => document.querySelector('[data-cue-title-input="start"]'),
+            'updated cue title',
+        );
+
+        expect(titleInput.textContent).toBe('Overture');
+        expect(cueStartAttrs(editor)).toMatchObject({
+            title: 'Overture',
+            kind: 'instrumental',
+        });
+    });
+
     it('keeps the number with the first word while later title words wrap', async () => {
         renderEditor();
 

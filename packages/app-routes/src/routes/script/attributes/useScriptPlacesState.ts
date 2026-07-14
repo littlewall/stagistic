@@ -17,11 +17,13 @@ export const useScriptPlacesState = (
     scriptRepository: ScriptRepository,
 ) => {
     const [places, setPlaces] = useState<ScriptPlace[]>([]);
+    const [scenePlaceIds, setScenePlaceIds] = useState<Record<string, string[]>>({});
     const [isLoading, setIsLoading] = useState(false);
 
     useEffect(() => {
         if (!scriptId) {
             setPlaces([]);
+            setScenePlaceIds({});
             setIsLoading(false);
 
             return;
@@ -32,10 +34,19 @@ export const useScriptPlacesState = (
         setIsLoading(true);
 
         const loadPlaces = async () => {
-            const storedPlaces = await scriptRepository.listScriptLocations(scriptId);
+            const placesPromise = scriptRepository.listScriptLocations(scriptId);
+            const assignmentsPromise = scriptRepository.listScriptSceneLocations(scriptId);
+            const [storedPlaces, storedSceneAssignments] = await Promise.all([placesPromise, assignmentsPromise]);
 
             if (isCurrent) {
                 setPlaces(storedPlaces);
+                setScenePlaceIds(storedSceneAssignments.reduce<Record<string, string[]>>((result, assignment) => {
+                    const currentPlaceIds = result[assignment.sceneHeadingBlockId] ?? [];
+
+                    result[assignment.sceneHeadingBlockId] = [...currentPlaceIds, assignment.locationId];
+
+                    return result;
+                }, {}));
                 setIsLoading(false);
             }
         };
@@ -88,13 +99,42 @@ export const useScriptPlacesState = (
 
         await scriptRepository.deleteScriptLocation(scriptId, placeId);
         setPlaces(previous => previous.filter(place => place.id !== placeId));
+        setScenePlaceIds(previous => Object.fromEntries(
+            Object.entries(previous).map(([sceneId, placeIds]) => [sceneId, placeIds.filter(candidate => candidate !== placeId)]),
+        ));
+    }, [scriptId, scriptRepository]);
+
+    const setScenePlaces = useCallback(async (sceneHeadingBlockId: string, placeIds: string[]) => {
+        if (!scriptId) {
+            return [];
+        }
+
+        setScenePlaceIds(previous => ({
+            ...previous,
+            [sceneHeadingBlockId]: placeIds,
+        }));
+
+        const storedPlaceIds = await scriptRepository.replaceScriptSceneLocations(
+            scriptId,
+            sceneHeadingBlockId,
+            placeIds,
+        );
+
+        setScenePlaceIds(previous => ({
+            ...previous,
+            [sceneHeadingBlockId]: storedPlaceIds,
+        }));
+
+        return storedPlaceIds;
     }, [scriptId, scriptRepository]);
 
     return {
         places,
+        scenePlaceIds,
         isLoading,
         createPlace,
         renamePlace,
         deletePlace,
+        setScenePlaces,
     };
 };

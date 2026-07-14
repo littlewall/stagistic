@@ -13,6 +13,7 @@ import {
     insertScriptCue,
     listScriptCues,
     unassignScriptCue,
+    updateScriptCue,
 } from './cues';
 
 describe('script cues queries', () => {
@@ -89,6 +90,35 @@ describe('script cues queries', () => {
         });
     });
 
+    it('updates cue title and kind within its script', async () => {
+        const {db} = await createTestDb();
+
+        await seedScript(db, 's1');
+        await seedScript(db, 's2');
+        await bulkUpsertScriptCues(db, [
+            {
+                id: 'c1', scriptId: 's1', sceneNumber: 1, indexInScene: 0, mode: 'open', title: 'Night', kind: 'song', startBlockId: 'b1', endBlockId: null, createdAt: 1, updatedAt: 1,
+            }, {
+                id: 'c2', scriptId: 's2', sceneNumber: 1, indexInScene: 0, mode: 'open', title: 'Night', kind: 'song', startBlockId: 'b1', endBlockId: null, createdAt: 1, updatedAt: 1,
+            },
+        ]);
+
+        await updateScriptCue(db, {
+            scriptId: 's1',
+            cueId: 'c1',
+            title: 'Overture',
+            kind: 'instrumental',
+            updatedAt: 2,
+        });
+
+        expect((await listScriptCues(db, 's1'))[0]).toMatchObject({
+            title: 'Overture', kind: 'instrumental', updatedAt: 2,
+        });
+        expect((await listScriptCues(db, 's2'))[0]).toMatchObject({
+            title: 'Night', kind: 'song', updatedAt: 1,
+        });
+    });
+
     it('unassigns cues without deleting them', async () => {
         const {db} = await createTestDb();
 
@@ -122,7 +152,9 @@ describe('script cues queries', () => {
             },
         ]);
 
-        await unassignScriptCue(db, {scriptId: 's1', cueId: 'c1', updatedAt: 2});
+        await unassignScriptCue(db, {
+            scriptId: 's1', cueId: 'c1', updatedAt: 2,
+        });
 
         expect((await listScriptCues(db, 's1'))[0]).toMatchObject({
             id: 'c1', startBlockId: null, endBlockId: null,

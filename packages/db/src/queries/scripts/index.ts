@@ -1,4 +1,5 @@
 export * from './acts';
+export * from './attachments';
 export * from './blockCharacterRefs';
 export * from './blocks';
 export * from './characters';
@@ -8,5 +9,6 @@ export * from './cues';
 export * from './duplicate';
 export * from './locations';
 export * from './outbox';
+export * from './sceneLocations';
 export * from './scenes';
 export * from './titlePageFields';

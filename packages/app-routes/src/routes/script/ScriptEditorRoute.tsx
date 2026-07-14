@@ -77,6 +77,7 @@ export const ScriptEditorRoute = () => {
         deleteCue,
         markCueAssigned,
         markCueUnassigned,
+        updateCueRequest,
         unassignCue,
     } = cueState;
 
@@ -237,6 +238,7 @@ export const ScriptEditorRoute = () => {
                         onManualSave: handleManualSave,
                         autoSaveDelayMs: AUTOSAVE_DELAY_MS,
                     }}
+                    requests={{updateCueRequest}}
                     layout={{
                         autoFocus: shouldAutoFocus,
                         leftSidebarToggle,

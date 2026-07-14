@@ -1,6 +1,8 @@
+import type {FileStorage} from '../fileStorage';
 import type {LocalDb} from '../pglite';
 import * as dbQueries from '../queries';
 import type {ScriptRepository} from '../scriptRepository';
+import {createAttachmentHandlers} from './attachments';
 import {createCharacterHandlers} from './characters';
 import {createSettingsHandlers} from './config';
 import {createContentHandlers} from './content';
@@ -14,11 +16,13 @@ import type {GetDb} from './types';
 export interface LocalPgliteRepositoryDeps {
     getLocalDb: () => Promise<LocalDb>,
     syncToFs: () => Promise<void>,
+    fileStorage: FileStorage,
 }
 
 export const createLocalPgliteRepository = ({
     getLocalDb,
     syncToFs,
+    fileStorage,
 }: LocalPgliteRepositoryDeps): ScriptRepository => {
     const dbPromise = getLocalDb();
 
@@ -56,6 +60,12 @@ export const createLocalPgliteRepository = ({
         recordOutbox,
         syncDb: syncToFs,
     });
+    const attachments = createAttachmentHandlers({
+        getDb,
+        recordOutbox,
+        syncDb: syncToFs,
+        fileStorage,
+    });
 
     const listScriptCharacters = async (scriptId: string) => {
         const db = await getDb();
@@ -70,12 +80,21 @@ export const createLocalPgliteRepository = ({
         listScriptCharacterGenders: scriptId => characterHandlers.listScriptCharacterGenders(scriptId),
         listScriptCues: scriptId => cues.list(scriptId),
         createScriptCue: (scriptId, input) => cues.create(scriptId, input),
+        updateScriptCue: (scriptId, cueId, input) => cues.update(scriptId, cueId, input),
         deleteScriptCue: (scriptId, cueId) => cues.delete(scriptId, cueId),
         unassignScriptCue: (scriptId, cueId) => cues.unassign(scriptId, cueId),
         listScriptLocations: scriptId => locations.list(scriptId),
+        listScriptSceneLocations: scriptId => locations.listSceneAssignments(scriptId),
         createScriptLocation: (scriptId, input) => locations.create(scriptId, input),
         renameScriptLocation: (scriptId, locationId, name) => locations.rename(scriptId, locationId, name),
         deleteScriptLocation: (scriptId, locationId) => locations.delete(scriptId, locationId),
+        replaceScriptSceneLocations: (scriptId, sceneHeadingBlockId, locationIds) => {
+            return locations.replaceSceneAssignments(
+                scriptId,
+                sceneHeadingBlockId,
+                locationIds,
+            );
+        },
         createScript: (title, initialContent) => scripts.create(title, initialContent),
         renameScript: (scriptId, input) => scripts.rename(scriptId, input),
         renameScriptTitle: (scriptId, title) => scripts.renameTitle(scriptId, title),
@@ -113,5 +132,9 @@ export const createLocalPgliteRepository = ({
         loadTitlePage: scriptId => titlePageHandlers.load(scriptId),
         saveTitlePage: (scriptId, settings) => titlePageHandlers.save(scriptId, settings),
         deleteTitlePage: scriptId => titlePageHandlers.delete(scriptId),
+        getCueAttachment: (cueId, role) => attachments.getByCueRole(cueId, role),
+        setCueAttachment: (scriptId, cueId, role, file) => attachments.setForCue(scriptId, cueId, role, file),
+        removeCueAttachment: (scriptId, cueId, role) => attachments.removeFromCue(scriptId, cueId, role),
+        getAttachmentBlob: storageKey => attachments.getBlob(storageKey),
     };
 };

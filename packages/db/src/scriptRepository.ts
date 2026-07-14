@@ -5,9 +5,11 @@ import type {
 } from '@stagistic/script';
 
 import type {
+    CueAttachmentRole,
     ScriptCharacterGenderOption,
     ScriptCharacterRef,
     ScriptCue,
+    ScriptCueAttachment,
     ScriptLocation,
     ScriptSummary,
 } from './types';
@@ -37,6 +39,8 @@ export interface CreateScriptCueInput {
     kind: 'song' | 'instrumental',
 }
 
+export type UpdateScriptCueInput = CreateScriptCueInput;
+
 export interface CreateScriptLocationInput {
     name: string,
 }
@@ -44,15 +48,46 @@ export interface CreateScriptLocationInput {
 export interface ScriptCuesRepository {
     list(scriptId: string): Promise<ScriptCue[]>,
     create(scriptId: string, input: CreateScriptCueInput): Promise<ScriptCue | null>,
+    update(scriptId: string, cueId: string, input: UpdateScriptCueInput): Promise<ScriptCue | null>,
     delete(scriptId: string, cueId: string): Promise<void>,
     unassign(scriptId: string, cueId: string): Promise<ScriptCue | null>,
 }
 
 export interface ScriptLocationsRepository {
     list(scriptId: string): Promise<ScriptLocation[]>,
+    listSceneAssignments(scriptId: string): Promise<ScriptSceneLocationAssignment[]>,
     create(scriptId: string, input: CreateScriptLocationInput): Promise<ScriptLocation | null>,
     rename(scriptId: string, locationId: string, name: string): Promise<ScriptLocation | null>,
     delete(scriptId: string, locationId: string): Promise<void>,
+    replaceSceneAssignments(
+        scriptId: string,
+        sceneHeadingBlockId: string,
+        locationIds: string[],
+    ): Promise<string[]>,
+}
+
+export interface ScriptSceneLocationAssignment {
+    sceneHeadingBlockId: string,
+    locationId: string,
+}
+
+export interface CueAttachmentUpload {
+    name: string,
+    type: string,
+    size: number,
+    blob: Blob,
+}
+
+export interface ScriptAttachmentsRepository {
+    getByCueRole(cueId: string, role: CueAttachmentRole): Promise<ScriptCueAttachment | null>,
+    setForCue(
+        scriptId: string,
+        cueId: string,
+        role: CueAttachmentRole,
+        file: CueAttachmentUpload,
+    ): Promise<ScriptCueAttachment | null>,
+    removeFromCue(scriptId: string, cueId: string, role: CueAttachmentRole): Promise<void>,
+    getBlob(storageKey: string): Promise<Blob | null>,
 }
 
 export interface ScriptTitlePageRepository {
@@ -68,12 +103,28 @@ export interface ScriptRepository {
     listScriptCharacterGenders(scriptId: string): Promise<ScriptCharacterGenderOption[]>,
     listScriptCues(scriptId: string): Promise<ScriptCue[]>,
     createScriptCue(scriptId: string, input: CreateScriptCueInput): Promise<ScriptCue | null>,
+    updateScriptCue(scriptId: string, cueId: string, input: UpdateScriptCueInput): Promise<ScriptCue | null>,
     deleteScriptCue(scriptId: string, cueId: string): Promise<void>,
     unassignScriptCue(scriptId: string, cueId: string): Promise<ScriptCue | null>,
     listScriptLocations(scriptId: string): Promise<ScriptLocation[]>,
+    listScriptSceneLocations(scriptId: string): Promise<ScriptSceneLocationAssignment[]>,
     createScriptLocation(scriptId: string, input: CreateScriptLocationInput): Promise<ScriptLocation | null>,
     renameScriptLocation(scriptId: string, locationId: string, name: string): Promise<ScriptLocation | null>,
     deleteScriptLocation(scriptId: string, locationId: string): Promise<void>,
+    replaceScriptSceneLocations(
+        scriptId: string,
+        sceneHeadingBlockId: string,
+        locationIds: string[],
+    ): Promise<string[]>,
+    getCueAttachment(cueId: string, role: CueAttachmentRole): Promise<ScriptCueAttachment | null>,
+    setCueAttachment(
+        scriptId: string,
+        cueId: string,
+        role: CueAttachmentRole,
+        file: CueAttachmentUpload,
+    ): Promise<ScriptCueAttachment | null>,
+    removeCueAttachment(scriptId: string, cueId: string, role: CueAttachmentRole): Promise<void>,
+    getAttachmentBlob(storageKey: string): Promise<Blob | null>,
     createScript(title: string, initialContent?: ScriptDocument): Promise<string>,
     renameScript(scriptId: string, input: RenameScriptInput): Promise<void>,
     renameScriptTitle(scriptId: string, title: string): Promise<void>,
