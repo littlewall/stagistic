@@ -11,10 +11,10 @@ export {
 export {
     createProjectedTableDocumentSource,
     createSqlScriptDocumentProjectionWriter,
-    loadScriptDocumentFromProjection,
-    rebuildScriptProjection,
     type LoadedProjectionDocument,
     type LoadedScriptDocument,
+    loadScriptDocumentFromProjection,
+    rebuildScriptProjection,
     type RebuildScriptProjectionArgs,
     type SaveScriptDocumentOptions,
     type ScriptDocumentProjectionWriter,
@@ -23,10 +23,12 @@ export {
 export * from './schema';
 export type {
     CreateScriptCueInput,
+    CreateScriptLocationInput,
     DuplicateScriptInput,
     ListScriptsOptions,
     RenameScriptInput,
     ScriptCuesRepository,
+    ScriptLocationsRepository,
     ScriptRepository,
     ScriptTitlePageRepository,
 } from './scriptRepository';

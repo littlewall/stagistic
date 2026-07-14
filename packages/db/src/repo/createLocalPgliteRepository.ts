@@ -5,6 +5,7 @@ import {createCharacterHandlers} from './characters';
 import {createSettingsHandlers} from './config';
 import {createContentHandlers} from './content';
 import {createCueHandlers} from './cues';
+import {createLocationHandlers} from './locations';
 import {createOutboxRecorder} from './outbox';
 import {createScriptsHandlers} from './scripts';
 import {createTitlePageHandlers} from './titlePage';
@@ -50,6 +51,11 @@ export const createLocalPgliteRepository = ({
         recordOutbox,
         syncDb: syncToFs,
     });
+    const locations = createLocationHandlers({
+        getDb,
+        recordOutbox,
+        syncDb: syncToFs,
+    });
 
     const listScriptCharacters = async (scriptId: string) => {
         const db = await getDb();
@@ -66,6 +72,10 @@ export const createLocalPgliteRepository = ({
         createScriptCue: (scriptId, input) => cues.create(scriptId, input),
         deleteScriptCue: (scriptId, cueId) => cues.delete(scriptId, cueId),
         unassignScriptCue: (scriptId, cueId) => cues.unassign(scriptId, cueId),
+        listScriptLocations: scriptId => locations.list(scriptId),
+        createScriptLocation: (scriptId, input) => locations.create(scriptId, input),
+        renameScriptLocation: (scriptId, locationId, name) => locations.rename(scriptId, locationId, name),
+        deleteScriptLocation: (scriptId, locationId) => locations.delete(scriptId, locationId),
         createScript: (title, initialContent) => scripts.create(title, initialContent),
         renameScript: (scriptId, input) => scripts.rename(scriptId, input),
         renameScriptTitle: (scriptId, title) => scripts.renameTitle(scriptId, title),

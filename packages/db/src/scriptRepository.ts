@@ -8,6 +8,7 @@ import type {
     ScriptCharacterGenderOption,
     ScriptCharacterRef,
     ScriptCue,
+    ScriptLocation,
     ScriptSummary,
 } from './types';
 
@@ -36,11 +37,22 @@ export interface CreateScriptCueInput {
     kind: 'song' | 'instrumental',
 }
 
+export interface CreateScriptLocationInput {
+    name: string,
+}
+
 export interface ScriptCuesRepository {
     list(scriptId: string): Promise<ScriptCue[]>,
     create(scriptId: string, input: CreateScriptCueInput): Promise<ScriptCue | null>,
     delete(scriptId: string, cueId: string): Promise<void>,
     unassign(scriptId: string, cueId: string): Promise<ScriptCue | null>,
+}
+
+export interface ScriptLocationsRepository {
+    list(scriptId: string): Promise<ScriptLocation[]>,
+    create(scriptId: string, input: CreateScriptLocationInput): Promise<ScriptLocation | null>,
+    rename(scriptId: string, locationId: string, name: string): Promise<ScriptLocation | null>,
+    delete(scriptId: string, locationId: string): Promise<void>,
 }
 
 export interface ScriptTitlePageRepository {
@@ -58,6 +70,10 @@ export interface ScriptRepository {
     createScriptCue(scriptId: string, input: CreateScriptCueInput): Promise<ScriptCue | null>,
     deleteScriptCue(scriptId: string, cueId: string): Promise<void>,
     unassignScriptCue(scriptId: string, cueId: string): Promise<ScriptCue | null>,
+    listScriptLocations(scriptId: string): Promise<ScriptLocation[]>,
+    createScriptLocation(scriptId: string, input: CreateScriptLocationInput): Promise<ScriptLocation | null>,
+    renameScriptLocation(scriptId: string, locationId: string, name: string): Promise<ScriptLocation | null>,
+    deleteScriptLocation(scriptId: string, locationId: string): Promise<void>,
     createScript(title: string, initialContent?: ScriptDocument): Promise<string>,
     renameScript(scriptId: string, input: RenameScriptInput): Promise<void>,
     renameScriptTitle(scriptId: string, title: string): Promise<void>,

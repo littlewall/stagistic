@@ -15,6 +15,7 @@ import {
     type AttributeManagerListItem,
     AttributeManagerListPanel,
     AttributeManagerModal,
+    AttributeManagerPlacesPanel,
     ScriptSettingsModal,
 } from '@stagistic/ui';
 import {
@@ -31,10 +32,12 @@ import {
 import {
     ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
     ATTRIBUTE_MANAGER_PANEL_CUES,
+    ATTRIBUTE_MANAGER_PANEL_PLACES,
     ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
     type AttributeManagerPanelId,
 } from '../attributes/attributeManagerMenu';
 import {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
+import {useScriptPlacesState} from '../attributes/useScriptPlacesState';
 import {useScriptCuesState} from '../editor/cues';
 import {ScriptEditorSettingsPanel} from '../editor/settings';
 import {ScriptCharactersProvider} from '../ScriptCharactersContext';
@@ -174,6 +177,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         handleAutoSave,
     });
     const cueState = useScriptCuesState(currentScriptId, scriptRepository);
+    const placeState = useScriptPlacesState(currentScriptId, scriptRepository);
     const attributeManagerCharacters = useMemo<AttributeManagerCharacter[]>(() => {
         return charactersContextValue.confirmedCharacterRecords.map(character => ({
             id: character.id,
@@ -303,6 +307,15 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                             emptyListLabel="No cues yet"
                             emptyDetailLabel="Select a cue"
                             detailPlaceholder="Cue details are coming soon."
+                        />
+                    ) : null}
+                    {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_PLACES ? (
+                        <AttributeManagerPlacesPanel
+                            places={placeState.places}
+                            isLoading={placeState.isLoading}
+                            onCreatePlace={placeState.createPlace}
+                            onRenamePlace={placeState.renamePlace}
+                            onDeletePlace={placeState.deletePlace}
                         />
                     ) : null}
                 </AttributeManagerModal>

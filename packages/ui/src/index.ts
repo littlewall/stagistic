@@ -30,9 +30,18 @@ export {
     type AttributeManagerTab,
 } from './dialogs/AttributeManagerModal';
 export {
+    type AttributeManagerPlace,
+    AttributeManagerPlacesPanel,
+    type AttributeManagerPlacesPanelProps,
+} from './dialogs/AttributeManagerPlacesPanel';
+export {
     CreateCharacterModal,
     type CreateCharacterModalProps,
 } from './dialogs/CreateCharacterModal';
+export {
+    CreatePlaceModal,
+    type CreatePlaceModalProps,
+} from './dialogs/CreatePlaceModal';
 export {
     DELETE_SCRIPT_CONFIRM_PHRASE,
     DeleteScriptConfirm,
