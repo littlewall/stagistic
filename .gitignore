@@ -69,3 +69,7 @@ tsconfig.tsbuildinfo
 # vite-plus compiled config artifact (source is vite.config.ts)
 vite.config.js
 vite.config.js.map
+
+# Graphify
+graphify-out/cache/
+graphify-out/.graphify_root

@@ -16,19 +16,32 @@
     border-right: 1px solid var(--color-border);
 }
 
-.browserHeader {
+.searchRow {
     display: flex;
     gap: var(--space-md);
     align-items: center;
-    justify-content: space-between;
-    min-height: calc(56px * var(--size-scale));
-    padding: var(--space-lg) var(--space-xl);
-    border-bottom: 1px solid var(--color-border);
+    padding: var(--space-xl);
 }
 
-.browserTitle {
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
+.searchField {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+
+    & input {
+        padding-left: calc(var(--space-xl) + 1rem);
+        background: var(--color-surface);
+    }
+}
+
+.searchIcon {
+    pointer-events: none;
+    position: absolute;
+    z-index: 1;
+    top: calc((var(--select-button-height) - 1rem) / 2);
+    left: var(--space-md);
+    width: 1rem;
+    height: 1rem;
     color: var(--color-text-muted);
 }
 
@@ -39,7 +52,10 @@
     width: var(--select-button-height);
     height: var(--select-button-height);
     padding: 0;
-    color: var(--color-text-muted);
+}
+
+.addButton {
+    color: var(--color-text);
 }
 
 .addButton:hover:not(:disabled) {
@@ -49,8 +65,10 @@
 
 .actionIcon {
     display: block;
+    flex: 0 0 auto;
     width: 1rem;
     height: 1rem;
+    color: currentcolor;
     fill: none;
     stroke: currentcolor;
     stroke-width: 2;
@@ -60,7 +78,7 @@
     overflow-y: auto;
     flex: 1 1 auto;
     min-height: 0;
-    padding: var(--space-md);
+    padding: 0 var(--space-md) var(--space-xl);
 }
 
 .listItem {

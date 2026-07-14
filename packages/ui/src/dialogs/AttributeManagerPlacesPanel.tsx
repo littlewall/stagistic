@@ -1,12 +1,17 @@
 import clsx from 'clsx';
 import {
     useEffect,
+    useMemo,
     useState,
 } from 'react';
 
 import {Button} from '../atoms/Button';
+import {Input} from '../atoms/Input';
 import {Tooltip} from '../atoms/Tooltip';
-import {PlusIcon} from '../icons';
+import {
+    PlusIcon,
+    SearchIcon,
+} from '../icons';
 import {AttributeManagerPlaceDetail} from './AttributeManagerPlaceDetail';
 import styles from './AttributeManagerPlacesPanel.module.css';
 import {CreatePlaceModal} from './CreatePlaceModal';
@@ -33,7 +38,16 @@ export const AttributeManagerPlacesPanel = ({
 }: AttributeManagerPlacesPanelProps) => {
     const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const selectedPlace = places.find(place => place.id === selectedPlaceId) ?? null;
+    const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
+    const visiblePlaces = useMemo(() => {
+        if (!normalizedSearchQuery) {
+            return places;
+        }
+
+        return places.filter(place => place.name.toLocaleLowerCase().includes(normalizedSearchQuery));
+    }, [normalizedSearchQuery, places]);
 
     useEffect(() => {
         const selectionStillExists = places.some(place => place.id === selectedPlaceId);
@@ -58,8 +72,16 @@ export const AttributeManagerPlacesPanel = ({
     return (
         <div className={styles.panel}>
             <aside className={styles.browser} aria-label="Place list">
-                <div className={styles.browserHeader}>
-                    <span className={styles.browserTitle}>Places</span>
+                <div className={styles.searchRow}>
+                    <div className={styles.searchField}>
+                        <SearchIcon className={styles.searchIcon} aria-hidden="true" />
+                        <Input
+                            value={searchQuery}
+                            onChange={event => setSearchQuery(event.target.value)}
+                            placeholder="Search places"
+                            aria-label="Search places"
+                        />
+                    </div>
                     <Tooltip label="Create place">
                         <Button
                             className={styles.addButton}
@@ -73,7 +95,7 @@ export const AttributeManagerPlacesPanel = ({
                     </Tooltip>
                 </div>
                 <div className={styles.browserList}>
-                    {places.map(place => {
+                    {visiblePlaces.map(place => {
                         const isSelected = place.id === selectedPlaceId;
 
                         return (
@@ -88,7 +110,7 @@ export const AttributeManagerPlacesPanel = ({
                             </button>
                         );
                     })}
-                    {places.length === 0 ? (
+                    {visiblePlaces.length === 0 ? (
                         <p className={styles.emptyList}>{listStatus}</p>
                     ) : null}
                 </div>

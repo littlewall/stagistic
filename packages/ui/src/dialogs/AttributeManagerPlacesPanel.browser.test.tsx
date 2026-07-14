@@ -41,9 +41,9 @@ const findButtonByText = (label: string): HTMLButtonElement => {
 
 const renderPanel = () => {
     const host = document.createElement('div');
-    const onCreatePlace = vi.fn(async (name: string) => ({id: 'place-3', name}));
-    const onRenamePlace = vi.fn(async () => undefined);
-    const onDeletePlace = vi.fn(async () => undefined);
+    const onCreatePlace = vi.fn((name: string) => Promise.resolve({id: 'place-3', name}));
+    const onRenamePlace = vi.fn(() => Promise.resolve());
+    const onDeletePlace = vi.fn(() => Promise.resolve());
 
     host.style.width = '900px';
     host.style.height = '600px';
@@ -54,10 +54,7 @@ const renderPanel = () => {
 
     root.render(
         <AttributeManagerPlacesPanel
-            places={[
-                {id: 'place-1', name: 'Backstage'},
-                {id: 'place-2', name: 'Main stage'},
-            ]}
+            places={[{id: 'place-1', name: 'Backstage'}, {id: 'place-2', name: 'Main stage'}]}
             onCreatePlace={onCreatePlace}
             onRenamePlace={onRenamePlace}
             onDeletePlace={onDeletePlace}
@@ -79,6 +76,24 @@ afterEach(() => {
 });
 
 describe('AttributeManagerPlacesPanel', () => {
+    it('filters places and renders a visible add icon', async () => {
+        renderPanel();
+
+        const searchInput = await waitForElement<HTMLInputElement>('[aria-label="Search places"]');
+        const addButton = await waitForElement<HTMLButtonElement>('[aria-label="Create place"]');
+        const addIcon = addButton.querySelector('svg');
+
+        expect(addIcon).not.toBeNull();
+        expect(addIcon?.getBoundingClientRect().width).toBeGreaterThan(0);
+
+        await page.elementLocator(searchInput).fill('main');
+
+        const list = await waitForElement('[aria-label="Place list"]');
+
+        expect(list.textContent).toContain('Main stage');
+        expect(list.textContent).not.toContain('Backstage');
+    });
+
     it('creates a place from the add action', async () => {
         const {onCreatePlace} = renderPanel();
 
