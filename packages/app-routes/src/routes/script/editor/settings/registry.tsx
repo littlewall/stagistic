@@ -2,6 +2,7 @@ import {
     SCRIPT_SETTINGS_PANEL_DANGER_ZONE,
     SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
     SCRIPT_SETTINGS_PANEL_HEADERS,
+    SCRIPT_SETTINGS_PANEL_INITIAL_PAGES,
     SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
     SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS,
     SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
@@ -9,6 +10,7 @@ import {
 import {DangerZoneSettingsPanel} from './danger-zone/DangerZoneSettingsPanel';
 import {TitlePageSettingsPanel} from './document-info/TitlePageSettingsPanel';
 import {HeaderFooterSettingsPanel} from './header-footer/HeaderFooterSettingsPanel';
+import {InitialPagesSettingsPanel} from './initial-pages/InitialPagesSettingsPanel';
 import {PageLayoutSettingsPanel} from './page-layout/PageLayoutSettingsPanel';
 import {StructureMarkersSettingsPanel} from './structure-markers/StructureMarkersSettingsPanel';
 import type {SectionRenderer} from './types';
@@ -35,6 +37,12 @@ export const SECTION_RENDERERS: Partial<Record<string, SectionRenderer>> = {
             scriptTitle={props.titlePageHandlers.scriptTitle}
             titlePageSettings={props.titlePageHandlers.titlePageSettings}
             onUpdate={props.headerFooterHandlers.onUpdateHeaderFooterSettings}
+        />
+    ),
+    [SCRIPT_SETTINGS_PANEL_INITIAL_PAGES]: props => (
+        <InitialPagesSettingsPanel
+            settings={props.resolvedScriptSettings.initialPages}
+            onUpdate={props.initialPagesHandlers.onUpdateInitialPagesSettings}
         />
     ),
     [SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES]: props => (

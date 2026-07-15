@@ -1,26 +1,16 @@
 import clsx from 'clsx';
 import {
-    Button as ComboBoxButton,
-    ComboBox,
-    ComboBoxValue,
-    Input,
-    type Key,
-    Label,
-    ListBox,
-    ListBoxItem,
-    Popover,
-} from 'react-aria-components/ComboBox';
+    type MouseEvent,
+    useId,
+    useRef,
+    useState,
+} from 'react';
 import {
-    Button as RemoveButton,
-    Tag,
-    TagGroup,
-    TagList,
-} from 'react-aria-components/TagGroup';
+    type Tag,
+    WithContext as ReactTags,
+} from 'react-tag-input';
 
-import {
-    ChevronDownIcon,
-    CloseIcon,
-} from '../../icons';
+import {CloseIcon} from '../../icons';
 import styles from './MultiComboBox.module.css';
 
 export interface MultiComboBoxOption {
@@ -39,7 +29,32 @@ interface MultiComboBoxProps {
     emptyLabel?: string,
 }
 
-const toStringKeys = (keys: Key[]) => keys.map(String);
+interface RemoveTagButtonProps {
+    className?: string,
+    onRemove: (event: MouseEvent<HTMLButtonElement>) => void,
+    tag: Tag,
+}
+
+const RemoveTagButton = ({
+    className,
+    onRemove,
+    tag,
+}: RemoveTagButtonProps) => (
+    <button
+        className={className}
+        type="button"
+        aria-label={`Remove ${tag.text}`}
+        onClick={onRemove}
+    >
+        <CloseIcon aria-hidden="true" />
+    </button>
+);
+
+const toTag = ({id, label}: MultiComboBoxOption): Tag => ({
+    id,
+    text: label,
+    className: '',
+});
 
 export const MultiComboBox = ({
     label,
@@ -49,70 +64,76 @@ export const MultiComboBox = ({
     onChange,
     className,
     isDisabled = false,
-    emptyLabel = 'No matching options',
-}: MultiComboBoxProps) => (
-    <ComboBox<MultiComboBoxOption, 'multiple'>
-        className={clsx(styles.root, className)}
-        selectionMode="multiple"
-        value={value}
-        isDisabled={isDisabled}
-        menuTrigger="focus"
-        onChange={keys => onChange(toStringKeys(keys))}
-    >
-        <Label className={styles.label}>{label}</Label>
-        <div className={styles.field}>
-            <Input className={styles.input} placeholder={placeholder} />
-            <ComboBoxButton className={styles.openButton} aria-label={`Show ${label.toLocaleLowerCase()}`}>
-                <ChevronDownIcon aria-hidden="true" />
-            </ComboBoxButton>
+}: MultiComboBoxProps) => {
+    const inputId = useId();
+    const rootRef = useRef<HTMLDivElement>(null);
+    const [isFocused, setIsFocused] = useState(false);
+    const selectedTags = value.flatMap(id => {
+        const option = options.find(candidate => candidate.id === id);
+
+        return option ? [toTag(option)] : [];
+    });
+    const suggestions = options.map(toTag);
+    const closeSuggestions = () => {
+        setIsFocused(false);
+        queueMicrotask(() => {
+            rootRef.current
+                ?.querySelector<HTMLInputElement>('input[data-automation="input"]')
+                ?.blur();
+        });
+    };
+    const handleAddition = (tag: Tag) => {
+        if (options.some(option => option.id === tag.id) && !value.includes(tag.id)) {
+            onChange([...value, tag.id]);
+        }
+
+        closeSuggestions();
+    };
+    const handleDelete = (index: number) => {
+        const tag = selectedTags[index];
+
+        if (tag) {
+            onChange(value.filter(id => id !== tag.id));
+        }
+    };
+
+    return (
+        <div
+            ref={rootRef}
+            className={clsx(styles.root, isDisabled && styles.disabled, className)}
+        >
+            <label className={styles.label} htmlFor={inputId}>{label}</label>
+            <ReactTags
+                id={inputId}
+                tags={selectedTags}
+                suggestions={suggestions}
+                placeholder={placeholder}
+                labelField="text"
+                inputFieldPosition="inline"
+                separators={['Enter']}
+                autoFocus={false}
+                readOnly={isDisabled}
+                allowUnique
+                allowDragDrop={false}
+                allowAdditionFromPaste={false}
+                allowDeleteFromEmptyInput={false}
+                handleAddition={handleAddition}
+                handleDelete={handleDelete}
+                handleInputFocus={() => setIsFocused(true)}
+                handleInputBlur={() => setIsFocused(false)}
+                shouldRenderSuggestions={() => isFocused}
+                removeComponent={RemoveTagButton}
+                classNames={{
+                    tags: styles.tagsRoot,
+                    tagInput: styles.tagInput,
+                    tagInputField: styles.input,
+                    selected: styles.selected,
+                    tag: styles.tag,
+                    remove: clsx('ReactTags__remove', styles.removeButton),
+                    suggestions: styles.suggestions,
+                    activeSuggestion: styles.activeSuggestion,
+                }}
+            />
         </div>
-        <ComboBoxValue<MultiComboBoxOption> className={styles.value}>
-            {({selectedItems}) => {
-                const items = selectedItems.filter((item): item is MultiComboBoxOption => item !== null);
-
-                if (items.length === 0) {
-                    return null;
-                }
-
-                return (
-                    <TagGroup
-                        aria-label={`Selected ${label.toLocaleLowerCase()}`}
-                        onRemove={keys => onChange(value.filter(id => !keys.has(id)))}
-                    >
-                        <TagList className={styles.tags} items={items}>
-                            {item => (
-                                <Tag
-                                    id={item.id}
-                                    className={styles.tag}
-                                    textValue={item.label}
-                                >
-                                    <span>{item.label}</span>
-                                    <RemoveButton slot="remove" className={styles.removeButton}>
-                                        <CloseIcon aria-hidden="true" />
-                                    </RemoveButton>
-                                </Tag>
-                            )}
-                        </TagList>
-                    </TagGroup>
-                );
-            }}
-        </ComboBoxValue>
-        <Popover className={styles.popover} offset={4}>
-            <ListBox
-                className={styles.listBox}
-                items={options}
-                renderEmptyState={() => <span className={styles.empty}>{emptyLabel}</span>}
-            >
-                {option => (
-                    <ListBoxItem
-                        id={option.id}
-                        className={styles.option}
-                        textValue={option.label}
-                    >
-                        {option.label}
-                    </ListBoxItem>
-                )}
-            </ListBox>
-        </Popover>
-    </ComboBox>
-);
+    );
+};

@@ -3,6 +3,7 @@ import {eq} from 'drizzle-orm';
 import {
     scriptSettingsBlocks,
     scriptSettingsHeadersFooters,
+    scriptSettingsInitialPages,
     scriptSettingsPageLayout,
     scriptSettingsStructure,
     scriptSettingsVisualPreferences,
@@ -34,6 +35,14 @@ export const getScriptStructureSettings = async (db: DbClient, scriptId: string)
     return rows[0] ?? null;
 };
 
+export const getScriptInitialPagesSettings = async (db: DbClient, scriptId: string) => {
+    const rows = await db.select().from(scriptSettingsInitialPages)
+        .where(eq(scriptSettingsInitialPages.scriptId, scriptId))
+        .limit(1);
+
+    return rows[0] ?? null;
+};
+
 export const listScriptHeaderFooterSettings = (db: DbClient, scriptId: string) => db
     .select()
     .from(scriptSettingsHeadersFooters)
@@ -48,6 +57,7 @@ export const deleteScriptSettings = async (db: DbClient, scriptId: string) => {
     await db.delete(scriptSettingsPageLayout).where(eq(scriptSettingsPageLayout.scriptId, scriptId));
     await db.delete(scriptSettingsVisualPreferences).where(eq(scriptSettingsVisualPreferences.scriptId, scriptId));
     await db.delete(scriptSettingsStructure).where(eq(scriptSettingsStructure.scriptId, scriptId));
+    await db.delete(scriptSettingsInitialPages).where(eq(scriptSettingsInitialPages.scriptId, scriptId));
     await db.delete(scriptSettingsHeadersFooters).where(eq(scriptSettingsHeadersFooters.scriptId, scriptId));
     await db.delete(scriptSettingsBlocks).where(eq(scriptSettingsBlocks.scriptId, scriptId));
 };
@@ -71,6 +81,13 @@ export const insertScriptStructureSettings = async (
     values: typeof scriptSettingsStructure.$inferInsert,
 ) => {
     await db.insert(scriptSettingsStructure).values(values);
+};
+
+export const insertScriptInitialPagesSettings = async (
+    db: DbClient,
+    values: typeof scriptSettingsInitialPages.$inferInsert,
+) => {
+    await db.insert(scriptSettingsInitialPages).values(values);
 };
 
 export const insertScriptHeaderFooterSettings = async (

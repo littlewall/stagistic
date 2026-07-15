@@ -90,5 +90,10 @@ export const compiledMigrations = [
         "id": "0017_add_scene_locations",
         "checksum": "cd92a747820a5b26b786068e14df9148c37898bee28052462a15b47dd02fb5ed",
         "sql": "CREATE TABLE \"script_scene_locations\" (\n\t\"scene_id\" text NOT NULL,\n\t\"location_id\" text NOT NULL,\n\tCONSTRAINT \"script_scene_locations_scene_id_location_id_pk\" PRIMARY KEY(\"scene_id\",\"location_id\")\n);\n--> statement-breakpoint\nALTER TABLE \"script_scene_locations\" ADD CONSTRAINT \"script_scene_locations_scene_id_script_scenes_id_fk\" FOREIGN KEY (\"scene_id\") REFERENCES \"public\".\"script_scenes\"(\"id\") ON DELETE cascade ON UPDATE no action;\n--> statement-breakpoint\nALTER TABLE \"script_scene_locations\" ADD CONSTRAINT \"script_scene_locations_location_id_script_locations_id_fk\" FOREIGN KEY (\"location_id\") REFERENCES \"public\".\"script_locations\"(\"id\") ON DELETE cascade ON UPDATE no action;\n--> statement-breakpoint\nCREATE INDEX \"script_scene_locations_location_id_idx\" ON \"script_scene_locations\" USING btree (\"location_id\");\n--> statement-breakpoint\nINSERT INTO \"script_scene_locations\" (\"scene_id\", \"location_id\")\nSELECT \"id\", \"location_id\"\nFROM \"script_scenes\"\nWHERE \"location_id\" IS NOT NULL\nON CONFLICT DO NOTHING;\n"
+    },
+    {
+        "id": "0018_add_initial_pages_settings",
+        "checksum": "b047f76b4f8a8fc6f53e5b2d38b43cbeb0d8499cb0c60b6d7288324db2c5c32b",
+        "sql": "CREATE TABLE \"script_settings_initial_pages\" (\n\t\"script_id\" text PRIMARY KEY NOT NULL REFERENCES \"scripts\"(\"id\") ON DELETE cascade,\n\t\"cast_order_by\" text,\n\t\"show_outline\" boolean,\n\t\"show_characters_in_songs\" boolean,\n\t\"created_at\" bigint NOT NULL,\n\t\"updated_at\" bigint NOT NULL\n);\n"
     }
 ] as const;

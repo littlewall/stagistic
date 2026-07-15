@@ -51,12 +51,14 @@ export const createSettingsHandlers = ({
             pageLayout,
             visual,
             structure,
+            initialPages,
             headerFooterRows,
             blocks,
         ] = await Promise.all([
             dbQueries.getScriptPageLayoutSettings(db, scriptId),
             dbQueries.getScriptVisualPreferences(db, scriptId),
             dbQueries.getScriptStructureSettings(db, scriptId),
+            dbQueries.getScriptInitialPagesSettings(db, scriptId),
             dbQueries.listScriptHeaderFooterSettings(db, scriptId),
             dbQueries.listScriptBlockSettings(db, scriptId),
         ]);
@@ -90,6 +92,20 @@ export const createSettingsHandlers = ({
                 actDisplay: toDefined({
                     linesBefore: structure.actLinesBefore,
                     linesAfter: structure.actLinesAfter,
+                }),
+            };
+        }
+
+        if (initialPages) {
+            const castOrderBy = initialPages.castOrderBy === 'appearance' ? 'appearance' : 'name';
+
+            settings.initialPages = {
+                castAndPlace: toDefined({
+                    castOrderBy,
+                    showOutline: initialPages.showOutline,
+                }),
+                songs: toDefined({
+                    showCharactersInSongs: initialPages.showCharactersInSongs,
                 }),
             };
         }
@@ -178,6 +194,17 @@ export const createSettingsHandlers = ({
                     scriptId,
                     actLinesBefore: settings.structure.actDisplay?.linesBefore,
                     actLinesAfter: settings.structure.actDisplay?.linesAfter,
+                    createdAt: now,
+                    updatedAt: now,
+                });
+            }
+
+            if (settings.initialPages) {
+                await dbQueries.insertScriptInitialPagesSettings(tx, {
+                    scriptId,
+                    castOrderBy: settings.initialPages.castAndPlace?.castOrderBy,
+                    showOutline: settings.initialPages.castAndPlace?.showOutline,
+                    showCharactersInSongs: settings.initialPages.songs?.showCharactersInSongs,
                     createdAt: now,
                     updatedAt: now,
                 });

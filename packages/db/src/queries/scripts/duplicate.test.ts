@@ -14,6 +14,7 @@ import {
     scriptBlocks,
     scriptCharacters,
     scriptScenes,
+    scriptSettingsInitialPages,
     scriptSettingsStructure,
 } from '../../schema';
 import {
@@ -93,6 +94,14 @@ const seedSource = async (db: TestDb): Promise<void> => {
         createdAt: 1,
         updatedAt: 1,
     });
+    await db.insert(scriptSettingsInitialPages).values({
+        scriptId: SOURCE_ID,
+        castOrderBy: 'appearance',
+        showOutline: false,
+        showCharactersInSongs: true,
+        createdAt: 1,
+        updatedAt: 1,
+    });
 };
 
 const listTarget = async (db: TestDb) => {
@@ -104,9 +113,13 @@ const listTarget = async (db: TestDb) => {
         .select()
         .from(scriptSettingsStructure)
         .where(eq(scriptSettingsStructure.scriptId, TARGET_ID));
+    const initialPages = await db
+        .select()
+        .from(scriptSettingsInitialPages)
+        .where(eq(scriptSettingsInitialPages.scriptId, TARGET_ID));
 
     return {
-        blocks, acts, scenes, characters, structure,
+        blocks, acts, scenes, characters, structure, initialPages,
     };
 };
 
@@ -125,7 +138,7 @@ describe('duplicateScriptRows', () => {
         });
 
         const {
-            blocks, acts, scenes, structure, characters,
+            blocks, acts, scenes, structure, characters, initialPages,
         } = await listTarget(db);
 
         expect(blocks).toHaveLength(2);
@@ -146,6 +159,7 @@ describe('duplicateScriptRows', () => {
 
         // Flags off: no settings, no characters.
         expect(structure).toHaveLength(0);
+        expect(initialPages).toHaveLength(0);
         expect(characters).toHaveLength(0);
     });
 
@@ -162,11 +176,16 @@ describe('duplicateScriptRows', () => {
             copyAttributes: false,
         });
 
-        const {structure} = await listTarget(db);
+        const {structure, initialPages} = await listTarget(db);
 
         expect(structure).toHaveLength(1);
         expect(structure[0]?.actLinesBefore).toBe(3);
         expect(structure[0]?.actLinesAfter).toBe(2);
+        expect(initialPages[0]).toMatchObject({
+            castOrderBy: 'appearance',
+            showOutline: false,
+            showCharactersInSongs: true,
+        });
     });
 
     it('copies characters and remapped refs only when copyAttributes is set', async () => {

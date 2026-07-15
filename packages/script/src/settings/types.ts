@@ -63,6 +63,23 @@ export interface StructureSettings {
     actDisplay: StructureActDisplaySettings,
 }
 
+export type CastOrderBy = 'name' | 'appearance';
+
+export interface InitialPagesSettings {
+    castAndPlace: {
+        castOrderBy: CastOrderBy,
+        showOutline: boolean,
+    },
+    songs: {
+        showCharactersInSongs: boolean,
+    },
+}
+
+export interface InitialPagesSettingsPatch {
+    castAndPlace?: Partial<InitialPagesSettings['castAndPlace']>,
+    songs?: Partial<InitialPagesSettings['songs']>,
+}
+
 export type HeaderFooterAlignment = 'left' | 'center' | 'right';
 
 export interface HeaderFooterCellSettings {
@@ -92,6 +109,7 @@ export interface EditorSettings {
     typography: TypographySettings,
     visual: VisualSettings,
     structure: StructureSettings,
+    initialPages: InitialPagesSettings,
     headerFooter: HeaderFooterSettings,
     blocks: BlockSettings,
 }
@@ -107,6 +125,7 @@ export interface EditorSettingsOverride {
     typography?: Partial<TypographySettings>,
     visual?: Partial<VisualSettings>,
     structure?: StructureSettingsPatch,
+    initialPages?: InitialPagesSettingsPatch,
     headerFooter?: HeaderFooterSettingsPatch,
     blocks?: Partial<Record<string, BlockSettingsPatch>>,
 }

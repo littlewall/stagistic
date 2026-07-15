@@ -114,6 +114,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         updateStructureSettings,
         updatePageSettings,
         updateHeaderFooterSettings,
+        updateInitialPagesSettings,
     } = useScriptEditorSettingsDraft({
         state: {
             currentScriptId,
@@ -198,10 +199,17 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
 
         const outline = buildScriptStructureOutline(getEditorValue()?.content);
 
-        return outline.acts.flatMap(act => act.items).map((scene, index) => ({
+        return outline.acts.flatMap(act => act.items.map(scene => ({
+            scene,
+            act,
+        }))).map(({scene, act}, index) => ({
             id: scene.blockId,
             number: `${index + 1}.`,
             title: scene.title,
+            group: {
+                id: act.actId,
+                label: act.actName,
+            },
         }));
     }, [getEditorValue, isAttributeManagerOpen]);
     const {cues} = cueState;
@@ -261,6 +269,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                         structureHandlers={{onUpdateStructureSettings: updateStructureSettings}}
                         pageLayoutHandlers={{onUpdatePageSettings: updatePageSettings}}
                         headerFooterHandlers={{onUpdateHeaderFooterSettings: updateHeaderFooterSettings}}
+                        initialPagesHandlers={{onUpdateInitialPagesSettings: updateInitialPagesSettings}}
                         titlePageHandlers={{
                             titlePageSettings: titlePageDraft,
                             scriptTitle: scriptTitleDraft,

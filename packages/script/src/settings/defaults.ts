@@ -46,6 +46,15 @@ export const DEFAULT_EDITOR_SETTINGS: EditorSettings = {
             linesAfter: 1,
         },
     },
+    initialPages: {
+        castAndPlace: {
+            castOrderBy: 'name',
+            showOutline: true,
+        },
+        songs: {
+            showCharactersInSongs: false,
+        },
+    },
     headerFooter: {
         /*
          * Top-right page mark and bottom-center integrated page number are fixed cells:

@@ -139,4 +139,29 @@ describe('AttributeManagerListPanel', () => {
         ]);
         expect(host.contains(button)).toBe(true);
     });
+
+    it('renders non-interactive group headings above their scenes', async () => {
+        const host = renderPanel([
+            {
+                id: 's1',
+                number: '1.',
+                title: 'Opening',
+                group: {id: 'act-1', label: 'Act I'},
+            }, {
+                id: 's2',
+                number: '2.',
+                title: 'Finale',
+                group: {id: 'act-2', label: 'Act II'},
+            },
+        ]);
+
+        await waitForElement('h4');
+
+        const headings = Array.from(host.querySelectorAll('h4'));
+        const buttons = Array.from(host.querySelectorAll('[aria-label="Scene list"] button'));
+
+        expect(headings.map(heading => heading.textContent)).toEqual(['Act I', 'Act II']);
+        expect(buttons.map(button => button.textContent)).toEqual(['1.Opening', '2.Finale']);
+        expect(headings.every(heading => heading instanceof HTMLHeadingElement)).toBe(true);
+    });
 });

@@ -1,5 +1,14 @@
-import {BLOCK_TEXT_ALIGN_OPTIONS, type ScriptBlockNodeType} from '@stagistic/script';
-import {clsx} from '@stagistic/ui';
+import {
+    BLOCK_TEXT_ALIGN_OPTIONS,
+    type BlockCasing,
+    type BlockTextAlign,
+    type ScriptBlockNodeType,
+} from '@stagistic/script';
+import {
+    clsx,
+    ToggleButtonGroup,
+    type ToggleButtonGroupOption,
+} from '@stagistic/ui';
 
 import type {
     BlockSettingsPatch,
@@ -14,6 +23,39 @@ interface ElementFormattingToolbarProps {
     handlers: ElementsHandlers,
 }
 
+type TextStyle = 'bold' | 'italic' | 'underline';
+
+const ALIGNMENT_OPTIONS: ToggleButtonGroupOption<BlockTextAlign>[] = BLOCK_TEXT_ALIGN_OPTIONS.map(option => ({
+    value: option,
+    label: `${option} align`,
+    content: <span className={clsx(styles.alignGlyph, styles[option])} />,
+    isIconOnly: true,
+}));
+
+const CASING_OPTIONS: ToggleButtonGroupOption<BlockCasing>[] = [
+    {
+        value: 'normal', label: 'Normal casing', content: <span className={styles.textIcon}>Aa</span>, isIconOnly: true,
+    },
+    {
+        value: 'uppercase', label: 'Uppercase casing', content: <span className={styles.textIcon}>AA</span>, isIconOnly: true,
+    },
+    {
+        value: 'lowercase', label: 'Lowercase casing', content: <span className={styles.textIcon}>aa</span>, isIconOnly: true,
+    },
+];
+
+const TEXT_STYLE_OPTIONS: ToggleButtonGroupOption<TextStyle>[] = [
+    {
+        value: 'bold', label: 'Bold', content: <span className={styles.textIcon}>B</span>, isIconOnly: true,
+    },
+    {
+        value: 'italic', label: 'Italic', content: <span className={clsx(styles.textIcon, styles.textIconItalic)}>I</span>, isIconOnly: true,
+    },
+    {
+        value: 'underline', label: 'Underline', content: <span className={clsx(styles.textIcon, styles.textIconUnderline)}>U</span>, isIconOnly: true,
+    },
+];
+
 export const ElementFormattingToolbar = ({
     blockType,
     model,
@@ -27,102 +69,45 @@ export const ElementFormattingToolbar = ({
         isItalic,
         isUnderline,
     } = model;
+    const activeTextStyles: TextStyle[] = [];
+
+    if (isBold) {
+        activeTextStyles.push('bold');
+    }
+
+    if (isItalic) {
+        activeTextStyles.push('italic');
+    }
+
+    if (isUnderline) {
+        activeTextStyles.push('underline');
+    }
 
     return (
         <div className={styles.previewToolbar}>
-            <div className={styles.toolbarGroup}>
-                {BLOCK_TEXT_ALIGN_OPTIONS.map(option => (
-                    <button
-                        key={option}
-                        type="button"
-                        className={clsx(
-                            styles.toolbarButton,
-                            option === textAlign && styles.active,
-                        )}
-                        onClick={() => {
-                            update({textAlign: option});
-                        }}
-                        aria-label={`${option} align`}
-                    >
-                        <span
-                            className={clsx(styles.alignGlyph, styles[option])}
-                        />
-                    </button>
-                ))}
-            </div>
-            <div className={styles.toolbarGroup}>
-                <button
-                    type="button"
-                    className={clsx(
-                        styles.toolbarButton,
-                        casing === 'normal' && styles.active,
-                    )}
-                    onClick={() => {
-                        update({casing: 'normal'});
-                    }}
-                    aria-label="Normal casing"
-                >
-                    <span className={styles.textIcon}>Aa</span>
-                </button>
-                <button
-                    type="button"
-                    className={clsx(
-                        styles.toolbarButton,
-                        casing === 'uppercase' && styles.active,
-                    )}
-                    onClick={() => {
-                        update({casing: 'uppercase'});
-                    }}
-                    aria-label="Uppercase casing"
-                >
-                    <span className={styles.textIcon}>AA</span>
-                </button>
-                <button
-                    type="button"
-                    className={clsx(
-                        styles.toolbarButton,
-                        casing === 'lowercase' && styles.active,
-                    )}
-                    onClick={() => {
-                        update({casing: 'lowercase'});
-                    }}
-                    aria-label="Lowercase casing"
-                >
-                    <span className={styles.textIcon}>aa</span>
-                </button>
-            </div>
-            <div className={styles.toolbarGroup}>
-                <button
-                    type="button"
-                    className={clsx(styles.toolbarButton, isBold && styles.active)}
-                    onClick={() => {
-                        update({isBold: !isBold});
-                    }}
-                    aria-label="Bold"
-                >
-                    <span className={styles.textIcon}>B</span>
-                </button>
-                <button
-                    type="button"
-                    className={clsx(styles.toolbarButton, isItalic && styles.active)}
-                    onClick={() => {
-                        update({isItalic: !isItalic});
-                    }}
-                    aria-label="Italic"
-                >
-                    <span className={clsx(styles.textIcon, styles.textIconItalic)}>I</span>
-                </button>
-                <button
-                    type="button"
-                    className={clsx(styles.toolbarButton, isUnderline && styles.active)}
-                    onClick={() => {
-                        update({isUnderline: !isUnderline});
-                    }}
-                    aria-label="Underline"
-                >
-                    <span className={clsx(styles.textIcon, styles.textIconUnderline)}>U</span>
-                </button>
-            </div>
+            <ToggleButtonGroup
+                ariaLabel="Text alignment"
+                options={ALIGNMENT_OPTIONS}
+                value={textAlign}
+                onChange={value => update({textAlign: value})}
+            />
+            <ToggleButtonGroup
+                ariaLabel="Text casing"
+                options={CASING_OPTIONS}
+                value={casing}
+                onChange={value => update({casing: value})}
+            />
+            <ToggleButtonGroup
+                ariaLabel="Text formatting"
+                options={TEXT_STYLE_OPTIONS}
+                selectionMode="multiple"
+                value={activeTextStyles}
+                onChange={values => update({
+                    isBold: values.includes('bold'),
+                    isItalic: values.includes('italic'),
+                    isUnderline: values.includes('underline'),
+                })}
+            />
         </div>
     );
 };

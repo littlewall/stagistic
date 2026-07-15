@@ -7,6 +7,7 @@ import type {SettingsNavGroup} from '@stagistic/ui';
 
 export const SETTINGS_MODAL_QUERY_KEY = 'settingsModal';
 export const SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO = 'document-info';
+export const SCRIPT_SETTINGS_PANEL_INITIAL_PAGES = 'initial-pages';
 export const SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES = 'visual-preferences';
 export const SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS = 'structure-markers';
 export const SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT = 'page-layout';
@@ -59,6 +60,7 @@ export const getBlockTypeFromElementPanelId = (panelId: string): ScriptBlockNode
 
 export type ScriptSettingsPanelId =
     | typeof SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO
+    | typeof SCRIPT_SETTINGS_PANEL_INITIAL_PAGES
     | typeof SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES
     | typeof SCRIPT_SETTINGS_PANEL_STRUCTURE_MARKERS
     | typeof SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT
@@ -76,6 +78,12 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
                 id: SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
                 label: 'Title Page',
                 panelId: SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
+            },
+            {
+                kind: 'item',
+                id: SCRIPT_SETTINGS_PANEL_INITIAL_PAGES,
+                label: 'Initial pages',
+                panelId: SCRIPT_SETTINGS_PANEL_INITIAL_PAGES,
             },
             {
                 kind: 'item',

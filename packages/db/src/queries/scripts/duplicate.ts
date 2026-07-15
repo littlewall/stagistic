@@ -17,6 +17,7 @@ import {
     scriptScenes,
     scriptSettingsBlocks,
     scriptSettingsHeadersFooters,
+    scriptSettingsInitialPages,
     scriptSettingsPageLayout,
     scriptSettingsStructure,
     scriptSettingsVisualPreferences,
@@ -260,6 +261,20 @@ const duplicateSettings = async (
 
     if (structureRows.length > 0) {
         await db.insert(scriptSettingsStructure).values(structureRows.map(row => ({
+            ...row,
+            scriptId: targetScriptId,
+            createdAt: now,
+            updatedAt: now,
+        })));
+    }
+
+    const initialPagesRows = await db
+        .select()
+        .from(scriptSettingsInitialPages)
+        .where(eq(scriptSettingsInitialPages.scriptId, sourceScriptId));
+
+    if (initialPagesRows.length > 0) {
+        await db.insert(scriptSettingsInitialPages).values(initialPagesRows.map(row => ({
             ...row,
             scriptId: targetScriptId,
             createdAt: now,

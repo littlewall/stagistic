@@ -23,6 +23,10 @@ export const mergeEditorSettings = (
                 linesAfter: base.structure.actDisplay.linesAfter,
             },
         },
+        initialPages: {
+            castAndPlace: {...base.initialPages.castAndPlace},
+            songs: {...base.initialPages.songs},
+        },
         headerFooter: {
             header: {
                 left: {...base.headerFooter.header.left},
@@ -98,6 +102,21 @@ export const mergeEditorSettings = (
                         ?? next.structure.actDisplay.linesBefore,
                     linesAfter: override.structure.actDisplay?.linesAfter
                         ?? next.structure.actDisplay.linesAfter,
+                },
+            };
+        }
+
+        if (override.initialPages) {
+            next.initialPages = {
+                castAndPlace: {
+                    castOrderBy: override.initialPages.castAndPlace?.castOrderBy
+                        ?? next.initialPages.castAndPlace.castOrderBy,
+                    showOutline: override.initialPages.castAndPlace?.showOutline
+                        ?? next.initialPages.castAndPlace.showOutline,
+                },
+                songs: {
+                    showCharactersInSongs: override.initialPages.songs?.showCharactersInSongs
+                        ?? next.initialPages.songs.showCharactersInSongs,
                 },
             };
         }

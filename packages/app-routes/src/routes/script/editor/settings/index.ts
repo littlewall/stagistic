@@ -5,6 +5,7 @@ export type {
     DangerZoneHandlers,
     ElementPreviewHandlers,
     ElementsHandlers,
+    InitialPagesHandlers,
     PageLayoutHandlers,
     PageSettingsPatch,
     ScriptEditorSettingsPanelProps,

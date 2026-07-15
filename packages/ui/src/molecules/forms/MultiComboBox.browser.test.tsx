@@ -31,11 +31,11 @@ const waitForElement = async <T extends Element>(selector: string): Promise<T> =
     throw new Error(`Expected element matching ${selector}`);
 };
 
-const waitForOption = async (label: string): Promise<HTMLElement> => {
+const waitForSuggestion = async (label: string): Promise<HTMLElement> => {
     const deadline = Date.now() + 1000;
 
     while (Date.now() < deadline) {
-        const option = Array.from(document.querySelectorAll<HTMLElement>('[role="option"]'))
+        const option = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="suggestions"] li'))
             .find(candidate => candidate.textContent?.trim() === label);
 
         if (option) {
@@ -45,7 +45,21 @@ const waitForOption = async (label: string): Promise<HTMLElement> => {
         await new Promise(resolve => window.setTimeout(resolve, 10));
     }
 
-    throw new Error(`Expected option ${label}`);
+    throw new Error(`Expected suggestion ${label}`);
+};
+
+const waitForSuggestionsToClose = async () => {
+    const deadline = Date.now() + 1000;
+
+    while (Date.now() < deadline) {
+        if (!document.querySelector('[data-testid="suggestions"]')) {
+            return;
+        }
+
+        await new Promise(resolve => window.setTimeout(resolve, 10));
+    }
+
+    throw new Error('Expected suggestions to close');
 };
 
 const renderComboBox = () => {
@@ -91,27 +105,30 @@ describe('MultiComboBox', () => {
 
         await page.elementLocator(input).click();
 
-        const backstage = await waitForOption('Backstage');
+        const backstage = await waitForSuggestion('Backstage');
 
         await page.elementLocator(backstage).click();
+        await waitForSuggestionsToClose();
+
+        const selectedTag = await waitForElement<HTMLElement>('[data-testid="tag"]');
+
+        expect(input.parentElement?.parentElement).toBe(selectedTag.parentElement);
 
         await page.elementLocator(input).click();
 
-        const mainStage = await waitForOption('Main stage');
+        expect(document.querySelector('[data-testid="suggestions"]')?.textContent)
+            .not.toContain('Backstage');
+
+        const mainStage = await waitForSuggestion('Main stage');
 
         await page.elementLocator(mainStage).click();
+        await waitForSuggestionsToClose();
 
         expect(onChange).toHaveBeenLastCalledWith(['backstage', 'main-stage']);
         expect(document.body.textContent).toContain('Backstage');
         expect(document.body.textContent).toContain('Main stage');
 
-        input.dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'Escape',
-            bubbles: true,
-        }));
-        await new Promise(resolve => window.setTimeout(resolve, 10));
-
-        const removeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[slot="remove"]'));
+        const removeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('[aria-label^="Remove "]'));
 
         await page.elementLocator(removeButtons[0]).click();
 

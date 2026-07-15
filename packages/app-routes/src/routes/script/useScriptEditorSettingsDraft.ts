@@ -6,6 +6,7 @@ import {
     type EditorSettingsOverride,
     type HeaderFooterAlignment,
     type HeaderFooterSettingsPatch,
+    type InitialPagesSettingsPatch,
     mergeEditorSettings,
     type PageSettings,
     type StructureSettingsPatch,
@@ -236,6 +237,23 @@ export const useScriptEditorSettingsDraft = ({
         }));
     }, []);
 
+    const updateInitialPagesSettings = useCallback((patch: InitialPagesSettingsPatch) => {
+        setScriptSettingsDraft(previous => ({
+            ...previous,
+            initialPages: {
+                ...previous.initialPages,
+                castAndPlace: {
+                    ...previous.initialPages?.castAndPlace,
+                    ...patch.castAndPlace,
+                },
+                songs: {
+                    ...previous.initialPages?.songs,
+                    ...patch.songs,
+                },
+            },
+        }));
+    }, []);
+
     return {
         scriptSettingsDraft,
         effectiveScriptSettingsDraft,
@@ -246,5 +264,6 @@ export const useScriptEditorSettingsDraft = ({
         updateStructureSettings,
         updatePageSettings,
         updateHeaderFooterSettings,
+        updateInitialPagesSettings,
     };
 };

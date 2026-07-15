@@ -13,6 +13,7 @@ describe('mergeEditorSettings', () => {
         expect(result).not.toBe(DEFAULT_EDITOR_SETTINGS);
         expect(result.page).not.toBe(DEFAULT_EDITOR_SETTINGS.page);
         expect(result.structure.actDisplay).not.toBe(DEFAULT_EDITOR_SETTINGS.structure.actDisplay);
+        expect(result.initialPages.castAndPlace).not.toBe(DEFAULT_EDITOR_SETTINGS.initialPages.castAndPlace);
         expect(result.headerFooter.header.left).not.toBe(DEFAULT_EDITOR_SETTINGS.headerFooter.header.left);
     });
 
@@ -58,6 +59,19 @@ describe('mergeEditorSettings', () => {
         expect(result.structure.actDisplay.linesBefore).toBe(5);
         expect(result.structure.actDisplay.linesAfter)
             .toBe(DEFAULT_EDITOR_SETTINGS.structure.actDisplay.linesAfter);
+    });
+
+    it('merges partial initial pages settings', () => {
+        const result = mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, {
+            initialPages: {
+                castAndPlace: {castOrderBy: 'appearance'},
+                songs: {showCharactersInSongs: true},
+            },
+        });
+
+        expect(result.initialPages.castAndPlace.castOrderBy).toBe('appearance');
+        expect(result.initialPages.castAndPlace.showOutline).toBe(true);
+        expect(result.initialPages.songs.showCharactersInSongs).toBe(true);
     });
 
     it('merges a partial header and footer patch', () => {

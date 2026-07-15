@@ -11,6 +11,10 @@ export interface AttributeManagerListItem {
     id: string,
     number: string,
     title: string,
+    group?: {
+        id: string,
+        label: string,
+    },
     subtitle?: string | null,
     /** Trailing glyph, e.g. a cue-kind icon. */
     icon?: ReactNode,
@@ -19,6 +23,33 @@ export interface AttributeManagerListItem {
         value: string,
     }>,
 }
+
+interface AttributeManagerListGroup {
+    id: string,
+    label: string | null,
+    items: AttributeManagerListItem[],
+}
+
+const groupListItems = (items: AttributeManagerListItem[]): AttributeManagerListGroup[] => {
+    return items.reduce<AttributeManagerListGroup[]>((groups, item) => {
+        const groupId = item.group?.id ?? 'ungrouped';
+        const currentGroup = groups.at(-1);
+
+        if (currentGroup?.id === groupId) {
+            currentGroup.items.push(item);
+
+            return groups;
+        }
+
+        groups.push({
+            id: groupId,
+            label: item.group?.label ?? null,
+            items: [item],
+        });
+
+        return groups;
+    }, []);
+};
 
 export interface AttributeManagerListPanelProps {
     items: AttributeManagerListItem[],
@@ -50,6 +81,7 @@ export const AttributeManagerListPanel = ({
         initialSelectedItemId ?? null,
     );
     const selectedItem = items.find(item => item.id === selectedItemId) ?? null;
+    const itemGroups = groupListItems(items);
 
     useEffect(() => {
         const selectionStillExists = items.some(item => item.id === selectedItemId);
@@ -75,30 +107,37 @@ export const AttributeManagerListPanel = ({
         <div className={styles.panel}>
             <aside className={styles.browser} aria-label={`${detailTypeLabel} list`}>
                 <div className={styles.browserList}>
-                    {items.map(item => {
-                        const isSelected = item.id === selectedItemId;
+                    {itemGroups.map(group => (
+                        <div key={`${group.id}-${group.items[0]?.id}`} className={styles.itemGroup}>
+                            {group.label ? (
+                                <h4 className={styles.groupTitle}>{group.label}</h4>
+                            ) : null}
+                            {group.items.map(item => {
+                                const isSelected = item.id === selectedItemId;
 
-                        return (
-                            <button
-                                key={item.id}
-                                type="button"
-                                className={clsx(styles.listItem, isSelected && styles.selected)}
-                                aria-pressed={isSelected}
-                                onClick={() => setSelectedItemId(item.id)}
-                            >
-                                <span className={styles.itemNumber}>{item.number}</span>
-                                <span className={styles.itemTitle}>{item.title}</span>
-                                {item.subtitle ? (
-                                    <span className={styles.itemSubtitle}>{item.subtitle}</span>
-                                ) : null}
-                                {item.icon ? (
-                                    <span className={styles.itemIcon} aria-hidden="true">
-                                        {item.icon}
-                                    </span>
-                                ) : null}
-                            </button>
-                        );
-                    })}
+                                return (
+                                    <button
+                                        key={item.id}
+                                        type="button"
+                                        className={clsx(styles.listItem, isSelected && styles.selected)}
+                                        aria-pressed={isSelected}
+                                        onClick={() => setSelectedItemId(item.id)}
+                                    >
+                                        <span className={styles.itemNumber}>{item.number}</span>
+                                        <span className={styles.itemTitle}>{item.title}</span>
+                                        {item.subtitle ? (
+                                            <span className={styles.itemSubtitle}>{item.subtitle}</span>
+                                        ) : null}
+                                        {item.icon ? (
+                                            <span className={styles.itemIcon} aria-hidden="true">
+                                                {item.icon}
+                                            </span>
+                                        ) : null}
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    ))}
                     {items.length === 0 ? (
                         <p className={styles.emptyList}>{listStatus}</p>
                     ) : null}

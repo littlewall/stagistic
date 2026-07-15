@@ -23,6 +23,24 @@
     padding: var(--space-xl) var(--space-md);
 }
 
+.itemGroup + .itemGroup {
+    margin-top: var(--space-xl);
+}
+
+.groupTitle {
+    overflow: hidden;
+    margin: 0 0 var(--space-sm);
+    padding: 0 var(--space-lg);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-muted);
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    white-space: nowrap;
+}
+
 .listItem {
     cursor: pointer;
     display: grid;

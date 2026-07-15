@@ -73,6 +73,17 @@ export const scriptSettingsStructure = pgTable('script_settings_structure', {
     updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
 });
 
+export const scriptSettingsInitialPages = pgTable('script_settings_initial_pages', {
+    scriptId: text('script_id')
+        .primaryKey()
+        .references(() => scripts.id, {onDelete: 'cascade'}),
+    castOrderBy: text('cast_order_by'),
+    showOutline: boolean('show_outline'),
+    showCharactersInSongs: boolean('show_characters_in_songs'),
+    createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+    updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+});
+
 export const scriptSettingsHeadersFooters = pgTable(
     'script_settings_headers_footers',
     {
@@ -406,6 +417,7 @@ export const dbSchema = {
     scriptSettingsPageLayout,
     scriptSettingsVisualPreferences,
     scriptSettingsStructure,
+    scriptSettingsInitialPages,
     scriptSettingsHeadersFooters,
     scriptSettingsBlocks,
     scriptCharacters,

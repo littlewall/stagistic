@@ -25,6 +25,10 @@ describe('settings persistence', () => {
             page: {marginTopPx: 72},
             typography: {fontSizePx: 16},
             visual: {characterColorSaturation: 42},
+            initialPages: {
+                castAndPlace: {castOrderBy: 'appearance', showOutline: false},
+                songs: {showCharactersInSongs: true},
+            },
             headerFooter: {
                 header: {
                     right: {
@@ -43,6 +47,10 @@ describe('settings persistence', () => {
 
         expect(stored?.page?.marginTopPx).toBe(72);
         expect(stored?.visual?.characterColorSaturation).toBe(42);
+        expect(stored?.initialPages).toEqual({
+            castAndPlace: {castOrderBy: 'appearance', showOutline: false},
+            songs: {showCharactersInSongs: true},
+        });
         expect(stored?.headerFooter?.header?.right?.text).toBe('{{page}}');
         expect(stored?.headerFooter?.header?.right?.isHiddenInEditor).toBe(true);
         expect(stored?.blocks?.dialogue?.isItalic).toBe(true);
