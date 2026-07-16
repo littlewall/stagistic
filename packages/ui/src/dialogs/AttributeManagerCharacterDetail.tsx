@@ -22,7 +22,10 @@ interface AttributeManagerCharacterDetailProps {
     characterColorSaturation?: number,
     isDeleting: boolean,
     isColorUpdating: boolean,
-    onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
+    onSetCharacterColor?: (
+        characterId: string,
+        colorHex: string | null,
+    ) => void | Promise<unknown>,
     onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
     onDeleteCharacter?: (characterId: string) => void,
 }

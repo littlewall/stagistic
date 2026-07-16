@@ -3,6 +3,11 @@ import {
     useScripts,
 } from '@stagistic/app-core';
 import {
+    useEditorLiveCharacters,
+    useEditorLiveCues,
+    useEditorLiveStructure,
+} from '@stagistic/editor';
+import {
     buildScriptStructureOutline,
     type EditorSettings,
     type EditorSettingsOverride,
@@ -18,6 +23,7 @@ import {
     AttributeManagerPlacesPanel,
     AttributeManagerSceneDetail,
     ScriptSettingsModal,
+    useKeyedFieldDrafts,
 } from '@stagistic/ui';
 import {
     createContext,
@@ -50,7 +56,11 @@ import {useScriptEditorSettingsDraft} from '../useScriptEditorSettingsDraft';
 import {useScriptEditorSettingsModal} from '../useScriptEditorSettingsModal';
 import {useScriptTitleDraft} from '../useScriptTitleDraft';
 import {useTitlePageDraft} from '../useTitlePageDraft';
-import {buildAttributeManagerCueItems} from './attributeManagerCueItems';
+import {
+    buildAttributeManagerCueItems,
+    buildAttributeManagerCueItemsFromLive,
+} from './attributeManagerCueItems';
+import {DraftSaveError} from './DraftSaveError';
 import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
 
 const BLOCK_LABEL_BY_TYPE = new Map(
@@ -93,6 +103,9 @@ export const useScriptSettingsModal = (): ScriptSettingsModalContextValue => {
  * of debounced savers. Views open it via `useScriptSettingsModal().openSettingsModal`.
  */
 export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) => {
+    const liveCharacters = useEditorLiveCharacters();
+    const liveCues = useEditorLiveCues();
+    const liveStructure = useEditorLiveStructure();
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
     const {deleteScript, renameScriptTitle} = useScripts();
@@ -101,9 +114,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         currentScript,
         currentScriptId,
         initialValue,
-        scriptSettingsOverride,
         handleAutoSave,
-        handleSaveScriptSettingsOverride,
     } = useScriptWorkspace();
     const {
         effectiveScriptSettingsDraft,
@@ -115,18 +126,17 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         updatePageSettings,
         updateHeaderFooterSettings,
         updateInitialPagesSettings,
+        scriptSettingsDraftError,
+        retryScriptSettings,
     } = useScriptEditorSettingsDraft({
-        state: {
-            currentScriptId,
-            scriptSettingsOverride,
-        },
-        requests: {
-            handleSaveScriptSettingsOverride,
-        },
+        currentScriptId,
+        repository: scriptRepository,
     });
     const {
         titlePageDraft,
         updateTitlePage,
+        titlePageDraftError,
+        retryTitlePage,
     } = useTitlePageDraft({
         currentScriptId,
         repository: scriptRepository,
@@ -134,6 +144,8 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     const {
         scriptTitleDraft,
         updateScriptTitle,
+        scriptTitleDraftError,
+        retryScriptTitle,
     } = useScriptTitleDraft({
         currentScriptId,
         currentScriptTitle: currentScript?.name ?? '',
@@ -181,42 +193,103 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         handleAutoSave,
     });
     const cueState = useScriptCuesState(currentScriptId, scriptRepository);
+    const {
+        getValue: getCueTitleDraft,
+        persistValue: persistCueTitleDraft,
+        setValue: setCueTitleDraft,
+    } = useKeyedFieldDrafts<string>(currentScriptId);
     const placeState = useScriptPlacesState(currentScriptId, scriptRepository);
     const cueAttachmentsState = useCueAttachmentsState(currentScriptId, scriptRepository);
     const attributeManagerCharacters = useMemo<AttributeManagerCharacter[]>(() => {
         return charactersContextValue.confirmedCharacterRecords.map(character => ({
             id: character.id,
-            name: character.key,
+            name: liveCharacters.keyByCharacterId.get(character.id) ?? character.key,
             color: character.colorHex ?? null,
             outline: character.outline ?? null,
         })).sort((left, right) => left.name.localeCompare(right.name));
-    }, [charactersContextValue.confirmedCharacterRecords]);
-    const {getEditorValue} = charactersContextValue;
+    }, [charactersContextValue.confirmedCharacterRecords, liveCharacters.keyByCharacterId]);
     const attributeManagerScenes = useMemo<AttributeManagerListItem[]>(() => {
         if (!isAttributeManagerOpen) {
             return [];
         }
 
-        const outline = buildScriptStructureOutline(getEditorValue()?.content);
+        if (liveStructure.rows.length === 0) {
+            const outline = buildScriptStructureOutline(initialValue?.content);
+            let fallbackSceneNumber = 0;
 
-        return outline.acts.flatMap(act => act.items.map(scene => ({
-            scene,
-            act,
-        }))).map(({scene, act}, index) => ({
-            id: scene.blockId,
-            number: `${index + 1}.`,
-            title: scene.title,
-            group: {
-                id: act.actId,
-                label: act.actName,
-            },
-        }));
-    }, [getEditorValue, isAttributeManagerOpen]);
+            return outline.acts.flatMap(act => act.items.map(scene => {
+                fallbackSceneNumber += 1;
+
+                return {
+                    id: scene.blockId,
+                    number: `${fallbackSceneNumber}.`,
+                    title: scene.title,
+                    group: {
+                        id: act.actId,
+                        label: act.actName,
+                    },
+                };
+            }));
+        }
+
+        let activeAct: {id: string, label: string} | undefined;
+        let sceneNumber = 0;
+
+        return liveStructure.rows.flatMap(row => {
+            if (row.kind === 'act') {
+                activeAct = {
+                    id: row.blockId,
+                    label: row.name,
+                };
+
+                return [];
+            }
+
+            sceneNumber += 1;
+
+            return [
+                {
+                    id: row.blockId,
+                    number: `${sceneNumber}.`,
+                    title: row.title,
+                    group: activeAct,
+                },
+            ];
+        });
+    }, [
+        initialValue?.content,
+        isAttributeManagerOpen,
+        liveStructure.rows,
+    ]);
     const {cues} = cueState;
     const attributeManagerCues = useMemo<AttributeManagerListItem[]>(() => {
-        return buildAttributeManagerCueItems(getEditorValue(), cues);
-    }, [cues, getEditorValue]);
+        const items = liveStructure.rows.length > 0 || liveCues.length > 0
+            ? buildAttributeManagerCueItemsFromLive(liveCues, liveStructure, cues)
+            : buildAttributeManagerCueItems(initialValue, cues);
+
+        return items
+            .map(item => ({
+                ...item,
+                title: getCueTitleDraft(item.id, item.title),
+            }));
+    }, [
+        cues,
+        getCueTitleDraft,
+        initialValue,
+        liveCues,
+        liveStructure,
+    ]);
     const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
+    const draftSaveError = scriptSettingsDraftError
+        ?? titlePageDraftError
+        ?? scriptTitleDraftError;
+    const retryFailedDrafts = () => {
+        void Promise.allSettled([
+            scriptSettingsDraftError ? retryScriptSettings() : Promise.resolve(),
+            titlePageDraftError ? retryTitlePage() : Promise.resolve(),
+            scriptTitleDraftError ? retryScriptTitle() : Promise.resolve(),
+        ]);
+    };
 
     const contextValue = useMemo<ScriptSettingsModalContextValue>(() => ({
         resolvedScriptSettings,
@@ -256,6 +329,10 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     onSelectPanel={handleSelectSettingsPanel}
                     onToggleExpand={toggleExpanded}
                 >
+                    <DraftSaveError
+                        error={draftSaveError}
+                        onRetry={retryFailedDrafts}
+                    />
                     <ScriptEditorSettingsPanel
                         panelId={activePanelId}
                         resolvedScriptSettings={resolvedScriptSettings}
@@ -335,8 +412,14 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                                 return cue ? (
                                     <CueAttachmentsDetail
                                         cue={cue}
+                                        displayTitle={item.title}
                                         state={cueAttachmentsState}
-                                        onUpdateCue={cueState.updateCue}
+                                        onTitleDraftChange={title => setCueTitleDraft(cue.id, title)}
+                                        onUpdateCue={(cueId, input) => persistCueTitleDraft(
+                                            cueId,
+                                            input.title,
+                                            title => cueState.updateCue(cueId, {...input, title}),
+                                        )}
                                     />
                                 ) : null;
                             }}
@@ -346,6 +429,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                         <AttributeManagerPlacesPanel
                             places={placeState.places}
                             isLoading={placeState.isLoading}
+                            draftScopeKey={currentScriptId}
                             onCreatePlace={placeState.createPlace}
                             onRenamePlace={placeState.renamePlace}
                             onDeletePlace={placeState.deletePlace}

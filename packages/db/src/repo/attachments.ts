@@ -77,7 +77,9 @@ export const createAttachmentHandlers = ({
                 await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
                 await recordOutbox({
                     scriptId,
+                    entityKey: `cue:${cueId}:attachment:${role}`,
                     opType: 'cueAttachment.set',
+                    occurredAt: now,
                     payloadJson: JSON.stringify({
                         scriptId,
                         cueId,
@@ -92,8 +94,8 @@ export const createAttachmentHandlers = ({
                 return orphanedStorageKey;
             });
         } catch (error) {
-            await fileStorage.delete(storageKey).catch(cleanupError => {
-                console.error('[attachments] Failed to clean up an uncommitted blob.', cleanupError);
+            await fileStorage.delete(storageKey).catch(() => {
+                console.error('[attachments] Failed to clean up an uncommitted blob.');
             });
 
             throw error;
@@ -102,8 +104,8 @@ export const createAttachmentHandlers = ({
         await syncDb();
 
         if (previousStorageKey) {
-            await fileStorage.delete(previousStorageKey).catch(error => {
-                console.error('[attachments] Failed to clean up a replaced blob.', error);
+            await fileStorage.delete(previousStorageKey).catch(() => {
+                console.error('[attachments] Failed to clean up a replaced blob.');
             });
         }
 
@@ -137,7 +139,9 @@ export const createAttachmentHandlers = ({
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
             await recordOutbox({
                 scriptId,
+                entityKey: `cue:${cueId}:attachment:${role}`,
                 opType: 'cueAttachment.remove',
+                occurredAt: now,
                 payloadJson: JSON.stringify({
                     scriptId,
                     cueId,
@@ -159,8 +163,8 @@ export const createAttachmentHandlers = ({
         await syncDb();
 
         if (removal.storageKey) {
-            await fileStorage.delete(removal.storageKey).catch(error => {
-                console.error('[attachments] Failed to clean up a removed blob.', error);
+            await fileStorage.delete(removal.storageKey).catch(() => {
+                console.error('[attachments] Failed to clean up a removed blob.');
             });
         }
     };

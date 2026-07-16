@@ -1,6 +1,5 @@
 import {
     type FormEvent,
-    useEffect,
     useState,
 } from 'react';
 
@@ -14,7 +13,9 @@ import {RemovePlaceModal} from './RemovePlaceModal';
 
 interface AttributeManagerPlaceDetailProps {
     place: AttributeManagerPlace,
+    confirmedName: string,
     places: AttributeManagerPlace[],
+    onNameDraftChange: (name: string) => void,
     onRenamePlace: (placeId: string, name: string) => void | Promise<unknown>,
     onDeletePlace: (placeId: string) => void | Promise<unknown>,
 }
@@ -23,15 +24,16 @@ const normalizePlaceName = (name: string) => name.trim().toLocaleLowerCase();
 
 export const AttributeManagerPlaceDetail = ({
     place,
+    confirmedName,
     places,
+    onNameDraftChange,
     onRenamePlace,
     onDeletePlace,
 }: AttributeManagerPlaceDetailProps) => {
-    const [nameDraft, setNameDraft] = useState(place.name);
     const [isRenaming, setIsRenaming] = useState(false);
     const [isRemoving, setIsRemoving] = useState(false);
     const [isRemoveOpen, setIsRemoveOpen] = useState(false);
-    const trimmedName = nameDraft.trim();
+    const trimmedName = place.name.trim();
     const normalizedName = normalizePlaceName(trimmedName);
     const isDuplicate = places.some(candidate => {
         return candidate.id !== place.id && normalizePlaceName(candidate.name) === normalizedName;
@@ -39,17 +41,13 @@ export const AttributeManagerPlaceDetail = ({
     const isInvalid = trimmedName.length === 0 || isDuplicate;
     const errorId = isInvalid ? 'place-name-error' : undefined;
 
-    useEffect(() => {
-        setNameDraft(place.name);
-    }, [place.id, place.name]);
-
     const persistName = async () => {
         if (isInvalid) {
             return;
         }
 
-        if (trimmedName === place.name) {
-            setNameDraft(place.name);
+        if (trimmedName === confirmedName) {
+            onNameDraftChange(confirmedName);
 
             return;
         }
@@ -58,6 +56,8 @@ export const AttributeManagerPlaceDetail = ({
 
         try {
             await onRenamePlace(place.id, trimmedName);
+        } catch {
+            // Keep the dirty draft visible; the catalog exposes the persistence error.
         } finally {
             setIsRenaming(false);
         }
@@ -103,6 +103,7 @@ export const AttributeManagerPlaceDetail = ({
                 <form
                     className={styles.nameForm}
                     onSubmit={handleSubmit}
+                    aria-busy={isRenaming}
                 >
                     <label className={formControlStyles.label} htmlFor={`place-name-${place.id}`}>
                         Name
@@ -111,11 +112,11 @@ export const AttributeManagerPlaceDetail = ({
                         id={`place-name-${place.id}`}
                         type="text"
                         className={formControlStyles.input}
-                        value={nameDraft}
-                        disabled={isRenaming || isRemoving}
+                        value={place.name}
+                        disabled={isRemoving}
                         aria-describedby={errorId}
                         aria-invalid={isInvalid}
-                        onChange={event => setNameDraft(event.target.value)}
+                        onChange={event => onNameDraftChange(event.target.value)}
                         onBlur={() => void persistName()}
                     />
                     {isInvalid ? (

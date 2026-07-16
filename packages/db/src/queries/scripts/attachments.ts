@@ -2,8 +2,15 @@ import {
     and, eq, sql,
 } from 'drizzle-orm';
 
-import {scriptAttachments, scriptCueAttachments} from '../../schema';
-import type {CueAttachmentRole} from '../../types';
+import {
+    scriptAttachments,
+    scriptCueAttachments,
+    scriptCues,
+} from '../../schema';
+import type {
+    CueAttachmentRole,
+    ScriptCueAttachmentBinding,
+} from '../../types';
 import type {DbClient} from '../types';
 
 export interface InsertAttachmentRow {
@@ -18,6 +25,36 @@ export interface InsertAttachmentRow {
 }
 
 export type AttachmentRow = InsertAttachmentRow;
+
+export const listScriptAttachments = async (
+    db: DbClient,
+    scriptId: string,
+) => db
+    .select()
+    .from(scriptAttachments)
+    .where(eq(scriptAttachments.scriptId, scriptId));
+
+export const listScriptCueAttachmentBindings = async (
+    db: DbClient,
+    scriptId: string,
+) => {
+    const rows = await db.select({
+        cueId: scriptCueAttachments.cueId,
+        attachmentId: scriptCueAttachments.attachmentId,
+        role: scriptCueAttachments.role,
+        sortOrder: scriptCueAttachments.sortOrder,
+        createdAt: scriptCueAttachments.createdAt,
+    })
+        .from(scriptCueAttachments)
+        .innerJoin(scriptCues, eq(scriptCueAttachments.cueId, scriptCues.id))
+        .where(eq(scriptCues.scriptId, scriptId));
+
+    return rows.flatMap<ScriptCueAttachmentBinding>(row => {
+        return row.role === 'integrated_score'
+            ? [{...row, role: 'integrated_score'}]
+            : [];
+    });
+};
 
 export const insertAttachment = async (db: DbClient, row: InsertAttachmentRow) => {
     await db.insert(scriptAttachments).values(row);

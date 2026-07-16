@@ -104,6 +104,21 @@ git push origin feature/your-feature-name
 - Address feedback from reviewers
 - Keep discussions professional and constructive
 
+### Database-backed changes
+
+Before designing persisted application state, read the
+[local-first state design](docs/superpowers/specs/2026-07-15-local-first-state-sync-design.md)
+and [persistence invariants](docs/persistence.md).
+
+Every metadata design and pull request must answer: is each new value owned by
+the active document, a derived projection, a persisted metadata collection, a
+form draft, or ephemeral UI state? Do not copy repository rows into component
+state without an explicit, documented ownership exception.
+
+Use the design's [mutation lifecycle](docs/superpowers/specs/2026-07-15-local-first-state-sync-design.md#4-a-persisted-collection-mutation-completes-only-after-confirmation)
+and [testing contract](docs/superpowers/specs/2026-07-15-local-first-state-sync-design.md#testing-strategy)
+as the implementation and review checklist.
+
 ## 🧪 Testing
 
 _(Testing guidelines will be added as the test suite is implemented)_

@@ -1,0 +1,1 @@
+export {useScriptCharacterCatalog} from './useScriptCharacterCatalog';

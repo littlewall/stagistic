@@ -31,20 +31,21 @@ export const createOutlineMutations = ({
             return null;
         }
 
-        await dbQueries.updateScriptCharacterOutline(db, {
-            scriptId,
-            characterId,
-            outline,
-            updatedAt: now,
-        });
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'character.outline',
-            payloadJson: buildCharacterOutlinePayload(scriptId, characterId, outline, now),
+        await db.transaction(async tx => {
+            await dbQueries.updateScriptCharacterOutline(tx, {
+                scriptId,
+                characterId,
+                outline,
+                updatedAt: now,
+            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `character:${characterId}`,
+                opType: 'character.outline',
+                occurredAt: now,
+                payloadJson: buildCharacterOutlinePayload(scriptId, characterId, outline, now),
+            }, tx);
         });
 
         /*

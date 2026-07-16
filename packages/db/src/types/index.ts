@@ -16,6 +16,7 @@ export type {
     ScriptBlockCharacterRef,
     ScriptCue,
     ScriptCueAttachment,
+    ScriptCueAttachmentBinding,
     ScriptLocation,
     ScriptScene,
     ScriptSettingsBlock,

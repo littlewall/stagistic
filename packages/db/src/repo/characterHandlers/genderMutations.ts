@@ -16,9 +16,13 @@ import type {CharacterHandlers} from './types';
 export const createGenderMutations = ({
     getDb,
     recordOutbox,
+    syncDb,
 }: CharacterMutationDeps): Pick<
     CharacterHandlers,
-    'listScriptCharacterGenders' | 'setScriptCharacterGender' | 'upsertScriptCharacterGender'
+    | 'listScriptCharacterGenders'
+    | 'setScriptCharacterGender'
+    | 'upsertScriptCharacterGender'
+    | 'upsertScriptCharacterGenderWithId'
 > => {
     const listScriptCharacterGenders: CharacterHandlers['listScriptCharacterGenders'] = async scriptId => {
         const db = await getDb();
@@ -54,20 +58,23 @@ export const createGenderMutations = ({
             return null;
         }
 
-        if (normalizedGenderKey !== null) {
-            const genderOption = await dbQueries.getScriptCharacterGenderByKey(db, {
+        const existingGenderOption = normalizedGenderKey === null
+            ? null
+            : await dbQueries.getScriptCharacterGenderByKey(db, {
                 scriptId,
                 genderKey: normalizedGenderKey,
             });
+        const defaultGenderLabel = normalizedGenderKey === null
+            ? undefined
+            : DEFAULT_GENDER_LABEL_BY_KEY.get(normalizedGenderKey);
 
-            if (!genderOption) {
-                const defaultGenderLabel = DEFAULT_GENDER_LABEL_BY_KEY.get(normalizedGenderKey);
+        if (normalizedGenderKey !== null && !existingGenderOption && !defaultGenderLabel) {
+            return null;
+        }
 
-                if (!defaultGenderLabel) {
-                    return null;
-                }
-
-                await dbQueries.upsertScriptCharacterGender(db, {
+        await db.transaction(async tx => {
+            if (normalizedGenderKey !== null && !existingGenderOption && defaultGenderLabel) {
+                await dbQueries.upsertScriptCharacterGender(tx, {
                     id: uuidv7(),
                     scriptId,
                     genderKey: normalizedGenderKey,
@@ -76,23 +83,23 @@ export const createGenderMutations = ({
                     updatedAt: now,
                 });
             }
-        }
 
-        await dbQueries.updateScriptCharacterGender(db, {
-            scriptId,
-            characterId,
-            genderKey: normalizedGenderKey,
-            updatedAt: now,
+            await dbQueries.updateScriptCharacterGender(tx, {
+                scriptId,
+                characterId,
+                genderKey: normalizedGenderKey,
+                updatedAt: now,
+            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `character:${characterId}`,
+                opType: 'character.gender',
+                occurredAt: now,
+                payloadJson: buildCharacterGenderPayload(scriptId, characterId, normalizedGenderKey, now),
+            }, tx);
         });
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'character.gender',
-            payloadJson: buildCharacterGenderPayload(scriptId, characterId, normalizedGenderKey, now),
-        });
+        await syncDb();
 
         return dbQueries.getScriptCharacterById(db, {
             scriptId,
@@ -100,11 +107,11 @@ export const createGenderMutations = ({
         });
     };
 
-    const upsertScriptCharacterGender: CharacterHandlers['upsertScriptCharacterGender'] = async (
+    const upsertScriptCharacterGenderWithId: CharacterHandlers['upsertScriptCharacterGenderWithId'] = async (
         scriptId,
-        label,
+        input,
     ) => {
-        const normalizedLabel = normalizeGenderLabel(label);
+        const normalizedLabel = normalizeGenderLabel(input.label);
         const genderKey = normalizeGenderKey(normalizedLabel);
 
         if (!genderKey) {
@@ -112,37 +119,45 @@ export const createGenderMutations = ({
         }
 
         const db = await getDb();
-        const now = Date.now();
+        const now = input.timestamp ?? Date.now();
 
-        await dbQueries.upsertScriptCharacterGender(db, {
-            id: uuidv7(),
-            scriptId,
-            genderKey,
-            genderLabel: normalizedLabel,
-            createdAt: now,
-            updatedAt: now,
+        await db.transaction(async tx => {
+            await dbQueries.upsertScriptCharacterGender(tx, {
+                id: input.id,
+                scriptId,
+                genderKey,
+                genderLabel: normalizedLabel,
+                createdAt: now,
+                updatedAt: now,
+            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `character-gender:${input.id}`,
+                opType: 'character.gender.upsert',
+                occurredAt: now,
+                payloadJson: buildCharacterGenderUpsertPayload(scriptId, genderKey, normalizedLabel, now),
+            }, tx);
         });
-
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-
-        await recordOutbox({
-            scriptId,
-            opType: 'character.gender.upsert',
-            payloadJson: buildCharacterGenderUpsertPayload(scriptId, genderKey, normalizedLabel, now),
-        });
+        await syncDb();
 
         return dbQueries.getScriptCharacterGenderByKey(db, {
             scriptId,
             genderKey,
         });
     };
+    const upsertScriptCharacterGender: CharacterHandlers['upsertScriptCharacterGender'] = (
+        scriptId,
+        label,
+    ) => upsertScriptCharacterGenderWithId(scriptId, {
+        id: uuidv7(),
+        label,
+    });
 
     return {
         listScriptCharacterGenders,
         setScriptCharacterGender,
         upsertScriptCharacterGender,
+        upsertScriptCharacterGenderWithId,
     };
 };

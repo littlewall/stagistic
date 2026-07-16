@@ -23,8 +23,10 @@ const ActRowContent = memo(({
 
     const handleNameChange = useCallback(
         (value: string) => {
-            // Keep the draft raw (untrimmed) so trailing spaces survive and the
-            // user can keep typing; only the committed name is trimmed.
+            /*
+             * Keep the draft raw (untrimmed) so trailing spaces survive and the
+             * user can keep typing; only the committed name is trimmed.
+             */
             onNamePreview(blockId, value);
 
             if (value.trim() === name.trim()) {
@@ -56,8 +58,10 @@ const ActRowContent = memo(({
             onRename(blockId, draftValue);
         }
 
-        // Drop the draft so the canonical name takes over — this lets edits made
-        // in the editor propagate back into the sidebar.
+        /*
+         * Drop the draft so the canonical name takes over — this lets edits made
+         * in the editor propagate back into the sidebar.
+         */
         onNamePreviewClear(blockId);
     }, [
         blockId,

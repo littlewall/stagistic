@@ -1,4 +1,7 @@
-import type {EditorSurfaceCache} from '@stagistic/editor';
+import type {
+    EditorSnapshotStore,
+    EditorSurfaceCache,
+} from '@stagistic/editor';
 import {
     createContext,
     type ReactNode,
@@ -9,6 +12,7 @@ import type {ScriptEditorController} from './controller/types';
 
 export type ScriptWorkspaceValue = ScriptEditorController & {
     editorSurfaceCache: EditorSurfaceCache,
+    editorSnapshotStore: EditorSnapshotStore,
 };
 
 const ScriptWorkspaceContext = createContext<ScriptWorkspaceValue | null>(null);

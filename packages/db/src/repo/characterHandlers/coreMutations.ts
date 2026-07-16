@@ -1,6 +1,7 @@
 import {normalizeCharacterKey} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 
+import type {DbClient} from '../../queries';
 import * as dbQueries from '../../queries';
 import type {CharacterMutationDeps} from './mutationDeps';
 import {
@@ -14,47 +15,59 @@ import type {CharacterHandlers} from './types';
 export const createCoreCharacterMutations = ({
     getDb,
     recordOutbox,
+    syncDb,
 }: CharacterMutationDeps): Pick<
     CharacterHandlers,
-    'confirmScriptCharacter' | 'deleteScriptCharacter' | 'renameScriptCharacter' | 'setScriptCharacterColor'
+    | 'confirmScriptCharacter'
+    | 'confirmScriptCharacterWithId'
+    | 'deleteScriptCharacter'
+    | 'renameScriptCharacter'
+    | 'setScriptCharacterColor'
 > => {
-    const confirmScriptCharacter: CharacterHandlers['confirmScriptCharacter'] = async (
+    const confirmScriptCharacterWithId: CharacterHandlers['confirmScriptCharacterWithId'] = async (
         scriptId,
-        characterKey,
+        input,
     ) => {
-        const normalizedKey = normalizeCharacterKey(characterKey);
+        const normalizedKey = normalizeCharacterKey(input.key);
 
         if (!normalizedKey) {
             return null;
         }
 
         const db = await getDb();
-        const now = Date.now();
+        const now = input.timestamp ?? Date.now();
 
-        await dbQueries.upsertScriptCharacter(db, {
-            id: uuidv7(),
-            scriptId,
-            characterKey: normalizedKey,
-            createdAt: now,
-            updatedAt: now,
+        await db.transaction(async tx => {
+            await dbQueries.upsertScriptCharacter(tx, {
+                id: input.id,
+                scriptId,
+                characterKey: normalizedKey,
+                createdAt: now,
+                updatedAt: now,
+            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `character:${input.id}`,
+                opType: 'character.confirm',
+                occurredAt: now,
+                payloadJson: buildCharacterConfirmPayload(scriptId, normalizedKey, now),
+            }, tx);
         });
-
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-
-        await recordOutbox({
-            scriptId,
-            opType: 'character.confirm',
-            payloadJson: buildCharacterConfirmPayload(scriptId, normalizedKey, now),
-        });
+        await syncDb();
 
         return dbQueries.getScriptCharacterByKey(db, {
             scriptId,
             characterKey: normalizedKey,
         });
     };
+    const confirmScriptCharacter: CharacterHandlers['confirmScriptCharacter'] = (
+        scriptId,
+        characterKey,
+    ) => confirmScriptCharacterWithId(scriptId, {
+        id: uuidv7(),
+        key: characterKey,
+    });
 
     const deleteScriptCharacter: CharacterHandlers['deleteScriptCharacter'] = async (scriptId, characterId) => {
         if (!characterId) {
@@ -72,25 +85,22 @@ export const createCoreCharacterMutations = ({
             return;
         }
 
-        await dbQueries.deleteScriptCharacter(db, {
-            scriptId,
-            characterId,
+        await db.transaction(async tx => {
+            await dbQueries.deleteScriptCharacter(tx, {scriptId, characterId});
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `character:${characterId}`,
+                opType: 'character.delete',
+                occurredAt: now,
+                payloadJson: buildCharacterDeletePayload(scriptId, characterId, currentCharacter.key, now),
+            }, tx);
         });
-
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-
-        await recordOutbox({
-            scriptId,
-            opType: 'character.delete',
-            payloadJson: buildCharacterDeletePayload(scriptId, characterId, currentCharacter.key, now),
-        });
+        await syncDb();
     };
 
     const finalizeRename = async (
-        db: Awaited<ReturnType<typeof getDb>>,
+        db: DbClient,
         scriptId: string,
         currentCharacter: {id: string, key: string},
         normalizedNextKey: string,
@@ -103,7 +113,9 @@ export const createCoreCharacterMutations = ({
 
         await recordOutbox({
             scriptId,
+            entityKey: `character:${currentCharacter.id}`,
             opType: 'character.rename',
+            occurredAt: now,
             payloadJson: buildCharacterRenamePayload(
                 scriptId,
                 currentCharacter.id,
@@ -111,12 +123,7 @@ export const createCoreCharacterMutations = ({
                 normalizedNextKey,
                 now,
             ),
-        });
-
-        return dbQueries.getScriptCharacterByKey(db, {
-            scriptId,
-            characterKey: normalizedNextKey,
-        });
+        }, db);
     };
 
     const renameScriptCharacter: CharacterHandlers['renameScriptCharacter'] = async (
@@ -150,29 +157,36 @@ export const createCoreCharacterMutations = ({
             characterKey: normalizedNextKey,
         });
 
-        if (existingTarget && existingTarget.id !== currentCharacter.id) {
-            await dbQueries.touchScriptCharacter(db, {
-                scriptId,
-                characterId: existingTarget.id,
-                updatedAt: now,
-            });
+        await db.transaction(async tx => {
+            if (existingTarget && existingTarget.id !== currentCharacter.id) {
+                await dbQueries.touchScriptCharacter(tx, {
+                    scriptId,
+                    characterId: existingTarget.id,
+                    updatedAt: now,
+                });
+                await dbQueries.deleteScriptCharacter(tx, {
+                    scriptId,
+                    characterId: currentCharacter.id,
+                });
+                await finalizeRename(tx, scriptId, currentCharacter, normalizedNextKey, now);
 
-            await dbQueries.deleteScriptCharacter(db, {
+                return;
+            }
+
+            await dbQueries.updateScriptCharacterKey(tx, {
                 scriptId,
                 characterId: currentCharacter.id,
+                characterKey: normalizedNextKey,
+                updatedAt: now,
             });
-
-            return finalizeRename(db, scriptId, currentCharacter, normalizedNextKey, now);
-        }
-
-        await dbQueries.updateScriptCharacterKey(db, {
-            scriptId,
-            characterId: currentCharacter.id,
-            characterKey: normalizedNextKey,
-            updatedAt: now,
+            await finalizeRename(tx, scriptId, currentCharacter, normalizedNextKey, now);
         });
+        await syncDb();
 
-        return finalizeRename(db, scriptId, currentCharacter, normalizedNextKey, now);
+        return dbQueries.getScriptCharacterByKey(db, {
+            scriptId,
+            characterKey: normalizedNextKey,
+        });
     };
 
     const setScriptCharacterColor: CharacterHandlers['setScriptCharacterColor'] = async (
@@ -195,21 +209,23 @@ export const createCoreCharacterMutations = ({
             return null;
         }
 
-        await dbQueries.updateScriptCharacterColor(db, {
-            scriptId,
-            characterId,
-            colorHex,
-            updatedAt: now,
+        await db.transaction(async tx => {
+            await dbQueries.updateScriptCharacterColor(tx, {
+                scriptId,
+                characterId,
+                colorHex,
+                updatedAt: now,
+            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `character:${characterId}`,
+                opType: 'character.color',
+                occurredAt: now,
+                payloadJson: buildCharacterColorPayload(scriptId, characterId, colorHex, now),
+            }, tx);
         });
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'character.color',
-            payloadJson: buildCharacterColorPayload(scriptId, characterId, colorHex, now),
-        });
+        await syncDb();
 
         return dbQueries.getScriptCharacterById(db, {
             scriptId,
@@ -219,6 +235,7 @@ export const createCoreCharacterMutations = ({
 
     return {
         confirmScriptCharacter,
+        confirmScriptCharacterWithId,
         deleteScriptCharacter,
         renameScriptCharacter,
         setScriptCharacterColor,

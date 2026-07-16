@@ -1,13 +1,10 @@
 import {
     useEditorElementSelection,
     useEditorInstance,
+    useEditorLiveCues,
     useFocusEditorBlock,
 } from '@stagistic/editor';
-import {
-    buildScriptBlockIndex,
-    formatCueNumber,
-    type ScriptDocument,
-} from '@stagistic/script';
+import {formatCueNumber} from '@stagistic/script';
 import {
     clsx,
     LinkSlashIcon,
@@ -17,7 +14,6 @@ import {
 import {
     type ReactNode,
     useCallback,
-    useEffect,
     useMemo,
     useState,
 } from 'react';
@@ -149,48 +145,33 @@ export const ScriptCuesSidebar = ({
     const editor = useEditorInstance();
     const elementSelection = useEditorElementSelection();
     const focusBlock = useFocusEditorBlock();
-    const [documentCues, setDocumentCues] = useState(() => {
-        return editor ? buildScriptBlockIndex(editor.getJSON() as ScriptDocument).snapshot.cues : [];
-    });
+    const documentCues = useEditorLiveCues();
     const [deleteTarget, setDeleteTarget] = useState<ScriptCueListItem | null>(null);
     const [unassignTarget, setUnassignTarget] = useState<ScriptCueListItem | null>(null);
-
-    useEffect(() => {
-        if (!editor) {
-            setDocumentCues([]);
-
-            return undefined;
-        }
-
-        const updateDocumentCues = () => {
-            setDocumentCues(buildScriptBlockIndex(editor.getJSON() as ScriptDocument).snapshot.cues);
-        };
-
-        updateDocumentCues();
-        editor.on('transaction', updateDocumentCues);
-
-        return () => {
-            editor.off('transaction', updateDocumentCues);
-        };
-    }, [editor]);
 
     const cueMetadataById = useMemo(() => new Map(documentCues.map((cue, index) => [
         cue.cueId, {
             number: formatCueNumber(cue),
             order: index,
             startBlockId: cue.startBlockId,
+            title: cue.title,
         },
     ] as const)), [documentCues]);
+    const displayedCues = useMemo(() => cues.map(cue => {
+        const liveTitle = cueMetadataById.get(cue.id)?.title.trim();
+
+        return liveTitle ? {...cue, title: liveTitle} : cue;
+    }), [cueMetadataById, cues]);
     const {
         assignedCues,
         unassignedCues,
     } = useMemo(() => ({
-        assignedCues: cues.filter(cue => cue.assignmentLabel).sort((left, right) => {
+        assignedCues: displayedCues.filter(cue => cue.assignmentLabel).sort((left, right) => {
             return (cueMetadataById.get(left.id)?.order ?? Number.MAX_SAFE_INTEGER)
                 - (cueMetadataById.get(right.id)?.order ?? Number.MAX_SAFE_INTEGER);
         }),
-        unassignedCues: cues.filter(cue => !cue.assignmentLabel),
-    }), [cueMetadataById, cues]);
+        unassignedCues: displayedCues.filter(cue => !cue.assignmentLabel),
+    }), [cueMetadataById, displayedCues]);
     const handleConfirmDelete = useCallback(async () => {
         if (!deleteTarget) {
             return;
@@ -204,7 +185,10 @@ export const ScriptCuesSidebar = ({
             return;
         }
 
-        editor?.commands.unassignCue(unassignTarget.id);
+        if (!editor?.commands.unassignCue(unassignTarget.id)) {
+            return;
+        }
+
         await onUnassignCue(unassignTarget.id);
         setUnassignTarget(null);
     }, [

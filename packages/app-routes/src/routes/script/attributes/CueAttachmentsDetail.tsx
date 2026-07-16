@@ -1,7 +1,7 @@
 import {
     AttributeManagerCueDetail, type CueAttachmentSlotView, RemoveAttachmentModal,
 } from '@stagistic/ui';
-import {useEffect, useState} from 'react';
+import {useState} from 'react';
 
 import type {
     ScriptCueListItem,
@@ -14,14 +14,18 @@ import {
 
 interface CueAttachmentsDetailProps {
     cue: ScriptCueListItem,
+    displayTitle?: string,
     state: ReturnType<typeof useCueAttachmentsState>,
     onUpdateCue: (cueId: string, input: UpdateScriptCueInput) => unknown,
+    onTitleDraftChange?: (title: string) => void,
 }
 
 export const CueAttachmentsDetail = ({
     cue,
+    displayTitle = cue.title,
     state,
     onUpdateCue,
+    onTitleDraftChange = () => undefined,
 }: CueAttachmentsDetailProps) => {
     const [previewId, setPreviewId] = useState<string | null>(null);
     const [removeId, setRemoveId] = useState<string | null>(null);
@@ -29,16 +33,11 @@ export const CueAttachmentsDetail = ({
     const {
         integratedScoresByCue,
         uploadingCueIds,
-        loadCue,
         uploadIntegratedScore,
         removeIntegratedScore,
         getBlob,
     } = state;
     const integratedScore = integratedScoresByCue.get(cueId) ?? null;
-
-    useEffect(() => {
-        void loadCue(cueId);
-    }, [cueId, loadCue]);
 
     const attachmentSlots: CueAttachmentSlotView[] = [
         {
@@ -60,10 +59,12 @@ export const CueAttachmentsDetail = ({
         <>
             <AttributeManagerCueDetail
                 cueId={cue.id}
-                cueTitle={cue.title}
+                cueTitle={displayTitle}
+                confirmedCueTitle={cue.title}
                 cueKind={cue.kind}
                 attachmentSlots={attachmentSlots}
                 onUpdateCue={input => onUpdateCue(cue.id, input)}
+                onCueTitleChange={onTitleDraftChange}
                 onUploadPdf={(_slotId, file) => void uploadIntegratedScore(cueId, file)}
                 onPreview={setPreviewId}
                 onRemove={() => setRemoveId(integratedScore?.id ?? null)}

@@ -24,6 +24,7 @@ export const EMPTY_STRUCTURE: EditorLiveStructureSnapshot = {
     rows: [],
     rowIndexByBlockId: new Map<string, number>(),
     sceneByBlockId: new Map<string, string>(),
+    actByBlockId: new Map<string, string>(),
 };
 
 export const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
@@ -39,6 +40,7 @@ export const createEmptyEditorLiveSnapshot = (): EditorLiveSnapshot => {
         index: EMPTY_INDEX,
         structure: EMPTY_STRUCTURE,
         characters: EMPTY_CHARACTERS,
+        cues: [],
         activeBlockId: null,
         activeBlockType: null,
     };
@@ -106,6 +108,7 @@ export const createEditorSnapshotStore = (initialSnapshot?: EditorLiveSnapshot):
             || !Object.is(snapshot.index, nextSnapshot.index)
             || !Object.is(snapshot.structure, nextSnapshot.structure)
             || !Object.is(snapshot.characters, nextSnapshot.characters)
+            || !Object.is(snapshot.cues, nextSnapshot.cues)
             || !Object.is(snapshot.activeBlockId, nextSnapshot.activeBlockId)
             || !Object.is(snapshot.activeBlockType, nextSnapshot.activeBlockType);
 

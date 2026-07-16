@@ -1,11 +1,10 @@
-import type {EditorSettingsOverride, ScriptDocument} from '@stagistic/script';
+import type {ScriptDocument} from '@stagistic/script';
 import {useCallback} from 'react';
 
 import type {
     AppToastPayload,
     CurrentScriptItem,
 } from '../types';
-import {isEditorSettingsOverrideEmpty} from './types';
 
 interface SaveIndicatorControls {
     startSaveIndicator: () => void,
@@ -14,11 +13,6 @@ interface SaveIndicatorControls {
 
 interface SaveRepository {
     saveLatest: (scriptId: string, value: ScriptDocument) => Promise<unknown>,
-    deleteScriptSettings: (scriptId: string) => Promise<unknown>,
-    saveScriptSettings: (
-        scriptId: string,
-        value: EditorSettingsOverride,
-    ) => Promise<unknown>,
 }
 
 interface UseScriptSaveHandlersArgs {
@@ -32,8 +26,6 @@ interface UseScriptSaveHandlersArgs {
         addToast: (payload: AppToastPayload) => void,
     },
     state: {
-        setScriptSettingsOverride: (value: EditorSettingsOverride | null) => void,
-        settingsSaveRequestRef: {current: number},
         saveIndicatorControls: SaveIndicatorControls,
     },
 }
@@ -47,11 +39,7 @@ export const useScriptSaveHandlers = ({
     const {currentScript, currentScriptId} = context;
     const scriptRepository = repository;
     const {setStorageError, addToast} = notifications;
-    const {
-        setScriptSettingsOverride,
-        settingsSaveRequestRef,
-        saveIndicatorControls,
-    } = state;
+    const {saveIndicatorControls} = state;
     const {startSaveIndicator, finishSaveIndicator} = saveIndicatorControls;
 
     const handleAutoSave = useCallback(async (value: ScriptDocument) => {
@@ -65,8 +53,8 @@ export const useScriptSaveHandlers = ({
             finishSaveIndicator(true);
 
             return true;
-        } catch (error) {
-            console.error('Failed to save latest script', error);
+        } catch {
+            console.error('Failed to save latest script');
             setStorageError('Failed to save script data.');
             addToast({
                 title: 'Failed to save',
@@ -102,8 +90,8 @@ export const useScriptSaveHandlers = ({
             finishSaveIndicator(true);
 
             return true;
-        } catch (error) {
-            console.error('Failed to save script', error);
+        } catch {
+            console.error('Failed to save script');
             setStorageError('Failed to save script data.');
             addToast({
                 title: 'Failed to save',
@@ -124,56 +112,8 @@ export const useScriptSaveHandlers = ({
         startSaveIndicator,
     ]);
 
-    const handleSaveScriptSettingsOverride = useCallback(async (settings?: EditorSettingsOverride) => {
-        if (!currentScriptId) {
-            return false;
-        }
-
-        try {
-            const requestId = settingsSaveRequestRef.current + 1;
-
-            settingsSaveRequestRef.current = requestId;
-
-            const nextSettings = settings ?? {};
-
-            if (isEditorSettingsOverrideEmpty(nextSettings)) {
-                await scriptRepository.deleteScriptSettings(currentScriptId);
-
-                if (requestId === settingsSaveRequestRef.current) {
-                    setScriptSettingsOverride(null);
-                }
-
-                return true;
-            }
-
-            await scriptRepository.saveScriptSettings(currentScriptId, nextSettings);
-
-            if (requestId === settingsSaveRequestRef.current) {
-                setScriptSettingsOverride(nextSettings);
-            }
-
-            return true;
-        } catch (error) {
-            console.error('Failed to save script settings config', error);
-            addToast({
-                title: 'Failed to save settings',
-                description: 'Editor settings were not saved.',
-                variant: 'error',
-            });
-
-            return false;
-        }
-    }, [
-        addToast,
-        currentScriptId,
-        scriptRepository,
-        setScriptSettingsOverride,
-        settingsSaveRequestRef,
-    ]);
-
     return {
         handleAutoSave,
         handleManualSave,
-        handleSaveScriptSettingsOverride,
     };
 };

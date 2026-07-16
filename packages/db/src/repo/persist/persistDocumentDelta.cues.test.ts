@@ -100,11 +100,13 @@ describe('persist cues', () => {
 
         await persister.persist(db, docWithCue('Night') as never);
 
-        expect(await listScriptCues(db, SCRIPT_ID)).toMatchObject([{
-            id: 'c1',
-            title: 'Night',
-            startBlockId: 'b1',
-            endBlockId: null,
-        }]);
+        expect(await listScriptCues(db, SCRIPT_ID)).toMatchObject([
+            {
+                id: 'c1',
+                title: 'Night',
+                startBlockId: 'b1',
+                endBlockId: null,
+            },
+        ]);
     });
 });

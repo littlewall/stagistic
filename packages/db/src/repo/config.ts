@@ -215,12 +215,14 @@ export const createSettingsHandlers = ({
                 scriptId,
                 rows: buildConfigRows(scriptId, settings, now),
             });
-        });
-
-        await recordOutbox({
-            scriptId,
-            opType: 'config.save',
-            payloadJson: JSON.stringify({scriptId, updatedAt: now}),
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `script:${scriptId}:settings`,
+                opType: 'config.save',
+                occurredAt: now,
+                payloadJson: JSON.stringify({scriptId, updatedAt: now}),
+            }, tx);
         });
 
         /*
@@ -232,12 +234,18 @@ export const createSettingsHandlers = ({
 
     const deleteScriptSettings: SettingsHandlers['deleteScriptSettings'] = async scriptId => {
         const db = await getDb();
+        const now = Date.now();
 
-        await dbQueries.deleteScriptSettings(db, scriptId);
-        await recordOutbox({
-            scriptId,
-            opType: 'config.delete',
-            payloadJson: JSON.stringify({scriptId, deletedAt: Date.now()}),
+        await db.transaction(async tx => {
+            await dbQueries.deleteScriptSettings(tx, scriptId);
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `script:${scriptId}:settings`,
+                opType: 'config.delete',
+                occurredAt: now,
+                payloadJson: JSON.stringify({scriptId, deletedAt: now}),
+            }, tx);
         });
 
         await syncDb();

@@ -4,9 +4,7 @@ import type {
 } from '@stagistic/export';
 import {
     buildScriptBlockIndex,
-    DEFAULT_EDITOR_SETTINGS,
     type EditorSettings,
-    mergeEditorSettings,
     normalizeCharacterKey,
 } from '@stagistic/script';
 import {useMemo} from 'react';
@@ -54,14 +52,11 @@ export const useExportScriptData = (): {
         currentScript,
         initialValue,
         initialIndexSnapshot,
-        scriptSettingsOverride,
     } = useScriptWorkspace();
-    const {titlePageDraft} = useScriptSettingsModal();
-
-    const settings = useMemo(
-        () => mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, scriptSettingsOverride ?? undefined),
-        [scriptSettingsOverride],
-    );
+    const {
+        resolvedScriptSettings: settings,
+        titlePageDraft,
+    } = useScriptSettingsModal();
 
     const script = useMemo<ScriptData | null>(() => {
         if (!initialValue || !currentScript) {

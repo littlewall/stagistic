@@ -8,12 +8,14 @@ export type CharacterHandlers = Pick<
     ScriptRepository,
     | 'listScriptCharacterGenders'
     | 'confirmScriptCharacter'
+    | 'confirmScriptCharacterWithId'
     | 'deleteScriptCharacter'
     | 'renameScriptCharacter'
     | 'setScriptCharacterColor'
     | 'setScriptCharacterGender'
     | 'setScriptCharacterOutline'
     | 'upsertScriptCharacterGender'
+    | 'upsertScriptCharacterGenderWithId'
 >;
 
 export interface CreateCharacterHandlersArgs {

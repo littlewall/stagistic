@@ -1,5 +1,6 @@
 import {useCharacterActions} from './useCharacterActions';
 import {useCharacterComputed} from './useCharacterComputed';
+import {useCharacterDocumentActions} from './useCharacterDocumentActions';
 import {useCharacterState} from './useCharacterState';
 import type {
     UseScriptEditorCharactersArgs,
@@ -12,12 +13,11 @@ export const useScriptEditorCharacters = ({
     initialValue,
     resolvedScriptSettings,
     characterColorSaturation,
+    handleAutoSave,
 }: UseScriptEditorCharactersArgs): UseScriptEditorCharactersResult => {
     const {
         editor,
-        characters,
-        pending,
-        setters,
+        catalog,
     } = useCharacterState({
         currentScriptId,
         scriptRepository,
@@ -29,24 +29,32 @@ export const useScriptEditorCharacters = ({
         confirmedCharactersById,
         confirmedCharacterSet,
         normalizeCharacterNameForInlineInput,
+        getCharacterNameForBlockType,
     } = useCharacterComputed({
         data: {
-            confirmedCharacterRecords: characters.confirmedCharacterRecords,
+            confirmedCharacterRecords: catalog.characters,
             characterSnapshot: null,
             resolvedScriptSettings,
             characterColorSaturation,
         },
         pending: {
-            confirmingCharacterKeys: pending.confirmingCharacterKeys,
-            deletingCharacterIds: pending.deletingCharacterIds,
-            renamingCharacterIds: pending.renamingCharacterIds,
-            renamingCharacterKeys: pending.renamingCharacterKeys,
-            colorUpdatingCharacterIds: pending.colorUpdatingCharacterIds,
-            genderUpdatingCharacterIds: pending.genderUpdatingCharacterIds,
+            confirmingCharacterKeys: catalog.pendingCharacterKeys,
+            deletingCharacterIds: catalog.deletingCharacterIds,
+            renamingCharacterIds: catalog.renamingCharacterIds,
+            renamingCharacterKeys: catalog.renamingCharacterKeys,
+            colorUpdatingCharacterIds: catalog.colorUpdatingCharacterIds,
+            genderUpdatingCharacterIds: catalog.genderUpdatingCharacterIds,
         },
         options: {
             includeSidebarLists: false,
         },
+    });
+    const documentActions = useCharacterDocumentActions({
+        getEditorValue: editor.getEditorValue,
+        setEditorValue: editor.setEditorValue,
+        setEditorOverrideValue: editor.setEditorOverrideValue,
+        handleAutoSave,
+        getCharacterNameForBlockType,
     });
 
     const {
@@ -59,30 +67,25 @@ export const useScriptEditorCharacters = ({
         handleSetCharacterOutline,
         handleUpsertCharacterGender,
     } = useCharacterActions({
-        context: {
-            currentScriptId,
-            scriptRepository,
-            setters,
-        },
-        computed: {
-            confirmedCharacterSet,
-            confirmedCharactersById,
-        },
+        catalog,
+        documentActions,
+        confirmedCharacterSet,
+        confirmedCharactersById,
     });
 
     return {
         getEditorValue: editor.getEditorValue,
         editorOverrideValue: editor.editorOverrideValue,
-        confirmedCharacterRecords: characters.confirmedCharacterRecords,
+        confirmedCharacterRecords: catalog.characters,
         normalizedConfirmedCharacterRecords,
-        pendingCharacterKeys: pending.confirmingCharacterKeys,
-        deletingCharacterIds: pending.deletingCharacterIds,
-        renamingCharacterIds: pending.renamingCharacterIds,
-        renamingCharacterKeys: pending.renamingCharacterKeys,
-        colorUpdatingCharacterIds: pending.colorUpdatingCharacterIds,
-        genderUpdatingCharacterIds: pending.genderUpdatingCharacterIds,
-        characterGenderOptions: characters.characterGenderOptions,
-        isCharactersLoading: characters.isCharactersLoading,
+        pendingCharacterKeys: catalog.pendingCharacterKeys,
+        deletingCharacterIds: catalog.deletingCharacterIds,
+        renamingCharacterIds: catalog.renamingCharacterIds,
+        renamingCharacterKeys: catalog.renamingCharacterKeys,
+        colorUpdatingCharacterIds: catalog.colorUpdatingCharacterIds,
+        genderUpdatingCharacterIds: catalog.genderUpdatingCharacterIds,
+        characterGenderOptions: catalog.genderOptions,
+        isCharactersLoading: catalog.isLoading,
         handleEditorValueChange: editor.handleEditorValueChange,
         normalizeCharacterNameForInlineInput,
         handleConfirmCharacter,

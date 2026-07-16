@@ -7,6 +7,7 @@ import {
 import type {
     EditorLiveActiveBlockInfo,
     EditorLiveCharacterSnapshot,
+    EditorLiveCueSnapshot,
     EditorLiveSnapshot,
     EditorLiveStructureSnapshot,
 } from '../contracts';
@@ -91,6 +92,10 @@ export const useEditorLiveStructure = () => {
 
 export const useEditorLiveCharacters = () => {
     return useEditorLiveSelector<EditorLiveCharacterSnapshot>(snapshot => snapshot.characters);
+};
+
+export const useEditorLiveCues = () => {
+    return useEditorLiveSelector<EditorLiveCueSnapshot>(snapshot => snapshot.cues);
 };
 
 export const useEditorLiveActiveBlock = () => {

@@ -1,31 +1,15 @@
-import {
-    type EditorValueChangeMeta,
-} from '@stagistic/editor';
-import {
-    type ScriptDocument,
-} from '@stagistic/script';
+import {useScriptCharacterCatalog} from '@stagistic/app-core';
+import type {EditorValueChangeMeta} from '@stagistic/editor';
+import type {ScriptDocument} from '@stagistic/script';
 import {
     type Dispatch,
     type SetStateAction,
     useCallback,
     useEffect,
-    useMemo,
-    useReducer,
     useRef,
     useState,
 } from 'react';
 
-import {
-    type CharacterDomainSetters,
-    type CharacterDomainState,
-    characterStateReducer,
-    createCharacterDomainSetters,
-    replaceCharacterDomainState,
-} from './characterStateReducer';
-import type {
-    CharacterGenderOption,
-    ScriptCharacterRecord,
-} from './types';
 import type {ScriptRepository} from './useScriptEditorCharacters.types';
 
 interface UseCharacterStateArgs {
@@ -42,70 +26,9 @@ export interface CharacterEditorState {
     handleEditorValueChange: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,
 }
 
-export interface CharacterCollectionsState {
-    confirmedCharacterRecords: ScriptCharacterRecord[],
-    characterGenderOptions: CharacterGenderOption[],
-    isCharactersLoading: boolean,
-}
-
-export interface CharacterPendingState {
-    confirmingCharacterKeys: string[],
-    deletingCharacterIds: string[],
-    renamingCharacterIds: string[],
-    renamingCharacterKeys: string[],
-    colorUpdatingCharacterIds: string[],
-    genderUpdatingCharacterIds: string[],
-}
-
-const DEFAULT_CHARACTER_GENDER_OPTIONS: CharacterGenderOption[] = [
-    {
-        id: 'default:male',
-        key: 'male',
-        label: 'Male',
-    }, {
-        id: 'default:female',
-        key: 'female',
-        label: 'Female',
-    },
-];
-
-const mergeCharacterGenderOptions = (options: CharacterGenderOption[]): CharacterGenderOption[] => {
-    const byKey = new Map<string, CharacterGenderOption>();
-
-    DEFAULT_CHARACTER_GENDER_OPTIONS.forEach(option => {
-        byKey.set(option.key, option);
-    });
-    options.forEach(option => {
-        if (!option.key || !option.label) {
-            return;
-        }
-
-        byKey.set(option.key, option);
-    });
-
-    return Array.from(byKey.values())
-        .sort((a, b) => a.label.localeCompare(b.label));
-};
-
-const createInitialCharacterDomainState = (): CharacterDomainState => {
-    return {
-        confirmedCharacterRecords: [],
-        confirmingCharacterKeys: [],
-        deletingCharacterIds: [],
-        renamingCharacterIds: [],
-        renamingCharacterKeys: [],
-        colorUpdatingCharacterIds: [],
-        genderUpdatingCharacterIds: [],
-        characterGenderOptions: DEFAULT_CHARACTER_GENDER_OPTIONS,
-        isCharactersLoading: false,
-    };
-};
-
-export interface CharacterState {
+interface CharacterState {
     editor: CharacterEditorState,
-    characters: CharacterCollectionsState,
-    pending: CharacterPendingState,
-    setters: CharacterDomainSetters,
+    catalog: ReturnType<typeof useScriptCharacterCatalog>,
 }
 
 export const useCharacterState = ({
@@ -116,26 +39,7 @@ export const useCharacterState = ({
     const previousScriptIdRef = useRef<string | null>(null);
     const editorValueRef = useRef<ScriptDocument | null>(null);
     const [editorOverrideValue, setEditorOverrideValue] = useState<ScriptDocument | null>(null);
-    const [characterDomainState, dispatchCharacterDomainState] = useReducer(
-        characterStateReducer,
-        undefined,
-        createInitialCharacterDomainState,
-    );
-    const setters = useMemo(
-        () => createCharacterDomainSetters(dispatchCharacterDomainState),
-        [],
-    );
-    const {
-        confirmedCharacterRecords,
-        confirmingCharacterKeys,
-        deletingCharacterIds,
-        renamingCharacterIds,
-        renamingCharacterKeys,
-        colorUpdatingCharacterIds,
-        genderUpdatingCharacterIds,
-        characterGenderOptions,
-        isCharactersLoading,
-    } = characterDomainState;
+    const catalog = useScriptCharacterCatalog(currentScriptId, scriptRepository);
 
     useEffect(() => {
         const didScriptChange = previousScriptIdRef.current !== currentScriptId;
@@ -154,58 +58,6 @@ export const useCharacterState = ({
         }
     }, [currentScriptId, initialValue]);
 
-    useEffect(() => {
-        if (!currentScriptId) {
-            replaceCharacterDomainState(dispatchCharacterDomainState, createInitialCharacterDomainState());
-
-            return;
-        }
-
-        let isActive = true;
-
-        replaceCharacterDomainState(dispatchCharacterDomainState, {
-            ...createInitialCharacterDomainState(),
-            isCharactersLoading: true,
-        });
-
-        const loadCharacters = async () => {
-            try {
-                const listCharactersRequest = scriptRepository.listScriptCharacters(currentScriptId);
-                const listGendersRequest = scriptRepository.listScriptCharacterGenders(currentScriptId);
-                const [storedCharacters, storedGenderOptions] = await Promise.all([listCharactersRequest, listGendersRequest]);
-
-                if (!isActive) {
-                    return;
-                }
-
-                setters.setConfirmedCharacterRecords(storedCharacters);
-                setters.setCharacterGenderOptions(mergeCharacterGenderOptions(storedGenderOptions));
-            } catch (error) {
-                if (!isActive) {
-                    return;
-                }
-
-                console.error('Failed to load script characters', error);
-                setters.setConfirmedCharacterRecords([]);
-                setters.setCharacterGenderOptions(DEFAULT_CHARACTER_GENDER_OPTIONS);
-            } finally {
-                if (isActive) {
-                    setters.setIsCharactersLoading(false);
-                }
-            }
-        };
-
-        void loadCharacters();
-
-        return () => {
-            isActive = false;
-        };
-    }, [
-        currentScriptId,
-        scriptRepository,
-        setters,
-    ]);
-
     const setEditorValue = useCallback((value: ScriptDocument | null) => {
         editorValueRef.current = value;
     }, []);
@@ -222,19 +74,6 @@ export const useCharacterState = ({
             setEditorOverrideValue,
             handleEditorValueChange,
         },
-        characters: {
-            confirmedCharacterRecords,
-            characterGenderOptions,
-            isCharactersLoading,
-        },
-        pending: {
-            confirmingCharacterKeys,
-            deletingCharacterIds,
-            renamingCharacterIds,
-            renamingCharacterKeys,
-            colorUpdatingCharacterIds,
-            genderUpdatingCharacterIds,
-        },
-        setters,
+        catalog,
     };
 };

@@ -7,7 +7,6 @@ import {useToastController} from '@stagistic/ui';
 import {
     useEffect,
     useMemo,
-    useRef,
 } from 'react';
 import {useNavigate} from 'react-router-dom';
 
@@ -36,10 +35,8 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     const {
         initialValue,
         initialIndexSnapshot,
-        scriptSettingsOverride,
         storageError,
         shouldAutoFocus,
-        setScriptSettingsOverride,
         setStorageError,
     } = useScriptLoader(currentScript?.id ?? null, scriptRepository);
     const {
@@ -48,13 +45,11 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         finishSaveIndicator,
     } = useSaveIndicator();
     const {addToast} = useToastController();
-    const settingsSaveRequestRef = useRef(0);
 
     const scriptsLoading = recentScriptsLoading || (scriptId ? currentScriptLoading : false);
     const scriptsError = currentScriptError ?? recentScriptsError;
     const currentScriptId = currentScript?.id ?? null;
-    const isContentLoading = Boolean(currentScriptId)
-        && (initialValue === undefined || scriptSettingsOverride === undefined);
+    const isContentLoading = Boolean(currentScriptId) && initialValue === undefined;
 
     const seedDefaultScript = useSeedDefaultScript(
         scriptRepository,
@@ -89,7 +84,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
             storageError,
             isContentLoading,
             initialValueLoaded: Boolean(initialValue),
-            scriptSettingsLoaded: scriptSettingsOverride !== undefined,
             scriptsLoading,
             scriptId,
         });
@@ -102,7 +96,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         recentScriptsLoading,
         scriptId,
         scriptsLoading,
-        scriptSettingsOverride,
         storageError,
     ]);
 
@@ -120,7 +113,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     const {
         handleAutoSave,
         handleManualSave,
-        handleSaveScriptSettingsOverride,
     } = useScriptSaveHandlers({
         context: {
             currentScript,
@@ -132,8 +124,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
             addToast,
         },
         state: {
-            setScriptSettingsOverride,
-            settingsSaveRequestRef,
             saveIndicatorControls: {
                 startSaveIndicator,
                 finishSaveIndicator,
@@ -149,13 +139,11 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         recentScripts,
         initialValue,
         initialIndexSnapshot,
-        scriptSettingsOverride,
         storageError,
         shouldAutoFocus,
         saveIndicator,
         editorLoadState,
         handleAutoSave,
         handleManualSave,
-        handleSaveScriptSettingsOverride,
     };
 };

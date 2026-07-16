@@ -70,7 +70,9 @@ export const createContentHandlers = ({
 
                 await recordOutbox({
                     scriptId,
+                    entityKey: `script:${scriptId}:document`,
                     opType: 'latest.save',
+                    occurredAt: now,
                     payloadJson: JSON.stringify({scriptId, updatedAt: now}),
                 }, tx);
             },

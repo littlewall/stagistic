@@ -22,6 +22,7 @@ import type {
 import type {ReactNode} from 'react';
 
 import type {SaveResult} from './hooks/useAutosaveController';
+import type {EditorSnapshotStore} from './live/store';
 import type {EditorSurfaceCache} from './surface/editorSurfaceCache';
 import type {BlockNodeType} from './tiptap/scriptCore';
 
@@ -112,7 +113,10 @@ export interface EditorLiveStructureSnapshot {
     rows: readonly EditorLiveStructureRow[],
     rowIndexByBlockId: ReadonlyMap<string, number>,
     sceneByBlockId: ReadonlyMap<string, string>,
+    actByBlockId: ReadonlyMap<string, string>,
 }
+
+export type EditorLiveCueSnapshot = EditorIndexSnapshot['cues'];
 
 export interface EditorLiveCharacterSnapshot {
     countsByKey: ReadonlyMap<string, number>,
@@ -133,6 +137,7 @@ export interface EditorLiveSnapshot {
     index: EditorIndexSnapshot,
     structure: EditorLiveStructureSnapshot,
     characters: EditorLiveCharacterSnapshot,
+    cues: EditorLiveCueSnapshot,
     activeBlockId: string | null,
     activeBlockType: BlockNodeType | null,
 }
@@ -243,4 +248,6 @@ export interface EditorProps {
     callbacks?: EditorLifecycleCallbacks,
     /** Workspace-owned cache keeping the live editor surface alive across view switches. */
     surfaceCache?: EditorSurfaceCache,
+    /** Workspace-owned live projection shared with UI mounted outside the editor shell. */
+    liveStore?: EditorSnapshotStore,
 }

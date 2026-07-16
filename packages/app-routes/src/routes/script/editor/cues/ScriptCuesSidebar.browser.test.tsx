@@ -81,13 +81,19 @@ const poll = async <T, >(getValue: () => T | null | undefined, label: string): P
     throw new Error(`Timed out waiting for ${label}`);
 };
 
-const mountSidebar = () => {
+const mountSidebar = ({
+    initialValue = documentWithCue,
+    onUnassignCue = () => {},
+}: {
+    initialValue?: ScriptDocument,
+    onUnassignCue?: (cueId: string) => void | Promise<void>,
+} = {}) => {
     const host = document.createElement('div');
     const root = createRoot(host);
 
     document.body.appendChild(host);
     root.render(
-        <ScriptEditor document={{initialValue: documentWithCue}}>
+        <ScriptEditor document={{initialValue}}>
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
                 <ScriptCuesSidebar
@@ -106,7 +112,7 @@ const mountSidebar = () => {
                     ]}
                     onAddCue={() => {}}
                     onDeleteCue={() => {}}
-                    onUnassignCue={() => {}}
+                    onUnassignCue={onUnassignCue}
                 />
             </ScriptEditor.LeftSidebar>
         </ScriptEditor>,
@@ -123,6 +129,24 @@ afterEach(() => {
 });
 
 describe('ScriptCuesSidebar', () => {
+    it('shows cue metadata edits from the live editor transaction immediately', async () => {
+        mountSidebar();
+
+        const editor = await poll(
+            () => (window as CueSidebarTestWindow).__cueSidebarEditor,
+            'editor',
+        );
+
+        editor.commands.updateCueMetadata('cue-1', 'Live overture', 'instrumental');
+
+        await poll(
+            () => document.body.textContent?.includes('Live overture') ? true : null,
+            'live cue title',
+        );
+
+        expect(document.body.textContent).not.toContain('Overture');
+    });
+
     it('highlights a cue clicked in the editor and clears it on the next outside click', async () => {
         mountSidebar();
 
@@ -181,5 +205,70 @@ describe('ScriptCuesSidebar', () => {
 
         expect(scrollIntoView).toHaveBeenCalledWith({block: 'start'});
         expect(document.querySelector('[data-cue-id="cue-unassigned"][data-cue-navigation]')).toBeNull();
+    });
+
+    it('completes document unassignment before publishing the catalog intent', async () => {
+        const onUnassignCue = vi.fn();
+
+        mountSidebar({onUnassignCue});
+
+        const editor = await poll(
+            () => (window as CueSidebarTestWindow).__cueSidebarEditor,
+            'editor',
+        );
+        const action = await poll(
+            () => document.querySelector<HTMLButtonElement>('[aria-label="Unassign Overture"]'),
+            'unassign action',
+        );
+
+        action.click();
+
+        const confirm = await poll(
+            () => Array.from(document.querySelectorAll('button')).find(button => {
+                return button.textContent?.trim() === 'Unassign cue';
+            }),
+            'unassign confirmation',
+        );
+
+        confirm.click();
+        await poll(() => onUnassignCue.mock.calls.length === 1 ? true : null, 'unassign callback');
+
+        expect(JSON.stringify(editor.getJSON())).not.toContain('cueStart');
+        expect(onUnassignCue).toHaveBeenCalledWith('cue-1');
+    });
+
+    it('does not publish an intent when the editor change fails', async () => {
+        const onUnassignCue = vi.fn();
+        const emptyDocument: ScriptDocument = {
+            type: 'doc',
+            content: [
+                {
+                    type: 'scene',
+                    attrs: {id: 'scene-1'},
+                    content: [],
+                },
+            ],
+        };
+
+        mountSidebar({initialValue: emptyDocument, onUnassignCue});
+
+        const action = await poll(
+            () => document.querySelector<HTMLButtonElement>('[aria-label="Unassign Overture"]'),
+            'unassign action',
+        );
+
+        action.click();
+
+        const confirm = await poll(
+            () => Array.from(document.querySelectorAll('button')).find(button => {
+                return button.textContent?.trim() === 'Unassign cue';
+            }),
+            'unassign confirmation',
+        );
+
+        confirm.click();
+        await new Promise(resolve => window.setTimeout(resolve, 30));
+
+        expect(onUnassignCue).not.toHaveBeenCalled();
     });
 });

@@ -1,8 +1,12 @@
-import {type useScriptRepository} from '@stagistic/app-core';
+import {
+    useScriptCues,
+    type useScriptRepository,
+} from '@stagistic/app-core';
 import type {UpdateCueRequest} from '@stagistic/editor';
 import {
     useCallback,
     useEffect,
+    useMemo,
     useRef,
     useState,
 } from 'react';
@@ -14,169 +18,151 @@ import type {
 } from './types';
 
 type ScriptRepository = ReturnType<typeof useScriptRepository>;
-type StoredScriptCue = Awaited<ReturnType<ScriptRepository['listScriptCues']>>[number];
-
-const toScriptCueListItem = (cue: StoredScriptCue): ScriptCueListItem => ({
-    id: cue.id,
-    title: cue.title,
-    kind: cue.kind === 'instrumental' ? 'instrumental' : 'song',
-    assignmentLabel: cue.startBlockId ? 'Assigned' : null,
-});
 
 export const useScriptCuesState = (
     scriptId: string | null,
     scriptRepository: ScriptRepository,
 ) => {
-    const [cues, setCues] = useState<ScriptCueListItem[]>([]);
+    const catalog = useScriptCues(scriptId, scriptRepository);
+    const [assignmentIntentState, setAssignmentIntentState] = useState<{
+        scriptId: string | null,
+        values: Record<string, boolean>,
+    }>({scriptId, values: {}});
     const [updateCueRequest, setUpdateCueRequest] = useState<UpdateCueRequest | null>(null);
     const updateCueRequestIdRef = useRef(0);
 
-    useEffect(() => {
-        if (!scriptId) {
-            setCues([]);
-
-            return;
-        }
-
-        let isCurrent = true;
-
-        const loadCues = async () => {
-            const storedCues = await scriptRepository.listScriptCues(scriptId);
-
-            if (isCurrent) {
-                setCues(storedCues.map(toScriptCueListItem));
-            }
-        };
-
-        void loadCues();
-
-        return () => {
-            isCurrent = false;
-        };
-    }, [scriptId, scriptRepository]);
-
-    const createCue = useCallback(async (input: CreateScriptCueInput) => {
-        if (!scriptId) {
-            return null;
-        }
-
-        const title = input.title.trim();
-
-        if (!title) {
-            return null;
-        }
-
-        const createdCue = await scriptRepository.createScriptCue(scriptId, {
-            title,
-            kind: input.kind,
-        });
-
-        if (!createdCue) {
-            return null;
-        }
-
-        const listItem = toScriptCueListItem(createdCue);
-
-        setCues(previous => [...previous, listItem]);
-
-        return listItem;
-    }, [scriptId, scriptRepository]);
-
-    const markCueAssigned = useCallback((cueId: string) => {
-        setCues(previous => previous.map(cue => {
-            return cue.id === cueId ? {...cue, assignmentLabel: 'Assigned'} : cue;
-        }));
-    }, []);
-
-    const updateCue = useCallback(async (cueId: string, input: UpdateScriptCueInput) => {
-        if (!scriptId || !cueId) {
-            return null;
-        }
-
-        const title = input.title.trim();
-
-        if (!title) {
-            return null;
-        }
-
+    const requestEditorCueUpdate = useCallback((
+        cueId: string,
+        title: string,
+        kind: 'song' | 'instrumental',
+    ) => {
         const requestId = updateCueRequestIdRef.current + 1;
 
         updateCueRequestIdRef.current = requestId;
-        setCues(previous => previous.map(cue => {
-            return cue.id === cueId ? {
-                ...cue,
-                title,
-                kind: input.kind,
-            } : cue;
-        }));
         setUpdateCueRequest({
             cueId,
             title,
-            kind: input.kind,
+            kind,
             requestId,
         });
+    }, []);
 
-        const updatedCue = await scriptRepository.updateScriptCue(scriptId, cueId, {
-            title,
-            kind: input.kind,
+    useEffect(() => {
+        setUpdateCueRequest(null);
+    }, [scriptId]);
+
+    useEffect(() => {
+        setAssignmentIntentState(previous => {
+            if (previous.scriptId !== scriptId) {
+                return {scriptId, values: {}};
+            }
+
+            const pendingEntries = Object.entries(previous.values).filter(([cueId, assigned]) => {
+                const cue = catalog.cues.find(candidate => candidate.id === cueId);
+
+                return cue ? Boolean(cue.startBlockId) !== assigned : false;
+            });
+
+            return pendingEntries.length === Object.keys(previous.values).length
+                ? previous
+                : {scriptId, values: Object.fromEntries(pendingEntries)};
         });
+    }, [catalog.cues, scriptId]);
 
-        if (!updatedCue) {
-            const storedCues = await scriptRepository.listScriptCues(scriptId);
+    const assignmentIntents = assignmentIntentState.scriptId === scriptId
+        ? assignmentIntentState.values
+        : {};
 
-            setCues(storedCues.map(toScriptCueListItem));
+    const cues = useMemo<ScriptCueListItem[]>(() => catalog.cues.map(cue => ({
+        id: cue.id,
+        title: cue.title,
+        kind: cue.kind === 'instrumental' ? 'instrumental' : 'song',
+        assignmentLabel: assignmentIntents[cue.id] ?? Boolean(cue.startBlockId)
+            ? 'Assigned'
+            : null,
+    })), [assignmentIntents, catalog.cues]);
 
+    const createCue = useCallback(async (input: CreateScriptCueInput) => {
+        const created = await catalog.createCue(input);
+
+        if (!created) {
             return null;
         }
 
-        const listItem = toScriptCueListItem(updatedCue);
+        return cues.find(cue => cue.id === created.id) ?? {
+            id: created.id,
+            title: created.title,
+            kind: created.kind === 'instrumental' ? 'instrumental' : 'song',
+            assignmentLabel: null,
+        };
+    }, [catalog, cues]);
 
-        setCues(previous => previous.map(cue => {
-            return cue.id === cueId ? listItem : cue;
-        }));
+    const updateCue = useCallback(async (cueId: string, input: UpdateScriptCueInput) => {
+        const title = input.title.trim();
+        const original = catalog.cues.find(cue => cue.id === cueId);
 
-        return listItem;
-    }, [scriptId, scriptRepository]);
-
-    const markCueUnassigned = useCallback((cueId: string) => {
-        setCues(previous => previous.map(cue => {
-            return cue.id === cueId ? {...cue, assignmentLabel: null} : cue;
-        }));
-    }, []);
-
-    const deleteCue = useCallback(async (cueId: string) => {
-        if (!scriptId || !cueId) {
-            return;
+        if (!scriptId || !cueId || !title || !original) {
+            return null;
         }
 
-        await scriptRepository.deleteScriptCue(scriptId, cueId);
-        setCues(previous => previous.filter(cue => cue.id !== cueId));
-    }, [scriptId, scriptRepository]);
+        requestEditorCueUpdate(cueId, title, input.kind);
 
-    const unassignCue = useCallback(async (cueId: string) => {
-        if (!scriptId || !cueId) {
-            return;
+        try {
+            const updated = await catalog.updateCue(cueId, {...input, title});
+
+            return updated ? {
+                id: updated.id,
+                title: updated.title,
+                kind: updated.kind === 'instrumental' ? 'instrumental' : 'song',
+                assignmentLabel: updated.startBlockId ? 'Assigned' : null,
+            } : null;
+        } catch (error) {
+            requestEditorCueUpdate(
+                original.id,
+                original.title,
+                original.kind === 'instrumental' ? 'instrumental' : 'song',
+            );
+            throw error;
         }
+    }, [
+        catalog,
+        requestEditorCueUpdate,
+        scriptId,
+    ]);
 
-        const updatedCue = await scriptRepository.unassignScriptCue(scriptId, cueId);
-
-        if (!updatedCue) {
-            return;
-        }
-
-        setCues(previous => previous.map(cue => {
-            return cue.id === cueId ? toScriptCueListItem(updatedCue) : cue;
+    const markAssignmentIntent = useCallback((cueId: string, assigned: boolean) => {
+        setAssignmentIntentState(previous => ({
+            scriptId,
+            values: {
+                ...previous.scriptId === scriptId ? previous.values : {},
+                [cueId]: assigned,
+            },
         }));
-    }, [scriptId, scriptRepository]);
+    }, [scriptId]);
+    const markCueAssigned = useCallback(
+        (cueId: string) => markAssignmentIntent(cueId, true),
+        [markAssignmentIntent],
+    );
+    const markCueUnassigned = useCallback(
+        (cueId: string) => markAssignmentIntent(cueId, false),
+        [markAssignmentIntent],
+    );
+    const unassignCue = useCallback((cueId: string) => {
+        markAssignmentIntent(cueId, false);
+
+        return Promise.resolve();
+    }, [markAssignmentIntent]);
 
     return {
         cues,
         createCue,
-        deleteCue,
+        deleteCue: catalog.deleteCue,
         markCueAssigned,
         markCueUnassigned,
         updateCue,
         updateCueRequest,
         unassignCue,
+        error: catalog.error,
+        isLoading: catalog.isLoading,
     };
 };

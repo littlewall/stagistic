@@ -15,7 +15,10 @@ import {
 } from '../characters/colorResolver';
 import type {PersistentCharacterRef} from '../contracts';
 import {buildSidebarProjectionFromIndex} from '../live/buildSidebarProjectionFromIndex';
-import {createEditorSnapshotStore} from '../live/store';
+import {
+    createEditorSnapshotStore,
+    type EditorSnapshotStore,
+} from '../live/store';
 import {
     type CharacterColorRefsBundle,
     createCharacterColorRefsBundle,
@@ -27,6 +30,7 @@ interface UseEditorCharacterColorsArgs {
     resolvedInitialValue: ScriptDocument,
     /** Externally-owned containers (cached editor surface); falls back to per-mount ones. */
     refs?: CharacterColorRefsBundle,
+    liveStore?: EditorSnapshotStore,
 }
 
 export const useEditorCharacterColors = ({
@@ -34,6 +38,7 @@ export const useEditorCharacterColors = ({
     characterColorSaturation,
     resolvedInitialValue,
     refs,
+    liveStore: providedLiveStore,
 }: UseEditorCharacterColorsArgs) => {
     const localRefs = useRef<CharacterColorRefsBundle | null>(null);
 
@@ -126,6 +131,7 @@ export const useEditorCharacterColors = ({
             index: indexSnapshot,
             structure: projection.structure,
             characters: projection.characters,
+            cues: indexSnapshot.cues,
             activeBlockId: null,
             activeBlockType: null,
         };
@@ -137,7 +143,18 @@ export const useEditorCharacterColors = ({
         characterColorSaturation,
     ]);
 
-    const [liveStore] = useState(() => createEditorSnapshotStore(initialLiveSnapshot));
+    const [localLiveStore] = useState(() => createEditorSnapshotStore(initialLiveSnapshot));
+    const liveStore = providedLiveStore ?? localLiveStore;
+    const initializedLiveStoreRef = useRef<EditorSnapshotStore | null>(null);
+
+    useEffect(() => {
+        if (!providedLiveStore || initializedLiveStoreRef.current === providedLiveStore) {
+            return;
+        }
+
+        initializedLiveStoreRef.current = providedLiveStore;
+        providedLiveStore.setSnapshot(initialLiveSnapshot);
+    }, [initialLiveSnapshot, providedLiveStore]);
 
     return {
         colorByCharacterIdRef,

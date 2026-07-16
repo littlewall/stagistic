@@ -1,5 +1,12 @@
 # Local persistence: how saves work and why they are fast
 
+Application-state ownership and reactive relational reads are specified in
+[Local-first application state and synchronization](superpowers/specs/2026-07-15-local-first-state-sync-design.md).
+That design complements this document: Tiptap and `ScriptDocumentSource` own
+the active document lifecycle, while PGlite-backed TanStack DB collections own
+reactive relational metadata in the UI. Neither layer is a second writable
+owner of the other.
+
 The editor persists scripts locally into PGlite (Postgres compiled to
 WASM) running in a Web Worker, with IndexedDB as the storage backend
 (`idb://stagistic-main`). There is no network round-trip; the entire
@@ -109,11 +116,40 @@ so both PGlite instances run with `relaxedDurability: true`:
 
 Durability is instead explicit: `saveLatest` awaits `syncToFs()` after
 the transaction commits. Without that call the WAL stays in worker
-memory and dies with the page. Consequence: mutations that do *not* go
-through `saveLatest` (character metadata handlers, configs, …) become
-durable on PGlite's own scheduled flush or on the next content save —
-acceptable trade-off, revisit if a durability-critical standalone
-mutation appears.
+memory and dies with the page. Standalone relational commands migrated
+to the local-first collection path—including scripts, places, cues,
+characters, settings, title-page data, and attachment metadata—also flush
+through their repository handlers after the domain transaction commits.
+
+## Application-state ownership audit
+
+Persisted relational rows are consumed through shared reactive sources and
+TanStack DB collections. No route hook should load repository rows into a
+component-owned array or map. The remaining imperative reads are intentional:
+
+- `useScriptLoader` loads the active document source; Tiptap owns the live body
+  after hydration and document autosave owns persistence.
+- attachment blobs stay in `FileStorage`; only their PGlite metadata and
+  cue-role bindings are reactive collections. Preview reads a blob on demand
+  and treats a missing blob as an unavailable local resource.
+- cue assignment intents, character document compensation, modal selection,
+  previews, and upload progress are ephemeral editor/workflow state rather
+  than copies of repository rows.
+
+## Future replication boundary
+
+The internal replication port models outbound batches, acknowledgements,
+inbound changes, retry policy, and status without selecting or enabling a
+provider. Inbound metadata operations must be applied to PGlite so the same
+reactive collection feeds update the UI. Active script bodies need a separate
+future Yjs/Hocuspocus-compatible document-sync port; mutation envelopes for
+relational metadata are not a document collaboration protocol.
+
+## Diagnostic logging
+
+Persistence diagnostics may include fixed operation labels, opaque entity IDs,
+timings, and sanitized errors. They must not include script text, titles,
+character/place/cue names, filenames, draft values, or serialized rows.
 
 `syncToFs()` cost is proportional to dirty pages, which is why minimal
 re-keying matters beyond the UPDATE itself.
@@ -150,3 +186,7 @@ Regression coverage: `persistDocumentDelta.test.ts` (fast path leaves
 scene rows untouched, insert-between-anchors keeps neighbor keys,
 full-re-key fallback) and `persistDocumentDelta.scale.test.ts` (scene
 move in a ~400-block script re-keys only the moved scene, < 1 s budget).
+`createReactiveCollection.test.ts` keeps 400-row hydration and mutation
+confirmation under 500 ms, while `pgliteLive.browser.test.ts` exercises the
+production worker twice and keeps a 400-block save under 2 s with the measured
+`syncToFs()` portion under 1 s.

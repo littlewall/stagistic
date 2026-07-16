@@ -17,7 +17,6 @@ type DeriveEditorLoadStateArgs = {
     storageError: string | null,
     isContentLoading: boolean,
     initialValueLoaded: boolean,
-    scriptSettingsLoaded: boolean,
     scriptsLoading: boolean,
     scriptId: string | undefined,
 };
@@ -51,7 +50,6 @@ export const deriveEditorLoadState = ({
     storageError,
     isContentLoading,
     initialValueLoaded,
-    scriptSettingsLoaded,
     scriptsLoading,
     scriptId,
 }: DeriveEditorLoadStateArgs): EditorLoadState => {
@@ -84,7 +82,7 @@ export const deriveEditorLoadState = ({
             label: 'Loading editor settings',
             status: resolveEditorLoadItemStatus({
                 hasError: Boolean(storageError),
-                isActive: !scriptSettingsLoaded,
+                isActive: false,
                 isDone: true,
             }),
         },

@@ -74,9 +74,9 @@ export const CueAttachmentPreviewModal = ({
             setStatus('ready');
         };
 
-        void render().catch(error => {
+        void render().catch(() => {
             if (!cancelled) {
-                console.error('[attachments] PDF preview failed', error);
+                console.error('[attachments] PDF preview failed');
                 setStatus('error');
             }
         });

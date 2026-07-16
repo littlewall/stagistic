@@ -3,9 +3,10 @@ import {
     type ScriptBlockNodeType,
 } from '@stagistic/script';
 import {
-    FormSelect,
     formControlStyles,
+    FormSelect,
 } from '@stagistic/ui';
+
 import type {
     ElementNumericModel,
     ElementsHandlers,

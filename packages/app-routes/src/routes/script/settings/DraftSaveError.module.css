@@ -1,0 +1,13 @@
+.error {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: space-between;
+    margin-block-end: var(--space-xl);
+    padding: var(--space-md) var(--space-lg);
+    font-size: var(--font-size-sm);
+    color: var(--color-status-danger);
+    background: color-mix(in oklch, var(--color-status-danger) 8%, transparent);
+    border: 1px solid color-mix(in oklch, var(--color-status-danger) 28%, var(--color-border));
+    border-radius: var(--radius-md);
+}

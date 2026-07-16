@@ -1,11 +1,5 @@
-import {
-    useCallback,
-    useEffect,
-    useRef,
-    useState,
-} from 'react';
-
-const SCRIPT_TITLE_SAVE_DEBOUNCE_MS = 450;
+import {usePersistedDraft} from '@stagistic/app-core';
+import {useCallback} from 'react';
 
 interface UseScriptTitleDraftArgs {
     currentScriptId: string | null,
@@ -18,67 +12,23 @@ export const useScriptTitleDraft = ({
     currentScriptTitle,
     renameScriptTitle,
 }: UseScriptTitleDraftArgs) => {
-    const [scriptTitleDraft, setScriptTitleDraft] = useState(currentScriptTitle);
-    const loadedScriptIdRef = useRef<string | null>(null);
-    const persistedTitleRef = useRef(currentScriptTitle);
-    const saveTimerRef = useRef<number | null>(null);
-
-    const clearSaveTimer = useCallback(() => {
-        if (saveTimerRef.current === null) {
-            return;
-        }
-
-        window.clearTimeout(saveTimerRef.current);
-        saveTimerRef.current = null;
-    }, []);
-
-    useEffect(() => {
-        if (loadedScriptIdRef.current !== currentScriptId) {
-            loadedScriptIdRef.current = currentScriptId;
-            persistedTitleRef.current = currentScriptTitle;
-            setScriptTitleDraft(currentScriptTitle);
-
-            return;
-        }
-
-        if (scriptTitleDraft !== persistedTitleRef.current) {
-            return;
-        }
-
-        persistedTitleRef.current = currentScriptTitle;
-        setScriptTitleDraft(currentScriptTitle);
-    }, [
-        currentScriptId,
-        currentScriptTitle,
-        scriptTitleDraft,
-    ]);
-
-    useEffect(() => {
-        if (!currentScriptId || scriptTitleDraft === persistedTitleRef.current) {
-            return;
-        }
-
-        clearSaveTimer();
-
-        const snapshot = scriptTitleDraft;
-
-        saveTimerRef.current = window.setTimeout(() => {
-            persistedTitleRef.current = snapshot;
-            void renameScriptTitle(currentScriptId, snapshot);
-        }, SCRIPT_TITLE_SAVE_DEBOUNCE_MS);
-
-        return clearSaveTimer;
-    }, [
-        clearSaveTimer,
-        currentScriptId,
-        renameScriptTitle,
-        scriptTitleDraft,
-    ]);
-
-    useEffect(() => clearSaveTimer, [clearSaveTimer]);
+    const persist = useCallback((scriptId: string, title: string) => {
+        return renameScriptTitle(scriptId, title);
+    }, [renameScriptTitle]);
+    const draft = usePersistedDraft({
+        entityKey: currentScriptId,
+        confirmedValue: currentScriptTitle,
+        isHydrated: currentScriptId !== null,
+        defaultValue: '',
+        persist,
+    });
 
     return {
-        scriptTitleDraft,
-        updateScriptTitle: setScriptTitleDraft,
+        scriptTitleDraft: draft.draft,
+        scriptTitleDraftStatus: draft.status,
+        scriptTitleDraftError: draft.error,
+        updateScriptTitle: draft.setDraft,
+        flushScriptTitle: draft.flush,
+        retryScriptTitle: draft.retry,
     };
 };

@@ -14,10 +14,12 @@ export const createCharacterHandlers = ({
     const coreMutations = createCoreCharacterMutations({
         getDb,
         recordOutbox,
+        syncDb,
     });
     const genderMutations = createGenderMutations({
         getDb,
         recordOutbox,
+        syncDb,
     });
     const outlineMutations = createOutlineMutations({
         getDb,

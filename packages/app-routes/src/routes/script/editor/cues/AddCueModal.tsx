@@ -1,7 +1,7 @@
 import {
     Button,
-    FormSelect,
     formControlStyles,
+    FormSelect,
     type FormSelectOption,
     ModalDialog,
 } from '@stagistic/ui';
@@ -22,16 +22,13 @@ import type {
     ScriptCueKind,
 } from './types';
 
-const KIND_OPTIONS: FormSelectOption[] = [
-    {value: 'song', label: 'Song'},
-    {value: 'instrumental', label: 'Instrumental'},
-];
+const KIND_OPTIONS: FormSelectOption[] = [{value: 'song', label: 'Song'}, {value: 'instrumental', label: 'Instrumental'}];
 
 interface AddCueModalProps {
     isOpen: boolean,
     initialTitle?: string,
     onClose: () => void,
-    onCreate: (input: CreateScriptCueInput) => Promise<unknown> | unknown,
+    onCreate: (input: CreateScriptCueInput) => unknown,
 }
 
 export const AddCueModal = ({

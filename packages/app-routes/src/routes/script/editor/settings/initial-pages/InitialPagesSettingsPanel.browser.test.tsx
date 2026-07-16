@@ -1,5 +1,7 @@
 import '@stagistic/ui/styles/base.css';
 
+import type {InitialPagesSettings} from '@stagistic/script';
+import {useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -37,21 +39,38 @@ afterEach(() => {
 });
 
 describe('InitialPagesSettingsPanel', () => {
-    it('shows the selected value before the parent provides updated settings', async () => {
+    it('renders a parent draft update in the same interaction', async () => {
         const onUpdate = vi.fn();
         const host = document.createElement('div');
         const root = createRoot(host);
+        const Harness = () => {
+            const [settings, setSettings] = useState<InitialPagesSettings>({
+                castAndPlace: {castOrderBy: 'name', showOutline: true},
+                songs: {showCharactersInSongs: false},
+            });
+
+            return (
+                <InitialPagesSettingsPanel
+                    settings={settings}
+                    onUpdate={patch => {
+                        onUpdate(patch);
+                        setSettings(previous => ({
+                            castAndPlace: {
+                                ...previous.castAndPlace,
+                                ...patch.castAndPlace,
+                            },
+                            songs: {
+                                ...previous.songs,
+                                ...patch.songs,
+                            },
+                        }));
+                    }}
+                />
+            );
+        };
 
         document.body.appendChild(host);
-        root.render(
-            <InitialPagesSettingsPanel
-                settings={{
-                    castAndPlace: {castOrderBy: 'name', showOutline: true},
-                    songs: {showCharactersInSongs: false},
-                }}
-                onUpdate={onUpdate}
-            />,
-        );
+        root.render(<Harness />);
         mountedRoots.push(root);
 
         const appearanceButton = await waitForButton('Appearance');

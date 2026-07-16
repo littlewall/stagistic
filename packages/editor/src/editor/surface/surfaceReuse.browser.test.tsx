@@ -1,6 +1,10 @@
 import '@stagistic/ui/styles/base.css';
 
-import type {ScriptDocument} from '@stagistic/script';
+import type {
+    EditorSettingsOverride,
+    ScriptDocument,
+} from '@stagistic/script';
+import {useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -75,9 +79,100 @@ const unmountAll = () => {
 
 const editorDom = () => document.querySelector<HTMLElement>('[data-editor]');
 
+const SettingsHarness = ({surfaceCache}: {surfaceCache: EditorSurfaceCache}) => {
+    const [settings, setSettings] = useState<EditorSettingsOverride>({
+        initialPages: {
+            castAndPlace: {showOutline: true},
+        },
+    });
+
+    return (
+        <>
+            <button
+                data-testid="change-export-setting"
+                onClick={() => setSettings(current => ({
+                    ...current,
+                    initialPages: {
+                        ...current.initialPages,
+                        castAndPlace: {
+                            ...current.initialPages?.castAndPlace,
+                            showOutline: !current.initialPages?.castAndPlace?.showOutline,
+                        },
+                    },
+                }))}
+                type="button"
+            >
+                Change export setting
+            </button>
+            <button
+                data-testid="change-editor-setting"
+                onClick={() => setSettings(current => ({
+                    ...current,
+                    visual: {
+                        characterColorSaturation:
+                            current.visual?.characterColorSaturation === 0.5 ? 0.75 : 0.5,
+                    },
+                }))}
+                type="button"
+            >
+                Change editor setting
+            </button>
+            <ScriptEditor
+                document={{
+                    initialValue: createDocument(),
+                    persistentCharacters: [],
+                }}
+                layout={{autoFocus: false}}
+                settings={{scriptSettings: settings}}
+                surfaceCache={surfaceCache}
+            />
+        </>
+    );
+};
+
+const mountSettingsHarness = (surfaceCache: EditorSurfaceCache) => {
+    const host = document.createElement('div');
+
+    host.style.width = '794px';
+    host.style.height = '1123px';
+    document.body.appendChild(host);
+
+    const root = createRoot(host);
+
+    root.render(<SettingsHarness surfaceCache={surfaceCache} />);
+    mountedRoots.push(root);
+};
+
 afterEach(unmountAll);
 
 describe('editor surface reuse', () => {
+    it('keeps the live instance for export-only settings changes', async () => {
+        const cache = createEditorSurfaceCache();
+
+        mountSettingsHarness(cache);
+        await waitFor(() => editorDom() !== null);
+
+        const initialDom = editorDom();
+        const exportSettingButton = document.querySelector<HTMLElement>(
+            '[data-testid="change-export-setting"]',
+        );
+
+        await userEvent.click(exportSettingButton as HTMLElement);
+
+        expect(editorDom()).toBe(initialDom);
+
+        const editorSettingButton = document.querySelector<HTMLElement>(
+            '[data-testid="change-editor-setting"]',
+        );
+
+        await userEvent.click(editorSettingButton as HTMLElement);
+        await waitFor(() => editorDom() !== initialDom);
+
+        expect(editorDom()).not.toBe(initialDom);
+
+        cache.destroy();
+    });
+
     it('re-attaches the same live instance and keeps typed content', async () => {
         const cache = createEditorSurfaceCache();
         const documentValue = createDocument();

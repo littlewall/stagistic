@@ -41,9 +41,39 @@ const findButtonByText = (label: string): HTMLButtonElement => {
     return button;
 };
 
-const renderPanel = (initialSelectedCharacterId?: string) => {
+const waitForVisibleElement = async <T extends Element>(selector: string): Promise<T> => {
+    const deadline = Date.now() + 1000;
+
+    while (Date.now() < deadline) {
+        const element = Array.from(document.querySelectorAll<T>(selector))
+            .find(candidate => candidate.getClientRects().length > 0);
+
+        if (element) {
+            return element;
+        }
+
+        await new Promise(resolve => window.setTimeout(resolve, 10));
+    }
+
+    throw new Error(`Expected a visible element matching ${selector}`);
+};
+
+const findVisibleButtonByText = (label: string): HTMLButtonElement => {
+    const button = Array.from(document.querySelectorAll('button'))
+        .find(candidate => candidate.textContent?.trim() === label && candidate.getClientRects().length > 0);
+
+    if (!button) {
+        throw new Error(`Expected a visible button labelled ${label}`);
+    }
+
+    return button;
+};
+
+const renderPanel = (
+    initialSelectedCharacterId?: string,
+    onSetCharacterColor = vi.fn(),
+) => {
     const host = document.createElement('div');
-    const onSetCharacterColor = vi.fn();
     const onSetCharacterOutline = vi.fn();
     const onDeleteCharacter = vi.fn();
     const onCreateCharacter = vi.fn();
@@ -116,6 +146,46 @@ describe('AttributeManagerCharactersPanel character actions', () => {
         await applyButton.click();
 
         expect(onSetCharacterColor).toHaveBeenCalledWith('char-1', expect.any(String));
+    });
+
+    it('keeps the newest color visible while older persistence is still pending', async () => {
+        const resolvers: Array<() => void> = [];
+        const onSetCharacterColor = vi.fn((
+            _characterId: string,
+            _colorHex: string | null,
+        ) => {
+            void _characterId;
+            void _colorHex;
+
+            return new Promise<void>(resolve => {
+                resolvers.push(resolve);
+            });
+        });
+
+        renderPanel(undefined, onSetCharacterColor);
+
+        const chooseColor = async (action: 'Apply' | 'Reset') => {
+            await page.elementLocator(
+                await waitForElement('[aria-label="Choose color for ANNA"]'),
+            ).click();
+            await waitForVisibleElement('[aria-label="Color picker for ANNA"]');
+            await page.elementLocator(findVisibleButtonByText(action)).click();
+        };
+
+        await chooseColor('Reset');
+        await chooseColor('Apply');
+
+        const newestColor = onSetCharacterColor.mock.calls[1]?.[1];
+        const listColor = findButtonByText('ANNA').querySelector<HTMLElement>('span');
+        const expected = document.createElement('span');
+
+        expected.style.backgroundColor = newestColor ?? '';
+        resolvers[0]?.();
+        await new Promise(resolve => window.setTimeout(resolve, 0));
+
+        expect(listColor?.style.backgroundColor).toBe(expected.style.backgroundColor);
+
+        resolvers[1]?.();
     });
 
     it('deletes only after confirming in the modal', async () => {

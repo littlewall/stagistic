@@ -1,3 +1,7 @@
+import type {
+    ScriptRepository,
+    ScriptTitlePageRecord,
+} from '@stagistic/app-core';
 import type {TitlePageSettings} from '@stagistic/script';
 import {StrictMode} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
@@ -14,49 +18,69 @@ import {useTitlePageDraft} from './useTitlePageDraft';
 const mountedRoots: Root[] = [];
 
 const waitFor = async (predicate: () => boolean) => {
-    const deadline = Date.now() + 2000;
+    const deadline = Date.now() + 2_000;
 
-    while (Date.now() < deadline) {
-        if (predicate()) {
-            return;
+    while (!predicate()) {
+        if (Date.now() >= deadline) {
+            throw new Error('Timed out waiting for title-page draft');
         }
 
         await new Promise(resolve => window.setTimeout(resolve, 10));
     }
-
-    throw new Error('Timed out waiting for condition');
 };
 
-const TestHarness = ({
-    scriptId,
-    repository,
-}: {
-    scriptId: string | null,
-    repository: {
-        loadTitlePage: (id: string) => Promise<TitlePageSettings | null>,
-        saveTitlePage: (id: string, settings: TitlePageSettings) => Promise<void>,
-    },
-}) => {
-    const {
-        titlePageDraft, isLoading, updateTitlePage,
-    } = useTitlePageDraft({
-        currentScriptId: scriptId,
+const createRepository = () => {
+    let rows: readonly ScriptTitlePageRecord[] = [];
+    const listeners = new Set<(value: readonly ScriptTitlePageRecord[]) => void>();
+    const saveCalls: TitlePageSettings[] = [];
+    const source = {
+        read: () => Promise.resolve(rows),
+        subscribe: async (listener: (value: readonly ScriptTitlePageRecord[]) => void) => {
+            listeners.add(listener);
+            await new Promise(resolve => window.setTimeout(resolve, 20));
+            listener(rows);
+
+            return () => {
+                listeners.delete(listener);
+            };
+        },
+        refresh: () => {
+            listeners.forEach(listener => listener(rows));
+
+            return Promise.resolve();
+        },
+    };
+    const repository = {
+        getScriptTitlePageSource: () => source,
+        saveTitlePage: (scriptId: string, settings: TitlePageSettings) => {
+            saveCalls.push(settings);
+            rows = [{scriptId, settings}];
+            listeners.forEach(listener => listener(rows));
+
+            return Promise.resolve();
+        },
+        deleteTitlePage: () => Promise.resolve(),
+    } as unknown as ScriptRepository;
+
+    return {repository, saveCalls};
+};
+
+const TestHarness = ({repository}: {repository: ScriptRepository}) => {
+    const draft = useTitlePageDraft({
+        currentScriptId: 'script-1',
         repository,
     });
 
     return (
         <button
             type="button"
-            data-testid="edit"
-            data-loaded={String(!isLoading)}
-            onClick={() => updateTitlePage({subtitle: 'Hello'})}
+            data-loaded={String(!draft.isLoading)}
+            onClick={() => draft.updateTitlePage({subtitle: 'Hello'})}
         >
-            {titlePageDraft.subtitle ?? 'no-subtitle'}
+            {draft.titlePageDraft.subtitle ?? 'no-subtitle'}:{draft.titlePageDraftStatus}
         </button>
     );
 };
-
-const isHarnessLoaded = () => document.querySelector('[data-testid="edit"]')?.getAttribute('data-loaded') === 'true';
 
 afterEach(() => {
     mountedRoots.forEach(root => root.unmount());
@@ -64,48 +88,25 @@ afterEach(() => {
     document.body.innerHTML = '';
 });
 
-describe('useTitlePageDraft persistence wiring', () => {
-    /*
-     * Under StrictMode (mount → cleanup → mount) with an async load, an earlier
-     * bug marked the script "loaded" before the await resolved, so the second
-     * mount skipped loading while the first mount's result was discarded —
-     * leaving loadedTitlePage stuck at undefined and the save effect permanently
-     * disabled. This asserts an edit still debounce-saves.
-     */
-    it('debounce-saves an edited title page under StrictMode with an async load', async () => {
-        const saveCalls: Array<[string, TitlePageSettings]> = [];
-        const repository = {
-            loadTitlePage: () => new Promise<TitlePageSettings | null>(resolve => {
-                window.setTimeout(() => resolve(null), 20);
-            }),
-            saveTitlePage: (id: string, settings: TitlePageSettings) => {
-                saveCalls.push([id, settings]);
-
-                return Promise.resolve();
-            },
-        };
-
+describe('useTitlePageDraft', () => {
+    it('hydrates and saves under StrictMode', async () => {
+        const {repository, saveCalls} = createRepository();
         const host = document.createElement('div');
-
-        document.body.appendChild(host);
-
         const root = createRoot(host);
 
+        document.body.appendChild(host);
         mountedRoots.push(root);
         root.render(
             <StrictMode>
-                <TestHarness scriptId="s1" repository={repository} />
+                <TestHarness repository={repository} />
             </StrictMode>,
         );
+        await waitFor(() => host.querySelector('button')?.dataset.loaded === 'true');
 
-        // With the bug, loadedTitlePage never resolves, so the hook stays loading forever.
-        await waitFor(isHarnessLoaded);
+        await userEvent.click(host.querySelector('button') as HTMLButtonElement);
+        await waitFor(() => saveCalls.length === 1);
+        await waitFor(() => host.textContent?.includes('Hello:saved') ?? false);
 
-        await userEvent.click(document.querySelector('[data-testid="edit"]') as HTMLElement);
-
-        await waitFor(() => saveCalls.length > 0);
-
-        expect(saveCalls[0][0]).toBe('s1');
-        expect(saveCalls[0][1].subtitle).toBe('Hello');
+        expect(saveCalls[0]?.subtitle).toBe('Hello');
     });
 });

@@ -19,12 +19,13 @@ import type {ScriptListItem} from './types';
 export const useScripts = () => {
     const {
         scriptsCollection,
+        scriptsStatus,
         scriptsStore,
     } = useScriptsContext();
-    const meta = useSyncExternalStore(
-        scriptsStore.subscribeMeta,
-        scriptsStore.getMeta,
-        scriptsStore.getMeta,
+    const storeStatus = useSyncExternalStore(
+        scriptsStatus.subscribe,
+        scriptsStatus.getSnapshot,
+        scriptsStatus.getSnapshot,
     );
 
     useEffect(() => {
@@ -90,7 +91,9 @@ export const useScripts = () => {
         deleteScript,
         setActiveBlock,
         refreshScripts: scriptsStore.refresh,
-        isLoading: meta.isLoading || isQueryLoading || status === 'idle',
-        error: meta.error,
+        isLoading: !storeStatus.isReady || isQueryLoading || status === 'idle',
+        error: storeStatus.sourceError
+            ?? storeStatus.mutations.find(mutation => mutation.status === 'failed')?.error
+            ?? null,
     };
 };

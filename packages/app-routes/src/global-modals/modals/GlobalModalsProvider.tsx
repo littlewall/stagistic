@@ -1,7 +1,4 @@
-import {
-    useScriptRepository,
-    useScriptsContext,
-} from '@stagistic/app-core';
+import {useScriptRepository} from '@stagistic/app-core';
 import {
     DeleteScriptModal,
     DuplicateScriptModal,
@@ -13,7 +10,6 @@ import {
 import {
     createContext,
     type ReactNode,
-    useCallback,
     useContext,
     useMemo,
 } from 'react';
@@ -53,11 +49,7 @@ interface GlobalModalsProviderProps {
 export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
-    const {scriptsStore} = useScriptsContext();
     const {addToast} = useToastController();
-    const refreshScripts = useCallback(() => {
-        void scriptsStore.refresh();
-    }, [scriptsStore]);
 
     const {
         isNewScriptOpen,
@@ -97,9 +89,6 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         },
         notifications: {
             addToast,
-        },
-        state: {
-            refreshScripts,
         },
     });
 

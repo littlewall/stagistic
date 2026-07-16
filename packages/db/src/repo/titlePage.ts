@@ -124,19 +124,22 @@ export const createTitlePageHandlers = ({
             credit.authors.forEach(author => addRow('credit_author', author, groupNo));
         });
 
-        await dbQueries.replaceScriptTitlePageFields(db, scriptId, rows);
-
         const subtitle = typeof settings.subtitle === 'string' ? settings.subtitle.trim() : '';
 
-        await dbQueries.updateScriptSubtitle(db, {
-            id: scriptId,
-            subtitle: subtitle.length > 0 ? subtitle : null,
-            updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'title-page.save',
-            payloadJson: JSON.stringify({scriptId, updatedAt: now}),
+        await db.transaction(async tx => {
+            await dbQueries.replaceScriptTitlePageFields(tx, scriptId, rows);
+            await dbQueries.updateScriptSubtitle(tx, {
+                id: scriptId,
+                subtitle: subtitle.length > 0 ? subtitle : null,
+                updatedAt: now,
+            });
+            await recordOutbox({
+                scriptId,
+                entityKey: `script:${scriptId}:title-page`,
+                opType: 'title-page.save',
+                occurredAt: now,
+                payloadJson: JSON.stringify({scriptId, updatedAt: now}),
+            }, tx);
         });
 
         /*
@@ -150,14 +153,18 @@ export const createTitlePageHandlers = ({
         const db = await getDb();
         const now = Date.now();
 
-        await dbQueries.replaceScriptTitlePageFields(db, scriptId, []);
-        await dbQueries.updateScriptSubtitle(db, {
-            id: scriptId, subtitle: null, updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'title-page.delete',
-            payloadJson: JSON.stringify({scriptId, deletedAt: now}),
+        await db.transaction(async tx => {
+            await dbQueries.replaceScriptTitlePageFields(tx, scriptId, []);
+            await dbQueries.updateScriptSubtitle(tx, {
+                id: scriptId, subtitle: null, updatedAt: now,
+            });
+            await recordOutbox({
+                scriptId,
+                entityKey: `script:${scriptId}:title-page`,
+                opType: 'title-page.delete',
+                occurredAt: now,
+                payloadJson: JSON.stringify({scriptId, deletedAt: now}),
+            }, tx);
         });
 
         await syncDb();

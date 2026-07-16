@@ -24,7 +24,6 @@
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
-    transition: background .15s ease, border-color .15s ease;
 
     &[data-hovered] {
         background: color-mix(in oklch, var(--color-surface-accent) 18%, transparent);

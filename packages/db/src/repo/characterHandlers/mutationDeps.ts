@@ -6,6 +6,7 @@ import type {
 export interface CharacterMutationDeps {
     getDb: GetDb,
     recordOutbox: RecordOutbox,
+    syncDb: () => Promise<void>,
 }
 
 export interface CharacterOutlineMutationDeps extends CharacterMutationDeps {

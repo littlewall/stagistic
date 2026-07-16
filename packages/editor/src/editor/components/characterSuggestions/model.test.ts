@@ -277,8 +277,7 @@ describe('computeCharacterSuggestions', () => {
                     id: 'jan-id',
                     key: 'Jan',
                     colorHex: null,
-                },
-                {
+                }, {
                     id: 'jana-id',
                     key: 'Jana',
                     colorHex: null,

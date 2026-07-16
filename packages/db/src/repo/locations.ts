@@ -32,6 +32,16 @@ export const createLocationHandlers = ({
     };
 
     const create: ScriptLocationsRepository['create'] = async (scriptId, input) => {
+        return createWithId(scriptId, {
+            ...input,
+            id: uuidv7(),
+        });
+    };
+
+    const createWithId: ScriptLocationsRepository['createWithId'] = async (
+        scriptId,
+        input,
+    ) => {
         const name = input.name.trim();
 
         if (!name) {
@@ -39,30 +49,28 @@ export const createLocationHandlers = ({
         }
 
         const db = await getDb();
-        const now = Date.now();
-        const locationId = uuidv7();
+        const now = input.timestamp ?? Date.now();
+        const locationId = input.id;
 
-        await dbQueries.upsertScriptLocation(db, {
-            id: locationId,
-            scriptId,
-            name,
-            description: null,
-            createdAt: now,
-            updatedAt: now,
-        });
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'location.create',
-            payloadJson: JSON.stringify({
+        await db.transaction(async tx => {
+            await dbQueries.upsertScriptLocation(tx, {
+                id: locationId,
                 scriptId,
-                locationId,
                 name,
+                description: null,
                 createdAt: now,
-            }),
+                updatedAt: now,
+            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `location:${locationId}`,
+                opType: 'location.create',
+                occurredAt: now,
+                payloadJson: JSON.stringify({
+                    scriptId, locationId, name, createdAt: now,
+                }),
+            }, tx);
         });
         await syncDb();
 
@@ -82,25 +90,23 @@ export const createLocationHandlers = ({
         const db = await getDb();
         const now = Date.now();
 
-        await dbQueries.updateScriptLocationName(db, {
-            scriptId,
-            locationId,
-            name,
-            updatedAt: now,
-        });
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'location.rename',
-            payloadJson: JSON.stringify({
+        await db.transaction(async tx => {
+            await dbQueries.updateScriptLocationName(tx, {
                 scriptId,
                 locationId,
                 name,
                 updatedAt: now,
-            }),
+            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `location:${locationId}`,
+                opType: 'location.rename',
+                occurredAt: now,
+                payloadJson: JSON.stringify({
+                    scriptId, locationId, name, updatedAt: now,
+                }),
+            }, tx);
         });
         await syncDb();
 
@@ -118,22 +124,18 @@ export const createLocationHandlers = ({
         const db = await getDb();
         const now = Date.now();
 
-        await dbQueries.deleteScriptLocation(db, {
-            scriptId,
-            locationId,
-        });
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'location.delete',
-            payloadJson: JSON.stringify({
+        await db.transaction(async tx => {
+            await dbQueries.deleteScriptLocation(tx, {scriptId, locationId});
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
                 scriptId,
-                locationId,
-                deletedAt: now,
-            }),
+                entityKey: `location:${locationId}`,
+                opType: 'location.delete',
+                occurredAt: now,
+                payloadJson: JSON.stringify({
+                    scriptId, locationId, deletedAt: now,
+                }),
+            }, tx);
         });
         await syncDb();
     };
@@ -149,26 +151,30 @@ export const createLocationHandlers = ({
 
         const db = await getDb();
         const now = Date.now();
-        const assignedLocationIds = await dbQueries.replaceScriptSceneLocations(db, {
-            scriptId,
-            sceneHeadingBlockId,
-            locationIds,
-        });
-
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'scene.locations.replace',
-            payloadJson: JSON.stringify({
+        const assignedLocationIds = await db.transaction(async tx => {
+            const assignedIds = await dbQueries.replaceScriptSceneLocations(tx, {
                 scriptId,
                 sceneHeadingBlockId,
-                locationIds: assignedLocationIds,
-                updatedAt: now,
-            }),
+                locationIds,
+            });
+
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `scene:${sceneHeadingBlockId}:locations`,
+                opType: 'scene.locations.replace',
+                occurredAt: now,
+                payloadJson: JSON.stringify({
+                    scriptId,
+                    sceneHeadingBlockId,
+                    locationIds: assignedIds,
+                    updatedAt: now,
+                }),
+            }, tx);
+
+            return assignedIds;
         });
+
         await syncDb();
 
         return assignedLocationIds;
@@ -178,6 +184,7 @@ export const createLocationHandlers = ({
         list,
         listSceneAssignments,
         create,
+        createWithId,
         rename,
         delete: deleteLocation,
         replaceSceneAssignments,

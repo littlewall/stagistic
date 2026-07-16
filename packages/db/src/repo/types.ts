@@ -9,6 +9,9 @@ export interface OutboxPayload {
     scriptId: string,
     opType: string,
     payloadJson: string,
+    entityKey?: string,
+    operationId?: string,
+    occurredAt?: number,
 }
 
 export type RecordOutbox = (payload: OutboxPayload, db?: DbClient) => Promise<void>;

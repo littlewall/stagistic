@@ -1,74 +1,48 @@
 import type {ScriptSummary} from '@stagistic/db';
+import {useLiveQuery} from '@tanstack/react-db';
 import {
     useCallback,
-    useEffect,
     useMemo,
-    useRef,
-    useState,
+    useSyncExternalStore,
 } from 'react';
 
 import {toScriptListItem} from './mappers';
-import {useScriptRepository} from './ScriptRepositoryProvider';
-import {onScriptsInvalidated} from './scriptsEvents';
+import {useScriptsContext} from './ScriptRepositoryProvider';
 import type {RecentScriptsState, ScriptListItem} from './types';
 
 export const useRecentScripts = (limit = 3): RecentScriptsState => {
-    const repository = useScriptRepository();
-    const [data, setData] = useState<ScriptSummary[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
-    const [error, setError] = useState<Error | null>(null);
-    const requestIdRef = useRef(0);
-    const hasCompletedLoadRef = useRef(false);
-
-    const load = useCallback(async () => {
-        const requestId = requestIdRef.current + 1;
-
-        requestIdRef.current = requestId;
-        setIsLoading(!hasCompletedLoadRef.current);
-
-        try {
-            const scripts = await repository.listScripts({limit});
-
-            if (requestIdRef.current !== requestId) {
-                return;
-            }
-
-            setData(scripts);
-            setError(null);
-        } catch (err) {
-            if (requestIdRef.current !== requestId) {
-                return;
-            }
-
-            setError(err as Error);
-        } finally {
-            if (requestIdRef.current === requestId) {
-                hasCompletedLoadRef.current = true;
-                setIsLoading(false);
-            }
-        }
-    }, [limit, repository]);
-
-    useEffect(() => {
-        void load();
-    }, [load]);
-
-    useEffect(() => {
-        return onScriptsInvalidated(() => {
-            void load();
-        });
-    }, [load]);
-
+    const {
+        repository,
+        scriptsCollection,
+        scriptsStatus,
+    } = useScriptsContext();
+    const storeStatus = useSyncExternalStore(
+        scriptsStatus.subscribe,
+        scriptsStatus.getSnapshot,
+        scriptsStatus.getSnapshot,
+    );
+    const {data, isLoading} = useLiveQuery(
+        q => q
+            .from({scripts: scriptsCollection})
+            .orderBy(({scripts}) => scripts.updatedAt, 'desc')
+            .limit(limit),
+        [limit, scriptsCollection],
+    );
+    const scriptSummaries = useMemo<ScriptSummary[]>(() => data ?? [], [data]);
     const scripts = useMemo<ScriptListItem[]>(
-        () => data.map(summary => toScriptListItem(summary)),
-        [data],
+        () => scriptSummaries.map(summary => toScriptListItem(summary)),
+        [scriptSummaries],
+    );
+    const refresh = useCallback(
+        () => repository.scriptSummaries.refresh(),
+        [repository],
     );
 
     return {
         scripts,
-        scriptSummaries: data,
-        isLoading,
-        error,
-        refresh: load,
+        scriptSummaries,
+        isLoading: !storeStatus.isReady || isLoading,
+        error: storeStatus.sourceError,
+        refresh,
     };
 };

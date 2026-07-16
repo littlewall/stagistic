@@ -1,88 +1,59 @@
 import type {ScriptSummary} from '@stagistic/db';
 import {
+    eq,
+    useLiveQuery,
+} from '@tanstack/react-db';
+import {
     useCallback,
-    useEffect,
     useMemo,
-    useRef,
-    useState,
+    useSyncExternalStore,
 } from 'react';
 
 import {toScriptListItem} from './mappers';
-import {useScriptRepository} from './ScriptRepositoryProvider';
-import {onScriptsInvalidated} from './scriptsEvents';
+import {useScriptsContext} from './ScriptRepositoryProvider';
 import type {
     ScriptListItem,
     ScriptSummaryState,
 } from './types';
 
 export const useScriptSummary = (scriptId?: string | null): ScriptSummaryState => {
-    const repository = useScriptRepository();
-    const [summary, setSummary] = useState<ScriptSummary | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState<Error | null>(null);
-    const requestIdRef = useRef(0);
-    const loadedScriptIdRef = useRef<string | null>(null);
-
-    const load = useCallback(async () => {
-        if (!scriptId) {
-            loadedScriptIdRef.current = null;
-            setSummary(null);
-            setIsLoading(false);
-            setError(null);
-
-            return;
-        }
-
-        const requestId = requestIdRef.current + 1;
-        const isInitialLoad = loadedScriptIdRef.current !== scriptId;
-
-        requestIdRef.current = requestId;
-        setIsLoading(isInitialLoad);
-
-        try {
-            const data = await repository.getScriptSummary(scriptId);
-
-            if (requestIdRef.current !== requestId) {
-                return;
+    const {
+        repository,
+        scriptsCollection,
+        scriptsStatus,
+    } = useScriptsContext();
+    const storeStatus = useSyncExternalStore(
+        scriptsStatus.subscribe,
+        scriptsStatus.getSnapshot,
+        scriptsStatus.getSnapshot,
+    );
+    const {data, isLoading} = useLiveQuery(
+        q => {
+            if (!scriptId) {
+                return undefined;
             }
 
-            setSummary(data);
-            setError(null);
-        } catch (err) {
-            if (requestIdRef.current !== requestId) {
-                return;
-            }
-
-            setSummary(null);
-            setError(err as Error);
-        } finally {
-            if (requestIdRef.current === requestId) {
-                loadedScriptIdRef.current = scriptId;
-                setIsLoading(false);
-            }
-        }
-    }, [repository, scriptId]);
-
-    useEffect(() => {
-        void load();
-    }, [load]);
-
-    useEffect(() => {
-        return onScriptsInvalidated(() => {
-            void load();
-        });
-    }, [load]);
-
+            return q
+                .from({scripts: scriptsCollection})
+                .where(({scripts}) => eq(scripts.id, scriptId));
+        },
+        [scriptId, scriptsCollection],
+    );
+    const summary = useMemo<ScriptSummary | null>(() => data?.[0] ?? null, [data]);
     const script = useMemo<ScriptListItem | null>(
         () => summary ? toScriptListItem(summary) : null,
         [summary],
+    );
+    const refresh = useCallback(
+        () => repository.scriptSummaries.refresh(),
+        [repository],
     );
 
     return {
         script,
         summary,
-        isLoading,
-        error,
-        refresh: load,
+        isLoading: Boolean(scriptId) && (!storeStatus.isReady || isLoading),
+        error: storeStatus.sourceError,
+        refresh,
     };
 };

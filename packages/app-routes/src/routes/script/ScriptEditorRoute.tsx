@@ -9,6 +9,7 @@ import {resolveDraftDate} from '@stagistic/script';
 import {AppLayout} from '@stagistic/ui';
 import {
     useCallback,
+    useDeferredValue,
     useMemo,
     useState,
 } from 'react';
@@ -58,6 +59,7 @@ export const ScriptEditorRoute = () => {
         handleAutoSave,
         handleManualSave,
         editorSurfaceCache,
+        editorSnapshotStore,
     } = useScriptWorkspace();
     const {
         resolvedScriptSettings,
@@ -71,6 +73,7 @@ export const ScriptEditorRoute = () => {
     } = useScriptSettingsModal();
     const [addCueModalState, setAddCueModalState] = useState<AddCueModalState | null>(null);
     const [removeCueRequest, setRemoveCueRequest] = useState<EditorCueRemoveRequest | null>(null);
+    const deferredScriptSettingsDraft = useDeferredValue(effectiveScriptSettingsDraft);
     const {
         cues,
         createCue,
@@ -223,6 +226,7 @@ export const ScriptEditorRoute = () => {
                 <ScriptEditor
                     key={currentScript?.id ?? 'editor'}
                     surfaceCache={editorSurfaceCache}
+                    liveStore={editorSnapshotStore}
                     document={{
                         initialValue: resolvedEditorInitialValue,
                         persistentCharacters: normalizedConfirmedCharacterRecords,
@@ -231,7 +235,7 @@ export const ScriptEditorRoute = () => {
                         draftDate: resolveDraftDate(titlePageDraft),
                     }}
                     settings={{
-                        scriptSettings: effectiveScriptSettingsDraft,
+                        scriptSettings: deferredScriptSettingsDraft,
                     }}
                     save={{
                         onAutoSave: handleAutoSave,

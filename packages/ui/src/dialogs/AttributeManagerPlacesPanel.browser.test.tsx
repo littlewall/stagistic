@@ -117,6 +117,17 @@ describe('AttributeManagerPlacesPanel', () => {
         expect(onRenamePlace).toHaveBeenCalledWith('place-1', 'Stage left');
     });
 
+    it('shows a name draft in the list and detail header before persistence', async () => {
+        renderPanel();
+
+        const nameInput = await waitForElement<HTMLInputElement>('#place-name-place-1');
+
+        await page.elementLocator(nameInput).fill('Stage left');
+
+        expect(document.querySelector('[aria-label="Place list"]')?.textContent).toContain('Stage left');
+        expect(document.querySelector('[aria-label="Place detail"] h3')?.textContent).toBe('Stage left');
+    });
+
     it('deletes only after confirmation', async () => {
         const {onDeletePlace} = renderPanel();
 

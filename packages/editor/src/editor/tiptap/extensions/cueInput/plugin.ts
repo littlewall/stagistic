@@ -8,13 +8,13 @@ import type {
     EditorCueCreateRequest,
     PersistentCueRef,
 } from '../../../contracts';
-import {getActiveScriptBlockFromState} from '../../scriptCore';
 import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
+import {getActiveScriptBlockFromState} from '../../scriptCore';
 import {
     blockHasCueAtom,
     buildInsertCueStart,
-    resolveNewCueNumber,
     resolveCueTargetBlock,
+    resolveNewCueNumber,
 } from '../cue/cueCommands';
 import {
     cueComposeKey,
@@ -149,6 +149,7 @@ export const createCueComposePlugin = (
 
                 if (event.key === 'Enter') {
                     event.preventDefault();
+
                     const title = compose.query.trim();
 
                     if (title.length === 0 || title.toLocaleLowerCase() === CUE_OUT_KEYWORD) {

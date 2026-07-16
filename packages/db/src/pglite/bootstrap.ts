@@ -1,4 +1,5 @@
 import {PGlite} from '@electric-sql/pglite';
+import {live} from '@electric-sql/pglite/live';
 import {PGliteWorker} from '@electric-sql/pglite/worker';
 import {drizzle, type PgliteDatabase} from 'drizzle-orm/pglite';
 
@@ -49,6 +50,7 @@ export const createPgliteBootstrap = ({
                         workerFactory(),
                         {
                             dataDir,
+                            extensions: {live},
                             relaxedDurability: true,
                         },
                     );
@@ -148,6 +150,7 @@ export const createPgliteBootstrap = ({
 
                 return PGlite.create({
                     dataDir,
+                    extensions: {live},
                     fsBundle,
                     wasmModule,
                     relaxedDurability: true,

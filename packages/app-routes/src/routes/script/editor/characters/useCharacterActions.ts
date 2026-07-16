@@ -1,25 +1,31 @@
+import type {useScriptCharacterCatalog} from '@stagistic/app-core';
 import {
-    useConfirmCharacter,
-    useDeleteCharacter,
-    useRenameCharacter,
-    useSetCharacterColor,
-    useSetCharacterGender,
-    useSetCharacterOutline,
-} from './actions';
+    normalizeCharacterColorHex,
+    normalizeCharacterKey,
+} from '@stagistic/script';
+import {useCallback} from 'react';
+
 import type {
-    CharacterActionContext, ConfirmEditorCallbacks, DeleteEditorCallbacks, RenameEditorCallbacks, RenamePreviewEditorCallbacks,
+    ConfirmEditorCallbacks,
+    DeleteEditorCallbacks,
+    RenameEditorCallbacks,
+    RenamePreviewEditorCallbacks,
 } from './actions/types';
+import {normalizeCharacterDisplayName} from './index';
 import type {
     CharacterGenderOption,
     ScriptCharacterRecord,
 } from './types';
+import type {useCharacterDocumentActions} from './useCharacterDocumentActions';
+
+type CharacterCatalog = ReturnType<typeof useScriptCharacterCatalog>;
+type CharacterDocumentActions = ReturnType<typeof useCharacterDocumentActions>;
 
 interface UseCharacterActionsArgs {
-    context: CharacterActionContext,
-    computed: {
-        confirmedCharacterSet: ReadonlySet<string>,
-        confirmedCharactersById: ReadonlyMap<string, ScriptCharacterRecord>,
-    },
+    catalog: CharacterCatalog,
+    documentActions: CharacterDocumentActions,
+    confirmedCharacterSet: ReadonlySet<string>,
+    confirmedCharactersById: ReadonlyMap<string, ScriptCharacterRecord>,
 }
 
 export interface CharacterActions {
@@ -44,62 +50,139 @@ export interface CharacterActions {
 }
 
 export const useCharacterActions = ({
-    context,
-    computed,
+    catalog,
+    documentActions,
+    confirmedCharacterSet,
+    confirmedCharactersById,
 }: UseCharacterActionsArgs): CharacterActions => {
-    const {
-        currentScriptId,
-        scriptRepository,
-        setters,
-    } = context;
-    const {
-        confirmedCharacterSet,
-        confirmedCharactersById,
-    } = computed;
+    const handleConfirmCharacter = useCallback((
+        characterKey: string,
+        colorHex?: string | null,
+        editorCallbacks?: ConfirmEditorCallbacks,
+    ) => {
+        const normalizedKey = normalizeCharacterKey(characterKey);
 
-    const baseArgs = {
-        currentScriptId,
-        scriptRepository,
-        setConfirmedCharacterRecords: setters.setConfirmedCharacterRecords,
-    };
+        if (!normalizedKey || confirmedCharacterSet.has(normalizedKey)) {
+            return;
+        }
 
-    const handleConfirmCharacter = useConfirmCharacter({
-        ...baseArgs,
+        void catalog.confirmCharacter(
+            normalizedKey,
+            normalizeCharacterColorHex(colorHex),
+        ).then(async character => {
+            if (!character) {
+                return;
+            }
+
+            if (editorCallbacks) {
+                editorCallbacks.onLinkRef(normalizedKey, character.id);
+
+                return;
+            }
+
+            await documentActions.linkCharacter(normalizedKey, character.id);
+        }).catch(() => undefined);
+    }, [
+        catalog,
         confirmedCharacterSet,
-        setConfirmingCharacterKeys: setters.setConfirmingCharacterKeys,
-    });
-    const handleDeleteCharacter = useDeleteCharacter({
-        ...baseArgs,
+        documentActions,
+    ]);
+
+    const handleDeleteCharacter = useCallback((
+        characterId: string,
+        editorCallbacks?: DeleteEditorCallbacks,
+    ) => {
+        if (!confirmedCharactersById.has(characterId)) {
+            return;
+        }
+
+        void catalog.deleteCharacter(characterId).then(async () => {
+            if (editorCallbacks) {
+                editorCallbacks.onUnlinkRef(characterId);
+
+                return;
+            }
+
+            await documentActions.unlinkCharacter(characterId);
+        }).catch(() => undefined);
+    }, [
+        catalog,
         confirmedCharactersById,
-        setDeletingCharacterIds: setters.setDeletingCharacterIds,
-    });
-    const {
-        handleRenameCharacterPreview,
-        handleRenameCharacter,
-    } = useRenameCharacter({
-        ...baseArgs,
+        documentActions,
+    ]);
+
+    const handleRenameCharacterPreview = useCallback((
+        characterId: string,
+        _previousCharacterName: string,
+        nextCharacterName: string,
+        editorCallbacks?: RenamePreviewEditorCallbacks,
+    ) => {
+        if (!confirmedCharactersById.has(characterId)) {
+            return;
+        }
+
+        const nextName = normalizeCharacterDisplayName(nextCharacterName);
+
+        if (nextName) {
+            editorCallbacks?.onRenameText(characterId, nextName);
+        }
+    }, [confirmedCharactersById]);
+
+    const handleRenameCharacter = useCallback((
+        characterId: string,
+        _previousCharacterName: string,
+        nextCharacterName: string,
+        editorCallbacks?: RenameEditorCallbacks,
+    ) => {
+        const original = confirmedCharactersById.get(characterId);
+        const nextName = normalizeCharacterDisplayName(nextCharacterName);
+        const nextKey = normalizeCharacterKey(nextName);
+
+        if (!original || !nextKey) {
+            return;
+        }
+
+        editorCallbacks?.onRenameText(characterId, nextName);
+        void catalog.renameCharacter(characterId, nextKey).then(async renamed => {
+            if (!renamed) {
+                return;
+            }
+
+            if (editorCallbacks) {
+                if (renamed.id !== characterId) {
+                    editorCallbacks.onReplaceId(characterId, renamed.id);
+                }
+
+                return;
+            }
+
+            await documentActions.renameCharacter(
+                characterId,
+                original.key,
+                nextName,
+                renamed.id,
+            );
+        }).catch(() => {
+            editorCallbacks?.onRenameText(characterId, original.key);
+        });
+    }, [
+        catalog,
         confirmedCharactersById,
-        setRenamingCharacterIds: setters.setRenamingCharacterIds,
-        setRenamingCharacterKeys: setters.setRenamingCharacterKeys,
-    });
-    const handleSetCharacterColor = useSetCharacterColor({
-        ...baseArgs,
-        confirmedCharactersById,
-        setColorUpdatingCharacterIds: setters.setColorUpdatingCharacterIds,
-    });
-    const handleSetCharacterOutline = useSetCharacterOutline({
-        ...baseArgs,
-        confirmedCharactersById,
-    });
-    const {
-        handleSetCharacterGender,
-        handleUpsertCharacterGender,
-    } = useSetCharacterGender({
-        ...baseArgs,
-        confirmedCharactersById,
-        setGenderUpdatingCharacterIds: setters.setGenderUpdatingCharacterIds,
-        setCharacterGenderOptions: setters.setCharacterGenderOptions,
-    });
+        documentActions,
+    ]);
+
+    const handleSetCharacterColor = useCallback((id: string, color: string | null) => {
+        return catalog.setCharacterColor(id, color).then(() => undefined);
+    }, [catalog]);
+    const handleSetCharacterGender = useCallback((id: string, gender: string | null) => {
+        void catalog.setCharacterGender(id, gender).catch(() => undefined);
+    }, [catalog]);
+    const handleSetCharacterOutline = useCallback((id: string, outline: string | null) => {
+        void catalog.setCharacterOutline(id, outline).catch(() => undefined);
+    }, [catalog]);
+    const handleUpsertCharacterGender = useCallback((label: string) => {
+        return catalog.createGender(label).catch(() => null);
+    }, [catalog]);
 
     return {
         handleConfirmCharacter,

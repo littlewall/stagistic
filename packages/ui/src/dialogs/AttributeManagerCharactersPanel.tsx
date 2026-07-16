@@ -2,6 +2,7 @@ import clsx from 'clsx';
 import {
     useEffect,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
@@ -30,13 +31,21 @@ export interface AttributeManagerCharactersPanelProps {
     characterColorSaturation?: number,
     deletingCharacterIds?: string[],
     colorUpdatingCharacterIds?: string[],
-    onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
+    onSetCharacterColor?: (
+        characterId: string,
+        colorHex: string | null,
+    ) => void | Promise<unknown>,
     onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
     onDeleteCharacter?: (characterId: string) => void,
     onCreateCharacter?: (characterName: string) => void,
 }
 
 type WorkspaceId = 'characters' | 'groups' | 'cast';
+
+interface CharacterColorIntent {
+    color: string | null,
+    revision: number,
+}
 
 const WORKSPACES: Array<{id: WorkspaceId, label: string}> = [
     {id: 'characters', label: 'Characters'},
@@ -68,16 +77,28 @@ export const AttributeManagerCharactersPanel = ({
     );
     const [searchQuery, setSearchQuery] = useState('');
     const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const colorIntentRevisionRef = useRef(0);
+    const [colorIntents, setColorIntents] = useState<Record<string, CharacterColorIntent>>({});
+    const displayedCharacters = useMemo(() => characters.map(character => {
+        if (!(character.id in colorIntents)) {
+            return character;
+        }
+
+        return {
+            ...character,
+            color: colorIntents[character.id]?.color ?? null,
+        };
+    }), [characters, colorIntents]);
     const activeWorkspace = WORKSPACES.find(item => item.id === activeWorkspaceId) ?? WORKSPACES[0];
     const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
     const filteredCharacters = useMemo(() => {
         if (!normalizedSearchQuery) {
-            return characters;
+            return displayedCharacters;
         }
 
-        return characters.filter(character => character.name.toLocaleLowerCase().includes(normalizedSearchQuery));
-    }, [characters, normalizedSearchQuery]);
-    const selectedCharacter = characters.find(character => character.id === selectedCharacterId) ?? null;
+        return displayedCharacters.filter(character => character.name.toLocaleLowerCase().includes(normalizedSearchQuery));
+    }, [displayedCharacters, normalizedSearchQuery]);
+    const selectedCharacter = displayedCharacters.find(character => character.id === selectedCharacterId) ?? null;
     const visibleCharacters = activeWorkspaceId === 'characters' ? filteredCharacters : [];
 
     useEffect(() => {
@@ -101,6 +122,34 @@ export const AttributeManagerCharactersPanel = ({
     const handleSelectWorkspace = (workspaceId: WorkspaceId) => {
         setActiveWorkspaceId(workspaceId);
         setSearchQuery('');
+    };
+    const handleSetCharacterColor = (characterId: string, colorHex: string | null) => {
+        const revision = colorIntentRevisionRef.current + 1;
+
+        colorIntentRevisionRef.current = revision;
+        setColorIntents(previous => ({
+            ...previous,
+            [characterId]: {
+                color: colorHex,
+                revision,
+            },
+        }));
+
+        void Promise.resolve(onSetCharacterColor?.(characterId, colorHex))
+            .catch(() => undefined)
+            .finally(() => {
+                setColorIntents(previous => {
+                    if (previous[characterId]?.revision !== revision) {
+                        return previous;
+                    }
+
+                    const next = {...previous};
+
+                    delete next[characterId];
+
+                    return next;
+                });
+            });
     };
 
     const listStatus = isLoading && activeWorkspaceId === 'characters'
@@ -196,7 +245,7 @@ export const AttributeManagerCharactersPanel = ({
                             characterColorSaturation={characterColorSaturation}
                             isDeleting={deletingCharacterIds.includes(selectedCharacter.id)}
                             isColorUpdating={colorUpdatingCharacterIds.includes(selectedCharacter.id)}
-                            onSetCharacterColor={onSetCharacterColor}
+                            onSetCharacterColor={handleSetCharacterColor}
                             onSetCharacterOutline={onSetCharacterOutline}
                             onDeleteCharacter={onDeleteCharacter}
                         />

@@ -20,7 +20,6 @@
     background: var(--select-button-bg);
     border: var(--select-button-border-width) solid var(--select-button-border-color);
     border-radius: var(--select-button-radius);
-    transition: background .15s ease, border-radius .15s ease;
 
     &:hover {
         background: var(--select-button-hover-bg);
@@ -115,7 +114,6 @@
     background: transparent;
     border: none;
     border-radius: var(--select-menu-item-radius);
-    transition: background .15s ease;
 }
 
 .item {

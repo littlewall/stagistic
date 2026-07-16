@@ -1,4 +1,8 @@
-import {CHARACTER_TAG_MARK_NAME} from '@stagistic/script';
+import {
+    CHARACTER_TAG_MARK_NAME,
+    CUE_OUT_NODE_NAME,
+    CUE_START_NODE_NAME,
+} from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {
     EditorState,
@@ -208,6 +212,45 @@ export const transactionTouchesStructureBlocks = (
     return collectChangedRanges(transaction).some(range => {
         return hasMatchingBlocksInRange(oldDoc, range.oldFrom, range.oldTo, isStructureBlockType)
             || hasMatchingBlocksInRange(newDoc, range.newFrom, range.newTo, isStructureBlockType);
+    });
+};
+
+const rangeHasCueNode = (
+    doc: ProseMirrorNode,
+    from: number,
+    to: number,
+) => {
+    const safeRange = resolveSafeRange(doc.content.size, from, to);
+
+    if (!safeRange) {
+        return false;
+    }
+
+    let found = false;
+
+    doc.nodesBetween(safeRange.from, safeRange.to, node => {
+        if (node.type.name === CUE_START_NODE_NAME || node.type.name === CUE_OUT_NODE_NAME) {
+            found = true;
+        }
+
+        return !found;
+    });
+
+    return found;
+};
+
+export const transactionTouchesCues = (
+    transaction: Transaction,
+    oldDoc: ProseMirrorNode,
+    newDoc: ProseMirrorNode,
+) => {
+    if (!transaction.docChanged) {
+        return false;
+    }
+
+    return collectChangedRanges(transaction).some(range => {
+        return rangeHasCueNode(oldDoc, range.oldFrom, range.oldTo)
+            || rangeHasCueNode(newDoc, range.newFrom, range.newTo);
     });
 };
 

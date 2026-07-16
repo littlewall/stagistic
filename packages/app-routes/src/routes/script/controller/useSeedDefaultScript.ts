@@ -61,8 +61,8 @@ export const useSeedDefaultScript = (
 
             seedStateRef.current.seeded = true;
             void navigate(`/script/${newScriptId}/editor`, {replace: true});
-        } catch (error) {
-            console.error('Failed to seed default script', error);
+        } catch {
+            console.error('Failed to seed default script');
             setStorageError('Failed to initialize local storage.');
             addToast({
                 title: 'Failed to initialize storage',

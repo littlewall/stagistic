@@ -146,7 +146,7 @@ export const runPgliteMigrations = async (client: PGlite) => {
         try {
             await applyMigration(client, migration);
         } catch (error) {
-            console.error(`[db] Migration ${migration.id} failed:`, error);
+            console.error(`[db] Migration ${migration.id} failed.`);
             throw error;
         }
     }

@@ -170,6 +170,7 @@ export const useEditorLifecycleSync = ({
         });
         const patch: Partial<EditorLiveSnapshot> = {
             revision: meta.revision,
+            cues: snapshot.cues,
             activeBlockId: liveStore.getSnapshot().activeBlockId,
             activeBlockType: liveStore.getSnapshot().activeBlockType,
         };
@@ -233,6 +234,7 @@ export const useEditorLifecycleSync = ({
             activeBlockType: runtime.activeBlockType,
             structure: nextStructure,
             characters: nextCharacters,
+            cues: runtime.cues,
             ...snapshot ? {index: snapshot} : {},
         });
 
@@ -293,4 +295,3 @@ export const useEditorLifecycleSync = ({
         emitBlockUiEventsFromEditor,
     };
 };
-

@@ -25,6 +25,7 @@ export default [
         ignores: [
             '.claude/**',
             '.impeccable/**',
+            '.kilo/**',
             '**/src-tauri/target/**',
             'packages/db/src/migrations.compiled.ts',
             '**/*.d.ts',

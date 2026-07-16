@@ -1,7 +1,6 @@
 import {
     buildScriptBlockIndex,
     coerceUnknownBlocksToStageDirections,
-    type EditorSettingsOverride,
     ensureSceneHeading,
     ensureScriptBlockIds,
     ensureScriptStructure,
@@ -17,16 +16,13 @@ import {
 type ScriptLoaderResult = {
     initialValue: ScriptDocument | null | undefined,
     initialIndexSnapshot: ScriptBlockIndexSnapshot | null | undefined,
-    scriptSettingsOverride: EditorSettingsOverride | null | undefined,
     storageError: string | null,
     shouldAutoFocus: boolean,
-    setScriptSettingsOverride: (value: EditorSettingsOverride | null) => void,
     setStorageError: (value: string | null) => void,
 };
 
 type ScriptLoaderRepository = {
     loadLatest: (scriptId: string) => Promise<ScriptDocument | null>,
-    loadScriptSettings: (scriptId: string) => Promise<EditorSettingsOverride | null>,
     saveLatest: (scriptId: string, value: ScriptDocument) => Promise<unknown>,
 };
 
@@ -36,9 +32,6 @@ export const useScriptLoader = (
 ): ScriptLoaderResult => {
     const [initialValue, setInitialValue] = useState<ScriptDocument | null | undefined>(undefined);
     const [initialIndexSnapshot, setInitialIndexSnapshot] = useState<ScriptBlockIndexSnapshot | null | undefined>(undefined);
-    const [scriptSettingsOverride, setScriptSettingsOverrideState] = useState<EditorSettingsOverride | null | undefined>(
-        undefined,
-    );
     const [storageError, setStorageErrorState] = useState<string | null>(null);
     const [shouldAutoFocus, setShouldAutoFocus] = useState(false);
 
@@ -51,29 +44,23 @@ export const useScriptLoader = (
 
         setInitialValue(undefined);
         setInitialIndexSnapshot(undefined);
-        setScriptSettingsOverrideState(undefined);
         setShouldAutoFocus(false);
 
         const loadLatest = async () => {
             try {
-                const loadLatestPromise = scriptRepository.loadLatest(currentScriptId);
-                const loadSettingsPromise = scriptRepository.loadScriptSettings(currentScriptId);
-                const [stored, storedSettings] = await Promise.all([loadLatestPromise, loadSettingsPromise]);
+                const stored = await scriptRepository.loadLatest(currentScriptId);
 
                 if (!isActive) {
                     return;
                 }
 
                 setStorageErrorState(null);
-                setScriptSettingsOverrideState(storedSettings);
-
                 if (!stored) {
                     const fallback = ensureSceneHeading(null);
                     const normalizedFallback = ensureScriptStructure(fallback);
 
                     setInitialValue(normalizedFallback);
                     setInitialIndexSnapshot(buildScriptBlockIndex(normalizedFallback).snapshot);
-                    setScriptSettingsOverrideState(null);
                     setShouldAutoFocus(true);
 
                     return;
@@ -95,8 +82,8 @@ export const useScriptLoader = (
                 setInitialValue(normalized);
                 setInitialIndexSnapshot(fallbackIndex);
                 setShouldAutoFocus(needsFocus);
-            } catch (error) {
-                console.error('Failed to load latest script', error);
+            } catch {
+                console.error('Failed to load latest script');
                 setStorageErrorState('Failed to load script data.');
 
                 const fallback = ensureSceneHeading(null);
@@ -104,7 +91,6 @@ export const useScriptLoader = (
 
                 setInitialValue(normalizedFallback);
                 setInitialIndexSnapshot(buildScriptBlockIndex(normalizedFallback).snapshot);
-                setScriptSettingsOverrideState(null);
                 setShouldAutoFocus(true);
             }
         };
@@ -119,10 +105,8 @@ export const useScriptLoader = (
     return {
         initialValue,
         initialIndexSnapshot,
-        scriptSettingsOverride,
         storageError,
         shouldAutoFocus,
-        setScriptSettingsOverride: value => setScriptSettingsOverrideState(value),
         setStorageError: value => setStorageErrorState(value),
     };
 };

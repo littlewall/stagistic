@@ -60,9 +60,6 @@ interface UseGlobalModalActionsArgs {
     notifications: {
         addToast: (toast: AppToastPayload) => void,
     },
-    state: {
-        refreshScripts: () => void,
-    },
 }
 
 export interface GlobalModalActions {
@@ -106,12 +103,10 @@ export const useGlobalModalActions = ({
     repository,
     navigation,
     notifications,
-    state,
 }: UseGlobalModalActionsArgs): GlobalModalActions => {
     const {scriptRepository} = repository;
     const {navigate} = navigation;
     const {addToast} = notifications;
-    const {refreshScripts} = state;
     const [isNewScriptOpen, setIsNewScriptOpen] = useState(false);
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [isImportLoading, setIsImportLoading] = useState(false);
@@ -186,10 +181,8 @@ export const useGlobalModalActions = ({
             await scriptRepository.setActiveBlock(scriptId, activeBlockId);
         }
 
-        refreshScripts();
-
         return scriptId;
-    }, [refreshScripts, scriptRepository]);
+    }, [scriptRepository]);
 
     const handleCreate = useCallback((name: string): Promise<void> => {
         const createAndNavigate = async () => {
@@ -203,8 +196,8 @@ export const useGlobalModalActions = ({
                     description: trimOrFallback(name, 'Untitled script'),
                     variant: 'success',
                 });
-            } catch (error) {
-                console.error('Failed to create script', error);
+            } catch {
+                console.error('Failed to create script');
                 addToast({
                     title: 'Failed to create script',
                     description: 'Please try again.',
@@ -231,7 +224,6 @@ export const useGlobalModalActions = ({
                     saveTitlePage: scriptRepository.saveTitlePage,
                     rollbackScript: async id => {
                         await scriptRepository.deleteScript(id);
-                        refreshScripts();
                     },
                 });
 
@@ -244,7 +236,7 @@ export const useGlobalModalActions = ({
                     variant: 'success',
                 });
             } catch (error) {
-                console.error('Failed to import script', error);
+                console.error('Failed to import script');
                 addToast({
                     title: 'Failed to import script',
                     description: error instanceof Error ? error.message : 'Please check the file and try again.',
@@ -260,7 +252,6 @@ export const useGlobalModalActions = ({
         addToast,
         createScriptWithActiveBlock,
         navigate,
-        refreshScripts,
         scriptRepository,
     ]);
 
@@ -274,7 +265,6 @@ export const useGlobalModalActions = ({
 
             try {
                 await scriptRepository.deleteScript(scriptToDelete.id);
-                refreshScripts();
                 setScriptToDelete(null);
                 addToast({
                     title: 'Script deleted',
@@ -282,7 +272,7 @@ export const useGlobalModalActions = ({
                     variant: 'success',
                 });
             } catch (error) {
-                console.error('Failed to delete script', error);
+                console.error('Failed to delete script');
                 addToast({
                     title: 'Failed to delete script',
                     description: error instanceof Error ? error.message : 'An unexpected error occurred.',
@@ -296,7 +286,6 @@ export const useGlobalModalActions = ({
         return deleteAndRefresh();
     }, [
         addToast,
-        refreshScripts,
         scriptRepository,
         scriptToDelete,
     ]);
@@ -314,7 +303,6 @@ export const useGlobalModalActions = ({
                     title: values.title,
                     subtitle: values.subtitle,
                 });
-                refreshScripts();
                 setScriptToRename(null);
                 addToast({
                     title: 'Script renamed',
@@ -322,7 +310,7 @@ export const useGlobalModalActions = ({
                     variant: 'success',
                 });
             } catch (error) {
-                console.error('Failed to rename script', error);
+                console.error('Failed to rename script');
                 addToast({
                     title: 'Failed to rename script',
                     description: error instanceof Error ? error.message : 'An unexpected error occurred.',
@@ -336,7 +324,6 @@ export const useGlobalModalActions = ({
         return renameAndRefresh();
     }, [
         addToast,
-        refreshScripts,
         scriptRepository,
         scriptToRename,
     ]);
@@ -361,7 +348,6 @@ export const useGlobalModalActions = ({
                     copyAttributes: values.copyAttributes,
                 });
 
-                refreshScripts();
                 setScriptToDuplicate(null);
                 addToast({
                     title: 'Script duplicated',
@@ -373,7 +359,7 @@ export const useGlobalModalActions = ({
                     void navigate(`/script/${newScriptId}/editor`);
                 }
             } catch (error) {
-                console.error('Failed to duplicate script', error);
+                console.error('Failed to duplicate script');
                 addToast({
                     title: 'Failed to duplicate script',
                     description: error instanceof Error ? error.message : 'An unexpected error occurred.',
@@ -388,7 +374,6 @@ export const useGlobalModalActions = ({
     }, [
         addToast,
         navigate,
-        refreshScripts,
         scriptRepository,
         scriptToDuplicate,
     ]);

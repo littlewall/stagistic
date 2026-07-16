@@ -1,3 +1,8 @@
+import {
+    type ScriptRepository,
+    usePersistedDraft,
+    useScriptEditorSettingsRecord,
+} from '@stagistic/app-core';
 import {type ScriptBlockNodeType} from '@stagistic/script';
 import {
     clampCharacterColorSaturation,
@@ -13,10 +18,7 @@ import {
 } from '@stagistic/script';
 import {
     useCallback,
-    useEffect,
     useMemo,
-    useRef,
-    useState,
 } from 'react';
 
 import {
@@ -24,9 +26,9 @@ import {
     normalizeSettingsOverride,
 } from './editor/settings';
 
-const SETTINGS_SAVE_DEBOUNCE_MS = 450;
-
 type HeaderFooterRowPatch = NonNullable<HeaderFooterSettingsPatch['header']>;
+
+const EMPTY_SETTINGS: EditorSettingsOverride = {};
 
 const mergeHeaderFooterRow = (
     previous: HeaderFooterRowPatch | undefined,
@@ -48,123 +50,40 @@ const mergeHeaderFooterRow = (
 };
 
 interface UseScriptEditorSettingsDraftArgs {
-    state: {
-        currentScriptId: string | null,
-        scriptSettingsOverride: EditorSettingsOverride | null | undefined,
-    },
-    requests: {
-        handleSaveScriptSettingsOverride: (settings?: EditorSettingsOverride) => Promise<boolean>,
-    },
+    currentScriptId: string | null,
+    repository: ScriptRepository,
 }
 
 export const useScriptEditorSettingsDraft = ({
-    state,
-    requests,
+    currentScriptId,
+    repository,
 }: UseScriptEditorSettingsDraftArgs) => {
-    const {
-        currentScriptId,
-        scriptSettingsOverride,
-    } = state;
-    const {handleSaveScriptSettingsOverride} = requests;
-    const [scriptSettingsDraft, setScriptSettingsDraft] = useState<EditorSettingsOverride>({});
-    const settingsSaveTimerRef = useRef<number | null>(null);
-    const hydratedSettingsScriptIdRef = useRef<string | null>(null);
-
-    const effectiveScriptSettingsDraft = useMemo<EditorSettingsOverride>(() => {
-        const hasHydratedForCurrentScript = currentScriptId !== null
-            && hydratedSettingsScriptIdRef.current === currentScriptId;
-
-        return !hasHydratedForCurrentScript && scriptSettingsOverride != null
-            ? normalizeSettingsOverride(scriptSettingsOverride)
-            : scriptSettingsDraft;
-    }, [
-        currentScriptId,
-        scriptSettingsDraft,
-        scriptSettingsOverride,
-    ]);
-
-    const resolvedScriptSettings = useMemo<EditorSettings>(
-        () => mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, effectiveScriptSettingsDraft),
-        [effectiveScriptSettingsDraft],
+    const record = useScriptEditorSettingsRecord(currentScriptId, repository);
+    const confirmedSettings = useMemo(
+        () => normalizeSettingsOverride(record.record?.settings ?? EMPTY_SETTINGS),
+        [record.record?.settings],
     );
-
-    const draftSerialized = useMemo(
-        () => JSON.stringify(scriptSettingsDraft ?? {}),
+    const persist = useCallback((_scriptId: string, value: EditorSettingsOverride) => {
+        return record.save(normalizeSettingsOverride(value));
+    }, [record.save]);
+    const draft = usePersistedDraft({
+        entityKey: currentScriptId,
+        confirmedValue: confirmedSettings,
+        isHydrated: !record.isLoading,
+        defaultValue: EMPTY_SETTINGS,
+        persist,
+    });
+    const scriptSettingsDraft = draft.draft;
+    const resolvedScriptSettings = useMemo<EditorSettings>(
+        () => mergeEditorSettings(DEFAULT_EDITOR_SETTINGS, scriptSettingsDraft),
         [scriptSettingsDraft],
     );
-    const loadedSerialized = useMemo(
-        () => JSON.stringify(scriptSettingsOverride ?? {}),
-        [scriptSettingsOverride],
-    );
-
-    const clearSettingsSaveTimer = useCallback(() => {
-        if (!settingsSaveTimerRef.current) {
-            return;
-        }
-
-        window.clearTimeout(settingsSaveTimerRef.current);
-        settingsSaveTimerRef.current = null;
-    }, []);
-
-    useEffect(() => {
-        hydratedSettingsScriptIdRef.current = null;
-        setScriptSettingsDraft({});
-    }, [currentScriptId]);
-
-    useEffect(() => {
-        if (!currentScriptId || scriptSettingsOverride === undefined) {
-            return;
-        }
-
-        if (hydratedSettingsScriptIdRef.current === currentScriptId) {
-            return;
-        }
-
-        setScriptSettingsDraft(normalizeSettingsOverride(scriptSettingsOverride ?? {}));
-        hydratedSettingsScriptIdRef.current = currentScriptId;
-    }, [currentScriptId, scriptSettingsOverride]);
-
-    useEffect(() => {
-        if (!currentScriptId || scriptSettingsOverride === undefined) {
-            return;
-        }
-
-        if (draftSerialized === loadedSerialized) {
-            return;
-        }
-
-        clearSettingsSaveTimer();
-
-        const snapshot = scriptSettingsDraft;
-
-        settingsSaveTimerRef.current = window.setTimeout(() => {
-            void handleSaveScriptSettingsOverride(snapshot);
-        }, SETTINGS_SAVE_DEBOUNCE_MS);
-
-        return () => {
-            clearSettingsSaveTimer();
-        };
-    }, [
-        clearSettingsSaveTimer,
-        currentScriptId,
-        draftSerialized,
-        handleSaveScriptSettingsOverride,
-        loadedSerialized,
-        scriptSettingsDraft,
-        scriptSettingsOverride,
-    ]);
-
-    useEffect(() => {
-        return () => {
-            clearSettingsSaveTimer();
-        };
-    }, [clearSettingsSaveTimer]);
 
     const updateBlockSettings = useCallback((
         blockType: ScriptBlockNodeType,
         patch: BlockSettingsPatch,
     ) => {
-        setScriptSettingsDraft(previous => ({
+        draft.setDraft(previous => ({
             ...previous,
             blocks: {
                 ...previous.blocks,
@@ -174,10 +93,10 @@ export const useScriptEditorSettingsDraft = ({
                 },
             },
         }));
-    }, []);
+    }, [draft.setDraft]);
 
     const resetBlockSettings = useCallback((blockType: ScriptBlockNodeType) => {
-        setScriptSettingsDraft(previous => {
+        draft.setDraft(previous => {
             const nextBlocks = {...previous.blocks};
 
             delete nextBlocks[blockType];
@@ -187,22 +106,22 @@ export const useScriptEditorSettingsDraft = ({
                 blocks: Object.keys(nextBlocks).length > 0 ? nextBlocks : undefined,
             };
         });
-    }, []);
+    }, [draft.setDraft]);
 
     const updateCharacterColorSaturation = useCallback((value: number) => {
         const nextSaturation = clampCharacterColorSaturation(value);
 
-        setScriptSettingsDraft(previous => ({
+        draft.setDraft(previous => ({
             ...previous,
             visual: {
                 ...previous.visual,
                 characterColorSaturation: nextSaturation,
             },
         }));
-    }, []);
+    }, [draft.setDraft]);
 
     const updateStructureSettings = useCallback((patch: StructureSettingsPatch) => {
-        setScriptSettingsDraft(previous => ({
+        draft.setDraft(previous => ({
             ...previous,
             structure: {
                 ...previous.structure,
@@ -213,20 +132,20 @@ export const useScriptEditorSettingsDraft = ({
                 },
             },
         }));
-    }, []);
+    }, [draft.setDraft]);
 
     const updatePageSettings = useCallback((patch: Partial<PageSettings>) => {
-        setScriptSettingsDraft(previous => ({
+        draft.setDraft(previous => ({
             ...previous,
             page: {
                 ...previous.page,
                 ...patch,
             },
         }));
-    }, []);
+    }, [draft.setDraft]);
 
     const updateHeaderFooterSettings = useCallback((patch: HeaderFooterSettingsPatch) => {
-        setScriptSettingsDraft(previous => ({
+        draft.setDraft(previous => ({
             ...previous,
             headerFooter: {
                 ...previous.headerFooter,
@@ -235,10 +154,10 @@ export const useScriptEditorSettingsDraft = ({
                 footer: mergeHeaderFooterRow(previous.headerFooter?.footer, patch.footer),
             },
         }));
-    }, []);
+    }, [draft.setDraft]);
 
     const updateInitialPagesSettings = useCallback((patch: InitialPagesSettingsPatch) => {
-        setScriptSettingsDraft(previous => ({
+        draft.setDraft(previous => ({
             ...previous,
             initialPages: {
                 ...previous.initialPages,
@@ -252,12 +171,16 @@ export const useScriptEditorSettingsDraft = ({
                 },
             },
         }));
-    }, []);
+    }, [draft.setDraft]);
 
     return {
         scriptSettingsDraft,
-        effectiveScriptSettingsDraft,
+        effectiveScriptSettingsDraft: scriptSettingsDraft,
         resolvedScriptSettings,
+        scriptSettingsDraftStatus: draft.status,
+        scriptSettingsDraftError: draft.error ?? record.error,
+        retryScriptSettings: draft.retry,
+        flushScriptSettings: draft.flush,
         updateBlockSettings,
         resetBlockSettings,
         updateCharacterColorSaturation,

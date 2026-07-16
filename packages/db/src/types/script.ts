@@ -5,6 +5,7 @@ import {
     scriptAttachments,
     scriptBlockCharacterRefs,
     scriptBlocks,
+    scriptCueAttachments,
     scriptCues,
     scriptLocations,
     scripts,
@@ -31,6 +32,11 @@ export type ScriptLocation = InferSelectModel<typeof scriptLocations>;
 export type ScriptBlockCharacterRef = InferSelectModel<typeof scriptBlockCharacterRefs>;
 export type ScriptCue = InferSelectModel<typeof scriptCues>;
 export type ScriptAttachment = InferSelectModel<typeof scriptAttachments>;
+type ScriptCueAttachmentBindingRow = InferSelectModel<typeof scriptCueAttachments>;
+
+export interface ScriptCueAttachmentBinding extends Omit<ScriptCueAttachmentBindingRow, 'role'> {
+    role: CueAttachmentRole,
+}
 
 export interface ScriptCueAttachment extends ScriptAttachment {
     role: CueAttachmentRole,

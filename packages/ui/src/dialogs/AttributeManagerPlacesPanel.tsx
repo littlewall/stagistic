@@ -8,6 +8,7 @@ import {
 import {Button} from '../atoms/Button';
 import {Input} from '../atoms/Input';
 import {Tooltip} from '../atoms/Tooltip';
+import {useKeyedFieldDrafts} from '../hooks/useKeyedFieldDrafts';
 import {
     PlusIcon,
     SearchIcon,
@@ -24,6 +25,7 @@ export interface AttributeManagerPlace {
 export interface AttributeManagerPlacesPanelProps {
     places: AttributeManagerPlace[],
     isLoading?: boolean,
+    draftScopeKey?: string | null,
     onCreatePlace: (name: string) => AttributeManagerPlace | null | Promise<AttributeManagerPlace | null>,
     onRenamePlace: (placeId: string, name: string) => void | Promise<unknown>,
     onDeletePlace: (placeId: string) => void | Promise<unknown>,
@@ -32,6 +34,7 @@ export interface AttributeManagerPlacesPanelProps {
 export const AttributeManagerPlacesPanel = ({
     places,
     isLoading = false,
+    draftScopeKey = null,
     onCreatePlace,
     onRenamePlace,
     onDeletePlace,
@@ -39,15 +42,25 @@ export const AttributeManagerPlacesPanel = ({
     const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const selectedPlace = places.find(place => place.id === selectedPlaceId) ?? null;
+    const {
+        getValue: getNameDraft,
+        persistValue: persistNameDraft,
+        setValue: setNameDraft,
+    } = useKeyedFieldDrafts<string>(draftScopeKey);
+    const displayedPlaces = useMemo(() => places.map(place => ({
+        ...place,
+        name: getNameDraft(place.id, place.name),
+    })), [getNameDraft, places]);
+    const selectedPlace = displayedPlaces.find(place => place.id === selectedPlaceId) ?? null;
+    const selectedConfirmedPlace = places.find(place => place.id === selectedPlaceId) ?? null;
     const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
     const visiblePlaces = useMemo(() => {
         if (!normalizedSearchQuery) {
-            return places;
+            return displayedPlaces;
         }
 
-        return places.filter(place => place.name.toLocaleLowerCase().includes(normalizedSearchQuery));
-    }, [normalizedSearchQuery, places]);
+        return displayedPlaces.filter(place => place.name.toLocaleLowerCase().includes(normalizedSearchQuery));
+    }, [displayedPlaces, normalizedSearchQuery]);
 
     useEffect(() => {
         const selectionStillExists = places.some(place => place.id === selectedPlaceId);
@@ -116,11 +129,17 @@ export const AttributeManagerPlacesPanel = ({
                 </div>
             </aside>
             <section className={styles.detail} aria-label="Place detail">
-                {selectedPlace ? (
+                {selectedPlace && selectedConfirmedPlace ? (
                     <AttributeManagerPlaceDetail
                         place={selectedPlace}
-                        places={places}
-                        onRenamePlace={onRenamePlace}
+                        confirmedName={selectedConfirmedPlace.name}
+                        places={displayedPlaces}
+                        onNameDraftChange={name => setNameDraft(selectedPlace.id, name)}
+                        onRenamePlace={(placeId, name) => persistNameDraft(
+                            placeId,
+                            name,
+                            draft => onRenamePlace(placeId, draft),
+                        )}
                         onDeletePlace={onDeletePlace}
                     />
                 ) : (

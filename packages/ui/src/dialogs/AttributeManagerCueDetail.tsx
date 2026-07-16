@@ -1,8 +1,6 @@
 import {
     type FormEvent,
-    useEffect,
     useRef,
-    useState,
 } from 'react';
 
 import {Button} from '../atoms/Button';
@@ -34,9 +32,11 @@ export interface CueAttachmentSlotView {
 export interface AttributeManagerCueDetailProps {
     cueId: string,
     cueTitle: string,
+    confirmedCueTitle: string,
     cueKind: CueKind,
     attachmentSlots: CueAttachmentSlotView[],
     onUpdateCue: (input: {title: string, kind: CueKind}) => unknown,
+    onCueTitleChange: (title: string) => void,
     onUploadPdf: (slotId: string, file: File) => void,
     onPreview: (attachmentId: string) => void,
     onRemove: (slotId: string) => void,
@@ -45,8 +45,10 @@ export interface AttributeManagerCueDetailProps {
 interface CueMetadataFieldsProps {
     cueId: string,
     cueTitle: string,
+    confirmedCueTitle: string,
     cueKind: CueKind,
     onUpdateCue: AttributeManagerCueDetailProps['onUpdateCue'],
+    onCueTitleChange: AttributeManagerCueDetailProps['onCueTitleChange'],
 }
 
 interface AttachmentSlotProps {
@@ -69,28 +71,24 @@ const formatSize = (bytes: number): string => {
 const CueMetadataFields = ({
     cueId,
     cueTitle,
+    confirmedCueTitle,
     cueKind,
     onUpdateCue,
+    onCueTitleChange,
 }: CueMetadataFieldsProps) => {
-    const [titleDraft, setTitleDraft] = useState(cueTitle);
-
-    useEffect(() => {
-        setTitleDraft(cueTitle);
-    }, [cueId, cueTitle]);
-
     const persistTitle = () => {
-        const title = titleDraft.trim();
+        const title = cueTitle.trim();
 
         if (!title) {
-            setTitleDraft(cueTitle);
+            onCueTitleChange(confirmedCueTitle);
 
             return;
         }
 
-        setTitleDraft(title);
+        onCueTitleChange(title);
 
-        if (title !== cueTitle) {
-            onUpdateCue({title, kind: cueKind});
+        if (title !== confirmedCueTitle) {
+            void Promise.resolve(onUpdateCue({title, kind: cueKind})).catch(() => undefined);
         }
     };
     const handleSubmit = (event: FormEvent) => {
@@ -108,12 +106,12 @@ const CueMetadataFields = ({
                     id={`cue-name-${cueId}`}
                     type="text"
                     className={formControlStyles.input}
-                    value={titleDraft}
-                    onChange={event => setTitleDraft(event.target.value)}
+                    value={cueTitle}
+                    onChange={event => onCueTitleChange(event.target.value)}
                     onBlur={persistTitle}
                     onKeyDown={event => {
                         if (event.key === 'Escape') {
-                            setTitleDraft(cueTitle);
+                            onCueTitleChange(confirmedCueTitle);
                             event.currentTarget.blur();
                         }
                     }}
@@ -132,10 +130,10 @@ const CueMetadataFields = ({
                         const kind = value === 'instrumental' ? 'instrumental' : 'song';
 
                         if (kind !== cueKind) {
-                            onUpdateCue({
-                                title: titleDraft.trim() || cueTitle,
+                            void Promise.resolve(onUpdateCue({
+                                title: cueTitle.trim() || confirmedCueTitle,
                                 kind,
-                            });
+                            })).catch(() => undefined);
                         }
                     }}
                 />
@@ -217,9 +215,11 @@ const AttachmentSlot = ({
 export const AttributeManagerCueDetail = ({
     cueId,
     cueTitle,
+    confirmedCueTitle,
     cueKind,
     attachmentSlots,
     onUpdateCue,
+    onCueTitleChange,
     onUploadPdf,
     onPreview,
     onRemove,
@@ -228,8 +228,10 @@ export const AttributeManagerCueDetail = ({
         <CueMetadataFields
             cueId={cueId}
             cueTitle={cueTitle}
+            confirmedCueTitle={confirmedCueTitle}
             cueKind={cueKind}
             onUpdateCue={onUpdateCue}
+            onCueTitleChange={onCueTitleChange}
         />
         <ul className={styles.slots}>
             {attachmentSlots.map(slot => (

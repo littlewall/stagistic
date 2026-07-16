@@ -25,7 +25,7 @@ export const createCueHandlers = ({
         return dbQueries.listScriptCues(db, scriptId);
     };
 
-    const create: ScriptCuesRepository['create'] = async (scriptId, input) => {
+    const createWithId: ScriptCuesRepository['createWithId'] = async (scriptId, input) => {
         const title = input.title.trim();
 
         if (!title) {
@@ -33,36 +33,37 @@ export const createCueHandlers = ({
         }
 
         const db = await getDb();
-        const now = Date.now();
-        const cueId = uuidv7();
+        const now = input.timestamp ?? Date.now();
+        const cueId = input.id;
 
-        await dbQueries.insertScriptCue(db, {
-            id: cueId,
-            scriptId,
-            sceneNumber: 0,
-            indexInScene: 0,
-            mode: 'open',
-            title,
-            kind: input.kind,
-            startBlockId: null,
-            endBlockId: null,
-            createdAt: now,
-            updatedAt: now,
-        });
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'cue.create',
-            payloadJson: JSON.stringify({
+        await db.transaction(async tx => {
+            await dbQueries.insertScriptCue(tx, {
+                id: cueId,
                 scriptId,
-                cueId,
+                sceneNumber: 0,
+                indexInScene: 0,
+                mode: 'open',
                 title,
                 kind: input.kind,
+                startBlockId: null,
+                endBlockId: null,
                 createdAt: now,
-            }),
+                updatedAt: now,
+            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `cue:${cueId}`,
+                opType: 'cue.create',
+                occurredAt: now,
+                payloadJson: JSON.stringify({
+                    scriptId,
+                    cueId,
+                    title,
+                    kind: input.kind,
+                    createdAt: now,
+                }),
+            }, tx);
         });
         await syncDb();
 
@@ -71,6 +72,10 @@ export const createCueHandlers = ({
             cueId,
         });
     };
+    const create: ScriptCuesRepository['create'] = (scriptId, input) => createWithId(scriptId, {
+        ...input,
+        id: uuidv7(),
+    });
 
     const update: ScriptCuesRepository['update'] = async (scriptId, cueId, input) => {
         const title = input.title.trim();
@@ -82,27 +87,28 @@ export const createCueHandlers = ({
         const db = await getDb();
         const now = Date.now();
 
-        await dbQueries.updateScriptCue(db, {
-            scriptId,
-            cueId,
-            title,
-            kind: input.kind,
-            updatedAt: now,
-        });
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'cue.update',
-            payloadJson: JSON.stringify({
+        await db.transaction(async tx => {
+            await dbQueries.updateScriptCue(tx, {
                 scriptId,
                 cueId,
                 title,
                 kind: input.kind,
                 updatedAt: now,
-            }),
+            });
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
+                scriptId,
+                entityKey: `cue:${cueId}`,
+                opType: 'cue.update',
+                occurredAt: now,
+                payloadJson: JSON.stringify({
+                    scriptId,
+                    cueId,
+                    title,
+                    kind: input.kind,
+                    updatedAt: now,
+                }),
+            }, tx);
         });
         await syncDb();
 
@@ -120,65 +126,27 @@ export const createCueHandlers = ({
         const db = await getDb();
         const now = Date.now();
 
-        await dbQueries.deleteScriptCue(db, {
-            scriptId,
-            cueId,
-        });
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'cue.delete',
-            payloadJson: JSON.stringify({
+        await db.transaction(async tx => {
+            await dbQueries.deleteScriptCue(tx, {scriptId, cueId});
+            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await recordOutbox({
                 scriptId,
-                cueId,
-                deletedAt: now,
-            }),
+                entityKey: `cue:${cueId}`,
+                opType: 'cue.delete',
+                occurredAt: now,
+                payloadJson: JSON.stringify({
+                    scriptId, cueId, deletedAt: now,
+                }),
+            }, tx);
         });
         await syncDb();
-    };
-
-    const unassign: ScriptCuesRepository['unassign'] = async (scriptId, cueId) => {
-        if (!cueId) {
-            return null;
-        }
-
-        const db = await getDb();
-        const now = Date.now();
-
-        await dbQueries.unassignScriptCue(db, {
-            scriptId,
-            cueId,
-            updatedAt: now,
-        });
-        await dbQueries.updateScriptTimestamp(db, {
-            scriptId,
-            updatedAt: now,
-        });
-        await recordOutbox({
-            scriptId,
-            opType: 'cue.unassign',
-            payloadJson: JSON.stringify({
-                scriptId,
-                cueId,
-                updatedAt: now,
-            }),
-        });
-        await syncDb();
-
-        return dbQueries.getScriptCueById(db, {
-            scriptId,
-            cueId,
-        });
     };
 
     return {
         list,
         create,
+        createWithId,
         update,
         delete: deleteCue,
-        unassign,
     };
 };

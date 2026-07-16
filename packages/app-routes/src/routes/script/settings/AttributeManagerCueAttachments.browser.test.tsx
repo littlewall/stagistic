@@ -1,5 +1,9 @@
 import '@stagistic/ui/styles/base.css';
 
+import {
+    type ComponentProps,
+    useState,
+} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -56,11 +60,30 @@ const makeState = (
 ) => ({
     integratedScoresByCue: new Map([['cue-1', attachment]]),
     uploadingCueIds: new Set<string>(),
-    loadCue: () => Promise.resolve(),
     uploadIntegratedScore: () => Promise.resolve(),
     removeIntegratedScore: () => Promise.resolve(),
     getBlob: () => Promise.resolve(null),
 }) as unknown as ReturnType<typeof useCueAttachmentsState>;
+
+const TestDetail = ({
+    state,
+    onUpdateCue,
+}: {
+    state: ReturnType<typeof useCueAttachmentsState>,
+    onUpdateCue: ComponentProps<typeof CueAttachmentsDetail>['onUpdateCue'],
+}) => {
+    const [displayTitle, setDisplayTitle] = useState(cue.title);
+
+    return (
+        <CueAttachmentsDetail
+            cue={cue}
+            displayTitle={displayTitle}
+            state={state}
+            onTitleDraftChange={setDisplayTitle}
+            onUpdateCue={onUpdateCue}
+        />
+    );
+};
 
 const renderDetail = (
     state: ReturnType<typeof useCueAttachmentsState>,
@@ -73,8 +96,7 @@ const renderDetail = (
     const root = createRoot(host);
 
     root.render(
-        <CueAttachmentsDetail
-            cue={cue}
+        <TestDetail
             state={state}
             onUpdateCue={onUpdateCue}
         />,
@@ -170,33 +192,6 @@ describe('CueAttachmentsDetail', () => {
         expect(host.textContent).toContain('Replace PDF');
     });
 
-    it('does not reload a cue when only the state container identity changes', async () => {
-        const loadCue = vi.fn(async () => {});
-        const firstState = {
-            ...makeState(null),
-            loadCue,
-        } as ReturnType<typeof useCueAttachmentsState>;
-        const {root} = renderDetail(firstState);
-
-        await waitFor(() => loadCue.mock.calls.length === 1);
-
-        const nextState = {
-            ...makeState(null),
-            loadCue,
-        } as ReturnType<typeof useCueAttachmentsState>;
-
-        root.render(
-            <CueAttachmentsDetail
-                cue={cue}
-                state={nextState}
-                onUpdateCue={vi.fn()}
-            />,
-        );
-        await new Promise(resolve => window.setTimeout(resolve, 50));
-
-        expect(loadCue).toHaveBeenCalledTimes(1);
-    });
-
     it('does not restart an open preview when the state container identity changes', async () => {
         const attachment = {
             id: 'a1',
@@ -234,6 +229,28 @@ describe('CueAttachmentsDetail', () => {
         await new Promise(resolve => window.setTimeout(resolve, 50));
 
         expect(getBlob).toHaveBeenCalledTimes(1);
+    });
+
+    it('shows the missing-blob state without removing metadata', async () => {
+        const attachment = {
+            id: 'a1',
+            filename: 'missing.pdf',
+            sizeBytes: 2048,
+            storageKey: 'missing-key',
+        };
+        const {host} = renderDetail(makeState(attachment));
+
+        await waitFor(() => host.textContent?.includes('missing.pdf') ?? false);
+
+        const previewButton = [...host.querySelectorAll('button')]
+            .find(button => button.textContent === 'missing.pdf');
+
+        previewButton?.click();
+        await waitFor(() => document.body.textContent?.includes(
+            'This attachment is not available in this browser.',
+        ) ?? false);
+
+        expect(host.textContent).toContain('missing.pdf');
     });
 
     it('fits the PDF preview to the available width', async () => {

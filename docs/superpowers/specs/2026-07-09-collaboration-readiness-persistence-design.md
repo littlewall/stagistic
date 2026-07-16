@@ -1,5 +1,11 @@
 # Collaboration-readiness persistence refactor
 
+> Related: [Local-first application state and synchronization](./2026-07-15-local-first-state-sync-design.md)
+> defines the complementary relational UI-state path. This document owns the
+> active script source and projection architecture; the local-first state
+> design owns PGlite-backed reactive metadata collections. They remain separate
+> writable state machines.
+
 Date: 2026-07-09
 Status: Proposed design, pending implementation plan
 

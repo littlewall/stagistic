@@ -1,4 +1,8 @@
-import {createEditorSurfaceCache} from '@stagistic/editor';
+import {
+    createEditorSnapshotStore,
+    createEditorSurfaceCache,
+    EditorSnapshotStoreProvider,
+} from '@stagistic/editor';
 import {LoaderOverlay} from '@stagistic/ui';
 import {
     useEffect,
@@ -18,6 +22,7 @@ export const ScriptWorkspaceRoute = () => {
         editorLoadState, initialValue, storageError,
     } = controller;
     const editorSurfaceCache = useMemo(() => createEditorSurfaceCache(), []);
+    const editorSnapshotStore = useMemo(() => createEditorSnapshotStore(), [scriptId]);
     const pendingCacheDestroyRef = useRef<number | null>(null);
 
     useEffect(() => {
@@ -41,8 +46,14 @@ export const ScriptWorkspaceRoute = () => {
     }, [editorSurfaceCache]);
 
     const workspaceValue = useMemo<ScriptWorkspaceValue>(
-        () => ({...controller, editorSurfaceCache}),
-        [controller, editorSurfaceCache],
+        () => ({
+            ...controller, editorSnapshotStore, editorSurfaceCache,
+        }),
+        [
+            controller,
+            editorSnapshotStore,
+            editorSurfaceCache,
+        ],
     );
 
     if (editorLoadState.isLoading || !initialValue) {
@@ -59,9 +70,11 @@ export const ScriptWorkspaceRoute = () => {
 
     return (
         <ScriptWorkspaceProvider value={workspaceValue}>
-            <ScriptSettingsModalProvider>
-                <Outlet />
-            </ScriptSettingsModalProvider>
+            <EditorSnapshotStoreProvider store={editorSnapshotStore}>
+                <ScriptSettingsModalProvider>
+                    <Outlet />
+                </ScriptSettingsModalProvider>
+            </EditorSnapshotStoreProvider>
         </ScriptWorkspaceProvider>
     );
 };

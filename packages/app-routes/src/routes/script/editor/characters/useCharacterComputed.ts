@@ -120,7 +120,10 @@ export const useCharacterComputed = ({
         const normalized: ScriptCharacterRecord[] = [];
 
         confirmedCharacterRecords.forEach(character => {
-            const key = normalizeCharacterKey(character.key);
+            const liveKey = character.id
+                ? characterSnapshot?.keyByCharacterId.get(character.id)
+                : null;
+            const key = normalizeCharacterKey(liveKey ?? character.key);
 
             if (!key || seen.has(key)) {
                 return;
@@ -139,7 +142,7 @@ export const useCharacterComputed = ({
         normalized.sort((a, b) => a.key.localeCompare(b.key));
 
         return normalized;
-    }, [confirmedCharacterRecords]);
+    }, [characterSnapshot?.keyByCharacterId, confirmedCharacterRecords]);
 
     const normalizedConfirmedCharacterKeys = useMemo(
         () => normalizedConfirmedCharacterRecords.map(character => character.key),

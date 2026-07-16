@@ -364,14 +364,19 @@ describe('CharacterSuggestionsOverlay browser behavior', () => {
         await expectSuggestionsVisuallyReachable();
     });
 
-    it('shows character suggestions when editing an existing stage-direction pill', async () => {
+    it('shows alternative suggestions when editing an existing stage-direction pill', async () => {
         renderEditor(createStageDirectionWithCharacterTag());
 
-        const tag = page.elementLocator(await waitForElement('[data-character-key="JOHNY"]'));
+        const tagElement = await waitForElement('[data-character-key="JOHNY"]');
+        const tag = page.elementLocator(tagElement);
+        const tagRect = tagElement.getBoundingClientRect();
 
-        await tag.click();
-        await waitForVisibleListbox();
-        await waitForVisibleOption('JOHNY');
+        await tag.click({
+            position: {
+                x: Math.max(1, tagRect.width - 2),
+                y: tagRect.height / 2,
+            },
+        });
 
         await userEvent.keyboard('{Backspace}{Backspace}{Backspace}');
         await waitForAnimationFrame();

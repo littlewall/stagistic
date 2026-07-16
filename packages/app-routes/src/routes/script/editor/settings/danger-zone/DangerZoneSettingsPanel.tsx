@@ -31,7 +31,7 @@ export const DangerZoneSettingsPanel = ({
                 variant: 'success',
             });
         } catch (error) {
-            console.error('Failed to delete script', error);
+            console.error('Failed to delete script');
             addToast({
                 title: 'Failed to delete script',
                 description: error instanceof Error ? error.message : 'An unexpected error occurred.',

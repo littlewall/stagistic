@@ -1,9 +1,8 @@
-import {eq} from 'drizzle-orm';
-
 import {
     SCRIPT_DOCUMENT_SCHEMA_VERSION,
     type ScriptDocument,
 } from '@stagistic/script';
+import {eq} from 'drizzle-orm';
 
 import {
     type ExtractedBlockRow,

@@ -1,10 +1,10 @@
 import clsx from 'clsx';
 
+import styles from './FormSelect.module.css';
 import {
     Select,
     type SelectOption,
 } from './Select';
-import styles from './FormSelect.module.css';
 
 export type FormSelectOption = SelectOption;
 

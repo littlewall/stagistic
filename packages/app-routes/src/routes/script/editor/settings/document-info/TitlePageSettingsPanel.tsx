@@ -5,10 +5,10 @@ import {
     type TitlePageSettings,
 } from '@stagistic/script';
 import {
-    FormSelect,
     formControlStyles,
-    InputTable,
+    FormSelect,
     type FormSelectOption,
+    InputTable,
     type InputTableColumnDef,
     type InputTableRow,
 } from '@stagistic/ui';

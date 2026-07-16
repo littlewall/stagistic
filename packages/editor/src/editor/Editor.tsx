@@ -20,6 +20,7 @@ import {
     resolveEditorSettings,
     stripScriptSettings,
 } from './editorSettings';
+import {useEditorRuntimeSettings} from './editorSettings/useEditorRuntimeSettings';
 import {LeftSidebar, RightSidebar} from './editorSlots';
 import {EditorElementSelectionProvider} from './elementSelection/context';
 import {
@@ -50,6 +51,7 @@ const Editor = ({
     requests,
     callbacks,
     surfaceCache,
+    liveStore: providedLiveStore,
     children,
 }: EditorProps & {children?: ReactNode}) => {
     const {
@@ -60,7 +62,7 @@ const Editor = ({
         draftDate,
     } = document;
     const {
-        settings,
+        settings: globalSettings,
         scriptSettings,
     } = settingsProps ?? {};
     const {
@@ -110,15 +112,14 @@ const Editor = ({
     const rootRef = useRef<HTMLDivElement | null>(null);
     const canvasHostRef = useRef<HTMLDivElement | null>(null);
 
-    const resolvedSettings = useMemo(() => {
-        const effectiveScriptSettings = scriptSettings ?? resolvedInitialValue.attrs?.settings;
-
-        return resolveEditorSettings(settings, effectiveScriptSettings);
-    }, [
-        resolvedInitialValue.attrs?.settings,
-        scriptSettings,
-        settings,
-    ]);
+    const runtimeGlobalSettings = useEditorRuntimeSettings(globalSettings);
+    const runtimeScriptSettings = useEditorRuntimeSettings(
+        scriptSettings ?? resolvedInitialValue.attrs?.settings,
+    );
+    const resolvedSettings = useMemo(
+        () => resolveEditorSettings(runtimeGlobalSettings, runtimeScriptSettings),
+        [runtimeGlobalSettings, runtimeScriptSettings],
+    );
 
     const initialContentSignature = useMemo(
         () => JSON.stringify(stripScriptSettings(resolvedInitialValue)),
@@ -164,6 +165,7 @@ const Editor = ({
         characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
         resolvedInitialValue,
         refs: surfaceRefsRef.current,
+        liveStore: providedLiveStore,
     });
 
     const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;

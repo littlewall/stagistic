@@ -24,7 +24,7 @@ const logMigrationAudit = (context: string, audit: RewriteBlocksMigrationAudit) 
     const baseMessage = `[db-local] ${context} script=${audit.scriptId} status=${audit.status}`;
 
     if (audit.status === 'failed') {
-        console.warn(baseMessage, audit.error ?? 'unknown migration error');
+        console.warn(baseMessage);
 
         return;
     }

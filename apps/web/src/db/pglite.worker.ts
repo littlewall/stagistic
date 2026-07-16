@@ -1,4 +1,5 @@
 import {PGlite} from '@electric-sql/pglite';
+import {live} from '@electric-sql/pglite/live';
 import {worker} from '@electric-sql/pglite/worker';
 import pgliteDataUrl from '@pglite-data?url';
 import pgliteWasmUrl from '@pglite-wasm?url';
@@ -24,6 +25,7 @@ void worker({
 
         const db = await PGlite.create({
             dataDir,
+            extensions: {live},
             fsBundle,
             wasmModule,
             relaxedDurability: options.relaxedDurability ?? true,

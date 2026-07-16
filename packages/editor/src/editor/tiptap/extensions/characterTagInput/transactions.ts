@@ -94,9 +94,11 @@ export const buildEditCommittedTagTransaction = (
         return null;
     }
 
-    // Keep the caret where the user clicked instead of forcing it to the tag
-    // end. Clamp to inside the tag (>= range.from + 1) so the reopened compose
-    // region stays valid.
+    /*
+     * Keep the caret where the user clicked instead of forcing it to the tag
+     * end. Clamp to inside the tag (>= range.from + 1) so the reopened compose
+     * region stays valid.
+     */
     const caret = Math.min(Math.max(pos, range.from + 1), range.to);
 
     return state.tr

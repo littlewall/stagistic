@@ -5,6 +5,7 @@ export * from './pglite';
 export type {DbClient} from './queries';
 export * from './queries';
 export * as dbQueries from './queries';
+export * from './reactive';
 export {
     createLocalPgliteRepository,
     type LocalPgliteRepositoryDeps,
@@ -25,13 +26,19 @@ export * from './schema';
 export type {
     CreateScriptCueInput,
     CreateScriptLocationInput,
+    CreateScriptLocationWithIdInput,
+    CreateScriptWithIdInput,
+    CueAttachmentUpload,
     DuplicateScriptInput,
+    DuplicateScriptWithIdInput,
     ListScriptsOptions,
     RenameScriptInput,
     ScriptCuesRepository,
+    ScriptEditorSettingsRecord,
     ScriptLocationsRepository,
     ScriptRepository,
     ScriptSceneLocationAssignment,
+    ScriptTitlePageRecord,
     ScriptTitlePageRepository,
     UpdateScriptCueInput,
 } from './scriptRepository';
@@ -48,6 +55,7 @@ export type {
     ScriptCharacterRef,
     ScriptCue,
     ScriptCueAttachment,
+    ScriptCueAttachmentBinding,
     ScriptLocation,
     ScriptScene,
     ScriptSettingsBlock,

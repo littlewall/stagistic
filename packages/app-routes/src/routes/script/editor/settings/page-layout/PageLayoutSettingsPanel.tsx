@@ -1,8 +1,8 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
 import {
     clsx,
-    FormSelect,
     formControlStyles,
+    FormSelect,
 } from '@stagistic/ui';
 import {
     startTransition,

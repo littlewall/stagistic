@@ -41,6 +41,8 @@ export const buildStructureSnapshotFromBlocks = (blocks: readonly StructureBlock
     const rows: EditorLiveStructureRow[] = [];
     const rowIndexByBlockId = new Map<string, number>();
     const sceneByBlockId = new Map<string, string>();
+    const actByBlockId = new Map<string, string>();
+    let currentActBlockId: string | null = null;
     let currentSceneBlockId: string | null = null;
 
     for (const block of blocks) {
@@ -58,6 +60,8 @@ export const buildStructureSnapshotFromBlocks = (blocks: readonly StructureBlock
 
             rows.push(row);
             rowIndexByBlockId.set(block.blockId, row.index);
+            actByBlockId.set(block.blockId, block.blockId);
+            currentActBlockId = block.blockId;
             currentSceneBlockId = null;
             continue;
         }
@@ -73,6 +77,10 @@ export const buildStructureSnapshotFromBlocks = (blocks: readonly StructureBlock
             rows.push(row);
             rowIndexByBlockId.set(block.blockId, row.index);
             sceneByBlockId.set(block.blockId, block.blockId);
+            if (currentActBlockId) {
+                actByBlockId.set(block.blockId, currentActBlockId);
+            }
+
             currentSceneBlockId = block.blockId;
             continue;
         }
@@ -81,6 +89,10 @@ export const buildStructureSnapshotFromBlocks = (blocks: readonly StructureBlock
 
         if (ancestorSceneId) {
             sceneByBlockId.set(block.blockId, ancestorSceneId);
+        }
+
+        if (currentActBlockId) {
+            actByBlockId.set(block.blockId, currentActBlockId);
         }
     }
 
@@ -92,6 +104,7 @@ export const buildStructureSnapshotFromBlocks = (blocks: readonly StructureBlock
         rows,
         rowIndexByBlockId,
         sceneByBlockId,
+        actByBlockId,
     };
 };
 

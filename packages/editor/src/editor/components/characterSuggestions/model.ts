@@ -215,8 +215,10 @@ const computeCharacterTagComposeSuggestions = ({
 
     const markType = editor.state.schema.marks[CHARACTER_TAG_MARK_NAME];
 
-    // Only suggest when the caret is at the end of the pill — never while
-    // editing in its middle (e.g. a backspace inside a committed name).
+    /*
+     * Only suggest when the caret is at the end of the pill — never while
+     * editing in its middle (e.g. a backspace inside a committed name).
+     */
     if (!markType || !isCaretAtCharacterTagEnd(editor.state, compose.to, markType)) {
         return null;
     }

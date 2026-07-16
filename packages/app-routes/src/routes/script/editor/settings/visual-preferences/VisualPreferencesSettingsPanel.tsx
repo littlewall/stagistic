@@ -4,8 +4,8 @@ import {
     clampCharacterColorSaturation,
 } from '@stagistic/script';
 import {
-    FormSelect,
     formControlStyles,
+    FormSelect,
     type FormSelectOption,
 } from '@stagistic/ui';
 import {useMemo} from 'react';

@@ -1,7 +1,8 @@
-import {type useScriptRepository} from '@stagistic/app-core';
-import {useCallback, useState} from 'react';
-
-type ScriptRepository = ReturnType<typeof useScriptRepository>;
+import {
+    type ScriptRepository,
+    useScriptAttachments,
+} from '@stagistic/app-core';
+import {useCallback, useMemo} from 'react';
 
 export const INTEGRATED_SCORE_ROLE = 'integrated_score';
 
@@ -15,7 +16,6 @@ export interface CueAttachmentRecord {
 export interface CueAttachmentsState {
     integratedScoresByCue: Map<string, CueAttachmentRecord | null>,
     uploadingCueIds: Set<string>,
-    loadCue: (cueId: string) => Promise<void>,
     uploadIntegratedScore: (cueId: string, file: File) => Promise<void>,
     removeIntegratedScore: (cueId: string) => Promise<void>,
     getBlob: (storageKey: string) => Promise<Blob | null>,
@@ -25,85 +25,32 @@ export const useCueAttachmentsState = (
     scriptId: string | null,
     scriptRepository: ScriptRepository,
 ): CueAttachmentsState => {
-    const [integratedScoresByCue, setIntegratedScoresByCue]
-        = useState<Map<string, CueAttachmentRecord | null>>(new Map());
-    const [uploadingCueIds, setUploadingCueIds] = useState<Set<string>>(new Set());
+    const attachments = useScriptAttachments(scriptId, scriptRepository);
+    const integratedScoresByCue = useMemo(() => {
+        const byCue = new Map<string, CueAttachmentRecord | null>();
 
-    const setIntegratedScore = useCallback((cueId: string, attachment: CueAttachmentRecord | null) => {
-        setIntegratedScoresByCue(previous => {
-            const next = new Map(previous);
+        attachments.byCueRole.forEach((attachment, key) => {
+            const [cueId, role] = key.split(':');
 
-            next.set(cueId, attachment);
-
-            return next;
+            if (cueId && role === INTEGRATED_SCORE_ROLE) {
+                byCue.set(cueId, attachment);
+            }
         });
-    }, []);
 
-    const loadCue = useCallback(async (cueId: string) => {
-        const attachment = await scriptRepository.getCueAttachment(cueId, INTEGRATED_SCORE_ROLE);
-
-        setIntegratedScore(cueId, attachment);
-    }, [scriptRepository, setIntegratedScore]);
-
-    const uploadIntegratedScore = useCallback(async (cueId: string, file: File) => {
-        if (!scriptId) {
-            return;
-        }
-
-        setUploadingCueIds(previous => new Set(previous).add(cueId));
-
-        try {
-            const attachment = await scriptRepository.setCueAttachment(
-                scriptId,
-                cueId,
-                INTEGRATED_SCORE_ROLE,
-                {
-                    name: file.name,
-                    type: file.type,
-                    size: file.size,
-                    blob: file,
-                },
-            );
-
-            setIntegratedScore(cueId, attachment);
-        } finally {
-            setUploadingCueIds(previous => {
-                const next = new Set(previous);
-
-                next.delete(cueId);
-
-                return next;
-            });
-        }
-    }, [
-        scriptId,
-        scriptRepository,
-        setIntegratedScore,
-    ]);
-
-    const removeIntegratedScore = useCallback(async (cueId: string) => {
-        if (!scriptId) {
-            return;
-        }
-
-        await scriptRepository.removeCueAttachment(scriptId, cueId, INTEGRATED_SCORE_ROLE);
-        setIntegratedScore(cueId, null);
-    }, [
-        scriptId,
-        scriptRepository,
-        setIntegratedScore,
-    ]);
-
-    const getBlob = useCallback((storageKey: string) => {
-        return scriptRepository.getAttachmentBlob(storageKey);
-    }, [scriptRepository]);
+        return byCue;
+    }, [attachments.byCueRole]);
+    const uploadIntegratedScore = useCallback((cueId: string, file: File) => {
+        return attachments.upload(cueId, INTEGRATED_SCORE_ROLE, file);
+    }, [attachments.upload]);
+    const removeIntegratedScore = useCallback((cueId: string) => {
+        return attachments.remove(cueId, INTEGRATED_SCORE_ROLE);
+    }, [attachments.remove]);
 
     return {
         integratedScoresByCue,
-        uploadingCueIds,
-        loadCue,
+        uploadingCueIds: attachments.uploadingCueIds,
         uploadIntegratedScore,
         removeIntegratedScore,
-        getBlob,
+        getBlob: attachments.getBlob,
     };
 };

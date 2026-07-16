@@ -15,12 +15,14 @@ import {
 import {
     buildCharacterRuntime,
 } from '../../runtime/buildCharacterRuntime';
+import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
 import {buildStructureRuntime} from '../../runtime/buildStructureRuntime';
 import type {EditorRuntimeState} from '../../runtime/editorRuntimeTypes';
 import {
     selectionTouchesCharacterBlock,
     transactionTouchesCharacterBlocks,
     transactionTouchesCharacterTags,
+    transactionTouchesCues,
     transactionTouchesStructureBlocks,
 } from '../../runtime/transactionGuards';
 import {
@@ -101,6 +103,7 @@ const createInitialState = (
         activeBlockType: activeBlock.activeBlockType,
         structure: buildStructureRuntime(state.doc),
         characters: characterState.snapshot,
+        cues: buildIndexSnapshotFromPmDoc(state.doc).cues,
         characterDecorations: characterState.decorations,
     };
 };
@@ -154,6 +157,8 @@ export const EditorRuntimeExtension = Extension.create<EditorRuntimeOptions>({
                             oldState.doc,
                             tr.doc,
                         );
+                        const shouldRefreshCues = shouldRefreshStructure
+                            || transactionTouchesCues(tr, oldState.doc, tr.doc);
 
                         if (!tr.docChanged && !tr.selectionSet && !shouldRefreshCharacters) {
                             return pluginState;
@@ -164,6 +169,7 @@ export const EditorRuntimeExtension = Extension.create<EditorRuntimeOptions>({
                         let nextCharacters = pluginState.characters;
                         let nextDecorations = pluginState.characterDecorations;
                         let nextStructure = pluginState.structure;
+                        let nextCues = pluginState.cues;
 
                         if (shouldRefreshCharacters) {
                             const characterState = buildCharacterState(newState, options);
@@ -181,12 +187,17 @@ export const EditorRuntimeExtension = Extension.create<EditorRuntimeOptions>({
                             nextStructure = buildStructureRuntime(newState.doc);
                         }
 
+                        if (shouldRefreshCues) {
+                            nextCues = buildIndexSnapshotFromPmDoc(newState.doc).cues;
+                        }
+
                         return {
                             revision: nextRevision,
                             activeBlockId: activeBlock.activeBlockId,
                             activeBlockType: activeBlock.activeBlockType,
                             structure: nextStructure,
                             characters: nextCharacters,
+                            cues: nextCues,
                             characterDecorations: nextDecorations ?? EMPTY_DECORATIONS,
                         };
                     },

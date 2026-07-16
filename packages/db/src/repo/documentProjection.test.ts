@@ -92,8 +92,7 @@ describe('documentProjection', () => {
             document: doc([
                 {
                     id: 'h1', type: 'scene', text: 'A renamed',
-                },
-                {id: 'a2', text: 'new'},
+                }, {id: 'a2', text: 'new'},
             ]),
         });
 
@@ -125,8 +124,7 @@ describe('documentProjection', () => {
             document: doc([
                 {
                     id: 'h1', type: 'scene', text: 'INT. ROOM',
-                },
-                {id: 'a1', text: 'Action.'},
+                }, {id: 'a1', text: 'Action.'},
             ]),
         });
 
