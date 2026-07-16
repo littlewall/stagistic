@@ -6,27 +6,13 @@ import type {
     ScriptRepository,
 } from '@stagistic/db';
 
-import {createReactiveCollection} from '../collections';
+import {
+    createKeyedTaskQueue,
+    createReactiveCollection,
+    createRepositoryStoreRegistry,
+} from '../collections';
 
 const bindingKey = (binding: ScriptCueAttachmentBinding) => `${binding.cueId}:${binding.role}`;
-
-const createCueQueue = () => {
-    const queues = new Map<string, Promise<void>>();
-
-    return (cueId: string, task: () => Promise<void>) => {
-        const previous = queues.get(cueId) ?? Promise.resolve();
-        const current = previous.catch(() => undefined).then(task);
-
-        queues.set(cueId, current);
-        void current.finally(() => {
-            if (queues.get(cueId) === current) {
-                queues.delete(cueId);
-            }
-        }).catch(() => undefined);
-
-        return current;
-    };
-};
 
 export const createScriptAttachmentsStore = (
     repository: ScriptRepository,
@@ -44,7 +30,7 @@ export const createScriptAttachmentsStore = (
         source: bindingsSource,
         getKey: bindingKey,
     });
-    const enqueueCue = createCueQueue();
+    const enqueueCue = createKeyedTaskQueue<string>();
 
     const refresh = async () => {
         await Promise.all([attachmentsSource.refresh(), bindingsSource.refresh()]);
@@ -77,31 +63,6 @@ export const createScriptAttachmentsStore = (
 
 export type ScriptAttachmentsStore = ReturnType<typeof createScriptAttachmentsStore>;
 
-const storesByRepository = new WeakMap<
-    ScriptRepository,
-    Map<string, ScriptAttachmentsStore>
->();
-
-export const getScriptAttachmentsStore = (
-    repository: ScriptRepository,
-    scriptId: string,
-) => {
-    let stores = storesByRepository.get(repository);
-
-    if (!stores) {
-        stores = new Map();
-        storesByRepository.set(repository, stores);
-    }
-
-    const existing = stores.get(scriptId);
-
-    if (existing) {
-        return existing;
-    }
-
-    const store = createScriptAttachmentsStore(repository, scriptId);
-
-    stores.set(scriptId, store);
-
-    return store;
-};
+export const getScriptAttachmentsStore = createRepositoryStoreRegistry(
+    createScriptAttachmentsStore,
+);

@@ -1,13 +1,11 @@
 import {
     useRecentScripts,
+    useScriptActions,
     useScriptRepository,
     useScriptSummary,
 } from '@stagistic/app-core';
 import {useToastController} from '@stagistic/ui';
-import {
-    useEffect,
-    useMemo,
-} from 'react';
+import {useMemo} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {deriveEditorLoadState} from './controller/editorLoadState';
@@ -24,7 +22,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         scripts: recentScriptsData,
         isLoading: recentScriptsLoading,
         error: recentScriptsError,
-        refresh: refreshRecentScripts,
     } = useRecentScripts(4);
     const {
         script: currentScript,
@@ -32,6 +29,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         error: currentScriptError,
     } = useScriptSummary(scriptId);
     const scriptRepository = useScriptRepository();
+    const scriptActions = useScriptActions();
     const {
         initialValue,
         initialIndexSnapshot,
@@ -52,8 +50,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     const isContentLoading = Boolean(currentScriptId) && initialValue === undefined;
 
     const seedDefaultScript = useSeedDefaultScript(
-        scriptRepository,
-        refreshRecentScripts,
+        scriptActions,
         navigate,
         addToast,
         setStorageError,
@@ -105,10 +102,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
             : recentScriptsData.slice(0, 3),
         [recentScriptsData, currentScript],
     );
-
-    useEffect(() => {
-        void refreshRecentScripts();
-    }, [refreshRecentScripts, scriptId]);
 
     const {
         handleAutoSave,

@@ -3,12 +3,9 @@ import {
     eq,
     useLiveQuery,
 } from '@tanstack/react-db';
-import {
-    useCallback,
-    useMemo,
-    useSyncExternalStore,
-} from 'react';
+import {useMemo} from 'react';
 
+import {useReactiveCollectionStatus} from '../collections';
 import {toScriptListItem} from './mappers';
 import {useScriptsContext} from './ScriptRepositoryProvider';
 import type {
@@ -18,15 +15,10 @@ import type {
 
 export const useScriptSummary = (scriptId?: string | null): ScriptSummaryState => {
     const {
-        repository,
         scriptsCollection,
         scriptsStatus,
     } = useScriptsContext();
-    const storeStatus = useSyncExternalStore(
-        scriptsStatus.subscribe,
-        scriptsStatus.getSnapshot,
-        scriptsStatus.getSnapshot,
-    );
+    const storeStatus = useReactiveCollectionStatus(scriptsStatus);
     const {data, isLoading} = useLiveQuery(
         q => {
             if (!scriptId) {
@@ -44,16 +36,11 @@ export const useScriptSummary = (scriptId?: string | null): ScriptSummaryState =
         () => summary ? toScriptListItem(summary) : null,
         [summary],
     );
-    const refresh = useCallback(
-        () => repository.scriptSummaries.refresh(),
-        [repository],
-    );
 
     return {
         script,
         summary,
         isLoading: Boolean(scriptId) && (!storeStatus.isReady || isLoading),
         error: storeStatus.sourceError,
-        refresh,
     };
 };

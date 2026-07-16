@@ -25,6 +25,7 @@ describe('character handlers', () => {
         const confirmed = await handlers.confirmScriptCharacterWithId(scriptId, {
             id: 'character-stable',
             key: ' alice ',
+            colorHex: '#123456',
             timestamp: 10,
         });
         const gender = await handlers.upsertScriptCharacterGenderWithId(scriptId, {
@@ -33,7 +34,11 @@ describe('character handlers', () => {
             timestamp: 11,
         });
 
-        expect(confirmed).toMatchObject({id: 'character-stable', key: 'ALICE'});
+        expect(confirmed).toMatchObject({
+            id: 'character-stable',
+            key: 'ALICE',
+            colorHex: '#123456',
+        });
         expect(gender).toEqual({
             id: 'gender-stable',
             key: 'non binary',

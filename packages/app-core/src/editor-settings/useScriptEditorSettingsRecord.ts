@@ -4,24 +4,13 @@ import {useLiveQuery} from '@tanstack/react-db';
 import {
     useCallback,
     useMemo,
-    useSyncExternalStore,
 } from 'react';
 
+import {
+    useReactiveCollectionStatus,
+    useReactiveSourceSnapshot,
+} from '../collections';
 import {getScriptEditorSettingsStore} from './scriptEditorSettingsStore';
-
-const emptyStatus = {
-    isReady: true,
-    sourceError: null,
-    mutations: [],
-} as const;
-const getEmptyStatus = () => emptyStatus;
-const subscribeEmpty = () => () => undefined;
-const emptyConfirmed = {
-    rows: [],
-    isReady: true,
-    error: null,
-} as const;
-const getEmptyConfirmed = () => emptyConfirmed;
 
 export const useScriptEditorSettingsRecord = (
     scriptId: string | null,
@@ -30,16 +19,8 @@ export const useScriptEditorSettingsRecord = (
     const store = useMemo(() => scriptId
         ? getScriptEditorSettingsStore(repository, scriptId)
         : null, [repository, scriptId]);
-    const storeStatus = useSyncExternalStore(
-        store?.status.subscribe ?? subscribeEmpty,
-        store?.status.getSnapshot ?? getEmptyStatus,
-        store?.status.getSnapshot ?? getEmptyStatus,
-    );
-    const confirmed = useSyncExternalStore(
-        store?.confirmed.subscribe ?? subscribeEmpty,
-        store?.confirmed.getSnapshot ?? getEmptyConfirmed,
-        store?.confirmed.getSnapshot ?? getEmptyConfirmed,
-    );
+    const storeStatus = useReactiveCollectionStatus(store?.status);
+    const confirmed = useReactiveSourceSnapshot(store?.confirmed);
     const query = useLiveQuery(q => {
         if (!store) {
             return undefined;

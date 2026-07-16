@@ -4,6 +4,7 @@ import {
     PointerSensor,
 } from '@dnd-kit/dom';
 import {DragDropProvider} from '@dnd-kit/react';
+import {useScriptActions} from '@stagistic/app-core';
 import {
     useEditorActCommands,
     useEditorLiveActiveBlock,
@@ -46,8 +47,9 @@ const ACTIVE_BLOCK_PERSIST_DELAY_MS = 250;
 
 export const ScriptStructureSidebar = () => {
     const {
-        currentScriptId, scriptRepository, indexSnapshot,
+        currentScriptId, indexSnapshot,
     } = useScriptSession();
+    const {setActiveBlock} = useScriptActions();
     const actCommands = useEditorActCommands();
     const liveStructure = useEditorLiveStructure();
     const liveActiveBlockId = useEditorLiveActiveBlock();
@@ -57,7 +59,7 @@ export const ScriptStructureSidebar = () => {
     const [actNamePreviewById, setActNamePreviewById] = useState<Record<string, string>>({});
 
     // ── Active block persistence (debounced) ─────────────────────────────────
-    const lastPersistedActiveBlockIdRef = useRef<string | null>(null);
+    const lastPersistedActiveBlockIdsRef = useRef(new Map<string, string | null>());
     const pendingPersistScriptIdRef = useRef<string | null>(null);
     const pendingPersistBlockIdRef = useRef<string | null>(null);
     const persistTimerRef = useRef<number | null>(null);
@@ -80,13 +82,14 @@ export const ScriptStructureSidebar = () => {
         pendingPersistScriptIdRef.current = null;
         pendingPersistBlockIdRef.current = null;
 
-        if (!scriptId || lastPersistedActiveBlockIdRef.current === blockId) {
+        if (!scriptId || lastPersistedActiveBlockIdsRef.current.get(scriptId) === blockId) {
             return;
         }
 
-        lastPersistedActiveBlockIdRef.current = blockId;
-        void scriptRepository.setActiveBlock(scriptId, blockId);
-    }, [clearPendingPersistTimer, scriptRepository]);
+        void setActiveBlock(scriptId, blockId).then(() => {
+            lastPersistedActiveBlockIdsRef.current.set(scriptId, blockId);
+        }).catch(() => undefined);
+    }, [clearPendingPersistTimer, setActiveBlock]);
 
     // Flush on unmount
     useEffect(() => () => {
@@ -96,13 +99,15 @@ export const ScriptStructureSidebar = () => {
     // Reset + flush on script change
     useEffect(() => {
         flushPendingActiveBlockPersist();
-        lastPersistedActiveBlockIdRef.current = null;
         setActNamePreviewById({});
     }, [currentScriptId, flushPendingActiveBlockPersist]);
 
     // Debounced persist on active block change
     useEffect(() => {
-        if (!currentScriptId || lastPersistedActiveBlockIdRef.current === liveActiveBlockId) {
+        if (
+            !currentScriptId
+            || lastPersistedActiveBlockIdsRef.current.get(currentScriptId) === liveActiveBlockId
+        ) {
             return;
         }
 

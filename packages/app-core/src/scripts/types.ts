@@ -10,7 +10,6 @@ export interface ScriptSummaryState {
     summary: ScriptSummary | null,
     isLoading: boolean,
     error: Error | null,
-    refresh: () => void,
 }
 
 export interface RecentScriptsState {
@@ -18,5 +17,4 @@ export interface RecentScriptsState {
     scriptSummaries: ScriptSummary[],
     isLoading: boolean,
     error: Error | null,
-    refresh: () => Promise<void>,
 }

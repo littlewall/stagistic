@@ -1,20 +1,15 @@
-import type {
-    DuplicateScriptInput,
-    RenameScriptInput,
-    ScriptSummary,
-} from '@stagistic/db';
-import type {ScriptDocument} from '@stagistic/script';
+import type {ScriptSummary} from '@stagistic/db';
 import {useLiveQuery} from '@tanstack/react-db';
 import {
-    useCallback,
     useEffect,
     useMemo,
-    useSyncExternalStore,
 } from 'react';
 
+import {useReactiveCollectionStatus} from '../collections';
 import {toScriptListItem} from './mappers';
 import {useScriptsContext} from './ScriptRepositoryProvider';
 import type {ScriptListItem} from './types';
+import {useScriptActions} from './useScriptActions';
 
 export const useScripts = () => {
     const {
@@ -22,11 +17,8 @@ export const useScripts = () => {
         scriptsStatus,
         scriptsStore,
     } = useScriptsContext();
-    const storeStatus = useSyncExternalStore(
-        scriptsStatus.subscribe,
-        scriptsStatus.getSnapshot,
-        scriptsStatus.getSnapshot,
-    );
+    const actions = useScriptActions();
+    const storeStatus = useReactiveCollectionStatus(scriptsStatus);
 
     useEffect(() => {
         void scriptsStore.init();
@@ -51,45 +43,10 @@ export const useScripts = () => {
         [data],
     );
 
-    const createScript = useCallback(
-        (name: string, initialContent?: ScriptDocument) => scriptsStore.createScript(name, initialContent),
-        [scriptsStore],
-    );
-
-    const renameScript = useCallback(
-        (scriptId: string, input: RenameScriptInput) => scriptsStore.renameScript(scriptId, input),
-        [scriptsStore],
-    );
-
-    const renameScriptTitle = useCallback(
-        (scriptId: string, title: string) => scriptsStore.renameScriptTitle(scriptId, title),
-        [scriptsStore],
-    );
-
-    const duplicateScript = useCallback(
-        (sourceScriptId: string, input: DuplicateScriptInput) => scriptsStore.duplicateScript(sourceScriptId, input),
-        [scriptsStore],
-    );
-
-    const deleteScript = useCallback(
-        (scriptId: string) => scriptsStore.deleteScript(scriptId),
-        [scriptsStore],
-    );
-
-    const setActiveBlock = useCallback(
-        (scriptId: string, blockId: string | null) => scriptsStore.setActiveBlock(scriptId, blockId),
-        [scriptsStore],
-    );
-
     return {
         scripts,
         scriptSummaries,
-        createScript,
-        renameScript,
-        renameScriptTitle,
-        duplicateScript,
-        deleteScript,
-        setActiveBlock,
+        ...actions,
         refreshScripts: scriptsStore.refresh,
         isLoading: !storeStatus.isReady || isQueryLoading || status === 'idle',
         error: storeStatus.sourceError

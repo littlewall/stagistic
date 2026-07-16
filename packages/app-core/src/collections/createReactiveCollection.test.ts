@@ -117,6 +117,74 @@ describe('reactive collection bridge', () => {
         expect(result.collection.get('row-1')?.title).toBe('Original');
     });
 
+    it('does not confirm an insert from entity identity alone', async () => {
+        const source = createInMemoryReactiveQuerySource<Row>([]);
+        const result = createReactiveCollection({
+            id: `insert-confirmation-${crypto.randomUUID()}`,
+            source,
+            getKey: row => row.id,
+            confirmationTimeoutMs: 20,
+            handlers: {
+                insert: row => {
+                    source.emit([{id: row.id, title: 'Different persisted value'}]);
+
+                    return Promise.resolve();
+                },
+            },
+        });
+
+        await result.collection.preload();
+
+        const transaction = result.collection.insert({
+            id: 'row-1',
+            title: 'Expected persisted value',
+        });
+
+        await expect(transaction.isPersisted.promise).rejects.toThrow(
+            'Timed out confirming insert for entity row-1',
+        );
+    });
+
+    it('rolls back writes when a read-only collection has no persistence handler', async () => {
+        const source = createInMemoryReactiveQuerySource<Row>([{id: 'row-1', title: 'Original'}]);
+        const result = createReactiveCollection({
+            id: `read-only-${crypto.randomUUID()}`,
+            source,
+            getKey: row => row.id,
+        });
+
+        await result.collection.preload();
+
+        const transaction = result.collection.update('row-1', draft => {
+            draft.title = 'Not persisted';
+        });
+
+        await expect(transaction.isPersisted.promise).rejects.toThrow(
+            'Missing update handler for collection read-only-',
+        );
+        expect(result.collection.get('row-1')?.title).toBe('Original');
+    });
+
+    it('exposes confirmed rows from the collection source subscription', async () => {
+        const source = createInMemoryReactiveQuerySource<Row>([{id: 'row-1', title: 'Original'}]);
+        const result = createReactiveCollection({
+            id: `confirmed-${crypto.randomUUID()}`,
+            source,
+            getKey: row => row.id,
+        });
+
+        await result.collection.preload();
+
+        expect(result.confirmed.getSnapshot()).toMatchObject({
+            isReady: true,
+            rows: [{id: 'row-1', title: 'Original'}],
+        });
+
+        source.emit([{id: 'row-1', title: 'External'}]);
+
+        expect(result.confirmed.getSnapshot().rows).toEqual([{id: 'row-1', title: 'External'}]);
+    });
+
     it('serializes rapid writes to one entity so the newest intent wins', async () => {
         const gates = [deferred(), deferred()];
         const persisted: string[] = [];

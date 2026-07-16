@@ -93,7 +93,15 @@ const mountSidebar = ({
 
     document.body.appendChild(host);
     root.render(
-        <ScriptEditor document={{initialValue}}>
+        <ScriptEditor
+            document={{initialValue}}
+            layout={{
+                leftSidebarToggle: {
+                    isOpen: true,
+                    onToggle: () => {},
+                },
+            }}
+        >
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
                 <ScriptCuesSidebar

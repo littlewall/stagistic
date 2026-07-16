@@ -1,4 +1,5 @@
 import {createAsyncPersistencePacer} from '../pacing';
+import {createGenerationSaveQueue} from './createGenerationSaveQueue';
 import {
     defaultDraftEquals,
     type PersistedDraftControllerOptions,
@@ -36,7 +37,6 @@ export const createPersistedDraftController = <TKey, TValue>({
     let revision = 0;
     let generation = 0;
     let timer: unknown;
-    let savePromise: Promise<void> | null = null;
     let isActive = false;
     let persistValue = persist;
 
@@ -63,13 +63,9 @@ export const createPersistedDraftController = <TKey, TValue>({
         timer = undefined;
     };
 
-    const runSaveLoop = () => {
-        if (savePromise) {
-            return savePromise;
-        }
-
-        const saveGeneration = generation;
-        const run = async () => {
+    const saveQueue = createGenerationSaveQueue({
+        getGeneration: () => generation,
+        run: async saveGeneration => {
             while (
                 saveGeneration === generation
                 && entity.key !== null
@@ -118,14 +114,9 @@ export const createPersistedDraftController = <TKey, TValue>({
                     error: null,
                 });
             }
-        };
-
-        savePromise = run().finally(() => {
-            savePromise = null;
-        });
-
-        return savePromise;
-    };
+        },
+    });
+    const runSaveLoop = saveQueue.execute;
 
     const persistencePacer = createAsyncPersistencePacer(
         () => runSaveLoop(),

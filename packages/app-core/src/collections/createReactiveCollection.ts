@@ -4,6 +4,8 @@ import {
     type PendingMutation,
 } from '@tanstack/react-db';
 
+import {createKeyedTaskQueue} from './createKeyedTaskQueue';
+import {createReactiveSourceStore} from './createReactiveSourceStore';
 import {
     createReactiveCollectionStatusStore,
     type ReactiveCollectionStatusStore,
@@ -77,11 +79,13 @@ const isConfirmed = <T extends object, TKey extends string | number>(
         return false;
     }
 
-    if (mutation.type === 'insert') {
-        return true;
-    }
+    const expectedValues = mutation.type === 'insert'
+        ? toDomainCollectionValue(mutation.modified)
+        : mutation.changes;
 
-    return Object.entries(mutation.changes).every(([key, value]) => valuesEqual(row[key as keyof T], value));
+    return Object.entries(expectedValues).every(([key, value]) => {
+        return valuesEqual(row[key as keyof T], value);
+    });
 };
 
 const waitForConfirmation = async <T extends object, TKey extends string | number>(
@@ -121,24 +125,6 @@ const waitForConfirmation = async <T extends object, TKey extends string | numbe
     }
 };
 
-const createEntityQueue = () => {
-    const queues = new Map<string | number, Promise<void>>();
-
-    return (key: string | number, task: () => Promise<void>) => {
-        const previous = queues.get(key) ?? Promise.resolve();
-        const current = previous.catch(() => undefined).then(task);
-
-        queues.set(key, current);
-        void current.finally(() => {
-            if (queues.get(key) === current) {
-                queues.delete(key);
-            }
-        }).catch(() => undefined);
-
-        return current;
-    };
-};
-
 export const createReactiveCollection = <
     T extends object,
     TKey extends string | number,
@@ -150,7 +136,8 @@ export const createReactiveCollection = <
     confirmationTimeoutMs = 2_000,
 }: CreateReactiveCollectionOptions<T, TKey>) => {
     const status = createReactiveCollectionStatusStore();
-    const enqueueEntityMutation = createEntityQueue();
+    const confirmed = createReactiveSourceStore<T>();
+    const enqueueEntityMutation = createKeyedTaskQueue<TKey>();
 
     const persist = async (
         mutation: ReactivePendingMutation<T, TKey>,
@@ -160,16 +147,27 @@ export const createReactiveCollection = <
 
         try {
             const commands = {
-                insert: () => handlers.insert?.(mutation.modified),
-                update: () => handlers.update?.(
-                    mutation.original as T,
-                    mutation.modified,
-                    mutation.changes,
-                ),
-                delete: () => handlers.delete?.(mutation.original as T),
+                insert: handlers.insert
+                    ? () => handlers.insert?.(mutation.modified)
+                    : undefined,
+                update: handlers.update
+                    ? () => handlers.update?.(
+                        mutation.original as T,
+                        mutation.modified,
+                        mutation.changes,
+                    )
+                    : undefined,
+                delete: handlers.delete
+                    ? () => handlers.delete?.(mutation.original as T)
+                    : undefined,
             };
+            const command = commands[action];
 
-            await commands[action]();
+            if (!command) {
+                throw new Error(`Missing ${action} handler for collection ${id}`);
+            }
+
+            await command();
             await waitForConfirmation(source, mutation, getKey, confirmationTimeoutMs);
             status.finishMutation(mutation.key, action);
         } catch (error) {
@@ -208,6 +206,7 @@ export const createReactiveCollection = <
                     truncate();
                     rows.forEach(value => write({type: 'insert', value}));
                     commit();
+                    confirmed.setRows(rows);
 
                     if (!status.getSnapshot().isReady) {
                         status.setReady();
@@ -219,6 +218,7 @@ export const createReactiveCollection = <
 
                 void source.subscribe(applySnapshot, error => {
                     status.setSourceError(error);
+                    confirmed.setError(error);
                 }).then(cleanup => {
                     if (!active) {
                         cleanup();
@@ -228,11 +228,16 @@ export const createReactiveCollection = <
 
                     unsubscribe = cleanup;
                 }).catch(error => {
+                    if (!active) {
+                        return;
+                    }
+
                     const normalizedError = error instanceof Error
                         ? error
                         : new Error(String(error));
 
                     status.setSourceError(normalizedError);
+                    confirmed.setError(normalizedError);
                     status.setReady();
                     markReady();
                 });
@@ -263,7 +268,9 @@ export const createReactiveCollection = <
         },
     });
 
-    return {collection, status};
+    return {
+        collection, status, confirmed,
+    };
 };
 
 export type {ReactiveCollectionStatusStore};

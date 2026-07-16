@@ -2,7 +2,6 @@ import {fileURLToPath} from 'node:url';
 
 import {playwright} from 'vite-plus/test/browser-playwright';
 import {defineConfig} from 'vite-plus/test/config';
-import tsconfigPaths from 'vite-tsconfig-paths';
 
 const pgliteDataPath = fileURLToPath(
     new URL('./node_modules/@electric-sql/pglite/dist/pglite.data', import.meta.url),
@@ -12,11 +11,11 @@ const pgliteWasmPath = fileURLToPath(
 );
 
 export default defineConfig({
-    plugins: [tsconfigPaths()],
     optimizeDeps: {
         exclude: ['@electric-sql/pglite'],
     },
     resolve: {
+        tsconfigPaths: true,
         alias: [{find: /^@pglite-data/, replacement: pgliteDataPath}, {find: /^@pglite-wasm/, replacement: pgliteWasmPath}],
     },
     test: {

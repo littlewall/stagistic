@@ -6,7 +6,7 @@ import type {EditorSettingsOverride} from '@stagistic/script';
 
 import {
     createReactiveCollection,
-    createReactiveSourceStore,
+    createRepositoryStoreRegistry,
 } from '../collections';
 
 const hasPersistedValue = (value: unknown): boolean => {
@@ -26,8 +26,11 @@ export const createScriptEditorSettingsStore = (
     scriptId: string,
 ) => {
     const source = repository.getScriptEditorSettingsSource(scriptId);
-    const confirmed = createReactiveSourceStore(source);
-    const {collection, status} = createReactiveCollection<ScriptEditorSettingsRecord, string>({
+    const {
+        collection,
+        status,
+        confirmed,
+    } = createReactiveCollection<ScriptEditorSettingsRecord, string>({
         id: `script-editor-settings:${scriptId}`,
         source,
         getKey: record => record.scriptId,
@@ -72,31 +75,6 @@ export const createScriptEditorSettingsStore = (
 
 export type ScriptEditorSettingsStore = ReturnType<typeof createScriptEditorSettingsStore>;
 
-const storesByRepository = new WeakMap<
-    ScriptRepository,
-    Map<string, ScriptEditorSettingsStore>
->();
-
-export const getScriptEditorSettingsStore = (
-    repository: ScriptRepository,
-    scriptId: string,
-) => {
-    let stores = storesByRepository.get(repository);
-
-    if (!stores) {
-        stores = new Map();
-        storesByRepository.set(repository, stores);
-    }
-
-    const existing = stores.get(scriptId);
-
-    if (existing) {
-        return existing;
-    }
-
-    const store = createScriptEditorSettingsStore(repository, scriptId);
-
-    stores.set(scriptId, store);
-
-    return store;
-};
+export const getScriptEditorSettingsStore = createRepositoryStoreRegistry(
+    createScriptEditorSettingsStore,
+);

@@ -80,7 +80,11 @@ const createRepository = (initialCharacters: ScriptCharacterRef[] = [character()
         getScriptCharactersSource: () => characters,
         getScriptCharacterGendersSource: () => genders,
         confirmScriptCharacterWithId: async (_scriptId, input) => {
-            const confirmed = character({id: input.id, key: input.key});
+            const confirmed = character({
+                id: input.id,
+                key: input.key,
+                colorHex: input.colorHex ?? null,
+            });
 
             characters.emit([...await characters.read(), confirmed]);
 

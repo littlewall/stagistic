@@ -2,7 +2,6 @@ import {
     ensureSceneHeading,
     ensureScriptBlockIds,
     ensureScriptStructure,
-    getFirstBlockId,
     type ScriptDocument,
 } from '@stagistic/script';
 import {
@@ -16,14 +15,12 @@ import type {AppToastPayload} from '../types';
 const DEFAULT_SCRIPT_TITLE = 'Untitled script';
 const SEED_COOLDOWN_MS = 5000;
 
-type SeedDefaultScriptRepository = {
+type SeedDefaultScriptActions = {
     createScript: (title: string, initialContent?: ScriptDocument) => Promise<string>,
-    setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,
 };
 
 export const useSeedDefaultScript = (
-    scriptRepository: SeedDefaultScriptRepository,
-    refreshRecentScripts: () => Promise<void>,
+    scriptActions: SeedDefaultScriptActions,
     navigate: NavigateFunction,
     addToast: (toast: AppToastPayload) => void,
     setStorageError: (value: string | null) => void,
@@ -50,14 +47,7 @@ export const useSeedDefaultScript = (
 
         try {
             const seedValue = ensureScriptStructure(ensureScriptBlockIds(ensureSceneHeading(null)));
-            const newScriptId = await scriptRepository.createScript(DEFAULT_SCRIPT_TITLE, seedValue);
-            const activeBlockId = getFirstBlockId(seedValue);
-
-            if (activeBlockId) {
-                await scriptRepository.setActiveBlock(newScriptId, activeBlockId);
-            }
-
-            void refreshRecentScripts();
+            const newScriptId = await scriptActions.createScript(DEFAULT_SCRIPT_TITLE, seedValue);
 
             seedStateRef.current.seeded = true;
             void navigate(`/script/${newScriptId}/editor`, {replace: true});
@@ -75,8 +65,7 @@ export const useSeedDefaultScript = (
     }, [
         addToast,
         navigate,
-        refreshRecentScripts,
-        scriptRepository,
+        scriptActions,
         setStorageError,
     ]);
 };

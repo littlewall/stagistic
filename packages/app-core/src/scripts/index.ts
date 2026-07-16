@@ -10,6 +10,7 @@ export type {
     ScriptSummaryState,
 } from './types';
 export {useRecentScripts} from './useRecentScripts';
+export {useScriptActions} from './useScriptActions';
 export {useScripts} from './useScripts';
 export {useScriptSummary} from './useScriptSummary';
 export type {ScriptSummary} from '@stagistic/db';

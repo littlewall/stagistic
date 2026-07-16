@@ -17,8 +17,8 @@
         "@electric-sql/pglite": "^0.3.7",
         "@stagistic/app-core": "workspace:*",
         "@stagistic/app-routes": "workspace:*",
-        "@stagistic/shared": "workspace:*",
         "@stagistic/db": "workspace:*",
+        "@stagistic/shared": "workspace:*",
         "@stagistic/ui": "workspace:*",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",
@@ -27,10 +27,9 @@
     "devDependencies": {
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
-        "@vitejs/plugin-react": "^4.7.0",
+        "@vitejs/plugin-react": "^6.0.3",
         "lightningcss": "^1.30.1",
         "typescript": "^5.9.2",
-        "vite": "^6.4.3",
-        "vite-tsconfig-paths": "^5.1.4"
+        "vite": "^8.1.5"
     }
 }

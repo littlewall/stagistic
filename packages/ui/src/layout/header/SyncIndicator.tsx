@@ -36,6 +36,7 @@ export const SyncIndicator = ({state = 'saved'}: SyncIndicatorProps) => {
         <Tooltip label={syncMeta.label}>
             <span
                 className={styles.scriptStatus}
+                role="img"
                 aria-label={syncMeta.label}
                 aria-live="polite"
                 tabIndex={0}

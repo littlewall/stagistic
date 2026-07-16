@@ -42,6 +42,7 @@ export const createCoreCharacterMutations = ({
                 id: input.id,
                 scriptId,
                 characterKey: normalizedKey,
+                colorHex: input.colorHex,
                 createdAt: now,
                 updatedAt: now,
             });
@@ -53,6 +54,21 @@ export const createCoreCharacterMutations = ({
                 occurredAt: now,
                 payloadJson: buildCharacterConfirmPayload(scriptId, normalizedKey, now),
             }, tx);
+
+            if (input.colorHex !== undefined && input.colorHex !== null) {
+                await recordOutbox({
+                    scriptId,
+                    entityKey: `character:${input.id}`,
+                    opType: 'character.color',
+                    occurredAt: now,
+                    payloadJson: buildCharacterColorPayload(
+                        scriptId,
+                        input.id,
+                        input.colorHex,
+                        now,
+                    ),
+                }, tx);
+            }
         });
         await syncDb();
 

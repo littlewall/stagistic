@@ -2,12 +2,14 @@ import {
     describe,
     expect,
     it,
+    vi,
 } from 'vite-plus/test';
 
 import {
     createLocalPgliteRepository,
     InMemoryFileStorage,
 } from '../index';
+import type {LocalDb} from '../pglite';
 import {
     listScripts,
     replaceScriptSceneLocations,
@@ -32,6 +34,49 @@ const waitFor = async (predicate: () => boolean) => {
 };
 
 describe('PGlite reactive query source', () => {
+    it('removes a failed subscriber before a later restart', async () => {
+        let shouldFail = true;
+        const unsubscribeLiveQuery = vi.fn(() => Promise.resolve());
+        const db = {
+            $client: {
+                live: {
+                    query: vi.fn(() => Promise.resolve({
+                        unsubscribe: unsubscribeLiveQuery,
+                    })),
+                },
+            },
+        } as unknown as LocalDb;
+        const readRows = vi.fn(() => {
+            if (shouldFail) {
+                return Promise.reject(new Error('initial read failed'));
+            }
+
+            return Promise.resolve([{id: 'script-a'}]);
+        });
+        const source = createPgliteReactiveQuerySource({
+            getDb: () => Promise.resolve(db),
+            readRows,
+            watchQuery: 'SELECT id FROM scripts',
+        });
+        const failedListener = vi.fn();
+
+        await expect(source.subscribe(failedListener)).rejects.toThrow('initial read failed');
+        expect(unsubscribeLiveQuery).toHaveBeenCalledTimes(1);
+
+        shouldFail = false;
+
+        const activeListener = vi.fn();
+        const unsubscribe = await source.subscribe(activeListener);
+
+        expect(activeListener).toHaveBeenCalledTimes(1);
+
+        await source.refresh();
+
+        expect(failedListener).not.toHaveBeenCalled();
+        expect(activeListener).toHaveBeenCalledTimes(2);
+        unsubscribe();
+    });
+
     it('observes committed insert, update, delete, and transactional snapshots', async () => {
         const {db} = await createLiveTestDb();
         const source = createPgliteReactiveQuerySource({

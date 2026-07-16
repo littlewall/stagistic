@@ -197,6 +197,48 @@ describe('persisted draft controller', () => {
         });
     });
 
+    it('persists a new entity update queued behind the previous entity save', async () => {
+        const pendingFirstSave = deferred();
+        const persisted: string[] = [];
+        const controller = createPersistedDraftController({
+            defaultValue: '',
+            persist: async (key: string, value: string) => {
+                persisted.push(`${key}:${value}`);
+
+                if (key === 'one') {
+                    await pendingFirstSave.promise;
+                }
+            },
+        });
+
+        controller.resume();
+        controller.setEntity({
+            key: 'one', confirmedValue: 'One', isHydrated: true,
+        });
+        controller.update('Saving one');
+
+        const firstSave = controller.flush();
+
+        controller.setEntity({
+            key: 'two', confirmedValue: 'Two', isHydrated: true,
+        });
+        controller.update('Saving two');
+
+        const secondSave = controller.flush();
+
+        expect(persisted).toEqual(['one:Saving one']);
+
+        pendingFirstSave.resolve();
+        await Promise.all([firstSave, secondSave]);
+
+        expect(persisted).toEqual(['one:Saving one', 'two:Saving two']);
+        expect(controller.getSnapshot()).toMatchObject({
+            value: 'Saving two',
+            status: 'saved',
+            isDirty: false,
+        });
+    });
+
     it('resets loading state when the entity key changes', () => {
         const controller = createPersistedDraftController({
             defaultValue: '',

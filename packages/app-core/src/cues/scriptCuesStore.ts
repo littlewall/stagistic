@@ -7,6 +7,7 @@ import type {
 
 import {
     createReactiveCollection,
+    createRepositoryStoreRegistry,
     toDomainCollectionValue,
 } from '../collections';
 
@@ -120,28 +121,4 @@ export const createScriptCuesStore = (
 
 export type ScriptCuesStore = ReturnType<typeof createScriptCuesStore>;
 
-const storesByRepository = new WeakMap<ScriptRepository, Map<string, ScriptCuesStore>>();
-
-export const getScriptCuesStore = (
-    repository: ScriptRepository,
-    scriptId: string,
-) => {
-    let stores = storesByRepository.get(repository);
-
-    if (!stores) {
-        stores = new Map();
-        storesByRepository.set(repository, stores);
-    }
-
-    const existing = stores.get(scriptId);
-
-    if (existing) {
-        return existing;
-    }
-
-    const store = createScriptCuesStore(repository, scriptId);
-
-    stores.set(scriptId, store);
-
-    return store;
-};
+export const getScriptCuesStore = createRepositoryStoreRegistry(createScriptCuesStore);

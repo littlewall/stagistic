@@ -6,30 +6,14 @@ import type {
 import {createOptimisticAction} from '@tanstack/react-db';
 
 import {
+    createKeyedTaskQueue,
     createReactiveCollection,
+    createRepositoryStoreRegistry,
     toDomainCollectionValue,
 } from '../collections';
 
 const assignmentKey = (assignment: ScriptSceneLocationAssignment) => `${assignment.sceneHeadingBlockId}:${assignment.locationId}`;
 const normalizeIds = (ids: string[]) => [...new Set(ids)].sort();
-
-const createEntityQueue = () => {
-    const queues = new Map<string, Promise<void>>();
-
-    return (key: string, task: () => Promise<void>) => {
-        const previous = queues.get(key) ?? Promise.resolve();
-        const current = previous.catch(() => undefined).then(task);
-
-        queues.set(key, current);
-        void current.finally(() => {
-            if (queues.get(key) === current) {
-                queues.delete(key);
-            }
-        }).catch(() => undefined);
-
-        return current;
-    };
-};
 
 export const createScriptPlacesStore = (
     repository: ScriptRepository,
@@ -76,7 +60,7 @@ export const createScriptPlacesStore = (
         source: assignmentsSource,
         getKey: assignmentKey,
     });
-    const enqueueSceneMutation = createEntityQueue();
+    const enqueueSceneMutation = createKeyedTaskQueue<string>();
     const replaceSceneAssignments = createOptimisticAction<{
         sceneHeadingBlockId: string,
         locationIds: string[],
@@ -221,31 +205,4 @@ export const createScriptPlacesStore = (
 
 export type ScriptPlacesStore = ReturnType<typeof createScriptPlacesStore>;
 
-const storesByRepository = new WeakMap<
-    ScriptRepository,
-    Map<string, ScriptPlacesStore>
->();
-
-export const getScriptPlacesStore = (
-    repository: ScriptRepository,
-    scriptId: string,
-) => {
-    let stores = storesByRepository.get(repository);
-
-    if (!stores) {
-        stores = new Map();
-        storesByRepository.set(repository, stores);
-    }
-
-    const existing = stores.get(scriptId);
-
-    if (existing) {
-        return existing;
-    }
-
-    const store = createScriptPlacesStore(repository, scriptId);
-
-    stores.set(scriptId, store);
-
-    return store;
-};
+export const getScriptPlacesStore = createRepositoryStoreRegistry(createScriptPlacesStore);

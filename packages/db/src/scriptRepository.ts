@@ -65,6 +65,7 @@ export type UpdateScriptCueInput = CreateScriptCueInput;
 export interface ConfirmScriptCharacterWithIdInput {
     id: string,
     key: string,
+    colorHex?: string | null,
     timestamp?: number,
 }
 

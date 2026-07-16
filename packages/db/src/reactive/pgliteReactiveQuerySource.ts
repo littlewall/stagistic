@@ -89,7 +89,7 @@ export const createPgliteReactiveQuerySource = <T>({
 
         const currentGeneration = generation;
 
-        startPromise = (async () => {
+        const nextStart = (async () => {
             const db = await getDb();
             const client = (db as unknown as {$client: PGliteWithLive}).$client;
             const handle = await client.live.query({
@@ -108,11 +108,17 @@ export const createPgliteReactiveQuerySource = <T>({
 
             liveQuery = handle;
             await enqueueRead(true);
-        })().finally(() => {
-            startPromise = null;
-        });
+        })();
 
-        return startPromise;
+        startPromise = nextStart;
+
+        try {
+            await nextStart;
+        } finally {
+            if (startPromise === nextStart) {
+                startPromise = null;
+            }
+        }
     };
 
     return {
@@ -124,10 +130,24 @@ export const createPgliteReactiveQuerySource = <T>({
                 errorListeners.add(onError);
             }
 
-            if (liveQuery && snapshot) {
-                listener(snapshot);
-            } else {
-                await start();
+            try {
+                if (liveQuery && snapshot) {
+                    listener(snapshot);
+                } else {
+                    await start();
+                }
+            } catch (error) {
+                listeners.delete(listener);
+
+                if (onError) {
+                    errorListeners.delete(onError);
+                }
+
+                if (listeners.size === 0) {
+                    await stop();
+                }
+
+                throw error;
             }
 
             let active = true;

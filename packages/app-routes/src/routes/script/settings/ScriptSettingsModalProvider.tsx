@@ -1,27 +1,14 @@
 import {
+    useScriptActions,
     useScriptRepository,
-    useScripts,
 } from '@stagistic/app-core';
 import {
-    useEditorLiveCharacters,
-    useEditorLiveCues,
-    useEditorLiveStructure,
-} from '@stagistic/editor';
-import {
-    buildScriptStructureOutline,
     type EditorSettings,
     type EditorSettingsOverride,
     type TitlePageSettings,
 } from '@stagistic/script';
 import {isApplePlatform} from '@stagistic/shared';
 import {
-    type AttributeManagerCharacter,
-    AttributeManagerCharactersPanel,
-    type AttributeManagerListItem,
-    AttributeManagerListPanel,
-    AttributeManagerModal,
-    AttributeManagerPlacesPanel,
-    AttributeManagerSceneDetail,
     ScriptSettingsModal,
     useKeyedFieldDrafts,
 } from '@stagistic/ui';
@@ -37,13 +24,8 @@ import {
 } from 'react-router-dom';
 
 import {
-    ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
-    ATTRIBUTE_MANAGER_PANEL_CUES,
-    ATTRIBUTE_MANAGER_PANEL_PLACES,
-    ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
     type AttributeManagerPanelId,
 } from '../attributes/attributeManagerMenu';
-import {CueAttachmentsDetail} from '../attributes/CueAttachmentsDetail';
 import {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
 import {useCueAttachmentsState} from '../attributes/useCueAttachmentsState';
 import {useScriptPlacesState} from '../attributes/useScriptPlacesState';
@@ -56,12 +38,10 @@ import {useScriptEditorSettingsDraft} from '../useScriptEditorSettingsDraft';
 import {useScriptEditorSettingsModal} from '../useScriptEditorSettingsModal';
 import {useScriptTitleDraft} from '../useScriptTitleDraft';
 import {useTitlePageDraft} from '../useTitlePageDraft';
-import {
-    buildAttributeManagerCueItems,
-    buildAttributeManagerCueItemsFromLive,
-} from './attributeManagerCueItems';
 import {DraftSaveError} from './DraftSaveError';
+import {ScriptAttributeManagerModal} from './ScriptAttributeManagerModal';
 import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
+import {useAttributeManagerItems} from './useAttributeManagerItems';
 
 const BLOCK_LABEL_BY_TYPE = new Map(
     SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const),
@@ -103,12 +83,9 @@ export const useScriptSettingsModal = (): ScriptSettingsModalContextValue => {
  * of debounced savers. Views open it via `useScriptSettingsModal().openSettingsModal`.
  */
 export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) => {
-    const liveCharacters = useEditorLiveCharacters();
-    const liveCues = useEditorLiveCues();
-    const liveStructure = useEditorLiveStructure();
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
-    const {deleteScript, renameScriptTitle} = useScripts();
+    const {deleteScript, renameScriptTitle} = useScriptActions();
     const [searchParams, setSearchParams] = useSearchParams();
     const {
         currentScript,
@@ -200,85 +177,18 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     } = useKeyedFieldDrafts<string>(currentScriptId);
     const placeState = useScriptPlacesState(currentScriptId, scriptRepository);
     const cueAttachmentsState = useCueAttachmentsState(currentScriptId, scriptRepository);
-    const attributeManagerCharacters = useMemo<AttributeManagerCharacter[]>(() => {
-        return charactersContextValue.confirmedCharacterRecords.map(character => ({
-            id: character.id,
-            name: liveCharacters.keyByCharacterId.get(character.id) ?? character.key,
-            color: character.colorHex ?? null,
-            outline: character.outline ?? null,
-        })).sort((left, right) => left.name.localeCompare(right.name));
-    }, [charactersContextValue.confirmedCharacterRecords, liveCharacters.keyByCharacterId]);
-    const attributeManagerScenes = useMemo<AttributeManagerListItem[]>(() => {
-        if (!isAttributeManagerOpen) {
-            return [];
-        }
-
-        if (liveStructure.rows.length === 0) {
-            const outline = buildScriptStructureOutline(initialValue?.content);
-            let fallbackSceneNumber = 0;
-
-            return outline.acts.flatMap(act => act.items.map(scene => {
-                fallbackSceneNumber += 1;
-
-                return {
-                    id: scene.blockId,
-                    number: `${fallbackSceneNumber}.`,
-                    title: scene.title,
-                    group: {
-                        id: act.actId,
-                        label: act.actName,
-                    },
-                };
-            }));
-        }
-
-        let activeAct: {id: string, label: string} | undefined;
-        let sceneNumber = 0;
-
-        return liveStructure.rows.flatMap(row => {
-            if (row.kind === 'act') {
-                activeAct = {
-                    id: row.blockId,
-                    label: row.name,
-                };
-
-                return [];
-            }
-
-            sceneNumber += 1;
-
-            return [
-                {
-                    id: row.blockId,
-                    number: `${sceneNumber}.`,
-                    title: row.title,
-                    group: activeAct,
-                },
-            ];
-        });
-    }, [
-        initialValue?.content,
-        isAttributeManagerOpen,
-        liveStructure.rows,
-    ]);
     const {cues} = cueState;
-    const attributeManagerCues = useMemo<AttributeManagerListItem[]>(() => {
-        const items = liveStructure.rows.length > 0 || liveCues.length > 0
-            ? buildAttributeManagerCueItemsFromLive(liveCues, liveStructure, cues)
-            : buildAttributeManagerCueItems(initialValue, cues);
-
-        return items
-            .map(item => ({
-                ...item,
-                title: getCueTitleDraft(item.id, item.title),
-            }));
-    }, [
+    const {
+        characterItems: attributeManagerCharacters,
+        sceneItems: attributeManagerScenes,
+        cueItems: attributeManagerCues,
+    } = useAttributeManagerItems({
+        isOpen: isAttributeManagerOpen,
+        initialValue,
+        characters: charactersContextValue,
         cues,
         getCueTitleDraft,
-        initialValue,
-        liveCues,
-        liveStructure,
-    ]);
+    });
     const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
     const draftSaveError = scriptSettingsDraftError
         ?? titlePageDraftError
@@ -359,83 +269,26 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                         }}
                     />
                 </ScriptSettingsModal>
-                <AttributeManagerModal
+                <ScriptAttributeManagerModal
+                    currentScriptId={currentScriptId}
                     isOpen={isAttributeManagerOpen}
                     tabs={attributeManagerTabs}
-                    activeTabId={activeAttributeManagerPanelId}
+                    activePanelId={activeAttributeManagerPanelId}
+                    selectedCharacterId={selectedAttributeManagerCharacterId}
+                    selectedCueId={selectedAttributeManagerCueId}
                     onClose={closeAttributeManagerModal}
-                    onSelectTab={selectAttributeManagerPanel}
-                >
-                    {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_STRUCTURE ? (
-                        <AttributeManagerListPanel
-                            items={attributeManagerScenes}
-                            detailTypeLabel="Scene"
-                            emptyListLabel="No scenes yet"
-                            emptyDetailLabel="Select a scene"
-                            detailPlaceholder="Scene details are coming soon."
-                            renderDetail={item => (
-                                <AttributeManagerSceneDetail
-                                    places={placeState.places}
-                                    selectedPlaceIds={placeState.scenePlaceIds[item.id] ?? []}
-                                    onChangePlaceIds={placeIds => {
-                                        void placeState.setScenePlaces(item.id, placeIds);
-                                    }}
-                                />
-                            )}
-                        />
-                    ) : null}
-                    {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_CHARACTERS ? (
-                        <AttributeManagerCharactersPanel
-                            characters={attributeManagerCharacters}
-                            initialSelectedCharacterId={selectedAttributeManagerCharacterId}
-                            isLoading={charactersContextValue.isCharactersLoading}
-                            characterColorSaturation={resolvedScriptSettings.visual.characterColorSaturation}
-                            deletingCharacterIds={charactersContextValue.deletingCharacterIds}
-                            colorUpdatingCharacterIds={charactersContextValue.colorUpdatingCharacterIds}
-                            onSetCharacterColor={charactersContextValue.handleSetCharacterColor}
-                            onSetCharacterOutline={charactersContextValue.handleSetCharacterOutline}
-                            onDeleteCharacter={charactersContextValue.handleDeleteCharacter}
-                            onCreateCharacter={charactersContextValue.handleConfirmCharacter}
-                        />
-                    ) : null}
-                    {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_CUES ? (
-                        <AttributeManagerListPanel
-                            items={attributeManagerCues}
-                            initialSelectedItemId={selectedAttributeManagerCueId}
-                            detailTypeLabel="Cue"
-                            emptyListLabel="No cues yet"
-                            emptyDetailLabel="Select a cue"
-                            detailPlaceholder="Cue details are coming soon."
-                            renderDetail={item => {
-                                const cue = cues.find(candidate => candidate.id === item.id);
-
-                                return cue ? (
-                                    <CueAttachmentsDetail
-                                        cue={cue}
-                                        displayTitle={item.title}
-                                        state={cueAttachmentsState}
-                                        onTitleDraftChange={title => setCueTitleDraft(cue.id, title)}
-                                        onUpdateCue={(cueId, input) => persistCueTitleDraft(
-                                            cueId,
-                                            input.title,
-                                            title => cueState.updateCue(cueId, {...input, title}),
-                                        )}
-                                    />
-                                ) : null;
-                            }}
-                        />
-                    ) : null}
-                    {activeAttributeManagerPanelId === ATTRIBUTE_MANAGER_PANEL_PLACES ? (
-                        <AttributeManagerPlacesPanel
-                            places={placeState.places}
-                            isLoading={placeState.isLoading}
-                            draftScopeKey={currentScriptId}
-                            onCreatePlace={placeState.createPlace}
-                            onRenamePlace={placeState.renamePlace}
-                            onDeletePlace={placeState.deletePlace}
-                        />
-                    ) : null}
-                </AttributeManagerModal>
+                    onSelectPanel={selectAttributeManagerPanel}
+                    characters={charactersContextValue}
+                    characterItems={attributeManagerCharacters}
+                    characterColorSaturation={resolvedScriptSettings.visual.characterColorSaturation}
+                    sceneItems={attributeManagerScenes}
+                    placeState={placeState}
+                    cueState={cueState}
+                    cueItems={attributeManagerCues}
+                    cueAttachmentsState={cueAttachmentsState}
+                    setCueTitleDraft={setCueTitleDraft}
+                    persistCueTitleDraft={persistCueTitleDraft}
+                />
             </ScriptCharactersProvider>
         </ScriptSettingsModalContext.Provider>
     );

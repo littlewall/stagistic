@@ -3,10 +3,9 @@ import {useLiveQuery} from '@tanstack/react-db';
 import {
     useCallback,
     useMemo,
-    useSyncExternalStore,
 } from 'react';
 
-import type {ReactiveCollectionStatusStore} from '../collections';
+import {useReactiveCollectionStatus} from '../collections';
 import {getScriptCharactersStore} from './scriptCharactersStoreRegistry';
 
 const defaultGenderOptions = [
@@ -16,20 +15,6 @@ const defaultGenderOptions = [
         id: 'default:female', key: 'female', label: 'Female',
     },
 ];
-const emptyStatus = {
-    isReady: true,
-    sourceError: null,
-    mutations: [],
-} as const;
-const getEmptyStatus = () => emptyStatus;
-const subscribeEmpty = () => () => undefined;
-const useStatus = (status: ReactiveCollectionStatusStore | undefined) => {
-    return useSyncExternalStore(
-        status?.subscribe ?? subscribeEmpty,
-        status?.getSnapshot ?? getEmptyStatus,
-        status?.getSnapshot ?? getEmptyStatus,
-    );
-};
 
 export const useScriptCharacterCatalog = (
     scriptId: string | null,
@@ -38,9 +23,9 @@ export const useScriptCharacterCatalog = (
     const store = useMemo(() => scriptId
         ? getScriptCharactersStore(repository, scriptId)
         : null, [repository, scriptId]);
-    const charactersStatus = useStatus(store?.charactersStatus);
-    const gendersStatus = useStatus(store?.gendersStatus);
-    const actionStatus = useStatus(store?.actionStatus);
+    const charactersStatus = useReactiveCollectionStatus(store?.charactersStatus);
+    const gendersStatus = useReactiveCollectionStatus(store?.gendersStatus);
+    const actionStatus = useReactiveCollectionStatus(store?.actionStatus);
     const charactersQuery = useLiveQuery(q => {
         if (!store) {
             return undefined;

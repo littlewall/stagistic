@@ -31,22 +31,11 @@ export const createScriptCharactersStore = (
                 const confirmed = await repository.confirmScriptCharacterWithId(scriptId, {
                     id: character.id,
                     key: character.key,
+                    colorHex: character.colorHex,
                 });
 
                 if (!confirmed) {
                     throw new Error('The character could not be confirmed');
-                }
-
-                if (character.colorHex !== null) {
-                    const colored = await repository.setScriptCharacterColor(
-                        scriptId,
-                        confirmed.id,
-                        character.colorHex,
-                    );
-
-                    if (!colored) {
-                        throw new Error('The character color could not be saved');
-                    }
                 }
             },
             update: async (original, modified, changes) => {

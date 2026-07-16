@@ -7,18 +7,10 @@ import {useLiveQuery} from '@tanstack/react-db';
 import {
     useCallback,
     useMemo,
-    useSyncExternalStore,
 } from 'react';
 
+import {useReactiveCollectionStatus} from '../collections';
 import {getScriptCuesStore} from './scriptCuesStore';
-
-const emptyStatus = {
-    isReady: true,
-    sourceError: null,
-    mutations: [],
-} as const;
-const getEmptyStatus = () => emptyStatus;
-const subscribeEmpty = () => () => undefined;
 
 export const useScriptCues = (
     scriptId: string | null,
@@ -27,11 +19,7 @@ export const useScriptCues = (
     const store = useMemo(() => scriptId
         ? getScriptCuesStore(repository, scriptId)
         : null, [repository, scriptId]);
-    const status = useSyncExternalStore(
-        store?.status.subscribe ?? subscribeEmpty,
-        store?.status.getSnapshot ?? getEmptyStatus,
-        store?.status.getSnapshot ?? getEmptyStatus,
-    );
+    const status = useReactiveCollectionStatus(store?.status);
     const query = useLiveQuery(
         q => {
             if (!store) {

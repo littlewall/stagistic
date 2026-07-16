@@ -1,4 +1,7 @@
-import {useScriptRepository} from '@stagistic/app-core';
+import {
+    useScriptActions,
+    useScriptRepository,
+} from '@stagistic/app-core';
 import {
     DeleteScriptModal,
     DuplicateScriptModal,
@@ -10,6 +13,7 @@ import {
 import {
     createContext,
     type ReactNode,
+    useCallback,
     useContext,
     useMemo,
 } from 'react';
@@ -49,6 +53,11 @@ interface GlobalModalsProviderProps {
 export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
+    const scriptActions = useScriptActions();
+    const saveTitlePage = useCallback((
+        scriptId: string,
+        settings: Parameters<typeof scriptRepository.saveTitlePage>[1],
+    ) => scriptRepository.saveTitlePage(scriptId, settings), [scriptRepository]);
     const {addToast} = useToastController();
 
     const {
@@ -81,9 +90,8 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         handleRename,
         handleDuplicate,
     } = useGlobalModalActions({
-        repository: {
-            scriptRepository,
-        },
+        scriptActions,
+        saveTitlePage,
         navigation: {
             navigate,
         },

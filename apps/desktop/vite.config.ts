@@ -1,8 +1,7 @@
 import {fileURLToPath} from 'node:url';
 
 import react from '@vitejs/plugin-react';
-import {defineConfig} from 'vite';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import {defineConfig} from 'vite-plus';
 
 const host = process.env.TAURI_DEV_HOST;
 const pgliteDataPath = fileURLToPath(
@@ -13,7 +12,7 @@ const pgliteWasmPath = fileURLToPath(
 );
 
 export default defineConfig({
-    plugins: [react(), tsconfigPaths()],
+    plugins: [react()],
     css: {
         transformer: 'lightningcss',
     },
@@ -21,6 +20,7 @@ export default defineConfig({
         exclude: ['@electric-sql/pglite'],
     },
     resolve: {
+        tsconfigPaths: true,
         alias: [{find: /^@pglite-data/, replacement: pgliteDataPath}, {find: /^@pglite-wasm/, replacement: pgliteWasmPath}],
     },
     clearScreen: false,

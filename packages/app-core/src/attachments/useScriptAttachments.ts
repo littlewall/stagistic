@@ -8,18 +8,10 @@ import {
     useCallback,
     useMemo,
     useState,
-    useSyncExternalStore,
 } from 'react';
 
+import {useReactiveCollectionStatus} from '../collections';
 import {getScriptAttachmentsStore} from './scriptAttachmentsStore';
-
-const emptyStatus = {
-    isReady: true,
-    sourceError: null,
-    mutations: [],
-} as const;
-const getEmptyStatus = () => emptyStatus;
-const subscribeEmpty = () => () => undefined;
 
 export const useScriptAttachments = (
     scriptId: string | null,
@@ -28,16 +20,8 @@ export const useScriptAttachments = (
     const store = useMemo(() => scriptId
         ? getScriptAttachmentsStore(repository, scriptId)
         : null, [repository, scriptId]);
-    const attachmentsStatus = useSyncExternalStore(
-        store?.attachmentsStatus.subscribe ?? subscribeEmpty,
-        store?.attachmentsStatus.getSnapshot ?? getEmptyStatus,
-        store?.attachmentsStatus.getSnapshot ?? getEmptyStatus,
-    );
-    const bindingsStatus = useSyncExternalStore(
-        store?.bindingsStatus.subscribe ?? subscribeEmpty,
-        store?.bindingsStatus.getSnapshot ?? getEmptyStatus,
-        store?.bindingsStatus.getSnapshot ?? getEmptyStatus,
-    );
+    const attachmentsStatus = useReactiveCollectionStatus(store?.attachmentsStatus);
+    const bindingsStatus = useReactiveCollectionStatus(store?.bindingsStatus);
     const attachmentsQuery = useLiveQuery(q => {
         return store ? q.from({attachments: store.attachmentsCollection}) : undefined;
     }, [store]);

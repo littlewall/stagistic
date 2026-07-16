@@ -6,7 +6,7 @@ import type {TitlePageSettings} from '@stagistic/script';
 
 import {
     createReactiveCollection,
-    createReactiveSourceStore,
+    createRepositoryStoreRegistry,
 } from '../collections';
 
 export const createScriptTitlePageStore = (
@@ -14,8 +14,11 @@ export const createScriptTitlePageStore = (
     scriptId: string,
 ) => {
     const source = repository.getScriptTitlePageSource(scriptId);
-    const confirmed = createReactiveSourceStore(source);
-    const {collection, status} = createReactiveCollection<ScriptTitlePageRecord, string>({
+    const {
+        collection,
+        status,
+        confirmed,
+    } = createReactiveCollection<ScriptTitlePageRecord, string>({
         id: `script-title-page:${scriptId}`,
         source,
         getKey: record => record.scriptId,
@@ -47,31 +50,6 @@ export const createScriptTitlePageStore = (
 
 export type ScriptTitlePageStore = ReturnType<typeof createScriptTitlePageStore>;
 
-const storesByRepository = new WeakMap<
-    ScriptRepository,
-    Map<string, ScriptTitlePageStore>
->();
-
-export const getScriptTitlePageStore = (
-    repository: ScriptRepository,
-    scriptId: string,
-) => {
-    let stores = storesByRepository.get(repository);
-
-    if (!stores) {
-        stores = new Map();
-        storesByRepository.set(repository, stores);
-    }
-
-    const existing = stores.get(scriptId);
-
-    if (existing) {
-        return existing;
-    }
-
-    const store = createScriptTitlePageStore(repository, scriptId);
-
-    stores.set(scriptId, store);
-
-    return store;
-};
+export const getScriptTitlePageStore = createRepositoryStoreRegistry(
+    createScriptTitlePageStore,
+);

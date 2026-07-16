@@ -124,6 +124,7 @@ describe('atomic domain write and outbox recording', () => {
         await expect(handlers.confirmScriptCharacterWithId('script-1', {
             id: 'character-1',
             key: 'ALICE',
+            colorHex: '#123456',
         })).rejects.toThrow(outboxFailure);
 
         expect(await db.select().from(dbSchema.scriptCharacters)).toEqual([]);

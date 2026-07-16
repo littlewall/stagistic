@@ -3,18 +3,10 @@ import {useLiveQuery} from '@tanstack/react-db';
 import {
     useCallback,
     useMemo,
-    useSyncExternalStore,
 } from 'react';
 
+import {useReactiveCollectionStatus} from '../collections';
 import {getScriptPlacesStore} from './scriptPlacesStore';
-
-const emptyStatus = {
-    isReady: true,
-    sourceError: null,
-    mutations: [],
-} as const;
-const getEmptyStatus = () => emptyStatus;
-const subscribeEmpty = () => () => undefined;
 
 export const useScriptPlaces = (
     scriptId: string | null,
@@ -23,16 +15,8 @@ export const useScriptPlaces = (
     const store = useMemo(() => scriptId
         ? getScriptPlacesStore(repository, scriptId)
         : null, [repository, scriptId]);
-    const locationsStatus = useSyncExternalStore(
-        store?.locationsStatus.subscribe ?? subscribeEmpty,
-        store?.locationsStatus.getSnapshot ?? getEmptyStatus,
-        store?.locationsStatus.getSnapshot ?? getEmptyStatus,
-    );
-    const assignmentsStatus = useSyncExternalStore(
-        store?.assignmentsStatus.subscribe ?? subscribeEmpty,
-        store?.assignmentsStatus.getSnapshot ?? getEmptyStatus,
-        store?.assignmentsStatus.getSnapshot ?? getEmptyStatus,
-    );
+    const locationsStatus = useReactiveCollectionStatus(store?.locationsStatus);
+    const assignmentsStatus = useReactiveCollectionStatus(store?.assignmentsStatus);
     const locationsQuery = useLiveQuery(
         q => {
             if (!store) {
