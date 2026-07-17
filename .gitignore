@@ -71,5 +71,4 @@ vite.config.js
 vite.config.js.map
 
 # Graphify
-graphify-out/cache/
-graphify-out/.graphify_root
+graphify-out/
