@@ -117,6 +117,67 @@ describe('reactive collection bridge', () => {
         expect(result.collection.get('row-1')?.title).toBe('Original');
     });
 
+    it('confirms an update whose source echo differs in key order and empty sections', async () => {
+        interface SettingsRow {
+            id: string,
+            settings: Record<string, unknown>,
+        }
+
+        const source = createInMemoryReactiveQuerySource<SettingsRow>([
+            {
+                id: 'row-1',
+                settings: {page: {widthPx: 100}},
+            },
+        ]);
+        const {collection} = createReactiveCollection({
+            id: `test-${crypto.randomUUID()}`,
+            source,
+            getKey: (row: SettingsRow) => row.id,
+            confirmationTimeoutMs: 50,
+            handlers: {
+                update: async (_original, modified) => {
+                    /*
+                     * Simulate the DB round-trip: sections rebuilt in a fixed
+                     * key order plus hydrated-but-empty sections.
+                     */
+                    source.emit([
+                        {
+                            id: modified.id,
+                            settings: {
+                                typography: {},
+                                page: modified.settings.page as object,
+                                initialPages: {
+                                    castAndPlace: {castOrderBy: 'appearance'},
+                                    songs: {},
+                                },
+                            },
+                        },
+                    ]);
+
+                    return Promise.resolve();
+                },
+            },
+        });
+
+        await collection.preload();
+
+        const transaction = collection.update('row-1', draft => {
+            draft.settings = {
+                initialPages: {
+                    songs: {},
+                    castAndPlace: {castOrderBy: 'appearance'},
+                },
+                page: {widthPx: 100},
+            };
+        });
+
+        await transaction.isPersisted.promise;
+
+        expect(collection.get('row-1')?.settings).toMatchObject({
+            initialPages: {castAndPlace: {castOrderBy: 'appearance'}},
+        });
+    });
+
     it('does not confirm an insert from entity identity alone', async () => {
         const source = createInMemoryReactiveQuerySource<Row>([]);
         const result = createReactiveCollection({

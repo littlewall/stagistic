@@ -39,6 +39,14 @@ export const createPersistedDraftController = <TKey, TValue>({
     let timer: unknown;
     let isActive = false;
     let persistValue = persist;
+    /*
+     * The value currently handed to persist(). While it is in flight the
+     * database is about to contain it, so it — not entity.confirmedValue —
+     * is the baseline for dirtiness checks and confirmed-echo reconciliation.
+     */
+    let inFlight: {key: TKey, value: TValue} | null = null;
+
+    const isSaveInFlight = () => inFlight !== null && Object.is(inFlight.key, entity.key);
 
     const emit = (next: PersistedDraftSnapshot<TValue>) => {
         snapshot = next;
@@ -66,53 +74,81 @@ export const createPersistedDraftController = <TKey, TValue>({
     const saveQueue = createGenerationSaveQueue({
         getGeneration: () => generation,
         run: async saveGeneration => {
-            while (
-                saveGeneration === generation
-                && entity.key !== null
-                && snapshot.isHydrated
-                && snapshot.isDirty
-            ) {
-                const saveRevision = revision;
-                const value = snapshot.value;
-                const key = entity.key;
+            try {
+                while (
+                    saveGeneration === generation
+                    && entity.key !== null
+                    && snapshot.isHydrated
+                    && snapshot.isDirty
+                ) {
+                    const saveRevision = revision;
+                    const value = snapshot.value;
+                    const key = entity.key;
 
-                emit({
-                    ...snapshot, status: 'saving', error: null,
-                });
+                    inFlight = {key, value};
+                    emit({
+                        ...snapshot, status: 'saving', error: null,
+                    });
 
-                try {
-                    await persistValue(key, value);
-                } catch (error) {
+                    try {
+                        await persistValue(key, value);
+                    } catch (error) {
+                        if (saveGeneration !== generation) {
+                            return;
+                        }
+
+                        if (saveRevision !== revision) {
+                            /*
+                             * Newer local edits exist; nothing was written, so
+                             * re-baseline against the confirmed value and let
+                             * the loop retry (or stop when nothing differs).
+                             */
+                            const isDirty = !equals(snapshot.value, entity.confirmedValue);
+
+                            emit({
+                                ...snapshot,
+                                isDirty,
+                                status: isDirty ? 'saving' : 'idle',
+                                error: null,
+                            });
+                            continue;
+                        }
+
+                        emit({
+                            ...snapshot, status: 'error', error: toDraftError(error),
+                        });
+                        throw error;
+                    }
+
                     if (saveGeneration !== generation) {
                         return;
                     }
 
+                    // The write happened even if newer edits arrived meanwhile.
+                    entity = {...entity, confirmedValue: value};
+
                     if (saveRevision !== revision) {
+                        const isDirty = !equals(snapshot.value, value);
+
+                        emit({
+                            ...snapshot,
+                            isDirty,
+                            status: isDirty ? 'saving' : 'saved',
+                            error: null,
+                        });
                         continue;
                     }
 
                     emit({
-                        ...snapshot, status: 'error', error: toDraftError(error),
+                        value,
+                        status: 'saved',
+                        isHydrated: true,
+                        isDirty: false,
+                        error: null,
                     });
-                    throw error;
                 }
-
-                if (saveGeneration !== generation) {
-                    return;
-                }
-
-                if (saveRevision !== revision) {
-                    continue;
-                }
-
-                entity = {...entity, confirmedValue: value};
-                emit({
-                    value,
-                    status: 'saved',
-                    isHydrated: true,
-                    isDirty: false,
-                    error: null,
-                });
+            } finally {
+                inFlight = null;
             }
         },
     });
@@ -211,6 +247,11 @@ export const createPersistedDraftController = <TKey, TValue>({
         }
 
         if (!equals(snapshot.value, confirmedValue)) {
+            if (isSaveInFlight()) {
+                // Reconcile after the save settles; the echo may predate it.
+                return;
+            }
+
             emit({
                 value: confirmedValue,
                 status: 'idle',
@@ -229,7 +270,10 @@ export const createPersistedDraftController = <TKey, TValue>({
         const value = typeof next === 'function'
             ? (next as (previous: TValue) => TValue)(snapshot.value)
             : next;
-        const isDirty = !equals(value, entity.confirmedValue);
+        const baseline = isSaveInFlight() && inFlight
+            ? inFlight.value
+            : entity.confirmedValue;
+        const isDirty = !equals(value, baseline);
 
         revision += 1;
         emit({
@@ -250,7 +294,11 @@ export const createPersistedDraftController = <TKey, TValue>({
     const flush = () => {
         cancelScheduledSave();
 
-        if (!snapshot.isDirty || entity.key === null || !snapshot.isHydrated) {
+        if (entity.key === null || !snapshot.isHydrated) {
+            return Promise.resolve();
+        }
+
+        if (!snapshot.isDirty && !isSaveInFlight()) {
             return Promise.resolve();
         }
 

@@ -1,3 +1,5 @@
+import {structuralValueEquals} from '@stagistic/shared';
+
 export type PersistedDraftStatus =
     | 'loading'
     | 'idle'
@@ -34,7 +36,7 @@ export interface PersistedDraftControllerOptions<TKey, TValue> {
 }
 
 export const defaultDraftEquals = <TValue>(left: TValue, right: TValue) => {
-    return Object.is(left, right) || JSON.stringify(left) === JSON.stringify(right);
+    return structuralValueEquals(left, right);
 };
 
 export const toDraftError = (error: unknown) => {

@@ -127,6 +127,9 @@ importers:
       '@stagistic/script':
         specifier: workspace:*
         version: link:../script
+      '@stagistic/shared':
+        specifier: workspace:*
+        version: link:../shared
       '@tanstack/pacer':
         specifier: 0.21.1
         version: 0.21.1

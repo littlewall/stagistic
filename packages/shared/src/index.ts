@@ -11,3 +11,4 @@ export * from './utils/number';
 export * from './utils/object';
 export * from './utils/platform';
 export * from './utils/string';
+export * from './utils/structuralEquals';

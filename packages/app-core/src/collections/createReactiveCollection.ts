@@ -1,4 +1,5 @@
 import type {ReactiveQuerySource} from '@stagistic/db';
+import {structuralValueEquals} from '@stagistic/shared';
 import {
     createCollection,
     type PendingMutation,
@@ -62,8 +63,6 @@ const createConfirmation = () => {
     };
 };
 
-const valuesEqual = (left: unknown, right: unknown) => Object.is(left, right)
-    || JSON.stringify(left) === JSON.stringify(right);
 const isConfirmed = <T extends object, TKey extends string | number>(
     rows: readonly T[],
     mutation: ReactivePendingMutation<T, TKey>,
@@ -84,7 +83,7 @@ const isConfirmed = <T extends object, TKey extends string | number>(
         : mutation.changes;
 
     return Object.entries(expectedValues).every(([key, value]) => {
-        return valuesEqual(row[key as keyof T], value);
+        return structuralValueEquals(row[key as keyof T], value);
     });
 };
 

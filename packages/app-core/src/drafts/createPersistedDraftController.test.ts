@@ -126,6 +126,89 @@ describe('persisted draft controller', () => {
         });
     });
 
+    it('re-persists a draft reverted to the confirmed value while a save is in flight', async () => {
+        const firstSave = deferred();
+        const persisted: string[] = [];
+        const {scheduler, run} = createScheduler();
+        const controller = createPersistedDraftController({
+            defaultValue: '',
+            scheduler,
+            persist: async (_key: string, value: string) => {
+                persisted.push(value);
+
+                if (value === 'Appearance') {
+                    await firstSave.promise;
+                }
+            },
+        });
+
+        controller.resume();
+        controller.setEntity({
+            key: 'one', confirmedValue: 'Name', isHydrated: true,
+        });
+        controller.update('Appearance');
+        run();
+        await Promise.resolve();
+        expect(persisted).toEqual(['Appearance']);
+
+        controller.update('Name');
+        controller.setEntity({
+            key: 'one', confirmedValue: 'Appearance', isHydrated: true,
+        });
+
+        firstSave.resolve();
+        await controller.flush();
+
+        expect(persisted).toEqual(['Appearance', 'Name']);
+        expect(controller.getSnapshot()).toMatchObject({
+            value: 'Name',
+            status: 'saved',
+            isDirty: false,
+        });
+    });
+
+    it('keeps the draft value when a confirmed echo arrives during an in-flight save', async () => {
+        const firstSave = deferred();
+        const persisted: string[] = [];
+        const {scheduler, run} = createScheduler();
+        const controller = createPersistedDraftController({
+            defaultValue: '',
+            scheduler,
+            persist: async (_key: string, value: string) => {
+                persisted.push(value);
+
+                if (value === 'Appearance') {
+                    await firstSave.promise;
+                }
+            },
+        });
+
+        controller.resume();
+        controller.setEntity({
+            key: 'one', confirmedValue: 'Name', isHydrated: true,
+        });
+        controller.update('Appearance');
+        run();
+        await Promise.resolve();
+
+        controller.update('Name');
+
+        expect(controller.getSnapshot()).toMatchObject({
+            value: 'Name',
+            isDirty: true,
+        });
+
+        controller.setEntity({
+            key: 'one', confirmedValue: 'Appearance', isHydrated: true,
+        });
+        expect(controller.getSnapshot().value).toBe('Name');
+
+        firstSave.resolve();
+        await controller.flush();
+
+        expect(persisted).toEqual(['Appearance', 'Name']);
+    });
+
     it('retains a failed draft and retries it', async () => {
         const persist = vi.fn()
             .mockRejectedValueOnce(new Error('disk full'))
