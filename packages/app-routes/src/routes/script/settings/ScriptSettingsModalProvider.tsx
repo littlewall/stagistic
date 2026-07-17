@@ -47,14 +47,10 @@ const BLOCK_LABEL_BY_TYPE = new Map(
     SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const),
 );
 
-/*
- * Values every script view (editor, export, future ones) reads from the shared
- * settings host: the resolved settings that drive the view, plus the drafts and
- * the workspace modal entry points wired to the app header.
- */
 interface ScriptSettingsModalContextValue {
     resolvedScriptSettings: EditorSettings,
     effectiveScriptSettingsDraft: EditorSettingsOverride,
+    isEditorPresentationHydrated: boolean,
     titlePageDraft: TitlePageSettings,
     scriptTitleDraft: string,
     cueState: ReturnType<typeof useScriptCuesState>,
@@ -77,11 +73,6 @@ export const useScriptSettingsModal = (): ScriptSettingsModalContextValue => {
     return context;
 };
 
-/*
- * Owns the script settings/title-page/title drafts and the settings modal once,
- * at the workspace level, so every view shares a single modal and a single set
- * of debounced savers. Views open it via `useScriptSettingsModal().openSettingsModal`.
- */
 export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) => {
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
@@ -90,11 +81,14 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     const {
         currentScript,
         currentScriptId,
+        characterCatalog,
+        cueCatalog,
         initialValue,
         handleAutoSave,
     } = useScriptWorkspace();
     const {
         effectiveScriptSettingsDraft,
+        isScriptSettingsHydrated,
         resolvedScriptSettings,
         updateBlockSettings,
         resetBlockSettings,
@@ -111,6 +105,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     });
     const {
         titlePageDraft,
+        isTitlePageHydrated,
         updateTitlePage,
         titlePageDraftError,
         retryTitlePage,
@@ -120,6 +115,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     });
     const {
         scriptTitleDraft,
+        isScriptTitleHydrated,
         updateScriptTitle,
         scriptTitleDraftError,
         retryScriptTitle,
@@ -163,13 +159,13 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         contextValue: charactersContextValue,
     } = useScriptCharactersContextValue({
         currentScriptId,
-        scriptRepository,
+        characterCatalog,
         initialValue,
         resolvedScriptSettings,
         characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
-    const cueState = useScriptCuesState(currentScriptId, scriptRepository);
+    const cueState = useScriptCuesState(currentScriptId, cueCatalog);
     const {
         getValue: getCueTitleDraft,
         persistValue: persistCueTitleDraft,
@@ -193,6 +189,9 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     const draftSaveError = scriptSettingsDraftError
         ?? titlePageDraftError
         ?? scriptTitleDraftError;
+    const isEditorPresentationHydrated = isScriptSettingsHydrated
+        && isTitlePageHydrated
+        && isScriptTitleHydrated;
     const retryFailedDrafts = () => {
         void Promise.allSettled([
             scriptSettingsDraftError ? retryScriptSettings() : Promise.resolve(),
@@ -204,6 +203,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     const contextValue = useMemo<ScriptSettingsModalContextValue>(() => ({
         resolvedScriptSettings,
         effectiveScriptSettingsDraft,
+        isEditorPresentationHydrated,
         titlePageDraft,
         scriptTitleDraft,
         cueState,
@@ -215,6 +215,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     }), [
         cueState,
         effectiveScriptSettingsDraft,
+        isEditorPresentationHydrated,
         openAttributeManagerModal,
         openAttributeManagerModalWithPanel,
         openAttributeManagerCharacter,

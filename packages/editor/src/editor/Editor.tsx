@@ -6,8 +6,10 @@ import {
     type ReactNode,
     useCallback,
     useEffect,
+    useLayoutEffect,
     useMemo,
     useRef,
+    useState,
 } from 'react';
 
 import {EditorActCommandsProvider} from './actCommands/context';
@@ -31,6 +33,7 @@ import {useEditorCharacterColors} from './hooks/useEditorCharacterColors';
 import {useEditorCharacterSync} from './hooks/useEditorCharacterSync';
 import {useEditorLifecycle} from './hooks/useEditorLifecycle';
 import {useEditorSidebarLayout} from './hooks/useEditorSidebarLayout';
+import {usePaginationReady} from './hooks/usePaginationReady';
 import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
 import {EditorSnapshotStoreProvider} from './live/context';
@@ -269,6 +272,17 @@ const Editor = ({
         renderScale,
     });
 
+    const isPaginationReady = usePaginationReady(editor);
+    const [hasPresentedCanvas, setHasPresentedCanvas] = useState(isPaginationReady);
+
+    useLayoutEffect(() => {
+        if (isPaginationReady) {
+            setHasPresentedCanvas(true);
+        }
+    }, [isPaginationReady]);
+
+    const isInitialCanvasReady = hasPresentedCanvas || isPaginationReady;
+
     const {actCommands} = useEditorLifecycle({
         editor: {
             instance: editor,
@@ -307,6 +321,7 @@ const Editor = ({
                 <EditorElementSelectionProvider editor={editor} rootRef={rootRef}>
                     <EditorActCommandsProvider value={actCommands}>
                         <EditorShell
+                            isCanvasReady={isInitialCanvasReady}
                             canvas={{
                                 autoFocus,
                                 characterColorSaturation: resolvedSettings.visual.characterColorSaturation,

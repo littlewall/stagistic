@@ -1,4 +1,7 @@
-import {type useScriptRepository} from '@stagistic/app-core';
+import {
+    useScriptCues,
+    type useScriptRepository,
+} from '@stagistic/app-core';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -71,7 +74,8 @@ const Harness = ({
     scriptId: string,
     repository: Repository,
 }) => {
-    const state = useScriptCuesState(scriptId, repository);
+    const catalog = useScriptCues(scriptId, repository);
+    const state = useScriptCuesState(scriptId, catalog);
 
     return (
         <div>

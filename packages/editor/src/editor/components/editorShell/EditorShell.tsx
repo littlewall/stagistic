@@ -1,5 +1,9 @@
 import type {HeaderFooterSettings} from '@stagistic/script';
-import {ArrowLeftIcon, ArrowRightIcon} from '@stagistic/ui';
+import {
+    ArrowLeftIcon,
+    ArrowRightIcon,
+    LoaderOverlay,
+} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
 import {
@@ -39,6 +43,12 @@ interface EditorShellCanvasProps {
 
 interface EditorShellProps {
     canvas: EditorShellCanvasProps,
+    /**
+     * Keeps the opaque loader above the live canvas until the first paginated
+     * layout exists, so text, headers, and footers appear together. The canvas
+     * remains measurable and focusable behind it.
+     */
+    isCanvasReady?: boolean,
     layout?: EditorLayoutProps,
     rootRef: RefObject<HTMLDivElement | null>,
     canvasHostRef: RefObject<HTMLDivElement | null>,
@@ -50,6 +60,7 @@ interface EditorShellProps {
 
 export const EditorShell = ({
     canvas,
+    isCanvasReady = true,
     layout,
     rootRef,
     canvasHostRef,
@@ -102,10 +113,19 @@ export const EditorShell = ({
         <div
             className={styles.root}
             data-character-tag-scope={characterTagScopeId}
+            data-editor-ready={isCanvasReady ? 'true' : 'false'}
             {...{[CHARACTER_HIGHLIGHT_ATTR]: DEFAULT_CHARACTER_HIGHLIGHT}}
+            aria-busy={!isCanvasReady}
             ref={rootRef}
             style={rootStyle}
         >
+            {!isCanvasReady ? (
+                <LoaderOverlay
+                    title="Preparing editor"
+                    subtitle="Loading your script"
+                    statusText="Laying out pages"
+                />
+            ) : null}
             {characterTagPaletteCss ? (
                 <style data-character-tag-palette>{characterTagPaletteCss}</style>
             ) : null}
@@ -170,6 +190,7 @@ export const EditorShell = ({
                 </aside>
                 <div
                     className={styles.canvasHost}
+                    data-editor-canvas-host="true"
                     ref={canvasHostRef}
                 >
                     <EditorCanvas

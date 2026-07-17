@@ -1,6 +1,5 @@
 import {
-    useScriptCues,
-    type useScriptRepository,
+    type useScriptCues,
 } from '@stagistic/app-core';
 import type {UpdateCueRequest} from '@stagistic/editor';
 import {
@@ -17,13 +16,10 @@ import type {
     UpdateScriptCueInput,
 } from './types';
 
-type ScriptRepository = ReturnType<typeof useScriptRepository>;
-
 export const useScriptCuesState = (
     scriptId: string | null,
-    scriptRepository: ScriptRepository,
+    catalog: ReturnType<typeof useScriptCues>,
 ) => {
-    const catalog = useScriptCues(scriptId, scriptRepository);
     const [assignmentIntentState, setAssignmentIntentState] = useState<{
         scriptId: string | null,
         values: Record<string, boolean>,

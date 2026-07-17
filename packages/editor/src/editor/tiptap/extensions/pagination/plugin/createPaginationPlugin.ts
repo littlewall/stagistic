@@ -44,6 +44,7 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                     decorations: DecorationSet.empty,
                     pagination: createInitialPaginationState(extension.options),
                     forceRecalcToken: extension.storage.forceRecalcToken,
+                    hasComputed: false,
                 };
             },
             apply: (tr, pluginState: PaginationPluginState) => {
@@ -77,6 +78,7 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                         decorations: pluginState.decorations.map(tr.mapping, tr.doc),
                         pagination: pluginState.pagination,
                         forceRecalcToken: pluginState.forceRecalcToken,
+                        hasComputed: pluginState.hasComputed,
                     };
                 }
 
@@ -159,6 +161,7 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                         decorations,
                         pagination,
                         forceRecalcToken: extension.storage.forceRecalcToken,
+                        hasComputed: true,
                     });
 
                     view.dispatch(tr);

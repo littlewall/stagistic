@@ -27,6 +27,7 @@ export const useScriptTitleDraft = ({
         scriptTitleDraft: draft.draft,
         scriptTitleDraftStatus: draft.status,
         scriptTitleDraftError: draft.error,
+        isScriptTitleHydrated: draft.isHydrated,
         updateScriptTitle: draft.setDraft,
         flushScriptTitle: draft.flush,
         retryScriptTitle: draft.retry,

@@ -30,6 +30,7 @@ import {UnassignCueModal} from './UnassignCueModal';
 
 interface ScriptCuesSidebarProps {
     cues: readonly ScriptCueListItem[],
+    isLoading?: boolean,
     onAddCue: () => void,
     onDeleteCue: (cueId: string) => void | Promise<void>,
     onUnassignCue: (cueId: string) => void | Promise<void>,
@@ -138,6 +139,7 @@ const CueRow = ({
 
 export const ScriptCuesSidebar = ({
     cues,
+    isLoading = false,
     onAddCue,
     onDeleteCue,
     onUnassignCue,
@@ -224,17 +226,25 @@ export const ScriptCuesSidebar = ({
                     </SidebarActionsGroup>
                 )}
             />
-            <section className={styles.section} aria-label="Assigned cues">
-                {assignedCues.length > 0 ? renderCueList(assignedCues) : (
-                    <p className={styles.empty}>No assigned cues yet.</p>
-                )}
-            </section>
-            {unassignedCues.length > 0 ? (
-                <section className={styles.section} aria-labelledby="cues-unassigned">
-                    <h3 id="cues-unassigned" className={styles.sectionTitle}>Unassigned</h3>
-                    {renderCueList(unassignedCues)}
+            {isLoading ? (
+                <section className={styles.section} aria-label="Cues">
+                    <p className={styles.empty} role="status">Loading cues...</p>
                 </section>
-            ) : null}
+            ) : (
+                <>
+                    <section className={styles.section} aria-label="Assigned cues">
+                        {assignedCues.length > 0 ? renderCueList(assignedCues) : (
+                            <p className={styles.empty}>No assigned cues yet.</p>
+                        )}
+                    </section>
+                    {unassignedCues.length > 0 ? (
+                        <section className={styles.section} aria-labelledby="cues-unassigned">
+                            <h3 id="cues-unassigned" className={styles.sectionTitle}>Unassigned</h3>
+                            {renderCueList(unassignedCues)}
+                        </section>
+                    ) : null}
+                </>
+            )}
             <DeleteCueModal
                 isOpen={deleteTarget !== null}
                 cueTitle={deleteTarget?.title}

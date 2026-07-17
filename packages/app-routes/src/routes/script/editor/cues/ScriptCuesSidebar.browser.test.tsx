@@ -83,9 +83,11 @@ const poll = async <T, >(getValue: () => T | null | undefined, label: string): P
 
 const mountSidebar = ({
     initialValue = documentWithCue,
+    isLoading = false,
     onUnassignCue = () => {},
 }: {
     initialValue?: ScriptDocument,
+    isLoading?: boolean,
     onUnassignCue?: (cueId: string) => void | Promise<void>,
 } = {}) => {
     const host = document.createElement('div');
@@ -118,6 +120,7 @@ const mountSidebar = ({
                             assignmentLabel: null,
                         },
                     ]}
+                    isLoading={isLoading}
                     onAddCue={() => {}}
                     onDeleteCue={() => {}}
                     onUnassignCue={onUnassignCue}
@@ -137,6 +140,15 @@ afterEach(() => {
 });
 
 describe('ScriptCuesSidebar', () => {
+    it('shows loading without exposing stale content or a false empty state', async () => {
+        mountSidebar({isLoading: true});
+
+        await poll(() => document.body.textContent?.includes('Loading cues...') ? true : null, 'loading state');
+
+        expect(document.querySelector('[data-cue-navigation="true"]')).toBeNull();
+        expect(document.body.textContent).not.toContain('No assigned cues yet.');
+    });
+
     it('shows cue metadata edits from the live editor transaction immediately', async () => {
         mountSidebar();
 

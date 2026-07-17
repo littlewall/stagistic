@@ -1,8 +1,12 @@
 import {
     useRecentScripts,
     useScriptActions,
+    useScriptCharacterCatalog,
+    useScriptCues,
+    useScriptEditorSettingsRecord,
     useScriptRepository,
     useScriptSummary,
+    useScriptTitlePageRecord,
 } from '@stagistic/app-core';
 import {useToastController} from '@stagistic/ui';
 import {useMemo} from 'react';
@@ -47,7 +51,18 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     const scriptsLoading = recentScriptsLoading || (scriptId ? currentScriptLoading : false);
     const scriptsError = currentScriptError ?? recentScriptsError;
     const currentScriptId = currentScript?.id ?? null;
+    const editorSettingsRecord = useScriptEditorSettingsRecord(currentScriptId, scriptRepository);
+    const titlePageRecord = useScriptTitlePageRecord(currentScriptId, scriptRepository);
+    const characterCatalog = useScriptCharacterCatalog(currentScriptId, scriptRepository);
+    const cueCatalog = useScriptCues(currentScriptId, scriptRepository);
     const isContentLoading = Boolean(currentScriptId) && initialValue === undefined;
+    const isEditorMetadataLoading = Boolean(currentScriptId) && (
+        editorSettingsRecord.isLoading
+        || titlePageRecord.isLoading
+    );
+    const editorMetadataError = editorSettingsRecord.error ?? titlePageRecord.error;
+    const isSidebarDataLoading = characterCatalog.isLoading || cueCatalog.isLoading;
+    const sidebarDataError = characterCatalog.error ?? cueCatalog.error;
 
     const seedDefaultScript = useSeedDefaultScript(
         scriptActions,
@@ -80,6 +95,10 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
             currentScriptLoading,
             storageError,
             isContentLoading,
+            editorMetadataError,
+            isEditorMetadataLoading,
+            sidebarDataError,
+            isSidebarDataLoading,
             initialValueLoaded: Boolean(initialValue),
             scriptsLoading,
             scriptId,
@@ -87,12 +106,16 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     }, [
         currentScriptError,
         currentScriptLoading,
+        editorMetadataError,
         initialValue,
         isContentLoading,
+        isEditorMetadataLoading,
+        isSidebarDataLoading,
         recentScriptsError,
         recentScriptsLoading,
         scriptId,
         scriptsLoading,
+        sidebarDataError,
         storageError,
     ]);
 
@@ -129,6 +152,8 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         scriptsError,
         currentScript,
         currentScriptId,
+        characterCatalog,
+        cueCatalog,
         recentScripts,
         initialValue,
         initialIndexSnapshot,

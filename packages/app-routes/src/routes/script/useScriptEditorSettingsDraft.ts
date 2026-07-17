@@ -176,6 +176,15 @@ export const useScriptEditorSettingsDraft = ({
     return {
         scriptSettingsDraft,
         effectiveScriptSettingsDraft: scriptSettingsDraft,
+        /*
+         * draft.isHydrated alone lags one render behind a script switch (the
+         * controller only learns the new key in a layout effect), which lets
+         * the editor mount with empty settings and immediately unmount.
+         * record.isLoading is computed synchronously from the store, so it is
+         * correct on the very first render; the draft flag then keeps the
+         * gate closed until the hydrated value is actually in the snapshot.
+         */
+        isScriptSettingsHydrated: !record.isLoading && draft.isHydrated,
         resolvedScriptSettings,
         scriptSettingsDraftStatus: draft.status,
         scriptSettingsDraftError: draft.error ?? record.error,

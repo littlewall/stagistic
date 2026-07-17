@@ -140,6 +140,7 @@ export const HeaderFooterOverlay = ({
     return (
         <div
             className={styles.layer}
+            data-header-footer-layer="true"
             style={layerStyle}
             aria-hidden="true"
         >

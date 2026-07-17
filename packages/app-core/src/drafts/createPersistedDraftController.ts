@@ -314,6 +314,7 @@ export const createPersistedDraftController = <TKey, TValue>({
             };
         },
         getSnapshot: () => snapshot,
+        getEntityKey: () => entity.key,
         setEntity,
         setPersist: (nextPersist: typeof persist) => {
             persistValue = nextPersist;

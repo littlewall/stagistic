@@ -2,6 +2,7 @@ import {
     useEffect,
     useLayoutEffect,
     useMemo,
+    useRef,
     useSyncExternalStore,
 } from 'react';
 
@@ -31,13 +32,40 @@ export const usePersistedDraft = <TKey, TValue>({
     equals,
     scheduler,
 }: UsePersistedDraftOptions<TKey, TValue>) => {
-    const controller = useMemo(() => createPersistedDraftController({
-        defaultValue,
-        persist,
-        debounceMs,
-        equals,
-        scheduler,
-    }), [
+    const entityRef = useRef({
+        key: entityKey,
+        confirmedValue,
+        isHydrated,
+    });
+
+    entityRef.current = {
+        key: entityKey,
+        confirmedValue,
+        isHydrated,
+    };
+
+    const controller = useMemo(() => {
+        const nextController = createPersistedDraftController({
+            defaultValue,
+            persist,
+            debounceMs,
+            equals,
+            scheduler,
+        });
+
+        /*
+         * Seed the controller before its first snapshot is read. Otherwise its
+         * default null-entity snapshot reports hydrated=true for one render,
+         * which can expose default values as if they belonged to entityKey.
+         */
+        nextController.setEntity(entityRef.current);
+
+        /*
+         * Entity changes are applied by the layout effect below without
+         * replacing the controller or losing a dirty draft.
+         */
+        return nextController;
+    }, [
         debounceMs,
         defaultValue,
         equals,
@@ -70,13 +98,14 @@ export const usePersistedDraft = <TKey, TValue>({
         controller.getSnapshot,
         controller.getSnapshot,
     );
+    const isCurrentEntity = Object.is(controller.getEntityKey(), entityKey);
 
     return {
-        draft: snapshot.value,
-        status: snapshot.status,
-        isHydrated: snapshot.isHydrated,
-        isDirty: snapshot.isDirty,
-        error: snapshot.error,
+        draft: isCurrentEntity ? snapshot.value : defaultValue,
+        status: isCurrentEntity ? snapshot.status : 'loading' as const,
+        isHydrated: isCurrentEntity && snapshot.isHydrated,
+        isDirty: isCurrentEntity && snapshot.isDirty,
+        error: isCurrentEntity ? snapshot.error : null,
         setDraft: controller.update,
         flush: controller.flush,
         retry: controller.retry,

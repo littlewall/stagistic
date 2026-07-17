@@ -25,6 +25,8 @@ export interface PaginationPluginState {
     decorations: DecorationSet,
     pagination: PaginationState,
     forceRecalcToken: number,
+    /** False until the first real (measured) recalc has been dispatched. */
+    hasComputed: boolean,
 }
 
 export interface PaginationOptions {

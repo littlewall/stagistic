@@ -1,4 +1,4 @@
-import {useScriptCharacterCatalog} from '@stagistic/app-core';
+import type {useScriptCharacterCatalog} from '@stagistic/app-core';
 import type {EditorValueChangeMeta} from '@stagistic/editor';
 import type {ScriptDocument} from '@stagistic/script';
 import {
@@ -10,11 +10,9 @@ import {
     useState,
 } from 'react';
 
-import type {ScriptRepository} from './useScriptEditorCharacters.types';
-
 interface UseCharacterStateArgs {
     currentScriptId: string | null,
-    scriptRepository: ScriptRepository,
+    characterCatalog: ReturnType<typeof useScriptCharacterCatalog>,
     initialValue: ScriptDocument | null | undefined,
 }
 
@@ -33,13 +31,13 @@ interface CharacterState {
 
 export const useCharacterState = ({
     currentScriptId,
-    scriptRepository,
+    characterCatalog,
     initialValue,
 }: UseCharacterStateArgs): CharacterState => {
     const previousScriptIdRef = useRef<string | null>(null);
     const editorValueRef = useRef<ScriptDocument | null>(null);
     const [editorOverrideValue, setEditorOverrideValue] = useState<ScriptDocument | null>(null);
-    const catalog = useScriptCharacterCatalog(currentScriptId, scriptRepository);
+    const catalog = characterCatalog;
 
     useEffect(() => {
         const didScriptChange = previousScriptIdRef.current !== currentScriptId;

@@ -1,4 +1,4 @@
-import {type useScriptRepository} from '@stagistic/app-core';
+import {type useScriptCharacterCatalog} from '@stagistic/app-core';
 import {
     type EditorValueChangeMeta,
 } from '@stagistic/editor';
@@ -12,11 +12,9 @@ import type {
     ScriptCharacterRecord,
 } from './types';
 
-export type ScriptRepository = ReturnType<typeof useScriptRepository>;
-
 export interface UseScriptEditorCharactersArgs {
     currentScriptId: string | null,
-    scriptRepository: ScriptRepository,
+    characterCatalog: ReturnType<typeof useScriptCharacterCatalog>,
     initialValue: ScriptDocument | null | undefined,
     resolvedScriptSettings: EditorSettings,
     characterColorSaturation: number,

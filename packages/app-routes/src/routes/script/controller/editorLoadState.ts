@@ -16,6 +16,10 @@ type DeriveEditorLoadStateArgs = {
     currentScriptLoading: boolean,
     storageError: string | null,
     isContentLoading: boolean,
+    editorMetadataError: unknown,
+    isEditorMetadataLoading: boolean,
+    sidebarDataError: unknown,
+    isSidebarDataLoading: boolean,
     initialValueLoaded: boolean,
     scriptsLoading: boolean,
     scriptId: string | undefined,
@@ -49,6 +53,10 @@ export const deriveEditorLoadState = ({
     currentScriptLoading,
     storageError,
     isContentLoading,
+    editorMetadataError,
+    isEditorMetadataLoading,
+    sidebarDataError,
+    isSidebarDataLoading,
     initialValueLoaded,
     scriptsLoading,
     scriptId,
@@ -81,9 +89,17 @@ export const deriveEditorLoadState = ({
         {
             label: 'Loading editor settings',
             status: resolveEditorLoadItemStatus({
-                hasError: Boolean(storageError),
-                isActive: false,
-                isDone: true,
+                hasError: Boolean(editorMetadataError),
+                isActive: isEditorMetadataLoading,
+                isDone: Boolean(scriptId) && !isEditorMetadataLoading,
+            }),
+        },
+        {
+            label: 'Loading characters and cues',
+            status: resolveEditorLoadItemStatus({
+                hasError: Boolean(sidebarDataError),
+                isActive: isSidebarDataLoading,
+                isDone: Boolean(scriptId) && !isSidebarDataLoading,
             }),
         },
     ] as const;
@@ -107,6 +123,9 @@ export const deriveEditorLoadState = ({
     return {
         progress,
         statusText,
-        isLoading: scriptsLoading || isContentLoading,
+        isLoading: scriptsLoading
+            || isContentLoading
+            || isEditorMetadataLoading
+            || isSidebarDataLoading,
     };
 };

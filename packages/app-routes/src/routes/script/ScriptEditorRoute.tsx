@@ -6,10 +6,9 @@ import {
     ScriptEditor,
 } from '@stagistic/editor';
 import {resolveDraftDate} from '@stagistic/script';
-import {AppLayout} from '@stagistic/ui';
+import {AppLayout, LoaderOverlay} from '@stagistic/ui';
 import {
     useCallback,
-    useDeferredValue,
     useMemo,
     useState,
 } from 'react';
@@ -22,6 +21,7 @@ import {
     ScriptCuesSidebar,
     UnassignCueModal,
 } from './editor/cues';
+import {DeferredScriptEditor} from './editor/DeferredScriptEditor';
 import {
     type SidebarPanel,
     useEditorSidebars,
@@ -64,6 +64,7 @@ export const ScriptEditorRoute = () => {
     const {
         resolvedScriptSettings,
         effectiveScriptSettingsDraft,
+        isEditorPresentationHydrated,
         titlePageDraft,
         scriptTitleDraft,
         cueState,
@@ -73,7 +74,6 @@ export const ScriptEditorRoute = () => {
     } = useScriptSettingsModal();
     const [addCueModalState, setAddCueModalState] = useState<AddCueModalState | null>(null);
     const [removeCueRequest, setRemoveCueRequest] = useState<EditorCueRemoveRequest | null>(null);
-    const deferredScriptSettingsDraft = useDeferredValue(effectiveScriptSettingsDraft);
     const {
         cues,
         createCue,
@@ -171,6 +171,7 @@ export const ScriptEditorRoute = () => {
             renderContent: () => (
                 <ScriptCuesSidebar
                     cues={cues}
+                    isLoading={cueState.isLoading}
                     onAddCue={openAddCueModal}
                     onDeleteCue={deleteCue}
                     onUnassignCue={unassignCue}
@@ -197,8 +198,19 @@ export const ScriptEditorRoute = () => {
     });
     const resolvedEditorInitialValue = editorOverrideValue ?? initialValue;
 
-    if (!resolvedEditorInitialValue) {
-        return null;
+    /*
+     * Mount the editor once every value used to lay out its first frame is
+     * hydrated. Building it from defaults and replacing those values a moment
+     * later makes the script surface visibly rebuild.
+     */
+    if (!resolvedEditorInitialValue || !isEditorPresentationHydrated) {
+        return (
+            <LoaderOverlay
+                title="Preparing editor"
+                subtitle="Loading your script"
+                statusText="Loading editor settings"
+            />
+        );
     }
 
     return (
@@ -223,7 +235,7 @@ export const ScriptEditorRoute = () => {
                         {storageError}
                     </div>
                 ) : null}
-                <ScriptEditor
+                <DeferredScriptEditor
                     key={currentScript?.id ?? 'editor'}
                     surfaceCache={editorSurfaceCache}
                     liveStore={editorSnapshotStore}
@@ -234,9 +246,7 @@ export const ScriptEditorRoute = () => {
                         scriptTitle: scriptTitleDraft,
                         draftDate: resolveDraftDate(titlePageDraft),
                     }}
-                    settings={{
-                        scriptSettings: deferredScriptSettingsDraft,
-                    }}
+                    scriptSettings={effectiveScriptSettingsDraft}
                     save={{
                         onAutoSave: handleAutoSave,
                         onManualSave: handleManualSave,
@@ -266,7 +276,7 @@ export const ScriptEditorRoute = () => {
                     <ScriptEditor.RightSidebar>
                         {rightSidebar}
                     </ScriptEditor.RightSidebar>
-                </ScriptEditor>
+                </DeferredScriptEditor>
                 <AddCueModal
                     isOpen={addCueModalState !== null}
                     initialTitle={addCueModalState?.source === 'editor'

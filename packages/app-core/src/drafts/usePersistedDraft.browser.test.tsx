@@ -53,7 +53,71 @@ const Harness = ({persist}: {persist: (key: string, value: string) => Promise<vo
     );
 };
 
+type KeyedDraftRender = {
+    entityKey: string,
+    draft: string,
+    isHydrated: boolean,
+};
+
+const KeyedHarness = ({onRender}: {onRender: (render: KeyedDraftRender) => void}) => {
+    const [entityKey, setEntityKey] = useState('script-1');
+    const confirmedValue = entityKey === 'script-1' ? 'First' : 'Second';
+    const draft = usePersistedDraft({
+        entityKey,
+        confirmedValue,
+        isHydrated: true,
+        defaultValue: '',
+        persist: () => Promise.resolve(),
+    });
+
+    onRender({
+        entityKey,
+        draft: draft.draft,
+        isHydrated: draft.isHydrated,
+    });
+
+    return (
+        <>
+            <button type="button" onClick={() => setEntityKey('script-2')}>switch</button>
+            <output>{draft.draft}:{String(draft.isHydrated)}</output>
+        </>
+    );
+};
+
 describe('usePersistedDraft', () => {
+    it('never reports a value as hydrated for the wrong entity key', async () => {
+        const renders: KeyedDraftRender[] = [];
+        const host = document.createElement('div');
+        const root = createRoot(host);
+
+        roots.push(root);
+        document.body.appendChild(host);
+        root.render(<KeyedHarness onRender={render => renders.push(render)} />);
+
+        await waitFor(() => host.textContent?.includes('First:true') ?? false);
+
+        expect(renders[0]).toEqual({
+            entityKey: 'script-1',
+            draft: 'First',
+            isHydrated: true,
+        });
+
+        renders.length = 0;
+        (host.querySelector('button') as HTMLButtonElement).click();
+        await waitFor(() => host.textContent?.includes('Second:true') ?? false);
+
+        expect(renders).toContainEqual({
+            entityKey: 'script-2',
+            draft: '',
+            isHydrated: false,
+        });
+        expect(renders.at(-1)).toEqual({
+            entityKey: 'script-2',
+            draft: 'Second',
+            isHydrated: true,
+        });
+    });
+
     it('survives StrictMode setup cleanup without saving hydrated data', async () => {
         const persist = vi.fn(() => Promise.resolve());
         const host = document.createElement('div');

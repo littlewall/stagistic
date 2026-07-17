@@ -9,7 +9,7 @@ import type {
 
 export const useScriptEditorCharacters = ({
     currentScriptId,
-    scriptRepository,
+    characterCatalog,
     initialValue,
     resolvedScriptSettings,
     characterColorSaturation,
@@ -20,7 +20,7 @@ export const useScriptEditorCharacters = ({
         catalog,
     } = useCharacterState({
         currentScriptId,
-        scriptRepository,
+        characterCatalog,
         initialValue,
     });
 
