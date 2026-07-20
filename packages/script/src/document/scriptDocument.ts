@@ -126,6 +126,15 @@ export const createEmptyScriptDocument = (
     };
 };
 
+export const createActlessScriptDocument = (
+    blockId?: string,
+    settings?: EditorSettingsOverride,
+): ScriptDocument => ({
+    type: 'doc',
+    attrs: settings ? {settings} : undefined,
+    content: [createScriptBlockNode('scene', blockId)],
+});
+
 export const createDefaultScriptDocument = (
     blockId?: string,
     settings?: EditorSettingsOverride,

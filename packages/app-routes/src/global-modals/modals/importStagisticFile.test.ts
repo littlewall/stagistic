@@ -29,6 +29,8 @@ draftDate: 2026-07-01
             'When Night Falls',
             expect.objectContaining({type: 'doc'}),
         );
+        expect(createScript.mock.calls[0][1].content.map(node => node.type))
+            .toEqual(['scene']);
         expect(saveTitlePage).toHaveBeenCalledWith('script-1', expect.objectContaining({
             draftDate: '2026-07-01',
         }));

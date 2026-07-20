@@ -6,11 +6,9 @@ import type {
 } from '@stagistic/db';
 import {
     createNodeId,
-    ensureSceneHeading,
     ensureScriptBlockIds,
     ensureScriptStructure,
     getFirstBlockId,
-    isScriptDocumentEmpty,
     type ScriptDocument,
 } from '@stagistic/script';
 
@@ -28,12 +26,11 @@ const normalizeSubtitle = (subtitle: string | null) => {
 const normalizeInitialContent = (initialContent?: ScriptDocument) => {
     let activeBlockId = createNodeId();
 
-    if (!initialContent || isScriptDocumentEmpty(initialContent)) {
+    if (!initialContent) {
         return {activeBlockId, content: undefined};
     }
 
-    const withSceneHeading = ensureSceneHeading(initialContent);
-    const content = ensureScriptStructure(ensureScriptBlockIds(withSceneHeading));
+    const content = ensureScriptStructure(ensureScriptBlockIds(initialContent));
 
     activeBlockId = getFirstBlockId(content) ?? activeBlockId;
 

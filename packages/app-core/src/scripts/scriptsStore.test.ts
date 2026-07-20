@@ -3,6 +3,7 @@ import {
     type ScriptRepository,
     type ScriptSummary,
 } from '@stagistic/db';
+import {createActlessScriptDocument} from '@stagistic/script';
 import {
     describe,
     expect,
@@ -43,6 +44,7 @@ type ScriptsStoreRepository = Pick<
 
 const createRepository = () => {
     const source = createInMemoryReactiveQuerySource<ScriptSummary>([initialScript]);
+    const createInputs: Parameters<ScriptRepository['createScriptWithId']>[0][] = [];
     let nextId = 1;
     const replaceRow = async (row: ScriptSummary) => {
         const rows = await source.read();
@@ -53,6 +55,7 @@ const createRepository = () => {
         scriptSummaries: source,
         allocateScriptId: () => `allocated-${nextId++}`,
         createScriptWithId: async input => {
+            createInputs.push(input);
             await replaceRow({
                 id: input.id,
                 title: input.title,
@@ -110,10 +113,24 @@ const createRepository = () => {
     };
     const repository = repositoryAdapter as unknown as ScriptRepository;
 
-    return {repository, source};
+    return {createInputs, repository, source};
 };
 
 describe('scripts store', () => {
+    it('preserves an explicitly supplied actless initial document', async () => {
+        const {createInputs, repository} = createRepository();
+        const store = createScriptsStore(repository);
+
+        await store.scriptsStore.init();
+        await store.scriptsStore.createScript(
+            'One act',
+            createActlessScriptDocument('scene-1'),
+        );
+
+        expect(createInputs[0].initialContent?.content.map(node => node.type))
+            .toEqual(['scene']);
+    });
+
     it('uses stable optimistic IDs for create and duplicate, then confirms deletes', async () => {
         const {repository} = createRepository();
         const store = createScriptsStore(repository);
