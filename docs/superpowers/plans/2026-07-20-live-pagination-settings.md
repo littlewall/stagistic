@@ -150,6 +150,7 @@ git commit -m "fix(editor): share live pagination options through storage"
 - Create: `packages/editor/src/editor/editorSettings/rebuildSettings.ts`
 - Modify: `packages/editor/src/editor/editorSettings/index.ts`
 - Modify: `packages/editor/src/editor/Editor.tsx`
+- Modify: `packages/editor/src/editor/model/blockSettingMaps.ts`
 - Modify: `packages/editor/src/editor/useEditorExtensions.ts`
 - Modify: `packages/editor/src/editor/surface/surfaceReuse.browser.test.tsx`
 
@@ -216,7 +217,7 @@ if (!paginationExtensionRef.current) {
 const paginationExtension = paginationExtensionRef.current;
 ```
 
-Import `useRef`. Change the dependencies for `blockShortcuts`, `blockNextElements`, and `blockCasing` from the full `resolvedSettings` object to `resolvedSettings.blocks`. Keep structure and visual changes in the surface signature so they still rebuild intentionally.
+Import `useRef`. Change the block-setting helpers to accept `BlockSettings`, then pass `resolvedSettings.blocks` and depend only on that object for `blockShortcuts`, `blockNextElements`, and `blockCasing`. Keep structure and visual changes in the surface signature so they still rebuild intentionally.
 
 - [ ] **Step 5: Verify GREEN and commit**
 

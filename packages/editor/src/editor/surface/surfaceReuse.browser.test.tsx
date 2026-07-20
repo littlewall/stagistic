@@ -105,17 +105,45 @@ const SettingsHarness = ({surfaceCache}: {surfaceCache: EditorSurfaceCache}) => 
                 Change export setting
             </button>
             <button
-                data-testid="change-editor-setting"
+                data-testid="change-live-settings"
                 onClick={() => setSettings(current => ({
                     ...current,
-                    visual: {
-                        characterColorSaturation:
-                            current.visual?.characterColorSaturation === 0.5 ? 0.75 : 0.5,
+                    page: {
+                        ...current.page,
+                        heightPx: current.page?.heightPx === 1200 ? 1300 : 1200,
+                    },
+                    typography: {
+                        ...current.typography,
+                        lineHeight: current.typography?.lineHeight === 1.5 ? 1.6 : 1.5,
+                    },
+                    headerFooter: {
+                        header: {
+                            left: {
+                                text: 'Updated header',
+                                isHiddenInEditor: false,
+                            },
+                        },
                     },
                 }))}
                 type="button"
             >
-                Change editor setting
+                Change live settings
+            </button>
+            <button
+                data-testid="change-block-setting"
+                onClick={() => setSettings(current => ({
+                    ...current,
+                    blocks: {
+                        ...current.blocks,
+                        dialogue: {
+                            ...current.blocks?.dialogue,
+                            spacingBeforeEm: current.blocks?.dialogue?.spacingBeforeEm === 1 ? 2 : 1,
+                        },
+                    },
+                }))}
+                type="button"
+            >
+                Change block setting
             </button>
             <ScriptEditor
                 document={{
@@ -146,7 +174,7 @@ const mountSettingsHarness = (surfaceCache: EditorSurfaceCache) => {
 afterEach(unmountAll);
 
 describe('editor surface reuse', () => {
-    it('keeps the live instance for export-only settings changes', async () => {
+    it('keeps live settings mounted and rebuilds for block settings', async () => {
         const cache = createEditorSurfaceCache();
 
         mountSettingsHarness(cache);
@@ -161,11 +189,23 @@ describe('editor surface reuse', () => {
 
         expect(editorDom()).toBe(initialDom);
 
-        const editorSettingButton = document.querySelector<HTMLElement>(
-            '[data-testid="change-editor-setting"]',
+        const liveSettingsButton = document.querySelector<HTMLElement>(
+            '[data-testid="change-live-settings"]',
         );
 
-        await userEvent.click(editorSettingButton as HTMLElement);
+        await userEvent.click(liveSettingsButton as HTMLElement);
+        await waitFor(() => document
+            .querySelector('[data-header-footer-layer="true"]')
+            ?.textContent
+            ?.includes('Updated header') === true);
+
+        expect(editorDom()).toBe(initialDom);
+
+        const blockSettingButton = document.querySelector<HTMLElement>(
+            '[data-testid="change-block-setting"]',
+        );
+
+        await userEvent.click(blockSettingButton as HTMLElement);
         await waitFor(() => editorDom() !== initialDom);
 
         expect(editorDom()).not.toBe(initialDom);

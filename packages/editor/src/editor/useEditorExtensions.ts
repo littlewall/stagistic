@@ -9,7 +9,10 @@ import Italic from '@tiptap/extension-italic';
 import Text from '@tiptap/extension-text';
 import Underline from '@tiptap/extension-underline';
 import UniqueID from '@tiptap/extension-unique-id';
-import {useMemo} from 'react';
+import {
+    useMemo,
+    useRef,
+} from 'react';
 
 import type {
     EditorCueCreateRequest,
@@ -74,21 +77,26 @@ export const useEditorExtensions = ({
     onCueUnassigned,
     enableBlockUiEvents,
 }: UseEditorExtensionsArgs): Extensions => {
-    const paginationExtension = useMemo(
-        () => createPaginationExtension(resolvedSettings, sizeScale),
-        [resolvedSettings, sizeScale],
+    const paginationExtensionRef = useRef<ReturnType<typeof createPaginationExtension> | null>(
+        null,
     );
+
+    if (!paginationExtensionRef.current) {
+        paginationExtensionRef.current = createPaginationExtension(resolvedSettings, sizeScale);
+    }
+
+    const paginationExtension = paginationExtensionRef.current;
     const blockShortcuts = useMemo(
-        () => getBlockShortcuts(resolvedSettings),
-        [resolvedSettings],
+        () => getBlockShortcuts(resolvedSettings.blocks),
+        [resolvedSettings.blocks],
     );
     const blockNextElements = useMemo(
-        () => getBlockNextElements(resolvedSettings),
-        [resolvedSettings],
+        () => getBlockNextElements(resolvedSettings.blocks),
+        [resolvedSettings.blocks],
     );
     const blockCasing = useMemo(
-        () => getBlockCasing(resolvedSettings),
-        [resolvedSettings],
+        () => getBlockCasing(resolvedSettings.blocks),
+        [resolvedSettings.blocks],
     );
     const scriptBehaviorExtension = useMemo(
         () => ScriptBehaviorExtension.configure({

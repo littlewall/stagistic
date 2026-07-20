@@ -20,6 +20,7 @@ import type {EditorProps} from './contracts';
 import {
     getEditorCssVars,
     resolveEditorSettings,
+    selectEditorRebuildSettings,
     stripScriptSettings,
 } from './editorSettings';
 import {useEditorRuntimeSettings} from './editorSettings/useEditorRuntimeSettings';
@@ -130,7 +131,7 @@ const Editor = ({
     );
     const surfaceSignature = useMemo(() => JSON.stringify({
         content: initialContentSignature,
-        settings: resolvedSettings,
+        settings: selectEditorRebuildSettings(resolvedSettings),
         sizeScale,
         blockUi: Boolean(onBlockUiEvent),
     }), [
