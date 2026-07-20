@@ -3,10 +3,12 @@ import type {ReactNode} from 'react';
 import type {ImportPayload} from './importScript/model';
 import type {ImportScriptFile} from './importScript/types';
 
+export type NewScriptShape = 'multi-act' | 'one-act';
+
 export interface NewScriptModalProps {
     isOpen: boolean,
     onClose: () => void,
-    onCreate: (name: string) => void | Promise<void>,
+    onCreate: (name: string, shape: NewScriptShape) => void | Promise<void>,
 }
 
 export interface ImportScriptModalProps {

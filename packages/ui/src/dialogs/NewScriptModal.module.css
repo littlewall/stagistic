@@ -18,6 +18,10 @@
     composes: input from './dialogForm.module.css';
 }
 
+.shapeOptions {
+    margin-top: calc(-1 * var(--space-sm));
+}
+
 .actions {
     composes: actions from './dialogForm.module.css';
 }

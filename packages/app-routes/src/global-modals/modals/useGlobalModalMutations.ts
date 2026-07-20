@@ -1,4 +1,5 @@
 import {trimOrFallback} from '@stagistic/script';
+import type {NewScriptShape} from '@stagistic/ui';
 import {
     type Dispatch,
     type SetStateAction,
@@ -15,6 +16,7 @@ import type {
     UseGlobalModalActionsArgs,
 } from './globalModalTypes';
 import {importStagisticFile} from './importStagisticFile';
+import {createInitialScriptDocument} from './initialScriptDocument';
 
 interface UseGlobalModalMutationsArgs extends Pick<
     UseGlobalModalActionsArgs,
@@ -56,9 +58,13 @@ export const useGlobalModalMutations = ({
     setScriptToDuplicate,
     setIsDuplicating,
 }: UseGlobalModalMutationsArgs) => {
-    const handleCreate = useCallback(async (name: string) => {
+    const handleCreate = useCallback(async (
+        name: string,
+        shape: NewScriptShape,
+    ) => {
         try {
-            const scriptId = await scriptActions.createScript(name);
+            const initialContent = createInitialScriptDocument(shape);
+            const scriptId = await scriptActions.createScript(name, initialContent);
 
             setIsNewScriptOpen(false);
             void navigate(`/script/${scriptId}/editor`);

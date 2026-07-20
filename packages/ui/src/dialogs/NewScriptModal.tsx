@@ -8,9 +8,28 @@ import {
 } from 'react';
 
 import {Button} from '../atoms/Button';
+import {
+    RadioChoiceGroup,
+    type RadioChoiceOption,
+} from '../atoms/RadioChoiceGroup';
 import {ModalDialog} from './ModalDialog';
 import styles from './NewScriptModal.module.css';
-import type {NewScriptModalProps} from './types';
+import type {
+    NewScriptModalProps,
+    NewScriptShape,
+} from './types';
+
+const SCRIPT_SHAPE_OPTIONS: RadioChoiceOption<NewScriptShape>[] = [
+    {
+        value: 'multi-act',
+        label: 'Multi-act',
+        description: 'Starts with Act One and a scene.',
+    }, {
+        value: 'one-act',
+        label: 'One-act',
+        description: 'Starts with a scene only.',
+    },
+];
 
 export const NewScriptModal = ({
     isOpen,
@@ -19,11 +38,13 @@ export const NewScriptModal = ({
 }: NewScriptModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
+    const [shape, setShape] = useState<NewScriptShape>('multi-act');
     const [isPending, setIsPending] = useState(false);
 
     useEffect(() => {
         if (!isOpen) {
             setName('');
+            setShape('multi-act');
 
             return;
         }
@@ -40,11 +61,15 @@ export const NewScriptModal = ({
         setIsPending(true);
 
         try {
-            await onCreate(name);
+            await onCreate(name, shape);
         } finally {
             setIsPending(false);
         }
-    }, [name, onCreate]);
+    }, [
+        name,
+        onCreate,
+        shape,
+    ]);
     const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
     }, []);
@@ -70,6 +95,14 @@ export const NewScriptModal = ({
                     value={name}
                     onChange={handleNameChange}
                     placeholder="Untitled script"
+                />
+                <RadioChoiceGroup
+                    ariaLabel="Initial script structure"
+                    className={styles.shapeOptions}
+                    value={shape}
+                    options={SCRIPT_SHAPE_OPTIONS}
+                    onChange={setShape}
+                    isDisabled={isPending}
                 />
                 <div className={styles.actions}>
                     <Button

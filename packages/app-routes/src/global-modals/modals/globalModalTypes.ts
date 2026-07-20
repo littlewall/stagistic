@@ -2,6 +2,7 @@ import type {
     ScriptDocument,
     TitlePageSettings,
 } from '@stagistic/script';
+import type {NewScriptShape} from '@stagistic/ui';
 import type {NavigateFunction} from 'react-router-dom';
 
 import type {AppToastPayload} from '../../routes/script/types';
@@ -80,7 +81,7 @@ export interface GlobalModalActions {
     openDuplicateScript: (script: ScriptToDuplicate) => void,
     closeDuplicateScript: () => void,
     setPrefilledImport: (value: ScriptImportFile | null) => void,
-    handleCreate: (name: string) => Promise<void>,
+    handleCreate: (name: string, shape: NewScriptShape) => Promise<void>,
     handleImport: (payload: ScriptImportFile & {name: string}) => Promise<void>,
     handleDelete: () => Promise<void>,
     handleRename: (values: {title: string, subtitle: string}) => Promise<void>,

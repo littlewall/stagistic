@@ -1,3 +1,4 @@
+import type {ScriptDocument} from '@stagistic/script';
 import {
     describe, expect, it, vi,
 } from 'vite-plus/test';
@@ -6,7 +7,9 @@ import {importStagisticFile} from './importStagisticFile';
 
 describe('importStagisticFile', () => {
     it('creates a script and persists imported title-page settings', async () => {
-        const createScript = vi.fn(() => Promise.resolve('script-1'));
+        const createScript = vi
+            .fn<(name: string, document: ScriptDocument) => Promise<string>>()
+            .mockResolvedValue('script-1');
         const saveTitlePage = vi.fn(async () => {});
         const rollbackScript = vi.fn(async () => {});
 
