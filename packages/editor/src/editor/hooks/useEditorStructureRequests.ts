@@ -1,9 +1,4 @@
-import {
-    getScriptBlockId,
-    getScriptBlockNodeType,
-    isScriptBlockNode,
-    type ScriptDocument,
-} from '@stagistic/script';
+import type {ScriptDocument} from '@stagistic/script';
 import {type Editor as TiptapEditor} from '@tiptap/react';
 import {
     type MutableRefObject, useEffect, useMemo, useRef,
@@ -15,9 +10,9 @@ import type {
     EditorValueChangeMeta,
 } from '../contracts';
 import {
+    buildDeleteActContent,
     buildInsertActContent,
     type CommitContext,
-    removeActBlockById,
     setPlainTextContent,
     tryCommitDocument,
 } from './structureRequestMutations';
@@ -156,19 +151,8 @@ export const useEditorStructureRequests = ({
         }
 
         const currentValue = commitContext.editor.getJSON() as ScriptDocument;
-        const firstNode = currentValue.content?.[0];
-
-        if (
-            firstNode &&
-            isScriptBlockNode(firstNode) &&
-            getScriptBlockNodeType(firstNode) === 'act' &&
-            getScriptBlockId(firstNode) === deleteActRequest.blockId
-        ) {
-            return;
-        }
-
-        const [nextContent, didChange] = removeActBlockById(
-            currentValue.content,
+        const {nextContent, didChange} = buildDeleteActContent(
+            currentValue,
             deleteActRequest.blockId,
         );
 

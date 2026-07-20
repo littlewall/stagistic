@@ -15,14 +15,14 @@ describe('initial script documents', () => {
     it('creates a multi-act document by default', () => {
         const document = createDefaultScriptDocument('scene-1');
 
-        expect(document.content.map(getScriptBlockNodeType)).toEqual(['act', 'scene']);
+        expect(document.content.map(node => getScriptBlockNodeType(node))).toEqual(['act', 'scene']);
         expect(getScriptBlockId(document.content[1])).toBe('scene-1');
     });
 
     it('creates an actless document with only a scene', () => {
         const document = createActlessScriptDocument('scene-1');
 
-        expect(document.content.map(getScriptBlockNodeType)).toEqual(['scene']);
+        expect(document.content.map(node => getScriptBlockNodeType(node))).toEqual(['scene']);
         expect(getScriptBlockId(document.content[0])).toBe('scene-1');
     });
 });

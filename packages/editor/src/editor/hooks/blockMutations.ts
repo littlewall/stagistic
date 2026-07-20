@@ -117,6 +117,15 @@ export const removeActBlockById = (
     return [didChange ? nextNodes : nodes, didChange];
 };
 
+export const buildDeleteActContent = (
+    currentValue: ScriptDocument,
+    blockId: string,
+): {nextContent: ScriptNode[] | undefined, didChange: boolean} => {
+    const [nextContent, didChange] = removeActBlockById(currentValue.content, blockId);
+
+    return {nextContent, didChange};
+};
+
 export const insertActBlockBeforeId = (
     nodes: ScriptNode[] | undefined,
     beforeBlockId: string,

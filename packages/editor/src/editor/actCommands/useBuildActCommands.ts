@@ -1,9 +1,4 @@
-import {
-    getScriptBlockId,
-    getScriptBlockNodeType,
-    isScriptBlockNode,
-    type ScriptDocument,
-} from '@stagistic/script';
+import type {ScriptDocument} from '@stagistic/script';
 import {type Editor as TiptapEditor} from '@tiptap/react';
 import {
     type MutableRefObject, useCallback, useMemo,
@@ -16,9 +11,9 @@ import {
     moveTopLevelNonStructuralBlock,
 } from '../hooks/structureReorder';
 import {
+    buildDeleteActContent,
     buildInsertActContent,
     type CommitContext,
-    removeActBlockById,
     setPlainTextContent,
     tryCommitDocument,
     tryCommitSceneReorder,
@@ -88,18 +83,7 @@ export const useBuildActCommands = ({
         }
 
         const currentValue = commitCtx.editor.getJSON() as ScriptDocument;
-        const firstNode = currentValue.content?.[0];
-
-        if (
-            firstNode
-            && isScriptBlockNode(firstNode)
-            && getScriptBlockNodeType(firstNode) === 'act'
-            && getScriptBlockId(firstNode) === blockId
-        ) {
-            return;
-        }
-
-        const [nextContent, didChange] = removeActBlockById(currentValue.content, blockId);
+        const {nextContent, didChange} = buildDeleteActContent(currentValue, blockId);
 
         tryCommitDocument(commitCtx, nextContent, didChange, currentValue.attrs);
     }, [commitCtx]);

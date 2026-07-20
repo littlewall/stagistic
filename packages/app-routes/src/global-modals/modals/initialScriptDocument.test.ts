@@ -9,9 +9,9 @@ import {createInitialScriptDocument} from './initialScriptDocument';
 
 describe('createInitialScriptDocument', () => {
     it('maps the modal choice to document structure', () => {
-        expect(createInitialScriptDocument('multi-act').content.map(getScriptBlockNodeType))
+        expect(createInitialScriptDocument('multi-act').content.map(node => getScriptBlockNodeType(node)))
             .toEqual(['act', 'scene']);
-        expect(createInitialScriptDocument('one-act').content.map(getScriptBlockNodeType))
+        expect(createInitialScriptDocument('one-act').content.map(node => getScriptBlockNodeType(node)))
             .toEqual(['scene']);
     });
 });

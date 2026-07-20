@@ -11,7 +11,6 @@ import type {StructureRowActContentProps, StructureRowActProps} from './types';
 const ActRowContent = memo(({
     blockId,
     name,
-    isFirstAct,
     namePreview,
     onRename,
     onNamePreview,
@@ -102,20 +101,18 @@ const ActRowContent = memo(({
                         }
                     }}
                 />
-                {!isFirstAct && (
-                    <button
-                        type="button"
-                        className={styles.actDeleteButton}
-                        aria-label={`Delete act ${name}`}
-                        onMouseDown={event => {
-                            event.preventDefault();
-                            event.stopPropagation();
-                            onDelete(blockId);
-                        }}
-                    >
-                        ×
-                    </button>
-                )}
+                <button
+                    type="button"
+                    className={styles.actDeleteButton}
+                    aria-label={`Delete act ${name}`}
+                    onMouseDown={event => {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        onDelete(blockId);
+                    }}
+                >
+                    ×
+                </button>
             </div>
         </>
     );

@@ -38,7 +38,13 @@ const getInput = () => document.querySelector('input[aria-label^="Rename act"]')
  * dropped on blur. `name` is settable from the outside to simulate a rename
  * made in the editor propagating back through live structure.
  */
-const Harness = ({onRename}: {onRename: (value: string) => void}) => {
+const Harness = ({
+    onRename,
+    onDelete,
+}: {
+    onRename: (value: string) => void,
+    onDelete: (blockId: string) => void,
+}) => {
     const [name, setName] = useState('Act');
     const [previewById, setPreviewById] = useState<Record<string, string>>({});
 
@@ -72,7 +78,7 @@ const Harness = ({onRename}: {onRename: (value: string) => void}) => {
                 onRename={handleRename}
                 onNamePreview={handleNamePreview}
                 onNamePreviewClear={handleNamePreviewClear}
-                onDelete={() => {}}
+                onDelete={onDelete}
             />
             <button
                 type="button"
@@ -85,7 +91,10 @@ const Harness = ({onRename}: {onRename: (value: string) => void}) => {
     );
 };
 
-const mount = (onRename: (value: string) => void = () => {}) => {
+const mount = (
+    onRename: (value: string) => void = () => {},
+    onDelete: (blockId: string) => void = () => {},
+) => {
     const host = document.createElement('div');
 
     document.body.appendChild(host);
@@ -93,7 +102,7 @@ const mount = (onRename: (value: string) => void = () => {}) => {
     const root = createRoot(host);
 
     mountedRoots.push(root);
-    root.render(<Harness onRename={onRename} />);
+    root.render(<Harness onRename={onRename} onDelete={onDelete} />);
 };
 
 const typeAtEnd = async (text: string) => {
@@ -111,6 +120,19 @@ afterEach(() => {
 });
 
 describe('StructureRowAct rename input', () => {
+    it('allows deleting the first act', async () => {
+        const deleted: string[] = [];
+
+        mount(undefined, blockId => deleted.push(blockId));
+        const deleteButton = await waitFor(() => {
+            return document.querySelector<HTMLButtonElement>('button[aria-label="Delete act Act"]') !== null;
+        }).then(() => document.querySelector<HTMLButtonElement>('button[aria-label="Delete act Act"]')!);
+
+        await userEvent.click(deleteButton);
+
+        expect(deleted).toEqual([BLOCK_ID]);
+    });
+
     it('keeps spaces while typing a multi-word act name', async () => {
         const committed: string[] = [];
 

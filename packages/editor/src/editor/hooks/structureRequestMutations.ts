@@ -28,6 +28,7 @@ export interface CommitContext {
 }
 
 export {
+    buildDeleteActContent,
     buildInsertActContent,
     insertActBlockBeforeId,
     removeActBlockById,
