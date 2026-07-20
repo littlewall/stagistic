@@ -10,8 +10,8 @@ import {buildPaginationState} from '../layout/buildPaginationState';
 import {createInitialPaginationState} from '../state/createInitialPaginationState';
 import {
     type BlockCacheEntry,
-    type PaginationExtensionAdapter,
     type PaginationPluginState,
+    type PaginationStorage,
 } from '../types';
 
 export const paginationKey = new PluginKey<PaginationPluginState>('script-pagination');
@@ -19,18 +19,19 @@ export const PAGINATION_CONTROL_META_KEY = 'script-pagination-control';
 
 const TYPING_RECALC_DELAY_MS = 250;
 
-const computeLayoutMetrics = (extension: PaginationExtensionAdapter, view: {dom: {clientWidth: number}}) => {
-    const heightKey = `${extension.options.pageWidth}|${extension.options.marginLeft}|`
-        + `${extension.options.marginRight}|${extension.options.lineHeightPx}`;
+const computeLayoutMetrics = (storage: PaginationStorage, view: {dom: {clientWidth: number}}) => {
+    const options = storage.options;
+    const heightKey = `${options.pageWidth}|${options.marginLeft}|`
+        + `${options.marginRight}|${options.lineHeightPx}`;
     const contentWidth = Math.max(
         0,
-        view.dom.clientWidth - extension.options.marginLeft - extension.options.marginRight,
+        view.dom.clientWidth - options.marginLeft - options.marginRight,
     );
 
     return {heightKey, contentWidth};
 };
 
-export const createPaginationPlugin = (extension: PaginationExtensionAdapter) => {
+export const createPaginationPlugin = (storage: PaginationStorage) => {
     let lastOptionsVersion = -1;
     let lastContentWidth = 0;
     let lastHeightKey = '';
@@ -42,8 +43,8 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
             init: () => {
                 return {
                     decorations: DecorationSet.empty,
-                    pagination: createInitialPaginationState(extension.options),
-                    forceRecalcToken: extension.storage.forceRecalcToken,
+                    pagination: createInitialPaginationState(storage.options),
+                    forceRecalcToken: storage.forceRecalcToken,
                     hasComputed: false,
                 };
             },
@@ -54,8 +55,8 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                 } | undefined;
 
                 if (meta) {
-                    extension.storage.state = meta.pagination;
-                    extension.storage.forceRecalcToken = meta.forceRecalcToken;
+                    storage.state = meta.pagination;
+                    storage.forceRecalcToken = meta.forceRecalcToken;
 
                     return meta;
                 }
@@ -65,7 +66,7 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                     && typeof controlMeta.forceRecalcToken === 'number'
                     && controlMeta.forceRecalcToken !== pluginState.forceRecalcToken
                 ) {
-                    extension.storage.forceRecalcToken = controlMeta.forceRecalcToken;
+                    storage.forceRecalcToken = controlMeta.forceRecalcToken;
 
                     return {
                         ...pluginState,
@@ -129,8 +130,8 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                 do {
                     needsRecalc = false;
 
-                    const optionsVersion = extension.storage.optionsVersion;
-                    const {heightKey, contentWidth} = computeLayoutMetrics(extension, view);
+                    const optionsVersion = storage.optionsVersion;
+                    const {heightKey, contentWidth} = computeLayoutMetrics(storage, view);
                     const layoutChanged = heightKey !== lastHeightKey || contentWidth !== lastContentWidth;
 
                     lastOptionsVersion = optionsVersion;
@@ -149,18 +150,18 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
                         usedFallbackMeasurements,
                     } = buildPaginationState(
                         view,
-                        extension.options,
+                        storage.options,
                         blockCache,
                     );
 
                     blockCache = nextCache;
 
-                    extension.storage.state = pagination;
+                    storage.state = pagination;
 
                     const tr = view.state.tr.setMeta(paginationKey, {
                         decorations,
                         pagination,
-                        forceRecalcToken: extension.storage.forceRecalcToken,
+                        forceRecalcToken: storage.forceRecalcToken,
                         hasComputed: true,
                     });
 
@@ -235,9 +236,9 @@ export const createPaginationPlugin = (extension: PaginationExtensionAdapter) =>
 
             return {
                 update: (view, prevState) => {
-                    const optionsVersion = extension.storage.optionsVersion;
+                    const optionsVersion = storage.optionsVersion;
                     const docChanged = !prevState.doc.eq(view.state.doc);
-                    const {heightKey, contentWidth} = computeLayoutMetrics(extension, view);
+                    const {heightKey, contentWidth} = computeLayoutMetrics(storage, view);
                     const layoutChanged = heightKey !== lastHeightKey || contentWidth !== lastContentWidth;
                     const previousPluginState = paginationKey.getState(prevState);
                     const currentPluginState = paginationKey.getState(view.state);

@@ -25,6 +25,7 @@ export const PaginationExtension = Extension.create<PaginationOptions, Paginatio
 
     addStorage() {
         return {
+            options: this.options,
             optionsVersion: 0,
             state: createInitialPaginationState(this.options),
             forceRecalcToken: 0,
@@ -34,12 +35,12 @@ export const PaginationExtension = Extension.create<PaginationOptions, Paginatio
     addCommands() {
         return {
             updatePaginationSettings: (settings: Partial<PaginationOptions>) => () => {
-                if (arePaginationSettingsApplied(this.options, settings)) {
+                if (arePaginationSettingsApplied(this.storage.options, settings)) {
                     return true;
                 }
 
-                this.options = {
-                    ...this.options,
+                this.storage.options = {
+                    ...this.storage.options,
                     ...settings,
                 };
 
@@ -76,7 +77,7 @@ export const PaginationExtension = Extension.create<PaginationOptions, Paginatio
     },
 
     addProseMirrorPlugins() {
-        return [createPaginationPlugin(this)];
+        return [createPaginationPlugin(this.storage)];
     },
 });
 

@@ -176,36 +176,49 @@ describe('pagination golden', () => {
         }
 
         const pages = await pollStablePages(editor);
+        const editorRoot = document.querySelector<HTMLElement>('[data-editor-ready]');
+        const cssPageHeight = Number.parseFloat(
+            editorRoot?.style.getPropertyValue('--editor-page-height') ?? '',
+        );
+        const paginationPageHeight = paginationKey.getState(editor.state)?.pagination.pageHeight;
 
+        expect(paginationPageHeight).toBeCloseTo(cssPageHeight);
         expect(pages.length).toBeGreaterThanOrEqual(3);
         expect(pages).toMatchInlineSnapshot(`
           [
             {
-              "endOffset": 1212.8400000000001,
+              "endOffset": 896.9290680100754,
               "endPos": 18,
               "index": 1,
               "startOffset": 0,
               "startPos": 0,
             },
             {
-              "endOffset": 2425.6800000000003,
+              "endOffset": 1793.8581360201506,
               "endPos": 3624,
               "index": 2,
-              "startOffset": 1212.8400000000001,
+              "startOffset": 896.9290680100754,
               "startPos": 18,
             },
             {
-              "endOffset": 3638.5200000000004,
-              "endPos": 7243,
+              "endOffset": 2690.787204030226,
+              "endPos": 3624,
               "index": 3,
-              "startOffset": 2425.6800000000003,
+              "startOffset": 1793.8581360201506,
               "startPos": 3624,
             },
             {
-              "endOffset": 4747.68,
-              "endPos": 9944,
+              "endOffset": 3587.716272040301,
+              "endPos": 7243,
               "index": 4,
-              "startOffset": 3638.5200000000004,
+              "startOffset": 2690.787204030226,
+              "startPos": 3624,
+            },
+            {
+              "endOffset": 4407.971083123424,
+              "endPos": 9944,
+              "index": 5,
+              "startOffset": 3587.716272040301,
               "startPos": 7243,
             },
           ]

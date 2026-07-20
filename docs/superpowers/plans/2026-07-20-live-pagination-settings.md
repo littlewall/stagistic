@@ -22,6 +22,7 @@
 
 **Files:**
 - Modify: `packages/editor/src/editor/tiptap/extensions/pagination/optionsPropagation.browser.test.tsx`
+- Modify: `packages/editor/src/editor/tiptap/extensions/pagination/layout/paginationGolden.browser.test.tsx`
 - Modify: `packages/editor/src/editor/tiptap/extensions/pagination/types.ts`
 - Modify: `packages/editor/src/editor/tiptap/extensions/PaginationExtension.ts`
 - Modify: `packages/editor/src/editor/tiptap/extensions/pagination/plugin/createPaginationPlugin.ts`
@@ -121,6 +122,8 @@ const computeLayoutMetrics = (
 
 Use `storage.options` for initial pagination state and `buildPaginationState`; use `storage` directly for version, state, and force-recalc reads/writes.
 
+Add a golden-test invariant that the plugin's `pagination.pageHeight` equals the rendered `--editor-page-height`. Update the inline page-boundary snapshot because the fixed plugin now receives the existing responsive `renderScale`; the old snapshot captured the stale unscaled options.
+
 - [ ] **Step 5: Verify GREEN and commit**
 
 Run:
@@ -130,7 +133,7 @@ pnpm --filter @stagistic/editor test:browser
 pnpm --filter @stagistic/editor typecheck
 ```
 
-Expected: both commands pass.
+Expected: both commands pass. The golden page boundaries use the same scaled page height as the rendered CSS.
 
 Commit:
 

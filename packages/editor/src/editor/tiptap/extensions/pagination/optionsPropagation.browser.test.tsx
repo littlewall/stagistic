@@ -10,12 +10,13 @@ import {
 import {ScriptBlockNodes} from '../../nodes';
 import {DocumentWithSettings} from '../DocumentExtension';
 import {PaginationExtension} from '../PaginationExtension';
+import {paginationKey} from './plugin/createPaginationPlugin';
+import type {PaginationStorage} from './types';
 
 /*
- * The pagination plugin reads options through the extension context it was
- * created with. These tests pin down that `updatePaginationSettings` reaches
- * that context, which is what lets settings apply without rebuilding the
- * editor.
+ * Tiptap creates separate contexts for commands and plugins. These tests pin
+ * down that both sides share pagination options through extension storage,
+ * which lets settings apply without rebuilding the editor.
  */
 
 const editors: TiptapEditor[] = [];
@@ -51,16 +52,26 @@ const createEditor = () => {
     return editor;
 };
 
-const getPluginVisibleOptions = (editor: TiptapEditor) => {
-    const extension = editor.extensionManager.extensions.find(
-        candidate => candidate.name === 'Pagination',
-    );
+const getPaginationStorage = (editor: TiptapEditor) => {
+    const storage = editor.storage as unknown as Record<string, unknown>;
 
-    if (!extension) {
-        throw new Error('Pagination extension not registered');
+    return storage.Pagination as PaginationStorage;
+};
+
+const waitFor = async (predicate: () => boolean, timeoutMs = 10_000): Promise<void> => {
+    const deadline = Date.now() + timeoutMs;
+
+    while (Date.now() < deadline) {
+        if (predicate()) {
+            return;
+        }
+
+        await new Promise(resolve => {
+            window.setTimeout(resolve, 10);
+        });
     }
 
-    return extension.options as {pageHeight: number, pageWidth: number};
+    throw new Error('Timed out waiting for pagination state');
 };
 
 describe('pagination options propagation', () => {
@@ -73,7 +84,7 @@ describe('pagination options propagation', () => {
         document.body.innerHTML = '';
     });
 
-    it('exposes updated settings on the shared extension options', () => {
+    it('exposes updated settings on shared pagination storage', () => {
         const editor = createEditor();
 
         const commands = editor.commands as {
@@ -82,12 +93,12 @@ describe('pagination options propagation', () => {
 
         commands.updatePaginationSettings?.({pageHeight: 2000});
 
-        expect(getPluginVisibleOptions(editor).pageHeight).toBe(2000);
+        expect(getPaginationStorage(editor).options.pageHeight).toBe(2000);
     });
 
     it('bumps the options version so the plugin recalculates', () => {
         const editor = createEditor();
-        const storage = editor.storage.Pagination as {optionsVersion: number};
+        const storage = getPaginationStorage(editor);
         const before = storage.optionsVersion;
 
         const commands = editor.commands as {
@@ -97,5 +108,20 @@ describe('pagination options propagation', () => {
         commands.updatePaginationSettings?.({pageHeight: 2000});
 
         expect(storage.optionsVersion).toBe(before + 1);
+    });
+
+    it('recalculates pagination from updated storage options', async () => {
+        const editor = createEditor();
+        const commands = editor.commands as {
+            updatePaginationSettings?: (settings: {pageHeight: number}) => boolean,
+        };
+
+        commands.updatePaginationSettings?.({pageHeight: 2000});
+
+        await waitFor(
+            () => paginationKey.getState(editor.state)?.pagination.pageHeight === 2000,
+        );
+
+        expect(paginationKey.getState(editor.state)?.pagination.pageHeight).toBe(2000);
     });
 });

@@ -43,6 +43,7 @@ export interface PaginationOptions {
 }
 
 export interface PaginationStorage {
+    options: PaginationOptions,
     optionsVersion: number,
     state: PaginationState,
     forceRecalcToken: number,
@@ -74,9 +75,4 @@ export interface BuildPaginationStateResult {
     nextCache: Map<string, BlockCacheEntry>,
     hasInlineBreaks: boolean,
     usedFallbackMeasurements: boolean,
-}
-
-export interface PaginationExtensionAdapter {
-    options: PaginationOptions,
-    storage: PaginationStorage,
 }
