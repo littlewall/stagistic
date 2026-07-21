@@ -1,12 +1,12 @@
 import {
     canBlockTypeHaveCharacterTags,
     collectCharacterTags,
-    collectCueAtoms,
-    type CueBlockInput,
-    deriveCues,
+    collectMusicAtoms,
+    deriveMusic,
     extractCharacterKeys,
     type IndexedScriptBlock,
     type IndexedScriptCharacterRef,
+    type MusicBlockInput,
     resolveScriptBlockNodeType,
     type ScriptBlockIndexSnapshot,
     type ScriptNode,
@@ -102,7 +102,7 @@ const resolveBlockType = (node: ProseMirrorNode) => {
 
 export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIndexSnapshot => {
     const blocks: IndexedScriptBlock[] = [];
-    const cueBlockInputs: CueBlockInput[] = [];
+    const musicBlockInputs: MusicBlockInput[] = [];
     let orderNo = 0;
     let currentActBlockId: string | null = null;
     let currentSceneBlockId: string | null = null;
@@ -147,10 +147,10 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
             ),
         });
 
-        cueBlockInputs.push({
+        musicBlockInputs.push({
             blockId,
             blockType,
-            cueAtoms: collectCueAtoms(node.toJSON() as ScriptNode),
+            musicAtoms: collectMusicAtoms(node.toJSON() as ScriptNode),
         });
 
         orderNo += 1;
@@ -163,12 +163,12 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
     } catch {
         return {
             blocks: [],
-            cues: [],
+            music: [],
         };
     }
 
     return {
         blocks,
-        cues: deriveCues(cueBlockInputs),
+        music: deriveMusic(musicBlockInputs),
     };
 };

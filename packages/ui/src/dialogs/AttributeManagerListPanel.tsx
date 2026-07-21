@@ -16,7 +16,7 @@ export interface AttributeManagerListItem {
         label: string,
     },
     subtitle?: string | null,
-    /** Trailing glyph, e.g. a cue-kind icon. */
+    /** Trailing glyph, e.g. a music-kind icon. */
     icon?: ReactNode,
     detailMetadata?: Array<{
         label: string,

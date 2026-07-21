@@ -20,7 +20,7 @@ const doc = (content: ScriptNode[]): ScriptDocument => ({type: 'doc', content});
 
 describe('buildScriptBlockIndex', () => {
     it('returns an empty snapshot for nullish or empty documents', () => {
-        const empty = {snapshot: {blocks: [], cues: []}, blockCount: 0};
+        const empty = {snapshot: {blocks: [], music: []}, blockCount: 0};
 
         expect(buildScriptBlockIndex(null)).toEqual(empty);
         expect(buildScriptBlockIndex(undefined)).toEqual(empty);
@@ -129,27 +129,27 @@ describe('buildScriptBlockIndex', () => {
         expect(snapshot.blocks[0].characterRefs).toEqual([{key: 'ANNA', characterId: 'char-anna'}]);
     });
 
-    it('projects cues from stage-direction cue atoms', () => {
+    it('projects music from stage-direction music atoms', () => {
         const {snapshot} = buildScriptBlockIndex(doc([
             {
                 type: 'stageDirection',
                 attrs: {id: 'b1'},
                 content: [
                     {type: 'text', text: 'Lights fade.'}, {
-                        type: 'cueStart',
+                        type: 'musicStart',
                         attrs: {
-                            cueId: 'c1', mode: 'open', title: 'Night', kind: null,
+                            musicId: 'c1', mode: 'open', title: 'Night', kind: null,
                         },
                     },
                 ],
             }, {
-                type: 'stageDirection', attrs: {id: 'b2'}, content: [{type: 'cueOut'}],
+                type: 'stageDirection', attrs: {id: 'b2'}, content: [{type: 'musicOut'}],
             },
         ]));
 
-        expect(snapshot.cues).toEqual([
+        expect(snapshot.music).toEqual([
             {
-                cueId: 'c1', sceneNumber: 0, indexInScene: 0, sceneCueCount: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2',
+                musicId: 'c1', sceneNumber: 0, indexInScene: 0, sceneMusicCount: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2',
             },
         ]);
     });

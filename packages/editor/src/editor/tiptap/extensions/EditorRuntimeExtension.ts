@@ -22,7 +22,7 @@ import {
     selectionTouchesCharacterBlock,
     transactionTouchesCharacterBlocks,
     transactionTouchesCharacterTags,
-    transactionTouchesCues,
+    transactionTouchesMusic,
     transactionTouchesStructureBlocks,
 } from '../../runtime/transactionGuards';
 import {
@@ -103,7 +103,7 @@ const createInitialState = (
         activeBlockType: activeBlock.activeBlockType,
         structure: buildStructureRuntime(state.doc),
         characters: characterState.snapshot,
-        cues: buildIndexSnapshotFromPmDoc(state.doc).cues,
+        music: buildIndexSnapshotFromPmDoc(state.doc).music,
         characterDecorations: characterState.decorations,
     };
 };
@@ -157,8 +157,8 @@ export const EditorRuntimeExtension = Extension.create<EditorRuntimeOptions>({
                             oldState.doc,
                             tr.doc,
                         );
-                        const shouldRefreshCues = shouldRefreshStructure
-                            || transactionTouchesCues(tr, oldState.doc, tr.doc);
+                        const shouldRefreshMusic = shouldRefreshStructure
+                            || transactionTouchesMusic(tr, oldState.doc, tr.doc);
 
                         if (!tr.docChanged && !tr.selectionSet && !shouldRefreshCharacters) {
                             return pluginState;
@@ -169,7 +169,7 @@ export const EditorRuntimeExtension = Extension.create<EditorRuntimeOptions>({
                         let nextCharacters = pluginState.characters;
                         let nextDecorations = pluginState.characterDecorations;
                         let nextStructure = pluginState.structure;
-                        let nextCues = pluginState.cues;
+                        let nextMusic = pluginState.music;
 
                         if (shouldRefreshCharacters) {
                             const characterState = buildCharacterState(newState, options);
@@ -187,8 +187,8 @@ export const EditorRuntimeExtension = Extension.create<EditorRuntimeOptions>({
                             nextStructure = buildStructureRuntime(newState.doc);
                         }
 
-                        if (shouldRefreshCues) {
-                            nextCues = buildIndexSnapshotFromPmDoc(newState.doc).cues;
+                        if (shouldRefreshMusic) {
+                            nextMusic = buildIndexSnapshotFromPmDoc(newState.doc).music;
                         }
 
                         return {
@@ -197,7 +197,7 @@ export const EditorRuntimeExtension = Extension.create<EditorRuntimeOptions>({
                             activeBlockType: activeBlock.activeBlockType,
                             structure: nextStructure,
                             characters: nextCharacters,
-                            cues: nextCues,
+                            music: nextMusic,
                             characterDecorations: nextDecorations ?? EMPTY_DECORATIONS,
                         };
                     },

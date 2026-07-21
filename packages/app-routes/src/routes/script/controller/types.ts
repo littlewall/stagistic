@@ -1,6 +1,6 @@
 import type {
     useScriptCharacterCatalog,
-    useScriptCues,
+    useScriptMusic,
 } from '@stagistic/app-core';
 import type {
     EditorSettingsOverride,
@@ -23,7 +23,7 @@ export type ScriptEditorController = {
     currentScript: CurrentScriptItem | null,
     currentScriptId: string | null,
     characterCatalog: ReturnType<typeof useScriptCharacterCatalog>,
-    cueCatalog: ReturnType<typeof useScriptCues>,
+    musicCatalog: ReturnType<typeof useScriptMusic>,
     recentScripts: CurrentScriptItem[],
     initialValue: ScriptDocument | null | undefined,
     initialIndexSnapshot: ScriptBlockIndexSnapshot | null | undefined,

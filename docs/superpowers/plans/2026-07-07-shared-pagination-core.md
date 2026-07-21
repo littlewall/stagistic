@@ -968,7 +968,7 @@ from the shared package.
 - Modify: `packages/editor/src/editor/tiptap/extensions/pagination/constants.ts`
 - Modify: `packages/editor/src/editor/tiptap/extensions/pagination/layout/buildPaginationState.ts`
 - Delete: `packages/editor/src/editor/tiptap/extensions/pagination/layout/selectSplitPoint.ts`
-- Test: existing browser tests under `packages/editor/.../pagination/` and `packages/editor/src/editor/tiptap/nodes/cueNode.browser.test.tsx`
+- Test: existing browser tests under `packages/editor/.../pagination/` and `packages/editor/src/editor/tiptap/nodes/musicNode.browser.test.tsx`
 
 **Interfaces:**
 - Consumes from Task 4: `paginate`, `PaginatorBlock`, `PaginationPlan`, `PageBreak`; from Task 2: `isSplittableBlockType`, `isOrphanCandidateBlockType`, `MIN_SPLIT_LINES_BEFORE`, `MIN_SPLIT_LINES_AFTER`, `FIT_EPSILON_PX`; from Task 3: `BlockLine`.
@@ -1023,7 +1023,7 @@ It mounts `ScriptEditor` with a multi-page document (≥3 pages: several `scene`
 `character` + long `dialogue` blocks so orphan pushdown and a split both fire),
 reads `PaginationExtension` storage `state.pages`, and asserts the exact
 `{startPos, endPos, startOffset, endOffset}` array. Model the harness on
-`cueNode.browser.test.tsx` (`renderEditor`, `poll`, `afterEach`). Access state via
+`musicNode.browser.test.tsx` (`renderEditor`, `poll`, `afterEach`). Access state via
 the editor instance:
 ```ts
 import {PaginationExtension} from '../../PaginationExtension';
@@ -1083,7 +1083,7 @@ and update its importers to `@stagistic/script-pagination`.
 Run: `pnpm --filter @stagistic/editor exec tsc --noEmit`
 Expected: no new errors.
 
-Run: `npx vp test run -c packages/editor/vitest.browser.config.ts packages/editor/src/editor/tiptap/extensions/pagination packages/editor/src/editor/tiptap/nodes/cueNode.browser.test.tsx`
+Run: `npx vp test run -c packages/editor/vitest.browser.config.ts packages/editor/src/editor/tiptap/extensions/pagination packages/editor/src/editor/tiptap/nodes/musicNode.browser.test.tsx`
 Expected: PASS, **golden snapshot unchanged**. If the golden differs, the adapter
 is not equivalent — fix the adapter (never edit the snapshot).
 
@@ -1155,7 +1155,7 @@ Expected: FAIL — today the heading stays on page 1 before the break.
 
 - [ ] **Step 4: Refactor `transcribeExportPlan` into an adapter**
 
-Keep the existing text pipeline (`getBlockRawText`, cue labels, `wrapText`,
+Keep the existing text pipeline (`getBlockRawText`, music labels, `wrapText`,
 `normalizeBlockText`, `resolveLineX`, `makeRun`). Replace the manual
 `cursor`/`ensureLineFits`/`applyForcedBreak` layout with:
 
@@ -1214,7 +1214,7 @@ Run: `pnpm --filter @stagistic/export exec tsc --noEmit`
 Expected: no errors.
 
 Run: `npx vp test run packages/export/`
-Expected: PASS — the new pushdown test passes and the existing cue/delimiter/
+Expected: PASS — the new pushdown test passes and the existing music/delimiter/
 forced-break tests stay green.
 
 - [ ] **Step 6: Prepare commit (do not commit)**
@@ -1278,7 +1278,7 @@ Proposed message: `chore(pagination): remove duplicated break logic`. Ask the ow
 - Export adapter gains widow/orphan/keep-together → Task 6. ✔
 - Unified metrics from settings → Tasks 5–6. ✔
 - Delete duplication → Task 7. ✔
-- Out-of-scope (rule changes, cue pills, highlight setting) → untouched. ✔
+- Out-of-scope (rule changes, music pills, highlight setting) → untouched. ✔
 
 **Placeholder scan:** No TBD/TODO; every code step shows code; the one implementer
 note in Task 4 points at an authoritative reference (git history of

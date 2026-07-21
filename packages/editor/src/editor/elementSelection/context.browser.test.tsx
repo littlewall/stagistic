@@ -44,7 +44,7 @@ const documentWithUnconfirmedCharacter: ScriptDocument = {
     ],
 };
 
-const documentWithCueOut: ScriptDocument = {
+const documentWithMusicOut: ScriptDocument = {
     type: 'doc',
     content: [
         {
@@ -54,20 +54,20 @@ const documentWithCueOut: ScriptDocument = {
         },
         {
             type: 'stageDirection',
-            attrs: {id: 'cue-start-block'},
+            attrs: {id: 'music-start-block'},
             content: [
                 {
-                    type: 'cueStart',
+                    type: 'musicStart',
                     attrs: {
-                        cueId: 'cue-1', mode: 'open', title: 'Night',
+                        musicId: 'music-1', mode: 'open', title: 'Night',
                     },
                 },
             ],
         },
         {
             type: 'stageDirection',
-            attrs: {id: 'cue-out-block'},
-            content: [{type: 'cueOut'}],
+            attrs: {id: 'music-out-block'},
+            content: [{type: 'musicOut'}],
         },
     ],
 };
@@ -75,8 +75,8 @@ const documentWithCueOut: ScriptDocument = {
 const SelectionProbe = () => {
     const selection = useEditorElementSelection();
 
-    if (selection?.type === 'cue') {
-        return <output data-cue-selection={selection.cueId} />;
+    if (selection?.type === 'music') {
+        return <output data-music-selection={selection.musicId} />;
     }
 
     if (selection?.type !== 'character') {
@@ -227,13 +227,13 @@ describe('editor element selection', () => {
         );
     });
 
-    it('resolves a cue out pill to the cue it closes', async () => {
+    it('resolves a music out pill to the music it closes', async () => {
         const host = document.createElement('div');
         const root = createRoot(host);
 
         document.body.appendChild(host);
         root.render(
-            <ScriptEditor document={{initialValue: documentWithCueOut}}>
+            <ScriptEditor document={{initialValue: documentWithMusicOut}}>
                 <ScriptEditor.LeftSidebar>
                     <SelectionProbe />
                 </ScriptEditor.LeftSidebar>
@@ -242,15 +242,15 @@ describe('editor element selection', () => {
         roots.push(root);
 
         const pill = await poll(
-            () => document.querySelector<HTMLElement>('[data-cue-pill="out"]'),
-            'cue out pill',
+            () => document.querySelector<HTMLElement>('[data-music-pill="out"]'),
+            'music out pill',
         );
 
         pill.dispatchEvent(new PointerEvent('pointerdown', {bubbles: true}));
 
         expect(await poll(
-            () => document.querySelector('[data-cue-selection="cue-1"]'),
-            'cue out selection',
+            () => document.querySelector('[data-music-selection="music-1"]'),
+            'music out selection',
         )).toBeTruthy();
     });
 

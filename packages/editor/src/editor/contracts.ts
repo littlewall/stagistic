@@ -32,31 +32,31 @@ export interface PersistentCharacterRef {
     colorHex?: string | null,
 }
 
-export type PersistentCueKind = 'song' | 'instrumental';
+export type PersistentMusicKind = 'song' | 'instrumental';
 
-export interface PersistentCueRef {
+export interface PersistentMusicRef {
     id: string,
     title: string,
-    kind: PersistentCueKind,
+    kind: PersistentMusicKind,
     assignmentLabel?: string | null,
 }
 
-export interface EditorCueCreateRequest {
+export interface EditorMusicCreateRequest {
     title: string,
     blockId: string,
-    complete: (cue: PersistentCueRef) => boolean,
+    complete: (music: PersistentMusicRef) => boolean,
 }
 
-export interface EditorCueRemoveRequest {
-    cueId: string,
+export interface EditorMusicRemoveRequest {
+    musicId: string,
     title: string,
     complete: () => boolean,
 }
 
-export interface UpdateCueRequest {
-    cueId: string,
+export interface UpdateMusicRequest {
+    musicId: string,
     title: string,
-    kind: PersistentCueKind,
+    kind: PersistentMusicKind,
     requestId: number,
 }
 
@@ -116,7 +116,7 @@ export interface EditorLiveStructureSnapshot {
     actByBlockId: ReadonlyMap<string, string>,
 }
 
-export type EditorLiveCueSnapshot = EditorIndexSnapshot['cues'];
+export type EditorLiveMusicSnapshot = EditorIndexSnapshot['music'];
 
 export interface EditorLiveCharacterSnapshot {
     countsByKey: ReadonlyMap<string, number>,
@@ -137,7 +137,7 @@ export interface EditorLiveSnapshot {
     index: EditorIndexSnapshot,
     structure: EditorLiveStructureSnapshot,
     characters: EditorLiveCharacterSnapshot,
-    cues: EditorLiveCueSnapshot,
+    music: EditorLiveMusicSnapshot,
     activeBlockId: string | null,
     activeBlockType: BlockNodeType | null,
 }
@@ -185,7 +185,7 @@ export interface EditorStructureRequests {
     renameActRequest?: RenameActRequest | null,
     deleteActRequest?: DeleteActRequest | null,
     moveSceneRequest?: MoveSceneRequest | null,
-    updateCueRequest?: UpdateCueRequest | null,
+    updateMusicRequest?: UpdateMusicRequest | null,
 }
 
 export interface EditorLifecycleCallbacks {
@@ -193,11 +193,11 @@ export interface EditorLifecycleCallbacks {
     onIndexChange?: (snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void,
     onActiveBlockChange?: (blockId: string | null) => void,
     onBlockUiEvent?: (event: EditorBlockUiEvent) => void,
-    onRequestCreateCue?: (request: EditorCueCreateRequest) => void,
-    onRequestRemoveCue?: (request: EditorCueRemoveRequest) => void,
-    onOpenCueManager?: (cueId: string) => void,
-    onCueAssigned?: (cueId: string) => void,
-    onCueUnassigned?: (cueId: string) => void,
+    onRequestCreateMusic?: (request: EditorMusicCreateRequest) => void,
+    onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
+    onOpenMusicManager?: (musicId: string) => void,
+    onMusicAssigned?: (musicId: string) => void,
+    onMusicUnassigned?: (musicId: string) => void,
 }
 
 export interface EditorSaveCallbacks {
@@ -234,7 +234,7 @@ export interface EditorLayoutProps {
 export interface EditorDocumentProps {
     initialValue: ScriptDocument,
     persistentCharacters?: readonly PersistentCharacterRef[],
-    persistentCues?: readonly PersistentCueRef[],
+    persistentMusic?: readonly PersistentMusicRef[],
     scriptTitle?: string,
     draftDate?: string,
 }

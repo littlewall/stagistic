@@ -2,8 +2,8 @@ import {
     CHARACTER_TAG_ID_ATTR,
     CHARACTER_TAG_KEY_ATTR,
     CHARACTER_TAG_MARK_NAME,
-    CUE_OUT_NODE_NAME,
-    CUE_START_NODE_NAME,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
 } from '@stagistic/script';
 import {type Node as ProseMirrorNode, Schema} from '@tiptap/pm/model';
 import {EditorState, TextSelection} from '@tiptap/pm/state';
@@ -32,13 +32,13 @@ const schema = new Schema({
     nodes: {
         doc: {content: '(character | stageDirection | dialogue)+'},
         text: {group: 'inline'},
-        [CUE_START_NODE_NAME]: {
+        [MUSIC_START_NODE_NAME]: {
             group: 'inline',
             inline: true,
             atom: true,
             attrs: {title: {default: ''}},
         },
-        [CUE_OUT_NODE_NAME]: {
+        [MUSIC_OUT_NODE_NAME]: {
             group: 'inline', inline: true, atom: true,
         },
         character: createBlockSpec('character'),
@@ -100,7 +100,7 @@ const createEditor = (
 };
 
 describe('updateBlockType', () => {
-    it('normalizes a legacy + delimiter to / when converting a block to a character cue', () => {
+    it('normalizes a legacy + delimiter to / when converting a block to a character music', () => {
         const {editor, getBlock} = createEditor('stageDirection', 'SALLY+ISABELLA');
 
         expect(updateBlockType(editor, 'character')).toBe(true);
@@ -122,7 +122,7 @@ describe('updateBlockType', () => {
         expect(getBlock()?.textContent).toBe('SALLY+ISABELLA');
     });
 
-    it('turns character pills and cue atoms into plain text when leaving a stage direction', () => {
+    it('turns character pills and music atoms into plain text when leaving a stage direction', () => {
         const characterTag = schema.marks[CHARACTER_TAG_MARK_NAME].create({
             [CHARACTER_TAG_KEY_ATTR]: 'ANNA',
             [CHARACTER_TAG_ID_ATTR]: 'character-1',
@@ -130,9 +130,9 @@ describe('updateBlockType', () => {
         const content = [
             schema.text('ANNA', [characterTag]),
             schema.text(' enters'),
-            schema.node(CUE_START_NODE_NAME, {title: 'Lights'}),
+            schema.node(MUSIC_START_NODE_NAME, {title: 'Lights'}),
             schema.text('then '),
-            schema.node(CUE_OUT_NODE_NAME),
+            schema.node(MUSIC_OUT_NODE_NAME),
         ];
         const {editor, getBlock} = createEditor('stageDirection', '', content, {
             ANNA: 'character-1',
@@ -146,7 +146,7 @@ describe('updateBlockType', () => {
     });
 
     it('normalizes stage-direction content through the selection-preserving type change', () => {
-        const content = [schema.node(CUE_START_NODE_NAME, {title: 'Sound'})];
+        const content = [schema.node(MUSIC_START_NODE_NAME, {title: 'Sound'})];
         const {editor, getBlock} = createEditor('stageDirection', '', content);
         const block = getActiveScriptBlockFromState(editor.state);
 

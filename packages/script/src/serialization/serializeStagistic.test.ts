@@ -43,7 +43,7 @@ copyright: "© 2026 Jane Smith"
 `);
     });
 
-    it('serializes blocks, marks, tags, cues, and speech spacing canonically', () => {
+    it('serializes blocks, marks, tags, music, and speech spacing canonically', () => {
         const document: ScriptDocument = {
             type: 'doc',
             content: [
@@ -63,9 +63,9 @@ copyright: "© 2026 Jane Smith"
                         },
                         text(' enters.'),
                         {
-                            type: 'cueStart',
+                            type: 'musicStart',
                             attrs: {
-                                cueId: 'cue-1', mode: 'open', title: 'She said "Yes"',
+                                musicId: 'music-1', mode: 'open', title: 'She said "Yes"',
                             },
                         },
                     ],
@@ -78,10 +78,10 @@ copyright: "© 2026 Jane Smith"
                 },
                 {type: 'lyrics', content: [text('\tAnd I will stay')]},
                 {type: 'lyrics', content: []},
-                {type: 'stageDirection', content: [{type: 'cueOut'}]},
+                {type: 'stageDirection', content: [{type: 'musicOut'}]},
                 {
                     type: 'stageDirection',
-                    content: [{type: 'cueStart', attrs: {mode: 'hit', title: 'Knock \\ twice'}}],
+                    content: [{type: 'musicStart', attrs: {mode: 'hit', title: 'Knock \\ twice'}}],
                 },
                 {type: 'note', content: [text('Rework this transition')]},
             ],
@@ -96,7 +96,7 @@ copyright: "© 2026 Jane Smith"
 
 ## A garden. Dusk.
 
-Anna watches as @"Mrs. Washington" enters. @@cue 1 "She said \"Yes\""
+Anna watches as @"Mrs. Washington" enters. @@music 1 "She said \"Yes\""
 
 "Mrs. Washington"
 (quietly)
@@ -106,7 +106,7 @@ Anna watches as @"Mrs. Washington" enters. @@cue 1 "She said \"Yes\""
 
 @@out 1
 
-@@cue 2 "Knock \\ twice"
+@@music 2 "Knock \\ twice"
 
 @@out 2
 

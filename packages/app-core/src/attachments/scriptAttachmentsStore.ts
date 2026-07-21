@@ -1,8 +1,8 @@
 import type {
-    CueAttachmentRole,
-    CueAttachmentUpload,
+    MusicAttachmentRole,
+    MusicAttachmentUpload,
     ScriptAttachment,
-    ScriptCueAttachmentBinding,
+    ScriptMusicAttachmentBinding,
     ScriptRepository,
 } from '@stagistic/db';
 
@@ -12,42 +12,42 @@ import {
     createRepositoryStoreRegistry,
 } from '../collections';
 
-const bindingKey = (binding: ScriptCueAttachmentBinding) => `${binding.cueId}:${binding.role}`;
+const bindingKey = (binding: ScriptMusicAttachmentBinding) => `${binding.musicId}:${binding.role}`;
 
 export const createScriptAttachmentsStore = (
     repository: ScriptRepository,
     scriptId: string,
 ) => {
     const attachmentsSource = repository.getScriptAttachmentsSource(scriptId);
-    const bindingsSource = repository.getScriptCueAttachmentBindingsSource(scriptId);
+    const bindingsSource = repository.getScriptMusicAttachmentBindingsSource(scriptId);
     const attachments = createReactiveCollection<ScriptAttachment, string>({
         id: `script-attachments:${scriptId}`,
         source: attachmentsSource,
         getKey: attachment => attachment.id,
     });
-    const bindings = createReactiveCollection<ScriptCueAttachmentBinding, string>({
-        id: `script-cue-attachments:${scriptId}`,
+    const bindings = createReactiveCollection<ScriptMusicAttachmentBinding, string>({
+        id: `script-music-attachments:${scriptId}`,
         source: bindingsSource,
         getKey: bindingKey,
     });
-    const enqueueCue = createKeyedTaskQueue<string>();
+    const enqueueMusic = createKeyedTaskQueue<string>();
 
     const refresh = async () => {
         await Promise.all([attachmentsSource.refresh(), bindingsSource.refresh()]);
     };
     const upload = (
-        cueId: string,
-        role: CueAttachmentRole,
-        file: CueAttachmentUpload,
-    ) => enqueueCue(cueId, async () => {
-        await repository.setCueAttachment(scriptId, cueId, role, file);
+        musicId: string,
+        role: MusicAttachmentRole,
+        file: MusicAttachmentUpload,
+    ) => enqueueMusic(musicId, async () => {
+        await repository.setMusicAttachment(scriptId, musicId, role, file);
         await refresh();
     });
     const remove = (
-        cueId: string,
-        role: CueAttachmentRole,
-    ) => enqueueCue(cueId, async () => {
-        await repository.removeCueAttachment(scriptId, cueId, role);
+        musicId: string,
+        role: MusicAttachmentRole,
+    ) => enqueueMusic(musicId, async () => {
+        await repository.removeMusicAttachment(scriptId, musicId, role);
         await refresh();
     });
 

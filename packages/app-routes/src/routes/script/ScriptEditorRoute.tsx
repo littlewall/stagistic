@@ -1,7 +1,7 @@
 import {useScriptRepository} from '@stagistic/app-core';
 import {
-    type EditorCueCreateRequest,
-    type EditorCueRemoveRequest,
+    type EditorMusicCreateRequest,
+    type EditorMusicRemoveRequest,
     incrementRouteRenderCount,
     ScriptEditor,
 } from '@stagistic/editor';
@@ -16,12 +16,12 @@ import {useNavigate} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
-import {
-    AddCueModal,
-    ScriptCuesSidebar,
-    UnassignCueModal,
-} from './editor/cues';
 import {DeferredScriptEditor} from './editor/DeferredScriptEditor';
+import {
+    AddMusicModal,
+    ScriptMusicSidebar,
+    UnassignMusicModal,
+} from './editor/music';
 import {
     type SidebarPanel,
     useEditorSidebars,
@@ -38,9 +38,9 @@ import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'calc(280px * var(--size-scale))';
 
-type AddCueModalState =
+type AddMusicModalState =
     | {source: 'sidebar'}
-    | {source: 'editor', request: EditorCueCreateRequest};
+    | {source: 'editor', request: EditorMusicCreateRequest};
 
 export const ScriptEditorRoute = () => {
     incrementRouteRenderCount();
@@ -67,22 +67,22 @@ export const ScriptEditorRoute = () => {
         isEditorPresentationHydrated,
         titlePageDraft,
         scriptTitleDraft,
-        cueState,
+        musicState,
         openSettingsModal,
         openAttributeManagerModal,
-        openAttributeManagerCue,
+        openAttributeManagerMusic,
     } = useScriptSettingsModal();
-    const [addCueModalState, setAddCueModalState] = useState<AddCueModalState | null>(null);
-    const [removeCueRequest, setRemoveCueRequest] = useState<EditorCueRemoveRequest | null>(null);
+    const [addMusicModalState, setAddMusicModalState] = useState<AddMusicModalState | null>(null);
+    const [removeMusicRequest, setRemoveMusicRequest] = useState<EditorMusicRemoveRequest | null>(null);
     const {
-        cues,
-        createCue,
-        deleteCue,
-        markCueAssigned,
-        markCueUnassigned,
-        updateCueRequest,
-        unassignCue,
-    } = cueState;
+        music,
+        createMusic,
+        deleteMusic,
+        markMusicAssigned,
+        markMusicUnassigned,
+        updateMusicRequest,
+        unassignMusic,
+    } = musicState;
 
     const displayedCurrentScript = useMemo(
         () => currentScript ? {...currentScript, name: scriptTitleDraft} : null,
@@ -104,41 +104,41 @@ export const ScriptEditorRoute = () => {
         getEditorValue,
         titlePage: titlePageDraft,
     });
-    const openAddCueModal = useCallback(() => {
-        setAddCueModalState({source: 'sidebar'});
+    const openAddMusicModal = useCallback(() => {
+        setAddMusicModalState({source: 'sidebar'});
     }, []);
-    const closeAddCueModal = useCallback(() => {
-        setAddCueModalState(null);
+    const closeAddMusicModal = useCallback(() => {
+        setAddMusicModalState(null);
     }, []);
-    const handleRequestCreateCue = useCallback((request: EditorCueCreateRequest) => {
-        setAddCueModalState({
+    const handleRequestCreateMusic = useCallback((request: EditorMusicCreateRequest) => {
+        setAddMusicModalState({
             source: 'editor',
             request,
         });
     }, []);
-    const handleRequestRemoveCue = useCallback((request: EditorCueRemoveRequest) => {
-        setRemoveCueRequest(request);
+    const handleRequestRemoveMusic = useCallback((request: EditorMusicRemoveRequest) => {
+        setRemoveMusicRequest(request);
     }, []);
-    const handleCreateCue = useCallback(async (input: Parameters<typeof createCue>[0]) => {
-        const createdCue = await createCue(input);
+    const handleCreateMusic = useCallback(async (input: Parameters<typeof createMusic>[0]) => {
+        const createdMusic = await createMusic(input);
 
-        if (createdCue && addCueModalState?.source === 'editor') {
-            addCueModalState.request.complete(createdCue);
+        if (createdMusic && addMusicModalState?.source === 'editor') {
+            addMusicModalState.request.complete(createdMusic);
         }
 
-        return createdCue;
-    }, [addCueModalState, createCue]);
-    const handleConfirmRemoveCue = useCallback(async () => {
-        if (!removeCueRequest) {
+        return createdMusic;
+    }, [addMusicModalState, createMusic]);
+    const handleConfirmRemoveMusic = useCallback(async () => {
+        if (!removeMusicRequest) {
             return;
         }
 
-        if (removeCueRequest.complete()) {
-            await unassignCue(removeCueRequest.cueId);
+        if (removeMusicRequest.complete()) {
+            await unassignMusic(removeMusicRequest.musicId);
         }
 
-        setRemoveCueRequest(null);
-    }, [removeCueRequest, unassignCue]);
+        setRemoveMusicRequest(null);
+    }, [removeMusicRequest, unassignMusic]);
 
     const sessionContextValue = useMemo(() => ({
         currentScriptId,
@@ -166,23 +166,23 @@ export const ScriptEditorRoute = () => {
             renderContent: () => <ScriptCharactersSidebar />,
         },
         {
-            id: 'cues',
-            label: 'Cues',
+            id: 'music',
+            label: 'Music',
             renderContent: () => (
-                <ScriptCuesSidebar
-                    cues={cues}
-                    isLoading={cueState.isLoading}
-                    onAddCue={openAddCueModal}
-                    onDeleteCue={deleteCue}
-                    onUnassignCue={unassignCue}
+                <ScriptMusicSidebar
+                    music={music}
+                    isLoading={musicState.isLoading}
+                    onAddMusic={openAddMusicModal}
+                    onDeleteMusic={deleteMusic}
+                    onUnassignMusic={unassignMusic}
                 />
             ),
         },
     ], [
-        cues,
-        deleteCue,
-        openAddCueModal,
-        unassignCue,
+        music,
+        deleteMusic,
+        openAddMusicModal,
+        unassignMusic,
     ]);
     const {
         leftSidebarToggle,
@@ -241,7 +241,7 @@ export const ScriptEditorRoute = () => {
                     document={{
                         initialValue: resolvedEditorInitialValue,
                         persistentCharacters: normalizedConfirmedCharacterRecords,
-                        persistentCues: cues,
+                        persistentMusic: music,
                         scriptTitle: scriptTitleDraft,
                         draftDate: resolveDraftDate(titlePageDraft),
                     }}
@@ -251,7 +251,7 @@ export const ScriptEditorRoute = () => {
                         onManualSave: handleManualSave,
                         autoSaveDelayMs: AUTOSAVE_DELAY_MS,
                     }}
-                    requests={{updateCueRequest}}
+                    requests={{updateMusicRequest}}
                     layout={{
                         autoFocus: shouldAutoFocus,
                         leftSidebarToggle,
@@ -262,11 +262,11 @@ export const ScriptEditorRoute = () => {
                     }}
                     callbacks={{
                         onValueChange: handleResolvedEditorValueChange,
-                        onRequestCreateCue: handleRequestCreateCue,
-                        onRequestRemoveCue: handleRequestRemoveCue,
-                        onOpenCueManager: openAttributeManagerCue,
-                        onCueAssigned: markCueAssigned,
-                        onCueUnassigned: markCueUnassigned,
+                        onRequestCreateMusic: handleRequestCreateMusic,
+                        onRequestRemoveMusic: handleRequestRemoveMusic,
+                        onOpenMusicManager: openAttributeManagerMusic,
+                        onMusicAssigned: markMusicAssigned,
+                        onMusicUnassigned: markMusicUnassigned,
                     }}
                 >
                     <ScriptEditor.LeftSidebar>
@@ -276,19 +276,19 @@ export const ScriptEditorRoute = () => {
                         {rightSidebar}
                     </ScriptEditor.RightSidebar>
                 </DeferredScriptEditor>
-                <AddCueModal
-                    isOpen={addCueModalState !== null}
-                    initialTitle={addCueModalState?.source === 'editor'
-                        ? addCueModalState.request.title
+                <AddMusicModal
+                    isOpen={addMusicModalState !== null}
+                    initialTitle={addMusicModalState?.source === 'editor'
+                        ? addMusicModalState.request.title
                         : undefined}
-                    onClose={closeAddCueModal}
-                    onCreate={handleCreateCue}
+                    onClose={closeAddMusicModal}
+                    onCreate={handleCreateMusic}
                 />
-                <UnassignCueModal
-                    isOpen={removeCueRequest !== null}
-                    cueTitle={removeCueRequest?.title}
-                    onClose={() => setRemoveCueRequest(null)}
-                    onConfirm={handleConfirmRemoveCue}
+                <UnassignMusicModal
+                    isOpen={removeMusicRequest !== null}
+                    musicTitle={removeMusicRequest?.title}
+                    onClose={() => setRemoveMusicRequest(null)}
+                    onConfirm={handleConfirmRemoveMusic}
                 />
             </AppLayout>
         </ScriptSessionProvider>

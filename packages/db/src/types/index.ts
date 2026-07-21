@@ -5,19 +5,19 @@ export type {
     ScriptCharacterRef,
 } from './characters';
 export {
-    CUE_ATTACHMENT_ROLES,
-    type CueAttachmentRole,
-} from './cueAttachments';
+    MUSIC_ATTACHMENT_ROLES,
+    type MusicAttachmentRole,
+} from './musicAttachments';
 export type {
     Script,
     ScriptAct,
     ScriptAttachment,
     ScriptBlock,
     ScriptBlockCharacterRef,
-    ScriptCue,
-    ScriptCueAttachment,
-    ScriptCueAttachmentBinding,
     ScriptLocation,
+    ScriptMusic,
+    ScriptMusicAttachment,
+    ScriptMusicAttachmentBinding,
     ScriptScene,
     ScriptSettingsBlock,
     ScriptSummary,

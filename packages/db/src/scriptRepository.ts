@@ -6,14 +6,14 @@ import type {
 
 import type {ReactiveQuerySource} from './reactive';
 import type {
-    CueAttachmentRole,
+    MusicAttachmentRole,
     ScriptAttachment,
     ScriptCharacterGenderOption,
     ScriptCharacterRef,
-    ScriptCue,
-    ScriptCueAttachment,
-    ScriptCueAttachmentBinding,
     ScriptLocation,
+    ScriptMusic,
+    ScriptMusicAttachment,
+    ScriptMusicAttachmentBinding,
     ScriptSummary,
 } from './types';
 
@@ -50,17 +50,17 @@ export interface DuplicateScriptWithIdInput extends DuplicateScriptInput {
     timestamp?: number,
 }
 
-export interface CreateScriptCueInput {
+export interface CreateScriptMusicInput {
     title: string,
     kind: 'song' | 'instrumental',
 }
 
-export interface CreateScriptCueWithIdInput extends CreateScriptCueInput {
+export interface CreateScriptMusicWithIdInput extends CreateScriptMusicInput {
     id: string,
     timestamp?: number,
 }
 
-export type UpdateScriptCueInput = CreateScriptCueInput;
+export type UpdateScriptMusicInput = CreateScriptMusicInput;
 
 export interface ConfirmScriptCharacterWithIdInput {
     id: string,
@@ -84,12 +84,12 @@ export interface CreateScriptLocationWithIdInput extends CreateScriptLocationInp
     timestamp?: number,
 }
 
-export interface ScriptCuesRepository {
-    list(scriptId: string): Promise<ScriptCue[]>,
-    create(scriptId: string, input: CreateScriptCueInput): Promise<ScriptCue | null>,
-    createWithId(scriptId: string, input: CreateScriptCueWithIdInput): Promise<ScriptCue | null>,
-    update(scriptId: string, cueId: string, input: UpdateScriptCueInput): Promise<ScriptCue | null>,
-    delete(scriptId: string, cueId: string): Promise<void>,
+export interface ScriptMusicRepository {
+    list(scriptId: string): Promise<ScriptMusic[]>,
+    create(scriptId: string, input: CreateScriptMusicInput): Promise<ScriptMusic | null>,
+    createWithId(scriptId: string, input: CreateScriptMusicWithIdInput): Promise<ScriptMusic | null>,
+    update(scriptId: string, musicId: string, input: UpdateScriptMusicInput): Promise<ScriptMusic | null>,
+    delete(scriptId: string, musicId: string): Promise<void>,
 }
 
 export interface ScriptLocationsRepository {
@@ -111,7 +111,7 @@ export interface ScriptSceneLocationAssignment {
     locationId: string,
 }
 
-export interface CueAttachmentUpload {
+export interface MusicAttachmentUpload {
     name: string,
     type: string,
     size: number,
@@ -119,14 +119,14 @@ export interface CueAttachmentUpload {
 }
 
 export interface ScriptAttachmentsRepository {
-    getByCueRole(cueId: string, role: CueAttachmentRole): Promise<ScriptCueAttachment | null>,
-    setForCue(
+    getByMusicRole(musicId: string, role: MusicAttachmentRole): Promise<ScriptMusicAttachment | null>,
+    setForMusic(
         scriptId: string,
-        cueId: string,
-        role: CueAttachmentRole,
-        file: CueAttachmentUpload,
-    ): Promise<ScriptCueAttachment | null>,
-    removeFromCue(scriptId: string, cueId: string, role: CueAttachmentRole): Promise<void>,
+        musicId: string,
+        role: MusicAttachmentRole,
+        file: MusicAttachmentUpload,
+    ): Promise<ScriptMusicAttachment | null>,
+    removeFromMusic(scriptId: string, musicId: string, role: MusicAttachmentRole): Promise<void>,
     getBlob(storageKey: string): Promise<Blob | null>,
 }
 
@@ -151,13 +151,13 @@ export interface ScriptRepository {
     allocateScriptId(): string,
     allocateScriptCharacterId(): string,
     allocateScriptCharacterGenderId(): string,
-    allocateScriptCueId(): string,
+    allocateScriptMusicId(): string,
     allocateScriptLocationId(): string,
     getScriptCharactersSource(scriptId: string): ReactiveQuerySource<ScriptCharacterRef>,
     getScriptCharacterGendersSource(
         scriptId: string,
     ): ReactiveQuerySource<ScriptCharacterGenderOption>,
-    getScriptCuesSource(scriptId: string): ReactiveQuerySource<ScriptCue>,
+    getScriptMusicSource(scriptId: string): ReactiveQuerySource<ScriptMusic>,
     getScriptLocationsSource(scriptId: string): ReactiveQuerySource<ScriptLocation>,
     getScriptSceneLocationsSource(
         scriptId: string,
@@ -165,21 +165,21 @@ export interface ScriptRepository {
     getScriptTitlePageSource(scriptId: string): ReactiveQuerySource<ScriptTitlePageRecord>,
     getScriptEditorSettingsSource(scriptId: string): ReactiveQuerySource<ScriptEditorSettingsRecord>,
     getScriptAttachmentsSource(scriptId: string): ReactiveQuerySource<ScriptAttachment>,
-    getScriptCueAttachmentBindingsSource(
+    getScriptMusicAttachmentBindingsSource(
         scriptId: string,
-    ): ReactiveQuerySource<ScriptCueAttachmentBinding>,
+    ): ReactiveQuerySource<ScriptMusicAttachmentBinding>,
     listScripts(options?: ListScriptsOptions): Promise<ScriptSummary[]>,
     getScriptSummary(scriptId: string): Promise<ScriptSummary | null>,
     listScriptCharacters(scriptId: string): Promise<ScriptCharacterRef[]>,
     listScriptCharacterGenders(scriptId: string): Promise<ScriptCharacterGenderOption[]>,
-    listScriptCues(scriptId: string): Promise<ScriptCue[]>,
-    createScriptCue(scriptId: string, input: CreateScriptCueInput): Promise<ScriptCue | null>,
-    createScriptCueWithId(
+    listScriptMusic(scriptId: string): Promise<ScriptMusic[]>,
+    createScriptMusic(scriptId: string, input: CreateScriptMusicInput): Promise<ScriptMusic | null>,
+    createScriptMusicWithId(
         scriptId: string,
-        input: CreateScriptCueWithIdInput,
-    ): Promise<ScriptCue | null>,
-    updateScriptCue(scriptId: string, cueId: string, input: UpdateScriptCueInput): Promise<ScriptCue | null>,
-    deleteScriptCue(scriptId: string, cueId: string): Promise<void>,
+        input: CreateScriptMusicWithIdInput,
+    ): Promise<ScriptMusic | null>,
+    updateScriptMusic(scriptId: string, musicId: string, input: UpdateScriptMusicInput): Promise<ScriptMusic | null>,
+    deleteScriptMusic(scriptId: string, musicId: string): Promise<void>,
     listScriptLocations(scriptId: string): Promise<ScriptLocation[]>,
     listScriptSceneLocations(scriptId: string): Promise<ScriptSceneLocationAssignment[]>,
     createScriptLocation(scriptId: string, input: CreateScriptLocationInput): Promise<ScriptLocation | null>,
@@ -194,14 +194,14 @@ export interface ScriptRepository {
         sceneHeadingBlockId: string,
         locationIds: string[],
     ): Promise<string[]>,
-    getCueAttachment(cueId: string, role: CueAttachmentRole): Promise<ScriptCueAttachment | null>,
-    setCueAttachment(
+    getMusicAttachment(musicId: string, role: MusicAttachmentRole): Promise<ScriptMusicAttachment | null>,
+    setMusicAttachment(
         scriptId: string,
-        cueId: string,
-        role: CueAttachmentRole,
-        file: CueAttachmentUpload,
-    ): Promise<ScriptCueAttachment | null>,
-    removeCueAttachment(scriptId: string, cueId: string, role: CueAttachmentRole): Promise<void>,
+        musicId: string,
+        role: MusicAttachmentRole,
+        file: MusicAttachmentUpload,
+    ): Promise<ScriptMusicAttachment | null>,
+    removeMusicAttachment(scriptId: string, musicId: string, role: MusicAttachmentRole): Promise<void>,
     getAttachmentBlob(storageKey: string): Promise<Blob | null>,
     createScript(title: string, initialContent?: ScriptDocument): Promise<string>,
     createScriptWithId(input: CreateScriptWithIdInput): Promise<void>,

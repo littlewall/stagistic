@@ -11,8 +11,8 @@ import {createTestDb, seedScript} from '../testing/createTestDb';
 import {createAttachmentHandlers} from './attachments';
 import {createCharacterHandlers} from './characters';
 import {createSettingsHandlers} from './config';
-import {createCueHandlers} from './cues';
 import {createLocationHandlers} from './locations';
+import {createMusicHandlers} from './music';
 import {createScriptsHandlers} from './scripts';
 import {createTitlePageHandlers} from './titlePage';
 import type {RecordOutbox} from './types';
@@ -74,7 +74,7 @@ describe('atomic domain write and outbox recording', () => {
         expect(syncDb).not.toHaveBeenCalled();
     });
 
-    it('rolls back places and cues', async () => {
+    it('rolls back places and music', async () => {
         const {
             db,
             getDb,
@@ -86,7 +86,7 @@ describe('atomic domain write and outbox recording', () => {
             recordOutbox: failingOutbox,
             syncDb,
         });
-        const cues = createCueHandlers({
+        const music = createMusicHandlers({
             getDb,
             recordOutbox: failingOutbox,
             syncDb,
@@ -96,14 +96,14 @@ describe('atomic domain write and outbox recording', () => {
             id: 'place-1',
             name: 'Stage',
         })).rejects.toThrow(outboxFailure);
-        await expect(cues.createWithId('script-1', {
-            id: 'cue-1',
+        await expect(music.createWithId('script-1', {
+            id: 'music-1',
             title: 'Overture',
             kind: 'song',
         })).rejects.toThrow(outboxFailure);
 
         expect(await db.select().from(dbSchema.scriptLocations)).toEqual([]);
-        expect(await db.select().from(dbSchema.scriptCues)).toEqual([]);
+        expect(await db.select().from(dbSchema.scriptMusic)).toEqual([]);
         await expectScriptTimestamp(db, initialUpdatedAt);
         expect(syncDb).not.toHaveBeenCalled();
     });
@@ -171,13 +171,13 @@ describe('atomic domain write and outbox recording', () => {
             syncDb,
         } = await setup();
 
-        await db.insert(dbSchema.scriptCues).values({
-            id: 'cue-1',
+        await db.insert(dbSchema.scriptMusic).values({
+            id: 'music-1',
             scriptId: 'script-1',
             sceneNumber: 0,
             indexInScene: 0,
             mode: 'open',
-            title: 'Cue',
+            title: 'Music',
             kind: 'song',
             startBlockId: null,
             endBlockId: null,
@@ -192,7 +192,7 @@ describe('atomic domain write and outbox recording', () => {
             fileStorage: new InMemoryFileStorage(),
         });
 
-        await expect(handlers.setForCue('script-1', 'cue-1', 'integrated_score', {
+        await expect(handlers.setForMusic('script-1', 'music-1', 'integrated_score', {
             name: 'score.pdf',
             type: 'application/pdf',
             size: 3,
@@ -200,7 +200,7 @@ describe('atomic domain write and outbox recording', () => {
         })).rejects.toThrow(outboxFailure);
 
         expect(await db.select().from(dbSchema.scriptAttachments)).toEqual([]);
-        expect(await db.select().from(dbSchema.scriptCueAttachments)).toEqual([]);
+        expect(await db.select().from(dbSchema.scriptMusicAttachments)).toEqual([]);
         await expectScriptTimestamp(db, initialUpdatedAt);
         expect(syncDb).not.toHaveBeenCalled();
     });

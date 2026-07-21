@@ -44,14 +44,14 @@ const hasBlockActionsOverlayFocus = () => {
 };
 
 /*
- * A focused cue pill steals DOM focus from the editor, so the selection-based
+ * A focused music pill steals DOM focus from the editor, so the selection-based
  * active block resolves to null. Resolve the block that owns the focused pill
- * from the DOM instead, so clicking a cue tag activates its block.
+ * from the DOM instead, so clicking a music tag activates its block.
  */
-const resolveFocusedCuePillBlockId = () => {
+const resolveFocusedMusicPillBlockId = () => {
     const activeElement = document.activeElement;
 
-    if (!(activeElement instanceof Element) || !activeElement.closest('[data-cue-pill]')) {
+    if (!(activeElement instanceof Element) || !activeElement.closest('[data-music-pill]')) {
         return null;
     }
 
@@ -84,16 +84,16 @@ export const useOverlayPosition = ({
             return;
         }
 
-        const focusedCuePillBlockId = resolveFocusedCuePillBlockId();
+        const focusedMusicPillBlockId = resolveFocusedMusicPillBlockId();
 
-        if (focusedCuePillBlockId) {
-            const cueBlock = findScriptBlockByIdFromState(targetEditor.state, focusedCuePillBlockId);
+        if (focusedMusicPillBlockId) {
+            const musicBlock = findScriptBlockByIdFromState(targetEditor.state, focusedMusicPillBlockId);
 
-            if (cueBlock) {
+            if (musicBlock) {
                 commitActiveBlockState({
-                    blockId: cueBlock.id,
-                    blockType: cueBlock.blockType,
-                    blockPos: cueBlock.pos,
+                    blockId: musicBlock.id,
+                    blockType: musicBlock.blockType,
+                    blockPos: musicBlock.pos,
                 });
 
                 return;
@@ -158,7 +158,7 @@ export const useOverlayPosition = ({
             }
 
             window.requestAnimationFrame(() => {
-                if (resolveFocusedCuePillBlockId()) {
+                if (resolveFocusedMusicPillBlockId()) {
                     updateActiveBlockState(editor);
 
                     return;
@@ -193,7 +193,7 @@ export const useOverlayPosition = ({
         }
 
         const handleDocumentFocusIn = () => {
-            if (resolveFocusedCuePillBlockId()) {
+            if (resolveFocusedMusicPillBlockId()) {
                 updateActiveBlockState(editor);
 
                 return;

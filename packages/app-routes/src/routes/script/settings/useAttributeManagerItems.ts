@@ -1,6 +1,6 @@
 import {
     useEditorLiveCharacters,
-    useEditorLiveCues,
+    useEditorLiveMusic,
     useEditorLiveStructure,
 } from '@stagistic/editor';
 import {buildScriptStructureOutline} from '@stagistic/script';
@@ -10,30 +10,30 @@ import type {
 } from '@stagistic/ui';
 import {useMemo} from 'react';
 
-import type {useScriptCuesState} from '../editor/cues';
+import type {useScriptMusicState} from '../editor/music';
 import type {useScriptCharactersContextValue} from '../useScriptCharactersContextValue';
 import {
-    buildAttributeManagerCueItems,
-    buildAttributeManagerCueItemsFromLive,
-} from './attributeManagerCueItems';
+    buildAttributeManagerMusicItems,
+    buildAttributeManagerMusicItemsFromLive,
+} from './attributeManagerMusicItems';
 
 interface UseAttributeManagerItemsArgs {
     isOpen: boolean,
-    initialValue: Parameters<typeof buildAttributeManagerCueItems>[0],
+    initialValue: Parameters<typeof buildAttributeManagerMusicItems>[0],
     characters: ReturnType<typeof useScriptCharactersContextValue>['contextValue'],
-    cues: ReturnType<typeof useScriptCuesState>['cues'],
-    getCueTitleDraft: (cueId: string, confirmedTitle: string) => string,
+    music: ReturnType<typeof useScriptMusicState>['music'],
+    getMusicTitleDraft: (musicId: string, confirmedTitle: string) => string,
 }
 
 export const useAttributeManagerItems = ({
     isOpen,
     initialValue,
     characters,
-    cues,
-    getCueTitleDraft,
+    music,
+    getMusicTitleDraft,
 }: UseAttributeManagerItemsArgs) => {
     const liveCharacters = useEditorLiveCharacters();
-    const liveCues = useEditorLiveCues();
+    const liveMusic = useEditorLiveMusic();
     const liveStructure = useEditorLiveStructure();
     const characterItems = useMemo<AttributeManagerCharacter[]>(() => {
         return characters.confirmedCharacterRecords.map(character => ({
@@ -96,26 +96,26 @@ export const useAttributeManagerItems = ({
         isOpen,
         liveStructure.rows,
     ]);
-    const cueItems = useMemo<AttributeManagerListItem[]>(() => {
-        const items = liveStructure.rows.length > 0 || liveCues.length > 0
-            ? buildAttributeManagerCueItemsFromLive(liveCues, liveStructure, cues)
-            : buildAttributeManagerCueItems(initialValue, cues);
+    const musicItems = useMemo<AttributeManagerListItem[]>(() => {
+        const items = liveStructure.rows.length > 0 || liveMusic.length > 0
+            ? buildAttributeManagerMusicItemsFromLive(liveMusic, liveStructure, music)
+            : buildAttributeManagerMusicItems(initialValue, music);
 
         return items.map(item => ({
             ...item,
-            title: getCueTitleDraft(item.id, item.title),
+            title: getMusicTitleDraft(item.id, item.title),
         }));
     }, [
-        cues,
-        getCueTitleDraft,
+        music,
+        getMusicTitleDraft,
         initialValue,
-        liveCues,
+        liveMusic,
         liveStructure,
     ]);
 
     return {
         characterItems,
         sceneItems,
-        cueItems,
+        musicItems,
     };
 };

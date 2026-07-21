@@ -45,7 +45,7 @@ is naming, legacy cruft, and a few genuinely new concepts. We therefore
   `sceneHeading` → `scene`, `parenthetical` → `aside` internally).
 - No coercion/permanent migration code — see §9.
 
-**Add (the new concepts):** cue, inline character tag, lyric section
+**Add (the new concepts):** music, inline character tag, lyric section
 level. Of these, only what the editor can render today is built now; the
 rest is *reserved as specification* (§7–§8).
 
@@ -62,14 +62,14 @@ regenerate/migrate the one script rather than writing permanent coercion.
 **This spec covers:**
 - The clean-break block vocabulary and identifier scheme.
 - The mapping of every syntax construct to stored data.
-- A *specification* of how the not-yet-in-editor constructs (cue, inline
+- A *specification* of how the not-yet-in-editor constructs (music, inline
   tag) will be stored, so a later exporter has a target.
 - The temporary migration.
 
 **Explicit non-goals (downstream specs):**
 - The parser and serializer (text ↔ document). This spec only defines the
   *target* shape.
-- Building editor entities/UX for cue and inline tagging.
+- Building editor entities/UX for music and inline tagging.
 - Tuning import (done after the new editor features land) and export
   (more complex; only its target spec matters now).
 
@@ -158,21 +158,21 @@ These constructs exist in the syntax but not yet in the editor. The model
 concrete target and import → store → export can round-trip. **No code is
 written for these now.**
 
-### Cue (`@@cue` / `@@out`)
+### Music (`@@music` / `@@out`)
 
-- **Editor intent (future):** typing `@` opens a custom inline input; the
-  writer types the cue text; metadata is stored bound to that text
-  position, the way character references are. The `@@cue` / `@@out`
+- **Editor intent:** typing `#` opens a custom inline input; the
+  writer selects or creates a music entry; metadata is stored bound to that
+  position, the way character references are. The `@@music` / `@@out`
   markup is **not visible** in the editor — it is purely the import/export
   serialization of that bound metadata.
-- **Reserved storage:** cue metadata (number, title, kind:
-  song/instrumental/sound, role: start/out) bound to a position inside a
+- **Reserved storage:** music metadata (number, title, kind:
+  song/instrumental, role: start/out) bound to a position inside a
   `stageDirection` block — analogous to `script_block_character_refs`
-  binding a character to a block. A dedicated `script_cues` relational
+  binding a character to a block. A dedicated `script_music` relational
   entity (mirroring `script_scenes`/`script_acts`, with
-  `start_block_id`/`end_block_id`) and block-index `cue_id` tagging are
-  the expected fuller shape **when cue lands in the editor**.
-- **Round-trip rule for the future exporter:** a cue with no `@@out` is
+  `start_block_id`/`end_block_id`) and block-index `music_id` tagging are
+  the expected fuller shape **when music lands in the editor**.
+- **Round-trip rule for the exporter:** music with no `@@out` is
   assumed to end at the end of its scene; the kind is `song` if lyrics
   fall within its interval, otherwise generic.
 
@@ -212,6 +212,6 @@ With the model defined, the remaining specs are:
    including the whole-document `#`/`##` pre-scan, case+position
    detection, soft-break (`~`) handling, and case-correct lyric export.
 2. **Editor + import** — editing surfaces and the import flow (and, in
-   time, the cue inline-input and inline-tag UX that turn the reserved
+   time, the music inline-input and inline-tag UX that turn the reserved
    bindings into built features).
 3. **Export** — serialization to `.stagistic` text per the syntax spec.

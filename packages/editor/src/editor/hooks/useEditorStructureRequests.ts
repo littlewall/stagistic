@@ -43,12 +43,12 @@ export const useEditorStructureRequests = ({
         renameActRequest,
         deleteActRequest,
         moveSceneRequest,
-        updateCueRequest,
+        updateMusicRequest,
     } = requests ?? {};
     const lastInsertActRequestIdRef = useRef<number | null>(null);
     const lastRenameActRequestIdRef = useRef<number | null>(null);
     const lastDeleteActRequestIdRef = useRef<number | null>(null);
-    const lastUpdateCueRequestIdRef = useRef<number | null>(null);
+    const lastUpdateMusicRequestIdRef = useRef<number | null>(null);
 
     const commitContext = useMemo<CommitContext | null>(() => {
         if (!editor) {
@@ -75,21 +75,21 @@ export const useEditorStructureRequests = ({
     });
 
     useEffect(() => {
-        if (!editor || !updateCueRequest) {
+        if (!editor || !updateMusicRequest) {
             return;
         }
 
-        if (lastUpdateCueRequestIdRef.current === updateCueRequest.requestId) {
+        if (lastUpdateMusicRequestIdRef.current === updateMusicRequest.requestId) {
             return;
         }
 
-        lastUpdateCueRequestIdRef.current = updateCueRequest.requestId;
-        editor.commands.updateCueMetadata(
-            updateCueRequest.cueId,
-            updateCueRequest.title,
-            updateCueRequest.kind,
+        lastUpdateMusicRequestIdRef.current = updateMusicRequest.requestId;
+        editor.commands.updateMusicMetadata(
+            updateMusicRequest.musicId,
+            updateMusicRequest.title,
+            updateMusicRequest.kind,
         );
-    }, [editor, updateCueRequest]);
+    }, [editor, updateMusicRequest]);
 
     useEffect(() => {
         if (!commitContext || !insertActRequest) {

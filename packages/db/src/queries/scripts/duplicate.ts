@@ -10,8 +10,8 @@ import {
     scriptBlocks,
     scriptCharacterGenders,
     scriptCharacters,
-    scriptCues,
     scriptLocations,
+    scriptMusic,
     scripts,
     scriptSceneLocations,
     scriptScenes,
@@ -42,7 +42,7 @@ const remapNullable = (map: Map<string, string>, id: string | null): string | nu
 /**
  * Copy every row of a script into a fresh script within a single transaction.
  *
- * Content (blocks, acts, scenes, locations, cues) is always copied. Settings and
+ * Content (blocks, acts, scenes, locations, music) is always copied. Settings and
  * confirmed characters are copied only when the corresponding flag is set. The
  * title page is never copied. All primary keys are regenerated and every
  * cross-reference is remapped to the new ids.
@@ -85,10 +85,10 @@ export const duplicateScriptRows = async (
         .select()
         .from(scriptBlocks)
         .where(eq(scriptBlocks.scriptId, sourceScriptId));
-    const cueRows = await db
+    const musicRows = await db
         .select()
-        .from(scriptCues)
-        .where(eq(scriptCues.scriptId, sourceScriptId));
+        .from(scriptMusic)
+        .where(eq(scriptMusic.scriptId, sourceScriptId));
     const sceneIds = sceneRows.map(row => row.id);
     const sceneLocationRows = sceneIds.length > 0
         ? await db
@@ -154,8 +154,8 @@ export const duplicateScriptRows = async (
         })));
     }
 
-    if (cueRows.length > 0) {
-        await db.insert(scriptCues).values(cueRows.map(row => ({
+    if (musicRows.length > 0) {
+        await db.insert(scriptMusic).values(musicRows.map(row => ({
             ...row,
             id: uuidv7(),
             scriptId: targetScriptId,

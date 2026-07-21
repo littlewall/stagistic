@@ -11,16 +11,16 @@ import {
 
 import {
     ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
-    ATTRIBUTE_MANAGER_PANEL_CUES,
+    ATTRIBUTE_MANAGER_PANEL_MUSIC,
     ATTRIBUTE_MANAGER_PANEL_PLACES,
     ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
     type AttributeManagerPanelId,
 } from '../attributes/attributeManagerMenu';
-import {CueAttachmentsDetail} from '../attributes/CueAttachmentsDetail';
+import {MusicAttachmentsDetail} from '../attributes/MusicAttachmentsDetail';
 import type {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
-import type {useCueAttachmentsState} from '../attributes/useCueAttachmentsState';
+import type {useMusicAttachmentsState} from '../attributes/useMusicAttachmentsState';
 import type {useScriptPlacesState} from '../attributes/useScriptPlacesState';
-import type {useScriptCuesState} from '../editor/cues';
+import type {useScriptMusicState} from '../editor/music';
 import type {useScriptCharactersContextValue} from '../useScriptCharactersContextValue';
 
 interface ScriptAttributeManagerModalProps {
@@ -29,7 +29,7 @@ interface ScriptAttributeManagerModalProps {
     tabs: ReturnType<typeof useAttributeManagerModalState>['tabs'],
     activePanelId: AttributeManagerPanelId,
     selectedCharacterId: string | null,
-    selectedCueId: string | null,
+    selectedMusicId: string | null,
     onClose: () => void,
     onSelectPanel: (panelId: string) => void,
     characters: ReturnType<typeof useScriptCharactersContextValue>['contextValue'],
@@ -37,12 +37,12 @@ interface ScriptAttributeManagerModalProps {
     characterColorSaturation: EditorSettings['visual']['characterColorSaturation'],
     sceneItems: AttributeManagerListItem[],
     placeState: ReturnType<typeof useScriptPlacesState>,
-    cueState: ReturnType<typeof useScriptCuesState>,
-    cueItems: AttributeManagerListItem[],
-    cueAttachmentsState: ReturnType<typeof useCueAttachmentsState>,
-    setCueTitleDraft: (cueId: string, title: string) => void,
-    persistCueTitleDraft: (
-        cueId: string,
+    musicState: ReturnType<typeof useScriptMusicState>,
+    musicItems: AttributeManagerListItem[],
+    musicAttachmentsState: ReturnType<typeof useMusicAttachmentsState>,
+    setMusicTitleDraft: (musicId: string, title: string) => void,
+    persistMusicTitleDraft: (
+        musicId: string,
         title: string,
         persist: (title: string) => void | Promise<unknown>,
     ) => Promise<void>,
@@ -54,7 +54,7 @@ export const ScriptAttributeManagerModal = ({
     tabs,
     activePanelId,
     selectedCharacterId,
-    selectedCueId,
+    selectedMusicId,
     onClose,
     onSelectPanel,
     characters,
@@ -62,13 +62,13 @@ export const ScriptAttributeManagerModal = ({
     characterColorSaturation,
     sceneItems,
     placeState,
-    cueState,
-    cueItems,
-    cueAttachmentsState,
-    setCueTitleDraft,
-    persistCueTitleDraft,
+    musicState,
+    musicItems,
+    musicAttachmentsState,
+    setMusicTitleDraft,
+    persistMusicTitleDraft,
 }: ScriptAttributeManagerModalProps) => {
-    const {cues} = cueState;
+    const {music: musicCatalog} = musicState;
 
     return (
         <AttributeManagerModal
@@ -110,27 +110,27 @@ export const ScriptAttributeManagerModal = ({
                     onCreateCharacter={characters.handleConfirmCharacter}
                 />
             ) : null}
-            {activePanelId === ATTRIBUTE_MANAGER_PANEL_CUES ? (
+            {activePanelId === ATTRIBUTE_MANAGER_PANEL_MUSIC ? (
                 <AttributeManagerListPanel
-                    items={cueItems}
-                    initialSelectedItemId={selectedCueId}
-                    detailTypeLabel="Cue"
-                    emptyListLabel="No cues yet"
-                    emptyDetailLabel="Select a cue"
-                    detailPlaceholder="Cue details are coming soon."
+                    items={musicItems}
+                    initialSelectedItemId={selectedMusicId}
+                    detailTypeLabel="Music"
+                    emptyListLabel="No music yet"
+                    emptyDetailLabel="Select music"
+                    detailPlaceholder="Music details are coming soon."
                     renderDetail={item => {
-                        const cue = cues.find(candidate => candidate.id === item.id);
+                        const music = musicCatalog.find(candidate => candidate.id === item.id);
 
-                        return cue ? (
-                            <CueAttachmentsDetail
-                                cue={cue}
+                        return music ? (
+                            <MusicAttachmentsDetail
+                                music={music}
                                 displayTitle={item.title}
-                                state={cueAttachmentsState}
-                                onTitleDraftChange={title => setCueTitleDraft(cue.id, title)}
-                                onUpdateCue={(cueId, input) => persistCueTitleDraft(
-                                    cueId,
+                                state={musicAttachmentsState}
+                                onTitleDraftChange={title => setMusicTitleDraft(music.id, title)}
+                                onUpdateMusic={(musicId, input) => persistMusicTitleDraft(
+                                    musicId,
                                     input.title,
-                                    title => cueState.updateCue(cueId, {...input, title}),
+                                    title => musicState.updateMusic(musicId, {...input, title}),
                                 )}
                             />
                         ) : null;

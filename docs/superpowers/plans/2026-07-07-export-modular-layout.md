@@ -41,7 +41,7 @@
 - `packages/editor/src/editor/export/cleanMode.ts` — clean-mode flag + storage read by decoration extensions. (create)
 - `packages/editor/src/editor/export/transcribeSurface.ts` — walk the paginated DOM → `TranscriptResult`. (create)
 - `packages/editor/src/editor/export/ExportMeasureSurface.tsx` — offscreen clean paginated surface for an `ExportPlan`. (create)
-- `packages/editor/src/editor/tiptap/nodes/CuePill.tsx` + `CuePill.module.css` — audit/fix layout-neutrality (M0). (modify if needed)
+- `packages/editor/src/editor/tiptap/nodes/MusicPill.tsx` + `MusicPill.module.css` — audit/fix layout-neutrality (M0). (modify if needed)
 - `packages/editor/src/editor/tiptap/marks/CharacterTagMark.ts` — audit layout-neutrality (M0). (modify if needed)
 - `packages/editor/src/index.ts` — export the new export/* API. (modify)
 
@@ -69,19 +69,19 @@
 
 Gates everything. Confirm (and fix) that editor-only decorations add zero layout.
 
-### Task 1: Layout-neutrality guard for character tags and cue pills
+### Task 1: Layout-neutrality guard for character tags and music pills
 
 **Files:**
 - Test: `packages/editor/src/editor/export/decorationNeutrality.browser.test.tsx` (create)
-- Modify only if a test fails: `packages/editor/src/editor/tiptap/nodes/CuePill.module.css`, `packages/editor/src/editor/tiptap/marks/CharacterTagMark.ts`
+- Modify only if a test fails: `packages/editor/src/editor/tiptap/nodes/MusicPill.module.css`, `packages/editor/src/editor/tiptap/marks/CharacterTagMark.ts`
 
 **Interfaces:**
-- Consumes: existing editor mount test helpers (find how `cueNode.browser.test.tsx` mounts an editor and reuse that harness).
+- Consumes: existing editor mount test helpers (find how `musicNode.browser.test.tsx` mounts an editor and reuse that harness).
 - Produces: a proven invariant — decorations do not change block height. No exported symbols.
 
 - [ ] **Step 1: Find the existing browser-test editor harness**
 
-Run: `sed -n '1,60p' packages/editor/src/editor/tiptap/nodes/cueNode.browser.test.tsx`
+Run: `sed -n '1,60p' packages/editor/src/editor/tiptap/nodes/musicNode.browser.test.tsx`
 Expected: see how a TipTap editor is mounted in jsdom/browser mode and how nodes are inserted. Reuse that exact mounting approach below (do not invent a new one).
 
 - [ ] **Step 2: Write the failing neutrality test**
@@ -100,11 +100,11 @@ describe("decoration layout-neutrality", () => {
         expect(Math.abs(tagged.getBoundingClientRect().height - plain.getBoundingClientRect().height)).toBeLessThan(0.5);
     });
 
-    it("cue pill adds no height to its line", async () => {
-        const {editorEl} = await mountEditorWithContent(/* a block with a cue vs. one without */);
-        const withCue = editorEl.querySelector<HTMLElement>("[data-block-id='withCue']")!;
-        const withoutCue = editorEl.querySelector<HTMLElement>("[data-block-id='withoutCue']")!;
-        expect(Math.abs(withCue.getBoundingClientRect().height - withoutCue.getBoundingClientRect().height)).toBeLessThan(0.5);
+    it("music pill adds no height to its line", async () => {
+        const {editorEl} = await mountEditorWithContent(/* a block with a music vs. one without */);
+        const withMusic = editorEl.querySelector<HTMLElement>("[data-block-id='withMusic']")!;
+        const withoutMusic = editorEl.querySelector<HTMLElement>("[data-block-id='withoutMusic']")!;
+        expect(Math.abs(withMusic.getBoundingClientRect().height - withoutMusic.getBoundingClientRect().height)).toBeLessThan(0.5);
     });
 });
 ```
@@ -118,7 +118,7 @@ Expected: PASS if decorations are already neutral; FAIL if a decoration inflates
 
 - [ ] **Step 4: If FAIL, fix the offending decoration**
 
-Reimplement the offender as layout-neutral: color/weight only for `characterTag`; for `CuePill`, make the frame an overlay (absolutely-positioned pseudo-element or `box-shadow`/outline that does not grow the box, or negative-margin inset), so the pill's box does not add inline width/height to the text flow. Re-run Step 3 until PASS.
+Reimplement the offender as layout-neutral: color/weight only for `characterTag`; for `MusicPill`, make the frame an overlay (absolutely-positioned pseudo-element or `box-shadow`/outline that does not grow the box, or negative-margin inset), so the pill's box does not add inline width/height to the text flow. Re-run Step 3 until PASS.
 
 - [ ] **Step 5: Verify**
 
@@ -418,12 +418,12 @@ Expected: PASS; tsc clean.
 
 **Files:**
 - Create: `packages/editor/src/editor/export/cleanMode.ts`
-- Modify: the character-tag and cue-pill rendering to honor the flag
+- Modify: the character-tag and music-pill rendering to honor the flag
 - Test: `packages/editor/src/editor/export/cleanMode.browser.test.tsx`
 
 **Interfaces:**
 - Consumes: TipTap extension storage API.
-- Produces: `CLEAN_MODE_ATTR = 'data-export-clean'` on the editor root, and a helper `isCleanMode(view): boolean`. When clean mode is on, `characterTag` renders as a plain `span` (no identity class → no color chip) and `CuePill` renders text-only (no frame). Layout is unchanged (guaranteed by M0), only ornaments vanish.
+- Produces: `CLEAN_MODE_ATTR = 'data-export-clean'` on the editor root, and a helper `isCleanMode(view): boolean`. When clean mode is on, `characterTag` renders as a plain `span` (no identity class → no color chip) and `MusicPill` renders text-only (no frame). Layout is unchanged (guaranteed by M0), only ornaments vanish.
 
 - [ ] **Step 1: Discover how extensions read a per-editor flag**
 
@@ -431,11 +431,11 @@ Run: `mcp__codegraph__codegraph_context "how editor extensions read a per-instan
 
 - [ ] **Step 2: Write the failing test**
 
-Mount an editor in clean mode with a tagged character + a cue; assert the identity class / cue-frame element is absent while the text content and block heights are identical to non-clean.
+Mount an editor in clean mode with a tagged character + a music; assert the identity class / music-frame element is absent while the text content and block heights are identical to non-clean.
 
 - [ ] **Step 3: Implement the flag + conditional rendering**
 
-Add `data-export-clean="true"` to the surface root via editorProps; in `CharacterTagMark.renderHTML` and `CuePill`, when the root is clean, drop the ornament class/frame but keep text. (Because ornaments are layout-neutral, dropping them cannot shift layout.)
+Add `data-export-clean="true"` to the surface root via editorProps; in `CharacterTagMark.renderHTML` and `MusicPill`, when the root is clean, drop the ornament class/frame but keep text. (Because ornaments are layout-neutral, dropping them cannot shift layout.)
 
 - [ ] **Step 4: Verify**
 

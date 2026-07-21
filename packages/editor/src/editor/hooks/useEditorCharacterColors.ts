@@ -131,7 +131,7 @@ export const useEditorCharacterColors = ({
             index: indexSnapshot,
             structure: projection.structure,
             characters: projection.characters,
-            cues: indexSnapshot.cues,
+            music: indexSnapshot.music,
             activeBlockId: null,
             activeBlockType: null,
         };

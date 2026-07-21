@@ -16,8 +16,8 @@ describe('ContextMenu', () => {
                 items={[
                     {
                         kind: 'command',
-                        id: 'add-cue',
-                        label: 'Add cue',
+                        id: 'add-music',
+                        label: 'Add music',
                         detail: '(1.A)',
                         icon: null,
                     },
@@ -30,8 +30,8 @@ describe('ContextMenu', () => {
             />,
         );
 
-        expect(html).toContain('aria-label="Add cue (1.A)"');
-        expect(html).toContain('>Add cue</span><span');
+        expect(html).toContain('aria-label="Add music (1.A)"');
+        expect(html).toContain('>Add music</span><span');
         expect(html).toContain('>(1.A)</span>');
     });
 });

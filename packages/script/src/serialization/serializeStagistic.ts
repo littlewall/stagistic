@@ -1,10 +1,10 @@
 import {CHARACTER_TAG_MARK_NAME} from '../characters';
 import {
-    CUE_MODE_ATTR, CUE_OUT_NODE_NAME, CUE_START_NODE_NAME, CUE_TITLE_ATTR,
-} from '../cues';
-import {
     getScriptBlockNodeType, type ScriptDocument, type ScriptNode,
 } from '../document';
+import {
+    MUSIC_MODE_ATTR, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME, MUSIC_TITLE_ATTR,
+} from '../music';
 import {
     isQuotedCharacterCueLine,
     isUppercaseSyntaxLine,
@@ -21,8 +21,8 @@ export interface SerializeStagisticOptions {
 }
 
 type SerializationState = {
-    cueNumber: number,
-    openCueNumber: number | null,
+    musicNumber: number,
+    openMusicNumber: number | null,
 };
 
 const getText = (node: ScriptNode): string => {
@@ -98,31 +98,31 @@ const serializeInlineContent = (
     for (let index = 0; index < content.length; index += 1) {
         const node = content[index];
 
-        if (node.type === CUE_START_NODE_NAME) {
-            state.cueNumber += 1;
+        if (node.type === MUSIC_START_NODE_NAME) {
+            state.musicNumber += 1;
 
-            const number = state.cueNumber;
+            const number = state.musicNumber;
             const title =
-                typeof node.attrs?.[CUE_TITLE_ATTR] === 'string' ? node.attrs[CUE_TITLE_ATTR] : '';
-            const marker = `@@cue ${number} ${quoteLiteral(title)}`;
+                typeof node.attrs?.[MUSIC_TITLE_ATTR] === 'string' ? node.attrs[MUSIC_TITLE_ATTR] : '';
+            const marker = `@@music ${number} ${quoteLiteral(title)}`;
 
             text = text.trimEnd() ? `${text.trimEnd()} ${marker}` : marker;
 
-            if (node.attrs?.[CUE_MODE_ATTR] === 'hit') {
+            if (node.attrs?.[MUSIC_MODE_ATTR] === 'hit') {
                 hitOut = `@@out ${number}`;
             } else {
-                state.openCueNumber = number;
+                state.openMusicNumber = number;
             }
 
             continue;
         }
 
-        if (node.type === CUE_OUT_NODE_NAME) {
-            if (state.openCueNumber !== null) {
-                const marker = `@@out ${state.openCueNumber}`;
+        if (node.type === MUSIC_OUT_NODE_NAME) {
+            if (state.openMusicNumber !== null) {
+                const marker = `@@out ${state.openMusicNumber}`;
 
                 text = text.trimEnd() ? `${text.trimEnd()} ${marker}` : marker;
-                state.openCueNumber = null;
+                state.openMusicNumber = null;
             }
 
             continue;
@@ -233,7 +233,7 @@ const stageDirectionRunContinuesSpeech = (content: ScriptNode[], fromIndex: numb
 
 const serializeBody = (document: ScriptDocument) => {
     const sections: string[] = [];
-    const state: SerializationState = {cueNumber: 0, openCueNumber: null};
+    const state: SerializationState = {musicNumber: 0, openMusicNumber: null};
     const hasActs = document.content.some(node => getScriptBlockNodeType(node) === 'act');
 
     for (let index = 0; index < document.content.length; index += 1) {
@@ -241,13 +241,13 @@ const serializeBody = (document: ScriptDocument) => {
         const blockType = getScriptBlockNodeType(node);
 
         if (blockType === 'act') {
-            state.openCueNumber = null;
+            state.openMusicNumber = null;
             sections.push(`# ${serializeInlineContent(node.content, state).text.trim()}`);
             continue;
         }
 
         if (blockType === 'scene') {
-            state.openCueNumber = null;
+            state.openMusicNumber = null;
             sections.push(`${hasActs ? '##' : '#'} ${serializeInlineContent(node.content, state).text.trim()}`);
             continue;
         }

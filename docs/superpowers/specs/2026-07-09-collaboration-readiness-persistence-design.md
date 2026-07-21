@@ -26,7 +26,7 @@ editor document source
 Today the document source is the existing PGlite block-table storage. In a later
 cloud build, the document source can become Hocuspocus/Yjs binary storage while
 the projection writer continues to maintain relational read models such as
-blocks, scenes, cues, and character references.
+blocks, scenes, music, and character references.
 
 This spec is deliberately incremental: no UI rewrite, no schema split for every
 table, no realtime transport, and no new production behavior.
@@ -200,7 +200,7 @@ make the role explicit.
   - `script_blocks`
   - `script_acts`
   - `script_scenes` projection fields
-  - `script_cues`
+  - `script_music`
   - `script_block_character_refs`
 - Metadata fields are not overwritten by projection writes unless they are
   explicitly projection-owned today.
@@ -341,7 +341,7 @@ user-metadata-owned in tables that currently carry both.
 |---|---|
 | all columns | projection from current document + confirmed character records |
 
-`script_cues`:
+`script_music`:
 
 | Column | Owner |
 |---|---|
@@ -411,14 +411,14 @@ reconciliation path. Avoid inventing a second block extraction algorithm.
 ### Acceptance criteria
 
 - Running rebuild from the current document produces the same effective blocks,
-  scenes, acts, cues, and refs as normal saves.
+  scenes, acts, music, and refs as normal saves.
 - Rebuild does not delete metadata-owned rows/columns.
 - Rebuild is transactionally safe.
 - Rebuild can be called without an editor instance.
 
 ### Tests
 
-- Rebuild from an empty projection creates blocks/scenes/acts/cues/refs.
+- Rebuild from an empty projection creates blocks/scenes/acts/music/refs.
 - Rebuild after stale projection rows removes obsolete projection-owned rows.
 - Rebuild preserves scene metadata.
 - Rebuild produces a document that can round-trip through

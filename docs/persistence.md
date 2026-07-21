@@ -21,7 +21,7 @@ Terminology:
   `ScriptDocumentSource`. Today this is still backed by the local block-table
   projection; a future server build can replace it with Yjs/Hocuspocus storage.
 - **Projection**: relational read models (`script_blocks`, `script_scenes`,
-  `script_cues`, character refs) materialized from the script document for fast
+  `script_music`, character refs) materialized from the script document for fast
   local queries, sidebars, export, and future production surfaces.
 
 The current local source and projection share the same PGlite tables, but the
@@ -117,7 +117,7 @@ so both PGlite instances run with `relaxedDurability: true`:
 Durability is instead explicit: `saveLatest` awaits `syncToFs()` after
 the transaction commits. Without that call the WAL stays in worker
 memory and dies with the page. Standalone relational commands migrated
-to the local-first collection path—including scripts, places, cues,
+to the local-first collection path—including scripts, places, music,
 characters, settings, title-page data, and attachment metadata—also flush
 through their repository handlers after the domain transaction commits.
 
@@ -130,9 +130,9 @@ component-owned array or map. The remaining imperative reads are intentional:
 - `useScriptLoader` loads the active document source; Tiptap owns the live body
   after hydration and document autosave owns persistence.
 - attachment blobs stay in `FileStorage`; only their PGlite metadata and
-  cue-role bindings are reactive collections. Preview reads a blob on demand
+  music-role bindings are reactive collections. Preview reads a blob on demand
   and treats a missing blob as an unavailable local resource.
-- cue assignment intents, character document compensation, modal selection,
+- music assignment intents, character document compensation, modal selection,
   previews, and upload progress are ephemeral editor/workflow state rather
   than copies of repository rows.
 
@@ -149,7 +149,7 @@ relational metadata are not a document collaboration protocol.
 
 Persistence diagnostics may include fixed operation labels, opaque entity IDs,
 timings, and sanitized errors. They must not include script text, titles,
-character/place/cue names, filenames, draft values, or serialized rows.
+character/place/music names, filenames, draft values, or serialized rows.
 
 `syncToFs()` cost is proportional to dirty pages, which is why minimal
 re-keying matters beyond the UPDATE itself.

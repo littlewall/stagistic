@@ -4,10 +4,10 @@ import type {
     BlockActionItem,
     BlockActionProvider,
 } from './actionTypes';
-import {resolveStageDirectionCueActions} from './stageDirectionCueActions';
+import {resolveStageDirectionMusicActions} from './stageDirectionMusicActions';
 
 const BLOCK_ACTION_PROVIDERS: Partial<Record<BlockNodeType, BlockActionProvider>> = {
-    stageDirection: resolveStageDirectionCueActions,
+    stageDirection: resolveStageDirectionMusicActions,
 };
 
 export const resolveBlockActions = (context: BlockActionContext): readonly BlockActionItem[] => {

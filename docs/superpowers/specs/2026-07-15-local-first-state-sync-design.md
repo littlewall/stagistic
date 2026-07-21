@@ -46,7 +46,7 @@ state protocol:
 - Tiptap owns the active script document and saves it through an autosave path.
 - title, title-page, and editor settings each implement their own keyed draft,
   hydration, debounce, and stale-response protection;
-- places, cues, characters, and attachments each load repository data into
+- places, music, characters, and attachments each load repository data into
   component state and implement their own mutation/reconciliation behavior;
 - some mutations wait for PGlite before updating the UI, some update first and
   reconcile, and some are fire-and-forget;
@@ -148,7 +148,7 @@ case.
 - Places load two lists into local state. Scene assignments update
   optimistically and are then replaced with the repository response; catalog
   mutations generally update after persistence.
-- Cues load into local state. Cue updates are optimistic and reconcile from the
+- Music load into local state. Music updates are optimistic and reconcile from the
   response or a full reload; other operations mostly update after persistence.
 - Characters use a reducer with separate pending-ID arrays. Field actions
   optimistically patch the reducer, then either apply the returned row or reload
@@ -175,7 +175,7 @@ nested.
 ### Script document
 
 Tiptap/ProseMirror is the immediate source of truth while editing. Autosave
-persists the document through `saveLatest`; relational block, act, scene, cue,
+persists the document through `saveLatest`; relational block, act, scene, music,
 and character-reference projections are updated by the persistence layer.
 
 This is intentionally different from metadata CRUD. Rolling a document back on
@@ -270,7 +270,7 @@ depend on which strategy is used.
 
 Simple single-entity CRUD should use collection mutation handlers. Multi-row or
 intent-based operations should use named optimistic actions/manual
-transactions—for example replacing all places assigned to a scene or a cue
+transactions—for example replacing all places assigned to a scene or a music
 operation that also changes the editor document.
 
 ### 5. Concurrency semantics are explicit
@@ -348,7 +348,7 @@ metadata and projections around the editor, but they must not become a second
 owner of the active document.
 
 The active editor exposes one workspace-owned live projection containing
-structure, cue ranges, character counts/display keys, and active-block state.
+structure, music ranges, character counts/display keys, and active-block state.
 Editor sidebars and Attribute Manager subscribe to selectors over this same
 projection. They do not attach independent ProseMirror transaction listeners or
 rebuild JSON snapshots in component state. Persisted catalog metadata remains
@@ -374,8 +374,8 @@ session-only data are genuinely useful; it is not a default replacement for
 | Active script body | Tiptap/ProseMirror | `ScriptDocumentSource` in PGlite today | editor transactions | retain edits, show unsaved/error, retry |
 | Script metadata | TanStack DB optimistic transaction | PGlite | TanStack DB live query | automatic rollback + visible retry |
 | Characters, genders | TanStack DB optimistic transaction | PGlite | TanStack DB live query | automatic rollback + visible retry |
-| Cues catalog | TanStack DB optimistic transaction | PGlite | TanStack DB live query | automatic rollback/reconcile |
-| Cue placement in document | Tiptap plus named coordinated action | document source + cue projection | editor transaction + collection | compensate/reconcile both owners |
+| Music catalog | TanStack DB optimistic transaction | PGlite | TanStack DB live query | automatic rollback/reconcile |
+| Music placement in document | Tiptap plus named coordinated action | document source + music projection | editor transaction + collection | compensate/reconcile both owners |
 | Places and scene assignments | TanStack DB transaction | PGlite | joined live query | atomic rollback/reconcile |
 | Attachments metadata | TanStack DB transaction | PGlite | TanStack DB live query | rollback metadata; storage cleanup policy remains domain-specific |
 | Settings/title page/title draft | shared draft controller | PGlite | confirmed source + draft overlay | keep failed draft, show retry |
@@ -403,14 +403,14 @@ document source. They exercise two collections, a join, and a multi-row
 replacement mutation without editor coupling. They are the best proof that
 local component caches can be removed.
 
-### Cues after places
+### Music after places
 
-Cue catalog CRUD can use a collection. Cue assignment/unassignment crosses the
+Music catalog CRUD can use a collection. Music assignment/unassignment crosses the
 catalog/document boundary and must use a named domain action with explicit
 compensation/reconciliation. Do not hide that coupling in a generic CRUD
 handler.
 
-### Characters after cues
+### Characters after music
 
 Character metadata can replace reducer-owned confirmed rows and pending-ID
 arrays. Rename/delete/confirm also transform document marks or references, so
@@ -586,7 +586,7 @@ through package/domain public APIs.
 
 ### Hybrid document/metadata operations
 
-Cues and characters cross state-owner boundaries. Mitigation: named domain
+Music and characters cross state-owner boundaries. Mitigation: named domain
 actions with explicit compensation, never generic “update both” helpers.
 
 ### Cloud conflicts
@@ -627,7 +627,7 @@ not SQL.
 - All script-list consumers read one PGlite-backed scripts collection.
 - `SCRIPTS_INVALIDATE_EVENT`, scripts `replaceAll`, and duplicated script
   request-ID loaders are removed.
-- At least places, cues, and characters no longer keep confirmed repository rows
+- At least places, music, and characters no longer keep confirmed repository rows
   in component-owned caches.
 - Simple metadata writes are visibly optimistic and automatically roll back on
   repository failure.

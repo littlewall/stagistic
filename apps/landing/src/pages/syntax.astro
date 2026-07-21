@@ -13,7 +13,7 @@ const toc = [
     {id: 'lyrics', n: '06', title: 'Lyrics'},
     {id: 'soft-break', n: '07', title: 'Soft breaks'},
     {id: 'stage-directions', n: '08', title: 'Stage directions'},
-    {id: 'cues', n: '09', title: 'Structural cues'},
+    {id: 'music', n: '09', title: 'Music'},
     {id: 'quoting', n: '10', title: 'Quoting'},
     {id: 'inline', n: '11', title: 'Inline marks'},
     {id: 'example', n: '12', title: 'Full example'},
@@ -83,7 +83,7 @@ const exForcedStageDirInSpeech = `MICHAEL
 !He pauses, listening.
 AND THEN HE SINGS AGAIN`;
 
-const exCue = `The lights slowly fade. @@cue 1 "When Night Falls"
+const exMusic = `The lights slowly fade. @@music 1 "When Night Falls"
 
 ANNA
 WHEN NIGHT FALLS AND THE LIGHTS GO DOWN
@@ -92,7 +92,7 @@ The lights come up. @@out 1`;
 
 const exQuoting = String.raw`"Mrs. Washington"
 @"Mrs. Washington"
-@@cue 1 "She Said \"Yes\""`;
+@@music 1 "She Said \"Yes\""`;
 
 const exMarks = `*italic*  **bold**  _underline_
 
@@ -123,7 +123,7 @@ Sorry I'm late.
 ANNA
 It's fine. I was waiting.
 
-The lights slowly fade. @@cue 1 "When Night Falls"
+The lights slowly fade. @@music 1 "When Night Falls"
 
 ANNA
 WHEN NIGHT FALLS AND THE LIGHTS GO DOWN
@@ -147,7 +147,7 @@ const markers = [
     ['@name', 'Forced character cue (at the start of a block)'],
     ['@Name  /  @"Name"', 'Character tag (inside a stage direction)'],
     ['/', 'Unison separator on a cue line'],
-    ['@@cue N "title"  /  @@out N', 'Structural cue — start / end'],
+    ['@@music N "title"  /  @@out N', 'Music — start / end'],
     ['(...)', 'Aside (in a speech) or parenthetical stage direction (at block start)'],
     ['[[ ... ]]', 'Author note (never printed)'],
     ['*   **   _', 'Italic / bold / underline'],
@@ -164,7 +164,7 @@ const markers = [
         <title>Stagistic — Syntax</title>
         <meta
             name="description"
-            content="The Stagistic syntax: a plain-text format for theatre and musical scripts. Acts, scenes, dialogue, lyrics, stage directions, and musical cues."
+            content="The Stagistic syntax: a plain-text format for theatre and musical scripts. Acts, scenes, dialogue, lyrics, stage directions, and music."
         />
         <meta property="og:image" content="/opengraph.jpg" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -223,7 +223,7 @@ const markers = [
                                 text editor and import it — or read what the
                                 editor writes out. It is rooted in Fountain, but
                                 it speaks theatre: acts and scenes, spoken and
-                                sung, stage directions, and musical cues.
+                                sung, stage directions, and music.
                             </p>
                             <p class={s.docIntroSecondary}>
                                 The guiding rule is <em>implicit where it reads
@@ -539,39 +539,39 @@ const markers = [
                             </div>
                         </section>
 
-                        <!-- Structural cues -->
-                        <section id="cues" class={s.section}>
+                        <!-- Music -->
+                        <section id="music" class={s.section}>
                             <h2 class={s.sectionTitle}>
                                 <span class={s.sectionNum}>09</span>
-                                Structural cues
+                                Music
                             </h2>
                             <p class={s.prose}>
-                                A cue fires something with a duration — most often
-                                a song, but also an instrumental or a sound. Write
-                                it inline inside a stage direction:
-                                <span class={s.code}>@@cue N "title"</span> to fire
-                                it, <span class={s.code}>@@out N</span> to end it.
-                                The number ties the two together. With no
-                                <span class={s.code}>@@out</span>, the cue runs to
-                                the end of the scene.
+                                A music item marks a song or instrumental passage
+                                for actors and directors. Write it inline inside a
+                                stage direction:
+                                <span class={s.code}>@@music N "title"</span> to
+                                start it and <span class={s.code}>@@out N</span>
+                                to end it. The number ties the two together. With
+                                no <span class={s.code}>@@out</span>, the music
+                                runs to the end of the scene.
                             </p>
                             <div class={s.example}>
                                 <div class={s.exampleCol}>
                                     <p class={s.exampleLabel}>You type</p>
-                                    <pre class={s.codeBlock}>{exCue}</pre>
+                                    <pre class={s.codeBlock}>{exMusic}</pre>
                                 </div>
                                 <div class={s.exampleCol}>
                                     <p class={s.exampleLabel}>Renders as</p>
                                     <div class={s.rendered}>
                                         <p class={s.rDir}>
                                             The lights slowly fade.
-                                            <span class={s.rCue}> ♪ 1 — When Night Falls</span>
+                                            <span class={s.rMusic}> ♪ 1 — When Night Falls</span>
                                         </p>
                                         <p class={s.rChar}>ANNA</p>
                                         <p class={s.rLyric}>WHEN NIGHT FALLS AND THE LIGHTS GO DOWN</p>
                                         <p class={s.rDir}>
                                             The lights come up.
-                                            <span class={s.rCue}> ♪ out 1</span>
+                                            <span class={s.rMusic}> ♪ out 1</span>
                                         </p>
                                     </div>
                                 </div>
@@ -647,7 +647,8 @@ const markers = [
                             <p class={s.prose}>
                                 Everything together: frontmatter, an act and
                                 scene, a stage direction with a tagged character,
-                                spoken dialogue, a sung number bracketed by a cue,
+                                spoken dialogue, a sung number bracketed by music
+                                markers,
                                 unison singing, and an author note.
                             </p>
                             <div class={s.example}>
@@ -672,7 +673,7 @@ const markers = [
                                         <p class={s.rLine}>It's fine. I was waiting.</p>
                                         <p class={s.rDir}>
                                             The lights slowly fade.
-                                            <span class={s.rCue}> ♪ 1 — When Night Falls</span>
+                                            <span class={s.rMusic}> ♪ 1 — When Night Falls</span>
                                         </p>
                                         <p class={s.rChar}>ANNA</p>
                                         <p class={s.rLyric}>WHEN NIGHT FALLS AND THE LIGHTS GO DOWN</p>
@@ -683,7 +684,7 @@ const markers = [
                                         <p class={s.rLyric}>AND THE WORLD WILL STOP</p>
                                         <p class={s.rDir}>
                                             The lights come up.
-                                            <span class={s.rCue}> ♪ out 1</span>
+                                            <span class={s.rMusic}> ♪ out 1</span>
                                         </p>
                                     </div>
                                 </div>

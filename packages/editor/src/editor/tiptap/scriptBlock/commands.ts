@@ -1,7 +1,7 @@
 import {
     createNodeId,
-    CUE_OUT_NODE_NAME,
-    CUE_START_NODE_NAME,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
     normalizeCharacterEditorDelimiters,
     resolveScriptBlockNodeType,
 } from '@stagistic/script';
@@ -60,7 +60,7 @@ const stripLeadingActionTabs = (
     return tr.delete(blockContentStart, blockContentStart + indentCount);
 };
 
-const normalizeCharacterCueText = (
+const normalizeCharacterMusicText = (
     tr: Transaction,
     nextBlockType: BlockNodeType,
     blockPos: number,
@@ -149,7 +149,7 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
         activeBlock.pos,
         activeBlock.node,
     );
-    tr = normalizeCharacterCueText(tr, normalized, activeBlock.pos);
+    tr = normalizeCharacterMusicText(tr, normalized, activeBlock.pos);
     tr = setSelectionNearBlockStart(tr, activeBlock.pos);
     tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
     editor.view.dispatch(tr.scrollIntoView());
@@ -158,15 +158,15 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
     return true;
 };
 
-const isCueAtomNodeName = (name: string | undefined): boolean => {
-    return name === CUE_START_NODE_NAME || name === CUE_OUT_NODE_NAME;
+const isMusicAtomNodeName = (name: string | undefined): boolean => {
+    return name === MUSIC_START_NODE_NAME || name === MUSIC_OUT_NODE_NAME;
 };
 
-const blockNodeHasCueAtom = (node: ProseMirrorNode): boolean => {
+const blockNodeHasMusicAtom = (node: ProseMirrorNode): boolean => {
     let found = false;
 
     node.forEach(child => {
-        if (isCueAtomNodeName(child.type.name)) {
+        if (isMusicAtomNodeName(child.type.name)) {
             found = true;
         }
     });
@@ -175,14 +175,14 @@ const blockNodeHasCueAtom = (node: ProseMirrorNode): boolean => {
 };
 
 /**
- * A cue atom is bound to its block and always sits at the block end (§4.1).
+ * A music atom is bound to its block and always sits at the block end (§4.1).
  * A block split moves everything after the caret into the new block, so a
- * cue would migrate with it (or, when splitting an otherwise-empty block, be
- * stranded in the wrong sibling). Rather than split a cue-bearing block, keep
- * it (with its cue and any text) intact and insert an empty typed block right
+ * music would migrate with it (or, when splitting an otherwise-empty block, be
+ * stranded in the wrong sibling). Rather than split a music-bearing block, keep
+ * it (with its music and any text) intact and insert an empty typed block right
  * after it, moving the caret there.
  */
-const insertEmptyBlockAfterCueBlock = (editor: Editor, blockType: BlockNodeType): boolean => {
+const insertEmptyBlockAfterMusicBlock = (editor: Editor, blockType: BlockNodeType): boolean => {
     const nodes = editor.schema.nodes as Record<string, NodeType>;
     const nextNodeType = resolveNodeTypeForBlockType(nodes, blockType);
 
@@ -213,8 +213,8 @@ const insertEmptyBlockAfterCueBlock = (editor: Editor, blockType: BlockNodeType)
 export const splitBlockWithType = (editor: Editor, blockType: BlockNodeType) => {
     const activeBlock = getActiveScriptBlockFromState(editor.state);
 
-    if (activeBlock && blockNodeHasCueAtom(activeBlock.node)) {
-        return insertEmptyBlockAfterCueBlock(editor, blockType);
+    if (activeBlock && blockNodeHasMusicAtom(activeBlock.node)) {
+        return insertEmptyBlockAfterMusicBlock(editor, blockType);
     }
 
     const didSplit = editor.commands.splitBlock();

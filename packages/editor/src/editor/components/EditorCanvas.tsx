@@ -4,21 +4,21 @@ import {type CSSProperties, useRef} from 'react';
 
 import type {
     PersistentCharacterRef,
-    PersistentCueRef,
+    PersistentMusicRef,
 } from '../contracts';
 import CharacterSuggestionsOverlay from './CharacterSuggestionsOverlay';
-import CueDraftSuggestionsOverlay from './CueDraftSuggestionsOverlay';
-import CueSuggestionsOverlay from './CueSuggestionsOverlay';
 import EditorBlockActionsOverlay from './EditorBlockActionsOverlay';
 import styles from './EditorCanvas.module.css';
 import {EmptyEnterBlockChooserOverlay} from './emptyEnterChooser/EmptyEnterBlockChooserOverlay';
 import {HeaderFooterOverlay} from './HeaderFooterOverlay';
+import MusicDraftSuggestionsOverlay from './MusicDraftSuggestionsOverlay';
+import MusicSuggestionsOverlay from './MusicSuggestionsOverlay';
 
 type EditorCanvasProps = {
     editor: TiptapEditor | null,
     persistentCharacters?: readonly PersistentCharacterRef[],
-    persistentCues?: readonly PersistentCueRef[],
-    onCueAssigned?: (cueId: string) => void,
+    persistentMusic?: readonly PersistentMusicRef[],
+    onMusicAssigned?: (musicId: string) => void,
     characterColorSaturation?: number,
     autoFocus?: boolean,
     style?: CSSProperties,
@@ -30,8 +30,8 @@ type EditorCanvasProps = {
 export const EditorCanvas = ({
     editor,
     persistentCharacters = [],
-    persistentCues = [],
-    onCueAssigned,
+    persistentMusic = [],
+    onMusicAssigned,
     characterColorSaturation,
     autoFocus,
     style,
@@ -60,17 +60,17 @@ export const EditorCanvas = ({
                 persistentCharacters={persistentCharacters}
                 characterColorSaturation={characterColorSaturation}
             />
-            <CueSuggestionsOverlay
+            <MusicSuggestionsOverlay
                 editor={editor}
                 canvasRef={canvasRef}
-                persistentCues={persistentCues}
-                onCueAssigned={onCueAssigned}
+                persistentMusic={persistentMusic}
+                onMusicAssigned={onMusicAssigned}
             />
-            <CueDraftSuggestionsOverlay
+            <MusicDraftSuggestionsOverlay
                 editor={editor}
                 canvasRef={canvasRef}
-                persistentCues={persistentCues}
-                onCueAssigned={onCueAssigned}
+                persistentMusic={persistentMusic}
+                onMusicAssigned={onMusicAssigned}
             />
             <EmptyEnterBlockChooserOverlay editor={editor} canvasRef={canvasRef} />
             <EditorBlockActionsOverlay editor={editor} canvasRef={canvasRef} />

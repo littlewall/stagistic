@@ -16,8 +16,8 @@ describe('mutation envelope', () => {
     it('round-trips stable identity and domain payload fields', () => {
         const envelope = createMutationEnvelope({
             operationId: 'operation-1',
-            operationType: 'cue.update',
-            entityKey: 'cue:cue-1',
+            operationType: 'music.update',
+            entityKey: 'music:music-1',
             scriptId: 'script-1',
             occurredAt: 123,
             payload: {title: 'Overture'},
@@ -26,8 +26,8 @@ describe('mutation envelope', () => {
         expect(parseMutationEnvelope(serializeMutationEnvelope(envelope))).toEqual({
             version: 1,
             operationId: 'operation-1',
-            operationType: 'cue.update',
-            entityKey: 'cue:cue-1',
+            operationType: 'music.update',
+            entityKey: 'music:music-1',
             scriptId: 'script-1',
             actorId: LOCAL_ACTOR_PLACEHOLDER,
             deviceId: LOCAL_DEVICE_PLACEHOLDER,

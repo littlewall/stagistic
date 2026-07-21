@@ -181,5 +181,5 @@ Both adapters derive identical metrics from `EditorSettings`:
 ## Out of scope
 
 - Changing any break *rule* (only relocating the existing editor rules).
-- Cue-pill grid alignment (separate follow-up).
+- Music-pill grid alignment (separate follow-up).
 - The character highlight-intensity setting (separate spec).

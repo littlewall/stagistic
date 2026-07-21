@@ -6,7 +6,7 @@
 block in the editor — both confirmed (cast) and unconfirmed characters,
 with autocomplete for confirmed ones. The editor surface, data
 representation, and character aggregation are all in scope. Structural
-cues (`@@cue` / `@@out`) are a **separate downstream spec**.
+music (`@@music` / `@@out`) is a **separate downstream spec**.
 
 Builds on `docs/superpowers/specs/2026-06-14-stagistic-syntax-design.md`
 (§11 character tag, §12 quoting rule).
@@ -38,7 +38,7 @@ In scope:
 
 Out of scope (see §10):
 
-- Structural cues `@@cue` / `@@out` (separate spec).
+- Music `@@music` / `@@out` (separate spec).
 - Tags in any block other than `stage_direction`.
 - Passive "suggestion" highlighting of untagged cast names in prose.
 - Forced lowercase / canonical-case display (phase 1 is uppercase-only).
@@ -218,7 +218,7 @@ schema change may not be needed — to be confirmed during planning.
 
 ## 10. Out of scope / future
 
-- **Structural cues** `@@cue` / `@@out` — separate downstream spec.
+- **Music** `@@music` / `@@out` — separate downstream spec.
 - **Passive suggestion** — highlight/underline an untagged cast name in
   prose and offer a one-click link, without auto-tagging. Designed-around
   but not built now (the mark model leaves room for it).

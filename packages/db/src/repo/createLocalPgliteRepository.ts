@@ -9,8 +9,8 @@ import {createCharacterHandlers} from './characters';
 import {createSettingsHandlers} from './config';
 import {createContentHandlers} from './content';
 import {createLocalPgliteReactiveSources} from './createLocalPgliteReactiveSources';
-import {createCueHandlers} from './cues';
 import {createLocationHandlers} from './locations';
+import {createMusicHandlers} from './music';
 import {createOutboxRecorder} from './outbox';
 import {createScriptsHandlers} from './scripts';
 import {createTitlePageHandlers} from './titlePage';
@@ -40,7 +40,7 @@ export const createLocalPgliteRepository = ({
     const content = createContentHandlers(mutationDeps);
     const settingsHandlers = createSettingsHandlers(mutationDeps);
     const titlePageHandlers = createTitlePageHandlers(mutationDeps);
-    const cues = createCueHandlers(mutationDeps);
+    const music = createMusicHandlers(mutationDeps);
     const locations = createLocationHandlers(mutationDeps);
     const attachments = createAttachmentHandlers({
         ...mutationDeps,
@@ -54,7 +54,7 @@ export const createLocalPgliteRepository = ({
         listScripts: () => scripts.list(),
         listCharacters: listScriptCharacters,
         listCharacterGenders: scriptId => characterHandlers.listScriptCharacterGenders(scriptId),
-        listCues: scriptId => cues.list(scriptId),
+        listMusic: scriptId => music.list(scriptId),
         listLocations: scriptId => locations.list(scriptId),
         listSceneLocations: scriptId => locations.listSceneAssignments(scriptId),
         loadTitlePage: scriptId => titlePageHandlers.load(scriptId),
@@ -66,17 +66,17 @@ export const createLocalPgliteRepository = ({
         allocateScriptId: uuidv7,
         allocateScriptCharacterId: uuidv7,
         allocateScriptCharacterGenderId: uuidv7,
-        allocateScriptCueId: uuidv7,
+        allocateScriptMusicId: uuidv7,
         allocateScriptLocationId: uuidv7,
         listScripts: options => scripts.list(options),
         getScriptSummary: scriptId => scripts.getSummary(scriptId),
         listScriptCharacters: scriptId => listScriptCharacters(scriptId),
         listScriptCharacterGenders: scriptId => characterHandlers.listScriptCharacterGenders(scriptId),
-        listScriptCues: scriptId => cues.list(scriptId),
-        createScriptCue: (scriptId, input) => cues.create(scriptId, input),
-        createScriptCueWithId: (scriptId, input) => cues.createWithId(scriptId, input),
-        updateScriptCue: (scriptId, cueId, input) => cues.update(scriptId, cueId, input),
-        deleteScriptCue: (scriptId, cueId) => cues.delete(scriptId, cueId),
+        listScriptMusic: scriptId => music.list(scriptId),
+        createScriptMusic: (scriptId, input) => music.create(scriptId, input),
+        createScriptMusicWithId: (scriptId, input) => music.createWithId(scriptId, input),
+        updateScriptMusic: (scriptId, musicId, input) => music.update(scriptId, musicId, input),
+        deleteScriptMusic: (scriptId, musicId) => music.delete(scriptId, musicId),
         listScriptLocations: scriptId => locations.list(scriptId),
         listScriptSceneLocations: scriptId => locations.listSceneAssignments(scriptId),
         createScriptLocation: (scriptId, input) => locations.create(scriptId, input),
@@ -125,12 +125,12 @@ export const createLocalPgliteRepository = ({
         loadTitlePage: scriptId => titlePageHandlers.load(scriptId),
         saveTitlePage: (scriptId, settings) => titlePageHandlers.save(scriptId, settings),
         deleteTitlePage: scriptId => titlePageHandlers.delete(scriptId),
-        getCueAttachment: (cueId, role) => attachments.getByCueRole(cueId, role),
-        setCueAttachment: (scriptId, cueId, role, file) => {
-            return attachments.setForCue(scriptId, cueId, role, file);
+        getMusicAttachment: (musicId, role) => attachments.getByMusicRole(musicId, role),
+        setMusicAttachment: (scriptId, musicId, role, file) => {
+            return attachments.setForMusic(scriptId, musicId, role, file);
         },
-        removeCueAttachment: (scriptId, cueId, role) => {
-            return attachments.removeFromCue(scriptId, cueId, role);
+        removeMusicAttachment: (scriptId, musicId, role) => {
+            return attachments.removeFromMusic(scriptId, musicId, role);
         },
         getAttachmentBlob: key => attachments.getBlob(key),
     };

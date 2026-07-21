@@ -95,7 +95,7 @@ export const deriveEditorLoadState = ({
             }),
         },
         {
-            label: 'Loading characters and cues',
+            label: 'Loading characters and music',
             status: resolveEditorLoadItemStatus({
                 hasError: Boolean(sidebarDataError),
                 isActive: isSidebarDataLoading,

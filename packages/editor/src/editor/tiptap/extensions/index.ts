@@ -28,20 +28,20 @@ export {
     CharacterTagInputExtension,
     getCharacterTagComposeFromState,
 } from './CharacterTagInputExtension';
-export {CueCommandsExtension} from './cue/CueCommandsExtension';
-export {
-    cueComposeKey,
-    type CueComposeState,
-    CueInputExtension,
-    getCueComposeFromState,
-} from './CueInputExtension';
-export {CueNumberingExtension} from './CueNumberingExtension';
 export {
     EMPTY_ENTER_CHOOSER_WRITER_TYPES,
     EmptyEnterChooserExtension,
     getEmptyEnterChooserFromState,
     isEmptyEnterChooserWriterType,
 } from './EmptyEnterChooserExtension';
+export {MusicCommandsExtension} from './music/MusicCommandsExtension';
+export {
+    getMusicComposeFromState,
+    musicComposeKey,
+    type MusicComposeState,
+    MusicInputExtension,
+} from './MusicInputExtension';
+export {MusicNumberingExtension} from './MusicNumberingExtension';
 export {ScriptBehaviorExtension} from './ScriptBehaviorExtension';
 
 // ─── Decorations ─────────────────────────────────────────────────────────────

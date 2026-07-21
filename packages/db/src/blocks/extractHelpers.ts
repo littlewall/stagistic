@@ -62,7 +62,7 @@ export const toCharacterRefByKey = (attrs: Record<string, unknown> | undefined):
 };
 
 /**
- * Confirmed character refs for a block, merging cue-block attr refs with
+ * Confirmed character refs for a block, merging music-block attr refs with
  * stage-direction characterTag mark refs. Attr refs win on key collisions.
  */
 export const toCharacterRefByKeyWithTags = (node: ScriptNode): Record<string, string> => {

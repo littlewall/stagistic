@@ -39,7 +39,7 @@ Resumption notes:
 
 - Isolated mount (500 blocks/22 pages): editor ~70ms, pagination ~200ms; user's script (~87 pages): commit at ~540ms, pagination stable at ~1450ms after switch.
 - `useEditorLifecycle` initial-apply runs `setContent(initialValue)` on every mount → resets to stale load-time doc (autosave flushes on unmount, so DB is newer than what remount shows → data-loss vector when typing resumes). Cache + skip-apply fixes both.
-- tiptap v3 `EditorContent` unmount parks the editor DOM in a detached div; `init()` re-appends it and recreates node views (only cue pills are React node views — cheap).
+- tiptap v3 `EditorContent` unmount parks the editor DOM in a detached div; `init()` re-appends it and recreates node views (only music pills are React node views — cheap).
 - `updatePaginationSettings` unconditionally bumps `optionsVersion` + dispatches → needs equality guard.
 
 ---

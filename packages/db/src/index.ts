@@ -24,26 +24,26 @@ export {
 } from './repo/documentProjection';
 export * from './schema';
 export type {
-    CreateScriptCueInput,
     CreateScriptLocationInput,
     CreateScriptLocationWithIdInput,
+    CreateScriptMusicInput,
     CreateScriptWithIdInput,
-    CueAttachmentUpload,
     DuplicateScriptInput,
     DuplicateScriptWithIdInput,
     ListScriptsOptions,
+    MusicAttachmentUpload,
     RenameScriptInput,
-    ScriptCuesRepository,
     ScriptEditorSettingsRecord,
     ScriptLocationsRepository,
+    ScriptMusicRepository,
     ScriptRepository,
     ScriptSceneLocationAssignment,
     ScriptTitlePageRecord,
     ScriptTitlePageRepository,
-    UpdateScriptCueInput,
+    UpdateScriptMusicInput,
 } from './scriptRepository';
 export type {
-    CueAttachmentRole,
+    MusicAttachmentRole,
     Script,
     ScriptAct,
     ScriptAttachment,
@@ -53,13 +53,13 @@ export type {
     ScriptCharacterGender,
     ScriptCharacterGenderOption,
     ScriptCharacterRef,
-    ScriptCue,
-    ScriptCueAttachment,
-    ScriptCueAttachmentBinding,
     ScriptLocation,
+    ScriptMusic,
+    ScriptMusicAttachment,
+    ScriptMusicAttachmentBinding,
     ScriptScene,
     ScriptSettingsBlock,
     ScriptSummary,
     ScriptTitlePageField,
 } from './types';
-export {CUE_ATTACHMENT_ROLES} from './types';
+export {MUSIC_ATTACHMENT_ROLES} from './types';

@@ -44,7 +44,7 @@ describe('deriveEditorLoadState', () => {
 
         expect(state).toEqual({
             progress: 0.9,
-            statusText: 'Loading characters and cues',
+            statusText: 'Loading characters and music',
             isLoading: true,
         });
     });

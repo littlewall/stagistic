@@ -5,15 +5,15 @@ import {
     scriptAttachments,
     scriptBlockCharacterRefs,
     scriptBlocks,
-    scriptCueAttachments,
-    scriptCues,
     scriptLocations,
+    scriptMusic,
+    scriptMusicAttachments,
     scripts,
     scriptScenes,
     scriptSettingsBlocks,
     scriptSettingsTitlePage,
 } from '../schema';
-import type {CueAttachmentRole} from './cueAttachments';
+import type {MusicAttachmentRole} from './musicAttachments';
 
 export type Script = InferSelectModel<typeof scripts>;
 
@@ -30,14 +30,14 @@ export type ScriptAct = InferSelectModel<typeof scriptActs>;
 export type ScriptTitlePageField = InferSelectModel<typeof scriptSettingsTitlePage>;
 export type ScriptLocation = InferSelectModel<typeof scriptLocations>;
 export type ScriptBlockCharacterRef = InferSelectModel<typeof scriptBlockCharacterRefs>;
-export type ScriptCue = InferSelectModel<typeof scriptCues>;
+export type ScriptMusic = InferSelectModel<typeof scriptMusic>;
 export type ScriptAttachment = InferSelectModel<typeof scriptAttachments>;
-type ScriptCueAttachmentBindingRow = InferSelectModel<typeof scriptCueAttachments>;
+type ScriptMusicAttachmentBindingRow = InferSelectModel<typeof scriptMusicAttachments>;
 
-export interface ScriptCueAttachmentBinding extends Omit<ScriptCueAttachmentBindingRow, 'role'> {
-    role: CueAttachmentRole,
+export interface ScriptMusicAttachmentBinding extends Omit<ScriptMusicAttachmentBindingRow, 'role'> {
+    role: MusicAttachmentRole,
 }
 
-export interface ScriptCueAttachment extends ScriptAttachment {
-    role: CueAttachmentRole,
+export interface ScriptMusicAttachment extends ScriptAttachment {
+    role: MusicAttachmentRole,
 }

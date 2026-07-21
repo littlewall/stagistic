@@ -31,8 +31,8 @@ Concrete things Fountain cannot express that this format must:
 - **Simultaneous/unison singing** (multiple characters, same words).
 - **Tagging a character** inside a stage direction (machine-readable
   reference + capitalization of the acting character).
-- **Structural cues** — the start (and our addition, the end) of a song,
-  instrumental, or sound, written inside a stage direction.
+- **Music** — the start and end of a song or instrumental passage,
+  written inside a stage direction.
 - **Nested lyric sections** (A/B/C section indentation).
 
 ## 2. Lineage and philosophy
@@ -66,7 +66,7 @@ The syntax must distinguish exactly these constructs:
 | Lyrics | Sung line; nestable into sections |
 | Stage direction | Narrative/action description |
 | Aside | Parenthetical delivery note `(...)` |
-| Cue (structural) | Inline in a stage direction: song/instrumental/sound start + end |
+| Music | Inline in a stage direction: song/instrumental start + end |
 | Character tag | Inline reference to a character inside a stage direction |
 | Author note | Non-printing note |
 | Inline emphasis | bold / italic / underline |
@@ -367,25 +367,25 @@ AŽ PŘIJDE NOC A ZHASNOU SVĚTLA
 (The corresponding rendered indents and hanging-indent-on-wrap are a
 render concern, downstream.)
 
-## 10. Structural cue (song / instrumental / sound)
+## 10. Music (song / instrumental)
 
-A cue is **generic** — it fires *something* with a duration: most often a
-song, but also an instrumental or a sound. (Production cues for
-lights/SFX are separate and get a different notation later.)
+Music marks a song or instrumental passage for actors and directors.
+Production cues for lights, sound and effects are separate and get their
+own notation and view later.
 
-NMI defines only the **start** ("the cue" — where it fires). The **end**
-is *our addition*, needed for typesetting/stylistics (how long the
-song/instrumental/sound plays). If no end is given, the cue is assumed to
+NMI defines only the **start**. The **end** is our addition, needed for
+typesetting and script structure (how long the music plays). If no end is
+given, the music is assumed to
 end at the end of the scene.
 
-Cues are **inline syntax inside a stage direction block**, not a separate
+Music markers are **inline syntax inside a stage direction block**, not a separate
 block:
 
-- **Start (fire):** `@@cue <N> "<title>"`
+- **Start (fire):** `@@music <N> "<title>"`
 - **End (out):** `@@out <N>`
 
 ```
-Světla pomalu zhasínají. @@cue 1 "Až přijde noc"
+Světla pomalu zhasínají. @@music 1 "Až přijde noc"
 
 ANNA
 AŽ PŘIJDE NOC A ZHASNOU SVĚTLA
@@ -393,14 +393,12 @@ AŽ PŘIJDE NOC A ZHASNOU SVĚTLA
 Světla najedou. @@out 1
 ```
 
-- `<N>` is a number — the cue's identity. It matches an `@@out` to its
-  `@@cue` and feeds the (downstream) list of musical numbers.
-- The double `@@` distinguishes a cue from `@` (a character).
-- The pair is **`cue` … `out`** (theatrical "music out") rather than
-  "cue end", because a cue is the firing point, not an interval.
-- **Type** (song / instrumental / sound) is generic; a cue followed by
-  lyrics is a song. (An explicit type may be added later without breaking
-  this.)
+- `<N>` is a number — the music entry's identity. It matches an `@@out` to its
+  `@@music` and feeds the (downstream) list of musical numbers.
+- The double `@@` distinguishes music from `@` (a character).
+- The pair is **`music` … `out`**; `out` is the established theatrical
+  expression and stays visibly coupled to the double-`@` syntax.
+- **Type** is song or instrumental; music followed by lyrics is a song.
 
 ## 11. Character tag inside a stage direction
 
@@ -439,7 +437,7 @@ This one rule applies everywhere:
   Washington"`, `"AC/DC"`, `"@home"`.
 - **Character tag** for a multi-word/special name: `@"Mrs. Washington"`
   (bare `@Mrs. Washington` would tag only `Mrs`).
-- **Cue title:** `@@cue 1 "Overture"`.
+- **Music title:** `@@music 1 "Overture"`.
 
 A bare `@Name` tags exactly one whitespace-delimited token; once a name
 contains a space, a period, or a special character, it **must** be
@@ -450,7 +448,7 @@ Inside a quoted literal, backslash escapes the two delimiter characters:
 backslash. No other backslash escape has special meaning.
 
 ```
-@@cue 1 "Řekl \"Ano\""
+@@music 1 "Řekl \"Ano\""
 @"Doktor \"X\""
 ```
 
@@ -489,7 +487,7 @@ Promiň, že jdu pozdě.
 ANNA
 To nic. Čekala jsem.
 
-Světla pomalu zhasínají. @@cue 1 "Až přijde noc"
+Světla pomalu zhasínají. @@music 1 "Až přijde noc"
 
 ANNA
 AŽ PŘIJDE NOC A ZHASNOU SVĚTLA
@@ -519,7 +517,7 @@ position + case):
 | `@name` | forced character cue (block start) |
 | `@Name` / `@"Name"` | character tag (inside stage direction) |
 | `/` | unison separator on a cue line |
-| `@@cue N "title"` / `@@out N` | structural cue start / end |
+| `@@music N "title"` / `@@out N` | music start / end |
 | `(...)` | aside (in speech) / parenthetical stage direction (block start) |
 | `[[ ... ]]` | author note (non-printing) |
 | `*` `**` `_` | italic / bold / underline |
@@ -529,7 +527,7 @@ position + case):
 
 ## 16. Implementation layers
 
-1. **Data model** — implemented: blocks, refs, cue entities, and structure.
+1. **Data model** — implemented: blocks, refs, music entities, and structure.
 2. **Parser + serializer** — implemented: text ↔ document, including the
    whole-document pre-scan, forced stage directions, and canonical stacked
    serialization.

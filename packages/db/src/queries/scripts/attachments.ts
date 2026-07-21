@@ -4,12 +4,12 @@ import {
 
 import {
     scriptAttachments,
-    scriptCueAttachments,
-    scriptCues,
+    scriptMusic,
+    scriptMusicAttachments,
 } from '../../schema';
 import type {
-    CueAttachmentRole,
-    ScriptCueAttachmentBinding,
+    MusicAttachmentRole,
+    ScriptMusicAttachmentBinding,
 } from '../../types';
 import type {DbClient} from '../types';
 
@@ -34,22 +34,22 @@ export const listScriptAttachments = async (
     .from(scriptAttachments)
     .where(eq(scriptAttachments.scriptId, scriptId));
 
-export const listScriptCueAttachmentBindings = async (
+export const listScriptMusicAttachmentBindings = async (
     db: DbClient,
     scriptId: string,
 ) => {
     const rows = await db.select({
-        cueId: scriptCueAttachments.cueId,
-        attachmentId: scriptCueAttachments.attachmentId,
-        role: scriptCueAttachments.role,
-        sortOrder: scriptCueAttachments.sortOrder,
-        createdAt: scriptCueAttachments.createdAt,
+        musicId: scriptMusicAttachments.musicId,
+        attachmentId: scriptMusicAttachments.attachmentId,
+        role: scriptMusicAttachments.role,
+        sortOrder: scriptMusicAttachments.sortOrder,
+        createdAt: scriptMusicAttachments.createdAt,
     })
-        .from(scriptCueAttachments)
-        .innerJoin(scriptCues, eq(scriptCueAttachments.cueId, scriptCues.id))
-        .where(eq(scriptCues.scriptId, scriptId));
+        .from(scriptMusicAttachments)
+        .innerJoin(scriptMusic, eq(scriptMusicAttachments.musicId, scriptMusic.id))
+        .where(eq(scriptMusic.scriptId, scriptId));
 
-    return rows.flatMap<ScriptCueAttachmentBinding>(row => {
+    return rows.flatMap<ScriptMusicAttachmentBinding>(row => {
         return row.role === 'integrated_score'
             ? [{...row, role: 'integrated_score'}]
             : [];
@@ -60,23 +60,23 @@ export const insertAttachment = async (db: DbClient, row: InsertAttachmentRow) =
     await db.insert(scriptAttachments).values(row);
 };
 
-export const insertCueAttachmentLink = async (
+export const insertMusicAttachmentLink = async (
     db: DbClient,
     row: {
-        cueId: string,
+        musicId: string,
         attachmentId: string,
-        role: CueAttachmentRole,
+        role: MusicAttachmentRole,
         sortOrder: number,
         createdAt: number,
     },
 ) => {
-    await db.insert(scriptCueAttachments).values(row);
+    await db.insert(scriptMusicAttachments).values(row);
 };
 
-export const getAttachmentByCueRole = async (
+export const getAttachmentByMusicRole = async (
     db: DbClient,
-    cueId: string,
-    role: CueAttachmentRole,
+    musicId: string,
+    role: MusicAttachmentRole,
 ): Promise<AttachmentRow | null> => {
     const rows = await db
         .select({
@@ -89,11 +89,11 @@ export const getAttachmentByCueRole = async (
             createdAt: scriptAttachments.createdAt,
             updatedAt: scriptAttachments.updatedAt,
         })
-        .from(scriptCueAttachments)
-        .innerJoin(scriptAttachments, eq(scriptCueAttachments.attachmentId, scriptAttachments.id))
+        .from(scriptMusicAttachments)
+        .innerJoin(scriptAttachments, eq(scriptMusicAttachments.attachmentId, scriptAttachments.id))
         .where(and(
-            eq(scriptCueAttachments.cueId, cueId),
-            eq(scriptCueAttachments.role, role),
+            eq(scriptMusicAttachments.musicId, musicId),
+            eq(scriptMusicAttachments.role, role),
         ))
         .limit(1);
 
@@ -110,15 +110,15 @@ export const getAttachmentById = async (db: DbClient, attachmentId: string): Pro
     return rows[0] ?? null;
 };
 
-export const deleteCueAttachmentLinkByRole = async (
+export const deleteMusicAttachmentLinkByRole = async (
     db: DbClient,
-    payload: {cueId: string, role: CueAttachmentRole},
+    payload: {musicId: string, role: MusicAttachmentRole},
 ) => {
     await db
-        .delete(scriptCueAttachments)
+        .delete(scriptMusicAttachments)
         .where(and(
-            eq(scriptCueAttachments.cueId, payload.cueId),
-            eq(scriptCueAttachments.role, payload.role),
+            eq(scriptMusicAttachments.musicId, payload.musicId),
+            eq(scriptMusicAttachments.role, payload.role),
         ));
 };
 
@@ -129,8 +129,8 @@ export const deleteAttachment = async (db: DbClient, attachmentId: string) => {
 export const countAttachmentLinks = async (db: DbClient, attachmentId: string): Promise<number> => {
     const rows = await db
         .select({count: sql<number>`count(*)::int`})
-        .from(scriptCueAttachments)
-        .where(eq(scriptCueAttachments.attachmentId, attachmentId));
+        .from(scriptMusicAttachments)
+        .where(eq(scriptMusicAttachments.attachmentId, attachmentId));
 
     return rows[0]?.count ?? 0;
 };

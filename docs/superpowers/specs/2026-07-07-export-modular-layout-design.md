@@ -10,7 +10,7 @@ the header `ViewSwitcher`) into a real, **modular** export environment.
 
 The export system must support many **templates** (basic script, later
 "integrated script + score", …). Each template is further customizable **per
-export** via inputs (filters, cue PDFs) and options (page-break rules, blank
+export** via inputs (filters, music PDFs) and options (page-break rules, blank
 pages). **Per-export config is ephemeral — nothing persists to the DB.**
 
 Every export screen shares the same shell: a control panel (template picker +
@@ -34,7 +34,7 @@ reaches the PDF layer.
 ### Clean render mode — editor decorations excluded
 
 The editor renders editor-only visual affordances that are **not** part of the
-printed script: character-name chips/decorators, the frame/box around cues, and
+printed script: character-name chips/decorators, the frame/box around music, and
 similar ornaments. Export shows **clean text only** (barring a deliberate
 exception).
 
@@ -46,7 +46,7 @@ the transcriber would capture them.
 must not affect layout — they must add **zero** height/width to a block or shift
 line positions. Given that, removing them for export changes nothing about
 pagination: `editor == clean == preview == export`, unconditionally. If a
-decoration *does* currently alter block height (e.g. a cue frame adding
+decoration *does* currently alter block height (e.g. a music frame adding
 border/padding to the flow), that is a **defect to fix first** — see
 *Prerequisite (step 0)*. We do not design around it; we fix it.
 
@@ -66,14 +66,14 @@ is an explicit, additive exception rather than a rewrite.
   pdf.js preview. Debounced, cancellable auto-regeneration.
 
 **Out of scope (must not be designed against — additive later)**
-- **Integrated script + score** template: per-cue PDF upload, merged/repaginated
+- **Integrated script + score** template: per-music PDF upload, merged/repaginated
   output via `pdf-lib`. The pipeline must accommodate a post-step without change.
 - Saving/reusing export configs. Non-PDF output formats.
 
 ## Prerequisite (step 0) — decorations must be layout-neutral
 
 Before building any export code, audit the editor-only decorations
-(character-name chips/decorators, cue frames, and any similar ornaments) and
+(character-name chips/decorators, music frames, and any similar ornaments) and
 **confirm each adds zero height/width and does not shift line positions**. The
 whole fidelity guarantee rests on this: only if decorations are layout-neutral
 does clean mode produce the *same* pagination as the editor.
@@ -130,7 +130,7 @@ Each does one thing, is pure `value` + `onChange`, knows nothing about "export":
 - `PageBreakModule` — start acts/scenes on a new page; scenes on an **odd** page.
 - `BlankPagesModule` — blank pages between title page and script; each blank
   toggles whether it counts toward page numbering.
-- `CuePdfModule` — later phase (score): attach a PDF per cue.
+- `MusicPdfModule` — later phase (score): attach a PDF per music.
 
 Independently testable; reused across templates (Basic and Score both use
 page-break + blank-page modules).
@@ -192,7 +192,7 @@ Where each option lives:
 | Scene/act on new page                 | `pagination` — forced break at scene start               |
 | Scene on **odd** page                 | `pagination` — forced break + blank spacer if it lands even |
 | Blank pages title↔script (counted?)   | `pagination` — blank-page sentinels; flag = counts toward numbering |
-| Score: cue PDFs merged & repaginated  | `postSteps` — `pdf-lib` interleave + renumber (later)    |
+| Score: music PDFs merged & repaginated  | `postSteps` — `pdf-lib` interleave + renumber (later)    |
 
 ### Registry
 
@@ -299,7 +299,7 @@ starting the next.
   sentinels at expected positions, run coordinates monotonic per page).
 - **Fidelity guard** — browser test asserting the measure surface's page breaks
   match the transcribed page-break sentinels (editor == export invariant).
-- **Clean mode** — browser test: a doc with character chips / cue frames renders
+- **Clean mode** — browser test: a doc with character chips / music frames renders
   on the measure surface with those ornaments absent, and the transcription
   contains only clean text (no decoration artifacts).
 - **Shell** — browser test: switch template resets config; debounced regen

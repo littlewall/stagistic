@@ -1,7 +1,7 @@
 import {
     createInMemoryReactiveQuerySource,
     type ScriptAttachment,
-    type ScriptCueAttachmentBinding,
+    type ScriptMusicAttachmentBinding,
     type ScriptRepository,
 } from '@stagistic/db';
 import {
@@ -31,8 +31,8 @@ const attachment: ScriptAttachment = {
     createdAt: 1,
     updatedAt: 1,
 };
-const binding: ScriptCueAttachmentBinding = {
-    cueId: 'cue-1',
+const binding: ScriptMusicAttachmentBinding = {
+    musicId: 'music-1',
     attachmentId: attachment.id,
     role: 'integrated_score',
     sortOrder: 1,
@@ -42,12 +42,12 @@ const binding: ScriptCueAttachmentBinding = {
 describe('script attachments store', () => {
     it('publishes metadata only after storage and SQL persistence succeed', async () => {
         const attachments = createInMemoryReactiveQuerySource<ScriptAttachment>([]);
-        const bindings = createInMemoryReactiveQuerySource<ScriptCueAttachmentBinding>([]);
+        const bindings = createInMemoryReactiveQuerySource<ScriptMusicAttachmentBinding>([]);
         const gate = deferred();
         const repository = {
             getScriptAttachmentsSource: () => attachments,
-            getScriptCueAttachmentBindingsSource: () => bindings,
-            setCueAttachment: async () => {
+            getScriptMusicAttachmentBindingsSource: () => bindings,
+            setMusicAttachment: async () => {
                 await gate.promise;
                 attachments.emit([attachment]);
                 bindings.emit([binding]);
@@ -59,7 +59,7 @@ describe('script attachments store', () => {
 
         await Promise.all([store.attachmentsCollection.preload(), store.bindingsCollection.preload()]);
 
-        const upload = store.upload('cue-1', 'integrated_score', {
+        const upload = store.upload('music-1', 'integrated_score', {
             name: 'score.pdf',
             type: 'application/pdf',
             size: 3,
@@ -73,6 +73,6 @@ describe('script attachments store', () => {
         await upload;
 
         expect(store.attachmentsCollection.get(attachment.id)).toMatchObject(attachment);
-        expect(store.bindingsCollection.get('cue-1:integrated_score')).toMatchObject(binding);
+        expect(store.bindingsCollection.get('music-1:integrated_score')).toMatchObject(binding);
     });
 });

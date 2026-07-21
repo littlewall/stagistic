@@ -20,7 +20,7 @@ import {
 } from '../tiptap/extensions/characterTagInput/markRanges';
 
 export type EditorElementSelection =
-    | {type: 'cue', cueId: string}
+    | {type: 'music', musicId: string}
     | {
         type: 'character', characterId: string | null, characterKey: string,
     }
@@ -46,8 +46,8 @@ const isSameSelection = (
         return current === next;
     }
 
-    if (current.type === 'cue' && next.type === 'cue') {
-        return current.cueId === next.cueId;
+    if (current.type === 'music' && next.type === 'music') {
+        return current.musicId === next.musicId;
     }
 
     return current.type === 'character'
@@ -106,14 +106,14 @@ const resolveSelection = (
         return null;
     }
 
-    const cuePill = target.closest<HTMLElement>('[data-cue-pill]');
+    const musicPill = target.closest<HTMLElement>('[data-music-pill]');
 
-    if (cuePill) {
-        const cueId = cuePill.dataset.cueId
-            ?? cuePill.querySelector<HTMLElement>('[data-cue-id]')?.dataset.cueId
+    if (musicPill) {
+        const musicId = musicPill.dataset.musicId
+            ?? musicPill.querySelector<HTMLElement>('[data-music-id]')?.dataset.musicId
             ?? '';
 
-        return cueId ? {type: 'cue', cueId} : null;
+        return musicId ? {type: 'music', musicId} : null;
     }
 
     const characterPill = target.closest<HTMLElement>('[data-character-key]');

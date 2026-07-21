@@ -6,7 +6,7 @@ import {
 
 import {
     ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
-    ATTRIBUTE_MANAGER_PANEL_CUES,
+    ATTRIBUTE_MANAGER_PANEL_MUSIC,
     ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
     type AttributeManagerPanelId,
     attributeManagerTabs,
@@ -18,29 +18,29 @@ export const useAttributeManagerModalState = () => {
         ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
     );
     const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(null);
-    const [selectedCueId, setSelectedCueId] = useState<string | null>(null);
+    const [selectedMusicId, setSelectedMusicId] = useState<string | null>(null);
 
     const open = useCallback(() => {
         setSelectedCharacterId(null);
-        setSelectedCueId(null);
+        setSelectedMusicId(null);
         setIsOpen(true);
     }, []);
     const openWithPanel = useCallback((panelId: AttributeManagerPanelId) => {
         setSelectedCharacterId(null);
-        setSelectedCueId(null);
+        setSelectedMusicId(null);
         setActivePanelId(panelId);
         setIsOpen(true);
     }, []);
     const openCharacter = useCallback((characterId: string) => {
         setSelectedCharacterId(characterId);
-        setSelectedCueId(null);
+        setSelectedMusicId(null);
         setActivePanelId(ATTRIBUTE_MANAGER_PANEL_CHARACTERS);
         setIsOpen(true);
     }, []);
-    const openCue = useCallback((cueId: string) => {
+    const openMusic = useCallback((musicId: string) => {
         setSelectedCharacterId(null);
-        setSelectedCueId(cueId);
-        setActivePanelId(ATTRIBUTE_MANAGER_PANEL_CUES);
+        setSelectedMusicId(musicId);
+        setActivePanelId(ATTRIBUTE_MANAGER_PANEL_MUSIC);
         setIsOpen(true);
     }, []);
     const close = useCallback(() => {
@@ -55,12 +55,12 @@ export const useAttributeManagerModalState = () => {
         isOpen,
         activePanelId,
         selectedCharacterId,
-        selectedCueId,
+        selectedMusicId,
         tabs,
         open,
         openWithPanel,
         openCharacter,
-        openCue,
+        openMusic,
         close,
         selectPanel,
     };

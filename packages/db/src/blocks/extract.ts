@@ -1,10 +1,10 @@
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
 import {
-    collectCueAtoms,
-    type CueBlockInput,
-    deriveCues,
+    collectMusicAtoms,
+    deriveMusic,
     getScriptBlockTypeFromNodeType,
     isScriptBlockNodeType,
+    type MusicBlockInput,
 } from '@stagistic/script';
 import {isObjectRecord} from '@stagistic/shared';
 
@@ -17,7 +17,7 @@ import {
 import type {
     ExtractedActRow,
     ExtractedBlockRow,
-    ExtractedCueRow,
+    ExtractedMusicRow,
     ExtractedSceneRow,
     ExtractScriptBlocksResult,
 } from './types';
@@ -118,7 +118,7 @@ export const extractScriptBlocks = (
             blocks: [],
             acts: [],
             scenes: [],
-            cues: [],
+            music: [],
             importMetadata,
             warnings,
         };
@@ -127,7 +127,7 @@ export const extractScriptBlocks = (
     const blocks: ExtractedBlockRow[] = [];
     const acts: ExtractedActRow[] = [];
     const scenes: ExtractedSceneRow[] = [];
-    const cueBlockInputs: CueBlockInput[] = [];
+    const musicBlockInputs: MusicBlockInput[] = [];
     const usedBlockIds = new Set<string>();
     const actByHeadingBlockId = new Map<string, ExtractedActRow>();
     const sceneByHeadingBlockId = new Map<string, ExtractedSceneRow>();
@@ -204,10 +204,10 @@ export const extractScriptBlocks = (
                 characterRefByKey,
             });
 
-            cueBlockInputs.push({
+            musicBlockInputs.push({
                 blockId,
                 blockType,
-                cueAtoms: collectCueAtoms(node),
+                musicAtoms: collectMusicAtoms(node),
             });
 
             orderNo += 1;
@@ -216,22 +216,22 @@ export const extractScriptBlocks = (
 
     walk(sourceDocument.content);
 
-    const cues: ExtractedCueRow[] = deriveCues(cueBlockInputs).map(cue => ({
-        id: cue.cueId,
-        sceneNumber: cue.sceneNumber,
-        indexInScene: cue.indexInScene,
-        mode: cue.mode,
-        title: cue.title,
-        kind: cue.kind,
-        startBlockId: cue.startBlockId,
-        endBlockId: cue.endBlockId,
+    const music: ExtractedMusicRow[] = deriveMusic(musicBlockInputs).map(music => ({
+        id: music.musicId,
+        sceneNumber: music.sceneNumber,
+        indexInScene: music.indexInScene,
+        mode: music.mode,
+        title: music.title,
+        kind: music.kind,
+        startBlockId: music.startBlockId,
+        endBlockId: music.endBlockId,
     }));
 
     return {
         blocks,
         acts,
         scenes,
-        cues,
+        music,
         importMetadata,
         warnings,
     };

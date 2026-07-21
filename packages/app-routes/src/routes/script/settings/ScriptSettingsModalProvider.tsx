@@ -27,9 +27,9 @@ import {
     type AttributeManagerPanelId,
 } from '../attributes/attributeManagerMenu';
 import {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
-import {useCueAttachmentsState} from '../attributes/useCueAttachmentsState';
+import {useMusicAttachmentsState} from '../attributes/useMusicAttachmentsState';
 import {useScriptPlacesState} from '../attributes/useScriptPlacesState';
-import {useScriptCuesState} from '../editor/cues';
+import {useScriptMusicState} from '../editor/music';
 import {ScriptEditorSettingsPanel} from '../editor/settings';
 import {ScriptCharactersProvider} from '../ScriptCharactersContext';
 import {useScriptWorkspace} from '../ScriptWorkspaceContext';
@@ -53,12 +53,12 @@ interface ScriptSettingsModalContextValue {
     isEditorPresentationHydrated: boolean,
     titlePageDraft: TitlePageSettings,
     scriptTitleDraft: string,
-    cueState: ReturnType<typeof useScriptCuesState>,
+    musicState: ReturnType<typeof useScriptMusicState>,
     openSettingsModal: () => void,
     openAttributeManagerModal: () => void,
     openAttributeManagerModalWithPanel: (panelId: AttributeManagerPanelId) => void,
     openAttributeManagerCharacter: (characterId: string) => void,
-    openAttributeManagerCue: (cueId: string) => void,
+    openAttributeManagerMusic: (musicId: string) => void,
 }
 
 const ScriptSettingsModalContext = createContext<ScriptSettingsModalContextValue | null>(null);
@@ -82,7 +82,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         currentScript,
         currentScriptId,
         characterCatalog,
-        cueCatalog,
+        musicCatalog,
         initialValue,
         handleAutoSave,
     } = useScriptWorkspace();
@@ -145,12 +145,12 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         isOpen: isAttributeManagerOpen,
         activePanelId: activeAttributeManagerPanelId,
         selectedCharacterId: selectedAttributeManagerCharacterId,
-        selectedCueId: selectedAttributeManagerCueId,
+        selectedMusicId: selectedAttributeManagerMusicId,
         tabs: attributeManagerTabs,
         open: openAttributeManagerModal,
         openWithPanel: openAttributeManagerModalWithPanel,
         openCharacter: openAttributeManagerCharacter,
-        openCue: openAttributeManagerCue,
+        openMusic: openAttributeManagerMusic,
         close: closeAttributeManagerModal,
         selectPanel: selectAttributeManagerPanel,
     } = useAttributeManagerModalState();
@@ -165,25 +165,25 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
         handleAutoSave,
     });
-    const cueState = useScriptCuesState(currentScriptId, cueCatalog);
+    const musicState = useScriptMusicState(currentScriptId, musicCatalog);
     const {
-        getValue: getCueTitleDraft,
-        persistValue: persistCueTitleDraft,
-        setValue: setCueTitleDraft,
+        getValue: getMusicTitleDraft,
+        persistValue: persistMusicTitleDraft,
+        setValue: setMusicTitleDraft,
     } = useKeyedFieldDrafts<string>(currentScriptId);
     const placeState = useScriptPlacesState(currentScriptId, scriptRepository);
-    const cueAttachmentsState = useCueAttachmentsState(currentScriptId, scriptRepository);
-    const {cues} = cueState;
+    const musicAttachmentsState = useMusicAttachmentsState(currentScriptId, scriptRepository);
+    const {music} = musicState;
     const {
         characterItems: attributeManagerCharacters,
         sceneItems: attributeManagerScenes,
-        cueItems: attributeManagerCues,
+        musicItems: attributeManagerMusic,
     } = useAttributeManagerItems({
         isOpen: isAttributeManagerOpen,
         initialValue,
         characters: charactersContextValue,
-        cues,
-        getCueTitleDraft,
+        music,
+        getMusicTitleDraft,
     });
     const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
     const draftSaveError = scriptSettingsDraftError
@@ -206,20 +206,20 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         isEditorPresentationHydrated,
         titlePageDraft,
         scriptTitleDraft,
-        cueState,
+        musicState,
         openSettingsModal,
         openAttributeManagerModal,
         openAttributeManagerModalWithPanel,
         openAttributeManagerCharacter,
-        openAttributeManagerCue,
+        openAttributeManagerMusic,
     }), [
-        cueState,
+        musicState,
         effectiveScriptSettingsDraft,
         isEditorPresentationHydrated,
         openAttributeManagerModal,
         openAttributeManagerModalWithPanel,
         openAttributeManagerCharacter,
-        openAttributeManagerCue,
+        openAttributeManagerMusic,
         openSettingsModal,
         resolvedScriptSettings,
         scriptTitleDraft,
@@ -276,7 +276,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     tabs={attributeManagerTabs}
                     activePanelId={activeAttributeManagerPanelId}
                     selectedCharacterId={selectedAttributeManagerCharacterId}
-                    selectedCueId={selectedAttributeManagerCueId}
+                    selectedMusicId={selectedAttributeManagerMusicId}
                     onClose={closeAttributeManagerModal}
                     onSelectPanel={selectAttributeManagerPanel}
                     characters={charactersContextValue}
@@ -284,11 +284,11 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     characterColorSaturation={resolvedScriptSettings.visual.characterColorSaturation}
                     sceneItems={attributeManagerScenes}
                     placeState={placeState}
-                    cueState={cueState}
-                    cueItems={attributeManagerCues}
-                    cueAttachmentsState={cueAttachmentsState}
-                    setCueTitleDraft={setCueTitleDraft}
-                    persistCueTitleDraft={persistCueTitleDraft}
+                    musicState={musicState}
+                    musicItems={attributeManagerMusic}
+                    musicAttachmentsState={musicAttachmentsState}
+                    setMusicTitleDraft={setMusicTitleDraft}
+                    persistMusicTitleDraft={persistMusicTitleDraft}
                 />
             </ScriptCharactersProvider>
         </ScriptSettingsModalContext.Provider>

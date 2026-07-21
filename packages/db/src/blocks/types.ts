@@ -76,7 +76,7 @@ export interface ExtractedBlockRow {
     characterRefByKey: Record<string, string>,
 }
 
-export interface ExtractedCueRow {
+export interface ExtractedMusicRow {
     id: string,
     sceneNumber: number,
     indexInScene: number,
@@ -103,7 +103,7 @@ export interface ExtractScriptBlocksResult {
     blocks: ExtractedBlockRow[],
     acts: ExtractedActRow[],
     scenes: ExtractedSceneRow[],
-    cues: ExtractedCueRow[],
+    music: ExtractedMusicRow[],
     importMetadata: ExtractedImportMetadata,
     warnings: string[],
 }

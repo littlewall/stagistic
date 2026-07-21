@@ -5,23 +5,24 @@ import {
     CHARACTER_TAG_KEY_ATTR,
     CHARACTER_TAG_MARK_NAME,
 } from '../characters';
-import {
-    CUE_ID_ATTR,
-    CUE_KIND_ATTR,
-    CUE_MODE_ATTR,
-    CUE_OUT_NODE_NAME,
-    CUE_START_NODE_NAME,
-    CUE_TITLE_ATTR,
-} from '../cues';
 import type {ScriptNode} from '../document';
+import {
+    MUSIC_ID_ATTR,
+    MUSIC_KIND_ATTR,
+    MUSIC_MODE_ATTR,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
+    MUSIC_TITLE_ATTR,
+} from '../music';
 import {normalizeCharacterKey} from '../syntax';
 import {readQuotedLiteral} from './literals';
+import {StagisticParseError} from './types';
 
 type InlineMark = NonNullable<ScriptNode['marks']>[number];
 
 export interface ParsedStageBlock {
     node: ScriptNode,
-    cue?: {
+    music?: {
         role: 'start' | 'out',
         number: number,
         line: number,
@@ -143,24 +144,28 @@ export const parseInlineText = (source: string, line: number): ScriptNode[] => {
     return nodes;
 };
 
-const readCueMarker = (source: string, start: number, line: number) => {
-    const cueMatch = (/^@@cue\s+(\d+)\s+/u).exec(source.slice(start));
+const readMusicMarker = (source: string, start: number, line: number) => {
+    if ((/^@@cue\b/u).test(source.slice(start))) {
+        throw new StagisticParseError('@@cue is no longer supported; use @@music.', line);
+    }
 
-    if (cueMatch) {
-        const titleStart = start + cueMatch[0].length;
+    const musicMatch = (/^@@music\s+(\d+)\s+/u).exec(source.slice(start));
+
+    if (musicMatch) {
+        const titleStart = start + musicMatch[0].length;
         const title = readQuotedLiteral(source, titleStart, line);
 
         return {
             end: title.end,
-            number: Number(cueMatch[1]),
+            number: Number(musicMatch[1]),
             role: 'start' as const,
             node: {
-                type: CUE_START_NODE_NAME,
+                type: MUSIC_START_NODE_NAME,
                 attrs: {
-                    [CUE_ID_ATTR]: createNodeId(),
-                    [CUE_MODE_ATTR]: 'open',
-                    [CUE_TITLE_ATTR]: title.value,
-                    [CUE_KIND_ATTR]: null,
+                    [MUSIC_ID_ATTR]: createNodeId(),
+                    [MUSIC_MODE_ATTR]: 'open',
+                    [MUSIC_TITLE_ATTR]: title.value,
+                    [MUSIC_KIND_ATTR]: null,
                 },
             } satisfies ScriptNode,
         };
@@ -173,7 +178,7 @@ const readCueMarker = (source: string, start: number, line: number) => {
             end: start + outMatch[0].length,
             number: Number(outMatch[1]),
             role: 'out' as const,
-            node: {type: CUE_OUT_NODE_NAME} satisfies ScriptNode,
+            node: {type: MUSIC_OUT_NODE_NAME} satisfies ScriptNode,
         };
     }
 
@@ -204,7 +209,7 @@ export const parseStageDirectionLine = (source: string, line: number): ParsedSta
 
         plainText += source.slice(cursor, markerStart);
 
-        const marker = readCueMarker(source, markerStart, line);
+        const marker = readMusicMarker(source, markerStart, line);
 
         if (!marker) {
             plainText += '@@';
@@ -217,7 +222,7 @@ export const parseStageDirectionLine = (source: string, line: number): ParsedSta
         content.push(marker.node);
         blocks.push({
             node: {type: 'stageDirection', content},
-            cue: {
+            music: {
                 role: marker.role, number: marker.number, line,
             },
         });

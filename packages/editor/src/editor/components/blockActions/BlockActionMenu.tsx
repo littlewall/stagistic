@@ -2,11 +2,11 @@ import {
     type ReactNode,
 } from 'react';
 
-import {
-    CueHitIcon,
-    CueRangeIcon,
-} from '../CueIcons';
 import styles from '../EditorBlockActionsOverlay.module.css';
+import {
+    MusicHitIcon,
+    MusicRangeIcon,
+} from '../MusicIcons';
 import type {
     BlockActionCommand,
     BlockActionIcon,
@@ -18,12 +18,12 @@ import {
 } from './ContextMenu';
 import type {BlockActionMenuProps} from './types';
 
-const CueIcon = ({icon}: {icon: BlockActionIcon}) => {
+const MusicIcon = ({icon}: {icon: BlockActionIcon}) => {
     const paths: Record<BlockActionIcon, ReactNode> = {
-        cue: <CueRangeIcon />,
-        cueStart: <CueRangeIcon hollowEndpoint="start" />,
-        cueHit: <CueHitIcon />,
-        cueOut: <CueRangeIcon hollowEndpoint="end" />,
+        music: <MusicRangeIcon />,
+        musicStart: <MusicRangeIcon hollowEndpoint="start" />,
+        musicHit: <MusicHitIcon />,
+        musicOut: <MusicRangeIcon hollowEndpoint="end" />,
     };
 
     return paths[icon];
@@ -36,17 +36,17 @@ const toContextMenuItem = (
     if (item.kind === 'command') {
         return {
             ...item,
-            icon: <CueIcon icon={item.icon} />,
+            icon: <MusicIcon icon={item.icon} />,
             onClick: () => onExecute(item),
         };
     }
 
     return {
         ...item,
-        icon: <CueIcon icon={item.icon} />,
+        icon: <MusicIcon icon={item.icon} />,
         items: item.items.map(command => ({
             ...command,
-            icon: <CueIcon icon={command.icon} />,
+            icon: <MusicIcon icon={command.icon} />,
             onClick: () => onExecute(command),
         })),
     };

@@ -47,8 +47,8 @@ Levels 2–3 are **out of scope** here; the architecture below makes them additi
 - Settings schema field, persistence, and switcher UI (comes with the switcher).
 - Fill / fill-text modes.
 - `.characterSeparator` (unchanged — plain muted `/`).
-- Cue pills (`CuePill.module.css .tagBody`) — they carry the same
-  grid-shifting box padding and will need equivalent treatment later for cue-line
+- Music pills (`MusicPill.module.css .tagBody`) — they carry the same
+  grid-shifting box padding and will need equivalent treatment later for music-label
   export parity. Tracked as a follow-up, not done here.
 
 ## Architecture (Approach 1: root data-attribute + mode-scoped CSS)
@@ -82,7 +82,7 @@ Levels 2–3 are **out of scope** here; the architecture below makes them additi
   stays the normal script ink color** — only the underline carries color.
 - **Confirmed** (`[data-character-id]`): `text-decoration-style: solid`.
 - **Unconfirmed** (`:not([data-character-id])`): `text-decoration-style: dashed`.
-  This mirrors the current solid-fill vs. outline semantic and the cue
+  This mirrors the current solid-fill vs. outline semantic and the music
   open/hit (solid/dashed) convention.
 - **Thickness / offset:** tuned during implementation (prefer existing design
   tokens); values chosen so the underline reads as a character marker, not plain
@@ -111,7 +111,7 @@ then wrap at the same points. Existing export tests remain green.
 
 ## Follow-ups (not in this change)
 
-- Cue pill (`.tagBody`) padding causes the same grid shift; give cues an
-  equivalent zero-layout treatment for long cue-title export parity.
+- Music pill (`.tagBody`) padding causes the same grid shift; give music pills an
+  equivalent zero-layout treatment for long music-title export parity.
 - Highlight-intensity setting: schema field + switcher UI + fill / fill-text
   mode CSS (levels 2–3).

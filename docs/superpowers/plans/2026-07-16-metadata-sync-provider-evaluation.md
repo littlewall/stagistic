@@ -26,7 +26,7 @@ reviewed backend design and rollout approval.
 
 ## Phase 2 — Domain conflict policies
 
-- [ ] Specify create/update/delete semantics for scripts, places, cues,
+- [ ] Specify create/update/delete semantics for scripts, places, music,
   characters, settings/title page, and attachment metadata.
 - [ ] Choose revisions or field-level merge rules per domain; do not apply one
   generic last-write-wins rule to every entity.

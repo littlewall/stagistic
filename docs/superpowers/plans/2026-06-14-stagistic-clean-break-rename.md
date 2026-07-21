@@ -653,7 +653,7 @@ git commit -m "chore(migration): remove temporary legacy document upgrade after 
 
 ## Self-review notes (for the implementer)
 
-- **Spec coverage:** §5 vocabulary → A1; §6 naming + `fountain/`→`syntax/` + drop legacy node mode → A2/A3/A4; §7 construct mapping (built-now) → A/B/C/D; §9 temporary migration → E. Reserved bindings (§8 cue/inline tag) are intentionally **not** in this plan — they are spec-only.
+- **Spec coverage:** §5 vocabulary → A1; §6 naming + `fountain/`→`syntax/` + drop legacy node mode → A2/A3/A4; §7 construct mapping (built-now) → A/B/C/D; §9 temporary migration → E. Reserved bindings (§8 music/inline tag) are intentionally **not** in this plan — they are spec-only.
 - **Lyric section level (§7):** no task — it already works via leading tabs in `text_content`; nothing to change.
 - **Frontmatter / title page:** storage unchanged; the YAML mapping is import/export (phase 2/3), out of scope here.
 - **Known red windows:** the monorepo does not typecheck between Phase A start and Phase D Step D2-2. That is expected for a coordinated rename; do not "fix" it with temporary aliases.

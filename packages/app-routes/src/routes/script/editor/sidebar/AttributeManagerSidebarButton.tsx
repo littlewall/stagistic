@@ -2,7 +2,7 @@ import {TableIcon} from '@stagistic/ui';
 
 import {
     ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
-    ATTRIBUTE_MANAGER_PANEL_CUES,
+    ATTRIBUTE_MANAGER_PANEL_MUSIC,
     ATTRIBUTE_MANAGER_PANEL_PLACES,
     ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
     type AttributeManagerPanelId,
@@ -13,7 +13,7 @@ import {SidebarContextButton} from './SidebarContextButton';
 const PANEL_LABEL_BY_ID = {
     [ATTRIBUTE_MANAGER_PANEL_STRUCTURE]: 'Structure',
     [ATTRIBUTE_MANAGER_PANEL_CHARACTERS]: 'Characters',
-    [ATTRIBUTE_MANAGER_PANEL_CUES]: 'Cues',
+    [ATTRIBUTE_MANAGER_PANEL_MUSIC]: 'Music',
     [ATTRIBUTE_MANAGER_PANEL_PLACES]: 'Places',
 } as const satisfies Record<AttributeManagerPanelId, string>;
 

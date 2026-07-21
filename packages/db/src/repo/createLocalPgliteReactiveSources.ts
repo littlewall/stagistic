@@ -12,9 +12,9 @@ import type {
     ScriptAttachment,
     ScriptCharacterGenderOption,
     ScriptCharacterRef,
-    ScriptCue,
-    ScriptCueAttachmentBinding,
     ScriptLocation,
+    ScriptMusic,
+    ScriptMusicAttachmentBinding,
     ScriptSummary,
 } from '../types';
 import type {GetDb} from './types';
@@ -24,7 +24,7 @@ interface CreateLocalPgliteReactiveSourcesArgs {
     listScripts: () => Promise<ScriptSummary[]>,
     listCharacters: (scriptId: string) => Promise<ScriptCharacterRef[]>,
     listCharacterGenders: (scriptId: string) => Promise<ScriptCharacterGenderOption[]>,
-    listCues: (scriptId: string) => Promise<ScriptCue[]>,
+    listMusic: (scriptId: string) => Promise<ScriptMusic[]>,
     listLocations: (scriptId: string) => Promise<ScriptLocation[]>,
     listSceneLocations: (scriptId: string) => Promise<ScriptSceneLocationAssignment[]>,
     loadTitlePage: (scriptId: string) => Promise<ScriptTitlePageRecord['settings'] | null>,
@@ -58,7 +58,7 @@ export const createLocalPgliteReactiveSources = ({
     listScripts,
     listCharacters,
     listCharacterGenders,
-    listCues,
+    listMusic,
     listLocations,
     listSceneLocations,
     loadTitlePage,
@@ -97,14 +97,14 @@ export const createLocalPgliteReactiveSources = ({
             watchParams: [scriptId],
         });
     });
-    const getScriptCuesSource = createScriptSourceRegistry(scriptId => {
+    const getScriptMusicSource = createScriptSourceRegistry(scriptId => {
         return createPgliteReactiveQuerySource({
             getDb,
-            readRows: () => listCues(scriptId),
+            readRows: () => listMusic(scriptId),
             watchQuery: `
                 SELECT id, script_id, scene_number, index_in_scene, mode, title,
                     kind, start_block_id, end_block_id, created_at, updated_at
-                FROM script_cues
+                FROM script_music
                 WHERE script_id = $1
             `,
             watchParams: [scriptId],
@@ -200,21 +200,21 @@ export const createLocalPgliteReactiveSources = ({
             watchParams: [scriptId],
         });
     });
-    const getScriptCueAttachmentBindingsSource = createScriptSourceRegistry<
-        ScriptCueAttachmentBinding
+    const getScriptMusicAttachmentBindingsSource = createScriptSourceRegistry<
+        ScriptMusicAttachmentBinding
     >(scriptId => {
         return createPgliteReactiveQuerySource({
             getDb,
-            readRows: async () => dbQueries.listScriptCueAttachmentBindings(
+            readRows: async () => dbQueries.listScriptMusicAttachmentBindings(
                 await getDb(),
                 scriptId,
             ),
             watchQuery: `
-                SELECT binding.cue_id, binding.attachment_id, binding.role,
+                SELECT binding.music_id, binding.attachment_id, binding.role,
                     binding.sort_order, binding.created_at
-                FROM script_cue_attachments AS binding
-                INNER JOIN script_cues AS cue ON cue.id = binding.cue_id
-                WHERE cue.script_id = $1
+                FROM script_music_attachments AS binding
+                INNER JOIN script_music AS music ON music.id = binding.music_id
+                WHERE music.script_id = $1
             `,
             watchParams: [scriptId],
         });
@@ -224,12 +224,12 @@ export const createLocalPgliteReactiveSources = ({
         scriptSummaries,
         getScriptCharactersSource,
         getScriptCharacterGendersSource,
-        getScriptCuesSource,
+        getScriptMusicSource,
         getScriptLocationsSource,
         getScriptSceneLocationsSource,
         getScriptTitlePageSource,
         getScriptEditorSettingsSource,
         getScriptAttachmentsSource,
-        getScriptCueAttachmentBindingsSource,
+        getScriptMusicAttachmentBindingsSource,
     };
 };

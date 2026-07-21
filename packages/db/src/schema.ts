@@ -339,12 +339,12 @@ export const scriptBlockCharacterRefs = pgTable(
 );
 
 /*
- * Script cue catalog. Cue markers in the document assign existing cue rows to
+ * Script music catalog. Music markers in the document assign existing music rows to
  * block intervals by setting start/end block ids; removing a marker only clears
  * that assignment.
  */
-export const scriptCues = pgTable(
-    'script_cues',
+export const scriptMusic = pgTable(
+    'script_music',
     {
         id: text('id').primaryKey(),
         scriptId: text('script_id')
@@ -361,7 +361,7 @@ export const scriptCues = pgTable(
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },
     table => ({
-        scriptIdIdx: index('script_cues_script_id_idx').on(table.scriptId),
+        scriptIdIdx: index('script_music_script_id_idx').on(table.scriptId),
     }),
 );
 
@@ -388,13 +388,13 @@ export const scriptAttachments = pgTable(
     }),
 );
 
-/* Join between a cue and an attachment. Both sides cascade-delete. */
-export const scriptCueAttachments = pgTable(
-    'script_cue_attachments',
+/* Join between a music and an attachment. Both sides cascade-delete. */
+export const scriptMusicAttachments = pgTable(
+    'script_music_attachments',
     {
-        cueId: text('cue_id')
+        musicId: text('music_id')
             .notNull()
-            .references(() => scriptCues.id, {onDelete: 'cascade'}),
+            .references(() => scriptMusic.id, {onDelete: 'cascade'}),
         attachmentId: text('attachment_id')
             .notNull()
             .references(() => scriptAttachments.id, {onDelete: 'cascade'}),
@@ -403,11 +403,11 @@ export const scriptCueAttachments = pgTable(
         createdAt: bigint('created_at', {mode: 'number'}).notNull(),
     },
     table => ({
-        pk: primaryKey({columns: [table.cueId, table.attachmentId]}),
-        cueRoleUniqueIdx: uniqueIndex('script_cue_attachments_cue_role_unique_idx')
-            .on(table.cueId, table.role),
-        cueIdIdx: index('script_cue_attachments_cue_id_idx').on(table.cueId),
-        attachmentIdIdx: index('script_cue_attachments_attachment_id_idx').on(table.attachmentId),
+        pk: primaryKey({columns: [table.musicId, table.attachmentId]}),
+        musicRoleUniqueIdx: uniqueIndex('script_music_attachments_music_role_unique_idx')
+            .on(table.musicId, table.role),
+        musicIdIdx: index('script_music_attachments_music_id_idx').on(table.musicId),
+        attachmentIdIdx: index('script_music_attachments_attachment_id_idx').on(table.attachmentId),
     }),
 );
 
@@ -429,7 +429,7 @@ export const dbSchema = {
     scriptActs,
     scriptBlocks,
     scriptBlockCharacterRefs,
-    scriptCues,
+    scriptMusic,
     scriptAttachments,
-    scriptCueAttachments,
+    scriptMusicAttachments,
 };

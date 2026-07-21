@@ -1213,7 +1213,7 @@ git commit -m "feat(editor): sync sidebar link/unlink/rename to live tag marks"
 - Plain-text Stagistic **syntax** serialization of `@`/`@"…"` (no serializer exists yet;
   lands with the future parser/serializer spec — the mark already round-trips via
   `contentJson`).
-- Structural cues `@@cue` / `@@out` (separate spec).
+- Music `@@music` / `@@out` (separate spec).
 - Passive “suggestion” highlighting of untagged cast names in prose.
 - Forced lowercase / canonical-case display. Phase 1 forces uppercase via the
   `.characterTag` CSS rule (Task 6), independent of the stage-direction block’s

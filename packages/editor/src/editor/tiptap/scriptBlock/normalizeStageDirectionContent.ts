@@ -1,30 +1,30 @@
 import {
     CHARACTER_TAG_MARK_NAME,
-    CUE_OUT_NODE_NAME,
-    CUE_START_NODE_NAME,
-    CUE_TITLE_ATTR,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
+    MUSIC_TITLE_ATTR,
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode, Schema} from '@tiptap/pm/model';
 import type {Transaction} from '@tiptap/pm/state';
 
 import type {BlockNodeType} from '../scriptCore';
 
-const readCueNodeText = (node: ProseMirrorNode): string => {
-    if (node.type.name === CUE_OUT_NODE_NAME) {
+const readMusicNodeText = (node: ProseMirrorNode): string => {
+    if (node.type.name === MUSIC_OUT_NODE_NAME) {
         return 'out';
     }
 
-    const title: unknown = node.attrs[CUE_TITLE_ATTR];
+    const title: unknown = node.attrs[MUSIC_TITLE_ATTR];
 
     return typeof title === 'string' ? title : '';
 };
 
-const cueNodeToText = (
+const musicNodeToText = (
     node: ProseMirrorNode,
     previousNode: ProseMirrorNode | null,
     nextNode: ProseMirrorNode | null,
 ): string => {
-    const text = readCueNodeText(node);
+    const text = readMusicNodeText(node);
 
     if (!text) {
         return '';
@@ -37,8 +37,8 @@ const cueNodeToText = (
     return `${prefix}${text}${suffix}`;
 };
 
-const isCueNode = (node: ProseMirrorNode) => {
-    return node.type.name === CUE_START_NODE_NAME || node.type.name === CUE_OUT_NODE_NAME;
+const isMusicNode = (node: ProseMirrorNode) => {
+    return node.type.name === MUSIC_START_NODE_NAME || node.type.name === MUSIC_OUT_NODE_NAME;
 };
 
 export const normalizeFormerStageDirectionContent = (
@@ -66,14 +66,14 @@ export const normalizeFormerStageDirectionContent = (
             });
         }
 
-        if (isCueNode(child)) {
+        if (isMusicNode(child)) {
             const previousNode = index > 0 ? blockNode.child(index - 1) : null;
             const nextNode = index + 1 < blockNode.childCount ? blockNode.child(index + 1) : null;
 
             changes.push(() => {
                 const mappedFrom = tr.mapping.map(from);
                 const mappedTo = tr.mapping.map(to);
-                const text = cueNodeToText(child, previousNode, nextNode);
+                const text = musicNodeToText(child, previousNode, nextNode);
 
                 if (!text) {
                     tr.delete(mappedFrom, mappedTo);

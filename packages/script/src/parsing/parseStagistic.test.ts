@@ -4,9 +4,9 @@ import {
 
 import {
     CHARACTER_TAG_MARK_NAME,
-    CUE_MODE_ATTR,
-    CUE_OUT_NODE_NAME,
-    CUE_START_NODE_NAME,
+    MUSIC_MODE_ATTR,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
     type ScriptNode,
 } from '..';
 import {parseStagistic} from './parseStagistic';
@@ -19,6 +19,16 @@ const getText = (node: ScriptNode): string => {
 };
 
 describe('parseStagistic', () => {
+    it('parses @@music and rejects the removed @@cue syntax', () => {
+        const result = parseStagistic('!Music begins @@music 1 "Overture"');
+        const musicStart = result.document.content[0].content
+            ?.find(node => node.type === 'musicStart');
+
+        expect(musicStart?.attrs?.title).toBe('Overture');
+        expect(() => parseStagistic('!Music begins @@cue 1 "Overture"'))
+            .toThrow(StagisticParseError);
+    });
+
     it('parses the complete syntax and title-page frontmatter', () => {
         const result = parseStagistic(`---
 title: When Night Falls
@@ -52,11 +62,11 @@ I am *still* here.
 ~
 ONE MORE LINE
 
-Anna watches @"Mrs. Washington" enter. @@cue 1 "She said \\"Yes\\""
+Anna watches @"Mrs. Washington" enter. @@music 1 "She said \\"Yes\\""
 
 The lights return. @@out 1
 
-@@cue 2 "Knock"
+@@music 2 "Knock"
 
 @@out 2
 
@@ -99,14 +109,14 @@ The lights return. @@out 1
         expect(getText(result.document.content[4])).toBe('McCLANE');
         expect(getText(result.document.content[8])).toBe('');
 
-        const openCue = result.document.content[10].content?.find(node => node.type === CUE_START_NODE_NAME);
-        const cueOut = result.document.content[11].content?.find(node => node.type === CUE_OUT_NODE_NAME);
-        const hitCue = result.document.content[12].content?.find(node => node.type === CUE_START_NODE_NAME);
+        const openMusic = result.document.content[10].content?.find(node => node.type === MUSIC_START_NODE_NAME);
+        const musicOut = result.document.content[11].content?.find(node => node.type === MUSIC_OUT_NODE_NAME);
+        const hitMusic = result.document.content[12].content?.find(node => node.type === MUSIC_START_NODE_NAME);
 
-        expect(openCue?.attrs?.title).toBe('She said "Yes"');
-        expect(openCue?.attrs?.[CUE_MODE_ATTR]).toBe('open');
-        expect(cueOut).toBeTruthy();
-        expect(hitCue?.attrs?.[CUE_MODE_ATTR]).toBe('hit');
+        expect(openMusic?.attrs?.title).toBe('She said "Yes"');
+        expect(openMusic?.attrs?.[MUSIC_MODE_ATTR]).toBe('open');
+        expect(musicOut).toBeTruthy();
+        expect(hitMusic?.attrs?.[MUSIC_MODE_ATTR]).toBe('hit');
     });
 
     it('parses uppercase lines as character cues unless ! forces a stage direction', () => {
@@ -179,14 +189,14 @@ LYRICS TWO
         expect(getText(result.document.content[2])).toBe('LYRICS ONE');
     });
 
-    it('rejects invalid frontmatter and mismatched cue outs', () => {
+    it('rejects invalid frontmatter and mismatched music outs', () => {
         expect(() => parseStagistic(`---
 draftDate: 01/07/2026
 ---
 Text
 `)).toThrow(StagisticParseError);
 
-        expect(() => parseStagistic(`Text @@cue 1 "One"
+        expect(() => parseStagistic(`Text @@music 1 "One"
 
 @@out 2
 `)).toThrow('@@out 2 does not match');

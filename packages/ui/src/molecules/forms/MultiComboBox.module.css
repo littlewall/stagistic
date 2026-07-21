@@ -141,9 +141,9 @@
     & mark {
         font-weight: inherit;
         color: inherit;
-        background: transparent;
         text-decoration: underline;
         text-underline-offset: 2px;
+        background: transparent;
     }
 }
 

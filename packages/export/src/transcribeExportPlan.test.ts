@@ -67,16 +67,16 @@ describe('transcribeExportPlan', () => {
         expect(text).toContain('Zvědavá jsem, co mě čeká.');
     });
 
-    it('transcribes cue atoms as their numbered label so they occupy a line', () => {
+    it('transcribes music atoms as their numbered label so they occupy a line', () => {
         const transcript = transcribeExportPlan(plan([
             block('scene', 's1', 'Scene one'), {
                 type: 'stageDirection',
                 attrs: {id: 'sd1', blockType: 'stageDirection'},
                 content: [
                     {
-                        type: 'cueStart',
+                        type: 'musicStart',
                         attrs: {
-                            cueId: 'c1', mode: 'open', title: 'dddddddddd',
+                            musicId: 'c1', mode: 'open', title: 'dddddddddd',
                         },
                     },
                 ],
@@ -113,28 +113,28 @@ describe('transcribeExportPlan', () => {
         expect(text).toContain(' enters.');
     });
 
-    it('renders cue labels inside stage directions in bold', () => {
+    it('renders music labels inside stage directions in bold', () => {
         const transcript = transcribeExportPlan(plan([
             block('scene', 's1', 'Scene one'), {
                 type: 'stageDirection',
                 attrs: {id: 'sd1', blockType: 'stageDirection'},
                 content: [
                     {type: 'text', text: 'Lights shift'}, {
-                        type: 'cueStart',
+                        type: 'musicStart',
                         attrs: {
-                            cueId: 'c1', mode: 'open', title: 'Knock',
+                            musicId: 'c1', mode: 'open', title: 'Knock',
                         },
                     },
                 ],
             },
         ]), DEFAULT_EDITOR_SETTINGS);
 
-        const cueRun = transcript.items
+        const musicRun = transcript.items
             .filter(isVisualLine)
             .flatMap(item => item.runs)
             .find(run => run.text.includes('1. Knock'));
 
-        expect(cueRun?.bold).toBe(true);
+        expect(musicRun?.bold).toBe(true);
     });
 
     it('keeps multi-character cue lines tight (no spaces around slashes), matching the editor', () => {

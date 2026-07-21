@@ -2,7 +2,7 @@ import type {DecorationSet} from '@tiptap/pm/view';
 
 import type {
     EditorLiveCharacterSnapshot,
-    EditorLiveCueSnapshot,
+    EditorLiveMusicSnapshot,
     EditorLiveStructureSnapshot,
 } from '../contracts';
 import type {BlockNodeType} from '../tiptap/scriptCore';
@@ -18,6 +18,6 @@ export interface EditorRuntimeState {
     activeBlockType: BlockNodeType | null,
     structure: EditorLiveStructureSnapshot,
     characters: EditorLiveCharacterSnapshot,
-    cues: EditorLiveCueSnapshot,
+    music: EditorLiveMusicSnapshot,
     characterDecorations: DecorationSet,
 }

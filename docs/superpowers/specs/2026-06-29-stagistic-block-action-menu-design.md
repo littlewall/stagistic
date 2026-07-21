@@ -2,9 +2,9 @@
 
 **Date:** 2026-06-29  
 **Status:** Design approved; not built  
-**Related:** [Stagistic Cues — Editor & Data Design](2026-06-24-stagistic-cues-editor-design.md)
-(§3 domain rules, §4.1 one-cue-per-block invariant, §5 entry, §6.1 live
-cue model)
+**Related:** [Stagistic Music — Editor & Data Design](2026-06-24-stagistic-music-editor-design.md)
+(§3 domain rules, §4.1 one-music-per-block invariant, §5 entry, §6.1 live
+music model)
 
 ## 1. Decision
 
@@ -30,15 +30,15 @@ This spec defines:
 - the per-block action provider contract;
 - command and submenu item shapes;
 - menu, submenu, pointer, and keyboard behavior;
-- the first provider: cue actions for `stageDirection` blocks;
+- the first provider: music actions for `stageDirection` blocks;
 - integration with the existing `EditorBlockActionsOverlay` and block
   type menu.
 
 This spec does **not** define:
 
-- cue pairing, insertion, or persistence rules already owned by the cue
+- music pairing, insertion, or persistence rules already owned by the music
   spec;
-- cue-pill actions (open/hit and delete), which remain in the pill menu;
+- music-pill actions (open/hit and delete), which remain in the pill menu;
 - actions for block types other than `stageDirection`;
 - a custom right-click surface;
 - mobile or touch-specific invocation.
@@ -54,7 +54,7 @@ controls in this order:
    unchanged.
 
 The horizontal ellipsis distinguishes a block-scoped menu from the
-vertical kebab used by an active cue pill. Both controls use the existing
+vertical kebab used by an active music pill. Both controls use the existing
 small square ghost-button dimensions and visual states. The action trigger
 does not initiate drag; drag remains owned by the block type trigger.
 
@@ -151,52 +151,52 @@ states use the existing menu colors.
 Only leaf items execute commands. A submenu parent is navigation, not a
 command.
 
-## 6. Stage-direction cue provider
+## 6. Stage-direction music provider
 
 Only `stageDirection` registers actions in the first implementation. It
 returns one top-level submenu:
 
-- **Cues**
-  - **Add cue**
-  - **Add out (`<open cue display name>`)** — conditional
+- **Music**
+  - **Add music**
+  - **Add out (`<open music display name>`)** — conditional
 
-The provider first applies the cue spec's one-cue-atom-per-block invariant.
-If the target stage direction already contains a `cueStart` or `cueOut`, it
-returns no cue actions. With no other registered actions, the action
+The provider first applies the music spec's one-music-atom-per-block invariant.
+If the target stage direction already contains a `musicStart` or `musicOut`, it
+returns no music actions. With no other registered actions, the action
 trigger is therefore absent on that block.
 
-### 6.1 Add cue
+### 6.1 Add music
 
-`Add cue` is present when the target stage direction contains no cue atom.
-It invokes the same create-mode flow as the cue spec's `#` compose: insert
+`Add music` is present when the target stage direction contains no music atom.
+It invokes the same create-mode flow as the music spec's `#` compose: insert
 at the end of the target block, open title editing, and return focus to the
-cue title. Starting a new open cue while another is open retains the cue
+music title. Starting a new open music while another is open retains the music
 spec's implicit-close behavior.
 
 ### 6.2 Add out
 
 `Add out` is present only when all of the following are true:
 
-- the target is a `stageDirection` with no cue atom;
-- the live positional cue model reports an open durational cue at the
+- the target is a `stageDirection` with no music atom;
+- the live positional music model reports an open durational music at the
   target block's end insertion position;
-- that cue is in the same scene and has not already been closed explicitly;
-- the cue is not a hit.
+- that music is in the same scene and has not already been closed explicitly;
+- the music is not a hit.
 
-The visible label is `Add out (<cue title>)`, using the current title from
-the live cue model. Whitespace-only or empty titles fall back to
-`Cue <number>`, producing, for example, `Add out (Cue 4)`. Long titles are
+The visible label is `Add out (<music title>)`, using the current title from
+the live music model. Whitespace-only or empty titles fall back to
+`Music <number>`, producing, for example, `Add out (Music 4)`. Long titles are
 truncated visually to the menu width, while the accessible name retains
 the full label.
 
-Activating the item inserts `cueOut` at the end of the target block and
-closes the menu. If the cue is no longer open when the command executes,
+Activating the item inserts `musicOut` at the end of the target block and
+closes the menu. If the music is no longer open when the command executes,
 the command makes no document change.
 
 ### 6.3 Empty-state filtering
 
-`Cues` is omitted if neither child action is available. The generic menu
-never renders empty submenu panels, disabled cue commands, or a trigger
+`Music` is omitted if neither child action is available. The generic menu
+never renders empty submenu panels, disabled music commands, or a trigger
 whose only content would be empty.
 
 ## 7. Keyboard and accessibility
@@ -231,7 +231,7 @@ Recommended component split:
 - `BlockTypeMenu` — the existing type chooser, renamed from the ambiguous
   `BlockActionsMenu`;
 - `blockActionRegistry` — block type to provider mapping;
-- `stageDirectionCueActions` — cue-specific resolution and commands;
+- `stageDirectionMusicActions` — music-specific resolution and commands;
 - shared menu panel/item primitives or styles extracted from the existing
   block type menu.
 
@@ -243,19 +243,19 @@ pointer-down/drag path must remain isolated from the new action trigger.
 
 - Right-click anywhere in the editor opens the native OS/browser context
   menu; Stagistic does not suppress it.
-- A cue-free `stageDirection` shows the action trigger to the left of the
+- A music-free `stageDirection` shows the action trigger to the left of the
   type/drag trigger.
-- Its primary menu contains `Cues`; hovering or opening it shows `Add cue`.
-- `Add out (<name>)` appears only where an open cue can be closed and uses
-  the live title of that cue.
-- Empty cue titles use `Cue <number>` in the `Add out` label.
-- A stage direction that already contains a cue atom exposes no cue actions.
+- Its primary menu contains `Music`; hovering or opening it shows `Add music`.
+- `Add out (<name>)` appears only where an open music can be closed and uses
+  the live title of that music.
+- Empty music titles use `Music <number>` in the `Add out` label.
+- A stage direction that already contains a music atom exposes no music actions.
 - A block with no resolved actions renders no action trigger.
 - Opening one gutter menu closes the other; drag closes the action menu.
 - Block type change and drag behavior remain unchanged.
 - Mouse and keyboard paths satisfy §7.
 - Provider tests cover per-type absence, existing-atom filtering, open/hit/
-  closed cue states, title changes, empty-title fallback, and stale-command
+  closed music states, title changes, empty-title fallback, and stale-command
   revalidation.
 - Browser tests cover trigger visibility, submenu pointer traversal,
   keyboard navigation, exclusive menu state, command execution, and native
@@ -264,6 +264,6 @@ pointer-down/drag path must remain isolated from the new action trigger.
 ## 10. Supersession
 
 This spec supersedes the right-click `BlockContextMenu` proposed in §5.2
-of the 2026-06-24 cue spec. The cue spec remains authoritative for cue
+of the 2026-06-24 music spec. The music spec remains authoritative for music
 domain and insertion rules; this document is authoritative for block-action
 discovery, rendering, and invocation.

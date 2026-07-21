@@ -1,22 +1,22 @@
 import {
     buildPageMark,
     CHARACTER_TAG_MARK_NAME,
-    collectCueAtoms,
-    CUE_ID_ATTR,
-    CUE_OUT_NODE_NAME,
-    CUE_START_NODE_NAME,
-    CUE_TITLE_ATTR,
-    type CueBlockInput,
-    deriveCues,
+    collectMusicAtoms,
+    deriveMusic,
     type EditorSettings,
-    formatCueNumber,
-    formatOutLabel,
+    formatMusicNumber,
+    formatMusicOutLabel,
     getScriptBlockId,
     getScriptBlockNodeType,
     hasNodeChildren,
     type HeaderFooterAlignment,
     type HeaderFooterCellSettings,
     type HeaderFooterRowSettings,
+    MUSIC_ID_ATTR,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
+    MUSIC_TITLE_ATTR,
+    type MusicBlockInput,
     resolveDraftDate,
     resolveHeaderFooterText,
     type ScriptDocument,
@@ -62,8 +62,8 @@ const getNodeText = (node: ScriptNode): string => {
     return `${ownText}${childText}`;
 };
 
-interface CueLabels {
-    numberByCueId: Map<string, string>,
+interface MusicLabels {
+    numberByMusicId: Map<string, string>,
     outLabelByBlockId: Map<string, string>,
 }
 
@@ -99,28 +99,28 @@ const readAttrString = (
 };
 
 /**
- * Cue atoms carry no inline text: their visible label (scene-scoped number +
- * title) is derived globally, exactly as the editor's cue-numbering plugin does,
+ * Music atoms carry no inline text: their visible label (scene-scoped number +
+ * title) is derived globally, exactly as the editor's music-numbering plugin does,
  * so the transcript reserves the same vertical space the editor shows.
  */
-const buildCueLabels = (doc: ScriptDocument): CueLabels => {
-    const inputs: CueBlockInput[] = doc.content.map(node => ({
+const buildMusicLabels = (doc: ScriptDocument): MusicLabels => {
+    const inputs: MusicBlockInput[] = doc.content.map(node => ({
         blockId: getScriptBlockId(node) ?? '',
         blockType: getScriptBlockNodeType(node, DEFAULT_BLOCK_TYPE),
-        cueAtoms: collectCueAtoms(node),
+        musicAtoms: collectMusicAtoms(node),
     }));
-    const numberByCueId = new Map<string, string>();
+    const numberByMusicId = new Map<string, string>();
     const outLabelByBlockId = new Map<string, string>();
 
-    deriveCues(inputs).forEach(cue => {
-        numberByCueId.set(cue.cueId, formatCueNumber(cue));
+    deriveMusic(inputs).forEach(music => {
+        numberByMusicId.set(music.musicId, formatMusicNumber(music));
 
-        if (cue.mode === 'open' && cue.endBlockId) {
-            outLabelByBlockId.set(cue.endBlockId, formatOutLabel(cue));
+        if (music.mode === 'open' && music.endBlockId) {
+            outLabelByBlockId.set(music.endBlockId, formatMusicOutLabel(music));
         }
     });
 
-    return {numberByCueId, outLabelByBlockId};
+    return {numberByMusicId, outLabelByBlockId};
 };
 
 const markStyle = (node: ScriptNode): InlineStyle => ({
@@ -160,7 +160,7 @@ const pushSegment = (
 const getBlockRawSegments = (
     node: ScriptNode,
     blockId: string,
-    cues: CueLabels,
+    music: MusicLabels,
 ): TextSegment[] => {
     if (!hasNodeChildren(node)) {
         return [{text: getNodeText(node), style: {...markStyle(node), characterTag: hasCharacterTagMark(node)}}];
@@ -169,17 +169,17 @@ const getBlockRawSegments = (
     const segments: TextSegment[] = [];
 
     node.content.forEach(child => {
-        if (child.type === CUE_START_NODE_NAME) {
-            const number = cues.numberByCueId.get(readAttrString(child.attrs, CUE_ID_ATTR)) ?? '';
-            const title = readAttrString(child.attrs, CUE_TITLE_ATTR).trim();
+        if (child.type === MUSIC_START_NODE_NAME) {
+            const number = music.numberByMusicId.get(readAttrString(child.attrs, MUSIC_ID_ATTR)) ?? '';
+            const title = readAttrString(child.attrs, MUSIC_TITLE_ATTR).trim();
 
             pushSegment(segments, ` ${title.length > 0 ? `${number} ${title}` : number} `, {bold: true});
 
             return;
         }
 
-        if (child.type === CUE_OUT_NODE_NAME) {
-            pushSegment(segments, ` ${cues.outLabelByBlockId.get(blockId) ?? 'out'} `, {bold: true});
+        if (child.type === MUSIC_OUT_NODE_NAME) {
+            pushSegment(segments, ` ${music.outLabelByBlockId.get(blockId) ?? 'out'} `, {bold: true});
 
             return;
         }
@@ -621,7 +621,7 @@ export const transcribeExportPlan = (
 ): TranscriptResult => {
     const forcedBreakByBlockId = new Map(plan.pagination.forcedBreaks.map(item => [item.blockId, item]));
     const contentWidthPx = settings.page.widthPx - settings.page.marginLeftPx - settings.page.marginRightPx;
-    const cueLabels = buildCueLabels(plan.doc);
+    const musicLabels = buildMusicLabels(plan.doc);
     const structureMarks = buildStructureMarks(plan.doc);
 
     const prepared: PreparedBlock[] = plan.doc.content.map(node => {
@@ -639,7 +639,7 @@ export const transcribeExportPlan = (
             : block.indentRightPx ?? 0;
         const availableWidthPx = Math.max(charWidthPx, contentWidthPx - indentLeftPx - indentRightPx);
         const maxChars = Math.max(1, Math.floor(availableWidthPx / charWidthPx));
-        const rawSegments = getBlockRawSegments(node, blockId ?? '', cueLabels);
+        const rawSegments = getBlockRawSegments(node, blockId ?? '', musicLabels);
         const segments = normalizeBlockSegments(rawSegments, blockType, block.casing);
 
         return {

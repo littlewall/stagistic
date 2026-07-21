@@ -17,7 +17,7 @@ type SelectorListener<TSelected> = {
 
 const EMPTY_INDEX: EditorIndexSnapshot = {
     blocks: [],
-    cues: [],
+    music: [],
 };
 
 export const EMPTY_STRUCTURE: EditorLiveStructureSnapshot = {
@@ -40,7 +40,7 @@ export const createEmptyEditorLiveSnapshot = (): EditorLiveSnapshot => {
         index: EMPTY_INDEX,
         structure: EMPTY_STRUCTURE,
         characters: EMPTY_CHARACTERS,
-        cues: [],
+        music: [],
         activeBlockId: null,
         activeBlockType: null,
     };
@@ -108,7 +108,7 @@ export const createEditorSnapshotStore = (initialSnapshot?: EditorLiveSnapshot):
             || !Object.is(snapshot.index, nextSnapshot.index)
             || !Object.is(snapshot.structure, nextSnapshot.structure)
             || !Object.is(snapshot.characters, nextSnapshot.characters)
-            || !Object.is(snapshot.cues, nextSnapshot.cues)
+            || !Object.is(snapshot.music, nextSnapshot.music)
             || !Object.is(snapshot.activeBlockId, nextSnapshot.activeBlockId)
             || !Object.is(snapshot.activeBlockType, nextSnapshot.activeBlockType);
 

@@ -58,7 +58,7 @@ full-repository lint failures are not acceptance criteria for this refactor.
 
 ### Task 2: Add characterization tests for current optimistic behavior
 
-- [x] Cover one place assignment, one cue update, one character field update,
+- [x] Cover one place assignment, one music update, one character field update,
   and one editor-settings toggle.
 - [x] Assert when the visual value changes relative to the unresolved repository
   promise.
@@ -280,31 +280,31 @@ resolves and confirmed data after it resolves.
 
 **Proposed commit:** `refactor(places): transact scene place assignments`
 
-## Phase 5 — Cues
+## Phase 5 — Music
 
-### Task 19: Add the cue catalog collection
+### Task 19: Add the music catalog collection
 
-- [x] Add a script-scoped reactive source for cue catalog rows.
-- [x] Replace the hook's initial list effect and confirmed cue array with a live
+- [x] Add a script-scoped reactive source for music catalog rows.
+- [x] Replace the hook's initial list effect and confirmed music array with a live
   query/mapping.
 - [x] Preserve editor request state separately; it is an intent channel, not a
   data cache.
-- [x] Add coverage for unassigned and assigned cue projections.
+- [x] Add coverage for unassigned and assigned music projections.
 
-**Proposed commit:** `refactor(cues): read cue catalog from a live collection`
+**Proposed commit:** `refactor(music): read music catalog from a live collection`
 
-### Task 20: Move cue catalog CRUD to optimistic mutations
+### Task 20: Move music catalog CRUD to optimistic mutations
 
-- [x] Allocate cue IDs before creation.
+- [x] Allocate music IDs before creation.
 - [x] Make create, title/kind update, and delete optimistic.
 - [x] Remove full-list reload reconciliation.
 - [x] Test validation failure, persistence rollback, and two rapid title edits.
 
-**Proposed commit:** `refactor(cues): standardize optimistic cue CRUD`
+**Proposed commit:** `refactor(music): standardize optimistic music CRUD`
 
-### Task 21: Define coordinated cue assignment actions
+### Task 21: Define coordinated music assignment actions
 
-- [x] Give assign and unassign explicit named actions spanning the cue row and
+- [x] Give assign and unassign explicit named actions spanning the music row and
   Tiptap document intent.
 - [x] Define which side executes first and the compensation path for failure.
 - [x] Keep request IDs only as editor command deduplication, not network/cache
@@ -316,15 +316,15 @@ resolves and confirmed data after it resolves.
 Assignment ordering: the Tiptap transaction executes first. A rejected editor
 command publishes no catalog intent. After a successful editor change, the
 document remains authoritative; autosave failure retains the dirty document and
-its visible save error for retry instead of rolling text back. The reactive cue
+its visible save error for retry instead of rolling text back. The reactive music
 projection confirms the resulting assignment and clears the ephemeral intent.
 For title/kind updates, failed catalog persistence sends a compensating editor
 request with the last confirmed metadata.
 
-**Phase gate:** cue list data has one owner; editor placement remains explicitly
+**Phase gate:** music list data has one owner; editor placement remains explicitly
 coordinated.
 
-**Proposed commit:** `refactor(cues): coordinate catalog and document assignment`
+**Proposed commit:** `refactor(music): coordinate catalog and document assignment`
 
 ## Phase 6 — Characters
 
@@ -450,7 +450,7 @@ nested optimistic mirrors remain.
 
 ### Task 32: Make attachment metadata reactive
 
-- [x] Add collections for attachment metadata and cue-role bindings.
+- [x] Add collections for attachment metadata and music-role bindings.
 - [x] Replace component-owned attachment list loading with live queries.
 - [x] Keep blob reads imperative; blobs are not collection rows.
 - [x] Preserve missing-blob UI behavior.
@@ -499,7 +499,7 @@ nested optimistic mirrors remain.
   commit.
 - [x] Preserve `syncToFs()` behavior after the transaction.
 
-Split this task into one commit per domain: scripts, places, cues, characters,
+Split this task into one commit per domain: scripts, places, music, characters,
 settings/title page, and attachments.
 
 **Proposed commit pattern:** `refactor(<domain>): make mutation recording atomic`
@@ -587,7 +587,7 @@ settings/title page, and attachments.
 ### Task 44: Share Attribute Manager display drafts
 
 - [x] Add reusable keyed field drafts with revision-based newest-wins cleanup.
-- [x] Show cue and place name drafts immediately in their list and detail header.
+- [x] Show music and place name drafts immediately in their list and detail header.
 - [x] Hold character color intent through source confirmation so closing the
   picker cannot flash the old color.
 - [x] Retain failed field drafts and let the next blur retry persistence.
@@ -595,12 +595,12 @@ settings/title page, and attachments.
 ### Task 45: Make document-derived sidebars real time
 
 - [x] Hoist one editor snapshot store to the script workspace.
-- [x] Extend the live projection with cues and act/scene membership.
-- [x] Replace the cue sidebar's component transaction listener with a live
+- [x] Extend the live projection with music and act/scene membership.
+- [x] Replace the music sidebar's component transaction listener with a live
   selector.
-- [x] Use live scene titles, cue titles, and linked character display keys in
+- [x] Use live scene titles, music titles, and linked character display keys in
   Attribute Manager and editor sidebars.
-- [x] Cover rapid colors, immediate field display, direct cue edits, settings
+- [x] Cover rapid colors, immediate field display, direct music edits, settings
   timing, and persistence failures with controllable browser tests.
 
 ## Success criteria

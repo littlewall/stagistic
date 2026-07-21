@@ -126,7 +126,7 @@ describe('AttributeManagerListPanel', () => {
                 id: 'c1',
                 number: '1.',
                 title: 'Overture',
-                icon: <span>Cue kind</span>,
+                icon: <span>Music kind</span>,
             },
         ]);
 
@@ -135,7 +135,7 @@ describe('AttributeManagerListPanel', () => {
         expect(Array.from(button.children).map(child => child.textContent)).toEqual([
             '1.',
             'Overture',
-            'Cue kind',
+            'Music kind',
         ]);
         expect(host.contains(button)).toBe(true);
     });

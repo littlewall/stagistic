@@ -1,6 +1,6 @@
 import type {
-    CueAttachmentRole,
-    ScriptCueAttachment,
+    MusicAttachmentRole,
+    ScriptMusicAttachment,
     ScriptRepository,
 } from '@stagistic/db';
 import {useLiveQuery} from '@tanstack/react-db';
@@ -28,9 +28,9 @@ export const useScriptAttachments = (
     const bindingsQuery = useLiveQuery(q => {
         return store ? q.from({bindings: store.bindingsCollection}) : undefined;
     }, [store]);
-    const [uploadingCueIds, setUploadingCueIds] = useState<Set<string>>(new Set());
+    const [uploadingMusicIds, setUploadingMusicIds] = useState<Set<string>>(new Set());
     const [error, setError] = useState<Error | null>(null);
-    const byCueRole = useMemo(() => {
+    const byMusicRole = useMemo(() => {
         const attachments = new Map(
             (attachmentsQuery.data ?? []).map(attachment => [attachment.id, attachment]),
         );
@@ -38,12 +38,12 @@ export const useScriptAttachments = (
         return new Map((bindingsQuery.data ?? []).flatMap(binding => {
             const attachment = attachments.get(binding.attachmentId);
 
-            return attachment ? [[`${binding.cueId}:${binding.role}`, {...attachment, role: binding.role} satisfies ScriptCueAttachment] as const] : [];
+            return attachment ? [[`${binding.musicId}:${binding.role}`, {...attachment, role: binding.role} satisfies ScriptMusicAttachment] as const] : [];
         }));
     }, [attachmentsQuery.data, bindingsQuery.data]);
     const upload = useCallback(async (
-        cueId: string,
-        role: CueAttachmentRole,
+        musicId: string,
+        role: MusicAttachmentRole,
         file: File,
     ) => {
         if (!store) {
@@ -51,10 +51,10 @@ export const useScriptAttachments = (
         }
 
         setError(null);
-        setUploadingCueIds(previous => new Set(previous).add(cueId));
+        setUploadingMusicIds(previous => new Set(previous).add(musicId));
 
         try {
-            await store.upload(cueId, role, {
+            await store.upload(musicId, role, {
                 name: file.name,
                 type: file.type,
                 size: file.size,
@@ -66,23 +66,23 @@ export const useScriptAttachments = (
                 : new Error(String(uploadError)));
             throw uploadError;
         } finally {
-            setUploadingCueIds(previous => {
+            setUploadingMusicIds(previous => {
                 const next = new Set(previous);
 
-                next.delete(cueId);
+                next.delete(musicId);
 
                 return next;
             });
         }
     }, [store]);
     const remove = useCallback(async (
-        cueId: string,
-        role: CueAttachmentRole,
+        musicId: string,
+        role: MusicAttachmentRole,
     ) => {
         setError(null);
 
         try {
-            await store?.remove(cueId, role);
+            await store?.remove(musicId, role);
         } catch (removeError) {
             setError(removeError instanceof Error
                 ? removeError
@@ -95,8 +95,8 @@ export const useScriptAttachments = (
     }, [repository]);
 
     return {
-        byCueRole,
-        uploadingCueIds,
+        byMusicRole,
+        uploadingMusicIds,
         isLoading: Boolean(store) && (
             !attachmentsStatus.isReady
             || !bindingsStatus.isReady

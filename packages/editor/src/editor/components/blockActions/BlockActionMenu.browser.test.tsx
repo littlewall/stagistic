@@ -152,12 +152,12 @@ const findMenuItem = (label: string) => {
         }) ?? null;
 };
 
-const openCuesSubmenu = async () => {
-    const cuesItem = await poll(() => findMenuItem('Cues'), 'Cues item');
+const openMusicSubmenu = async () => {
+    const musicItem = await poll(() => findMenuItem('Music'), 'Music item');
 
-    await page.elementLocator(cuesItem).hover();
+    await page.elementLocator(musicItem).hover();
 
-    return cuesItem;
+    return musicItem;
 };
 
 afterEach(() => {
@@ -167,129 +167,129 @@ afterEach(() => {
 });
 
 describe('block action menu', () => {
-    it('opens Cues in a submenu and adds an editable cue', async () => {
+    it('opens Music in a submenu and adds an editable music', async () => {
         renderEditor();
 
         await getEditor();
         await openActionMenu('sd-1');
-        await openCuesSubmenu();
+        await openMusicSubmenu();
 
-        const addCue = await poll(() => findMenuItem('Add cue'), 'Add cue item');
+        const addMusic = await poll(() => findMenuItem('Add music'), 'Add music item');
 
-        await page.elementLocator(addCue).click();
+        await page.elementLocator(addMusic).click();
 
         const input = await poll(
             () => document.querySelector<HTMLElement>(
-                '[data-id="sd-1"] [data-cue-title-input="start"]',
+                '[data-id="sd-1"] [data-music-title-input="start"]',
             ),
-            'new cue title input',
+            'new music title input',
         );
 
         expect(document.activeElement).toBe(input);
-        expect(document.querySelector('[data-cue-number]')?.textContent).toBe('0)');
+        expect(document.querySelector('[data-music-number]')?.textContent).toBe('0)');
         expect(document.querySelector('[data-block-action-trigger="true"]')).toBeNull();
     });
 
-    it('suggests and assigns an unassigned cue from a new cue pill', async () => {
-        const onCueAssigned = vi.fn();
+    it('suggests and assigns an unassigned music from a new music pill', async () => {
+        const onMusicAssigned = vi.fn();
 
         renderEditor(createDocument(), {
             document: {
-                persistentCues: [
+                persistentMusic: [
                     {
-                        id: 'cue-overture',
+                        id: 'music-overture',
                         title: 'Overture',
                         kind: 'instrumental',
                         assignmentLabel: null,
                     },
                     {
-                        id: 'cue-finale',
+                        id: 'music-finale',
                         title: 'Finale',
                         kind: 'song',
                         assignmentLabel: null,
                     },
                     ...Array.from({length: 9}, (_, index) => ({
-                        id: `cue-${index + 1}`,
-                        title: `Cue ${index + 1}`,
+                        id: `music-${index + 1}`,
+                        title: `Music ${index + 1}`,
                         kind: 'song' as const,
                         assignmentLabel: null,
                     })),
                 ],
             },
-            callbacks: {onCueAssigned},
+            callbacks: {onMusicAssigned},
         });
 
         const editor = await getEditor();
 
         await openActionMenu('sd-1');
-        await openCuesSubmenu();
+        await openMusicSubmenu();
 
-        const addCue = await poll(() => findMenuItem('Add cue'), 'Add cue item');
+        const addMusic = await poll(() => findMenuItem('Add music'), 'Add music item');
 
-        await page.elementLocator(addCue).click();
+        await page.elementLocator(addMusic).click();
 
         const input = await poll(
-            () => document.querySelector<HTMLElement>('[data-cue-draft="true"]'),
-            'draft cue title input',
+            () => document.querySelector<HTMLElement>('[data-music-draft="true"]'),
+            'draft music title input',
         );
         const listbox = await poll(
-            () => document.querySelector<HTMLElement>('[role="listbox"][aria-label="Cue suggestions"]'),
-            'cue suggestions',
+            () => document.querySelector<HTMLElement>('[role="listbox"][aria-label="Music suggestions"]'),
+            'music suggestions',
         );
 
         expect(listbox.textContent).toContain('Overture');
         expect(listbox.textContent).toContain('Finale');
-        expect(listbox.textContent).toContain('Cue 9');
+        expect(listbox.textContent).toContain('Music 9');
 
         await userEvent.type(input, 'Over');
         await poll(
             () => listbox.textContent?.includes('Overture') && !listbox.textContent.includes('Finale')
                 ? true
                 : null,
-            'filtered cue suggestions',
+            'filtered music suggestions',
         );
         await userEvent.keyboard('{ArrowDown}{Enter}');
 
-        const cueStart = editor.getJSON().content?.[0]?.content
-            ?.find(node => node.type === 'cueStart') as ScriptNode | undefined;
+        const musicStart = editor.getJSON().content?.[0]?.content
+            ?.find(node => node.type === 'musicStart') as ScriptNode | undefined;
 
-        expect(cueStart?.attrs).toMatchObject({
-            cueId: 'cue-overture',
+        expect(musicStart?.attrs).toMatchObject({
+            musicId: 'music-overture',
             title: 'Overture',
             kind: 'instrumental',
             draft: false,
         });
-        expect(onCueAssigned).toHaveBeenCalledWith('cue-overture');
-        expect(document.querySelector('[data-cue-draft="true"]')).toBeNull();
+        expect(onMusicAssigned).toHaveBeenCalledWith('music-overture');
+        expect(document.querySelector('[data-music-draft="true"]')).toBeNull();
     });
 
-    it('uses range, start, and emphasized endpoint cue icons', async () => {
+    it('uses range, start, and emphasized endpoint music icons', async () => {
         renderEditor(createDocument(2));
 
         const editor = await getEditor();
 
-        editor.commands.insertCueStart('sd-1', 'Night');
+        editor.commands.insertMusicStart('sd-1', 'Night');
         focusBlock(editor, 'sd-2');
         await openActionMenu('sd-2');
 
-        const cues = await openCuesSubmenu();
-        const addCue = await poll(() => findMenuItem('Add cue'), 'Add cue item');
+        const music = await openMusicSubmenu();
+        const addMusic = await poll(() => findMenuItem('Add music'), 'Add music item');
         const addOut = await poll(() => findMenuItem('Add out 0) Night'), 'Add out item');
 
-        expect(cues.querySelector('[data-cue-icon="range"]')).toBeTruthy();
-        expect(addCue.querySelector('[data-cue-point="start"][data-cue-point-style="hollow"]')).toBeTruthy();
-        expect(addOut.querySelector('[data-cue-point="end"][data-cue-point-style="hollow"]')).toBeTruthy();
+        expect(music.querySelector('[data-music-icon="range"]')).toBeTruthy();
+        expect(addMusic.querySelector('[data-music-point="start"][data-music-point-style="hollow"]')).toBeTruthy();
+        expect(addOut.querySelector('[data-music-point="end"][data-music-point-style="hollow"]')).toBeTruthy();
     });
 
-    it('shows Add out with the live open-cue title and inserts the out', async () => {
+    it('shows Add out with the live open-music title and inserts the out', async () => {
         renderEditor(createDocument(2));
 
         const editor = await getEditor();
 
-        editor.commands.insertCueStart('sd-1', 'Night');
+        editor.commands.insertMusicStart('sd-1', 'Night');
         focusBlock(editor, 'sd-2');
         await openActionMenu('sd-2');
-        await openCuesSubmenu();
+        await openMusicSubmenu();
 
         const addOut = await poll(
             () => findMenuItem('Add out 0) Night'),
@@ -298,18 +298,18 @@ describe('block action menu', () => {
 
         await page.elementLocator(addOut).click();
 
-        expect(document.querySelector('[data-id="sd-2"] [data-cue-pill="out"]')).toBeTruthy();
+        expect(document.querySelector('[data-id="sd-2"] [data-music-pill="out"]')).toBeTruthy();
     });
 
-    it('uses the cue number when an open cue has no title', async () => {
+    it('uses the music number when an open music has no title', async () => {
         renderEditor(createDocument(2));
 
         const editor = await getEditor();
 
-        editor.commands.insertCueStart('sd-1', '');
+        editor.commands.insertMusicStart('sd-1', '');
         focusBlock(editor, 'sd-2');
         await openActionMenu('sd-2');
-        await openCuesSubmenu();
+        await openMusicSubmenu();
 
         expect(await poll(
             () => findMenuItem('Add out 0)'),
@@ -317,17 +317,17 @@ describe('block action menu', () => {
         )).toBeTruthy();
     });
 
-    it('does not offer Add out for a hit cue', async () => {
+    it('does not offer Add out for a hit music', async () => {
         renderEditor(createDocument(2));
 
         const editor = await getEditor();
 
-        editor.commands.insertCueStart('sd-1', 'Hit', 'hit');
+        editor.commands.insertMusicStart('sd-1', 'Hit', 'hit');
         focusBlock(editor, 'sd-2');
         await openActionMenu('sd-2');
-        await openCuesSubmenu();
+        await openMusicSubmenu();
 
-        expect(findMenuItem('Add cue')).toBeTruthy();
+        expect(findMenuItem('Add music')).toBeTruthy();
         expect(findMenuItem('Add out')).toBeNull();
     });
 
@@ -349,18 +349,18 @@ describe('block action menu', () => {
             cancelable: true,
         }));
 
-        const cuesItem = await poll(() => findMenuItem('Cues'), 'Cues item');
+        const musicItem = await poll(() => findMenuItem('Music'), 'Music item');
 
         await poll(
-            () => document.activeElement === cuesItem ? cuesItem : null,
-            'Cues item focus',
+            () => document.activeElement === musicItem ? musicItem : null,
+            'Music item focus',
         );
 
         await userEvent.keyboard('{ArrowRight}');
 
-        const addCue = await poll(() => findMenuItem('Add cue'), 'Add cue item');
+        const addMusic = await poll(() => findMenuItem('Add music'), 'Add music item');
 
-        expect(document.activeElement).toBe(addCue);
+        expect(document.activeElement).toBe(addMusic);
 
         await userEvent.keyboard('{Escape}');
         await poll(
@@ -376,10 +376,10 @@ describe('block action menu', () => {
 
         await getEditor();
         await openActionMenu('sd-1');
-        await openCuesSubmenu();
+        await openMusicSubmenu();
         await poll(
-            () => document.querySelector('[data-block-submenu-panel="cues"]'),
-            'Cues submenu',
+            () => document.querySelector('[data-block-submenu-panel="music"]'),
+            'Music submenu',
         );
 
         const typeTrigger = document.querySelector<HTMLElement>('[data-block-actions-trigger="true"]');
@@ -390,7 +390,7 @@ describe('block action menu', () => {
 
         await page.elementLocator(typeTrigger).hover();
 
-        expect(document.querySelector('[data-block-submenu-panel="cues"]')).toBeNull();
+        expect(document.querySelector('[data-block-submenu-panel="music"]')).toBeNull();
     });
 
     it('extends the menu-item hit target to the panel edge while keeping its surface inset', async () => {
@@ -399,16 +399,16 @@ describe('block action menu', () => {
         await getEditor();
 
         const menu = await openActionMenu('sd-1');
-        const cuesItem = await poll(() => findMenuItem('Cues'), 'Cues item');
+        const musicItem = await poll(() => findMenuItem('Music'), 'Music item');
         const panel = menu.querySelector<HTMLElement>('[data-block-menu-panel="primary"]');
-        const surface = cuesItem.querySelector<HTMLElement>('[data-menu-item-surface]');
+        const surface = musicItem.querySelector<HTMLElement>('[data-menu-item-surface]');
 
         if (!panel || !surface) {
             throw new Error('Menu panel or item surface not found');
         }
 
         const panelRect = panel.getBoundingClientRect();
-        const itemRect = cuesItem.getBoundingClientRect();
+        const itemRect = musicItem.getBoundingClientRect();
         const surfaceRect = surface.getBoundingClientRect();
 
         expect(itemRect.left).toBeCloseTo(panelRect.left, 1);

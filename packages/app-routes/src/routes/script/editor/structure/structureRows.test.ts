@@ -21,7 +21,7 @@ describe('scene numbering', () => {
                     blockId: 's2', blockType: 'scene', textContent: 'Dusk', orderNo: 3, actBlockId: 'a2', sceneBlockId: 's2', characterRefs: null,
                 },
             ],
-            cues: [],
+            music: [],
         });
 
         const scenes = state.groups.flatMap(group => group.scenes);

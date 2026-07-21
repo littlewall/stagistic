@@ -2,8 +2,8 @@ import {
     useRecentScripts,
     useScriptActions,
     useScriptCharacterCatalog,
-    useScriptCues,
     useScriptEditorSettingsRecord,
+    useScriptMusic,
     useScriptRepository,
     useScriptSummary,
     useScriptTitlePageRecord,
@@ -54,15 +54,15 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
     const editorSettingsRecord = useScriptEditorSettingsRecord(currentScriptId, scriptRepository);
     const titlePageRecord = useScriptTitlePageRecord(currentScriptId, scriptRepository);
     const characterCatalog = useScriptCharacterCatalog(currentScriptId, scriptRepository);
-    const cueCatalog = useScriptCues(currentScriptId, scriptRepository);
+    const musicCatalog = useScriptMusic(currentScriptId, scriptRepository);
     const isContentLoading = Boolean(currentScriptId) && initialValue === undefined;
     const isEditorMetadataLoading = Boolean(currentScriptId) && (
         editorSettingsRecord.isLoading
         || titlePageRecord.isLoading
     );
     const editorMetadataError = editorSettingsRecord.error ?? titlePageRecord.error;
-    const isSidebarDataLoading = characterCatalog.isLoading || cueCatalog.isLoading;
-    const sidebarDataError = characterCatalog.error ?? cueCatalog.error;
+    const isSidebarDataLoading = characterCatalog.isLoading || musicCatalog.isLoading;
+    const sidebarDataError = characterCatalog.error ?? musicCatalog.error;
 
     const seedDefaultScript = useSeedDefaultScript(
         scriptActions,
@@ -153,7 +153,7 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         currentScript,
         currentScriptId,
         characterCatalog,
-        cueCatalog,
+        musicCatalog,
         recentScripts,
         initialValue,
         initialIndexSnapshot,

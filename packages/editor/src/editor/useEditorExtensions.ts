@@ -15,10 +15,10 @@ import {
 } from 'react';
 
 import type {
-    EditorCueCreateRequest,
-    EditorCueRemoveRequest,
+    EditorMusicCreateRequest,
+    EditorMusicRemoveRequest,
     PersistentCharacterRef,
-    PersistentCueRef,
+    PersistentMusicRef,
 } from './contracts';
 import {
     getBlockCasing,
@@ -30,19 +30,19 @@ import {
     CharacterRefSyncExtension,
     CharacterTagInputExtension,
     createPaginationExtension,
-    CueCommandsExtension,
-    CueInputExtension,
-    CueNumberingExtension,
     EditorRuntimeExtension,
     EmptyEnterChooserExtension,
+    MusicCommandsExtension,
+    MusicInputExtension,
+    MusicNumberingExtension,
     PlaceholderExtension,
     ScriptBehaviorExtension,
 } from './tiptap/extensions';
 import {DocumentWithSettings} from './tiptap/extensions/DocumentExtension';
 import {CharacterTagMark} from './tiptap/marks';
 import {
-    CueOutNode,
-    CueStartNode,
+    MusicOutNode,
+    MusicStartNode,
     SCRIPT_BLOCK_NODE_NAMES,
     ScriptBlockNodes,
 } from './tiptap/nodes';
@@ -54,12 +54,12 @@ type UseEditorExtensionsArgs = {
     colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
     rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>},
     persistentCharactersRef?: {current: readonly PersistentCharacterRef[]},
-    persistentCuesRef?: {current: readonly PersistentCueRef[]},
-    onRequestCreateCue?: (request: EditorCueCreateRequest) => void,
-    onRequestRemoveCue?: (request: EditorCueRemoveRequest) => void,
-    onOpenCueManager?: (cueId: string) => void,
-    onCueAssigned?: (cueId: string) => void,
-    onCueUnassigned?: (cueId: string) => void,
+    persistentMusicRef?: {current: readonly PersistentMusicRef[]},
+    onRequestCreateMusic?: (request: EditorMusicCreateRequest) => void,
+    onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
+    onOpenMusicManager?: (musicId: string) => void,
+    onMusicAssigned?: (musicId: string) => void,
+    onMusicUnassigned?: (musicId: string) => void,
     enableBlockUiEvents?: boolean,
 };
 
@@ -69,12 +69,12 @@ export const useEditorExtensions = ({
     colorByCharacterIdRef,
     rememberedColorByKeyRef,
     persistentCharactersRef,
-    persistentCuesRef,
-    onRequestCreateCue,
-    onRequestRemoveCue,
-    onOpenCueManager,
-    onCueAssigned,
-    onCueUnassigned,
+    persistentMusicRef,
+    onRequestCreateMusic,
+    onRequestRemoveMusic,
+    onOpenMusicManager,
+    onMusicAssigned,
+    onMusicUnassigned,
     enableBlockUiEvents,
 }: UseEditorExtensionsArgs): Extensions => {
     const paginationExtensionRef = useRef<ReturnType<typeof createPaginationExtension> | null>(
@@ -152,41 +152,41 @@ export const useEditorExtensions = ({
         }),
         [persistentCharactersRef],
     );
-    const cueInputExtension = useMemo(
-        () => CueInputExtension.configure({
-            persistentCuesRef,
-            onRequestCreateCue,
-            onCueAssigned,
+    const musicInputExtension = useMemo(
+        () => MusicInputExtension.configure({
+            persistentMusicRef,
+            onRequestCreateMusic,
+            onMusicAssigned,
         }),
         [
-            onCueAssigned,
-            onRequestCreateCue,
-            persistentCuesRef,
+            onMusicAssigned,
+            onRequestCreateMusic,
+            persistentMusicRef,
         ],
     );
-    const cueCommandsExtension = useMemo(
-        () => CueCommandsExtension.configure({
-            onCueUnassigned,
+    const musicCommandsExtension = useMemo(
+        () => MusicCommandsExtension.configure({
+            onMusicUnassigned,
         }),
-        [onCueUnassigned],
+        [onMusicUnassigned],
     );
-    const cueStartNode = useMemo(
-        () => CueStartNode.configure({
-            onCueAssigned,
-            onOpenCueManager,
-            onRequestCreateCue,
-            onRequestRemoveCue,
+    const musicStartNode = useMemo(
+        () => MusicStartNode.configure({
+            onMusicAssigned,
+            onOpenMusicManager,
+            onRequestCreateMusic,
+            onRequestRemoveMusic,
         }),
         [
-            onCueAssigned,
-            onOpenCueManager,
-            onRequestCreateCue,
-            onRequestRemoveCue,
+            onMusicAssigned,
+            onOpenMusicManager,
+            onRequestCreateMusic,
+            onRequestRemoveMusic,
         ],
     );
-    const cueOutNode = useMemo(
-        () => CueOutNode.configure({onOpenCueManager}),
-        [onOpenCueManager],
+    const musicOutNode = useMemo(
+        () => MusicOutNode.configure({onOpenMusicManager}),
+        [onOpenMusicManager],
     );
     const uniqueIdExtension = useMemo(() => {
         const uniqueIdTypes = [...SCRIPT_BLOCK_NODE_NAMES];
@@ -210,11 +210,11 @@ export const useEditorExtensions = ({
             characterTagMark,
             characterTagInputExtension,
             ...ScriptBlockNodes,
-            cueStartNode,
-            cueOutNode,
-            cueCommandsExtension,
-            cueInputExtension,
-            CueNumberingExtension,
+            musicStartNode,
+            musicOutNode,
+            musicCommandsExtension,
+            musicInputExtension,
+            MusicNumberingExtension,
             PlaceholderExtension,
             emptyEnterChooserExtension,
             scriptBehaviorExtension,
@@ -232,10 +232,10 @@ export const useEditorExtensions = ({
         characterRefSyncExtension,
         characterTagMark,
         characterTagInputExtension,
-        cueCommandsExtension,
-        cueInputExtension,
-        cueOutNode,
-        cueStartNode,
+        musicCommandsExtension,
+        musicInputExtension,
+        musicOutNode,
+        musicStartNode,
         emptyEnterChooserExtension,
         editorRuntimeExtension,
         enableBlockUiEvents,

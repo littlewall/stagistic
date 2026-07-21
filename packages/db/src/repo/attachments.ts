@@ -20,15 +20,15 @@ export const createAttachmentHandlers = ({
     syncDb,
     fileStorage,
 }: CreateAttachmentHandlersArgs): ScriptAttachmentsRepository => {
-    const getByCueRole: ScriptAttachmentsRepository['getByCueRole'] = async (cueId, role) => {
+    const getByMusicRole: ScriptAttachmentsRepository['getByMusicRole'] = async (musicId, role) => {
         const db = await getDb();
-        const attachment = await dbQueries.getAttachmentByCueRole(db, cueId, role);
+        const attachment = await dbQueries.getAttachmentByMusicRole(db, musicId, role);
 
         return attachment ? {...attachment, role} : null;
     };
 
-    const setForCue: ScriptAttachmentsRepository['setForCue'] = async (scriptId, cueId, role, file) => {
-        if (!cueId) {
+    const setForMusic: ScriptAttachmentsRepository['setForMusic'] = async (scriptId, musicId, role, file) => {
+        if (!musicId) {
             return null;
         }
 
@@ -42,7 +42,7 @@ export const createAttachmentHandlers = ({
 
         try {
             previousStorageKey = await db.transaction(async tx => {
-                const previous = await dbQueries.getAttachmentByCueRole(tx, cueId, role);
+                const previous = await dbQueries.getAttachmentByMusicRole(tx, musicId, role);
 
                 await dbQueries.insertAttachment(tx, {
                     id: attachmentId,
@@ -54,9 +54,9 @@ export const createAttachmentHandlers = ({
                     createdAt: now,
                     updatedAt: now,
                 });
-                await dbQueries.deleteCueAttachmentLinkByRole(tx, {cueId, role});
-                await dbQueries.insertCueAttachmentLink(tx, {
-                    cueId,
+                await dbQueries.deleteMusicAttachmentLinkByRole(tx, {musicId, role});
+                await dbQueries.insertMusicAttachmentLink(tx, {
+                    musicId,
                     attachmentId,
                     role,
                     sortOrder: now,
@@ -77,12 +77,12 @@ export const createAttachmentHandlers = ({
                 await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
                 await recordOutbox({
                     scriptId,
-                    entityKey: `cue:${cueId}:attachment:${role}`,
-                    opType: 'cueAttachment.set',
+                    entityKey: `music:${musicId}:attachment:${role}`,
+                    opType: 'musicAttachment.set',
                     occurredAt: now,
                     payloadJson: JSON.stringify({
                         scriptId,
-                        cueId,
+                        musicId,
                         role,
                         attachmentId,
                         replacedAttachmentId: previous?.id ?? null,
@@ -114,21 +114,21 @@ export const createAttachmentHandlers = ({
         return attachment ? {...attachment, role} : null;
     };
 
-    const removeFromCue: ScriptAttachmentsRepository['removeFromCue'] = async (scriptId, cueId, role) => {
-        if (!cueId) {
+    const removeFromMusic: ScriptAttachmentsRepository['removeFromMusic'] = async (scriptId, musicId, role) => {
+        if (!musicId) {
             return;
         }
 
         const db = await getDb();
         const now = Date.now();
         const removal = await db.transaction(async tx => {
-            const attachment = await dbQueries.getAttachmentByCueRole(tx, cueId, role);
+            const attachment = await dbQueries.getAttachmentByMusicRole(tx, musicId, role);
 
             if (!attachment) {
                 return null;
             }
 
-            await dbQueries.deleteCueAttachmentLinkByRole(tx, {cueId, role});
+            await dbQueries.deleteMusicAttachmentLinkByRole(tx, {musicId, role});
 
             const remaining = await dbQueries.countAttachmentLinks(tx, attachment.id);
 
@@ -139,12 +139,12 @@ export const createAttachmentHandlers = ({
             await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
             await recordOutbox({
                 scriptId,
-                entityKey: `cue:${cueId}:attachment:${role}`,
-                opType: 'cueAttachment.remove',
+                entityKey: `music:${musicId}:attachment:${role}`,
+                opType: 'musicAttachment.remove',
                 occurredAt: now,
                 payloadJson: JSON.stringify({
                     scriptId,
-                    cueId,
+                    musicId,
                     role,
                     attachmentId: attachment.id,
                     updatedAt: now,
@@ -174,6 +174,6 @@ export const createAttachmentHandlers = ({
     };
 
     return {
-        getByCueRole, setForCue, removeFromCue, getBlob,
+        getByMusicRole, setForMusic, removeFromMusic, getBlob,
     };
 };

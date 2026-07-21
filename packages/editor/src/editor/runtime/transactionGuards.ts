@@ -1,7 +1,7 @@
 import {
     CHARACTER_TAG_MARK_NAME,
-    CUE_OUT_NODE_NAME,
-    CUE_START_NODE_NAME,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {
@@ -215,7 +215,7 @@ export const transactionTouchesStructureBlocks = (
     });
 };
 
-const rangeHasCueNode = (
+const rangeHasMusicNode = (
     doc: ProseMirrorNode,
     from: number,
     to: number,
@@ -229,7 +229,7 @@ const rangeHasCueNode = (
     let found = false;
 
     doc.nodesBetween(safeRange.from, safeRange.to, node => {
-        if (node.type.name === CUE_START_NODE_NAME || node.type.name === CUE_OUT_NODE_NAME) {
+        if (node.type.name === MUSIC_START_NODE_NAME || node.type.name === MUSIC_OUT_NODE_NAME) {
             found = true;
         }
 
@@ -239,7 +239,7 @@ const rangeHasCueNode = (
     return found;
 };
 
-export const transactionTouchesCues = (
+export const transactionTouchesMusic = (
     transaction: Transaction,
     oldDoc: ProseMirrorNode,
     newDoc: ProseMirrorNode,
@@ -249,8 +249,8 @@ export const transactionTouchesCues = (
     }
 
     return collectChangedRanges(transaction).some(range => {
-        return rangeHasCueNode(oldDoc, range.oldFrom, range.oldTo)
-            || rangeHasCueNode(newDoc, range.newFrom, range.newTo);
+        return rangeHasMusicNode(oldDoc, range.oldFrom, range.oldTo)
+            || rangeHasMusicNode(newDoc, range.newFrom, range.newTo);
     });
 };
 

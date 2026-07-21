@@ -8,7 +8,7 @@ import {
 } from '../fileStorage';
 import {dbSchema} from '../schema';
 import {createTestDb, seedScript} from '../testing/createTestDb';
-import {CUE_ATTACHMENT_ROLES} from '../types';
+import {MUSIC_ATTACHMENT_ROLES} from '../types';
 import {createAttachmentHandlers} from './attachments';
 
 const upload = (name: string) => ({
@@ -53,16 +53,16 @@ class TrackingFileStorage implements FileStorage {
 const setup = async (fileStorage: FileStorage = new InMemoryFileStorage()) => {
     const {db} = await createTestDb();
     const scriptId = 'script-1';
-    const cueId = 'cue-1';
+    const musicId = 'music-1';
 
     await seedScript(db, scriptId);
-    await db.insert(dbSchema.scriptCues).values({
-        id: cueId,
+    await db.insert(dbSchema.scriptMusic).values({
+        id: musicId,
         scriptId,
         sceneNumber: 0,
         indexInScene: 0,
         mode: 'open',
-        title: 'Cue 1',
+        title: 'Music 1',
         kind: 'song',
         startBlockId: null,
         endBlockId: null,
@@ -78,48 +78,48 @@ const setup = async (fileStorage: FileStorage = new InMemoryFileStorage()) => {
     });
 
     return {
-        db, scriptId, cueId, handlers, fileStorage,
+        db, scriptId, musicId, handlers, fileStorage,
     };
 };
 
 describe('createAttachmentHandlers', () => {
-    it('sets and gets a cue attachment by role', async () => {
+    it('sets and gets a music attachment by role', async () => {
         const {
-            scriptId, cueId, handlers,
+            scriptId, musicId, handlers,
         } = await setup();
 
-        const created = await handlers.setForCue(
+        const created = await handlers.setForMusic(
             scriptId,
-            cueId,
-            CUE_ATTACHMENT_ROLES.integratedScore,
+            musicId,
+            MUSIC_ATTACHMENT_ROLES.integratedScore,
             upload('score.pdf'),
         );
-        const stored = await handlers.getByCueRole(cueId, CUE_ATTACHMENT_ROLES.integratedScore);
+        const stored = await handlers.getByMusicRole(musicId, MUSIC_ATTACHMENT_ROLES.integratedScore);
 
         expect(created?.filename).toBe('score.pdf');
-        expect(created?.role).toBe(CUE_ATTACHMENT_ROLES.integratedScore);
+        expect(created?.role).toBe(MUSIC_ATTACHMENT_ROLES.integratedScore);
         expect(stored?.id).toBe(created?.id);
         expect(await handlers.getBlob(created!.storageKey)).not.toBeNull();
     });
 
-    it('replaces the existing attachment in the same cue role', async () => {
+    it('replaces the existing attachment in the same music role', async () => {
         const {
-            db, scriptId, cueId, handlers,
+            db, scriptId, musicId, handlers,
         } = await setup();
-        const first = await handlers.setForCue(
+        const first = await handlers.setForMusic(
             scriptId,
-            cueId,
-            CUE_ATTACHMENT_ROLES.integratedScore,
+            musicId,
+            MUSIC_ATTACHMENT_ROLES.integratedScore,
             upload('first.pdf'),
         );
-        const second = await handlers.setForCue(
+        const second = await handlers.setForMusic(
             scriptId,
-            cueId,
-            CUE_ATTACHMENT_ROLES.integratedScore,
+            musicId,
+            MUSIC_ATTACHMENT_ROLES.integratedScore,
             upload('second.pdf'),
         );
-        const stored = await handlers.getByCueRole(cueId, CUE_ATTACHMENT_ROLES.integratedScore);
-        const links = await db.select().from(dbSchema.scriptCueAttachments);
+        const stored = await handlers.getByMusicRole(musicId, MUSIC_ATTACHMENT_ROLES.integratedScore);
+        const links = await db.select().from(dbSchema.scriptMusicAttachments);
 
         expect(stored?.id).toBe(second?.id);
         expect(links).toHaveLength(1);
@@ -129,18 +129,18 @@ describe('createAttachmentHandlers', () => {
 
     it('removes the link and GCs the orphaned attachment + blob', async () => {
         const {
-            scriptId, cueId, handlers,
+            scriptId, musicId, handlers,
         } = await setup();
-        const created = await handlers.setForCue(
+        const created = await handlers.setForMusic(
             scriptId,
-            cueId,
-            CUE_ATTACHMENT_ROLES.integratedScore,
+            musicId,
+            MUSIC_ATTACHMENT_ROLES.integratedScore,
             upload('a.pdf'),
         );
 
-        await handlers.removeFromCue(scriptId, cueId, CUE_ATTACHMENT_ROLES.integratedScore);
+        await handlers.removeFromMusic(scriptId, musicId, MUSIC_ATTACHMENT_ROLES.integratedScore);
 
-        expect(await handlers.getByCueRole(cueId, CUE_ATTACHMENT_ROLES.integratedScore)).toBeNull();
+        expect(await handlers.getByMusicRole(musicId, MUSIC_ATTACHMENT_ROLES.integratedScore)).toBeNull();
         expect(await handlers.getBlob(created!.storageKey)).toBeNull();
     });
 
@@ -148,10 +148,10 @@ describe('createAttachmentHandlers', () => {
         const fileStorage = new TrackingFileStorage();
         const {scriptId, handlers} = await setup(fileStorage);
 
-        await expect(handlers.setForCue(
+        await expect(handlers.setForMusic(
             scriptId,
-            'missing-cue',
-            CUE_ATTACHMENT_ROLES.integratedScore,
+            'missing-music',
+            MUSIC_ATTACHMENT_ROLES.integratedScore,
             upload('orphan.pdf'),
         )).rejects.toThrow();
 
@@ -163,21 +163,21 @@ describe('createAttachmentHandlers', () => {
         const fileStorage = new TrackingFileStorage();
         const {
             scriptId,
-            cueId,
+            musicId,
             handlers,
         } = await setup(fileStorage);
-        const created = await handlers.setForCue(
+        const created = await handlers.setForMusic(
             scriptId,
-            cueId,
-            CUE_ATTACHMENT_ROLES.integratedScore,
+            musicId,
+            MUSIC_ATTACHMENT_ROLES.integratedScore,
             upload('score.pdf'),
         );
         const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
 
         fileStorage.failDelete = true;
-        await handlers.removeFromCue(scriptId, cueId, CUE_ATTACHMENT_ROLES.integratedScore);
+        await handlers.removeFromMusic(scriptId, musicId, MUSIC_ATTACHMENT_ROLES.integratedScore);
 
-        expect(await handlers.getByCueRole(cueId, CUE_ATTACHMENT_ROLES.integratedScore)).toBeNull();
+        expect(await handlers.getByMusicRole(musicId, MUSIC_ATTACHMENT_ROLES.integratedScore)).toBeNull();
         expect(await handlers.getBlob(created!.storageKey)).not.toBeNull();
         expect(consoleError).toHaveBeenCalledWith(
             '[attachments] Failed to clean up a removed blob.',
@@ -190,19 +190,19 @@ describe('createAttachmentHandlers', () => {
         const fileStorage = new TrackingFileStorage();
         const {
             scriptId,
-            cueId,
+            musicId,
             handlers,
         } = await setup(fileStorage);
-        const created = await handlers.setForCue(
+        const created = await handlers.setForMusic(
             scriptId,
-            cueId,
-            CUE_ATTACHMENT_ROLES.integratedScore,
+            musicId,
+            MUSIC_ATTACHMENT_ROLES.integratedScore,
             upload('missing.pdf'),
         );
 
         await fileStorage.delete(created!.storageKey);
 
-        expect(await handlers.getByCueRole(cueId, CUE_ATTACHMENT_ROLES.integratedScore))
+        expect(await handlers.getByMusicRole(musicId, MUSIC_ATTACHMENT_ROLES.integratedScore))
             .toMatchObject({filename: 'missing.pdf'});
         expect(await handlers.getBlob(created!.storageKey)).toBeNull();
     });

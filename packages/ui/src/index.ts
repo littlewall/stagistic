@@ -20,13 +20,6 @@ export {
     type AttributeManagerCharactersPanelProps,
 } from './dialogs/AttributeManagerCharactersPanel';
 export {
-    AttributeManagerCueDetail,
-    type AttributeManagerCueDetailProps,
-    type CueAttachmentSlotView,
-    type CueAttachmentView,
-    type CueKind,
-} from './dialogs/AttributeManagerCueDetail';
-export {
     type AttributeManagerDetailTab,
     AttributeManagerDetailTabs,
 } from './dialogs/AttributeManagerDetailTabs';
@@ -40,6 +33,13 @@ export {
     type AttributeManagerModalProps,
     type AttributeManagerTab,
 } from './dialogs/AttributeManagerModal';
+export {
+    AttributeManagerMusicDetail,
+    type AttributeManagerMusicDetailProps,
+    type MusicAttachmentSlotView,
+    type MusicAttachmentView,
+    type MusicKind,
+} from './dialogs/AttributeManagerMusicDetail';
 export {
     type AttributeManagerPlace,
     AttributeManagerPlacesPanel,

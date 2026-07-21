@@ -170,7 +170,7 @@ export const useEditorLifecycleSync = ({
         });
         const patch: Partial<EditorLiveSnapshot> = {
             revision: meta.revision,
-            cues: snapshot.cues,
+            music: snapshot.music,
             activeBlockId: liveStore.getSnapshot().activeBlockId,
             activeBlockType: liveStore.getSnapshot().activeBlockType,
         };
@@ -234,7 +234,7 @@ export const useEditorLifecycleSync = ({
             activeBlockType: runtime.activeBlockType,
             structure: nextStructure,
             characters: nextCharacters,
-            cues: runtime.cues,
+            music: runtime.music,
             ...snapshot ? {index: snapshot} : {},
         });
 

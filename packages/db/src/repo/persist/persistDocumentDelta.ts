@@ -12,9 +12,9 @@ import {
     bulkDeleteScriptBlocks,
     bulkDeleteScriptScenes,
     bulkReplaceScriptBlockCharacterRefs,
-    bulkUnassignScriptCues,
+    bulkUnassignScriptMusic,
     bulkUpsertScriptActs,
-    bulkUpsertScriptCues,
+    bulkUpsertScriptMusic,
     bulkUpsertScriptScenes,
     type DbClient,
     generateBlockOrderKeys,
@@ -22,7 +22,7 @@ import {
     writeFinalBlockOrders,
 } from '../../queries';
 import {
-    scriptActs, scriptBlocks, scriptCues, scriptScenes,
+    scriptActs, scriptBlocks, scriptMusic, scriptScenes,
 } from '../../schema';
 import {diffExtractedBlocks} from './diffExtractedBlocks';
 import {computeOrderKeyAssignments} from './minimalOrderKeys';
@@ -75,13 +75,13 @@ const toCharacterRefRows = (block: ExtractedBlockRow, knownCharacterIds: Set<str
 export const createDocumentPersister = (scriptId: string) => {
     let lastSavedBlocks = new Map<string, ExtractedBlockRow>();
     let baselineOrderKeys = new Map<string, string>();
-    let lastSavedCueSignature = '';
+    let lastSavedMusicSignature = '';
     let queue: Promise<void> = Promise.resolve();
 
     const setBaseline = (blocks: ExtractedBlockRow[], orderKeys?: Map<string, string>) => {
         lastSavedBlocks = new Map(blocks.map(block => [block.blockId, block]));
         baselineOrderKeys = orderKeys ?? new Map<string, string>();
-        lastSavedCueSignature = '';
+        lastSavedMusicSignature = '';
     };
 
     const persistImpl = async (
@@ -92,36 +92,36 @@ export const createDocumentPersister = (scriptId: string) => {
         const now = Date.now();
         const extracted = extractScriptBlocks(scriptId, document);
 
-        const cueSignature = extracted.cues
-            .map(cue => `${cue.id}:${cue.sceneNumber}:${cue.indexInScene}:${cue.mode}:${cue.title}:${cue.kind ?? ''}:${cue.startBlockId}:${cue.endBlockId ?? ''}`)
+        const musicSignature = extracted.music
+            .map(music => `${music.id}:${music.sceneNumber}:${music.indexInScene}:${music.mode}:${music.title}:${music.kind ?? ''}:${music.startBlockId}:${music.endBlockId ?? ''}`)
             .join('|');
-        const reconcileCues = async (tx: DbClient) => {
-            if (cueSignature === lastSavedCueSignature) {
+        const reconcileMusic = async (tx: DbClient) => {
+            if (musicSignature === lastSavedMusicSignature) {
                 return;
             }
 
-            const existingCues = await tx
-                .select({id: scriptCues.id})
-                .from(scriptCues)
-                .where(eq(scriptCues.scriptId, scriptId));
-            const nextCueIds = new Set(extracted.cues.map(cue => cue.id));
+            const existingMusic = await tx
+                .select({id: scriptMusic.id})
+                .from(scriptMusic)
+                .where(eq(scriptMusic.scriptId, scriptId));
+            const nextMusicIds = new Set(extracted.music.map(music => music.id));
 
-            await bulkUpsertScriptCues(tx, extracted.cues.map(cue => ({
-                id: cue.id,
+            await bulkUpsertScriptMusic(tx, extracted.music.map(music => ({
+                id: music.id,
                 scriptId,
-                sceneNumber: cue.sceneNumber,
-                indexInScene: cue.indexInScene,
-                mode: cue.mode,
-                title: cue.title,
-                kind: cue.kind,
-                startBlockId: cue.startBlockId,
-                endBlockId: cue.endBlockId,
+                sceneNumber: music.sceneNumber,
+                indexInScene: music.indexInScene,
+                mode: music.mode,
+                title: music.title,
+                kind: music.kind,
+                startBlockId: music.startBlockId,
+                endBlockId: music.endBlockId,
                 createdAt: now,
                 updatedAt: now,
             })));
-            await bulkUnassignScriptCues(
+            await bulkUnassignScriptMusic(
                 tx,
-                existingCues.filter(row => !nextCueIds.has(row.id)).map(row => row.id),
+                existingMusic.filter(row => !nextMusicIds.has(row.id)).map(row => row.id),
                 now,
             );
         };
@@ -129,9 +129,9 @@ export const createDocumentPersister = (scriptId: string) => {
         const diff = diffExtractedBlocks(Array.from(lastSavedBlocks.values()), extracted.blocks);
 
         if (diff.inserted.length === 0 && diff.updated.length === 0 && diff.deletedIds.length === 0) {
-            if (afterPersist || cueSignature !== lastSavedCueSignature) {
+            if (afterPersist || musicSignature !== lastSavedMusicSignature) {
                 await db.transaction(async tx => {
-                    await reconcileCues(tx);
+                    await reconcileMusic(tx);
 
                     if (afterPersist) {
                         await afterPersist(tx);
@@ -139,7 +139,7 @@ export const createDocumentPersister = (scriptId: string) => {
                 });
             }
 
-            lastSavedCueSignature = cueSignature;
+            lastSavedMusicSignature = musicSignature;
 
             return;
         }
@@ -357,7 +357,7 @@ export const createDocumentPersister = (scriptId: string) => {
 
         await db.transaction(async tx => {
             await writeDelta(tx);
-            await reconcileCues(tx);
+            await reconcileMusic(tx);
 
             if (afterPersist) {
                 await afterPersist(tx);
@@ -365,7 +365,7 @@ export const createDocumentPersister = (scriptId: string) => {
         });
 
         setBaseline(extracted.blocks, orderKeyById);
-        lastSavedCueSignature = cueSignature;
+        lastSavedMusicSignature = musicSignature;
     };
 
     const persist = (

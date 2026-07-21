@@ -241,7 +241,7 @@ describe('PGlite reactive query source', () => {
         unsubscribeSettings();
     });
 
-    it('observes externally committed attachment metadata and cue bindings', async () => {
+    it('observes externally committed attachment metadata and music bindings', async () => {
         const {db} = await createLiveTestDb();
         const repository = createLocalPgliteRepository({
             getLocalDb: () => Promise.resolve(db),
@@ -250,13 +250,13 @@ describe('PGlite reactive query source', () => {
         });
 
         await seedScript(db, 'script-1');
-        await db.insert(dbSchema.scriptCues).values({
-            id: 'cue-1',
+        await db.insert(dbSchema.scriptMusic).values({
+            id: 'music-1',
             scriptId: 'script-1',
             sceneNumber: 0,
             indexInScene: 0,
             mode: 'open',
-            title: 'Cue',
+            title: 'Music',
             kind: 'song',
             startBlockId: null,
             endBlockId: null,
@@ -265,14 +265,14 @@ describe('PGlite reactive query source', () => {
         });
 
         const attachments = repository.getScriptAttachmentsSource('script-1');
-        const bindings = repository.getScriptCueAttachmentBindingsSource('script-1');
+        const bindings = repository.getScriptMusicAttachmentBindingsSource('script-1');
         const attachmentSnapshots: string[][] = [];
         const bindingSnapshots: string[][] = [];
         const unsubscribeAttachments = await attachments.subscribe(rows => {
             attachmentSnapshots.push(rows.map(row => row.id));
         });
         const unsubscribeBindings = await bindings.subscribe(rows => {
-            bindingSnapshots.push(rows.map(row => `${row.cueId}:${row.role}`));
+            bindingSnapshots.push(rows.map(row => `${row.musicId}:${row.role}`));
         });
 
         await db.transaction(async tx => {
@@ -286,8 +286,8 @@ describe('PGlite reactive query source', () => {
                 createdAt: 1,
                 updatedAt: 1,
             });
-            await tx.insert(dbSchema.scriptCueAttachments).values({
-                cueId: 'cue-1',
+            await tx.insert(dbSchema.scriptMusicAttachments).values({
+                musicId: 'music-1',
                 attachmentId: 'attachment-1',
                 role: 'integrated_score',
                 sortOrder: 1,
@@ -296,7 +296,7 @@ describe('PGlite reactive query source', () => {
         });
 
         await waitFor(() => attachmentSnapshots.some(rows => rows.includes('attachment-1')));
-        await waitFor(() => bindingSnapshots.some(rows => rows.includes('cue-1:integrated_score')));
+        await waitFor(() => bindingSnapshots.some(rows => rows.includes('music-1:integrated_score')));
 
         unsubscribeAttachments();
         unsubscribeBindings();

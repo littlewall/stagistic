@@ -3,12 +3,12 @@ import {
     splitTrailingParentheticalSuffix,
 } from '@stagistic/shared';
 
-import {CUE_MODE_ATTR} from '../cues';
 import {
     createScriptBlockNode,
     type ScriptDocument,
     type ScriptNode,
 } from '../document';
+import {MUSIC_MODE_ATTR} from '../music';
 import {
     isForcedCharacterCueLine,
     isQuotedCharacterCueLine,
@@ -115,49 +115,52 @@ const isParenthetical = (value: string) => {
     return trimmed.startsWith('(') && trimmed.endsWith(')');
 };
 
-const isPureCueBlock = (block: ParsedBlock, role: 'start' | 'out') => {
-    return block.cue?.role === role && block.node.content?.length === 1;
+const isPureMusicBlock = (block: ParsedBlock, role: 'start' | 'out') => {
+    return block.music?.role === role && block.node.content?.length === 1;
 };
 
-const resolveCueModes = (blocks: ParsedBlock[]): ScriptNode[] => {
+const resolveMusicModes = (blocks: ParsedBlock[]): ScriptNode[] => {
     const result: ScriptNode[] = [];
-    const seenCueNumbers = new Set<number>();
-    let openCueNumber: number | null = null;
+    const seenMusicNumbers = new Set<number>();
+    let openMusicNumber: number | null = null;
 
     for (let index = 0; index < blocks.length; index += 1) {
         const block = blocks[index];
 
         if (block.node.type === 'scene') {
-            openCueNumber = null;
+            openMusicNumber = null;
         }
 
-        if (!block.cue) {
+        if (!block.music) {
             result.push(block.node);
             continue;
         }
 
-        if (!Number.isSafeInteger(block.cue.number) || block.cue.number < 1) {
-            throw new StagisticParseError('Cue numbers must be positive integers.', block.cue.line);
+        if (!Number.isSafeInteger(block.music.number) || block.music.number < 1) {
+            throw new StagisticParseError('Music numbers must be positive integers.', block.music.line);
         }
 
-        if (block.cue.role === 'start') {
-            if (seenCueNumbers.has(block.cue.number)) {
-                throw new StagisticParseError(`Cue ${block.cue.number} is declared more than once.`, block.cue.line);
+        if (block.music.role === 'start') {
+            if (seenMusicNumbers.has(block.music.number)) {
+                throw new StagisticParseError(
+                    `Music ${block.music.number} is declared more than once.`,
+                    block.music.line,
+                );
             }
 
-            seenCueNumbers.add(block.cue.number);
+            seenMusicNumbers.add(block.music.number);
 
             const next = blocks[index + 1];
             const isHit = next
-                && isPureCueBlock(next, 'out')
-                && next.cue?.number === block.cue.number;
+                && isPureMusicBlock(next, 'out')
+                && next.music?.number === block.music.number;
 
             if (isHit) {
-                const cueContent = block.node.content ?? [];
-                const cueNode = cueContent[cueContent.length - 1];
+                const musicContent = block.node.content ?? [];
+                const musicNode = musicContent[musicContent.length - 1];
 
-                if (cueNode?.attrs) {
-                    cueNode.attrs[CUE_MODE_ATTR] = 'hit';
+                if (musicNode?.attrs) {
+                    musicNode.attrs[MUSIC_MODE_ATTR] = 'hit';
                 }
 
                 result.push(block.node);
@@ -165,19 +168,19 @@ const resolveCueModes = (blocks: ParsedBlock[]): ScriptNode[] => {
                 continue;
             }
 
-            openCueNumber = block.cue.number;
+            openMusicNumber = block.music.number;
             result.push(block.node);
             continue;
         }
 
-        if (openCueNumber !== block.cue.number) {
+        if (openMusicNumber !== block.music.number) {
             throw new StagisticParseError(
-                `@@out ${block.cue.number} does not match the currently open cue.`,
-                block.cue.line,
+                `@@out ${block.music.number} does not match the currently open music.`,
+                block.music.line,
             );
         }
 
-        openCueNumber = null;
+        openMusicNumber = null;
         result.push(block.node);
     }
 
@@ -314,7 +317,7 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
 
     const document: ScriptDocument = {
         type: 'doc',
-        content: resolveCueModes(blocks),
+        content: resolveMusicModes(blocks),
     };
 
     return {

@@ -17,7 +17,7 @@ import {
 import {
     scriptActs,
     scriptBlocks,
-    scriptCues,
+    scriptMusic,
     scriptScenes,
 } from '../schema';
 import {createDocumentPersister} from './persist/persistDocumentDelta';
@@ -126,7 +126,7 @@ export const rebuildScriptProjection = async ({
         const existingActs = await tx.select({id: scriptActs.id}).from(scriptActs).where(eq(scriptActs.scriptId, scriptId));
         const existingScenes = await tx.select().from(scriptScenes).where(eq(scriptScenes.scriptId, scriptId));
         const existingBlocks = await tx.select({id: scriptBlocks.id}).from(scriptBlocks).where(eq(scriptBlocks.scriptId, scriptId));
-        const existingCues = await tx.select({id: scriptCues.id}).from(scriptCues).where(eq(scriptCues.scriptId, scriptId));
+        const existingMusic = await tx.select({id: scriptMusic.id}).from(scriptMusic).where(eq(scriptMusic.scriptId, scriptId));
         const knownCharacters = await dbQueries.listScriptCharacters(tx, scriptId);
 
         const nextActIds = new Set(extracted.acts.map(act => act.id));
@@ -199,24 +199,24 @@ export const rebuildScriptProjection = async ({
             rows: toCharacterRefRows(block, knownCharacterIds),
         })));
 
-        const nextCueIds = new Set(extracted.cues.map(cue => cue.id));
+        const nextMusicIds = new Set(extracted.music.map(music => music.id));
 
-        await dbQueries.bulkUpsertScriptCues(tx, extracted.cues.map(cue => ({
-            id: cue.id,
+        await dbQueries.bulkUpsertScriptMusic(tx, extracted.music.map(music => ({
+            id: music.id,
             scriptId,
-            sceneNumber: cue.sceneNumber,
-            indexInScene: cue.indexInScene,
-            mode: cue.mode,
-            title: cue.title,
-            kind: cue.kind,
-            startBlockId: cue.startBlockId,
-            endBlockId: cue.endBlockId,
+            sceneNumber: music.sceneNumber,
+            indexInScene: music.indexInScene,
+            mode: music.mode,
+            title: music.title,
+            kind: music.kind,
+            startBlockId: music.startBlockId,
+            endBlockId: music.endBlockId,
             createdAt: now,
             updatedAt: now,
         })));
-        await dbQueries.bulkUnassignScriptCues(
+        await dbQueries.bulkUnassignScriptMusic(
             tx,
-            existingCues.filter(cue => !nextCueIds.has(cue.id)).map(cue => cue.id),
+            existingMusic.filter(music => !nextMusicIds.has(music.id)).map(music => music.id),
             now,
         );
 

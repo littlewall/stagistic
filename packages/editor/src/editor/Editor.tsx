@@ -61,7 +61,7 @@ const Editor = ({
     const {
         initialValue,
         persistentCharacters = [],
-        persistentCues = [],
+        persistentMusic = [],
         scriptTitle,
         draftDate,
     } = document;
@@ -86,11 +86,11 @@ const Editor = ({
         onIndexChange,
         onActiveBlockChange,
         onBlockUiEvent,
-        onRequestCreateCue,
-        onRequestRemoveCue,
-        onOpenCueManager,
-        onCueAssigned,
-        onCueUnassigned,
+        onRequestCreateMusic,
+        onRequestRemoveMusic,
+        onOpenMusicManager,
+        onMusicAssigned,
+        onMusicUnassigned,
     } = callbacks ?? {};
 
     const resolvedInitialValue = useMemo(
@@ -152,11 +152,11 @@ const Editor = ({
             ?? createCharacterColorRefsBundle();
     }
 
-    const persistentCuesRef = useRef(persistentCues);
+    const persistentMusicRef = useRef(persistentMusic);
 
     useEffect(() => {
-        persistentCuesRef.current = persistentCues;
-    }, [persistentCues]);
+        persistentMusicRef.current = persistentMusic;
+    }, [persistentMusic]);
 
     const {
         colorByCharacterIdRef,
@@ -197,12 +197,12 @@ const Editor = ({
         colorByCharacterIdRef,
         rememberedColorByKeyRef,
         persistentCharactersRef,
-        persistentCuesRef,
-        onRequestCreateCue,
-        onRequestRemoveCue,
-        onOpenCueManager,
-        onCueAssigned,
-        onCueUnassigned,
+        persistentMusicRef,
+        onRequestCreateMusic,
+        onRequestRemoveMusic,
+        onOpenMusicManager,
+        onMusicAssigned,
+        onMusicUnassigned,
         enableBlockUiEvents: Boolean(onBlockUiEvent),
     });
     const initialDoc = useMemo<ScriptDocument>(
@@ -327,8 +327,8 @@ const Editor = ({
                                 characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
                                 editor,
                                 persistentCharacters,
-                                persistentCues,
-                                onCueAssigned,
+                                persistentMusic,
+                                onMusicAssigned,
                                 headerFooter: resolvedSettings.headerFooter,
                                 scriptTitle,
                                 draftDate,
