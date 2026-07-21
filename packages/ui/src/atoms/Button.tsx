@@ -10,7 +10,7 @@ import {ProgressCircle} from './ProgressCircle';
 
 type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
 
-type ButtonSize = 'sm' | 'md';
+type ButtonSize = 'icon' | 'sm' | 'md';
 
 type ButtonProps = {
     variant?: ButtonVariant,

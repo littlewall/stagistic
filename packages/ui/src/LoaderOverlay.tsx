@@ -4,19 +4,15 @@ import {ProgressPanel} from './feedback/ProgressPanel';
 import styles from './LoaderOverlay.module.css';
 
 type LoaderOverlayProps = {
-    title?: string,
-    subtitle?: string,
+    label?: string,
+    messages?: ReactNode[],
     progress?: number,
-    statusText?: string,
-    hint?: ReactNode,
 };
 
 export const LoaderOverlay = ({
-    title = 'Preparing Stagistic',
-    subtitle = 'Setting up your workspace',
+    label = 'Preparing Stagistic',
+    messages = ['Setting up your workspace'],
     progress,
-    statusText,
-    hint,
 }: LoaderOverlayProps) => {
     return (
         <div
@@ -26,11 +22,9 @@ export const LoaderOverlay = ({
         >
             <div className={styles.panel}>
                 <ProgressPanel
-                    title={title}
-                    subtitle={subtitle}
+                    label={label}
+                    messages={messages}
                     progress={progress}
-                    statusText={statusText}
-                    hint={hint}
                 />
             </div>
         </div>

@@ -59,11 +59,13 @@ export const ScriptWorkspaceRoute = () => {
     if (editorLoadState.isLoading || !initialValue) {
         return (
             <LoaderOverlay
-                title="Preparing editor"
-                subtitle="Loading your script"
+                label="Preparing editor"
+                messages={[
+                    storageError
+                    ?? editorLoadState.statusText
+                    ?? 'Loading your script',
+                ]}
                 progress={editorLoadState.progress}
-                statusText={editorLoadState.statusText}
-                hint={storageError ?? 'Please wait while we set up the editor.'}
             />
         );
     }

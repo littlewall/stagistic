@@ -206,9 +206,8 @@ export const ScriptEditorRoute = () => {
     if (!resolvedEditorInitialValue || !isEditorPresentationHydrated) {
         return (
             <LoaderOverlay
-                title="Preparing editor"
-                subtitle="Loading your script"
-                statusText="Loading editor settings"
+                label="Preparing editor"
+                messages={['Loading editor settings']}
             />
         );
     }

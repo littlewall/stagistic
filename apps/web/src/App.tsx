@@ -64,10 +64,9 @@ const App = () => {
     if (!bootReady) {
         return (
             <LoaderOverlay
-                title="Starting Stagistic"
-                subtitle={bootStatus}
+                label="Starting Stagistic"
+                messages={[bootStatus]}
                 progress={bootProgress}
-                hint="Please wait while we set up your environment."
             />
         );
     }

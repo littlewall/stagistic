@@ -89,10 +89,9 @@ export const ScriptListRoute = () => {
                 {scriptsLoading ? (
                     <div className={styles.listLoading}>
                         <ProgressPanel
-                            title="Loading scripts"
-                            subtitle="Syncing your scripts"
+                            label="Loading scripts"
+                            messages={['Loading script list']}
                             size="sm"
-                            statusText="Loading script list"
                         />
                     </div>
                 ) : (

@@ -9,7 +9,7 @@
 .list {
     display: flex;
     flex-direction: column;
-    gap: var(--space-lg);
+    gap: var(--space-md);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -18,56 +18,81 @@
 .toast {
     pointer-events: auto;
     display: grid;
-    grid-template-columns: 1fr auto;
-    gap: var(--space-lg);
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: var(--space-md);
     align-items: start;
     /* stylelint-disable-next-line csstree/validator */
-    min-width: min(320px, 80vw);
+    min-width: min(calc(300px * var(--size-scale)), 80vw);
     /* stylelint-disable-next-line csstree/validator */
-    max-width: min(420px, 90vw);
-    padding: var(--space-xl) var(--space-xl);
+    max-width: min(calc(380px * var(--size-scale)), 90vw);
+    padding: var(--space-lg);
     color: var(--color-text);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
-    border-radius: calc(14px * var(--size-scale));
-    box-shadow: var(--shadow-popover);
+    border-radius: var(--radius-md);
+    box-shadow: none;
 
-    &[data-variant = 'success'] {
-        background: color-mix(in oklch, var(--color-status-success) 8%, var(--color-surface));
-        border-color: color-mix(in oklch, var(--color-status-success) 30%, var(--color-border));
+    &[data-variant = 'success'] .statusIndicator {
+        background: var(--color-status-success);
     }
 
-    &[data-variant = 'error'] {
-        background: color-mix(in oklch, var(--color-status-danger) 8%, var(--color-surface));
-        border-color: color-mix(in oklch, var(--color-status-danger) 30%, var(--color-border));
+    &[data-variant = 'error'] .statusIndicator {
+        background: var(--color-status-danger);
+    }
+
+    & .statusIndicator {
+        width: calc(6px * var(--size-scale));
+        height: calc(6px * var(--size-scale));
+        margin-top: calc(5px * var(--size-scale));
+        background: var(--color-text-muted);
+        border-radius: var(--radius-full);
     }
 
     & .content {
         display: flex;
         flex-direction: column;
-        gap: var(--space-sm);
+        gap: var(--space-xs);
+        min-width: 0;
     }
 
     & .title {
+        font-size: var(--font-size-md);
         font-weight: var(--font-weight-semibold);
+        line-height: var(--line-height-snug);
     }
 
     & .description {
         font-size: var(--font-size-sm);
+        line-height: var(--line-height-normal);
         color: var(--color-text-muted);
     }
 
     & .closeButton {
         cursor: pointer;
+        display: grid;
+        place-items: center;
+        width: calc(24px * var(--size-scale));
+        height: calc(24px * var(--size-scale));
         padding: 0;
-        font-size: var(--font-size-2xl);
         line-height: var(--line-height-none);
         color: var(--color-text-muted);
         background: transparent;
         border: none;
+        border-radius: var(--radius-xs);
 
         &:hover {
             color: var(--color-text);
+            background: var(--color-surface-raised);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--color-focus-ring);
+            outline-offset: 1px;
+        }
+
+        & svg {
+            width: calc(12px * var(--size-scale));
+            height: calc(12px * var(--size-scale));
         }
     }
 }

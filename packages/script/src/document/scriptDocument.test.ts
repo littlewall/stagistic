@@ -10,6 +10,7 @@ import {
     getScriptBlockId,
     getScriptBlockNodeType,
 } from './scriptDocument';
+import {ensureSceneHeading} from './scriptDocumentHelpers';
 
 describe('initial script documents', () => {
     it('creates a multi-act document by default', () => {
@@ -24,5 +25,14 @@ describe('initial script documents', () => {
 
         expect(document.content.map(node => getScriptBlockNodeType(node))).toEqual(['scene']);
         expect(getScriptBlockId(document.content[0])).toBe('scene-1');
+    });
+
+    it('keeps an empty actless document actless during loader normalization', () => {
+        const document = createActlessScriptDocument('scene-1');
+        const normalized = ensureSceneHeading(document);
+
+        expect(normalized.content.map(node => getScriptBlockNodeType(node)))
+            .toEqual(['scene']);
+        expect(getScriptBlockId(normalized.content[0])).toBe('scene-1');
     });
 });

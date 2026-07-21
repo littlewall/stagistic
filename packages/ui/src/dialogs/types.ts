@@ -7,6 +7,7 @@ export type NewScriptShape = 'multi-act' | 'one-act';
 
 export interface NewScriptModalProps {
     isOpen: boolean,
+    isTransitioning?: boolean,
     onClose: () => void,
     onCreate: (name: string, shape: NewScriptShape) => void | Promise<void>,
 }

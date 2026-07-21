@@ -27,7 +27,7 @@ interface UseGlobalModalMutationsArgs extends Pick<
     scriptToDelete: ScriptToDelete | null,
     scriptToRename: ScriptToRename | null,
     scriptToDuplicate: ScriptToDuplicate | null,
-    setIsNewScriptOpen: Dispatch<SetStateAction<boolean>>,
+    setNewScriptTransitionPath: Dispatch<SetStateAction<string | null>>,
     setIsImportOpen: Dispatch<SetStateAction<boolean>>,
     setIsImportLoading: Dispatch<SetStateAction<boolean>>,
     setPrefilledImport: Dispatch<SetStateAction<ScriptImportFile | null>>,
@@ -47,7 +47,7 @@ export const useGlobalModalMutations = ({
     scriptToDelete,
     scriptToRename,
     scriptToDuplicate,
-    setIsNewScriptOpen,
+    setNewScriptTransitionPath,
     setIsImportOpen,
     setIsImportLoading,
     setPrefilledImport,
@@ -65,15 +65,17 @@ export const useGlobalModalMutations = ({
         try {
             const initialContent = createInitialScriptDocument(shape);
             const scriptId = await scriptActions.createScript(name, initialContent);
+            const editorPath = `/script/${scriptId}/editor`;
 
-            setIsNewScriptOpen(false);
-            void navigate(`/script/${scriptId}/editor`);
+            setNewScriptTransitionPath(editorPath);
+            void navigate(editorPath);
             addToast({
                 title: 'Script created',
                 description: trimOrFallback(name, 'Untitled script'),
                 variant: 'success',
             });
         } catch {
+            setNewScriptTransitionPath(null);
             console.error('Failed to create script');
             addToast({
                 title: 'Failed to create script',
@@ -85,7 +87,7 @@ export const useGlobalModalMutations = ({
         addToast,
         navigate,
         scriptActions,
-        setIsNewScriptOpen,
+        setNewScriptTransitionPath,
     ]);
     const handleImport = useCallback(async (payload: ScriptImportFile & {name: string}) => {
         setIsImportLoading(true);

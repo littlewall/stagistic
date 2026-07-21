@@ -3,6 +3,10 @@ import type {
     ScriptNode,
 } from '@stagistic/script';
 import {
+    ensureSceneHeading,
+    getScriptBlockNodeType,
+} from '@stagistic/script';
+import {
     describe,
     expect,
     it,
@@ -40,5 +44,20 @@ describe('buildDeleteActContent', () => {
         ]);
         expect(result.nextContent?.[0]).toBe(firstScene);
         expect(result.nextContent?.[2]).toBe(secondScene);
+    });
+
+    it('keeps the result actless after loader normalization', () => {
+        const document: ScriptDocument = {
+            type: 'doc',
+            content: [block('act', 'act-1'), block('scene', 'scene-1')],
+        };
+        const result = buildDeleteActContent(document, 'act-1');
+        const reloaded = ensureSceneHeading({
+            type: 'doc',
+            content: result.nextContent ?? [],
+        });
+
+        expect(reloaded.content.map(node => getScriptBlockNodeType(node)))
+            .toEqual(['scene']);
     });
 });

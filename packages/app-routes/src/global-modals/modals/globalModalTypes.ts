@@ -58,6 +58,7 @@ export interface UseGlobalModalActionsArgs {
 
 export interface GlobalModalActions {
     isNewScriptOpen: boolean,
+    newScriptTransitionPath: string | null,
     isImportOpen: boolean,
     prefilledImport: ScriptImportFile | null,
     isImportLoading: boolean,
@@ -72,6 +73,7 @@ export interface GlobalModalActions {
     isDuplicating: boolean,
     openNewScript: () => void,
     closeNewScript: () => void,
+    completeNewScriptTransition: () => void,
     openImportScript: () => void,
     closeImportScript: () => void,
     openDeleteScript: (script: ScriptToDelete) => void,

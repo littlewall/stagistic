@@ -1,6 +1,10 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {useHotkey} from '@tanstack/react-hotkeys';
-import {TextSelection, type Transaction} from '@tiptap/pm/state';
+import {
+    type Selection,
+    TextSelection,
+    type Transaction,
+} from '@tiptap/pm/state';
 import {type Editor as TiptapEditor} from '@tiptap/react';
 import {
     useEffect,
@@ -35,6 +39,30 @@ const getWindowTarget = () => {
 const forcePaginationRecalc = (editor: TiptapEditor) => {
     type PaginationCommands = {forcePaginationRecalc?: () => boolean};
     (editor.commands as PaginationCommands).forcePaginationRecalc?.();
+};
+
+const resolveInitialSelection = (editor: TiptapEditor): Selection => {
+    let firstScenePosition: number | null = null;
+
+    editor.state.doc.descendants((node, pos) => {
+        if (firstScenePosition !== null) {
+            return false;
+        }
+
+        if (node.type.name !== 'scene') {
+            return true;
+        }
+
+        firstScenePosition = pos + 1;
+
+        return false;
+    });
+
+    if (firstScenePosition === null) {
+        return TextSelection.atStart(editor.state.doc);
+    }
+
+    return TextSelection.near(editor.state.doc.resolve(firstScenePosition), 1);
 };
 
 /*
@@ -228,7 +256,7 @@ export const useEditorLifecycle = ({
         if (!isRestoredSurface) {
             instance.view.dispatch(
                 instance.state.tr
-                    .setSelection(TextSelection.atStart(instance.state.doc))
+                    .setSelection(resolveInitialSelection(instance))
                     .setMeta('preventUpdate', true)
                     .setMeta('addToHistory', false),
             );
@@ -290,7 +318,7 @@ export const useEditorLifecycle = ({
             return;
         }
 
-        instance.commands.focus('start');
+        instance.commands.focus(resolveInitialSelection(instance).from);
     }, [autoFocus, instance]);
 
     useHotkey('Mod+S', () => {

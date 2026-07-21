@@ -16,7 +16,6 @@ type UseScriptEditorInstanceArgs = {
     signature: string,
     extensions: Extensions,
     content: ScriptDocument,
-    autoFocus?: boolean,
     characterColorRefs: CharacterColorRefsBundle,
 };
 
@@ -39,7 +38,6 @@ export const useScriptEditorInstance = ({
     signature,
     extensions,
     content,
-    autoFocus,
     characterColorRefs,
 }: UseScriptEditorInstanceArgs): {editor: TiptapEditor} => {
     const createState = (): InstanceState => {
@@ -58,7 +56,7 @@ export const useScriptEditorInstance = ({
         const editor = new TiptapEditor({
             extensions,
             content,
-            autofocus: autoFocus ? 'start' : false,
+            autofocus: false,
             editorProps: {
                 attributes: {
                     'data-editor': 'true',

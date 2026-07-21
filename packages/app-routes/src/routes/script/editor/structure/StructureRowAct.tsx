@@ -1,5 +1,5 @@
 import {useSortable} from '@dnd-kit/react/sortable';
-import {ActBlockIcon, clsx} from '@stagistic/ui';
+import {clsx} from '@stagistic/ui';
 import {
     memo, useCallback, useRef,
 } from 'react';
@@ -72,9 +72,6 @@ const ActRowContent = memo(({
 
     return (
         <>
-            <span className={styles.actIconWrapper} aria-hidden="true">
-                <ActBlockIcon />
-            </span>
             <div className={styles.actTitle}>
                 <input
                     type="text"
@@ -107,6 +104,9 @@ const ActRowContent = memo(({
                     aria-label={`Delete act ${name}`}
                     onMouseDown={event => {
                         event.preventDefault();
+                        event.stopPropagation();
+                    }}
+                    onClick={event => {
                         event.stopPropagation();
                         onDelete(blockId);
                     }}

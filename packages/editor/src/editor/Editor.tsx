@@ -215,7 +215,6 @@ const Editor = ({
         signature: surfaceSignature,
         extensions,
         content: initialDoc,
-        autoFocus,
         characterColorRefs: surfaceRefsRef.current,
     });
 

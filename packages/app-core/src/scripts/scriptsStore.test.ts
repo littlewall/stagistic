@@ -113,7 +113,9 @@ const createRepository = () => {
     };
     const repository = repositoryAdapter as unknown as ScriptRepository;
 
-    return {createInputs, repository, source};
+    return {
+        createInputs, repository, source,
+    };
 };
 
 describe('scripts store', () => {

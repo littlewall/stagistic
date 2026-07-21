@@ -25,6 +25,7 @@ import {
     type ScriptToRename,
     useGlobalModalActions,
 } from './useGlobalModalActions';
+import {useNewScriptTransitionCompletion} from './useNewScriptTransitionCompletion';
 
 type GlobalModalsController = {
     openNewScript: () => void,
@@ -62,6 +63,7 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
 
     const {
         isNewScriptOpen,
+        newScriptTransitionPath,
         isImportOpen,
         prefilledImport,
         isImportLoading,
@@ -76,6 +78,7 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         isDuplicating,
         openNewScript,
         closeNewScript,
+        completeNewScriptTransition,
         openImportScript,
         closeImportScript,
         openDeleteScript,
@@ -100,6 +103,11 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         },
     });
 
+    useNewScriptTransitionCompletion({
+        targetPath: newScriptTransitionPath,
+        onComplete: completeNewScriptTransition,
+    });
+
     const contextValue = useMemo<GlobalModalsController>(() => ({
         openNewScript,
         openImportScript,
@@ -119,6 +127,7 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
             {children}
             <NewScriptModal
                 isOpen={isNewScriptOpen}
+                isTransitioning={newScriptTransitionPath !== null}
                 onClose={closeNewScript}
                 onCreate={handleCreate}
             />

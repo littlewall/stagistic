@@ -30,6 +30,7 @@ export const useGlobalModalActions = ({
     const {navigate} = navigation;
     const {addToast} = notifications;
     const [isNewScriptOpen, setIsNewScriptOpen] = useState(false);
+    const [newScriptTransitionPath, setNewScriptTransitionPath] = useState<string | null>(null);
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [isImportLoading, setIsImportLoading] = useState(false);
     const [prefilledImport, setPrefilledImport] = useState<ScriptImportFile | null>(null);
@@ -42,6 +43,10 @@ export const useGlobalModalActions = ({
 
     const openNewScript = useCallback(() => setIsNewScriptOpen(true), []);
     const closeNewScript = useCallback(() => setIsNewScriptOpen(false), []);
+    const completeNewScriptTransition = useCallback(() => {
+        setIsNewScriptOpen(false);
+        setNewScriptTransitionPath(null);
+    }, []);
     const openImportScript = useCallback(() => setIsImportOpen(true), []);
     const closeImportScript = useCallback(() => {
         setIsImportOpen(false);
@@ -79,7 +84,7 @@ export const useGlobalModalActions = ({
         scriptToDelete,
         scriptToRename,
         scriptToDuplicate,
-        setIsNewScriptOpen,
+        setNewScriptTransitionPath,
         setIsImportOpen,
         setIsImportLoading,
         setPrefilledImport,
@@ -93,6 +98,7 @@ export const useGlobalModalActions = ({
 
     return useMemo(() => ({
         isNewScriptOpen,
+        newScriptTransitionPath,
         isImportOpen,
         prefilledImport,
         isImportLoading,
@@ -107,6 +113,7 @@ export const useGlobalModalActions = ({
         isDuplicating,
         openNewScript,
         closeNewScript,
+        completeNewScriptTransition,
         openImportScript,
         closeImportScript,
         openDeleteScript,
@@ -122,12 +129,14 @@ export const useGlobalModalActions = ({
         closeDuplicateScript,
         closeImportScript,
         closeNewScript,
+        completeNewScriptTransition,
         closeRenameScript,
         isDeleting,
         isDuplicating,
         isImportLoading,
         isImportOpen,
         isNewScriptOpen,
+        newScriptTransitionPath,
         isRenaming,
         mutations,
         openDeleteScript,

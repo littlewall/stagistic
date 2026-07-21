@@ -12,6 +12,7 @@ import {
     RadioChoiceGroup,
     type RadioChoiceOption,
 } from '../atoms/RadioChoiceGroup';
+import {LoaderOverlay} from '../LoaderOverlay';
 import {ModalDialog} from './ModalDialog';
 import styles from './NewScriptModal.module.css';
 import type {
@@ -33,6 +34,7 @@ const SCRIPT_SHAPE_OPTIONS: RadioChoiceOption<NewScriptShape>[] = [
 
 export const NewScriptModal = ({
     isOpen,
+    isTransitioning = false,
     onClose,
     onCreate,
 }: NewScriptModalProps) => {
@@ -40,6 +42,17 @@ export const NewScriptModal = ({
     const [name, setName] = useState('');
     const [shape, setShape] = useState<NewScriptShape>('multi-act');
     const [isPending, setIsPending] = useState(false);
+    const loadingMessages: string[] = [];
+
+    if (isPending) {
+        loadingMessages.push('Creating your script');
+    }
+
+    if (isTransitioning) {
+        loadingMessages.push('Opening editor');
+    }
+
+    const isLoading = loadingMessages.length > 0;
 
     useEffect(() => {
         if (!isOpen) {
@@ -73,52 +86,64 @@ export const NewScriptModal = ({
     const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
     }, []);
+    const handleClose = useCallback(() => {
+        if (isLoading) {
+            return;
+        }
+
+        onClose();
+    }, [isLoading, onClose]);
 
     return (
         <ModalDialog
             isOpen={isOpen}
-            onClose={onClose}
+            onClose={handleClose}
             ariaLabel="Create new script"
         >
-            <h2 className={styles.title}>Create new script</h2>
-            <p className={styles.subtitle}>
-                Give your new script a working title. You can change it later.
-            </p>
-            <form className={styles.form} onSubmit={handleSubmit}>
-                <label className={styles.label} htmlFor="script-name">
-                    Script name
-                </label>
-                <input
-                    id="script-name"
-                    ref={inputRef}
-                    className={styles.input}
-                    value={name}
-                    onChange={handleNameChange}
-                    placeholder="Untitled script"
+            {isLoading ? (
+                <LoaderOverlay
+                    label="Preparing editor"
+                    messages={loadingMessages}
                 />
-                <RadioChoiceGroup
-                    ariaLabel="Initial script structure"
-                    className={styles.shapeOptions}
-                    value={shape}
-                    options={SCRIPT_SHAPE_OPTIONS}
-                    onChange={setShape}
-                    isDisabled={isPending}
-                />
-                <div className={styles.actions}>
-                    <Button
-                        type="submit"
-                        isPending={isPending}
-                    >
-                        Create script
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        onPress={onClose}
-                    >
-                        Cancel
-                    </Button>
-                </div>
-            </form>
+            ) : (
+                <>
+                    <h2 className={styles.title}>Create new script</h2>
+                    <p className={styles.subtitle}>
+                        Give your new script a working title. You can change it later.
+                    </p>
+                    <form className={styles.form} onSubmit={handleSubmit}>
+                        <label className={styles.label} htmlFor="script-name">
+                            Script name
+                        </label>
+                        <input
+                            id="script-name"
+                            ref={inputRef}
+                            className={styles.input}
+                            value={name}
+                            onChange={handleNameChange}
+                            placeholder="Untitled script"
+                        />
+                        <RadioChoiceGroup
+                            ariaLabel="Initial script structure"
+                            className={styles.shapeOptions}
+                            value={shape}
+                            options={SCRIPT_SHAPE_OPTIONS}
+                            onChange={setShape}
+                        />
+                        <div className={styles.actions}>
+                            <Button type="submit">
+                                Create script
+                            </Button>
+                            <Button
+                                variant="ghost"
+                                onPress={handleClose}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </form>
+                </>
+            )}
         </ModalDialog>
     );
 };

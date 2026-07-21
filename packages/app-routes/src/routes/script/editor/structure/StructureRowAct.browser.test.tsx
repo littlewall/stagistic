@@ -1,3 +1,5 @@
+import '@stagistic/ui/styles/base.css';
+
 import {
     useCallback,
     useState,
@@ -116,19 +118,58 @@ const typeAtEnd = async (text: string) => {
 afterEach(() => {
     mountedRoots.forEach(root => root.unmount());
     mountedRoots.length = 0;
+    document.documentElement.style.removeProperty('--size-scale');
     document.body.innerHTML = '';
 });
 
 describe('StructureRowAct rename input', () => {
+    it('renders a quiet iconless row aligned with scene numbers', async () => {
+        document.documentElement.style.setProperty('--size-scale', '1');
+        mount();
+        await waitFor(() => getInput() !== null);
+
+        const row = document.querySelector<HTMLElement>('[data-structure-act-id] > div')!;
+        const deleteButton = row.querySelector<HTMLButtonElement>('button[aria-label^="Delete act"]')!;
+        const deleteStyle = getComputedStyle(deleteButton);
+        const titleOffset = getInput().getBoundingClientRect().left
+            - row.getBoundingClientRect().left;
+
+        expect(row.querySelector('svg')).toBeNull();
+        expect(deleteStyle.backgroundColor).toBe('rgba(0, 0, 0, 0)');
+        expect(deleteStyle.borderTopColor).toBe('rgba(0, 0, 0, 0)');
+        expect(Math.abs(titleOffset - 14)).toBeLessThan(0.5);
+    });
+
     it('allows deleting the first act', async () => {
         const deleted: string[] = [];
 
         mount(undefined, blockId => deleted.push(blockId));
+
         const deleteButton = await waitFor(() => {
             return document.querySelector<HTMLButtonElement>('button[aria-label="Delete act Act"]') !== null;
         }).then(() => document.querySelector<HTMLButtonElement>('button[aria-label="Delete act Act"]')!);
 
         await userEvent.click(deleteButton);
+
+        expect(deleted).toEqual([BLOCK_ID]);
+    });
+
+    it('allows deleting the first act with the keyboard', async () => {
+        const deleted: string[] = [];
+
+        mount(undefined, blockId => deleted.push(blockId));
+
+        const deleteButton = await waitFor(() => {
+            return document.querySelector<HTMLButtonElement>('button[aria-label="Delete act Act"]') !== null;
+        }).then(() => document.querySelector<HTMLButtonElement>('button[aria-label="Delete act Act"]')!);
+
+        getInput().focus();
+        await userEvent.tab();
+
+        expect(document.activeElement).toBe(deleteButton);
+        expect(getComputedStyle(deleteButton).opacity).toBe('1');
+
+        await userEvent.keyboard('{Enter}');
 
         expect(deleted).toEqual([BLOCK_ID]);
     });

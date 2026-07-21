@@ -48,10 +48,11 @@ const renderModal = (onCreate: (...args: unknown[]) => void) => {
     document.body.appendChild(host);
 
     const root = createRoot(host);
-    const render = (isOpen: boolean) => {
+    const render = (isOpen: boolean, isTransitioning = false) => {
         root.render(
             <NewScriptModal
                 isOpen={isOpen}
+                isTransitioning={isTransitioning}
                 onClose={() => {}}
                 onCreate={onCreate}
             />,
@@ -105,5 +106,66 @@ describe('NewScriptModal', () => {
         const multiAct = await waitForElement<HTMLInputElement>('input[type="radio"][value="multi-act"]');
 
         expect(multiAct.checked).toBe(true);
+    });
+
+    it('shows a loader while creation is pending and preserves the draft', async () => {
+        let resolveCreate: (() => void) | undefined;
+        const onCreate = vi.fn(() => new Promise<void>(resolve => {
+            resolveCreate = resolve;
+        }));
+
+        renderModal(onCreate);
+
+        const nameInput = await waitForElement<HTMLInputElement>('#script-name');
+        const oneAct = await waitForElement<HTMLInputElement>('input[type="radio"][value="one-act"]');
+
+        await page.elementLocator(nameInput).fill('Long Day');
+        await page.elementLocator(oneAct.closest('label')!).click();
+        await page.elementLocator(await waitForElement('button[type="submit"]')).click();
+        await waitFor(() => document.querySelector(
+            '[role="progressbar"][aria-label="Preparing editor"]',
+        ) !== null);
+
+        expect(document.querySelector('form')).toBeNull();
+
+        resolveCreate?.();
+        await waitFor(() => document.querySelector('form') !== null);
+
+        const restoredNameInput = await waitForElement<HTMLInputElement>('#script-name');
+        const restoredOneAct = await waitForElement<HTMLInputElement>('input[value="one-act"]');
+
+        expect(restoredNameInput.value).toBe('Long Day');
+        expect(restoredOneAct.checked).toBe(true);
+    });
+
+    it('keeps the loader visible while the editor route is transitioning', async () => {
+        let resolveCreate: (() => void) | undefined;
+        let creationSettled = false;
+        const onCreate = vi.fn(() => new Promise<void>(resolve => {
+            resolveCreate = resolve;
+        }).finally(() => {
+            creationSettled = true;
+        }));
+        const modal = renderModal(onCreate);
+
+        await page.elementLocator(await waitForElement('button[type="submit"]')).click();
+        await waitFor(() => document.querySelector(
+            '[role="progressbar"][aria-label="Preparing editor"]',
+        ) !== null);
+
+        modal.render(true, true);
+        await waitFor(() => document.body.textContent?.includes('Opening editor') === true);
+
+        expect(document.body.textContent).toContain('Creating your script');
+
+        resolveCreate?.();
+        await waitFor(() => creationSettled);
+        await waitFor(() => document.body.textContent?.includes('Creating your script') === false);
+
+        expect(document.querySelector('form')).toBeNull();
+        expect(document.body.textContent).toContain('Opening editor');
+
+        modal.render(true, false);
+        await waitFor(() => document.querySelector('form') !== null);
     });
 });

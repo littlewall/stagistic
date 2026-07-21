@@ -3,6 +3,7 @@ import {createNodeId} from '@stagistic/shared';
 import {
     createEmptyScriptDocument,
     getScriptBlockId,
+    getScriptBlockNodeType,
     isScriptBlockNode,
     type ScriptDocument,
     type ScriptNode,
@@ -166,6 +167,14 @@ export const ensureSceneHeading = (
     value?: ScriptDocument | null,
     options?: {activeBlockId?: string | null},
 ): ScriptDocument => {
+    const hasSceneHeading = value?.content.some(node => {
+        return isScriptBlockNode(node) && getScriptBlockNodeType(node) === 'scene';
+    });
+
+    if (hasSceneHeading && value) {
+        return value;
+    }
+
     if (isScriptDocumentEmpty(value)) {
         return createEmptyScriptDocument(
             options?.activeBlockId ?? createNodeId(),

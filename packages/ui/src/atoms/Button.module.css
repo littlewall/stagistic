@@ -30,6 +30,10 @@
         padding: var(--space-md) var(--space-xl);
     }
 
+    &.icon {
+        padding: 0;
+    }
+
     &.primary {
         color: var(--color-surface);
         background: var(--color-text);

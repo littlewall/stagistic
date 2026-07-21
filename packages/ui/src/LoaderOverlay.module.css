@@ -2,12 +2,19 @@
     position: fixed;
     z-index: 20;
     inset: 0;
-    display: grid;
-    place-items: center;
+    overflow: auto;
     padding: var(--space-5xl);
     background: var(--color-bg);
 }
 
 .panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateX(-50%);
     width: min(520px, 90vw);
+
+    & > div > [role = 'progressbar'] {
+        transform: translateY(-50%);
+    }
 }

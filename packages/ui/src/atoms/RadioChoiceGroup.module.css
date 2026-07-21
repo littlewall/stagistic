@@ -5,12 +5,12 @@
 }
 
 .option {
+    cursor: pointer;
     display: flex;
     gap: var(--space-md);
     align-items: flex-start;
     padding: var(--space-lg);
     color: var(--color-text-muted);
-    cursor: pointer;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-md);
@@ -36,8 +36,8 @@
 }
 
 .indicator {
-    box-sizing: border-box;
     flex: 0 0 auto;
+    box-sizing: border-box;
     width: 14px;
     height: 14px;
     margin-top: 2px;
@@ -53,9 +53,9 @@
 
 .copy {
     display: flex;
-    min-width: 0;
     flex-direction: column;
     gap: var(--space-xs);
+    min-width: 0;
 }
 
 .label {

@@ -121,9 +121,8 @@ export const EditorShell = ({
         >
             {!isCanvasReady ? (
                 <LoaderOverlay
-                    title="Preparing editor"
-                    subtitle="Loading your script"
-                    statusText="Laying out pages"
+                    label="Preparing editor"
+                    messages={['Laying out pages']}
                 />
             ) : null}
             {characterTagPaletteCss ? (
