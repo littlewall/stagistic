@@ -1,42 +1,36 @@
 import {
     type DerivedMusic,
     formatMusicNumber,
+    MUSIC_OUT_NODE_NAME,
     type ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
 import {
-    blockHasMusicAtom,
+    blockHasMusicStart,
     resolveMusicTargetBlock,
     resolveNewMusicNumber,
+    resolveScriptTargetBlock,
 } from '../../tiptap/extensions/music/musicCommands';
+import {
+    findMusicAtomRange,
+    resolveMusicOutCandidate,
+} from '../../tiptap/extensions/music/musicOutCommands';
 import type {
     BlockActionCommand,
     BlockActionContext,
     BlockActionItem,
 } from './actionTypes';
 
-const focusMusicTitle = (editor: TiptapEditor, blockId: string) => {
-    window.requestAnimationFrame(() => {
-        const block = Array.from(editor.view.dom.querySelectorAll<HTMLElement>('[data-id]'))
-            .find(candidate => candidate.dataset.id === blockId);
-        const input = block?.querySelector<HTMLElement>('[data-music-title-input="start"]');
-
-        input?.focus();
-    });
-};
-
 const MUSIC_TITLE_PREVIEW_LENGTH = 10;
 
 const truncateMusicTitle = (title: string) => {
     const characters = Array.from(title.trim());
 
-    if (characters.length <= MUSIC_TITLE_PREVIEW_LENGTH) {
-        return characters.join('');
-    }
-
-    return `${characters.slice(0, MUSIC_TITLE_PREVIEW_LENGTH).join('')}…`;
+    return characters.length <= MUSIC_TITLE_PREVIEW_LENGTH
+        ? characters.join('')
+        : `${characters.slice(0, MUSIC_TITLE_PREVIEW_LENGTH).join('')}…`;
 };
 
 export const formatOpenMusicDisplayName = (music: DerivedMusic) => {
@@ -46,118 +40,155 @@ export const formatOpenMusicDisplayName = (music: DerivedMusic) => {
     return title ? `${number} ${title}` : number;
 };
 
+export const formatSetMusicOutLabel = (music: DerivedMusic) => {
+    const number = formatMusicNumber(music).replace(/\)$/u, '');
+
+    return `Set out here (${number})`;
+};
+
 export {resolveNewMusicNumber} from '../../tiptap/extensions/music/musicCommands';
 
 export const resolveOpenMusicAtBlock = (
     snapshot: ScriptBlockIndexSnapshot,
     blockId: string,
-): DerivedMusic | null => {
-    const blocksById = new Map(snapshot.blocks.map(block => [block.blockId, block] as const));
-    const targetBlock = blocksById.get(blockId);
+): DerivedMusic | null => resolveMusicOutCandidate(snapshot, blockId);
 
-    if (!targetBlock) {
+export type MusicOutBoundaryAction = 'add' | 'set' | 'remove';
+
+export interface MusicBoundaryAvailability {
+    canAddMusic: boolean,
+    newMusicNumber: string | null,
+    outAction: MusicOutBoundaryAction | null,
+    outMusic: DerivedMusic | null,
+    isOrphanOut: boolean,
+}
+
+export interface MusicBoundaryAtomState {
+    hasMusicStart: boolean,
+    hasMusicOut: boolean,
+}
+
+export const resolveMusicBoundaryAvailabilityFromSnapshot = (
+    snapshot: ScriptBlockIndexSnapshot,
+    blockId: string,
+    atoms: MusicBoundaryAtomState,
+): MusicBoundaryAvailability | null => {
+    const block = snapshot.blocks.find(candidate => candidate.blockId === blockId);
+
+    if (!block) {
         return null;
     }
 
-    const latestOpenMusic = snapshot.music
-        .filter(music => {
-            const startBlock = blocksById.get(music.startBlockId);
+    const explicitOutMusic = snapshot.music.find(music => music.endBlockId === blockId) ?? null;
+    const outMusic = atoms.hasMusicOut
+        ? explicitOutMusic
+        : resolveMusicOutCandidate(snapshot, blockId);
+    const isOrphanOut = atoms.hasMusicOut
+        && snapshot.orphanMusicOutBlockIds.includes(blockId);
+    const canAddMusic = block.blockType === 'stageDirection' && !atoms.hasMusicStart;
 
-            return music.mode === 'open'
-                && startBlock !== undefined
-                && startBlock.orderNo < targetBlock.orderNo
-                && startBlock.sceneBlockId === targetBlock.sceneBlockId;
-        })
-        .sort((left, right) => {
-            const leftOrder = blocksById.get(left.startBlockId)?.orderNo ?? -1;
-            const rightOrder = blocksById.get(right.startBlockId)?.orderNo ?? -1;
-
-            return rightOrder - leftOrder;
-        })[0];
-
-    if (!latestOpenMusic?.endBlockId) {
-        return latestOpenMusic ?? null;
-    }
-
-    const endBlock = blocksById.get(latestOpenMusic.endBlockId);
-
-    return endBlock && endBlock.orderNo > targetBlock.orderNo
-        ? latestOpenMusic
-        : null;
+    return {
+        canAddMusic,
+        newMusicNumber: canAddMusic ? resolveNewMusicNumber(snapshot, blockId) : null,
+        outAction: atoms.hasMusicOut ? 'remove' : outMusic ? outMusic.endBlockId ? 'set' : 'add' : null,
+        outMusic,
+        isOrphanOut,
+    };
 };
 
-const resolveMusicAvailability = (editor: TiptapEditor, blockId: string) => {
-    const block = resolveMusicTargetBlock(editor.state, blockId);
+export const resolveMusicBoundaryAvailability = (
+    editor: TiptapEditor,
+    blockId: string,
+): MusicBoundaryAvailability | null => {
+    const block = resolveScriptTargetBlock(editor.state, blockId);
 
-    if (!block || blockHasMusicAtom(block)) {
+    if (!block) {
         return null;
     }
 
     const snapshot = buildIndexSnapshotFromPmDoc(editor.state.doc);
-    const newMusicNumber = resolveNewMusicNumber(snapshot, blockId);
+    const hasOut = findMusicAtomRange(block, MUSIC_OUT_NODE_NAME) !== null;
+    const hasMusicStart = resolveMusicTargetBlock(editor.state, blockId) !== null
+        && blockHasMusicStart(block);
 
-    if (!newMusicNumber) {
+    return resolveMusicBoundaryAvailabilityFromSnapshot(snapshot, blockId, {
+        hasMusicStart,
+        hasMusicOut: hasOut,
+    });
+};
+
+const resolveOutCommand = (
+    editor: TiptapEditor,
+    blockId: string,
+    availability: MusicBoundaryAvailability,
+): BlockActionCommand | null => {
+    const {outAction, outMusic} = availability;
+
+    if (!outAction) {
+        return null;
+    }
+
+    if (outAction === 'remove') {
+        return {
+            kind: 'command',
+            id: 'remove-out',
+            label: 'Remove out',
+            detail: outMusic ? formatOpenMusicDisplayName(outMusic) : undefined,
+            icon: 'musicOut',
+            run: () => {
+                editor.commands.removeMusicOutAtBlock(blockId);
+                editor.commands.focus();
+            },
+        };
+    }
+
+    if (!outMusic) {
         return null;
     }
 
     return {
-        openMusic: resolveOpenMusicAtBlock(snapshot, blockId),
-        newMusicNumber,
+        kind: 'command',
+        id: outAction === 'set' ? 'set-out' : 'add-out',
+        label: outAction === 'set' ? formatSetMusicOutLabel(outMusic) : 'Add out',
+        detail: formatOpenMusicDisplayName(outMusic),
+        icon: 'musicOut',
+        run: () => {
+            editor.commands.setMusicOutAtBlock(blockId);
+            editor.commands.focus();
+        },
     };
 };
 
-const runAddMusic = (editor: TiptapEditor, blockId: string) => {
-    if (!resolveMusicAvailability(editor, blockId)) {
-        return;
-    }
-
-    if (editor.commands.insertMusicStart(blockId, '', 'open', {isDraft: true})) {
-        focusMusicTitle(editor, blockId);
-    }
-};
-
-const runAddOut = (editor: TiptapEditor, blockId: string) => {
-    if (!resolveMusicAvailability(editor, blockId)?.openMusic) {
-        return;
-    }
-
-    editor.commands.insertMusicOut(blockId);
-    editor.commands.focus();
-};
-
-export const resolveStageDirectionMusicActions = ({
+export const resolveMusicBoundaryActions = ({
     editor,
     blockId,
 }: BlockActionContext): readonly BlockActionItem[] => {
-    const availability = resolveMusicAvailability(editor, blockId);
+    const availability = resolveMusicBoundaryAvailability(editor, blockId);
 
     if (!availability) {
         return [];
     }
 
-    const items: BlockActionCommand[] = [
-        {
+    const items: BlockActionCommand[] = [];
+
+    if (availability.canAddMusic && availability.newMusicNumber) {
+        items.push({
             kind: 'command',
             id: 'add-music',
             label: 'Add music',
             detail: availability.newMusicNumber,
             icon: 'musicStart',
-            run: () => runAddMusic(editor, blockId),
-        },
-    ];
-
-    if (availability.openMusic) {
-        items.push({
-            kind: 'command',
-            id: 'add-out',
-            label: 'Add out',
-            detail: formatOpenMusicDisplayName(availability.openMusic),
-            icon: 'musicOut',
-            run: () => runAddOut(editor, blockId),
+            run: () => editor.commands.insertMusicDraft(blockId),
         });
     }
 
-    return [
+    const outCommand = resolveOutCommand(editor, blockId, availability);
+
+    if (outCommand) {
+        items.push(outCommand);
+    }
+
+    return items.length > 0 ? [
         {
             kind: 'submenu',
             id: 'music',
@@ -165,5 +196,7 @@ export const resolveStageDirectionMusicActions = ({
             icon: 'music',
             items,
         },
-    ];
+    ] : [];
 };
+
+export const resolveStageDirectionMusicActions = resolveMusicBoundaryActions;

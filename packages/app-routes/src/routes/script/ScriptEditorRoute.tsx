@@ -110,6 +110,13 @@ export const ScriptEditorRoute = () => {
     const closeAddMusicModal = useCallback(() => {
         setAddMusicModalState(null);
     }, []);
+    const cancelAddMusicModal = useCallback(() => {
+        if (addMusicModalState?.source === 'editor') {
+            addMusicModalState.request.cancel?.();
+        }
+
+        setAddMusicModalState(null);
+    }, [addMusicModalState]);
     const handleRequestCreateMusic = useCallback((request: EditorMusicCreateRequest) => {
         setAddMusicModalState({
             source: 'editor',
@@ -281,6 +288,7 @@ export const ScriptEditorRoute = () => {
                     initialTitle={addMusicModalState?.source === 'editor'
                         ? addMusicModalState.request.title
                         : undefined}
+                    onCancel={cancelAddMusicModal}
                     onClose={closeAddMusicModal}
                     onCreate={handleCreateMusic}
                 />

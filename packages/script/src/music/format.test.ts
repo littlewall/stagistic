@@ -2,10 +2,7 @@ import {
     describe, expect, it,
 } from 'vite-plus/test';
 
-import {
-    formatMusicNumber, formatMusicOutLabel,
-    musicLetter,
-} from './format';
+import {formatMusicNumber, musicLetter} from './format';
 
 describe('music formatters', () => {
     it('formats a lone music in a scene as the scene number', () => {
@@ -26,14 +23,5 @@ describe('music formatters', () => {
     it('continues letters past Z', () => {
         expect(musicLetter(25)).toBe('Z');
         expect(musicLetter(26)).toBe('AA');
-    });
-
-    it('formats an out as "<number> out (title)", dropping empty parens', () => {
-        expect(formatMusicOutLabel({
-            sceneNumber: 3, indexInScene: 0, sceneMusicCount: 2, title: 'Night',
-        })).toBe('3.A) out (Night)');
-        expect(formatMusicOutLabel({
-            sceneNumber: 3, indexInScene: 0, sceneMusicCount: 1, title: '',
-        })).toBe('3) out');
     });
 });

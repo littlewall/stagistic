@@ -329,6 +329,8 @@ const Editor = ({
                                 persistentCharacters,
                                 persistentMusic,
                                 onMusicAssigned,
+                                onOpenMusicManager,
+                                onRequestRemoveMusic,
                                 headerFooter: resolvedSettings.headerFooter,
                                 scriptTitle,
                                 draftDate,

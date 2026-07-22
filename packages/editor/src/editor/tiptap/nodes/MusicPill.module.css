@@ -20,6 +20,15 @@
     color: var(--color-text);
 }
 
+.structuralOut {
+    pointer-events: none;
+    overflow: hidden;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    vertical-align: baseline;
+}
+
 .menu {
     cursor: default;
     user-select: none;

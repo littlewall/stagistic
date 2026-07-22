@@ -45,6 +45,7 @@ export interface EditorMusicCreateRequest {
     title: string,
     blockId: string,
     complete: (music: PersistentMusicRef) => boolean,
+    cancel?: () => boolean,
 }
 
 export interface EditorMusicRemoveRequest {

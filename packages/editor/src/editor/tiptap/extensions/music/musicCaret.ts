@@ -15,13 +15,28 @@ export const isMusicAtom = (node: ProseMirrorNode | null | undefined): boolean =
     return node?.type.name === MUSIC_START_NODE_NAME || node?.type.name === MUSIC_OUT_NODE_NAME;
 };
 
+const hasOnlyTrailingMusicAtoms = (state: EditorState, pos: number): boolean => {
+    const $pos = state.doc.resolve(pos);
+    let offset = $pos.parentOffset;
+
+    while (offset < $pos.parent.content.size) {
+        const child = $pos.parent.childAfter(offset).node;
+
+        if (!child || !isMusicAtom(child)) {
+            return false;
+        }
+
+        offset += child.nodeSize;
+    }
+
+    return offset > $pos.parentOffset;
+};
+
 export const isCaretBeforeTrailingMusic = (state: EditorState): boolean => {
     const {selection} = state;
     const music = selection.$from.nodeAfter;
 
-    return selection.empty
-        && isMusicAtom(music)
-        && selection.$from.parentOffset + (music?.nodeSize ?? 0) === selection.$from.parent.content.size;
+    return selection.empty && isMusicAtom(music) && hasOnlyTrailingMusicAtoms(state, selection.from);
 };
 
 export const moveCaretBeforeTrailingMusic = (
@@ -29,14 +44,21 @@ export const moveCaretBeforeTrailingMusic = (
     pos: number,
 ): Transaction | null => {
     const resolvedPos = state.doc.resolve(pos);
-    const music = resolvedPos.nodeBefore;
 
-    if (!music || !isMusicAtom(music) || resolvedPos.parentOffset !== resolvedPos.parent.content.size) {
+    if (!isMusicAtom(resolvedPos.nodeBefore) || resolvedPos.parentOffset !== resolvedPos.parent.content.size) {
         return null;
     }
 
+    let targetPos = pos;
+    let cursor = state.doc.resolve(targetPos);
+
+    while (isMusicAtom(cursor.nodeBefore)) {
+        targetPos -= cursor.nodeBefore?.nodeSize ?? 0;
+        cursor = state.doc.resolve(targetPos);
+    }
+
     return state.tr
-        .setSelection(TextSelection.create(state.doc, pos - music.nodeSize))
+        .setSelection(TextSelection.create(state.doc, targetPos))
         .scrollIntoView();
 };
 
@@ -78,13 +100,24 @@ export const moveCaretBeforeTrailingMusicInPreviousBlock = (
     }
 
     const previousBlock = state.doc.resolve(block.pos).nodeBefore;
-    const music = previousBlock?.lastChild;
 
-    if (!music || !isMusicAtom(music)) {
+    if (!previousBlock || !isMusicAtom(previousBlock.lastChild)) {
         return null;
     }
 
-    const musicPos = block.pos - 1 - music.nodeSize;
+    let trailingSize = 0;
+
+    for (let index = previousBlock.childCount - 1; index >= 0; index -= 1) {
+        const child = previousBlock.child(index);
+
+        if (!isMusicAtom(child)) {
+            break;
+        }
+
+        trailingSize += child.nodeSize;
+    }
+
+    const musicPos = block.pos - 1 - trailingSize;
 
     return state.tr
         .setSelection(TextSelection.create(state.doc, musicPos))

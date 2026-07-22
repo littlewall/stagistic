@@ -122,7 +122,7 @@ describe('updateBlockType', () => {
         expect(getBlock()?.textContent).toBe('SALLY+ISABELLA');
     });
 
-    it('turns character pills and music atoms into plain text when leaving a stage direction', () => {
+    it('turns a music start into plain text but preserves an out when leaving a stage direction', () => {
         const characterTag = schema.marks[CHARACTER_TAG_MARK_NAME].create({
             [CHARACTER_TAG_KEY_ATTR]: 'ANNA',
             [CHARACTER_TAG_ID_ATTR]: 'character-1',
@@ -139,10 +139,10 @@ describe('updateBlockType', () => {
         });
 
         expect(updateBlockType(editor, 'dialogue')).toBe(true);
-        expect(getBlock()?.textContent).toBe('ANNA enters Lights then out');
+        expect(getBlock()?.textContent).toBe('ANNA enters Lights then ');
         expect(getBlock()?.attrs.characterRefs).toBeNull();
         expect(getBlock()?.child(0).marks).toEqual([]);
-        expect(getBlock()?.content.content.every(node => node.isText)).toBe(true);
+        expect(getBlock()?.content.content.at(-1)?.type.name).toBe(MUSIC_OUT_NODE_NAME);
     });
 
     it('normalizes stage-direction content through the selection-preserving type change', () => {

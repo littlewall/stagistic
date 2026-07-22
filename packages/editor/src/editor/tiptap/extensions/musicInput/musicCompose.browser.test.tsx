@@ -376,7 +376,7 @@ describe('music # compose', () => {
         expect((stageDirection?.content ?? []).some(node => node.type === 'text' && (node.text ?? '').includes('Half'))).toBe(false);
     });
 
-    it('shows an (initially empty) compose pill right after #', async () => {
+    it('shows an initially empty draft pill right after #', async () => {
         renderEditor();
 
         await getEditor();
@@ -386,13 +386,13 @@ describe('music # compose', () => {
         await el.click();
         await userEvent.type(el, '#');
 
-        const composePill = await poll(() => document.querySelector('[data-music-compose]'), 'compose pill');
+        const composePill = await poll(() => document.querySelector('[data-music-title-input="start"]'), 'draft pill');
 
         expect(composePill).toBeTruthy();
-        expect(composePill?.getAttribute('data-music-number')).toBe('0)');
+        expect(composePill?.getAttribute('data-music-draft')).toBe('true');
     });
 
-    it('Backspace on an empty title cancels the compose and # re-triggers', async () => {
+    it('Backspace on an empty title cancels the draft and # re-triggers', async () => {
         renderEditor();
 
         const editor = await getEditor();
@@ -400,20 +400,20 @@ describe('music # compose', () => {
 
         await el.click();
         await userEvent.type(el, '#');
-        await poll(() => document.querySelector('[data-music-compose]'), 'compose pill');
+        await poll(() => document.querySelector('[data-music-title-input="start"]'), 'draft pill');
 
         await userEvent.keyboard('{Backspace}');
-        await poll(() => document.querySelector('[data-music-compose]') ? null : true, 'compose cleared');
+        await poll(() => document.querySelector('[data-music-title-input="start"]') ? null : true, 'draft cleared');
 
         await userEvent.type(el, '#');
-        await poll(() => document.querySelector('[data-music-compose]'), 'compose pill again');
+        await poll(() => document.querySelector('[data-music-title-input="start"]'), 'draft pill again');
 
         const stageDirection = getStageDirection(editor);
 
         expect((stageDirection?.content ?? []).some(node => node.type === 'text' && (node.text ?? '').includes('#'))).toBe(false);
     });
 
-    it('# + "out" + Enter commits a musicOut instead of a titled music', async () => {
+    it('# + "out" + Enter commits a titled music; out has its own command', async () => {
         renderEditor();
 
         const editor = await getEditor();
@@ -423,12 +423,12 @@ describe('music # compose', () => {
         await userEvent.type(el, '#out');
         await userEvent.keyboard('{Enter}');
 
-        await poll(() => document.querySelector('[data-music-pill="out"]'), 'music out pill');
+        await poll(() => document.querySelector('[data-music-pill="start"]'), 'music start pill');
 
         const stageDirection = getStageDirection(editor);
 
-        expect((stageDirection?.content ?? []).some(node => node.type === 'musicOut')).toBe(true);
-        expect((stageDirection?.content ?? []).some(node => node.type === 'musicStart')).toBe(false);
+        expect((stageDirection?.content ?? []).some(node => node.type === 'musicOut')).toBe(false);
+        expect((stageDirection?.content ?? []).some(node => node.type === 'musicStart')).toBe(true);
     });
 
     it('@ still opens the character-tag compose in a stage direction that has a music', async () => {
@@ -447,7 +447,7 @@ describe('music # compose', () => {
         expect(getCharacterTagComposeFromState(editor.state)).not.toBeNull();
     });
 
-    it('renders the closed music number and title on the out pill', async () => {
+    it('keeps the closed music out pill structural', async () => {
         renderEditor(createTwoBlockDocument());
 
         const editor = await getEditor();
@@ -459,20 +459,8 @@ describe('music # compose', () => {
 
         const outPill = await poll(() => document.querySelector('[data-music-pill="out"]'), 'music out pill');
 
-        await poll(() => (outPill.textContent ?? '').includes('Night (end)') ? true : null, 'out label');
-
-        expect(outPill.textContent).toContain('0) Night (end)');
-
-        const primary = outPill.querySelector<HTMLElement>('[data-music-out-primary]');
-        const title = outPill.querySelector<HTMLElement>('[data-music-out-title]');
-        const suffix = outPill.querySelector<HTMLElement>('[data-music-out-suffix]');
-
-        expect(primary?.textContent).toBe('0)');
-        expect(title?.textContent).toBe(' Night');
-        expect(suffix?.textContent).toBe(' (end)');
-        expect(getComputedStyle(primary as HTMLElement).fontWeight).toBe('700');
-        expect(getComputedStyle(title as HTMLElement).fontWeight).toBe('400');
-        expect(getComputedStyle(title as HTMLElement).color).not.toBe(getComputedStyle(primary as HTMLElement).color);
+        expect(outPill.textContent).toBe('');
+        expect(outPill.getAttribute('aria-hidden')).toBe('true');
     });
 
     it('keeps music labels after the document is loaded again', async () => {
@@ -485,9 +473,7 @@ describe('music # compose', () => {
         await new Promise(resolve => window.requestAnimationFrame(resolve));
 
         const number = document.querySelector<HTMLElement>('[data-music-number]');
-        const outPrimary = document.querySelector<HTMLElement>('[data-music-out-primary]');
 
         expect(number?.textContent).toBe('0)');
-        expect(outPrimary?.textContent).toBe('0)');
     });
 });

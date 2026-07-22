@@ -16,6 +16,7 @@ import {createElement} from 'react';
 import type {
     EditorMusicCreateRequest,
     EditorMusicRemoveRequest,
+    PersistentMusicRef,
 } from '../../contracts';
 import {MusicStartPill} from './MusicPill';
 
@@ -28,6 +29,7 @@ interface MusicStartNodeOptions {
     onOpenMusicManager?: (musicId: string) => void,
     onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
     onRequestCreateMusic?: (request: EditorMusicCreateRequest) => void,
+    persistentMusicRef?: {current: readonly PersistentMusicRef[]},
 }
 
 export const MusicStartNode = Node.create<MusicStartNodeOptions>({
@@ -92,6 +94,7 @@ export const MusicStartNode = Node.create<MusicStartNodeOptions>({
             onMusicAssigned: this.options.onMusicAssigned,
             onOpenMusicManager: this.options.onOpenMusicManager,
             onRequestCreateMusic: this.options.onRequestCreateMusic,
+            persistentMusicRef: this.options.persistentMusicRef,
             onRequestRemoveMusic: this.options.onRequestRemoveMusic,
         }));
     },

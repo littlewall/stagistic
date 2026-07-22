@@ -18,6 +18,7 @@ type SelectorListener<TSelected> = {
 const EMPTY_INDEX: EditorIndexSnapshot = {
     blocks: [],
     music: [],
+    orphanMusicOutBlockIds: [],
 };
 
 export const EMPTY_STRUCTURE: EditorLiveStructureSnapshot = {

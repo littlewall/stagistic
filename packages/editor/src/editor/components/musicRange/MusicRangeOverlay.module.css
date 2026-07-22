@@ -1,0 +1,198 @@
+.range {
+    pointer-events: none;
+    position: absolute;
+    z-index: 1;
+    transform: translateX(-50%);
+    width: 1px;
+    background: color-mix(in oklch, var(--color-text) 18%, transparent);
+}
+
+.boundary {
+    cursor: pointer;
+    position: absolute;
+    z-index: 3;
+    transform: translate(-50%, -50%);
+    box-sizing: border-box;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    color: var(--color-text);
+    background: transparent;
+    border: 0;
+
+    &:focus-visible {
+        border-radius: var(--radius-sm);
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 1px;
+    }
+
+    &::before,
+    &::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        box-sizing: border-box;
+    }
+
+    &[data-marker-kind = 'start']::after,
+    &[data-marker-kind = 'hit']::after,
+    &[data-marker-kind = 'shared']::after {
+        width: 5px;
+        height: 5px;
+        background: currentcolor;
+        border-radius: var(--radius-full);
+    }
+
+    &[data-marker-kind = 'end']::before,
+    &[data-marker-kind = 'orphan']::before {
+        width: 7px;
+        height: 7px;
+        background: var(--color-surface-paper);
+        border: 1px solid currentcolor;
+        border-radius: var(--radius-full);
+    }
+
+    &[data-marker-kind = 'shared']::before {
+        width: 9px;
+        height: 9px;
+        background: var(--color-surface-paper);
+        border: 1px solid currentcolor;
+        border-radius: var(--radius-full);
+    }
+
+    &[data-marker-kind = 'shared']::after {
+        width: 3px;
+        height: 3px;
+    }
+
+    &[data-end-tone = 'implicit']::before {
+        color: color-mix(in oklch, var(--color-text) 48%, var(--color-surface-paper));
+    }
+
+    &[data-end-tone = 'orphan']::before {
+        color: var(--color-warning);
+        border-style: dashed;
+    }
+
+    &[data-music-rail-drop-preview = 'true'] {
+        border-radius: var(--radius-sm);
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 1px;
+    }
+}
+
+.dropPreview {
+    pointer-events: none;
+    position: absolute;
+    z-index: 4;
+    transform: translate(-50%, -50%);
+    width: 20px;
+    height: 20px;
+    color: var(--color-focus-ring);
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        box-sizing: border-box;
+        width: 9px;
+        height: 9px;
+        background: var(--color-surface-paper);
+        border: 1px solid currentcolor;
+        border-radius: var(--radius-full);
+    }
+}
+
+.activeTriggerAnchor {
+    pointer-events: none;
+    position: absolute;
+    z-index: 4;
+    transform: translate(-50%, -50%);
+}
+
+.activeTrigger {
+    pointer-events: auto;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    font: inherit;
+    font-size: 7px;
+    line-height: 1;
+    color: color-mix(in oklch, var(--color-text-muted) 64%, transparent);
+    letter-spacing: 1px;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-full);
+
+    &:hover,
+    &:focus-visible {
+        color: var(--color-text);
+        background: color-mix(in oklch, var(--color-surface-accent) 30%, transparent);
+        outline: none;
+    }
+
+    &:active {
+        transform: scale(.97);
+    }
+}
+
+.menu {
+    position: fixed;
+    z-index: 20;
+    overflow: hidden;
+    display: grid;
+    min-width: 190px;
+    padding: 4px;
+    background: var(--color-surface-paper);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-popover);
+}
+
+.section + .section {
+    padding-top: 4px;
+    border-top: 1px solid var(--color-border);
+}
+
+.sectionLabel {
+    display: block;
+    padding: 5px 8px 3px;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.menuItem {
+    cursor: pointer;
+    display: flex;
+    gap: var(--space-sm);
+    align-items: baseline;
+    justify-content: space-between;
+    width: 100%;
+    padding: 6px 8px;
+    font: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+
+    &:hover,
+    &:focus-visible {
+        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+        outline: none;
+    }
+}
+
+.detail {
+    color: var(--color-text-muted);
+}

@@ -45,7 +45,7 @@ describe('buildIndexSnapshotFromPmDoc music', () => {
 
         expect(buildIndexSnapshotFromPmDoc(doc).music).toEqual([
             {
-                musicId: 'c1', sceneNumber: 0, indexInScene: 0, sceneMusicCount: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2',
+                musicId: 'c1', sceneNumber: 0, indexInScene: 0, sceneMusicCount: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2', effectiveEndBlockId: 'b2', endKind: 'explicit',
             },
         ]);
     });

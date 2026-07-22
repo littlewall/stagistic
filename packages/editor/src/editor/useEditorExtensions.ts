@@ -35,6 +35,7 @@ import {
     MusicCommandsExtension,
     MusicInputExtension,
     MusicNumberingExtension,
+    MusicRailExtension,
     PlaceholderExtension,
     ScriptBehaviorExtension,
 } from './tiptap/extensions';
@@ -176,12 +177,14 @@ export const useEditorExtensions = ({
             onOpenMusicManager,
             onRequestCreateMusic,
             onRequestRemoveMusic,
+            persistentMusicRef,
         }),
         [
             onMusicAssigned,
             onOpenMusicManager,
             onRequestCreateMusic,
             onRequestRemoveMusic,
+            persistentMusicRef,
         ],
     );
     const musicOutNode = useMemo(
@@ -215,6 +218,7 @@ export const useEditorExtensions = ({
             musicCommandsExtension,
             musicInputExtension,
             MusicNumberingExtension,
+            MusicRailExtension,
             PlaceholderExtension,
             emptyEnterChooserExtension,
             scriptBehaviorExtension,

@@ -3,6 +3,7 @@ import {type Editor as TiptapEditor, EditorContent} from '@tiptap/react';
 import {type CSSProperties, useRef} from 'react';
 
 import type {
+    EditorMusicRemoveRequest,
     PersistentCharacterRef,
     PersistentMusicRef,
 } from '../contracts';
@@ -12,6 +13,7 @@ import styles from './EditorCanvas.module.css';
 import {EmptyEnterBlockChooserOverlay} from './emptyEnterChooser/EmptyEnterBlockChooserOverlay';
 import {HeaderFooterOverlay} from './HeaderFooterOverlay';
 import MusicDraftSuggestionsOverlay from './MusicDraftSuggestionsOverlay';
+import MusicRangeOverlay from './musicRange/MusicRangeOverlay';
 import MusicSuggestionsOverlay from './MusicSuggestionsOverlay';
 
 type EditorCanvasProps = {
@@ -19,6 +21,8 @@ type EditorCanvasProps = {
     persistentCharacters?: readonly PersistentCharacterRef[],
     persistentMusic?: readonly PersistentMusicRef[],
     onMusicAssigned?: (musicId: string) => void,
+    onOpenMusicManager?: (musicId: string) => void,
+    onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
     characterColorSaturation?: number,
     autoFocus?: boolean,
     style?: CSSProperties,
@@ -32,6 +36,8 @@ export const EditorCanvas = ({
     persistentCharacters = [],
     persistentMusic = [],
     onMusicAssigned,
+    onOpenMusicManager,
+    onRequestRemoveMusic,
     characterColorSaturation,
     autoFocus,
     style,
@@ -74,6 +80,12 @@ export const EditorCanvas = ({
             />
             <EmptyEnterBlockChooserOverlay editor={editor} canvasRef={canvasRef} />
             <EditorBlockActionsOverlay editor={editor} canvasRef={canvasRef} />
+            <MusicRangeOverlay
+                editor={editor}
+                canvasRef={canvasRef}
+                onOpenMusicManager={onOpenMusicManager}
+                onRequestRemoveMusic={onRequestRemoveMusic}
+            />
             <HeaderFooterOverlay
                 editor={editor}
                 canvasRef={canvasRef}

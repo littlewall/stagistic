@@ -33,9 +33,6 @@ export const MusicOutNode = Node.create<MusicOutNodeOptions>({
     },
 
     addNodeView() {
-        return ReactNodeViewRenderer(props => createElement(MusicOutPill, {
-            ...props,
-            onOpenMusicManager: this.options.onOpenMusicManager,
-        }));
+        return ReactNodeViewRenderer(props => createElement(MusicOutPill, props));
     },
 });

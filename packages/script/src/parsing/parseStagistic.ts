@@ -115,8 +115,12 @@ const isParenthetical = (value: string) => {
     return trimmed.startsWith('(') && trimmed.endsWith(')');
 };
 
+function getSingleMusicMarker(block: ParsedBlock) {
+    return block.music?.length === 1 ? block.music[0] : null;
+}
+
 const isPureMusicBlock = (block: ParsedBlock, role: 'start' | 'out') => {
-    return block.music?.role === role && block.node.content?.length === 1;
+    return getSingleMusicMarker(block)?.role === role && block.node.content?.length === 1;
 };
 
 const resolveMusicModes = (blocks: ParsedBlock[]): ScriptNode[] => {
@@ -131,56 +135,73 @@ const resolveMusicModes = (blocks: ParsedBlock[]): ScriptNode[] => {
             openMusicNumber = null;
         }
 
-        if (!block.music) {
+        const markers = block.music ?? [];
+
+        if (markers.length === 0) {
             result.push(block.node);
             continue;
         }
 
-        if (!Number.isSafeInteger(block.music.number) || block.music.number < 1) {
-            throw new StagisticParseError('Music numbers must be positive integers.', block.music.line);
-        }
+        const marker = getSingleMusicMarker(block);
+        const next = blocks[index + 1];
+        const nextMarker = next ? getSingleMusicMarker(next) : null;
+        const isHit = marker?.role === 'start'
+            && isPureMusicBlock(block, 'start')
+            && next
+            && isPureMusicBlock(next, 'out')
+            && nextMarker?.number === marker.number;
 
-        if (block.music.role === 'start') {
-            if (seenMusicNumbers.has(block.music.number)) {
-                throw new StagisticParseError(
-                    `Music ${block.music.number} is declared more than once.`,
-                    block.music.line,
-                );
+        if (isHit) {
+            const musicNode = block.node.content?.at(-1);
+
+            if (musicNode?.attrs) {
+                musicNode.attrs[MUSIC_MODE_ATTR] = 'hit';
             }
 
-            seenMusicNumbers.add(block.music.number);
+            result.push(block.node);
+            index += 1;
+            continue;
+        }
 
-            const next = blocks[index + 1];
-            const isHit = next
-                && isPureMusicBlock(next, 'out')
-                && next.music?.number === block.music.number;
+        for (const current of markers) {
+            if (current.role === 'start') {
+                const musicNumber = current.number;
 
-            if (isHit) {
-                const musicContent = block.node.content ?? [];
-                const musicNode = musicContent[musicContent.length - 1];
-
-                if (musicNode?.attrs) {
-                    musicNode.attrs[MUSIC_MODE_ATTR] = 'hit';
+                if (musicNumber === null || !Number.isSafeInteger(musicNumber) || musicNumber < 1) {
+                    throw new StagisticParseError('Music numbers must be positive integers.', current.line);
                 }
 
-                result.push(block.node);
-                index += 1;
+                if (seenMusicNumbers.has(musicNumber)) {
+                    throw new StagisticParseError(
+                        `Music ${musicNumber} is declared more than once.`,
+                        current.line,
+                    );
+                }
+
+                seenMusicNumbers.add(musicNumber);
+                openMusicNumber = musicNumber;
                 continue;
             }
 
-            openMusicNumber = block.music.number;
-            result.push(block.node);
-            continue;
+            if (current.number !== null && openMusicNumber !== current.number) {
+                throw new StagisticParseError(
+                    `@@out ${current.number} does not match the currently open music.`,
+                    current.line,
+                );
+            }
+
+            openMusicNumber = null;
         }
 
-        if (openMusicNumber !== block.music.number) {
-            throw new StagisticParseError(
-                `@@out ${block.music.number} does not match the currently open music.`,
-                block.music.line,
-            );
+        if (isPureMusicBlock(block, 'out') && result.length > 0) {
+            const previous = result.at(-1);
+
+            if (previous) {
+                previous.content = [...previous.content ?? [], ...block.node.content ?? []];
+                continue;
+            }
         }
 
-        openMusicNumber = null;
         result.push(block.node);
     }
 

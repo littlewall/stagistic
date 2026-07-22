@@ -23,6 +23,7 @@ import {
 import type {
     EditorMusicCreateRequest,
     EditorMusicRemoveRequest,
+    PersistentMusicRef,
 } from '../../contracts';
 import styles from './MusicPill.module.css';
 import {
@@ -31,6 +32,7 @@ import {
     type MusicMode,
 } from './MusicPillControls';
 import {
+    cancelMusicDraft,
     findMusicPillElement,
     handleBlurWithin,
     handleFocusWithin,
@@ -45,6 +47,7 @@ interface MusicStartPillProps extends NodeViewProps {
     onOpenMusicManager?: (musicId: string) => void,
     onRequestCreateMusic?: (request: EditorMusicCreateRequest) => void,
     onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
+    persistentMusicRef?: {current: readonly PersistentMusicRef[]},
 }
 
 export const MusicStartPill = ({
@@ -58,6 +61,7 @@ export const MusicStartPill = ({
     onOpenMusicManager,
     onRequestCreateMusic,
     onRequestRemoveMusic,
+    persistentMusicRef,
 }: MusicStartPillProps) => {
     const {
         active, setActive, rootRef,
@@ -128,6 +132,23 @@ export const MusicStartPill = ({
         const nextTitle = value.trim();
         const pos = getPos();
 
+        const existingMusic = persistentMusicRef?.current.find(candidate => {
+            return !candidate.assignmentLabel
+                && candidate.title.trim().toLocaleLowerCase() === nextTitle.toLocaleLowerCase();
+        });
+
+        if (nextTitle && isDraft && existingMusic) {
+            updateAttributes({
+                [MUSIC_ID_ATTR]: existingMusic.id,
+                [MUSIC_TITLE_ATTR]: existingMusic.title,
+                [MUSIC_KIND_ATTR]: existingMusic.kind,
+                [MUSIC_DRAFT_ATTR]: false,
+            });
+            onMusicAssigned?.(existingMusic.id);
+
+            return;
+        }
+
         if (!nextTitle || !isDraft || !onRequestCreateMusic || typeof pos !== 'number') {
             return;
         }
@@ -141,6 +162,7 @@ export const MusicStartPill = ({
         onRequestCreateMusic({
             title: nextTitle,
             blockId: candidateBlockId,
+            cancel: () => cancelMusicDraft(editor, getPos, musicId),
             complete: music => {
                 updateAttributes({
                     [MUSIC_ID_ATTR]: music.id,
@@ -198,7 +220,21 @@ export const MusicStartPill = ({
                     suppressContentEditableWarning
                     spellCheck={false}
                     onInput={event => updateTitle(event.currentTarget.textContent ?? '')}
-                    onBlur={event => commitTitle(event.currentTarget.textContent ?? '')}
+                    onBlur={event => {
+                        const value = event.currentTarget.textContent ?? '';
+
+                        if (isDraft && !value.trim()) {
+                            deleteNode();
+
+                            return;
+                        }
+
+                        commitTitle(value);
+
+                        if (isDraft) {
+                            requestMusicCreation(value);
+                        }
+                    }}
                     onKeyDown={event => {
                         event.stopPropagation();
 
@@ -207,16 +243,26 @@ export const MusicStartPill = ({
 
                             event.preventDefault();
                             commitTitle(currentTitle);
-                            requestMusicCreation(currentTitle);
                             event.currentTarget.blur();
                         }
 
                         if (event.key === 'Escape') {
                             event.preventDefault();
+                            if (isDraft) {
+                                deleteNode();
+
+                                return;
+                            }
+
                             setDraftTitle(title);
                             event.currentTarget.textContent = title;
                             updateAttributes({[MUSIC_TITLE_ATTR]: title});
                             event.currentTarget.blur();
+                        }
+
+                        if (event.key === 'Backspace' && isDraft && !(event.currentTarget.textContent ?? '')) {
+                            event.preventDefault();
+                            deleteNode();
                         }
                     }}
                 />

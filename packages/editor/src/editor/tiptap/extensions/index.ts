@@ -42,6 +42,7 @@ export {
     MusicInputExtension,
 } from './MusicInputExtension';
 export {MusicNumberingExtension} from './MusicNumberingExtension';
+export {MusicRailExtension} from './musicRail/MusicRailExtension';
 export {ScriptBehaviorExtension} from './ScriptBehaviorExtension';
 
 // ─── Decorations ─────────────────────────────────────────────────────────────

@@ -144,6 +144,29 @@ LYRICS TWO`);
         ]);
     });
 
+    it('serializes non-stage and orphan outs as structural !@@out lines', () => {
+        const document: ScriptDocument = {
+            type: 'doc',
+            content: [
+                {type: 'stageDirection',
+                    content: [
+                        {
+                            type: 'musicStart', attrs: {mode: 'open', title: 'Night'},
+                        },
+                    ]},
+                {type: 'character', content: [text('JOHN')]},
+                {type: 'dialogue',
+                    content: [text('The music dies.'), {type: 'musicOut'}]},
+                {type: 'stageDirection', content: [{type: 'musicOut'}]},
+            ],
+        };
+
+        const result = serializeStagistic(document, {scriptTitle: 'Test'});
+
+        expect(result).toContain('The music dies.\n!@@out 1');
+        expect(result).toContain('!@@out');
+    });
+
     it('serializes scenes with a single hash when the document has no acts', () => {
         const document: ScriptDocument = {
             type: 'doc',

@@ -14,6 +14,13 @@ export interface MusicBlockInput {
     musicAtoms: MusicAtom[],
 }
 
+export type MusicEndKind =
+    | 'hit'
+    | 'explicit'
+    | 'next-music'
+    | 'scene-end'
+    | 'document-end';
+
 export interface DerivedMusic {
     musicId: string,
     /** 1-based scene ordinal (global across acts); 0 before the first scene. */
@@ -26,5 +33,14 @@ export interface DerivedMusic {
     title: string,
     kind: string | null,
     startBlockId: string,
+    /** Block that owns an explicit out marker. Implicit boundaries are not persisted. */
     endBlockId: string | null,
+    /** Block whose trailing boundary is the effective end of the music. */
+    effectiveEndBlockId: string,
+    endKind: MusicEndKind,
+}
+
+export interface DerivedMusicTimeline {
+    music: DerivedMusic[],
+    orphanOutBlockIds: string[],
 }

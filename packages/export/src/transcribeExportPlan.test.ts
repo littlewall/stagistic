@@ -87,7 +87,7 @@ describe('transcribeExportPlan', () => {
             .filter(isVisualLine)
             .flatMap(item => item.runs.map(run => run.text));
 
-        expect(text).toContain('1. dddddddddd');
+        expect(text).toContain('1) dddddddddd');
     });
 
     it('uppercases character tags inside stage directions', () => {
@@ -132,9 +132,25 @@ describe('transcribeExportPlan', () => {
         const musicRun = transcript.items
             .filter(isVisualLine)
             .flatMap(item => item.runs)
-            .find(run => run.text.includes('1. Knock'));
+            .find(run => run.text.includes('1) Knock'));
 
         expect(musicRun?.bold).toBe(true);
+    });
+
+    it('does not print an explicit or orphan music out label', () => {
+        const transcript = transcribeExportPlan(plan([
+            {
+                type: 'stageDirection',
+                attrs: {id: 'sd1', blockType: 'stageDirection'},
+                content: [{type: 'musicOut'}],
+            },
+        ]), DEFAULT_EDITOR_SETTINGS);
+        const text = transcript.items
+            .filter(isVisualLine)
+            .flatMap(item => item.runs.map(run => run.text))
+            .join('');
+
+        expect(text).not.toContain('out');
     });
 
     it('keeps multi-character cue lines tight (no spaces around slashes), matching the editor', () => {

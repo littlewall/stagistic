@@ -1,6 +1,7 @@
 import {
     MUSIC_ID_ATTR,
     MUSIC_KIND_ATTR,
+    MUSIC_OUT_NODE_NAME,
     MUSIC_START_NODE_NAME,
     MUSIC_TITLE_ATTR,
     type MusicMode,
@@ -13,6 +14,7 @@ import {
     type Transaction,
 } from '@tiptap/pm/state';
 
+import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
 import {IMMEDIATE_SAVE_META_KEY} from '../../../saveMeta';
 import {
     isCaretBeforeTrailingMusic,
@@ -22,12 +24,21 @@ import {
     moveCaretToNextBlockAfterTrailingMusic,
 } from './musicCaret';
 import {
-    blockHasMusicAtom,
+    blockHasMusicStart,
     buildDeleteMusicStart,
-    buildInsertMusicOut,
     buildInsertMusicStart,
+    buildUpdateMusicMode,
+    focusMusicTitle,
     resolveMusicTargetBlock,
+    resolveScriptTargetBlock,
 } from './musicCommands';
+import {
+    buildMoveOrphanMusicOut,
+    buildRemoveMusicOutAtBlock,
+    buildSetMusicOutAtBlock,
+    findMusicAtomRange,
+    resolveMusicOutCandidate,
+} from './musicOutCommands';
 
 const isMusicPillTarget = (target: EventTarget | null) => {
     return target instanceof Element && target.closest('[data-music-pill]') !== null;
@@ -56,7 +67,7 @@ const resolveTrailingMusicClickPosition = (
         return null;
     }
 
-    return resolveMusicTargetBlock(state, blockElement.dataset.id)?.to ?? null;
+    return resolveScriptTargetBlock(state, blockElement.dataset.id)?.to ?? null;
 };
 
 type PositionRange = {
@@ -179,7 +190,12 @@ declare module '@tiptap/core' {
                 },
             ) => ReturnType,
             insertMusicOut: (blockId: string | null) => ReturnType,
+            insertMusicDraft: (blockId: string | null) => ReturnType,
+            setMusicOutAtBlock: (blockId: string | null) => ReturnType,
+            removeMusicOutAtBlock: (blockId: string) => ReturnType,
+            moveOrphanMusicOut: (sourceBlockId: string, targetBlockId: string) => ReturnType,
             deleteMusicStart: (pos: number) => ReturnType,
+            updateMusicMode: (pos: number, mode: MusicMode) => ReturnType,
             unassignMusic: (musicId: string) => ReturnType,
             updateMusicMetadata: (
                 musicId: string,
@@ -202,7 +218,7 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
             insertMusicStart: (blockId, title, mode = 'open', options) => ({state, dispatch}) => {
                 const block = resolveMusicTargetBlock(state, blockId);
 
-                if (!block || blockHasMusicAtom(block)) {
+                if (!block || blockHasMusicStart(block)) {
                     return false;
                 }
 
@@ -212,16 +228,69 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
 
                 return true;
             },
-            insertMusicOut: blockId => ({state, dispatch}) => {
+            insertMusicDraft: blockId => ({state, dispatch}) => {
                 const block = resolveMusicTargetBlock(state, blockId);
 
-                if (!block || blockHasMusicAtom(block)) {
+                if (!block || blockHasMusicStart(block)) {
                     return false;
                 }
 
                 if (dispatch) {
-                    dispatch(buildInsertMusicOut(state, block));
+                    dispatch(buildInsertMusicStart(state, block, '', 'open', {isDraft: true}));
+                    focusMusicTitle(this.editor.view.dom, block.id);
                 }
+
+                return true;
+            },
+            insertMusicOut: blockId => ({commands}) => commands.setMusicOutAtBlock(blockId),
+            setMusicOutAtBlock: blockId => ({state, dispatch}) => {
+                const block = resolveScriptTargetBlock(state, blockId);
+
+                if (!block) {
+                    return false;
+                }
+
+                if (findMusicAtomRange(block, MUSIC_OUT_NODE_NAME)) {
+                    return true;
+                }
+
+                const snapshot = buildIndexSnapshotFromPmDoc(state.doc);
+
+                if (!resolveMusicOutCandidate(snapshot, block.id)) {
+                    return false;
+                }
+
+                const tr = buildSetMusicOutAtBlock(state, block.id);
+
+                if (dispatch && tr) {
+                    dispatch(tr);
+                }
+
+                return true;
+            },
+            removeMusicOutAtBlock: blockId => ({state, dispatch}) => {
+                const tr = buildRemoveMusicOutAtBlock(state, blockId);
+
+                if (!tr) {
+                    return false;
+                }
+
+                dispatch?.(tr);
+
+                return true;
+            },
+            moveOrphanMusicOut: (sourceBlockId, targetBlockId) => ({state, dispatch}) => {
+                const transaction = buildMoveOrphanMusicOut(
+                    state,
+                    sourceBlockId,
+                    targetBlockId,
+                );
+
+                if (!transaction) {
+                    return false;
+                }
+
+                dispatch?.(transaction);
 
                 return true;
             },
@@ -241,6 +310,17 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
                         this.options.onMusicUnassigned?.(musicId);
                     }
                 }
+
+                return true;
+            },
+            updateMusicMode: (pos, mode) => ({state, dispatch}) => {
+                const node = state.doc.nodeAt(pos);
+
+                if (!node || node.type.name !== MUSIC_START_NODE_NAME) {
+                    return false;
+                }
+
+                dispatch?.(buildUpdateMusicMode(state, pos, node, mode));
 
                 return true;
             },
@@ -338,6 +418,37 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
                         }
 
                         const {selection} = view.state;
+
+                        if (
+                            event.key.toLocaleLowerCase() === 'o'
+                            && event.shiftKey
+                            && (event.metaKey || event.ctrlKey)
+                            && !event.altKey
+                            && !event.isComposing
+                        ) {
+                            const block = resolveScriptTargetBlock(view.state);
+
+                            if (!block) {
+                                return false;
+                            }
+
+                            const hasOut = findMusicAtomRange(block, MUSIC_OUT_NODE_NAME) !== null;
+                            const snapshot = buildIndexSnapshotFromPmDoc(view.state.doc);
+
+                            if (!hasOut && !resolveMusicOutCandidate(snapshot, block.id)) {
+                                return false;
+                            }
+
+                            event.preventDefault();
+
+                            const tr = hasOut ? null : buildSetMusicOutAtBlock(view.state, block.id);
+
+                            if (tr) {
+                                view.dispatch(tr);
+                            }
+
+                            return true;
+                        }
 
                         if ((event.key === 'Backspace' || event.key === 'Delete') && !selection.empty) {
                             const tr = buildDeleteSelectionPreservingMusicAtoms(view.state);

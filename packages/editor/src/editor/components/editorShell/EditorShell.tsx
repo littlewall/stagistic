@@ -21,6 +21,7 @@ import {
 } from '../../characters/characterHighlight';
 import type {
     EditorLayoutProps,
+    EditorMusicRemoveRequest,
     PersistentCharacterRef,
     PersistentMusicRef,
 } from '../../contracts';
@@ -35,6 +36,8 @@ interface EditorShellCanvasProps {
     persistentCharacters?: readonly PersistentCharacterRef[],
     persistentMusic?: readonly PersistentMusicRef[],
     onMusicAssigned?: (musicId: string) => void,
+    onOpenMusicManager?: (musicId: string) => void,
+    onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
     characterColorSaturation?: number,
     headerFooter: HeaderFooterSettings,
     scriptTitle?: string,
@@ -75,6 +78,8 @@ export const EditorShell = ({
         persistentCharacters,
         persistentMusic,
         onMusicAssigned,
+        onOpenMusicManager,
+        onRequestRemoveMusic,
         characterColorSaturation,
         headerFooter,
         scriptTitle,
@@ -197,6 +202,8 @@ export const EditorShell = ({
                         persistentCharacters={persistentCharacters}
                         persistentMusic={persistentMusic}
                         onMusicAssigned={onMusicAssigned}
+                        onOpenMusicManager={onOpenMusicManager}
+                        onRequestRemoveMusic={onRequestRemoveMusic}
                         characterColorSaturation={characterColorSaturation}
                         autoFocus={autoFocus}
                         headerFooter={headerFooter}

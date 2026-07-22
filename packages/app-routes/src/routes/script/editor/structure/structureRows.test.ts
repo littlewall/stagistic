@@ -22,6 +22,7 @@ describe('scene numbering', () => {
                 },
             ],
             music: [],
+            orphanMusicOutBlockIds: [],
         });
 
         const scenes = state.groups.flatMap(group => group.scenes);

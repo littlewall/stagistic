@@ -29,6 +29,34 @@ describe('parseStagistic', () => {
             .toThrow(StagisticParseError);
     });
 
+    it('attaches a standalone out to the previous content block and preserves a shared out/start boundary', () => {
+        const standalone = parseStagistic(`!Cue @@music 3 "OLD"
+
+JOHN
+The music dies under the final word.
+!@@out 3`);
+        const shared = parseStagistic(`!Cue @@music 3 "OLD"
+
+!The overture cuts. @@out 3 @@music 4 "NIGHT"`);
+
+        const dialogue = standalone.document.content[2];
+        const sharedBoundary = shared.document.content[1];
+
+        expect(dialogue?.type).toBe('dialogue');
+        expect(dialogue?.content?.at(-1)?.type).toBe(MUSIC_OUT_NODE_NAME);
+        expect(sharedBoundary?.content?.map(node => node.type)).toEqual([
+            'text',
+            MUSIC_OUT_NODE_NAME,
+            MUSIC_START_NODE_NAME,
+        ]);
+    });
+
+    it('round-trips a bare orphan out without assigning it a number', () => {
+        const result = parseStagistic('!@@out');
+
+        expect(result.document.content[0]?.content?.[0]?.type).toBe(MUSIC_OUT_NODE_NAME);
+    });
+
     it('parses the complete syntax and title-page frontmatter', () => {
         const result = parseStagistic(`---
 title: When Night Falls

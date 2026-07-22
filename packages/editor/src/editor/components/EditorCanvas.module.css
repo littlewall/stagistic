@@ -1,5 +1,6 @@
 .canvas {
     --block-controls-gutter: clamp(calc(10px * var(--size-scale)), 1vw, calc(28px * var(--size-scale)));
+    --music-rail-inset: calc(var(--block-controls-gutter) + var(--space-md));
 
     scrollbar-gutter: stable;
     position: relative;

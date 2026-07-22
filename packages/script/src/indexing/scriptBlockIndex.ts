@@ -17,14 +17,14 @@ import {
 import {
     collectMusicAtoms,
     type DerivedMusic,
-    deriveMusic,
+    deriveMusicTimeline,
     type MusicBlockInput,
 } from '../music';
 import {
     extractCharacterKeys,
 } from '../syntax';
 
-export const SCRIPT_BLOCK_INDEX_SCHEMA_VERSION = 1;
+export const SCRIPT_BLOCK_INDEX_SCHEMA_VERSION = 2;
 
 export interface IndexedScriptCharacterRef {
     key: string,
@@ -44,6 +44,7 @@ export interface IndexedScriptBlock {
 export interface ScriptBlockIndexSnapshot {
     blocks: IndexedScriptBlock[],
     music: DerivedMusic[],
+    orphanMusicOutBlockIds: string[],
 }
 
 export interface BuildScriptBlockIndexResult {
@@ -122,6 +123,7 @@ export const buildScriptBlockIndex = (
             snapshot: {
                 blocks: [],
                 music: [],
+                orphanMusicOutBlockIds: [],
             },
             blockCount: 0,
         };
@@ -186,10 +188,13 @@ export const buildScriptBlockIndex = (
 
     walkNodes(value.content);
 
+    const musicTimeline = deriveMusicTimeline(musicBlockInputs);
+
     return {
         snapshot: {
             blocks,
-            music: deriveMusic(musicBlockInputs),
+            music: musicTimeline.music,
+            orphanMusicOutBlockIds: musicTimeline.orphanOutBlockIds,
         },
         blockCount: blocks.length,
     };

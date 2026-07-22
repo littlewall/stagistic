@@ -11,8 +11,9 @@ import type {
 import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
 import {getActiveScriptBlockFromState} from '../../scriptCore';
 import {
-    blockHasMusicAtom,
+    blockHasMusicStart,
     buildInsertMusicStart,
+    focusMusicTitle,
     resolveMusicTargetBlock,
     resolveNewMusicNumber,
 } from '../music/musicCommands';
@@ -33,7 +34,6 @@ import styles from './musicCompose.module.css';
 import {
     buildAbandonMusic,
     buildCommitMusic,
-    buildOpenMusicCompose,
 } from './transactions';
 
 export interface MusicComposePluginOptions {
@@ -132,11 +132,12 @@ export const createMusicComposePlugin = (
 
                 const block = getActiveScriptBlockFromState(state);
 
-                if (!block || block.blockType !== STAGE_DIRECTION_NODE_TYPE || blockHasMusicAtom(block)) {
+                if (!block || block.blockType !== STAGE_DIRECTION_NODE_TYPE || blockHasMusicStart(block)) {
                     return false;
                 }
 
-                view.dispatch(buildOpenMusicCompose(state, block));
+                view.dispatch(buildInsertMusicStart(state, block, '', 'open', {isDraft: true}));
+                focusMusicTitle(view.dom, block.id);
 
                 return true;
             },
@@ -189,7 +190,7 @@ export const createMusicComposePlugin = (
                         complete: music => {
                             const targetBlock = resolveMusicTargetBlock(view.state, blockId);
 
-                            if (!targetBlock || blockHasMusicAtom(targetBlock)) {
+                            if (!targetBlock || blockHasMusicStart(targetBlock)) {
                                 return false;
                             }
 

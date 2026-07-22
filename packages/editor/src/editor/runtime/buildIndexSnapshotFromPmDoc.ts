@@ -2,7 +2,7 @@ import {
     canBlockTypeHaveCharacterTags,
     collectCharacterTags,
     collectMusicAtoms,
-    deriveMusic,
+    deriveMusicTimeline,
     extractCharacterKeys,
     type IndexedScriptBlock,
     type IndexedScriptCharacterRef,
@@ -164,11 +164,15 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
         return {
             blocks: [],
             music: [],
+            orphanMusicOutBlockIds: [],
         };
     }
 
+    const musicTimeline = deriveMusicTimeline(musicBlockInputs);
+
     return {
         blocks,
-        music: deriveMusic(musicBlockInputs),
+        music: musicTimeline.music,
+        orphanMusicOutBlockIds: musicTimeline.orphanOutBlockIds,
     };
 };

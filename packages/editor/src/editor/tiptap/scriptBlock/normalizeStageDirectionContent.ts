@@ -38,7 +38,7 @@ const musicNodeToText = (
 };
 
 const isMusicNode = (node: ProseMirrorNode) => {
-    return node.type.name === MUSIC_START_NODE_NAME || node.type.name === MUSIC_OUT_NODE_NAME;
+    return node.type.name === MUSIC_START_NODE_NAME;
 };
 
 export const normalizeFormerStageDirectionContent = (

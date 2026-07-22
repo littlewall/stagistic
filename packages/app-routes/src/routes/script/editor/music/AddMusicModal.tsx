@@ -27,6 +27,7 @@ const KIND_OPTIONS: FormSelectOption[] = [{value: 'song', label: 'Song'}, {value
 interface AddMusicModalProps {
     isOpen: boolean,
     initialTitle?: string,
+    onCancel: () => void,
     onClose: () => void,
     onCreate: (input: CreateScriptMusicInput) => unknown,
 }
@@ -34,6 +35,7 @@ interface AddMusicModalProps {
 export const AddMusicModal = ({
     isOpen,
     initialTitle = '',
+    onCancel,
     onClose,
     onCreate,
 }: AddMusicModalProps) => {
@@ -95,7 +97,7 @@ export const AddMusicModal = ({
     return (
         <ModalDialog
             isOpen={isOpen}
-            onClose={onClose}
+            onClose={onCancel}
             ariaLabel="Add music"
             panelClassName={styles.panel}
         >
@@ -136,7 +138,7 @@ export const AddMusicModal = ({
                     </Button>
                     <Button
                         variant="ghost"
-                        onPress={onClose}
+                        onPress={onCancel}
                     >
                         Cancel
                     </Button>

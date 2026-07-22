@@ -20,8 +20,25 @@ import {
     findScriptBlockByIdFromState,
     getActiveScriptBlockFromState,
 } from '../../scriptCore';
+import {findMusicAtomRange} from './musicOutCommands';
 
 const STAGE_DIRECTION_NODE_TYPE = 'stageDirection';
+
+export const focusMusicTitle = (editorDom: HTMLElement, blockId: string) => {
+    const focus = () => {
+        const block = Array.from(editorDom.querySelectorAll<HTMLElement>('[data-id]'))
+            .find(candidate => candidate.dataset.id === blockId);
+        const input = block?.querySelector<HTMLElement>('[data-music-title-input="start"]');
+
+        input?.focus();
+
+        return Boolean(input);
+    };
+
+    if (!focus()) {
+        window.requestAnimationFrame(focus);
+    }
+};
 
 /**
  * Resolves the stage-direction block a music should attach to: an explicit
@@ -39,6 +56,15 @@ export const resolveMusicTargetBlock = (
     return block && block.blockType === STAGE_DIRECTION_NODE_TYPE ? block : null;
 };
 
+export const resolveScriptTargetBlock = (
+    state: EditorState,
+    blockId?: string | null,
+): ActiveScriptBlock | null => {
+    return blockId
+        ? findScriptBlockByIdFromState(state, blockId)
+        : getActiveScriptBlockFromState(state);
+};
+
 /**
  * True when the block already holds a music atom. A stage direction carries at
  * most one music marker — a start OR an out, never both (§4.1).
@@ -53,6 +79,10 @@ export const blockHasMusicAtom = (block: ActiveScriptBlock): boolean => {
     });
 
     return found;
+};
+
+export const blockHasMusicStart = (block: ActiveScriptBlock): boolean => {
+    return findMusicAtomRange(block, MUSIC_START_NODE_NAME) !== null;
 };
 
 /** The single music atom always sits at the end of the block (§4.1, §5.3). */
@@ -105,32 +135,6 @@ export const resolveNewMusicNumber = (
     });
 };
 
-export const buildInsertMusicOut = (
-    state: EditorState,
-    block: ActiveScriptBlock,
-): Transaction => {
-    const node = state.schema.nodes[MUSIC_OUT_NODE_NAME].create();
-
-    return state.tr.insert(block.to, node);
-};
-
-type PositionRange = {
-    from: number,
-    to: number,
-};
-
-const findMusicOutRange = (state: EditorState, block: ActiveScriptBlock): PositionRange | null => {
-    let range: PositionRange | null = null;
-
-    state.doc.nodesBetween(block.from, block.to, (child, childPos) => {
-        if (child.type.name === MUSIC_OUT_NODE_NAME) {
-            range = {from: childPos, to: childPos + child.nodeSize};
-        }
-    });
-
-    return range;
-};
-
 /**
  * Deletes a music-start atom. When it's an open music with a paired music-out
  * later in the doc (§3.1 pairing), both atoms are removed in one
@@ -148,7 +152,7 @@ export const buildDeleteMusicStart = (
 
     if (music?.mode === 'open' && music.endBlockId && music.endBlockId !== music.startBlockId) {
         const endBlock = findScriptBlockByIdFromState(state, music.endBlockId);
-        const outRange = endBlock ? findMusicOutRange(state, endBlock) : null;
+        const outRange = endBlock ? findMusicAtomRange(endBlock, MUSIC_OUT_NODE_NAME) : null;
 
         if (outRange) {
             tr.delete(outRange.from, outRange.to);
@@ -156,4 +160,41 @@ export const buildDeleteMusicStart = (
     }
 
     return tr.delete(pos, pos + node.nodeSize);
+};
+
+export const buildUpdateMusicMode = (
+    state: EditorState,
+    pos: number,
+    node: ProseMirrorNode,
+    mode: MusicMode,
+): Transaction => {
+    const currentMode = node.attrs[MUSIC_MODE_ATTR] === 'hit' ? 'hit' : 'open';
+
+    if (currentMode !== 'open' || mode !== 'hit') {
+        return state.tr.setNodeMarkup(pos, undefined, {
+            ...node.attrs,
+            [MUSIC_MODE_ATTR]: mode,
+        });
+    }
+
+    const musicId = String(node.attrs[MUSIC_ID_ATTR] ?? '');
+    const snapshot = buildIndexSnapshotFromPmDoc(state.doc);
+    const music = snapshot.music.find(candidate => candidate.musicId === musicId);
+    const tr = state.tr;
+
+    if (music?.endBlockId && music.endBlockId !== music.startBlockId) {
+        const endBlock = findScriptBlockByIdFromState(state, music.endBlockId);
+        const outRange = endBlock ? findMusicAtomRange(endBlock, MUSIC_OUT_NODE_NAME) : null;
+
+        if (outRange) {
+            tr.delete(outRange.from, outRange.to);
+        }
+    }
+
+    const mappedPos = tr.mapping.map(pos, 1);
+
+    return tr.setNodeMarkup(mappedPos, undefined, {
+        ...node.attrs,
+        [MUSIC_MODE_ATTR]: mode,
+    });
 };

@@ -1,3 +1,7 @@
+import {
+    MUSIC_DRAFT_ATTR,
+    MUSIC_ID_ATTR,
+} from '@stagistic/script';
 import type {NodeViewProps} from '@tiptap/react';
 import {
     type FocusEvent,
@@ -84,6 +88,29 @@ export const findMusicPillElement = (
     const pills = editor.view.dom.querySelectorAll<HTMLElement>(`[data-music-pill="${role}"]`);
 
     return Array.from(pills).find(pill => pill.dataset.musicId === musicId) ?? null;
+};
+
+export const cancelMusicDraft = (
+    editor: NodeViewProps['editor'],
+    getPos: NodeViewProps['getPos'],
+    musicId: string,
+) => {
+    const currentPos = getPos();
+
+    if (typeof currentPos !== 'number') {
+        return false;
+    }
+
+    const currentNode = editor.state.doc.nodeAt(currentPos);
+
+    if (
+        currentNode?.attrs[MUSIC_DRAFT_ATTR] !== true
+        || currentNode.attrs[MUSIC_ID_ATTR] !== musicId
+    ) {
+        return false;
+    }
+
+    return editor.commands.deleteMusicStart(currentPos);
 };
 
 export const scrollToMusicPill = (

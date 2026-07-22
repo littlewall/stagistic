@@ -89,9 +89,13 @@ const serializeTextNode = (node: ScriptNode) => {
 const serializeInlineContent = (
     nodes: ScriptNode[] | undefined,
     state: SerializationState,
-): {text: string, hitOut: string | null} => {
+    options: {includeOut?: boolean} = {},
+): {
+    text: string, hitOut: string | null, outMarkers: string[],
+} => {
     let text = '';
     let hitOut: string | null = null;
+    const outMarkers: string[] = [];
 
     const content = nodes ?? [];
 
@@ -118,12 +122,17 @@ const serializeInlineContent = (
         }
 
         if (node.type === MUSIC_OUT_NODE_NAME) {
-            if (state.openMusicNumber !== null) {
-                const marker = `@@out ${state.openMusicNumber}`;
+            const marker = state.openMusicNumber !== null
+                ? `@@out ${state.openMusicNumber}`
+                : '@@out';
 
+            if (options.includeOut !== false) {
                 text = text.trimEnd() ? `${text.trimEnd()} ${marker}` : marker;
-                state.openMusicNumber = null;
+            } else {
+                outMarkers.push(marker);
             }
+
+            state.openMusicNumber = null;
 
             continue;
         }
@@ -170,10 +179,12 @@ const serializeInlineContent = (
             continue;
         }
 
-        text += serializeInlineContent(node.content, state).text;
+        text += serializeInlineContent(node.content, state, options).text;
     }
 
-    return {text, hitOut};
+    return {
+        text, hitOut, outMarkers,
+    };
 };
 
 const serializeCharacterCue = (node: ScriptNode) => {
@@ -190,29 +201,30 @@ const serializeCharacterCue = (node: ScriptNode) => {
 
 const serializeSpeechBlock = (node: ScriptNode, state: SerializationState) => {
     const blockType = getScriptBlockNodeType(node);
-    const {text, hitOut} = serializeInlineContent(node.content, state);
+    const {
+        text, hitOut, outMarkers,
+    } = serializeInlineContent(node.content, state, {includeOut: false});
+    let serialized: string;
 
     if ((blockType === 'dialogue' || blockType === 'lyrics') && text.length === 0) {
-        return '~';
-    }
-
-    if (blockType === 'stageDirection') {
-        return hitOut ? `!${text} ${hitOut}` : `!${text}`;
-    }
-
-    if (blockType === 'aside') {
+        serialized = '~';
+    } else if (blockType === 'stageDirection') {
+        serialized = hitOut ? `!${text} ${hitOut}` : `!${text}`;
+    } else if (blockType === 'aside') {
         const trimmed = text.trim();
 
-        return trimmed.startsWith('(') && trimmed.endsWith(')') ? trimmed : `(${trimmed})`;
-    }
-
-    if (blockType === 'lyrics') {
+        serialized = trimmed.startsWith('(') && trimmed.endsWith(')') ? trimmed : `(${trimmed})`;
+    } else if (blockType === 'lyrics') {
         const match = (/^(\t*)(.*)$/su).exec(text);
 
-        return `${match?.[1] ?? ''}${(match?.[2] ?? '').toUpperCase()}`;
+        serialized = `${match?.[1] ?? ''}${(match?.[2] ?? '').toUpperCase()}`;
+    } else {
+        serialized = text;
     }
 
-    return text;
+    return outMarkers.length > 0
+        ? `${serialized}\n${outMarkers.map(marker => `!${marker}`).join('\n')}`
+        : serialized;
 };
 
 const SPEECH_CONTINUATION_TYPES = [

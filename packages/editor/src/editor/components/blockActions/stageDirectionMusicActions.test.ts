@@ -7,6 +7,8 @@ import {
 
 import {
     formatOpenMusicDisplayName,
+    formatSetMusicOutLabel,
+    resolveMusicBoundaryAvailabilityFromSnapshot,
     resolveNewMusicNumber,
     resolveOpenMusicAtBlock,
 } from './stageDirectionMusicActions';
@@ -40,6 +42,8 @@ const music = (
     kind: null,
     startBlockId,
     endBlockId,
+    effectiveEndBlockId: endBlockId ?? startBlockId,
+    endKind: endBlockId ? 'explicit' : 'document-end',
 });
 
 const sceneBlock = (
@@ -59,12 +63,13 @@ describe('resolveOpenMusicAtBlock', () => {
                 block('target', 2),
             ],
             music: [music('first', 1, 'start-1'), music('second', 2, 'start-2')],
+            orphanMusicOutBlockIds: [],
         };
 
         expect(resolveOpenMusicAtBlock(snapshot, 'target')?.musicId).toBe('second');
     });
 
-    it('returns null after the latest music was explicitly closed', () => {
+    it('returns closed music so its explicit out can move', () => {
         const snapshot: ScriptBlockIndexSnapshot = {
             blocks: [
                 block('start', 0),
@@ -72,18 +77,56 @@ describe('resolveOpenMusicAtBlock', () => {
                 block('target', 2),
             ],
             music: [music('closed', 1, 'start', 'out')],
+            orphanMusicOutBlockIds: [],
         };
 
-        expect(resolveOpenMusicAtBlock(snapshot, 'target')).toBeNull();
+        expect(resolveOpenMusicAtBlock(snapshot, 'target')?.musicId).toBe('closed');
     });
 
     it('returns null across a scene boundary', () => {
         const snapshot: ScriptBlockIndexSnapshot = {
             blocks: [block('start', 0, 'scene-1'), block('target', 1, 'scene-2')],
             music: [music('previous-scene', 1, 'start')],
+            orphanMusicOutBlockIds: [],
         };
 
         expect(resolveOpenMusicAtBlock(snapshot, 'target')).toBeNull();
+    });
+});
+
+describe('resolveMusicBoundaryAvailabilityFromSnapshot', () => {
+    it('resolves rail actions without reading the ProseMirror document', () => {
+        const snapshot: ScriptBlockIndexSnapshot = {
+            blocks: [block('start', 0), block('target', 1)],
+            music: [music('open', 0, 'start')],
+            orphanMusicOutBlockIds: [],
+        };
+
+        expect(resolveMusicBoundaryAvailabilityFromSnapshot(snapshot, 'target', {
+            hasMusicStart: false,
+            hasMusicOut: false,
+        })).toMatchObject({
+            canAddMusic: true,
+            outAction: 'add',
+            outMusic: {musicId: 'open'},
+        });
+    });
+
+    it('uses precomputed atom flags for drafts and orphan outs', () => {
+        const snapshot: ScriptBlockIndexSnapshot = {
+            blocks: [block('target', 0)],
+            music: [],
+            orphanMusicOutBlockIds: ['target'],
+        };
+
+        expect(resolveMusicBoundaryAvailabilityFromSnapshot(snapshot, 'target', {
+            hasMusicStart: true,
+            hasMusicOut: true,
+        })).toMatchObject({
+            canAddMusic: false,
+            outAction: 'remove',
+            isOrphanOut: true,
+        });
     });
 });
 
@@ -92,6 +135,7 @@ describe('resolveNewMusicNumber', () => {
         const snapshot: ScriptBlockIndexSnapshot = {
             blocks: [sceneBlock('scene-1', 0), block('target', 1)],
             music: [],
+            orphanMusicOutBlockIds: [],
         };
 
         expect(resolveNewMusicNumber(snapshot, 'target')).toBe('1)');
@@ -106,13 +150,22 @@ describe('resolveNewMusicNumber', () => {
                 block('last', 3),
             ],
             music: [music('first-music', 0, 'first'), music('last-music', 1, 'last')],
+            orphanMusicOutBlockIds: [],
         };
 
         expect(resolveNewMusicNumber(snapshot, 'target')).toBe('1.B)');
     });
 
     it('returns null for an unknown block', () => {
-        expect(resolveNewMusicNumber({blocks: [], music: []}, 'missing')).toBeNull();
+        expect(resolveNewMusicNumber({
+            blocks: [], music: [], orphanMusicOutBlockIds: [],
+        }, 'missing')).toBeNull();
+    });
+});
+
+describe('formatSetMusicOutLabel', () => {
+    it('wraps the music number in parentheses', () => {
+        expect(formatSetMusicOutLabel(music('music', 0, 'start'))).toBe('Set out here (1.A)');
     });
 });
 

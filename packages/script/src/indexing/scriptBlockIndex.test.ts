@@ -20,7 +20,12 @@ const doc = (content: ScriptNode[]): ScriptDocument => ({type: 'doc', content});
 
 describe('buildScriptBlockIndex', () => {
     it('returns an empty snapshot for nullish or empty documents', () => {
-        const empty = {snapshot: {blocks: [], music: []}, blockCount: 0};
+        const empty = {
+            snapshot: {
+                blocks: [], music: [], orphanMusicOutBlockIds: [],
+            },
+            blockCount: 0,
+        };
 
         expect(buildScriptBlockIndex(null)).toEqual(empty);
         expect(buildScriptBlockIndex(undefined)).toEqual(empty);
@@ -149,8 +154,18 @@ describe('buildScriptBlockIndex', () => {
 
         expect(snapshot.music).toEqual([
             {
-                musicId: 'c1', sceneNumber: 0, indexInScene: 0, sceneMusicCount: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2',
+                musicId: 'c1', sceneNumber: 0, indexInScene: 0, sceneMusicCount: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2', effectiveEndBlockId: 'b2', endKind: 'explicit',
             },
         ]);
+    });
+
+    it('projects orphan music out block ids', () => {
+        const {snapshot} = buildScriptBlockIndex(doc([
+            {
+                type: 'dialogue', attrs: {id: 'b1'}, content: [{type: 'musicOut'}],
+            },
+        ]));
+
+        expect(snapshot.orphanMusicOutBlockIds).toEqual(['b1']);
     });
 });

@@ -56,8 +56,6 @@ const computeSignature = (doc: ProseMirrorNode): string => {
             parts.push('S');
         } else if (name === MUSIC_START_NODE_NAME) {
             parts.push(`s:${String(node.attrs[MUSIC_ID_ATTR] ?? '')}:${String(node.attrs[MUSIC_TITLE_ATTR] ?? '')}:${String(node.attrs[MUSIC_MODE_ATTR] ?? '')}`);
-        } else if (name === MUSIC_OUT_NODE_NAME) {
-            parts.push('o');
         }
 
         return true;
@@ -113,19 +111,17 @@ const buildDecorations = (doc: ProseMirrorNode): DecorationSet => {
         return true;
     });
 
-    const labels = buildMusicLabelMap(deriveMusic(musicBlockInputs));
+    const derivedMusic = deriveMusic(musicBlockInputs);
+    const labels = buildMusicLabelMap(derivedMusic);
     const decorations = atomSites.map(site => {
         if (site.name === MUSIC_START_NODE_NAME) {
             return Decoration.node(site.pos, site.pos + site.size, {}, {musicNumber: labels.byMusicId.get(site.musicId) ?? ''});
         }
 
-        const outParts = labels.outPartsByEndBlockId.get(site.blockId);
+        const music = derivedMusic.find(entry => entry.endBlockId === site.blockId);
 
         return Decoration.node(site.pos, site.pos + site.size, {}, {
-            musicId: outParts?.musicId ?? '',
-            outLabel: labels.outByEndBlockId.get(site.blockId) ?? 'out',
-            outNumber: outParts?.number ?? '',
-            outTitle: outParts?.title ?? '',
+            musicId: music?.musicId ?? '',
         });
     });
 

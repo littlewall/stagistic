@@ -187,6 +187,7 @@ describe('music pill caret placement', () => {
 
         const editor = await getEditor();
 
+        editor.commands.insertMusicStart('sd-1', 'Night');
         editor.commands.insertMusicOut('sd-2');
 
         const pill = await poll(

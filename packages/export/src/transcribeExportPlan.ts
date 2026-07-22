@@ -5,7 +5,6 @@ import {
     deriveMusic,
     type EditorSettings,
     formatMusicNumber,
-    formatMusicOutLabel,
     getScriptBlockId,
     getScriptBlockNodeType,
     hasNodeChildren,
@@ -64,7 +63,6 @@ const getNodeText = (node: ScriptNode): string => {
 
 interface MusicLabels {
     numberByMusicId: Map<string, string>,
-    outLabelByBlockId: Map<string, string>,
 }
 
 interface InlineStyle {
@@ -110,17 +108,12 @@ const buildMusicLabels = (doc: ScriptDocument): MusicLabels => {
         musicAtoms: collectMusicAtoms(node),
     }));
     const numberByMusicId = new Map<string, string>();
-    const outLabelByBlockId = new Map<string, string>();
 
     deriveMusic(inputs).forEach(music => {
         numberByMusicId.set(music.musicId, formatMusicNumber(music));
-
-        if (music.mode === 'open' && music.endBlockId) {
-            outLabelByBlockId.set(music.endBlockId, formatMusicOutLabel(music));
-        }
     });
 
-    return {numberByMusicId, outLabelByBlockId};
+    return {numberByMusicId};
 };
 
 const markStyle = (node: ScriptNode): InlineStyle => ({
@@ -159,7 +152,7 @@ const pushSegment = (
 
 const getBlockRawSegments = (
     node: ScriptNode,
-    blockId: string,
+    _blockId: string,
     music: MusicLabels,
 ): TextSegment[] => {
     if (!hasNodeChildren(node)) {
@@ -179,8 +172,6 @@ const getBlockRawSegments = (
         }
 
         if (child.type === MUSIC_OUT_NODE_NAME) {
-            pushSegment(segments, ` ${music.outLabelByBlockId.get(blockId) ?? 'out'} `, {bold: true});
-
             return;
         }
 

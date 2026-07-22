@@ -24,9 +24,9 @@ export interface ParsedStageBlock {
     node: ScriptNode,
     music?: {
         role: 'start' | 'out',
-        number: number,
+        number: number | null,
         line: number,
-    },
+    }[],
 }
 
 const sameMarks = (left: InlineMark[] | undefined, right: InlineMark[] | undefined) => {
@@ -171,12 +171,12 @@ const readMusicMarker = (source: string, start: number, line: number) => {
         };
     }
 
-    const outMatch = (/^@@out\s+(\d+)/u).exec(source.slice(start));
+    const outMatch = (/^@@out(?:\s+(\d+))?\b/u).exec(source.slice(start));
 
     if (outMatch) {
         return {
             end: start + outMatch[0].length,
-            number: Number(outMatch[1]),
+            number: outMatch[1] ? Number(outMatch[1]) : null,
             role: 'out' as const,
             node: {type: MUSIC_OUT_NODE_NAME} satisfies ScriptNode,
         };
@@ -186,53 +186,46 @@ const readMusicMarker = (source: string, start: number, line: number) => {
 };
 
 export const parseStageDirectionLine = (source: string, line: number): ParsedStageBlock[] => {
-    const blocks: ParsedStageBlock[] = [];
-    let plainText = '';
+    const content: ScriptNode[] = [];
+    const music: NonNullable<ParsedStageBlock['music']> = [];
     let cursor = 0;
-
-    const pushPlainBlock = () => {
-        if (!plainText) {
-            return;
-        }
-
-        blocks.push({node: {type: 'stageDirection', content: parseInlineText(plainText, line)}});
-        plainText = '';
-    };
 
     while (cursor < source.length) {
         const markerStart = source.indexOf('@@', cursor);
 
         if (markerStart < 0) {
-            plainText += source.slice(cursor);
+            content.push(...parseInlineText(source.slice(cursor), line));
             break;
         }
 
-        plainText += source.slice(cursor, markerStart);
+        const betweenMarkers = source.slice(cursor, markerStart);
+        const previous = content.at(-1);
+        const followsMusicAtom = previous?.type === MUSIC_START_NODE_NAME
+            || previous?.type === MUSIC_OUT_NODE_NAME;
+
+        if (!(followsMusicAtom && betweenMarkers.trim().length === 0)) {
+            content.push(...parseInlineText(betweenMarkers, line));
+        }
 
         const marker = readMusicMarker(source, markerStart, line);
 
         if (!marker) {
-            plainText += '@@';
+            content.push(...parseInlineText('@@', line));
             cursor = markerStart + 2;
             continue;
         }
 
-        const content = parseInlineText(plainText.trimEnd(), line);
-
         content.push(marker.node);
-        blocks.push({
-            node: {type: 'stageDirection', content},
-            music: {
-                role: marker.role, number: marker.number, line,
-            },
+        music.push({
+            role: marker.role, number: marker.number, line,
         });
-        plainText = '';
         cursor = marker.end;
     }
 
-    pushPlainBlock();
-
-    return blocks.length > 0
-        ? blocks
-        : [{node: {type: 'stageDirection', content: []}}];
+    return [
+        {
+            node: {type: 'stageDirection', content},
+            music: music.length > 0 ? music : undefined,
+        },
+    ];
 };
