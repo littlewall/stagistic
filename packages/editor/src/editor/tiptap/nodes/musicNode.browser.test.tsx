@@ -57,6 +57,16 @@ const createThreeBlockDocument = (): ScriptDocument => ({
     ],
 });
 
+const createFourBlockDocument = (): ScriptDocument => ({
+    type: 'doc',
+    content: [
+        createStageDirection('sd-1'),
+        createStageDirection('sd-2'),
+        createStageDirection('sd-3'),
+        createStageDirection('sd-4'),
+    ],
+});
+
 const createOrphanDragDocument = (): ScriptDocument => ({
     type: 'doc',
     content: [
@@ -674,6 +684,67 @@ describe('music pill node views', () => {
         expect(document.querySelector('[data-id="sd-2"] [data-music-pill="out"]')).toBeNull();
         expect(document.querySelector('[data-id="sd-3"] [data-music-pill="out"]')).toBeTruthy();
         expect(document.querySelector('[data-music-rail-drop-preview="true"]')).toBeNull();
+    });
+
+    it('keeps the drop preview on the block containing the pointer vertically', async () => {
+        renderEditor(createFourBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', 'Night', 'open', {musicId: 'music-1'});
+        editor.commands.insertMusicOut('sd-2');
+
+        const source = await poll(
+            () => document.querySelector<HTMLElement>('[data-block-id="sd-2"][data-marker-kind="end"]'),
+            'explicit end marker',
+        );
+        const canvas = document.querySelector<HTMLElement>('[data-editor-scroll-container="true"]');
+        const blocks = await Promise.all([
+            'sd-1',
+            'sd-2',
+            'sd-3',
+            'sd-4',
+        ].map(blockId => {
+            return poll(
+                () => document.querySelector<HTMLElement>(`[data-id="${blockId}"]`),
+                `${blockId} geometry block`,
+            );
+        }));
+
+        if (!canvas) {
+            throw new Error('Music drag canvas not found');
+        }
+
+        const blockRects = [
+            new DOMRect(0, 0, 100, 20),
+            new DOMRect(0, 30, 100, 20),
+            new DOMRect(0, 100, 100, 180),
+            new DOMRect(0, 300, 100, 20),
+        ];
+        const rectSpies = blocks.map((block, index) => {
+            return vi.spyOn(block, 'getBoundingClientRect').mockReturnValue(blockRects[index]);
+        });
+        const capture = vi.spyOn(source, 'setPointerCapture').mockImplementation(() => undefined);
+        const elements = vi.spyOn(document, 'elementsFromPoint').mockReturnValue([canvas]);
+
+        source.dispatchEvent(new PointerEvent('pointerdown', {
+            bubbles: true, pointerId: 1, button: 0, clientX: 10, clientY: 40,
+        }));
+        source.dispatchEvent(new PointerEvent('pointermove', {
+            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 260,
+        }));
+
+        expect(document.querySelector(
+            '[data-music-rail-drop-preview="true"][data-block-id="sd-3"]',
+        )).not.toBeNull();
+
+        source.dispatchEvent(new PointerEvent('pointercancel', {
+            bubbles: true, pointerId: 1,
+        }));
+
+        rectSpies.forEach(spy => spy.mockRestore());
+        capture.mockRestore();
+        elements.mockRestore();
     });
 
     it('activates the pill when clicking anywhere on the tag, not just the input', async () => {

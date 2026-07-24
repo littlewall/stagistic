@@ -52,7 +52,10 @@ const resolveClosestBlockId = (canvas: HTMLElement, pointerClientY: number) => {
             continue;
         }
 
-        const distance = Math.abs(block.getBoundingClientRect().top - pointerClientY);
+        const rect = block.getBoundingClientRect();
+        const distance = pointerClientY < rect.top
+            ? rect.top - pointerClientY
+            : Math.max(0, pointerClientY - rect.bottom);
 
         if (distance < closestDistance) {
             closestBlockId = blockId;
