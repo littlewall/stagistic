@@ -17,6 +17,7 @@ import {
 import {useEditorInstance} from '../../context';
 import type {EditorLifecycleCallbacks} from '../../contracts';
 import ScriptEditor from '../../Editor';
+import {getEmptyEnterChooserFromState} from '../extensions/EmptyEnterChooserExtension';
 import {musicRailPluginKey} from '../extensions/musicRail/MusicRailExtension';
 
 type MusicTestWindow = Window & {__musicTestEditor?: Editor | null};
@@ -958,14 +959,14 @@ describe('music pill node views', () => {
 
         // Caret before the music (block has no text besides the music).
         editor.commands.focus('start');
-        // Empty block → Enter opens the next-block chooser; a second Enter confirms.
-        await userEvent.keyboard('{Enter}');
         await userEvent.keyboard('{Enter}');
 
         const content = editor.getJSON().content as ScriptNode[] | undefined;
 
         expect(content?.length).toBe(2);
         expect(musicOwnerBlockId(editor)).toBe('sd-1');
+        expect(content?.[1]?.type).toBe('character');
+        expect(getEmptyEnterChooserFromState(editor.state).isOpen).toBe(false);
     });
 
     it('keeps a music in its block when splitting at the end of block text with Enter', async () => {

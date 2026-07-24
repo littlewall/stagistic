@@ -160,9 +160,17 @@ export const ScriptMusicSidebar = ({
         },
     ] as const)), [documentMusic]);
     const displayedMusic = useMemo(() => music.map(music => {
-        const liveTitle = musicMetadataById.get(music.id)?.title.trim();
+        const liveMetadata = musicMetadataById.get(music.id);
 
-        return liveTitle ? {...music, title: liveTitle} : music;
+        if (!liveMetadata) {
+            return music;
+        }
+
+        return {
+            ...music,
+            assignmentLabel: music.assignmentLabel ?? liveMetadata.number,
+            title: liveMetadata.title.trim() || music.title,
+        };
     }), [musicMetadataById, music]);
     const {
         assignedMusic,

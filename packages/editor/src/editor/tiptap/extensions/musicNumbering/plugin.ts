@@ -14,7 +14,9 @@ import {
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {
-    Plugin, PluginKey,
+    type EditorState,
+    Plugin,
+    PluginKey,
 } from '@tiptap/pm/state';
 import {
     Decoration, DecorationSet,
@@ -32,6 +34,26 @@ interface MusicNumberingState {
 }
 
 export const musicNumberingPluginKey = new PluginKey<MusicNumberingState>('musicNumbering');
+
+export const getMusicNumberLabelsById = (
+    state: EditorState,
+): ReadonlyMap<string, string> => {
+    const labels = new Map<string, string>();
+    const decorations = musicNumberingPluginKey.getState(state)?.decorations.find() ?? [];
+
+    decorations.forEach(decoration => {
+        const node = state.doc.nodeAt(decoration.from);
+        const musicId: unknown = node?.attrs[MUSIC_ID_ATTR];
+        const decorationSpec = decoration.spec as {musicNumber?: unknown};
+        const label = decorationSpec.musicNumber;
+
+        if (typeof musicId === 'string' && typeof label === 'string') {
+            labels.set(musicId, label);
+        }
+    });
+
+    return labels;
+};
 
 const readBlockId = (node: ProseMirrorNode): string => {
     const attrs = node.attrs as Record<string, unknown>;

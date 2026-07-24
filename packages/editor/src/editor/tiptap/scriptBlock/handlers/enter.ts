@@ -11,6 +11,7 @@ import {isEmptyEnterChooserWriterType} from '../../extensions/EmptyEnterChooserE
 import {
     type BlockNodeType,
     getActiveScriptBlockFromState,
+    isScriptBlockContentEmpty,
     isScriptBlockNodeName,
     normalizeBlockNodeType,
     SCRIPT_BLOCK_NODE_NAMES,
@@ -115,7 +116,7 @@ const insertBlockAfter = (
         id: createNodeId(),
     });
     let tr = context.editor.state.tr.insert(insertPos, insertedNode);
-    const selectionPos = tr.mapping.map(insertPos + 1);
+    const selectionPos = insertPos + 1;
 
     tr = tr.setSelection(TextSelection.near(tr.doc.resolve(selectionPos), 1));
     context.editor.view.dispatch(tr.scrollIntoView());
@@ -179,7 +180,10 @@ export const handleEnter = (
         return false;
     }
 
-    const isEmptyBlock = (block.node.textContent ?? '').trim().length === 0;
+    const isEmptyBlock = isScriptBlockContentEmpty(block.node);
+    const hasOnlyNonTextContent = !isEmptyBlock
+        && (block.node.textContent ?? '').trim().length === 0;
+    const wasSelectionEmpty = editor.state.selection.empty;
 
     if (
         !event.shiftKey
@@ -214,9 +218,16 @@ export const handleEnter = (
         editor.commands.deleteSelection();
     }
 
+    if (!event.shiftKey && wasSelectionEmpty && hasOnlyNonTextContent) {
+        return insertBlockAfter(
+            createBlockContext(editor, block),
+            resolveNextTypeOnEnter(block.blockType, blockNextElements),
+        );
+    }
+
     if (
         block.blockType === 'aside'
-        && (block.node.textContent ?? '').trim().length === 0
+        && isScriptBlockContentEmpty(block.node)
     ) {
         return setBlockTypeWithSelection(editor, block, 'character');
     }

@@ -11,6 +11,7 @@ import type {BlockNextElementMap} from '../scriptBlock/handlers/types';
 import {
     type BlockNodeType,
     getActiveScriptBlockFromState,
+    isScriptBlockContentEmpty,
     isSelectionAcrossBlocks,
     normalizeBlockNodeType,
     SCRIPT_BLOCK_NODE_NAMES,
@@ -78,7 +79,7 @@ const isCollapsedSingleBlockSelection = (state: EditorState) => {
     return true;
 };
 
-const isBlockTextEmpty = (state: EditorState, blockPos: number | null) => {
+const isBlockContentEmpty = (state: EditorState, blockPos: number | null) => {
     if (typeof blockPos !== 'number') {
         return false;
     }
@@ -89,7 +90,7 @@ const isBlockTextEmpty = (state: EditorState, blockPos: number | null) => {
         return false;
     }
 
-    return (nodeAtPos.textContent ?? '').trim().length === 0;
+    return isScriptBlockContentEmpty(nodeAtPos);
 };
 
 export const createOpenStateFromPayload = (payload: OpenMetaPayload): EmptyEnterChooserState => {
@@ -169,7 +170,7 @@ export const createEmptyEnterChooserPlugin = (): Plugin<EmptyEnterChooserState> 
                     return CLOSED_EMPTY_ENTER_CHOOSER_STATE;
                 }
 
-                if (!isBlockTextEmpty(newState, activeBlock.pos)) {
+                if (!isBlockContentEmpty(newState, activeBlock.pos)) {
                     return CLOSED_EMPTY_ENTER_CHOOSER_STATE;
                 }
 

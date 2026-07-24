@@ -1,6 +1,9 @@
 import type {Editor} from '@tiptap/react';
 
-import type {ActiveScriptBlock} from '../scriptCore';
+import {
+    type ActiveScriptBlock,
+    isScriptBlockContentEmpty,
+} from '../scriptCore';
 
 export type BlockContext = {
     editor: Editor,
@@ -42,4 +45,4 @@ export const isInsideParentheses = (text: string, offset: number) => {
 export const isEmptyDialogueLikeBlock = (block: ActiveScriptBlock) => (
     block.blockType === 'dialogue'
     || block.blockType === 'lyrics'
-) && (block.node.textContent ?? '').trim().length === 0;
+) && isScriptBlockContentEmpty(block.node);

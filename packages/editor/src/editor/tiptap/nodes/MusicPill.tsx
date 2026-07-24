@@ -16,6 +16,7 @@ import {
 import clsx from 'clsx';
 import {
     useEffect,
+    useId,
     useRef,
     useState,
 } from 'react';
@@ -41,6 +42,7 @@ import {
     scrollToMusicPill,
     usePillActivation,
 } from './musicPillHelpers';
+import {MusicPillMenuPopover} from './MusicPillMenuPopover';
 
 interface MusicStartPillProps extends NodeViewProps {
     onMusicAssigned?: (musicId: string) => void,
@@ -66,6 +68,7 @@ export const MusicStartPill = ({
     const {
         active, setActive, rootRef,
     } = usePillActivation();
+    const anchorName = `--music-pill-${useId().replaceAll(/[^a-zA-Z0-9_-]/g, '')}`;
     const titleRef = useRef<HTMLSpanElement>(null);
     const mode: MusicMode = node.attrs[MUSIC_MODE_ATTR] === 'hit' ? 'hit' : 'open';
     const isDraft = node.attrs[MUSIC_DRAFT_ATTR] === true;
@@ -184,6 +187,8 @@ export const MusicStartPill = ({
             className={clsx(styles.pill, styles[mode], active && styles.active)}
             data-music-pill="start"
             data-music-id={musicId || undefined}
+            data-music-active={active ? 'true' : undefined}
+            style={{'--music-pill-anchor': anchorName}}
             contentEditable={false}
             onFocus={handleFocusWithin(setActive)}
             onBlur={handleBlurWithin(rootRef, setActive)}
@@ -247,8 +252,8 @@ export const MusicStartPill = ({
                         }
 
                         if (event.key === 'Escape') {
-                            event.preventDefault();
                             if (isDraft) {
+                                event.preventDefault();
                                 deleteNode();
 
                                 return;
@@ -268,10 +273,7 @@ export const MusicStartPill = ({
                 />
             </span>
             {active ? (
-                <span
-                    className={styles.menu}
-                    data-music-menu="start"
-                >
+                <MusicPillMenuPopover isOpen onOpenChange={setActive}>
                     {hasEndMusic ? (
                         <MusicMenuButton label="Go to music end" onClick={goToEndMusic}>
                             <ArrowRightIcon aria-hidden="true" />
@@ -289,7 +291,7 @@ export const MusicStartPill = ({
                     >
                         <MusicDeleteIcon />
                     </MusicMenuButton>
-                </span>
+                </MusicPillMenuPopover>
             ) : null}
             {' '}
         </NodeViewWrapper>

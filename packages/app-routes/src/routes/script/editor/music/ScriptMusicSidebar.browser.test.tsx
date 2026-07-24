@@ -167,6 +167,48 @@ describe('ScriptMusicSidebar', () => {
         expect(document.body.textContent).not.toContain('Overture');
     });
 
+    it('treats catalog music present in the live document as assigned immediately', async () => {
+        const documentWithNewAssignment: ScriptDocument = {
+            type: 'doc',
+            content: [
+                {
+                    type: 'scene',
+                    attrs: {id: 'scene-1'},
+                    content: [],
+                }, {
+                    type: 'stageDirection',
+                    attrs: {id: 'music-block'},
+                    content: [
+                        {
+                            type: 'musicStart',
+                            attrs: {
+                                musicId: 'music-unassigned',
+                                mode: 'open',
+                                title: 'Finale',
+                                kind: 'song',
+                            },
+                        },
+                    ],
+                },
+            ],
+        };
+
+        mountSidebar({initialValue: documentWithNewAssignment});
+
+        const assignedSection = await poll(
+            () => document.querySelector<HTMLElement>('[aria-label="Assigned music"]'),
+            'assigned music section',
+        );
+
+        await poll(
+            () => assignedSection.textContent?.includes('Finale') ? true : null,
+            'live assigned music',
+        );
+
+        expect(assignedSection.textContent).toContain('Finale');
+        expect(document.getElementById('music-unassigned')).toBeNull();
+    });
+
     it('highlights a music clicked in the editor and clears it on the next outside click', async () => {
         mountSidebar();
 

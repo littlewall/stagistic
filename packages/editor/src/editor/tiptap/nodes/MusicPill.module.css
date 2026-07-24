@@ -32,12 +32,9 @@
 .menu {
     cursor: default;
     user-select: none;
-    position: absolute;
-    z-index: 12;
-    bottom: 100%;
-    left: 50%;
+    position: fixed;
+    inset: auto auto anchor(top) anchor(center);
     transform: translate(-50%, calc(var(--space-sm) * -1));
-    display: inline-flex;
     gap: var(--bubble-menu-gap);
     align-items: center;
     padding: var(--bubble-menu-padding);
@@ -46,13 +43,20 @@
     border: var(--bubble-menu-border);
     border-radius: var(--bubble-menu-radius);
     box-shadow: var(--bubble-menu-shadow);
+    position-anchor: var(--music-pill-anchor);
+
+    &:popover-open {
+        display: inline-flex;
+    }
 }
 
 .tagBody {
     /* outline (not border) keeps the box out of layout so it adds no width. */
+    user-select: text;
     position: relative;
     outline: 1px solid var(--music-border-color);
     outline-offset: .1em;
+    anchor-name: var(--music-pill-anchor);
 }
 
 .active {

@@ -70,6 +70,18 @@ export const isScriptBlockNodeName = (value: unknown): value is string => {
     return typeof value === 'string' && SCRIPT_BLOCK_NODE_NAME_SET.has(value);
 };
 
+export const isScriptBlockContentEmpty = (node: ProseMirrorNode): boolean => {
+    let isEmpty = true;
+
+    node.forEach(child => {
+        if (!child.isText || (child.text ?? '').trim().length > 0) {
+            isEmpty = false;
+        }
+    });
+
+    return isEmpty;
+};
+
 const resolveBlockTypeFromNode = (node: ProseMirrorNode): BlockNodeType => {
     const resolvedFromNodeName = resolveScriptBlockNodeType(node.type.name);
 
