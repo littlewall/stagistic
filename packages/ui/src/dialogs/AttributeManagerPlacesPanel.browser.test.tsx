@@ -121,11 +121,13 @@ describe('AttributeManagerPlacesPanel', () => {
         renderPanel();
 
         const nameInput = await waitForElement<HTMLInputElement>('#place-name-place-1');
+        const detailHeader = await waitForElement('[aria-label="Place detail"] header');
 
         await page.elementLocator(nameInput).fill('Stage left');
 
         expect(document.querySelector('[aria-label="Place list"]')?.textContent).toContain('Stage left');
         expect(document.querySelector('[aria-label="Place detail"] h3')?.textContent).toBe('Stage left');
+        expect(detailHeader.textContent).not.toContain('Place');
     });
 
     it('deletes only after confirmation', async () => {

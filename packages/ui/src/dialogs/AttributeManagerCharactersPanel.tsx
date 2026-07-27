@@ -16,6 +16,7 @@ import {
 import {AttributeManagerCharacterDetail} from './AttributeManagerCharacterDetail';
 import styles from './AttributeManagerCharactersPanel.module.css';
 import {CreateCharacterModal} from './CreateCharacterModal';
+import {useAttributeManagerCharacterNames} from './useAttributeManagerCharacterNames';
 
 export interface AttributeManagerCharacter {
     id: string,
@@ -29,7 +30,9 @@ export interface AttributeManagerCharactersPanelProps {
     initialSelectedCharacterId?: string | null,
     isLoading?: boolean,
     characterColorSaturation?: number,
+    draftScopeKey?: string | null,
     deletingCharacterIds?: string[],
+    renamingCharacterIds?: string[],
     colorUpdatingCharacterIds?: string[],
     onSetCharacterColor?: (
         characterId: string,
@@ -38,6 +41,11 @@ export interface AttributeManagerCharactersPanelProps {
     onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
     onDeleteCharacter?: (characterId: string) => void,
     onCreateCharacter?: (characterName: string) => void,
+    onRenameCharacter?: (
+        characterId: string,
+        previousName: string,
+        nextName: string,
+    ) => void | Promise<unknown>,
 }
 
 type WorkspaceId = 'characters' | 'groups' | 'cast';
@@ -64,12 +72,15 @@ export const AttributeManagerCharactersPanel = ({
     initialSelectedCharacterId,
     isLoading = false,
     characterColorSaturation,
+    draftScopeKey = null,
     deletingCharacterIds = [],
+    renamingCharacterIds = [],
     colorUpdatingCharacterIds = [],
     onSetCharacterColor,
     onSetCharacterOutline,
     onDeleteCharacter,
     onCreateCharacter,
+    onRenameCharacter,
 }: AttributeManagerCharactersPanelProps) => {
     const [activeWorkspaceId, setActiveWorkspaceId] = useState<WorkspaceId>('characters');
     const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(
@@ -79,7 +90,7 @@ export const AttributeManagerCharactersPanel = ({
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const colorIntentRevisionRef = useRef(0);
     const [colorIntents, setColorIntents] = useState<Record<string, CharacterColorIntent>>({});
-    const displayedCharacters = useMemo(() => characters.map(character => {
+    const colorizedCharacters = useMemo(() => characters.map(character => {
         if (!(character.id in colorIntents)) {
             return character;
         }
@@ -89,6 +100,16 @@ export const AttributeManagerCharactersPanel = ({
             color: colorIntents[character.id]?.color ?? null,
         };
     }), [characters, colorIntents]);
+    const {
+        displayedCharacters,
+        persistName,
+        resetName,
+        setName,
+    } = useAttributeManagerCharacterNames({
+        characters: colorizedCharacters,
+        draftScopeKey,
+        onRenameCharacter,
+    });
     const activeWorkspace = WORKSPACES.find(item => item.id === activeWorkspaceId) ?? WORKSPACES[0];
     const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
     const filteredCharacters = useMemo(() => {
@@ -99,6 +120,7 @@ export const AttributeManagerCharactersPanel = ({
         return displayedCharacters.filter(character => character.name.toLocaleLowerCase().includes(normalizedSearchQuery));
     }, [displayedCharacters, normalizedSearchQuery]);
     const selectedCharacter = displayedCharacters.find(character => character.id === selectedCharacterId) ?? null;
+    const selectedConfirmedCharacter = characters.find(character => character.id === selectedCharacterId) ?? null;
     const visibleCharacters = activeWorkspaceId === 'characters' ? filteredCharacters : [];
 
     useEffect(() => {
@@ -155,7 +177,9 @@ export const AttributeManagerCharactersPanel = ({
     const listStatus = isLoading && activeWorkspaceId === 'characters'
         ? 'Loading characters...'
         : EMPTY_LABELS[activeWorkspaceId];
-    const hasSelectedCharacter = activeWorkspaceId === 'characters' && selectedCharacter;
+    const hasSelectedCharacter = activeWorkspaceId === 'characters'
+        && selectedCharacter
+        && selectedConfirmedCharacter;
 
     return (
         <div className={styles.panel}>
@@ -242,9 +266,15 @@ export const AttributeManagerCharactersPanel = ({
                     {hasSelectedCharacter ? (
                         <AttributeManagerCharacterDetail
                             character={selectedCharacter}
+                            confirmedName={selectedConfirmedCharacter.name}
+                            characters={displayedCharacters}
                             characterColorSaturation={characterColorSaturation}
                             isDeleting={deletingCharacterIds.includes(selectedCharacter.id)}
+                            isRenaming={renamingCharacterIds.includes(selectedCharacter.id)}
                             isColorUpdating={colorUpdatingCharacterIds.includes(selectedCharacter.id)}
+                            onNameDraftChange={name => setName(selectedCharacter.id, name)}
+                            onResetNameDraft={() => resetName(selectedCharacter.id)}
+                            onRenameCharacter={persistName}
                             onSetCharacterColor={handleSetCharacterColor}
                             onSetCharacterOutline={onSetCharacterOutline}
                             onDeleteCharacter={onDeleteCharacter}

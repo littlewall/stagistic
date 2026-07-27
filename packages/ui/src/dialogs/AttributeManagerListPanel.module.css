@@ -16,11 +16,72 @@
     border-right: 1px solid var(--color-border);
 }
 
+.searchRow {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    padding: var(--space-xl);
+}
+
+.searchField {
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 0;
+
+    & input {
+        padding-left: calc(var(--space-xl) + 1rem);
+        background: var(--color-surface);
+    }
+}
+
+.searchIcon {
+    pointer-events: none;
+    position: absolute;
+    z-index: 1;
+    top: calc((var(--select-button-height) - 1rem) / 2);
+    left: var(--space-md);
+    width: 1rem;
+    height: 1rem;
+    color: var(--color-text-muted);
+}
+
+.addButton {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: var(--select-button-height);
+    height: var(--select-button-height);
+    padding: 0;
+
+    &:hover:not(:disabled) {
+        color: var(--color-text);
+        background: var(--select-menu-item-hover-bg);
+    }
+}
+
+.searchRow .addButton {
+    color: var(--color-text);
+}
+
+.actionIcon {
+    display: block;
+    flex: 0 0 auto;
+    width: 1rem;
+    height: 1rem;
+    color: currentcolor;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2;
+}
+
 .browserList {
     overflow-y: auto;
     flex: 1 1 auto;
     min-height: 0;
     padding: var(--space-xl) var(--space-md);
+}
+
+.browserListWithToolbar {
+    padding-top: 0;
 }
 
 .itemGroup + .itemGroup {
@@ -65,6 +126,10 @@
         color: var(--color-text);
         background: var(--select-menu-item-active-bg);
     }
+}
+
+.listItemWithoutNumber {
+    grid-template-columns: minmax(0, 1fr) auto;
 }
 
 .itemNumber {
@@ -154,6 +219,20 @@
     white-space: nowrap;
 }
 
+.detailTitleWrapped {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+}
+
+.detailSubtitle {
+    margin: 0;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    white-space: normal;
+}
+
 .detailMetadata {
     display: flex;
     flex: 0 0 auto;
@@ -164,6 +243,15 @@
     font-family: var(--font-family-mono);
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);
+}
+
+.detailHeaderAside {
+    display: flex;
+    flex: 0 0 auto;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: flex-end;
+    max-width: 55%;
 }
 
 .detailMetadataRow {

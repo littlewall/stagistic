@@ -1,9 +1,14 @@
+import {
+    type ComponentProps,
+    type ComponentType,
+} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
     describe,
     expect,
     it,
+    vi,
 } from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
@@ -13,6 +18,22 @@ import {
 } from './AttributeManagerListPanel';
 
 const mountedRoots: Root[] = [];
+
+type SearchableListPanelProps = ComponentProps<typeof AttributeManagerListPanel> & {
+    search?: {
+        ariaLabel: string,
+        placeholder: string,
+    },
+    createAction?: {
+        ariaLabel: string,
+        tooltipLabel: string,
+        onPress: () => void,
+    },
+    hideDetailTypeLabel?: boolean,
+    wrapDetailTitle?: boolean,
+};
+
+const SearchableListPanel = AttributeManagerListPanel as ComponentType<SearchableListPanelProps>;
 
 const waitForElement = async <T extends Element>(selector: string): Promise<T> => {
     const deadline = Date.now() + 1000;
@@ -140,6 +161,21 @@ describe('AttributeManagerListPanel', () => {
         expect(host.contains(button)).toBe(true);
     });
 
+    it('does not reserve a number column for unnumbered items', async () => {
+        renderPanel([
+            {
+                id: 'c1',
+                number: '',
+                title: 'Unassigned overture',
+                icon: <span>Music kind</span>,
+            },
+        ]);
+
+        const button = await waitForElement<HTMLButtonElement>('[aria-label="Scene list"] button');
+
+        expect(Array.from(button.children).map(child => child.textContent)).toEqual(['Unassigned overture', 'Music kind']);
+    });
+
     it('renders non-interactive group headings above their scenes', async () => {
         const host = renderPanel([
             {
@@ -163,5 +199,91 @@ describe('AttributeManagerListPanel', () => {
         expect(headings.map(heading => heading.textContent)).toEqual(['Act I', 'Act II']);
         expect(buttons.map(button => button.textContent)).toEqual(['1.Opening', '2.Finale']);
         expect(headings.every(heading => heading instanceof HTMLHeadingElement)).toBe(true);
+    });
+
+    it('filters titled items and invokes the optional create action', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+        const onCreate = vi.fn();
+
+        host.style.setProperty('--color-text', 'rgb(10, 20, 30)');
+        host.style.setProperty('--color-text-muted', 'transparent');
+        document.body.appendChild(host);
+        root.render(
+            <SearchableListPanel
+                items={[
+                    {
+                        id: 'm1', number: '1.', title: 'Overture',
+                    }, {
+                        id: 'm2', number: '', title: 'Finale',
+                    },
+                ]}
+                detailTypeLabel="Music"
+                emptyListLabel="No music yet"
+                emptyDetailLabel="Select music"
+                detailPlaceholder=""
+                search={{ariaLabel: 'Search music', placeholder: 'Search music'}}
+                createAction={{
+                    ariaLabel: 'Create music',
+                    tooltipLabel: 'Create music',
+                    onPress: onCreate,
+                }}
+            />,
+        );
+        mountedRoots.push(root);
+
+        const searchInput = await waitForElement<HTMLInputElement>('[aria-label="Search music"]');
+
+        await page.elementLocator(searchInput).fill('final');
+
+        const list = await waitForElement('[aria-label="Music list"]');
+
+        expect(list.textContent).toContain('Finale');
+        expect(list.textContent).not.toContain('Overture');
+
+        const addButton = await waitForElement<HTMLButtonElement>('[aria-label="Create music"]');
+        const addIcon = addButton.querySelector('svg');
+
+        expect(addIcon).not.toBeNull();
+        expect(addIcon?.getBoundingClientRect().width).toBeGreaterThan(0);
+        expect(getComputedStyle(addIcon as SVGElement).color).toBe('rgb(10, 20, 30)');
+
+        await page.elementLocator(addButton).click();
+
+        expect(onCreate).toHaveBeenCalledOnce();
+    });
+
+    it('shows a wrapping detail subtitle without a type label', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+        const items: Array<AttributeManagerListItem & {detailSubtitle: string}> = [
+            {
+                id: 'm1',
+                number: '1.A)',
+                title: 'A very long music title that must remain readable',
+                detailSubtitle: '12. A very long scene title that must remain readable',
+            },
+        ];
+
+        document.body.appendChild(host);
+        root.render(
+            <SearchableListPanel
+                items={items}
+                detailTypeLabel="Music"
+                hideDetailTypeLabel
+                wrapDetailTitle
+                emptyListLabel="No music yet"
+                emptyDetailLabel="Select music"
+                detailPlaceholder=""
+            />,
+        );
+        mountedRoots.push(root);
+
+        const detail = await waitForElement('[aria-label="Music detail"]');
+        const heading = detail.querySelector('h3');
+
+        expect(detail.querySelector('header')?.textContent).not.toContain('Music');
+        expect(detail.querySelector('header')?.textContent).toContain(items[0]?.detailSubtitle);
+        expect(getComputedStyle(heading as HTMLHeadingElement).whiteSpace).toBe('normal');
     });
 });

@@ -45,7 +45,7 @@ export interface ScriptCharactersContextValue {
         previousCharacterName: string,
         nextCharacterName: string,
         editorCallbacks?: RenameEditorCallbacks,
-    ) => void,
+    ) => Promise<void>,
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
     handleSetCharacterOutline: (characterId: string, outline: string | null) => void,

@@ -245,4 +245,13 @@ describe('AttributeManagerCharactersPanel character actions', () => {
 
         expect(onSetCharacterOutline).toHaveBeenCalledWith('char-1', 'brooding rival');
     });
+
+    it('does not repeat the character type above the selected name', async () => {
+        renderPanel();
+
+        const detailHeader = await waitForElement('[aria-label="Characters detail"] header');
+
+        expect(detailHeader.textContent).toContain('ANNA');
+        expect(detailHeader.textContent).not.toContain('Character');
+    });
 });

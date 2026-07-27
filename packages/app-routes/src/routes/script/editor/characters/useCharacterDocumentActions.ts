@@ -88,6 +88,7 @@ export const useCharacterDocumentActions = ({
     ]);
 
     return {
+        applyDocumentChange: applyChange,
         linkCharacter,
         unlinkCharacter,
         renameCharacter,

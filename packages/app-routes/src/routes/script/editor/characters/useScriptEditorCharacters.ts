@@ -74,6 +74,7 @@ export const useScriptEditorCharacters = ({
     });
 
     return {
+        applyDocumentChange: documentActions.applyDocumentChange,
         getEditorValue: editor.getEditorValue,
         editorOverrideValue: editor.editorOverrideValue,
         confirmedCharacterRecords: catalog.characters,

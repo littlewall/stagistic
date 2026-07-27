@@ -35,24 +35,28 @@ export const buildAttributeManagerMusicItemsFromLive = (
         const sceneNumber = sceneId ? sceneNumberById.get(sceneId) : null;
         const sceneLabel = scene?.kind === 'scene'
             ? `${sceneNumber ?? '–'}. ${scene.title || 'Untitled scene'}`
-            : '–';
+            : null;
 
         return {
             id: music.musicId,
             number: formatMusicNumber(music),
             title: catalogMusic?.title || music.title || 'Untitled music',
+            group: act?.kind === 'act'
+                ? {id: act.blockId, label: act.name || 'Untitled act'}
+                : undefined,
             icon: kind === 'instrumental' ? <MusicDoubleNoteIcon /> : <MicrophoneIcon />,
-            detailMetadata: [{label: 'Act', value: act?.kind === 'act' ? act.name || '–' : '–'}, {label: 'Scene', value: sceneLabel}],
+            detailSubtitle: sceneLabel,
         };
     });
     const unassignedItems = music
         .filter(music => !documentMusicIds.has(music.id))
         .map(music => ({
             id: music.id,
-            number: '–',
+            number: '',
             title: music.title,
+            group: {id: 'unassigned', label: 'Unassigned'},
             icon: music.kind === 'instrumental' ? <MusicDoubleNoteIcon /> : <MicrophoneIcon />,
-            detailMetadata: [{label: 'Act', value: '–'}, {label: 'Scene', value: '–'}],
+            detailSubtitle: null,
         }));
 
     return [...assignedItems, ...unassignedItems];
@@ -81,24 +85,28 @@ export const buildAttributeManagerMusicItems = (
         const sceneNumber = scene ? sceneNumberById.get(scene.blockId) : null;
         const sceneLabel = scene
             ? `${sceneNumber ?? '–'}. ${scene.textContent || 'Untitled scene'}`
-            : '–';
+            : null;
 
         return {
             id: music.musicId,
             number: formatMusicNumber(music),
             title: catalogMusic?.title || music.title || 'Untitled music',
+            group: act?.blockType === 'act'
+                ? {id: act.blockId, label: act.textContent || 'Untitled act'}
+                : undefined,
             icon: kind === 'instrumental' ? <MusicDoubleNoteIcon /> : <MicrophoneIcon />,
-            detailMetadata: [{label: 'Act', value: act?.textContent || '–'}, {label: 'Scene', value: sceneLabel}],
+            detailSubtitle: sceneLabel,
         };
     });
     const unassignedItems = music
         .filter(music => !documentMusicIds.has(music.id))
         .map(music => ({
             id: music.id,
-            number: '–',
+            number: '',
             title: music.title,
+            group: {id: 'unassigned', label: 'Unassigned'},
             icon: music.kind === 'instrumental' ? <MusicDoubleNoteIcon /> : <MicrophoneIcon />,
-            detailMetadata: [{label: 'Act', value: '–'}, {label: 'Scene', value: '–'}],
+            detailSubtitle: null,
         }));
 
     return [...assignedItems, ...unassignedItems];

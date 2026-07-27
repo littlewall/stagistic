@@ -18,14 +18,9 @@ import {
     useContext,
     useMemo,
 } from 'react';
-import {
-    useNavigate,
-    useSearchParams,
-} from 'react-router-dom';
+import {useNavigate, useSearchParams} from 'react-router-dom';
 
-import {
-    type AttributeManagerPanelId,
-} from '../attributes/attributeManagerMenu';
+import {type AttributeManagerPanelId} from '../attributes/attributeManagerMenu';
 import {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
 import {useMusicAttachmentsState} from '../attributes/useMusicAttachmentsState';
 import {useScriptPlacesState} from '../attributes/useScriptPlacesState';
@@ -38,6 +33,7 @@ import {useScriptEditorSettingsDraft} from '../useScriptEditorSettingsDraft';
 import {useScriptEditorSettingsModal} from '../useScriptEditorSettingsModal';
 import {useScriptTitleDraft} from '../useScriptTitleDraft';
 import {useTitlePageDraft} from '../useTitlePageDraft';
+import {deleteAttributeManagerMusic} from './deleteAttributeManagerMusic';
 import {DraftSaveError} from './DraftSaveError';
 import {ScriptAttributeManagerModal} from './ScriptAttributeManagerModal';
 import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
@@ -156,7 +152,9 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     } = useAttributeManagerModalState();
 
     const {
+        applyDocumentChange,
         contextValue: charactersContextValue,
+        getEditorValue,
     } = useScriptCharactersContextValue({
         currentScriptId,
         characterCatalog,
@@ -173,7 +171,6 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     } = useKeyedFieldDrafts<string>(currentScriptId);
     const placeState = useScriptPlacesState(currentScriptId, scriptRepository);
     const musicAttachmentsState = useMusicAttachmentsState(currentScriptId, scriptRepository);
-    const {music} = musicState;
     const {
         characterItems: attributeManagerCharacters,
         sceneItems: attributeManagerScenes,
@@ -182,7 +179,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         isOpen: isAttributeManagerOpen,
         initialValue,
         characters: charactersContextValue,
-        music,
+        music: musicState.music,
         getMusicTitleDraft,
     });
     const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
@@ -199,6 +196,12 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
             scriptTitleDraftError ? retryScriptTitle() : Promise.resolve(),
         ]);
     };
+    const handleDeleteMusic = (musicId: string) => deleteAttributeManagerMusic({
+        document: getEditorValue(),
+        musicId,
+        applyDocumentChange,
+        deleteMusic: musicState.deleteMusic,
+    });
 
     const contextValue = useMemo<ScriptSettingsModalContextValue>(() => ({
         resolvedScriptSettings,
@@ -289,6 +292,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     musicAttachmentsState={musicAttachmentsState}
                     setMusicTitleDraft={setMusicTitleDraft}
                     persistMusicTitleDraft={persistMusicTitleDraft}
+                    onDeleteMusic={handleDeleteMusic}
                 />
             </ScriptCharactersProvider>
         </ScriptSettingsModalContext.Provider>

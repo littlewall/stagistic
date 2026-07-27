@@ -1,6 +1,8 @@
+import {normalizeCharacterKey} from '@stagistic/script';
 import clsx from 'clsx';
 import {
     type CSSProperties,
+    type FormEvent,
     useMemo,
     useState,
 } from 'react';
@@ -19,9 +21,19 @@ import {RemoveCharacterModal} from './RemoveCharacterModal';
 
 interface AttributeManagerCharacterDetailProps {
     character: AttributeManagerCharacter,
+    confirmedName: string,
+    characters: AttributeManagerCharacter[],
     characterColorSaturation?: number,
     isDeleting: boolean,
+    isRenaming: boolean,
     isColorUpdating: boolean,
+    onNameDraftChange: (name: string) => void,
+    onResetNameDraft: () => void,
+    onRenameCharacter?: (
+        characterId: string,
+        previousName: string,
+        nextName: string,
+    ) => void | Promise<unknown>,
     onSetCharacterColor?: (
         characterId: string,
         colorHex: string | null,
@@ -32,9 +44,15 @@ interface AttributeManagerCharacterDetailProps {
 
 export const AttributeManagerCharacterDetail = ({
     character,
+    confirmedName,
+    characters,
     characterColorSaturation,
     isDeleting,
+    isRenaming,
     isColorUpdating,
+    onNameDraftChange,
+    onResetNameDraft,
+    onRenameCharacter,
     onSetCharacterColor,
     onSetCharacterOutline,
     onDeleteCharacter,
@@ -49,6 +67,14 @@ export const AttributeManagerCharacterDetail = ({
         isConfirmed: true,
     }), [character]);
     const isColorActionDisabled = isDeleting || isColorUpdating || !onSetCharacterColor;
+    const trimmedName = character.name.trim();
+    const normalizedName = normalizeCharacterKey(trimmedName);
+    const isDuplicate = characters.some(candidate => {
+        return candidate.id !== character.id
+            && normalizeCharacterKey(candidate.name) === normalizedName;
+    });
+    const isInvalid = trimmedName.length === 0 || isDuplicate;
+    const errorId = isInvalid ? `character-name-error-${character.id}` : undefined;
     const colorPicker = useCharacterColorPickerState({
         character: editorCharacter,
         isColorActionDisabled,
@@ -59,6 +85,27 @@ export const AttributeManagerCharacterDetail = ({
     const handleConfirmDelete = () => {
         onDeleteCharacter?.(character.id);
         setIsRemoveOpen(false);
+    };
+    const persistName = async () => {
+        if (isInvalid || !onRenameCharacter) {
+            return;
+        }
+
+        if (trimmedName === confirmedName) {
+            onResetNameDraft();
+
+            return;
+        }
+
+        try {
+            await onRenameCharacter(character.id, confirmedName, trimmedName);
+        } catch {
+            // Keep the dirty draft visible; the catalog exposes the persistence error.
+        }
+    };
+    const handleNameSubmit = (event: FormEvent) => {
+        event.preventDefault();
+        void persistName();
     };
 
     return (
@@ -92,7 +139,6 @@ export const AttributeManagerCharacterDetail = ({
                         }}
                     />
                     <div>
-                        <p className={styles.detailType}>Character</p>
                         <h3 className={styles.detailTitle}>{character.name}</h3>
                     </div>
                 </div>
@@ -101,7 +147,7 @@ export const AttributeManagerCharacterDetail = ({
                         className={styles.deleteButton}
                         variant="ghost"
                         size="sm"
-                        isDisabled={isDeleting || !onDeleteCharacter}
+                        isDisabled={isDeleting || isRenaming || !onDeleteCharacter}
                         aria-label={`Remove ${character.name}`}
                         onPress={() => setIsRemoveOpen(true)}
                     >
@@ -110,6 +156,38 @@ export const AttributeManagerCharacterDetail = ({
                 </Tooltip>
             </header>
             <div className={styles.detailBody}>
+                <form
+                    className={styles.nameForm}
+                    onSubmit={handleNameSubmit}
+                    aria-busy={isRenaming}
+                >
+                    <label className={formControlStyles.label} htmlFor={`character-name-${character.id}`}>
+                        Name
+                    </label>
+                    <input
+                        id={`character-name-${character.id}`}
+                        type="text"
+                        className={formControlStyles.input}
+                        value={character.name}
+                        disabled={isDeleting || isRenaming || !onRenameCharacter}
+                        aria-describedby={errorId}
+                        aria-invalid={isInvalid}
+                        onChange={event => onNameDraftChange(event.target.value)}
+                        onBlur={() => void persistName()}
+                        onKeyDown={event => {
+                            if (event.key === 'Escape') {
+                                onResetNameDraft();
+                            }
+                        }}
+                    />
+                    {isInvalid ? (
+                        <p id={errorId} className={styles.error}>
+                            {isDuplicate
+                                ? 'A character with this name already exists.'
+                                : 'Name cannot be empty.'}
+                        </p>
+                    ) : null}
+                </form>
                 <section
                     className={clsx(styles.outlineSection, formControlStyles.field)}
                     style={{'--character-color': colorPicker.currentCharacterColorHex} as CSSProperties}

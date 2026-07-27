@@ -40,6 +40,7 @@ const Harness = ({catalog}: {catalog: Catalog}) => {
     const actions = useCharacterActions({
         catalog,
         documentActions: {
+            applyDocumentChange: () => Promise.resolve(true),
             linkCharacter: () => Promise.resolve(true),
             unlinkCharacter: () => Promise.resolve(true),
             renameCharacter: () => Promise.resolve(true),
@@ -82,15 +83,17 @@ const Harness = ({catalog}: {catalog: Catalog}) => {
             </button>
             <button
                 type="button"
-                onClick={() => actions.handleRenameCharacter(
-                    'character-1',
-                    'ALICE',
-                    'BOB',
-                    {
-                        onRenameText: (_id, name) => record(`rename:${name}`),
-                        onReplaceId: () => record('replaced'),
-                    },
-                )}
+                onClick={() => {
+                    void Promise.resolve(actions.handleRenameCharacter(
+                        'character-1',
+                        'ALICE',
+                        'BOB',
+                        {
+                            onRenameText: (_id, name) => record(`rename:${name}`),
+                            onReplaceId: () => record('replaced'),
+                        },
+                    )).catch(() => record('rejected'));
+                }}
             >
                 Rename
             </button>
@@ -153,8 +156,8 @@ describe('useCharacterActions', () => {
         const host = await mount(catalog);
 
         host.querySelectorAll<HTMLButtonElement>('button')[2]?.click();
-        await waitFor(() => host.querySelector('output')?.textContent === 'rename:BOB,rename:ALICE');
+        await waitFor(() => host.querySelector('output')?.textContent === 'rename:BOB,rename:ALICE,rejected');
 
-        expect(host.querySelector('output')?.textContent).toBe('rename:BOB,rename:ALICE');
+        expect(host.querySelector('output')?.textContent).toBe('rename:BOB,rename:ALICE,rejected');
     });
 });

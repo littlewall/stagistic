@@ -22,6 +22,10 @@ export interface UseScriptEditorCharactersArgs {
 }
 
 export interface UseScriptEditorCharactersResult {
+    applyDocumentChange: (change: {
+        value: ScriptDocument,
+        changed: boolean,
+    }) => Promise<boolean>,
     getEditorValue: () => ScriptDocument | null,
     editorOverrideValue: ScriptDocument | null,
     confirmedCharacterRecords: ScriptCharacterRecord[],
@@ -47,7 +51,7 @@ export interface UseScriptEditorCharactersResult {
         characterId: string,
         previousCharacterName: string,
         nextCharacterName: string,
-    ) => void,
+    ) => Promise<void>,
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
     handleSetCharacterOutline: (characterId: string, outline: string | null) => void,

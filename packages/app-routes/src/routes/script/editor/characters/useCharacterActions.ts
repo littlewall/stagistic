@@ -42,7 +42,7 @@ export interface CharacterActions {
         previousCharacterName: string,
         nextCharacterName: string,
         editorCallbacks?: RenameEditorCallbacks,
-    ) => void,
+    ) => Promise<void>,
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
     handleSetCharacterOutline: (characterId: string, outline: string | null) => void,
@@ -139,11 +139,12 @@ export const useCharacterActions = ({
         const nextKey = normalizeCharacterKey(nextName);
 
         if (!original || !nextKey) {
-            return;
+            return Promise.resolve();
         }
 
         editorCallbacks?.onRenameText(characterId, nextName);
-        void catalog.renameCharacter(characterId, nextKey).then(async renamed => {
+
+        return catalog.renameCharacter(characterId, nextKey).then(async renamed => {
             if (!renamed) {
                 return;
             }
@@ -162,8 +163,9 @@ export const useCharacterActions = ({
                 nextName,
                 renamed.id,
             );
-        }).catch(() => {
+        }).catch(error => {
             editorCallbacks?.onRenameText(characterId, original.key);
+            throw error;
         });
     }, [
         catalog,

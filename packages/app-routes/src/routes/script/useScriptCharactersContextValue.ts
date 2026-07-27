@@ -8,6 +8,7 @@ import type {UseScriptEditorCharactersArgs} from './editor/characters/useScriptE
 import type {ScriptCharactersContextValue} from './ScriptCharactersContext';
 
 interface UseScriptCharactersContextValueResult {
+    applyDocumentChange: ReturnType<typeof useScriptEditorCharacters>['applyDocumentChange'],
     getEditorValue: ReturnType<typeof useScriptEditorCharacters>['getEditorValue'],
     editorOverrideValue: ScriptCharactersContextValue['editorOverrideValue'],
     normalizedConfirmedCharacterRecords: ScriptCharactersContextValue['normalizedConfirmedCharacterRecords'],
@@ -19,6 +20,7 @@ export const useScriptCharactersContextValue = (
     args: UseScriptEditorCharactersArgs,
 ): UseScriptCharactersContextValueResult => {
     const {
+        applyDocumentChange,
         getEditorValue,
         editorOverrideValue,
         confirmedCharacterRecords,
@@ -99,6 +101,7 @@ export const useScriptCharactersContextValue = (
     ]);
 
     return {
+        applyDocumentChange,
         getEditorValue,
         editorOverrideValue,
         normalizedConfirmedCharacterRecords,

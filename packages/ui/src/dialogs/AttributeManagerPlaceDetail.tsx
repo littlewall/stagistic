@@ -83,7 +83,6 @@ export const AttributeManagerPlaceDetail = ({
         <>
             <header className={styles.detailHeader}>
                 <div className={styles.detailIdentity}>
-                    <p className={styles.detailType}>Place</p>
                     <h3 className={styles.detailTitle}>{place.name}</h3>
                 </div>
                 <Tooltip label={`Remove ${place.name}`} placement="left">
