@@ -9,9 +9,24 @@ export interface ExportCharacter {
     displayName: string,
 }
 
+export interface ExportInitialCharacter {
+    id: string,
+    displayName: string,
+    outline: string | null,
+    firstAppearanceOrder: number | null,
+}
+
+export interface ExportInitialPlace {
+    id: string,
+    name: string,
+    firstAppearanceOrder: number,
+}
+
 export interface ScriptData {
     doc: ScriptDocument,
     characters: ExportCharacter[],
+    initialCharacters: ExportInitialCharacter[],
+    initialPlaces: ExportInitialPlace[],
     scriptTitle: string,
     titlePage: TitlePageSettings | null,
 }

@@ -8,14 +8,31 @@ export interface ForcedBreak {
     kind: 'new-page' | 'odd-page',
 }
 
-export interface BlankPageSentinel {
-    count: number,
-    countsInNumbering: boolean,
-}
-
 export interface PaginationOverrides {
     forcedBreaks: ForcedBreak[],
-    blankPagesBeforeScript: BlankPageSentinel,
+}
+
+export interface CharactersAndPlacesInitialPagePlan {
+    kind: 'characters-and-places',
+    characters: Array<{
+        id: string,
+        displayName: string,
+        outline: string | null,
+    }>,
+    places: Array<{
+        id: string,
+        name: string,
+    }>,
+    showCharacterOutlines: boolean,
+}
+
+export type InitialPagePlan = CharactersAndPlacesInitialPagePlan;
+
+export interface LeadingPagesPlan {
+    initialPages: InitialPagePlan[],
+    manualBlankCount: number,
+    showRomanPageNumbers: boolean,
+    startEachInitialPageOnOddPage: boolean,
 }
 
 export interface ExportPostStep {
@@ -26,6 +43,7 @@ export interface ExportPlan {
     doc: ScriptDocument,
     titlePage: TitlePageSettings | null,
     scriptTitle: string,
+    leadingPages: LeadingPagesPlan,
     pagination: PaginationOverrides,
     postSteps: ExportPostStep[],
 }

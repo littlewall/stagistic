@@ -8,18 +8,34 @@ export interface PageBreakValue {
     sceneOnOddPage: boolean,
 }
 
+export type CharacterInitialPageOrder = 'name' | 'first-appearance';
+
+export interface CharactersAndPlacesValue {
+    enabled: boolean,
+    showPlaces: boolean,
+    showCharacterOutlines: boolean,
+    characterOrder: CharacterInitialPageOrder,
+}
+
+export interface InitialPagesValue {
+    startEachInitialPageOnOddPage: boolean,
+    showPageNumbers: boolean,
+    charactersAndPlaces: CharactersAndPlacesValue,
+}
+
 export interface BlankPageSpec {
+    enabled: boolean,
     count: number,
-    countsInNumbering: boolean,
 }
 
 export interface BlankPagesValue {
-    betweenTitleAndScript: BlankPageSpec,
+    betweenInitialPagesAndScript: BlankPageSpec,
 }
 
 export interface BasicExportConfig {
     characterFilter: CharacterFilterValue,
     pageBreaks: PageBreakValue,
+    initialPages: InitialPagesValue,
     blankPages: BlankPagesValue,
 }
 
@@ -29,5 +45,20 @@ export const BASIC_DEFAULTS: BasicExportConfig = {
         sceneOnNewPage: true,
         sceneOnOddPage: false,
     },
-    blankPages: {betweenTitleAndScript: {count: 0, countsInNumbering: false}},
+    initialPages: {
+        startEachInitialPageOnOddPage: true,
+        showPageNumbers: true,
+        charactersAndPlaces: {
+            enabled: true,
+            showPlaces: true,
+            showCharacterOutlines: false,
+            characterOrder: 'name',
+        },
+    },
+    blankPages: {
+        betweenInitialPagesAndScript: {
+            enabled: false,
+            count: 1,
+        },
+    },
 };

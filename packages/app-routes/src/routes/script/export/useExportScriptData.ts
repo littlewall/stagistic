@@ -1,3 +1,7 @@
+import {
+    useScriptPlaces,
+    useScriptRepository,
+} from '@stagistic/app-core';
 import type {
     ExportCharacter,
     ScriptData,
@@ -11,6 +15,7 @@ import {useMemo} from 'react';
 
 import {useScriptWorkspace} from '../ScriptWorkspaceContext';
 import {useScriptSettingsModal} from '../settings/ScriptSettingsModalProvider';
+import {collectInitialPageData} from './collectInitialPageData';
 
 const toDisplayName = (key: string) => key
     .toLowerCase()
@@ -50,9 +55,13 @@ export const useExportScriptData = (): {
 } => {
     const {
         currentScript,
+        currentScriptId,
+        characterCatalog,
         initialValue,
         initialIndexSnapshot,
     } = useScriptWorkspace();
+    const repository = useScriptRepository();
+    const placeState = useScriptPlaces(currentScriptId, repository);
     const {
         resolvedScriptSettings: settings,
         titlePageDraft,
@@ -64,17 +73,31 @@ export const useExportScriptData = (): {
         }
 
         const snapshot = initialIndexSnapshot ?? buildScriptBlockIndex(initialValue).snapshot;
+        const {
+            initialCharacters,
+            initialPlaces,
+        } = collectInitialPageData(
+            snapshot,
+            characterCatalog.characters,
+            placeState.places,
+            placeState.scenePlaceIds,
+        );
 
         return {
             doc: initialValue,
             characters: collectCharacters(snapshot),
+            initialCharacters,
+            initialPlaces,
             scriptTitle: currentScript.name,
             titlePage: titlePageDraft,
         };
     }, [
+        characterCatalog.characters,
         currentScript,
         initialIndexSnapshot,
         initialValue,
+        placeState.places,
+        placeState.scenePlaceIds,
         titlePageDraft,
     ]);
 

@@ -6,6 +6,7 @@ import {
 } from 'react';
 
 import styles from './ExportPreview.module.css';
+import {DEFAULT_EXPORT_PREVIEW_ZOOM} from './exportPreviewZoom';
 import {useExportContext} from './ExportProvider';
 import {renderPdfToCanvases} from './renderPdfToCanvases';
 
@@ -15,7 +16,7 @@ export const ExportPreview = () => {
     const [pageCount, setPageCount] = useState(0);
     const [isRenderingPreview, setIsRenderingPreview] = useState(false);
     const [renderedArtifact, setRenderedArtifact] = useState<Blob | null>(null);
-    const [zoom, setZoom] = useState(0.9);
+    const [zoom, setZoom] = useState(DEFAULT_EXPORT_PREVIEW_ZOOM);
     const isBusy = status === 'regenerating' || isRenderingPreview || artifact !== renderedArtifact;
     const busyLabel = pageCount > 0 ? 'Updating preview' : 'Preparing preview';
 

@@ -32,6 +32,7 @@ import {
     type PaginatorBlock,
 } from '@stagistic/script-pagination';
 
+import {composeLeadingPages} from './initialPages/composeLeadingPages';
 import type {ExportPlan} from './plan';
 import {buildTitlePageItems} from './titlePage/buildTitlePageItems';
 import type {
@@ -770,9 +771,8 @@ export const transcribeExportPlan = (
     const scriptPages = pages.filter(page => page.items.length > 0 || page.isInsertedBlank);
     const scriptItems = withHeaderFooter(scriptPages, plan, settings);
     const titleItems = buildTitlePageItems(plan.titlePage, plan.scriptTitle, settings);
-    const blankCount = plan.pagination.blankPagesBeforeScript.count;
-    const breaksAfterTitle = blankCount + (scriptItems.length > 0 ? 1 : 0);
-    const leadingItems: PageItem[] = [...titleItems, ...Array.from({length: breaksAfterTitle}, () => PAGE_BREAK_ITEM)];
+    const leadingPages = composeLeadingPages(plan.leadingPages, settings);
+    const leadingItems: PageItem[] = [titleItems, ...leadingPages].flatMap(page => [...page, PAGE_BREAK_ITEM]);
 
     return {
         pageWidthPx: settings.page.widthPx,

@@ -23,12 +23,14 @@ const plan = (blocks: ExportPlan['doc']['content']): ExportPlan => ({
     },
     titlePage: null,
     scriptTitle: '',
+    leadingPages: {
+        initialPages: [],
+        manualBlankCount: 0,
+        showRomanPageNumbers: true,
+        startEachInitialPageOnOddPage: false,
+    },
     pagination: {
         forcedBreaks: [],
-        blankPagesBeforeScript: {
-            count: 0,
-            countsInNumbering: false,
-        },
     },
     postSteps: [],
 });
@@ -169,10 +171,6 @@ describe('transcribeExportPlan', () => {
             ...plan([block('scene', 's1', 'Scene one'), block('scene', 's2', 'Scene two')]),
             pagination: {
                 forcedBreaks: [{blockId: 's2', kind: 'new-page'}],
-                blankPagesBeforeScript: {
-                    count: 0,
-                    countsInNumbering: false,
-                },
             },
         }, DEFAULT_EDITOR_SETTINGS);
 
@@ -192,10 +190,6 @@ describe('transcribeExportPlan', () => {
             ...plan([block('scene', 's1', 'Scene one'), block('scene', 's2', 'Scene two')]),
             pagination: {
                 forcedBreaks: [{blockId: 's2', kind: 'odd-page'}],
-                blankPagesBeforeScript: {
-                    count: 0,
-                    countsInNumbering: false,
-                },
             },
         }, DEFAULT_EDITOR_SETTINGS);
 
@@ -211,15 +205,12 @@ describe('transcribeExportPlan', () => {
             ...plan([block('scene', 's1', 'Scene one'), block('scene', 's2', 'Scene two')]),
             pagination: {
                 forcedBreaks: [{blockId: 's2', kind: 'odd-page'}],
-                blankPagesBeforeScript: {
-                    count: 0,
-                    countsInNumbering: false,
-                },
             },
         }, DEFAULT_EDITOR_SETTINGS);
         const pages = splitPages(transcript.items);
-        const insertedBlankText = pageText(pages[2] ?? []);
-        const secondSceneText = pageText(pages[3] ?? []);
+        const secondScenePageIndex = pages.findIndex(page => pageText(page).includes('SCENE TWO'));
+        const insertedBlankText = pageText(pages[secondScenePageIndex - 1] ?? []);
+        const secondSceneText = pageText(pages[secondScenePageIndex] ?? []);
 
         expect(insertedBlankText).toEqual(['2.']);
         expect(secondSceneText).toContain('2-2');
@@ -241,22 +232,69 @@ describe('transcribeExportPlan', () => {
         expect(sceneIndex).toBeGreaterThan(firstBreak);
     });
 
-    it('inserts blank pages between the title page and the script', () => {
+    it('adds an unnumbered balancing blank when no leading pages are configured', () => {
+        const transcript = transcribeExportPlan(
+            plan([block('scene', 's1', 'Scene one')]),
+            DEFAULT_EDITOR_SETTINGS,
+        );
+        const pages = splitPages(transcript.items);
+
+        expect(pages).toHaveLength(3);
+        expect(pageText(pages[1] ?? [])).toEqual([]);
+        expect(pageText(pages[2] ?? [])).toContain('SCENE ONE');
+        expect(pageText(pages[2] ?? [])).toContain('1.');
+    });
+
+    it('numbers initial, manual blank, and balancing pages with lowercase Roman numerals', () => {
+        const base = plan([block('scene', 's1', 'Scene one')]);
+        const transcript = transcribeExportPlan({
+            ...base,
+            leadingPages: {
+                initialPages: [
+                    {
+                        kind: 'characters-and-places',
+                        characters: [
+                            {
+                                id: 'anna',
+                                displayName: 'Anna',
+                                outline: null,
+                            },
+                        ],
+                        places: [],
+                        showCharacterOutlines: false,
+                    },
+                ],
+                manualBlankCount: 1,
+                showRomanPageNumbers: true,
+                startEachInitialPageOnOddPage: false,
+            },
+        }, DEFAULT_EDITOR_SETTINGS);
+        const pages = splitPages(transcript.items);
+
+        expect(pages).toHaveLength(5);
+        expect(pageText(pages[1] ?? [])).toContain('i');
+        expect(pageText(pages[2] ?? [])).toEqual(['ii']);
+        expect(pageText(pages[3] ?? [])).toEqual(['iii']);
+        expect(pageText(pages[4] ?? [])).toContain('SCENE ONE');
+        expect(pageText(pages[4] ?? [])).toContain('1.');
+    });
+
+    it('inserts manual and balancing blanks after initial pages', () => {
         const base = plan([block('scene', 's1', 'Scene one')]);
         const transcript = transcribeExportPlan({
             ...base,
             scriptTitle: 'My Play',
-            pagination: {
-                ...base.pagination,
-                blankPagesBeforeScript: {count: 2, countsInNumbering: false},
+            leadingPages: {
+                ...base.leadingPages,
+                manualBlankCount: 2,
             },
         }, DEFAULT_EDITOR_SETTINGS);
 
         const sceneIndex = indexOfText(transcript.items, 'SCENE ONE');
         const breaksBeforeScene = transcript.items.slice(0, sceneIndex).filter(isPageBreak).length;
 
-        // title → blank1 → blank2 → script = three page breaks.
-        expect(breaksBeforeScene).toBe(3);
+        // title → manual1 → manual2 → balancing blank → script.
+        expect(breaksBeforeScene).toBe(4);
     });
 
     it('pushes a non-splittable heading whole to the next page instead of tearing it', () => {
