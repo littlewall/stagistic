@@ -7,9 +7,9 @@ import {
 import {formatMusicNumber} from '@stagistic/script';
 import {
     clsx,
+    EditPencilIcon,
     LinkSlashIcon,
     Tooltip,
-    TrashIcon,
 } from '@stagistic/ui';
 import {
     type ReactNode,
@@ -19,10 +19,10 @@ import {
 } from 'react';
 
 import {ATTRIBUTE_MANAGER_PANEL_MUSIC} from '../../attributes/attributeManagerMenu';
+import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalProvider';
 import {SidebarMiniHeader} from '../sidebar';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import {SidebarActionsGroup} from '../sidebar/SidebarActionsGroup';
-import {DeleteMusicModal} from './DeleteMusicModal';
 import {MusicSidebarContextActions} from './MusicSidebarContextActions';
 import styles from './ScriptMusicSidebar.module.css';
 import type {ScriptMusicListItem} from './types';
@@ -32,7 +32,6 @@ interface ScriptMusicSidebarProps {
     music: readonly ScriptMusicListItem[],
     isLoading?: boolean,
     onAddMusic: () => void,
-    onDeleteMusic: (musicId: string) => void | Promise<void>,
     onUnassignMusic: (musicId: string) => void | Promise<void>,
 }
 
@@ -72,8 +71,8 @@ interface MusicRowProps {
     number: string | null,
     startBlockId: string | null,
     onFocus: (blockId: string) => void,
-    onRequestDelete: (music: ScriptMusicListItem) => void,
     onRequestUnassign: (music: ScriptMusicListItem) => void,
+    onOpenMusicManager: (musicId: string) => void,
 }
 
 const MusicRow = ({
@@ -82,8 +81,8 @@ const MusicRow = ({
     number,
     startBlockId,
     onFocus,
-    onRequestDelete,
     onRequestUnassign,
+    onOpenMusicManager,
 }: MusicRowProps) => {
     const isAssigned = Boolean(music.assignmentLabel);
     const label = (
@@ -126,11 +125,11 @@ const MusicRow = ({
                     </RowActionButton>
                 ) : null}
                 <RowActionButton
-                    ariaLabel={`Delete ${music.title}`}
-                    tooltipLabel="Delete music"
-                    onPress={() => onRequestDelete(music)}
+                    ariaLabel={`Edit ${music.title}`}
+                    tooltipLabel="Manage music"
+                    onPress={() => onOpenMusicManager(music.id)}
                 >
-                    <TrashIcon aria-hidden="true" />
+                    <EditPencilIcon aria-hidden="true" />
                 </RowActionButton>
             </span>
         </li>
@@ -141,14 +140,13 @@ export const ScriptMusicSidebar = ({
     music,
     isLoading = false,
     onAddMusic,
-    onDeleteMusic,
     onUnassignMusic,
 }: ScriptMusicSidebarProps) => {
     const editor = useEditorInstance();
     const elementSelection = useEditorElementSelection();
     const focusBlock = useFocusEditorBlock();
     const documentMusic = useEditorLiveMusic();
-    const [deleteTarget, setDeleteTarget] = useState<ScriptMusicListItem | null>(null);
+    const {openAttributeManagerMusic} = useScriptSettingsModal();
     const [unassignTarget, setUnassignTarget] = useState<ScriptMusicListItem | null>(null);
 
     const musicMetadataById = useMemo(() => new Map(documentMusic.map((music, index) => [
@@ -182,14 +180,6 @@ export const ScriptMusicSidebar = ({
         }),
         unassignedMusic: displayedMusic.filter(music => !music.assignmentLabel),
     }), [musicMetadataById, displayedMusic]);
-    const handleConfirmDelete = useCallback(async () => {
-        if (!deleteTarget) {
-            return;
-        }
-
-        await onDeleteMusic(deleteTarget.id);
-        setDeleteTarget(null);
-    }, [deleteTarget, onDeleteMusic]);
     const handleConfirmUnassign = useCallback(async () => {
         if (!unassignTarget) {
             return;
@@ -217,8 +207,8 @@ export const ScriptMusicSidebar = ({
                     number={musicMetadataById.get(music.id)?.number ?? null}
                     startBlockId={musicMetadataById.get(music.id)?.startBlockId ?? null}
                     onFocus={focusBlock}
-                    onRequestDelete={setDeleteTarget}
                     onRequestUnassign={setUnassignTarget}
+                    onOpenMusicManager={openAttributeManagerMusic}
                 />
             ))}
         </ul>
@@ -253,12 +243,6 @@ export const ScriptMusicSidebar = ({
                     ) : null}
                 </>
             )}
-            <DeleteMusicModal
-                isOpen={deleteTarget !== null}
-                musicTitle={deleteTarget?.title}
-                onClose={() => setDeleteTarget(null)}
-                onConfirm={handleConfirmDelete}
-            />
             <UnassignMusicModal
                 isOpen={unassignTarget !== null}
                 musicTitle={unassignTarget?.title}

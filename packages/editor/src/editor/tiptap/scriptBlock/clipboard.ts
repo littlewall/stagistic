@@ -13,6 +13,7 @@ import type {EditorState} from '@tiptap/pm/state';
 import type {EditorView} from '@tiptap/pm/view';
 
 import {getMusicNumberLabelsById} from '../extensions/musicNumbering/plugin';
+import {SCRIPT_BLOCK_DOM_SELECTOR} from '../scriptCore';
 
 const MUSIC_START_SELECTOR = '[data-music-pill="start"]';
 const MUSIC_OUT_SELECTOR = '[data-music-pill="out"]';
@@ -42,7 +43,72 @@ const resolveCopiedNodeViewTarget = (element: Element): Element => {
     return element;
 };
 
-export const copySelectedMusicAsText = (
+const collectTextNodes = (root: Node) => {
+    const nodes: Text[] = [];
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+
+    while (walker.nextNode()) {
+        nodes.push(walker.currentNode as Text);
+    }
+
+    return nodes;
+};
+
+const applyVisibleCasing = (text: string, source: Text) => {
+    const parent = source.parentElement;
+
+    if (!parent) {
+        return text;
+    }
+
+    const transform = getComputedStyle(parent).textTransform;
+
+    if (transform === 'uppercase') {
+        return text.toLocaleUpperCase();
+    }
+
+    if (transform === 'lowercase') {
+        return text.toLocaleLowerCase();
+    }
+
+    return text;
+};
+
+const normalizeCopiedTextCasing = (
+    sourceRoot: HTMLElement,
+    range: Range,
+    copiedRoot: HTMLElement,
+) => {
+    const sourceNodes = collectTextNodes(sourceRoot)
+        .filter(node => rangeIntersectsNode(range, node));
+    const copiedNodes = collectTextNodes(copiedRoot);
+
+    copiedNodes.forEach((node, index) => {
+        const source = sourceNodes[index];
+
+        if (source) {
+            node.textContent = applyVisibleCasing(node.textContent ?? '', source);
+        }
+    });
+};
+
+const selectionBelongsToEditor = (view: EditorView, range: Range) => {
+    const commonAncestor = range.commonAncestorContainer;
+
+    return commonAncestor === view.dom || view.dom.contains(commonAncestor);
+};
+
+const readCopiedPlainText = (container: HTMLElement) => {
+    const blocks = [...container.querySelectorAll<HTMLElement>(SCRIPT_BLOCK_DOM_SELECTOR)];
+
+    if (blocks.length < 2) {
+        return container.textContent ?? '';
+    }
+
+    return blocks.map(block => block.textContent ?? '').join('\n');
+};
+
+export const copyVisibleScriptSelection = (
     view: EditorView,
     event: ClipboardEvent,
 ): boolean => {
@@ -54,16 +120,18 @@ export const copySelectedMusicAsText = (
     }
 
     const range = selection.getRangeAt(0);
-    const selectedMusic = [...view.dom.querySelectorAll(MUSIC_START_SELECTOR)]
-        .filter(pill => rangeIntersectsNode(range, pill));
 
-    if (selectedMusic.length === 0) {
+    if (!selectionBelongsToEditor(view, range)) {
         return false;
     }
+
+    const selectedMusic = [...view.dom.querySelectorAll(MUSIC_START_SELECTOR)]
+        .filter(pill => rangeIntersectsNode(range, pill));
 
     const container = document.createElement('div');
 
     container.appendChild(range.cloneContents());
+    normalizeCopiedTextCasing(view.dom, range, container);
     container.querySelectorAll(MUSIC_OUT_SELECTOR).forEach(out => {
         resolveCopiedNodeViewTarget(out).remove();
     });
@@ -89,7 +157,7 @@ export const copySelectedMusicAsText = (
     event.preventDefault();
     clipboardData.clearData();
     clipboardData.setData('text/html', container.innerHTML);
-    clipboardData.setData('text/plain', container.textContent ?? '');
+    clipboardData.setData('text/plain', readCopiedPlainText(container));
 
     return true;
 };

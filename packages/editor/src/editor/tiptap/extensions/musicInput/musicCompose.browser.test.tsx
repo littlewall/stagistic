@@ -288,7 +288,7 @@ describe('music # compose', () => {
         expect(onMusicUnassigned).toHaveBeenCalledWith('music-existing');
     });
 
-    it('requests confirmation before removing a music from the editor pill menu', async () => {
+    it('requests confirmation before unassigning music from the editor pill menu', async () => {
         const removeRequestRef: {current: EditorMusicRemoveRequest | null} = {current: null};
         const onMusicUnassigned = vi.fn();
 
@@ -321,9 +321,12 @@ describe('music # compose', () => {
 
         await page.elementLocator(pill).click();
 
-        const removeButton = await poll(() => document.querySelector('button[aria-label="Remove music"]'), 'remove music button');
+        const unassignButton = await poll(
+            () => document.querySelector('button[aria-label="Unassign music"]'),
+            'unassign music button',
+        );
 
-        await page.elementLocator(removeButton).click();
+        await page.elementLocator(unassignButton).click();
 
         const removeRequest = removeRequestRef.current;
 
@@ -336,7 +339,7 @@ describe('music # compose', () => {
         expect(document.querySelector('[data-music-pill="start"]')).toBeTruthy();
         expect(removeRequest.complete()).toBe(true);
         expect(onMusicUnassigned).toHaveBeenCalledWith('music-existing');
-        await poll(() => document.querySelector('[data-music-pill="start"]') ? null : true, 'music removed');
+        await poll(() => document.querySelector('[data-music-pill="start"]') ? null : true, 'music unassigned');
     });
 
     it('cancels on Escape, leaving no music and no stray title text', async () => {

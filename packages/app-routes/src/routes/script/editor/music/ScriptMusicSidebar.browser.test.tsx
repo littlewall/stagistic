@@ -17,8 +17,18 @@ import {
 
 import {ScriptMusicSidebar} from './ScriptMusicSidebar';
 
+const {openAttributeManagerMusic} = vi.hoisted(() => ({
+    openAttributeManagerMusic: vi.fn(),
+}));
+
 vi.mock('../sidebar/AttributeManagerSidebarButton', () => ({
     AttributeManagerSidebarButton: () => null,
+}));
+
+vi.mock('../../settings/ScriptSettingsModalProvider', () => ({
+    useScriptSettingsModal: () => ({
+        openAttributeManagerMusic,
+    }),
 }));
 
 type EditorInstance = NonNullable<ReturnType<typeof useEditorInstance>>;
@@ -122,7 +132,6 @@ const mountSidebar = ({
                     ]}
                     isLoading={isLoading}
                     onAddMusic={() => {}}
-                    onDeleteMusic={() => {}}
                     onUnassignMusic={onUnassignMusic}
                 />
             </ScriptEditor.LeftSidebar>
@@ -137,6 +146,7 @@ afterEach(() => {
     document.body.innerHTML = '';
     delete (window as MusicSidebarTestWindow).__musicSidebarEditor;
     vi.restoreAllMocks();
+    openAttributeManagerMusic.mockReset();
 });
 
 describe('ScriptMusicSidebar', () => {
@@ -267,6 +277,20 @@ describe('ScriptMusicSidebar', () => {
 
         expect(scrollIntoView).toHaveBeenCalledWith({block: 'start'});
         expect(document.querySelector('[data-music-id="music-unassigned"][data-music-navigation]')).toBeNull();
+    });
+
+    it('opens the selected music in the attribute manager from the edit action', async () => {
+        mountSidebar();
+
+        const editAction = await poll(
+            () => document.querySelector<HTMLButtonElement>('[aria-label="Edit Overture"]'),
+            'edit music action',
+        );
+
+        editAction.click();
+
+        expect(openAttributeManagerMusic).toHaveBeenCalledWith('music-1');
+        expect(document.querySelector('[aria-label="Delete Overture"]')).toBeNull();
     });
 
     it('completes document unassignment before publishing the catalog intent', async () => {

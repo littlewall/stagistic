@@ -77,11 +77,10 @@ export const ScriptEditorRoute = () => {
     const {
         music,
         createMusic,
-        deleteMusic,
+        unassignMusic,
         markMusicAssigned,
         markMusicUnassigned,
         updateMusicRequest,
-        unassignMusic,
     } = musicState;
 
     const displayedCurrentScript = useMemo(
@@ -180,14 +179,12 @@ export const ScriptEditorRoute = () => {
                     music={music}
                     isLoading={musicState.isLoading}
                     onAddMusic={openAddMusicModal}
-                    onDeleteMusic={deleteMusic}
                     onUnassignMusic={unassignMusic}
                 />
             ),
         },
     ], [
         music,
-        deleteMusic,
         openAddMusicModal,
         unassignMusic,
     ]);

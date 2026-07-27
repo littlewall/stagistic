@@ -3,7 +3,7 @@ import {Plugin} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
 import {
-    copySelectedMusicAsText,
+    copyVisibleScriptSelection,
     transformCopiedScriptSlice,
 } from '../scriptBlock/clipboard';
 import {
@@ -24,7 +24,7 @@ const createInputHandlersPlugin = (
     return new Plugin({
         props: {
             handleDOMEvents: {
-                copy: (view, event) => copySelectedMusicAsText(view, event),
+                copy: (view, event) => copyVisibleScriptSelection(view, event),
             },
             handleKeyDown: (_view, event) => handleKeyDown(editor, event, blockShortcuts, blockNextElements),
             handleTextInput: (_view, from, to, text) => handleTextInput(editor, from, to, text, blockCasing),

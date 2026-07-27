@@ -1,4 +1,4 @@
-import {Tooltip, TrashIcon} from '@stagistic/ui';
+import {LinkSlashIcon, Tooltip} from '@stagistic/ui';
 import clsx from 'clsx';
 import type {ReactNode} from 'react';
 
@@ -38,4 +38,4 @@ export const MusicMenuButton = ({
     </Tooltip>
 );
 
-export const MusicDeleteIcon = () => <TrashIcon aria-hidden="true" />;
+export const MusicUnassignIcon = () => <LinkSlashIcon aria-hidden="true" />;

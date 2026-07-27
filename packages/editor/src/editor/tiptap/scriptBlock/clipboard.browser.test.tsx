@@ -38,12 +38,12 @@ const initialValue: ScriptDocument = {
                 {type: 'text', text: 'Enter '},
                 {
                     type: 'text',
-                    text: 'ANNA',
+                    text: 'REBeccA',
                     marks: [
                         {
                             type: 'characterTag',
                             attrs: {
-                                characterKey: 'ANNA',
+                                characterKey: 'REBECCA',
                                 characterId: 'character-1',
                             },
                         },
@@ -186,7 +186,7 @@ describe('script clipboard transformation', () => {
         const json = copied.content.toJSON() as ScriptNode[];
         const serialized = JSON.stringify(json);
         const musicText = findTextNode(json, 'Overture');
-        const characterText = findTextNode(json, 'ANNA');
+        const characterText = findTextNode(json, 'REBeccA');
         const plainText = copied.content.textBetween(0, copied.content.size, '\n');
 
         expect(serialized).not.toContain('"musicStart"');
@@ -239,7 +239,9 @@ describe('script clipboard transformation', () => {
 
         expect(clipboardData.getData('text/plain')).toContain('1) Overture');
         expect(clipboardData.getData('text/html')).toContain('<strong> 1) Overture </strong>');
-        expect(clipboardData.getData('text/html')).toContain('data-character-key="ANNA"');
+        expect(clipboardData.getData('text/plain')).toContain('REBECCA');
+        expect(clipboardData.getData('text/html')).toContain('data-character-key="REBECCA"');
+        expect(clipboardData.getData('text/html')).toContain('>REBECCA</span>');
         expect(clipboardData.getData('text/html')).not.toContain('node-musicStart');
         expect(clipboardData.getData('text/html')).not.toContain('contenteditable="false"');
 
@@ -273,7 +275,7 @@ describe('script clipboard transformation', () => {
         const pastedBlock = (editor.getJSON().content as ScriptNode[] | undefined)
             ?.find(node => node.attrs?.id === 'paste-target');
         const pastedMusicText = findTextNode(pastedBlock?.content ?? [], 'Overture');
-        const pastedCharacter = findTextNode(pastedBlock?.content ?? [], 'ANNA');
+        const pastedCharacter = findTextNode(pastedBlock?.content ?? [], 'REBECCA');
 
         expect(pastedMusicText?.text).toContain('1) Overture');
         expect(pastedMusicText?.marks).toContainEqual(expect.objectContaining({type: 'bold'}));

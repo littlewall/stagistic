@@ -509,7 +509,7 @@ describe('music pill node views', () => {
             'start pill menu',
         );
 
-        expect([...startMenu.querySelectorAll('button')].map(button => button.ariaLabel)).toEqual(['Manage music', 'Remove music']);
+        expect([...startMenu.querySelectorAll('button')].map(button => button.ariaLabel)).toEqual(['Manage music', 'Unassign music']);
 
         const endpoint = await poll(
             () => document.querySelector('[data-block-id="sd-2"][data-marker-kind="end"]'),
@@ -903,7 +903,7 @@ describe('music pill node views', () => {
 
         await activatePill();
         await poll(() => document.querySelector('[data-music-menu="start"]'), 'pill menu');
-        await clickMenuButton('Remove music');
+        await clickMenuButton('Unassign music');
         await poll(() => document.querySelector('[data-music-pill="start"]') ? null : true, 'pill removed');
 
         expect(document.querySelector('[data-music-pill="start"]')).toBeNull();
@@ -920,7 +920,7 @@ describe('music pill node views', () => {
         await poll(() => document.querySelector('[data-id="sd-2"] [data-music-pill="out"]'), 'music out pill');
         await activatePill();
         await poll(() => document.querySelector('[data-music-menu="start"]'), 'pill menu');
-        await clickMenuButton('Remove music');
+        await clickMenuButton('Unassign music');
         await poll(() => document.querySelector('[data-music-pill="start"]') ? null : true, 'pill removed');
 
         expect(document.querySelector('[data-music-pill="start"]')).toBeNull();

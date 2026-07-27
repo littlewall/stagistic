@@ -109,8 +109,8 @@ const buildStartSection = (
     }
 
     items.push({
-        id: 'remove-music',
-        label: 'Remove music',
+        id: 'unassign-music',
+        label: 'Unassign music',
         run: run(() => {
             if (onRequestRemoveMusic) {
                 onRequestRemoveMusic({

@@ -28,9 +28,9 @@ import type {
 } from '../../contracts';
 import styles from './MusicPill.module.css';
 import {
-    MusicDeleteIcon,
     MusicMenuButton,
     type MusicMode,
+    MusicUnassignIcon,
 } from './MusicPillControls';
 import {
     cancelMusicDraft,
@@ -102,7 +102,7 @@ export const MusicStartPill = ({
         updateAttributes({[MUSIC_TITLE_ATTR]: value});
     };
 
-    const deleteMusic = () => {
+    const unassignMusic = () => {
         if (musicId && onRequestRemoveMusic) {
             onRequestRemoveMusic({
                 musicId,
@@ -285,11 +285,10 @@ export const MusicStartPill = ({
                         </MusicMenuButton>
                     ) : null}
                     <MusicMenuButton
-                        label="Remove music"
-                        isDanger
-                        onClick={deleteMusic}
+                        label="Unassign music"
+                        onClick={unassignMusic}
                     >
-                        <MusicDeleteIcon />
+                        <MusicUnassignIcon />
                     </MusicMenuButton>
                 </MusicPillMenuPopover>
             ) : null}
