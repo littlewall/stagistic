@@ -112,3 +112,9 @@
     color: var(--color-text-muted);
     white-space: nowrap;
 }
+.preservePagination {
+    display: flex;
+    gap: .35rem;
+    align-items: center;
+    margin-top: .5rem;
+}

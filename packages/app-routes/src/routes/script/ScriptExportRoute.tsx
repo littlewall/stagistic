@@ -16,6 +16,7 @@ export const ScriptExportRoute = () => {
     const {
         openSettingsModal,
         openAttributeManagerModal,
+        musicAttachmentsState,
     } = useScriptSettingsModal();
 
     const handleMenuAction = useCallback((actionId: string) => {
@@ -42,7 +43,11 @@ export const ScriptExportRoute = () => {
             ) : null}
         >
             {script ? (
-                <ExportProvider script={script} settings={settings}>
+                <ExportProvider
+                    script={script}
+                    settings={settings}
+                    musicAttachments={musicAttachmentsState}
+                >
                     <div className={styles.shell}>
                         <ExportControlPanel />
                         <ExportPreview />

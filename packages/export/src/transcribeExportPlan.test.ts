@@ -185,6 +185,27 @@ describe('transcribeExportPlan', () => {
         expect(text).toContain('1.');
     });
 
+    it('carries the configured page-number footer style for integrated-score composition', () => {
+        const transcript = transcribeExportPlan({
+            ...plan([block('scene', 's1', 'Scene one')]),
+            postSteps: [
+                {
+                    kind: 'integrated-score',
+                    musicId: 'music-1',
+                    title: 'Song',
+                    startBlockId: 's1',
+                    afterBlockId: 's1',
+                },
+            ],
+        }, DEFAULT_EDITOR_SETTINGS);
+
+        expect(transcript.integratedFooter).toMatchObject({
+            alignment: 'center',
+            text: '{{page_number}}',
+            bold: true,
+        });
+    });
+
     it('emits a blank PDF page for odd-page forced breaks', () => {
         const transcript = transcribeExportPlan({
             ...plan([block('scene', 's1', 'Scene one'), block('scene', 's2', 'Scene two')]),

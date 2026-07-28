@@ -1,5 +1,6 @@
 export * from './config';
 export * from './deriveBasicExportPlan';
+export * from './deriveIntegratedScoreExportPlan';
 export * from './filterByCharacter';
 export * from './initialPages/buildCharactersAndPlacesPages';
 export * from './initialPages/buildInitialPagePages';

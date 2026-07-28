@@ -1,4 +1,5 @@
 export {Button} from './atoms/Button';
+export {InlineTooltip} from './atoms/InlineTooltip';
 export {Input} from './atoms/Input';
 export {ProgressCircle} from './atoms/ProgressCircle';
 export {

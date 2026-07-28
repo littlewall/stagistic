@@ -420,6 +420,9 @@ interface ScriptPage {
     items: VisualLine[],
     mark: PageStructureMark | null,
     isInsertedBlank: boolean,
+    sourceBlockIds: Set<string>,
+    referencePageNumber?: number,
+    referencePageMarkNumber?: number,
 }
 
 const buildStructureMarks = (doc: ScriptDocument): PageStructureMark[] => {
@@ -569,7 +572,7 @@ const withHeaderFooter = (
     let pageMarkNumber = 0;
 
     return pages.flatMap((page, index) => {
-        const pageNumber = index + 1;
+        const pageNumber = page.referencePageNumber ?? index + 1;
 
         if (!page.isInsertedBlank) {
             pageMarkNumber += 1;
@@ -581,7 +584,7 @@ const withHeaderFooter = (
             y: headerY,
             page,
             pageNumber,
-            pageMarkNumber,
+            pageMarkNumber: page.referencePageMarkNumber ?? pageMarkNumber,
             draftDate,
             plan,
             settings,
@@ -592,7 +595,7 @@ const withHeaderFooter = (
             y: footerY,
             page,
             pageNumber,
-            pageMarkNumber,
+            pageMarkNumber: page.referencePageMarkNumber ?? pageMarkNumber,
             draftDate,
             plan,
             settings,
@@ -605,6 +608,40 @@ const withHeaderFooter = (
 
         return index === pages.length - 1 ? pageItems : [...pageItems, PAGE_BREAK_ITEM];
     });
+};
+
+const getIntegratedFooter = (
+    plan: ExportPlan,
+    settings: EditorSettings,
+) => {
+    if (plan.postSteps.length === 0) {
+        return undefined;
+    }
+
+    const fontSizePx = settings.typography.fontSizePx;
+    const lineHeightPx = fontSizePx * settings.typography.lineHeight;
+    const yPx = settings.page.heightPx - settings.page.marginBottomPx
+        + Math.max(0, (settings.page.marginBottomPx - lineHeightPx) / 2);
+
+    return HEADER_FOOTER_ALIGNMENTS.flatMap(alignment => {
+        const cell = settings.headerFooter.footer[alignment];
+
+        if (!cell.text.includes('{{page_number}}')) {
+            return [];
+        }
+
+        return [
+            {
+                alignment,
+                text: cell.text,
+                yPx,
+                fontSizePx,
+                bold: cell.isBold,
+                italic: cell.isItalic,
+                underline: cell.isUnderline,
+            },
+        ];
+    })[0];
 };
 
 export const transcribeExportPlan = (
@@ -701,7 +738,7 @@ export const transcribeExportPlan = (
 
     const pages: ScriptPage[] = [
         {
-            items: [], mark: null, isInsertedBlank: false,
+            items: [], mark: null, isInsertedBlank: false, sourceBlockIds: new Set(),
         },
     ];
     let currentPage = pages[0];
@@ -713,7 +750,7 @@ export const transcribeExportPlan = (
         }
 
         currentPage = {
-            items: [], mark: null, isInsertedBlank: false,
+            items: [], mark: null, isInsertedBlank: false, sourceBlockIds: new Set(),
         };
         pages.push(currentPage);
         y = settings.page.marginTopPx;
@@ -753,10 +790,15 @@ export const transcribeExportPlan = (
 
                     return run;
                 }),
+                sourceBlockId: getScriptBlockId(plan.doc.content[index]) ?? undefined,
             };
 
             currentPage.mark ??= structureMarks[index] ?? {actIndex: null, sceneNumber: 0};
             currentPage.items.push(visualLine);
+            if (visualLine.sourceBlockId) {
+                currentPage.sourceBlockIds.add(visualLine.sourceBlockId);
+            }
+
             y += item.lineHeightPx;
         });
 
@@ -768,7 +810,27 @@ export const transcribeExportPlan = (
      * script. Everything is one flat item stream: N page breaks after the title
      * = the title→next boundary plus (count − 1) blank-page boundaries.
      */
-    const scriptPages = pages.filter(page => page.items.length > 0 || page.isInsertedBlank);
+    const allScriptPages = pages.filter(page => page.items.length > 0 || page.isInsertedBlank);
+    let referencePageMarkNumber = 0;
+
+    allScriptPages.forEach((page, index) => {
+        if (!page.isInsertedBlank) {
+            referencePageMarkNumber += 1;
+        }
+
+        page.referencePageNumber = index + 1;
+        page.referencePageMarkNumber = referencePageMarkNumber;
+    });
+
+    const visibleBlockIds = plan.visibleBlockIds ? new Set(plan.visibleBlockIds) : null;
+    const scriptPages = visibleBlockIds
+        ? allScriptPages
+            .map(page => ({
+                ...page,
+                items: page.items.filter(line => !line.sourceBlockId || visibleBlockIds.has(line.sourceBlockId)),
+            }))
+            .filter(page => page.items.length > 0 || page.isInsertedBlank)
+        : allScriptPages;
     const scriptItems = withHeaderFooter(scriptPages, plan, settings);
     const titleItems = buildTitlePageItems(plan.titlePage, plan.scriptTitle, settings);
     const leadingPages = composeLeadingPages(plan.leadingPages, settings);
@@ -778,7 +840,17 @@ export const transcribeExportPlan = (
         pageWidthPx: settings.page.widthPx,
         pageHeightPx: settings.page.heightPx,
         marginLeftPx: settings.page.marginLeftPx,
+        marginRightPx: settings.page.marginRightPx,
         marginTopPx: settings.page.marginTopPx,
         items: [...leadingItems, ...scriptItems],
+        leadingPageCount: [titleItems, ...leadingPages].length,
+        scriptPageSourceBlockIds: scriptPages.map(page => [...page.sourceBlockIds]),
+        integratedScores: plan.postSteps.map(step => ({
+            musicId: step.musicId,
+            title: step.title,
+            startBlockId: step.startBlockId,
+            afterBlockId: step.afterBlockId,
+        })),
+        integratedFooter: getIntegratedFooter(plan, settings),
     };
 };

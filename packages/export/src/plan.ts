@@ -35,9 +35,15 @@ export interface LeadingPagesPlan {
     startEachInitialPageOnOddPage: boolean,
 }
 
-export interface ExportPostStep {
-    kind: string,
+export interface IntegratedScorePostStep {
+    kind: 'integrated-score',
+    musicId: string,
+    title: string,
+    startBlockId: string,
+    afterBlockId: string,
 }
+
+export type ExportPostStep = IntegratedScorePostStep;
 
 export interface ExportPlan {
     doc: ScriptDocument,
@@ -46,4 +52,6 @@ export interface ExportPlan {
     leadingPages: LeadingPagesPlan,
     pagination: PaginationOverrides,
     postSteps: ExportPostStep[],
+    /** When present, layout uses the full document and only these blocks remain visible. */
+    visibleBlockIds?: string[],
 }

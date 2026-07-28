@@ -50,6 +50,7 @@ interface ScriptSettingsModalContextValue {
     titlePageDraft: TitlePageSettings,
     scriptTitleDraft: string,
     musicState: ReturnType<typeof useScriptMusicState>,
+    musicAttachmentsState: ReturnType<typeof useMusicAttachmentsState>,
     openSettingsModal: () => void,
     openAttributeManagerModal: () => void,
     openAttributeManagerModalWithPanel: (panelId: AttributeManagerPanelId) => void,
@@ -210,6 +211,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         titlePageDraft,
         scriptTitleDraft,
         musicState,
+        musicAttachmentsState,
         openSettingsModal,
         openAttributeManagerModal,
         openAttributeManagerModalWithPanel,
@@ -217,6 +219,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         openAttributeManagerMusic,
     }), [
         musicState,
+        musicAttachmentsState,
         effectiveScriptSettingsDraft,
         isEditorPresentationHydrated,
         openAttributeManagerModal,

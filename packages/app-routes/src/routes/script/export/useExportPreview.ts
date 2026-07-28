@@ -27,6 +27,7 @@ export const useExportPreview = <TConfig >({
     const {
         script,
         settings,
+        musicAttachments,
         setArtifact,
         setStatus,
     } = useExportContext();
@@ -44,6 +45,19 @@ export const useExportPreview = <TConfig >({
                 try {
                     const plan = derive(config, script);
                     const transcript = transcribeExportPlan(plan, settings);
+                    const scorePdfs = await Promise.all(plan.postSteps.map(async step => {
+                        const attachment = musicAttachments?.integratedScoresByMusic.get(step.musicId);
+
+                        if (!attachment) {
+                            return null;
+                        }
+
+                        const blob = await musicAttachments?.getBlob(attachment.storageKey);
+
+                        return blob ? [step.musicId, await blob.arrayBuffer()] as const : null;
+                    }));
+
+                    transcript.scorePdfs = Object.fromEntries(scorePdfs.filter((item): item is readonly [string, ArrayBuffer] => item !== null));
 
                     if (controller.signal.aborted || runRef.current !== runId) {
                         return;
@@ -80,6 +94,7 @@ export const useExportPreview = <TConfig >({
         onArtifact,
         script,
         settings,
+        musicAttachments,
         setArtifact,
         setStatus,
     ]);

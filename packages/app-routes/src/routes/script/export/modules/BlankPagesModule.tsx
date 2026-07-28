@@ -1,8 +1,8 @@
 import type {BlankPagesValue} from '@stagistic/export';
 import {
+    InlineTooltip,
     Input,
     Switch,
-    Tooltip,
 } from '@stagistic/ui';
 
 import styles from './modules.module.css';
@@ -57,16 +57,12 @@ export const BlankPagesModule = ({
                         })}
                     />
                     {hasAutomaticBalancingBlank ? (
-                        <Tooltip label={BALANCING_BLANK_EXPLANATION}>
-                            <button
-                                type="button"
-                                className={styles.balancingBlankIndicator}
-                                aria-label={BALANCING_BLANK_EXPLANATION}
-                                data-testid="balancing-blank-indicator"
-                            >
-                                +1
-                            </button>
-                        </Tooltip>
+                        <InlineTooltip
+                            className={styles.balancingBlankIndicator}
+                            testId="balancing-blank-indicator"
+                            label="+1"
+                            tooltip={BALANCING_BLANK_EXPLANATION}
+                        />
                     ) : null}
                 </div>
             ) : null}

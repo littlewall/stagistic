@@ -74,7 +74,10 @@ export const deriveBasicExportPlan = (
     config: BasicExportConfig,
     script: ScriptData,
 ): ExportPlan => {
-    const doc = filterScriptByCharacter(script.doc, config.characterFilter, script.characters);
+    const filteredDoc = filterScriptByCharacter(script.doc, config.characterFilter, script.characters);
+    const preservePagination = config.characterFilter.mode === 'only'
+        && config.characterFilter.preserveFullScriptPagination !== false;
+    const doc = preservePagination ? script.doc : filteredDoc;
     const forcedBreaks: ForcedBreak[] = [];
     const charactersAndPlaces = buildCharactersAndPlacesPlan(config, script);
     const blankSpec = config.blankPages.betweenInitialPagesAndScript;
@@ -140,5 +143,8 @@ export const deriveBasicExportPlan = (
             forcedBreaks,
         },
         postSteps: [],
+        visibleBlockIds: preservePagination
+            ? filteredDoc.content.map(node => getScriptBlockId(node)).filter((id): id is string => id !== null)
+            : undefined,
     };
 };

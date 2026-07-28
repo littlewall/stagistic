@@ -8,6 +8,8 @@ import {
     useState,
 } from 'react';
 
+import type {MusicAttachmentsState} from '../attributes/useMusicAttachmentsState';
+
 export type ExportStatus = 'idle' | 'regenerating' | 'error';
 
 interface ExportContextValue {
@@ -17,6 +19,7 @@ interface ExportContextValue {
     status: ExportStatus,
     setArtifact: (artifact: Blob | null) => void,
     setStatus: (status: ExportStatus) => void,
+    musicAttachments: MusicAttachmentsState | null,
 }
 
 const ExportContext = createContext<ExportContextValue | null>(null);
@@ -34,10 +37,12 @@ export const useExportContext = (): ExportContextValue => {
 export const ExportProvider = ({
     script,
     settings,
+    musicAttachments = null,
     children,
 }: {
     script: ScriptData,
     settings: EditorSettings,
+    musicAttachments?: MusicAttachmentsState | null,
     children: ReactNode,
 }) => {
     const [artifact, setArtifact] = useState<Blob | null>(null);
@@ -50,10 +55,12 @@ export const ExportProvider = ({
         status,
         setArtifact,
         setStatus,
+        musicAttachments,
     }), [
         artifact,
         script,
         settings,
+        musicAttachments,
         status,
     ]);
 

@@ -1,6 +1,8 @@
 export interface CharacterFilterValue {
     mode: 'all' | 'only',
     characterIds: string[],
+    /** Defaults to true for both export templates. */
+    preserveFullScriptPagination?: boolean,
 }
 
 export interface PageBreakValue {
@@ -40,7 +42,9 @@ export interface BasicExportConfig {
 }
 
 export const BASIC_DEFAULTS: BasicExportConfig = {
-    characterFilter: {mode: 'all', characterIds: []},
+    characterFilter: {
+        mode: 'all', characterIds: [], preserveFullScriptPagination: true,
+    },
     pageBreaks: {
         sceneOnNewPage: true,
         sceneOnOddPage: false,
@@ -60,5 +64,21 @@ export const BASIC_DEFAULTS: BasicExportConfig = {
             enabled: false,
             count: 1,
         },
+    },
+};
+
+/** Integrated Score deliberately shares every user configurable option with Basic. */
+export type IntegratedScoreExportConfig = BasicExportConfig;
+
+export const INTEGRATED_SCORE_DEFAULTS: IntegratedScoreExportConfig = {
+    ...BASIC_DEFAULTS,
+    characterFilter: {...BASIC_DEFAULTS.characterFilter},
+    pageBreaks: {...BASIC_DEFAULTS.pageBreaks},
+    initialPages: {
+        ...BASIC_DEFAULTS.initialPages,
+        charactersAndPlaces: {...BASIC_DEFAULTS.initialPages.charactersAndPlaces},
+    },
+    blankPages: {
+        betweenInitialPagesAndScript: {...BASIC_DEFAULTS.blankPages.betweenInitialPagesAndScript},
     },
 };

@@ -2,7 +2,10 @@ import type {
     CharacterFilterValue,
     ExportCharacter,
 } from '@stagistic/export';
-import {Switch} from '@stagistic/ui';
+import {
+    InlineTooltip,
+    Switch,
+} from '@stagistic/ui';
 
 import styles from './modules.module.css';
 
@@ -28,6 +31,7 @@ export const CharacterFilterModule = ({
                 onChange={isSelected => onChange({
                     mode: isSelected ? 'only' : 'all',
                     characterIds: value.characterIds,
+                    preserveFullScriptPagination: value.preserveFullScriptPagination,
                 })}
             >
                 Selected characters only
@@ -51,6 +55,7 @@ export const CharacterFilterModule = ({
                                     onChange({
                                         mode: 'only',
                                         characterIds: Array.from(next),
+                                        preserveFullScriptPagination: value.preserveFullScriptPagination,
                                     });
                                 }}
                             />
@@ -60,6 +65,20 @@ export const CharacterFilterModule = ({
                     {characters.length === 0 ? (
                         <p className={styles.description}>No characters found in this script.</p>
                     ) : null}
+                </div>
+            ) : null}
+            {onlySelected ? (
+                <div className={styles.preservePagination}>
+                    <Switch
+                        isSelected={value.preserveFullScriptPagination !== false}
+                        onChange={preserveFullScriptPagination => onChange({...value, preserveFullScriptPagination})}
+                    >
+                        Preserve full-script pagination
+                    </Switch>
+                    <InlineTooltip
+                        label="?"
+                        tooltip="Keep page numbers and content positions aligned with the complete script."
+                    />
                 </div>
             ) : null}
         </div>

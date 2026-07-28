@@ -4,7 +4,10 @@ import {
     it,
 } from 'vite-plus/test';
 
-import {BASIC_DEFAULTS} from './config';
+import {
+    BASIC_DEFAULTS,
+    INTEGRATED_SCORE_DEFAULTS,
+} from './config';
 
 describe('BASIC_DEFAULTS', () => {
     it('starts with characters and places enabled and no manual blank pages', () => {
@@ -25,5 +28,12 @@ describe('BASIC_DEFAULTS', () => {
             enabled: false,
             count: 1,
         });
+    });
+});
+
+describe('INTEGRATED_SCORE_DEFAULTS', () => {
+    it('inherits basic options and preserves full-script pagination by default', () => {
+        expect(INTEGRATED_SCORE_DEFAULTS).toMatchObject(BASIC_DEFAULTS);
+        expect(INTEGRATED_SCORE_DEFAULTS.characterFilter.preserveFullScriptPagination).toBe(true);
     });
 });

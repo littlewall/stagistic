@@ -37,12 +37,30 @@ const cloneDefaults = (): BasicExportConfig => ({
     },
 });
 
-export const BasicExportTemplate = () => {
+export const BasicExportTemplate = ({
+    config: externalConfig,
+    onConfigChange,
+    derive = deriveBasicExportPlan,
+}: {
+    config?: BasicExportConfig,
+    onConfigChange?: (config: BasicExportConfig) => void,
+    derive?: typeof deriveBasicExportPlan,
+}) => {
     const {script, settings} = useExportContext();
-    const [config, setConfig] = useState<BasicExportConfig>(cloneDefaults);
+    const [localConfig, setLocalConfig] = useState<BasicExportConfig>(cloneDefaults);
+    const config = externalConfig ?? localConfig;
+    const setConfig = (update: BasicExportConfig | ((previous: BasicExportConfig) => BasicExportConfig)) => {
+        const next = typeof update === 'function' ? update(config) : update;
+
+        if (onConfigChange) {
+            onConfigChange(next);
+        } else {
+            setLocalConfig(next);
+        }
+    };
     const stableConfig = useMemo(() => config, [config]);
     const hasAutomaticBalancingBlank = useMemo(() => {
-        const plan = deriveBasicExportPlan(stableConfig, script);
+        const plan = derive(stableConfig, script);
 
         return willAddAutomaticBalancingBlank(plan.leadingPages, settings);
     }, [
@@ -53,7 +71,7 @@ export const BasicExportTemplate = () => {
 
     useExportPreview({
         config: stableConfig,
-        derive: deriveBasicExportPlan,
+        derive,
     });
 
     return (
