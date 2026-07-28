@@ -1,4 +1,3 @@
-import {Xmark} from 'iconoir-react';
 import {
     createContext,
     type ReactNode,
@@ -18,6 +17,7 @@ import {
     UNSTABLE_ToastRegion as ToastRegion,
 } from 'react-aria-components';
 
+import {CloseIcon} from '../icons/ui';
 import styles from './ToastProvider.module.css';
 
 export type ToastVariant = 'success' | 'error' | 'info';
@@ -44,6 +44,7 @@ const ToastItem = ({toast}: {toast: QueuedToast<ToastContent>}) => {
             className={styles.toast}
             data-variant={variant}
         >
+            <span className={styles.statusIndicator} aria-hidden="true" />
             <ToastContent className={styles.content}>
                 <Text slot="title" className={styles.title}>
                     {toast.content.title}
@@ -54,8 +55,12 @@ const ToastItem = ({toast}: {toast: QueuedToast<ToastContent>}) => {
                     </Text>
                 )}
             </ToastContent>
-            <Button slot="close" className={styles.closeButton}>
-                <Xmark />
+            <Button
+                slot="close"
+                className={styles.closeButton}
+                aria-label="Zavřít oznámení"
+            >
+                <CloseIcon />
             </Button>
         </Toast>
     );

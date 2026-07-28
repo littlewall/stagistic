@@ -1,0 +1,66 @@
+.bar {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+
+    &.small {
+        gap: var(--space-md);
+    }
+
+    & .track {
+        position: relative;
+        overflow: hidden;
+        flex: 1;
+        height: 8px;
+        background: var(--color-surface-accent);
+        border-radius: var(--radius-full);
+
+        &.indeterminate {
+            background: color-mix(in oklch, var(--color-surface-accent) 70%, transparent);
+        }
+    }
+
+    & .fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--color-progress-start) 0%, var(--color-progress-middle) 50%, var(--color-progress-end) 100%);
+        border-radius: var(--radius-full);
+        transition: width 200ms ease;
+
+        &.indeterminate {
+            will-change: transform, opacity;
+            position: absolute;
+            left: 0;
+            transform: translateX(-100%);
+            width: 35%;
+            animation: progress-wave 1.2s linear infinite;
+
+            @media (prefers-reduced-motion: reduce) {
+                transform: translateX(0);
+                opacity: .75;
+                animation: none;
+            }
+        }
+    }
+
+    & .percent {
+        min-width: 38px;
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text-muted);
+        text-align: right;
+    }
+}
+
+@keyframes progress-wave {
+    0% {
+        transform: translateX(-100%);
+        opacity: .5;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        transform: translateX(285.714%);
+        opacity: .5;
+    }
+}

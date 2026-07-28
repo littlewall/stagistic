@@ -1,0 +1,266 @@
+.root {
+    --L-block-scene: .165;
+    --L-block-stage-direction: .12;
+    --L-block-character: .19;
+    --L-block-dialogue: .13;
+    --L-block-aside: .29;
+    --L-block-centered: .23;
+    --character-tag-tint-strength: 30%;
+    --color-block-scene: oklch(from var(--base-neutral) var(--L-block-scene) calc(c * var(--C-block)) h);
+    --color-block-stage-direction: oklch(from var(--base-neutral) var(--L-block-stage-direction) calc(c * var(--C-block)) h);
+    --color-block-character: oklch(from var(--base-neutral) var(--L-block-character) calc(c * var(--C-block)) h);
+    --color-block-dialogue: oklch(from var(--base-neutral) var(--L-block-dialogue) calc(c * var(--C-block)) h);
+    --color-block-aside: oklch(from var(--base-neutral) var(--L-block-aside) calc(c * var(--C-block)) h);
+    --color-block-centered: oklch(from var(--base-neutral) var(--L-block-centered) calc(c * var(--C-block)) h);
+    --color-block-lyrics: var(--color-block-dialogue);
+
+    overflow: hidden;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+    background: var(--color-surface);
+}
+
+:global(:root[data-theme = 'dark']) .root {
+    --L-block-scene: .87;
+    --L-block-stage-direction: .88;
+    --L-block-character: .86;
+    --L-block-dialogue: .89;
+    --L-block-aside: .82;
+    --L-block-centered: .85;
+    --character-tag-tint-strength: 44%;
+}
+
+.toolbarRow {
+    display: grid;
+    grid-template-columns: var(--left-toolbar-size) minmax(0, 1fr) var(--right-toolbar-size);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+
+    @media (max-width: 1100px) {
+        grid-template-columns: var(--toolbar-toggle-width) minmax(0, 1fr) var(--toolbar-toggle-width);
+    }
+}
+
+.toolbarSide {
+    position: relative;
+    overflow: clip visible;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    padding: var(--space-md) var(--space-lg);
+}
+
+.toolbarSideLeft {
+    justify-content: flex-start;
+
+    &::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 1px;
+        opacity: var(--left-toolbar-divider-opacity, 0);
+        background: var(--color-border);
+        transition: opacity .24s ease;
+    }
+}
+
+.toolbarSideRight {
+    justify-content: flex-end;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 1px;
+        opacity: var(--right-toolbar-divider-opacity, 0);
+        background: var(--color-border);
+        transition: opacity .24s ease;
+    }
+}
+
+.sidebarToggleButton {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--control-height-sm);
+    height: var(--control-height-sm);
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: background .15s ease, border-color .15s ease;
+
+    &:hover {
+        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+    }
+
+    & svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
+}
+
+.sidebarToggleIcon {
+    transform-origin: center;
+    transform: rotate(0deg);
+    transition: transform .24s ease;
+
+    &.flipped {
+        transform: rotate(180deg);
+    }
+}
+
+.toolbarCenter {
+    overflow: visible;
+    min-width: 0;
+    padding: 0 var(--space-3xl);
+
+    @media (max-width: 1100px) {
+        padding: 0 var(--space-xl);
+    }
+}
+
+.toolbarCenterInner {
+    width: min(100%, var(--editor-page-width, 960px));
+    margin: 0 auto;
+}
+
+.contentRow {
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: var(--left-sidebar-size) minmax(0, 1fr) var(--right-sidebar-size);
+    flex: 1;
+    min-height: 0;
+
+    @media (max-width: 1100px) {
+        position: relative;
+        grid-template-columns: var(--toolbar-toggle-width) minmax(0, 1fr) var(--toolbar-toggle-width);
+    }
+}
+
+.canvasHost {
+    overflow: hidden;
+    display: flex;
+    grid-column: 2;
+    flex-direction: column;
+    align-items: center;
+    min-width: 0;
+    min-height: 0;
+    padding: 0 var(--space-3xl);
+
+    @media (max-width: 1100px) {
+        padding: 0 var(--space-xl);
+    }
+}
+
+.sidebarHidden {
+    pointer-events: none;
+    overflow: hidden;
+    min-height: 0;
+    visibility: hidden;
+    opacity: 0;
+    background: var(--color-surface);
+}
+
+.sidebarOpen {
+    overflow: hidden;
+    min-height: 0;
+    visibility: visible;
+    opacity: 1;
+    background: var(--color-surface);
+
+    @media (max-width: 1100px) {
+        transform: translateX(0);
+        box-shadow: var(--shadow-panel);
+    }
+}
+
+.sidebarLeft {
+    display: flex;
+    grid-column: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    min-height: 0;
+    border-right: 1px solid var(--color-border);
+
+    & > * {
+        width: calc(var(--editor-sidebar-width) - 1px);
+    }
+
+    &.sidebarHidden {
+
+        @media (max-width: 1100px) {
+            transform: translateX(-100%);
+        }
+    }
+
+    @media (max-width: 1100px) {
+        left: 0;
+    }
+}
+
+.sidebarRight {
+    display: flex;
+    grid-column: 3;
+    flex-direction: column;
+    align-items: flex-end;
+    min-height: 0;
+    border-left: 1px solid var(--color-border);
+
+    & > * {
+        width: calc(var(--editor-sidebar-width) - 1px);
+    }
+
+    &.sidebarHidden {
+
+        @media (max-width: 1100px) {
+            transform: translateX(100%);
+        }
+    }
+
+    @media (max-width: 1100px) {
+        right: 0;
+    }
+}
+
+.sidebarLeft,
+.sidebarRight {
+
+    @media (max-width: 1100px) {
+        position: absolute;
+        z-index: 2;
+        top: 0;
+        bottom: 0;
+        width: var(--editor-sidebar-width);
+        transition: transform .24s cubic-bezier(.32, .72, 0, 1), opacity .24s ease, visibility .24s ease;
+    }
+
+    @media (max-width: 1100px) and (prefers-reduced-motion: reduce) {
+        transition: opacity .15s ease, visibility .15s ease;
+
+        &.sidebarHidden {
+            transform: translateX(0);
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .toolbarSideLeft::after,
+    .toolbarSideRight::before,
+    .sidebarToggleIcon {
+        transition-duration: 0ms;
+    }
+}

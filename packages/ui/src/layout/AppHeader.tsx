@@ -1,227 +1,201 @@
+import clsx from 'clsx';
 import {
-    Folder, Home, NavArrowDown, Plus, UserCircle,
-} from 'iconoir-react';
-import {useCallback, useMemo} from 'react';
-import {
-    Button,
-    Header as MenuHeader,
-    Menu,
-    MenuItem,
-    MenuSection,
-    MenuTrigger,
-    Popover,
-    Separator,
-    Tooltip,
-    TooltipTrigger,
-} from 'react-aria-components';
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useState,
+} from 'react';
+import {Button} from 'react-aria-components';
 
+import {Tooltip} from '../atoms/Tooltip';
+import {
+    HomeIcon,
+    PlusIcon,
+    UploadIcon,
+} from '../icons/ui';
+import {
+    applyAppThemeMode,
+    type AppThemeMode,
+    readPreferredAppThemeMode,
+    subscribeToSystemThemeChange,
+} from '../theme';
 import styles from './AppHeader.module.css';
+import {AccountMenu} from './header/AccountMenu';
+import {ScriptMenu} from './header/ScriptMenu';
+import {SyncIndicator} from './header/SyncIndicator';
+import type {
+    ScriptListItem,
+    ScriptSyncState,
+    ScriptView,
+} from './header/types';
+import {ViewSwitcher} from './header/ViewSwitcher';
 
-export type Script = {
-    id: string,
-    name: string,
+export type {
+    ScriptListItem,
+    ScriptSyncState,
+    ScriptView,
 };
 
-export type ScriptSyncState = 'saved' | 'saving' | 'error';
-
-type AppHeaderProps = {
-    currentScript?: Script,
-    recentScripts?: Script[],
-    onSelectScript?: (script: Script) => void,
+export type AppHeaderProps = {
+    leftControls?: ReactNode,
+    scriptControls?: ReactNode,
     onMenuAction?: (actionId: string) => void,
-    showScriptMenu?: boolean,
-    scriptSyncState?: ScriptSyncState,
     onHome: () => void,
-    onNewScript: () => void,
-    onBackToEditor?: () => void,
-    backToEditorLabel?: string,
+    onNewScript?: () => void,
+    onImportScript?: () => void,
+    isFullWidth?: boolean,
 };
 
 export const AppHeader = ({
+    leftControls,
+    scriptControls,
+    onMenuAction,
+    onHome,
+    onNewScript,
+    onImportScript,
+    isFullWidth = false,
+}: AppHeaderProps) => {
+    const [themeMode, setThemeMode] = useState<AppThemeMode>(() => readPreferredAppThemeMode());
+
+    useEffect(() => {
+        applyAppThemeMode(themeMode);
+
+        if (themeMode !== 'auto') {
+            return;
+        }
+
+        return subscribeToSystemThemeChange(() => {
+            applyAppThemeMode('auto');
+        });
+    }, [themeMode]);
+
+    return (
+        <header className={styles.header}>
+            <div
+                className={styles.dragRegion}
+                data-tauri-drag-region
+                aria-hidden="true"
+            />
+            <div className={clsx(styles.inner, isFullWidth && styles.full)}>
+                <div className={styles.leftControls}>
+                    <Tooltip label="Home" placement="bottom">
+                        <Button
+                            className={styles.iconButton}
+                            onPress={onHome}
+                            aria-label="Go to home"
+                        >
+                            <HomeIcon className={styles.icon} aria-hidden="true" />
+                        </Button>
+                    </Tooltip>
+                    {onNewScript ? (
+                        <Tooltip label="New script" placement="bottom">
+                            <Button
+                                className={styles.iconButton}
+                                onPress={onNewScript}
+                                aria-label="New script"
+                            >
+                                <PlusIcon className={styles.icon} aria-hidden="true" />
+                            </Button>
+                        </Tooltip>
+                    ) : null}
+                    {onImportScript ? (
+                        <Tooltip label="Import script" placement="bottom">
+                            <Button
+                                className={styles.iconButton}
+                                onPress={onImportScript}
+                                aria-label="Import script"
+                            >
+                                <UploadIcon className={styles.icon} aria-hidden="true" />
+                            </Button>
+                        </Tooltip>
+                    ) : null}
+                    {leftControls ?? null}
+                </div>
+                <div className={styles.scriptControls}>
+                    {scriptControls ?? null}
+                </div>
+                <div className={styles.rightControls}>
+                    <AccountMenu
+                        themeMode={themeMode}
+                        onThemeChange={setThemeMode}
+                        onAction={onMenuAction}
+                    />
+                </div>
+            </div>
+        </header>
+    );
+};
+
+export type ScriptEditorAppHeaderProps = {
+    currentScript: ScriptListItem,
+    recentScripts?: ScriptListItem[],
+    onSelectScript: (script: ScriptListItem) => void,
+    onMenuAction?: (actionId: string) => void,
+    scriptSyncState?: ScriptSyncState,
+    onHome: () => void,
+    onBackToEditor?: () => void,
+    backToEditorLabel?: string,
+    isFullWidth?: boolean,
+    activeView: ScriptView,
+    onSelectView: (view: ScriptView) => void,
+};
+
+export const ScriptEditorAppHeader = ({
     currentScript,
     recentScripts = [],
     onSelectScript,
     onMenuAction,
-    showScriptMenu = true,
     scriptSyncState,
     onHome,
-    onNewScript,
     onBackToEditor,
     backToEditorLabel = 'Back to editor',
-}: AppHeaderProps) => {
-    const script = useMemo(() => currentScript, [currentScript]);
-    const handleSelectScript = useMemo(() => onSelectScript, [onSelectScript]);
-    const canShowScriptMenu = useMemo(
-        () => Boolean(showScriptMenu && script && handleSelectScript),
-        [
-            handleSelectScript,
-            script,
-            showScriptMenu,
-        ],
-    );
-    const showSyncState = useMemo(() => canShowScriptMenu, [canShowScriptMenu]);
-    const syncMeta = useMemo(() => {
-        const resolvedSyncState = scriptSyncState ?? 'saved';
-
-        return {
-            label: resolvedSyncState === 'saving'
-                ? 'Saving'
-                : resolvedSyncState === 'error'
-                    ? 'Error'
-                    : 'Saved',
-            className: resolvedSyncState === 'saving'
-                ? styles.scriptStatusSaving
-                : resolvedSyncState === 'error'
-                    ? styles.scriptStatusError
-                    : styles.scriptStatusSaved,
-        };
-    }, [scriptSyncState]);
-    const handleMenuAction = useCallback((key: string | number) => {
-        if (typeof key !== 'string') {
-            return;
-        }
-
+    isFullWidth = true,
+    activeView,
+    onSelectView,
+}: ScriptEditorAppHeaderProps) => {
+    const handleScriptMenuAction = useCallback((key: string) => {
         if (key.startsWith('script:')) {
             const scriptId = key.replace('script:', '');
             const script = recentScripts.find(item => item.id === scriptId);
 
-            if (script && handleSelectScript) {
-                handleSelectScript(script);
+            if (script) {
+                onSelectScript(script);
             }
 
             return;
         }
 
-        if (onMenuAction) {
-            onMenuAction(key);
-        }
+        onMenuAction?.(key);
     }, [
-        handleSelectScript,
         onMenuAction,
+        onSelectScript,
         recentScripts,
     ]);
 
     return (
-        <header className={styles.header} data-tauri-drag-region>
-            <div className={styles.leftControls}>
-                <Button
-                    className={styles.iconButton}
-                    onPress={onHome}
-                    aria-label="Go to home"
-                    data-tauri-drag-region="false"
-                >
-                    <Home className={styles.iconButtonGlyph} aria-hidden="true" />
-                </Button>
-                <Button
-                    className={styles.iconButton}
-                    onPress={onNewScript}
-                    aria-label="New script"
-                    data-tauri-drag-region="false"
-                >
-                    <Plus className={styles.iconButtonGlyph} aria-hidden="true" />
-                </Button>
-            </div>
-            <div className={styles.scriptControls}>
-                {onBackToEditor && (
-                    <Button
-                        className={`${styles.menuTrigger} ${styles.backButton}`}
-                        onPress={onBackToEditor}
-                        data-tauri-drag-region="false"
-                    >
-                        {backToEditorLabel}
-                    </Button>
-                )}
-                {canShowScriptMenu && (
-                    <MenuTrigger>
-                        <Button className={styles.menuTrigger} data-tauri-drag-region="false">
-                            <span className={styles.menuTriggerLabel}>{script!.name}</span>
-                            <NavArrowDown className={styles.caret} aria-hidden="true" />
-                        </Button>
-                        <Popover className={styles.menuPopover} placement="bottom">
-                            <Menu
-                                className={styles.menu}
-                                onAction={handleMenuAction}
-                            >
-                                <MenuSection className={styles.menuSection}>
-                                    <MenuItem className={styles.currentScriptBlock} isDisabled>
-                                        <span className={styles.currentScriptLabel}>Current script</span>
-                                        <span className={styles.currentScriptName}>{script!.name}</span>
-                                    </MenuItem>
-                                    <MenuItem className={styles.menuItem} id="settings">
-                                        Script settings
-                                    </MenuItem>
-                                    <MenuItem className={styles.menuItem} id="attributes">
-                                        Attribute manager
-                                    </MenuItem>
-                                </MenuSection>
-                                {recentScripts.length > 0 ? (
-                                    <>
-                                        <Separator className={styles.menuSeparator} />
-                                        <MenuSection className={styles.menuSection}>
-                                            <MenuHeader className={styles.menuHeader}>Recent scripts</MenuHeader>
-                                            {recentScripts.map(scriptItem => (
-                                                <MenuItem
-                                                    key={scriptItem.id}
-                                                    id={`script:${scriptItem.id}`}
-                                                    className={styles.menuItem}
-                                                >
-                                                    {scriptItem.name}
-                                                </MenuItem>
-                                            ))}
-                                        </MenuSection>
-                                    </>
-                                ) : null}
-                                <Separator className={styles.menuSeparator} />
-                                <MenuSection className={styles.menuSection}>
-                                    <MenuItem className={styles.menuItem} id="scripts">
-                                        <Folder className={styles.menuIcon} aria-hidden="true" />
-                                        All scripts
-                                    </MenuItem>
-                                    <MenuItem className={styles.menuItem} id="new-script">
-                                        <Plus className={styles.menuIcon} aria-hidden="true" />
-                                        New script
-                                    </MenuItem>
-                                </MenuSection>
-                            </Menu>
-                        </Popover>
-                    </MenuTrigger>
-                )}
-                {showSyncState && (
-                    <TooltipTrigger>
-                        <span
-                            className={styles.scriptStatus}
-                            aria-label={syncMeta.label}
-                            aria-live="polite"
-                            tabIndex={0}
+        <AppHeader
+            onMenuAction={onMenuAction}
+            onHome={onHome}
+            isFullWidth={isFullWidth}
+            scriptControls={<ViewSwitcher activeView={activeView} onSelectView={onSelectView} />}
+            leftControls={(
+                <>
+                    {onBackToEditor ? (
+                        <Button
+                            className={clsx(styles.menuTrigger, styles.backButton)}
+                            onPress={onBackToEditor}
                         >
-                            <span
-                                className={`${styles.scriptStatusDot} ${syncMeta.className}`}
-                                aria-hidden="true"
-                            />
-                        </span>
-                        <Tooltip className={styles.tooltip}>
-                            {syncMeta.label}
-                        </Tooltip>
-                    </TooltipTrigger>
-                )}
-            </div>
-            <MenuTrigger>
-                <Button className={styles.avatarTrigger} data-tauri-drag-region="false">
-                    <UserCircle className={styles.avatarIcon} aria-hidden="true" />
-                    <NavArrowDown className={styles.caret} aria-hidden="true" />
-                </Button>
-                <Popover className={styles.menuPopover} placement="bottom end">
-                    <Menu className={styles.menu}>
-                        <MenuItem className={styles.menuItem} id="profile">
-                            Account settings
-                        </MenuItem>
-                        <Separator className={styles.menuSeparator} />
-                        <MenuItem className={styles.menuItem} id="logout">
-                            Sign out
-                        </MenuItem>
-                    </Menu>
-                </Popover>
-            </MenuTrigger>
-        </header>
+                            {backToEditorLabel}
+                        </Button>
+                    ) : null}
+                    <ScriptMenu
+                        script={currentScript}
+                        recentScripts={recentScripts}
+                        onAction={handleScriptMenuAction}
+                    />
+                    <SyncIndicator state={scriptSyncState} />
+                </>
+            )}
+        />
     );
 };

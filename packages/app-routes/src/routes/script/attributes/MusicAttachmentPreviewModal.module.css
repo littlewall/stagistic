@@ -1,0 +1,44 @@
+.header {
+    margin-block-end: 12px;
+}
+
+.title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.body {
+    position: relative;
+    overflow: auto;
+    max-block-size: 70vh;
+}
+
+.pages {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    inline-size: 100%;
+}
+
+.page {
+    inline-size: 100%;
+    box-shadow: 0 1px 4px rgb(0 0 0 / 30%);
+}
+
+.page canvas {
+    display: block;
+}
+
+.overlay {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+}
+
+.message {
+    padding: 24px;
+    color: var(--color-text-muted);
+    text-align: center;
+}

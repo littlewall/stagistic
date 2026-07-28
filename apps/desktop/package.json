@@ -5,43 +5,23 @@
     "type": "module",
     "scripts": {
         "dev": "tauri dev",
-        "dev:ui": "vite",
+        "dev:ui": "vp dev",
         "build": "tauri build",
-        "build:ui": "tsc && vite build",
-        "lint": "eslint . --ext ts,tsx"
+        "build:ui": "vp build",
+        "lint": "eslint .",
+        "typecheck": "tsc -b"
     },
     "dependencies": {
-        "@electric-sql/pglite": "^0.3.7",
-        "@react-aria/toast": "^3.0.9",
-        "@react-stately/toast": "^3.1.2",
-        "@stagistic/app-core": "workspace:*",
-        "@stagistic/app-routes": "workspace:*",
-        "@stagistic/db": "workspace:*",
-        "@stagistic/editor-core": "workspace:*",
-        "@stagistic/shared": "workspace:*",
-        "@stagistic/sync-core": "workspace:*",
-        "@stagistic/ui": "workspace:*",
-        "@tauri-apps/api": "^2.0.0",
-        "@tauri-apps/plugin-dialog": "^2.0.0",
-        "@tauri-apps/plugin-fs": "^2.0.0",
-        "drizzle-orm": "^0.44.0",
         "react": "^19.0.0",
-        "react-dom": "^19.0.0",
-        "react-router-dom": "^7.13.0"
+        "react-dom": "^19.0.0"
     },
     "devDependencies": {
         "@tauri-apps/cli": "^2.0.0",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
-        "@typescript-eslint/eslint-plugin": "^8.19.0",
-        "@typescript-eslint/parser": "^8.19.0",
-        "@vitejs/plugin-react": "^4.3.4",
-        "eslint": "^9.17.0",
-        "eslint-plugin-react": "^7.37.2",
-        "eslint-plugin-react-refresh": "^0.4.14",
+        "@vitejs/plugin-react": "^6.0.3",
         "lightningcss": "^1.30.1",
         "typescript": "^5.9.2",
-        "vite": "^6.0.5",
-        "vite-tsconfig-paths": "^5.1.4"
+        "vite": "^8.1.5"
     }
 }

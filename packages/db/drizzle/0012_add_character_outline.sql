@@ -1,0 +1,1 @@
+ALTER TABLE "script_characters" ADD COLUMN "outline" text;

@@ -1,0 +1,1 @@
+export {useScriptMusic} from './useScriptMusic';

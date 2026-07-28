@@ -1,0 +1,329 @@
+.overlay {
+    --block-trigger-size: var(--control-height-sm);
+
+    pointer-events: none;
+    position: absolute;
+    z-index: 4;
+}
+
+.controls {
+    pointer-events: auto;
+    position: relative;
+    transform: translate(calc(-1 * var(--block-controls-gutter, 32px) - 100% - var(--space-sm)), -50%);
+    display: inline-flex;
+    gap: 0;
+    align-items: center;
+}
+
+.trigger {
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    flex: 0 0 var(--block-trigger-size);
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--block-trigger-size);
+    height: var(--block-trigger-size);
+    font-size: var(--font-size-xl);
+    line-height: var(--line-height-none);
+    color: var(--color-text);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+
+    &:hover {
+        background: color-mix(in oklch, var(--color-surface-accent) 30%, transparent);
+
+        & .triggerIcon {
+            opacity: 1;
+        }
+    }
+
+    &.open {
+        background: color-mix(in oklch, var(--color-surface-accent) 50%, transparent);
+        border-color: color-mix(in oklch, var(--color-surface-accent) 55%, var(--color-border));
+
+        & .triggerIcon {
+            opacity: 1;
+        }
+    }
+
+    &.noHover {
+        cursor: default;
+
+        &:hover {
+            background: transparent;
+            border-color: transparent;
+
+            & .triggerIcon {
+                opacity: .5;
+            }
+        }
+    }
+
+    &.pressing,
+    &.dragging {
+        background: transparent;
+        border-color: transparent;
+        box-shadow: none;
+
+        &:hover {
+            background: transparent;
+            border-color: transparent;
+            box-shadow: none;
+        }
+
+        & .triggerIcon {
+            visibility: hidden;
+            opacity: 0;
+        }
+
+        & .dragGrip {
+            visibility: visible;
+            opacity: .72;
+        }
+    }
+
+    &.dragging {
+        cursor: move;
+
+        &:hover {
+            cursor: move;
+        }
+    }
+}
+
+.actionTrigger {
+    anchor-name: --block-action-trigger;
+
+    & circle {
+        fill: currentcolor;
+        stroke: none;
+    }
+}
+
+.typeTrigger {
+    anchor-name: --block-type-trigger;
+}
+
+.triggerGlyph {
+    position: relative;
+    overflow: hidden;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    width: calc(16px * var(--size-scale));
+    height: calc(16px * var(--size-scale));
+}
+
+.triggerIcon,
+.dragGrip {
+    position: absolute;
+    inset: 0;
+    display: inline-flex;
+    flex: 0 0 calc(16px * var(--size-scale));
+    align-items: center;
+    justify-content: center;
+    width: calc(16px * var(--size-scale));
+    height: calc(16px * var(--size-scale));
+}
+
+.triggerIcon {
+    visibility: visible;
+    opacity: .5;
+    transition: opacity .15s ease;
+
+    & svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
+}
+
+.dragGrip {
+    position: relative;
+    color: color-mix(in oklch, var(--color-text-muted) 64%, var(--color-border));
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity .15s ease;
+
+    &::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(calc(-3px * var(--size-scale)), calc(-5px * var(--size-scale)));
+        width: calc(2px * var(--size-scale));
+        height: calc(2px * var(--size-scale));
+        opacity: 1;
+        background: currentcolor;
+        border-radius: var(--radius-full);
+        box-shadow: 0 calc(4px * var(--size-scale)) 0 currentcolor, 0 calc(8px * var(--size-scale)) 0 currentcolor, calc(4px * var(--size-scale)) 0 0 currentcolor, calc(4px * var(--size-scale)) calc(4px * var(--size-scale)) 0 currentcolor, calc(4px * var(--size-scale)) calc(8px * var(--size-scale)) 0 currentcolor;
+    }
+}
+
+.menuItemIcon svg {
+    width: 16px;
+    height: 16px;
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
+}
+
+.menu {
+    position: fixed;
+    top: anchor(bottom);
+    bottom: auto;
+    left: anchor(left);
+    overflow: hidden;
+    display: flex;
+    align-items: stretch;
+    min-width: calc(200px * var(--size-scale));
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-popover);
+
+    &.above {
+        top: auto;
+        bottom: anchor(top);
+    }
+
+    &.withSubmenu {
+        min-width: calc(400px * var(--size-scale));
+    }
+}
+
+.actionMenu {
+    position-anchor: --block-action-trigger;
+}
+
+.typeMenu {
+    position-anchor: --block-type-trigger;
+}
+
+.menuPrimaryPanel {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    display: grid;
+    gap: 0;
+    align-content: start;
+    min-width: calc(200px * var(--size-scale));
+    max-height: min(calc(280px * var(--size-scale)), var(--anchored-menu-max-height, calc(280px * var(--size-scale))));
+    padding: var(--space-sm) 0;
+}
+
+.menuSecondaryPanel {
+    display: grid;
+    align-content: start;
+    min-width: calc(200px * var(--size-scale));
+    background: color-mix(in oklch, var(--color-surface) 95%, var(--color-surface-accent) 5%);
+    border-left: 1px solid var(--color-border);
+}
+
+.menuSecondaryContent {
+    display: grid;
+    align-content: start;
+    padding: var(--space-sm) 0;
+}
+
+.menuItem {
+    cursor: pointer;
+    display: block;
+    width: 100%;
+    padding: 0 var(--space-sm);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    outline: 0;
+
+    &:hover .menuItemSurface {
+        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+    }
+
+    &:focus-visible .menuItemSurface {
+        box-shadow: 0 0 0 2px var(--color-focus-ring);
+    }
+
+    &.active {
+        font-weight: var(--font-weight-semibold);
+
+        & .menuItemSurface,
+        &:hover .menuItemSurface {
+            background: color-mix(in oklch, var(--color-surface-accent) 70%, transparent);
+        }
+    }
+
+    &.submenu .menuItemSurface {
+        grid-template-columns: 20px 1fr auto;
+    }
+}
+
+.menuItemSurface {
+    display: grid;
+    grid-template-columns: 20px 1fr;
+    gap: var(--space-md);
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    border: 1px solid transparent;
+    border-radius: var(--radius-lg);
+    transition: background .15s ease, box-shadow .15s ease;
+}
+
+.menuItemIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: calc(18px * var(--size-scale));
+    height: calc(18px * var(--size-scale));
+    color: var(--color-text-muted);
+}
+
+.menuItemLabel {
+    overflow: hidden;
+    display: flex;
+    gap: var(--space-sm);
+    min-width: 0;
+    line-height: var(--line-height-snug);
+    white-space: nowrap;
+}
+
+.menuItemDetail {
+    overflow: hidden;
+    color: var(--color-text-muted);
+    text-overflow: ellipsis;
+}
+
+.menuSeparator {
+    height: 1px;
+    margin: var(--space-sm) var(--space-md);
+    background: var(--color-border);
+}
+
+.menuItemCaret {
+    justify-self: end;
+    margin-left: auto;
+    color: var(--color-text-muted);
+
+    & svg {
+        width: calc(14px * var(--size-scale));
+        height: calc(14px * var(--size-scale));
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.5;
+    }
+}

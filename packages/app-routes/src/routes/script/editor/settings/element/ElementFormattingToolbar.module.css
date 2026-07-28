@@ -1,0 +1,50 @@
+.previewToolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-xl);
+
+    @media (max-width: 900px) {
+        gap: var(--space-sm);
+    }
+}
+
+.alignGlyph {
+    --line-one: 100%;
+    --line-two: 75%;
+    --line-three: 55%;
+
+    display: inline-block;
+    width: 14px;
+    height: 12px;
+    color: currentcolor;
+    background: linear-gradient(currentcolor 0 0) left 0 top 0 / var(--line-one) 2px no-repeat, linear-gradient(currentcolor 0 0) left 0 center / var(--line-two) 2px no-repeat, linear-gradient(currentcolor 0 0) left 0 bottom / var(--line-three) 2px no-repeat;
+
+    &.left {
+        background-position: left 0 top 0, left 0 center, left 0 bottom;
+    }
+    &.center {
+        background-position: center top 0, center center, center bottom;
+    }
+    &.right {
+        background-position: right 0 top 0, right 0 center, right 0 bottom;
+    }
+}
+
+.textIcon {
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-bold);
+    line-height: var(--line-height-none);
+    letter-spacing: var(--letter-spacing-sm);
+}
+
+.textIconItalic {
+    font-style: italic;
+}
+
+.textIconUnderline {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}

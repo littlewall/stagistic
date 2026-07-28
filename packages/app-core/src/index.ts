@@ -1,2 +1,14 @@
-export * from './events';
+export * from './attachments';
+export * from './characters';
+export * from './drafts';
+export * from './editor-settings';
+export * from './music';
+export * from './pacing';
+export * from './places';
 export * from './scripts';
+export * from './title-page';
+export type {
+    ScriptEditorSettingsRecord,
+    ScriptRepository,
+    ScriptTitlePageRecord,
+} from '@stagistic/db';

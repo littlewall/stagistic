@@ -1,30 +1,24 @@
 import type {ScriptSummary} from '@stagistic/db';
-import type {SlateValue} from '@stagistic/shared';
 import {useLiveQuery} from '@tanstack/react-db';
 import {
-    useCallback,
     useEffect,
     useMemo,
-    useSyncExternalStore,
 } from 'react';
 
+import {useReactiveCollectionStatus} from '../collections';
+import {toScriptListItem} from './mappers';
 import {useScriptsContext} from './ScriptRepositoryProvider';
-
-type ScriptListItem = {
-    id: string,
-    name: string,
-};
+import type {ScriptListItem} from './types';
+import {useScriptActions} from './useScriptActions';
 
 export const useScripts = () => {
     const {
         scriptsCollection,
+        scriptsStatus,
         scriptsStore,
     } = useScriptsContext();
-    const meta = useSyncExternalStore(
-        scriptsStore.subscribeMeta,
-        scriptsStore.getMeta,
-        scriptsStore.getMeta,
-    );
+    const actions = useScriptActions();
+    const storeStatus = useReactiveCollectionStatus(scriptsStatus);
 
     useEffect(() => {
         void scriptsStore.init();
@@ -41,10 +35,7 @@ export const useScripts = () => {
     );
 
     const scripts = useMemo<ScriptListItem[]>(
-        () => (data ?? []).map((summary: ScriptSummary) => ({
-            id: summary.id,
-            name: summary.title,
-        })),
+        () => (data ?? []).map((summary: ScriptSummary) => toScriptListItem(summary)),
         [data],
     );
     const scriptSummaries = useMemo<ScriptSummary[]>(
@@ -52,35 +43,14 @@ export const useScripts = () => {
         [data],
     );
 
-    const createScript = useCallback(
-        (name: string, initialContent?: SlateValue) => scriptsStore.createScript(name, initialContent),
-        [scriptsStore],
-    );
-
-    const renameScript = useCallback(
-        (scriptId: string, name: string) => scriptsStore.renameScript(scriptId, name),
-        [scriptsStore],
-    );
-
-    const deleteScript = useCallback(
-        (scriptId: string) => scriptsStore.deleteScript(scriptId),
-        [scriptsStore],
-    );
-
-    const setActiveBlock = useCallback(
-        (scriptId: string, blockId: string | null) => scriptsStore.setActiveBlock(scriptId, blockId),
-        [scriptsStore],
-    );
-
     return {
         scripts,
         scriptSummaries,
-        createScript,
-        renameScript,
-        deleteScript,
-        setActiveBlock,
+        ...actions,
         refreshScripts: scriptsStore.refresh,
-        isLoading: meta.isLoading || isQueryLoading || status === 'idle',
-        error: meta.error,
+        isLoading: !storeStatus.isReady || isQueryLoading || status === 'idle',
+        error: storeStatus.sourceError
+            ?? storeStatus.mutations.find(mutation => mutation.status === 'failed')?.error
+            ?? null,
     };
 };

@@ -1,165 +1,210 @@
-import type {ScriptSummary} from '@stagistic/db';
+import type {
+    DuplicateScriptInput,
+    RenameScriptInput,
+    ScriptRepository,
+    ScriptSummary,
+} from '@stagistic/db';
 import {
     createNodeId,
-    ensureNodeIds,
-    ensureSceneHeading,
+    ensureScriptBlockIds,
+    ensureScriptStructure,
     getFirstBlockId,
-    isSlateValueEmpty,
-    type SlateValue,
-} from '@stagistic/shared';
-import type {ScriptRepository} from '@stagistic/sync-core';
-import {
-    createCollection,
-    localOnlyCollectionOptions,
-} from '@tanstack/react-db';
+    type ScriptDocument,
+} from '@stagistic/script';
 
-type ScriptsMeta = {
-    isLoading: boolean,
-    error: Error | null,
+import {createReactiveCollection} from '../collections';
+
+type PendingInsertCommand = () => Promise<void>;
+
+const normalizeTitle = (title: string) => title.trim() || 'Untitled script';
+const normalizeSubtitle = (subtitle: string | null) => {
+    const trimmed = subtitle?.trim() ?? '';
+
+    return trimmed || null;
 };
 
-type Listener = () => void;
+const normalizeInitialContent = (initialContent?: ScriptDocument) => {
+    let activeBlockId = createNodeId();
 
-const createScriptsCollection = () => createCollection(
-    localOnlyCollectionOptions<ScriptSummary, string>({
+    if (!initialContent) {
+        return {activeBlockId, content: undefined};
+    }
+
+    const content = ensureScriptStructure(ensureScriptBlockIds(initialContent));
+
+    activeBlockId = getFirstBlockId(content) ?? activeBlockId;
+
+    return {activeBlockId, content};
+};
+
+export const createScriptsStore = (repository: ScriptRepository) => {
+    const pendingInserts = new Map<string, PendingInsertCommand>();
+    const {
+        collection: scriptsCollection,
+        status,
+    } = createReactiveCollection<ScriptSummary, string>({
         id: 'scripts',
+        source: repository.scriptSummaries,
         getKey: script => script.id,
-        initialData: [],
-        syncMode: 'eager',
-    }),
-);
+        handlers: {
+            insert: async script => {
+                const command = pendingInserts.get(script.id);
 
-export type ScriptsStoreState = {
-    repository: ScriptRepository,
-    scriptsCollection: ReturnType<typeof createScriptsCollection>,
-    scriptsStore: {
-        getMeta: () => ScriptsMeta,
-        subscribeMeta: (listener: Listener) => () => void,
-        init: () => Promise<void>,
-        refresh: () => Promise<void>,
-        createScript: (title: string, initialContent?: SlateValue) => Promise<string>,
-        renameScript: (scriptId: string, title: string) => Promise<void>,
-        deleteScript: (scriptId: string) => Promise<void>,
-        setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,
-    },
-};
+                if (!command) {
+                    throw new Error(`Missing insert command for script ${script.id}`);
+                }
 
-export const createScriptsStore = (repository: ScriptRepository): ScriptsStoreState => {
-    const scriptsCollection = createScriptsCollection();
-    const metaListeners = new Set<Listener>();
-    let metaState: ScriptsMeta = {
-        isLoading: true,
-        error: null,
-    };
+                try {
+                    await command();
+                } finally {
+                    pendingInserts.delete(script.id);
+                }
+            },
+            update: async (original, modified, changes) => {
+                if ('activeBlockId' in changes) {
+                    await repository.setActiveBlock(
+                        original.id,
+                        modified.activeBlockId ?? null,
+                    );
 
-    const emitMeta = () => {
-        metaListeners.forEach(listener => listener());
-    };
+                    return;
+                }
 
-    const setMeta = (partial: Partial<ScriptsMeta>) => {
-        metaState = {
-            ...metaState,
-            ...partial,
-        };
-        emitMeta();
-    };
+                if ('subtitle' in changes) {
+                    await repository.renameScript(original.id, {
+                        title: modified.title,
+                        subtitle: modified.subtitle,
+                    });
 
-    const replaceAll = async (scripts: ScriptSummary[]) => {
-        const existingIds = Array.from(scriptsCollection.keys());
+                    return;
+                }
 
-        if (existingIds.length > 0) {
-            const deleteTx = scriptsCollection.delete(existingIds);
+                if ('title' in changes) {
+                    await repository.renameScriptTitle(original.id, modified.title);
+                }
+            },
+            delete: script => repository.deleteScript(script.id),
+        },
+    });
 
-            await deleteTx.isPersisted.promise;
-        }
+    const insertWithCommand = async (
+        summary: ScriptSummary,
+        command: PendingInsertCommand,
+    ) => {
+        pendingInserts.set(summary.id, command);
 
-        if (scripts.length > 0) {
-            const insertTx = scriptsCollection.insert(scripts);
-
-            await insertTx.isPersisted.promise;
-        }
-    };
-
-    let initPromise: Promise<void> | null = null;
-
-    const refresh = async () => {
-        setMeta({isLoading: true});
+        const transaction = scriptsCollection.insert(summary);
 
         try {
-            const scripts = await repository.listScripts();
-
-            await replaceAll(scripts);
-
-            setMeta({error: null, isLoading: false});
+            await transaction.isPersisted.promise;
         } catch (error) {
-            console.error('Failed to refresh scripts collection', error);
-            setMeta({error: error as Error, isLoading: false});
+            pendingInserts.delete(summary.id);
             throw error;
         }
     };
 
-    const init = async () => {
-        if (!initPromise) {
-            initPromise = scriptsCollection.preload().then(refresh);
-        }
+    const createScript = async (title: string, initialContent?: ScriptDocument) => {
+        const id = repository.allocateScriptId();
+        const timestamp = Date.now();
+        const normalizedTitle = normalizeTitle(title);
+        const {activeBlockId, content} = normalizeInitialContent(initialContent);
 
-        return initPromise;
-    };
-
-    const createScript = async (title: string, initialContent?: SlateValue) => {
-        let activeBlockId = createNodeId();
-        let normalizedContent: SlateValue | undefined;
-
-        if (initialContent && !isSlateValueEmpty(initialContent)) {
-            const normalized = ensureSceneHeading(initialContent);
-            const withIds = ensureNodeIds(normalized);
-
-            normalizedContent = withIds;
-            activeBlockId = getFirstBlockId(withIds) ?? activeBlockId;
-        }
-
-        const id = await repository.createScript(title, normalizedContent);
-
-        await repository.setActiveBlock(id, activeBlockId);
-
-        await refresh();
+        await insertWithCommand({
+            id,
+            title: normalizedTitle,
+            subtitle: null,
+            activeBlockId,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+        }, () => repository.createScriptWithId({
+            id,
+            title: normalizedTitle,
+            initialContent: content,
+            activeBlockId,
+            timestamp,
+        }));
 
         return id;
     };
 
-    const renameScript = async (scriptId: string, title: string) => {
-        await repository.renameScript(scriptId, title);
-        await refresh();
+    const renameScript = async (scriptId: string, input: RenameScriptInput) => {
+        const transaction = scriptsCollection.update(scriptId, draft => {
+            draft.title = normalizeTitle(input.title);
+            draft.subtitle = normalizeSubtitle(input.subtitle);
+        });
+
+        await transaction.isPersisted.promise;
+    };
+
+    const renameScriptTitle = async (scriptId: string, title: string) => {
+        const transaction = scriptsCollection.update(scriptId, draft => {
+            draft.title = normalizeTitle(title);
+        });
+
+        await transaction.isPersisted.promise;
+    };
+
+    const duplicateScript = async (
+        sourceScriptId: string,
+        input: DuplicateScriptInput,
+    ) => {
+        const sourceScript = scriptsCollection.get(sourceScriptId);
+
+        if (!sourceScript) {
+            throw new Error(`Cannot duplicate missing script ${sourceScriptId}`);
+        }
+
+        const targetScriptId = repository.allocateScriptId();
+        const timestamp = Date.now();
+        const title = normalizeTitle(input.title);
+
+        await insertWithCommand({
+            ...sourceScript,
+            id: targetScriptId,
+            title,
+            createdAt: timestamp,
+            updatedAt: timestamp,
+        }, () => repository.duplicateScriptWithId(sourceScriptId, {
+            ...input,
+            title,
+            targetScriptId,
+            timestamp,
+        }));
+
+        return targetScriptId;
     };
 
     const deleteScript = async (scriptId: string) => {
-        await repository.deleteScript(scriptId);
-        await refresh();
+        const transaction = scriptsCollection.delete(scriptId);
+
+        await transaction.isPersisted.promise;
     };
 
     const setActiveBlock = async (scriptId: string, blockId: string | null) => {
-        await repository.setActiveBlock(scriptId, blockId);
-        scriptsCollection.update(scriptId, draft => {
-            draft.activeBlockId = blockId ?? null;
+        const transaction = scriptsCollection.update(scriptId, draft => {
+            draft.activeBlockId = blockId;
         });
+
+        await transaction.isPersisted.promise;
+    };
+
+    const scriptsStore = {
+        init: () => scriptsCollection.preload(),
+        refresh: () => repository.scriptSummaries.refresh(),
+        createScript,
+        renameScript,
+        renameScriptTitle,
+        duplicateScript,
+        deleteScript,
+        setActiveBlock,
     };
 
     return {
         repository,
         scriptsCollection,
-        scriptsStore: {
-            getMeta: () => metaState,
-            subscribeMeta: (listener: Listener) => {
-                metaListeners.add(listener);
-
-                return () => metaListeners.delete(listener);
-            },
-            init,
-            refresh,
-            createScript,
-            renameScript,
-            deleteScript,
-            setActiveBlock,
-        },
+        scriptsStatus: status,
+        scriptsStore,
     };
 };
+
+export type ScriptsStoreState = ReturnType<typeof createScriptsStore>;

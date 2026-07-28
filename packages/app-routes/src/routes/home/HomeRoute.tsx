@@ -1,243 +1,184 @@
 import {useScripts} from '@stagistic/app-core';
 import {
-    AppHeader,
     AppLayout,
     Button,
-    Card,
-    CardContent,
-    CardFooter,
-    CardHeader,
-    Grid,
-    HeroLayout,
-    Kicker,
+    Input,
     PageContainer,
     PageTitle,
-    Section,
-    SectionHeader,
-    SectionTitle,
+    SearchIcon,
+    Select,
     SubtleText,
-    Tag,
 } from '@stagistic/ui';
 import {
-    type KeyboardEvent as ReactKeyboardEvent,
-    type MouseEvent as ReactMouseEvent,
     useCallback,
     useMemo,
+    useState,
 } from 'react';
-import {Link, useNavigate} from 'react-router-dom';
+import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
+import {AppHeader} from '../../layout/AppHeader';
+import {
+    buildHomeDashboardModel,
+    type ScriptSort,
+} from './homeDashboardModel';
 import styles from './HomeRoute.module.css';
+import {ScriptListSection} from './ScriptListSection';
 
-const mockUpdates = [
-    {
-        id: '1', updated: 'Edited today', status: 'Draft',
-    },
-    {
-        id: '2', updated: 'Edited yesterday', status: 'In progress',
-    },
-    {
-        id: '3', updated: 'Edited 3 days ago', status: 'Concept',
-    },
-    {
-        id: '4', updated: 'Edited last week', status: 'Outline',
-    },
-];
+const SORT_OPTIONS = [{value: 'newest', label: 'Newest first'}, {value: 'title', label: 'Title A–Z'}];
 
 export const HomeRoute = () => {
     const navigate = useNavigate();
     const {
-        scripts,
         scriptSummaries,
+        isLoading: scriptsLoading,
+        error,
+        refreshScripts,
     } = useScripts();
-    const {openNewScript} = useGlobalModals();
-    const recentScripts = useMemo(() => scripts.slice(0, 6), [scripts]);
-    const openModal = useCallback(() => {
-        openNewScript();
-    }, [openNewScript]);
+    const {
+        openNewScript,
+        openDeleteScript,
+        openRenameScript,
+        openDuplicateScript,
+    } = useGlobalModals();
+    const [query, setQuery] = useState('');
+    const [sort, setSort] = useState<ScriptSort>('newest');
 
-    const latestScript = useMemo(() => {
-        if (scriptSummaries.length === 0) {
-            return null;
-        }
-
-        return scriptSummaries[0];
-    }, [scriptSummaries]);
-
-    const formatLastEdited = useCallback((timestamp: number) => {
-        const now = new Date();
-        const updated = new Date(timestamp);
-        const diffMs = now.getTime() - updated.getTime();
-        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-        if (diffDays <= 0) {
-            return 'Edited today';
-        }
-
-        if (diffDays === 1) {
-            return 'Edited yesterday';
-        }
-
-        if (diffDays < 7) {
-            return `Edited ${diffDays} days ago`;
-        }
-
-        const dateFormat = new Intl.DateTimeFormat('en-US', {
-            month: 'short',
-            day: 'numeric',
-            year: updated.getFullYear() === now.getFullYear() ? undefined : 'numeric',
+    const dashboard = useMemo(() => buildHomeDashboardModel({
+        scripts: scriptSummaries,
+        query,
+        sort,
+    }), [
+        query,
+        scriptSummaries,
+        sort,
+    ]);
+    const openScript = useCallback((scriptId: string) => {
+        void navigate(`/script/${scriptId}/editor`);
+    }, [navigate]);
+    const deleteScript = useCallback((script: {id: string, title: string}) => {
+        openDeleteScript({id: script.id, title: script.title});
+    }, [openDeleteScript]);
+    const renameScript = useCallback((script: {
+        id: string, title: string, subtitle: string | null,
+    }) => {
+        openRenameScript({
+            id: script.id, title: script.title, subtitle: script.subtitle ?? '',
         });
+    }, [openRenameScript]);
+    const duplicateScript = useCallback((script: {id: string, title: string}) => {
+        openDuplicateScript({id: script.id, title: script.title});
+    }, [openDuplicateScript]);
 
-        return `Edited ${dateFormat.format(updated)}`;
-    }, []);
+    if (scriptsLoading) {
+        return (
+            <AppLayout header={<AppHeader />}>
+                <PageContainer variant="standard">
+                    <div className={styles.skeleton}>
+                        <div className={styles.skeletonTitle} />
+                        <div className={styles.skeletonSearch} />
+                        <div className={styles.skeletonList}>
+                            <div className={styles.skeletonRow} />
+                            <div className={styles.skeletonRow} />
+                            <div className={styles.skeletonRow} />
+                        </div>
+                    </div>
+                </PageContainer>
+            </AppLayout>
+        );
+    }
 
-    const handleHome = useCallback(() => {
-        void navigate('/');
-    }, [navigate]);
-    const handleResumeScript = useCallback(() => {
-        if (!latestScript) {
-            return;
-        }
+    if (error) {
+        return (
+            <AppLayout header={<AppHeader />}>
+                <PageContainer variant="standard">
+                    <div className={styles.errorState}>
+                        <SubtleText>Couldn&apos;t load your scripts.</SubtleText>
+                        <Button variant="outline" onPress={() => void refreshScripts()}>
+                            Try again
+                        </Button>
+                    </div>
+                </PageContainer>
+            </AppLayout>
+        );
+    }
 
-        void navigate(`/script/${latestScript.id}/editor`);
-    }, [latestScript, navigate]);
-    const handleCardClick = useCallback((scriptId: string) => {
-        void navigate(`/script/${scriptId}/editor`);
-    }, [navigate]);
-    const handleCardKeyDown = useCallback((scriptId: string, event: ReactKeyboardEvent<HTMLElement>) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            void navigate(`/script/${scriptId}/editor`);
-        }
-    }, [navigate]);
-    const handleOpenEditor = useCallback((scriptId: string, event: ReactMouseEvent<HTMLElement>) => {
-        event.stopPropagation();
-        void navigate(`/script/${scriptId}/editor`);
-    }, [navigate]);
-    const handleOpenSettings = useCallback((scriptId: string, event: ReactMouseEvent<HTMLElement>) => {
-        event.stopPropagation();
-        void navigate(`/script/${scriptId}/settings`);
-    }, [navigate]);
-    const recentScriptCards = useMemo(
-        () => recentScripts.map((script, index) => (
-            <Card
-                key={script.id}
-                className={styles.card}
-                onClick={() => handleCardClick(script.id)}
-                role="button"
-                tabIndex={0}
-                onKeyDown={event => handleCardKeyDown(script.id, event)}
-            >
-                <CardHeader>
-                    <h3 className={styles.cardTitle}>{script.name}</h3>
-                    <Tag>
-                        {mockUpdates[index]?.status ?? 'Draft'}
-                    </Tag>
-                </CardHeader>
-                <CardContent>
-                    <SubtleText>
-                        {mockUpdates[index]?.updated ?? 'Edited recently'}
-                    </SubtleText>
-                </CardContent>
-                <CardFooter>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={event => handleOpenEditor(script.id, event)}
-                    >
-                        Open editor
-                    </Button>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={event => handleOpenSettings(script.id, event)}
-                    >
-                        Script settings
-                    </Button>
-                </CardFooter>
-            </Card>
-        ))
-        , [
-            handleCardClick,
-            handleCardKeyDown,
-            handleOpenEditor,
-            handleOpenSettings,
-            recentScripts,
-        ],
-    );
+    if (scriptSummaries.length === 0) {
+        return (
+            <AppLayout header={<AppHeader />}>
+                <PageContainer variant="standard">
+                    <div className={styles.emptyState}>
+                        <PageTitle>Your script&apos;s next act.</PageTitle>
+                        <SubtleText className={styles.emptySubtitle}>
+                            A script editor for theatrical plays and musicals.
+                            Create your first script to get started.
+                        </SubtleText>
+                        <div className={styles.emptyActions}>
+                            <Button onPress={openNewScript}>New script</Button>
+                        </div>
+                    </div>
+                </PageContainer>
+            </AppLayout>
+        );
+    }
 
     return (
-        <AppLayout
-            header={(
-                <AppHeader
-                    showScriptMenu={false}
-                    onHome={handleHome}
-                    onNewScript={openModal}
-                />
-            )}
-        >
+        <AppLayout header={<AppHeader />}>
             <PageContainer variant="standard">
-                <section className={styles.hero}>
-                    <HeroLayout>
-                        <div className={styles.heroContent}>
-                            <Kicker>Welcome to Stagistic Editor!</Kicker>
-                            <PageTitle>Your script&apos;s next act</PageTitle>
-                            <SubtleText className={styles.subtitle}>
-                                Create new scripts, explore active drafts, and keep your storytelling flow
-                                within a focused workspace.
+                <div className={styles.content}>
+                    <PageTitle>Scripts</PageTitle>
+                    <div className={styles.searchField}>
+                        <SearchIcon className={styles.searchIcon} aria-hidden="true" />
+                        <Input
+                            type="search"
+                            value={query}
+                            className={styles.searchInput}
+                            aria-label="Search scripts"
+                            placeholder="Search by title or subtitle"
+                            onChange={event => setQuery(event.target.value)}
+                        />
+                    </div>
+                    <div className={styles.sections}>
+                        <ScriptListSection
+                            title="Continue writing"
+                            scripts={dashboard.continueWriting}
+                            onOpenScript={openScript}
+                            onDeleteScript={deleteScript}
+                            onRenameScript={renameScript}
+                            onDuplicateScript={duplicateScript}
+                        />
+                        <ScriptListSection
+                            title="Recently edited"
+                            scripts={dashboard.recentlyEdited}
+                            onOpenScript={openScript}
+                            onDeleteScript={deleteScript}
+                            onRenameScript={renameScript}
+                            onDuplicateScript={duplicateScript}
+                        />
+                        <ScriptListSection
+                            title="All scripts"
+                            scripts={dashboard.allScripts}
+                            action={(
+                                <Select
+                                    value={sort}
+                                    options={SORT_OPTIONS}
+                                    ariaLabel="Sort all scripts"
+                                    className={styles.sortSelect}
+                                    onChange={value => setSort(value as ScriptSort)}
+                                />
+                            )}
+                            onOpenScript={openScript}
+                            onDeleteScript={deleteScript}
+                            onRenameScript={renameScript}
+                            onDuplicateScript={duplicateScript}
+                        />
+                        {dashboard.allScripts.length === 0 ? (
+                            <SubtleText className={styles.noResults}>
+                                No scripts match “{query.trim()}”.
                             </SubtleText>
-                            <div className={styles.actions}>
-                                <Button onClick={openModal}>
-                                    New script
-                                </Button>
-                                {scripts && scripts.length > 6 && (
-                                    <Button
-                                        as={Link}
-                                        variant="secondary"
-                                        to="/script/list"
-                                    >
-                                        View all scripts
-                                    </Button>
-                                )}
-                            </div>
-                        </div>
-                        {latestScript && (
-                            <Card className={styles.heroCard} variant="highlight">
-                                <CardContent>
-                                    <Kicker>Continue writing</Kicker>
-                                    <h2 className={styles.heroCardValue}>{latestScript.title}</h2>
-                                    <SubtleText>
-                                        {formatLastEdited(latestScript.updatedAt)}
-                                    </SubtleText>
-                                </CardContent>
-                                <CardFooter className={styles.heroCardFooter}>
-                                    <Button
-                                        className={styles.heroCardButton}
-                                        onClick={handleResumeScript}
-                                    >
-                                        Resume script
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-
-                        )}
-                    </HeroLayout>
-                </section>
-                {recentScripts.length > 0 && (
-                    <Section>
-                        <SectionHeader>
-                            <div>
-                                <SectionTitle>Recent scripts</SectionTitle>
-                                <SubtleText>
-                                    Jump straight into your latest work.
-                                </SubtleText>
-                            </div>
-                        </SectionHeader>
-                        <Grid>
-                            {recentScriptCards}
-                        </Grid>
-                    </Section>
-                )}
+                        ) : null}
+                    </div>
+                </div>
             </PageContainer>
         </AppLayout>
     );

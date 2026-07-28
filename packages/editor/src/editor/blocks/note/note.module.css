@@ -1,0 +1,12 @@
+.note {
+    padding-top: var(--note-spacing-before, 0);
+    padding-right: var(--note-indent-right, 0);
+    padding-left: var(--note-indent-left, 0);
+    font-weight: var(--note-font-weight, 400);
+    font-style: var(--note-font-style, normal);
+    line-height: var(--note-line-height, inherit);
+    color: var(--color-block-note, var(--color-block-stage-direction));
+    text-align: var(--note-align, left);
+    text-decoration-line: var(--note-underline, none);
+    text-transform: var(--note-casing, none);
+}

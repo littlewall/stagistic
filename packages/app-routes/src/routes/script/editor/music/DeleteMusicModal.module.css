@@ -1,0 +1,29 @@
+.panel {
+    width: min(360px, calc(100vw - var(--space-4xl)));
+}
+
+.title {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text);
+}
+
+.subtitle {
+    margin: var(--space-md) 0 0;
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+
+    & strong {
+        font-weight: var(--font-weight-semibold);
+        color: var(--color-text);
+    }
+}
+
+.actions {
+    display: flex;
+    gap: var(--space-sm);
+    justify-content: flex-start;
+    margin-top: var(--space-xl);
+}

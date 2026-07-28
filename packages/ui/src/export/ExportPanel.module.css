@@ -1,0 +1,32 @@
+.panel {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xl);
+}
+
+.section {
+    display: grid;
+    gap: var(--space-md);
+    padding-bottom: var(--space-xl);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.section:last-child {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+.heading {
+    margin: 0;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.body {
+    display: grid;
+    gap: var(--space-lg);
+}

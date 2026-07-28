@@ -1,6 +1,5 @@
 import {useScripts} from '@stagistic/app-core';
 import {
-    AppHeader,
     AppLayout,
     Button,
     Card,
@@ -10,143 +9,96 @@ import {
     Grid,
     Kicker,
     PageContainer,
+    PageHeader,
     PageTitle,
+    ProgressPanel,
     SubtleText,
-    Tag,
 } from '@stagistic/ui';
-import {
-    type KeyboardEvent as ReactKeyboardEvent,
-    type MouseEvent as ReactMouseEvent,
-    useCallback,
-    useMemo,
-} from 'react';
+import {type KeyboardEvent as ReactKeyboardEvent, useMemo} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
-import styles from './ScriptLlstRoute.module.css';
-
-const mockMeta = [
-    {
-        id: '1', updated: 'Edited today', status: 'Draft',
-    },
-    {
-        id: '2', updated: 'Edited yesterday', status: 'Outline',
-    },
-    {
-        id: '3', updated: 'Edited last week', status: 'In progress',
-    },
-    {
-        id: '4', updated: 'Edited 2 weeks ago', status: 'Concept',
-    },
-    {
-        id: '5', updated: 'Edited this month', status: 'Draft',
-    },
-    {
-        id: '6', updated: 'Edited this month', status: 'Draft',
-    },
-];
+import {AppHeader} from '../../layout/AppHeader';
+import {formatLastEdited} from '../../utils/formatLastEdited';
+import styles from './ScriptListRoute.module.css';
 
 export const ScriptListRoute = () => {
     const navigate = useNavigate();
-    const {scripts} = useScripts();
+    const {scriptSummaries, isLoading: scriptsLoading} = useScripts();
     const {openNewScript} = useGlobalModals();
-    const openModal = useCallback(() => {
-        openNewScript();
-    }, [openNewScript]);
-    const handleHome = useCallback(() => {
-        void navigate('/');
-    }, [navigate]);
-    const handleCardClick = useCallback((scriptId: string) => {
-        void navigate(`/script/${scriptId}/editor`);
-    }, [navigate]);
-    const handleCardKeyDown = useCallback((scriptId: string, event: ReactKeyboardEvent<HTMLElement>) => {
-        if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            void navigate(`/script/${scriptId}/editor`);
-        }
-    }, [navigate]);
-    const handleOpenEditor = useCallback((scriptId: string, event: ReactMouseEvent<HTMLElement>) => {
-        event.stopPropagation();
-        void navigate(`/script/${scriptId}/editor`);
-    }, [navigate]);
-    const handleOpenSettings = useCallback((scriptId: string, event: ReactMouseEvent<HTMLElement>) => {
-        event.stopPropagation();
-        void navigate(`/script/${scriptId}/settings`);
-    }, [navigate]);
+
     const scriptCards = useMemo(
-        () => scripts.map((script, index) => (
+        () => scriptSummaries.map(script => (
             <Card
                 key={script.id}
                 className={styles.card}
-                onClick={() => handleCardClick(script.id)}
+                onClick={() => void navigate(`/script/${script.id}/editor`)}
                 role="button"
                 tabIndex={0}
-                onKeyDown={event => handleCardKeyDown(script.id, event)}
+                onKeyDown={(event: ReactKeyboardEvent<HTMLElement>) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        void navigate(`/script/${script.id}/editor`);
+                    }
+                }}
             >
                 <CardHeader>
-                    <h2 className={styles.cardTitle}>{script.name}</h2>
-                    <Tag>
-                        {mockMeta[index]?.status ?? 'Draft'}
-                    </Tag>
+                    <h2 className={styles.cardTitle}>{script.title}</h2>
                 </CardHeader>
                 <CardContent>
                     <SubtleText>
-                        {mockMeta[index]?.updated ?? 'Edited recently'}
+                        {formatLastEdited(script.updatedAt)}
                     </SubtleText>
                 </CardContent>
                 <CardFooter>
                     <Button
                         variant="secondary"
                         size="sm"
-                        onClick={event => handleOpenEditor(script.id, event)}
+                        onPress={() => void navigate(`/script/${script.id}/editor`)}
                     >
                         Open editor
                     </Button>
                     <Button
                         variant="ghost"
                         size="sm"
-                        onClick={event => handleOpenSettings(script.id, event)}
+                        onPress={() => void navigate(`/script/${script.id}/settings`)}
                     >
                         Settings
                     </Button>
                 </CardFooter>
             </Card>
-        ))
-        , [
-            handleCardClick,
-            handleCardKeyDown,
-            handleOpenEditor,
-            handleOpenSettings,
-            scripts,
-        ],
+        )),
+        [navigate, scriptSummaries],
     );
 
     return (
-        <AppLayout
-            header={(
-                <AppHeader
-                    showScriptMenu={false}
-                    onHome={handleHome}
-                    onNewScript={openModal}
-                />
-            )}
-        >
+        <AppLayout header={<AppHeader />}>
             <PageContainer variant="standard">
-                <section className={styles.header}>
+                <PageHeader>
                     <div>
                         <Kicker>Scripts</Kicker>
-                        <PageTitle className={styles.title}>All scenarios</PageTitle>
+                        <PageTitle className={styles.title}>All scripts</PageTitle>
                         <SubtleText className={styles.subtitle}>
                             Keep drafts, outlines, and finished scripts in one consistent view.
                         </SubtleText>
                     </div>
-                    <Button onClick={openModal}>
+                    <Button onPress={openNewScript}>
                         New script
                     </Button>
-                </section>
-                <Grid>
-                    {scriptCards}
-                </Grid>
+                </PageHeader>
+                {scriptsLoading ? (
+                    <div className={styles.listLoading}>
+                        <ProgressPanel
+                            label="Loading scripts"
+                            messages={['Loading script list']}
+                            size="sm"
+                        />
+                    </div>
+                ) : (
+                    <Grid>
+                        {scriptCards}
+                    </Grid>
+                )}
             </PageContainer>
         </AppLayout>
     );

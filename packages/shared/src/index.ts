@@ -1,9 +1,14 @@
 /*
- * Shared utilities, types, and helpers
- * Used across all apps and packages
+ * @stagistic/shared — pure TypeScript utilities with zero framework dependencies.
+ * Consumed by @stagistic/script, @stagistic/db, @stagistic/editor, and
+ * @stagistic/app-routes. Keeping it framework-free prevents circular deps and
+ * lets any layer in the monorepo import it safely.
  */
 
-export * from './editor/editorDefaults';
+export * from './ids/nodeId';
 export * from './ids/uuidv7';
-export * from './nodeId';
-export * from './storage/latestScript';
+export * from './utils/number';
+export * from './utils/object';
+export * from './utils/platform';
+export * from './utils/string';
+export * from './utils/structuralEquals';

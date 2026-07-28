@@ -1,0 +1,143 @@
+import {
+    StrictMode,
+    useState,
+} from 'react';
+import {createRoot, type Root} from 'react-dom/client';
+import {
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
+} from 'vite-plus/test';
+
+import {usePersistedDraft} from './usePersistedDraft';
+
+const roots: Root[] = [];
+
+afterEach(() => {
+    roots.forEach(root => root.unmount());
+    roots.length = 0;
+    document.body.innerHTML = '';
+});
+
+const waitFor = async (predicate: () => boolean) => {
+    const deadline = Date.now() + 2_000;
+
+    while (!predicate()) {
+        if (Date.now() >= deadline) {
+            throw new Error('Timed out waiting for persisted draft');
+        }
+
+        await new Promise(resolve => window.setTimeout(resolve, 10));
+    }
+};
+
+const Harness = ({persist}: {persist: (key: string, value: string) => Promise<void>}) => {
+    const [confirmed, setConfirmed] = useState('Initial');
+    const draft = usePersistedDraft({
+        entityKey: 'script-1',
+        confirmedValue: confirmed,
+        isHydrated: true,
+        defaultValue: '',
+        debounceMs: 0,
+        persist,
+    });
+
+    return (
+        <>
+            <button type="button" onClick={() => draft.setDraft('Changed')}>change</button>
+            <button type="button" onClick={() => setConfirmed('External')}>external</button>
+            <output>{draft.draft}:{draft.status}</output>
+        </>
+    );
+};
+
+type KeyedDraftRender = {
+    entityKey: string,
+    draft: string,
+    isHydrated: boolean,
+};
+
+const KeyedHarness = ({onRender}: {onRender: (render: KeyedDraftRender) => void}) => {
+    const [entityKey, setEntityKey] = useState('script-1');
+    const confirmedValue = entityKey === 'script-1' ? 'First' : 'Second';
+    const draft = usePersistedDraft({
+        entityKey,
+        confirmedValue,
+        isHydrated: true,
+        defaultValue: '',
+        persist: () => Promise.resolve(),
+    });
+
+    onRender({
+        entityKey,
+        draft: draft.draft,
+        isHydrated: draft.isHydrated,
+    });
+
+    return (
+        <>
+            <button type="button" onClick={() => setEntityKey('script-2')}>switch</button>
+            <output>{draft.draft}:{String(draft.isHydrated)}</output>
+        </>
+    );
+};
+
+describe('usePersistedDraft', () => {
+    it('never reports a value as hydrated for the wrong entity key', async () => {
+        const renders: KeyedDraftRender[] = [];
+        const host = document.createElement('div');
+        const root = createRoot(host);
+
+        roots.push(root);
+        document.body.appendChild(host);
+        root.render(<KeyedHarness onRender={render => renders.push(render)} />);
+
+        await waitFor(() => host.textContent?.includes('First:true') ?? false);
+
+        expect(renders[0]).toEqual({
+            entityKey: 'script-1',
+            draft: 'First',
+            isHydrated: true,
+        });
+
+        renders.length = 0;
+        (host.querySelector('button') as HTMLButtonElement).click();
+        await waitFor(() => host.textContent?.includes('Second:true') ?? false);
+
+        expect(renders).toContainEqual({
+            entityKey: 'script-2',
+            draft: '',
+            isHydrated: false,
+        });
+        expect(renders.at(-1)).toEqual({
+            entityKey: 'script-2',
+            draft: 'Second',
+            isHydrated: true,
+        });
+    });
+
+    it('survives StrictMode setup cleanup without saving hydrated data', async () => {
+        const persist = vi.fn(() => Promise.resolve());
+        const host = document.createElement('div');
+        const root = createRoot(host);
+
+        roots.push(root);
+        document.body.appendChild(host);
+        root.render(
+            <StrictMode>
+                <Harness persist={persist} />
+            </StrictMode>,
+        );
+        await waitFor(() => host.textContent?.includes('Initial:idle') ?? false);
+
+        expect(persist).not.toHaveBeenCalled();
+
+        (host.querySelector('button') as HTMLButtonElement).click();
+        await waitFor(() => persist.mock.calls.length === 1);
+        await waitFor(() => host.textContent?.includes('Changed:saved') ?? false);
+
+        expect(persist).toHaveBeenCalledWith('script-1', 'Changed');
+    });
+});

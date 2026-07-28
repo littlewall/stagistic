@@ -1,0 +1,22 @@
+.deleteButton {
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: var(--select-button-height);
+    height: var(--select-button-height);
+    padding: 0;
+    color: color-mix(in oklch, var(--color-status-danger) 70%, var(--color-text));
+
+    &:hover:not(:disabled) {
+        color: var(--color-status-danger);
+        background: color-mix(in oklch, var(--color-status-danger) 16%, transparent);
+    }
+}
+
+.actionIcon {
+    display: block;
+    width: 1rem;
+    height: 1rem;
+    fill: none;
+    stroke: currentcolor;
+    stroke-width: 2;
+}

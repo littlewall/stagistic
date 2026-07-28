@@ -1,0 +1,45 @@
+.input {
+    box-sizing: border-box;
+    width: 100%;
+    height: var(--input-height, var(--select-button-height));
+    padding: 0 var(--input-padding-inline, var(--select-button-padding-inline));
+    font-family: inherit;
+    font-size: var(--input-font-size, var(--select-button-font-size));
+    font-weight: var(--select-button-font-weight);
+    color: var(--select-button-color);
+    background: var(--input-bg, var(--color-input-bg, var(--color-surface)));
+    border: var(--select-button-border-width) solid var(--input-border-color, var(--color-border));
+    border-radius: var(--input-radius, var(--select-button-radius));
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+
+    &:hover {
+        background: var(--input-hover-bg, var(--select-button-hover-bg));
+    }
+
+    &:focus {
+        border-color: var(--color-surface-accent);
+        outline: none;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: .4;
+    }
+
+    &::placeholder {
+        color: var(--color-ink-subtle, var(--color-text-muted));
+        opacity: .6;
+    }
+
+    &[data-size = 'sm'] {
+        --input-height: var(--select-button-height);
+    }
+
+    &[data-size = 'md'] {
+        --input-height: auto;
+        --input-padding-inline: var(--space-lg);
+        --input-font-size: var(--font-size-xl);
+
+        padding-block: var(--space-lg);
+    }
+}

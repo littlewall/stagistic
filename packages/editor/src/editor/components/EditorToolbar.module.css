@@ -1,0 +1,262 @@
+.toolbar {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--space-md) 0;
+    background: transparent;
+
+    @media (max-width: 900px) {
+        flex-wrap: wrap;
+    }
+}
+
+.group {
+    display: inline-flex;
+    gap: var(--space-md);
+    align-items: center;
+}
+
+.rightGroup {
+    display: inline-flex;
+    gap: var(--space-md);
+    align-items: center;
+    margin-left: auto;
+
+    @media (max-width: 900px) {
+        justify-content: flex-end;
+        width: 100%;
+        margin-left: 0;
+    }
+}
+
+.iconButton {
+    cursor: pointer;
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--control-height-sm);
+    height: var(--control-height-sm);
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    transition: background .15s ease, border-color .15s ease;
+
+    &:hover {
+        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: .45;
+    }
+
+    & svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
+
+    &.active {
+        color: var(--color-text);
+        background: var(--color-surface-raised);
+        border-color: color-mix(in oklch, var(--color-text) 28%, var(--color-border));
+        box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-text) 16%, transparent);
+
+        &:hover {
+            background: color-mix(in oklch, var(--color-surface-raised) 82%, var(--color-surface));
+        }
+    }
+}
+
+.icon {
+    width: 16px;
+    height: 16px;
+
+    & svg {
+        width: 16px;
+        height: 16px;
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
+}
+
+.textIcon {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-bold);
+    letter-spacing: var(--letter-spacing-sm);
+}
+
+.textIconItalic {
+    font-weight: var(--font-weight-semibold);
+    font-style: italic;
+}
+
+.textIconUnderline {
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.selectButton {
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--select-button-gap);
+    align-items: center;
+    width: calc(200px * var(--size-scale));
+    height: var(--select-button-height);
+    padding: 0 var(--select-button-padding-inline);
+    font-size: var(--select-button-font-size);
+    font-weight: var(--select-button-font-weight);
+    color: var(--select-button-color);
+    background: var(--select-button-bg);
+    border: var(--select-button-border-width) solid var(--select-button-border-color);
+    border-radius: var(--select-button-radius);
+    transition: background .15s ease, border-radius .15s ease;
+    anchor-name: --block-type-select;
+
+    &:hover {
+        background: var(--select-button-hover-bg);
+
+        & .selectIcon {
+            opacity: 1;
+        }
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: .5;
+    }
+
+    &[aria-expanded = 'true'] {
+        background: var(--select-menu-bg);
+        border-color: var(--color-border);
+        border-bottom-color: transparent;
+        border-bottom-right-radius: 0;
+        border-bottom-left-radius: 0;
+
+        &:hover {
+            background: var(--select-menu-hover-bg);
+        }
+
+        & .selectIcon {
+            opacity: 1;
+        }
+    }
+
+    & .selectIcon {
+        opacity: .5;
+        transition: opacity .15s ease;
+    }
+}
+
+.selectIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--select-icon-size);
+    height: var(--select-icon-size);
+
+    & svg {
+        width: var(--select-icon-size);
+        height: var(--select-icon-size);
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
+}
+
+.selectIconMuted {
+    color: var(--color-text-muted);
+}
+
+.selectLabel {
+    overflow: hidden;
+    min-width: 0;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chevron {
+    width: var(--select-chevron-size);
+    height: var(--select-chevron-size);
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
+}
+
+.menu {
+    position: fixed;
+    z-index: var(--select-menu-z-index);
+    top: anchor(bottom);
+    left: anchor(left);
+    overflow: auto;
+    overscroll-behavior: contain;
+    display: grid;
+    min-width: anchor-size(width);
+    max-height: min(var(--select-menu-max-height), var(--anchored-menu-max-height, var(--select-menu-max-height)));
+    margin-top: -1px;
+    padding: var(--select-menu-padding);
+    background: var(--select-menu-bg);
+    border: var(--select-menu-border);
+    border-top: 0;
+    border-radius: 0 0 var(--select-menu-radius) var(--select-menu-radius);
+    box-shadow: var(--select-menu-shadow);
+    position-anchor: --block-type-select;
+}
+
+.menuItem {
+    cursor: pointer;
+    display: flex;
+    gap: var(--select-menu-item-gap);
+    align-items: center;
+    min-height: var(--select-menu-item-min-height);
+    padding: var(--select-menu-item-padding);
+    font-size: var(--select-menu-item-font-size);
+    color: var(--select-menu-item-color);
+    background: transparent;
+    border: none;
+    border-radius: var(--select-menu-item-radius);
+    transition: background .15s ease, box-shadow .15s ease;
+
+    &:hover {
+        background: var(--select-menu-item-hover-bg);
+    }
+
+    &.active {
+        font-weight: var(--select-menu-item-active-font-weight);
+        background: var(--select-menu-item-active-bg);
+
+        &:hover {
+            background: var(--select-menu-item-active-bg);
+        }
+    }
+}
+
+.menuItemLabel {
+    line-height: var(--line-height-snug);
+}
+
+.menuLabel {
+    line-height: var(--line-height-snug);
+    white-space: nowrap;
+}

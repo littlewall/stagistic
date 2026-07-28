@@ -5,10 +5,13 @@
     "type": "module",
     "main": "./src/index.ts",
     "scripts": {
-        "lint": "eslint . --ext ts"
+        "lint": "eslint .",
+        "typecheck": "tsc -b",
+        "test": "vp test run"
     },
     "dependencies": {
-        "@stagistic/editor-core": "workspace:*"
+        "nanoid": "^5.0.7",
+        "uuidv7": "^1.2.1"
     },
     "devDependencies": {
         "typescript": "^5.9.2"

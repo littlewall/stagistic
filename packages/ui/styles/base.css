@@ -16,12 +16,12 @@ body,
 
 body {
     overflow: hidden;
-    font-family: var(--font-sans);
-    font-size: calc(13px * var(--size-scale));
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-md);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    color: var(--color-ink);
-    background: var(--color-paper);
+    color: var(--color-text);
+    background: var(--color-bg);
 }
 
 .size-sm {
@@ -45,7 +45,7 @@ select {
 }
 
 ::selection {
-    background: var(--color-highlight);
+    background: var(--color-surface-accent);
 }
 
 ::-webkit-scrollbar {
@@ -58,10 +58,10 @@ select {
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--color-divider);
-    border-radius: 999px;
+    background: var(--color-border);
+    border-radius: var(--radius-full);
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background: color-mix(in srgb, var(--color-ink) 20%, var(--color-divider));
+    background: color-mix(in oklch, var(--color-text) 20%, var(--color-border));
 }

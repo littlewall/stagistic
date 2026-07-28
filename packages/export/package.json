@@ -1,0 +1,23 @@
+{
+    "name": "@stagistic/export",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "main": "./src/index.ts",
+    "scripts": {
+        "lint": "eslint .",
+        "typecheck": "tsc -b",
+        "test": "vp test run",
+        "test:watch": "vp test watch"
+    },
+    "dependencies": {
+        "@pdf-lib/fontkit": "^1.1.1",
+        "@stagistic/script": "workspace:*",
+        "@stagistic/script-pagination": "workspace:*",
+        "jspdf": "^2.5.2",
+        "pdf-lib": "^1.17.1"
+    },
+    "devDependencies": {
+        "typescript": "^5.9.2"
+    }
+}

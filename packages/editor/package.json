@@ -1,0 +1,43 @@
+{
+    "name": "@stagistic/editor",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "main": "./src/index.ts",
+    "scripts": {
+        "lint": "eslint .",
+        "typecheck": "tsc -b",
+        "test": "vp test run",
+        "test:watch": "vp test watch",
+        "test:browser": "vp test run -c vitest.browser.config.ts",
+        "test:browser:debug": "vp test run -c vitest.browser.debug.config.ts"
+    },
+    "dependencies": {
+        "@stagistic/script": "workspace:*",
+        "@stagistic/script-pagination": "workspace:*",
+        "@stagistic/shared": "workspace:*",
+        "@stagistic/ui": "workspace:*",
+        "@tanstack/react-hotkeys": "^0.3.0",
+        "@tiptap/core": "^3.19.0",
+        "@tiptap/extension-bold": "^3.19.0",
+        "@tiptap/extension-document": "^3.19.0",
+        "@tiptap/extension-history": "^3.19.0",
+        "@tiptap/extension-italic": "^3.19.0",
+        "@tiptap/extension-text": "^3.19.0",
+        "@tiptap/extension-underline": "^3.19.0",
+        "@tiptap/extension-unique-id": "^3.19.0",
+        "@tiptap/pm": "^3.19.0",
+        "@tiptap/react": "^3.19.0",
+        "clsx": "^2.1.1"
+    },
+    "peerDependencies": {
+        "react": "^19.0.0",
+        "react-dom": "^19.0.0"
+    },
+    "devDependencies": {
+        "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "playwright": "^1.61.0",
+        "typescript": "^5.9.2"
+    }
+}

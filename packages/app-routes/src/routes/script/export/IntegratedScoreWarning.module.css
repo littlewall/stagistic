@@ -1,0 +1,20 @@
+.warning {
+    display: grid;
+    gap: .3rem;
+    margin: .5rem 0 .75rem;
+    padding-left: .55rem;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    border-left: 2px solid var(--color-warning, #d98b00);
+}
+
+.warning button {
+    font: inherit;
+    color: inherit;
+    text-align: left;
+}
+
+.warning ul {
+    margin: 0;
+    padding-left: 1rem;
+}

@@ -5,19 +5,26 @@
     "type": "module",
     "main": "./src/index.ts",
     "scripts": {
-        "lint": "eslint . --ext ts,tsx"
+        "lint": "eslint .",
+        "typecheck": "tsc -b",
+        "test": "vp test run",
+        "test:watch": "vp test watch",
+        "test:browser": "vp test run -c vitest.browser.config.ts"
     },
     "dependencies": {
         "@stagistic/db": "workspace:*",
+        "@stagistic/script": "workspace:*",
         "@stagistic/shared": "workspace:*",
-        "@stagistic/sync-core": "workspace:*",
-        "@tanstack/react-db": "^0.1.69"
+        "@tanstack/pacer": "0.21.1",
+        "@tanstack/react-db": "^0.1.92"
     },
     "peerDependencies": {
         "react": "^19.0.0"
     },
     "devDependencies": {
         "@types/react": "^19.0.0",
+        "@types/react-dom": "^19.0.0",
+        "react-dom": "^19.0.0",
         "typescript": "^5.9.2"
     }
 }

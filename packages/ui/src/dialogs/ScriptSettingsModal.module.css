@@ -1,0 +1,193 @@
+.backdrop {
+    position: fixed;
+    z-index: 15;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: var(--space-3xl);
+    background: var(--color-overlay-scrim);
+}
+
+.modal {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    width: min(1080px, 100%);
+    height: calc(100vh - (var(--space-3xl) * 2));
+    max-height: calc(100vh - (var(--space-3xl) * 2));
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-popover);
+
+    & .header {
+        display: flex;
+        gap: var(--space-lg);
+        align-items: center;
+        justify-content: space-between;
+        padding: var(--space-xl) var(--space-2xl);
+        border-bottom: 1px solid var(--color-border);
+
+        & .title {
+            font-size: var(--font-size-2xl);
+            font-weight: var(--font-weight-semibold);
+        }
+
+        & .closeButton {
+            cursor: pointer;
+            padding: var(--space-md) var(--space-lg);
+            font-size: var(--font-size-sm);
+            color: var(--color-text-muted);
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-sm);
+
+            &:hover {
+                color: var(--color-text);
+                background: var(--color-surface-raised);
+            }
+        }
+    }
+
+    & .body {
+        display: grid;
+        grid-template-columns: 280px 1fr;
+        flex: 1 1 auto;
+        min-height: 0;
+
+        & .sidebar {
+            overflow: auto;
+            padding: var(--space-xl);
+            background: color-mix(in oklch, var(--color-surface) 88%, var(--color-surface-raised));
+            border-right: 1px solid var(--color-border);
+
+            @media (max-width: 900px) {
+                max-height: 240px;
+                border-right: 0;
+                border-bottom: 1px solid var(--color-border);
+            }
+        }
+
+        & .content {
+            overflow: auto;
+            padding: var(--space-3xl);
+        }
+
+        @media (max-width: 900px) {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 900px) {
+        height: calc(100vh - (var(--space-xl) * 2));
+        max-height: calc(100vh - (var(--space-xl) * 2));
+    }
+}
+
+.group + .group {
+    margin-top: var(--space-xl);
+}
+
+.groupLabel {
+    margin-bottom: var(--space-md);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+}
+
+.navList,
+.subList {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.subList {
+    margin-top: var(--space-sm);
+    margin-left: var(--space-lg);
+}
+
+.navItem,
+.navExpandButton,
+.subItem {
+    cursor: pointer;
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    color: var(--color-text);
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-radius: var(--radius-sm);
+
+    &:hover {
+        background: var(--select-menu-item-hover-bg);
+    }
+}
+
+.navItem {
+    &.active {
+        font-weight: var(--font-weight-semibold);
+        background: var(--select-menu-item-active-bg);
+    }
+}
+
+.navExpandButton {
+    display: inline-flex;
+    gap: var(--space-md);
+    align-items: center;
+    justify-content: space-between;
+
+    &:hover {
+        & .expandArrow {
+            color: var(--color-text);
+        }
+    }
+}
+
+.expandArrow {
+    width: 14px;
+    height: 14px;
+    color: color-mix(in oklch, var(--color-text) 86%, var(--color-surface-accent));
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.2;
+    transition: transform 120ms ease, color 120ms ease;
+
+    &.open {
+        transform: rotate(90deg);
+    }
+}
+
+.subItem {
+    &.active {
+        font-weight: var(--font-weight-semibold);
+        background: var(--select-menu-item-active-bg);
+    }
+
+    & .subItemContent {
+        display: inline-flex;
+        gap: var(--space-md);
+        align-items: center;
+
+        & .subItemIcon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 14px;
+            height: 14px;
+            color: color-mix(in oklch, var(--color-text) 84%, var(--color-surface-accent));
+
+            & svg {
+                width: 14px;
+                height: 14px;
+                fill: none;
+                stroke: currentcolor;
+                stroke-linecap: round;
+                stroke-linejoin: round;
+                stroke-width: 1.8;
+            }
+        }
+    }
+}

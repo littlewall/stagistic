@@ -1,0 +1,178 @@
+/*
+ * Inline model (mirrors .characterTag): no display/line-height/font-size
+ * overrides, so the highlight never grows the line box and the pill stays
+ * baseline-centred with the surrounding text.
+ *
+ * Cell parity with the PDF export: the export renders a music as bold text
+ * `" number title "` and wraps by character count (0.6em/1ch per cell, see
+ * transcribeExportPlan). So the pill must occupy the same cells and add ZERO
+ * layout width of its own — hence `outline` (not `border`) for the box.
+ * Collapsible text spaces in the node view provide the export's leading and
+ * trailing spaces. Unlike margins, the browser discards them at a wrapped
+ * line start. Distinct from character tags: boxed, no fill, no border-radius.
+ */
+.pill {
+    --music-active-border-color: rgba(125 145 255 / 80%);
+    --music-border-color: color-mix(in oklch, var(--color-text) 14%, transparent);
+
+    user-select: none;
+    position: relative;
+    color: var(--color-text);
+}
+
+.structuralOut {
+    pointer-events: none;
+    overflow: hidden;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    vertical-align: baseline;
+}
+
+.menu {
+    cursor: default;
+    user-select: none;
+    position: fixed;
+    inset: auto auto anchor(top) anchor(center);
+    transform: translate(-50%, calc(var(--space-sm) * -1));
+    gap: var(--bubble-menu-gap);
+    align-items: center;
+    padding: var(--bubble-menu-padding);
+    white-space: nowrap;
+    background: var(--bubble-menu-bg);
+    border: var(--bubble-menu-border);
+    border-radius: var(--bubble-menu-radius);
+    box-shadow: var(--bubble-menu-shadow);
+    position-anchor: var(--music-pill-anchor);
+
+    &:popover-open {
+        display: inline-flex;
+    }
+}
+
+.tagBody {
+    /* outline (not border) keeps the box out of layout so it adds no width. */
+    user-select: text;
+    position: relative;
+    outline: 1px solid var(--music-border-color);
+    outline-offset: .1em;
+    anchor-name: var(--music-pill-anchor);
+}
+
+.active {
+    --music-border-color: var(--music-active-border-color);
+}
+
+.menuButton {
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bubble-menu-button-size);
+    height: var(--bubble-menu-button-size);
+    padding: 0;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--bubble-menu-button-radius);
+    transition: transform 160ms cubic-bezier(.23, 1, .32, 1), background .15s ease, border-color .15s ease, color .15s ease;
+
+    &:active {
+        transform: scale(.97);
+    }
+
+    &:hover {
+        color: var(--color-text);
+        background: color-mix(in oklch, var(--color-surface-accent) 32%, transparent);
+    }
+}
+
+.titleInput {
+    cursor: text;
+    user-select: text;
+    padding: 0;
+    font: inherit;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: inherit;
+    color: inherit;
+    outline: 0;
+
+    &:empty::before {
+        pointer-events: none;
+        content: attr(data-placeholder);
+        color: color-mix(in oklch, var(--color-text-muted) 42%, transparent);
+    }
+}
+
+.number {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: inherit;
+}
+
+.open {
+    .tagBody {
+        outline-style: solid;
+    }
+}
+
+.hit {
+    .tagBody {
+        outline-style: dashed;
+    }
+}
+
+.out {
+    color: var(--color-text);
+}
+
+.outLabel {
+    cursor: pointer;
+    font-variant-numeric: tabular-nums;
+}
+
+.outStrong {
+    font-weight: 700;
+}
+
+.outTitle {
+    font-weight: 400;
+    color: var(--color-text-muted);
+}
+
+.outSuffix {
+    font-weight: 400;
+    color: var(--color-text-muted);
+}
+
+.dangerButton {
+    &:hover {
+        color: var(--color-status-danger);
+        background: color-mix(in oklch, var(--color-status-danger) 12%, transparent);
+    }
+}
+
+.icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--bubble-menu-icon-size);
+    height: var(--bubble-menu-icon-size);
+
+    & :global(svg) {
+        width: var(--bubble-menu-icon-size);
+        height: var(--bubble-menu-icon-size);
+        fill: none;
+        stroke: currentcolor;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        stroke-width: 1.6;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .menuButton {
+        transition-duration: 0ms;
+    }
+}

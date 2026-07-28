@@ -16,14 +16,14 @@ export const AppLayout = ({
 }: AppLayoutProps) => {
     return (
         <div className={styles.page}>
-            {header && (
+            {header ? (
                 <div className={styles.header}>{header}</div>
-            )}
-            <div className={clsx(styles.body, !sidebar && styles.bodySingle)}>
+            ) : null}
+            <div className={clsx(styles.body, sidebar ? null : styles.single)}>
                 <main className={styles.main}>{children}</main>
-                {sidebar && (
+                {sidebar ? (
                     <aside className={clsx(styles.sidebar)}>{sidebar}</aside>
-                )}
+                ) : null}
             </div>
         </div>
     );

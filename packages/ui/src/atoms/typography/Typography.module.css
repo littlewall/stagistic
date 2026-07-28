@@ -1,19 +1,18 @@
 .kicker {
-    font-size: .8rem;
-    color: var(--color-ink-muted);
-    text-transform: uppercase;
-    letter-spacing: .12em;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
 }
 
 .pageTitle {
-    font-size: 2.2rem;
-    line-height: 1.1;
+    font-size: var(--font-size-4xl);
+    line-height: var(--line-height-tight);
 }
 
 .sectionTitle {
-    font-size: 1.4rem;
+    font-size: var(--font-size-3xl);
 }
 
 .subtle {
-    color: var(--color-ink-muted);
+    color: var(--color-text-muted);
 }

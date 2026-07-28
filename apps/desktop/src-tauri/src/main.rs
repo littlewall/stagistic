@@ -13,8 +13,12 @@ const MENU_ID_IMPORT: &str = "file_import_script";
 fn build_menu<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Menu<R>> {
     let pkg_info = app.package_info();
     let config = app.config();
+    let app_name = config
+        .product_name
+        .clone()
+        .unwrap_or_else(|| pkg_info.name.clone());
     let about_metadata = tauri::menu::AboutMetadata {
-        name: Some(pkg_info.name.clone()),
+        name: Some(app_name.clone()),
         version: Some(pkg_info.version.to_string()),
         copyright: config.bundle.copyright.clone(),
         authors: config.bundle.publisher.clone().map(|publisher| vec![publisher]),
@@ -79,7 +83,7 @@ fn build_menu<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Men
             #[cfg(target_os = "macos")]
             &Submenu::with_items(
                 app,
-                pkg_info.name.clone(),
+                app_name,
                 true,
                 &[
                     &PredefinedMenuItem::about(app, None, Some(about_metadata))?,

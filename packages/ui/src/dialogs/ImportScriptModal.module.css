@@ -1,139 +1,101 @@
-.backdrop {
-    position: fixed;
-    z-index: 40;
-    inset: 0;
-    display: grid;
-    place-items: center;
-    padding: var(--space-6);
-    background: rgba(20, 18, 16, .45);
-}
-
 .modal {
     display: flex;
     flex-direction: column;
-    gap: var(--space-3);
+    gap: var(--space-lg);
     /* stylelint-disable-next-line csstree/validator */
     width: min(560px, 100%);
-    padding: var(--space-7);
+    padding: var(--space-4xl);
     background: var(--color-surface);
-    border: 1px solid var(--color-divider);
-    border-radius: var(--radius-md);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
     box-shadow: var(--shadow-popover);
 }
 
 .title {
-    font-size: 1.4rem;
+    composes: title from './dialogForm.module.css';
 }
 
 .subtitle {
-    color: var(--color-ink-muted);
+    composes: subtitle from './dialogForm.module.css';
 }
 
 .form {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-4);
-    margin-top: var(--space-2);
+    composes: form from './dialogForm.module.css';
 }
 
 .label {
-    font-size: .8rem;
-    color: var(--color-ink-muted);
-    text-transform: uppercase;
-    letter-spacing: .12em;
+    composes: label from './dialogForm.module.css';
 }
 
 .input {
-    padding: var(--space-3) var(--space-4);
-    background: var(--color-highlight);
-    border: 1px solid var(--color-divider);
-    border-radius: var(--radius-sm);
-}
-
-.input:focus {
-    background: var(--color-surface);
-    border-color: color-mix(in srgb, var(--color-ink) 25%, var(--color-divider));
-    outline: none;
-}
-
-.dropZone {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    padding: var(--space-5);
-    background: var(--color-highlight);
-    border: 1px dashed var(--color-divider);
-    border-radius: var(--radius-sm);
-    text-align: center;
-    cursor: pointer;
-    transition: border-color 150ms ease, background 150ms ease;
-}
-
-.dropZone[data-hovered],
-.dropZone[data-drop-target] {
-    background: var(--color-surface);
-    border-color: color-mix(in srgb, var(--color-ink) 35%, var(--color-divider));
-}
-
-.dropZone[data-focus-visible] {
-    outline: 2px solid color-mix(in srgb, var(--color-ink) 60%, var(--color-divider));
-    outline-offset: 2px;
-}
-
-.dropZoneLabel {
-    font-weight: 600;
-}
-
-.dropZoneHint {
-    color: var(--color-ink-muted);
-    font-size: .9rem;
-}
-
-.error {
-    color: var(--color-danger);
-    font-size: .9rem;
+    composes: input from './dialogForm.module.css';
 }
 
 .actions {
-    display: flex;
-    gap: var(--space-2);
-    justify-content: flex-end;
+    composes: actions from './dialogForm.module.css';
 }
 
-.primaryButton,
-.ghostButton {
+.dropZone {
     cursor: pointer;
-    display: inline-flex;
-    gap: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-2xl);
+    text-align: center;
+    background: var(--color-surface-raised);
+    border: 1px dashed var(--color-border);
+    border-radius: var(--radius-sm);
+    transition: border-color 150ms ease, background 150ms ease;
+
+    &[data-hovered],
+    &[data-drop-target] {
+        background: var(--color-surface);
+        border-color: color-mix(in oklch, var(--color-text) 35%, var(--color-border));
+    }
+
+    &[data-focus-visible] {
+        outline: 2px solid color-mix(in oklch, var(--color-text) 60%, var(--color-border));
+        outline-offset: 2px;
+    }
+}
+
+.optionRow {
+    cursor: pointer;
+    display: flex;
+    gap: var(--space-md);
     align-items: center;
-    justify-content: center;
-    padding: var(--space-2) var(--space-5);
-    font-weight: 500;
-    border: 1px solid transparent;
-    border-radius: 999px;
-    transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
 }
 
-.primaryButton {
-    color: var(--color-surface);
-    background: var(--color-ink);
+.error {
+    font-size: var(--font-size-sm);
+    color: var(--color-status-danger);
 }
 
-.primaryButton:hover {
-    background: color-mix(in srgb, var(--color-ink) 85%, #000);
+.dropZoneTrigger {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    width: 100%;
+    text-align: center;
 }
 
-.primaryButton:disabled {
-    cursor: not-allowed;
-    opacity: .6;
+.dropZoneLabel {
+    font-weight: var(--font-weight-semibold);
 }
 
-.ghostButton {
-    color: var(--color-ink-muted);
-    background: transparent;
+.dropZoneHint {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
 }
 
-.ghostButton:hover {
-    color: var(--color-ink);
-    background: var(--color-highlight);
+.checkbox {
+    inline-size: 1rem;
+    block-size: 1rem;
+}
+
+.optionText {
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
 }

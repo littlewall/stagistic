@@ -4,39 +4,32 @@
     "private": true,
     "type": "module",
     "scripts": {
-        "dev": "vite",
-        "build": "tsc && vite build",
-        "preview": "vite preview",
-        "lint": "eslint . --ext ts,tsx"
+        "predev": "pnpm --filter @stagistic/db db:compile-migrations",
+        "dev": "vp dev",
+        "prebuild": "pnpm --filter @stagistic/db db:compile-migrations",
+        "build": "vp build",
+        "preview": "vp preview",
+        "lint": "eslint .",
+        "typecheck": "tsc -b",
+        "test:browser": "vp test run -c vitest.browser.config.ts"
     },
     "dependencies": {
-        "@platejs/basic-nodes": "^52.0.11",
-        "@platejs/slate": "^52.0.10",
+        "@electric-sql/pglite": "^0.3.7",
         "@stagistic/app-core": "workspace:*",
         "@stagistic/app-routes": "workspace:*",
         "@stagistic/db": "workspace:*",
-        "@stagistic/editor-core": "workspace:*",
         "@stagistic/shared": "workspace:*",
-        "@stagistic/sync-core": "workspace:*",
         "@stagistic/ui": "workspace:*",
-        "clsx": "^2.1.1",
-        "platejs": "^52.0.17",
         "react": "^19.0.0",
-        "react-aria-components": "^1.10.0",
         "react-dom": "^19.0.0",
         "react-router-dom": "^7.13.0"
     },
     "devDependencies": {
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
-        "@typescript-eslint/eslint-plugin": "^8.19.0",
-        "@typescript-eslint/parser": "^8.19.0",
-        "@vitejs/plugin-react": "^4.3.4",
-        "eslint": "^9.17.0",
-        "eslint-plugin-react": "^7.37.2",
-        "eslint-plugin-react-refresh": "^0.4.14",
+        "@vitejs/plugin-react": "^6.0.3",
         "lightningcss": "^1.30.1",
         "typescript": "^5.9.2",
-        "vite": "^6.0.5"
+        "vite": "^8.1.5"
     }
 }

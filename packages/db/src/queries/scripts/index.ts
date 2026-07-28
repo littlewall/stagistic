@@ -1,5 +1,14 @@
-// Queries related to the main scripts entity (CRUD, metadata, etc.)
-export * from './content';
+export * from './acts';
+export * from './attachments';
+export * from './blockCharacterRefs';
+export * from './blocks';
+export * from './characters';
+export * from './config';
 export * from './crud';
+export * from './duplicate';
+export * from './locations';
+export * from './music';
 export * from './outbox';
-export * from './version';
+export * from './sceneLocations';
+export * from './scenes';
+export * from './titlePageFields';

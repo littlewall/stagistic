@@ -1,0 +1,172 @@
+.table {
+    width: 100%;
+}
+
+.headerRow {
+    display: grid;
+    column-gap: var(--space-lg);
+    padding: 0 0 var(--space-md);
+
+    & .headerCell {
+        font-size: var(--font-size-sm);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-text-muted);
+    }
+}
+
+.dataRow {
+    display: grid;
+    column-gap: var(--space-lg);
+    padding: var(--space-md) 0;
+
+    &:hover {
+        & .removeRowButton {
+            opacity: 1;
+        }
+    }
+
+    & .dataCell {
+        display: flex;
+        flex-direction: column;
+    }
+
+    & .deleteCell {
+        display: flex;
+        align-items: flex-start;
+        justify-content: center;
+        padding-top: 4px;
+    }
+
+    & .removeRowButton {
+        cursor: pointer;
+        padding: 2px 5px;
+        font-size: var(--font-size-sm);
+        line-height: var(--line-height-none);
+        color: var(--color-text-muted);
+        opacity: 0;
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-sm);
+        transition: opacity 120ms, color 120ms;
+
+        &:hover {
+            color: var(--color-status-danger);
+            opacity: 1;
+        }
+    }
+}
+
+.cellInput {
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    height: var(--control-height-lg);
+    padding: 0 var(--select-button-padding-inline);
+    font-family: inherit;
+    font-size: var(--select-button-font-size);
+    font-weight: var(--select-button-font-weight);
+    color: var(--select-button-color);
+    background: var(--color-input-bg, var(--color-surface));
+    border: var(--select-button-border-width) solid var(--color-border);
+    border-radius: var(--select-button-radius);
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+
+    &:hover {
+        background: var(--select-button-hover-bg);
+    }
+
+    &:focus {
+        border-color: var(--color-surface-accent);
+        outline: none;
+    }
+
+    &::placeholder {
+        color: var(--color-text-muted);
+        opacity: .5;
+    }
+
+    &.withDelete {
+        padding-right: calc(var(--select-button-padding-inline) + var(--control-height-sm));
+    }
+}
+
+.arrayCell {
+    display: flex;
+    flex-direction: column;
+    gap: calc(var(--space-sm) * .5);
+
+    & .arrayEntry {
+        position: relative;
+        display: flex;
+        align-items: center;
+
+        &:hover {
+            & .removeEntryButton {
+                opacity: 1;
+            }
+        }
+
+        & .removeEntryButton {
+            cursor: pointer;
+            position: absolute;
+            top: 50%;
+            right: 4px;
+            transform: translateY(-50%);
+            padding: 1px 4px;
+            font-size: var(--font-size-sm);
+            line-height: var(--line-height-none);
+            color: var(--color-text-muted);
+            opacity: 0;
+            background: transparent;
+            border: none;
+            transition: opacity 100ms, color 100ms;
+
+            &:hover {
+                color: var(--color-status-danger);
+                opacity: 1;
+            }
+        }
+    }
+
+    & .addEntryButton {
+        cursor: pointer;
+        margin-top: 2px;
+        padding: 3px 6px;
+        font-family: inherit;
+        font-size: var(--font-size-sm);
+        color: var(--color-text-muted);
+        text-align: left;
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-sm);
+
+        &:hover {
+            color: var(--color-text);
+            background: var(--color-surface-raised);
+        }
+    }
+}
+
+.footer {
+    display: grid;
+    column-gap: var(--space-lg);
+    padding: var(--space-md) 0;
+
+    & .addRowButton {
+        cursor: pointer;
+        grid-column: 1 / -2;
+        padding: 3px 6px;
+        font-family: inherit;
+        font-size: var(--font-size-sm);
+        color: var(--color-text-muted);
+        text-align: left;
+        background: transparent;
+        border: none;
+        border-radius: var(--radius-sm);
+
+        &:hover {
+            color: var(--color-text);
+            background: var(--color-surface-raised);
+        }
+    }
+}

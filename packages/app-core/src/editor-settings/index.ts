@@ -1,0 +1,1 @@
+export {useScriptEditorSettingsRecord} from './useScriptEditorSettingsRecord';

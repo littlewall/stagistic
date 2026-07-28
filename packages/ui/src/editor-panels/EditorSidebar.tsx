@@ -1,164 +1,121 @@
 import clsx from 'clsx';
 import {
-    Clock,
-    List,
-    Notes,
-} from 'iconoir-react';
-import {
-    type ChangeEvent,
-    type Key,
-    type MouseEvent as ReactMouseEvent,
-    useCallback,
+    type CSSProperties,
     useMemo,
-    useState,
 } from 'react';
-import {
-    Tab,
-    TabList,
-    TabPanel,
-    Tabs,
-} from 'react-aria-components';
 
+import {CharacterRowConfirmed} from './CharacterRowConfirmed';
+import {CharacterRowPending} from './CharacterRowPending';
 import styles from './EditorSidebar.module.css';
+import type {EditorSidebarCharacter} from './types';
+import {getCharacterIdentityKey} from './utils';
 
-export type Scene = {
-    id: string,
-    heading: string,
-    lineNumber: number,
-};
+export type {EditorSidebarCharacter};
 
-type EditorSidebarProps = {
-    scenes: Scene[],
-    onSceneClick: (lineNumber: number) => void,
+interface EditorSidebarData {
+    confirmedCharacters: EditorSidebarCharacter[],
+    unconfirmedCharacters: EditorSidebarCharacter[],
+    isLoading?: boolean,
+}
+
+interface EditorSidebarActions {
+    onConfirmCharacter?: (characterKey: string, colorHex?: string | null) => void,
+    onEditCharacter?: (characterId: string) => void,
+    onFocusCharacter?: (characterKey: string) => void,
+}
+
+interface EditorSidebarOptions {
+    activeCharacterId?: string | null,
+    activeCharacterKey?: string | null,
     className?: string,
-};
+}
+
+export interface EditorSidebarProps {
+    data: EditorSidebarData,
+    actions?: EditorSidebarActions,
+    options?: EditorSidebarOptions,
+}
 
 export const EditorSidebar = ({
-    scenes,
-    onSceneClick,
-    className,
+    data,
+    actions,
+    options,
 }: EditorSidebarProps) => {
-    const [notes, setNotes] = useState('');
-    const [selectedKey, setSelectedKey] = useState<Key>('scenes');
-    const history = useMemo(() => [
-        {
-            id: '1',
-            time: '2 min ago',
-            action: 'Edited Scene 3',
-        },
-        {
-            id: '2',
-            time: '15 min ago',
-            action: 'Added new dialogue',
-        },
-        {
-            id: '3',
-            time: '1 hour ago',
-            action: 'Created script',
-        },
-    ], []);
-
-    const handleSelectionChange = useCallback((key: Key) => {
-        setSelectedKey(key);
-    }, []);
-
-    const handleNotesChange = useCallback((event: ChangeEvent<HTMLTextAreaElement>) => {
-        setNotes(event.target.value);
-    }, []);
-
-    const handleSceneButtonClick = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
-        const value = event.currentTarget.dataset.lineNumber;
-
-        if (!value) {
-            return;
-        }
-
-        const lineNumber = Number(value);
-
-        if (Number.isNaN(lineNumber)) {
-            return;
-        }
-
-        onSceneClick(lineNumber);
-    }, [onSceneClick]);
-
-    const sceneItems = useMemo(
-        () => scenes.map((scene, index) => (
-            <li key={scene.id}>
-                <button
-                    type="button"
-                    className={styles.sceneButton}
-                    onClick={handleSceneButtonClick}
-                    data-line-number={scene.lineNumber}
-                >
-                    <span className={styles.sceneIndex}>{index + 1}.</span>
-                    <span className={styles.sceneHeading}>{scene.heading}</span>
-                    <span className={styles.sceneChevron} aria-hidden="true">
-                        {'>'}
-                    </span>
-                </button>
-            </li>
-        ))
-        , [handleSceneButtonClick, scenes],
-    );
-
-    const historyItems = useMemo(
-        () => history.map(item => (
-            <li key={item.id} className={styles.historyItem}>
-                <p className={styles.historyAction}>{item.action}</p>
-                <p className={styles.historyTime}>{item.time}</p>
-            </li>
-        ))
-        , [history],
+    const {
+        confirmedCharacters,
+        unconfirmedCharacters,
+        isLoading,
+    } = data;
+    const {
+        onConfirmCharacter,
+        onEditCharacter,
+        onFocusCharacter,
+    } = actions ?? {};
+    const {
+        activeCharacterId,
+        activeCharacterKey,
+        className,
+    } = options ?? {};
+    const hasCharacters = confirmedCharacters.length > 0 || unconfirmedCharacters.length > 0;
+    const rows = useMemo(
+        () => [...confirmedCharacters, ...unconfirmedCharacters],
+        [confirmedCharacters, unconfirmedCharacters],
     );
 
     return (
         <aside className={clsx(styles.sidebar, className)}>
-            <Tabs
-                className={styles.tabs}
-                selectedKey={selectedKey}
-                onSelectionChange={handleSelectionChange}
-            >
-                <TabList className={styles.tabList}>
-                    <Tab id="scenes" className={styles.tab}>
-                        <List className={styles.tabIcon} aria-hidden="true" />
-                        Scenes
-                    </Tab>
-                    <Tab id="notes" className={styles.tab}>
-                        <Notes className={styles.tabIcon} aria-hidden="true" />
-                        Notes
-                    </Tab>
-                    <Tab id="history" className={styles.tab}>
-                        <Clock className={styles.tabIcon} aria-hidden="true" />
-                        History
-                    </Tab>
-                </TabList>
-                <TabPanel id="scenes" className={styles.tabPanel}>
-                    {scenes.length === 0 ? (
-                        <p className={styles.emptyState}>
-                            No scenes yet. Start with a scene heading like:
-                            <code className={styles.inlineCode}>INT. LOCATION - DAY</code>
-                        </p>
-                    ) : (
-                        <ul className={styles.sceneList}>
-                            {sceneItems}
-                        </ul>
-                    )}
-                </TabPanel>
-                <TabPanel id="notes" className={styles.tabPanel}>
-                    <textarea
-                        className={styles.notesArea}
-                        value={notes}
-                        onChange={handleNotesChange}
-                        placeholder="Add notes about your script..."
-                    />
-                </TabPanel>
-                <TabPanel id="history" className={styles.tabPanel}>
-                    <ul className={styles.historyList}>
-                        {historyItems}
+            <section className={styles.section}>
+                {isLoading ? (
+                    <p className={styles.emptyState}>Loading characters...</p>
+                ) : null}
+                {!isLoading && !hasCharacters ? (
+                    <p className={styles.emptyState}>
+                        No characters on stage yet. Add a Character block to start building your cast.
+                    </p>
+                ) : null}
+                {!isLoading && hasCharacters ? (
+                    <ul className={styles.characterList}>
+                        {rows.map(character => {
+                            const characterIdentityKey = getCharacterIdentityKey(character);
+                            const isConfirmPending = character.isConfirmPending ?? character.isPending ?? false;
+                            const isActive = activeCharacterId
+                                ? character.id === activeCharacterId
+                                : character.key === activeCharacterKey;
+
+                            return (
+                                <li
+                                    key={characterIdentityKey}
+                                    className={clsx(
+                                        styles.characterItem,
+                                        !character.isConfirmed && styles.unconfirmed,
+                                        isActive && styles.active,
+                                    )}
+                                    aria-current={isActive ? 'true' : undefined}
+                                    style={{'--character-color': character.color} as CSSProperties}
+                                >
+                                    {character.isConfirmed ? (
+                                        <CharacterRowConfirmed
+                                            character={character}
+                                            onEditCharacter={onEditCharacter}
+                                        />
+                                    ) : (
+                                        <CharacterRowPending
+                                            model={{
+                                                character,
+                                                isConfirmPending,
+                                            }}
+                                            actions={{
+                                                onConfirmCharacter,
+                                                onFocusCharacter,
+                                            }}
+                                        />
+                                    )}
+                                </li>
+                            );
+                        })}
                     </ul>
-                </TabPanel>
-            </Tabs>
+                ) : null}
+            </section>
         </aside>
     );
 };

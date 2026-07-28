@@ -1,0 +1,14 @@
+import type {SVGProps} from 'react';
+
+export const SectionBlockIcon = (props: SVGProps<SVGSVGElement>) => (
+    <svg
+        viewBox="0 0 24 24"
+        aria-hidden="true"
+        focusable={false}
+        {...props}
+    >
+        <path d="M6 6h12" />
+        <path d="M6 12h9" />
+        <path d="M6 18h12" />
+    </svg>
+);

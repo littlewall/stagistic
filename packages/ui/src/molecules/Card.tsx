@@ -4,7 +4,6 @@ import type {
     ElementType,
     ReactNode,
 } from 'react';
-import {useMemo} from 'react';
 
 import styles from './Card.module.css';
 
@@ -13,6 +12,7 @@ type CardProps<T extends ElementType> = {
     className?: string,
     as?: T,
     variant?: 'default' | 'highlight',
+    compact?: boolean,
 } & Omit<ComponentPropsWithoutRef<T>, 'as' | 'className'>;
 
 const defaultElement = 'article';
@@ -22,10 +22,11 @@ export const Card = <T extends ElementType = typeof defaultElement>({
     className,
     as,
     variant = 'default',
+    compact = false,
     ...props
 }: CardProps<T>) => {
-    const Component = useMemo(() => as ?? defaultElement, [as]);
-    const isInteractive = useMemo(() => Boolean(props.onClick || props.href), [props.onClick, props.href]);
+    const Component = as ?? defaultElement;
+    const isInteractive = Boolean(props.onClick || props.href);
 
     return (
         <Component
@@ -35,6 +36,7 @@ export const Card = <T extends ElementType = typeof defaultElement>({
                 {
                     [styles.highlight]: variant === 'highlight',
                     [styles.interactive]: isInteractive,
+                    [styles.compact]: compact,
                 },
                 className,
             )}

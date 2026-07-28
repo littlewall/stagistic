@@ -1,0 +1,84 @@
+.pageSettingsGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-xl);
+    margin-top: var(--space-xl);
+
+    @media (max-width: 900px) {
+        grid-template-columns: 1fr;
+    }
+}
+
+.pageSchematic {
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xs);
+}
+
+.pageSchematicMiddle {
+    display: flex;
+    flex: 1;
+}
+
+.pageSchematicMargin {
+    flex-shrink: 0;
+    background: var(--color-preview-spacing-soft);
+}
+
+.pageSchematicMarginLeft {
+    width: var(--page-margin-left-percent, 15%);
+}
+
+.pageSchematicMarginRight {
+    width: var(--page-margin-right-percent, 10%);
+}
+
+.pageSchematicCenter {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.pageSchematicZone,
+.pageSchematicContent {
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    padding-inline: var(--space-lg);
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+    white-space: nowrap;
+}
+
+.pageSchematicMarginTop {
+    height: var(--page-margin-top-height, 16px);
+    background: color-mix(in oklch, var(--color-preview-spacing-soft) 40%, var(--color-surface));
+    border-bottom: 1px solid var(--color-border);
+}
+
+.pageSchematicMarginBottom {
+    height: var(--page-margin-bottom-height, 16px);
+    background: color-mix(in oklch, var(--color-preview-spacing-soft) 40%, var(--color-surface));
+    border-top: 1px solid var(--color-border);
+}
+
+.pageSchematicZone {
+    height: 22px;
+    background: var(--color-surface-raised);
+    border-bottom: 1px solid var(--color-border);
+
+    &:last-child {
+        border-top: 1px solid var(--color-border);
+        border-bottom: none;
+    }
+}
+
+.pageSchematicContent {
+    flex: 1;
+    min-height: 40px;
+    background: var(--color-surface);
+}

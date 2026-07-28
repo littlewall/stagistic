@@ -1,0 +1,86 @@
+.metadataForm {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(calc(140px * var(--size-scale)), 1fr);
+    gap: var(--space-lg);
+    margin-block-end: var(--space-2xl);
+}
+
+.slots {
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--color-border);
+}
+
+.slot {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-xl);
+    align-items: center;
+    min-height: calc(64px * var(--size-scale));
+    padding: var(--space-lg) 0;
+}
+
+.slotContent {
+    min-width: 0;
+}
+
+.slotLabel {
+    margin: 0;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+}
+
+.attachmentMeta {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+    min-width: 0;
+    margin-block-start: var(--space-xs);
+}
+
+.fileButton {
+    overflow: hidden;
+    justify-content: flex-start;
+    min-width: 0;
+    max-width: 100%;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fileSize,
+.empty {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.fileSize {
+    flex: 0 0 auto;
+}
+
+.empty {
+    margin: var(--space-xs) 0 0;
+}
+
+.actions {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+.hiddenInput {
+    display: none;
+}
+
+@media (max-width: 720px) {
+    .metadataForm,
+    .slot {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .actions {
+        justify-content: flex-start;
+    }
+}

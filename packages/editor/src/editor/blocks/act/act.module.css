@@ -1,0 +1,18 @@
+.act {
+    padding: var(--act-spacing-before, 0) var(--act-indent-right, 0) var(--act-spacing-after, 0) var(--act-indent-left, 0);
+    font-weight: var(--act-font-weight, 700);
+    font-style: var(--act-font-style, normal);
+    line-height: var(--act-line-height, inherit);
+    color: var(--color-block-scene);
+    text-align: var(--act-align, left);
+    text-decoration-line: var(--act-underline, underline);
+    text-transform: var(--act-casing, uppercase);
+    letter-spacing: var(--letter-spacing-sm);
+
+    &[data-act-prefix]::before {
+        pointer-events: none;
+        content: attr(data-act-prefix) ' ';
+        user-select: none;
+        color: inherit;
+    }
+}

@@ -5,17 +5,23 @@
     "type": "module",
     "main": "./src/index.ts",
     "scripts": {
-        "lint": "eslint . --ext ts,tsx"
+        "lint": "eslint .",
+        "typecheck": "tsc -b",
+        "test": "vp test run",
+        "test:watch": "vp test watch",
+        "test:browser": "vp test run -c vitest.browser.config.ts"
     },
     "dependencies": {
+        "@dnd-kit/abstract": "^0.3.0",
+        "@dnd-kit/dom": "^0.3.0",
+        "@dnd-kit/react": "^0.3.0",
         "@stagistic/app-core": "workspace:*",
-        "@stagistic/editor-core": "workspace:*",
-        "@stagistic/editor-ui": "workspace:*",
+        "@stagistic/editor": "workspace:*",
+        "@stagistic/export": "workspace:*",
+        "@stagistic/script": "workspace:*",
         "@stagistic/shared": "workspace:*",
         "@stagistic/ui": "workspace:*",
-        "@tauri-apps/api": "^2.0.0",
-        "@tauri-apps/plugin-dialog": "^2.0.0",
-        "@tauri-apps/plugin-fs": "^2.0.0"
+        "pdfjs-dist": "^5.4.394"
     },
     "peerDependencies": {
         "react": "^19.0.0",

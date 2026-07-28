@@ -1,0 +1,13 @@
+.shell {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    height: 100%;
+    min-height: 0;
+}
+
+.placeholder {
+    display: grid;
+    place-items: center;
+    height: 100%;
+    color: var(--color-text-muted);
+}

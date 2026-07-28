@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+
+:root {
+    --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
+
+    /* Coolors palette: https://coolors.co/7d84b2-d17b0f-f4f1ec-311e10-403233 */
+    --color-palette-lavender: oklch(.6251 .0699 277.48);
+    --color-palette-copper: oklch(.6622 .1479 62.72);
+    --color-palette-paper: oklch(.9591 .0074 80.72);
+    --color-palette-umber: oklch(.2557 .0382 56.44);
+    --color-palette-aubergine: oklch(.333 .0203 13.4);
+
+    /* Surfaces */
+    --color-bg: var(--color-palette-paper);
+    --color-surface: oklch(from var(--color-palette-paper) .985 calc(c * .7) h);
+    --color-surface-raised: oklch(from var(--color-palette-paper) .94 calc(c * 1.15) h);
+    --color-surface-tint: color-mix(in oklch, var(--color-palette-lavender) 18%, var(--color-palette-paper));
+
+    /* Text */
+    --color-text: var(--color-palette-umber);
+    --color-text-muted: color-mix(in oklch, var(--color-palette-aubergine) 72%, var(--color-palette-paper));
+
+    /* Borders */
+    --color-border: color-mix(in oklch, var(--color-palette-aubergine) 20%, var(--color-palette-paper));
+    --color-border-strong: color-mix(in oklch, var(--color-palette-aubergine) 38%, var(--color-palette-paper));
+
+    /* Accent */
+    --color-amber: var(--color-palette-copper);
+    --color-amber-hover: color-mix(in oklch, var(--color-palette-copper) 88%, var(--color-palette-paper));
+    --color-blue: var(--color-palette-lavender);
+
+    /* Dark stage sections */
+    --color-stage-bg: var(--color-palette-umber);
+    --color-stage-nav-bg: oklch(from var(--color-palette-umber) l c h / .94);
+    --color-stage-nav-text: var(--color-palette-paper);
+    --color-stage-text: var(--color-palette-paper);
+    --color-stage-text-muted: color-mix(in oklch, var(--color-palette-paper) 64%, var(--color-palette-lavender));
+    --color-stage-text-subtle: color-mix(in oklch, var(--color-stage-text-muted) 72%, transparent);
+    --color-stage-border: oklch(from var(--color-palette-lavender) l c h / .24);
+    --color-stage-btn-fg: var(--color-palette-paper);
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    line-height: 1.5;
+    color: var(--color-text);
+    background: var(--color-bg);
+}
+
+h1,
+h2,
+h3 {
+    font-weight: 500;
+    text-wrap: balance;
+    letter-spacing: -.025em;
+}
+
+p {
+    text-wrap: pretty;
+}
+
+::selection {
+    background: var(--color-surface-tint);
+}

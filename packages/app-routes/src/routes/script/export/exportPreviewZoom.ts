@@ -1,0 +1,1 @@
+export const DEFAULT_EXPORT_PREVIEW_ZOOM = 1.2;

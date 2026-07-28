@@ -1,0 +1,55 @@
+.overlay {
+    pointer-events: none;
+    position: absolute;
+    z-index: 6;
+}
+
+.panel {
+    pointer-events: auto;
+    overflow-y: auto;
+    display: grid;
+    min-width: calc(220px * var(--size-scale));
+    max-height: min(calc(320px * var(--size-scale)), 50vh);
+    padding: var(--space-sm);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-popover);
+}
+
+.item {
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: calc(14px * var(--size-scale)) 1fr;
+    gap: var(--space-md);
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    text-align: left;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: calc(9px * var(--size-scale));
+
+    &:hover {
+        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+    }
+
+    &.active {
+        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+    }
+}
+
+.itemIcon {
+    width: calc(14px * var(--size-scale));
+    height: calc(14px * var(--size-scale));
+    color: var(--color-text-muted);
+}
+
+.itemLabel {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    letter-spacing: var(--letter-spacing-sm);
+    white-space: nowrap;
+}

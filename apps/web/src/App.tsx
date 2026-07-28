@@ -1,43 +1,94 @@
-
 import {
-    HomeRoute,
+    ScriptRepositoryProvider,
+} from '@stagistic/app-core';
+import {
     GlobalModalsProvider,
+    HomeRoute,
     ScriptEditorRoute,
+    ScriptExportRoute,
     ScriptListRoute,
     ScriptSettingsRoute,
+    ScriptWorkspaceRoute,
 } from '@stagistic/app-routes';
-import {ToastProvider} from '@stagistic/ui';
+import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {useEffect, useState} from 'react';
 import {
-    Navigate, Route, Routes,
+    Navigate,
+    Route,
+    Routes,
 } from 'react-router-dom';
 
-import {LoaderOverlay} from '../../packages/ui/src/LoaderOverlay';
+import {prepareLocalDbWithProgress} from './db';
+import {scriptRepository} from './repo';
 
 const App = () => {
-    // Simulace globálního načítání (např. při mountu, refreshi, delším fetchi)
-    const [loading, setLoading] = useState(true);
+    const [bootReady, setBootReady] = useState(false);
+    const [bootProgress, setBootProgress] = useState(0);
+    const [bootStatus, setBootStatus] = useState('Preparing');
 
     useEffect(() => {
-        // Simulace načítání (např. fetchování dat, inicializace)
-        const timeout = setTimeout(() => setLoading(false), 1200); // 1.2s loader
+        let isActive = true;
 
-        return () => clearTimeout(timeout);
+        const boot = async () => {
+            if (document?.fonts) {
+                await document.fonts.ready;
+            }
+
+            if (!isActive) {
+                return;
+            }
+
+            await prepareLocalDbWithProgress(update => {
+                if (!isActive) {
+                    return;
+                }
+
+                setBootProgress(update.progress);
+                setBootStatus(update.label);
+            });
+
+            if (!isActive) {
+                return;
+            }
+
+            setBootReady(true);
+        };
+
+        void boot();
+
+        return () => {
+            isActive = false;
+        };
     }, []);
 
+    if (!bootReady) {
+        return (
+            <LoaderOverlay
+                label="Starting Stagistic"
+                messages={[bootStatus]}
+                progress={bootProgress}
+            />
+        );
+    }
+
     return (
-        <ToastProvider>
-            <GlobalModalsProvider>
-                {loading && <LoaderOverlay />}
-                <Routes>
-                    <Route path="/" element={<HomeRoute />} />
-                    <Route path="/script/list" element={<ScriptListRoute />} />
-                    <Route path="/script/:scriptId/editor" element={<ScriptEditorRoute />} />
-                    <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                </Routes>
-            </GlobalModalsProvider>
-        </ToastProvider>
+        <ScriptRepositoryProvider repository={scriptRepository}>
+            <ToastProvider>
+                <GlobalModalsProvider>
+                    <Routes>
+                        <Route path="/" element={<HomeRoute />} />
+                        <Route path="/script/list" element={<ScriptListRoute />} />
+                        <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
+                            <Route index element={<Navigate to="editor" replace />} />
+                            <Route path="editor" element={<ScriptEditorRoute />} />
+                            <Route path="export" element={<ScriptExportRoute />} />
+                        </Route>
+                        <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </GlobalModalsProvider>
+            </ToastProvider>
+        </ScriptRepositoryProvider>
     );
 };
 
