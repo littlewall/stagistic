@@ -174,6 +174,20 @@ const mountSettingsHarness = (surfaceCache: EditorSurfaceCache) => {
 afterEach(unmountAll);
 
 describe('editor surface reuse', () => {
+    it('exposes the script editor as a named multiline textbox with instructions', async () => {
+        mountEditor(createDocument());
+        await waitFor(() => editorDom() !== null);
+
+        const editor = editorDom();
+        const descriptionId = editor?.getAttribute('aria-describedby');
+        const description = descriptionId ? document.getElementById(descriptionId) : null;
+
+        expect(editor?.getAttribute('role')).toBe('textbox');
+        expect(editor?.getAttribute('aria-multiline')).toBe('true');
+        expect(editor?.getAttribute('aria-label')).toBe('Script editor');
+        expect(description?.textContent).toContain('keyboard shortcuts');
+    });
+
     it('keeps live settings mounted and rebuilds for block settings', async () => {
         const cache = createEditorSurfaceCache();
 

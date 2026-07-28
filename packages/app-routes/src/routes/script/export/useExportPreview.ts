@@ -28,12 +28,21 @@ export const useExportPreview = <TConfig >({
         script,
         settings,
         musicAttachments,
+        canExport,
         setArtifact,
         setStatus,
     } = useExportContext();
     const runRef = useRef(0);
 
     useEffect(() => {
+        if (!canExport) {
+            runRef.current += 1;
+            setArtifact(null);
+            setStatus('idle');
+
+            return;
+        }
+
         const runId = runRef.current + 1;
         const controller = new AbortController();
 
@@ -90,6 +99,7 @@ export const useExportPreview = <TConfig >({
         };
     }, [
         config,
+        canExport,
         derive,
         onArtifact,
         script,

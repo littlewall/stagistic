@@ -12,7 +12,7 @@
  * line start. Distinct from character tags: boxed, no fill, no border-radius.
  */
 .pill {
-    --music-active-border-color: rgba(125 145 255 / 80%);
+    --music-active-border-color: var(--color-selection-outline);
     --music-border-color: color-mix(in oklch, var(--color-text) 14%, transparent);
 
     user-select: none;

@@ -28,7 +28,11 @@
     &:focus {
         background: var(--color-surface);
         border-color: color-mix(in oklch, var(--color-text) 25%, var(--color-border));
-        outline: none;
+    }
+
+    &:focus-visible {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
     }
 }
 

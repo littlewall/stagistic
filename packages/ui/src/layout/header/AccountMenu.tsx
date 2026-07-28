@@ -1,10 +1,7 @@
 import {
     Button,
-    Menu,
-    MenuItem,
     MenuTrigger,
     Popover,
-    Separator,
 } from 'react-aria-components';
 
 import {UserCircleIcon} from '../../icons/ui';
@@ -15,13 +12,23 @@ import {ThemeModeToggle} from './ThemeModeToggle';
 type AccountMenuProps = {
     themeMode: AppThemeMode,
     onThemeChange: (mode: AppThemeMode) => void,
-    onAction?: (actionId: string) => void,
+};
+
+export const AccountMenuContent = ({
+    themeMode,
+    onThemeChange,
+}: AccountMenuProps) => {
+    return (
+        <ThemeModeToggle
+            themeMode={themeMode}
+            onChange={onThemeChange}
+        />
+    );
 };
 
 export const AccountMenu = ({
     themeMode,
     onThemeChange,
-    onAction,
 }: AccountMenuProps) => {
     return (
         <MenuTrigger>
@@ -29,30 +36,10 @@ export const AccountMenu = ({
                 <UserCircleIcon className={styles.icon} aria-hidden="true" />
             </Button>
             <Popover className={styles.menuPopover} placement="bottom end">
-                <div className={styles.accountPopoverContent}>
-                    <ThemeModeToggle
-                        themeMode={themeMode}
-                        onChange={onThemeChange}
-                    />
-                    <Menu
-                        className={styles.menu}
-                        onAction={key => {
-                            if (typeof key !== 'string') {
-                                return;
-                            }
-
-                            onAction?.(key);
-                        }}
-                    >
-                        <MenuItem className={styles.menuItem} id="profile">
-                            Account settings
-                        </MenuItem>
-                        <Separator className={styles.menuSeparator} />
-                        <MenuItem className={styles.menuItem} id="logout">
-                            Sign out
-                        </MenuItem>
-                    </Menu>
-                </div>
+                <AccountMenuContent
+                    themeMode={themeMode}
+                    onThemeChange={onThemeChange}
+                />
             </Popover>
         </MenuTrigger>
     );

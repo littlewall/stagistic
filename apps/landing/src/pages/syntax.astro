@@ -214,6 +214,24 @@ const markers = [
                     <!-- Content -->
                     <div class={s.content}>
 
+                        <details class={s.narrowToc}>
+                            <summary class={s.narrowTocSummary}>On this page</summary>
+                            <nav aria-label="On this page">
+                                <ul class={s.narrowTocList}>
+                                    {
+                                        toc.map((item) => (
+                                            <li>
+                                                <a href={`#${item.id}`} class={s.tocLink}>
+                                                    <span class={s.tocNum}>{item.n}</span>
+                                                    {item.title}
+                                                </a>
+                                            </li>
+                                        ))
+                                    }
+                                </ul>
+                            </nav>
+                        </details>
+
                         <header class={s.lede}>
                             <p class={s.eyebrow}>The format</p>
                             <h1 class={s.docTitle}>Stagistic syntax</h1>

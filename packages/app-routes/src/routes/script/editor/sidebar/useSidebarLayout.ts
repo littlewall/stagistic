@@ -7,7 +7,7 @@ import {
 import {SIDEBAR_LAYOUT_STORAGE_KEY} from '../../../../storageKeys';
 import type {SidebarPanelId} from './types';
 
-const OVERLAY_BREAKPOINT_QUERY = '(max-width: 1100px)';
+const OVERLAY_BREAKPOINT_QUERY = '(max-width: 1199px)';
 
 interface SidebarLayoutState {
     isLeftOpen: boolean,

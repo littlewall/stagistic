@@ -77,12 +77,16 @@
 
     &:focus {
         border-color: var(--color-surface-accent);
-        outline: none;
+    }
+
+    &:focus-visible {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
     }
 
     &::placeholder {
-        color: var(--color-text-muted);
-        opacity: .5;
+        color: var(--color-text-placeholder);
+        opacity: 1;
     }
 
     &.withDelete {

@@ -1,24 +1,28 @@
 ---
 name: Stagistic
-description: Cloud editor for theatre and musical scripts
+description: Open-source editor for theatre and musical scripts
 colors:
-  # Neutrals — light mode
+  # Product neutrals — light mode
   script-paper: "oklch(0.97 0.004 51)"
   working-surface: "oklch(0.985 0.004 51)"
   surface-raised: "oklch(0.952 0.004 51)"
-  surface-tint: "oklch(0.908 0.014 51)"
   manuscript: "oklch(0.155 0.014 51)"
   marginalia: "oklch(0.465 0.014 51)"
+  placeholder: "oklch(0.42 0.014 51)"
   folded-edge: "oklch(0.875 0.014 51)"
   folded-edge-strong: "oklch(0.79 0.014 51)"
-  # Accent / brand
-  working-amber: "oklch(0.762 0.098 53.1)"
-  note-blue: "oklch(0.58 0.1 239)"
+  # Semantic accents
+  copper: "oklch(0.6622 0.1479 62.72)"
+  lavender: "oklch(0.6251 0.0699 277.48)"
+  # Landing brand register
+  brand-paper: "oklch(0.9591 0.0074 80.72)"
+  brand-umber: "oklch(0.2557 0.0382 56.44)"
+  brand-aubergine: "oklch(0.333 0.0203 13.4)"
   # Status
   cleared-green: "oklch(0.48 0.097 165.2)"
   cut-red: "oklch(0.54 0.127 14.8)"
   warning-amber: "oklch(0.56 0.101 56.1)"
-  # Dark mode surfaces
+  # Product neutrals — dark mode
   dark-stage: "oklch(0.135 0.006 51)"
   backstage-flat: "oklch(0.17 0.006 51)"
   illuminated-script: "oklch(0.92 0.014 51)"
@@ -65,6 +69,7 @@ spacing:
   xl: "16px"
   2xl: "20px"
   3xl: "24px"
+  4xl: "28px"
   5xl: "32px"
   6xl: "40px"
   7xl: "48px"
@@ -74,29 +79,14 @@ components:
     textColor: "{colors.script-paper}"
     rounded: "{rounded.full}"
     padding: "8px 20px"
-  button-primary-hover:
-    backgroundColor: "oklch(0.22 0.014 51)"
-    textColor: "{colors.script-paper}"
-    rounded: "{rounded.full}"
-    padding: "8px 20px"
   button-secondary:
     backgroundColor: "{colors.working-surface}"
-    textColor: "{colors.manuscript}"
-    rounded: "{rounded.full}"
-    padding: "8px 20px"
-  button-secondary-hover:
-    backgroundColor: "{colors.surface-raised}"
     textColor: "{colors.manuscript}"
     rounded: "{rounded.full}"
     padding: "8px 20px"
   button-ghost:
     backgroundColor: "transparent"
     textColor: "{colors.marginalia}"
-    rounded: "{rounded.full}"
-    padding: "8px 20px"
-  button-ghost-hover:
-    backgroundColor: "{colors.surface-raised}"
-    textColor: "{colors.manuscript}"
     rounded: "{rounded.full}"
     padding: "8px 20px"
   button-danger:
@@ -108,17 +98,15 @@ components:
     backgroundColor: "{colors.working-surface}"
     rounded: "{rounded.lg}"
     padding: "20px"
-  card-highlight:
-    backgroundColor: "{colors.surface-raised}"
-    rounded: "{rounded.lg}"
-    padding: "20px"
   input:
     backgroundColor: "{colors.working-surface}"
     textColor: "{colors.manuscript}"
+    placeholderColor: "{colors.placeholder}"
+    focusColor: "{colors.lavender}"
     rounded: "{rounded.sm}"
     padding: "6px 10px"
   tag:
-    backgroundColor: "{colors.surface-tint}"
+    backgroundColor: "lavender mixed with working surface"
     textColor: "{colors.marginalia}"
     rounded: "{rounded.full}"
     padding: "2px 8px"
@@ -128,166 +116,225 @@ components:
 
 ## 1. Overview
 
-**Creative North Star: "The Dark Stage"**
+**Creative North Star: “The Dark Stage”**
 
-The theatre before the house lights come up. Attention belongs to the work on the page, not to the tool holding it. Stagistic's design system exists in the wings: disciplined, unobtrusive, and exactly where it needs to be when the playwright needs it. The interface never interrupts a line of dialogue or a blocking note to announce itself.
+The theatre before the house lights come up. Attention belongs to the work on the page, not to the tool holding it. Stagistic exists in the wings: disciplined, unobtrusive, and available exactly when the playwright needs it. The interface never interrupts a line of dialogue or a blocking note to announce itself.
 
-The palette begins from a warm near-neutral — manuscript ink, script paper, stage lamp amber — and operates in restraint. The density is app-appropriate: compact, information-rich, never cluttered. In dark mode the whole system reads as the dark stage: near-black warm surfaces, warm near-white text, the amber accent rising like a working light. In light mode, the same warmth reads as a freshly turned page. Both modes share identical structure; only the lightness levels shift.
+The product is compact and information-rich without becoming a dashboard. In dark mode, near-black warm surfaces form the stage and the script becomes the light. In light mode, the same structure reads as ink and paper. Both themes share semantics and layout; lightness and contrast change, meaning does not.
 
-This system explicitly rejects three things. Heavy SaaS dashboard patterns (Jira, Asana) — dense sidebars, data-table-as-default, enterprise navigation — belong to project management tools, not to a playwright's instrument. Gamified or visually loud writing apps pull attention from the script; nothing here earns its place through decoration. Loud marketing aesthetics — feature-grid carousels, hero-metric numbers, purple gradients — are forbidden on both the app and landing surfaces.
+Stagistic uses two related visual registers:
 
-**Key Characteristics:**
-- Warm neutrals rooted in a single amber-tinted base; no arbitrary cool gray injection
-- Two complementary typefaces: IBM Plex Sans Variable for the interface, Courier Prime for scripted labels and the script canvas
-- Flat surfaces at rest; structural shadows only on floating elements (popovers, modals)
-- Full light/dark theme parity — same tokens, same structure, only lightness levels change
-- A size-scale system (`--size-scale`) that lets users shift the entire UI density without layout reflow
-- OKLCH throughout, relative-color-syntax for derived tokens — the system never drifts out of hue cohesion
+- **Product register:** warm, hue-cohesive neutrals with restrained copper and lavender semantics. The script canvas remains dominant.
+- **Brand register:** the landing page may use paper, umber, and aubergine more expressively, while preserving the same copper/lavender meanings and editorial restraint.
 
-## 2. Colors: The Manuscript Palette
+The system rejects heavy SaaS dashboards, gamified writing interfaces, and generic loud marketing aesthetics. Decoration does not earn space by itself.
 
-A warm single-hue neutral system anchored at hue 51° — the warmth of ink, paper, and stage lamp. One accent color (amber) and one utility color (blue). Everything else is neutral.
+**Key characteristics**
 
-### Primary
+- The script is always the highest-priority surface.
+- Warm product neutrals derive from one base hue; no arbitrary cool gray injection.
+- Copper and lavender have distinct semantic jobs and are not interchangeable.
+- IBM Plex Sans Variable is the interface voice; Courier Prime is the script voice.
+- Surfaces are flat at rest; shadows communicate actual floating depth.
+- Light and dark themes preserve the same structure and semantic roles.
+- OKLCH and `color-mix(in oklch, ...)` keep derived states visually coherent.
+- `--size-scale` changes interface density without changing component relationships.
 
-- **Working Amber** (`oklch(0.762 0.098 53.1)`): The brand accent. Used exclusively for progress indicators, the animated loading bar, and the active selection highlight. Its rarity is the point — when it appears, it carries meaning.
+## 2. Color
 
-### Secondary
+### Product neutral system
 
-- **Note Blue** (`oklch(0.58 0.1 239)`): Utility only. Link text, focus rings, and interactive state indicators. Never decorative.
+The editor application uses a warm neutral system anchored by `--base-neutral: oklch(.461 .0257 51)`. Surfaces, text, and borders derive from that base through relative color syntax.
 
-### Neutral
+- **Script Paper** (`oklch(0.97 0.004 51)`): application background in light mode.
+- **Working Surface** (`oklch(0.985 0.004 51)`): panels, controls, cards, and dialogs.
+- **Surface Raised** (`oklch(0.952 0.004 51)`): hover and highlighted states.
+- **Manuscript** (`oklch(0.155 0.014 51)`): primary text in light mode.
+- **Marginalia** (`oklch(0.465 0.014 51)`): secondary text and quiet metadata.
+- **Placeholder** (`oklch(0.42 0.014 51)`): explicit placeholder text; never simulated by lowering opacity.
+- **Folded Edge** (`oklch(0.875 0.014 51)`): default borders and dividers.
+- **Folded Edge Strong** (`oklch(0.79 0.014 51)`): stronger structural separation.
+- **Dark Stage** (`oklch(0.135 0.006 51)`): application background in dark mode.
+- **Backstage Flat** (`oklch(0.17 0.006 51)`): primary dark-mode surface.
+- **Illuminated Script** (`oklch(0.92 0.014 51)`): primary dark-mode text.
 
-- **Script Paper** (`oklch(0.97 0.004 51)`): Application background in light mode. Warm off-white, not cream — the chroma is low enough (0.004) that it reads as a true working surface, not a tinted aesthetic choice.
-- **Working Surface** (`oklch(0.985 0.004 51)`): The primary panel surface — cards, editor canvas background, modal background. Slightly lighter than the page to create lift without shadow.
-- **Surface Raised** (`oklch(0.952 0.004 51)`): Hover states, selected rows, and highlighted cards. The visual step above Script Paper.
-- **Surface Tint** (`oklch(0.908 0.014 51)`): Tag backgrounds, selection highlights, and accent fills. Higher chroma than the neutrals; this is where the amber hue becomes perceptible.
-- **Manuscript** (`oklch(0.155 0.014 51)`): Primary text. Warm near-black. All body copy, headings, and labels default to this.
-- **Marginalia** (`oklch(0.465 0.014 51)`): Secondary text, placeholders, muted labels, timestamps. Same hue as Manuscript, lower lightness commitment.
-- **Folded Edge** (`oklch(0.875 0.014 51)`): Default border. Dividers, card outlines, input strokes. Warm and quiet.
-- **Folded Edge Strong** (`oklch(0.79 0.014 51)`): Stronger borders for emphasis or structural separation.
-- **Dark Stage** (`oklch(0.135 0.006 51)`): Application background in dark mode.
-- **Backstage Flat** (`oklch(0.17 0.006 51)`): Primary surface in dark mode.
-- **Illuminated Script** (`oklch(0.92 0.014 51)`): Primary text in dark mode.
+`--color-surface-accent` is not another neutral. It is a low-chroma lavender mix used for selection, active rows, tags, and utility hover states: 16% lavender in light mode and 26% in dark mode.
+
+### Semantic accents
+
+- **Copper** (`oklch(0.6622 0.1479 62.72)`): branded and high-signal actions, progress, and music-specific emphasis. In the product, ordinary primary buttons can remain ink-colored; copper is reserved for moments that benefit from a distinct working-light signal.
+- **Lavender** (`oklch(0.6251 0.0699 277.48)`): selection, keyboard focus, links, and utility states. Lavender may be mixed into a surface, but it is not a CTA or progress color.
+
+### Landing brand register
+
+The landing page uses a broader palette because it has a brand role rather than a long-session editing role.
+
+- **Brand Paper** (`oklch(0.9591 0.0074 80.72)`): primary light background.
+- **Brand Umber** (`oklch(0.2557 0.0382 56.44)`): primary brand text and dark stage sections.
+- **Brand Aubergine** (`oklch(0.333 0.0203 13.4)`): muted text, borders, and warm shadow derivation.
+- **Copper and Lavender:** retain their product semantics across the landing page.
+
+The brand register must not leak into the editor as decorative surface color. The product remains quieter than its landing page.
 
 ### Status
 
-- **Cleared Green** (`oklch(0.48 0.097 165.2)`): Success states, confirmed actions.
-- **Cut Red** (`oklch(0.54 0.127 14.8)`): Destructive actions, error states, danger buttons.
-- **Warning Amber** (`oklch(0.56 0.101 56.1)`): Warnings and cautionary notices.
+- **Cleared Green** (`oklch(0.48 0.097 165.2)`): success and confirmed actions.
+- **Cut Red** (`oklch(0.54 0.127 14.8)`): destructive actions and errors.
+- **Warning Amber** (`oklch(0.56 0.101 56.1)`): warnings and caution. It is a status token, not a substitute for Copper.
 
-### Named Rules
+### Named rules
 
-**The One Accent Rule.** Working Amber appears on ≤5% of any given screen. It carries meaning: something is in progress, something is selected, something matters. Diluting it with decorative use destroys its signal value.
+**The Two Semantic Accents Rule.** Copper means action, progress, or music. Lavender means selection, focus, or utility. Neither accent is general decoration, and the two must not be swapped because one looks better in isolation. A screen does not need to display both.
 
-**The Hue Cohesion Rule.** All neutrals are derived from `--base-neutral: oklch(.461 .0257 51)` via relative-color-syntax — never from independent gray values. A new surface color is always `oklch(from var(--base-neutral) <L> calc(c * <factor>) h)`. This prevents the warm/cool drift that makes surfaces feel inconsistent at scale.
+**The Hue Cohesion Rule.** Product neutrals derive from `--base-neutral` through relative color syntax. New product surfaces do not use independent gray values.
+
+**The Register Rule.** The editor uses product neutrals. The landing page may use Brand Paper, Umber, and Aubergine. Shared brand colors retain the same semantic meaning in both registers.
 
 ## 3. Typography: The Two-Voice System
 
-**Interface Font:** IBM Plex Sans Variable (weights 100–700, variable axis)
-**Script Font:** Courier Prime (400 regular, 700 bold)
+- **Interface font:** IBM Plex Sans Variable, weights 100–700
+- **Script font:** Courier Prime, regular/bold and italic variants
 
-**Character:** IBM Plex Sans is a humanist grotesque with technical precision — clinical enough to stay neutral in an editor, warm enough not to feel corporate. Courier Prime is a screen-optimized serif monospace: it carries the visual grammar of a script page (the look of Final Draft, the feel of a photocopied prompt book) without the rendering roughness of Courier New. Together they create a two-register system: the interface speaks sans, the script canvas speaks mono.
+IBM Plex Sans is precise without feeling corporate. Courier Prime carries the visual grammar of a theatrical script while rendering more cleanly than Courier New. The interface speaks sans; the script speaks mono.
 
 ### Hierarchy
 
-- **Display** (weight 500, clamp(1.75rem, 4vw, 2.25rem), line-height 1.1, letter-spacing -0.02em): Page titles, modal headlines. Rare; used only at section-leading scale.
-- **Headline** (weight 500, 1.375rem / 22px, line-height 1.2, letter-spacing -0.02em): Section headings, card titles, panel headers.
-- **Title** (weight 500, 1.125rem / 18px, line-height 1.2): Sub-section labels, dialog section titles.
-- **Body** (weight 400, 0.8125rem / 13px base, line-height 1.5): Default interface text. All readable prose, form labels, descriptions. Max line length 65ch in reading contexts.
-- **Label / Mono** (Courier Prime, weight 400, 0.6875rem / 11px, letter-spacing 0.08em): Tags, structural markers, shortcut indicators, script element names in the sidebar. The mono voice signals "this is about the script's structure."
+- **Display:** weight 500, `clamp(1.75rem, 4vw, 2.25rem)`, line-height 1.1, letter-spacing `-0.02em`. Page-leading or modal headlines; rare.
+- **Headline:** weight 500, 22px base, line-height 1.2, letter-spacing `-0.02em`. Section headings and panel headers.
+- **Title:** weight 500, 18px base, line-height 1.2. Subsections and dialog sections.
+- **Body:** weight 400, 13px base, line-height 1.5. Default interface text. Reading contexts use a maximum line length of 65ch.
+- **Label / Mono:** Courier Prime, weight 400, 11px base, letter-spacing `0.08em`. Structural markers, shortcut indicators, and script element names.
 
-### Named Rules
+### Named rules
 
-**The Two-Voice Rule.** Courier Prime is the script's voice; IBM Plex Sans is the tool's voice. They don't overlap. Body copy in the interface is always sans. Script-canvas text and structural labels (act, scene, character name, lyric) are always mono. Mixing the two on the same element is prohibited.
+**The Two-Voice Rule.** Courier Prime is the script’s voice; IBM Plex Sans is the tool’s voice. Interface prose stays sans. Script content and structural labels such as act, scene, character, and lyric may use mono. Do not mix both faces within one text element.
 
-**The Size-Scale Rule.** All font sizes, spacing values, and control heights are multiplied by `--size-scale` (default 1.08). New values must follow this pattern. Never define a fixed-pixel font size that bypasses the scale.
+**The Size-Scale Rule.** Spacing, radii, font sizes, and control heights derive from `--size-scale`. The root fallback is `1.08`; explicit modes currently set `.size-sm` to `1`, `.size-md` to `1.1`, and `.size-lg` to `1.2`. New fixed values must use the scale unless they are intentionally physical CSS pixels, such as a 1px border or 2px focus outline.
 
-## 4. Elevation: Structural Shadows Only
+## 4. Elevation
 
-Surfaces are flat at rest. Depth is conveyed through tonal layering (the three-step surface stack: Script Paper → Working Surface → Surface Raised) rather than ambient shadows. Shadows are reserved strictly for floating elements that break out of the document flow.
+Surfaces are flat at rest. Depth comes from the tonal stack—background, surface, raised surface—not from ambient card shadows. Shadows are reserved for elements that float above document flow and for the script canvas.
 
-The shadow vocabulary is warm-tinted: all shadows derive from `--base-shadow: oklch(.177 .0062 41.5)` — a dark amber near-black. This keeps shadows from reading as cold or arbitrary against the warm surface stack.
+All shadows derive from `--base-shadow: oklch(.177 .0062 41.5)`, keeping them warm against both product and brand surfaces.
 
-### Shadow Vocabulary
+- **Popover:** `0 10px 30px`, alpha .18 in light mode and .5 in dark mode.
+- **Panel:** `0 12px 32px`, alpha .08 in light mode and .3 in dark mode.
+- **Card:** `0 10px 20px`, alpha .08 in light mode and .24 in dark mode; interactive state only.
+- **Canvas:** `0 12px 30px`, alpha .06 in light mode and .22 in dark mode.
 
-- **Popover** (`0 10px 30px oklch(.177 .006 41.5 / .18)`): Dropdown menus, select panels, tooltips, command palettes. The deepest shadow in the system.
-- **Panel** (`0 12px 32px oklch(.177 .006 41.5 / .08)`): Floating sidebars and detached panels.
-- **Card** (`0 10px 20px oklch(.177 .006 41.5 / .08)`): Used on hover state only — not at rest. Cards are flat until they become interactive.
-- **Canvas** (`0 12px 30px oklch(.177 .006 41.5 / .06)`): The editor canvas elevated over the app background.
-
-In dark mode, all shadow alpha values increase significantly (popover: 0.5, panel/card: 0.24–0.3, canvas: 0.22) to remain visible against dark surfaces.
-
-### Named Rules
-
-**The Flat-By-Default Rule.** No element carries a shadow at rest unless it is a floating overlay. If it's in the document flow, it uses tonal layering. If it's floating (popover, modal, drawer), it uses shadow. There is no middle ground.
+**The Flat-by-Default Rule.** If an element participates in normal document flow, use tonal layering. If it floats—popover, modal, detached panel, canvas—use the matching shadow token.
 
 ## 5. Components
 
 ### Buttons
 
-Buttons use full pill radius (`9999px`) for all variants — this is the system's single opinionated shape decision. The pill signals interactivity without requiring heavy visual weight.
+The shared Button atom uses a full pill radius. Compact selectors, segmented controls, menu items, and editor-specific icon controls may use smaller semantic radii when their shape communicates grouping or placement.
 
-- **Primary:** Manuscript background (`oklch(0.155 0.014 51)`) with Script Paper text. Medium weight (500). Padding: 8px 20px. Hover: slightly lightened background (`oklch(0.22 0.014 51)`). Transition: 150ms ease.
-- **Secondary:** Working Surface background, Manuscript text, Folded Edge border (1px). Hover: Surface Raised background.
-- **Ghost:** Transparent background, Marginalia text. Hover: Surface Raised background, Manuscript text. Used for toolbar actions and icon buttons — the lowest visual weight.
-- **Outline:** Transparent background, Manuscript text, Folded Edge border. Hover: Surface Raised background. Functionally close to Secondary; use when the border should read as structural rather than incidental.
-- **Danger:** Transparent background, Cut Red text, partial Cut Red border (35% Cut Red mixed with Folded Edge). Hover: 10% Cut Red fill. Never a solid red background — destructive actions should look deliberate, not alarming.
+- **Primary:** Manuscript background with surface text. Used for the main action inside product flows.
+- **Secondary:** Working Surface background, Manuscript text, Folded Edge border.
+- **Ghost:** Transparent, Marginalia text; raised surface on hover. Used for low-emphasis toolbar and contextual actions.
+- **Outline:** Transparent with Folded Edge border. Use when the boundary is structurally useful.
+- **Danger:** Cut Red text and a restrained mixed border; never solid red by default.
+- **Brand CTA:** Copper may be used for the landing page’s principal action. This is not the default product button treatment.
 
-All variants share: `font-weight: 500`, `cursor: pointer`, `transition: background 150ms ease, border-color 150ms ease, color 150ms ease`. Disabled state: `opacity: 0.6`, `cursor: not-allowed`.
+Shared button behavior: weight 500, 150ms color/background/border transitions, `cursor: pointer`; disabled controls use opacity .6 and `cursor: not-allowed`.
 
 ### Cards
 
-Cards are structural containers for grouped content. Their shape is gently rounded (`--radius-lg` / 10px). Default padding: 20px. The compact variant (panel rows, list items): 12px vertical / 16px horizontal.
+Cards are structural containers, not the default page-building unit. They use `--radius-lg`, a 1px Folded Edge border, and no shadow at rest. Default padding is 20px; compact padding is 12px by 16px.
 
-- **Default:** Working Surface background, Folded Edge border (1px), no shadow at rest.
-- **Highlight:** Surface Raised background — used to draw attention to a selected or featured item.
-- **Interactive (hover/focus):** Border shifts toward Manuscript at 12% mix. Card shadow appears (not at rest). Focus ring via `box-shadow` in Note Blue.
+Interactive hover may strengthen the border and add the Card shadow. Prefer a named link or button within a card over making the entire container clickable. Never nest interactive descendants inside a clickable card, and never nest Card components.
 
-Nested cards are prohibited. A Card inside a Card is always a layout problem.
+### Inputs and form controls
 
-### Inputs / Text Fields
+- **Shape:** `--radius-sm` for text fields; control-specific radii for grouped selectors.
+- **Default:** Working Surface background, Folded Edge border, Manuscript text.
+- **Focus:** border shifts toward the lavender surface accent.
+- **Focus visible:** 2px solid `--color-focus-ring` with a 2px offset.
+- **Placeholder:** explicit `--color-text-placeholder` at full opacity and at least 4.5:1 contrast.
+- **Disabled:** opacity .4 and `cursor: not-allowed`.
 
-- **Shape:** Rounded small (`--radius-sm` / 6px)
-- **Default:** Working Surface background, Folded Edge border (1px), Manuscript text
-- **Focus:** Border shifts to Surface Tint (`--color-surface-accent`). No outline — the border change is the focus indicator.
-- **Placeholder:** Marginalia color at 60% opacity
-- **Disabled:** `opacity: 0.4`, `cursor: not-allowed`
-- **Sizes:** sm (6px × 10px padding, 12px font), md (12px all-around, 16px font — the script title input)
+### Tags
 
-### Tags / Chips
+Tags use Courier Prime, uppercase, 11px base size, `0.08em` letter-spacing, a lavender-mixed surface, Marginalia text, and a pill radius. They identify script structure and compact metadata; they are not decorative badges.
 
-Tags carry a mono voice: they use Courier Prime at 11px, uppercase, letter-spacing 0.08em. Surface Tint background, Marginalia text, pill radius. Used for element type labels (ACT, SCENE, CHARACTER) and metadata chips.
+### App layout
 
-### App Layout
+The standard app shell has a sticky header, a main working surface, and an optional 280px scaled sidebar. The sidebar is removed from the in-flow layout at 1024px and below. The editor itself may compose additional left or right panels, but the script canvas must remain the visual center.
 
-The editor shell is a three-zone layout: sticky header, main canvas, optional sidebar (280px scaled). At ≤1024px, the sidebar collapses. The main canvas has a right border (`--color-border`, 1px) as the only structural divider — no other horizontal rules between zones.
+### Signature component: Script Canvas
 
-### Signature Component: Script Canvas
+The script canvas uses Courier Prime and `--color-surface-paper` throughout. It represents the printable page, including user-configurable layout and pagination, and floats above its surroundings with the Canvas shadow. No adjacent surface should compete with it at the same contrast or visual weight.
 
-The editor canvas uses Courier Prime throughout. It presents as a white page elevated over the surface with Canvas shadow. Page margins are controlled by user-configurable page layout settings. The canvas is always the visual center of the screen: no competing surfaces at the same visual weight.
+## 6. Responsive Layout Contract
 
-## 6. Do's and Don'ts
+The alpha editor is desktop-first. Its supported minimum is a **1024 CSS px viewport**; this is a browser viewport measurement, not a device’s physical screen resolution.
 
-### Do:
+- **Wide editor (`≥1200px`):** editor sidebars participate in the in-flow layout.
+- **Compact desktop (`1024–1199px`):** editor sidebars become mutually exclusive overlay drawers so the script canvas keeps useful working width.
+- **Best effort (`900–1023px`):** primary actions and content remain reachable, but layout density and composition are not guaranteed.
+- **Below 900px:** not supported in the alpha release. A future mobile interface may use different navigation and editing behavior rather than compressing the desktop UI.
 
-- **Do** keep the script canvas as the highest-contrast, most visually prominent element on any editor screen. Everything else recedes around it.
-- **Do** use the OKLCH relative-color-syntax pattern for all new surface colors: `oklch(from var(--base-neutral) <L> calc(c * <factor>) h)`. Never introduce a new gray hex value that bypasses the hue system.
-- **Do** derive all spacing and font sizes through `--size-scale`. `margin: calc(12px * var(--size-scale))`, not `margin: 12px`.
-- **Do** use Courier Prime for any label, marker, or element that belongs to the theatrical script structure (act, scene, character, stage direction, lyric). The mono voice signals "this is part of the script."
-- **Do** keep Working Amber rare. It appears on progress bars and active selection highlights. If you're reaching for amber for decoration, use Surface Tint instead.
-- **Do** apply shadows only to floating elements that break the document flow (popovers, modals, drawers, the canvas). Everything else is flat.
-- **Do** support `prefers-reduced-motion`. Any transition or animation must have a zero-duration or fade-only fallback inside `@media (prefers-reduced-motion: reduce)`.
-- **Do** use `color-mix(in oklch, ...)` for all hover/state color derivations. Never hardcode a hover hex that isn't rooted in the token system.
+The 1024px support boundary is product-wide. Component breakpoints may be higher when their content has a larger intrinsic width; these are layout constraints, not separate device categories. Dropdowns and popovers must remain inside the viewport, prefer their normal placement, and flip when the available space cannot contain them.
 
-### Don't:
+**The CSS Viewport Rule.** Responsive decisions use CSS viewport dimensions. Do not infer the input mode or device class from a breakpoint.
 
-- **Don't** introduce heavy SaaS dashboard patterns: dense sidebars with 20+ items, data tables as the default view, enterprise navigation structures. Stagistic is a writing instrument.
-- **Don't** add gamified or colorful elements: badges, reward animations, colored progress streaks, visual busy-ness that pulls focus from the script.
-- **Don't** use loud marketing aesthetics on any surface: purple gradients, hero-metric number blocks, identical feature-card grids, buzzword-dense copy, or the "FEATURES / PROCESS / PRICING" eyebrow-on-every-section pattern. If it could appear on a generic AI SaaS landing page, it doesn't belong here.
-- **Don't** use `border-left` or `border-right` greater than 1px as a colored accent stripe on any component. If you need to call attention to a callout or alert, use a background tint or a full border — never a side stripe.
-- **Don't** use `background-clip: text` with a gradient for decorative text. All text is a single solid color. Emphasis is carried by weight and size.
-- **Don't** mix IBM Plex Sans and Courier Prime on the same text element. The two voices operate in separate registers. Courier Prime is for script structure; IBM Plex Sans is for the interface.
-- **Don't** add nested cards (a Card component inside another Card). Restructure the layout instead.
-- **Don't** introduce a new gray color that doesn't derive from `--base-neutral` hue 51°. Cool gray injections break the warm cohesion.
-- **Don't** use `z-index` values above 20 in component CSS. The semantic z-index scale is: sticky (10) → dropdown/popover (12) → modal backdrop (15) → modal (16) → toast (18) → tooltip (19).
+**The Canvas Preservation Rule.** Compact behavior protects the script canvas before compressing editor controls or allowing multiple panels to compete with it.
+
+## 7. Content Contract
+
+Stagistic uses concise English UI copy until a complete localization layer exists. Do not mix locales within one product surface or introduce one-off translated strings.
+
+- Navigation, buttons, field labels, headings, and instructional copy use sentence case: `Title page`, `Page layout`, `Visual preferences`.
+- Uppercase belongs to the script’s structural voice: `ACT`, `SCENE`, and character cues. Ordinary instructions use common nouns: `character block`, `scene`, `stage direction`.
+- Product copy is direct and professional. Avoid marketing language, celebratory filler, and redundant explanation inside the editor.
+- Empty states describe the absence and provide the next useful action. In split views, the list states what is missing while the detail pane explains what the user can do; do not repeat one sentence in both panes.
+- Search-empty copy distinguishes an empty collection from zero matching results.
+- Production primary flows do not contain dead actions or `Coming soon` placeholders.
+
+**The One-Locale Rule.** Every released product surface uses one complete locale. English is the only product locale until localization is implemented as a system.
+
+**The Next-Action Rule.** An empty state earns its space by helping the user continue, not merely by restating that no data exists.
+
+## 8. Accessibility Contract
+
+Accessibility states are part of the visual system, not browser cleanup.
+
+- Every keyboard-interactive control has a visible `:focus-visible` treatment.
+- The default contract is `var(--focus-ring)`: 2px solid lavender with a 2px offset.
+- Never remove an outline without an equally visible replacement.
+- Placeholder text uses an explicit token at full opacity and maintains at least 4.5:1 contrast.
+- Selection uses the lavender surface accent and remains distinguishable in both themes.
+- Color does not carry status or selection meaning alone; structure, text, or state attributes provide the same information.
+- Motion respects `prefers-reduced-motion`; continuous movement becomes static or fade-only.
+- Interactive containers must not contain nested buttons or links.
+
+## 9. Do and Don’t
+
+### Do
+
+- Keep the script canvas the most prominent element in the editor.
+- Derive product neutrals from `--base-neutral` with OKLCH relative color syntax.
+- Use Copper for branded/high-signal action, progress, and music-specific emphasis.
+- Use Lavender for selection, focus, links, and utility states.
+- Use `--size-scale` for spacing, typography, radii, and control dimensions.
+- Use Courier Prime when the interface is speaking in the script’s structural voice.
+- Use shadows only for true elevation.
+- Use `color-mix(in oklch, ...)` for derived hover and state colors.
+- Preserve the quieter product register and the more expressive editorial landing register.
+- Write UI copy in concise English sentence case; reserve uppercase for structural script labels.
+
+### Don’t
+
+- Don’t swap Copper and Lavender or use either as arbitrary decoration.
+- Don’t introduce product grays that bypass the hue-cohesive neutral system.
+- Don’t bring Paper, Umber, or Aubergine brand surfaces into the editor without a defined semantic role.
+- Don’t introduce heavy SaaS navigation, default data tables, gamification, or visual reward mechanics.
+- Don’t use loud marketing conventions such as purple gradients, hero metrics, feature-card grids, or buzzword-heavy copy.
+- Don’t use thick colored side borders as accent stripes; prefer a full border or a surface tint.
+- Don’t use gradient-clipped decorative text.
+- Don’t mix IBM Plex Sans and Courier Prime within one text element.
+- Don’t nest cards or interactive controls inside a clickable container.
+- Don’t use placeholder opacity to manufacture a muted color.
+- Don’t remove keyboard focus indicators.
+- Don’t use component `z-index` values above 20. The shared order is sticky (10), dropdown/popover (12), modal backdrop (15), modal (16), toast (18), tooltip (19), and exceptional editor overlays (20).

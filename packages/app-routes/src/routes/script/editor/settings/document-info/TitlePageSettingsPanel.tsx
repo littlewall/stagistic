@@ -94,7 +94,7 @@ export const TitlePageSettingsPanel = ({
 
     return (
         <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Title Page</h3>
+            <h3 className={panelStyles.panelTitle}>Title page</h3>
             <div className={styles.section}>
                 <div className={styles.field}>
                     <label className={styles.label} htmlFor="tp-title">Title</label>

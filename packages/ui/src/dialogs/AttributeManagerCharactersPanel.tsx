@@ -61,10 +61,16 @@ const WORKSPACES: Array<{id: WorkspaceId, label: string}> = [
     {id: 'cast', label: 'Cast'},
 ];
 
-const EMPTY_LABELS: Record<WorkspaceId, string> = {
-    characters: 'No confirmed characters',
-    groups: 'No groups yet',
-    cast: 'No cast assignments yet',
+const EMPTY_LIST_LABELS: Record<WorkspaceId, string> = {
+    characters: 'No characters yet.',
+    groups: 'No groups yet.',
+    cast: 'No cast assignments yet.',
+};
+
+const EMPTY_DETAIL_LABELS: Record<WorkspaceId, string> = {
+    characters: 'Create a character to edit details here.',
+    groups: 'Group details will appear here.',
+    cast: 'Cast assignment details will appear here.',
 };
 
 export const AttributeManagerCharactersPanel = ({
@@ -175,8 +181,10 @@ export const AttributeManagerCharactersPanel = ({
     };
 
     const listStatus = isLoading && activeWorkspaceId === 'characters'
-        ? 'Loading characters...'
-        : EMPTY_LABELS[activeWorkspaceId];
+        ? 'Loading characters…'
+        : normalizedSearchQuery && activeWorkspaceId === 'characters'
+            ? 'No characters match your search.'
+            : EMPTY_LIST_LABELS[activeWorkspaceId];
     const hasSelectedCharacter = activeWorkspaceId === 'characters'
         && selectedCharacter
         && selectedConfirmedCharacter;
@@ -281,7 +289,7 @@ export const AttributeManagerCharactersPanel = ({
                         />
                     ) : (
                         <div className={styles.emptyDetail}>
-                            <p>{EMPTY_LABELS[activeWorkspaceId]}</p>
+                            <p>{EMPTY_DETAIL_LABELS[activeWorkspaceId]}</p>
                         </div>
                     )}
                 </section>

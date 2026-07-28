@@ -9,12 +9,6 @@
     --font-family-sans: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-family-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
 
-    /* ── Media query variables ─────────────────────────────────── */
-    /* stylelint-disable-next-line csstree/validator */
-    --media-tablet: (max-width: 1024px);
-    /* stylelint-disable-next-line csstree/validator */
-    --media-mobile: (max-width: 900px);
-
     /* ── Size scale ────────────────────────────────────────────── */
     /* Default is medium; override with .size-sm or .size-lg on body/root. */
     --size-scale: 1.08;
@@ -104,6 +98,7 @@
     --L-highlight: .952;
     --L-text: .155;
     --L-text-muted: .465;
+    --L-text-placeholder: .42;
     --L-border: .875;
 
     --L-success: .48;
@@ -132,6 +127,7 @@
     /* Text */
     --color-text: oklch(from var(--base-neutral) var(--L-text) calc(c * var(--C-block)) h);
     --color-text-muted: oklch(from var(--base-neutral) var(--L-text-muted) calc(c * var(--C-block)) h);
+    --color-text-placeholder: oklch(from var(--base-neutral) var(--L-text-placeholder) calc(c * var(--C-block)) h);
     --color-text-link: oklch(from var(--base-blue) .58 c h);
     --color-accent: var(--base-amber);
 
@@ -143,6 +139,10 @@
 
     /* Focus */
     --color-focus-ring: oklch(from var(--base-blue) .58 c h);
+    --color-selection-outline: color-mix(in oklch, var(--color-focus-ring) 80%, transparent);
+    --focus-ring-width: 2px;
+    --focus-ring-offset: 2px;
+    --focus-ring: var(--focus-ring-width) solid var(--color-focus-ring);
 
     /* Overlay */
     --color-overlay-scrim: oklch(from var(--base-shadow) .13 c h / var(--A-backdrop));
@@ -230,6 +230,7 @@
 
     --L-text: .92;
     --L-text-muted: .73;
+    --L-text-placeholder: .76;
 
     --L-border: .36;
 

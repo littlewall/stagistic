@@ -5,53 +5,57 @@ import s from './index.module.css';
 
 const features = [
     {
-        label: 'Stage directions',
+        label: 'Theatre-native writing',
         description:
-            'A first-class element, not an afterthought. Blocking, lighting cues, and set descriptions have dedicated formatting that keeps them visually distinct from dialogue.',
+            'Dedicated blocks for acts, scene headings, character cues, dialogue, stage directions, lyrics, and notes. Every part of the script keeps its own formatting and behaviour.',
     },
     {
-        label: 'Musical numbers',
+        label: 'Acts and scenes that stay connected',
         description:
-            'Tag songs and sequences directly within the script. See how they sit in the show\'s structure, track reprise relationships, and understand the pacing of your score alongside your story.',
+            'A live outline keeps the structure visible as you write. Jump directly to any scene, reorder scenes, and group them into acts instead of forcing your play into a screenplay-shaped structure.',
     },
     {
-        label: 'Lyric formatting',
+        label: 'Characters throughout the script',
         description:
-            'Lyrics have their own formatting mode, distinct from spoken dialogue and stage directions. Write verses, choruses, and bridges with the clarity a musical score demands.',
+            'Build a character catalogue directly from your script. Assign colours, highlight appearances across the document, rename characters consistently, and tag them inside stage directions.',
     },
     {
-        label: 'Character tracking',
+        label: 'Ready for musicals',
         description:
-            'Every character tracked across the entire script. See who appears in each scene, how much stage time each role has, and find any character\'s lines in seconds.',
+            'Write lyrics as their own block type, manage songs and instrumentals, place music cues and out markers directly in the script, and attach score PDFs to individual musical numbers.',
     },
     {
-        label: 'Dramatis personae',
+        label: 'A writing flow you can configure',
         description:
-            'The cast list writes itself. As you write, Stagistic builds a live dramatis personae with descriptions, first appearance, and scene count, ready to include at the front of any draft.',
+            'Configure page format, title page, headers and footers, and each block\'s indentation, alignment, emphasis, and casing. Set keyboard shortcuts and decide which block follows next, so the editor matches the way you write.',
     },
     {
-        label: 'Script export',
+        label: 'Advanced PDF export',
         description:
-            'Export your script as a clean, properly formatted PDF, laid out to standard theatrical conventions. Ready to hand to a director, dramaturg, or cast.',
+            'Preview and export professionally formatted PDFs, start scenes on new or odd-numbered pages, generate character-specific versions, or create an integrated-score export with the corresponding sheet music inserted at the right points.',
     },
 ];
 
 const faqs = [
     {
-        q: 'Is Stagistic Editor really free?',
-        a: 'Yes. Writing, structuring, and exporting are free, now and in the future. No subscription, no trial, no paywall. Open source too. Some production management features may become paid later, but the core writing tool will not.',
+        q: 'Is Stagistic Editor free?',
+        a: 'Yes. Stagistic Editor is free now and will remain free. There is no subscription, trial, or paywall for writing, structuring, or exporting your scripts. Other Stagistic production tools may be paid in the future, but the editor will not be.',
+    },
+    {
+        q: 'Do I need an account?',
+        a: 'No. You can open the editor and start writing without signing up. Your scripts are stored locally in your browser by default.',
     },
     {
         q: 'Is this really built for theatre, not screenwriting?',
-        a: 'Yes, and the distinction matters. Theatrical scripts have acts and scenes structured differently from screenplays. Stage directions serve directors differently. Musical numbers, lyrics, and vocal notation don\'t exist in screenwriting at all. Stagistic is built around how theatre actually works, not adapted from a film tool.',
+        a: 'Yes. Acts, scenes, stage directions, character cues, lyrics, and music are part of the document model rather than formatting conventions layered onto a screenplay editor.',
     },
     {
         q: 'Does it work for both plays and musicals?',
-        a: 'Yes. For plays, you get all the structural tools: acts, scenes, stage directions, character tracking, dramatis personae. For musicals, those are joined by musical number sequencing, lyric formatting, reprise tracking, and running time estimates that factor in your score. You can write a one-act play or a full three-act musical in the same editor.',
+        a: 'Yes. Plays get theatre-specific structure, characters, stage directions, and flexible PDF export. Musicals add dedicated lyric blocks, music cues and outs, song and instrumental catalogues, score PDFs, and integrated-score export.',
     },
     {
         q: 'Where is my data stored?',
-        a: 'Locally, by default. Your script lives on your machine. The browser version stores data in your browser. There\'s no cloud sync unless you opt into it. No account is required to write.',
+        a: 'Locally in your browser. You can download a .stagistic backup and import it again whenever you need it. Cloud sync is not part of the first alpha; it is planned for a later release and will be free.',
     },
     {
         q: 'Can I use it for a commercial production?',
@@ -59,11 +63,11 @@ const faqs = [
     },
     {
         q: 'Is Stagistic Editor open source?',
-        a: 'Yes. The editor is open source. You can self-host it, inspect the code, and contribute. The repository will be linked publicly once the alpha stabilises.',
+        a: 'Yes. The landing page and web editor are available on GitHub under the MIT licence. Issues, discussions, and pull requests are welcome.',
     },
     {
         q: 'What platforms does it run on?',
-        a: 'The editor runs in any modern browser without installation. A native macOS app is available in alpha. Windows and Linux desktop builds are on the roadmap.',
+        a: 'The editor runs in any modern browser without installation. Desktop and mobile apps are planned for later phases.',
     },
     {
         q: 'Is this stable enough to use for real work?',
@@ -125,7 +129,9 @@ const faqs = [
                         </p>
 
                         <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD2)}>
-                            <a href="#" class={s.btnPrimary}>Open in browser</a>
+                            <a href="https://editor.stagistic.app" class={s.btnPrimary}>
+                                Open in browser
+                            </a>
                         </div>
                     </div>
 
@@ -246,13 +252,12 @@ const faqs = [
                             The editor is free.<br />Always.
                         </h2>
                         <p class={s.alphaText}>
-                            Writing in Stagistic is free: locally, in the
-                            browser, or self-hosted. No account, no paywall.
-                            Open source.
+                            Writing in Stagistic is free in your browser, with
+                            no account or paywall. The editor will remain free.
                         </p>
                         <p class={s.alphaTextSecondary}>
-                            Some production features may be paid in the future.
-                            The editor never will be.
+                            The source is available on GitHub. Future production
+                            tools may be paid; the editor will not be.
                         </p>
                     </div>
                     <div class={s.alphaCard}>
@@ -267,11 +272,13 @@ const faqs = [
                             </div>
                             <div class={s.alphaCheckItem}>
                                 <span class={s.alphaCheckMark}>✓</span>
-                                <span>Browser &amp; macOS app</span>
+                                <span>Stored locally by default</span>
                             </div>
                         </div>
                         <div class={s.alphaCtas}>
-                            <a href="#" class={s.btnPrimary}>Open in browser</a>
+                            <a href="https://editor.stagistic.app" class={s.btnPrimary}>
+                                Open in browser
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -286,6 +293,12 @@ const faqs = [
                     </div>
                     <div class={s.footerRight}>
                         <a href="/syntax" class={s.footerLink}>Syntax</a>
+                        <a
+                            href="https://github.com/littlewall/stagistic"
+                            class={s.footerLink}
+                        >
+                            GitHub
+                        </a>
                         <a href="mailto:hello@stagistic.app" class={s.footerLink}>
                             hello@stagistic.app
                         </a>

@@ -58,7 +58,7 @@ const ToastItem = ({toast}: {toast: QueuedToast<ToastContent>}) => {
             <Button
                 slot="close"
                 className={styles.closeButton}
-                aria-label="Zavřít oznámení"
+                aria-label="Dismiss notification"
             >
                 <CloseIcon />
             </Button>

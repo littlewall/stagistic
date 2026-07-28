@@ -18,7 +18,11 @@
 
     &:focus {
         border-color: var(--color-surface-accent);
-        outline: none;
+    }
+
+    &:focus-visible {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
     }
 
     &:disabled {
@@ -27,8 +31,8 @@
     }
 
     &::placeholder {
-        color: var(--color-ink-subtle, var(--color-text-muted));
-        opacity: .6;
+        color: var(--color-text-placeholder);
+        opacity: 1;
     }
 
     &[data-size = 'sm'] {
