@@ -35,9 +35,9 @@
     --color-stage-nav-bg: oklch(from var(--color-palette-umber) l c h / .94);
     --color-stage-nav-text: var(--color-palette-paper);
     --color-stage-text: var(--color-palette-paper);
-    --color-stage-text-muted: color-mix(in oklch, var(--color-palette-paper) 64%, var(--color-palette-lavender));
+    --color-stage-text-muted: color-mix(in oklch, var(--color-palette-paper) 82%, var(--color-palette-umber));
     --color-stage-text-subtle: color-mix(in oklch, var(--color-stage-text-muted) 72%, transparent);
-    --color-stage-border: oklch(from var(--color-palette-lavender) l c h / .24);
+    --color-stage-border: oklch(from var(--color-palette-paper) l c h / .18);
     --color-stage-btn-fg: var(--color-palette-paper);
 }
 

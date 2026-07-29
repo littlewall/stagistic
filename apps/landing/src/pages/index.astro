@@ -8,31 +8,67 @@ const features = [
         label: 'Theatre-native writing',
         description:
             'Dedicated blocks for acts, scene headings, character cues, dialogue, stage directions, lyrics, and notes. Every part of the script keeps its own formatting and behaviour.',
+        imageSrc: '/editor-preview.png',
+        imageAlt: 'A formatted theatre script in the Stagistic editor',
+        imageFit: 'cover',
+        imagePosition: '50% 38%',
+        imageScale: '1.22',
+        shape: 'one',
     },
     {
         label: 'Acts and scenes that stay connected',
         description:
             'A live outline keeps the structure visible as you write. Jump directly to any scene, reorder scenes, and group them into acts instead of forcing your play into a screenplay-shaped structure.',
+        imageSrc: '/editor-preview.png',
+        imageAlt: 'The scene outline beside a script in the Stagistic editor',
+        imageFit: 'cover',
+        imagePosition: 'left 18%',
+        imageScale: '1.42',
+        shape: 'two',
     },
     {
         label: 'Characters throughout the script',
         description:
             'Build a character catalogue directly from your script. Assign colours, highlight appearances across the document, rename characters consistently, and tag them inside stage directions.',
+        imageSrc: '/editor-preview.png',
+        imageAlt: 'The character catalogue in the Stagistic editor',
+        imageFit: 'cover',
+        imagePosition: 'right 34%',
+        imageScale: '1.44',
+        shape: 'three',
     },
     {
         label: 'Ready for musicals',
         description:
             'Write lyrics as their own block type, manage songs and instrumentals, place music cues and out markers directly in the script, and attach score PDFs to individual musical numbers.',
+        imageSrc: '/editor-preview.png',
+        imageAlt: 'Lyrics formatted inside a musical script in Stagistic',
+        imageFit: 'cover',
+        imagePosition: '52% 70%',
+        imageScale: '1.32',
+        shape: 'one',
     },
     {
         label: 'A writing flow you can configure',
         description:
             'Configure page format, title page, headers and footers, and each block\'s indentation, alignment, emphasis, and casing. Set keyboard shortcuts and decide which block follows next, so the editor matches the way you write.',
+        imageSrc: '/editor-preview.png',
+        imageAlt: 'Formatting controls above a script in the Stagistic editor',
+        imageFit: 'cover',
+        imagePosition: '50% top',
+        imageScale: '1.28',
+        shape: 'three',
     },
     {
         label: 'Advanced PDF export',
         description:
             'Preview and export professionally formatted PDFs, start scenes on new or odd-numbered pages, generate character-specific versions, or create an integrated-score export with the corresponding sheet music inserted at the right points.',
+        imageSrc: '/editor-preview.png',
+        imageAlt: 'A print-ready theatre script displayed in Stagistic',
+        imageFit: 'cover',
+        imagePosition: '50% 48%',
+        imageScale: '1.24',
+        shape: 'two',
     },
 ];
 
@@ -136,42 +172,63 @@ const faqs = [
                     </div>
 
                     <div class={clsx(s.heroScript, s.fadeUp, s.fadeUpD3)}>
-                        <div class={s.scriptExcerpt}>
+                        <div
+                            class={s.scriptExcerpt}
+                            aria-label="Preview of the Stagistic editor"
+                        >
                             <div class={s.scriptExcerptBar}>
-                                <span>Act Two — Scene One</span>
-                                <span>stagistic editor</span>
+                                <span class={s.windowControls} aria-hidden="true">
+                                    <span></span>
+                                    <span></span>
+                                    <span></span>
+                                </span>
+                                <span class={s.previewDocumentTitle}>
+                                    The Glass Room — Draft 3
+                                </span>
+                                <span class={s.previewStatus}>Saved locally</span>
                             </div>
-                            <div class={s.scriptBody}>
-                                <p class={s.sAct}>ACT TWO, SCENE ONE</p>
-
-                                <p class={s.sDir}>
-                                    An empty rehearsal room. Piano, lid open.
-                                    MARA stands at the window. JONAS enters.
-                                </p>
-
-                                <p class={s.sChar}>JONAS</p>
-                                <div class={s.sSpeech}>
-                                    <p>I know you're not ready.</p>
+                            <div class={s.previewWorkspace}>
+                                <div class={s.previewOutline} aria-hidden="true">
+                                    <span class={s.previewOutlineLabel}>Scenes</span>
+                                    <span>Act 1, Scene 1</span>
+                                    <span>Act 1, Scene 2</span>
+                                    <span class={s.previewOutlineActive}>
+                                        Act 2, Scene 1
+                                    </span>
+                                    <span>Act 2, Scene 2</span>
                                 </div>
+                                <div class={s.scriptBody}>
+                                    <p class={s.sAct}>ACT TWO, SCENE ONE</p>
 
-                                <p class={s.sDir}>MARA doesn't turn around.</p>
+                                    <p class={s.sDir}>
+                                        An empty rehearsal room. Piano, lid open.
+                                        MARA stands at the window. JONAS enters.
+                                    </p>
 
-                                <p class={s.sChar}>MARA</p>
-                                <div class={s.sSpeech}>
-                                    <p>I'm always ready.</p>
-                                    <p class={s.sParen}>(a beat)</p>
-                                    <p>That's the problem.</p>
+                                    <p class={s.sChar}>JONAS</p>
+                                    <div class={s.sSpeech}>
+                                        <p>I know you're not ready.</p>
+                                    </div>
+
+                                    <p class={s.sDir}>MARA doesn't turn around.</p>
+
+                                    <p class={s.sChar}>MARA</p>
+                                    <div class={s.sSpeech}>
+                                        <p>I'm always ready.</p>
+                                        <p class={s.sParen}>(a beat)</p>
+                                        <p>That's the problem.</p>
+                                    </div>
+
+                                    <p class={s.sChar}>JONAS</p>
+                                    <div class={s.sSpeech}>
+                                        <p>The director wants the number</p>
+                                        <p>from the top of Act One.</p>
+                                    </div>
+
+                                    <p class={s.sMusic}>
+                                        Musical number: FIRST LIGHT (reprise, bar 23)
+                                    </p>
                                 </div>
-
-                                <p class={s.sChar}>JONAS</p>
-                                <div class={s.sSpeech}>
-                                    <p>The director wants the number</p>
-                                    <p>from the top of Act One.</p>
-                                </div>
-
-                                <p class={s.sMusic}>
-                                    Musical number: FIRST LIGHT (reprise, bar 23)
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -198,6 +255,12 @@ const faqs = [
                 </div>
             </section>
 
+            <div
+                class={s.sectionDivider}
+                data-section-divider
+                aria-hidden="true"
+            ></div>
+
             <!-- Features -->
             <section class={s.features} id="features">
                 <div class={clsx(s.featuresInner, s.reveal)} data-reveal>
@@ -205,15 +268,41 @@ const faqs = [
                     <div class={s.featuresList}>
                         {
                             features.map((f) => (
-                                <div class={s.featureItem}>
-                                    <span class={s.featureLabel}>{f.label}</span>
-                                    <p class={s.featureDesc}>{f.description}</p>
-                                </div>
+                                <article class={s.featureItem}>
+                                    <div class={s.featureCopy}>
+                                        <h3 class={s.featureLabel}>{f.label}</h3>
+                                        <p class={s.featureDesc}>{f.description}</p>
+                                    </div>
+                                    <div
+                                        class={s.featureMedia}
+                                        data-feature-media
+                                        data-shape={f.shape}
+                                    >
+                                        <div class={s.featureMediaFrame}>
+                                            <img
+                                                data-feature-image
+                                                src={f.imageSrc}
+                                                alt={f.imageAlt}
+                                                class={s.featureImage}
+                                                data-fit={f.imageFit}
+                                                loading="lazy"
+                                                decoding="async"
+                                                style={`--feature-image-position: ${f.imagePosition}; --feature-image-scale: ${f.imageScale};`}
+                                            />
+                                        </div>
+                                    </div>
+                                </article>
                             ))
                         }
                     </div>
                 </div>
             </section>
+
+            <div
+                class={s.sectionDivider}
+                data-section-divider
+                aria-hidden="true"
+            ></div>
 
             <!-- FAQ -->
             <section class={s.faq} id="faq">
@@ -280,8 +369,9 @@ const faqs = [
             <footer class={s.footer}>
                 <div class={s.footerInner}>
                     <div class={s.footerLeft}>
-                        <span class={s.footerLogo}>Stagistic</span>
-                        <span class={s.footerTagline}>Building tools for theatre.</span>
+                        <span class={s.footerLogo}>
+                            © Stagistic • Made with 💛 in Prague
+                        </span>
                     </div>
                     <div class={s.footerRight}>
                         <a href="/syntax" class={s.footerLink}>Syntax</a>
