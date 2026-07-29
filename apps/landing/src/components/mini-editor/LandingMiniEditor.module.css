@@ -1,58 +1,18 @@
-.fallback {
+.content {
     height: 100%;
-    padding: 1rem .75rem 1.25rem 2.5rem;
-    font-family: var(--font-mono);
-    font-size: 1rem;
-    line-height: 1.2;
-    color: var(--color-palette-umber);
-    background: oklch(from var(--color-palette-paper) .985 calc(c * .7) h);
+    opacity: 0;
+    animation: miniEditorContentIn .34s .66s ease-out both;
 }
 
-.fallbackBlock {
-    min-height: 1.2em;
+@keyframes miniEditorContentIn {
+    to {
+        opacity: 1;
+    }
 }
 
-.scene {
-    padding-top: 2em;
-    font-weight: 700;
-    text-transform: uppercase;
-}
-
-.stageDirection {
-    padding-top: 1em;
-}
-
-.character {
-    padding-top: 1em;
-    padding-right: 3ch;
-    padding-left: 30ch;
-    font-weight: 700;
-}
-
-.aside {
-    padding-right: 21ch;
-    padding-left: 16ch;
-    font-style: italic;
-}
-
-.dialogue {
-    padding-right: 3ch;
-    padding-left: 10ch;
-}
-
-.eli {
-    text-decoration: underline solid oklch(.82 .18 120) .14em;
-    text-underline-offset: .16em;
-}
-
-.mara {
-    text-decoration: underline solid oklch(.78 .18 305) .14em;
-    text-underline-offset: .16em;
-}
-
-.music {
-    padding: 0 .3em;
-    font-weight: 700;
-    font-style: normal;
-    border: 1px solid var(--color-border);
+@media (prefers-reduced-motion: reduce) {
+    .content {
+        opacity: 1;
+        animation: none;
+    }
 }

@@ -1,7 +1,10 @@
-@import url('https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+@import '@fontsource-variable/ibm-plex-sans';
+@import '@fontsource/courier-prime/400.css';
+@import '@fontsource/courier-prime/700.css';
+@import '@fontsource/courier-prime/400-italic.css';
 
 :root {
-    --font-sans: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-sans: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
 
     /* Coolors palette: https://coolors.co/7d84b2-d17b0f-f4f1ec-311e10-403233 */

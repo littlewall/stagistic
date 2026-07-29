@@ -107,7 +107,7 @@
 
 .heroInner {
     display: grid;
-    grid-template-columns: minmax(22rem, 1fr) minmax(30rem, 35rem);
+    grid-template-columns: minmax(38rem, 1fr) minmax(30rem, 35rem);
     gap: 5rem;
     align-items: center;
     width: 100%;
@@ -447,7 +447,7 @@
 }
 
 .alpha {
-    padding: 8rem 1.5rem;
+    padding: 6rem 1.5rem;
     background: var(--color-bg);
 }
 
@@ -594,19 +594,35 @@
 }
 
 .fadeUp {
-    animation: fadeUpIn .6s cubic-bezier(.22, 1, .36, 1) both;
+    animation: fadeUpIn .56s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 .fadeUpD1 {
-    animation-delay: .1s;
+    animation-delay: .34s;
 }
 
 .fadeUpD2 {
-    animation-delay: .2s;
+    animation-delay: .72s;
 }
 
 .fadeUpD3 {
-    animation-delay: .32s;
+    animation-delay: .18s;
+}
+
+.heroTitle.fadeUp {
+    animation-duration: .62s;
+}
+
+.heroDescription.fadeUp {
+    animation-duration: .56s;
+}
+
+.heroCtas.fadeUp {
+    animation-duration: .48s;
+}
+
+.heroScript.fadeUp {
+    animation-duration: .56s;
 }
 
 @keyframes fadeUpIn {

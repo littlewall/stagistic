@@ -199,9 +199,10 @@ The script uses the real default typography and block geometry:
 - Scene spacing before `2em`;
 - Stage direction and Character spacing before `1em`;
 - Dialogue and Aside spacing before `0`;
-- Character left indent `30ch`;
-- Dialogue left/right indents `10ch` / `3ch`;
-- Aside left/right indents `16ch` / `21ch`.
+- Character left indent `16ch`;
+- Dialogue left/right indents `6ch` / `3ch`;
+- Aside left/right indents `12ch` / `8ch`. These mini-editor-only indents
+  accommodate the narrower landing preview.
 
 Character-cue text uses `EditorRuntimeExtension` decorations and the real
 palette CSS at the maximum supported character-color saturation. The treatment
@@ -216,16 +217,16 @@ The mini profile also includes the main editor's music caret behavior. Clicking
 in the trailing whitespace after the final music pill moves the caret before
 the pill; typing therefore inserts text before the protected atom.
 
-## Hydration and Fallback
+## Hydration
 
 The mini-editor is above the fold, so the React island hydrates on page load.
-Before hydration, and if JavaScript initialization fails, the landing renders
-the same initial excerpt as static script markup in the same canvas. Hydration
-replaces that fallback without changing the hero's dimensions.
-
-Failure remains silent because the static excerpt still fulfills the landing
-page's preview role. The feature does not show an error, loading state, or
-storage status.
+The canvas does not render a separate static script fallback. Courier Prime and
+IBM Plex Sans are bundled locally. The editor starts mounting immediately while
+the hero uses two coordinated entrance tracks from `opacity: 0`. On the text
+track, the title runs from `0s` to `.62s`, the description from `.34s` to
+`.9s`, and the CTA from `.72s` to `1.2s`. On the preview track, the paper runs
+from `.18s` to `.74s` and the editor content uses a separate opacity-only
+animation from `.66s` to `1s`. The editor does not wait for a readiness signal.
 
 ## Accessibility
 
@@ -237,7 +238,6 @@ storage status.
   input.
 - Fixed structural behavior must not trap Tab outside the defined
   Stage-direction indentation behavior.
-- The static fallback preserves readable script content without JavaScript.
 
 ## Testing
 
@@ -271,7 +271,8 @@ storage status.
 - The mini-editor replaces the complete old preview, including its top bar and
   outline.
 - No toolbar, sidebar, status, or context-menu trigger is rendered.
-- The static fallback and hydrated editor have matching dimensions.
+- The first visible editor frame uses final font metrics and does not reflow
+  after hydration.
 - Desktop and landing-page mobile layouts keep the canvas inside the viewport.
 - Run the canonical focused editor browser tests, landing typecheck/build, and
   repository lint for touched files.

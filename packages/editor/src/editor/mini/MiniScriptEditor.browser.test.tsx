@@ -231,10 +231,13 @@ describe('MiniScriptEditor', () => {
         expect(getComputedStyle(editorRoot).lineHeight).toBe('19.2px');
         expect(
             getComputedStyle(editorRoot).getPropertyValue('--character-indent-left').trim(),
-        ).toBe('30ch');
+        ).toBe('16ch');
+        expect(
+            getComputedStyle(editorRoot).getPropertyValue('--aside-indent-left').trim(),
+        ).toBe('12ch');
         expect(
             getComputedStyle(editorRoot).getPropertyValue('--dialogue-indent-left').trim(),
-        ).toBe('10ch');
+        ).toBe('6ch');
         expect(
             getComputedStyle(mara).getPropertyValue('--character-tag-color').trim(),
         ).toBe(getConfirmedCharacterColor('mini-character:MARA', null, 60));
@@ -445,5 +448,21 @@ describe('MiniScriptEditor', () => {
         expect(editor.clientHeight).toBe(120);
         expect(editor.scrollHeight).toBeGreaterThan(editor.clientHeight);
         expect(getComputedStyle(editor).overflowY).toBe('auto');
+    });
+
+    it('keeps the aside text on one line in the narrow landing preview', async () => {
+        const host = renderMiniEditor({
+            width: '480px',
+            height: '500px',
+        });
+        const aside = await waitForElement<HTMLElement>(
+            host,
+            'p[blocktype="aside"]',
+        );
+        const range = document.createRange();
+
+        range.selectNodeContents(aside);
+
+        expect(range.getClientRects()).toHaveLength(1);
     });
 });

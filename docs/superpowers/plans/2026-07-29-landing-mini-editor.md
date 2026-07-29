@@ -295,8 +295,8 @@ character-tag, icon, and music styles locally. The surface must use:
 }
 
 .content {
-    --mini-edge: clamp(8px, 1vw, 12px);
-    --mini-indicator-size: clamp(24px, 2.5vw, 28px);
+    --mini-edge: clamp(10px, 1vw, 14px);
+    --mini-indicator-size: 16px;
 
     padding:
         var(--space-xl)
@@ -382,11 +382,16 @@ export const miniEditorDocument: ScriptDocument = {
 Use the actual script JSON names and character/music attribute constants from
 `@stagistic/script`; do not parse `.stagistic` text in the browser.
 
-- [ ] **Step 3: Add the island wrapper and static fallback**
+- [ ] **Step 3: Add the stable island wrapper**
 
-`LandingMiniEditor.tsx` passes the fixture to `MiniScriptEditor`. Its fallback
-uses matching script-block classes/data attributes and the same initial copy,
-so server output occupies the final height before hydration.
+`LandingMiniEditor.tsx` immediately passes the fixture to `MiniScriptEditor`.
+Do not render a separate static script fallback. The preview joins the fixed
+hero entrance timeline as two coordinated tracks from `opacity: 0` without
+waiting for a readiness signal. The title runs from `0s` to `.62s`, the
+description from `.34s` to `.9s`, and the CTA from `.72s` to `1.2s`. In
+parallel, the paper runs from `.18s` to `.74s`. Wrap the mini-editor content in
+a full-height element with a separate opacity-only animation from `.66s` to
+`1s`.
 
 - [ ] **Step 4: Replace the complete preview markup**
 

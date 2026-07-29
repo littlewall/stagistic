@@ -1,6 +1,6 @@
 .root {
     --size-scale: 1;
-    --mini-edge: clamp(8px, 1vw, 12px);
+    --mini-edge: clamp(10px, 1vw, 14px);
     --mini-indicator-size: 16px;
     --font-family-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
     --color-text: oklch(.2557 .0382 56.44);
@@ -28,15 +28,15 @@
     --stage-direction-spacing-before: 1em;
     --stage-direction-line-height: 1.2;
     --character-spacing-before: 1em;
-    --character-indent-left: 30ch;
+    --character-indent-left: 16ch;
     --character-indent-right: 3ch;
     --character-line-height: 1.2;
     --aside-spacing-before: 0;
-    --aside-indent-left: 16ch;
-    --aside-indent-right: 21ch;
+    --aside-indent-left: 12ch;
+    --aside-indent-right: 8ch;
     --aside-line-height: 1.2;
     --dialogue-spacing-before: 0;
-    --dialogue-indent-left: 10ch;
+    --dialogue-indent-left: 6ch;
     --dialogue-indent-right: 3ch;
     --dialogue-line-height: 1.2;
 

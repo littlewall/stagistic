@@ -18,7 +18,7 @@ export const miniEditorDocument: ScriptDocument = {
             attrs: {id: 'landing-mini-stage-direction-opening'},
             content: [{
                 type: 'text',
-                text: 'An old brass lamp stands beneath the great lens.',
+                text: 'An old lamp stands beneath the great lens.',
             }],
         }, {
             type: 'character',
@@ -79,7 +79,7 @@ export const miniEditorDocument: ScriptDocument = {
             attrs: {id: 'landing-mini-stage-direction-music'},
             content: [{
                 type: 'text',
-                text: 'Music starts to play. ',
+                text: 'Music starts to play.',
             }, {
                 type: MUSIC_START_NODE_NAME,
                 attrs: {
