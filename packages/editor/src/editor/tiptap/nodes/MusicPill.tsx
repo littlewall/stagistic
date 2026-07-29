@@ -45,6 +45,8 @@ import {
 import {MusicPillMenuPopover} from './MusicPillMenuPopover';
 
 interface MusicStartPillProps extends NodeViewProps {
+    locked?: boolean,
+    numberLabel?: string,
     onMusicAssigned?: (musicId: string) => void,
     onOpenMusicManager?: (musicId: string) => void,
     onRequestCreateMusic?: (request: EditorMusicCreateRequest) => void,
@@ -59,6 +61,8 @@ export const MusicStartPill = ({
     decorations,
     editor,
     getPos,
+    locked = false,
+    numberLabel,
     onMusicAssigned,
     onOpenMusicManager,
     onRequestCreateMusic,
@@ -74,7 +78,8 @@ export const MusicStartPill = ({
     const isDraft = node.attrs[MUSIC_DRAFT_ATTR] === true;
     const musicId = String(node.attrs[MUSIC_ID_ATTR] ?? '');
     const title = normalizeMusicTitle(node.attrs[MUSIC_TITLE_ATTR]);
-    const musicNumber = readDecorationLabel(decorations, 'musicNumber');
+    const musicNumber = numberLabel
+        ?? readDecorationLabel(decorations, 'musicNumber');
     const [draftTitle, setDraftTitle] = useState(title);
     const hasEndMusic = Boolean(musicId && findMusicPillElement(editor, 'out', musicId));
 
@@ -184,14 +189,18 @@ export const MusicStartPill = ({
         <NodeViewWrapper
             ref={rootRef}
             as="span"
-            className={clsx(styles.pill, styles[mode], active && styles.active)}
+            className={clsx(
+                styles.pill,
+                styles[mode],
+                active && !locked && styles.active,
+            )}
             data-music-pill="start"
             data-music-id={musicId || undefined}
             data-music-active={active ? 'true' : undefined}
             style={{'--music-pill-anchor': anchorName}}
             contentEditable={false}
-            onFocus={handleFocusWithin(setActive)}
-            onBlur={handleBlurWithin(rootRef, setActive)}
+            onFocus={locked ? undefined : handleFocusWithin(setActive)}
+            onBlur={locked ? undefined : handleBlurWithin(rootRef, setActive)}
         >
             {' '}
             <span
@@ -221,7 +230,7 @@ export const MusicStartPill = ({
                     aria-label="Music title"
                     aria-multiline="false"
                     contentEditable
-                    tabIndex={-1}
+                    tabIndex={locked ? 0 : -1}
                     suppressContentEditableWarning
                     spellCheck={false}
                     onInput={event => updateTitle(event.currentTarget.textContent ?? '')}
@@ -272,7 +281,7 @@ export const MusicStartPill = ({
                     }}
                 />
             </span>
-            {active ? (
+            {active && !locked ? (
                 <MusicPillMenuPopover isOpen onOpenChange={setActive}>
                     {hasEndMusic ? (
                         <MusicMenuButton label="Go to music end" onClick={goToEndMusic}>

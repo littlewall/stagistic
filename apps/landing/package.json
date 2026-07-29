@@ -10,7 +10,17 @@
         "typecheck": "astro check"
     },
     "dependencies": {
+        "@astrojs/react": "^6.0.2",
+        "@stagistic/editor": "workspace:*",
+        "@stagistic/script": "workspace:*",
         "astro": "^7.1.5",
-        "clsx": "^2.1.1"
+        "clsx": "^2.1.1",
+        "react": "^19.2.4",
+        "react-dom": "^19.2.4"
+    },
+    "devDependencies": {
+        "@astrojs/check": "^0.9.10",
+        "@types/react": "^19.2.10",
+        "@types/react-dom": "^19.2.3"
     }
 }

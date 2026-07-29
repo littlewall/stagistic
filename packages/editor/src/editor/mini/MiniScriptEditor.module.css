@@ -1,0 +1,110 @@
+.root {
+    --size-scale: 1;
+    --mini-edge: clamp(8px, 1vw, 12px);
+    --mini-indicator-size: 16px;
+    --font-family-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
+    --color-text: oklch(.2557 .0382 56.44);
+    --color-text-muted: color-mix(in oklch, oklch(.333 .0203 13.4) 68%, oklch(.9591 .0074 80.72));
+    --color-border: color-mix(in oklch, oklch(.333 .0203 13.4) 18%, oklch(.9591 .0074 80.72));
+    --color-surface: oklch(.985 .005 80.72);
+    --color-surface-accent: color-mix(in oklch, oklch(.6251 .0699 277.48) 18%, oklch(.9591 .0074 80.72));
+    --color-selection-outline: oklch(.6251 .0699 277.48);
+    --color-block-scene: var(--color-text);
+    --color-block-stage-direction: var(--color-text);
+    --color-block-character: var(--color-text);
+    --color-block-aside: var(--color-text);
+    --color-block-dialogue: var(--color-text);
+    --space-sm: 4px;
+    --space-md: 8px;
+    --space-xl: 16px;
+    --space-2xl: 20px;
+    --radius-xl: 12px;
+    --radius-full: 9999px;
+    --font-size-sm: 12px;
+    --letter-spacing-sm: .02em;
+    --shadow-popover: 0 10px 30px oklch(.177 .0062 41.5 / .18);
+    --scene-spacing-before: 2em;
+    --scene-line-height: 1.2;
+    --stage-direction-spacing-before: 1em;
+    --stage-direction-line-height: 1.2;
+    --character-spacing-before: 1em;
+    --character-indent-left: 30ch;
+    --character-indent-right: 3ch;
+    --character-line-height: 1.2;
+    --aside-spacing-before: 0;
+    --aside-indent-left: 16ch;
+    --aside-indent-right: 21ch;
+    --aside-line-height: 1.2;
+    --dialogue-spacing-before: 0;
+    --dialogue-indent-left: 10ch;
+    --dialogue-indent-right: 3ch;
+    --dialogue-line-height: 1.2;
+
+    scrollbar-gutter: stable;
+    position: relative;
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+    height: 100%;
+    font-family: var(--font-family-mono);
+    font-size: 16px;
+    line-height: 1.2;
+    color: var(--color-text);
+    background: var(--color-surface);
+}
+
+.screenReaderInstructions {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    white-space: nowrap;
+    clip-path: inset(50%);
+    border: 0;
+}
+
+.content {
+    min-height: 100%;
+    padding: var(--space-xl)
+        var(--mini-edge)
+        var(--space-2xl)
+        calc(var(--mini-edge) + var(--mini-indicator-size) + var(--mini-edge));
+}
+
+.content :global(.ProseMirror),
+.content :global(.ProseMirror-focused) {
+    min-height: 100%;
+    padding: 0;
+    outline: none;
+    box-shadow: none;
+}
+
+.blockIndicator {
+    pointer-events: none;
+    position: absolute;
+    left: var(--mini-edge);
+    transform: translateY(-50%);
+    display: grid;
+    place-items: center;
+    width: var(--mini-indicator-size);
+    height: var(--mini-indicator-size);
+    color: var(--color-text-muted);
+    opacity: 0;
+    background: transparent;
+    border: 0;
+}
+
+.root:focus-within .blockIndicator {
+    opacity: 1;
+}
+
+.blockIndicator :global(svg) {
+    width: 100%;
+    height: 100%;
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1.6;
+}

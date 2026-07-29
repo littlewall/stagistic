@@ -1,5 +1,6 @@
 ---
 import {clsx} from 'clsx';
+import LandingMiniEditor from '../components/mini-editor/LandingMiniEditor';
 import '../styles/global.css';
 import s from './index.module.css';
 
@@ -8,7 +9,7 @@ const features = [
         label: 'Theatre-native writing',
         description:
             'Dedicated blocks for acts, scene headings, character cues, dialogue, stage directions, lyrics, and notes. Every part of the script keeps its own formatting and behaviour.',
-        imageSrc: '/editor-preview.png',
+        imageSrc: '/features/theatre-writing.png',
         imageAlt: 'A formatted theatre script in the Stagistic editor',
         imageFit: 'cover',
         imagePosition: '50% 38%',
@@ -116,7 +117,7 @@ const faqs = [
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Stagistic — The editor built for theatre</title>
+        <title>Stagistic — Script editor built for theatre</title>
         <meta
             name="description"
             content="Stagistic is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
@@ -155,7 +156,7 @@ const faqs = [
 
                     <div class={s.heroContent}>
                         <h1 class={clsx(s.heroTitle, s.fadeUp)}>
-                            The editor built for theatre.
+                            Script editor built for theatre.
                         </h1>
 
                         <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
@@ -174,62 +175,9 @@ const faqs = [
                     <div class={clsx(s.heroScript, s.fadeUp, s.fadeUpD3)}>
                         <div
                             class={s.scriptExcerpt}
-                            aria-label="Preview of the Stagistic editor"
+                            aria-label="Interactive preview of the Stagistic editor"
                         >
-                            <div class={s.scriptExcerptBar}>
-                                <span class={s.windowControls} aria-hidden="true">
-                                    <span></span>
-                                    <span></span>
-                                    <span></span>
-                                </span>
-                                <span class={s.previewDocumentTitle}>
-                                    The Glass Room — Draft 3
-                                </span>
-                                <span class={s.previewStatus}>Saved locally</span>
-                            </div>
-                            <div class={s.previewWorkspace}>
-                                <div class={s.previewOutline} aria-hidden="true">
-                                    <span class={s.previewOutlineLabel}>Scenes</span>
-                                    <span>Act 1, Scene 1</span>
-                                    <span>Act 1, Scene 2</span>
-                                    <span class={s.previewOutlineActive}>
-                                        Act 2, Scene 1
-                                    </span>
-                                    <span>Act 2, Scene 2</span>
-                                </div>
-                                <div class={s.scriptBody}>
-                                    <p class={s.sAct}>ACT TWO, SCENE ONE</p>
-
-                                    <p class={s.sDir}>
-                                        An empty rehearsal room. Piano, lid open.
-                                        MARA stands at the window. JONAS enters.
-                                    </p>
-
-                                    <p class={s.sChar}>JONAS</p>
-                                    <div class={s.sSpeech}>
-                                        <p>I know you're not ready.</p>
-                                    </div>
-
-                                    <p class={s.sDir}>MARA doesn't turn around.</p>
-
-                                    <p class={s.sChar}>MARA</p>
-                                    <div class={s.sSpeech}>
-                                        <p>I'm always ready.</p>
-                                        <p class={s.sParen}>(a beat)</p>
-                                        <p>That's the problem.</p>
-                                    </div>
-
-                                    <p class={s.sChar}>JONAS</p>
-                                    <div class={s.sSpeech}>
-                                        <p>The director wants the number</p>
-                                        <p>from the top of Act One.</p>
-                                    </div>
-
-                                    <p class={s.sMusic}>
-                                        Musical number: FIRST LIGHT (reprise, bar 23)
-                                    </p>
-                                </div>
-                            </div>
+                            <LandingMiniEditor client:load />
                         </div>
                     </div>
 
