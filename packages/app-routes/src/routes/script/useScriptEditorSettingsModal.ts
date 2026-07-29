@@ -46,8 +46,8 @@ export const useScriptEditorSettingsModal = ({
             return;
         }
 
+        void navigate('/', {replace: true});
         await deleteScript(currentScriptId);
-        void navigate('/');
     }, [
         currentScriptId,
         deleteScript,
