@@ -229,7 +229,7 @@ export const ScriptEditorRoute = () => {
                             activeView="editor"
                         />
                     ) : (
-                        <AppHeader onMenuAction={handleMenuAction} />
+                        <AppHeader />
                     )
                 )}
             >

@@ -100,7 +100,6 @@ export const ScriptAttributeManagerModal = ({
                         detailTypeLabel="Scene"
                         emptyListLabel="No scenes yet"
                         emptyDetailLabel="Select a scene"
-                        detailPlaceholder="Scene details are coming soon."
                         renderDetail={item => (
                             <AttributeManagerSceneDetail
                                 places={placeState.places}
@@ -138,7 +137,6 @@ export const ScriptAttributeManagerModal = ({
                         wrapDetailTitle
                         emptyListLabel="No music yet"
                         emptyDetailLabel="Select music"
-                        detailPlaceholder="Music details are coming soon."
                         search={{ariaLabel: 'Search music', placeholder: 'Search music'}}
                         createAction={{
                             ariaLabel: 'Create music',

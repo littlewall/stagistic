@@ -5,7 +5,7 @@
     padding-left: .55rem;
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
-    border-left: 2px solid var(--color-warning, #d98b00);
+    border-left: 2px solid var(--color-status-warning);
 }
 
 .warning button {

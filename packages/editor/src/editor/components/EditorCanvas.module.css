@@ -16,6 +16,18 @@
     box-shadow: var(--shadow-canvas);
 }
 
+.screenReaderInstructions {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    white-space: nowrap;
+    clip-path: inset(50%);
+    border: 0;
+}
+
 .content {
     box-sizing: border-box;
     width: 100%;
@@ -33,5 +45,17 @@
         padding: 0;
         outline: none;
         box-shadow: none;
+    }
+
+    & :global([data-placeholder]::before) {
+        pointer-events: none;
+        content: attr(data-placeholder);
+        float: left;
+        height: 0;
+        font-weight: var(--font-weight-normal);
+        font-style: normal;
+        color: var(--color-text-placeholder);
+        text-decoration: none;
+        text-transform: none;
     }
 }

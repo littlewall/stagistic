@@ -122,6 +122,38 @@
     color: var(--color-border-strong);
 }
 
+.narrowToc {
+    display: none;
+    margin-bottom: 2rem;
+    background: color-mix(in oklch, var(--color-bg) 84%, var(--color-surface));
+    border: 1px solid var(--color-border);
+    border-radius: .5rem;
+}
+
+.narrowTocSummary {
+    cursor: pointer;
+    padding: .875rem 1rem;
+    font-family: var(--font-mono);
+    font-size: .6875rem;
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+}
+
+.narrowToc[open] .narrowTocSummary {
+    color: var(--color-text);
+    border-bottom: 1px solid var(--color-border);
+}
+
+.narrowTocList {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0 1.5rem;
+    margin: 0;
+    padding: .75rem 1rem 1rem;
+    list-style: none;
+}
+
 .content {
     min-width: 0;
 }
@@ -463,6 +495,10 @@
         display: none;
     }
 
+    .narrowToc {
+        display: block;
+    }
+
     .example {
         grid-template-columns: 1fr;
         gap: 1.25rem;
@@ -471,5 +507,11 @@
     .refRow {
         grid-template-columns: 1fr;
         gap: .25rem;
+    }
+}
+
+@media (max-width: 560px) {
+    .narrowTocList {
+        grid-template-columns: 1fr;
     }
 }

@@ -9,6 +9,7 @@ import {
 } from 'react';
 
 import type {MusicAttachmentsState} from '../attributes/useMusicAttachmentsState';
+import {hasExportableScriptContent} from './hasExportableScriptContent';
 
 export type ExportStatus = 'idle' | 'regenerating' | 'error';
 
@@ -16,6 +17,7 @@ interface ExportContextValue {
     script: ScriptData,
     settings: EditorSettings,
     artifact: Blob | null,
+    canExport: boolean,
     status: ExportStatus,
     setArtifact: (artifact: Blob | null) => void,
     setStatus: (status: ExportStatus) => void,
@@ -47,17 +49,20 @@ export const ExportProvider = ({
 }) => {
     const [artifact, setArtifact] = useState<Blob | null>(null);
     const [status, setStatus] = useState<ExportStatus>('idle');
+    const canExport = useMemo(() => hasExportableScriptContent(script.doc), [script.doc]);
 
     const value = useMemo<ExportContextValue>(() => ({
         script,
         settings,
         artifact,
+        canExport,
         status,
         setArtifact,
         setStatus,
         musicAttachments,
     }), [
         artifact,
+        canExport,
         script,
         settings,
         musicAttachments,

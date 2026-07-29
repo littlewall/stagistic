@@ -1,5 +1,6 @@
 import {clsx} from 'clsx';
 import {
+    type KeyboardEvent as ReactKeyboardEvent,
     type MouseEvent as ReactMouseEvent,
     type ReactNode,
     type SyntheticEvent,
@@ -9,6 +10,15 @@ import {
 } from 'react';
 
 import styles from './ModalDialog.module.css';
+
+const FOCUSABLE_SELECTOR = [
+    'button:not([disabled])',
+    'input:not([disabled])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    'a[href]',
+    '[tabindex]:not([tabindex="-1"])',
+].join(',');
 
 interface ModalDialogProps {
     isOpen: boolean,
@@ -26,6 +36,7 @@ export const ModalDialog = ({
     panelClassName,
 }: ModalDialogProps) => {
     const dialogRef = useRef<HTMLDialogElement | null>(null);
+    const restoreFocusRef = useRef<HTMLElement | null>(null);
 
     useEffect(() => {
         const dialog = dialogRef.current;
@@ -35,13 +46,24 @@ export const ModalDialog = ({
         }
 
         if (isOpen && !dialog.open) {
+            restoreFocusRef.current = document.activeElement instanceof HTMLElement
+                ? document.activeElement
+                : null;
             dialog.showModal();
         }
 
         if (!isOpen && dialog.open) {
             dialog.close();
+            restoreFocusRef.current?.focus();
+            restoreFocusRef.current = null;
         }
     }, [isOpen]);
+
+    useEffect(() => {
+        return () => {
+            restoreFocusRef.current?.focus();
+        };
+    }, []);
 
     const mouseDownTargetRef = useRef<EventTarget | null>(null);
 
@@ -63,6 +85,43 @@ export const ModalDialog = ({
         }
     }, [onClose]);
 
+    const handleKeyDown = useCallback((event: ReactKeyboardEvent<HTMLDialogElement>) => {
+        if (event.key !== 'Tab') {
+            return;
+        }
+
+        const dialog = dialogRef.current;
+
+        if (!dialog) {
+            return;
+        }
+
+        const focusableElements = Array
+            .from(dialog.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+            .filter(element => !element.hidden && element.getAttribute('aria-hidden') !== 'true');
+        const firstElement = focusableElements.at(0);
+        const lastElement = focusableElements.at(-1);
+
+        if (!firstElement || !lastElement) {
+            event.preventDefault();
+            dialog.focus();
+
+            return;
+        }
+
+        if (event.shiftKey && document.activeElement === firstElement) {
+            event.preventDefault();
+            lastElement.focus();
+
+            return;
+        }
+
+        if (!event.shiftKey && document.activeElement === lastElement) {
+            event.preventDefault();
+            firstElement.focus();
+        }
+    }, []);
+
     return (
         <dialog
             ref={dialogRef}
@@ -71,6 +130,7 @@ export const ModalDialog = ({
             onCancel={handleCancel}
             onMouseDown={handleMouseDown}
             onClick={handleClick}
+            onKeyDown={handleKeyDown}
         >
             <div className={clsx(panelClassName, styles.panel)}>
                 {children}

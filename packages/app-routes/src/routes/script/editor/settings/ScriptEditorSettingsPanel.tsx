@@ -3,7 +3,6 @@ import {
     isElementSettingsPanelId,
 } from '../../settings/settingsMenu';
 import {ElementSettingsPanel} from './element/ElementSettingsPanel';
-import {PlaceholderSettingsPanel} from './PlaceholderSettingsPanel';
 import {SECTION_RENDERERS} from './registry';
 import type {ScriptEditorSettingsPanelProps} from './types';
 
@@ -19,7 +18,7 @@ export const ScriptEditorSettingsPanel = (props: ScriptEditorSettingsPanelProps)
     }
 
     if (!isElementSettingsPanelId(panelId)) {
-        return <PlaceholderSettingsPanel panelId={panelId} />;
+        return null;
     }
 
     const blockType = getBlockTypeFromElementPanelId(panelId);

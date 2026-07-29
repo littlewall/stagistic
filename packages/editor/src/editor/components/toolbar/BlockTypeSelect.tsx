@@ -1,5 +1,6 @@
-import {useAnchoredMenuHeight} from '@stagistic/ui';
+import {useAnchoredMenuPlacement} from '@stagistic/ui';
 import clsx from 'clsx';
+import {useRef} from 'react';
 
 import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
 import styles from '../EditorToolbar.module.css';
@@ -11,6 +12,7 @@ export const BlockTypeSelect = ({
     actions,
     dropdownRef,
 }: BlockTypeSelectProps) => {
+    const menuRef = useRef<HTMLDivElement | null>(null);
     const {
         isOpen,
         canChangeBlockType,
@@ -18,8 +20,9 @@ export const BlockTypeSelect = ({
         activeBlockInfo,
     } = state;
     const {onSelectMouseDown, onMenuItemMouseDown} = actions;
-    const menuHeightStyle = useAnchoredMenuHeight({
+    const menuPlacement = useAnchoredMenuPlacement({
         anchorRef: dropdownRef,
+        menuRef,
         isOpen,
     });
 
@@ -28,6 +31,7 @@ export const BlockTypeSelect = ({
             <div
                 className={styles.dropdown}
                 ref={dropdownRef}
+                data-menu-placement={isOpen ? menuPlacement.placement : undefined}
             >
                 <button
                     className={styles.selectButton}
@@ -62,9 +66,13 @@ export const BlockTypeSelect = ({
                 </button>
                 {isOpen ? (
                     <div
-                        className={styles.menu}
+                        ref={menuRef}
+                        className={clsx(
+                            styles.menu,
+                            menuPlacement.placement === 'above' && styles.above,
+                        )}
                         role="menu"
-                        style={menuHeightStyle}
+                        style={menuPlacement.style}
                     >
                         {options.map(option => (
                             <button

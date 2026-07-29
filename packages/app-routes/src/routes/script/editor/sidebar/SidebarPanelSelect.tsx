@@ -1,6 +1,6 @@
 import {useExclusiveOverlay} from '@stagistic/editor';
 import {
-    ChevronDownIcon, clsx, useAnchoredMenuHeight, useDropdownDismiss,
+    ChevronDownIcon, clsx, useAnchoredMenuPlacement, useDropdownDismiss,
 } from '@stagistic/ui';
 import {
     useId,
@@ -33,14 +33,16 @@ export const SidebarPanelSelect = ({
 }: SidebarPanelSelectProps) => {
     const [isOpen, setIsOpen] = useState(false);
     const selectRef = useRef<HTMLDivElement | null>(null);
+    const menuRef = useRef<HTMLDivElement | null>(null);
     const rawId = useId();
     const anchorName = `--spa-${rawId.replace(/[^a-zA-Z0-9]/g, '')}` as const;
     const selectedPanel = useMemo(
         () => panels.find(panel => panel.id === selectedPanelId) ?? panels[0] ?? null,
         [panels, selectedPanelId],
     );
-    const menuHeightStyle = useAnchoredMenuHeight({
+    const menuPlacement = useAnchoredMenuPlacement({
         anchorRef: selectRef,
+        menuRef,
         isOpen,
     });
 
@@ -48,7 +50,11 @@ export const SidebarPanelSelect = ({
     useDropdownDismiss(isOpen, setIsOpen, selectRef);
 
     return (
-        <div className={styles.select} ref={selectRef}>
+        <div
+            className={styles.select}
+            ref={selectRef}
+            data-menu-placement={isOpen ? menuPlacement.placement : undefined}
+        >
             <button
                 type="button"
                 className={styles.button}
@@ -69,13 +75,15 @@ export const SidebarPanelSelect = ({
             </button>
             {isOpen ? (
                 <div
+                    ref={menuRef}
                     className={clsx(
                         styles.menu,
                         side === 'right' && styles.right,
+                        menuPlacement.placement === 'above' && styles.above,
                     )}
                     style={{
                         positionAnchor: anchorName,
-                        ...menuHeightStyle,
+                        ...menuPlacement.style,
                     }}
                     role="listbox"
                     aria-label={ariaLabel}

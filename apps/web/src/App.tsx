@@ -6,7 +6,6 @@ import {
     HomeRoute,
     ScriptEditorRoute,
     ScriptExportRoute,
-    ScriptListRoute,
     ScriptSettingsRoute,
     ScriptWorkspaceRoute,
 } from '@stagistic/app-routes';
@@ -77,7 +76,6 @@ const App = () => {
                 <GlobalModalsProvider>
                     <Routes>
                         <Route path="/" element={<HomeRoute />} />
-                        <Route path="/script/list" element={<ScriptListRoute />} />
                         <Route path="/script/:scriptId" element={<ScriptWorkspaceRoute />}>
                             <Route index element={<Navigate to="editor" replace />} />
                             <Route path="editor" element={<ScriptEditorRoute />} />

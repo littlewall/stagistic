@@ -72,8 +72,6 @@ export interface AttributeManagerListPanelProps {
     emptyListLabel: string,
     /** Shown in the detail column when no item is selected. */
     emptyDetailLabel: string,
-    /** Muted placeholder in the detail body while its contents are not built yet. */
-    detailPlaceholder: string,
     search?: {
         ariaLabel: string,
         placeholder: string,
@@ -97,7 +95,6 @@ export const AttributeManagerListPanel = ({
     wrapDetailTitle = false,
     emptyListLabel,
     emptyDetailLabel,
-    detailPlaceholder,
     search,
     createAction,
     renderDetail,
@@ -250,9 +247,7 @@ export const AttributeManagerListPanel = ({
                             </div>
                         </header>
                         <div className={styles.detailBody}>
-                            {renderDetail
-                                ? renderDetail(selectedItem)
-                                : <p className={styles.detailPlaceholder}>{detailPlaceholder}</p>}
+                            {renderDetail?.(selectedItem)}
                         </div>
                     </>
                 ) : (

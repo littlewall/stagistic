@@ -153,7 +153,7 @@ export const HeaderFooterSettingsPanel = ({
 
     return (
         <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Headers and Footers</h3>
+            <h3 className={panelStyles.panelTitle}>Headers and footers</h3>
             <div className={styles.composer}>
                 {renderRow('header')}
                 <div className={styles.editor}>

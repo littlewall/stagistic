@@ -24,10 +24,10 @@
     & .panel {
         display: flex;
         flex-direction: column;
-        gap: var(--space-lg);
+        gap: var(--modal-panel-gap, var(--space-lg));
         /* stylelint-disable-next-line csstree/validator */
-        width: min(520px, 100%);
-        padding: var(--space-4xl);
+        width: var(--modal-panel-width, min(520px, 100%));
+        padding: var(--modal-panel-padding, var(--space-4xl));
         background: var(--color-surface);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-lg);

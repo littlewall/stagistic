@@ -39,7 +39,6 @@ export type {
 export type AppHeaderProps = {
     leftControls?: ReactNode,
     scriptControls?: ReactNode,
-    onMenuAction?: (actionId: string) => void,
     onHome: () => void,
     onNewScript?: () => void,
     onImportScript?: () => void,
@@ -49,7 +48,6 @@ export type AppHeaderProps = {
 export const AppHeader = ({
     leftControls,
     scriptControls,
-    onMenuAction,
     onHome,
     onNewScript,
     onImportScript,
@@ -118,7 +116,6 @@ export const AppHeader = ({
                     <AccountMenu
                         themeMode={themeMode}
                         onThemeChange={setThemeMode}
-                        onAction={onMenuAction}
                     />
                 </div>
             </div>
@@ -174,7 +171,6 @@ export const ScriptEditorAppHeader = ({
 
     return (
         <AppHeader
-            onMenuAction={onMenuAction}
             onHome={onHome}
             isFullWidth={isFullWidth}
             scriptControls={<ViewSwitcher activeView={activeView} onSelectView={onSelectView} />}

@@ -7,6 +7,10 @@ import {
 } from 'react';
 
 import {
+    SCRIPT_EDITOR_DESCRIPTION_ID,
+    SCRIPT_EDITOR_LABEL,
+} from '../accessibility';
+import {
     type CharacterColorRefsBundle,
     type EditorSurfaceCache,
 } from './editorSurfaceCache';
@@ -59,7 +63,11 @@ export const useScriptEditorInstance = ({
             autofocus: false,
             editorProps: {
                 attributes: {
+                    'aria-describedby': SCRIPT_EDITOR_DESCRIPTION_ID,
+                    'aria-label': SCRIPT_EDITOR_LABEL,
+                    'aria-multiline': 'true',
                     'data-editor': 'true',
+                    role: 'textbox',
                 },
             },
         });

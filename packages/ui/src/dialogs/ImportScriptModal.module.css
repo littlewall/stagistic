@@ -40,7 +40,6 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
-    padding: var(--space-2xl);
     text-align: center;
     background: var(--color-surface-raised);
     border: 1px dashed var(--color-border);
@@ -51,11 +50,6 @@
     &[data-drop-target] {
         background: var(--color-surface);
         border-color: color-mix(in oklch, var(--color-text) 35%, var(--color-border));
-    }
-
-    &[data-focus-visible] {
-        outline: 2px solid color-mix(in oklch, var(--color-text) 60%, var(--color-border));
-        outline-offset: 2px;
     }
 }
 
@@ -77,8 +71,15 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-sm);
+    box-sizing: border-box;
     width: 100%;
+    padding: var(--space-2xl);
     text-align: center;
+
+    &[data-focus-visible] {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
 }
 
 .dropZoneLabel {

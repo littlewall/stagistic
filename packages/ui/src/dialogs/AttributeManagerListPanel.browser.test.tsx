@@ -73,7 +73,6 @@ const renderPanel = (
             detailTypeLabel="Scene"
             emptyListLabel="No scenes yet"
             emptyDetailLabel="Select a scene"
-            detailPlaceholder="Scene details are coming soon."
         />,
     );
     mountedRoots.push(root);
@@ -88,7 +87,7 @@ afterEach(() => {
 });
 
 describe('AttributeManagerListPanel', () => {
-    it('lists items and opens a placeholder detail on click', async () => {
+    it('lists items and opens the selected detail on click', async () => {
         const host = renderPanel([
             {
                 id: 's1', number: '1.', title: 'Opening',
@@ -110,7 +109,6 @@ describe('AttributeManagerListPanel', () => {
         const detail = await waitForElement('[aria-label="Scene detail"]');
 
         expect(detail.textContent).toContain('The reveal');
-        expect(detail.textContent).toContain('Scene details are coming soon.');
     });
 
     it('shows the empty state when there are no items', async () => {
@@ -123,6 +121,34 @@ describe('AttributeManagerListPanel', () => {
         const detail = await waitForElement('[aria-label="Scene detail"]');
 
         expect(detail.textContent).toContain('Select a scene');
+    });
+
+    it('leaves the detail body empty when no fallback content is provided', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+
+        document.body.appendChild(host);
+        root.render(
+            <AttributeManagerListPanel
+                items={[
+                    {
+                        id: 's1',
+                        number: '1.',
+                        title: 'Opening',
+                    },
+                ]}
+                initialSelectedItemId="s1"
+                detailTypeLabel="Scene"
+                emptyListLabel="No scenes yet"
+                emptyDetailLabel="Select a scene"
+            />,
+        );
+        mountedRoots.push(root);
+
+        const detail = await waitForElement('[aria-label="Scene detail"]');
+        const detailBody = detail.lastElementChild;
+
+        expect(detailBody?.childElementCount).toBe(0);
     });
 
     it('opens the requested item detail initially', async () => {
@@ -221,7 +247,6 @@ describe('AttributeManagerListPanel', () => {
                 detailTypeLabel="Music"
                 emptyListLabel="No music yet"
                 emptyDetailLabel="Select music"
-                detailPlaceholder=""
                 search={{ariaLabel: 'Search music', placeholder: 'Search music'}}
                 createAction={{
                     ariaLabel: 'Create music',
@@ -274,7 +299,6 @@ describe('AttributeManagerListPanel', () => {
                 wrapDetailTitle
                 emptyListLabel="No music yet"
                 emptyDetailLabel="Select music"
-                detailPlaceholder=""
             />,
         );
         mountedRoots.push(root);

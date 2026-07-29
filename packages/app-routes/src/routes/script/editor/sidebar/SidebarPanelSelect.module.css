@@ -44,6 +44,12 @@
     }
 }
 
+.select[data-menu-placement = 'above'] .button[aria-expanded = 'true'] {
+    border-top-color: transparent;
+    border-bottom-color: var(--color-border);
+    border-radius: 0 0 var(--select-button-radius) var(--select-button-radius);
+}
+
 .label {
     overflow: hidden;
     min-width: 0;
@@ -65,10 +71,12 @@
     position: fixed;
     z-index: var(--select-menu-z-index);
     top: anchor(bottom);
+    right: auto;
     left: anchor(left);
     overflow: auto;
     overscroll-behavior: contain;
     display: grid;
+    box-sizing: border-box;
     min-width: anchor-size(width);
     max-height: min(var(--select-menu-max-height), var(--anchored-menu-max-height, var(--select-menu-max-height)));
     margin-top: -1px;
@@ -81,6 +89,17 @@
 
     &.right {
         right: anchor(right);
+        left: auto;
+    }
+
+    &.above {
+        top: auto;
+        bottom: anchor(top);
+        margin-top: 0;
+        margin-bottom: -1px;
+        border-top: var(--select-menu-border);
+        border-bottom: 0;
+        border-radius: var(--select-menu-radius) var(--select-menu-radius) 0 0;
     }
 }
 

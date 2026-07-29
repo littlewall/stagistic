@@ -12,6 +12,20 @@ import {AttributeManagerCharactersPanel} from './AttributeManagerCharactersPanel
 
 const mountedRoots: Root[] = [];
 
+const CHARACTERS = [
+    {
+        id: 'char-1',
+        name: 'ANNA',
+        color: '#8899aa',
+        outline: 'existing outline',
+    }, {
+        id: 'char-2',
+        name: 'BORIS',
+        color: '#aa9988',
+        outline: 'selected outline',
+    },
+];
+
 const waitForElement = async <T extends Element>(selector: string): Promise<T> => {
     const deadline = Date.now() + 1000;
 
@@ -72,6 +86,7 @@ const findVisibleButtonByText = (label: string): HTMLButtonElement => {
 const renderPanel = (
     initialSelectedCharacterId?: string,
     onSetCharacterColor = vi.fn(),
+    characters = CHARACTERS,
 ) => {
     const host = document.createElement('div');
     const onSetCharacterOutline = vi.fn();
@@ -87,19 +102,7 @@ const renderPanel = (
 
     root.render(
         <AttributeManagerCharactersPanel
-            characters={[
-                {
-                    id: 'char-1',
-                    name: 'ANNA',
-                    color: '#8899aa',
-                    outline: 'existing outline',
-                }, {
-                    id: 'char-2',
-                    name: 'BORIS',
-                    color: '#aa9988',
-                    outline: 'selected outline',
-                },
-            ]}
+            characters={characters}
             initialSelectedCharacterId={initialSelectedCharacterId}
             onSetCharacterColor={onSetCharacterColor}
             onSetCharacterOutline={onSetCharacterOutline}
@@ -253,5 +256,16 @@ describe('AttributeManagerCharactersPanel character actions', () => {
 
         expect(detailHeader.textContent).toContain('ANNA');
         expect(detailHeader.textContent).not.toContain('Character');
+    });
+
+    it('separates an empty list status from the next action in the detail pane', async () => {
+        renderPanel(undefined, vi.fn(), []);
+
+        const list = await waitForElement('[aria-label="Characters list"]');
+        const detail = await waitForElement('[aria-label="Characters detail"]');
+
+        expect(list.textContent).toContain('No characters yet.');
+        expect(detail.textContent).toContain('Create a character to edit details here.');
+        expect(detail.textContent).not.toContain('No characters yet.');
     });
 });

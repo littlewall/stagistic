@@ -43,7 +43,7 @@ export const VisualPreferencesSettingsPanel = ({
 
     return (
         <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Visual Preferences</h3>
+            <h3 className={panelStyles.panelTitle}>Visual preferences</h3>
             <div className={formControlStyles.field}>
                 <label className={formControlStyles.label} htmlFor="character-color-saturation">
                     Character Color Saturation
