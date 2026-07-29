@@ -39,39 +39,39 @@ const features = [
 const faqs = [
     {
         q: 'Is Stagistic Editor free?',
-        a: 'Yes. Stagistic Editor is free now and will remain free. There is no subscription, trial, or paywall for writing, structuring, or exporting your scripts. Other Stagistic production tools may be paid in the future, but the editor will not be.',
+        a: 'Yes. Stagistic Editor is free now and will remain free in the future. There is no subscription, trial, or paywall for writing, structuring, or exporting your scripts.',
     },
     {
         q: 'Do I need an account?',
-        a: 'No. You can open the editor and start writing without signing up. Your scripts are stored locally in your browser by default.',
+        a: 'No. You can open the editor and start writing without signing up. Your scripts are stored locally in your browser by default. You can also download a backup of your work and import it again whenever you need it.',
     },
     {
-        q: 'Is this really built for theatre, not screenwriting?',
-        a: 'Yes. Acts, scenes, stage directions, character cues, lyrics, and music are part of the document model rather than formatting conventions layered onto a screenplay editor.',
+        q: 'Is this really built for theatre?',
+        a: 'Yes! Acts, scenes, stage directions, character cues, lyrics, and music are part of the document model rather than formatting conventions layered onto a screenplay editor.',
     },
     {
         q: 'Does it work for both plays and musicals?',
-        a: 'Yes. Plays get theatre-specific structure, characters, stage directions, and flexible PDF export. Musicals add dedicated lyric blocks, music cues and outs, song and instrumental catalogues, score PDFs, and integrated-score export.',
+        a: 'Yes. Plays get theatre-specific structure, characters, stage directions, and flexible export. Musicals add dedicated lyric blocks, music cues and outs, song and instrumental catalogues, score PDFs, and integrated-score export.',
     },
     {
         q: 'Where is my data stored?',
-        a: 'Locally in your browser. You can download a .stagistic backup and import it again whenever you need it. Cloud sync is not part of the first alpha; it is planned for a later release and will be free.',
+        a: 'Locally in your browser. You can download a .stagistic backup and import it again whenever you need it. Cloud sync is not ready yet; but when it is, it will be free.',
     },
     {
         q: 'Can I use it for a commercial production?',
-        a: 'Yes. There are no restrictions on how you use scripts you write in Stagistic, for professional theatre companies, touring productions, or any commercial context.',
+        a: 'Absolutely! There are no restrictions on how you use scripts you write in Stagistic. The editor is free for everyone.',
     },
     {
         q: 'Is Stagistic Editor open source?',
-        a: 'Yes. The landing page and web editor are available on GitHub under the MIT licence. Issues, discussions, and pull requests are welcome.',
+        a: 'Yes, the editor is available on GitHub under the MIT licence. Any contributions are welcome!',
     },
     {
         q: 'What platforms does it run on?',
-        a: 'The editor runs in any modern browser without installation. Desktop and mobile apps are planned for later phases.',
+        a: 'The editor runs in any modern browser without installation. Desktop and mobile apps are planned in future.',
     },
     {
         q: 'Is this stable enough to use for real work?',
-        a: "It's an experimental alpha. The core writing experience is functional, but expect rough edges. We recommend keeping backups of important scripts. Feedback and bug reports are very welcome — they directly shape what gets fixed first.",
+        a: "It's an experimental release. The core writing experience is functional, but expect rough edges. We recommend keeping backups of important scripts. Feedback and bug reports are very welcome - they directly shape what gets fixed first.",
     },
 ];
 ---
@@ -109,7 +109,7 @@ const faqs = [
                         <a href="#faq" class={s.navLink}>FAQ</a>
                         <a href="#alpha" class={s.navLink}>Get started</a>
                     </nav>
-                    <span class={s.navBadge}>Early access</span>
+                    <span class={s.navBadge}>Early alpha</span>
                 </div>
             </header>
 
@@ -130,7 +130,7 @@ const faqs = [
 
                         <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD2)}>
                             <a href="https://editor.stagistic.app" class={s.btnPrimary}>
-                                Open in browser
+                                Open editor in browser
                             </a>
                         </div>
                     </div>
@@ -189,17 +189,10 @@ const faqs = [
                     </div>
                     <div>
                         <p class={s.forTheatreText}>
-                            Stagistic understands the craft of theatre: how a
-                            scene builds, how a musical number interrupts and
-                            transforms dialogue, how stage directions serve the
-                            director as much as the story. These aren't
-                            formatting rules. They're how theatre thinks.
+                            Stagistic understands the craft of theatre: how a scene builds, how a musical number interrupts and transforms dialogue, how stage directions serve the director as much as the story. These aren't formatting rules. They're how theatre thinks.
                         </p>
                         <p class={s.forTheatreText}>
-                            Whether you're writing a one-act play or a full
-                            three-act musical, the editor stays out of your way
-                            and keeps your work structured exactly as theatre
-                            demands.
+                            Whether you're writing a one-act play or a full two-act musical, the editor stays out of your way and keeps your work structured exactly as theatre demands.
                         </p>
                     </div>
                 </div>
@@ -208,7 +201,7 @@ const faqs = [
             <!-- Features -->
             <section class={s.features} id="features">
                 <div class={clsx(s.featuresInner, s.reveal)} data-reveal>
-                    <h2 class={s.featuresTitle}>What it includes.</h2>
+                    <h2 class={s.featuresTitle}>What's included.</h2>
                     <div class={s.featuresList}>
                         {
                             features.map((f) => (
@@ -249,15 +242,14 @@ const faqs = [
                 <div class={clsx(s.alphaInner, s.reveal)} data-reveal>
                     <div>
                         <h2 class={s.alphaTitle}>
-                            The editor is free.<br />Always.
+                            Stagistic Editor is free.<br />Forever.
                         </h2>
                         <p class={s.alphaText}>
                             Writing in Stagistic is free in your browser, with
                             no account or paywall. The editor will remain free.
                         </p>
                         <p class={s.alphaTextSecondary}>
-                            The source is available on GitHub. Future production
-                            tools may be paid; the editor will not be.
+                            There may be some product features in future that require a paid subscription, but the core writing experience will always be free and open source.
                         </p>
                     </div>
                     <div class={s.alphaCard}>
@@ -277,7 +269,7 @@ const faqs = [
                         </div>
                         <div class={s.alphaCtas}>
                             <a href="https://editor.stagistic.app" class={s.btnPrimary}>
-                                Open in browser
+                                Open editor in browser
                             </a>
                         </div>
                     </div>
@@ -297,10 +289,10 @@ const faqs = [
                             href="https://github.com/littlewall/stagistic"
                             class={s.footerLink}
                         >
-                            GitHub
+                            GitHub repo
                         </a>
-                        <a href="mailto:hello@stagistic.app" class={s.footerLink}>
-                            hello@stagistic.app
+                        <a href="mailto:hello@stagistic.com" class={s.footerLink}>
+                            hello@stagistic.com
                         </a>
                     </div>
                 </div>
