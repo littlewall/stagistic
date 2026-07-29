@@ -100,6 +100,9 @@ export {
 export {useKeyedFieldDrafts} from './hooks/useKeyedFieldDrafts';
 export * from './icons';
 export {
+    AppFooter,
+} from './layout/AppFooter';
+export {
     AppHeader,
     type AppHeaderProps,
     ScriptEditorAppHeader,
