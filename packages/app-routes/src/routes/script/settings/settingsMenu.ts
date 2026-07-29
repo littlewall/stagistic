@@ -76,7 +76,7 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
             {
                 kind: 'item',
                 id: SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
-                label: 'Title Page',
+                label: 'Title page',
                 panelId: SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
             },
             {
@@ -88,25 +88,25 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
             {
                 kind: 'item',
                 id: SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
-                label: 'Page Layout',
+                label: 'Page layout',
                 panelId: SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
             },
             {
                 kind: 'item',
                 id: SCRIPT_SETTINGS_PANEL_HEADERS,
-                label: 'Headers and Footers',
+                label: 'Headers and footers',
                 panelId: SCRIPT_SETTINGS_PANEL_HEADERS,
             },
             {
                 kind: 'item',
                 id: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
-                label: 'Visual Preferences',
+                label: 'Visual preferences',
                 panelId: SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
             },
             {
                 kind: 'expandable',
                 id: SCRIPT_SETTINGS_EXPANDABLE_ELEMENTS,
-                label: 'Blocks settings',
+                label: 'Block settings',
                 subItems: SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => ({
                     id: item.id,
                     label: item.label,

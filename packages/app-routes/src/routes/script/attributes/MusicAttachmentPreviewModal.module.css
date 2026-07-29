@@ -23,7 +23,7 @@
 
 .page {
     inline-size: 100%;
-    box-shadow: 0 1px 4px rgb(0 0 0 / 30%);
+    box-shadow: 0 1px 4px var(--color-shadow-popover);
 }
 
 .page canvas {

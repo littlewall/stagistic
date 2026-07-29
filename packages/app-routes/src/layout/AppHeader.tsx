@@ -9,9 +9,14 @@ import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../global-modals/GlobalModalsProvider';
 
-type AppHeaderProps = Pick<UIAppHeaderProps, 'onMenuAction' | 'isFullWidth'>;
+type AppHeaderProps = Pick<UIAppHeaderProps, 'isFullWidth'> & {
+    showScriptActions?: boolean,
+};
 
-export const AppHeader = (props: AppHeaderProps) => {
+export const AppHeader = ({
+    showScriptActions = true,
+    ...props
+}: AppHeaderProps) => {
     const navigate = useNavigate();
     const {openNewScript, openImportScript} = useGlobalModals();
 
@@ -19,8 +24,8 @@ export const AppHeader = (props: AppHeaderProps) => {
         <UIAppHeader
             {...props}
             onHome={() => void navigate('/')}
-            onNewScript={openNewScript}
-            onImportScript={openImportScript}
+            onNewScript={showScriptActions ? openNewScript : undefined}
+            onImportScript={showScriptActions ? openImportScript : undefined}
         />
     );
 };

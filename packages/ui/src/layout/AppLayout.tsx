@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import type {ReactNode} from 'react';
 
+import {AppFooter} from './AppFooter';
 import styles from './AppLayout.module.css';
 
 type AppLayoutProps = {
@@ -25,6 +26,7 @@ export const AppLayout = ({
                     <aside className={clsx(styles.sidebar)}>{sidebar}</aside>
                 ) : null}
             </div>
+            <AppFooter />
         </div>
     );
 };

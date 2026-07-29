@@ -5,8 +5,14 @@ import {
     useState,
 } from 'react';
 
-interface UseAnchoredMenuHeightArgs {
+import {
+    type AnchoredMenuPlacement,
+    resolveAnchoredMenuPlacement,
+} from './anchoredMenuPlacement';
+
+interface UseAnchoredMenuPlacementArgs {
     anchorRef: RefObject<HTMLElement | null>,
+    menuRef: RefObject<HTMLElement | null>,
     isOpen: boolean,
     viewportMargin?: number,
 }
@@ -17,15 +23,21 @@ type AnchoredMenuHeightStyle = CSSProperties & {
 
 const DEFAULT_VIEWPORT_MARGIN = 8;
 
-export const useAnchoredMenuHeight = ({
+export const useAnchoredMenuPlacement = ({
     anchorRef,
+    menuRef,
     isOpen,
     viewportMargin = DEFAULT_VIEWPORT_MARGIN,
-}: UseAnchoredMenuHeightArgs): AnchoredMenuHeightStyle => {
+}: UseAnchoredMenuPlacementArgs): {
+    placement: AnchoredMenuPlacement,
+    style: AnchoredMenuHeightStyle,
+} => {
+    const [placement, setPlacement] = useState<AnchoredMenuPlacement>('below');
     const [style, setStyle] = useState<AnchoredMenuHeightStyle>({});
 
     useLayoutEffect(() => {
         if (!isOpen || typeof window === 'undefined') {
+            setPlacement('below');
             setStyle({});
 
             return;
@@ -34,15 +46,24 @@ export const useAnchoredMenuHeight = ({
         let rafId = 0;
         const updateHeight = () => {
             const anchor = anchorRef.current;
+            const menu = menuRef.current;
 
-            if (!anchor) {
+            if (!anchor || !menu) {
                 return;
             }
 
             const anchorRect = anchor.getBoundingClientRect();
-            const maxHeight = Math.max(0, Math.floor(window.innerHeight - anchorRect.bottom - viewportMargin));
+            const resolved = resolveAnchoredMenuPlacement({
+                anchorTop: anchorRect.top,
+                anchorBottom: anchorRect.bottom,
+                menuHeight: menu.scrollHeight || menu.getBoundingClientRect().height,
+                viewportHeight: window.innerHeight,
+                viewportMargin,
+            });
+            const maxHeight = resolved.maxHeight;
             const nextHeight = `${maxHeight}px`;
 
+            setPlacement(resolved.placement);
             setStyle(previous => {
                 if (previous['--anchored-menu-max-height'] === nextHeight) {
                     return previous;
@@ -62,10 +83,15 @@ export const useAnchoredMenuHeight = ({
             ? null
             : new ResizeObserver(scheduleUpdate);
         const anchor = anchorRef.current;
+        const menu = menuRef.current;
 
         updateHeight();
         if (anchor) {
             resizeObserver?.observe(anchor);
+        }
+
+        if (menu) {
+            resizeObserver?.observe(menu);
         }
 
         window.addEventListener('resize', scheduleUpdate);
@@ -83,8 +109,12 @@ export const useAnchoredMenuHeight = ({
     }, [
         anchorRef,
         isOpen,
+        menuRef,
         viewportMargin,
     ]);
 
-    return style;
+    return {
+        placement,
+        style,
+    };
 };

@@ -70,7 +70,7 @@ export const EditorSidebar = ({
                 ) : null}
                 {!isLoading && !hasCharacters ? (
                     <p className={styles.emptyState}>
-                        No characters on stage yet. Add a Character block to start building your cast.
+                        No characters on stage yet. Add a character block to start building your cast.
                     </p>
                 ) : null}
                 {!isLoading && hasCharacters ? (

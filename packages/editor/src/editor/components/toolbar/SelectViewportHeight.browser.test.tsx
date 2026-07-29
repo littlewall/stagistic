@@ -95,7 +95,7 @@ afterEach(() => {
 });
 
 describe('Select viewport height', () => {
-    it('keeps anchored options scrollable inside the viewport', async () => {
+    it('flips anchored options above a trigger near the viewport bottom', async () => {
         renderFixture();
 
         const trigger = page.elementLocator(await waitForElement<HTMLButtonElement>('[aria-label="Shortcut"]'));
@@ -104,9 +104,12 @@ describe('Select viewport height', () => {
         await waitForAnimationFrame();
 
         const listbox = await waitForElement<HTMLElement>('[role="listbox"]');
-        const rect = listbox.getBoundingClientRect();
+        const listboxRect = listbox.getBoundingClientRect();
+        const triggerRect = (await waitForElement<HTMLButtonElement>('[aria-label="Shortcut"]'))
+            .getBoundingClientRect();
 
-        expect(rect.bottom).toBeLessThanOrEqual(window.innerHeight);
+        expect(listboxRect.top).toBeGreaterThanOrEqual(0);
+        expect(listboxRect.bottom).toBeLessThanOrEqual(triggerRect.top + 1);
 
         listbox.scrollTop = listbox.scrollHeight;
         await waitForAnimationFrame();
@@ -116,6 +119,6 @@ describe('Select viewport height', () => {
         const lastOptionRect = lastOption?.getBoundingClientRect();
 
         expect(lastOption?.textContent?.trim()).toBe('0');
-        expect(lastOptionRect?.bottom).toBeLessThanOrEqual(rect.bottom + 1);
+        expect(lastOptionRect?.bottom).toBeLessThanOrEqual(listboxRect.bottom + 1);
     });
 });

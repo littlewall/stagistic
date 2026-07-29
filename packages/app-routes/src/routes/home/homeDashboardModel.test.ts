@@ -31,14 +31,12 @@ const scripts = [
 ];
 
 describe('buildHomeDashboardModel', () => {
-    it('builds time-based sections', () => {
+    it('returns one newest-first script list', () => {
         const model = buildHomeDashboardModel({
-            scripts, query: '', sort: 'newest', now: NOW,
+            scripts, query: '', sort: 'newest',
         });
 
-        expect(model.continueWriting.map(item => item.id)).toEqual(['recent']);
-        expect(model.recentlyEdited.map(item => item.id)).toEqual(['month']);
-        expect(model.allScripts.map(item => item.id)).toEqual([
+        expect(model.scripts.map(item => item.id)).toEqual([
             'recent',
             'month',
             'old',
@@ -47,26 +45,25 @@ describe('buildHomeDashboardModel', () => {
 
     it('searches title and subtitle case-insensitively', () => {
         const byTitle = buildHomeDashboardModel({
-            scripts, query: 'alpha', sort: 'newest', now: NOW,
+            scripts, query: 'alpha', sort: 'newest',
         });
         const bySubtitle = buildHomeDashboardModel({
-            scripts, query: 'MOON', sort: 'newest', now: NOW,
+            scripts, query: 'MOON', sort: 'newest',
         });
 
-        expect(byTitle.allScripts.map(item => item.id)).toEqual(['month']);
-        expect(bySubtitle.allScripts.map(item => item.id)).toEqual(['recent']);
+        expect(byTitle.scripts.map(item => item.id)).toEqual(['month']);
+        expect(bySubtitle.scripts.map(item => item.id)).toEqual(['recent']);
     });
 
-    it('sorts all scripts alphabetically without changing recent sections', () => {
+    it('sorts scripts alphabetically', () => {
         const model = buildHomeDashboardModel({
-            scripts, query: '', sort: 'title', now: NOW,
+            scripts, query: '', sort: 'title',
         });
 
-        expect(model.allScripts.map(item => item.title)).toEqual([
+        expect(model.scripts.map(item => item.title)).toEqual([
             'Alpha',
             'Beta',
             'Gamma',
         ]);
-        expect(model.recentlyEdited.map(item => item.title)).toEqual(['Alpha']);
     });
 });

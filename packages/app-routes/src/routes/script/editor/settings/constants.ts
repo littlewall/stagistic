@@ -2,13 +2,6 @@ import {
     type ScriptBlockNodeType,
 } from '@stagistic/script';
 
-import {
-    SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO,
-    SCRIPT_SETTINGS_PANEL_HEADERS,
-    SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT,
-    SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES,
-} from '../../settings/settingsMenu';
-
 export const SCREENPLAY_CHARS_PER_INCH = 10;
 export const PX_PER_INCH = 96;
 export const MIN_PREVIEW_CONTENT_CHARS = 30;
@@ -63,26 +56,4 @@ export const BLOCK_PREVIEW_TEXT_COLOR: Record<ScriptBlockNodeType, string> = {
     dialogue: 'var(--color-block-dialogue)',
     lyrics: 'var(--color-block-lyrics)',
     note: 'var(--color-block-note, var(--color-block-stage-directions))',
-};
-
-export const PANEL_DESCRIPTIONS: Record<string, {
-    title: string,
-    description: string,
-}> = {
-    [SCRIPT_SETTINGS_PANEL_DOCUMENT_INFO]: {
-        title: 'Title Page',
-        description: 'Title page metadata',
-    },
-    [SCRIPT_SETTINGS_PANEL_VISUAL_PREFERENCES]: {
-        title: 'Visual Preferences',
-        description: 'Customize appearance in script editor.',
-    },
-    [SCRIPT_SETTINGS_PANEL_PAGE_LAYOUT]: {
-        title: 'Page Layout',
-        description: 'Page size, margins, and typography settings panel placeholder.',
-    },
-    [SCRIPT_SETTINGS_PANEL_HEADERS]: {
-        title: 'Headers and Footers',
-        description: 'Header and footer controls.',
-    },
 };

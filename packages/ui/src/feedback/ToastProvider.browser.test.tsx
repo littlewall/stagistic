@@ -90,7 +90,7 @@ describe('ToastProvider', () => {
         )).toBe(true);
 
         const closeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(
-            'button[aria-label="Zavřít oznámení"]',
+            'button[aria-label="Dismiss notification"]',
         ));
 
         expect(closeButtons).toHaveLength(3);

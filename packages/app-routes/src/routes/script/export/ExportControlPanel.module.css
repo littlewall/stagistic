@@ -3,8 +3,8 @@
     display: grid;
     gap: var(--space-2xl);
     align-content: start;
-    width: min(380px, 34vw);
-    min-width: 320px;
+    width: clamp(300px, 31vw, 380px);
+    min-width: 300px;
     padding: var(--space-2xl);
     background: var(--color-surface);
 }

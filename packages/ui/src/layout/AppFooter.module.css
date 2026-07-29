@@ -1,0 +1,64 @@
+.footer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    flex: 0 0 auto;
+    gap: var(--space-xl);
+    align-items: center;
+    min-height: calc(28px * var(--size-scale));
+    padding: var(--space-sm) var(--space-2xl);
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-tight);
+    color: var(--color-text-muted);
+    background: var(--color-surface);
+    border-top: 1px solid var(--color-border-subtle);
+}
+
+.alphaStatus {
+    justify-self: center;
+    white-space: nowrap;
+}
+
+.alphaLink {
+    display: inline;
+    min-height: 0;
+    padding: 0;
+    font: inherit;
+    font-weight: var(--font-weight-normal);
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    background: transparent;
+    border: 0;
+
+    &:hover {
+        color: var(--color-text);
+        background: transparent;
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 2px;
+    }
+}
+
+.feedbackLink {
+    justify-self: end;
+    color: inherit;
+    text-underline-offset: 2px;
+
+    &:hover {
+        color: var(--color-text);
+    }
+
+    &:focus-visible {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 2px;
+    }
+}
+
+.modalTitle {
+    margin: 0;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    line-height: var(--line-height-snug);
+}

@@ -29,6 +29,7 @@ export const ThemeModeToggle = ({
                         onChange('light');
                     }}
                     aria-label="Light theme"
+                    aria-pressed={themeMode === 'light'}
                 >
                     <LightThemeIcon className={styles.icon} aria-hidden="true" />
                 </Button>
@@ -38,6 +39,7 @@ export const ThemeModeToggle = ({
                         onChange('dark');
                     }}
                     aria-label="Dark theme"
+                    aria-pressed={themeMode === 'dark'}
                 >
                     <DarkThemeIcon className={styles.icon} aria-hidden="true" />
                 </Button>
@@ -47,6 +49,7 @@ export const ThemeModeToggle = ({
                         onChange('auto');
                     }}
                     aria-label="System theme"
+                    aria-pressed={themeMode === 'auto'}
                 >
                     <SystemThemeIcon className={styles.icon} aria-hidden="true" />
                 </Button>

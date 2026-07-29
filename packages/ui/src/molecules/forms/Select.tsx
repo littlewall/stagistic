@@ -8,7 +8,7 @@ import {
 } from 'react';
 
 import styles from './Select.module.css';
-import {useAnchoredMenuHeight} from './useAnchoredMenuHeight';
+import {useAnchoredMenuPlacement} from './useAnchoredMenuHeight';
 import {useDropdownDismiss} from './useDropdownDismiss';
 
 export interface SelectOption {
@@ -50,21 +50,27 @@ export const Select = ({
     };
 
     const selectRef = useRef<HTMLDivElement | null>(null);
+    const menuRef = useRef<HTMLDivElement | null>(null);
     const rawId = useId();
     const anchorName = `--select-${rawId.replace(/[^a-zA-Z0-9]/g, '')}` as const;
     const selectedOption = useMemo(
         () => options.find(option => option.value === value) ?? options[0] ?? null,
         [options, value],
     );
-    const menuHeightStyle = useAnchoredMenuHeight({
+    const menuPlacement = useAnchoredMenuPlacement({
         anchorRef: selectRef,
+        menuRef,
         isOpen,
     });
 
     useDropdownDismiss(isOpen, setIsOpen, selectRef);
 
     return (
-        <div className={clsx(styles.select, className)} ref={selectRef}>
+        <div
+            className={clsx(styles.select, className)}
+            ref={selectRef}
+            data-menu-placement={isOpen ? menuPlacement.placement : undefined}
+        >
             <button
                 id={id}
                 type="button"
@@ -92,10 +98,14 @@ export const Select = ({
             </button>
             {isOpen ? (
                 <div
-                    className={styles.menu}
+                    ref={menuRef}
+                    className={clsx(
+                        styles.menu,
+                        menuPlacement.placement === 'above' && styles.above,
+                    )}
                     style={{
                         positionAnchor: anchorName,
-                        ...menuHeightStyle,
+                        ...menuPlacement.style,
                     }}
                     role="listbox"
                     aria-labelledby={id}

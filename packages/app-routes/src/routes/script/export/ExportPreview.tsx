@@ -11,19 +11,25 @@ import {useExportContext} from './ExportProvider';
 import {renderPdfToCanvases} from './renderPdfToCanvases';
 
 export const ExportPreview = () => {
-    const {artifact, status} = useExportContext();
+    const {
+        artifact,
+        canExport,
+        status,
+    } = useExportContext();
     const pagesRef = useRef<HTMLDivElement | null>(null);
     const [pageCount, setPageCount] = useState(0);
     const [isRenderingPreview, setIsRenderingPreview] = useState(false);
     const [renderedArtifact, setRenderedArtifact] = useState<Blob | null>(null);
     const [zoom, setZoom] = useState(DEFAULT_EXPORT_PREVIEW_ZOOM);
-    const isBusy = status === 'regenerating' || isRenderingPreview || artifact !== renderedArtifact;
+    const isBusy = canExport
+        && (status === 'regenerating' || isRenderingPreview || artifact !== renderedArtifact);
     const busyLabel = pageCount > 0 ? 'Updating preview' : 'Preparing preview';
 
     useEffect(() => {
-        if (!artifact || !pagesRef.current) {
+        if (!canExport || !artifact || !pagesRef.current) {
             setIsRenderingPreview(false);
             setRenderedArtifact(null);
+            setPageCount(0);
 
             return;
         }
@@ -66,7 +72,11 @@ export const ExportPreview = () => {
         return () => {
             cancelled = true;
         };
-    }, [artifact, zoom]);
+    }, [
+        artifact,
+        canExport,
+        zoom,
+    ]);
 
     return (
         <section
@@ -75,15 +85,35 @@ export const ExportPreview = () => {
             aria-busy={isBusy}
         >
             <div className={styles.toolbar}>
-                <span>{pageCount > 0 ? `${pageCount} pages` : 'No preview'}</span>
+                <span>{pageCount > 0 ? `${pageCount} pages` : 'Preview'}</span>
                 <div className={styles.zoomControls}>
-                    <button type="button" onClick={() => setZoom(value => Math.max(0.5, value - 0.1))}>-</button>
+                    <button
+                        type="button"
+                        aria-label="Zoom out"
+                        disabled={!canExport || pageCount === 0}
+                        onClick={() => setZoom(value => Math.max(0.5, value - 0.1))}
+                    >
+                        -
+                    </button>
                     <span>{Math.round(zoom * 100)}%</span>
-                    <button type="button" onClick={() => setZoom(value => Math.min(1.5, value + 0.1))}>+</button>
+                    <button
+                        type="button"
+                        aria-label="Zoom in"
+                        disabled={!canExport || pageCount === 0}
+                        onClick={() => setZoom(value => Math.min(1.5, value + 0.1))}
+                    >
+                        +
+                    </button>
                 </div>
             </div>
             <div className={styles.pages} ref={pagesRef}>
-                {!artifact ? <div className={styles.empty}>Preview will appear here.</div> : null}
+                {!canExport ? (
+                    <div className={styles.empty}>
+                        Add script content to generate a PDF preview.
+                    </div>
+                ) : !artifact ? (
+                    <div className={styles.empty}>Preview will appear here.</div>
+                ) : null}
             </div>
             {isBusy ? (
                 <div
@@ -97,7 +127,7 @@ export const ExportPreview = () => {
                     </div>
                 </div>
             ) : null}
-            {status === 'error' ? (
+            {canExport && status === 'error' ? (
                 <div className={styles.error} role="alert">Export preview failed.</div>
             ) : null}
         </section>

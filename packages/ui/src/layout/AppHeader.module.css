@@ -94,8 +94,8 @@
     &[data-focus-visible] {
         background: color-mix(in oklch, var(--color-surface-raised) 70%, transparent);
         border-color: transparent;
-        outline: none;
-        box-shadow: none;
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
     }
 }
 
@@ -214,8 +214,10 @@
         border-radius: var(--radius-md);
         transition: background .15s ease, box-shadow .15s ease;
 
-        &:focus-visible {
-            outline: none;
+        &:focus-visible,
+        &[data-focus-visible] {
+            outline: var(--focus-ring);
+            outline-offset: var(--focus-ring-offset);
         }
 
         &[data-focused],
@@ -240,11 +242,6 @@
         margin: var(--space-sm) 0;
         background: var(--color-border);
     }
-}
-
-.accountPopoverContent {
-    display: flex;
-    flex-direction: column;
 }
 
 .themeControlsContainer {
@@ -288,8 +285,8 @@
         &[data-focus-visible] {
             background: color-mix(in oklch, var(--color-surface-raised) 70%, transparent);
             border-color: transparent;
-            outline: none;
-            box-shadow: none;
+            outline: var(--focus-ring);
+            outline-offset: var(--focus-ring-offset);
         }
 
         &.active {

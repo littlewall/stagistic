@@ -14,7 +14,11 @@ const sanitizeFileName = (value: string) => {
 };
 
 export const ExportDownloadButton = () => {
-    const {artifact, script} = useExportContext();
+    const {
+        artifact,
+        canExport,
+        script,
+    } = useExportContext();
 
     const download = () => {
         if (!artifact) {
@@ -38,7 +42,7 @@ export const ExportDownloadButton = () => {
             type="button"
             size="sm"
             onPress={download}
-            isDisabled={!artifact}
+            isDisabled={!canExport || !artifact}
         >
             Download PDF
         </Button>

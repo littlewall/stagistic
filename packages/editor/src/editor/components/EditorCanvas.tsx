@@ -2,6 +2,7 @@ import type {HeaderFooterSettings} from '@stagistic/script';
 import {type Editor as TiptapEditor, EditorContent} from '@tiptap/react';
 import {type CSSProperties, useRef} from 'react';
 
+import {SCRIPT_EDITOR_DESCRIPTION_ID} from '../accessibility';
 import type {
     EditorMusicRemoveRequest,
     PersistentCharacterRef,
@@ -54,6 +55,12 @@ export const EditorCanvas = ({
             ref={canvasRef}
             style={style}
         >
+            <p
+                className={styles.screenReaderInstructions}
+                id={SCRIPT_EDITOR_DESCRIPTION_ID}
+            >
+                Use the toolbar or keyboard shortcuts to change block types and formatting.
+            </p>
             <EditorContent
                 className={styles.content}
                 editor={editor}

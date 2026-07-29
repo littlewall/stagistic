@@ -100,6 +100,9 @@ export {
 export {useKeyedFieldDrafts} from './hooks/useKeyedFieldDrafts';
 export * from './icons';
 export {
+    AppFooter,
+} from './layout/AppFooter';
+export {
     AppHeader,
     type AppHeaderProps,
     ScriptEditorAppHeader,
@@ -136,7 +139,7 @@ export {
 export type {SelectOption} from './molecules/forms/Select';
 export {Select} from './molecules/forms/Select';
 export {TextInput} from './molecules/forms/TextInput';
-export {useAnchoredMenuHeight} from './molecules/forms/useAnchoredMenuHeight';
+export {useAnchoredMenuPlacement} from './molecules/forms/useAnchoredMenuHeight';
 export {useDropdownDismiss} from './molecules/forms/useDropdownDismiss';
 export {ScriptActionsMenu} from './molecules/ScriptActionsMenu';
 export {

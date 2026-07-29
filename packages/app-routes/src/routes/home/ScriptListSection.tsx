@@ -4,15 +4,12 @@ import {
     ScriptIcon,
     SubtleText,
 } from '@stagistic/ui';
-import type {ReactNode} from 'react';
 
 import {formatLastEdited} from '../../utils/formatLastEdited';
 import styles from './HomeRoute.module.css';
 
 interface ScriptListSectionProps {
-    title: string,
     scripts: ScriptSummary[],
-    action?: ReactNode,
     onOpenScript: (scriptId: string) => void,
     onDeleteScript: (script: ScriptSummary) => void,
     onRenameScript: (script: ScriptSummary) => void,
@@ -20,9 +17,7 @@ interface ScriptListSectionProps {
 }
 
 export const ScriptListSection = ({
-    title,
     scripts,
-    action,
     onOpenScript,
     onDeleteScript,
     onRenameScript,
@@ -33,11 +28,7 @@ export const ScriptListSection = ({
     }
 
     return (
-        <section className={styles.listSection}>
-            <div className={styles.sectionHeader}>
-                <h2 className={styles.sectionTitle}>{title}</h2>
-                {action ? <div className={styles.sectionAction}>{action}</div> : null}
-            </div>
+        <section className={styles.listSection} aria-label="Scripts">
             <div className={styles.scriptList}>
                 {scripts.map(script => (
                     <div key={script.id} className={styles.scriptRow}>

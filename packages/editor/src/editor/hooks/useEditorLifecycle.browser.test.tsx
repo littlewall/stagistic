@@ -96,4 +96,22 @@ describe('useEditorLifecycle', () => {
         expect(activeBlock.blockType).toBe('scene');
         expect(activeBlock.id).toBe('scene-1');
     });
+
+    it('renders a quiet prompt in the active empty scene', async () => {
+        renderEditor();
+
+        const placeholderBlock = await poll(
+            () => document.querySelector<HTMLElement>('[data-placeholder]'),
+            'visible editor placeholder',
+        );
+        const placeholderStyle = getComputedStyle(placeholderBlock, '::before');
+        const colorProbe = document.createElement('span');
+
+        colorProbe.style.color = 'var(--color-text-placeholder)';
+        document.body.appendChild(colorProbe);
+
+        expect(placeholderBlock.dataset.placeholder).toBe('Start writing…');
+        expect(placeholderStyle.content).not.toBe('none');
+        expect(placeholderStyle.color).toBe(getComputedStyle(colorProbe).color);
+    });
 });

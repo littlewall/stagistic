@@ -138,7 +138,7 @@ export const PageLayoutSettingsPanel = ({
 
     return (
         <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Page Layout</h3>
+            <h3 className={panelStyles.panelTitle}>Page layout</h3>
             <div className={formControlStyles.previewCard}>
                 <div className={styles.pageSettingsGrid}>
                     <div className={formControlStyles.field}>

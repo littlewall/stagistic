@@ -38,7 +38,7 @@ export const PlaceholderExtension = Extension.create<{
 
     addOptions() {
         return {
-            placeholder: 'Start writing your script',
+            placeholder: 'Start writing…',
         };
     },
 

@@ -1,7 +1,8 @@
+import {useRef} from 'react';
 import {
     Button,
-    DropZone,
     FileTrigger,
+    useDrop,
 } from 'react-aria-components';
 
 import styles from '../ImportScriptModal.module.css';
@@ -13,13 +14,21 @@ export const ImportDropZone = ({
     onFileSelect,
     onPickFile,
 }: ImportDropZoneProps) => {
+    const dropZoneRef = useRef<HTMLDivElement | null>(null);
+    const {dropProps, isDropTarget} = useDrop({
+        ref: dropZoneRef,
+        getDropOperation: () => 'copy',
+        onDrop,
+    });
+    const dropZoneProps = {
+        ...dropProps,
+        className: styles.dropZone,
+        'data-drop-target': isDropTarget || undefined,
+    };
+
     if (onPickFile) {
         return (
-            <DropZone
-                className={styles.dropZone}
-                getDropOperation={() => 'copy'}
-                onDrop={onDrop}
-            >
+            <div {...dropZoneProps} ref={dropZoneRef}>
                 <Button
                     className={styles.dropZoneTrigger}
                     onPress={() => {
@@ -29,16 +38,12 @@ export const ImportDropZone = ({
                     <span className={styles.dropZoneLabel}>{fileLabel}</span>
                     <span className={styles.dropZoneHint}>Drop a .stagistic file or click to browse.</span>
                 </Button>
-            </DropZone>
+            </div>
         );
     }
 
     return (
-        <DropZone
-            className={styles.dropZone}
-            getDropOperation={() => 'copy'}
-            onDrop={onDrop}
-        >
+        <div {...dropZoneProps} ref={dropZoneRef}>
             <FileTrigger
                 acceptedFileTypes={['.stagistic']}
                 onSelect={onFileSelect}
@@ -48,6 +53,6 @@ export const ImportDropZone = ({
                     <span className={styles.dropZoneHint}>Drop a .stagistic file or click to browse.</span>
                 </Button>
             </FileTrigger>
-        </DropZone>
+        </div>
     );
 };

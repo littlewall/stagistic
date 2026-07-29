@@ -29,7 +29,7 @@ export const StructureMarkersSettingsPanel = ({
 
     return (
         <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Structure Markers</h3>
+            <h3 className={panelStyles.panelTitle}>Structure markers</h3>
             <div className={formControlStyles.flatGrid}>
                 <div className={formControlStyles.field}>
                     <label className={formControlStyles.label} htmlFor="settings-act-lines-before">
