@@ -17,7 +17,6 @@
     gap: var(--space-lg);
     align-items: start;
     min-width: 0;
-    min-height: calc(116px * var(--size-scale));
     padding: var(--space-xl);
     font: inherit;
     color: var(--color-text);
@@ -64,19 +63,17 @@
     line-height: var(--line-height-snug);
 }
 
-.startActionDescription,
-.startActionStatus {
+.startActionDescription {
     font-size: var(--font-size-sm);
     line-height: var(--line-height-normal);
     color: var(--color-text-muted);
     text-wrap: pretty;
 }
 
-.startActionStatus {
-    margin-top: auto;
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-xs);
-    letter-spacing: var(--letter-spacing-sm);
+.startActionError {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-danger);
 }
 
 .library {

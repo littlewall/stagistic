@@ -16,6 +16,7 @@ describe('AccountMenuContent', () => {
         expect(markup).toContain('aria-label="Theme mode"');
         expect(markup).toContain('aria-label="System theme" aria-pressed="true"');
         expect(markup).toContain('aria-label="Light theme" aria-pressed="false"');
+        expect(markup).toContain('Appearance');
         expect(markup).not.toContain('Account settings');
         expect(markup).not.toContain('Sign out');
     });

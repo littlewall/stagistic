@@ -1,8 +1,9 @@
-import {useScripts} from '@stagistic/app-core';
+import {useScriptRepository, useScripts} from '@stagistic/app-core';
 import {
     AppLayout,
     Button,
     Input,
+    LoaderOverlay,
     PageContainer,
     PageTitle,
     PlusIcon,
@@ -32,11 +33,14 @@ const SORT_OPTIONS = [{value: 'newest', label: 'Newest first'}, {value: 'title',
 
 export const HomeRoute = () => {
     const navigate = useNavigate();
+    const repository = useScriptRepository();
     const {
         scriptSummaries,
         isLoading: scriptsLoading,
         error,
         refreshScripts,
+        createScript,
+        deleteScript: deleteScriptRecord,
     } = useScripts();
     const {
         openNewScript,
@@ -47,6 +51,8 @@ export const HomeRoute = () => {
     } = useGlobalModals();
     const [query, setQuery] = useState('');
     const [sort, setSort] = useState<ScriptSort>('newest');
+    const [isCreatingExample, setIsCreatingExample] = useState(false);
+    const [exampleError, setExampleError] = useState<string | null>(null);
 
     const dashboard = useMemo(() => buildHomeDashboardModel({
         scripts: scriptSummaries,
@@ -73,9 +79,45 @@ export const HomeRoute = () => {
     const duplicateScript = useCallback((script: {id: string, title: string}) => {
         openDuplicateScript({id: script.id, title: script.title});
     }, [openDuplicateScript]);
+    const createExample = useCallback(async () => {
+        setIsCreatingExample(true);
+        setExampleError(null);
+
+        try {
+            const {createExampleScript} = await import('./example-script/createExampleScript');
+            const example = await createExampleScript({
+                actions: {
+                    createScript,
+                    deleteScript: deleteScriptRecord,
+                },
+                repository,
+            });
+
+            void navigate(`/script/${example.scriptId}/editor`);
+        } catch (caughtError) {
+            console.error('Could not create example script.', caughtError);
+            setExampleError('Couldn’t create the example script. Please try again.');
+        } finally {
+            setIsCreatingExample(false);
+        }
+    }, [
+        createScript,
+        deleteScriptRecord,
+        navigate,
+        repository,
+    ]);
+
+    if (isCreatingExample) {
+        return (
+            <LoaderOverlay
+                label="Preparing example script"
+                messages={['Creating script and loading attachments']}
+            />
+        );
+    }
 
     return (
-        <AppLayout header={<AppHeader showScriptActions={false} />}>
+        <AppLayout header={<AppHeader contentInset="page" showScriptActions={false} />}>
             <PageContainer variant="standard">
                 <div className={styles.content}>
                     <PageTitle>Scripts</PageTitle>
@@ -113,7 +155,8 @@ export const HomeRoute = () => {
                         <button
                             type="button"
                             className={styles.startAction}
-                            disabled
+                            disabled={isCreatingExample}
+                            onClick={() => void createExample()}
                         >
                             <ScriptIcon className={styles.startActionIcon} aria-hidden="true" />
                             <span className={styles.startActionCopy}>
@@ -121,7 +164,11 @@ export const HomeRoute = () => {
                                 <span className={styles.startActionDescription}>
                                     Explore the editor with a pre-filled script.
                                 </span>
-                                <span className={styles.startActionStatus}>Not available yet</span>
+                                {exampleError ? (
+                                    <span className={styles.startActionError} role="alert">
+                                        {exampleError}
+                                    </span>
+                                ) : null}
                             </span>
                         </button>
                     </div>

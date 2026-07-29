@@ -38,6 +38,13 @@ const createBlock = (type: string, content: ScriptNode[] = []): ScriptNode => {
     return {...block, content};
 };
 
+const parseAsideContent = (source: string, line: number) => {
+    const trimmed = source.trim();
+    const inner = trimmed.slice(1, -1).trim();
+
+    return parseInlineText(inner, line);
+};
+
 const isCharacterCueLine = (value: string) => {
     const {base} = splitTrailingParentheticalSuffix(value);
     const candidate = base || value.trim();
@@ -65,7 +72,7 @@ const parseCharacterCue = (source: string, line: number) => {
     const blocks = [createBlock('character', [{type: 'text', text: names.join('/')}])];
 
     if (suffix) {
-        blocks.push(createBlock('aside', parseInlineText(suffix, line)));
+        blocks.push(createBlock('aside', parseAsideContent(suffix, line)));
     }
 
     return blocks;
@@ -253,7 +260,10 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
             }
 
             if (isParenthetical(rawLine)) {
-                blocks.push({line: lineNumber, node: createBlock('aside', parseInlineText(trimmed, lineNumber))});
+                blocks.push({
+                    line: lineNumber,
+                    node: createBlock('aside', parseAsideContent(trimmed, lineNumber)),
+                });
 
                 return;
             }

@@ -1,6 +1,9 @@
 import '@stagistic/ui/styles/base.css';
 
-import {createDefaultScriptDocument} from '@stagistic/script';
+import {
+    createDefaultScriptDocument,
+    type ScriptDocument,
+} from '@stagistic/script';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
@@ -10,6 +13,7 @@ import {
     expect,
     it,
 } from 'vite-plus/test';
+import {userEvent} from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../context';
 import ScriptEditor from '../Editor';
@@ -49,7 +53,9 @@ const poll = async <T, >(get: () => T | null | undefined, label: string): Promis
     throw new Error(`Timed out waiting for ${label}`);
 };
 
-const renderEditor = () => {
+const renderEditor = (
+    initialValue: ScriptDocument = createDefaultScriptDocument('scene-1'),
+) => {
     const host = document.createElement('div');
 
     host.style.width = '1024px';
@@ -60,7 +66,7 @@ const renderEditor = () => {
 
     root.render(
         <ScriptEditor
-            document={{initialValue: createDefaultScriptDocument('scene-1')}}
+            document={{initialValue}}
             layout={{autoFocus: true}}
         >
             <ScriptEditor.LeftSidebar>
@@ -113,5 +119,75 @@ describe('useEditorLifecycle', () => {
         expect(placeholderBlock.dataset.placeholder).toBe('Start writing…');
         expect(placeholderStyle.content).not.toBe('none');
         expect(placeholderStyle.color).toBe(getComputedStyle(colorProbe).color);
+    });
+
+    it('does not render the prompt in an empty block when another block contains text', async () => {
+        const scriptDocument = createDefaultScriptDocument('scene-1');
+
+        scriptDocument.content.push({
+            type: 'stageDirection',
+            attrs: {id: 'stage-direction-1'},
+            content: [{type: 'text', text: 'The work light fades.'}],
+        });
+        renderEditor(scriptDocument);
+
+        await poll(
+            () => (window as LifecycleTestWindow).__lifecycleTestEditor,
+            'editor instance',
+        );
+
+        expect(document.querySelector('[data-placeholder]')).toBeNull();
+    });
+
+    it('does not render the prompt in an empty block when another block contains a non-text element', async () => {
+        const scriptDocument = createDefaultScriptDocument('scene-1');
+
+        scriptDocument.content.push({
+            type: 'stageDirection',
+            attrs: {id: 'music-block'},
+            content: [{
+                type: 'musicStart',
+                attrs: {
+                    musicId: 'music-1',
+                    mode: 'open',
+                    title: 'One Small Light',
+                    kind: 'song',
+                },
+            }],
+        });
+        renderEditor(scriptDocument);
+
+        await poll(
+            () => (window as LifecycleTestWindow).__lifecycleTestEditor,
+            'editor instance',
+        );
+
+        expect(document.querySelector('[data-placeholder]')).toBeNull();
+    });
+
+    it('dismisses the prompt after the first editor interaction', async () => {
+        renderEditor();
+
+        const placeholderBlock = await poll(
+            () => document.querySelector<HTMLElement>('[data-placeholder]'),
+            'visible editor placeholder',
+        );
+
+        await userEvent.click(placeholderBlock);
+
+        expect(document.querySelector('[data-placeholder]')).toBeNull();
+    });
+
+    it('dismisses the prompt after the first keyboard interaction', async () => {
+        renderEditor();
+
+        await poll(
+            () => document.querySelector<HTMLElement>('[data-placeholder]'),
+            'visible editor placeholder',
+        );
+
+        await userEvent.keyboard('{ArrowRight}');
+
+        expect(document.querySelector('[data-placeholder]')).toBeNull();
     });
 });
