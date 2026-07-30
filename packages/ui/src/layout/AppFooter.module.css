@@ -56,9 +56,8 @@
     }
 }
 
-.modalTitle {
-    margin: 0;
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-medium);
-    line-height: var(--line-height-snug);
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--space-md);
 }

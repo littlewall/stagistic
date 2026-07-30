@@ -72,6 +72,7 @@ export {
 export {ImportScriptModal} from './dialogs/ImportScriptModal';
 export {ModalDialog} from './dialogs/ModalDialog';
 export {NewScriptModal} from './dialogs/NewScriptModal';
+export {PrereleaseNotice} from './dialogs/PrereleaseNotice';
 export {
     RemoveAttachmentModal,
     type RemoveAttachmentModalProps,

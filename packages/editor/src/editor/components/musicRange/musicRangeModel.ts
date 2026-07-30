@@ -121,6 +121,10 @@ export const canDropMusicOutAtBoundary = (
         return false;
     }
 
+    if (target.blockType === 'act' || target.blockType === 'scene') {
+        return false;
+    }
+
     if (!musicId) {
         return snapshot.music.some(music => {
             const start = blocksById.get(music.startBlockId);

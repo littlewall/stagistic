@@ -22,6 +22,7 @@ import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import {AppHeader} from '../../layout/AppHeader';
+import {useDocumentTitle} from '../../useDocumentTitle';
 import {
     buildHomeDashboardModel,
     type ScriptSort,
@@ -32,6 +33,8 @@ import {ScriptListSection} from './ScriptListSection';
 const SORT_OPTIONS = [{value: 'newest', label: 'Newest first'}, {value: 'title', label: 'Title A–Z'}];
 
 export const HomeRoute = () => {
+    useDocumentTitle('Scripts');
+
     const navigate = useNavigate();
     const repository = useScriptRepository();
     const {

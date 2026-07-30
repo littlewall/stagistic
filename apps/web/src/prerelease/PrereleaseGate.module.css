@@ -1,0 +1,12 @@
+.acknowledgement {
+    margin: var(--space-md) 0 0;
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+    text-wrap: pretty;
+}
+
+.actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: var(--space-md);
+}
