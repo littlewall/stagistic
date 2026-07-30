@@ -3,7 +3,7 @@
     --color-blob-border: rgb(0 0 0 / .015);
 
     min-height: 100vh;
-    background: var(--color-bg);
+    background: var(--color-stage-nav-bg);
 }
 
 .nav {
@@ -27,7 +27,7 @@
     max-width: 72rem;
     height: 3rem;
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 0;
 }
 
 .navLogo {
