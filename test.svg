@@ -1,0 +1,70 @@
+<svg
+  width="135"
+  height="111"
+  viewBox="0 0 135 111"
+  xmlns="http://www.w3.org/2000/svg"
+  aria-label="Stagistic Editor"
+  role="img"
+>
+  <!-- Portál -->
+  <path
+    fill="#3d2a1d"
+    d="
+      M20 96
+      V31.5
+      C20 12.1 36 0 60 0
+      H95
+      C119 0 135 12.1 135 31.5
+      V96
+      Z
+    "
+  />
+
+  <!-- Plane protíná přesně levý spodní roh portálu (20, 96) -->
+  <path
+    fill="#e2a05f"
+    d="
+      M48 76
+      H135
+      V96
+      L123.8 111
+      H-1
+      Z
+    "
+  />
+
+  <!-- Struktura scénáře -->
+  <g fill="#fffaf6">
+    <!-- Character -->
+    <rect
+      x="59.5"
+      y="21.5"
+      width="38"
+      height="15"
+      rx="7.5"
+    />
+
+    <!-- Dialogue -->
+    <rect
+      x="38.5"
+      y="50.5"
+      width="83"
+      height="10"
+      rx="5"
+    />
+    <rect
+      x="38.5"
+      y="68"
+      width="83"
+      height="10"
+      rx="5"
+    />
+    <rect
+      x="38.5"
+      y="84.5"
+      width="59"
+      height="10"
+      rx="5"
+    />
+  </g>
+</svg>

@@ -43,6 +43,7 @@ export type AppHeaderProps = {
     onNewScript?: () => void,
     onImportScript?: () => void,
     isFullWidth?: boolean,
+    contentInset?: 'default' | 'page',
 };
 
 export const AppHeader = ({
@@ -52,6 +53,7 @@ export const AppHeader = ({
     onNewScript,
     onImportScript,
     isFullWidth = false,
+    contentInset = 'default',
 }: AppHeaderProps) => {
     const [themeMode, setThemeMode] = useState<AppThemeMode>(() => readPreferredAppThemeMode());
 
@@ -74,7 +76,11 @@ export const AppHeader = ({
                 data-tauri-drag-region
                 aria-hidden="true"
             />
-            <div className={clsx(styles.inner, isFullWidth && styles.full)}>
+            <div className={clsx(
+                styles.inner,
+                isFullWidth && styles.full,
+                contentInset === 'page' && styles.pageInset,
+            )}>
                 <div className={styles.leftControls}>
                     <Tooltip label="Home" placement="bottom">
                         <Button

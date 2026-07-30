@@ -4,6 +4,7 @@ import {
 
 import {
     CHARACTER_TAG_MARK_NAME,
+    getScriptBlockId,
     MUSIC_MODE_ATTR,
     MUSIC_OUT_NODE_NAME,
     MUSIC_START_NODE_NAME,
@@ -128,6 +129,10 @@ The lights return. @@out 1
             'stageDirection',
             'note',
         ]);
+        const blockIds = result.document.content.map(getScriptBlockId);
+
+        expect(blockIds.every(Boolean)).toBe(true);
+        expect(new Set(blockIds).size).toBe(blockIds.length);
         expect(getText(result.document.content[2])).toBe('ALL LIGHTS SNAP OUT');
 
         const tagOnly = result.document.content[3].content?.[0];
@@ -173,6 +178,22 @@ Hello.
 `);
 
         expect(getText(result.document.content[0])).toBe('TOMMY/REBECCA/MICHAEL');
+    });
+
+    it('stores aside content without the presentation parentheses', () => {
+        const result = parseStagistic(`PETER (from the door)
+(quietly)
+Hello.
+`);
+
+        expect(result.document.content.map(node => node.type)).toEqual([
+            'character',
+            'aside',
+            'aside',
+            'dialogue',
+        ]);
+        expect(getText(result.document.content[1])).toBe('from the door');
+        expect(getText(result.document.content[2])).toBe('quietly');
     });
 
     it('parses inline dialogue and one-act scene headings', () => {

@@ -5,7 +5,10 @@ import {
     CHARACTER_TAG_KEY_ATTR,
     CHARACTER_TAG_MARK_NAME,
 } from '../characters';
-import type {ScriptNode} from '../document';
+import {
+    createScriptBlockNode,
+    type ScriptNode,
+} from '../document';
 import {
     MUSIC_ID_ATTR,
     MUSIC_KIND_ATTR,
@@ -224,7 +227,10 @@ export const parseStageDirectionLine = (source: string, line: number): ParsedSta
 
     return [
         {
-            node: {type: 'stageDirection', content},
+            node: {
+                ...createScriptBlockNode('stageDirection'),
+                content,
+            },
             music: music.length > 0 ? music : undefined,
         },
     ];

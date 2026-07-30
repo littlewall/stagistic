@@ -44,27 +44,6 @@ const keyDownHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) 
     },
 };
 
-const normalizeActiveCharacterDelimiters = (editor: Editor) => {
-    const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
-
-    if (!block || block.blockType !== 'character') {
-        return;
-    }
-
-    const text = block.node.textContent ?? '';
-    const normalized = normalizeCharacterEditorDelimiters(text);
-
-    if (normalized === text) {
-        return;
-    }
-
-    const selectionOffset = Math.max(0, Math.min(editor.state.selection.from - block.from, normalized.length));
-    let tr = editor.state.tr.insertText(normalized, block.from, block.to);
-
-    tr = tr.setSelection(TextSelection.create(tr.doc, block.from + selectionOffset));
-    editor.view.dispatch(tr);
-};
-
 const handleCharacterInput = (
     context: BlockContext,
     from: number,
@@ -84,10 +63,16 @@ const handleCharacterInput = (
 
     // '/' is the canonical delimiter; a typed '+' is normalized to '/' too.
     if (text === '/' || text === '+') {
-        const tr = context.editor.state.tr.insertText(text, from, to);
+        const replaceFrom = Math.max(0, Math.min(from - context.block.from, blockText.length));
+        const replaceTo = Math.max(replaceFrom, Math.min(to - context.block.from, blockText.length));
+        const nextText = `${blockText.slice(0, replaceFrom)}${text}${blockText.slice(replaceTo)}`;
+        const nextPrefix = `${blockText.slice(0, replaceFrom)}${text}`;
+        const normalized = normalizeCharacterEditorDelimiters(nextText);
+        const selectionOffset = normalizeCharacterEditorDelimiters(nextPrefix).length;
+        let tr = context.editor.state.tr.insertText(normalized, context.block.from, context.block.to);
 
+        tr = tr.setSelection(TextSelection.create(tr.doc, context.block.from + selectionOffset));
         context.editor.view.dispatch(tr);
-        normalizeActiveCharacterDelimiters(context.editor);
 
         return true;
     }

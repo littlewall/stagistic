@@ -11,11 +11,13 @@ import {
 import {userEvent} from 'vite-plus/test/browser';
 
 import {HomeRoute} from './HomeRoute';
+import {createExampleScript} from './example-script/createExampleScript';
 
 const {
     headerProps,
     modalActions,
     scriptsState,
+    scriptActions,
 } = vi.hoisted(() => ({
     headerProps: {
         showScriptActions: null as boolean | null,
@@ -30,6 +32,10 @@ const {
     scriptsState: {
         summaries: [] as ScriptSummary[],
     },
+    scriptActions: {
+        createScript: vi.fn(),
+        deleteScript: vi.fn(),
+    },
 }));
 
 vi.mock('@stagistic/app-core', async importOriginal => {
@@ -42,9 +48,15 @@ vi.mock('@stagistic/app-core', async importOriginal => {
             isLoading: false,
             error: null,
             refreshScripts: vi.fn(),
+            ...scriptActions,
         }),
+        useScriptRepository: () => ({}),
     };
 });
+
+vi.mock('./example-script/createExampleScript', () => ({
+    createExampleScript: vi.fn(),
+}));
 
 vi.mock('../../global-modals/GlobalModalsProvider', () => ({
     useGlobalModals: () => modalActions,
@@ -99,6 +111,8 @@ afterEach(() => {
     scriptsState.summaries = [];
     headerProps.showScriptActions = null;
     Object.values(modalActions).forEach(action => action.mockReset());
+    Object.values(scriptActions).forEach(action => action.mockReset());
+    vi.mocked(createExampleScript).mockReset();
 });
 
 describe('HomeRoute', () => {
@@ -112,16 +126,41 @@ describe('HomeRoute', () => {
 
         expect(newScript).toBeTruthy();
         expect(importScript).toBeTruthy();
-        expect(exampleScript?.disabled).toBe(true);
+        expect(exampleScript?.disabled).toBe(false);
         expect(document.querySelector('[role="group"][aria-label="Start a script"]')).toBeTruthy();
         expect(document.querySelector('input[type="search"]')).toBeNull();
         expect(headerProps.showScriptActions).toBe(false);
 
+        vi.mocked(createExampleScript).mockResolvedValue({
+            scriptId: 'example-script',
+            title: 'Example musical',
+        });
+
         await userEvent.click(newScript as HTMLButtonElement);
         await userEvent.click(importScript as HTMLButtonElement);
+        await userEvent.click(exampleScript as HTMLButtonElement);
 
         expect(modalActions.openNewScript).toHaveBeenCalledTimes(1);
         expect(modalActions.openImportScript).toHaveBeenCalledTimes(1);
+        await expect.poll(() => vi.mocked(createExampleScript).mock.calls).toHaveLength(1);
+    });
+
+    it('replaces the home page with a full-page loader while creating an example script', async () => {
+        vi.mocked(createExampleScript).mockImplementation(() => new Promise(() => {}));
+
+        mountHome();
+        await waitForText('No scripts yet.');
+
+        await userEvent.click(findButton('Create example script') as HTMLButtonElement);
+
+        await expect.poll(() => document.querySelector('[role="status"]')).toBeTruthy();
+
+        const progressBar = document.querySelector('[role="progressbar"]');
+
+        expect(progressBar?.getAttribute('aria-label')).toBe('Preparing example script');
+        expect(document.body.textContent).toContain('Creating script and loading attachments');
+        expect(findButton('New script')).toBeUndefined();
+        expect(document.querySelector('[data-testid="app-header"]')).toBeNull();
     });
 
     it('shows each script once in a single searchable library', async () => {

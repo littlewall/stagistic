@@ -1,0 +1,18 @@
+.content {
+    height: 100%;
+    opacity: 0;
+    animation: miniEditorContentIn .36s 1.32s ease-out both;
+}
+
+@keyframes miniEditorContentIn {
+    to {
+        opacity: 1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .content {
+        opacity: 1;
+        animation: none;
+    }
+}

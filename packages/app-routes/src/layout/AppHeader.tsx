@@ -9,7 +9,7 @@ import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../global-modals/GlobalModalsProvider';
 
-type AppHeaderProps = Pick<UIAppHeaderProps, 'isFullWidth'> & {
+type AppHeaderProps = Pick<UIAppHeaderProps, 'contentInset' | 'isFullWidth'> & {
     showScriptActions?: boolean,
 };
 

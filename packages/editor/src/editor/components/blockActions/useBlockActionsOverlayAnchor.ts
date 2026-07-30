@@ -28,6 +28,30 @@ interface UseBlockActionsOverlayAnchorArgs {
     visibleOverlayState: OverlayActiveBlockState | null,
 }
 
+export const resolveBlockFirstLineCenter = (
+    container: HTMLElement,
+    block: HTMLElement,
+) => {
+    const containerRect = container.getBoundingClientRect();
+    const blockRect = block.getBoundingClientRect();
+    const computed = window.getComputedStyle(block);
+    const paddingTopPx = Number.parseFloat(computed.paddingTop) || 0;
+    const computedLineHeight = Number.parseFloat(computed.lineHeight);
+    const fontSize = Number.parseFloat(computed.fontSize);
+    const lineHeightPx = Number.isFinite(computedLineHeight)
+        && computedLineHeight > 0
+        ? computedLineHeight
+        : Number.isFinite(fontSize) && fontSize > 0
+            ? fontSize * 1.2
+            : 13 * 1.7;
+
+    return blockRect.top
+        - containerRect.top
+        + container.scrollTop
+        + paddingTopPx
+        + lineHeightPx / 2;
+};
+
 export const useBlockActionsOverlayAnchor = ({
     editor,
     canvasRef,
@@ -72,26 +96,7 @@ export const useBlockActionsOverlayAnchor = ({
 
         const canvasRect = canvas.getBoundingClientRect();
         const blockRect = blockElement.getBoundingClientRect();
-        const computed = window.getComputedStyle(blockElement);
-        const paddingTopPx = Number.parseFloat(computed.paddingTop) || 0;
-        const lineHeightValue = Number.parseFloat(computed.lineHeight);
-        const fontSizeValue = Number.parseFloat(computed.fontSize);
-
-        let lineHeightPx: number | undefined;
-
-        if (Number.isFinite(lineHeightValue) && lineHeightValue > 0) {
-            lineHeightPx = lineHeightValue;
-        }
-
-        if (Number.isFinite(fontSizeValue) && fontSizeValue > 0) {
-            lineHeightPx = fontSizeValue * 1.2;
-        }
-
-        if (lineHeightPx === undefined) {
-            lineHeightPx = 13 * 1.7;
-        }
-
-        const top = blockRect.top - canvasRect.top + canvas.scrollTop + paddingTopPx + lineHeightPx / 2;
+        const top = resolveBlockFirstLineCenter(canvas, blockElement);
         const left = blockRect.left - canvasRect.left;
         const nextAnchorStyle: OverlayAnchorStyle = {
             top: `${top}px`,

@@ -25,6 +25,8 @@ const readMode = (value: unknown) => {
 };
 
 interface MusicStartNodeOptions {
+    locked?: boolean,
+    numberLabel?: string,
     onMusicAssigned?: (musicId: string) => void,
     onOpenMusicManager?: (musicId: string) => void,
     onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
@@ -85,12 +87,14 @@ export const MusicStartNode = Node.create<MusicStartNodeOptions>({
     },
 
     addOptions() {
-        return {};
+        return {locked: false};
     },
 
     addNodeView() {
         return ReactNodeViewRenderer(props => createElement(MusicStartPill, {
             ...props,
+            locked: this.options.locked,
+            numberLabel: this.options.numberLabel,
             onMusicAssigned: this.options.onMusicAssigned,
             onOpenMusicManager: this.options.onOpenMusicManager,
             onRequestCreateMusic: this.options.onRequestCreateMusic,

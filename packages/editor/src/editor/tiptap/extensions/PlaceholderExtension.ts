@@ -4,6 +4,7 @@ import {
     Plugin,
     PluginKey,
 } from '@tiptap/pm/state';
+import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {
     Decoration,
     DecorationSet,
@@ -11,13 +12,58 @@ import {
 
 import {getActiveScriptBlockFromState} from '../scriptCore';
 
-const placeholderPluginKey = new PluginKey<DecorationSet>('script-placeholder');
+type PlaceholderPluginState = {
+    decorations: DecorationSet,
+    dismissed: boolean,
+};
 
-const buildPlaceholderDecorations = (state: EditorState, placeholder: string) => {
+const placeholderPluginKey = new PluginKey<PlaceholderPluginState>('script-placeholder');
+
+const hasInlineAtom = (node: ProseMirrorNode) => {
+    let found = false;
+
+    node.descendants(child => {
+        if (child.isLeaf && !child.isText) {
+            found = true;
+        }
+
+        return !found;
+    });
+
+    return found;
+};
+
+const isFreshEmptyDocument = (state: EditorState) => {
+    if (state.doc.childCount === 0) {
+        return true;
+    }
+
+    let isEmpty = true;
+
+    state.doc.forEach(node => {
+        const text = node.textContent.trim();
+        const isDefaultActHeading = node.type.name === 'act' && text.toLocaleUpperCase() === 'ACT ONE';
+
+        if ((!isDefaultActHeading && text.length > 0) || hasInlineAtom(node)) {
+            isEmpty = false;
+        }
+    });
+
+    return isEmpty;
+};
+
+const buildPlaceholderDecorations = (
+    state: EditorState,
+    placeholder: string,
+    dismissed: boolean,
+) => {
     try {
         const activeBlock = getActiveScriptBlockFromState(state);
 
-        if (!activeBlock || (activeBlock.node.textContent ?? '').trim().length > 0) {
+        if (dismissed
+            || !isFreshEmptyDocument(state)
+            || !activeBlock
+            || (activeBlock.node.textContent ?? '').trim().length > 0) {
             return DecorationSet.empty;
         }
 
@@ -44,20 +90,51 @@ export const PlaceholderExtension = Extension.create<{
 
     addProseMirrorPlugins() {
         return [
-            new Plugin<DecorationSet>({
+            new Plugin<PlaceholderPluginState>({
                 key: placeholderPluginKey,
                 state: {
-                    init: (_config, state) => buildPlaceholderDecorations(state, this.options.placeholder),
+                    init: (_config, state) => ({
+                        decorations: buildPlaceholderDecorations(
+                            state,
+                            this.options.placeholder,
+                            false,
+                        ),
+                        dismissed: false,
+                    }),
                     apply: (tr, pluginState, _oldState, newState) => {
-                        if (!tr.docChanged && !tr.selectionSet) {
+                        const dismissed = pluginState.dismissed
+                            || tr.getMeta(placeholderPluginKey) === 'dismiss';
+
+                        if (!tr.docChanged && !tr.selectionSet && dismissed === pluginState.dismissed) {
                             return pluginState;
                         }
 
-                        return buildPlaceholderDecorations(newState, this.options.placeholder);
+                        return {
+                            decorations: buildPlaceholderDecorations(
+                                newState,
+                                this.options.placeholder,
+                                dismissed,
+                            ),
+                            dismissed,
+                        };
                     },
                 },
                 props: {
-                    decorations: state => placeholderPluginKey.getState(state) ?? DecorationSet.empty,
+                    decorations: state => {
+                        return placeholderPluginKey.getState(state)?.decorations ?? DecorationSet.empty;
+                    },
+                    handleDOMEvents: {
+                        keydown: view => {
+                            view.dispatch(view.state.tr.setMeta(placeholderPluginKey, 'dismiss'));
+
+                            return false;
+                        },
+                        mousedown: view => {
+                            view.dispatch(view.state.tr.setMeta(placeholderPluginKey, 'dismiss'));
+
+                            return false;
+                        },
+                    },
                 },
             }),
         ];

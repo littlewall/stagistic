@@ -1,5 +1,6 @@
 ---
 import {clsx} from 'clsx';
+import SiteIcons from '../components/SiteIcons.astro';
 import '../styles/global.css';
 import s from './syntax.module.css';
 
@@ -161,18 +162,13 @@ const markers = [
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <SiteIcons />
         <title>Stagistic — Syntax</title>
         <meta
             name="description"
             content="The Stagistic syntax: a plain-text format for theatre and musical scripts. Acts, scenes, dialogue, lyrics, stage directions, and music."
         />
         <meta property="og:image" content="/opengraph.jpg" />
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-        <link
-            href="https://fonts.googleapis.com/css2?family=Courier+Prime:ital,wght@0,400;0,700;1,400&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
-            rel="stylesheet"
-        />
     </head>
     <body>
         <div class={s.page}>
@@ -180,14 +176,7 @@ const markers = [
             <!-- Nav -->
             <header class={s.nav}>
                 <div class={s.navInner}>
-                    <a href="/" class={s.navLogo}>
-                        <span class={s.logoText}>Stagistic</span>
-                        <span class={s.logoBadge}>Syntax</span>
-                    </a>
-                    <nav class={s.navLinks}>
-                        <a href="/#features" class={s.navLink}>Features</a>
-                        <a href="/" class={s.navLink}>Back to site</a>
-                    </nav>
+                    <a href="/" class={s.navLink}>Back to site</a>
                 </div>
             </header>
 

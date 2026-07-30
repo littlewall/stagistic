@@ -16,10 +16,14 @@
         max-width: 1400px;
         height: 100%;
         margin: 0 auto;
-        padding: 0 var(--space-xl);
+        padding: 0 var(--space-md);
 
         &.full {
             max-width: none;
+        }
+
+        &.pageInset {
+            padding-inline: calc(var(--space-3xl) + var(--space-md));
         }
 
         & .leftControls {
@@ -247,7 +251,18 @@
 .themeControlsContainer {
     display: flex;
     justify-content: flex-start;
-    padding: var(--space-md);
+    padding: var(--space-xs) var(--space-md) var(--space-md);
+}
+
+.settingsMenu {
+    padding: var(--space-md) 0;
+}
+
+.settingsMenuHeader {
+    padding: var(--space-sm) var(--space-lg);
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
 }
 
 .themeControls {

@@ -70,6 +70,10 @@ export {
     type EditorSnapshotStore,
 } from './editor/live/store';
 export {
+    MiniScriptEditor,
+    type MiniScriptEditorProps,
+} from './editor/mini/MiniScriptEditor';
+export {
     getEditorPerfMetricsSnapshot,
     incrementRouteRenderCount,
     resetEditorPerfMetrics,
