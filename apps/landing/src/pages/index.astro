@@ -1,6 +1,7 @@
 ---
 import {clsx} from 'clsx';
 import LandingMiniEditor from '../components/mini-editor/LandingMiniEditor';
+import SiteIcons from '../components/SiteIcons.astro';
 import '../styles/global.css';
 import s from './index.module.css';
 
@@ -10,7 +11,7 @@ const features = [
         description:
             'Dedicated blocks for acts, scene headings, character cues, dialogue, stage directions, lyrics, and notes. Every part of the script keeps its own formatting and behaviour.',
         imageSrc: '/features/theatre-writing.png',
-        imageAlt: 'A formatted theatre script in the Stagistic editor',
+        imageAlt: 'A formatted theatre script in Stagistic Editor',
         imageFit: 'contain',
         shape: 'one',
     },
@@ -19,7 +20,7 @@ const features = [
         description:
             'A live outline keeps the structure visible as you write. Jump directly to any scene, reorder scenes, and group them into acts instead of forcing your play into a screenplay-shaped structure.',
         imageSrc: '/editor-preview.png',
-        imageAlt: 'The scene outline beside a script in the Stagistic editor',
+        imageAlt: 'The scene outline beside a script in Stagistic Editor',
         imageFit: 'cover',
         imagePosition: 'left 18%',
         imageScale: '1.42',
@@ -30,7 +31,7 @@ const features = [
         description:
             'Build a character catalogue directly from your script. Assign colours, highlight appearances, group characters, rename characters, tag them inside stage directions, and write dialogue for two or more characters speaking together.',
         imageSrc: '/editor-preview.png',
-        imageAlt: 'The character catalogue in the Stagistic editor',
+        imageAlt: 'The character catalogue in Stagistic Editor',
         imageFit: 'cover',
         imagePosition: 'right 34%',
         imageScale: '1.44',
@@ -41,7 +42,7 @@ const features = [
         description:
             'Write lyrics as their own block type, manage songs and instrumentals, place music cues directly in the script, and attach score PDFs to individual musical numbers.',
         imageSrc: '/editor-preview.png',
-        imageAlt: 'Lyrics formatted inside a musical script in Stagistic',
+        imageAlt: 'Lyrics formatted inside a musical script in Stagistic Editor',
         imageFit: 'cover',
         imagePosition: '52% 70%',
         imageScale: '1.32',
@@ -52,7 +53,7 @@ const features = [
         description:
             'Configure page format, title page, headers and footers, and each block\'s indentation, alignment, emphasis, and casing. Set keyboard shortcuts and decide which block follows next, so the editor matches the way you write.',
         imageSrc: '/editor-preview.png',
-        imageAlt: 'Formatting controls above a script in the Stagistic editor',
+        imageAlt: 'Formatting controls above a script in Stagistic Editor',
         imageFit: 'cover',
         imagePosition: '50% top',
         imageScale: '1.28',
@@ -63,7 +64,7 @@ const features = [
         description:
             'Export print-ready PDFs with scene-based pagination, character-specific scripts, consistent page numbering across script and embedded score, and integrated sheet music insertion.',
         imageSrc: '/editor-preview.png',
-        imageAlt: 'A print-ready theatre script displayed in Stagistic',
+        imageAlt: 'A print-ready theatre script displayed in Stagistic Editor',
         imageFit: 'cover',
         imagePosition: '50% 48%',
         imageScale: '1.24',
@@ -94,7 +95,7 @@ const faqs = [
     },
     {
         q: 'Can I use it for a commercial production?',
-        a: 'Absolutely! There are no restrictions on how you use scripts you write in Stagistic. The editor is free for everyone.',
+        a: 'Absolutely! There are no restrictions on how you use scripts you write in Stagistic Editor. The editor is free for everyone.',
     },
     {
         q: 'Is Stagistic Editor open source?',
@@ -115,10 +116,11 @@ const faqs = [
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <title>Stagistic — Script editor built for theatre</title>
+        <SiteIcons />
+        <title>Stagistic Editor — Script editor built for theatre</title>
         <meta
             name="description"
-            content="Stagistic is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
+            content="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
         />
         <meta property="og:image" content="/opengraph.jpg" />
         <script is:inline>document.documentElement.classList.add('js');</script>
@@ -130,15 +132,20 @@ const faqs = [
             <header class={s.nav}>
                 <div class={s.navInner}>
                     <div class={s.navLogo}>
-                        <span class={s.logoText}>Stagistic</span>
-                        <span class={s.logoBadge}>Editor</span>
+                        <img
+                            src="/assets/stagistic-brand/editor-mark-on-dark.svg"
+                            alt=""
+                            class={s.logoMark}
+                        />
+                        <span class={s.logoText}>Stagistic Editor</span>
                     </div>
-                    <nav class={s.navLinks}>
+                    <nav class={s.navLinks} aria-label="Primary">
                         <a href="#features" class={s.navLink}>Features</a>
                         <a href="#faq" class={s.navLink}>FAQ</a>
-                        <a href="#alpha" class={s.navLink}>Get started</a>
                     </nav>
-                    <span class={s.navBadge}>Early alpha</span>
+                    <a href="https://editor.stagistic.app" class={s.navCta}>
+                        Try editor
+                    </a>
                 </div>
             </header>
 
@@ -152,7 +159,7 @@ const faqs = [
                         </h1>
 
                         <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
-                            Stagistic is a script editor built specifically for
+                            Stagistic Editor is a script editor built specifically for
                             theatrical plays and musicals. Not screenwriting. Not
                             prose. The stage.
                         </p>
@@ -161,13 +168,66 @@ const faqs = [
                             <a href="https://editor.stagistic.app" class={s.btnPrimary}>
                                 Open editor in browser
                             </a>
+                            <a href="#features" class={s.btnOutline}>
+                                Explore features
+                            </a>
                         </div>
                     </div>
 
                     <div class={clsx(s.heroScript, s.fadeUp, s.fadeUpD3)}>
                         <div
+                            class={s.tryEditorCallout}
+                            data-try-editor-callout
+                        >
+                            <span class={s.visuallyHidden}>Try it!</span>
+                            <svg
+                                viewBox="0 0 176 90"
+                                aria-hidden="true"
+                                focusable="false"
+                            >
+                                <path
+                                    class={clsx(
+                                        s.tryEditorCalloutStroke,
+                                        s.tryEditorCalloutText,
+                                    )}
+                                    pathLength="1"
+                                    vector-effect="non-scaling-stroke"
+                                    d="
+                                        M8 17C19 13 31 12 43 14
+                                        M25 13C22 22 20 32 19 42
+                                        M38 25C37 31 37 36 37 41
+                                        M38 29C43 23 49 23 52 27
+                                        M55 26C56 34 59 39 63 38
+                                        C68 37 71 30 73 25
+                                        M73 25C71 38 69 49 63 55
+                                        M91 26C90 31 89 36 89 41
+                                        M93 17L92.5 17
+                                        M102 20C100 28 99 34 99 40
+                                        C99 43 101 44 104 41
+                                        M95 27C101 26 107 26 111 27
+                                        M121 18C119 26 118 33 117 38
+                                        M116 45L116.5 45
+                                    "
+                                />
+                                <path
+                                    class={clsx(
+                                        s.tryEditorCalloutStroke,
+                                        s.tryEditorCalloutArrow,
+                                    )}
+                                    pathLength="1"
+                                    vector-effect="non-scaling-stroke"
+                                    d="
+                                        M132 27C158 28 170 38 166 52
+                                        C162 66 142 73 120 70
+                                        M120 70C126 66 131 61 134 57
+                                        M120 70C127 72 132 76 136 80
+                                    "
+                                />
+                            </svg>
+                        </div>
+                        <div
                             class={s.scriptExcerpt}
-                            aria-label="Interactive preview of the Stagistic editor"
+                            aria-label="Interactive preview of Stagistic Editor"
                         >
                             <LandingMiniEditor client:load />
                         </div>
@@ -186,7 +246,7 @@ const faqs = [
                     </div>
                     <div>
                         <p class={s.forTheatreText}>
-                            Stagistic understands the craft of theatre: how a scene builds, how a musical number interrupts and transforms dialogue, how stage directions serve the director as much as the story. These aren't formatting rules. They're how theatre thinks.
+                            Stagistic Editor understands the craft of theatre: how a scene builds, how a musical number interrupts and transforms dialogue, how stage directions serve the director as much as the story. These aren't formatting rules. They're how theatre thinks.
                         </p>
                         <p class={s.forTheatreText}>
                             Whether you're writing a one-act play or a full two-act musical, the editor stays out of your way and keeps your work structured exactly as theatre demands.
@@ -274,11 +334,14 @@ const faqs = [
                             Stagistic Editor is free.<br />Forever.
                         </h2>
                         <p class={s.alphaText}>
-                            Writing in Stagistic is free in your browser, with
-                            no account or paywall. The editor will remain free.
+                            Stagistic Editor is free to use in your browser, with no
+                            account or paywall. Every current and future Editor
+                            feature will remain free.
                         </p>
                         <p class={s.alphaTextSecondary}>
-                            There may be some product features in future that require a paid subscription, but the core writing experience will always be free and open source.
+                            Stagistic will grow into a family of tools for theatre and
+                            production. Some future tools may be paid, but Stagistic
+                            Editor will always be free and open source.
                         </p>
                     </div>
                     <div class={s.alphaCard}>

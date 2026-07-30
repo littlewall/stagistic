@@ -1,5 +1,6 @@
 ---
 import {clsx} from 'clsx';
+import SiteIcons from '../components/SiteIcons.astro';
 import '../styles/global.css';
 import s from './syntax.module.css';
 
@@ -161,6 +162,7 @@ const markers = [
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <SiteIcons />
         <title>Stagistic — Syntax</title>
         <meta
             name="description"
@@ -174,14 +176,7 @@ const markers = [
             <!-- Nav -->
             <header class={s.nav}>
                 <div class={s.navInner}>
-                    <a href="/" class={s.navLogo}>
-                        <span class={s.logoText}>Stagistic</span>
-                        <span class={s.logoBadge}>Syntax</span>
-                    </a>
-                    <nav class={s.navLinks}>
-                        <a href="/#features" class={s.navLink}>Features</a>
-                        <a href="/" class={s.navLink}>Back to site</a>
-                    </nav>
+                    <a href="/" class={s.navLink}>Back to site</a>
                 </div>
             </header>
 

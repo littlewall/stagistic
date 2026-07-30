@@ -1,7 +1,7 @@
 .content {
     height: 100%;
     opacity: 0;
-    animation: miniEditorContentIn .34s .66s ease-out both;
+    animation: miniEditorContentIn .36s 1.32s ease-out both;
 }
 
 @keyframes miniEditorContentIn {
