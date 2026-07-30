@@ -15,6 +15,7 @@ import {
 import {useNavigate} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
+import {useDocumentTitle} from '../../useDocumentTitle';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
 import {DeferredScriptEditor} from './editor/DeferredScriptEditor';
 import {
@@ -72,6 +73,9 @@ export const ScriptEditorRoute = () => {
         openAttributeManagerModal,
         openAttributeManagerMusic,
     } = useScriptSettingsModal();
+
+    useDocumentTitle(scriptTitleDraft);
+
     const [addMusicModalState, setAddMusicModalState] = useState<AddMusicModalState | null>(null);
     const [removeMusicRequest, setRemoveMusicRequest] = useState<EditorMusicRemoveRequest | null>(null);
     const {

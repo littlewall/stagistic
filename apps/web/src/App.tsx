@@ -18,10 +18,11 @@ import {
 } from 'react-router-dom';
 
 import {prepareLocalDbWithProgress} from './db';
-import {scriptRepository} from './repo';
+import {PrereleaseGate} from './prerelease/PrereleaseGate';
+import type {ScriptRepository} from './repo';
 
-const App = () => {
-    const [bootReady, setBootReady] = useState(false);
+const BootedApp = () => {
+    const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
     const [bootProgress, setBootProgress] = useState(0);
     const [bootStatus, setBootStatus] = useState('Preparing');
 
@@ -50,7 +51,13 @@ const App = () => {
                 return;
             }
 
-            setBootReady(true);
+            const repositoryModule = await import('./repo');
+
+            if (!isActive) {
+                return;
+            }
+
+            setScriptRepository(repositoryModule.scriptRepository);
         };
 
         void boot();
@@ -60,7 +67,7 @@ const App = () => {
         };
     }, []);
 
-    if (!bootReady) {
+    if (!scriptRepository) {
         return (
             <LoaderOverlay
                 label="Starting Stagistic"
@@ -89,5 +96,11 @@ const App = () => {
         </ScriptRepositoryProvider>
     );
 };
+
+const App = () => (
+    <PrereleaseGate>
+        <BootedApp />
+    </PrereleaseGate>
+);
 
 export default App;

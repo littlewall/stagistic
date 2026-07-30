@@ -2,6 +2,7 @@ import {AppLayout} from '@stagistic/ui';
 import {useCallback} from 'react';
 
 import {ScriptEditorAppHeader} from '../../layout/AppHeader';
+import {useDocumentTitle} from '../../useDocumentTitle';
 import {ExportControlPanel} from './export/ExportControlPanel';
 import {ExportPreview} from './export/ExportPreview';
 import {ExportProvider} from './export/ExportProvider';
@@ -12,6 +13,9 @@ import {useScriptSettingsModal} from './settings/ScriptSettingsModalProvider';
 
 export const ScriptExportRoute = () => {
     const {currentScript, recentScripts} = useScriptWorkspace();
+
+    useDocumentTitle(currentScript ? `Export · ${currentScript.name}` : 'Export');
+
     const {script, settings} = useExportScriptData();
     const {
         openSettingsModal,

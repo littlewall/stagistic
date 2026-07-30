@@ -117,6 +117,40 @@ describe('buildMusicRailBoundaries', () => {
 });
 
 describe('canDropMusicOutAtBoundary', () => {
+    it.each(['act', 'scene'])('rejects a %s block as an endpoint', blockType => {
+        const index = snapshot();
+
+        index.blocks = [
+            {
+                ...index.blocks[0],
+                blockId: 'start',
+                orderNo: 0,
+            }, {
+                ...index.blocks[0],
+                blockId: 'target',
+                orderNo: 1,
+                blockType,
+            },
+        ];
+        index.music = [
+            {
+                musicId: 'song',
+                sceneNumber: 1,
+                indexInScene: 0,
+                sceneMusicCount: 1,
+                mode: 'open',
+                title: 'Song',
+                kind: null,
+                startBlockId: 'start',
+                endBlockId: null,
+                effectiveEndBlockId: 'target',
+                endKind: 'scene-end',
+            },
+        ];
+
+        expect(canDropMusicOutAtBoundary(index, 'song', 'target')).toBe(false);
+    });
+
     it('allows hits but clamps the drop at the next durational start', () => {
         const index = snapshot();
 

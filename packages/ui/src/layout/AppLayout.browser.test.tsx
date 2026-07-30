@@ -7,7 +7,6 @@ import {
 } from 'vite-plus/test';
 import {
     page,
-    userEvent,
 } from 'vite-plus/test/browser';
 
 import {AppLayout} from './AppLayout';
@@ -73,9 +72,27 @@ describe('AppLayout', () => {
         await page.elementLocator(explainAlpha!).click();
         await waitFor(() => document.querySelector<HTMLDialogElement>('dialog')?.open === true);
 
-        expect(document.querySelector('dialog')?.textContent).toContain('Alpha pre-release');
+        const dialog = document.querySelector<HTMLDialogElement>('dialog')!;
+        const dialogText = dialog.textContent;
 
-        await userEvent.keyboard('{Escape}');
+        expect(dialogText).toContain('Pre-release notice');
+        expect(dialogText).toContain('Stagistic Editor is experimental pre-release software.');
+        expect(dialogText).toContain('Use it at your own risk.');
+        expect(dialogText).toContain('stored only in this browser');
+        expect(dialogText).toContain('Sync is not available yet.');
+        expect(dialogText).toContain('Nothing you create is sent from your device.');
+        expect(dialogText).toContain('does not send analytics, telemetry, or other usage data');
+        expect(dialogText).toContain('including theme and layout');
+        expect(dialogText).toContain('Back up your work regularly.');
+        expect(dialogText).toContain('may permanently remove it');
+
+        const closeButton = Array
+            .from(dialog.querySelectorAll('button'))
+            .find(button => button.textContent === 'Close');
+
+        expect(closeButton).toBeDefined();
+
+        await page.elementLocator(closeButton!).click();
         await waitFor(() => document.querySelector<HTMLDialogElement>('dialog')?.open === false);
     });
 });

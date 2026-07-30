@@ -16,6 +16,7 @@ export default defineConfig({
     },
     resolve: {
         tsconfigPaths: true,
+        dedupe: ['react', 'react-dom'],
         alias: [{find: /^@pglite-data/, replacement: pgliteDataPath}, {find: /^@pglite-wasm/, replacement: pgliteWasmPath}],
     },
     test: {

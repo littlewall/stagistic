@@ -2,6 +2,7 @@ import {useState} from 'react';
 
 import {Button} from '../atoms/Button';
 import {ModalDialog} from '../dialogs/ModalDialog';
+import {PrereleaseNotice} from '../dialogs/PrereleaseNotice';
 import styles from './AppFooter.module.css';
 
 export const AppFooter = () => {
@@ -10,7 +11,7 @@ export const AppFooter = () => {
     return (
         <>
             <footer className={styles.footer}>
-                <span>© Stagistic • Made with 💛 in Prague</span>
+                <span>© Stagistic Editor • Made with 💛 in Prague</span>
                 <span className={styles.alphaStatus}>
                     Alpha pre-release (
                     <Button
@@ -33,7 +34,15 @@ export const AppFooter = () => {
                 isOpen={isAlphaDialogOpen}
                 onClose={() => setIsAlphaDialogOpen(false)}
             >
-                <h2 className={styles.modalTitle}>Alpha pre-release</h2>
+                <PrereleaseNotice />
+                <div className={styles.modalActions}>
+                    <Button
+                        variant="secondary"
+                        onPress={() => setIsAlphaDialogOpen(false)}
+                    >
+                        Close
+                    </Button>
+                </div>
             </ModalDialog>
         </>
     );

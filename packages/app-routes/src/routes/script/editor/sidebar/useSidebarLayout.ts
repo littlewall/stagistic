@@ -5,9 +5,8 @@ import {
 } from 'react';
 
 import {SIDEBAR_LAYOUT_STORAGE_KEY} from '../../../../storageKeys';
+import {SIDEBAR_EXCLUSIVE_QUERY} from './sidebarViewport';
 import type {SidebarPanelId} from './types';
-
-const OVERLAY_BREAKPOINT_QUERY = '(max-width: 1199px)';
 
 interface SidebarLayoutState {
     isLeftOpen: boolean,
@@ -29,12 +28,12 @@ interface UseSidebarLayoutArgs {
     defaultRightPanelId: SidebarPanelId,
 }
 
-const getIsOverlayViewport = () => {
+const getIsExclusiveViewport = () => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
         return false;
     }
 
-    return window.matchMedia(OVERLAY_BREAKPOINT_QUERY).matches;
+    return window.matchMedia(SIDEBAR_EXCLUSIVE_QUERY).matches;
 };
 
 const isStoredSidebarLayoutState = (value: unknown): value is StoredSidebarLayoutState => {
@@ -103,23 +102,23 @@ export const useSidebarLayout = ({
             rightPanelId: resolvePanelId(stored?.rightPanelId, defaultRightPanelId, availablePanelIds),
         };
     });
-    const [isOverlayViewport, setIsOverlayViewport] = useState(getIsOverlayViewport);
+    const [isExclusiveViewport, setIsExclusiveViewport] = useState(getIsExclusiveViewport);
 
     useEffect(() => {
         if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
             return;
         }
 
-        const mediaQueryList = window.matchMedia(OVERLAY_BREAKPOINT_QUERY);
-        const syncOverlayMode = () => {
-            setIsOverlayViewport(mediaQueryList.matches);
+        const mediaQueryList = window.matchMedia(SIDEBAR_EXCLUSIVE_QUERY);
+        const syncExclusiveMode = () => {
+            setIsExclusiveViewport(mediaQueryList.matches);
         };
 
-        syncOverlayMode();
-        mediaQueryList.addEventListener('change', syncOverlayMode);
+        syncExclusiveMode();
+        mediaQueryList.addEventListener('change', syncExclusiveMode);
 
         return () => {
-            mediaQueryList.removeEventListener('change', syncOverlayMode);
+            mediaQueryList.removeEventListener('change', syncExclusiveMode);
         };
     }, []);
 
@@ -158,7 +157,7 @@ export const useSidebarLayout = ({
     ]);
 
     useEffect(() => {
-        if (!isOverlayViewport) {
+        if (!isExclusiveViewport) {
             return;
         }
 
@@ -166,7 +165,7 @@ export const useSidebarLayout = ({
             setState(previous => ({...previous, isLeftOpen: false}));
         }
     }, [
-        isOverlayViewport,
+        isExclusiveViewport,
         state.isLeftOpen,
         state.isRightOpen,
     ]);
@@ -178,12 +177,12 @@ export const useSidebarLayout = ({
             return {
                 ...previous,
                 isLeftOpen: nextIsLeftOpen,
-                isRightOpen: isOverlayViewport && nextIsLeftOpen
+                isRightOpen: isExclusiveViewport && nextIsLeftOpen
                     ? false
                     : previous.isRightOpen,
             };
         });
-    }, [isOverlayViewport]);
+    }, [isExclusiveViewport]);
 
     const toggleRight = useCallback(() => {
         setState(previous => {
@@ -191,13 +190,13 @@ export const useSidebarLayout = ({
 
             return {
                 ...previous,
-                isLeftOpen: isOverlayViewport && nextIsRightOpen
+                isLeftOpen: isExclusiveViewport && nextIsRightOpen
                     ? false
                     : previous.isLeftOpen,
                 isRightOpen: nextIsRightOpen,
             };
         });
-    }, [isOverlayViewport]);
+    }, [isExclusiveViewport]);
 
     const selectLeft = useCallback((panelId: SidebarPanelId) => {
         setState(previous => ({...previous, leftPanelId: panelId}));
