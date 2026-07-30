@@ -40,7 +40,7 @@ export const buildEditorRootStyle = ({
         '--right-toolbar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
         '--left-toolbar-divider-opacity': isLeftSidebarOpen ? '1' : '0',
         '--right-toolbar-divider-opacity': isRightSidebarOpen ? '1' : '0',
-        '--left-sidebar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
-        '--right-sidebar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
+        '--left-sidebar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : '0px',
+        '--right-sidebar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : '0px',
     } as CSSProperties;
 };
