@@ -138,6 +138,7 @@
     z-index: 2;
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .heroTitle {
@@ -762,16 +763,17 @@
     }
 
     .heroInner {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 3.5rem;
     }
 
     .heroContent {
+        width: 100%;
         max-width: 36rem;
     }
 
     .heroTitle {
-        max-width: 11ch;
+        max-width: 100%;
     }
 
     .heroScript {
@@ -832,6 +834,21 @@
 
     .heroTitle {
         font-size: clamp(2.75rem, 15vw, 4rem);
+    }
+
+    .heroCtas {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .heroCtas .btnPrimary,
+    .heroCtas .btnOutline {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .heroScript::before {
+        inset: 1.5rem -.5rem .5rem .5rem;
     }
 
     .footer {

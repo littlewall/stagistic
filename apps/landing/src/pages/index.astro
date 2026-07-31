@@ -117,12 +117,13 @@ const faqs = [
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <SiteIcons />
-        <title>Stagistic Editor — Script editor built for theatre</title>
+        <title>Stagistic Editor - Script editor built for theatre</title>
         <meta
             name="description"
             content="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
         />
         <meta property="og:image" content="/opengraph.jpg" />
+        <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
         <script is:inline>document.documentElement.classList.add('js');</script>
     </head>
     <body>
