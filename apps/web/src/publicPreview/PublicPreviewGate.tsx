@@ -1,7 +1,7 @@
 import {
     Button,
     ModalDialog,
-    PrereleaseNotice,
+    PublicPreviewNotice,
 } from '@stagistic/ui';
 import {
     type ReactNode,
@@ -10,23 +10,23 @@ import {
 } from 'react';
 
 import {
-    hasCurrentPrereleaseAcknowledgement,
-    storeCurrentPrereleaseAcknowledgement,
-} from './acknowledgement';
-import styles from './PrereleaseGate.module.css';
+    hasCurrentPublicPreviewAcknowledgement,
+    storeCurrentPublicPreviewAcknowledgement,
+} from './publicPreviewAcknowledgement';
+import styles from './PublicPreviewGate.module.css';
 
-interface PrereleaseGateProps {
+interface PublicPreviewGateProps {
     children: ReactNode,
 }
 
 const keepNoticeOpen = () => {};
 
-export const PrereleaseGate = ({children}: PrereleaseGateProps) => {
+export const PublicPreviewGate = ({children}: PublicPreviewGateProps) => {
     const [isAcknowledged, setIsAcknowledged] = useState(
-        hasCurrentPrereleaseAcknowledgement,
+        hasCurrentPublicPreviewAcknowledgement,
     );
     const acknowledge = useCallback(() => {
-        storeCurrentPrereleaseAcknowledgement();
+        storeCurrentPublicPreviewAcknowledgement();
         setIsAcknowledged(true);
     }, []);
 
@@ -36,11 +36,11 @@ export const PrereleaseGate = ({children}: PrereleaseGateProps) => {
 
     return (
         <ModalDialog
-            ariaLabel="Pre-release notice"
+            ariaLabel="Public preview notice"
             isOpen
             onClose={keepNoticeOpen}
         >
-            <PrereleaseNotice />
+            <PublicPreviewNotice />
             <p className={styles.acknowledgement}>
                 By continuing, you acknowledge these temporary limitations.
             </p>

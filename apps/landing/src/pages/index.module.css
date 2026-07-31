@@ -108,7 +108,7 @@
 }
 
 .hero,
-.alpha {
+.preview {
     --btn-primary-bg: var(--color-amber);
     --btn-primary-fg: var(--color-palette-paper);
     --btn-primary-hover: var(--color-amber-hover);
@@ -307,7 +307,7 @@
 }
 
 .forTheatre,
-.alpha {
+.preview {
     scroll-margin-top: 3rem;
     border-top: 1px solid var(--color-border);
 }
@@ -329,7 +329,7 @@
 .forTheatreTitle,
 .featuresTitle,
 .faqTitle,
-.alphaTitle {
+.previewTitle {
     font-size: clamp(1.875rem, 3.5vw, 2.875rem);
     font-weight: 600;
     line-height: 1.08;
@@ -534,12 +534,12 @@
     color: var(--color-text-muted);
 }
 
-.alpha {
+.preview {
     padding: 6rem 1.5rem;
     background: var(--color-bg);
 }
 
-.alphaInner {
+.previewInner {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 5rem;
@@ -548,11 +548,11 @@
     margin: 0 auto;
 }
 
-.alphaTitle {
+.previewTitle {
     margin-bottom: 1.25rem;
 }
 
-.alphaText {
+.previewText {
     max-width: 40ch;
     margin-bottom: 1rem;
     font-size: .9375rem;
@@ -560,28 +560,28 @@
     color: var(--color-text-muted);
 }
 
-.alphaTextSecondary {
+.previewTextSecondary {
     max-width: 44ch;
     font-size: .875rem;
     line-height: 1.7;
     color: var(--color-text-muted);
 }
 
-.alphaCard {
+.previewCard {
     align-self: center;
     padding: 2rem;
     background: var(--color-surface);
     border-radius: .625rem;
 }
 
-.alphaChecks {
+.previewChecks {
     display: flex;
     flex-direction: column;
     gap: .625rem;
     margin-bottom: 2rem;
 }
 
-.alphaCheckItem {
+.previewCheckItem {
     display: flex;
     gap: .75rem;
     align-items: center;
@@ -590,11 +590,11 @@
     color: var(--color-text-muted);
 }
 
-.alphaCheckMark {
+.previewCheckMark {
     color: var(--color-amber);
 }
 
-.alphaCtas {
+.previewCtas {
     display: flex;
     flex-direction: column;
     gap: .625rem;
@@ -784,7 +784,7 @@
 
     .forTheatreInner,
     .faqInner,
-    .alphaInner {
+    .previewInner {
         grid-template-columns: 1fr;
         gap: 2.5rem;
     }
@@ -827,7 +827,7 @@
     .forTheatre,
     .features,
     .faq,
-    .alpha {
+    .preview {
         padding-right: 1rem;
         padding-left: 1rem;
     }

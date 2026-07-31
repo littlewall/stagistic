@@ -5,11 +5,11 @@ import {
 } from 'vite-plus/test';
 
 import {
-    hasCurrentPrereleaseAcknowledgement,
-    storeCurrentPrereleaseAcknowledgement,
-} from './acknowledgement';
+    hasCurrentPublicPreviewAcknowledgement,
+    storeCurrentPublicPreviewAcknowledgement,
+} from './publicPreviewAcknowledgement';
 
-const STORAGE_KEY = 'stagistic.web.prereleaseAcknowledgement';
+const STORAGE_KEY = 'stagistic.web.publicPreviewAcknowledgement';
 
 class MemoryStorage {
     readonly #values = new Map<string, string>();
@@ -27,13 +27,13 @@ class MemoryStorage {
     };
 }
 
-describe('prerelease acknowledgement', () => {
+describe('public preview acknowledgement', () => {
     it('requires acknowledgement when no version is stored', () => {
-        expect(hasCurrentPrereleaseAcknowledgement(new MemoryStorage())).toBe(false);
+        expect(hasCurrentPublicPreviewAcknowledgement(new MemoryStorage())).toBe(false);
     });
 
     it('accepts only the current acknowledgement version', () => {
-        expect(hasCurrentPrereleaseAcknowledgement(new MemoryStorage('1'))).toBe(true);
+        expect(hasCurrentPublicPreviewAcknowledgement(new MemoryStorage('1'))).toBe(true);
     });
 
     it.each([
@@ -42,7 +42,7 @@ describe('prerelease acknowledgement', () => {
         'invalid',
         '',
     ])('rejects non-current version %j', version => {
-        expect(hasCurrentPrereleaseAcknowledgement(new MemoryStorage(version))).toBe(false);
+        expect(hasCurrentPublicPreviewAcknowledgement(new MemoryStorage(version))).toBe(false);
     });
 
     it('requires acknowledgement when storage cannot be read', () => {
@@ -52,15 +52,15 @@ describe('prerelease acknowledgement', () => {
             },
         };
 
-        expect(hasCurrentPrereleaseAcknowledgement(storage)).toBe(false);
+        expect(hasCurrentPublicPreviewAcknowledgement(storage)).toBe(false);
     });
 
     it('stores an acknowledgement that is accepted by a subsequent read', () => {
         const storage = new MemoryStorage();
 
-        expect(storeCurrentPrereleaseAcknowledgement(storage)).toBe(true);
+        expect(storeCurrentPublicPreviewAcknowledgement(storage)).toBe(true);
         expect(storage.getItem(STORAGE_KEY)).toBe('1');
-        expect(hasCurrentPrereleaseAcknowledgement(storage)).toBe(true);
+        expect(hasCurrentPublicPreviewAcknowledgement(storage)).toBe(true);
     });
 
     it('reports when acknowledgement cannot be stored', () => {
@@ -70,6 +70,6 @@ describe('prerelease acknowledgement', () => {
             },
         };
 
-        expect(storeCurrentPrereleaseAcknowledgement(storage)).toBe(false);
+        expect(storeCurrentPublicPreviewAcknowledgement(storage)).toBe(false);
     });
 });

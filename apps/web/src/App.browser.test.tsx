@@ -8,7 +8,7 @@ import {
 } from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
-const STORAGE_KEY = 'stagistic.web.prereleaseAcknowledgement';
+const STORAGE_KEY = 'stagistic.web.publicPreviewAcknowledgement';
 const mountedRoots: Root[] = [];
 
 const waitFor = async (predicate: () => boolean) => {
@@ -34,7 +34,7 @@ afterEach(() => {
 });
 
 describe('App', () => {
-    it('starts the database worker only after prerelease acknowledgement', async () => {
+    it('starts the database worker only after public preview acknowledgement', async () => {
         const NativeWorker = window.Worker;
         let startedWorkerCount = 0;
 

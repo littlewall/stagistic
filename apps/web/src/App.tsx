@@ -18,7 +18,7 @@ import {
 } from 'react-router-dom';
 
 import {prepareLocalDbWithProgress} from './db';
-import {PrereleaseGate} from './prerelease/PrereleaseGate';
+import {PublicPreviewGate} from './publicPreview/PublicPreviewGate';
 import type {ScriptRepository} from './repo';
 
 const BootedApp = () => {
@@ -98,9 +98,9 @@ const BootedApp = () => {
 };
 
 const App = () => (
-    <PrereleaseGate>
+    <PublicPreviewGate>
         <BootedApp />
-    </PrereleaseGate>
+    </PublicPreviewGate>
 );
 
 export default App;
