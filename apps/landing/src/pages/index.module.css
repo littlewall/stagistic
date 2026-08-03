@@ -362,11 +362,20 @@
 }
 
 .sectionDivider {
-    width: calc(100% - 3rem);
-    max-width: 72rem;
+    position: relative;
     height: 1px;
-    margin: 0 auto;
-    background: var(--color-border);
+    background: var(--color-surface);
+
+    &::before {
+        content: '';
+        display: block;
+        width: 100%;
+        width: calc(100% - 3rem);
+        max-width: 72rem;
+        height: 1px;
+        margin: 0 auto;
+        background: var(--color-border);
+    }
 }
 
 .features {
