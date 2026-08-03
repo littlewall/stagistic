@@ -183,6 +183,19 @@
     }
 }
 
+.desktopOnlyNotice {
+    display: none;
+    margin: 0;
+    padding: 1.25rem 1.5rem;
+    font-size: .95rem;
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+    text-wrap: pretty;
+    background: color-mix(in oklch, var(--color-bg) 72%, transparent);
+    border: 1px solid var(--color-blob-border);
+    border-radius: 1.5rem;
+}
+
 .tryEditorCallout {
     pointer-events: none;
     position: absolute;
@@ -863,5 +876,19 @@
     .footerInner {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+@media (max-width: 999px) {
+    .navCta,
+    .tryEditorCallout,
+    .scriptExcerpt,
+    .heroCtas .btnPrimary,
+    .previewCtas .btnPrimary {
+        display: none;
+    }
+
+    .desktopOnlyNotice {
+        display: block;
     }
 }

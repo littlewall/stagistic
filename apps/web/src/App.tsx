@@ -20,6 +20,7 @@ import {
 import {prepareLocalDbWithProgress} from './db';
 import {PublicPreviewGate} from './publicPreview/PublicPreviewGate';
 import type {ScriptRepository} from './repo';
+import {UnsupportedScreenGate} from './smallScreen/UnsupportedScreenGate';
 
 const BootedApp = () => {
     const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
@@ -98,9 +99,11 @@ const BootedApp = () => {
 };
 
 const App = () => (
-    <PublicPreviewGate>
-        <BootedApp />
-    </PublicPreviewGate>
+    <UnsupportedScreenGate>
+        <PublicPreviewGate>
+            <BootedApp />
+        </PublicPreviewGate>
+    </UnsupportedScreenGate>
 );
 
 export default App;
