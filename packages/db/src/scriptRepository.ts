@@ -9,6 +9,7 @@ import type {
     MusicAttachmentRole,
     ScriptAttachment,
     ScriptCharacterGenderOption,
+    ScriptCharacterGroupRef,
     ScriptCharacterRef,
     ScriptLocation,
     ScriptMusic,
@@ -19,6 +20,7 @@ import type {
 
 export type {
     ScriptCharacterGenderOption,
+    ScriptCharacterGroupRef,
     ScriptCharacterRef,
 } from './types';
 
@@ -150,10 +152,12 @@ export interface ScriptRepository {
     scriptSummaries: ReactiveQuerySource<ScriptSummary>,
     allocateScriptId(): string,
     allocateScriptCharacterId(): string,
+    allocateScriptCharacterGroupId(): string,
     allocateScriptCharacterGenderId(): string,
     allocateScriptMusicId(): string,
     allocateScriptLocationId(): string,
     getScriptCharactersSource(scriptId: string): ReactiveQuerySource<ScriptCharacterRef>,
+    getScriptCharacterGroupsSource(scriptId: string): ReactiveQuerySource<ScriptCharacterGroupRef>,
     getScriptCharacterGendersSource(
         scriptId: string,
     ): ReactiveQuerySource<ScriptCharacterGenderOption>,
@@ -171,6 +175,7 @@ export interface ScriptRepository {
     listScripts(options?: ListScriptsOptions): Promise<ScriptSummary[]>,
     getScriptSummary(scriptId: string): Promise<ScriptSummary | null>,
     listScriptCharacters(scriptId: string): Promise<ScriptCharacterRef[]>,
+    listScriptCharacterGroups(scriptId: string): Promise<ScriptCharacterGroupRef[]>,
     listScriptCharacterGenders(scriptId: string): Promise<ScriptCharacterGenderOption[]>,
     listScriptMusic(scriptId: string): Promise<ScriptMusic[]>,
     createScriptMusic(scriptId: string, input: CreateScriptMusicInput): Promise<ScriptMusic | null>,
@@ -212,13 +217,34 @@ export interface ScriptRepository {
     deleteScript(scriptId: string): Promise<void>,
     setActiveBlock(scriptId: string, blockId: string | null): Promise<void>,
     confirmScriptCharacter(scriptId: string, characterKey: string): Promise<ScriptCharacterRef | null>,
+    createScriptCharacterGroup(scriptId: string, key: string): Promise<ScriptCharacterGroupRef | null>,
+    createScriptCharacterGroupWithId(
+        scriptId: string,
+        input: {id: string, key: string, colorHex?: string | null, timestamp?: number},
+    ): Promise<ScriptCharacterGroupRef | null>,
     confirmScriptCharacterWithId(
         scriptId: string,
         input: ConfirmScriptCharacterWithIdInput,
     ): Promise<ScriptCharacterRef | null>,
     deleteScriptCharacter(scriptId: string, characterId: string): Promise<void>,
+    deleteScriptCharacterGroup(scriptId: string, groupId: string): Promise<void>,
     renameScriptCharacter(scriptId: string, characterId: string, nextCharacterKey: string): Promise<ScriptCharacterRef | null>,
+    renameScriptCharacterGroup(
+        scriptId: string,
+        groupId: string,
+        key: string,
+    ): Promise<ScriptCharacterGroupRef | null>,
     setScriptCharacterColor(scriptId: string, characterId: string, colorHex: string | null): Promise<ScriptCharacterRef | null>,
+    setScriptCharacterGroupColor(
+        scriptId: string,
+        groupId: string,
+        colorHex: string | null,
+    ): Promise<ScriptCharacterGroupRef | null>,
+    replaceScriptCharacterGroupMembers(
+        scriptId: string,
+        groupId: string,
+        memberIds: string[],
+    ): Promise<ScriptCharacterGroupRef | null>,
     setScriptCharacterGender(scriptId: string, characterId: string, genderKey: string | null): Promise<ScriptCharacterRef | null>,
     setScriptCharacterOutline(scriptId: string, characterId: string, outline: string | null): Promise<ScriptCharacterRef | null>,
     upsertScriptCharacterGender(scriptId: string, label: string): Promise<ScriptCharacterGenderOption | null>,

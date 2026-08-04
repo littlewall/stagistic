@@ -8,6 +8,7 @@ import {
     scriptActs,
     scriptBlockCharacterRefs,
     scriptBlocks,
+    scriptCharacterGroupMembers,
     scriptCharacterGenders,
     scriptCharacters,
     scriptLocations,
@@ -23,6 +24,7 @@ import {
     scriptSettingsVisualPreferences,
 } from '../../schema';
 import type {DbClient} from '../types';
+import {listScriptSpeakingEntities} from './characters';
 
 export interface DuplicateScriptQueryPayload {
     sourceScriptId: string,
@@ -37,7 +39,53 @@ export interface DuplicateScriptQueryPayload {
  * Remaps a nullable foreign key through an id map. Unknown ids fall back to null
  * (the referenced row was not copied), matching the `on delete set null` behavior.
  */
-const remapNullable = (map: Map<string, string>, id: string | null): string | null => id === null ? null : map.get(id) ?? null;
+const remapNullable = (map: ReadonlyMap<string, string>, id: string | null): string | null => id === null ? null : map.get(id) ?? null;
+
+const remapCharacterTagIds = (
+    contentJson: string | null,
+    entityIdMap: ReadonlyMap<string, string> | null,
+): string | null => {
+    if (contentJson === null) {
+        return null;
+    }
+
+    const remapValue = (value: unknown): unknown => {
+        if (Array.isArray(value)) {
+            return value.map(remapValue);
+        }
+
+        if (typeof value !== 'object' || value === null) {
+            return value;
+        }
+
+        const record = Object.fromEntries(
+            Object.entries(value).map(([key, child]) => [key, remapValue(child)]),
+        );
+
+        if (record.type !== 'characterTag') {
+            return record;
+        }
+
+        const attrs = typeof record.attrs === 'object' && record.attrs !== null
+            ? record.attrs as Record<string, unknown>
+            : {};
+        const oldId = typeof attrs.characterId === 'string' ? attrs.characterId : null;
+
+        return {
+            ...record,
+            attrs: {
+                ...attrs,
+                characterId: oldId === null ? null : entityIdMap?.get(oldId) ?? null,
+            },
+        };
+    };
+
+    try {
+        return JSON.stringify(remapValue(JSON.parse(contentJson) as unknown));
+    } catch {
+        return contentJson;
+    }
+};
 
 /**
  * Copy every row of a script into a fresh script within a single transaction.
@@ -96,11 +144,17 @@ export const duplicateScriptRows = async (
             .from(scriptSceneLocations)
             .where(inArray(scriptSceneLocations.sceneId, sceneIds))
         : [];
+    const speakingEntities = copyAttributes
+        ? await listScriptSpeakingEntities(db, sourceScriptId)
+        : [];
 
     const locationMap = new Map(locationRows.map(row => [row.id, uuidv7()]));
     const actMap = new Map(actRows.map(row => [row.id, uuidv7()]));
     const sceneMap = new Map(sceneRows.map(row => [row.id, uuidv7()]));
     const blockMap = new Map(blockRows.map(row => [row.id, uuidv7()]));
+    const entityIdMap = copyAttributes
+        ? new Map(speakingEntities.map(entity => [entity.id, uuidv7()]))
+        : null;
 
     if (locationRows.length > 0) {
         await db.insert(scriptLocations).values(locationRows.map(row => ({
@@ -147,6 +201,7 @@ export const duplicateScriptRows = async (
             ...row,
             id: blockMap.get(row.id)!,
             scriptId: targetScriptId,
+            contentJson: remapCharacterTagIds(row.contentJson, entityIdMap),
             sceneId: remapNullable(sceneMap, row.sceneId),
             actId: remapNullable(actMap, row.actId),
             createdAt: now,
@@ -167,24 +222,36 @@ export const duplicateScriptRows = async (
     }
 
     if (copyAttributes) {
-        const characterRows = await db
-            .select()
-            .from(scriptCharacters)
-            .where(eq(scriptCharacters.scriptId, sourceScriptId));
         const genderRows = await db
             .select()
             .from(scriptCharacterGenders)
             .where(eq(scriptCharacterGenders.scriptId, sourceScriptId));
-        const characterMap = new Map(characterRows.map(row => [row.id, uuidv7()]));
 
-        if (characterRows.length > 0) {
-            await db.insert(scriptCharacters).values(characterRows.map(row => ({
-                ...row,
-                id: characterMap.get(row.id)!,
+        if (speakingEntities.length > 0) {
+            await db.insert(scriptCharacters).values(speakingEntities.map(entity => ({
+                id: entityIdMap!.get(entity.id)!,
                 scriptId: targetScriptId,
+                characterKey: entity.key,
+                kind: entity.kind,
+                colorHex: entity.colorHex,
+                genderKey: entity.kind === 'character' ? entity.genderKey : null,
+                notes: entity.kind === 'character' ? entity.notes : null,
+                backstory: entity.kind === 'character' ? entity.backstory : null,
+                outline: entity.kind === 'character' ? entity.outline : null,
                 createdAt: now,
                 updatedAt: now,
             })));
+
+            const membershipRows = speakingEntities.flatMap(entity => entity.kind === 'group'
+                ? entity.memberIds.map(characterId => ({
+                    groupId: entityIdMap!.get(entity.id)!,
+                    characterId: entityIdMap!.get(characterId)!,
+                }))
+                : []);
+
+            if (membershipRows.length > 0) {
+                await db.insert(scriptCharacterGroupMembers).values(membershipRows);
+            }
         }
 
         if (genderRows.length > 0) {
@@ -203,14 +270,14 @@ export const duplicateScriptRows = async (
                 .select()
                 .from(scriptBlockCharacterRefs)
                 .where(inArray(scriptBlockCharacterRefs.blockId, blockIds)))
-                .filter(row => characterMap.has(row.characterId))
+                .filter(row => entityIdMap!.has(row.characterId))
             : [];
 
         if (refRows.length > 0) {
             await db.insert(scriptBlockCharacterRefs).values(refRows.map(row => ({
                 ...row,
                 blockId: blockMap.get(row.blockId)!,
-                characterId: characterMap.get(row.characterId)!,
+                characterId: entityIdMap!.get(row.characterId)!,
             })));
         }
     }

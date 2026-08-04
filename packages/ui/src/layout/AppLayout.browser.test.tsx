@@ -49,7 +49,7 @@ afterEach(() => {
 });
 
 describe('AppLayout', () => {
-    it('keeps alpha information and feedback reachable from every app screen', async () => {
+    it('keeps public preview information and feedback reachable from every app screen', async () => {
         renderLayout();
 
         await waitFor(() => document.querySelector('footer') !== null);
@@ -59,24 +59,24 @@ describe('AppLayout', () => {
         const feedback = document.querySelector<HTMLAnchorElement>(
             'a[href="mailto:feedback@stagistic.com"]',
         );
-        const explainAlpha = document.querySelector<HTMLButtonElement>(
-            'button[aria-label="What does Alpha pre-release mean?"]',
+        const explainPreview = document.querySelector<HTMLButtonElement>(
+            'button[aria-label="What does public preview mean?"]',
         );
 
         expect(feedback?.textContent).toBe('feedback@stagistic.com');
-        expect(explainAlpha?.textContent).toBe('what does it mean?');
-        expect(explainAlpha?.parentElement?.textContent).toBe(
-            'Alpha pre-release (what does it mean?)',
+        expect(explainPreview?.textContent).toBe('what does it mean?');
+        expect(explainPreview?.parentElement?.textContent).toBe(
+            'Public preview (what does it mean?)',
         );
 
-        await page.elementLocator(explainAlpha!).click();
+        await page.elementLocator(explainPreview!).click();
         await waitFor(() => document.querySelector<HTMLDialogElement>('dialog')?.open === true);
 
         const dialog = document.querySelector<HTMLDialogElement>('dialog')!;
         const dialogText = dialog.textContent;
 
-        expect(dialogText).toContain('Pre-release notice');
-        expect(dialogText).toContain('Stagistic Editor is experimental pre-release software.');
+        expect(dialogText).toContain('Public preview notice');
+        expect(dialogText).toContain('Stagistic Editor is in public preview.');
         expect(dialogText).toContain('Use it at your own risk.');
         expect(dialogText).toContain('stored only in this browser');
         expect(dialogText).toContain('Sync is not available yet.');

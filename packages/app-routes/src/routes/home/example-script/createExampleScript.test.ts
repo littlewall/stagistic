@@ -46,6 +46,7 @@ const createTemplate = (): ExampleScriptTemplate => ({
 
 const createCharacter = (id: string, key: string) => ({
     id,
+    kind: 'character' as const,
     key,
     colorHex: null,
     genderKey: null,

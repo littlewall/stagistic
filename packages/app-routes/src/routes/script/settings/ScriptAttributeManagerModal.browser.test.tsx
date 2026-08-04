@@ -14,13 +14,23 @@ import {
 } from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
-import {ATTRIBUTE_MANAGER_PANEL_MUSIC} from '../attributes/attributeManagerMenu';
+import {
+    ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
+    ATTRIBUTE_MANAGER_PANEL_MUSIC,
+} from '../attributes/attributeManagerMenu';
 import {ScriptAttributeManagerModal} from './ScriptAttributeManagerModal';
 
 const roots: Root[] = [];
 
 type DeletableAttributeManagerProps = ComponentProps<typeof ScriptAttributeManagerModal> & {
     onDeleteMusic?: (musicId: string) => Promise<void>,
+    groupItems?: Array<{
+        id: string,
+        name: string,
+        color: string | null,
+        memberIds: string[],
+        usageCount: number,
+    }>,
 };
 
 const DeletableAttributeManager = ScriptAttributeManagerModal as ComponentType<DeletableAttributeManagerProps>;
@@ -81,6 +91,7 @@ const renderMusicManager = (
             onSelectPanel={() => undefined}
             characters={{} as never}
             characterItems={[]}
+            groupItems={[]}
             characterColorSaturation={50}
             sceneItems={[]}
             placeState={{} as never}
@@ -167,5 +178,83 @@ describe('ScriptAttributeManagerModal music actions', () => {
         await new Promise(resolve => window.setTimeout(resolve, 20));
 
         expect(document.querySelector('dialog[aria-label="Delete music"]')).not.toBeNull();
+    });
+});
+
+describe('ScriptAttributeManagerModal group actions', () => {
+    it('forwards live group items, membership changes, and deletion', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+        const handleReplaceGroupMembers = vi.fn(() => Promise.resolve());
+        const handleDeleteGroup = vi.fn(() => Promise.resolve());
+
+        host.style.width = '1000px';
+        host.style.height = '700px';
+        document.body.appendChild(host);
+        root.render(
+            <DeletableAttributeManager
+                currentScriptId="script-1"
+                isOpen
+                tabs={[{id: ATTRIBUTE_MANAGER_PANEL_CHARACTERS, label: 'Characters'}]}
+                activePanelId={ATTRIBUTE_MANAGER_PANEL_CHARACTERS}
+                selectedCharacterId={null}
+                selectedGroupId="group-1"
+                selectedMusicId={null}
+                initialWorkspaceId="groups"
+                onClose={() => undefined}
+                onSelectPanel={() => undefined}
+                characters={{
+                    isCharactersLoading: false,
+                    deletingCharacterIds: [],
+                    renamingCharacterIds: [],
+                    colorUpdatingCharacterIds: [],
+                    deletingGroupIds: [],
+                    renamingGroupIds: [],
+                    colorUpdatingGroupIds: [],
+                    membershipUpdatingGroupIds: [],
+                    handleReplaceGroupMembers,
+                    handleDeleteGroup,
+                } as never}
+                characterItems={[{
+                    id: 'char-1',
+                    name: 'ANNA',
+                    color: null,
+                    outline: null,
+                    groupNames: ['ALL'],
+                }]}
+                groupItems={[{
+                    id: 'group-1',
+                    name: 'ALL',
+                    color: null,
+                    memberIds: [],
+                    usageCount: 1,
+                }]}
+                characterColorSaturation={50}
+                sceneItems={[]}
+                placeState={{} as never}
+                musicState={{music: []} as never}
+                musicItems={[]}
+                musicAttachmentsState={{} as never}
+                setMusicTitleDraft={() => undefined}
+                persistMusicTitleDraft={() => Promise.resolve()}
+                onDeleteMusic={() => Promise.resolve()}
+            />,
+        );
+        roots.push(root);
+
+        const memberInput = await waitForElement<HTMLInputElement>('[placeholder="Select members"]');
+
+        await page.elementLocator(memberInput).click();
+
+        const suggestion = await waitForElement<HTMLElement>('[data-testid="suggestions"] li');
+
+        await page.elementLocator(suggestion).click();
+        expect(handleReplaceGroupMembers).toHaveBeenCalledWith('group-1', ['char-1']);
+
+        await page.elementLocator(await waitForElement('[aria-label="Remove ALL"]')).click();
+        expect(document.body.textContent).toContain('become unconfirmed characters');
+
+        await page.elementLocator(findButton('Remove')!).click();
+        expect(handleDeleteGroup).toHaveBeenCalledWith('group-1');
     });
 });

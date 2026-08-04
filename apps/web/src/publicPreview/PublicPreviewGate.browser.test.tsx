@@ -11,9 +11,9 @@ import {
     userEvent,
 } from 'vite-plus/test/browser';
 
-import {PrereleaseGate} from './PrereleaseGate';
+import {PublicPreviewGate} from './PublicPreviewGate';
 
-const STORAGE_KEY = 'stagistic.web.prereleaseAcknowledgement';
+const STORAGE_KEY = 'stagistic.web.publicPreviewAcknowledgement';
 const mountedRoots: Root[] = [];
 
 const waitFor = async (predicate: () => boolean) => {
@@ -36,9 +36,9 @@ const renderGate = () => {
 
     document.body.appendChild(host);
     root.render(
-        <PrereleaseGate>
+        <PublicPreviewGate>
             <div>Application content</div>
-        </PrereleaseGate>,
+        </PublicPreviewGate>,
     );
     mountedRoots.push(root);
 };
@@ -51,7 +51,7 @@ afterEach(() => {
     vi.restoreAllMocks();
 });
 
-describe('PrereleaseGate', () => {
+describe('PublicPreviewGate', () => {
     it('blocks application content until the notice is acknowledged', async () => {
         window.localStorage.removeItem(STORAGE_KEY);
         renderGate();

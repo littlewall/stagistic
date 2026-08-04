@@ -17,9 +17,14 @@ export {
 } from './atoms/typography/Typography';
 export {
     type AttributeManagerCharacter,
+    type AttributeManagerCharacterWorkspaceId,
     AttributeManagerCharactersPanel,
     type AttributeManagerCharactersPanelProps,
+    type AttributeManagerGroup,
 } from './dialogs/AttributeManagerCharactersPanel';
+export {
+    AttributeManagerGroupDetail,
+} from './dialogs/AttributeManagerGroupDetail';
 export {
     type AttributeManagerDetailTab,
     AttributeManagerDetailTabs,
@@ -55,6 +60,10 @@ export {
     type CreateCharacterModalProps,
 } from './dialogs/CreateCharacterModal';
 export {
+    CreateGroupModal,
+    type CreateGroupModalProps,
+} from './dialogs/CreateGroupModal';
+export {
     CreatePlaceModal,
     type CreatePlaceModalProps,
 } from './dialogs/CreatePlaceModal';
@@ -72,11 +81,15 @@ export {
 export {ImportScriptModal} from './dialogs/ImportScriptModal';
 export {ModalDialog} from './dialogs/ModalDialog';
 export {NewScriptModal} from './dialogs/NewScriptModal';
-export {PrereleaseNotice} from './dialogs/PrereleaseNotice';
+export {PublicPreviewNotice} from './dialogs/PublicPreviewNotice';
 export {
     RemoveAttachmentModal,
     type RemoveAttachmentModalProps,
 } from './dialogs/RemoveAttachmentModal';
+export {
+    RemoveGroupModal,
+    type RemoveGroupModalProps,
+} from './dialogs/RemoveGroupModal';
 export {
     RenameScriptModal,
     type RenameScriptModalProps,
@@ -89,7 +102,11 @@ export {
     type SettingsNavSubItem,
 } from './dialogs/ScriptSettingsModal';
 export type {NewScriptShape} from './dialogs/types';
-export {EditorSidebar, type EditorSidebarCharacter} from './editor-panels/EditorSidebar';
+export {
+    EditorSidebar,
+    type EditorSidebarCharacter,
+    type EditorSidebarGroup,
+} from './editor-panels/EditorSidebar';
 export {ExportPanel} from './export/ExportPanel';
 export {ProgressBar} from './feedback/ProgressBar';
 export {ProgressPanel} from './feedback/ProgressPanel';

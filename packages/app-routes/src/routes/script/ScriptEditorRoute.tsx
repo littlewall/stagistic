@@ -95,7 +95,7 @@ export const ScriptEditorRoute = () => {
     const {
         getEditorValue,
         editorOverrideValue,
-        normalizedConfirmedCharacterRecords,
+        normalizedSpeakingEntityRecords,
         handleEditorValueChange: handleResolvedEditorValueChange,
     } = useScriptCharacters();
 
@@ -248,7 +248,7 @@ export const ScriptEditorRoute = () => {
                     liveStore={editorSnapshotStore}
                     document={{
                         initialValue: resolvedEditorInitialValue,
-                        persistentCharacters: normalizedConfirmedCharacterRecords,
+                        persistentCharacters: normalizedSpeakingEntityRecords,
                         persistentMusic: music,
                         scriptTitle: scriptTitleDraft,
                         draftDate: resolveDraftDate(titlePageDraft),

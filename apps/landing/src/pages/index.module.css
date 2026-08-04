@@ -3,7 +3,7 @@
     --color-blob-border: rgb(0 0 0 / .015);
 
     min-height: 100vh;
-    background: var(--color-bg);
+    background: var(--color-stage-nav-bg);
 }
 
 .nav {
@@ -27,13 +27,13 @@
     max-width: 72rem;
     height: 3rem;
     margin: 0 auto;
-    padding: 0 1rem;
+    padding: 0;
 }
 
 .navLogo {
     display: flex;
     gap: .5rem;
-    align-items: center;
+    align-items: flex-end;
 }
 
 .logoMark {
@@ -43,8 +43,9 @@
 }
 
 .logoText {
+    padding: 0;
     font-family: var(--font-mono);
-    font-size: .8125rem;
+    font-size: .9rem;
     font-weight: 500;
     color: var(--color-text);
     letter-spacing: -.01em;
@@ -108,7 +109,7 @@
 }
 
 .hero,
-.alpha {
+.preview {
     --btn-primary-bg: var(--color-amber);
     --btn-primary-fg: var(--color-palette-paper);
     --btn-primary-hover: var(--color-amber-hover);
@@ -138,6 +139,7 @@
     z-index: 2;
     display: flex;
     flex-direction: column;
+    min-width: 0;
 }
 
 .heroTitle {
@@ -180,6 +182,19 @@
         border: 1px solid var(--color-blob-border);
         border-radius: 3.25rem 1.5rem 3rem 2rem / 2rem 3rem 1.75rem 2.75rem;
     }
+}
+
+.desktopOnlyNotice {
+    display: none;
+    margin: 0;
+    padding: 1.25rem 1.5rem;
+    font-size: .95rem;
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+    text-wrap: pretty;
+    background: color-mix(in oklch, var(--color-bg) 72%, transparent);
+    border: 1px solid var(--color-blob-border);
+    border-radius: 1.5rem;
 }
 
 .tryEditorCallout {
@@ -306,7 +321,7 @@
 }
 
 .forTheatre,
-.alpha {
+.preview {
     scroll-margin-top: 3rem;
     border-top: 1px solid var(--color-border);
 }
@@ -328,7 +343,7 @@
 .forTheatreTitle,
 .featuresTitle,
 .faqTitle,
-.alphaTitle {
+.previewTitle {
     font-size: clamp(1.875rem, 3.5vw, 2.875rem);
     font-weight: 600;
     line-height: 1.08;
@@ -348,11 +363,20 @@
 }
 
 .sectionDivider {
-    width: calc(100% - 3rem);
-    max-width: 72rem;
+    position: relative;
     height: 1px;
-    margin: 0 auto;
-    background: var(--color-border);
+    background: var(--color-surface);
+
+    &::before {
+        content: '';
+        display: block;
+        width: 100%;
+        width: calc(100% - 3rem);
+        max-width: 72rem;
+        height: 1px;
+        margin: 0 auto;
+        background: var(--color-border);
+    }
 }
 
 .features {
@@ -533,12 +557,12 @@
     color: var(--color-text-muted);
 }
 
-.alpha {
+.preview {
     padding: 6rem 1.5rem;
     background: var(--color-bg);
 }
 
-.alphaInner {
+.previewInner {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 5rem;
@@ -547,11 +571,11 @@
     margin: 0 auto;
 }
 
-.alphaTitle {
+.previewTitle {
     margin-bottom: 1.25rem;
 }
 
-.alphaText {
+.previewText {
     max-width: 40ch;
     margin-bottom: 1rem;
     font-size: .9375rem;
@@ -559,28 +583,28 @@
     color: var(--color-text-muted);
 }
 
-.alphaTextSecondary {
+.previewTextSecondary {
     max-width: 44ch;
     font-size: .875rem;
     line-height: 1.7;
     color: var(--color-text-muted);
 }
 
-.alphaCard {
+.previewCard {
     align-self: center;
     padding: 2rem;
     background: var(--color-surface);
     border-radius: .625rem;
 }
 
-.alphaChecks {
+.previewChecks {
     display: flex;
     flex-direction: column;
     gap: .625rem;
     margin-bottom: 2rem;
 }
 
-.alphaCheckItem {
+.previewCheckItem {
     display: flex;
     gap: .75rem;
     align-items: center;
@@ -589,11 +613,11 @@
     color: var(--color-text-muted);
 }
 
-.alphaCheckMark {
+.previewCheckMark {
     color: var(--color-amber);
 }
 
-.alphaCtas {
+.previewCtas {
     display: flex;
     flex-direction: column;
     gap: .625rem;
@@ -762,16 +786,17 @@
     }
 
     .heroInner {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(0, 1fr);
         gap: 3.5rem;
     }
 
     .heroContent {
+        width: 100%;
         max-width: 36rem;
     }
 
     .heroTitle {
-        max-width: 11ch;
+        max-width: 100%;
     }
 
     .heroScript {
@@ -782,7 +807,7 @@
 
     .forTheatreInner,
     .faqInner,
-    .alphaInner {
+    .previewInner {
         grid-template-columns: 1fr;
         gap: 2.5rem;
     }
@@ -825,13 +850,28 @@
     .forTheatre,
     .features,
     .faq,
-    .alpha {
+    .preview {
         padding-right: 1rem;
         padding-left: 1rem;
     }
 
     .heroTitle {
         font-size: clamp(2.75rem, 15vw, 4rem);
+    }
+
+    .heroCtas {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .heroCtas .btnPrimary,
+    .heroCtas .btnOutline {
+        justify-content: center;
+        width: 100%;
+    }
+
+    .heroScript::before {
+        inset: 1.5rem -.5rem .5rem .5rem;
     }
 
     .footer {
@@ -846,5 +886,19 @@
     .footerInner {
         flex-direction: column;
         align-items: flex-start;
+    }
+}
+
+@media (max-width: 999px) {
+    .navCta,
+    .tryEditorCallout,
+    .scriptExcerpt,
+    .heroCtas .btnPrimary,
+    .previewCtas .btnPrimary {
+        display: none;
+    }
+
+    .desktopOnlyNotice {
+        display: block;
     }
 }

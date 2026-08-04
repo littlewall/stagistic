@@ -18,8 +18,9 @@ import {
 } from 'react-router-dom';
 
 import {prepareLocalDbWithProgress} from './db';
-import {PrereleaseGate} from './prerelease/PrereleaseGate';
+import {PublicPreviewGate} from './publicPreview/PublicPreviewGate';
 import type {ScriptRepository} from './repo';
+import {UnsupportedScreenGate} from './smallScreen/UnsupportedScreenGate';
 
 const BootedApp = () => {
     const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
@@ -98,9 +99,11 @@ const BootedApp = () => {
 };
 
 const App = () => (
-    <PrereleaseGate>
-        <BootedApp />
-    </PrereleaseGate>
+    <UnsupportedScreenGate>
+        <PublicPreviewGate>
+            <BootedApp />
+        </PublicPreviewGate>
+    </UnsupportedScreenGate>
 );
 
 export default App;

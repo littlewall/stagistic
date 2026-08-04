@@ -29,10 +29,12 @@ export const CreateCharacterModal = ({
 }: CreateCharacterModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
+    const [isTouched, setIsTouched] = useState(false);
 
     useEffect(() => {
         if (!isOpen) {
             setName('');
+            setIsTouched(false);
 
             return;
         }
@@ -49,9 +51,11 @@ export const CreateCharacterModal = ({
         [existingCharacterNames],
     );
     const normalizedName = useMemo(() => normalizeCharacterKey(name), [name]);
-    const isDuplicate = normalizedName.length > 0 && existingKeys.has(normalizedName);
-    const canSubmit = normalizedName.length > 0 && !isDuplicate;
-    const errorId = isDuplicate ? 'create-character-error' : undefined;
+    const isEmpty = normalizedName.length === 0;
+    const isDuplicate = !isEmpty && existingKeys.has(normalizedName);
+    const canSubmit = !isEmpty && !isDuplicate;
+    const isErrorVisible = isDuplicate || (isTouched && isEmpty);
+    const errorId = isErrorVisible ? 'create-character-error' : undefined;
 
     const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
@@ -59,6 +63,7 @@ export const CreateCharacterModal = ({
 
     const handleSubmit = useCallback((event: FormEvent) => {
         event.preventDefault();
+        setIsTouched(true);
 
         if (!canSubmit) {
             return;
@@ -95,12 +100,15 @@ export const CreateCharacterModal = ({
                         onChange={handleNameChange}
                         placeholder="Character name"
                         aria-describedby={errorId}
-                        aria-invalid={isDuplicate}
+                        aria-invalid={isErrorVisible}
+                        onBlur={() => setIsTouched(true)}
                     />
                 </div>
-                {isDuplicate ? (
+                {errorId ? (
                     <p id="create-character-error" className={styles.error}>
-                        A confirmed character with this name already exists.
+                        {isDuplicate
+                            ? 'A character or group with this name already exists.'
+                            : 'Name cannot be empty.'}
                     </p>
                 ) : null}
                 <div className={styles.actions}>

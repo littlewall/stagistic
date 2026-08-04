@@ -11,6 +11,7 @@ import type {
 import type {
     ScriptAttachment,
     ScriptCharacterGenderOption,
+    ScriptCharacterGroupRef,
     ScriptCharacterRef,
     ScriptLocation,
     ScriptMusic,
@@ -23,6 +24,7 @@ interface CreateLocalPgliteReactiveSourcesArgs {
     getDb: GetDb,
     listScripts: () => Promise<ScriptSummary[]>,
     listCharacters: (scriptId: string) => Promise<ScriptCharacterRef[]>,
+    listCharacterGroups: (scriptId: string) => Promise<ScriptCharacterGroupRef[]>,
     listCharacterGenders: (scriptId: string) => Promise<ScriptCharacterGenderOption[]>,
     listMusic: (scriptId: string) => Promise<ScriptMusic[]>,
     listLocations: (scriptId: string) => Promise<ScriptLocation[]>,
@@ -57,6 +59,7 @@ export const createLocalPgliteReactiveSources = ({
     getDb,
     listScripts,
     listCharacters,
+    listCharacterGroups,
     listCharacterGenders,
     listMusic,
     listLocations,
@@ -93,6 +96,27 @@ export const createLocalPgliteReactiveSources = ({
                 SELECT id, gender_key, gender_label
                 FROM script_character_genders
                 WHERE script_id = $1
+            `,
+            watchParams: [scriptId],
+        });
+    });
+    const getScriptCharacterGroupsSource = createScriptSourceRegistry(scriptId => {
+        return createPgliteReactiveQuerySource({
+            getDb,
+            readRows: () => listCharacterGroups(scriptId),
+            watchQuery: `
+                WITH script_groups AS (
+                    SELECT id, script_id, character_key, color_hex
+                    FROM script_characters
+                    WHERE script_id = $1 AND kind = 'group'
+                )
+                SELECT id, script_id, character_key, color_hex, 'group' AS source
+                FROM script_groups
+                UNION ALL
+                SELECT members.group_id AS id, script_groups.script_id, members.character_id,
+                    NULL AS color_hex, 'member' AS source
+                FROM script_character_group_members AS members
+                INNER JOIN script_groups ON script_groups.id = members.group_id
             `,
             watchParams: [scriptId],
         });
@@ -223,6 +247,7 @@ export const createLocalPgliteReactiveSources = ({
     return {
         scriptSummaries,
         getScriptCharactersSource,
+        getScriptCharacterGroupsSource,
         getScriptCharacterGendersSource,
         getScriptMusicSource,
         getScriptLocationsSource,

@@ -145,6 +145,7 @@ export const scriptCharacters = pgTable(
             .notNull()
             .references(() => scripts.id, {onDelete: 'cascade'}),
         characterKey: text('character_key').notNull(),
+        kind: text('kind').notNull().default('character'),
         colorHex: text('color_hex'),
         genderKey: text('gender_key'),
         notes: text('notes'),
@@ -157,6 +158,22 @@ export const scriptCharacters = pgTable(
         scriptCharacterUniqueIdx: uniqueIndex('script_characters_script_character_unique_idx')
             .on(table.scriptId, table.characterKey),
         scriptIdIdx: index('script_characters_script_id_idx').on(table.scriptId),
+    }),
+);
+
+export const scriptCharacterGroupMembers = pgTable(
+    'script_character_group_members',
+    {
+        groupId: text('group_id')
+            .notNull()
+            .references(() => scriptCharacters.id, {onDelete: 'cascade'}),
+        characterId: text('character_id')
+            .notNull()
+            .references(() => scriptCharacters.id, {onDelete: 'cascade'}),
+    },
+    table => ({
+        pk: primaryKey({columns: [table.groupId, table.characterId]}),
+        characterIdIdx: index('script_character_group_members_character_id_idx').on(table.characterId),
     }),
 );
 
@@ -421,6 +438,7 @@ export const dbSchema = {
     scriptSettingsHeadersFooters,
     scriptSettingsBlocks,
     scriptCharacters,
+    scriptCharacterGroupMembers,
     scriptCharacterGenders,
     scriptLocations,
     scriptScenes,

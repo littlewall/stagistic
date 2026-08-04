@@ -6,6 +6,7 @@ import * as dbQueries from '../queries';
 import type {ScriptRepository} from '../scriptRepository';
 import {createAttachmentHandlers} from './attachments';
 import {createCharacterHandlers} from './characters';
+import {createCharacterGroupHandlers} from './characterGroupHandlers';
 import {createSettingsHandlers} from './config';
 import {createContentHandlers} from './content';
 import {createLocalPgliteReactiveSources} from './createLocalPgliteReactiveSources';
@@ -37,6 +38,7 @@ export const createLocalPgliteRepository = ({
     };
     const scripts = createScriptsHandlers(mutationDeps);
     const characterHandlers = createCharacterHandlers(mutationDeps);
+    const characterGroupHandlers = createCharacterGroupHandlers(mutationDeps);
     const content = createContentHandlers(mutationDeps);
     const settingsHandlers = createSettingsHandlers(mutationDeps);
     const titlePageHandlers = createTitlePageHandlers(mutationDeps);
@@ -53,6 +55,7 @@ export const createLocalPgliteRepository = ({
         getDb,
         listScripts: () => scripts.list(),
         listCharacters: listScriptCharacters,
+        listCharacterGroups: scriptId => characterGroupHandlers.listScriptCharacterGroups(scriptId),
         listCharacterGenders: scriptId => characterHandlers.listScriptCharacterGenders(scriptId),
         listMusic: scriptId => music.list(scriptId),
         listLocations: scriptId => locations.list(scriptId),
@@ -65,12 +68,14 @@ export const createLocalPgliteRepository = ({
         ...reactiveSources,
         allocateScriptId: uuidv7,
         allocateScriptCharacterId: uuidv7,
+        allocateScriptCharacterGroupId: uuidv7,
         allocateScriptCharacterGenderId: uuidv7,
         allocateScriptMusicId: uuidv7,
         allocateScriptLocationId: uuidv7,
         listScripts: options => scripts.list(options),
         getScriptSummary: scriptId => scripts.getSummary(scriptId),
         listScriptCharacters: scriptId => listScriptCharacters(scriptId),
+        listScriptCharacterGroups: scriptId => characterGroupHandlers.listScriptCharacterGroups(scriptId),
         listScriptCharacterGenders: scriptId => characterHandlers.listScriptCharacterGenders(scriptId),
         listScriptMusic: scriptId => music.list(scriptId),
         createScriptMusic: (scriptId, input) => music.create(scriptId, input),
@@ -95,15 +100,33 @@ export const createLocalPgliteRepository = ({
         deleteScript: scriptId => scripts.delete(scriptId),
         setActiveBlock: (scriptId, blockId) => scripts.setActiveBlock(scriptId, blockId),
         confirmScriptCharacter: (scriptId, key) => characterHandlers.confirmScriptCharacter(scriptId, key),
+        createScriptCharacterGroup: (scriptId, key) => {
+            return characterGroupHandlers.createScriptCharacterGroup(scriptId, key);
+        },
+        createScriptCharacterGroupWithId: (scriptId, input) => {
+            return characterGroupHandlers.createScriptCharacterGroupWithId(scriptId, input);
+        },
         confirmScriptCharacterWithId: (scriptId, input) => {
             return characterHandlers.confirmScriptCharacterWithId(scriptId, input);
         },
         deleteScriptCharacter: (scriptId, id) => characterHandlers.deleteScriptCharacter(scriptId, id),
+        deleteScriptCharacterGroup: (scriptId, id) => {
+            return characterGroupHandlers.deleteScriptCharacterGroup(scriptId, id);
+        },
         renameScriptCharacter: (scriptId, id, key) => {
             return characterHandlers.renameScriptCharacter(scriptId, id, key);
         },
+        renameScriptCharacterGroup: (scriptId, id, key) => {
+            return characterGroupHandlers.renameScriptCharacterGroup(scriptId, id, key);
+        },
         setScriptCharacterColor: (scriptId, id, color) => {
             return characterHandlers.setScriptCharacterColor(scriptId, id, color);
+        },
+        setScriptCharacterGroupColor: (scriptId, id, color) => {
+            return characterGroupHandlers.setScriptCharacterGroupColor(scriptId, id, color);
+        },
+        replaceScriptCharacterGroupMembers: (scriptId, id, memberIds) => {
+            return characterGroupHandlers.replaceScriptCharacterGroupMembers(scriptId, id, memberIds);
         },
         setScriptCharacterGender: (scriptId, id, gender) => {
             return characterHandlers.setScriptCharacterGender(scriptId, id, gender);

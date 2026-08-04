@@ -1,12 +1,19 @@
 import {
     focusFirstCharacterBlock,
+    getConfirmedCharacterColor,
     linkCharacterRef,
     useEditorElementSelection,
     useEditorInstance,
     useEditorLiveCharacters,
 } from '@stagistic/editor';
-import {normalizeCharacterKey} from '@stagistic/script';
-import {EditorSidebar} from '@stagistic/ui';
+import {
+    normalizeCharacterColorHex,
+    normalizeCharacterKey,
+} from '@stagistic/script';
+import {
+    EditorSidebar,
+    type EditorSidebarGroup,
+} from '@stagistic/ui';
 import {
     useCallback,
     useMemo,
@@ -27,7 +34,10 @@ import {useCharacterComputed} from './useCharacterComputed';
 
 export const ScriptCharactersSidebar = () => {
     const {resolvedScriptSettings} = useScriptSession();
-    const {openAttributeManagerCharacter} = useScriptSettingsModal();
+    const {
+        openAttributeManagerCharacter,
+        openAttributeManagerGroup,
+    } = useScriptSettingsModal();
     const characters = useScriptCharacters();
     const editor = useEditorInstance();
     const elementSelection = useEditorElementSelection();
@@ -38,10 +48,12 @@ export const ScriptCharactersSidebar = () => {
 
     const {
         confirmedCharacters,
+        normalizedConfirmedGroupRecords,
         unconfirmedCharacters,
     } = useCharacterComputed({
         data: {
             confirmedCharacterRecords: characters.confirmedCharacterRecords,
+            confirmedGroupRecords: characters.confirmedGroupRecords,
             characterSnapshot: liveCharacters,
             resolvedScriptSettings,
             characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
@@ -55,6 +67,27 @@ export const ScriptCharactersSidebar = () => {
             genderUpdatingCharacterIds: characters.genderUpdatingCharacterIds,
         },
     });
+    const groups = useMemo<EditorSidebarGroup[]>(() => normalizedConfirmedGroupRecords.map(group => {
+        const normalizedColorHex = normalizeCharacterColorHex(group.colorHex);
+
+        return {
+            id: group.id,
+            key: group.key,
+            color: getConfirmedCharacterColor(
+                group.id,
+                normalizedColorHex,
+                resolvedScriptSettings.visual.characterColorSaturation,
+            ),
+            colorHex: normalizedColorHex ?? null,
+            isConfirmed: true,
+            isEmpty: group.memberIds.length === 0,
+            isColorUpdatePending: characters.colorUpdatingGroupIds.includes(group.id),
+        };
+    }), [
+        characters.colorUpdatingGroupIds,
+        normalizedConfirmedGroupRecords,
+        resolvedScriptSettings.visual.characterColorSaturation,
+    ]);
 
     const handleFocusCharacter = useCallback((characterKey: string) => {
         if (editor) {
@@ -80,9 +113,18 @@ export const ScriptCharactersSidebar = () => {
             },
         });
     }, [characters, editor]);
-    const confirmedCharacterKeys = useMemo(() => {
-        return new Set(characters.confirmedCharacterRecords.map(character => normalizeCharacterKey(character.key)));
-    }, [characters.confirmedCharacterRecords]);
+    const occupiedCharacterKeys = useMemo(() => {
+        return new Set([
+            ...characters.confirmedCharacterRecords,
+            ...characters.confirmedGroupRecords,
+        ].map(entity => normalizeCharacterKey(entity.key)));
+    }, [
+        characters.confirmedCharacterRecords,
+        characters.confirmedGroupRecords,
+    ]);
+    const handleSetGroupColor = useCallback((groupId: string, colorHex: string | null) => {
+        void characters.handleSetGroupColor(groupId, colorHex).catch(() => undefined);
+    }, [characters]);
 
     return (
         <div className={styles.content}>
@@ -97,13 +139,17 @@ export const ScriptCharactersSidebar = () => {
             <EditorSidebar
                 data={{
                     confirmedCharacters,
+                    groups,
                     unconfirmedCharacters,
+                    characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
                     isLoading: characters.isCharactersLoading,
                 }}
                 actions={{
                     onConfirmCharacter: handleConfirmCharacter,
                     onEditCharacter: openAttributeManagerCharacter,
+                    onEditGroup: openAttributeManagerGroup,
                     onFocusCharacter: handleFocusCharacter,
+                    onSetGroupColor: handleSetGroupColor,
                 }}
                 options={{
                     activeCharacterId: elementSelection?.type === 'character'
@@ -117,7 +163,7 @@ export const ScriptCharactersSidebar = () => {
             />
             <AddCharacterModal
                 isOpen={isAddCharacterOpen}
-                existingCharacterKeys={confirmedCharacterKeys}
+                occupiedCharacterKeys={occupiedCharacterKeys}
                 onClose={closeAddCharacterModal}
                 onCreate={handleAddCharacter}
             />

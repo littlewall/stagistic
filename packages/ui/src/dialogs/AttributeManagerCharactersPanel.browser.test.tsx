@@ -1,4 +1,5 @@
-import {createRoot, type Root} from 'react-dom/client';
+import {useState} from 'react';
+import {createRoot} from 'react-dom/client';
 import {
     afterEach,
     describe,
@@ -6,266 +7,294 @@ import {
     it,
     vi,
 } from 'vite-plus/test';
-import {page} from 'vite-plus/test/browser';
+import {
+    page,
+    userEvent,
+} from 'vite-plus/test/browser';
 
 import {AttributeManagerCharactersPanel} from './AttributeManagerCharactersPanel';
+import {
+    CHARACTERS,
+    cleanupPanels,
+    findButtonByText,
+    GROUPS,
+    mountedRoots,
+    waitForElement,
+} from './AttributeManagerCharactersPanel.browser.testUtils';
 
-const mountedRoots: Root[] = [];
+afterEach(cleanupPanels);
 
-const CHARACTERS = [
-    {
-        id: 'char-1',
-        name: 'ANNA',
-        color: '#8899aa',
-        outline: 'existing outline',
-    }, {
-        id: 'char-2',
-        name: 'BORIS',
-        color: '#aa9988',
-        outline: 'selected outline',
-    },
-];
-
-const waitForElement = async <T extends Element>(selector: string): Promise<T> => {
-    const deadline = Date.now() + 1000;
-
-    while (Date.now() < deadline) {
-        const element = document.querySelector<T>(selector);
-
-        if (element) {
-            return element;
-        }
-
-        await new Promise(resolve => {
-            window.setTimeout(resolve, 10);
-        });
-    }
-
-    throw new Error(`Expected element matching ${selector}`);
-};
-
-const findButtonByText = (label: string): HTMLButtonElement => {
-    const button = Array.from(document.querySelectorAll('button'))
-        .find(candidate => candidate.textContent?.trim() === label);
-
-    if (!button) {
-        throw new Error(`Expected a button labelled ${label}`);
-    }
-
-    return button;
-};
-
-const waitForVisibleElement = async <T extends Element>(selector: string): Promise<T> => {
-    const deadline = Date.now() + 1000;
-
-    while (Date.now() < deadline) {
-        const element = Array.from(document.querySelectorAll<T>(selector))
-            .find(candidate => candidate.getClientRects().length > 0);
-
-        if (element) {
-            return element;
-        }
-
-        await new Promise(resolve => window.setTimeout(resolve, 10));
-    }
-
-    throw new Error(`Expected a visible element matching ${selector}`);
-};
-
-const findVisibleButtonByText = (label: string): HTMLButtonElement => {
-    const button = Array.from(document.querySelectorAll('button'))
-        .find(candidate => candidate.textContent?.trim() === label && candidate.getClientRects().length > 0);
-
-    if (!button) {
-        throw new Error(`Expected a visible button labelled ${label}`);
-    }
-
-    return button;
-};
-
-const renderPanel = (
-    initialSelectedCharacterId?: string,
-    onSetCharacterColor = vi.fn(),
-    characters = CHARACTERS,
-) => {
+const createHost = () => {
     const host = document.createElement('div');
-    const onSetCharacterOutline = vi.fn();
-    const onDeleteCharacter = vi.fn();
-    const onCreateCharacter = vi.fn();
-
+    const root = createRoot(host);
     host.style.width = '900px';
     host.style.height = '600px';
     host.style.setProperty('--size-scale', '1');
     document.body.appendChild(host);
-
-    const root = createRoot(host);
-
-    root.render(
-        <AttributeManagerCharactersPanel
-            characters={characters}
-            initialSelectedCharacterId={initialSelectedCharacterId}
-            onSetCharacterColor={onSetCharacterColor}
-            onSetCharacterOutline={onSetCharacterOutline}
-            onDeleteCharacter={onDeleteCharacter}
-            onCreateCharacter={onCreateCharacter}
-        />,
-    );
     mountedRoots.push(root);
-
-    return {
-        onSetCharacterColor,
-        onSetCharacterOutline,
-        onDeleteCharacter,
-        onCreateCharacter,
-    };
+    return root;
 };
 
-afterEach(() => {
-    mountedRoots.forEach(root => root.unmount());
-    mountedRoots.length = 0;
-    document.body.innerHTML = '';
-});
-
-describe('AttributeManagerCharactersPanel character actions', () => {
-    it('opens with the requested character selected', async () => {
-        renderPanel('char-2');
-
-        await waitForElement('[aria-label="Outline for BORIS"]');
-
-        expect(document.querySelector('[aria-label="Outline for ANNA"]')).toBeNull();
-    });
-
-    it('applies a character color through the shared picker', async () => {
-        const {onSetCharacterColor} = renderPanel();
-        const colorButton = page.elementLocator(
-            await waitForElement('[aria-label="Choose color for ANNA"]'),
+describe('AttributeManagerCharactersPanel groups workspace', () => {
+    it('separates an empty groups list from the next action', async () => {
+        createHost().render(
+            <AttributeManagerCharactersPanel
+                characters={CHARACTERS}
+                groups={[]}
+                initialWorkspaceId="groups"
+                onCreateGroup={() => null}
+            />,
         );
-
-        await colorButton.click();
-        await waitForElement('[aria-label="Color picker for ANNA"]');
-
-        const applyButton = page.elementLocator(findButtonByText('Apply'));
-
-        await applyButton.click();
-
-        expect(onSetCharacterColor).toHaveBeenCalledWith('char-1', expect.any(String));
+        const list = await waitForElement('[aria-label="Groups list"]');
+        const detail = await waitForElement('[aria-label="Groups detail"]');
+        expect(list.textContent).toContain('No groups yet.');
+        expect(detail.textContent).toContain('Create a group to edit details here.');
+        expect(detail.textContent).not.toContain('No groups yet.');
     });
 
-    it('keeps the newest color visible while older persistence is still pending', async () => {
-        const resolvers: Array<() => void> = [];
-        const onSetCharacterColor = vi.fn((
-            _characterId: string,
-            _colorHex: string | null,
-        ) => {
-            void _characterId;
-            void _colorHex;
+    it('searches, selects, and creates an initially empty group', async () => {
+        const onCreateGroup = vi.fn((name: string) => Promise.resolve({id: 'group-3', name}));
+        createHost().render(
+            <AttributeManagerCharactersPanel
+                characters={CHARACTERS}
+                groups={GROUPS}
+                initialWorkspaceId="groups"
+                initialSelectedGroupId="group-1"
+                onCreateGroup={onCreateGroup}
+            />,
+        );
+        const search = await waitForElement<HTMLInputElement>('[aria-label="Search groups"]');
+        expect(search.disabled).toBe(false);
+        expect(document.querySelector('[aria-label="Groups detail"]')?.textContent).toContain('Members');
+        await page.elementLocator(search).fill('ensemble');
+        expect(document.querySelector('[aria-label="Groups list"]')?.textContent).not.toContain('ALL');
+        expect(document.querySelector('[aria-label="Groups list"]')?.textContent).toContain('ENSEMBLE');
+        await page.elementLocator(findButtonByText('ENSEMBLE')).click();
+        expect(document.querySelector('[aria-label="Groups detail"] h3')?.textContent).toBe('ENSEMBLE');
+        await page.elementLocator(await waitForElement('[aria-label="Create group"]')).click();
+        await page.elementLocator(await waitForElement<HTMLInputElement>('#create-group-name')).fill('Chorus');
+        await page.elementLocator(findButtonByText('Create group')).click();
+        expect(onCreateGroup).toHaveBeenCalledWith('CHORUS');
+    });
 
-            return new Promise<void>(resolve => {
-                resolvers.push(resolve);
-            });
-        });
+    it('rejects cross-kind duplicates when creating a group', async () => {
+        const onCreateGroup = vi.fn();
+        createHost().render(
+            <AttributeManagerCharactersPanel
+                characters={CHARACTERS}
+                groups={GROUPS}
+                initialWorkspaceId="groups"
+                onCreateGroup={onCreateGroup}
+            />,
+        );
+        await page.elementLocator(await waitForElement('[aria-label="Create group"]')).click();
+        const input = await waitForElement<HTMLInputElement>('#create-group-name');
+        await page.elementLocator(input).fill('Anna (V.O.)');
+        expect(input.getAttribute('aria-invalid')).toBe('true');
+        expect(document.body.textContent).toContain('A character or group with this name already exists.');
+        expect(onCreateGroup).not.toHaveBeenCalled();
+        await page.elementLocator(input).fill('   ');
+        await userEvent.keyboard('{Tab}');
+        expect(document.body.textContent).toContain('Name cannot be empty.');
+        expect(onCreateGroup).not.toHaveBeenCalled();
+    });
 
-        renderPanel(undefined, onSetCharacterColor);
-
-        const chooseColor = async (action: 'Apply' | 'Reset') => {
-            await page.elementLocator(
-                await waitForElement('[aria-label="Choose color for ANNA"]'),
-            ).click();
-            await waitForVisibleElement('[aria-label="Color picker for ANNA"]');
-            await page.elementLocator(findVisibleButtonByText(action)).click();
+    it('does not show a duplicate error for the optimistic group while creation is pending', async () => {
+        let resolvePersistence: () => void = () => undefined;
+        const TestCase = () => {
+            const [groups, setGroups] = useState(GROUPS);
+            const handleCreate = async (name: string) => {
+                setGroups(current => [...current, {
+                    id: 'group-3', name, color: null, memberIds: [], usageCount: 0,
+                }]);
+                await new Promise<void>(resolve => {
+                    resolvePersistence = resolve;
+                });
+                return {id: 'group-3'};
+            };
+            return (
+                <AttributeManagerCharactersPanel
+                    characters={CHARACTERS}
+                    groups={groups}
+                    initialWorkspaceId="groups"
+                    onCreateGroup={handleCreate}
+                />
+            );
         };
-
-        await chooseColor('Reset');
-        await chooseColor('Apply');
-
-        const newestColor = onSetCharacterColor.mock.calls[1]?.[1];
-        const listColor = findButtonByText('ANNA').querySelector<HTMLElement>('span');
-        const expected = document.createElement('span');
-
-        expected.style.backgroundColor = newestColor ?? '';
-        resolvers[0]?.();
+        createHost().render(<TestCase />);
+        await page.elementLocator(await waitForElement('[aria-label="Create group"]')).click();
+        const input = await waitForElement<HTMLInputElement>('#create-group-name');
+        await page.elementLocator(input).fill('Chorus');
+        await page.elementLocator(findButtonByText('Create group')).click();
         await new Promise(resolve => window.setTimeout(resolve, 0));
 
-        expect(listColor?.style.backgroundColor).toBe(expected.style.backgroundColor);
-
-        resolvers[1]?.();
+        expect(input.getAttribute('aria-invalid')).toBe('false');
+        expect(document.querySelector('#create-group-error')).toBeNull();
+        expect(document.querySelector('dialog[aria-label="Create group"]')?.hasAttribute('open')).toBe(true);
+        resolvePersistence();
+        await new Promise(resolve => window.setTimeout(resolve, 20));
+        expect(document.querySelector('dialog[aria-label="Create group"]')?.hasAttribute('open')).toBe(false);
     });
 
-    it('deletes only after confirming in the modal', async () => {
-        const {onDeleteCharacter} = renderPanel();
-        const deleteButton = page.elementLocator(
-            await waitForElement('[aria-label="Remove ANNA"]'),
+    it('keeps a rejected group creation usable with normal validation', async () => {
+        createHost().render(
+            <AttributeManagerCharactersPanel
+                characters={CHARACTERS}
+                groups={GROUPS}
+                initialWorkspaceId="groups"
+                onCreateGroup={() => Promise.reject(new Error('write failed'))}
+            />,
+        );
+        await page.elementLocator(await waitForElement('[aria-label="Create group"]')).click();
+        const input = await waitForElement<HTMLInputElement>('#create-group-name');
+
+        await page.elementLocator(input).fill('Chorus');
+        await page.elementLocator(findButtonByText('Create group')).click();
+        await new Promise(resolve => window.setTimeout(resolve, 0));
+
+        expect(input.isConnected).toBe(true);
+        expect(input.disabled).toBe(false);
+        expect(document.querySelector('dialog[aria-label="Create group"]')?.hasAttribute('open')).toBe(true);
+        await page.elementLocator(input).fill('Anna');
+        expect(input.getAttribute('aria-invalid')).toBe('true');
+    });
+
+    it('keeps a null group creation usable with normal validation', async () => {
+        createHost().render(
+            <AttributeManagerCharactersPanel
+                characters={CHARACTERS}
+                groups={GROUPS}
+                initialWorkspaceId="groups"
+                onCreateGroup={() => null}
+            />,
+        );
+        await page.elementLocator(await waitForElement('[aria-label="Create group"]')).click();
+        const input = await waitForElement<HTMLInputElement>('#create-group-name');
+
+        await page.elementLocator(input).fill('Chorus');
+        await page.elementLocator(findButtonByText('Create group')).click();
+        await new Promise(resolve => window.setTimeout(resolve, 0));
+
+        expect(document.querySelector('dialog[aria-label="Create group"]')?.hasAttribute('open')).toBe(true);
+        expect(input.disabled).toBe(false);
+        await page.elementLocator(input).fill('Anna');
+        expect(input.getAttribute('aria-invalid')).toBe('true');
+    });
+
+    it('keeps membership selection usable while persistence is pending', async () => {
+        const onChange = vi.fn((
+            _id: string,
+            _memberIds: string[],
+        ) => new Promise<void>(() => undefined));
+        const TestCase = () => {
+            const [groups, setGroups] = useState(GROUPS);
+            const handleChange = (id: string, memberIds: string[]) => {
+                setGroups(current => current.map(group => group.id === id ? {...group, memberIds} : group));
+
+                return onChange(id, memberIds);
+            };
+
+            return (
+                <AttributeManagerCharactersPanel
+                    characters={CHARACTERS}
+                    groups={groups}
+                    initialWorkspaceId="groups"
+                    initialSelectedGroupId="group-1"
+                    onChangeGroupMemberIds={handleChange}
+                />
+            );
+        };
+
+        createHost().render(<TestCase />);
+        const input = await waitForElement<HTMLInputElement>('[placeholder="Select members"]');
+
+        await page.elementLocator(input).click();
+        await page.elementLocator(
+            await waitForElement<HTMLElement>('[data-testid="suggestions"] li'),
+        ).click();
+        await new Promise(resolve => window.setTimeout(resolve, 0));
+
+        expect(onChange).toHaveBeenCalledWith('group-1', ['char-1']);
+        const currentInput = await waitForElement<HTMLInputElement>('[placeholder="Select members"]');
+
+        expect(currentInput).toBe(input);
+        expect(currentInput.readOnly).toBe(false);
+        await page.elementLocator(currentInput).click();
+        const boris = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="suggestions"] li'))
+            .find(option => option.textContent?.trim() === 'BORIS');
+
+        if (!boris) {
+            throw new Error('Expected BORIS suggestion');
+        }
+
+        await page.elementLocator(boris).click();
+        expect(onChange).toHaveBeenLastCalledWith('group-1', ['char-1', 'char-2']);
+    });
+
+    it('updates group color and renders used and unused deletion warnings', async () => {
+        const onSetGroupColor = vi.fn();
+        const onDeleteGroup = vi.fn();
+
+        createHost().render(
+            <AttributeManagerCharactersPanel
+                characters={CHARACTERS}
+                groups={GROUPS}
+                initialWorkspaceId="groups"
+                initialSelectedGroupId="group-1"
+                onSetGroupColor={onSetGroupColor}
+                onDeleteGroup={onDeleteGroup}
+            />,
         );
 
-        await deleteButton.click();
-        await waitForElement('dialog[aria-label="Remove character"]');
-        expect(onDeleteCharacter).not.toHaveBeenCalled();
-
-        const confirmButton = page.elementLocator(findButtonByText('Remove'));
-
-        await confirmButton.click();
-
-        expect(onDeleteCharacter).toHaveBeenCalledWith('char-1');
+        await page.elementLocator(await waitForElement('[aria-label="Choose color for ALL"]')).click();
+        await page.elementLocator(findButtonByText('Apply')).click();
+        expect(onSetGroupColor).toHaveBeenCalledWith('group-1', expect.any(String));
+        await page.elementLocator(await waitForElement('[aria-label="Remove ALL"]')).click();
+        expect(document.body.textContent).toContain('Its occurrences stay in the script and become unconfirmed characters.');
+        await page.elementLocator(findButtonByText('Cancel')).click();
+        await page.elementLocator(findButtonByText('ENSEMBLE')).click();
+        await page.elementLocator(await waitForElement('[aria-label="Remove ENSEMBLE"]')).click();
+        expect(document.body.textContent).not.toContain('Its occurrences stay in the script and become unconfirmed characters.');
     });
 
-    it('creates a confirmed character through the add button', async () => {
-        const {onCreateCharacter} = renderPanel();
-        const addButton = page.elementLocator(
-            await waitForElement<HTMLButtonElement>('[aria-label="Create characters"]'),
-        );
+    it('restores confirmed group color when persistence rejects', async () => {
+        const onSetColor = vi.fn((
+            _id: string,
+            _color: string | null,
+        ) => Promise.reject(new Error('write failed')));
+        const TestCase = () => {
+            const [groups, setGroups] = useState(GROUPS);
+            const handleSetColor = async (id: string, color: string | null) => {
+                const confirmed = groups;
 
-        expect(
-            document.querySelector<HTMLButtonElement>('[aria-label="Create characters"]')?.disabled,
-        ).toBe(false);
+                setGroups(current => current.map(group => group.id === id ? {...group, color} : group));
+                try {
+                    await onSetColor(id, color);
+                } catch (error) {
+                    setGroups(confirmed);
+                    throw error;
+                }
+            };
 
-        await addButton.click();
+            return (
+                <AttributeManagerCharactersPanel
+                    characters={CHARACTERS}
+                    groups={groups}
+                    initialWorkspaceId="groups"
+                    initialSelectedGroupId="group-1"
+                    onSetGroupColor={handleSetColor}
+                />
+            );
+        };
 
-        const nameInput = await waitForElement<HTMLInputElement>('#create-character-name');
+        createHost().render(<TestCase />);
+        const colorTrigger = await waitForElement<HTMLElement>('[aria-label="Choose color for ALL"]');
 
-        await page.elementLocator(nameInput).fill('Rebecca');
+        await page.elementLocator(colorTrigger).click();
+        await page.elementLocator(findButtonByText('Apply')).click();
+        await new Promise(resolve => window.setTimeout(resolve, 20));
 
-        const createButton = page.elementLocator(findButtonByText('Create character'));
-
-        await createButton.click();
-
-        expect(onCreateCharacter).toHaveBeenCalledWith('REBECCA');
-    });
-
-    it('persists the edited outline on blur', async () => {
-        const {onSetCharacterOutline} = renderPanel();
-        const inputElement = await waitForElement<HTMLInputElement>(
-            '[aria-label="Outline for ANNA"]',
-        );
-
-        expect(inputElement.tagName).toBe('INPUT');
-
-        const input = page.elementLocator(inputElement);
-
-        expect(inputElement.value).toBe('existing outline');
-
-        await input.fill('brooding rival');
-        inputElement.blur();
-
-        expect(onSetCharacterOutline).toHaveBeenCalledWith('char-1', 'brooding rival');
-    });
-
-    it('does not repeat the character type above the selected name', async () => {
-        renderPanel();
-
-        const detailHeader = await waitForElement('[aria-label="Characters detail"] header');
-
-        expect(detailHeader.textContent).toContain('ANNA');
-        expect(detailHeader.textContent).not.toContain('Character');
-    });
-
-    it('separates an empty list status from the next action in the detail pane', async () => {
-        renderPanel(undefined, vi.fn(), []);
-
-        const list = await waitForElement('[aria-label="Characters list"]');
-        const detail = await waitForElement('[aria-label="Characters detail"]');
-
-        expect(list.textContent).toContain('No characters yet.');
-        expect(detail.textContent).toContain('Create a character to edit details here.');
-        expect(detail.textContent).not.toContain('No characters yet.');
+        expect(onSetColor).toHaveBeenCalledWith('group-1', expect.any(String));
+        expect(colorTrigger.style.getPropertyValue('--character-color')).toBe('#778899');
     });
 });

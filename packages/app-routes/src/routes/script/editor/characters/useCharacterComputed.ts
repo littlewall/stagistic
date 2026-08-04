@@ -7,7 +7,6 @@ import {
     DEFAULT_EDITOR_SETTINGS,
     type EditorSettings,
     normalizeCharacterColorHex,
-    normalizeCharacterKey,
 } from '@stagistic/script';
 import {
     useCallback,
@@ -17,18 +16,21 @@ import {
 import {
     collectUnconfirmedCharacterKeysFromSnapshot,
     EMPTY_UNCONFIRMED_CHARACTER_KEYS,
+    normalizeSpeakingEntityRecords,
 } from './characterComputedHelpers';
 import {
     normalizeCharacterDisplayName,
 } from './index';
 import type {
     EditorSidebarCharacter,
+    ScriptCharacterGroupRecord,
     ScriptCharacterRecord,
 } from './types';
 
 interface UseCharacterComputedArgs {
     data: {
         confirmedCharacterRecords: ScriptCharacterRecord[],
+        confirmedGroupRecords: ScriptCharacterGroupRecord[],
         characterSnapshot: EditorLiveCharacterSnapshot | null,
         resolvedScriptSettings: EditorSettings,
         characterColorSaturation: number,
@@ -48,10 +50,14 @@ interface UseCharacterComputedArgs {
 
 export interface CharacterComputed {
     normalizedConfirmedCharacterRecords: ScriptCharacterRecord[],
+    normalizedConfirmedGroupRecords: ScriptCharacterGroupRecord[],
+    normalizedSpeakingEntityRecords: ScriptCharacterRecord[],
     confirmedCharacters: EditorSidebarCharacter[],
     unconfirmedCharacters: EditorSidebarCharacter[],
     confirmedCharactersById: Map<string, ScriptCharacterRecord>,
+    confirmedGroupsById: Map<string, ScriptCharacterGroupRecord>,
     confirmedCharacterSet: Set<string>,
+    confirmedSpeakingEntitySet: Set<string>,
     getCharacterNameForBlockType: (name: string, blockType: unknown) => string,
     normalizeCharacterNameForInlineInput: (name: string) => string,
 }
@@ -63,6 +69,7 @@ export const useCharacterComputed = ({
 }: UseCharacterComputedArgs): CharacterComputed => {
     const {
         confirmedCharacterRecords,
+        confirmedGroupRecords,
         characterSnapshot,
         resolvedScriptSettings,
         characterColorSaturation,
@@ -115,34 +122,25 @@ export const useCharacterComputed = ({
         return result;
     }, [confirmedCharacterRecords]);
 
-    const normalizedConfirmedCharacterRecords = useMemo(() => {
-        const seen = new Set<string>();
-        const normalized: ScriptCharacterRecord[] = [];
-
-        confirmedCharacterRecords.forEach(character => {
-            const liveKey = character.id
-                ? characterSnapshot?.keyByCharacterId.get(character.id)
-                : null;
-            const key = normalizeCharacterKey(liveKey ?? character.key);
-
-            if (!key || seen.has(key)) {
-                return;
-            }
-
-            seen.add(key);
-            normalized.push({
-                id: character.id,
-                key,
-                colorHex: character.colorHex ?? null,
-                genderKey: character.genderKey ?? null,
-                outline: character.outline ?? null,
-            });
-        });
-
-        normalized.sort((a, b) => a.key.localeCompare(b.key));
-
-        return normalized;
-    }, [characterSnapshot?.keyByCharacterId, confirmedCharacterRecords]);
+    const confirmedGroupsById = useMemo(
+        () => new Map(confirmedGroupRecords.map(group => [group.id, group])),
+        [confirmedGroupRecords],
+    );
+    const normalizedConfirmedCharacterRecords = useMemo(
+        () => normalizeSpeakingEntityRecords(confirmedCharacterRecords, characterSnapshot),
+        [characterSnapshot, confirmedCharacterRecords],
+    );
+    const normalizedConfirmedGroupRecords = useMemo(
+        () => normalizeSpeakingEntityRecords(confirmedGroupRecords, characterSnapshot),
+        [characterSnapshot, confirmedGroupRecords],
+    );
+    const normalizedSpeakingEntityRecords = useMemo(
+        () => [
+            ...normalizedConfirmedCharacterRecords,
+            ...normalizedConfirmedGroupRecords,
+        ].sort((left, right) => left.key.localeCompare(right.key)),
+        [normalizedConfirmedCharacterRecords, normalizedConfirmedGroupRecords],
+    );
 
     const normalizedConfirmedCharacterKeys = useMemo(
         () => normalizedConfirmedCharacterRecords.map(character => character.key),
@@ -156,13 +154,17 @@ export const useCharacterComputed = ({
 
         return collectUnconfirmedCharacterKeysFromSnapshot(
             characterSnapshot,
-            normalizedConfirmedCharacterRecords,
+            normalizedSpeakingEntityRecords,
         );
-    }, [characterSnapshot, normalizedConfirmedCharacterRecords]);
+    }, [characterSnapshot, normalizedSpeakingEntityRecords]);
 
     const confirmedCharacterSet = useMemo(
         () => new Set(normalizedConfirmedCharacterKeys),
         [normalizedConfirmedCharacterKeys],
+    );
+    const confirmedSpeakingEntitySet = useMemo(
+        () => new Set(normalizedSpeakingEntityRecords.map(entity => entity.key)),
+        [normalizedSpeakingEntityRecords],
     );
 
     const confirmedCharacters = useMemo<EditorSidebarCharacter[]>(
@@ -261,10 +263,14 @@ export const useCharacterComputed = ({
 
     return {
         normalizedConfirmedCharacterRecords,
+        normalizedConfirmedGroupRecords,
+        normalizedSpeakingEntityRecords,
         confirmedCharacters,
         unconfirmedCharacters,
         confirmedCharactersById,
+        confirmedGroupsById,
         confirmedCharacterSet,
+        confirmedSpeakingEntitySet,
         getCharacterNameForBlockType,
         normalizeCharacterNameForInlineInput,
     };

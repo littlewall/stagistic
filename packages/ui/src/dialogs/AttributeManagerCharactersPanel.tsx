@@ -2,42 +2,54 @@ import clsx from 'clsx';
 import {
     useEffect,
     useMemo,
-    useRef,
     useState,
 } from 'react';
 
-import {Button} from '../atoms/Button';
-import {Input} from '../atoms/Input';
-import {Tooltip} from '../atoms/Tooltip';
-import {
-    PlusIcon,
-    SearchIcon,
-} from '../icons';
+import {useKeyedFieldDrafts} from '../hooks/useKeyedFieldDrafts';
 import {AttributeManagerCharacterDetail} from './AttributeManagerCharacterDetail';
+import {AttributeManagerEntityBrowser} from './AttributeManagerEntityBrowser';
+import {AttributeManagerGroupDetail} from './AttributeManagerGroupDetail';
 import styles from './AttributeManagerCharactersPanel.module.css';
 import {CreateCharacterModal} from './CreateCharacterModal';
+import {CreateGroupModal} from './CreateGroupModal';
 import {useAttributeManagerCharacterNames} from './useAttributeManagerCharacterNames';
+import {useOptimisticAttributeManagerColors} from './useOptimisticAttributeManagerColors';
 
 export interface AttributeManagerCharacter {
     id: string,
     name: string,
     color: string | null,
     outline: string | null,
+    groupNames?: string[],
 }
+
+export interface AttributeManagerGroup {
+    id: string,
+    name: string,
+    color: string | null,
+    memberIds: string[],
+    usageCount: number,
+}
+
+export type AttributeManagerCharacterWorkspaceId = 'characters' | 'groups';
+type WorkspaceId = AttributeManagerCharacterWorkspaceId | 'cast';
 
 export interface AttributeManagerCharactersPanelProps {
     characters: AttributeManagerCharacter[],
+    groups?: AttributeManagerGroup[],
     initialSelectedCharacterId?: string | null,
+    initialSelectedGroupId?: string | null,
+    initialWorkspaceId?: AttributeManagerCharacterWorkspaceId,
     isLoading?: boolean,
     characterColorSaturation?: number,
     draftScopeKey?: string | null,
     deletingCharacterIds?: string[],
     renamingCharacterIds?: string[],
     colorUpdatingCharacterIds?: string[],
-    onSetCharacterColor?: (
-        characterId: string,
-        colorHex: string | null,
-    ) => void | Promise<unknown>,
+    deletingGroupIds?: string[],
+    renamingGroupIds?: string[],
+    colorUpdatingGroupIds?: string[],
+    onSetCharacterColor?: (characterId: string, colorHex: string | null) => void | Promise<unknown>,
     onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
     onDeleteCharacter?: (characterId: string) => void,
     onCreateCharacter?: (characterName: string) => void,
@@ -46,66 +58,58 @@ export interface AttributeManagerCharactersPanelProps {
         previousName: string,
         nextName: string,
     ) => void | Promise<unknown>,
-}
-
-type WorkspaceId = 'characters' | 'groups' | 'cast';
-
-interface CharacterColorIntent {
-    color: string | null,
-    revision: number,
+    onCreateGroup?: (groupName: string) => {id: string} | null | Promise<{id: string} | null>,
+    onRenameGroup?: (
+        groupId: string,
+        previousName: string,
+        nextName: string,
+    ) => void | Promise<unknown>,
+    onDeleteGroup?: (groupId: string) => void | Promise<unknown>,
+    onSetGroupColor?: (groupId: string, colorHex: string | null) => void | Promise<unknown>,
+    onChangeGroupMemberIds?: (groupId: string, memberIds: string[]) => void | Promise<unknown>,
 }
 
 const WORKSPACES: Array<{id: WorkspaceId, label: string}> = [
     {id: 'characters', label: 'Characters'},
     {id: 'groups', label: 'Groups'},
-    {id: 'cast', label: 'Cast'},
+    // {id: 'cast', label: 'Cast'},
 ];
-
-const EMPTY_LIST_LABELS: Record<WorkspaceId, string> = {
-    characters: 'No characters yet.',
-    groups: 'No groups yet.',
-    cast: 'No cast assignments yet.',
-};
-
-const EMPTY_DETAIL_LABELS: Record<WorkspaceId, string> = {
-    characters: 'Create a character to edit details here.',
-    groups: 'Group details will appear here.',
-    cast: 'Cast assignment details will appear here.',
-};
 
 export const AttributeManagerCharactersPanel = ({
     characters,
+    groups = [],
     initialSelectedCharacterId,
+    initialSelectedGroupId,
+    initialWorkspaceId = 'characters',
     isLoading = false,
     characterColorSaturation,
     draftScopeKey = null,
     deletingCharacterIds = [],
     renamingCharacterIds = [],
     colorUpdatingCharacterIds = [],
+    deletingGroupIds = [],
+    renamingGroupIds = [],
+    colorUpdatingGroupIds = [],
     onSetCharacterColor,
     onSetCharacterOutline,
     onDeleteCharacter,
     onCreateCharacter,
     onRenameCharacter,
+    onCreateGroup,
+    onRenameGroup,
+    onDeleteGroup,
+    onSetGroupColor,
+    onChangeGroupMemberIds,
 }: AttributeManagerCharactersPanelProps) => {
-    const [activeWorkspaceId, setActiveWorkspaceId] = useState<WorkspaceId>('characters');
-    const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(
-        initialSelectedCharacterId ?? null,
-    );
-    const [searchQuery, setSearchQuery] = useState('');
-    const [isCreateOpen, setIsCreateOpen] = useState(false);
-    const colorIntentRevisionRef = useRef(0);
-    const [colorIntents, setColorIntents] = useState<Record<string, CharacterColorIntent>>({});
-    const colorizedCharacters = useMemo(() => characters.map(character => {
-        if (!(character.id in colorIntents)) {
-            return character;
-        }
-
-        return {
-            ...character,
-            color: colorIntents[character.id]?.color ?? null,
-        };
-    }), [characters, colorIntents]);
+    const [activeWorkspaceId, setActiveWorkspaceId] = useState<WorkspaceId>(initialWorkspaceId);
+    const [selectedCharacterId, setSelectedCharacterId] = useState<string | null>(initialSelectedCharacterId ?? null);
+    const [selectedGroupId, setSelectedGroupId] = useState<string | null>(initialSelectedGroupId ?? null);
+    const [isCreateCharacterOpen, setIsCreateCharacterOpen] = useState(false);
+    const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
+    const {
+        colorizedItems: colorizedCharacters,
+        setColor: handleSetCharacterColor,
+    } = useOptimisticAttributeManagerColors(characters, onSetCharacterColor);
     const {
         displayedCharacters,
         persistName,
@@ -116,166 +120,114 @@ export const AttributeManagerCharactersPanel = ({
         draftScopeKey,
         onRenameCharacter,
     });
-    const activeWorkspace = WORKSPACES.find(item => item.id === activeWorkspaceId) ?? WORKSPACES[0];
-    const normalizedSearchQuery = searchQuery.trim().toLocaleLowerCase();
-    const filteredCharacters = useMemo(() => {
-        if (!normalizedSearchQuery) {
-            return displayedCharacters;
-        }
+    const {
+        getValue: getGroupName,
+        persistValue: persistGroupName,
+        resetValue: resetGroupName,
+        setValue: setGroupName,
+    } = useKeyedFieldDrafts<string>(draftScopeKey);
+    const displayedGroups = useMemo(() => groups.map(group => ({
+        ...group,
+        name: getGroupName(group.id, group.name),
+    })), [getGroupName, groups]);
+    const selectedCharacter = displayedCharacters.find(item => item.id === selectedCharacterId) ?? null;
+    const selectedConfirmedCharacter = characters.find(item => item.id === selectedCharacterId) ?? null;
+    const selectedGroup = displayedGroups.find(item => item.id === selectedGroupId) ?? null;
+    const selectedConfirmedGroup = groups.find(item => item.id === selectedGroupId) ?? null;
+    const allEntityNames = [
+        ...characters.map(item => ({id: item.id, name: item.name})),
+        ...groups.map(item => ({id: item.id, name: item.name})),
+        ...displayedCharacters.map(item => ({id: item.id, name: item.name})),
+        ...displayedGroups.map(item => ({id: item.id, name: item.name})),
+    ];
 
-        return displayedCharacters.filter(character => character.name.toLocaleLowerCase().includes(normalizedSearchQuery));
-    }, [displayedCharacters, normalizedSearchQuery]);
-    const selectedCharacter = displayedCharacters.find(character => character.id === selectedCharacterId) ?? null;
-    const selectedConfirmedCharacter = characters.find(character => character.id === selectedCharacterId) ?? null;
-    const visibleCharacters = activeWorkspaceId === 'characters' ? filteredCharacters : [];
-
+    useEffect(() => setActiveWorkspaceId(initialWorkspaceId), [initialWorkspaceId]);
+    useEffect(() => setSelectedGroupId(initialSelectedGroupId ?? null), [initialSelectedGroupId]);
     useEffect(() => {
-        const selectionStillExists = characters.some(character => character.id === selectedCharacterId);
-
-        if (selectionStillExists) {
+        if (characters.some(item => item.id === selectedCharacterId)) {
             return;
         }
 
-        const initialSelectionExists = characters.some(character => character.id === initialSelectedCharacterId);
+        const initialExists = characters.some(item => item.id === initialSelectedCharacterId);
 
-        setSelectedCharacterId(initialSelectionExists
-            ? initialSelectedCharacterId ?? null
-            : characters[0]?.id ?? null);
-    }, [
-        characters,
-        initialSelectedCharacterId,
-        selectedCharacterId,
-    ]);
+        setSelectedCharacterId(initialExists ? initialSelectedCharacterId ?? null : characters[0]?.id ?? null);
+    }, [characters, initialSelectedCharacterId, selectedCharacterId]);
+    useEffect(() => {
+        if (groups.some(item => item.id === selectedGroupId)) {
+            return;
+        }
 
-    const handleSelectWorkspace = (workspaceId: WorkspaceId) => {
-        setActiveWorkspaceId(workspaceId);
-        setSearchQuery('');
+        const initialExists = groups.some(item => item.id === initialSelectedGroupId);
+
+        setSelectedGroupId(initialExists ? initialSelectedGroupId ?? null : groups[0]?.id ?? null);
+    }, [groups, initialSelectedGroupId, selectedGroupId]);
+
+    const handleCreateGroup = async (name: string) => {
+        const created = await onCreateGroup?.(name);
+
+        if (!created) {
+            return;
+        }
+
+        setSelectedGroupId(created.id);
+        setIsCreateGroupOpen(false);
     };
-    const handleSetCharacterColor = (characterId: string, colorHex: string | null) => {
-        const revision = colorIntentRevisionRef.current + 1;
-
-        colorIntentRevisionRef.current = revision;
-        setColorIntents(previous => ({
-            ...previous,
-            [characterId]: {
-                color: colorHex,
-                revision,
-            },
-        }));
-
-        void Promise.resolve(onSetCharacterColor?.(characterId, colorHex))
-            .catch(() => undefined)
-            .finally(() => {
-                setColorIntents(previous => {
-                    if (previous[characterId]?.revision !== revision) {
-                        return previous;
-                    }
-
-                    const next = {...previous};
-
-                    delete next[characterId];
-
-                    return next;
-                });
-            });
-    };
-
-    const listStatus = isLoading && activeWorkspaceId === 'characters'
-        ? 'Loading characters…'
-        : normalizedSearchQuery && activeWorkspaceId === 'characters'
-            ? 'No characters match your search.'
-            : EMPTY_LIST_LABELS[activeWorkspaceId];
-    const hasSelectedCharacter = activeWorkspaceId === 'characters'
-        && selectedCharacter
-        && selectedConfirmedCharacter;
+    const activeWorkspace = WORKSPACES.find(item => item.id === activeWorkspaceId) ?? WORKSPACES[0];
+    const isCharactersWorkspace = activeWorkspaceId === 'characters';
+    const browserItems = isCharactersWorkspace ? displayedCharacters : displayedGroups;
+    const selectedItemId = isCharactersWorkspace ? selectedCharacterId : selectedGroupId;
 
     return (
         <div className={styles.panel}>
             <header className={styles.workspaceNavigation}>
-                <div
-                    className={styles.workspaceTabs}
-                    role="tablist"
-                    aria-label="Character manager views"
-                >
-                    {WORKSPACES.map(workspace => {
-                        const isActive = workspace.id === activeWorkspaceId;
-
-                        return (
-                            <button
-                                key={workspace.id}
-                                type="button"
-                                className={clsx(styles.workspaceTab, isActive && styles.active)}
-                                role="tab"
-                                aria-selected={isActive}
-                                onClick={() => handleSelectWorkspace(workspace.id)}
-                            >
-                                {workspace.label}
-                            </button>
-                        );
-                    })}
+                <div className={styles.workspaceTabs} role="tablist" aria-label="Character manager views">
+                    {WORKSPACES.map(workspace => (
+                        <button
+                            key={workspace.id}
+                            type="button"
+                            className={clsx(styles.workspaceTab, workspace.id === activeWorkspaceId && styles.active)}
+                            role="tab"
+                            aria-selected={workspace.id === activeWorkspaceId}
+                            onClick={() => setActiveWorkspaceId(workspace.id)}
+                        >
+                            {workspace.label}
+                        </button>
+                    ))}
                 </div>
             </header>
             <div className={styles.workspace}>
-                <aside className={styles.browser} aria-label={`${activeWorkspace.label} list`}>
-                    <div className={styles.searchRow}>
-                        <div className={styles.searchField}>
-                            <SearchIcon className={styles.searchIcon} aria-hidden="true" />
-                            <Input
-                                value={searchQuery}
-                                onChange={event => setSearchQuery(event.target.value)}
-                                placeholder={`Search ${activeWorkspace.label.toLocaleLowerCase()}`}
-                                disabled={activeWorkspaceId !== 'characters'}
-                                aria-label={`Search ${activeWorkspace.label.toLocaleLowerCase()}`}
-                            />
-                        </div>
-                        <Tooltip
-                            label="Create character"
-                            isDisabled={activeWorkspaceId !== 'characters' || !onCreateCharacter}
-                        >
-                            <Button
-                                className={styles.addButton}
-                                variant="ghost"
-                                size="sm"
-                                isDisabled={activeWorkspaceId !== 'characters' || !onCreateCharacter}
-                                aria-label={`Create ${activeWorkspace.label.toLocaleLowerCase()}`}
-                                onPress={() => setIsCreateOpen(true)}
-                            >
-                                <PlusIcon className={styles.actionIcon} aria-hidden="true" />
-                            </Button>
-                        </Tooltip>
-                    </div>
-                    <div className={styles.browserList}>
-                        {visibleCharacters.map(character => {
-                            const isSelected = character.id === selectedCharacterId;
-
-                            return (
-                                <button
-                                    key={character.id}
-                                    type="button"
-                                    className={clsx(styles.listItem, isSelected && styles.selected)}
-                                    aria-pressed={isSelected}
-                                    onClick={() => setSelectedCharacterId(character.id)}
-                                >
-                                    <span
-                                        className={styles.characterColor}
-                                        style={character.color ? {backgroundColor: character.color} : undefined}
-                                        aria-hidden="true"
-                                    />
-                                    <span className={styles.characterName}>{character.name}</span>
-                                </button>
-                            );
-                        })}
-                        {visibleCharacters.length === 0 ? (
-                            <p className={styles.emptyList}>{listStatus}</p>
-                        ) : null}
-                    </div>
-                </aside>
-                <section className={styles.detail} aria-label={`${activeWorkspace.label} detail`}>
-                    {hasSelectedCharacter ? (
+                <AttributeManagerEntityBrowser
+                    key={activeWorkspaceId}
+                    items={browserItems}
+                    selectedItemId={selectedItemId}
+                    listLabel={`${activeWorkspace.label} list`}
+                    searchLabel={`Search ${activeWorkspace.label.toLocaleLowerCase()}`}
+                    createAriaLabel={isCharactersWorkspace ? 'Create characters' : 'Create group'}
+                    createTooltipLabel={isCharactersWorkspace ? 'Create character' : 'Create group'}
+                    emptyLabel={isCharactersWorkspace ? 'No characters yet.' : 'No groups yet.'}
+                    loadingLabel={isCharactersWorkspace ? 'Loading characters…' : 'Loading groups…'}
+                    noMatchesLabel={isCharactersWorkspace
+                        ? 'No characters match your search.'
+                        : 'No groups match your search.'}
+                    isLoading={isLoading}
+                    isCreateDisabled={isCharactersWorkspace ? !onCreateCharacter : !onCreateGroup}
+                    onSelectItem={isCharactersWorkspace ? setSelectedCharacterId : setSelectedGroupId}
+                    onCreate={isCharactersWorkspace
+                        ? () => setIsCreateCharacterOpen(true)
+                        : () => setIsCreateGroupOpen(true)}
+                />
+                <section
+                    className={styles.detail}
+                    aria-label={`${activeWorkspace.label} detail`}
+                    data-selected-group-id={!isCharactersWorkspace ? selectedGroupId ?? undefined : undefined}
+                >
+                    {isCharactersWorkspace && selectedCharacter && selectedConfirmedCharacter ? (
                         <AttributeManagerCharacterDetail
                             character={selectedCharacter}
                             confirmedName={selectedConfirmedCharacter.name}
-                            characters={displayedCharacters}
+                            characters={allEntityNames.map(entity => ({
+                                ...entity, color: null, outline: null,
+                            }))}
                             characterColorSaturation={characterColorSaturation}
                             isDeleting={deletingCharacterIds.includes(selectedCharacter.id)}
                             isRenaming={renamingCharacterIds.includes(selectedCharacter.id)}
@@ -287,19 +239,54 @@ export const AttributeManagerCharactersPanel = ({
                             onSetCharacterOutline={onSetCharacterOutline}
                             onDeleteCharacter={onDeleteCharacter}
                         />
-                    ) : (
+                    ) : null}
+                    {!isCharactersWorkspace && selectedGroup && selectedConfirmedGroup ? (
+                        <AttributeManagerGroupDetail
+                            group={selectedGroup}
+                            confirmedName={selectedConfirmedGroup.name}
+                            speakingEntities={allEntityNames}
+                            characters={displayedCharacters}
+                            characterColorSaturation={characterColorSaturation}
+                            isDeleting={deletingGroupIds.includes(selectedGroup.id)}
+                            isRenaming={renamingGroupIds.includes(selectedGroup.id)}
+                            isColorUpdating={colorUpdatingGroupIds.includes(selectedGroup.id)}
+                            onNameDraftChange={name => setGroupName(selectedGroup.id, name)}
+                            onResetNameDraft={() => resetGroupName(selectedGroup.id)}
+                            onRenameGroup={(id, previousName, nextName) => persistGroupName(
+                                id,
+                                nextName,
+                                name => onRenameGroup?.(id, previousName, name),
+                            )}
+                            onSetGroupColor={onSetGroupColor}
+                            onChangeMemberIds={memberIds => onChangeGroupMemberIds?.(selectedGroup.id, memberIds)}
+                            onDeleteGroup={onDeleteGroup}
+                        />
+                    ) : null}
+                    {(isCharactersWorkspace
+                        ? !selectedCharacter || !selectedConfirmedCharacter
+                        : !selectedGroup || !selectedConfirmedGroup) ? (
                         <div className={styles.emptyDetail}>
-                            <p>{EMPTY_DETAIL_LABELS[activeWorkspaceId]}</p>
+                            <p>{isCharactersWorkspace
+                                ? 'Create a character to edit details here.'
+                                : 'Create a group to edit details here.'}</p>
                         </div>
-                    )}
+                    ) : null}
                 </section>
             </div>
             {onCreateCharacter ? (
                 <CreateCharacterModal
-                    isOpen={isCreateOpen}
-                    existingCharacterNames={characters.map(character => character.name)}
-                    onClose={() => setIsCreateOpen(false)}
+                    isOpen={isCreateCharacterOpen}
+                    existingCharacterNames={allEntityNames.map(entity => entity.name)}
+                    onClose={() => setIsCreateCharacterOpen(false)}
                     onCreate={onCreateCharacter}
+                />
+            ) : null}
+            {onCreateGroup ? (
+                <CreateGroupModal
+                    isOpen={isCreateGroupOpen}
+                    existingEntityNames={allEntityNames.map(entity => entity.name)}
+                    onClose={() => setIsCreateGroupOpen(false)}
+                    onCreate={handleCreateGroup}
                 />
             ) : null}
         </div>

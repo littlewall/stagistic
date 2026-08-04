@@ -2,24 +2,24 @@ import {useState} from 'react';
 
 import {Button} from '../atoms/Button';
 import {ModalDialog} from '../dialogs/ModalDialog';
-import {PrereleaseNotice} from '../dialogs/PrereleaseNotice';
+import {PublicPreviewNotice} from '../dialogs/PublicPreviewNotice';
 import styles from './AppFooter.module.css';
 
 export const AppFooter = () => {
-    const [isAlphaDialogOpen, setIsAlphaDialogOpen] = useState(false);
+    const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
 
     return (
         <>
             <footer className={styles.footer}>
                 <span>© Stagistic Editor • Made with 💛 in Prague</span>
-                <span className={styles.alphaStatus}>
-                    Alpha pre-release (
+                <span className={styles.previewStatus}>
+                    Public preview (
                     <Button
-                        aria-label="What does Alpha pre-release mean?"
-                        className={styles.alphaLink}
+                        aria-label="What does public preview mean?"
+                        className={styles.previewLink}
                         size="icon"
                         variant="ghost"
-                        onPress={() => setIsAlphaDialogOpen(true)}
+                        onPress={() => setIsPreviewDialogOpen(true)}
                     >
                         what does it mean?
                     </Button>
@@ -30,15 +30,15 @@ export const AppFooter = () => {
                 </a>
             </footer>
             <ModalDialog
-                ariaLabel="About the Alpha pre-release"
-                isOpen={isAlphaDialogOpen}
-                onClose={() => setIsAlphaDialogOpen(false)}
+                ariaLabel="About the public preview"
+                isOpen={isPreviewDialogOpen}
+                onClose={() => setIsPreviewDialogOpen(false)}
             >
-                <PrereleaseNotice />
+                <PublicPreviewNotice />
                 <div className={styles.modalActions}>
                     <Button
                         variant="secondary"
-                        onPress={() => setIsAlphaDialogOpen(false)}
+                        onPress={() => setIsPreviewDialogOpen(false)}
                     >
                         Close
                     </Button>

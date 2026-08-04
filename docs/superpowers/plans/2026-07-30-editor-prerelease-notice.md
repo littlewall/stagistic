@@ -11,7 +11,7 @@
 ## Global Constraints
 
 - The notice copy must match `docs/superpowers/specs/2026-07-30-editor-prerelease-notice-design.md`.
-- The acknowledgement key is `stagistic.web.prereleaseAcknowledgement` and the current value is `"1"`.
+- The acknowledgement key is `stagistic.web.publicPreviewAcknowledgement` and the current value is `"1"`.
 - The local database must not initialize before acknowledgement.
 - The required modal cannot close through Escape or the backdrop.
 - Storage failures must not crash the app; failed writes may allow only the current session to proceed.
@@ -35,13 +35,13 @@
 ### Task 1: Versioned acknowledgement storage
 
 **Files:**
-- Create: `apps/web/src/prerelease/acknowledgement.ts`
-- Test: `apps/web/src/prerelease/acknowledgement.test.ts`
+- Create: `apps/web/src/publicPreview/publicPreviewAcknowledgement.ts`
+- Test: `apps/web/src/publicPreview/acknowledgement.test.ts`
 
 **Interfaces:**
 - Produces: `hasCurrentPrereleaseAcknowledgement(storage?: Pick<Storage, 'getItem'>): boolean`
 - Produces: `storeCurrentPrereleaseAcknowledgement(storage?: Pick<Storage, 'setItem'>): boolean`
-- Produces: `PRERELEASE_ACKNOWLEDGEMENT_STORAGE_KEY` and `CURRENT_PRERELEASE_ACKNOWLEDGEMENT_VERSION`
+- Produces: `PUBLIC_PREVIEW_ACKNOWLEDGEMENT_STORAGE_KEY` and `CURRENT_PUBLIC_PREVIEW_ACKNOWLEDGEMENT_VERSION`
 
 - [ ] **Step 1: Write failing storage tests**
 
@@ -51,7 +51,7 @@ Use a small in-test `Storage` implementation backed by `Map<string, string>`.
 
 - [ ] **Step 2: Verify the tests fail for the missing module**
 
-Run: `pnpm test -- apps/web/src/prerelease/acknowledgement.test.ts`
+Run: `pnpm test -- apps/web/src/publicPreview/acknowledgement.test.ts`
 
 Expected: FAIL because `./acknowledgement` does not exist.
 
@@ -60,9 +60,9 @@ Expected: FAIL because `./acknowledgement` does not exist.
 Use these exact public constants:
 
 ```ts
-export const PRERELEASE_ACKNOWLEDGEMENT_STORAGE_KEY
-    = 'stagistic.web.prereleaseAcknowledgement';
-export const CURRENT_PRERELEASE_ACKNOWLEDGEMENT_VERSION = '1';
+export const PUBLIC_PREVIEW_ACKNOWLEDGEMENT_STORAGE_KEY
+    = 'stagistic.web.publicPreviewAcknowledgement';
+export const CURRENT_PUBLIC_PREVIEW_ACKNOWLEDGEMENT_VERSION = '1';
 ```
 
 Both public functions accept no required arguments. Keep browser storage lookup
@@ -70,22 +70,22 @@ inside a guarded helper; return `false` on unavailable storage or exceptions.
 
 - [ ] **Step 4: Verify storage tests pass**
 
-Run: `pnpm test -- apps/web/src/prerelease/acknowledgement.test.ts`
+Run: `pnpm test -- apps/web/src/publicPreview/acknowledgement.test.ts`
 
 Expected: PASS.
 
 ### Task 2: Shared notice and completed footer dialog
 
 **Files:**
-- Create: `packages/ui/src/dialogs/PrereleaseNotice.tsx`
-- Create: `packages/ui/src/dialogs/PrereleaseNotice.module.css`
+- Create: `packages/ui/src/dialogs/PublicPreviewNotice.tsx`
+- Create: `packages/ui/src/dialogs/PublicPreviewNotice.module.css`
 - Modify: `packages/ui/src/index.ts`
 - Modify: `packages/ui/src/layout/AppFooter.tsx`
 - Modify: `packages/ui/src/layout/AppFooter.module.css`
 - Test: `packages/ui/src/layout/AppLayout.browser.test.tsx`
 
 **Interfaces:**
-- Produces: exported `PrereleaseNotice` with no props.
+- Produces: exported `PublicPreviewNotice` with no props.
 - Consumes: existing `ModalDialog` and `Button`.
 
 - [ ] **Step 1: Extend the footer browser test first**
@@ -104,7 +104,7 @@ Expected: FAIL because the factual notice and Close button are absent.
 - [ ] **Step 3: Add the shared notice and footer action**
 
 Render the approved title, introduction, and four bullet points in
-`PrereleaseNotice`. Keep readable prose within the existing modal width, use only
+`PublicPreviewNotice`. Keep readable prose within the existing modal width, use only
 design-system tokens, and add a right-aligned secondary Close action to
 `AppFooter`.
 
@@ -117,15 +117,15 @@ Expected: PASS.
 ### Task 3: Required first-run gate before boot
 
 **Files:**
-- Create: `apps/web/src/prerelease/PrereleaseGate.tsx`
-- Create: `apps/web/src/prerelease/PrereleaseGate.module.css`
-- Test: `apps/web/src/prerelease/PrereleaseGate.browser.test.tsx`
+- Create: `apps/web/src/publicPreview/PublicPreviewGate.tsx`
+- Create: `apps/web/src/publicPreview/PublicPreviewGate.module.css`
+- Test: `apps/web/src/publicPreview/PublicPreviewGate.browser.test.tsx`
 - Test: `apps/web/src/App.browser.test.tsx`
 - Modify: `apps/web/src/App.tsx`
 
 **Interfaces:**
-- Produces: `PrereleaseGate({children}: {children: ReactNode})`.
-- Consumes: `PrereleaseNotice`, `ModalDialog`, `Button`, and Task 1 storage functions.
+- Produces: `PublicPreviewGate({children}: {children: ReactNode})`.
+- Consumes: `PublicPreviewNotice`, `ModalDialog`, `Button`, and Task 1 storage functions.
 
 - [ ] **Step 1: Write the failing gate browser test**
 
@@ -137,9 +137,9 @@ literal value `"1"` under the literal approved key and renders the content.
 
 - [ ] **Step 2: Verify the gate test fails for the missing component**
 
-Run: `pnpm --filter @stagistic/web test:browser -- PrereleaseGate.browser.test.tsx`
+Run: `pnpm --filter @stagistic/web test:browser -- PublicPreviewGate.browser.test.tsx`
 
-Expected: FAIL because `PrereleaseGate` does not exist.
+Expected: FAIL because `PublicPreviewGate` does not exist.
 
 - [ ] **Step 3: Implement the gate**
 
@@ -151,7 +151,7 @@ in-memory state to acknowledged regardless of write success.
 
 - [ ] **Step 4: Verify the gate test passes**
 
-Run: `pnpm --filter @stagistic/web test:browser -- PrereleaseGate.browser.test.tsx`
+Run: `pnpm --filter @stagistic/web test:browser -- PublicPreviewGate.browser.test.tsx`
 
 Expected: PASS.
 
@@ -164,9 +164,9 @@ inside `BootedApp` only after database preparation completes. Make the default
 `App` render:
 
 ```tsx
-<PrereleaseGate>
+<PublicPreviewGate>
     <BootedApp />
-</PrereleaseGate>
+</PublicPreviewGate>
 ```
 
 Because `BootedApp` is not rendered and the repository module is not evaluated
@@ -179,10 +179,10 @@ construction and verifies zero workers before acknowledgement and one afterward.
 Run:
 
 ```bash
-pnpm test -- apps/web/src/prerelease/acknowledgement.test.ts
+pnpm test -- apps/web/src/publicPreview/acknowledgement.test.ts
 pnpm --filter @stagistic/ui test:browser -- AppLayout.browser.test.tsx
 pnpm --filter @stagistic/web test:browser -- App.browser.test.tsx
-pnpm --filter @stagistic/web test:browser -- PrereleaseGate.browser.test.tsx
+pnpm --filter @stagistic/web test:browser -- PublicPreviewGate.browser.test.tsx
 pnpm --filter @stagistic/ui typecheck
 pnpm --filter @stagistic/web typecheck
 pnpm lint

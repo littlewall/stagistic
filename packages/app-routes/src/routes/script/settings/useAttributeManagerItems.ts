@@ -6,6 +6,7 @@ import {
 import {buildScriptStructureOutline} from '@stagistic/script';
 import type {
     AttributeManagerCharacter,
+    AttributeManagerGroup,
     AttributeManagerListItem,
 } from '@stagistic/ui';
 import {useMemo} from 'react';
@@ -41,8 +42,29 @@ export const useAttributeManagerItems = ({
             name: liveCharacters.keyByCharacterId.get(character.id) ?? character.key,
             color: character.colorHex ?? null,
             outline: character.outline ?? null,
+            groupNames: characters.confirmedGroupRecords
+                .filter(group => group.memberIds.includes(character.id))
+                .map(group => liveCharacters.keyByCharacterId.get(group.id) ?? group.key)
+                .sort((left, right) => left.localeCompare(right)),
         })).sort((left, right) => left.name.localeCompare(right.name));
-    }, [characters.confirmedCharacterRecords, liveCharacters.keyByCharacterId]);
+    }, [
+        characters.confirmedCharacterRecords,
+        characters.confirmedGroupRecords,
+        liveCharacters.keyByCharacterId,
+    ]);
+    const groupItems = useMemo<AttributeManagerGroup[]>(() => {
+        return characters.confirmedGroupRecords.map(group => ({
+            id: group.id,
+            name: liveCharacters.keyByCharacterId.get(group.id) ?? group.key,
+            color: group.colorHex,
+            memberIds: group.memberIds,
+            usageCount: liveCharacters.countsByCharacterId.get(group.id) ?? 0,
+        })).sort((left, right) => left.name.localeCompare(right.name));
+    }, [
+        characters.confirmedGroupRecords,
+        liveCharacters.countsByCharacterId,
+        liveCharacters.keyByCharacterId,
+    ]);
     const sceneItems = useMemo<AttributeManagerListItem[]>(() => {
         if (!isOpen) {
             return [];
@@ -115,6 +137,7 @@ export const useAttributeManagerItems = ({
 
     return {
         characterItems,
+        groupItems,
         sceneItems,
         musicItems,
     };

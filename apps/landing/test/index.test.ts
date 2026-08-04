@@ -5,6 +5,43 @@ import {
     beforeAll, describe, expect, it,
 } from 'vite-plus/test';
 
+const readSvgCanvas = (relativePath: string) => {
+    const svg = readFileSync(
+        new URL(relativePath, import.meta.url),
+        'utf8',
+    );
+    const root = svg.match(/<svg\b[^>]*>/)?.[0] ?? '';
+
+    return {
+        width: root.match(/\bwidth="([^"]+)"/)?.[1],
+        height: root.match(/\bheight="([^"]+)"/)?.[1],
+        viewBox: root.match(/\bviewBox="([^"]+)"/)?.[1],
+    };
+};
+
+const readPngDimensions = (relativePath: string) => {
+    const png = readFileSync(new URL(relativePath, import.meta.url));
+
+    return [
+        png.readUInt32BE(16),
+        png.readUInt32BE(20),
+    ];
+};
+
+const readIcoDimensions = (relativePath: string) => {
+    const ico = readFileSync(new URL(relativePath, import.meta.url));
+    const imageCount = ico.readUInt16LE(4);
+
+    return Array.from({length: imageCount}, (_, index) => {
+        const offset = 6 + index * 16;
+
+        return [
+            ico[offset] || 256,
+            ico[offset + 1] || 256,
+        ];
+    });
+};
+
 describe('landing page', () => {
     let homeHtml = '';
     let syntaxHtml = '';
@@ -41,7 +78,7 @@ describe('landing page', () => {
 
     it('uses the editor identity in product copy and the umbrella brand in the footer', () => {
         expect(homeHtml).toContain(
-            '<title>Stagistic Editor — Script editor built for theatre</title>',
+            '<title>Stagistic Editor - Script editor built for theatre</title>',
         );
         expect(homeHtml).toContain(
             'Stagistic Editor is a script editor built specifically for',
@@ -152,6 +189,34 @@ describe('landing page', () => {
         for (const faviconPath of faviconPaths) {
             expect(existsSync(new URL(faviconPath, import.meta.url))).toBe(true);
         }
+    });
+
+    it('ships the approved editor mark canvas at every icon size', () => {
+        const svgPaths = [
+            '../public/assets/stagistic-brand/editor-mark-on-light.svg',
+            '../public/assets/stagistic-brand/editor-mark-on-dark.svg',
+            '../public/favicon.svg',
+        ];
+
+        for (const svgPath of svgPaths) {
+            expect(readSvgCanvas(svgPath)).toEqual({
+                width: '135',
+                height: '130',
+                viewBox: '0 0 135 130',
+            });
+        }
+
+        expect(readPngDimensions('../public/favicon-16x16.png'))
+            .toEqual([16, 16]);
+        expect(readPngDimensions('../public/favicon-32x32.png'))
+            .toEqual([32, 32]);
+        expect(readPngDimensions('../public/apple-touch-icon.png'))
+            .toEqual([180, 180]);
+        expect(readIcoDimensions('../public/favicon.ico'))
+            .toEqual([
+                [16, 16],
+                [32, 32],
+            ]);
     });
 
     it('renders container-width dividers around the features section', () => {

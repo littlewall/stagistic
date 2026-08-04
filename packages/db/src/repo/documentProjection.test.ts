@@ -10,6 +10,9 @@ import {
 } from '../blocks';
 import {
     scriptBlocks,
+    scriptBlockCharacterRefs,
+    scriptCharacterGroupMembers,
+    scriptCharacters,
     scriptLocations,
     scriptScenes,
 } from '../schema';
@@ -131,6 +134,7 @@ describe('documentProjection', () => {
         const loaded = await loadScriptDocumentFromProjection(db, 's1');
 
         expect(loaded?.document.content.map(node => node.attrs?.id)).toEqual(['h1', 'a1']);
+        expect(loaded?.schemaVersion).toBe(3);
 
         const storedBlocks = await db
             .select()
@@ -146,5 +150,43 @@ describe('documentProjection', () => {
         })), []);
 
         expect(rebuilt.document.content.map(node => node.attrs?.id)).toEqual(['h1', 'a1']);
+    });
+
+    it('persists confirmed group refs from inline character tags', async () => {
+        const {db} = await createTestDb();
+
+        await seedScript(db, 's1');
+        await db.insert(scriptCharacters).values([
+            {
+                id: 'char-1', scriptId: 's1', characterKey: 'ANNA', createdAt: 1, updatedAt: 1,
+            }, {
+                id: 'group-1', scriptId: 's1', characterKey: 'ALL', kind: 'group', createdAt: 1, updatedAt: 1,
+            },
+        ]);
+        await db.insert(scriptCharacterGroupMembers).values({groupId: 'group-1', characterId: 'char-1'});
+
+        await rebuildScriptProjection({
+            db,
+            scriptId: 's1',
+            document: {
+                type: 'doc',
+                content: [{
+                    type: 'stageDirection',
+                    attrs: {id: 'b1'},
+                    content: [{
+                        type: 'text',
+                        text: 'ALL',
+                        marks: [{type: 'characterTag', attrs: {characterKey: 'ALL', characterId: 'group-1'}}],
+                    }],
+                }],
+            },
+        });
+
+        expect(await db.select().from(scriptBlockCharacterRefs)).toEqual([{
+            blockId: 'b1',
+            characterId: 'group-1',
+            characterKey: 'ALL',
+            isConfirmed: true,
+        }]);
     });
 });

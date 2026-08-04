@@ -17,6 +17,7 @@ import {
 const script = {
     doc: sampleDoc(),
     characters: [],
+    groups: [],
     initialCharacters: [
         {
             id: 'char-b',

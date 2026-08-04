@@ -119,6 +119,7 @@ const CharacterSidebarProbe = () => {
                         isConfirmed: true,
                     },
                 ],
+                groups: [],
                 unconfirmedCharacters: [
                     {
                         key: 'ANN',

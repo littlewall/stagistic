@@ -8,7 +8,7 @@ import {
 } from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
-const STORAGE_KEY = 'stagistic.web.prereleaseAcknowledgement';
+const STORAGE_KEY = 'stagistic.web.publicPreviewAcknowledgement';
 const mountedRoots: Root[] = [];
 
 const waitFor = async (predicate: () => boolean) => {
@@ -25,16 +25,17 @@ const waitFor = async (predicate: () => boolean) => {
     throw new Error('Timed out waiting for condition');
 };
 
-afterEach(() => {
+afterEach(async () => {
     mountedRoots.forEach(root => root.unmount());
     mountedRoots.length = 0;
     document.body.innerHTML = '';
     window.localStorage.removeItem(STORAGE_KEY);
     vi.unstubAllGlobals();
+    await page.viewport(1280, 800);
 });
 
 describe('App', () => {
-    it('starts the database worker only after prerelease acknowledgement', async () => {
+    it('starts the database worker only after public preview acknowledgement', async () => {
         const NativeWorker = window.Worker;
         let startedWorkerCount = 0;
 
@@ -47,6 +48,7 @@ describe('App', () => {
 
         window.localStorage.removeItem(STORAGE_KEY);
         vi.stubGlobal('Worker', TrackingWorker);
+        await page.viewport(1280, 800);
 
         const {default: App} = await import('./App');
         const host = document.createElement('div');

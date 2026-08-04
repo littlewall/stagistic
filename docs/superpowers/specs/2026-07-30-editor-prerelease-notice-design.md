@@ -79,7 +79,7 @@ backdrop.
 Use this namespaced local storage entry with a serialized version value:
 
 ```text
-stagistic.web.prereleaseAcknowledgement = "1"
+stagistic.web.publicPreviewAcknowledgement = "1"
 ```
 
 Only an exact match with the current version counts as acknowledged. Incrementing

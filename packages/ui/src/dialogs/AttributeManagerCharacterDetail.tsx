@@ -183,7 +183,7 @@ export const AttributeManagerCharacterDetail = ({
                     {isInvalid ? (
                         <p id={errorId} className={styles.error}>
                             {isDuplicate
-                                ? 'A character with this name already exists.'
+                                ? 'A character or group with this name already exists.'
                                 : 'Name cannot be empty.'}
                         </p>
                     ) : null}
@@ -204,6 +204,7 @@ export const AttributeManagerCharacterDetail = ({
             <RemoveCharacterModal
                 isOpen={isRemoveOpen}
                 characterKey={character.name}
+                groupNames={character.groupNames ?? []}
                 onClose={() => setIsRemoveOpen(false)}
                 onConfirm={handleConfirmDelete}
             />

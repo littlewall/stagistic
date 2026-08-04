@@ -1,10 +1,13 @@
 import type {
     ScriptCharacterGenderOption,
+    ScriptCharacterGroupRef,
     ScriptCharacterRef,
+    ScriptSpeakingEntityRef,
 } from '../../../types';
 
 interface ScriptCharacterRow {
     id: string,
+    kind: string,
     characterKey: string,
     colorHex: string | null,
     genderKey: string | null,
@@ -22,6 +25,7 @@ interface ScriptCharacterGenderRow {
 export const mapCharacterRow = (row: ScriptCharacterRow): ScriptCharacterRef => {
     return {
         id: row.id,
+        kind: 'character',
         key: row.characterKey,
         colorHex: row.colorHex,
         genderKey: row.genderKey,
@@ -29,6 +33,25 @@ export const mapCharacterRow = (row: ScriptCharacterRow): ScriptCharacterRef => 
         backstory: row.backstory,
         outline: row.outline,
     };
+};
+
+export const mapSpeakingEntityRow = (
+    row: ScriptCharacterRow,
+    memberIds: string[],
+): ScriptSpeakingEntityRef => {
+    if (row.kind !== 'group') {
+        return mapCharacterRow(row);
+    }
+
+    const group: ScriptCharacterGroupRef = {
+        id: row.id,
+        kind: 'group',
+        key: row.characterKey,
+        colorHex: row.colorHex,
+        memberIds,
+    };
+
+    return group;
 };
 
 export const mapGenderRow = (row: ScriptCharacterGenderRow): ScriptCharacterGenderOption => {

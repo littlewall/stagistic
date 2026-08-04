@@ -32,6 +32,7 @@ const roots: Root[] = [];
 const toScriptData = (doc: ScriptDocument): ScriptData => ({
     doc,
     characters: [],
+    groups: [],
     initialCharacters: [],
     initialPlaces: [],
     scriptTitle: 'Draft',

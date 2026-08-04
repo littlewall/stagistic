@@ -1,6 +1,7 @@
 import clsx from 'clsx';
 import {
     type MouseEvent,
+    useEffect,
     useId,
     useRef,
     useState,
@@ -68,12 +69,20 @@ export const MultiComboBox = ({
     const inputId = useId();
     const rootRef = useRef<HTMLDivElement>(null);
     const [isFocused, setIsFocused] = useState(false);
-    const selectedTags = value.flatMap(id => {
+    const [selectedValue, setSelectedValue] = useState(value);
+    const selectedValueRef = useRef(value);
+    const selectedTags = selectedValue.flatMap(id => {
         const option = options.find(candidate => candidate.id === id);
 
         return option ? [toTag(option)] : [];
     });
     const suggestions = options.map(toTag);
+
+    useEffect(() => {
+        selectedValueRef.current = value;
+        setSelectedValue(value);
+    }, [value]);
+
     const closeSuggestions = () => {
         setIsFocused(false);
         queueMicrotask(() => {
@@ -83,8 +92,14 @@ export const MultiComboBox = ({
         });
     };
     const handleAddition = (tag: Tag) => {
-        if (options.some(option => option.id === tag.id) && !value.includes(tag.id)) {
-            onChange([...value, tag.id]);
+        const currentValue = selectedValueRef.current;
+
+        if (options.some(option => option.id === tag.id) && !currentValue.includes(tag.id)) {
+            const nextValue = [...currentValue, tag.id];
+
+            selectedValueRef.current = nextValue;
+            setSelectedValue(nextValue);
+            onChange(nextValue);
         }
 
         closeSuggestions();
@@ -93,7 +108,11 @@ export const MultiComboBox = ({
         const tag = selectedTags[index];
 
         if (tag) {
-            onChange(value.filter(id => id !== tag.id));
+            const nextValue = selectedValueRef.current.filter(id => id !== tag.id);
+
+            selectedValueRef.current = nextValue;
+            setSelectedValue(nextValue);
+            onChange(nextValue);
         }
     };
 

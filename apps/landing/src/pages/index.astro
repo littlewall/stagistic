@@ -19,55 +19,45 @@ const features = [
         label: 'Acts and scenes that stay connected',
         description:
             'A live outline keeps the structure visible as you write. Jump directly to any scene, reorder scenes, and group them into acts instead of forcing your play into a screenplay-shaped structure.',
-        imageSrc: '/editor-preview.png',
+        imageSrc: '/features/acts-and-scenes.png',
         imageAlt: 'The scene outline beside a script in Stagistic Editor',
-        imageFit: 'cover',
-        imagePosition: 'left 18%',
-        imageScale: '1.42',
+        imageFit: 'contain',
         shape: 'two',
     },
     {
         label: 'Characters throughout the script',
         description:
             'Build a character catalogue directly from your script. Assign colours, highlight appearances, group characters, rename characters, tag them inside stage directions, and write dialogue for two or more characters speaking together.',
-        imageSrc: '/editor-preview.png',
+        imageSrc: '/features/characters.png',
         imageAlt: 'The character catalogue in Stagistic Editor',
-        imageFit: 'cover',
-        imagePosition: 'right 34%',
-        imageScale: '1.44',
+    imageFit: 'contain',
         shape: 'three',
     },
     {
         label: 'Ready for musicals',
         description:
             'Write lyrics as their own block type, manage songs and instrumentals, place music cues directly in the script, and attach score PDFs to individual musical numbers.',
-        imageSrc: '/editor-preview.png',
+        imageSrc: '/features/musical.png',
         imageAlt: 'Lyrics formatted inside a musical script in Stagistic Editor',
-        imageFit: 'cover',
-        imagePosition: '52% 70%',
-        imageScale: '1.32',
+    imageFit: 'contain',
         shape: 'one',
     },
     {
         label: 'A writing flow you can configure',
         description:
             'Configure page format, title page, headers and footers, and each block\'s indentation, alignment, emphasis, and casing. Set keyboard shortcuts and decide which block follows next, so the editor matches the way you write.',
-        imageSrc: '/editor-preview.png',
+        imageSrc: '/features/writing-flow.png',
         imageAlt: 'Formatting controls above a script in Stagistic Editor',
-        imageFit: 'cover',
-        imagePosition: '50% top',
-        imageScale: '1.28',
+            imageFit: 'cover',
         shape: 'three',
     },
     {
         label: 'Advanced PDF export',
         description:
             'Export print-ready PDFs with scene-based pagination, character-specific scripts, consistent page numbering across script and embedded score, and integrated sheet music insertion.',
-        imageSrc: '/editor-preview.png',
+        imageSrc: '/features/export.png',
         imageAlt: 'A print-ready theatre script displayed in Stagistic Editor',
-        imageFit: 'cover',
-        imagePosition: '50% 48%',
-        imageScale: '1.24',
+            imageFit: 'cover',
         shape: 'two',
     },
 ];
@@ -107,7 +97,7 @@ const faqs = [
     },
     {
         q: 'Is this stable enough to use for real work?',
-        a: "It's an experimental release. The core writing experience is functional, but expect rough edges. We recommend keeping backups of important scripts. Feedback and bug reports are very welcome - they directly shape what gets fixed first.",
+        a: "It's in public preview. The core writing experience is functional, but expect rough edges. We recommend keeping backups of important scripts. Feedback and bug reports are very welcome - they directly shape what gets fixed first.",
     },
 ];
 ---
@@ -117,12 +107,13 @@ const faqs = [
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <SiteIcons />
-        <title>Stagistic Editor — Script editor built for theatre</title>
+        <title>Stagistic Editor - Script editor built for theatre</title>
         <meta
             name="description"
             content="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
         />
         <meta property="og:image" content="/opengraph.jpg" />
+        <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
         <script is:inline>document.documentElement.classList.add('js');</script>
     </head>
     <body>
@@ -231,6 +222,11 @@ const faqs = [
                         >
                             <LandingMiniEditor client:load />
                         </div>
+                        <p class={s.desktopOnlyNotice} role="note">
+                            Stagistic Editor is built for larger screens. Open it on
+                            a laptop or desktop at least 1000 pixels wide &mdash;
+                            mobile support is on the way.
+                        </p>
                     </div>
 
                 </div>
@@ -326,43 +322,48 @@ const faqs = [
                 </div>
             </section>
 
-            <!-- Alpha / CTA -->
-            <section class={s.alpha} id="alpha">
-                <div class={clsx(s.alphaInner, s.reveal)} data-reveal>
+            <!-- Public preview / CTA -->
+            <section class={s.preview} id="preview">
+                <div class={clsx(s.previewInner, s.reveal)} data-reveal>
                     <div>
-                        <h2 class={s.alphaTitle}>
+                        <h2 class={s.previewTitle}>
                             Stagistic Editor is free.<br />Forever.
                         </h2>
-                        <p class={s.alphaText}>
+                        <p class={s.previewText}>
                             Stagistic Editor is free to use in your browser, with no
                             account or paywall. Every current and future Editor
                             feature will remain free.
                         </p>
-                        <p class={s.alphaTextSecondary}>
+                        <p class={s.previewTextSecondary}>
                             Stagistic will grow into a family of tools for theatre and
                             production. Some future tools may be paid, but Stagistic
                             Editor will always be free and open source.
                         </p>
                     </div>
-                    <div class={s.alphaCard}>
-                        <div class={s.alphaChecks}>
-                            <div class={s.alphaCheckItem}>
-                                <span class={s.alphaCheckMark}>✓</span>
+                    <div class={s.previewCard}>
+                        <div class={s.previewChecks}>
+                            <div class={s.previewCheckItem}>
+                                <span class={s.previewCheckMark}>✓</span>
                                 <span>Free &amp; open source</span>
                             </div>
-                            <div class={s.alphaCheckItem}>
-                                <span class={s.alphaCheckMark}>✓</span>
+                            <div class={s.previewCheckItem}>
+                                <span class={s.previewCheckMark}>✓</span>
                                 <span>No account needed</span>
                             </div>
-                            <div class={s.alphaCheckItem}>
-                                <span class={s.alphaCheckMark}>✓</span>
+                            <div class={s.previewCheckItem}>
+                                <span class={s.previewCheckMark}>✓</span>
                                 <span>Stored locally by default</span>
                             </div>
                         </div>
-                        <div class={s.alphaCtas}>
+                        <div class={s.previewCtas}>
                             <a href="https://editor.stagistic.app" class={s.btnPrimary}>
                                 Open editor in browser
                             </a>
+                            <p class={s.desktopOnlyNotice} role="note">
+                                Stagistic Editor is built for larger screens. Open it
+                                on a laptop or desktop at least 1000 pixels wide
+                                &mdash; mobile support is on the way.
+                            </p>
                         </div>
                     </div>
                 </div>

@@ -127,7 +127,7 @@ export const rebuildScriptProjection = async ({
         const existingScenes = await tx.select().from(scriptScenes).where(eq(scriptScenes.scriptId, scriptId));
         const existingBlocks = await tx.select({id: scriptBlocks.id}).from(scriptBlocks).where(eq(scriptBlocks.scriptId, scriptId));
         const existingMusic = await tx.select({id: scriptMusic.id}).from(scriptMusic).where(eq(scriptMusic.scriptId, scriptId));
-        const knownCharacters = await dbQueries.listScriptCharacters(tx, scriptId);
+        const knownSpeakingEntities = await dbQueries.listScriptSpeakingEntities(tx, scriptId);
 
         const nextActIds = new Set(extracted.acts.map(act => act.id));
 
@@ -192,7 +192,7 @@ export const rebuildScriptProjection = async ({
             updatedAt: now,
         })));
 
-        const knownCharacterIds = new Set(knownCharacters.map(character => character.id));
+        const knownCharacterIds = new Set(knownSpeakingEntities.map(entity => entity.id));
 
         await dbQueries.bulkReplaceScriptBlockCharacterRefs(tx, extracted.blocks.map(block => ({
             blockId: block.blockId,

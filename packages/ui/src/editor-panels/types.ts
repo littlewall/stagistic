@@ -14,4 +14,8 @@ export interface EditorSidebarCharacter extends Pick<ScriptCharacterRecord, 'key
     isGenderUpdatePending?: boolean,
 }
 
+export interface EditorSidebarGroup extends EditorSidebarCharacter {
+    isEmpty: boolean,
+}
+
 export type {CharacterGenderOption};

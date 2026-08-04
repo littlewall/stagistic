@@ -1,10 +1,10 @@
-import styles from './PrereleaseNotice.module.css';
+import styles from './PublicPreviewNotice.module.css';
 
-export const PrereleaseNotice = () => (
+export const PublicPreviewNotice = () => (
     <div className={styles.notice}>
-        <h2 className={styles.title}>Pre-release notice</h2>
+        <h2 className={styles.title}>Public preview notice</h2>
         <p className={styles.introduction}>
-            Stagistic Editor is experimental pre-release software. It may contain errors or
+            Stagistic Editor is in public preview. It may contain errors or
             behave unexpectedly. Use it at your own risk.
         </p>
         <ul className={styles.points}>

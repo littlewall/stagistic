@@ -14,6 +14,7 @@ import {createScriptCharactersStore} from './scriptCharactersStore';
 
 const character = (overrides: Partial<ScriptCharacterRef> = {}): ScriptCharacterRef => ({
     id: 'character-1',
+    kind: 'character',
     key: 'ALICE',
     colorHex: null,
     genderKey: null,

@@ -55,6 +55,7 @@ interface ScriptSettingsModalContextValue {
     openAttributeManagerModal: () => void,
     openAttributeManagerModalWithPanel: (panelId: AttributeManagerPanelId) => void,
     openAttributeManagerCharacter: (characterId: string) => void,
+    openAttributeManagerGroup: (groupId: string) => void,
     openAttributeManagerMusic: (musicId: string) => void,
 }
 
@@ -142,11 +143,14 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         isOpen: isAttributeManagerOpen,
         activePanelId: activeAttributeManagerPanelId,
         selectedCharacterId: selectedAttributeManagerCharacterId,
+        selectedGroupId: selectedAttributeManagerGroupId,
         selectedMusicId: selectedAttributeManagerMusicId,
+        initialWorkspaceId: initialAttributeManagerWorkspaceId,
         tabs: attributeManagerTabs,
         open: openAttributeManagerModal,
         openWithPanel: openAttributeManagerModalWithPanel,
         openCharacter: openAttributeManagerCharacter,
+        openGroup: openAttributeManagerGroup,
         openMusic: openAttributeManagerMusic,
         close: closeAttributeManagerModal,
         selectPanel: selectAttributeManagerPanel,
@@ -174,6 +178,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
     const musicAttachmentsState = useMusicAttachmentsState(currentScriptId, scriptRepository);
     const {
         characterItems: attributeManagerCharacters,
+        groupItems: attributeManagerGroups,
         sceneItems: attributeManagerScenes,
         musicItems: attributeManagerMusic,
     } = useAttributeManagerItems({
@@ -216,6 +221,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         openAttributeManagerModal,
         openAttributeManagerModalWithPanel,
         openAttributeManagerCharacter,
+        openAttributeManagerGroup,
         openAttributeManagerMusic,
     }), [
         musicState,
@@ -225,6 +231,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         openAttributeManagerModal,
         openAttributeManagerModalWithPanel,
         openAttributeManagerCharacter,
+        openAttributeManagerGroup,
         openAttributeManagerMusic,
         openSettingsModal,
         resolvedScriptSettings,
@@ -282,11 +289,14 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     tabs={attributeManagerTabs}
                     activePanelId={activeAttributeManagerPanelId}
                     selectedCharacterId={selectedAttributeManagerCharacterId}
+                    selectedGroupId={selectedAttributeManagerGroupId}
                     selectedMusicId={selectedAttributeManagerMusicId}
+                    initialWorkspaceId={initialAttributeManagerWorkspaceId}
                     onClose={closeAttributeManagerModal}
                     onSelectPanel={selectAttributeManagerPanel}
                     characters={charactersContextValue}
                     characterItems={attributeManagerCharacters}
+                    groupItems={attributeManagerGroups}
                     characterColorSaturation={resolvedScriptSettings.visual.characterColorSaturation}
                     sceneItems={attributeManagerScenes}
                     placeState={placeState}

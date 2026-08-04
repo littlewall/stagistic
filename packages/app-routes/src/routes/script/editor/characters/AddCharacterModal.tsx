@@ -18,14 +18,14 @@ import styles from './AddCharacterModal.module.css';
 
 interface AddCharacterModalProps {
     isOpen: boolean,
-    existingCharacterKeys: ReadonlySet<string>,
+    occupiedCharacterKeys: ReadonlySet<string>,
     onClose: () => void,
     onCreate: (characterKey: string) => void,
 }
 
 export const AddCharacterModal = ({
     isOpen,
-    existingCharacterKeys,
+    occupiedCharacterKeys,
     onClose,
     onCreate,
 }: AddCharacterModalProps) => {
@@ -47,7 +47,7 @@ export const AddCharacterModal = ({
     }, [isOpen]);
 
     const normalizedName = useMemo(() => normalizeCharacterKey(name), [name]);
-    const isDuplicate = normalizedName.length > 0 && existingCharacterKeys.has(normalizedName);
+    const isDuplicate = normalizedName.length > 0 && occupiedCharacterKeys.has(normalizedName);
     const canSubmit = normalizedName.length > 0 && !isDuplicate;
     const errorId = isDuplicate ? 'add-character-error' : undefined;
 
@@ -98,7 +98,7 @@ export const AddCharacterModal = ({
                 </div>
                 {isDuplicate ? (
                     <p id="add-character-error" className={styles.error}>
-                        A confirmed character with this name already exists.
+                        A character or group with this name already exists.
                     </p>
                 ) : null}
                 <div className={styles.actions}>

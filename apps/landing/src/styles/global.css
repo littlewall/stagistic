@@ -7,7 +7,6 @@
     --font-sans: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
 
-    /* Coolors palette: https://coolors.co/7d84b2-d17b0f-f4f1ec-311e10-403233 */
     --color-palette-lavender: oklch(.6251 .0699 277.48);
     --color-palette-copper: oklch(.6622 .1479 62.72);
     --color-palette-paper: oklch(.9591 .0074 80.72);
@@ -62,7 +61,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.5;
     color: var(--color-text);
-    background: var(--color-bg);
+    background: oklch(.2557 .0382 56.44);
 }
 
 h1,
