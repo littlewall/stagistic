@@ -73,6 +73,18 @@ const toggleLyricsTarget = (blockType: BlockContext['block']['blockType']) => {
     return null;
 };
 
+const toggleAsideTarget = (blockType: BlockContext['block']['blockType']) => {
+    if (blockType === 'dialogue') {
+        return 'aside';
+    }
+
+    if (blockType === 'aside') {
+        return 'dialogue';
+    }
+
+    return null;
+};
+
 const handleLyricsShortcut = (context: BlockContext, event: KeyboardEvent) => {
     event.preventDefault();
 
@@ -81,6 +93,18 @@ const handleLyricsShortcut = (context: BlockContext, event: KeyboardEvent) => {
     if (!nextBlockType) {
         return true;
     }
+
+    return setBlockTypeWithSelection(context.editor, context.block, nextBlockType);
+};
+
+const handleAsideToggle = (context: BlockContext, event: KeyboardEvent) => {
+    const nextBlockType = toggleAsideTarget(context.block.blockType);
+
+    if (!nextBlockType) {
+        return false;
+    }
+
+    event.preventDefault();
 
     return setBlockTypeWithSelection(context.editor, context.block, nextBlockType);
 };
@@ -101,6 +125,10 @@ export const handleTab = (editor: Editor, event: KeyboardEvent) => {
 
     if ((block.blockType === 'dialogue' || block.blockType === 'lyrics') && isLyricsShortcut(event)) {
         return handleLyricsShortcut(context, event);
+    }
+
+    if (!hasAnyTabModifier(event) && handleAsideToggle(context, event)) {
+        return true;
     }
 
     const handler = tabHandlers[block.blockType];

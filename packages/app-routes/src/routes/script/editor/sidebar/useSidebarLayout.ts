@@ -1,6 +1,7 @@
 import {
     useCallback,
     useEffect,
+    useRef,
     useState,
 } from 'react';
 
@@ -26,6 +27,7 @@ interface UseSidebarLayoutArgs {
     availablePanelIds: readonly SidebarPanelId[],
     defaultLeftPanelId: SidebarPanelId,
     defaultRightPanelId: SidebarPanelId,
+    storageScope: string,
 }
 
 const getIsExclusiveViewport = () => {
@@ -51,13 +53,17 @@ const isStoredSidebarLayoutState = (value: unknown): value is StoredSidebarLayou
     );
 };
 
-const readStored = (): StoredSidebarLayoutState | null => {
+const getStorageKey = (storageScope: string) => {
+    return `${SIDEBAR_LAYOUT_STORAGE_KEY}:${storageScope}`;
+};
+
+const readStored = (storageScope: string): StoredSidebarLayoutState | null => {
     if (typeof window === 'undefined') {
         return null;
     }
 
     try {
-        const raw = window.localStorage.getItem(SIDEBAR_LAYOUT_STORAGE_KEY);
+        const raw = window.localStorage.getItem(getStorageKey(storageScope));
 
         if (!raw) {
             return null;
@@ -87,21 +93,35 @@ const resolvePanelId = (
     return fallback;
 };
 
+const createInitialState = (
+    storageScope: string,
+    defaultLeftPanelId: SidebarPanelId,
+    defaultRightPanelId: SidebarPanelId,
+    availablePanelIds: readonly SidebarPanelId[],
+): SidebarLayoutState => {
+    const stored = readStored(storageScope);
+
+    return {
+        isLeftOpen: stored?.isLeftOpen ?? true,
+        isRightOpen: stored?.isRightOpen ?? true,
+        leftPanelId: resolvePanelId(stored?.leftPanelId, defaultLeftPanelId, availablePanelIds),
+        rightPanelId: resolvePanelId(stored?.rightPanelId, defaultRightPanelId, availablePanelIds),
+    };
+};
+
 export const useSidebarLayout = ({
     availablePanelIds,
     defaultLeftPanelId,
     defaultRightPanelId,
+    storageScope,
 }: UseSidebarLayoutArgs) => {
-    const [state, setState] = useState<SidebarLayoutState>(() => {
-        const stored = readStored();
-
-        return {
-            isLeftOpen: stored?.isLeftOpen ?? false,
-            isRightOpen: stored?.isRightOpen ?? false,
-            leftPanelId: resolvePanelId(stored?.leftPanelId, defaultLeftPanelId, availablePanelIds),
-            rightPanelId: resolvePanelId(stored?.rightPanelId, defaultRightPanelId, availablePanelIds),
-        };
-    });
+    const storageScopeRef = useRef(storageScope);
+    const [state, setState] = useState<SidebarLayoutState>(() => createInitialState(
+        storageScope,
+        defaultLeftPanelId,
+        defaultRightPanelId,
+        availablePanelIds,
+    ));
     const [isExclusiveViewport, setIsExclusiveViewport] = useState(getIsExclusiveViewport);
 
     useEffect(() => {
@@ -123,16 +143,35 @@ export const useSidebarLayout = ({
     }, []);
 
     useEffect(() => {
-        if (typeof window === 'undefined') {
+        if (typeof window === 'undefined' || storageScopeRef.current !== storageScope) {
             return;
         }
 
         try {
-            window.localStorage.setItem(SIDEBAR_LAYOUT_STORAGE_KEY, JSON.stringify(state));
+            window.localStorage.setItem(getStorageKey(storageScope), JSON.stringify(state));
         } catch {
             // Ignore storage write failures in constrained environments.
         }
-    }, [state]);
+    }, [state, storageScope]);
+
+    useEffect(() => {
+        if (storageScopeRef.current === storageScope) {
+            return;
+        }
+
+        storageScopeRef.current = storageScope;
+        setState(createInitialState(
+            storageScope,
+            defaultLeftPanelId,
+            defaultRightPanelId,
+            availablePanelIds,
+        ));
+    }, [
+        availablePanelIds,
+        defaultLeftPanelId,
+        defaultRightPanelId,
+        storageScope,
+    ]);
 
     // Reconcile state when the set of available panels changes.
     useEffect(() => {

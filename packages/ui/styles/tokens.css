@@ -94,6 +94,7 @@
 
     --L-bg: .97;
     --L-surface: .985;
+    --L-paper: .985;
     --L-accent: .908;
     --L-highlight: .952;
     --L-text: .155;
@@ -122,7 +123,7 @@
     --color-surface: oklch(from var(--base-neutral) var(--L-surface) calc(c * var(--C-bg)) h);
     --color-surface-raised: oklch(from var(--base-neutral) var(--L-highlight) calc(c * var(--C-bg)) h);
     --color-surface-accent: color-mix(in oklch, var(--base-blue) 16%, var(--color-surface));
-    --color-surface-paper: oklch(from var(--base-neutral) var(--L-surface) calc(c * .1) h);
+    --color-surface-paper: oklch(from var(--base-neutral) var(--L-paper) calc(c * .1) h);
 
     /* Text */
     --color-text: oklch(from var(--base-neutral) var(--L-text) calc(c * var(--C-block)) h);
@@ -225,6 +226,7 @@
 
     --L-bg: .135;
     --L-surface: .17;
+    --L-paper: .26;
     --L-accent: .278;
     --L-highlight: .33;
 
