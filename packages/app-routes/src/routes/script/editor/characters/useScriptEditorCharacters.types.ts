@@ -9,6 +9,7 @@ import {
 
 import type {
     CharacterGenderOption,
+    ScriptCharacterGroupRecord,
     ScriptCharacterRecord,
 } from './types';
 
@@ -29,13 +30,20 @@ export interface UseScriptEditorCharactersResult {
     getEditorValue: () => ScriptDocument | null,
     editorOverrideValue: ScriptDocument | null,
     confirmedCharacterRecords: ScriptCharacterRecord[],
+    confirmedGroupRecords: ScriptCharacterGroupRecord[],
     normalizedConfirmedCharacterRecords: ScriptCharacterRecord[],
+    normalizedSpeakingEntityRecords: ScriptCharacterRecord[],
     pendingCharacterKeys: string[],
     deletingCharacterIds: string[],
     renamingCharacterIds: string[],
     renamingCharacterKeys: string[],
     colorUpdatingCharacterIds: string[],
     genderUpdatingCharacterIds: string[],
+    creatingGroupKeys: string[],
+    deletingGroupIds: string[],
+    renamingGroupIds: string[],
+    colorUpdatingGroupIds: string[],
+    membershipUpdatingGroupIds: string[],
     characterGenderOptions: CharacterGenderOption[],
     isCharactersLoading: boolean,
     handleEditorValueChange: (value: ScriptDocument, meta?: EditorValueChangeMeta) => void,
@@ -56,4 +64,13 @@ export interface UseScriptEditorCharactersResult {
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
     handleSetCharacterOutline: (characterId: string, outline: string | null) => void,
     handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,
+    handleCreateGroup: (groupKey: string) => Promise<ScriptCharacterGroupRecord | null>,
+    handleDeleteGroup: (groupId: string) => Promise<void>,
+    handleRenameGroup: (
+        groupId: string,
+        previousGroupName: string,
+        nextGroupName: string,
+    ) => Promise<ScriptCharacterGroupRecord | null>,
+    handleSetGroupColor: (groupId: string, colorHex: string | null) => Promise<void>,
+    handleReplaceGroupMembers: (groupId: string, memberIds: string[]) => Promise<void>,
 }

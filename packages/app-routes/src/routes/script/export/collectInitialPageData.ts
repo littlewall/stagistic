@@ -5,8 +5,19 @@ import type {
 import {
     normalizeCharacterKey,
     type ScriptBlockIndexSnapshot,
-    type ScriptCharacterRecord,
 } from '@stagistic/script';
+
+export type ExportCatalogEntity = {
+    id: string,
+    kind: 'character',
+    key: string,
+    outline?: string | null,
+} | {
+    id: string,
+    kind: 'group',
+    key: string,
+    memberIds: string[],
+};
 
 const toDisplayName = (key: string) => key
     .toLowerCase()
@@ -20,7 +31,7 @@ const cleanOutline = (outline: string | null | undefined): string | null => {
 
 const collectCharacters = (
     snapshot: ScriptBlockIndexSnapshot,
-    confirmedCharacters: ScriptCharacterRecord[],
+    catalogEntities: ExportCatalogEntity[],
 ): ExportInitialCharacter[] => {
     const firstOrderById = new Map<string, number>();
     const firstOrderByKey = new Map<string, number>();
@@ -41,18 +52,22 @@ const collectCharacters = (
             });
         });
 
-    return confirmedCharacters.map(character => {
-        const key = normalizeCharacterKey(character.key);
+    return catalogEntities
+        .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'character'}> => (
+            entity.kind === 'character'
+        ))
+        .map(character => {
+            const key = normalizeCharacterKey(character.key);
 
-        return {
-            id: character.id,
-            displayName: toDisplayName(key),
-            outline: cleanOutline(character.outline),
-            firstAppearanceOrder: firstOrderById.get(character.id)
-                ?? firstOrderByKey.get(key)
-                ?? null,
-        };
-    });
+            return {
+                id: character.id,
+                displayName: toDisplayName(key),
+                outline: cleanOutline(character.outline),
+                firstAppearanceOrder: firstOrderById.get(character.id)
+                    ?? firstOrderByKey.get(key)
+                    ?? null,
+            };
+        });
 };
 
 const collectPlaces = (
@@ -93,13 +108,13 @@ const collectPlaces = (
 
 export const collectInitialPageData = (
     snapshot: ScriptBlockIndexSnapshot,
-    confirmedCharacters: ScriptCharacterRecord[],
+    catalogEntities: ExportCatalogEntity[],
     places: Array<{id: string, name: string}>,
     scenePlaceIds: Record<string, string[]>,
 ): {
     initialCharacters: ExportInitialCharacter[],
     initialPlaces: ExportInitialPlace[],
 } => ({
-    initialCharacters: collectCharacters(snapshot, confirmedCharacters),
+    initialCharacters: collectCharacters(snapshot, catalogEntities),
     initialPlaces: collectPlaces(snapshot, places, scenePlaceIds),
 });

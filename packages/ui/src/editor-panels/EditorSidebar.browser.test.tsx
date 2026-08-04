@@ -31,12 +31,42 @@ const waitForElement = async <T extends Element>(selector: string): Promise<T> =
     throw new Error(`Expected element matching ${selector}`);
 };
 
+const waitForElementIn = async <T extends Element>(
+    host: HTMLElement,
+    selector: string,
+): Promise<T> => {
+    const deadline = Date.now() + 1000;
+
+    while (Date.now() < deadline) {
+        const element = host.querySelector<T>(selector);
+
+        if (element) {
+            return element;
+        }
+
+        await new Promise(resolve => {
+            window.setTimeout(resolve, 10);
+        });
+    }
+
+    throw new Error(`Expected host element matching ${selector}`);
+};
+
 const confirmedCharacter: EditorSidebarCharacter = {
     id: 'char-1',
     key: 'ANNA',
     color: '#8899aa',
     isConfirmed: true,
     outline: null,
+};
+
+const emptyGroup = {
+    id: 'group-1',
+    key: 'ALL',
+    color: '#9988aa',
+    colorHex: '#9988aa',
+    isConfirmed: true,
+    isEmpty: true,
 };
 
 const renderSidebar = (
@@ -53,6 +83,7 @@ const renderSidebar = (
         <EditorSidebar
             data={{
                 confirmedCharacters: [confirmedCharacter],
+                groups: [],
                 unconfirmedCharacters: [],
             }}
             actions={{onEditCharacter}}
@@ -105,6 +136,7 @@ describe('EditorSidebar character rows', () => {
             <EditorSidebar
                 data={{
                     confirmedCharacters: [],
+                    groups: [],
                     unconfirmedCharacters: [
                         {
                             key: 'BORIS',
@@ -123,5 +155,131 @@ describe('EditorSidebar character rows', () => {
 
         expect(row?.lastElementChild).toBe(confirmButton);
         expect(row?.firstElementChild?.className).toContain('characterColorOutline');
+    });
+});
+
+describe('EditorSidebar group rows', () => {
+    const renderGroups = (actions = {}) => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+
+        host.style.setProperty('--size-scale', '1');
+        document.body.appendChild(host);
+        root.render(
+            <EditorSidebar
+                data={{
+                    confirmedCharacters: [confirmedCharacter],
+                    groups: [emptyGroup],
+                    unconfirmedCharacters: [
+                        {
+                            key: 'BORIS',
+                            color: '#aa9988',
+                            isConfirmed: false,
+                        },
+                    ],
+                }}
+                actions={actions}
+            />,
+        );
+        mountedRoots.push(root);
+    };
+
+    it('orders confirmed characters, groups, then unconfirmed characters', async () => {
+        renderGroups();
+
+        await waitForElement('[aria-label="Manage group ALL"]');
+
+        const sidebarText = document.querySelector('aside')?.textContent ?? '';
+
+        expect(sidebarText.indexOf('ANNA')).toBeLessThan(sidebarText.indexOf('Groups'));
+        expect(sidebarText.indexOf('Groups')).toBeLessThan(sidebarText.indexOf('ALL'));
+        expect(sidebarText.indexOf('ALL')).toBeLessThan(sidebarText.indexOf('BORIS'));
+    });
+
+    it('shows a conditional Groups heading and a quiet Empty tag', async () => {
+        renderGroups();
+
+        await waitForElement('[aria-label="Manage group ALL"]');
+
+        expect(document.querySelector('aside')?.textContent).toContain('Groups');
+        expect(document.querySelector('aside')?.textContent).toContain('Empty');
+        expect(Array.from(document.querySelectorAll('h2')).map(heading => heading.textContent))
+            .toEqual(['Groups', 'Unconfirmed']);
+        expect(getComputedStyle(document.querySelector('h2')!).fontWeight).toBe('400');
+
+        const host = document.createElement('div');
+        const root = createRoot(host);
+
+        document.body.appendChild(host);
+        root.render(
+            <EditorSidebar
+                data={{
+                    confirmedCharacters: [confirmedCharacter],
+                    groups: [],
+                    unconfirmedCharacters: [],
+                }}
+            />,
+        );
+        mountedRoots.push(root);
+
+        await waitForElementIn(host, '[aria-label="Manage ANNA"]');
+
+        expect(Array.from(host.querySelectorAll('h2')).some(heading => heading.textContent === 'Groups')).toBe(false);
+    });
+
+    it('focuses a group by its key and manages it through a separate callback', async () => {
+        const onFocusCharacter = vi.fn();
+        const onEditGroup = vi.fn();
+
+        renderGroups({onFocusCharacter, onEditGroup});
+
+        await page.elementLocator(await waitForElement('[aria-label="Focus ALL"]')).click();
+        await page.elementLocator(await waitForElement('[aria-label="Manage group ALL"]')).click();
+
+        expect(onFocusCharacter).toHaveBeenCalledWith('ALL');
+        expect(onEditGroup).toHaveBeenCalledWith('group-1');
+    });
+
+    it('persists a group color through the shared picker', async () => {
+        const onSetGroupColor = vi.fn();
+
+        renderGroups({onSetGroupColor});
+
+        await page.elementLocator(
+            await waitForElement('[aria-label="Choose color for ALL"]'),
+        ).click();
+        await waitForElement('[aria-label="Color picker for ALL"]');
+
+        const applyButton = Array.from(document.querySelectorAll('button'))
+            .find(button => button.textContent?.trim() === 'Apply');
+
+        if (!applyButton) {
+            throw new Error('Expected the color picker apply button');
+        }
+
+        await page.elementLocator(applyButton).click();
+
+        expect(onSetGroupColor).toHaveBeenCalledWith('group-1', expect.any(String));
+    });
+
+    it('treats an existing group as sidebar content', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+
+        document.body.appendChild(host);
+        root.render(
+            <EditorSidebar
+                data={{
+                    confirmedCharacters: [],
+                    groups: [emptyGroup],
+                    unconfirmedCharacters: [],
+                }}
+            />,
+        );
+        mountedRoots.push(root);
+
+        await waitForElement('[aria-label="Manage group ALL"]');
+
+        expect(host.textContent).not.toContain('No characters on stage yet');
     });
 });

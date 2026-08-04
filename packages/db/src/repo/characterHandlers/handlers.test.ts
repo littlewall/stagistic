@@ -6,10 +6,50 @@ import {
 } from 'vite-plus/test';
 
 import * as dbQueries from '../../queries';
+import {scriptCharacters} from '../../schema';
 import {createTestDb, seedScript} from '../../testing/createTestDb';
 import {createCharacterHandlers} from './handlers';
 
 describe('character handlers', () => {
+    it('rejects a character rename that collides with a group', async () => {
+        const {db} = await createTestDb();
+        const scriptId = 'script-1';
+        const handlers = createCharacterHandlers({
+            getDb: () => Promise.resolve(db),
+            recordOutbox: () => Promise.resolve(),
+            syncDb: () => Promise.resolve(),
+        });
+
+        await seedScript(db, scriptId);
+        await db.insert(scriptCharacters).values({
+            id: 'group-all',
+            scriptId,
+            characterKey: 'ALL',
+            kind: 'group',
+            colorHex: null,
+            genderKey: null,
+            notes: null,
+            backstory: null,
+            outline: null,
+            createdAt: 10,
+            updatedAt: 10,
+        });
+        await handlers.confirmScriptCharacterWithId(scriptId, {
+            id: 'character-alice',
+            key: 'Alice',
+            timestamp: 11,
+        });
+
+        await expect(handlers.renameScriptCharacter(scriptId, 'character-alice', 'All')).resolves.toBeNull();
+        expect(await dbQueries.getScriptSpeakingEntityByKey(db, {
+            scriptId,
+            characterKey: 'ALL',
+        })).toMatchObject({
+            id: 'group-all',
+            kind: 'group',
+        });
+    });
+
     it('uses caller IDs and flushes every standalone metadata mutation', async () => {
         const {db} = await createTestDb();
         const scriptId = 'script-1';

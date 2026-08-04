@@ -187,3 +187,13 @@ export interface GetScriptCharacterByIdPayload {
     scriptId: string,
     characterId: string,
 }
+
+export interface GetScriptSpeakingEntityByKeyPayload {
+    scriptId: string,
+    characterKey: string,
+}
+
+export interface GetScriptSpeakingEntityByIdPayload {
+    scriptId: string,
+    characterId: string,
+}

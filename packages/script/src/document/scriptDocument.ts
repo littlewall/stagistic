@@ -8,7 +8,7 @@ import {
 } from '../syntax';
 
 export const DEFAULT_SCRIPT_BLOCK_NODE_TYPE: ScriptBlockNodeType = 'stageDirection';
-export const SCRIPT_DOCUMENT_SCHEMA_VERSION = 2;
+export const SCRIPT_DOCUMENT_SCHEMA_VERSION = 3;
 
 export type ScriptNode = {
     type?: string,

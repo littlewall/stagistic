@@ -18,7 +18,7 @@ import {
     bulkUpsertScriptScenes,
     type DbClient,
     generateBlockOrderKeys,
-    listScriptCharacters,
+    listScriptSpeakingEntities,
     writeFinalBlockOrders,
 } from '../../queries';
 import {
@@ -220,7 +220,7 @@ export const createDocumentPersister = (scriptId: string) => {
         );
 
         const knownCharacterIds = diff.inserted.length > 0 || refChangedUpdated.length > 0
-            ? new Set((await listScriptCharacters(db, scriptId)).map(character => character.id))
+            ? new Set((await listScriptSpeakingEntities(db, scriptId)).map(entity => entity.id))
             : new Set<string>();
 
         const replaceRefs = async (tx: DbClient, blocks: ExtractedBlockRow[]) => {

@@ -132,6 +132,7 @@ export const createScriptCharactersStore = (
         const id = repository.allocateScriptCharacterId();
         const transaction = characters.collection.insert({
             id,
+            kind: 'character',
             key: normalizedKey,
             colorHex: colorHex ?? null,
             genderKey: null,

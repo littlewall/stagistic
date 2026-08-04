@@ -1,5 +1,7 @@
 import type {
-    ComponentProps, ReactElement, ReactNode,
+    ComponentProps,
+    ReactElement,
+    ReactNode,
 } from 'react';
 import {
     Focusable,
@@ -30,8 +32,7 @@ export interface TooltipProps {
 /**
  * Reusable icon-button tooltip. Wraps any single focusable element (typically a
  * native <button>) so the same styling as the app header applies everywhere —
- * toolbars, bubble menus, gutter controls. The trigger is made react-aria
- * compatible via <Focusable>, so plain DOM buttons work without conversion.
+ * toolbars, bubble menus, gutter controls.
  */
 export const Tooltip = ({
     label,
@@ -40,19 +41,28 @@ export const Tooltip = ({
     closeDelay = 0,
     isDisabled = false,
     children,
-}: TooltipProps) => (
-    <TooltipTrigger
-        delay={delay}
-        closeDelay={closeDelay}
-        isDisabled={isDisabled}
-    >
-        <Focusable isDisabled={isDisabled}>{children as FocusableChild}</Focusable>
-        <AriaTooltip
-            className={styles.tooltip}
-            placement={placement}
-            offset={6}
+}: TooltipProps) => {
+    if (isDisabled) {
+        return children;
+    }
+
+    const trigger = typeof children.type === 'string'
+        ? <Focusable>{children as FocusableChild}</Focusable>
+        : children;
+
+    return (
+        <TooltipTrigger
+            delay={delay}
+            closeDelay={closeDelay}
         >
-            {label}
-        </AriaTooltip>
-    </TooltipTrigger>
-);
+            {trigger}
+            <AriaTooltip
+                className={styles.tooltip}
+                placement={placement}
+                offset={6}
+            >
+                {label}
+            </AriaTooltip>
+        </TooltipTrigger>
+    );
+};

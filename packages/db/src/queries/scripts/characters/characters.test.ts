@@ -5,11 +5,18 @@ import {
 import {
     createTestDb, seedScript, type TestDb,
 } from '../../../testing/createTestDb';
+import {
+    scriptCharacterGroupMembers,
+    scriptCharacters,
+} from '../../../schema';
 import type {UpsertScriptCharacterPayload} from '../payloads';
 import {
     getScriptCharacterById,
     getScriptCharacterByKey,
+    getScriptSpeakingEntityById,
+    getScriptSpeakingEntityByKey,
     listScriptCharacters,
+    listScriptSpeakingEntities,
 } from './read';
 import {
     deleteScriptCharacter,
@@ -52,6 +59,7 @@ describe('script character read/write', () => {
 
         const expected = {
             id: 'c1',
+            kind: 'character' as const,
             key: 'ANNA',
             colorHex: '#ffffff',
             genderKey: 'female',
@@ -127,6 +135,94 @@ describe('script character read/write', () => {
             .toBeNull();
         expect(await getScriptCharacterById(db, {scriptId: SCRIPT_ID, characterId: 'nope'}))
             .toBeNull();
+    });
+
+    it('keeps groups out of character reads and includes them as speaking entities', async () => {
+        const db = await setup();
+
+        await upsert(db);
+        await db.insert(scriptCharacters).values({
+            id: 'group-1',
+            scriptId: SCRIPT_ID,
+            kind: 'group',
+            characterKey: 'ENSEMBLE',
+            colorHex: '#123456',
+            createdAt: 1,
+            updatedAt: 1,
+        });
+        await db.insert(scriptCharacterGroupMembers).values({
+            groupId: 'group-1',
+            characterId: 'c1',
+        });
+
+        expect(await listScriptCharacters(db, SCRIPT_ID)).toEqual([{
+            id: 'c1',
+            kind: 'character',
+            key: 'ANNA',
+            colorHex: null,
+            genderKey: null,
+            notes: null,
+            backstory: null,
+            outline: null,
+        }]);
+        expect(await listScriptSpeakingEntities(db, SCRIPT_ID)).toEqual([
+            {
+                id: 'c1',
+                kind: 'character',
+                key: 'ANNA',
+                colorHex: null,
+                genderKey: null,
+                notes: null,
+                backstory: null,
+                outline: null,
+            }, {
+                id: 'group-1',
+                kind: 'group',
+                key: 'ENSEMBLE',
+                colorHex: '#123456',
+                memberIds: ['c1'],
+            },
+        ]);
+        expect(await getScriptSpeakingEntityByKey(db, {
+            scriptId: SCRIPT_ID, characterKey: 'ENSEMBLE',
+        })).toEqual({
+            id: 'group-1',
+            kind: 'group',
+            key: 'ENSEMBLE',
+            colorHex: '#123456',
+            memberIds: ['c1'],
+        });
+        expect(await getScriptSpeakingEntityById(db, {
+            scriptId: SCRIPT_ID, characterId: 'group-1',
+        })).toEqual({
+            id: 'group-1',
+            kind: 'group',
+            key: 'ENSEMBLE',
+            colorHex: '#123456',
+            memberIds: ['c1'],
+        });
+    });
+
+    it('rejects a character/group key collision', async () => {
+        const db = await setup();
+
+        await db.insert(scriptCharacters).values({
+            id: 'group-1',
+            scriptId: SCRIPT_ID,
+            kind: 'group',
+            characterKey: 'ENSEMBLE',
+            createdAt: 1,
+            updatedAt: 1,
+        });
+
+        await expect(db.insert(scriptCharacters).values({
+            id: 'character-1',
+            scriptId: SCRIPT_ID,
+            kind: 'character',
+            characterKey: 'ENSEMBLE',
+            createdAt: 1,
+            updatedAt: 1,
+        })).rejects.toThrow();
     });
 
     it('updateScriptCharacterColor changes only the color', async () => {

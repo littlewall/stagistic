@@ -31,6 +31,7 @@ const script = {
         ],
     },
     characters: [],
+    groups: [],
     initialCharacters: [],
     initialPlaces: [],
     scriptTitle: 'Test',

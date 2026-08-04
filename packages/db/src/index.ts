@@ -52,6 +52,8 @@ export type {
     ScriptCharacter,
     ScriptCharacterGender,
     ScriptCharacterGenderOption,
+    ScriptCharacterGroupRef,
+    ScriptCharacterKind,
     ScriptCharacterRef,
     ScriptLocation,
     ScriptMusic,
@@ -59,6 +61,7 @@ export type {
     ScriptMusicAttachmentBinding,
     ScriptScene,
     ScriptSettingsBlock,
+    ScriptSpeakingEntityRef,
     ScriptSummary,
     ScriptTitlePageField,
 } from './types';

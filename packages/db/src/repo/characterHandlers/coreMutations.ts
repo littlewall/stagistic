@@ -36,8 +36,18 @@ export const createCoreCharacterMutations = ({
 
         const db = await getDb();
         const now = input.timestamp ?? Date.now();
+        let confirmed = false;
 
         await db.transaction(async tx => {
+            const existing = await dbQueries.getScriptSpeakingEntityByKey(tx, {
+                scriptId,
+                characterKey: normalizedKey,
+            });
+
+            if (existing?.kind === 'group') {
+                return;
+            }
+
             await dbQueries.upsertScriptCharacter(tx, {
                 id: input.id,
                 scriptId,
@@ -69,7 +79,12 @@ export const createCoreCharacterMutations = ({
                     ),
                 }, tx);
             }
+            confirmed = true;
         });
+
+        if (!confirmed) {
+            return null;
+        }
         await syncDb();
 
         return dbQueries.getScriptCharacterByKey(db, {
@@ -168,10 +183,14 @@ export const createCoreCharacterMutations = ({
             return currentCharacter;
         }
 
-        const existingTarget = await dbQueries.getScriptCharacterByKey(db, {
+        const existingTarget = await dbQueries.getScriptSpeakingEntityByKey(db, {
             scriptId,
             characterKey: normalizedNextKey,
         });
+
+        if (existingTarget?.kind === 'group') {
+            return null;
+        }
 
         await db.transaction(async tx => {
             if (existingTarget && existingTarget.id !== currentCharacter.id) {

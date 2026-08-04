@@ -18,6 +18,17 @@ export type CharacterHandlers = Pick<
     | 'upsertScriptCharacterGenderWithId'
 >;
 
+export type CharacterGroupHandlers = Pick<
+    ScriptRepository,
+    | 'listScriptCharacterGroups'
+    | 'createScriptCharacterGroup'
+    | 'createScriptCharacterGroupWithId'
+    | 'renameScriptCharacterGroup'
+    | 'deleteScriptCharacterGroup'
+    | 'setScriptCharacterGroupColor'
+    | 'replaceScriptCharacterGroupMembers'
+>;
+
 export interface CreateCharacterHandlersArgs {
     getDb: GetDb,
     recordOutbox: RecordOutbox,

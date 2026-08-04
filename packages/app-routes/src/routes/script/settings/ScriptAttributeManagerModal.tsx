@@ -2,6 +2,7 @@ import type {EditorSettings} from '@stagistic/script';
 import {
     type AttributeManagerCharacter,
     AttributeManagerCharactersPanel,
+    type AttributeManagerGroup,
     type AttributeManagerListItem,
     AttributeManagerListPanel,
     AttributeManagerModal,
@@ -38,11 +39,14 @@ interface ScriptAttributeManagerModalProps {
     tabs: ReturnType<typeof useAttributeManagerModalState>['tabs'],
     activePanelId: AttributeManagerPanelId,
     selectedCharacterId: string | null,
+    selectedGroupId?: string | null,
     selectedMusicId: string | null,
+    initialWorkspaceId?: ReturnType<typeof useAttributeManagerModalState>['initialWorkspaceId'],
     onClose: () => void,
     onSelectPanel: (panelId: string) => void,
     characters: ReturnType<typeof useScriptCharactersContextValue>['contextValue'],
     characterItems: AttributeManagerCharacter[],
+    groupItems: AttributeManagerGroup[],
     characterColorSaturation: EditorSettings['visual']['characterColorSaturation'],
     sceneItems: AttributeManagerListItem[],
     placeState: ReturnType<typeof useScriptPlacesState>,
@@ -64,11 +68,14 @@ export const ScriptAttributeManagerModal = ({
     tabs,
     activePanelId,
     selectedCharacterId,
+    selectedGroupId = null,
     selectedMusicId,
+    initialWorkspaceId = 'characters',
     onClose,
     onSelectPanel,
     characters,
     characterItems,
+    groupItems,
     characterColorSaturation,
     sceneItems,
     placeState,
@@ -114,18 +121,29 @@ export const ScriptAttributeManagerModal = ({
                 {activePanelId === ATTRIBUTE_MANAGER_PANEL_CHARACTERS ? (
                     <AttributeManagerCharactersPanel
                         characters={characterItems}
+                        groups={groupItems}
                         initialSelectedCharacterId={selectedCharacterId}
+                        initialSelectedGroupId={selectedGroupId}
+                        initialWorkspaceId={initialWorkspaceId}
                         isLoading={characters.isCharactersLoading}
                         characterColorSaturation={characterColorSaturation}
                         draftScopeKey={currentScriptId}
                         deletingCharacterIds={characters.deletingCharacterIds}
                         renamingCharacterIds={characters.renamingCharacterIds}
                         colorUpdatingCharacterIds={characters.colorUpdatingCharacterIds}
+                        deletingGroupIds={characters.deletingGroupIds}
+                        renamingGroupIds={characters.renamingGroupIds}
+                        colorUpdatingGroupIds={characters.colorUpdatingGroupIds}
                         onSetCharacterColor={characters.handleSetCharacterColor}
                         onSetCharacterOutline={characters.handleSetCharacterOutline}
                         onDeleteCharacter={characters.handleDeleteCharacter}
                         onCreateCharacter={characters.handleConfirmCharacter}
                         onRenameCharacter={characters.handleRenameCharacter}
+                        onCreateGroup={characters.handleCreateGroup}
+                        onRenameGroup={characters.handleRenameGroup}
+                        onDeleteGroup={characters.handleDeleteGroup}
+                        onSetGroupColor={characters.handleSetGroupColor}
+                        onChangeGroupMemberIds={characters.handleReplaceGroupMembers}
                     />
                 ) : null}
                 {activePanelId === ATTRIBUTE_MANAGER_PANEL_MUSIC ? (

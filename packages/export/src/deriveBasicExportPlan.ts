@@ -74,7 +74,12 @@ export const deriveBasicExportPlan = (
     config: BasicExportConfig,
     script: ScriptData,
 ): ExportPlan => {
-    const filteredDoc = filterScriptByCharacter(script.doc, config.characterFilter, script.characters);
+    const filteredDoc = filterScriptByCharacter(
+        script.doc,
+        config.characterFilter,
+        script.characters,
+        script.groups,
+    );
     const preservePagination = config.characterFilter.mode === 'only'
         && config.characterFilter.preserveFullScriptPagination !== false;
     const doc = preservePagination ? script.doc : filteredDoc;

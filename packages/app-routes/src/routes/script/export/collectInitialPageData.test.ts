@@ -60,13 +60,16 @@ const snapshot = {
 
 const confirmedCharacters = [
     {
-        id: 'char-a', key: 'ANNA', outline: '  Lead  ',
+        id: 'char-a', kind: 'character' as const, key: 'ANNA', outline: '  Lead  ',
     },
     {
-        id: 'char-b', key: 'BOB', outline: ' ',
+        id: 'char-b', kind: 'character' as const, key: 'BOB', outline: ' ',
     },
     {
-        id: 'char-z', key: 'ZORA', outline: null,
+        id: 'char-z', kind: 'character' as const, key: 'ZORA', outline: null,
+    },
+    {
+        id: 'group-all', kind: 'group' as const, key: 'ALL', memberIds: ['char-a'],
     },
 ];
 
@@ -78,7 +81,7 @@ const places = [
 ];
 
 describe('collectInitialPageData', () => {
-    it('collects confirmed characters with outlines and first appearances', () => {
+    it('collects exact-kind characters with outlines and first appearances', () => {
         const result = collectInitialPageData(
             snapshot,
             confirmedCharacters,

@@ -2,7 +2,10 @@ export type {
     ScriptCharacter,
     ScriptCharacterGender,
     ScriptCharacterGenderOption,
+    ScriptCharacterGroupRef,
+    ScriptCharacterKind,
     ScriptCharacterRef,
+    ScriptSpeakingEntityRef,
 } from './characters';
 export {
     MUSIC_ATTACHMENT_ROLES,

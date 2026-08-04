@@ -5,6 +5,7 @@ import styles from './RemoveCharacterModal.module.css';
 export interface RemoveCharacterModalProps {
     isOpen: boolean,
     characterKey?: string,
+    groupNames?: string[],
     isRemoving?: boolean,
     onClose: () => void,
     onConfirm: () => void | Promise<void>,
@@ -13,6 +14,7 @@ export interface RemoveCharacterModalProps {
 export const RemoveCharacterModal = ({
     isOpen,
     characterKey,
+    groupNames = [],
     isRemoving = false,
     onClose,
     onConfirm,
@@ -34,6 +36,11 @@ export const RemoveCharacterModal = ({
         <p className={styles.subtitleSecondary}>
             Its lines and blocks stay in the script — nothing is removed from the screenplay.
         </p>
+        {characterKey && groupNames.length > 0 ? (
+            <p className={styles.subtitleSecondary}>
+                {characterKey} belongs to {formatGroupNames(groupNames)}. Deleting {characterKey} removes them from these groups.
+            </p>
+        ) : null}
         <div className={styles.actions}>
             <Button
                 variant="danger"
@@ -54,3 +61,15 @@ export const RemoveCharacterModal = ({
         </div>
     </ModalDialog>
 );
+
+const formatGroupNames = (groupNames: string[]) => {
+    if (groupNames.length < 2) {
+        return groupNames[0] ?? '';
+    }
+
+    if (groupNames.length === 2) {
+        return `${groupNames[0]} and ${groupNames[1]}`;
+    }
+
+    return `${groupNames.slice(0, -1).join(', ')}, and ${groupNames.at(-1)}`;
+};

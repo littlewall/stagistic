@@ -4,6 +4,7 @@ import {
 } from '@stagistic/app-core';
 import type {
     ExportCharacter,
+    ExportCharacterGroup,
     ScriptData,
 } from '@stagistic/export';
 import {
@@ -13,41 +14,46 @@ import {
 } from '@stagistic/script';
 import {useMemo} from 'react';
 
+import {useScriptCharacters} from '../ScriptCharactersContext';
 import {useScriptWorkspace} from '../ScriptWorkspaceContext';
 import {useScriptSettingsModal} from '../settings/ScriptSettingsModalProvider';
-import {collectInitialPageData} from './collectInitialPageData';
+import {
+    collectInitialPageData,
+    type ExportCatalogEntity,
+} from './collectInitialPageData';
 
 const toDisplayName = (key: string) => key
     .toLowerCase()
     .replace(/(^|\s)\S/gu, match => match.toUpperCase());
 
-const collectCharacters = (
-    snapshot: ReturnType<typeof buildScriptBlockIndex>['snapshot'],
-): ExportCharacter[] => {
-    const byId = new Map<string, ExportCharacter>();
-    const byKey = new Map<string, ExportCharacter>();
+const collectCharacters = (catalogEntities: ExportCatalogEntity[]): ExportCharacter[] => (
+    catalogEntities
+        .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'character'}> => (
+            entity.kind === 'character'
+        ))
+        .map(character => {
+            const key = normalizeCharacterKey(character.key);
 
-    snapshot.blocks.forEach(block => {
-        block.characterRefs?.forEach(ref => {
-            const normalizedKey = normalizeCharacterKey(ref.key);
-            const id = ref.characterId ?? `key:${normalizedKey}`;
-            const character = {
-                id,
-                key: normalizedKey,
-                displayName: toDisplayName(normalizedKey),
+            return {
+                id: character.id,
+                key,
+                displayName: toDisplayName(key),
             };
+        })
+        .sort((left, right) => left.displayName.localeCompare(right.displayName))
+);
 
-            if (ref.characterId) {
-                byId.set(ref.characterId, character);
-            } else if (!byKey.has(normalizedKey)) {
-                byKey.set(normalizedKey, character);
-            }
-        });
-    });
-
-    return [...byId.values(), ...byKey.values()]
-        .sort((a, b) => a.displayName.localeCompare(b.displayName));
-};
+const collectGroups = (catalogEntities: ExportCatalogEntity[]): ExportCharacterGroup[] => (
+    catalogEntities
+        .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'group'}> => (
+            entity.kind === 'group'
+        ))
+        .map(group => ({
+            id: group.id,
+            key: normalizeCharacterKey(group.key),
+            memberIds: [...group.memberIds],
+        }))
+);
 
 export const useExportScriptData = (): {
     script: ScriptData | null,
@@ -56,10 +62,13 @@ export const useExportScriptData = (): {
     const {
         currentScript,
         currentScriptId,
-        characterCatalog,
         initialValue,
         initialIndexSnapshot,
     } = useScriptWorkspace();
+    const {
+        confirmedCharacterRecords,
+        confirmedGroupRecords,
+    } = useScriptCharacters();
     const repository = useScriptRepository();
     const placeState = useScriptPlaces(currentScriptId, repository);
     const {
@@ -73,26 +82,35 @@ export const useExportScriptData = (): {
         }
 
         const snapshot = initialIndexSnapshot ?? buildScriptBlockIndex(initialValue).snapshot;
+        const catalogEntities: ExportCatalogEntity[] = [
+            ...confirmedCharacterRecords.map(character => ({
+                ...character,
+                kind: 'character' as const,
+            })),
+            ...confirmedGroupRecords,
+        ];
         const {
             initialCharacters,
             initialPlaces,
         } = collectInitialPageData(
             snapshot,
-            characterCatalog.characters,
+            catalogEntities,
             placeState.places,
             placeState.scenePlaceIds,
         );
 
         return {
             doc: initialValue,
-            characters: collectCharacters(snapshot),
+            characters: collectCharacters(catalogEntities),
+            groups: collectGroups(catalogEntities),
             initialCharacters,
             initialPlaces,
             scriptTitle: currentScript.name,
             titlePage: titlePageDraft,
         };
     }, [
-        characterCatalog.characters,
+        confirmedCharacterRecords,
+        confirmedGroupRecords,
         currentScript,
         initialIndexSnapshot,
         initialValue,

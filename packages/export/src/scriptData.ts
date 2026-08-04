@@ -9,6 +9,12 @@ export interface ExportCharacter {
     displayName: string,
 }
 
+export interface ExportCharacterGroup {
+    id: string,
+    key: string,
+    memberIds: string[],
+}
+
 export interface ExportInitialCharacter {
     id: string,
     displayName: string,
@@ -25,6 +31,7 @@ export interface ExportInitialPlace {
 export interface ScriptData {
     doc: ScriptDocument,
     characters: ExportCharacter[],
+    groups: ExportCharacterGroup[],
     initialCharacters: ExportInitialCharacter[],
     initialPlaces: ExportInitialPlace[],
     scriptTitle: string,

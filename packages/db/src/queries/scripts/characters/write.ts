@@ -27,6 +27,7 @@ export const upsertScriptCharacter = async (
             id: payload.id,
             scriptId: payload.scriptId,
             characterKey: payload.characterKey,
+            kind: 'character',
             colorHex: payload.colorHex ?? null,
             genderKey: payload.genderKey ?? null,
             notes: payload.notes ?? null,
@@ -45,6 +46,7 @@ export const upsertScriptCharacter = async (
                 outline: payload.outline ?? null,
                 updatedAt: payload.updatedAt,
             },
+            setWhere: eq(scriptCharacters.kind, 'character'),
         });
 };
 
@@ -58,6 +60,7 @@ export const deleteScriptCharacter = async (
             and(
                 eq(scriptCharacters.scriptId, payload.scriptId),
                 eq(scriptCharacters.id, payload.characterId),
+                eq(scriptCharacters.kind, 'character'),
             ),
         );
 };
@@ -76,6 +79,7 @@ export const updateScriptCharacterKey = async (
             and(
                 eq(scriptCharacters.scriptId, payload.scriptId),
                 eq(scriptCharacters.id, payload.characterId),
+                eq(scriptCharacters.kind, 'character'),
             ),
         );
 };
@@ -93,6 +97,7 @@ export const touchScriptCharacter = async (
             and(
                 eq(scriptCharacters.scriptId, payload.scriptId),
                 eq(scriptCharacters.id, payload.characterId),
+                eq(scriptCharacters.kind, 'character'),
             ),
         );
 };
@@ -111,6 +116,7 @@ export const updateScriptCharacterColor = async (
             and(
                 eq(scriptCharacters.scriptId, payload.scriptId),
                 eq(scriptCharacters.id, payload.characterId),
+                eq(scriptCharacters.kind, 'character'),
             ),
         );
 };
@@ -129,6 +135,7 @@ export const updateScriptCharacterGender = async (
             and(
                 eq(scriptCharacters.scriptId, payload.scriptId),
                 eq(scriptCharacters.id, payload.characterId),
+                eq(scriptCharacters.kind, 'character'),
             ),
         );
 };
@@ -147,6 +154,7 @@ export const updateScriptCharacterNotes = async (
             and(
                 eq(scriptCharacters.scriptId, payload.scriptId),
                 eq(scriptCharacters.id, payload.characterId),
+                eq(scriptCharacters.kind, 'character'),
             ),
         );
 };
@@ -165,6 +173,7 @@ export const updateScriptCharacterBackstory = async (
             and(
                 eq(scriptCharacters.scriptId, payload.scriptId),
                 eq(scriptCharacters.id, payload.characterId),
+                eq(scriptCharacters.kind, 'character'),
             ),
         );
 };
@@ -183,6 +192,7 @@ export const updateScriptCharacterOutline = async (
             and(
                 eq(scriptCharacters.scriptId, payload.scriptId),
                 eq(scriptCharacters.id, payload.characterId),
+                eq(scriptCharacters.kind, 'character'),
             ),
         );
 };

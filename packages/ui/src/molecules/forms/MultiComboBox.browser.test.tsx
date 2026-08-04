@@ -134,4 +134,71 @@ describe('MultiComboBox', () => {
 
         expect(onChange).toHaveBeenLastCalledWith(['main-stage']);
     });
+
+    it('accumulates rapid selections before the controlled value catches up', async () => {
+        const host = document.createElement('div');
+        const onChange = vi.fn<(value: string[]) => void>();
+        const root = createRoot(host);
+
+        document.body.appendChild(host);
+        root.render(
+            <MultiComboBox
+                label="Places"
+                placeholder="Select places"
+                options={[{id: 'backstage', label: 'Backstage'}, {id: 'main-stage', label: 'Main stage'}]}
+                value={[]}
+                onChange={onChange}
+            />,
+        );
+        mountedRoots.push(root);
+
+        const input = await waitForElement<HTMLInputElement>('[placeholder="Select places"]');
+
+        await page.elementLocator(input).click();
+        await page.elementLocator(await waitForSuggestion('Backstage')).click();
+        await waitForSuggestionsToClose();
+        await page.elementLocator(input).click();
+        await page.elementLocator(await waitForSuggestion('Main stage')).click();
+
+        expect(onChange).toHaveBeenLastCalledWith(['backstage', 'main-stage']);
+        expect(document.body.textContent).toContain('Backstage');
+        expect(document.body.textContent).toContain('Main stage');
+    });
+
+    it('resynchronizes local selections when the controlled value rolls back', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+        const TestCase = () => {
+            const [value, setValue] = useState<string[]>([]);
+
+            return (
+                <>
+                    <MultiComboBox
+                        label="Places"
+                        placeholder="Select places"
+                        options={[{id: 'backstage', label: 'Backstage'}, {id: 'main-stage', label: 'Main stage'}]}
+                        value={value}
+                        onChange={() => undefined}
+                    />
+                    <button type="button" onClick={() => setValue(['main-stage'])}>Rollback</button>
+                </>
+            );
+        };
+
+        document.body.appendChild(host);
+        root.render(<TestCase />);
+        mountedRoots.push(root);
+        const input = await waitForElement<HTMLInputElement>('[placeholder="Select places"]');
+
+        await page.elementLocator(input).click();
+        await page.elementLocator(await waitForSuggestion('Backstage')).click();
+        await page.elementLocator(input).click();
+        await page.elementLocator(await waitForSuggestion('Main stage')).click();
+        await page.elementLocator(Array.from(document.querySelectorAll('button'))
+            .find(button => button.textContent === 'Rollback')!).click();
+        await new Promise(resolve => window.setTimeout(resolve, 0));
+
+        expect(Array.from(document.querySelectorAll('[data-testid="tag"]')).map(tag => tag.textContent))
+            .toEqual(['Main stage']);
+    });
 });

@@ -9,7 +9,7 @@ import {
     bulkUpsertScriptScenes,
     deleteScriptAct,
     deleteScriptScene,
-    listScriptCharacters,
+    listScriptSpeakingEntities,
     replaceScriptTitlePageFields,
 } from '../queries';
 import {
@@ -37,7 +37,7 @@ const persistExtractedBlocks = async (
 ): Promise<PersistExtractedBlocksResult> => {
     const warnings: string[] = [];
 
-    const scriptCharacters = await listScriptCharacters(db, scriptId);
+    const speakingEntities = await listScriptSpeakingEntities(db, scriptId);
     const existingScenes = await db
         .select()
         .from(scriptScenes)
@@ -50,7 +50,7 @@ const persistExtractedBlocks = async (
         .select({id: scriptActs.id})
         .from(scriptActs)
         .where(eq(scriptActs.scriptId, scriptId));
-    const characterIdSet = new Set(scriptCharacters.map(character => character.id));
+    const characterIdSet = new Set(speakingEntities.map(entity => entity.id));
     const sceneIdByHeadingBlockId = new Map<string, string>();
     const actIdByHeadingBlockId = new Map<string, string>();
     const existingSceneByHeadingBlockId = new Map<string, typeof existingScenes[number]>();

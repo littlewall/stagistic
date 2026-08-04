@@ -91,3 +91,77 @@ export const buildCharacterGenderUpsertPayload = (
         updatedAt,
     });
 };
+
+export const buildCharacterGroupCreatePayload = (
+    scriptId: string,
+    groupId: string,
+    key: string,
+    colorHex: string | null,
+    createdAt: number,
+) => {
+    return JSON.stringify({
+        scriptId,
+        groupId,
+        key,
+        colorHex,
+        createdAt,
+    });
+};
+
+export const buildCharacterGroupRenamePayload = (
+    scriptId: string,
+    groupId: string,
+    previousKey: string,
+    nextKey: string,
+    renamedAt: number,
+) => {
+    return JSON.stringify({
+        scriptId,
+        groupId,
+        previousKey,
+        nextKey,
+        renamedAt,
+    });
+};
+
+export const buildCharacterGroupDeletePayload = (
+    scriptId: string,
+    groupId: string,
+    key: string,
+    deletedAt: number,
+) => {
+    return JSON.stringify({
+        scriptId,
+        groupId,
+        key,
+        deletedAt,
+    });
+};
+
+export const buildCharacterGroupColorPayload = (
+    scriptId: string,
+    groupId: string,
+    colorHex: string | null,
+    updatedAt: number,
+) => {
+    return JSON.stringify({
+        scriptId,
+        groupId,
+        colorHex,
+        updatedAt,
+    });
+};
+
+export const buildCharacterGroupMembersPayload = (
+    scriptId: string,
+    groupId: string,
+    memberIds: string[],
+    updatedAt: number,
+) => {
+    return JSON.stringify({
+        scriptId,
+        groupId,
+        memberIds,
+        updatedAt,
+    });
+};
