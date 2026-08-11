@@ -20,6 +20,12 @@
     border-bottom: 1px solid var(--color-border);
 }
 
+.heading {
+    margin: 0;
+    font: inherit;
+    color: inherit;
+}
+
 .zoomControls {
     display: inline-flex;
     gap: var(--space-sm);

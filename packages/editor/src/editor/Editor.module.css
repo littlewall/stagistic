@@ -33,15 +33,18 @@
     --character-tag-tint-strength: 44%;
 }
 
+/*
+ * The side tracks already collapse to the toggle rail on their own — the sizes
+ * carry the open state (see `buildRootStyle`). Pinning them to the rail below
+ * the overlay breakpoint would squeeze the open sidebar's toolbar into ~56 px,
+ * clipping the panel select away and leaving only the close button, so the
+ * drawer could never be switched to another panel.
+ */
 .toolbarRow {
     display: grid;
     grid-template-columns: var(--left-toolbar-size) minmax(0, 1fr) var(--right-toolbar-size);
     background: var(--color-surface);
     border-bottom: 1px solid var(--color-border);
-
-    @media (max-width: 1199px) {
-        grid-template-columns: var(--toolbar-toggle-width) minmax(0, 1fr) var(--toolbar-toggle-width);
-    }
 }
 
 .toolbarSide {
@@ -151,7 +154,15 @@
     }
 }
 
+/*
+ * `isolation` keeps every canvas overlay — music range boundaries and menus,
+ * block actions, suggestions, the empty-enter chooser — inside one stacking
+ * context. Without it their z-indexes (up to 20) compete directly against the
+ * sidebar's, so below the overlay breakpoint they paint through the drawer that
+ * is supposed to be covering them.
+ */
 .canvasHost {
+    isolation: isolate;
     overflow: hidden;
     display: flex;
     grid-column: 2;

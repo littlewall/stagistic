@@ -1,4 +1,5 @@
 import {
+    BLOCK_ITEMS,
     type ScriptBlockNodeType,
 } from '@stagistic/script';
 import {mergeAttributes, Node} from '@tiptap/core';
@@ -19,6 +20,14 @@ export interface CreateScriptNodeConfig {
     name: string,
     blockType: BlockNodeType,
 }
+
+const BLOCK_ROLE_DESCRIPTION_BY_TYPE = Object.fromEntries(
+    BLOCK_ITEMS.map(item => [item.nodeType, item.label]),
+) as Record<ScriptBlockNodeType, string>;
+
+const getBlockRoleDescription = (blockType: BlockNodeType) => {
+    return BLOCK_ROLE_DESCRIPTION_BY_TYPE[blockType];
+};
 
 const resolveParsedBlockType = (element: HTMLElement, fallback: ScriptBlockNodeType) => {
     const rawType = element.getAttribute(SCRIPT_BLOCK_DOM_TYPE_ATTRIBUTE)
@@ -48,7 +57,8 @@ const createStableScriptNodeView = (
     const attributes = mergeAttributes(HTMLAttributes, {
         class: getBlockClassName(renderedBlockType),
         [SCRIPT_BLOCK_DOM_TYPE_ATTRIBUTE]: renderedBlockType,
-    });
+        'aria-roledescription': getBlockRoleDescription(renderedBlockType),
+    }) as Record<string, unknown>;
 
     Object.entries(attributes).forEach(([attribute, value]) => {
         if (value !== null && value !== undefined && value !== false) {
@@ -57,7 +67,8 @@ const createStableScriptNodeView = (
     });
 
     const syncBlockId = (node: ProseMirrorNode) => {
-        const blockId = node.attrs.id;
+        const attrs = node.attrs as Record<string, unknown>;
+        const blockId = attrs.id;
 
         if (typeof blockId === 'string' && blockId.length > 0) {
             dom.setAttribute(SCRIPT_BLOCK_DOM_ID_ATTRIBUTE, blockId);
@@ -145,6 +156,7 @@ export const createScriptNode = ({name, blockType: defaultBlockType}: CreateScri
             const blockType = normalizeBlockNodeType(node.attrs.blockType ?? defaultBlockType);
             const resolvedAttributes = {
                 class: getBlockClassName(blockType),
+                'aria-roledescription': getBlockRoleDescription(blockType),
             };
 
             return [

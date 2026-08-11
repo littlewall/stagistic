@@ -4,7 +4,6 @@ import {
     ensureSceneHeading,
     ensureScriptBlockIds,
     ensureScriptStructure,
-    isScriptDocumentEmpty,
     type ScriptBlockIndexSnapshot,
     type ScriptDocument,
 } from '@stagistic/script';
@@ -12,6 +11,8 @@ import {
     useEffect,
     useState,
 } from 'react';
+
+import {shouldAutoFocusInitialScript} from './initialScriptFocus';
 
 type ScriptLoaderResult = {
     initialValue: ScriptDocument | null | undefined,
@@ -66,7 +67,7 @@ export const useScriptLoader = (
                     return;
                 }
 
-                const needsFocus = isScriptDocumentEmpty(stored);
+                const needsFocus = shouldAutoFocusInitialScript(stored);
 
                 const coerced = coerceUnknownBlocksToStageDirections(stored);
 

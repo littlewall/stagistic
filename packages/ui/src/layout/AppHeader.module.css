@@ -67,7 +67,6 @@
 }
 
 .menuTrigger,
-.avatarTrigger,
 .iconButton {
     cursor: pointer;
     display: inline-flex;
@@ -118,18 +117,6 @@
         width: calc(16px * var(--size-scale));
         height: calc(16px * var(--size-scale));
         color: var(--color-text);
-    }
-}
-
-.avatarTrigger {
-    justify-content: center;
-    padding: var(--space-md);
-    border-radius: var(--radius-full);
-
-    & .icon {
-        width: calc(22px * var(--size-scale));
-        height: calc(22px * var(--size-scale));
-        color: var(--color-text-muted);
     }
 }
 
@@ -322,6 +309,13 @@
     align-items: center;
     justify-content: center;
     padding: 0 var(--space-sm);
+
+    /* A `span` carrying `tabIndex={0}`, so the base rule does not reach it. */
+    &:focus-visible {
+        border-radius: var(--radius-sm);
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
 
     & .dot {
         width: 8px;

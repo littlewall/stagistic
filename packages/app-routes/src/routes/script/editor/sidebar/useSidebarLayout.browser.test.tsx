@@ -114,6 +114,70 @@ describe('useSidebarLayout viewport contract', () => {
         await expect.poll(readState).toBe('true:true');
     });
 
+    it('keeps both drawers closed on arrival at 1199 px', async () => {
+        installMatchMedia(1199);
+        mount();
+
+        await expect.poll(readState).toBe('false:false');
+    });
+
+    it('keeps both drawers closed at 1199 px even when the stored layout had them open', async () => {
+        window.localStorage.setItem(
+            `${SIDEBAR_LAYOUT_STORAGE_KEY}:script-1`,
+            JSON.stringify({isLeftOpen: true, isRightOpen: true}),
+        );
+        installMatchMedia(1199);
+        mount();
+
+        await expect.poll(readState).toBe('false:false');
+    });
+
+    it('opens one drawer at a time at 1199 px', async () => {
+        installMatchMedia(1199);
+        mount();
+
+        await expect.poll(() => document.querySelectorAll('button').length).toBe(2);
+        await userEvent.click(document.querySelectorAll('button')[1]);
+        await expect.poll(readState).toBe('false:true');
+
+        await userEvent.click(document.querySelector('button')!);
+        await expect.poll(readState).toBe('true:false');
+    });
+
+    it('closes an open drawer when its own toggle is pressed again', async () => {
+        installMatchMedia(1199);
+        mount();
+
+        await expect.poll(() => document.querySelectorAll('button').length).toBe(2);
+        await userEvent.click(document.querySelectorAll('button')[1]);
+        await expect.poll(readState).toBe('false:true');
+
+        await userEvent.click(document.querySelectorAll('button')[1]);
+        await expect.poll(readState).toBe('false:false');
+    });
+
+    it('does not persist drawer state opened at 1199 px', async () => {
+        installMatchMedia(1199);
+        mount();
+
+        await expect.poll(() => document.querySelectorAll('button').length).toBe(2);
+        await userEvent.click(document.querySelectorAll('button')[1]);
+        await expect.poll(readState).toBe('false:true');
+
+        const stored: unknown = JSON.parse(
+            window.localStorage.getItem(`${SIDEBAR_LAYOUT_STORAGE_KEY}:script-1`) ?? '{}',
+        );
+
+        expect(stored).toMatchObject({isLeftOpen: true, isRightOpen: true});
+    });
+
+    it('still docks a sidebar at 1200 px, just above the overlay breakpoint', async () => {
+        installMatchMedia(1200);
+        mount();
+
+        await expect.poll(readState).toBe('false:true');
+    });
+
     it('keeps sidebar state separate for each script', async () => {
         installMatchMedia(1470);
         const firstRoot = mount('script-1');

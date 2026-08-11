@@ -73,6 +73,25 @@ const getEditor = async (): Promise<Editor> => {
     throw new Error('Timed out waiting for editor instance');
 };
 
+const getElement = async <ElementType extends Element>(
+    selector: string,
+    label: string,
+): Promise<ElementType> => {
+    const deadline = Date.now() + 2000;
+
+    while (Date.now() < deadline) {
+        const element = document.querySelector<ElementType>(selector);
+
+        if (element) {
+            return element;
+        }
+
+        await new Promise(resolve => window.setTimeout(resolve, 10));
+    }
+
+    throw new Error(`Timed out waiting for ${label}`);
+};
+
 afterEach(() => {
     mountedRoots.forEach(root => root.unmount());
     mountedRoots.length = 0;
@@ -80,6 +99,61 @@ afterEach(() => {
 });
 
 describe('empty Enter chooser', () => {
+    it('offers only block types that begin a script section', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+
+        editor.commands.openEmptyEnterChooser({
+            blockId: 'stage-direction-1',
+            blockPos: 0,
+            blockType: 'stageDirection',
+        });
+
+        const chooser = await getElement<HTMLElement>(
+            '[aria-label="Empty block type chooser"]',
+            'empty Enter chooser',
+        );
+        const labels = [...chooser.querySelectorAll<HTMLButtonElement>('button')]
+            .map(button => button.ariaLabel);
+
+        expect(labels).toEqual([
+            'Set block type to Scene',
+            'Set block type to Stage direction',
+            'Set block type to Character',
+        ]);
+    });
+
+    it('aligns its left edge with the active block instead of its gutter trigger', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+        const block = editor.view.nodeDOM(0);
+
+        if (!(block instanceof HTMLElement)) {
+            throw new Error('Script block not found');
+        }
+
+        await getElement<HTMLButtonElement>(
+            '[data-block-actions-trigger="true"][data-block-id="stage-direction-1"]',
+            'block type trigger',
+        );
+
+        editor.commands.openEmptyEnterChooser({
+            blockId: 'stage-direction-1',
+            blockPos: 0,
+            blockType: 'stageDirection',
+        });
+
+        const chooser = await getElement<HTMLElement>(
+            '[aria-label="Empty block type chooser"]',
+            'empty Enter chooser',
+        );
+
+        expect(chooser.getBoundingClientRect().left)
+            .toBeCloseTo(block.getBoundingClientRect().left, 1);
+    });
+
     it('confirms the selection without dispatching a stale command transaction', async () => {
         renderEditor();
 

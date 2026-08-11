@@ -6,8 +6,22 @@ import {
 } from 'react';
 
 import {SIDEBAR_LAYOUT_STORAGE_KEY} from '../../../../storageKeys';
-import {SIDEBAR_EXCLUSIVE_QUERY} from './sidebarViewport';
+import {SIDEBAR_EXCLUSIVE_QUERY, SIDEBAR_OVERLAY_QUERY} from './sidebarViewport';
 import type {SidebarPanelId} from './types';
+
+/*
+ * Below the overlay breakpoint a sidebar stops being part of the layout and
+ * floats above the script, so "open" means two different things:
+ *
+ * - docked (wide): a persisted layout preference — the canvas shrinks next to it;
+ * - overlay (narrow): a transient drawer — it covers the ends of the lines.
+ *
+ * Persisting the drawer would mean arriving on a laptop with the script silently
+ * covered, so overlay state is session-only and always starts closed. Only one
+ * drawer can be open at a time (the overlay range is a subset of the exclusive
+ * range), which is why it is a single slot rather than two booleans.
+ */
+type OverlayDrawer = 'left' | 'right' | null;
 
 interface SidebarLayoutState {
     isLeftOpen: boolean,
@@ -30,12 +44,12 @@ interface UseSidebarLayoutArgs {
     storageScope: string,
 }
 
-const getIsExclusiveViewport = () => {
+const getIsMatchingViewport = (query: string) => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
         return false;
     }
 
-    return window.matchMedia(SIDEBAR_EXCLUSIVE_QUERY).matches;
+    return window.matchMedia(query).matches;
 };
 
 const isStoredSidebarLayoutState = (value: unknown): value is StoredSidebarLayoutState => {
@@ -122,25 +136,42 @@ export const useSidebarLayout = ({
         defaultRightPanelId,
         availablePanelIds,
     ));
-    const [isExclusiveViewport, setIsExclusiveViewport] = useState(getIsExclusiveViewport);
+    const [isExclusiveViewport, setIsExclusiveViewport] = useState(
+        () => getIsMatchingViewport(SIDEBAR_EXCLUSIVE_QUERY),
+    );
+    const [isOverlayViewport, setIsOverlayViewport] = useState(
+        () => getIsMatchingViewport(SIDEBAR_OVERLAY_QUERY),
+    );
+    const [overlayDrawer, setOverlayDrawer] = useState<OverlayDrawer>(null);
 
     useEffect(() => {
         if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
             return;
         }
 
-        const mediaQueryList = window.matchMedia(SIDEBAR_EXCLUSIVE_QUERY);
-        const syncExclusiveMode = () => {
-            setIsExclusiveViewport(mediaQueryList.matches);
+        const exclusiveQueryList = window.matchMedia(SIDEBAR_EXCLUSIVE_QUERY);
+        const overlayQueryList = window.matchMedia(SIDEBAR_OVERLAY_QUERY);
+        const syncViewportModes = () => {
+            setIsExclusiveViewport(exclusiveQueryList.matches);
+            setIsOverlayViewport(overlayQueryList.matches);
         };
 
-        syncExclusiveMode();
-        mediaQueryList.addEventListener('change', syncExclusiveMode);
+        syncViewportModes();
+        exclusiveQueryList.addEventListener('change', syncViewportModes);
+        overlayQueryList.addEventListener('change', syncViewportModes);
 
         return () => {
-            mediaQueryList.removeEventListener('change', syncExclusiveMode);
+            exclusiveQueryList.removeEventListener('change', syncViewportModes);
+            overlayQueryList.removeEventListener('change', syncViewportModes);
         };
     }, []);
+
+    // Leaving overlay mode retires the drawer, so returning to it starts closed.
+    useEffect(() => {
+        if (!isOverlayViewport) {
+            setOverlayDrawer(null);
+        }
+    }, [isOverlayViewport]);
 
     useEffect(() => {
         if (typeof window === 'undefined' || storageScopeRef.current !== storageScope) {
@@ -160,6 +191,7 @@ export const useSidebarLayout = ({
         }
 
         storageScopeRef.current = storageScope;
+        setOverlayDrawer(null);
         setState(createInitialState(
             storageScope,
             defaultLeftPanelId,
@@ -195,8 +227,13 @@ export const useSidebarLayout = ({
         defaultRightPanelId,
     ]);
 
+    /*
+     * Docked sidebars are mutually exclusive below the exclusive breakpoint.
+     * Overlay mode enforces this through `overlayDrawer` instead, and must not
+     * rewrite the persisted docked preference while the drawers are floating.
+     */
     useEffect(() => {
-        if (!isExclusiveViewport) {
+        if (!isExclusiveViewport || isOverlayViewport) {
             return;
         }
 
@@ -205,11 +242,20 @@ export const useSidebarLayout = ({
         }
     }, [
         isExclusiveViewport,
+        isOverlayViewport,
         state.isLeftOpen,
         state.isRightOpen,
     ]);
 
     const toggleLeft = useCallback(() => {
+        if (isOverlayViewport) {
+            setOverlayDrawer(previous => {
+                return previous === 'left' ? null : 'left';
+            });
+
+            return;
+        }
+
         setState(previous => {
             const nextIsLeftOpen = !previous.isLeftOpen;
 
@@ -221,9 +267,17 @@ export const useSidebarLayout = ({
                     : previous.isRightOpen,
             };
         });
-    }, [isExclusiveViewport]);
+    }, [isExclusiveViewport, isOverlayViewport]);
 
     const toggleRight = useCallback(() => {
+        if (isOverlayViewport) {
+            setOverlayDrawer(previous => {
+                return previous === 'right' ? null : 'right';
+            });
+
+            return;
+        }
+
         setState(previous => {
             const nextIsRightOpen = !previous.isRightOpen;
 
@@ -235,7 +289,7 @@ export const useSidebarLayout = ({
                 isRightOpen: nextIsRightOpen,
             };
         });
-    }, [isExclusiveViewport]);
+    }, [isExclusiveViewport, isOverlayViewport]);
 
     const selectLeft = useCallback((panelId: SidebarPanelId) => {
         setState(previous => ({...previous, leftPanelId: panelId}));
@@ -246,8 +300,8 @@ export const useSidebarLayout = ({
     }, []);
 
     return {
-        isLeftOpen: state.isLeftOpen,
-        isRightOpen: state.isRightOpen,
+        isLeftOpen: isOverlayViewport ? overlayDrawer === 'left' : state.isLeftOpen,
+        isRightOpen: isOverlayViewport ? overlayDrawer === 'right' : state.isRightOpen,
         leftPanelId: state.leftPanelId,
         rightPanelId: state.rightPanelId,
         toggleLeft,

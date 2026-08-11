@@ -68,7 +68,7 @@ export const InitialPagesModule = ({
                 {page.enabled ? (
                     <div className={styles.initialPageOptions}>
                         <section className={styles.initialPageSection}>
-                            <h4 className={styles.sectionTitle}>Characters</h4>
+                            <h4 className={styles.sectionTitle}>Character outlines</h4>
                             <div className={styles.sectionOptions}>
                                 <Switch
                                     isSelected={page.showCharacterOutlines}

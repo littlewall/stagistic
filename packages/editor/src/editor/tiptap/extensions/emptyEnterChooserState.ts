@@ -39,9 +39,6 @@ export const EMPTY_ENTER_CHOOSER_WRITER_TYPES: readonly BlockNodeType[] = [
     'scene',
     'stageDirection',
     'character',
-    'aside',
-    'dialogue',
-    'lyrics',
 ];
 
 const EMPTY_ENTER_CHOOSER_WRITER_TYPE_SET = new Set(EMPTY_ENTER_CHOOSER_WRITER_TYPES);

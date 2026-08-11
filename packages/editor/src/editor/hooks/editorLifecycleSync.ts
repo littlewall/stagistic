@@ -69,7 +69,7 @@ export const sanitizeScriptBlocks = (editor: TiptapEditor) => {
         return;
     }
 
-    editor.view.dispatch(tr.setMeta('preventUpdate', true));
+    editor.view.dispatch(tr.setMeta('preventUpdate', true).setMeta('addToHistory', false));
 };
 
 const getNow = () => {

@@ -1,5 +1,6 @@
 import '@stagistic/ui/styles/base.css';
 
+import type {ScriptDocument} from '@stagistic/script';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -13,7 +14,10 @@ import {
 } from 'vite-plus/test/browser';
 
 import {getConfirmedCharacterColor} from '../characters/colorResolver';
-import {createMiniEditorTestDocument} from './miniEditorTestUtils';
+import {
+    createMiniEditorTestDocument,
+    createMiniEditorTestEditor,
+} from './miniEditorTestUtils';
 import {MiniScriptEditor} from './MiniScriptEditor';
 
 const mountedRoots: Root[] = [];
@@ -41,6 +45,52 @@ const renderMiniEditor = (
     mountedRoots.push(root);
 
     return host;
+};
+
+const createAllBlockTypesDocument = (): ScriptDocument => {
+    const baseDocument = createMiniEditorTestDocument();
+
+    return {
+        ...baseDocument,
+        content: [
+            {
+                type: 'act',
+                attrs: {id: 'mini-act'},
+                content: [{type: 'text', text: 'ACT I'}],
+            },
+            ...baseDocument.content ?? [],
+            {
+                type: 'lyrics',
+                attrs: {id: 'mini-lyrics'},
+                content: [{type: 'text', text: 'SING'}],
+            },
+            {
+                type: 'note',
+                attrs: {id: 'mini-note'},
+                content: [{type: 'text', text: 'Revision note'}],
+            },
+        ],
+    };
+};
+
+const expectBlockRoleDescriptions = (root: ParentNode) => {
+    const expectedDescriptions = [
+        ['act', 'ACT'],
+        ['scene', 'Scene'],
+        ['stageDirection', 'Stage direction'],
+        ['character', 'Character'],
+        ['aside', 'Aside'],
+        ['dialogue', 'Dialogue'],
+        ['lyrics', 'Lyrics'],
+        ['note', 'Notes'],
+    ] as const;
+
+    expectedDescriptions.forEach(([blockType, description]) => {
+        const block = root.querySelector<HTMLElement>(`p[blocktype="${blockType}"]`);
+
+        expect(block?.tagName).toBe('P');
+        expect(block?.getAttribute('aria-roledescription')).toBe(description);
+    });
 };
 
 const waitForElement = async <TElement extends Element>(
@@ -103,6 +153,36 @@ describe('MiniScriptEditor', () => {
         expect(editor.querySelector('[data-editor-toolbar]')).toBeNull();
         expect(editor.querySelector('[data-editor-sidebar]')).toBeNull();
         expect(editor.querySelector('button')).toBeNull();
+    });
+
+    it('exposes every script block type as a paragraph role description', async () => {
+        const host = renderMiniEditor(
+            undefined,
+            undefined,
+            createAllBlockTypesDocument(),
+        );
+        const editor = await waitForElement<HTMLElement>(
+            host,
+            '[data-mini-editor]',
+        );
+
+        expectBlockRoleDescriptions(editor);
+    });
+
+    it('serializes every script block role description', () => {
+        const editor = createMiniEditorTestEditor();
+
+        try {
+            editor.commands.setContent(createAllBlockTypesDocument());
+
+            const serializedDocument = document.createElement('div');
+
+            serializedDocument.innerHTML = editor.getHTML();
+
+            expectBlockRoleDescriptions(serializedDocument);
+        } finally {
+            editor.destroy();
+        }
     });
 
     it('shows a non-interactive type icon for the active block', async () => {

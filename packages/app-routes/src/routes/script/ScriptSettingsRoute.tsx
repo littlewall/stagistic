@@ -1,4 +1,5 @@
 import {useScripts} from '@stagistic/app-core';
+import {LoaderOverlay} from '@stagistic/ui';
 import {Navigate, useParams} from 'react-router-dom';
 
 import {SETTINGS_MODAL_QUERY_KEY} from './settings/settingsMenu';
@@ -8,7 +9,12 @@ export const ScriptSettingsRoute = () => {
     const {scripts, isLoading} = useScripts();
 
     if (isLoading) {
-        return null;
+        return (
+            <LoaderOverlay
+                label="Preparing editor"
+                messages={['Loading your script']}
+            />
+        );
     }
 
     const targetScriptId = scriptId ?? scripts[0]?.id;

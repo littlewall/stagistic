@@ -4,6 +4,7 @@ import {
     type DragEndEvent,
     type DragStartEvent,
     Feedback,
+    KeyboardSensor,
     PointerActivationConstraints,
     PointerSensor,
 } from '@dnd-kit/dom';
@@ -52,6 +53,8 @@ export const buildAccessibilityPlugin = (
 export const configuredPointerSensor: SensorDescriptor = PointerSensor.configure({
     activationConstraints: [new PointerActivationConstraints.Distance({value: 5})],
 });
+
+export const configuredKeyboardSensor: SensorDescriptor = KeyboardSensor.configure({});
 
 export const feedbackWithoutDropAnimation: PluginDescriptor = Feedback.configure({
     dropAnimation: null,

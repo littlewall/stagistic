@@ -91,6 +91,40 @@ const waitForGone = async (selector: string) => {
     throw new Error(`Expected element matching ${selector} to be gone`);
 };
 
+const waitForAttribute = async (element: Element, attribute: string) => {
+    const deadline = Date.now() + 1000;
+
+    while (Date.now() < deadline) {
+        const value = element.getAttribute(attribute);
+
+        if (value) {
+            return value;
+        }
+
+        await new Promise(resolve => {
+            window.setTimeout(resolve, 10);
+        });
+    }
+
+    throw new Error(`Expected ${attribute} to be set`);
+};
+
+const waitForAttributeGone = async (element: Element, attribute: string) => {
+    const deadline = Date.now() + 1000;
+
+    while (Date.now() < deadline) {
+        if (!element.hasAttribute(attribute)) {
+            return;
+        }
+
+        await new Promise(resolve => {
+            window.setTimeout(resolve, 10);
+        });
+    }
+
+    throw new Error(`Expected ${attribute} to be removed`);
+};
+
 const renderEditor = () => {
     const host = document.createElement('div');
 
@@ -150,5 +184,37 @@ describe('character tag confirmation', () => {
         await userEvent.keyboard('{Escape}');
 
         await waitForGone('[role="listbox"][aria-label="Character suggestions"]');
+    });
+
+    it('exposes keyboard selection through the focused editor', async () => {
+        renderEditor();
+
+        const editorElement = await waitForElement<HTMLElement>('[contenteditable="true"]');
+        const editor = page.elementLocator(editorElement);
+
+        await editor.click();
+        await userEvent.type(editor, '@');
+
+        const listbox = await waitForElement<HTMLElement>('[role="listbox"][aria-label="Character suggestions"]');
+
+        expect(editorElement.hasAttribute('aria-activedescendant')).toBe(false);
+
+        await userEvent.keyboard('{ArrowDown}');
+
+        const activeDescendantId = await waitForAttribute(editorElement, 'aria-activedescendant');
+        const controlledListboxId = await waitForAttribute(editorElement, 'aria-controls');
+        const activeOption = document.getElementById(activeDescendantId);
+
+        expect(listbox.id).toBe(controlledListboxId);
+        expect(activeOption?.getAttribute('role')).toBe('option');
+        expect(activeOption?.getAttribute('aria-selected')).toBe('true');
+
+        await userEvent.keyboard('{Escape}');
+        await waitForGone('[role="listbox"][aria-label="Character suggestions"]');
+        await waitForAttributeGone(editorElement, 'aria-activedescendant');
+        await waitForAttributeGone(editorElement, 'aria-controls');
+
+        expect(editorElement.hasAttribute('aria-activedescendant')).toBe(false);
+        expect(editorElement.hasAttribute('aria-controls')).toBe(false);
     });
 });

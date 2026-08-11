@@ -6,10 +6,12 @@ import {
 } from 'react';
 
 import styles from '../CharacterSuggestionsOverlay.module.css';
+import {getCharacterSuggestionOptionId} from './accessibility';
 import type {SuggestionEntry} from './model';
 
 type CharacterSuggestionsOverlayViewProps = {
     overlayRef: RefObject<HTMLDivElement | null>,
+    listboxId: string,
     style: CSSProperties,
     suggestions: SuggestionEntry[],
     activeSuggestionIndex: number | null,
@@ -18,6 +20,7 @@ type CharacterSuggestionsOverlayViewProps = {
 
 export const CharacterSuggestionsOverlayView = ({
     overlayRef,
+    listboxId,
     style,
     suggestions,
     activeSuggestionIndex,
@@ -31,6 +34,7 @@ export const CharacterSuggestionsOverlayView = ({
         >
             <div
                 className={styles.panel}
+                id={listboxId}
                 role="listbox"
                 aria-label="Character suggestions"
             >
@@ -40,6 +44,7 @@ export const CharacterSuggestionsOverlayView = ({
                     return (
                         <button
                             key={suggestion.key}
+                            id={getCharacterSuggestionOptionId(listboxId, index)}
                             className={clsx(styles.item, isActive && styles.active)}
                             type="button"
                             role="option"

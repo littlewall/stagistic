@@ -121,7 +121,7 @@ Snímky: `f4-04-appearance-popover-light-1440.png`, `f10-02-script-menu.png`
 
 ## B4 — Empty-enter chooser překrývá předchozí řádek a stojí mimo textový sloupec
 
-**Priorita: Important** · `packages/editor/src/editor/components/emptyEnterChooser/EmptyEnterBlockChooserOverlay.tsx:153-171`
+**Priorita: Important** · `packages/editor/src/editor/components/emptyEnterChooser/EmptyEnterBlockChooserOverlay.tsx:157-171`
 
 Naměřeno při prázdném bloku na `top 337`, výška 38:
 
@@ -317,10 +317,10 @@ V kódu existuje plnohodnotný systém zkratek:
 | Vstup | Efekt | Zdroj |
 |---|---|---|
 | `Ctrl`+`1…7`,`0` (macOS) / `Alt`+`…` (jinde) | Změna typu bloku | `handlers/shortcuts.ts:16-36` |
-| `Alt`+`Enter` / `Shift`+`Alt`+`Enter` | Cyklení typů vpřed/vzad | `handlers/shortcuts.ts:71-94` |
-| `Enter` | Blok typu `nextElement` | `handlers/index.ts:107-109` |
-| `Enter` na prázdném | Chooser | `handlers/index.ts:49-97` |
-| `Tab` | Vlastní handler | `handlers/index.ts:111-113` |
+| `Alt`+`Enter` / `Shift`+`Alt`+`Enter` | Cyklení typů vpřed/vzad | `handlers/index.ts:106-108` → `handlers/shortcuts.ts:71-94` |
+| `Enter` | Blok typu `nextElement` | `handlers/index.ts:110-112` |
+| `Enter` na prázdném | Chooser | `handlers/enter.ts:205` |
+| `Tab` | Vlastní handler | `handlers/index.ts:114-116` |
 
 Za běhu se z toho **nezobrazí nic**. Ověřeno: menu `Change block type` má u sedmi položek jen ikonu a název; tooltipy nesou jen popisek (`Bold` → „Bold", chooser → „Scene"); gutter také ne. Jediná zmínka je sr-only odstavec „Use the toolbar or keyboard shortcuts to change block types and formatting." (`packages/editor/src/editor/components/EditorCanvas.tsx:62`) — tedy věta, kterou vidoucí uživatel nikdy neuvidí, a která navíc žádnou konkrétní zkratku neuvádí.
 
@@ -443,14 +443,22 @@ Skutečná nastavení scénáře **nemají trvalou URL** — otevírají se quer
 
 **Priorita: Important** · `packages/script/src/blocks/specs/`
 
-Řetězení přes `Enter`:
+Řetězení přes `Enter` (`nextElement` v každém specu):
 
-```
-ACT → scene → stageDirection → character → dialogue → character → …
-aside → dialogue        lyrics → lyrics        notes → stageDirection
-```
+| Z | Do | Kotva |
+|---|---|---|
+| `act` | `scene` | `specs/act.ts:14` |
+| `scene` | `stageDirection` | `specs/scene.ts:13` |
+| `stageDirection` | `character` | `specs/stageDirection.ts:13` |
+| `character` | `dialogue` | `specs/character.ts:15` |
+| `dialogue` | `character` | `specs/dialogue.ts:15` |
+| `aside` | `dialogue` | `specs/aside.ts:15` |
+| `lyrics` | `lyrics` | `specs/lyrics.ts:15` |
+| `note` | `stageDirection` | `specs/note.ts:13` |
 
-`Enter` tedy sám nikdy nedovede uživatele k `aside`, `lyrics` ani `notes`. Do těch se lze dostat výhradně přes zkratku (**neviditelnou**, R1), přes menu v toolbaru, nebo přes gutter.
+Hlavní smyčka je tedy `character ⇄ dialogue`. Do `aside`, `lyrics` ani `note` **žádná šipka nevede**.
+
+`Enter` tedy sám nikdy nedovede uživatele k `aside`, `lyrics` ani `note`. Do těch se lze dostat výhradně přes zkratku (**neviditelnou**, R1 — `aside.ts:14` = `4`, `lyrics.ts:14` = `7`, `note.ts:12` = `0`), přes menu v toolbaru, nebo přes gutter.
 
 Přitom `aside` a `lyrics` jsou přesně ty typy, které dělají ze Stagisticu **divadelní a muzikálový** nástroj, ne obecný textový editor. Jsou to diferenciátory produktu, schované nejhlouběji.
 

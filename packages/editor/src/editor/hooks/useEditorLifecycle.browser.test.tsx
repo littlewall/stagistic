@@ -101,6 +101,24 @@ describe('useEditorLifecycle', () => {
 
         expect(activeBlock.blockType).toBe('scene');
         expect(activeBlock.id).toBe('scene-1');
+        expect(document.activeElement).toBe(editor.view.dom);
+    });
+
+    it('does not make Undo available right after a script loads', async () => {
+        renderEditor();
+
+        const editor = await poll(
+            () => (window as LifecycleTestWindow).__lifecycleTestEditor,
+            'editor instance',
+        );
+
+        await poll(() => {
+            const block = getActiveScriptBlockFromState(editor.state);
+
+            return block?.blockType === 'scene' ? block : null;
+        }, 'initial scene selection');
+
+        expect(editor.can().undo()).toBe(false);
     });
 
     it('renders a quiet prompt in the active empty scene', async () => {
@@ -145,15 +163,17 @@ describe('useEditorLifecycle', () => {
         scriptDocument.content.push({
             type: 'stageDirection',
             attrs: {id: 'music-block'},
-            content: [{
-                type: 'musicStart',
-                attrs: {
-                    musicId: 'music-1',
-                    mode: 'open',
-                    title: 'One Small Light',
-                    kind: 'song',
+            content: [
+                {
+                    type: 'musicStart',
+                    attrs: {
+                        musicId: 'music-1',
+                        mode: 'open',
+                        title: 'One Small Light',
+                        kind: 'song',
+                    },
                 },
-            }],
+            ],
         });
         renderEditor(scriptDocument);
 
