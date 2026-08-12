@@ -113,7 +113,10 @@ const faqs = [
             content="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
         />
         <meta property="og:image" content="/opengraph.jpg" />
-        <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
+        <link
+            rel="canonical"
+            href={new URL(Astro.url.pathname.replace(/^\/+/, ''), Astro.site).href}
+        />
         <script is:inline>document.documentElement.classList.add('js');</script>
     </head>
     <body>
@@ -283,7 +286,6 @@ const faqs = [
                                                 data-fit={f.imageFit}
                                                 loading="lazy"
                                                 decoding="async"
-                                                style={`--feature-image-position: ${f.imagePosition}; --feature-image-scale: ${f.imageScale};`}
                                             />
                                         </div>
                                     </div>
