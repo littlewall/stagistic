@@ -1,4 +1,7 @@
-import type {ScriptBlockNodeType} from '@stagistic/script';
+import type {
+    BlockShortcut,
+    ScriptBlockNodeType,
+} from '@stagistic/script';
 import {Tooltip} from '@stagistic/ui';
 import clsx from 'clsx';
 import type {
@@ -44,6 +47,7 @@ interface BlockGutterControlsProps {
         style: CSSProperties | undefined,
         triggerRef: RefObject<HTMLButtonElement | null>,
         menuRef: RefObject<HTMLDivElement | null>,
+        blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
         isPressVisualActive: boolean,
         isDragging: boolean,
         isDisabled: boolean,
@@ -138,6 +142,7 @@ export const BlockGutterControls = ({
             {typeMenu.isOpen && !typeMenu.isDragging ? (
                 <BlockTypeMenu
                     blockType={block.type}
+                    blockShortcuts={typeMenu.blockShortcuts}
                     isMenuAbove={typeMenu.isAbove}
                     menuRef={typeMenu.menuRef}
                     menuStyle={typeMenu.style}

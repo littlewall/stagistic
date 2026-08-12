@@ -1,4 +1,7 @@
-import type {ScriptBlockNodeType} from '@stagistic/script';
+import type {
+    BlockShortcut,
+    ScriptBlockNodeType,
+} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import type {
     CSSProperties,
@@ -23,6 +26,7 @@ export interface BlockActionMenuProps {
 
 export interface BlockTypeMenuProps {
     blockType: BlockNodeType,
+    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
     isMenuAbove: boolean,
     menuRef: RefObject<HTMLDivElement | null>,
     menuStyle: CSSProperties | undefined,

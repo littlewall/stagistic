@@ -224,6 +224,7 @@ export const ScriptEditorRoute = () => {
     return (
         <ScriptSessionProvider value={sessionContextValue}>
             <AppLayout
+                footer={null}
                 header={(
                     displayedCurrentScript ? (
                         <ScriptEditorAppHeader

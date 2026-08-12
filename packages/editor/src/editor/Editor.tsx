@@ -39,6 +39,10 @@ import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
 import {EditorSnapshotStoreProvider} from './live/context';
 import {
+    getBlockNextElements,
+    getBlockShortcuts,
+} from './model/blockSettingMaps';
+import {
     type CharacterColorRefsBundle,
     createCharacterColorRefsBundle,
 } from './surface/editorSurfaceCache';
@@ -123,6 +127,14 @@ const Editor = ({
     const resolvedSettings = useMemo(
         () => resolveEditorSettings(runtimeGlobalSettings, runtimeScriptSettings),
         [runtimeGlobalSettings, runtimeScriptSettings],
+    );
+    const blockShortcuts = useMemo(
+        () => getBlockShortcuts(resolvedSettings.blocks),
+        [resolvedSettings.blocks],
+    );
+    const blockNextElements = useMemo(
+        () => getBlockNextElements(resolvedSettings.blocks),
+        [resolvedSettings.blocks],
     );
 
     const initialContentSignature = useMemo(
@@ -334,6 +346,8 @@ const Editor = ({
                                 headerFooter: resolvedSettings.headerFooter,
                                 scriptTitle,
                                 draftDate,
+                                blockShortcuts,
+                                blockNextElements,
                             }}
                             layout={resolvedLayout}
                             rootRef={rootRef}

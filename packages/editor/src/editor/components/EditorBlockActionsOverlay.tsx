@@ -1,4 +1,7 @@
-import type {ScriptBlockNodeType} from '@stagistic/script';
+import type {
+    BlockShortcut,
+    ScriptBlockNodeType,
+} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
     type MouseEvent as ReactMouseEvent,
@@ -30,9 +33,12 @@ import styles from './EditorBlockActionsOverlay.module.css';
 interface EditorBlockActionsOverlayProps {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
+    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
 }
 
-const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverlayProps) => {
+const EditorBlockActionsOverlay = ({
+    editor, canvasRef, blockShortcuts,
+}: EditorBlockActionsOverlayProps) => {
     const liveRevision = useEditorLiveSelector(snapshot => snapshot.revision);
     const typeTriggerRef = useRef<HTMLButtonElement | null>(null);
     const typeMenuRef = useRef<HTMLDivElement | null>(null);
@@ -270,6 +276,7 @@ const EditorBlockActionsOverlay = ({editor, canvasRef}: EditorBlockActionsOverla
                     style: typeMenuStyle,
                     triggerRef: typeTriggerRef,
                     menuRef: typeMenuRef,
+                    blockShortcuts,
                     isPressVisualActive,
                     isDragging: Boolean(activeDrag),
                     isDisabled: isMenuDisabledBlock,

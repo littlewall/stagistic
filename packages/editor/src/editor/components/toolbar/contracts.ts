@@ -1,4 +1,7 @@
-import {type ScriptBlockNodeType} from '@stagistic/script';
+import {
+    type BlockShortcut,
+    type ScriptBlockNodeType,
+} from '@stagistic/script';
 import type {
     MouseEvent as ReactMouseEvent,
     ReactNode,
@@ -57,6 +60,7 @@ export interface BlockTypeSelectActions {
 
 export interface BlockTypeSelectProps {
     options: readonly BlockTypeSelectOption[],
+    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
     dropdownRef: RefObject<HTMLDivElement | null>,
     state: BlockTypeSelectState,
     actions: BlockTypeSelectActions,

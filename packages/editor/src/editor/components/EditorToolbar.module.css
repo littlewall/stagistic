@@ -276,3 +276,11 @@
     line-height: var(--line-height-snug);
     white-space: nowrap;
 }
+
+.menuShortcut {
+    overflow: hidden;
+    margin-left: auto;
+    color: var(--color-text-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
