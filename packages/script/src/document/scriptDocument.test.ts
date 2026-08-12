@@ -18,7 +18,6 @@ describe('initial script documents', () => {
 
         expect(document.content.map(node => getScriptBlockNodeType(node))).toEqual(['act', 'scene']);
         expect(getScriptBlockId(document.content[1])).toBe('scene-1');
-        expect(document.content[1].content).toEqual([{type: 'text', text: 'SCENE ONE'}]);
     });
 
     it('creates an actless document with only a scene', () => {
@@ -26,7 +25,6 @@ describe('initial script documents', () => {
 
         expect(document.content.map(node => getScriptBlockNodeType(node))).toEqual(['scene']);
         expect(getScriptBlockId(document.content[0])).toBe('scene-1');
-        expect(document.content[0].content).toEqual([{type: 'text', text: 'SCENE ONE'}]);
     });
 
     it('keeps an empty actless document actless during loader normalization', () => {

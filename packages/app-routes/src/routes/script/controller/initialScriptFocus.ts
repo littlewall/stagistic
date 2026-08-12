@@ -16,15 +16,8 @@ const isDefaultActHeading = (node: ScriptNode): boolean => {
         && getNodeTextContent(node).trim().toLocaleUpperCase() === 'ACT ONE';
 };
 
-const isDefaultSceneHeading = (node: ScriptNode): boolean => {
-    return getScriptBlockNodeType(node) === 'scene'
-        && getNodeTextContent(node).trim().toLocaleUpperCase() === 'SCENE ONE';
-};
-
 export const shouldAutoFocusInitialScript = (value: ScriptDocument): boolean => {
     return value.content.every(node => {
-        return isDefaultActHeading(node)
-            || isDefaultSceneHeading(node)
-            || getNodeTextContent(node).trim().length === 0;
+        return isDefaultActHeading(node) || getNodeTextContent(node).trim().length === 0;
     });
 };

@@ -108,13 +108,6 @@ export const createScriptBlockNode = (
     };
 };
 
-const createInitialSceneBlock = (blockId?: string): ScriptNode => {
-    return {
-        ...createScriptBlockNode('scene', blockId),
-        content: [{type: 'text', text: 'SCENE ONE'}],
-    };
-};
-
 export const createEmptyScriptDocument = (
     blockId?: string,
     settings?: EditorSettingsOverride,
@@ -128,7 +121,7 @@ export const createEmptyScriptDocument = (
             {
                 ...actBlock,
                 content: [{type: 'text', text: 'ACT ONE'}],
-            }, createInitialSceneBlock(blockId),
+            }, createScriptBlockNode('scene', blockId),
         ],
     };
 };
@@ -139,7 +132,7 @@ export const createActlessScriptDocument = (
 ): ScriptDocument => ({
     type: 'doc',
     attrs: settings ? {settings} : undefined,
-    content: [createInitialSceneBlock(blockId)],
+    content: [createScriptBlockNode('scene', blockId)],
 });
 
 export const createDefaultScriptDocument = (

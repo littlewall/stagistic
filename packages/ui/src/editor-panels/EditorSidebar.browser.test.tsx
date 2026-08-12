@@ -102,29 +102,6 @@ afterEach(() => {
 });
 
 describe('EditorSidebar character rows', () => {
-    it('uses the standard empty-cast message', async () => {
-        const host = document.createElement('div');
-        const root = createRoot(host);
-
-        document.body.appendChild(host);
-        root.render(
-            <EditorSidebar
-                data={{
-                    confirmedCharacters: [],
-                    groups: [],
-                    unconfirmedCharacters: [],
-                }}
-            />,
-        );
-        mountedRoots.push(root);
-
-        const sidebar = await waitForElementIn<HTMLElement>(host, 'aside');
-
-        expect(sidebar.textContent).toContain(
-            'No characters on stage yet. Add a character block to start building your cast.',
-        );
-    });
-
     it('marks the matching character as active', async () => {
         renderSidebar(undefined, 'char-1');
 

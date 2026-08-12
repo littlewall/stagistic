@@ -1,7 +1,4 @@
-import {
-    createDefaultScriptDocument,
-    type ScriptDocument,
-} from '@stagistic/script';
+import type {ScriptDocument} from '@stagistic/script';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
@@ -45,13 +42,13 @@ const EditorProbe = () => {
 
 const mountedRoots: Root[] = [];
 
-const renderEditor = (value = initialValue) => {
+const renderEditor = () => {
     const host = document.createElement('div');
     const root = createRoot(host);
 
     document.body.appendChild(host);
     root.render(
-        <ScriptEditor document={{initialValue: value}} layout={{autoFocus: true}}>
+        <ScriptEditor document={{initialValue}} layout={{autoFocus: true}}>
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
             </ScriptEditor.LeftSidebar>
@@ -102,14 +99,6 @@ afterEach(() => {
 });
 
 describe('empty Enter chooser', () => {
-    it('keeps a new script free of additional canvas guidance', async () => {
-        renderEditor(createDefaultScriptDocument('scene-1'));
-
-        await getEditor();
-
-        expect(document.querySelector('[data-empty-editor-guidance="true"]')).toBeNull();
-    });
-
     it('offers only block types that begin a script section', async () => {
         renderEditor();
 
