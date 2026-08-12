@@ -1,4 +1,5 @@
 import {
+    type BlockShortcut,
     type ScriptBlockNodeType,
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
@@ -27,6 +28,7 @@ import {useToolbarState} from './toolbar/useToolbarState';
 
 interface EditorToolbarProps {
     editor: TiptapEditor | null,
+    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
 }
 
 const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
@@ -37,7 +39,7 @@ const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
 
 const MULTI_BLOCK_OPTIONS = BLOCKS_WITHOUT_ACT.filter(option => MULTI_BLOCK_ALLOWED_TYPES.has(option.type));
 
-const EditorToolbar = ({editor}: EditorToolbarProps) => {
+const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState(false);
@@ -221,6 +223,7 @@ const EditorToolbar = ({editor}: EditorToolbarProps) => {
             />
             <BlockTypeSelect
                 options={isMultiBlockSelection ? MULTI_BLOCK_OPTIONS : BLOCKS_WITHOUT_ACT}
+                blockShortcuts={blockShortcuts}
                 dropdownRef={dropdownRef}
                 state={blockTypeState}
                 actions={blockTypeActions}

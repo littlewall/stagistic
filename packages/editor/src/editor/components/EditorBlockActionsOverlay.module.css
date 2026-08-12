@@ -302,8 +302,11 @@
 
 .menuItemDetail {
     overflow: hidden;
+    flex-shrink: 0;
+    margin-left: auto;
     color: var(--color-text-muted);
     text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .menuSeparator {

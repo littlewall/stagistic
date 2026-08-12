@@ -44,6 +44,25 @@ select {
     color: inherit;
 }
 
+/*
+ * The designed ring is the floor for anything focusable, not something each
+ * component has to remember. Half the editor toolbar used to fall through to
+ * Chrome's UA outline (`1px auto rgb(0, 95, 204)`) purely because nobody wrote
+ * a rule for it, which left keyboard users looking at two different focus
+ * styles in one window.
+ *
+ * Both halves sit in `:where()`, so the whole selector weighs nothing and any
+ * component declaration wins — including a deliberate `outline: none` next to
+ * some other indicator, the way the home script rows use an inset shadow.
+ * Elements that are focusable but not text entry (`[contenteditable]`, the
+ * script canvas) stay out on purpose: a ring around the page would fight the
+ * distraction-free canvas.
+ */
+:where(a, button, input, textarea, select, summary):where(:focus-visible) {
+    outline: var(--focus-ring);
+    outline-offset: var(--focus-ring-offset);
+}
+
 ::selection {
     background: var(--color-surface-accent);
 }

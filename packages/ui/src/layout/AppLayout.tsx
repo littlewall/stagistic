@@ -7,12 +7,15 @@ import styles from './AppLayout.module.css';
 type AppLayoutProps = {
     header?: ReactNode,
     sidebar?: ReactNode,
+    /** Overrides the default footer. Pass `null` to render no footer at all. */
+    footer?: ReactNode,
     children: ReactNode,
 };
 
 export const AppLayout = ({
     header,
     sidebar,
+    footer,
     children,
 }: AppLayoutProps) => {
     return (
@@ -26,7 +29,7 @@ export const AppLayout = ({
                     <aside className={clsx(styles.sidebar)}>{sidebar}</aside>
                 ) : null}
             </div>
-            <AppFooter />
+            {footer === undefined ? <AppFooter /> : footer}
         </div>
     );
 };

@@ -3,11 +3,13 @@ import clsx from 'clsx';
 import {useRef} from 'react';
 
 import {BLOCK_ICONS} from '../../blocks/controls/blockIcons';
+import {formatBlockShortcutLabel} from '../../model/formatBlockShortcut';
 import styles from '../EditorToolbar.module.css';
 import type {BlockTypeSelectProps} from './contracts';
 
 export const BlockTypeSelect = ({
     options,
+    blockShortcuts,
     state,
     actions,
     dropdownRef,
@@ -74,26 +76,35 @@ export const BlockTypeSelect = ({
                         role="menu"
                         style={menuPlacement.style}
                     >
-                        {options.map(option => (
-                            <button
-                                key={option.type}
-                                type="button"
-                                role="menuitem"
-                                className={clsx(
-                                    styles.menuItem,
-                                    option.type === activeBlockInfo?.type && styles.active,
-                                )}
-                                aria-label={`Set block type to ${option.label}`}
-                                onMouseDown={event => onMenuItemMouseDown(option.type, event)}
-                            >
-                                <span className={styles.icon}>
-                                    {BLOCK_ICONS[option.type]}
-                                </span>
-                                <span className={styles.menuLabel}>
-                                    {option.label}
-                                </span>
-                            </button>
-                        ))}
+                        {options.map(option => {
+                            const shortcut = blockShortcuts?.[option.type];
+
+                            return (
+                                <button
+                                    key={option.type}
+                                    type="button"
+                                    role="menuitem"
+                                    className={clsx(
+                                        styles.menuItem,
+                                        option.type === activeBlockInfo?.type && styles.active,
+                                    )}
+                                    aria-label={`Set block type to ${option.label}`}
+                                    onMouseDown={event => onMenuItemMouseDown(option.type, event)}
+                                >
+                                    <span className={styles.icon}>
+                                        {BLOCK_ICONS[option.type]}
+                                    </span>
+                                    <span className={styles.menuLabel}>
+                                        {option.label}
+                                    </span>
+                                    {shortcut ? (
+                                        <span className={styles.menuShortcut}>
+                                            {formatBlockShortcutLabel(shortcut)}
+                                        </span>
+                                    ) : null}
+                                </button>
+                            );
+                        })}
                     </div>
                 ) : null}
             </div>

@@ -4,7 +4,8 @@ import {
     Popover,
 } from 'react-aria-components';
 
-import {SettingsIcon} from '../../icons/ui';
+import {Tooltip} from '../../atoms/Tooltip';
+import {AppearanceIcon} from '../../icons/ui';
 import {type AppThemeMode} from '../../theme';
 import styles from '../AppHeader.module.css';
 import {ThemeModeToggle} from './ThemeModeToggle';
@@ -35,9 +36,19 @@ export const AccountMenu = ({
 }: AccountMenuProps) => {
     return (
         <MenuTrigger>
-            <Button className={styles.avatarTrigger} aria-label="Open settings">
-                <SettingsIcon className={styles.icon} aria-hidden="true" />
-            </Button>
+            {/*
+              * A cog promises the whole settings surface, but this popover only
+              * carries `Appearance` — the real settings live in `ScriptMenu`. The
+              * palette matches what is actually behind the button and stays honest
+              * as the menu grows with further look-and-feel controls (density is
+              * the obvious next one: `.size-sm/md/lg` exist in `base.css` with no
+              * control anywhere).
+              */}
+            <Tooltip label="Appearance" placement="bottom">
+                <Button className={styles.iconButton} aria-label="Appearance">
+                    <AppearanceIcon className={styles.icon} aria-hidden="true" />
+                </Button>
+            </Tooltip>
             <Popover className={styles.menuPopover} placement="bottom end">
                 <AccountMenuContent
                     themeMode={themeMode}

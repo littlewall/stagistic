@@ -169,7 +169,10 @@ const markers = [
             content="The Stagistic syntax: a plain-text format for theatre and musical scripts. Acts, scenes, dialogue, lyrics, stage directions, and music."
         />
         <meta property="og:image" content="/opengraph.jpg" />
-        <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site).href} />
+        <link
+            rel="canonical"
+            href={new URL(Astro.url.pathname.replace(/^\/+/, ''), Astro.site).href}
+        />
     </head>
     <body>
         <div class={s.page}>

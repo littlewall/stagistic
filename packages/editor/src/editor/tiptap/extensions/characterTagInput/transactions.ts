@@ -23,6 +23,7 @@ import {
     PLACEHOLDER_CHARACTER,
 } from './constants';
 import {
+    charAt,
     findTagRangeForEndTyping,
     isCharacterTagMarkedAt,
 } from './markRanges';
@@ -53,6 +54,7 @@ export const buildOpenComposeTransaction = (
 
     const {
         insertLeadingSpace,
+        insertTrailingSpace,
     } = openComposeOptions;
     const mark = markType.create({
         [CHARACTER_TAG_KEY_ATTR]: '',
@@ -71,6 +73,10 @@ export const buildOpenComposeTransaction = (
         composeFrom + (to - from),
         state.schema.text(PLACEHOLDER_CHARACTER, [mark]),
     );
+
+    if (insertTrailingSpace) {
+        tr = tr.insertText(' ', composeFrom + 1);
+    }
 
     return tr
         .setMeta(OPEN_META_KEY, composeFrom)
@@ -225,7 +231,9 @@ const buildCommittedTagInsertion = (
     let tr = state.tr.replaceWith(from, to, state.schema.text(name, [mark]));
     let caret = from + name.length;
 
-    if (trailingSpace) {
+    const hasTrailingSpace = (/\s/).test(charAt(state, to));
+
+    if (trailingSpace && !hasTrailingSpace) {
         tr = tr.insertText(' ', caret);
         caret += 1;
     }

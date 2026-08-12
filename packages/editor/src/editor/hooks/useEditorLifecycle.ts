@@ -235,7 +235,14 @@ export const useEditorLifecycle = ({
 
         if (!isRestoredSurface) {
             isApplyingInitialRef.current = true;
-            instance.commands.setContent(initialValue, {emitUpdate: false});
+            instance.chain()
+                .setContent(initialValue, {emitUpdate: false})
+                .command(({tr}) => {
+                    tr.setMeta('addToHistory', false);
+
+                    return true;
+                })
+                .run();
             sanitizeScriptBlocks(instance);
 
             const syncCommands = instance.commands as {syncCharacterRefs?: () => boolean};
@@ -244,7 +251,8 @@ export const useEditorLifecycle = ({
             instance.view.dispatch(
                 instance.state.tr
                     .setDocAttribute('settings', initialValue.attrs?.settings ?? null)
-                    .setMeta('preventUpdate', true),
+                    .setMeta('preventUpdate', true)
+                    .setMeta('addToHistory', false),
             );
             isApplyingInitialRef.current = false;
             appliedInitialByEditor.set(instance, initialSerialized);

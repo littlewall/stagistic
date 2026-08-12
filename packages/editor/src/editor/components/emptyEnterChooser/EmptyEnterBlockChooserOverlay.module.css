@@ -20,10 +20,11 @@
 .button {
     cursor: pointer;
     display: inline-flex;
+    gap: var(--space-sm);
     align-items: center;
     justify-content: center;
-    width: var(--bubble-menu-button-size);
     height: var(--bubble-menu-button-size);
+    padding: 0 var(--space-sm);
     color: var(--color-text-muted);
     background: transparent;
     border: 1px solid transparent;
@@ -61,4 +62,11 @@
         stroke-linejoin: round;
         stroke-width: 1.6;
     }
+}
+
+.shortcut {
+    font-size: var(--font-size-xxs);
+    line-height: var(--line-height-none);
+    color: var(--color-text-muted);
+    white-space: nowrap;
 }

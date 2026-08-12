@@ -133,7 +133,7 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
         expect(document.querySelector('dialog[aria-label="Create group"]')?.hasAttribute('open')).toBe(true);
         resolvePersistence();
         await new Promise(resolve => window.setTimeout(resolve, 20));
-        expect(document.querySelector('dialog[aria-label="Create group"]')?.hasAttribute('open')).toBe(false);
+        expect(document.querySelector('dialog[aria-label="Create group"]')).toBeNull();
     });
 
     it('keeps a rejected group creation usable with normal validation', async () => {

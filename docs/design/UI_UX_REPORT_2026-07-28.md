@@ -1,3 +1,6 @@
+> **Superseded by [`UI_MAP_2026-08-04.md`](./UI_MAP_2026-08-04.md) a [`UX_FINDINGS_2026-08-04.md`](./UX_FINDINGS_2026-08-04.md).**
+> Tenhle report je zastaralý — od jeho vzniku padla route `/script/list`, home se sjednotila na jeden seznam a `DESIGN.md` se přepsal. **Nepoužívat jako vstup redesignu.** Zůstává jen jako historický záznam.
+
 # Stagistic — generální UI/UX audit
 
 **Datum:** 28. 7. 2026  

@@ -85,7 +85,7 @@ export const ExportPreview = () => {
             aria-busy={isBusy}
         >
             <div className={styles.toolbar}>
-                <span>{pageCount > 0 ? `${pageCount} pages` : 'Preview'}</span>
+                <h2 className={styles.heading}>{pageCount > 0 ? `${pageCount} pages` : 'Preview'}</h2>
                 <div className={styles.zoomControls}>
                     <button
                         type="button"

@@ -11,6 +11,7 @@ import {
     getFirstBlockId,
     type ScriptDocument,
 } from '@stagistic/script';
+import {BasicIndex} from '@tanstack/react-db';
 
 import {createReactiveCollection} from '../collections';
 
@@ -86,6 +87,8 @@ export const createScriptsStore = (repository: ScriptRepository) => {
             delete: script => repository.deleteScript(script.id),
         },
     });
+
+    scriptsCollection.createIndex(script => script.updatedAt, {indexType: BasicIndex});
 
     const insertWithCommand = async (
         summary: ScriptSummary,

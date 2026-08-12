@@ -9,6 +9,7 @@ import styles from './EmptyEnterBlockChooserOverlay.module.css';
 interface ChooserTypeButtonProps {
     optionType: BlockNodeType,
     label: string,
+    shortcutLabel?: string,
     isActive: boolean,
     onMouseDown: (optionType: BlockNodeType, event: ReactMouseEvent<HTMLButtonElement>) => void,
 }
@@ -16,6 +17,7 @@ interface ChooserTypeButtonProps {
 export const ChooserTypeButton = ({
     optionType,
     label,
+    shortcutLabel,
     isActive,
     onMouseDown,
 }: ChooserTypeButtonProps) => {
@@ -30,6 +32,9 @@ export const ChooserTypeButton = ({
                 <span className={styles.icon}>
                     {BLOCK_ICONS[optionType]}
                 </span>
+                {shortcutLabel && (
+                    <span className={styles.shortcut}>{shortcutLabel}</span>
+                )}
             </button>
         </Tooltip>
     );

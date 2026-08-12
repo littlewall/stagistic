@@ -1,6 +1,7 @@
 import {
     Accessibility,
     Feedback,
+    KeyboardSensor,
     PointerSensor,
 } from '@dnd-kit/dom';
 import {DragDropProvider} from '@dnd-kit/react';
@@ -28,6 +29,7 @@ import {SidebarActionsGroup} from '../sidebar/SidebarActionsGroup';
 import styles from './ScriptStructureSidebar.module.css';
 import {
     buildAccessibilityPlugin,
+    configuredKeyboardSensor,
     configuredPointerSensor,
     feedbackWithoutDropAnimation,
 } from './structureDndConfig';
@@ -226,7 +228,11 @@ export const ScriptStructureSidebar = () => {
     );
 
     const sensors = useCallback(
-        (defaults: readonly unknown[]) => [...defaults.filter(s => s !== PointerSensor), configuredPointerSensor],
+        (defaults: readonly unknown[]) => [
+            ...defaults.filter(sensor => sensor !== PointerSensor && sensor !== KeyboardSensor),
+            configuredPointerSensor,
+            configuredKeyboardSensor,
+        ],
         [],
     );
 

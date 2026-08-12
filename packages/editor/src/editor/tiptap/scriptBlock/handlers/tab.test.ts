@@ -26,9 +26,10 @@ const createBlockSpec = (blockType: BlockNodeType) => ({
 
 const schema = new Schema({
     nodes: {
-        doc: {content: '(dialogue | lyrics | stageDirection)+'},
+        doc: {content: '(dialogue | aside | lyrics | stageDirection)+'},
         text: {group: 'inline'},
         dialogue: createBlockSpec('dialogue'),
+        aside: createBlockSpec('aside'),
         lyrics: createBlockSpec('lyrics'),
         stageDirection: createBlockSpec('stageDirection'),
     },
@@ -83,8 +84,18 @@ const createEditor = (blockType: BlockNodeType, text: string) => {
 };
 
 describe('handleTab', () => {
-    it('keeps plain Tab from converting dialogue to lyrics', () => {
+    it('converts dialogue to aside on plain Tab', () => {
         const {editor, getBlock} = createEditor('dialogue', 'Sing this');
+        const event = createTabEvent();
+
+        expect(handleTab(editor, event)).toBe(true);
+        expect(event.wasPrevented()).toBe(true);
+        expect(getBlock()?.type.name).toBe('aside');
+        expect(getBlock()?.attrs.blockType).toBe('aside');
+    });
+
+    it('converts aside back to dialogue on plain Tab', () => {
+        const {editor, getBlock} = createEditor('aside', 'Quietly');
         const event = createTabEvent();
 
         expect(handleTab(editor, event)).toBe(true);

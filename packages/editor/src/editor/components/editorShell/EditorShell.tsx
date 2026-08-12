@@ -1,4 +1,8 @@
-import type {HeaderFooterSettings} from '@stagistic/script';
+import type {
+    BlockShortcut,
+    HeaderFooterSettings,
+    ScriptBlockNodeType,
+} from '@stagistic/script';
 import {
     ArrowLeftIcon,
     ArrowRightIcon,
@@ -29,6 +33,7 @@ import styles from '../../Editor.module.css';
 import {useEditorLiveCharacters} from '../../live/hooks';
 import {EditorCanvas} from '../EditorCanvas';
 import EditorToolbar from '../EditorToolbar';
+import {EditorStatusBar} from './EditorStatusBar';
 
 interface EditorShellCanvasProps {
     editor: TiptapEditor | null,
@@ -42,6 +47,8 @@ interface EditorShellCanvasProps {
     headerFooter: HeaderFooterSettings,
     scriptTitle?: string,
     draftDate?: string,
+    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
+    blockNextElements?: Partial<Record<ScriptBlockNodeType, ScriptBlockNodeType>>,
 }
 
 interface EditorShellProps {
@@ -84,6 +91,8 @@ export const EditorShell = ({
         headerFooter,
         scriptTitle,
         draftDate,
+        blockShortcuts,
+        blockNextElements,
     } = canvas;
     const {
         leftSidebarToggle,
@@ -157,7 +166,7 @@ export const EditorShell = ({
                 </div>
                 <div className={styles.toolbarCenter}>
                     <div className={styles.toolbarCenterInner}>
-                        <EditorToolbar editor={editor} />
+                        <EditorToolbar editor={editor} blockShortcuts={blockShortcuts} />
                     </div>
                 </div>
                 <div className={clsx(styles.toolbarSide, styles.toolbarSideRight)}>
@@ -209,6 +218,7 @@ export const EditorShell = ({
                         headerFooter={headerFooter}
                         scriptTitle={scriptTitle}
                         draftDate={draftDate}
+                        blockShortcuts={blockShortcuts}
                     />
                 </div>
                 <aside
@@ -221,6 +231,10 @@ export const EditorShell = ({
                     {rightSidebar}
                 </aside>
             </div>
+            <EditorStatusBar
+                editor={editor}
+                blockNextElements={blockNextElements ?? {}}
+            />
         </div>
     );
 };

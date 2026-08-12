@@ -87,47 +87,35 @@ export const useChooserAnchor = ({
         }
 
         const triggerElement = resolveBlockActionsTriggerElement(canvas, chooserState.blockId);
-        let anchorTop = 0;
-        let anchorLeft = 0;
-        let hasAnchorFromTrigger = false;
+        const blockElement = resolveScriptBlockElementById(
+            editor,
+            chooserState.blockId,
+            chooserState.blockPos,
+        );
+        const blockOffset = blockElement
+            ? resolveElementOffsetWithinAncestor(blockElement, canvas)
+            : null;
+        let anchorTop = blockOffset?.top ?? 0;
+        let anchorLeft = blockOffset?.left ?? 0;
 
         if (triggerElement) {
             const triggerOffset = resolveElementRectOffsetWithinAncestor(triggerElement, canvas);
 
             if (triggerOffset) {
                 anchorTop = triggerOffset.top;
-                anchorLeft = triggerOffset.left;
-                hasAnchorFromTrigger = true;
+
+                if (!blockOffset) {
+                    anchorLeft = triggerOffset.left;
+                }
             }
         }
 
-        if (!hasAnchorFromTrigger) {
-            const blockElement = resolveScriptBlockElementById(
-                editor,
-                chooserState.blockId,
-                chooserState.blockPos,
-            );
+        if (!blockOffset && !triggerElement) {
+            setAnchorStyle(previous => {
+                return previous === null ? previous : null;
+            });
 
-            if (!blockElement) {
-                setAnchorStyle(previous => {
-                    return previous === null ? previous : null;
-                });
-
-                return;
-            }
-
-            const offset = resolveElementOffsetWithinAncestor(blockElement, canvas);
-
-            if (!offset) {
-                setAnchorStyle(previous => {
-                    return previous === null ? previous : null;
-                });
-
-                return;
-            }
-
-            anchorTop = offset.top;
-            anchorLeft = offset.left;
+            return;
         }
 
         const nextAnchorStyle: ChooserAnchorStyle = {

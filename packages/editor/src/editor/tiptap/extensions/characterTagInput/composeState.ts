@@ -60,13 +60,22 @@ const isWordBoundaryBefore = (state: EditorState, block: ComposeBlock, from: num
     return charBefore.length === 0 || (/\s/).test(charBefore);
 };
 
+const isWordBoundaryAfter = (state: EditorState, block: ComposeBlock, from: number): boolean => {
+    const charAfter = from < block.to ? charAt(state, from) : '';
+
+    return charAfter.length === 0 || (/\s/).test(charAfter);
+};
+
 const isAtCharacterTagRangeStart = (state: EditorState, from: number, markType: MarkType): boolean => {
     const range = getMarkRange(state.doc.resolve(from), markType);
 
     return range?.from === from;
 };
 
-export const getOpenComposeOptions = (state: EditorState, from: number): {insertLeadingSpace: boolean} | null => {
+export const getOpenComposeOptions = (state: EditorState, from: number): {
+    insertLeadingSpace: boolean,
+    insertTrailingSpace: boolean,
+} | null => {
     if (!state.selection.empty) {
         return null;
     }
@@ -77,7 +86,10 @@ export const getOpenComposeOptions = (state: EditorState, from: number): {insert
         return null;
     }
 
-    return {insertLeadingSpace: !isWordBoundaryBefore(state, block, from)};
+    return {
+        insertLeadingSpace: !isWordBoundaryBefore(state, block, from),
+        insertTrailingSpace: !isWordBoundaryAfter(state, block, from),
+    };
 };
 
 export const isComposeValid = (state: EditorState, from: number): boolean => {

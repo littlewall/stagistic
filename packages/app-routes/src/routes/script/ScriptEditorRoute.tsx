@@ -203,6 +203,7 @@ export const ScriptEditorRoute = () => {
         panels: sidebarPanels,
         defaultLeftPanelId: 'structure',
         defaultRightPanelId: 'characters',
+        storageScope: currentScriptId ?? 'new-script',
     });
     const resolvedEditorInitialValue = editorOverrideValue ?? initialValue;
 
@@ -223,6 +224,7 @@ export const ScriptEditorRoute = () => {
     return (
         <ScriptSessionProvider value={sessionContextValue}>
             <AppLayout
+                footer={null}
                 header={(
                     displayedCurrentScript ? (
                         <ScriptEditorAppHeader

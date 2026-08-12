@@ -98,7 +98,7 @@ describe('InitialPagesModule', () => {
         ).toBeLessThan(
             Array.from(document.querySelectorAll<HTMLLabelElement>('label')).indexOf(numberingSwitch),
         );
-        expect(charactersHeading?.textContent).toBe('Characters');
+        expect(charactersHeading?.textContent).toBe('Character outlines');
         expect(placesHeading?.textContent).toBe('Places');
         expect(orderSelect.textContent).toContain('Name');
         expect(orderPrefix.parentElement?.contains(orderSelect)).toBe(true);

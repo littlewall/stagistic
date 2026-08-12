@@ -94,12 +94,7 @@ describe('NewScriptModal', () => {
         expect(onCreate).toHaveBeenCalledWith('', 'one-act');
 
         modal.render(false);
-        await waitFor(() => {
-            const multiAct = document.querySelector<HTMLInputElement>('input[value="multi-act"]');
-            const dialog = document.querySelector<HTMLDialogElement>('dialog');
-
-            return dialog?.open === false && multiAct?.checked === true;
-        });
+        await waitFor(() => document.querySelector<HTMLDialogElement>('dialog') === null);
         modal.render(true);
         await waitFor(() => document.querySelector<HTMLDialogElement>('dialog')?.open === true);
 

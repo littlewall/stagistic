@@ -21,21 +21,23 @@ export const ExportControlPanel = () => {
     const templateKey = useMemo(() => templateId, [templateId]);
 
     return (
-        <aside className={styles.panel} aria-label="Export controls">
+        <div className={styles.panel}>
             <div className={styles.header}>
                 <h1 className={styles.title}>Export</h1>
                 <ExportDownloadButton />
             </div>
-            <label className={styles.templateField}>
-                <span>Template</span>
-                <TemplatePicker value={templateId} onChange={setTemplateId} />
-            </label>
-            {templateId === 'integratedScore' ? <IntegratedScoreWarning config={config} /> : null}
-            <TemplateComponent
-                key={templateKey}
-                config={config}
-                onConfigChange={setConfig}
-            />
-        </aside>
+            <aside className={styles.controls} aria-label="Export controls">
+                <label className={styles.templateField}>
+                    <span>Template</span>
+                    <TemplatePicker value={templateId} onChange={setTemplateId} />
+                </label>
+                {templateId === 'integratedScore' ? <IntegratedScoreWarning config={config} /> : null}
+                <TemplateComponent
+                    key={templateKey}
+                    config={config}
+                    onConfigChange={setConfig}
+                />
+            </aside>
+        </div>
     );
 };

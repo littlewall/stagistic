@@ -7,6 +7,7 @@ import {
     useCallback,
     useEffect,
     useRef,
+    useState,
 } from 'react';
 
 import styles from './ModalDialog.module.css';
@@ -37,6 +38,13 @@ export const ModalDialog = ({
 }: ModalDialogProps) => {
     const dialogRef = useRef<HTMLDialogElement | null>(null);
     const restoreFocusRef = useRef<HTMLElement | null>(null);
+    const [isMounted, setIsMounted] = useState(isOpen);
+
+    useEffect(() => {
+        if (isOpen) {
+            setIsMounted(true);
+        }
+    }, [isOpen]);
 
     useEffect(() => {
         const dialog = dialogRef.current;
@@ -56,8 +64,9 @@ export const ModalDialog = ({
             dialog.close();
             restoreFocusRef.current?.focus();
             restoreFocusRef.current = null;
+            setIsMounted(false);
         }
-    }, [isOpen]);
+    }, [isOpen, isMounted]);
 
     useEffect(() => {
         return () => {
@@ -121,6 +130,10 @@ export const ModalDialog = ({
             firstElement.focus();
         }
     }, []);
+
+    if (!isMounted) {
+        return null;
+    }
 
     return (
         <dialog

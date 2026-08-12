@@ -1,3 +1,7 @@
+import type {
+    BlockShortcut,
+    ScriptBlockNodeType,
+} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
     type MouseEvent as ReactMouseEvent,
@@ -10,6 +14,7 @@ import {
 } from 'react';
 
 import {BLOCKS} from '../../blocks/blockRegistry';
+import {formatBlockShortcutLabel} from '../../model/formatBlockShortcut';
 import {
     EMPTY_ENTER_CHOOSER_WRITER_TYPES,
     type EmptyEnterChooserState,
@@ -23,6 +28,7 @@ import {useChooserAnchor} from './useChooserAnchor';
 interface EmptyEnterBlockChooserOverlayProps {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
+    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
 }
 
 const CLOSED_CHOOSER_STATE: EmptyEnterChooserState = {
@@ -46,6 +52,7 @@ const isSameChooserState = (previous: EmptyEnterChooserState, next: EmptyEnterCh
 export const EmptyEnterBlockChooserOverlay = ({
     editor,
     canvasRef,
+    blockShortcuts,
 }: EmptyEnterBlockChooserOverlayProps) => {
     const [chooserState, setChooserState] = useState<EmptyEnterChooserState>(() => {
         if (!editor) {
@@ -157,15 +164,20 @@ export const EmptyEnterBlockChooserOverlay = ({
                 role="toolbar"
                 aria-label="Empty block type chooser"
             >
-                {EMPTY_ENTER_CHOOSER_WRITER_TYPES.map(optionType => (
-                    <ChooserTypeButton
-                        key={optionType}
-                        optionType={optionType}
-                        label={labelByType.get(optionType) ?? 'Block'}
-                        isActive={chooserState.selectedType === optionType}
-                        onMouseDown={handleTypeMouseDown}
-                    />
-                ))}
+                {EMPTY_ENTER_CHOOSER_WRITER_TYPES.map(optionType => {
+                    const shortcut = blockShortcuts?.[optionType];
+
+                    return (
+                        <ChooserTypeButton
+                            key={optionType}
+                            optionType={optionType}
+                            label={labelByType.get(optionType) ?? 'Block'}
+                            shortcutLabel={shortcut ? formatBlockShortcutLabel(shortcut) : undefined}
+                            isActive={chooserState.selectedType === optionType}
+                            onMouseDown={handleTypeMouseDown}
+                        />
+                    );
+                })}
             </div>
         </div>
     );

@@ -1,4 +1,8 @@
-import type {HeaderFooterSettings} from '@stagistic/script';
+import type {
+    BlockShortcut,
+    HeaderFooterSettings,
+    ScriptBlockNodeType,
+} from '@stagistic/script';
 import {type Editor as TiptapEditor, EditorContent} from '@tiptap/react';
 import {type CSSProperties, useRef} from 'react';
 
@@ -30,6 +34,7 @@ type EditorCanvasProps = {
     headerFooter: HeaderFooterSettings,
     scriptTitle?: string,
     draftDate?: string,
+    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
 };
 
 export const EditorCanvas = ({
@@ -45,6 +50,7 @@ export const EditorCanvas = ({
     headerFooter,
     scriptTitle = '',
     draftDate = '',
+    blockShortcuts,
 }: EditorCanvasProps) => {
     const canvasRef = useRef<HTMLElement | null>(null);
 
@@ -85,8 +91,16 @@ export const EditorCanvas = ({
                 persistentMusic={persistentMusic}
                 onMusicAssigned={onMusicAssigned}
             />
-            <EmptyEnterBlockChooserOverlay editor={editor} canvasRef={canvasRef} />
-            <EditorBlockActionsOverlay editor={editor} canvasRef={canvasRef} />
+            <EmptyEnterBlockChooserOverlay
+                editor={editor}
+                canvasRef={canvasRef}
+                blockShortcuts={blockShortcuts}
+            />
+            <EditorBlockActionsOverlay
+                editor={editor}
+                canvasRef={canvasRef}
+                blockShortcuts={blockShortcuts}
+            />
             <MusicRangeOverlay
                 editor={editor}
                 canvasRef={canvasRef}

@@ -4,10 +4,12 @@ import {
     type ScriptSummary,
 } from '@stagistic/db';
 import {createActlessScriptDocument} from '@stagistic/script';
+import {createLiveQueryCollection} from '@tanstack/react-db';
 import {
     describe,
     expect,
     it,
+    vi,
 } from 'vite-plus/test';
 
 import {createScriptsStore} from './scriptsStore';
@@ -188,5 +190,28 @@ describe('scripts store', () => {
         source.emit([{...initialScript, title: 'External'}]);
 
         expect(store.scriptsCollection.get('script-1')?.title).toBe('External');
+    });
+
+    it('has an index on updatedAt so orderBy with limit does not fall back to a full scan', async () => {
+        const {repository} = createRepository();
+        const store = createScriptsStore(repository);
+
+        await store.scriptsStore.init();
+
+        const warn = vi.spyOn(console, 'warn').mockImplementation(() => undefined);
+
+        try {
+            const recent = createLiveQueryCollection(
+                q => q
+                    .from({scripts: store.scriptsCollection})
+                    .orderBy(({scripts}) => scripts.updatedAt, 'desc')
+                    .limit(3),
+            );
+
+            await recent.preload();
+        } finally {
+            expect(warn).not.toHaveBeenCalledWith(expect.stringContaining('requires an index'));
+            warn.mockRestore();
+        }
     });
 });

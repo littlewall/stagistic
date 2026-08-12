@@ -15,6 +15,7 @@ interface UseEditorSidebarsArgs {
     panels: readonly SidebarPanel[],
     defaultLeftPanelId?: SidebarPanelId,
     defaultRightPanelId?: SidebarPanelId,
+    storageScope: string,
 }
 
 interface UseEditorSidebarsResult {
@@ -30,6 +31,7 @@ export const useEditorSidebars = ({
     panels,
     defaultLeftPanelId,
     defaultRightPanelId,
+    storageScope,
 }: UseEditorSidebarsArgs): UseEditorSidebarsResult => {
     const availablePanelIds = useMemo(() => panels.map(panel => panel.id), [panels]);
     const resolvedDefaultLeft = defaultLeftPanelId ?? panels[0]?.id ?? '';
@@ -39,6 +41,7 @@ export const useEditorSidebars = ({
         availablePanelIds,
         defaultLeftPanelId: resolvedDefaultLeft,
         defaultRightPanelId: resolvedDefaultRight,
+        storageScope,
     });
 
     const panelById = useMemo(() => {

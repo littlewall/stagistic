@@ -93,6 +93,6 @@ describe('AppLayout', () => {
         expect(closeButton).toBeDefined();
 
         await page.elementLocator(closeButton!).click();
-        await waitFor(() => document.querySelector<HTMLDialogElement>('dialog')?.open === false);
+        await waitFor(() => document.querySelector<HTMLDialogElement>('dialog') === null);
     });
 });
