@@ -41,11 +41,15 @@ const forcePaginationRecalc = (editor: TiptapEditor) => {
     (editor.commands as PaginationCommands).forcePaginationRecalc?.();
 };
 
-const resolveInitialSelection = (editor: TiptapEditor): Selection => {
-    let firstScenePosition: number | null = null;
+const resolveInitialSelection = (
+    editor: TiptapEditor,
+    placeAtSceneEnd = false,
+): Selection => {
+    let firstSceneStart: number | null = null;
+    let firstSceneEnd: number | null = null;
 
     editor.state.doc.descendants((node, pos) => {
-        if (firstScenePosition !== null) {
+        if (firstSceneEnd !== null) {
             return false;
         }
 
@@ -53,16 +57,19 @@ const resolveInitialSelection = (editor: TiptapEditor): Selection => {
             return true;
         }
 
-        firstScenePosition = pos + 1;
+        firstSceneStart = pos + 1;
+        firstSceneEnd = pos + node.nodeSize - 1;
 
         return false;
     });
 
-    if (firstScenePosition === null) {
+    if (firstSceneStart === null || firstSceneEnd === null) {
         return TextSelection.atStart(editor.state.doc);
     }
 
-    return TextSelection.near(editor.state.doc.resolve(firstScenePosition), 1);
+    const position = placeAtSceneEnd ? firstSceneEnd : firstSceneStart;
+
+    return TextSelection.near(editor.state.doc.resolve(position), placeAtSceneEnd ? -1 : 1);
 };
 
 /*
@@ -264,7 +271,7 @@ export const useEditorLifecycle = ({
         if (!isRestoredSurface) {
             instance.view.dispatch(
                 instance.state.tr
-                    .setSelection(resolveInitialSelection(instance))
+                    .setSelection(resolveInitialSelection(instance, autoFocus))
                     .setMeta('preventUpdate', true)
                     .setMeta('addToHistory', false),
             );
@@ -297,6 +304,7 @@ export const useEditorLifecycle = ({
             revision: revisionRef.current,
         });
     }, [
+        autoFocus,
         instance,
         initialSerialized,
         initialValue,
@@ -326,7 +334,7 @@ export const useEditorLifecycle = ({
             return;
         }
 
-        instance.commands.focus(resolveInitialSelection(instance).from);
+        instance.commands.focus(resolveInitialSelection(instance, true).from);
     }, [autoFocus, instance]);
 
     useHotkey('Mod+S', () => {

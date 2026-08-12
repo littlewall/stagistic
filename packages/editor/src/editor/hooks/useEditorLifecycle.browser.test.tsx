@@ -23,6 +23,16 @@ type LifecycleTestWindow = Window & {__lifecycleTestEditor?: Editor | null};
 
 const mountedRoots: Root[] = [];
 
+const emptySceneDocument: ScriptDocument = {
+    type: 'doc',
+    content: [
+        {
+            type: 'scene',
+            attrs: {id: 'scene-1'},
+        },
+    ],
+};
+
 const EditorProbe = () => {
     const editor = useEditorInstance();
 
@@ -55,6 +65,7 @@ const poll = async <T, >(get: () => T | null | undefined, label: string): Promis
 
 const renderEditor = (
     initialValue: ScriptDocument = createDefaultScriptDocument('scene-1'),
+    autoFocus = true,
 ) => {
     const host = document.createElement('div');
 
@@ -67,7 +78,7 @@ const renderEditor = (
     root.render(
         <ScriptEditor
             document={{initialValue}}
-            layout={{autoFocus: true}}
+            layout={{autoFocus}}
         >
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
@@ -101,7 +112,26 @@ describe('useEditorLifecycle', () => {
 
         expect(activeBlock.blockType).toBe('scene');
         expect(activeBlock.id).toBe('scene-1');
+        expect(activeBlock.node.textContent).toBe('SCENE ONE');
+        expect(editor.state.selection.$from.parentOffset).toBe('SCENE ONE'.length);
         expect(document.activeElement).toBe(editor.view.dom);
+    });
+
+    it('keeps the initial selection at the scene start without autofocus', async () => {
+        renderEditor(createDefaultScriptDocument('scene-1'), false);
+
+        const editor = await poll(
+            () => (window as LifecycleTestWindow).__lifecycleTestEditor,
+            'editor instance',
+        );
+
+        await poll(() => {
+            const block = getActiveScriptBlockFromState(editor.state);
+
+            return block?.blockType === 'scene' ? block : null;
+        }, 'initial scene selection');
+
+        expect(editor.state.selection.$from.parentOffset).toBe(0);
     });
 
     it('does not make Undo available right after a script loads', async () => {
@@ -122,7 +152,7 @@ describe('useEditorLifecycle', () => {
     });
 
     it('renders a quiet prompt in the active empty scene', async () => {
-        renderEditor();
+        renderEditor(emptySceneDocument);
 
         const placeholderBlock = await poll(
             () => document.querySelector<HTMLElement>('[data-placeholder]'),
@@ -186,7 +216,7 @@ describe('useEditorLifecycle', () => {
     });
 
     it('dismisses the prompt after the first editor interaction', async () => {
-        renderEditor();
+        renderEditor(emptySceneDocument);
 
         const placeholderBlock = await poll(
             () => document.querySelector<HTMLElement>('[data-placeholder]'),
@@ -199,7 +229,7 @@ describe('useEditorLifecycle', () => {
     });
 
     it('dismisses the prompt after the first keyboard interaction', async () => {
-        renderEditor();
+        renderEditor(emptySceneDocument);
 
         await poll(
             () => document.querySelector<HTMLElement>('[data-placeholder]'),

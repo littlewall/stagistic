@@ -15,7 +15,7 @@ describe('shouldAutoFocusInitialScript', () => {
         expect(shouldAutoFocusInitialScript(createDefaultScriptDocument('scene-1'))).toBe(true);
     });
 
-    it('treats an empty one-act script as ready for writing', () => {
+    it('treats the untouched one-act template as ready for writing', () => {
         expect(shouldAutoFocusInitialScript(createActlessScriptDocument('scene-1'))).toBe(true);
     });
 
