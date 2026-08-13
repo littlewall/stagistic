@@ -1,3 +1,5 @@
+import '@stagistic/ui/styles/base.css';
+
 import type {ScriptSummary} from '@stagistic/app-core';
 import {createRoot, type Root} from 'react-dom/client';
 import {MemoryRouter} from 'react-router-dom';
@@ -10,8 +12,8 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
-import {HomeRoute} from './HomeRoute';
 import {createExampleScript} from './example-script/createExampleScript';
+import {HomeRoute} from './HomeRoute';
 
 const {
     headerProps,
@@ -104,6 +106,26 @@ const findButton = (label: string) => {
         .find(button => button.textContent?.includes(label));
 };
 
+const expectSubtlePrimaryAction = async (
+    primary: HTMLButtonElement,
+    secondary: HTMLButtonElement,
+) => {
+    await userEvent.hover(document.querySelector('h1') as HTMLHeadingElement);
+    await new Promise(resolve => window.setTimeout(resolve, 200));
+
+    const primaryIcon = primary.querySelector('svg');
+    const secondaryIcon = secondary.querySelector('svg');
+
+    expect(getComputedStyle(primary).backgroundColor)
+        .toBe(getComputedStyle(secondary).backgroundColor);
+    expect(getComputedStyle(primary).color)
+        .toBe(getComputedStyle(secondary).color);
+    expect(getComputedStyle(primary).borderTopColor)
+        .not.toBe(getComputedStyle(secondary).borderTopColor);
+    expect(getComputedStyle(primaryIcon as SVGElement).backgroundColor)
+        .not.toBe(getComputedStyle(secondaryIcon as SVGElement).backgroundColor);
+};
+
 afterEach(() => {
     roots.forEach(root => root.unmount());
     roots.length = 0;
@@ -143,6 +165,19 @@ describe('HomeRoute', () => {
         expect(modalActions.openNewScript).toHaveBeenCalledTimes(1);
         expect(modalActions.openImportScript).toHaveBeenCalledTimes(1);
         await expect.poll(() => vi.mocked(createExampleScript).mock.calls).toHaveLength(1);
+    });
+
+    it('prioritizes the example action in an empty library', async () => {
+        mountHome();
+        await waitForText('No scripts yet.');
+
+        const newScript = findButton('New script');
+        const exampleScript = findButton('Create example script');
+
+        await expectSubtlePrimaryAction(
+            exampleScript as HTMLButtonElement,
+            newScript as HTMLButtonElement,
+        );
     });
 
     it('replaces the home page with a full-page loader while creating an example script', async () => {
@@ -186,5 +221,35 @@ describe('HomeRoute', () => {
         expect(document.body.textContent).not.toContain('Continue writing');
         expect(document.body.textContent).not.toContain('Recently edited');
         expect(document.body.textContent).not.toContain('All scripts');
+    });
+
+    it('prioritizes a new script and removes the example action from a populated library', async () => {
+        scriptsState.summaries = [
+            {
+                id: 'script-1',
+                title: 'One draft',
+                subtitle: null,
+                activeBlockId: null,
+                createdAt: 1,
+                updatedAt: 2,
+            },
+        ];
+
+        mountHome();
+        await waitForText('One draft');
+
+        const newScript = findButton('New script');
+        const importScript = findButton('Import script');
+        const startActions = document.querySelector<HTMLElement>(
+            '[role="group"][aria-label="Start a script"]',
+        );
+
+        expect(findButton('Create example script')).toBeUndefined();
+        expect(getComputedStyle(startActions as HTMLElement).gridTemplateColumns.split(' '))
+            .toHaveLength(2);
+        await expectSubtlePrimaryAction(
+            newScript as HTMLButtonElement,
+            importScript as HTMLButtonElement,
+        );
     });
 });
