@@ -410,12 +410,16 @@
     border-radius: var(--radius-sm);
 
     &:focus-visible {
-        outline: 2px solid color-mix(in oklch, var(--character-color) 48%, var(--color-text));
-        outline-offset: 1px;
+        outline: none;
     }
 
     &::placeholder {
         color: var(--color-text-muted);
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: 2px solid color-mix(in oklch, var(--character-color) 48%, var(--color-text));
+        outline-offset: 1px;
     }
 }
 

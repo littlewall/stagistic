@@ -16,13 +16,8 @@
         background: var(--input-hover-bg, var(--select-button-hover-bg));
     }
 
-    &:focus {
-        border-color: var(--color-surface-accent);
-    }
-
     &:focus-visible {
-        outline: var(--focus-ring);
-        outline-offset: var(--focus-ring-offset);
+        outline: none;
     }
 
     &:disabled {
@@ -33,6 +28,15 @@
     &::placeholder {
         color: var(--color-text-placeholder);
         opacity: 1;
+    }
+
+    &[data-focused] {
+        border-color: var(--color-surface-accent);
+    }
+
+    &[data-focus-visible] {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
     }
 
     &[data-size = 'sm'] {

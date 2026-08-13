@@ -1,3 +1,5 @@
+import '../../../styles/tokens.css';
+
 import {
     useState,
 } from 'react';
@@ -9,7 +11,10 @@ import {
     it,
     vi,
 } from 'vite-plus/test';
-import {page} from 'vite-plus/test/browser';
+import {
+    page,
+    userEvent,
+} from 'vite-plus/test/browser';
 
 import {MultiComboBox} from './MultiComboBox';
 
@@ -99,6 +104,32 @@ afterEach(() => {
 });
 
 describe('MultiComboBox', () => {
+    it('shows its focus ring only for keyboard navigation', async () => {
+        renderComboBox();
+
+        const input = await waitForElement<HTMLInputElement>('[placeholder="Select places"]');
+        const selected = input.parentElement?.parentElement;
+
+        if (!selected) {
+            throw new Error('Expected selected tags container');
+        }
+
+        await page.elementLocator(input).click();
+
+        expect(window.getComputedStyle(selected).outlineStyle).toBe('none');
+
+        input.blur();
+
+        const keyboardStart = document.createElement('button');
+
+        document.body.prepend(keyboardStart);
+        keyboardStart.focus();
+        await userEvent.tab();
+
+        expect(document.activeElement).toBe(input);
+        expect(window.getComputedStyle(selected).outlineStyle).toBe('solid');
+    });
+
     it('selects and removes multiple options', async () => {
         const onChange = renderComboBox();
         const input = await waitForElement<HTMLInputElement>('[placeholder="Select places"]');
@@ -188,6 +219,7 @@ describe('MultiComboBox', () => {
         document.body.appendChild(host);
         root.render(<TestCase />);
         mountedRoots.push(root);
+
         const input = await waitForElement<HTMLInputElement>('[placeholder="Select places"]');
 
         await page.elementLocator(input).click();

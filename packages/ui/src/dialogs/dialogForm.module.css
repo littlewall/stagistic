@@ -31,6 +31,10 @@
     }
 
     &:focus-visible {
+        outline: none;
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);
     }

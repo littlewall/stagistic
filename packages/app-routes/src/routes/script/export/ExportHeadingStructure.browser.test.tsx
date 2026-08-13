@@ -96,6 +96,22 @@ describe('export accessibility structure', () => {
         expect(preview?.querySelector('h1, h2, h3, h4, h5, h6')).not.toBeNull();
     });
 
+    it('places the download action in the PDF preview toolbar', async () => {
+        mountExport();
+
+        const preview = await poll(
+            () => document.querySelector<HTMLElement>('[aria-label="PDF preview"]'),
+            'PDF preview',
+        );
+        const controlPanelHeading = document.querySelector('h1');
+        const controlPanelHeader = controlPanelHeading?.parentElement;
+        const previewDownload = Array.from(preview.querySelectorAll('button'))
+            .find(button => button.textContent?.trim() === 'Download PDF');
+
+        expect(previewDownload).not.toBeUndefined();
+        expect(controlPanelHeader?.textContent).not.toContain('Download PDF');
+    });
+
     it('does not reuse the same heading text for unrelated Characters controls', async () => {
         mountExport();
 

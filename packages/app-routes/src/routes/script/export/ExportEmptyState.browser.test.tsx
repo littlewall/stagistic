@@ -16,7 +16,6 @@ import {
     vi,
 } from 'vite-plus/test';
 
-import {ExportDownloadButton} from './ExportDownloadButton';
 import {ExportPreview} from './ExportPreview';
 import {
     ExportProvider,
@@ -57,7 +56,6 @@ const mountExport = (doc: ScriptDocument) => {
     root.render(
         <ExportProvider script={toScriptData(doc)} settings={DEFAULT_EDITOR_SETTINGS}>
             <ArtifactProbe />
-            <ExportDownloadButton />
             <ExportPreview />
         </ExportProvider>,
     );

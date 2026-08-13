@@ -9,9 +9,9 @@
 }
 
 .toolbar {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
-    justify-content: space-between;
     min-height: var(--control-height-lg);
     padding: 0 var(--space-xl);
     font-size: var(--font-size-sm);
@@ -21,15 +21,65 @@
 }
 
 .heading {
-    margin: 0;
-    font: inherit;
-    color: inherit;
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    white-space: nowrap;
+    clip: rect(0 0 0 0);
+    border: 0;
 }
 
+.pageControls,
 .zoomControls {
     display: inline-flex;
     gap: var(--space-sm);
     align-items: center;
+}
+
+.zoomControls {
+    justify-self: start;
+}
+
+.pageControls {
+    justify-self: center;
+}
+
+.toolbarActions {
+    justify-self: end;
+}
+
+.pageIndicator {
+    display: inline-flex;
+    gap: var(--space-sm);
+    align-items: center;
+    color: var(--color-text);
+    white-space: nowrap;
+}
+
+.pageNumberInput {
+    width: 3rem;
+    text-align: center;
+    appearance: textfield;
+
+    &::-webkit-inner-spin-button,
+    &::-webkit-outer-spin-button {
+        margin: 0;
+        appearance: none;
+    }
+}
+
+.toolbarButton {
+    flex: 0 0 auto;
+    width: 28px;
+    height: 28px;
+}
+
+.toolbarButton svg {
+    width: 14px;
+    height: 14px;
 }
 
 .zoomControls button {
