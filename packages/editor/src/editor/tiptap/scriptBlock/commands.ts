@@ -14,6 +14,7 @@ import {
     type ActiveScriptBlock,
     type BlockNodeType,
     getActiveScriptBlockFromState,
+    isScriptBlockNodeName,
     normalizeBlockNodeType,
 } from '../scriptCore';
 import {normalizeFormerStageDirectionContent} from './normalizeStageDirectionContent';
@@ -151,6 +152,72 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
     );
     tr = normalizeCharacterMusicText(tr, normalized, activeBlock.pos);
     tr = setSelectionNearBlockStart(tr, activeBlock.pos);
+    tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
+    editor.view.dispatch(tr.scrollIntoView());
+    focusEditor(editor);
+
+    return true;
+};
+
+/**
+ * Bulk block-type change for a multi-block selection (the toolbar's
+ * "Selected blocks" dropdown). Each block type is its own ProseMirror node
+ * type, so the node type itself must be swapped via setNodeMarkup's `type`
+ * argument for every matching block — not just the `blockType` attribute —
+ * otherwise the node keeps behaving as its old type (persistence, indexing,
+ * casing) while only rendering as the new one.
+ */
+export const updateBlockTypeForSelection = (editor: Editor, blockType: BlockNodeType): boolean => {
+    const normalized = normalizeBlockNodeType(blockType);
+    const nodes = editor.schema.nodes as Record<string, NodeType>;
+    const nodeType = resolveNodeTypeForBlockType(nodes, normalized);
+
+    if (!nodeType) {
+        return false;
+    }
+
+    const {state} = editor;
+    const {from, to} = state.selection;
+    let tr = state.tr;
+    let didChange = false;
+
+    state.doc.nodesBetween(from, to, (node, pos) => {
+        if (!isScriptBlockNodeName(node.type.name)) {
+            return true;
+        }
+
+        const previousBlockType = normalizeBlockNodeType(
+            resolveScriptBlockNodeType(node.type.name) ?? (node.attrs.blockType as BlockNodeType),
+        );
+
+        if (previousBlockType === 'act' || previousBlockType === normalized) {
+            return false;
+        }
+
+        const attributes = {
+            ...node.attrs,
+            blockType: normalized,
+            characterRefs:
+                previousBlockType === 'stageDirection' && normalized !== 'stageDirection'
+                    ? null
+                    : (node.attrs.characterRefs as Record<string, string> | null),
+        };
+
+        const mappedPos = tr.mapping.map(pos);
+
+        tr = tr.setNodeMarkup(mappedPos, nodeType, attributes);
+        tr = stripLeadingActionTabs(tr, previousBlockType, normalized, mappedPos + 1, node.textContent ?? '');
+        tr = normalizeFormerStageDirectionContent(tr, editor.schema, previousBlockType, normalized, pos, node);
+        tr = normalizeCharacterMusicText(tr, normalized, pos);
+        didChange = true;
+
+        return false;
+    });
+
+    if (!didChange) {
+        return false;
+    }
+
     tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
     editor.view.dispatch(tr.scrollIntoView());
     focusEditor(editor);

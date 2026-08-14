@@ -14,7 +14,11 @@ import {
 
 import type {BlockNodeType} from '../scriptCore';
 import {getActiveScriptBlockFromState} from '../scriptCore';
-import {setBlockTypeWithSelection, updateBlockType} from './commands';
+import {
+    setBlockTypeWithSelection,
+    updateBlockType,
+    updateBlockTypeForSelection,
+} from './commands';
 
 const createBlockSpec = (blockType: BlockNodeType) => ({
     group: 'block',
@@ -30,7 +34,7 @@ const createBlockSpec = (blockType: BlockNodeType) => ({
 
 const schema = new Schema({
     nodes: {
-        doc: {content: '(character | stageDirection | dialogue)+'},
+        doc: {content: '(character | stageDirection | dialogue | lyrics | act)+'},
         text: {group: 'inline'},
         [MUSIC_START_NODE_NAME]: {
             group: 'inline',
@@ -44,6 +48,8 @@ const schema = new Schema({
         character: createBlockSpec('character'),
         stageDirection: createBlockSpec('stageDirection'),
         dialogue: createBlockSpec('dialogue'),
+        lyrics: createBlockSpec('lyrics'),
+        act: createBlockSpec('act'),
     },
     marks: {
         [CHARACTER_TAG_MARK_NAME]: {
@@ -96,6 +102,62 @@ const createEditor = (
     return {
         editor,
         getBlock: () => state.doc.firstChild,
+    };
+};
+
+const createMultiBlockEditor = (
+    blocks: Array<{blockType: BlockNodeType, text: string, id: string}>,
+) => {
+    const nodes = blocks.map(({blockType, text, id}) => schema.node(
+        blockType,
+        {
+            blockType,
+            id,
+            characterRefs: null,
+        },
+        text ? [schema.text(text)] : undefined,
+    ));
+    const doc = schema.node('doc', null, nodes);
+    const lastNode = nodes.at(-1);
+
+    if (!lastNode) {
+        throw new Error('Expected at least one block');
+    }
+
+    const to = doc.content.size - lastNode.nodeSize + 1;
+    let state = EditorState.create({
+        schema,
+        doc,
+        selection: TextSelection.create(doc, 1, to),
+    });
+    let dispatchCount = 0;
+    const editor = {
+        get state() {
+            return state;
+        },
+        schema,
+        view: {
+            focus: () => {},
+            dispatch: (tr: EditorState['tr']) => {
+                dispatchCount += 1;
+                state = state.apply(tr);
+            },
+        },
+        commands: {
+            focus: () => true,
+        },
+    } as unknown as TiptapEditor;
+
+    return {
+        editor,
+        getBlocks: () => {
+            const result: ProseMirrorNode[] = [];
+
+            state.doc.forEach(node => result.push(node));
+
+            return result;
+        },
+        getDispatchCount: () => dispatchCount,
     };
 };
 
@@ -157,5 +219,72 @@ describe('updateBlockType', () => {
         expect(setBlockTypeWithSelection(editor, block, 'dialogue')).toBe(true);
         expect(getBlock()?.textContent).toBe('Sound');
         expect(getBlock()?.firstChild?.isText).toBe(true);
+    });
+});
+
+describe('updateBlockTypeForSelection', () => {
+    it('changes the actual node type (not just the blockType attribute) for every block in the selection', () => {
+        const {editor, getBlocks} = createMultiBlockEditor([
+            {blockType: 'dialogue', text: 'Hello there', id: 'block-1'},
+            {blockType: 'dialogue', text: 'General Kenobi', id: 'block-2'},
+        ]);
+
+        expect(updateBlockTypeForSelection(editor, 'lyrics')).toBe(true);
+
+        const blocks = getBlocks();
+
+        expect(blocks.map(block => block.type.name)).toEqual(['lyrics', 'lyrics']);
+        expect(blocks.map(block => block.attrs.blockType)).toEqual(['lyrics', 'lyrics']);
+        expect(blocks.map(block => block.textContent)).toEqual(['Hello there', 'General Kenobi']);
+    });
+
+    it('dispatches a single transaction so the bulk change is one undo step', () => {
+        const {editor, getDispatchCount} = createMultiBlockEditor([
+            {blockType: 'dialogue', text: 'Hello there', id: 'block-1'},
+            {blockType: 'dialogue', text: 'General Kenobi', id: 'block-2'},
+            {blockType: 'dialogue', text: 'You are a bold one', id: 'block-3'},
+        ]);
+
+        updateBlockTypeForSelection(editor, 'lyrics');
+
+        expect(getDispatchCount()).toBe(1);
+    });
+
+    it('converts mixed dialogue and stage-direction blocks and resets characterRefs from a former stage direction', () => {
+        const {editor, getBlocks} = createMultiBlockEditor([
+            {blockType: 'dialogue', text: 'Hello there', id: 'block-1'},
+            {blockType: 'stageDirection', text: '\tGeneral Kenobi', id: 'block-2'},
+        ]);
+
+        expect(updateBlockTypeForSelection(editor, 'lyrics')).toBe(true);
+
+        const blocks = getBlocks();
+
+        expect(blocks.map(block => block.type.name)).toEqual(['lyrics', 'lyrics']);
+        // The leading action-indent tab from the former stage direction is stripped, same as a single-block change.
+        expect(blocks[1].textContent).toBe('General Kenobi');
+    });
+
+    it('leaves blocks whose type is not eligible for bulk change (act) untouched', () => {
+        const {editor, getBlocks} = createMultiBlockEditor([
+            {blockType: 'act', text: 'ACT ONE', id: 'block-1'},
+            {blockType: 'dialogue', text: 'Hello there', id: 'block-2'},
+        ]);
+
+        expect(updateBlockTypeForSelection(editor, 'lyrics')).toBe(true);
+
+        const blocks = getBlocks();
+
+        expect(blocks.map(block => block.type.name)).toEqual(['act', 'lyrics']);
+    });
+
+    it('does nothing and returns false when no block in the selection can change', () => {
+        const {editor, getBlocks, getDispatchCount} = createMultiBlockEditor([
+            {blockType: 'lyrics', text: 'Hello there', id: 'block-1'},
+        ]);
+
+        expect(updateBlockTypeForSelection(editor, 'lyrics')).toBe(false);
+        expect(getDispatchCount()).toBe(0);
+        expect(getBlocks().map(block => block.type.name)).toEqual(['lyrics']);
     });
 });
