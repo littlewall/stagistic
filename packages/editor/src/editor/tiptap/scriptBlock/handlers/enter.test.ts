@@ -101,6 +101,56 @@ const createEditor = (blockType: BlockNodeType, text = '', cursorOffset = 0, blo
     return editor;
 };
 
+/*
+ * Some Enter decisions (an aside resuming the flow it interrupted) can only be
+ * made by looking at the blocks around the caret, so those cases need a real
+ * multi-block document. The caret starts at the end of the last block.
+ */
+const createMultiBlockEditor = (blocks: Array<{blockType: BlockNodeType, text: string}>) => {
+    const nodes = blocks.map(({blockType, text}, index) => schema.node(
+        blockType,
+        {blockType, id: `block-${index + 1}`},
+        text ? [schema.text(text)] : undefined,
+    ));
+    const doc = schema.node('doc', null, nodes);
+    const lastNode = nodes.at(-1);
+
+    if (!lastNode) {
+        throw new Error('Expected at least one block');
+    }
+
+    const selectionPos = doc.content.size - lastNode.nodeSize + 1 + lastNode.textContent.length;
+    let state = EditorState.create({
+        schema,
+        doc,
+        selection: TextSelection.create(doc, selectionPos),
+    });
+
+    return {
+        get state() {
+            return state;
+        },
+        schema,
+        view: {
+            focus: () => {},
+            dispatch: (tr: EditorState['tr']) => {
+                state = state.apply(tr);
+            },
+        },
+        commands: {
+            focus: () => true,
+            deleteSelection: () => {
+                state = state.apply(state.tr.deleteSelection());
+
+                return true;
+            },
+            splitBlock: () => splitBlock(state, tr => {
+                state = state.apply(tr);
+            }),
+        },
+    } as unknown as TiptapEditor;
+};
+
 const getBlockTypes = (editor: TiptapEditor) => {
     const blockTypes: string[] = [];
 
@@ -231,6 +281,53 @@ describe('handleEnter', () => {
 
         expect(handleEnter(editor, createEnterEvent(), {lyrics: 'scene'})).toBe(true);
         expect(getBlockTypes(editor)).toEqual(['character']);
+    });
+
+    it('resumes lyrics when Enter fires at the end of an aside that interrupted a song', () => {
+        const editor = createMultiBlockEditor([
+            {blockType: 'lyrics', text: 'La la la'},
+            {blockType: 'aside', text: 'quietly'},
+        ]);
+
+        expect(handleEnter(editor, createEnterEvent(), {aside: 'dialogue'})).toBe(true);
+        expect(getBlockTypes(editor)).toEqual(['lyrics', 'aside', 'lyrics']);
+    });
+
+    it('skips a run of asides when working out which flow to resume', () => {
+        const editor = createMultiBlockEditor([
+            {blockType: 'lyrics', text: 'La la la'},
+            {blockType: 'aside', text: 'first'},
+            {blockType: 'aside', text: 'second'},
+        ]);
+
+        expect(handleEnter(editor, createEnterEvent(), {aside: 'dialogue'})).toBe(true);
+        expect(getBlockTypes(editor)).toEqual(['lyrics', 'aside', 'aside', 'lyrics']);
+    });
+
+    it('keeps the configured next type for an aside that interrupted spoken dialogue', () => {
+        const editor = createMultiBlockEditor([
+            {blockType: 'dialogue', text: 'Hello there'},
+            {blockType: 'aside', text: 'quietly'},
+        ]);
+
+        expect(handleEnter(editor, createEnterEvent(), {aside: 'character'})).toBe(true);
+        expect(getBlockTypes(editor)).toEqual(['dialogue', 'aside', 'character']);
+    });
+
+    it('keeps the aside type when Enter splits it mid-text', () => {
+        const editor = createMultiBlockEditor([
+            {blockType: 'lyrics', text: 'La la la'},
+            {blockType: 'aside', text: 'quietly'},
+        ]);
+
+        // Four characters back from the end of "quietly", i.e. "qui|etly".
+        editor.view.dispatch(editor.state.tr.setSelection(
+            TextSelection.create(editor.state.doc, editor.state.doc.content.size - 5),
+        ));
+
+        expect(handleEnter(editor, createEnterEvent())).toBe(true);
+        expect(getBlockTypes(editor)).toEqual(['lyrics', 'aside', 'aside']);
+        expect(getBlockTexts(editor)).toEqual(['La la la', 'qui', 'etly']);
     });
 
     it('splitting mid-text on act keeps the act type instead of jumping to scene', () => {

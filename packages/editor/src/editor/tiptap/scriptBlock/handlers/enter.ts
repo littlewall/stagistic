@@ -26,6 +26,7 @@ import {
     createBlockContext,
     isEmptyDialogueLikeBlock,
 } from '../context';
+import {resolveAsideFlowTarget} from './tab';
 import {
     type BlockNextElementMap,
     type HandlerMap,
@@ -90,13 +91,34 @@ export const resolveParentheticalTabTarget = (editor: Editor, blockPos: number):
         ?? 'dialogue';
 };
 
-const resolveNextTypeOnEnter = (
+export const resolveNextTypeOnEnter = (
     blockType: BlockNodeType,
     blockNextElements?: BlockNextElementMap,
 ): BlockNodeType => {
     const configured = blockNextElements?.[blockType];
 
     return configured ?? normalizeBlockNodeType(getEnterFallback(blockType));
+};
+
+/*
+ * An aside interrupts a dialogue or a lyrics flow, and Enter past its end has
+ * to resume whatever that flow was. The configured next element can't express
+ * "carry on with what was being sung", so the document lookup only overrides
+ * the setting where it knows something the setting cannot: a lyrics flow.
+ * Dialogue flows keep honouring the configured type.
+ */
+export const resolveAdvanceTypeOnEnter = (
+    context: BlockContext,
+    blockNextElements?: BlockNextElementMap,
+): BlockNodeType => {
+    const isResumingLyrics = context.block.blockType === 'aside'
+        && resolveAsideFlowTarget(context.editor.state.doc, context.block.pos) === 'lyrics';
+
+    if (isResumingLyrics) {
+        return 'lyrics';
+    }
+
+    return resolveNextTypeOnEnter(context.block.blockType, blockNextElements);
 };
 
 /*
@@ -110,7 +132,7 @@ const resolveSplitType = (
     context: BlockContext,
     blockNextElements?: BlockNextElementMap,
 ): BlockNodeType => context.isAtEnd
-    ? resolveNextTypeOnEnter(context.block.blockType, blockNextElements)
+    ? resolveAdvanceTypeOnEnter(context, blockNextElements)
     : context.block.blockType;
 
 const insertBlockAfter = (
@@ -220,7 +242,7 @@ export const handleEnter = (
     if (!event.shiftKey && wasSelectionEmpty && hasOnlyNonTextContent) {
         return insertBlockAfter(
             context,
-            resolveNextTypeOnEnter(block.blockType, blockNextElements),
+            resolveAdvanceTypeOnEnter(context, blockNextElements),
         );
     }
 

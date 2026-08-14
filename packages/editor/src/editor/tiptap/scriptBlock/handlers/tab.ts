@@ -93,21 +93,47 @@ const findPrecedingFlowBlockType = (doc: ProseMirrorNode, blockPos: number): Blo
     return null;
 };
 
-const toggleAsideTarget = (context: BlockContext): BlockNodeType | null => {
-    const {blockType} = context.block;
+/**
+ * The flow an aside interrupted, and therefore the type both Tab (toggling the
+ * aside back) and Enter (continuing past it) should resume. One resolver for
+ * one question, so the two keys can't disagree about the same block.
+ */
+export const resolveAsideFlowTarget = (
+    doc: ProseMirrorNode,
+    blockPos: number,
+): BlockNodeType => {
+    const flowOrigin = findPrecedingFlowBlockType(doc, blockPos);
 
+    return flowOrigin === 'lyrics' ? 'lyrics' : 'dialogue';
+};
+
+/**
+ * The block a plain Tab would switch this one to, or null when Tab does
+ * something else here (stage direction indents; everything else is inert).
+ * Exported so the status bar can advertise the same destination Tab will
+ * actually produce.
+ */
+export const resolveAsideToggleTarget = (
+    doc: ProseMirrorNode,
+    blockType: BlockNodeType,
+    blockPos: number,
+): BlockNodeType | null => {
     if (blockType === 'dialogue' || blockType === 'lyrics') {
         return 'aside';
     }
 
     if (blockType === 'aside') {
-        const flowOrigin = findPrecedingFlowBlockType(context.editor.state.doc, context.block.pos);
-
-        return flowOrigin === 'lyrics' ? 'lyrics' : 'dialogue';
+        return resolveAsideFlowTarget(doc, blockPos);
     }
 
     return null;
 };
+
+const toggleAsideTarget = (context: BlockContext): BlockNodeType | null => resolveAsideToggleTarget(
+    context.editor.state.doc,
+    context.block.blockType,
+    context.block.pos,
+);
 
 const handleQuickToggle = (context: BlockContext, event: KeyboardEvent) => {
     const nextBlockType = getBlockQuickToggleTarget(context.block.blockType);

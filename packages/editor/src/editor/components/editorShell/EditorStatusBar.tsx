@@ -11,10 +11,19 @@ import {useState} from 'react';
 import {BLOCKS, BLOCKS_WITHOUT_ACT} from '../../blocks/blockRegistry';
 import {getBlockQuickToggleTarget} from '../../model/blockQuickToggle';
 import {
+    type EnterHintBlockState,
+    resolveEnterHint,
+} from '../../model/enterHint';
+import {
     formatBlockCycleShortcutLabel,
     formatBlockQuickToggleShortcutLabel,
     formatShiftEnterShortcutLabel,
+    formatTabShortcutLabel,
 } from '../../model/formatBlockShortcut';
+import {
+    resolveAsideFlowTarget,
+    resolveAsideToggleTarget,
+} from '../../tiptap/scriptBlock/handlers/tab';
 import {
     getActiveScriptBlockFromState,
     isScriptBlockContentEmpty,
@@ -38,35 +47,51 @@ type EditorStatusBarSegment = {
     description: string,
 };
 
+export interface EditorStatusBarBlockState extends EnterHintBlockState {
+    asideToggleTarget: ScriptBlockNodeType | null,
+}
+
 const getLabel = (type: ScriptBlockNodeType) => labelByType.get(type) ?? type;
 
 export const getEditorStatusBarSegments = (
     activeType: ScriptBlockNodeType | null,
     blockNextElements: Partial<Record<ScriptBlockNodeType, ScriptBlockNodeType>>,
-    isActiveBlockEmpty: boolean,
+    blockState: EditorStatusBarBlockState,
 ): EditorStatusBarSegment[] => {
     if (!activeType) {
         return [];
     }
 
     const result: EditorStatusBarSegment[] = [];
-    const nextType = isActiveBlockEmpty && DIALOGUE_LIKE_TYPES.has(activeType)
-        ? 'character'
-        : blockNextElements[activeType];
+    const enterHint = resolveEnterHint(activeType, blockNextElements, blockState);
+    const enterDescription = enterHint.kind === 'chooser'
+        ? 'Choose type'
+        : getLabel(enterHint.blockType);
 
-    if (nextType) {
-        result.push({
-            id: 'enter',
-            key: '⏎',
-            description: getLabel(nextType),
-        });
-    }
+    result.push({
+        id: 'enter',
+        key: '⏎',
+        description: enterDescription,
+    });
 
-    if (DIALOGUE_LIKE_TYPES.has(activeType)) {
+    /*
+     * Shift+Enter always continues the current block type, so for a block
+     * whose next element is itself (lyrics, by default) it duplicates the
+     * plain Enter hint. Only advertise the simpler chord in that case.
+     */
+    if (DIALOGUE_LIKE_TYPES.has(activeType) && getLabel(activeType) !== enterDescription) {
         result.push({
             id: 'shift-enter',
             key: formatShiftEnterShortcutLabel(),
             description: getLabel(activeType),
+        });
+    }
+
+    if (blockState.asideToggleTarget) {
+        result.push({
+            id: 'aside-toggle',
+            key: formatTabShortcutLabel(),
+            description: `Switch to ${getLabel(blockState.asideToggleTarget).toLowerCase()}`,
         });
     }
 
@@ -122,19 +147,51 @@ export const EditorStatusBar = ({
                 return null;
             }
 
+            /*
+             * Same emptiness/caret rules the Enter handler uses (see
+             * createBlockContext) so the hints can't promise something other
+             * than what the key press does.
+             */
+            const {selection} = stateEditor.state;
+            const isCollapsed = selection.empty;
+            const isEmpty = isScriptBlockContentEmpty(activeBlock.node);
+
             return {
                 type: activeBlock.blockType,
-                isEmpty: isScriptBlockContentEmpty(activeBlock.node),
+                isEmpty,
+                hasOnlyNonTextContent: !isEmpty && (activeBlock.node.textContent ?? '').trim().length === 0,
+                isAtStart: isCollapsed && selection.from === activeBlock.from,
+                isAtEnd: isCollapsed && selection.from === activeBlock.to,
+                asideFlowTarget: activeBlock.blockType === 'aside'
+                    ? resolveAsideFlowTarget(stateEditor.state.doc, activeBlock.pos)
+                    : null,
+                asideToggleTarget: resolveAsideToggleTarget(
+                    stateEditor.state.doc,
+                    activeBlock.blockType,
+                    activeBlock.pos,
+                ),
             };
         },
         equalityFn: (previous, next) => previous?.type === next?.type
-            && previous?.isEmpty === next?.isEmpty,
+            && previous?.isEmpty === next?.isEmpty
+            && previous?.hasOnlyNonTextContent === next?.hasOnlyNonTextContent
+            && previous?.isAtStart === next?.isAtStart
+            && previous?.isAtEnd === next?.isAtEnd
+            && previous?.asideFlowTarget === next?.asideFlowTarget
+            && previous?.asideToggleTarget === next?.asideToggleTarget,
     });
 
     const segments = getEditorStatusBarSegments(
         activeBlockStatus?.type ?? null,
         blockNextElements,
-        activeBlockStatus?.isEmpty ?? false,
+        {
+            isEmpty: activeBlockStatus?.isEmpty ?? false,
+            hasOnlyNonTextContent: activeBlockStatus?.hasOnlyNonTextContent ?? false,
+            isAtStart: activeBlockStatus?.isAtStart ?? false,
+            isAtEnd: activeBlockStatus?.isAtEnd ?? false,
+            asideFlowTarget: activeBlockStatus?.asideFlowTarget ?? null,
+            asideToggleTarget: activeBlockStatus?.asideToggleTarget ?? null,
+        },
     );
 
     return (
