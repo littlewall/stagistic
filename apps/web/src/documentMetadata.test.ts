@@ -67,18 +67,20 @@ describe('web document metadata', () => {
         });
     });
 
-    it('ships the theme-aware two-path favicon mark', () => {
+    it('ships the square-cropped theme-aware two-path favicon mark', () => {
         const faviconSvg = readFileSync(
             new URL('../dist/favicon.svg', import.meta.url),
             'utf8',
         );
 
-        expect(faviconSvg).toContain('viewBox="0 0 120 120"');
+        expect(faviconSvg).toContain(
+            'viewBox="9.95484 8.87608 94.88736 94.88736"',
+        );
         expect(faviconSvg.match(/<path\b/g) ?? []).toHaveLength(2);
         expect(faviconSvg).toMatch(/\.mark\s*\{\s*fill:\s*#3d2a1d/);
         expect(faviconSvg).toMatch(
             /@media\s*\(prefers-color-scheme:\s*dark\)/,
         );
-        expect(faviconSvg).toMatch(/fill:\s*#e2a05f/);
+        expect(faviconSvg).toMatch(/fill:\s*#f4f1ec/);
     });
 });
