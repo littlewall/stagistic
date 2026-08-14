@@ -58,14 +58,16 @@ export const HomeRoute = () => {
     const [isCreatingExample, setIsCreatingExample] = useState(false);
     const [exampleError, setExampleError] = useState<string | null>(null);
     const hasScripts = scriptSummaries.length > 0;
+    const showLibraryTools = scriptSummaries.length >= 5;
 
     const dashboard = useMemo(() => buildHomeDashboardModel({
         scripts: scriptSummaries,
-        query,
-        sort,
+        query: showLibraryTools ? query : '',
+        sort: showLibraryTools ? sort : 'newest',
     }), [
         query,
         scriptSummaries,
+        showLibraryTools,
         sort,
     ]);
     const openScript = useCallback((scriptId: string) => {
@@ -205,26 +207,28 @@ export const HomeRoute = () => {
                         <SubtleText className={styles.emptyLibrary}>No scripts yet.</SubtleText>
                     ) : (
                         <div className={styles.library}>
-                            <div className={styles.libraryTools}>
-                                <div className={styles.searchField}>
-                                    <SearchIcon className={styles.searchIcon} aria-hidden="true" />
-                                    <Input
-                                        type="search"
-                                        value={query}
-                                        className={styles.searchInput}
-                                        aria-label="Search scripts"
-                                        placeholder="Search by title or subtitle"
-                                        onChange={event => setQuery(event.target.value)}
+                            {showLibraryTools ? (
+                                <div className={styles.libraryTools}>
+                                    <div className={styles.searchField}>
+                                        <SearchIcon className={styles.searchIcon} aria-hidden="true" />
+                                        <Input
+                                            type="search"
+                                            value={query}
+                                            className={styles.searchInput}
+                                            aria-label="Search scripts"
+                                            placeholder="Search by title or subtitle"
+                                            onChange={event => setQuery(event.target.value)}
+                                        />
+                                    </div>
+                                    <Select
+                                        value={sort}
+                                        options={SORT_OPTIONS}
+                                        ariaLabel="Sort scripts"
+                                        className={styles.sortSelect}
+                                        onChange={value => setSort(value as ScriptSort)}
                                     />
                                 </div>
-                                <Select
-                                    value={sort}
-                                    options={SORT_OPTIONS}
-                                    ariaLabel="Sort scripts"
-                                    className={styles.sortSelect}
-                                    onChange={value => setSort(value as ScriptSort)}
-                                />
-                            </div>
+                            ) : null}
                             <ScriptListSection
                                 scripts={dashboard.scripts}
                                 onOpenScript={openScript}

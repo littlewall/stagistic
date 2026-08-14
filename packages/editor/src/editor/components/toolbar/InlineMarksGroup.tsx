@@ -3,6 +3,7 @@ import {
 } from '@stagistic/ui';
 import clsx from 'clsx';
 
+import {getToolbarShortcutLabels} from '../../model/toolbarShortcutLabels';
 import styles from '../EditorToolbar.module.css';
 import type {InlineMarksGroupProps} from './contracts';
 
@@ -24,10 +25,15 @@ export const InlineMarksGroup = ({
         onItalicMouseDown,
         onUnderlineMouseDown,
     } = actions;
+    const shortcuts = getToolbarShortcutLabels();
 
     return (
         <div className={styles.group}>
-            <Tooltip label="Undo" isDisabled={!canUndo}>
+            <Tooltip
+                label="Undo"
+                shortcut={shortcuts.undo}
+                isDisabled={!canUndo}
+            >
                 <button
                     className={styles.iconButton}
                     type="button"
@@ -38,7 +44,11 @@ export const InlineMarksGroup = ({
                     <UndoIcon aria-hidden="true" />
                 </button>
             </Tooltip>
-            <Tooltip label="Redo" isDisabled={!canRedo}>
+            <Tooltip
+                label="Redo"
+                shortcut={shortcuts.redo}
+                isDisabled={!canRedo}
+            >
                 <button
                     className={styles.iconButton}
                     type="button"
@@ -49,7 +59,7 @@ export const InlineMarksGroup = ({
                     <RedoIcon aria-hidden="true" />
                 </button>
             </Tooltip>
-            <Tooltip label="Bold">
+            <Tooltip label="Bold" shortcut={shortcuts.bold}>
                 <button
                     className={clsx(styles.iconButton, isBoldActive && styles.active)}
                     type="button"
@@ -60,7 +70,7 @@ export const InlineMarksGroup = ({
                     <BoldIcon aria-hidden="true" />
                 </button>
             </Tooltip>
-            <Tooltip label="Italic">
+            <Tooltip label="Italic" shortcut={shortcuts.italic}>
                 <button
                     className={clsx(styles.iconButton, isItalicActive && styles.active)}
                     type="button"
@@ -71,7 +81,7 @@ export const InlineMarksGroup = ({
                     <ItalicIcon aria-hidden="true" />
                 </button>
             </Tooltip>
-            <Tooltip label="Underline">
+            <Tooltip label="Underline" shortcut={shortcuts.underline}>
                 <button
                     className={clsx(styles.iconButton, isUnderlineActive && styles.active)}
                     type="button"

@@ -79,12 +79,13 @@ const mountHome = () => {
     const root = createRoot(host);
 
     document.body.appendChild(host);
-    root.render(
-        <MemoryRouter>
-            <HomeRoute />
-        </MemoryRouter>,
-    );
+
+    const render = () => root.render(<MemoryRouter><HomeRoute /></MemoryRouter>);
+
+    render();
     roots.push(root);
+
+    return render;
 };
 
 const waitForText = async (text: string) => {
@@ -105,6 +106,23 @@ const findButton = (label: string) => {
     return Array.from(document.querySelectorAll('button'))
         .find(button => button.textContent?.includes(label));
 };
+
+const scriptSummary = (id: string, title: string, updatedAt: number): ScriptSummary => ({
+    id,
+    title,
+    subtitle: null,
+    activeBlockId: null,
+    createdAt: updatedAt,
+    updatedAt,
+});
+
+const fiveScripts = [
+    scriptSummary('script-1', 'One draft', 1),
+    scriptSummary('script-2', 'Two draft', 2),
+    scriptSummary('script-3', 'Three draft', 3),
+    scriptSummary('script-4', 'Four draft', 4),
+    scriptSummary('script-5', 'Five draft', 5),
+];
 
 const expectSubtlePrimaryAction = async (
     primary: HTMLButtonElement,
@@ -198,17 +216,8 @@ describe('HomeRoute', () => {
         expect(document.querySelector('[data-testid="app-header"]')).toBeNull();
     });
 
-    it('shows each script once in a single searchable library', async () => {
-        scriptsState.summaries = [
-            {
-                id: 'script-1',
-                title: 'One draft',
-                subtitle: null,
-                activeBlockId: null,
-                createdAt: 1,
-                updatedAt: 2,
-            },
-        ];
+    it('shows one script once without unnecessary library tools', async () => {
+        scriptsState.summaries = [scriptSummary('script-1', 'One draft', 2)];
 
         mountHome();
         await waitForText('One draft');
@@ -217,23 +226,56 @@ describe('HomeRoute', () => {
             .filter(button => button.textContent?.includes('One draft'));
 
         expect(scriptButtons).toHaveLength(1);
-        expect(document.querySelector('input[type="search"]')).toBeTruthy();
+        expect(document.querySelector('input[type="search"]')).toBeNull();
+        expect(document.querySelector('[aria-label="Sort scripts"]')).toBeNull();
         expect(document.body.textContent).not.toContain('Continue writing');
         expect(document.body.textContent).not.toContain('Recently edited');
         expect(document.body.textContent).not.toContain('All scripts');
     });
 
+    it('shows library tools for five scripts', async () => {
+        scriptsState.summaries = fiveScripts;
+
+        mountHome();
+        await waitForText('Five draft');
+
+        expect(document.querySelector('input[type="search"]')).toBeTruthy();
+        expect(document.querySelector('[aria-label="Sort scripts"]')).toBeTruthy();
+    });
+
+    it('ignores hidden library tools when the library shrinks below five scripts', async () => {
+        scriptsState.summaries = fiveScripts;
+
+        const rerender = mountHome();
+
+        await waitForText('Five draft');
+
+        await userEvent.click(document.querySelector('[aria-label="Sort scripts"]') as HTMLButtonElement);
+        await userEvent.click(findButton('Title A–Z') as HTMLButtonElement);
+        await userEvent.type(
+            document.querySelector('input[type="search"]') as HTMLInputElement,
+            'No match',
+        );
+        await waitForText('No scripts match');
+
+        scriptsState.summaries = fiveScripts.slice(0, 4);
+        rerender();
+
+        await waitForText('Four draft');
+        expect(document.querySelector('input[type="search"]')).toBeNull();
+        expect(Array.from(document.querySelectorAll('[aria-label="Scripts"] button'))
+            .filter(button => button.textContent?.includes('draft'))
+            .map(button => fiveScripts.find(script => button.textContent?.includes(script.title))?.title))
+            .toEqual([
+                'Four draft',
+                'Three draft',
+                'Two draft',
+                'One draft',
+            ]);
+    });
+
     it('prioritizes a new script and removes the example action from a populated library', async () => {
-        scriptsState.summaries = [
-            {
-                id: 'script-1',
-                title: 'One draft',
-                subtitle: null,
-                activeBlockId: null,
-                createdAt: 1,
-                updatedAt: 2,
-            },
-        ];
+        scriptsState.summaries = [scriptSummary('script-1', 'One draft', 2)];
 
         mountHome();
         await waitForText('One draft');
