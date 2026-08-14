@@ -84,6 +84,47 @@ const createEditor = (blockType: BlockNodeType, text: string) => {
     };
 };
 
+const createMultiBlockEditor = (blocks: Array<{blockType: BlockNodeType, text: string}>) => {
+    const nodes = blocks.map(({blockType, text}, index) => schema.node(
+        blockType,
+        {blockType, id: `block-${index + 1}`},
+        text ? [schema.text(text)] : undefined,
+    ));
+    const doc = schema.node('doc', null, nodes);
+    const lastNode = nodes.at(-1);
+
+    if (!lastNode) {
+        throw new Error('Expected at least one block');
+    }
+
+    const selectionPos = doc.content.size - lastNode.nodeSize + 1 + lastNode.textContent.length;
+    let state = EditorState.create({
+        schema,
+        doc,
+        selection: TextSelection.create(doc, selectionPos),
+    });
+    const editor = {
+        get state() {
+            return state;
+        },
+        schema,
+        view: {
+            focus: () => {},
+            dispatch: (tr: EditorState['tr']) => {
+                state = state.apply(tr);
+            },
+        },
+        commands: {
+            focus: () => true,
+        },
+    } as unknown as TiptapEditor;
+
+    return {
+        editor,
+        getLastBlock: () => state.doc.lastChild,
+    };
+};
+
 describe('handleTab', () => {
     it('converts dialogue to aside on plain Tab', () => {
         const {editor, getBlock} = createEditor('dialogue', 'Sing this');
@@ -155,13 +196,94 @@ describe('handleTab', () => {
         expect(getBlock()?.attrs.blockType).toBe('character');
     });
 
-    it('keeps lyrics indentation behavior', () => {
+    it('converts lyrics to aside on plain Tab', () => {
         const {editor, getBlock} = createEditor('lyrics', 'Sing this');
         const event = createTabEvent();
 
         expect(handleTab(editor, event)).toBe(true);
         expect(event.wasPrevented()).toBe(true);
+        expect(getBlock()?.type.name).toBe('aside');
+        expect(getBlock()?.textContent).toBe('Sing this');
+    });
+
+    it('strips wrapping parens when Tab converts dialogue text already wrapped in them to aside', () => {
+        const {editor, getBlock} = createEditor('dialogue', '(quietly)');
+        const event = createTabEvent();
+
+        expect(handleTab(editor, event)).toBe(true);
+        expect(getBlock()?.type.name).toBe('aside');
+        expect(getBlock()?.textContent).toBe('quietly');
+    });
+
+    it('does nothing on Shift Tab for dialogue (no more aside toggle)', () => {
+        const {editor, getBlock} = createEditor('dialogue', 'Sing this');
+        const event = createTabEvent({shiftKey: true});
+
+        expect(handleTab(editor, event)).toBe(true);
+        expect(event.wasPrevented()).toBe(true);
+        expect(getBlock()?.type.name).toBe('dialogue');
+    });
+
+    it('does nothing on Shift Tab for lyrics (no more indent behavior)', () => {
+        const {editor, getBlock} = createEditor('lyrics', 'Sing this');
+        const event = createTabEvent({shiftKey: true});
+
+        expect(handleTab(editor, event)).toBe(true);
+        expect(event.wasPrevented()).toBe(true);
         expect(getBlock()?.type.name).toBe('lyrics');
-        expect(getBlock()?.textContent).toBe('\tSing this');
+        expect(getBlock()?.textContent).toBe('Sing this');
+    });
+
+    it('returns aside to lyrics when the nearest preceding non-aside block is lyrics', () => {
+        const {editor, getLastBlock} = createMultiBlockEditor([
+            {blockType: 'lyrics', text: 'La la la'},
+            {blockType: 'aside', text: 'Quietly'},
+        ]);
+        const event = createTabEvent();
+
+        expect(handleTab(editor, event)).toBe(true);
+        expect(getLastBlock()?.type.name).toBe('lyrics');
+    });
+
+    it('returns aside to dialogue when the nearest preceding non-aside block is dialogue', () => {
+        const {editor, getLastBlock} = createMultiBlockEditor([
+            {blockType: 'dialogue', text: 'Hello there'},
+            {blockType: 'aside', text: 'Quietly'},
+        ]);
+        const event = createTabEvent();
+
+        expect(handleTab(editor, event)).toBe(true);
+        expect(getLastBlock()?.type.name).toBe('dialogue');
+    });
+
+    it('skips over a run of consecutive asides to find the flow origin', () => {
+        const {editor, getLastBlock} = createMultiBlockEditor([
+            {blockType: 'lyrics', text: 'La la la'},
+            {blockType: 'aside', text: 'First aside'},
+            {blockType: 'aside', text: 'Second aside'},
+        ]);
+        const event = createTabEvent();
+
+        expect(handleTab(editor, event)).toBe(true);
+        expect(getLastBlock()?.type.name).toBe('lyrics');
+    });
+
+    it('defaults to dialogue when no preceding block establishes a flow', () => {
+        const {editor, getBlock} = createEditor('aside', 'Quietly');
+        const event = createTabEvent();
+
+        expect(handleTab(editor, event)).toBe(true);
+        expect(getBlock()?.type.name).toBe('dialogue');
+    });
+
+    it('defaults to dialogue when the nearest preceding non-aside block is neither dialogue nor lyrics', () => {
+        const {editor, getLastBlock} = createMultiBlockEditor([
+            {blockType: 'character', text: 'HAMLET'},
+            {blockType: 'aside', text: 'Quietly'},
+        ]);
+        const event = createTabEvent();
+
+        expect(handleTab(editor, event)).toBe(true);
+        expect(getLastBlock()?.type.name).toBe('dialogue');
     });
 });

@@ -34,7 +34,7 @@ const createBlockSpec = (blockType: BlockNodeType) => ({
 
 const schema = new Schema({
     nodes: {
-        doc: {content: '(character | stageDirection | dialogue | lyrics | act)+'},
+        doc: {content: '(character | stageDirection | dialogue | lyrics | aside | act)+'},
         text: {group: 'inline'},
         [MUSIC_START_NODE_NAME]: {
             group: 'inline',
@@ -49,6 +49,7 @@ const schema = new Schema({
         stageDirection: createBlockSpec('stageDirection'),
         dialogue: createBlockSpec('dialogue'),
         lyrics: createBlockSpec('lyrics'),
+        aside: createBlockSpec('aside'),
         act: createBlockSpec('act'),
     },
     marks: {
@@ -222,6 +223,45 @@ describe('updateBlockType', () => {
     });
 });
 
+describe('setBlockTypeWithSelection converting to aside', () => {
+    it('strips a single leading and trailing paren when the text is fully wrapped', () => {
+        const {editor, getBlock} = createEditor('dialogue', '(quietly)');
+        const block = getActiveScriptBlockFromState(editor.state);
+
+        if (!block) {
+            throw new Error('Expected an active dialogue block');
+        }
+
+        expect(setBlockTypeWithSelection(editor, block, 'aside')).toBe(true);
+        expect(getBlock()?.type.name).toBe('aside');
+        expect(getBlock()?.textContent).toBe('quietly');
+    });
+
+    it('leaves text untouched when it is not wrapped in a matching leading/trailing paren pair', () => {
+        const {editor, getBlock} = createEditor('dialogue', '(quietly');
+        const block = getActiveScriptBlockFromState(editor.state);
+
+        if (!block) {
+            throw new Error('Expected an active dialogue block');
+        }
+
+        expect(setBlockTypeWithSelection(editor, block, 'aside')).toBe(true);
+        expect(getBlock()?.textContent).toBe('(quietly');
+    });
+
+    it('does not strip parens when converting to a non-aside type', () => {
+        const {editor, getBlock} = createEditor('dialogue', '(quietly)');
+        const block = getActiveScriptBlockFromState(editor.state);
+
+        if (!block) {
+            throw new Error('Expected an active dialogue block');
+        }
+
+        expect(setBlockTypeWithSelection(editor, block, 'lyrics')).toBe(true);
+        expect(getBlock()?.textContent).toBe('(quietly)');
+    });
+});
+
 describe('updateBlockTypeForSelection', () => {
     it('changes the actual node type (not just the blockType attribute) for every block in the selection', () => {
         const {editor, getBlocks} = createMultiBlockEditor([
@@ -276,6 +316,20 @@ describe('updateBlockTypeForSelection', () => {
         const blocks = getBlocks();
 
         expect(blocks.map(block => block.type.name)).toEqual(['act', 'lyrics']);
+    });
+
+    it('strips wrapping parens from each block when bulk-converting to aside', () => {
+        const {editor, getBlocks} = createMultiBlockEditor([
+            {blockType: 'dialogue', text: '(quietly)', id: 'block-1'},
+            {blockType: 'lyrics', text: 'La la la', id: 'block-2'},
+        ]);
+
+        expect(updateBlockTypeForSelection(editor, 'aside')).toBe(true);
+
+        const blocks = getBlocks();
+
+        expect(blocks.map(block => block.type.name)).toEqual(['aside', 'aside']);
+        expect(blocks.map(block => block.textContent)).toEqual(['quietly', 'La la la']);
     });
 
     it('does nothing and returns false when no block in the selection can change', () => {

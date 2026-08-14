@@ -1,7 +1,9 @@
+import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {Editor} from '@tiptap/react';
 
 import {getBlockQuickToggleTarget} from '../../../model/blockQuickToggle';
 import {
+    type BlockNodeType,
     getActiveScriptBlockFromState,
     SCRIPT_BLOCK_NODE_NAMES,
 } from '../../scriptCore';
@@ -13,17 +15,18 @@ import {
 import {type HandlerMap} from './types';
 
 /*
- * Stage directions and lyrics use literal leading tabs for indentation; one
- * tab renders 0.5" (tab-size: 5 with the monospace font).
+ * Stage directions use literal leading tabs for indentation; one tab renders
+ * 0.5" (tab-size: 5 with the monospace font).
  */
 const MAX_ACTION_INDENT = 2;
-const MAX_LYRICS_INDENT = 3;
 
 const hasAnyTabModifier = (event: KeyboardEvent) => event.altKey || event.ctrlKey || event.metaKey;
 
 const isQuickToggleShortcut = (event: KeyboardEvent) => {
     return event.altKey && !event.shiftKey && !event.metaKey;
 };
+
+const isPlainTab = (event: KeyboardEvent) => !hasAnyTabModifier(event) && !event.shiftKey;
 
 const createIndentTabHandler = (maxIndent: number) => (context: BlockContext, event: KeyboardEvent) => {
     event.preventDefault();
@@ -62,13 +65,45 @@ const createIndentTabHandler = (maxIndent: number) => (context: BlockContext, ev
     return true;
 };
 
-const toggleAsideTarget = (blockType: BlockContext['block']['blockType']) => {
-    if (blockType === 'dialogue') {
+/*
+ * An aside doesn't record whether it interrupted a dialogue or a lyrics flow,
+ * so toggling it back has to infer that from context: walk back through
+ * preceding siblings (script blocks are flat children of doc), skipping over
+ * any run of further asides, and use the type of the first non-aside block
+ * found. Lyrics resumes lyrics; anything else (dialogue, another block type,
+ * or no preceding block at all) falls back to dialogue.
+ */
+const findPrecedingFlowBlockType = (doc: ProseMirrorNode, blockPos: number): BlockNodeType | null => {
+    let searchPos = blockPos;
+
+    while (searchPos > 0) {
+        const {node, offset} = doc.childBefore(searchPos);
+
+        if (!node) {
+            return null;
+        }
+
+        if (node.type.name !== 'aside') {
+            return node.attrs.blockType as BlockNodeType;
+        }
+
+        searchPos = offset;
+    }
+
+    return null;
+};
+
+const toggleAsideTarget = (context: BlockContext): BlockNodeType | null => {
+    const {blockType} = context.block;
+
+    if (blockType === 'dialogue' || blockType === 'lyrics') {
         return 'aside';
     }
 
     if (blockType === 'aside') {
-        return 'dialogue';
+        const flowOrigin = findPrecedingFlowBlockType(context.editor.state.doc, context.block.pos);
+
+        return flowOrigin === 'lyrics' ? 'lyrics' : 'dialogue';
     }
 
     return null;
@@ -87,7 +122,7 @@ const handleQuickToggle = (context: BlockContext, event: KeyboardEvent) => {
 };
 
 const handleAsideToggle = (context: BlockContext, event: KeyboardEvent) => {
-    const nextBlockType = toggleAsideTarget(context.block.blockType);
+    const nextBlockType = toggleAsideTarget(context);
 
     if (!nextBlockType) {
         return false;
@@ -100,7 +135,6 @@ const handleAsideToggle = (context: BlockContext, event: KeyboardEvent) => {
 
 const tabHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => boolean> = {
     ['stageDirection']: createIndentTabHandler(MAX_ACTION_INDENT),
-    ['lyrics']: createIndentTabHandler(MAX_LYRICS_INDENT),
 };
 
 export const handleTab = (editor: Editor, event: KeyboardEvent) => {
@@ -116,7 +150,7 @@ export const handleTab = (editor: Editor, event: KeyboardEvent) => {
         return true;
     }
 
-    if (!hasAnyTabModifier(event) && handleAsideToggle(context, event)) {
+    if (isPlainTab(event) && handleAsideToggle(context, event)) {
         return true;
     }
 
