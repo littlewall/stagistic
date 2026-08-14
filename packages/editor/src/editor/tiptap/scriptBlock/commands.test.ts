@@ -262,6 +262,56 @@ describe('setBlockTypeWithSelection converting to aside', () => {
     });
 });
 
+describe('single-block type change restores cursor position', () => {
+    it('keeps a collapsed cursor at the same offset after updateBlockType', () => {
+        const {editor} = createEditor('dialogue', 'Hello there');
+        const pos = 1 + 5;
+
+        editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, pos)));
+
+        expect(updateBlockType(editor, 'lyrics')).toBe(true);
+        expect(editor.state.selection.from).toBe(pos);
+        expect(editor.state.selection.to).toBe(pos);
+    });
+
+    it('keeps a non-collapsed selection range after updateBlockType', () => {
+        const {editor} = createEditor('dialogue', 'Hello there');
+        const from = 1 + 2;
+        const to = 1 + 7;
+
+        editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, from, to)));
+
+        expect(updateBlockType(editor, 'lyrics')).toBe(true);
+        expect(editor.state.selection.from).toBe(from);
+        expect(editor.state.selection.to).toBe(to);
+    });
+
+    it('shifts the cursor left by the stripped leading tabs when converting a stage direction', () => {
+        const {editor} = createEditor('stageDirection', '\t\tHello there');
+        const pos = 1 + 5;
+
+        editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, pos)));
+
+        expect(updateBlockType(editor, 'dialogue')).toBe(true);
+        expect(editor.state.selection.from).toBe(pos - 2);
+    });
+
+    it('shifts the cursor left when converting to aside strips a leading paren', () => {
+        const {editor} = createEditor('dialogue', '(quietly now)');
+        const pos = 1 + 8;
+        const block = getActiveScriptBlockFromState(editor.state);
+
+        if (!block) {
+            throw new Error('Expected an active dialogue block');
+        }
+
+        editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, pos)));
+
+        expect(setBlockTypeWithSelection(editor, block, 'aside')).toBe(true);
+        expect(editor.state.selection.from).toBe(pos - 1);
+    });
+});
+
 describe('updateBlockTypeForSelection', () => {
     it('changes the actual node type (not just the blockType attribute) for every block in the selection', () => {
         const {editor, getBlocks} = createMultiBlockEditor([

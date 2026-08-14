@@ -24,11 +24,34 @@ const focusEditor = (editor: Editor) => {
     editor.commands.focus();
 };
 
-const setSelectionNearBlockStart = (tr: Transaction, blockPos: number) => {
-    const mappedPos = tr.mapping.map(blockPos + 1);
-    const resolved = tr.doc.resolve(mappedPos);
+const clampToRange = (pos: number, min: number, max: number) => Math.min(Math.max(pos, min), max);
 
-    return tr.setSelection(TextSelection.near(resolved, 1));
+/**
+ * A single-block type change (keyboard shortcut, Tab toggle, ...) shouldn't
+ * knock the cursor back to the block start — restore it (or the selected
+ * range) at the same offset, mapped through whatever content-normalizing
+ * edits ran earlier in the transaction and clamped to the block's new
+ * content, in case that content got shorter (stripped tabs/parens, etc).
+ */
+const restoreBlockSelection = (
+    tr: Transaction,
+    blockPos: number,
+    originalAnchor: number,
+    originalHead: number,
+): Transaction => {
+    const mappedPos = tr.mapping.map(blockPos);
+    const node = tr.doc.nodeAt(mappedPos);
+
+    if (!node) {
+        return tr;
+    }
+
+    const contentStart = mappedPos + 1;
+    const contentEnd = contentStart + node.content.size;
+    const anchor = clampToRange(tr.mapping.map(originalAnchor), contentStart, contentEnd);
+    const head = clampToRange(tr.mapping.map(originalHead), contentStart, contentEnd);
+
+    return tr.setSelection(TextSelection.create(tr.doc, anchor, head));
 };
 
 const countLeadingTabs = (text: string) => {
@@ -170,6 +193,7 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
                 ? null
                 : (activeBlock.node.attrs.characterRefs as Record<string, string> | null),
     };
+    const {anchor: originalAnchor, head: originalHead} = editor.state.selection;
 
     let tr = editor.state.tr.setNodeMarkup(activeBlock.pos, nodeType, attributes);
 
@@ -190,7 +214,7 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
     );
     tr = normalizeCharacterMusicText(tr, normalized, activeBlock.pos);
     tr = stripAsideParentheses(tr, normalized, activeBlock.pos);
-    tr = setSelectionNearBlockStart(tr, activeBlock.pos);
+    tr = restoreBlockSelection(tr, activeBlock.pos, originalAnchor, originalHead);
     tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
     editor.view.dispatch(tr.scrollIntoView());
     focusEditor(editor);
@@ -317,11 +341,65 @@ const insertEmptyBlockAfterMusicBlock = (editor: Editor, blockType: BlockNodeTyp
     return true;
 };
 
+/**
+ * Splitting at the very start of a block isn't really a split - nothing moves
+ * to the new block - it's "push an empty block in above me". Doing it via
+ * ProseMirror's splitBlock actively hurts here on two counts: it rewrites the
+ * leading (empty) half to the schema's default block type, which is whatever
+ * node happens to be registered first (scene) rather than anything the writer
+ * asked for; and because a split copies the original attrs to both halves, the
+ * caret half is the one that ends up needing a fresh id, leaving the empty
+ * block holding the original block's identity. Insert the block directly
+ * instead and leave the caret (and the original id) on the text.
+ */
+const insertEmptyBlockBefore = (
+    editor: Editor,
+    block: ActiveScriptBlock,
+    blockType: BlockNodeType,
+): boolean => {
+    const nodes = editor.schema.nodes as Record<string, NodeType>;
+    const nodeType = resolveNodeTypeForBlockType(nodes, blockType);
+
+    if (!nodeType) {
+        return false;
+    }
+
+    const insertedNode = nodeType.create({blockType, id: createNodeId()});
+    const {anchor, head} = editor.state.selection;
+    let tr = editor.state.tr.insert(block.pos, insertedNode);
+
+    tr = tr.setSelection(TextSelection.create(
+        tr.doc,
+        tr.mapping.map(anchor),
+        tr.mapping.map(head),
+    ));
+    tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
+    editor.view.dispatch(tr.scrollIntoView());
+    focusEditor(editor);
+
+    return true;
+};
+
+/*
+ * Mirrors prosemirror-commands' own `!atEnd && atStart` test: the caret sits
+ * at the block start with content still ahead of it. An empty block is both
+ * at start and at end, and must keep taking the normal split path.
+ */
+const isAtBlockStartWithContentAhead = (editor: Editor, block: ActiveScriptBlock) => {
+    const {selection} = editor.state;
+
+    return selection.empty && selection.from === block.from && selection.from !== block.to;
+};
+
 export const splitBlockWithType = (editor: Editor, blockType: BlockNodeType) => {
     const activeBlock = getActiveScriptBlockFromState(editor.state);
 
     if (activeBlock && blockNodeHasMusicAtom(activeBlock.node)) {
         return insertEmptyBlockAfterMusicBlock(editor, blockType);
+    }
+
+    if (activeBlock && isAtBlockStartWithContentAhead(editor, activeBlock)) {
+        return insertEmptyBlockBefore(editor, activeBlock, blockType);
     }
 
     const didSplit = editor.commands.splitBlock();
@@ -379,6 +457,8 @@ export const setBlockTypeWithSelection = (
                 : (block.node.attrs.characterRefs as Record<string, string> | null),
     };
 
+    const {anchor: originalAnchor, head: originalHead} = editor.state.selection;
+
     let tr = editor.state.tr.setNodeMarkup(block.pos, nodeType, attrs);
 
     tr = stripLeadingActionTabs(
@@ -397,7 +477,7 @@ export const setBlockTypeWithSelection = (
         block.node,
     );
     tr = stripAsideParentheses(tr, normalized, block.pos);
-    tr = setSelectionNearBlockStart(tr, block.pos);
+    tr = restoreBlockSelection(tr, block.pos, originalAnchor, originalHead);
     tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
 
     editor.view.dispatch(tr.scrollIntoView());

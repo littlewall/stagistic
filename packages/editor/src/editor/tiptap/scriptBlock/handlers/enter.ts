@@ -99,6 +99,20 @@ const resolveNextTypeOnEnter = (
     return configured ?? normalizeBlockNodeType(getEnterFallback(blockType));
 };
 
+/*
+ * The configured "next type" (e.g. dialogue -> character) only makes sense
+ * when Enter is advancing the flow, i.e. the cursor was at the very end of
+ * the block. Splitting mid-content isn't advancing anything - the new block
+ * should stay the same type as the one it was split from, or the writer sees
+ * an unexplained type change they never asked for.
+ */
+const resolveSplitType = (
+    context: BlockContext,
+    blockNextElements?: BlockNextElementMap,
+): BlockNodeType => context.isAtEnd
+    ? resolveNextTypeOnEnter(context.block.blockType, blockNextElements)
+    : context.block.blockType;
+
 const insertBlockAfter = (
     context: BlockContext,
     blockType: BlockNodeType,
@@ -127,36 +141,19 @@ const insertBlockAfter = (
 
 const enterHandlers: HandlerMap<(context: BlockContext, blockNextElements?: BlockNextElementMap) => boolean> = {
     ['act']: (context, blockNextElements) => {
-        const nextType = blockNextElements?.['act'] ?? 'scene';
-
         if (context.isAtEnd) {
-            return insertBlockAfter(context, nextType);
+            return insertBlockAfter(context, blockNextElements?.['act'] ?? 'scene');
         }
 
-        return splitBlockWithType(context.editor, nextType);
+        return splitBlockWithType(context.editor, 'act');
     },
     ['character']: (context, blockNextElements) => {
         if (context.isAtStart) {
             return insertActionBefore(context.editor, context.block.pos, context.block.from);
         }
 
-        return splitBlockWithType(
-            context.editor,
-            resolveNextTypeOnEnter('character', blockNextElements),
-        );
+        return splitBlockWithType(context.editor, resolveSplitType(context, blockNextElements));
     },
-    ['dialogue']: (_context, blockNextElements) => splitBlockWithType(
-        _context.editor,
-        resolveNextTypeOnEnter('dialogue', blockNextElements),
-    ),
-    ['lyrics']: (_context, blockNextElements) => splitBlockWithType(
-        _context.editor,
-        resolveNextTypeOnEnter('lyrics', blockNextElements),
-    ),
-    ['aside']: (_context, blockNextElements) => splitBlockWithType(
-        _context.editor,
-        resolveNextTypeOnEnter('aside', blockNextElements),
-    ),
 };
 
 const shiftEnterHandlers: HandlerMap<(context: BlockContext) => boolean> = {
@@ -218,9 +215,11 @@ export const handleEnter = (
         editor.commands.deleteSelection();
     }
 
+    const context = createBlockContext(editor, block);
+
     if (!event.shiftKey && wasSelectionEmpty && hasOnlyNonTextContent) {
         return insertBlockAfter(
-            createBlockContext(editor, block),
+            context,
             resolveNextTypeOnEnter(block.blockType, blockNextElements),
         );
     }
@@ -235,8 +234,6 @@ export const handleEnter = (
     if (!event.shiftKey && isEmptyDialogueLikeBlock(block)) {
         return setBlockTypeWithSelection(editor, block, 'character');
     }
-
-    const context = createBlockContext(editor, block);
 
     if (event.shiftKey) {
         const shiftHandler = shiftEnterHandlers[block.blockType];
@@ -254,11 +251,7 @@ export const handleEnter = (
         }
     }
 
-    const nextType = context.isAtEnd
-        ? resolveNextTypeOnEnter(block.blockType, blockNextElements)
-        : block.blockType;
-
-    return splitBlockWithType(editor, nextType);
+    return splitBlockWithType(editor, resolveSplitType(context, blockNextElements));
 };
 
 export const enterHandlerMaps = {
