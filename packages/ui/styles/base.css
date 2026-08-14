@@ -51,14 +51,21 @@ select {
  * a rule for it, which left keyboard users looking at two different focus
  * styles in one window.
  *
- * Both halves sit in `:where()`, so the whole selector weighs nothing and any
- * component declaration wins — including a deliberate `outline: none` next to
- * some other indicator, the way the home script rows use an inset shadow.
+ * The native `:focus-visible` fallback sits in `:where()`. The app-level
+ * modality attribute adds only one attribute of weight, so explicit component
+ * indicators still win — including the home script rows' inset shadow.
+ * Text entry relies on that modality attribute because browsers may treat a
+ * pointer-focused input as `:focus-visible`.
  * Elements that are focusable but not text entry (`[contenteditable]`, the
  * script canvas) stay out on purpose: a ring around the page would fight the
  * distraction-free canvas.
  */
-:where(a, button, input, textarea, select, summary):where(:focus-visible) {
+:where(a, button, input, textarea, select, summary):where(:focus) {
+    outline: none;
+}
+
+:where(a, button, select, summary):where(:focus-visible),
+:root[data-focus-ring-visible] :where(a, button, input, textarea, select, summary):where(:focus) {
     outline: var(--focus-ring);
     outline-offset: var(--focus-ring-offset);
 }

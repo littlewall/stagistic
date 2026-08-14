@@ -9,11 +9,11 @@ import {
 
 import {BLOCKS_WITHOUT_ACT} from '../blocks/blockRegistry';
 import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
-import {updateBlockType} from '../tiptap/scriptBlock/commands';
 import {
-    isScriptBlockNodeName,
-    normalizeBlockNodeType,
-} from '../tiptap/scriptCore';
+    updateBlockType,
+    updateBlockTypeForSelection,
+} from '../tiptap/scriptBlock/commands';
+import {normalizeBlockNodeType} from '../tiptap/scriptCore';
 import styles from './EditorToolbar.module.css';
 import {BlockTypeSelect} from './toolbar/BlockTypeSelect';
 import type {
@@ -143,34 +143,7 @@ const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
         }
 
         if (isMultiBlockSelection) {
-            const {from, to} = editor.state.selection;
-            let tr = editor.state.tr;
-            let didChange = false;
-
-            editor.state.doc.nodesBetween(from, to, (node, pos) => {
-                if (!isScriptBlockNodeName(node.type.name)) {
-                    return true;
-                }
-
-                if (node.attrs.blockType === 'act' || node.attrs.blockType === optionType) {
-                    return false;
-                }
-
-                tr = tr.setNodeMarkup(pos, undefined, {
-                    ...node.attrs,
-                    blockType: optionType,
-                });
-                didChange = true;
-
-                return false;
-            });
-
-            if (!didChange) {
-                return;
-            }
-
-            editor.commands.focus();
-            editor.view.dispatch(tr);
+            updateBlockTypeForSelection(editor, optionType);
 
             return;
         }

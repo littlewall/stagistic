@@ -37,6 +37,7 @@ import {
     MusicNumberingExtension,
     MusicRailExtension,
     PlaceholderExtension,
+    SceneNumberingExtension,
     ScriptBehaviorExtension,
 } from './tiptap/extensions';
 import {DocumentWithSettings} from './tiptap/extensions/DocumentExtension';
@@ -220,6 +221,7 @@ export const useEditorExtensions = ({
             MusicNumberingExtension,
             MusicRailExtension,
             PlaceholderExtension,
+            SceneNumberingExtension,
             emptyEnterChooserExtension,
             scriptBehaviorExtension,
             characterRefSyncExtension,

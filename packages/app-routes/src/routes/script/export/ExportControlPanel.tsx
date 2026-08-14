@@ -8,7 +8,6 @@ import {
 } from 'react';
 
 import styles from './ExportControlPanel.module.css';
-import {ExportDownloadButton} from './ExportDownloadButton';
 import {IntegratedScoreWarning} from './IntegratedScoreWarning';
 import {EXPORT_TEMPLATES} from './registry';
 import {TemplatePicker} from './TemplatePicker';
@@ -24,7 +23,6 @@ export const ExportControlPanel = () => {
         <div className={styles.panel}>
             <div className={styles.header}>
                 <h1 className={styles.title}>Export</h1>
-                <ExportDownloadButton />
             </div>
             <aside className={styles.controls} aria-label="Export controls">
                 <label className={styles.templateField}>

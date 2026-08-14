@@ -80,13 +80,17 @@
     }
 
     &:focus-visible {
-        outline: var(--focus-ring);
-        outline-offset: var(--focus-ring-offset);
+        outline: none;
     }
 
     &::placeholder {
         color: var(--color-text-placeholder);
         opacity: 1;
+    }
+
+    :global(:root[data-focus-ring-visible]) &:focus {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
     }
 
     &.withDelete {

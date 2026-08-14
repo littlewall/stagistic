@@ -86,9 +86,9 @@ describe('landing page', () => {
         expect(homeHtml).toContain('© Stagistic • Made with 💛 in Prague');
     });
 
-    it('renders the editor mark with one uninterrupted wordmark', () => {
+    it('renders the paper Stagistic mark with one uninterrupted wordmark', () => {
         expect(homeHtml).toContain(
-            'src="/assets/stagistic-brand/editor-mark-on-dark.svg"',
+            'src="/assets/stagistic-brand/stagistic-mark-on-dark.svg"',
         );
         expect(homeHtml).toContain('>Stagistic Editor</span>');
         expect(homeHtml).not.toContain('>Editor</span>');
@@ -191,11 +191,10 @@ describe('landing page', () => {
         }
     });
 
-    it('ships the approved editor mark canvas at every icon size', () => {
+    it('ships the approved editor and favicon canvases at every icon size', () => {
         const svgPaths = [
             '../public/assets/stagistic-brand/editor-mark-on-light.svg',
             '../public/assets/stagistic-brand/editor-mark-on-dark.svg',
-            '../public/favicon.svg',
         ];
 
         for (const svgPath of svgPaths) {
@@ -205,6 +204,12 @@ describe('landing page', () => {
                 viewBox: '0 0 135 130',
             });
         }
+
+        expect(readSvgCanvas('../public/favicon.svg')).toEqual({
+            width: '120',
+            height: '120',
+            viewBox: '9.95484 8.87608 94.88736 94.88736',
+        });
 
         expect(readPngDimensions('../public/favicon-16x16.png'))
             .toEqual([16, 16]);
@@ -217,6 +222,30 @@ describe('landing page', () => {
                 [16, 16],
                 [32, 32],
             ]);
+    });
+
+    it('ships the two-path favicon mark in umber and paper theme colours', () => {
+        const faviconSvg = readFileSync(
+            new URL('../public/favicon.svg', import.meta.url),
+            'utf8',
+        );
+
+        expect(faviconSvg.match(/<path\b/g) ?? []).toHaveLength(2);
+        expect(faviconSvg).toMatch(/\.mark\s*\{\s*fill:\s*#3d2a1d/);
+        expect(faviconSvg).toMatch(
+            /@media\s*\(prefers-color-scheme:\s*dark\)/,
+        );
+        expect(faviconSvg).toMatch(/fill:\s*#f4f1ec/);
+    });
+
+    it('ships the square-cropped paper mark used by the dark header', () => {
+        expect(readSvgCanvas(
+            '../public/assets/stagistic-brand/stagistic-mark-on-dark.svg',
+        )).toEqual({
+            width: '120',
+            height: '120',
+            viewBox: '9.95484 8.87608 94.88736 94.88736',
+        });
     });
 
     it('renders container-width dividers around the features section', () => {

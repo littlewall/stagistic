@@ -13,11 +13,6 @@
         background: var(--color-surface-raised);
         border: 1px solid var(--color-border);
         border-radius: var(--radius-sm);
-
-        &:focus {
-            outline: 2px solid color-mix(in oklch, var(--color-surface-accent) 50%, transparent);
-            outline-offset: 2px;
-        }
     }
 
     & .description {

@@ -17,6 +17,8 @@ type FocusableChild = ComponentProps<typeof Focusable>['children'];
 export interface TooltipProps {
     /** Tooltip text shown on hover/focus. */
     label: ReactNode,
+    /** Optional keyboard shortcut shown below the label. */
+    shortcut?: ReactNode,
     /** Placement relative to the trigger. Defaults to 'top'. */
     placement?: AriaTooltipProps['placement'],
     /** Hover open delay in ms. Defaults to 0 (no delay). */
@@ -36,6 +38,7 @@ export interface TooltipProps {
  */
 export const Tooltip = ({
     label,
+    shortcut,
     placement = 'top',
     delay = 0,
     closeDelay = 0,
@@ -61,7 +64,12 @@ export const Tooltip = ({
                 placement={placement}
                 offset={6}
             >
-                {label}
+                {shortcut ? (
+                    <span className={styles.content}>
+                        <span>{label}</span>
+                        <kbd className={styles.shortcut}>{shortcut}</kbd>
+                    </span>
+                ) : label}
             </AriaTooltip>
         </TooltipTrigger>
     );

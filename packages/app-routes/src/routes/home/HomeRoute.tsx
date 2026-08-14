@@ -2,6 +2,7 @@ import {useScriptRepository, useScripts} from '@stagistic/app-core';
 import {
     AppLayout,
     Button,
+    clsx,
     Input,
     LoaderOverlay,
     PageContainer,
@@ -56,14 +57,17 @@ export const HomeRoute = () => {
     const [sort, setSort] = useState<ScriptSort>('newest');
     const [isCreatingExample, setIsCreatingExample] = useState(false);
     const [exampleError, setExampleError] = useState<string | null>(null);
+    const hasScripts = scriptSummaries.length > 0;
+    const showLibraryTools = scriptSummaries.length >= 5;
 
     const dashboard = useMemo(() => buildHomeDashboardModel({
         scripts: scriptSummaries,
-        query,
-        sort,
+        query: showLibraryTools ? query : '',
+        sort: showLibraryTools ? sort : 'newest',
     }), [
         query,
         scriptSummaries,
+        showLibraryTools,
         sort,
     ]);
     const openScript = useCallback((scriptId: string) => {
@@ -125,13 +129,19 @@ export const HomeRoute = () => {
                 <div className={styles.content}>
                     <PageTitle>Scripts</PageTitle>
                     <div
-                        className={styles.startActions}
+                        className={clsx(
+                            styles.startActions,
+                            hasScripts && styles.startActionsPopulated,
+                        )}
                         role="group"
                         aria-label="Start a script"
                     >
                         <button
                             type="button"
-                            className={styles.startAction}
+                            className={clsx(
+                                styles.startAction,
+                                hasScripts && styles.startActionPrimary,
+                            )}
                             onClick={openNewScript}
                         >
                             <PlusIcon className={styles.startActionIcon} aria-hidden="true" />
@@ -155,25 +165,27 @@ export const HomeRoute = () => {
                                 </span>
                             </span>
                         </button>
-                        <button
-                            type="button"
-                            className={styles.startAction}
-                            disabled={isCreatingExample}
-                            onClick={() => void createExample()}
-                        >
-                            <ScriptIcon className={styles.startActionIcon} aria-hidden="true" />
-                            <span className={styles.startActionCopy}>
-                                <span className={styles.startActionTitle}>Create example script</span>
-                                <span className={styles.startActionDescription}>
-                                    Explore the editor with a pre-filled script.
-                                </span>
-                                {exampleError ? (
-                                    <span className={styles.startActionError} role="alert">
-                                        {exampleError}
+                        {!hasScripts ? (
+                            <button
+                                type="button"
+                                className={clsx(styles.startAction, styles.startActionPrimary)}
+                                disabled={isCreatingExample}
+                                onClick={() => void createExample()}
+                            >
+                                <ScriptIcon className={styles.startActionIcon} aria-hidden="true" />
+                                <span className={styles.startActionCopy}>
+                                    <span className={styles.startActionTitle}>Create example script</span>
+                                    <span className={styles.startActionDescription}>
+                                        Explore the editor with a pre-filled script.
                                     </span>
-                                ) : null}
-                            </span>
-                        </button>
+                                    {exampleError ? (
+                                        <span className={styles.startActionError} role="alert">
+                                            {exampleError}
+                                        </span>
+                                    ) : null}
+                                </span>
+                            </button>
+                        ) : null}
                     </div>
                     {scriptsLoading ? (
                         <div className={styles.skeleton} aria-label="Loading scripts">
@@ -195,26 +207,28 @@ export const HomeRoute = () => {
                         <SubtleText className={styles.emptyLibrary}>No scripts yet.</SubtleText>
                     ) : (
                         <div className={styles.library}>
-                            <div className={styles.libraryTools}>
-                                <div className={styles.searchField}>
-                                    <SearchIcon className={styles.searchIcon} aria-hidden="true" />
-                                    <Input
-                                        type="search"
-                                        value={query}
-                                        className={styles.searchInput}
-                                        aria-label="Search scripts"
-                                        placeholder="Search by title or subtitle"
-                                        onChange={event => setQuery(event.target.value)}
+                            {showLibraryTools ? (
+                                <div className={styles.libraryTools}>
+                                    <div className={styles.searchField}>
+                                        <SearchIcon className={styles.searchIcon} aria-hidden="true" />
+                                        <Input
+                                            type="search"
+                                            value={query}
+                                            className={styles.searchInput}
+                                            aria-label="Search scripts"
+                                            placeholder="Search by title or subtitle"
+                                            onChange={event => setQuery(event.target.value)}
+                                        />
+                                    </div>
+                                    <Select
+                                        value={sort}
+                                        options={SORT_OPTIONS}
+                                        ariaLabel="Sort scripts"
+                                        className={styles.sortSelect}
+                                        onChange={value => setSort(value as ScriptSort)}
                                     />
                                 </div>
-                                <Select
-                                    value={sort}
-                                    options={SORT_OPTIONS}
-                                    ariaLabel="Sort scripts"
-                                    className={styles.sortSelect}
-                                    onChange={value => setSort(value as ScriptSort)}
-                                />
-                            </div>
+                            ) : null}
                             <ScriptListSection
                                 scripts={dashboard.scripts}
                                 onOpenScript={openScript}

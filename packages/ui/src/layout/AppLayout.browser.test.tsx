@@ -1,3 +1,6 @@
+import '../../styles/base.css';
+
+import type {ReactNode} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {
     afterEach,
@@ -7,8 +10,10 @@ import {
 } from 'vite-plus/test';
 import {
     page,
+    userEvent,
 } from 'vite-plus/test/browser';
 
+import {formControlStyles} from '../molecules/forms/formControlStyles';
 import {AppLayout} from './AppLayout';
 
 const mountedRoots: Root[] = [];
@@ -27,7 +32,7 @@ const waitFor = async (predicate: () => boolean) => {
     throw new Error('Timed out waiting for condition');
 };
 
-const renderLayout = () => {
+const renderLayout = (children: ReactNode = <div>Script canvas</div>) => {
     const host = document.createElement('div');
 
     document.body.appendChild(host);
@@ -36,7 +41,7 @@ const renderLayout = () => {
 
     root.render(
         <AppLayout>
-            <div>Script canvas</div>
+            {children}
         </AppLayout>,
     );
     mountedRoots.push(root);
@@ -49,6 +54,35 @@ afterEach(() => {
 });
 
 describe('AppLayout', () => {
+    it('does not show a focus ring after a pointer focuses a text input', async () => {
+        renderLayout(<input className={formControlStyles.input} aria-label="Script title" />);
+
+        await waitFor(() => document.querySelector('[aria-label="Script title"]') !== null);
+
+        const input = document.querySelector<HTMLInputElement>('[aria-label="Script title"]');
+
+        if (!input) {
+            throw new Error('Expected script title input');
+        }
+
+        await page.elementLocator(input).click();
+
+        expect(document.activeElement).toBe(input);
+        expect(window.getComputedStyle(input).outlineStyle).toBe('none');
+    });
+
+    it('shows a focus ring when the keyboard focuses a text input', async () => {
+        renderLayout(<input className={formControlStyles.input} aria-label="Script title" />);
+
+        await waitFor(() => document.querySelector('[aria-label="Script title"]') !== null);
+        await userEvent.tab();
+
+        const input = document.querySelector<HTMLInputElement>('[aria-label="Script title"]');
+
+        expect(document.activeElement).toBe(input);
+        expect(window.getComputedStyle(input as HTMLInputElement).outlineStyle).toBe('solid');
+    });
+
     it('keeps public preview information and feedback reachable from every app screen', async () => {
         renderLayout();
 

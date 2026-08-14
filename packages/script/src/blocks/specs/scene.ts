@@ -7,7 +7,7 @@ export const sceneSpec = {
     listId: 'element-scene',
     enterFallback: 'stageDirection',
     defaultSettings: {
-        spacingBeforeEm: 2.0,
+        spacingBeforeEm: 1.0,
         lineHeight: 1.2,
         shortcut: '1',
         nextElement: 'stageDirection',
@@ -15,6 +15,6 @@ export const sceneSpec = {
         casing: 'uppercase',
         isBold: true,
         isItalic: false,
-        isUnderline: false,
+        isUnderline: true,
     },
 } as const satisfies BlockSpec;

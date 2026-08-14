@@ -8,3 +8,21 @@
     border-radius: var(--radius-full);
     box-shadow: var(--shadow-popover);
 }
+
+.content {
+    display: inline-flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.shortcut {
+    padding: 0;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xxs);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-none);
+    color: color-mix(in oklch, var(--color-surface) 72%, transparent);
+    letter-spacing: var(--letter-spacing-normal);
+    background: transparent;
+}

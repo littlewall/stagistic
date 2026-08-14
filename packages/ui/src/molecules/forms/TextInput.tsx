@@ -6,6 +6,7 @@ import {
     useMemo,
 } from 'react';
 
+import {Input} from '../../atoms/Input';
 import styles from './TextInput.module.css';
 
 type TextInputProps = {
@@ -13,7 +14,7 @@ type TextInputProps = {
     description?: string,
     className?: string,
     inputClassName?: string,
-} & Omit<ComponentPropsWithoutRef<'input'>, 'className'>;
+} & Omit<ComponentPropsWithoutRef<typeof Input>, 'className' | 'size'>;
 
 export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
     label,
@@ -30,10 +31,11 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
     return (
         <label className={clsx(styles.field, className)} htmlFor={resolvedId}>
             {label}
-            <input
+            <Input
                 {...props}
                 id={resolvedId}
                 ref={ref}
+                size="md"
                 className={clsx(styles.input, inputClassName)}
                 aria-describedby={descriptionId}
             />

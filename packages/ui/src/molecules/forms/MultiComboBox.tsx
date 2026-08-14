@@ -6,6 +6,7 @@ import {
     useRef,
     useState,
 } from 'react';
+import {Group} from 'react-aria-components';
 import {
     type Tag,
     WithContext as ReactTags,
@@ -122,37 +123,39 @@ export const MultiComboBox = ({
             className={clsx(styles.root, isDisabled && styles.disabled, className)}
         >
             <label className={styles.label} htmlFor={inputId}>{label}</label>
-            <ReactTags
-                id={inputId}
-                tags={selectedTags}
-                suggestions={suggestions}
-                placeholder={placeholder}
-                labelField="text"
-                inputFieldPosition="inline"
-                separators={['Enter']}
-                autoFocus={false}
-                readOnly={isDisabled}
-                allowUnique
-                allowDragDrop={false}
-                allowAdditionFromPaste={false}
-                allowDeleteFromEmptyInput={false}
-                handleAddition={handleAddition}
-                handleDelete={handleDelete}
-                handleInputFocus={() => setIsFocused(true)}
-                handleInputBlur={() => setIsFocused(false)}
-                shouldRenderSuggestions={() => isFocused}
-                removeComponent={RemoveTagButton}
-                classNames={{
-                    tags: styles.tagsRoot,
-                    tagInput: styles.tagInput,
-                    tagInputField: styles.input,
-                    selected: styles.selected,
-                    tag: styles.tag,
-                    remove: clsx('ReactTags__remove', styles.removeButton),
-                    suggestions: styles.suggestions,
-                    activeSuggestion: styles.activeSuggestion,
-                }}
-            />
+            <Group className={styles.focusGroup} role="presentation">
+                <ReactTags
+                    id={inputId}
+                    tags={selectedTags}
+                    suggestions={suggestions}
+                    placeholder={placeholder}
+                    labelField="text"
+                    inputFieldPosition="inline"
+                    separators={['Enter']}
+                    autoFocus={false}
+                    readOnly={isDisabled}
+                    allowUnique
+                    allowDragDrop={false}
+                    allowAdditionFromPaste={false}
+                    allowDeleteFromEmptyInput={false}
+                    handleAddition={handleAddition}
+                    handleDelete={handleDelete}
+                    handleInputFocus={() => setIsFocused(true)}
+                    handleInputBlur={() => setIsFocused(false)}
+                    shouldRenderSuggestions={() => isFocused}
+                    removeComponent={RemoveTagButton}
+                    classNames={{
+                        tags: styles.tagsRoot,
+                        tagInput: styles.tagInput,
+                        tagInputField: styles.input,
+                        selected: styles.selected,
+                        tag: styles.tag,
+                        remove: clsx('ReactTags__remove', styles.removeButton),
+                        suggestions: styles.suggestions,
+                        activeSuggestion: styles.activeSuggestion,
+                    }}
+                />
+            </Group>
         </div>
     );
 };

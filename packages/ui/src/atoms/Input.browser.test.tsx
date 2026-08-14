@@ -13,6 +13,22 @@ import {Input} from './Input';
 
 let mountedRoot: Root | null = null;
 
+const waitForInput = async (host: HTMLElement) => {
+    const deadline = Date.now() + 1000;
+
+    while (Date.now() < deadline) {
+        const input = host.querySelector<HTMLInputElement>('input');
+
+        if (input) {
+            return input;
+        }
+
+        await new Promise(resolve => window.setTimeout(resolve, 10));
+    }
+
+    throw new Error('Expected input');
+};
+
 const getRgb = (color: string) => {
     const canvas = document.createElement('canvas');
     const context = canvas.getContext('2d');
@@ -58,6 +74,21 @@ afterEach(() => {
 });
 
 describe('Input accessibility styles', () => {
+    it('does not show a focus ring after a pointer focuses it', async () => {
+        const host = document.createElement('div');
+
+        document.body.appendChild(host);
+        mountedRoot = createRoot(host);
+        mountedRoot.render(<Input aria-label="Title" />);
+
+        const input = await waitForInput(host);
+
+        await userEvent.click(input);
+
+        expect(document.activeElement).toBe(input);
+        expect(window.getComputedStyle(input).outlineStyle).toBe('none');
+    });
+
     it('shows a keyboard focus ring and an opaque placeholder', async () => {
         const host = document.createElement('div');
 
@@ -65,12 +96,13 @@ describe('Input accessibility styles', () => {
         mountedRoot = createRoot(host);
         mountedRoot.render(<Input aria-label="Title" placeholder="Untitled" />);
 
+        const input = await waitForInput(host);
+
         await userEvent.tab();
 
-        const input = host.querySelector<HTMLInputElement>('input');
-        const styles = window.getComputedStyle(input as HTMLInputElement);
+        const styles = window.getComputedStyle(input);
         const placeholderStyles = window.getComputedStyle(
-            input as HTMLInputElement,
+            input,
             '::placeholder',
         );
 
@@ -87,9 +119,9 @@ describe('Input accessibility styles', () => {
         document.documentElement.dataset.theme = 'dark';
         await new Promise(resolve => window.setTimeout(resolve, 200));
 
-        const darkStyles = window.getComputedStyle(input as HTMLInputElement);
+        const darkStyles = window.getComputedStyle(input);
         const darkPlaceholderStyles = window.getComputedStyle(
-            input as HTMLInputElement,
+            input,
             '::placeholder',
         );
 

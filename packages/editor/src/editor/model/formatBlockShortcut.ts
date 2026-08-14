@@ -18,6 +18,14 @@ export const formatBlockCycleShortcutLabel = (): string => {
     return isApplePlatform() ? '⌥⏎' : 'Alt+Enter';
 };
 
-export const formatLyricsToggleShortcutLabel = (): string => {
+export const formatBlockQuickToggleShortcutLabel = (): string => {
     return isApplePlatform() ? '⌥⇥' : 'Alt+Tab';
+};
+
+export const formatShiftEnterShortcutLabel = (): string => {
+    return isApplePlatform() ? '⇧⏎' : 'Shift+Enter';
+};
+
+export const formatTabShortcutLabel = (): string => {
+    return isApplePlatform() ? '⇥' : 'Tab';
 };

@@ -1,3 +1,5 @@
+import '@stagistic/ui/styles/base.css';
+
 import type {ScriptSummary} from '@stagistic/app-core';
 import {createRoot, type Root} from 'react-dom/client';
 import {MemoryRouter} from 'react-router-dom';
@@ -10,8 +12,8 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
-import {HomeRoute} from './HomeRoute';
 import {createExampleScript} from './example-script/createExampleScript';
+import {HomeRoute} from './HomeRoute';
 
 const {
     headerProps,
@@ -77,12 +79,13 @@ const mountHome = () => {
     const root = createRoot(host);
 
     document.body.appendChild(host);
-    root.render(
-        <MemoryRouter>
-            <HomeRoute />
-        </MemoryRouter>,
-    );
+
+    const render = () => root.render(<MemoryRouter><HomeRoute /></MemoryRouter>);
+
+    render();
     roots.push(root);
+
+    return render;
 };
 
 const waitForText = async (text: string) => {
@@ -102,6 +105,43 @@ const waitForText = async (text: string) => {
 const findButton = (label: string) => {
     return Array.from(document.querySelectorAll('button'))
         .find(button => button.textContent?.includes(label));
+};
+
+const scriptSummary = (id: string, title: string, updatedAt: number): ScriptSummary => ({
+    id,
+    title,
+    subtitle: null,
+    activeBlockId: null,
+    createdAt: updatedAt,
+    updatedAt,
+});
+
+const fiveScripts = [
+    scriptSummary('script-1', 'One draft', 1),
+    scriptSummary('script-2', 'Two draft', 2),
+    scriptSummary('script-3', 'Three draft', 3),
+    scriptSummary('script-4', 'Four draft', 4),
+    scriptSummary('script-5', 'Five draft', 5),
+];
+
+const expectSubtlePrimaryAction = async (
+    primary: HTMLButtonElement,
+    secondary: HTMLButtonElement,
+) => {
+    await userEvent.hover(document.querySelector('h1') as HTMLHeadingElement);
+    await new Promise(resolve => window.setTimeout(resolve, 200));
+
+    const primaryIcon = primary.querySelector('svg');
+    const secondaryIcon = secondary.querySelector('svg');
+
+    expect(getComputedStyle(primary).backgroundColor)
+        .toBe(getComputedStyle(secondary).backgroundColor);
+    expect(getComputedStyle(primary).color)
+        .toBe(getComputedStyle(secondary).color);
+    expect(getComputedStyle(primary).borderTopColor)
+        .not.toBe(getComputedStyle(secondary).borderTopColor);
+    expect(getComputedStyle(primaryIcon as SVGElement).backgroundColor)
+        .not.toBe(getComputedStyle(secondaryIcon as SVGElement).backgroundColor);
 };
 
 afterEach(() => {
@@ -145,6 +185,19 @@ describe('HomeRoute', () => {
         await expect.poll(() => vi.mocked(createExampleScript).mock.calls).toHaveLength(1);
     });
 
+    it('prioritizes the example action in an empty library', async () => {
+        mountHome();
+        await waitForText('No scripts yet.');
+
+        const newScript = findButton('New script');
+        const exampleScript = findButton('Create example script');
+
+        await expectSubtlePrimaryAction(
+            exampleScript as HTMLButtonElement,
+            newScript as HTMLButtonElement,
+        );
+    });
+
     it('replaces the home page with a full-page loader while creating an example script', async () => {
         vi.mocked(createExampleScript).mockImplementation(() => new Promise(() => {}));
 
@@ -163,17 +216,8 @@ describe('HomeRoute', () => {
         expect(document.querySelector('[data-testid="app-header"]')).toBeNull();
     });
 
-    it('shows each script once in a single searchable library', async () => {
-        scriptsState.summaries = [
-            {
-                id: 'script-1',
-                title: 'One draft',
-                subtitle: null,
-                activeBlockId: null,
-                createdAt: 1,
-                updatedAt: 2,
-            },
-        ];
+    it('shows one script once without unnecessary library tools', async () => {
+        scriptsState.summaries = [scriptSummary('script-1', 'One draft', 2)];
 
         mountHome();
         await waitForText('One draft');
@@ -182,9 +226,72 @@ describe('HomeRoute', () => {
             .filter(button => button.textContent?.includes('One draft'));
 
         expect(scriptButtons).toHaveLength(1);
-        expect(document.querySelector('input[type="search"]')).toBeTruthy();
+        expect(document.querySelector('input[type="search"]')).toBeNull();
+        expect(document.querySelector('[aria-label="Sort scripts"]')).toBeNull();
         expect(document.body.textContent).not.toContain('Continue writing');
         expect(document.body.textContent).not.toContain('Recently edited');
         expect(document.body.textContent).not.toContain('All scripts');
+    });
+
+    it('shows library tools for five scripts', async () => {
+        scriptsState.summaries = fiveScripts;
+
+        mountHome();
+        await waitForText('Five draft');
+
+        expect(document.querySelector('input[type="search"]')).toBeTruthy();
+        expect(document.querySelector('[aria-label="Sort scripts"]')).toBeTruthy();
+    });
+
+    it('ignores hidden library tools when the library shrinks below five scripts', async () => {
+        scriptsState.summaries = fiveScripts;
+
+        const rerender = mountHome();
+
+        await waitForText('Five draft');
+
+        await userEvent.click(document.querySelector('[aria-label="Sort scripts"]') as HTMLButtonElement);
+        await userEvent.click(findButton('Title A–Z') as HTMLButtonElement);
+        await userEvent.type(
+            document.querySelector('input[type="search"]') as HTMLInputElement,
+            'No match',
+        );
+        await waitForText('No scripts match');
+
+        scriptsState.summaries = fiveScripts.slice(0, 4);
+        rerender();
+
+        await waitForText('Four draft');
+        expect(document.querySelector('input[type="search"]')).toBeNull();
+        expect(Array.from(document.querySelectorAll('[aria-label="Scripts"] button'))
+            .filter(button => button.textContent?.includes('draft'))
+            .map(button => fiveScripts.find(script => button.textContent?.includes(script.title))?.title))
+            .toEqual([
+                'Four draft',
+                'Three draft',
+                'Two draft',
+                'One draft',
+            ]);
+    });
+
+    it('prioritizes a new script and removes the example action from a populated library', async () => {
+        scriptsState.summaries = [scriptSummary('script-1', 'One draft', 2)];
+
+        mountHome();
+        await waitForText('One draft');
+
+        const newScript = findButton('New script');
+        const importScript = findButton('Import script');
+        const startActions = document.querySelector<HTMLElement>(
+            '[role="group"][aria-label="Start a script"]',
+        );
+
+        expect(findButton('Create example script')).toBeUndefined();
+        expect(getComputedStyle(startActions as HTMLElement).gridTemplateColumns.split(' '))
+            .toHaveLength(2);
+        await expectSubtlePrimaryAction(
+            newScript as HTMLButtonElement,
+            importScript as HTMLButtonElement,
+        );
     });
 });

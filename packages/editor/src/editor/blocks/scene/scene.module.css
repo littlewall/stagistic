@@ -9,4 +9,23 @@
     text-align: var(--scene-align, left);
     text-decoration-line: var(--scene-underline, none);
     text-transform: var(--scene-casing, uppercase);
+
+    &[data-scene-number]::before {
+        pointer-events: none;
+        content: attr(data-scene-number) '.';
+        user-select: none;
+        position: absolute;
+        top: var(--scene-spacing-before, 0);
+        right: calc(100% + var(--space-sm)
+        + var(--block-trigger-size, var(--control-height-sm))
+        + var(--block-trigger-size, var(--control-height-sm)));
+        display: block;
+        width: var(--block-trigger-size, var(--control-height-sm));
+        font-weight: var(--font-weight-bold);
+        font-style: normal;
+        color: var(--color-text-muted);
+        text-align: center;
+        text-decoration: none;
+        text-transform: none;
+    }
 }
