@@ -48,6 +48,7 @@ export {ScriptBehaviorExtension} from './ScriptBehaviorExtension';
 // ─── Decorations ─────────────────────────────────────────────────────────────
 
 export {PlaceholderExtension} from './PlaceholderExtension';
+export {SceneNumberingExtension} from './SceneNumberingExtension';
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
 

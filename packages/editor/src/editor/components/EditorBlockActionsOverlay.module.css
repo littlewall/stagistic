@@ -9,9 +9,9 @@
 .controls {
     pointer-events: auto;
     position: relative;
-    transform: translate(calc(-1 * var(--block-controls-gutter, 32px) - 100% - var(--space-sm)), -50%);
-    display: inline-flex;
-    gap: 0;
+    transform: translate(calc(-100% - var(--space-sm)), -50%);
+    display: grid;
+    grid-template-columns: repeat(3, var(--block-trigger-size));
     align-items: center;
 }
 
@@ -95,6 +95,7 @@
 }
 
 .actionTrigger {
+    grid-column: 2;
     anchor-name: --block-action-trigger;
 
     & circle {
@@ -104,6 +105,7 @@
 }
 
 .typeTrigger {
+    grid-column: 3;
     anchor-name: --block-type-trigger;
 }
 

@@ -31,7 +31,7 @@ describe('web document metadata', () => {
             new URL('../dist/index.html', import.meta.url),
             'utf8',
         );
-    });
+    }, 30_000);
 
     it('exposes the complete editor favicon set and base title', () => {
         expect(html).toContain('<title>Stagistic Editor</title>');
@@ -65,5 +65,20 @@ describe('web document metadata', () => {
         faviconPaths.forEach(faviconPath => {
             expect(existsSync(new URL(faviconPath, import.meta.url))).toBe(true);
         });
+    });
+
+    it('ships the theme-aware two-path favicon mark', () => {
+        const faviconSvg = readFileSync(
+            new URL('../dist/favicon.svg', import.meta.url),
+            'utf8',
+        );
+
+        expect(faviconSvg).toContain('viewBox="0 0 120 120"');
+        expect(faviconSvg.match(/<path\b/g) ?? []).toHaveLength(2);
+        expect(faviconSvg).toMatch(/\.mark\s*\{\s*fill:\s*#3d2a1d/);
+        expect(faviconSvg).toMatch(
+            /@media\s*\(prefers-color-scheme:\s*dark\)/,
+        );
+        expect(faviconSvg).toMatch(/fill:\s*#e2a05f/);
     });
 });

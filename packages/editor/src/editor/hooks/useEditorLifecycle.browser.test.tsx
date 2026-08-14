@@ -85,6 +85,84 @@ afterEach(() => {
 });
 
 describe('useEditorLifecycle', () => {
+    it('numbers every scene in structure order without storing the numbers', async () => {
+        const scriptDocument = createDefaultScriptDocument('scene-1');
+
+        scriptDocument.content.push(
+            {
+                type: 'stageDirection',
+                attrs: {id: 'stage-direction-1'},
+                content: [{type: 'text', text: 'Blackout.'}],
+            },
+            {
+                type: 'act',
+                attrs: {id: 'act-2'},
+                content: [{type: 'text', text: 'Act Two'}],
+            },
+            {
+                type: 'scene',
+                attrs: {id: 'scene-2'},
+                content: [{type: 'text', text: 'Night'}],
+            },
+        );
+        renderEditor(scriptDocument);
+
+        const editor = await poll(
+            () => (window as LifecycleTestWindow).__lifecycleTestEditor,
+            'editor instance',
+        );
+
+        await poll(
+            () => document.querySelectorAll('p[blocktype="scene"]').length === 2 ? true : null,
+            'scene blocks',
+        );
+
+        const sceneBlocks = Array.from(document.querySelectorAll<HTMLElement>('p[blocktype="scene"]'));
+        const savedScenes = editor.getJSON().content?.filter(node => node.type === 'scene') ?? [];
+        const markerStyle = getComputedStyle(sceneBlocks[0], '::before');
+        const colorProbe = document.createElement('span');
+
+        colorProbe.style.color = 'var(--color-text-muted)';
+        document.body.appendChild(colorProbe);
+
+        expect(sceneBlocks.map(block => block.dataset.sceneNumber)).toEqual(['1', '2']);
+        expect(markerStyle.content).toBe('"1."');
+        expect(markerStyle.fontWeight).toBe('700');
+        expect(markerStyle.color).toBe(getComputedStyle(colorProbe).color);
+        expect(document.querySelector('[data-id="stage-direction-1"]')?.getAttribute('data-scene-number')).toBeNull();
+        expect(savedScenes.every(scene => scene.attrs?.sceneNumber === undefined)).toBe(true);
+    });
+
+    it('keeps three gutter slots with the block type control next to the text', async () => {
+        renderEditor();
+
+        await poll(
+            () => (window as LifecycleTestWindow).__lifecycleTestEditor,
+            'editor instance',
+        );
+
+        const typeTrigger = await poll(
+            () => document.querySelector<HTMLElement>('[data-block-actions-trigger="true"]'),
+            'block type trigger',
+        );
+        const sceneBlock = document.querySelector<HTMLElement>('p[blocktype="scene"]');
+        const controls = typeTrigger.parentElement;
+
+        if (!sceneBlock || !controls) {
+            throw new Error('Expected the scene block and its gutter controls.');
+        }
+
+        const gridColumns = getComputedStyle(controls).gridTemplateColumns
+            .split(' ')
+            .filter(Boolean);
+        const textGap = sceneBlock.getBoundingClientRect().left
+            - typeTrigger.getBoundingClientRect().right;
+
+        expect(gridColumns).toHaveLength(3);
+        expect(textGap).toBeGreaterThanOrEqual(0);
+        expect(textGap).toBeLessThanOrEqual(8);
+    });
+
     it('places the initial cursor at the first scene of a multi-act script', async () => {
         renderEditor();
 

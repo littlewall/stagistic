@@ -5,15 +5,15 @@ import {
     mergeEditorSettings,
 } from '@stagistic/script';
 
-const MIN_PAGE_WIDTH_PX = 480;
+const MIN_PAGE_MARGIN_HORIZONTAL_PX = 96; // 1"
+const MIN_PAGE_CONTENT_WIDTH_PX = 320;
+const MIN_PAGE_WIDTH_PX = MIN_PAGE_CONTENT_WIDTH_PX + MIN_PAGE_MARGIN_HORIZONTAL_PX * 2;
 const MAX_PAGE_WIDTH_PX = 2000;
 const MIN_PAGE_HEIGHT_PX = 640;
 const MAX_PAGE_HEIGHT_PX = 4000;
-const MIN_PAGE_CONTENT_WIDTH_PX = 320;
 const MIN_PAGE_CONTENT_HEIGHT_PX = 240;
 const MAX_PAGE_GAP_PX = 240;
 const MAX_CONTENT_MARGIN_PX = 400;
-const MIN_PAGE_MARGIN_HORIZONTAL_PX = 48; // 0.5"
 const MIN_FONT_SIZE_PX = 10;
 const MAX_FONT_SIZE_PX = 36;
 const MIN_LINE_HEIGHT = 0.8;
@@ -66,10 +66,17 @@ const sanitizeResolvedSettings = (settings: EditorSettings): EditorSettings => {
     const horizontalMarginsTotal = marginLeft + marginRight;
 
     if (horizontalMarginsTotal > maxHorizontalMarginsTotal && horizontalMarginsTotal > 0) {
-        const ratio = maxHorizontalMarginsTotal / horizontalMarginsTotal;
+        const leftExcess = marginLeft - MIN_PAGE_MARGIN_HORIZONTAL_PX;
+        const rightExcess = marginRight - MIN_PAGE_MARGIN_HORIZONTAL_PX;
+        const excessTotal = leftExcess + rightExcess;
+        const excessBudget = Math.max(
+            0,
+            maxHorizontalMarginsTotal - MIN_PAGE_MARGIN_HORIZONTAL_PX * 2,
+        );
+        const ratio = excessTotal > 0 ? excessBudget / excessTotal : 0;
 
-        marginLeft = Math.floor(marginLeft * ratio);
-        marginRight = Math.floor(marginRight * ratio);
+        marginLeft = MIN_PAGE_MARGIN_HORIZONTAL_PX + Math.floor(leftExcess * ratio);
+        marginRight = MIN_PAGE_MARGIN_HORIZONTAL_PX + Math.floor(rightExcess * ratio);
     }
 
     const verticalMarginsTotal = marginTop + marginBottom;
