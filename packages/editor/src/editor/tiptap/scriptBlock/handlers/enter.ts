@@ -232,7 +232,7 @@ export const handleEnter = (
         return setBlockTypeWithSelection(editor, block, 'character');
     }
 
-    if (isEmptyDialogueLikeBlock(block)) {
+    if (!event.shiftKey && isEmptyDialogueLikeBlock(block)) {
         return setBlockTypeWithSelection(editor, block, 'character');
     }
 

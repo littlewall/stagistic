@@ -9,12 +9,15 @@ import {useEditorState} from '@tiptap/react';
 import {useState} from 'react';
 
 import {BLOCKS, BLOCKS_WITHOUT_ACT} from '../../blocks/blockRegistry';
+import {getBlockQuickToggleTarget} from '../../model/blockQuickToggle';
 import {
     formatBlockCycleShortcutLabel,
-    formatLyricsToggleShortcutLabel,
+    formatBlockQuickToggleShortcutLabel,
+    formatShiftEnterShortcutLabel,
 } from '../../model/formatBlockShortcut';
 import {
     getActiveScriptBlockFromState,
+    isScriptBlockContentEmpty,
     isSelectionAcrossBlocks,
     SCRIPT_BLOCK_NODE_NAMES,
 } from '../../tiptap/scriptCore';
@@ -27,6 +30,7 @@ interface EditorStatusBarProps {
 
 const CYCLE_TYPES = BLOCKS_WITHOUT_ACT.map(block => block.type);
 const labelByType = new Map(BLOCKS.map(block => [block.type, block.label]));
+const DIALOGUE_LIKE_TYPES: ReadonlySet<ScriptBlockNodeType> = new Set(['dialogue', 'lyrics']);
 
 type EditorStatusBarSegment = {
     id: string,
@@ -36,28 +40,19 @@ type EditorStatusBarSegment = {
 
 const getLabel = (type: ScriptBlockNodeType) => labelByType.get(type) ?? type;
 
-const getLyricsToggleTarget = (type: ScriptBlockNodeType): ScriptBlockNodeType | null => {
-    if (type === 'dialogue') {
-        return 'lyrics';
-    }
-
-    if (type === 'lyrics') {
-        return 'dialogue';
-    }
-
-    return null;
-};
-
 export const getEditorStatusBarSegments = (
     activeType: ScriptBlockNodeType | null,
     blockNextElements: Partial<Record<ScriptBlockNodeType, ScriptBlockNodeType>>,
+    isActiveBlockEmpty: boolean,
 ): EditorStatusBarSegment[] => {
     if (!activeType) {
         return [];
     }
 
     const result: EditorStatusBarSegment[] = [];
-    const nextType = blockNextElements[activeType];
+    const nextType = isActiveBlockEmpty && DIALOGUE_LIKE_TYPES.has(activeType)
+        ? 'character'
+        : blockNextElements[activeType];
 
     if (nextType) {
         result.push({
@@ -67,13 +62,21 @@ export const getEditorStatusBarSegments = (
         });
     }
 
-    const lyricsToggleTarget = getLyricsToggleTarget(activeType);
-
-    if (lyricsToggleTarget) {
+    if (DIALOGUE_LIKE_TYPES.has(activeType)) {
         result.push({
-            id: 'lyrics-toggle',
-            key: formatLyricsToggleShortcutLabel(),
-            description: `Switch to ${getLabel(lyricsToggleTarget).toLowerCase()}`,
+            id: 'shift-enter',
+            key: formatShiftEnterShortcutLabel(),
+            description: getLabel(activeType),
+        });
+    }
+
+    const quickToggleTarget = getBlockQuickToggleTarget(activeType);
+
+    if (quickToggleTarget) {
+        result.push({
+            id: 'quick-toggle',
+            key: formatBlockQuickToggleShortcutLabel(),
+            description: `Switch to ${getLabel(quickToggleTarget).toLowerCase()}`,
         });
     }
 
@@ -102,7 +105,7 @@ export const EditorStatusBar = ({
     blockNextElements,
 }: EditorStatusBarProps) => {
     const [isPreviewDialogOpen, setIsPreviewDialogOpen] = useState(false);
-    const activeType = useEditorState({
+    const activeBlockStatus = useEditorState({
         editor,
         selector: ({editor: stateEditor}) => {
             if (!stateEditor) {
@@ -115,11 +118,24 @@ export const EditorStatusBar = ({
 
             const activeBlock = getActiveScriptBlockFromState(stateEditor.state, SCRIPT_BLOCK_NODE_NAMES);
 
-            return activeBlock?.blockType ?? null;
+            if (!activeBlock) {
+                return null;
+            }
+
+            return {
+                type: activeBlock.blockType,
+                isEmpty: isScriptBlockContentEmpty(activeBlock.node),
+            };
         },
+        equalityFn: (previous, next) => previous?.type === next?.type
+            && previous?.isEmpty === next?.isEmpty,
     });
 
-    const segments = getEditorStatusBarSegments(activeType, blockNextElements);
+    const segments = getEditorStatusBarSegments(
+        activeBlockStatus?.type ?? null,
+        blockNextElements,
+        activeBlockStatus?.isEmpty ?? false,
+    );
 
     return (
         <>

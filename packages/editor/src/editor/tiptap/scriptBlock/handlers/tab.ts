@@ -1,5 +1,6 @@
 import type {Editor} from '@tiptap/react';
 
+import {getBlockQuickToggleTarget} from '../../../model/blockQuickToggle';
 import {
     getActiveScriptBlockFromState,
     SCRIPT_BLOCK_NODE_NAMES,
@@ -20,7 +21,7 @@ const MAX_LYRICS_INDENT = 3;
 
 const hasAnyTabModifier = (event: KeyboardEvent) => event.altKey || event.ctrlKey || event.metaKey;
 
-const isLyricsShortcut = (event: KeyboardEvent) => {
+const isQuickToggleShortcut = (event: KeyboardEvent) => {
     return event.altKey && !event.shiftKey && !event.metaKey;
 };
 
@@ -61,18 +62,6 @@ const createIndentTabHandler = (maxIndent: number) => (context: BlockContext, ev
     return true;
 };
 
-const toggleLyricsTarget = (blockType: BlockContext['block']['blockType']) => {
-    if (blockType === 'dialogue') {
-        return 'lyrics';
-    }
-
-    if (blockType === 'lyrics') {
-        return 'dialogue';
-    }
-
-    return null;
-};
-
 const toggleAsideTarget = (blockType: BlockContext['block']['blockType']) => {
     if (blockType === 'dialogue') {
         return 'aside';
@@ -85,14 +74,14 @@ const toggleAsideTarget = (blockType: BlockContext['block']['blockType']) => {
     return null;
 };
 
-const handleLyricsShortcut = (context: BlockContext, event: KeyboardEvent) => {
-    event.preventDefault();
-
-    const nextBlockType = toggleLyricsTarget(context.block.blockType);
+const handleQuickToggle = (context: BlockContext, event: KeyboardEvent) => {
+    const nextBlockType = getBlockQuickToggleTarget(context.block.blockType);
 
     if (!nextBlockType) {
-        return true;
+        return false;
     }
+
+    event.preventDefault();
 
     return setBlockTypeWithSelection(context.editor, context.block, nextBlockType);
 };
@@ -123,8 +112,8 @@ export const handleTab = (editor: Editor, event: KeyboardEvent) => {
 
     const context = createBlockContext(editor, block);
 
-    if ((block.blockType === 'dialogue' || block.blockType === 'lyrics') && isLyricsShortcut(event)) {
-        return handleLyricsShortcut(context, event);
+    if (isQuickToggleShortcut(event) && handleQuickToggle(context, event)) {
+        return true;
     }
 
     if (!hasAnyTabModifier(event) && handleAsideToggle(context, event)) {

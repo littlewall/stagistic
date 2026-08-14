@@ -26,8 +26,9 @@ const createBlockSpec = (blockType: BlockNodeType) => ({
 
 const schema = new Schema({
     nodes: {
-        doc: {content: '(dialogue | aside | lyrics | stageDirection)+'},
+        doc: {content: '(character | dialogue | aside | lyrics | stageDirection)+'},
         text: {group: 'inline'},
+        character: createBlockSpec('character'),
         dialogue: createBlockSpec('dialogue'),
         aside: createBlockSpec('aside'),
         lyrics: createBlockSpec('lyrics'),
@@ -132,6 +133,26 @@ describe('handleTab', () => {
         expect(event.wasPrevented()).toBe(true);
         expect(getBlock()?.type.name).toBe('lyrics');
         expect(getBlock()?.attrs.blockType).toBe('lyrics');
+    });
+
+    it('converts character to stage direction on Option Tab', () => {
+        const {editor, getBlock} = createEditor('character', 'HAMLET');
+        const event = createTabEvent({altKey: true});
+
+        expect(handleTab(editor, event)).toBe(true);
+        expect(event.wasPrevented()).toBe(true);
+        expect(getBlock()?.type.name).toBe('stageDirection');
+        expect(getBlock()?.attrs.blockType).toBe('stageDirection');
+    });
+
+    it('converts stage direction to character on Option Tab', () => {
+        const {editor, getBlock} = createEditor('stageDirection', 'HAMLET enters');
+        const event = createTabEvent({altKey: true});
+
+        expect(handleTab(editor, event)).toBe(true);
+        expect(event.wasPrevented()).toBe(true);
+        expect(getBlock()?.type.name).toBe('character');
+        expect(getBlock()?.attrs.blockType).toBe('character');
     });
 
     it('keeps lyrics indentation behavior', () => {
