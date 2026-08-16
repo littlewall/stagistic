@@ -15,7 +15,7 @@
     width: 100%;
 
     &[data-focus-within] .selected {
-        border-color: var(--color-surface-accent);
+        border-color: var(--state-selected-edge);
     }
 
     &[data-focus-visible] .selected {
@@ -99,7 +99,7 @@
     }
 
     &:focus-visible {
-        outline: 2px solid var(--color-focus-ring, var(--color-surface-accent));
+        outline: 2px solid var(--color-focus-ring);
         outline-offset: 1px;
     }
 

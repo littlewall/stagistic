@@ -37,7 +37,7 @@
         border-radius: var(--radius-md);
 
         &:hover {
-            background: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
+            background: var(--state-hover);
         }
     }
 }
@@ -122,16 +122,19 @@
     border-radius: var(--radius-md);
 
     &.active {
-        background: color-mix(in oklch, var(--color-surface-accent) 80%, transparent);
-        box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-surface-accent) 55%, var(--color-border));
+        background: var(--state-selected);
+        box-shadow: inset 0 0 0 1px var(--state-selected-edge);
 
         & .itemButton {
             background: transparent;
         }
     }
 
+    /* A drop target is provisional: outline only, never a fill, so it cannot
+       be mistaken for the selected scene. */
     &.actDropTarget {
-        background: color-mix(in oklch, var(--color-surface-accent) 22%, transparent);
+        outline: var(--state-drop-edge);
+        outline-offset: -1.5px;
     }
 }
 
@@ -147,14 +150,14 @@
 
     & .actDeleteButton:focus-visible {
         opacity: 1;
-        outline: 2px solid var(--color-focus-ring, var(--color-surface-accent));
+        outline: 2px solid var(--color-focus-ring);
         outline-offset: 2px;
     }
 }
 
 .sceneRow {
     &:hover:not(.active) {
-        background: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
+        background: var(--state-hover);
     }
 
     &[data-dnd-placeholder = 'clone'] {
@@ -240,8 +243,7 @@
 
 .scenePlaceholder {
     min-height: 28px;
-    background: color-mix(in oklch, var(--color-surface-accent) 40%, transparent);
-    border: 1.5px dashed color-mix(in oklch, var(--color-border) 80%, var(--color-surface-accent));
+    border: var(--state-drop-edge);
     border-radius: var(--radius-md);
 }
 

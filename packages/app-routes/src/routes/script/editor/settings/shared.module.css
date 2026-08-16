@@ -98,11 +98,11 @@
     }
 
     :global(:root[data-focus-ring-visible]) &:focus::-webkit-slider-thumb {
-        box-shadow: 0 0 0 2px var(--color-focus-ring, var(--color-surface-accent));
+        box-shadow: 0 0 0 2px var(--color-focus-ring);
     }
 
     :global(:root[data-focus-ring-visible]) &:focus::-moz-range-thumb {
-        box-shadow: 0 0 0 2px var(--color-focus-ring, var(--color-surface-accent));
+        box-shadow: 0 0 0 2px var(--color-focus-ring);
     }
 }
 

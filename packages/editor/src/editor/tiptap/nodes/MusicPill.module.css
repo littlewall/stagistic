@@ -83,7 +83,7 @@
 
     &:hover {
         color: var(--color-text);
-        background: color-mix(in oklch, var(--color-surface-accent) 32%, transparent);
+        background: var(--state-hover);
     }
 }
 

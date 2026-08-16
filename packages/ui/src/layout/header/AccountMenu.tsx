@@ -38,8 +38,8 @@ export const AccountMenu = ({
         <MenuTrigger>
             {/*
               * A cog promises the whole settings surface, but this popover only
-              * carries `Appearance` — the real settings live in `ScriptMenu`. The
-              * palette matches what is actually behind the button and stays honest
+              * carries `Appearance` — the real settings live behind the header's
+              * own gear. The palette matches what is behind the button and stays honest
               * as the menu grows with further look-and-feel controls (density is
               * the obvious next one: `.size-sm/md/lg` exist in `base.css` with no
               * control anywhere).

@@ -1,4 +1,4 @@
-import {TableIcon} from '@stagistic/ui';
+import {AttributeManagerIcon} from '@stagistic/ui';
 
 import {
     ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
@@ -26,14 +26,15 @@ export const AttributeManagerSidebarButton = ({
 }: AttributeManagerSidebarButtonProps) => {
     const {openAttributeManagerModalWithPanel} = useScriptSettingsModal();
     const label = PANEL_LABEL_BY_ID[panelId];
+    const actionLabel = `Open ${label.toLowerCase()} in attribute manager`;
 
     return (
         <SidebarContextButton
-            ariaLabel={`Open ${label} in attribute manager`}
-            tooltipLabel={`Manage ${label.toLowerCase()}`}
+            ariaLabel={actionLabel}
+            tooltipLabel={actionLabel}
             onClick={() => openAttributeManagerModalWithPanel(panelId)}
         >
-            <TableIcon aria-hidden="true" />
+            <AttributeManagerIcon aria-hidden="true" />
         </SidebarContextButton>
     );
 };

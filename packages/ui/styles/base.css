@@ -71,7 +71,7 @@ select {
 }
 
 ::selection {
-    background: var(--color-surface-accent);
+    background: var(--state-selected);
 }
 
 ::-webkit-scrollbar {

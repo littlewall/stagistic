@@ -138,6 +138,40 @@
     --color-border-strong: oklch(from var(--base-neutral) .79 calc(c * var(--C-block)) h);
     --color-divider: var(--color-border);
 
+    /* ── Layers ────────────────────────────────────────────────────
+       Every surface belongs to exactly one layer, and the layer decides
+       both its background and how it is bounded. A boundary between two
+       layers gets tone plus --color-border; a boundary inside one layer
+       gets a --color-border-subtle hairline and nothing else. */
+    --layer-shell-bg: var(--color-bg);
+    --layer-shell-edge: var(--color-border-subtle);
+    --layer-panel-bg: var(--color-surface);
+    --layer-panel-edge: var(--color-border);
+    --layer-float-bg: var(--color-surface);
+
+    --shell-height: calc(48px * var(--size-scale));
+    --panel-width: calc(256px * var(--size-scale));
+    --panel-head-height: var(--control-height-md);
+
+    /* ── Interaction states ────────────────────────────────────────
+       One mechanic per state. Two states never differ only in the alpha
+       of a shared color, which is what made selection, hover, navigation
+       and drop targets read alike. */
+
+    /* Pointer echo — neutral, so lavender is free to mean selection. */
+    --state-hover: color-mix(in oklch, var(--color-surface-raised) 70%, transparent);
+
+    /* Chosen in the data — scene, character, music item. */
+    --state-selected: color-mix(in oklch, var(--base-blue) 14%, var(--color-surface));
+    --state-selected-edge: color-mix(in oklch, var(--base-blue) 45%, var(--color-border));
+
+    /* Where I am in the application — ink, outside the two-accent system. */
+    --state-current-edge: var(--color-text);
+    --state-current-bar-width: 2px;
+
+    /* Provisional — outline only, so it cannot be mistaken for selection. */
+    --state-drop-edge: 1.5px dashed color-mix(in oklch, var(--base-blue) 40%, var(--color-border));
+
     /* Focus */
     --color-focus-ring: oklch(from var(--base-blue) .58 c h);
     --color-selection-outline: color-mix(in oklch, var(--color-focus-ring) 80%, transparent);
@@ -177,7 +211,7 @@
     --select-button-font-weight: var(--font-weight-normal);
     --select-button-color: var(--color-text);
     --select-button-bg: transparent;
-    --select-button-hover-bg: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+    --select-button-hover-bg: var(--state-hover);
     --select-button-border-color: transparent;
     --select-button-border-width: 1px;
     --select-button-radius: var(--radius-md);
@@ -203,8 +237,8 @@
     --select-menu-item-font-size: var(--font-size-sm);
     --select-menu-item-color: var(--color-text);
     --select-menu-item-radius: var(--radius-md);
-    --select-menu-item-hover-bg: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
-    --select-menu-item-active-bg: color-mix(in oklch, var(--color-surface-accent) 85%, transparent);
+    --select-menu-item-hover-bg: var(--state-hover);
+    --select-menu-item-active-bg: var(--state-selected);
     --select-menu-item-active-font-weight: var(--font-weight-semibold);
 
     /* Bubble menu — compact floating panel above pills / empty-block chooser */
@@ -252,6 +286,13 @@
 
     /* dark mode overrides */
     --color-surface-accent: color-mix(in oklch, var(--base-blue) 26%, var(--color-surface));
+
+    /* A tint carries far less contrast over a .17 surface than over a .98 one,
+       so selection is mixed harder here and its edge is pushed past the border
+       to keep the same "chosen in the data" reading as in light mode. */
+    --state-selected: color-mix(in oklch, var(--base-blue) 23%, var(--color-surface));
+    --state-selected-edge: color-mix(in oklch, var(--base-blue) 55%, var(--color-border));
+    --state-drop-edge: 1.5px dashed color-mix(in oklch, var(--base-blue) 50%, var(--color-border));
     --color-border-subtle: oklch(from var(--base-neutral) .28 calc(c * var(--C-block)) h);
     --color-border-strong: oklch(from var(--base-neutral) .52 calc(c * var(--C-block)) h);
     --color-text-link: oklch(from var(--base-blue) .68 c h);

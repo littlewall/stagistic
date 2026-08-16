@@ -1,7 +1,6 @@
 import clsx from 'clsx';
 import {
     type ReactNode,
-    useCallback,
     useEffect,
     useState,
 } from 'react';
@@ -9,8 +8,11 @@ import {Button} from 'react-aria-components';
 
 import {Tooltip} from '../atoms/Tooltip';
 import {
+    AttributeManagerIcon,
+    DownloadIcon,
     HomeIcon,
     PlusIcon,
+    SettingsIcon,
     UploadIcon,
 } from '../icons/ui';
 import {
@@ -21,7 +23,7 @@ import {
 } from '../theme';
 import styles from './AppHeader.module.css';
 import {AccountMenu} from './header/AccountMenu';
-import {ScriptMenu} from './header/ScriptMenu';
+import {ScriptTitle} from './header/ScriptTitle';
 import {SyncIndicator} from './header/SyncIndicator';
 import type {
     ScriptListItem,
@@ -39,6 +41,7 @@ export type {
 export type AppHeaderProps = {
     leftControls?: ReactNode,
     scriptControls?: ReactNode,
+    scriptActions?: ReactNode,
     onHome: () => void,
     onNewScript?: () => void,
     onImportScript?: () => void,
@@ -49,6 +52,7 @@ export type AppHeaderProps = {
 export const AppHeader = ({
     leftControls,
     scriptControls,
+    scriptActions,
     onHome,
     onNewScript,
     onImportScript,
@@ -76,11 +80,13 @@ export const AppHeader = ({
                 data-tauri-drag-region
                 aria-hidden="true"
             />
-            <div className={clsx(
-                styles.inner,
-                isFullWidth && styles.full,
-                contentInset === 'page' && styles.pageInset,
-            )}>
+            <div
+                className={clsx(
+                    styles.inner,
+                    isFullWidth && styles.full,
+                    contentInset === 'page' && styles.pageInset,
+                )}
+            >
                 <div className={styles.leftControls}>
                     <Tooltip label="Home" placement="bottom">
                         <Button
@@ -119,10 +125,20 @@ export const AppHeader = ({
                     {scriptControls ?? null}
                 </div>
                 <div className={styles.rightControls}>
-                    <AccountMenu
-                        themeMode={themeMode}
-                        onThemeChange={setThemeMode}
-                    />
+                    {scriptActions ? (
+                        <>
+                            <div className={styles.actionGroup}>
+                                {scriptActions}
+                            </div>
+                            <span className={styles.actionDivider} aria-hidden="true" />
+                        </>
+                    ) : null}
+                    <div className={styles.actionGroup}>
+                        <AccountMenu
+                            themeMode={themeMode}
+                            onThemeChange={setThemeMode}
+                        />
+                    </div>
                 </div>
             </div>
         </header>
@@ -131,9 +147,8 @@ export const AppHeader = ({
 
 export type ScriptEditorAppHeaderProps = {
     currentScript: ScriptListItem,
-    recentScripts?: ScriptListItem[],
-    onSelectScript: (script: ScriptListItem) => void,
     onMenuAction?: (actionId: string) => void,
+    onRenameScript?: (name: string) => void,
     scriptSyncState?: ScriptSyncState,
     onHome: () => void,
     onBackToEditor?: () => void,
@@ -145,9 +160,8 @@ export type ScriptEditorAppHeaderProps = {
 
 export const ScriptEditorAppHeader = ({
     currentScript,
-    recentScripts = [],
-    onSelectScript,
     onMenuAction,
+    onRenameScript,
     scriptSyncState,
     onHome,
     onBackToEditor,
@@ -156,30 +170,42 @@ export const ScriptEditorAppHeader = ({
     activeView,
     onSelectView,
 }: ScriptEditorAppHeaderProps) => {
-    const handleScriptMenuAction = useCallback((key: string) => {
-        if (key.startsWith('script:')) {
-            const scriptId = key.replace('script:', '');
-            const script = recentScripts.find(item => item.id === scriptId);
-
-            if (script) {
-                onSelectScript(script);
-            }
-
-            return;
-        }
-
-        onMenuAction?.(key);
-    }, [
-        onMenuAction,
-        onSelectScript,
-        recentScripts,
-    ]);
-
     return (
         <AppHeader
             onHome={onHome}
             isFullWidth={isFullWidth}
             scriptControls={<ViewSwitcher activeView={activeView} onSelectView={onSelectView} />}
+            scriptActions={onMenuAction ? (
+                <>
+                    <Tooltip label="Open script settings" placement="bottom">
+                        <Button
+                            className={styles.iconButton}
+                            aria-label="Open script settings"
+                            onPress={() => onMenuAction('settings')}
+                        >
+                            <SettingsIcon className={styles.icon} aria-hidden="true" />
+                        </Button>
+                    </Tooltip>
+                    <Tooltip label="Open attribute manager" placement="bottom">
+                        <Button
+                            className={styles.iconButton}
+                            aria-label="Open attribute manager"
+                            onPress={() => onMenuAction('attributes')}
+                        >
+                            <AttributeManagerIcon className={styles.icon} aria-hidden="true" />
+                        </Button>
+                    </Tooltip>
+                    <Tooltip label="Download .stagistic file" placement="bottom">
+                        <Button
+                            className={styles.iconButton}
+                            aria-label="Download .stagistic file"
+                            onPress={() => onMenuAction('export-stagistic')}
+                        >
+                            <DownloadIcon className={styles.icon} aria-hidden="true" />
+                        </Button>
+                    </Tooltip>
+                </>
+            ) : null}
             leftControls={(
                 <>
                     {onBackToEditor ? (
@@ -190,11 +216,7 @@ export const ScriptEditorAppHeader = ({
                             {backToEditorLabel}
                         </Button>
                     ) : null}
-                    <ScriptMenu
-                        script={currentScript}
-                        recentScripts={recentScripts}
-                        onAction={handleScriptMenuAction}
-                    />
+                    <ScriptTitle name={currentScript.name} onRename={onRenameScript} />
                     <SyncIndicator state={scriptSyncState} />
                 </>
             )}

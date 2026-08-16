@@ -1,5 +1,5 @@
 const OVERLAY_MAX_WIDTH = 1199;
-const EXCLUSIVE_MAX_WIDTH = 1469;
+const EXCLUSIVE_MAX_WIDTH = OVERLAY_MAX_WIDTH;
 
 /*
  * Keep these in sync with the matching `@media (max-width: …)` blocks in

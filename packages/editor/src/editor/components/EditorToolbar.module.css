@@ -1,33 +1,36 @@
 .toolbar {
     display: flex;
-    gap: var(--space-md);
+    gap: var(--space-sm);
     align-items: center;
-    justify-content: space-between;
-    padding: var(--space-md) 0;
+    height: var(--panel-head-height);
+    padding: 0;
     background: transparent;
-
-    @media (max-width: 900px) {
-        flex-wrap: wrap;
-    }
 }
 
 .group {
     display: inline-flex;
-    gap: var(--space-md);
+    gap: var(--space-xs);
     align-items: center;
 }
 
 .rightGroup {
     display: inline-flex;
-    gap: var(--space-md);
+    gap: var(--space-sm);
     align-items: center;
-    margin-left: auto;
+    margin-left: 0;
+}
 
-    @media (max-width: 900px) {
-        justify-content: flex-end;
-        width: 100%;
-        margin-left: 0;
-    }
+.divider {
+    flex: none;
+    width: 1px;
+    height: calc(20px * var(--size-scale));
+    margin: 0 var(--space-xs);
+    background: var(--color-border-subtle);
+}
+
+.spacer {
+    flex: 1;
+    min-width: var(--space-md);
 }
 
 .iconButton {
@@ -38,14 +41,14 @@
     justify-content: center;
     width: var(--control-height-sm);
     height: var(--control-height-sm);
-    color: var(--color-text);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 0;
     border-radius: var(--radius-md);
     transition: background .15s ease, border-color .15s ease;
 
     &:hover {
-        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+        background: var(--state-hover);
     }
 
     &:disabled {
@@ -65,12 +68,11 @@
 
     &.active {
         color: var(--color-text);
-        background: var(--color-surface-raised);
-        border-color: color-mix(in oklch, var(--color-text) 28%, var(--color-border));
-        box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-text) 16%, transparent);
+        background: var(--state-selected);
+        box-shadow: inset 0 0 0 1px var(--state-selected-edge);
 
         &:hover {
-            background: color-mix(in oklch, var(--color-surface-raised) 82%, var(--color-surface));
+            background: var(--state-selected);
         }
     }
 }
@@ -114,10 +116,13 @@
 .selectButton {
     cursor: pointer;
     display: grid;
-    grid-template-columns: auto 1fr auto;
+
+    /* Icon, label, chevron — nothing between the label and the chevron, so the
+       chevron ends where the button ends and the whole width stays clickable. */
+    grid-template-columns: auto minmax(0, 1fr) auto;
     gap: var(--select-button-gap);
     align-items: center;
-    width: calc(200px * var(--size-scale));
+    width: calc(210px * var(--size-scale));
     height: var(--select-button-height);
     padding: 0 var(--select-button-padding-inline);
     font-size: var(--select-button-font-size);

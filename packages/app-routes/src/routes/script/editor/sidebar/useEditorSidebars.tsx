@@ -3,7 +3,7 @@ import {
     useMemo,
 } from 'react';
 
-import {EditorSidebarToolbar} from './EditorSidebarToolbar';
+import {SidebarPanelSelect} from './SidebarPanelSelect';
 import type {
     SidebarPanel,
     SidebarPanelId,
@@ -21,8 +21,6 @@ interface UseEditorSidebarsArgs {
 interface UseEditorSidebarsResult {
     leftSidebarToggle: SidebarToggle,
     rightSidebarToggle: SidebarToggle,
-    leftSidebarHeader: ReactNode,
-    rightSidebarHeader: ReactNode,
     leftSidebar: ReactNode,
     rightSidebar: ReactNode,
 }
@@ -56,35 +54,37 @@ export const useEditorSidebars = ({
 
     const leftPanel = panelById.get(layout.leftPanelId);
     const rightPanel = panelById.get(layout.rightPanelId);
+    const leftNavigation = (
+        <SidebarPanelSelect
+            side="left"
+            panels={panels}
+            selectedPanelId={layout.leftPanelId}
+            onSelectPanel={layout.selectLeft}
+            ariaLabel="Select left sidebar panel"
+        />
+    );
+    const rightNavigation = (
+        <SidebarPanelSelect
+            side="right"
+            panels={panels}
+            selectedPanelId={layout.rightPanelId}
+            onSelectPanel={layout.selectRight}
+            ariaLabel="Select right sidebar panel"
+        />
+    );
 
     return {
         leftSidebarToggle: {
             isOpen: layout.isLeftOpen,
+            label: leftPanel?.label ?? 'Left',
             onToggle: layout.toggleLeft,
         },
         rightSidebarToggle: {
             isOpen: layout.isRightOpen,
+            label: rightPanel?.label ?? 'Right',
             onToggle: layout.toggleRight,
         },
-        leftSidebarHeader: (
-            <EditorSidebarToolbar
-                side="left"
-                panels={panels}
-                selectedPanelId={layout.leftPanelId}
-                onSelectPanel={layout.selectLeft}
-                onClose={layout.toggleLeft}
-            />
-        ),
-        rightSidebarHeader: (
-            <EditorSidebarToolbar
-                side="right"
-                panels={panels}
-                selectedPanelId={layout.rightPanelId}
-                onSelectPanel={layout.selectRight}
-                onClose={layout.toggleRight}
-            />
-        ),
-        leftSidebar: leftPanel?.renderContent() ?? null,
-        rightSidebar: rightPanel?.renderContent() ?? null,
+        leftSidebar: leftPanel?.renderContent(leftNavigation) ?? null,
+        rightSidebar: rightPanel?.renderContent(rightNavigation) ?? null,
     };
 };

@@ -1,8 +1,10 @@
+import {serializeStagistic} from '@stagistic/script';
 import {AppLayout} from '@stagistic/ui';
 import {useCallback} from 'react';
 
 import {ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../useDocumentTitle';
+import {downloadStagistic} from './downloadStagistic';
 import {ExportControlPanel} from './export/ExportControlPanel';
 import {ExportPreview} from './export/ExportPreview';
 import {ExportProvider} from './export/ExportProvider';
@@ -12,7 +14,7 @@ import {useScriptWorkspace} from './ScriptWorkspaceContext';
 import {useScriptSettingsModal} from './settings/ScriptSettingsModalProvider';
 
 export const ScriptExportRoute = () => {
-    const {currentScript, recentScripts} = useScriptWorkspace();
+    const {currentScript} = useScriptWorkspace();
 
     useDocumentTitle(currentScript ? `Export · ${currentScript.name}` : 'Export');
 
@@ -20,6 +22,8 @@ export const ScriptExportRoute = () => {
     const {
         openSettingsModal,
         openAttributeManagerModal,
+        scriptTitleDraft,
+        updateScriptTitle,
         musicAttachmentsState,
     } = useScriptSettingsModal();
 
@@ -32,16 +36,32 @@ export const ScriptExportRoute = () => {
 
         if (actionId === 'attributes') {
             openAttributeManagerModal();
+
+            return;
         }
-    }, [openAttributeManagerModal, openSettingsModal]);
+
+        if (actionId === 'export-stagistic' && script) {
+            const content = serializeStagistic(script.doc, {
+                scriptTitle: scriptTitleDraft,
+                titlePage: script.titlePage ?? undefined,
+            });
+
+            downloadStagistic(scriptTitleDraft, content);
+        }
+    }, [
+        openAttributeManagerModal,
+        openSettingsModal,
+        script,
+        scriptTitleDraft,
+    ]);
 
     return (
         <AppLayout
             header={currentScript ? (
                 <ScriptEditorAppHeader
-                    currentScript={currentScript}
-                    recentScripts={recentScripts}
+                    currentScript={{...currentScript, name: scriptTitleDraft}}
                     onMenuAction={handleMenuAction}
+                    onRenameScript={updateScriptTitle}
                     activeView="export"
                 />
             ) : null}

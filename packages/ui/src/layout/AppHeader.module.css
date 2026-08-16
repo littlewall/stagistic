@@ -1,12 +1,13 @@
 .header {
-    --app-header-height: 44px;
     --traffic-light-space: 76px;
 
+    /* Shell layer — see The Recessive Shell Rule. The bar sits at background
+       lightness and separates with a single hairline, so panels and canvas
+       read as objects placed on it rather than as more of the same slab. */
     position: relative;
-    height: var(--app-header-height);
-    background: var(--color-surface);
-    backdrop-filter: blur(8px);
-    border-bottom: 1px solid var(--color-border);
+    height: var(--shell-height);
+    background: var(--layer-shell-bg);
+    border-bottom: 1px solid var(--layer-shell-edge);
 
     & .inner {
         position: relative;
@@ -39,19 +40,32 @@
             position: relative;
             z-index: 1;
             display: inline-flex;
-            gap: var(--space-md);
-            align-items: center;
+            place-self: stretch center;
             justify-content: center;
-            justify-self: center;
             width: max-content;
         }
 
+        /* The Scope Gradient Rule — actions run left to right from the
+           narrowest scope to the widest: script, then application. */
         & .rightControls {
             position: relative;
             z-index: 1;
             display: inline-flex;
+            gap: var(--space-lg);
             align-items: center;
             justify-self: end;
+        }
+
+        & .actionGroup {
+            display: inline-flex;
+            gap: var(--space-xs);
+            align-items: center;
+        }
+
+        & .actionDivider {
+            width: 1px;
+            height: calc(18px * var(--size-scale));
+            background: var(--layer-shell-edge);
         }
     }
 
@@ -87,7 +101,7 @@
     }
 
     &[data-hovered] {
-        background: color-mix(in oklch, var(--color-surface-accent) 60%, transparent);
+        background: var(--state-hover);
     }
 
     &[data-pressed] {
@@ -110,14 +124,83 @@
 }
 
 .iconButton {
-    padding: var(--space-md);
-    border-radius: var(--radius-full);
+    width: var(--control-height-md);
+    height: var(--control-height-md);
+    padding: 0;
+    color: var(--color-text-muted);
+    border-radius: var(--radius-md);
+
+    &[data-hovered],
+    &[data-pressed],
+    &[data-focus-visible] {
+        color: var(--color-text);
+    }
 
     & .icon {
         width: calc(16px * var(--size-scale));
         height: calc(16px * var(--size-scale));
-        color: var(--color-text);
+        color: currentcolor;
     }
+}
+
+.scriptTitle,
+.scriptTitleStatic {
+    overflow: hidden;
+    max-width: calc(260px * var(--size-scale));
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
+    text-overflow: ellipsis;
+    letter-spacing: -.01em;
+    white-space: nowrap;
+}
+
+.scriptTitle {
+    display: inline-grid;
+    min-width: calc(72px * var(--size-scale));
+
+    &::after,
+    & .scriptTitleInput {
+        grid-area: 1 / 1;
+        min-width: 0;
+        padding: var(--space-xs) var(--space-sm);
+        font: inherit;
+        letter-spacing: inherit;
+        white-space: pre;
+        border: 1px solid transparent;
+        border-radius: var(--radius-sm);
+    }
+
+    &::after {
+        content: attr(data-value) ' ';
+        visibility: hidden;
+    }
+
+    & .scriptTitleInput {
+        cursor: text;
+        width: 100%;
+        color: inherit;
+        text-overflow: ellipsis;
+        background: transparent;
+        outline: none;
+        transition: background .12s ease, border-color .12s ease;
+
+        &:hover {
+            background: var(--state-hover);
+            border-color: var(--color-border-subtle);
+        }
+
+        &:focus {
+            background: var(--layer-panel-bg);
+            border-color: var(--layer-panel-edge);
+            outline: var(--focus-ring);
+            outline-offset: 1px;
+        }
+    }
+}
+
+.scriptTitleStatic {
+    padding: var(--space-xs) var(--space-sm);
 }
 
 .menuTrigger {
@@ -213,7 +296,7 @@
 
         &[data-focused],
         &[data-hovered] {
-            background: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
+            background: var(--state-hover);
         }
 
         &[data-disabled] {
@@ -281,7 +364,7 @@
         }
 
         &[data-hovered] {
-            background: color-mix(in oklch, var(--color-surface-accent) 40%, transparent);
+            background: var(--state-hover);
         }
 
         &[data-focus-visible] {

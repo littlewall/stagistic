@@ -136,7 +136,7 @@
     &:hover,
     &:focus-visible {
         color: var(--color-text);
-        background: color-mix(in oklch, var(--color-surface-accent) 30%, transparent);
+        background: var(--state-hover);
         outline: none;
     }
 
@@ -188,7 +188,7 @@
 
     &:hover,
     &:focus-visible {
-        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+        background: var(--state-hover);
         outline: none;
     }
 }

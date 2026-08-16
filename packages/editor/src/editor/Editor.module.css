@@ -20,7 +20,7 @@
     flex-direction: column;
     height: 100%;
     min-height: 0;
-    background: var(--color-surface);
+    background: var(--layer-shell-bg);
 }
 
 :global(:root[data-theme = 'dark']) .root {
@@ -33,59 +33,54 @@
     --character-tag-tint-strength: 44%;
 }
 
+.shellBody {
+    position: relative;
+    overflow: hidden;
+    display: grid;
+    grid-template-columns: var(--left-sidebar-size) minmax(0, 1fr) var(--right-sidebar-size);
+    flex: 1;
+    min-height: 0;
+
+    @media (max-width: 1199px) {
+        grid-template-columns: 0 minmax(0, 1fr) 0;
+    }
+}
+
+.editorMain {
+    overflow: hidden;
+    display: flex;
+    grid-column: 2;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 0;
+}
+
 /*
- * The side tracks already collapse to the toggle rail on their own — the sizes
- * carry the open state (see `buildRootStyle`). Pinning them to the rail below
- * the overlay breakpoint would squeeze the open sidebar's toolbar into ~56 px,
- * clipping the panel select away and leaving only the close button, so the
- * drawer could never be switched to another panel.
+ * Two different scopes share this row, so they are placed rather than flowed.
+ * The panel toggles belong to the shell and keep the outer edges; everything
+ * else acts on the text and is confined to the page column below, which is why
+ * the outer tracks are fixed — that keeps the middle track centred on the same
+ * axis as the paper even when only one toggle is present.
  */
 .toolbarRow {
+    --toolbar-edge-width: var(--control-height-sm);
+
     display: grid;
-    grid-template-columns: var(--left-toolbar-size) minmax(0, 1fr) var(--right-toolbar-size);
-    background: var(--color-surface);
-    border-bottom: 1px solid var(--color-border);
-}
-
-.toolbarSide {
-    position: relative;
-    overflow: clip visible;
-    display: flex;
+    grid-template-columns: var(--toolbar-edge-width) minmax(0, 1fr) var(--toolbar-edge-width);
+    flex: none;
+    gap: var(--space-md);
     align-items: center;
-    min-width: 0;
-    padding: var(--space-md) var(--space-lg);
+    padding: 0 var(--space-lg);
+    background: var(--layer-panel-bg);
+    border-bottom: 1px solid var(--layer-shell-edge);
 }
 
-.toolbarSideLeft {
-    justify-content: flex-start;
-
-    &::after {
-        content: '';
-        position: absolute;
-        top: 0;
-        right: 0;
-        bottom: 0;
-        width: 1px;
-        opacity: var(--left-toolbar-divider-opacity, 0);
-        background: var(--color-border);
-        transition: opacity .24s ease;
-    }
+.toolbarToggleStart {
+    grid-column: 1;
 }
 
-.toolbarSideRight {
-    justify-content: flex-end;
-
-    &::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        width: 1px;
-        opacity: var(--right-toolbar-divider-opacity, 0);
-        background: var(--color-border);
-        transition: opacity .24s ease;
-    }
+.toolbarToggleEnd {
+    grid-column: 3;
 }
 
 .sidebarToggleButton {
@@ -95,14 +90,24 @@
     justify-content: center;
     width: var(--control-height-sm);
     height: var(--control-height-sm);
-    color: var(--color-text);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 0;
     border-radius: var(--radius-md);
     transition: background .15s ease, border-color .15s ease;
 
     &:hover {
-        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+        background: var(--state-hover);
+    }
+
+    /*
+     * See The Visible Target Rule. The panel is already 256px of evidence that
+     * it is open, so a lavender chip here would both repeat that and spend
+     * selection's mechanic on something that is not a selection; the icon's
+     * filled sliver says which side, and the ink says it is on.
+     */
+    &.active {
+        color: var(--color-text);
     }
 
     & svg {
@@ -116,42 +121,15 @@
     }
 }
 
-.sidebarToggleIcon {
-    transform-origin: center;
-    transform: rotate(0deg);
-    transition: transform .24s ease;
-
-    &.flipped {
-        transform: rotate(180deg);
-    }
-}
-
-.toolbarCenter {
-    overflow: visible;
-    min-width: 0;
-    padding: 0 var(--space-3xl);
-
-    @media (max-width: 1199px) {
-        padding: 0 var(--space-xl);
-    }
-}
-
+/*
+ * Bold, italic and the block selector format the page, so they are the width of
+ * the page. Letting them stretch across the shell put them nowhere near the
+ * text they change once both panels were closed.
+ */
 .toolbarCenterInner {
+    grid-column: 2;
     width: min(100%, var(--editor-page-width, 960px));
-    margin: 0 auto;
-}
-
-.contentRow {
-    overflow: hidden;
-    display: grid;
-    grid-template-columns: var(--left-sidebar-size) minmax(0, 1fr) var(--right-sidebar-size);
-    flex: 1;
-    min-height: 0;
-
-    @media (max-width: 1199px) {
-        position: relative;
-        grid-template-columns: var(--toolbar-toggle-width) minmax(0, 1fr) var(--toolbar-toggle-width);
-    }
+    margin-inline: auto;
 }
 
 /*
@@ -165,7 +143,7 @@
     isolation: isolate;
     overflow: hidden;
     display: flex;
-    grid-column: 2;
+    flex: 1;
     flex-direction: column;
     align-items: center;
     min-width: 0;
@@ -183,7 +161,7 @@
     min-height: 0;
     visibility: hidden;
     opacity: 0;
-    background: var(--color-surface);
+    background: var(--layer-panel-bg);
 }
 
 .sidebarOpen {
@@ -191,7 +169,7 @@
     min-height: 0;
     visibility: visible;
     opacity: 1;
-    background: var(--color-surface);
+    background: var(--layer-panel-bg);
 
     @media (max-width: 1199px) {
         transform: translateX(0);
@@ -205,7 +183,7 @@
     flex-direction: column;
     align-items: flex-start;
     min-height: 0;
-    border-right: 1px solid var(--color-border);
+    border-right: 1px solid var(--layer-panel-edge);
 
     & > * {
         width: calc(var(--editor-sidebar-width) - 1px);
@@ -229,7 +207,7 @@
     flex-direction: column;
     align-items: flex-end;
     min-height: 0;
-    border-left: 1px solid var(--color-border);
+    border-left: 1px solid var(--layer-panel-edge);
 
     & > * {
         width: calc(var(--editor-sidebar-width) - 1px);
@@ -249,10 +227,14 @@
 
 .sidebarLeft,
 .sidebarRight {
+    position: relative;
+    z-index: 3;
+    overflow: hidden;
+    min-width: 0;
 
     @media (max-width: 1199px) {
         position: absolute;
-        z-index: 2;
+        z-index: 3;
         top: 0;
         bottom: 0;
         width: var(--editor-sidebar-width);
@@ -268,10 +250,32 @@
     }
 }
 
+.sidebarScrim {
+    pointer-events: none;
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    display: none;
+    opacity: 0;
+    background: var(--color-overlay-scrim);
+    border: 0;
+    transition: opacity .24s ease;
+
+    @media (max-width: 1199px) {
+        display: block;
+    }
+}
+
+.sidebarScrimVisible {
+
+    @media (max-width: 1199px) {
+        pointer-events: auto;
+        opacity: 1;
+    }
+}
+
 @media (prefers-reduced-motion: reduce) {
-    .toolbarSideLeft::after,
-    .toolbarSideRight::before,
-    .sidebarToggleIcon {
+    .sidebarScrim {
         transition-duration: 0ms;
     }
 }

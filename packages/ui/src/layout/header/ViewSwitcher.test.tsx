@@ -19,6 +19,6 @@ describe('ViewSwitcher', () => {
 
         expect(markup).toContain('Editor');
         expect(markup).toContain('Export');
-        expect(markup).toContain('aria-pressed="true"');
+        expect(markup).toContain('aria-current="page"');
     });
 });

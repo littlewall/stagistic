@@ -43,7 +43,7 @@
     border-radius: var(--radius-md);
 
     &:hover:not(.active) {
-        background: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
+        background: var(--state-hover);
     }
 
     &:hover .actions,
@@ -52,8 +52,8 @@
     }
 
     &.active {
-        background: color-mix(in oklch, var(--color-surface-accent) 80%, transparent);
-        box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-surface-accent) 55%, var(--color-border));
+        background: var(--state-selected);
+        box-shadow: inset 0 0 0 1px var(--state-selected-edge);
     }
 }
 
@@ -103,7 +103,7 @@
 
     &:hover {
         color: var(--color-text);
-        background: color-mix(in oklch, var(--color-surface-accent) 30%, transparent);
+        background: var(--state-hover);
     }
 
     &:active {

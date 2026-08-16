@@ -37,7 +37,7 @@ import {useScriptSettingsModal} from './settings/ScriptSettingsModalProvider';
 import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
 
 const AUTOSAVE_DELAY_MS = 1500;
-const SIDEBAR_WIDTH = 'calc(280px * var(--size-scale))';
+const SIDEBAR_WIDTH = 'calc(256px * var(--size-scale))';
 
 type AddMusicModalState =
     | {source: 'sidebar'}
@@ -51,7 +51,6 @@ export const ScriptEditorRoute = () => {
     const {
         currentScript,
         currentScriptId,
-        recentScripts,
         initialValue,
         initialIndexSnapshot,
         storageError,
@@ -68,6 +67,7 @@ export const ScriptEditorRoute = () => {
         isEditorPresentationHydrated,
         titlePageDraft,
         scriptTitleDraft,
+        updateScriptTitle,
         musicState,
         openSettingsModal,
         openAttributeManagerModal,
@@ -168,18 +168,19 @@ export const ScriptEditorRoute = () => {
         {
             id: 'structure',
             label: 'Structure',
-            renderContent: () => <ScriptStructureSidebar />,
+            renderContent: header => <ScriptStructureSidebar header={header} />,
         },
         {
             id: 'characters',
             label: 'Characters',
-            renderContent: () => <ScriptCharactersSidebar />,
+            renderContent: header => <ScriptCharactersSidebar header={header} />,
         },
         {
             id: 'music',
             label: 'Music',
-            renderContent: () => (
+            renderContent: header => (
                 <ScriptMusicSidebar
+                    header={header}
                     music={music}
                     isLoading={musicState.isLoading}
                     onAddMusic={openAddMusicModal}
@@ -195,8 +196,6 @@ export const ScriptEditorRoute = () => {
     const {
         leftSidebarToggle,
         rightSidebarToggle,
-        leftSidebarHeader,
-        rightSidebarHeader,
         leftSidebar,
         rightSidebar,
     } = useEditorSidebars({
@@ -229,9 +228,9 @@ export const ScriptEditorRoute = () => {
                     displayedCurrentScript ? (
                         <ScriptEditorAppHeader
                             currentScript={displayedCurrentScript}
-                            recentScripts={recentScripts}
                             scriptSyncState={saveIndicator}
                             onMenuAction={handleMenuAction}
+                            onRenameScript={updateScriptTitle}
                             activeView="editor"
                         />
                     ) : (
@@ -266,8 +265,6 @@ export const ScriptEditorRoute = () => {
                         autoFocus: shouldAutoFocus,
                         leftSidebarToggle,
                         rightSidebarToggle,
-                        leftSidebarHeader,
-                        rightSidebarHeader,
                         sidebarWidth: SIDEBAR_WIDTH,
                     }}
                     callbacks={{

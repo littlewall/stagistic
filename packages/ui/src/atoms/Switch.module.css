@@ -12,7 +12,7 @@
     }
 
     &[data-focus-visible] .track {
-        outline: 2px solid var(--color-focus-ring, var(--color-surface-accent));
+        outline: 2px solid var(--color-focus-ring);
         outline-offset: 2px;
     }
 
