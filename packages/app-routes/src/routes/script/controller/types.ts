@@ -24,7 +24,6 @@ export type ScriptEditorController = {
     currentScriptId: string | null,
     characterCatalog: ReturnType<typeof useScriptCharacterCatalog>,
     musicCatalog: ReturnType<typeof useScriptMusic>,
-    recentScripts: CurrentScriptItem[],
     initialValue: ScriptDocument | null | undefined,
     initialIndexSnapshot: ScriptBlockIndexSnapshot | null | undefined,
     storageError: string | null,

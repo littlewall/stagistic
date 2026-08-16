@@ -1,0 +1,1300 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="utf-8">
+<title>Stagistic — editor shell v0 (2026-08-14)</title>
+<style>
+/* Fonty z repa (@fontsource) — stejné soubory jako produkce, bez CDN */
+@font-face {
+    font-family: 'IBM Plex Sans Variable';
+    font-style: normal;
+    font-weight: 100 700;
+    font-display: block;
+    src: url('fonts/ibm-plex-sans-latin-wght-normal.woff2') format('woff2-variations');
+}
+@font-face { font-family: 'Courier Prime'; font-style: normal; font-weight: 400; font-display: block; src: url('fonts/courier-prime-latin-400-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Courier Prime'; font-style: normal; font-weight: 700; font-display: block; src: url('fonts/courier-prime-latin-700-normal.woff2') format('woff2'); }
+@font-face { font-family: 'Courier Prime'; font-style: italic; font-weight: 400; font-display: block; src: url('fonts/courier-prime-latin-400-italic.woff2') format('woff2'); }
+@font-face { font-family: 'Courier Prime'; font-style: italic; font-weight: 700; font-display: block; src: url('fonts/courier-prime-latin-700-italic.woff2') format('woff2'); }
+
+/* ════════════════════════════════════════════════════════════════
+   TOKENS — kopie packages/ui/styles/tokens.css (beze změny)
+   ════════════════════════════════════════════════════════════════ */
+:root {
+    --font-family-sans: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --font-family-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
+
+    --size-scale: 1.08;
+
+    --space-xs: calc(2px * var(--size-scale));
+    --space-sm: calc(4px * var(--size-scale));
+    --space-md: calc(8px * var(--size-scale));
+    --space-lg: calc(12px * var(--size-scale));
+    --space-xl: calc(16px * var(--size-scale));
+    --space-2xl: calc(20px * var(--size-scale));
+    --space-3xl: calc(24px * var(--size-scale));
+    --space-5xl: calc(32px * var(--size-scale));
+
+    --radius-xs: calc(4px * var(--size-scale));
+    --radius-sm: calc(6px * var(--size-scale));
+    --radius-md: calc(8px * var(--size-scale));
+    --radius-lg: calc(10px * var(--size-scale));
+    --radius-full: 9999px;
+
+    --font-size-xxs: calc(10px * var(--size-scale));
+    --font-size-xs: calc(11px * var(--size-scale));
+    --font-size-sm: calc(12px * var(--size-scale));
+    --font-size-md: calc(13px * var(--size-scale));
+    --font-size-lg: calc(15px * var(--size-scale));
+    --font-size-2xl: calc(18px * var(--size-scale));
+
+    --font-weight-normal: 400;
+    --font-weight-medium: 500;
+    --font-weight-bold: 700;
+
+    --letter-spacing-lg: .08em;
+
+    --control-height-xs: calc(24px * var(--size-scale));
+    --control-height-sm: calc(26px * var(--size-scale));
+    --control-height-md: calc(32px * var(--size-scale));
+
+    --palette-lavender: oklch(.6251 .0699 277.48);
+    --palette-copper: oklch(.6622 .1479 62.72);
+
+    --base-neutral: oklch(.461 .0257 51);
+    --base-amber: var(--palette-copper);
+    --base-blue: var(--palette-lavender);
+    --base-green: oklch(.52 .0971 165.2);
+    --base-yellow: oklch(.769 .1006 56.1);
+    --base-red: oklch(.554 .1273 14.8);
+    --base-shadow: oklch(.177 .0062 41.5);
+
+    --C-bg: .15;
+    --C-block: .55;
+
+    --L-bg: .97;
+    --L-surface: .985;
+    --L-paper: .985;
+    --L-highlight: .952;
+    --L-text: .155;
+    --L-text-muted: .465;
+    --L-border: .875;
+    --L-success: .48;
+
+    --A-shadow-popover: .18;
+    --A-shadow-canvas: .06;
+
+    --color-bg: oklch(from var(--base-neutral) var(--L-bg) calc(c * var(--C-bg)) h);
+    --color-surface: oklch(from var(--base-neutral) var(--L-surface) calc(c * var(--C-bg)) h);
+    --color-surface-raised: oklch(from var(--base-neutral) var(--L-highlight) calc(c * var(--C-bg)) h);
+    --color-surface-accent: color-mix(in oklch, var(--base-blue) 16%, var(--color-surface));
+    --color-surface-paper: oklch(from var(--base-neutral) var(--L-paper) calc(c * .1) h);
+
+    --color-text: oklch(from var(--base-neutral) var(--L-text) calc(c * var(--C-block)) h);
+    --color-text-muted: oklch(from var(--base-neutral) var(--L-text-muted) calc(c * var(--C-block)) h);
+    --color-accent: var(--base-amber);
+
+    --color-border-subtle: oklch(from var(--base-neutral) .93 calc(c * var(--C-block)) h);
+    --color-border: oklch(from var(--base-neutral) var(--L-border) calc(c * var(--C-block)) h);
+
+    --color-focus-ring: oklch(from var(--base-blue) .58 c h);
+    --focus-ring: 2px solid var(--color-focus-ring);
+    --focus-ring-offset: 2px;
+
+    --color-status-success: oklch(from var(--base-green) var(--L-success) c h);
+
+    --color-shadow-popover: oklch(from var(--base-shadow) .13 c h / var(--A-shadow-popover));
+    --color-shadow-canvas: oklch(from var(--base-shadow) .13 c h / var(--A-shadow-canvas));
+    --shadow-popover: 0 10px 30px var(--color-shadow-popover);
+    --shadow-canvas: 0 12px 30px var(--color-shadow-canvas);
+
+    color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+    --C-bg: .25;
+    --L-bg: .135;
+    --L-surface: .17;
+    --L-paper: .26;
+    --L-highlight: .33;
+    --L-text: .92;
+    --L-text-muted: .73;
+    --L-border: .36;
+    --L-success: .57;
+    --A-shadow-popover: .5;
+    --A-shadow-canvas: .22;
+    --color-surface-accent: color-mix(in oklch, var(--base-blue) 26%, var(--color-surface));
+    --color-border-subtle: oklch(from var(--base-neutral) .28 calc(c * var(--C-block)) h);
+    --color-focus-ring: oklch(from var(--base-blue) .68 c h);
+    color-scheme: dark;
+}
+
+/* ════════════════════════════════════════════════════════════════
+   NOVÉ TOKENY — vrstvy + stavy  (návrh k doplnění do tokens.css)
+   ════════════════════════════════════════════════════════════════ */
+:root {
+    /* A. Model vrstev */
+    --layer-shell-bg:    var(--color-bg);
+    --layer-shell-edge:  var(--color-border-subtle);
+    --layer-panel-bg:    var(--color-surface);
+    --layer-panel-edge:  var(--color-border);
+    --layer-float-bg:    var(--color-surface);
+
+    --shell-height:      calc(48px * var(--size-scale));
+    --panel-width:       calc(256px * var(--size-scale));
+    --panel-head-height: var(--control-height-md);
+
+    /* B. Sémantika stavů — pět mechanik */
+    --state-hover:          color-mix(in oklch, var(--color-surface-raised) 70%, transparent);
+    --state-selected:       color-mix(in oklch, var(--base-blue) 14%, var(--color-surface));
+    --state-selected-edge:  color-mix(in oklch, var(--base-blue) 45%, var(--color-border));
+    --state-current-edge:   var(--color-text);
+    --state-drop-edge:      1.5px dashed color-mix(in oklch, var(--base-blue) 40%, var(--color-border));
+}
+
+/* ════════════════════════════════════════════════════════════════
+   STRÁNKA MOCKUPU  (není součást produktu)
+   ════════════════════════════════════════════════════════════════ */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 0 0 96px;
+    font-family: var(--font-family-sans);
+    color: var(--color-text);
+    background: oklch(from var(--base-neutral) calc(var(--L-bg) - .025) calc(c * .1) h);
+}
+
+.docBar {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    gap: var(--space-xl);
+    align-items: center;
+    padding: var(--space-lg) var(--space-3xl);
+    font-size: var(--font-size-sm);
+    background: var(--layer-shell-bg);
+    border-bottom: 1px solid var(--color-border);
+}
+.docBar strong { font-weight: var(--font-weight-medium); }
+.docBar .spacer { flex: 1; }
+.docBar button {
+    cursor: pointer;
+    height: var(--control-height-sm);
+    padding: 0 var(--space-lg);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+}
+.docBar button:hover { background: var(--state-hover); }
+
+.docSection {
+    max-width: 1480px;
+    margin: 0 auto;
+    padding: var(--space-5xl) var(--space-3xl) 0;
+}
+.docSection > h2 {
+    margin: 0 0 var(--space-sm);
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: -.02em;
+}
+.docSection > p {
+    max-width: 65ch;
+    margin: 0 0 var(--space-xl);
+    font-size: var(--font-size-md);
+    line-height: 1.5;
+    color: var(--color-text-muted);
+}
+.docNote {
+    display: inline-block;
+    margin-bottom: var(--space-md);
+    padding: var(--space-xs) var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--letter-spacing-lg);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+}
+
+/* Rám jednoho „screenshotu“ */
+.frame {
+    overflow: hidden;
+    height: 760px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 18px 40px oklch(from var(--base-shadow) .13 c h / .10);
+}
+.frame.w1440 { width: 1440px; }
+.frame.w1200 { width: 1200px; }
+.scroller { overflow-x: auto; padding-bottom: var(--space-lg); }
+
+/* ════════════════════════════════════════════════════════════════
+   EDITOR SHELL
+   ════════════════════════════════════════════════════════════════ */
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    font-size: var(--font-size-md);
+}
+
+/* ── L1 SHELL ─────────────────────────────────────────────────── */
+.shell {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex: none;
+    gap: var(--space-xl);
+    align-items: stretch;
+    height: var(--shell-height);
+    padding: 0 var(--space-lg);
+    /* L1 = pozadí aplikace, NE povrch */
+    background: var(--layer-shell-bg);
+    border-bottom: 1px solid var(--layer-shell-edge);
+}
+
+.shellGroup { display: flex; gap: var(--space-sm); align-items: center; }
+.shellGroup.identity { gap: var(--space-md); }
+.shellSpacer { flex: 1; }
+
+/* Hodnost 3 — utility */
+.iconBtn {
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--control-height-md);
+    height: var(--control-height-md);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    transition: background .12s ease, color .12s ease;
+}
+.iconBtn svg { width: 16px; height: 16px; }
+.iconBtn:hover { color: var(--color-text); background: var(--state-hover); }
+.iconBtn[aria-pressed='true'] { color: var(--color-text); background: var(--state-hover); }
+.iconBtn.is-focus { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+
+/* Hodnost 1 — identita scénáře. Ne menu; klik = přejmenování na místě. */
+.scriptName {
+    cursor: text;
+    overflow: hidden;
+    max-width: 260px;
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-medium);
+    letter-spacing: -.01em;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: var(--color-text);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: background .12s ease, border-color .12s ease;
+}
+.scriptName:hover, .scriptName.is-hover {
+    background: var(--state-hover);
+    border-color: var(--color-border-subtle);
+}
+.scriptName:focus, .scriptName.is-editing {
+    cursor: text;
+    background: var(--color-surface);
+    border-color: var(--color-border);
+    outline: var(--focus-ring);
+    outline-offset: 1px;
+}
+
+.syncDot { display: inline-flex; flex: none; align-items: center; padding-left: var(--space-xs); }
+.syncDot i {
+    width: 7px;
+    height: 7px;
+    background: var(--color-status-success);
+    border-radius: var(--radius-full);
+}
+
+/* Zóna B — akce seřazené podle rozsahu (script → editor → app) */
+.actionGroup { display: flex; gap: var(--space-xs); align-items: center; }
+
+.userBtn {
+    cursor: pointer;
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--control-height-sm);
+    height: var(--control-height-sm);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-full);
+    transition: background .12s ease, color .12s ease;
+}
+.userBtn svg { width: 15px; height: 15px; }
+.userBtn:hover { color: var(--color-text); background: var(--state-hover); }
+
+.shellDivider {
+    align-self: center;
+    width: 1px;
+    height: 18px;
+    background: var(--color-border);
+}
+
+/* Hodnost 2 — views (routy nad scénářem) */
+.views { display: flex; gap: var(--space-sm); align-items: stretch; }
+.viewTab {
+    position: relative;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-lg);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text-muted);
+    background: transparent;
+    border: none;
+    transition: color .12s ease;
+}
+.viewTab:hover { color: var(--color-text); }
+/* MECHANIKA „current“ — inkoustová hrana, žádná výplň */
+.viewTab[aria-current='page'] { color: var(--color-text); }
+.viewTab[aria-current='page']::after {
+    content: '';
+    position: absolute;
+    right: var(--space-md);
+    bottom: -1px;
+    left: var(--space-md);
+    height: 2px;
+    background: var(--state-current-edge);
+    border-radius: 2px 2px 0 0;
+}
+.viewTab.is-focus { outline: var(--focus-ring); outline-offset: -3px; border-radius: var(--radius-sm); }
+
+/* ── TĚLO ─────────────────────────────────────────────────────── */
+.body {
+    position: relative;
+    display: flex;
+    flex: 1;
+    min-height: 0;
+    align-items: stretch;
+}
+
+/* ── L2 PANEL ─────────────────────────────────────────────────── */
+.panel {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    width: var(--panel-width);
+    background: var(--layer-panel-bg);
+}
+.panel.left  { border-right: 1px solid var(--layer-panel-edge); }
+.panel.right { border-left: 1px solid var(--layer-panel-edge); }
+
+.panelHead {
+    display: flex;
+    flex: none;
+    gap: var(--space-sm);
+    align-items: center;
+    height: var(--panel-head-height);
+    padding: 0 var(--space-sm) 0 var(--space-lg);
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+/* Signature move — hlas scénáře, ne hlas nástroje.
+   Zároveň přepínač typu panelu: stejná mechanika afordance jako název
+   scénáře — v klidu čistý text, na hover neutrální čip. Jeden idiom. */
+.panelHead .title {
+    display: flex;
+
+    /* Cíl se drží obsahu, ne šířky panelu — chevron tak sedí přesně na
+       konci klikatelné plochy a za ním už nic podbarveného nezbývá.
+       Ikony vpravo odsune auto margin, ne roztažené tlačítko. */
+    flex: 0 1 auto;
+    gap: var(--space-sm);
+    align-items: center;
+    min-width: 0;
+    height: var(--control-height-xs);
+    margin-inline: calc(var(--space-md) * -1) auto;
+    padding-inline: var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--letter-spacing-lg);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: background .12s ease, border-color .12s ease, color .12s ease;
+}
+.panelHead .title { cursor: pointer; }
+.panelHead .title > span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.panelHead .title svg {
+    flex: none;
+    width: 13px;
+    height: 13px;
+    opacity: .55;
+    transition: opacity .12s ease;
+}
+.panelHead .title:hover, .panelHead .title.is-hover {
+    color: var(--color-text);
+    background: var(--state-hover);
+    border-color: var(--color-border-subtle);
+}
+.panelHead .title:hover svg, .panelHead .title.is-hover svg { opacity: 1; }
+.panelHead .title:focus-visible { outline: var(--focus-ring); outline-offset: 1px; }
+.panelHead .iconBtn { width: var(--control-height-xs); height: var(--control-height-xs); }
+.panelHead .iconBtn svg { width: 14px; height: 14px; }
+
+.panelBody { overflow-y: auto; flex: 1; padding: var(--space-md) var(--space-md) var(--space-3xl); }
+
+/* Skupina aktů */
+.actGroup { margin-bottom: var(--space-lg); }
+.actRow {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    height: var(--control-height-sm);
+    padding: 0 var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--letter-spacing-lg);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+
+.row {
+    cursor: pointer;
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    width: 100%;
+    min-height: var(--control-height-sm);
+    padding: 0 var(--space-md);
+    font-family: inherit;
+    font-size: var(--font-size-md);
+    text-align: left;
+    color: var(--color-text);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: background .12s ease;
+}
+.row .num {
+    flex: none;
+    width: 14px;
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+.row .label { overflow: hidden; flex: 1; text-overflow: ellipsis; white-space: nowrap; }
+.row .trail { flex: none; color: var(--color-text-muted); opacity: 0; }
+.row:hover .trail { opacity: 1; }
+.row .dot { flex: none; width: 8px; height: 8px; border-radius: var(--radius-full); }
+
+/* MECHANIKA „hover“ — neutrální, nikdy accent */
+.row:hover, .row.is-hover { background: var(--state-hover); }
+
+/* MECHANIKA „selected“ — levandulová výplň + hrana */
+.row[aria-selected='true'], .row.is-selected {
+    background: var(--state-selected);
+    border-color: var(--state-selected-edge);
+}
+.row.is-focus { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+.row.is-drop { background: transparent; border: var(--state-drop-edge); }
+
+.panelEmpty {
+    padding: var(--space-lg) var(--space-md);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+    color: var(--color-text-muted);
+}
+
+/* ── HLAVNÍ SLOUPEC ───────────────────────────────────────────── */
+.main { display: flex; flex: 1; flex-direction: column; min-width: 0; }
+
+/* Toolbar = L2, ale jen nad sloupcem plátna */
+.toolbar {
+    display: flex;
+    flex: none;
+    gap: var(--space-lg);
+    align-items: center;
+    height: var(--control-height-md);
+    padding: 0 var(--space-lg);
+    background: var(--layer-panel-bg);
+    border-bottom: 1px solid var(--layer-panel-edge);
+}
+.toolbarGroup { display: flex; gap: var(--space-xs); align-items: center; }
+.toolbar .iconBtn { width: var(--control-height-xs); height: var(--control-height-xs); }
+.toolbar .iconBtn svg { width: 14px; height: 14px; }
+.toolbarDivider { width: 1px; height: 16px; background: var(--color-border); }
+
+.blockSelect {
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--space-md);
+    align-items: center;
+    height: var(--control-height-xs);
+    padding: 0 var(--space-md);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--letter-spacing-lg);
+    text-transform: uppercase;
+    color: var(--color-text);
+    background: transparent;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+}
+.blockSelect .caret { width: 12px; height: 12px; color: var(--color-text-muted); }
+.blockSelect .kbd {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xxs);
+    letter-spacing: 0;
+    color: var(--color-text-muted);
+}
+
+/* ── Lp PAPÍR ─────────────────────────────────────────────────── */
+.stage { overflow: hidden; flex: 1; padding: var(--space-3xl) 0 0; background: var(--color-bg); }
+.paper {
+    width: 720px;
+    min-height: 100%;
+    margin: 0 auto;
+    padding: var(--space-5xl) 96px;
+    font-family: var(--font-family-mono);
+    font-size: 17.28px;
+    line-height: 20.736px;
+    color: var(--color-text);
+    background: var(--color-surface-paper);
+    box-shadow: var(--shadow-canvas);
+}
+.paper p { margin: 0; }
+.b-act { padding-top: 17.28px; font-weight: 700; text-transform: uppercase; text-decoration: underline; letter-spacing: .35px; }
+.b-scene { padding-top: 34.56px; font-weight: 700; text-transform: uppercase; }
+.b-stage { padding-top: 17.28px; }
+.b-char { padding-top: 17.28px; margin-left: 148px; font-weight: 700; text-transform: uppercase; }
+.b-dial { margin-left: 74px; }
+.b-aside { margin-left: 126px; font-style: italic; text-transform: lowercase; }
+.b-aside::before { content: '('; }
+.b-aside::after { content: ')'; }
+.charTag { border-bottom: 2px solid var(--tag, var(--palette-copper)); }
+
+/* ── Overlay režim (< 1200) ───────────────────────────────────── */
+.panel.overlay {
+    position: absolute;
+    z-index: 3;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    box-shadow: -12px 0 32px oklch(from var(--base-shadow) .13 c h / .12);
+}
+.scrim {
+    position: absolute;
+    z-index: 2;
+    inset: 0;
+    background: oklch(from var(--base-shadow) .13 c h / .10);
+}
+
+/* ════════════════════════════════════════════════════════════════
+   SPECIMEN BOARDS
+   ════════════════════════════════════════════════════════════════ */
+.board {
+    display: grid;
+    grid-template-columns: 160px 1fr 1fr;
+    gap: 1px;
+    overflow: hidden;
+    background: var(--color-border);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+}
+.board > * { padding: var(--space-lg) var(--space-xl); background: var(--color-surface); }
+.board .bh {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--letter-spacing-lg);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+    background: var(--color-bg);
+}
+.board .bl { display: flex; align-items: center; font-size: var(--font-size-md); font-weight: var(--font-weight-medium); }
+.board.tips { grid-template-columns: 210px 1fr 150px; }
+.board.tips .bl { font-weight: var(--font-weight-normal); }
+.board.tips .cell { gap: var(--space-xs); }
+.board.tips .tip { font-size: var(--font-size-md); }
+.board.tips .why { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.board.tips kbd {
+    display: inline-block;
+    padding: 1px var(--space-sm);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-xs);
+}
+.board.tips .none { font-size: var(--font-size-sm); color: var(--color-text-muted); }
+.board .cell { display: flex; flex-direction: column; gap: var(--space-md); justify-content: center; }
+.board code {
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+/* „dnes“ — reprodukce současného chování */
+.old-hover    { background: color-mix(in oklch, var(--color-surface-accent) 60%, transparent); }
+.old-selected { background: color-mix(in oklch, var(--color-surface-accent) 80%, transparent); box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-surface-accent) 55%, var(--color-border)); }
+.old-current  { background: color-mix(in oklch, var(--color-surface-accent) 60%, transparent); box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-surface-accent) 70%, transparent); }
+.old-drop     { background: color-mix(in oklch, var(--color-surface-accent) 40%, transparent); }
+
+.chip {
+    display: inline-flex;
+    align-items: center;
+    align-self: flex-start;
+    min-width: 148px;
+    height: var(--control-height-sm);
+    padding: 0 var(--space-lg);
+    font-size: var(--font-size-md);
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+}
+.chip.new-hover    { background: var(--state-hover); }
+.chip.new-selected { background: var(--state-selected); border-color: var(--state-selected-edge); }
+.chip.new-current  { position: relative; color: var(--color-text); font-weight: var(--font-weight-medium); }
+.chip.new-current::after { content: ''; position: absolute; right: var(--space-md); bottom: -1px; left: var(--space-md); height: 2px; background: var(--state-current-edge); }
+.chip.new-drop     { border: var(--state-drop-edge); }
+.chip.new-focus    { outline: var(--focus-ring); outline-offset: var(--focus-ring-offset); }
+
+/* Anatomie hlavičky */
+.zones {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-lg);
+    margin-top: var(--space-lg);
+}
+.zoneCard {
+    padding: var(--space-lg) var(--space-xl);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+.zoneCard b {
+    display: block;
+    margin-bottom: var(--space-sm);
+    font-family: var(--font-family-mono);
+    font-size: var(--font-size-xs);
+    letter-spacing: var(--letter-spacing-lg);
+    text-transform: uppercase;
+    color: var(--color-text-muted);
+}
+.zoneCard p { margin: 0; font-size: var(--font-size-md); line-height: 1.5; }
+.zoneCard .icons { display: flex; gap: var(--space-md); margin-top: var(--space-lg); color: var(--color-text-muted); }
+.zoneCard .icons svg { width: 17px; height: 17px; }
+
+.iconChoice { display: flex; gap: var(--space-lg); margin-top: var(--space-lg); }
+.iconOpt {
+    flex: 1;
+    padding: var(--space-xl);
+    text-align: center;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+.iconOpt.pick { border-color: var(--state-selected-edge); background: var(--state-selected); }
+.iconOpt svg { width: 24px; height: 24px; color: var(--color-text); }
+.iconOpt b { display: block; margin-top: var(--space-md); font-size: var(--font-size-md); font-weight: var(--font-weight-medium); }
+.iconOpt span { display: block; margin-top: var(--space-xs); font-size: var(--font-size-sm); color: var(--color-text-muted); }
+
+.layers { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--space-lg); }
+.layerCard { overflow: hidden; border: 1px solid var(--color-border); border-radius: var(--radius-md); }
+.layerSwatch { height: 72px; }
+.layerCard .meta { padding: var(--space-lg); font-size: var(--font-size-sm); background: var(--color-surface); }
+.layerCard .meta b { display: block; margin-bottom: var(--space-xs); font-weight: var(--font-weight-medium); }
+.layerCard .meta code { display: block; font-family: var(--font-family-mono); font-size: var(--font-size-xxs); color: var(--color-text-muted); }
+.sw-l0 { background: var(--color-bg); }
+.sw-l1 { background: var(--layer-shell-bg); border-bottom: 1px solid var(--layer-shell-edge); }
+.sw-l2 { background: var(--layer-panel-bg); border-bottom: 1px solid var(--layer-panel-edge); }
+.sw-l3 { background: var(--layer-float-bg); box-shadow: var(--shadow-popover); }
+.sw-lp { background: var(--color-surface-paper); box-shadow: var(--shadow-canvas); }
+
+.assume { max-width: 78ch; font-size: var(--font-size-md); line-height: 1.6; }
+.assume li { margin-bottom: var(--space-md); }
+.assume code { font-family: var(--font-family-mono); font-size: var(--font-size-sm); }
+</style>
+</head>
+<body>
+
+<!-- Ikonový sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <g id="i-home"><path d="M3 10.5 12 3l9 7.5M5.5 9.5V20h13V9.5"/></g>
+    <g id="i-gear"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-2.9 1.2 2 2 0 1 1-4 0 1.7 1.7 0 0 0-2.9-1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1A1.7 1.7 0 0 0 3 15a2 2 0 1 1 0-4 1.7 1.7 0 0 0 1.5-2.6l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1A1.7 1.7 0 0 0 10.2 4a2 2 0 1 1 4 0 1.7 1.7 0 0 0 2.9 1.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1A1.7 1.7 0 0 0 21 11a2 2 0 1 1 0 4Z"/></g>
+    <g id="i-download"><path d="M12 3.5v11M7.5 10.5 12 15l4.5-4.5M4.5 20.5h15"/></g>
+    <g id="i-panelleft"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9.5 4v16"/></g>
+    <g id="i-panelright"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M14.5 4v16"/></g>
+    <g id="i-user"><circle cx="12" cy="8.5" r="3.2"/><path d="M5.5 20a6.5 6.5 0 0 1 13 0"/></g>
+    <g id="i-plus"><path d="M12 5v14M5 12h14"/></g>
+    <g id="i-chevron"><path d="m6 9.5 6 5 6-5"/></g>
+
+    <!-- ── Attribute manager — custom, varianta D: rejstřík ────────────
+         Tři řádky, každý = barevný štítek + jméno. Přesně datový model
+         attribute manageru: pojmenovaná entita, která má barvu.        -->
+    <g id="i-am-register">
+        <rect x="3" y="4.75" width="4" height="4" rx="1.2"/>
+        <path d="M10 6.75h11"/>
+        <rect x="3" y="10" width="4" height="4" rx="1.2"/>
+        <path d="M10 12h11"/>
+        <rect x="3" y="15.25" width="4" height="4" rx="1.2"/>
+        <path d="M10 17.25h7.5"/>
+    </g>
+
+    <!-- varianta E: karta záznamu — jeden list rejstříku, barevný štítek v rohu -->
+    <g id="i-am-card">
+        <rect x="3.25" y="4.25" width="17.5" height="15.5" rx="2.5"/>
+        <rect x="6.25" y="7.5" width="3.5" height="3.5" rx="1"/>
+        <path d="M12.5 9.25h5.25"/>
+        <path d="M6.25 14.5h11.5"/>
+    </g>
+
+    <!-- varianta F: kartotéka — stoh karet se štítkem, „rejstřík scénáře“ -->
+    <g id="i-am-stack">
+        <path d="M7.5 6.5V5.25A2 2 0 0 1 9.5 3.25h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-1.25"/>
+        <rect x="3.25" y="7.5" width="13.25" height="13.25" rx="2"/>
+        <rect x="6" y="10.5" width="3" height="3" rx=".9"/>
+        <path d="M11.25 12h2.5"/>
+        <path d="M6 17h7.75"/>
+    </g>
+  </defs>
+</svg>
+
+<div class="docBar">
+    <strong>Stagistic — editor shell v0</strong>
+    <span style="color:var(--color-text-muted)">2026-08-14 · návrh, ne produkční kód</span>
+    <span class="spacer"></span>
+    <button onclick="document.documentElement.dataset.theme = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark'">Light / dark</button>
+    <button onclick="document.body.style.zoom = document.body.style.zoom === '0.75' ? '1' : '0.75'">Fit / 1:1</button>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════════
+     §1 — 1440, oba panely otevřené
+     ══════════════════════════════════════════════════════════ -->
+<section class="docSection">
+    <h2>§1 — 1440 px, oba panely otevřené</h2>
+    <p>App bar splývá s pozadím a je rámem; panely jsou povrchy. Aktivní view nese inkoustovou hranu, vybraná scéna levandulovou výplň — dvě různé mechaniky, žádná záměna.</p>
+    <div class="scroller">
+    <div class="frame w1440">
+        <div class="app">
+
+            <!-- L1 SHELL -->
+            <header class="shell">
+                <!-- ZÓNA A — identita a navigace: „co a kde“ -->
+                <div class="shellGroup">
+                    <button class="iconBtn" title="Back to scripts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-home"/></svg></button>
+                </div>
+                <div class="shellGroup identity">
+                    <span class="scriptName" contenteditable="true" spellcheck="false" title="Rename script">One Small Light</span>
+                    <span class="syncDot" title="Saved a few seconds ago"><i></i></span>
+                </div>
+                <span class="shellDivider"></span>
+                <nav class="views">
+                    <button class="viewTab" aria-current="page">Editor</button>
+                    <button class="viewTab">Export</button>
+                </nav>
+
+                <span class="shellSpacer"></span>
+
+                <!-- ZÓNA B — akce, zleva doprava od nejužšího rozsahu k nejširšímu -->
+                <div class="actionGroup" title="Rozsah: scénář">
+                    <button class="iconBtn" title="Open script settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-gear"/></svg></button>
+                    <button class="iconBtn" title="Open attribute manager"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><use href="#i-am-register"/></svg></button>
+                    <button class="iconBtn" title="Download .stagistic file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-download"/></svg></button>
+                </div>
+                <span class="shellDivider"></span>
+                <div class="actionGroup" title="Rozsah: aplikace">
+                    <button class="userBtn" title="Open account menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-user"/></svg></button>
+                </div>
+            </header>
+
+            <div class="body">
+
+                <!-- L2 — struktura -->
+                <aside class="panel left">
+                    <div class="panelHead">
+                        <button class="title is-hover" aria-haspopup="listbox"><span>Structure</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chevron"/></svg></button>
+                        <button class="iconBtn" title="Add act"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></button>
+                        <button class="iconBtn" title="Open structure in attribute manager"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><use href="#i-am-register"/></svg></button>
+                    </div>
+                    <div class="panelBody">
+                        <div class="actGroup">
+                            <div class="actRow">Act one</div>
+                            <button class="row"><span class="num">1</span><span class="label">Storm is coming</span></button>
+                            <button class="row is-selected"><span class="num">2</span><span class="label">Inside the lighthouse</span></button>
+                            <button class="row is-hover"><span class="num">3</span><span class="label">The lamp</span><span class="trail">⠿</span></button>
+                        </div>
+                        <div class="actGroup">
+                            <div class="actRow">Act two</div>
+                            <button class="row"><span class="num">4</span><span class="label">Morning</span></button>
+                            <button class="row is-drop"><span class="num">5</span><span class="label">The return</span></button>
+                        </div>
+                    </div>
+                </aside>
+
+                <!-- HLAVNÍ SLOUPEC -->
+                <div class="main">
+                    <div class="toolbar">
+                        <button class="iconBtn" aria-pressed="true" title="Structure panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-panelleft"/></svg></button>
+                        <span class="toolbarDivider"></span>
+                        <div class="toolbarGroup">
+                            <button class="iconBtn" title="Undo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+                            <button class="iconBtn" title="Redo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
+                        </div>
+                        <span class="toolbarDivider"></span>
+                        <div class="toolbarGroup">
+                            <button class="iconBtn" title="Bold"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M7 5h6a4 4 0 0 1 0 8H7Zm0 8h7a4 4 0 0 1 0 8H7Z"/></svg></button>
+                            <button class="iconBtn" title="Italic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 5h-4M14 19h-4M15 5 9 19"/></svg></button>
+                            <button class="iconBtn" title="Underline"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 4v7a5 5 0 0 0 10 0V4M6 20h12"/></svg></button>
+                        </div>
+                        <span class="shellSpacer"></span>
+                        <button class="blockSelect">Dialogue<span class="kbd">⌃5</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+                        <span class="toolbarDivider"></span>
+                        <button class="iconBtn" aria-pressed="true" title="Characters panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-panelright"/></svg></button>
+                    </div>
+
+                    <div class="stage">
+                        <div class="paper">
+                            <p class="b-act">Act one</p>
+                            <p class="b-scene">Storm is coming</p>
+                            <p class="b-stage">A storm gathers over the sea. The lighthouse is dark.</p>
+                            <p class="b-char">Mara</p>
+                            <p class="b-dial">The fishing boats will return before midnight.</p>
+                            <p class="b-char">Eli</p>
+                            <p class="b-aside">dryly</p>
+                            <p class="b-dial">And our lamp is broken.</p>
+                            <p class="b-char">Mara</p>
+                            <p class="b-dial">Then we fix it.</p>
+                            <p class="b-stage"><span class="charTag">ELI</span> takes an old key from his pocket.</p>
+                            <p class="b-char">Eli</p>
+                            <p class="b-aside">offers her the key</p>
+                            <p class="b-dial">After you.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- L2 — postavy -->
+                <aside class="panel right">
+                    <div class="panelHead">
+                        <button class="title" aria-haspopup="listbox"><span>Characters</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chevron"/></svg></button>
+                        <button class="iconBtn" title="Add character"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></button>
+                        <button class="iconBtn" title="Open characters in attribute manager"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><use href="#i-am-register"/></svg></button>
+                    </div>
+                    <div class="panelBody">
+                        <button class="row"><span class="dot" style="background:var(--palette-copper)"></span><span class="label">Eli</span><span class="trail">✎</span></button>
+                        <button class="row"><span class="dot" style="background:var(--palette-lavender)"></span><span class="label">Mara</span><span class="trail">✎</span></button>
+                        <button class="row is-focus"><span class="dot" style="background:var(--base-green)"></span><span class="label">Keeper</span><span class="trail">✎</span></button>
+                    </div>
+                </aside>
+
+            </div>
+        </div>
+    </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     §2 — 1200, pravý panel jako overlay
+     ══════════════════════════════════════════════════════════ -->
+<section class="docSection">
+    <h2>§2 — 1200 px, panel překrývá plátno</h2>
+    <p>Dnes panel překrývá text bez jakékoli kompenzace (B1, Critical). Nově je to přiznaný dočasný overlay se scrimem a stínem — plátno pod ním zůstává celé a panel se při psaní sám zavře.</p>
+    <div class="scroller">
+    <div class="frame w1200">
+        <div class="app">
+            <header class="shell">
+                <div class="shellGroup">
+                    <button class="iconBtn" title="Back to scripts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-home"/></svg></button>
+                </div>
+                <div class="shellGroup identity">
+                    <span class="scriptName" contenteditable="true" spellcheck="false" title="Rename script">One Small Light</span>
+                    <span class="syncDot"><i></i></span>
+                </div>
+                <span class="shellDivider"></span>
+                <nav class="views">
+                    <button class="viewTab" aria-current="page">Editor</button>
+                    <button class="viewTab">Export</button>
+                </nav>
+                <span class="shellSpacer"></span>
+                <div class="actionGroup">
+                    <button class="iconBtn" title="Open script settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-gear"/></svg></button>
+                    <button class="iconBtn" title="Open attribute manager"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><use href="#i-am-register"/></svg></button>
+                    <button class="iconBtn" title="Download .stagistic file"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-download"/></svg></button>
+                </div>
+                <span class="shellDivider"></span>
+                <div class="actionGroup">
+                    <button class="userBtn" title="Open account menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-user"/></svg></button>
+                </div>
+            </header>
+
+            <div class="body">
+                <div class="main">
+                    <div class="toolbar">
+                        <button class="iconBtn" title="Structure panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-panelleft"/></svg></button>
+                        <span class="toolbarDivider"></span>
+                        <div class="toolbarGroup">
+                            <button class="iconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+                            <button class="iconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
+                        </div>
+                        <span class="toolbarDivider"></span>
+                        <div class="toolbarGroup">
+                            <button class="iconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M7 5h6a4 4 0 0 1 0 8H7Zm0 8h7a4 4 0 0 1 0 8H7Z"/></svg></button>
+                            <button class="iconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M14 5h-4M14 19h-4M15 5 9 19"/></svg></button>
+                            <button class="iconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 4v7a5 5 0 0 0 10 0V4M6 20h12"/></svg></button>
+                        </div>
+                        <span class="shellSpacer"></span>
+                        <button class="blockSelect">Dialogue<span class="kbd">⌃5</span><svg class="caret" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg></button>
+                        <span class="toolbarDivider"></span>
+                        <button class="iconBtn" aria-pressed="true" title="Characters panel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-panelright"/></svg></button>
+                    </div>
+                    <div class="stage">
+                        <div class="paper">
+                            <p class="b-act">Act one</p>
+                            <p class="b-scene">Storm is coming</p>
+                            <p class="b-stage">A storm gathers over the sea. The lighthouse is dark.</p>
+                            <p class="b-char">Mara</p>
+                            <p class="b-dial">The fishing boats will return before midnight.</p>
+                            <p class="b-char">Eli</p>
+                            <p class="b-aside">dryly</p>
+                            <p class="b-dial">And our lamp is broken.</p>
+                            <p class="b-char">Mara</p>
+                            <p class="b-dial">Then we fix it.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="scrim"></div>
+                <aside class="panel right overlay">
+                    <div class="panelHead">
+                        <button class="title" aria-haspopup="listbox"><span>Characters</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><use href="#i-chevron"/></svg></button>
+                        <button class="iconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 5v14M5 12h14"/></svg></button>
+                        <button class="iconBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/></svg></button>
+                    </div>
+                    <div class="panelBody">
+                        <button class="row"><span class="dot" style="background:var(--palette-copper)"></span><span class="label">Eli</span><span class="trail">✎</span></button>
+                        <button class="row"><span class="dot" style="background:var(--palette-lavender)"></span><span class="label">Mara</span><span class="trail">✎</span></button>
+                    </div>
+                </aside>
+            </div>
+        </div>
+    </div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     §3 — stavy: dnes vs. nově
+     ══════════════════════════════════════════════════════════ -->
+<section class="docSection">
+    <h2>§3 — Anatomie hlavičky</h2>
+    <p><b>The Scope Gradient Rule.</b> V hlavičce jsou jen dva rozsahy — <b>scénář</b> a <b>aplikace</b>. Co patří konkrétní routě, žije v toolbaru té routy, ne v hlavičce. Skupiny dělí vlas a pozice ikony tak sama nese informaci o tom, čeho se akce týká.</p>
+    <div class="zones">
+        <div class="zoneCard">
+            <b>Hlavička · rozsah scénář</b>
+            <p>Platí pro tenhle scénář bez ohledu na to, ve kterém view jsem. Ikony bez popisku, tooltip s nulovou prodlevou, každá otevírá modal.</p>
+            <div class="icons">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-gear"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><use href="#i-am-register"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><use href="#i-download"/></svg>
+            </div>
+        </div>
+        <div class="zoneCard">
+            <b>Hlavička · rozsah aplikace</b>
+            <p>Účet a vzhled. Dnes jen <code>Appearance</code>, výhledově uživatelské menu napříč celou aplikací — proto jiný tvar než nástrojové ikony.</p>
+            <div class="icons">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-user"/></svg>
+            </div>
+        </div>
+        <div class="zoneCard">
+            <b>Toolbar · rozsah editor</b>
+            <p>Přepínače panelů sedí na <b>krajních koncích toolbaru</b> — levá ikona sousedí s levým panelem, pravá s pravým. Mapování si vysvětlí samo a v exportu prostě nejsou.</p>
+            <div class="icons">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-panelleft"/></svg>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><use href="#i-panelright"/></svg>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="margin-top:var(--space-5xl)">Název scénáře — tři stavy</h2>
+    <p>Není to menu ani statický popisek: klik ho přepne do editace na místě. V §1 a §2 je název opravdu <code>contenteditable</code> — klikni do něj a přepiš si ho. Přejmenování tím žije na dvou místech, která se neperou: tady rychle a v <code>Script settings → Title page</code> spolu s ostatními údaji titulní strany.</p>
+    <div class="iconChoice">
+        <div class="iconOpt"><span class="scriptName" style="display:inline-block;max-width:none">One Small Light</span><b>Rest</b><span>Bez rámečku. Čte se jako identita, ne jako ovládací prvek.</span></div>
+        <div class="iconOpt"><span class="scriptName is-hover" style="display:inline-block;max-width:none">One Small Light</span><b>Hover</b><span>Neutrální podklad a jemná hrana — jediný okamžik, kdy se afordance přizná.</span></div>
+        <div class="iconOpt"><span class="scriptName is-editing" style="display:inline-block;max-width:none">One Small Light</span><b>Editace</b><span>Povrch, plná hrana a focus ring. <code>Enter</code> potvrdí, <code>Esc</code> vrátí.</span></div>
+    </div>
+
+    <h2 style="margin-top:var(--space-5xl)">Ikona pro attribute manager — vlastní kresba</h2>
+    <p>Tag máš pravdu že nesedí: v celém zbytku webu znamená „štítek, cena, sleva“, a tenhle význam si uživatel přinese s sebou. Vyrobit vlastní ikonu problém není — všechny ikony v aplikaci jsou stejně stavěné ručně na mřížce 24 × 24, tah 1.6, zaoblené konce. Vlastní ikona je tady navíc na místě: attribute manager nemá obecný protějšek, který by šel vypůjčit.</p>
+    <p><b>Co ta ikona musí říct.</b> Manager drží čtyři rejstříky — <code>Structure</code>, <code>Characters</code>, <code>Music</code>, <code>Places</code>. Společné jim není „seznam“, ale to, že jde o <b>pojmenované entity, které mají barvu</b>. Barevný štítek + jméno je doslova datový model. Proto ho všechny tři varianty používají jako motiv — liší se jen tím, jak moc ho zabalí.</p>
+    <div class="iconChoice">
+        <div class="iconOpt pick">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><use href="#i-am-register"/></svg>
+            <b>D — Rejstřík</b>
+            <span>V mockupu nasazená. Tři řádky <i>štítek + jméno</i>, bez rámu. Nejlíp drží na 16 px a nepleteme si ji s panelem Structure, protože ta má odsazení, tahle má štítky.</span>
+        </div>
+        <div class="iconOpt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><use href="#i-am-card"/></svg>
+            <b>E — Karta záznamu</b>
+            <span>Jeden list rejstříku se štítkem v rohu. Klidnější silueta, ale méně říká o tom, že jde o správu <i>množiny</i> věcí.</span>
+        </div>
+        <div class="iconOpt">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><use href="#i-am-stack"/></svg>
+            <b>F — Kartotéka</b>
+            <span>Stoh karet, přední se štítkem. Nejvíc „rejstřík“, ale nejhustší — na 16 px se zadní karta slévá s přední.</span>
+        </div>
+    </div>
+    <p style="margin-top:var(--space-lg);color:var(--color-text-muted)">Pokud ti nesedne ani jedna, řekni jen slovo, kterým bys tu funkci popsal ty — kresbu na to navážu. Zavrhnuté varianty (tag, list tree, cast) jsou pryč.</p>
+
+    <h2 style="margin-top:var(--space-5xl)">Přepínač typu panelu</h2>
+    <p>Panely mají přepínatelný typ, takže jejich nadpis musí být ovladatelný. Nechal jsem ho být samotným přepínačem, ale s afordancí — <b>stejnou mechanikou jako u názvu scénáře</b>: v klidu čistý text, na hover neutrální čip s vlasovou hranou. Chevron dává vědět už v klidu, že se to rozbaluje.</p>
+    <p>Důvod, proč ne „statický nadpis + ikonka vedle“: rozbilo by to cíl na dva a ta ikonka by byla dvojznačná (sbaluje panel? mění typ?). Takhle má aplikace <b>jediný idiom</b>: text, pod kterým na hover vyjede neutrální čip, je ovládací prvek. Uživatel se to naučí jednou a platí to na název scénáře i na hlavičku panelu.</p>
+    <p><b>Chevron u textu, ne u kraje panelu.</b> Tlačítko se drží šířky obsahu — chevron tedy <i>je</i> na konci klikatelné plochy a za ním nezbývá žádné podbarvené mrtvé místo. Ikony vpravo odsune auto margin, ne roztažené tlačítko. Chevron až u pravého kraje patří k <code>select</code> polím, která mají viditelný rám a vlastní celou šířku; tady je ovládacím prvkem sám nadpis, takže cíl musí kopírovat text. Navíc by chevron u kraje sousedil s ikonou <code>+</code> a nebylo by poznat, kde přepínač končí.</p>
+    <p>V §1 je levý panel schválně ukázaný v hover stavu, pravý v klidovém — ať vidíš oba vedle sebe a je vidět, kam přesně čip sahá.</p>
+
+    <h2 style="margin-top:var(--space-5xl)">Proklik do manageru z panelu</h2>
+    <p>Tabulka je pryč, v hlavičce panelu je <b>stejná ikona rejstříku jako v app baru</b>. Je to totiž tatáž akce — cíl je attribute manager. Že se otevře rovnou na správné záložce je zpřesnění téhož cíle, ne jiný cíl, a ikona má kódovat <i>kam to vede</i>.</p>
+    <p>Ikony podle druhu panelu by řekly „spravovat postavy“, tedy zdánlivě jiný ovládací prvek, a uživatel by si ho s ikonou v hlavičce nespojil. Navíc by opakovaly kontext, který už je vedle nich napsaný — panel se jmenuje <code>CHARACTERS</code>, není co dodávat. A stálo by to čtyři nové ikony, které jinde v aplikaci neexistují.</p>
+    <p>Naopak když se ta samá značka objeví na dvou místech, naučí uživatele mapování <i>tahle značka = attribute manager</i>. Tím se zpětně zlepší objevitelnost ikony v hlavičce, což je dnes ten slabší z obou vstupů. Cílovou záložku nese tooltip: <code>Open characters in attribute manager</code>.</p>
+</section>
+
+<section class="docSection">
+    <h2>§4 — Stavy: dnes vs. nově</h2>
+    <p>Levý sloupec reprodukuje současné hodnoty ze zdroje. Všechny čtyři stavy jsou ředěním jednoho tokenu — proto splývají. Vpravo má každý stav vlastní mechaniku.</p>
+    <div class="board">
+        <div class="bh">Stav</div>
+        <div class="bh">Dnes — <code>--color-surface-accent</code></div>
+        <div class="bh">Nově — vlastní mechanika</div>
+
+        <div class="bl">hover</div>
+        <div class="cell"><span class="chip old-hover">Storm is coming</span><code>accent 60 %</code></div>
+        <div class="cell"><span class="chip new-hover">Storm is coming</span><code>--state-hover · neutrální</code></div>
+
+        <div class="bl">selected</div>
+        <div class="cell"><span class="chip old-selected">Storm is coming</span><code>accent 80 % + inset ring 55 %</code></div>
+        <div class="cell"><span class="chip new-selected">Storm is coming</span><code>--state-selected · levandulová výplň</code></div>
+
+        <div class="bl">current view</div>
+        <div class="cell"><span class="chip old-current">Editor</span><code>accent 60 % + inset ring 70 %</code></div>
+        <div class="cell"><span class="chip new-current">Editor</span><code>--state-current-edge · inkoust, bez výplně</code></div>
+
+        <div class="bl">focus</div>
+        <div class="cell"><span class="chip old-hover" style="outline:1px auto rgb(0,95,204)">Keeper</span><code>místy výchozí prohlížečový (B2)</code></div>
+        <div class="cell"><span class="chip new-focus">Keeper</span><code>--focus-ring · vždy</code></div>
+
+        <div class="bl">drop target</div>
+        <div class="cell"><span class="chip old-drop">The return</span><code>accent 40 %</code></div>
+        <div class="cell"><span class="chip new-drop">The return</span><code>--state-drop-edge · přerušovaná hrana</code></div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     §4 — vrstvy
+     ══════════════════════════════════════════════════════════ -->
+<section class="docSection">
+    <h2>§5 — Model vrstev</h2>
+    <p>Dnes mají app bar, toolbar, sidebar i header sidebaru identický recept. Nově nese hodnost tón, hrana a hustota.</p>
+    <div class="layers">
+        <div class="layerCard"><div class="layerSwatch sw-l0"></div><div class="meta"><b>L0 Stage</b><code>--color-bg</code></div></div>
+        <div class="layerCard"><div class="layerSwatch sw-l1"></div><div class="meta"><b>L1 Shell</b><code>--layer-shell-bg + subtle</code></div></div>
+        <div class="layerCard"><div class="layerSwatch sw-l2"></div><div class="meta"><b>L2 Panel</b><code>--layer-panel-bg + border</code></div></div>
+        <div class="layerCard"><div class="layerSwatch sw-l3"></div><div class="meta"><b>L3 Float</b><code>+ --shadow-popover</code></div></div>
+        <div class="layerCard"><div class="layerSwatch sw-lp"></div><div class="meta"><b>Lp Paper</b><code>--color-surface-paper</code></div></div>
+    </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════════════
+     §5 — předpoklady
+     ══════════════════════════════════════════════════════════ -->
+<section class="docSection">
+    <h2>§6 — Obsahy tooltipů</h2>
+    <p>Nulová prodleva je potvrzená, takže tooltip vyskočí při každém přejetí. To z něj dělá součást vizuálního šumu — a znamená to, že tooltip, který neřekne nic navíc oproti ikoně, je čistá ztráta. Šest pravidel, ze kterých plyne celá tabulka níž.</p>
+    <ol class="assume">
+        <li><b>Tooltip jen tam, kde není vidět popisek.</b> Taby <code>Editor</code>/<code>Export</code>, přepínač typu bloku i nadpis panelu popisek mají — tooltip by při nulové prodlevě jen překryl text, který uživatel právě čte. Proto je nedostanou.</li>
+        <li><b>Akce = sloveso + předmět.</b> <code>Open script settings</code>, ne <code>Settings</code>. Ikona už pojmenovává <i>věc</i>; tooltip musí přidat <i>děj</i>, jinak nepřidává nic.</li>
+        <li><b>Přepínač = jméno ovládaného, stejné v obou stavech.</b> <code>Structure panel</code>, <code>Bold</code>. Stav nese <code>aria-pressed</code> a vzhled. Přepisování popisku na <code>Hide</code>/<code>Show</code> je známý anti-vzor: čtečka i uživatel pak neví, jestli slovo popisuje současný stav, nebo výsledek kliknutí. Tohle je změna proti dnešku — <code>EditorSidebarToolbar</code> dnes používá <code>Close left sidebar</code>.</li>
+        <li><b>Zkratka je vlastní pole, ne text v popisku.</b> <code>Tooltip</code> už má prop <code>shortcut</code>. Nikdy nevpisovat <code>⌘Z</code> do <code>label</code> — jinak se to nedá zarovnat ani lokalizovat.</li>
+        <li><b>Proklik pojmenuje cíl i vstup.</b> <code>Open characters in attribute manager</code>. Bez druhé části vypadá tlačítko v panelu jako duplikát toho v hlavičce.</li>
+        <li><b>Stav je výjimka: nese informaci, ne jméno.</b> Tečka u názvu scénáře je jediný tooltip, který se mění podle dat — je to údaj, ne ovládací prvek.</li>
+    </ol>
+
+    <div class="board tips" style="margin-top:var(--space-3xl)">
+        <div class="bh">Prvek</div>
+        <div class="bh">Tooltip</div>
+        <div class="bh">Zkratka</div>
+
+        <div class="bl">Domů</div>
+        <div class="cell"><span class="tip">Back to scripts</span><span class="why">Ne <code>Scripts</code> — z domečku není poznat, že je to odchod z editoru.</span></div>
+        <div class="cell"><span class="none">—</span></div>
+
+        <div class="bl">Název scénáře</div>
+        <div class="cell"><span class="tip">Rename script</span><span class="why">Jediné místo, kde tooltip nese afordanci. Kdyby při čtení názvu rušil, je to první kandidát na výjimku z nulové prodlevy.</span></div>
+        <div class="cell"><span class="none">—</span></div>
+
+        <div class="bl">Stavová tečka</div>
+        <div class="cell"><span class="tip">Saved a few seconds ago</span><span class="why">Dál <code>Saving…</code> a <code>Couldn’t save — retrying</code>. Mění se podle dat, viz pravidlo 6.</span></div>
+        <div class="cell"><span class="none">—</span></div>
+
+        <div class="bl">Ozubené kolo</div>
+        <div class="cell"><span class="tip">Open script settings</span><span class="why">Slovo <code>script</code> odděluje od budoucích uživatelských preferencí pod účtem.</span></div>
+        <div class="cell"><span class="none">—</span></div>
+
+        <div class="bl">Rejstřík (hlavička)</div>
+        <div class="cell"><span class="tip">Open attribute manager</span></div>
+        <div class="cell"><span class="none">—</span></div>
+
+        <div class="bl">Šipka dolů</div>
+        <div class="cell"><span class="tip">Download .stagistic file</span><span class="why">Přípona je tam schválně: odlišuje stažení souboru „jak je“ od PDF exportu, který má vlastní view.</span></div>
+        <div class="cell"><span class="none">—</span></div>
+
+        <div class="bl">Účet</div>
+        <div class="cell"><span class="tip">Open account menu</span></div>
+        <div class="cell"><span class="none">—</span></div>
+
+        <div class="bl">Taby Editor / Export</div>
+        <div class="cell"><span class="none">Žádný — mají popisek (pravidlo 1).</span></div>
+        <div class="cell"><span class="none">—</span></div>
+
+        <div class="bl">Přepínače panelů</div>
+        <div class="cell"><span class="tip">Structure panel · Characters panel</span><span class="why">Stejné v otevřeném i zavřeném stavu (pravidlo 3).</span></div>
+        <div class="cell"><span class="none">—</span></div>
+
+        <div class="bl">Zpět / Vpřed</div>
+        <div class="cell"><span class="tip">Undo · Redo</span></div>
+        <div class="cell"><kbd>⌘Z</kbd> <kbd>⇧⌘Z</kbd></div>
+
+        <div class="bl">Řezy písma</div>
+        <div class="cell"><span class="tip">Bold · Italic · Underline</span></div>
+        <div class="cell"><kbd>⌘B</kbd> <kbd>⌘I</kbd> <kbd>⌘U</kbd></div>
+
+        <div class="bl">Typ bloku</div>
+        <div class="cell"><span class="none">Žádný — má popisek. Zkratky patří do položek nabídky.</span></div>
+        <div class="cell"><span class="none">—</span></div>
+
+        <div class="bl">Nadpis panelu</div>
+        <div class="cell"><span class="none">Žádný — má popisek a chevron. Co dělá, vysvětlí rozbalená nabídka.</span></div>
+        <div class="cell"><span class="none">—</span></div>
+
+        <div class="bl">Plus v panelu</div>
+        <div class="cell"><span class="tip">Add act · Add character</span><span class="why">Podle typu panelu, protože <code>+</code> sám o sobě neříká, co přibude.</span></div>
+        <div class="cell"><span class="none">—</span></div>
+
+        <div class="bl">Rejstřík (panel)</div>
+        <div class="cell"><span class="tip">Open structure in attribute manager</span><span class="why">Druhá varianta <code>Open characters in attribute manager</code> (pravidlo 5).</span></div>
+        <div class="cell"><span class="none">—</span></div>
+    </div>
+
+    <p style="margin-top:var(--space-lg);color:var(--color-text-muted)">Zkratky pro undo/redo a řezy jsou v tabulce jako mac varianta; komponenta si je bere z <code>shortcut</code> propu, takže per-platformní zápis se řeší tam, ne v textech.</p>
+</section>
+
+<section class="docSection">
+    <h2>§7 — Předpoklady tohohle v0</h2>
+    <ul class="assume">
+        <li><b>Přepínače panelů sedí na krajích toolbaru</b>, ne v hlavičce. Levá ikona sousedí s levým panelem, pravá s pravým — mapování se tím vysvětlí samo a v exportu prostě nejsou.</li>
+        <li><b>Toolbar běží jen nad sloupcem plátna</b>, ne přes celou šířku. Panel si tím vlastní celou svoji výšku včetně headeru.</li>
+        <li><b>Zkratka je vidět v triggeru typu bloku</b> (<code>Dialogue ⌃5</code>) — první splátka na R1 (zkratky nikde v UI). Plný vzor pro zkratky je samostatné téma.</li>
+        <li><b>Patička v editoru zmizela</b> (R9). Odkazy patří na home a do preferencí, ne pod plátno.</li>
+        <li><b>Plátno je beze změny</b> — typografie bloků odpovídá naměřeným hodnotám z UI mapy. Hierarchie bloků (R4) je samostatné rozhodnutí, tenhle mockup ji záměrně neřeší.</li>
+        <li><b>Ikony jsou placeholdery</b> z generického setu; produkční sada je v <code>packages/ui/src/icons</code>.</li>
+        <li><b>Panel se ukazuje bez loading a error stavu</b> — ty přijdou v plném buildu.</li>
+    </ul>
+</section>
+
+<script>
+/* ════════════════════════════════════════════════════════════════
+   Název scénáře — contenteditable s uzavřenou klávesnicí.
+   Tohle je zároveň spec pro implementaci: plain-text pole, které se
+   jen tváří jako nadpis. Nesmí z něj vypadnout nic, co by se dalo
+   uložit do databáze jako jméno scénáře.
+   ════════════════════════════════════════════════════════════════ */
+const MAX_TITLE = 120;
+
+document.querySelectorAll('[contenteditable]').forEach(el => {
+    let committed = el.textContent.trim();
+
+    /* Enter potvrdí (nikdy nevloží zalomení), Esc vrátí, Tab jde dál na
+       další prvek a nikdy nevloží tabulátor. */
+    el.addEventListener('keydown', event => {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            el.blur();
+
+            return;
+        }
+
+        if (event.key === 'Escape') {
+            event.preventDefault();
+            el.textContent = committed;
+            el.blur();
+
+            return;
+        }
+
+        if (event.key === 'Tab') {
+            /* Prohlížeče se tu neshodnou — Safari umí vložit tabulátor.
+               Focus posuneme sami a zápis potvrdíme. */
+            event.preventDefault();
+            el.blur();
+        }
+    });
+
+    /* Vložení ze schránky jen jako plain text, bez formátování a bez řádků. */
+    el.addEventListener('paste', event => {
+        event.preventDefault();
+        const text = (event.clipboardData?.getData('text/plain') ?? '')
+            .replace(/\s+/gu, ' ')
+            .trim();
+
+        document.execCommand('insertText', false, text);
+    });
+
+    /* Drag & drop dovnitř by propašoval HTML. */
+    el.addEventListener('drop', event => event.preventDefault());
+
+    /* Průběžná sanitizace — zlomy a přetečení délky řešíme hned,
+       ne až při ukládání. */
+    el.addEventListener('input', () => {
+        if (el.textContent.includes('\n') || el.textContent.length > MAX_TITLE) {
+            el.textContent = el.textContent.replace(/\s+/gu, ' ').slice(0, MAX_TITLE);
+            const range = document.createRange();
+
+            range.selectNodeContents(el);
+            range.collapse(false);
+            const selection = window.getSelection();
+
+            selection.removeAllRanges();
+            selection.addRange(range);
+        }
+    });
+
+    /* Prázdný název se nedá uložit — vrací se poslední platný. */
+    el.addEventListener('blur', () => {
+        const next = el.textContent.replace(/\s+/gu, ' ').trim();
+
+        if (next === '') {
+            el.textContent = committed;
+
+            return;
+        }
+
+        committed = next;
+        el.textContent = next;
+    });
+});
+</script>
+</body>
+</html>

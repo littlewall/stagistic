@@ -34,12 +34,7 @@ export const buildEditorRootStyle = ({
             return variables;
         }, {}),
         ...editorStyle,
-        '--editor-sidebar-width': sidebarWidth ?? 'calc(280px * var(--size-scale))',
-        '--toolbar-toggle-width': 'calc(var(--control-height-sm) + (var(--space-lg) * 2))',
-        '--left-toolbar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
-        '--right-toolbar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : 'var(--toolbar-toggle-width)',
-        '--left-toolbar-divider-opacity': isLeftSidebarOpen ? '1' : '0',
-        '--right-toolbar-divider-opacity': isRightSidebarOpen ? '1' : '0',
+        '--editor-sidebar-width': sidebarWidth ?? 'var(--panel-width)',
         '--left-sidebar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : '0px',
         '--right-sidebar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : '0px',
     } as CSSProperties;

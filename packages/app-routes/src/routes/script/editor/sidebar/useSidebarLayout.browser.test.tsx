@@ -90,23 +90,23 @@ afterEach(() => {
 
 describe('useSidebarLayout viewport contract', () => {
     it('opens both sidebars by default on a wide viewport', async () => {
-        installMatchMedia(1470);
+        installMatchMedia(1440);
         mount();
 
         await expect.poll(readState).toBe('true:true');
     });
 
-    it('keeps only the last-opened sidebar at 1469 px', async () => {
-        installMatchMedia(1469);
+    it('allows both sidebars at 1200 px', async () => {
+        installMatchMedia(1200);
         mount();
 
         await openBoth();
 
-        await expect.poll(readState).toBe('false:true');
+        await expect.poll(readState).toBe('true:true');
     });
 
-    it('allows both sidebars at 1470 px', async () => {
-        installMatchMedia(1470);
+    it('allows both sidebars at 1440 px', async () => {
+        installMatchMedia(1440);
         mount();
 
         await openBoth();
@@ -171,15 +171,16 @@ describe('useSidebarLayout viewport contract', () => {
         expect(stored).toMatchObject({isLeftOpen: true, isRightOpen: true});
     });
 
-    it('still docks a sidebar at 1200 px, just above the overlay breakpoint', async () => {
+    it('docks both sidebars at 1200 px, just above the overlay breakpoint', async () => {
         installMatchMedia(1200);
         mount();
 
-        await expect.poll(readState).toBe('false:true');
+        await expect.poll(readState).toBe('true:true');
     });
 
     it('keeps sidebar state separate for each script', async () => {
         installMatchMedia(1470);
+
         const firstRoot = mount('script-1');
 
         await expect.poll(readState).toBe('true:true');

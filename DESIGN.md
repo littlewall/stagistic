@@ -158,7 +158,7 @@ The editor application uses a warm neutral system anchored by `--base-neutral: o
 - **Backstage Flat** (`oklch(0.17 0.006 51)`): primary dark-mode surface.
 - **Illuminated Script** (`oklch(0.92 0.014 51)`): primary dark-mode text.
 
-`--color-surface-accent` is not another neutral. It is a low-chroma lavender mix used for selection, active rows, tags, and utility hover states: 16% lavender in light mode and 26% in dark mode.
+`--color-surface-accent` is not another neutral. It is a low-chroma lavender mix—16% lavender in light mode, 26% in dark—and it is the resting tint for tags and other lavender-toned surfaces. It is **not** the raw material for interaction states. Diluting one accent to five different percentages is how selection, hover, navigation, and drop targets came to look alike; those states derive from the dedicated `--state-*` tokens in section 5 instead.
 
 ### Semantic accents
 
@@ -211,7 +211,33 @@ IBM Plex Sans is precise without feeling corporate. Courier Prime carries the vi
 
 **The Size-Scale Rule.** Spacing, radii, font sizes, and control heights derive from `--size-scale`. The root fallback is `1.08`; explicit modes currently set `.size-sm` to `1`, `.size-md` to `1.1`, and `.size-lg` to `1.2`. New fixed values must use the scale unless they are intentionally physical CSS pixels, such as a 1px border or 2px focus outline.
 
-## 4. Elevation
+## 4. Layers and Elevation
+
+### The layer model
+
+Every surface in the editor belongs to exactly one of five layers. The layer decides both the background and how the surface is bounded, so a new component never has to invent a recipe.
+
+| Layer | What lives there | Background | Boundary |
+| --- | --- | --- | --- |
+| **Shell** | app header; anything that frames the application | `--layer-shell-bg` (= `--color-bg`) | `--layer-shell-edge` hairline |
+| **Panel** | sidebars, editor toolbar, cards, dialogs | `--layer-panel-bg` (= `--color-surface`) | `--layer-panel-edge` |
+| **Canvas** | the script page | `--color-surface-paper` | Canvas shadow, no border |
+| **Float** | popovers, modals, tooltips, bubble menus | `--layer-float-bg` | `--layer-panel-edge` plus the matching shadow |
+| **Section** | subdivision inside one panel: panel header, toolbar group, list group | none; inherits its panel | `--color-border-subtle` hairline |
+
+The shell is deliberately the *darkest* light-mode layer and the flattest dark-mode one. It recedes so that panels and canvas read as objects placed on it. An app header that is also a raised surface competes with the material it is supposed to hold.
+
+Layer dimensions are tokens as well: `--shell-height`, `--panel-width`, `--panel-head-height`.
+
+### Named rules
+
+**The Recessive Shell Rule.** The application header is not a surface. It sits at background lightness and separates from the content below with a single hairline. Controls inside it carry their own weight; the bar itself carries none.
+
+**The Layer Boundary Rule.** A boundary between two different layers is drawn with a tonal change *and* a `--color-border` line. A boundary inside a single layer—panel header against panel body, one toolbar group against the next—is drawn with a `--color-border-subtle` hairline and nothing else. It never gets a second background. Ignoring this is what turns a header, a toolbar, a panel, and a panel header into four identical slabs.
+
+**The Section Is Not a Panel Rule.** Subdividing a panel does not create a new layer. If a region needs its own background to be legible, it is a panel, and it belongs outside its parent rather than nested inside it.
+
+### Elevation
 
 Surfaces are flat at rest. Depth comes from the tonal stack—background, surface, raised surface—not from ambient card shadows. Shadows are reserved for elements that float above document flow and for the script canvas.
 
@@ -224,7 +250,32 @@ All shadows derive from `--base-shadow: oklch(.177 .0062 41.5)`, keeping them wa
 
 **The Flat-by-Default Rule.** If an element participates in normal document flow, use tonal layering. If it floats—popover, modal, detached panel, canvas—use the matching shadow token.
 
-## 5. Components
+## 5. Interaction States
+
+Interaction states are a semantic system, not a set of tints. Each state answers a different question, so each gets a different *kind* of signal rather than a different strength of one signal.
+
+| State | Question it answers | Mechanic | Token |
+| --- | --- | --- | --- |
+| **Hover** | Where is my pointer? | Neutral tone, no hue | `--state-hover` |
+| **Selected** | What have I chosen in the data? | Lavender tint plus a lavender edge | `--state-selected`, `--state-selected-edge` |
+| **Current** | Where am I in the application? | Ink bar on the active edge, no fill | `--state-current-edge` |
+| **Drop target** | Where will this land? | Dashed lavender edge, no fill | `--state-drop-edge` |
+| **Focus visible** | What does the keyboard control? | Lavender ring, offset | `--focus-ring` |
+| **Revealed** | Is the region this button opens on screen? | The icon fills in on the side it opens; ink goes to full strength | no token—the icon carries it |
+
+Hover is a pointer echo and carries no meaning, so it stays neutral; that is what frees lavender to mean selection and only selection. Drop target and selected both concern the data, so they share the hue but differ in mechanic—one fills, the other only outlines, and the dashed edge reads as provisional.
+
+### Named rules
+
+**The One Mechanic Per State Rule.** Every interaction state has exactly one mechanic. Two states must never differ only in the alpha of the same color. If a new state needs a look, it gets a new mechanic or it is not a new state.
+
+**The Navigation Is Not Selection Rule.** *Where I am in the application* and *what I have selected in the data* are different facts and never share a treatment. The current route or view is marked with an ink edge—neither Copper nor Lavender—so it sits outside the two-accent system and cannot be confused with a selected scene, character, or music item.
+
+**The Visible Target Rule.** When a toggle opens a region that is itself on screen—a panel, a drawer—its on-state is drawn in the icon, which fills in on the side it opens, and never with `--state-selected`. The open region is already the evidence, so a lavender chip duplicates it and spends selection's mechanic on something that is not a selection. Ink moves from muted to full alongside the icon so the state survives at 16px. This does not apply to a toggle whose target is invisible—`Bold` on a collapsed cursor has nothing else to show its state, so it keeps the selected tint.
+
+**The Affordance Reveal Rule.** Text that is itself a control—the script title in the header, a panel's type picker—shows no chrome at rest, reveals a neutral chip with a hairline border on hover, and takes the full surface treatment while focused or editing. A chevron marks anything that opens a menu, and the control's hit area hugs its text so the chevron sits at the end of the target. This is one idiom for the whole application: text under a neutral chip is operable.
+
+## 6. Components
 
 ### Buttons
 
@@ -266,7 +317,7 @@ The standard app shell has a sticky header, a main working surface, and an optio
 
 The script canvas uses Courier Prime and `--color-surface-paper` throughout. It represents the printable page, including user-configurable layout and pagination, and floats above its surroundings with the Canvas shadow. No adjacent surface should compete with it at the same contrast or visual weight.
 
-## 6. Responsive Layout Contract
+## 7. Responsive Layout Contract
 
 The alpha editor is desktop-first. Its supported minimum is a **1024 CSS px viewport**; this is a browser viewport measurement, not a device’s physical screen resolution.
 
@@ -281,7 +332,7 @@ The 1024px support boundary is product-wide. Component breakpoints may be higher
 
 **The Canvas Preservation Rule.** Compact behavior protects the script canvas before compressing editor controls or allowing multiple panels to compete with it.
 
-## 7. Content Contract
+## 8. Content Contract
 
 Stagistic uses concise English UI copy until a complete localization layer exists. Do not mix locales within one product surface or introduce one-off translated strings.
 
@@ -296,7 +347,20 @@ Stagistic uses concise English UI copy until a complete localization layer exist
 
 **The Next-Action Rule.** An empty state earns its space by helping the user continue, not merely by restating that no data exists.
 
-## 8. Accessibility Contract
+### Tooltips
+
+Tooltips open with no delay, so every one of them is part of the visual noise. A tooltip that repeats what the control already shows is a cost with no benefit.
+
+- **Only where there is no visible label.** Tabs, block-type selectors, and panel titles already carry text; a tooltip would cover the words the user is reading.
+- **Actions read as verb plus object:** `Open script settings`, not `Settings`. The icon names the thing; the tooltip must supply the action.
+- **Toggles read as the name of what they control, identically in both states:** `Structure panel`, `Bold`. State belongs to `aria-pressed` and to the visual treatment.
+- **Keyboard shortcuts use the `shortcut` prop,** never inline text inside the label.
+- **A deep link names its destination and its entry point:** `Open characters in attribute manager`.
+- **Status readouts are the exception** and may change with the data: `Saved a few seconds ago`, `Saving…`, `Couldn’t save — retrying`.
+
+**The Stable Toggle Name Rule.** A toggle button that exposes `aria-pressed` keeps one name in both states. Rewriting the label to `Show` or `Hide` makes the word ambiguous—it could describe the current state or the result of clicking—and duplicates information the pressed state already carries.
+
+## 9. Accessibility Contract
 
 Accessibility states are part of the visual system, not browser cleanup.
 
@@ -304,12 +368,15 @@ Accessibility states are part of the visual system, not browser cleanup.
 - The default contract is `var(--focus-ring)`: 2px solid lavender with a 2px offset.
 - Never remove an outline without an equally visible replacement.
 - Placeholder text uses an explicit token at full opacity and maintains at least 4.5:1 contrast.
-- Selection uses the lavender surface accent and remains distinguishable in both themes.
+- Selection uses `--state-selected` with its matching edge and remains distinguishable in both themes.
 - Color does not carry status or selection meaning alone; structure, text, or state attributes provide the same information.
+- Toggle buttons expose `aria-pressed` and keep a stable accessible name across states.
+- A control whose only affordance appears on hover—see The Affordance Reveal Rule—is still a real button or a text field in the markup, so it reaches keyboard and assistive technology at rest.
+- Editable headings such as the script title behave as single-line plain-text fields: `Enter` commits, `Escape` reverts, `Tab` moves focus without inserting a character, and pasted content is stripped to plain text.
 - Motion respects `prefers-reduced-motion`; continuous movement becomes static or fade-only.
 - Interactive containers must not contain nested buttons or links.
 
-## 9. Do and Don’t
+## 10. Do and Don’t
 
 ### Do
 
@@ -323,6 +390,12 @@ Accessibility states are part of the visual system, not browser cleanup.
 - Use `color-mix(in oklch, ...)` for derived hover and state colors.
 - Preserve the quieter product register and the more expressive editorial landing register.
 - Write UI copy in concise English sentence case; reserve uppercase for structural script labels.
+- Place every surface on one of the five layers and take its background and boundary from that layer.
+- Give each interaction state its own mechanic, and reach for the `--state-*` tokens rather than mixing a fresh tint.
+- Mark the current route or view with an ink edge so navigation never looks like selection.
+- Let a text control reveal its affordance as a neutral chip on hover, with the hit area hugging the text.
+- Keep a toggle's tooltip and accessible name stable across states and let `aria-pressed` carry the state.
+- Draw the on-state of a panel toggle inside its icon, since the open panel already carries the state itself.
 
 ### Don’t
 
@@ -332,6 +405,11 @@ Accessibility states are part of the visual system, not browser cleanup.
 - Don’t introduce heavy SaaS navigation, default data tables, gamification, or visual reward mechanics.
 - Don’t use loud marketing conventions such as purple gradients, hero metrics, feature-card grids, or buzzword-heavy copy.
 - Don’t use thick colored side borders as accent stripes; prefer a full border or a surface tint.
+- Don’t mark a toggle with `--state-selected` when the region it opens is already visible; the tint then says nothing the screen isn’t saying.
+- Don’t distinguish two interaction states by the alpha of one shared color.
+- Don’t dilute `--color-surface-accent` into a new state tint; add a mechanic instead.
+- Don’t give a section inside a panel its own background, and don’t let the application header behave as a raised surface.
+- Don’t write a tooltip for a control that already shows its label, and don’t inline a keyboard shortcut into the label text.
 - Don’t use gradient-clipped decorative text.
 - Don’t mix IBM Plex Sans and Courier Prime within one text element.
 - Don’t nest cards or interactive controls inside a clickable container.

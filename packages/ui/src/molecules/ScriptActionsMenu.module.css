@@ -57,7 +57,7 @@
 
     &[data-focused],
     &[data-hovered] {
-        background: color-mix(in oklch, var(--color-surface-accent) 35%, transparent);
+        background: var(--state-hover);
     }
 }
 

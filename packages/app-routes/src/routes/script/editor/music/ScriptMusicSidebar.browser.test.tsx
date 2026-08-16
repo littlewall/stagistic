@@ -110,6 +110,7 @@ const mountSidebar = ({
             layout={{
                 leftSidebarToggle: {
                     isOpen: true,
+                    label: 'Music',
                     onToggle: () => {},
                 },
             }}

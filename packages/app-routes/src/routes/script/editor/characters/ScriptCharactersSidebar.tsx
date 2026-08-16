@@ -15,6 +15,7 @@ import {
     type EditorSidebarGroup,
 } from '@stagistic/ui';
 import {
+    type ReactNode,
     useCallback,
     useMemo,
     useState,
@@ -32,7 +33,11 @@ import {CharactersSidebarContextActions} from './CharactersSidebarContextActions
 import styles from './ScriptCharactersSidebar.module.css';
 import {useCharacterComputed} from './useCharacterComputed';
 
-export const ScriptCharactersSidebar = () => {
+interface ScriptCharactersSidebarProps {
+    header?: ReactNode,
+}
+
+export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) => {
     const {resolvedScriptSettings} = useScriptSession();
     const {
         openAttributeManagerCharacter,
@@ -114,14 +119,8 @@ export const ScriptCharactersSidebar = () => {
         });
     }, [characters, editor]);
     const occupiedCharacterKeys = useMemo(() => {
-        return new Set([
-            ...characters.confirmedCharacterRecords,
-            ...characters.confirmedGroupRecords,
-        ].map(entity => normalizeCharacterKey(entity.key)));
-    }, [
-        characters.confirmedCharacterRecords,
-        characters.confirmedGroupRecords,
-    ]);
+        return new Set([...characters.confirmedCharacterRecords, ...characters.confirmedGroupRecords].map(entity => normalizeCharacterKey(entity.key)));
+    }, [characters.confirmedCharacterRecords, characters.confirmedGroupRecords]);
     const handleSetGroupColor = useCallback((groupId: string, colorHex: string | null) => {
         void characters.handleSetGroupColor(groupId, colorHex).catch(() => undefined);
     }, [characters]);
@@ -129,6 +128,7 @@ export const ScriptCharactersSidebar = () => {
     return (
         <div className={styles.content}>
             <SidebarMiniHeader
+                navigation={header}
                 actions={<CharactersSidebarContextActions onAddCharacter={openAddCharacterModal} />}
                 controls={(
                     <SidebarActionsGroup>

@@ -13,9 +13,8 @@ import {
 describe('getSidebarViewportMode', () => {
     it.each([
         [1199, {isExclusive: true, isOverlay: true}],
-        [1200, {isExclusive: true, isOverlay: false}],
-        [1469, {isExclusive: true, isOverlay: false}],
-        [1470, {isExclusive: false, isOverlay: false}],
+        [1200, {isExclusive: false, isOverlay: false}],
+        [1440, {isExclusive: false, isOverlay: false}],
     ])('resolves the sidebar contract at %d px', (width, expected) => {
         expect(getSidebarViewportMode(width)).toEqual(expected);
     });
@@ -26,7 +25,7 @@ describe('getSidebarViewportMode', () => {
      * machine disagreeing about whether a sidebar is docked or floating.
      */
     it('exposes media queries matching the breakpoints', () => {
-        expect(SIDEBAR_EXCLUSIVE_QUERY).toBe('(max-width: 1469px)');
+        expect(SIDEBAR_EXCLUSIVE_QUERY).toBe('(max-width: 1199px)');
         expect(SIDEBAR_OVERLAY_QUERY).toBe('(max-width: 1199px)');
     });
 });

@@ -2,6 +2,7 @@ import '@stagistic/ui/styles/base.css';
 
 import {
     afterEach,
+    beforeEach,
     describe,
     expect,
     it,
@@ -45,24 +46,27 @@ const mountShell = ({isRightSidebarOpen}: {isRightSidebarOpen: boolean}) => {
     applyRootStyle(root, isRightSidebarOpen);
 
     root.innerHTML = `
-        <div class="${styles.toolbarRow}">
-            <div class="${styles.toolbarSide} ${styles.toolbarSideLeft}"></div>
-            <div class="${styles.toolbarCenter}">
-                <div class="${styles.toolbarCenterInner}">toolbar</div>
-            </div>
-            <div class="${styles.toolbarSide} ${styles.toolbarSideRight}" data-testid="right-toolbar-side">
-                <div data-testid="right-header" style="flex: 1; min-width: 0;">header</div>
-            </div>
-        </div>
-        <div class="${styles.contentRow}">
+        <div class="${styles.shellBody}">
+            <div class="${styles.sidebarScrim} ${isRightSidebarOpen ? styles.sidebarScrimVisible : ''}" data-testid="sidebar-scrim"></div>
             <aside class="${styles.sidebarLeft} ${styles.sidebarHidden}"></aside>
-            <div class="${styles.canvasHost}">
-                <div data-testid="music-cue" style="position: relative; z-index: 20; width: 100%; height: 24px; margin-top: 120px;"></div>
-            </div>
+            <main class="${styles.editorMain}" data-testid="editor-main">
+                <div class="${styles.toolbarRow}">
+                    <button class="${styles.sidebarToggleButton} ${styles.toolbarToggleStart}"></button>
+                    <div class="${styles.toolbarCenterInner}" data-testid="toolbar-content">toolbar</div>
+                    <button class="${styles.sidebarToggleButton} ${styles.toolbarToggleEnd}"></button>
+                </div>
+                <div class="${styles.canvasHost}">
+                    <div data-testid="page" style="width: var(--editor-page-width); height: 60px;"></div>
+                    <div data-testid="music-cue" style="position: relative; z-index: 20; width: 100%; height: 24px; margin-top: 120px;"></div>
+                </div>
+            </main>
             <aside
                 class="${styles.sidebarRight} ${isRightSidebarOpen ? styles.sidebarOpen : styles.sidebarHidden}"
                 data-testid="right-sidebar"
-            ></aside>
+            >
+                <div data-testid="right-header" style="height: 40px;">header</div>
+                <div style="flex: 1;">content</div>
+            </aside>
         </div>
     `;
 
@@ -81,35 +85,40 @@ const getRect = (testId: string) => {
     return element.getBoundingClientRect();
 };
 
+/*
+ * `--panel-width` is a root token, so pinning the density scale has to happen at
+ * the root too — an element-level override would never reach it.
+ */
+beforeEach(() => {
+    document.documentElement.style.setProperty('--size-scale', '1');
+});
+
 afterEach(async () => {
+    document.documentElement.style.removeProperty('--size-scale');
     document.body.innerHTML = '';
     await page.viewport(DOCKED_WIDTH, VIEWPORT_HEIGHT);
 });
 
 describe('editor shell layout below the overlay breakpoint', () => {
-    it('gives the open sidebar toolbar the full sidebar width', async () => {
+    it('keeps the drawer header and content in one full-height overlay', async () => {
         await page.viewport(OVERLAY_WIDTH, VIEWPORT_HEIGHT);
         mountShell({isRightSidebarOpen: true});
 
-        const toolbarSide = getRect('right-toolbar-side');
         const sidebar = getRect('right-sidebar');
+        const header = getRect('right-header');
 
-        /*
-         * Regression guard: the toolbar row used to be pinned to the toggle rail
-         * here, which clipped the panel select and left the drawer stuck on
-         * whichever panel it opened with.
-         */
-        expect(toolbarSide.width).toBeCloseTo(sidebar.width, 0);
-        expect(getRect('right-header').width).toBeGreaterThan(0);
+        expect(sidebar.width).toBeCloseTo(256, 0);
+        expect(sidebar.height).toBeCloseTo(VIEWPORT_HEIGHT, 0);
+        expect(header.width).toBeCloseTo(sidebar.width - 1, 0);
     });
 
-    it('keeps the closed sidebar toolbar down at the toggle rail', async () => {
+    it('does not reserve canvas width for an overlay drawer', async () => {
         await page.viewport(OVERLAY_WIDTH, VIEWPORT_HEIGHT);
-        mountShell({isRightSidebarOpen: false});
+        mountShell({isRightSidebarOpen: true});
 
-        const toolbarSide = getRect('right-toolbar-side');
+        const editorMain = getRect('editor-main');
 
-        expect(toolbarSide.width).toBeLessThan(100);
+        expect(editorMain.width).toBeCloseTo(OVERLAY_WIDTH, 0);
     });
 
     it('keeps canvas overlays underneath the open drawer', async () => {
@@ -128,13 +137,44 @@ describe('editor shell layout below the overlay breakpoint', () => {
         expect(topElement?.closest(`.${styles.sidebarRight}`)).not.toBeNull();
     });
 
+    it('places a scrim above the canvas and below the drawer', async () => {
+        await page.viewport(OVERLAY_WIDTH, VIEWPORT_HEIGHT);
+        mountShell({isRightSidebarOpen: true});
+
+        const scrim = getRect('sidebar-scrim');
+        const topElement = document.elementFromPoint(100, scrim.top + 100);
+
+        expect(topElement?.closest(`.${styles.sidebarScrim}`)).not.toBeNull();
+    });
+
+    /*
+     * Bold, italic and the block selector change the page, so they have to look
+     * attached to it. Stretched across the shell they ended up nowhere near the
+     * text once both panels were closed.
+     */
+    it('keeps the formatting controls on the page column, not the shell width', async () => {
+        await page.viewport(DOCKED_WIDTH, VIEWPORT_HEIGHT);
+
+        const root = mountShell({isRightSidebarOpen: false});
+
+        root.style.setProperty('--editor-page-width', '600px');
+
+        const toolbarContent = getRect('toolbar-content');
+        const pageRect = getRect('page');
+
+        expect(toolbarContent.width).toBeCloseTo(600, 0);
+        expect(toolbarContent.left).toBeCloseTo(pageRect.left, 0);
+        expect(toolbarContent.right).toBeCloseTo(pageRect.right, 0);
+    });
+
     it('still lays the sidebar out as a grid track above the breakpoint', async () => {
         await page.viewport(DOCKED_WIDTH, VIEWPORT_HEIGHT);
         mountShell({isRightSidebarOpen: true});
 
-        const canvasHost = document.querySelector<HTMLElement>(`.${styles.canvasHost}`)!;
+        const editorMain = getRect('editor-main');
         const sidebar = getRect('right-sidebar');
 
-        expect(canvasHost.getBoundingClientRect().right).toBeLessThanOrEqual(sidebar.left + 1);
+        expect(sidebar.width).toBeCloseTo(256, 0);
+        expect(editorMain.right).toBeLessThanOrEqual(sidebar.left + 1);
     });
 });

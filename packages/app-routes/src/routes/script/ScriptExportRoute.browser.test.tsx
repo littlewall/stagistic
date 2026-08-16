@@ -102,7 +102,6 @@ const renderAt = (view: 'editor' | 'export') => {
         <MemoryRouter initialEntries={[`/script/s1/${view}`]}>
             <ScriptEditorAppHeader
                 currentScript={{id: 's1', name: 'My Script'}}
-                recentScripts={[]}
                 activeView={view}
             />
             <Routes>

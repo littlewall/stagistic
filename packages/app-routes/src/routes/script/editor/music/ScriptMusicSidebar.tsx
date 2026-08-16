@@ -29,6 +29,7 @@ import type {ScriptMusicListItem} from './types';
 import {UnassignMusicModal} from './UnassignMusicModal';
 
 interface ScriptMusicSidebarProps {
+    header?: ReactNode,
     music: readonly ScriptMusicListItem[],
     isLoading?: boolean,
     onAddMusic: () => void,
@@ -137,6 +138,7 @@ const MusicRow = ({
 };
 
 export const ScriptMusicSidebar = ({
+    header,
     music,
     isLoading = false,
     onAddMusic,
@@ -217,6 +219,7 @@ export const ScriptMusicSidebar = ({
     return (
         <div className={styles.content}>
             <SidebarMiniHeader
+                navigation={header}
                 actions={<MusicSidebarContextActions onAddMusic={onAddMusic} />}
                 controls={(
                     <SidebarActionsGroup>

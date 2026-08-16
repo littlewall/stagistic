@@ -49,6 +49,7 @@ interface ScriptSettingsModalContextValue {
     isEditorPresentationHydrated: boolean,
     titlePageDraft: TitlePageSettings,
     scriptTitleDraft: string,
+    updateScriptTitle: (title: string) => void,
     musicState: ReturnType<typeof useScriptMusicState>,
     musicAttachmentsState: ReturnType<typeof useMusicAttachmentsState>,
     openSettingsModal: () => void,
@@ -215,6 +216,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         isEditorPresentationHydrated,
         titlePageDraft,
         scriptTitleDraft,
+        updateScriptTitle,
         musicState,
         musicAttachmentsState,
         openSettingsModal,
@@ -237,6 +239,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         resolvedScriptSettings,
         scriptTitleDraft,
         titlePageDraft,
+        updateScriptTitle,
     ]);
 
     return (

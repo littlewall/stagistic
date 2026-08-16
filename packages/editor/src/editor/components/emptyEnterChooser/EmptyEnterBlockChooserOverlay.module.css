@@ -32,17 +32,14 @@
     transition: background .15s ease, border-color .15s ease, color .15s ease;
 
     &:hover {
-        background: color-mix(in oklch, var(--color-surface-accent) 32%, transparent);
+        background: var(--state-hover);
     }
 
+    /* Keyboard cursor, not a pointer echo — Enter commits this one. */
     &.active {
         color: var(--color-text);
-        background: color-mix(in oklch, var(--color-surface-accent) 62%, transparent);
-        border-color: color-mix(in oklch, var(--color-surface-accent) 55%, var(--color-border));
-
-        &:hover {
-            background: color-mix(in oklch, var(--color-surface-accent) 62%, transparent);
-        }
+        background: var(--state-selected);
+        border-color: var(--state-selected-edge);
     }
 }
 

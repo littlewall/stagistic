@@ -3,19 +3,17 @@ import type {
     HeaderFooterSettings,
     ScriptBlockNodeType,
 } from '@stagistic/script';
-import {
-    ArrowLeftIcon,
-    ArrowRightIcon,
-    LoaderOverlay,
-} from '@stagistic/ui';
+import {LoaderOverlay} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
 import {
     type CSSProperties,
     type MouseEvent as ReactMouseEvent,
     type RefObject,
+    useEffect,
     useId,
     useMemo,
+    useRef,
 } from 'react';
 
 import {buildCharacterTagPaletteCss} from '../../characters/buildCharacterTagPaletteCss';
@@ -33,6 +31,7 @@ import styles from '../../Editor.module.css';
 import {useEditorLiveCharacters} from '../../live/hooks';
 import {EditorCanvas} from '../EditorCanvas';
 import EditorToolbar from '../EditorToolbar';
+import {EditorSidebarToggleButton} from './EditorSidebarToggleButton';
 import {EditorStatusBar} from './EditorStatusBar';
 
 interface EditorShellCanvasProps {
@@ -97,8 +96,6 @@ export const EditorShell = ({
     const {
         leftSidebarToggle,
         rightSidebarToggle,
-        leftSidebarHeader,
-        rightSidebarHeader,
         leftSidebar,
         rightSidebar,
     } = layout ?? {};
@@ -122,6 +119,48 @@ export const EditorShell = ({
     ]);
     const isLeftSidebarOpen = leftSidebarToggle?.isOpen ?? false;
     const isRightSidebarOpen = rightSidebarToggle?.isOpen ?? false;
+    const isAnySidebarOpen = isLeftSidebarOpen || isRightSidebarOpen;
+    const sidebarTogglesRef = useRef({leftSidebarToggle, rightSidebarToggle});
+
+    sidebarTogglesRef.current = {leftSidebarToggle, rightSidebarToggle};
+
+    useEffect(() => {
+        const editorElement = editor?.view.dom;
+
+        if (!editorElement) {
+            return;
+        }
+
+        const handleBeforeInput = () => {
+            if (!window.matchMedia('(max-width: 1199px)').matches) {
+                return;
+            }
+
+            const {leftSidebarToggle: leftToggle, rightSidebarToggle: rightToggle} = sidebarTogglesRef.current;
+
+            if (leftToggle?.isOpen) {
+                leftToggle.onToggle();
+            }
+
+            if (rightToggle?.isOpen) {
+                rightToggle.onToggle();
+            }
+        };
+
+        editorElement.addEventListener('beforeinput', handleBeforeInput);
+
+        return () => editorElement.removeEventListener('beforeinput', handleBeforeInput);
+    }, [editor]);
+
+    const handleScrimMouseDown = () => {
+        if (leftSidebarToggle?.isOpen) {
+            leftSidebarToggle.onToggle();
+        }
+
+        if (rightSidebarToggle?.isOpen) {
+            rightSidebarToggle.onToggle();
+        }
+    };
 
     return (
         <div
@@ -142,56 +181,17 @@ export const EditorShell = ({
             {characterTagPaletteCss ? (
                 <style data-character-tag-palette>{characterTagPaletteCss}</style>
             ) : null}
-            <div className={styles.toolbarRow}>
-                <div className={clsx(styles.toolbarSide, styles.toolbarSideLeft)}>
-                    {leftSidebarToggle && isLeftSidebarOpen && leftSidebarHeader
-                        ? leftSidebarHeader
-                        : null}
-                    {leftSidebarToggle && !isLeftSidebarOpen ? (
-                        <button
-                            className={styles.sidebarToggleButton}
-                            type="button"
-                            aria-label="Show left sidebar"
-                            onMouseDown={onLeftSidebarToggleMouseDown}
-                        >
-                            <ArrowLeftIcon
-                                aria-hidden="true"
-                                className={clsx(
-                                    styles.sidebarToggleIcon,
-                                    styles.flipped,
-                                )}
-                            />
-                        </button>
-                    ) : null}
-                </div>
-                <div className={styles.toolbarCenter}>
-                    <div className={styles.toolbarCenterInner}>
-                        <EditorToolbar editor={editor} blockShortcuts={blockShortcuts} />
-                    </div>
-                </div>
-                <div className={clsx(styles.toolbarSide, styles.toolbarSideRight)}>
-                    {rightSidebarToggle && isRightSidebarOpen && rightSidebarHeader
-                        ? rightSidebarHeader
-                        : null}
-                    {rightSidebarToggle && !isRightSidebarOpen ? (
-                        <button
-                            className={styles.sidebarToggleButton}
-                            type="button"
-                            aria-label="Show right sidebar"
-                            onMouseDown={onRightSidebarToggleMouseDown}
-                        >
-                            <ArrowRightIcon
-                                aria-hidden="true"
-                                className={clsx(
-                                    styles.sidebarToggleIcon,
-                                    styles.flipped,
-                                )}
-                            />
-                        </button>
-                    ) : null}
-                </div>
-            </div>
-            <div className={styles.contentRow}>
+            <div className={styles.shellBody}>
+                <button
+                    className={clsx(
+                        styles.sidebarScrim,
+                        isAnySidebarOpen && styles.sidebarScrimVisible,
+                    )}
+                    type="button"
+                    aria-label="Close panels"
+                    tabIndex={isAnySidebarOpen ? 0 : -1}
+                    onMouseDown={handleScrimMouseDown}
+                />
                 <aside
                     className={clsx(
                         styles.sidebarLeft,
@@ -201,26 +201,54 @@ export const EditorShell = ({
                 >
                     {leftSidebar}
                 </aside>
-                <div
-                    className={styles.canvasHost}
-                    data-editor-canvas-host="true"
-                    ref={canvasHostRef}
-                >
-                    <EditorCanvas
-                        editor={editor}
-                        persistentCharacters={persistentCharacters}
-                        persistentMusic={persistentMusic}
-                        onMusicAssigned={onMusicAssigned}
-                        onOpenMusicManager={onOpenMusicManager}
-                        onRequestRemoveMusic={onRequestRemoveMusic}
-                        characterColorSaturation={characterColorSaturation}
-                        autoFocus={autoFocus}
-                        headerFooter={headerFooter}
-                        scriptTitle={scriptTitle}
-                        draftDate={draftDate}
-                        blockShortcuts={blockShortcuts}
-                    />
-                </div>
+                <main className={styles.editorMain}>
+                    <div className={styles.toolbarRow}>
+                        {leftSidebarToggle ? (
+                            <EditorSidebarToggleButton
+                                side="left"
+                                label={leftSidebarToggle.label}
+                                isOpen={isLeftSidebarOpen}
+                                className={styles.toolbarToggleStart}
+                                onMouseDown={onLeftSidebarToggleMouseDown}
+                            />
+                        ) : null}
+                        <div className={styles.toolbarCenterInner}>
+                            <EditorToolbar
+                                editor={editor}
+                                blockShortcuts={blockShortcuts}
+                            />
+                        </div>
+                        {rightSidebarToggle ? (
+                            <EditorSidebarToggleButton
+                                side="right"
+                                label={rightSidebarToggle.label}
+                                isOpen={isRightSidebarOpen}
+                                className={styles.toolbarToggleEnd}
+                                onMouseDown={onRightSidebarToggleMouseDown}
+                            />
+                        ) : null}
+                    </div>
+                    <div
+                        className={styles.canvasHost}
+                        data-editor-canvas-host="true"
+                        ref={canvasHostRef}
+                    >
+                        <EditorCanvas
+                            editor={editor}
+                            persistentCharacters={persistentCharacters}
+                            persistentMusic={persistentMusic}
+                            onMusicAssigned={onMusicAssigned}
+                            onOpenMusicManager={onOpenMusicManager}
+                            onRequestRemoveMusic={onRequestRemoveMusic}
+                            characterColorSaturation={characterColorSaturation}
+                            autoFocus={autoFocus}
+                            headerFooter={headerFooter}
+                            scriptTitle={scriptTitle}
+                            draftDate={draftDate}
+                            blockShortcuts={blockShortcuts}
+                        />
+                    </div>
+                </main>
                 <aside
                     className={clsx(
                         styles.sidebarRight,

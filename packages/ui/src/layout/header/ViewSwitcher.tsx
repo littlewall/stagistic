@@ -28,6 +28,7 @@ export const ViewSwitcher = ({activeView, onSelectView}: ViewSwitcherProps) => {
                     key={item.view}
                     className={clsx(styles.segment)}
                     isSelected={item.view === activeView}
+                    aria-current={item.view === activeView ? 'page' : undefined}
                     onPress={() => {
                         if (item.view !== activeView) {
                             onSelectView(item.view);

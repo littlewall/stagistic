@@ -14,6 +14,7 @@ import {
 } from '@stagistic/editor';
 import {
     Fragment,
+    type ReactNode,
     useCallback,
     useEffect,
     useMemo,
@@ -47,7 +48,11 @@ import {useStructureSidebarDnd} from './useStructureSidebarDnd';
 
 const ACTIVE_BLOCK_PERSIST_DELAY_MS = 250;
 
-export const ScriptStructureSidebar = () => {
+interface ScriptStructureSidebarProps {
+    header?: ReactNode,
+}
+
+export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) => {
     const {
         currentScriptId, indexSnapshot,
     } = useScriptSession();
@@ -241,6 +246,7 @@ export const ScriptStructureSidebar = () => {
     return (
         <div className={styles.content}>
             <SidebarMiniHeader
+                navigation={header}
                 actions={<StructureSidebarContextActions />}
                 controls={(
                     <SidebarActionsGroup>

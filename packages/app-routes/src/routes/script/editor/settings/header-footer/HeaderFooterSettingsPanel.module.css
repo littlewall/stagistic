@@ -129,7 +129,7 @@
     transition: background .15s ease, border-color .15s ease;
 
     &:not([data-disabled]):hover {
-        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+        background: var(--state-hover);
     }
 
     &[data-disabled]:hover {

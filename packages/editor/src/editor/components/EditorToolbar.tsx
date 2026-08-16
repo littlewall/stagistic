@@ -4,7 +4,11 @@ import {
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState,
+    type MouseEvent as ReactMouseEvent,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
 } from 'react';
 
 import {BLOCKS_WITHOUT_ACT} from '../blocks/blockRegistry';
@@ -39,7 +43,10 @@ const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
 
 const MULTI_BLOCK_OPTIONS = BLOCKS_WITHOUT_ACT.filter(option => MULTI_BLOCK_ALLOWED_TYPES.has(option.type));
 
-const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
+const EditorToolbar = ({
+    editor,
+    blockShortcuts,
+}: EditorToolbarProps) => {
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState(false);
@@ -194,6 +201,7 @@ const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
                 state={inlineMarksState}
                 actions={inlineMarksActions}
             />
+            <span className={styles.spacer} />
             <BlockTypeSelect
                 options={isMultiBlockSelection ? MULTI_BLOCK_OPTIONS : BLOCKS_WITHOUT_ACT}
                 blockShortcuts={blockShortcuts}

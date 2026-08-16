@@ -218,6 +218,7 @@ export interface EditorSettingsProps {
 
 export interface EditorSidebarToggle {
     isOpen: boolean,
+    label: string,
     onToggle: () => void,
 }
 
@@ -225,8 +226,6 @@ export interface EditorLayoutProps {
     autoFocus?: boolean,
     leftSidebarToggle?: EditorSidebarToggle,
     rightSidebarToggle?: EditorSidebarToggle,
-    leftSidebarHeader?: ReactNode,
-    rightSidebarHeader?: ReactNode,
     leftSidebar?: ReactNode,
     rightSidebar?: ReactNode,
     sidebarWidth?: string,

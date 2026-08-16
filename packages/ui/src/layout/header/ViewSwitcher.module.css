@@ -1,22 +1,22 @@
 .switcher {
     display: inline-flex;
     gap: var(--space-xs);
-    align-items: center;
+    align-items: stretch;
 }
 
 .segment {
     cursor: pointer;
+    position: relative;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: var(--space-sm) var(--space-lg);
+    padding: 0 var(--space-lg);
     font-size: var(--font-size-md);
     font-weight: var(--font-weight-medium);
     color: var(--color-text-muted);
     background: transparent;
     border: none;
-    border-radius: var(--radius-md);
-    transition: background .12s ease, color .12s ease;
+    transition: color .12s ease;
 
     &:focus {
         outline: none;
@@ -25,7 +25,6 @@
 
     &[data-hovered] {
         color: var(--color-text);
-        background: color-mix(in oklch, var(--color-surface-accent) 30%, transparent);
     }
 
     &[data-focus-visible] {
@@ -35,7 +34,16 @@
 
     &[data-selected] {
         color: var(--color-text);
-        background: color-mix(in oklch, var(--color-surface-accent) 60%, transparent);
-        box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-surface-accent) 70%, transparent);
+
+        &::after {
+            content: '';
+            position: absolute;
+            right: var(--space-md);
+            bottom: -1px;
+            left: var(--space-md);
+            height: var(--state-current-bar-width);
+            background: var(--state-current-edge);
+            border-radius: var(--state-current-bar-width) var(--state-current-bar-width) 0 0;
+        }
     }
 }

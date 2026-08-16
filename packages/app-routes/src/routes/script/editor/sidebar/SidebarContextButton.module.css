@@ -17,7 +17,7 @@
 
     &:hover {
         color: var(--color-text);
-        background: color-mix(in oklch, var(--color-surface-accent) 24%, transparent);
+        background: var(--state-hover);
     }
 
     &:active {

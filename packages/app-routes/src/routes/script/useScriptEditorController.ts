@@ -119,13 +119,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         storageError,
     ]);
 
-    const recentScripts = useMemo(
-        () => currentScript
-            ? recentScriptsData.filter(script => script.id !== currentScript.id).slice(0, 3)
-            : recentScriptsData.slice(0, 3),
-        [recentScriptsData, currentScript],
-    );
-
     const {
         handleAutoSave,
         handleManualSave,
@@ -154,7 +147,6 @@ export const useScriptEditorController = (scriptId: string | undefined): ScriptE
         currentScriptId,
         characterCatalog,
         musicCatalog,
-        recentScripts,
         initialValue,
         initialIndexSnapshot,
         storageError,

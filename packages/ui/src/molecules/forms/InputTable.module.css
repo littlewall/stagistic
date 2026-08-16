@@ -76,7 +76,7 @@
     }
 
     &:focus {
-        border-color: var(--color-surface-accent);
+        border-color: var(--state-selected-edge);
     }
 
     &:focus-visible {

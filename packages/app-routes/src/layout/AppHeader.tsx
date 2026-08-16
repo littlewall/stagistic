@@ -32,7 +32,7 @@ export const AppHeader = ({
 
 type ScriptEditorAppHeaderProps = Omit<
     UIScriptEditorAppHeaderProps,
-    'onHome' | 'onSelectScript' | 'onSelectView'
+    'onHome' | 'onSelectView'
 >;
 
 export const ScriptEditorAppHeader = (props: ScriptEditorAppHeaderProps) => {
@@ -42,7 +42,6 @@ export const ScriptEditorAppHeader = (props: ScriptEditorAppHeaderProps) => {
         <UIScriptEditorAppHeader
             {...props}
             onHome={() => void navigate('/')}
-            onSelectScript={script => void navigate(`/script/${script.id}/editor`)}
             onSelectView={(view: ScriptView) => void navigate(`/script/${props.currentScript.id}/${view}`)}
         />
     );

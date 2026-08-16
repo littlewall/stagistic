@@ -4,26 +4,28 @@
     --select-button-radius: var(--radius-md);
 
     position: relative;
-    flex: 1;
+    flex: 0 1 auto;
     min-width: 0;
+    margin-inline-end: auto;
 }
 
 .button {
     cursor: pointer;
-    display: grid;
-    grid-template-columns: 1fr auto;
+    display: inline-flex;
     gap: var(--select-button-gap);
     align-items: center;
-    width: 100%;
-    height: var(--select-button-height);
+    max-width: 100%;
+    height: var(--control-height-xs);
     padding: 0 var(--select-button-padding-inline);
-    font-family: inherit;
+    font-family: var(--font-family-mono);
     font-size: var(--select-button-font-size);
-    font-weight: var(--select-button-font-weight);
+    font-weight: var(--font-weight-semibold);
     color: var(--select-button-color);
     text-align: left;
-    background: var(--select-button-bg);
-    border: var(--select-button-border-width) solid var(--select-button-border-color);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-wide);
+    background: transparent;
+    border: 1px solid transparent;
     border-radius: var(--select-button-radius);
     transition: background .15s ease, border-radius .15s ease;
 

@@ -37,11 +37,11 @@
     border-radius: calc(9px * var(--size-scale));
 
     &:hover {
-        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+        background: var(--state-hover);
     }
 
     &.active {
-        background: color-mix(in oklch, var(--color-surface-accent) 45%, transparent);
+        background: var(--state-selected);
     }
 }
 
