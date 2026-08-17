@@ -216,8 +216,10 @@ export const ScriptEditorAppHeader = ({
                             {backToEditorLabel}
                         </Button>
                     ) : null}
-                    <ScriptTitle name={currentScript.name} onRename={onRenameScript} />
-                    <SyncIndicator state={scriptSyncState} />
+                    <div className={styles.scriptIdentity}>
+                        <ScriptTitle name={currentScript.name} onRename={onRenameScript} />
+                        <SyncIndicator state={scriptSyncState} />
+                    </div>
                 </>
             )}
         />

@@ -17,7 +17,7 @@
         max-width: 1400px;
         height: 100%;
         margin: 0 auto;
-        padding: 0 var(--space-md);
+        padding: 0 var(--space-lg);
 
         &.full {
             max-width: none;
@@ -124,11 +124,17 @@
 }
 
 .iconButton {
+    flex: 0 0 var(--control-height-md);
+    display: flex;
     width: var(--control-height-md);
     height: var(--control-height-md);
     padding: 0;
+    box-sizing: border-box;
+    aspect-ratio: 1;
+    align-items: center;
+    justify-content: center;
     color: var(--color-text-muted);
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-full);
 
     &[data-hovered],
     &[data-pressed],
@@ -137,6 +143,7 @@
     }
 
     & .icon {
+        display: block;
         width: calc(16px * var(--size-scale));
         height: calc(16px * var(--size-scale));
         color: currentcolor;
@@ -155,8 +162,16 @@
     white-space: nowrap;
 }
 
+.scriptIdentity {
+    display: inline-flex;
+    gap: var(--space-xs);
+    align-items: center;
+    min-width: 0;
+}
+
 .scriptTitle {
     display: inline-grid;
+    width: max-content;
     min-width: calc(72px * var(--size-scale));
 
     &::after,
@@ -391,7 +406,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 var(--space-sm);
+    padding: 0 var(--space-xs);
 
     /* A `span` carrying `tabIndex={0}`, so the base rule does not reach it. */
     &:focus-visible {
