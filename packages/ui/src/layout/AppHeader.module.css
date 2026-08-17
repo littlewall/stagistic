@@ -12,7 +12,7 @@
     & .inner {
         position: relative;
         display: grid;
-        grid-template-columns: auto minmax(0, 1fr) auto;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
         align-items: center;
         max-width: 1400px;
         height: 100%;
@@ -31,15 +31,19 @@
             position: relative;
             z-index: 1;
             display: inline-flex;
+            grid-column: 1;
             gap: var(--space-md);
             align-items: center;
             justify-self: start;
+            width: 100%;
+            min-width: 0;
         }
 
         & .scriptControls {
             position: relative;
             z-index: 1;
             display: inline-flex;
+            grid-column: 2;
             place-self: stretch center;
             justify-content: center;
             width: max-content;
@@ -51,9 +55,11 @@
             position: relative;
             z-index: 1;
             display: inline-flex;
+            grid-column: 3;
             gap: var(--space-lg);
             align-items: center;
             justify-self: end;
+            min-width: 0;
         }
 
         & .actionGroup {
@@ -124,15 +130,15 @@
 }
 
 .iconButton {
-    flex: 0 0 var(--control-height-md);
     display: flex;
+    flex: 0 0 var(--control-height-md);
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    aspect-ratio: 1;
     width: var(--control-height-md);
     height: var(--control-height-md);
     padding: 0;
-    box-sizing: border-box;
-    aspect-ratio: 1;
-    align-items: center;
-    justify-content: center;
     color: var(--color-text-muted);
     border-radius: var(--radius-full);
 
@@ -153,7 +159,8 @@
 .scriptTitle,
 .scriptTitleStatic {
     overflow: hidden;
-    max-width: calc(260px * var(--size-scale));
+    min-width: 0;
+    max-width: calc(220px * var(--size-scale));
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-medium);
     color: var(--color-text);
@@ -163,10 +170,14 @@
 }
 
 .scriptIdentity {
-    display: inline-flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) calc(24px * var(--size-scale));
+    flex: 0 1 auto;
     gap: var(--space-xs);
     align-items: center;
+    width: max-content;
     min-width: 0;
+    max-width: 100%;
 }
 
 .scriptTitle {
@@ -355,7 +366,7 @@
     gap: calc(2px * var(--size-scale));
     align-items: center;
     padding: calc(2px * var(--size-scale));
-    background: color-mix(in oklch, var(--color-surface-raised) 70%, transparent);
+    background: var(--segment-track-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-full);
 
@@ -368,9 +379,11 @@
         height: calc(28px * var(--size-scale));
         color: var(--color-text-muted);
         background: transparent;
+
+        /* Held transparent rather than dropped: the box must not resize between states. */
         border: 1px solid transparent;
         border-radius: var(--radius-full);
-        transition: background .12s ease, border-color .12s ease, color .12s ease;
+        transition: background .12s ease, color .12s ease, box-shadow .12s ease;
 
         &:focus {
             border-color: transparent;
@@ -378,12 +391,19 @@
             box-shadow: none;
         }
 
+        /*
+         * This used to be `--state-hover`, which resolves to the exact
+         * `color-mix(surface-raised 70%, transparent)` the track was painted
+         * with — the repaint happened and was invisible, so choosing a mode had
+         * no pointer feedback at all.
+         */
         &[data-hovered] {
-            background: var(--state-hover);
+            color: var(--color-text);
+            background: var(--segment-hover-bg);
         }
 
         &[data-focus-visible] {
-            background: color-mix(in oklch, var(--color-surface-raised) 70%, transparent);
+            background: var(--segment-hover-bg);
             border-color: transparent;
             outline: var(--focus-ring);
             outline-offset: var(--focus-ring-offset);
@@ -391,8 +411,14 @@
 
         &.active {
             color: var(--color-text);
-            background: var(--color-surface);
-            border-color: var(--color-border);
+            background: var(--segment-active-bg);
+            border-color: transparent;
+            box-shadow: var(--segment-active-shadow);
+
+            /* The chosen mode answered nothing on hover, so it alone felt inert. */
+            &[data-hovered] {
+                background: var(--segment-active-hover-bg);
+            }
         }
 
         & .icon {
@@ -406,13 +432,21 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 0 var(--space-xs);
+    width: calc(24px * var(--size-scale));
+    height: var(--control-height-md);
+    opacity: 1;
+    transition: opacity .18s ease;
 
     /* A `span` carrying `tabIndex={0}`, so the base rule does not reach it. */
     &:focus-visible {
         border-radius: var(--radius-sm);
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);
+    }
+
+    &.idle {
+        pointer-events: none;
+        opacity: 0;
     }
 
     & .dot {
@@ -427,11 +461,33 @@
         }
 
         &.saving {
-            background: var(--color-status-warning);
+            width: 10px;
+            height: 10px;
+            background: transparent;
+            border: 2px solid color-mix(in oklch, var(--color-status-warning) 28%, transparent);
+            border-top-color: var(--color-status-warning);
+            box-shadow: none;
+            animation: sync-indicator-spin .9s linear infinite;
         }
 
         &.error {
             background: var(--color-status-danger);
         }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .scriptStatus {
+        transition: none;
+
+        & .dot.saving {
+            animation: none;
+        }
+    }
+}
+
+@keyframes sync-indicator-spin {
+    to {
+        transform: rotate(360deg);
     }
 }

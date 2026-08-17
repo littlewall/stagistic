@@ -7,6 +7,7 @@ import {
 } from 'react';
 
 const SAVE_SLOW_INDICATOR_MS = 600;
+const SAVE_SUCCESS_INDICATOR_MS = 1200;
 
 type SaveIndicatorController = {
     saveIndicator: ScriptSyncState,
@@ -15,12 +16,16 @@ type SaveIndicatorController = {
 };
 
 export const useSaveIndicator = (): SaveIndicatorController => {
-    const [saveIndicator, setSaveIndicator] = useState<ScriptSyncState>('saved');
+    const [saveIndicator, setSaveIndicator] = useState<ScriptSyncState>('idle');
     const pendingSaveRef = useRef(0);
     const slowSaveTimerRef = useRef<number | null>(null);
 
     const startSaveIndicator = useCallback(() => {
         pendingSaveRef.current += 1;
+
+        setSaveIndicator(current => {
+            return current === 'saved' ? 'idle' : current;
+        });
 
         if (slowSaveTimerRef.current) {
             window.clearTimeout(slowSaveTimerRef.current);
@@ -46,9 +51,29 @@ export const useSaveIndicator = (): SaveIndicatorController => {
                 slowSaveTimerRef.current = null;
             }
 
-            setSaveIndicator(success ? 'saved' : 'error');
+            if (!success) {
+                setSaveIndicator('error');
+
+                return;
+            }
+
+            setSaveIndicator('saved');
         }
     }, []);
+
+    useEffect(() => {
+        if (saveIndicator !== 'saved') {
+            return;
+        }
+
+        const successTimer = window.setTimeout(() => {
+            setSaveIndicator('idle');
+        }, SAVE_SUCCESS_INDICATOR_MS);
+
+        return () => {
+            window.clearTimeout(successTimer);
+        };
+    }, [saveIndicator]);
 
     useEffect(() => {
         return () => {
