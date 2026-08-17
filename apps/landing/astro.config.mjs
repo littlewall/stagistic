@@ -5,6 +5,9 @@ export default defineConfig({
     site: 'https://stagistic.com',
     integrations: [react()],
     trailingSlash: 'never',
+    build: {
+        format: 'file'
+    },
     vite: {
         css: {
             modules: {
