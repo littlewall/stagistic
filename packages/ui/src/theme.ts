@@ -6,6 +6,7 @@ export const DEFAULT_APP_THEME: AppTheme = 'light';
 export const DEFAULT_APP_THEME_MODE: AppThemeMode = 'auto';
 
 const DARK_THEME_MEDIA_QUERY = '(prefers-color-scheme: dark)';
+const REDUCED_MOTION_MEDIA_QUERY = '(prefers-reduced-motion: reduce)';
 
 export const isAppTheme = (value: unknown): value is AppTheme => value === 'light' || value === 'dark';
 export const isAppThemeMode = (value: unknown): value is AppThemeMode => value === 'auto' || isAppTheme(value);
@@ -76,12 +77,52 @@ export const readPreferredAppTheme = (): AppTheme => {
     return readDocumentTheme() ?? resolveAppTheme(readPreferredAppThemeMode());
 };
 
+type ViewTransitionDocument = Document & {
+    startViewTransition?: (callback: () => void) => unknown,
+};
+
+/**
+ * A cross-fade is worth it only when the swap both changes colour and is allowed
+ * to animate: the first paint has no previous theme to fade from, switching
+ * between `dark` and `auto` that resolves to dark changes nothing, and a user
+ * asking for less motion is asking for less of this too.
+ */
+const shouldCrossFadeTheme = (previousTheme: AppTheme | null, nextTheme: AppTheme): boolean => {
+    if (previousTheme === null || previousTheme === nextTheme) {
+        return false;
+    }
+
+    if (typeof (document as ViewTransitionDocument).startViewTransition !== 'function') {
+        return false;
+    }
+
+    return !(typeof window !== 'undefined'
+        && typeof window.matchMedia === 'function'
+        && window.matchMedia(REDUCED_MOTION_MEDIA_QUERY).matches);
+};
+
 export const applyAppThemeMode = (themeMode: AppThemeMode): AppTheme => {
     const resolvedTheme = resolveAppTheme(themeMode);
 
     if (typeof document !== 'undefined') {
-        document.documentElement.setAttribute('data-theme-mode', themeMode);
-        document.documentElement.setAttribute('data-theme', resolvedTheme);
+        const applyThemeAttributes = () => {
+            document.documentElement.setAttribute('data-theme-mode', themeMode);
+            document.documentElement.setAttribute('data-theme', resolvedTheme);
+        };
+
+        /*
+         * The view transition owns the swap: the browser snapshots the page, runs the
+         * callback, snapshots again and blends the two textures on the compositor —
+         * one paint instead of a style recalc per frame across every element (see
+         * base.css for the numbers). The cost is that the attributes land on the next
+         * frame rather than synchronously, which is why anything reading them back
+         * has to wait a frame; the returned theme is still available immediately.
+         */
+        if (shouldCrossFadeTheme(readDocumentTheme(), resolvedTheme)) {
+            (document as ViewTransitionDocument).startViewTransition?.(applyThemeAttributes);
+        } else {
+            applyThemeAttributes();
+        }
     }
 
     if (typeof window !== 'undefined') {

@@ -28,7 +28,7 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border-subtle);
     border-radius: var(--radius-lg);
-    transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease, color 150ms ease;
+    transition: border-color var(--duration-normal) var(--ease-standard), box-shadow var(--duration-normal) var(--ease-standard), transform var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
 
     /*
      * Hover used to wash the card in `--color-surface-raised` and drop
@@ -68,7 +68,7 @@
     width: calc(20px * var(--size-scale));
     height: calc(20px * var(--size-scale));
     color: var(--color-text-muted);
-    transition: color 150ms ease;
+    transition: color var(--duration-normal) var(--ease-standard);
 }
 
 .startActionCopy {
@@ -190,7 +190,7 @@
     align-items: stretch;
     min-height: calc(58px * var(--size-scale));
     border-bottom: 1px solid var(--color-border-subtle);
-    transition: background 150ms ease, color 150ms ease;
+    transition: background var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
 
     &:last-child {
         border-bottom: none;
@@ -235,7 +235,7 @@
     width: calc(18px * var(--size-scale));
     height: calc(18px * var(--size-scale));
     color: var(--color-text-muted);
-    transition: color 150ms ease;
+    transition: color var(--duration-normal) var(--ease-standard);
 }
 
 .scriptInfo {

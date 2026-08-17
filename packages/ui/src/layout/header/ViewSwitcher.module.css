@@ -16,7 +16,7 @@
     color: var(--color-text-muted);
     background: transparent;
     border: none;
-    transition: color .12s ease;
+    transition: color var(--duration-fast) var(--ease-standard);
 
     &:focus {
         outline: none;

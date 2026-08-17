@@ -258,7 +258,7 @@
     background: transparent;
     border: none;
     border-radius: var(--radius-xs);
-    transition: color .15s ease, background .15s ease;
+    transition: color var(--duration-normal) var(--ease-standard), background var(--duration-normal) var(--ease-standard);
 
     &:hover {
         color: color-mix(in oklch, var(--character-color) 55%, var(--color-text));
@@ -289,7 +289,7 @@
     background: transparent;
     border: none;
     border-radius: var(--radius-xs);
-    transition: color .15s ease, background .15s ease;
+    transition: color var(--duration-normal) var(--ease-standard), background var(--duration-normal) var(--ease-standard);
 
     &:hover {
         color: var(--color-text);
@@ -320,7 +320,7 @@
     background: transparent;
     border: none;
     border-radius: var(--radius-xs);
-    transition: color .15s ease, background .15s ease;
+    transition: color var(--duration-normal) var(--ease-standard), background var(--duration-normal) var(--ease-standard);
 
     &:hover {
         color: var(--color-text);

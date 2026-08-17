@@ -48,7 +48,7 @@
     background: transparent;
     border: 0;
     border-radius: var(--radius-full);
-    transition: background .15s ease, border-color .15s ease;
+    transition: background var(--duration-normal) var(--ease-standard), border-color var(--duration-normal) var(--ease-standard);
 
     &:hover {
         background: var(--state-hover);
@@ -134,7 +134,7 @@
     background: var(--select-button-bg);
     border: var(--select-button-border-width) solid var(--select-button-border-color);
     border-radius: var(--select-button-radius);
-    transition: background .15s ease, border-radius .15s ease;
+    transition: background var(--duration-normal) var(--ease-standard), border-radius var(--duration-normal) var(--ease-standard);
     anchor-name: --block-type-select;
 
     &:hover {
@@ -168,7 +168,7 @@
 
     & .selectIcon {
         opacity: .5;
-        transition: opacity .15s ease;
+        transition: opacity var(--duration-normal) var(--ease-standard);
     }
 }
 
@@ -260,7 +260,7 @@
     background: transparent;
     border: none;
     border-radius: var(--select-menu-item-radius);
-    transition: background .15s ease, box-shadow .15s ease;
+    transition: background var(--duration-normal) var(--ease-standard), box-shadow var(--duration-normal) var(--ease-standard);
 
     &:hover {
         background: var(--select-menu-item-hover-bg);

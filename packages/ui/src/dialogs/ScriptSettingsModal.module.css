@@ -165,7 +165,7 @@
     stroke-linecap: round;
     stroke-linejoin: round;
     stroke-width: 2.2;
-    transition: transform 120ms ease, color 120ms ease;
+    transition: transform var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 
     &.open {
         transform: rotate(90deg);

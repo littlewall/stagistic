@@ -84,7 +84,7 @@
     background: transparent;
     border: 0;
     border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    transition: background 150ms ease, color 150ms ease;
+    transition: background var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
 
     &:hover {
         color: var(--color-text);

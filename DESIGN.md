@@ -265,7 +265,23 @@ Interaction states are a semantic system, not a set of tints. Each state answers
 
 Hover is a pointer echo and carries no meaning, so it stays neutral; that is what frees lavender to mean selection and only selection. Drop target and selected both concern the data, so they share the hue but differ in mechanic—one fills, the other only outlines, and the dashed edge reads as provisional.
 
+### Motion
+
+Durations are tokens, not per-component decisions. A component that writes its own number drifts: the same hover ran at `.12s` in the header, `150ms` on a button, and `160ms` on a music pill before these existed.
+
+| Token | Value | Use |
+| --- | --- | --- |
+| `--duration-fast` | 120ms | Pointer-scale feedback: icon buttons, header controls, reveal chips |
+| `--duration-normal` | 150ms | The default for hover, focus, and colour changes |
+| `--duration-slow` | 200ms | Progress and larger fades |
+| `--duration-slower` | 240ms | Drawers and panels that travel |
+| `--duration-theme` | `--duration-slow` | The light/dark swap only; times the view transition, never a component |
+
+Curves: `--ease-standard` for state changes, `--ease-out` for a control that pops under the pointer, `--ease-emphasized` for a surface that travels.
+
 ### Named rules
+
+**The Theme Swaps As One Rule.** Light and dark cross-fade over `--duration-theme` as a single image, and no component times the swap itself. `theme.ts` applies `data-theme` inside `document.startViewTransition`, and `base.css` gives `::view-transition-old(root)` / `::view-transition-new(root)` the token duration and easing. A component that instead relies on its own hover timing leaves the header, the canvas, and a card arriving at three different moments—and any surface with no hover rule snaps in a single frame. Doing it as a transition per element fixes the timing but not the feel: measured on an 8018-element script it spent 184ms in every frame, because each frame is a full style recalc and repaint with every `oklch(from …)` and `color-mix()` re-resolved per element; narrowing the property list or halving the duration changed nothing. One snapshot blended on the compositor holds 8.5ms frames. Where view transitions are unavailable, or under `prefers-reduced-motion`, the swap is instant rather than partial.
 
 **The One Mechanic Per State Rule.** Every interaction state has exactly one mechanic. Two states must never differ only in the alpha of the same color. If a new state needs a look, it gets a new mechanic or it is not a new state.
 
@@ -288,7 +304,7 @@ The shared Button atom uses a full pill radius. Compact selectors, segmented con
 - **Danger:** Cut Red text and a restrained mixed border; never solid red by default.
 - **Brand CTA:** Copper may be used for the landing page’s principal action. This is not the default product button treatment.
 
-Shared button behavior: weight 500, 150ms color/background/border transitions, `cursor: pointer`; disabled controls use opacity .6 and `cursor: not-allowed`.
+Shared button behavior: weight 500, `--duration-normal` color/background/border transitions, `cursor: pointer`; disabled controls use opacity .6 and `cursor: not-allowed`.
 
 ### Cards
 
