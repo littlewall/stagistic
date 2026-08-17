@@ -195,6 +195,11 @@
     --color-shadow-canvas: oklch(from var(--base-shadow) .13 c h / var(--A-shadow-canvas));
     --shadow-popover: 0 10px 30px var(--color-shadow-popover);
     --shadow-card: 0 10px 20px var(--color-shadow-card);
+
+    /* Contact shadow for elements that lift by a pixel under the pointer. A
+       20px-blur cloud under a hovered card reads as a much heavier UI than a
+       hairline does, and the depth was never carrying any meaning. */
+    --shadow-hairline: 0 1px 2px color-mix(in oklch, var(--color-shadow-card) 70%, transparent);
     --shadow-panel: 0 12px 32px var(--color-shadow-panel);
     --shadow-canvas: 0 12px 30px var(--color-shadow-canvas);
 
@@ -240,6 +245,18 @@
     --select-menu-item-hover-bg: var(--state-hover);
     --select-menu-item-active-bg: var(--state-selected);
     --select-menu-item-active-font-weight: var(--font-weight-semibold);
+
+    /* ── Segmented control ────────────────────────────────────────
+       Icon-sized modes sharing one track (theme mode today). The track is
+       recessed and the chosen pill floats out of it, so the pill needs no
+       border of its own — a third one, inside a bordered popover on a
+       bordered track, was all any of them read as. Hover moves toward ink
+       in both themes, away from wherever the track sits. */
+    --segment-track-bg: var(--color-surface-raised);
+    --segment-active-bg: var(--color-surface);
+    --segment-active-shadow: var(--shadow-hairline);
+    --segment-hover-bg: color-mix(in oklch, var(--color-text) 7%, var(--segment-track-bg));
+    --segment-active-hover-bg: color-mix(in oklch, var(--color-text) 5%, var(--segment-active-bg));
 
     /* Bubble menu — compact floating panel above pills / empty-block chooser */
     --bubble-menu-gap: var(--space-xs);
@@ -293,6 +310,12 @@
     --state-selected: color-mix(in oklch, var(--base-blue) 23%, var(--color-surface));
     --state-selected-edge: color-mix(in oklch, var(--base-blue) 55%, var(--color-border));
     --state-drop-edge: 1.5px dashed color-mix(in oklch, var(--base-blue) 50%, var(--color-border));
+    /* The light pairing would seat the active pill at the popover's own
+       lightness, reading as a hole rather than a raised segment. Dark keeps the
+       mechanic and swaps the pair: track below the popover, pill well above it. */
+    --segment-track-bg: var(--color-bg);
+    --segment-active-bg: var(--color-surface-raised);
+
     --color-border-subtle: oklch(from var(--base-neutral) .28 calc(c * var(--C-block)) h);
     --color-border-strong: oklch(from var(--base-neutral) .52 calc(c * var(--C-block)) h);
     --color-text-link: oklch(from var(--base-blue) .68 c h);

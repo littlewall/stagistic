@@ -28,12 +28,22 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border-subtle);
     border-radius: var(--radius-lg);
-    transition: background 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+    transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease, color 150ms ease;
 
+    /*
+     * Hover used to wash the card in `--color-surface-raised` and drop
+     * `--shadow-card` under it. The state now lives on the edge plus a one-pixel
+     * lift: nothing about a pointer resting on a card justifies restating its
+     * whole surface, and a 20px-blur cloud sat oddly against the flat page.
+     */
     &:hover:not(:disabled) {
-        background: var(--color-surface-raised);
-        border-color: var(--color-border);
-        box-shadow: var(--shadow-card);
+        transform: translateY(-1px);
+        border-color: var(--color-border-strong);
+        box-shadow: var(--shadow-hairline);
+
+        & .startActionIcon {
+            color: var(--color-text);
+        }
     }
 
     &:focus-visible {
@@ -46,12 +56,19 @@
         color: var(--color-text-muted);
         background: color-mix(in oklch, var(--color-surface) 70%, transparent);
     }
+
+    @media (prefers-reduced-motion: reduce) {
+        &:hover:not(:disabled) {
+            transform: none;
+        }
+    }
 }
 
 .startActionIcon {
     width: calc(20px * var(--size-scale));
     height: calc(20px * var(--size-scale));
     color: var(--color-text-muted);
+    transition: color 150ms ease;
 }
 
 .startActionCopy {
@@ -85,9 +102,9 @@
     background: var(--color-surface);
     border-color: var(--color-border);
 
-    &:hover:not(:disabled) {
-        background: var(--color-surface-raised);
-        border-color: var(--color-border-strong);
+    /* Its icon is already ink-on-surface, so the shared hover would erase the glyph. */
+    &:hover:not(:disabled) .startActionIcon {
+        color: var(--color-surface);
     }
 
     .startActionIcon {
@@ -173,13 +190,23 @@
     align-items: stretch;
     min-height: calc(58px * var(--size-scale));
     border-bottom: 1px solid var(--color-border-subtle);
+    transition: background 150ms ease, color 150ms ease;
 
     &:last-child {
         border-bottom: none;
     }
 
+    /*
+     * A row has no edge of its own to carry the state, so tone stays — but at
+     * `--state-hover`, the shared pointer echo, rather than a full-strength
+     * `--color-surface-raised` wash.
+     */
     &:hover {
-        background: var(--color-surface-raised);
+        background: var(--state-hover);
+
+        & .scriptIcon {
+            color: var(--color-text);
+        }
     }
 }
 
@@ -208,6 +235,7 @@
     width: calc(18px * var(--size-scale));
     height: calc(18px * var(--size-scale));
     color: var(--color-text-muted);
+    transition: color 150ms ease;
 }
 
 .scriptInfo {

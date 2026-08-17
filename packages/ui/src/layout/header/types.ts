@@ -3,6 +3,6 @@ export interface ScriptListItem {
     name: string,
 }
 
-export type ScriptSyncState = 'saved' | 'saving' | 'error';
+export type ScriptSyncState = 'idle' | 'saved' | 'saving' | 'error';
 
 export type ScriptView = 'editor' | 'export';

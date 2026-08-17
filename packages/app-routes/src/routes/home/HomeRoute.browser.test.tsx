@@ -144,6 +144,30 @@ const expectSubtlePrimaryAction = async (
         .not.toBe(getComputedStyle(secondaryIcon as SVGElement).backgroundColor);
 };
 
+/* Hover transitions run for 150ms, so styles are read once they settle. */
+const settle = async () => {
+    await new Promise(resolve => window.setTimeout(resolve, 250));
+};
+
+const unhover = async () => {
+    await userEvent.hover(document.querySelector('h1') as HTMLHeadingElement);
+    await settle();
+};
+
+/* Resolves a token the way the browser will, without restating its value here. */
+const resolveShadow = (token: string) => {
+    const probe = document.createElement('div');
+
+    probe.style.boxShadow = `var(${token})`;
+    document.body.appendChild(probe);
+
+    const resolved = getComputedStyle(probe).boxShadow;
+
+    probe.remove();
+
+    return resolved;
+};
+
 afterEach(() => {
     roots.forEach(root => root.unmount());
     roots.length = 0;
@@ -293,5 +317,74 @@ describe('HomeRoute', () => {
             newScript as HTMLButtonElement,
             importScript as HTMLButtonElement,
         );
+    });
+});
+
+describe('HomeRoute hover states', () => {
+    /*
+     * Hovering a start card used to wash it in `--color-surface-raised` and drop
+     * `--shadow-card` — a 20px-blur cloud under a 160px card. Both mechanics read
+     * as a heavier, older UI than the rest of the page, so hover now carries the
+     * edge and a 1px lift instead of tone and depth.
+     */
+    it('answers a start-card hover through its edge, not a fill or a drop shadow', async () => {
+        scriptsState.summaries = [scriptSummary('script-1', 'One draft', 2)];
+
+        mountHome();
+        await waitForText('One draft');
+
+        const card = findButton('Import script') as HTMLButtonElement;
+
+        await unhover();
+
+        const resting = getComputedStyle(card);
+        const restingBackground = resting.backgroundColor;
+        const restingBorder = resting.borderTopColor;
+
+        await userEvent.hover(card);
+        await settle();
+
+        const hovered = getComputedStyle(card);
+
+        expect(hovered.backgroundColor).toBe(restingBackground);
+        expect(hovered.borderTopColor).not.toBe(restingBorder);
+        expect(hovered.boxShadow).not.toBe(resolveShadow('--shadow-card'));
+        expect(hovered.boxShadow).not.toBe('none');
+        expect(hovered.transform).not.toBe('none');
+    });
+
+    /*
+     * A row has no edge to carry the state, so tone stays — but at a fraction of
+     * the old full-strength `--color-surface-raised` wash.
+     */
+    it('keeps a row hover well under a full surface-raised wash', async () => {
+        scriptsState.summaries = [scriptSummary('script-1', 'One draft', 2)];
+
+        mountHome();
+        await waitForText('One draft');
+
+        const row = document.querySelector<HTMLElement>('[aria-label="Scripts"] button')
+            ?.parentElement as HTMLElement;
+
+        await unhover();
+
+        const restingBackground = getComputedStyle(row).backgroundColor;
+
+        await userEvent.hover(row);
+        await settle();
+
+        const hoveredBackground = getComputedStyle(row).backgroundColor;
+        const probe = document.createElement('div');
+
+        probe.style.backgroundColor = 'var(--color-surface-raised)';
+        document.body.appendChild(probe);
+
+        const fullWash = getComputedStyle(probe).backgroundColor;
+
+        probe.remove();
+
+        expect(hoveredBackground).not.toBe(restingBackground);
+        expect(hoveredBackground).not.toBe(fullWash);
+        expect(getComputedStyle(row).transform).toBe('none');
     });
 });

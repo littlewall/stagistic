@@ -50,6 +50,23 @@ const mountHeader = () => {
     return {actions};
 };
 
+const mountHeaderWithName = (name: string) => {
+    const host = document.createElement('div');
+
+    document.body.appendChild(host);
+    root = createRoot(host);
+    root.render(
+        <ScriptEditorAppHeader
+            currentScript={{id: 'script-1', name}}
+            onHome={() => {}}
+            activeView="editor"
+            onSelectView={() => {}}
+            onRenameScript={() => {}}
+            scriptSyncState="saving"
+        />,
+    );
+};
+
 afterEach(() => {
     root?.unmount();
     root = null;
@@ -66,6 +83,23 @@ describe('ScriptEditorAppHeader', () => {
         expect(document.querySelector('button[aria-label="Open attribute manager"]')).not.toBeNull();
         expect(document.querySelector('button[aria-label="Download .stagistic file"]')).not.toBeNull();
         expect(document.querySelector('button[aria-haspopup="menu"]')).toBeNull();
+    });
+
+    it('keeps the sync status in a fixed lane directly after the truncated script title', async () => {
+        mountHeaderWithName('A script title long enough to exceed the available header identity space');
+
+        const identity = await waitForElement<HTMLElement>('[data-script-identity]');
+        const title = await waitForElement<HTMLInputElement>('input[aria-label="Script name"]');
+        const status = await waitForElement<HTMLElement>('[data-sync-status]');
+        const identityStyle = window.getComputedStyle(identity);
+        const titleRect = title.getBoundingClientRect();
+        const statusRect = status.getBoundingClientRect();
+
+        expect(identityStyle.display).toBe('grid');
+        expect(status.parentElement).toBe(identity);
+        expect(title.scrollWidth).toBeGreaterThan(title.clientWidth);
+        expect(statusRect.left - titleRect.right).toBeLessThanOrEqual(8);
+        expect(statusRect.width).toBeGreaterThanOrEqual(20);
     });
 
     it('dispatches each script action directly', async () => {

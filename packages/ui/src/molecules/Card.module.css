@@ -7,7 +7,7 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    transition: border-color 150ms ease, box-shadow 150ms ease;
+    transition: border-color 150ms ease, box-shadow 150ms ease, transform 150ms ease;
 
     &.compact {
         gap: var(--space-md);
@@ -18,11 +18,21 @@
     &.interactive {
         cursor: pointer;
 
+        /* Same hover language as the dashboard start cards: edge plus a
+           one-pixel lift, not a `--shadow-card` cloud. */
         &:hover,
         &:focus-visible {
-            border-color: color-mix(in oklch, var(--color-text) 12%, var(--color-border));
+            transform: translateY(-1px);
+            border-color: var(--color-border-strong);
             outline: none;
-            box-shadow: var(--shadow-card);
+            box-shadow: var(--shadow-hairline);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            &:hover,
+            &:focus-visible {
+                transform: none;
+            }
         }
     }
 
