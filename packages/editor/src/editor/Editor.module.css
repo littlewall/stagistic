@@ -85,15 +85,18 @@
 
 .sidebarToggleButton {
     cursor: pointer;
-    display: inline-flex;
+    flex: 0 0 var(--control-height-sm);
+    display: flex;
     align-items: center;
     justify-content: center;
     width: var(--control-height-sm);
     height: var(--control-height-sm);
+    box-sizing: border-box;
+    aspect-ratio: 1;
     color: var(--color-text-muted);
     background: transparent;
     border: 0;
-    border-radius: var(--radius-md);
+    border-radius: var(--radius-full);
     transition: background .15s ease, border-color .15s ease;
 
     &:hover {
