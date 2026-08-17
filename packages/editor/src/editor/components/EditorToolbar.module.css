@@ -36,14 +36,14 @@
 .iconButton {
     cursor: pointer;
     position: relative;
-    flex: 0 0 var(--control-height-sm);
     display: flex;
+    flex: 0 0 var(--control-height-sm);
     align-items: center;
     justify-content: center;
-    width: var(--control-height-sm);
-    height: var(--control-height-sm);
     box-sizing: border-box;
     aspect-ratio: 1;
+    width: var(--control-height-sm);
+    height: var(--control-height-sm);
     color: var(--color-text-muted);
     background: transparent;
     border: 0;
@@ -119,9 +119,6 @@
 .selectButton {
     cursor: pointer;
     display: grid;
-
-    /* Icon, label, chevron — nothing between the label and the chevron, so the
-       chevron ends where the button ends and the whole width stays clickable. */
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: var(--select-button-gap);
     align-items: center;

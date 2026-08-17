@@ -174,6 +174,18 @@ const mountSettingsHarness = (surfaceCache: EditorSurfaceCache) => {
 afterEach(unmountAll);
 
 describe('editor surface reuse', () => {
+    it('enables block spellcheck without assuming the script language', async () => {
+        mountEditor(createDocument());
+        await waitFor(() => editorDom() !== null);
+
+        const editor = editorDom();
+        const blocks = Array.from(editor?.querySelectorAll<HTMLElement>('p[blocktype]') ?? []);
+
+        expect(editor?.getAttribute('lang')).toBe('');
+        expect(blocks).toHaveLength(40);
+        expect(blocks.every(block => block.getAttribute('spellcheck') === 'true')).toBe(true);
+    });
+
     it('exposes the script editor as a named multiline textbox with instructions', async () => {
         mountEditor(createDocument());
         await waitFor(() => editorDom() !== null);

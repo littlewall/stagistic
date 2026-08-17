@@ -16,21 +16,11 @@ type ScriptTitleProps = {
     onRename?: (name: string) => void,
 };
 
-/**
- * The script name is the header's identity, so it stays plain text at rest and
- * only reveals a neutral chip on hover — see The Affordance Reveal Rule.
- *
- * It is a real `input` rather than a contenteditable heading. A single-line
- * text field already refuses newlines, pastes as plain text, moves focus on
- * Tab, and cannot receive dropped markup, so only commit and revert need
- * handling here.
- */
 export const ScriptTitle = ({name, onRename}: ScriptTitleProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const shouldRevertOnBlurRef = useRef(false);
     const [draft, setDraft] = useState(name);
 
-    /* An external rename — settings, sync — wins over an untouched draft. */
     useEffect(() => {
         if (document.activeElement !== inputRef.current) {
             setDraft(name);

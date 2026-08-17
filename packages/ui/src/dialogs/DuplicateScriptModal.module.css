@@ -39,8 +39,6 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
-
-    /* Allow multi-line hints to wrap instead of overflowing the switch label. */
     white-space: normal;
 }
 

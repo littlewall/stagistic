@@ -102,7 +102,6 @@
     background: var(--color-surface);
     border-color: var(--color-border);
 
-    /* Its icon is already ink-on-surface, so the shared hover would erase the glyph. */
     &:hover:not(:disabled) .startActionIcon {
         color: var(--color-surface);
     }

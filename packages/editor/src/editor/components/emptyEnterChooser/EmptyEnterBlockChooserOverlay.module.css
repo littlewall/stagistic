@@ -35,7 +35,6 @@
         background: var(--state-hover);
     }
 
-    /* Keyboard cursor, not a pointer echo — Enter commits this one. */
     &.active {
         color: var(--color-text);
         background: var(--state-selected);

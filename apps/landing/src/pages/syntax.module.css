@@ -3,7 +3,6 @@
     background: var(--color-bg);
 }
 
-/* ---- Nav (dark, consistent with home) ----------------------------------- */
 .nav {
     --color-text: var(--color-stage-nav-text);
     --color-text-muted: oklch(from var(--color-stage-nav-text) l c h / .54);
@@ -37,7 +36,6 @@
     }
 }
 
-/* ---- Layout ------------------------------------------------------------- */
 .main {
     padding: 4rem 1.5rem 6rem;
 }
@@ -128,7 +126,6 @@
     min-width: 0;
 }
 
-/* ---- Lede --------------------------------------------------------------- */
 .lede {
     padding-bottom: 1rem;
 }
@@ -170,7 +167,6 @@
     }
 }
 
-/* ---- Sections ----------------------------------------------------------- */
 .section {
     scroll-margin-top: 4.5rem;
     margin-top: 3.25rem;
@@ -247,7 +243,6 @@
     border-radius: .5rem;
 }
 
-/* Inline code token inside prose */
 .prose .code,
 .bullets .code,
 .note .code,
@@ -261,7 +256,6 @@
     border-radius: .25rem;
 }
 
-/* ---- Examples ----------------------------------------------------------- */
 .example {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -299,7 +293,6 @@
     border-radius: .5rem;
 }
 
-/* Rendered preview */
 .rendered {
     padding: 1rem 1.25rem;
     font-family: var(--font-mono);
@@ -376,7 +369,6 @@
     color: color-mix(in oklch, var(--color-text-muted) 72%, transparent);
 }
 
-/* ---- Marker reference --------------------------------------------------- */
 .refTable {
     margin-top: 1.5rem;
     border-top: 1px solid var(--color-border);
@@ -403,7 +395,6 @@
     color: var(--color-text-muted);
 }
 
-/* ---- Footer ------------------------------------------------------------- */
 .footer {
     padding: 2.5rem 1.5rem;
     border-top: 1px solid var(--color-border);
@@ -454,7 +445,6 @@
     }
 }
 
-/* ---- Responsive --------------------------------------------------------- */
 @media (max-width: 860px) {
     .shell {
         grid-template-columns: 1fr;

@@ -241,7 +241,6 @@ export const scriptScenes = pgTable(
     }),
 );
 
-/* Many-to-many assignment of catalogued places to scenes. */
 export const scriptSceneLocations = pgTable(
     'script_scene_locations',
     {
@@ -405,7 +404,6 @@ export const scriptAttachments = pgTable(
     }),
 );
 
-/* Join between a music and an attachment. Both sides cascade-delete. */
 export const scriptMusicAttachments = pgTable(
     'script_music_attachments',
     {

@@ -129,8 +129,6 @@
         }
     }
 
-    /* A drop target is provisional: outline only, never a fill, so it cannot
-       be mistaken for the selected scene. */
     &.actDropTarget {
         outline: var(--state-drop-edge);
         outline-offset: -1.5px;
