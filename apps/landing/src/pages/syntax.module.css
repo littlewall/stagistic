@@ -1,5 +1,6 @@
 .page {
     min-height: 100vh;
+    background: var(--color-bg);
 }
 
 /* ---- Nav (dark, consistent with home) ----------------------------------- */

@@ -115,7 +115,7 @@ const faqs = [
         <meta property="og:image" content="/opengraph.jpg" />
         <link
             rel="canonical"
-            href={new URL(Astro.url.pathname.replace(/^\/+/, ''), Astro.site).href}
+            href={`https://${Astro.site?.hostname}`}
         />
         <script is:inline>document.documentElement.classList.add('js');</script>
     </head>
