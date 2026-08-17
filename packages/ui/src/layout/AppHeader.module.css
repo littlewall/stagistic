@@ -98,7 +98,7 @@
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
-    transition: background .12s ease, border-color .12s ease, color .12s ease;
+    transition: background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard);
 
     &:focus {
         border-color: transparent;
@@ -209,7 +209,7 @@
         text-overflow: ellipsis;
         background: transparent;
         outline: none;
-        transition: background .12s ease, border-color .12s ease;
+        transition: background var(--duration-fast) var(--ease-standard), border-color var(--duration-fast) var(--ease-standard);
 
         &:hover {
             background: var(--state-hover);
@@ -312,7 +312,7 @@
         margin: 0 var(--space-md);
         padding: var(--space-md) var(--space-md);
         border-radius: var(--radius-md);
-        transition: background .15s ease, box-shadow .15s ease;
+        transition: background var(--duration-normal) var(--ease-standard), box-shadow var(--duration-normal) var(--ease-standard);
 
         &:focus-visible,
         &[data-focus-visible] {
@@ -383,7 +383,7 @@
         /* Held transparent rather than dropped: the box must not resize between states. */
         border: 1px solid transparent;
         border-radius: var(--radius-full);
-        transition: background .12s ease, color .12s ease, box-shadow .12s ease;
+        transition: background var(--duration-fast) var(--ease-standard), color var(--duration-fast) var(--ease-standard), box-shadow var(--duration-fast) var(--ease-standard);
 
         &:focus {
             border-color: transparent;
@@ -435,7 +435,7 @@
     width: calc(24px * var(--size-scale));
     height: var(--control-height-md);
     opacity: 1;
-    transition: opacity .18s ease;
+    transition: opacity var(--duration-slow) var(--ease-standard);
 
     /* A `span` carrying `tabIndex={0}`, so the base rule does not reach it. */
     &:focus-visible {

@@ -17,18 +17,18 @@ export {
 } from './atoms/typography/Typography';
 export {
     type AttributeManagerCharacter,
-    type AttributeManagerCharacterWorkspaceId,
     AttributeManagerCharactersPanel,
     type AttributeManagerCharactersPanelProps,
+    type AttributeManagerCharacterWorkspaceId,
     type AttributeManagerGroup,
 } from './dialogs/AttributeManagerCharactersPanel';
-export {
-    AttributeManagerGroupDetail,
-} from './dialogs/AttributeManagerGroupDetail';
 export {
     type AttributeManagerDetailTab,
     AttributeManagerDetailTabs,
 } from './dialogs/AttributeManagerDetailTabs';
+export {
+    AttributeManagerGroupDetail,
+} from './dialogs/AttributeManagerGroupDetail';
 export {
     type AttributeManagerListItem,
     AttributeManagerListPanel,

@@ -97,7 +97,7 @@
     background: transparent;
     border: 0;
     border-radius: var(--radius-full);
-    transition: background .15s ease, border-color .15s ease;
+    transition: background var(--duration-normal) var(--ease-standard), border-color var(--duration-normal) var(--ease-standard);
 
     &:hover {
         background: var(--state-hover);
@@ -241,11 +241,11 @@
         top: 0;
         bottom: 0;
         width: var(--editor-sidebar-width);
-        transition: transform .24s cubic-bezier(.32, .72, 0, 1), opacity .24s ease, visibility .24s ease;
+        transition: transform var(--duration-slower) var(--ease-emphasized), opacity var(--duration-slower) var(--ease-standard), visibility var(--duration-slower) var(--ease-standard);
     }
 
     @media (max-width: 1199px) and (prefers-reduced-motion: reduce) {
-        transition: opacity .15s ease, visibility .15s ease;
+        transition: opacity var(--duration-normal) var(--ease-standard), visibility var(--duration-normal) var(--ease-standard);
 
         &.sidebarHidden {
             transform: translateX(0);
@@ -262,7 +262,7 @@
     opacity: 0;
     background: var(--color-overlay-scrim);
     border: 0;
-    transition: opacity .24s ease;
+    transition: opacity var(--duration-slower) var(--ease-standard);
 
     @media (max-width: 1199px) {
         display: block;

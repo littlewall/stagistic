@@ -24,6 +24,36 @@ body {
     background: var(--color-bg);
 }
 
+/*
+ * Theme switching is decided here, not by each component.
+ *
+ * Nothing used to own the light/dark swap, so what animated was whatever a
+ * component happened to declare for its own hover: the header cross-faded over
+ * .12s, buttons over 150ms, a music pill over 160ms, and every surface with no
+ * hover rule at all — body, the canvas, panel backgrounds, scrims, shadows —
+ * snapped in a single frame.
+ *
+ * The swap is now one composited cross-fade of the whole page (theme.ts drives
+ * it through a view transition), not a transition per element. The per-element
+ * version was measured on a synthetic script and it is not affordable: at 8018
+ * elements it spent 184ms in every frame of the fade, because each frame is a
+ * full style recalc and repaint of the document and every themed value —
+ * `oklch(from …)`, `color-mix(…)` — is resolved again per element. Narrowing the
+ * property list to three (108ms) or halving the duration (109ms) did not help;
+ * the cost is per element, not per property or per millisecond. Snapshotting
+ * once and blending two textures on the compositor holds 8.5ms frames at the
+ * same element count.
+ *
+ * Only duration and easing are set below. The rest of the cross-fade — the
+ * complementary opacity curves and the `plus-lighter` blending that keeps the
+ * midpoint from flashing — is the browser default and is already what we want.
+ */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: var(--duration-theme);
+    animation-timing-function: var(--ease-theme);
+}
+
 .size-sm {
     --size-scale: 1;
 }

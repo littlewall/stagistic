@@ -72,6 +72,24 @@
     --control-height-md: calc(32px * var(--size-scale));
     --control-height-lg: calc(40px * var(--size-scale));
 
+    /* ── Motion ────────────────────────────────────────────────────
+       Four durations and three curves, because every component used to
+       write its own number: hover on the header ran at .12s, the same
+       hover on a button at 150ms, on a music pill at 160ms. Reach for
+       --duration-normal unless there is a reason; --duration-theme is
+       reserved for the light/dark swap and is applied globally by
+       base.css, never per component. */
+    --duration-fast: 120ms;
+    --duration-normal: 150ms;
+    --duration-slow: 200ms;
+    --duration-slower: 240ms;
+    --duration-theme: var(--duration-slow);
+
+    --ease-standard: ease;
+    --ease-out: cubic-bezier(.23, 1, .32, 1);
+    --ease-emphasized: cubic-bezier(.32, .72, 0, 1);
+    --ease-theme: var(--ease-standard);
+
     /* ── Brand palette (OKLCH) ─────────────────────────────────── */
     --palette-lavender: oklch(.6251 .0699 277.48); /* #7d84b2 */
     --palette-copper: oklch(.6622 .1479 62.72); /* #d17b0f */

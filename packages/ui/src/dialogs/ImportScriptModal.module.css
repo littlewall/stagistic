@@ -44,7 +44,7 @@
     background: var(--color-surface-raised);
     border: 1px dashed var(--color-border);
     border-radius: var(--radius-sm);
-    transition: border-color 150ms ease, background 150ms ease;
+    transition: border-color var(--duration-normal) var(--ease-standard), background var(--duration-normal) var(--ease-standard);
 
     &[data-hovered],
     &[data-drop-target] {
