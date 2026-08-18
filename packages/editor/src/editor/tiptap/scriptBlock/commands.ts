@@ -84,21 +84,28 @@ const stripLeadingActionTabs = (
     return tr.delete(blockContentStart, blockContentStart + indentCount);
 };
 
+const BLOCK_DELIMITERS: Partial<Record<BlockNodeType, readonly [string, string]>> = {
+    aside: ['(', ')'],
+    note: ['[[', ']]'],
+};
+
 /**
- * An aside already renders its own wrapping parentheses via CSS (and blocks
- * literal '(' / ')' from being typed into one). A block converted to aside
- * from a type that does allow literal parens (dialogue, lyrics, ...) would
- * otherwise show doubled parens if its text happens to already be wrapped in
- * them, so strip a single leading '(' and trailing ')' pair on conversion.
+ * Aside and note blocks render their syntax delimiters via CSS. A block
+ * converted from a type that allows literal delimiters would otherwise show
+ * them twice, so remove one complete outer pair from the editable content.
  */
-const stripAsideParentheses = (
+const stripRenderedBlockDelimiters = (
     tr: Transaction,
     nextBlockType: BlockNodeType,
     blockPos: number,
 ): Transaction => {
-    if (nextBlockType !== 'aside') {
+    const delimiters = BLOCK_DELIMITERS[nextBlockType];
+
+    if (!delimiters) {
         return tr;
     }
+
+    const [opening, closing] = delimiters;
 
     const mappedPos = tr.mapping.map(blockPos);
     const node = tr.doc.nodeAt(mappedPos);
@@ -109,15 +116,17 @@ const stripAsideParentheses = (
 
     const text = node.textContent;
 
-    if (text.length < 2 || !text.startsWith('(') || !text.endsWith(')')) {
+    if (text.length < opening.length + closing.length
+        || !text.startsWith(opening)
+        || !text.endsWith(closing)) {
         return tr;
     }
 
     const contentStart = mappedPos + 1;
     const contentEnd = contentStart + node.content.size;
-    let next = tr.delete(contentEnd - 1, contentEnd);
+    let next = tr.delete(contentEnd - closing.length, contentEnd);
 
-    next = next.delete(contentStart, contentStart + 1);
+    next = next.delete(contentStart, contentStart + opening.length);
 
     return next;
 };
@@ -213,7 +222,7 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
         activeBlock.node,
     );
     tr = normalizeCharacterMusicText(tr, normalized, activeBlock.pos);
-    tr = stripAsideParentheses(tr, normalized, activeBlock.pos);
+    tr = stripRenderedBlockDelimiters(tr, normalized, activeBlock.pos);
     tr = restoreBlockSelection(tr, activeBlock.pos, originalAnchor, originalHead);
     tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
     editor.view.dispatch(tr.scrollIntoView());
@@ -272,7 +281,7 @@ export const updateBlockTypeForSelection = (editor: Editor, blockType: BlockNode
         tr = stripLeadingActionTabs(tr, previousBlockType, normalized, mappedPos + 1, node.textContent ?? '');
         tr = normalizeFormerStageDirectionContent(tr, editor.schema, previousBlockType, normalized, pos, node);
         tr = normalizeCharacterMusicText(tr, normalized, pos);
-        tr = stripAsideParentheses(tr, normalized, pos);
+        tr = stripRenderedBlockDelimiters(tr, normalized, pos);
         didChange = true;
 
         return false;
@@ -476,7 +485,7 @@ export const setBlockTypeWithSelection = (
         block.pos,
         block.node,
     );
-    tr = stripAsideParentheses(tr, normalized, block.pos);
+    tr = stripRenderedBlockDelimiters(tr, normalized, block.pos);
     tr = restoreBlockSelection(tr, block.pos, originalAnchor, originalHead);
     tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
 

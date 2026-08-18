@@ -46,6 +46,14 @@ const initialValue: ScriptDocument = {
     ],
 };
 
+const emptyInitialValue: ScriptDocument = {
+    type: 'doc',
+    content: [{
+        type: 'stageDirection',
+        attrs: {id: 'stage-direction-empty'},
+    }],
+};
+
 const EditorProbe = () => {
     const editor = useEditorInstance();
 
@@ -62,7 +70,7 @@ const EditorProbe = () => {
 
 const roots: Root[] = [];
 
-const renderEditor = () => {
+const renderEditor = (documentValue: ScriptDocument = initialValue) => {
     const host = document.createElement('div');
 
     host.style.width = '1024px';
@@ -73,7 +81,7 @@ const renderEditor = () => {
 
     root.render(
         <ScriptEditor
-            document={{initialValue}}
+            document={{initialValue: documentValue}}
             layout={{autoFocus: true}}
             callbacks={{onOpenMusicManager: vi.fn()}}
         >
@@ -296,5 +304,39 @@ describe('music pill interaction', () => {
         expect(selection?.containsNode(number, true)).toBe(true);
         expect(selection?.containsNode(input, true)).toBe(true);
         expect(getComputedStyle(visualBody).userSelect).toBe('text');
+    });
+
+    it('does not render the active music placeholder outside the pill', async () => {
+        renderEditor();
+
+        const editor = await getEditor();
+        const {input} = await getPillElements(editor);
+
+        await page.elementLocator(input).click();
+        await poll(() => input.dataset.placeholder === 'music' ? input : null, 'active music placeholder');
+
+        const placeholderStyle = getComputedStyle(input, '::before');
+
+        expect(placeholderStyle.content).toBe('none');
+        expect(placeholderStyle.float).toBe('none');
+    });
+
+    it('keeps an empty music draft placeholder inside the pill', async () => {
+        renderEditor(emptyInitialValue);
+
+        const editor = await getEditor();
+
+        expect(editor.commands.insertMusicDraft('stage-direction-empty')).toBe(true);
+
+        const input = await poll(
+            () => editor.view.dom.querySelector<HTMLElement>('[data-music-title-input="start"]'),
+            'draft music title input',
+        );
+        await poll(() => document.activeElement === input ? input : null, 'focused draft music title');
+
+        const placeholderStyle = getComputedStyle(input, '::before');
+
+        expect(placeholderStyle.content).toBe('"music"');
+        expect(placeholderStyle.float).toBe('none');
     });
 });

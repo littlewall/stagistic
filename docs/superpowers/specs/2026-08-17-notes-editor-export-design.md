@@ -14,6 +14,9 @@ print them by default, and let writers hide them from an export.
 - Keep the existing note layout settings. Change the note block default to
   italic.
 - Empty note blocks still show both delimiter pairs around the caret position.
+- While editing a note, manual `[` and `]` input is consumed just as manual
+  parentheses are consumed in an `aside`; generated delimiters remain the only
+  structural brackets.
 
 ## Block type conversion
 
@@ -48,7 +51,7 @@ print them by default, and let writers hide them from an export.
 ## Tests
 
 - Editor command tests cover complete, incomplete, single-block, and bulk note
-  delimiter normalization.
+  delimiter normalization, plus manual delimiter input guards.
 - Browser/CSS coverage verifies visible, generated note delimiters and italic
   default styling.
 - Export tests verify `showNotes` defaults to true, preserves notes by default,

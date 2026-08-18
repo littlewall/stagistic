@@ -11,6 +11,7 @@ import {
 
 describe('BASIC_DEFAULTS', () => {
     it('starts with characters and places enabled and no manual blank pages', () => {
+        expect(BASIC_DEFAULTS.showNotes).toBe(true);
         expect(BASIC_DEFAULTS.characterFilter.mode).toBe('all');
         expect(BASIC_DEFAULTS.pageBreaks.sceneOnNewPage).toBe(true);
         expect(BASIC_DEFAULTS.pageBreaks.sceneOnOddPage).toBe(false);
@@ -34,6 +35,7 @@ describe('BASIC_DEFAULTS', () => {
 describe('INTEGRATED_SCORE_DEFAULTS', () => {
     it('inherits basic options and preserves full-script pagination by default', () => {
         expect(INTEGRATED_SCORE_DEFAULTS).toMatchObject(BASIC_DEFAULTS);
+        expect(INTEGRATED_SCORE_DEFAULTS.showNotes).toBe(true);
         expect(INTEGRATED_SCORE_DEFAULTS.characterFilter.preserveFullScriptPagination).toBe(true);
     });
 });

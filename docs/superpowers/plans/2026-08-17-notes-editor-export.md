@@ -27,6 +27,8 @@
 **Files:**
 - Modify: `packages/editor/src/editor/tiptap/scriptBlock/commands.test.ts`
 - Modify: `packages/editor/src/editor/tiptap/scriptBlock/commands.ts`
+- Modify: `packages/editor/src/editor/tiptap/scriptBlock/handlers/textInput.test.ts`
+- Modify: `packages/editor/src/editor/tiptap/scriptBlock/handlers/textInput.ts`
 - Modify: `packages/editor/src/editor/blocks/note/note.module.css`
 - Modify: `packages/script/src/blocks/specs/note.ts`
 - Modify: `packages/editor/src/editor/mini/MiniScriptEditor.browser.test.tsx`
@@ -65,6 +67,10 @@ Run: `pnpm --filter @stagistic/editor test -- src/editor/tiptap/scriptBlock/comm
 Expected: PASS.
 
 - [ ] **Step 5: Write failing browser assertions for note presentation**
+
+Add failing handler tests proving manual `[` / `]` input is consumed in a note
+for both keydown and text-input paths, then extend the existing generated
+delimiter sanitizer to cover notes with square brackets.
 
 Extend the mini editor browser test with a note block assertion that its computed font style is `italic`, and that `::before` / `::after` computed `content` values are `"[["` and `"]]"`.
 

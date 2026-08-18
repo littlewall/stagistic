@@ -1,5 +1,6 @@
 import {
     getScriptBlockId,
+    getScriptBlockNodeType,
 } from '@stagistic/script';
 
 import type {BasicExportConfig} from './config';
@@ -74,15 +75,21 @@ export const deriveBasicExportPlan = (
     config: BasicExportConfig,
     script: ScriptData,
 ): ExportPlan => {
+    const inputDoc = config.showNotes
+        ? script.doc
+        : {
+            ...script.doc,
+            content: script.doc.content.filter(node => getScriptBlockNodeType(node) !== 'note'),
+        };
     const filteredDoc = filterScriptByCharacter(
-        script.doc,
+        inputDoc,
         config.characterFilter,
         script.characters,
         script.groups,
     );
     const preservePagination = config.characterFilter.mode === 'only'
         && config.characterFilter.preserveFullScriptPagination !== false;
-    const doc = preservePagination ? script.doc : filteredDoc;
+    const doc = preservePagination ? inputDoc : filteredDoc;
     const forcedBreaks: ForcedBreak[] = [];
     const charactersAndPlaces = buildCharactersAndPlacesPlan(config, script);
     const blankSpec = config.blankPages.betweenInitialPagesAndScript;

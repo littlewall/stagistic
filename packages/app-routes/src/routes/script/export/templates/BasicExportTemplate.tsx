@@ -13,11 +13,13 @@ import {
 import {useExportContext} from '../ExportProvider';
 import {BlankPagesModule} from '../modules/BlankPagesModule';
 import {CharacterFilterModule} from '../modules/CharacterFilterModule';
+import {ContentModule} from '../modules/ContentModule';
 import {InitialPagesModule} from '../modules/InitialPagesModule';
 import {PageBreakModule} from '../modules/PageBreakModule';
 import {useExportPreview} from '../useExportPreview';
 
 const cloneDefaults = (): BasicExportConfig => ({
+    showNotes: BASIC_DEFAULTS.showNotes,
     characterFilter: {
         ...BASIC_DEFAULTS.characterFilter,
         characterIds: [...BASIC_DEFAULTS.characterFilter.characterIds],
@@ -92,6 +94,13 @@ export const BasicExportTemplate = ({
                     onChange={initialPages => setConfig(previous => ({
                         ...previous,
                         initialPages,
+                    }))}
+                />
+                <ContentModule
+                    value={config.showNotes}
+                    onChange={showNotes => setConfig(previous => ({
+                        ...previous,
+                        showNotes,
                     }))}
                 />
                 <PageBreakModule

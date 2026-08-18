@@ -35,6 +35,7 @@ export interface BlankPagesValue {
 }
 
 export interface BasicExportConfig {
+    showNotes: boolean,
     characterFilter: CharacterFilterValue,
     pageBreaks: PageBreakValue,
     initialPages: InitialPagesValue,
@@ -42,6 +43,7 @@ export interface BasicExportConfig {
 }
 
 export const BASIC_DEFAULTS: BasicExportConfig = {
+    showNotes: true,
     characterFilter: {
         mode: 'all', characterIds: [], preserveFullScriptPagination: true,
     },

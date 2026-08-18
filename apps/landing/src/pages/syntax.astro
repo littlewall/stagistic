@@ -97,7 +97,7 @@ const exQuoting = String.raw`"Mrs. Washington"
 
 const exMarks = `*italic*  **bold**  _underline_
 
-[[ a note to self — never printed ]]`;
+[[ a note to self ]]`;
 
 const exFull = `---
 title: When Night Falls
@@ -150,7 +150,7 @@ const markers = [
     ['/', 'Unison separator on a cue line'],
     ['@@music N "title"  /  @@out N', 'Music — start / end'],
     ['(...)', 'Aside (in a speech) or parenthetical stage direction (at block start)'],
-    ['[[ ... ]]', 'Author note (never printed)'],
+    ['[[ ... ]]', 'Author note'],
     ['*   **   _', 'Italic / bold / underline'],
     ['leading tab(s)', 'Lyric section level'],
     ['~ (alone on a line)', 'Soft break — empty in-speech block, no cue reset'],
@@ -628,7 +628,7 @@ const markers = [
                                 <span class={s.code}>**bold**</span>,
                                 <span class={s.code}>_underline_</span>. A note in
                                 <span class={s.code}>[[ double brackets ]]</span>
-                                is for you only — it never prints.
+                                is included in exports by default.
                             </p>
                             <div class={s.example}>
                                 <div class={s.exampleCol}>
@@ -643,7 +643,7 @@ const markers = [
                                             <strong> bold</strong>
                                             <u> underline</u>
                                         </p>
-                                        <p class={s.rNote}>(the note is not printed)</p>
+                                        <p class={s.rNote}>[[ a note to self ]]</p>
                                     </div>
                                 </div>
                             </div>
