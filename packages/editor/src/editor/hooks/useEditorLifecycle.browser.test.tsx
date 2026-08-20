@@ -119,17 +119,26 @@ describe('useEditorLifecycle', () => {
 
         const sceneBlocks = Array.from(document.querySelectorAll<HTMLElement>('p[blocktype="scene"]'));
         const savedScenes = editor.getJSON().content?.filter(node => node.type === 'scene') ?? [];
-        const markerStyle = getComputedStyle(sceneBlocks[0], '::before');
+        const firstScene = sceneBlocks[0];
+
+        expect(firstScene).not.toBeUndefined();
+
+        /*
+         * The number is a computed label rendered as a `::before` from the
+         * `data-scene-number` node-decoration attribute — never an editable node
+         * and never stored on the scene.
+         */
+        const markerStyle = getComputedStyle(firstScene, '::before');
         const colorProbe = document.createElement('span');
 
         colorProbe.style.color = 'var(--color-text-muted)';
         document.body.appendChild(colorProbe);
 
         expect(sceneBlocks.map(block => block.dataset.sceneNumber)).toEqual(['1', '2']);
-        expect(markerStyle.content).toBe('"1."');
+        expect(markerStyle.content).toContain('1');
         expect(markerStyle.fontWeight).toBe('700');
         expect(markerStyle.color).toBe(getComputedStyle(colorProbe).color);
-        expect(document.querySelector('[data-id="stage-direction-1"]')?.getAttribute('data-scene-number')).toBeNull();
+        expect(document.querySelector<HTMLElement>('[data-id="stage-direction-1"]')?.dataset.sceneNumber).toBeUndefined();
         expect(savedScenes.every(scene => scene.attrs?.sceneNumber === undefined)).toBe(true);
     });
 

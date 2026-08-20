@@ -2,7 +2,7 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import type {BlockNodeType} from '../../tiptap/scriptCore';
 
-export type BlockActionIcon = 'music' | 'musicStart' | 'musicHit' | 'musicOut';
+export type BlockActionIcon = 'music' | 'musicStart' | 'musicHit' | 'musicOut' | 'delete';
 
 export interface BlockActionCommand {
     kind: 'command',

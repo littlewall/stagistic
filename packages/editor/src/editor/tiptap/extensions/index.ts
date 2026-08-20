@@ -43,11 +43,13 @@ export {
 } from './MusicInputExtension';
 export {MusicNumberingExtension} from './MusicNumberingExtension';
 export {MusicRailExtension} from './musicRail/MusicRailExtension';
+export {SceneCommandsExtension} from './SceneCommandsExtension';
 export {ScriptBehaviorExtension} from './ScriptBehaviorExtension';
 
 // ─── Decorations ─────────────────────────────────────────────────────────────
 
 export {PlaceholderExtension} from './PlaceholderExtension';
+export {SceneGuardExtension} from './SceneGuardExtension';
 export {SceneNumberingExtension} from './SceneNumberingExtension';
 
 // ─── Layout ──────────────────────────────────────────────────────────────────

@@ -17,6 +17,7 @@ import {SCRIPT_BLOCK_DOM_SELECTOR} from '../scriptCore';
 
 const MUSIC_START_SELECTOR = '[data-music-pill="start"]';
 const MUSIC_OUT_SELECTOR = '[data-music-pill="out"]';
+const SCENE_NUMBER_SELECTOR = '.scene-number';
 
 const rangeIntersectsNode = (range: Range, node: Node) => {
     try {
@@ -132,6 +133,9 @@ export const copyVisibleScriptSelection = (
 
     container.appendChild(range.cloneContents());
     normalizeCopiedTextCasing(view.dom, range, container);
+    container.querySelectorAll(SCENE_NUMBER_SELECTOR).forEach(number => {
+        number.remove();
+    });
     container.querySelectorAll(MUSIC_OUT_SELECTOR).forEach(out => {
         resolveCopiedNodeViewTarget(out).remove();
     });

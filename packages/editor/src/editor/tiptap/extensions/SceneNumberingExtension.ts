@@ -17,6 +17,14 @@ import {
 
 const sceneNumberingKey = new PluginKey<DecorationSet>('scene-numbering');
 
+/*
+ * The scene number is a computed label, never stored or exported. Rendering it
+ * as an inline widget put a non-editable node on the block's first caret
+ * position, which spawned a phantom caret slot (doubled caret in empty scenes,
+ * selection that couldn't extend past the block start). A node decoration keeps
+ * the number entirely out of the caret/selection model: it only tags the scene
+ * block with `data-scene-number`, and CSS renders it via `::before`.
+ */
 const buildSceneNumberDecorations = (doc: ProseMirrorNode) => {
     const decorations: Decoration[] = [];
     let sceneNumber = 0;

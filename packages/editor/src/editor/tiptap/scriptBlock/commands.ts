@@ -400,6 +400,44 @@ const isAtBlockStartWithContentAhead = (editor: Editor, block: ActiveScriptBlock
     return selection.empty && selection.from === block.from && selection.from !== block.to;
 };
 
+/**
+ * A scene heading can't be split through ProseMirror's `splitBlock` + convert
+ * dance: `splitBlock` first clones the scene (two scene nodes), and the
+ * follow-up conversion of the trailing half back to `blockType` drops the scene
+ * count, which the scene guard rejects — leaving two scene headings behind
+ * (never what Enter should do to a heading). Build the split as a single
+ * transaction instead: the scene keeps whatever preceded the caret, and a fresh
+ * `blockType` block takes whatever followed it. Net scene count is unchanged, so
+ * the guard never fires.
+ */
+const splitSceneIntoTypedBlock = (
+    editor: Editor,
+    block: ActiveScriptBlock,
+    blockType: BlockNodeType,
+): boolean => {
+    const nodes = editor.schema.nodes as Record<string, NodeType>;
+    const nodeType = resolveNodeTypeForBlockType(nodes, blockType);
+
+    if (!nodeType) {
+        return false;
+    }
+
+    const {from} = editor.state.selection;
+    const trailing = editor.state.doc.slice(from, block.to);
+    const insertedNode = nodeType.create({blockType, id: createNodeId()}, trailing.content);
+
+    let tr = editor.state.tr.delete(from, block.to);
+    const insertPos = tr.mapping.map(block.pos + block.node.nodeSize);
+
+    tr = tr.insert(insertPos, insertedNode);
+    tr = tr.setSelection(TextSelection.near(tr.doc.resolve(insertPos + 1), 1));
+    tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
+    editor.view.dispatch(tr.scrollIntoView());
+    focusEditor(editor);
+
+    return true;
+};
+
 export const splitBlockWithType = (editor: Editor, blockType: BlockNodeType) => {
     const activeBlock = getActiveScriptBlockFromState(editor.state);
 
@@ -409,6 +447,10 @@ export const splitBlockWithType = (editor: Editor, blockType: BlockNodeType) => 
 
     if (activeBlock && isAtBlockStartWithContentAhead(editor, activeBlock)) {
         return insertEmptyBlockBefore(editor, activeBlock, blockType);
+    }
+
+    if (activeBlock && activeBlock.blockType === 'scene') {
+        return splitSceneIntoTypedBlock(editor, activeBlock, blockType);
     }
 
     const didSplit = editor.commands.splitBlock();

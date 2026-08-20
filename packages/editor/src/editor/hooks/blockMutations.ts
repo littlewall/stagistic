@@ -126,6 +126,68 @@ export const buildDeleteActContent = (
     return {nextContent, didChange};
 };
 
+export const removeSceneBlockById = (
+    nodes: ScriptNode[] | undefined,
+    blockId: string,
+): [ScriptNode[] | undefined, boolean] => {
+    if (!Array.isArray(nodes) || nodes.length === 0) {
+        return [nodes, false];
+    }
+
+    let didChange = false;
+    const nextNodes: ScriptNode[] = [];
+
+    nodes.forEach(node => {
+        if (!node || typeof node !== 'object') {
+            nextNodes.push(node);
+
+            return;
+        }
+
+        if (
+            isScriptBlockNode(node)
+            && getScriptBlockId(node) === blockId
+            && getScriptBlockNodeType(node) === 'scene'
+        ) {
+            didChange = true;
+
+            return;
+        }
+
+        const [nextContent, childChanged] = removeSceneBlockById(node.content, blockId);
+
+        if (!childChanged) {
+            nextNodes.push(node);
+
+            return;
+        }
+
+        didChange = true;
+        nextNodes.push({
+            ...node,
+            content: nextContent,
+        });
+    });
+
+    return [didChange ? nextNodes : nodes, didChange];
+};
+
+export const buildDeleteSceneHeadingContent = (
+    currentValue: ScriptDocument,
+    blockId: string,
+): ScriptDocument | null => {
+    const [nextContent, didChange] = removeSceneBlockById(currentValue.content, blockId);
+
+    if (!didChange || !Array.isArray(nextContent)) {
+        return null;
+    }
+
+    return {
+        ...currentValue,
+        content: nextContent,
+    };
+};
+
 export const insertActBlockBeforeId = (
     nodes: ScriptNode[] | undefined,
     beforeBlockId: string,

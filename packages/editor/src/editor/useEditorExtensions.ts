@@ -37,6 +37,8 @@ import {
     MusicNumberingExtension,
     MusicRailExtension,
     PlaceholderExtension,
+    SceneCommandsExtension,
+    SceneGuardExtension,
     SceneNumberingExtension,
     ScriptBehaviorExtension,
 } from './tiptap/extensions';
@@ -62,6 +64,7 @@ type UseEditorExtensionsArgs = {
     onOpenMusicManager?: (musicId: string) => void,
     onMusicAssigned?: (musicId: string) => void,
     onMusicUnassigned?: (musicId: string) => void,
+    onRequestDeleteScene?: (sceneHeadingBlockId: string) => void,
     enableBlockUiEvents?: boolean,
 };
 
@@ -77,6 +80,7 @@ export const useEditorExtensions = ({
     onOpenMusicManager,
     onMusicAssigned,
     onMusicUnassigned,
+    onRequestDeleteScene,
     enableBlockUiEvents,
 }: UseEditorExtensionsArgs): Extensions => {
     const paginationExtensionRef = useRef<ReturnType<typeof createPaginationExtension> | null>(
@@ -172,6 +176,12 @@ export const useEditorExtensions = ({
         }),
         [onMusicUnassigned],
     );
+    const sceneCommandsExtension = useMemo(
+        () => SceneCommandsExtension.configure({
+            onRequestDeleteScene,
+        }),
+        [onRequestDeleteScene],
+    );
     const musicStartNode = useMemo(
         () => MusicStartNode.configure({
             onMusicAssigned,
@@ -221,6 +231,8 @@ export const useEditorExtensions = ({
             MusicNumberingExtension,
             MusicRailExtension,
             PlaceholderExtension,
+            sceneCommandsExtension,
+            SceneGuardExtension,
             SceneNumberingExtension,
             emptyEnterChooserExtension,
             scriptBehaviorExtension,
@@ -242,6 +254,7 @@ export const useEditorExtensions = ({
         musicInputExtension,
         musicOutNode,
         musicStartNode,
+        sceneCommandsExtension,
         emptyEnterChooserExtension,
         editorRuntimeExtension,
         enableBlockUiEvents,

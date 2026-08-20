@@ -95,6 +95,7 @@ const Editor = ({
         onOpenMusicManager,
         onMusicAssigned,
         onMusicUnassigned,
+        onRequestDeleteScene,
     } = callbacks ?? {};
 
     const resolvedInitialValue = useMemo(
@@ -215,6 +216,7 @@ const Editor = ({
         onOpenMusicManager,
         onMusicAssigned,
         onMusicUnassigned,
+        onRequestDeleteScene,
         enableBlockUiEvents: Boolean(onBlockUiEvent),
     });
     const initialDoc = useMemo<ScriptDocument>(

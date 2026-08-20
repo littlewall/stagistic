@@ -11,6 +11,7 @@ import type {
 } from '../contracts';
 import {
     buildDeleteActContent,
+    buildDeleteSceneHeadingContent,
     buildInsertActContent,
     type CommitContext,
     setPlainTextContent,
@@ -43,11 +44,13 @@ export const useEditorStructureRequests = ({
         renameActRequest,
         deleteActRequest,
         moveSceneRequest,
+        deleteSceneRequest,
         updateMusicRequest,
     } = requests ?? {};
     const lastInsertActRequestIdRef = useRef<number | null>(null);
     const lastRenameActRequestIdRef = useRef<number | null>(null);
     const lastDeleteActRequestIdRef = useRef<number | null>(null);
+    const lastDeleteSceneRequestIdRef = useRef<number | null>(null);
     const lastUpdateMusicRequestIdRef = useRef<number | null>(null);
 
     const commitContext = useMemo<CommitContext | null>(() => {
@@ -158,4 +161,33 @@ export const useEditorStructureRequests = ({
 
         tryCommitDocument(commitContext, nextContent, didChange, currentValue.attrs);
     }, [commitContext, deleteActRequest]);
+
+    useEffect(() => {
+        if (!commitContext || !deleteSceneRequest) {
+            return;
+        }
+
+        if (lastDeleteSceneRequestIdRef.current === deleteSceneRequest.requestId) {
+            return;
+        }
+
+        lastDeleteSceneRequestIdRef.current = deleteSceneRequest.requestId;
+
+        if (!deleteSceneRequest.sceneHeadingBlockId) {
+            return;
+        }
+
+        const currentValue = commitContext.editor.getJSON() as ScriptDocument;
+        const nextDocument = buildDeleteSceneHeadingContent(
+            currentValue,
+            deleteSceneRequest.sceneHeadingBlockId,
+        );
+
+        tryCommitDocument(
+            commitContext,
+            nextDocument?.content,
+            nextDocument !== null,
+            currentValue.attrs,
+        );
+    }, [commitContext, deleteSceneRequest]);
 };

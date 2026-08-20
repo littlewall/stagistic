@@ -23,6 +23,8 @@ import {
     ScriptMusicSidebar,
     UnassignMusicModal,
 } from './editor/music';
+import {DeleteSceneHeadingModal} from './editor/scene/DeleteSceneHeadingModal';
+import {useSceneDeletionState} from './editor/scene/useSceneDeletionState';
 import {
     type SidebarPanel,
     useEditorSidebars,
@@ -78,6 +80,13 @@ export const ScriptEditorRoute = () => {
 
     const [addMusicModalState, setAddMusicModalState] = useState<AddMusicModalState | null>(null);
     const [removeMusicRequest, setRemoveMusicRequest] = useState<EditorMusicRemoveRequest | null>(null);
+    const {
+        pendingSceneDelete,
+        deleteSceneRequest,
+        requestDeleteScene,
+        closeSceneDeleteModal,
+        confirmDeleteScene,
+    } = useSceneDeletionState();
     const {
         music,
         createMusic,
@@ -260,7 +269,10 @@ export const ScriptEditorRoute = () => {
                         onManualSave: handleManualSave,
                         autoSaveDelayMs: AUTOSAVE_DELAY_MS,
                     }}
-                    requests={{updateMusicRequest}}
+                    requests={{
+                        updateMusicRequest,
+                        deleteSceneRequest,
+                    }}
                     layout={{
                         autoFocus: shouldAutoFocus,
                         leftSidebarToggle,
@@ -274,6 +286,7 @@ export const ScriptEditorRoute = () => {
                         onOpenMusicManager: openAttributeManagerMusic,
                         onMusicAssigned: markMusicAssigned,
                         onMusicUnassigned: markMusicUnassigned,
+                        onRequestDeleteScene: requestDeleteScene,
                     }}
                 >
                     <ScriptEditor.LeftSidebar>
@@ -297,6 +310,11 @@ export const ScriptEditorRoute = () => {
                     musicTitle={removeMusicRequest?.title}
                     onClose={() => setRemoveMusicRequest(null)}
                     onConfirm={handleConfirmRemoveMusic}
+                />
+                <DeleteSceneHeadingModal
+                    isOpen={pendingSceneDelete !== null}
+                    onClose={closeSceneDeleteModal}
+                    onConfirm={confirmDeleteScene}
                 />
             </AppLayout>
         </ScriptSessionProvider>
