@@ -156,6 +156,7 @@ export {
 } from './molecules/forms/MultiComboBox';
 export type {SelectOption} from './molecules/forms/Select';
 export {Select} from './molecules/forms/Select';
+export {SettingSwitch} from './molecules/forms/SettingSwitch';
 export {TextInput} from './molecules/forms/TextInput';
 export {useAnchoredMenuPlacement} from './molecules/forms/useAnchoredMenuHeight';
 export {useDropdownDismiss} from './molecules/forms/useDropdownDismiss';

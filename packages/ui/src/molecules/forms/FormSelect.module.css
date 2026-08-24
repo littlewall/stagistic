@@ -1,5 +1,12 @@
 .root {
-    --select-button-height: var(--control-height-lg);
     --select-button-border-color: var(--color-border);
     --select-button-bg: var(--color-input-bg, var(--color-surface));
+}
+
+.md {
+    --select-button-height: var(--control-height-md);
+}
+
+.lg {
+    --select-button-height: var(--control-height-lg);
 }

@@ -1,6 +1,9 @@
 import {Switch} from '@stagistic/ui';
 
-import styles from './modules.module.css';
+import {
+    ExportSettingRow,
+    ExportSettingsGroup,
+} from './ExportSettingsLayout';
 
 export const ContentModule = ({
     value,
@@ -9,12 +12,15 @@ export const ContentModule = ({
     value: boolean,
     onChange: (value: boolean) => void,
 }) => (
-    <div className={styles.module}>
-        <div>
-            <h3 className={styles.title}>Content</h3>
-        </div>
-        <Switch isSelected={value} onChange={onChange}>
-            Show notes
-        </Switch>
-    </div>
+    <ExportSettingsGroup>
+        <ExportSettingRow>
+            <Switch
+                variant="setting"
+                isSelected={value}
+                onChange={onChange}
+            >
+                Show notes
+            </Switch>
+        </ExportSettingRow>
+    </ExportSettingsGroup>
 );

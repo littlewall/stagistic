@@ -49,3 +49,27 @@
     width: calc(30px * var(--size-scale));
     padding-inline: 0;
 }
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+    border: 0;
+}
+
+.chip {
+    min-width: 0;
+    height: calc(28px * var(--size-scale));
+    padding-inline: var(--space-lg);
+    font-size: var(--font-size-sm);
+    border-color: var(--color-border);
+    border-radius: var(--radius-sm);
+
+    &[data-selected] {
+        color: var(--color-surface);
+        background: var(--color-text);
+        border-color: var(--color-text);
+    }
+}

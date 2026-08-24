@@ -26,6 +26,12 @@
     }
 }
 
+.setting {
+    flex-direction: row-reverse;
+    justify-content: space-between;
+    width: 100%;
+}
+
 .track {
     display: flex;
     flex-shrink: 0;

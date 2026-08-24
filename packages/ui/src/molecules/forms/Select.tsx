@@ -26,6 +26,7 @@ interface SelectProps {
     className?: string,
     isOpen?: boolean,
     onIsOpenChange?: (isOpen: boolean) => void,
+    width?: 'full' | 'content',
 }
 
 export const Select = ({
@@ -37,6 +38,7 @@ export const Select = ({
     className,
     isOpen: controlledIsOpen,
     onIsOpenChange,
+    width = 'full',
 }: SelectProps) => {
     const [internalIsOpen, setInternalIsOpen] = useState(false);
     const isControlled = controlledIsOpen !== undefined;
@@ -67,10 +69,24 @@ export const Select = ({
 
     return (
         <div
-            className={clsx(styles.select, className)}
+            className={clsx(
+                styles.select,
+                width === 'content' && styles.content,
+                className,
+            )}
             ref={selectRef}
             data-menu-placement={isOpen ? menuPlacement.placement : undefined}
         >
+            {width === 'content' ? (
+                <span className={styles.sizer} aria-hidden="true">
+                    {options.map(option => (
+                        <span key={String(option.value)} className={styles.sizerLabel}>
+                            {option.label}
+                        </span>
+                    ))}
+                    <span className={styles.sizerChevron} />
+                </span>
+            ) : null}
             <button
                 id={id}
                 type="button"

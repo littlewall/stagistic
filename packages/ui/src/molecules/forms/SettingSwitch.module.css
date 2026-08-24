@@ -1,0 +1,26 @@
+.root {
+    display: grid;
+    grid-template-columns: auto auto minmax(0, 1fr) auto;
+    gap: var(--space-sm);
+    align-items: center;
+    width: 100%;
+}
+
+.control {
+    display: contents;
+}
+
+.control > span[aria-hidden = 'true'] {
+    grid-column: 4;
+    grid-row: 1;
+}
+
+.control > span:last-child {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.addon {
+    grid-column: 2;
+    grid-row: 1;
+}

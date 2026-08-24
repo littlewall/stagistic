@@ -44,7 +44,7 @@ const buildCharactersAndPlacesPlan = (
 ): CharactersAndPlacesInitialPagePlan | null => {
     const value = config.initialPages.charactersAndPlaces;
 
-    if (!value.enabled) {
+    if (!value.enabled && !value.showPlaces) {
         return null;
     }
 
@@ -54,13 +54,16 @@ const buildCharactersAndPlacesPlan = (
 
     return {
         kind: 'characters-and-places',
-        characters: [...script.initialCharacters]
-            .sort(compareCharacters)
-            .map(character => ({
-                id: character.id,
-                displayName: character.displayName,
-                outline: character.outline,
-            })),
+        ...value.enabled ? {} : {showCharacters: false},
+        characters: value.enabled
+            ? [...script.initialCharacters]
+                .sort(compareCharacters)
+                .map(character => ({
+                    id: character.id,
+                    displayName: character.displayName,
+                    outline: character.outline,
+                }))
+            : [],
         places: value.showPlaces
             ? script.initialPlaces.map(place => ({
                 id: place.id,
