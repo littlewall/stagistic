@@ -20,6 +20,7 @@ interface ToggleButtonGroupBaseProps<Value extends string> {
     ariaLabelledBy?: string,
     className?: string,
     isDisabled?: boolean,
+    variant?: 'default' | 'chips',
 }
 
 interface SingleToggleButtonGroupProps<Value extends string> {
@@ -47,6 +48,7 @@ export const ToggleButtonGroup = <Value extends string,>(
         ariaLabelledBy,
         className,
         isDisabled,
+        variant = 'default',
     } = props;
     const selectionMode = props.selectionMode ?? 'single';
     const selectedKeys = props.selectionMode === 'multiple' ? props.value : [props.value];
@@ -71,7 +73,11 @@ export const ToggleButtonGroup = <Value extends string,>(
 
     return (
         <RACToggleButtonGroup
-            className={clsx(styles.group, className)}
+            className={clsx(
+                styles.group,
+                variant === 'chips' && styles.chips,
+                className,
+            )}
             selectionMode={selectionMode}
             selectedKeys={selectedKeys}
             disallowEmptySelection={selectionMode === 'single'}
@@ -84,7 +90,11 @@ export const ToggleButtonGroup = <Value extends string,>(
                 <RACToggleButton
                     key={option.value}
                     id={option.value}
-                    className={clsx(styles.item, option.isIconOnly && styles.iconOnly)}
+                    className={clsx(
+                        styles.item,
+                        variant === 'chips' && styles.chip,
+                        option.isIconOnly && styles.iconOnly,
+                    )}
                     aria-label={option.label}
                 >
                     {option.content ?? option.label}

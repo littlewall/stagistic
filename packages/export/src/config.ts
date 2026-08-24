@@ -13,6 +13,7 @@ export interface PageBreakValue {
 export type CharacterInitialPageOrder = 'name' | 'first-appearance';
 
 export interface CharactersAndPlacesValue {
+    /** Controls character content; the shared initial page exists when this or showPlaces is true. */
     enabled: boolean,
     showPlaces: boolean,
     showCharacterOutlines: boolean,

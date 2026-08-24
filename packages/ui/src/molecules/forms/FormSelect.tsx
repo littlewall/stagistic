@@ -17,6 +17,8 @@ interface FormSelectProps {
     className?: string,
     isOpen?: boolean,
     onIsOpenChange?: (isOpen: boolean) => void,
+    size?: 'md' | 'lg',
+    width?: 'full' | 'content',
 }
 
 export const FormSelect = ({
@@ -28,6 +30,8 @@ export const FormSelect = ({
     className,
     isOpen,
     onIsOpenChange,
+    size = 'lg',
+    width,
 }: FormSelectProps) => (
     <Select
         id={id}
@@ -35,8 +39,9 @@ export const FormSelect = ({
         options={options}
         ariaLabel={ariaLabel}
         onChange={onChange}
-        className={clsx(styles.root, className)}
+        className={clsx(styles.root, styles[size], className)}
         isOpen={isOpen}
         onIsOpenChange={onIsOpenChange}
+        width={width}
     />
 );

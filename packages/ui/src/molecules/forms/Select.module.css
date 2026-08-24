@@ -3,6 +3,46 @@
     width: 100%;
 }
 
+.content {
+    display: grid;
+    justify-self: end;
+    width: max-content;
+    max-width: 100%;
+}
+
+.content > .button,
+.content > .sizer {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.sizer {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--select-button-gap);
+    align-items: center;
+    box-sizing: border-box;
+    height: var(--select-button-height);
+    padding: 0 var(--select-button-padding-inline);
+    font-size: var(--select-button-font-size);
+    font-weight: var(--select-button-font-weight);
+    visibility: hidden;
+    border: var(--select-button-border-width) solid transparent;
+}
+
+.sizerLabel {
+    grid-column: 1;
+    grid-row: 1;
+    white-space: nowrap;
+}
+
+.sizerChevron {
+    grid-column: 2;
+    grid-row: 1;
+    width: var(--select-chevron-size);
+    height: var(--select-chevron-size);
+}
+
 .button {
     cursor: pointer;
     display: grid;
@@ -36,6 +76,10 @@
             background: var(--select-menu-hover-bg);
         }
     }
+}
+
+.content > .button {
+    min-width: 100%;
 }
 
 .select[data-menu-placement = 'above'] .button[aria-expanded = 'true'] {

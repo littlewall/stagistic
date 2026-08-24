@@ -222,6 +222,27 @@ describe('deriveBasicExportPlan', () => {
         expect(plan.leadingPages.startEachInitialPageOnOddPage).toBe(false);
     });
 
+    it('keeps a places-only initial page when characters are disabled', () => {
+        const plan = deriveBasicExportPlan(withConfig({
+            initialPages: {
+                ...BASIC_DEFAULTS.initialPages,
+                charactersAndPlaces: {
+                    ...BASIC_DEFAULTS.initialPages.charactersAndPlaces,
+                    enabled: false,
+                    showPlaces: true,
+                },
+            },
+        }), script);
+
+        expect(plan.leadingPages.initialPages[0]).toEqual({
+            kind: 'characters-and-places',
+            characters: [],
+            places: [{id: 'place-stage', name: 'Stage'}, {id: 'place-home', name: 'Home'}],
+            showCharacters: false,
+            showCharacterOutlines: false,
+        });
+    });
+
     it('omits the initial page when disabled and clamps enabled manual blanks', () => {
         const plan = deriveBasicExportPlan(withConfig({
             initialPages: {
@@ -229,6 +250,7 @@ describe('deriveBasicExportPlan', () => {
                 charactersAndPlaces: {
                     ...BASIC_DEFAULTS.initialPages.charactersAndPlaces,
                     enabled: false,
+                    showPlaces: false,
                 },
             },
             blankPages: {

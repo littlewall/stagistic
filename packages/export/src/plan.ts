@@ -14,6 +14,8 @@ export interface PaginationOverrides {
 
 export interface CharactersAndPlacesInitialPagePlan {
     kind: 'characters-and-places',
+    /** Defaults to true for plans created before independent Characters/Places controls. */
+    showCharacters?: boolean,
     characters: Array<{
         id: string,
         displayName: string,

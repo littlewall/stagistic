@@ -11,9 +11,9 @@ import {
 } from 'react';
 
 import {useExportContext} from '../ExportProvider';
-import {BlankPagesModule} from '../modules/BlankPagesModule';
 import {CharacterFilterModule} from '../modules/CharacterFilterModule';
 import {ContentModule} from '../modules/ContentModule';
+import {ExportSettingsGroup} from '../modules/ExportSettingsLayout';
 import {InitialPagesModule} from '../modules/InitialPagesModule';
 import {PageBreakModule} from '../modules/PageBreakModule';
 import {useExportPreview} from '../useExportPreview';
@@ -77,32 +77,42 @@ export const BasicExportTemplate = ({
     });
 
     return (
-        <ExportPanel>
-            <ExportPanel.Input>
-                <CharacterFilterModule
-                    value={config.characterFilter}
-                    characters={script.characters}
-                    onChange={characterFilter => setConfig(previous => ({
-                        ...previous,
-                        characterFilter,
-                    }))}
-                />
-            </ExportPanel.Input>
-            <ExportPanel.Options>
+        <>
+            <ExportPanel.Section title="Content">
+                <ExportSettingsGroup>
+                    <CharacterFilterModule
+                        value={config.characterFilter}
+                        characters={script.characters}
+                        onChange={characterFilter => setConfig(previous => ({
+                            ...previous,
+                            characterFilter,
+                        }))}
+                    />
+                    <ContentModule
+                        value={config.showNotes}
+                        onChange={showNotes => setConfig(previous => ({
+                            ...previous,
+                            showNotes,
+                        }))}
+                    />
+                </ExportSettingsGroup>
+            </ExportPanel.Section>
+            <ExportPanel.Section title="Opening pages">
                 <InitialPagesModule
                     value={config.initialPages}
+                    blankPages={config.blankPages}
+                    hasAutomaticBalancingBlank={hasAutomaticBalancingBlank}
                     onChange={initialPages => setConfig(previous => ({
                         ...previous,
                         initialPages,
                     }))}
-                />
-                <ContentModule
-                    value={config.showNotes}
-                    onChange={showNotes => setConfig(previous => ({
+                    onBlankPagesChange={blankPages => setConfig(previous => ({
                         ...previous,
-                        showNotes,
+                        blankPages,
                     }))}
                 />
+            </ExportPanel.Section>
+            <ExportPanel.Section title="Page flow">
                 <PageBreakModule
                     value={config.pageBreaks}
                     onChange={pageBreaks => setConfig(previous => ({
@@ -110,15 +120,7 @@ export const BasicExportTemplate = ({
                         pageBreaks,
                     }))}
                 />
-                <BlankPagesModule
-                    value={config.blankPages}
-                    hasAutomaticBalancingBlank={hasAutomaticBalancingBlank}
-                    onChange={blankPages => setConfig(previous => ({
-                        ...previous,
-                        blankPages,
-                    }))}
-                />
-            </ExportPanel.Options>
-        </ExportPanel>
+            </ExportPanel.Section>
+        </>
     );
 };

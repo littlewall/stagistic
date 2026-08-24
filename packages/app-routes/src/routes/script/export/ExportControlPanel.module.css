@@ -1,11 +1,9 @@
 .panel {
     overflow: auto;
     display: grid;
-    gap: var(--space-2xl);
     align-content: start;
     width: clamp(300px, 31vw, 380px);
     min-width: 300px;
-    padding: var(--space-2xl);
     background: var(--color-surface);
 }
 
@@ -14,12 +12,7 @@
     gap: var(--space-lg);
     align-items: center;
     justify-content: space-between;
-}
-
-.controls {
-    display: grid;
-    gap: var(--space-2xl);
-    align-content: start;
+    padding: var(--space-2xl);
 }
 
 .title {
@@ -27,22 +20,4 @@
     font-size: var(--font-size-xl);
     font-weight: var(--font-weight-medium);
     color: var(--color-text);
-}
-
-.description {
-    max-width: 34ch;
-    margin: var(--space-xs) 0 0;
-    font-size: var(--font-size-sm);
-    line-height: var(--line-height-normal);
-    color: var(--color-text-muted);
-}
-
-.templateField {
-    display: grid;
-    gap: var(--space-sm);
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-    text-transform: uppercase;
-    letter-spacing: .08em;
 }
