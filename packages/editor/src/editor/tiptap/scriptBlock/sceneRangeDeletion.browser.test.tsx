@@ -23,7 +23,7 @@ import {useEditorInstance} from '../../context';
 import ScriptEditor from '../../Editor';
 import {findScriptBlockByIdFromState} from '../scriptCore';
 
-type SceneGuardTestWindow = Window & {__sceneGuardTestEditor?: Editor | null};
+type SceneTestWindow = Window & {__sceneRangeDeletionEditor?: Editor | null};
 
 const scene = (id: string, text: string): ScriptNode => ({
     type: 'scene', attrs: {id}, content: text ? [{type: 'text', text}] : [],
@@ -33,18 +33,14 @@ const stageDirection = (id: string, text: string): ScriptNode => ({
     type: 'stageDirection', attrs: {id}, content: text ? [{type: 'text', text}] : [],
 });
 
-const dialogue = (id: string, text: string): ScriptNode => ({
-    type: 'dialogue', attrs: {id}, content: text ? [{type: 'text', text}] : [],
-});
-
 const EditorProbe = () => {
     const editor = useEditorInstance();
 
     useEffect(() => {
-        (window as SceneGuardTestWindow).__sceneGuardTestEditor = editor;
+        (window as SceneTestWindow).__sceneRangeDeletionEditor = editor;
 
         return () => {
-            delete (window as SceneGuardTestWindow).__sceneGuardTestEditor;
+            delete (window as SceneTestWindow).__sceneRangeDeletionEditor;
         };
     }, [editor]);
 
@@ -92,35 +88,37 @@ const poll = async <T, >(get: () => T | null | undefined, label: string): Promis
 };
 
 const getEditor = () => poll(
-    () => (window as SceneGuardTestWindow).__sceneGuardTestEditor ?? null,
+    () => (window as SceneTestWindow).__sceneRangeDeletionEditor ?? null,
     'editor instance',
 );
 
-const blockTypes = (editor: Editor) => (editor.getJSON().content ?? []).map(node => node.type);
-
-const sceneCount = (editor: Editor) => blockTypes(editor).filter(type => type === 'scene').length;
-
-const selectAcrossBlocks = (
+const selectRange = (
     editor: Editor,
-    from: {blockId: string, offset: number},
-    to: {blockId: string, offset: number},
+    fromId: string,
+    fromOffset: number,
+    toId: string,
+    toOffset: number,
 ) => {
-    const fromBlock = findScriptBlockByIdFromState(editor.state, from.blockId);
-    const toBlock = findScriptBlockByIdFromState(editor.state, to.blockId);
+    const fromBlock = findScriptBlockByIdFromState(editor.state, fromId);
+    const toBlock = findScriptBlockByIdFromState(editor.state, toId);
 
     if (!fromBlock || !toBlock) {
-        throw new Error('Block not found for selection');
+        throw new Error('Range endpoints not found');
     }
 
     editor.view.dispatch(
         editor.state.tr.setSelection(TextSelection.create(
             editor.state.doc,
-            fromBlock.from + from.offset,
-            toBlock.from + to.offset,
+            fromBlock.from + fromOffset,
+            toBlock.from + toOffset,
         )),
     );
     editor.commands.focus();
 };
+
+const blockTypes = (editor: Editor) => (editor.getJSON().content ?? []).map(node => node.type);
+
+const text = (editor: Editor, id: string) => findScriptBlockByIdFromState(editor.state, id)?.node.textContent;
 
 afterEach(() => {
     mountedRoots.forEach(root => root.unmount());
@@ -128,52 +126,64 @@ afterEach(() => {
     document.body.innerHTML = '';
 });
 
-describe('scene guard extension', () => {
-    it('deletes a range spanning a scene heading, keeping the scene as an empty divider', async () => {
+describe('scene range deletion', () => {
+    it('deletes across A -> scene -> B, keeping the scene as an empty divider', async () => {
         renderEditor({
             type: 'doc',
             content: [
-                stageDirection('b1', 'Before'),
-                scene('s2', 'INT. HOUSE'),
-                stageDirection('b2', 'After'),
+                scene('s0', 'OPENING'),
+                stageDirection('a', 'HELLO'),
+                scene('s1', 'MIDDLE'),
+                stageDirection('b', 'WORLD'),
             ],
         });
 
         const editor = await getEditor();
 
-        await poll(() => blockTypes(editor).length === 3 ? true : null, 'three blocks');
+        await poll(() => blockTypes(editor).length === 4 ? true : null, 'four blocks');
 
-        selectAcrossBlocks(editor, {blockId: 'b1', offset: 3}, {blockId: 'b2', offset: 2});
+        selectRange(editor, 'a', 2, 'b', 2);
         await userEvent.keyboard('{Delete}');
 
         expect(blockTypes(editor)).toEqual([
+            'scene',
             'stageDirection',
             'scene',
             'stageDirection',
         ]);
-        expect(findScriptBlockByIdFromState(editor.state, 'b1')?.node.textContent).toBe('Bef');
-        expect(findScriptBlockByIdFromState(editor.state, 's2')?.node.textContent).toBe('');
-        expect(findScriptBlockByIdFromState(editor.state, 'b2')?.node.textContent).toBe('ter');
+        expect(text(editor, 's1')).toBe('');
+        expect(text(editor, 'a')).toBe('HE');
+        expect(text(editor, 'b')).toBe('RLD');
+        expect(text(editor, 's0')).toBe('OPENING');
     });
 
-    it('keeps every scene node on select-all + Delete', async () => {
+    it('Backspace across a fully-selected scene empties it but keeps the node', async () => {
         renderEditor({
             type: 'doc',
             content: [
-                scene('s1', 'S1'),
-                dialogue('d1', 'hi'),
-                scene('s2', 'S2'),
+                scene('s0', 'OPENING'),
+                stageDirection('a', 'HELLO'),
+                scene('s1', 'MIDDLE'),
+                stageDirection('b', 'WORLD'),
             ],
         });
 
         const editor = await getEditor();
 
-        await poll(() => sceneCount(editor) === 2 ? true : null, 'two scenes');
+        await poll(() => blockTypes(editor).length === 4 ? true : null, 'four blocks');
 
-        editor.commands.selectAll();
-        editor.commands.focus();
-        await userEvent.keyboard('{Delete}');
+        // From end of A through the whole scene to start of B.
+        selectRange(editor, 'a', 'HELLO'.length, 'b', 0);
+        await userEvent.keyboard('{Backspace}');
 
-        expect(sceneCount(editor)).toBe(2);
+        expect(blockTypes(editor)).toEqual([
+            'scene',
+            'stageDirection',
+            'scene',
+            'stageDirection',
+        ]);
+        expect(text(editor, 's1')).toBe('');
+        expect(text(editor, 'a')).toBe('HELLO');
+        expect(text(editor, 'b')).toBe('WORLD');
     });
 });

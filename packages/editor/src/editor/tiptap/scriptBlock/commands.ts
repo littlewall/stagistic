@@ -186,6 +186,12 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
         return false;
     }
 
+    if (activeBlock.blockType === 'scene' && normalized !== 'scene') {
+        editor.commands.requestConvertScene(activeBlock.id, normalized);
+
+        return true;
+    }
+
     const nodes = editor.schema.nodes as Record<string, NodeType>;
     const nodeType = resolveNodeTypeForBlockType(nodes, normalized);
 
@@ -262,7 +268,17 @@ export const updateBlockTypeForSelection = (editor: Editor, blockType: BlockNode
             resolveScriptBlockNodeType(node.type.name) ?? (node.attrs.blockType as BlockNodeType),
         );
 
-        if (previousBlockType === 'act' || previousBlockType === normalized) {
+        /*
+         * Acts are structural and scenes carry projection-owned metadata whose
+         * removal is confirmation-gated (see updateBlockType/requestConvertScene),
+         * so a bulk selection convert leaves both untouched rather than silently
+         * dropping a scene's synopsis/places. Same-type blocks are already done.
+         */
+        if (
+            previousBlockType === 'act'
+            || previousBlockType === 'scene'
+            || previousBlockType === normalized
+        ) {
             return false;
         }
 
@@ -491,6 +507,13 @@ export const setBlockTypeWithSelection = (
     blockType: BlockNodeType,
 ) => {
     const normalized = normalizeBlockNodeType(blockType);
+
+    if (block.blockType === 'scene' && normalized !== 'scene') {
+        editor.commands.requestConvertScene(block.id, normalized);
+
+        return true;
+    }
+
     const nodes = editor.schema.nodes as Record<string, NodeType>;
     const nodeType = resolveNodeTypeForBlockType(nodes, normalized);
 

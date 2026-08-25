@@ -28,6 +28,7 @@ export interface CommitContext {
 }
 
 export {
+    buildConvertSceneHeadingContent,
     buildDeleteActContent,
     buildDeleteSceneHeadingContent,
     buildInsertActContent,

@@ -23,7 +23,9 @@ import {
     ScriptMusicSidebar,
     UnassignMusicModal,
 } from './editor/music';
+import {ConvertSceneHeadingModal} from './editor/scene/ConvertSceneHeadingModal';
 import {DeleteSceneHeadingModal} from './editor/scene/DeleteSceneHeadingModal';
+import {useSceneConversionState} from './editor/scene/useSceneConversionState';
 import {useSceneDeletionState} from './editor/scene/useSceneDeletionState';
 import {
     type SidebarPanel,
@@ -87,6 +89,13 @@ export const ScriptEditorRoute = () => {
         closeSceneDeleteModal,
         confirmDeleteScene,
     } = useSceneDeletionState();
+    const {
+        pendingSceneConversion,
+        convertSceneRequest,
+        requestConvertScene,
+        closeSceneConvertModal,
+        confirmConvertScene,
+    } = useSceneConversionState();
     const {
         music,
         createMusic,
@@ -272,6 +281,7 @@ export const ScriptEditorRoute = () => {
                     requests={{
                         updateMusicRequest,
                         deleteSceneRequest,
+                        convertSceneRequest,
                     }}
                     layout={{
                         autoFocus: shouldAutoFocus,
@@ -287,6 +297,7 @@ export const ScriptEditorRoute = () => {
                         onMusicAssigned: markMusicAssigned,
                         onMusicUnassigned: markMusicUnassigned,
                         onRequestDeleteScene: requestDeleteScene,
+                        onRequestConvertScene: requestConvertScene,
                     }}
                 >
                     <ScriptEditor.LeftSidebar>
@@ -315,6 +326,11 @@ export const ScriptEditorRoute = () => {
                     isOpen={pendingSceneDelete !== null}
                     onClose={closeSceneDeleteModal}
                     onConfirm={confirmDeleteScene}
+                />
+                <ConvertSceneHeadingModal
+                    isOpen={pendingSceneConversion !== null}
+                    onClose={closeSceneConvertModal}
+                    onConfirm={confirmConvertScene}
                 />
             </AppLayout>
         </ScriptSessionProvider>

@@ -5,6 +5,10 @@ import {getEmptyEnterChooserFromState} from '../../extensions/EmptyEnterChooserE
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
 import {createBlockContext} from '../context';
 import {
+    deleteSelectionPreservingScenes,
+    selectionSpansScene,
+} from '../deleteSelectionPreservingScenes';
+import {
     shouldBlockBackspace,
     shouldBlockForwardDelete,
 } from '../sceneDeletionGuard';
@@ -117,6 +121,15 @@ export const handleKeyDown = (
 
     if (event.key === 'Tab') {
         return handleTab(editor, event);
+    }
+
+    if (
+        (event.key === 'Backspace' || event.key === 'Delete')
+        && selectionSpansScene(editor.state)
+    ) {
+        event.preventDefault();
+
+        return deleteSelectionPreservingScenes(editor);
     }
 
     if (event.key === 'Backspace' && shouldBlockBackspace(editor.state)) {

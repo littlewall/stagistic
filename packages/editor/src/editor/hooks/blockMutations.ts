@@ -188,6 +188,82 @@ export const buildDeleteSceneHeadingContent = (
     };
 };
 
+const convertSceneBlockById = (
+    nodes: ScriptNode[] | undefined,
+    blockId: string,
+    nextNodeType: string,
+): [ScriptNode[] | undefined, boolean] => {
+    if (!Array.isArray(nodes) || nodes.length === 0) {
+        return [nodes, false];
+    }
+
+    let didChange = false;
+    const nextNodes = nodes.map(node => {
+        if (!node || typeof node !== 'object') {
+            return node;
+        }
+
+        if (
+            isScriptBlockNode(node)
+            && getScriptBlockId(node) === blockId
+            && getScriptBlockNodeType(node) === 'scene'
+        ) {
+            didChange = true;
+
+            return {
+                ...node,
+                type: nextNodeType,
+            };
+        }
+
+        const [nextContent, childChanged] = convertSceneBlockById(node.content, blockId, nextNodeType);
+
+        if (!childChanged) {
+            return node;
+        }
+
+        didChange = true;
+
+        return {
+            ...node,
+            content: nextContent,
+        };
+    });
+
+    return [didChange ? nextNodes : nodes, didChange];
+};
+
+/**
+ * Convert a scene heading block into another block type in place, keeping the
+ * block's id and its heading text as the new block's content. The scene's
+ * projection-owned metadata (synopsis, color, place assignments) is pruned by
+ * the projection once the block leaves the scene set — mirroring the data loss
+ * of {@link buildDeleteSceneHeadingContent}. Returns null when the target isn't
+ * a scene, the target type is `scene` (a no-op), or the id can't be resolved.
+ */
+export const buildConvertSceneHeadingContent = (
+    currentValue: ScriptDocument,
+    blockId: string,
+    targetBlockType: string,
+): ScriptDocument | null => {
+    const nextNodeType = resolveScriptBlockNodeType(targetBlockType);
+
+    if (!nextNodeType || nextNodeType === 'scene') {
+        return null;
+    }
+
+    const [nextContent, didChange] = convertSceneBlockById(currentValue.content, blockId, nextNodeType);
+
+    if (!didChange || !Array.isArray(nextContent)) {
+        return null;
+    }
+
+    return {
+        ...currentValue,
+        content: nextContent,
+    };
+};
+
 export const insertActBlockBeforeId = (
     nodes: ScriptNode[] | undefined,
     beforeBlockId: string,
