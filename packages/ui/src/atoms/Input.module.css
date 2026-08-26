@@ -1,19 +1,19 @@
 .input {
     box-sizing: border-box;
     width: 100%;
-    height: var(--input-height, var(--select-button-height));
-    padding: 0 var(--input-padding-inline, var(--select-button-padding-inline));
+    height: var(--input-height, var(--control-trigger-height));
+    padding: 0 var(--input-padding-inline, var(--control-trigger-padding-inline));
     font-family: inherit;
-    font-size: var(--input-font-size, var(--select-button-font-size));
-    font-weight: var(--select-button-font-weight);
-    color: var(--select-button-color);
+    font-size: var(--input-font-size, var(--control-trigger-font-size));
+    font-weight: var(--control-trigger-font-weight);
+    color: var(--control-trigger-color);
     background: var(--input-bg, var(--color-input-bg, var(--color-surface)));
-    border: var(--select-button-border-width) solid var(--input-border-color, var(--color-border));
-    border-radius: var(--input-radius, var(--select-button-radius));
+    border: var(--control-trigger-border-width) solid var(--input-border-color, var(--color-border));
+    border-radius: var(--input-radius, var(--control-trigger-radius));
     transition: background var(--duration-normal) var(--ease-standard), border-color var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
 
     &:hover {
-        background: var(--input-hover-bg, var(--select-button-hover-bg));
+        background: var(--input-hover-bg, var(--control-trigger-hover-bg));
     }
 
     &:focus-visible {
@@ -40,7 +40,7 @@
     }
 
     &[data-size = 'sm'] {
-        --input-height: var(--select-button-height);
+        --input-height: var(--control-trigger-height);
     }
 
     &[data-size = 'md'] {

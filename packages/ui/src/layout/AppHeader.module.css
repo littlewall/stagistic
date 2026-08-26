@@ -357,6 +357,17 @@
 }
 
 .themeControls {
+    /* Icon-sized modes sharing one track (theme mode today). The track is
+       recessed and the chosen pill floats out of it, so the pill needs no
+       border of its own — a third one, inside a bordered popover on a
+       bordered track, was all any of them read as. Hover moves toward ink
+       in both themes, away from wherever the track sits. */
+    --segment-track-bg: var(--color-surface-raised);
+    --segment-active-bg: var(--color-surface);
+    --segment-active-shadow: var(--shadow-hairline);
+    --segment-hover-bg: color-mix(in oklch, var(--color-text) 7%, var(--segment-track-bg));
+    --segment-active-hover-bg: color-mix(in oklch, var(--color-text) 5%, var(--segment-active-bg));
+
     display: inline-flex;
     gap: calc(2px * var(--size-scale));
     align-items: center;
@@ -412,6 +423,14 @@
             height: calc(14px * var(--size-scale));
         }
     }
+}
+
+:root[data-theme = 'dark'] .themeControls {
+    /* The light pairing would seat the active pill at the popover's own
+       lightness, reading as a hole rather than a raised segment. Dark keeps the
+       mechanic and swaps the pair: track below the popover, pill well above it. */
+    --segment-track-bg: var(--color-bg);
+    --segment-active-bg: var(--color-surface-raised);
 }
 
 .scriptStatus {

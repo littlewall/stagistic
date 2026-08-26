@@ -1,12 +1,12 @@
 .root {
-    --select-button-border-color: var(--color-border);
-    --select-button-bg: var(--color-input-bg, var(--color-surface));
+    --control-trigger-border-color: var(--color-border);
+    --control-trigger-bg: var(--color-input-bg, var(--color-surface));
 }
 
 .md {
-    --select-button-height: var(--control-height-md);
+    --control-trigger-height: var(--control-height-md);
 }
 
 .lg {
-    --select-button-height: var(--control-height-lg);
+    --control-trigger-height: var(--control-height-lg);
 }

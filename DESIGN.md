@@ -293,6 +293,38 @@ Curves: `--ease-standard` for state changes, `--ease-out` for a control that pop
 
 ## 6. Components
 
+### The component contract
+
+Appearance is expressed three ways, in order of preference.
+
+| Level | Use when | Written as |
+|---|---|---|
+| Variant prop | the appearance is a bounded, named set | `<Button variant="danger" size="sm">` |
+| CSS variable | the value is genuinely per-instance | `<Panel style={{'--panel-pad': 'var(--space-xl)'}}>` |
+| `className` | positioning by the parent only | `<Button className="col-span-2">` |
+
+Components are organised in dependency layers: tokens, then primitives, then
+controls, then patterns, then routes. This is a different axis from the five
+elevation layers in §4, which decide a surface's background and boundary; a
+component sits on exactly one of each. The primitives named below (`Stack`,
+`Text`, `Panel`, `Overlay`) do not exist yet — they arrive with the primitives
+work that follows this consolidation, and the rule is stated here so that work
+is built against it.
+
+### Named rules
+
+**The Layer Dependency Rule.** Tokens, then primitives, then controls, then patterns, then routes — dependency layers, not the elevation layers of §4. A layer may use tokens and the layers below it, never the layers above it. A primitive knows nothing about a script, a scene, or a character.
+
+**The className Is Position Only Rule.** `className` on a control or a pattern may affect where the element sits in its parent—margin, grid or flex placement, width. It may never affect how the element looks—background, border, radius, padding, colour, typography. Those go through a variant or a declared variable. Utility class precedence is decided by the stylesheet, not by the attribute, so repainting through `className` is non-deterministic. Primitives are exempt: placement is what they are for.
+
+**The Declared Surface Rule.** A component's overridable variables are published API: named, defaulted from tokens, listed in its type and in the catalog. Typically three to six. Everything else is internal and may change without notice.
+
+**The Component Variables Are Scoped Rule.** A variable belonging to one component is declared on that component's own root class, not on `:root`. `:root` carries design tokens only. The corollary is a naming obligation: a variable on `:root` must not be named after a component, because the moment a second component reads it the name is a lie. Shared control and menu values live in `--control-*` and `--menu-*`. `--bubble-menu-*` stays on `:root` under that same corollary: two different bubble menus read it, so the name describes a pattern rather than one component.
+
+**The Variant Before Override Rule.** If an appearance recurs, it is a variant with a name. A variable override is for a value that is genuinely per-instance. Three call sites overriding the same variable to the same value is a missing variant.
+
+**The Routes Carry No CSS Rule.** A route composes components. If a route needs a style no component provides, that is a missing component or a missing variant, not a new `.module.css`. The exception is genuinely singular geometry, such as the export page schematic.
+
 ### Buttons
 
 The shared Button atom uses a full pill radius. Compact selectors, segmented controls, menu items, and editor-specific icon controls may use smaller semantic radii when their shape communicates grouping or placement.

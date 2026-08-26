@@ -96,11 +96,11 @@
     gap: var(--space-md);
     align-items: center;
     min-height: var(--control-height-lg);
-    padding: 0 var(--select-button-padding-inline);
+    padding: 0 var(--control-trigger-padding-inline);
     font-size: var(--font-size-sm);
     background: var(--color-surface);
     border: 1px dashed var(--color-border);
-    border-radius: var(--select-button-radius);
+    border-radius: var(--control-trigger-radius);
 }
 
 .fixedNoteLabel {

@@ -40,7 +40,7 @@
     height: calc(24px * var(--size-scale));
     padding: 0 var(--space-sm);
     font: inherit;
-    font-size: var(--select-button-font-size);
+    font-size: var(--control-trigger-font-size);
     color: var(--color-text);
     background: transparent;
     border: 0;
@@ -111,17 +111,17 @@
 
 .suggestions {
     position: absolute;
-    z-index: var(--select-menu-z-index);
+    z-index: var(--menu-z-index);
     top: calc(100% + var(--space-xs));
     right: 0;
     left: 0;
     overflow-y: auto;
-    max-height: var(--select-menu-max-height);
-    padding: var(--select-menu-padding);
-    background: var(--select-menu-bg);
-    border: var(--select-menu-border);
-    border-radius: var(--select-menu-radius);
-    box-shadow: var(--select-menu-shadow);
+    max-height: var(--menu-max-height);
+    padding: var(--menu-padding);
+    background: var(--menu-bg);
+    border: var(--menu-border);
+    border-radius: var(--menu-radius);
+    box-shadow: var(--menu-shadow);
 
     & ul {
         display: grid;
@@ -134,15 +134,15 @@
         cursor: pointer;
         display: flex;
         align-items: center;
-        min-height: var(--select-menu-item-min-height);
-        padding: var(--select-menu-item-padding);
-        font-size: var(--select-menu-item-font-size);
-        color: var(--select-menu-item-color);
-        border-radius: var(--select-menu-item-radius);
+        min-height: var(--menu-item-min-height);
+        padding: var(--menu-item-padding);
+        font-size: var(--menu-item-font-size);
+        color: var(--menu-item-color);
+        border-radius: var(--menu-item-radius);
     }
 
     & li:hover {
-        background: var(--select-menu-item-hover-bg);
+        background: var(--menu-item-hover-bg);
     }
 
     & mark {
@@ -155,5 +155,5 @@
 }
 
 .activeSuggestion {
-    background: var(--select-menu-item-hover-bg);
+    background: var(--menu-item-hover-bg);
 }

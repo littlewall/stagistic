@@ -38,7 +38,7 @@
     pointer-events: none;
     position: absolute;
     z-index: 1;
-    top: calc((var(--select-button-height) - 1rem) / 2);
+    top: calc((var(--control-trigger-height) - 1rem) / 2);
     left: var(--space-md);
     width: 1rem;
     height: 1rem;
@@ -48,13 +48,13 @@
 .addButton {
     flex: 0 0 auto;
     box-sizing: border-box;
-    width: var(--select-button-height);
-    height: var(--select-button-height);
+    width: var(--control-trigger-height);
+    height: var(--control-trigger-height);
     padding: 0;
 
     &:hover:not(:disabled) {
         color: var(--color-text);
-        background: var(--select-menu-item-hover-bg);
+        background: var(--menu-item-hover-bg);
     }
 }
 
@@ -98,7 +98,7 @@
     color: var(--color-text-muted);
     text-overflow: ellipsis;
     text-transform: uppercase;
-    letter-spacing: var(--letter-spacing-wide);
+    letter-spacing: var(--letter-spacing-sm);
     white-space: nowrap;
 }
 
@@ -119,12 +119,12 @@
 
     &:hover {
         color: var(--color-text);
-        background: var(--select-menu-item-hover-bg);
+        background: var(--menu-item-hover-bg);
     }
 
     &.selected {
         color: var(--color-text);
-        background: var(--select-menu-item-active-bg);
+        background: var(--menu-item-active-bg);
     }
 }
 
@@ -169,7 +169,7 @@
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);
     text-transform: uppercase;
-    letter-spacing: var(--letter-spacing-wide);
+    letter-spacing: var(--letter-spacing-sm);
 }
 
 .emptyList {

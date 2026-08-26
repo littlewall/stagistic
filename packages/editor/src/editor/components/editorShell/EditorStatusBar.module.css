@@ -1,4 +1,8 @@
 .statusBar {
+    /* Read by the narrow-viewport grid below and probed by useResponsiveScale.
+       Square footprint, matching the other toolbar controls. */
+    --toolbar-toggle-width: var(--control-height-md);
+
     display: grid;
     grid-template-columns: var(--left-sidebar-size) minmax(0, 1fr) var(--right-sidebar-size);
     flex: 0 0 auto;

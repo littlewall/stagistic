@@ -72,7 +72,7 @@
     }
 
     &[data-end-tone = 'orphan']::before {
-        color: var(--color-warning);
+        color: var(--color-status-warning);
         border-style: dashed;
     }
 
