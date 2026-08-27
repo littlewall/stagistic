@@ -88,13 +88,13 @@
 
     &:hover {
         color: var(--color-text);
-        background: var(--select-menu-item-hover-bg);
+        background: var(--menu-item-hover-bg);
     }
 
     &.active {
         font-weight: var(--font-weight-semibold);
         color: var(--color-text);
-        background: var(--select-menu-item-active-bg);
+        background: var(--menu-item-active-bg);
     }
 }
 

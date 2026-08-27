@@ -16,18 +16,31 @@
     grid-row: 1;
 }
 
+.form {
+    --control-trigger-border-color: var(--color-border);
+    --control-trigger-bg: var(--color-input-bg, var(--color-surface));
+}
+
+.md {
+    --control-trigger-height: var(--control-height-md);
+}
+
+.lg {
+    --control-trigger-height: var(--control-height-lg);
+}
+
 .sizer {
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: var(--select-button-gap);
+    gap: var(--control-trigger-gap);
     align-items: center;
     box-sizing: border-box;
-    height: var(--select-button-height);
-    padding: 0 var(--select-button-padding-inline);
-    font-size: var(--select-button-font-size);
-    font-weight: var(--select-button-font-weight);
+    height: var(--control-trigger-height);
+    padding: 0 var(--control-trigger-padding-inline);
+    font-size: var(--control-trigger-font-size);
+    font-weight: var(--control-trigger-font-weight);
     visibility: hidden;
-    border: var(--select-button-border-width) solid transparent;
+    border: var(--control-trigger-border-width) solid transparent;
 }
 
 .sizerLabel {
@@ -39,42 +52,38 @@
 .sizerChevron {
     grid-column: 2;
     grid-row: 1;
-    width: var(--select-chevron-size);
-    height: var(--select-chevron-size);
+    width: var(--control-chevron-size);
+    height: var(--control-chevron-size);
 }
 
 .button {
     cursor: pointer;
     display: grid;
     grid-template-columns: 1fr auto;
-    gap: var(--select-button-gap);
+    gap: var(--control-trigger-gap);
     align-items: center;
     width: 100%;
-    height: var(--select-button-height);
-    padding: 0 var(--select-button-padding-inline);
+    height: var(--control-trigger-height);
+    padding: 0 var(--control-trigger-padding-inline);
     font-family: inherit;
-    font-size: var(--select-button-font-size);
-    font-weight: var(--select-button-font-weight);
-    color: var(--select-button-color);
+    font-size: var(--control-trigger-font-size);
+    font-weight: var(--control-trigger-font-weight);
+    color: var(--control-trigger-color);
     text-align: left;
-    background: var(--select-button-bg);
-    border: var(--select-button-border-width) solid var(--select-button-border-color);
-    border-radius: var(--select-button-radius);
+    background: var(--control-trigger-bg);
+    border: var(--control-trigger-border-width) solid var(--control-trigger-border-color);
+    border-radius: var(--control-trigger-radius);
 
     &:hover {
-        background: var(--select-button-hover-bg);
+        background: var(--control-trigger-hover-bg);
     }
 
     &[aria-expanded = 'true'] {
-        background: var(--select-menu-bg);
+        background: var(--menu-bg);
         border-color: var(--color-border);
         border-bottom-color: transparent;
         border-bottom-right-radius: 0;
         border-bottom-left-radius: 0;
-
-        &:hover {
-            background: var(--select-menu-hover-bg);
-        }
     }
 }
 
@@ -85,12 +94,12 @@
 .select[data-menu-placement = 'above'] .button[aria-expanded = 'true'] {
     border-top-color: transparent;
     border-bottom-color: var(--color-border);
-    border-radius: 0 0 var(--select-button-radius) var(--select-button-radius);
+    border-radius: 0 0 var(--control-trigger-radius) var(--control-trigger-radius);
 }
 
 .value {
     display: inline-flex;
-    gap: var(--select-button-gap);
+    gap: var(--control-trigger-gap);
     align-items: center;
     min-width: 0;
 }
@@ -107,12 +116,12 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: var(--select-icon-size);
-    height: var(--select-icon-size);
+    width: var(--control-icon-size);
+    height: var(--control-icon-size);
 
     & svg {
-        width: var(--select-icon-size);
-        height: var(--select-icon-size);
+        width: var(--control-icon-size);
+        height: var(--control-icon-size);
         fill: none;
         stroke: currentcolor;
         stroke-linecap: round;
@@ -122,8 +131,8 @@
 }
 
 .chevron {
-    width: var(--select-chevron-size);
-    height: var(--select-chevron-size);
+    width: var(--control-chevron-size);
+    height: var(--control-chevron-size);
     fill: none;
     stroke: currentcolor;
     stroke-linecap: round;
@@ -133,7 +142,7 @@
 
 .menu {
     position: fixed;
-    z-index: var(--select-menu-z-index);
+    z-index: var(--menu-z-index);
     top: anchor(bottom);
     right: anchor(right);
     left: anchor(left);
@@ -141,23 +150,23 @@
     overscroll-behavior: contain;
     display: grid;
     box-sizing: border-box;
-    max-height: min(var(--select-menu-max-height), var(--anchored-menu-max-height, var(--select-menu-max-height)));
+    max-height: min(var(--menu-max-height), var(--anchored-menu-max-height, var(--menu-max-height)));
     margin-top: -1px;
-    padding: var(--select-menu-padding);
-    background: var(--select-menu-bg);
-    border: var(--select-menu-border);
+    padding: var(--menu-padding);
+    background: var(--menu-bg);
+    border: var(--menu-border);
     border-top: 0;
-    border-radius: 0 0 var(--select-menu-radius) var(--select-menu-radius);
-    box-shadow: var(--select-menu-shadow);
+    border-radius: 0 0 var(--menu-radius) var(--menu-radius);
+    box-shadow: var(--menu-shadow);
 
     &.above {
         top: auto;
         bottom: anchor(top);
         margin-top: 0;
         margin-bottom: -1px;
-        border-top: var(--select-menu-border);
+        border-top: var(--menu-border);
         border-bottom: 0;
-        border-radius: var(--select-menu-radius) var(--select-menu-radius) 0 0;
+        border-radius: var(--menu-radius) var(--menu-radius) 0 0;
     }
 }
 
@@ -167,28 +176,28 @@
     display: flex;
     align-items: center;
     width: 100%;
-    min-height: var(--select-menu-item-min-height);
-    padding: var(--select-menu-item-padding);
-    font-size: var(--select-menu-item-font-size);
-    color: var(--select-menu-item-color);
+    min-height: var(--menu-item-min-height);
+    padding: var(--menu-item-padding);
+    font-size: var(--menu-item-font-size);
+    color: var(--menu-item-color);
     text-align: left;
     background: transparent;
     border: none;
-    border-radius: var(--select-menu-item-radius);
+    border-radius: var(--menu-item-radius);
 }
 
 .item {
     &:hover {
-        background: var(--select-menu-item-hover-bg);
+        background: var(--menu-item-hover-bg);
     }
 }
 
 .itemActive {
-    font-weight: var(--select-menu-item-active-font-weight);
-    background: var(--select-menu-item-active-bg);
+    font-weight: var(--menu-item-active-font-weight);
+    background: var(--menu-item-active-bg);
 
     &:hover {
-        background: var(--select-menu-item-active-bg);
+        background: var(--menu-item-active-bg);
     }
 }
 

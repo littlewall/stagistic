@@ -86,7 +86,7 @@ const getRect = (testId: string) => {
 };
 
 /*
- * `--panel-width` is a root token, so pinning the density scale has to happen at
+ * `--sidebar-width` is a root token, so pinning the density scale has to happen at
  * the root too — an element-level override would never reach it.
  */
 beforeEach(() => {

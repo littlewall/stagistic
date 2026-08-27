@@ -94,7 +94,7 @@
 .startActionError {
     font-size: var(--font-size-sm);
     line-height: var(--line-height-normal);
-    color: var(--color-danger);
+    color: var(--color-status-danger);
 }
 
 .startActionPrimary {
@@ -166,11 +166,11 @@
 }
 
 .sortSelect {
-    --select-button-height: calc(32px * var(--size-scale));
-    --select-button-padding-inline: var(--space-lg);
-    --select-button-font-size: var(--font-size-sm);
-    --select-button-bg: transparent;
-    --select-button-border-color: var(--color-border-subtle);
+    --control-trigger-height: calc(32px * var(--size-scale));
+    --control-trigger-padding-inline: var(--space-lg);
+    --control-trigger-font-size: var(--font-size-sm);
+    --control-trigger-bg: transparent;
+    --control-trigger-border-color: var(--color-border-subtle);
 
     width: calc(148px * var(--size-scale));
 }

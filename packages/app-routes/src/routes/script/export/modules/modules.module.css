@@ -6,7 +6,7 @@
 .settingRow,
 .countField,
 .orderField {
-    height: var(--select-button-height);
+    height: var(--control-trigger-height);
 }
 
 .settingRow {

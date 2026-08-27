@@ -34,7 +34,7 @@ export const buildEditorRootStyle = ({
             return variables;
         }, {}),
         ...editorStyle,
-        '--editor-sidebar-width': sidebarWidth ?? 'var(--panel-width)',
+        '--editor-sidebar-width': sidebarWidth ?? 'var(--sidebar-width)',
         '--left-sidebar-size': isLeftSidebarOpen ? 'var(--editor-sidebar-width)' : '0px',
         '--right-sidebar-size': isRightSidebarOpen ? 'var(--editor-sidebar-width)' : '0px',
     } as CSSProperties;

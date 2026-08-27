@@ -1,6 +1,3 @@
-import clsx from 'clsx';
-
-import styles from './FormSelect.module.css';
 import {
     Select,
     type SelectOption,
@@ -39,7 +36,9 @@ export const FormSelect = ({
         options={options}
         ariaLabel={ariaLabel}
         onChange={onChange}
-        className={clsx(styles.root, styles[size], className)}
+        variant="form"
+        size={size}
+        className={className}
         isOpen={isOpen}
         onIsOpenChange={onIsOpenChange}
         width={width}

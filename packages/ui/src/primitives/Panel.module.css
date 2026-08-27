@@ -1,0 +1,49 @@
+.panel {
+    --panel-bg: var(--layer-panel-bg);
+    --panel-edge: var(--layer-panel-edge);
+    --panel-pad: var(--space-md);
+
+    min-width: 0;
+    padding: var(--panel-pad);
+    background: var(--panel-bg);
+    border-radius: var(--radius-md);
+}
+
+.layerShell {
+    --panel-bg: var(--layer-shell-bg);
+    --panel-edge: var(--layer-shell-edge);
+}
+
+.layerPanel {
+    --panel-bg: var(--layer-panel-bg);
+    --panel-edge: var(--layer-panel-edge);
+}
+
+/* Float is the only layer that carries a shadow: per DESIGN.md §4 a floating
+   surface is separated by elevation, not by a tonal step alone. */
+.layerFloat {
+    --panel-bg: var(--layer-float-bg);
+    --panel-edge: var(--layer-panel-edge);
+
+    box-shadow: var(--shadow-popover);
+}
+
+.bordered {
+    border: 1px solid var(--panel-edge);
+}
+
+.padNone {
+    --panel-pad: var(--space-none);
+}
+
+.padSm {
+    --panel-pad: var(--space-sm);
+}
+
+.padMd {
+    --panel-pad: var(--space-md);
+}
+
+.padLg {
+    --panel-pad: var(--space-lg);
+}

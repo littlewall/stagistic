@@ -15,7 +15,7 @@
 
     & .title {
         font-size: var(--font-size-sm);
-        font-weight: var(--font-weight-regular);
+        font-weight: var(--font-weight-normal);
         color: var(--color-text-muted);
     }
 }

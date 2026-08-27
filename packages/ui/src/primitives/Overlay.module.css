@@ -1,0 +1,44 @@
+.overlay {
+    --overlay-bg: var(--layer-float-bg);
+    --overlay-shadow: var(--shadow-popover);
+    --overlay-offset: var(--space-xs);
+
+    position: absolute;
+    background: var(--overlay-bg);
+    border: 1px solid var(--layer-panel-edge);
+    border-radius: var(--radius-md);
+    z-index: 1;
+    box-shadow: var(--overlay-shadow);
+}
+
+.top {
+    bottom: 100%;
+    margin-bottom: var(--overlay-offset);
+}
+
+.bottom {
+    top: 100%;
+    margin-top: var(--overlay-offset);
+}
+
+.left {
+    right: 100%;
+    margin-right: var(--overlay-offset);
+}
+
+.right {
+    left: 100%;
+    margin-left: var(--overlay-offset);
+}
+
+.popover {
+    --overlay-shadow: var(--shadow-popover);
+}
+
+.panel {
+    --overlay-shadow: var(--shadow-panel);
+}
+
+.canvas {
+    --overlay-shadow: var(--shadow-canvas);
+}

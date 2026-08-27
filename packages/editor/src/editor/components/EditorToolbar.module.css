@@ -2,7 +2,7 @@
     display: flex;
     gap: var(--space-sm);
     align-items: center;
-    height: var(--panel-head-height);
+    height: var(--sidebar-head-height);
     padding: 0;
     background: transparent;
 }
@@ -120,22 +120,22 @@
     cursor: pointer;
     display: grid;
     grid-template-columns: auto minmax(0, 1fr) auto;
-    gap: var(--select-button-gap);
+    gap: var(--control-trigger-gap);
     align-items: center;
     width: calc(210px * var(--size-scale));
-    height: var(--select-button-height);
-    padding: 0 var(--select-button-padding-inline);
-    font-size: var(--select-button-font-size);
-    font-weight: var(--select-button-font-weight);
-    color: var(--select-button-color);
-    background: var(--select-button-bg);
-    border: var(--select-button-border-width) solid var(--select-button-border-color);
-    border-radius: var(--select-button-radius);
+    height: var(--control-trigger-height);
+    padding: 0 var(--control-trigger-padding-inline);
+    font-size: var(--control-trigger-font-size);
+    font-weight: var(--control-trigger-font-weight);
+    color: var(--control-trigger-color);
+    background: var(--control-trigger-bg);
+    border: var(--control-trigger-border-width) solid var(--control-trigger-border-color);
+    border-radius: var(--control-trigger-radius);
     transition: background var(--duration-normal) var(--ease-standard), border-radius var(--duration-normal) var(--ease-standard);
     anchor-name: --block-type-select;
 
     &:hover {
-        background: var(--select-button-hover-bg);
+        background: var(--control-trigger-hover-bg);
 
         & .selectIcon {
             opacity: 1;
@@ -148,15 +148,11 @@
     }
 
     &[aria-expanded = 'true'] {
-        background: var(--select-menu-bg);
+        background: var(--menu-bg);
         border-color: var(--color-border);
         border-bottom-color: transparent;
         border-bottom-right-radius: 0;
         border-bottom-left-radius: 0;
-
-        &:hover {
-            background: var(--select-menu-hover-bg);
-        }
 
         & .selectIcon {
             opacity: 1;
@@ -172,19 +168,19 @@
 .dropdown[data-menu-placement = 'above'] .selectButton[aria-expanded = 'true'] {
     border-top-color: transparent;
     border-bottom-color: var(--color-border);
-    border-radius: 0 0 var(--select-button-radius) var(--select-button-radius);
+    border-radius: 0 0 var(--control-trigger-radius) var(--control-trigger-radius);
 }
 
 .selectIcon {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: var(--select-icon-size);
-    height: var(--select-icon-size);
+    width: var(--control-icon-size);
+    height: var(--control-icon-size);
 
     & svg {
-        width: var(--select-icon-size);
-        height: var(--select-icon-size);
+        width: var(--control-icon-size);
+        height: var(--control-icon-size);
         fill: none;
         stroke: currentcolor;
         stroke-linecap: round;
@@ -206,8 +202,8 @@
 }
 
 .chevron {
-    width: var(--select-chevron-size);
-    height: var(--select-chevron-size);
+    width: var(--control-chevron-size);
+    height: var(--control-chevron-size);
     fill: none;
     stroke: currentcolor;
     stroke-linecap: round;
@@ -217,21 +213,21 @@
 
 .menu {
     position: fixed;
-    z-index: var(--select-menu-z-index);
+    z-index: var(--menu-z-index);
     top: anchor(bottom);
     left: anchor(left);
     overflow: auto;
     overscroll-behavior: contain;
     display: grid;
     min-width: anchor-size(width);
-    max-height: min(var(--select-menu-max-height), var(--anchored-menu-max-height, var(--select-menu-max-height)));
+    max-height: min(var(--menu-max-height), var(--anchored-menu-max-height, var(--menu-max-height)));
     margin-top: -1px;
-    padding: var(--select-menu-padding);
-    background: var(--select-menu-bg);
-    border: var(--select-menu-border);
+    padding: var(--menu-padding);
+    background: var(--menu-bg);
+    border: var(--menu-border);
     border-top: 0;
-    border-radius: 0 0 var(--select-menu-radius) var(--select-menu-radius);
-    box-shadow: var(--select-menu-shadow);
+    border-radius: 0 0 var(--menu-radius) var(--menu-radius);
+    box-shadow: var(--menu-shadow);
     position-anchor: --block-type-select;
 
     &.above {
@@ -239,36 +235,36 @@
         bottom: anchor(top);
         margin-top: 0;
         margin-bottom: -1px;
-        border-top: var(--select-menu-border);
+        border-top: var(--menu-border);
         border-bottom: 0;
-        border-radius: var(--select-menu-radius) var(--select-menu-radius) 0 0;
+        border-radius: var(--menu-radius) var(--menu-radius) 0 0;
     }
 }
 
 .menuItem {
     cursor: pointer;
     display: flex;
-    gap: var(--select-menu-item-gap);
+    gap: var(--menu-item-gap);
     align-items: center;
-    min-height: var(--select-menu-item-min-height);
-    padding: var(--select-menu-item-padding);
-    font-size: var(--select-menu-item-font-size);
-    color: var(--select-menu-item-color);
+    min-height: var(--menu-item-min-height);
+    padding: var(--menu-item-padding);
+    font-size: var(--menu-item-font-size);
+    color: var(--menu-item-color);
     background: transparent;
     border: none;
-    border-radius: var(--select-menu-item-radius);
+    border-radius: var(--menu-item-radius);
     transition: background var(--duration-normal) var(--ease-standard), box-shadow var(--duration-normal) var(--ease-standard);
 
     &:hover {
-        background: var(--select-menu-item-hover-bg);
+        background: var(--menu-item-hover-bg);
     }
 
     &.active {
-        font-weight: var(--select-menu-item-active-font-weight);
-        background: var(--select-menu-item-active-bg);
+        font-weight: var(--menu-item-active-font-weight);
+        background: var(--menu-item-active-bg);
 
         &:hover {
-            background: var(--select-menu-item-active-bg);
+            background: var(--menu-item-active-bg);
         }
     }
 }
