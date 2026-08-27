@@ -1,0 +1,24 @@
+{
+    "name": "@stagistic/feature-demos",
+    "version": "0.0.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        "./editor-blocks-fixture": "./src/fixtures/editorBlocksFixture.ts",
+        "./run-editor-blocks-demo": "./src/demo/runEditorBlocksDemo.ts"
+    },
+    "dependencies": {
+        "@stagistic/script": "workspace:*"
+    },
+    "scripts": {
+        "demo:editor-blocks": "tsx src/runEditorBlocksDemo.ts",
+        "test": "vp test run -c vitest.config.ts",
+        "typecheck": "tsc -b"
+    },
+    "devDependencies": {
+        "@types/node": "^24.13.1",
+        "playwright": "^1.61.0",
+        "tsx": "^4.21.0",
+        "typescript": "^5.9.2"
+    }
+}

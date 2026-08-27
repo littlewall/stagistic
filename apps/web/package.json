@@ -25,6 +25,7 @@
         "react-router-dom": "^7.13.0"
     },
     "devDependencies": {
+        "@stagistic/feature-demos": "workspace:*",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@vitejs/plugin-react": "^6.0.3",
