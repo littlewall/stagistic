@@ -110,3 +110,96 @@ describe('css custom properties', () => {
         expect(offenders).toEqual([]);
     });
 });
+
+describe('dev catalog coverage', () => {
+    it('catalogues every component @stagistic/ui exports', () => {
+        const index = readFileSync(
+            join(repoRoot, 'packages/ui/src/index.ts'),
+            'utf8',
+        );
+        const registry = ['primitives', 'controls']
+            .map(name => readFileSync(
+                join(repoRoot, `apps/web/src/dev/registry/${name}.tsx`),
+                'utf8',
+            ))
+            .join('\n');
+
+        /*
+         * A component is a PascalCase value export. That excludes `type`
+         * exports, the hooks, `formControlStyles`, the SCREAMING_CASE
+         * constants and the theme helper functions — none of which have a
+         * visual form to catalogue.
+         */
+        const components = [...index.matchAll(/export \{([^}]*)\}/g)]
+            .flatMap(match => match[1].split(','))
+            .map(name => name.trim())
+            .filter(name => (/^[A-Z][A-Za-z0-9]*$/).test(name) && !(/^[A-Z0-9_]+$/).test(name));
+
+        /*
+         * Everything packages/ui exports that the catalog does not cover yet.
+         * The Patterns and Editor plans (spec steps 5-8) empty this list; it
+         * only ever shrinks. It is spelled out rather than inferred so that a
+         * NEWLY exported component fails this test until someone either
+         * catalogues it or consciously adds it here.
+         */
+        const NOT_CATALOGUED_YET = new Set([
+            'InlineTooltip',
+            'AttributeManagerCharactersPanel',
+            'AttributeManagerDetailTabs',
+            'AttributeManagerGroupDetail',
+            'AttributeManagerListPanel',
+            'AttributeManagerModal',
+            'AttributeManagerMusicDetail',
+            'AttributeManagerPlacesPanel',
+            'AttributeManagerSceneDetail',
+            'CreateCharacterModal',
+            'CreateGroupModal',
+            'CreatePlaceModal',
+            'DeleteScriptConfirm',
+            'DeleteScriptModal',
+            'DuplicateScriptModal',
+            'ImportScriptModal',
+            'ModalDialog',
+            'NewScriptModal',
+            'PublicPreviewNotice',
+            'RemoveAttachmentModal',
+            'RemoveGroupModal',
+            'RenameScriptModal',
+            'ScriptSettingsModal',
+            'EditorSidebar',
+            'ExportPanel',
+            'ProgressBar',
+            'ProgressPanel',
+            'ToastProvider',
+            'AppFooter',
+            'AppHeader',
+            'ScriptEditorAppHeader',
+            'AppLayout',
+            'LoaderOverlay',
+            'ButtonGroup',
+            'Card',
+            'CardContent',
+            'CardFooter',
+            'CardHeader',
+            'FormSelect',
+            'InputTable',
+            'MultiComboBox',
+            'SettingSwitch',
+            'TextInput',
+            'ScriptActionsMenu',
+            'ToggleButtonGroup',
+            'Grid',
+            'HeroLayout',
+            'PageContainer',
+            'PageHeader',
+            'Section',
+            'SectionHeader',
+        ]);
+
+        const missing = components
+            .filter(name => !NOT_CATALOGUED_YET.has(name))
+            .filter(name => !registry.includes(`name: '${name}'`));
+
+        expect(missing).toEqual([]);
+    });
+});

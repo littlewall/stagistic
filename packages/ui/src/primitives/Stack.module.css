@@ -1,0 +1,85 @@
+.stack {
+    /* The one overridable value. Every gap class sets it; callers with a
+       genuinely per-instance spacing set it directly instead of adding a class. */
+    --stack-gap: var(--space-md);
+
+    display: flex;
+    gap: var(--stack-gap);
+    min-width: 0;
+}
+
+.column {
+    flex-direction: column;
+}
+
+.row {
+    flex-direction: row;
+}
+
+.wrap {
+    flex-wrap: wrap;
+}
+
+.gapNone {
+    --stack-gap: var(--space-none);
+}
+
+.gapXs {
+    --stack-gap: var(--space-xs);
+}
+
+.gapSm {
+    --stack-gap: var(--space-sm);
+}
+
+.gapMd {
+    --stack-gap: var(--space-md);
+}
+
+.gapLg {
+    --stack-gap: var(--space-lg);
+}
+
+.gapXl {
+    --stack-gap: var(--space-xl);
+}
+
+.gap2xl {
+    --stack-gap: var(--space-2xl);
+}
+
+.alignStart {
+    align-items: flex-start;
+}
+
+.alignCenter {
+    align-items: center;
+}
+
+.alignEnd {
+    align-items: flex-end;
+}
+
+.alignStretch {
+    align-items: stretch;
+}
+
+.alignBaseline {
+    align-items: baseline;
+}
+
+.justifyStart {
+    justify-content: flex-start;
+}
+
+.justifyCenter {
+    justify-content: center;
+}
+
+.justifyEnd {
+    justify-content: flex-end;
+}
+
+.justifyBetween {
+    justify-content: space-between;
+}

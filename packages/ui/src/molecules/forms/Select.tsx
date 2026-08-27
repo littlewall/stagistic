@@ -27,6 +27,8 @@ interface SelectProps {
     isOpen?: boolean,
     onIsOpenChange?: (isOpen: boolean) => void,
     width?: 'full' | 'content',
+    variant?: 'plain' | 'form',
+    size?: 'md' | 'lg',
 }
 
 export const Select = ({
@@ -39,6 +41,8 @@ export const Select = ({
     isOpen: controlledIsOpen,
     onIsOpenChange,
     width = 'full',
+    variant = 'plain',
+    size = 'md',
 }: SelectProps) => {
     const [internalIsOpen, setInternalIsOpen] = useState(false);
     const isControlled = controlledIsOpen !== undefined;
@@ -72,6 +76,8 @@ export const Select = ({
             className={clsx(
                 styles.select,
                 width === 'content' && styles.content,
+                variant === 'form' && styles.form,
+                variant === 'form' && styles[size],
                 className,
             )}
             ref={selectRef}

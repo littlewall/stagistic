@@ -36,7 +36,8 @@ export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
                 id={resolvedId}
                 ref={ref}
                 size="md"
-                className={clsx(styles.input, inputClassName)}
+                variant="raised"
+                className={inputClassName}
                 aria-describedby={descriptionId}
             />
             {description ? (

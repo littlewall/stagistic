@@ -50,4 +50,9 @@
 
         padding-block: var(--space-lg);
     }
+
+    &.raised {
+        --input-bg: var(--color-surface-raised);
+        --input-radius: var(--radius-sm);
+    }
 }

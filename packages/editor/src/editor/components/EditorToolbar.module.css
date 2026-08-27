@@ -2,7 +2,7 @@
     display: flex;
     gap: var(--space-sm);
     align-items: center;
-    height: var(--panel-head-height);
+    height: var(--sidebar-head-height);
     padding: 0;
     background: transparent;
 }

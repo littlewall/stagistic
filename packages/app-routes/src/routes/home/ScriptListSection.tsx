@@ -2,7 +2,7 @@ import type {ScriptSummary} from '@stagistic/app-core';
 import {
     ScriptActionsMenu,
     ScriptIcon,
-    SubtleText,
+    Text,
 } from '@stagistic/ui';
 
 import {formatLastEdited} from '../../utils/formatLastEdited';
@@ -44,9 +44,9 @@ export const ScriptListSection = ({
                                     <span className={styles.scriptSubtitle}>{script.subtitle}</span>
                                 ) : null}
                             </span>
-                            <SubtleText className={styles.scriptMeta}>
+                            <Text variant="muted" className={styles.scriptMeta}>
                                 {formatLastEdited(script.updatedAt)}
-                            </SubtleText>
+                            </Text>
                         </button>
                         <div className={styles.actionsMenu}>
                             <ScriptActionsMenu

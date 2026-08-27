@@ -9,20 +9,24 @@ import styles from './Input.module.css';
 
 type InputSize = 'sm' | 'md';
 
+type InputVariant = 'default' | 'raised';
+
 type InputProps = {
     size?: InputSize,
+    variant?: InputVariant,
     className?: string,
 } & Omit<ReactAriaInputProps, 'className' | 'size'>;
 
 export const Input = forwardRef<HTMLInputElement, InputProps>(({
     size = 'sm',
+    variant = 'default',
     className,
     ...props
 }, ref) => (
     <ReactAriaInput
         {...props}
         ref={ref}
-        className={clsx(styles.input, className)}
+        className={clsx(styles.input, variant !== 'default' && styles[variant], className)}
         data-size={size}
     />
 ));

@@ -168,8 +168,8 @@
     --layer-float-bg: var(--color-surface);
 
     --shell-height: calc(48px * var(--size-scale));
-    --panel-width: calc(256px * var(--size-scale));
-    --panel-head-height: var(--control-height-md);
+    --sidebar-width: calc(256px * var(--size-scale));
+    --sidebar-head-height: var(--control-height-md);
 
     /* ── Interaction states ────────────────────────────────────────
        One mechanic per state. Two states never differ only in the alpha

@@ -31,6 +31,11 @@
     }
 
     &.icon {
+        flex: 0 0 var(--control-height-md);
+        box-sizing: border-box;
+        aspect-ratio: 1;
+        width: var(--control-height-md);
+        height: var(--control-height-md);
         padding: 0;
     }
 
@@ -64,9 +69,22 @@
         background: transparent;
         border-color: transparent;
 
-        &:hover {
+        &[data-hovered] {
             color: var(--color-text);
-            background: var(--color-surface-raised);
+            background: var(--state-hover);
+        }
+
+        &[data-pressed] {
+            color: var(--color-text);
+            background: var(--state-hover);
+        }
+
+        &[data-focus-visible] {
+            color: var(--color-text);
+            background: var(--state-hover);
+            border-color: transparent;
+            outline: var(--focus-ring);
+            outline-offset: var(--focus-ring-offset);
         }
     }
 
