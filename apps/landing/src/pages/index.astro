@@ -1,8 +1,7 @@
 ---
 import {clsx} from 'clsx';
 import LandingMiniEditor from '../components/mini-editor/LandingMiniEditor';
-import SiteIcons from '../components/SiteIcons.astro';
-import '../styles/global.css';
+import Layout from '../layouts/Layout.astro';
 import s from './index.module.css';
 
 const features = [
@@ -10,7 +9,7 @@ const features = [
         label: 'Theatre-native writing',
         description:
             'Dedicated blocks for acts, scene headings, character cues, dialogue, stage directions, lyrics, and notes. Every part of the script keeps its own formatting and behaviour.',
-        imageSrc: '/features/theatre-writing.png',
+        imageSrc: '/features/theatre-writing.jpg',
         imageAlt: 'A formatted theatre script in Stagistic Editor',
         imageFit: 'contain',
         shape: 'one',
@@ -19,7 +18,7 @@ const features = [
         label: 'Acts and scenes that stay connected',
         description:
             'A live outline keeps the structure visible as you write. Jump directly to any scene, reorder scenes, and group them into acts instead of forcing your play into a screenplay-shaped structure.',
-        imageSrc: '/features/acts-and-scenes.png',
+        imageSrc: '/features/acts-and-scenes.jpg',
         imageAlt: 'The scene outline beside a script in Stagistic Editor',
         imageFit: 'contain',
         shape: 'two',
@@ -28,7 +27,7 @@ const features = [
         label: 'Characters throughout the script',
         description:
             'Build a character catalogue directly from your script. Assign colours, highlight appearances, group characters, rename characters, tag them inside stage directions, and write dialogue for two or more characters speaking together.',
-        imageSrc: '/features/characters.png',
+        imageSrc: '/features/characters.jpg',
         imageAlt: 'The character catalogue in Stagistic Editor',
     imageFit: 'contain',
         shape: 'three',
@@ -37,7 +36,7 @@ const features = [
         label: 'Ready for musicals',
         description:
             'Write lyrics as their own block type, manage songs and instrumentals, place music cues directly in the script, and attach score PDFs to individual musical numbers.',
-        imageSrc: '/features/musical.png',
+        imageSrc: '/features/musical.jpg',
         imageAlt: 'Lyrics formatted inside a musical script in Stagistic Editor',
     imageFit: 'contain',
         shape: 'one',
@@ -46,7 +45,7 @@ const features = [
         label: 'A writing flow you can configure',
         description:
             'Configure page format, title page, headers and footers, and each block\'s indentation, alignment, emphasis, and casing. Set keyboard shortcuts and decide which block follows next, so the editor matches the way you write.',
-        imageSrc: '/features/writing-flow.png',
+        imageSrc: '/features/writing-flow.jpg',
         imageAlt: 'Formatting controls above a script in Stagistic Editor',
             imageFit: 'cover',
         shape: 'three',
@@ -55,7 +54,7 @@ const features = [
         label: 'Advanced PDF export',
         description:
             'Export print-ready PDFs with scene-based pagination, character-specific scripts, consistent page numbering across script and embedded score, and integrated sheet music insertion.',
-        imageSrc: '/features/export.png',
+        imageSrc: '/features/export.jpg',
         imageAlt: 'A print-ready theatre script displayed in Stagistic Editor',
             imageFit: 'cover',
         shape: 'two',
@@ -102,46 +101,12 @@ const faqs = [
 ];
 ---
 
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <SiteIcons />
-        <title>Stagistic Editor - Script editor built for theatre</title>
-        <meta
-            name="description"
-            content="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
-        />
-        <meta property="og:image" content="/opengraph.jpg" />
-        <link
-            rel="canonical"
-            href={`https://${Astro.site?.hostname}`}
-        />
-        <script is:inline>document.documentElement.classList.add('js');</script>
-    </head>
-    <body>
-        <div class={s.page}>
-
-            <!-- Nav -->
-            <header class={s.nav}>
-                <div class={s.navInner}>
-                    <div class={s.navLogo}>
-                        <img
-                            src="/assets/stagistic-brand/stagistic-mark-on-dark.svg"
-                            alt=""
-                            class={s.logoMark}
-                        />
-                        <span class={s.logoText}>Stagistic Editor</span>
-                    </div>
-                    <nav class={s.navLinks} aria-label="Primary">
-                        <a href="#features" class={s.navLink}>Features</a>
-                        <a href="#faq" class={s.navLink}>FAQ</a>
-                    </nav>
-                    <a href="https://editor.stagistic.app" class={s.navCta}>
-                        Try editor
-                    </a>
-                </div>
-            </header>
+<Layout
+    title="Stagistic Editor - Script editor built for theatre"
+    description="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
+    canonical={`https://${Astro.site?.hostname}`}
+>
+    <div class={s.page}>
 
             <!-- Hero -->
             <section class={s.hero}>
@@ -371,29 +336,6 @@ const faqs = [
                 </div>
             </section>
 
-            <!-- Footer -->
-            <footer class={s.footer}>
-                <div class={s.footerInner}>
-                    <div class={s.footerLeft}>
-                        <span class={s.footerLogo}>
-                            © Stagistic • Made with 💛 in Prague
-                        </span>
-                    </div>
-                    <div class={s.footerRight}>
-                        <a href="/syntax" class={s.footerLink}>Syntax</a>
-                        <a
-                            href="https://github.com/littlewall/stagistic"
-                            class={s.footerLink}
-                        >
-                            GitHub repo
-                        </a>
-                        <a href="mailto:hello@stagistic.com" class={s.footerLink}>
-                            hello@stagistic.com
-                        </a>
-                    </div>
-                </div>
-            </footer>
-
         </div>
 
         <script>
@@ -413,5 +355,4 @@ const faqs = [
                 observer.observe(el);
             });
         </script>
-    </body>
-</html>
+</Layout>

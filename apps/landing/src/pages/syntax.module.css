@@ -3,41 +3,30 @@
     background: var(--color-bg);
 }
 
-.nav {
-    --color-text: var(--color-stage-nav-text);
-    --color-text-muted: oklch(from var(--color-stage-nav-text) l c h / .54);
-    --color-border: var(--color-stage-border);
-
-    position: sticky;
-    z-index: 10;
-    top: 0;
-    background: var(--color-stage-nav-bg);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid oklch(from var(--color-stage-nav-text) l c h / .08);
+.main {
+    padding: 0 1.5rem 6rem;
 }
 
-.navInner {
-    display: flex;
-    align-items: center;
-    max-width: 64rem;
-    height: 3rem;
-    margin: 0 auto;
-    padding: 0;
-}
-
-.navLink {
-    font-size: .8125rem;
+.backLink {
+    display: block;
+    max-width: 72rem;
+    margin: 0 auto 3rem;
+    padding: 1.25rem 1.5rem 0;
+    font-family: var(--font-mono);
+    font-size: .75rem;
     color: var(--color-text-muted);
     text-decoration: none;
     transition: color .15s ease;
 
     &:hover {
-        color: var(--color-stage-nav-text);
+        color: var(--color-text);
     }
-}
 
-.main {
-    padding: 4rem 1.5rem 6rem;
+    &:focus-visible {
+        border-radius: .125rem;
+        outline: 2px solid var(--color-blue);
+        outline-offset: 4px;
+    }
 }
 
 .shell {
@@ -393,56 +382,6 @@
     font-size: .875rem;
     line-height: 1.6;
     color: var(--color-text-muted);
-}
-
-.footer {
-    padding: 2.5rem 1.5rem;
-    border-top: 1px solid var(--color-border);
-}
-
-.footerInner {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 64rem;
-    margin: 0 auto;
-}
-
-.footerLeft {
-    display: flex;
-    gap: 1rem;
-    align-items: center;
-}
-
-.footerLogo {
-    font-family: var(--font-mono);
-    font-size: .875rem;
-    font-weight: 500;
-    color: var(--color-text);
-}
-
-.footerTagline {
-    font-size: .8125rem;
-    color: color-mix(in oklch, var(--color-text-muted) 72%, transparent);
-}
-
-.footerRight {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-}
-
-.footerLink {
-    font-size: .8125rem;
-    color: var(--color-text-muted);
-    text-decoration: none;
-    transition: color .15s ease;
-
-    &:hover {
-        color: var(--color-text);
-    }
 }
 
 @media (max-width: 860px) {

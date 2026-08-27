@@ -6,108 +6,6 @@
     background: var(--color-stage-nav-bg);
 }
 
-.nav {
-    --color-text: var(--color-stage-nav-text);
-    --color-text-muted: var(--color-stage-text-muted);
-    --color-border: var(--color-stage-border);
-
-    position: sticky;
-    z-index: 10;
-    top: 0;
-    color: var(--color-text);
-    background: var(--color-stage-nav-bg);
-    backdrop-filter: blur(12px);
-    border-bottom: 1px solid var(--color-border);
-}
-
-.navInner {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 72rem;
-    height: 3rem;
-    margin: 0 auto;
-    padding: 0;
-}
-
-.navLogo {
-    display: flex;
-    gap: .5rem;
-    align-items: flex-end;
-}
-
-.logoMark {
-    display: block;
-    width: auto;
-    height: 1.625rem;
-}
-
-.logoText {
-    padding: 0;
-    font-family: var(--font-mono);
-    font-size: .9rem;
-    font-weight: 500;
-    color: var(--color-text);
-    letter-spacing: -.01em;
-}
-
-.navLinks {
-    display: flex;
-    gap: 1.5rem;
-    align-items: center;
-}
-
-.navLink {
-    font-size: .8125rem;
-    color: var(--color-text);
-    text-decoration-color: transparent;
-    text-decoration-line: underline;
-    text-decoration-thickness: 1px;
-    text-underline-offset: .3rem;
-    transition: text-decoration-color .15s ease;
-
-    &:hover {
-        text-decoration-color: currentcolor;
-    }
-
-    &:focus-visible {
-        color: var(--color-text);
-        border-radius: .125rem;
-        outline: 2px solid var(--color-blue);
-        outline-offset: 4px;
-    }
-}
-
-.navCta {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 2rem;
-    padding: .25rem .875rem;
-    font-size: .75rem;
-    font-weight: 500;
-    color: var(--color-stage-btn-fg);
-    text-decoration: none;
-    background: var(--color-amber);
-    border: 1px solid transparent;
-    border-radius: 9999px;
-    transition: background .15s ease, transform .15s ease;
-
-    &:hover {
-        transform: translateY(-1px);
-        background: var(--color-amber-hover);
-    }
-
-    &:active {
-        transform: translateY(0);
-    }
-
-    &:focus-visible {
-        outline: 2px solid var(--color-blue);
-        outline-offset: 3px;
-    }
-}
-
 .hero,
 .preview {
     --btn-primary-bg: var(--color-amber);
@@ -623,64 +521,6 @@
     gap: .625rem;
 }
 
-.footer {
-    --color-text: var(--color-stage-nav-text);
-    --color-text-muted: var(--color-stage-text-muted);
-    --color-border: var(--color-stage-border);
-
-    padding: 2.75rem 1.5rem;
-    color: var(--color-text);
-    background: var(--color-stage-bg);
-    border-top: 1px solid var(--color-border);
-}
-
-.footerInner {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    align-items: center;
-    justify-content: space-between;
-    max-width: 72rem;
-    margin: 0 auto;
-}
-
-.footerLeft {
-    display: flex;
-    align-items: center;
-}
-
-.footerLogo {
-    font-family: var(--font-mono);
-    font-size: .75rem;
-    font-weight: 400;
-    color: var(--color-text-muted);
-}
-
-.footerRight {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    align-items: center;
-}
-
-.footerLink {
-    font-size: .8125rem;
-    color: var(--color-text-muted);
-    text-decoration: none;
-    transition: color .15s ease;
-
-    &:hover {
-        color: var(--color-text);
-    }
-
-    &:focus-visible {
-        color: var(--color-text);
-        border-radius: .125rem;
-        outline: 2px solid var(--color-blue);
-        outline-offset: 4px;
-    }
-}
-
 .reveal {
     transition: opacity .55s cubic-bezier(.22, 1, .36, 1), transform .55s cubic-bezier(.22, 1, .36, 1);
 }
@@ -828,18 +668,6 @@
 }
 
 @media (max-width: 640px) {
-    .navInner {
-        padding: 0 1rem;
-    }
-
-    .navLinks {
-        display: none;
-    }
-
-    .navCta {
-        min-height: 2.75rem;
-    }
-
     .tryEditorCallout {
         top: -1.5rem;
         right: .5rem;
@@ -874,23 +702,12 @@
         inset: 1.5rem -.5rem .5rem .5rem;
     }
 
-    .footer {
-        padding-right: 1rem;
-        padding-left: 1rem;
-    }
-
     .sectionDivider {
         width: calc(100% - 2rem);
-    }
-
-    .footerInner {
-        flex-direction: column;
-        align-items: flex-start;
     }
 }
 
 @media (max-width: 999px) {
-    .navCta,
     .tryEditorCallout,
     .scriptExcerpt,
     .heroCtas .btnPrimary,
