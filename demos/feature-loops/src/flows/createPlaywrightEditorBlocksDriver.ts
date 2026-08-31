@@ -3,9 +3,19 @@ import type {Page} from 'playwright';
 import type {EditorBlocksFlowDriver} from './runEditorBlocksFlow';
 
 const WORD_GROUP_PAUSE_MS = 110;
-const HUMAN_KEY_PAUSES_MS = [48, 62, 44, 57, 51, 66] as const;
+const HUMAN_KEY_PAUSES_MS = [
+    48,
+    62,
+    44,
+    57,
+    51,
+    66,
+] as const;
 
-type PlaywrightEditorBlocksPage = Pick<Page, 'keyboard' | 'waitForTimeout' | 'locator' | 'getByRole'>;
+type PlaywrightEditorBlocksPage = Pick<
+    Page,
+    'keyboard' | 'waitForTimeout' | 'waitForFunction' | 'locator' | 'getByRole'
+>;
 
 const waitForVisible = async (page: PlaywrightEditorBlocksPage, selector: string) => {
     await page.locator(selector).last().waitFor({state: 'visible'});
@@ -31,7 +41,23 @@ export const createPlaywrightEditorBlocksDriver = (
     },
     press: key => page.keyboard.press(key),
     pause: durationMs => page.waitForTimeout(durationMs),
-    waitForBlock: blockType => waitForVisible(page, `[data-block-type="${blockType}"]`),
+    moveToBlock: async blockId => {
+        await page.keyboard.press('ArrowDown');
+        await page.waitForFunction(targetBlockId => {
+            const selection = window.getSelection();
+            const anchorNode = selection?.anchorNode;
+
+            if (!anchorNode) {
+                return false;
+            }
+
+            const anchorElement = anchorNode instanceof Element
+                ? anchorNode
+                : anchorNode.parentElement;
+
+            return anchorElement?.closest('p[data-id]')?.getAttribute('data-id') === targetBlockId;
+        }, blockId);
+    },
     waitForSuggestions: () => page.getByRole('listbox').waitFor({state: 'visible'}),
     waitForMusicPill: () => waitForVisible(page, '[data-music-pill="start"]'),
 });

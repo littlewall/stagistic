@@ -1,13 +1,13 @@
 import type {Page} from 'playwright';
 
 import {
-    runEditorBlocksFlow,
     type EditorBlocksFlowDriver,
+    runEditorBlocksFlow,
 } from '../flows/runEditorBlocksFlow';
 import {prepareEditorBlocksCapture} from './prepareEditorBlocksCapture';
 
 type RunRecordedEditorBlocksDemoArgs = {
-    page: Pick<Page, 'addInitScript' | 'goto' | 'waitForURL' | 'getByRole'>,
+    page: Pick<Page, 'addInitScript' | 'addStyleTag' | 'goto' | 'waitForURL' | 'getByRole'>,
     driver: EditorBlocksFlowDriver,
     baseUrl: string,
     waitForOperator: (prompt: string) => Promise<void>,

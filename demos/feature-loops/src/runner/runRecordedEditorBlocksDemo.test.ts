@@ -1,9 +1,9 @@
+import type {Page} from 'playwright';
 import {
     describe,
     expect,
     it,
 } from 'vite-plus/test';
-import type {Page} from 'playwright';
 
 const loadRunner = () => import('./runRecordedEditorBlocksDemo');
 
@@ -14,61 +14,92 @@ describe('runRecordedEditorBlocksDemo', () => {
 
         await runRecordedEditorBlocksDemo({
             page: {
-                addInitScript: async () => {
+                addInitScript: () => {
                     events.push('acknowledgePreview');
+
+                    return Promise.resolve();
                 },
-                goto: async () => {
+                goto: () => {
                     events.push('goto');
+
+                    return Promise.resolve();
                 },
-                waitForURL: async () => {
+                waitForURL: () => {
                     events.push('waitForURL');
+
+                    return Promise.resolve();
+                },
+                addStyleTag: () => {
+                    events.push('addDemoStyle');
+
+                    return Promise.resolve();
                 },
                 getByRole: () => ({
-                    focus: async () => {
+                    focus: () => {
                         events.push('focus');
+
+                        return Promise.resolve();
                     },
                 }),
-            } as unknown as Pick<Page, 'addInitScript' | 'goto' | 'waitForURL' | 'getByRole'>,
+            } as unknown as Pick<Page, 'addInitScript' | 'addStyleTag' | 'goto' | 'waitForURL' | 'getByRole'>,
             driver: {
-                typeWordGroups: async () => {
+                typeWordGroups: () => {
                     events.push('flow');
+
+                    return Promise.resolve();
                 },
-                typeHuman: async () => {
+                typeHuman: () => {
                     events.push('flow');
+
+                    return Promise.resolve();
                 },
-                press: async () => {
+                press: () => {
                     events.push('flow');
+
+                    return Promise.resolve();
                 },
-                pause: async durationMs => {
+                pause: durationMs => {
                     events.push(['pause', durationMs]);
+
+                    return Promise.resolve();
                 },
-                waitForBlock: async () => {
+                moveToBlock: () => {
                     events.push('flow');
+
+                    return Promise.resolve();
                 },
-                waitForSuggestions: async () => {
+                waitForSuggestions: () => {
                     events.push('flow');
+
+                    return Promise.resolve();
                 },
-                waitForMusicPill: async () => {
+                waitForMusicPill: () => {
                     events.push('flow');
+
+                    return Promise.resolve();
                 },
             },
             baseUrl: 'http://localhost:3000',
-            waitForOperator: async prompt => {
+            waitForOperator: prompt => {
                 events.push(['operator', prompt]);
+
+                return Promise.resolve();
             },
             log: message => {
                 events.push(['log', message]);
             },
         });
 
-        expect(events.slice(0, 6)).toEqual([
+        expect(events.slice(0, 7)).toEqual([
             'acknowledgePreview',
             'goto',
             'waitForURL',
+            'addDemoStyle',
             'focus',
             ['log', 'Ready for Recordly. Start recording, then press Enter here.'],
             ['operator', 'Start flow'],
         ]);
+
         const firstFlowIndex = events.findIndex(event => event === 'flow');
         const finalHoldIndex = events.findIndex(event => Array.isArray(event)
             && event[0] === 'pause' && event[1] === 1_400);
@@ -77,7 +108,7 @@ describe('runRecordedEditorBlocksDemo', () => {
         const closeIndex = events.findIndex(event => Array.isArray(event)
             && event[0] === 'operator' && event[1] === 'Close browser');
 
-        expect(firstFlowIndex).toBeGreaterThan(6);
+        expect(firstFlowIndex).toBeGreaterThan(7);
         expect(finalHoldIndex).toBeGreaterThan(firstFlowIndex);
         expect(completedIndex).toBeGreaterThan(finalHoldIndex);
         expect(closeIndex).toBeGreaterThan(completedIndex);

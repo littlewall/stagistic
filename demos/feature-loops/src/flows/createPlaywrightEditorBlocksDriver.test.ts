@@ -1,9 +1,9 @@
+import type {Page} from 'playwright';
 import {
     describe,
     expect,
     it,
 } from 'vite-plus/test';
-import type {Page} from 'playwright';
 
 const loadDriver = () => import('./createPlaywrightEditorBlocksDriver');
 
@@ -13,36 +13,55 @@ describe('createPlaywrightEditorBlocksDriver', () => {
         const events: unknown[] = [];
         const locator = (selector: string) => ({
             last: () => ({
-                waitFor: async (options: unknown) => {
-                    events.push(['waitFor', selector, options]);
+                waitFor: (options: unknown) => {
+                    events.push([
+                        'waitFor',
+                        selector,
+                        options,
+                    ]);
+
+                    return Promise.resolve();
                 },
             }),
         });
         const page = {
             keyboard: {
-                insertText: async (text: string) => {
+                insertText: (text: string) => {
                     events.push(['insertText', text]);
+
+                    return Promise.resolve();
                 },
-                type: async (text: string) => {
+                type: (text: string) => {
                     events.push(['type', text]);
+
+                    return Promise.resolve();
                 },
-                press: async (key: string) => {
+                press: (key: string) => {
                     events.push(['press', key]);
+
+                    return Promise.resolve();
                 },
             },
-            waitForTimeout: async (durationMs: number) => {
+            waitForTimeout: (durationMs: number) => {
                 events.push(['wait', durationMs]);
+
+                return Promise.resolve();
+            },
+            waitForFunction: (_predicate: unknown, arg: unknown) => {
+                events.push(['waitForActiveBlock', arg]);
+
+                return Promise.resolve();
             },
             locator,
             getByRole: (role: string) => locator(`[role="${role}"]`).last(),
         };
         const driver = createPlaywrightEditorBlocksDriver(
-            page as unknown as Pick<Page, 'keyboard' | 'waitForTimeout' | 'locator' | 'getByRole'>,
+            page as unknown as Pick<Page, 'keyboard' | 'waitForTimeout' | 'waitForFunction' | 'locator' | 'getByRole'>,
         );
 
         await driver.typeWordGroups(['A storm', ' gathers.']);
         await driver.typeHuman('ELI');
-        await driver.waitForBlock('aside');
+        await driver.moveToBlock('demo-aside');
         await driver.waitForSuggestions();
         await driver.waitForMusicPill();
 
@@ -56,9 +75,18 @@ describe('createPlaywrightEditorBlocksDriver', () => {
             ['wait', 62],
             ['type', 'I'],
             ['wait', 44],
-            ['waitFor', '[data-block-type="aside"]', {state: 'visible'}],
-            ['waitFor', '[role="listbox"]', {state: 'visible'}],
-            ['waitFor', '[data-music-pill="start"]', {state: 'visible'}],
+            ['press', 'ArrowDown'],
+            ['waitForActiveBlock', 'demo-aside'],
+            [
+                'waitFor',
+                '[role="listbox"]',
+                {state: 'visible'},
+            ],
+            [
+                'waitFor',
+                '[data-music-pill="start"]',
+                {state: 'visible'},
+            ],
         ]);
     });
 });

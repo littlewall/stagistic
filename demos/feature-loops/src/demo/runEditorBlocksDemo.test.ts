@@ -12,10 +12,10 @@ describe('runEditorBlocksDemo', () => {
         const events: string[] = [];
 
         const scriptId = await runEditorBlocksDemo({
-            seedScript: async () => {
+            seedScript: () => {
                 events.push('seed');
 
-                return 'script-123';
+                return Promise.resolve('script-123');
             },
             navigate: path => {
                 events.push(path);

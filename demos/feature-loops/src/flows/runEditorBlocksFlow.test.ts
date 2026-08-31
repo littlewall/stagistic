@@ -12,71 +12,75 @@ describe('runEditorBlocksFlow', () => {
         const events: unknown[] = [];
 
         await runEditorBlocksFlow({
-            typeWordGroups: async groups => {
+            typeWordGroups: groups => {
                 events.push(['typeWordGroups', groups]);
+
+                return Promise.resolve();
             },
-            typeHuman: async text => {
+            typeHuman: text => {
                 events.push(['typeHuman', text]);
+
+                return Promise.resolve();
             },
-            press: async key => {
+            press: key => {
                 events.push(['press', key]);
+
+                return Promise.resolve();
             },
-            pause: async durationMs => {
+            pause: durationMs => {
                 events.push(['pause', durationMs]);
+
+                return Promise.resolve();
             },
-            waitForBlock: async blockType => {
-                events.push(['waitForBlock', blockType]);
+            moveToBlock: blockId => {
+                events.push(['moveToBlock', blockId]);
+
+                return Promise.resolve();
             },
-            waitForSuggestions: async () => {
+            waitForSuggestions: () => {
                 events.push(['waitForSuggestions']);
+
+                return Promise.resolve();
             },
-            waitForMusicPill: async () => {
+            waitForMusicPill: () => {
                 events.push(['waitForMusicPill']);
+
+                return Promise.resolve();
             },
         });
 
         expect(events).toEqual([
             ['typeWordGroups', ['THE', ' ROOFTOP']],
-            ['press', 'Enter'],
-            ['waitForBlock', 'stageDirection'],
-            ['typeWordGroups', ['A storm', ' gathers.']],
-            ['press', 'Enter'],
-            ['press', 'Alt+Enter'],
-            ['waitForBlock', 'character'],
+            ['moveToBlock', 'demo-stage-direction-1'],
+            ['typeWordGroups', ['A storm gathers', ' over the silent city.']],
+            ['moveToBlock', 'demo-character-block-1'],
             ['typeHuman', 'MAR'],
             ['waitForSuggestions'],
             ['pause', 280],
             ['press', 'ArrowDown'],
             ['pause', 180],
             ['press', 'Enter'],
-            ['press', 'Enter'],
-            ['waitForBlock', 'dialogue'],
-            ['typeHuman', 'Wait.'],
-            ['press', 'Enter'],
-            ['waitForBlock', 'character'],
+            ['moveToBlock', 'demo-dialogue'],
+            ['typeHuman', 'Wait. The storm is almost here.'],
+            ['moveToBlock', 'demo-character-block-2'],
             ['typeHuman', 'EL'],
             ['waitForSuggestions'],
             ['pause', 280],
             ['press', 'ArrowDown'],
             ['pause', 180],
             ['press', 'Enter'],
-            ['press', 'Enter'],
-            ['waitForBlock', 'dialogue'],
-            ['press', 'Control+4'],
-            ['waitForBlock', 'aside'],
-            ['typeHuman', '(softly)'],
-            ['press', 'Enter'],
-            ['waitForBlock', 'dialogue'],
-            ['press', 'Control+7'],
-            ['waitForBlock', 'lyrics'],
+            ['moveToBlock', 'demo-aside'],
+            ['pause', 300],
+            ['typeWordGroups', ['softly']],
+            ['pause', 120],
+            ['moveToBlock', 'demo-lyrics'],
             ['typeHuman', 'WE RISE'],
-            ['press', 'Enter'],
-            ['waitForBlock', 'lyrics'],
-            ['press', 'Control+2'],
-            ['waitForBlock', 'stageDirection'],
-            ['typeWordGroups', ['The light', ' spills.']],
+            ['moveToBlock', 'demo-lyrics-2'],
+            ['typeHuman', 'WITH THE DAWN'],
+            ['moveToBlock', 'demo-stage-direction-2'],
+            ['typeWordGroups', ['First light spills', ' over the rooftop.']],
             ['typeWordGroups', ['#']],
-            ['typeHuman', 'Dawn'],
+            ['typeHuman', 'Dawn in Gold'],
             ['press', 'Enter'],
             ['waitForMusicPill'],
             ['pause', 1_400],

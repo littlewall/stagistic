@@ -12,7 +12,8 @@
         {"path": "./packages/script-pagination"},
         {"path": "./packages/export"},
         {"path": "./apps/desktop"},
-        {"path": "./apps/web"}
+        {"path": "./apps/web"},
+        {"path": "./demos/feature-loops"}
     ],
     "include": [
         "vite.config.ts"

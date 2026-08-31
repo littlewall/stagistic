@@ -8,19 +8,18 @@ type EditorBlocksDemoRepository = {
     ) => Promise<unknown>,
     createScriptMusicWithId: (
         scriptId: string,
-        music: {id: string, title: string, kind: 'song' | 'instrumental'},
+        music: {
+            id: string, title: string, kind: 'song' | 'instrumental',
+        },
     ) => Promise<unknown>,
     setActiveBlock: (scriptId: string, blockId: string | null) => Promise<void>,
 };
 
 const EDITOR_BLOCKS_DEMO_SEED = {
-    characters: [
-        {id: 'demo-character-mara', key: 'MARA'},
-        {id: 'demo-character-eli', key: 'ELI'},
-    ],
+    characters: [{id: 'demo-character-mara', key: 'MARA'}, {id: 'demo-character-eli', key: 'ELI'}],
     music: {
         id: 'demo-music-dawn',
-        title: 'Dawn',
+        title: 'Dawn in Gold',
         kind: 'instrumental',
     },
 } as const;
@@ -66,6 +65,11 @@ export const createEditorBlocksDemoDocument = (): ScriptDocument => ({
         {
             type: 'lyrics',
             attrs: {id: 'demo-lyrics'},
+            content: [],
+        },
+        {
+            type: 'lyrics',
+            attrs: {id: 'demo-lyrics-2'},
             content: [],
         },
         {
