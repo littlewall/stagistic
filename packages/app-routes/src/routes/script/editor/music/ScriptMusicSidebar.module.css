@@ -16,12 +16,12 @@
 .sectionTitle {
     margin: 0 0 var(--space-md);
     padding-inline: var(--space-md);
-    font-family: var(--font-family-mono);
+    font-family: var(--font-family-sans);
     font-size: var(--font-size-xs);
-    font-weight: 400;
+    font-weight: var(--font-weight-semibold);
     color: var(--color-text-muted);
     text-transform: uppercase;
-    letter-spacing: .08em;
+    letter-spacing: var(--letter-spacing-lg);
 }
 
 .itemList {
@@ -37,7 +37,7 @@
     grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--space-md);
     align-items: center;
-    min-height: calc(30px * var(--size-scale));
+    min-height: calc(28px * var(--size-scale));
     padding-left: var(--space-md);
     color: var(--color-text);
     border-radius: var(--radius-md);
@@ -85,35 +85,6 @@
     gap: 1px;
     opacity: .38;
     transition: opacity var(--duration-normal) var(--ease-standard);
-}
-
-.rowAction {
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: calc(22px * var(--size-scale));
-    height: calc(22px * var(--size-scale));
-    padding: 0;
-    color: var(--color-text-muted);
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--radius-sm);
-    transition: background var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard), transform var(--duration-fast) var(--ease-out);
-
-    &:hover {
-        color: var(--color-text);
-        background: var(--state-hover);
-    }
-
-    &:active {
-        transform: scale(.96);
-    }
-
-    & svg {
-        width: calc(13px * var(--size-scale));
-        height: calc(13px * var(--size-scale));
-    }
 }
 
 .empty {

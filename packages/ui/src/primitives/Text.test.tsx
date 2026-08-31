@@ -36,6 +36,12 @@ describe('Text', () => {
         expect(markup).toContain(styles.size4xl);
     });
 
+    it('renders the eyebrow variant class', () => {
+        const markup = renderToStaticMarkup(<Text variant="eyebrow" size="xs">Section</Text>);
+
+        expect(markup).toContain(styles.eyebrow);
+    });
+
     it('adds the truncate class only when asked', () => {
         expect(renderToStaticMarkup(<Text>x</Text>)).not.toContain(styles.truncate);
         expect(renderToStaticMarkup(<Text truncate>x</Text>)).toContain(styles.truncate);

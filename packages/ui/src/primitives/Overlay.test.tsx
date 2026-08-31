@@ -25,4 +25,11 @@ describe('Overlay', () => {
         expect(markup).toContain(styles.right);
         expect(markup).toContain(styles.canvas);
     });
+
+    it('renders the element named by `as`', () => {
+        const markup = renderToStaticMarkup(<Overlay as="section">x</Overlay>);
+
+        expect(markup).toContain('<section');
+        expect(markup).toContain(styles.overlay);
+    });
 });

@@ -1,15 +1,35 @@
 import {
     Button,
+    IconButton,
     Input,
+    Notice,
+    PanelHeader,
     ProgressCircle,
     RadioChoiceGroup,
     Select,
+    SettingRow,
+    SettingsGroup,
     Switch,
     Tag,
     Tooltip,
 } from '@stagistic/ui';
 
 import type {CatalogGroup} from './types';
+
+const PlusGlyph = () => (
+    <svg
+        viewBox="0 0 16 16"
+        fill="none"
+        aria-hidden="true"
+    >
+        <path
+            d="M8 3v10M3 8h10"
+            stroke="currentColor"
+            strokeWidth="1.5"
+            strokeLinecap="round"
+        />
+    </svg>
+);
 
 export const controls: CatalogGroup = {
     title: 'Controls',
@@ -43,6 +63,78 @@ export const controls: CatalogGroup = {
                 },
                 {label: 'size sm', node: <Button size="sm">Small</Button>},
                 {label: 'disabled', node: <Button isDisabled>Disabled</Button>},
+            ],
+        },
+        {
+            name: 'IconButton',
+            /*
+             * IconButton captures resting surface (variant), size, radius
+             * (shape) and destructive tone (tone) as props reading tokens
+             * directly; it declares no custom properties of its own.
+             */
+            variables: [],
+            samples: [
+                {label: 'ghost / sm', node: <IconButton aria-label="Add"><PlusGlyph /></IconButton>},
+                {
+                    label: 'outline / md / pill',
+                    node: (
+                        <IconButton
+                            variant="outline"
+                            size="md"
+                            shape="pill"
+                            aria-label="Add"
+                        ><PlusGlyph />
+                        </IconButton>
+                    ),
+                },
+                {label: 'filled / sm', node: <IconButton variant="filled" aria-label="Add"><PlusGlyph /></IconButton>},
+                {label: 'xs', node: <IconButton size="xs" aria-label="Add"><PlusGlyph /></IconButton>},
+                {label: 'danger', node: <IconButton tone="danger" aria-label="Remove"><PlusGlyph /></IconButton>},
+                {label: 'selected', node: <IconButton isSelected aria-label="Bold"><PlusGlyph /></IconButton>},
+            ],
+        },
+        {
+            name: 'SettingsGroup',
+            /*
+             * SettingsGroup/SettingRow/PanelHeader are layout scaffolding:
+             * they set grid/flow and spacing from tokens directly and declare
+             * no custom properties of their own.
+             */
+            variables: [],
+            samples: [
+                {
+                    label: 'group + rows',
+                    node: (
+                        <SettingsGroup>
+                            <SettingRow><span>First</span></SettingRow>
+                            <SettingRow><span>Second</span></SettingRow>
+                        </SettingsGroup>
+                    ),
+                },
+            ],
+        },
+        {
+            name: 'SettingRow',
+            variables: [],
+            samples: [{label: 'row', node: <SettingRow><span>Label</span></SettingRow>}],
+        },
+        {
+            name: 'PanelHeader',
+            variables: [],
+            samples: [
+                {
+                    label: 'title + description',
+                    node: <PanelHeader title="Layout" description="Adjust the page." />,
+                }, {label: 'title only', node: <PanelHeader title="Layout" />},
+            ],
+        },
+        {
+            name: 'Notice',
+            variables: [],
+            samples: [
+                {label: 'warning', node: <Notice variant="warning">2 numbers are missing a score PDF</Notice>},
+                {label: 'error', node: <Notice variant="error">Export preview failed.</Notice>},
+                {label: 'empty', node: <Notice variant="empty">No scripts yet.</Notice>},
             ],
         },
         {

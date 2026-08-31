@@ -1,4 +1,5 @@
 export {Button} from './atoms/Button';
+export {IconButton} from './atoms/IconButton';
 export {InlineTooltip} from './atoms/InlineTooltip';
 export {Input} from './atoms/Input';
 export {ProgressCircle} from './atoms/ProgressCircle';
@@ -102,6 +103,7 @@ export {
     type EditorSidebarGroup,
 } from './editor-panels/EditorSidebar';
 export {ExportPanel} from './export/ExportPanel';
+export {Notice} from './feedback/Notice';
 export {ProgressBar} from './feedback/ProgressBar';
 export {ProgressPanel} from './feedback/ProgressPanel';
 export {
@@ -150,6 +152,11 @@ export {
 } from './molecules/forms/MultiComboBox';
 export type {SelectOption} from './molecules/forms/Select';
 export {Select} from './molecules/forms/Select';
+export {
+    PanelHeader,
+    SettingRow,
+    SettingsGroup,
+} from './molecules/forms/SettingsGroup';
 export {SettingSwitch} from './molecules/forms/SettingSwitch';
 export {TextInput} from './molecules/forms/TextInput';
 export {useAnchoredMenuPlacement} from './molecules/forms/useAnchoredMenuHeight';
