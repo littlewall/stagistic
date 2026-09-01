@@ -1,0 +1,21 @@
+.panel {
+    --list-bg: var(--color-surface);
+    --list-edge: var(--color-border-subtle);
+    --list-radius: var(--radius-lg);
+    --list-gap: var(--space-none);
+
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    gap: var(--list-gap);
+    background: var(--list-bg);
+    border-radius: var(--list-radius);
+}
+
+.bordered {
+    border: 1px solid var(--list-edge);
+}
+
+.inset {
+    padding: var(--space-xs);
+}

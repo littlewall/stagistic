@@ -6,6 +6,7 @@ import {
     PanelHeader,
     ProgressCircle,
     RadioChoiceGroup,
+    SearchInput,
     Select,
     SettingRow,
     SettingsGroup,
@@ -284,6 +285,15 @@ export const controls: CatalogGroup = {
                     ),
                 },
             ],
+        },
+        {
+            name: 'SearchInput',
+            variables: [
+                '--search-height',
+                '--search-radius',
+                '--search-icon-inset',
+            ],
+            samples: [{label: 'md', node: <SearchInput placeholder="Search scripts" />}, {label: 'sm', node: <SearchInput size="sm" placeholder="Filter" />}],
         },
     ],
 };

@@ -1,0 +1,97 @@
+.card {
+    --action-card-pad: var(--space-xl);
+    --action-card-radius: var(--radius-lg);
+
+    cursor: pointer;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: var(--space-lg);
+    align-items: start;
+    min-width: 0;
+    padding: var(--action-card-pad);
+    font: inherit;
+    color: var(--color-text);
+    text-align: left;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--action-card-radius);
+    transition: transform var(--duration-normal) var(--ease-standard), border-color var(--duration-normal) var(--ease-standard), box-shadow var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard);
+
+    &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        border-color: var(--color-border-strong);
+        box-shadow: var(--shadow-hairline);
+
+        & .icon {
+            color: var(--color-text);
+        }
+    }
+
+    &:focus-visible {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        color: var(--color-text-muted);
+        background: color-mix(in oklch, var(--color-surface) 70%, transparent);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &:hover:not(:disabled) {
+            transform: none;
+        }
+    }
+}
+
+.icon {
+    width: calc(20px * var(--size-scale));
+    height: calc(20px * var(--size-scale));
+    color: var(--color-text-muted);
+    transition: color var(--duration-normal) var(--ease-standard);
+}
+
+.copy {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    min-width: 0;
+}
+
+.title {
+    font-size: var(--font-size-md);
+    font-weight: var(--font-weight-semibold);
+    line-height: var(--line-height-snug);
+}
+
+.description {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+    text-wrap: pretty;
+}
+
+.error {
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-status-danger);
+}
+
+.primary {
+    border-color: var(--color-border);
+
+    &:hover:not(:disabled) .icon {
+        color: var(--color-surface);
+    }
+
+    & .icon {
+        box-sizing: border-box;
+        width: calc(28px * var(--size-scale));
+        height: calc(28px * var(--size-scale));
+        padding: calc(5px * var(--size-scale));
+        color: var(--color-surface);
+        background: var(--color-text);
+        border-radius: var(--radius-xs);
+    }
+}

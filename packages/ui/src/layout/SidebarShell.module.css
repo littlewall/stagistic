@@ -1,0 +1,51 @@
+.shell {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.header {
+    --sidebar-head-height: calc(44px * var(--size-scale));
+
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    display: flex;
+    flex: none;
+    gap: var(--space-sm);
+    align-items: center;
+    justify-content: space-between;
+    height: var(--sidebar-head-height);
+    padding: 0 var(--space-sm) 0 var(--space-lg);
+    background: var(--layer-panel-bg);
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.title {
+    overflow: hidden;
+    min-width: 0;
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-muted);
+    text-overflow: ellipsis;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-sm);
+    white-space: nowrap;
+}
+
+.actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+.body {
+    --sidebar-pad: var(--space-lg);
+
+    overflow: auto;
+    flex: 1;
+    min-height: 0;
+    padding: var(--sidebar-pad);
+}
