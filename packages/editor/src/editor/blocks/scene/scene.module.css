@@ -10,6 +10,31 @@
     text-decoration-line: var(--scene-underline, none);
     text-transform: var(--scene-casing, uppercase);
 
+    /*
+     * Ribbon tab hugging the left edge of the page — a minimal scene-start
+     * marker so scene boundaries are scannable while scrolling. It sits in the
+     * left margin gutter: the block's own left edge is inset by the page margin,
+     * so pulling the marker back by that margin lands it flush against the page
+     * edge, independent of any scene indent.
+     *
+     * Centred on the first line like the block action controls: `1lh` is the
+     * block's own line box, so `spacing-before + 0.5lh` is the first line's
+     * vertical centre and the marker is offset up by half its height — the
+     * `lh` unit tracks the per-block line-height from settings automatically.
+     */
+    &::after {
+        pointer-events: none;
+        content: '';
+        user-select: none;
+        position: absolute;
+        top: calc(var(--scene-spacing-before, 0px) + (1lh - var(--scene-marker-height, 1.1em)) / 2);
+        left: calc(-1 * var(--editor-margin-left, 96px));
+        width: var(--scene-marker-width, 4px);
+        height: var(--scene-marker-height, 1.1em);
+        background: var(--color-scene-marker);
+        border-radius: 0 var(--scene-marker-radius, 3px) var(--scene-marker-radius, 3px) 0;
+    }
+
     &[data-scene-number]::before {
         pointer-events: none;
         content: attr(data-scene-number) '.';
