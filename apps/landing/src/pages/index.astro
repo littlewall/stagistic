@@ -188,7 +188,7 @@ const faqs = [
                             class={s.scriptExcerpt}
                             aria-label="Interactive preview of Stagistic Editor"
                         >
-                            <LandingMiniEditor client:load />
+                            <LandingMiniEditor client:media="not (max-width: 1000px)" />
                         </div>
                         <p class={s.desktopOnlyNotice} role="note">
                             Stagistic Editor is built for larger screens. Open it on

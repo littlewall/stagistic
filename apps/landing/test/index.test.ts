@@ -44,6 +44,7 @@ const readIcoDimensions = (relativePath: string) => {
 
 describe('landing page', () => {
     let homeHtml = '';
+    let homeCss = '';
     let syntaxHtml = '';
 
     beforeAll(() => {
@@ -63,8 +64,17 @@ describe('landing page', () => {
             new URL('../dist/index.html', import.meta.url),
             'utf8',
         );
+        const homeCssPath = homeHtml.match(
+            /<link rel="stylesheet" href="([^"]+index\.[^"]+\.css)">/,
+        )?.[1];
+
+        expect(homeCssPath).toBeDefined();
+        homeCss = readFileSync(
+            new URL(`../dist${homeCssPath}`, import.meta.url),
+            'utf8',
+        );
         syntaxHtml = readFileSync(
-            new URL('../dist/syntax/index.html', import.meta.url),
+            new URL('../dist/syntax.html', import.meta.url),
             'utf8',
         );
     });
@@ -141,6 +151,30 @@ describe('landing page', () => {
         expect(callout).toContain('aria-hidden="true"');
         expect(calloutIndex).toBeGreaterThan(-1);
         expect(editorIndex).toBeGreaterThan(calloutIndex);
+    });
+
+    it('only adds the mini editor above 1000px', () => {
+        const miniEditorIslandMarkup = homeHtml.match(
+            /<astro-island\b[^>]+component-url="[^"]+LandingMiniEditor[^"]+"[\s\S]*?<\/astro-island>/,
+        )?.[0] ?? '';
+        const miniEditorIsland = miniEditorIslandMarkup.match(
+            /<astro-island\b[^>]*>/,
+        )?.[0] ?? '';
+
+        expect(miniEditorIsland).toContain('client="media"');
+        expect(miniEditorIsland).toContain(
+            '&quot;value&quot;:&quot;not (max-width: 1000px)&quot;',
+        );
+        expect(homeCss).toContain('@media (width<=1000px)');
+        expect(homeCss).toMatch(
+            /@media \(width<=1000px\)\{[^@]*\._heroScript_[^{]+\{display:none}/,
+        );
+    });
+
+    it('uses the full hero width when the mini editor is hidden', () => {
+        expect(homeCss).toMatch(
+            /@media \(width<=1000px\)\{\._heroInner_[^{]+\{grid-template-columns:minmax\(0,1fr\);gap:0}\._heroContent_[^{]+\{width:100%;max-width:none}/,
+        );
     });
 
     it('promises every Editor feature will remain free', () => {

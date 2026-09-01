@@ -719,7 +719,21 @@
     }
 }
 
-@media (max-width: 999px) {
+@media (max-width: 1000px) {
+    .heroInner {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+
+    .heroContent {
+        width: 100%;
+        max-width: none;
+    }
+
+    .heroScript {
+        display: none;
+    }
+
     .tryEditorCallout,
     .scriptExcerpt,
     .heroCtas .btnPrimary,
