@@ -1,9 +1,9 @@
 import {
-    Button,
     MenuTrigger,
     Popover,
 } from 'react-aria-components';
 
+import {Button} from '../../atoms/Button';
 import {Tooltip} from '../../atoms/Tooltip';
 import {AppearanceIcon} from '../../icons/ui';
 import {type AppThemeMode} from '../../theme';
@@ -45,7 +45,11 @@ export const AccountMenu = ({
               * control anywhere).
               */}
             <Tooltip label="Appearance" placement="bottom">
-                <Button className={styles.iconButton} aria-label="Appearance">
+                <Button
+                    variant="ghost"
+                    size="icon"
+                    aria-label="Appearance"
+                >
                     <AppearanceIcon className={styles.icon} aria-hidden="true" />
                 </Button>
             </Tooltip>

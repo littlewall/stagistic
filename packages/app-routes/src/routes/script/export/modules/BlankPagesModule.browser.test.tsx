@@ -60,7 +60,7 @@ afterEach(() => {
 });
 
 describe('BlankPagesModule', () => {
-    it('keeps enabled blank-page counts between one and ten', async () => {
+    it('selects no blank pages or a count between one and ten', async () => {
         const host = document.createElement('div');
         const root = createRoot(host);
         const Harness = ({
@@ -90,26 +90,55 @@ describe('BlankPagesModule', () => {
         root.render(<Harness hasAutomaticBalancingBlank />);
         mountedRoots.push(root);
 
-        const pageSwitch = await waitFor(() => document.querySelector<HTMLInputElement>('input[role="switch"]'));
-        const pageSwitchLabel = await waitFor(() => Array
-            .from(document.querySelectorAll<HTMLLabelElement>('label'))
-            .find(element => element.textContent?.trim() === 'Blank pages') ?? null);
+        const select = await waitFor(() => document.querySelector<HTMLButtonElement>('button[aria-label="Blank page count"]'));
 
-        expect(pageSwitch.checked).toBe(false);
+        expect(select.textContent?.trim()).toBe('none');
+        expect(document.querySelector('input[role="switch"]')).toBeNull();
         expect(document.querySelector('input[type="number"]')).toBeNull();
 
-        await userEvent.click(pageSwitchLabel);
+        await userEvent.click(select);
 
-        const input = await waitFor(() => document.querySelector<HTMLInputElement>('input[type="number"]'));
-        const countLabel = await waitFor(() => Array
-            .from(document.querySelectorAll<HTMLLabelElement>('label'))
-            .find(element => element.textContent?.trim() === 'Count') ?? null);
+        const options = await waitFor(() => document.querySelector<HTMLElement>('[role="listbox"]'));
+        const optionLabels = Array
+            .from(options.querySelectorAll<HTMLElement>('[role="option"]'))
+            .map(option => option.textContent?.trim());
+
+        expect(optionLabels).toEqual([
+            'none',
+            '1',
+            '2',
+            '3',
+            '4',
+            '5',
+            '6',
+            '7',
+            '8',
+            '9',
+            '10',
+        ]);
+
+        const tenOption = Array
+            .from(options.querySelectorAll<HTMLButtonElement>('[role="option"]'))
+            .find(option => option.textContent?.trim() === '10');
+
+        expect(tenOption).not.toBeUndefined();
+
+        if (!tenOption) {
+            return;
+        }
+
+        await userEvent.click(tenOption);
+
+        await waitFor(() => document.querySelector<HTMLOutputElement>('[data-testid="value"]')?.textContent?.includes('"count":10')
+            ? document.querySelector<HTMLOutputElement>('[data-testid="value"]')
+            : null);
+
         const balancingIndicator = await waitFor(() => document.querySelector<HTMLButtonElement>('[data-testid="balancing-blank-indicator"]'));
 
-        expect(input.value).toBe('1');
-        expect(input.getBoundingClientRect().left - countLabel.getBoundingClientRect().right).toBeLessThan(16);
+        expect(select.textContent?.trim()).toBe('10');
+        expect(document.querySelector('[data-testid="value"]')?.textContent).toContain('"enabled":true');
         expect(balancingIndicator.textContent).toBe('+1');
-        expect(balancingIndicator.getBoundingClientRect().left - input.getBoundingClientRect().right).toBeLessThan(16);
+        expect(balancingIndicator.getBoundingClientRect().left - select.getBoundingClientRect().right).toBeLessThan(16);
 
         await userEvent.hover(balancingIndicator);
 
@@ -119,21 +148,72 @@ describe('BlankPagesModule', () => {
 
         expect(tooltip.textContent).toContain('An additional blank page');
 
-        await userEvent.click(input);
-        await userEvent.keyboard('{ArrowDown}');
+        await userEvent.click(select);
 
-        expect(input.value).toBe('1');
+        const noneOption = await waitFor(() => Array
+            .from(document.querySelectorAll<HTMLButtonElement>('[role="option"]'))
+            .find(option => option.textContent?.trim() === 'none') ?? null);
 
-        await userEvent.keyboard(
-            Array.from({length: 12}, () => '{ArrowUp}').join(''),
-        );
+        await userEvent.click(noneOption);
 
-        expect(input.value).toBe('10');
+        await waitFor(() => document.querySelector<HTMLOutputElement>('[data-testid="value"]')?.textContent?.includes('"enabled":false')
+            ? document.querySelector<HTMLOutputElement>('[data-testid="value"]')
+            : null);
+
+        expect(select.textContent?.trim()).toBe('none');
+        expect(document.querySelector('[data-testid="value"]')?.textContent).toContain('"count":10');
+        await waitForMissing(() => document.querySelector('[data-testid="balancing-blank-indicator"]'));
 
         root.render(<Harness hasAutomaticBalancingBlank={false} />);
 
         await waitForMissing(() => document.querySelector('[data-testid="balancing-blank-indicator"]'));
 
         expect(document.querySelector('[data-testid="balancing-blank-indicator"]')).toBeNull();
+    });
+
+    it('normalizes an invalid enabled count before displaying or retaining it', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+        const Harness = () => {
+            const [value, setValue] = useState<BlankPagesValue>({
+                betweenInitialPagesAndScript: {
+                    enabled: true,
+                    count: 20,
+                },
+            });
+
+            return (
+                <>
+                    <BlankPagesModule
+                        value={value}
+                        hasAutomaticBalancingBlank={false}
+                        onChange={setValue}
+                    />
+                    <output data-testid="value">{JSON.stringify(value)}</output>
+                </>
+            );
+        };
+
+        document.body.appendChild(host);
+        root.render(<Harness />);
+        mountedRoots.push(root);
+
+        const select = await waitFor(() => document.querySelector<HTMLButtonElement>('button[aria-label="Blank page count"]'));
+
+        expect(select.textContent?.trim()).toBe('10');
+
+        await userEvent.click(select);
+
+        const noneOption = await waitFor(() => Array
+            .from(document.querySelectorAll<HTMLButtonElement>('[role="option"]'))
+            .find(option => option.textContent?.trim() === 'none') ?? null);
+
+        await userEvent.click(noneOption);
+
+        await waitFor(() => document.querySelector<HTMLOutputElement>('[data-testid="value"]')?.textContent?.includes('"enabled":false')
+            ? document.querySelector<HTMLOutputElement>('[data-testid="value"]')
+            : null);
+
+        expect(document.querySelector('[data-testid="value"]')?.textContent).toContain('"count":10');
     });
 });

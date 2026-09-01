@@ -13,6 +13,7 @@ export interface PageBreakValue {
 export type CharacterInitialPageOrder = 'name' | 'first-appearance';
 
 export interface CharactersAndPlacesValue {
+    /** Controls character content; the shared initial page exists when this or showPlaces is true. */
     enabled: boolean,
     showPlaces: boolean,
     showCharacterOutlines: boolean,
@@ -35,6 +36,7 @@ export interface BlankPagesValue {
 }
 
 export interface BasicExportConfig {
+    showNotes: boolean,
     characterFilter: CharacterFilterValue,
     pageBreaks: PageBreakValue,
     initialPages: InitialPagesValue,
@@ -42,6 +44,7 @@ export interface BasicExportConfig {
 }
 
 export const BASIC_DEFAULTS: BasicExportConfig = {
+    showNotes: true,
     characterFilter: {
         mode: 'all', characterIds: [], preserveFullScriptPagination: true,
     },

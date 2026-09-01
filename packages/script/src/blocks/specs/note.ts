@@ -14,7 +14,7 @@ export const noteSpec = {
         textAlign: 'left',
         casing: 'normal',
         isBold: false,
-        isItalic: false,
+        isItalic: true,
         isUnderline: false,
     },
 } as const satisfies BlockSpec;

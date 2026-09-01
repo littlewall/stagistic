@@ -28,10 +28,13 @@ export interface CommitContext {
 }
 
 export {
+    buildConvertSceneHeadingContent,
     buildDeleteActContent,
+    buildDeleteSceneHeadingContent,
     buildInsertActContent,
     insertActBlockBeforeId,
     removeActBlockById,
+    removeSceneBlockById,
     setPlainTextContent,
 } from './blockMutations';
 

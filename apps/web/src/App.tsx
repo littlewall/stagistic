@@ -10,7 +10,9 @@ import {
     ScriptWorkspaceRoute,
 } from '@stagistic/app-routes';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
-import {useEffect, useState} from 'react';
+import {
+    lazy, Suspense, useEffect, useState,
+} from 'react';
 import {
     Navigate,
     Route,
@@ -21,6 +23,16 @@ import {prepareLocalDbWithProgress} from './db';
 import {PublicPreviewGate} from './publicPreview/PublicPreviewGate';
 import type {ScriptRepository} from './repo';
 import {UnsupportedScreenGate} from './smallScreen/UnsupportedScreenGate';
+
+const DevUiRoute = import.meta.env.DEV
+    ? lazy(() => import('./dev/DevUiRoute').then(module => ({default: module.DevUiRoute})))
+    : null;
+const EditorBlocksDemoRoute = import.meta.env.DEV
+    ? lazy(() => import('./dev/EditorBlocksDemoRoute').then(module => ({default: module.EditorBlocksDemoRoute})))
+    : null;
+const ActsAndScenesDemoRoute = import.meta.env.DEV
+    ? lazy(() => import('./dev/ActsAndScenesDemoRoute').then(module => ({default: module.ActsAndScenesDemoRoute})))
+    : null;
 
 const BootedApp = () => {
     const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
@@ -90,6 +102,36 @@ const BootedApp = () => {
                             <Route path="export" element={<ScriptExportRoute />} />
                         </Route>
                         <Route path="/script/:scriptId/settings" element={<ScriptSettingsRoute />} />
+                        {DevUiRoute ? (
+                            <Route
+                                path="/dev/ui"
+                                element={(
+                                    <Suspense fallback={null}>
+                                        <DevUiRoute />
+                                    </Suspense>
+                                )}
+                            />
+                        ) : null}
+                        {EditorBlocksDemoRoute ? (
+                            <Route
+                                path="/dev/demos/editor-blocks"
+                                element={(
+                                    <Suspense fallback={null}>
+                                        <EditorBlocksDemoRoute />
+                                    </Suspense>
+                                )}
+                            />
+                        ) : null}
+                        {ActsAndScenesDemoRoute ? (
+                            <Route
+                                path="/dev/demos/acts-and-scenes"
+                                element={(
+                                    <Suspense fallback={null}>
+                                        <ActsAndScenesDemoRoute />
+                                    </Suspense>
+                                )}
+                            />
+                        ) : null}
                         <Route path="*" element={<Navigate to="/" replace />} />
                     </Routes>
                 </GlobalModalsProvider>

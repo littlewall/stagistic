@@ -1,7 +1,7 @@
 .select {
-    --select-button-height: var(--control-height-sm);
-    --select-button-font-weight: var(--font-weight-semibold);
-    --select-button-radius: var(--radius-md);
+    --control-trigger-height: var(--control-height-sm);
+    --control-trigger-font-weight: var(--font-weight-semibold);
+    --control-trigger-radius: var(--radius-md);
 
     position: relative;
     flex: 0 1 auto;
@@ -12,44 +12,39 @@
 .button {
     cursor: pointer;
     display: inline-flex;
-    gap: var(--select-button-gap);
+    gap: var(--control-trigger-gap);
     align-items: center;
     max-width: 100%;
     height: var(--control-height-xs);
-    padding: 0 var(--select-button-padding-inline);
-    font-family: var(--font-family-mono);
-    font-size: var(--select-button-font-size);
+    padding: 0 var(--control-trigger-padding-inline);
+    font-size: var(--control-trigger-font-size);
     font-weight: var(--font-weight-semibold);
-    color: var(--select-button-color);
+    color: var(--control-trigger-color);
     text-align: left;
     text-transform: uppercase;
-    letter-spacing: var(--letter-spacing-wide);
+    letter-spacing: var(--letter-spacing-sm);
     background: transparent;
     border: 1px solid transparent;
-    border-radius: var(--select-button-radius);
+    border-radius: var(--control-trigger-radius);
     transition: background var(--duration-normal) var(--ease-standard), border-radius var(--duration-normal) var(--ease-standard);
 
     &:hover {
-        background: var(--select-button-hover-bg);
+        background: var(--control-trigger-hover-bg);
     }
 
     &[aria-expanded = 'true'] {
-        background: var(--select-menu-bg);
+        background: var(--menu-bg);
         border-color: var(--color-border);
         border-bottom-color: transparent;
         border-bottom-right-radius: 0;
         border-bottom-left-radius: 0;
-
-        &:hover {
-            background: var(--select-menu-hover-bg);
-        }
     }
 }
 
 .select[data-menu-placement = 'above'] .button[aria-expanded = 'true'] {
     border-top-color: transparent;
     border-bottom-color: var(--color-border);
-    border-radius: 0 0 var(--select-button-radius) var(--select-button-radius);
+    border-radius: 0 0 var(--control-trigger-radius) var(--control-trigger-radius);
 }
 
 .label {
@@ -60,8 +55,8 @@
 }
 
 .chevron {
-    width: var(--select-chevron-size);
-    height: var(--select-chevron-size);
+    width: var(--control-chevron-size);
+    height: var(--control-chevron-size);
     fill: none;
     stroke: currentcolor;
     stroke-linecap: round;
@@ -71,7 +66,7 @@
 
 .menu {
     position: fixed;
-    z-index: var(--select-menu-z-index);
+    z-index: var(--menu-z-index);
     top: anchor(bottom);
     right: auto;
     left: anchor(left);
@@ -80,14 +75,14 @@
     display: grid;
     box-sizing: border-box;
     min-width: anchor-size(width);
-    max-height: min(var(--select-menu-max-height), var(--anchored-menu-max-height, var(--select-menu-max-height)));
+    max-height: min(var(--menu-max-height), var(--anchored-menu-max-height, var(--menu-max-height)));
     margin-top: -1px;
-    padding: var(--select-menu-padding);
-    background: var(--select-menu-bg);
-    border: var(--select-menu-border);
+    padding: var(--menu-padding);
+    background: var(--menu-bg);
+    border: var(--menu-border);
     border-top: 0;
-    border-radius: 0 0 var(--select-menu-radius) var(--select-menu-radius);
-    box-shadow: var(--select-menu-shadow);
+    border-radius: 0 0 var(--menu-radius) var(--menu-radius);
+    box-shadow: var(--menu-shadow);
 
     &.right {
         right: anchor(right);
@@ -99,38 +94,38 @@
         bottom: anchor(top);
         margin-top: 0;
         margin-bottom: -1px;
-        border-top: var(--select-menu-border);
+        border-top: var(--menu-border);
         border-bottom: 0;
-        border-radius: var(--select-menu-radius) var(--select-menu-radius) 0 0;
+        border-radius: var(--menu-radius) var(--menu-radius) 0 0;
     }
 }
 
 .item {
     cursor: pointer;
     display: flex;
-    gap: var(--select-menu-item-gap);
+    gap: var(--menu-item-gap);
     align-items: center;
     width: 100%;
-    min-height: var(--select-menu-item-min-height);
-    padding: var(--select-menu-item-padding);
-    font-size: var(--select-menu-item-font-size);
-    color: var(--select-menu-item-color);
+    min-height: var(--menu-item-min-height);
+    padding: var(--menu-item-padding);
+    font-size: var(--menu-item-font-size);
+    color: var(--menu-item-color);
     text-align: left;
     background: transparent;
     border: none;
-    border-radius: var(--select-menu-item-radius);
+    border-radius: var(--menu-item-radius);
     transition: background var(--duration-normal) var(--ease-standard);
 
     &:hover {
-        background: var(--select-menu-item-hover-bg);
+        background: var(--menu-item-hover-bg);
     }
 
     &.active {
-        font-weight: var(--select-menu-item-active-font-weight);
-        background: var(--select-menu-item-active-bg);
+        font-weight: var(--menu-item-active-font-weight);
+        background: var(--menu-item-active-bg);
 
         &:hover {
-            background: var(--select-menu-item-active-bg);
+            background: var(--menu-item-active-bg);
         }
     }
 }

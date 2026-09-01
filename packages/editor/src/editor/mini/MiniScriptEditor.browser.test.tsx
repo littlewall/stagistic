@@ -73,6 +73,21 @@ const createAllBlockTypesDocument = (): ScriptDocument => {
     };
 };
 
+const createEmptyNoteDocument = (): ScriptDocument => {
+    const baseDocument = createMiniEditorTestDocument();
+
+    return {
+        ...baseDocument,
+        content: [
+            ...(baseDocument.content ?? []),
+            {
+                type: 'note',
+                attrs: {id: 'mini-empty-note'},
+            },
+        ],
+    };
+};
+
 const expectBlockRoleDescriptions = (root: ParentNode) => {
     const expectedDescriptions = [
         ['act', 'ACT'],
@@ -167,6 +182,42 @@ describe('MiniScriptEditor', () => {
         );
 
         expectBlockRoleDescriptions(editor);
+    });
+
+    it('renders note syntax delimiters outside italic editable content', async () => {
+        const host = renderMiniEditor(
+            undefined,
+            undefined,
+            createAllBlockTypesDocument(),
+        );
+        const note = await waitForElement<HTMLElement>(
+            host,
+            'p[blocktype="note"]',
+        );
+
+        expect(getComputedStyle(note).fontStyle).toBe('italic');
+        expect(getComputedStyle(note, '::before').content).toBe('"[["');
+        expect(getComputedStyle(note, '::after').content).toBe('"]]"');
+        expect(note.textContent).toBe('Revision note');
+    });
+
+    it('keeps empty note delimiters on one line', async () => {
+        const host = renderMiniEditor(
+            undefined,
+            undefined,
+            createEmptyNoteDocument(),
+        );
+        const note = await waitForElement<HTMLElement>(
+            host,
+            'p[blocktype="note"]',
+        );
+
+        const noteStyle = getComputedStyle(note);
+        const closingDelimiterStyle = getComputedStyle(note, '::after');
+
+        expect(Number.parseFloat(noteStyle.paddingLeft)).toBeGreaterThan(0);
+        expect(Number.parseFloat(closingDelimiterStyle.left))
+            .toBeCloseTo(Number.parseFloat(noteStyle.paddingLeft));
     });
 
     it('serializes every script block role description', () => {

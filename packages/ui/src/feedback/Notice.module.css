@@ -1,0 +1,23 @@
+.notice {
+    font-size: var(--font-size-sm);
+}
+
+.warning {
+    display: grid;
+    gap: var(--space-xs);
+    padding-left: var(--space-sm);
+    color: var(--color-text-muted);
+    border-left: 2px solid var(--color-status-warning);
+}
+
+.error {
+    color: var(--color-status-danger);
+}
+
+.empty {
+    font-size: var(--font-size-md);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+    text-align: center;
+    text-wrap: pretty;
+}

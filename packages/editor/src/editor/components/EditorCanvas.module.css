@@ -48,7 +48,7 @@
         box-shadow: none;
     }
 
-    & :global([data-placeholder]::before) {
+    & :global(.ProseMirror > [data-placeholder]::before) {
         pointer-events: none;
         content: attr(data-placeholder);
         float: left;

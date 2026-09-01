@@ -1,8 +1,8 @@
 .deleteButton {
     flex: 0 0 auto;
     box-sizing: border-box;
-    width: var(--select-button-height);
-    height: var(--select-button-height);
+    width: var(--control-trigger-height);
+    height: var(--control-trigger-height);
     padding: 0;
     color: color-mix(in oklch, var(--color-status-danger) 70%, var(--color-text));
 

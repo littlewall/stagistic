@@ -61,7 +61,13 @@ const createEnterEvent = (shiftKey = false) => {
     } as unknown as KeyboardEvent & {wasPrevented: () => boolean};
 };
 
-const createEditor = (blockType: BlockNodeType, text = '', cursorOffset = 0, blockId = 'block-1') => {
+const createEditor = (
+    blockType: BlockNodeType,
+    text = '',
+    cursorOffset = 0,
+    blockId = 'block-1',
+    onRequestConvertScene: (blockId: string, blockType: BlockNodeType) => void = () => {},
+) => {
     const block = schema.node(blockType, {blockType, id: blockId}, text ? [schema.text(text)] : undefined);
     const doc = schema.node('doc', null, [block]);
     let state = EditorState.create({
@@ -82,6 +88,7 @@ const createEditor = (blockType: BlockNodeType, text = '', cursorOffset = 0, blo
         },
         commands: {
             focus: () => true,
+            requestConvertScene: onRequestConvertScene,
             deleteSelection: () => {
                 state = state.apply(state.tr.deleteSelection());
 
@@ -231,6 +238,17 @@ describe('handleEnter', () => {
             expect(getBlockTypes(editor)).toEqual([blockType, 'aside']);
         },
     );
+
+    it('does not request scene conversion while creating the configured next block', () => {
+        const conversionRequests: Array<{blockId: string, blockType: BlockNodeType}> = [];
+        const editor = createEditor('dialogue', 'Hello', 5, 'dialogue-1', (blockId, blockType) => {
+            conversionRequests.push({blockId, blockType});
+        });
+
+        expect(handleEnter(editor, createEnterEvent(), {dialogue: 'aside'})).toBe(true);
+        expect(conversionRequests).toEqual([]);
+        expect(getBlockTypes(editor)).toEqual(['dialogue', 'aside']);
+    });
 
     it('keeps producing lyrics when Enter is pressed again at the start of a freshly split lyrics block', () => {
         // Split "Sing|this song" mid-text, which parks the caret at the start

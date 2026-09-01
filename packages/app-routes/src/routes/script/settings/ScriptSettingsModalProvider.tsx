@@ -34,6 +34,7 @@ import {useScriptEditorSettingsModal} from '../useScriptEditorSettingsModal';
 import {useScriptTitleDraft} from '../useScriptTitleDraft';
 import {useTitlePageDraft} from '../useTitlePageDraft';
 import {deleteAttributeManagerMusic} from './deleteAttributeManagerMusic';
+import {deleteAttributeManagerScene} from './deleteAttributeManagerScene';
 import {DraftSaveError} from './DraftSaveError';
 import {ScriptAttributeManagerModal} from './ScriptAttributeManagerModal';
 import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
@@ -209,6 +210,16 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         applyDocumentChange,
         deleteMusic: musicState.deleteMusic,
     });
+    /*
+     * Scene items are built in document order, so the first entry is the
+     * document-first scene heading — the one that can never be deleted.
+     */
+    const firstSceneHeadingBlockId = attributeManagerScenes[0]?.id ?? null;
+    const handleDeleteScene = (sceneHeadingBlockId: string) => deleteAttributeManagerScene({
+        document: getEditorValue(),
+        sceneHeadingBlockId,
+        applyDocumentChange,
+    });
 
     const contextValue = useMemo<ScriptSettingsModalContextValue>(() => ({
         resolvedScriptSettings,
@@ -302,6 +313,8 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     groupItems={attributeManagerGroups}
                     characterColorSaturation={resolvedScriptSettings.visual.characterColorSaturation}
                     sceneItems={attributeManagerScenes}
+                    firstSceneHeadingBlockId={firstSceneHeadingBlockId}
+                    onDeleteScene={handleDeleteScene}
                     placeState={placeState}
                     musicState={musicState}
                     musicItems={attributeManagerMusic}

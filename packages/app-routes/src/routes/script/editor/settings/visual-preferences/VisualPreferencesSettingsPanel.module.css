@@ -10,7 +10,7 @@
 }
 
 .selectCompact {
-    --select-button-height: calc(30px * var(--size-scale));
+    --control-trigger-height: calc(30px * var(--size-scale));
 
     width: max-content;
 }

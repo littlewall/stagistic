@@ -34,7 +34,7 @@ const createBlockSpec = (blockType: BlockNodeType) => ({
 
 const schema = new Schema({
     nodes: {
-        doc: {content: '(character | stageDirection | dialogue | lyrics | aside | act)+'},
+        doc: {content: '(character | stageDirection | dialogue | lyrics | aside | note | act)+'},
         text: {group: 'inline'},
         [MUSIC_START_NODE_NAME]: {
             group: 'inline',
@@ -50,6 +50,7 @@ const schema = new Schema({
         dialogue: createBlockSpec('dialogue'),
         lyrics: createBlockSpec('lyrics'),
         aside: createBlockSpec('aside'),
+        note: createBlockSpec('note'),
         act: createBlockSpec('act'),
     },
     marks: {
@@ -107,9 +108,13 @@ const createEditor = (
 };
 
 const createMultiBlockEditor = (
-    blocks: Array<{blockType: BlockNodeType, text: string, id: string}>,
+    blocks: Array<{
+        blockType: BlockNodeType, text: string, id: string,
+    }>,
 ) => {
-    const nodes = blocks.map(({blockType, text, id}) => schema.node(
+    const nodes = blocks.map(({
+        blockType, text, id,
+    }) => schema.node(
         blockType,
         {
             blockType,
@@ -163,6 +168,14 @@ const createMultiBlockEditor = (
 };
 
 describe('updateBlockType', () => {
+    it('strips one complete outer note delimiter pair when converting to note', () => {
+        const {editor, getBlock} = createEditor('stageDirection', '[[ rewrite this ]]');
+
+        expect(updateBlockType(editor, 'note')).toBe(true);
+        expect(getBlock()?.type.name).toBe('note');
+        expect(getBlock()?.textContent).toBe(' rewrite this ');
+    });
+
     it('normalizes a legacy + delimiter to / when converting a block to a character music', () => {
         const {editor, getBlock} = createEditor('stageDirection', 'SALLY+ISABELLA');
 
@@ -262,6 +275,35 @@ describe('setBlockTypeWithSelection converting to aside', () => {
     });
 });
 
+describe('setBlockTypeWithSelection converting to note', () => {
+    it('leaves incomplete note delimiters in editable content', () => {
+        const {editor, getBlock} = createEditor('dialogue', '[[ rewrite this');
+        const block = getActiveScriptBlockFromState(editor.state);
+
+        if (!block) {
+            throw new Error('Expected an active dialogue block');
+        }
+
+        expect(setBlockTypeWithSelection(editor, block, 'note')).toBe(true);
+        expect(getBlock()?.textContent).toBe('[[ rewrite this');
+    });
+
+    it('maps the cursor past a removed two-character opening delimiter', () => {
+        const {editor} = createEditor('dialogue', '[[ rewrite this ]]');
+        const pos = 1 + 8;
+        const block = getActiveScriptBlockFromState(editor.state);
+
+        if (!block) {
+            throw new Error('Expected an active dialogue block');
+        }
+
+        editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, pos)));
+
+        expect(setBlockTypeWithSelection(editor, block, 'note')).toBe(true);
+        expect(editor.state.selection.from).toBe(pos - 2);
+    });
+});
+
 describe('single-block type change restores cursor position', () => {
     it('keeps a collapsed cursor at the same offset after updateBlockType', () => {
         const {editor} = createEditor('dialogue', 'Hello there');
@@ -315,8 +357,11 @@ describe('single-block type change restores cursor position', () => {
 describe('updateBlockTypeForSelection', () => {
     it('changes the actual node type (not just the blockType attribute) for every block in the selection', () => {
         const {editor, getBlocks} = createMultiBlockEditor([
-            {blockType: 'dialogue', text: 'Hello there', id: 'block-1'},
-            {blockType: 'dialogue', text: 'General Kenobi', id: 'block-2'},
+            {
+                blockType: 'dialogue', text: 'Hello there', id: 'block-1',
+            }, {
+                blockType: 'dialogue', text: 'General Kenobi', id: 'block-2',
+            },
         ]);
 
         expect(updateBlockTypeForSelection(editor, 'lyrics')).toBe(true);
@@ -324,15 +369,21 @@ describe('updateBlockTypeForSelection', () => {
         const blocks = getBlocks();
 
         expect(blocks.map(block => block.type.name)).toEqual(['lyrics', 'lyrics']);
-        expect(blocks.map(block => block.attrs.blockType)).toEqual(['lyrics', 'lyrics']);
+        expect(blocks.map(block => block.attrs.blockType as BlockNodeType)).toEqual(['lyrics', 'lyrics']);
         expect(blocks.map(block => block.textContent)).toEqual(['Hello there', 'General Kenobi']);
     });
 
     it('dispatches a single transaction so the bulk change is one undo step', () => {
         const {editor, getDispatchCount} = createMultiBlockEditor([
-            {blockType: 'dialogue', text: 'Hello there', id: 'block-1'},
-            {blockType: 'dialogue', text: 'General Kenobi', id: 'block-2'},
-            {blockType: 'dialogue', text: 'You are a bold one', id: 'block-3'},
+            {
+                blockType: 'dialogue', text: 'Hello there', id: 'block-1',
+            },
+            {
+                blockType: 'dialogue', text: 'General Kenobi', id: 'block-2',
+            },
+            {
+                blockType: 'dialogue', text: 'You are a bold one', id: 'block-3',
+            },
         ]);
 
         updateBlockTypeForSelection(editor, 'lyrics');
@@ -342,8 +393,11 @@ describe('updateBlockTypeForSelection', () => {
 
     it('converts mixed dialogue and stage-direction blocks and resets characterRefs from a former stage direction', () => {
         const {editor, getBlocks} = createMultiBlockEditor([
-            {blockType: 'dialogue', text: 'Hello there', id: 'block-1'},
-            {blockType: 'stageDirection', text: '\tGeneral Kenobi', id: 'block-2'},
+            {
+                blockType: 'dialogue', text: 'Hello there', id: 'block-1',
+            }, {
+                blockType: 'stageDirection', text: '\tGeneral Kenobi', id: 'block-2',
+            },
         ]);
 
         expect(updateBlockTypeForSelection(editor, 'lyrics')).toBe(true);
@@ -357,8 +411,11 @@ describe('updateBlockTypeForSelection', () => {
 
     it('leaves blocks whose type is not eligible for bulk change (act) untouched', () => {
         const {editor, getBlocks} = createMultiBlockEditor([
-            {blockType: 'act', text: 'ACT ONE', id: 'block-1'},
-            {blockType: 'dialogue', text: 'Hello there', id: 'block-2'},
+            {
+                blockType: 'act', text: 'ACT ONE', id: 'block-1',
+            }, {
+                blockType: 'dialogue', text: 'Hello there', id: 'block-2',
+            },
         ]);
 
         expect(updateBlockTypeForSelection(editor, 'lyrics')).toBe(true);
@@ -370,8 +427,11 @@ describe('updateBlockTypeForSelection', () => {
 
     it('strips wrapping parens from each block when bulk-converting to aside', () => {
         const {editor, getBlocks} = createMultiBlockEditor([
-            {blockType: 'dialogue', text: '(quietly)', id: 'block-1'},
-            {blockType: 'lyrics', text: 'La la la', id: 'block-2'},
+            {
+                blockType: 'dialogue', text: '(quietly)', id: 'block-1',
+            }, {
+                blockType: 'lyrics', text: 'La la la', id: 'block-2',
+            },
         ]);
 
         expect(updateBlockTypeForSelection(editor, 'aside')).toBe(true);
@@ -382,9 +442,30 @@ describe('updateBlockTypeForSelection', () => {
         expect(blocks.map(block => block.textContent)).toEqual(['quietly', 'La la la']);
     });
 
+    it('strips wrapping note delimiters from each block when bulk-converting to note', () => {
+        const {editor, getBlocks} = createMultiBlockEditor([
+            {
+                blockType: 'dialogue', text: '[[ first ]]', id: 'block-1',
+            }, {
+                blockType: 'lyrics', text: '[[ second ]]', id: 'block-2',
+            },
+        ]);
+
+        expect(updateBlockTypeForSelection(editor, 'note')).toBe(true);
+
+        const blocks = getBlocks();
+
+        expect(blocks.map(block => block.type.name)).toEqual(['note', 'note']);
+        expect(blocks.map(block => block.textContent)).toEqual([' first ', ' second ']);
+    });
+
     it('does nothing and returns false when no block in the selection can change', () => {
-        const {editor, getBlocks, getDispatchCount} = createMultiBlockEditor([
-            {blockType: 'lyrics', text: 'Hello there', id: 'block-1'},
+        const {
+            editor, getBlocks, getDispatchCount,
+        } = createMultiBlockEditor([
+            {
+                blockType: 'lyrics', text: 'Hello there', id: 'block-1',
+            },
         ]);
 
         expect(updateBlockTypeForSelection(editor, 'lyrics')).toBe(false);

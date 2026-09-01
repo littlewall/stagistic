@@ -1,8 +1,7 @@
 ---
 import {clsx} from 'clsx';
 import LandingMiniEditor from '../components/mini-editor/LandingMiniEditor';
-import SiteIcons from '../components/SiteIcons.astro';
-import '../styles/global.css';
+import Layout from '../layouts/Layout.astro';
 import s from './index.module.css';
 
 const features = [
@@ -10,18 +9,18 @@ const features = [
         label: 'Theatre-native writing',
         description:
             'Dedicated blocks for acts, scene headings, character cues, dialogue, stage directions, lyrics, and notes. Every part of the script keeps its own formatting and behaviour.',
-        imageSrc: '/features/theatre-writing.png',
-        imageAlt: 'A formatted theatre script in Stagistic Editor',
-        imageFit: 'contain',
+        videoSrc: '/features/theatre-writing.mp4',
+        videoTitle: 'A formatted theatre script in Stagistic Editor',
+        videoFit: 'contain',
         shape: 'one',
     },
     {
         label: 'Acts and scenes that stay connected',
         description:
             'A live outline keeps the structure visible as you write. Jump directly to any scene, reorder scenes, and group them into acts instead of forcing your play into a screenplay-shaped structure.',
-        imageSrc: '/features/acts-and-scenes.png',
-        imageAlt: 'The scene outline beside a script in Stagistic Editor',
-        imageFit: 'contain',
+        videoSrc: '/features/acts-and-scenes.mp4',
+        videoTitle: 'The scene outline beside a script in Stagistic Editor',
+        videoFit: 'contain',
         shape: 'two',
     },
     {
@@ -30,7 +29,7 @@ const features = [
             'Build a character catalogue directly from your script. Assign colours, highlight appearances, group characters, rename characters, tag them inside stage directions, and write dialogue for two or more characters speaking together.',
         imageSrc: '/features/characters.png',
         imageAlt: 'The character catalogue in Stagistic Editor',
-    imageFit: 'contain',
+        imageFit: 'contain',
         shape: 'three',
     },
     {
@@ -102,46 +101,12 @@ const faqs = [
 ];
 ---
 
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <SiteIcons />
-        <title>Stagistic Editor - Script editor built for theatre</title>
-        <meta
-            name="description"
-            content="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
-        />
-        <meta property="og:image" content="/opengraph.jpg" />
-        <link
-            rel="canonical"
-            href={`https://${Astro.site?.hostname}`}
-        />
-        <script is:inline>document.documentElement.classList.add('js');</script>
-    </head>
-    <body>
-        <div class={s.page}>
-
-            <!-- Nav -->
-            <header class={s.nav}>
-                <div class={s.navInner}>
-                    <div class={s.navLogo}>
-                        <img
-                            src="/assets/stagistic-brand/stagistic-mark-on-dark.svg"
-                            alt=""
-                            class={s.logoMark}
-                        />
-                        <span class={s.logoText}>Stagistic Editor</span>
-                    </div>
-                    <nav class={s.navLinks} aria-label="Primary">
-                        <a href="#features" class={s.navLink}>Features</a>
-                        <a href="#faq" class={s.navLink}>FAQ</a>
-                    </nav>
-                    <a href="https://editor.stagistic.app" class={s.navCta}>
-                        Try editor
-                    </a>
-                </div>
-            </header>
+<Layout
+    title="Stagistic Editor - Script editor built for theatre"
+    description="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
+    canonical={`https://${Astro.site?.hostname}`}
+>
+    <div class={s.page}>
 
             <!-- Hero -->
             <section class={s.hero}>
@@ -277,17 +242,33 @@ const faqs = [
                                         data-feature-media
                                         data-shape={f.shape}
                                     >
-                                        <div class={s.featureMediaFrame}>
-                                            <img
-                                                data-feature-image
-                                                src={f.imageSrc}
-                                                alt={f.imageAlt}
-                                                class={s.featureImage}
-                                                data-fit={f.imageFit}
-                                                loading="lazy"
-                                                decoding="async"
-                                            />
-                                        </div>
+                                        { f.videoSrc ? (
+                                            <div class={s.featureMediaFrame}>
+                                                <video
+                                                    data-feature-video
+                                                    src={f.videoSrc}
+                                                    title={f.videoTitle}
+                                                    class={s.featureVideo}
+                                                    data-fit={f.videoFit}
+                                                    autoplay
+                                                    muted
+                                                    loop
+                                                    playsinline
+                                                />
+                                            </div>
+                                        ) : f.imageSrc ? (
+                                            <div class={s.featureMediaFrame}>
+                                                <img
+                                                    data-feature-image
+                                                    src={f.imageSrc}
+                                                    alt={f.imageAlt}
+                                                    class={s.featureImage}
+                                                    data-fit={f.imageFit}
+                                                    loading="lazy"
+                                                    decoding="async"
+                                                />
+                                            </div>
+                                        ) : null }
                                     </div>
                                 </article>
                             ))
@@ -371,29 +352,6 @@ const faqs = [
                 </div>
             </section>
 
-            <!-- Footer -->
-            <footer class={s.footer}>
-                <div class={s.footerInner}>
-                    <div class={s.footerLeft}>
-                        <span class={s.footerLogo}>
-                            © Stagistic • Made with 💛 in Prague
-                        </span>
-                    </div>
-                    <div class={s.footerRight}>
-                        <a href="/syntax" class={s.footerLink}>Syntax</a>
-                        <a
-                            href="https://github.com/littlewall/stagistic"
-                            class={s.footerLink}
-                        >
-                            GitHub repo
-                        </a>
-                        <a href="mailto:hello@stagistic.com" class={s.footerLink}>
-                            hello@stagistic.com
-                        </a>
-                    </div>
-                </div>
-            </footer>
-
         </div>
 
         <script>
@@ -413,5 +371,4 @@ const faqs = [
                 observer.observe(el);
             });
         </script>
-    </body>
-</html>
+</Layout>

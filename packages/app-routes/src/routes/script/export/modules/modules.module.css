@@ -1,11 +1,11 @@
-.module {
-    display: grid;
-    gap: var(--space-md);
+.countField,
+.orderField {
+    height: var(--control-trigger-height);
 }
 
 .title {
     margin: 0;
-    font-size: var(--font-size-md);
+    font-size: var(--font-size-sm);
     font-weight: var(--font-weight-medium);
     color: var(--color-text);
 }
@@ -17,22 +17,13 @@
     color: var(--color-text-muted);
 }
 
-.checkList {
-    display: grid;
-    gap: var(--space-sm);
-}
-
-.checkRow,
 .field {
     display: flex;
     gap: var(--space-sm);
     align-items: center;
+    justify-content: space-between;
     font-size: var(--font-size-sm);
     color: var(--color-text);
-}
-
-.field {
-    justify-content: space-between;
 }
 
 .field input {
@@ -41,63 +32,46 @@
 
 .countField {
     display: grid;
-    grid-template-columns: auto calc(72px * var(--size-scale)) auto;
+    grid-template-columns: minmax(0, 1fr) auto auto;
     gap: var(--space-md);
     align-items: center;
-    justify-content: start;
+    width: 100%;
     font-size: var(--font-size-sm);
-    color: var(--color-text);
+    color: var(--color-text-muted);
 }
 
-.balancingBlankIndicator {
-    cursor: help;
-    padding: 0;
-    font: inherit;
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-    background: transparent;
-    border: 0;
-    border-bottom: 1px dashed currentcolor;
-
-    &:focus-visible {
-        outline: 2px solid var(--color-focus-ring);
-        outline-offset: 2px;
-    }
+.initialPage,
+.placesInitialPage {
+    display: grid;
+    gap: var(--space-md);
 }
 
 .initialPage {
-    display: grid;
-    gap: var(--space-md);
     padding-top: var(--space-md);
     border-top: 1px solid var(--color-border);
 }
 
 .initialPageTitle {
-    font-weight: var(--font-weight-bold);
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--color-text);
 }
 
 .initialPageOptions {
+    position: relative;
     display: grid;
     gap: var(--space-lg);
     padding-left: var(--space-md);
     border-left: 1px solid var(--color-border);
-}
 
-.initialPageSection {
-    display: grid;
-    gap: var(--space-lg);
-}
-
-.sectionTitle {
-    margin: 0;
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-medium);
-    color: var(--color-text-muted);
-}
-
-.sectionOptions {
-    display: grid;
-    gap: var(--space-md);
+    &::before {
+        content: '';
+        position: absolute;
+        top: calc(-1 * var(--space-sm));
+        left: -1px;
+        height: var(--space-sm);
+        border-left: 1px solid var(--color-border);
+    }
 }
 
 .orderField {
@@ -111,10 +85,4 @@
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
     white-space: nowrap;
-}
-.preservePagination {
-    display: flex;
-    gap: .35rem;
-    align-items: center;
-    margin-top: .5rem;
 }

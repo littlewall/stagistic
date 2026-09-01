@@ -58,6 +58,7 @@ const createStableScriptNodeView = (
         class: getBlockClassName(renderedBlockType),
         [SCRIPT_BLOCK_DOM_TYPE_ATTRIBUTE]: renderedBlockType,
         'aria-roledescription': getBlockRoleDescription(renderedBlockType),
+        spellcheck: 'true',
     }) as Record<string, unknown>;
 
     Object.entries(attributes).forEach(([attribute, value]) => {

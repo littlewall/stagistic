@@ -37,6 +37,8 @@ import {
     MusicNumberingExtension,
     MusicRailExtension,
     PlaceholderExtension,
+    SceneCommandsExtension,
+    SceneGuardExtension,
     SceneNumberingExtension,
     ScriptBehaviorExtension,
 } from './tiptap/extensions';
@@ -49,6 +51,7 @@ import {
     ScriptBlockNodes,
 } from './tiptap/nodes';
 import characterTagStyles from './tiptap/scriptBlock/CharacterTagDecorations.module.css';
+import type {BlockNodeType} from './tiptap/scriptCore';
 
 type UseEditorExtensionsArgs = {
     resolvedSettings: EditorSettings,
@@ -62,6 +65,8 @@ type UseEditorExtensionsArgs = {
     onOpenMusicManager?: (musicId: string) => void,
     onMusicAssigned?: (musicId: string) => void,
     onMusicUnassigned?: (musicId: string) => void,
+    onRequestDeleteScene?: (sceneHeadingBlockId: string) => void,
+    onRequestConvertScene?: (sceneHeadingBlockId: string, targetBlockType: BlockNodeType) => void,
     enableBlockUiEvents?: boolean,
 };
 
@@ -77,6 +82,8 @@ export const useEditorExtensions = ({
     onOpenMusicManager,
     onMusicAssigned,
     onMusicUnassigned,
+    onRequestDeleteScene,
+    onRequestConvertScene,
     enableBlockUiEvents,
 }: UseEditorExtensionsArgs): Extensions => {
     const paginationExtensionRef = useRef<ReturnType<typeof createPaginationExtension> | null>(
@@ -172,6 +179,13 @@ export const useEditorExtensions = ({
         }),
         [onMusicUnassigned],
     );
+    const sceneCommandsExtension = useMemo(
+        () => SceneCommandsExtension.configure({
+            onRequestDeleteScene,
+            onRequestConvertScene,
+        }),
+        [onRequestDeleteScene, onRequestConvertScene],
+    );
     const musicStartNode = useMemo(
         () => MusicStartNode.configure({
             onMusicAssigned,
@@ -221,6 +235,8 @@ export const useEditorExtensions = ({
             MusicNumberingExtension,
             MusicRailExtension,
             PlaceholderExtension,
+            sceneCommandsExtension,
+            SceneGuardExtension,
             SceneNumberingExtension,
             emptyEnterChooserExtension,
             scriptBehaviorExtension,
@@ -242,6 +258,7 @@ export const useEditorExtensions = ({
         musicInputExtension,
         musicOutNode,
         musicStartNode,
+        sceneCommandsExtension,
         emptyEnterChooserExtension,
         editorRuntimeExtension,
         enableBlockUiEvents,

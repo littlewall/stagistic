@@ -7,10 +7,7 @@
     gap: var(--space-sm);
     align-items: center;
     justify-content: space-between;
-    height: var(--panel-head-height);
-
-    /* Every panel opens through this header, so the gap that keeps the first
-       row off the hairline belongs here rather than in each panel's own list. */
+    height: var(--sidebar-head-height);
     margin-bottom: var(--space-lg);
     padding: 0 var(--space-sm) 0 var(--space-lg);
     background: var(--layer-panel-bg);

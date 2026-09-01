@@ -84,21 +84,28 @@ const stripLeadingActionTabs = (
     return tr.delete(blockContentStart, blockContentStart + indentCount);
 };
 
+const BLOCK_DELIMITERS: Partial<Record<BlockNodeType, readonly [string, string]>> = {
+    aside: ['(', ')'],
+    note: ['[[', ']]'],
+};
+
 /**
- * An aside already renders its own wrapping parentheses via CSS (and blocks
- * literal '(' / ')' from being typed into one). A block converted to aside
- * from a type that does allow literal parens (dialogue, lyrics, ...) would
- * otherwise show doubled parens if its text happens to already be wrapped in
- * them, so strip a single leading '(' and trailing ')' pair on conversion.
+ * Aside and note blocks render their syntax delimiters via CSS. A block
+ * converted from a type that allows literal delimiters would otherwise show
+ * them twice, so remove one complete outer pair from the editable content.
  */
-const stripAsideParentheses = (
+const stripRenderedBlockDelimiters = (
     tr: Transaction,
     nextBlockType: BlockNodeType,
     blockPos: number,
 ): Transaction => {
-    if (nextBlockType !== 'aside') {
+    const delimiters = BLOCK_DELIMITERS[nextBlockType];
+
+    if (!delimiters) {
         return tr;
     }
+
+    const [opening, closing] = delimiters;
 
     const mappedPos = tr.mapping.map(blockPos);
     const node = tr.doc.nodeAt(mappedPos);
@@ -109,15 +116,17 @@ const stripAsideParentheses = (
 
     const text = node.textContent;
 
-    if (text.length < 2 || !text.startsWith('(') || !text.endsWith(')')) {
+    if (text.length < opening.length + closing.length
+        || !text.startsWith(opening)
+        || !text.endsWith(closing)) {
         return tr;
     }
 
     const contentStart = mappedPos + 1;
     const contentEnd = contentStart + node.content.size;
-    let next = tr.delete(contentEnd - 1, contentEnd);
+    let next = tr.delete(contentEnd - closing.length, contentEnd);
 
-    next = next.delete(contentStart, contentStart + 1);
+    next = next.delete(contentStart, contentStart + opening.length);
 
     return next;
 };
@@ -169,14 +178,12 @@ export const insertParenPair = (editor: Editor, from: number, to: number) => {
     focusEditor(editor);
 };
 
-export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: string) => {
-    const normalized = normalizeBlockNodeType(blockType);
-    const activeBlock = getActiveScriptBlockFromState(editor.state);
-
-    if (!activeBlock) {
-        return false;
-    }
-
+const applyBlockType = (
+    editor: Editor,
+    activeBlock: ActiveScriptBlock,
+    normalized: BlockNodeType,
+    id?: string,
+) => {
     const nodes = editor.schema.nodes as Record<string, NodeType>;
     const nodeType = resolveNodeTypeForBlockType(nodes, normalized);
 
@@ -213,13 +220,30 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
         activeBlock.node,
     );
     tr = normalizeCharacterMusicText(tr, normalized, activeBlock.pos);
-    tr = stripAsideParentheses(tr, normalized, activeBlock.pos);
+    tr = stripRenderedBlockDelimiters(tr, normalized, activeBlock.pos);
     tr = restoreBlockSelection(tr, activeBlock.pos, originalAnchor, originalHead);
     tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
     editor.view.dispatch(tr.scrollIntoView());
     focusEditor(editor);
 
     return true;
+};
+
+export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: string) => {
+    const normalized = normalizeBlockNodeType(blockType);
+    const activeBlock = getActiveScriptBlockFromState(editor.state);
+
+    if (!activeBlock) {
+        return false;
+    }
+
+    if (activeBlock.blockType === 'scene' && normalized !== 'scene') {
+        editor.commands.requestConvertScene(activeBlock.id, normalized);
+
+        return true;
+    }
+
+    return applyBlockType(editor, activeBlock, normalized, id);
 };
 
 /**
@@ -253,7 +277,17 @@ export const updateBlockTypeForSelection = (editor: Editor, blockType: BlockNode
             resolveScriptBlockNodeType(node.type.name) ?? (node.attrs.blockType as BlockNodeType),
         );
 
-        if (previousBlockType === 'act' || previousBlockType === normalized) {
+        /*
+         * Acts are structural and scenes carry projection-owned metadata whose
+         * removal is confirmation-gated (see updateBlockType/requestConvertScene),
+         * so a bulk selection convert leaves both untouched rather than silently
+         * dropping a scene's synopsis/places. Same-type blocks are already done.
+         */
+        if (
+            previousBlockType === 'act'
+            || previousBlockType === 'scene'
+            || previousBlockType === normalized
+        ) {
             return false;
         }
 
@@ -272,7 +306,7 @@ export const updateBlockTypeForSelection = (editor: Editor, blockType: BlockNode
         tr = stripLeadingActionTabs(tr, previousBlockType, normalized, mappedPos + 1, node.textContent ?? '');
         tr = normalizeFormerStageDirectionContent(tr, editor.schema, previousBlockType, normalized, pos, node);
         tr = normalizeCharacterMusicText(tr, normalized, pos);
-        tr = stripAsideParentheses(tr, normalized, pos);
+        tr = stripRenderedBlockDelimiters(tr, normalized, pos);
         didChange = true;
 
         return false;
@@ -391,6 +425,44 @@ const isAtBlockStartWithContentAhead = (editor: Editor, block: ActiveScriptBlock
     return selection.empty && selection.from === block.from && selection.from !== block.to;
 };
 
+/**
+ * A scene heading can't be split through ProseMirror's `splitBlock` + convert
+ * dance: `splitBlock` first clones the scene (two scene nodes), and the
+ * follow-up conversion of the trailing half back to `blockType` drops the scene
+ * count, which the scene guard rejects — leaving two scene headings behind
+ * (never what Enter should do to a heading). Build the split as a single
+ * transaction instead: the scene keeps whatever preceded the caret, and a fresh
+ * `blockType` block takes whatever followed it. Net scene count is unchanged, so
+ * the guard never fires.
+ */
+const splitSceneIntoTypedBlock = (
+    editor: Editor,
+    block: ActiveScriptBlock,
+    blockType: BlockNodeType,
+): boolean => {
+    const nodes = editor.schema.nodes as Record<string, NodeType>;
+    const nodeType = resolveNodeTypeForBlockType(nodes, blockType);
+
+    if (!nodeType) {
+        return false;
+    }
+
+    const {from} = editor.state.selection;
+    const trailing = editor.state.doc.slice(from, block.to);
+    const insertedNode = nodeType.create({blockType, id: createNodeId()}, trailing.content);
+
+    let tr = editor.state.tr.delete(from, block.to);
+    const insertPos = tr.mapping.map(block.pos + block.node.nodeSize);
+
+    tr = tr.insert(insertPos, insertedNode);
+    tr = tr.setSelection(TextSelection.near(tr.doc.resolve(insertPos + 1), 1));
+    tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
+    editor.view.dispatch(tr.scrollIntoView());
+    focusEditor(editor);
+
+    return true;
+};
+
 export const splitBlockWithType = (editor: Editor, blockType: BlockNodeType) => {
     const activeBlock = getActiveScriptBlockFromState(editor.state);
 
@@ -402,13 +474,28 @@ export const splitBlockWithType = (editor: Editor, blockType: BlockNodeType) => 
         return insertEmptyBlockBefore(editor, activeBlock, blockType);
     }
 
+    if (activeBlock && activeBlock.blockType === 'scene') {
+        return splitSceneIntoTypedBlock(editor, activeBlock, blockType);
+    }
+
     const didSplit = editor.commands.splitBlock();
 
     if (!didSplit) {
         return false;
     }
 
-    return updateBlockType(editor, blockType, createNodeId());
+    const splitBlock = getActiveScriptBlockFromState(editor.state);
+
+    if (!splitBlock) {
+        return false;
+    }
+
+    return applyBlockType(
+        editor,
+        splitBlock,
+        normalizeBlockNodeType(blockType),
+        createNodeId(),
+    );
 };
 
 export const insertActionBefore = (editor: Editor, blockPos: number, blockStart: number) => {
@@ -440,6 +527,13 @@ export const setBlockTypeWithSelection = (
     blockType: BlockNodeType,
 ) => {
     const normalized = normalizeBlockNodeType(blockType);
+
+    if (block.blockType === 'scene' && normalized !== 'scene') {
+        editor.commands.requestConvertScene(block.id, normalized);
+
+        return true;
+    }
+
     const nodes = editor.schema.nodes as Record<string, NodeType>;
     const nodeType = resolveNodeTypeForBlockType(nodes, normalized);
 
@@ -476,7 +570,7 @@ export const setBlockTypeWithSelection = (
         block.pos,
         block.node,
     );
-    tr = stripAsideParentheses(tr, normalized, block.pos);
+    tr = stripRenderedBlockDelimiters(tr, normalized, block.pos);
     tr = restoreBlockSelection(tr, block.pos, originalAnchor, originalHead);
     tr.setMeta(IMMEDIATE_SAVE_META_KEY, true);
 

@@ -25,6 +25,12 @@ type MusicTestWindow = Window & {__musicTestEditor?: Editor | null};
 const createStageDirection = (id: string, content: ScriptNode[] = []): ScriptNode => ({
     type: 'stageDirection', attrs: {id}, content,
 });
+const createAside = (id: string, content: ScriptNode[] = []): ScriptNode => ({
+    type: 'aside', attrs: {id}, content,
+});
+const createNote = (id: string, content: ScriptNode[] = []): ScriptNode => ({
+    type: 'note', attrs: {id}, content,
+});
 const EditorProbe = () => {
     const editor = useEditorInstance();
 
@@ -431,6 +437,82 @@ describe('music pill node views', () => {
         expect(after).toBeCloseTo(before, 0);
     });
 
+    it('keeps an aside closing parenthesis on its text line when the music ends there', async () => {
+        renderEditor({
+            type: 'doc',
+            content: [
+                createStageDirection('sd-1', [
+                    {
+                        type: 'musicStart',
+                        attrs: {
+                            musicId: 'music-1',
+                            mode: 'open',
+                            title: 'Night',
+                            kind: null,
+                            isDraft: false,
+                        },
+                    },
+                ]),
+                createAside('aside-1', [{type: 'text', text: 'quietly'}, {type: 'musicOut'}]),
+                createAside('aside-2', [{type: 'text', text: 'quietly'}]),
+            ],
+        });
+
+        const asideWithMusicOut = await poll(
+            () => document.querySelector<HTMLElement>('[data-id="aside-1"]'),
+            'aside with music end',
+        );
+        const plainAside = await poll(
+            () => document.querySelector<HTMLElement>('[data-id="aside-2"]'),
+            'plain aside',
+        );
+        const musicOutWrapper = asideWithMusicOut.querySelector<HTMLElement>('.node-musicOut');
+
+        expect(asideWithMusicOut.getBoundingClientRect().height)
+            .toBeCloseTo(plainAside.getBoundingClientRect().height, 1);
+        expect(getComputedStyle(asideWithMusicOut, '::after').content).toBe('none');
+        expect(musicOutWrapper).not.toBeNull();
+        expect(getComputedStyle(musicOutWrapper!, '::after').content).toBe('")"');
+    });
+
+    it('keeps a note closing marker on its text line when the music ends there', async () => {
+        renderEditor({
+            type: 'doc',
+            content: [
+                createStageDirection('sd-1', [
+                    {
+                        type: 'musicStart',
+                        attrs: {
+                            musicId: 'music-1',
+                            mode: 'open',
+                            title: 'Night',
+                            kind: null,
+                            isDraft: false,
+                        },
+                    },
+                ]),
+                createNote('note-1', [{type: 'text', text: 'private'}, {type: 'musicOut'}]),
+                createNote('note-2', [{type: 'text', text: 'private'}]),
+            ],
+        });
+
+        const noteWithMusicOut = await poll(
+            () => document.querySelector<HTMLElement>('[data-id="note-1"]'),
+            'note with music end',
+        );
+        const plainNote = await poll(
+            () => document.querySelector<HTMLElement>('[data-id="note-2"]'),
+            'plain note',
+        );
+        const musicOutWrapper = noteWithMusicOut.querySelector<HTMLElement>('.node-musicOut');
+
+        expect(noteWithMusicOut.getBoundingClientRect().height)
+            .toBeCloseTo(plainNote.getBoundingClientRect().height, 1);
+        expect(getComputedStyle(noteWithMusicOut, '::after').content).toBe('none');
+        expect(musicOutWrapper).not.toBeNull();
+        expect(getComputedStyle(musicOutWrapper!, '::after').content).toBe('"]]"');
+    });
+
     const musicStartAttrs = (editor: Editor): Record<string, unknown> | undefined => {
         const content = editor.getJSON().content as ScriptNode[] | undefined;
         const stageDirection = content?.find(node => node.attrs?.id === 'sd-1');
@@ -685,6 +767,93 @@ describe('music pill node views', () => {
         expect(document.querySelector('[data-id="sd-2"] [data-music-pill="out"]')).toBeNull();
         expect(document.querySelector('[data-id="sd-3"] [data-music-pill="out"]')).toBeTruthy();
         expect(document.querySelector('[data-music-rail-drop-preview="true"]')).toBeNull();
+        expect(document.querySelector('[data-music-rail-drop-target="true"]')).toBeNull();
+        expect(document.querySelector('[data-music-rail-drop-range-preview="true"]')).toBeNull();
+    });
+
+    it('shows eligible endpoints and the prospective range while dragging a music end', async () => {
+        renderEditor(createFourBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', 'Night', 'open', {musicId: 'music-1'});
+        editor.commands.insertMusicOut('sd-2');
+
+        const source = await poll(
+            () => document.querySelector<HTMLElement>('[data-block-id="sd-2"][data-marker-kind="end"]'),
+            'explicit end marker',
+        );
+        const target = await poll(
+            () => document.querySelector<HTMLElement>('[data-id="sd-4"]'),
+            'target block',
+        );
+        const start = await poll(
+            () => document.querySelector<HTMLElement>('[data-start-music-id="music-1"]'),
+            'music start marker',
+        );
+        const capture = vi.spyOn(source, 'setPointerCapture').mockImplementation(() => undefined);
+        const elements = vi.spyOn(document, 'elementsFromPoint').mockReturnValue([target]);
+
+        source.dispatchEvent(new PointerEvent('pointerdown', {
+            bubbles: true, pointerId: 1, button: 0, clientX: 10, clientY: 10,
+        }));
+
+        const dropTargets = Array.from(
+            document.querySelectorAll<HTMLElement>('[data-music-rail-drop-target="true"]'),
+        );
+        const canvas = document.querySelector<HTMLElement>('[data-editor-scroll-container="true"]');
+        const neutralReference = document.createElement('span');
+
+        expect(dropTargets.map(marker => marker.dataset.blockId)).toEqual(['sd-3', 'sd-4']);
+
+        neutralReference.style.background = 'color-mix(in oklch, var(--color-text-muted) 38%, transparent)';
+        canvas?.appendChild(neutralReference);
+
+        expect(getComputedStyle(dropTargets[0]).backgroundColor)
+            .toBe(getComputedStyle(neutralReference).backgroundColor);
+
+        neutralReference.remove();
+
+        source.dispatchEvent(new PointerEvent('pointermove', {
+            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 30,
+        }));
+
+        const rangePreview = document.querySelector<HTMLElement>(
+            '[data-music-rail-drop-range-preview="true"]',
+        );
+
+        expect(rangePreview).not.toBeNull();
+
+        const startRect = start.getBoundingClientRect();
+        const targetPreview = document.querySelector<HTMLElement>(
+            '[data-music-rail-drop-preview="true"][data-block-id="sd-4"]',
+        );
+
+        if (!rangePreview || !targetPreview) {
+            throw new Error('Music range drag preview not found');
+        }
+
+        const canvasRect = canvas?.getBoundingClientRect();
+        const targetRect = targetPreview.getBoundingClientRect();
+
+        if (!canvas || !canvasRect) {
+            throw new Error('Editor canvas not found');
+        }
+
+        const expectedTop = startRect.top - canvasRect.top + canvas.scrollTop + startRect.height / 2;
+        const expectedBottom = targetRect.top - canvasRect.top + canvas.scrollTop + targetRect.height / 2;
+
+        expect(Number.parseFloat(rangePreview.style.top)).toBeCloseTo(expectedTop, 0);
+        expect(Number.parseFloat(rangePreview.style.height)).toBeCloseTo(expectedBottom - expectedTop, 0);
+
+        document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape'}));
+
+        capture.mockRestore();
+        elements.mockRestore();
+
+        expect(document.querySelector('[data-music-rail-drop-target="true"]')).toBeNull();
+        expect(document.querySelector('[data-music-rail-drop-preview="true"]')).toBeNull();
+        expect(document.querySelector('[data-music-rail-drop-range-preview="true"]')).toBeNull();
     });
 
     it('keeps the drop preview on the block containing the pointer vertically', async () => {
@@ -746,6 +915,10 @@ describe('music pill node views', () => {
         rectSpies.forEach(spy => spy.mockRestore());
         capture.mockRestore();
         elements.mockRestore();
+
+        expect(document.querySelector('[data-music-rail-drop-target="true"]')).toBeNull();
+        expect(document.querySelector('[data-music-rail-drop-preview="true"]')).toBeNull();
+        expect(document.querySelector('[data-music-rail-drop-range-preview="true"]')).toBeNull();
     });
 
     it('activates the pill when clicking anywhere on the tag, not just the input', async () => {

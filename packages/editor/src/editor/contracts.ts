@@ -88,6 +88,17 @@ export interface MoveSceneRequest {
     requestId: number,
 }
 
+export interface DeleteSceneRequest {
+    sceneHeadingBlockId: string,
+    requestId: number,
+}
+
+export interface ConvertSceneRequest {
+    sceneHeadingBlockId: string,
+    targetBlockType: BlockNodeType,
+    requestId: number,
+}
+
 export interface EditorValueChangeMeta {
     source: 'typing' | 'structure',
     revision: number,
@@ -186,6 +197,8 @@ export interface EditorStructureRequests {
     renameActRequest?: RenameActRequest | null,
     deleteActRequest?: DeleteActRequest | null,
     moveSceneRequest?: MoveSceneRequest | null,
+    deleteSceneRequest?: DeleteSceneRequest | null,
+    convertSceneRequest?: ConvertSceneRequest | null,
     updateMusicRequest?: UpdateMusicRequest | null,
 }
 
@@ -199,6 +212,8 @@ export interface EditorLifecycleCallbacks {
     onOpenMusicManager?: (musicId: string) => void,
     onMusicAssigned?: (musicId: string) => void,
     onMusicUnassigned?: (musicId: string) => void,
+    onRequestDeleteScene?: (sceneHeadingBlockId: string) => void,
+    onRequestConvertScene?: (sceneHeadingBlockId: string, targetBlockType: BlockNodeType) => void,
 }
 
 export interface EditorSaveCallbacks {

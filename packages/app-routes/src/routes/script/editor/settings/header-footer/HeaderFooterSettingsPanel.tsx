@@ -11,6 +11,7 @@ import {
     Button,
     clsx,
     formControlStyles,
+    IconButton,
     ItalicIcon,
     Switch,
     UnderlineIcon,
@@ -159,33 +160,33 @@ export const HeaderFooterSettingsPanel = ({
                 <div className={styles.editor}>
                     <div className={styles.editorToolbar}>
                         <div className={styles.formattingGroup} aria-label="Text formatting">
-                            <Button
-                                variant="ghost"
-                                className={clsx(styles.formatButton, activeCell?.isBold && styles.activeFormat)}
+                            <IconButton
+                                variant="filled"
+                                className={clsx(activeCell?.isBold && styles.activeFormat)}
                                 isDisabled={!activeCell}
                                 onPress={() => updateActiveCell({isBold: !activeCell?.isBold})}
                                 aria-label="Bold"
                                 aria-pressed={activeCell?.isBold ?? false}
                             ><BoldIcon />
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                className={clsx(styles.formatButton, activeCell?.isItalic && styles.activeFormat)}
+                            </IconButton>
+                            <IconButton
+                                variant="filled"
+                                className={clsx(activeCell?.isItalic && styles.activeFormat)}
                                 isDisabled={!activeCell}
                                 onPress={() => updateActiveCell({isItalic: !activeCell?.isItalic})}
                                 aria-label="Italic"
                                 aria-pressed={activeCell?.isItalic ?? false}
                             ><ItalicIcon />
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                className={clsx(styles.formatButton, activeCell?.isUnderline && styles.activeFormat)}
+                            </IconButton>
+                            <IconButton
+                                variant="filled"
+                                className={clsx(activeCell?.isUnderline && styles.activeFormat)}
                                 isDisabled={!activeCell}
                                 onPress={() => updateActiveCell({isUnderline: !activeCell?.isUnderline})}
                                 aria-label="Underline"
                                 aria-pressed={activeCell?.isUnderline ?? false}
                             ><UnderlineIcon />
-                            </Button>
+                            </IconButton>
                         </div>
                         <Switch
                             isDisabled={!activeCell}

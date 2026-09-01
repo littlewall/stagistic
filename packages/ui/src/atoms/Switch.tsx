@@ -7,15 +7,26 @@ import {
 
 import styles from './Switch.module.css';
 
-type SwitchProps = Omit<RACSwitchProps, 'children' | 'className'> & {
+export type SwitchProps = Omit<RACSwitchProps, 'children' | 'className'> & {
     className?: string,
     children?: ReactNode,
+    variant?: 'default' | 'setting',
 };
 
 export const Switch = ({
-    className, children, ...props
+    className,
+    children,
+    variant = 'default',
+    ...props
 }: SwitchProps) => (
-    <RACSwitch {...props} className={clsx(styles.switch, className)}>
+    <RACSwitch
+        {...props}
+        className={clsx(
+            styles.switch,
+            variant === 'setting' && styles.setting,
+            className,
+        )}
+    >
         <span className={styles.track} aria-hidden="true">
             <span className={styles.thumb} />
         </span>

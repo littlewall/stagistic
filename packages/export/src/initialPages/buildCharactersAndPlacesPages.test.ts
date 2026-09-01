@@ -146,4 +146,21 @@ describe('buildCharactersAndPlacesPages', () => {
 
         expect(pages.flatMap(page => page.map(textOf))).not.toContain('PLACES');
     });
+
+    it('starts a places-only page without an empty Characters section', () => {
+        const [page] = buildCharactersAndPlacesPages(
+            basePlan({
+                showCharacters: false,
+                characters: [],
+            }),
+            DEFAULT_EDITOR_SETTINGS,
+        );
+        const pageText = page.map(textOf);
+
+        expect(pageText).toEqual([
+            'PLACES',
+            'Attic',
+            'Stage',
+        ]);
+    });
 });

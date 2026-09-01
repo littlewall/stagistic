@@ -1,5 +1,7 @@
-import type {BasicExportConfig} from '@stagistic/export';
-import {deriveIntegratedScoreExportPlan} from '@stagistic/export';
+import {
+    type BasicExportConfig,
+    deriveIntegratedScoreExportPlan,
+} from '@stagistic/export';
 
 import {BasicExportTemplate} from './BasicExportTemplate';
 

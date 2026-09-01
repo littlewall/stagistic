@@ -4,6 +4,15 @@ import type {Editor} from '@tiptap/react';
 import {getEmptyEnterChooserFromState} from '../../extensions/EmptyEnterChooserExtension';
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
 import {createBlockContext} from '../context';
+import {
+    deleteSelectionPreservingScenes,
+    selectionSpansScene,
+} from '../deleteSelectionPreservingScenes';
+import {
+    deleteEmptyBlockAfterScene,
+    shouldBlockBackspace,
+    shouldBlockForwardDelete,
+} from '../sceneDeletionGuard';
 import {enterHandlerMaps, handleEnter} from './enter';
 import {handlePaste, pasteHandlerMaps} from './paste';
 import {handleBlockShortcut, handleBlockTypeCycle} from './shortcuts';
@@ -113,6 +122,33 @@ export const handleKeyDown = (
 
     if (event.key === 'Tab') {
         return handleTab(editor, event);
+    }
+
+    if (
+        (event.key === 'Backspace' || event.key === 'Delete')
+        && selectionSpansScene(editor.state)
+    ) {
+        event.preventDefault();
+
+        return deleteSelectionPreservingScenes(editor);
+    }
+
+    if (event.key === 'Backspace' && deleteEmptyBlockAfterScene(editor)) {
+        event.preventDefault();
+
+        return true;
+    }
+
+    if (event.key === 'Backspace' && shouldBlockBackspace(editor.state)) {
+        event.preventDefault();
+
+        return true;
+    }
+
+    if (event.key === 'Delete' && shouldBlockForwardDelete(editor.state)) {
+        event.preventDefault();
+
+        return true;
     }
 
     const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);

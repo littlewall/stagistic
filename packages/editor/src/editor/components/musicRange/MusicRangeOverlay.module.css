@@ -72,7 +72,7 @@
     }
 
     &[data-end-tone = 'orphan']::before {
-        color: var(--color-warning);
+        color: var(--color-status-warning);
         border-style: dashed;
     }
 
@@ -105,6 +105,26 @@
         border: 1px solid currentcolor;
         border-radius: var(--radius-full);
     }
+}
+
+.dropRangePreview {
+    pointer-events: none;
+    position: absolute;
+    z-index: 3;
+    transform: translateX(-50%);
+    width: 1px;
+    background: color-mix(in oklch, var(--color-focus-ring) 68%, transparent);
+}
+
+.dropTarget {
+    pointer-events: none;
+    position: absolute;
+    z-index: 4;
+    transform: translate(-50%, -50%);
+    width: 5px;
+    height: 5px;
+    background: color-mix(in oklch, var(--color-text-muted) 38%, transparent);
+    border-radius: var(--radius-full);
 }
 
 .activeTriggerAnchor {

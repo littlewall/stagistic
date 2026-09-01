@@ -4,8 +4,9 @@ import {
     useEffect,
     useState,
 } from 'react';
-import {Button} from 'react-aria-components';
+import {Button as RACButton} from 'react-aria-components';
 
+import {Button} from '../atoms/Button';
 import {Tooltip} from '../atoms/Tooltip';
 import {
     AttributeManagerIcon,
@@ -90,7 +91,8 @@ export const AppHeader = ({
                 <div className={styles.leftControls}>
                     <Tooltip label="Home" placement="bottom">
                         <Button
-                            className={styles.iconButton}
+                            variant="ghost"
+                            size="icon"
                             onPress={onHome}
                             aria-label="Go to home"
                         >
@@ -100,7 +102,8 @@ export const AppHeader = ({
                     {onNewScript ? (
                         <Tooltip label="New script" placement="bottom">
                             <Button
-                                className={styles.iconButton}
+                                variant="ghost"
+                                size="icon"
                                 onPress={onNewScript}
                                 aria-label="New script"
                             >
@@ -111,7 +114,8 @@ export const AppHeader = ({
                     {onImportScript ? (
                         <Tooltip label="Import script" placement="bottom">
                             <Button
-                                className={styles.iconButton}
+                                variant="ghost"
+                                size="icon"
                                 onPress={onImportScript}
                                 aria-label="Import script"
                             >
@@ -179,7 +183,8 @@ export const ScriptEditorAppHeader = ({
                 <>
                     <Tooltip label="Open script settings" placement="bottom">
                         <Button
-                            className={styles.iconButton}
+                            variant="ghost"
+                            size="icon"
                             aria-label="Open script settings"
                             onPress={() => onMenuAction('settings')}
                         >
@@ -188,7 +193,8 @@ export const ScriptEditorAppHeader = ({
                     </Tooltip>
                     <Tooltip label="Open attribute manager" placement="bottom">
                         <Button
-                            className={styles.iconButton}
+                            variant="ghost"
+                            size="icon"
                             aria-label="Open attribute manager"
                             onPress={() => onMenuAction('attributes')}
                         >
@@ -197,7 +203,8 @@ export const ScriptEditorAppHeader = ({
                     </Tooltip>
                     <Tooltip label="Download .stagistic file" placement="bottom">
                         <Button
-                            className={styles.iconButton}
+                            variant="ghost"
+                            size="icon"
                             aria-label="Download .stagistic file"
                             onPress={() => onMenuAction('export-stagistic')}
                         >
@@ -209,12 +216,12 @@ export const ScriptEditorAppHeader = ({
             leftControls={(
                 <>
                     {onBackToEditor ? (
-                        <Button
+                        <RACButton
                             className={clsx(styles.menuTrigger, styles.backButton)}
                             onPress={onBackToEditor}
                         >
                             {backToEditorLabel}
-                        </Button>
+                        </RACButton>
                     ) : null}
                     <div className={styles.scriptIdentity} data-script-identity>
                         <ScriptTitle name={currentScript.name} onRename={onRenameScript} />

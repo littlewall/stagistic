@@ -1,0 +1,30 @@
+.route {
+    min-height: 100vh;
+    padding: var(--space-xl);
+    background: var(--color-bg);
+}
+
+.controls {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+    margin-bottom: var(--space-xl);
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: var(--space-lg);
+    align-items: start;
+}
+
+.sample {
+    padding: var(--space-md);
+    border: 1px dashed var(--color-border-subtle);
+    border-radius: var(--radius-sm);
+}
+
+.contract {
+    /* variant carries one axis, so muted and mono cannot both be props today. */
+    font-family: var(--font-family-mono);
+}

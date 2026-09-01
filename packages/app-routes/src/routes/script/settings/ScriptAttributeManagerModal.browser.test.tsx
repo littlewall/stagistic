@@ -17,6 +17,7 @@ import {page} from 'vite-plus/test/browser';
 import {
     ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
     ATTRIBUTE_MANAGER_PANEL_MUSIC,
+    ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
 } from '../attributes/attributeManagerMenu';
 import {ScriptAttributeManagerModal} from './ScriptAttributeManagerModal';
 
@@ -54,6 +55,63 @@ const waitForElement = async <T extends Element>(selector: string): Promise<T> =
 const findButton = (label: string) => {
     return Array.from(document.querySelectorAll<HTMLButtonElement>('button'))
         .find(button => button.textContent?.trim() === label) ?? null;
+};
+
+const findByText = (text: string) => {
+    return Array.from(document.querySelectorAll<HTMLButtonElement>('button'))
+        .find(button => button.textContent?.includes(text)) ?? null;
+};
+
+const renderStructureManager = (
+    deleteScene = vi.fn(() => Promise.resolve()),
+    firstSceneHeadingBlockId: string | null = 's1',
+) => {
+    const host = document.createElement('div');
+    const root = createRoot(host);
+    const sceneItems = [
+        {
+            id: 's1', number: '1.', title: 'Opening',
+        }, {
+            id: 's2', number: '2.', title: 'Kitchen',
+        },
+    ];
+
+    host.style.width = '1000px';
+    host.style.height = '700px';
+    document.body.appendChild(host);
+    root.render(
+        <DeletableAttributeManager
+            currentScriptId="script-1"
+            isOpen
+            tabs={[{id: ATTRIBUTE_MANAGER_PANEL_STRUCTURE, label: 'Structure'}]}
+            activePanelId={ATTRIBUTE_MANAGER_PANEL_STRUCTURE}
+            selectedCharacterId={null}
+            selectedMusicId={null}
+            onClose={() => undefined}
+            onSelectPanel={() => undefined}
+            characters={{} as never}
+            characterItems={[]}
+            groupItems={[]}
+            characterColorSaturation={50}
+            sceneItems={sceneItems}
+            firstSceneHeadingBlockId={firstSceneHeadingBlockId}
+            onDeleteScene={deleteScene}
+            placeState={{
+                places: [],
+                scenePlaceIds: {},
+                setScenePlaces: vi.fn(),
+            } as never}
+            musicState={{music: []} as never}
+            musicItems={[]}
+            musicAttachmentsState={{} as never}
+            setMusicTitleDraft={() => undefined}
+            persistMusicTitleDraft={() => Promise.resolve()}
+            onDeleteMusic={() => Promise.resolve()}
+        />,
+    );
+    roots.push(root);
+
+    return {deleteScene};
 };
 
 const renderMusicManager = (
@@ -94,6 +152,8 @@ const renderMusicManager = (
             groupItems={[]}
             characterColorSaturation={50}
             sceneItems={[]}
+            firstSceneHeadingBlockId={null}
+            onDeleteScene={() => Promise.resolve()}
             placeState={{} as never}
             musicState={{
                 music,
@@ -215,22 +275,28 @@ describe('ScriptAttributeManagerModal group actions', () => {
                     handleReplaceGroupMembers,
                     handleDeleteGroup,
                 } as never}
-                characterItems={[{
-                    id: 'char-1',
-                    name: 'ANNA',
-                    color: null,
-                    outline: null,
-                    groupNames: ['ALL'],
-                }]}
-                groupItems={[{
-                    id: 'group-1',
-                    name: 'ALL',
-                    color: null,
-                    memberIds: [],
-                    usageCount: 1,
-                }]}
+                characterItems={[
+                    {
+                        id: 'char-1',
+                        name: 'ANNA',
+                        color: null,
+                        outline: null,
+                        groupNames: ['ALL'],
+                    },
+                ]}
+                groupItems={[
+                    {
+                        id: 'group-1',
+                        name: 'ALL',
+                        color: null,
+                        memberIds: [],
+                        usageCount: 1,
+                    },
+                ]}
                 characterColorSaturation={50}
                 sceneItems={[]}
+                firstSceneHeadingBlockId={null}
+                onDeleteScene={() => Promise.resolve()}
                 placeState={{} as never}
                 musicState={{music: []} as never}
                 musicItems={[]}
@@ -256,5 +322,50 @@ describe('ScriptAttributeManagerModal group actions', () => {
 
         await page.elementLocator(findButton('Remove')!).click();
         expect(handleDeleteGroup).toHaveBeenCalledWith('group-1');
+    });
+});
+
+describe('ScriptAttributeManagerModal scene actions', () => {
+    it('hides the delete action for the first scene heading', async () => {
+        renderStructureManager();
+
+        // The first scene is selected by default; it must never be deletable.
+        await waitForElement('[aria-label="Scene detail"]');
+
+        expect(document.querySelector('[aria-label="Delete scene heading"]')).toBeNull();
+    });
+
+    it('deletes a non-first scene only after confirmation', async () => {
+        const {deleteScene} = renderStructureManager();
+
+        await waitForElement('[aria-label="Scene list"]');
+        await page.elementLocator(findByText('Kitchen')!).click();
+
+        const deleteButton = await waitForElement<HTMLButtonElement>('[aria-label="Delete scene heading"]');
+
+        await page.elementLocator(deleteButton).click();
+        await waitForElement('dialog[aria-label="Delete scene heading"]');
+
+        expect(deleteScene).not.toHaveBeenCalled();
+
+        await page.elementLocator(findButton('Delete heading')!).click();
+
+        expect(deleteScene).toHaveBeenCalledWith('s2');
+    });
+
+    it('keeps the confirmation open when deletion fails', async () => {
+        const deleteScene = vi.fn(() => Promise.reject(new Error('write failed')));
+
+        renderStructureManager(deleteScene);
+
+        await waitForElement('[aria-label="Scene list"]');
+        await page.elementLocator(findByText('Kitchen')!).click();
+        await page.elementLocator(
+            await waitForElement<HTMLButtonElement>('[aria-label="Delete scene heading"]'),
+        ).click();
+        await page.elementLocator(findButton('Delete heading')!).click();
+        await new Promise(resolve => window.setTimeout(resolve, 20));
+
+        expect(document.querySelector('dialog[aria-label="Delete scene heading"]')).not.toBeNull();
     });
 });

@@ -1,5 +1,11 @@
 import type {ReactNode} from 'react';
+import {
+    Disclosure,
+    DisclosurePanel,
+} from 'react-aria-components';
 
+import {Button} from '../atoms/Button';
+import {ChevronDownIcon} from '../icons';
 import styles from './ExportPanel.module.css';
 
 interface ExportPanelProps {
@@ -7,27 +13,38 @@ interface ExportPanelProps {
 }
 
 interface ExportPanelSectionProps {
+    title: string,
     children: ReactNode,
 }
 
-const Section = ({
+const ExportPanelSection = ({
     title,
     children,
-}: ExportPanelSectionProps & {title: string}) => (
-    <section className={styles.section} aria-labelledby={`export-${title.toLowerCase()}`}>
-        <h2 className={styles.heading} id={`export-${title.toLowerCase()}`}>{title}</h2>
-        <div className={styles.body}>{children}</div>
-    </section>
+}: ExportPanelSectionProps) => (
+    <Disclosure className={styles.section}>
+        <h2 className={styles.heading}>
+            <Button
+                slot="trigger"
+                variant="ghost"
+                className={styles.trigger}
+            >
+                <span>{title}</span>
+                <ChevronDownIcon
+                    className={styles.chevron}
+                    aria-hidden="true"
+                />
+            </Button>
+        </h2>
+        <DisclosurePanel role="region" className={styles.body}>
+            {children}
+        </DisclosurePanel>
+    </Disclosure>
 );
 
 export const ExportPanel = ({children}: ExportPanelProps) => (
     <div className={styles.panel}>{children}</div>
 );
 
-ExportPanel.Input = function ExportPanelInput({children}: ExportPanelSectionProps) {
-    return <Section title="Input">{children}</Section>;
-};
-
-ExportPanel.Options = function ExportPanelOptions({children}: ExportPanelSectionProps) {
-    return <Section title="Options">{children}</Section>;
+ExportPanel.Section = function ExportPanelSectionComponent(props: ExportPanelSectionProps) {
+    return <ExportPanelSection {...props} />;
 };

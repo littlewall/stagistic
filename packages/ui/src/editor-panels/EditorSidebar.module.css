@@ -15,7 +15,7 @@
 
     & .title {
         font-size: var(--font-size-sm);
-        font-weight: var(--font-weight-regular);
+        font-weight: var(--font-weight-normal);
         color: var(--color-text-muted);
     }
 }
@@ -355,7 +355,6 @@
 .characterOutlineInput {
     resize: none;
     overflow-y: auto;
-    /* Grows from one line to two, then scrolls (max-height ≈ two lines + padding). */
     width: 100%;
     min-height: calc(28px * var(--size-scale));
     max-height: calc(46px * var(--size-scale));

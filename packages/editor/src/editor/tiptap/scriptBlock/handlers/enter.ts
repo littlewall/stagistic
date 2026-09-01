@@ -127,11 +127,15 @@ export const resolveAdvanceTypeOnEnter = (
  * the block. Splitting mid-content isn't advancing anything - the new block
  * should stay the same type as the one it was split from, or the writer sees
  * an unexplained type change they never asked for.
+ *
+ * A scene heading is the exception: it is a single-line construct, so Enter
+ * must never produce a second scene heading — mid-content or not. It always
+ * advances to the configured next type, carrying any trailing text along.
  */
 const resolveSplitType = (
     context: BlockContext,
     blockNextElements?: BlockNextElementMap,
-): BlockNodeType => context.isAtEnd
+): BlockNodeType => context.isAtEnd || context.block.blockType === 'scene'
     ? resolveAdvanceTypeOnEnter(context, blockNextElements)
     : context.block.blockType;
 

@@ -23,6 +23,10 @@ import {
     ScriptMusicSidebar,
     UnassignMusicModal,
 } from './editor/music';
+import {ConvertSceneHeadingModal} from './editor/scene/ConvertSceneHeadingModal';
+import {DeleteSceneHeadingModal} from './editor/scene/DeleteSceneHeadingModal';
+import {useSceneConversionState} from './editor/scene/useSceneConversionState';
+import {useSceneDeletionState} from './editor/scene/useSceneDeletionState';
 import {
     type SidebarPanel,
     useEditorSidebars,
@@ -78,6 +82,20 @@ export const ScriptEditorRoute = () => {
 
     const [addMusicModalState, setAddMusicModalState] = useState<AddMusicModalState | null>(null);
     const [removeMusicRequest, setRemoveMusicRequest] = useState<EditorMusicRemoveRequest | null>(null);
+    const {
+        pendingSceneDelete,
+        deleteSceneRequest,
+        requestDeleteScene,
+        closeSceneDeleteModal,
+        confirmDeleteScene,
+    } = useSceneDeletionState();
+    const {
+        pendingSceneConversion,
+        convertSceneRequest,
+        requestConvertScene,
+        closeSceneConvertModal,
+        confirmConvertScene,
+    } = useSceneConversionState();
     const {
         music,
         createMusic,
@@ -260,7 +278,11 @@ export const ScriptEditorRoute = () => {
                         onManualSave: handleManualSave,
                         autoSaveDelayMs: AUTOSAVE_DELAY_MS,
                     }}
-                    requests={{updateMusicRequest}}
+                    requests={{
+                        updateMusicRequest,
+                        deleteSceneRequest,
+                        convertSceneRequest,
+                    }}
                     layout={{
                         autoFocus: shouldAutoFocus,
                         leftSidebarToggle,
@@ -274,6 +296,8 @@ export const ScriptEditorRoute = () => {
                         onOpenMusicManager: openAttributeManagerMusic,
                         onMusicAssigned: markMusicAssigned,
                         onMusicUnassigned: markMusicUnassigned,
+                        onRequestDeleteScene: requestDeleteScene,
+                        onRequestConvertScene: requestConvertScene,
                     }}
                 >
                     <ScriptEditor.LeftSidebar>
@@ -297,6 +321,16 @@ export const ScriptEditorRoute = () => {
                     musicTitle={removeMusicRequest?.title}
                     onClose={() => setRemoveMusicRequest(null)}
                     onConfirm={handleConfirmRemoveMusic}
+                />
+                <DeleteSceneHeadingModal
+                    isOpen={pendingSceneDelete !== null}
+                    onClose={closeSceneDeleteModal}
+                    onConfirm={confirmDeleteScene}
+                />
+                <ConvertSceneHeadingModal
+                    isOpen={pendingSceneConversion !== null}
+                    onClose={closeSceneConvertModal}
+                    onConfirm={confirmConvertScene}
                 />
             </AppLayout>
         </ScriptSessionProvider>

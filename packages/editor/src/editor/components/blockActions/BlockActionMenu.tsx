@@ -1,3 +1,4 @@
+import {TrashIcon} from '@stagistic/ui';
 import {
     type ReactNode,
 } from 'react';
@@ -18,12 +19,13 @@ import {
 } from './ContextMenu';
 import type {BlockActionMenuProps} from './types';
 
-const MusicIcon = ({icon}: {icon: BlockActionIcon}) => {
+const ActionIcon = ({icon}: {icon: BlockActionIcon}) => {
     const paths: Record<BlockActionIcon, ReactNode> = {
         music: <MusicRangeIcon />,
         musicStart: <MusicRangeIcon hollowEndpoint="start" />,
         musicHit: <MusicHitIcon />,
         musicOut: <MusicRangeIcon hollowEndpoint="end" />,
+        delete: <TrashIcon aria-hidden="true" />,
     };
 
     return paths[icon];
@@ -36,17 +38,17 @@ const toContextMenuItem = (
     if (item.kind === 'command') {
         return {
             ...item,
-            icon: <MusicIcon icon={item.icon} />,
+            icon: <ActionIcon icon={item.icon} />,
             onClick: () => onExecute(item),
         };
     }
 
     return {
         ...item,
-        icon: <MusicIcon icon={item.icon} />,
+        icon: <ActionIcon icon={item.icon} />,
         items: item.items.map(command => ({
             ...command,
-            icon: <MusicIcon icon={command.icon} />,
+            icon: <ActionIcon icon={command.icon} />,
             onClick: () => onExecute(command),
         })),
     };

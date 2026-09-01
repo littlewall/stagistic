@@ -30,6 +30,7 @@ import {
     DeleteMusicModal,
     type useScriptMusicState,
 } from '../editor/music';
+import {DeleteSceneHeadingModal} from '../editor/scene/DeleteSceneHeadingModal';
 import type {useScriptCharactersContextValue} from '../useScriptCharactersContextValue';
 import styles from './ScriptAttributeManagerModal.module.css';
 
@@ -49,6 +50,8 @@ interface ScriptAttributeManagerModalProps {
     groupItems: AttributeManagerGroup[],
     characterColorSaturation: EditorSettings['visual']['characterColorSaturation'],
     sceneItems: AttributeManagerListItem[],
+    firstSceneHeadingBlockId: string | null,
+    onDeleteScene: (sceneHeadingBlockId: string) => Promise<void>,
     placeState: ReturnType<typeof useScriptPlacesState>,
     musicState: ReturnType<typeof useScriptMusicState>,
     musicItems: AttributeManagerListItem[],
@@ -78,6 +81,8 @@ export const ScriptAttributeManagerModal = ({
     groupItems,
     characterColorSaturation,
     sceneItems,
+    firstSceneHeadingBlockId,
+    onDeleteScene,
     placeState,
     musicState,
     musicItems,
@@ -91,6 +96,8 @@ export const ScriptAttributeManagerModal = ({
     const [createdMusicId, setCreatedMusicId] = useState<string | null>(null);
     const [deleteTarget, setDeleteTarget] = useState<AttributeManagerListItem | null>(null);
     const [isDeletingMusic, setIsDeletingMusic] = useState(false);
+    const [sceneDeleteTarget, setSceneDeleteTarget] = useState<AttributeManagerListItem | null>(null);
+    const [isDeletingScene, setIsDeletingScene] = useState(false);
 
     return (
         <>
@@ -107,6 +114,26 @@ export const ScriptAttributeManagerModal = ({
                         detailTypeLabel="Scene"
                         emptyListLabel="No scenes yet"
                         emptyDetailLabel="Select a scene"
+                        renderDetailAction={item => {
+                            if (item.id === firstSceneHeadingBlockId) {
+                                return null;
+                            }
+
+                            return (
+                                <Tooltip label="Delete scene heading" placement="left">
+                                    <Button
+                                        className={styles.deleteButton}
+                                        variant="ghost"
+                                        size="sm"
+                                        isDisabled={isDeletingScene}
+                                        aria-label="Delete scene heading"
+                                        onPress={() => setSceneDeleteTarget(item)}
+                                    >
+                                        <TrashIcon className={styles.actionIcon} aria-hidden="true" />
+                                    </Button>
+                                </Tooltip>
+                            );
+                        }}
                         renderDetail={item => (
                             <AttributeManagerSceneDetail
                                 places={placeState.places}
@@ -236,6 +263,27 @@ export const ScriptAttributeManagerModal = ({
                         // Keep the dialog open; persistence errors are surfaced by the catalog.
                     } finally {
                         setIsDeletingMusic(false);
+                    }
+                }}
+            />
+            <DeleteSceneHeadingModal
+                isOpen={sceneDeleteTarget !== null}
+                isDeleting={isDeletingScene}
+                onClose={() => setSceneDeleteTarget(null)}
+                onConfirm={async () => {
+                    if (!sceneDeleteTarget) {
+                        return;
+                    }
+
+                    setIsDeletingScene(true);
+
+                    try {
+                        await onDeleteScene(sceneDeleteTarget.id);
+                        setSceneDeleteTarget(null);
+                    } catch {
+                        // Keep the dialog open; persistence errors are surfaced by the projection.
+                    } finally {
+                        setIsDeletingScene(false);
                     }
                 }}
             />

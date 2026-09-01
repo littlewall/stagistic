@@ -10,30 +10,40 @@ import {
     it,
 } from 'vite-plus/test';
 
-import {handleTextInput} from './textInput';
+import type {BlockNodeType} from '../../scriptCore';
+import {getActiveScriptBlockFromState} from '../../scriptCore';
+import {createBlockContext} from '../context';
+import {
+    handleTextInput,
+    textInputHandlerMaps,
+} from './textInput';
+
+const createBlockSpec = (blockType: BlockNodeType) => ({
+    group: 'block',
+    content: 'text*',
+    attrs: {
+        id: {default: `${blockType}-1`},
+        blockType: {default: blockType},
+    },
+    toDOM: () => ['p', 0] as const,
+    parseDOM: [{tag: 'p'}],
+});
 
 const schema = new Schema({
     nodes: {
-        doc: {content: 'character+'},
+        doc: {content: '(character | aside | note)+'},
         text: {group: 'inline'},
-        character: {
-            group: 'block',
-            content: 'text*',
-            attrs: {
-                id: {default: 'character-1'},
-                blockType: {default: 'character'},
-            },
-            toDOM: () => ['p', 0],
-            parseDOM: [{tag: 'p'}],
-        },
+        character: createBlockSpec('character'),
+        aside: createBlockSpec('aside'),
+        note: createBlockSpec('note'),
     },
     marks: {},
 });
 
-const createEditor = (text: string) => {
+const createEditor = (text: string, blockType: BlockNodeType = 'character') => {
     const block = schema.node(
-        'character',
-        {id: 'character-1', blockType: 'character'},
+        blockType,
+        {id: `${blockType}-1`, blockType},
         text ? [schema.text(text)] : undefined,
     );
     const doc = schema.node('doc', null, [block]);
@@ -103,5 +113,45 @@ describe('handleTextInput character delimiters', () => {
         expect(handled).toBe(true);
         expect(dispatchedTexts).toEqual(['ALEX (V/']);
         expect(getState().selection.from).toBe(9);
+    });
+});
+
+describe('handleTextInput note delimiters', () => {
+    it('strips manually entered square brackets from inserted text', () => {
+        const {
+            editor,
+            dispatchedTexts,
+            getState,
+        } = createEditor('Rewrite ', 'note');
+
+        const handled = handleTextInput(editor, 9, 9, '[[draft]]');
+
+        expect(handled).toBe(true);
+        expect(dispatchedTexts).toEqual(['Rewrite draft']);
+        expect(getState().doc.textContent).toBe('Rewrite draft');
+    });
+
+    it('prevents a bracket key before it reaches note content', () => {
+        const {editor} = createEditor('Rewrite', 'note');
+        const block = getActiveScriptBlockFromState(editor.state);
+
+        if (!block) {
+            throw new Error('Expected an active note block');
+        }
+
+        let prevented = false;
+        const event = {
+            key: '[',
+            preventDefault: () => {
+                prevented = true;
+            },
+        } as KeyboardEvent;
+        const handled = textInputHandlerMaps.keyDownHandlers.note?.(
+            createBlockContext(editor, block),
+            event,
+        );
+
+        expect(handled).toBe(true);
+        expect(prevented).toBe(true);
     });
 });

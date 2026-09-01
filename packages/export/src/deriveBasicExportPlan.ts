@@ -1,5 +1,6 @@
 import {
     getScriptBlockId,
+    getScriptBlockNodeType,
 } from '@stagistic/script';
 
 import type {BasicExportConfig} from './config';
@@ -43,7 +44,7 @@ const buildCharactersAndPlacesPlan = (
 ): CharactersAndPlacesInitialPagePlan | null => {
     const value = config.initialPages.charactersAndPlaces;
 
-    if (!value.enabled) {
+    if (!value.enabled && !value.showPlaces) {
         return null;
     }
 
@@ -53,13 +54,16 @@ const buildCharactersAndPlacesPlan = (
 
     return {
         kind: 'characters-and-places',
-        characters: [...script.initialCharacters]
-            .sort(compareCharacters)
-            .map(character => ({
-                id: character.id,
-                displayName: character.displayName,
-                outline: character.outline,
-            })),
+        ...value.enabled ? {} : {showCharacters: false},
+        characters: value.enabled
+            ? [...script.initialCharacters]
+                .sort(compareCharacters)
+                .map(character => ({
+                    id: character.id,
+                    displayName: character.displayName,
+                    outline: character.outline,
+                }))
+            : [],
         places: value.showPlaces
             ? script.initialPlaces.map(place => ({
                 id: place.id,
@@ -74,15 +78,21 @@ export const deriveBasicExportPlan = (
     config: BasicExportConfig,
     script: ScriptData,
 ): ExportPlan => {
+    const inputDoc = config.showNotes
+        ? script.doc
+        : {
+            ...script.doc,
+            content: script.doc.content.filter(node => getScriptBlockNodeType(node) !== 'note'),
+        };
     const filteredDoc = filterScriptByCharacter(
-        script.doc,
+        inputDoc,
         config.characterFilter,
         script.characters,
         script.groups,
     );
     const preservePagination = config.characterFilter.mode === 'only'
         && config.characterFilter.preserveFullScriptPagination !== false;
-    const doc = preservePagination ? script.doc : filteredDoc;
+    const doc = preservePagination ? inputDoc : filteredDoc;
     const forcedBreaks: ForcedBreak[] = [];
     const charactersAndPlaces = buildCharactersAndPlacesPlan(config, script);
     const blankSpec = config.blankPages.betweenInitialPagesAndScript;

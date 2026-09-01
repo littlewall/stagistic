@@ -54,6 +54,7 @@ const script = {
 };
 
 const withConfig = (patch: Partial<BasicExportConfig>): BasicExportConfig => ({
+    showNotes: patch.showNotes ?? BASIC_DEFAULTS.showNotes,
     characterFilter: patch.characterFilter ?? BASIC_DEFAULTS.characterFilter,
     pageBreaks: patch.pageBreaks ?? BASIC_DEFAULTS.pageBreaks,
     initialPages: patch.initialPages ?? BASIC_DEFAULTS.initialPages,
@@ -61,6 +62,35 @@ const withConfig = (patch: Partial<BasicExportConfig>): BasicExportConfig => ({
 });
 
 describe('deriveBasicExportPlan', () => {
+    it('keeps notes in the printable document by default', () => {
+        const plan = deriveBasicExportPlan(BASIC_DEFAULTS, {
+            ...script,
+            doc: {
+                type: 'doc',
+                content: [block('scene', 'sceneA', 'Scene A'), block('note', 'noteA', 'Rewrite this')],
+            },
+        });
+
+        expect(plan.doc.content.map(node => node.type)).toEqual(['scene', 'note']);
+    });
+
+    it('removes notes before deriving the printable document and pagination', () => {
+        const plan = deriveBasicExportPlan(withConfig({showNotes: false}), {
+            ...script,
+            doc: {
+                type: 'doc',
+                content: [
+                    block('scene', 'sceneA', 'Scene A'),
+                    block('note', 'noteA', 'Rewrite this'),
+                    block('scene', 'sceneB', 'Scene B'),
+                ],
+            },
+        });
+
+        expect(plan.doc.content.map(node => node.type)).toEqual(['scene', 'scene']);
+        expect(plan.pagination.forcedBreaks).toEqual([{blockId: 'sceneB', kind: 'new-page'}]);
+    });
+
     it('adds page breaks to later scenes by default', () => {
         const plan = deriveBasicExportPlan(BASIC_DEFAULTS, script);
 
@@ -192,6 +222,27 @@ describe('deriveBasicExportPlan', () => {
         expect(plan.leadingPages.startEachInitialPageOnOddPage).toBe(false);
     });
 
+    it('keeps a places-only initial page when characters are disabled', () => {
+        const plan = deriveBasicExportPlan(withConfig({
+            initialPages: {
+                ...BASIC_DEFAULTS.initialPages,
+                charactersAndPlaces: {
+                    ...BASIC_DEFAULTS.initialPages.charactersAndPlaces,
+                    enabled: false,
+                    showPlaces: true,
+                },
+            },
+        }), script);
+
+        expect(plan.leadingPages.initialPages[0]).toEqual({
+            kind: 'characters-and-places',
+            characters: [],
+            places: [{id: 'place-stage', name: 'Stage'}, {id: 'place-home', name: 'Home'}],
+            showCharacters: false,
+            showCharacterOutlines: false,
+        });
+    });
+
     it('omits the initial page when disabled and clamps enabled manual blanks', () => {
         const plan = deriveBasicExportPlan(withConfig({
             initialPages: {
@@ -199,6 +250,7 @@ describe('deriveBasicExportPlan', () => {
                 charactersAndPlaces: {
                     ...BASIC_DEFAULTS.initialPages.charactersAndPlaces,
                     enabled: false,
+                    showPlaces: false,
                 },
             },
             blankPages: {

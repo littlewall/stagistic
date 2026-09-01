@@ -1,0 +1,121 @@
+.iconButton {
+    cursor: pointer;
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    aspect-ratio: 1;
+    padding: 0;
+    color: var(--color-text-muted);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    transition: background var(--duration-normal) var(--ease-standard), color var(--duration-normal) var(--ease-standard), transform var(--duration-fast) var(--ease-out);
+
+    &[data-pressed] {
+        transform: scale(.96);
+    }
+
+    &[data-focus-visible] {
+        outline: var(--focus-ring);
+        outline-offset: var(--focus-ring-offset);
+    }
+
+    &[data-disabled] {
+        cursor: not-allowed;
+        opacity: .4;
+    }
+
+    & svg {
+        display: block;
+    }
+}
+
+/* sizes (pixel values preserved from the migrated sites) */
+.xs {
+    width: calc(22px * var(--size-scale));
+    height: calc(22px * var(--size-scale));
+
+    & svg {
+        width: calc(14px * var(--size-scale));
+        height: calc(14px * var(--size-scale));
+    }
+}
+
+.sm {
+    width: var(--control-height-sm);
+    height: var(--control-height-sm);
+
+    & svg {
+        width: calc(14px * var(--size-scale));
+        height: calc(14px * var(--size-scale));
+    }
+}
+
+.md {
+    width: calc(28px * var(--size-scale));
+    height: calc(28px * var(--size-scale));
+
+    & svg {
+        width: calc(16px * var(--size-scale));
+        height: calc(16px * var(--size-scale));
+    }
+}
+
+/* shape (A1: full-round sites opt in) */
+.pill {
+    border-radius: var(--radius-full);
+}
+
+/* variants (A4: resting surface) */
+.ghost {
+    background: transparent;
+    border-color: transparent;
+
+    &[data-hovered] {
+        color: var(--color-text);
+        background: var(--state-hover);
+    }
+}
+
+.outline {
+    color: var(--color-text);
+    background: transparent;
+    border-color: var(--color-border);
+
+    &[data-hovered] {
+        background: var(--state-hover);
+    }
+}
+
+.filled {
+    color: var(--color-text);
+    background: var(--color-surface);
+    border-color: var(--color-border);
+
+    &[data-hovered] {
+        background: var(--state-hover);
+    }
+}
+
+/* tone (A5: destructive) — the parent controls reveal/opacity */
+.neutral {
+    color: var(--color-text-muted);
+}
+
+.danger {
+    color: color-mix(in oklch, var(--color-text-muted) 90%, var(--color-border));
+
+    &[data-hovered] {
+        color: color-mix(in oklch, var(--color-status-danger) 75%, var(--color-text-muted));
+        background: color-mix(in oklch, var(--color-status-danger) 12%, transparent);
+    }
+}
+
+/* selected (editor toolbar active state) */
+.iconButton[data-selected] {
+    color: var(--color-text);
+    background: var(--state-selected);
+    box-shadow: inset 0 0 0 1px var(--state-selected-edge);
+}

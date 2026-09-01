@@ -16,7 +16,7 @@
     &[data-pressed],
     &[data-focus-visible] {
         color: var(--color-text);
-        background: var(--color-surface-raised);
+        background: var(--state-hover);
     }
 }
 

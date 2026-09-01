@@ -22,16 +22,25 @@ import {
     type HandlerMap,
 } from './types';
 
-const keyDownHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => boolean> = {
-    ['aside']: (_context, event) => {
-        if (event.key === '(' || event.key === ')') {
-            event.preventDefault();
+const ASIDE_DELIMITER_CHARACTERS: ReadonlySet<string> = new Set(['(', ')']);
+const NOTE_DELIMITER_CHARACTERS: ReadonlySet<string> = new Set(['[', ']']);
 
-            return true;
-        }
-
+const handleDelimiterKeyDown = (
+    event: KeyboardEvent,
+    delimiters: ReadonlySet<string>,
+) => {
+    if (!delimiters.has(event.key)) {
         return false;
-    },
+    }
+
+    event.preventDefault();
+
+    return true;
+};
+
+const keyDownHandlers: HandlerMap<(context: BlockContext, event: KeyboardEvent) => boolean> = {
+    ['aside']: (_context, event) => handleDelimiterKeyDown(event, ASIDE_DELIMITER_CHARACTERS),
+    ['note']: (_context, event) => handleDelimiterKeyDown(event, NOTE_DELIMITER_CHARACTERS),
     ['character']: (context, event) => {
         if (event.key !== '(') {
             return false;
@@ -101,17 +110,20 @@ const handleCharacterInput = (
     return false;
 };
 
-const handleParentheticalInput = (
+const handleGeneratedDelimiterInput = (
     context: BlockContext,
     from: number,
     to: number,
     text: string,
+    delimiters: ReadonlySet<string>,
 ) => {
-    if (!(/[()]/).test(text)) {
+    const sanitized = Array.from(text)
+        .filter(character => !delimiters.has(character))
+        .join('');
+
+    if (sanitized === text) {
         return false;
     }
-
-    const sanitized = text.replace(/[()]/g, '');
 
     if (sanitized.length === 0) {
         return true;
@@ -130,7 +142,20 @@ const textInputHandlers: HandlerMap<(
     to: number,
     text: string,
 ) => boolean> = {
-    ['aside']: handleParentheticalInput,
+    ['aside']: (context, from, to, text) => handleGeneratedDelimiterInput(
+        context,
+        from,
+        to,
+        text,
+        ASIDE_DELIMITER_CHARACTERS,
+    ),
+    ['note']: (context, from, to, text) => handleGeneratedDelimiterInput(
+        context,
+        from,
+        to,
+        text,
+        NOTE_DELIMITER_CHARACTERS,
+    ),
 };
 
 export const handleTextInput = (

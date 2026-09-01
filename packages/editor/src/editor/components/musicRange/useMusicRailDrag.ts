@@ -7,16 +7,17 @@ import {
     SCRIPT_BLOCK_DOM_SELECTOR,
 } from '../../tiptap/scriptCore';
 import {
-    resolveMusicRailBlockTop,
-    resolveMusicRailLeft,
-} from './musicRailDom';
-import {canDropMusicOutAtBoundary} from './musicRangeModel';
+    createMusicRailDragView,
+    isEligibleMusicRailDropTarget,
+} from './musicRailDragDom';
 
 type MusicRailDragProps = {
     editor: TiptapEditor | null,
     canvasRef: RefObject<HTMLElement | null>,
     onDragStart: () => void,
     previewClassName: string,
+    rangePreviewClassName: string,
+    targetClassName: string,
 };
 
 type DragSession = {
@@ -26,7 +27,6 @@ type DragSession = {
     musicId: string | null,
     sourceBlockId: string,
     targetBlockId: string | null,
-    preview: HTMLElement | null,
     isDragging: boolean,
 };
 
@@ -66,49 +66,13 @@ const resolveClosestBlockId = (canvas: HTMLElement, pointerClientY: number) => {
     return closestBlockId;
 };
 
-const clearPreview = (session: DragSession | null) => {
-    if (session?.preview) {
-        session.preview.remove();
-        session.preview = null;
-    }
-};
-
-const showPreview = (
-    editor: TiptapEditor,
-    canvas: HTMLElement,
-    session: DragSession,
-    blockId: string,
-    className: string,
-) => {
-    if (session.targetBlockId === blockId && session.preview?.isConnected) {
-        return;
-    }
-
-    const top = resolveMusicRailBlockTop(editor, canvas, blockId);
-
-    clearPreview(session);
-
-    if (top === null) {
-        return;
-    }
-
-    const preview = document.createElement('span');
-
-    preview.className = className;
-    preview.dataset.musicRailDropPreview = 'true';
-    preview.dataset.blockId = blockId;
-    preview.style.left = `${resolveMusicRailLeft(canvas)}px`;
-    preview.style.top = `${top}px`;
-    preview.ariaHidden = 'true';
-    canvas.appendChild(preview);
-    session.preview = preview;
-};
-
 export const useMusicRailDrag = ({
     editor,
     canvasRef,
     onDragStart,
     previewClassName,
+    rangePreviewClassName,
+    targetClassName,
 }: MusicRailDragProps) => {
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -119,9 +83,14 @@ export const useMusicRailDrag = ({
 
         let session: DragSession | null = null;
         let suppressNextClick = false;
+        const dragView = createMusicRailDragView(editor, canvas, {
+            dropPreview: previewClassName,
+            eligibleTarget: targetClassName,
+            rangePreview: rangePreviewClassName,
+        });
 
         const cancel = () => {
-            clearPreview(session);
+            dragView.clear();
             session = null;
         };
         const handlePointerDown = (event: PointerEvent) => {
@@ -134,16 +103,23 @@ export const useMusicRailDrag = ({
             }
 
             boundary.setPointerCapture(event.pointerId);
+
+            const sourceBlockId = boundary.dataset.blockId ?? '';
+            const snapshot = musicRailPluginKey.getState(editor.state)?.snapshot;
+
             session = {
                 pointerId: event.pointerId,
                 originX: event.clientX,
                 originY: event.clientY,
                 musicId,
-                sourceBlockId: boundary.dataset.blockId ?? '',
+                sourceBlockId,
                 targetBlockId: null,
-                preview: null,
                 isDragging: false,
             };
+
+            if (snapshot) {
+                dragView.showEligibleTargets(snapshot, musicId, sourceBlockId);
+            }
         };
         const handlePointerMove = (event: PointerEvent) => {
             if (!session || session.pointerId !== event.pointerId) {
@@ -175,13 +151,18 @@ export const useMusicRailDrag = ({
             const isAllowed = Boolean(
                 snapshot
                 && targetBlockId
-                && canDropMusicOutAtBoundary(snapshot, session.musicId, targetBlockId),
+                && isEligibleMusicRailDropTarget(
+                    snapshot,
+                    session.musicId,
+                    session.sourceBlockId,
+                    targetBlockId,
+                ),
             );
 
-            if (isAllowed && targetBlockId) {
-                showPreview(editor, canvas, session, targetBlockId, previewClassName);
+            if (isAllowed && targetBlockId && snapshot) {
+                dragView.showPreview(snapshot, session.musicId, targetBlockId);
             } else {
-                clearPreview(session);
+                dragView.clearPreview();
             }
 
             session.targetBlockId = isAllowed ? targetBlockId : null;
@@ -251,5 +232,7 @@ export const useMusicRailDrag = ({
         editor,
         onDragStart,
         previewClassName,
+        rangePreviewClassName,
+        targetClassName,
     ]);
 };

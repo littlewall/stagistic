@@ -26,7 +26,7 @@ describe('buildEditorRootStyle', () => {
             isRightSidebarOpen: false,
         }) as Record<string, string>;
 
-        expect(style['--editor-sidebar-width']).toBe('var(--panel-width)');
+        expect(style['--editor-sidebar-width']).toBe('var(--sidebar-width)');
     });
 
     it('does not reserve content width for a closed sidebar', () => {

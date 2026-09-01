@@ -67,6 +67,7 @@ export const useScriptEditorInstance = ({
                     'aria-label': SCRIPT_EDITOR_LABEL,
                     'aria-multiline': 'true',
                     'data-editor': 'true',
+                    lang: '',
                     role: 'textbox',
                 },
             },

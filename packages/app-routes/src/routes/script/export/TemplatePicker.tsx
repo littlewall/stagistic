@@ -1,4 +1,4 @@
-import {Select} from '@stagistic/ui';
+import {FormSelect} from '@stagistic/ui';
 
 import {EXPORT_TEMPLATES} from './registry';
 
@@ -14,7 +14,7 @@ export const TemplatePicker = ({
     value: string,
     onChange: (value: string) => void,
 }) => (
-    <Select
+    <FormSelect
         value={value}
         options={options}
         ariaLabel="Export template"

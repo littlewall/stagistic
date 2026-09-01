@@ -51,7 +51,6 @@
 }
 
 .tagBody {
-    /* outline (not border) keeps the box out of layout so it adds no width. */
     user-select: text;
     position: relative;
     outline: 1px solid var(--music-border-color);

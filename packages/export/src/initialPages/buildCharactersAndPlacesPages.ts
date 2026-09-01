@@ -32,6 +32,7 @@ interface PageCursor {
     pages: VisualPage[],
     current: VisualPage,
     y: number,
+    heading: string,
 }
 
 const makeRun = (
@@ -92,7 +93,7 @@ const startPage = (
     const page = [
         centeredLine(
             geometry,
-            CHARACTERS_HEADING,
+            cursor.heading,
             geometry.contentTopPx,
             geometry.headingFontSizePx,
             {bold: true},
@@ -187,8 +188,17 @@ const pushPlaces = (
     cursor: PageCursor,
     geometry: Geometry,
     places: CharactersAndPlacesInitialPagePlan['places'],
+    isFirstSection: boolean,
 ) => {
     if (places.length === 0) {
+        return;
+    }
+
+    if (isFirstSection) {
+        places.forEach(place => {
+            pushBodyLine(cursor, geometry, place.name);
+        });
+
         return;
     }
 
@@ -196,17 +206,25 @@ const pushPlaces = (
     const firstGroupHeight = gapPx
         + geometry.headingLineHeightPx
         + geometry.bodyLineHeightPx * 2;
+    const startsOnNewPage = cursor.y + firstGroupHeight > geometry.contentBottomPx
+        && hasBodyContent(cursor);
 
-    ensureSpace(cursor, geometry, firstGroupHeight);
-    cursor.y += gapPx;
-    cursor.current.push(centeredLine(
-        geometry,
-        PLACES_HEADING,
-        cursor.y,
-        geometry.headingFontSizePx,
-        {bold: true},
-    ));
-    cursor.y += geometry.headingLineHeightPx + geometry.bodyLineHeightPx;
+    cursor.heading = PLACES_HEADING;
+
+    if (startsOnNewPage) {
+        startPage(cursor, geometry);
+    } else {
+        cursor.y += gapPx;
+        cursor.current.push(centeredLine(
+            geometry,
+            PLACES_HEADING,
+            cursor.y,
+            geometry.headingFontSizePx,
+            {bold: true},
+        ));
+        cursor.y += geometry.headingLineHeightPx + geometry.bodyLineHeightPx;
+    }
+
     places.forEach(place => {
         pushBodyLine(cursor, geometry, place.name);
     });
@@ -217,22 +235,27 @@ export const buildCharactersAndPlacesPages = (
     settings: EditorSettings,
 ): VisualPage[] => {
     const geometry = createGeometry(settings);
+    const showCharacters = plan.showCharacters !== false;
     const cursor: PageCursor = {
         pages: [],
         current: [],
         y: geometry.contentTopPx,
+        heading: showCharacters ? CHARACTERS_HEADING : PLACES_HEADING,
     };
 
     startPage(cursor, geometry);
-    plan.characters.forEach(character => {
-        pushCharacter(
-            cursor,
-            geometry,
-            character,
-            plan.showCharacterOutlines,
-        );
-    });
-    pushPlaces(cursor, geometry, plan.places);
+    if (showCharacters) {
+        plan.characters.forEach(character => {
+            pushCharacter(
+                cursor,
+                geometry,
+                character,
+                plan.showCharacterOutlines,
+            );
+        });
+    }
+
+    pushPlaces(cursor, geometry, plan.places, !showCharacters);
 
     return cursor.pages;
 };

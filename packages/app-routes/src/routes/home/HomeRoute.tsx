@@ -6,12 +6,11 @@ import {
     Input,
     LoaderOverlay,
     PageContainer,
-    PageTitle,
     PlusIcon,
     ScriptIcon,
     SearchIcon,
     Select,
-    SubtleText,
+    Text,
     UploadIcon,
 } from '@stagistic/ui';
 import {
@@ -127,7 +126,7 @@ export const HomeRoute = () => {
         <AppLayout header={<AppHeader contentInset="page" showScriptActions={false} />}>
             <PageContainer variant="standard">
                 <div className={styles.content}>
-                    <PageTitle>Scripts</PageTitle>
+                    <Text as="h1" size="4xl">Scripts</Text>
                     <div
                         className={clsx(
                             styles.startActions,
@@ -198,13 +197,13 @@ export const HomeRoute = () => {
                         </div>
                     ) : error ? (
                         <div className={styles.errorState}>
-                            <SubtleText>Couldn&apos;t load your scripts.</SubtleText>
+                            <Text variant="muted">Couldn&apos;t load your scripts.</Text>
                             <Button variant="outline" onPress={() => void refreshScripts()}>
                                 Try again
                             </Button>
                         </div>
                     ) : scriptSummaries.length === 0 ? (
-                        <SubtleText className={styles.emptyLibrary}>No scripts yet.</SubtleText>
+                        <Text variant="muted" className={styles.emptyLibrary}>No scripts yet.</Text>
                     ) : (
                         <div className={styles.library}>
                             {showLibraryTools ? (
@@ -237,9 +236,9 @@ export const HomeRoute = () => {
                                 onDuplicateScript={duplicateScript}
                             />
                             {dashboard.scripts.length === 0 ? (
-                                <SubtleText className={styles.noResults}>
+                                <Text variant="muted" className={styles.noResults}>
                                     No scripts match “{query.trim()}”.
-                                </SubtleText>
+                                </Text>
                             ) : null}
                         </div>
                     )}
