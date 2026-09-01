@@ -71,32 +71,6 @@
     }
 }
 
-.toolbarButton {
-    flex: 0 0 auto;
-    width: 28px;
-    height: 28px;
-}
-
-.toolbarButton svg {
-    width: 14px;
-    height: 14px;
-}
-
-.zoomControls button {
-    cursor: pointer;
-    width: 28px;
-    height: 28px;
-    color: var(--color-text);
-    background: transparent;
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-full);
-
-    &:disabled {
-        cursor: not-allowed;
-        opacity: .4;
-    }
-}
-
 .pages {
     scrollbar-color: var(--color-border-strong) var(--color-surface);
     scrollbar-width: auto;

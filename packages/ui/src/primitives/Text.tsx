@@ -8,7 +8,7 @@ import {
 
 import styles from './Text.module.css';
 
-type TextVariant = 'body' | 'muted' | 'label' | 'mono';
+type TextVariant = 'body' | 'muted' | 'label' | 'mono' | 'eyebrow';
 
 type TextSize = 'xxs' | 'xs' | 'sm' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
 
@@ -25,6 +25,7 @@ const VARIANT_CLASS: Record<TextVariant, string> = {
     muted: styles.muted,
     label: styles.label,
     mono: styles.mono,
+    eyebrow: styles.eyebrow,
 };
 
 const SIZE_CLASS: Record<TextSize, string> = {

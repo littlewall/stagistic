@@ -1,6 +1,11 @@
 import {
+    ActionCard,
+    ListPanel,
+    ListRow,
     Overlay,
     Panel,
+    SidebarShell,
+    Skeleton,
     Stack,
     Text,
 } from '@stagistic/ui';
@@ -98,6 +103,114 @@ export const primitives: CatalogGroup = {
                             <Overlay placement="right" elevation="canvas">
                                 <Text>Canvas body</Text>
                             </Overlay>
+                        </div>
+                    ),
+                },
+            ],
+        },
+        {
+            name: 'Skeleton',
+            variables: [
+                '--skeleton-w',
+                '--skeleton-h',
+                '--skeleton-radius',
+            ],
+            samples: [
+                {label: 'block', node: <Skeleton style={{width: '12rem'}} />},
+                {label: 'line', node: <Skeleton shape="line" style={{width: '12rem'}} />},
+                {label: 'circle', node: <Skeleton shape="circle" style={{width: '3rem'}} />},
+            ],
+        },
+        {
+            name: 'ActionCard',
+            variables: ['--action-card-pad', '--action-card-radius'],
+            samples: [
+                {
+                    label: 'default',
+                    node: (
+                        <ActionCard
+                            icon={<span>+</span>}
+                            title="New script"
+                            description="Start from scratch"
+                        />
+                    ),
+                },
+                {
+                    label: 'primary',
+                    node: (
+                        <ActionCard
+                            variant="primary"
+                            icon={<span>↥</span>}
+                            title="Import"
+                            description="From .fdx or .fountain"
+                        />
+                    ),
+                },
+                {
+                    label: 'with error',
+                    node: (
+                        <ActionCard
+                            icon={<span>↥</span>}
+                            title="Import"
+                            error="That file could not be read"
+                        />
+                    ),
+                },
+            ],
+        },
+        {
+            name: 'ListPanel',
+            variables: [
+                '--list-bg',
+                '--list-edge',
+                '--list-radius',
+                '--list-gap',
+            ],
+            samples: [
+                {
+                    label: 'bordered + compact rows',
+                    node: (
+                        <ListPanel inset>
+                            <ListRow interactive>Act I</ListRow>
+                            <ListRow interactive selected>Act II</ListRow>
+                            <ListRow interactive>Act III</ListRow>
+                        </ListPanel>
+                    ),
+                },
+            ],
+        },
+        {
+            name: 'ListRow',
+            variables: [
+                '--list-row-min-height',
+                '--list-row-padding',
+                '--list-row-gap',
+            ],
+            samples: [
+                {label: 'compact', node: <ListRow interactive>Scene 1</ListRow>},
+                {label: 'library', node: <ListRow size="library" interactive>Hamlet</ListRow>},
+                {label: 'selected', node: <ListRow interactive selected>Selected</ListRow>},
+                {
+                    label: 'slots',
+                    node: <ListRow leading={<span>≡</span>} trailing={<span>⋯</span>}>With slots</ListRow>,
+                },
+            ],
+        },
+        {
+            name: 'SidebarShell',
+            variables: ['--sidebar-head-height', '--sidebar-pad'],
+            samples: [
+                {
+                    label: 'title + actions',
+                    node: (
+                        <div
+                            style={{
+                                height: '12rem', width: '16rem', border: '1px solid var(--color-border)',
+                            }}
+                        >
+                            <SidebarShell title="Structure" actions={<button type="button">+</button>}>
+                                <div>Body content</div>
+                            </SidebarShell>
                         </div>
                     ),
                 },

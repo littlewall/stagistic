@@ -8,6 +8,7 @@ import {formatMusicNumber} from '@stagistic/script';
 import {
     clsx,
     EditPencilIcon,
+    IconButton,
     LinkSlashIcon,
     Tooltip,
 } from '@stagistic/ui';
@@ -50,19 +51,16 @@ const RowActionButton = ({
     children,
 }: RowActionButtonProps) => (
     <Tooltip label={tooltipLabel} placement="bottom">
-        <button
-            type="button"
-            className={styles.rowAction}
+        <IconButton
+            size="xs"
             aria-label={ariaLabel}
             onMouseDown={event => {
                 event.preventDefault();
             }}
-            onClick={() => {
-                onPress();
-            }}
+            onPress={onPress}
         >
             {children}
-        </button>
+        </IconButton>
     </Tooltip>
 );
 

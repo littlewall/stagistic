@@ -44,7 +44,11 @@ export const ScriptListSection = ({
                                     <span className={styles.scriptSubtitle}>{script.subtitle}</span>
                                 ) : null}
                             </span>
-                            <Text variant="muted" className={styles.scriptMeta}>
+                            <Text
+                                variant="muted"
+                                size="sm"
+                                className={styles.scriptMeta}
+                            >
                                 {formatLastEdited(script.updatedAt)}
                             </Text>
                         </button>

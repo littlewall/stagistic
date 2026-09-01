@@ -1,0 +1,47 @@
+.row {
+    --list-row-min-height: calc(28px * var(--size-scale));
+    --list-row-padding: 0 var(--space-md);
+    --list-row-gap: var(--space-sm);
+
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--list-row-gap);
+    align-items: center;
+    min-height: var(--list-row-min-height);
+    padding: var(--list-row-padding);
+    border-radius: var(--radius-md);
+}
+
+.compact {
+    --list-row-min-height: calc(28px * var(--size-scale));
+}
+
+.library {
+    --list-row-min-height: calc(58px * var(--size-scale));
+    --list-row-padding: var(--space-lg) var(--space-xl);
+    --list-row-gap: var(--space-lg);
+}
+
+.interactive {
+    cursor: pointer;
+    transition: background var(--duration-normal) var(--ease-standard);
+
+    &:hover {
+        background: var(--state-hover);
+    }
+}
+
+.selected {
+    background: var(--state-selected);
+    box-shadow: inset 0 0 0 1px var(--state-selected-edge);
+}
+
+.leading,
+.trailing {
+    display: inline-flex;
+    align-items: center;
+}
+
+.main {
+    min-width: 0;
+}

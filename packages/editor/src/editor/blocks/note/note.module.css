@@ -17,6 +17,10 @@
         left: calc(var(--note-indent-left, 0px) + 2ch);
     }
 
+    &:has(> :global(.node-musicOut + .ProseMirror-separator + .ProseMirror-trailingBreak))::after {
+        content: none;
+    }
+
     &::before,
     &::after {
         pointer-events: none;
@@ -32,6 +36,13 @@
 
     &::after {
         content: ']]';
+    }
+
+    & > :global(.node-musicOut)::after {
+        pointer-events: none;
+        content: ']]';
+        user-select: none;
+        color: inherit;
     }
 
     & > :global(.ProseMirror-trailingBreak:only-child) {

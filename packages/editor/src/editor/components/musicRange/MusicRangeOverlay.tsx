@@ -76,6 +76,8 @@ const MusicRangeOverlay = ({
         canvasRef,
         onDragStart: handleDragStart,
         previewClassName: styles.dropPreview,
+        rangePreviewClassName: styles.dropRangePreview,
+        targetClassName: styles.dropTarget,
     });
 
     useEffect(() => {
