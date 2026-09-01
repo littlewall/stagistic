@@ -58,11 +58,6 @@ describe('runRecordedActsAndScenesDemo', () => {
 
                     return Promise.resolve();
                 },
-                moveToBlockEnd: () => {
-                    events.push('flow');
-
-                    return Promise.resolve();
-                },
                 addAct: () => {
                     events.push('flow');
 

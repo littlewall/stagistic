@@ -3,7 +3,6 @@ export type ActsAndScenesFlowDriver = {
     typeBlock: (text: string) => Promise<void>,
     press: (key: string) => Promise<void>,
     pause: (durationMs: number) => Promise<void>,
-    moveToBlockEnd: (blockId: string) => Promise<void>,
     addAct: () => Promise<void>,
     waitForSecondAct: () => Promise<void>,
     beginFirstSceneDrag: () => Promise<void>,
@@ -13,7 +12,6 @@ export type ActsAndScenesFlowDriver = {
 
 export const runActsAndScenesFlow = async (driver: ActsAndScenesFlowDriver): Promise<void> => {
     await driver.pause(600);
-    await driver.moveToBlockEnd('acts-demo-station-dialogue-2');
     await driver.press('Enter');
     await driver.press('Control+1');
     await driver.typeHuman('THE CONSERVATORY');
@@ -25,8 +23,6 @@ export const runActsAndScenesFlow = async (driver: ActsAndScenesFlowDriver): Pro
         'The air is warmer here.',
         'JON',
         'Then we have found the right place.',
-        'A bell rings somewhere below.',
-        'They step into the light.',
     ];
 
     for (const [index, text] of sceneBodyBlocks.entries()) {

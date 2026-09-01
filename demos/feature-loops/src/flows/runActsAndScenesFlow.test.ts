@@ -7,7 +7,7 @@ import {
 const loadFlow = () => import('./runActsAndScenesFlow');
 
 describe('runActsAndScenesFlow', () => {
-    it('types the new scene heading humanly and adds its body one block at a time before moving it', async () => {
+    it('creates a scene without changing the operator-positioned cursor', async () => {
         const {runActsAndScenesFlow} = await loadFlow();
         const events: unknown[] = [];
 
@@ -29,11 +29,6 @@ describe('runActsAndScenesFlow', () => {
             },
             pause: durationMs => {
                 events.push(['pause', durationMs]);
-
-                return Promise.resolve();
-            },
-            moveToBlockEnd: blockId => {
-                events.push(['moveToBlockEnd', blockId]);
 
                 return Promise.resolve();
             },
@@ -66,7 +61,6 @@ describe('runActsAndScenesFlow', () => {
 
         expect(events).toEqual([
             ['pause', 600],
-            ['moveToBlockEnd', 'acts-demo-station-dialogue-2'],
             ['press', 'Enter'],
             ['press', 'Control+1'],
             ['typeHuman', 'THE CONSERVATORY'],
@@ -84,12 +78,6 @@ describe('runActsAndScenesFlow', () => {
             ['pause', 280],
             ['press', 'Enter'],
             ['typeBlock', 'Then we have found the right place.'],
-            ['pause', 280],
-            ['press', 'Enter'],
-            ['typeBlock', 'A bell rings somewhere below.'],
-            ['pause', 280],
-            ['press', 'Enter'],
-            ['typeBlock', 'They step into the light.'],
             ['pause', 1_000],
             ['addAct'],
             ['waitForSecondAct'],

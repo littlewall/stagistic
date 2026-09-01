@@ -55,10 +55,6 @@ export const createPlaywrightActsAndScenesDriver = (
         typeBlock: text => page.keyboard.insertText(text),
         press: key => page.keyboard.press(key),
         pause: durationMs => page.waitForTimeout(durationMs),
-        moveToBlockEnd: async blockId => {
-            await page.locator(`[data-id="${blockId}"]`).click();
-            await page.keyboard.press('End');
-        },
         addAct: () => page.getByRole('button', {name: 'Add act'}).click(),
         waitForSecondAct: () => page.locator(SECOND_ACT_SELECTOR).nth(1).waitFor({state: 'visible'}),
         beginFirstSceneDrag: async () => {

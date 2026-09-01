@@ -20,8 +20,7 @@ export const restoreSelectionForBlock = (editor: TiptapEditor, blockId: string |
 
     const tr = editor.state.tr
         .setSelection(TextSelection.near(editor.state.doc.resolve(selectionPos), 1))
-        .setMeta('preventUpdate', true)
-        .scrollIntoView();
+        .setMeta('preventUpdate', true);
 
     editor.view.dispatch(tr);
 };

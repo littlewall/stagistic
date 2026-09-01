@@ -122,14 +122,12 @@ describe('createPlaywrightActsAndScenesDriver', () => {
         const humanDriver = driver as unknown as {
             typeHuman: (text: string) => Promise<void>,
             typeBlock: (text: string) => Promise<void>,
-            moveToBlockEnd: (blockId: string) => Promise<void>,
         };
 
         await humanDriver.typeHuman('THE');
         await humanDriver.typeBlock('Vines climb the glass walls.');
         await driver.press('Control+1');
         await driver.pause(600);
-        await humanDriver.moveToBlockEnd('acts-demo-station-dialogue-2');
         await driver.addAct();
         await driver.waitForSecondAct();
         await driver.beginFirstSceneDrag();
@@ -146,8 +144,6 @@ describe('createPlaywrightActsAndScenesDriver', () => {
             ['insertText', 'Vines climb the glass walls.'],
             ['press', 'Control+1'],
             ['pause', 600],
-            ['blockClick', '[data-id="acts-demo-station-dialogue-2"]'],
-            ['press', 'End'],
             ['addAct'],
             [
                 'nth',
