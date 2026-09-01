@@ -29,6 +29,7 @@ interface EditorSidebarActions {
     onEditCharacter?: (characterId: string) => void,
     onEditGroup?: (groupId: string) => void,
     onFocusCharacter?: (characterKey: string) => void,
+    onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
     onSetGroupColor?: (groupId: string, colorHex: string | null) => void,
 }
 
@@ -61,6 +62,7 @@ export const EditorSidebar = ({
         onEditCharacter,
         onEditGroup,
         onFocusCharacter,
+        onSetCharacterColor,
         onSetGroupColor,
     } = actions ?? {};
     const {
@@ -102,7 +104,9 @@ export const EditorSidebar = ({
                                         >
                                             <CharacterRowConfirmed
                                                 character={character}
+                                                characterColorSaturation={characterColorSaturation}
                                                 onEditCharacter={onEditCharacter}
+                                                onSetCharacterColor={onSetCharacterColor}
                                             />
                                         </li>
                                     );
@@ -129,7 +133,6 @@ export const EditorSidebar = ({
                                                     group={group}
                                                     characterColorSaturation={characterColorSaturation}
                                                     onEditGroup={onEditGroup}
-                                                    onFocusCharacter={onFocusCharacter}
                                                     onSetGroupColor={onSetGroupColor}
                                                 />
                                             </li>

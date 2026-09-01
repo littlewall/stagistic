@@ -124,6 +124,9 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
     const handleSetGroupColor = useCallback((groupId: string, colorHex: string | null) => {
         void characters.handleSetGroupColor(groupId, colorHex).catch(() => undefined);
     }, [characters]);
+    const handleSetCharacterColor = useCallback((characterId: string, colorHex: string | null) => {
+        void Promise.resolve(characters.handleSetCharacterColor(characterId, colorHex)).catch(() => undefined);
+    }, [characters]);
 
     return (
         <div className={styles.content}>
@@ -149,6 +152,7 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
                     onEditCharacter: openAttributeManagerCharacter,
                     onEditGroup: openAttributeManagerGroup,
                     onFocusCharacter: handleFocusCharacter,
+                    onSetCharacterColor: handleSetCharacterColor,
                     onSetGroupColor: handleSetGroupColor,
                 }}
                 options={{

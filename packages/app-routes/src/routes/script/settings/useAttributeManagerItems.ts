@@ -1,9 +1,13 @@
 import {
+    getConfirmedCharacterColor,
     useEditorLiveCharacters,
     useEditorLiveMusic,
     useEditorLiveStructure,
 } from '@stagistic/editor';
-import {buildScriptStructureOutline} from '@stagistic/script';
+import {
+    buildScriptStructureOutline,
+    normalizeCharacterColorHex,
+} from '@stagistic/script';
 import type {
     AttributeManagerCharacter,
     AttributeManagerGroup,
@@ -24,6 +28,7 @@ interface UseAttributeManagerItemsArgs {
     characters: ReturnType<typeof useScriptCharactersContextValue>['contextValue'],
     music: ReturnType<typeof useScriptMusicState>['music'],
     getMusicTitleDraft: (musicId: string, confirmedTitle: string) => string,
+    characterColorSaturation?: number,
 }
 
 export const useAttributeManagerItems = ({
@@ -32,6 +37,7 @@ export const useAttributeManagerItems = ({
     characters,
     music,
     getMusicTitleDraft,
+    characterColorSaturation,
 }: UseAttributeManagerItemsArgs) => {
     const liveCharacters = useEditorLiveCharacters();
     const liveMusic = useEditorLiveMusic();
@@ -40,7 +46,11 @@ export const useAttributeManagerItems = ({
         return characters.confirmedCharacterRecords.map(character => ({
             id: character.id,
             name: liveCharacters.keyByCharacterId.get(character.id) ?? character.key,
-            color: character.colorHex ?? null,
+            color: getConfirmedCharacterColor(
+                character.id,
+                normalizeCharacterColorHex(character.colorHex),
+                characterColorSaturation,
+            ),
             outline: character.outline ?? null,
             groupNames: characters.confirmedGroupRecords
                 .filter(group => group.memberIds.includes(character.id))
@@ -50,6 +60,7 @@ export const useAttributeManagerItems = ({
     }, [
         characters.confirmedCharacterRecords,
         characters.confirmedGroupRecords,
+        characterColorSaturation,
         liveCharacters.keyByCharacterId,
     ]);
     const groupItems = useMemo<AttributeManagerGroup[]>(() => {
