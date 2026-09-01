@@ -254,7 +254,9 @@ const faqs = [
                                                     muted
                                                     loop
                                                     playsinline
-                                                />
+                                                >
+                                                    <source src={f.videoSrc} type="video/mp4" />
+                                                </video>
                                             </div>
                                         ) : f.imageSrc ? (
                                             <div class={s.featureMediaFrame}>
