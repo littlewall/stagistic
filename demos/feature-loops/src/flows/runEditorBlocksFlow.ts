@@ -9,9 +9,9 @@ export type EditorBlocksFlowDriver = {
 };
 
 export const runEditorBlocksFlow = async (driver: EditorBlocksFlowDriver): Promise<void> => {
-    await driver.typeWordGroups(['THE', ' ROOFTOP']);
+    await driver.typeHuman('THE ROOFTOP');
     await driver.moveToBlock('demo-stage-direction-1');
-    await driver.typeWordGroups(['A storm gathers', ' over the silent city.']);
+    await driver.typeHuman('A storm gathers over the silent city.');
     await driver.moveToBlock('demo-character-block-1');
 
     await driver.typeHuman('MAR');
@@ -22,6 +22,12 @@ export const runEditorBlocksFlow = async (driver: EditorBlocksFlowDriver): Promi
     await driver.press('Enter');
     await driver.moveToBlock('demo-dialogue');
     await driver.typeHuman('Wait. The storm is almost here.');
+    await driver.moveToBlock('demo-stage-direction-music');
+    await driver.typeHuman('A distant melody rises.');
+    await driver.typeHuman('#');
+    await driver.typeHuman('Dawn in Gold');
+    await driver.press('Enter');
+    await driver.waitForMusicPill();
     await driver.moveToBlock('demo-character-block-2');
 
     await driver.typeHuman('EL');
@@ -32,7 +38,7 @@ export const runEditorBlocksFlow = async (driver: EditorBlocksFlowDriver): Promi
     await driver.press('Enter');
     await driver.moveToBlock('demo-aside');
     await driver.pause(300);
-    await driver.typeWordGroups(['softly']);
+    await driver.typeHuman('softly');
     await driver.pause(120);
     await driver.moveToBlock('demo-lyrics');
     await driver.typeHuman('WE RISE');
@@ -40,10 +46,6 @@ export const runEditorBlocksFlow = async (driver: EditorBlocksFlowDriver): Promi
     await driver.typeHuman('WITH THE DAWN');
     await driver.moveToBlock('demo-stage-direction-2');
 
-    await driver.typeWordGroups(['First light spills', ' over the rooftop.']);
-    await driver.typeWordGroups(['#']);
-    await driver.typeHuman('Dawn in Gold');
-    await driver.press('Enter');
-    await driver.waitForMusicPill();
+    await driver.typeHuman('First light spills over the rooftop.');
     await driver.pause(1_400);
 };

@@ -53,6 +53,11 @@ export const createEditorBlocksDemoDocument = (): ScriptDocument => ({
             content: [],
         },
         {
+            type: 'stageDirection',
+            attrs: {id: 'demo-stage-direction-music'},
+            content: [],
+        },
+        {
             type: 'character',
             attrs: {id: 'demo-character-block-2'},
             content: [],

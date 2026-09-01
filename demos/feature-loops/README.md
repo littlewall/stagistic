@@ -24,10 +24,10 @@ demo script, cast, and music on every run.
 
 When the terminal prints `Ready for Recordly`, move the physical cursor outside
 the window, start Recordly recording, and press Enter in the terminal. The flow
-holds for 900 ms, writes the block sequence, and holds its final `Dawn in Gold` music
-pill for 1400 ms. When it prints `Flow complete`, stop the Recordly recording,
-then press Enter to close Chromium. The script is not reset before that final
-confirmation.
+holds for 900 ms, types every non-prepopulated block character by character,
+then holds the final stage direction for 1400 ms. When it prints `Flow complete`,
+stop the Recordly recording, then press Enter to close Chromium. The script is
+not reset before that final confirmation.
 
 To use a different local server address:
 
@@ -37,5 +37,5 @@ corepack pnpm --filter @stagistic/feature-demos demo:editor-blocks
 ```
 
 The flow writes `ACT I`, a scene and stage direction, MARA and ELI through the
-real character suggestions, dialogue, aside, two lyric lines, and a final stage
-direction with the existing `Dawn in Gold` music pill.
+real character suggestions, dialogue, aside, and two lyric lines. It starts
+`Dawn in Gold` in a stage direction before ELI.

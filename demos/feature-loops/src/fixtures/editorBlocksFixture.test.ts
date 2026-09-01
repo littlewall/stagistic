@@ -7,7 +7,7 @@ import {
 const loadFixture = () => import('./editorBlocksFixture');
 
 describe('createEditorBlocksDemoDocument', () => {
-    it('starts with a static act and an empty scene ready for writing', async () => {
+    it('starts with a static act and empty blocks ready for character-by-character typing', async () => {
         const {createEditorBlocksDemoDocument} = await loadFixture();
 
         expect(createEditorBlocksDemoDocument()).toEqual({
@@ -36,6 +36,11 @@ describe('createEditorBlocksDemoDocument', () => {
                 {
                     type: 'dialogue',
                     attrs: {id: 'demo-dialogue'},
+                    content: [],
+                },
+                {
+                    type: 'stageDirection',
+                    attrs: {id: 'demo-stage-direction-music'},
                     content: [],
                 },
                 {
@@ -158,6 +163,11 @@ describe('seedEditorBlocksDemoScript', () => {
                         {
                             type: 'dialogue',
                             attrs: {id: 'demo-dialogue'},
+                            content: [],
+                        },
+                        {
+                            type: 'stageDirection',
+                            attrs: {id: 'demo-stage-direction-music'},
                             content: [],
                         },
                         {

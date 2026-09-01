@@ -14,7 +14,7 @@ const HUMAN_KEY_PAUSES_MS = [
 
 type PlaywrightEditorBlocksPage = Pick<
     Page,
-    'keyboard' | 'waitForTimeout' | 'waitForFunction' | 'locator' | 'getByRole'
+    'keyboard' | 'waitForTimeout' | 'evaluate' | 'locator' | 'getByRole'
 >;
 
 const waitForVisible = async (page: PlaywrightEditorBlocksPage, selector: string) => {
@@ -41,23 +41,26 @@ export const createPlaywrightEditorBlocksDriver = (
     },
     press: key => page.keyboard.press(key),
     pause: durationMs => page.waitForTimeout(durationMs),
-    moveToBlock: async blockId => {
-        await page.keyboard.press('ArrowDown');
-        await page.waitForFunction(targetBlockId => {
-            const selection = window.getSelection();
-            const anchorNode = selection?.anchorNode;
+    moveToBlock: blockId => page.evaluate(targetBlockId => {
+        const editor = document.querySelector<HTMLElement>('[data-editor="true"]');
+        const target = document.querySelector<HTMLElement>(`[data-id="${targetBlockId}"]`);
 
-            if (!anchorNode) {
-                return false;
-            }
+        if (!editor || !target) {
+            throw new Error(`Could not select demo block: ${targetBlockId}`);
+        }
 
-            const anchorElement = anchorNode instanceof Element
-                ? anchorNode
-                : anchorNode.parentElement;
+        editor.focus({preventScroll: true});
 
-            return anchorElement?.closest('p[data-id]')?.getAttribute('data-id') === targetBlockId;
-        }, blockId);
-    },
+        const range = document.createRange();
+
+        range.selectNodeContents(target);
+        range.collapse(true);
+
+        const selection = window.getSelection();
+
+        selection?.removeAllRanges();
+        selection?.addRange(range);
+    }, blockId),
     waitForSuggestions: () => page.getByRole('listbox').waitFor({state: 'visible'}),
-    waitForMusicPill: () => waitForVisible(page, '[data-music-pill="start"]'),
+    waitForMusicPill: () => waitForVisible(page, '[data-music-pill="start"]:not(:has([data-music-draft="true"]))'),
 });

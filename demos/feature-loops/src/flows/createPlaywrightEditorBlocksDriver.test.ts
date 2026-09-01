@@ -47,8 +47,8 @@ describe('createPlaywrightEditorBlocksDriver', () => {
 
                 return Promise.resolve();
             },
-            waitForFunction: (_predicate: unknown, arg: unknown) => {
-                events.push(['waitForActiveBlock', arg]);
+            evaluate: (_callback: unknown, arg?: unknown) => {
+                events.push(['selectBlock', arg]);
 
                 return Promise.resolve();
             },
@@ -56,7 +56,7 @@ describe('createPlaywrightEditorBlocksDriver', () => {
             getByRole: (role: string) => locator(`[role="${role}"]`).last(),
         };
         const driver = createPlaywrightEditorBlocksDriver(
-            page as unknown as Pick<Page, 'keyboard' | 'waitForTimeout' | 'waitForFunction' | 'locator' | 'getByRole'>,
+            page as unknown as Pick<Page, 'keyboard' | 'waitForTimeout' | 'evaluate' | 'locator' | 'getByRole'>,
         );
 
         await driver.typeWordGroups(['A storm', ' gathers.']);
@@ -75,8 +75,7 @@ describe('createPlaywrightEditorBlocksDriver', () => {
             ['wait', 62],
             ['type', 'I'],
             ['wait', 44],
-            ['press', 'ArrowDown'],
-            ['waitForActiveBlock', 'demo-aside'],
+            ['selectBlock', 'demo-aside'],
             [
                 'waitFor',
                 '[role="listbox"]',
@@ -84,7 +83,7 @@ describe('createPlaywrightEditorBlocksDriver', () => {
             ],
             [
                 'waitFor',
-                '[data-music-pill="start"]',
+                '[data-music-pill="start"]:not(:has([data-music-draft="true"]))',
                 {state: 'visible'},
             ],
         ]);
