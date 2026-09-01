@@ -1,3 +1,4 @@
+import {MUSIC_ID_ATTR} from '@stagistic/script';
 import {
     type Editor,
     Extension,
@@ -6,7 +7,7 @@ import {Plugin} from '@tiptap/pm/state';
 
 import {handleTab} from '../tiptap/scriptBlock/handlers';
 import {
-    findScriptBlockSelectionPosFromState,
+    findScriptBlockByIdFromState,
     getActiveScriptBlockFromState,
     isSelectionAcrossBlocks,
     SCRIPT_BLOCK_NODE_NAMES,
@@ -46,14 +47,28 @@ const moveToNextBlock = (
         return true;
     }
 
-    const selectionPos = findScriptBlockSelectionPosFromState(
+    const resolvedNextBlock = findScriptBlockByIdFromState(
         editor.state,
         nextBlock.id,
         SCRIPT_BLOCK_NODE_NAMES,
     );
 
-    if (selectionPos === null) {
+    if (!resolvedNextBlock) {
         return true;
+    }
+
+    let selectionPos = resolvedNextBlock.to;
+
+    if (nextBlock.id === signature.music.blockId) {
+        resolvedNextBlock.node.descendants((node, pos) => {
+            if (node.attrs[MUSIC_ID_ATTR] !== signature.music.musicId) {
+                return true;
+            }
+
+            selectionPos = resolvedNextBlock.from + pos;
+
+            return false;
+        });
     }
 
     return editor.commands.setTextSelection(selectionPos);

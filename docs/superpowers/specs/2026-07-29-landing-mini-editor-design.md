@@ -78,8 +78,9 @@ are created.
 
 ### Fixed navigation
 
-- Enter moves the caret to the start of the next fixed block and does not
-  create or split a block.
+- Enter moves the caret to the end of the next fixed block and does not create
+  or split a block. If that block ends with protected music, the caret stops
+  before the music pill.
 - Enter in the final block is consumed and does nothing.
 - Backspace at the start of a block is consumed and cannot join it to the
   previous block.

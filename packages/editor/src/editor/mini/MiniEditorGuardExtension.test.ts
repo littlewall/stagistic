@@ -148,9 +148,11 @@ describe('mini editor guard', () => {
         editor.destroy();
     });
 
-    it('moves Enter to the next block and consumes it in the final block', () => {
+    it('moves Enter to the end of the next block and consumes it in the final block', () => {
         const editor = createGuardedMiniEditorTestEditor();
         const characterPos = findMiniEditorTestBlockPosition(editor, 'mini-character');
+        const asidePos = findMiniEditorTestBlockPosition(editor, 'mini-aside');
+        const asideNodeSize = editor.state.doc.nodeAt(asidePos)?.nodeSize ?? 0;
         const dialoguePos = findMiniEditorTestBlockPosition(editor, 'mini-dialogue');
 
         editor.commands.setTextSelection(characterPos + 1);
@@ -164,6 +166,7 @@ describe('mini editor guard', () => {
             editor.state,
             SCRIPT_BLOCK_NODE_NAMES,
         )?.id).toBe('mini-aside');
+        expect(editor.state.selection.from).toBe(asidePos + asideNodeSize - 1);
 
         editor.commands.setTextSelection(dialoguePos + 1);
 
@@ -173,6 +176,28 @@ describe('mini editor guard', () => {
             miniEditorStructureSignature,
         )).toBe(true);
         expect(editor.state.doc.childCount).toBe(5);
+
+        editor.destroy();
+    });
+
+    it('moves Enter before protected music at the end of the next block', () => {
+        const editor = createGuardedMiniEditorTestEditor();
+        const scenePos = findMiniEditorTestBlockPosition(editor, 'mini-scene');
+        const stageDirectionPos = findMiniEditorTestBlockPosition(
+            editor,
+            'mini-stage-direction',
+        );
+
+        editor.commands.setTextSelection(scenePos + 1);
+
+        expect(handleMiniEditorKeyDown(
+            editor,
+            createKeyEvent('Enter'),
+            miniEditorStructureSignature,
+        )).toBe(true);
+        expect(editor.state.selection.from).toBe(
+            stageDirectionPos + 1 + 'Music starts. '.length,
+        );
 
         editor.destroy();
     });
