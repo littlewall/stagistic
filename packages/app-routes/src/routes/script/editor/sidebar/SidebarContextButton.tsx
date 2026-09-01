@@ -1,7 +1,5 @@
-import {Tooltip} from '@stagistic/ui';
+import {IconButton, Tooltip} from '@stagistic/ui';
 import {type ReactNode} from 'react';
-
-import styles from './SidebarContextButton.module.css';
 
 interface SidebarContextButtonProps {
     ariaLabel: string,
@@ -17,9 +15,8 @@ export const SidebarContextButton = ({
     children,
 }: SidebarContextButtonProps) => {
     const button = (
-        <button
-            type="button"
-            className={styles.button}
+        <IconButton
+            size="xs"
             aria-label={ariaLabel}
             onMouseDown={event => {
                 event.preventDefault();
@@ -27,7 +24,7 @@ export const SidebarContextButton = ({
             }}
         >
             {children}
-        </button>
+        </IconButton>
     );
 
     if (!tooltipLabel) {

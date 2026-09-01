@@ -1,7 +1,7 @@
 import {
     ArrowLeftIcon,
     ArrowRightIcon,
-    Button,
+    IconButton,
     Input,
     ProgressCircle,
 } from '@stagistic/ui';
@@ -165,40 +165,43 @@ export const ExportPreview = () => {
                     role="group"
                     aria-label="Preview zoom"
                 >
-                    <button
-                        type="button"
+                    <IconButton
+                        variant="outline"
+                        size="md"
+                        shape="pill"
                         aria-label="Zoom out"
-                        disabled={!canExport || pageCount === 0}
-                        onClick={() => setZoom(value => Math.max(0.5, value - 0.1))}
+                        isDisabled={!canExport || pageCount === 0}
+                        onPress={() => setZoom(value => Math.max(0.5, value - 0.1))}
                     >
                         -
-                    </button>
+                    </IconButton>
                     <span>{Math.round(zoom * 100)}%</span>
-                    <button
-                        type="button"
+                    <IconButton
+                        variant="outline"
+                        size="md"
+                        shape="pill"
                         aria-label="Zoom in"
-                        disabled={!canExport || pageCount === 0}
-                        onClick={() => setZoom(value => Math.min(1.5, value + 0.1))}
+                        isDisabled={!canExport || pageCount === 0}
+                        onPress={() => setZoom(value => Math.min(1.5, value + 0.1))}
                     >
                         +
-                    </button>
+                    </IconButton>
                 </div>
                 <div
                     className={styles.pageControls}
                     role="group"
                     aria-label="Preview page navigation"
                 >
-                    <Button
-                        type="button"
+                    <IconButton
                         variant="outline"
-                        size="icon"
-                        className={styles.toolbarButton}
+                        size="md"
+                        shape="pill"
                         aria-label="Previous page"
                         isDisabled={pageCount === 0 || currentPage === 1}
                         onPress={() => goToPage(currentPage - 1)}
                     >
                         <ArrowLeftIcon aria-hidden="true" />
-                    </Button>
+                    </IconButton>
                     <div className={styles.pageIndicator}>
                         <span>Page</span>
                         <Input
@@ -226,17 +229,16 @@ export const ExportPreview = () => {
                             / {pageCount > 0 ? pageCount : '–'}
                         </span>
                     </div>
-                    <Button
-                        type="button"
+                    <IconButton
                         variant="outline"
-                        size="icon"
-                        className={styles.toolbarButton}
+                        size="md"
+                        shape="pill"
                         aria-label="Next page"
                         isDisabled={pageCount === 0 || currentPage === pageCount}
                         onPress={() => goToPage(currentPage + 1)}
                     >
                         <ArrowRightIcon aria-hidden="true" />
-                    </Button>
+                    </IconButton>
                 </div>
                 <div className={styles.toolbarActions}>
                     <ExportDownloadButton />

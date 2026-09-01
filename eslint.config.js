@@ -61,6 +61,7 @@ export default [
                         'packages/ui/vite.config.ts',
                         'packages/app-routes/vite.config.ts',
                         'packages/app-core/vite.config.ts',
+                        'demos/feature-loops/vitest.config.ts',
                         'packages/editor/vitest.browser.config.ts',
                         'packages/editor/vitest.browser.debug.config.ts',
                         'packages/ui/vitest.browser.config.ts',

@@ -1,17 +1,6 @@
-.module {
-    display: grid;
-    gap: var(--space-md);
-}
-
-.settingRow,
 .countField,
 .orderField {
     height: var(--control-trigger-height);
-}
-
-.settingRow {
-    display: flex;
-    align-items: center;
 }
 
 .title {

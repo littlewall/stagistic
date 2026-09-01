@@ -1,4 +1,5 @@
 import {type BasicExportConfig, deriveIntegratedScoreExportPlan} from '@stagistic/export';
+import {Notice} from '@stagistic/ui';
 import {useState} from 'react';
 
 import {useScriptSettingsModal} from '../settings/ScriptSettingsModalProvider';
@@ -16,7 +17,7 @@ export const IntegratedScoreWarning = ({config}: {config: BasicExportConfig}) =>
     }
 
     return (
-        <div className={styles.warning} role="status">
+        <Notice variant="warning" className={styles.warningExtras}>
             <span>{`${missing.length} music ${missing.length === 1 ? 'number is' : 'numbers are'} missing an Integrated score PDF`}</span>
             <button type="button" onClick={() => setIsOpen(value => !value)}>
                 Review missing music
@@ -32,6 +33,6 @@ export const IntegratedScoreWarning = ({config}: {config: BasicExportConfig}) =>
                     ))}
                 </ul>
             ) : null}
-        </div>
+        </Notice>
     );
 };

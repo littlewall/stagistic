@@ -26,6 +26,15 @@
     font-family: var(--font-family-mono);
 }
 
+.eyebrow {
+    --text-color: var(--color-text-muted);
+
+    font-family: var(--font-family-sans);
+    font-weight: var(--font-weight-semibold);
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-lg);
+}
+
 .sizeXxs {
     --text-size: var(--font-size-xxs);
 }

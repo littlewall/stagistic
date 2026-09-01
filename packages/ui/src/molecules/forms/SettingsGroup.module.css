@@ -1,0 +1,26 @@
+.group {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.row {
+    display: flex;
+    align-items: center;
+    height: var(--control-trigger-height);
+}
+
+.panelHeader {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.panelTitle {
+    margin: 0;
+    font-size: var(--font-size-2xl);
+    font-weight: var(--font-weight-semibold);
+}
+
+.panelDescription {
+    margin: 0;
+    color: var(--color-text-muted);
+}
