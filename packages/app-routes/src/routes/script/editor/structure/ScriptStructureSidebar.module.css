@@ -154,6 +154,8 @@
 }
 
 .sceneRow {
+    grid-template-columns: auto 1fr auto;
+
     &:hover:not(.active) {
         background: var(--state-hover);
     }
@@ -229,6 +231,16 @@
 .itemLabel {
     min-width: 0;
     overflow-wrap: break-word;
+}
+
+.pageBadge {
+    justify-self: end;
+    padding-inline: var(--space-md);
+    font-size: var(--font-size-xs);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--line-height-none);
+    color: color-mix(in oklch, var(--color-text-muted) 55%, var(--color-border));
+    white-space: nowrap;
 }
 
 .sceneTitle {

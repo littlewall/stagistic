@@ -29,6 +29,7 @@ export type {
     EditorLiveActiveBlockInfo,
     EditorLiveCharacterSnapshot,
     EditorLiveMusicSnapshot,
+    EditorLiveScenePlacementSnapshot,
     EditorLiveSnapshot,
     EditorLiveStructureRow,
     EditorLiveStructureSnapshot,
@@ -48,6 +49,7 @@ export type {
     PersistentMusicKind,
     PersistentMusicRef,
     RenameActRequest,
+    ScenePlacement,
     UpdateMusicRequest,
 } from './editor/contracts';
 export {default as ScriptEditor} from './editor/Editor';
@@ -67,6 +69,7 @@ export {
     useEditorLiveActiveBlockInfo,
     useEditorLiveCharacters,
     useEditorLiveMusic,
+    useEditorLiveScenePlacement,
     useEditorLiveSelector,
     useEditorLiveSnapshot,
     useEditorLiveStructure,

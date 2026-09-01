@@ -8,6 +8,7 @@ import type {
     EditorLiveActiveBlockInfo,
     EditorLiveCharacterSnapshot,
     EditorLiveMusicSnapshot,
+    EditorLiveScenePlacementSnapshot,
     EditorLiveSnapshot,
     EditorLiveStructureSnapshot,
 } from '../contracts';
@@ -88,6 +89,10 @@ export const useEditorLiveSnapshot = () => {
 
 export const useEditorLiveStructure = () => {
     return useEditorLiveSelector<EditorLiveStructureSnapshot>(snapshot => snapshot.structure);
+};
+
+export const useEditorLiveScenePlacement = () => {
+    return useEditorLiveSelector<EditorLiveScenePlacementSnapshot>(snapshot => snapshot.scenePlacement);
 };
 
 export const useEditorLiveCharacters = () => {
