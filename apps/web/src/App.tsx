@@ -30,6 +30,9 @@ const DevUiRoute = import.meta.env.DEV
 const EditorBlocksDemoRoute = import.meta.env.DEV
     ? lazy(() => import('./dev/EditorBlocksDemoRoute').then(module => ({default: module.EditorBlocksDemoRoute})))
     : null;
+const ActsAndScenesDemoRoute = import.meta.env.DEV
+    ? lazy(() => import('./dev/ActsAndScenesDemoRoute').then(module => ({default: module.ActsAndScenesDemoRoute})))
+    : null;
 
 const BootedApp = () => {
     const [scriptRepository, setScriptRepository] = useState<ScriptRepository | null>(null);
@@ -115,6 +118,16 @@ const BootedApp = () => {
                                 element={(
                                     <Suspense fallback={null}>
                                         <EditorBlocksDemoRoute />
+                                    </Suspense>
+                                )}
+                            />
+                        ) : null}
+                        {ActsAndScenesDemoRoute ? (
+                            <Route
+                                path="/dev/demos/acts-and-scenes"
+                                element={(
+                                    <Suspense fallback={null}>
+                                        <ActsAndScenesDemoRoute />
                                     </Suspense>
                                 )}
                             />

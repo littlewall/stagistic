@@ -39,3 +39,20 @@ corepack pnpm --filter @stagistic/feature-demos demo:editor-blocks
 The flow writes `ACT I`, a scene and stage direction, MARA and ELI through the
 real character suggestions, dialogue, aside, and two lyric lines. It starts
 `Dawn in Gold` in a stage direction before ELI.
+
+## Acts and scenes
+
+Start the web app as above, then run:
+
+```sh
+corepack pnpm --filter @stagistic/feature-demos demo:acts-and-scenes
+```
+
+The runner opens the same 1440 × 900 dark-mode editor and waits for Recordly
+before playback. The roughly seven-second loop starts with `ACT I` and `THE
+STATION` and ends at `No. We wait for the signal.` The flow creates `THE
+CONSERVATORY` through the real scene shortcut, types its heading character by
+character, then fills the scene body one block at a time with a short pause
+between blocks. It adds `ACT II`, then drags `THE STATION` under it, stopping
+halfway across the current horizontal drag path. The outline remains visible
+after the drop until the operator confirms that recording has stopped.
