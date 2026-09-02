@@ -10,6 +10,8 @@ export interface StructureRowSceneProps {
     index: number,
     groupId: string,
     isActive: boolean,
+    /** 1-based page the scene starts on; omitted until pagination has measured. */
+    startPage?: number,
     onFocus: (blockId: string) => void,
 }
 

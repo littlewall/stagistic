@@ -128,6 +128,17 @@ export interface EditorLiveStructureSnapshot {
     actByBlockId: ReadonlyMap<string, string>,
 }
 
+export interface ScenePlacement {
+    /** 1-based page the scene heading sits on. */
+    startPage: number,
+}
+
+export interface EditorLiveScenePlacementSnapshot {
+    byBlockId: ReadonlyMap<string, ScenePlacement>,
+    /** True once pagination has produced at least one measured layout. */
+    hasComputed: boolean,
+}
+
 export type EditorLiveMusicSnapshot = EditorIndexSnapshot['music'];
 
 export interface EditorLiveCharacterSnapshot {
@@ -148,6 +159,7 @@ export interface EditorLiveSnapshot {
     revision: number,
     index: EditorIndexSnapshot,
     structure: EditorLiveStructureSnapshot,
+    scenePlacement: EditorLiveScenePlacementSnapshot,
     characters: EditorLiveCharacterSnapshot,
     music: EditorLiveMusicSnapshot,
     activeBlockId: string | null,

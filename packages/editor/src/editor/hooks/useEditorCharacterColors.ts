@@ -18,6 +18,7 @@ import {buildSidebarProjectionFromIndex} from '../live/buildSidebarProjectionFro
 import {
     createEditorSnapshotStore,
     type EditorSnapshotStore,
+    EMPTY_SCENE_PLACEMENT,
 } from '../live/store';
 import {
     type CharacterColorRefsBundle,
@@ -130,6 +131,7 @@ export const useEditorCharacterColors = ({
             revision: 0,
             index: indexSnapshot,
             structure: projection.structure,
+            scenePlacement: EMPTY_SCENE_PLACEMENT,
             characters: projection.characters,
             music: indexSnapshot.music,
             activeBlockId: null,

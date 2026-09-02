@@ -1,5 +1,6 @@
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {
+    type EditorState,
     Plugin,
     PluginKey,
 } from '@tiptap/pm/state';
@@ -16,6 +17,10 @@ import {
 
 export const paginationKey = new PluginKey<PaginationPluginState>('script-pagination');
 export const PAGINATION_CONTROL_META_KEY = 'script-pagination-control';
+
+export const getPaginationPluginState = (state: EditorState): PaginationPluginState | null => {
+    return paginationKey.getState(state) ?? null;
+};
 
 const TYPING_RECALC_DELAY_MS = 250;
 

@@ -189,6 +189,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         characters: charactersContextValue,
         music: musicState.music,
         getMusicTitleDraft,
+        characterColorSaturation: resolvedScriptSettings.visual.characterColorSaturation,
     });
     const shortcutPrefix = isApplePlatform() ? 'Option' : 'Alt';
     const draftSaveError = scriptSettingsDraftError

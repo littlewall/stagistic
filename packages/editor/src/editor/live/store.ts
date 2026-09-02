@@ -1,6 +1,7 @@
 import type {
     EditorIndexSnapshot,
     EditorLiveCharacterSnapshot,
+    EditorLiveScenePlacementSnapshot,
     EditorLiveSnapshot,
     EditorLiveStructureSnapshot,
 } from '../contracts';
@@ -28,6 +29,11 @@ export const EMPTY_STRUCTURE: EditorLiveStructureSnapshot = {
     actByBlockId: new Map<string, string>(),
 };
 
+export const EMPTY_SCENE_PLACEMENT: EditorLiveScenePlacementSnapshot = {
+    byBlockId: new Map<string, never>(),
+    hasComputed: false,
+};
+
 export const EMPTY_CHARACTERS: EditorLiveCharacterSnapshot = {
     countsByKey: new Map<string, number>(),
     countsByCharacterId: new Map<string, number>(),
@@ -40,6 +46,7 @@ export const createEmptyEditorLiveSnapshot = (): EditorLiveSnapshot => {
         revision: 0,
         index: EMPTY_INDEX,
         structure: EMPTY_STRUCTURE,
+        scenePlacement: EMPTY_SCENE_PLACEMENT,
         characters: EMPTY_CHARACTERS,
         music: [],
         activeBlockId: null,
@@ -108,6 +115,7 @@ export const createEditorSnapshotStore = (initialSnapshot?: EditorLiveSnapshot):
             !Object.is(snapshot.revision, nextSnapshot.revision)
             || !Object.is(snapshot.index, nextSnapshot.index)
             || !Object.is(snapshot.structure, nextSnapshot.structure)
+            || !Object.is(snapshot.scenePlacement, nextSnapshot.scenePlacement)
             || !Object.is(snapshot.characters, nextSnapshot.characters)
             || !Object.is(snapshot.music, nextSnapshot.music)
             || !Object.is(snapshot.activeBlockId, nextSnapshot.activeBlockId)

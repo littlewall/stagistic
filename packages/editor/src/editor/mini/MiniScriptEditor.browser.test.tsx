@@ -79,8 +79,7 @@ const createEmptyNoteDocument = (): ScriptDocument => {
     return {
         ...baseDocument,
         content: [
-            ...(baseDocument.content ?? []),
-            {
+            ...baseDocument.content ?? [], {
                 type: 'note',
                 attrs: {id: 'mini-empty-note'},
             },
@@ -451,6 +450,25 @@ describe('MiniScriptEditor', () => {
         expect(pillWrapper.nextSibling?.textContent?.includes('X') ?? false).toBe(false);
     });
 
+    it('moves Enter before the trailing music pill', async () => {
+        const host = renderMiniEditor();
+        const scene = await waitForElement<HTMLElement>(
+            host,
+            'p[blocktype="scene"]',
+        );
+        const stageDirection = await waitForElement<HTMLElement>(
+            host,
+            'p[blocktype="stageDirection"]',
+        );
+
+        await userEvent.click(scene);
+        setCollapsedSelection(scene, scene.childNodes.length);
+        await userEvent.keyboard('{Enter}X');
+
+        expect(stageDirection.textContent?.startsWith('Music starts. X')).toBe(true);
+        expect(stageDirection.querySelector('[data-music-pill="start"]')).toBeTruthy();
+    });
+
     it('suggests names written into the character block for stage directions', async () => {
         const host = renderMiniEditor();
         const character = await waitForElement<HTMLElement>(
@@ -530,39 +548,35 @@ describe('MiniScriptEditor', () => {
         expect(option.textContent?.trim()).toBe('MARA');
     });
 
-    it('moves forward with Enter and stops Backspace at the block boundary', async () => {
+    it('moves to the next block end with Enter and stops Backspace at its boundary', async () => {
         const host = renderMiniEditor();
-        const scene = await waitForElement<HTMLElement>(
+        const character = await waitForElement<HTMLElement>(
             host,
-            'p[blocktype="scene"]',
+            'p[blocktype="character"]',
         );
-        const stageDirection = await waitForElement<HTMLElement>(
+        const aside = await waitForElement<HTMLElement>(
             host,
-            'p[blocktype="stageDirection"]',
+            'p[blocktype="aside"]',
         );
-        const originalSceneText = scene.textContent;
+        const originalCharacterText = character.textContent;
 
-        await userEvent.click(scene);
+        await userEvent.click(character);
 
-        const sceneText = scene.firstChild;
-
-        if (!sceneText) {
-            throw new Error('Expected scene text.');
-        }
-
-        setCollapsedSelection(sceneText, sceneText.textContent?.length ?? 0);
+        setCollapsedSelection(
+            character,
+            character.childNodes.length,
+        );
         await userEvent.keyboard('{Enter}');
 
         const selectionAfterEnter = window.getSelection();
 
-        expect(
-            stageDirection.contains(selectionAfterEnter?.anchorNode ?? null),
-        ).toBe(true);
+        expect(aside.contains(selectionAfterEnter?.anchorNode ?? null)).toBe(true);
+        expect(selectionAfterEnter?.anchorOffset).toBe(aside.textContent?.length);
 
-        setCollapsedSelection(stageDirection, 0);
+        setCollapsedSelection(aside, 0);
         await userEvent.keyboard('{Backspace}');
 
-        expect(scene.textContent).toBe(originalSceneText);
+        expect(character.textContent).toBe(originalCharacterText);
         expect(host.querySelectorAll('p[blocktype]')).toHaveLength(5);
     });
 

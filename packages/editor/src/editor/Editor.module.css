@@ -13,6 +13,7 @@
     --color-block-aside: oklch(from var(--base-neutral) var(--L-block-aside) calc(c * var(--C-block)) h);
     --color-block-centered: oklch(from var(--base-neutral) var(--L-block-centered) calc(c * var(--C-block)) h);
     --color-block-lyrics: var(--color-block-dialogue);
+    --color-scene-marker: var(--base-amber);
 
     overflow: hidden;
     display: flex;
