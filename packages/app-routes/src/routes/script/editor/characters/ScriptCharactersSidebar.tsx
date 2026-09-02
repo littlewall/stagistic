@@ -85,7 +85,6 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
             ),
             colorHex: normalizedColorHex ?? null,
             isConfirmed: true,
-            isEmpty: group.memberIds.length === 0,
             isColorUpdatePending: characters.colorUpdatingGroupIds.includes(group.id),
         };
     }), [

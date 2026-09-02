@@ -33,7 +33,7 @@ export const useCharacterColorPickerState = ({
     characterColorSaturation,
 }: UseCharacterColorPickerStateArgs) => {
     const resolvedColorSaturation = clampCharacterColorSaturation(characterColorSaturation);
-    const currentCharacterColorHex = normalizeHexColor(character.colorHex ?? character.color)
+    const currentCharacterColorHex = normalizeHexColor(character.color)
         ?? DEFAULT_COLOR_HEX;
     const colorTriggerRef = useRef<HTMLSpanElement | null>(null);
     const [isColorPickerOpen, setIsColorPickerOpen] = useState(false);

@@ -5,8 +5,10 @@
     "type": "module",
     "exports": {
         "./acts-and-scenes-fixture": "./src/fixtures/actsAndScenesFixture.ts",
+        "./characters-fixture": "./src/fixtures/charactersDemoFixture.ts",
         "./editor-blocks-fixture": "./src/fixtures/editorBlocksFixture.ts",
         "./run-acts-and-scenes-demo": "./src/demo/runActsAndScenesDemo.ts",
+        "./run-characters-demo": "./src/demo/runCharactersDemo.ts",
         "./run-editor-blocks-demo": "./src/demo/runEditorBlocksDemo.ts"
     },
     "dependencies": {
@@ -14,6 +16,8 @@
     },
     "scripts": {
         "demo:acts-and-scenes": "tsx src/runActsAndScenesDemo.ts",
+        "demo:characters-attributes": "tsx src/runCharactersAttributesDemo.ts",
+        "demo:characters-editor": "tsx src/runCharactersEditorDemo.ts",
         "demo:editor-blocks": "tsx src/runEditorBlocksDemo.ts",
         "test": "vp test run -c vitest.config.ts",
         "typecheck": "tsc -b"

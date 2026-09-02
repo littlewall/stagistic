@@ -67,12 +67,17 @@ export const useAttributeManagerItems = ({
         return characters.confirmedGroupRecords.map(group => ({
             id: group.id,
             name: liveCharacters.keyByCharacterId.get(group.id) ?? group.key,
-            color: group.colorHex,
+            color: getConfirmedCharacterColor(
+                group.id,
+                normalizeCharacterColorHex(group.colorHex),
+                characterColorSaturation,
+            ),
             memberIds: group.memberIds,
             usageCount: liveCharacters.countsByCharacterId.get(group.id) ?? 0,
         })).sort((left, right) => left.name.localeCompare(right.name));
     }, [
         characters.confirmedGroupRecords,
+        characterColorSaturation,
         liveCharacters.countsByCharacterId,
         liveCharacters.keyByCharacterId,
     ]);

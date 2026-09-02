@@ -66,7 +66,6 @@ const emptyGroup = {
     color: '#9988aa',
     colorHex: '#9988aa',
     isConfirmed: true,
-    isEmpty: true,
 };
 
 const renderSidebar = (
@@ -163,6 +162,34 @@ describe('EditorSidebar character rows', () => {
         expect(onSetCharacterColor).toHaveBeenCalledWith('char-1', expect.any(String));
     });
 
+    it('renders the resolved character color instead of its stored color', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+
+        document.body.appendChild(host);
+        root.render(
+            <EditorSidebar
+                data={{
+                    confirmedCharacters: [
+                        {
+                            ...confirmedCharacter,
+                            color: '#BBAA99',
+                            colorHex: '#112233',
+                        },
+                    ],
+                    groups: [],
+                    unconfirmedCharacters: [],
+                }}
+                actions={{onSetCharacterColor: vi.fn()}}
+            />,
+        );
+        mountedRoots.push(root);
+
+        const colorTrigger = await waitForElement<HTMLElement>('[aria-label="Choose color for ANNA"]');
+
+        expect(colorTrigger.style.getPropertyValue('--character-color')).toBe('#BBAA99');
+    });
+
     it('places the pending confirmation action at the far right', async () => {
         const host = document.createElement('div');
         const root = createRoot(host);
@@ -232,13 +259,13 @@ describe('EditorSidebar group rows', () => {
         expect(sidebarText.indexOf('ALL')).toBeLessThan(sidebarText.indexOf('BORIS'));
     });
 
-    it('shows a conditional Groups heading and a quiet Empty tag', async () => {
+    it('shows a conditional Groups heading without an empty-state tag', async () => {
         renderGroups();
 
         await waitForElement('[aria-label="Manage group ALL"]');
 
         expect(document.querySelector('aside')?.textContent).toContain('Groups');
-        expect(document.querySelector('aside')?.textContent).toContain('Empty');
+        expect(document.querySelector('aside')?.textContent).not.toContain('Empty');
         expect(Array.from(document.querySelectorAll('h2')).map(heading => heading.textContent))
             .toEqual(['Groups', 'Unconfirmed']);
         expect(getComputedStyle(document.querySelector('h2')!).fontWeight).toBe('400');
@@ -296,6 +323,34 @@ describe('EditorSidebar group rows', () => {
         await page.elementLocator(applyButton).click();
 
         expect(onSetGroupColor).toHaveBeenCalledWith('group-1', expect.any(String));
+    });
+
+    it('renders the resolved group color instead of its stored color', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+
+        document.body.appendChild(host);
+        root.render(
+            <EditorSidebar
+                data={{
+                    confirmedCharacters: [],
+                    groups: [
+                        {
+                            ...emptyGroup,
+                            color: '#CCBBAA',
+                            colorHex: '#223344',
+                        },
+                    ],
+                    unconfirmedCharacters: [],
+                }}
+                actions={{onSetGroupColor: vi.fn()}}
+            />,
+        );
+        mountedRoots.push(root);
+
+        const colorTrigger = await waitForElement<HTMLElement>('[aria-label="Choose color for ALL"]');
+
+        expect(colorTrigger.style.getPropertyValue('--character-color')).toBe('#CCBBAA');
     });
 
     it('treats an existing group as sidebar content', async () => {

@@ -31,12 +31,6 @@
     gap: var(--space-md);
 }
 
-.groupEmptyTag {
-    flex-shrink: 0;
-    padding: var(--space-xs) var(--space-md);
-    font-size: var(--font-size-xxs);
-}
-
 .characterItem {
     overflow: hidden;
     background: transparent;

@@ -56,3 +56,26 @@ character, then fills the scene body one block at a time with a short pause
 between blocks. It adds `ACT II`, then drags `THE STATION` under it, stopping
 halfway across the current horizontal drag path. The outline remains visible
 after the drop until the operator confirms that recording has stopped.
+
+## Characters
+
+Start the web app as above. Capture the editor sequence with:
+
+```sh
+corepack pnpm --filter @stagistic/feature-demos demo:characters-editor
+```
+
+It starts with `MARA` and `ELI` confirmed, an empty `THE WATCH` group, and
+`WARDEN` as an unconfirmed character in the sidebar. The flow writes a solo
+MARA cue and line, a `MARA / ELI` cue with a shared line, then tags MARA in a
+stage direction.
+
+Capture the group-management sequence separately with:
+
+```sh
+corepack pnpm --filter @stagistic/feature-demos demo:characters-attributes
+```
+
+Before Recordly starts, this runner opens Attribute manager → Characters →
+Groups with `THE WATCH` selected. The flow adds MARA and ELI as members, then
+applies a new preset color to the group.
