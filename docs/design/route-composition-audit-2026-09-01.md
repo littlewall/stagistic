@@ -86,3 +86,51 @@ Header: sticky, `--layer-panel-bg`, `border-bottom 1px --color-border-subtle`, t
 2. `ActionCard` gains an `error` slot beyond the spec-draft props — **needs OK.**
 3. `ListRow` selected state gains an inset `--state-selected-edge` ring the structure sidebar lacks today — **needs OK.**
 4. `SearchInput` keeps its own 44px/36px height scale rather than borrowing `--control-height-*` — **needs OK.**
+
+## HomeRoute recomposition — delta table (2026-09-01, rulings 2026-09-02)
+
+Every value the HomeRoute recomposition (plan `docs/superpowers/plans/2026-09-01-homeroute-recomposition.md`)
+changes versus today's `HomeRoute.module.css`. Nothing outside this table is unified.
+Risk column: **structural** = DOM moved, pixels identical; **visual** = pixels move; **drop** = a detail is removed.
+
+| # | Delta | Today (route) | Component | Risk | Ruling |
+|---|---|---|---|---|---|
+| H1 | Primary-card icon chip host | chip bg on the `<svg>` itself (`.startActionIcon`) | `ActionCard` puts the chip bg on the `.icon` `<span>`, `<svg>` inside | structural | `ActionCard .icon > svg {width:100%;height:100%;display:block}` — the 28px chip with 5px padding yields an 18px glyph either way, so pixels are identical. Browser-test icon-bg selector moves `svg` → its wrapper. |
+| H2 | Row hover host | `.scriptRow` (flex wrapper; `button.parentElement`) | `ListRow .row` (grid; button lands in `.main`, so `parentElement` = `.main`) | structural | Hover test selects the row itself via `button.closest('[class*="scriptRow"]')`. `--state-hover` value unchanged. |
+| H3 | Error-state text colour | `<Text variant="muted">` + `Button` | `Notice variant="error"` = `--color-status-danger` | visual | **APPROVED 2026-09-02: keep muted.** The error state is route layout over existing primitives, not a reimplemented pattern — it does not move to `Notice`. `.errorState` stays as residual layout. |
+| H4 | Empty / no-result vertical padding | `.emptyLibrary` `3xl 0`, `.noResults` `5xl 0` | `Notice variant="empty"` carries no padding | structural | Padding is route layout — stays as a thin wrapper class on `Notice`. Text treatment (centered, muted, md, pretty) is what `Notice empty` already renders. |
+| H5 | Search field metrics | icon `left: --space-xl`, text starts 42px, **32px tall** | phase-1 `SearchInput`: icon `left: --space-lg`, text starts 34px, right padding 12px, 44px tall | visual | **APPROVED 2026-09-02: solve with component variants, not a route override.** `SearchInput` is rebuilt as a thin wrapper over `Input`, so height, focus, hover and placeholder stay `Input`'s and only the icon-inset arithmetic is the component's. `md` = the library search (pill: `surface-raised`, transparent border, `radius-full`, `--font-size-md`, 18px glyph at `--space-xl`, text at 42px, right padding 42px); `sm` = the dialog search (plain: default bg/border/radius, `--control-trigger-font-size`, 1rem glyph at `--space-md`, text at 32px, right padding `--control-trigger-padding-inline`). Shared: `--search-icon-gap: --space-md` and `--search-text-inset = inset + size + gap`. **Supersedes sign-off item 4 — the phase-1 "44/36 height scale" was measured wrong.** Both real search sites stand at `--control-trigger-height` (32px·scale, browser-measured 34.55px at `--size-scale` 1.08); HomeRoute's `.searchField --input-height: 44px` never applied, because `Input`'s own `[data-size='sm']` declaration outranks an inherited custom property. The size names now carry the chrome, not a second height scale. |
+| H6 | Skeleton stagger | `.skeletonRow:nth-child(2/3)` `animation-delay .1s/.2s` | `Skeleton` has no per-instance delay | drop | **APPROVED 2026-09-02: drop.** Three synchronized shimmer blocks. |
+| H7 | Script-row internals | `.scriptOpenButton` owns the row padding (`--space-lg --space-xl`) and `flex: 1` | `ListRow size="library"` owns min-height 58px + `--space-lg --space-xl` padding + `--space-lg` gap; open button is row content, menu is `trailing` | structural | Button drops its padding and `flex: 1` (`width: 100%` inside `.main`); keeps its inner `auto 1fr auto` grid and inset focus ring. Row height and left inset unchanged. See H11 for what does move. |
+| H8 | List panel background | `.scriptList` `color-mix(in oklch, var(--color-surface) 70%, transparent)` | `ListPanel` `--list-bg: var(--color-surface)` (opaque) | visual → neutralized | Preserved with a one-line `--list-bg` override on the route's panel class. The translucent library surface is deliberate; it is not normalized away here. |
+| H9 | Row divider | `.scriptRow` `border-bottom 1px --color-border-subtle`, none on `:last-child` | neither `ListPanel` nor `ListRow` draws dividers | visual → neutralized | The divider stays as route residue on the row class. (The plan's claim that `ListPanel` supplies it was wrong — verified against `ListPanel.module.css`.) |
+| H10 | Row corner radius | `.scriptRow` square; hover wash is full-bleed | `ListRow .row` `border-radius: --radius-md` → rounded hover fill | visual → neutralized | `ListRow` gains `--list-row-radius`; `library` sets it to `--radius-none` (a full-bleed row inside a bordered panel has no corners of its own). `compact` keeps `--radius-md`. |
+| H11 | Row inset owner + open-button hit area | the open button owns the row's `--space-lg --space-xl` inset and stretches, so the whole row is one click target | `ListRow library` would own the inset, confining the button to `.main` | hit area | **Preserved, not normalized.** Letting the row own its padding measured out as a click target collapsing from 61.6px to **19.4px** inside a 62.6px row (the button shrink-wraps to its tallest child once it has no padding) — a behaviour change, which the plan forbids. The route therefore sets `--list-row-padding: 0; --list-row-gap: 0; align-items: stretch` on the row and keeps `padding` + `height: 100%` on the button, and the ⋯ menu keeps its `margin-right: --space-md`. `ListRow library` still owns min-height, hover, radius and the slot geometry. Row, button, menu and meta boxes are byte-identical to the pre-change baseline. |
+| H12 | Search input states | react-aria `Input`: `[data-focused]` → `--state-selected-edge`, `[data-focus-visible]` → `--focus-ring`, hover → `--control-trigger-hover-bg`, placeholder `--color-text-placeholder` | phase-1 `SearchInput` raw `<input>`: `:focus-visible` → `--color-border-strong`, `outline: none`, no hover, placeholder `--color-text-muted` | visual + a11y | Fixed by H5's rebuild — wrapping `Input` restores the focus ring (phase-1 `SearchInput` dropped it), the focus edge, the hover tone and the placeholder colour. No route-side compensation needed. |
+
+| H13 | Start-card error announcement | `<span role="alert">` inside the card copy | `ActionCard`'s `error` slot had no role | a11y | `ActionCard` now renders its error slot as `role="alert"` — the announcement is a property of the slot, not of one route's markup. |
+| H14 | Empty-library alignment | `.emptyLibrary` on `<Text variant="muted">` — **left-aligned**, line-height from `Text` | `Notice variant="empty"` centers and uses `--line-height-normal` | visual | **The one accepted visual change in this recomposition.** "No scripts yet." moves left → center and its line box grows 3px (69.8px → 72.9px block). Spec §5.4 maps `.emptyLibrary` to `Notice empty`, and the neighbouring "No scripts match …" is already centered, so the two empty states now read alike. Revert if unwanted: keep `<Text variant="muted">` for the empty library and use `Notice` only for the no-result copy. |
+| H15 | `ListRow` slot layout (component bug found by measurement) | — | `.row` was `grid-template-columns: auto 1fr auto`; with `leading` omitted, `.main` landed in the `auto` track and `.trailing` took the `1fr`, so the row shrink-wrapped and the ⋯ menu sat right after the title instead of at the right edge | correctness | `.row` is now `display: flex` with `.main { flex: 1 1 auto; min-width: 0 }` and `.leading`/`.trailing { flex: 0 0 auto }`. Optional slots cost no track and no gap. HomeRoute was `ListRow`'s first consumer, so nothing else was affected. |
+
+### Residual `HomeRoute.module.css` after Tasks 2–5 (route layout + row content — phase-2 UnoCSS targets)
+
+Stays: `.content`, `.startActions`/`.startActionsPopulated`, `.library`, `.libraryTools`, `.listSection`,
+`.sortSelect`, `.scriptPanel` (H8 `--list-bg`), `.scriptRow` (H9 divider, H11 inset owner, icon-hover echo),
+`.scriptOpenButton` (inner grid, inset, focus ring), `.actionsMenu` (H11 right inset), `.scriptIcon`,
+`.scriptInfo`, `.scriptTitle`, `.scriptSubtitle`, `.scriptMeta`, `.skeleton`, `.skeletonSearch` (the search
+bar's slot height/radius), `.skeletonList`, `.emptyLibrary`, `.noResults`, `.errorState`, and the
+`@media (max-width: 720px)` block. 174 lines, down from 353.
+
+Deleted: `.startAction`, `.startActionIcon`, `.startActionCopy`, `.startActionTitle`, `.startActionDescription`,
+`.startActionError`, `.startActionPrimary`, `.scriptList`, `.searchField`, `.searchIcon`, `.searchInput`,
+`.skeletonRow`, `@keyframes shimmer`, and `.noResults`' own `text-align` (now `Notice empty`'s).
+
+**Cascade note.** Three residual rules override a component's own class-level declaration, so each is written
+two classes deep (`.listSection .scriptPanel`, `.skeleton .skeletonSearch`, and the `--list-row-*` custom
+properties on `.scriptRow`). A single-class override would tie on specificity and be decided by CSS-module
+bundle order, which is not something a route should depend on.
+
+**Verification.** Both states were browser-measured before and after (geometry, colours, radii, padding,
+font sizes) for: search input + icon, list panel, row, open button, ⋯ menu, meta text, all three start cards,
+their icon chips, and the empty state. Everything matches the baseline to the hundredth of a pixel except
+H14, which is the one approved-in-report visual change.

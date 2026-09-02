@@ -50,6 +50,13 @@
     height: calc(20px * var(--size-scale));
     color: var(--color-text-muted);
     transition: color var(--duration-normal) var(--ease-standard);
+
+    /* The chip host owns the slot; the glyph inside fills it. */
+    & > svg {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
 }
 
 .copy {

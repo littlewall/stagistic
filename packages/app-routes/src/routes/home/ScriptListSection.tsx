@@ -1,5 +1,7 @@
 import type {ScriptSummary} from '@stagistic/app-core';
 import {
+    ListPanel,
+    ListRow,
     ScriptActionsMenu,
     ScriptIcon,
     Text,
@@ -29,9 +31,24 @@ export const ScriptListSection = ({
 
     return (
         <section className={styles.listSection} aria-label="Scripts">
-            <div className={styles.scriptList}>
+            <ListPanel className={styles.scriptPanel}>
                 {scripts.map(script => (
-                    <div key={script.id} className={styles.scriptRow}>
+                    <ListRow
+                        key={script.id}
+                        size="library"
+                        interactive
+                        className={styles.scriptRow}
+                        trailing={(
+                            <span className={styles.actionsMenu}>
+                                <ScriptActionsMenu
+                                    scriptTitle={script.title}
+                                    onRename={() => onRenameScript(script)}
+                                    onDuplicate={() => onDuplicateScript(script)}
+                                    onDelete={() => onDeleteScript(script)}
+                                />
+                            </span>
+                        )}
+                    >
                         <button
                             type="button"
                             className={styles.scriptOpenButton}
@@ -52,17 +69,9 @@ export const ScriptListSection = ({
                                 {formatLastEdited(script.updatedAt)}
                             </Text>
                         </button>
-                        <div className={styles.actionsMenu}>
-                            <ScriptActionsMenu
-                                scriptTitle={script.title}
-                                onRename={() => onRenameScript(script)}
-                                onDuplicate={() => onDuplicateScript(script)}
-                                onDelete={() => onDeleteScript(script)}
-                            />
-                        </div>
-                    </div>
+                    </ListRow>
                 ))}
-            </div>
+            </ListPanel>
         </section>
     );
 };

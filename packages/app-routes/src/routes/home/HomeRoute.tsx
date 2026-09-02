@@ -1,15 +1,17 @@
 import {useScriptRepository, useScripts} from '@stagistic/app-core';
 import {
+    ActionCard,
     AppLayout,
     Button,
     clsx,
-    Input,
     LoaderOverlay,
+    Notice,
     PageContainer,
     PlusIcon,
     ScriptIcon,
-    SearchIcon,
+    SearchInput,
     Select,
+    Skeleton,
     Text,
     UploadIcon,
 } from '@stagistic/ui';
@@ -135,64 +137,41 @@ export const HomeRoute = () => {
                         role="group"
                         aria-label="Start a script"
                     >
-                        <button
+                        <ActionCard
                             type="button"
-                            className={clsx(
-                                styles.startAction,
-                                hasScripts && styles.startActionPrimary,
-                            )}
+                            variant={hasScripts ? 'primary' : 'default'}
+                            icon={<PlusIcon aria-hidden="true" />}
+                            title="New script"
+                            description="Start with an empty theatre or musical script."
                             onClick={openNewScript}
-                        >
-                            <PlusIcon className={styles.startActionIcon} aria-hidden="true" />
-                            <span className={styles.startActionCopy}>
-                                <span className={styles.startActionTitle}>New script</span>
-                                <span className={styles.startActionDescription}>
-                                    Start with an empty theatre or musical script.
-                                </span>
-                            </span>
-                        </button>
-                        <button
+                        />
+                        <ActionCard
                             type="button"
-                            className={styles.startAction}
+                            icon={<UploadIcon aria-hidden="true" />}
+                            title="Import script"
+                            description="Bring in an existing script file."
                             onClick={openImportScript}
-                        >
-                            <UploadIcon className={styles.startActionIcon} aria-hidden="true" />
-                            <span className={styles.startActionCopy}>
-                                <span className={styles.startActionTitle}>Import script</span>
-                                <span className={styles.startActionDescription}>
-                                    Bring in an existing script file.
-                                </span>
-                            </span>
-                        </button>
+                        />
                         {!hasScripts ? (
-                            <button
+                            <ActionCard
                                 type="button"
-                                className={clsx(styles.startAction, styles.startActionPrimary)}
+                                variant="primary"
+                                icon={<ScriptIcon aria-hidden="true" />}
+                                title="Create example script"
+                                description="Explore the editor with a pre-filled script."
+                                error={exampleError}
                                 disabled={isCreatingExample}
                                 onClick={() => void createExample()}
-                            >
-                                <ScriptIcon className={styles.startActionIcon} aria-hidden="true" />
-                                <span className={styles.startActionCopy}>
-                                    <span className={styles.startActionTitle}>Create example script</span>
-                                    <span className={styles.startActionDescription}>
-                                        Explore the editor with a pre-filled script.
-                                    </span>
-                                    {exampleError ? (
-                                        <span className={styles.startActionError} role="alert">
-                                            {exampleError}
-                                        </span>
-                                    ) : null}
-                                </span>
-                            </button>
+                            />
                         ) : null}
                     </div>
                     {scriptsLoading ? (
                         <div className={styles.skeleton} aria-label="Loading scripts">
-                            <div className={styles.skeletonSearch} />
+                            <Skeleton className={styles.skeletonSearch} />
                             <div className={styles.skeletonList}>
-                                <div className={styles.skeletonRow} />
-                                <div className={styles.skeletonRow} />
-                                <div className={styles.skeletonRow} />
+                                <Skeleton shape="block" />
+                                <Skeleton shape="block" />
+                                <Skeleton shape="block" />
                             </div>
                         </div>
                     ) : error ? (
@@ -203,22 +182,17 @@ export const HomeRoute = () => {
                             </Button>
                         </div>
                     ) : scriptSummaries.length === 0 ? (
-                        <Text variant="muted" className={styles.emptyLibrary}>No scripts yet.</Text>
+                        <Notice variant="empty" className={styles.emptyLibrary}>No scripts yet.</Notice>
                     ) : (
                         <div className={styles.library}>
                             {showLibraryTools ? (
                                 <div className={styles.libraryTools}>
-                                    <div className={styles.searchField}>
-                                        <SearchIcon className={styles.searchIcon} aria-hidden="true" />
-                                        <Input
-                                            type="search"
-                                            value={query}
-                                            className={styles.searchInput}
-                                            aria-label="Search scripts"
-                                            placeholder="Search by title or subtitle"
-                                            onChange={event => setQuery(event.target.value)}
-                                        />
-                                    </div>
+                                    <SearchInput
+                                        value={query}
+                                        aria-label="Search scripts"
+                                        placeholder="Search by title or subtitle"
+                                        onChange={event => setQuery(event.target.value)}
+                                    />
                                     <Select
                                         value={sort}
                                         options={SORT_OPTIONS}
@@ -236,9 +210,9 @@ export const HomeRoute = () => {
                                 onDuplicateScript={duplicateScript}
                             />
                             {dashboard.scripts.length === 0 ? (
-                                <Text variant="muted" className={styles.noResults}>
+                                <Notice variant="empty" className={styles.noResults}>
                                     No scripts match “{query.trim()}”.
-                                </Text>
+                                </Notice>
                             ) : null}
                         </div>
                     )}
