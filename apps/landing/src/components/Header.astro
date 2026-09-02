@@ -1,0 +1,159 @@
+---
+interface Props {
+    variant?: 'full' | 'subpage';
+}
+
+const {variant = 'full'} = Astro.props;
+const navLinks = [
+    {href: '/#features', label: 'Features'},
+    {href: '/#faq', label: 'FAQ'},
+];
+---
+
+<header class="nav">
+    <div class="navInner">
+        <a href="/" class="navLogo">
+            <img
+                src="/assets/stagistic-brand/stagistic-mark-on-dark.svg"
+                alt=""
+                class="logoMark"
+            />
+            <span class="logoText">Stagistic Editor</span>
+        </a>
+
+        {
+            variant === 'full' && (
+                <nav class="navLinks" aria-label="Primary">
+                    {navLinks.map((link) => (
+                        <a href={link.href} class="navLink">
+                            {link.label}
+                        </a>
+                    ))}
+                </nav>
+            )
+        }
+
+        <a href="https://editor.stagistic.app" class="navCta">Try editor</a>
+    </div>
+</header>
+
+<style>
+    .nav {
+        --color-text: var(--color-stage-nav-text);
+        --color-text-muted: var(--color-stage-text-muted);
+        --color-border: var(--color-stage-border);
+
+        position: sticky;
+        z-index: 10;
+        top: 0;
+        color: var(--color-text);
+        background: var(--color-stage-nav-bg);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    .navInner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        max-width: 72rem;
+        height: 3rem;
+        margin: 0 auto;
+        padding: 0 1.5rem;
+    }
+
+    .navLogo {
+        display: flex;
+        gap: 0.5rem;
+        align-items: flex-end;
+        text-decoration: none;
+    }
+
+    .logoMark {
+        display: block;
+        width: auto;
+        height: 1.625rem;
+    }
+
+    .logoText {
+        padding: 0;
+        font-family: var(--font-mono);
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--color-text);
+        letter-spacing: -0.01em;
+    }
+
+    .navLinks {
+        display: flex;
+        gap: 1.5rem;
+        align-items: center;
+    }
+
+    .navLink {
+        font-size: 0.8125rem;
+        color: var(--color-text);
+        text-decoration-color: transparent;
+        text-decoration-line: underline;
+        text-decoration-thickness: 1px;
+        text-underline-offset: 0.3rem;
+        transition: text-decoration-color 0.15s ease;
+
+        &:hover {
+            text-decoration-color: currentcolor;
+        }
+
+        &:focus-visible {
+            color: var(--color-text);
+            border-radius: 0.125rem;
+            outline: 2px solid var(--color-blue);
+            outline-offset: 4px;
+        }
+    }
+
+    .navCta {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 2rem;
+        padding: 0.25rem 0.875rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        color: var(--color-stage-btn-fg);
+        text-decoration: none;
+        background: var(--color-amber);
+        border: 1px solid transparent;
+        border-radius: 9999px;
+        transition:
+            background 0.15s ease,
+            transform 0.15s ease;
+
+        &:hover {
+            transform: translateY(-1px);
+            background: var(--color-amber-hover);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+
+        &:focus-visible {
+            outline: 2px solid var(--color-blue);
+            outline-offset: 3px;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .navInner {
+            padding: 0 1rem;
+        }
+
+        .navLinks {
+            display: none;
+        }
+
+        .navCta {
+            min-height: 2.75rem;
+        }
+    }
+</style>

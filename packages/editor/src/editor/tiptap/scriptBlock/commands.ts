@@ -178,20 +178,12 @@ export const insertParenPair = (editor: Editor, from: number, to: number) => {
     focusEditor(editor);
 };
 
-export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: string) => {
-    const normalized = normalizeBlockNodeType(blockType);
-    const activeBlock = getActiveScriptBlockFromState(editor.state);
-
-    if (!activeBlock) {
-        return false;
-    }
-
-    if (activeBlock.blockType === 'scene' && normalized !== 'scene') {
-        editor.commands.requestConvertScene(activeBlock.id, normalized);
-
-        return true;
-    }
-
+const applyBlockType = (
+    editor: Editor,
+    activeBlock: ActiveScriptBlock,
+    normalized: BlockNodeType,
+    id?: string,
+) => {
     const nodes = editor.schema.nodes as Record<string, NodeType>;
     const nodeType = resolveNodeTypeForBlockType(nodes, normalized);
 
@@ -235,6 +227,23 @@ export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: s
     focusEditor(editor);
 
     return true;
+};
+
+export const updateBlockType = (editor: Editor, blockType: BlockNodeType, id?: string) => {
+    const normalized = normalizeBlockNodeType(blockType);
+    const activeBlock = getActiveScriptBlockFromState(editor.state);
+
+    if (!activeBlock) {
+        return false;
+    }
+
+    if (activeBlock.blockType === 'scene' && normalized !== 'scene') {
+        editor.commands.requestConvertScene(activeBlock.id, normalized);
+
+        return true;
+    }
+
+    return applyBlockType(editor, activeBlock, normalized, id);
 };
 
 /**
@@ -475,7 +484,18 @@ export const splitBlockWithType = (editor: Editor, blockType: BlockNodeType) => 
         return false;
     }
 
-    return updateBlockType(editor, blockType, createNodeId());
+    const splitBlock = getActiveScriptBlockFromState(editor.state);
+
+    if (!splitBlock) {
+        return false;
+    }
+
+    return applyBlockType(
+        editor,
+        splitBlock,
+        normalizeBlockNodeType(blockType),
+        createNodeId(),
+    );
 };
 
 export const insertActionBefore = (editor: Editor, blockPos: number, blockStart: number) => {

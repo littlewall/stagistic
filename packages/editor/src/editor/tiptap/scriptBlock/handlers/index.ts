@@ -9,6 +9,7 @@ import {
     selectionSpansScene,
 } from '../deleteSelectionPreservingScenes';
 import {
+    deleteEmptyBlockAfterScene,
     shouldBlockBackspace,
     shouldBlockForwardDelete,
 } from '../sceneDeletionGuard';
@@ -130,6 +131,12 @@ export const handleKeyDown = (
         event.preventDefault();
 
         return deleteSelectionPreservingScenes(editor);
+    }
+
+    if (event.key === 'Backspace' && deleteEmptyBlockAfterScene(editor)) {
+        event.preventDefault();
+
+        return true;
     }
 
     if (event.key === 'Backspace' && shouldBlockBackspace(editor.state)) {

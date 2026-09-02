@@ -117,6 +117,23 @@ afterEach(() => {
 });
 
 describe('scene heading deletion barrier', () => {
+    it('removes an empty block after a scene and moves the caret into the scene', async () => {
+        renderEditor({
+            type: 'doc',
+            content: [scene('s1', ''), stageDirection('b1', '')],
+        });
+
+        const editor = await getEditor();
+
+        await poll(() => blockTypes(editor).length === 2 ? true : null, 'two blocks');
+
+        placeCaret(editor, 'b1', 0);
+        await userEvent.keyboard('{Backspace}');
+
+        expect(blockTypes(editor)).toEqual(['scene']);
+        expect(getActiveScriptBlockFromState(editor.state)?.id).toBe('s1');
+    });
+
     it('Backspace at scene start does not merge the scene into the previous block', async () => {
         renderEditor({
             type: 'doc',

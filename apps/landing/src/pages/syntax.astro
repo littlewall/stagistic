@@ -1,7 +1,6 @@
 ---
 import {clsx} from 'clsx';
-import SiteIcons from '../components/SiteIcons.astro';
-import '../styles/global.css';
+import Layout from '../layouts/Layout.astro';
 import s from './syntax.module.css';
 
 // --- Table of contents -----------------------------------------------------
@@ -158,34 +157,17 @@ const markers = [
 ];
 ---
 
-<html lang="en">
-    <head>
-        <meta charset="utf-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <SiteIcons />
-        <title>Stagistic — Syntax</title>
-        <meta
-            name="description"
-            content="The Stagistic syntax: a plain-text format for theatre and musical scripts. Acts, scenes, dialogue, lyrics, stage directions, and music."
-        />
-        <meta property="og:image" content="/opengraph.jpg" />
-        <link
-            rel="canonical"
-            href={new URL("/syntax", Astro.site).href}
-        />
-    </head>
-    <body>
-        <div class={s.page}>
+<Layout
+    title="Stagistic — Syntax"
+    description="The Stagistic syntax: a plain-text format for theatre and musical scripts. Acts, scenes, dialogue, lyrics, stage directions, and music."
+    canonical={new URL("/syntax", Astro.site).href}
+    header="subpage"
+>
+    <div class={s.page}>
+        <a href="/" class={s.backLink}>← Back to site</a>
 
-            <!-- Nav -->
-            <header class={s.nav}>
-                <div class={s.navInner}>
-                    <a href="/" class={s.navLink}>Back to site</a>
-                </div>
-            </header>
-
-            <main class={s.main}>
-                <div class={s.shell}>
+        <main class={s.main}>
+            <div class={s.shell}>
 
                     <!-- Table of contents -->
                     <aside class={s.toc}>
@@ -728,22 +710,5 @@ const markers = [
                 </div>
             </main>
 
-            <!-- Footer -->
-            <footer class={s.footer}>
-                <div class={s.footerInner}>
-                    <div class={s.footerLeft}>
-                        <span class={s.footerLogo}>Stagistic</span>
-                        <span class={s.footerTagline}>Building tools for theatre.</span>
-                    </div>
-                    <div class={s.footerRight}>
-                        <a href="/" class={s.footerLink}>Home</a>
-                        <a href="mailto:hello@stagistic.app" class={s.footerLink}>
-                            hello@stagistic.app
-                        </a>
-                    </div>
-                </div>
-            </footer>
-
         </div>
-    </body>
-</html>
+</Layout>
