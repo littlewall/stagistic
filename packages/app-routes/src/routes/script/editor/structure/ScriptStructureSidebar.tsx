@@ -12,6 +12,7 @@ import {
     useEditorLiveStructure,
     useFocusEditorBlock,
 } from '@stagistic/editor';
+import {SidebarActionsGroup, SidebarMiniHeader} from '@stagistic/ui';
 import {
     Fragment,
     type ReactNode,
@@ -24,9 +25,7 @@ import {
 
 import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attributes/attributeManagerMenu';
 import {useScriptSession} from '../../ScriptSessionContext';
-import {SidebarMiniHeader} from '../sidebar';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
-import {SidebarActionsGroup} from '../sidebar/SidebarActionsGroup';
 import styles from './ScriptStructureSidebar.module.css';
 import {
     buildAccessibilityPlugin,

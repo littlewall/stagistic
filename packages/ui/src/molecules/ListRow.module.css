@@ -27,7 +27,8 @@
     cursor: pointer;
     transition: background var(--duration-normal) var(--ease-standard);
 
-    &:hover {
+    /* :not(.selected) so hovering a selected row keeps the selected surface. */
+    &:hover:not(.selected) {
         background: var(--state-hover);
     }
 }

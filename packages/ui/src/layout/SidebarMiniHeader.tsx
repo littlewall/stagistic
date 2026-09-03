@@ -2,7 +2,7 @@ import {type ReactNode} from 'react';
 
 import styles from './SidebarMiniHeader.module.css';
 
-interface SidebarMiniHeaderProps {
+export interface SidebarMiniHeaderProps {
     navigation?: ReactNode,
     actions?: ReactNode,
     controls?: ReactNode,

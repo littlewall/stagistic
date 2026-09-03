@@ -586,3 +586,169 @@ lists it as a modal to unify is stale and should be rewritten before it is picke
 - **`ScriptAttributeManagerModal`**: stale spec row, see Task 6.4.
 - **The whole-number pixel pass** across the repo before the UnoCSS rewrite — every decimal in this
   document comes from the single `--size-scale: 1.08` in `styles/tokens.css`.
+
+## Step 6 audit (2026-09-03) — editor sidebars
+
+Baseline: `15f75a74`, working tree otherwise clean. All numbers below are measured in Chromium via a
+temporary browser probe that mounted replicas of the real class combinations and read
+`getComputedStyle` (probe deleted afterwards; no source changed).
+
+### Inventory
+
+| Sidebar | tsx | css | classes | State |
+| --- | --- | --- | --- | --- |
+| `ScriptCharactersSidebar` | 172 | 11 | 2 | Already delegates to `EditorSidebar`; CSS is `.content` + `.sidebar`, both pure layout |
+| `ScriptMusicSidebar` | 255 | 95 | 12 | Hand-rolled list + rows; the real convergence candidate |
+| `ScriptStructureSidebar` | 322 | 253 | 20 (16 live, 4 dead) | DnD act/scene tree; spec says shell-only |
+
+### Measured baseline
+
+| Element | height | min-height | padding | gap | radius |
+| --- | --- | --- | --- | --- | --- |
+| music `.item` (active) | 30.23 | 30.24 | `0 0 0 8.64` | 8.64 | 8.64 |
+| `ListRow size="compact"` (selected) | 30.23 | 30.24 | `0 8.64 0 8.64` | 4.32 | 8.64 |
+| structure `.itemRow.sceneRow` (active) | 28 | auto | `0` | — | 8.64 |
+| structure `.itemButton` | 28 | **28** | `0 8.64 0 0` | — | 8.64 |
+| structure `.actRow` / `.actTitle` | 28 | **28** | `0 0 0 15.12` | 4.32 | 8.64 / 0 |
+| `SidebarMiniHeader .header` | **34.55** | — | `0 4.32 0 12.96` | 4.32 | 0 |
+| `SidebarShell .header` | **47.52** | — | `0 4.32 0 12.96` | 4.32 | 0 |
+| music `.itemList` | — | — | `0` | 2px | — |
+| structure `.itemList` | — | — | `0 12.96 12.96` | 2px | — |
+
+Selected/active backgrounds are byte-identical across music `.item.active`, structure `.itemRow.active`
+and `ListRow.selected`: `oklch(0.934614 0.0131013 32.3072)` plus `inset 0 0 0 1px
+oklch(0.762545 0.0392292 350.916)`.
+
+### Finding S-A — `SidebarShell` has no product consumer
+
+`SidebarShell` is referenced only by its own test and by `apps/web/src/dev/registry/primitives.tsx`.
+Nothing in `app-routes` uses it. The header that actually ships is `SidebarMiniHeader`, in `app-routes`.
+The step-6 premise "sidebars adopt the shell primitive" is therefore inverted: the primitive is the
+unproven copy, the route-local component is the real one.
+
+The heights differ because `SidebarShell.module.css:9` locally overrides `--sidebar-head-height` to
+`calc(44px * var(--size-scale))`, while `SidebarMiniHeader` inherits the global token
+(`tokens.css:172` → `--control-height-md` → `calc(32px * var(--size-scale))`). 47.52px vs 34.56px.
+Adopting `SidebarShell` as-is would grow every editor sidebar header by ~13px.
+
+### Finding S-B — the two headers are otherwise the same rule
+
+`SidebarMiniHeader .header` declares exactly the same properties as `SidebarShell .header`
+(sticky, `z-index: 1`, `top: 0`, flex, `flex: none`, `gap: var(--space-sm)`, centred,
+space-between, `height: var(--sidebar-head-height)`, `padding: 0 var(--space-sm) 0 var(--space-lg)`,
+`background: var(--layer-panel-bg)`, `border-bottom: 1px solid var(--color-border-subtle)`), and adds
+`margin-bottom: var(--space-lg)`. `.actions` is identical in both files. This is the strongest
+de-duplication candidate in step 6 — but it needs a ruling on which height survives, and
+`SidebarMiniHeader` carries three slots (navigation/actions/controls) against `SidebarShell`'s two.
+
+### Finding S-C — music `.item` vs `ListRow size="compact"`
+
+Same min-height, same radius, same selected background and inset ring. Four deltas, all of which
+would need approval:
+
+1. **Right padding** — `.item` has `padding-left: var(--space-md)` only; `ListRow` pads both sides.
+   The action cluster would move 8.64px left.
+2. **Gap** — `--space-md` (8.64px) → `--list-row-gap: var(--space-sm)` (4.32px).
+3. **Layout mode** — `grid-template-columns: minmax(0, 1fr) auto` → flex with `.main { flex: 1 1 auto }`.
+   Equivalent for this content, but the ellipsis on `.label` depends on `min-width: 0`, which both provide.
+4. **Behaviour, not cosmetics** — `ListRow`'s `.interactive:hover` is 0-2-0 and outranks `.selected`
+   (0-1-0), so hovering the *active* row would repaint it with `--state-hover`. Music deliberately
+   writes `&:hover:not(.active)` to keep the selected background. Either music loses that, or
+   `ListRow.module.css` is fixed in `packages/ui` (which also changes the home script list).
+5. **Accessibility** — `ListRow` puts `aria-selected` on the row. Music puts `aria-current` on the inner
+   button. Passing `selected` would add an ARIA attribute that is not there today, which the
+   "same `aria-*`" constraint forbids; the class would have to be applied via `className` instead.
+
+### Finding S-D — `ListPanel` does not fit either list
+
+Both `.itemList`s are bare `<ul>`s: `display: grid; gap: 2px`, no surface, no border, no radius.
+`ListPanel` sets `background: var(--color-surface)`, `overflow: hidden`,
+`border-radius: var(--radius-lg)` and `--list-gap: var(--space-none)`. Adopting it would add a visible
+panel where there is none and collapse the 2px row separation. Not a candidate.
+
+### Finding S-E — structure rows never got `--size-scale`
+
+Structure writes `min-height: 28px` raw in `.actTitle`, `.actRow`, `.itemButton` and
+`.scenePlaceholder`; music and `ListRow` write `calc(28px * var(--size-scale))`. The two sidebars'
+rows are 2.24px apart today. Pre-existing, not step-6 fallout, but it is the reason structure cannot
+share a row primitive without a visual row.
+
+Same class of residue in the same file: `padding-left: calc(14px * var(--size-scale))` on `.actTitle`
+(15.12px, no token), `border-radius: calc(5px * var(--size-scale))` on `.actDeleteButton` (5.4px),
+`min-height: calc(15px * var(--size-scale))` on `.dragHandle`, `outline-offset: -1.5px`, and the
+opacity ramp `.3 / .52 / .55 / .72 / .96` (music adds `.38`). None of these are tokens.
+
+### Finding S-F — 4 dead class blocks in the structure module
+
+Verified per-directory (not repo-wide, to avoid the name-collision false negative from step 5): the
+module is imported by exactly three files, and their combined usage is 16 classes. Unreferenced:
+
+| Class | Lines | Note |
+| --- | --- | --- |
+| `.menu` (+ nested `.right`, `.item`) | 9–43 | A hand-rolled popover surface — dead |
+| `.actPrefixButton` | 65–73 | Dead |
+| `.itemButton.dragging` | 188–190 | Dead |
+| `.dragHandleSpacer` | 223–227 | Dead |
+| `.scenePlaceholder` | 242–246 | Dead |
+| `.dragOverlayRow` | 248–253 | Dead |
+
+63 declaration lines, about a quarter of the file.
+
+### Finding S-G — `EditorSidebar` rows are a third dialect, deliberately
+
+`EditorSidebar.module.css` `.characterRow` is `min-height: calc(30px * var(--size-scale))`,
+`padding: var(--space-sm) var(--space-md)`, inside a `.characterItem` with a 1px border and
+`radius-md`, and its `.active` state swaps the border out rather than adding an inset ring. It is a
+bordered card row, not a compact list row. Converging it onto `ListRow` would be a redesign, not a
+recomposition — out of scope.
+
+### Finding S-H — the characters sidebar is already done
+
+`ScriptCharactersSidebar` renders `SidebarMiniHeader` + `<EditorSidebar>` and owns 11 lines of pure
+layout CSS. There is nothing to recompose.
+
+### Step 6 rulings (approved 2026-09-03)
+
+| # | Ruling |
+| --- | --- |
+| S1 | Music rows adopt `ListRow`. `selected` is **not** allowed to emit `aria-selected` — the row keeps `aria-current` on the inner button. Approved visual rows: right padding +8.64px, row gap 8.64 → 4.32px. |
+| S2 | `SidebarMiniHeader` (+ `SidebarActionsGroup`) is promoted into `packages/ui/src/layout`; `SidebarShell`, its test and its dev-registry entry are deleted. Header height stays 34.56px. |
+| S3 | Structure sidebar: delete the dead CSS from Finding S-F only. `min-height: 28px` stays; unifying it with music belongs to the whole-number pixel pass. |
+| S4 | `ListRow.module.css` `.interactive:hover` is scoped to `:not(.selected)` in `packages/ui`. This also changes the home script list, where hovering the selected row currently repaints it. |
+
+### Step 6 close-out
+
+| Area | Outcome |
+| --- | --- |
+| `ListRow` (S4) | `.interactive:hover` scoped to `:not(.selected)`; new `announceSelected` prop lets a consumer take the selected surface without emitting `aria-selected` |
+| Music rows (S1) | `MusicRow` renders `<ListRow as="li" interactive selected announceSelected={false}>`; the action cluster moved into `trailing`; `.item` and `.active` deleted from the module |
+| Sidebar header (S2) | `SidebarMiniHeader` + `SidebarActionsGroup` moved to `packages/ui/src/layout`; `SidebarShell`, its module, its test and its `index.ts` export deleted; dev registry entry replaced by two entries |
+| Structure (S3) | 69 lines of dead CSS removed (253 → 184); every remaining class is referenced |
+| Visual delta, whole step | two rows, both approved under S1: music row gains 8.64px of right padding, row gap 8.64 → 4.32px. Header height, row height, radius, selected surface and inset ring measured byte-identical before and after |
+
+**Regression caught by measurement.** `.label` truncated because it was a direct grid item of
+`.item` in a `minmax(0, 1fr)` column. Nested inside `ListRow`'s `.main`, a long title widened the row
+to 410px inside a 280px sidebar instead of truncating. Two declarations restore it:
+`display: block; inline-size: 100%` on `.label`, and `grid-template-columns: minmax(0, 1fr)` on
+`.itemList`. Re-measured: row 280px, `scrollWidth` 382 > `clientWidth` 251, truncation confirmed.
+
+**Behaviour preserved deliberately:**
+
+- The row is `<li>` with no `aria-selected`; `aria-current` stays on the inner button (S1).
+- Non-navigable rows keep `cursor: default` via `.row.staticRow` — doubled so it outranks
+  `ListRow`'s `.interactive`, which is what now supplies the hover surface.
+- The actions reveal (`opacity: .38` → `1` on hover/focus-within) moved to `.row`, unchanged.
+
+**Residue after step 6:**
+
+- Structure's unscaled `min-height: 28px` (four rules), `padding-left: calc(14px * …)` (15.12px),
+  `border-radius: calc(5px * …)` (5.4px) and the opacity ramp `.3 / .52 / .55 / .72 / .96` —
+  deferred to the whole-number pixel pass (S3).
+- `SidebarMiniHeader` keeps its name in `packages/ui` although "Mini" no longer has a counterpart;
+  renaming a public export is a separate decision.
+- `EditorSidebar`'s bordered 30px character rows remain a third row dialect (Finding S-G) —
+  converging them would be a redesign.
+- `packages/ui` node + browser suites fully green (70 / 112). `packages/app-routes` shows only the
+  two known pre-existing reds: `prepareExampleScriptDocument.test.ts` (node) and
+  `ScriptExportRoute.browser.test.tsx > renders exact-kind character catalog rows only` (browser).
+  Every sidebar test passed unmodified.

@@ -6,42 +6,6 @@
     padding: 0;
 }
 
-.menu {
-    position: absolute;
-    z-index: 3;
-    top: calc(100% + var(--space-sm));
-    left: 0;
-    display: grid;
-    min-width: calc(140px * var(--size-scale));
-    padding: var(--space-sm);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-popover);
-
-    &.right {
-        right: 0;
-        left: auto;
-    }
-
-    & .item {
-        cursor: pointer;
-        width: 100%;
-        min-height: calc(28px * var(--size-scale));
-        padding: 0 var(--space-md);
-        font-size: var(--font-size-sm);
-        color: var(--color-text);
-        text-align: left;
-        background: transparent;
-        border: 1px solid transparent;
-        border-radius: var(--radius-md);
-
-        &:hover {
-            background: var(--state-hover);
-        }
-    }
-}
-
 .empty {
     margin: 0;
     padding-inline: var(--space-lg);
@@ -60,16 +24,6 @@
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
     color: var(--color-text-muted);
-}
-
-.actPrefixButton {
-    cursor: pointer;
-    padding: 0;
-    font: inherit;
-    color: inherit;
-    white-space: nowrap;
-    background: transparent;
-    border: 0;
 }
 
 .actTitleInput {
@@ -184,10 +138,6 @@
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--radius-md);
-
-    &.dragging {
-        opacity: .52;
-    }
 }
 
 .dragHandle {
@@ -220,12 +170,6 @@
     }
 }
 
-.dragHandleSpacer {
-    display: inline-flex;
-    flex: 0 0 calc(14px * var(--size-scale));
-    min-height: calc(15px * var(--size-scale));
-}
-
 .itemLabel {
     min-width: 0;
     overflow-wrap: break-word;
@@ -237,17 +181,4 @@
 
 .actTitleDisplay {
     text-transform: var(--act-casing, uppercase);
-}
-
-.scenePlaceholder {
-    min-height: 28px;
-    border: var(--state-drop-edge);
-    border-radius: var(--radius-md);
-}
-
-.dragOverlayRow {
-    opacity: .96;
-    background: var(--color-surface);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-card);
 }

@@ -139,7 +139,8 @@ export {
     type ScriptView,
 } from './layout/AppHeader';
 export {AppLayout} from './layout/AppLayout';
-export {SidebarShell, type SidebarShellProps} from './layout/SidebarShell';
+export {SidebarActionsGroup} from './layout/SidebarActionsGroup';
+export {SidebarMiniHeader, type SidebarMiniHeaderProps} from './layout/SidebarMiniHeader';
 export {LoaderOverlay} from './LoaderOverlay';
 export {ActionCard, type ActionCardProps} from './molecules/ActionCard';
 export {ButtonGroup} from './molecules/ButtonGroup';
