@@ -3,6 +3,8 @@ import {
     clsx,
     formControlStyles,
     FormSelect,
+    PanelHeader,
+    SettingsGroup,
 } from '@stagistic/ui';
 import {
     startTransition,
@@ -137,10 +139,10 @@ export const PageLayoutSettingsPanel = ({
     } as React.CSSProperties;
 
     return (
-        <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Page layout</h3>
+        <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
+            <PanelHeader level={3} title="Page layout" />
             <div className={formControlStyles.previewCard}>
-                <div className={styles.pageSettingsGrid}>
+                <div className={clsx(formControlStyles.flatGrid, styles.threeColumn)}>
                     <div className={formControlStyles.field}>
                         <span className={formControlStyles.label}>Page size</span>
                         <FormSelect
@@ -280,6 +282,6 @@ export const PageLayoutSettingsPanel = ({
                     <span>{'Right: '}{localRightMarginInches}</span>
                 </div>
             </div>
-        </div>
+        </SettingsGroup>
     );
 };

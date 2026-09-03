@@ -134,3 +134,185 @@ bundle order, which is not something a route should depend on.
 font sizes) for: search input + icon, list panel, row, open button, ⋯ menu, meta text, all three start cards,
 their icon chips, and the empty state. Everything matches the baseline to the hundredth of a pixel except
 H14, which is the one approved-in-report visual change.
+
+## Settings panels recomposition — delta table (2026-09-02)
+
+Step 4 of spec §9. Prepared by reading all nine modules and their `.tsx` consumers before writing
+anything — step 3 established that the phase-1 audit's numbers cannot be trusted as measurements.
+
+Three of the spec's premises for this step do not survive that reading, so they appear below as
+rulings rather than as instructions: `SettingRow` fits none of these panels (S4), `shared.module.css`
+is a widget rather than shared settings chrome (S5), and the real duplication is the 8× panel shell
+plus `TitlePageSettingsPanel`'s local copy of `formControlStyles` (S2, S8).
+
+| # | Site | Today | After | Kind | Ruling |
+|---|---|---|---|---|---|
+| S1 | Panel heading tag | 8 panels render `<h3>`; `PanelHeader` renders `<h2>` | `PanelHeader level={3}` | a11y | **Needed.** Recommend adding a `level` prop. Changing the panels to `h2` would alter the document outline, which the "no accessibility change" constraint forbids. |
+| S2 | Panel shell | `.panelStack` = `flex column; gap: --space-2xl`, repeated identically in all 8 panels | `SettingsGroup gap="2xl"` = `grid; gap: --space-2xl` | none if measured equal | **Needed.** Grid and flex column are equivalent for block children, but that must be proven by measurement before adoption, not assumed. |
+| S3 | Preview colour tokens | 7 `--color-preview-*` custom properties declared on `.panelStack`, plus a `[data-theme='dark']` override | stay in the route module on a new `.panelTokens` class, passed via `SettingsGroup className` | none | Mechanical. The tokens are consumed by `ElementPreview`, the page schematic and the indent slider, so they cannot move into the component. |
+| S4 | `SettingRow` | unused by every editor settings panel | stays unused here | none | **Needed.** As shipped it is `flex; align-items: center; height: --control-trigger-height` — a horizontal fixed-height row. The editor panels are vertical label-over-control fields, i.e. `formControlStyles.field`. Its only correct consumers are the export modules, via the `ExportSettingsLayout` alias. Forcing it here would be a visual change, not a recomposition. **Supersedes the spec §9 step-4 wording.** |
+| S5 | `settings/shared.module.css` (148 lines) | route module | unchanged, marked `phase-2 Uno`, revisited at step 7 | none | **Needed.** Despite the name, all 148 lines are `.indentSlider*` — one dual-range slider with a single consumer (`ElementPreview`). It is a widget, not a settings pattern. Deferred alongside `ElementPreview.module.css` and `ElementFormattingToolbar.module.css`. |
+| S6 | Hardcoded mono stacks | the literal `ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace` in `shared.module.css` `.indentSliderLabels`, `page-layout` `.pageSchematicZone`/`.pageSchematicContent`, and `element/ElementNumericControls` `.shortcutPrefix` | unchanged in this step | token debt | **Needed.** These bypass the token system *and* put mono on UI chrome rather than script content, which cuts against the standing "mono is reserved for script content" rule. Recommend tabling: it is a token decision, not a composition one. (`header-footer` `.previewCell` uses `var(--font-family-mono)` legitimately — that cell renders script header/footer text.) |
+| S7 | Dead classes | `.placeholderCard` and `.panelDescription` in `ScriptEditorSettingsPanel.module.css` — zero references anywhere in `app-routes` | deleted | none | Mechanical. |
+| S8 | `TitlePage` `.field` / `.label` | local re-declaration | `formControlStyles.field` / `.label` | none | Mechanical — proven byte-identical below. |
+| S9 | `initial-pages` `.fields` | `grid; repeat(2, minmax(0,1fr)); gap --space-xl; @900px → 1fr` — **no `margin-top`** | `formControlStyles.flatGrid` + local `.flushGrid { margin-top: 0 }` | none | **Corrected 2026-09-02.** This row originally claimed `.fields` carried `margin-top: --space-xl` and was therefore byte-identical to `.flatGrid`. It does not, and it is not. `.flatGrid` does carry the margin (for its pre-existing consumers `structure-markers` and `element/ElementNumericControls`), so adopting it unmodified added 17.28px, doubling the gap `.section` already supplies. Caught by measurement, not by reading. |
+| S10 | `page-layout` `.pageSettingsGrid` | as S9 but `repeat(3, …)` | `formControlStyles.flatGrid` + `--flat-grid-columns: 3` | none | **Needed.** Requires adding a `--flat-grid-columns` custom property to the shared `.flatGrid`, defaulting to 2. |
+| S11 | `element` `.resetButton` | hand-rolled 40-line pill: `--control-height-xs`, `--radius-full`, transparent bg, `--font-size-xs`, 13px icon, own hover/focus | `Button size="xs" variant="outline"` + residual radius/icon override | visual, likely | **Needed.** Must be measured before and after. If `Button` cannot reproduce the metrics, the route class stays and the difference becomes a new delta row. |
+| S12 | `danger-zone` `.dangerTitle` | `--color-status-danger` | unchanged | none | **Needed.** Confirm the HomeRoute ruling of 2026-09-02 ("keep muted, no danger red") does *not* generalise here — that ruling was about an error notice, whereas this section is genuinely destructive. |
+
+**APPROVED 2026-09-02.** The maintainer approved every recommendation above as written: `PanelHeader`
+gains a `level` prop (S1); `SettingsGroup` gains a `gap` variant and the grid/flex equivalence is proven
+by measurement (S2); `SettingRow` is not used by the editor panels and the spec §9 wording is superseded
+(S4); `shared.module.css` defers to step 7 (S5); the hardcoded mono stacks are tabled as token debt rather
+than fixed here (S6); `.flatGrid` gains `--flat-grid-columns` (S10); `.resetButton` becomes a `Button` only
+if measurement proves parity, otherwise the difference returns as a new row (S11); the danger-zone red stays,
+because the HomeRoute "no danger red" ruling was about an error notice, not a destructive section (S12).
+
+### S11 outcome — `.resetButton` stays hand-rolled (measured 2026-09-02)
+
+S11 was approved conditionally: adopt `Button` *only* if measurement proves parity, otherwise the
+difference returns as a new row. Measurement says no, so the route class stays. `Button` has no `xs`
+size (`'icon' | 'sm' | 'md'` only), and its smallest real size is a 40px control against a 26px pill:
+
+```
+                     .resetButton          Button variant=outline size=sm
+box                  68.58 × 25.91         102.83 × 40.3
+min-height           25.92px               0px
+padding              0 8.64px              8.64px 17.28px
+gap                  4.32px                8.64px
+font-size            11.88px               14.04px
+colour               oklch(.465 …) muted   oklch(.155 …) text
+icon                 14.03 × 14.03         21.05 × 21.05
+radius / background / border / font-family / font-weight   → identical
+```
+
+Reaching parity would mean overriding min-height, padding, gap, font-size, colour, icon size, the
+hover colour and border-colour, and the focus ring — i.e. re-declaring almost all of `.resetButton`,
+at `.resetButton.resetButton` specificity to beat `.button.sm` (0-2-0). That is not a recomposition,
+so the control is left as it is and recorded here as the residual difference.
+
+The rest of Task 5 did land: `ElementSettingsPanel`'s heading is now `PanelHeader level={3}`, measured
+identical to the local `<h3>` — heading x 0 / w 58.03 / h 25 / 19.44px / weight 600 / margin 0, reset
+button at x 1211.42 / w 68.58, row height 25.91, with `PanelHeader`'s wrapper collapsing exactly onto
+the heading. `.panelTitle` is deleted from `ScriptEditorSettingsPanel.module.css`.
+
+### Proven-identical pairs (diffed rule-by-rule, 2026-09-02)
+
+```
+TitlePage   .field { display:flex; flex-direction:column; gap:6px }
+formControl .field { display:flex; flex-direction:column; gap:6px }                  → identical
+
+TitlePage   .label { font-size:--font-size-sm; font-weight:--font-weight-semibold; color:--color-text-muted }
+formControl .label { font-size:--font-size-sm; font-weight:--font-weight-semibold; color:--color-text-muted }
+                                                                                     → identical
+
+initial-pages .fields   { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+                          gap:--space-xl; @900px → 1fr }
+formControl   .flatGrid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr));
+                          gap:--space-xl; margin-top:--space-xl; @900px → 1fr }
+                                                              → NOT identical: margin-top only.
+                                                                Cancelled locally by .flushGrid.
+```
+
+### Measured parity for the flat grid (2026-09-02)
+
+Every consumer measured at the default 1280px viewport, before and after, via a temporary probe
+(`getBoundingClientRect` + `getComputedStyle`) round-tripped against HEAD with `git diff` / `git apply -R`.
+
+```
+initial-pages    columns 631.359px 631.375px  gap 17.28  margin-top 0      cells y=80.86
+                 sections y=44.59 / 162.69                                 → identical to HEAD
+page-layout      columns 415.156px ×3         gap 17.28  margin-top 17.28  cells y=72.48
+                                                                           → identical to HEAD
+.flatGrid alone  columns 631.359px 631.375px  gap 17.28  margin-top 17.28
+(unparameterised, as used by structure-markers and ElementNumericControls) → identical to HEAD
+```
+
+The unparameterised measurement is what proves `repeat(var(--flat-grid-columns, 2), …)` is invisible
+to the two consumers that pre-date this step and never set the variable.
+
+### Residue each module keeps
+
+```
+ScriptEditorSettingsPanel.module.css → .panelTokens (7 OKLCH preview tokens + dark override).
+                                       Singular: the preview widgets are the only consumers.
+header-footer/                       → the whole composer — .previewSection/.previewLabel/.previewRow/
+                                       .previewCell/.activeCell/.left/.center/.right/.previewText/
+                                       .editor/.editorToolbar/.fixedNote*/.formattingGroup/
+                                       .activeFormat/.variables/.variableButton. One header/footer
+                                       composer exists in the product.
+page-layout/                         → .pageSchematic* (the page diagram). Singular.
+document-info/                       → .section/.title/.hint/.draftDateRow/.draftDateField/
+                                       .subFieldLabel/.checkboxLabel/.draftDatePreview.
+                                       The draft-date row is singular.
+visual-preferences/                  → .inlineRow/.selectCompact/.previewPrefix/.previewDots/
+                                       .previewDot. Singular.
+initial-pages/                       → .section/.sectionTitle.
+element/ElementSettingsPanel         → .panelHeader (title + reset, space-between) and whatever
+                                       .resetButton residue S11 leaves.
+element/ElementNumericControls       → .shortcutField/.shortcutPrefix. Already on formControlStyles
+                                       for its fields.
+danger-zone/                         → .dangerCard/.dangerHeader (pending S12).
+shared.module.css                    → all 148 lines (indent slider), per S5.
+```
+
+### Note on `.panelTitle`
+
+`.panelTitle` survives the shell recomposition and is deleted only once `ElementSettingsPanel`'s
+header moves to `PanelHeader` — that panel puts its heading in a flex row beside the reset button,
+so it cannot adopt `PanelHeader` until the button beside it is a `Button`. This is sequencing, not
+an oversight.
+
+### Step 4 close-out (2026-09-02)
+
+All twelve rulings are implemented or explicitly closed:
+
+| # | Outcome |
+|---|---|
+| S1 | Implemented. `PanelHeader` gained `level?: 2 \| 3 \| 4`; the tag and the type size are independent, so an `h3`/`h4` keeps `--font-size-2xl` unless a caller overrides it. |
+| S2 | Implemented. All 8 panel shells are `SettingsGroup gap="2xl"`. Measured identical: rowGap 21.6px, heading 19.44px/600, children y 0 / 44.59 / 162.69. |
+| S3 | Implemented. Tokens live on `.panelTokens` in the route module, passed via `SettingsGroup className`. |
+| S4 | Closed unused, as ruled. `SettingRow` is untouched by the editor panels. |
+| S5 | Deferred to step 7, as ruled. |
+| S6 | Tabled as token debt, as ruled. The three hardcoded mono stacks are unchanged. |
+| S7 | Implemented. `.placeholderCard` and `.panelDescription` deleted. |
+| S8 | Implemented. `TitlePage` uses `formControlStyles.field`/`.label`; `.hint` lifted to top level, measured unchanged (12.96px, muted, opacity .7). |
+| S9 | **Corrected** — see the row above. `.flatGrid` adopted plus a local `.flushGrid { margin-top: 0 }`. |
+| S10 | Implemented. `--flat-grid-columns: 3` on `.threeColumn`; measured `415.156px` ×3, identical to HEAD. |
+| S11 | **Not adopted** — see the S11 outcome above. `.resetButton` stays hand-rolled. |
+| S12 | Confirmed as ruled. The danger red stays; `.dangerTitle`/`.dangerDescription` folded into `PanelHeader level={4}` with a size/colour override, measured identical (h4 21px tall at 16.2px/600 in `oklch(.54 .1273 14.8)`, description 14.04px muted, header gap 2.16px, section gap 12.96px), and the copy including `<strong>` and its surrounding spaces is byte-identical. |
+
+**Deferred to step 7, unchanged by this step:** `settings/shared.module.css` (148 lines, all `.indentSlider*`),
+`ElementPreview.module.css` and `ElementFormattingToolbar.module.css`. All three are one widget each with a
+single consumer, so they are widget extractions rather than settings-chrome deduplication — the same reason
+recorded under S5.
+
+**Residue after step 4** — every surviving class in the settings tree, with why it survives:
+
+```
+ScriptEditorSettingsPanel  .panelTokens          7 OKLCH preview tokens + dark override. Consumed by the
+                                                 preview widgets, so it cannot move into the component.
+danger-zone/               .dangerCard           the card. Singular.
+                           .dangerHeader         tighter gap + the h4 size/danger colour over PanelHeader.
+document-info/             .section .title       the draft-date grouping. Singular.
+                           .hint .draftDateRow .draftDateField .subFieldLabel
+                           .checkboxLabel .draftDatePreview
+initial-pages/             .section .sectionTitle
+                           .flushGrid            cancels .flatGrid's margin (see S9).
+page-layout/               .threeColumn          --flat-grid-columns: 3 + the shared leading margin.
+                           .pageSchematic*       the page diagram. Singular.
+element/                   .panelHeader          the title-plus-reset flex row.
+                           .resetButton          see S11 — Button cannot reach 26px.
+header-footer/             the whole composer    .previewSection/.previewLabel/.previewRow/.previewCell/
+                                                 .activeCell/.left/.center/.right/.previewText/.editor/
+                                                 .editorToolbar/.fixedNote*/.formattingGroup/
+                                                 .activeFormat/.variables/.variableButton.
+                                                 One header/footer composer exists in the product.
+structure-markers/         (none beyond the shared grid)
+visual-preferences/        (none beyond the shell)
+```
+
+`.center` in `header-footer` and the `.indentSlider*` set in `shared.module.css` read as unreferenced to a
+naive grep; they are reached via `styles[alignment]` and via the `sharedStyles` import alias respectively.
+Neither is dead.
+

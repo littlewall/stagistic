@@ -1,4 +1,9 @@
-.panelStack {
+/*
+ * Residual: the OKLCH preview tokens consumed by ElementPreview, the page schematic and the
+ * indent slider. Panel layout now comes from SettingsGroup, the heading from PanelHeader.
+ * phase-2 Uno target.
+ */
+.panelTokens {
     --L-preview-amber: .64;
     --A-preview-amber: .72;
     --A-preview-amber-soft: .2;
@@ -11,36 +16,13 @@
     --color-preview-slider-selected: oklch(from var(--base-blue) var(--L-preview-blue) c h / .32);
     --color-preview-slider-handle: oklch(from var(--base-blue) var(--L-preview-blue) c h / var(--A-preview-blue));
     --color-preview-slider-boundary: oklch(from var(--base-neutral) .52 calc(c * .45) h / .55);
-
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2xl);
 }
 
-:global(:root[data-theme = 'dark']) .panelStack {
+:global(:root[data-theme = 'dark']) .panelTokens {
     --L-preview-amber: .6;
     --A-preview-amber: .62;
     --A-preview-amber-soft: .24;
     --A-preview-amber-strong: .46;
     --L-preview-blue: .64;
     --A-preview-blue: .96;
-}
-
-.panelTitle {
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-semibold);
-}
-
-.panelDescription {
-    color: var(--color-text-muted);
-}
-
-.placeholderCard {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    padding: var(--space-xl);
-    background: var(--color-surface-raised);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
 }

@@ -7,6 +7,8 @@ import {
     formControlStyles,
     FormSelect,
     type FormSelectOption,
+    PanelHeader,
+    SettingsGroup,
 } from '@stagistic/ui';
 import {useMemo} from 'react';
 
@@ -42,8 +44,8 @@ export const VisualPreferencesSettingsPanel = ({
     );
 
     return (
-        <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Visual preferences</h3>
+        <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
+            <PanelHeader level={3} title="Visual preferences" />
             <div className={formControlStyles.field}>
                 <label className={formControlStyles.label} htmlFor="character-color-saturation">
                     Character Color Saturation
@@ -72,6 +74,6 @@ export const VisualPreferencesSettingsPanel = ({
                     </div>
                 </div>
             </div>
-        </div>
+        </SettingsGroup>
     );
 };

@@ -1,3 +1,4 @@
+/* Residual route content — the draft-date row is singular. phase-2 Uno target. */
 .section {
     display: flex;
     flex-direction: column;
@@ -10,22 +11,11 @@
     }
 }
 
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-
-    & .label {
-        font-size: var(--font-size-sm);
-        font-weight: var(--font-weight-semibold);
-        color: var(--color-text-muted);
-    }
-
-    & .hint {
-        font-size: var(--font-size-sm);
-        color: var(--color-text-muted);
-        opacity: .7;
-    }
+/* Was nested under the local .field, which is now formControlStyles.field. */
+.hint {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    opacity: .7;
 }
 
 .draftDateRow {

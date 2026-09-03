@@ -6,7 +6,7 @@
 
 .flatGrid {
     display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(var(--flat-grid-columns, 2), minmax(0, 1fr));
     gap: var(--space-xl);
     margin-top: var(--space-xl);
 
