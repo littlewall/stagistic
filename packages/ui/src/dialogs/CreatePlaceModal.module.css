@@ -1,11 +1,3 @@
-.panel {
-    width: min(calc(420px * var(--size-scale)), 100%);
-}
-
-.title {
-    composes: title from './dialogForm.module.css';
-}
-
 .form {
     composes: form from './dialogForm.module.css';
 }
@@ -14,8 +6,4 @@
     margin: 0;
     font-size: var(--font-size-sm);
     color: var(--color-status-danger);
-}
-
-.actions {
-    composes: actions from './dialogForm.module.css';
 }

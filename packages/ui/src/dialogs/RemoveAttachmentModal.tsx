@@ -1,6 +1,4 @@
-import {Button} from '../atoms/Button';
-import {ModalDialog} from './ModalDialog';
-import styles from './RemoveAttachmentModal.module.css';
+import {ConfirmModal} from './ConfirmModal';
 
 export interface RemoveAttachmentModalProps {
     isOpen: boolean,
@@ -17,30 +15,14 @@ export const RemoveAttachmentModal = ({
     onClose,
     onConfirm,
 }: RemoveAttachmentModalProps) => (
-    <ModalDialog
+    <ConfirmModal
         isOpen={isOpen}
-        onClose={onClose}
         ariaLabel="Remove attachment"
-    >
-        <h2 className={styles.title}>Remove {attachmentName}?</h2>
-        <p className={styles.subtitle}>
-            This deletes the file from this browser. It cannot be undone.
-        </p>
-        <div className={styles.actions}>
-            <Button
-                variant="danger"
-                isPending={isRemoving}
-                onPress={() => void onConfirm()}
-            >
-                Remove
-            </Button>
-            <Button
-                variant="ghost"
-                isDisabled={isRemoving}
-                onPress={onClose}
-            >
-                Cancel
-            </Button>
-        </div>
-    </ModalDialog>
+        title={<>Remove {attachmentName}?</>}
+        description="This deletes the file from this browser. It cannot be undone."
+        confirmLabel="Remove"
+        isPending={isRemoving}
+        onClose={onClose}
+        onConfirm={onConfirm}
+    />
 );

@@ -8,7 +8,9 @@ import {
 } from 'react';
 
 import {Button} from '../atoms/Button';
+import {ModalActions} from './ModalActions';
 import {ModalDialog} from './ModalDialog';
+import {ModalHeader} from './ModalHeader';
 import styles from './RenameScriptModal.module.css';
 
 export interface RenameScriptSubmit {
@@ -86,10 +88,10 @@ export const RenameScriptModal = ({
             onClose={onClose}
             ariaLabel="Rename script"
         >
-            <h2 className={styles.title}>Rename script</h2>
-            <p className={styles.subtitle}>
-                Update the title and subtitle for this script.
-            </p>
+            <ModalHeader
+                title="Rename script"
+                description="Update the title and subtitle for this script."
+            />
             <form className={styles.form} onSubmit={handleSubmit}>
                 <div className={styles.field}>
                     <label className={styles.label} htmlFor="rename-script-title">
@@ -119,7 +121,7 @@ export const RenameScriptModal = ({
                         onChange={handleSubtitleChange}
                     />
                 </div>
-                <div className={styles.actions}>
+                <ModalActions>
                     <Button
                         type="submit"
                         isDisabled={!canSubmit}
@@ -134,7 +136,7 @@ export const RenameScriptModal = ({
                     >
                         Cancel
                     </Button>
-                </div>
+                </ModalActions>
             </form>
         </ModalDialog>
     );

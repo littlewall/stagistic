@@ -1,11 +1,3 @@
-.title {
-    composes: title from './dialogForm.module.css';
-}
-
-.subtitle {
-    composes: subtitle from './dialogForm.module.css';
-}
-
 .body {
     display: flex;
     flex-direction: column;

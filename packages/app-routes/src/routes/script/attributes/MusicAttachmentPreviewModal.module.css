@@ -1,11 +1,11 @@
 .header {
-    margin-block-end: 12px;
+    margin-block-end: var(--space-lg);
 }
 
 .title {
     margin: 0;
-    font-size: 16px;
-    font-weight: 600;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
 }
 
 .body {
@@ -17,7 +17,7 @@
 .pages {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--space-lg);
     inline-size: 100%;
 }
 

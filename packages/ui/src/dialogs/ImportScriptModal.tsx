@@ -2,7 +2,9 @@ import {Button} from '../atoms/Button';
 import {ImportDropZone} from './importScript/ImportDropZone';
 import {useImportScriptModalState} from './importScript/useImportScriptModalState';
 import styles from './ImportScriptModal.module.css';
+import {ModalActions} from './ModalActions';
 import {ModalDialog} from './ModalDialog';
+import {ModalHeader} from './ModalHeader';
 import type {ImportScriptModalProps} from './types';
 
 export const ImportScriptModal = ({
@@ -36,12 +38,11 @@ export const ImportScriptModal = ({
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Import script"
-            panelClassName={styles.modal}
         >
-            <h2 className={styles.title}>Import script</h2>
-            <p className={styles.subtitle}>
-                Bring in a Stagistic file and continue working in the editor.
-            </p>
+            <ModalHeader
+                title="Import script"
+                description="Bring in a Stagistic file and continue working in the editor."
+            />
             <form className={styles.form} onSubmit={handleSubmit}>
                 <label className={styles.label} htmlFor="import-script-name">
                     Script name
@@ -67,7 +68,7 @@ export const ImportScriptModal = ({
                         {fileError}
                     </p>
                 ) : null}
-                <div className={styles.actions}>
+                <ModalActions>
                     <Button
                         variant="primary"
                         type="submit"
@@ -82,7 +83,7 @@ export const ImportScriptModal = ({
                     >
                         Cancel
                     </Button>
-                </div>
+                </ModalActions>
             </form>
         </ModalDialog>
     );

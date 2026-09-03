@@ -13,7 +13,9 @@ import {
     type RadioChoiceOption,
 } from '../atoms/RadioChoiceGroup';
 import {LoaderOverlay} from '../LoaderOverlay';
+import {ModalActions} from './ModalActions';
 import {ModalDialog} from './ModalDialog';
+import {ModalHeader} from './ModalHeader';
 import styles from './NewScriptModal.module.css';
 import type {
     NewScriptModalProps,
@@ -107,10 +109,10 @@ export const NewScriptModal = ({
                 />
             ) : (
                 <>
-                    <h2 className={styles.title}>Create new script</h2>
-                    <p className={styles.subtitle}>
-                        Give your new script a working title. You can change it later.
-                    </p>
+                    <ModalHeader
+                        title="Create new script"
+                        description="Give your new script a working title. You can change it later."
+                    />
                     <form className={styles.form} onSubmit={handleSubmit}>
                         <label className={styles.label} htmlFor="script-name">
                             Script name
@@ -130,7 +132,7 @@ export const NewScriptModal = ({
                             options={SCRIPT_SHAPE_OPTIONS}
                             onChange={setShape}
                         />
-                        <div className={styles.actions}>
+                        <ModalActions>
                             <Button type="submit">
                                 Create script
                             </Button>
@@ -140,7 +142,7 @@ export const NewScriptModal = ({
                             >
                                 Cancel
                             </Button>
-                        </div>
+                        </ModalActions>
                     </form>
                 </>
             )}

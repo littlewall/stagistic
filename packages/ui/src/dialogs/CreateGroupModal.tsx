@@ -12,7 +12,9 @@ import {
 import {Button} from '../atoms/Button';
 import {formControlStyles} from '../molecules/forms/formControlStyles';
 import styles from './CreateCharacterModal.module.css';
+import {ModalActions} from './ModalActions';
 import {ModalDialog} from './ModalDialog';
+import {ModalHeader} from './ModalHeader';
 
 export interface CreateGroupModalProps {
     isOpen: boolean,
@@ -88,10 +90,13 @@ export const CreateGroupModal = ({
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Create group"
-            panelClassName={styles.panel}
         >
-            <h2 className={styles.title}>Create group</h2>
-            <form className={styles.form} onSubmit={event => void handleSubmit(event)} aria-busy={isSubmitting}>
+            <ModalHeader title="Create group" />
+            <form
+                className={styles.form}
+                onSubmit={event => void handleSubmit(event)}
+                aria-busy={isSubmitting}
+            >
                 <div className={formControlStyles.field}>
                     <label className={formControlStyles.label} htmlFor="create-group-name">
                         Group name
@@ -116,12 +121,12 @@ export const CreateGroupModal = ({
                             : 'Name cannot be empty.'}
                     </p>
                 ) : null}
-                <div className={styles.actions}>
+                <ModalActions>
                     <Button type="submit" isDisabled={isInvalid || isSubmitting}>
                         Create group
                     </Button>
                     <Button variant="ghost" onPress={onClose}>Cancel</Button>
-                </div>
+                </ModalActions>
             </form>
         </ModalDialog>
     );

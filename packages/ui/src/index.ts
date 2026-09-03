@@ -52,6 +52,10 @@ export {
     type AttributeManagerSceneDetailProps,
 } from './dialogs/AttributeManagerSceneDetail';
 export {
+    ConfirmModal,
+    type ConfirmModalProps,
+} from './dialogs/ConfirmModal';
+export {
     CreateCharacterModal,
     type CreateCharacterModalProps,
 } from './dialogs/CreateCharacterModal';
@@ -75,7 +79,15 @@ export {
     type DuplicateScriptSubmit,
 } from './dialogs/DuplicateScriptModal';
 export {ImportScriptModal} from './dialogs/ImportScriptModal';
+export {
+    ModalActions,
+    type ModalActionsProps,
+} from './dialogs/ModalActions';
 export {ModalDialog} from './dialogs/ModalDialog';
+export {
+    ModalHeader,
+    type ModalHeaderProps,
+} from './dialogs/ModalHeader';
 export {NewScriptModal} from './dialogs/NewScriptModal';
 export {PublicPreviewNotice} from './dialogs/PublicPreviewNotice';
 export {

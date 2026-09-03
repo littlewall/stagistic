@@ -316,3 +316,273 @@ visual-preferences/        (none beyond the shell)
 naive grep; they are reached via `styles[alignment]` and via the `sharedStyles` import alias respectively.
 Neither is dead.
 
+
+---
+
+## Step 5 audit (2026-09-03) — modals and notices
+
+Spec §9 step 5 reads "Modals → `ModalDialog` (7 modules); notices → `Notice` (2)". As with step 4, the
+framing is stale: **all eight app-routes modals already render inside `ModalDialog`**, and the one notice
+that the spec points at already renders inside `Notice`. Shell adoption is done. What is left is the
+duplicated chrome *inside* the panel, and it spans `packages/ui/src/dialogs` too — the spec's seven-module
+list is a subset of the real surface.
+
+### Measured baseline (chromium, viewport 1280, `--size-scale: 1.08`)
+
+Probe mounted `DeleteSceneHeadingModal` and `AddCharacterModal` and read `getBoundingClientRect` +
+`getComputedStyle` off the rendered panel.
+
+| | `DeleteSceneHeadingModal` (confirm) | `AddCharacterModal` (form) |
+|---|---|---|
+| panel width | **520px** | **520px** |
+| panel padding / gap | 30.24px / 12.96px | 30.24px / 12.96px |
+| `h2` size / weight | 16.2px / 600 | 23.76px / 700 |
+| actions gap | 4.32px | 8.64px |
+| actions margin-top | 17.28px | 0px |
+
+### Finding A — every `panelClassName` width override is dead CSS
+
+`ModalDialog.module.css` nests the panel rule: `.dialog { & .panel { … } }`, i.e. specificity **0-2-0**.
+`ModalDialog.tsx` renders `<div className={clsx(panelClassName, styles.panel)}>`, so a consumer's
+single-class `.panel` is **0-1-0** and loses every declaration it tries to override. Measured: both modals
+render at 520px, not at the 360px and 420px×scale their own modules ask for.
+
+Dead rules, confirmed by measurement and by specificity:
+
+```
+packages/app-routes  editor/scene/DeleteSceneHeadingModal   .panel width min(360px, …)
+                     editor/scene/ConvertSceneHeadingModal  .panel width min(360px, …)
+                     editor/music/DeleteMusicModal          .panel width min(360px, …)   (also used by UnassignMusicModal)
+                     editor/music/AddMusicModal             .panel width min(420px * --size-scale, 100%)
+                     editor/characters/AddCharacterModal    .panel width min(420px * --size-scale, 100%)
+packages/ui          dialogs/CreateCharacterModal           .panel width min(420px * --size-scale, 100%)   (also used by CreateGroupModal)
+                     dialogs/CreatePlaceModal               .panel width min(420px * --size-scale, 100%)
+                     dialogs/ImportScriptModal              .modal — all 9 declarations duplicate .dialog .panel, all inert
+```
+
+`ScriptSettingsModal` is the one that works, and it works because it sets `--modal-panel-gap/-padding/-width`
+custom properties instead of the properties themselves — custom properties resolve on the element, so
+specificity never enters into it. That is the supported override channel.
+
+### Finding B — two divergent confirm dialects
+
+Nine confirm modals, one structure (`h2` question → `p` explanation → danger + ghost buttons), two visual
+specs that have drifted apart:
+
+| | Dialect A — `packages/ui` (`dialogForm.module.css`) | Dialect B — `packages/app-routes` |
+|---|---|---|
+| consumers | `RemoveCharacterModal`, `RemoveGroupModal`, `RemovePlaceModal`, `RemoveAttachmentModal`, `DeleteScriptModal` | `DeleteMusicModal`, `UnassignMusicModal`, `DeleteSceneHeadingModal`, `ConvertSceneHeadingModal` |
+| title | `--font-size-3xl` (23.76px), inherited weight 700 | `--font-size-lg` (16.2px), `--font-weight-semibold`, `margin: 0` |
+| subtitle | `--color-text-muted` only; spacing from the panel's flex gap | `+ margin-top --space-md`, `--font-size-sm`, `line-height normal` |
+| actions | gap `--space-md`; consumers add `margin-top --space-lg` | gap `--space-sm`, `margin-top --space-xl` |
+
+`ConvertSceneHeadingModal.module.css` and `DeleteSceneHeadingModal.module.css` are **byte-identical**;
+`DeleteMusicModal.module.css` differs only by a nested `& strong` in `.subtitle`. `UnassignMusicModal.tsx`
+already reaches across directories to `import styles from './DeleteMusicModal.module.css'` — the duplication
+is being worked around by hand today.
+
+### Finding C — the form dialect is already unified, just not shared
+
+`AddCharacterModal.module.css` (app-routes) and `CreateCharacterModal.module.css` (ui) are the same four
+rules: 420px panel (dead), `.title` 3xl, `.form` flex-column gap `--space-xl`, `.actions` flex gap
+`--space-md`, plus `.error`. `AddMusicModal` is the same minus `.error`; `CreatePlaceModal` is the same
+expressed through `composes:`. The one real divergence is that `dialogForm`'s `.form` carries
+`margin-top: var(--space-md)` — used by `NewScriptModal` / `RenameScriptModal` / `ImportScriptModal`, not by
+the 420px group.
+
+`dialogForm.module.css` is **not exported** from `@stagistic/ui` (only `formControlStyles` is), which is why
+app-routes hand-copies it rather than composing it.
+
+### Finding D — the two spec'd notices
+
+| module | state | note |
+|---|---|---|
+| `export/IntegratedScoreWarning` | **already `Notice variant="warning"`** | residual `.warningExtras` is local layout only (own margin, button reset, `ul` padding). Nothing to do. |
+| `settings/DraftSaveError` | hand-rolled banner, **not** a `Notice` | 8%-danger fill, 28%-danger border, `--radius-md`, padding, `space-between` row. `Notice variant="error"` is *only* `color: --color-status-danger` at `--font-size-sm` — no box at all. Swapping it in deletes the banner. Sole instance of this treatment repo-wide (grepped `color-status-danger) 8%`). |
+
+### Finding E — out of scope
+
+`ScriptAttributeManagerModal` is not a `ModalDialog` consumer at all; it renders `AttributeManagerModal`.
+Its module holds no modal chrome — only `.deleteButton` and `.actionIcon`. The spec row is stale.
+
+`MusicAttachmentPreviewModal` matches the user's "shell + header, body fully custom" ruling exactly: the
+body is a PDF canvas host. Its header is the only shared-shaped part, and it is written in raw px
+(`.title` 16px/600, `.header` `margin-block-end: 12px`) rather than tokens — within a rounding hair of
+`--font-size-lg` × 1.08 = 16.2px and `--space-lg` × 1.08 = 12.96px.
+
+### Step 5 rulings (approved 2026-09-03)
+
+| # | Ruling |
+|---|---|
+| M1 | **Scope: both packages.** `packages/app-routes` *and* `packages/ui/src/dialogs`. Unifying only app-routes would leave the two dialects standing side by side. |
+| M2 | **Confirm modals unify onto dialect A** (the `dialogForm` spec, 5 of the 9 consumers, and the one that already matches the form modals). The four app-routes confirms change visually: title `--font-size-lg`/600 → `--font-size-3xl`/700, actions gap `--space-sm` → `--space-md`, actions margin `--space-xl` → `--space-lg`, subtitle loses its own `margin-top`/`font-size-sm`. Approved as a normalization row. |
+| M3 | **Dead `.panel` widths are deleted, 520px stays.** Pure recomposition, no visual change. Reviving the authored widths through `--modal-panel-width` is explicitly *not* part of this step. |
+| M4 | **`DraftSaveError` stays hand-rolled.** A banner is a different object from an inline notice, and it is the only instance repo-wide. The spec row is not applicable. `IntegratedScoreWarning` already satisfies its row; no change. |
+| M5 | **Non-confirm modals keep only the shell plus a header/footer slot**; bodies stay fully custom (user's ruling). Form modals adopt `ModalHeader` + `ModalActions`, their `<form>` bodies are untouched. |
+
+#### M2 rider — the decimal pixels are systemic, not local
+
+The maintainer's condition on M2 was that the unified values be "normal" numbers rather than `16.2px` /
+`23.76px` / `4.32px`. Those decimals cannot be fixed inside a modal: `styles/tokens.css` defines **every**
+spacing, radius, font-size and control token as `calc(<whole px> * var(--size-scale))` with
+`--size-scale: 1.08`. The authored bases are already integers and the spacing ramp is already a clean 4px
+series (2, 4, 8, 12, 16, 20, 24, 28, 32, 40, 48); the font ramp is ad hoc (10, 11, 12, 13, 15, 16, 18, 22, 35).
+The single global 1.08 multiplier is what produces every fraction in the app.
+
+So step 5 changes nothing here beyond making sure the shared components reference tokens only, which means
+all nine confirm modals move together whenever the scale is normalized. **The whole-number pass is recorded
+as a separate task to run across the repo before the UnoCSS rewrite**, not as part of this step.
+
+### Step 5 — Tasks 1–3 measured outcomes (2026-09-03)
+
+**Task 1.** `modalChrome.module.css`, `ModalHeader`, `ModalActions`, `ConfirmModal` added to
+`packages/ui/src/dialogs` and exported. `ModalHeader` returns a **fragment**: the heading and its
+paragraphs are direct flex children of the panel and take its `gap: 12.96px`, so a wrapper element would
+silently collapse that spacing. Parity probe against the then-current `RemoveCharacterModal`:
+**diffCount 0** across panel geometry, title, all three paragraphs (including `<strong>` innerHTML),
+actions row, button labels and the child tag sequence `H2, P, P, P, DIV`.
+
+**Task 2 — five `packages/ui` confirms.** `RemovePlaceModal`, `RemoveAttachmentModal`,
+`RemoveCharacterModal`, `RemoveGroupModal` → `ConfirmModal`; `DeleteScriptModal` → `ModalHeader` plus its
+own `DeleteScriptConfirm` body. Three modules deleted; `RemoveGroupModal`'s cross-file import of
+`RemoveCharacterModal.module.css` is gone. Probe over 9 cases (incl. pending states, missing-title
+fallbacks, conditional notes): **0 diffs** before the colour fix below.
+
+**New finding — the UA `dialog` rule breaks token inheritance.** The UA stylesheet sets
+`color: CanvasText` on `<dialog>`, and a *specified* value outranks inheritance from `body`. So text
+inside any modal that does not set its own colour renders pure black in light mode and pure white in
+dark (`color-scheme` follows the theme), never `--color-text`. Dialect B set `color: var(--color-text)`
+on its titles and was therefore correct; dialect A did not. `modalChrome .title` now sets it explicitly.
+
+**Task 3 — four `packages/app-routes` confirms.** `DeleteMusicModal`, `UnassignMusicModal`,
+`DeleteSceneHeadingModal`, `ConvertSceneHeadingModal` → `ConfirmModal`; three modules deleted.
+Measured over 9 cases, the delta set is **uniform across every case** — no per-modal surprise — and is
+exactly the approved M2 list:
+
+```
+H2.fontSize      16.2px  -> 23.76px      (--font-size-lg -> --font-size-3xl)
+H2.fontWeight    600     -> 700
+P.fontSize       12.96px -> 14.04px      (--font-size-sm -> inherited --font-size-md)
+P.lineHeight     19.44px -> normal       (follows from dropping the sm/normal pairing)
+P.marginTop      8.64px  -> 0px          (spacing now comes from the panel's own gap)
+DIV.marginTop    17.28px -> 12.96px      (--space-xl -> --space-lg)
+DIV.gap          4.32px  -> 8.64px       (--space-sm -> --space-md)
+```
+
+HTML, `childTags` and button state are byte-identical in every case. Panel height drops 4.36px
+(`DeleteMusicModal`) to 5.78px (the rest).
+
+**Colour delta, reported because Task 2 was billed as zero-change.** With `.title` now setting
+`color: var(--color-text)`, the four app-routes titles keep the colour they already had, and the five
+`packages/ui` titles move `rgb(0, 0, 0)` → `oklch(0.155 0.014135 51)`. Re-measured: that is their
+**only** delta against HEAD. It is a correction — those headings were never meant to be pure black.
+
+**Follow-up, not acted on:** the same UA rule still applies to every *other* uncoloured string inside
+every modal (bodies, labels, hints). Fixing it at the root would be one declaration —
+`color: var(--color-text)` on `ModalDialog`'s `.panel` — but it moves text in all 14+ dialogs at once,
+so it needs its own normalization row.
+
+**`tokens.test.ts`.** Its dev-catalog assertion is designed to fail on a newly exported component until
+someone catalogues it or consciously lists it. `ConfirmModal`, `ModalActions` and `ModalHeader` were added
+to `NOT_CATALOGUED_YET` alongside `ModalDialog` and every other dialog, which is the documented mechanism —
+the catalog covers primitives and controls, and no modal is in it.
+
+### Step 5 — Tasks 4–6 measured outcomes (2026-09-03)
+
+**Task 4 — nine form modals adopt the header/footer slots (M5).** `AddCharacterModal`, `AddMusicModal`
+(app-routes); `CreateCharacterModal`, `CreateGroupModal`, `CreatePlaceModal`, `NewScriptModal`,
+`RenameScriptModal`, `DuplicateScriptModal`, `ImportScriptModal` (ui). Each `<h2 className={styles.title}>`
+(plus its `<p className={styles.subtitle}>` where present) became `<ModalHeader title description />`, and
+each `<div className={styles.actions}>` became `<ModalActions>`. Every `<form>` body is untouched.
+
+`.title`, `.subtitle` and `.actions` were then deleted from all nine modules and from
+`dialogForm.module.css`, which is left with `.form`, `.label` and `.input`. No `composes:` reference to the
+three removed rules survives anywhere in either package.
+
+Measured on three representatives covering both dialects and both packages — `CreatePlaceModal`
+(420px group, composes `dialogForm`), `RenameScriptModal` (title + subtitle) and `AddCharacterModal`
+(app-routes local dialect). The **only** delta in the whole dump is the already-reported colour
+correction:
+
+```
+H2.color   rgb(0, 0, 0) -> oklch(0.155 0.014135 51)     (UA CanvasText -> --color-text)
+```
+
+Panel `520px` / `30.24px` padding / `12.96px` gap, `H2` `23.76px` / `700`, form `gap: 17.28px`, actions
+`gap: 8.64px` / `flex-start`, and every rect position and size are byte-identical before and after.
+
+The one real divergence noted in the plan stays as it is: `dialogForm .form` carries
+`margin-top: var(--space-md)` and the 420px group's local `.form` does not. `.form` is body, not chrome.
+
+**Task 5 — the dead panel CSS is gone (M3).** Deleted `.panel` from `CreateCharacterModal.module.css`,
+`CreatePlaceModal.module.css`, `AddMusicModal.module.css` and `AddCharacterModal.module.css`, `.modal`
+from `ImportScriptModal.module.css`, and the six matching `panelClassName` props (`CreateGroupModal`
+passed `styles.panel` from `CreateCharacterModal.module.css`). `ScriptSettingsModal` keeps its
+`panelClassName` — it overrides through `--modal-panel-*` custom properties, which is the channel that
+actually works.
+
+Confirmed inert by property, not just by measurement: `ModalDialog`'s `.dialog & .panel` (0-2-0) declares
+exactly `display`, `flex-direction`, `gap`, `width`, `padding`, `background`, `border`, `border-radius`
+and `box-shadow`, which is a superset of every property the deleted 0-1-0 rules declared. Post-delete
+probe of `ImportScriptModal` and `CreatePlaceModal`: both still `520px` / `30.24px` / `12.96px`, with all
+nine properties matching `ModalDialog`'s panel exactly.
+
+**Task 6.1 — `IntegratedScoreWarning`: no change.** It already renders `Notice variant="warning"`;
+`.warningExtras` is local layout only (block margin, plus `font`/`color`/`text-align` resets on its
+descendant buttons and padding on its list). Nothing in it duplicates what `Notice` provides.
+
+**Task 6.2 — `DraftSaveError` stays hand-rolled (M4).** `Notice` renders a single `<div>` with a variant
+class and no slots. `DraftSaveError` is a `justify-content: space-between` banner with a trailing
+`Button`, its own padded/bordered `color-mix` surface and a `--radius-md` corner; `Notice variant="error"`
+supplies only `font-size: var(--font-size-sm)` and `color: var(--color-status-danger)`. Converting it
+would mean either adding a wrapper element inside the notice or extending `Notice` with an action slot —
+an API change, not a recomposition. Its `role="alert"` already matches what `Notice` would default to.
+
+**Task 6.3 — `MusicAttachmentPreviewModal` header tokenized.** Body stays custom (M5). Changed:
+
+```
+.header  margin-block-end  12px -> var(--space-lg)              12px    -> 12.96px
+.title   font-size         16px -> var(--font-size-lg)          16px    -> 16.2px
+.title   font-weight       600  -> var(--font-weight-semibold)  no change
+.pages   gap               12px -> var(--space-lg)              12px    -> 12.96px
+```
+
+Every delta is sub-pixel, as predicted. `--font-size-lg` (15px base) is chosen over `--font-size-xl`
+(16px base) deliberately: with `--size-scale: 1.08` it renders 16.2px, the nearest computed value to the
+current 16px, where `--font-size-xl` would jump to 17.28px. The title's line box grows 20px → 21px and the
+panel 173.42px → 175.38px, which is that 0.2px of type plus the 0.96px of margin.
+
+`.message { padding: 24px }` was **left raw**: `--space-3xl` would move it 24px → 25.92px, which is above
+the sub-pixel threshold this task was allowed to spend. `.page`'s `box-shadow: 0 1px 4px` has no matching
+token. Both are listed as residue below.
+
+**Task 6.4 — `ScriptAttributeManagerModal`: out of scope (Finding E).** It is a full attribute-manager
+workspace with its own panel system, not a modal that the shared chrome describes. The spec row that
+lists it as a modal to unify is stale and should be rewritten before it is picked up again.
+
+### Step 5 close-out
+
+| Area | Outcome |
+| --- | --- |
+| Shared chrome | `modalChrome.module.css`, `ModalHeader`, `ModalActions`, `ConfirmModal` in `packages/ui/src/dialogs`, all exported |
+| Confirm modals | 9 unified onto `ConfirmModal` (5 ui, 4 app-routes); 7 modules deleted |
+| Form modals | 9 adopt `ModalHeader` + `ModalActions`; bodies untouched; `.title`/`.subtitle`/`.actions` deleted from 9 modules and from `dialogForm.module.css` |
+| Dead panel CSS | 5 rules + 6 `panelClassName` props deleted; measured inert before and after |
+| Notices | `IntegratedScoreWarning` unchanged; `DraftSaveError` stays hand-rolled (M4) |
+| Preview modal | header tokenized, sub-pixel only; body custom |
+| Visual delta, whole step | one row: modal `h2` colour `rgb(0, 0, 0)` → `--color-text`, plus the approved M2 confirm-dialect list and the sub-pixel preview-header moves |
+
+**Residue — not addressed in step 5:**
+
+- **The UA `dialog { color: CanvasText }` rule still applies to every uncoloured string inside every
+  modal** (bodies, labels, hints). One declaration would fix it — `color: var(--color-text)` on
+  `ModalDialog`'s `.panel` — but it moves text in all 14+ dialogs at once and needs its own
+  normalization row.
+- **`MusicAttachmentPreviewModal.module.css`**: `.message { padding: 24px }` and
+  `.page { box-shadow: 0 1px 4px … }` are still raw px, deliberately (see Task 6.3).
+- **`ImportScriptModal.module.css`**: `.optionRow`, `.checkbox` and `.optionText` are unreferenced — and
+  were already unreferenced at HEAD, so this is pre-existing dead CSS rather than step-5 fallout. Left
+  in place because it is a different finding from M3.
+- **`ScriptAttributeManagerModal`**: stale spec row, see Task 6.4.
+- **The whole-number pixel pass** across the repo before the UnoCSS rewrite — every decimal in this
+  document comes from the single `--size-scale: 1.08` in `styles/tokens.css`.

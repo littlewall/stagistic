@@ -1,9 +1,4 @@
-import {
-    Button,
-    ModalDialog,
-} from '@stagistic/ui';
-
-import styles from './ConvertSceneHeadingModal.module.css';
+import {ConfirmModal} from '@stagistic/ui';
 
 interface ConvertSceneHeadingModalProps {
     isOpen: boolean,
@@ -18,39 +13,15 @@ export const ConvertSceneHeadingModal = ({
     onClose,
     onConfirm,
 }: ConvertSceneHeadingModalProps) => (
-    <ModalDialog
+    <ConfirmModal
         isOpen={isOpen}
-        onClose={() => {
-            if (!isConverting) {
-                onClose();
-            }
-        }}
         ariaLabel="Convert scene heading"
-        panelClassName={styles.panel}
-    >
-        <h2 className={styles.title}>
-            Convert scene heading?
-        </h2>
-        <p className={styles.subtitle}>
-            Its synopsis and places will be removed. The heading text stays as the new block type.
-        </p>
-        <div className={styles.actions}>
-            <Button
-                variant="danger"
-                isPending={isConverting}
-                onPress={() => {
-                    void onConfirm();
-                }}
-            >
-                Convert heading
-            </Button>
-            <Button
-                variant="ghost"
-                isDisabled={isConverting}
-                onPress={onClose}
-            >
-                Cancel
-            </Button>
-        </div>
-    </ModalDialog>
+        title="Convert scene heading?"
+        description="Its synopsis and places will be removed. The heading text stays as the new block type."
+        confirmLabel="Convert heading"
+        isPending={isConverting}
+        lockWhilePending
+        onClose={onClose}
+        onConfirm={onConfirm}
+    />
 );
