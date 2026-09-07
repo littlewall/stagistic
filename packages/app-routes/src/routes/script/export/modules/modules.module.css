@@ -1,3 +1,8 @@
+/*
+ * Residue after the `SettingsGroup` extraction: the count and order fields, whose
+ * three-track grids are specific to the export module list.
+ * phase-2 Uno.
+ */
 .countField,
 .orderField {
     height: var(--control-trigger-height);
@@ -15,19 +20,6 @@
     font-size: var(--font-size-sm);
     line-height: var(--line-height-normal);
     color: var(--color-text-muted);
-}
-
-.field {
-    display: flex;
-    gap: var(--space-sm);
-    align-items: center;
-    justify-content: space-between;
-    font-size: var(--font-size-sm);
-    color: var(--color-text);
-}
-
-.field input {
-    width: 82px;
 }
 
 .countField {

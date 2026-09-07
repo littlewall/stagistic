@@ -216,7 +216,8 @@ export const controls: CatalogGroup = {
                             />
                         </div>
                     ),
-                }, {
+                },
+                {
                     label: 'form, size lg',
                     node: (
                         <div style={{position: 'relative'}}>
@@ -224,6 +225,21 @@ export const controls: CatalogGroup = {
                                 ariaLabel="Form select"
                                 variant="form"
                                 size="lg"
+                                value="a"
+                                options={[{value: 'a', label: 'Option A'}, {value: 'b', label: 'Option B'}]}
+                                onChange={() => {}}
+                            />
+                        </div>
+                    ),
+                },
+                {
+                    label: 'panel, align start',
+                    node: (
+                        <div style={{position: 'relative'}}>
+                            <Select
+                                ariaLabel="Panel select"
+                                variant="panel"
+                                align="start"
                                 value="a"
                                 options={[{value: 'a', label: 'Option A'}, {value: 'b', label: 'Option B'}]}
                                 onChange={() => {}}

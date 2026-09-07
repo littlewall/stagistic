@@ -752,3 +752,153 @@ to 410px inside a 280px sidebar instead of truncating. Two declarations restore 
   two known pre-existing reds: `prepareExampleScriptDocument.test.ts` (node) and
   `ScriptExportRoute.browser.test.tsx > renders exact-kind character catalog rows only` (browser).
   Every sidebar test passed unmodified.
+
+---
+
+## Step 7 close-out (2026-09-07)
+
+Spec §9.7: *delete emptied modules; every remaining `app-routes` module is either genuinely
+singular (§5.5) or an approved exception, each with a one-line justification and a `phase-2 Uno`
+marker; catalog + DESIGN.md synced.*
+
+### Findings
+
+**S7-A — `SidebarPanelSelect.module.css` (131 lines) was still a copy of `Select.module.css`.**
+Spec §5.3 lists it as "becomes a documented `Select` usage, module deleted", but step 6 covered only
+the three list sidebars. Rule-by-rule the two files agreed: `.button` (surface, border, radius, the
+`[aria-expanded='true']` joined-edge treatment and the `[data-menu-placement='above']` inversion),
+`.menu`, `.item`/`.active` versus `.item`/`.itemActive`, `.chevron` and `.label` were the same
+declarations against the same `--control-trigger-*` / `--menu-*` tokens. Success criterion §10.1 was
+failing.
+
+Four things genuinely differed, and only these needed new API:
+
+| Difference | Why it is not a copy-paste artefact |
+| --- | --- |
+| uppercase, `--letter-spacing-sm`, `--control-height-xs`, semibold | The panel switcher's voice. Not reachable through the declared `--control-trigger-*` surface (`text-transform` is not a variable), so it is a variant, per The Variant Before Override Rule. |
+| trigger shrinks to its own label | `Select`'s `full` stretches; its `content` mode pins the trigger to the *widest* option through a hidden sizer. The switcher is neither. Folded into the `panel` variant rather than a fourth `width` value. |
+| menu pinned to one edge and grown from it | `Select`'s menu pins both edges, so it is exactly the trigger's width. The right sidebar's menu must open leftward. Became `align="start" \| "end"`. |
+| open and choose on `mousedown` with the default prevented | Focus must not leave the ProseMirror canvas. Became `preserveFocus`, documented as editor-chrome-only. |
+
+Plus `menuAriaLabel`, so the listbox keeps the name "Left sidebar panel" instead of inheriting the
+trigger's uppercase text. Every addition is optional and defaults to today's behaviour, so no
+existing `Select` call site changes.
+
+**Parity by measurement.** A temporary probe measured the trigger and the open menu before and
+after, after `document.fonts.ready` and after the open transition settled. Identical: trigger
+`119.03 × 25.91`, padding `0 8.64`, gap `8.64`, `12.96px/600` uppercase, tracking `0.2592px`,
+transparent surface with a 1px transparent border, radius `8.64` closing to `8.64 8.64 0 0` when
+open over the `--menu-bg` fill; menu `119.03 × 113.27` at `left: 8, top: 24.91`, padding `4.32`,
+radius `0 0 8.64 8.64`; all three options `108.41 × 34.55`, padding `8.64`, radius `8.64`, the
+selected one at weight 600 on `oklch(0.934614 0.0131013 32.3072)`; `role="listbox"` with
+`aria-label="Left sidebar panel"` and no `aria-labelledby`; and `document.activeElement` still
+`BODY` after opening, confirming focus was not stolen.
+
+Four computed values changed, none of them rendered: the trigger is now `display: grid` rather than
+`inline-flex` (same box, same child positions), the label sits in `Select`'s `.value` wrapper (same
+box), and the option rows report `gap: normal` rather than `8.64px` (they have one child).
+
+The route module is now 10 lines of positioning: `flex: 0 1 auto; min-width: 0;
+margin-inline-end: auto`.
+
+**S7-B — `settings/shared.module.css` (148 lines) was the indent dual-range slider, written twice.**
+All fifteen classes were `indentSlider*`, and `PageLayoutSettingsPanel` and `ElementPreview` each
+hand-rendered the same eight-node tree — the track, five positioned spans, two overlaid range
+inputs, then a sibling three-span labels row. The CSS was shared; the skeleton was not. That is the
+case The Reusable Skeleton Rule exists to catch.
+
+Ruled route-local rather than promoted: it is one control in one settings area, its whole contract
+is seven `--preview-*` percentages the two panels compute differently, and §10 fixes the phase-1
+component budget at five. `shared.module.css` was `git mv`-ed to `IndentRangeSlider.module.css`
+(the classes losing their now-redundant `indentSlider` prefix) and `IndentRangeSlider.tsx` renders
+the tree once, taking a `start` and an `end` handle (`value`/`min`/`max`/`step`/`ariaLabel`/
+`onChange`/`onCommit`) plus a `labels` slot. It returns a fragment, so both call sites keep the
+exact DOM they had. The clamp maths, the aria-labels and the label text stay in the panels.
+
+**S7-C — dead rules.** One in `app-routes`: `export/modules/modules.module.css` `.field` and
+`.field input` (four importers, none referencing `styles.field`). Five in `packages/ui`, deleted
+under the same ruling although §9.7's stated scope is `app-routes`: `ImportScriptModal.module.css`
+`.optionRow` / `.checkbox` / `.optionText` (step-5 residue), `AttributeManagerPlacesPanel.module.css`
+`.detailType` (the live one is `AttributeManagerListPanel.module.css:206`) and
+`EditorSidebar.module.css` `.characterColorButton`. Each verified against dynamic `styles[…]`
+lookups and CSS `composes:` before deletion.
+
+### The 27 remaining `app-routes` modules
+
+Every file now opens with its own justification comment and a `phase-2 Uno` marker; this table is
+the index.
+
+| Module | Lines | Kind | Justification |
+| --- | ---: | --- | --- |
+| `home/HomeRoute` | 191 | route layout | Start-card grid, library column, script-row content and the media query. Cards, rows, search, skeletons and notices are all `@stagistic/ui`. |
+| `script/ScriptExportRoute` | 17 | route layout | The export page's two-pane shell and its pre-load placeholder. |
+| `script/attributes/MusicAttachmentPreviewModal` | 49 | singular | Paged score/PDF canvas viewer inside `ModalDialog`. |
+| `script/editor/characters/AddCharacterModal` | 15 | route layout | Field stack inside `ModalDialog`, plus one error line. |
+| `script/editor/characters/ScriptCharactersSidebar` | 16 | route layout | The sidebar's flow column and its width. |
+| `script/editor/music/AddMusicModal` | 9 | route layout | Field stack inside `ModalDialog`. |
+| `script/editor/music/ScriptMusicSidebar` | 96 | singular | Hover-revealed action cluster, truncating navigable label, cue-number column — on top of `ListRow`. |
+| `script/editor/settings/IndentRangeSlider` | 153 | singular | The dual-range indent rail (S7-B). |
+| `script/editor/settings/ScriptEditorSettingsPanel` | 28 | route layout | The settings shell's token block. |
+| `.../danger-zone/DangerZoneSettingsPanel` | 23 | singular | The destructive-action card's warning tint; no shared surface carries a danger wash. |
+| `.../document-info/TitlePageSettingsPanel` | 56 | route layout | Draft-date row, sub-field labels and the inline preview line. |
+| `.../element/ElementFormattingToolbar` | 55 | singular | The alignment glyph (three rules whose widths draw the alignment) and the italic/underline letterforms. |
+| `.../element/ElementNumericControls` | 16 | singular | The keyboard-shortcut field's inline prefix. |
+| `.../element/ElementPreview` | 65 | singular | Script-content preview line and spacing bands, mono register. Exempt by §5.5. |
+| `.../element/ElementSettingsPanel` | 48 | route layout | Panel header row and the reset affordance beside it. |
+| `.../header-footer/HeaderFooterSettingsPanel` | 149 | singular | Three-cell printed-page preview grid plus the variable-token composer. |
+| `.../initial-pages/InitialPagesSettingsPanel` | 19 | route layout | Section stack and one flush grid. |
+| `.../page-layout/PageLayoutSettingsPanel` | 78 | singular | The page schematic — margins, header/footer zones and content band. |
+| `.../visual-preferences/VisualPreferencesSettingsPanel` | 39 | singular | The inline dot preview of the chosen page-break mark. |
+| `script/editor/sidebar/SidebarPanelSelect` | 10 | route layout | Positioning only, after S7-A. |
+| `script/editor/structure/ScriptStructureSidebar` | 190 | singular | Kept fully singular under step-6 ruling S3: drag handles, act-title editing, DnD drop states. |
+| `script/export/ExportControlPanel` | 27 | route layout | The export sidebar's panel column and sticky title row. |
+| `script/export/ExportPreview` | 182 | singular | Paged page-preview canvas, custom scrollbar, busy/error overlays. Exempt by §5.5. |
+| `script/export/IntegratedScoreWarning` | 18 | route layout | The extra list and inline action inside a `Notice variant="warning"`. |
+| `script/export/modules/modules.module.css` | 80 | singular | Count and order fields, whose three-track grids are specific to the export module list. |
+| `script/settings/DraftSaveError` | 18 | route layout | The floating save-error pill — positioned chrome, already documented as outside `Notice`. |
+| `script/settings/ScriptAttributeManagerModal` | 26 | route layout | The delete affordance's placement in the attribute manager. |
+
+None of the 27 reimplements a shared pattern. Total route CSS is 1,673 lines including those headers, down from 2,588 at
+the start of this work.
+
+### Catalog and DESIGN.md
+
+`/dev/ui` already carries all five new components with their variable contracts (`Skeleton`,
+`ActionCard`, `ListPanel`, `ListRow` in `primitives.tsx`, `SearchInput` in `controls.tsx`) plus the
+two promoted in step 6 (`SidebarMiniHeader`, `SidebarActionsGroup`); the `tokens.test.ts` coverage
+test that enforces this is green. `Select` gains no catalog entry of its own — it was already
+listed — but DESIGN.md's form-controls section now documents its three variants and the `align`
+option.
+
+DESIGN.md changes:
+
+- **The Sidebar Row Rule** now records the structure sidebar's deviation explicitly. The rule says
+  editor sidebar rows are 28px times the size scale; Music and Characters get there through
+  `ListRow size="compact"` (30.24px at `--size-scale: 1.08`) but Structure is hardcoded to a raw
+  28px and sits 2.24px short. Ruling S3 left it there for the whole-number pixel pass, so the rule
+  now says so rather than reading as satisfied.
+- **The Modal Chrome Rule** added — step 5 shipped `ModalDialog` / `ModalHeader` / `ModalActions` /
+  `ConfirmModal` and no named rule covered them.
+- **The Sidebar Frame Rule** added — names `SidebarMiniHeader`, `SidebarActionsGroup` and
+  `Select variant="panel"` now that `SidebarShell` is gone.
+- **The Routes Carry No CSS Rule** extended with the close-out convention: a surviving route module
+  opens with a one-line justification and a `phase-2 Uno` marker, and one without that header has
+  not been justified.
+
+### Open, not fixed here
+
+- `IndentRangeSlider.module.css:131` sets a hardcoded mono stack
+  (`ui-monospace, SFMono-Regular, Menlo, …`) on the measurement labels — chrome in a monospace
+  voice, which The Mono Is Script Content Only Rule forbids, and bypassing `--font-family-mono`
+  besides. Changing it moves visible type, so it needs its own normalization row.
+- The whole-number pixel pass (every decimal in this document comes from `--size-scale: 1.08`).
+- The UA `dialog { color: CanvasText }` root-cause fix.
+- `SidebarMiniHeader`'s name, now that "Mini" has no counterpart.
+
+### Verification
+
+`tsc -b` clean. `eslint --fix` and `stylelint --fix` clean over every changed file.
+`packages/ui`: 70/70 node, 112/112 browser. `packages/app-routes`: 39/40 node and 111/112 browser,
+the two failures being the known pre-existing reds — `prepareExampleScriptDocument.test.ts` and
+`ScriptExportRoute.browser.test.tsx > renders exact-kind character catalog rows only`. No snapshot
+was updated and no assertion was loosened.

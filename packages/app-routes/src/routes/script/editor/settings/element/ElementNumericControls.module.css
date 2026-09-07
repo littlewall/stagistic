@@ -1,3 +1,7 @@
+/*
+ * Singular geometry: the keyboard-shortcut field's inline prefix.
+ * phase-2 Uno.
+ */
 .shortcutField {
     display: grid;
     grid-template-columns: auto 1fr;

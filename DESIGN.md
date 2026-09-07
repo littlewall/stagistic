@@ -323,15 +323,19 @@ is built against it.
 
 **The Variant Before Override Rule.** If an appearance recurs, it is a variant with a name. A variable override is for a value that is genuinely per-instance. Three call sites overriding the same variable to the same value is a missing variant.
 
-**The Routes Carry No CSS Rule.** A route composes components. If a route needs a style no component provides, that is a missing component or a missing variant, not a new `.module.css`. The exception is genuinely singular geometry, such as the export page schematic.
+**The Routes Carry No CSS Rule.** A route composes components. If a route needs a style no component provides, that is a missing component or a missing variant, not a new `.module.css`. The exception is genuinely singular geometry, such as the export page schematic. Every surviving route module opens with a comment saying in one line why it is singular and carrying a `phase-2 Uno` marker; a module without that header has not been justified and should not exist.
 
 **The Reusable Skeleton Rule.** A component extracted for cross-application reuse exposes a *visual shell only* — its structure, spacing, and state affordances (the hover echo, the selected edge) reached through declared variables and named slots. It never embeds application behaviour: no event handlers, drag-and-drop, data fetching, or route state live inside it. Behaviour is composed by the consuming route through the shell's slots and children. Single use is not an exemption — a shell used in one place today is still a shell. Its inverse is the boundary that keeps the abstraction honest: content that is fixed to one application and carries heavy handlers (an editor's drag-ordered sidebar body) stays in the route; only the reusable skeleton around it — the sidebar frame, the row geometry — is extracted.
+
+**The Modal Chrome Rule.** A dialog is `ModalDialog` (the backdrop, the panel, the escape and focus handling) with `ModalHeader` for the title block and `ModalActions` for the button row. A dialog whose whole job is to confirm or cancel one action is `ConfirmModal` and is not assembled by hand. Everything between the header and the actions is the caller's: modals carry one-off content by design, and only the chrome around it is shared.
+
+**The Sidebar Frame Rule.** An editor sidebar's header row is `SidebarMiniHeader` — the panel switcher slot, the actions slot, and the `--sidebar-head-height` it defines. Trailing icon actions in that row are grouped by `SidebarActionsGroup`. The panel switcher itself is `Select variant="panel"`; no sidebar re-declares an uppercase trigger or its attached menu.
 
 **The Icon Button Rule.** A square icon action is the `IconButton` atom, never a bespoke `.iconButton` class in a route or an editor module. Its appearance is chosen through props, not `className`: `variant` for the resting surface (ghost, outline, filled), `size` for the footprint (xs, sm, md), `shape="pill"` for a full-round hit area, `tone="danger"` for a destructive action, and `isSelected` for a toggled toolbar state. The old per-surface icon-button classes are gone; there is one icon action, parameterised.
 
 **The Mono Is Script Content Only Rule.** `--font-family-mono` (Courier Prime) is reserved for rendered script content — the canvas, element previews, the header/footer preview cells, the mini editor. Chrome never borrows it. An uppercase, tracked, muted chrome label is `Text variant="eyebrow"` (sans, semibold, uppercase, `--letter-spacing-lg`, Marginalia), so the monospace voice keeps meaning: if it is set in Courier Prime, it is the script.
 
-**The Sidebar Row Rule.** List rows across the editor sidebars share one height — 28px times the size scale — and one active treatment: the `--state-selected` fill with a 1px inset `--state-selected-edge`. Music and Structure keep their own layout (their columns and drag models differ) but never their own row height or their own selected edge.
+**The Sidebar Row Rule.** List rows across the editor sidebars share one height — 28px times the size scale — and one active treatment: the `--state-selected` fill with a 1px inset `--state-selected-edge`. Music and Structure keep their own layout (their columns and drag models differ) but never their own row height or their own selected edge. Music and Characters reach that height through `ListRow size="compact"`. **Structure is a recorded deviation:** its act/scene rows are hardcoded to a raw 28px, so at the shipped `--size-scale: 1.08` they sit 2.24px short of the rule. The selected edge already matches. The height is reconciled by the whole-number pixel pass, not by a local patch — see the route-composition audit, step 6 ruling S3.
 
 **The Settings Scaffolding Rule.** A settings surface is built from `SettingsGroup` (the grid of rows), `SettingRow` (one control-height row), and `PanelHeader` (the title and optional description). No route re-implements the group, the row, or the header block; the export panel and the editor setting panels compose these.
 
@@ -364,6 +368,12 @@ Interactive hover may strengthen the border and add the Card shadow. Prefer a na
 - **Focus visible:** 2px solid `--color-focus-ring` with a 2px offset.
 - **Placeholder:** explicit `--color-text-placeholder` at full opacity and at least 4.5:1 contrast.
 - **Disabled:** opacity .4 and `cursor: not-allowed`.
+
+`Select` carries three variants: `plain` (transparent trigger, the default),
+`form` (the bordered field surface, sized `md` or `lg`), and `panel` (the
+uppercase, tracked sidebar switcher at `--control-height-xs`, shrunk to its own
+label). Its menu matches the trigger's width by default; `align="start"` or
+`align="end"` pins one edge instead and lets the menu grow from it.
 
 ### Tags
 

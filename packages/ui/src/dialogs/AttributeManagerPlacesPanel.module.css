@@ -145,12 +145,6 @@
     min-width: 0;
 }
 
-.detailType {
-    margin: 0 0 var(--space-xs);
-    font-size: var(--font-size-xs);
-    color: var(--color-text-muted);
-}
-
 .detailTitle {
     overflow: hidden;
     margin: 0;

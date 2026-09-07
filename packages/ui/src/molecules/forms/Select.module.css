@@ -29,6 +29,26 @@
     --control-trigger-height: var(--control-height-lg);
 }
 
+/*
+ * Panel switcher: an uppercase, tracked trigger that shrinks to its own label.
+ * The editor sidebar header has no width to give away, so this variant drops the
+ * full-width default instead of stretching across the header row.
+ */
+.select.panel {
+    --control-trigger-height: var(--control-height-xs);
+    --control-trigger-font-weight: var(--font-weight-semibold);
+
+    width: auto;
+}
+
+.panel .button {
+    width: auto;
+    max-width: 100%;
+    text-transform: uppercase;
+    letter-spacing: var(--letter-spacing-sm);
+    transition: background var(--duration-normal) var(--ease-standard), border-radius var(--duration-normal) var(--ease-standard);
+}
+
 .sizer {
     display: grid;
     grid-template-columns: 1fr auto;
@@ -168,6 +188,22 @@
         border-bottom: 0;
         border-radius: var(--menu-radius) var(--menu-radius) 0 0;
     }
+}
+
+/*
+ * Default `.menu` pins both edges, so the menu is exactly as wide as the trigger.
+ * An aligned menu pins one edge and grows from it, never narrower than the trigger.
+ */
+.menu.menuStart {
+    right: auto;
+    left: anchor(left);
+    min-width: anchor-size(width);
+}
+
+.menu.menuEnd {
+    right: anchor(right);
+    left: auto;
+    min-width: anchor-size(width);
 }
 
 .item,

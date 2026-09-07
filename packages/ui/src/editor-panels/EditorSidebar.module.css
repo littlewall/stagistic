@@ -101,33 +101,6 @@
     }
 }
 
-.characterColorButton {
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: calc(18px * var(--size-scale));
-    height: calc(18px * var(--size-scale));
-    padding: 0;
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-xs);
-
-    &:hover {
-        background: color-mix(in oklch, var(--character-color) 16%, transparent);
-    }
-
-    &:focus-visible {
-        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
-        outline-offset: 1px;
-    }
-
-    &[data-disabled] {
-        cursor: default;
-        opacity: .55;
-    }
-}
-
 .characterColorPopover {
     z-index: 12;
     background: var(--color-surface);

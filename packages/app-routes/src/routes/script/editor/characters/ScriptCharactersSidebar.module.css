@@ -1,3 +1,8 @@
+/*
+ * Route layout: the sidebar's flow column and its width. Rows, header and actions
+ * come from `ListRow` / `SidebarMiniHeader` / `SidebarActionsGroup`.
+ * phase-2 Uno: route layout.
+ */
 .content {
     overflow: hidden;
     display: flex;

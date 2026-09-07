@@ -28,13 +28,6 @@
     }
 }
 
-.optionRow {
-    cursor: pointer;
-    display: flex;
-    gap: var(--space-md);
-    align-items: center;
-}
-
 .error {
     font-size: var(--font-size-sm);
     color: var(--color-status-danger);
@@ -64,14 +57,4 @@
 .dropZoneHint {
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
-}
-
-.checkbox {
-    inline-size: 1rem;
-    block-size: 1rem;
-}
-
-.optionText {
-    font-size: var(--font-size-sm);
-    color: var(--color-text);
 }

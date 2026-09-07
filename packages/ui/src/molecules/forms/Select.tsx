@@ -1,5 +1,6 @@
 import clsx from 'clsx';
 import {
+    type MouseEvent,
     type ReactNode,
     useId,
     useMemo,
@@ -27,8 +28,17 @@ interface SelectProps {
     isOpen?: boolean,
     onIsOpenChange?: (isOpen: boolean) => void,
     width?: 'full' | 'content',
-    variant?: 'plain' | 'form',
+    variant?: 'panel' | 'plain' | 'form',
     size?: 'md' | 'lg',
+    /** Pin the menu to one edge of the trigger and let it grow. Omit to match the trigger's width exactly. */
+    align?: 'end' | 'start',
+    /** Name the listbox itself when the trigger's own label is not the right name for it. */
+    menuAriaLabel?: string,
+    /**
+     * Open and choose on `mousedown` with the default prevented, so focus stays where it is.
+     * Set only where moving focus would tear down the caller's selection — the editor chrome.
+     */
+    preserveFocus?: boolean,
 }
 
 export const Select = ({
@@ -43,6 +53,9 @@ export const Select = ({
     width = 'full',
     variant = 'plain',
     size = 'md',
+    align,
+    menuAriaLabel,
+    preserveFocus = false,
 }: SelectProps) => {
     const [internalIsOpen, setInternalIsOpen] = useState(false);
     const isControlled = controlledIsOpen !== undefined;
@@ -71,11 +84,25 @@ export const Select = ({
 
     useDropdownDismiss(isOpen, setIsOpen, selectRef);
 
+    const activate = (run: () => void) => {
+        if (!preserveFocus) {
+            return {onClick: run};
+        }
+
+        return {
+            onMouseDown: (event: MouseEvent<HTMLButtonElement>) => {
+                event.preventDefault();
+                run();
+            },
+        };
+    };
+
     return (
         <div
             className={clsx(
                 styles.select,
                 width === 'content' && styles.content,
+                variant === 'panel' && styles.panel,
                 variant === 'form' && styles.form,
                 variant === 'form' && styles[size],
                 className,
@@ -101,7 +128,7 @@ export const Select = ({
                 aria-label={ariaLabel}
                 aria-haspopup="listbox"
                 aria-expanded={isOpen}
-                onClick={() => setIsOpen(!isOpen)}
+                {...activate(() => setIsOpen(!isOpen))}
             >
                 <span className={styles.value}>
                     {selectedOption?.icon ? (
@@ -123,6 +150,8 @@ export const Select = ({
                     ref={menuRef}
                     className={clsx(
                         styles.menu,
+                        align === 'start' && styles.menuStart,
+                        align === 'end' && styles.menuEnd,
                         menuPlacement.placement === 'above' && styles.above,
                     )}
                     style={{
@@ -130,6 +159,7 @@ export const Select = ({
                         ...menuPlacement.style,
                     }}
                     role="listbox"
+                    aria-label={menuAriaLabel}
                     aria-labelledby={id}
                 >
                     {options.map(option => (
@@ -142,10 +172,10 @@ export const Select = ({
                                 styles.item,
                                 option.value === value && styles.itemActive,
                             )}
-                            onClick={() => {
+                            {...activate(() => {
                                 onChange(option.value);
                                 setIsOpen(false);
-                            }}
+                            })}
                         >
                             <span className={styles.itemValue}>
                                 {option.icon ? (

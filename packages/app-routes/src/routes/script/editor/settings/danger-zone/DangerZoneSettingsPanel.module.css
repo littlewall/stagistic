@@ -1,3 +1,8 @@
+/*
+ * Singular geometry: the destructive-action card's warning tint and header tone.
+ * No shared surface carries a danger wash.
+ * phase-2 Uno.
+ */
 .dangerCard {
     display: flex;
     flex-direction: column;

@@ -14,9 +14,9 @@ import {
 } from 'react';
 
 import {MIN_PAGE_MARGIN_HORIZONTAL_PX, PX_PER_INCH} from '../constants';
+import {IndentRangeSlider} from '../IndentRangeSlider';
 import {clamp, formatInches} from '../math';
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
-import sharedStyles from '../shared.module.css';
 import type {
     PageLayoutHandlers,
     ScriptEditorSettingsPanelProps,
@@ -214,20 +214,15 @@ export const PageLayoutSettingsPanel = ({
                     </div>
                     <div className={styles.pageSchematicMarginBottom} />
                 </div>
-                <div className={sharedStyles.indentSliderTrack} style={{...sliderStyle, ...localSliderStyleOverride}}>
-                    <span className={sharedStyles.indentSliderBase} />
-                    <span className={sharedStyles.indentSliderMiddleBase} />
-                    <span className={sharedStyles.indentSliderSelected} />
-                    <span className={sharedStyles.indentSliderDefaultStart} />
-                    <span className={sharedStyles.indentSliderDefaultEnd} />
-                    <input
-                        type="range"
-                        className={clsx(sharedStyles.indentSliderInput, sharedStyles.indentSliderInputStart)}
-                        min={0}
-                        max={previewReferenceTotal}
-                        step={marginSliderStep}
-                        value={localSliderStart}
-                        onChange={event => {
+                <IndentRangeSlider
+                    style={{...sliderStyle, ...localSliderStyleOverride}}
+                    start={{
+                        value: localSliderStart,
+                        min: 0,
+                        max: previewReferenceTotal,
+                        step: marginSliderStep,
+                        ariaLabel: 'Left page margin',
+                        onChange: event => {
                             const rawStart = Number.parseFloat(event.target.value);
                             const maxStart = clamp(
                                 latestEnd.current - MIN_PAGE_CONTENT_WIDTH_PX,
@@ -238,22 +233,20 @@ export const PageLayoutSettingsPanel = ({
 
                             latestStart.current = next;
                             setLocalSliderStart(next);
-                        }}
-                        onPointerUp={() => {
+                        },
+                        onCommit: () => {
                             const nextRightPx = previewReferenceTotal - latestEnd.current;
 
                             onUpdatePageSettings({marginLeftPx: latestStart.current, marginRightPx: nextRightPx});
-                        }}
-                        aria-label="Left page margin"
-                    />
-                    <input
-                        type="range"
-                        className={clsx(sharedStyles.indentSliderInput, sharedStyles.indentSliderInputEnd)}
-                        min={0}
-                        max={previewReferenceTotal}
-                        step={marginSliderStep}
-                        value={localSliderEnd}
-                        onChange={event => {
+                        },
+                    }}
+                    end={{
+                        value: localSliderEnd,
+                        min: 0,
+                        max: previewReferenceTotal,
+                        step: marginSliderStep,
+                        ariaLabel: 'Right page margin',
+                        onChange: event => {
                             const rawEnd = Number.parseFloat(event.target.value);
                             const minEnd = clamp(
                                 latestStart.current + MIN_PAGE_CONTENT_WIDTH_PX,
@@ -264,23 +257,24 @@ export const PageLayoutSettingsPanel = ({
 
                             latestEnd.current = next;
                             setLocalSliderEnd(next);
-                        }}
-                        onPointerUp={() => {
+                        },
+                        onCommit: () => {
                             const nextRightPx = previewReferenceTotal - latestEnd.current;
 
                             onUpdatePageSettings({
                                 marginLeftPx: latestStart.current,
                                 marginRightPx: clamp(nextRightPx, MIN_PAGE_MARGIN_HORIZONTAL_PX, previewReferenceTotal),
                             });
-                        }}
-                        aria-label="Right page margin"
-                    />
-                </div>
-                <div className={sharedStyles.indentSliderLabels}>
-                    <span>{'Left: '}{localLeftMarginInches}</span>
-                    <span>{localContentWidthInches}{' wide'}</span>
-                    <span>{'Right: '}{localRightMarginInches}</span>
-                </div>
+                        },
+                    }}
+                    labels={(
+                        <>
+                            <span>{'Left: '}{localLeftMarginInches}</span>
+                            <span>{localContentWidthInches}{' wide'}</span>
+                            <span>{'Right: '}{localRightMarginInches}</span>
+                        </>
+                    )}
+                />
             </div>
         </SettingsGroup>
     );

@@ -1,3 +1,9 @@
+/*
+ * Kept fully singular (step 6 ruling S3): the act/scene tree carries its own drag
+ * handles, act-title editing and DnD drop states, and its rows sit at a raw 28px
+ * rather than 28px x --size-scale — reconciled by the whole-number pixel pass, not here.
+ * phase-2 Uno.
+ */
 .content {
     position: relative;
     overflow: hidden auto;

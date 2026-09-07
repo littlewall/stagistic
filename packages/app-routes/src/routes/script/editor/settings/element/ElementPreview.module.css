@@ -1,3 +1,8 @@
+/*
+ * Singular geometry: the script-content preview line and its spacing bands, in the
+ * mono register the canvas uses. Exempt by spec §5.5.
+ * phase-2 Uno.
+ */
 .previewSpacingRow {
     position: relative;
     width: var(--preview-line-width, 80%);

@@ -1,12 +1,17 @@
-.indentSliderTrack {
+/*
+ * The indent dual-range slider: one rail, a highlighted selection, two default
+ * boundary ticks and two overlaid range thumbs. Singular geometry — no shared
+ * control has this shape. phase-2 Uno.
+ */
+.track {
     position: relative;
     height: 28px;
     margin-top: var(--space-sm);
 }
 
-.indentSliderBase,
-.indentSliderMiddleBase,
-.indentSliderSelected {
+.base,
+.middleBase,
+.selected {
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
@@ -14,25 +19,25 @@
     border-radius: var(--radius-full);
 }
 
-.indentSliderBase {
+.base {
     inset-inline: 0;
     background: var(--color-preview-indent-rail);
 }
 
-.indentSliderMiddleBase {
+.middleBase {
     right: calc(100% - var(--preview-slider-zone-end-percent, 90%));
     left: var(--preview-slider-zone-start-percent, 10%);
     background: var(--color-preview-indent-rail);
 }
 
-.indentSliderSelected {
+.selected {
     right: calc(100% - var(--preview-indent-end-percent, 100%));
     left: var(--preview-indent-start-percent, 0%);
     background: var(--color-preview-slider-selected);
 }
 
-.indentSliderDefaultStart,
-.indentSliderDefaultEnd {
+.defaultStart,
+.defaultEnd {
     pointer-events: none;
     position: absolute;
     top: 50%;
@@ -42,15 +47,15 @@
     background: var(--color-preview-slider-boundary);
 }
 
-.indentSliderDefaultStart {
+.defaultStart {
     left: var(--preview-indent-default-start-percent, 0%);
 }
 
-.indentSliderDefaultEnd {
+.defaultEnd {
     left: var(--preview-indent-default-end-percent, 100%);
 }
 
-.indentSliderInput {
+.input {
     pointer-events: none;
     position: absolute;
     inset: 0 calc(100% - var(--preview-slider-zone-end-percent, 90%)) 0 var(--preview-slider-zone-start-percent, 10%);
@@ -104,21 +109,21 @@
     }
 }
 
-.indentSliderInputStart {
+.inputStart {
     &::-webkit-slider-thumb,
     &::-moz-range-thumb {
         background: var(--color-preview-slider-handle);
     }
 }
 
-.indentSliderInputEnd {
+.inputEnd {
     &::-webkit-slider-thumb,
     &::-moz-range-thumb {
         background: var(--color-preview-slider-handle);
     }
 }
 
-.indentSliderLabels {
+.labels {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: var(--space-md);

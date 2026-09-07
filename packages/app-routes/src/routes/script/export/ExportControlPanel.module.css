@@ -1,3 +1,7 @@
+/*
+ * Route layout: the export sidebar's panel column and its sticky title row.
+ * phase-2 Uno: route layout.
+ */
 .panel {
     overflow: auto;
     display: grid;

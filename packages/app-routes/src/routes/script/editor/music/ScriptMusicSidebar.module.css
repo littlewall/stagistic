@@ -1,3 +1,9 @@
+/*
+ * Row-scoped behaviour on top of `ListRow`: the hover-revealed action cluster, the
+ * truncating navigable label, and the cue-number column. Sizing, hover and the
+ * selected surface are `ListRow`'s.
+ * phase-2 Uno.
+ */
 .content {
     overflow: hidden auto;
     flex: 1;
