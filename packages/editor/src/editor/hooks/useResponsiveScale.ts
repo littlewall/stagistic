@@ -8,7 +8,7 @@ type UseResponsiveScaleArgs = {
     rootRef: RefObject<HTMLDivElement | null>,
     canvasHostRef: RefObject<HTMLDivElement | null>,
     pageWidthPx: number,
-    sizeScale: number,
+    editorZoom: number,
 };
 
 /**
@@ -36,7 +36,7 @@ export const useResponsiveScale = ({
     rootRef,
     canvasHostRef,
     pageWidthPx,
-    sizeScale,
+    editorZoom,
 }: UseResponsiveScaleArgs) => {
     const [responsiveScale, setResponsiveScale] = useState(1);
 
@@ -48,7 +48,7 @@ export const useResponsiveScale = ({
             return;
         }
 
-        const pageWidth = pageWidthPx * sizeScale;
+        const pageWidth = pageWidthPx * editorZoom;
 
         if (!Number.isFinite(pageWidth) || pageWidth <= 0) {
             setResponsiveScale(1);
@@ -127,9 +127,9 @@ export const useResponsiveScale = ({
         };
     }, [
         canvasHostRef,
+        editorZoom,
         pageWidthPx,
         rootRef,
-        sizeScale,
     ]);
 
     return responsiveScale;

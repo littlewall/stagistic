@@ -72,3 +72,6 @@ vite.config.js.map
 
 # Graphify
 graphify-out/
+
+# Vitest browser-mode failure screenshots (screenshotOnFailure debris, not baselines)
+**/__screenshots__/
