@@ -54,18 +54,6 @@ body {
     animation-timing-function: var(--ease-theme);
 }
 
-.size-sm {
-    --size-scale: 1;
-}
-
-.size-md {
-    --size-scale: 1.1;
-}
-
-.size-lg {
-    --size-scale: 1.2;
-}
-
 button,
 input,
 textarea,

@@ -118,13 +118,11 @@ const typeAtEnd = async (text: string) => {
 afterEach(() => {
     mountedRoots.forEach(root => root.unmount());
     mountedRoots.length = 0;
-    document.documentElement.style.removeProperty('--size-scale');
     document.body.innerHTML = '';
 });
 
 describe('StructureRowAct rename input', () => {
     it('renders a quiet iconless row aligned with scene numbers', async () => {
-        document.documentElement.style.setProperty('--size-scale', '1');
         mount();
         await waitFor(() => getInput() !== null);
 

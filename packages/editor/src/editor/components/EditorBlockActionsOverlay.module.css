@@ -116,8 +116,8 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: calc(16px * var(--size-scale));
-    height: calc(16px * var(--size-scale));
+    width: 16px;
+    height: 16px;
 }
 
 .triggerIcon,
@@ -125,11 +125,11 @@
     position: absolute;
     inset: 0;
     display: inline-flex;
-    flex: 0 0 calc(16px * var(--size-scale));
+    flex: 0 0 16px;
     align-items: center;
     justify-content: center;
-    width: calc(16px * var(--size-scale));
-    height: calc(16px * var(--size-scale));
+    width: 16px;
+    height: 16px;
 }
 
 .triggerIcon {
@@ -160,13 +160,13 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        transform: translate(calc(-3px * var(--size-scale)), calc(-5px * var(--size-scale)));
-        width: calc(2px * var(--size-scale));
-        height: calc(2px * var(--size-scale));
+        transform: translate(-3px, -5px);
+        width: 2px;
+        height: 2px;
         opacity: 1;
         background: currentcolor;
         border-radius: var(--radius-full);
-        box-shadow: 0 calc(4px * var(--size-scale)) 0 currentcolor, 0 calc(8px * var(--size-scale)) 0 currentcolor, calc(4px * var(--size-scale)) 0 0 currentcolor, calc(4px * var(--size-scale)) calc(4px * var(--size-scale)) 0 currentcolor, calc(4px * var(--size-scale)) calc(8px * var(--size-scale)) 0 currentcolor;
+        box-shadow: 0 4px 0 currentcolor, 0 8px 0 currentcolor, 4px 0 0 currentcolor, 4px 4px 0 currentcolor, 4px 8px 0 currentcolor;
     }
 }
 
@@ -188,7 +188,7 @@
     overflow: hidden;
     display: flex;
     align-items: stretch;
-    min-width: calc(200px * var(--size-scale));
+    min-width: 200px;
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-xl);
@@ -200,7 +200,7 @@
     }
 
     &.withSubmenu {
-        min-width: calc(400px * var(--size-scale));
+        min-width: 400px;
     }
 }
 
@@ -218,15 +218,15 @@
     display: grid;
     gap: 0;
     align-content: start;
-    min-width: calc(200px * var(--size-scale));
-    max-height: min(calc(280px * var(--size-scale)), var(--anchored-menu-max-height, calc(280px * var(--size-scale))));
+    min-width: 200px;
+    max-height: min(var(--menu-max-height), var(--anchored-menu-max-height, var(--menu-max-height)));
     padding: var(--space-sm) 0;
 }
 
 .menuSecondaryPanel {
     display: grid;
     align-content: start;
-    min-width: calc(200px * var(--size-scale));
+    min-width: 200px;
     background: color-mix(in oklch, var(--color-surface) 95%, var(--color-surface-accent) 5%);
     border-left: 1px solid var(--color-border);
 }
@@ -288,8 +288,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(18px * var(--size-scale));
-    height: calc(18px * var(--size-scale));
+    width: 18px;
+    height: 18px;
     color: var(--color-text-muted);
 }
 
@@ -323,8 +323,8 @@
     color: var(--color-text-muted);
 
     & svg {
-        width: calc(14px * var(--size-scale));
-        height: calc(14px * var(--size-scale));
+        width: 14px;
+        height: 14px;
         fill: none;
         stroke: currentcolor;
         stroke-linecap: round;

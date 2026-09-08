@@ -1,7 +1,7 @@
 /*
  * Kept fully singular (step 6 ruling S3): the act/scene tree carries its own drag
  * handles, act-title editing and DnD drop states, and its rows sit at a raw 28px
- * rather than 28px x --size-scale — reconciled by the whole-number pixel pass, not here.
+ * rather than the scaled control height — reconciled by the whole-number pixel pass.
  * phase-2 Uno.
  */
 .content {
@@ -21,12 +21,12 @@
 
 .actTitle {
     display: flex;
-    gap: calc(4px * var(--size-scale));
+    gap: var(--space-sm);
     align-items: center;
     width: 100%;
     min-height: 28px;
     margin: 0;
-    padding-left: calc(14px * var(--size-scale));
+    padding-left: 14px;
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
     color: var(--color-text-muted);
@@ -48,8 +48,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(16px * var(--size-scale));
-    height: calc(16px * var(--size-scale));
+    width: 16px;
+    height: 16px;
     margin-left: auto;
     font-size: var(--font-size-sm);
     line-height: var(--line-height-none);
@@ -57,7 +57,7 @@
     opacity: 0;
     background: transparent;
     border: 1px solid transparent;
-    border-radius: calc(5px * var(--size-scale));
+    border-radius: 5px;
 
     &:hover {
         color: color-mix(in oklch, var(--color-status-danger) 75%, var(--color-text-muted));
@@ -151,25 +151,25 @@
     cursor: grab;
     user-select: none;
     display: inline-flex;
-    flex: 0 0 calc(6px * var(--size-scale));
+    flex: 0 0 6px;
     align-items: center;
     justify-content: center;
     box-sizing: content-box;
-    width: calc(6px * var(--size-scale));
-    min-height: calc(15px * var(--size-scale));
+    width: 6px;
+    min-height: 15px;
     margin: 0;
-    padding-inline: calc(4px * var(--size-scale));
+    padding-inline: var(--space-sm);
     color: color-mix(in oklch, var(--color-text-muted) 55%, var(--color-border));
     appearance: none;
     opacity: .55;
     background-color: transparent;
     background-image: radial-gradient(currentcolor .8px, transparent .9px), radial-gradient(currentcolor .8px, transparent .9px);
-    background-position: 0 0, calc(3px * var(--size-scale)) 0;
+    background-position: 0 0, 3px 0;
     background-clip: content-box;
     background-origin: content-box;
-    background-size: calc(3px * var(--size-scale)) calc(4px * var(--size-scale));
+    background-size: 3px 4px;
     border: 0;
-    border-radius: calc(3px * var(--size-scale));
+    border-radius: 3px;
 
     &:active {
         cursor: grabbing;

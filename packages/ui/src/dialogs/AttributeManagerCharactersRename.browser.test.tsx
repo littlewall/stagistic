@@ -74,7 +74,6 @@ const renderPanel = (
 
     host.style.width = '900px';
     host.style.height = '600px';
-    host.style.setProperty('--size-scale', '1');
     document.body.appendChild(host);
     root.render(
         <RenameableCharactersPanel

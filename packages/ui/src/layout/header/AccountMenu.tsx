@@ -41,8 +41,8 @@ export const AccountMenu = ({
               * carries `Appearance` — the real settings live behind the header's
               * own gear. The palette matches what is behind the button and stays honest
               * as the menu grows with further look-and-feel controls (density is
-              * the obvious next one: `.size-sm/md/lg` exist in `base.css` with no
-              * control anywhere).
+              * the obvious next one, though nothing implements it today — the dead
+              * `.size-sm/md/lg` classes went with the density coefficient they set).
               */}
             <Tooltip label="Appearance" placement="bottom">
                 <Button

@@ -23,7 +23,7 @@
 .divider {
     flex: none;
     width: 1px;
-    height: calc(20px * var(--size-scale));
+    height: 20px;
     margin: 0 var(--space-xs);
     background: var(--color-border-subtle);
 }
@@ -75,7 +75,7 @@
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: var(--control-trigger-gap);
     align-items: center;
-    width: calc(210px * var(--size-scale));
+    width: 210px;
     height: var(--control-trigger-height);
     padding: 0 var(--control-trigger-padding-inline);
     font-size: var(--control-trigger-font-size);

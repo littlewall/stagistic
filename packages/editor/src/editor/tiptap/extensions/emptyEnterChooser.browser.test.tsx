@@ -43,9 +43,9 @@ const EditorProbe = () => {
 const mountedRoots: Root[] = [];
 
 /*
- * These specs never loaded tokens.css, so the editor's old read of --size-scale
- * fell back to 1. editorZoom={1} states that explicitly now that the value is a
- * prop rather than an ambient global.
+ * These specs never loaded tokens.css, so the editor's old read of the UI density
+ * coefficient fell back to 1. editorZoom={1} states that explicitly now that the
+ * value is a prop rather than an ambient global.
  */
 const renderEditor = () => {
     const host = document.createElement('div');
@@ -53,7 +53,11 @@ const renderEditor = () => {
 
     document.body.appendChild(host);
     root.render(
-        <ScriptEditor document={{initialValue}} layout={{autoFocus: true}} editorZoom={1}>
+        <ScriptEditor
+            document={{initialValue}}
+            layout={{autoFocus: true}}
+            editorZoom={1}
+        >
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
             </ScriptEditor.LeftSidebar>

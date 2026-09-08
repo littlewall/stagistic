@@ -1,6 +1,6 @@
 .metadataForm {
     display: grid;
-    grid-template-columns: minmax(0, 2fr) minmax(calc(140px * var(--size-scale)), 1fr);
+    grid-template-columns: minmax(0, 2fr) minmax(140px, 1fr);
     gap: var(--space-lg);
     margin-block-end: var(--space-2xl);
 }
@@ -19,7 +19,7 @@
     grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--space-xl);
     align-items: center;
-    min-height: calc(64px * var(--size-scale));
+    min-height: 64px;
     padding: var(--space-lg) 0;
 }
 

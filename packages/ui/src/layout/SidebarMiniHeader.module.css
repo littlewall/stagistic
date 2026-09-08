@@ -33,5 +33,5 @@
     gap: var(--space-sm);
     align-items: center;
     justify-content: flex-end;
-    min-width: calc(40px * var(--size-scale));
+    min-width: 40px;
 }

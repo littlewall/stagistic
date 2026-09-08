@@ -4,7 +4,7 @@
     flex: 0 0 auto;
     gap: var(--space-xl);
     align-items: center;
-    min-height: calc(28px * var(--size-scale));
+    min-height: 28px;
     padding: var(--space-sm) var(--space-2xl);
     font-size: var(--font-size-xs);
     line-height: var(--line-height-tight);

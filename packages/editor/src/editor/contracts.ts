@@ -264,7 +264,7 @@ export interface EditorProps {
     /**
      * Zooms the page canvas only: page width, render scale, pagination and
      * overlay placement. Chrome sizes from the shared tokens and never sees
-     * this value. Defaults to 1.08, the constant the UI used to carry.
+     * this value. Defaults to 1: the page renders at its nominal size.
      */
     editorZoom?: number,
     /** Workspace-owned cache keeping the live editor surface alive across view switches. */

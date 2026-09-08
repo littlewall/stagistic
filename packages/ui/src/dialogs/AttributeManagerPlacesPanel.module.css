@@ -1,7 +1,7 @@
 .panel {
     overflow: hidden;
     display: grid;
-    grid-template-columns: minmax(calc(220px * var(--size-scale)), calc(300px * var(--size-scale))) minmax(0, 1fr);
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
     flex: 1 1 auto;
     height: 100%;
     min-height: 0;
@@ -137,7 +137,7 @@
     gap: var(--space-lg);
     align-items: center;
     justify-content: space-between;
-    min-height: calc(76px * var(--size-scale));
+    min-height: 76px;
     padding: var(--space-xl) var(--space-2xl);
 }
 
@@ -196,7 +196,7 @@
 @media (max-width: 720px) {
     .panel {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: minmax(calc(180px * var(--size-scale)), .45fr) minmax(calc(240px * var(--size-scale)), 1fr);
+        grid-template-rows: minmax(180px, .45fr) minmax(240px, 1fr);
     }
 
     .browser {

@@ -1,5 +1,5 @@
 .row {
-    --list-row-min-height: calc(28px * var(--size-scale));
+    --list-row-min-height: 28px;
     --list-row-padding: 0 var(--space-md);
     --list-row-gap: var(--space-sm);
     --list-row-radius: var(--radius-md);
@@ -13,11 +13,11 @@
 }
 
 .compact {
-    --list-row-min-height: calc(28px * var(--size-scale));
+    --list-row-min-height: 28px;
 }
 
 .library {
-    --list-row-min-height: calc(58px * var(--size-scale));
+    --list-row-min-height: 58px;
     --list-row-padding: var(--space-lg) var(--space-xl);
     --list-row-gap: var(--space-lg);
     --list-row-radius: var(--radius-none);

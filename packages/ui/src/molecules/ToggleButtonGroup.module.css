@@ -14,8 +14,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-width: calc(30px * var(--size-scale));
-    height: calc(28px * var(--size-scale));
+    min-width: 30px;
+    height: 28px;
     padding: 0 var(--space-md);
     font-family: inherit;
     font-size: var(--font-size-md);
@@ -46,7 +46,7 @@
 }
 
 .iconOnly {
-    width: calc(30px * var(--size-scale));
+    width: 30px;
     padding-inline: 0;
 }
 
@@ -61,7 +61,7 @@
 
 .chip {
     min-width: 0;
-    height: calc(28px * var(--size-scale));
+    height: 28px;
     padding-inline: var(--space-lg);
     font-size: var(--font-size-sm);
     border-color: var(--color-border);

@@ -14,7 +14,7 @@
 }
 
 .sizeMd {
-    --search-icon-size: calc(18px * var(--size-scale));
+    --search-icon-size: 18px;
     --search-icon-inset: var(--space-xl);
     --search-padding-end: var(--search-text-inset);
     --input-bg: var(--color-surface-raised);

@@ -58,7 +58,7 @@ const Editor = ({
     layout,
     requests,
     callbacks,
-    editorZoom = 1.08,
+    editorZoom = 1,
     surfaceCache,
     liveStore: providedLiveStore,
     children,

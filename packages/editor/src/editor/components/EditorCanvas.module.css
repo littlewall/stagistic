@@ -1,6 +1,6 @@
 .canvas {
     --block-trigger-size: var(--control-height-sm);
-    --block-controls-gutter: clamp(calc(10px * var(--size-scale)), 1vw, calc(28px * var(--size-scale)));
+    --block-controls-gutter: clamp(10px, 1vw, 28px);
     --music-rail-inset: calc(var(--block-controls-gutter) + var(--space-md));
 
     scrollbar-gutter: stable;
@@ -35,7 +35,7 @@
     min-height: 100%;
     padding: var(--editor-margin-top, 96px) var(--editor-margin-right, 96px) var(--editor-margin-bottom, 96px) var(--editor-margin-left, 96px);
     font-family: var(--font-family-mono);
-    font-size: var(--editor-font-size, calc(13px * var(--size-scale)));
+    font-size: var(--editor-font-size, 13px);
     line-height: var(--editor-line-height, 1.7);
     color: var(--color-text);
     tab-size: 5;

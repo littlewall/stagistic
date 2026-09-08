@@ -29,7 +29,6 @@ const createHost = () => {
     const root = createRoot(host);
     host.style.width = '900px';
     host.style.height = '600px';
-    host.style.setProperty('--size-scale', '1');
     document.body.appendChild(host);
     mountedRoots.push(root);
     return root;

@@ -8,8 +8,14 @@
     pointer-events: auto;
     overflow-y: auto;
     display: grid;
-    min-width: calc(220px * var(--size-scale));
-    max-height: min(calc(320px * var(--size-scale)), 50vh);
+    min-width: 220px;
+    /*
+     * stylelint's csstree grammar for max-height has not been taught the math
+     * functions; it accepted this while the argument was a calc() and rejects the
+     * plain length. The CSS is valid.
+     */
+    /* stylelint-disable-next-line csstree/validator */
+    max-height: min(320px, 50vh);
     padding: var(--space-sm);
     background: var(--color-surface);
     border: 1px solid var(--color-border);
@@ -20,7 +26,7 @@
 .item {
     cursor: pointer;
     display: grid;
-    grid-template-columns: calc(14px * var(--size-scale)) 1fr;
+    grid-template-columns: 14px 1fr;
     gap: var(--space-md);
     align-items: center;
     padding: var(--space-sm) var(--space-md);
@@ -30,7 +36,7 @@
     text-align: left;
     background: transparent;
     border: 1px solid transparent;
-    border-radius: calc(9px * var(--size-scale));
+    border-radius: 9px;
 
     &:hover {
         background: var(--state-hover);
@@ -42,8 +48,8 @@
 }
 
 .itemIcon {
-    width: calc(14px * var(--size-scale));
-    height: calc(14px * var(--size-scale));
+    width: 14px;
+    height: 14px;
     color: var(--color-text-muted);
 }
 
