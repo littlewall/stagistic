@@ -138,7 +138,7 @@ The system rejects heavy SaaS dashboards, gamified writing interfaces, and gener
 - Surfaces are flat at rest; shadows communicate actual floating depth.
 - Light and dark themes preserve the same structure and semantic roles.
 - OKLCH and `color-mix(in oklch, ...)` keep derived states visually coherent.
-- `--size-scale` changes interface density without changing component relationships.
+- Sizes are `rem` from a whole-pixel ladder, so the interface grows with the reader's browser font size without changing component relationships.
 
 ## 2. Color
 
@@ -209,7 +209,7 @@ IBM Plex Sans is precise without feeling corporate. Courier Prime carries the vi
 
 **The Two-Voice Rule.** Courier Prime is the script’s voice; IBM Plex Sans is the tool’s voice. Interface prose stays sans. Script content and structural labels such as act, scene, character, and lyric may use mono. Do not mix both faces within one text element.
 
-**The Size-Scale Rule.** Spacing, radii, font sizes, and control heights derive from `--size-scale`. The root fallback is `1.08`; explicit modes currently set `.size-sm` to `1`, `.size-md` to `1.1`, and `.size-lg` to `1.2`. New fixed values must use the scale unless they are intentionally physical CSS pixels, such as a 1px border or 2px focus outline.
+**The Sizes Scale With The Reader Rule.** Spacing, radii, font sizes, control heights and chrome dimensions are `rem`, drawn from a whole-pixel ladder in `tokens.css` where every token carries its pixel value in a comment. The root is 16px and 16 is a power of two, so each value converts exactly: 12px is `0.75rem`, 11px is `0.6875rem`. Think in the pixels; ship the rem. A reader who raises their browser's default font size then gets a proportionally larger interface, which px cannot give them — page zoom scales px, the font-size setting does not, and that setting is the standard remedy for low vision. Three domains are deliberately exempt. Hairline borders, focus-ring widths and the `--radius-full` sentinel stay `px`, because a scaled hairline is a blurred sub-pixel line that buys no legibility. Media-query breakpoints are `em`, so the layout responds along with the type rather than giving a reader with large text more content in an unchanged column. The editor canvas is `px` times `--editor-zoom`, because A4 is a physical size and must not change because the menu text grew. Components never write a `rem` literal: they use tokens, which carry the right unit for their domain.
 
 ## 4. Layers and Elevation
 
@@ -335,7 +335,7 @@ is built against it.
 
 **The Mono Is Script Content Only Rule.** `--font-family-mono` (Courier Prime) is reserved for rendered script content — the canvas, element previews, the header/footer preview cells, the mini editor. Chrome never borrows it. An uppercase, tracked, muted chrome label is `Text variant="eyebrow"` (sans, semibold, uppercase, `--letter-spacing-lg`, Marginalia), so the monospace voice keeps meaning: if it is set in Courier Prime, it is the script.
 
-**The Sidebar Row Rule.** List rows across the editor sidebars share one height — 28px times the size scale — and one active treatment: the `--state-selected` fill with a 1px inset `--state-selected-edge`. Music and Structure keep their own layout (their columns and drag models differ) but never their own row height or their own selected edge. Music and Characters reach that height through `ListRow size="compact"`. **Structure is a recorded deviation:** its act/scene rows are hardcoded to a raw 28px, so at the shipped `--size-scale: 1.08` they sit 2.24px short of the rule. The selected edge already matches. The height is reconciled by the whole-number pixel pass, not by a local patch — see the route-composition audit, step 6 ruling S3.
+**The Sidebar Row Rule.** List rows across the editor sidebars share one height — 28px — and one active treatment: the `--state-selected` fill with a 1px inset `--state-selected-edge`. Music and Structure keep their own layout (their columns and drag models differ) but never their own row height or their own selected edge. Music and Characters reach that height through `ListRow size="compact"`. Structure's act/scene rows hardcode the same 28px. The deviation recorded here in step 6 of the route composition — Structure sitting 2.24px short — existed only because `ListRow` multiplied its 28px by the density coefficient while Structure's raw value was not multiplied; retiring that coefficient in the whole-number pixel pass closed the gap, and the two now measure identically.
 
 **The Settings Scaffolding Rule.** A settings surface is built from `SettingsGroup` (the grid of rows), `SettingRow` (one control-height row), and `PanelHeader` (the title and optional description). No route re-implements the group, the row, or the header block; the export panel and the editor setting panels compose these.
 
@@ -454,7 +454,7 @@ Accessibility states are part of the visual system, not browser cleanup.
 - Derive product neutrals from `--base-neutral` with OKLCH relative color syntax.
 - Use Copper for branded/high-signal action, progress, and music-specific emphasis.
 - Use Lavender for selection, focus, links, and utility states.
-- Use `--size-scale` for spacing, typography, radii, and control dimensions.
+- Use the ladder tokens for spacing, typography, radii, and control dimensions; they carry the right unit for their domain.
 - Use Courier Prime when the interface is speaking in the script’s structural voice.
 - Use shadows only for true elevation.
 - Use `color-mix(in oklch, ...)` for derived hover and state colors.

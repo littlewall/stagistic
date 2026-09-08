@@ -23,7 +23,7 @@
         grid-template-columns: minmax(0, 1fr);
     }
 
-    @media (max-width: 1024px) {
+    @media (max-width: 64em) {
         grid-template-columns: minmax(0, 1fr);
     }
 }
@@ -42,7 +42,7 @@
     min-height: 0;
     background: var(--color-surface);
 
-    @media (max-width: 1024px) {
+    @media (max-width: 64em) {
         display: none;
     }
 }

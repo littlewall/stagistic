@@ -11,7 +11,7 @@
     justify-content: center;
     margin-bottom: var(--space-xl);
 
-    @media (max-width: 900px) {
+    @media (max-width: 56.25em) {
         gap: var(--space-sm);
     }
 }

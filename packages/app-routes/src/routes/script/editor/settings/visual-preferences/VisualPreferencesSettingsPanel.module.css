@@ -7,7 +7,7 @@
     gap: var(--space-lg);
     align-items: center;
 
-    @media (max-width: 900px) {
+    @media (max-width: 56.25em) {
         flex-wrap: wrap;
         gap: var(--space-md);
     }

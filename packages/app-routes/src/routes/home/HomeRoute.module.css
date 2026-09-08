@@ -175,7 +175,7 @@
     gap: var(--space-sm);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 45em) {
     .startActions,
     .libraryTools {
         grid-template-columns: 1fr;

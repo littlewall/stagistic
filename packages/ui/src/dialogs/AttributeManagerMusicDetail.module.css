@@ -74,7 +74,7 @@
     display: none;
 }
 
-@media (max-width: 720px) {
+@media (max-width: 45em) {
     .metadataForm,
     .slot {
         grid-template-columns: minmax(0, 1fr);

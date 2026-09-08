@@ -618,7 +618,7 @@
     }
 }
 
-@media (max-width: 980px) {
+@media (max-width: 61.25em) {
     .heroInner {
         grid-template-columns: minmax(18rem, 1fr) minmax(28rem, 32rem);
         gap: 2rem;
@@ -630,7 +630,7 @@
     }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 53.75em) {
     .hero {
         min-height: 0;
         padding-top: 5.5rem;
@@ -679,7 +679,7 @@
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 40em) {
     .tryEditorCallout {
         top: -1.5rem;
         right: .5rem;
@@ -719,7 +719,7 @@
     }
 }
 
-@media (max-width: 999px) {
+@media (max-width: 62.4375em) {
     .tryEditorCallout,
     .scriptExcerpt,
     .heroCtas .btnPrimary,

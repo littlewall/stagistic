@@ -289,7 +289,7 @@
     color: var(--color-text-muted);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 45em) {
     .panel {
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: minmax(180px, .45fr) minmax(240px, 1fr);
