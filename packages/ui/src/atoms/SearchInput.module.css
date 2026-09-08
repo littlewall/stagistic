@@ -24,7 +24,7 @@
 }
 
 .sizeSm {
-    --search-icon-size: 1rem;
+    --search-icon-size: var(--icon-size-md);
     --search-icon-inset: var(--space-md);
     --search-padding-end: var(--control-trigger-padding-inline);
 }

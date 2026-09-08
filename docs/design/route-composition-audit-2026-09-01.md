@@ -902,3 +902,138 @@ DESIGN.md changes:
 the two failures being the known pre-existing reds — `prepareExampleScriptDocument.test.ts` and
 `ScriptExportRoute.browser.test.tsx > renders exact-kind character catalog rows only`. No snapshot
 was updated and no assertion was loosened.
+
+---
+
+## Whole-number pixel pass close-out (2026-09-07)
+
+Spec: `docs/superpowers/specs/2026-09-07-whole-number-pixel-pass-design.md`.
+Plan: `docs/superpowers/plans/2026-09-07-whole-number-pixel-pass.md`.
+This is the pass the "Open, not fixed here" list above was waiting for.
+
+### What it did
+
+`--size-scale: 1.08` multiplied 36 tokens and 493 hand-written `calc()` expressions, and every
+decimal recorded anywhere in this document came from it. It began as the editor's text zoom —
+keeping the canvas faithful to A4/Letter while the type grew — and leaked into the whole design
+system; the zoom feature stopped shipping, the leak did not. The pass split it in two: an
+editor-owned `--editor-zoom` for page geometry, and nothing at all for the UI. The surviving
+whole-number ladder then moved to `rem`, so the interface finally answers to the reader's browser
+font size.
+
+| Task | Outcome | Visual change |
+| --- | --- | --- |
+| 1 | Measurement probe (`sizeProbe.browser.test.tsx`, temporary) | none |
+| 2 | Editor takes `editorZoom` as a prop; emits `--editor-zoom` | none (value still 1.08) |
+| 3 | 8 hand-written calcs adopt the token that already carried the number | none |
+| 4 | **The flip** — tokens become literal whole pixels; `--size-scale` deleted | **UI 8% smaller; canvas at nominal size** |
+| 5 | Ladder → `rem`; 40 breakpoint declarations → `em` | none at a 16px root |
+| 6 | `--icon-size-sm/md/lg`; two off-grid tokens moved | `--font-size-4xl` 35→36, `--bubble-menu-icon-size` 15→16, icon boxes now scale |
+| 7 | Probe retired; this close-out | none |
+
+### Measured, not eyeballed
+
+There were no image baselines to fall back on — see the screenshot finding below — so the probe was
+the pass's only verification. It resolved all 36 scale-derived tokens (measured 64× and divided
+back down, because layout quantises to 1/64px and would otherwise read 8.64px as 8.625) plus five
+surfaces, and every task compared a payload before and after its edit.
+
+| Check | Expected | Result |
+| --- | --- | --- |
+| Tasks 2, 3 | identical | 0 outliers each |
+| Task 4 | `after == before / 1.08` | all 36 tokens exact; 7 box outliers, all explained |
+| Task 5 at a 16px root | identical | 0 outliers — the `rem` conversion is provably the identity |
+| Task 5 at a 20px root | `× 1.25` | every token exact; hairline stayed 1px |
+| Task 6 | only the two intended moves | exactly 2 outliers |
+
+Task 4's seven outliers: three are block-level divs whose width comes from the 1000px host rather
+than a token; `Button`'s 9999px pill radius and 1px hairline are deliberately not token-derived and
+must not shrink; and `Button`'s height and width miss by 0.51px and 0.17px because text line boxes
+and glyph advances round to integers and do not scale linearly with font-size — its own padding and
+font-size scaled exactly.
+
+The 20px-root run is the accessibility claim in evidence rather than in prose: `--space-md` 8→10,
+`--font-size-md` 13→16.25, `--sidebar-width` 256→320, `--shell-height` 48→60, hairline 1→1.
+
+### The screenshot finding
+
+The 63 PNGs under `__screenshots__/` were **never baselines**. Nothing in the repo calls
+`toMatchScreenshot`, `toMatchImageSnapshot`, `toMatchFileSnapshot` or `.screenshot(`, and
+`vitest.browser.config.ts` configures no image comparison. They are vitest `screenshotOnFailure`
+artifacts — filenames are test names with a `-1` suffix, and one belonged to a test on the known-red
+list — committed by accident. They were deleted and `**/__screenshots__/` added to `.gitignore`.
+
+This corrects the earlier close-outs in this document. Where they say no screenshot was updated
+without an approved normalization row, the guarantee was real but the mechanism was not: those files
+asserted nothing, so nothing was being protected. Phase 1's visual safety net was the measurements
+taken per step, not the images.
+
+### Corrections to the plan, found by execution
+
+- **Task 3 was over-estimated.** The plan expected ~194 conversions. Grouping the inventory by CSS
+  property instead of by number showed 130 of the 230 occurrences are `width`/`height` on icon and
+  control boxes. Substituting `--space-4xl` for a 28px control height because the numbers match is
+  false tidiness; 8 declarations converted, the rest went to Tasks 4 and 6.
+- **`--control-height-sm` 26→28 was dropped.** The spec proposed it without seeing `IconButton`'s
+  variants: `.sm` is a `var(--control-height-sm)` box with a 14px glyph and `.md` a hardcoded 28px
+  box with a 16px glyph, so moving the token would give both variants the same box. Its other
+  justification had already been spent (see below). What the 28px cluster really shows is that
+  `IconButton.md` has no token and that most hand-written 28s are row and bar heights — a different
+  family from control height.
+- **Two carriers the plan missed.** `useDragSourceHighlight.ts` injected `calc(4px *
+  var(--size-scale))` into an inline stylesheet from TypeScript, where deleting the variable would
+  have made `border-radius` invalid; and `/dev/ui` had a live scale switcher built on the
+  coefficient, now repointed at the root font size (14/16/20px), which is the axis the `rem` ladder
+  answers to.
+- **Task 2.6 was wrong.** The `--size-scale: 1` pin in `editorShellLayout.browser.test.tsx` exists
+  for `--sidebar-width`, a UI token, not for canvas zoom, so it belonged to Task 4.
+
+### Deviations retired
+
+**The Sidebar Row Rule deviation (step 6, ruling S3) is closed — by the flip, not by a patch.**
+Structure's act/scene rows sat 2.24px short of `ListRow` only because `ListRow` multiplied its 28px
+by the coefficient while Structure's raw 28px was not multiplied. Retiring the coefficient closed
+the gap; both now measure 28px exactly. `DESIGN.md`'s rule was rewritten accordingly.
+
+`DESIGN.md`'s **Size-Scale Rule** described a coefficient that no longer exists and was replaced by
+**The Sizes Scale With The Reader Rule**, which states the unit contract per domain: `rem` for
+sizes, `px` for hairlines and the focus ring, `em` for breakpoints, `px × --editor-zoom` for the
+canvas. Two further stale claims in §1 and the quick reference went with it.
+
+### Success criteria
+
+| Criterion | Result |
+| --- | --- |
+| No `size-scale` / `sizeScale` anywhere | 0 matches across `packages` and `apps`, comments included |
+| Every size token a whole number, no size `calc()` in `tokens.css` | Holds. 13 `calc()` remain and are **OKLCH chroma math on colour tokens**, not sizes — the spec's wording ("no `calc()` remains in the file") was too broad |
+| `--editor-zoom` read only by page geometry | Holds — canvas width, `renderScale`, pagination, overlay placement |
+| No hand-written `calc(Npx * <scale>)` in component CSS | 0 matches |
+| Probe relations per task | All held; every outlier explained above |
+| No tracked `__screenshots__` | 0 |
+| Suites green | `ui` 70 node / 112 browser; `editor` 239 node; `app-routes` 39/40 node, 111/112 browser — only the known reds |
+
+One criterion is **not** fully met: "no component writes a bare `rem` literal". 21 of them were
+`1rem` icon boxes and their centring math in the attribute-manager panels and `SearchInput`, missed
+by Task 6 because its classifier looked for `14/16/18px`; those now use `--icon-size-md`. Nine
+genuine one-offs remain — a `.625rem` colour dot, `1.15rem` and `3rem` in `ExportPreview`, and the
+standalone unsupported-screen gate's own type scale. Each is a singular value with no token behind
+it, and each already scales with the reader, so none of them undermines the contract.
+
+### Residue
+
+- **`IconButton.md`'s 28px box has no token**, and the wider question it raises: most hand-written
+  28s are row and bar heights (`ListRow`, structure rows, footer, status bar) with no shared token
+  either. A row-height family is a design decision that deserves its own review, and phase 2 may
+  answer it differently.
+- Two newly recorded **pre-existing** reds in the `editor` browser suite, verified against a clean
+  tree by patch round-trip: `paginationGolden.browser.test.tsx > produces stable multi-page
+  boundaries…` and `BlockActionMenu.browser.test.tsx > supports keyboard submenu navigation…`. The
+  editor browser suite was never run during phase 1, which is why they were not on the list.
+- **stylelint's csstree grammar for `max-height`** has not learned the math functions and rejects
+  `min(320px, 50vh)` now that the argument is no longer a `calc()`. The CSS is valid; the
+  declaration carries a disable comment and an explanation.
+- The touched browser-test files hold **39 eslint errors, against 40 at HEAD** for the same files —
+  pre-existing debt, reported rather than fixed, and one fewer than before.
+- Still open from the phase-1 list: the hardcoded mono stack on `IndentRangeSlider.module.css`'s
+  measurement labels, the UA `dialog { color: CanvasText }` root-cause fix, and
+  `SidebarMiniHeader`'s name.
