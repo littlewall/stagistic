@@ -132,8 +132,8 @@
 
 .icon {
     display: block;
-    width: 16px;
-    height: 16px;
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
     color: currentcolor;
 }
 
@@ -211,8 +211,8 @@
 }
 
 .caret {
-    width: 14px;
-    height: 14px;
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
     color: var(--color-text-muted);
 }
 
@@ -304,8 +304,8 @@
     }
 
     & .menuIcon {
-        width: 16px;
-        height: 16px;
+        width: var(--icon-size-md);
+        height: var(--icon-size-md);
         color: var(--color-text-muted);
     }
 
@@ -396,8 +396,8 @@
         }
 
         & .icon {
-            width: 14px;
-            height: 14px;
+            width: var(--icon-size-sm);
+            height: var(--icon-size-sm);
         }
     }
 }

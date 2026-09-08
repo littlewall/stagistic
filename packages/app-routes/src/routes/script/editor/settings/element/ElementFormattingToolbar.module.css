@@ -22,7 +22,7 @@
     --line-three: 55%;
 
     display: inline-block;
-    width: 14px;
+    width: var(--icon-size-sm);
     height: 12px;
     color: currentcolor;
     background: linear-gradient(currentcolor 0 0) left 0 top 0 / var(--line-one) 2px no-repeat, linear-gradient(currentcolor 0 0) left 0 center / var(--line-two) 2px no-repeat, linear-gradient(currentcolor 0 0) left 0 bottom / var(--line-three) 2px no-repeat;

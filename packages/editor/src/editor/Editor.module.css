@@ -114,8 +114,8 @@
     }
 
     & svg {
-        width: 16px;
-        height: 16px;
+        width: var(--icon-size-md);
+        height: var(--icon-size-md);
         fill: none;
         stroke: currentcolor;
         stroke-linecap: round;

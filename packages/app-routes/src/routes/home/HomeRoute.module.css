@@ -104,8 +104,8 @@
 }
 
 .scriptIcon {
-    width: 18px;
-    height: 18px;
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
     color: var(--color-text-muted);
     transition: color var(--duration-normal) var(--ease-standard);
 }

@@ -116,8 +116,8 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
 }
 
 .triggerIcon,
@@ -128,8 +128,8 @@
     flex: 0 0 16px;
     align-items: center;
     justify-content: center;
-    width: 16px;
-    height: 16px;
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
 }
 
 .triggerIcon {
@@ -138,8 +138,8 @@
     transition: opacity var(--duration-normal) var(--ease-standard);
 
     & svg {
-        width: 16px;
-        height: 16px;
+        width: var(--icon-size-md);
+        height: var(--icon-size-md);
         fill: none;
         stroke: currentcolor;
         stroke-linecap: round;
@@ -171,8 +171,8 @@
 }
 
 .menuItemIcon svg {
-    width: 16px;
-    height: 16px;
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
     fill: none;
     stroke: currentcolor;
     stroke-linecap: round;
@@ -288,8 +288,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
     color: var(--color-text-muted);
 }
 
@@ -323,8 +323,8 @@
     color: var(--color-text-muted);
 
     & svg {
-        width: 14px;
-        height: 14px;
+        width: var(--icon-size-sm);
+        height: var(--icon-size-sm);
         fill: none;
         stroke: currentcolor;
         stroke-linecap: round;

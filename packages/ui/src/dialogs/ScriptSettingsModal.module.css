@@ -157,8 +157,8 @@
 }
 
 .expandArrow {
-    width: 14px;
-    height: 14px;
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
     color: color-mix(in oklch, var(--color-text) 86%, var(--color-surface-accent));
     fill: none;
     stroke: currentcolor;
@@ -187,13 +187,13 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 14px;
-            height: 14px;
+            width: var(--icon-size-sm);
+            height: var(--icon-size-sm);
             color: color-mix(in oklch, var(--color-text) 84%, var(--color-surface-accent));
 
             & svg {
-                width: 14px;
-                height: 14px;
+                width: var(--icon-size-sm);
+                height: var(--icon-size-sm);
                 fill: none;
                 stroke: currentcolor;
                 stroke-linecap: round;

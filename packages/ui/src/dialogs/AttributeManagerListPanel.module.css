@@ -146,8 +146,8 @@
     flex: 0 0 auto;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
     color: currentcolor;
 }
 

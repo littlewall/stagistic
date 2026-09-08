@@ -225,8 +225,8 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
     color: color-mix(in oklch, var(--color-text) 84%, var(--character-color));
     background: transparent;
     border: none;
@@ -255,8 +255,8 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
     margin-left: auto;
     color: var(--color-text-muted);
     background: transparent;
@@ -286,8 +286,8 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: 18px;
-    height: 18px;
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
     margin-left: auto;
     color: var(--color-text-muted);
     background: transparent;

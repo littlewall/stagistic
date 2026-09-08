@@ -42,8 +42,8 @@
 
 .chevron {
     flex: 0 0 auto;
-    width: 14px;
-    height: 14px;
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
     color: var(--color-text-muted);
     transition: transform var(--duration-fast) var(--ease-standard);
 

@@ -38,8 +38,8 @@
     height: 22px;
 
     & svg {
-        width: 14px;
-        height: 14px;
+        width: var(--icon-size-sm);
+        height: var(--icon-size-sm);
     }
 }
 
@@ -48,8 +48,8 @@
     height: var(--control-height-sm);
 
     & svg {
-        width: 14px;
-        height: 14px;
+        width: var(--icon-size-sm);
+        height: var(--icon-size-sm);
     }
 }
 
@@ -58,8 +58,8 @@
     height: 28px;
 
     & svg {
-        width: 16px;
-        height: 16px;
+        width: var(--icon-size-md);
+        height: var(--icon-size-md);
     }
 }
 

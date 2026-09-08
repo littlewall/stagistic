@@ -21,8 +21,8 @@
 }
 
 .icon {
-    width: 18px;
-    height: 18px;
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
 }
 
 .popover {

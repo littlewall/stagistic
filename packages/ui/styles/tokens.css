@@ -55,7 +55,16 @@
     --font-size-xl: 1rem; /* 16px */
     --font-size-2xl: 1.125rem; /* 18px */
     --font-size-3xl: 1.375rem; /* 22px */
-    --font-size-4xl: 2.1875rem; /* 35px */
+    --font-size-4xl: 2.25rem; /* 36px */
+
+    /* ── Icon sizes ────────────────────────────────────────────── */
+    /*
+     * Icon boxes, so a glyph beside a label grows with it. An icon pinned to a
+     * fixed pixel next to text the reader has enlarged reads as broken.
+     */
+    --icon-size-sm: .875rem; /* 14px */
+    --icon-size-md: 1rem; /* 16px */
+    --icon-size-lg: 1.125rem; /* 18px */
 
     --font-weight-normal: 400;
     --font-weight-medium: 500;
@@ -249,7 +258,7 @@
     --control-trigger-radius: var(--radius-md);
 
     /* Icon + chevron */
-    --control-icon-size: 1rem; /* 16px */
+    --control-icon-size: var(--icon-size-md);
     --control-chevron-size: .875rem; /* 14px */
 
     /* Menu (popover) */
@@ -281,7 +290,7 @@
     --bubble-menu-shadow: 0 1px 2px color-mix(in oklch, var(--color-text) 12%, transparent);
     --bubble-menu-button-size: 1.5rem; /* 24px */
     --bubble-menu-button-radius: var(--radius-sm);
-    --bubble-menu-icon-size: .9375rem; /* 15px */
+    --bubble-menu-icon-size: var(--icon-size-md);
 
     color-scheme: light;
 }
