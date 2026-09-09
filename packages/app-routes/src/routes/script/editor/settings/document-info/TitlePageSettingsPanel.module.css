@@ -1,4 +1,4 @@
-/* Residual route content — the draft-date row is singular. phase-2 Uno target. */
+/* Residual route content — the draft-date row is singular. */
 .section {
     display: flex;
     flex-direction: column;
@@ -28,7 +28,7 @@
 .draftDateField {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--space-md);
 }
 
 .subFieldLabel {
@@ -43,13 +43,13 @@
     display: flex;
     gap: var(--space-md);
     align-items: center;
-    padding-bottom: 7px;
+    padding-bottom: var(--space-md);
     font-size: var(--font-size-sm);
     color: var(--color-text);
 }
 
 .draftDatePreview {
-    padding: 4px 0 5px;
+    padding: var(--space-sm) 0;
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
     white-space: nowrap;

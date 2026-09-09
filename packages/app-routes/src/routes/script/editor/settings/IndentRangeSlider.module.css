@@ -1,7 +1,7 @@
 /*
  * The indent dual-range slider: one rail, a highlighted selection, two default
  * boundary ticks and two overlaid range thumbs. Singular geometry — no shared
- * control has this shape. phase-2 Uno.
+ * control has this shape.
  */
 .track {
     position: relative;
@@ -79,6 +79,9 @@
         cursor: pointer;
         width: 16px;
         height: 16px;
+        /* Centres the 16px thumb on the 28px input: (28 - 16) / 2. Derived
+           geometry, not a rhythm step — a ladder value would sit off-axis. */
+        /* stylelint-disable-next-line declaration-property-unit-allowed-list */
         margin-top: 6px;
         appearance: none;
         border: 2px solid var(--color-surface);

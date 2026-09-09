@@ -1,6 +1,5 @@
 /*
  * Route layout: the extra list and inline action inside a `Notice variant="warning"`.
- * phase-2 Uno: route layout.
  */
 .warningExtras {
     margin: var(--space-md) 0 var(--space-lg);

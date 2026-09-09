@@ -1,7 +1,6 @@
 /*
  * Singular geometry: the script-content preview line and its spacing bands, in the
  * mono register the canvas uses. Exempt by spec §5.5.
- * phase-2 Uno.
  */
 .previewSpacingRow {
     position: relative;
@@ -53,6 +52,9 @@
 .previewLineText {
     width: 100%;
     font-family: var(--font-family-mono);
+    /* Script content in the mono register, sized against the page rather than
+       the UI ladder — the same exemption the editor canvas carries. */
+    /* stylelint-disable-next-line declaration-property-unit-allowed-list */
     font-size: var(--preview-font-size, 16px);
     font-weight: var(--preview-font-weight, 400);
     font-style: var(--preview-font-style, normal);

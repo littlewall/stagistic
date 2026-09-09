@@ -2,7 +2,6 @@
  * Row-scoped behaviour on top of `ListRow`: the hover-revealed action cluster, the
  * truncating navigable label, and the cue-number column. Sizing, hover and the
  * selected surface are `ListRow`'s.
- * phase-2 Uno.
  */
 .content {
     overflow: hidden auto;
@@ -34,7 +33,7 @@
     display: grid;
     /* minmax(0, …) so a long title truncates instead of widening the track. */
     grid-template-columns: minmax(0, 1fr);
-    gap: 2px;
+    gap: var(--space-xs);
     margin: 0;
     padding: 0;
     list-style: none;
@@ -83,7 +82,7 @@
 
 .actions {
     display: inline-flex;
-    gap: 1px;
+    gap: var(--space-px);
     opacity: .38;
     transition: opacity var(--duration-normal) var(--ease-standard);
 }

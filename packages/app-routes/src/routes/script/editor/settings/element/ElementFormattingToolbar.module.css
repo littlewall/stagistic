@@ -1,7 +1,6 @@
 /*
  * Singular geometry: the alignment glyph (three rules whose widths draw the
  * alignment) and the italic/underline letterforms. Buttons are `IconButton`.
- * phase-2 Uno.
  */
 .previewToolbar {
     display: flex;

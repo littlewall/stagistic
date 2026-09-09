@@ -1037,3 +1037,130 @@ it, and each already scales with the reader, so none of them undermines the cont
 - Still open from the phase-1 list: the hardcoded mono stack on `IndentRangeSlider.module.css`'s
   measurement labels, the UA `dialog { color: CanvasText }` root-cause fix, and
   `SidebarMiniHeader`'s name.
+
+---
+
+## Normalization row: off-ladder values snapped (2026-09-08)
+
+Spec: `docs/superpowers/specs/2026-09-08-style-reuse-enforcement-design.md`, part one.
+
+Turning on the value guards left eighteen declarations failing because they used a length the
+ladder has no step for — `5px` seven times, `6px` six, `3px` four, `7px` and `14px` once each.
+These are the accumulated re-invention the guards exist to stop, and this is the one moment they
+were all visible together. Ruled per *value* rather than per site, so the same number could not
+resolve two ways in one repo.
+
+| Value | Ruling | Sites |
+| --- | --- | --- |
+| `7px` | → `--space-md` (8px) | `TitlePageSettingsPanel` `padding-bottom` |
+| `14px` | → `--space-lg` (12px) | `ScriptStructureSidebar` `padding-left` |
+| `5px` (spacing) | → `--space-sm` (4px) | `ActionCard`, `EditorSidebar`, `ToastProvider`, `HeaderFooterSettingsPanel`, `TitlePageSettingsPanel`, `InputTable` |
+| `5px` (radius) | → `--radius-sm` (6px) | `ScriptStructureSidebar` |
+| `3px` (spacing) | → `--space-sm` (4px), or `--space-xs` (2px) paired | `ToggleButtonGroup`, `InputTable` ×2 |
+| `3px` (radius) | → `--radius-xs` (4px) | `ScriptStructureSidebar` |
+| `6px` (gap) | → `--space-md` (8px) | `formControlStyles`, `TitlePageSettingsPanel` |
+| `6px` (padding) | → `--space-sm` (4px) | `DeleteScriptConfirm` (→ 8px, paired with `--space-px`), `InputTable` ×2 |
+
+Sixteen declarations moved, each by one or two pixels. `InputTable`'s three compact ghost buttons
+(`.removeRowButton`, `.addEntryButton`, `.addRowButton`) had been written `2px 5px`, `3px 6px` and
+`3px 6px`; all three now read `var(--space-xs) var(--space-sm)`, so a set of siblings that had
+drifted into three paddings converges on one.
+
+**One test expectation changed, and only one.** `StructureRowAct.browser.test.tsx` asserts the act
+title aligns with the scene numbers at a 14px offset; the structure sidebar's `padding-left` is the
+thing that produces it, so the assertion now reads 12. That is the snap doing exactly what it was
+approved to do, not a test bent to fit.
+
+### Two exemptions, documented rather than snapped
+
+Both carry a `stylelint-disable-next-line` and a one-line reason in the stylesheet.
+
+- **`IndentRangeSlider.module.css` `margin-top: 6px`** on the range thumb. The input is 28px and
+  the thumb 16px, so this is `(28 - 16) / 2` — the offset that centres it. Derived geometry, not a
+  rhythm step; snapping it to 8px would have pushed the thumb 2px off-axis. It was within one edit
+  of being snapped, and reading the surrounding rule is what stopped it.
+- **`ElementPreview.module.css` `font-size: var(--preview-font-size, 16px)`.** `--preview-font-size`
+  is never set by anything, so the fallback is always the real value, and it sits under
+  `font-family: var(--font-family-mono)` — script content sized against the page, the same domain
+  the whole-number pixel pass exempted for `--editor-font-size`. A UI font token here would be the
+  false tidiness this work exists to avoid.
+
+After the ruling, stylelint reports **129 files, 0 problems**.
+
+---
+
+## Style reuse enforcement close-out (2026-09-08)
+
+Spec: `docs/superpowers/specs/2026-09-08-style-reuse-enforcement-design.md`.
+Plan: `docs/superpowers/plans/2026-09-08-style-reuse-enforcement.md`.
+
+Phase 1 removed duplicated CSS; the pixel pass made the ladder whole-numbered and `rem`-based.
+Neither stopped the thing that produced the duplication: nothing in the toolchain objected when a
+value was invented. This pass makes an invented value fail the build.
+
+### What each part did
+
+| Part | Outcome |
+| --- | --- |
+| 1 — own the config | `@dvdevcz/stylelint` dropped; its 128-rule config copied into `stylelint/base.js` and its four plugins named directly. Proved identical by `--print-config`. |
+| 2 — value guards | `stylelint/guards.js` forbids absolute lengths (`px`/`rem`/`em`) on padding, margin, gap, font-size, border-radius and the inset family, scoped to `packages/ui` + `packages/app-routes`; plus `color-no-hex`. 19 declarations brought onto the ladder. |
+| 3 — off-ladder ruling | 16 values snapped under one normalization row, 2 exempted (see the row above). |
+| 4 — header check | `scripts/check-route-css-headers.mjs` wired into `pnpm lint`; 26 dead `phase-2 Uno` markers removed; the rule in `DESIGN.md` updated to match. |
+
+### UnoCSS is retired
+
+§11 of the phase-1 spec promised UnoCSS as "phase 2". That plan is dropped. UnoCSS makes writing
+styles cheaper but does not make inventing values harder — `p-[13px]` is one keystroke — so it does
+not address the stated goal, it contradicts four rules the design system already stands on (the
+className-is-position-only family), and it would leave the editor on a second styling idiom
+indefinitely. Enforcement addresses re-invention directly, with no new dependency. Anyone reading
+the phase-1 spec alone should follow its "Replaces" header here.
+
+### The guards, proved biting
+
+A four-line probe (`padding: 13px; gap: 6px; font-size: 1.2rem; color: #3a3a3a;`) draws exactly
+four errors — three `declaration-property-unit-allowed-list`, one `color-no-hex` — and is removed
+after. `var()`, `calc()` with tokens, `clamp()`/`min()`/`max()` with relative units, percentages,
+and every colour function in use all pass.
+
+### Deferred modernisation work list
+
+Owning the config is the moment to ask which of the 128 inherited rules still earn their place;
+doing it inside the move would have destroyed the `--print-config` proof, so it is deliberately a
+next step. The evidence, gathered now:
+
+- **The csstree plugin runs on `css-tree@2.3.1`, unpatched**, while stylelint 16.26.1 itself ships
+  `css-tree@^3.1.0` plus `@csstools/css-syntax-patches-for-csstree`. The hand-written
+  `| <min()> | <max()> | <clamp()>` extensions on `width`/`padding`/`font-size`/`max-height` are
+  scar tissue from that gap. Candidate: drop the plugin for stylelint's own
+  `declaration-property-value-no-unknown`, which runs on the modern patched grammar — needs its own
+  before/after over all 129 files, since coverage is not identical (the plugin also validates
+  at-rules).
+- **`@stylistic/stylelint-plugin@2.1.3`** emits a `context.fix is being deprecated` warning for
+  ~30 rules on every run. Deciding its replacement is separate; note oxfmt does not cover CSS, so
+  "let the formatter own stylistics" has no answer here yet.
+- Rules the config inherited but a CSS-Modules repo may not need: `selector-max-id`,
+  `selector-max-type`, the Sass/Less at-rule allowances, `no-unknown-animations` pinned to warning.
+
+### The eslint stage of `pnpm lint`
+
+`lint` is `eslint . && stylelint … && node scripts/check-route-css-headers.mjs`. The stylelint and
+header stages are green (129 files/0 problems; 27/27 justified). The **eslint stage has pre-existing
+failures** on ~53 test and source files (`@stylistic` debt) plus git-ignored `tmp/ux-walk/*.mjs`
+scratch — none touched by this pass. Because the chain is `&&`, that failure short-circuits before
+the later stages, so `pnpm lint` as a whole cannot show green until the eslint debt is cleared,
+which is the territory of the planned eslint → oxlint/oxfmt move.
+
+### The two DESIGN.md reuse rules (spec part four)
+
+Applied before the plan ran, recorded here for completeness:
+
+- **The Variant Before Override Rule** amended — shared API is earned by the *second* call site, and
+  a variant whose only consumer is one route is a route-specific modification wearing a shared
+  component's clothes. The threshold is two, in both directions.
+- **The Nameable Is A Component Rule** added — if it has a name in the design language (card, row,
+  panel, toolbar, field, header, dialog) it *is* the component of that name; a route assembling one
+  inline from primitives has written a component and declined to name it.
+
+Both are documented rather than enforced: the judgement is the point, and a linter that tried to
+make it would be wrong more often than right.

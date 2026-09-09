@@ -1,6 +1,5 @@
 /*
  * Route layout: the export page's two-pane shell and its pre-load placeholder.
- * phase-2 Uno: route layout.
  */
 .shell {
     display: grid;

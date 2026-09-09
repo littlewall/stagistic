@@ -331,7 +331,7 @@
     width: 100%;
     min-height: 28px;
     max-height: 46px;
-    padding: 5px var(--space-md);
+    padding: var(--space-sm) var(--space-md);
     font: inherit;
     font-size: var(--font-size-xs);
     line-height: 1.4;

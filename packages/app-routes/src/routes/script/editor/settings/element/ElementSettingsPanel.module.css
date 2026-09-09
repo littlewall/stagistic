@@ -1,6 +1,5 @@
 /*
  * Route layout: the panel's header row and the reset affordance beside it.
- * phase-2 Uno: route layout.
  */
 .panelHeader {
     display: flex;

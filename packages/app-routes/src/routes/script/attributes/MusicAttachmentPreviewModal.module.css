@@ -1,7 +1,6 @@
 /*
  * Singular geometry: the paged PDF/score canvas viewer inside `ModalDialog`.
  * The chrome is the dialog's; only the canvas stack and its busy overlay are here.
- * phase-2 Uno.
  */
 .header {
     margin-block-end: var(--space-lg);
@@ -43,7 +42,7 @@
 }
 
 .message {
-    padding: 24px;
+    padding: var(--space-3xl);
     color: var(--color-text-muted);
     text-align: center;
 }

@@ -1,7 +1,6 @@
 /*
  * Positioning only — the switcher's appearance is `Select variant="panel"`.
  * It shrinks to its own label and pushes the sidebar's actions to the far edge.
- * phase-2 Uno: route layout.
  */
 .select {
     flex: 0 1 auto;

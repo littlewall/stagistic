@@ -43,7 +43,7 @@
     & .statusIndicator {
         width: 6px;
         height: 6px;
-        margin-top: 5px;
+        margin-top: var(--space-sm);
         background: var(--color-text-muted);
         border-radius: var(--radius-full);
     }

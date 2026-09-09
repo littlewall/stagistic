@@ -1,7 +1,6 @@
 /*
  * Route layout: the floating save-error pill — positioned chrome, documented as
  * outside `Notice` by The Status Block Rule.
- * phase-2 Uno: route layout.
  */
 .error {
     display: flex;

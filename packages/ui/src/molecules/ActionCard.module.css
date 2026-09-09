@@ -96,7 +96,7 @@
         box-sizing: border-box;
         width: 28px;
         height: 28px;
-        padding: 5px;
+        padding: var(--space-sm);
         color: var(--color-surface);
         background: var(--color-text);
         border-radius: var(--radius-xs);

@@ -1,6 +1,5 @@
 /*
  * Route layout: the vertical field stack inside `ModalDialog`, plus one error line.
- * phase-2 Uno: route layout.
  */
 .form {
     display: flex;

@@ -37,7 +37,7 @@
         content: '';
         position: absolute;
         right: var(--space-lg);
-        bottom: -1px;
+        bottom: calc(var(--space-px) * -1);
         left: var(--space-lg);
         height: 2px;
         background: transparent;

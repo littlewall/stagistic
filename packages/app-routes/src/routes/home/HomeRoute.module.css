@@ -1,5 +1,5 @@
 /*
- * Residual route layout + row content — phase-2 UnoCSS target.
+ * Residual route layout + row content.
  * Every shared pattern (start card, list panel/row, search, skeleton, notices)
  * now comes from `@stagistic/ui`; what is left is singular to this route.
  */

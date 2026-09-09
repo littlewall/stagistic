@@ -1,7 +1,6 @@
 /*
  * Residual: the OKLCH preview tokens consumed by ElementPreview, the page schematic and the
  * indent slider. Panel layout now comes from SettingsGroup, the heading from PanelHeader.
- * phase-2 Uno target.
  */
 .panelTokens {
     --L-preview-amber: .64;

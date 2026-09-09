@@ -9,12 +9,6 @@
     overflow-y: auto;
     display: grid;
     min-width: 220px;
-    /*
-     * stylelint's csstree grammar for max-height has not been taught the math
-     * functions; it accepted this while the argument was a calc() and rejects the
-     * plain length. The CSS is valid.
-     */
-    /* stylelint-disable-next-line csstree/validator */
     max-height: min(320px, 50vh);
     padding: var(--space-sm);
     background: var(--color-surface);

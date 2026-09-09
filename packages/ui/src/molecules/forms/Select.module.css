@@ -171,7 +171,7 @@
     display: grid;
     box-sizing: border-box;
     max-height: min(var(--menu-max-height), var(--anchored-menu-max-height, var(--menu-max-height)));
-    margin-top: -1px;
+    margin-top: calc(var(--space-px) * -1);
     padding: var(--menu-padding);
     background: var(--menu-bg);
     border: var(--menu-border);
@@ -183,7 +183,7 @@
         top: auto;
         bottom: anchor(top);
         margin-top: 0;
-        margin-bottom: -1px;
+        margin-bottom: calc(var(--space-px) * -1);
         border-top: var(--menu-border);
         border-bottom: 0;
         border-radius: var(--menu-radius) var(--menu-radius) 0 0;

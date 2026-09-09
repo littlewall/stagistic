@@ -12,7 +12,7 @@
     },
     "packageManager": "pnpm@11.17.0",
     "scripts": {
-        "lint": "eslint . && stylelint \"**/*.{css,scss}\"",
+        "lint": "eslint . && stylelint \"**/*.{css,scss}\" && node scripts/check-route-css-headers.mjs",
         "pretypecheck": "pnpm db:check-migrations",
         "typecheck": "tsc -b",
         "pretest": "pnpm db:check-migrations",
@@ -29,10 +29,13 @@
         "docker:logs": "docker compose logs -f"
     },
     "devDependencies": {
+        "@carlosjeurissen/stylelint-csstree-validator": "^3.3.1",
         "@dvdevcz/eslint": "^0.4.0",
-        "@dvdevcz/stylelint": "^0.1.0",
+        "@stylistic/stylelint-plugin": "^2.1.3",
         "@types/node": "^24.13.1",
         "stylelint": "^16.26.1",
+        "stylelint-config-clean-order": "^6.1.0",
+        "stylelint-order": "^6.0.4",
         "typescript": "^5.9.3",
         "typescript-plugin-css-modules": "^5.2.0",
         "vite-plus": "^0.1.24"

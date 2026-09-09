@@ -1,7 +1,6 @@
 /*
  * Residue after the `SettingsGroup` extraction: the count and order fields, whose
  * three-track grids are specific to the export module list.
- * phase-2 Uno.
  */
 .countField,
 .orderField {
@@ -60,7 +59,7 @@
         content: '';
         position: absolute;
         top: calc(-1 * var(--space-sm));
-        left: -1px;
+        left: calc(var(--space-px) * -1);
         height: var(--space-sm);
         border-left: 1px solid var(--color-border);
     }
