@@ -52,8 +52,8 @@ export default [
                     allowDefaultProject: [
                         'eslint.config.js',
                         'stylelint.config.js',
-                        'stylelint/base.js',
-                        'stylelint/guards.js',
+                        'packages/stylelint-config/src/base.js',
+                        'packages/stylelint-config/src/guards.js',
                         'scripts/check-route-css-headers.mjs',
                         'apps/desktop/vite.config.ts',
                         'packages/db/scripts/compile-migrations.mjs',

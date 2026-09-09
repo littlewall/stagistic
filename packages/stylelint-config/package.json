@@ -1,0 +1,16 @@
+{
+    "name": "@stagistic/stylelint-config",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "exports": {
+        "./base": "./src/base.js",
+        "./guards": "./src/guards.js"
+    },
+    "dependencies": {
+        "@stylistic/stylelint-plugin": "^5.3.0",
+        "stylelint": "^17.15.0",
+        "stylelint-config-clean-order": "^6.1.0",
+        "stylelint-order": "^8.1.1"
+    }
+}

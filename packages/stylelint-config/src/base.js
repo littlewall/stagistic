@@ -1,21 +1,15 @@
-/*
- * Inherited verbatim from @dvdevcz/stylelint@0.1.0, which this repo no longer
- * depends on. Copied rather than rewritten so the move could be proved
- * rule-for-rule identical; nothing here has been reviewed for whether it still
- * earns its place. That review is scheduled separately — see §5 of
- * docs/superpowers/specs/2026-09-08-style-reuse-enforcement-design.md.
- */
-import stylelintConfigCleanOrder from 'stylelint-config-clean-order';
+import stylisticPlugin from '@stylistic/stylelint-plugin';
+import stylelintConfigCleanOrder, {propertyGroups} from 'stylelint-config-clean-order';
+import stylelintOrder from 'stylelint-order';
 
-const propertiesOrder = stylelintConfigCleanOrder.propertyGroups.map(properties => ({
+const propertiesOrder = propertyGroups.map(properties => ({
     noEmptyLineBetween: true,
     emptyLineBefore: 'never',
     properties,
 }));
 
 var index = {
-    extends: ['stylelint-config-clean-order'],
-    plugins: ['@carlosjeurissen/stylelint-csstree-validator', '@stylistic/stylelint-plugin'],
+    plugins: [stylelintOrder, stylisticPlugin],
     ignoreFiles: [
         '**/*.js',
         '**/*.jsx',
@@ -24,7 +18,8 @@ var index = {
         '**/node_modules/**',
     ],
     rules: {
-    // recommended
+        ...stylelintConfigCleanOrder.rules,
+        // recommended
         'annotation-no-unknown': true,
         'block-no-empty': true,
         'color-no-invalid-hex': true,
@@ -97,15 +92,7 @@ var index = {
         '@stylistic/block-opening-brace-newline-after': 'always',
         '@stylistic/block-opening-brace-newline-before': 'never-single-line',
         '@stylistic/block-opening-brace-space-before': 'always',
-        'csstree/validator': {
-            properties: {
-                content: '| attr( <custom-ident> )',
-                width: '| <min()> | <max()> | <clamp()>',
-                padding: '| <min()> | <max()> | <clamp()>',
-                'font-size': '| <min()> | <max()> | <clamp()>',
-            },
-            ignoreProperties: ['composes', 'scrollbar-width'],
-        },
+        'declaration-property-value-no-unknown': true,
         '@stylistic/color-hex-case': 'lower',
         'color-hex-length': 'short',
         'color-named': 'never',
