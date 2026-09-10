@@ -17,12 +17,19 @@ import {paginationKey} from '../plugin/createPaginationPlugin';
 
 /*
  * Regression oracle for the pagination refactor: the editor must drive the
- * shared @stagistic/script-pagination core and produce byte-for-byte the same
- * page boundaries it produced before. This snapshots PaginationExtension's
- * `state.pages` for a multi-page document that exercises orphan pushdown
- * (scene/character headings near a boundary) and a mid-block split (long
- * dialogue). If the refactor changes any startPos/endPos/startOffset/endOffset,
+ * shared @stagistic/script-pagination core and produce the same page boundaries
+ * it produced before. This snapshots PaginationExtension's `state.pages` for a
+ * multi-page document that exercises orphan pushdown (scene/character headings
+ * near a boundary) and a mid-block split (long dialogue). If the refactor
+ * changes any startPos/endPos, or moves an offset relative to the page height,
  * this snapshot must change — which means the adapter is not equivalent.
+ *
+ * Offsets are recorded as multiples of the page height rather than raw pixels.
+ * `useResponsiveScale` derives the page geometry from the available canvas
+ * width, so unrelated chrome CSS (the toolbar rail width) rescales every offset
+ * by one uniform factor without touching a single page boundary. The ratios are
+ * invariant under that scale, so they keep this a real oracle for the adapter
+ * instead of a tripwire for every CSS tweak.
  */
 
 interface PageInfoLike {
@@ -36,6 +43,14 @@ interface PageInfoLike {
 type GoldenWindow = Window & {__paginationGoldenEditor?: Editor | null};
 
 const paragraph = (sentences: number): string => Array.from({length: sentences}, () => 'The quick brown fox jumps over the lazy dog.').join(' ');
+
+/*
+ * 4 decimals resolves to well under a tenth of a pixel at any realistic page
+ * height, while absorbing float noise from the division.
+ */
+const inPages = (offset: number, pageHeight: number) => Math.round(
+    (offset / pageHeight) * 1e4,
+) / 1e4;
 
 const block = (type: string, id: string, textValue: string): ScriptNode => ({
     type,
@@ -188,43 +203,53 @@ describe('pagination golden', () => {
         );
         const paginationPageHeight = paginationKey.getState(editor.state)?.pagination.pageHeight;
 
+        if (!paginationPageHeight) {
+            throw new Error('Pagination page height is unavailable');
+        }
+
         expect(paginationPageHeight).toBeCloseTo(cssPageHeight);
         expect(pages.length).toBeGreaterThanOrEqual(3);
-        expect(pages).toMatchInlineSnapshot(`
+        expect(pages.map(page => ({
+            endOffsetInPages: inPages(page.endOffset, paginationPageHeight),
+            endPos: page.endPos,
+            index: page.index,
+            startOffsetInPages: inPages(page.startOffset, paginationPageHeight),
+            startPos: page.startPos,
+        }))).toMatchInlineSnapshot(`
           [
             {
-              "endOffset": 896.9290680100754,
+              "endOffsetInPages": 1,
               "endPos": 18,
               "index": 1,
-              "startOffset": 0,
+              "startOffsetInPages": 0,
               "startPos": 0,
             },
             {
-              "endOffset": 1793.8581360201506,
+              "endOffsetInPages": 2,
               "endPos": 3624,
               "index": 2,
-              "startOffset": 896.9290680100754,
+              "startOffsetInPages": 1,
               "startPos": 18,
             },
             {
-              "endOffset": 2690.787204030226,
+              "endOffsetInPages": 3,
               "endPos": 3624,
               "index": 3,
-              "startOffset": 1793.8581360201506,
+              "startOffsetInPages": 2,
               "startPos": 3624,
             },
             {
-              "endOffset": 3587.716272040301,
+              "endOffsetInPages": 4,
               "endPos": 7243,
               "index": 4,
-              "startOffset": 2690.787204030226,
+              "startOffsetInPages": 3,
               "startPos": 3624,
             },
             {
-              "endOffset": 4407.971083123424,
+              "endOffsetInPages": 4.9145,
               "endPos": 9944,
               "index": 5,
-              "startOffset": 3587.716272040301,
+              "startOffsetInPages": 4,
               "startPos": 7243,
             },
           ]

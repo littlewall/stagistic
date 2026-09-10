@@ -64,16 +64,21 @@ describe('landing page', () => {
             'utf8',
         );
         syntaxHtml = readFileSync(
-            new URL('../dist/syntax/index.html', import.meta.url),
+            new URL('../dist/syntax.html', import.meta.url),
             'utf8',
         );
     });
 
-    it('renders an accessible media image for every feature', () => {
+    it('gives every feature media an accessible name', () => {
+        const images = homeHtml.match(/data-feature-image/g) ?? [];
+        const videos = homeHtml.match(/data-feature-video/g) ?? [];
+
         expect(homeHtml.match(/data-feature-media/g) ?? []).toHaveLength(6);
-        expect(homeHtml.match(/data-feature-image/g) ?? []).toHaveLength(6);
+        expect(images.length + videos.length).toBe(6);
         expect(homeHtml.match(/data-feature-image[^>]+alt="[^"]+"/g) ?? [])
-            .toHaveLength(6);
+            .toHaveLength(images.length);
+        expect(homeHtml.match(/data-feature-video[^>]+title="[^"]+"/g) ?? [])
+            .toHaveLength(videos.length);
     });
 
     it('uses the editor identity in product copy and the umbrella brand in the footer', () => {
@@ -102,12 +107,12 @@ describe('landing page', () => {
 
         expect(primaryNav.match(/<a\b/g) ?? []).toHaveLength(2);
         expect(primaryNav).toContain('aria-label="Primary"');
-        expect(primaryNav).toContain('href="#features"');
-        expect(primaryNav).toContain('href="#faq"');
+        expect(primaryNav).toContain('href="/#features"');
+        expect(primaryNav).toContain('href="/#faq"');
         expect(primaryNav).not.toContain('href="#alpha"');
         expect(homeHeader).not.toContain('Early alpha');
         expect(homeHeader).toContain(
-            '<a href="https://editor.stagistic.app" class="_navCta_',
+            '<a href="https://editor.stagistic.app" class="navCta"',
         );
         expect(homeHeader).toContain('>Try editor</a>');
     });
@@ -152,13 +157,14 @@ describe('landing page', () => {
         );
     });
 
-    it('keeps only the back link in the syntax header', () => {
+    it('drops the primary nav from the syntax header and keeps a way back', () => {
         const syntaxHeader = syntaxHtml.match(/<header\b[\s\S]*?<\/header>/)
             ?.[0] ?? '';
 
-        expect(syntaxHeader).toContain('>Back to site</a>');
-        expect(syntaxHeader).not.toContain('Stagistic');
+        expect(syntaxHeader).not.toContain('aria-label="Primary"');
         expect(syntaxHeader).not.toContain('href="/#features"');
+        expect(syntaxHeader).not.toContain('href="/#faq"');
+        expect(syntaxHtml).toContain('← Back to site</a>');
         expect(syntaxHtml).toContain('>Stagistic syntax</h1>');
     });
 
@@ -192,18 +198,13 @@ describe('landing page', () => {
     });
 
     it('ships the approved editor and favicon canvases at every icon size', () => {
-        const svgPaths = [
-            '../public/assets/stagistic-brand/editor-mark-on-light.svg',
-            '../public/assets/stagistic-brand/editor-mark-on-dark.svg',
-        ];
-
-        for (const svgPath of svgPaths) {
-            expect(readSvgCanvas(svgPath)).toEqual({
-                width: '135',
-                height: '130',
-                viewBox: '0 0 135 130',
-            });
-        }
+        expect(readSvgCanvas(
+            '../public/assets/stagistic-brand/stagistic-mark-on-dark.svg',
+        )).toEqual({
+            width: '120',
+            height: '120',
+            viewBox: '9.95484 8.87608 94.88736 94.88736',
+        });
 
         expect(readSvgCanvas('../public/favicon.svg')).toEqual({
             width: '120',

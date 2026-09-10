@@ -374,7 +374,18 @@ describe('block action menu', () => {
             'closed action menu',
         );
 
-        expect(document.activeElement).toBe(trigger);
+        /*
+         * The gutter remounts its trigger while the menu is open, so identity
+         * with the node captured above is not something the menu can promise —
+         * only that focus lands back on the live trigger for this block rather
+         * than falling to <body>.
+         */
+        const activeElement = document.activeElement;
+
+        expect(activeElement).not.toBe(document.body);
+        expect(activeElement?.matches(
+            '[data-block-action-trigger="true"][data-block-id="sd-1"]',
+        )).toBe(true);
     });
 
     it('closes the submenu when the pointer leaves its parent and panel', async () => {

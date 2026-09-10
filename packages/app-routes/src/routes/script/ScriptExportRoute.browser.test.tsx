@@ -194,10 +194,13 @@ describe('export character filter', () => {
         document.body.appendChild(host);
         root.render(<ExportCharacterFilterProbe />);
         mountedRoots.push(root);
-        await waitFor(() => document.querySelectorAll('input[type="checkbox"]').length > 0);
 
-        const labels = Array.from(document.querySelectorAll('label'))
-            .map(label => label.textContent?.trim());
+        const chipSelector = '[aria-label="Characters to export"] button';
+
+        await waitFor(() => document.querySelectorAll(chipSelector).length > 0);
+
+        const labels = Array.from(document.querySelectorAll(chipSelector))
+            .map(chip => chip.textContent?.trim());
 
         expect(labels).toContain('Anna');
         expect(labels).not.toContain('All');
