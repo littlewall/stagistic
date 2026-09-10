@@ -2,7 +2,7 @@ import {Button} from 'react-aria-components';
 
 import {Tag} from '../atoms/Tag';
 import {Tooltip} from '../atoms/Tooltip';
-import {EditPencilIcon, EyeIcon} from '../icons';
+import {EditPencilIcon} from '../icons';
 import {CharacterColorControl} from './characterRowConfirmed/CharacterColorControl';
 import {useCharacterColorPickerState} from './characterRowConfirmed/useCharacterColorPickerState';
 import styles from './EditorSidebar.module.css';
@@ -59,23 +59,6 @@ export const CharacterGroupRow = ({
             <span className={styles.characterName}>{group.key}</span>
             {group.isEmpty ? (
                 <Tag className={styles.groupEmptyTag}>Empty</Tag>
-            ) : null}
-            {onFocusCharacter ? (
-                <Tooltip label="Focus first occurrence" placement="left">
-                    <Button
-                        className={styles.focusIconButton}
-                        variant="ghost"
-                        size="icon"
-                        aria-label={`Focus ${group.key}`}
-                        onPress={() => onFocusCharacter(group.key)}
-                    >
-                        <EyeIcon
-                            className={styles.iconGlyph}
-                            strokeWidth={2}
-                            aria-hidden="true"
-                        />
-                    </Button>
-                </Tooltip>
             ) : null}
             <Tooltip
                 label={`Manage group ${group.key}`}

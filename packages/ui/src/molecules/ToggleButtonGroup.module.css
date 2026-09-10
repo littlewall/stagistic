@@ -31,7 +31,6 @@
 
     &[data-selected] {
         background: var(--state-selected);
-        border-color: var(--state-selected-edge);
     }
 
     &[data-focus-visible] {

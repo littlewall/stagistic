@@ -4,7 +4,7 @@
     position: relative;
     height: var(--shell-height);
     background: var(--color-surface);
-    border-bottom: 1px solid var(--layer-shell-edge);
+    border-bottom: 1px solid var(--layer-panel-edge);
 
     & .inner {
         position: relative;
