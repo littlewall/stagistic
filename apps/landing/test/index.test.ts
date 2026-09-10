@@ -44,6 +44,7 @@ const readIcoDimensions = (relativePath: string) => {
 
 describe('landing page', () => {
     let homeHtml = '';
+    let homeCss = '';
     let syntaxHtml = '';
 
     beforeAll(() => {
@@ -63,17 +64,31 @@ describe('landing page', () => {
             new URL('../dist/index.html', import.meta.url),
             'utf8',
         );
+        const cssPaths = Array.from(homeHtml.matchAll(
+            /<link rel="stylesheet" href="([^"]+\.css)">/g
+        )).map((m) => m[1]);
+
+        expect(cssPaths.length).toBeGreaterThan(0);
+        homeCss = cssPaths.map((cssPath) => readFileSync(
+            new URL(`../dist${cssPath}`, import.meta.url),
+            'utf8',
+        )).join('\n');
         syntaxHtml = readFileSync(
-            new URL('../dist/syntax/index.html', import.meta.url),
+            new URL('../dist/editor/syntax.html', import.meta.url),
             'utf8',
         );
     });
 
-    it('renders an accessible media image for every feature', () => {
+    it('gives every feature media an accessible name', () => {
+        const images = homeHtml.match(/data-feature-image/g) ?? [];
+        const videos = homeHtml.match(/data-feature-video/g) ?? [];
+
         expect(homeHtml.match(/data-feature-media/g) ?? []).toHaveLength(6);
-        expect(homeHtml.match(/data-feature-image/g) ?? []).toHaveLength(6);
+        expect(images.length + videos.length).toBe(6);
         expect(homeHtml.match(/data-feature-image[^>]+alt="[^"]+"/g) ?? [])
-            .toHaveLength(6);
+            .toHaveLength(images.length);
+        expect(homeHtml.match(/data-feature-video[^>]+title="[^"]+"/g) ?? [])
+            .toHaveLength(videos.length);
     });
 
     it('uses the editor identity in product copy and the umbrella brand in the footer', () => {
@@ -100,14 +115,16 @@ describe('landing page', () => {
         const primaryNav = homeHeader.match(/<nav\b[\s\S]*?<\/nav>/)
             ?.[0] ?? '';
 
-        expect(primaryNav.match(/<a\b/g) ?? []).toHaveLength(2);
+        expect(primaryNav.match(/<a\b/g) ?? []).toHaveLength(4);
         expect(primaryNav).toContain('aria-label="Primary"');
-        expect(primaryNav).toContain('href="#features"');
-        expect(primaryNav).toContain('href="#faq"');
+        expect(primaryNav).toContain('href="/editor/playwriting"');
+        expect(primaryNav).toContain('href="/editor/musicals"');
+        expect(primaryNav).toContain('href="/open-source"');
+        expect(primaryNav).toContain('href="/editor/syntax"');
         expect(primaryNav).not.toContain('href="#alpha"');
         expect(homeHeader).not.toContain('Early alpha');
         expect(homeHeader).toContain(
-            '<a href="https://editor.stagistic.app" class="_navCta_',
+            '<a href="https://editor.stagistic.app" class="navCta"',
         );
         expect(homeHeader).toContain('>Try editor</a>');
     });
@@ -139,26 +156,48 @@ describe('landing page', () => {
 
         expect(callout).toContain('>Try it!</span>');
         expect(callout).toContain('aria-hidden="true"');
+        expect(homeCss).toMatch(
+            /\._tryEditorCallout_[^{]+\{[^}]*color:var\(--color-text\)/,
+        );
         expect(calloutIndex).toBeGreaterThan(-1);
         expect(editorIndex).toBeGreaterThan(calloutIndex);
+    });
+
+    it('only adds the mini editor above 1000px', () => {
+        const miniEditorIslandMarkup = homeHtml.match(
+            /<astro-island\b[^>]+component-url="[^"]+LandingMiniEditor[^"]+"[\s\S]*?<\/astro-island>/,
+        )?.[0] ?? '';
+        const miniEditorIsland = miniEditorIslandMarkup.match(
+            /<astro-island\b[^>]*>/,
+        )?.[0] ?? '';
+
+        expect(miniEditorIsland).toContain('client="media"');
+        expect(miniEditorIsland).toContain(
+            '&quot;value&quot;:&quot;not (max-width: 1000px)&quot;',
+        );
+        expect(homeCss).toContain('@media (width<=62.4375em)');
+        expect(homeCss).toMatch(
+            /@media \(width<=62\.4375em\)\{[^@]*\._scriptExcerpt_[^{]+\{display:none}/,
+        );
+    });
+
+    it('stacks the hero content on small screens', () => {
+        expect(homeCss).toMatch(
+            /@media \(width<=53\.75em\)\{[^@]*\._heroInner_[^{]+\{grid-template-columns:minmax\(0,1fr\)/,
+        );
     });
 
     it('promises every Editor feature will remain free', () => {
         expect(homeHtml).toContain(
             'Every current and future Editor feature will remain free.',
         );
-        expect(homeHtml).toContain(
-            'Some future tools may be paid, but Stagistic Editor will always be free and open source.',
-        );
     });
 
-    it('keeps only the back link in the syntax header', () => {
+    it('includes the primary nav on the syntax header', () => {
         const syntaxHeader = syntaxHtml.match(/<header\b[\s\S]*?<\/header>/)
             ?.[0] ?? '';
 
-        expect(syntaxHeader).toContain('>Back to site</a>');
-        expect(syntaxHeader).not.toContain('Stagistic');
-        expect(syntaxHeader).not.toContain('href="/#features"');
+        expect(syntaxHeader).toContain('aria-label="Primary"');
         expect(syntaxHtml).toContain('>Stagistic syntax</h1>');
     });
 
@@ -171,7 +210,7 @@ describe('landing page', () => {
                 '<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">',
             );
             expect(html).toContain(
-                '<meta name="theme-color" content="#3d2a1d">',
+                '<meta name="theme-color" content="#1d2327">',
             );
             expect(html).not.toContain('rel="manifest"');
         }
@@ -192,18 +231,13 @@ describe('landing page', () => {
     });
 
     it('ships the approved editor and favicon canvases at every icon size', () => {
-        const svgPaths = [
-            '../public/assets/stagistic-brand/editor-mark-on-light.svg',
-            '../public/assets/stagistic-brand/editor-mark-on-dark.svg',
-        ];
-
-        for (const svgPath of svgPaths) {
-            expect(readSvgCanvas(svgPath)).toEqual({
-                width: '135',
-                height: '130',
-                viewBox: '0 0 135 130',
-            });
-        }
+        expect(readSvgCanvas(
+            '../public/assets/stagistic-brand/stagistic-mark-on-dark.svg',
+        )).toEqual({
+            width: '120',
+            height: '120',
+            viewBox: '9.95484 8.87608 94.88736 94.88736',
+        });
 
         expect(readSvgCanvas('../public/favicon.svg')).toEqual({
             width: '120',
@@ -224,14 +258,14 @@ describe('landing page', () => {
             ]);
     });
 
-    it('ships the two-path favicon mark in umber and paper theme colours', () => {
+    it('ships the two-path favicon mark in steel wool and paper theme colours', () => {
         const faviconSvg = readFileSync(
             new URL('../public/favicon.svg', import.meta.url),
             'utf8',
         );
 
         expect(faviconSvg.match(/<path\b/g) ?? []).toHaveLength(2);
-        expect(faviconSvg).toMatch(/\.mark\s*\{\s*fill:\s*#3d2a1d/);
+        expect(faviconSvg).toMatch(/\.mark\s*\{\s*fill:\s*#5b6267/);
         expect(faviconSvg).toMatch(
             /@media\s*\(prefers-color-scheme:\s*dark\)/,
         );
@@ -246,6 +280,31 @@ describe('landing page', () => {
             height: '120',
             viewBox: '9.95484 8.87608 94.88736 94.88736',
         });
+    });
+
+    it('fulfils the SEO contract on all static routes', () => {
+        const routes = [
+            '../dist/index.html',
+            '../dist/editor/playwriting.html',
+            '../dist/editor/musicals.html',
+            '../dist/editor/syntax.html',
+            '../dist/open-source.html',
+            '../dist/404.html',
+        ];
+
+        for (const route of routes) {
+            const html = readFileSync(new URL(route, import.meta.url), 'utf8');
+
+            expect(html).toMatch(/<title>[^<]+<\/title>/);
+            expect(html).toMatch(/<meta name="description" content="[^"]+"/);
+            
+            if (route !== '../dist/404.html') {
+                expect(html).toMatch(/<link rel="canonical" href="[^"]+"/);
+            }
+
+            const h1s = html.match(/<h1\b[^>]*>[\s\S]*?<\/h1>/g) ?? [];
+            expect(h1s).toHaveLength(1);
+        }
     });
 
     it('renders container-width dividers around the features section', () => {

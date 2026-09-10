@@ -127,6 +127,42 @@ describe('EditorSidebar character rows', () => {
         expect(onEditCharacter).toHaveBeenCalledWith('char-1');
     });
 
+    it('persists a confirmed character color through the shared picker', async () => {
+        const onSetCharacterColor = vi.fn();
+        const host = document.createElement('div');
+        const root = createRoot(host);
+
+        host.style.setProperty('--size-scale', '1');
+        document.body.appendChild(host);
+        root.render(
+            <EditorSidebar
+                data={{
+                    confirmedCharacters: [confirmedCharacter],
+                    groups: [],
+                    unconfirmedCharacters: [],
+                }}
+                actions={{onSetCharacterColor}}
+            />,
+        );
+        mountedRoots.push(root);
+
+        await page.elementLocator(
+            await waitForElement('[aria-label="Choose color for ANNA"]'),
+        ).click();
+        await waitForElement('[aria-label="Color picker for ANNA"]');
+
+        const applyButton = Array.from(document.querySelectorAll('button'))
+            .find(button => button.textContent?.trim() === 'Apply');
+
+        if (!applyButton) {
+            throw new Error('Expected the color picker apply button');
+        }
+
+        await page.elementLocator(applyButton).click();
+
+        expect(onSetCharacterColor).toHaveBeenCalledWith('char-1', expect.any(String));
+    });
+
     it('places the pending confirmation action at the far right', async () => {
         const host = document.createElement('div');
         const root = createRoot(host);
@@ -163,7 +199,6 @@ describe('EditorSidebar group rows', () => {
         const host = document.createElement('div');
         const root = createRoot(host);
 
-        host.style.setProperty('--size-scale', '1');
         document.body.appendChild(host);
         root.render(
             <EditorSidebar
@@ -227,16 +262,16 @@ describe('EditorSidebar group rows', () => {
         expect(Array.from(host.querySelectorAll('h2')).some(heading => heading.textContent === 'Groups')).toBe(false);
     });
 
-    it('focuses a group by its key and manages it through a separate callback', async () => {
+    it('manages groups without a first occurrence action', async () => {
         const onFocusCharacter = vi.fn();
         const onEditGroup = vi.fn();
 
         renderGroups({onFocusCharacter, onEditGroup});
 
-        await page.elementLocator(await waitForElement('[aria-label="Focus ALL"]')).click();
         await page.elementLocator(await waitForElement('[aria-label="Manage group ALL"]')).click();
 
-        expect(onFocusCharacter).toHaveBeenCalledWith('ALL');
+        expect(document.querySelector('[aria-label="Focus ALL"]')).toBeNull();
+        expect(onFocusCharacter).not.toHaveBeenCalled();
         expect(onEditGroup).toHaveBeenCalledWith('group-1');
     });
 

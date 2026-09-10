@@ -1,5 +1,9 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
-import {UndoIcon} from '@stagistic/ui';
+import {
+    PanelHeader,
+    SettingsGroup,
+    UndoIcon,
+} from '@stagistic/ui';
 import {
     useLayoutEffect,
     useState,
@@ -21,6 +25,7 @@ export const ElementSettingsPanel = ({
     blockType,
     blockLabel,
     resolvedScriptSettings,
+    canReset,
     shortcutPrefix,
     onResetBlockSettings,
     onUpdateBlockSettings,
@@ -76,18 +81,20 @@ export const ElementSettingsPanel = ({
     };
 
     return (
-        <div className={styles.panelStack}>
+        <SettingsGroup gap="2xl" className={styles.panelTokens}>
             <div className={elementStyles.panelHeader}>
-                <h3 className={styles.panelTitle}>{blockLabel}</h3>
-                <button
-                    type="button"
-                    className={elementStyles.resetButton}
-                    onClick={() => onResetBlockSettings(blockType)}
-                    aria-label={`Reset ${blockLabel} settings to defaults`}
-                >
-                    <UndoIcon aria-hidden="true" />
-                    <span>Reset</span>
-                </button>
+                <PanelHeader level={3} title={blockLabel} />
+                {canReset ? (
+                    <button
+                        type="button"
+                        className={elementStyles.resetButton}
+                        onClick={() => onResetBlockSettings(blockType)}
+                        aria-label={`Reset ${blockLabel} settings to defaults`}
+                    >
+                        <UndoIcon aria-hidden="true" />
+                        <span>Reset</span>
+                    </button>
+                ) : null}
             </div>
             <ElementPreview
                 model={preview}
@@ -118,6 +125,6 @@ export const ElementSettingsPanel = ({
                 model={localNumericModel}
                 handlers={{onUpdateBlockSettings: handleUpdateBlockSettings}}
             />
-        </div>
+        </SettingsGroup>
     );
 };

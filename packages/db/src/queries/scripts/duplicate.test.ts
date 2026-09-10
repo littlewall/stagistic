@@ -62,7 +62,8 @@ const seedSource = async (db: TestDb): Promise<void> => {
             actId: 'act-1',
             createdAt: 1,
             updatedAt: 1,
-        }, {
+        },
+        {
             id: 'block-2',
             scriptId: SOURCE_ID,
             blockType: 'dialogue',
@@ -72,21 +73,26 @@ const seedSource = async (db: TestDb): Promise<void> => {
             actId: 'act-1',
             createdAt: 1,
             updatedAt: 1,
-        }, {
+        },
+        {
             id: 'block-3',
             scriptId: SOURCE_ID,
             blockType: 'stageDirection',
             blockOrder: 'a2',
             textContent: 'ALL enter.',
-            contentJson: JSON.stringify([{
-                type: 'text',
-                text: 'ALL',
-                marks: [{type: 'characterTag', attrs: {characterKey: 'ALL', characterId: 'group-1'}}],
-            }, {
-                type: 'text',
-                text: ' UNKNOWN',
-                marks: [{type: 'characterTag', attrs: {characterKey: 'UNKNOWN', characterId: 'missing-entity'}}],
-            }, {type: 'text', text: ' enter.'}]),
+            contentJson: JSON.stringify([
+                {
+                    type: 'text',
+                    text: 'ALL',
+                    marks: [{type: 'characterTag', attrs: {characterKey: 'ALL', characterId: 'group-1'}}],
+                },
+                {
+                    type: 'text',
+                    text: ' UNKNOWN',
+                    marks: [{type: 'characterTag', attrs: {characterKey: 'UNKNOWN', characterId: 'missing-entity'}}],
+                },
+                {type: 'text', text: ' enter.'},
+            ]),
             sceneId: 'scene-1',
             actId: 'act-1',
             createdAt: 1,
@@ -193,6 +199,12 @@ describe('duplicateScriptRows', () => {
         // Cross-references point at the new block/scene/act ids.
         const headingBlock = blocks.find(block => block.blockType === 'sceneHeading');
 
+        /*
+         * Without this the two assertions below compare undefined to undefined
+         * and pass even when the duplicate carries no heading cross-references
+         * at all.
+         */
+        expect(headingBlock?.id).toEqual(expect.any(String));
         expect(acts[0]?.headingBlockId).toBe(headingBlock?.id);
         expect(scenes[0]?.headingBlockId).toBe(headingBlock?.id);
         expect(blocks.every(block => block.sceneId === scenes[0]?.id)).toBe(true);
@@ -242,7 +254,9 @@ describe('duplicateScriptRows', () => {
             copyAttributes: true,
         });
 
-        const {characters, memberships, blocks} = await listTarget(db);
+        const {
+            characters, memberships, blocks,
+        } = await listTarget(db);
         const character = characters.find(row => row.kind === 'character');
         const group = characters.find(row => row.kind === 'group');
 
@@ -296,7 +310,9 @@ describe('duplicateScriptRows', () => {
             copyAttributes: false,
         });
 
-        const {blocks, characters, memberships} = await listTarget(db);
+        const {
+            blocks, characters, memberships,
+        } = await listTarget(db);
         const blockIds = blocks.map(block => block.id);
         const allRefs = await db.select().from(scriptBlockCharacterRefs);
         const targetRefs = allRefs.filter(ref => blockIds.includes(ref.blockId));

@@ -131,8 +131,8 @@ const expectSubtlePrimaryAction = async (
     await userEvent.hover(document.querySelector('h1') as HTMLHeadingElement);
     await new Promise(resolve => window.setTimeout(resolve, 200));
 
-    const primaryIcon = primary.querySelector('svg');
-    const secondaryIcon = secondary.querySelector('svg');
+    const primaryIcon = primary.querySelector('svg')?.parentElement;
+    const secondaryIcon = secondary.querySelector('svg')?.parentElement;
 
     expect(getComputedStyle(primary).backgroundColor)
         .toBe(getComputedStyle(secondary).backgroundColor);
@@ -140,8 +140,8 @@ const expectSubtlePrimaryAction = async (
         .toBe(getComputedStyle(secondary).color);
     expect(getComputedStyle(primary).borderTopColor)
         .not.toBe(getComputedStyle(secondary).borderTopColor);
-    expect(getComputedStyle(primaryIcon as SVGElement).backgroundColor)
-        .not.toBe(getComputedStyle(secondaryIcon as SVGElement).backgroundColor);
+    expect(getComputedStyle(primaryIcon as HTMLElement).backgroundColor)
+        .not.toBe(getComputedStyle(secondaryIcon as HTMLElement).backgroundColor);
 };
 
 /* Hover transitions run for 150ms, so styles are read once they settle. */
@@ -364,7 +364,7 @@ describe('HomeRoute hover states', () => {
         await waitForText('One draft');
 
         const row = document.querySelector<HTMLElement>('[aria-label="Scripts"] button')
-            ?.parentElement as HTMLElement;
+            ?.closest('[class*="scriptRow"]') as HTMLElement;
 
         await unhover();
 

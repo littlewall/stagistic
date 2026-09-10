@@ -13,6 +13,7 @@ export const StructureRowScene = memo(({
     index,
     groupId,
     isActive,
+    startPage,
     onFocus,
 }: StructureRowSceneProps) => {
     const {ref, handleRef} = useSortable({
@@ -47,6 +48,9 @@ export const StructureRowScene = memo(({
             >
                 <span className={clsx(styles.itemLabel, styles.sceneTitle)}>{`${sceneNumber}. ${title}`}</span>
             </button>
+            {startPage !== undefined && (
+                <span className={styles.pageBadge}>{`p. ${startPage}`}</span>
+            )}
         </li>
     );
 });

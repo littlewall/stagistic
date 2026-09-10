@@ -10,7 +10,7 @@
     display: flex;
     align-items: center;
     font-family: var(--font-family-mono);
-    font-size: var(--editor-font-size, calc(13px * var(--size-scale)));
+    font-size: var(--editor-font-size, 13px);
     line-height: 1.2;
     color: var(--color-text);
     white-space: nowrap;

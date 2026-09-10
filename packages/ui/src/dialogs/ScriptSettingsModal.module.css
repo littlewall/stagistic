@@ -60,7 +60,7 @@
             background: color-mix(in oklch, var(--color-surface) 88%, var(--color-surface-raised));
             border-right: 1px solid var(--color-border);
 
-            @media (max-width: 900px) {
+            @media (max-width: 56.25em) {
                 max-height: 240px;
                 border-right: 0;
                 border-bottom: 1px solid var(--color-border);
@@ -72,7 +72,7 @@
             padding: var(--space-3xl);
         }
 
-        @media (max-width: 1100px) {
+        @media (max-width: 68.75em) {
             grid-template-columns: 240px minmax(0, 1fr);
 
             & .content {
@@ -80,12 +80,12 @@
             }
         }
 
-        @media (max-width: 900px) {
+        @media (max-width: 56.25em) {
             grid-template-columns: 1fr;
         }
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 56.25em) {
         height: calc(100vh - (var(--space-xl) * 2));
         max-height: calc(100vh - (var(--space-xl) * 2));
     }
@@ -107,6 +107,13 @@
     margin: 0;
     padding: 0;
     list-style: none;
+}
+
+.navSeparator {
+    height: 0;
+    margin: var(--space-md) var(--space-lg);
+    border: 0;
+    border-top: 1px solid var(--color-border);
 }
 
 .subList {
@@ -157,8 +164,8 @@
 }
 
 .expandArrow {
-    width: 14px;
-    height: 14px;
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
     color: color-mix(in oklch, var(--color-text) 86%, var(--color-surface-accent));
     fill: none;
     stroke: currentcolor;
@@ -187,13 +194,13 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 14px;
-            height: 14px;
+            width: var(--icon-size-sm);
+            height: var(--icon-size-sm);
             color: color-mix(in oklch, var(--color-text) 84%, var(--color-surface-accent));
 
             & svg {
-                width: 14px;
-                height: 14px;
+                width: var(--icon-size-sm);
+                height: var(--icon-size-sm);
                 fill: none;
                 stroke: currentcolor;
                 stroke-linecap: round;

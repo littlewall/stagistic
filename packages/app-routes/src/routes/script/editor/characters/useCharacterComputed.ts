@@ -135,10 +135,7 @@ export const useCharacterComputed = ({
         [characterSnapshot, confirmedGroupRecords],
     );
     const normalizedSpeakingEntityRecords = useMemo(
-        () => [
-            ...normalizedConfirmedCharacterRecords,
-            ...normalizedConfirmedGroupRecords,
-        ].sort((left, right) => left.key.localeCompare(right.key)),
+        () => [...normalizedConfirmedCharacterRecords, ...normalizedConfirmedGroupRecords].sort((left, right) => left.key.localeCompare(right.key)),
         [normalizedConfirmedCharacterRecords, normalizedConfirmedGroupRecords],
     );
 

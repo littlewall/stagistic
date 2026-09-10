@@ -30,14 +30,14 @@
 }
 
 .tagInput {
-    flex: 1 1 calc(120px * var(--size-scale));
-    min-width: calc(120px * var(--size-scale));
+    flex: 1 1 120px;
+    min-width: 120px;
 }
 
 .input {
     box-sizing: border-box;
     width: 100%;
-    height: calc(24px * var(--size-scale));
+    height: var(--control-height-xs);
     padding: 0 var(--space-sm);
     font: inherit;
     font-size: var(--control-trigger-font-size);
@@ -73,7 +73,7 @@
     display: inline-flex;
     gap: var(--space-sm);
     align-items: center;
-    min-height: calc(24px * var(--size-scale));
+    min-height: var(--control-height-xs);
     padding: var(--space-xs) var(--space-sm) var(--space-xs) var(--space-md);
     font-size: var(--font-size-xs);
     color: var(--color-text);
@@ -85,8 +85,8 @@
     cursor: pointer;
     display: grid;
     place-items: center;
-    width: calc(18px * var(--size-scale));
-    height: calc(18px * var(--size-scale));
+    width: 18px;
+    height: 18px;
     padding: 0;
     color: var(--color-text-muted);
     background: transparent;
@@ -104,8 +104,8 @@
     }
 
     & svg {
-        width: calc(12px * var(--size-scale));
-        height: calc(12px * var(--size-scale));
+        width: 12px;
+        height: 12px;
     }
 }
 

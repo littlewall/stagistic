@@ -1,6 +1,6 @@
 .skeleton {
     --skeleton-w: 100%;
-    --skeleton-h: calc(16px * var(--size-scale));
+    --skeleton-h: 16px;
     --skeleton-radius: var(--radius-md);
 
     width: var(--skeleton-w);
@@ -12,12 +12,12 @@
 }
 
 .line {
-    --skeleton-h: calc(12px * var(--size-scale));
+    --skeleton-h: 12px;
     --skeleton-radius: var(--radius-full);
 }
 
 .block {
-    --skeleton-h: calc(58px * var(--size-scale));
+    --skeleton-h: 58px;
 }
 
 .circle {

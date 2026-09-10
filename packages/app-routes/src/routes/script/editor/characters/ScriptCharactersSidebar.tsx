@@ -13,6 +13,8 @@ import {
 import {
     EditorSidebar,
     type EditorSidebarGroup,
+    SidebarActionsGroup,
+    SidebarMiniHeader,
 } from '@stagistic/ui';
 import {
     type ReactNode,
@@ -25,9 +27,7 @@ import {ATTRIBUTE_MANAGER_PANEL_CHARACTERS} from '../../attributes/attributeMana
 import {useScriptCharacters} from '../../ScriptCharactersContext';
 import {useScriptSession} from '../../ScriptSessionContext';
 import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalProvider';
-import {SidebarMiniHeader} from '../sidebar';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
-import {SidebarActionsGroup} from '../sidebar/SidebarActionsGroup';
 import {AddCharacterModal} from './AddCharacterModal';
 import {CharactersSidebarContextActions} from './CharactersSidebarContextActions';
 import styles from './ScriptCharactersSidebar.module.css';
@@ -124,6 +124,9 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
     const handleSetGroupColor = useCallback((groupId: string, colorHex: string | null) => {
         void characters.handleSetGroupColor(groupId, colorHex).catch(() => undefined);
     }, [characters]);
+    const handleSetCharacterColor = useCallback((characterId: string, colorHex: string | null) => {
+        void Promise.resolve(characters.handleSetCharacterColor(characterId, colorHex)).catch(() => undefined);
+    }, [characters]);
 
     return (
         <div className={styles.content}>
@@ -149,6 +152,7 @@ export const ScriptCharactersSidebar = ({header}: ScriptCharactersSidebarProps) 
                     onEditCharacter: openAttributeManagerCharacter,
                     onEditGroup: openAttributeManagerGroup,
                     onFocusCharacter: handleFocusCharacter,
+                    onSetCharacterColor: handleSetCharacterColor,
                     onSetGroupColor: handleSetGroupColor,
                 }}
                 options={{

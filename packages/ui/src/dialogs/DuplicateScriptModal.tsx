@@ -10,7 +10,9 @@ import {
 import {Button} from '../atoms/Button';
 import {Switch} from '../atoms/Switch';
 import styles from './DuplicateScriptModal.module.css';
+import {ModalActions} from './ModalActions';
 import {ModalDialog} from './ModalDialog';
+import {ModalHeader} from './ModalHeader';
 
 export interface DuplicateScriptSubmit {
     title: string,
@@ -94,10 +96,10 @@ export const DuplicateScriptModal = ({
             onClose={onClose}
             ariaLabel="Duplicate script"
         >
-            <h2 className={styles.title}>Duplicate script</h2>
-            <p className={styles.subtitle}>
-                Creates a copy of this script. The script content is always copied.
-            </p>
+            <ModalHeader
+                title="Duplicate script"
+                description="Creates a copy of this script. The script content is always copied."
+            />
             <form className={styles.form} onSubmit={handleSubmit}>
                 <div className={styles.field}>
                     <label className={styles.label} htmlFor="duplicate-script-title">
@@ -151,7 +153,7 @@ export const DuplicateScriptModal = ({
                     />
                     Open in editor after creating
                 </label>
-                <div className={styles.actions}>
+                <ModalActions>
                     <Button
                         type="submit"
                         isDisabled={!canSubmit}
@@ -166,7 +168,7 @@ export const DuplicateScriptModal = ({
                     >
                         Cancel
                     </Button>
-                </div>
+                </ModalActions>
             </form>
         </ModalDialog>
     );

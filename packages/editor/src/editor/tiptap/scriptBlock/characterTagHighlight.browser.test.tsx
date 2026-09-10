@@ -8,8 +8,8 @@ import {
     afterEach, describe, expect, it,
 } from 'vite-plus/test';
 
-import ScriptEditor from '../../Editor';
 import {useEditorInstance} from '../../context';
+import ScriptEditor from '../../Editor';
 import {linkCharacterRef} from './characterRefCommands';
 
 /*
@@ -177,8 +177,16 @@ describe('character tag highlight (underline mode)', () => {
             context.fillStyle = getComputedStyle(element).backgroundColor;
             context.fillRect(0, 0, 1, 1);
 
-            const [red, green, blue] = context.getImageData(0, 0, 1, 1).data;
-            const channels = [red, green, blue].map(value => {
+            const [
+                red,
+                green,
+                blue,
+            ] = context.getImageData(0, 0, 1, 1).data;
+            const channels = [
+                red,
+                green,
+                blue,
+            ].map(value => {
                 const normalized = value / 255;
 
                 return normalized <= 0.04045

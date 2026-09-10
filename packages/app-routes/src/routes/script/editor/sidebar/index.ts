@@ -1,5 +1,4 @@
 export {SidebarContextButton} from './SidebarContextButton';
-export {SidebarMiniHeader} from './SidebarMiniHeader';
 export type {
     SidebarPanel,
     SidebarPanelId,

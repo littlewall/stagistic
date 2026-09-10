@@ -29,7 +29,11 @@ describe('prepareActsAndScenesCapture', () => {
             },
             getByRole: (role: string, options: unknown) => ({
                 focus: () => {
-                    events.push(['focus', role, options]);
+                    events.push([
+                        'focus',
+                        role,
+                        options,
+                    ]);
 
                     return Promise.resolve();
                 },
@@ -50,7 +54,11 @@ describe('prepareActsAndScenesCapture', () => {
             ],
             ['goto', 'http://localhost:3000/dev/demos/acts-and-scenes'],
             ['waitForURL', '**/script/*/editor'],
-            ['focus', 'textbox', {name: 'Script editor'}],
+            [
+                'focus',
+                'textbox',
+                {name: 'Script editor'},
+            ],
         ]);
     });
 });

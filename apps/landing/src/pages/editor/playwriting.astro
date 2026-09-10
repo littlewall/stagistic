@@ -1,0 +1,102 @@
+---
+import {clsx} from 'clsx';
+import Layout from '../../layouts/Layout.astro';
+import s from '../index.module.css';
+---
+
+<Layout
+    title="Playwriting Software - Stagistic Editor"
+    description="A professional playwriting software built for the stage. Format acts, scenes, stage directions, and multi-character dialogue effortlessly."
+    canonical={new URL("/editor/playwriting", Astro.site).href}
+>
+    <div class={s.page}>
+        <section class={s.hero}>
+            <div class={s.heroInner}>
+                <div class={s.heroContent}>
+                    <h1 class={clsx(s.heroTitle, s.fadeUp)}>
+                        Playwriting software built for the stage.
+                    </h1>
+                    <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
+                        Screenplay software forces you into camera angles. Stagistic Editor provides a structural foundation designed purely for the theatre.
+                    </p>
+                    <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD2)}>
+                        <a href="https://editor.stagistic.app" class={s.btnPrimary}>
+                            Open editor in browser
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class={s.forTheatre}>
+            <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
+                <div>
+                    <h2 class={s.forTheatreTitle}>Acts and scenes, not INT. and EXT.</h2>
+                </div>
+                <div>
+                    <p class={s.forTheatreText}>
+                        Film tools assume a new location means a new scene. But on stage, a single act can span an hour in one room, or jump through time and space in minutes.
+                    </p>
+                    <p class={s.forTheatreText}>
+                        Stagistic Editor is built on a true theatrical hierarchy. Group your scenes into acts, reorder them in the live outline, and let the editor handle the complex pagination and numbering automatically.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <div class={s.sectionDivider} aria-hidden="true"></div>
+
+        <section class={s.forTheatre}>
+            <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
+                <div>
+                    <h2 class={s.forTheatreTitle}>Characters with context.</h2>
+                </div>
+                <div>
+                    <p class={s.forTheatreText}>
+                        Theatre scripts demand flexibility that simple ALL CAPS text can't provide. In Stagistic Editor, characters are managed in a central catalogue.
+                    </p>
+                    <p class={s.forTheatreText}>
+                        You can easily write dialogue for multiple characters speaking simultaneously. You can group characters into ensembles, assign alternate names (for disguises or character development), and even link multiple characters to a single actor for the final export.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <div class={s.sectionDivider} aria-hidden="true"></div>
+
+        <section class={s.forTheatre}>
+            <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
+                <div>
+                    <h2 class={s.forTheatreTitle}>Smarter stage directions.</h2>
+                </div>
+                <div>
+                    <p class={s.forTheatreText}>
+                        Stage directions aren't just action lines. They are instructions for the director and the actors performing the scene.
+                    </p>
+                    <p class={s.forTheatreText}>
+                        Stagistic Editor treats stage directions as distinct structural elements. You can write them inline within dialogue or as standalone blocks. Crucially, you can tag specific characters inside a stage direction, making it instantly clear who is performing the action.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const observer = new IntersectionObserver(
+            (entries) => {
+                for (const entry of entries) {
+                    if (entry.isIntersecting) {
+                        entry.target.setAttribute('data-visible', '');
+                        observer.unobserve(entry.target);
+                    }
+                }
+            },
+            {threshold: 0.06, rootMargin: '-20px'},
+        );
+
+        document.querySelectorAll('[data-reveal]').forEach((el) => {
+            observer.observe(el);
+        });
+    </script>
+</Layout>

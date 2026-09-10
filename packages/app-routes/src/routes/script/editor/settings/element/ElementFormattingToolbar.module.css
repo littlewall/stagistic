@@ -1,3 +1,7 @@
+/*
+ * Singular geometry: the alignment glyph (three rules whose widths draw the
+ * alignment) and the italic/underline letterforms. Buttons are `IconButton`.
+ */
 .previewToolbar {
     display: flex;
     flex-wrap: wrap;
@@ -6,7 +10,7 @@
     justify-content: center;
     margin-bottom: var(--space-xl);
 
-    @media (max-width: 900px) {
+    @media (max-width: 56.25em) {
         gap: var(--space-sm);
     }
 }
@@ -17,7 +21,7 @@
     --line-three: 55%;
 
     display: inline-block;
-    width: 14px;
+    width: var(--icon-size-sm);
     height: 12px;
     color: currentcolor;
     background: linear-gradient(currentcolor 0 0) left 0 top 0 / var(--line-one) 2px no-repeat, linear-gradient(currentcolor 0 0) left 0 center / var(--line-two) 2px no-repeat, linear-gradient(currentcolor 0 0) left 0 bottom / var(--line-three) 2px no-repeat;

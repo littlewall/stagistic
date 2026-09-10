@@ -69,13 +69,11 @@ const renderToasts = () => {
 afterEach(() => {
     mountedRoots.forEach(root => root.unmount());
     mountedRoots.length = 0;
-    document.documentElement.style.removeProperty('--size-scale');
     document.body.innerHTML = '';
 });
 
 describe('ToastProvider', () => {
     it('renders flat status toasts with compact close controls', async () => {
-        document.documentElement.style.setProperty('--size-scale', '1');
         renderToasts();
 
         await waitFor(() => document.querySelectorAll('[data-variant]').length === 3);

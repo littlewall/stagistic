@@ -2,7 +2,6 @@ import '@stagistic/ui/styles/base.css';
 
 import {
     afterEach,
-    beforeEach,
     describe,
     expect,
     it,
@@ -85,16 +84,7 @@ const getRect = (testId: string) => {
     return element.getBoundingClientRect();
 };
 
-/*
- * `--sidebar-width` is a root token, so pinning the density scale has to happen at
- * the root too — an element-level override would never reach it.
- */
-beforeEach(() => {
-    document.documentElement.style.setProperty('--size-scale', '1');
-});
-
 afterEach(async () => {
-    document.documentElement.style.removeProperty('--size-scale');
     document.body.innerHTML = '';
     await page.viewport(DOCKED_WIDTH, VIEWPORT_HEIGHT);
 });

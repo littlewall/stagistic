@@ -29,7 +29,7 @@ Canonical checks — run these, not `vp lint`/`vp fmt` (oxlint/oxfmt are NOT use
 - For a self-contained pre-existing failure worth fixing now, dispatch a subagent to fix it in isolation so it doesn't derail the current task.
 
 ## Design context
-See [PRODUCT.md](PRODUCT.md) and [DESIGN.md](DESIGN.md) before any UI work.
+See [PRODUCT.md](PRODUCT.md) before any UI work.
 
 **Register:** product (app-first). The editor app (`apps/web`) is the primary surface; the landing page (`apps/landing`) is brand register.
 

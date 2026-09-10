@@ -1,4 +1,8 @@
-import {DeleteScriptConfirm} from '@stagistic/ui';
+import {
+    DeleteScriptConfirm,
+    PanelHeader,
+    SettingsGroup,
+} from '@stagistic/ui';
 import {useToastController} from '@stagistic/ui';
 import {
     useCallback,
@@ -46,23 +50,27 @@ export const DangerZoneSettingsPanel = ({
     ]);
 
     return (
-        <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Danger zone</h3>
+        <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
+            <PanelHeader level={3} title="Danger zone" />
             <section className={styles.dangerCard}>
-                <div className={styles.dangerHeader}>
-                    <h4 className={styles.dangerTitle}>Delete script</h4>
-                    <p className={styles.dangerDescription}>
-                        Permanently deletes
-                        {scriptTitle ? <strong>{` “${scriptTitle}” `}</strong> : ' this script '}
-                        and all of its content. This action cannot be undone.
-                    </p>
-                </div>
+                <PanelHeader
+                    level={4}
+                    className={styles.dangerHeader}
+                    title="Delete script"
+                    description={(
+                        <>
+                            Permanently deletes
+                            {scriptTitle ? <strong>{` “${scriptTitle}” `}</strong> : ' this script '}
+                            and all of its content. This action cannot be undone.
+                        </>
+                    )}
+                />
                 <DeleteScriptConfirm
                     scriptTitle={scriptTitle}
                     isDeleting={isDeleting}
                     onConfirm={handleDelete}
                 />
             </section>
-        </div>
+        </SettingsGroup>
     );
 };

@@ -1,16 +1,19 @@
+/*
+ * Singular geometry: the inline dot preview that shows the chosen page-break mark.
+ */
 .inlineRow {
     display: flex;
     gap: var(--space-lg);
     align-items: center;
 
-    @media (max-width: 900px) {
+    @media (max-width: 56.25em) {
         flex-wrap: wrap;
         gap: var(--space-md);
     }
 }
 
 .selectCompact {
-    --control-trigger-height: calc(30px * var(--size-scale));
+    --control-trigger-height: 30px;
 
     width: max-content;
 }
@@ -28,8 +31,8 @@
 }
 
 .previewDot {
-    width: calc(10px * var(--size-scale));
-    height: calc(10px * var(--size-scale));
+    width: 10px;
+    height: 10px;
     border: 1px solid color-mix(in oklch, var(--color-text) 14%, var(--color-surface));
     border-radius: var(--radius-full);
 }

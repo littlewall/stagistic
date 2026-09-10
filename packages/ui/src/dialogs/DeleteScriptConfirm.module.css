@@ -16,7 +16,7 @@
 }
 
 .confirmPhrase {
-    padding: 1px 6px;
+    padding: var(--space-px) var(--space-md);
     font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     color: var(--color-status-danger);
     background: color-mix(in oklch, var(--color-status-danger) 12%, transparent);

@@ -3,7 +3,9 @@ import {
     formControlStyles,
     FormSelect,
     type FormSelectOption,
+    ModalActions,
     ModalDialog,
+    ModalHeader,
 } from '@stagistic/ui';
 import {
     type ChangeEvent,
@@ -99,9 +101,8 @@ export const AddMusicModal = ({
             isOpen={isOpen}
             onClose={onCancel}
             ariaLabel="Add music"
-            panelClassName={styles.panel}
         >
-            <h2 className={styles.title}>Add music</h2>
+            <ModalHeader title="Add music" />
             <form className={styles.form} onSubmit={handleSubmit}>
                 <div className={formControlStyles.field}>
                     <label className={formControlStyles.label} htmlFor="music-title">
@@ -129,7 +130,7 @@ export const AddMusicModal = ({
                         onChange={handleKindChange}
                     />
                 </div>
-                <div className={styles.actions}>
+                <ModalActions>
                     <Button
                         type="submit"
                         isDisabled={!canSubmit}
@@ -142,7 +143,7 @@ export const AddMusicModal = ({
                     >
                         Cancel
                     </Button>
-                </div>
+                </ModalActions>
             </form>
         </ModalDialog>
     );

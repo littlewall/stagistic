@@ -1,5 +1,9 @@
 import type {EditorSettings} from '@stagistic/script';
-import {formControlStyles} from '@stagistic/ui';
+import {
+    formControlStyles,
+    PanelHeader,
+    SettingsGroup,
+} from '@stagistic/ui';
 import type {ChangeEvent} from 'react';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
@@ -28,8 +32,8 @@ export const StructureMarkersSettingsPanel = ({
     };
 
     return (
-        <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Structure markers</h3>
+        <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
+            <PanelHeader level={3} title="Structure markers" />
             <div className={formControlStyles.flatGrid}>
                 <div className={formControlStyles.field}>
                     <label className={formControlStyles.label} htmlFor="settings-act-lines-before">
@@ -62,6 +66,6 @@ export const StructureMarkersSettingsPanel = ({
                     />
                 </div>
             </div>
-        </div>
+        </SettingsGroup>
     );
 };

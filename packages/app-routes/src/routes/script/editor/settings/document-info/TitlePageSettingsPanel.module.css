@@ -1,3 +1,4 @@
+/* Residual route content — the draft-date row is singular. */
 .section {
     display: flex;
     flex-direction: column;
@@ -10,22 +11,11 @@
     }
 }
 
-.field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-
-    & .label {
-        font-size: var(--font-size-sm);
-        font-weight: var(--font-weight-semibold);
-        color: var(--color-text-muted);
-    }
-
-    & .hint {
-        font-size: var(--font-size-sm);
-        color: var(--color-text-muted);
-        opacity: .7;
-    }
+/* Was nested under the local .field, which is now formControlStyles.field. */
+.hint {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    opacity: .7;
 }
 
 .draftDateRow {
@@ -38,7 +28,7 @@
 .draftDateField {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: var(--space-md);
 }
 
 .subFieldLabel {
@@ -48,18 +38,13 @@
     opacity: .75;
 }
 
+/* Nudges the checkbox up to sit on the same baseline as the adjacent fields. */
 .checkboxLabel {
-    cursor: pointer;
-    display: flex;
-    gap: var(--space-md);
-    align-items: center;
-    padding-bottom: 7px;
-    font-size: var(--font-size-sm);
-    color: var(--color-text);
+    padding-bottom: var(--space-md);
 }
 
 .draftDatePreview {
-    padding: 4px 0 5px;
+    padding: var(--space-sm) 0;
     font-size: var(--font-size-sm);
     color: var(--color-text-muted);
     white-space: nowrap;

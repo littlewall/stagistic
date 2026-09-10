@@ -1,11 +1,3 @@
-.title {
-    font-size: var(--font-size-3xl);
-}
-
-.subtitle {
-    color: var(--color-text-muted);
-}
-
 .form {
     display: flex;
     flex-direction: column;
@@ -38,10 +30,4 @@
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);
     }
-}
-
-.actions {
-    display: flex;
-    gap: var(--space-md);
-    justify-content: flex-start;
 }

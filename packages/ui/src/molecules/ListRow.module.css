@@ -1,47 +1,50 @@
 .row {
-    --list-row-min-height: calc(28px * var(--size-scale));
+    --list-row-min-height: 28px;
     --list-row-padding: 0 var(--space-md);
     --list-row-gap: var(--space-sm);
+    --list-row-radius: var(--radius-md);
 
-    display: grid;
-    grid-template-columns: auto 1fr auto;
+    display: flex;
     gap: var(--list-row-gap);
     align-items: center;
     min-height: var(--list-row-min-height);
     padding: var(--list-row-padding);
-    border-radius: var(--radius-md);
+    border-radius: var(--list-row-radius);
 }
 
 .compact {
-    --list-row-min-height: calc(28px * var(--size-scale));
+    --list-row-min-height: 28px;
 }
 
 .library {
-    --list-row-min-height: calc(58px * var(--size-scale));
+    --list-row-min-height: 58px;
     --list-row-padding: var(--space-lg) var(--space-xl);
     --list-row-gap: var(--space-lg);
+    --list-row-radius: var(--radius-none);
 }
 
 .interactive {
     cursor: pointer;
     transition: background var(--duration-normal) var(--ease-standard);
 
-    &:hover {
+    /* :not(.selected) so hovering a selected row keeps the selected surface. */
+    &:hover:not(.selected) {
         background: var(--state-hover);
     }
 }
 
 .selected {
     background: var(--state-selected);
-    box-shadow: inset 0 0 0 1px var(--state-selected-edge);
 }
 
 .leading,
 .trailing {
     display: inline-flex;
+    flex: 0 0 auto;
     align-items: center;
 }
 
 .main {
+    flex: 1 1 auto;
     min-width: 0;
 }

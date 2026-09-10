@@ -10,13 +10,13 @@ import {
     scriptCharacterGroupMembers,
     scriptCharacters,
 } from '../schema';
-import type {OutboxPayload} from './types';
 import {
     createTestDb,
     seedScript,
 } from '../testing/createTestDb';
-import {createCharacterHandlers} from './characterHandlers/handlers';
 import {createCharacterGroupHandlers} from './characterGroupHandlers';
+import {createCharacterHandlers} from './characterHandlers/handlers';
+import type {OutboxPayload} from './types';
 
 const createHandlers = async () => {
     const {db} = await createTestDb();
@@ -53,9 +53,17 @@ describe('character group handlers', () => {
 
         await seedScript(db, scriptId);
         await db.insert(scriptCharacters).values({
-            id: 'character-alice', scriptId, characterKey: 'ALICE', kind: 'character',
-            colorHex: null, genderKey: null, notes: null, backstory: null, outline: null,
-            createdAt: 1, updatedAt: 1,
+            id: 'character-alice',
+            scriptId,
+            characterKey: 'ALICE',
+            kind: 'character',
+            colorHex: null,
+            genderKey: null,
+            notes: null,
+            backstory: null,
+            outline: null,
+            createdAt: 1,
+            updatedAt: 1,
         });
         await groupHandlers.createScriptCharacterGroupWithId(scriptId, {
             id: 'group-all', key: 'All', colorHex: '#112233', timestamp: 100,
@@ -75,23 +83,28 @@ describe('character group handlers', () => {
         expect(syncDb).toHaveBeenCalledTimes(5);
         expect(outboxPayloads.map(payload => ({
             opType: payload.opType,
-            payload: JSON.parse(payload.payloadJson),
+            payload: JSON.parse(payload.payloadJson) as Record<string, unknown>,
         }))).toEqual([
-            {opType: 'character-group.create', payload: {
-                scriptId, groupId: 'group-all', key: 'ALL', colorHex: '#112233', createdAt: 100,
-            }},
-            {opType: 'character-group.rename', payload: {
-                scriptId, groupId: 'group-all', previousKey: 'ALL', nextKey: 'ENSEMBLE', renamedAt: 200,
-            }},
-            {opType: 'character-group.color', payload: {
-                scriptId, groupId: 'group-all', colorHex: '#abcdef', updatedAt: 300,
-            }},
-            {opType: 'character-group.members', payload: {
-                scriptId, groupId: 'group-all', memberIds: ['character-alice'], updatedAt: 400,
-            }},
-            {opType: 'character-group.delete', payload: {
-                scriptId, groupId: 'group-all', key: 'ENSEMBLE', deletedAt: 500,
-            }},
+            {opType: 'character-group.create',
+                payload: {
+                    scriptId, groupId: 'group-all', key: 'ALL', colorHex: '#112233', createdAt: 100,
+                }},
+            {opType: 'character-group.rename',
+                payload: {
+                    scriptId, groupId: 'group-all', previousKey: 'ALL', nextKey: 'ENSEMBLE', renamedAt: 200,
+                }},
+            {opType: 'character-group.color',
+                payload: {
+                    scriptId, groupId: 'group-all', colorHex: '#abcdef', updatedAt: 300,
+                }},
+            {opType: 'character-group.members',
+                payload: {
+                    scriptId, groupId: 'group-all', memberIds: ['character-alice'], updatedAt: 400,
+                }},
+            {opType: 'character-group.delete',
+                payload: {
+                    scriptId, groupId: 'group-all', key: 'ENSEMBLE', deletedAt: 500,
+                }},
         ]);
     });
 
@@ -260,10 +273,12 @@ describe('character group handlers', () => {
             timestamp: 12,
         });
         await groupHandlers.replaceScriptCharacterGroupMembers(scriptId, 'group-all', ['character-bob']);
-        expect(await db.select().from(scriptCharacterGroupMembers)).toEqual([{
-            groupId: 'group-all',
-            characterId: 'character-bob',
-        }]);
+        expect(await db.select().from(scriptCharacterGroupMembers)).toEqual([
+            {
+                groupId: 'group-all',
+                characterId: 'character-bob',
+            },
+        ]);
         await groupHandlers.deleteScriptCharacterGroup(scriptId, 'group-all');
         expect(await db.select().from(scriptCharacterGroupMembers)).toEqual([]);
     });

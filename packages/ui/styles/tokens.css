@@ -9,44 +9,62 @@
     --font-family-sans: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-family-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
 
-    /* ── Size scale ────────────────────────────────────────────── */
-    /* Default is medium; override with .size-sm or .size-lg on body/root. */
-    --size-scale: 1.08;
+    /*
+     * ── The ladder ─────────────────────────────────────────────
+     *
+     * Sizes are whole pixels, shipped as rem so they grow with the reader's
+     * browser font size. The root is 16px and 16 is a power of two, so every
+     * value converts exactly — the px in each comment is what renders at the
+     * default setting, and it is the number to think in.
+     *
+     * Four things stay px on purpose: zero, `--space-px`, the `--radius-full`
+     * sentinel, and the hairline and focus-ring widths. A scaled hairline is a
+     * blurred sub-pixel line and buys no legibility.
+     */
 
     /* ── Space ─────────────────────────────────────────────────── */
     --space-none: 0px;
     --space-px: 1px;
-    --space-xs: calc(2px * var(--size-scale));
-    --space-sm: calc(4px * var(--size-scale));
-    --space-md: calc(8px * var(--size-scale));
-    --space-lg: calc(12px * var(--size-scale));
-    --space-xl: calc(16px * var(--size-scale));
-    --space-2xl: calc(20px * var(--size-scale));
-    --space-3xl: calc(24px * var(--size-scale));
-    --space-4xl: calc(28px * var(--size-scale));
-    --space-5xl: calc(32px * var(--size-scale));
-    --space-6xl: calc(40px * var(--size-scale));
-    --space-7xl: calc(48px * var(--size-scale));
+    --space-xs: .125rem; /* 2px */
+    --space-sm: .25rem; /* 4px */
+    --space-md: .5rem; /* 8px */
+    --space-lg: .75rem; /* 12px */
+    --space-xl: 1rem; /* 16px */
+    --space-2xl: 1.25rem; /* 20px */
+    --space-3xl: 1.5rem; /* 24px */
+    --space-4xl: 1.75rem; /* 28px */
+    --space-5xl: 2rem; /* 32px */
+    --space-6xl: 2.5rem; /* 40px */
+    --space-7xl: 3rem; /* 48px */
 
     /* ── Radius ────────────────────────────────────────────────── */
     --radius-none: 0px;
-    --radius-xs: calc(4px * var(--size-scale));
-    --radius-sm: calc(6px * var(--size-scale));
-    --radius-md: calc(8px * var(--size-scale));
-    --radius-lg: calc(10px * var(--size-scale));
-    --radius-xl: calc(12px * var(--size-scale));
+    --radius-xs: .25rem; /* 4px */
+    --radius-sm: .375rem; /* 6px */
+    --radius-md: .5rem; /* 8px */
+    --radius-lg: .625rem; /* 10px */
+    --radius-xl: .75rem; /* 12px */
     --radius-full: 9999px;
 
     /* ── Typography ────────────────────────────────────────────── */
-    --font-size-xxs: calc(10px * var(--size-scale));
-    --font-size-xs: calc(11px * var(--size-scale));
-    --font-size-sm: calc(12px * var(--size-scale));
-    --font-size-md: calc(13px * var(--size-scale));
-    --font-size-lg: calc(15px * var(--size-scale));
-    --font-size-xl: calc(16px * var(--size-scale));
-    --font-size-2xl: calc(18px * var(--size-scale));
-    --font-size-3xl: calc(22px * var(--size-scale));
-    --font-size-4xl: calc(35px * var(--size-scale));
+    --font-size-xxs: .625rem; /* 10px */
+    --font-size-xs: .6875rem; /* 11px */
+    --font-size-sm: .75rem; /* 12px */
+    --font-size-md: .8125rem; /* 13px */
+    --font-size-lg: .9375rem; /* 15px */
+    --font-size-xl: 1rem; /* 16px */
+    --font-size-2xl: 1.125rem; /* 18px */
+    --font-size-3xl: 1.375rem; /* 22px */
+    --font-size-4xl: 2.25rem; /* 36px */
+
+    /* ── Icon sizes ────────────────────────────────────────────── */
+    /*
+     * Icon boxes, so a glyph beside a label grows with it. An icon pinned to a
+     * fixed pixel next to text the reader has enlarged reads as broken.
+     */
+    --icon-size-sm: .875rem; /* 14px */
+    --icon-size-md: 1rem; /* 16px */
+    --icon-size-lg: 1.125rem; /* 18px */
 
     --font-weight-normal: 400;
     --font-weight-medium: 500;
@@ -67,10 +85,10 @@
     --letter-spacing-xl: .12em;
 
     /* ── Control heights ───────────────────────────────────────── */
-    --control-height-xs: calc(24px * var(--size-scale));
-    --control-height-sm: calc(26px * var(--size-scale));
-    --control-height-md: calc(32px * var(--size-scale));
-    --control-height-lg: calc(40px * var(--size-scale));
+    --control-height-xs: 1.5rem; /* 24px */
+    --control-height-sm: 1.625rem; /* 26px */
+    --control-height-md: 2rem; /* 32px */
+    --control-height-lg: 2.5rem; /* 40px */
 
     /* ── Motion ────────────────────────────────────────────────────
        Four durations and three curves, because every component used to
@@ -90,21 +108,25 @@
     --ease-emphasized: cubic-bezier(.32, .72, 0, 1);
     --ease-theme: var(--ease-standard);
 
-    /* ── Brand palette (OKLCH) ─────────────────────────────────── */
-    --palette-lavender: oklch(.6251 .0699 277.48); /* #7d84b2 */
-    --palette-copper: oklch(.6622 .1479 62.72); /* #d17b0f */
+    /* ── Brand palette (OKLCH) ─────────────────────────────────────
+       Three Pantone anchors plus the paper the script is printed on.
+       Steel Wool is the neutral the whole interface is built from —
+       text, borders and shadows. Creamed Corn means "chosen", Primrose
+       Yellow means "act on this"; nothing else may claim those two. */
+    --palette-steel-wool: oklch(.4918 .0118 238.71); /* #5b6267 */
+    --palette-creamed-corn: oklch(.9106 .0863 90.83); /* #f7e09f */
+    --palette-primrose-yellow: oklch(.854 .1432 89.53); /* #f4ca52 */
     --palette-paper: oklch(.9591 .0074 80.72); /* #f4f1ec */
-    --palette-umber: oklch(.2557 .0382 56.44); /* #311e10 */
-    --palette-aubergine: oklch(.333 .0203 13.4); /* #403233 */
 
     /* ── Base palette (OKLCH) ──────────────────────────────────── */
-    --base-neutral: oklch(.461 .0257 51);
-    --base-amber: var(--palette-copper);
-    --base-blue: var(--palette-lavender);
+    --base-neutral: var(--palette-steel-wool);
+    --base-surface: var(--palette-paper);
+    --base-accent: var(--palette-primrose-yellow);
+    --base-selection: var(--palette-creamed-corn);
     --base-green: oklch(.52 .0971 165.2);
     --base-yellow: oklch(.769 .1006 56.1);
     --base-red: oklch(.554 .1273 14.8);
-    --base-shadow: oklch(.177 .0062 41.5);
+    --base-shadow: oklch(from var(--palette-steel-wool) .177 c h);
 
     /* ── Theme knobs (light) ───────────────────────────────────── */
     --C-bg: .15;
@@ -130,25 +152,21 @@
     --A-shadow-panel: .08;
     --A-shadow-canvas: .06;
 
-    --L-progress-start: .525;
-    --L-progress-mid: .625;
-    --L-progress-end: .78;
-
     /* ── Semantic tokens ───────────────────────────────────────── */
 
     /* Surfaces */
-    --color-bg: oklch(from var(--base-neutral) var(--L-bg) calc(c * var(--C-bg)) h);
-    --color-surface: oklch(from var(--base-neutral) var(--L-surface) calc(c * var(--C-bg)) h);
-    --color-surface-raised: oklch(from var(--base-neutral) var(--L-highlight) calc(c * var(--C-bg)) h);
-    --color-surface-accent: color-mix(in oklch, var(--base-blue) 16%, var(--color-surface));
-    --color-surface-paper: oklch(from var(--base-neutral) var(--L-paper) calc(c * .1) h);
+    --color-bg: oklch(from var(--base-surface) var(--L-bg) calc(c * var(--C-bg)) h);
+    --color-surface: oklch(from var(--base-surface) var(--L-surface) calc(c * var(--C-bg)) h);
+    --color-surface-raised: oklch(from var(--base-surface) var(--L-highlight) calc(c * var(--C-bg)) h);
+    --color-surface-accent: oklch(from var(--base-selection) .93 calc(c * .45) h);
+    --color-surface-paper: oklch(from var(--base-surface) var(--L-paper) calc(c * .1) h);
 
     /* Text */
     --color-text: oklch(from var(--base-neutral) var(--L-text) calc(c * var(--C-block)) h);
     --color-text-muted: oklch(from var(--base-neutral) var(--L-text-muted) calc(c * var(--C-block)) h);
     --color-text-placeholder: oklch(from var(--base-neutral) var(--L-text-placeholder) calc(c * var(--C-block)) h);
-    --color-text-link: oklch(from var(--base-blue) .58 c h);
-    --color-accent: var(--base-amber);
+    --color-text-link: oklch(from var(--base-selection) .58 c h);
+    --color-accent: var(--base-accent);
 
     /* Borders */
     --color-border-subtle: oklch(from var(--base-neutral) .93 calc(c * var(--C-block)) h);
@@ -167,8 +185,8 @@
     --layer-panel-edge: var(--color-border);
     --layer-float-bg: var(--color-surface);
 
-    --shell-height: calc(48px * var(--size-scale));
-    --sidebar-width: calc(256px * var(--size-scale));
+    --shell-height: 3rem; /* 48px */
+    --sidebar-width: 16rem; /* 256px */
     --sidebar-head-height: var(--control-height-md);
 
     /* ── Interaction states ────────────────────────────────────────
@@ -176,22 +194,22 @@
        of a shared color, which is what made selection, hover, navigation
        and drop targets read alike. */
 
-    /* Pointer echo — neutral, so lavender is free to mean selection. */
+    /* Pointer echo — neutral, so Creamed Corn is free to mean selection. */
     --state-hover: color-mix(in oklch, var(--color-surface-raised) 70%, transparent);
 
     /* Chosen in the data — scene, character, music item. */
-    --state-selected: color-mix(in oklch, var(--base-blue) 14%, var(--color-surface));
-    --state-selected-edge: color-mix(in oklch, var(--base-blue) 45%, var(--color-border));
+    --state-selected: oklch(from var(--base-selection) .94 calc(c * .38) h);
+    --state-selected-edge: oklch(from var(--base-selection) .8 calc(c * .75) h);
 
     /* Where I am in the application — ink, outside the two-accent system. */
     --state-current-edge: var(--color-text);
     --state-current-bar-width: 2px;
 
     /* Provisional — outline only, so it cannot be mistaken for selection. */
-    --state-drop-edge: 1.5px dashed color-mix(in oklch, var(--base-blue) 40%, var(--color-border));
+    --state-drop-edge: 1.5px dashed oklch(from var(--base-selection) .74 calc(c * .9) h);
 
     /* Focus */
-    --color-focus-ring: oklch(from var(--base-blue) .58 c h);
+    --color-focus-ring: oklch(from var(--base-selection) .58 c h);
     --color-selection-outline: color-mix(in oklch, var(--color-focus-ring) 80%, transparent);
     --focus-ring-width: 2px;
     --focus-ring-offset: 2px;
@@ -221,11 +239,6 @@
     --shadow-panel: 0 12px 32px var(--color-shadow-panel);
     --shadow-canvas: 0 12px 30px var(--color-shadow-canvas);
 
-    /* Progress */
-    --color-progress-start: oklch(from var(--base-amber) var(--L-progress-start) c h);
-    --color-progress-middle: oklch(from var(--base-amber) var(--L-progress-mid) c h);
-    --color-progress-end: oklch(from var(--base-amber) var(--L-progress-end) calc(c * .8) h);
-
     /* Button (trigger) */
     --control-trigger-height: var(--control-height-md);
     --control-trigger-padding-inline: var(--space-md);
@@ -240,8 +253,8 @@
     --control-trigger-radius: var(--radius-md);
 
     /* Icon + chevron */
-    --control-icon-size: 16px;
-    --control-chevron-size: calc(14px * var(--size-scale));
+    --control-icon-size: var(--icon-size-md);
+    --control-chevron-size: .875rem; /* 14px */
 
     /* Menu (popover) */
     --menu-bg: var(--color-surface);
@@ -249,11 +262,11 @@
     --menu-radius: var(--radius-md);
     --menu-shadow: var(--shadow-popover);
     --menu-padding: var(--space-sm);
-    --menu-max-height: calc(280px * var(--size-scale));
+    --menu-max-height: 17.5rem; /* 280px */
     --menu-z-index: 12;
 
     /* Menu item */
-    --menu-item-min-height: calc(32px * var(--size-scale));
+    --menu-item-min-height: 2rem; /* 32px */
     --menu-item-padding: var(--space-md);
     --menu-item-gap: var(--space-md);
     --menu-item-font-size: var(--font-size-sm);
@@ -270,9 +283,9 @@
     --bubble-menu-bg: var(--color-surface);
     --bubble-menu-border: 1px solid var(--color-border);
     --bubble-menu-shadow: 0 1px 2px color-mix(in oklch, var(--color-text) 12%, transparent);
-    --bubble-menu-button-size: calc(24px * var(--size-scale));
+    --bubble-menu-button-size: 1.5rem; /* 24px */
     --bubble-menu-button-radius: var(--radius-sm);
-    --bubble-menu-icon-size: calc(15px * var(--size-scale));
+    --bubble-menu-icon-size: var(--icon-size-md);
 
     color-scheme: light;
 }
@@ -302,24 +315,20 @@
     --A-shadow-panel: .3;
     --A-shadow-canvas: .22;
 
-    --L-progress-start: .575;
-    --L-progress-mid: .67;
-    --L-progress-end: .755;
-
     /* dark mode overrides */
-    --color-surface-accent: color-mix(in oklch, var(--base-blue) 26%, var(--color-surface));
+    --color-surface-accent: oklch(from var(--base-selection) .3 calc(c * .4) h);
 
     /* A tint carries far less contrast over a .17 surface than over a .98 one,
-       so selection is mixed harder here and its edge is pushed past the border
-       to keep the same "chosen in the data" reading as in light mode. */
-    --state-selected: color-mix(in oklch, var(--base-blue) 23%, var(--color-surface));
-    --state-selected-edge: color-mix(in oklch, var(--base-blue) 55%, var(--color-border));
-    --state-drop-edge: 1.5px dashed color-mix(in oklch, var(--base-blue) 50%, var(--color-border));
+       so selection keeps its own lightness here and its edge is pushed past the
+       border to keep the same "chosen in the data" reading as in light mode. */
+    --state-selected: oklch(from var(--base-selection) .28 calc(c * .35) h);
+    --state-selected-edge: oklch(from var(--base-selection) .62 calc(c * .8) h);
+    --state-drop-edge: 1.5px dashed oklch(from var(--base-selection) .62 calc(c * .8) h);
 
     --color-border-subtle: oklch(from var(--base-neutral) .28 calc(c * var(--C-block)) h);
     --color-border-strong: oklch(from var(--base-neutral) .52 calc(c * var(--C-block)) h);
-    --color-text-link: oklch(from var(--base-blue) .68 c h);
-    --color-focus-ring: oklch(from var(--base-blue) .68 c h);
+    --color-text-link: oklch(from var(--base-selection) .68 c h);
+    --color-focus-ring: oklch(from var(--base-selection) .68 c h);
 
     color-scheme: dark;
 }

@@ -10,8 +10,13 @@ import type {CatalogGroup} from './registry/types';
 
 const GROUPS: CatalogGroup[] = [primitives, controls];
 
+/*
+ * The catalog's scale axis is the reader's root font size, which is what the
+ * rem ladder responds to. `md` is the browser default; the other two are the
+ * settings a low-vision reader actually reaches for.
+ */
 const SCALES = {
-    sm: '0.9', md: '1.08', lg: '1.25',
+    sm: '14px', md: '16px', lg: '20px',
 } as const;
 
 type ScaleName = keyof typeof SCALES;
@@ -23,10 +28,10 @@ export const DevUiRoute = () => {
     useEffect(() => {
         const root = document.documentElement;
         const previousTheme = root.getAttribute('data-theme');
-        const previousScale = root.style.getPropertyValue('--size-scale');
+        const previousScale = root.style.fontSize;
 
         root.setAttribute('data-theme', theme);
-        root.style.setProperty('--size-scale', SCALES[scale]);
+        root.style.fontSize = SCALES[scale];
 
         return () => {
             if (previousTheme === null) {
@@ -35,7 +40,7 @@ export const DevUiRoute = () => {
                 root.setAttribute('data-theme', previousTheme);
             }
 
-            root.style.setProperty('--size-scale', previousScale);
+            root.style.fontSize = previousScale;
         };
     }, [theme, scale]);
 

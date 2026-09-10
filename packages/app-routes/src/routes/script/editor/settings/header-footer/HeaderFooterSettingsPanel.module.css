@@ -1,3 +1,7 @@
+/*
+ * Singular geometry: the three-cell header/footer preview grid (a miniature of the
+ * printed page, mono register) and the variable-token composer beneath it.
+ */
 .composer {
     display: grid;
     gap: var(--space-2xl);
@@ -45,8 +49,12 @@
 
 .activeCell.activeCell.activeCell {
     color: var(--color-text);
-    border-color: color-mix(in oklch, var(--color-text) 45%, transparent);
-    border-style: dotted;
+    background: var(--menu-item-active-bg);
+    border-color: transparent;
+
+    &:hover {
+        background: var(--menu-item-active-bg);
+    }
 }
 
 .left {
@@ -135,7 +143,7 @@
 }
 
 .variableButton {
-    padding: 5px var(--space-lg);
+    padding: var(--space-sm) var(--space-lg);
     font-size: var(--font-size-xs);
 }
 

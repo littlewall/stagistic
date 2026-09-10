@@ -48,10 +48,12 @@ const initialValue: ScriptDocument = {
 
 const emptyInitialValue: ScriptDocument = {
     type: 'doc',
-    content: [{
-        type: 'stageDirection',
-        attrs: {id: 'stage-direction-empty'},
-    }],
+    content: [
+        {
+            type: 'stageDirection',
+            attrs: {id: 'stage-direction-empty'},
+        },
+    ],
 };
 
 const EditorProbe = () => {
@@ -332,6 +334,7 @@ describe('music pill interaction', () => {
             () => editor.view.dom.querySelector<HTMLElement>('[data-music-title-input="start"]'),
             'draft music title input',
         );
+
         await poll(() => document.activeElement === input ? input : null, 'focused draft music title');
 
         const placeholderStyle = getComputedStyle(input, '::before');

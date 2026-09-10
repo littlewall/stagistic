@@ -4,7 +4,7 @@
     position: relative;
     height: var(--shell-height);
     background: var(--color-surface);
-    border-bottom: 1px solid var(--layer-shell-edge);
+    border-bottom: 1px solid var(--layer-panel-edge);
 
     & .inner {
         position: relative;
@@ -65,7 +65,7 @@
 
         & .actionDivider {
             width: 1px;
-            height: calc(18px * var(--size-scale));
+            height: 18px;
             background: var(--layer-shell-edge);
         }
     }
@@ -117,7 +117,7 @@
 
     & .label {
         overflow: hidden;
-        max-width: calc(220px * var(--size-scale));
+        max-width: 220px;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
@@ -132,8 +132,8 @@
 
 .icon {
     display: block;
-    width: calc(16px * var(--size-scale));
-    height: calc(16px * var(--size-scale));
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
     color: currentcolor;
 }
 
@@ -141,7 +141,7 @@
 .scriptTitleStatic {
     overflow: hidden;
     min-width: 0;
-    max-width: calc(220px * var(--size-scale));
+    max-width: 220px;
     font-size: var(--font-size-lg);
     font-weight: var(--font-weight-medium);
     color: var(--color-text);
@@ -152,7 +152,7 @@
 
 .scriptIdentity {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) calc(24px * var(--size-scale));
+    grid-template-columns: minmax(0, 1fr) 24px;
     flex: 0 1 auto;
     gap: var(--space-xs);
     align-items: center;
@@ -164,7 +164,7 @@
 .scriptTitle {
     display: inline-grid;
     width: max-content;
-    min-width: calc(72px * var(--size-scale));
+    min-width: 72px;
 
     &::after,
     & .scriptTitleInput {
@@ -211,8 +211,8 @@
 }
 
 .caret {
-    width: calc(14px * var(--size-scale));
-    height: calc(14px * var(--size-scale));
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
     color: var(--color-text-muted);
 }
 
@@ -232,7 +232,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-md);
-    min-width: calc(240px * var(--size-scale));
+    min-width: 240px;
     padding: var(--space-md) 0;
     font-size: var(--font-size-md);
 
@@ -304,8 +304,8 @@
     }
 
     & .menuIcon {
-        width: calc(16px * var(--size-scale));
-        height: calc(16px * var(--size-scale));
+        width: var(--icon-size-md);
+        height: var(--icon-size-md);
         color: var(--color-text-muted);
     }
 
@@ -346,9 +346,9 @@
     --segment-active-hover-bg: color-mix(in oklch, var(--color-text) 5%, var(--segment-active-bg));
 
     display: inline-flex;
-    gap: calc(2px * var(--size-scale));
+    gap: var(--space-xs);
     align-items: center;
-    padding: calc(2px * var(--size-scale));
+    padding: var(--space-xs);
     background: var(--segment-track-bg);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-full);
@@ -358,8 +358,8 @@
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        width: calc(28px * var(--size-scale));
-        height: calc(28px * var(--size-scale));
+        width: 28px;
+        height: 28px;
         color: var(--color-text-muted);
         background: transparent;
         border: 1px solid transparent;
@@ -396,8 +396,8 @@
         }
 
         & .icon {
-            width: calc(14px * var(--size-scale));
-            height: calc(14px * var(--size-scale));
+            width: var(--icon-size-sm);
+            height: var(--icon-size-sm);
         }
     }
 }
@@ -414,7 +414,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(24px * var(--size-scale));
+    width: 24px;
     height: var(--control-height-md);
     opacity: 1;
     transition: opacity var(--duration-slow) var(--ease-standard);

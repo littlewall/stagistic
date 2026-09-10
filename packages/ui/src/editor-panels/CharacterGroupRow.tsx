@@ -1,10 +1,8 @@
-import {Button} from '../atoms/Button';
+import {Button} from 'react-aria-components';
+
 import {Tag} from '../atoms/Tag';
 import {Tooltip} from '../atoms/Tooltip';
-import {
-    EditPencilIcon,
-    EyeIcon,
-} from '../icons';
+import {EditPencilIcon} from '../icons';
 import {CharacterColorControl} from './characterRowConfirmed/CharacterColorControl';
 import {useCharacterColorPickerState} from './characterRowConfirmed/useCharacterColorPickerState';
 import styles from './EditorSidebar.module.css';
@@ -14,7 +12,6 @@ interface CharacterGroupRowProps {
     group: EditorSidebarGroup,
     characterColorSaturation?: number,
     onEditGroup?: (groupId: string) => void,
-    onFocusCharacter?: (characterKey: string) => void,
     onSetGroupColor?: (groupId: string, colorHex: string | null) => void,
 }
 
@@ -22,7 +19,6 @@ export const CharacterGroupRow = ({
     group,
     characterColorSaturation,
     onEditGroup,
-    onFocusCharacter,
     onSetGroupColor,
 }: CharacterGroupRowProps) => {
     const isColorActionDisabled = Boolean(group.isColorUpdatePending) || !onSetGroupColor;
@@ -64,19 +60,6 @@ export const CharacterGroupRow = ({
             {group.isEmpty ? (
                 <Tag className={styles.groupEmptyTag}>Empty</Tag>
             ) : null}
-            {onFocusCharacter ? (
-                <Tooltip label="Focus first occurrence" placement="left">
-                    <Button
-                        className={styles.focusIconButton}
-                        variant="ghost"
-                        size="icon"
-                        aria-label={`Focus ${group.key}`}
-                        onPress={() => onFocusCharacter(group.key)}
-                    >
-                        <EyeIcon className={styles.iconGlyph} strokeWidth={2} aria-hidden="true" />
-                    </Button>
-                </Tooltip>
-            ) : null}
             <Tooltip
                 label={`Manage group ${group.key}`}
                 placement="left"
@@ -84,9 +67,7 @@ export const CharacterGroupRow = ({
             >
                 <Button
                     className={styles.editIconButton}
-                    variant="ghost"
-                    size="icon"
-                    isDisabled={isEditDisabled}
+                    aria-disabled={isEditDisabled}
                     aria-label={`Manage group ${group.key}`}
                     onPress={() => {
                         if (!group.id || isEditDisabled) {

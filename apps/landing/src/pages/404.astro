@@ -1,0 +1,31 @@
+---
+import Layout from '../layouts/Layout.astro';
+import s from './index.module.css';
+---
+
+<Layout
+    title="Page not found - Stagistic Editor"
+    description="The page you are looking for could not be found."
+>
+    <div class={s.page}>
+        <section class={s.hero}>
+            <div class={s.heroInner}>
+                <div class={s.heroContent}>
+                    <h1 class={s.heroTitle}>404 - Not Found</h1>
+                    <p class={s.heroDescription}>
+                        The page you are looking for does not exist or has been moved.
+                        But you can always write your own pages.
+                    </p>
+                    <div class={s.heroCtas}>
+                        <a href="/" class={s.btnPrimary}>
+                            Return to homepage
+                        </a>
+                        <a href="https://editor.stagistic.app" class={s.btnOutline}>
+                            Open editor
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+</Layout>

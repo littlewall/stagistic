@@ -1,6 +1,6 @@
 .page {
-    --color-blob: rgb(0 0 0 / .02);
-    --color-blob-border: rgb(0 0 0 / .015);
+    --color-blob: color-mix(in oklch, var(--color-selection) 72%, var(--color-bg));
+    --color-blob-border: color-mix(in oklch, var(--color-palette-steel-wool) 14%, transparent);
 
     min-height: 100vh;
     background: var(--color-stage-nav-bg);
@@ -8,9 +8,9 @@
 
 .hero,
 .preview {
-    --btn-primary-bg: var(--color-amber);
-    --btn-primary-fg: var(--color-palette-paper);
-    --btn-primary-hover: var(--color-amber-hover);
+    --btn-primary-bg: var(--color-action);
+    --btn-primary-fg: var(--color-on-action);
+    --btn-primary-hover: var(--color-action-hover);
 }
 
 .hero {
@@ -102,7 +102,7 @@
     top: -1.875rem;
     right: 1.75rem;
     width: 10.5rem;
-    color: var(--color-amber);
+    color: var(--color-text);
 }
 
 .tryEditorCallout svg {
@@ -147,9 +147,9 @@
 }
 
 .scriptExcerpt {
-    --color-text: var(--color-palette-umber);
-    --color-text-muted: color-mix(in oklch, var(--color-palette-aubergine) 68%, var(--color-palette-paper));
-    --color-border: color-mix(in oklch, var(--color-palette-aubergine) 18%, var(--color-palette-paper));
+    --color-text: oklch(from var(--color-palette-steel-wool) .18 calc(c * .9) h);
+    --color-text-muted: var(--color-palette-steel-wool);
+    --color-border: color-mix(in oklch, var(--color-palette-steel-wool) 18%, var(--color-palette-paper));
     --color-surface: oklch(from var(--color-palette-paper) .985 calc(c * .7) h);
     --color-surface-raised: oklch(from var(--color-palette-paper) .94 calc(c * 1.15) h);
 
@@ -161,7 +161,7 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: .75rem;
-    box-shadow: 0 3px 8px oklch(from var(--color-palette-aubergine) .18 c h / .08), 0 28px 70px oklch(from var(--color-palette-aubergine) .18 c h / .16);
+    box-shadow: 0 3px 8px oklch(from var(--color-palette-steel-wool) .18 c h / .08), 0 28px 70px oklch(from var(--color-palette-steel-wool) .18 c h / .16);
 
     & > :global(astro-island) {
         display: block;
@@ -192,7 +192,7 @@
     }
 
     &:focus-visible {
-        outline: 2px solid var(--color-blue);
+        outline: 2px solid var(--color-focus-ring);
         outline-offset: 3px;
     }
 }
@@ -260,6 +260,18 @@
     }
 }
 
+.textLink {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: var(--color-text-muted);
+    transition: text-decoration-color 0.15s ease;
+
+    &:hover {
+        text-decoration-color: var(--color-text);
+    }
+}
+
 .sectionDivider {
     position: relative;
     height: 1px;
@@ -320,6 +332,10 @@
     color: var(--color-text-muted);
 }
 
+.featureLinkWrap {
+    margin-top: 1.5rem;
+}
+
 .featureMedia {
     isolation: isolate;
     position: relative;
@@ -331,8 +347,8 @@
         z-index: -1;
         inset: .75rem -1.25rem .25rem 1.25rem;
         transform: rotate(-2deg);
-        opacity: .25;
-        background: var(--color-amber);
+        opacity: .72;
+        background: var(--color-selection);
         border-radius: 1.5rem 2.5rem 1.75rem 2.25rem / 2rem 1.5rem 2.25rem 1.75rem;
     }
 
@@ -355,7 +371,7 @@
     background: var(--color-surface);
     border: 1px solid var(--color-border);
     border-radius: .625rem;
-    box-shadow: 0 2px 6px oklch(from var(--color-palette-aubergine) .18 c h / .08), 0 18px 40px oklch(from var(--color-palette-aubergine) .18 c h / .12);
+    box-shadow: 0 2px 6px oklch(from var(--color-palette-steel-wool) .18 c h / .08), 0 18px 40px oklch(from var(--color-palette-steel-wool) .18 c h / .12);
 }
 
 .featureImage {
@@ -435,7 +451,7 @@
 
         &:focus-visible {
             color: var(--color-text);
-            outline: 2px solid var(--color-blue);
+            outline: 2px solid var(--color-focus-ring);
             outline-offset: 4px;
         }
 
@@ -524,7 +540,17 @@
 }
 
 .previewCheckMark {
-    color: var(--color-amber);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: currentColor;
+    flex-shrink: 0;
+}
+
+.previewCheckMark svg {
+    display: block;
+    width: 1.125rem;
+    height: 1.125rem;
 }
 
 .previewCtas {
@@ -618,7 +644,7 @@
     }
 }
 
-@media (max-width: 980px) {
+@media (max-width: 61.25em) {
     .heroInner {
         grid-template-columns: minmax(18rem, 1fr) minmax(28rem, 32rem);
         gap: 2rem;
@@ -630,7 +656,7 @@
     }
 }
 
-@media (max-width: 860px) {
+@media (max-width: 53.75em) {
     .hero {
         min-height: 0;
         padding-top: 5.5rem;
@@ -679,7 +705,7 @@
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 40em) {
     .tryEditorCallout {
         top: -1.5rem;
         right: .5rem;
@@ -719,7 +745,7 @@
     }
 }
 
-@media (max-width: 999px) {
+@media (max-width: 62.4375em) {
     .tryEditorCallout,
     .scriptExcerpt,
     .heroCtas .btnPrimary,

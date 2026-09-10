@@ -12,7 +12,7 @@
     },
     "packageManager": "pnpm@11.17.0",
     "scripts": {
-        "lint": "eslint . && stylelint \"**/*.{css,scss}\"",
+        "lint": "eslint . && stylelint \"**/*.{css,scss}\" && node scripts/check-route-css-headers.mjs",
         "pretypecheck": "pnpm db:check-migrations",
         "typecheck": "tsc -b",
         "pretest": "pnpm db:check-migrations",
@@ -30,9 +30,9 @@
     },
     "devDependencies": {
         "@dvdevcz/eslint": "^0.4.0",
-        "@dvdevcz/stylelint": "^0.1.0",
+        "@stagistic/stylelint-config": "workspace:*",
         "@types/node": "^24.13.1",
-        "stylelint": "^16.26.1",
+        "stylelint": "^17.15.0",
         "typescript": "^5.9.3",
         "typescript-plugin-css-modules": "^5.2.0",
         "vite-plus": "^0.1.24"

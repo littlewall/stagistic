@@ -15,6 +15,8 @@ export type ListRowProps<T extends ElementType = 'div'> = {
     as?: T,
     size?: ListRowSize,
     selected?: boolean,
+    /** Set false when the row's selected state is already announced by a child (e.g. aria-current). */
+    announceSelected?: boolean,
     interactive?: boolean,
     leading?: ReactNode,
     trailing?: ReactNode,
@@ -31,6 +33,7 @@ export const ListRow = <T extends ElementType = 'div'>({
     as,
     size = 'compact',
     selected = false,
+    announceSelected = true,
     interactive = false,
     leading,
     trailing,
@@ -41,7 +44,7 @@ export const ListRow = <T extends ElementType = 'div'>({
     as ?? 'div',
     {
         ...props,
-        'aria-selected': selected || undefined,
+        'aria-selected': (selected && announceSelected) || undefined,
         className: clsx(
             styles.row,
             SIZE_CLASS[size],

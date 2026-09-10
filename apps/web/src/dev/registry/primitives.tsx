@@ -4,7 +4,8 @@ import {
     ListRow,
     Overlay,
     Panel,
-    SidebarShell,
+    SidebarActionsGroup,
+    SidebarMiniHeader,
     Skeleton,
     Stack,
     Text,
@@ -197,20 +198,37 @@ export const primitives: CatalogGroup = {
             ],
         },
         {
-            name: 'SidebarShell',
-            variables: ['--sidebar-head-height', '--sidebar-pad'],
+            name: 'SidebarActionsGroup',
+            variables: [],
             samples: [
                 {
-                    label: 'title + actions',
+                    label: 'grouped controls',
                     node: (
-                        <div
-                            style={{
-                                height: '12rem', width: '16rem', border: '1px solid var(--color-border)',
-                            }}
-                        >
-                            <SidebarShell title="Structure" actions={<button type="button">+</button>}>
-                                <div>Body content</div>
-                            </SidebarShell>
+                        <SidebarActionsGroup>
+                            <button type="button">＋</button>
+                            <button type="button">⋯</button>
+                        </SidebarActionsGroup>
+                    ),
+                },
+            ],
+        },
+        {
+            name: 'SidebarMiniHeader',
+            variables: ['--sidebar-head-height'],
+            samples: [
+                {
+                    label: 'navigation + actions + controls',
+                    node: (
+                        <div style={{width: '16rem', border: '1px solid var(--color-border)'}}>
+                            <SidebarMiniHeader
+                                navigation={<span>Structure</span>}
+                                actions={<button type="button">+</button>}
+                                controls={(
+                                    <SidebarActionsGroup>
+                                        <button type="button">⋯</button>
+                                    </SidebarActionsGroup>
+                                )}
+                            />
                         </div>
                     ),
                 },

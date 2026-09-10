@@ -53,7 +53,7 @@ export const useDragSourceHighlight = () => {
             'background: color-mix(in oklch, var(--color-accent) 22%, transparent) !important;',
             'box-shadow: inset 0 0 0 1px color-mix(in oklch, var(--color-accent) 38%, transparent) !important;',
             'outline: 1px solid color-mix(in oklch, var(--color-accent) 65%, transparent) !important;',
-            'border-radius: calc(4px * var(--size-scale)) !important;',
+            'border-radius: var(--radius-xs) !important;',
             '}',
         ].join('');
 

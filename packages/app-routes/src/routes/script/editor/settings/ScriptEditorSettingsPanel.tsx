@@ -8,7 +8,7 @@ import type {ScriptEditorSettingsPanelProps} from './types';
 
 export const ScriptEditorSettingsPanel = (props: ScriptEditorSettingsPanelProps) => {
     const {
-        panelId, resolvedScriptSettings, blockLabelByType, shortcutPrefix, elementsHandlers,
+        panelId, resolvedScriptSettings, settingsOverride, blockLabelByType, shortcutPrefix, elementsHandlers,
     } = props;
 
     const renderer = SECTION_RENDERERS[panelId];
@@ -27,12 +27,16 @@ export const ScriptEditorSettingsPanel = (props: ScriptEditorSettingsPanelProps)
         return null;
     }
 
+    const blockOverride = settingsOverride.blocks?.[blockType];
+    const canReset = blockOverride !== undefined && Object.keys(blockOverride).length > 0;
+
     return (
         <ElementSettingsPanel
             key={blockType}
             blockType={blockType}
             blockLabel={blockLabelByType.get(blockType) ?? 'Element'}
             resolvedScriptSettings={resolvedScriptSettings}
+            canReset={canReset}
             shortcutPrefix={shortcutPrefix}
             onResetBlockSettings={elementsHandlers.onResetBlockSettings}
             onUpdateBlockSettings={elementsHandlers.onUpdateBlockSettings}

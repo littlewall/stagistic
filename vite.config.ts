@@ -2,7 +2,8 @@ import {defineConfig} from 'vite-plus';
 
 /*
  * Linting and formatting are owned by eslint (@dvdevcz/eslint) + stylelint
- * (@dvdevcz/stylelint), configured in eslint.config.js / stylelint.config.js.
+ * (configured in-house under stylelint/), wired in eslint.config.js /
+ * stylelint.config.js.
  * vite-plus here only configures the test runner.
  */
 

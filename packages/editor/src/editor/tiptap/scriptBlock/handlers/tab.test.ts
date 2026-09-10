@@ -235,10 +235,7 @@ describe('handleTab', () => {
     });
 
     it('returns aside to lyrics when the nearest preceding non-aside block is lyrics', () => {
-        const {editor, getLastBlock} = createMultiBlockEditor([
-            {blockType: 'lyrics', text: 'La la la'},
-            {blockType: 'aside', text: 'Quietly'},
-        ]);
+        const {editor, getLastBlock} = createMultiBlockEditor([{blockType: 'lyrics', text: 'La la la'}, {blockType: 'aside', text: 'Quietly'}]);
         const event = createTabEvent();
 
         expect(handleTab(editor, event)).toBe(true);
@@ -246,10 +243,7 @@ describe('handleTab', () => {
     });
 
     it('returns aside to dialogue when the nearest preceding non-aside block is dialogue', () => {
-        const {editor, getLastBlock} = createMultiBlockEditor([
-            {blockType: 'dialogue', text: 'Hello there'},
-            {blockType: 'aside', text: 'Quietly'},
-        ]);
+        const {editor, getLastBlock} = createMultiBlockEditor([{blockType: 'dialogue', text: 'Hello there'}, {blockType: 'aside', text: 'Quietly'}]);
         const event = createTabEvent();
 
         expect(handleTab(editor, event)).toBe(true);
@@ -277,10 +271,7 @@ describe('handleTab', () => {
     });
 
     it('defaults to dialogue when the nearest preceding non-aside block is neither dialogue nor lyrics', () => {
-        const {editor, getLastBlock} = createMultiBlockEditor([
-            {blockType: 'character', text: 'HAMLET'},
-            {blockType: 'aside', text: 'Quietly'},
-        ]);
+        const {editor, getLastBlock} = createMultiBlockEditor([{blockType: 'character', text: 'HAMLET'}, {blockType: 'aside', text: 'Quietly'}]);
         const event = createTabEvent();
 
         expect(handleTab(editor, event)).toBe(true);

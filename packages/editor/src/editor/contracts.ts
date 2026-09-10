@@ -128,6 +128,17 @@ export interface EditorLiveStructureSnapshot {
     actByBlockId: ReadonlyMap<string, string>,
 }
 
+export interface ScenePlacement {
+    /** 1-based page the scene heading sits on. */
+    startPage: number,
+}
+
+export interface EditorLiveScenePlacementSnapshot {
+    byBlockId: ReadonlyMap<string, ScenePlacement>,
+    /** True once pagination has produced at least one measured layout. */
+    hasComputed: boolean,
+}
+
 export type EditorLiveMusicSnapshot = EditorIndexSnapshot['music'];
 
 export interface EditorLiveCharacterSnapshot {
@@ -148,6 +159,7 @@ export interface EditorLiveSnapshot {
     revision: number,
     index: EditorIndexSnapshot,
     structure: EditorLiveStructureSnapshot,
+    scenePlacement: EditorLiveScenePlacementSnapshot,
     characters: EditorLiveCharacterSnapshot,
     music: EditorLiveMusicSnapshot,
     activeBlockId: string | null,
@@ -261,6 +273,12 @@ export interface EditorProps {
     layout?: EditorLayoutProps,
     requests?: EditorStructureRequests,
     callbacks?: EditorLifecycleCallbacks,
+    /**
+     * Zooms the page canvas only: page width, render scale, pagination and
+     * overlay placement. Chrome sizes from the shared tokens and never sees
+     * this value. Defaults to 1: the page renders at its nominal size.
+     */
+    editorZoom?: number,
     /** Workspace-owned cache keeping the live editor surface alive across view switches. */
     surfaceCache?: EditorSurfaceCache,
     /** Workspace-owned live projection shared with UI mounted outside the editor shell. */

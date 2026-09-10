@@ -7,9 +7,9 @@ import {
 
 import {useKeyedFieldDrafts} from '../hooks/useKeyedFieldDrafts';
 import {AttributeManagerCharacterDetail} from './AttributeManagerCharacterDetail';
+import styles from './AttributeManagerCharactersPanel.module.css';
 import {AttributeManagerEntityBrowser} from './AttributeManagerEntityBrowser';
 import {AttributeManagerGroupDetail} from './AttributeManagerGroupDetail';
-import styles from './AttributeManagerCharactersPanel.module.css';
 import {CreateCharacterModal} from './CreateCharacterModal';
 import {CreateGroupModal} from './CreateGroupModal';
 import {useAttributeManagerCharacterNames} from './useAttributeManagerCharacterNames';
@@ -70,8 +70,7 @@ export interface AttributeManagerCharactersPanelProps {
 }
 
 const WORKSPACES: Array<{id: WorkspaceId, label: string}> = [
-    {id: 'characters', label: 'Characters'},
-    {id: 'groups', label: 'Groups'},
+    {id: 'characters', label: 'Characters'}, {id: 'groups', label: 'Groups'},
     // {id: 'cast', label: 'Cast'},
 ];
 
@@ -151,7 +150,11 @@ export const AttributeManagerCharactersPanel = ({
         const initialExists = characters.some(item => item.id === initialSelectedCharacterId);
 
         setSelectedCharacterId(initialExists ? initialSelectedCharacterId ?? null : characters[0]?.id ?? null);
-    }, [characters, initialSelectedCharacterId, selectedCharacterId]);
+    }, [
+        characters,
+        initialSelectedCharacterId,
+        selectedCharacterId,
+    ]);
     useEffect(() => {
         if (groups.some(item => item.id === selectedGroupId)) {
             return;
@@ -160,7 +163,11 @@ export const AttributeManagerCharactersPanel = ({
         const initialExists = groups.some(item => item.id === initialSelectedGroupId);
 
         setSelectedGroupId(initialExists ? initialSelectedGroupId ?? null : groups[0]?.id ?? null);
-    }, [groups, initialSelectedGroupId, selectedGroupId]);
+    }, [
+        groups,
+        initialSelectedGroupId,
+        selectedGroupId,
+    ]);
 
     const handleCreateGroup = async (name: string) => {
         const created = await onCreateGroup?.(name);
@@ -180,7 +187,11 @@ export const AttributeManagerCharactersPanel = ({
     return (
         <div className={styles.panel}>
             <header className={styles.workspaceNavigation}>
-                <div className={styles.workspaceTabs} role="tablist" aria-label="Character manager views">
+                <div
+                    className={styles.workspaceTabs}
+                    role="tablist"
+                    aria-label="Character manager views"
+                >
                     {WORKSPACES.map(workspace => (
                         <button
                             key={workspace.id}
@@ -265,12 +276,13 @@ export const AttributeManagerCharactersPanel = ({
                     {(isCharactersWorkspace
                         ? !selectedCharacter || !selectedConfirmedCharacter
                         : !selectedGroup || !selectedConfirmedGroup) ? (
-                        <div className={styles.emptyDetail}>
-                            <p>{isCharactersWorkspace
-                                ? 'Create a character to edit details here.'
-                                : 'Create a group to edit details here.'}</p>
-                        </div>
-                    ) : null}
+                            <div className={styles.emptyDetail}>
+                                <p>{isCharactersWorkspace
+                                    ? 'Create a character to edit details here.'
+                                    : 'Create a group to edit details here.'}
+                                </p>
+                            </div>
+                        ) : null}
                 </section>
             </div>
             {onCreateCharacter ? (

@@ -7,40 +7,41 @@
     --font-sans: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
 
-    --color-palette-lavender: oklch(.6251 .0699 277.48);
-    --color-palette-copper: oklch(.6622 .1479 62.72);
+    --color-palette-steel-wool: oklch(.4918 .0118 238.71);
+    --color-palette-creamed-corn: oklch(.9106 .0863 90.83);
+    --color-palette-primrose-yellow: oklch(.854 .1432 89.53);
     --color-palette-paper: oklch(.9591 .0074 80.72);
-    --color-palette-umber: oklch(.2557 .0382 56.44);
-    --color-palette-aubergine: oklch(.333 .0203 13.4);
 
     /* Surfaces */
     --color-bg: var(--color-palette-paper);
     --color-surface: oklch(from var(--color-palette-paper) .985 calc(c * .7) h);
     --color-surface-raised: oklch(from var(--color-palette-paper) .94 calc(c * 1.15) h);
-    --color-surface-tint: color-mix(in oklch, var(--color-palette-lavender) 18%, var(--color-palette-paper));
+    --color-surface-tint: color-mix(in oklch, var(--color-palette-creamed-corn) 72%, var(--color-palette-paper));
 
     /* Text */
-    --color-text: var(--color-palette-umber);
-    --color-text-muted: color-mix(in oklch, var(--color-palette-aubergine) 72%, var(--color-palette-paper));
+    --color-text: oklch(from var(--color-palette-steel-wool) .18 calc(c * .9) h);
+    --color-text-muted: var(--color-palette-steel-wool);
 
     /* Borders */
-    --color-border: color-mix(in oklch, var(--color-palette-aubergine) 20%, var(--color-palette-paper));
-    --color-border-strong: color-mix(in oklch, var(--color-palette-aubergine) 38%, var(--color-palette-paper));
+    --color-border: color-mix(in oklch, var(--color-palette-steel-wool) 20%, var(--color-palette-paper));
+    --color-border-strong: color-mix(in oklch, var(--color-palette-steel-wool) 42%, var(--color-palette-paper));
 
-    /* Accent */
-    --color-amber: var(--color-palette-copper);
-    --color-amber-hover: color-mix(in oklch, var(--color-palette-copper) 88%, var(--color-palette-paper));
-    --color-blue: var(--color-palette-lavender);
+    /* Semantic accents */
+    --color-action: var(--color-palette-primrose-yellow);
+    --color-action-hover: oklch(from var(--color-palette-primrose-yellow) .8 c h);
+    --color-on-action: oklch(from var(--color-palette-steel-wool) .18 c h);
+    --color-selection: var(--color-palette-creamed-corn);
+    --color-focus-ring: oklch(from var(--color-palette-creamed-corn) .58 c h);
 
     /* Dark stage sections */
-    --color-stage-bg: var(--color-palette-umber);
-    --color-stage-nav-bg: oklch(from var(--color-palette-umber) l c h / .94);
+    --color-stage-bg: oklch(from var(--color-palette-steel-wool) .25 c h);
+    --color-stage-nav-bg: oklch(from var(--color-palette-steel-wool) .25 c h / .96);
     --color-stage-nav-text: var(--color-palette-paper);
     --color-stage-text: var(--color-palette-paper);
-    --color-stage-text-muted: color-mix(in oklch, var(--color-palette-paper) 82%, var(--color-palette-umber));
+    --color-stage-text-muted: color-mix(in oklch, var(--color-palette-paper) 78%, var(--color-stage-bg));
     --color-stage-text-subtle: color-mix(in oklch, var(--color-stage-text-muted) 72%, transparent);
     --color-stage-border: oklch(from var(--color-palette-paper) l c h / .18);
-    --color-stage-btn-fg: var(--color-palette-paper);
+    --color-stage-btn-fg: var(--color-on-action);
 }
 
 *,
@@ -61,7 +62,7 @@ body {
     -moz-osx-font-smoothing: grayscale;
     line-height: 1.5;
     color: var(--color-text);
-    background: oklch(.2557 .0382 56.44);
+    background: var(--color-stage-bg);
 }
 
 h1,

@@ -12,7 +12,9 @@ import {
 import {Button} from '../atoms/Button';
 import {formControlStyles} from '../molecules/forms/formControlStyles';
 import styles from './CreateCharacterModal.module.css';
+import {ModalActions} from './ModalActions';
 import {ModalDialog} from './ModalDialog';
+import {ModalHeader} from './ModalHeader';
 
 export interface CreateCharacterModalProps {
     isOpen: boolean,
@@ -83,9 +85,8 @@ export const CreateCharacterModal = ({
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Create character"
-            panelClassName={styles.panel}
         >
-            <h2 className={styles.title}>Create character</h2>
+            <ModalHeader title="Create character" />
             <form className={styles.form} onSubmit={handleSubmit}>
                 <div className={formControlStyles.field}>
                     <label className={formControlStyles.label} htmlFor="create-character-name">
@@ -111,7 +112,7 @@ export const CreateCharacterModal = ({
                             : 'Name cannot be empty.'}
                     </p>
                 ) : null}
-                <div className={styles.actions}>
+                <ModalActions>
                     <Button
                         type="submit"
                         isDisabled={!canSubmit}
@@ -124,7 +125,7 @@ export const CreateCharacterModal = ({
                     >
                         Cancel
                     </Button>
-                </div>
+                </ModalActions>
             </form>
         </ModalDialog>
     );

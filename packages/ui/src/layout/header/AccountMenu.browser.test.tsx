@@ -149,7 +149,9 @@ describe('theme mode toggle', () => {
      * within ~40px. The active pill now reads through tone alone.
      */
     it('marks the active mode without a third border', async () => {
-        const {track, system, light} = await openThemeControls();
+        const {
+            track, system, light,
+        } = await openThemeControls();
 
         await settle();
 

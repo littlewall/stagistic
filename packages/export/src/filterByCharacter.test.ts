@@ -64,11 +64,21 @@ describe('filterScriptByCharacter', () => {
         const out = filterScriptByCharacter(
             doc,
             {mode: 'only', characterIds: ['anna']},
-            [{id: 'anna', key: 'ANNA', displayName: 'Anna'}],
             [
-                {id: 'all', key: 'ALL', memberIds: ['anna']},
-                {id: 'chorus', key: 'CHORUS', memberIds: ['bob']},
-                {id: 'empty', key: 'EMPTY', memberIds: []},
+                {
+                    id: 'anna', key: 'ANNA', displayName: 'Anna',
+                },
+            ],
+            [
+                {
+                    id: 'all', key: 'ALL', memberIds: ['anna'],
+                },
+                {
+                    id: 'chorus', key: 'CHORUS', memberIds: ['bob'],
+                },
+                {
+                    id: 'empty', key: 'EMPTY', memberIds: [],
+                },
             ],
         );
         const ids = out.content.map(node => node.attrs?.id);

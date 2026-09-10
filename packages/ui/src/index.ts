@@ -1,4 +1,5 @@
 export {Button} from './atoms/Button';
+export {Checkbox, type CheckboxProps} from './atoms/Checkbox';
 export {IconButton} from './atoms/IconButton';
 export {InlineTooltip} from './atoms/InlineTooltip';
 export {Input} from './atoms/Input';
@@ -52,6 +53,10 @@ export {
     type AttributeManagerSceneDetailProps,
 } from './dialogs/AttributeManagerSceneDetail';
 export {
+    ConfirmModal,
+    type ConfirmModalProps,
+} from './dialogs/ConfirmModal';
+export {
     CreateCharacterModal,
     type CreateCharacterModalProps,
 } from './dialogs/CreateCharacterModal';
@@ -75,7 +80,15 @@ export {
     type DuplicateScriptSubmit,
 } from './dialogs/DuplicateScriptModal';
 export {ImportScriptModal} from './dialogs/ImportScriptModal';
+export {
+    ModalActions,
+    type ModalActionsProps,
+} from './dialogs/ModalActions';
 export {ModalDialog} from './dialogs/ModalDialog';
+export {
+    ModalHeader,
+    type ModalHeaderProps,
+} from './dialogs/ModalHeader';
 export {NewScriptModal} from './dialogs/NewScriptModal';
 export {PublicPreviewNotice} from './dialogs/PublicPreviewNotice';
 export {
@@ -127,7 +140,8 @@ export {
     type ScriptView,
 } from './layout/AppHeader';
 export {AppLayout} from './layout/AppLayout';
-export {SidebarShell, type SidebarShellProps} from './layout/SidebarShell';
+export {SidebarActionsGroup} from './layout/SidebarActionsGroup';
+export {SidebarMiniHeader, type SidebarMiniHeaderProps} from './layout/SidebarMiniHeader';
 export {LoaderOverlay} from './LoaderOverlay';
 export {ActionCard, type ActionCardProps} from './molecules/ActionCard';
 export {ButtonGroup} from './molecules/ButtonGroup';

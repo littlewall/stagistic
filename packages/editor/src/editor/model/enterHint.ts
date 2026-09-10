@@ -22,8 +22,10 @@ export interface EnterHintBlockState {
 
 const asBlockType = (blockType: BlockNodeType): EnterHint => ({kind: 'blockType', blockType});
 
-// Mirrors resolveAdvanceTypeOnEnter: an aside resumes a lyrics flow rather
-// than the configured next element.
+/*
+ * Mirrors resolveAdvanceTypeOnEnter: an aside resumes a lyrics flow rather
+ * than the configured next element.
+ */
 const resolveAdvanceType = (
     blockType: BlockNodeType,
     blockNextElements: BlockNextElementMap,
@@ -47,8 +49,10 @@ export const resolveEnterHint = (
         return {kind: 'chooser'};
     }
 
-    // A block holding only a music atom keeps its content and gets a new
-    // block after it, wherever the caret sits inside it.
+    /*
+     * A block holding only a music atom keeps its content and gets a new
+     * block after it, wherever the caret sits inside it.
+     */
     if (state.hasOnlyNonTextContent) {
         return asBlockType(resolveAdvanceType(blockType, blockNextElements, state));
     }
@@ -57,8 +61,10 @@ export const resolveEnterHint = (
         return asBlockType('character');
     }
 
-    // The act handler resolves its own fallback rather than going through
-    // getEnterFallback; keep the two spellings in step.
+    /*
+     * The act handler resolves its own fallback rather than going through
+     * getEnterFallback; keep the two spellings in step.
+     */
     if (blockType === 'act') {
         return asBlockType(state.isAtEnd ? blockNextElements['act'] ?? 'scene' : 'act');
     }

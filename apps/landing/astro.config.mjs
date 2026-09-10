@@ -3,6 +3,9 @@ import {defineConfig} from 'astro/config';
 
 export default defineConfig({
     site: 'https://stagistic.com',
+    redirects: {
+        '/syntax': '/editor/syntax',
+    },
     integrations: [react()],
     trailingSlash: 'never',
     build: {

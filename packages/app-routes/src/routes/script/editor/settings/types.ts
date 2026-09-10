@@ -3,6 +3,7 @@ import type {
     BlockSettingsPatch,
     BlockShortcut,
     EditorSettings,
+    EditorSettingsOverride,
     HeaderFooterSettingsPatch,
     InitialPagesSettingsPatch,
     PageSettings,
@@ -71,6 +72,7 @@ export interface DangerZoneHandlers {
 export interface ScriptEditorSettingsPanelProps {
     panelId: string,
     resolvedScriptSettings: EditorSettings,
+    settingsOverride: EditorSettingsOverride,
     blockLabelByType: Map<ScriptBlockNodeType, string>,
     shortcutPrefix: string,
     elementsHandlers: ElementsHandlers & ElementResetHandlers,
@@ -89,6 +91,7 @@ export interface ElementSettingsPanelProps {
     blockType: ScriptBlockNodeType,
     blockLabel: string,
     resolvedScriptSettings: EditorSettings,
+    canReset: boolean,
     shortcutPrefix: string,
     onResetBlockSettings: ElementResetHandlers['onResetBlockSettings'],
     onUpdateBlockSettings: UpdateBlockSettings,

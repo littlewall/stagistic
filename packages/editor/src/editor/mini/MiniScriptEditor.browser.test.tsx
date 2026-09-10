@@ -169,6 +169,30 @@ describe('MiniScriptEditor', () => {
         expect(editor.querySelector('button')).toBeNull();
     });
 
+    it('renders an immutable scene number outside editable content', async () => {
+        const host = renderMiniEditor();
+        const scene = await waitForElement<HTMLElement>(
+            host,
+            'p[blocktype="scene"]',
+        );
+        const sceneText = scene.firstChild;
+
+        if (!sceneText) {
+            throw new Error('Expected scene heading text.');
+        }
+
+        expect(scene.dataset.sceneNumber).toBe('1');
+        expect(getComputedStyle(scene, '::before').content).toBe('"1."');
+        expect(scene.textContent).toBe('Inside the lighthouse');
+
+        await userEvent.click(scene);
+        setCollapsedSelection(sceneText, 0);
+        await userEvent.keyboard('{Backspace}');
+
+        expect(scene.dataset.sceneNumber).toBe('1');
+        expect(scene.textContent).toBe('Inside the lighthouse');
+    });
+
     it('exposes every script block type as a paragraph role description', async () => {
         const host = renderMiniEditor(
             undefined,

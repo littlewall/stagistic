@@ -54,6 +54,7 @@ export {SceneNumberingExtension} from './SceneNumberingExtension';
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
 
+export {getPaginationPluginState} from './pagination/plugin/createPaginationPlugin';
 export {createPaginationExtension, PaginationExtension} from './PaginationExtension';
 
 // ─── Runtime indexes ─────────────────────────────────────────────────────────

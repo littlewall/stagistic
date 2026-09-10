@@ -39,7 +39,7 @@
             content: '';
             position: absolute;
             right: var(--space-md);
-            bottom: -1px;
+            bottom: calc(var(--space-px) * -1);
             left: var(--space-md);
             height: var(--state-current-bar-width);
             background: var(--state-current-edge);

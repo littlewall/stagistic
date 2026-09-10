@@ -1,46 +1,27 @@
-.panelStack {
-    --L-preview-amber: .64;
-    --A-preview-amber: .72;
-    --A-preview-amber-soft: .2;
-    --A-preview-amber-strong: .42;
-    --L-preview-blue: .58;
-    --A-preview-blue: .95;
-    --color-preview-indent-rail: oklch(from var(--base-amber) var(--L-preview-amber) calc(c * .95) h / var(--A-preview-amber));
-    --color-preview-spacing-soft: oklch(from var(--base-amber) var(--L-preview-amber) calc(c * .9) h / var(--A-preview-amber-soft));
-    --color-preview-spacing-strong: oklch(from var(--base-amber) var(--L-preview-amber) calc(c * .95) h / var(--A-preview-amber-strong));
-    --color-preview-slider-selected: oklch(from var(--base-blue) var(--L-preview-blue) c h / .32);
-    --color-preview-slider-handle: oklch(from var(--base-blue) var(--L-preview-blue) c h / var(--A-preview-blue));
+/*
+ * Residual: the OKLCH preview tokens consumed by ElementPreview, the page schematic and the
+ * indent slider. Panel layout now comes from SettingsGroup, the heading from PanelHeader.
+ */
+.panelTokens {
+    --L-preview-accent: .64;
+    --A-preview-accent: .72;
+    --A-preview-accent-soft: .2;
+    --A-preview-accent-strong: .42;
+    --L-preview-selection: .58;
+    --A-preview-selection: .95;
+    --color-preview-indent-rail: oklch(from var(--base-accent) var(--L-preview-accent) calc(c * .95) h / var(--A-preview-accent));
+    --color-preview-spacing-soft: oklch(from var(--base-accent) var(--L-preview-accent) calc(c * .9) h / var(--A-preview-accent-soft));
+    --color-preview-spacing-strong: oklch(from var(--base-accent) var(--L-preview-accent) calc(c * .95) h / var(--A-preview-accent-strong));
+    --color-preview-slider-selected: oklch(from var(--base-selection) var(--L-preview-selection) c h / .32);
+    --color-preview-slider-handle: oklch(from var(--base-selection) var(--L-preview-selection) c h / var(--A-preview-selection));
     --color-preview-slider-boundary: oklch(from var(--base-neutral) .52 calc(c * .45) h / .55);
-
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2xl);
 }
 
-:global(:root[data-theme = 'dark']) .panelStack {
-    --L-preview-amber: .6;
-    --A-preview-amber: .62;
-    --A-preview-amber-soft: .24;
-    --A-preview-amber-strong: .46;
-    --L-preview-blue: .64;
-    --A-preview-blue: .96;
-}
-
-.panelTitle {
-    font-size: var(--font-size-2xl);
-    font-weight: var(--font-weight-semibold);
-}
-
-.panelDescription {
-    color: var(--color-text-muted);
-}
-
-.placeholderCard {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    padding: var(--space-xl);
-    background: var(--color-surface-raised);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
+:global(:root[data-theme = 'dark']) .panelTokens {
+    --L-preview-accent: .6;
+    --A-preview-accent: .62;
+    --A-preview-accent-soft: .24;
+    --A-preview-accent-strong: .46;
+    --L-preview-selection: .64;
+    --A-preview-selection: .96;
 }

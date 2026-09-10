@@ -35,7 +35,8 @@ describe('prepareExampleScriptDocument', () => {
             }),
         ]);
         expect(document.content.some(node => node.type === 'stageDirection'
-            && node.content?.every(child => child.type === 'musicStart'))).toBe(true);
+            && node.content?.some(child => child.type === 'musicStart'
+                && child.attrs?.kind === 'song'))).toBe(true);
         expect(snapshot.orphanMusicOutBlockIds).toEqual([]);
     });
 

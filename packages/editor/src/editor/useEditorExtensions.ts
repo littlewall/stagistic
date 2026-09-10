@@ -55,7 +55,7 @@ import type {BlockNodeType} from './tiptap/scriptCore';
 
 type UseEditorExtensionsArgs = {
     resolvedSettings: EditorSettings,
-    sizeScale: number,
+    editorZoom: number,
     colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
     rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>},
     persistentCharactersRef?: {current: readonly PersistentCharacterRef[]},
@@ -72,7 +72,7 @@ type UseEditorExtensionsArgs = {
 
 export const useEditorExtensions = ({
     resolvedSettings,
-    sizeScale,
+    editorZoom,
     colorByCharacterIdRef,
     rememberedColorByKeyRef,
     persistentCharactersRef,
@@ -91,7 +91,7 @@ export const useEditorExtensions = ({
     );
 
     if (!paginationExtensionRef.current) {
-        paginationExtensionRef.current = createPaginationExtension(resolvedSettings, sizeScale);
+        paginationExtensionRef.current = createPaginationExtension(resolvedSettings, editorZoom);
     }
 
     const paginationExtension = paginationExtensionRef.current;

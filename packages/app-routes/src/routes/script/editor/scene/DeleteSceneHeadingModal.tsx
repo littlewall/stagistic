@@ -1,9 +1,4 @@
-import {
-    Button,
-    ModalDialog,
-} from '@stagistic/ui';
-
-import styles from './DeleteSceneHeadingModal.module.css';
+import {ConfirmModal} from '@stagistic/ui';
 
 interface DeleteSceneHeadingModalProps {
     isOpen: boolean,
@@ -18,39 +13,15 @@ export const DeleteSceneHeadingModal = ({
     onClose,
     onConfirm,
 }: DeleteSceneHeadingModalProps) => (
-    <ModalDialog
+    <ConfirmModal
         isOpen={isOpen}
-        onClose={() => {
-            if (!isDeleting) {
-                onClose();
-            }
-        }}
         ariaLabel="Delete scene heading"
-        panelClassName={styles.panel}
-    >
-        <h2 className={styles.title}>
-            Delete scene heading?
-        </h2>
-        <p className={styles.subtitle}>
-            Its synopsis and places will be removed. Blocks in this scene stay and move under the previous scene.
-        </p>
-        <div className={styles.actions}>
-            <Button
-                variant="danger"
-                isPending={isDeleting}
-                onPress={() => {
-                    void onConfirm();
-                }}
-            >
-                Delete heading
-            </Button>
-            <Button
-                variant="ghost"
-                isDisabled={isDeleting}
-                onPress={onClose}
-            >
-                Cancel
-            </Button>
-        </div>
-    </ModalDialog>
+        title="Delete scene heading?"
+        description="Its synopsis and places will be removed. Blocks in this scene stay and move under the previous scene."
+        confirmLabel="Delete heading"
+        isPending={isDeleting}
+        lockWhilePending
+        onClose={onClose}
+        onConfirm={onConfirm}
+    />
 );

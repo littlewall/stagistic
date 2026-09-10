@@ -1,3 +1,6 @@
+/*
+ * Route layout: the extra list and inline action inside a `Notice variant="warning"`.
+ */
 .warningExtras {
     margin: var(--space-md) 0 var(--space-lg);
 }

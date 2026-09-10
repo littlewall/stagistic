@@ -73,8 +73,7 @@ describe('AccountMenu flushSync repro', () => {
             await waitForElement('[aria-label="Theme mode"]');
             await new Promise(resolve => window.setTimeout(resolve, 100));
 
-            const flushSyncCalls = errorSpy.mock.calls.filter(call =>
-                typeof call[0] === 'string' && call[0].includes('flushSync'));
+            const flushSyncCalls = errorSpy.mock.calls.filter(call => typeof call[0] === 'string' && call[0].includes('flushSync'));
 
             expect(flushSyncCalls).toEqual([]);
         } finally {

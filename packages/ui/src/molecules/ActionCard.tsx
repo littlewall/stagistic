@@ -45,6 +45,6 @@ export const ActionCard = <T extends ElementType = 'button'>({
     <span key="copy" className={styles.copy}>
         <span className={styles.title}>{title}</span>
         {description != null && <span className={styles.description}>{description}</span>}
-        {error != null && <span className={styles.error}>{error}</span>}
+        {error != null && <span role="alert" className={styles.error}>{error}</span>}
     </span>,
 );

@@ -34,12 +34,12 @@
 
 /* sizes (pixel values preserved from the migrated sites) */
 .xs {
-    width: calc(22px * var(--size-scale));
-    height: calc(22px * var(--size-scale));
+    width: 22px;
+    height: 22px;
 
     & svg {
-        width: calc(14px * var(--size-scale));
-        height: calc(14px * var(--size-scale));
+        width: var(--icon-size-sm);
+        height: var(--icon-size-sm);
     }
 }
 
@@ -48,18 +48,18 @@
     height: var(--control-height-sm);
 
     & svg {
-        width: calc(14px * var(--size-scale));
-        height: calc(14px * var(--size-scale));
+        width: var(--icon-size-sm);
+        height: var(--icon-size-sm);
     }
 }
 
 .md {
-    width: calc(28px * var(--size-scale));
-    height: calc(28px * var(--size-scale));
+    width: 28px;
+    height: 28px;
 
     & svg {
-        width: calc(16px * var(--size-scale));
-        height: calc(16px * var(--size-scale));
+        width: var(--icon-size-md);
+        height: var(--icon-size-md);
     }
 }
 
@@ -117,5 +117,4 @@
 .iconButton[data-selected] {
     color: var(--color-text);
     background: var(--state-selected);
-    box-shadow: inset 0 0 0 1px var(--state-selected-edge);
 }

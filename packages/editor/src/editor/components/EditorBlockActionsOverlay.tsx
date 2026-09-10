@@ -52,6 +52,7 @@ const EditorBlockActionsOverlay = ({
     } = useBlockActionsMenuState({
         triggerRef: typeTriggerRef,
         menuRef: typeMenuRef,
+        editor,
     });
     const {
         isMenuOpen: isActionMenuOpen,
@@ -61,6 +62,7 @@ const EditorBlockActionsOverlay = ({
     } = useBlockActionsMenuState({
         triggerRef: actionTriggerRef,
         menuRef: actionMenuRef,
+        editor,
     });
     const isAnyMenuOpen = isTypeMenuOpen || isActionMenuOpen;
     const {activeBlockState} = useOverlayPosition({

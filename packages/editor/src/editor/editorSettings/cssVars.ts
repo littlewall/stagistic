@@ -90,10 +90,15 @@ const buildStandardBlockVars = (
     };
 };
 
-export const getEditorCssVars = (settings: EditorSettings, scale = 1): EditorCssVars => {
+export const getEditorCssVars = (
+    settings: EditorSettings,
+    scale = 1,
+    editorZoom = 1,
+): EditorCssVars => {
     const blocks = settings.blocks;
     const baseLineHeight = settings.typography.lineHeight;
     const vars: Record<string, string | undefined> = {
+        '--editor-zoom': String(editorZoom),
         '--editor-font-size': toPxScaled(settings.typography.fontSizePx, scale),
         '--editor-line-height': String(baseLineHeight),
         '--editor-page-width': toPxScaled(settings.page.widthPx, scale),

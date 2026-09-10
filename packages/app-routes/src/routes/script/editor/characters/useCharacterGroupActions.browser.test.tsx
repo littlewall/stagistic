@@ -9,9 +9,9 @@ import {
     it,
 } from 'vite-plus/test';
 
+import type {ScriptCharacterGroupRecord} from './types';
 import {useCharacterDocumentActions} from './useCharacterDocumentActions';
 import {useCharacterGroupActions} from './useCharacterGroupActions';
-import type {ScriptCharacterGroupRecord} from './types';
 
 type Catalog = ReturnType<typeof useScriptCharacterCatalog>;
 
@@ -30,17 +30,21 @@ const groupDocument = (linked: boolean): ScriptDocument => ({
         }, {
             type: 'stageDirection',
             attrs: {id: 'direction-1'},
-            content: [{
-                type: 'text',
-                text: 'ALL',
-                marks: [{
-                    type: 'characterTag',
-                    attrs: {
-                        characterKey: 'ALL',
-                        characterId: linked ? 'group-1' : null,
-                    },
-                }],
-            }],
+            content: [
+                {
+                    type: 'text',
+                    text: 'ALL',
+                    marks: [
+                        {
+                            type: 'characterTag',
+                            attrs: {
+                                characterKey: 'ALL',
+                                characterId: linked ? 'group-1' : null,
+                            },
+                        },
+                    ],
+                },
+            ],
         },
     ],
 });
@@ -83,16 +87,17 @@ const Harness = ({
         catalog,
         documentActions,
         confirmedSpeakingEntitySet: new Set(hasConfirmedGroup ? ['ALL'] : []),
-        confirmedGroupsById: new Map(hasConfirmedGroup ? [[
-            'group-1',
-            {
-                id: 'group-1',
-                kind: 'group',
-                key: 'ALL',
-                colorHex: null,
-                memberIds: [],
-            },
-        ]] : []),
+        confirmedGroupsById: new Map(hasConfirmedGroup ? [
+            [
+                'group-1', {
+                    id: 'group-1',
+                    kind: 'group',
+                    key: 'ALL',
+                    colorHex: null,
+                    memberIds: [],
+                },
+            ],
+        ] : []),
     });
     const recordRename = (_id: string, name: string) => {
         setRenameEvents(previous => [...previous, name]);
@@ -163,6 +168,7 @@ describe('useCharacterGroupActions', () => {
         await waitFor(() => JSON.stringify(readDocument(host)).includes('group-1'));
 
         const document = readDocument(host);
+
         expect(document.content[0].attrs?.characterRefs).toEqual({ALL: 'group-1'});
         expect(document.content[1].content?.[0]?.marks?.[0]?.attrs?.characterId).toBe('group-1');
     });
@@ -183,6 +189,7 @@ describe('useCharacterGroupActions', () => {
         await waitFor(() => JSON.stringify(readDocument(host)).includes('CHORUS'));
 
         const document = readDocument(host);
+
         expect(document.content[0].content?.[0]?.text).toBe('CHORUS');
         expect(document.content[0].attrs?.characterRefs).toEqual({CHORUS: 'group-1'});
         expect(document.content[1].content?.[0]?.text).toBe('CHORUS');
@@ -200,6 +207,7 @@ describe('useCharacterGroupActions', () => {
         await waitFor(() => !JSON.stringify(readDocument(host)).includes('group-1'));
 
         const document = readDocument(host);
+
         expect(document.content[0].content?.[0]?.text).toBe('ALL');
         expect(document.content[0].attrs?.characterRefs).toBeUndefined();
         expect(document.content[1].content?.[0]?.text).toBe('ALL');

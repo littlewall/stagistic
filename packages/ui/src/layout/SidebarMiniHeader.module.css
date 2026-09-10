@@ -1,0 +1,36 @@
+.header {
+    position: sticky;
+    z-index: 1;
+    top: 0;
+    display: flex;
+    flex: none;
+    gap: var(--space-sm);
+    align-items: center;
+    justify-content: space-between;
+    height: var(--sidebar-head-height);
+    margin-bottom: var(--space-lg);
+    padding: 0 var(--space-sm) 0 var(--space-lg);
+    background: var(--layer-panel-bg);
+}
+
+.actions {
+    display: flex;
+    flex-shrink: 0;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+.actionsGroup {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+}
+
+.controls {
+    display: flex;
+    flex: 0 0 auto;
+    gap: var(--space-sm);
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 40px;
+}

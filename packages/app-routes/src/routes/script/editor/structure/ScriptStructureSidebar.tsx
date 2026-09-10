@@ -9,9 +9,11 @@ import {useScriptActions} from '@stagistic/app-core';
 import {
     useEditorActCommands,
     useEditorLiveActiveBlock,
+    useEditorLiveScenePlacement,
     useEditorLiveStructure,
     useFocusEditorBlock,
 } from '@stagistic/editor';
+import {SidebarActionsGroup, SidebarMiniHeader} from '@stagistic/ui';
 import {
     Fragment,
     type ReactNode,
@@ -24,9 +26,7 @@ import {
 
 import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attributes/attributeManagerMenu';
 import {useScriptSession} from '../../ScriptSessionContext';
-import {SidebarMiniHeader} from '../sidebar';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
-import {SidebarActionsGroup} from '../sidebar/SidebarActionsGroup';
 import styles from './ScriptStructureSidebar.module.css';
 import {
     buildAccessibilityPlugin,
@@ -59,6 +59,7 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
     const {setActiveBlock} = useScriptActions();
     const actCommands = useEditorActCommands();
     const liveStructure = useEditorLiveStructure();
+    const scenePlacement = useEditorLiveScenePlacement();
     const liveActiveBlockId = useEditorLiveActiveBlock();
     const focusBlock = useFocusEditorBlock();
 
@@ -299,18 +300,23 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
                                             />
                                         )
                                     )}
-                                    {group.scenes.map((scene, idx) => (
-                                        <StructureRowScene
-                                            key={scene.blockId}
-                                            blockId={scene.blockId}
-                                            title={scene.title}
-                                            sceneNumber={scene.sceneNumber}
-                                            index={idx + sceneIndexOffset}
-                                            groupId={group.groupId}
-                                            isActive={scene.blockId === activeSceneBlockId}
-                                            onFocus={handleSceneFocus}
-                                        />
-                                    ))}
+                                    {group.scenes.map((scene, idx) => {
+                                        const placement = scenePlacement.byBlockId.get(scene.blockId);
+
+                                        return (
+                                            <StructureRowScene
+                                                key={scene.blockId}
+                                                blockId={scene.blockId}
+                                                title={scene.title}
+                                                sceneNumber={scene.sceneNumber}
+                                                index={idx + sceneIndexOffset}
+                                                groupId={group.groupId}
+                                                isActive={scene.blockId === activeSceneBlockId}
+                                                startPage={placement?.startPage}
+                                                onFocus={handleSceneFocus}
+                                            />
+                                        );
+                                    })}
                                 </Fragment>
                             );
                         })}

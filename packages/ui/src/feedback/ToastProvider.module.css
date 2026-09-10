@@ -22,9 +22,9 @@
     gap: var(--space-md);
     align-items: start;
     /* stylelint-disable-next-line csstree/validator */
-    min-width: min(calc(300px * var(--size-scale)), 80vw);
+    min-width: min(300px, 80vw);
     /* stylelint-disable-next-line csstree/validator */
-    max-width: min(calc(380px * var(--size-scale)), 90vw);
+    max-width: min(380px, 90vw);
     padding: var(--space-lg);
     color: var(--color-text);
     background: var(--color-surface);
@@ -41,9 +41,9 @@
     }
 
     & .statusIndicator {
-        width: calc(6px * var(--size-scale));
-        height: calc(6px * var(--size-scale));
-        margin-top: calc(5px * var(--size-scale));
+        width: 6px;
+        height: 6px;
+        margin-top: var(--space-sm);
         background: var(--color-text-muted);
         border-radius: var(--radius-full);
     }
@@ -71,8 +71,8 @@
         cursor: pointer;
         display: grid;
         place-items: center;
-        width: calc(24px * var(--size-scale));
-        height: calc(24px * var(--size-scale));
+        width: 24px;
+        height: 24px;
         padding: 0;
         line-height: var(--line-height-none);
         color: var(--color-text-muted);
@@ -91,8 +91,8 @@
         }
 
         & svg {
-            width: calc(12px * var(--size-scale));
-            height: calc(12px * var(--size-scale));
+            width: 12px;
+            height: 12px;
         }
     }
 }

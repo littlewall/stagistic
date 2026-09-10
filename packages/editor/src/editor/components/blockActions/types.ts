@@ -53,4 +53,5 @@ export interface UseMenuPlacementArgs {
 export interface UseBlockActionsMenuStateArgs {
     triggerRef: RefObject<HTMLButtonElement | null>,
     menuRef: RefObject<HTMLDivElement | null>,
+    editor: TiptapEditor | null,
 }

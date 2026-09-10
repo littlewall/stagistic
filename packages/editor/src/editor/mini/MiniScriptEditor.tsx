@@ -31,6 +31,7 @@ import {
     CharacterTagInputExtension,
     EditorRuntimeExtension,
     MusicNumberingExtension,
+    SceneNumberingExtension,
 } from '../tiptap/extensions';
 import {DocumentWithSettings} from '../tiptap/extensions/DocumentExtension';
 import {CharacterTagMark} from '../tiptap/marks';
@@ -134,6 +135,7 @@ const MiniScriptEditorSurface = ({
             persistentCharactersRef: characterColorRefs.persistentCharactersRef,
         }),
         ...ScriptBlockNodes,
+        SceneNumberingExtension,
         MusicStartNode.configure({
             locked: true,
             numberLabel: musicNumberLabel,

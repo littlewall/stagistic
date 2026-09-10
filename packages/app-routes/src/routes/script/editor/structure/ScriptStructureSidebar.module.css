@@ -1,45 +1,14 @@
+/*
+ * Kept fully singular (step 6 ruling S3): the act/scene tree carries its own drag
+ * handles, act-title editing and DnD drop states, and its rows sit at a raw 28px
+ * rather than the scaled control height — reconciled by the whole-number pixel pass.
+ */
 .content {
     position: relative;
     overflow: hidden auto;
     flex: 1;
     min-height: 0;
     padding: 0;
-}
-
-.menu {
-    position: absolute;
-    z-index: 3;
-    top: calc(100% + var(--space-sm));
-    left: 0;
-    display: grid;
-    min-width: calc(140px * var(--size-scale));
-    padding: var(--space-sm);
-    background: var(--color-surface);
-    border: 1px solid var(--color-border);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-popover);
-
-    &.right {
-        right: 0;
-        left: auto;
-    }
-
-    & .item {
-        cursor: pointer;
-        width: 100%;
-        min-height: calc(28px * var(--size-scale));
-        padding: 0 var(--space-md);
-        font-size: var(--font-size-sm);
-        color: var(--color-text);
-        text-align: left;
-        background: transparent;
-        border: 1px solid transparent;
-        border-radius: var(--radius-md);
-
-        &:hover {
-            background: var(--state-hover);
-        }
-    }
 }
 
 .empty {
@@ -51,25 +20,15 @@
 
 .actTitle {
     display: flex;
-    gap: calc(4px * var(--size-scale));
+    gap: var(--space-sm);
     align-items: center;
     width: 100%;
     min-height: 28px;
     margin: 0;
-    padding-left: calc(14px * var(--size-scale));
+    padding-left: var(--space-lg);
     font-size: var(--font-size-sm);
     font-weight: var(--font-weight-bold);
     color: var(--color-text-muted);
-}
-
-.actPrefixButton {
-    cursor: pointer;
-    padding: 0;
-    font: inherit;
-    color: inherit;
-    white-space: nowrap;
-    background: transparent;
-    border: 0;
 }
 
 .actTitleInput {
@@ -88,8 +47,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(16px * var(--size-scale));
-    height: calc(16px * var(--size-scale));
+    width: 16px;
+    height: 16px;
     margin-left: auto;
     font-size: var(--font-size-sm);
     line-height: var(--line-height-none);
@@ -97,7 +56,7 @@
     opacity: 0;
     background: transparent;
     border: 1px solid transparent;
-    border-radius: calc(5px * var(--size-scale));
+    border-radius: var(--radius-sm);
 
     &:hover {
         color: color-mix(in oklch, var(--color-status-danger) 75%, var(--color-text-muted));
@@ -108,7 +67,7 @@
 
 .itemList {
     display: grid;
-    gap: 2px;
+    gap: var(--space-xs);
     margin: 0;
     padding: 0 var(--space-lg) var(--space-lg);
     list-style: none;
@@ -123,7 +82,6 @@
 
     &.active {
         background: var(--state-selected);
-        box-shadow: inset 0 0 0 1px var(--state-selected-edge);
 
         & .itemButton {
             background: transparent;
@@ -154,6 +112,8 @@
 }
 
 .sceneRow {
+    grid-template-columns: auto 1fr auto;
+
     &:hover:not(.active) {
         background: var(--state-hover);
     }
@@ -184,10 +144,6 @@
     background: transparent;
     border: 1px solid transparent;
     border-radius: var(--radius-md);
-
-    &.dragging {
-        opacity: .52;
-    }
 }
 
 .dragHandle {
@@ -195,40 +151,44 @@
     cursor: grab;
     user-select: none;
     display: inline-flex;
-    flex: 0 0 calc(6px * var(--size-scale));
+    flex: 0 0 6px;
     align-items: center;
     justify-content: center;
     box-sizing: content-box;
-    width: calc(6px * var(--size-scale));
-    min-height: calc(15px * var(--size-scale));
+    width: 6px;
+    min-height: 15px;
     margin: 0;
-    padding-inline: calc(4px * var(--size-scale));
+    padding-inline: var(--space-sm);
     color: color-mix(in oklch, var(--color-text-muted) 55%, var(--color-border));
     appearance: none;
     opacity: .55;
     background-color: transparent;
     background-image: radial-gradient(currentcolor .8px, transparent .9px), radial-gradient(currentcolor .8px, transparent .9px);
-    background-position: 0 0, calc(3px * var(--size-scale)) 0;
+    background-position: 0 0, 3px 0;
     background-clip: content-box;
     background-origin: content-box;
-    background-size: calc(3px * var(--size-scale)) calc(4px * var(--size-scale));
+    background-size: 3px 4px;
     border: 0;
-    border-radius: calc(3px * var(--size-scale));
+    border-radius: var(--radius-xs);
 
     &:active {
         cursor: grabbing;
     }
 }
 
-.dragHandleSpacer {
-    display: inline-flex;
-    flex: 0 0 calc(14px * var(--size-scale));
-    min-height: calc(15px * var(--size-scale));
-}
-
 .itemLabel {
     min-width: 0;
     overflow-wrap: break-word;
+}
+
+.pageBadge {
+    justify-self: end;
+    padding-inline: var(--space-md);
+    font-size: var(--font-size-xs);
+    font-variant-numeric: tabular-nums;
+    line-height: var(--line-height-none);
+    color: color-mix(in oklch, var(--color-text-muted) 55%, var(--color-border));
+    white-space: nowrap;
 }
 
 .sceneTitle {
@@ -237,17 +197,4 @@
 
 .actTitleDisplay {
     text-transform: var(--act-casing, uppercase);
-}
-
-.scenePlaceholder {
-    min-height: 28px;
-    border: var(--state-drop-edge);
-    border-radius: var(--radius-md);
-}
-
-.dragOverlayRow {
-    opacity: .96;
-    background: var(--color-surface);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-card);
 }

@@ -16,8 +16,13 @@ import {useScriptEditorSettingsDraft} from './useScriptEditorSettingsDraft';
 
 const roots: Root[] = [];
 
+/*
+ * The budget is generous because the whole browser suite shares one chromium:
+ * the predicate below settles in milliseconds when this file runs alone, but a
+ * 2s deadline occasionally expired under full-suite load.
+ */
 const waitFor = async (predicate: () => boolean) => {
-    const deadline = Date.now() + 2_000;
+    const deadline = Date.now() + 10_000;
 
     while (!predicate()) {
         if (Date.now() >= deadline) {

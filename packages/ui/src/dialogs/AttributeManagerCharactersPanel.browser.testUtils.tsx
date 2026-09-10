@@ -3,8 +3,8 @@ import {vi} from 'vite-plus/test';
 
 import {
     type AttributeManagerCharacter,
-    type AttributeManagerCharacterWorkspaceId,
     AttributeManagerCharactersPanel,
+    type AttributeManagerCharacterWorkspaceId,
     type AttributeManagerGroup,
 } from './AttributeManagerCharactersPanel';
 
@@ -106,11 +106,11 @@ export const renderPanel = (
     initialSelectedGroupId?: string,
     groups: AttributeManagerGroup[] = [],
 ): {
-    onSetCharacterColor: (characterId: string, colorHex: string | null) => unknown,
-    onSetCharacterOutline: (characterId: string, outline: string | null) => unknown,
-    onDeleteCharacter: (characterId: string) => unknown,
-    onCreateCharacter: (characterName: string) => unknown,
-} => {
+        onSetCharacterColor: (characterId: string, colorHex: string | null) => unknown,
+        onSetCharacterOutline: (characterId: string, outline: string | null) => unknown,
+        onDeleteCharacter: (characterId: string) => unknown,
+        onCreateCharacter: (characterName: string) => unknown,
+    } => {
     const host = document.createElement('div');
     const onSetCharacterOutline = vi.fn();
     const onDeleteCharacter = vi.fn();
@@ -118,7 +118,6 @@ export const renderPanel = (
 
     host.style.width = '900px';
     host.style.height = '600px';
-    host.style.setProperty('--size-scale', '1');
     document.body.appendChild(host);
 
     const root = createRoot(host);
