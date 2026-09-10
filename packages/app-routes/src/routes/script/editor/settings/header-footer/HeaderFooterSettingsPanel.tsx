@@ -156,7 +156,7 @@ export const HeaderFooterSettingsPanel = ({
 
     return (
         <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
-            <PanelHeader level={3} title="Headers and footers" />
+            <PanelHeader level={3} title="Header and footer" />
             <div className={styles.composer}>
                 {renderRow('header')}
                 <div className={styles.editor}>

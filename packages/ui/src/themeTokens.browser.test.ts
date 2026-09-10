@@ -22,10 +22,10 @@ const PALETTE: ReadonlyArray<readonly [string, Rgb]> = [
         ],
     ],
     [
-        '--palette-muted-lime', [
-            203,
-            192,
-            116,
+        '--palette-creamed-corn', [
+            247,
+            224,
+            159,
         ],
     ],
     [
@@ -57,7 +57,7 @@ describe('brand palette', () => {
     it('anchors the interface on the three Pantone colors', () => {
         expect(getRgb(read('--base-neutral'))).toEqual(getRgb(read('--palette-steel-wool')));
         expect(getRgb(read('--base-accent'))).toEqual(getRgb(read('--palette-primrose-yellow')));
-        expect(getRgb(read('--base-selection'))).toEqual(getRgb(read('--palette-muted-lime')));
+        expect(getRgb(read('--base-selection'))).toEqual(getRgb(read('--palette-creamed-corn')));
     });
 });
 

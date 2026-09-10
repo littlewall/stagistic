@@ -260,7 +260,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                 {children}
                 <ScriptSettingsModal
                     isOpen={isSettingsOpen}
-                    title="Settings"
+                    title="Script settings"
                     groups={groups}
                     activePanelId={activePanelId}
                     expandedItemIds={expandedItemIds}
@@ -275,6 +275,7 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
                     <ScriptEditorSettingsPanel
                         panelId={activePanelId}
                         resolvedScriptSettings={resolvedScriptSettings}
+                        settingsOverride={effectiveScriptSettingsDraft}
                         blockLabelByType={BLOCK_LABEL_BY_TYPE}
                         shortcutPrefix={shortcutPrefix}
                         elementsHandlers={{

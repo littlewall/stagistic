@@ -43,9 +43,19 @@ export const ScriptSettingsModal = ({
                 <aside className={styles.sidebar} aria-label="Settings sections">
                     {groups.map(group => (
                         <section key={group.id} className={styles.group}>
-                            <h3 className={styles.groupLabel}>{group.label}</h3>
+                            {groups.length > 1 ? (
+                                <h3 className={styles.groupLabel}>{group.label}</h3>
+                            ) : null}
                             <ul className={styles.navList}>
                                 {group.items.map(item => {
+                                    if (item.kind === 'separator') {
+                                        return (
+                                            <li key={item.id} aria-hidden="true">
+                                                <hr className={styles.navSeparator} />
+                                            </li>
+                                        );
+                                    }
+
                                     if (item.kind === 'item') {
                                         const isActive = activePanelId === item.panelId;
 

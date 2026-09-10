@@ -25,6 +25,7 @@ export const ElementSettingsPanel = ({
     blockType,
     blockLabel,
     resolvedScriptSettings,
+    canReset,
     shortcutPrefix,
     onResetBlockSettings,
     onUpdateBlockSettings,
@@ -83,15 +84,17 @@ export const ElementSettingsPanel = ({
         <SettingsGroup gap="2xl" className={styles.panelTokens}>
             <div className={elementStyles.panelHeader}>
                 <PanelHeader level={3} title={blockLabel} />
-                <button
-                    type="button"
-                    className={elementStyles.resetButton}
-                    onClick={() => onResetBlockSettings(blockType)}
-                    aria-label={`Reset ${blockLabel} settings to defaults`}
-                >
-                    <UndoIcon aria-hidden="true" />
-                    <span>Reset</span>
-                </button>
+                {canReset ? (
+                    <button
+                        type="button"
+                        className={elementStyles.resetButton}
+                        onClick={() => onResetBlockSettings(blockType)}
+                        aria-label={`Reset ${blockLabel} settings to defaults`}
+                    >
+                        <UndoIcon aria-hidden="true" />
+                        <span>Reset</span>
+                    </button>
+                ) : null}
             </div>
             <ElementPreview
                 model={preview}

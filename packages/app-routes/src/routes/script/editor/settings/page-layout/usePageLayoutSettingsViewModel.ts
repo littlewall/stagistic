@@ -83,9 +83,12 @@ export const usePageLayoutSettingsViewModel = ({
             '--page-margin-bottom-height': `${bottomMarginRowsRaw * pseudoRowUnit}px`,
         } as CSSProperties;
 
-        // Schematic row labels
-        const headerRows = Math.round(contentMarginTopPx / safeFontSize);
-        const footerRows = Math.round(contentMarginBottomPx / safeFontSize);
+        /*
+         * Schematic row labels. The layout always reserves at least one row for
+         * the header and footer bands, so the label never drops below 1 row.
+         */
+        const headerRows = Math.max(1, Math.round(contentMarginTopPx / safeFontSize));
+        const footerRows = Math.max(1, Math.round(contentMarginBottomPx / safeFontSize));
         const contentRows = Math.round(
             Math.max(0, pageHeightPx - marginTopPx - marginBottomPx - contentMarginTopPx - contentMarginBottomPx)
             / safeFontSize,

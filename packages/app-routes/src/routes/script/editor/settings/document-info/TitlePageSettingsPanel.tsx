@@ -5,6 +5,7 @@ import {
     type TitlePageSettings,
 } from '@stagistic/script';
 import {
+    Checkbox,
     formControlStyles,
     FormSelect,
     type FormSelectOption,
@@ -181,19 +182,18 @@ export const TitlePageSettingsPanel = ({
                             }}
                         />
                     </div>
-                    <label className={styles.checkboxLabel}>
-                        <input
-                            type="checkbox"
-                            checked={localDraftDateMode === 'auto'}
-                            onChange={e => {
-                                const nextDraftDateMode = e.target.checked ? 'auto' : 'manual';
+                    <Checkbox
+                        className={styles.checkboxLabel}
+                        isSelected={localDraftDateMode === 'auto'}
+                        onChange={isSelected => {
+                            const nextDraftDateMode = isSelected ? 'auto' : 'manual';
 
-                                setLocalDraftDateMode(nextDraftDateMode);
-                                onUpdate({draftDateMode: nextDraftDateMode});
-                            }}
-                        />
+                            setLocalDraftDateMode(nextDraftDateMode);
+                            onUpdate({draftDateMode: nextDraftDateMode});
+                        }}
+                    >
                         Automatic date of export
-                    </label>
+                    </Checkbox>
                     <div className={styles.draftDateField}>
                         <span className={styles.subFieldLabel}>Preview</span>
                         <span className={styles.draftDatePreview}>{draftDatePreview || '—'}</span>

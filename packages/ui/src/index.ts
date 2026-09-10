@@ -1,4 +1,5 @@
 export {Button} from './atoms/Button';
+export {Checkbox, type CheckboxProps} from './atoms/Checkbox';
 export {IconButton} from './atoms/IconButton';
 export {InlineTooltip} from './atoms/InlineTooltip';
 export {Input} from './atoms/Input';

@@ -111,10 +111,10 @@
     /* ── Brand palette (OKLCH) ─────────────────────────────────────
        Three Pantone anchors plus the paper the script is printed on.
        Steel Wool is the neutral the whole interface is built from —
-       text, borders and shadows. Muted Lime means "chosen", Primrose
+       text, borders and shadows. Creamed Corn means "chosen", Primrose
        Yellow means "act on this"; nothing else may claim those two. */
     --palette-steel-wool: oklch(.4918 .0118 238.71); /* #5b6267 */
-    --palette-muted-lime: oklch(.8 .0978 101.11); /* #cbc074 */
+    --palette-creamed-corn: oklch(.9106 .0863 90.83); /* #f7e09f */
     --palette-primrose-yellow: oklch(.854 .1432 89.53); /* #f4ca52 */
     --palette-paper: oklch(.9591 .0074 80.72); /* #f4f1ec */
 
@@ -122,7 +122,7 @@
     --base-neutral: var(--palette-steel-wool);
     --base-surface: var(--palette-paper);
     --base-accent: var(--palette-primrose-yellow);
-    --base-selection: var(--palette-muted-lime);
+    --base-selection: var(--palette-creamed-corn);
     --base-green: oklch(.52 .0971 165.2);
     --base-yellow: oklch(.769 .1006 56.1);
     --base-red: oklch(.554 .1273 14.8);
@@ -194,7 +194,7 @@
        of a shared color, which is what made selection, hover, navigation
        and drop targets read alike. */
 
-    /* Pointer echo — neutral, so lavender is free to mean selection. */
+    /* Pointer echo — neutral, so Creamed Corn is free to mean selection. */
     --state-hover: color-mix(in oklch, var(--color-surface-raised) 70%, transparent);
 
     /* Chosen in the data — scene, character, music item. */

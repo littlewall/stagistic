@@ -94,7 +94,7 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
             {
                 kind: 'item',
                 id: SCRIPT_SETTINGS_PANEL_HEADERS,
-                label: 'Headers and footers',
+                label: 'Header and footer',
                 panelId: SCRIPT_SETTINGS_PANEL_HEADERS,
             },
             {
@@ -113,6 +113,10 @@ export const scriptSettingsMenu: SettingsNavGroup[] = [
                     panelId: getElementSettingsPanelId(item.blockType),
                     icon: BLOCK_ICONS[item.blockType],
                 })),
+            },
+            {
+                kind: 'separator',
+                id: 'danger-zone-separator',
             },
             {
                 kind: 'item',

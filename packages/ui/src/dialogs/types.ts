@@ -40,11 +40,17 @@ export interface SettingsNavExpandableItem {
     subItems: SettingsNavSubItem[],
 }
 
+export interface SettingsNavSeparatorItem {
+    id: string,
+}
+
 export type SettingsNavItem = ({
     kind: 'item',
 } & SettingsNavLinkItem) | ({
     kind: 'expandable',
-} & SettingsNavExpandableItem);
+} & SettingsNavExpandableItem) | ({
+    kind: 'separator',
+} & SettingsNavSeparatorItem);
 
 export interface SettingsNavGroup {
     id: string,

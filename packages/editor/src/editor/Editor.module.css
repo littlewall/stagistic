@@ -106,7 +106,7 @@
 
     /*
      * See The Visible Target Rule. The panel is already 256px of evidence that
-     * it is open, so a lavender chip here would both repeat that and spend
+     * it is open, so a selection-coloured chip here would both repeat that and spend
      * selection's mechanic on something that is not a selection; the icon's
      * filled sliver says which side, and the ink says it is on.
      */

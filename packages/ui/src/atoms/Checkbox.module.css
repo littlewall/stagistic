@@ -1,0 +1,63 @@
+.checkbox {
+    cursor: pointer;
+    display: inline-flex;
+    gap: var(--space-md);
+    align-items: center;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+
+    &[data-disabled] {
+        cursor: not-allowed;
+        opacity: .5;
+    }
+
+    &[data-focus-visible] .box {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 2px;
+    }
+
+    &[data-hovered]:not([data-disabled]) .box {
+        border-color: var(--color-border-strong, var(--color-border));
+    }
+
+    &[data-selected] .box,
+    &[data-indeterminate] .box {
+        background: var(--color-text);
+        border-color: var(--color-text);
+    }
+
+    &[data-selected] .mark,
+    &[data-indeterminate] .mark {
+        opacity: 1;
+    }
+}
+
+.box {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: 18px;
+    height: 18px;
+    background: var(--color-input-bg, var(--color-surface));
+    border: 1px solid var(--color-border-strong, var(--color-border));
+    border-radius: var(--radius-xs);
+    transition: background var(--duration-normal) var(--ease-standard), border-color var(--duration-normal) var(--ease-standard);
+}
+
+.mark {
+    width: 12px;
+    height: 12px;
+    opacity: 0;
+    fill: none;
+    stroke: var(--color-surface);
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2.75;
+    transition: opacity var(--duration-fast) var(--ease-standard);
+}
+
+.label {
+    white-space: nowrap;
+}
