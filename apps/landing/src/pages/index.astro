@@ -6,13 +6,14 @@ import s from './index.module.css';
 
 const features = [
     {
-        label: 'Theatre-native writing',
+        label: 'A playwriting structure',
         description:
             'Dedicated blocks for acts, scene headings, character cues, dialogue, stage directions, lyrics, and notes. Every part of the script keeps its own formatting and behaviour.',
         videoSrc: '/features/theatre-writing.mp4',
         videoTitle: 'A formatted theatre script in Stagistic Editor',
         videoFit: 'contain',
         shape: 'one',
+        href: '/editor/playwriting',
     },
     {
         label: 'Acts and scenes that stay connected',
@@ -24,7 +25,7 @@ const features = [
         shape: 'two',
     },
     {
-        label: 'Characters throughout the script',
+        label: 'Smart character management',
         description:
             'Build a character catalogue directly from your script. Assign colours, highlight appearances, group characters, rename characters, tag them inside stage directions, and write dialogue for two or more characters speaking together.',
         imageSrc: '/features/characters.png',
@@ -33,13 +34,14 @@ const features = [
         shape: 'three',
     },
     {
-        label: 'Ready for musicals',
+        label: 'First-class musical theatre support',
         description:
             'Write lyrics as their own block type, manage songs and instrumentals, place music cues directly in the script, and attach score PDFs to individual musical numbers.',
         imageSrc: '/features/musical.png',
         imageAlt: 'Lyrics formatted inside a musical script in Stagistic Editor',
-    imageFit: 'contain',
+        imageFit: 'contain',
         shape: 'one',
+        href: '/editor/musicals',
     },
     {
         label: 'A writing flow you can configure',
@@ -47,16 +49,16 @@ const features = [
             'Configure page format, title page, headers and footers, and each block\'s indentation, alignment, emphasis, and casing. Set keyboard shortcuts and decide which block follows next, so the editor matches the way you write.',
         imageSrc: '/features/writing-flow.png',
         imageAlt: 'Formatting controls above a script in Stagistic Editor',
-            imageFit: 'cover',
+        imageFit: 'cover',
         shape: 'three',
     },
     {
-        label: 'Advanced PDF export',
+        label: 'Integrated script and score export',
         description:
-            'Export print-ready PDFs with scene-based pagination, character-specific scripts, consistent page numbering across script and embedded score, and integrated sheet music insertion.',
+            'Export your script and sheet music into a single, print-ready PDF. Stagistic Editor automatically handles page numbering across your text and inserted music scores, so actors and musicians always stay on the same page.',
         imageSrc: '/features/export.png',
         imageAlt: 'A print-ready theatre script displayed in Stagistic Editor',
-            imageFit: 'cover',
+        imageFit: 'cover',
         shape: 'two',
     },
 ];
@@ -71,14 +73,6 @@ const faqs = [
         a: 'No. You can open the editor and start writing without signing up. Your scripts are stored locally in your browser by default. You can also download a backup of your work and import it again whenever you need it.',
     },
     {
-        q: 'Is this really built for theatre?',
-        a: 'Yes! Acts, scenes, stage directions, character cues, lyrics, and music are part of the document model rather than formatting conventions layered onto a screenplay editor.',
-    },
-    {
-        q: 'Does it work for both plays and musicals?',
-        a: 'Yes. Plays get theatre-specific structure, characters, stage directions, and flexible export. Musicals add dedicated lyric blocks, music cues and outs, song and instrumental catalogues, score PDFs, and integrated-score export.',
-    },
-    {
         q: 'Where is my data stored?',
         a: 'Locally in your browser. You can download a .stagistic backup and import it again whenever you need it. Cloud sync is not ready yet; but when it is, it will be free.',
     },
@@ -87,16 +81,20 @@ const faqs = [
         a: 'Absolutely! There are no restrictions on how you use scripts you write in Stagistic Editor. The editor is free for everyone.',
     },
     {
+        q: 'How is Stagistic Editor different from other software?',
+        a: 'Industry standard tools like Final Draft use a screenplay structure (INT/EXT) which Stagistic Editor deliberately avoids in favour of theatre acts and scenes. It is designed from the ground up specifically for stage plays and musicals.',
+    },
+    {
+        q: 'How does Stagistic Editor help me format a stage script?',
+        a: 'Instead of formatting text with spaces and tabs, Stagistic Editor uses dedicated blocks for elements like stage directions, dialogue, and lyrics. This means your play stays perfectly structured, character names remain linked to a central cast list, and stage directions format automatically.',
+    },
+    {
+        q: 'How do I format a musical script?',
+        a: 'Writing a libretto is natively supported. Stagistic Editor has dedicated blocks for lyrics, handles songs and instrumentals via a catalogue, and allows you to attach PDF scores directly to musical numbers. The export engine then seamlessly combines your script and scores into one paginated document.',
+    },
+    {
         q: 'Is Stagistic Editor open source?',
         a: 'Yes, the editor is available on GitHub under the MIT licence. Any contributions are welcome!',
-    },
-    {
-        q: 'What platforms does it run on?',
-        a: 'The editor runs in any modern browser without installation. Desktop and mobile apps are planned in future.',
-    },
-    {
-        q: 'Is this stable enough to use for real work?',
-        a: "It's in public preview. The core writing experience is functional, but expect rough edges. We recommend keeping backups of important scripts. Feedback and bug reports are very welcome - they directly shape what gets fixed first.",
     },
 ];
 ---
@@ -104,7 +102,7 @@ const faqs = [
 <Layout
     title="Stagistic Editor - Script editor built for theatre"
     description="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
-    canonical={`https://${Astro.site?.hostname}`}
+    canonical={new URL("/", Astro.site).href}
 >
     <div class={s.page}>
 
@@ -114,13 +112,13 @@ const faqs = [
 
                     <div class={s.heroContent}>
                         <h1 class={clsx(s.heroTitle, s.fadeUp)}>
-                            Script editor built for theatre.
+                            Write for the stage, not the screen.
                         </h1>
 
                         <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
-                            Stagistic Editor is a script editor built specifically for
-                            theatrical plays and musicals. Not screenwriting. Not
-                            prose. The stage.
+                            Most script editors force you to think in camera angles.
+                            Stagistic Editor provides a structural foundation built entirely
+                            for theatrical plays and musicals.
                         </p>
 
                         <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD2)}>
@@ -205,15 +203,15 @@ const faqs = [
                 <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
                     <div>
                         <h2 class={s.forTheatreTitle}>
-                            Every decision made<br />for stage writing.
+                            The screenplay problem.
                         </h2>
                     </div>
                     <div>
                         <p class={s.forTheatreText}>
-                            Stagistic Editor understands the craft of theatre: how a scene builds, how a musical number interrupts and transforms dialogue, how stage directions serve the director as much as the story. These aren't formatting rules. They're how theatre thinks.
+                            Industry standard tools like Final Draft are built for film. They assume your story is driven by <em>INT/EXT</em> camera setups, shots, and cuts. When you try to write a play in them, you spend more time fighting the formatting than writing.
                         </p>
                         <p class={s.forTheatreText}>
-                            Whether you're writing a one-act play or a full two-act musical, the editor stays out of your way and keeps your work structured exactly as theatre demands.
+                            Stagistic Editor is different. It understands the craft of theatre: acts, scenes, musical cues, and complex character interactions. It doesn't force a screenplay structure onto your stage play.
                         </p>
                     </div>
                 </div>
@@ -225,10 +223,9 @@ const faqs = [
                 aria-hidden="true"
             ></div>
 
-            <!-- Features -->
             <section class={s.features} id="features">
                 <div class={clsx(s.featuresInner, s.reveal)} data-reveal>
-                    <h2 class={s.featuresTitle}>What's included.</h2>
+                    <h2 class={s.featuresTitle}>Features built for playwrights and librettists.</h2>
                     <div class={s.featuresList}>
                         {
                             features.map((f) => (
@@ -236,6 +233,13 @@ const faqs = [
                                     <div class={s.featureCopy}>
                                         <h3 class={s.featureLabel}>{f.label}</h3>
                                         <p class={s.featureDesc}>{f.description}</p>
+                                        {f.href && (
+                                            <div class={s.featureLinkWrap}>
+                                                <a href={f.href} class={s.btnOutline}>
+                                                    Learn more &rarr;
+                                                </a>
+                                            </div>
+                                        )}
                                     </div>
                                     <div
                                         class={s.featureMedia}
@@ -319,24 +323,32 @@ const faqs = [
                             account or paywall. Every current and future Editor
                             feature will remain free.
                         </p>
-                        <p class={s.previewTextSecondary}>
-                            Stagistic will grow into a family of tools for theatre and
-                            production. Some future tools may be paid, but Stagistic
-                            Editor will always be free and open source.
-                        </p>
+
                     </div>
                     <div class={s.previewCard}>
                         <div class={s.previewChecks}>
                             <div class={s.previewCheckItem}>
-                                <span class={s.previewCheckMark}>✓</span>
+                                <span class={s.previewCheckMark}>
+                                    <svg viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
+                                        <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
                                 <span>Free &amp; open source</span>
                             </div>
                             <div class={s.previewCheckItem}>
-                                <span class={s.previewCheckMark}>✓</span>
+                                <span class={s.previewCheckMark}>
+                                    <svg viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
+                                        <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
                                 <span>No account needed</span>
                             </div>
                             <div class={s.previewCheckItem}>
-                                <span class={s.previewCheckMark}>✓</span>
+                                <span class={s.previewCheckMark}>
+                                    <svg viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
+                                        <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
                                 <span>Stored locally by default</span>
                             </div>
                         </div>

@@ -260,6 +260,18 @@
     }
 }
 
+.textLink {
+    color: var(--color-text);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    text-decoration-color: var(--color-text-muted);
+    transition: text-decoration-color 0.15s ease;
+
+    &:hover {
+        text-decoration-color: var(--color-text);
+    }
+}
+
 .sectionDivider {
     position: relative;
     height: 1px;
@@ -318,6 +330,10 @@
     font-size: .9375rem;
     line-height: 1.72;
     color: var(--color-text-muted);
+}
+
+.featureLinkWrap {
+    margin-top: 1.5rem;
 }
 
 .featureMedia {
@@ -524,7 +540,17 @@
 }
 
 .previewCheckMark {
-    color: var(--color-action);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: currentColor;
+    flex-shrink: 0;
+}
+
+.previewCheckMark svg {
+    display: block;
+    width: 1.125rem;
+    height: 1.125rem;
 }
 
 .previewCtas {

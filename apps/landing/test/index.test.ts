@@ -64,17 +64,17 @@ describe('landing page', () => {
             new URL('../dist/index.html', import.meta.url),
             'utf8',
         );
-        const homeCssPath = homeHtml.match(
-            /<link rel="stylesheet" href="([^"]+index\.[^"]+\.css)">/,
-        )?.[1];
+        const cssPaths = Array.from(homeHtml.matchAll(
+            /<link rel="stylesheet" href="([^"]+\.css)">/g
+        )).map((m) => m[1]);
 
-        expect(homeCssPath).toBeDefined();
-        homeCss = readFileSync(
-            new URL(`../dist${homeCssPath}`, import.meta.url),
+        expect(cssPaths.length).toBeGreaterThan(0);
+        homeCss = cssPaths.map((cssPath) => readFileSync(
+            new URL(`../dist${cssPath}`, import.meta.url),
             'utf8',
-        );
+        )).join('\n');
         syntaxHtml = readFileSync(
-            new URL('../dist/syntax.html', import.meta.url),
+            new URL('../dist/editor/syntax.html', import.meta.url),
             'utf8',
         );
     });
@@ -115,10 +115,12 @@ describe('landing page', () => {
         const primaryNav = homeHeader.match(/<nav\b[\s\S]*?<\/nav>/)
             ?.[0] ?? '';
 
-        expect(primaryNav.match(/<a\b/g) ?? []).toHaveLength(2);
+        expect(primaryNav.match(/<a\b/g) ?? []).toHaveLength(4);
         expect(primaryNav).toContain('aria-label="Primary"');
-        expect(primaryNav).toContain('href="/#features"');
-        expect(primaryNav).toContain('href="/#faq"');
+        expect(primaryNav).toContain('href="/editor/playwriting"');
+        expect(primaryNav).toContain('href="/editor/musicals"');
+        expect(primaryNav).toContain('href="/open-source"');
+        expect(primaryNav).toContain('href="/editor/syntax"');
         expect(primaryNav).not.toContain('href="#alpha"');
         expect(homeHeader).not.toContain('Early alpha');
         expect(homeHeader).toContain(
@@ -173,15 +175,15 @@ describe('landing page', () => {
         expect(miniEditorIsland).toContain(
             '&quot;value&quot;:&quot;not (max-width: 1000px)&quot;',
         );
-        expect(homeCss).toContain('@media (width<=1000px)');
+        expect(homeCss).toContain('@media (width<=62.4375em)');
         expect(homeCss).toMatch(
-            /@media \(width<=1000px\)\{[^@]*\._heroScript_[^{]+\{display:none}/,
+            /@media \(width<=62\.4375em\)\{[^@]*\._scriptExcerpt_[^{]+\{display:none}/,
         );
     });
 
-    it('uses the full hero width when the mini editor is hidden', () => {
+    it('stacks the hero content on small screens', () => {
         expect(homeCss).toMatch(
-            /@media \(width<=1000px\)\{\._heroInner_[^{]+\{grid-template-columns:minmax\(0,1fr\);gap:0}\._heroContent_[^{]+\{width:100%;max-width:none}/,
+            /@media \(width<=53\.75em\)\{[^@]*\._heroInner_[^{]+\{grid-template-columns:minmax\(0,1fr\)/,
         );
     });
 
@@ -189,19 +191,13 @@ describe('landing page', () => {
         expect(homeHtml).toContain(
             'Every current and future Editor feature will remain free.',
         );
-        expect(homeHtml).toContain(
-            'Some future tools may be paid, but Stagistic Editor will always be free and open source.',
-        );
     });
 
-    it('drops the primary nav from the syntax header and keeps a way back', () => {
+    it('includes the primary nav on the syntax header', () => {
         const syntaxHeader = syntaxHtml.match(/<header\b[\s\S]*?<\/header>/)
             ?.[0] ?? '';
 
-        expect(syntaxHeader).not.toContain('aria-label="Primary"');
-        expect(syntaxHeader).not.toContain('href="/#features"');
-        expect(syntaxHeader).not.toContain('href="/#faq"');
-        expect(syntaxHtml).toContain('← Back to site</a>');
+        expect(syntaxHeader).toContain('aria-label="Primary"');
         expect(syntaxHtml).toContain('>Stagistic syntax</h1>');
     });
 
@@ -284,6 +280,31 @@ describe('landing page', () => {
             height: '120',
             viewBox: '9.95484 8.87608 94.88736 94.88736',
         });
+    });
+
+    it('fulfils the SEO contract on all static routes', () => {
+        const routes = [
+            '../dist/index.html',
+            '../dist/editor/playwriting.html',
+            '../dist/editor/musicals.html',
+            '../dist/editor/syntax.html',
+            '../dist/open-source.html',
+            '../dist/404.html',
+        ];
+
+        for (const route of routes) {
+            const html = readFileSync(new URL(route, import.meta.url), 'utf8');
+
+            expect(html).toMatch(/<title>[^<]+<\/title>/);
+            expect(html).toMatch(/<meta name="description" content="[^"]+"/);
+            
+            if (route !== '../dist/404.html') {
+                expect(html).toMatch(/<link rel="canonical" href="[^"]+"/);
+            }
+
+            const h1s = html.match(/<h1\b[^>]*>[\s\S]*?<\/h1>/g) ?? [];
+            expect(h1s).toHaveLength(1);
+        }
     });
 
     it('renders container-width dividers around the features section', () => {

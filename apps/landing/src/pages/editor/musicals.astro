@@ -1,0 +1,120 @@
+---
+import {clsx} from 'clsx';
+import Layout from '../../layouts/Layout.astro';
+import s from '../index.module.css';
+---
+
+<Layout
+    title="Musical Theatre Script Software - Stagistic Editor"
+    description="The only script editor built with first-class support for musical theatre. Write librettos, format lyrics, and export integrated scores."
+    canonical={new URL("/editor/musicals", Astro.site).href}
+>
+    <div class={s.page}>
+        <section class={s.hero}>
+            <div class={s.heroInner}>
+                <div class={s.heroContent}>
+                    <h1 class={clsx(s.heroTitle, s.fadeUp)}>
+                        The only script editor that understands musicals.
+                    </h1>
+                    <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
+                        Stop manually merging your libretto and sheet music. Stagistic Editor treats lyrics and music cues as first-class elements, bringing your entire show together.
+                    </p>
+                    <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD2)}>
+                        <a href="https://editor.stagistic.app" class={s.btnPrimary}>
+                            Open editor in browser
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section class={s.forTheatre}>
+            <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
+                <div>
+                    <h2 class={s.forTheatreTitle}>Lyrics are first-class text.</h2>
+                </div>
+                <div>
+                    <p class={s.forTheatreText}>
+                        In standard screenplay software, lyrics are usually just dialogue formatted with italics and parentheses. In Stagistic Editor, lyrics have their own dedicated block type.
+                    </p>
+                    <p class={s.forTheatreText}>
+                        This means they look right, behave right, and export correctly. You can easily use simple keyboard shortcuts to instantly toggle back and forth between spoken dialogue and lyrics while writing.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <div class={s.sectionDivider} aria-hidden="true"></div>
+
+        <section class={s.forTheatre}>
+            <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
+                <div>
+                    <h2 class={s.forTheatreTitle}>Music catalogue & visual cues.</h2>
+                </div>
+                <div>
+                    <p class={s.forTheatreText}>
+                        Keep track of every musical number and instrumental. Stagistic Editor lets you manage a complete music catalogue right alongside your script.
+                    </p>
+                    <p class={s.forTheatreText}>
+                        When you insert a music cue, the editor visually highlights the portion of the script from the cue all the way to the end of the song. This gives you perfect visibility of exactly where the music plays underneath the action.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <div class={s.sectionDivider} aria-hidden="true"></div>
+
+        <section class={s.forTheatre}>
+            <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
+                <div>
+                    <h2 class={s.forTheatreTitle}>Vocal ranges for your cast.</h2>
+                </div>
+                <div>
+                    <p class={s.forTheatreText}>
+                        When building your character list, you can assign specific vocal ranges to each role directly in the editor.
+                    </p>
+                    <p class={s.forTheatreText}>
+                        This data isn't just for your own notes - it can be automatically included in your exported script and character sides, giving casting directors and musical directors exactly the information they need up front.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <div class={s.sectionDivider} aria-hidden="true"></div>
+
+        <section class={s.forTheatre}>
+            <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
+                <div>
+                    <h2 class={s.forTheatreTitle}>The integrated score export.</h2>
+                </div>
+                <div>
+                    <p class={s.forTheatreText}>
+                        This is the feature that changes everything. Traditionally, book writers and composers have to manually stitch together the libretto PDF and the score PDFs from Finale or Sibelius, completely breaking page numbers in the process.
+                    </p>
+                    <p class={s.forTheatreText}>
+                        Stagistic Editor solves this. You can attach your score PDFs directly to the musical numbers in your catalogue. When you hit export, the engine seamlessly combines your script and the music scores into one single document with continuous, unified page numbering.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <script>
+        const observer = new IntersectionObserver(
+            (entries) => {
+                for (const entry of entries) {
+                    if (entry.isIntersecting) {
+                        entry.target.setAttribute('data-visible', '');
+                        observer.unobserve(entry.target);
+                    }
+                }
+            },
+            {threshold: 0.06, rootMargin: '-20px'},
+        );
+
+        document.querySelectorAll('[data-reveal]').forEach((el) => {
+            observer.observe(el);
+        });
+    </script>
+</Layout>

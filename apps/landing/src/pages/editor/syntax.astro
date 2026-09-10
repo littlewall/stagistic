@@ -1,6 +1,6 @@
 ---
 import {clsx} from 'clsx';
-import Layout from '../layouts/Layout.astro';
+import Layout from '../../layouts/Layout.astro';
 import s from './syntax.module.css';
 
 // --- Table of contents -----------------------------------------------------
@@ -158,13 +158,11 @@ const markers = [
 ---
 
 <Layout
-    title="Stagistic — Syntax"
-    description="The Stagistic syntax: a plain-text format for theatre and musical scripts. Acts, scenes, dialogue, lyrics, stage directions, and music."
-    canonical={new URL("/syntax", Astro.site).href}
-    header="subpage"
+    title="Stagistic Syntax Reference - Stagistic Editor"
+    description="Learn the Stagistic syntax: an open, plain-text format designed specifically for theatre and musical scripts. No proprietary lock-in."
+    canonical={new URL("/editor/syntax", Astro.site).href}
 >
     <div class={s.page}>
-        <a href="/" class={s.backLink}>← Back to site</a>
 
         <main class={s.main}>
             <div class={s.shell}>
@@ -211,18 +209,10 @@ const markers = [
                             <p class={s.eyebrow}>The format</p>
                             <h1 class={s.docTitle}>Stagistic syntax</h1>
                             <p class={s.docIntro}>
-                                A plain-text format for theatrical plays and
-                                musicals. You can draft a whole script in any
-                                text editor and import it — or read what the
-                                editor writes out. It is rooted in Fountain, but
-                                it speaks theatre: acts and scenes, spoken and
-                                sung, stage directions, and music.
+                                Why a new syntax? While formats like <a href="https://fountain.io" target="_blank" class={s.textLink}>Fountain</a> are excellent for screenwriting, they fall short for the stage. Fountain doesn't natively understand acts, scenes, musical cues, or the distinction between dialogue and lyrics.
                             </p>
                             <p class={s.docIntroSecondary}>
-                                The guiding rule is <em>implicit where it reads
-                                naturally, explicit only where ambiguity would
-                                otherwise hurt</em>. Most of what you write needs
-                                no markup at all.
+                                That's why we created <strong>Stagistic Syntax</strong> — a plain-text format rooted in the simplicity of Fountain, but built entirely for theatrical plays and musicals. The guiding rule is <em>implicit where it reads naturally, explicit only where ambiguity would otherwise hurt</em>. Most of what you write needs no markup at all.
                             </p>
                         </header>
 
