@@ -3,7 +3,7 @@ import {linkCharacterRefInScriptDocument, type ScriptDocument} from '@stagistic/
 
 import {loadExampleScriptTemplate} from './loadExampleScriptTemplate';
 
-const INTEGRATED_SCORE_ROLE = 'integrated_score' as const;
+const INTEGRATED_SCORE_ROLE = 'integrated_score';
 
 export interface ExampleScriptActions {
     createScript(title: string, document: ScriptDocument): Promise<string>,

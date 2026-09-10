@@ -151,7 +151,11 @@ export const AttributeManagerGroupDetail = ({
                 </Tooltip>
             </header>
             <div className={styles.detailBody}>
-                <form className={styles.nameForm} onSubmit={handleNameSubmit} aria-busy={isRenaming}>
+                <form
+                    className={styles.nameForm}
+                    onSubmit={handleNameSubmit}
+                    aria-busy={isRenaming}
+                >
                     <label className={formControlStyles.label} htmlFor={`group-name-${group.id}`}>
                         Name
                     </label>

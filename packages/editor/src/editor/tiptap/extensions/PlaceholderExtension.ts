@@ -1,10 +1,10 @@
 import {Extension} from '@tiptap/core';
+import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {
     type EditorState,
     Plugin,
     PluginKey,
 } from '@tiptap/pm/state';
-import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {
     Decoration,
     DecorationSet,

@@ -1,14 +1,14 @@
 import {
     parseStagistic,
-    trimOrFallback,
     type TitlePageSettings,
+    trimOrFallback,
 } from '@stagistic/script';
 
-import source from './example-script.stagistic?raw';
 import scoreUrl from './example-score.pdf?url&no-inline';
+import source from './example-script.stagistic?raw';
 import {
-    prepareExampleScriptDocument,
     type PreparedExampleScript,
+    prepareExampleScriptDocument,
 } from './prepareExampleScriptDocument';
 
 export interface ExampleScriptTemplate extends PreparedExampleScript {

@@ -8,8 +8,8 @@ import {
     scriptActs,
     scriptBlockCharacterRefs,
     scriptBlocks,
-    scriptCharacterGroupMembers,
     scriptCharacterGenders,
+    scriptCharacterGroupMembers,
     scriptCharacters,
     scriptLocations,
     scriptMusic,
@@ -242,12 +242,16 @@ export const duplicateScriptRows = async (
                 updatedAt: now,
             })));
 
-            const membershipRows = speakingEntities.flatMap(entity => entity.kind === 'group'
-                ? entity.memberIds.map(characterId => ({
+            const membershipRows = speakingEntities.flatMap(entity => {
+                if (entity.kind !== 'group') {
+                    return [];
+                }
+
+                return entity.memberIds.map(characterId => ({
                     groupId: entityIdMap!.get(entity.id)!,
                     characterId: entityIdMap!.get(characterId)!,
-                }))
-                : []);
+                }));
+            });
 
             if (membershipRows.length > 0) {
                 await db.insert(scriptCharacterGroupMembers).values(membershipRows);

@@ -220,7 +220,9 @@ export interface ScriptRepository {
     createScriptCharacterGroup(scriptId: string, key: string): Promise<ScriptCharacterGroupRef | null>,
     createScriptCharacterGroupWithId(
         scriptId: string,
-        input: {id: string, key: string, colorHex?: string | null, timestamp?: number},
+        input: {
+            id: string, key: string, colorHex?: string | null, timestamp?: number,
+        },
     ): Promise<ScriptCharacterGroupRef | null>,
     confirmScriptCharacterWithId(
         scriptId: string,

@@ -32,6 +32,11 @@ export default [
             '**/*.d.mts',
             'apps/landing/**',
             /*
+             * Gitignored scratch space. Nothing here belongs to any tsconfig,
+             * so the type-aware rules only ever report parse failures for it.
+             */
+            'tmp/**',
+            /*
              * vite-plus compiles vite.config.ts -> vite.config.js on each run;
              * it is a gitignored build artifact, not a source file.
              */

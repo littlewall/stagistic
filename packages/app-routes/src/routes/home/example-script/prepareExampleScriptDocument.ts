@@ -16,7 +16,7 @@ export interface PreparedExampleScript {
 type NormalizeMusicResult = {
     node: ScriptNode,
     musicStartCount: number,
-}
+};
 
 const normalizeMusicKindInNode = (node: ScriptNode): NormalizeMusicResult => {
     const nested = (node.content ?? []).map(normalizeMusicKindInNode);

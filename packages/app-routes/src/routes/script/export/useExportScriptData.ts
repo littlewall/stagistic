@@ -26,34 +26,25 @@ const toDisplayName = (key: string) => key
     .toLowerCase()
     .replace(/(^|\s)\S/gu, match => match.toUpperCase());
 
-const collectCharacters = (catalogEntities: ExportCatalogEntity[]): ExportCharacter[] => (
-    catalogEntities
-        .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'character'}> => (
-            entity.kind === 'character'
-        ))
-        .map(character => {
-            const key = normalizeCharacterKey(character.key);
+const collectCharacters = (catalogEntities: ExportCatalogEntity[]): ExportCharacter[] => catalogEntities
+    .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'character'}> => entity.kind === 'character')
+    .map(character => {
+        const key = normalizeCharacterKey(character.key);
 
-            return {
-                id: character.id,
-                key,
-                displayName: toDisplayName(key),
-            };
-        })
-        .sort((left, right) => left.displayName.localeCompare(right.displayName))
-);
-
-const collectGroups = (catalogEntities: ExportCatalogEntity[]): ExportCharacterGroup[] => (
-    catalogEntities
-        .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'group'}> => (
-            entity.kind === 'group'
-        ))
-        .map(group => ({
-            id: group.id,
-            key: normalizeCharacterKey(group.key),
-            memberIds: [...group.memberIds],
-        }))
-);
+        return {
+            id: character.id,
+            key,
+            displayName: toDisplayName(key),
+        };
+    })
+    .sort((left, right) => left.displayName.localeCompare(right.displayName));
+const collectGroups = (catalogEntities: ExportCatalogEntity[]): ExportCharacterGroup[] => catalogEntities
+    .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'group'}> => entity.kind === 'group')
+    .map(group => ({
+        id: group.id,
+        key: normalizeCharacterKey(group.key),
+        memberIds: [...group.memberIds],
+    }));
 
 export const useExportScriptData = (): {
     script: ScriptData | null,
@@ -86,8 +77,7 @@ export const useExportScriptData = (): {
             ...confirmedCharacterRecords.map(character => ({
                 ...character,
                 kind: 'character' as const,
-            })),
-            ...confirmedGroupRecords,
+            })), ...confirmedGroupRecords,
         ];
         const {
             initialCharacters,

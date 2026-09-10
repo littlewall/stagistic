@@ -73,7 +73,11 @@ export const CharacterGroupRow = ({
                         aria-label={`Focus ${group.key}`}
                         onPress={() => onFocusCharacter(group.key)}
                     >
-                        <EyeIcon className={styles.iconGlyph} strokeWidth={2} aria-hidden="true" />
+                        <EyeIcon
+                            className={styles.iconGlyph}
+                            strokeWidth={2}
+                            aria-hidden="true"
+                        />
                     </Button>
                 </Tooltip>
             ) : null}
