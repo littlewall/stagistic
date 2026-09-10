@@ -43,9 +43,9 @@ description: Personal code style preferences used when writing or reviewing Type
 ## Composition & UI Rules
 
 ### Visual Identity & Tokens
-- **The Two Semantic Accents Rule**: Copper means action, progress, or music. Lavender means selection, focus, or utility. Never use either as general decoration, and never swap them.
+- **The Two Semantic Accents Rule**: Primrose Yellow means action, progress, or music. Creamed Corn means selection, focus, or utility. Never use either as general decoration, and never swap them.
 - **The Hue Cohesion Rule**: Product neutrals derive from `--base-neutral` through relative color syntax (`color-mix()`, `oklch()`). No arbitrary cool gray injections.
-- **The Register Rule**: The editor uses product neutrals. The landing page may use Brand Paper, Umber, and Aubergine. Shared brand colors retain the same semantic meaning in both registers.
+- **The Register Rule**: The editor uses Steel Wool-derived product neutrals. The landing page may use Paper and graphite surfaces more expressively. Shared brand accents retain the same semantic meaning in both registers.
 - **The Two-Voice Rule**: Courier Prime is the script's voice; IBM Plex Sans is the tool's voice. Never mix both within one text element.
 - **The Mono Is Script Content Only Rule**: `--font-family-mono` is reserved for rendered script content. Chrome never borrows it. Uppercase muted labels use the "eyebrow" variant of Plex Sans.
 - **The Sizes Scale With The Reader Rule**: All spacing, radii, font sizes, control heights, and chrome dimensions use `rem`, drawn from the whole-pixel ladder tokens. Hairlines, focus rings, `--radius-full`, and editor canvas dimensions remain `px`. Breakpoints use `em`.
@@ -60,8 +60,8 @@ description: Personal code style preferences used when writing or reviewing Type
 
 ### State & Interaction
 - **The Theme Swaps As One Rule**: Light and dark cross-fade via View Transitions as a single image. No component should manually time the swap.
-- **The One Mechanic Per State Rule**: Every state has one mechanic (hover = neutral tone; selected = lavender tint + edge; current = ink edge; focus = offset ring).
-- **The Navigation Is Not Selection Rule**: The current route/view is marked with an ink edge. Data selection uses lavender. They must never share a treatment.
+- **The One Mechanic Per State Rule**: Every state has one mechanic (hover = neutral tone; selected = Creamed Corn tint + edge; current = ink edge; focus = offset ring).
+- **The Navigation Is Not Selection Rule**: The current route/view is marked with an ink edge. Data selection uses Creamed Corn. They must never share a treatment.
 - **The Visible Target Rule**: When a toggle opens a visible panel, its on-state is drawn by filling the icon, never with `--state-selected`.
 - **The Affordance Reveal Rule**: Text that acts as a control (like panel type pickers) shows no chrome at rest, reveals a neutral chip on hover, and takes full surface treatment on focus/edit.
 - **The Stable Toggle Name Rule**: A toggle button keeping `aria-pressed` uses one stable name for both states. Don't change labels to "Show/Hide" based on state.

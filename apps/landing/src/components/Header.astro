@@ -106,7 +106,7 @@ const navLinks = [
         &:focus-visible {
             color: var(--color-text);
             border-radius: 0.125rem;
-            outline: 2px solid var(--color-blue);
+            outline: 2px solid var(--color-focus-ring);
             outline-offset: 4px;
         }
     }
@@ -121,7 +121,7 @@ const navLinks = [
         font-weight: 500;
         color: var(--color-stage-btn-fg);
         text-decoration: none;
-        background: var(--color-amber);
+        background: var(--color-action);
         border: 1px solid transparent;
         border-radius: 9999px;
         transition:
@@ -130,7 +130,7 @@ const navLinks = [
 
         &:hover {
             transform: translateY(-1px);
-            background: var(--color-amber-hover);
+            background: var(--color-action-hover);
         }
 
         &:active {
@@ -138,7 +138,7 @@ const navLinks = [
         }
 
         &:focus-visible {
-            outline: 2px solid var(--color-blue);
+            outline: 2px solid var(--color-focus-ring);
             outline-offset: 3px;
         }
     }

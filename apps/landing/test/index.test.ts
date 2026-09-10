@@ -154,6 +154,9 @@ describe('landing page', () => {
 
         expect(callout).toContain('>Try it!</span>');
         expect(callout).toContain('aria-hidden="true"');
+        expect(homeCss).toMatch(
+            /\._tryEditorCallout_[^{]+\{[^}]*color:var\(--color-text\)/,
+        );
         expect(calloutIndex).toBeGreaterThan(-1);
         expect(editorIndex).toBeGreaterThan(calloutIndex);
     });
@@ -211,7 +214,7 @@ describe('landing page', () => {
                 '<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180">',
             );
             expect(html).toContain(
-                '<meta name="theme-color" content="#3d2a1d">',
+                '<meta name="theme-color" content="#1d2327">',
             );
             expect(html).not.toContain('rel="manifest"');
         }
@@ -259,14 +262,14 @@ describe('landing page', () => {
             ]);
     });
 
-    it('ships the two-path favicon mark in umber and paper theme colours', () => {
+    it('ships the two-path favicon mark in steel wool and paper theme colours', () => {
         const faviconSvg = readFileSync(
             new URL('../public/favicon.svg', import.meta.url),
             'utf8',
         );
 
         expect(faviconSvg.match(/<path\b/g) ?? []).toHaveLength(2);
-        expect(faviconSvg).toMatch(/\.mark\s*\{\s*fill:\s*#3d2a1d/);
+        expect(faviconSvg).toMatch(/\.mark\s*\{\s*fill:\s*#5b6267/);
         expect(faviconSvg).toMatch(
             /@media\s*\(prefers-color-scheme:\s*dark\)/,
         );

@@ -10,11 +10,12 @@
 
 - On light: `public/assets/stagistic-brand/editor-mark-on-light.svg`
 - On dark: `public/assets/stagistic-brand/editor-mark-on-dark.svg`
-- Portal brown: `#3d2a1d`
-- Plane orange: `#e2a05f`
-- Paper white: `#fffaf6`
+- Steel Wool: `#5b6267` — neutral foundation
+- Creamed Corn: `#f7e09f` — selection and quiet emphasis
+- Primrose Yellow: `#f4ca52` — action, music, and attention
+- Paper: `#f4f1ec` — script and light surfaces
 
-Use the on-dark mark against the landing header's umber surface. A visible
+Use the on-dark mark against the landing header's graphite surface. A visible
 `Stagistic Editor` wordmark accompanies it; the image itself is decorative in
 that lockup.
 

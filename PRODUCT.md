@@ -12,8 +12,8 @@ The theatre before the house lights come up. Attention belongs to the work on th
 
 - **Quiet, precise, theatrical**: The interface carries the discipline of a prompt book.
 - **Two visual registers**:
-  - **Product register**: Warm, hue-cohesive neutrals with restrained copper and lavender semantics. The script canvas remains dominant.
-  - **Brand register**: The landing page uses paper, umber, and aubergine more expressively, while preserving editorial restraint.
+  - **Product register**: Steel Wool neutrals around warm paper, with restrained Primrose Yellow and Creamed Corn semantics. The script canvas remains dominant.
+  - **Brand register**: The landing page uses paper, graphite, Primrose Yellow, and Creamed Corn more expressively, while preserving editorial restraint.
 
 ## Design Principles
 1. **The script is the center.** Every UI decision is measured against whether it serves or distracts from the act of writing. When in doubt, subtract.
@@ -28,7 +28,7 @@ The theatre before the house lights come up. Attention belongs to the work on th
 - **Loud marketing / AI landing pages**: Purple gradients, hero metrics, buzzword copy.
 
 ## Core Visual Identity
-- **Color System**: Warm product neutrals anchored by `--base-neutral`. Two distinct semantic accents: **Copper** (action, progress, music) and **Lavender** (selection, focus, utility).
+- **Color System**: Steel Wool anchors text, borders, shadows, and graphite surfaces around warm Paper. Two distinct semantic accents: **Primrose Yellow** (action, progress, music) and **Creamed Corn** (selection, focus, utility).
 - **Two-Voice Typography**: **IBM Plex Sans Variable** is the interface's voice. **Courier Prime** is the script's voice. They are never mixed within a single element.
 - **Elevation**: Surfaces are flat at rest (tonal layering). Shadows are reserved strictly for floating elements (modals, popovers) and the script canvas.
 
