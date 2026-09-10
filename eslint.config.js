@@ -32,6 +32,11 @@ export default [
             '**/*.d.mts',
             'apps/landing/**',
             /*
+             * Gitignored scratch space. Nothing here belongs to any tsconfig,
+             * so the type-aware rules only ever report parse failures for it.
+             */
+            'tmp/**',
+            /*
              * vite-plus compiles vite.config.ts -> vite.config.js on each run;
              * it is a gitignored build artifact, not a source file.
              */
@@ -52,6 +57,9 @@ export default [
                     allowDefaultProject: [
                         'eslint.config.js',
                         'stylelint.config.js',
+                        'packages/stylelint-config/src/base.js',
+                        'packages/stylelint-config/src/guards.js',
+                        'scripts/check-route-css-headers.mjs',
                         'apps/desktop/vite.config.ts',
                         'packages/db/scripts/compile-migrations.mjs',
                         'packages/db/vite.config.ts',

@@ -89,7 +89,6 @@ const renderComboBox = () => {
     };
 
     host.style.width = '400px';
-    host.style.setProperty('--size-scale', '1');
     document.body.appendChild(host);
     root.render(<TestCase />);
     mountedRoots.push(root);

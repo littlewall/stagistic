@@ -10,6 +10,9 @@ import {
     EditPencilIcon,
     IconButton,
     LinkSlashIcon,
+    ListRow,
+    SidebarActionsGroup,
+    SidebarMiniHeader,
     Tooltip,
 } from '@stagistic/ui';
 import {
@@ -21,9 +24,7 @@ import {
 
 import {ATTRIBUTE_MANAGER_PANEL_MUSIC} from '../../attributes/attributeManagerMenu';
 import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalProvider';
-import {SidebarMiniHeader} from '../sidebar';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
-import {SidebarActionsGroup} from '../sidebar/SidebarActionsGroup';
 import {MusicSidebarContextActions} from './MusicSidebarContextActions';
 import styles from './ScriptMusicSidebar.module.css';
 import type {ScriptMusicListItem} from './types';
@@ -97,7 +98,34 @@ const MusicRow = ({
     );
 
     return (
-        <li className={clsx(styles.item, isActive && styles.active)}>
+        <ListRow
+            as="li"
+            interactive
+            selected={isActive}
+            /* The navigable label already carries aria-current; the row must not add aria-selected. */
+            announceSelected={false}
+            className={clsx(styles.row, !startBlockId && styles.staticRow)}
+            trailing={(
+                <span className={styles.actions}>
+                    {isAssigned ? (
+                        <RowActionButton
+                            ariaLabel={`Unassign ${music.title}`}
+                            tooltipLabel="Unassign music"
+                            onPress={() => onRequestUnassign(music)}
+                        >
+                            <LinkSlashIcon aria-hidden="true" />
+                        </RowActionButton>
+                    ) : null}
+                    <RowActionButton
+                        ariaLabel={`Edit ${music.title}`}
+                        tooltipLabel="Manage music"
+                        onPress={() => onOpenMusicManager(music.id)}
+                    >
+                        <EditPencilIcon aria-hidden="true" />
+                    </RowActionButton>
+                </span>
+            )}
+        >
             {startBlockId ? (
                 <button
                     type="button"
@@ -113,25 +141,7 @@ const MusicRow = ({
                     {label}
                 </button>
             ) : <span className={styles.label}>{label}</span>}
-            <span className={styles.actions}>
-                {isAssigned ? (
-                    <RowActionButton
-                        ariaLabel={`Unassign ${music.title}`}
-                        tooltipLabel="Unassign music"
-                        onPress={() => onRequestUnassign(music)}
-                    >
-                        <LinkSlashIcon aria-hidden="true" />
-                    </RowActionButton>
-                ) : null}
-                <RowActionButton
-                    ariaLabel={`Edit ${music.title}`}
-                    tooltipLabel="Manage music"
-                    onPress={() => onOpenMusicManager(music.id)}
-                >
-                    <EditPencilIcon aria-hidden="true" />
-                </RowActionButton>
-            </span>
-        </li>
+        </ListRow>
     );
 };
 

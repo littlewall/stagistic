@@ -68,11 +68,15 @@ describe('useScriptEditorSettingsModal', () => {
 
         roots.push(root);
         document.body.appendChild(host);
-        root.render(<Harness deleteScript={() => {
-            deletionStarted = true;
+        root.render(
+            <Harness
+                deleteScript={() => {
+                    deletionStarted = true;
 
-            return gate.promise;
-        }} />);
+                    return gate.promise;
+                }}
+            />,
+        );
         await waitFor(() => host.querySelector('button') !== null);
 
         host.querySelector('button')?.click();

@@ -19,7 +19,7 @@
     display: flex;
     justify-content: space-between;
     width: 100%;
-    min-height: calc(48px * var(--size-scale));
+    min-height: 48px;
     padding: 0 var(--space-3xl);
     font-size: var(--font-size-md);
     font-weight: var(--font-weight-medium);
@@ -42,8 +42,8 @@
 
 .chevron {
     flex: 0 0 auto;
-    width: calc(14px * var(--size-scale));
-    height: calc(14px * var(--size-scale));
+    width: var(--icon-size-sm);
+    height: var(--icon-size-sm);
     color: var(--color-text-muted);
     transition: transform var(--duration-fast) var(--ease-standard);
 

@@ -41,7 +41,7 @@ import {useScriptSettingsModal} from './settings/ScriptSettingsModalProvider';
 import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
 
 const AUTOSAVE_DELAY_MS = 1500;
-const SIDEBAR_WIDTH = 'calc(256px * var(--size-scale))';
+const SIDEBAR_WIDTH = 'var(--sidebar-width)';
 
 type AddMusicModalState =
     | {source: 'sidebar'}

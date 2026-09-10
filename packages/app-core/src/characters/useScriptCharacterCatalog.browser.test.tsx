@@ -116,10 +116,7 @@ describe('useScriptCharacterCatalog', () => {
                 label: 'Non Binary',
             },
         ]);
-        const groups = createInMemoryReactiveQuerySource([
-            group('group-2', 'ZULU'),
-            group('group-1', 'ENSEMBLE'),
-        ]);
+        const groups = createInMemoryReactiveQuerySource([group('group-2', 'ZULU'), group('group-1', 'ENSEMBLE')]);
         const repository = {
             getScriptCharactersSource: () => characters,
             getScriptCharacterGroupsSource: () => groups,
@@ -206,9 +203,7 @@ describe('useScriptCharacterCatalog', () => {
 
     it('exposes optimistic group actions, cross-kind validation, rollback, and errors', async () => {
         const characters = createInMemoryReactiveQuerySource([character('character-1', 'ALICE')]);
-        const groups = createInMemoryReactiveQuerySource([
-            {...group('group-1', 'ENSEMBLE'), memberIds: ['character-1']},
-        ]);
+        const groups = createInMemoryReactiveQuerySource([{...group('group-1', 'ENSEMBLE'), memberIds: ['character-1']}]);
         const genders = createInMemoryReactiveQuerySource<ScriptCharacterGenderOption>([]);
         const createGate = deferred();
         const membershipGate = deferred();
@@ -219,7 +214,9 @@ describe('useScriptCharacterCatalog', () => {
             getScriptCharacterGendersSource: () => genders,
             createScriptCharacterGroupWithId: async (
                 _scriptId: string,
-                input: {id: string, key: string, colorHex?: string | null},
+                input: {
+                    id: string, key: string, colorHex?: string | null,
+                },
             ) => {
                 await createGate.promise;
 
@@ -230,8 +227,8 @@ describe('useScriptCharacterCatalog', () => {
                 return created;
             },
             deleteScriptCharacterGroup: async () => {},
-            renameScriptCharacterGroup: async () => null,
-            setScriptCharacterGroupColor: async () => null,
+            renameScriptCharacterGroup: () => Promise.resolve(null),
+            setScriptCharacterGroupColor: () => Promise.resolve(null),
             replaceScriptCharacterGroupMembers: async () => {
                 await membershipGate.promise;
 

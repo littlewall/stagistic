@@ -85,7 +85,9 @@ const createRepository = (
 
         const updated = {...original, ...changes};
 
-        groups.emit((await groups.read()).map(row => row.id === id ? updated : row));
+        groups.emit((await groups.read()).map(row => {
+            return row.id === id ? updated : row;
+        }));
 
         return updated;
     };
@@ -158,8 +160,17 @@ describe('script character groups store', () => {
     });
 
     it.each([
-        ['colorHex', 'setScriptCharacterGroupColor', '#abcdef', 'setGroupColor'],
-        ['memberIds', 'replaceScriptCharacterGroupMembers', ['character-2'], 'replaceGroupMembers'],
+        [
+            'colorHex',
+            'setScriptCharacterGroupColor',
+            '#abcdef',
+            'setGroupColor',
+        ], [
+            'memberIds',
+            'replaceScriptCharacterGroupMembers',
+            ['character-2'],
+            'replaceGroupMembers',
+        ],
     ] as const)('updates %s optimistically through its dedicated action', async (
         field,
         method,

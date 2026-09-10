@@ -1,3 +1,6 @@
+/*
+ * Route layout: the export sidebar's panel column and its sticky title row.
+ */
 .panel {
     overflow: auto;
     display: grid;

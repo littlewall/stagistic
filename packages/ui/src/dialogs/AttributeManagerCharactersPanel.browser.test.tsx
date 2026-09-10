@@ -27,11 +27,12 @@ afterEach(cleanupPanels);
 const createHost = () => {
     const host = document.createElement('div');
     const root = createRoot(host);
+
     host.style.width = '900px';
     host.style.height = '600px';
-    host.style.setProperty('--size-scale', '1');
     document.body.appendChild(host);
     mountedRoots.push(root);
+
     return root;
 };
 
@@ -45,8 +46,10 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
                 onCreateGroup={() => null}
             />,
         );
+
         const list = await waitForElement('[aria-label="Groups list"]');
         const detail = await waitForElement('[aria-label="Groups detail"]');
+
         expect(list.textContent).toContain('No groups yet.');
         expect(detail.textContent).toContain('Create a group to edit details here.');
         expect(detail.textContent).not.toContain('No groups yet.');
@@ -54,6 +57,7 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
 
     it('searches, selects, and creates an initially empty group', async () => {
         const onCreateGroup = vi.fn((name: string) => Promise.resolve({id: 'group-3', name}));
+
         createHost().render(
             <AttributeManagerCharactersPanel
                 characters={CHARACTERS}
@@ -63,7 +67,9 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
                 onCreateGroup={onCreateGroup}
             />,
         );
+
         const search = await waitForElement<HTMLInputElement>('[aria-label="Search groups"]');
+
         expect(search.disabled).toBe(false);
         expect(document.querySelector('[aria-label="Groups detail"]')?.textContent).toContain('Members');
         await page.elementLocator(search).fill('ensemble');
@@ -79,6 +85,7 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
 
     it('rejects cross-kind duplicates when creating a group', async () => {
         const onCreateGroup = vi.fn();
+
         createHost().render(
             <AttributeManagerCharactersPanel
                 characters={CHARACTERS}
@@ -88,7 +95,9 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
             />,
         );
         await page.elementLocator(await waitForElement('[aria-label="Create group"]')).click();
+
         const input = await waitForElement<HTMLInputElement>('#create-group-name');
+
         await page.elementLocator(input).fill('Anna (V.O.)');
         expect(input.getAttribute('aria-invalid')).toBe('true');
         expect(document.body.textContent).toContain('A character or group with this name already exists.');
@@ -104,14 +113,18 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
         const TestCase = () => {
             const [groups, setGroups] = useState(GROUPS);
             const handleCreate = async (name: string) => {
-                setGroups(current => [...current, {
-                    id: 'group-3', name, color: null, memberIds: [], usageCount: 0,
-                }]);
+                setGroups(current => [
+                    ...current, {
+                        id: 'group-3', name, color: null, memberIds: [], usageCount: 0,
+                    },
+                ]);
                 await new Promise<void>(resolve => {
                     resolvePersistence = resolve;
                 });
+
                 return {id: 'group-3'};
             };
+
             return (
                 <AttributeManagerCharactersPanel
                     characters={CHARACTERS}
@@ -121,9 +134,12 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
                 />
             );
         };
+
         createHost().render(<TestCase />);
         await page.elementLocator(await waitForElement('[aria-label="Create group"]')).click();
+
         const input = await waitForElement<HTMLInputElement>('#create-group-name');
+
         await page.elementLocator(input).fill('Chorus');
         await page.elementLocator(findButtonByText('Create group')).click();
         await new Promise(resolve => window.setTimeout(resolve, 0));
@@ -146,6 +162,7 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
             />,
         );
         await page.elementLocator(await waitForElement('[aria-label="Create group"]')).click();
+
         const input = await waitForElement<HTMLInputElement>('#create-group-name');
 
         await page.elementLocator(input).fill('Chorus');
@@ -169,6 +186,7 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
             />,
         );
         await page.elementLocator(await waitForElement('[aria-label="Create group"]')).click();
+
         const input = await waitForElement<HTMLInputElement>('#create-group-name');
 
         await page.elementLocator(input).fill('Chorus');
@@ -182,14 +200,15 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
     });
 
     it('keeps membership selection usable while persistence is pending', async () => {
-        const onChange = vi.fn((
-            _id: string,
-            _memberIds: string[],
-        ) => new Promise<void>(() => undefined));
+        const onChange = vi.fn<(id: string, memberIds: string[]) => Promise<void>>(
+            () => new Promise<void>(() => undefined),
+        );
         const TestCase = () => {
             const [groups, setGroups] = useState(GROUPS);
             const handleChange = (id: string, memberIds: string[]) => {
-                setGroups(current => current.map(group => group.id === id ? {...group, memberIds} : group));
+                setGroups(current => current.map(group => {
+                    return group.id === id ? {...group, memberIds} : group;
+                }));
 
                 return onChange(id, memberIds);
             };
@@ -206,6 +225,7 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
         };
 
         createHost().render(<TestCase />);
+
         const input = await waitForElement<HTMLInputElement>('[placeholder="Select members"]');
 
         await page.elementLocator(input).click();
@@ -215,11 +235,13 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
         await new Promise(resolve => window.setTimeout(resolve, 0));
 
         expect(onChange).toHaveBeenCalledWith('group-1', ['char-1']);
+
         const currentInput = await waitForElement<HTMLInputElement>('[placeholder="Select members"]');
 
         expect(currentInput).toBe(input);
         expect(currentInput.readOnly).toBe(false);
         await page.elementLocator(currentInput).click();
+
         const boris = Array.from(document.querySelectorAll<HTMLElement>('[data-testid="suggestions"] li'))
             .find(option => option.textContent?.trim() === 'BORIS');
 
@@ -258,16 +280,17 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
     });
 
     it('restores confirmed group color when persistence rejects', async () => {
-        const onSetColor = vi.fn((
-            _id: string,
-            _color: string | null,
-        ) => Promise.reject(new Error('write failed')));
+        const onSetColor = vi.fn<(id: string, color: string | null) => Promise<void>>(
+            () => Promise.reject(new Error('write failed')),
+        );
         const TestCase = () => {
             const [groups, setGroups] = useState(GROUPS);
             const handleSetColor = async (id: string, color: string | null) => {
                 const confirmed = groups;
 
-                setGroups(current => current.map(group => group.id === id ? {...group, color} : group));
+                setGroups(current => current.map(group => {
+                    return group.id === id ? {...group, color} : group;
+                }));
                 try {
                     await onSetColor(id, color);
                 } catch (error) {
@@ -288,6 +311,7 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
         };
 
         createHost().render(<TestCase />);
+
         const colorTrigger = await waitForElement<HTMLElement>('[aria-label="Choose color for ALL"]');
 
         await page.elementLocator(colorTrigger).click();

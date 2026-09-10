@@ -54,12 +54,11 @@ describe('AttributeManagerCharactersPanel character actions', () => {
 
     it('keeps the newest color visible while older persistence is still pending', async () => {
         const resolvers: Array<() => void> = [];
-        const onSetCharacterColor = vi.fn((
-            _characterId: string,
-            _colorHex: string | null,
-        ) => new Promise<void>(resolve => {
-            resolvers.push(resolve);
-        }));
+        const onSetCharacterColor = vi.fn<(characterId: string, colorHex: string | null) => Promise<void>>(
+            () => new Promise<void>(resolve => {
+                resolvers.push(resolve);
+            }),
+        );
 
         renderPanel(undefined, onSetCharacterColor);
 
@@ -133,6 +132,7 @@ describe('AttributeManagerCharactersPanel character actions', () => {
         const {onCreateCharacter} = renderPanel();
 
         await page.elementLocator(await waitForElement('[aria-label="Create characters"]')).click();
+
         const input = await waitForElement<HTMLInputElement>('#create-character-name');
 
         await page.elementLocator(input).fill('   ');
@@ -156,6 +156,7 @@ describe('AttributeManagerCharactersPanel character actions', () => {
         );
 
         await page.elementLocator(await waitForElement('[aria-label="Create characters"]')).click();
+
         const input = await waitForElement<HTMLInputElement>('#create-character-name');
 
         await page.elementLocator(input).fill('All');
@@ -176,6 +177,7 @@ describe('AttributeManagerCharactersPanel character actions', () => {
 
     it('does not repeat the character type above the selected name', async () => {
         renderPanel();
+
         const detailHeader = await waitForElement('[aria-label="Characters detail"] header');
 
         expect(detailHeader.textContent).toContain('ANNA');
@@ -184,6 +186,7 @@ describe('AttributeManagerCharactersPanel character actions', () => {
 
     it('separates an empty list status from the next action in the detail pane', async () => {
         renderPanel(undefined, vi.fn(), []);
+
         const list = await waitForElement('[aria-label="Characters list"]');
         const detail = await waitForElement('[aria-label="Characters detail"]');
 

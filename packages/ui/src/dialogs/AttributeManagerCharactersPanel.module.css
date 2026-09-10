@@ -37,7 +37,7 @@
         content: '';
         position: absolute;
         right: var(--space-lg);
-        bottom: -1px;
+        bottom: calc(var(--space-px) * -1);
         left: var(--space-lg);
         height: 2px;
         background: transparent;
@@ -54,7 +54,7 @@
 .workspace {
     overflow: hidden;
     display: grid;
-    grid-template-columns: minmax(calc(220px * var(--size-scale)), calc(300px * var(--size-scale))) minmax(0, 1fr);
+    grid-template-columns: minmax(220px, 300px) minmax(0, 1fr);
     flex: 1 1 auto;
     min-height: 0;
 }
@@ -91,8 +91,8 @@
 .actionIcon {
     display: block;
     flex: 0 0 auto;
-    width: 1rem;
-    height: 1rem;
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
     fill: none;
     stroke: currentcolor;
     stroke-width: 2;
@@ -112,7 +112,7 @@
     min-width: 0;
 
     & input {
-        padding-left: calc(var(--space-xl) + 1rem);
+        padding-left: calc(var(--space-xl) + var(--icon-size-md));
         background: var(--color-surface);
     }
 }
@@ -121,10 +121,10 @@
     pointer-events: none;
     position: absolute;
     z-index: 1;
-    top: calc((var(--control-trigger-height) - 1rem) / 2);
+    top: calc((var(--control-trigger-height) - var(--icon-size-md)) / 2);
     left: var(--space-md);
-    width: 1rem;
-    height: 1rem;
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
     color: var(--color-text-muted);
 }
 
@@ -198,14 +198,14 @@
     gap: var(--space-lg);
     align-items: center;
     justify-content: space-between;
-    min-height: calc(76px * var(--size-scale));
+    min-height: 76px;
     padding: var(--space-xl) var(--space-2xl);
 }
 
 .detailColorControl,
 .detailColorSwatch {
-    width: calc(12px * var(--size-scale));
-    height: calc(12px * var(--size-scale));
+    width: 12px;
+    height: 12px;
 }
 
 .deleteButton {
@@ -271,7 +271,7 @@
     color: var(--color-text-muted);
 }
 
-@media (max-width: 720px) {
+@media (max-width: 45em) {
     .workspaceNavigation {
         overflow-x: auto;
     }
@@ -282,7 +282,7 @@
 
     .workspace {
         grid-template-columns: minmax(0, 1fr);
-        grid-template-rows: minmax(calc(180px * var(--size-scale)), .45fr) minmax(calc(240px * var(--size-scale)), 1fr);
+        grid-template-rows: minmax(180px, .45fr) minmax(240px, 1fr);
     }
 
     .browser {

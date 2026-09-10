@@ -122,10 +122,7 @@ export const useScriptCharacterCatalog = (
             return true;
         }
 
-        return [
-            ...Array.from(store?.charactersCollection.values() ?? []),
-            ...Array.from(groupsStore?.groupsCollection.values() ?? []),
-        ].some(entity => {
+        return [...Array.from(store?.charactersCollection.values() ?? []), ...Array.from(groupsStore?.groupsCollection.values() ?? [])].some(entity => {
             return entity.id !== excludedGroupId
                 && normalizeCharacterKey(entity.key) === normalizedKey;
         });

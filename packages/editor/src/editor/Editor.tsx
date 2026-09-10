@@ -58,6 +58,7 @@ const Editor = ({
     layout,
     requests,
     callbacks,
+    editorZoom = 1,
     surfaceCache,
     liveStore: providedLiveStore,
     children,
@@ -107,18 +108,6 @@ const Editor = ({
         () => serializeDocumentForSave(resolvedInitialValue),
         [resolvedInitialValue],
     );
-    const sizeScale = useMemo(() => {
-        if (typeof window === 'undefined') {
-            return 1;
-        }
-
-        const raw = window
-            .getComputedStyle(window.document.documentElement)
-            .getPropertyValue('--size-scale');
-        const parsed = Number.parseFloat(raw);
-
-        return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
-    }, []);
     const rootRef = useRef<HTMLDivElement | null>(null);
     const canvasHostRef = useRef<HTMLDivElement | null>(null);
 
@@ -146,13 +135,13 @@ const Editor = ({
     const surfaceSignature = useMemo(() => JSON.stringify({
         content: initialContentSignature,
         settings: selectEditorRebuildSettings(resolvedSettings),
-        sizeScale,
+        editorZoom,
         blockUi: Boolean(onBlockUiEvent),
     }), [
+        editorZoom,
         initialContentSignature,
         onBlockUiEvent,
         resolvedSettings,
-        sizeScale,
     ]);
     /*
      * The color refs are captured by editor extensions via closure, so a
@@ -192,12 +181,19 @@ const Editor = ({
         rootRef,
         canvasHostRef,
         pageWidthPx: resolvedSettings.page.widthPx,
-        sizeScale,
+        editorZoom,
     });
-    const renderScale = useMemo(() => sizeScale * responsiveScale, [responsiveScale, sizeScale]);
+    const renderScale = useMemo(
+        () => editorZoom * responsiveScale,
+        [editorZoom, responsiveScale],
+    );
     const editorStyle = useMemo(
-        () => getEditorCssVars(resolvedSettings, renderScale),
-        [renderScale, resolvedSettings],
+        () => getEditorCssVars(resolvedSettings, renderScale, editorZoom),
+        [
+            editorZoom,
+            renderScale,
+            resolvedSettings,
+        ],
     );
 
     const {
@@ -207,7 +203,7 @@ const Editor = ({
 
     const extensions = useEditorExtensions({
         resolvedSettings,
-        sizeScale,
+        editorZoom,
         colorByCharacterIdRef,
         rememberedColorByKeyRef,
         persistentCharactersRef,

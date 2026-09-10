@@ -1,9 +1,4 @@
-import {
-    Button,
-    ModalDialog,
-} from '@stagistic/ui';
-
-import styles from './DeleteMusicModal.module.css';
+import {ConfirmModal} from '@stagistic/ui';
 
 interface DeleteMusicModalProps {
     isOpen: boolean,
@@ -20,42 +15,26 @@ export const DeleteMusicModal = ({
     onClose,
     onConfirm,
 }: DeleteMusicModalProps) => (
-    <ModalDialog
+    <ConfirmModal
         isOpen={isOpen}
-        onClose={() => {
-            if (!isDeleting) {
-                onClose();
-            }
-        }}
         ariaLabel="Delete music"
-        panelClassName={styles.panel}
-    >
-        <h2 className={styles.title}>
-            Delete
-            {musicTitle ? ` ${musicTitle}` : ' music'}?
-        </h2>
-        <p className={styles.subtitle}>
-            This removes
-            {musicTitle ? <strong>{` ${musicTitle} `}</strong> : ' the music '}
-            from the music list.
-        </p>
-        <div className={styles.actions}>
-            <Button
-                variant="danger"
-                isPending={isDeleting}
-                onPress={() => {
-                    void onConfirm();
-                }}
-            >
+        title={(
+            <>
                 Delete
-            </Button>
-            <Button
-                variant="ghost"
-                isDisabled={isDeleting}
-                onPress={onClose}
-            >
-                Cancel
-            </Button>
-        </div>
-    </ModalDialog>
+                {musicTitle ? ` ${musicTitle}` : ' music'}?
+            </>
+        )}
+        description={(
+            <>
+                This removes
+                {musicTitle ? <strong>{` ${musicTitle} `}</strong> : ' the music '}
+                from the music list.
+            </>
+        )}
+        confirmLabel="Delete"
+        isPending={isDeleting}
+        lockWhilePending
+        onClose={onClose}
+        onConfirm={onConfirm}
+    />
 );

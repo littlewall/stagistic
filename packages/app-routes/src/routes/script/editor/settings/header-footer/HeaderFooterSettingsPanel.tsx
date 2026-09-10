@@ -13,6 +13,8 @@ import {
     formControlStyles,
     IconButton,
     ItalicIcon,
+    PanelHeader,
+    SettingsGroup,
     Switch,
     UnderlineIcon,
 } from '@stagistic/ui';
@@ -153,8 +155,8 @@ export const HeaderFooterSettingsPanel = ({
     );
 
     return (
-        <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Headers and footers</h3>
+        <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
+            <PanelHeader level={3} title="Headers and footers" />
             <div className={styles.composer}>
                 {renderRow('header')}
                 <div className={styles.editor}>
@@ -232,6 +234,6 @@ export const HeaderFooterSettingsPanel = ({
                 </div>
                 {renderRow('footer')}
             </div>
-        </div>
+        </SettingsGroup>
     );
 };

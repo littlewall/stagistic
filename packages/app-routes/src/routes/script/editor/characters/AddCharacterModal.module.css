@@ -1,11 +1,6 @@
-.panel {
-    width: min(calc(420px * var(--size-scale)), 100%);
-}
-
-.title {
-    font-size: var(--font-size-3xl);
-}
-
+/*
+ * Route layout: the vertical field stack inside `ModalDialog`, plus one error line.
+ */
 .form {
     display: flex;
     flex-direction: column;
@@ -16,10 +11,4 @@
     margin: 0;
     font-size: var(--font-size-sm);
     color: var(--color-status-danger);
-}
-
-.actions {
-    display: flex;
-    gap: var(--space-md);
-    justify-content: flex-start;
 }

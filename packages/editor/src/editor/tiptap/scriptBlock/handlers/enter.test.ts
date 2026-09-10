@@ -251,8 +251,10 @@ describe('handleEnter', () => {
     });
 
     it('keeps producing lyrics when Enter is pressed again at the start of a freshly split lyrics block', () => {
-        // Split "Sing|this song" mid-text, which parks the caret at the start
-        // of the new block, then press Enter again from exactly there.
+        /*
+         * Split "Sing|this song" mid-text, which parks the caret at the start
+         * of the new block, then press Enter again from exactly there.
+         */
         const editor = createEditor('lyrics', 'Sing this song', 4);
 
         expect(handleEnter(editor, createEnterEvent())).toBe(true);
@@ -260,8 +262,16 @@ describe('handleEnter', () => {
         expect(getBlockTexts(editor)).toEqual(['Sing', ' this song']);
 
         expect(handleEnter(editor, createEnterEvent())).toBe(true);
-        expect(getBlockTypes(editor)).toEqual(['lyrics', 'lyrics', 'lyrics']);
-        expect(getBlockTexts(editor)).toEqual(['Sing', '', ' this song']);
+        expect(getBlockTypes(editor)).toEqual([
+            'lyrics',
+            'lyrics',
+            'lyrics',
+        ]);
+        expect(getBlockTexts(editor)).toEqual([
+            'Sing',
+            '',
+            ' this song',
+        ]);
     });
 
     it.each(DIALOGUE_LIKE_BLOCK_TYPES)(
@@ -302,13 +312,14 @@ describe('handleEnter', () => {
     });
 
     it('resumes lyrics when Enter fires at the end of an aside that interrupted a song', () => {
-        const editor = createMultiBlockEditor([
-            {blockType: 'lyrics', text: 'La la la'},
-            {blockType: 'aside', text: 'quietly'},
-        ]);
+        const editor = createMultiBlockEditor([{blockType: 'lyrics', text: 'La la la'}, {blockType: 'aside', text: 'quietly'}]);
 
         expect(handleEnter(editor, createEnterEvent(), {aside: 'dialogue'})).toBe(true);
-        expect(getBlockTypes(editor)).toEqual(['lyrics', 'aside', 'lyrics']);
+        expect(getBlockTypes(editor)).toEqual([
+            'lyrics',
+            'aside',
+            'lyrics',
+        ]);
     });
 
     it('skips a run of asides when working out which flow to resume', () => {
@@ -319,24 +330,27 @@ describe('handleEnter', () => {
         ]);
 
         expect(handleEnter(editor, createEnterEvent(), {aside: 'dialogue'})).toBe(true);
-        expect(getBlockTypes(editor)).toEqual(['lyrics', 'aside', 'aside', 'lyrics']);
+        expect(getBlockTypes(editor)).toEqual([
+            'lyrics',
+            'aside',
+            'aside',
+            'lyrics',
+        ]);
     });
 
     it('keeps the configured next type for an aside that interrupted spoken dialogue', () => {
-        const editor = createMultiBlockEditor([
-            {blockType: 'dialogue', text: 'Hello there'},
-            {blockType: 'aside', text: 'quietly'},
-        ]);
+        const editor = createMultiBlockEditor([{blockType: 'dialogue', text: 'Hello there'}, {blockType: 'aside', text: 'quietly'}]);
 
         expect(handleEnter(editor, createEnterEvent(), {aside: 'character'})).toBe(true);
-        expect(getBlockTypes(editor)).toEqual(['dialogue', 'aside', 'character']);
+        expect(getBlockTypes(editor)).toEqual([
+            'dialogue',
+            'aside',
+            'character',
+        ]);
     });
 
     it('keeps the aside type when Enter splits it mid-text', () => {
-        const editor = createMultiBlockEditor([
-            {blockType: 'lyrics', text: 'La la la'},
-            {blockType: 'aside', text: 'quietly'},
-        ]);
+        const editor = createMultiBlockEditor([{blockType: 'lyrics', text: 'La la la'}, {blockType: 'aside', text: 'quietly'}]);
 
         // Four characters back from the end of "quietly", i.e. "qui|etly".
         editor.view.dispatch(editor.state.tr.setSelection(
@@ -344,8 +358,16 @@ describe('handleEnter', () => {
         ));
 
         expect(handleEnter(editor, createEnterEvent())).toBe(true);
-        expect(getBlockTypes(editor)).toEqual(['lyrics', 'aside', 'aside']);
-        expect(getBlockTexts(editor)).toEqual(['La la la', 'qui', 'etly']);
+        expect(getBlockTypes(editor)).toEqual([
+            'lyrics',
+            'aside',
+            'aside',
+        ]);
+        expect(getBlockTexts(editor)).toEqual([
+            'La la la',
+            'qui',
+            'etly',
+        ]);
     });
 
     it('splitting mid-text on act keeps the act type instead of jumping to scene', () => {

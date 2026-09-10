@@ -7,7 +7,7 @@
     grid-template-columns: var(--left-sidebar-size) minmax(0, 1fr) var(--right-sidebar-size);
     flex: 0 0 auto;
     align-items: center;
-    min-height: calc(28px * var(--size-scale));
+    min-height: 28px;
     padding: var(--space-sm) 0;
     font-size: var(--font-size-xs);
     line-height: var(--line-height-tight);
@@ -15,7 +15,7 @@
     background: var(--color-surface);
     border-top: 1px solid var(--color-border-subtle);
 
-    @media (max-width: 1199px) {
+    @media (max-width: 74.9375em) {
         grid-template-columns: var(--toolbar-toggle-width) minmax(0, 1fr) var(--toolbar-toggle-width);
     }
 }

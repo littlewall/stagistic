@@ -45,7 +45,11 @@ const resolve = (
 });
 
 describe('resolveEnterHint', () => {
-    it.each(['scene', 'stageDirection', 'character'] as const)(
+    it.each([
+        'scene',
+        'stageDirection',
+        'character',
+    ] as const)(
         'reports the type chooser for an empty %s block',
         blockType => {
             expect(resolve(blockType, {
@@ -55,7 +59,11 @@ describe('resolveEnterHint', () => {
         },
     );
 
-    it.each(['aside', 'dialogue', 'lyrics'] as const)(
+    it.each([
+        'aside',
+        'dialogue',
+        'lyrics',
+    ] as const)(
         'reports character for an empty %s block',
         blockType => {
             expect(resolve(blockType, {
@@ -105,7 +113,12 @@ describe('resolveEnterHint', () => {
         },
     );
 
-    it.each(['dialogue', 'scene', 'act', 'stageDirection'] as const)(
+    it.each([
+        'dialogue',
+        'scene',
+        'act',
+        'stageDirection',
+    ] as const)(
         'reports the same type for %s when the caret splits mid-content',
         blockType => {
             expect(resolve(blockType, {isAtEnd: false})).toEqual({

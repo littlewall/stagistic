@@ -53,9 +53,7 @@ const collectCharacters = (
         });
 
     return catalogEntities
-        .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'character'}> => (
-            entity.kind === 'character'
-        ))
+        .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'character'}> => entity.kind === 'character')
         .map(character => {
             const key = normalizeCharacterKey(character.key);
 

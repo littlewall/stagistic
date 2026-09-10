@@ -3,8 +3,8 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: calc(32px * var(--size-scale));
-    height: calc(32px * var(--size-scale));
+    width: 32px;
+    height: 32px;
     padding: 0;
     color: var(--color-text-muted);
     background: transparent;
@@ -21,8 +21,8 @@
 }
 
 .icon {
-    width: calc(18px * var(--size-scale));
-    height: calc(18px * var(--size-scale));
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
 }
 
 .popover {
@@ -41,7 +41,7 @@
     display: flex;
     flex-direction: column;
     gap: var(--space-xs);
-    min-width: calc(184px * var(--size-scale));
+    min-width: 184px;
     padding: var(--space-md);
     font-size: var(--font-size-md);
     outline: none;

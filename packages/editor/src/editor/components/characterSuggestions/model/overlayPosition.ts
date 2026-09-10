@@ -12,8 +12,8 @@ const getSafeCoordsAtPos = (editor: TiptapEditor, pos: number, fallbackPos: numb
     }
 };
 
-const getSizeScale = (element: HTMLElement) => {
-    const raw = window.getComputedStyle(element).getPropertyValue('--size-scale');
+const getEditorZoom = (element: HTMLElement) => {
+    const raw = window.getComputedStyle(element).getPropertyValue('--editor-zoom');
     const parsed = Number.parseFloat(raw);
 
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 1;
@@ -52,8 +52,8 @@ export const computeOverlayStyle = ({
         return null;
     }
 
-    const sizeScale = getSizeScale(canvas);
-    const tagPadding = horizontalPaddingPx * sizeScale;
+    const editorZoom = getEditorZoom(canvas);
+    const tagPadding = horizontalPaddingPx * editorZoom;
     const canvasRect = canvas.getBoundingClientRect();
     const rawLeft = anchorStartCoords.left - canvasRect.left + canvas.scrollLeft - tagPadding;
     const maxLeft = canvas.clientWidth - overlayWidthPx;

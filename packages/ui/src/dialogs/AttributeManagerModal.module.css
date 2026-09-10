@@ -62,7 +62,7 @@
         min-height: 0;
     }
 
-    @media (max-width: 900px) {
+    @media (max-width: 56.25em) {
         height: calc(100vh - (var(--space-xl) * 2));
         max-height: calc(100vh - (var(--space-xl) * 2));
     }
@@ -98,7 +98,7 @@
     }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 56.25em) {
     .backdrop {
         padding: var(--space-xl);
     }

@@ -4,7 +4,10 @@ import type {
     InitialPagesSettingsPatch,
 } from '@stagistic/script';
 import {
+    clsx,
     formControlStyles,
+    PanelHeader,
+    SettingsGroup,
     ToggleButtonGroup,
     type ToggleButtonGroupOption,
 } from '@stagistic/ui';
@@ -45,11 +48,11 @@ export const InitialPagesSettingsPanel = ({
     onUpdate,
 }: InitialPagesSettingsPanelProps) => {
     return (
-        <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Initial pages</h3>
+        <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
+            <PanelHeader level={3} title="Initial pages" />
             <section className={styles.section}>
                 <h4 className={styles.sectionTitle}>Cast and place</h4>
-                <div className={styles.fields}>
+                <div className={clsx(formControlStyles.flatGrid, styles.flushGrid)}>
                     <div className={formControlStyles.field}>
                         <span id="initial-pages-cast-order" className={formControlStyles.label}>Cast order by</span>
                         <ToggleButtonGroup
@@ -88,6 +91,6 @@ export const InitialPagesSettingsPanel = ({
                     />
                 </div>
             </section>
-        </div>
+        </SettingsGroup>
     );
 };

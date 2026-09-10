@@ -62,6 +62,11 @@ type RenderEditorOptions = {
     callbacks?: EditorProps['callbacks'],
 };
 
+/*
+ * These specs never loaded tokens.css, so the editor's old read of the UI density
+ * coefficient fell back to 1. editorZoom={1} states that explicitly now that the
+ * value is a prop rather than an ambient global.
+ */
 const renderEditor = (
     initialValue: ScriptDocument = createDocument(),
     options: RenderEditorOptions = {},
@@ -82,6 +87,7 @@ const renderEditor = (
             }}
             callbacks={options.callbacks}
             layout={{autoFocus: true}}
+            editorZoom={1}
         >
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
@@ -368,7 +374,18 @@ describe('block action menu', () => {
             'closed action menu',
         );
 
-        expect(document.activeElement).toBe(trigger);
+        /*
+         * The gutter remounts its trigger while the menu is open, so identity
+         * with the node captured above is not something the menu can promise —
+         * only that focus lands back on the live trigger for this block rather
+         * than falling to <body>.
+         */
+        const activeElement = document.activeElement;
+
+        expect(activeElement).not.toBe(document.body);
+        expect(activeElement?.matches(
+            '[data-block-action-trigger="true"][data-block-id="sd-1"]',
+        )).toBe(true);
     });
 
     it('closes the submenu when the pointer leaves its parent and panel', async () => {

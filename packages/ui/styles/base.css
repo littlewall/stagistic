@@ -54,18 +54,6 @@ body {
     animation-timing-function: var(--ease-theme);
 }
 
-.size-sm {
-    --size-scale: 1;
-}
-
-.size-md {
-    --size-scale: 1.1;
-}
-
-.size-lg {
-    --size-scale: 1.2;
-}
-
 button,
 input,
 textarea,
@@ -90,6 +78,7 @@ select {
  * script canvas) stay out on purpose: a ring around the page would fight the
  * distraction-free canvas.
  */
+/* stylelint-disable selector-max-type -- global reset combines HTML element selectors in :where() */
 :where(a, button, input, textarea, select, summary):where(:focus) {
     outline: none;
 }
@@ -99,6 +88,7 @@ select {
     outline: var(--focus-ring);
     outline-offset: var(--focus-ring-offset);
 }
+/* stylelint-enable selector-max-type */
 
 ::selection {
     background: var(--state-selected);

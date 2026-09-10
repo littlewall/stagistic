@@ -2,7 +2,9 @@ import {normalizeCharacterKey} from '@stagistic/script';
 import {
     Button,
     formControlStyles,
+    ModalActions,
     ModalDialog,
+    ModalHeader,
 } from '@stagistic/ui';
 import {
     type ChangeEvent,
@@ -76,9 +78,8 @@ export const AddCharacterModal = ({
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Add character"
-            panelClassName={styles.panel}
         >
-            <h2 className={styles.title}>Add character</h2>
+            <ModalHeader title="Add character" />
             <form className={styles.form} onSubmit={handleSubmit}>
                 <div className={formControlStyles.field}>
                     <label className={formControlStyles.label} htmlFor="character-name">
@@ -101,7 +102,7 @@ export const AddCharacterModal = ({
                         A character or group with this name already exists.
                     </p>
                 ) : null}
-                <div className={styles.actions}>
+                <ModalActions>
                     <Button
                         type="submit"
                         isDisabled={!canSubmit}
@@ -114,7 +115,7 @@ export const AddCharacterModal = ({
                     >
                         Cancel
                     </Button>
-                </div>
+                </ModalActions>
             </form>
         </ModalDialog>
     );

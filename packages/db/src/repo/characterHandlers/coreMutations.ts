@@ -79,12 +79,14 @@ export const createCoreCharacterMutations = ({
                     ),
                 }, tx);
             }
+
             confirmed = true;
         });
 
         if (!confirmed) {
             return null;
         }
+
         await syncDb();
 
         return dbQueries.getScriptCharacterByKey(db, {

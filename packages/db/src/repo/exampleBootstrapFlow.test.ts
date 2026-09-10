@@ -43,6 +43,7 @@ The lamp shines. @@out 1
             title: 'Example',
             initialContent: document,
         });
+
         const characterId = repository.allocateScriptCharacterId();
 
         await repository.confirmScriptCharacterWithId(scriptId, {

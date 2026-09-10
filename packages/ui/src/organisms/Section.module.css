@@ -13,7 +13,7 @@
         background: color-mix(in oklch, var(--color-surface-raised) 85%, var(--color-surface));
         border-color: color-mix(in oklch, var(--color-text) 12%, var(--color-border));
 
-        @media (max-width: 900px) {
+        @media (max-width: 56.25em) {
             align-items: stretch;
         }
     }
@@ -24,7 +24,7 @@
         align-items: center;
         justify-content: space-between;
 
-        @media (max-width: 900px) {
+        @media (max-width: 56.25em) {
             flex-direction: column;
             align-items: flex-start;
         }

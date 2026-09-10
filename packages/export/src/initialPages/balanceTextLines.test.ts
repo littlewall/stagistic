@@ -20,6 +20,11 @@ describe('balanceTextLines', () => {
             22,
         );
 
+        /*
+         * The length guard matters: `every` is vacuously true on an empty
+         * array, so without it a balancer that returned nothing would pass.
+         */
+        expect(lines.length).toBeGreaterThan(1);
         expect(lines.every(line => line.length <= 22)).toBe(true);
     });
 

@@ -1,3 +1,7 @@
+/*
+ * Route layout: the floating save-error pill — positioned chrome, documented as
+ * outside `Notice` by The Status Block Rule.
+ */
 .error {
     display: flex;
     gap: var(--space-lg);

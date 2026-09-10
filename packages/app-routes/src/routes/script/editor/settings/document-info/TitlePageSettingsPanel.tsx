@@ -11,6 +11,8 @@ import {
     InputTable,
     type InputTableColumnDef,
     type InputTableRow,
+    PanelHeader,
+    SettingsGroup,
 } from '@stagistic/ui';
 import {
     useCallback,
@@ -93,11 +95,11 @@ export const TitlePageSettingsPanel = ({
     }, [onUpdate]);
 
     return (
-        <div className={panelStyles.panelStack}>
-            <h3 className={panelStyles.panelTitle}>Title page</h3>
+        <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
+            <PanelHeader level={3} title="Title page" />
             <div className={styles.section}>
-                <div className={styles.field}>
-                    <label className={styles.label} htmlFor="tp-title">Title</label>
+                <div className={formControlStyles.field}>
+                    <label className={formControlStyles.label} htmlFor="tp-title">Title</label>
                     <input
                         id="tp-title"
                         type="text"
@@ -107,8 +109,8 @@ export const TitlePageSettingsPanel = ({
                         onChange={event => onUpdateScriptTitle(event.target.value)}
                     />
                 </div>
-                <div className={styles.field}>
-                    <label className={styles.label} htmlFor="tp-subtitle">Subtitle</label>
+                <div className={formControlStyles.field}>
+                    <label className={formControlStyles.label} htmlFor="tp-subtitle">Subtitle</label>
                     <input
                         id="tp-subtitle"
                         type="text"
@@ -131,8 +133,8 @@ export const TitlePageSettingsPanel = ({
                 />
             </div>
             <div className={styles.section}>
-                <div className={styles.field}>
-                    <label className={styles.label} htmlFor="tp-source">Source</label>
+                <div className={formControlStyles.field}>
+                    <label className={formControlStyles.label} htmlFor="tp-source">Source</label>
                     <input
                         id="tp-source"
                         type="text"
@@ -199,8 +201,8 @@ export const TitlePageSettingsPanel = ({
                 </div>
             </div>
             <div className={styles.section}>
-                <div className={styles.field}>
-                    <label className={styles.label} htmlFor="tp-copyright">Copyright</label>
+                <div className={formControlStyles.field}>
+                    <label className={formControlStyles.label} htmlFor="tp-copyright">Copyright</label>
                     <input
                         id="tp-copyright"
                         type="text"
@@ -214,8 +216,8 @@ export const TitlePageSettingsPanel = ({
                 </div>
             </div>
             <div className={styles.section}>
-                <div className={styles.field}>
-                    <label className={styles.label} htmlFor="tp-contact">Contact</label>
+                <div className={formControlStyles.field}>
+                    <label className={formControlStyles.label} htmlFor="tp-contact">Contact</label>
                     <textarea
                         id="tp-contact"
                         className={formControlStyles.textarea}
@@ -228,6 +230,6 @@ export const TitlePageSettingsPanel = ({
                     <span className={styles.hint}>No blank lines between lines of text.</span>
                 </div>
             </div>
-        </div>
+        </SettingsGroup>
     );
 };

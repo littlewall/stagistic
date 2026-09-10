@@ -199,7 +199,6 @@ describe('EditorSidebar group rows', () => {
         const host = document.createElement('div');
         const root = createRoot(host);
 
-        host.style.setProperty('--size-scale', '1');
         document.body.appendChild(host);
         root.render(
             <EditorSidebar

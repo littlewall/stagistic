@@ -1,0 +1,33 @@
+/*
+ * Shared modal chrome: the title/description/actions spec that every dialog in the app follows.
+ * Bodies stay local to each modal — only the header and the footer row live here.
+ */
+
+/*
+ * The colour is explicit because the UA stylesheet sets `color: CanvasText` on <dialog>, which
+ * outranks inheritance from body and would otherwise render headings pure black / pure white
+ * instead of the token.
+ */
+.title {
+    font-size: var(--font-size-3xl);
+    color: var(--color-text);
+}
+
+.description {
+    color: var(--color-text-muted);
+}
+
+.note {
+    margin-top: var(--space-md);
+    color: var(--color-text-muted);
+}
+
+.actions {
+    display: flex;
+    gap: var(--space-md);
+    justify-content: flex-start;
+}
+
+.actionsSpaced {
+    margin-top: var(--space-lg);
+}

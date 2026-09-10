@@ -11,7 +11,9 @@ import {
 import {Button} from '../atoms/Button';
 import {formControlStyles} from '../molecules/forms/formControlStyles';
 import styles from './CreatePlaceModal.module.css';
+import {ModalActions} from './ModalActions';
 import {ModalDialog} from './ModalDialog';
+import {ModalHeader} from './ModalHeader';
 
 export interface CreatePlaceModalProps {
     isOpen: boolean,
@@ -85,9 +87,8 @@ export const CreatePlaceModal = ({
             isOpen={isOpen}
             onClose={onClose}
             ariaLabel="Create place"
-            panelClassName={styles.panel}
         >
-            <h2 className={styles.title}>Create place</h2>
+            <ModalHeader title="Create place" />
             <form className={styles.form} onSubmit={event => void handleSubmit(event)}>
                 <div className={formControlStyles.field}>
                     <label className={formControlStyles.label} htmlFor="create-place-name">
@@ -110,7 +111,7 @@ export const CreatePlaceModal = ({
                         A place with this name already exists.
                     </p>
                 ) : null}
-                <div className={styles.actions}>
+                <ModalActions>
                     <Button
                         type="submit"
                         isDisabled={!canSubmit}
@@ -125,7 +126,7 @@ export const CreatePlaceModal = ({
                     >
                         Cancel
                     </Button>
-                </div>
+                </ModalActions>
             </form>
         </ModalDialog>
     );

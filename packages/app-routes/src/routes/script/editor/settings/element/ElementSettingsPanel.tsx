@@ -1,5 +1,9 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
-import {UndoIcon} from '@stagistic/ui';
+import {
+    PanelHeader,
+    SettingsGroup,
+    UndoIcon,
+} from '@stagistic/ui';
 import {
     useLayoutEffect,
     useState,
@@ -76,9 +80,9 @@ export const ElementSettingsPanel = ({
     };
 
     return (
-        <div className={styles.panelStack}>
+        <SettingsGroup gap="2xl" className={styles.panelTokens}>
             <div className={elementStyles.panelHeader}>
-                <h3 className={styles.panelTitle}>{blockLabel}</h3>
+                <PanelHeader level={3} title={blockLabel} />
                 <button
                     type="button"
                     className={elementStyles.resetButton}
@@ -118,6 +122,6 @@ export const ElementSettingsPanel = ({
                 model={localNumericModel}
                 handlers={{onUpdateBlockSettings: handleUpdateBlockSettings}}
             />
-        </div>
+        </SettingsGroup>
     );
 };

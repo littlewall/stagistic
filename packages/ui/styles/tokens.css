@@ -9,44 +9,62 @@
     --font-family-sans: 'IBM Plex Sans Variable', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-family-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;
 
-    /* ── Size scale ────────────────────────────────────────────── */
-    /* Default is medium; override with .size-sm or .size-lg on body/root. */
-    --size-scale: 1.08;
+    /*
+     * ── The ladder ─────────────────────────────────────────────
+     *
+     * Sizes are whole pixels, shipped as rem so they grow with the reader's
+     * browser font size. The root is 16px and 16 is a power of two, so every
+     * value converts exactly — the px in each comment is what renders at the
+     * default setting, and it is the number to think in.
+     *
+     * Four things stay px on purpose: zero, `--space-px`, the `--radius-full`
+     * sentinel, and the hairline and focus-ring widths. A scaled hairline is a
+     * blurred sub-pixel line and buys no legibility.
+     */
 
     /* ── Space ─────────────────────────────────────────────────── */
     --space-none: 0px;
     --space-px: 1px;
-    --space-xs: calc(2px * var(--size-scale));
-    --space-sm: calc(4px * var(--size-scale));
-    --space-md: calc(8px * var(--size-scale));
-    --space-lg: calc(12px * var(--size-scale));
-    --space-xl: calc(16px * var(--size-scale));
-    --space-2xl: calc(20px * var(--size-scale));
-    --space-3xl: calc(24px * var(--size-scale));
-    --space-4xl: calc(28px * var(--size-scale));
-    --space-5xl: calc(32px * var(--size-scale));
-    --space-6xl: calc(40px * var(--size-scale));
-    --space-7xl: calc(48px * var(--size-scale));
+    --space-xs: .125rem; /* 2px */
+    --space-sm: .25rem; /* 4px */
+    --space-md: .5rem; /* 8px */
+    --space-lg: .75rem; /* 12px */
+    --space-xl: 1rem; /* 16px */
+    --space-2xl: 1.25rem; /* 20px */
+    --space-3xl: 1.5rem; /* 24px */
+    --space-4xl: 1.75rem; /* 28px */
+    --space-5xl: 2rem; /* 32px */
+    --space-6xl: 2.5rem; /* 40px */
+    --space-7xl: 3rem; /* 48px */
 
     /* ── Radius ────────────────────────────────────────────────── */
     --radius-none: 0px;
-    --radius-xs: calc(4px * var(--size-scale));
-    --radius-sm: calc(6px * var(--size-scale));
-    --radius-md: calc(8px * var(--size-scale));
-    --radius-lg: calc(10px * var(--size-scale));
-    --radius-xl: calc(12px * var(--size-scale));
+    --radius-xs: .25rem; /* 4px */
+    --radius-sm: .375rem; /* 6px */
+    --radius-md: .5rem; /* 8px */
+    --radius-lg: .625rem; /* 10px */
+    --radius-xl: .75rem; /* 12px */
     --radius-full: 9999px;
 
     /* ── Typography ────────────────────────────────────────────── */
-    --font-size-xxs: calc(10px * var(--size-scale));
-    --font-size-xs: calc(11px * var(--size-scale));
-    --font-size-sm: calc(12px * var(--size-scale));
-    --font-size-md: calc(13px * var(--size-scale));
-    --font-size-lg: calc(15px * var(--size-scale));
-    --font-size-xl: calc(16px * var(--size-scale));
-    --font-size-2xl: calc(18px * var(--size-scale));
-    --font-size-3xl: calc(22px * var(--size-scale));
-    --font-size-4xl: calc(35px * var(--size-scale));
+    --font-size-xxs: .625rem; /* 10px */
+    --font-size-xs: .6875rem; /* 11px */
+    --font-size-sm: .75rem; /* 12px */
+    --font-size-md: .8125rem; /* 13px */
+    --font-size-lg: .9375rem; /* 15px */
+    --font-size-xl: 1rem; /* 16px */
+    --font-size-2xl: 1.125rem; /* 18px */
+    --font-size-3xl: 1.375rem; /* 22px */
+    --font-size-4xl: 2.25rem; /* 36px */
+
+    /* ── Icon sizes ────────────────────────────────────────────── */
+    /*
+     * Icon boxes, so a glyph beside a label grows with it. An icon pinned to a
+     * fixed pixel next to text the reader has enlarged reads as broken.
+     */
+    --icon-size-sm: .875rem; /* 14px */
+    --icon-size-md: 1rem; /* 16px */
+    --icon-size-lg: 1.125rem; /* 18px */
 
     --font-weight-normal: 400;
     --font-weight-medium: 500;
@@ -67,10 +85,10 @@
     --letter-spacing-xl: .12em;
 
     /* ── Control heights ───────────────────────────────────────── */
-    --control-height-xs: calc(24px * var(--size-scale));
-    --control-height-sm: calc(26px * var(--size-scale));
-    --control-height-md: calc(32px * var(--size-scale));
-    --control-height-lg: calc(40px * var(--size-scale));
+    --control-height-xs: 1.5rem; /* 24px */
+    --control-height-sm: 1.625rem; /* 26px */
+    --control-height-md: 2rem; /* 32px */
+    --control-height-lg: 2.5rem; /* 40px */
 
     /* ── Motion ────────────────────────────────────────────────────
        Four durations and three curves, because every component used to
@@ -167,8 +185,8 @@
     --layer-panel-edge: var(--color-border);
     --layer-float-bg: var(--color-surface);
 
-    --shell-height: calc(48px * var(--size-scale));
-    --sidebar-width: calc(256px * var(--size-scale));
+    --shell-height: 3rem; /* 48px */
+    --sidebar-width: 16rem; /* 256px */
     --sidebar-head-height: var(--control-height-md);
 
     /* ── Interaction states ────────────────────────────────────────
@@ -240,8 +258,8 @@
     --control-trigger-radius: var(--radius-md);
 
     /* Icon + chevron */
-    --control-icon-size: 16px;
-    --control-chevron-size: calc(14px * var(--size-scale));
+    --control-icon-size: var(--icon-size-md);
+    --control-chevron-size: .875rem; /* 14px */
 
     /* Menu (popover) */
     --menu-bg: var(--color-surface);
@@ -249,11 +267,11 @@
     --menu-radius: var(--radius-md);
     --menu-shadow: var(--shadow-popover);
     --menu-padding: var(--space-sm);
-    --menu-max-height: calc(280px * var(--size-scale));
+    --menu-max-height: 17.5rem; /* 280px */
     --menu-z-index: 12;
 
     /* Menu item */
-    --menu-item-min-height: calc(32px * var(--size-scale));
+    --menu-item-min-height: 2rem; /* 32px */
     --menu-item-padding: var(--space-md);
     --menu-item-gap: var(--space-md);
     --menu-item-font-size: var(--font-size-sm);
@@ -270,9 +288,9 @@
     --bubble-menu-bg: var(--color-surface);
     --bubble-menu-border: 1px solid var(--color-border);
     --bubble-menu-shadow: 0 1px 2px color-mix(in oklch, var(--color-text) 12%, transparent);
-    --bubble-menu-button-size: calc(24px * var(--size-scale));
+    --bubble-menu-button-size: 1.5rem; /* 24px */
     --bubble-menu-button-radius: var(--radius-sm);
-    --bubble-menu-icon-size: calc(15px * var(--size-scale));
+    --bubble-menu-icon-size: var(--icon-size-md);
 
     color-scheme: light;
 }

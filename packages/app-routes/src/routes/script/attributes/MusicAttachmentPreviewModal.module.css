@@ -1,11 +1,15 @@
+/*
+ * Singular geometry: the paged PDF/score canvas viewer inside `ModalDialog`.
+ * The chrome is the dialog's; only the canvas stack and its busy overlay are here.
+ */
 .header {
-    margin-block-end: 12px;
+    margin-block-end: var(--space-lg);
 }
 
 .title {
     margin: 0;
-    font-size: 16px;
-    font-weight: 600;
+    font-size: var(--font-size-lg);
+    font-weight: var(--font-weight-semibold);
 }
 
 .body {
@@ -17,7 +21,7 @@
 .pages {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: var(--space-lg);
     inline-size: 100%;
 }
 
@@ -38,7 +42,7 @@
 }
 
 .message {
-    padding: 24px;
+    padding: var(--space-3xl);
     color: var(--color-text-muted);
     text-align: center;
 }

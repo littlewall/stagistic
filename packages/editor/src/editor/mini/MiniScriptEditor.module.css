@@ -1,5 +1,4 @@
 .root {
-    --size-scale: 1;
     --mini-edge: clamp(10px, 1vw, 14px);
     --mini-indicator-size: 16px;
     --font-family-mono: 'Courier Prime', 'Courier New', ui-monospace, monospace;

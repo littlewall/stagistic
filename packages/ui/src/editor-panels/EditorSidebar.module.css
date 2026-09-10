@@ -58,14 +58,14 @@
     display: flex;
     gap: var(--space-md);
     align-items: center;
-    min-height: calc(30px * var(--size-scale));
+    min-height: 30px;
     padding: var(--space-sm) var(--space-md);
 }
 
 .characterColor {
     flex-shrink: 0;
-    width: calc(10px * var(--size-scale));
-    height: calc(10px * var(--size-scale));
+    width: 10px;
+    height: 10px;
     background: var(--character-color, var(--color-surface-accent));
     border: 1px solid color-mix(in oklch, var(--color-text) 15%, var(--color-surface));
     border-radius: var(--radius-full);
@@ -73,8 +73,8 @@
 
 .characterColorOutline {
     flex-shrink: 0;
-    width: calc(10px * var(--size-scale));
-    height: calc(10px * var(--size-scale));
+    width: 10px;
+    height: 10px;
     background: transparent;
     border: 1.5px solid color-mix(in oklch, var(--color-text) 30%, transparent);
     border-radius: var(--radius-full);
@@ -86,8 +86,8 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: calc(10px * var(--size-scale));
-    height: calc(10px * var(--size-scale));
+    width: 10px;
+    height: 10px;
 
     &:focus-visible {
         border-radius: var(--radius-full);
@@ -96,33 +96,6 @@
     }
 
     &[aria-disabled = 'true'] {
-        cursor: default;
-        opacity: .55;
-    }
-}
-
-.characterColorButton {
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: calc(18px * var(--size-scale));
-    height: calc(18px * var(--size-scale));
-    padding: 0;
-    background: transparent;
-    border: none;
-    border-radius: var(--radius-xs);
-
-    &:hover {
-        background: color-mix(in oklch, var(--character-color) 16%, transparent);
-    }
-
-    &:focus-visible {
-        outline: 2px solid color-mix(in oklch, var(--character-color) 45%, var(--color-text));
-        outline-offset: 1px;
-    }
-
-    &[data-disabled] {
         cursor: default;
         opacity: .55;
     }
@@ -139,7 +112,7 @@
 .characterColorDialog {
     display: grid;
     gap: var(--space-md);
-    min-width: calc(190px * var(--size-scale));
+    min-width: 190px;
     padding: var(--space-md);
 }
 
@@ -150,7 +123,7 @@
 
 .characterColorPreview {
     width: 100%;
-    min-height: calc(44px * var(--size-scale));
+    min-height: 44px;
     border: 1px solid color-mix(in oklch, var(--color-text) 16%, var(--color-surface));
     border-radius: var(--radius-md);
 }
@@ -163,7 +136,7 @@
     position: relative;
     overflow: hidden;
     width: 100%;
-    height: calc(18px * var(--size-scale));
+    height: 18px;
     border: 1px solid var(--color-border);
     border-radius: var(--radius-full);
 }
@@ -172,8 +145,8 @@
     z-index: 1;
     top: 50%;
     transform: translate(-50%, -50%);
-    width: calc(12px * var(--size-scale));
-    height: calc(12px * var(--size-scale));
+    width: 12px;
+    height: 12px;
     background: var(--color-surface);
     border: 2px solid color-mix(in oklch, var(--color-text) 74%, var(--color-surface));
     border-radius: var(--radius-full);
@@ -190,7 +163,7 @@
     cursor: pointer;
     overflow: hidden;
     width: 100%;
-    min-height: calc(20px * var(--size-scale));
+    min-height: 20px;
     padding: 0;
     border: 1px solid color-mix(in oklch, var(--color-text) 16%, var(--color-surface));
     border-radius: var(--radius-sm);
@@ -203,7 +176,7 @@
 
 .characterColorSwatchFill {
     width: 100%;
-    min-height: calc(20px * var(--size-scale));
+    min-height: 20px;
     border-radius: inherit;
 }
 
@@ -219,7 +192,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: calc(22px * var(--size-scale));
+    min-height: 22px;
     padding: 0 var(--space-md);
     border: 1px solid transparent;
     border-radius: var(--radius-sm);
@@ -252,8 +225,8 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: calc(18px * var(--size-scale));
-    height: calc(18px * var(--size-scale));
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
     color: color-mix(in oklch, var(--color-text) 84%, var(--character-color));
     background: transparent;
     border: none;
@@ -282,8 +255,8 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: calc(18px * var(--size-scale));
-    height: calc(18px * var(--size-scale));
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
     margin-left: auto;
     color: var(--color-text-muted);
     background: transparent;
@@ -313,8 +286,8 @@
     flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    width: calc(18px * var(--size-scale));
-    height: calc(18px * var(--size-scale));
+    width: var(--icon-size-lg);
+    height: var(--icon-size-lg);
     margin-left: auto;
     color: var(--color-text-muted);
     background: transparent;
@@ -334,8 +307,8 @@
 }
 
 .iconGlyph {
-    width: calc(13px * var(--size-scale));
-    height: calc(13px * var(--size-scale));
+    width: 13px;
+    height: 13px;
     fill: none;
     stroke: currentcolor;
     stroke-linecap: round;
@@ -344,8 +317,8 @@
 }
 
 .confirmSpinner {
-    width: calc(11px * var(--size-scale));
-    height: calc(11px * var(--size-scale));
+    width: 11px;
+    height: 11px;
     border: 2px solid color-mix(in oklch, var(--color-text) 25%, transparent);
     border-top-color: color-mix(in oklch, var(--color-text) 86%, var(--character-color));
     border-radius: var(--radius-full);
@@ -356,9 +329,9 @@
     resize: none;
     overflow-y: auto;
     width: 100%;
-    min-height: calc(28px * var(--size-scale));
-    max-height: calc(46px * var(--size-scale));
-    padding: calc(5px * var(--size-scale)) var(--space-md);
+    min-height: 28px;
+    max-height: 46px;
+    padding: var(--space-sm) var(--space-md);
     font: inherit;
     font-size: var(--font-size-xs);
     line-height: 1.4;

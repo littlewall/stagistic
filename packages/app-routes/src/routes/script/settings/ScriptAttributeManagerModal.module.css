@@ -1,3 +1,6 @@
+/*
+ * Route layout: the delete affordance's placement inside the attribute manager.
+ */
 .deleteButton {
     flex: 0 0 auto;
     box-sizing: border-box;
@@ -14,8 +17,8 @@
 
 .actionIcon {
     display: block;
-    width: 1rem;
-    height: 1rem;
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
     fill: none;
     stroke: currentcolor;
     stroke-width: 2;

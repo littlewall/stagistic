@@ -1,7 +1,4 @@
-import {
-    clsx,
-    formControlStyles,
-} from '@stagistic/ui';
+import {formControlStyles} from '@stagistic/ui';
 import {
     type ReactNode,
     useLayoutEffect,
@@ -12,12 +9,12 @@ import {
 import {
     SCREENPLAY_CHARS_PER_INCH,
 } from '../constants';
+import {IndentRangeSlider} from '../IndentRangeSlider';
 import {
     clamp,
     formatInches,
     formatNumeric,
 } from '../math';
-import sharedStyles from '../shared.module.css';
 import type {
     ElementPreviewHandlers,
     ElementPreviewModel,
@@ -96,20 +93,14 @@ export const ElementPreview = ({
             {hasSpacingAfter ? (
                 <div className={styles.previewSpacingAfterRow} />
             ) : null}
-            <div className={sharedStyles.indentSliderTrack}>
-                <span className={sharedStyles.indentSliderBase} />
-                <span className={sharedStyles.indentSliderMiddleBase} />
-                <span className={sharedStyles.indentSliderSelected} />
-                <span className={sharedStyles.indentSliderDefaultStart} />
-                <span className={sharedStyles.indentSliderDefaultEnd} />
-                <input
-                    type="range"
-                    className={clsx(sharedStyles.indentSliderInput, sharedStyles.indentSliderInputStart)}
-                    min={0}
-                    max={previewReferenceChars}
-                    step={1}
-                    value={localStart}
-                    onChange={event => {
+            <IndentRangeSlider
+                start={{
+                    value: localStart,
+                    min: 0,
+                    max: previewReferenceChars,
+                    step: 1,
+                    ariaLabel: 'Block start indent',
+                    onChange: event => {
                         const rawStart = Number.parseInt(event.target.value, 10);
                         const maxStart = Math.max(
                             defaultSliderStartChars,
@@ -119,34 +110,33 @@ export const ElementPreview = ({
 
                         latestStart.current = next;
                         setLocalStart(next);
-                    }}
-                    onPointerUp={() => handlers.onStartChange(latestStart.current)}
-                    aria-label="Block start indent"
-                />
-                <input
-                    type="range"
-                    className={clsx(sharedStyles.indentSliderInput, sharedStyles.indentSliderInputEnd)}
-                    min={0}
-                    max={previewReferenceChars}
-                    step={1}
-                    value={localEnd}
-                    onChange={event => {
+                    },
+                    onCommit: () => handlers.onStartChange(latestStart.current),
+                }}
+                end={{
+                    value: localEnd,
+                    min: 0,
+                    max: previewReferenceChars,
+                    step: 1,
+                    ariaLabel: 'Block end indent',
+                    onChange: event => {
                         const rawEnd = Number.parseInt(event.target.value, 10);
                         const minEnd = latestStart.current + minPreviewContentChars;
                         const next = clamp(rawEnd, minEnd, defaultSliderEndChars);
 
                         latestEnd.current = next;
                         setLocalEnd(next);
-                    }}
-                    onPointerUp={() => handlers.onEndChange(latestEnd.current)}
-                    aria-label="Block end indent"
-                />
-            </div>
-            <div className={sharedStyles.indentSliderLabels}>
-                <span>{'Start: '}{formatInches(localLeftTotalInches)}</span>
-                <span>{formatNumeric(localContentChars / SCREENPLAY_CHARS_PER_INCH)}&quot; / {localContentChars} chars</span>
-                <span>{'End: '}{formatInches(localRightTotalInches)}</span>
-            </div>
+                    },
+                    onCommit: () => handlers.onEndChange(latestEnd.current),
+                }}
+                labels={(
+                    <>
+                        <span>{'Start: '}{formatInches(localLeftTotalInches)}</span>
+                        <span>{formatNumeric(localContentChars / SCREENPLAY_CHARS_PER_INCH)}&quot; / {localContentChars} chars</span>
+                        <span>{'End: '}{formatInches(localRightTotalInches)}</span>
+                    </>
+                )}
+            />
         </div>
     );
 };

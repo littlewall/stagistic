@@ -3,10 +3,6 @@ import {uuidv7} from '@stagistic/shared';
 
 import * as dbQueries from '../queries';
 import type {ScriptCharacterGroupRef} from '../types';
-import type {
-    GetDb,
-    RecordOutbox,
-} from './types';
 import {
     buildCharacterGroupColorPayload,
     buildCharacterGroupCreatePayload,
@@ -15,6 +11,10 @@ import {
     buildCharacterGroupRenamePayload,
 } from './characterHandlers/outboxPayloads';
 import type {CharacterGroupHandlers} from './characterHandlers/types';
+import type {
+    GetDb,
+    RecordOutbox,
+} from './types';
 
 interface CreateCharacterGroupHandlersArgs {
     getDb: GetDb,
@@ -111,6 +111,7 @@ export const createCharacterGroupHandlers = ({
 
             if (current.key === key) {
                 unchanged = current;
+
                 return;
             }
 

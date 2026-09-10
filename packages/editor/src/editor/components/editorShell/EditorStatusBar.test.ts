@@ -49,8 +49,10 @@ describe('getEditorStatusBarSegments', () => {
             blockType: 'lyrics',
             isEmpty: false,
             enterType: 'Lyrics',
-            // Enter already produces lyrics here - Shift+Enter would only say
-            // the same thing with a harder chord.
+            /*
+             * Enter already produces lyrics here - Shift+Enter would only say
+             * the same thing with a harder chord.
+             */
             shiftEnterType: null,
         },
         {
@@ -80,7 +82,9 @@ describe('getEditorStatusBarSegments', () => {
             shiftEnterType,
         }) => {
             const defaultNextType = blockType === 'lyrics' ? 'lyrics' : 'character';
-            const expected: {id: string, key: string, description: string}[] = [
+            const expected: {
+                id: string, key: string, description: string,
+            }[] = [
                 {
                     id: 'enter',
                     key: '⏎',
@@ -116,8 +120,7 @@ describe('getEditorStatusBarSegments', () => {
                 id: 'enter',
                 key: '⏎',
                 description: 'Character',
-            },
-            {
+            }, {
                 id: 'shift-enter',
                 key: shiftEnterKey,
                 description: 'Dialogue',

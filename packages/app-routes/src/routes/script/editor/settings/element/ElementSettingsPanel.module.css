@@ -1,3 +1,6 @@
+/*
+ * Route layout: the panel's header row and the reset affordance beside it.
+ */
 .panelHeader {
     display: flex;
     gap: var(--space-lg);
@@ -33,8 +36,8 @@
     }
 
     & svg {
-        width: calc(13px * var(--size-scale));
-        height: calc(13px * var(--size-scale));
+        width: 13px;
+        height: 13px;
         fill: none;
         stroke: currentcolor;
         stroke-linecap: round;

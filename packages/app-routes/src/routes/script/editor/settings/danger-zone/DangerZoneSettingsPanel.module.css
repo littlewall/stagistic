@@ -1,21 +1,22 @@
+/*
+ * Singular geometry: the destructive-action card's warning tint and header tone.
+ * No shared surface carries a danger wash.
+ */
 .dangerCard {
     display: flex;
     flex-direction: column;
     gap: var(--space-lg);
 }
 
-.dangerHeader {
-    display: flex;
-    flex-direction: column;
+/*
+ * PanelHeader supplies the layout and the description colour. Only the tighter gap and the
+ * sub-heading's size and danger colour remain. Doubled class to win the cross-module ordering tie.
+ */
+.dangerHeader.dangerHeader {
     gap: var(--space-xs);
-}
 
-.dangerTitle {
-    font-size: var(--font-size-lg);
-    font-weight: var(--font-weight-semibold);
-    color: var(--color-status-danger);
-}
-
-.dangerDescription {
-    color: var(--color-text-muted);
+    & h4 {
+        font-size: var(--font-size-lg);
+        color: var(--color-status-danger);
+    }
 }
