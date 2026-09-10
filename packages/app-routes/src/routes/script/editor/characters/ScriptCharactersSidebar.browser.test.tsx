@@ -17,8 +17,8 @@ import {
 import {userEvent} from 'vite-plus/test/browser';
 
 import {
-    ScriptCharactersProvider,
     type ScriptCharactersContextValue,
+    ScriptCharactersProvider,
 } from '../../ScriptCharactersContext';
 import {ScriptCharactersSidebar} from './ScriptCharactersSidebar';
 
@@ -66,14 +66,16 @@ const createReactiveSource = <T, >(initialRows: readonly T[]) => {
 
     return {
         read: () => Promise.resolve(initialRows),
-        subscribe: async (listener: (rows: readonly T[]) => void) => {
+        subscribe: (listener: (rows: readonly T[]) => void) => {
             listeners.add(listener);
             listener(initialRows);
 
-            return () => listeners.delete(listener);
+            return Promise.resolve(() => listeners.delete(listener));
         },
-        refresh: async () => {
+        refresh: () => {
             listeners.forEach(listener => listener(initialRows));
+
+            return Promise.resolve();
         },
     };
 };
@@ -128,10 +130,10 @@ const createContextValue = (
     handleSetCharacterColor: () => {},
     handleSetCharacterGender: () => {},
     handleSetCharacterOutline: () => {},
-    handleUpsertCharacterGender: async () => null,
-    handleCreateGroup: async () => null,
+    handleUpsertCharacterGender: () => Promise.resolve(null),
+    handleCreateGroup: () => Promise.resolve(null),
     handleDeleteGroup: async () => {},
-    handleRenameGroup: async () => null,
+    handleRenameGroup: () => Promise.resolve(null),
     handleSetGroupColor: async () => {},
     handleReplaceGroupMembers: async () => {},
     ...overrides,
@@ -175,6 +177,7 @@ describe('ScriptCharactersSidebar', () => {
         );
 
         await userEvent.click(document.querySelector('button[aria-label="Add character"]')!);
+
         const input = document.querySelector<HTMLInputElement>('#character-name');
 
         if (!input) {
@@ -199,9 +202,7 @@ describe('ScriptCharactersSidebar', () => {
         const persistenceGate = new Promise<void>(resolve => {
             releasePersistence = resolve;
         });
-        const charactersSource = createReactiveSource([
-            character('character-1', 'ALICE'),
-        ]);
+        const charactersSource = createReactiveSource([character('character-1', 'ALICE')]);
         const groupsSource = createReactiveSource([group()]);
         const gendersSource = createReactiveSource([]);
         const repository = {
@@ -215,6 +216,7 @@ describe('ScriptCharactersSidebar', () => {
             },
         } as unknown as ScriptRepository;
         const unhandled: unknown[] = [];
+
         activeUnhandledHandler = (event: PromiseRejectionEvent) => {
             unhandled.push(event.reason);
             event.preventDefault();

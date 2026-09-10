@@ -8,15 +8,15 @@ import {
     vi,
 } from 'vite-plus/test';
 
-import source from './example-script.stagistic?raw';
 import {createExampleScript} from './createExampleScript';
+import source from './example-script.stagistic?raw';
 import {
-    loadExampleScriptTemplate,
     type ExampleScriptTemplate,
+    loadExampleScriptTemplate,
 } from './loadExampleScriptTemplate';
 import {prepareExampleScriptDocument} from './prepareExampleScriptDocument';
 
-const INTEGRATED_SCORE_ROLE = 'integrated_score' as const;
+const INTEGRATED_SCORE_ROLE = 'integrated_score';
 
 vi.mock('./loadExampleScriptTemplate', () => ({
     loadExampleScriptTemplate: vi.fn(),
@@ -60,19 +60,19 @@ const createRepository = (): ExampleRepository => {
 
     return {
         allocateScriptCharacterId: () => `character-${++characterNumber}`,
-        confirmScriptCharacterWithId: vi.fn(async (_scriptId, input) => {
-            return createCharacter(input.id, input.key);
+        confirmScriptCharacterWithId: vi.fn((_scriptId: string, input: {id: string, key: string}) => {
+            return Promise.resolve(createCharacter(input.id, input.key));
         }),
-        saveLatest: vi.fn(async () => undefined),
-        saveTitlePage: vi.fn(async () => undefined),
-        setMusicAttachment: vi.fn(async () => null),
-        removeMusicAttachment: vi.fn(async () => undefined),
+        saveLatest: vi.fn(() => Promise.resolve(undefined)),
+        saveTitlePage: vi.fn(() => Promise.resolve(undefined)),
+        setMusicAttachment: vi.fn(() => Promise.resolve(null)),
+        removeMusicAttachment: vi.fn(() => Promise.resolve(undefined)),
     };
 };
 
 const createActions = () => ({
-    createScript: vi.fn(async () => 'script-new'),
-    deleteScript: vi.fn(async () => undefined),
+    createScript: vi.fn(() => Promise.resolve('script-new')),
+    deleteScript: vi.fn(() => Promise.resolve(undefined)),
 });
 
 afterEach(() => {
@@ -106,10 +106,7 @@ describe('createExampleScript', () => {
         const characterRefs = buildScriptBlockIndex(savedDocument).snapshot.blocks
             .flatMap(block => block.characterRefs ?? []);
 
-        expect(characterRefs).toEqual(expect.arrayContaining([
-            expect.objectContaining({characterId: 'character-1'}),
-            expect.objectContaining({characterId: 'character-2'}),
-        ]));
+        expect(characterRefs).toEqual(expect.arrayContaining([expect.objectContaining({characterId: 'character-1'}), expect.objectContaining({characterId: 'character-2'})]));
     });
 
     it('deletes the incomplete script when document persistence fails', async () => {

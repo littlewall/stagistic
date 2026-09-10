@@ -221,9 +221,18 @@ describe('AttributeManagerListPanel', () => {
         const headings = Array.from(host.querySelectorAll('h4'));
         const buttons = Array.from(host.querySelectorAll('[aria-label="Scene list"] button'));
 
+        /*
+         * Located by text rather than by tag: querying 'h4' and then asserting
+         * the results are headings is circular, and would keep passing if the
+         * group labels regressed to plain elements.
+         */
+        const labelElements = Array.from(host.querySelectorAll<HTMLElement>('*'))
+            .filter(element => element.childElementCount === 0
+                && (element.textContent === 'Act I' || element.textContent === 'Act II'));
+
         expect(headings.map(heading => heading.textContent)).toEqual(['Act I', 'Act II']);
         expect(buttons.map(button => button.textContent)).toEqual(['1.Opening', '2.Finale']);
-        expect(headings.every(heading => heading instanceof HTMLHeadingElement)).toBe(true);
+        expect(labelElements.map(element => element.tagName)).toEqual(['H4', 'H4']);
     });
 
     it('filters titled items and invokes the optional create action', async () => {

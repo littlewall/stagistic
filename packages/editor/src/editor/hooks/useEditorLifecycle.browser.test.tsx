@@ -138,8 +138,18 @@ describe('useEditorLifecycle', () => {
         expect(markerStyle.content).toContain('1');
         expect(markerStyle.fontWeight).toBe('700');
         expect(markerStyle.color).toBe(getComputedStyle(colorProbe).color);
-        expect(document.querySelector<HTMLElement>('[data-id="stage-direction-1"]')?.dataset.sceneNumber).toBeUndefined();
-        expect(savedScenes.every(scene => scene.attrs?.sceneNumber === undefined)).toBe(true);
+
+        const stageDirection = document.querySelector<HTMLElement>('[data-id="stage-direction-1"]');
+
+        /*
+         * Both assertions guard against passing on absence: the optional chain
+         * would report "no scene number" for a stage direction that never
+         * rendered, and `every` is vacuously true once the scenes stop being
+         * persisted at all.
+         */
+        expect(stageDirection).not.toBeNull();
+        expect(stageDirection?.dataset.sceneNumber).toBeUndefined();
+        expect(savedScenes.map(scene => scene.attrs?.sceneNumber as unknown)).toEqual([undefined, undefined]);
     });
 
     it('keeps three gutter slots with the block type control next to the text', async () => {

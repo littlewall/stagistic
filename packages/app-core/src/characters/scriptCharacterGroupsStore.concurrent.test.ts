@@ -81,32 +81,36 @@ const createRepository = (initialGroups: ScriptCharacterGroupRef[]) => {
         allocateScriptCharacterGroupId: () => `new-group-${nextId++}`,
         getScriptCharactersSource: () => characters,
         getScriptCharacterGroupsSource: () => groups,
-        createScriptCharacterGroupWithId: async (
+        createScriptCharacterGroupWithId: (
             _scriptId: string,
             input: {id: string, key: string},
         ) => {
             actions.creates += 1;
+
             const created = group(input.id, input.key);
 
             confirmedGroups = [...confirmedGroups, created];
             groups.emit(confirmedGroups);
 
-            return created;
+            return Promise.resolve(created);
         },
-        renameScriptCharacterGroup: async (_scriptId: string, id: string, key: string) => {
+        renameScriptCharacterGroup: (_scriptId: string, id: string, key: string) => {
             actions.renames += 1;
+
             const original = confirmedGroups.find(row => row.id === id);
 
             if (!original) {
-                return null;
+                return Promise.resolve(null);
             }
 
             const renamed = {...original, key};
 
-            confirmedGroups = confirmedGroups.map(row => row.id === id ? renamed : row);
+            confirmedGroups = confirmedGroups.map(row => {
+                return row.id === id ? renamed : row;
+            });
             groups.emit(confirmedGroups);
 
-            return renamed;
+            return Promise.resolve(renamed);
         },
     } as unknown as ScriptRepository;
 
@@ -117,7 +121,9 @@ const createRepository = (initialGroups: ScriptCharacterGroupRef[]) => {
 
 describe('script character groups store concurrency', () => {
     it('allows only one overlapping create for the same normalized key', async () => {
-        const {repository, characters, groups, actions} = createRepository([]);
+        const {
+            repository, characters, groups, actions,
+        } = createRepository([]);
         const blocked = blockReads(characters);
         const store = createScriptCharacterGroupsStore(repository, 'script-1');
 
@@ -139,16 +145,15 @@ describe('script character groups store concurrency', () => {
 
     it('allows only one overlapping rename to the same normalized key', async () => {
         const initial = [group('group-1', 'ENSEMBLE'), group('group-2', 'CHORUS')];
-        const {repository, characters, groups, actions} = createRepository(initial);
+        const {
+            repository, characters, groups, actions,
+        } = createRepository(initial);
         const blocked = blockReads(characters);
         const store = createScriptCharacterGroupsStore(repository, 'script-1');
 
         await store.groupsCollection.preload();
 
-        const renames = [
-            store.renameGroup('group-1', ' players '),
-            store.renameGroup('group-2', 'PLAYERS'),
-        ];
+        const renames = [store.renameGroup('group-1', ' players '), store.renameGroup('group-2', 'PLAYERS')];
 
         await waitFor(() => blocked.count() === 2);
         blocked.gate.resolve();

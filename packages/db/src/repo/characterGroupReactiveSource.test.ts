@@ -37,16 +37,32 @@ describe('character group reactive source', () => {
         await seedScript(db, scriptId);
         await db.insert(dbSchema.scriptCharacters).values([
             {
-                id: 'group-all', scriptId, characterKey: 'ALL', kind: 'group',
-                colorHex: null, genderKey: null, notes: null, backstory: null, outline: null,
-                createdAt: 1, updatedAt: 1,
-            },
-            {
-                id: 'character-alice', scriptId, characterKey: 'ALICE', kind: 'character',
-                colorHex: null, genderKey: null, notes: null, backstory: null, outline: null,
-                createdAt: 1, updatedAt: 1,
+                id: 'group-all',
+                scriptId,
+                characterKey: 'ALL',
+                kind: 'group',
+                colorHex: null,
+                genderKey: null,
+                notes: null,
+                backstory: null,
+                outline: null,
+                createdAt: 1,
+                updatedAt: 1,
+            }, {
+                id: 'character-alice',
+                scriptId,
+                characterKey: 'ALICE',
+                kind: 'character',
+                colorHex: null,
+                genderKey: null,
+                notes: null,
+                backstory: null,
+                outline: null,
+                createdAt: 1,
+                updatedAt: 1,
             },
         ]);
+
         const snapshots: string[][] = [];
         const unsubscribe = await repository.getScriptCharacterGroupsSource(scriptId).subscribe(rows => {
             snapshots.push(rows.map(row => `${row.id}:${row.memberIds.join(',')}`));

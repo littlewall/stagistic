@@ -9,8 +9,8 @@ import {
     type RewriteScriptDocument,
 } from '../blocks';
 import {
-    scriptBlocks,
     scriptBlockCharacterRefs,
+    scriptBlocks,
     scriptCharacterGroupMembers,
     scriptCharacters,
     scriptLocations,
@@ -170,23 +170,29 @@ describe('documentProjection', () => {
             scriptId: 's1',
             document: {
                 type: 'doc',
-                content: [{
-                    type: 'stageDirection',
-                    attrs: {id: 'b1'},
-                    content: [{
-                        type: 'text',
-                        text: 'ALL',
-                        marks: [{type: 'characterTag', attrs: {characterKey: 'ALL', characterId: 'group-1'}}],
-                    }],
-                }],
+                content: [
+                    {
+                        type: 'stageDirection',
+                        attrs: {id: 'b1'},
+                        content: [
+                            {
+                                type: 'text',
+                                text: 'ALL',
+                                marks: [{type: 'characterTag', attrs: {characterKey: 'ALL', characterId: 'group-1'}}],
+                            },
+                        ],
+                    },
+                ],
             },
         });
 
-        expect(await db.select().from(scriptBlockCharacterRefs)).toEqual([{
-            blockId: 'b1',
-            characterId: 'group-1',
-            characterKey: 'ALL',
-            isConfirmed: true,
-        }]);
+        expect(await db.select().from(scriptBlockCharacterRefs)).toEqual([
+            {
+                blockId: 'b1',
+                characterId: 'group-1',
+                characterKey: 'ALL',
+                isConfirmed: true,
+            },
+        ]);
     });
 });

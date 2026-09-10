@@ -34,8 +34,16 @@ vi.mock('./ScriptWorkspaceContext', () => ({
         currentScript: {id: 's1', name: 'My Script'},
         currentScriptId: 's1',
         characterCatalog: {
-            characters: [{id: 'anna', kind: 'character', key: 'ANNA', outline: null}],
-            groups: [{id: 'all', kind: 'group', key: 'ALL', memberIds: ['anna']}],
+            characters: [
+                {
+                    id: 'anna', kind: 'character', key: 'ANNA', outline: null,
+                },
+            ],
+            groups: [
+                {
+                    id: 'all', kind: 'group', key: 'ALL', memberIds: ['anna'],
+                },
+            ],
         },
         initialValue: {type: 'doc', content: []},
         initialIndexSnapshot: {
@@ -48,8 +56,7 @@ vi.mock('./ScriptWorkspaceContext', () => ({
                     actBlockId: null,
                     sceneBlockId: null,
                     characterRefs: [{key: 'ANNA', characterId: 'anna'}],
-                },
-                {
+                }, {
                     blockId: 'all-cue',
                     orderNo: 1,
                     blockType: 'character',
@@ -68,10 +75,14 @@ vi.mock('./ScriptWorkspaceContext', () => ({
 vi.mock('./ScriptCharactersContext', () => ({
     useScriptCharacters: () => ({
         confirmedCharacterRecords: [
-            {id: 'anna', kind: 'character', key: 'ANNA', outline: null},
+            {
+                id: 'anna', kind: 'character', key: 'ANNA', outline: null,
+            },
         ],
         confirmedGroupRecords: [
-            {id: 'all', kind: 'group', key: 'ALL', memberIds: ['anna']},
+            {
+                id: 'all', kind: 'group', key: 'ALL', memberIds: ['anna'],
+            },
         ],
     }),
 }));

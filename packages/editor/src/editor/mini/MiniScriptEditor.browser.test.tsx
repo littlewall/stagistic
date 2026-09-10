@@ -79,8 +79,7 @@ const createEmptyNoteDocument = (): ScriptDocument => {
     return {
         ...baseDocument,
         content: [
-            ...(baseDocument.content ?? []),
-            {
+            ...baseDocument.content ?? [], {
                 type: 'note',
                 attrs: {id: 'mini-empty-note'},
             },

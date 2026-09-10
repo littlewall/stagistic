@@ -3,12 +3,12 @@ import {
 } from 'vite-plus/test';
 
 import {
-    createTestDb, seedScript, type TestDb,
-} from '../../../testing/createTestDb';
-import {
     scriptCharacterGroupMembers,
     scriptCharacters,
 } from '../../../schema';
+import {
+    createTestDb, seedScript, type TestDb,
+} from '../../../testing/createTestDb';
 import type {UpsertScriptCharacterPayload} from '../payloads';
 import {
     getScriptCharacterById,
@@ -155,16 +155,18 @@ describe('script character read/write', () => {
             characterId: 'c1',
         });
 
-        expect(await listScriptCharacters(db, SCRIPT_ID)).toEqual([{
-            id: 'c1',
-            kind: 'character',
-            key: 'ANNA',
-            colorHex: null,
-            genderKey: null,
-            notes: null,
-            backstory: null,
-            outline: null,
-        }]);
+        expect(await listScriptCharacters(db, SCRIPT_ID)).toEqual([
+            {
+                id: 'c1',
+                kind: 'character',
+                key: 'ANNA',
+                colorHex: null,
+                genderKey: null,
+                notes: null,
+                backstory: null,
+                outline: null,
+            },
+        ]);
         expect(await listScriptSpeakingEntities(db, SCRIPT_ID)).toEqual([
             {
                 id: 'c1',

@@ -129,6 +129,7 @@ The lights return. @@out 1
             'stageDirection',
             'note',
         ]);
+
         const blockIds = result.document.content.map(getScriptBlockId);
 
         expect(blockIds.every(Boolean)).toBe(true);

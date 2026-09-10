@@ -213,13 +213,15 @@ describe('AttributeManagerCharactersPanel rename', () => {
     it('rejects a character name that duplicates a group', async () => {
         const {onRenameCharacter} = renderPanel(
             undefined,
-            [{
-                id: 'group-1',
-                name: 'ENSEMBLE',
-                color: null,
-                memberIds: [],
-                usageCount: 0,
-            }],
+            [
+                {
+                    id: 'group-1',
+                    name: 'ENSEMBLE',
+                    color: null,
+                    memberIds: [],
+                    usageCount: 0,
+                },
+            ],
         );
         const input = await waitForElement<HTMLInputElement>('#character-name-char-1');
 
@@ -236,13 +238,15 @@ describe('AttributeManagerCharactersPanel rename', () => {
 
         renderPanel(
             undefined,
-            [{
-                id: 'group-1',
-                name: 'ALL',
-                color: null,
-                memberIds: [],
-                usageCount: 0,
-            }],
+            [
+                {
+                    id: 'group-1',
+                    name: 'ALL',
+                    color: null,
+                    memberIds: [],
+                    usageCount: 0,
+                },
+            ],
             onRenameGroup,
         );
 

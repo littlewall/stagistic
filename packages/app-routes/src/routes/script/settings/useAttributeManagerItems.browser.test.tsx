@@ -30,10 +30,7 @@ describe('useAttributeManagerItems', () => {
             characters: {
                 countsByKey: new Map(),
                 countsByCharacterId: new Map([['group-1', 3]]),
-                keyByCharacterId: new Map([
-                    ['char-1', 'ANNA'],
-                    ['group-1', 'EVERYONE'],
-                ]),
+                keyByCharacterId: new Map([['char-1', 'ANNA'], ['group-1', 'EVERYONE']]),
                 displayColorByKey: new Map(),
             },
         });
@@ -57,13 +54,15 @@ const ItemsHarness = () => {
         initialValue: null,
         characters: {
             confirmedCharacterRecords: [{id: 'char-1', key: 'ANNA'}],
-            confirmedGroupRecords: [{
-                id: 'group-1',
-                kind: 'group',
-                key: 'ALL',
-                colorHex: null,
-                memberIds: ['char-1'],
-            }],
+            confirmedGroupRecords: [
+                {
+                    id: 'group-1',
+                    kind: 'group',
+                    key: 'ALL',
+                    colorHex: null,
+                    memberIds: ['char-1'],
+                },
+            ],
         } as never,
         music: [],
         getMusicTitleDraft: (_id, title) => title,
