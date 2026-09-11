@@ -19,6 +19,7 @@ import type {EditorLifecycleCallbacks} from '../../contracts';
 import ScriptEditor from '../../Editor';
 import {getEmptyEnterChooserFromState} from '../extensions/EmptyEnterChooserExtension';
 import {musicRailPluginKey} from '../extensions/musicRail/MusicRailExtension';
+import {findScriptBlockByIdFromState} from '../scriptCore';
 
 type MusicTestWindow = Window & {__musicTestEditor?: Editor | null};
 
@@ -188,10 +189,10 @@ describe('music pill node views', () => {
             'music boundary menu',
         );
         const addMusic = [...menu.querySelectorAll('button')]
-            .find(button => button.textContent?.includes('Add music'));
+            .find(button => button.textContent?.includes('Start new music'));
 
         if (!addMusic) {
-            throw new Error('Add music rail action not found');
+            throw new Error('Start new music rail action not found');
         }
 
         await page.elementLocator(addMusic).click();
@@ -230,10 +231,10 @@ describe('music pill node views', () => {
             'music boundary menu',
         );
         const addMusic = [...menu.querySelectorAll('button')]
-            .find(button => button.textContent?.includes('Add music'));
+            .find(button => button.textContent?.includes('Start new music'));
 
         if (!addMusic) {
-            throw new Error('Add music rail action not found');
+            throw new Error('Start new music rail action not found');
         }
 
         await page.elementLocator(addMusic).click();
@@ -626,14 +627,360 @@ describe('music pill node views', () => {
             () => document.querySelector('[data-music-rail-menu="true"]'),
             'shared music menu',
         );
-        const labels = [...menu.querySelectorAll('[data-music-rail-section-label]')]
-            .map(label => label.textContent);
+        const headers = [...menu.querySelectorAll('[data-music-rail-section-label]')]
+            .map(label => [label.querySelector('[data-music-rail-section-kind]')?.textContent, label.querySelector('[data-music-rail-section-name]')?.textContent]);
 
-        expect(labels).toEqual(['Ending: 0.A) Overture', 'Starting: 0.B) Night']);
+        expect(headers).toEqual([['End music:', '0.A) Overture'], ['Start music:', '0.B) Night']]);
     });
 
-    it('renders one persistent range aligned with the start of its endpoint blocks', async () => {
+    it('keeps a long music title whole in the rail menu header', async () => {
+        const longTitle = 'Chuť velkoměsta a jeho nekonečných nocí';
+
+        renderEditor(createDocument(), {onOpenMusicManager: vi.fn()});
+
+        const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', longTitle, 'open', {musicId: 'long-music'});
+
+        const marker = await poll(
+            () => document.querySelector('[data-start-music-id="long-music"]'),
+            'music start marker',
+        );
+
+        await page.elementLocator(marker).click();
+
+        const name = await poll(
+            () => document.querySelector<HTMLElement>('[data-music-rail-section-name]'),
+            'rail menu music name',
+        );
+
+        expect(name.textContent).toBe(`0) ${longTitle}`);
+
+        // Whole title, so it has to have wrapped rather than been clipped.
+        const menu = document.querySelector<HTMLElement>('[data-music-rail-menu="true"]');
+
+        expect(name.scrollWidth).toBeLessThanOrEqual(name.clientWidth);
+        expect(name.getBoundingClientRect().height).toBeGreaterThan(20);
+        expect(menu?.getBoundingClientRect().width).toBeLessThanOrEqual(260);
+    });
+
+    it('marks the rail point whose menu is open and clears it on close', async () => {
+        renderEditor(createTwoBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', 'Overture', 'open', {musicId: 'marked'});
+
+        const marker = await poll(
+            () => document.querySelector<HTMLElement>('[data-start-music-id="marked"]'),
+            'music start marker',
+        );
+
+        const restingColor = getComputedStyle(marker).color;
+
+        await page.elementLocator(marker).click();
+
+        await poll(
+            () => document.querySelector('[data-music-rail-menu="true"]'),
+            'music rail menu',
+        );
+
+        expect(marker.dataset.musicRailMenuOpen).toBe('true');
+
+        const openColor = getComputedStyle(marker).color;
+
+        expect(openColor).not.toBe(restingColor);
+
+        document.dispatchEvent(new KeyboardEvent('keydown', {key: 'Escape', bubbles: true}));
+
+        await poll(
+            () => marker.dataset.musicRailMenuOpen === undefined ? true : null,
+            'cleared open marker',
+        );
+
+        expect(getComputedStyle(marker).color).toBe(restingColor);
+    });
+
+    it('toggles the rail menu shut when its own point is clicked again', async () => {
+        renderEditor(createTwoBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', 'Overture', 'open', {musicId: 'toggled'});
+
+        const marker = await poll(
+            () => document.querySelector<HTMLElement>('[data-start-music-id="toggled"]'),
+            'music start marker',
+        );
+
+        await page.elementLocator(marker).click();
+        await poll(
+            () => document.querySelector('[data-music-rail-menu="true"]'),
+            'music rail menu',
+        );
+
+        await page.elementLocator(marker).click();
+        await poll(
+            () => document.querySelector('[data-music-rail-menu="true"]') ? null : true,
+            'closed music rail menu',
+        );
+
+        expect(marker.dataset.musicRailMenuOpen).toBeUndefined();
+    });
+
+    it('opens the active block trigger menu while another rail menu is open', async () => {
+        /*
+         * Three blocks: the implicit end of the music lands on the last one, so
+         * the middle block is free to carry the caret and its own trigger.
+         */
         renderEditor(createThreeBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', 'Overture', 'open', {musicId: 'first'});
+        editor.commands.focus();
+        editor.commands.setTextSelection(findScriptBlockByIdFromState(editor.state, 'sd-2')?.from ?? 1);
+
+        const findTrigger = () => document.querySelector<HTMLElement>(
+            '[data-music-rail-active-trigger="true"][data-block-id="sd-2"]',
+        );
+
+        await poll(findTrigger, 'active block music trigger');
+
+        const marker = await poll(
+            () => document.querySelector<HTMLElement>('[data-start-music-id="first"]'),
+            'music start marker',
+        );
+
+        await page.elementLocator(marker).click();
+        await poll(
+            () => document.querySelector('[data-music-rail-menu="true"]'),
+            'first music rail menu',
+        );
+
+        // The trigger of the block the caret is on outlives the first menu...
+        const trigger = await poll(findTrigger, 'surviving music trigger');
+
+        await page.elementLocator(trigger).click();
+
+        // ...and its own click opens its menu instead of only dismissing the other.
+        const menu = await poll(
+            () => {
+                const candidate = document.querySelector('[data-music-rail-menu="true"]');
+
+                return candidate?.textContent?.includes('Start new music') ? candidate : null;
+            },
+            'active block music menu',
+        );
+
+        expect(menu.textContent).toContain('Start new music');
+        expect(marker.dataset.musicRailMenuOpen).toBeUndefined();
+        expect(findTrigger()?.dataset.musicRailMenuOpen).toBe('true');
+    });
+
+    it('keeps the whole music name on its own line in a boundary command', async () => {
+        const longTitle = 'Chuť velkoměsta a jeho nekonečných nocí';
+
+        renderEditor(createThreeBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', longTitle, 'open', {musicId: 'long-out'});
+        /*
+         * An explicit end elsewhere is what turns the middle block's command
+         * into a "Set music end" command that names a music.
+         */
+        editor.commands.insertMusicOut('sd-3');
+        editor.commands.focus();
+        editor.commands.setTextSelection(findScriptBlockByIdFromState(editor.state, 'sd-2')?.from ?? 1);
+
+        const trigger = await poll(
+            () => document.querySelector<HTMLElement>('[data-music-rail-active-trigger="true"][data-block-id="sd-2"]'),
+            'active block music trigger',
+        );
+
+        await page.elementLocator(trigger).click();
+
+        const setOut = await poll(
+            () => [...document.querySelectorAll<HTMLElement>('[data-music-rail-menu="true"] button')]
+                .find(button => button.textContent?.includes('Set music end')),
+            'set music end action',
+        );
+        const detail = setOut.querySelector<HTMLElement>('span + span');
+
+        expect(setOut.firstElementChild?.textContent).toBe('Set music end (0)');
+
+        // Title alone: the number is already in the label above it.
+        expect(detail?.textContent).toBe(longTitle);
+
+        // Own line, wrapped rather than clipped.
+        const labelBottom = setOut.firstElementChild?.getBoundingClientRect().bottom ?? 0;
+
+        expect(detail?.getBoundingClientRect().top).toBeGreaterThanOrEqual(labelBottom);
+        expect(detail?.scrollWidth).toBeLessThanOrEqual(detail?.clientWidth ?? 0);
+    });
+
+    it('marks the active block trigger while its own menu is open', async () => {
+        renderEditor(createThreeBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.focus();
+        editor.commands.setTextSelection(findScriptBlockByIdFromState(editor.state, 'sd-2')?.from ?? 1);
+
+        const findTrigger = () => document.querySelector<HTMLElement>(
+            '[data-music-rail-active-trigger="true"][data-block-id="sd-2"]',
+        );
+        const trigger = await poll(findTrigger, 'active block music trigger');
+        const restingColor = getComputedStyle(trigger).color;
+
+        await page.elementLocator(trigger).click();
+        await poll(
+            () => document.querySelector('[data-music-rail-menu="true"]'),
+            'active block music menu',
+        );
+
+        const openTrigger = findTrigger();
+
+        expect(openTrigger?.dataset.musicRailMenuOpen).toBe('true');
+        expect(openTrigger && getComputedStyle(openTrigger).color).not.toBe(restingColor);
+    });
+
+    it('offers no end bookkeeping on a music that ends automatically', async () => {
+        renderEditor(createThreeBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', 'Overture', 'open', {musicId: 'auto-end'});
+
+        const endMarker = await poll(
+            () => document.querySelector<HTMLElement>('[data-end-music-id="auto-end"]'),
+            'implicit music end marker',
+        );
+
+        await page.elementLocator(endMarker).click();
+
+        const menu = await poll(
+            () => document.querySelector('[data-music-rail-menu="true"]'),
+            'music rail menu',
+        );
+
+        expect(menu.textContent).toContain('Go to start');
+        expect(menu.textContent).not.toContain('Make explicit');
+        expect(menu.textContent).not.toContain('Reset music end');
+    });
+
+    it('hands a placed music end back to the structure', async () => {
+        renderEditor(createThreeBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', 'Overture', 'open', {musicId: 'placed-end'});
+        editor.commands.insertMusicOut('sd-2');
+
+        const endMarker = await poll(
+            () => document.querySelector<HTMLElement>('[data-end-music-id="placed-end"][data-block-id="sd-2"]'),
+            'explicit music end marker',
+        );
+
+        await page.elementLocator(endMarker).click();
+
+        const resetEnd = await poll(
+            () => [...document.querySelectorAll<HTMLElement>('[data-music-rail-menu="true"] button')]
+                .find(button => button.textContent?.includes('Reset music end')),
+            'reset music end action',
+        );
+
+        await new Promise(resolve => window.setTimeout(resolve, 400));
+
+        expect(document.querySelector('[data-music-rail-menu="true"]')).not.toBeNull();
+        expect(document.querySelector('[data-music-rail-drop-target="true"]')).toBeNull();
+
+        await page.elementLocator(resetEnd).click();
+
+        // The out atom goes, the music keeps an end — now derived, not placed.
+        await poll(
+            () => document.querySelector('[data-id="sd-2"] [data-music-pill="out"]') ? null : true,
+            'removed music out',
+        );
+
+        const music = musicRailPluginKey.getState(editor.state)?.snapshot.music
+            .find(candidate => candidate.musicId === 'placed-end');
+
+        expect(music?.endKind).not.toBe('explicit');
+        expect(music?.effectiveEndBlockId).toBe('sd-3');
+    });
+
+    it('hides the reset when the end has nowhere left to move', async () => {
+        renderEditor(createThreeBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', 'Overture', 'open', {musicId: 'pinned-last'});
+        // Last block of the script: resetting would land the end right back here.
+        editor.commands.insertMusicOut('sd-3');
+
+        const endMarker = await poll(
+            () => document.querySelector<HTMLElement>('[data-end-music-id="pinned-last"][data-block-id="sd-3"]'),
+            'explicit music end marker',
+        );
+
+        await page.elementLocator(endMarker).click();
+
+        const menu = await poll(
+            () => document.querySelector('[data-music-rail-menu="true"]'),
+            'music rail menu',
+        );
+
+        expect(menu.textContent).toContain('Go to start');
+        expect(menu.textContent).not.toContain('Reset music end');
+    });
+
+    it('flashes the block a rail menu navigates to', async () => {
+        renderEditor(createTwoBlockDocument());
+
+        const editor = await getEditor();
+
+        editor.commands.insertMusicStart('sd-1', 'Overture', 'open', {musicId: 'flashed'});
+        editor.commands.insertMusicOut('sd-2');
+
+        const marker = await poll(
+            () => document.querySelector('[data-start-music-id="flashed"]'),
+            'music start marker',
+        );
+
+        await page.elementLocator(marker).click();
+
+        const goToEnd = await poll(
+            () => [...document.querySelectorAll('[data-music-rail-menu="true"] button')]
+                .find(button => button.textContent?.includes('Go to effective end')),
+            'go to effective end action',
+        );
+
+        await page.elementLocator(goToEnd).click();
+
+        const flashed = await poll(
+            () => document.querySelector('[data-focus-flash]'),
+            'flashed block',
+        );
+
+        expect((flashed as HTMLElement).dataset.id).toBe('sd-2');
+    });
+
+    it('aligns a music start with the last line of its block and its end with the first', async () => {
+        renderEditor({
+            type: 'doc',
+            content: [
+                createStageDirection('sd-1', [
+                    {
+                        type: 'text',
+                        text: 'A long opening direction that wraps across several lines so the music starts beside its pill at the end of the block. '.repeat(6),
+                    },
+                ]),
+                createStageDirection('sd-2'),
+                createStageDirection('sd-3'),
+            ],
+        });
 
         const editor = await getEditor();
 
@@ -660,7 +1007,7 @@ describe('music pill node views', () => {
             throw new Error('Music endpoint blocks not found');
         }
 
-        const expectedMarkerY = (block: HTMLElement) => {
+        const expectedFirstLineY = (block: HTMLElement) => {
             const blockRect = block.getBoundingClientRect();
             const style = getComputedStyle(block);
             const paddingTop = Number.parseFloat(style.paddingTop) || 0;
@@ -668,12 +1015,21 @@ describe('music pill node views', () => {
 
             return blockRect.top + paddingTop + lineHeight / 2;
         };
+        const expectedLastLineY = (block: HTMLElement) => {
+            const blockRect = block.getBoundingClientRect();
+            const style = getComputedStyle(block);
+            const paddingBottom = Number.parseFloat(style.paddingBottom) || 0;
+            const lineHeight = Number.parseFloat(style.lineHeight);
+
+            return blockRect.bottom - paddingBottom - lineHeight / 2;
+        };
         const startRect = startMarker.getBoundingClientRect();
         const endRect = endMarker.getBoundingClientRect();
         const rangeRect = range.getBoundingClientRect();
 
-        expect(startRect.top + startRect.height / 2).toBeCloseTo(expectedMarkerY(startBlock), 0);
-        expect(endRect.top + endRect.height / 2).toBeCloseTo(expectedMarkerY(endBlock), 0);
+        expect(startBlock.getBoundingClientRect().height).toBeGreaterThan(80);
+        expect(startRect.top + startRect.height / 2).toBeCloseTo(expectedLastLineY(startBlock), 0);
+        expect(endRect.top + endRect.height / 2).toBeCloseTo(expectedFirstLineY(endBlock), 0);
         expect(rangeRect.top).toBeCloseTo(startRect.top + startRect.height / 2, 0);
         expect(rangeRect.bottom).toBeCloseTo(endRect.top + endRect.height / 2, 0);
         expect(rangeRect.left + rangeRect.width / 2).toBeCloseTo(startRect.left + startRect.width / 2, 0);
@@ -688,7 +1044,7 @@ describe('music pill node views', () => {
 
         expect(triggerRect.left + triggerRect.width / 2).toBeCloseTo(startRect.left + startRect.width / 2, 0);
         expect(Math.abs(
-            triggerRect.top + triggerRect.height / 2 - expectedMarkerY(middleBlock),
+            triggerRect.top + triggerRect.height / 2 - expectedFirstLineY(middleBlock),
         )).toBeLessThan(1);
     });
 
@@ -747,6 +1103,7 @@ describe('music pill node views', () => {
         source.dispatchEvent(new PointerEvent('pointerdown', {
             bubbles: true, pointerId: 1, button: 0, clientX: 10, clientY: 10,
         }));
+        await new Promise(resolve => window.setTimeout(resolve, 400));
         source.dispatchEvent(new PointerEvent('pointermove', {
             bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 30,
         }));
@@ -772,7 +1129,20 @@ describe('music pill node views', () => {
     });
 
     it('shows eligible endpoints and the prospective range while dragging a music end', async () => {
-        renderEditor(createFourBlockDocument());
+        renderEditor({
+            type: 'doc',
+            content: [
+                createStageDirection('sd-1', [
+                    {
+                        type: 'text',
+                        text: 'A long opening direction that keeps the music start far from the first line. '.repeat(6),
+                    },
+                ]),
+                createStageDirection('sd-2'),
+                createStageDirection('sd-3'),
+                createStageDirection('sd-4'),
+            ],
+        });
 
         const editor = await getEditor();
 
@@ -798,6 +1168,20 @@ describe('music pill node views', () => {
             bubbles: true, pointerId: 1, button: 0, clientX: 10, clientY: 10,
         }));
 
+        expect(document.querySelector('[data-music-rail-drop-target="true"]')).toBeNull();
+
+        source.dispatchEvent(new PointerEvent('pointermove', {
+            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 30,
+        }));
+
+        expect(document.querySelector('[data-music-rail-drop-target="true"]')).toBeNull();
+
+        await new Promise(resolve => window.setTimeout(resolve, 400));
+
+        source.dispatchEvent(new PointerEvent('pointermove', {
+            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 30,
+        }));
+
         const dropTargets = Array.from(
             document.querySelectorAll<HTMLElement>('[data-music-rail-drop-target="true"]'),
         );
@@ -814,10 +1198,6 @@ describe('music pill node views', () => {
 
         neutralReference.remove();
 
-        source.dispatchEvent(new PointerEvent('pointermove', {
-            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 30,
-        }));
-
         const rangePreview = document.querySelector<HTMLElement>(
             '[data-music-rail-drop-range-preview="true"]',
         );
@@ -832,6 +1212,20 @@ describe('music pill node views', () => {
         if (!rangePreview || !targetPreview) {
             throw new Error('Music range drag preview not found');
         }
+
+        const previewDotStyle = getComputedStyle(targetPreview, '::before');
+        const activeHaloReference = document.createElement('span');
+
+        activeHaloReference.style.background = 'color-mix(in oklch, oklch(from var(--base-accent) .52 c h) 16%, transparent)';
+        canvas?.appendChild(activeHaloReference);
+
+        expect(previewDotStyle.width).toBe('5px');
+        expect(previewDotStyle.height).toBe('5px');
+        expect(previewDotStyle.backgroundColor).toBe(getComputedStyle(dropTargets[0]).backgroundColor);
+        expect(getComputedStyle(targetPreview).backgroundColor)
+            .toBe(getComputedStyle(activeHaloReference).backgroundColor);
+
+        activeHaloReference.remove();
 
         const canvasRect = canvas?.getBoundingClientRect();
         const targetRect = targetPreview.getBoundingClientRect();
@@ -900,6 +1294,7 @@ describe('music pill node views', () => {
         source.dispatchEvent(new PointerEvent('pointerdown', {
             bubbles: true, pointerId: 1, button: 0, clientX: 10, clientY: 40,
         }));
+        await new Promise(resolve => window.setTimeout(resolve, 400));
         source.dispatchEvent(new PointerEvent('pointermove', {
             bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 260,
         }));

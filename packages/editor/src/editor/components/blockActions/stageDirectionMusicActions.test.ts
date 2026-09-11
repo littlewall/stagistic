@@ -6,7 +6,8 @@ import {
 } from 'vite-plus/test';
 
 import {
-    formatOpenMusicDisplayName,
+    canResetMusicEnd,
+    formatMusicTitlePreview,
     formatSetMusicOutLabel,
     resolveMusicBoundaryAvailabilityFromSnapshot,
     resolveNewMusicNumber,
@@ -52,6 +53,67 @@ const sceneBlock = (
 ): ScriptBlockIndexSnapshot['blocks'][number] => ({
     ...block(blockId, orderNo, blockId),
     blockType: 'scene',
+});
+
+describe('canResetMusicEnd', () => {
+    const snapshotOf = (
+        blocks: ScriptBlockIndexSnapshot['blocks'],
+        musicItems: ScriptBlockIndexSnapshot['music'] = [],
+    ): ScriptBlockIndexSnapshot => ({
+        blocks,
+        music: musicItems,
+        orphanMusicOutBlockIds: [],
+    });
+
+    it('allows the reset while a plain block still follows', () => {
+        const snapshot = snapshotOf([
+            block('sd-1', 0),
+            block('sd-2', 1),
+            block('sd-3', 2),
+        ]);
+
+        expect(canResetMusicEnd(snapshot, 'sd-2')).toBe(true);
+    });
+
+    it('refuses on the last block of the script', () => {
+        const snapshot = snapshotOf([block('sd-1', 0), block('sd-2', 1)]);
+
+        expect(canResetMusicEnd(snapshot, 'sd-2')).toBe(false);
+    });
+
+    it('refuses when the scene ends right after', () => {
+        const snapshot = snapshotOf([
+            block('sd-1', 0),
+            block('sd-2', 1),
+            sceneBlock('scene-2', 2),
+        ]);
+
+        expect(canResetMusicEnd(snapshot, 'sd-2')).toBe(false);
+    });
+
+    it('refuses when the next block starts another music', () => {
+        const snapshot = snapshotOf(
+            [
+                block('sd-1', 0),
+                block('sd-2', 1),
+                block('sd-3', 2),
+            ],
+            [music('next', 1, 'sd-3')],
+        );
+
+        expect(canResetMusicEnd(snapshot, 'sd-2')).toBe(false);
+    });
+
+    it('reads document order from orderNo, not from the array', () => {
+        const snapshot = snapshotOf([
+            block('sd-3', 2),
+            block('sd-1', 0),
+            block('sd-2', 1),
+        ]);
+
+        expect(canResetMusicEnd(snapshot, 'sd-2')).toBe(true);
+        expect(canResetMusicEnd(snapshot, 'sd-3')).toBe(false);
+    });
 });
 
 describe('resolveOpenMusicAtBlock', () => {
@@ -165,26 +227,26 @@ describe('resolveNewMusicNumber', () => {
 
 describe('formatSetMusicOutLabel', () => {
     it('wraps the music number in parentheses', () => {
-        expect(formatSetMusicOutLabel(music('music', 0, 'start'))).toBe('Set out here (1.A)');
+        expect(formatSetMusicOutLabel(music('music', 0, 'start'))).toBe('Set music end (1.A)');
     });
 });
 
-describe('formatOpenMusicDisplayName', () => {
-    it('includes the music number and title', () => {
-        expect(formatOpenMusicDisplayName(music('music', 0, 'start'))).toBe('1.A) music');
+describe('formatMusicTitlePreview', () => {
+    it('carries the title alone, since the command label owns the number', () => {
+        expect(formatMusicTitlePreview(music('music', 0, 'start'))).toBe('music');
     });
 
     it('truncates titles after ten characters', () => {
-        expect(formatOpenMusicDisplayName({
+        expect(formatMusicTitlePreview({
             ...music('music', 0, 'start'),
             title: 'Long title name',
-        })).toBe('1.A) Long title…');
+        })).toBe('Long title…');
     });
 
-    it('uses only the music number when the title is empty', () => {
-        expect(formatOpenMusicDisplayName({
+    it('has nothing to show for an empty title', () => {
+        expect(formatMusicTitlePreview({
             ...music('music', 0, 'start'),
             title: ' ',
-        })).toBe('1.A)');
+        })).toBeUndefined();
     });
 });

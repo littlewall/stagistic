@@ -2,6 +2,7 @@ import type {ScriptBlockIndexSnapshot} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {
+    resolveMusicRailBlockBottom,
     resolveMusicRailBlockTop,
     resolveMusicRailLeft,
 } from './musicRailDom';
@@ -144,7 +145,7 @@ export const createMusicRailDragView = (
         const targetTop = resolveMusicRailBlockTop(editor, canvas, blockId);
         const startBlockId = resolveStartBlockId(snapshot, musicId, blockId);
         const startTop = startBlockId
-            ? resolveMusicRailBlockTop(editor, canvas, startBlockId)
+            ? resolveMusicRailBlockBottom(editor, canvas, startBlockId)
             : null;
 
         if (targetTop === null) {

@@ -10,6 +10,13 @@ type RangeGeometry = {
     height: number,
 };
 
+/**
+ * Marks the one rail point whose context menu is currently open. Written by the
+ * overlay rather than by the marker controller: the menu is React state, the
+ * markers are imperative DOM, and only the overlay sees both.
+ */
+export const MUSIC_RAIL_MENU_OPEN_ATTRIBUTE = 'data-music-rail-menu-open';
+
 export const escapeMusicRailSelector = (value: string) => {
     return globalThis.CSS?.escape?.(value) ?? value.replace(/["\\]/gu, '\\$&');
 };
@@ -72,10 +79,11 @@ export const resolveMusicRailLeft = (canvas: HTMLElement) => {
     return canvas.scrollLeft + canvas.clientWidth - inset;
 };
 
-export const resolveMusicRailBlockTop = (
+const resolveMusicRailBlockLineCenter = (
     editor: TiptapEditor,
     canvas: HTMLElement,
     blockId: string,
+    edge: 'top' | 'bottom',
 ) => {
     const block = resolveScriptBlockElementById(editor, blockId);
 
@@ -86,13 +94,36 @@ export const resolveMusicRailBlockTop = (
     const canvasRect = canvas.getBoundingClientRect();
     const blockRect = block.getBoundingClientRect();
     const computed = getComputedStyle(block);
-    const paddingTop = Number.parseFloat(computed.paddingTop) || 0;
     const fontSize = Number.parseFloat(computed.fontSize);
     const lineHeight = Number.isFinite(fontSize) && fontSize > 0
         ? fontSize * 1.2
         : 13 * 1.7;
 
+    if (edge === 'bottom') {
+        const paddingBottom = Number.parseFloat(computed.paddingBottom) || 0;
+
+        return blockRect.bottom - canvasRect.top + canvas.scrollTop - paddingBottom - lineHeight / 2;
+    }
+
+    const paddingTop = Number.parseFloat(computed.paddingTop) || 0;
+
     return blockRect.top - canvasRect.top + canvas.scrollTop + paddingTop + lineHeight / 2;
+};
+
+export const resolveMusicRailBlockTop = (
+    editor: TiptapEditor,
+    canvas: HTMLElement,
+    blockId: string,
+) => {
+    return resolveMusicRailBlockLineCenter(editor, canvas, blockId, 'top');
+};
+
+export const resolveMusicRailBlockBottom = (
+    editor: TiptapEditor,
+    canvas: HTMLElement,
+    blockId: string,
+) => {
+    return resolveMusicRailBlockLineCenter(editor, canvas, blockId, 'bottom');
 };
 
 const syncBoundaryData = (element: HTMLButtonElement, boundary: MusicRailBoundary) => {
@@ -157,7 +188,9 @@ export const createMusicRailMarkerController = (
                 return;
             }
 
-            const top = resolveMusicRailBlockTop(editor, canvas, boundary.blockId);
+            const top = boundary.startMusicId
+                ? resolveMusicRailBlockBottom(editor, canvas, boundary.blockId)
+                : resolveMusicRailBlockTop(editor, canvas, boundary.blockId);
 
             if (top === null) {
                 return;
@@ -250,4 +283,7 @@ export const scrollToMusicRailBlock = (
         block: 'center',
         inline: 'nearest',
     });
+
+    // Same arrival feedback as a sidebar jump: the scroll alone points at nothing.
+    editor.commands.flashBlockFocus(blockId);
 };
