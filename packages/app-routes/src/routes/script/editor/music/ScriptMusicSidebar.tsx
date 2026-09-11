@@ -2,7 +2,7 @@ import {
     useEditorElementSelection,
     useEditorInstance,
     useEditorLiveMusic,
-    useFocusEditorBlock,
+    useFocusEditorMusic,
 } from '@stagistic/editor';
 import {formatMusicNumber} from '@stagistic/script';
 import {
@@ -154,7 +154,7 @@ export const ScriptMusicSidebar = ({
 }: ScriptMusicSidebarProps) => {
     const editor = useEditorInstance();
     const elementSelection = useEditorElementSelection();
-    const focusBlock = useFocusEditorBlock();
+    const focusMusic = useFocusEditorMusic();
     const documentMusic = useEditorLiveMusic();
     const {openAttributeManagerMusic} = useScriptSettingsModal();
     const [unassignTarget, setUnassignTarget] = useState<ScriptMusicListItem | null>(null);
@@ -216,7 +216,7 @@ export const ScriptMusicSidebar = ({
                     isActive={elementSelection?.type === 'music' && elementSelection.musicId === music.id}
                     number={musicMetadataById.get(music.id)?.number ?? null}
                     startBlockId={musicMetadataById.get(music.id)?.startBlockId ?? null}
-                    onFocus={focusBlock}
+                    onFocus={focusMusic}
                     onRequestUnassign={setUnassignTarget}
                     onOpenMusicManager={openAttributeManagerMusic}
                 />

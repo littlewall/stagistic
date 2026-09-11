@@ -48,6 +48,11 @@ export {ScriptBehaviorExtension} from './ScriptBehaviorExtension';
 
 // ─── Decorations ─────────────────────────────────────────────────────────────
 
+export {
+    BLOCK_FOCUS_FLASH_ATTRIBUTE,
+    BLOCK_FOCUS_FLASH_DURATION_MS,
+    BlockFocusFlashExtension,
+} from './BlockFocusFlashExtension';
 export {PlaceholderExtension} from './PlaceholderExtension';
 export {SceneGuardExtension} from './SceneGuardExtension';
 export {SceneNumberingExtension} from './SceneNumberingExtension';

@@ -63,6 +63,7 @@ export {
 } from './editor/hooks/blockMutations';
 export {useExclusiveOverlay} from './editor/hooks/useExclusiveOverlay';
 export {useFocusEditorBlock} from './editor/hooks/useFocusEditorBlock';
+export {useFocusEditorMusic} from './editor/hooks/useFocusEditorMusic';
 export {EditorSnapshotStoreProvider} from './editor/live/context';
 export {
     useEditorLiveActiveBlock,

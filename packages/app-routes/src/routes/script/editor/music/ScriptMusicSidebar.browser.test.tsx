@@ -280,6 +280,45 @@ describe('ScriptMusicSidebar', () => {
         expect(document.querySelector('[data-music-id="music-unassigned"][data-music-navigation]')).toBeNull();
     });
 
+    it('parks the caret at the end of the title inside the pill', async () => {
+        mountSidebar();
+
+        const navigationButton = await poll(
+            () => document.querySelector<HTMLButtonElement>('[data-music-navigation="true"]'),
+            'music navigation button',
+        );
+
+        navigationButton.click();
+
+        const titleInput = await poll(
+            () => {
+                const input = document.querySelector<HTMLElement>('[data-music-title-input="start"]');
+
+                return input && document.activeElement === input ? input : null;
+            },
+            'focused music title',
+        );
+
+        expect(titleInput.textContent).toBe('Overture');
+
+        const selection = window.getSelection();
+
+        expect(selection?.isCollapsed).toBe(true);
+
+        /*
+         * Collapsing to the end can anchor on the span or on its text node, so
+         * the caret is located by what lies in front of it rather than by a raw
+         * offset: everything before it must be the whole title.
+         */
+        const caret = selection?.getRangeAt(0);
+        const beforeCaret = document.createRange();
+
+        beforeCaret.selectNodeContents(titleInput);
+        beforeCaret.setEnd(caret?.startContainer ?? titleInput, caret?.startOffset ?? 0);
+
+        expect(beforeCaret.toString()).toBe('Overture');
+    });
+
     it('opens the selected music in the attribute manager from the edit action', async () => {
         mountSidebar();
 

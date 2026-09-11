@@ -24,15 +24,42 @@ import {findMusicAtomRange} from './musicOutCommands';
 
 const STAGE_DIRECTION_NODE_TYPE = 'stageDirection';
 
+/*
+ * Focusing a contenteditable leaves the caret at offset 0, which is invisible
+ * on the empty title of a fresh draft but puts the cursor in front of the text
+ * on a music that already has a name — so typing would run backwards. Collapsing
+ * a range over the span's own contents parks it after the last character, which
+ * is where a click on the pill would have left it.
+ */
+const placeCaretAtEnd = (element: HTMLElement) => {
+    const selection = window.getSelection();
+
+    if (!selection) {
+        return;
+    }
+
+    const range = document.createRange();
+
+    range.selectNodeContents(element);
+    range.collapse(false);
+    selection.removeAllRanges();
+    selection.addRange(range);
+};
+
 export const focusMusicTitle = (editorDom: HTMLElement, blockId: string) => {
     const focus = () => {
         const block = Array.from(editorDom.querySelectorAll<HTMLElement>('[data-id]'))
             .find(candidate => candidate.dataset.id === blockId);
         const input = block?.querySelector<HTMLElement>('[data-music-title-input="start"]');
 
-        input?.focus();
+        if (!input) {
+            return false;
+        }
 
-        return Boolean(input);
+        input.focus();
+        placeCaretAtEnd(input);
+
+        return true;
     };
 
     if (!focus()) {

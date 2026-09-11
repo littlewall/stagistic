@@ -123,6 +123,7 @@
     --base-surface: var(--palette-paper);
     --base-accent: var(--palette-primrose-yellow);
     --base-selection: var(--palette-creamed-corn);
+    --base-flash: var(--palette-creamed-corn);
     --base-green: oklch(.52 .0971 165.2);
     --base-yellow: oklch(.769 .1006 56.1);
     --base-red: oklch(.554 .1273 14.8);
@@ -204,6 +205,10 @@
     /* Where I am in the application — ink, outside the two-accent system. */
     --state-current-edge: var(--color-text);
     --state-current-bar-width: 2px;
+
+    /* Navigated to from elsewhere — a jump target that tints on arrival and
+       fades itself out. Transient by definition: nothing wears it at rest. */
+    --state-flash: oklch(from var(--base-flash) .972 calc(c * .24) h);
 
     /* Provisional — outline only, so it cannot be mistaken for selection. */
     --state-drop-edge: 1.5px dashed oklch(from var(--base-selection) .74 calc(c * .9) h);
@@ -324,6 +329,7 @@
     --state-selected: oklch(from var(--base-selection) .28 calc(c * .35) h);
     --state-selected-edge: oklch(from var(--base-selection) .62 calc(c * .8) h);
     --state-drop-edge: 1.5px dashed oklch(from var(--base-selection) .62 calc(c * .8) h);
+    --state-flash: oklch(from var(--base-flash) .3 calc(c * .24) h);
 
     --color-border-subtle: oklch(from var(--base-neutral) .28 calc(c * var(--C-block)) h);
     --color-border-strong: oklch(from var(--base-neutral) .52 calc(c * var(--C-block)) h);

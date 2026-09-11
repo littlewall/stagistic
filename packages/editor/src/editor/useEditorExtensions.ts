@@ -26,6 +26,7 @@ import {
     getBlockShortcuts,
 } from './model/blockSettingMaps';
 import {
+    BlockFocusFlashExtension,
     BlockUiEventsExtension,
     CharacterRefSyncExtension,
     CharacterTagInputExtension,
@@ -235,6 +236,7 @@ export const useEditorExtensions = ({
             MusicNumberingExtension,
             MusicRailExtension,
             PlaceholderExtension,
+            BlockFocusFlashExtension,
             sceneCommandsExtension,
             SceneGuardExtension,
             SceneNumberingExtension,

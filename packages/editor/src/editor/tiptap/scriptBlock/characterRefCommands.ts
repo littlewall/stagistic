@@ -260,5 +260,12 @@ export const focusFirstCharacterBlock = (
 
     element?.scrollIntoView({block: 'center'});
 
+    // Tints the block on arrival so the jump has a visible target.
+    const blockId: unknown = editor.state.doc.nodeAt(targetPos)?.attrs.id;
+
+    if (typeof blockId === 'string') {
+        editor.commands.flashBlockFocus(blockId);
+    }
+
     return true;
 };
