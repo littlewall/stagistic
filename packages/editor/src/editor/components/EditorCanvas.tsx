@@ -20,6 +20,7 @@ import {HeaderFooterOverlay} from './HeaderFooterOverlay';
 import MusicDraftSuggestionsOverlay from './MusicDraftSuggestionsOverlay';
 import MusicRangeOverlay from './musicRange/MusicRangeOverlay';
 import MusicSuggestionsOverlay from './MusicSuggestionsOverlay';
+import {SceneCollapseOverlay} from './sceneCollapse/SceneCollapseOverlay';
 
 type EditorCanvasProps = {
     editor: TiptapEditor | null,
@@ -100,6 +101,10 @@ export const EditorCanvas = ({
                 editor={editor}
                 canvasRef={canvasRef}
                 blockShortcuts={blockShortcuts}
+            />
+            <SceneCollapseOverlay
+                editor={editor}
+                canvasRef={canvasRef}
             />
             <MusicRangeOverlay
                 editor={editor}

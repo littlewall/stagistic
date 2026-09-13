@@ -56,6 +56,11 @@ export {
 export {PlaceholderExtension} from './PlaceholderExtension';
 export {SceneGuardExtension} from './SceneGuardExtension';
 export {SceneNumberingExtension} from './SceneNumberingExtension';
+export {
+    getSceneCollapseSnapshot,
+    SceneCollapseExtension,
+    type SceneCollapseSnapshot,
+} from './sceneCollapse/SceneCollapseExtension';
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
 

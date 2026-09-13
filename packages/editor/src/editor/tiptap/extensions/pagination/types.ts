@@ -67,6 +67,14 @@ export interface BlockCacheEntry {
     height: number,
     isFallback: boolean,
     hasInlineBreaks: boolean,
+    /** Hidden blocks keep their cached entry separate from a measured one. */
+    isHidden: boolean,
+    /**
+     * Raw `offsetHeight` the entry was measured from. Decorations can restyle a
+     * block without touching its node, so the node alone cannot validate a cached
+     * height.
+     */
+    domHeight: number,
 }
 
 export interface BuildPaginationStateResult {

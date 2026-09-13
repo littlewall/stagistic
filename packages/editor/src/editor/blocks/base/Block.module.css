@@ -15,6 +15,16 @@
 }
 
 /*
+ * Collapsed scene body. `SceneCollapseExtension` marks every block of a
+ * collapsed scene with a node decoration; hiding lives here rather than in
+ * scene.module.css because the attribute lands on blocks of any type, and the
+ * rule has to out-specify the `display: block` reset above.
+ */
+.block[data-scene-content-collapsed = 'true'] {
+    display: none;
+}
+
+/*
  * Jump-to feedback. Clicking a scene, character or music row in a sidebar moves
  * the caret and scrolls the block into view; once the scroll settles there is
  * nothing left pointing at the block that was asked for. The tint lands with no

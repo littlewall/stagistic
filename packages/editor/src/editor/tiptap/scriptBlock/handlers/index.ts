@@ -2,6 +2,7 @@ import {isApplePlatform} from '@stagistic/shared';
 import type {Editor} from '@tiptap/react';
 
 import {getEmptyEnterChooserFromState} from '../../extensions/EmptyEnterChooserExtension';
+import {handleSceneCollapseKeyDown} from '../../extensions/sceneCollapse/sceneCollapseKeyDown';
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
 import {createBlockContext} from '../context';
 import {
@@ -106,6 +107,10 @@ export const handleKeyDown = (
         }
 
         chooserCommands.closeEmptyEnterChooser?.();
+    }
+
+    if (handleSceneCollapseKeyDown(editor, event)) {
+        return true;
     }
 
     if (handleBlockShortcut(editor, event, blockShortcuts)) {
