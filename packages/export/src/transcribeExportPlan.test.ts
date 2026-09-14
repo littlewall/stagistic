@@ -8,8 +8,13 @@ import {
     it,
 } from 'vite-plus/test';
 
+import {BASIC_DEFAULTS} from './config';
+import {deriveBasicExportPlan} from './deriveBasicExportPlan';
 import type {ExportPlan} from './plan';
-import {block} from './testUtils';
+import {
+    block,
+    sampleDoc,
+} from './testUtils';
 import {transcribeExportPlan} from './transcribeExportPlan';
 import type {
     PageItem,
@@ -33,6 +38,16 @@ const plan = (blocks: ExportPlan['doc']['content']): ExportPlan => ({
         forcedBreaks: [],
     },
     postSteps: [],
+});
+
+const baseScript = () => ({
+    doc: sampleDoc(),
+    characters: [],
+    groups: [],
+    initialCharacters: [],
+    initialPlaces: [],
+    scriptTitle: 'Test Play',
+    titlePage: null,
 });
 
 const isVisualLine = (item: PageItem): item is VisualLine => !('type' in item);
@@ -333,5 +348,34 @@ describe('transcribeExportPlan', () => {
         // The heading lands AFTER the page break (kept with its dialogue), not before.
         expect(breakIndex).toBeGreaterThan(-1);
         expect(headingIndex).toBeGreaterThan(breakIndex);
+    });
+
+    it('prints script page numbers on the contents page', () => {
+        const planWithContents = deriveBasicExportPlan(BASIC_DEFAULTS, {
+            ...baseScript(),
+            doc: {
+                type: 'doc',
+                content: [
+                    block('scene', 's1', 'First Scene'),
+                    block('dialogue', 'd1', 'Hello.'),
+                    block('scene', 's2', 'Second Scene'),
+                    block('dialogue', 'd2', 'Goodbye.'),
+                ],
+            },
+        });
+        const transcript = transcribeExportPlan(planWithContents, DEFAULT_EDITOR_SETTINGS);
+        const lines = transcript.items.filter((item): item is VisualLine => !('type' in item));
+        const firstScene = lines.find(line => line.runs[0]?.text === '1. First Scene');
+        const secondScene = lines.find(line => line.runs[0]?.text === '2. Second Scene');
+
+        expect(firstScene?.runs.at(-1)?.text).toBe('1');
+        expect(secondScene?.runs.at(-1)?.text).toBe('2');
+    });
+
+    it('keeps the leading page count even so integrated numbering is stable', () => {
+        const planWithContents = deriveBasicExportPlan(BASIC_DEFAULTS, baseScript());
+        const transcript = transcribeExportPlan(planWithContents, DEFAULT_EDITOR_SETTINGS);
+
+        expect((transcript.leadingPageCount ?? 0) % 2).toBe(0);
     });
 });

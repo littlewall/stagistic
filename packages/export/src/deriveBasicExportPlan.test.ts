@@ -151,40 +151,37 @@ describe('deriveBasicExportPlan', () => {
     it('derives the default characters and places page in name order', () => {
         const plan = deriveBasicExportPlan(BASIC_DEFAULTS, script);
 
-        expect(plan.leadingPages).toEqual({
-            initialPages: [
+        expect(plan.leadingPages.initialPages[0]).toEqual({
+            kind: 'characters-and-places',
+            characters: [
                 {
-                    kind: 'characters-and-places',
-                    characters: [
-                        {
-                            id: 'char-a',
-                            displayName: 'Anna',
-                            outline: 'Lead',
-                        },
-                        {
-                            id: 'char-b',
-                            displayName: 'Bob',
-                            outline: 'Baritone',
-                        },
-                        {
-                            id: 'char-z',
-                            displayName: 'Zora',
-                            outline: null,
-                        },
-                    ],
-                    places: [{id: 'place-stage', name: 'Stage'}, {id: 'place-home', name: 'Home'}],
-                    showCharacterOutlines: false,
+                    id: 'char-a',
+                    displayName: 'Anna',
+                    outline: 'Lead',
+                },
+                {
+                    id: 'char-b',
+                    displayName: 'Bob',
+                    outline: 'Baritone',
+                },
+                {
+                    id: 'char-z',
+                    displayName: 'Zora',
+                    outline: null,
                 },
             ],
-            manualBlankCount: 0,
-            showRomanPageNumbers: true,
-            startEachInitialPageOnOddPage: true,
+            places: [{id: 'place-stage', name: 'Stage'}, {id: 'place-home', name: 'Home'}],
+            showCharacterOutlines: false,
         });
+        expect(plan.leadingPages.manualBlankCount).toBe(0);
+        expect(plan.leadingPages.showRomanPageNumbers).toBe(true);
+        expect(plan.leadingPages.startEachInitialPageOnOddPage).toBe(true);
     });
 
     it('orders characters by first appearance and hides places when requested', () => {
         const plan = deriveBasicExportPlan(withConfig({
             initialPages: {
+                ...BASIC_DEFAULTS.initialPages,
                 startEachInitialPageOnOddPage: false,
                 showPageNumbers: false,
                 charactersAndPlaces: {
@@ -252,6 +249,10 @@ describe('deriveBasicExportPlan', () => {
                     enabled: false,
                     showPlaces: false,
                 },
+                contents: {
+                    ...BASIC_DEFAULTS.initialPages.contents,
+                    enabled: false,
+                },
             },
             blankPages: {
                 betweenInitialPagesAndScript: {
@@ -263,5 +264,57 @@ describe('deriveBasicExportPlan', () => {
 
         expect(plan.leadingPages.initialPages).toEqual([]);
         expect(plan.leadingPages.manualBlankCount).toBe(10);
+    });
+
+    it('appends a contents page after characters and places', () => {
+        const plan = deriveBasicExportPlan(BASIC_DEFAULTS, {
+            ...script,
+            doc: {
+                type: 'doc',
+                content: [block('act', 'a1', 'ACT ONE'), block('scene', 's1', 'The Diner')],
+            },
+        });
+
+        expect(plan.leadingPages.initialPages.map(page => page.kind))
+            .toEqual(['characters-and-places', 'contents']);
+        expect(plan.leadingPages.initialPages[1]).toMatchObject({
+            kind: 'contents',
+            variant: 'scenes-and-musical-numbers',
+            showScoreColumn: false,
+        });
+    });
+
+    it('derives contents from the character-filtered document', () => {
+        const plan = deriveBasicExportPlan({
+            ...BASIC_DEFAULTS,
+            characterFilter: {
+                mode: 'only',
+                characterIds: ['c-alice'],
+                preserveFullScriptPagination: true,
+            },
+        }, {
+            ...script,
+            characters: [
+                {
+                    id: 'c-alice', key: 'ALICE', displayName: 'Alice',
+                },
+            ],
+            doc: {
+                type: 'doc',
+                content: [
+                    block('scene', 's1', 'Alice Scene'),
+                    block('stageDirection', 'sd1', '@ALICE waits.'),
+                    block('scene', 's2', 'Bob Scene'),
+                    block('stageDirection', 'sd2', '@BOB waits.'),
+                ],
+            },
+        });
+        const contents = plan.leadingPages.initialPages
+            .find(page => page.kind === 'contents');
+
+        expect(contents?.kind).toBe('contents');
+        expect(contents?.kind === 'contents'
+            ? contents.acts[0].scenes.map(scene => scene.title)
+            : []).toEqual(['Alice Scene']);
     });
 });

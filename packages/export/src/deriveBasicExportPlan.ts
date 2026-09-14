@@ -5,6 +5,7 @@ import {
 
 import type {BasicExportConfig} from './config';
 import {filterScriptByCharacter} from './filterByCharacter';
+import {deriveContentsPlan} from './initialPages/contents/deriveContentsPlan';
 import type {
     CharactersAndPlacesInitialPagePlan,
     ExportPlan,
@@ -95,6 +96,12 @@ export const deriveBasicExportPlan = (
     const doc = preservePagination ? inputDoc : filteredDoc;
     const forcedBreaks: ForcedBreak[] = [];
     const charactersAndPlaces = buildCharactersAndPlacesPlan(config, script);
+    const contents = deriveContentsPlan(
+        config.initialPages.contents,
+        filteredDoc,
+        script.characters,
+        script.groups,
+    );
     const blankSpec = config.blankPages.betweenInitialPagesAndScript;
     let hasPreviousGroup = false;
     let currentActHasScene = false;
@@ -147,7 +154,7 @@ export const deriveBasicExportPlan = (
         titlePage: script.titlePage,
         scriptTitle: script.scriptTitle,
         leadingPages: {
-            initialPages: charactersAndPlaces ? [charactersAndPlaces] : [],
+            initialPages: [...charactersAndPlaces ? [charactersAndPlaces] : [], ...contents ? [contents] : []],
             manualBlankCount: blankSpec.enabled
                 ? Math.max(1, Math.min(10, Math.floor(blankSpec.count)))
                 : 0,

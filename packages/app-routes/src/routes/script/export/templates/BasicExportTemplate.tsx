@@ -31,6 +31,9 @@ const cloneDefaults = (): BasicExportConfig => ({
         charactersAndPlaces: {
             ...BASIC_DEFAULTS.initialPages.charactersAndPlaces,
         },
+        contents: {
+            ...BASIC_DEFAULTS.initialPages.contents,
+        },
     },
     blankPages: {
         betweenInitialPagesAndScript: {

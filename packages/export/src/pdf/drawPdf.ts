@@ -16,6 +16,7 @@ import {
     getPdfMonoFontFamily,
     registerFonts,
 } from './fonts';
+import {planIntegratedAssembly} from './planIntegratedAssembly';
 
 const PX_TO_PT = 72 / 96;
 
@@ -173,87 +174,59 @@ export const drawPdf = async (
     const generated = await PDFDocument.load(doc.output('arraybuffer'));
     const result = await PDFDocument.create();
     const generatedPages = await result.copyPages(generated, generated.getPageIndices());
-    const scoresAfterPage = new Map<number, ArrayBuffer[]>();
     const leadingPages = transcript.leadingPageCount ?? 0;
-    const musicStartGeneratedPageIndexes = new Set<number>();
+    const scorePagesByMusicId = new Map<string, PDFPage[]>();
+    const scorePageCounts = new Map<string, number>();
 
-    transcript.integratedScores.forEach(score => {
-        const startPageIndex = (transcript.scriptPageSourceBlockIds ?? [])
-            .findIndex(sourceIds => sourceIds.includes(score.startBlockId));
+    for (const score of transcript.integratedScores) {
+        const buffer = transcript.scorePdfs?.[score.musicId];
 
-        if (startPageIndex >= 0) {
-            musicStartGeneratedPageIndexes.add(leadingPages + startPageIndex + 1);
+        if (!buffer) {
+            continue;
         }
+
+        const scoreDocument = await PDFDocument.load(buffer);
+        const pages = await result.copyPages(scoreDocument, scoreDocument.getPageIndices());
+
+        scorePagesByMusicId.set(score.musicId, pages);
+        scorePageCounts.set(score.musicId, pages.length);
+    }
+
+    const assembly = planIntegratedAssembly({
+        scriptPageSourceBlockIds: transcript.scriptPageSourceBlockIds ?? [],
+        scores: transcript.integratedScores.map(score => ({
+            musicId: score.musicId,
+            startBlockId: score.startBlockId,
+            afterBlockId: score.afterBlockId,
+            pageCount: scorePageCounts.get(score.musicId) ?? 0,
+        })),
     });
 
-    transcript.integratedScores.forEach(score => {
-        const sourcePages = transcript.scriptPageSourceBlockIds ?? [];
-        let sourcePageIndex = -1;
+    for (let index = 0; index < leadingPages; index += 1) {
+        result.addPage(generatedPages[index]);
+    }
 
-        sourcePages.forEach((sourceIds, index) => {
-            if (sourceIds.includes(score.afterBlockId)) {
-                sourcePageIndex = index;
-            }
-        });
+    const {width, height} = generatedPages[0].getSize();
 
-        const pdf = transcript.scorePdfs?.[score.musicId];
+    assembly.steps.forEach(step => {
+        if (step.kind === 'blank') {
+            result.addPage([width, height]);
 
-        if (sourcePageIndex === undefined || sourcePageIndex < 0 || !pdf) {
             return;
         }
 
-        const pageIndex = leadingPages + sourcePageIndex;
-        const existing = scoresAfterPage.get(pageIndex) ?? [];
+        if (step.kind === 'script') {
+            result.addPage(generatedPages[leadingPages + (step.scriptPageIndex ?? 0)]);
 
-        existing.push(pdf);
-        scoresAfterPage.set(pageIndex, existing);
+            return;
+        }
+
+        const pages = scorePagesByMusicId.get(step.musicId ?? '');
+
+        if (pages) {
+            result.addPage(pages[step.scorePageIndex ?? 0]);
+        }
     });
-
-    let requireOddBookPage = false;
-
-    for (let pageIndex = 0; pageIndex < generatedPages.length; pageIndex += 1) {
-        if (musicStartGeneratedPageIndexes.has(pageIndex) && (result.getPageCount() + 1) % 2 === 0) {
-            const previous = generatedPages[Math.max(0, pageIndex - 1)];
-            const {width, height} = previous.getSize();
-
-            result.addPage([width, height]);
-        }
-
-        if (requireOddBookPage && (result.getPageCount() + 1) % 2 === 0) {
-            const previous = generatedPages[Math.max(0, pageIndex - 1)];
-            const {width, height} = previous.getSize();
-
-            result.addPage([width, height]);
-        }
-
-        requireOddBookPage = false;
-        result.addPage(generatedPages[pageIndex]);
-
-        const scorePdfs = scoresAfterPage.get(pageIndex) ?? [];
-
-        if (transcript.integratedScores.some(score => {
-            const sourcePageIndex = (transcript.scriptPageSourceBlockIds ?? [])
-                .reduce((lastIndex, sourceIds, index) => sourceIds.includes(score.afterBlockId) ? index : lastIndex, -1);
-
-            return sourcePageIndex >= 0 && leadingPages + sourcePageIndex === pageIndex;
-        })) {
-            requireOddBookPage = true;
-        }
-
-        for (const scorePdf of scorePdfs) {
-            if ((result.getPageCount() + 1) % 2 === 0) {
-                const page = generatedPages[pageIndex];
-                const {width, height} = page.getSize();
-
-                result.addPage([width, height]);
-            }
-
-            const score = await PDFDocument.load(scorePdf);
-            const pages = await result.copyPages(score, score.getPageIndices());
-
-            pages.forEach(page => result.addPage(page));
-        }
-    }
 
     const finalPages = result.getPages();
 

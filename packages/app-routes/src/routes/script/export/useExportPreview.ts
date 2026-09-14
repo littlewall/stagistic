@@ -1,5 +1,6 @@
 import {
     type ExportPlan,
+    readPdfPageCounts,
     renderPdfInWorker,
     type ScriptData,
     transcribeExportPlan,
@@ -53,8 +54,7 @@ export const useExportPreview = <TConfig >({
             const run = async () => {
                 try {
                     const plan = derive(config, script);
-                    const transcript = transcribeExportPlan(plan, settings);
-                    const scorePdfs = await Promise.all(plan.postSteps.map(async step => {
+                    const scoreEntries = await Promise.all(plan.postSteps.map(async step => {
                         const attachment = musicAttachments?.integratedScoresByMusic.get(step.musicId);
 
                         if (!attachment) {
@@ -65,8 +65,13 @@ export const useExportPreview = <TConfig >({
 
                         return blob ? [step.musicId, await blob.arrayBuffer()] as const : null;
                     }));
+                    const scorePdfs = Object.fromEntries(
+                        scoreEntries.filter((item): item is readonly [string, ArrayBuffer] => item !== null),
+                    );
+                    const scorePageCounts = await readPdfPageCounts(scorePdfs);
+                    const transcript = transcribeExportPlan(plan, settings, {scorePageCounts});
 
-                    transcript.scorePdfs = Object.fromEntries(scorePdfs.filter((item): item is readonly [string, ArrayBuffer] => item !== null));
+                    transcript.scorePdfs = scorePdfs;
 
                     if (controller.signal.aborted || runRef.current !== runId) {
                         return;

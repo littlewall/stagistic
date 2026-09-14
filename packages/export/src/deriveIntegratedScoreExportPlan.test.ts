@@ -50,4 +50,18 @@ describe('deriveIntegratedScoreExportPlan', () => {
         expect(plan.pagination.forcedBreaks).toContainEqual({blockId: 'music', kind: 'odd-page'});
         expect(plan.pagination.forcedBreaks).toContainEqual({blockId: 'after', kind: 'odd-page'});
     });
+
+    it('turns on the contents score column', () => {
+        const plan = deriveIntegratedScoreExportPlan(INTEGRATED_SCORE_DEFAULTS, {
+            ...script,
+            doc: {
+                type: 'doc',
+                content: [block('scene', 's1', 'The Diner')],
+            },
+        });
+        const contents = plan.leadingPages.initialPages
+            .find(page => page.kind === 'contents');
+
+        expect(contents?.kind === 'contents' ? contents.showScoreColumn : null).toBe(true);
+    });
 });

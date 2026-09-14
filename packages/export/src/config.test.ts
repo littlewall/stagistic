@@ -24,6 +24,10 @@ describe('BASIC_DEFAULTS', () => {
                 showCharacterOutlines: false,
                 characterOrder: 'name',
             },
+            contents: {
+                enabled: true,
+                variant: 'scenes-and-musical-numbers',
+            },
         });
         expect(BASIC_DEFAULTS.blankPages.betweenInitialPagesAndScript).toEqual({
             enabled: false,
@@ -37,5 +41,16 @@ describe('INTEGRATED_SCORE_DEFAULTS', () => {
         expect(INTEGRATED_SCORE_DEFAULTS).toMatchObject(BASIC_DEFAULTS);
         expect(INTEGRATED_SCORE_DEFAULTS.showNotes).toBe(true);
         expect(INTEGRATED_SCORE_DEFAULTS.characterFilter.preserveFullScriptPagination).toBe(true);
+    });
+});
+
+describe('INTEGRATED_SCORE_DEFAULTS contents', () => {
+    it('clones the contents value instead of sharing it with Basic', () => {
+        expect(INTEGRATED_SCORE_DEFAULTS.initialPages.contents).toEqual({
+            enabled: true,
+            variant: 'scenes-and-musical-numbers',
+        });
+        expect(INTEGRATED_SCORE_DEFAULTS.initialPages.contents)
+            .not.toBe(BASIC_DEFAULTS.initialPages.contents);
     });
 });

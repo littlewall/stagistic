@@ -9,6 +9,7 @@ import {
     type VisualPage,
 } from './buildCharactersAndPlacesPages';
 import {buildInitialPagePages} from './buildInitialPagePages';
+import type {ContentsPageNumbers} from './contents/contentsPageNumbers';
 import {toLowerRoman} from './romanNumerals';
 
 const MONO_FONT_FAMILY = 'Courier Prime';
@@ -80,9 +81,10 @@ export const composeRenderedLeadingPages = (
 const renderInitialPages = (
     plan: LeadingPagesPlan,
     settings: EditorSettings,
+    pageNumbers?: ContentsPageNumbers,
 ): RenderedInitialPages => {
     const groups = plan.initialPages
-        .map(initialPage => buildInitialPagePages(initialPage, settings))
+        .map(initialPage => buildInitialPagePages(initialPage, settings, pageNumbers))
         .filter(group => group.length > 0);
 
     if (groups.length === 0) {
@@ -118,8 +120,9 @@ const renderInitialPages = (
 export const willAddAutomaticBalancingBlank = (
     plan: LeadingPagesPlan,
     settings: EditorSettings,
+    pageNumbers?: ContentsPageNumbers,
 ) => {
-    const {pages} = renderInitialPages(plan, settings);
+    const {pages} = renderInitialPages(plan, settings, pageNumbers);
     const manualBlankCount = Math.max(
         0,
         Math.floor(plan.manualBlankCount),
@@ -131,11 +134,12 @@ export const willAddAutomaticBalancingBlank = (
 export const composeLeadingPages = (
     plan: LeadingPagesPlan,
     settings: EditorSettings,
+    pageNumbers?: ContentsPageNumbers,
 ): VisualPage[] => {
     const {
         pages,
         romanNumberStartIndex,
-    } = renderInitialPages(plan, settings);
+    } = renderInitialPages(plan, settings, pageNumbers);
 
     return composeRenderedLeadingPages(
         pages,

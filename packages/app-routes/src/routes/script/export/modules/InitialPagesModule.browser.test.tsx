@@ -62,6 +62,9 @@ describe('InitialPagesModule', () => {
                 charactersAndPlaces: {
                     ...BASIC_DEFAULTS.initialPages.charactersAndPlaces,
                 },
+                contents: {
+                    ...BASIC_DEFAULTS.initialPages.contents,
+                },
             });
             const [blankPages, setBlankPages] = useState({
                 betweenInitialPagesAndScript: {
@@ -165,6 +168,9 @@ describe('InitialPagesModule', () => {
                     charactersAndPlaces: {
                         ...BASIC_DEFAULTS.initialPages.charactersAndPlaces,
                     },
+                    contents: {
+                        ...BASIC_DEFAULTS.initialPages.contents,
+                    },
                 }}
                 blankPages={{
                     betweenInitialPagesAndScript: {
@@ -245,4 +251,48 @@ describe('InitialPagesModule', () => {
         expect(getComputedStyle(charactersRow.parentElement!).borderTopWidth).not.toBe('0px');
         expect(getComputedStyle(placesRow.parentElement!).borderTopWidth).toBe('0px');
     });
+
+    it('toggles the contents page and switches its variant', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+        const Harness = () => {
+            const [value, setValue] = useState<InitialPagesValue>(BASIC_DEFAULTS.initialPages);
+
+            return (
+                <InitialPagesModule
+                    value={value}
+                    blankPages={BASIC_DEFAULTS.blankPages}
+                    hasAutomaticBalancingBlank={false}
+                    onChange={setValue}
+                    onBlankPagesChange={() => undefined}
+                />
+            );
+        };
+
+        document.body.append(host);
+        mountedRoots.push(root);
+        root.render(<Harness />);
+
+        const contents = await waitFor(() => findSwitch('Contents'));
+
+        expect(checked(contents)).toBe(true);
+
+        const select = await waitFor(() => document.querySelector<HTMLButtonElement>('button[aria-label="Show contents as"]'));
+
+        expect(select.textContent?.trim()).toBe('scenes and musical numbers');
+
+        await userEvent.click(select);
+
+        const option = await waitFor(() => Array
+            .from(document.querySelectorAll<HTMLButtonElement>('button[role="option"]'))
+            .find(element => element.textContent?.trim() === 'musical numbers') ?? null);
+
+        await userEvent.click(option);
+        await waitFor(() => select.textContent?.trim() === 'musical numbers' ? select : null);
+
+        await userEvent.click(contents);
+        await waitFor(() => checked(contents) === false ? contents : null);
+        expect(document.querySelector('button[aria-label="Show contents as"]')).toBeNull();
+    });
 });
+

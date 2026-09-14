@@ -20,10 +20,21 @@ export interface CharactersAndPlacesValue {
     characterOrder: CharacterInitialPageOrder,
 }
 
+export type ContentsVariant =
+    | 'scenes'
+    | 'musical-numbers'
+    | 'scenes-and-musical-numbers';
+
+export interface ContentsValue {
+    enabled: boolean,
+    variant: ContentsVariant,
+}
+
 export interface InitialPagesValue {
     startEachInitialPageOnOddPage: boolean,
     showPageNumbers: boolean,
     charactersAndPlaces: CharactersAndPlacesValue,
+    contents: ContentsValue,
 }
 
 export interface BlankPageSpec {
@@ -61,6 +72,10 @@ export const BASIC_DEFAULTS: BasicExportConfig = {
             showCharacterOutlines: false,
             characterOrder: 'name',
         },
+        contents: {
+            enabled: true,
+            variant: 'scenes-and-musical-numbers',
+        },
     },
     blankPages: {
         betweenInitialPagesAndScript: {
@@ -80,6 +95,7 @@ export const INTEGRATED_SCORE_DEFAULTS: IntegratedScoreExportConfig = {
     initialPages: {
         ...BASIC_DEFAULTS.initialPages,
         charactersAndPlaces: {...BASIC_DEFAULTS.initialPages.charactersAndPlaces},
+        contents: {...BASIC_DEFAULTS.initialPages.contents},
     },
     blankPages: {
         betweenInitialPagesAndScript: {...BASIC_DEFAULTS.blankPages.betweenInitialPagesAndScript},

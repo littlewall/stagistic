@@ -1,5 +1,6 @@
 import type {
     BlankPagesValue,
+    ContentsVariant,
     InitialPagesValue,
 } from '@stagistic/export';
 import {
@@ -25,6 +26,23 @@ const CHARACTER_ORDER_OPTIONS: FormSelectOption[] = [
     },
 ];
 
+const CONTENTS_VARIANT_OPTIONS: FormSelectOption[] = [
+    {
+        label: 'scenes',
+        value: 'scenes',
+    },
+    {
+        label: 'musical numbers',
+        value: 'musical-numbers',
+    },
+    {
+        label: 'scenes and musical numbers',
+        value: 'scenes-and-musical-numbers',
+    },
+];
+
+const CONTENTS_VARIANTS = new Set(CONTENTS_VARIANT_OPTIONS.map(option => option.value));
+
 export const InitialPagesModule = ({
     value,
     blankPages,
@@ -45,6 +63,16 @@ export const InitialPagesModule = ({
         ...value,
         charactersAndPlaces: {
             ...page,
+            ...patch,
+        },
+    });
+    const contents = value.contents;
+    const updateContents = (
+        patch: Partial<InitialPagesValue['contents']>,
+    ) => onChange({
+        ...value,
+        contents: {
+            ...contents,
             ...patch,
         },
     });
@@ -132,6 +160,36 @@ export const InitialPagesModule = ({
                         <span className={styles.initialPageTitle}>Places</span>
                     </Switch>
                 </ExportSettingRow>
+            </div>
+            <div className={styles.initialPage}>
+                <ExportSettingRow>
+                    <Switch
+                        variant="setting"
+                        isSelected={contents.enabled}
+                        onChange={enabled => updateContents({enabled})}
+                    >
+                        <span className={styles.initialPageTitle}>Contents</span>
+                    </Switch>
+                </ExportSettingRow>
+                {contents.enabled ? (
+                    <div className={styles.initialPageOptions}>
+                        <div className={styles.orderField}>
+                            <span className={styles.orderPrefix}>Show</span>
+                            <FormSelect
+                                ariaLabel="Show contents as"
+                                size="md"
+                                width="content"
+                                options={CONTENTS_VARIANT_OPTIONS}
+                                value={contents.variant}
+                                onChange={variant => {
+                                    if (CONTENTS_VARIANTS.has(variant)) {
+                                        updateContents({variant: variant as ContentsVariant});
+                                    }
+                                }}
+                            />
+                        </div>
+                    </div>
+                ) : null}
             </div>
         </ExportSettingsGroup>
     );
