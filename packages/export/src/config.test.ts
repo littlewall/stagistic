@@ -16,7 +16,7 @@ describe('BASIC_DEFAULTS', () => {
         expect(BASIC_DEFAULTS.pageBreaks.sceneOnNewPage).toBe(true);
         expect(BASIC_DEFAULTS.pageBreaks.sceneOnOddPage).toBe(false);
         expect(BASIC_DEFAULTS.initialPages).toEqual({
-            startEachInitialPageOnOddPage: true,
+            startEachInitialPageOnOddPage: false,
             showPageNumbers: true,
             charactersAndPlaces: {
                 enabled: true,
@@ -27,6 +27,9 @@ describe('BASIC_DEFAULTS', () => {
             contents: {
                 enabled: true,
                 variant: 'scenes-and-musical-numbers',
+            },
+            vocalRanges: {
+                enabled: true,
             },
         });
         expect(BASIC_DEFAULTS.blankPages.betweenInitialPagesAndScript).toEqual({
@@ -52,5 +55,17 @@ describe('INTEGRATED_SCORE_DEFAULTS contents', () => {
         });
         expect(INTEGRATED_SCORE_DEFAULTS.initialPages.contents)
             .not.toBe(BASIC_DEFAULTS.initialPages.contents);
+    });
+});
+
+describe('vocalRanges defaults', () => {
+    it('defaults vocal ranges on', () => {
+        expect(BASIC_DEFAULTS.initialPages.vocalRanges).toEqual({enabled: true});
+    });
+
+    it('clones the vocalRanges value instead of sharing it with Basic', () => {
+        expect(INTEGRATED_SCORE_DEFAULTS.initialPages.vocalRanges).toEqual({enabled: true});
+        expect(INTEGRATED_SCORE_DEFAULTS.initialPages.vocalRanges)
+            .not.toBe(BASIC_DEFAULTS.initialPages.vocalRanges);
     });
 });

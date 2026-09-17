@@ -65,6 +65,9 @@ describe('InitialPagesModule', () => {
                 contents: {
                     ...BASIC_DEFAULTS.initialPages.contents,
                 },
+                vocalRanges: {
+                    ...BASIC_DEFAULTS.initialPages.vocalRanges,
+                },
             });
             const [blankPages, setBlankPages] = useState({
                 betweenInitialPagesAndScript: {
@@ -103,7 +106,7 @@ describe('InitialPagesModule', () => {
         expect(checked(charactersSwitch)).toBe(true);
         expect(checked(placesSwitch)).toBe(true);
         expect(checked(outlineSwitch)).toBe(false);
-        expect(checked(oddPageSwitch)).toBe(true);
+        expect(checked(oddPageSwitch)).toBe(false);
         expect(checked(numberingSwitch)).toBe(true);
         expect(
             Array.from(document.querySelectorAll<HTMLLabelElement>('label')).indexOf(oddPageSwitch),
@@ -135,7 +138,7 @@ describe('InitialPagesModule', () => {
 
         expect(output).toContain('"showPlaces":true');
         expect(output).toContain('"showCharacterOutlines":true');
-        expect(output).toContain('"startEachInitialPageOnOddPage":false');
+        expect(output).toContain('"startEachInitialPageOnOddPage":true');
         expect(output).toContain('"characterOrder":"first-appearance"');
         expect(orderSelect.textContent?.trim()).toBe('first appearance');
         expect(Math.abs(orderSelect.getBoundingClientRect().width - collapsedWidth)).toBeLessThan(1);
@@ -171,6 +174,9 @@ describe('InitialPagesModule', () => {
                     contents: {
                         ...BASIC_DEFAULTS.initialPages.contents,
                     },
+                    vocalRanges: {
+                        ...BASIC_DEFAULTS.initialPages.vocalRanges,
+                    },
                 }}
                 blankPages={{
                     betweenInitialPagesAndScript: {
@@ -189,6 +195,8 @@ describe('InitialPagesModule', () => {
         const charactersSwitch = await waitFor(() => findSwitch('Characters'));
         const outlineSwitch = await waitFor(() => findSwitch('Show character outlines'));
         const placesSwitch = await waitFor(() => findSwitch('Places'));
+        const contentsSwitch = await waitFor(() => findSwitch('Contents'));
+        const vocalRangesSwitch = await waitFor(() => findSwitch('Vocal ranges'));
         const blankLabel = await waitFor(() => document.querySelector<HTMLLabelElement>('label[for="blank-page-count"]'));
         const blankSelect = await waitFor(() => document.querySelector<HTMLButtonElement>('button[aria-label="Blank page count"]'));
         const orderSelect = await waitFor(() => document.querySelector<HTMLButtonElement>('button[aria-label="Order characters by"]'));
@@ -203,6 +211,8 @@ describe('InitialPagesModule', () => {
         const charactersRow = charactersSwitch.parentElement!;
         const outlineRow = outlineSwitch.parentElement!;
         const placesRow = placesSwitch.parentElement!;
+        const contentsRow = contentsSwitch.parentElement!;
+        const vocalRangesRow = vocalRangesSwitch.parentElement!;
         const rowHeights = [
             oddPageRow,
             numberingRow,
@@ -248,8 +258,10 @@ describe('InitialPagesModule', () => {
         expect(orderSelectStyle.borderRadius).toBe(blankSelectStyle.borderRadius);
         expect(getComputedStyle(blankLabel).color).toBe(getComputedStyle(oddPageSwitch).color);
         expect(getComputedStyle(blankLabel).fontSize).toBe(getComputedStyle(oddPageSwitch).fontSize);
-        expect(getComputedStyle(charactersRow.parentElement!).borderTopWidth).not.toBe('0px');
+        expect(getComputedStyle(charactersRow.parentElement!).borderTopWidth).toBe('0px');
         expect(getComputedStyle(placesRow.parentElement!).borderTopWidth).toBe('0px');
+        expect(getComputedStyle(contentsRow.parentElement!).borderTopWidth).toBe('0px');
+        expect(getComputedStyle(vocalRangesRow.parentElement!).borderTopWidth).toBe('0px');
     });
 
     it('toggles the contents page and switches its variant', async () => {
@@ -294,5 +306,34 @@ describe('InitialPagesModule', () => {
         await waitFor(() => checked(contents) === false ? contents : null);
         expect(document.querySelector('button[aria-label="Show contents as"]')).toBeNull();
     });
-});
 
+    it('toggles the vocal ranges page', async () => {
+        const host = document.createElement('div');
+        const root = createRoot(host);
+        const Harness = () => {
+            const [value, setValue] = useState<InitialPagesValue>(BASIC_DEFAULTS.initialPages);
+
+            return (
+                <InitialPagesModule
+                    value={value}
+                    blankPages={BASIC_DEFAULTS.blankPages}
+                    hasAutomaticBalancingBlank={false}
+                    onChange={setValue}
+                    onBlankPagesChange={() => undefined}
+                />
+            );
+        };
+
+        document.body.append(host);
+        mountedRoots.push(root);
+        root.render(<Harness />);
+
+        const vocalRanges = await waitFor(() => findSwitch('Vocal ranges'));
+
+        expect(checked(vocalRanges)).toBe(true);
+
+        await userEvent.click(vocalRanges);
+        await waitFor(() => checked(vocalRanges) === false ? vocalRanges : null);
+        expect(checked(vocalRanges)).toBe(false);
+    });
+});

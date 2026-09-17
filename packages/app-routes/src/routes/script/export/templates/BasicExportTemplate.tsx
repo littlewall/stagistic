@@ -34,6 +34,9 @@ const cloneDefaults = (): BasicExportConfig => ({
         contents: {
             ...BASIC_DEFAULTS.initialPages.contents,
         },
+        vocalRanges: {
+            ...BASIC_DEFAULTS.initialPages.vocalRanges,
+        },
     },
     blankPages: {
         betweenInitialPagesAndScript: {

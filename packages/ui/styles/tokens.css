@@ -201,6 +201,7 @@
     /* Chosen in the data — scene, character, music item. */
     --state-selected: oklch(from var(--base-selection) .94 calc(c * .38) h);
     --state-selected-edge: oklch(from var(--base-selection) .8 calc(c * .75) h);
+    --state-selected-strong: oklch(from var(--base-selection) .58 c h);
 
     /* Where I am in the application — ink, outside the two-accent system. */
     --state-current-edge: var(--color-text);
@@ -328,6 +329,7 @@
        border to keep the same "chosen in the data" reading as in light mode. */
     --state-selected: oklch(from var(--base-selection) .28 calc(c * .35) h);
     --state-selected-edge: oklch(from var(--base-selection) .62 calc(c * .8) h);
+    --state-selected-strong: oklch(from var(--base-selection) .68 c h);
     --state-drop-edge: 1.5px dashed oklch(from var(--base-selection) .62 calc(c * .8) h);
     --state-flash: oklch(from var(--base-flash) .3 calc(c * .24) h);
 

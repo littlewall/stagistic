@@ -82,6 +82,7 @@ export const useExportScriptData = (): {
         const {
             initialCharacters,
             initialPlaces,
+            initialVocalRanges,
         } = collectInitialPageData(
             snapshot,
             catalogEntities,
@@ -95,6 +96,7 @@ export const useExportScriptData = (): {
             groups: collectGroups(catalogEntities),
             initialCharacters,
             initialPlaces,
+            initialVocalRanges,
             scriptTitle: currentScript.name,
             titlePage: titlePageDraft,
         };

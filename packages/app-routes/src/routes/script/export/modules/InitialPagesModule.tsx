@@ -191,6 +191,20 @@ export const InitialPagesModule = ({
                     </div>
                 ) : null}
             </div>
+            <div className={styles.initialPage}>
+                <ExportSettingRow>
+                    <Switch
+                        variant="setting"
+                        isSelected={value.vocalRanges.enabled}
+                        onChange={enabled => onChange({
+                            ...value,
+                            vocalRanges: {enabled},
+                        })}
+                    >
+                        <span className={styles.initialPageTitle}>Vocal ranges</span>
+                    </Switch>
+                </ExportSettingRow>
+            </div>
         </ExportSettingsGroup>
     );
 };

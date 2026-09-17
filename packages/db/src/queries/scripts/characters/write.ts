@@ -14,6 +14,8 @@ import type {
     UpdateScriptCharacterKeyPayload,
     UpdateScriptCharacterNotesPayload,
     UpdateScriptCharacterOutlinePayload,
+    UpdateScriptCharacterVocalRangePayload,
+    UpdateScriptCharacterVoiceTypePayload,
     UpsertScriptCharacterPayload,
 } from '../payloads';
 
@@ -33,6 +35,9 @@ export const upsertScriptCharacter = async (
             notes: payload.notes ?? null,
             backstory: payload.backstory ?? null,
             outline: payload.outline ?? null,
+            voiceType: payload.voiceType ?? null,
+            vocalRangeLow: payload.vocalRangeLow ?? null,
+            vocalRangeHigh: payload.vocalRangeHigh ?? null,
             createdAt: payload.createdAt,
             updatedAt: payload.updatedAt,
         })
@@ -44,6 +49,9 @@ export const upsertScriptCharacter = async (
                 notes: payload.notes ?? null,
                 backstory: payload.backstory ?? null,
                 outline: payload.outline ?? null,
+                voiceType: payload.voiceType ?? null,
+                vocalRangeLow: payload.vocalRangeLow ?? null,
+                vocalRangeHigh: payload.vocalRangeHigh ?? null,
                 updatedAt: payload.updatedAt,
             },
             setWhere: eq(scriptCharacters.kind, 'character'),
@@ -186,6 +194,45 @@ export const updateScriptCharacterOutline = async (
         .update(scriptCharacters)
         .set({
             outline: payload.outline,
+            updatedAt: payload.updatedAt,
+        })
+        .where(
+            and(
+                eq(scriptCharacters.scriptId, payload.scriptId),
+                eq(scriptCharacters.id, payload.characterId),
+                eq(scriptCharacters.kind, 'character'),
+            ),
+        );
+};
+
+export const updateScriptCharacterVoiceType = async (
+    db: DbClient,
+    payload: UpdateScriptCharacterVoiceTypePayload,
+) => {
+    await db
+        .update(scriptCharacters)
+        .set({
+            voiceType: payload.voiceType,
+            updatedAt: payload.updatedAt,
+        })
+        .where(
+            and(
+                eq(scriptCharacters.scriptId, payload.scriptId),
+                eq(scriptCharacters.id, payload.characterId),
+                eq(scriptCharacters.kind, 'character'),
+            ),
+        );
+};
+
+export const updateScriptCharacterVocalRange = async (
+    db: DbClient,
+    payload: UpdateScriptCharacterVocalRangePayload,
+) => {
+    await db
+        .update(scriptCharacters)
+        .set({
+            vocalRangeLow: payload.vocalRangeLow,
+            vocalRangeHigh: payload.vocalRangeHigh,
             updatedAt: payload.updatedAt,
         })
         .where(

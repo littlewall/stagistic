@@ -11,7 +11,7 @@ import {
     toDomainCollectionValue,
 } from '../collections';
 
-type CharacterField = 'colorHex' | 'genderKey' | 'outline';
+type CharacterField = 'colorHex' | 'genderKey' | 'outline' | 'voiceType' | 'vocalRangeLow' | 'vocalRangeHigh';
 
 const normalizeGenderLabel = (label: string) => label.trim().replace(/\s+/g, ' ');
 
@@ -54,6 +54,30 @@ export const createScriptCharactersStore = (
                         scriptId,
                         original.id,
                         modified.outline,
+                    ),
+                    voiceType: () => repository.setScriptCharacterVoiceType(
+                        scriptId,
+                        original.id,
+                        modified.voiceType,
+                    ),
+                    /*
+                     * Both keys read the current low+high pair and call the same
+                     * combined setter, since the range is only ever edited as a pair.
+                     * When a single edit changes both bounds at once, this fires twice
+                     * with identical (already-current) arguments — harmless, but keeps
+                     * the per-changed-field loop below correct for either bound alone.
+                     */
+                    vocalRangeLow: () => repository.setScriptCharacterVocalRange(
+                        scriptId,
+                        original.id,
+                        modified.vocalRangeLow,
+                        modified.vocalRangeHigh,
+                    ),
+                    vocalRangeHigh: () => repository.setScriptCharacterVocalRange(
+                        scriptId,
+                        original.id,
+                        modified.vocalRangeLow,
+                        modified.vocalRangeHigh,
                     ),
                 };
                 const changedFields = Object.keys(changes).filter(
@@ -139,6 +163,9 @@ export const createScriptCharactersStore = (
             notes: null,
             backstory: null,
             outline: null,
+            voiceType: null,
+            vocalRangeLow: null,
+            vocalRangeHigh: null,
         });
 
         return runAction(normalizedKey, 'confirm', async () => {
@@ -164,6 +191,29 @@ export const createScriptCharactersStore = (
         });
 
         return runAction(characterId, field, async () => {
+            await transaction.isPersisted.promise;
+
+            const character = characters.collection.get(characterId);
+
+            return character ? toDomainCollectionValue(character) : null;
+        });
+    };
+
+    const updateVocalRange = async (
+        characterId: string,
+        vocalRangeLow: string | null,
+        vocalRangeHigh: string | null,
+    ) => {
+        if (!characters.collection.has(characterId)) {
+            return null;
+        }
+
+        const transaction = characters.collection.update(characterId, draft => {
+            draft.vocalRangeLow = vocalRangeLow;
+            draft.vocalRangeHigh = vocalRangeHigh;
+        });
+
+        return runAction(characterId, 'vocalRangeLow', async () => {
             await transaction.isPersisted.promise;
 
             const character = characters.collection.get(characterId);
@@ -268,6 +318,12 @@ export const createScriptCharactersStore = (
         setCharacterColor: (id: string, value: string | null) => updateField(id, 'colorHex', value),
         setCharacterGender: (id: string, value: string | null) => updateField(id, 'genderKey', value),
         setCharacterOutline: (id: string, value: string | null) => updateField(id, 'outline', value),
+        setCharacterVoiceType: (id: string, value: string | null) => updateField(id, 'voiceType', value),
+        setCharacterVocalRange: (id: string, low: string | null, high: string | null) => updateVocalRange(
+            id,
+            low,
+            high,
+        ),
         createGender,
     };
 };

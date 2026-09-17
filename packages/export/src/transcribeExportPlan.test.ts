@@ -46,6 +46,7 @@ const baseScript = () => ({
     groups: [],
     initialCharacters: [],
     initialPlaces: [],
+    initialVocalRanges: [],
     scriptTitle: 'Test Play',
     titlePage: null,
 });

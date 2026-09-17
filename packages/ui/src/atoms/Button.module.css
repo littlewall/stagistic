@@ -64,6 +64,26 @@
         }
     }
 
+    &.toggle {
+        color: var(--color-text);
+        background: var(--color-surface);
+        border-color: var(--color-border);
+
+        &[data-hovered] {
+            background: var(--state-hover);
+        }
+
+        &[aria-pressed = 'true'] {
+            background: var(--state-selected);
+            border-color: var(--color-text-muted);
+        }
+
+        &[data-focus-visible] {
+            outline: var(--focus-ring);
+            outline-offset: var(--focus-ring-offset);
+        }
+    }
+
     &.ghost {
         color: var(--color-text-muted);
         background: transparent;
@@ -85,6 +105,34 @@
             border-color: transparent;
             outline: var(--focus-ring);
             outline-offset: var(--focus-ring-offset);
+        }
+    }
+
+    &.segment {
+        color: var(--color-text-muted);
+        background: transparent;
+        border-color: transparent;
+        border-radius: 0;
+        transition: color var(--duration-normal) var(--ease-standard);
+
+        &[data-hovered] {
+            color: var(--color-text);
+            background: var(--state-hover);
+        }
+
+        &[aria-pressed = 'true'] {
+            color: var(--color-text);
+            background: var(--state-selected);
+        }
+
+        &[aria-pressed = 'true'][data-hovered] {
+            background: var(--state-selected);
+        }
+
+        &[data-focus-visible] {
+            color: var(--color-text);
+            outline: var(--focus-ring);
+            outline-offset: calc(-1 * var(--focus-ring-offset));
         }
     }
 

@@ -49,6 +49,7 @@ const script = {
             firstAppearanceOrder: 10,
         },
     ],
+    initialVocalRanges: [],
     scriptTitle: 'Test',
     titlePage: null,
 };
@@ -175,7 +176,7 @@ describe('deriveBasicExportPlan', () => {
         });
         expect(plan.leadingPages.manualBlankCount).toBe(0);
         expect(plan.leadingPages.showRomanPageNumbers).toBe(true);
-        expect(plan.leadingPages.startEachInitialPageOnOddPage).toBe(true);
+        expect(plan.leadingPages.startEachInitialPageOnOddPage).toBe(false);
     });
 
     it('orders characters by first appearance and hides places when requested', () => {
@@ -316,5 +317,87 @@ describe('deriveBasicExportPlan', () => {
         expect(contents?.kind === 'contents'
             ? contents.acts[0].scenes.map(scene => scene.title)
             : []).toEqual(['Alice Scene']);
+    });
+
+    it('appends a vocal ranges page in name order when ranges are present', () => {
+        const plan = deriveBasicExportPlan(BASIC_DEFAULTS, {
+            ...script,
+            initialVocalRanges: [
+                {
+                    id: 'char-b', displayName: 'Bob', voiceType: 'baritone', low: 'C3', high: 'A4', firstAppearanceOrder: 1,
+                }, {
+                    id: 'char-a', displayName: 'Anna', voiceType: null, low: 'A3', high: 'C6', firstAppearanceOrder: 8,
+                },
+            ],
+        });
+
+        expect(plan.leadingPages.initialPages.map(page => page.kind))
+            .toEqual([
+                'characters-and-places',
+                'contents',
+                'vocal-ranges',
+            ]);
+        expect(plan.leadingPages.initialPages[2]).toEqual({
+            kind: 'vocal-ranges',
+            entries: [
+                {
+                    id: 'char-a', displayName: 'Anna', voiceType: null, low: 'A3', high: 'C6',
+                }, {
+                    id: 'char-b', displayName: 'Bob', voiceType: 'baritone', low: 'C3', high: 'A4',
+                },
+            ],
+        });
+    });
+
+    it('orders the vocal ranges page by first appearance when configured', () => {
+        const plan = deriveBasicExportPlan(withConfig({
+            initialPages: {
+                ...BASIC_DEFAULTS.initialPages,
+                charactersAndPlaces: {
+                    ...BASIC_DEFAULTS.initialPages.charactersAndPlaces,
+                    characterOrder: 'first-appearance',
+                },
+            },
+        }), {
+            ...script,
+            initialVocalRanges: [
+                {
+                    id: 'char-b', displayName: 'Bob', voiceType: 'baritone', low: 'C3', high: 'A4', firstAppearanceOrder: 1,
+                }, {
+                    id: 'char-a', displayName: 'Anna', voiceType: null, low: 'A3', high: 'C6', firstAppearanceOrder: 8,
+                },
+            ],
+        });
+        const vocalRanges = plan.leadingPages.initialPages.find(page => page.kind === 'vocal-ranges');
+
+        expect(vocalRanges?.kind === 'vocal-ranges' ? vocalRanges.entries.map(entry => entry.id) : [])
+            .toEqual(['char-b', 'char-a']);
+    });
+
+    it('omits the vocal ranges page when disabled or when no character has a complete range', () => {
+        const disabled = deriveBasicExportPlan(withConfig({
+            initialPages: {
+                ...BASIC_DEFAULTS.initialPages,
+                vocalRanges: {enabled: false},
+            },
+        }), {
+            ...script,
+            initialVocalRanges: [
+                {
+                    id: 'char-a', displayName: 'Anna', voiceType: null, low: 'A3', high: 'C6', firstAppearanceOrder: 8,
+                },
+            ],
+        });
+
+        expect(disabled.leadingPages.initialPages.map(page => page.kind))
+            .not.toContain('vocal-ranges');
+
+        const empty = deriveBasicExportPlan(BASIC_DEFAULTS, {
+            ...script,
+            initialVocalRanges: [],
+        });
+
+        expect(empty.leadingPages.initialPages.map(page => page.kind))
+            .not.toContain('vocal-ranges');
     });
 });

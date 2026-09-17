@@ -63,9 +63,21 @@ export interface ContentsInitialPagePlan {
     showScoreColumn: boolean,
 }
 
+export interface VocalRangesInitialPagePlan {
+    kind: 'vocal-ranges',
+    entries: Array<{
+        id: string,
+        displayName: string,
+        voiceType: string | null,
+        low: string,
+        high: string,
+    }>,
+}
+
 export type InitialPagePlan =
     | CharactersAndPlacesInitialPagePlan
-    | ContentsInitialPagePlan;
+    | ContentsInitialPagePlan
+    | VocalRangesInitialPagePlan;
 
 export interface LeadingPagesPlan {
     initialPages: InitialPagePlan[],

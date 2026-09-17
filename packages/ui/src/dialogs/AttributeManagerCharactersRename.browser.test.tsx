@@ -79,9 +79,22 @@ const renderPanel = (
         <RenameableCharactersPanel
             characters={[
                 {
-                    id: 'char-1', name: 'ANNA', color: null, outline: null, groupNames: ['ALL', 'ENSEMBLE'],
+                    id: 'char-1',
+                    name: 'ANNA',
+                    color: null,
+                    outline: null,
+                    voiceType: null,
+                    vocalRangeLow: null,
+                    vocalRangeHigh: null,
+                    groupNames: ['ALL', 'ENSEMBLE'],
                 }, {
-                    id: 'char-2', name: 'BORIS', color: null, outline: null,
+                    id: 'char-2',
+                    name: 'BORIS',
+                    color: null,
+                    outline: null,
+                    voiceType: null,
+                    vocalRangeLow: null,
+                    vocalRangeHigh: null,
                 },
             ]}
             groups={groups}

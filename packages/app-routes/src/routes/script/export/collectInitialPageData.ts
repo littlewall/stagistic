@@ -1,9 +1,11 @@
 import type {
     ExportInitialCharacter,
     ExportInitialPlace,
+    ExportInitialVocalRange,
 } from '@stagistic/export';
 import {
     normalizeCharacterKey,
+    parsePitch,
     type ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
 
@@ -12,6 +14,9 @@ export type ExportCatalogEntity = {
     kind: 'character',
     key: string,
     outline?: string | null,
+    voiceType?: string | null,
+    vocalRangeLow?: string | null,
+    vocalRangeHigh?: string | null,
 } | {
     id: string,
     kind: 'group',
@@ -29,10 +34,7 @@ const cleanOutline = (outline: string | null | undefined): string | null => {
     return value.length > 0 ? value : null;
 };
 
-const collectCharacters = (
-    snapshot: ScriptBlockIndexSnapshot,
-    catalogEntities: ExportCatalogEntity[],
-): ExportInitialCharacter[] => {
+const buildFirstAppearanceOrders = (snapshot: ScriptBlockIndexSnapshot) => {
     const firstOrderById = new Map<string, number>();
     const firstOrderByKey = new Map<string, number>();
 
@@ -52,21 +54,52 @@ const collectCharacters = (
             });
         });
 
-    return catalogEntities
-        .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'character'}> => entity.kind === 'character')
-        .map(character => {
-            const key = normalizeCharacterKey(character.key);
-
-            return {
-                id: character.id,
-                displayName: toDisplayName(key),
-                outline: cleanOutline(character.outline),
-                firstAppearanceOrder: firstOrderById.get(character.id)
-                    ?? firstOrderByKey.get(key)
-                    ?? null,
-            };
-        });
+    return {firstOrderById, firstOrderByKey};
 };
+
+const firstAppearanceOrderOf = (
+    character: Extract<ExportCatalogEntity, {kind: 'character'}>,
+    firstAppearanceOrders: ReturnType<typeof buildFirstAppearanceOrders>,
+): number | null => firstAppearanceOrders.firstOrderById.get(character.id)
+    ?? firstAppearanceOrders.firstOrderByKey.get(normalizeCharacterKey(character.key))
+    ?? null;
+
+const collectCharacters = (
+    catalogEntities: ExportCatalogEntity[],
+    firstAppearanceOrders: ReturnType<typeof buildFirstAppearanceOrders>,
+): ExportInitialCharacter[] => catalogEntities
+    .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'character'}> => entity.kind === 'character')
+    .map(character => ({
+        id: character.id,
+        displayName: toDisplayName(normalizeCharacterKey(character.key)),
+        outline: cleanOutline(character.outline),
+        firstAppearanceOrder: firstAppearanceOrderOf(character, firstAppearanceOrders),
+    }));
+
+const collectVocalRanges = (
+    catalogEntities: ExportCatalogEntity[],
+    firstAppearanceOrders: ReturnType<typeof buildFirstAppearanceOrders>,
+): ExportInitialVocalRange[] => catalogEntities
+    .filter((entity): entity is Extract<ExportCatalogEntity, {kind: 'character'}> => entity.kind === 'character')
+    .flatMap(character => {
+        const low = character.vocalRangeLow ?? null;
+        const high = character.vocalRangeHigh ?? null;
+
+        if (!low || !high || !parsePitch(low) || !parsePitch(high)) {
+            return [];
+        }
+
+        return [
+            {
+                id: character.id,
+                displayName: toDisplayName(normalizeCharacterKey(character.key)),
+                voiceType: character.voiceType ?? null,
+                low,
+                high,
+                firstAppearanceOrder: firstAppearanceOrderOf(character, firstAppearanceOrders),
+            },
+        ];
+    });
 
 const collectPlaces = (
     snapshot: ScriptBlockIndexSnapshot,
@@ -112,7 +145,13 @@ export const collectInitialPageData = (
 ): {
     initialCharacters: ExportInitialCharacter[],
     initialPlaces: ExportInitialPlace[],
-} => ({
-    initialCharacters: collectCharacters(snapshot, catalogEntities),
-    initialPlaces: collectPlaces(snapshot, places, scenePlaceIds),
-});
+    initialVocalRanges: ExportInitialVocalRange[],
+} => {
+    const firstAppearanceOrders = buildFirstAppearanceOrders(snapshot);
+
+    return {
+        initialCharacters: collectCharacters(catalogEntities, firstAppearanceOrders),
+        initialPlaces: collectPlaces(snapshot, places, scenePlaceIds),
+        initialVocalRanges: collectVocalRanges(catalogEntities, firstAppearanceOrders),
+    };
+};

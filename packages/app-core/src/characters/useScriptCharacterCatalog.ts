@@ -111,6 +111,16 @@ export const useScriptCharacterCatalog = (
             ?? Promise.resolve(null),
         [store],
     );
+    const setCharacterVoiceType = useCallback(
+        (id: string, value: string | null) => store?.setCharacterVoiceType(id, value)
+            ?? Promise.resolve(null),
+        [store],
+    );
+    const setCharacterVocalRange = useCallback(
+        (id: string, low: string | null, high: string | null) => store?.setCharacterVocalRange(id, low, high)
+            ?? Promise.resolve(null),
+        [store],
+    );
     const createGender = useCallback(
         (label: string) => store?.createGender(label) ?? Promise.resolve(null),
         [store],
@@ -184,6 +194,8 @@ export const useScriptCharacterCatalog = (
         colorUpdatingCharacterIds: pendingIds('colorHex'),
         genderUpdatingCharacterIds: pendingIds('genderKey'),
         outlineUpdatingCharacterIds: pendingIds('outline'),
+        voiceTypeUpdatingCharacterIds: pendingIds('voiceType'),
+        vocalRangeUpdatingCharacterIds: pendingIds('vocalRangeLow'),
         creatingGroupKeys: pendingGroupIds('create'),
         deletingGroupIds: pendingGroupIds('delete'),
         renamingGroupIds: pendingGroupIds('key'),
@@ -195,6 +207,8 @@ export const useScriptCharacterCatalog = (
         setCharacterColor,
         setCharacterGender,
         setCharacterOutline,
+        setCharacterVoiceType,
+        setCharacterVocalRange,
         createGender,
         createGroup,
         deleteGroup,

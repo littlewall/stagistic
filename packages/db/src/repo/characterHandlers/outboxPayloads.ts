@@ -78,6 +78,36 @@ export const buildCharacterOutlinePayload = (
     });
 };
 
+export const buildCharacterVoiceTypePayload = (
+    scriptId: string,
+    characterId: string,
+    voiceType: string | null,
+    updatedAt: number,
+) => {
+    return JSON.stringify({
+        scriptId,
+        characterId,
+        voiceType,
+        updatedAt,
+    });
+};
+
+export const buildCharacterVocalRangePayload = (
+    scriptId: string,
+    characterId: string,
+    vocalRangeLow: string | null,
+    vocalRangeHigh: string | null,
+    updatedAt: number,
+) => {
+    return JSON.stringify({
+        scriptId,
+        characterId,
+        vocalRangeLow,
+        vocalRangeHigh,
+        updatedAt,
+    });
+};
+
 export const buildCharacterGenderUpsertPayload = (
     scriptId: string,
     genderKey: string,

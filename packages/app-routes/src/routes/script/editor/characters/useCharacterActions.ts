@@ -46,6 +46,8 @@ export interface CharacterActions {
     handleSetCharacterColor: (characterId: string, colorHex: string | null) => void,
     handleSetCharacterGender: (characterId: string, genderKey: string | null) => void,
     handleSetCharacterOutline: (characterId: string, outline: string | null) => void,
+    handleSetCharacterVoiceType: (characterId: string, voiceType: string | null) => void,
+    handleSetCharacterVocalRange: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void,
     handleUpsertCharacterGender: (label: string) => Promise<CharacterGenderOption | null>,
 }
 
@@ -182,6 +184,12 @@ export const useCharacterActions = ({
     const handleSetCharacterOutline = useCallback((id: string, outline: string | null) => {
         void catalog.setCharacterOutline(id, outline).catch(() => undefined);
     }, [catalog]);
+    const handleSetCharacterVoiceType = useCallback((id: string, voiceType: string | null) => {
+        void catalog.setCharacterVoiceType(id, voiceType).catch(() => undefined);
+    }, [catalog]);
+    const handleSetCharacterVocalRange = useCallback((id: string, low: string | null, high: string | null) => {
+        void catalog.setCharacterVocalRange(id, low, high).catch(() => undefined);
+    }, [catalog]);
     const handleUpsertCharacterGender = useCallback((label: string) => {
         return catalog.createGender(label).catch(() => null);
     }, [catalog]);
@@ -194,6 +202,8 @@ export const useCharacterActions = ({
         handleSetCharacterColor,
         handleSetCharacterGender,
         handleSetCharacterOutline,
+        handleSetCharacterVoiceType,
+        handleSetCharacterVocalRange,
         handleUpsertCharacterGender,
     };
 };

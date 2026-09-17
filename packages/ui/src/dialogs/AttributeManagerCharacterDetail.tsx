@@ -15,6 +15,7 @@ import {useCharacterColorPickerState} from '../editor-panels/characterRowConfirm
 import type {EditorSidebarCharacter} from '../editor-panels/types';
 import {TrashIcon} from '../icons';
 import {formControlStyles} from '../molecules/forms/formControlStyles';
+import {VocalRangeSection} from '../vocal-range/VocalRangeSection';
 import type {AttributeManagerCharacter} from './AttributeManagerCharactersPanel';
 import styles from './AttributeManagerCharactersPanel.module.css';
 import {RemoveCharacterModal} from './RemoveCharacterModal';
@@ -39,6 +40,8 @@ interface AttributeManagerCharacterDetailProps {
         colorHex: string | null,
     ) => void | Promise<unknown>,
     onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
+    onSetCharacterVoiceType?: (characterId: string, voiceType: string | null) => void,
+    onSetCharacterVocalRange?: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void,
     onDeleteCharacter?: (characterId: string) => void,
 }
 
@@ -55,6 +58,8 @@ export const AttributeManagerCharacterDetail = ({
     onRenameCharacter,
     onSetCharacterColor,
     onSetCharacterOutline,
+    onSetCharacterVoiceType,
+    onSetCharacterVocalRange,
     onDeleteCharacter,
 }: AttributeManagerCharacterDetailProps) => {
     const [isRemoveOpen, setIsRemoveOpen] = useState(false);
@@ -200,6 +205,16 @@ export const AttributeManagerCharacterDetail = ({
                         onSetCharacterOutline={onSetCharacterOutline}
                     />
                 </section>
+                <VocalRangeSection
+                    character={{
+                        id: character.id,
+                        voiceType: character.voiceType,
+                        vocalRangeLow: character.vocalRangeLow,
+                        vocalRangeHigh: character.vocalRangeHigh,
+                    }}
+                    onSetCharacterVoiceType={onSetCharacterVoiceType}
+                    onSetCharacterVocalRange={onSetCharacterVocalRange}
+                />
             </div>
             <RemoveCharacterModal
                 isOpen={isRemoveOpen}

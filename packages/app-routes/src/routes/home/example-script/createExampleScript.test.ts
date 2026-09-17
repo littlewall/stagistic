@@ -53,6 +53,9 @@ const createCharacter = (id: string, key: string) => ({
     notes: null,
     backstory: null,
     outline: null,
+    voiceType: null,
+    vocalRangeLow: null,
+    vocalRangeHigh: null,
 });
 
 const createRepository = (): ExampleRepository => {

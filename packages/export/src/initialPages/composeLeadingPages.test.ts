@@ -5,7 +5,10 @@ import {
     it,
 } from 'vite-plus/test';
 
-import type {VisualLine} from '../visualLine';
+import type {
+    InitialPageVisualPage,
+    VisualLine,
+} from '../visualLine';
 import {
     composeLeadingPages,
     composeRenderedLeadingPages,
@@ -28,7 +31,14 @@ const page = (label: string): VisualLine[] => [
     },
 ];
 
-const pageText = (lines: VisualLine[]) => lines.flatMap(line => line.runs.map(run => run.text));
+const pageText = (lines: InitialPageVisualPage) => lines
+    .flatMap(line => {
+        if (!('runs' in line)) {
+            return [];
+        }
+
+        return line.runs.map(run => run.text);
+    });
 const initialPage = (
     label: string,
     characterCount = 1,

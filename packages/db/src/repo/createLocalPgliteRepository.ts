@@ -134,6 +134,12 @@ export const createLocalPgliteRepository = ({
         setScriptCharacterOutline: (scriptId, id, outline) => {
             return characterHandlers.setScriptCharacterOutline(scriptId, id, outline);
         },
+        setScriptCharacterVoiceType: (scriptId, id, voiceType) => {
+            return characterHandlers.setScriptCharacterVoiceType(scriptId, id, voiceType);
+        },
+        setScriptCharacterVocalRange: (scriptId, id, low, high) => {
+            return characterHandlers.setScriptCharacterVocalRange(scriptId, id, low, high);
+        },
         upsertScriptCharacterGender: (scriptId, label) => {
             return characterHandlers.upsertScriptCharacterGender(scriptId, label);
         },

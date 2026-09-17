@@ -1,0 +1,159 @@
+.widget {
+    --vocal-range-active-note-color: var(--state-selected-strong);
+
+    overflow: hidden;
+    display: inline-flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    inline-size: min(100%, var(--vocal-range-widget-max-inline-size, 32rem));
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+}
+
+.root {
+    display: block;
+    inline-size: 100%;
+    block-size: auto;
+    color: var(--color-text);
+}
+
+.rangeHeader {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    border-bottom: 1px solid var(--color-border);
+}
+
+.rangeHeaderItem {
+    min-inline-size: 0;
+
+    &[data-selected] {
+        background: var(--state-selected);
+        box-shadow: inset 0 -2px var(--color-text);
+    }
+
+    & + & {
+        border-left: 1px solid var(--color-border);
+    }
+}
+
+.rangeHeaderButton {
+    flex-direction: column;
+    gap: 0;
+    align-items: flex-start;
+    inline-size: 100%;
+}
+
+.rangeLabel {
+    font-size: var(--font-size-xs);
+    line-height: var(--line-height-tight);
+    color: var(--color-text-muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+}
+
+.noteControls {
+    display: flex;
+    gap: var(--space-xs);
+    align-items: center;
+    padding: var(--space-sm);
+    border-top: 1px solid var(--color-border);
+}
+
+.controlGroup {
+    display: inline-flex;
+    gap: var(--space-xs);
+    align-items: center;
+}
+
+.controlDivider {
+    flex: none;
+    width: 1px;
+    height: 20px;
+    margin: 0 var(--space-xs);
+    background: var(--color-border-subtle);
+}
+
+.controlIcon {
+    width: var(--icon-size-md);
+    height: var(--icon-size-md);
+}
+
+.accidentalIcon {
+    font-size: var(--font-size-xl);
+    line-height: 1;
+}
+
+.staffLine {
+    pointer-events: none;
+    stroke: currentcolor;
+    stroke-width: 1;
+}
+
+.ledgerLine {
+    pointer-events: none;
+    stroke: currentcolor;
+    stroke-width: 1;
+}
+
+.connector {
+    pointer-events: none;
+    stroke: currentcolor;
+    stroke-width: 1;
+}
+
+.note {
+    touch-action: none;
+    cursor: grab;
+    user-select: none;
+    outline: none;
+
+    &:focus-visible .selectionHalo {
+        opacity: 1;
+        fill: transparent;
+        stroke: currentcolor;
+    }
+
+    &[data-selected] {
+        color: var(--vocal-range-active-note-color);
+    }
+
+    &[data-dragging] {
+        cursor: grabbing;
+    }
+}
+
+.noteHitTarget {
+    fill: transparent;
+}
+
+.selectionHalo {
+    pointer-events: none;
+    opacity: 0;
+    fill: transparent;
+    stroke: transparent;
+    stroke-width: 1;
+    transition: opacity var(--duration-fast) var(--ease-standard), fill var(--duration-fast) var(--ease-standard);
+}
+
+.notehead {
+    pointer-events: none;
+    fill: var(--color-surface);
+    stroke: currentcolor;
+    stroke-width: 2.2;
+}
+
+.clef {
+    pointer-events: none;
+    fill: currentcolor;
+    stroke: none;
+}
+
+.accidental {
+    pointer-events: none;
+    fill: none;
+    stroke: currentcolor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 1;
+}

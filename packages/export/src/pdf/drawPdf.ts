@@ -8,10 +8,12 @@ import {
 
 import type {
     PageItem,
+    StaffRowItem,
     TranscriptResult,
     VisualLine,
     VisualRun,
 } from '../visualLine';
+import {drawStaffRow} from './drawStaffRow';
 import {
     getPdfMonoFontFamily,
     registerFonts,
@@ -21,6 +23,7 @@ import {planIntegratedAssembly} from './planIntegratedAssembly';
 const PX_TO_PT = 72 / 96;
 
 const isPageBreak = (item: PageItem): item is {type: '__page_break__'} => 'type' in item && item.type === '__page_break__';
+const isStaffRow = (item: PageItem): item is StaffRowItem => 'type' in item && item.type === 'staff-row';
 const getFontStyle = (run: VisualRun) => {
     if (run.bold && run.italic) {
         return 'bolditalic';
@@ -160,6 +163,12 @@ export const drawPdf = async (
     transcript.items.forEach(item => {
         if (isPageBreak(item)) {
             doc.addPage();
+
+            return;
+        }
+
+        if (isStaffRow(item)) {
+            drawStaffRow(doc, item, monoFontFamily);
 
             return;
         }

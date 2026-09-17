@@ -2,12 +2,10 @@ import type {EditorSettings} from '@stagistic/script';
 
 import type {LeadingPagesPlan} from '../plan';
 import type {
+    InitialPageVisualPage,
     VisualLine,
     VisualRun,
 } from '../visualLine';
-import {
-    type VisualPage,
-} from './buildCharactersAndPlacesPages';
 import {buildInitialPagePages} from './buildInitialPagePages';
 import type {ContentsPageNumbers} from './contents/contentsPageNumbers';
 import {toLowerRoman} from './romanNumerals';
@@ -18,7 +16,7 @@ const CHAR_WIDTH_EM = 0.6;
 export const needsBalancingBlank = (leadingPageCount: number) => leadingPageCount % 2 === 0;
 
 interface RenderedInitialPages {
-    pages: VisualPage[],
+    pages: InitialPageVisualPage[],
     romanNumberStartIndex: number,
 }
 
@@ -51,15 +49,15 @@ const buildRomanFooter = (
 };
 
 export const composeRenderedLeadingPages = (
-    renderedInitialPages: VisualPage[],
+    renderedInitialPages: InitialPageVisualPage[],
     manualBlankCount: number,
     showRomanPageNumbers: boolean,
     settings: EditorSettings,
     romanNumberStartIndex = 0,
-): VisualPage[] => {
+): InitialPageVisualPage[] => {
     const hasInitialPages = renderedInitialPages.length > 0;
     const blankCount = Math.max(0, Math.floor(manualBlankCount));
-    const pages = [...renderedInitialPages.map(page => [...page]), ...Array.from({length: blankCount}, () => [] as VisualPage)];
+    const pages = [...renderedInitialPages.map(page => [...page]), ...Array.from({length: blankCount}, () => [] as InitialPageVisualPage)];
 
     if (needsBalancingBlank(pages.length)) {
         pages.push([]);
@@ -101,7 +99,7 @@ const renderInitialPages = (
         };
     }
 
-    const pages: VisualPage[] = [[]];
+    const pages: InitialPageVisualPage[] = [[]];
 
     groups.forEach(group => {
         if (needsBalancingBlank(pages.length)) {
@@ -135,7 +133,7 @@ export const composeLeadingPages = (
     plan: LeadingPagesPlan,
     settings: EditorSettings,
     pageNumbers?: ContentsPageNumbers,
-): VisualPage[] => {
+): InitialPageVisualPage[] => {
     const {
         pages,
         romanNumberStartIndex,

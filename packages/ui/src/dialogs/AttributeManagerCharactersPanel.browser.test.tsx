@@ -322,3 +322,55 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
         expect(colorTrigger.style.getPropertyValue('--character-color')).toBe('#778899');
     });
 });
+
+describe('AttributeManagerCharactersPanel characters workspace — vocal range', () => {
+    it('edits voice type through the character detail', async () => {
+        const onSetCharacterVoiceType = vi.fn();
+
+        createHost().render(
+            <AttributeManagerCharactersPanel
+                characters={CHARACTERS}
+                initialSelectedCharacterId="char-1"
+                onSetCharacterVoiceType={onSetCharacterVoiceType}
+            />,
+        );
+
+        const input = await waitForElement<HTMLInputElement>('[role="combobox"]');
+
+        await page.elementLocator(input).fill('soprano');
+        input.blur();
+
+        expect(onSetCharacterVoiceType).toHaveBeenLastCalledWith('char-1', 'soprano');
+    });
+
+    it('edits the vocal range through the character detail', async () => {
+        const onSetCharacterVocalRange = vi.fn();
+        const charactersWithRange = CHARACTERS.map(character => {
+            if (character.id !== 'char-1') {
+                return character;
+            }
+
+            return {
+                ...character, vocalRangeLow: 'C3', vocalRangeHigh: 'A4',
+            };
+        });
+
+        createHost().render(
+            <AttributeManagerCharactersPanel
+                characters={charactersWithRange}
+                initialSelectedCharacterId="char-1"
+                onSetCharacterVocalRange={onSetCharacterVocalRange}
+            />,
+        );
+
+        const lowHeader = await waitForElement<HTMLButtonElement>('[aria-label="Edit low note C3"]');
+
+        await page.elementLocator(lowHeader).click();
+
+        const button = await waitForElement<HTMLButtonElement>('[aria-label="Octave up"]');
+
+        await page.elementLocator(button).click();
+
+        expect(onSetCharacterVocalRange).toHaveBeenCalledWith('char-1', 'C4', 'A4');
+    });
+});

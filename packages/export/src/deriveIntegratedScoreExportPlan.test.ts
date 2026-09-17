@@ -34,6 +34,7 @@ const script = {
     groups: [],
     initialCharacters: [],
     initialPlaces: [],
+    initialVocalRanges: [],
     scriptTitle: 'Test',
     titlePage: null,
 };

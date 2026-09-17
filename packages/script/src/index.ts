@@ -4,6 +4,7 @@ export * from './document';
 export * from './indexing';
 export * from './music';
 export * from './parsing';
+export * from './pitch';
 export * from './serialization';
 export * from './settings';
 export * from './structure';
