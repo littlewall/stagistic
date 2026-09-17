@@ -1,0 +1,56 @@
+import {defineConfig} from 'oxlint';
+
+export default defineConfig({
+    categories: {
+        correctness: 'error',
+    },
+    env: {
+        browser: true,
+        node: true,
+        serviceworker: true,
+    },
+    ignorePatterns: ['**/*.d.ts', '**/*.d.mts', '**/build/**', '**/dist/**', '**/sanity.types.ts'],
+    options: {
+        typeAware: true,
+    },
+    plugins: ['oxc', 'typescript', 'unicorn'],
+    rules: {
+        'eslint/no-array-constructor': 'error',
+        'eslint/no-case-declarations': 'error',
+        'eslint/no-empty': 'error',
+        'eslint/no-fallthrough': 'error',
+        'eslint/no-prototype-builtins': 'error',
+        'eslint/no-regex-spaces': 'error',
+        'eslint/no-unexpected-multiline': 'error',
+        'eslint/no-useless-assignment': 'error',
+        'eslint/no-var': 'error',
+        'eslint/prefer-const': 'error',
+        'eslint/prefer-rest-params': 'error',
+        'eslint/prefer-spread': 'error',
+        'eslint/preserve-caught-error': 'error',
+        'typescript/ban-ts-comment': 'error',
+        'typescript/no-empty-object-type': 'error',
+        'typescript/no-explicit-any': 'warn',
+        'typescript/no-misused-promises': [
+            'error',
+            {
+                checksVoidReturn: false,
+            },
+        ],
+        'typescript/no-namespace': 'error',
+        'typescript/no-require-imports': 'error',
+        'typescript/no-unnecessary-type-assertion': 'error',
+        'typescript/no-unnecessary-type-constraint': 'error',
+        'typescript/no-unsafe-argument': 'error',
+        'typescript/no-unsafe-assignment': 'error',
+        'typescript/no-unsafe-call': 'error',
+        'typescript/no-unsafe-enum-comparison': 'error',
+        'typescript/no-unsafe-function-type': 'error',
+        'typescript/no-unsafe-member-access': 'error',
+        'typescript/no-unsafe-return': 'error',
+        'typescript/only-throw-error': 'error',
+        'typescript/prefer-promise-reject-errors': 'error',
+        'typescript/require-await': 'error',
+        'typescript/restrict-plus-operands': 'error',
+    },
+});

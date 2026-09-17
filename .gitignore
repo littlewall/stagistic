@@ -23,10 +23,10 @@ apps/desktop/src-tauri/icons/*.icns
 apps/desktop/src-tauri/icons/*.ico
 
 # Cache
-.turbo
 .cache
 .parcel-cache
 .eslintcache
+.superpowers
 
 # Logs
 *.log
