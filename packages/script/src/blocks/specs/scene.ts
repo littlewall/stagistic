@@ -16,5 +16,6 @@ export const sceneSpec = {
         isBold: true,
         isItalic: false,
         isUnderline: true,
+        sceneNumberFormat: 'dot',
     },
 } as const satisfies BlockSpec;

@@ -1,25 +1,12 @@
-import {
-    CHARACTER_TAG_MARK_NAME,
-    DEFAULT_EDITOR_SETTINGS,
-} from '@stagistic/script';
-import {
-    describe,
-    expect,
-    it,
-} from 'vite-plus/test';
+import {CHARACTER_TAG_MARK_NAME, DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
+import {describe, expect, it} from 'vite-plus/test';
 
 import {BASIC_DEFAULTS} from './config';
 import {deriveBasicExportPlan} from './deriveBasicExportPlan';
 import type {ExportPlan} from './plan';
-import {
-    block,
-    sampleDoc,
-} from './testUtils';
+import {block, sampleDoc} from './testUtils';
 import {transcribeExportPlan} from './transcribeExportPlan';
-import type {
-    PageItem,
-    VisualLine,
-} from './visualLine';
+import type {PageItem, VisualLine} from './visualLine';
 
 const plan = (blocks: ExportPlan['doc']['content']): ExportPlan => ({
     doc: {
@@ -69,83 +56,143 @@ const splitPages = (items: PageItem[]): PageItem[][] => {
 
     return pages;
 };
-const pageText = (items: PageItem[]): string[] => items
-    .filter(isVisualLine)
-    .flatMap(item => item.runs.map(run => run.text));
+const pageText = (items: PageItem[]): string[] => items.filter(isVisualLine).flatMap(item => item.runs.map(run => run.text));
 
 describe('transcribeExportPlan', () => {
     it('creates text PDF lines from script document content', () => {
-        const transcript = transcribeExportPlan(plan([block('scene', 's1', 'Mizí i poslední'), block('stageDirection', 'sd1', 'Zvědavá jsem, co mě čeká.')]), DEFAULT_EDITOR_SETTINGS);
+        const transcript = transcribeExportPlan(
+            plan([block('scene', 's1', 'Mizí i poslední'), block('stageDirection', 'sd1', 'Zvědavá jsem, co mě čeká.')]),
+            DEFAULT_EDITOR_SETTINGS,
+        );
 
-        const text = transcript.items
-            .filter(isVisualLine)
-            .flatMap(item => item.runs.map(run => run.text));
+        const text = transcript.items.filter(isVisualLine).flatMap(item => item.runs.map(run => run.text));
 
         expect(text).toContain('MIZÍ I POSLEDNÍ');
         expect(text).toContain('Zvědavá jsem, co mě čeká.');
     });
 
-    it('transcribes music atoms as their numbered label so they occupy a line', () => {
-        const transcript = transcribeExportPlan(plan([
-            block('scene', 's1', 'Scene one'), {
-                type: 'stageDirection',
-                attrs: {id: 'sd1', blockType: 'stageDirection'},
-                content: [
-                    {
-                        type: 'musicStart',
-                        attrs: {
-                            musicId: 'c1', mode: 'open', title: 'dddddddddd',
-                        },
-                    },
-                ],
-            },
-        ]), DEFAULT_EDITOR_SETTINGS);
+    const findLineWithRun = (items: PageItem[], runText: string): VisualLine | undefined =>
+        items.filter(isVisualLine).find(line => line.runs.some(run => run.text === runText));
 
-        const text = transcript.items
-            .filter(isVisualLine)
-            .flatMap(item => item.runs.map(run => run.text));
+    const settingsWithSceneFormat = (format: 'none' | 'dot' | 'paren') => ({
+        ...DEFAULT_EDITOR_SETTINGS,
+        blocks: {
+            ...DEFAULT_EDITOR_SETTINGS.blocks,
+            scene: {
+                ...DEFAULT_EDITOR_SETTINGS.blocks.scene,
+                sceneNumberFormat: format,
+            },
+        },
+    });
+
+    it('prepends sequential scene numbers to scene headings in the script body', () => {
+        const transcript = transcribeExportPlan(plan([block('scene', 's1', 'Scene one'), block('scene', 's2', 'Scene two')]), DEFAULT_EDITOR_SETTINGS);
+
+        const firstScene = findLineWithRun(transcript.items, 'SCENE ONE');
+        const secondScene = findLineWithRun(transcript.items, 'SCENE TWO');
+
+        expect(firstScene?.runs[0]?.text).toBe('1. ');
+        expect(secondScene?.runs[0]?.text).toBe('2. ');
+    });
+
+    it('renders the scene number without underline while the heading stays underlined', () => {
+        const transcript = transcribeExportPlan(plan([block('scene', 's1', 'Scene one')]), DEFAULT_EDITOR_SETTINGS);
+        const line = findLineWithRun(transcript.items, 'SCENE ONE');
+        const numberRun = line?.runs.find(run => run.text === '1. ');
+        const headingRun = line?.runs.find(run => run.text === 'SCENE ONE');
+
+        expect(numberRun?.underline).toBe(false);
+        expect(headingRun?.underline).toBe(true);
+    });
+
+    it('uses the parenthesis scene-number format when configured', () => {
+        const transcript = transcribeExportPlan(plan([block('scene', 's1', 'Scene one')]), settingsWithSceneFormat('paren'));
+
+        expect(findLineWithRun(transcript.items, 'SCENE ONE')?.runs[0]?.text).toBe('1) ');
+    });
+
+    it('omits the scene number from the body when numbering is disabled', () => {
+        const transcript = transcribeExportPlan(plan([block('scene', 's1', 'Scene one')]), settingsWithSceneFormat('none'));
+        const line = findLineWithRun(transcript.items, 'SCENE ONE');
+
+        expect(line?.runs[0]?.text).toBe('SCENE ONE');
+        expect(line?.runs.some(run => run.text.trim() === '1.')).toBe(false);
+    });
+
+    it('transcribes music atoms as their numbered label so they occupy a line', () => {
+        const transcript = transcribeExportPlan(
+            plan([
+                block('scene', 's1', 'Scene one'),
+                {
+                    type: 'stageDirection',
+                    attrs: {id: 'sd1', blockType: 'stageDirection'},
+                    content: [
+                        {
+                            type: 'musicStart',
+                            attrs: {
+                                musicId: 'c1',
+                                mode: 'open',
+                                title: 'dddddddddd',
+                            },
+                        },
+                    ],
+                },
+            ]),
+            DEFAULT_EDITOR_SETTINGS,
+        );
+
+        const text = transcript.items.filter(isVisualLine).flatMap(item => item.runs.map(run => run.text));
 
         expect(text).toContain('1) dddddddddd');
     });
 
     it('uppercases character tags inside stage directions', () => {
-        const transcript = transcribeExportPlan(plan([
-            {
-                type: 'stageDirection',
-                attrs: {id: 'sd1', blockType: 'stageDirection'},
-                content: [
-                    {
-                        type: 'text',
-                        text: 'Anna',
-                        marks: [{type: CHARACTER_TAG_MARK_NAME}],
-                    }, {type: 'text', text: ' enters.'},
-                ],
-            },
-        ]), DEFAULT_EDITOR_SETTINGS);
+        const transcript = transcribeExportPlan(
+            plan([
+                {
+                    type: 'stageDirection',
+                    attrs: {id: 'sd1', blockType: 'stageDirection'},
+                    content: [
+                        {
+                            type: 'text',
+                            text: 'Anna',
+                            marks: [{type: CHARACTER_TAG_MARK_NAME}],
+                        },
+                        {type: 'text', text: ' enters.'},
+                    ],
+                },
+            ]),
+            DEFAULT_EDITOR_SETTINGS,
+        );
 
-        const text = transcript.items
-            .filter(isVisualLine)
-            .flatMap(item => item.runs.map(run => run.text));
+        const text = transcript.items.filter(isVisualLine).flatMap(item => item.runs.map(run => run.text));
 
         expect(text).toContain('ANNA');
         expect(text).toContain(' enters.');
     });
 
     it('renders music labels inside stage directions in bold', () => {
-        const transcript = transcribeExportPlan(plan([
-            block('scene', 's1', 'Scene one'), {
-                type: 'stageDirection',
-                attrs: {id: 'sd1', blockType: 'stageDirection'},
-                content: [
-                    {type: 'text', text: 'Lights shift'}, {
-                        type: 'musicStart',
-                        attrs: {
-                            musicId: 'c1', mode: 'open', title: 'Knock',
+        const transcript = transcribeExportPlan(
+            plan([
+                block('scene', 's1', 'Scene one'),
+                {
+                    type: 'stageDirection',
+                    attrs: {id: 'sd1', blockType: 'stageDirection'},
+                    content: [
+                        {type: 'text', text: 'Lights shift'},
+                        {
+                            type: 'musicStart',
+                            attrs: {
+                                musicId: 'c1',
+                                mode: 'open',
+                                title: 'Knock',
+                            },
                         },
-                    },
-                ],
-            },
-        ]), DEFAULT_EDITOR_SETTINGS);
+                    ],
+                },
+            ]),
+            DEFAULT_EDITOR_SETTINGS,
+        );
 
         const musicRun = transcript.items
             .filter(isVisualLine)
@@ -156,13 +203,16 @@ describe('transcribeExportPlan', () => {
     });
 
     it('does not print an explicit or orphan music out label', () => {
-        const transcript = transcribeExportPlan(plan([
-            {
-                type: 'stageDirection',
-                attrs: {id: 'sd1', blockType: 'stageDirection'},
-                content: [{type: 'musicOut'}],
-            },
-        ]), DEFAULT_EDITOR_SETTINGS);
+        const transcript = transcribeExportPlan(
+            plan([
+                {
+                    type: 'stageDirection',
+                    attrs: {id: 'sd1', blockType: 'stageDirection'},
+                    content: [{type: 'musicOut'}],
+                },
+            ]),
+            DEFAULT_EDITOR_SETTINGS,
+        );
         const text = transcript.items
             .filter(isVisualLine)
             .flatMap(item => item.runs.map(run => run.text))
@@ -172,7 +222,10 @@ describe('transcribeExportPlan', () => {
     });
 
     it('keeps multi-character cue lines tight (no spaces around slashes), matching the editor', () => {
-        const transcript = transcribeExportPlan(plan([block('scene', 's1', 'Scene one'), block('character', 'ch1', 'TOMMY/REBECCA/MICHAEL')]), DEFAULT_EDITOR_SETTINGS);
+        const transcript = transcribeExportPlan(
+            plan([block('scene', 's1', 'Scene one'), block('character', 'ch1', 'TOMMY/REBECCA/MICHAEL')]),
+            DEFAULT_EDITOR_SETTINGS,
+        );
 
         const text = transcript.items
             .filter(isVisualLine)
@@ -183,12 +236,15 @@ describe('transcribeExportPlan', () => {
     });
 
     it('honors forced page breaks', () => {
-        const transcript = transcribeExportPlan({
-            ...plan([block('scene', 's1', 'Scene one'), block('scene', 's2', 'Scene two')]),
-            pagination: {
-                forcedBreaks: [{blockId: 's2', kind: 'new-page'}],
+        const transcript = transcribeExportPlan(
+            {
+                ...plan([block('scene', 's1', 'Scene one'), block('scene', 's2', 'Scene two')]),
+                pagination: {
+                    forcedBreaks: [{blockId: 's2', kind: 'new-page'}],
+                },
             },
-        }, DEFAULT_EDITOR_SETTINGS);
+            DEFAULT_EDITOR_SETTINGS,
+        );
 
         expect(transcript.items.some(item => 'type' in item && item.type === '__page_break__')).toBe(true);
     });
@@ -202,18 +258,21 @@ describe('transcribeExportPlan', () => {
     });
 
     it('carries the configured page-number footer style for integrated-score composition', () => {
-        const transcript = transcribeExportPlan({
-            ...plan([block('scene', 's1', 'Scene one')]),
-            postSteps: [
-                {
-                    kind: 'integrated-score',
-                    musicId: 'music-1',
-                    title: 'Song',
-                    startBlockId: 's1',
-                    afterBlockId: 's1',
-                },
-            ],
-        }, DEFAULT_EDITOR_SETTINGS);
+        const transcript = transcribeExportPlan(
+            {
+                ...plan([block('scene', 's1', 'Scene one')]),
+                postSteps: [
+                    {
+                        kind: 'integrated-score',
+                        musicId: 'music-1',
+                        title: 'Song',
+                        startBlockId: 's1',
+                        afterBlockId: 's1',
+                    },
+                ],
+            },
+            DEFAULT_EDITOR_SETTINGS,
+        );
 
         expect(transcript.integratedFooter).toMatchObject({
             alignment: 'center',
@@ -223,12 +282,15 @@ describe('transcribeExportPlan', () => {
     });
 
     it('emits a blank PDF page for odd-page forced breaks', () => {
-        const transcript = transcribeExportPlan({
-            ...plan([block('scene', 's1', 'Scene one'), block('scene', 's2', 'Scene two')]),
-            pagination: {
-                forcedBreaks: [{blockId: 's2', kind: 'odd-page'}],
+        const transcript = transcribeExportPlan(
+            {
+                ...plan([block('scene', 's1', 'Scene one'), block('scene', 's2', 'Scene two')]),
+                pagination: {
+                    forcedBreaks: [{blockId: 's2', kind: 'odd-page'}],
+                },
             },
-        }, DEFAULT_EDITOR_SETTINGS);
+            DEFAULT_EDITOR_SETTINGS,
+        );
 
         const firstScene = indexOfText(transcript.items, 'SCENE ONE');
         const secondScene = indexOfText(transcript.items, 'SCENE TWO');
@@ -238,12 +300,15 @@ describe('transcribeExportPlan', () => {
     });
 
     it('gives inserted odd blank pages only the integrated page number', () => {
-        const transcript = transcribeExportPlan({
-            ...plan([block('scene', 's1', 'Scene one'), block('scene', 's2', 'Scene two')]),
-            pagination: {
-                forcedBreaks: [{blockId: 's2', kind: 'odd-page'}],
+        const transcript = transcribeExportPlan(
+            {
+                ...plan([block('scene', 's1', 'Scene one'), block('scene', 's2', 'Scene two')]),
+                pagination: {
+                    forcedBreaks: [{blockId: 's2', kind: 'odd-page'}],
+                },
             },
-        }, DEFAULT_EDITOR_SETTINGS);
+            DEFAULT_EDITOR_SETTINGS,
+        );
         const pages = splitPages(transcript.items);
         const secondScenePageIndex = pages.findIndex(page => pageText(page).includes('SCENE TWO'));
         const insertedBlankText = pageText(pages[secondScenePageIndex - 1] ?? []);
@@ -255,10 +320,7 @@ describe('transcribeExportPlan', () => {
     });
 
     it('prepends the title page as page one, before the script content', () => {
-        const transcript = transcribeExportPlan(
-            {...plan([block('scene', 's1', 'Scene one')]), scriptTitle: 'My Play'},
-            DEFAULT_EDITOR_SETTINGS,
-        );
+        const transcript = transcribeExportPlan({...plan([block('scene', 's1', 'Scene one')]), scriptTitle: 'My Play'}, DEFAULT_EDITOR_SETTINGS);
 
         const titleIndex = indexOfText(transcript.items, 'My Play');
         const firstBreak = transcript.items.findIndex(isPageBreak);
@@ -270,10 +332,7 @@ describe('transcribeExportPlan', () => {
     });
 
     it('adds an unnumbered balancing blank when no leading pages are configured', () => {
-        const transcript = transcribeExportPlan(
-            plan([block('scene', 's1', 'Scene one')]),
-            DEFAULT_EDITOR_SETTINGS,
-        );
+        const transcript = transcribeExportPlan(plan([block('scene', 's1', 'Scene one')]), DEFAULT_EDITOR_SETTINGS);
         const pages = splitPages(transcript.items);
 
         expect(pages).toHaveLength(3);
@@ -284,28 +343,31 @@ describe('transcribeExportPlan', () => {
 
     it('numbers initial, manual blank, and balancing pages with lowercase Roman numerals', () => {
         const base = plan([block('scene', 's1', 'Scene one')]);
-        const transcript = transcribeExportPlan({
-            ...base,
-            leadingPages: {
-                initialPages: [
-                    {
-                        kind: 'characters-and-places',
-                        characters: [
-                            {
-                                id: 'anna',
-                                displayName: 'Anna',
-                                outline: null,
-                            },
-                        ],
-                        places: [],
-                        showCharacterOutlines: false,
-                    },
-                ],
-                manualBlankCount: 1,
-                showRomanPageNumbers: true,
-                startEachInitialPageOnOddPage: false,
+        const transcript = transcribeExportPlan(
+            {
+                ...base,
+                leadingPages: {
+                    initialPages: [
+                        {
+                            kind: 'characters-and-places',
+                            characters: [
+                                {
+                                    id: 'anna',
+                                    displayName: 'Anna',
+                                    outline: null,
+                                },
+                            ],
+                            places: [],
+                            showCharacterOutlines: false,
+                        },
+                    ],
+                    manualBlankCount: 1,
+                    showRomanPageNumbers: true,
+                    startEachInitialPageOnOddPage: false,
+                },
             },
-        }, DEFAULT_EDITOR_SETTINGS);
+            DEFAULT_EDITOR_SETTINGS,
+        );
         const pages = splitPages(transcript.items);
 
         expect(pages).toHaveLength(5);
@@ -318,14 +380,17 @@ describe('transcribeExportPlan', () => {
 
     it('inserts manual and balancing blanks after initial pages', () => {
         const base = plan([block('scene', 's1', 'Scene one')]);
-        const transcript = transcribeExportPlan({
-            ...base,
-            scriptTitle: 'My Play',
-            leadingPages: {
-                ...base.leadingPages,
-                manualBlankCount: 2,
+        const transcript = transcribeExportPlan(
+            {
+                ...base,
+                scriptTitle: 'My Play',
+                leadingPages: {
+                    ...base.leadingPages,
+                    manualBlankCount: 2,
+                },
             },
-        }, DEFAULT_EDITOR_SETTINGS);
+            DEFAULT_EDITOR_SETTINGS,
+        );
 
         const sceneIndex = indexOfText(transcript.items, 'SCENE ONE');
         const breaksBeforeScene = transcript.items.slice(0, sceneIndex).filter(isPageBreak).length;
@@ -336,12 +401,15 @@ describe('transcribeExportPlan', () => {
 
     it('pushes a non-splittable heading whole to the next page instead of tearing it', () => {
         const fillers = Array.from({length: 40}, (_unused, index) => block('stageDirection', `sd${index}`, `Line number ${index} on the page.`));
-        const transcript = transcribeExportPlan(plan([
-            block('scene', 's1', 'Scene one'),
-            ...fillers,
-            block('character', 'lastHeading', 'ISABELLA'),
-            block('dialogue', 'd1', 'A closing line of dialogue.'),
-        ]), DEFAULT_EDITOR_SETTINGS);
+        const transcript = transcribeExportPlan(
+            plan([
+                block('scene', 's1', 'Scene one'),
+                ...fillers,
+                block('character', 'lastHeading', 'ISABELLA'),
+                block('dialogue', 'd1', 'A closing line of dialogue.'),
+            ]),
+            DEFAULT_EDITOR_SETTINGS,
+        );
 
         const breakIndex = transcript.items.findIndex(item => 'type' in item && item.type === '__page_break__');
         const headingIndex = transcript.items.findIndex(item => !('type' in item) && item.runs.some(run => run.text === 'ISABELLA'));

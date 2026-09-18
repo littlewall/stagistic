@@ -2,9 +2,11 @@ import {
     buildPageMark,
     CHARACTER_TAG_MARK_NAME,
     collectMusicAtoms,
+    DEFAULT_SCENE_NUMBER_FORMAT,
     deriveMusic,
     type EditorSettings,
     formatMusicNumber,
+    formatSceneNumber,
     getScriptBlockId,
     getScriptBlockNodeType,
     hasNodeChildren,
@@ -37,63 +39,52 @@ import type {ContentsPageNumbers} from './initialPages/contents/contentsPageNumb
 import {planIntegratedAssembly} from './pdf/planIntegratedAssembly';
 import type {ExportPlan} from './plan';
 import {buildTitlePageItems} from './titlePage/buildTitlePageItems';
-import type {
-    PageItem,
-    TranscriptResult,
-    VisualLine,
-    VisualRun,
-} from './visualLine';
+import type {PageItem, TranscriptResult, VisualLine, VisualRun} from './visualLine';
 
 const PAGE_BREAK_ITEM: PageItem = {type: '__page_break__'};
 const MONO_FONT_FAMILY = 'Courier Prime';
 const DEFAULT_BLOCK_TYPE = 'stageDirection';
 const CHAR_WIDTH_EM = 0.6;
 const HEADER_FOOTER_MAX_WIDTH_RATIO = 0.4;
-const HEADER_FOOTER_ALIGNMENTS: HeaderFooterAlignment[] = [
-    'left',
-    'center',
-    'right',
-];
+const HEADER_FOOTER_ALIGNMENTS: HeaderFooterAlignment[] = ['left', 'center', 'right'];
 
 const getNodeText = (node: ScriptNode): string => {
     const ownText = typeof node.text === 'string' ? node.text : '';
-    const childText = hasNodeChildren(node)
-        ? node.content.map(getNodeText).join('')
-        : '';
+    const childText = hasNodeChildren(node) ? node.content.map(getNodeText).join('') : '';
 
     return `${ownText}${childText}`;
 };
 
 interface MusicLabels {
-    numberByMusicId: Map<string, string>,
+    numberByMusicId: Map<string, string>;
 }
 
 interface InlineStyle {
-    bold?: boolean,
-    italic?: boolean,
-    underline?: boolean,
-    characterTag?: boolean,
+    bold?: boolean;
+    italic?: boolean;
+    underline?: boolean;
+    characterTag?: boolean;
+    // Forces underline off regardless of the block's underline setting, so the
+    // scene-number label stays un-underlined like the editor's `::before` marker.
+    noUnderline?: boolean;
 }
 
 interface TextSegment {
-    text: string,
-    style: InlineStyle,
+    text: string;
+    style: InlineStyle;
 }
 
 interface WrappedLine {
-    text: string,
-    segments: TextSegment[],
+    text: string;
+    segments: TextSegment[];
 }
 
 interface TextWord {
-    segments: TextSegment[],
-    spaceStyle: InlineStyle,
+    segments: TextSegment[];
+    spaceStyle: InlineStyle;
 }
 
-const readAttrString = (
-    attrs: Record<string, unknown> | undefined,
-    key: string,
-): string => {
+const readAttrString = (attrs: Record<string, unknown> | undefined, key: string): string => {
     const value = attrs?.[key];
 
     return typeof value === 'string' ? value : '';
@@ -129,22 +120,21 @@ const hasCharacterTagMark = (node: ScriptNode): boolean => {
     return node.marks?.some(mark => mark.type === CHARACTER_TAG_MARK_NAME) ?? false;
 };
 
-const pushSegment = (
-    segments: TextSegment[],
-    text: string,
-    style: InlineStyle = {},
-) => {
+const pushSegment = (segments: TextSegment[], text: string, style: InlineStyle = {}) => {
     if (text.length === 0) {
         return;
     }
 
     const previous = segments[segments.length - 1];
 
-    if (previous
-        && Boolean(previous.style.bold) === Boolean(style.bold)
-        && Boolean(previous.style.italic) === Boolean(style.italic)
-        && Boolean(previous.style.underline) === Boolean(style.underline)
-        && Boolean(previous.style.characterTag) === Boolean(style.characterTag)) {
+    if (
+        previous &&
+        Boolean(previous.style.bold) === Boolean(style.bold) &&
+        Boolean(previous.style.italic) === Boolean(style.italic) &&
+        Boolean(previous.style.underline) === Boolean(style.underline) &&
+        Boolean(previous.style.noUnderline) === Boolean(style.noUnderline) &&
+        Boolean(previous.style.characterTag) === Boolean(style.characterTag)
+    ) {
         previous.text = `${previous.text}${text}`;
 
         return;
@@ -153,11 +143,7 @@ const pushSegment = (
     segments.push({text, style});
 };
 
-const getBlockRawSegments = (
-    node: ScriptNode,
-    _blockId: string,
-    music: MusicLabels,
-): TextSegment[] => {
+const getBlockRawSegments = (node: ScriptNode, _blockId: string, music: MusicLabels): TextSegment[] => {
     if (!hasNodeChildren(node)) {
         return [{text: getNodeText(node), style: {...markStyle(node), characterTag: hasCharacterTagMark(node)}}];
     }
@@ -184,10 +170,7 @@ const getBlockRawSegments = (
     return segments;
 };
 
-const applyCasing = (
-    text: string,
-    casing: string | undefined,
-) => {
+const applyCasing = (text: string, casing: string | undefined) => {
     if (casing === 'uppercase') {
         return text.toLocaleUpperCase();
     }
@@ -199,23 +182,16 @@ const applyCasing = (
     return text;
 };
 
-const normalizeBlockSegments = (
-    rawSegments: TextSegment[],
-    blockType: string,
-    casing: string | undefined,
-) => {
+const normalizeBlockSegments = (rawSegments: TextSegment[], blockType: string, casing: string | undefined) => {
     const segments: TextSegment[] = [];
     let pendingSpace = false;
 
     rawSegments.forEach(segment => {
-        const isCharacterTag = blockType === 'stageDirection'
-            && segment.style.characterTag === true;
-        const casedText = isCharacterTag
-            ? segment.text.toLocaleUpperCase()
-            : applyCasing(segment.text, casing);
+        const isCharacterTag = blockType === 'stageDirection' && segment.style.characterTag === true;
+        const casedText = isCharacterTag ? segment.text.toLocaleUpperCase() : applyCasing(segment.text, casing);
 
         Array.from(casedText).forEach(character => {
-            if ((/\s/u).test(character)) {
+            if (/\s/u.test(character)) {
                 pendingSpace = segments.length > 0;
 
                 return;
@@ -238,10 +214,7 @@ const normalizeBlockSegments = (
     return segments;
 };
 
-const splitLongWord = (
-    word: TextSegment[],
-    maxChars: number,
-): TextSegment[][] => {
+const splitLongWord = (word: TextSegment[], maxChars: number): TextSegment[][] => {
     const chunks: TextSegment[][] = [];
     let chunk: TextSegment[] = [];
     let chunkLength = 0;
@@ -302,10 +275,7 @@ const splitWords = (segments: TextSegment[]): TextWord[] => {
     return words;
 };
 
-const wrapSegments = (
-    segments: TextSegment[],
-    maxChars: number,
-) => {
+const wrapSegments = (segments: TextSegment[], maxChars: number) => {
     if (segments.length === 0) {
         return [toWrappedLine([])];
     }
@@ -358,19 +328,13 @@ const wrapSegments = (
     return lines;
 };
 
-const makeRun = (
-    text: string,
-    x: number,
-    block: NonNullable<EditorSettings['blocks'][string]>,
-    fontSizePx: number,
-    style: InlineStyle = {},
-): VisualRun => ({
+const makeRun = (text: string, x: number, block: NonNullable<EditorSettings['blocks'][string]>, fontSizePx: number, style: InlineStyle = {}): VisualRun => ({
     text,
     x,
     fontSizePx,
     bold: (block.isBold ?? false) || (style.bold ?? false),
     italic: (block.isItalic ?? false) || (style.italic ?? false),
-    underline: (block.isUnderline ?? false) || (style.underline ?? false),
+    underline: style.noUnderline === true ? false : (block.isUnderline ?? false) || (style.underline ?? false),
     fontFamily: MONO_FONT_FAMILY,
 });
 
@@ -381,11 +345,11 @@ const resolveLineX = ({
     availableWidthPx,
     charWidthPx,
 }: {
-    block: NonNullable<EditorSettings['blocks'][string]>,
-    line: string,
-    baseX: number,
-    availableWidthPx: number,
-    charWidthPx: number,
+    block: NonNullable<EditorSettings['blocks'][string]>;
+    line: string;
+    baseX: number;
+    availableWidthPx: number;
+    charWidthPx: number;
 }) => {
     const textWidthPx = line.length * charWidthPx;
 
@@ -401,30 +365,30 @@ const resolveLineX = ({
 };
 
 interface PreparedBlock {
-    blockType: string,
-    block: NonNullable<EditorSettings['blocks'][string]>,
-    fontSizePx: number,
-    lineHeightPx: number,
-    spacingBeforePx: number,
-    spacingAfterPx: number,
-    baseX: number,
-    availableWidthPx: number,
-    charWidthPx: number,
-    wrapped: WrappedLine[],
+    blockType: string;
+    block: NonNullable<EditorSettings['blocks'][string]>;
+    fontSizePx: number;
+    lineHeightPx: number;
+    spacingBeforePx: number;
+    spacingAfterPx: number;
+    baseX: number;
+    availableWidthPx: number;
+    charWidthPx: number;
+    wrapped: WrappedLine[];
 }
 
 interface PageStructureMark {
-    actIndex: number | null,
-    sceneNumber: number,
+    actIndex: number | null;
+    sceneNumber: number;
 }
 
 interface ScriptPage {
-    items: VisualLine[],
-    mark: PageStructureMark | null,
-    isInsertedBlank: boolean,
-    sourceBlockIds: Set<string>,
-    referencePageNumber?: number,
-    referencePageMarkNumber?: number,
+    items: VisualLine[];
+    mark: PageStructureMark | null;
+    isInsertedBlank: boolean;
+    sourceBlockIds: Set<string>;
+    referencePageNumber?: number;
+    referencePageMarkNumber?: number;
 }
 
 const buildStructureMarks = (doc: ScriptDocument): PageStructureMark[] => {
@@ -449,12 +413,7 @@ const buildStructureMarks = (doc: ScriptDocument): PageStructureMark[] => {
     });
 };
 
-const makeHeaderFooterRun = (
-    text: string,
-    x: number,
-    cell: HeaderFooterCellSettings,
-    fontSizePx: number,
-): VisualRun => ({
+const makeHeaderFooterRun = (text: string, x: number, cell: HeaderFooterCellSettings, fontSizePx: number): VisualRun => ({
     text,
     x,
     fontSizePx,
@@ -470,10 +429,10 @@ const resolveHeaderFooterX = ({
     settings,
     fontSizePx,
 }: {
-    alignment: HeaderFooterAlignment,
-    text: string,
-    settings: EditorSettings,
-    fontSizePx: number,
+    alignment: HeaderFooterAlignment;
+    text: string;
+    settings: EditorSettings;
+    fontSizePx: number;
 }) => {
     const charWidthPx = fontSizePx * CHAR_WIDTH_EM;
     const textWidthPx = text.length * charWidthPx;
@@ -492,10 +451,7 @@ const resolveHeaderFooterX = ({
     return settings.page.marginLeftPx;
 };
 
-const shouldRenderInsertedBlankCell = (
-    area: 'header' | 'footer',
-    cell: HeaderFooterCellSettings,
-): boolean => {
+const shouldRenderInsertedBlankCell = (area: 'header' | 'footer', cell: HeaderFooterCellSettings): boolean => {
     return area === 'footer' && cell.text.includes('{{page_number}}');
 };
 
@@ -510,24 +466,24 @@ const buildHeaderFooterLine = ({
     plan,
     settings,
 }: {
-    area: 'header' | 'footer',
-    row: HeaderFooterRowSettings,
-    y: number,
-    page: ScriptPage,
-    pageNumber: number,
-    pageMarkNumber: number,
-    draftDate: string,
-    plan: ExportPlan,
-    settings: EditorSettings,
+    area: 'header' | 'footer';
+    row: HeaderFooterRowSettings;
+    y: number;
+    page: ScriptPage;
+    pageNumber: number;
+    pageMarkNumber: number;
+    draftDate: string;
+    plan: ExportPlan;
+    settings: EditorSettings;
 }): VisualLine | null => {
     const mark = page.mark ?? {actIndex: null, sceneNumber: 0};
     const pageMark = page.isInsertedBlank
         ? ''
         : buildPageMark({
-            actIndex: mark.actIndex,
-            sceneNumber: mark.sceneNumber,
-            pageNumber: pageMarkNumber,
-        });
+              actIndex: mark.actIndex,
+              sceneNumber: mark.sceneNumber,
+              pageNumber: pageMarkNumber,
+          });
     const runs = HEADER_FOOTER_ALIGNMENTS.flatMap(alignment => {
         const cell = row[alignment];
 
@@ -560,16 +516,11 @@ const buildHeaderFooterLine = ({
     return runs.length > 0 ? {y, runs} : null;
 };
 
-const withHeaderFooter = (
-    pages: ScriptPage[],
-    plan: ExportPlan,
-    settings: EditorSettings,
-): PageItem[] => {
+const withHeaderFooter = (pages: ScriptPage[], plan: ExportPlan, settings: EditorSettings): PageItem[] => {
     const fontSizePx = settings.typography.fontSizePx;
     const lineHeightPx = fontSizePx * settings.typography.lineHeight;
     const headerY = Math.max(0, (settings.page.marginTopPx - lineHeightPx) / 2);
-    const footerY = settings.page.heightPx - settings.page.marginBottomPx
-        + Math.max(0, (settings.page.marginBottomPx - lineHeightPx) / 2);
+    const footerY = settings.page.heightPx - settings.page.marginBottomPx + Math.max(0, (settings.page.marginBottomPx - lineHeightPx) / 2);
     const draftDate = plan.titlePage ? resolveDraftDate(plan.titlePage) : '';
     let pageMarkNumber = 0;
 
@@ -602,28 +553,20 @@ const withHeaderFooter = (
             plan,
             settings,
         });
-        const pageItems: PageItem[] = [
-            ...header ? [header] : [],
-            ...page.items,
-            ...footer ? [footer] : [],
-        ];
+        const pageItems: PageItem[] = [...(header ? [header] : []), ...page.items, ...(footer ? [footer] : [])];
 
         return index === pages.length - 1 ? pageItems : [...pageItems, PAGE_BREAK_ITEM];
     });
 };
 
-const getIntegratedFooter = (
-    plan: ExportPlan,
-    settings: EditorSettings,
-) => {
+const getIntegratedFooter = (plan: ExportPlan, settings: EditorSettings) => {
     if (plan.postSteps.length === 0) {
         return undefined;
     }
 
     const fontSizePx = settings.typography.fontSizePx;
     const lineHeightPx = fontSizePx * settings.typography.lineHeight;
-    const yPx = settings.page.heightPx - settings.page.marginBottomPx
-        + Math.max(0, (settings.page.marginBottomPx - lineHeightPx) / 2);
+    const yPx = settings.page.heightPx - settings.page.marginBottomPx + Math.max(0, (settings.page.marginBottomPx - lineHeightPx) / 2);
 
     return HEADER_FOOTER_ALIGNMENTS.flatMap(alignment => {
         const cell = settings.headerFooter.footer[alignment];
@@ -648,36 +591,36 @@ const getIntegratedFooter = (
 
 export interface TranscribeOptions {
     /** Page count of each attached score PDF, keyed by music id. */
-    scorePageCounts?: Record<string, number>,
+    scorePageCounts?: Record<string, number>;
 }
 
-export const transcribeExportPlan = (
-    plan: ExportPlan,
-    settings: EditorSettings,
-    options: TranscribeOptions = {},
-): TranscriptResult => {
+export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings, options: TranscribeOptions = {}): TranscriptResult => {
     const forcedBreakByBlockId = new Map(plan.pagination.forcedBreaks.map(item => [item.blockId, item]));
     const contentWidthPx = settings.page.widthPx - settings.page.marginLeftPx - settings.page.marginRightPx;
     const musicLabels = buildMusicLabels(plan.doc);
     const structureMarks = buildStructureMarks(plan.doc);
 
-    const prepared: PreparedBlock[] = plan.doc.content.map(node => {
+    const prepared: PreparedBlock[] = plan.doc.content.map((node, index) => {
         const blockType = getScriptBlockNodeType(node, DEFAULT_BLOCK_TYPE);
         const block = settings.blocks[blockType] ?? settings.blocks[DEFAULT_BLOCK_TYPE] ?? {};
         const blockId = getScriptBlockId(node);
         const fontSizePx = block.fontSizePx ?? settings.typography.fontSizePx;
         const lineHeightPx = fontSizePx * (block.lineHeight ?? settings.typography.lineHeight);
         const charWidthPx = fontSizePx * CHAR_WIDTH_EM;
-        const indentLeftPx = typeof block.indentLeftChars === 'number'
-            ? block.indentLeftChars * charWidthPx
-            : block.indentLeftPx ?? 0;
-        const indentRightPx = typeof block.indentRightChars === 'number'
-            ? block.indentRightChars * charWidthPx
-            : block.indentRightPx ?? 0;
+        const indentLeftPx = typeof block.indentLeftChars === 'number' ? block.indentLeftChars * charWidthPx : (block.indentLeftPx ?? 0);
+        const indentRightPx = typeof block.indentRightChars === 'number' ? block.indentRightChars * charWidthPx : (block.indentRightPx ?? 0);
         const availableWidthPx = Math.max(charWidthPx, contentWidthPx - indentLeftPx - indentRightPx);
         const maxChars = Math.max(1, Math.floor(availableWidthPx / charWidthPx));
         const rawSegments = getBlockRawSegments(node, blockId ?? '', musicLabels);
         const segments = normalizeBlockSegments(rawSegments, blockType, block.casing);
+
+        if (blockType === 'scene') {
+            const label = formatSceneNumber(structureMarks[index]?.sceneNumber ?? 0, block.sceneNumberFormat ?? DEFAULT_SCENE_NUMBER_FORMAT);
+
+            if (label.length > 0) {
+                segments.unshift({text: `${label} `, style: {noUnderline: true}});
+            }
+        }
 
         return {
             blockType,
@@ -746,7 +689,10 @@ export const transcribeExportPlan = (
 
     const pages: ScriptPage[] = [
         {
-            items: [], mark: null, isInsertedBlank: false, sourceBlockIds: new Set(),
+            items: [],
+            mark: null,
+            isInsertedBlank: false,
+            sourceBlockIds: new Set(),
         },
     ];
     let currentPage = pages[0];
@@ -758,7 +704,10 @@ export const transcribeExportPlan = (
         }
 
         currentPage = {
-            items: [], mark: null, isInsertedBlank: false, sourceBlockIds: new Set(),
+            items: [],
+            mark: null,
+            isInsertedBlank: false,
+            sourceBlockIds: new Set(),
         };
         pages.push(currentPage);
         y = settings.page.marginTopPx;
@@ -833,11 +782,11 @@ export const transcribeExportPlan = (
     const visibleBlockIds = plan.visibleBlockIds ? new Set(plan.visibleBlockIds) : null;
     const scriptPages = visibleBlockIds
         ? allScriptPages
-            .map(page => ({
-                ...page,
-                items: page.items.filter(line => !line.sourceBlockId || visibleBlockIds.has(line.sourceBlockId)),
-            }))
-            .filter(page => page.items.length > 0 || page.isInsertedBlank)
+              .map(page => ({
+                  ...page,
+                  items: page.items.filter(line => !line.sourceBlockId || visibleBlockIds.has(line.sourceBlockId)),
+              }))
+              .filter(page => page.items.length > 0 || page.isInsertedBlank)
         : allScriptPages;
     const scriptItems = withHeaderFooter(scriptPages, plan, settings);
     const titleItems = buildTitlePageItems(plan.titlePage, plan.scriptTitle, settings);
@@ -856,14 +805,14 @@ export const transcribeExportPlan = (
 
     const scoreStartPageByMusicId = options.scorePageCounts
         ? planIntegratedAssembly({
-            scriptPageSourceBlockIds,
-            scores: plan.postSteps.map(step => ({
-                musicId: step.musicId,
-                startBlockId: step.startBlockId,
-                afterBlockId: step.afterBlockId,
-                pageCount: options.scorePageCounts?.[step.musicId] ?? 0,
-            })),
-        }).scoreStartPageByMusicId
+              scriptPageSourceBlockIds,
+              scores: plan.postSteps.map(step => ({
+                  musicId: step.musicId,
+                  startBlockId: step.startBlockId,
+                  afterBlockId: step.afterBlockId,
+                  pageCount: options.scorePageCounts?.[step.musicId] ?? 0,
+              })),
+          }).scoreStartPageByMusicId
         : new Map<string, number>();
     const pageNumbers: ContentsPageNumbers = {
         scriptPageNumberByBlockId,

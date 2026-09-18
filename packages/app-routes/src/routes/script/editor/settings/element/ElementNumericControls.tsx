@@ -1,42 +1,31 @@
-import {
-    type BlockShortcut,
-    type ScriptBlockNodeType,
-} from '@stagistic/script';
-import {
-    formControlStyles,
-    FormSelect,
-} from '@stagistic/ui';
+import {type BlockShortcut, type SceneNumberFormat, type ScriptBlockNodeType} from '@stagistic/script';
+import {formControlStyles, FormSelect} from '@stagistic/ui';
 
-import type {
-    ElementNumericModel,
-    ElementsHandlers,
-} from '../types';
+import type {ElementNumericModel, ElementsHandlers} from '../types';
+
 import styles from './ElementNumericControls.module.css';
 
 interface ElementNumericControlsProps {
-    blockType: ScriptBlockNodeType,
-    shortcutPrefix: string,
-    model: ElementNumericModel,
-    handlers: ElementsHandlers,
+    blockType: ScriptBlockNodeType;
+    shortcutPrefix: string;
+    model: ElementNumericModel;
+    handlers: ElementsHandlers;
 }
 
-export const ElementNumericControls = ({
-    blockType,
-    shortcutPrefix,
-    model,
-    handlers,
-}: ElementNumericControlsProps) => {
+export const ElementNumericControls = ({blockType, shortcutPrefix, model, handlers}: ElementNumericControlsProps) => {
     const {
         spacingBefore,
         spacingAfter,
         lineHeight,
         shortcut,
         nextElement,
+        sceneNumberFormat,
         spacingBeforeOptions,
         spacingAfterOptions,
         lineHeightOptions,
         shortcutOptions,
         nextElementOptions,
+        sceneNumberFormatOptions,
     } = model;
     const {onUpdateBlockSettings} = handlers;
 
@@ -109,6 +98,22 @@ export const ElementNumericControls = ({
                         onChange={nextValue => {
                             onUpdateBlockSettings(blockType, {
                                 nextElement: nextValue as ScriptBlockNodeType,
+                            });
+                        }}
+                    />
+                </div>
+            ) : null}
+            {sceneNumberFormat !== undefined && sceneNumberFormatOptions ? (
+                <div className={formControlStyles.field}>
+                    <span className={formControlStyles.label}>Scene numbering</span>
+                    <FormSelect
+                        id="settings-scene-numbering"
+                        ariaLabel="Select scene numbering"
+                        value={sceneNumberFormat}
+                        options={sceneNumberFormatOptions}
+                        onChange={nextValue => {
+                            onUpdateBlockSettings(blockType, {
+                                sceneNumberFormat: nextValue as SceneNumberFormat,
                             });
                         }}
                     />

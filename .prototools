@@ -1,0 +1,4 @@
+moon = "2.5.5"
+
+[settings]
+auto-install = true

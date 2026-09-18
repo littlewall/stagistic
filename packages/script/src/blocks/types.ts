@@ -1,12 +1,12 @@
 import type {BlockSpacingSettings} from '../settings';
 
-export type BlockSpecDefaults = Required<Pick<
-    BlockSpacingSettings,
-    'spacingBeforeEm' | 'lineHeight' | 'nextElement' | 'textAlign' | 'casing' | 'isBold' | 'isItalic' | 'isUnderline'
->> & Pick<
-    BlockSpacingSettings,
-    'spacingAfterEm' | 'shortcut' | 'indentLeftChars' | 'indentRightChars' | 'indentLeftPx' | 'indentRightPx' | 'fontSizePx'
->;
+export type BlockSpecDefaults = Required<
+    Pick<BlockSpacingSettings, 'spacingBeforeEm' | 'lineHeight' | 'nextElement' | 'textAlign' | 'casing' | 'isBold' | 'isItalic' | 'isUnderline'>
+> &
+    Pick<
+        BlockSpacingSettings,
+        'spacingAfterEm' | 'shortcut' | 'indentLeftChars' | 'indentRightChars' | 'indentLeftPx' | 'indentRightPx' | 'fontSizePx' | 'sceneNumberFormat'
+    >;
 
 /**
  * A BlockSpec is the single source of truth for one block type's
@@ -28,18 +28,18 @@ export type BlockSpecDefaults = Required<Pick<
  */
 export interface BlockSpec {
     /** Tiptap node name (camelCase). */
-    readonly nodeType: string,
+    readonly nodeType: string;
     /** Stored block type identifier (snake_case). */
-    readonly blockType: string,
+    readonly blockType: string;
     /** Human-readable label used in toolbars and menus. */
-    readonly label: string,
+    readonly label: string;
     /** Stable list id (used for keys in UI lists). */
-    readonly listId: string,
+    readonly listId: string;
     /**
      * Hardcoded default for the block type a user lands on after pressing
      * Enter from this block, when no user setting overrides it.
      */
-    readonly enterFallback: string,
+    readonly enterFallback: string;
     /** Default settings for this block, contributed to DEFAULT_EDITOR_SETTINGS.blocks. */
-    readonly defaultSettings: BlockSpecDefaults,
+    readonly defaultSettings: BlockSpecDefaults;
 }

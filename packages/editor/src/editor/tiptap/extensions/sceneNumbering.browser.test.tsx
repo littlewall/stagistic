@@ -1,14 +1,10 @@
 import '@stagistic/ui/styles/base.css';
 
-import type {ScriptDocument, ScriptNode} from '@stagistic/script';
+import type {EditorSettingsOverride, ScriptDocument, ScriptNode} from '@stagistic/script';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
-import {
-    createRoot, type Root,
-} from 'react-dom/client';
-import {
-    afterEach, describe, expect, it,
-} from 'vite-plus/test';
+import {createRoot, type Root} from 'react-dom/client';
+import {afterEach, describe, expect, it} from 'vite-plus/test';
 
 import {useEditorInstance} from '../../context';
 import ScriptEditor from '../../Editor';
@@ -16,11 +12,15 @@ import ScriptEditor from '../../Editor';
 type SceneTestWindow = Window & {__sceneTestEditor?: Editor | null};
 
 const scene = (id: string, text: string): ScriptNode => ({
-    type: 'scene', attrs: {id}, content: text ? [{type: 'text', text}] : [],
+    type: 'scene',
+    attrs: {id},
+    content: text ? [{type: 'text', text}] : [],
 });
 
 const stageDirection = (id: string, text: string): ScriptNode => ({
-    type: 'stageDirection', attrs: {id}, content: text ? [{type: 'text', text}] : [],
+    type: 'stageDirection',
+    attrs: {id},
+    content: text ? [{type: 'text', text}] : [],
 });
 
 const EditorProbe = () => {
@@ -39,7 +39,7 @@ const EditorProbe = () => {
 
 const mountedRoots: Root[] = [];
 
-const renderEditor = (initialValue: ScriptDocument) => {
+const renderEditor = (initialValue: ScriptDocument, scriptSettings?: EditorSettingsOverride) => {
     const host = document.createElement('div');
 
     host.style.width = '1024px';
@@ -49,7 +49,7 @@ const renderEditor = (initialValue: ScriptDocument) => {
     const root = createRoot(host);
 
     root.render(
-        <ScriptEditor document={{initialValue}} layout={{autoFocus: true}}>
+        <ScriptEditor document={{initialValue}} settings={scriptSettings ? {scriptSettings} : undefined} layout={{autoFocus: true}}>
             <ScriptEditor.LeftSidebar>
                 <EditorProbe />
             </ScriptEditor.LeftSidebar>
@@ -59,7 +59,7 @@ const renderEditor = (initialValue: ScriptDocument) => {
     mountedRoots.push(root);
 };
 
-const poll = async <T, >(get: () => T | null | undefined, label: string): Promise<T> => {
+const poll = async <T,>(get: () => T | null | undefined, label: string): Promise<T> => {
     const deadline = Date.now() + 2000;
 
     while (Date.now() < deadline) {
@@ -90,16 +90,13 @@ describe('scene numbering', () => {
             content: [scene('s1', 'INT. HOUSE'), stageDirection('b1', 'A room.')],
         });
 
-        const sceneEl = await poll(
-            () => document.querySelector<HTMLElement>('p[blocktype="scene"][data-scene-number]'),
-            'numbered scene block element',
-        );
+        const sceneEl = await poll(() => document.querySelector<HTMLElement>('p[blocktype="scene"][data-scene-number]'), 'numbered scene block element');
 
         /*
          * The number lives in an attribute the CSS renders, never in the DOM
          * content: no widget node sits on the block's first caret position.
          */
-        expect(sceneEl.getAttribute('data-scene-number')).toBe('1');
+        expect(sceneEl.getAttribute('data-scene-number')).toBe('1.');
         expect(sceneEl.querySelector('.scene-number')).toBeNull();
 
         // It is not part of the editable text, so it cannot be selected or exported.
@@ -107,29 +104,50 @@ describe('scene numbering', () => {
 
         const before = window.getComputedStyle(sceneEl, '::before');
 
-        expect(before.content).toContain('1');
+        expect(before.content).toContain('1.');
+    });
+
+    it('applies the parenthesis format from settings', async () => {
+        renderEditor(
+            {
+                type: 'doc',
+                content: [scene('s1', 'INT. HOUSE'), stageDirection('b1', 'A room.')],
+            },
+            {blocks: {scene: {sceneNumberFormat: 'paren'}}},
+        );
+
+        const sceneEl = await poll(() => document.querySelector<HTMLElement>('p[blocktype="scene"][data-scene-number]'), 'numbered scene block element');
+
+        expect(sceneEl.getAttribute('data-scene-number')).toBe('1)');
+    });
+
+    it('omits the number entirely when numbering is disabled', async () => {
+        renderEditor(
+            {
+                type: 'doc',
+                content: [scene('s1', 'INT. HOUSE'), stageDirection('b1', 'A room.')],
+            },
+            {blocks: {scene: {sceneNumberFormat: 'none'}}},
+        );
+
+        const sceneEl = await poll(() => document.querySelector<HTMLElement>('p[blocktype="scene"]'), 'scene block element');
+
+        expect(sceneEl.hasAttribute('data-scene-number')).toBe(false);
     });
 
     it('numbers multiple scenes sequentially', async () => {
         renderEditor({
             type: 'doc',
-            content: [
-                scene('s1', 'FIRST'),
-                stageDirection('b1', 'x'),
-                scene('s2', 'SECOND'),
-            ],
+            content: [scene('s1', 'FIRST'), stageDirection('b1', 'x'), scene('s2', 'SECOND')],
         });
 
-        const scenes = await poll(
-            () => {
-                const found = document.querySelectorAll<HTMLElement>('p[blocktype="scene"][data-scene-number]');
+        const scenes = await poll(() => {
+            const found = document.querySelectorAll<HTMLElement>('p[blocktype="scene"][data-scene-number]');
 
-                return found.length === 2 ? found : null;
-            },
-            'two numbered scene blocks',
-        );
+            return found.length === 2 ? found : null;
+        }, 'two numbered scene blocks');
 
-        expect(scenes[0].getAttribute('data-scene-number')).toBe('1');
-        expect(scenes[1].getAttribute('data-scene-number')).toBe('2');
+        expect(scenes[0].getAttribute('data-scene-number')).toBe('1.');
+        expect(scenes[1].getAttribute('data-scene-number')).toBe('2.');
     });
 });
