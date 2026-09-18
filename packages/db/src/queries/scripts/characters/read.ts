@@ -35,6 +35,9 @@ const characterSelectFields = {
     notes: scriptCharacters.notes,
     backstory: scriptCharacters.backstory,
     outline: scriptCharacters.outline,
+    voiceType: scriptCharacters.voiceType,
+    vocalRangeLow: scriptCharacters.vocalRangeLow,
+    vocalRangeHigh: scriptCharacters.vocalRangeHigh,
 };
 
 const listMemberIdsByGroup = async (db: DbClient, groupIds: string[]): Promise<Map<string, string[]>> => {

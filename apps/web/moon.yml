@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# Inherits `lint` (vp lint) + `typecheck` (tsc -b). No plain `test` here (only
+# browser tests), so exclude the inherited one.
+workspace:
+  inheritedTasks:
+    exclude: ['test']
+
+tasks:
+  # predev -> db migrations compiled first (cross-project dep)
+  dev:
+    command: 'vp dev'
+    deps: ['db:db-compile-migrations']
+    preset: 'server'
+
+  # prebuild -> db migrations compiled first
+  build:
+    command: 'vp build'
+    deps: ['db:db-compile-migrations']
+    options:
+      cache: false
+
+  preview:
+    command: 'vp preview'
+    preset: 'server'
+
+  test-browser:
+    command: 'vp test run -c vitest.browser.config.ts'
+    options:
+      cache: false

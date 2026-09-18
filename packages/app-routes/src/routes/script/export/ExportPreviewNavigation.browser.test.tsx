@@ -42,6 +42,7 @@ const toScriptData = (doc: ScriptDocument): ScriptData => ({
     groups: [],
     initialCharacters: [],
     initialPlaces: [],
+    initialVocalRanges: [],
     scriptTitle: 'Draft',
     titlePage: null,
 });

@@ -48,4 +48,8 @@
         text-transform: none;
         vertical-align: baseline;
     }
+
+    &[data-scene-collapsed = 'true'] {
+        padding-bottom: var(--scene-collapse-summary-space, 1.5rem);
+    }
 }

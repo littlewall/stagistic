@@ -22,13 +22,13 @@ type MusicRailDragProps = {
 
 type DragSession = {
     pointerId: number,
-    originX: number,
-    originY: number,
     musicId: string | null,
     sourceBlockId: string,
     targetBlockId: string | null,
     isDragging: boolean,
 };
+
+const MUSIC_RAIL_DRAG_HOLD_DELAY_MS = 350;
 
 const getBoundary = (target: EventTarget | null) => {
     return target instanceof Element
@@ -82,6 +82,7 @@ export const useMusicRailDrag = ({
         }
 
         let session: DragSession | null = null;
+        let dragActivationTimer: number | null = null;
         let suppressNextClick = false;
         const dragView = createMusicRailDragView(editor, canvas, {
             dropPreview: previewClassName,
@@ -90,8 +91,32 @@ export const useMusicRailDrag = ({
         });
 
         const cancel = () => {
+            if (dragActivationTimer !== null) {
+                window.clearTimeout(dragActivationTimer);
+                dragActivationTimer = null;
+            }
+
             dragView.clear();
             session = null;
+        };
+        const startDrag = (pointerId: number) => {
+            if (!session || session.pointerId !== pointerId || session.isDragging) {
+                return;
+            }
+
+            dragActivationTimer = null;
+            session.isDragging = true;
+            onDragStart();
+
+            const snapshot = musicRailPluginKey.getState(editor.state)?.snapshot;
+
+            if (snapshot) {
+                dragView.showEligibleTargets(
+                    snapshot,
+                    session.musicId,
+                    session.sourceBlockId,
+                );
+            }
         };
         const handlePointerDown = (event: PointerEvent) => {
             const boundary = getBoundary(event.target);
@@ -105,41 +130,29 @@ export const useMusicRailDrag = ({
             boundary.setPointerCapture(event.pointerId);
 
             const sourceBlockId = boundary.dataset.blockId ?? '';
-            const snapshot = musicRailPluginKey.getState(editor.state)?.snapshot;
 
             session = {
                 pointerId: event.pointerId,
-                originX: event.clientX,
-                originY: event.clientY,
                 musicId,
                 sourceBlockId,
                 targetBlockId: null,
                 isDragging: false,
             };
 
-            if (snapshot) {
-                dragView.showEligibleTargets(snapshot, musicId, sourceBlockId);
-            }
+            dragActivationTimer = window.setTimeout(() => {
+                startDrag(event.pointerId);
+            }, MUSIC_RAIL_DRAG_HOLD_DELAY_MS);
         };
         const handlePointerMove = (event: PointerEvent) => {
             if (!session || session.pointerId !== event.pointerId) {
                 return;
             }
 
-            const distance = Math.hypot(
-                event.clientX - session.originX,
-                event.clientY - session.originY,
-            );
-
-            if (!session.isDragging && distance < 5) {
+            if (!session.isDragging) {
                 return;
             }
 
-            if (!session.isDragging) {
-                session.isDragging = true;
-                onDragStart();
-            }
-
+            const snapshot = musicRailPluginKey.getState(editor.state)?.snapshot;
             const elements = document.elementsFromPoint(event.clientX, event.clientY);
             const boundary = elements
                 .map(element => getBoundary(element))
@@ -147,7 +160,6 @@ export const useMusicRailDrag = ({
             const targetBlockId = boundary?.dataset.blockId
                 ?? elements.map(element => getBlockId(element)).find(Boolean)
                 ?? resolveClosestBlockId(canvas, event.clientY);
-            const snapshot = musicRailPluginKey.getState(editor.state)?.snapshot;
             const isAllowed = Boolean(
                 snapshot
                 && targetBlockId

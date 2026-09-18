@@ -52,6 +52,9 @@ export const useAttributeManagerItems = ({
                 characterColorSaturation,
             ),
             outline: character.outline ?? null,
+            voiceType: character.voiceType ?? null,
+            vocalRangeLow: character.vocalRangeLow ?? null,
+            vocalRangeHigh: character.vocalRangeHigh ?? null,
             groupNames: characters.confirmedGroupRecords
                 .filter(group => group.memberIds.includes(character.id))
                 .map(group => liveCharacters.keyByCharacterId.get(group.id) ?? group.key)

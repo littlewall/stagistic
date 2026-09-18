@@ -6,7 +6,8 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import type {EditorMusicRemoveRequest} from '../../contracts';
 import {
-    formatOpenMusicDisplayName,
+    canResetMusicEnd,
+    formatFullMusicDisplayName,
     resolveMusicBoundaryActions,
 } from '../blockActions/stageDirectionMusicActions';
 import {scrollToMusicRailBlock} from './musicRailDom';
@@ -28,9 +29,20 @@ type MenuItem = {
     run: () => void,
 };
 
+/*
+ * `kind` says what this marker does to the music, `name` says which music. They
+ * are separate lines because the name is the part that has to be recognised and
+ * a title is as long as it is — clipping it to fit one row turned the header
+ * into a riddle.
+ */
+type MenuSectionHeader = {
+    kind: string,
+    name: string,
+};
+
 type MenuSection = {
     id: string,
-    label?: string,
+    header?: MenuSectionHeader,
     musicId?: string,
     items: MenuItem[],
 };
@@ -47,6 +59,7 @@ type MusicRailMenuProps = {
 const buildEndSection = (
     editor: TiptapEditor,
     menu: MusicRailMenuState,
+    snapshot: ScriptBlockIndexSnapshot,
     music: DerivedMusic,
     run: (action: () => void) => () => void,
     onOpenMusicManager?: (musicId: string) => void,
@@ -67,19 +80,25 @@ const buildEndSection = (
         });
     }
 
-    items.push(music.endKind === 'explicit' ? {
-        id: 'remove-out',
-        label: 'Remove out',
-        run: run(() => editor.commands.removeMusicOutAtBlock(menu.blockId)),
-    } : {
-        id: 'make-explicit',
-        label: 'Make explicit here',
-        run: run(() => editor.commands.setMusicOutAtBlock(menu.blockId)),
-    });
+    /*
+     * Only offered where there is a placed end to hand back: an end that is
+     * already automatic has nothing to release, and pinning it where it already
+     * falls was a command about the document's bookkeeping, not about the music.
+     */
+    if (music.endKind === 'explicit' && canResetMusicEnd(snapshot, menu.blockId)) {
+        items.push({
+            id: 'remove-out',
+            label: 'Reset music end',
+            run: run(() => editor.commands.removeMusicOutAtBlock(menu.blockId)),
+        });
+    }
 
     return {
         id: 'ending',
-        label: `Ending: ${formatOpenMusicDisplayName(music)}`,
+        header: {
+            kind: 'End music:',
+            name: formatFullMusicDisplayName(music),
+        },
         musicId: music.musicId,
         items,
     };
@@ -128,7 +147,10 @@ const buildStartSection = (
 
     return {
         id: 'starting',
-        label: `Starting: ${formatOpenMusicDisplayName(music)}`,
+        header: {
+            kind: 'Start music:',
+            name: formatFullMusicDisplayName(music),
+        },
         musicId: music.musicId,
         items,
     };
@@ -156,7 +178,8 @@ const buildBoundarySection = (
         items: action.items.map(item => ({
             id: item.id,
             label: item.label,
-            detail: item.detail,
+            // This menu gives the detail a line of its own, so it takes the whole name.
+            detail: item.detailFull ?? item.detail,
             run: run(item.run),
         })),
     };
@@ -179,14 +202,18 @@ export const MusicRailMenu = ({
     const sections: MenuSection[] = [];
 
     if (endMusic) {
-        sections.push(buildEndSection(editor, menu, endMusic, run, onOpenMusicManager));
+        sections.push(buildEndSection(editor, menu, snapshot, endMusic, run, onOpenMusicManager));
     } else if (menu.markerKind === 'orphan') {
         sections.push({
             id: 'orphan',
             items: [
                 {
+                    /*
+                     * A stray end atom belonging to no music: there is nothing
+                     * to hand back to, it can only go.
+                     */
                     id: 'remove-orphan',
-                    label: 'Remove out',
+                    label: 'Remove stray end',
                     run: run(() => editor.commands.removeMusicOutAtBlock(menu.blockId)),
                 },
             ],
@@ -230,12 +257,23 @@ export const MusicRailMenu = ({
                     key={section.id}
                     className={styles.section}
                 >
-                    {section.label ? (
+                    {section.header ? (
                         <span
                             className={styles.sectionLabel}
                             data-music-rail-section-label="true"
                         >
-                            {section.label}
+                            <span
+                                className={styles.sectionKind}
+                                data-music-rail-section-kind="true"
+                            >
+                                {section.header.kind}
+                            </span>
+                            <span
+                                className={styles.sectionName}
+                                data-music-rail-section-name="true"
+                            >
+                                {section.header.name}
+                            </span>
                         </span>
                     ) : null}
                     {section.items.map(item => (

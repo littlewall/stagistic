@@ -28,12 +28,24 @@ export interface ExportInitialPlace {
     firstAppearanceOrder: number,
 }
 
+export interface ExportInitialVocalRange {
+    id: string,
+    displayName: string,
+    voiceType: string | null,
+    /** Scientific pitch notation, e.g. "F#3". */
+    low: string,
+    /** Scientific pitch notation, e.g. "A4". */
+    high: string,
+    firstAppearanceOrder: number | null,
+}
+
 export interface ScriptData {
     doc: ScriptDocument,
     characters: ExportCharacter[],
     groups: ExportCharacterGroup[],
     initialCharacters: ExportInitialCharacter[],
     initialPlaces: ExportInitialPlace[],
+    initialVocalRanges: ExportInitialVocalRange[],
     scriptTitle: string,
     titlePage: TitlePageSettings | null,
 }

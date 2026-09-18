@@ -1,0 +1,19 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+tasks:
+  demo-acts-and-scenes:
+    command: 'tsx src/runActsAndScenesDemo.ts'
+    options:
+      cache: false
+
+  demo-editor-blocks:
+    command: 'tsx src/runEditorBlocksDemo.ts'
+    options:
+      cache: false
+
+  test:
+    command: 'vp test run -c vitest.config.ts'
+    options:
+      cache: false
+      mergeArgs: 'replace'

@@ -21,6 +21,9 @@ const character = (overrides: Partial<ScriptCharacterRef> = {}): ScriptCharacter
     notes: null,
     backstory: null,
     outline: null,
+    voiceType: null,
+    vocalRangeLow: null,
+    vocalRangeHigh: null,
     ...overrides,
 });
 
@@ -49,6 +52,8 @@ type CharactersRepository = Pick<
     | 'setScriptCharacterColor'
     | 'setScriptCharacterGender'
     | 'setScriptCharacterOutline'
+    | 'setScriptCharacterVoiceType'
+    | 'setScriptCharacterVocalRange'
     | 'upsertScriptCharacterGenderWithId'
 >;
 
@@ -113,6 +118,12 @@ const createRepository = (initialCharacters: ScriptCharacterRef[] = [character()
         },
         setScriptCharacterOutline: (_scriptId, id, outline) => {
             return updateCharacter(id, {outline});
+        },
+        setScriptCharacterVoiceType: (_scriptId, id, voiceType) => {
+            return updateCharacter(id, {voiceType});
+        },
+        setScriptCharacterVocalRange: (_scriptId, id, vocalRangeLow, vocalRangeHigh) => {
+            return updateCharacter(id, {vocalRangeLow, vocalRangeHigh});
         },
         upsertScriptCharacterGenderWithId: async (_scriptId, input) => {
             const option = {
@@ -188,6 +199,11 @@ describe('script characters store', () => {
             'setScriptCharacterOutline',
             'A difficult choice',
         ],
+        [
+            'voiceType',
+            'setScriptCharacterVoiceType',
+            'tenor',
+        ],
     ] as const)('rolls back a failed %s update', async (field, method, value) => {
         const {repository} = createRepository();
         const gate = deferred();
@@ -202,6 +218,7 @@ describe('script characters store', () => {
             colorHex: () => store.setCharacterColor('character-1', value),
             genderKey: () => store.setCharacterGender('character-1', value),
             outline: () => store.setCharacterOutline('character-1', value),
+            voiceType: () => store.setCharacterVoiceType('character-1', value),
         };
         const update = updates[field]();
 
@@ -216,6 +233,33 @@ describe('script characters store', () => {
             action: field,
             status: 'failed',
         }));
+    });
+
+    it('sets both bounds of the vocal range together and rolls back both on failure', async () => {
+        const {repository, characters} = createRepository();
+        const gate = deferred();
+
+        repository.setScriptCharacterVocalRange = () => gate.promise.then(() => null);
+
+        const store = createScriptCharactersStore(repository, 'script-1');
+
+        await Promise.all([store.charactersCollection.preload(), store.gendersCollection.preload()]);
+
+        const update = store.setCharacterVocalRange('character-1', 'C3', 'A4');
+
+        expect(store.charactersCollection.get('character-1')).toMatchObject({
+            vocalRangeLow: 'C3',
+            vocalRangeHigh: 'A4',
+        });
+
+        gate.reject(new Error('vocalRange failed'));
+        await expect(update).rejects.toThrow('vocalRange failed');
+
+        expect(store.charactersCollection.get('character-1')).toMatchObject({
+            vocalRangeLow: null,
+            vocalRangeHigh: null,
+        });
+        expect(await characters.read()).toEqual([character()]);
     });
 
     it('keeps the newest outline visible while same-character writes serialize', async () => {

@@ -5,6 +5,7 @@ import type {
     CharacterHandlers,
     CreateCharacterHandlersArgs,
 } from './types';
+import {createVocalRangeMutations} from './vocalRangeMutations';
 
 export const createCharacterHandlers = ({
     getDb,
@@ -26,10 +27,16 @@ export const createCharacterHandlers = ({
         recordOutbox,
         syncDb,
     });
+    const vocalRangeMutations = createVocalRangeMutations({
+        getDb,
+        recordOutbox,
+        syncDb,
+    });
 
     return {
         ...genderMutations,
         ...coreMutations,
         ...outlineMutations,
+        ...vocalRangeMutations,
     };
 };

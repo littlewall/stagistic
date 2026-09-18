@@ -10,17 +10,23 @@ import {
 
 export const mountedRoots: Root[] = [];
 
-export const CHARACTERS = [
+export const CHARACTERS: AttributeManagerCharacter[] = [
     {
         id: 'char-1',
         name: 'ANNA',
         color: '#8899aa',
         outline: 'existing outline',
+        voiceType: null,
+        vocalRangeLow: null,
+        vocalRangeHigh: null,
     }, {
         id: 'char-2',
         name: 'BORIS',
         color: '#aa9988',
         outline: 'selected outline',
+        voiceType: null,
+        vocalRangeLow: null,
+        vocalRangeHigh: null,
     },
 ];
 

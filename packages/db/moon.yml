@@ -1,0 +1,39 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# Inherits `lint`. `typecheck` and `test` are inherited but get a pre-dep on
+# migration checks (the old pretypecheck/pretest lifecycle hooks). Partial task
+# defs MERGE with the inherited ones, so `typecheck` keeps `tsc -b` and only
+# gains the dep.
+tasks:
+  db-generate:
+    script: 'drizzle-kit generate && node ./scripts/compile-migrations.mjs'
+    options:
+      cache: false
+
+  db-check:
+    command: 'drizzle-kit check'
+    options:
+      cache: false
+
+  db-compile-migrations:
+    command: 'node ./scripts/compile-migrations.mjs'
+    options:
+      cache: false
+
+  db-check-migrations:
+    command: 'node ./scripts/compile-migrations.mjs --check'
+    options:
+      cache: false
+
+  typecheck:
+    deps: ['~:db-check-migrations']
+
+  # db tests run from the package root (matches the existing `--dir .`)
+  test:
+    command: 'vp test run --dir .'
+    deps: ['~:db-check-migrations']
+    options:
+      cache: false
+      # fully replace the inherited `vp test run` args, don't append to them
+      mergeArgs: 'replace'

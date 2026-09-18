@@ -7,6 +7,19 @@
     background: color-mix(in oklch, var(--color-text) 18%, transparent);
 }
 
+/*
+ * Colour of the point whose menu is open — a boundary marker on the rail or the
+ * active block's own trigger, both get it. Brand yellow taken down to ink
+ * weight: at 5px the accent's own lightness would read as a smudge on paper,
+ * and the marker has to stay a marker. Dark mode lifts it instead, for the same
+ * reason against a dark page.
+ */
+.boundary,
+.activeTrigger,
+.dropPreview {
+    --music-marker-open-color: oklch(from var(--base-accent) .52 c h);
+}
+
 .boundary {
     cursor: pointer;
     position: absolute;
@@ -81,6 +94,29 @@
         outline: 2px solid var(--color-focus-ring);
         outline-offset: 1px;
     }
+
+    /*
+     * Listed for the pseudo-elements too, not just the button: the end and
+     * orphan tones set their own colour on ::before, which would otherwise
+     * outrank the open state and leave those markers looking untouched.
+     */
+    &[data-music-rail-menu-open = 'true'],
+    &[data-music-rail-menu-open = 'true']::before,
+    &[data-music-rail-menu-open = 'true']::after {
+        color: var(--music-marker-open-color);
+    }
+
+    /* Halo, so a 5px dot changing hue is not the whole signal. */
+    &[data-music-rail-menu-open = 'true'] {
+        background: color-mix(in oklch, var(--music-marker-open-color) 16%, transparent);
+        border-radius: var(--radius-full);
+    }
+}
+
+:global(:root[data-theme = 'dark']) .boundary,
+:global(:root[data-theme = 'dark']) .activeTrigger,
+:global(:root[data-theme = 'dark']) .dropPreview {
+    --music-marker-open-color: oklch(from var(--base-accent) .72 c h);
 }
 
 .dropPreview {
@@ -90,7 +126,8 @@
     transform: translate(-50%, -50%);
     width: 20px;
     height: 20px;
-    color: var(--color-focus-ring);
+    background: color-mix(in oklch, var(--music-marker-open-color) 16%, transparent);
+    border-radius: var(--radius-full);
 
     &::before {
         content: '';
@@ -98,11 +135,9 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        box-sizing: border-box;
-        width: 9px;
-        height: 9px;
-        background: var(--color-surface-paper);
-        border: 1px solid currentcolor;
+        width: 5px;
+        height: 5px;
+        background: color-mix(in oklch, var(--color-text-muted) 38%, transparent);
         border-radius: var(--radius-full);
     }
 }
@@ -163,6 +198,12 @@
     &:active {
         transform: scale(.97);
     }
+
+    /* Listed after the hover state so an open menu outranks the pointer. */
+    &[data-music-rail-menu-open = 'true'] {
+        color: var(--music-marker-open-color);
+        background: color-mix(in oklch, var(--music-marker-open-color) 16%, transparent);
+    }
 }
 
 .menu {
@@ -171,6 +212,10 @@
     overflow: hidden;
     display: grid;
     min-width: 190px;
+
+    /* Bounded so a long music title wraps inside the menu instead of stretching
+       it across the page; the header below is allowed as many lines as it needs. */
+    max-width: 260px;
     padding: 4px;
     background: var(--color-surface-paper);
     border: 1px solid var(--color-border);
@@ -183,19 +228,40 @@
     border-top: 1px solid var(--color-border);
 }
 
+/*
+ * Two lines: what this marker does, then which music it does it to. The name
+ * is never clipped — a half-title is not an identification — so the header
+ * grows downwards and a hairline holds it apart from the actions below.
+ */
 .sectionLabel {
-    display: block;
-    padding: 5px 8px 3px;
+    display: grid;
+    gap: 1px;
+    margin-bottom: 4px;
+    padding: 5px 8px 6px;
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.sectionKind {
     font-size: var(--font-size-xs);
     color: var(--color-text-muted);
 }
 
+.sectionName {
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    overflow-wrap: anywhere;
+}
+
+/*
+ * Label, then its detail on the next line. Side by side, a music name had to be
+ * clipped to keep the row on one line — and the name is the only thing telling
+ * two otherwise identical commands apart, so the row gives way instead.
+ */
 .menuItem {
     cursor: pointer;
-    display: flex;
-    gap: var(--space-sm);
-    align-items: baseline;
-    justify-content: space-between;
+    display: grid;
+    gap: 1px;
+    justify-items: start;
     width: 100%;
     padding: 6px 8px;
     font: inherit;
@@ -215,4 +281,6 @@
 
 .detail {
     color: var(--color-text-muted);
+    text-align: left;
+    overflow-wrap: anywhere;
 }

@@ -8,7 +8,7 @@ import {
 import styles from './Button.module.css';
 import {ProgressCircle} from './ProgressCircle';
 
-type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline';
+type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'outline' | 'toggle' | 'segment';
 
 type ButtonSize = 'icon' | 'sm' | 'md';
 

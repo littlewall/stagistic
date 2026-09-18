@@ -249,6 +249,17 @@ export interface ScriptRepository {
     ): Promise<ScriptCharacterGroupRef | null>,
     setScriptCharacterGender(scriptId: string, characterId: string, genderKey: string | null): Promise<ScriptCharacterRef | null>,
     setScriptCharacterOutline(scriptId: string, characterId: string, outline: string | null): Promise<ScriptCharacterRef | null>,
+    setScriptCharacterVoiceType(
+        scriptId: string,
+        characterId: string,
+        voiceType: string | null,
+    ): Promise<ScriptCharacterRef | null>,
+    setScriptCharacterVocalRange(
+        scriptId: string,
+        characterId: string,
+        vocalRangeLow: string | null,
+        vocalRangeHigh: string | null,
+    ): Promise<ScriptCharacterRef | null>,
     upsertScriptCharacterGender(scriptId: string, label: string): Promise<ScriptCharacterGenderOption | null>,
     upsertScriptCharacterGenderWithId(
         scriptId: string,

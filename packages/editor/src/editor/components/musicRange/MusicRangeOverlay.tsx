@@ -4,6 +4,7 @@ import {
     useCallback,
     useEffect,
     useMemo,
+    useRef,
     useState,
 } from 'react';
 
@@ -14,6 +15,8 @@ import {useOverlayPosition} from '../blockActions/useOverlayPosition';
 import {
     createMusicRailMarkerController,
     createMusicRailRangeController,
+    escapeMusicRailSelector,
+    MUSIC_RAIL_MENU_OPEN_ATTRIBUTE,
     resolveMusicRailLeft,
 } from './musicRailDom';
 import {MusicRailMenu, type MusicRailMenuState} from './MusicRailMenu';
@@ -35,6 +38,8 @@ const MusicRangeOverlay = ({
 }: MusicRangeOverlayProps) => {
     const [menu, setMenu] = useState<MusicRailMenuState | null>(null);
     const [railRevision, setRailRevision] = useState(0);
+    // Read by the canvas click handler, which is bound once and cannot see state.
+    const openMenuRef = useRef<MusicRailMenuState | null>(null);
     const {activeBlockState} = useOverlayPosition({
         editor,
         canvasRef,
@@ -81,25 +86,78 @@ const MusicRangeOverlay = ({
     });
 
     useEffect(() => {
+        openMenuRef.current = menu;
+    }, [menu]);
+
+    /*
+     * Points the open menu back at the marker it belongs to. The menu is placed
+     * at a fixed position away from the rail, so without this the link between
+     * the two is left to the reader; it is cleared by the effect teardown, which
+     * covers every way the menu closes.
+     */
+    useEffect(() => {
+        const canvas = canvasRef.current;
+
+        if (!canvas || !menu) {
+            return undefined;
+        }
+
+        const marker = canvas.querySelector<HTMLElement>(
+            `[data-music-rail-boundary="true"][data-block-id="${escapeMusicRailSelector(menu.blockId)}"]`,
+        );
+
+        marker?.setAttribute(MUSIC_RAIL_MENU_OPEN_ATTRIBUTE, 'true');
+
+        return () => {
+            marker?.removeAttribute(MUSIC_RAIL_MENU_OPEN_ATTRIBUTE);
+        };
+    }, [canvasRef, menu]);
+
+    useEffect(() => {
         const canvas = canvasRef.current;
 
         if (!editor || !canvas) {
             return undefined;
         }
 
-        const handleClick = (event: MouseEvent) => {
-            const target = event.target instanceof Element
-                ? event.target.closest<HTMLElement>('[data-music-rail-boundary="true"]')
+        const findRailPoint = (eventTarget: EventTarget | null) => {
+            return eventTarget instanceof Element
+                ? eventTarget.closest<HTMLElement>('[data-music-rail-boundary="true"]')
                 : null;
+        };
+        const handleClick = (event: MouseEvent) => {
+            const target = findRailPoint(event.target);
 
             if (!target) {
                 return;
             }
 
             event.preventDefault();
+
+            // Second click on the point that owns the open menu dismisses it.
+            if (openMenuRef.current?.blockId === target.dataset.blockId) {
+                setMenu(null);
+
+                return;
+            }
+
             openMenuForTarget(target);
         };
         const closeMenu = () => setMenu(null);
+        const handlePointerDown = (event: PointerEvent) => {
+            /*
+             * A rail point decides for itself on click — open, switch or toggle
+             * shut. Dismissing here instead would also drop the active block's
+             * trigger, which only exists while something is open: it would be
+             * unmounted between this pointerdown and its own click, and the
+             * click the reader aimed at would land on nothing.
+             */
+            if (findRailPoint(event.target)) {
+                return;
+            }
+
+            closeMenu();
+        };
         const handleKeyDown = (event: KeyboardEvent) => {
             if (event.key === 'Escape') {
                 closeMenu();
@@ -108,13 +166,13 @@ const MusicRangeOverlay = ({
 
         canvas.addEventListener('click', handleClick);
         canvas.addEventListener('scroll', closeMenu, {passive: true});
-        document.addEventListener('pointerdown', closeMenu);
+        document.addEventListener('pointerdown', handlePointerDown);
         document.addEventListener('keydown', handleKeyDown);
 
         return () => {
             canvas.removeEventListener('click', handleClick);
             canvas.removeEventListener('scroll', closeMenu);
-            document.removeEventListener('pointerdown', closeMenu);
+            document.removeEventListener('pointerdown', handlePointerDown);
             document.removeEventListener('keydown', handleKeyDown);
         };
     }, [

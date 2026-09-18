@@ -8,7 +8,14 @@ export interface BlockActionCommand {
     kind: 'command',
     id: string,
     label: string,
+    /** Compact secondary text, for menus that keep every command on one line. */
     detail?: string,
+    /**
+     * The same secondary text with nothing clipped, for menus that can give it
+     * a line of its own. A music name is what tells two commands apart, so a
+     * surface that can afford the room should never show the preview instead.
+     */
+    detailFull?: string,
     icon: BlockActionIcon,
     run: () => void,
 }

@@ -8,6 +8,8 @@ WORKDIR /app
 
 # Copy workspace files
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY moon.yml ./
+COPY .moon ./.moon
 COPY apps/web/package.json ./apps/web/
 COPY packages ./packages
 
@@ -24,7 +26,7 @@ COPY tsconfig.base.json ./
 
 # Build
 WORKDIR /app/apps/web
-RUN pnpm build
+RUN pnpm exec moon run web:build
 
 # Production stage - serve with nginx
 FROM nginx:alpine

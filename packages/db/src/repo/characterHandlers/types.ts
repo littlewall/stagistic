@@ -14,6 +14,8 @@ export type CharacterHandlers = Pick<
     | 'setScriptCharacterColor'
     | 'setScriptCharacterGender'
     | 'setScriptCharacterOutline'
+    | 'setScriptCharacterVoiceType'
+    | 'setScriptCharacterVocalRange'
     | 'upsertScriptCharacterGender'
     | 'upsertScriptCharacterGenderWithId'
 >;

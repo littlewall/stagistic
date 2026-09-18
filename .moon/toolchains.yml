@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/toolchain.json
+$schema: 'https://moonrepo.dev/schemas/toolchain.json'
+
+# NOTE: this moon build (v2.5.5) reads `.moon/toolchains.yml` (plural), NOT the
+# `.moon/toolchain.yml` shown in the 1.x public docs.
+#
+# The javascript + node toolchains are what make moon (a) detect projects with a
+# package.json as node projects and (b) prepend node_modules/.bin to PATH so
+# `vp`, `tsc`, `astro`, `tauri`, `drizzle-kit` resolve inside each task. In moon
+# 2.5.x the `node` toolchain requires the parent `javascript` toolchain too.
+#
+# No version pinned on purpose -> moon uses the system node/pnpm (engines +
+# packageManager in package.json stay the source of truth). Pin later (or set
+# versionFromPrototools: true) if you want moon/proto to auto-install versions.
+javascript: {}
+node:
+  packageManager: 'pnpm'

@@ -1,6 +1,7 @@
 import {
     type DerivedMusic,
     formatMusicNumber,
+    type IndexedScriptBlock,
     MUSIC_OUT_NODE_NAME,
     type ScriptBlockIndexSnapshot,
 } from '@stagistic/script';
@@ -33,17 +34,95 @@ const truncateMusicTitle = (title: string) => {
         : `${characters.slice(0, MUSIC_TITLE_PREVIEW_LENGTH).join('')}…`;
 };
 
-export const formatOpenMusicDisplayName = (music: DerivedMusic) => {
+/*
+ * Music commands name the number in their own label, so the title travels on
+ * its own — two lines of "1) …" in one menu row is the number said twice.
+ */
+
+/** As much of the title as a single-line row can hold. */
+export const formatMusicTitlePreview = (music: DerivedMusic) => {
+    return truncateMusicTitle(music.title) || undefined;
+};
+
+/** The whole title, for surfaces that can wrap it onto as many lines as it takes. */
+export const formatMusicTitleFull = (music: DerivedMusic) => {
+    return music.title.trim() || undefined;
+};
+
+/** Number plus whole title, for headers that have no number of their own. */
+export const formatFullMusicDisplayName = (music: DerivedMusic) => {
     const number = formatMusicNumber(music);
-    const title = truncateMusicTitle(music.title);
+    const title = music.title.trim();
 
     return title ? `${number} ${title}` : number;
 };
 
-export const formatSetMusicOutLabel = (music: DerivedMusic) => {
-    const number = formatMusicNumber(music).replace(/\)$/u, '');
+const stripMusicNumberBracket = (number: string) => number.replace(/\)$/u, '');
 
-    return `Set out here (${number})`;
+const withMusicNumber = (label: string, number: string) => {
+    return `${label} (${stripMusicNumberBracket(number)})`;
+};
+
+/*
+ * One command, one name. Whether the music currently ends implicitly at the end
+ * of its scene or explicitly at a block someone pinned is a distinction in the
+ * document, not in the reader's head: either way the music ends, and this is
+ * how you say where. Splitting it into "Add out" and "Set out here" made the
+ * same action look like two.
+ */
+export const formatSetMusicOutLabel = (music: DerivedMusic) => {
+    return withMusicNumber('Set music end', formatMusicNumber(music));
+};
+
+/*
+ * Dropping the out atom does not leave the music without an end — the end goes
+ * back to being derived: the scene boundary, the next music, or the end of the
+ * script (see deriveMusicTimeline). It is also the only way back to a derived
+ * end, because dragging the endpoint always pins it to a block.
+ */
+export const formatResetMusicEndLabel = (music: DerivedMusic) => {
+    return withMusicNumber('Reset music end', formatMusicNumber(music));
+};
+
+const SCENE_BOUNDARY_BLOCK_TYPES = new Set(['act', 'scene']);
+
+const resolveNextBlock = (snapshot: ScriptBlockIndexSnapshot, blockId: string) => {
+    const block = snapshot.blocks.find(candidate => candidate.blockId === blockId);
+
+    if (!block) {
+        return null;
+    }
+
+    return snapshot.blocks.reduce<IndexedScriptBlock | null>((closest, candidate) => {
+        if (candidate.orderNo <= block.orderNo) {
+            return closest;
+        }
+
+        return !closest || candidate.orderNo < closest.orderNo ? candidate : closest;
+    }, null);
+};
+
+/**
+ * Whether resetting a placed end would actually move it. The derived end is the
+ * block before the next scene boundary, or the block where the next music
+ * starts — so when either of those sits immediately after this block, the end
+ * has nowhere to go and the command would be a no-op worth hiding.
+ */
+export const canResetMusicEnd = (snapshot: ScriptBlockIndexSnapshot, blockId: string) => {
+    const nextBlock = resolveNextBlock(snapshot, blockId);
+
+    if (!nextBlock || SCENE_BOUNDARY_BLOCK_TYPES.has(nextBlock.blockType)) {
+        return false;
+    }
+
+    return !snapshot.music.some(music => {
+        return music.mode === 'open' && music.startBlockId === nextBlock.blockId;
+    });
+};
+
+/** Starting a music is what dropping the pill does, so the label says so. */
+export const formatAddMusicLabel = (newMusicNumber: string) => {
+    return withMusicNumber('Start new music', newMusicNumber);
 };
 
 export {resolveNewMusicNumber} from '../../tiptap/extensions/music/musicCommands';
@@ -61,6 +140,8 @@ export interface MusicBoundaryAvailability {
     outAction: MusicOutBoundaryAction | null,
     outMusic: DerivedMusic | null,
     isOrphanOut: boolean,
+    /** False when the end has nowhere to move to, which is when it is not worth offering. */
+    canResetEnd: boolean,
 }
 
 export interface MusicBoundaryAtomState {
@@ -93,6 +174,7 @@ export const resolveMusicBoundaryAvailabilityFromSnapshot = (
         outAction: atoms.hasMusicOut ? 'remove' : outMusic ? outMusic.endBlockId ? 'set' : 'add' : null,
         outMusic,
         isOrphanOut,
+        canResetEnd: canResetMusicEnd(snapshot, blockId),
     };
 };
 
@@ -129,11 +211,30 @@ const resolveOutCommand = (
     }
 
     if (outAction === 'remove') {
+        // A stray end belongs to no music, so there is nothing to hand it back to.
+        if (!outMusic) {
+            return {
+                kind: 'command',
+                id: 'remove-out',
+                label: 'Remove stray end',
+                icon: 'musicOut',
+                run: () => {
+                    editor.commands.removeMusicOutAtBlock(blockId);
+                    editor.commands.focus();
+                },
+            };
+        }
+
+        if (!availability.canResetEnd) {
+            return null;
+        }
+
         return {
             kind: 'command',
             id: 'remove-out',
-            label: 'Remove out',
-            detail: outMusic ? formatOpenMusicDisplayName(outMusic) : undefined,
+            label: formatResetMusicEndLabel(outMusic),
+            detail: formatMusicTitlePreview(outMusic),
+            detailFull: formatMusicTitleFull(outMusic),
             icon: 'musicOut',
             run: () => {
                 editor.commands.removeMusicOutAtBlock(blockId);
@@ -148,9 +249,10 @@ const resolveOutCommand = (
 
     return {
         kind: 'command',
-        id: outAction === 'set' ? 'set-out' : 'add-out',
-        label: outAction === 'set' ? formatSetMusicOutLabel(outMusic) : 'Add out',
-        detail: formatOpenMusicDisplayName(outMusic),
+        id: 'set-out',
+        label: formatSetMusicOutLabel(outMusic),
+        detail: formatMusicTitlePreview(outMusic),
+        detailFull: formatMusicTitleFull(outMusic),
         icon: 'musicOut',
         run: () => {
             editor.commands.setMusicOutAtBlock(blockId);
@@ -175,8 +277,7 @@ export const resolveMusicBoundaryActions = ({
         items.push({
             kind: 'command',
             id: 'add-music',
-            label: 'Add music',
-            detail: availability.newMusicNumber,
+            label: formatAddMusicLabel(availability.newMusicNumber),
             icon: 'musicStart',
             run: () => editor.commands.insertMusicDraft(blockId),
         });

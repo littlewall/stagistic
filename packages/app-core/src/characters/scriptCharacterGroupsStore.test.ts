@@ -21,6 +21,9 @@ const character = (id: string, key: string): ScriptCharacterRef => ({
     notes: null,
     backstory: null,
     outline: null,
+    voiceType: null,
+    vocalRangeLow: null,
+    vocalRangeHigh: null,
 });
 
 const group = (overrides: Partial<ScriptCharacterGroupRef> = {}): ScriptCharacterGroupRef => ({

@@ -105,5 +105,10 @@ export const compiledMigrations = [
         "id": "0020_add_character_groups",
         "checksum": "6a3c922b25b408d621cbae96a27b165a2c1a2f3c4715347c36fe7dbe06aa944a",
         "sql": "ALTER TABLE \"script_characters\" ADD COLUMN \"kind\" text DEFAULT 'character' NOT NULL;\n--> statement-breakpoint\nCREATE TABLE \"script_character_group_members\" (\n    \"group_id\" text NOT NULL,\n    \"character_id\" text NOT NULL,\n    CONSTRAINT \"script_character_group_members_group_id_character_id_pk\" PRIMARY KEY(\"group_id\", \"character_id\")\n);\n--> statement-breakpoint\nALTER TABLE \"script_character_group_members\" ADD CONSTRAINT \"script_character_group_members_group_id_script_characters_id_fk\" FOREIGN KEY (\"group_id\") REFERENCES \"public\".\"script_characters\"(\"id\") ON DELETE cascade ON UPDATE no action;\n--> statement-breakpoint\nALTER TABLE \"script_character_group_members\" ADD CONSTRAINT \"script_character_group_members_character_id_script_characters_id_fk\" FOREIGN KEY (\"character_id\") REFERENCES \"public\".\"script_characters\"(\"id\") ON DELETE cascade ON UPDATE no action;\n--> statement-breakpoint\nCREATE INDEX \"script_character_group_members_character_id_idx\" ON \"script_character_group_members\" USING btree (\"character_id\");\n"
+    },
+    {
+        "id": "0021_add_character_vocal_range",
+        "checksum": "8ad097ab2fb1bb00670f4b15efc5de54bb6bbb7ef5da35e6ddbd2617f1bebebc",
+        "sql": "ALTER TABLE \"script_characters\" ADD COLUMN \"voice_type\" text;\nALTER TABLE \"script_characters\" ADD COLUMN \"vocal_range_low\" text;\nALTER TABLE \"script_characters\" ADD COLUMN \"vocal_range_high\" text;\n"
     }
 ] as const;

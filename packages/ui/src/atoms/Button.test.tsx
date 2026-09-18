@@ -35,6 +35,15 @@ describe('Button', () => {
         expect(styles.ghost).not.toBe(styles.icon);
     });
 
+    it('exposes a toggle variant for stable pressed controls', () => {
+        const markup = renderToStaticMarkup(
+            <Button variant="toggle" aria-pressed>Sharp</Button>,
+        );
+
+        expect(markup).toContain(styles.toggle);
+        expect(markup).toContain('aria-pressed="true"');
+    });
+
     it('keeps a caller className alongside its own classes', () => {
         const markup = renderToStaticMarkup(<Button className="col-span-2">x</Button>);
 

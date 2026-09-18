@@ -19,6 +19,9 @@ export interface ScriptCharacterRef {
     notes: string | null,
     backstory: string | null,
     outline: string | null,
+    voiceType: string | null,
+    vocalRangeLow: string | null,
+    vocalRangeHigh: string | null,
 }
 
 export interface ScriptCharacterGroupRef {

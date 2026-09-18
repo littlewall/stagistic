@@ -51,6 +51,10 @@
         padding-block: var(--space-lg);
     }
 
+    &[data-size = 'lg'] {
+        --input-height: var(--control-height-lg);
+    }
+
     &.raised {
         --input-bg: var(--color-surface-raised);
         --input-radius: var(--radius-sm);

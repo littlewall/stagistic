@@ -5,22 +5,29 @@ import {
 
 import type {BasicExportConfig} from './config';
 import {filterScriptByCharacter} from './filterByCharacter';
+import {deriveContentsPlan} from './initialPages/contents/deriveContentsPlan';
 import type {
     CharactersAndPlacesInitialPagePlan,
     ExportPlan,
     ForcedBreak,
+    VocalRangesInitialPagePlan,
 } from './plan';
 import {groupScenes} from './scenes';
 import type {ScriptData} from './scriptData';
 
+interface OrderableInitialEntry {
+    displayName: string,
+    firstAppearanceOrder: number | null,
+}
+
 const compareCharactersByName = (
-    left: ScriptData['initialCharacters'][number],
-    right: ScriptData['initialCharacters'][number],
+    left: OrderableInitialEntry,
+    right: OrderableInitialEntry,
 ) => left.displayName.localeCompare(right.displayName);
 
 const compareCharactersByAppearance = (
-    left: ScriptData['initialCharacters'][number],
-    right: ScriptData['initialCharacters'][number],
+    left: OrderableInitialEntry,
+    right: OrderableInitialEntry,
 ) => {
     if (left.firstAppearanceOrder === null && right.firstAppearanceOrder === null) {
         return compareCharactersByName(left, right);
@@ -74,6 +81,32 @@ const buildCharactersAndPlacesPlan = (
     };
 };
 
+const buildVocalRangesPlan = (
+    config: BasicExportConfig,
+    script: ScriptData,
+): VocalRangesInitialPagePlan | null => {
+    if (!config.initialPages.vocalRanges.enabled || script.initialVocalRanges.length === 0) {
+        return null;
+    }
+
+    const compareCharacters = config.initialPages.charactersAndPlaces.characterOrder === 'first-appearance'
+        ? compareCharactersByAppearance
+        : compareCharactersByName;
+
+    return {
+        kind: 'vocal-ranges',
+        entries: [...script.initialVocalRanges]
+            .sort(compareCharacters)
+            .map(entry => ({
+                id: entry.id,
+                displayName: entry.displayName,
+                voiceType: entry.voiceType,
+                low: entry.low,
+                high: entry.high,
+            })),
+    };
+};
+
 export const deriveBasicExportPlan = (
     config: BasicExportConfig,
     script: ScriptData,
@@ -95,6 +128,13 @@ export const deriveBasicExportPlan = (
     const doc = preservePagination ? inputDoc : filteredDoc;
     const forcedBreaks: ForcedBreak[] = [];
     const charactersAndPlaces = buildCharactersAndPlacesPlan(config, script);
+    const contents = deriveContentsPlan(
+        config.initialPages.contents,
+        filteredDoc,
+        script.characters,
+        script.groups,
+    );
+    const vocalRanges = buildVocalRangesPlan(config, script);
     const blankSpec = config.blankPages.betweenInitialPagesAndScript;
     let hasPreviousGroup = false;
     let currentActHasScene = false;
@@ -147,7 +187,11 @@ export const deriveBasicExportPlan = (
         titlePage: script.titlePage,
         scriptTitle: script.scriptTitle,
         leadingPages: {
-            initialPages: charactersAndPlaces ? [charactersAndPlaces] : [],
+            initialPages: [
+                ...charactersAndPlaces ? [charactersAndPlaces] : [],
+                ...contents ? [contents] : [],
+                ...vocalRanges ? [vocalRanges] : [],
+            ],
             manualBlankCount: blankSpec.enabled
                 ? Math.max(1, Math.min(10, Math.floor(blankSpec.count)))
                 : 0,

@@ -56,5 +56,18 @@ export const deriveIntegratedScoreExportPlan = (
         }
     });
 
-    return {...plan, postSteps};
+    return {
+        ...plan,
+        leadingPages: {
+            ...plan.leadingPages,
+            initialPages: plan.leadingPages.initialPages.map(page => {
+                if (page.kind === 'contents') {
+                    return {...page, showScoreColumn: true};
+                }
+
+                return page;
+            }),
+        },
+        postSteps,
+    };
 };

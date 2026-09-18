@@ -180,7 +180,7 @@ describe('block action menu', () => {
         await openActionMenu('sd-1');
         await openMusicSubmenu();
 
-        const addMusic = await poll(() => findMenuItem('Add music'), 'Add music item');
+        const addMusic = await poll(() => findMenuItem('Start new music'), 'Start new music item');
 
         await page.elementLocator(addMusic).click();
 
@@ -230,7 +230,7 @@ describe('block action menu', () => {
         await openActionMenu('sd-1');
         await openMusicSubmenu();
 
-        const addMusic = await poll(() => findMenuItem('Add music'), 'Add music item');
+        const addMusic = await poll(() => findMenuItem('Start new music'), 'Start new music item');
 
         await page.elementLocator(addMusic).click();
 
@@ -279,15 +279,15 @@ describe('block action menu', () => {
         await openActionMenu('sd-2');
 
         const music = await openMusicSubmenu();
-        const addMusic = await poll(() => findMenuItem('Add music'), 'Add music item');
-        const addOut = await poll(() => findMenuItem('Add out 0) Night'), 'Add out item');
+        const addMusic = await poll(() => findMenuItem('Start new music'), 'Start new music item');
+        const addOut = await poll(() => findMenuItem('Set music end (0) Night'), 'Set music end item');
 
         expect(music.querySelector('[data-music-icon="range"]')).toBeTruthy();
         expect(addMusic.querySelector('[data-music-point="start"][data-music-point-style="hollow"]')).toBeTruthy();
         expect(addOut.querySelector('[data-music-point="end"][data-music-point-style="hollow"]')).toBeTruthy();
     });
 
-    it('shows Add out with the live open-music title and inserts the out', async () => {
+    it('shows Set music end with the live open-music title and inserts the out', async () => {
         renderEditor(createDocument(2));
 
         const editor = await getEditor();
@@ -298,8 +298,8 @@ describe('block action menu', () => {
         await openMusicSubmenu();
 
         const addOut = await poll(
-            () => findMenuItem('Add out 0) Night'),
-            'Add out item',
+            () => findMenuItem('Set music end (0) Night'),
+            'Set music end item',
         );
 
         await page.elementLocator(addOut).click();
@@ -318,12 +318,12 @@ describe('block action menu', () => {
         await openMusicSubmenu();
 
         expect(await poll(
-            () => findMenuItem('Add out 0)'),
-            'untitled Add out item',
+            () => findMenuItem('Set music end (0)'),
+            'untitled Set music end item',
         )).toBeTruthy();
     });
 
-    it('does not offer Add out for a hit music', async () => {
+    it('does not offer a music end command for a hit music', async () => {
         renderEditor(createDocument(2));
 
         const editor = await getEditor();
@@ -333,8 +333,8 @@ describe('block action menu', () => {
         await openActionMenu('sd-2');
         await openMusicSubmenu();
 
-        expect(findMenuItem('Add music')).toBeTruthy();
-        expect(findMenuItem('Add out')).toBeNull();
+        expect(findMenuItem('Start new music')).toBeTruthy();
+        expect(findMenuItem('Set music end')).toBeNull();
     });
 
     it('supports keyboard submenu navigation and restores trigger focus', async () => {
@@ -364,7 +364,7 @@ describe('block action menu', () => {
 
         await userEvent.keyboard('{ArrowRight}');
 
-        const addMusic = await poll(() => findMenuItem('Add music'), 'Add music item');
+        const addMusic = await poll(() => findMenuItem('Start new music'), 'Start new music item');
 
         expect(document.activeElement).toBe(addMusic);
 

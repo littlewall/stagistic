@@ -1,0 +1,46 @@
+.layer {
+    pointer-events: none;
+    position: absolute;
+    z-index: 4;
+    inset: 0;
+}
+
+/*
+ * The control stays in the layout at all times and only fades: an expanded
+ * scene shows it while the pointer is over the control itself or it holds
+ * focus, so the gutter stays quiet while writing but the affordance is exactly
+ * where the sticker already points. A collapsed scene keeps it lit, which is
+ * what marks the scene as collapsed.
+ */
+.item {
+    pointer-events: auto;
+    position: absolute;
+    transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity var(--duration-normal) var(--ease-standard);
+
+    &[data-visible = 'true'],
+    &:hover,
+    &:focus-within {
+        opacity: 1;
+    }
+}
+
+.trigger {
+    /* Singular canvas geometry: appearance remains owned by IconButton. */
+    position: relative;
+}
+
+.chevronCollapsed {
+    transform: rotate(-90deg);
+}
+
+.summary {
+    position: absolute;
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-xs);
+    font-weight: var(--font-weight-normal);
+    line-height: var(--line-height-normal);
+    color: var(--color-text-muted);
+    text-transform: none;
+}

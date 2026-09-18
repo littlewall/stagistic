@@ -20,6 +20,9 @@ export interface AttributeManagerCharacter {
     name: string,
     color: string | null,
     outline: string | null,
+    voiceType: string | null,
+    vocalRangeLow: string | null,
+    vocalRangeHigh: string | null,
     groupNames?: string[],
 }
 
@@ -51,6 +54,8 @@ export interface AttributeManagerCharactersPanelProps {
     colorUpdatingGroupIds?: string[],
     onSetCharacterColor?: (characterId: string, colorHex: string | null) => void | Promise<unknown>,
     onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
+    onSetCharacterVoiceType?: (characterId: string, voiceType: string | null) => void,
+    onSetCharacterVocalRange?: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void,
     onDeleteCharacter?: (characterId: string) => void,
     onCreateCharacter?: (characterName: string) => void,
     onRenameCharacter?: (
@@ -91,6 +96,8 @@ export const AttributeManagerCharactersPanel = ({
     colorUpdatingGroupIds = [],
     onSetCharacterColor,
     onSetCharacterOutline,
+    onSetCharacterVoiceType,
+    onSetCharacterVocalRange,
     onDeleteCharacter,
     onCreateCharacter,
     onRenameCharacter,
@@ -237,7 +244,12 @@ export const AttributeManagerCharactersPanel = ({
                             character={selectedCharacter}
                             confirmedName={selectedConfirmedCharacter.name}
                             characters={allEntityNames.map(entity => ({
-                                ...entity, color: null, outline: null,
+                                ...entity,
+                                color: null,
+                                outline: null,
+                                voiceType: null,
+                                vocalRangeLow: null,
+                                vocalRangeHigh: null,
                             }))}
                             characterColorSaturation={characterColorSaturation}
                             isDeleting={deletingCharacterIds.includes(selectedCharacter.id)}
@@ -248,6 +260,8 @@ export const AttributeManagerCharactersPanel = ({
                             onRenameCharacter={persistName}
                             onSetCharacterColor={handleSetCharacterColor}
                             onSetCharacterOutline={onSetCharacterOutline}
+                            onSetCharacterVoiceType={onSetCharacterVoiceType}
+                            onSetCharacterVocalRange={onSetCharacterVocalRange}
                             onDeleteCharacter={onDeleteCharacter}
                         />
                     ) : null}

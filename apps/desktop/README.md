@@ -14,19 +14,19 @@ Offline-first desktop shell for the Stagistic editor. This app uses Tauri with a
 From the repo root:
 
 ```bash
-pnpm desktop:dev
+moon run desktop:dev
 ```
 
 Or directly from this folder:
 
 ```bash
-pnpm dev
+moon run desktop:dev-ui
 ```
 
 ## Build
 
 ```bash
-pnpm desktop:build
+moon run desktop:build
 ```
 
 ## Notes

@@ -33,6 +33,8 @@ import {
 } from '@stagistic/script-pagination';
 
 import {composeLeadingPages} from './initialPages/composeLeadingPages';
+import type {ContentsPageNumbers} from './initialPages/contents/contentsPageNumbers';
+import {planIntegratedAssembly} from './pdf/planIntegratedAssembly';
 import type {ExportPlan} from './plan';
 import {buildTitlePageItems} from './titlePage/buildTitlePageItems';
 import type {
@@ -644,9 +646,15 @@ const getIntegratedFooter = (
     })[0];
 };
 
+export interface TranscribeOptions {
+    /** Page count of each attached score PDF, keyed by music id. */
+    scorePageCounts?: Record<string, number>,
+}
+
 export const transcribeExportPlan = (
     plan: ExportPlan,
     settings: EditorSettings,
+    options: TranscribeOptions = {},
 ): TranscriptResult => {
     const forcedBreakByBlockId = new Map(plan.pagination.forcedBreaks.map(item => [item.blockId, item]));
     const contentWidthPx = settings.page.widthPx - settings.page.marginLeftPx - settings.page.marginRightPx;
@@ -833,7 +841,35 @@ export const transcribeExportPlan = (
         : allScriptPages;
     const scriptItems = withHeaderFooter(scriptPages, plan, settings);
     const titleItems = buildTitlePageItems(plan.titlePage, plan.scriptTitle, settings);
-    const leadingPages = composeLeadingPages(plan.leadingPages, settings);
+    const scriptPageSourceBlockIds = scriptPages.map(page => [...page.sourceBlockIds]);
+    const scriptPageNumberByBlockId = new Map<string, number>();
+
+    scriptPages.forEach((page, index) => {
+        const pageNumber = page.referencePageNumber ?? index + 1;
+
+        page.sourceBlockIds.forEach(blockId => {
+            if (!scriptPageNumberByBlockId.has(blockId)) {
+                scriptPageNumberByBlockId.set(blockId, pageNumber);
+            }
+        });
+    });
+
+    const scoreStartPageByMusicId = options.scorePageCounts
+        ? planIntegratedAssembly({
+            scriptPageSourceBlockIds,
+            scores: plan.postSteps.map(step => ({
+                musicId: step.musicId,
+                startBlockId: step.startBlockId,
+                afterBlockId: step.afterBlockId,
+                pageCount: options.scorePageCounts?.[step.musicId] ?? 0,
+            })),
+        }).scoreStartPageByMusicId
+        : new Map<string, number>();
+    const pageNumbers: ContentsPageNumbers = {
+        scriptPageNumberByBlockId,
+        scoreStartPageByMusicId,
+    };
+    const leadingPages = composeLeadingPages(plan.leadingPages, settings, pageNumbers);
     const leadingItems: PageItem[] = [titleItems, ...leadingPages].flatMap(page => [...page, PAGE_BREAK_ITEM]);
 
     return {
@@ -844,7 +880,7 @@ export const transcribeExportPlan = (
         marginTopPx: settings.page.marginTopPx,
         items: [...leadingItems, ...scriptItems],
         leadingPageCount: [titleItems, ...leadingPages].length,
-        scriptPageSourceBlockIds: scriptPages.map(page => [...page.sourceBlockIds]),
+        scriptPageSourceBlockIds,
         integratedScores: plan.postSteps.map(step => ({
             musicId: step.musicId,
             title: step.title,

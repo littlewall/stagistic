@@ -14,7 +14,29 @@ export interface VisualLine {
     sourceBlockId?: string,
 }
 
-export type PageItem = VisualLine | {type: '__page_break__'};
+export interface StaffRowItem {
+    type: 'staff-row',
+    label: {
+        text: string, x: number, y: number, fontSizePx: number,
+    },
+    staff: {
+        xPx: number,
+        widthPx: number,
+        /** Y coordinate of staff position 0 (the bottom line). */
+        baselineY: number,
+        /** Px per half staff-space; staff lines sit at positions 0,2,4,6,8 above baselineY. */
+        unitPx: number,
+        clef: 'treble' | 'treble-8vb',
+        notes: Array<{
+            position: number, alter: -1 | 0 | 1, ledgerPositions: number[], xFraction: number,
+        }>,
+    },
+}
+
+export type PageItem = VisualLine | StaffRowItem | {type: '__page_break__'};
+
+/** A page of leading-matter items where staff rows and plain text lines can mix (e.g. Vocal Ranges alongside Contents). */
+export type InitialPageVisualPage = Array<VisualLine | StaffRowItem>;
 
 export interface TranscriptResult {
     pageWidthPx: number,

@@ -86,7 +86,13 @@ export const buildPaginationState = (
             hasInlineBreaks = true;
         }
 
-        const splittable = isSplittableBlockType(blockType);
+        /*
+         * A hidden block (a collapsed scene's body) occupies no space, so it can
+         * neither be split across a break nor pull a following block down as an
+         * orphan — it only stays in the list to keep page start/end positions
+         * anchored to real document positions.
+         */
+        const splittable = !resolvedBlock.isHidden && isSplittableBlockType(blockType);
         const key = String(offset);
 
         measurementKeyByBlockKey.set(key, resolvedBlock.key);
@@ -95,7 +101,7 @@ export const buildPaginationState = (
             endKey: String(offset + node.nodeSize),
             height: resolvedBlock.height,
             splittable,
-            orphanCandidate: isOrphanCandidateBlockType(blockType),
+            orphanCandidate: !resolvedBlock.isHidden && isOrphanCandidateBlockType(blockType),
             getLineMap: splittable && blockDom
                 ? () => buildLineMap(view, offset, node, blockDom)
                 : undefined,

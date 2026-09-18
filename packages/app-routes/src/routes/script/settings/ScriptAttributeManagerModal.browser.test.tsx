@@ -281,6 +281,9 @@ describe('ScriptAttributeManagerModal group actions', () => {
                         name: 'ANNA',
                         color: null,
                         outline: null,
+                        voiceType: null,
+                        vocalRangeLow: null,
+                        vocalRangeHigh: null,
                         groupNames: ['ALL'],
                     },
                 ]}

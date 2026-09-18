@@ -6,7 +6,7 @@
 
 ## DB schema changes
 After any change to `packages/db/src/` schema or `drizzle/*.sql` files, run:
-`pnpm --filter @stagistic/db db:compile-migrations`
+`moon run db:db-compile-migrations`
 (`db:generate` does this automatically; manual SQL edits do not.)
 
 ## Document schema version
@@ -16,11 +16,13 @@ or document-to-projection semantics. Do not bump it for DB-only projection chang
 metadata columns, UI, autosave internals, or export layout changes.
 
 ## Checks (clean-shield toolchain)
-Canonical checks — run these, not `vp lint`/`vp fmt` (oxlint/oxfmt are NOT used here):
-- Typecheck: `npx tsc -b` (whole graph) or `pnpm --filter @stagistic/<pkg> typecheck`.
-- Lint: `pnpm lint` = `eslint . && stylelint`. Auto-fix: `npx eslint . --fix` then `npx stylelint "**/*.{css,scss}" --fix`. Formatting is owned by eslint's `@stylistic/*` rules — `eslint --fix` IS the formatter.
-- Node tests: `pnpm test` (`vp test run`). Test imports: `import {describe, it, expect} from "vite-plus/test"`.
-- Browser tests: `pnpm --filter @stagistic/<pkg> test:browser` (app-core/app-routes/editor/ui). They pin no viewport → layout/caret asserts are env-sensitive; editor has known pre-existing reds (overlay viewport-fit, cueCaret off-by-one, tied to WIP).
+Canonical commands run through moon. Root workflows are defined in `moon.yml`; reusable project tasks live in `.moon/tasks/global.yml`; project overrides live beside each app/package in `moon.yml`. The implementation still uses Vite+, oxfmt, oxlint, stylelint, Biome, Astro, and other underlying tools, but invoke them through moon.
+- Typecheck: `moon run root:typecheck` (whole graph) or `moon run <project>:typecheck`.
+- Lint: `moon run root:lint`; auto-fix: `moon run root:lint-fix`. For one project use `moon run <project>:lint`.
+- Format: `moon run root:format` (writes in place) / `moon run root:format-check`.
+- Commit hook: moon manages `.moon/hooks` from `.moon/workspace.yml` and runs `moon run root:staged`. The task delegates staged-file selection and re-staging to Vite+ using the map in `vite.config.ts`. Run `moon sync hooks` to install or refresh hooks explicitly; normal moon commands also sync them because `vcs.sync` is enabled.
+- Node tests: `moon run root:test` (whole repo), `moon run <project>:test`, or `moon run <project>:test-watch`. Test imports use `vite-plus/test`.
+- Browser tests: `moon run <project>:test-browser` (app-core/app-routes/editor/ui). They pin no viewport → layout/caret asserts are env-sensitive; editor has known pre-existing reds (overlay viewport-fit, cueCaret off-by-one, tied to WIP).
 - Root `vite.config.ts` only configures the test runner; `vite.config.js` is a gitignored compiled artifact — never edit or commit it.
 
 ## Handling test/lint/ts failures

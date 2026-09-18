@@ -88,10 +88,12 @@ describe('character handlers', () => {
         await handlers.setScriptCharacterColor(scriptId, 'character-stable', '#123456');
         await handlers.setScriptCharacterGender(scriptId, 'character-stable', 'non binary');
         await handlers.setScriptCharacterOutline(scriptId, 'character-stable', 'Arc');
+        await handlers.setScriptCharacterVoiceType(scriptId, 'character-stable', 'tenor');
+        await handlers.setScriptCharacterVocalRange(scriptId, 'character-stable', 'C3', 'A4');
         await handlers.renameScriptCharacter(scriptId, 'character-stable', 'ALICIA');
         await handlers.deleteScriptCharacter(scriptId, 'character-stable');
 
-        expect(syncDb).toHaveBeenCalledTimes(7);
+        expect(syncDb).toHaveBeenCalledTimes(9);
         expect(await dbQueries.listScriptCharacters(db, scriptId)).toEqual([]);
     });
 });

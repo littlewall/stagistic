@@ -73,6 +73,36 @@ const confirmedCharacters = [
     },
 ];
 
+const charactersWithVocalRanges = [
+    {
+        id: 'char-a',
+        kind: 'character' as const,
+        key: 'ANNA',
+        outline: null,
+        voiceType: 'soprano',
+        vocalRangeLow: 'A3',
+        vocalRangeHigh: 'C6',
+    },
+    {
+        id: 'char-b',
+        kind: 'character' as const,
+        key: 'BOB',
+        outline: null,
+        voiceType: null,
+        vocalRangeLow: null,
+        vocalRangeHigh: 'C5',
+    },
+    {
+        id: 'char-z',
+        kind: 'character' as const,
+        key: 'ZORA',
+        outline: null,
+        voiceType: 'alto',
+        vocalRangeLow: 'H3',
+        vocalRangeHigh: 'C5',
+    },
+];
+
 const places = [
     {id: 'place-a', name: 'Attic'},
     {id: 'place-b', name: 'Ballroom'},
@@ -137,6 +167,26 @@ describe('collectInitialPageData', () => {
                 id: 'place-a',
                 name: 'Attic',
                 firstAppearanceOrder: 3,
+            },
+        ]);
+    });
+
+    it('collects only characters with a complete, valid vocal range', () => {
+        const result = collectInitialPageData(
+            snapshot,
+            charactersWithVocalRanges,
+            places,
+            {},
+        );
+
+        expect(result.initialVocalRanges).toEqual([
+            {
+                id: 'char-a',
+                displayName: 'Anna',
+                voiceType: 'soprano',
+                low: 'A3',
+                high: 'C6',
+                firstAppearanceOrder: 4,
             },
         ]);
     });

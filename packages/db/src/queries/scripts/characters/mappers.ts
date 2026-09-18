@@ -14,6 +14,9 @@ interface ScriptCharacterRow {
     notes: string | null,
     backstory: string | null,
     outline: string | null,
+    voiceType: string | null,
+    vocalRangeLow: string | null,
+    vocalRangeHigh: string | null,
 }
 
 interface ScriptCharacterGenderRow {
@@ -32,6 +35,9 @@ export const mapCharacterRow = (row: ScriptCharacterRow): ScriptCharacterRef => 
         notes: row.notes,
         backstory: row.backstory,
         outline: row.outline,
+        voiceType: row.voiceType,
+        vocalRangeLow: row.vocalRangeLow,
+        vocalRangeHigh: row.vocalRangeHigh,
     };
 };
 

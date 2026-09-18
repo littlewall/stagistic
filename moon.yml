@@ -1,0 +1,84 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# Repository-wide workflows and one-off maintenance commands. Shared project
+# tasks live in .moon/tasks/global.yml instead.
+workspace:
+  inheritedTasks:
+    include: []
+
+tasks:
+  lint:
+    script: 'vp lint && stylelint "**/*.{css,scss}" && node scripts/check-route-css-headers.mjs'
+    options:
+      cache: false
+
+  lint-fix:
+    script: 'vp lint --fix && stylelint "**/*.{css,scss}" --fix'
+    options:
+      cache: false
+
+  lint-js-fix:
+    command: 'vp lint --fix'
+    options:
+      cache: false
+
+  stylelint-fix:
+    command: 'stylelint --fix'
+    options:
+      cache: false
+
+  format:
+    command: 'vp fmt'
+    options:
+      cache: false
+
+  format-check:
+    command: 'vp fmt --check'
+    options:
+      cache: false
+
+  typecheck:
+    command: 'tsc -b'
+    deps: ['db:db-check-migrations']
+    options:
+      cache: false
+
+  test:
+    command: 'vp test run'
+    deps: ['db:db-check-migrations']
+    options:
+      cache: false
+
+  test-watch:
+    command: 'vp test watch'
+    preset: 'server'
+
+  staged:
+    command: 'vp staged'
+    options:
+      cache: false
+
+  clean:
+    command: 'rm -rf node_modules'
+    options:
+      cache: false
+
+  docker-up:
+    command: 'docker compose up -d'
+    options:
+      cache: false
+
+  docker-down:
+    command: 'docker compose down'
+    options:
+      cache: false
+
+  docker-https:
+    command: 'docker compose -f docker-compose.yml -f infra/proxy/caddy/docker-compose.https.yml up -d'
+    options:
+      cache: false
+
+  docker-logs:
+    command: 'docker compose logs -f'
+    preset: 'server'

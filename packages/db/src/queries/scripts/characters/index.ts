@@ -35,5 +35,7 @@ export {
     updateScriptCharacterKey,
     updateScriptCharacterNotes,
     updateScriptCharacterOutline,
+    updateScriptCharacterVocalRange,
+    updateScriptCharacterVoiceType,
     upsertScriptCharacter,
 } from './write';

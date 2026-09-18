@@ -1,0 +1,47 @@
+.root {
+    position: relative;
+    width: 100%;
+}
+
+.menu {
+    position: absolute;
+    z-index: var(--menu-z-index);
+    top: 100%;
+    right: 0;
+    left: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    box-sizing: border-box;
+    max-height: var(--menu-max-height);
+    margin-top: var(--space-xs);
+    padding: var(--menu-padding);
+    background: var(--menu-bg);
+    border: var(--menu-border);
+    border-radius: var(--menu-radius);
+    box-shadow: var(--menu-shadow);
+}
+
+.item {
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-height: var(--menu-item-min-height);
+    padding: var(--menu-item-padding);
+    font-size: var(--menu-item-font-size);
+    color: var(--menu-item-color);
+    text-align: left;
+    background: transparent;
+    border: none;
+    border-radius: var(--menu-item-radius);
+
+    &:hover {
+        background: var(--menu-item-hover-bg);
+    }
+}
+
+.empty {
+    padding: var(--menu-item-padding);
+    font-size: var(--menu-item-font-size);
+    color: var(--color-text-muted);
+}

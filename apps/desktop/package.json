@@ -3,14 +3,6 @@
     "version": "0.1.0",
     "private": true,
     "type": "module",
-    "scripts": {
-        "dev": "tauri dev",
-        "dev:ui": "vp dev",
-        "build": "tauri build",
-        "build:ui": "vp build",
-        "lint": "eslint .",
-        "typecheck": "tsc -b"
-    },
     "dependencies": {
         "react": "^19.0.0",
         "react-dom": "^19.0.0"

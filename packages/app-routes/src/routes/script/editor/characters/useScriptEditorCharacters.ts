@@ -70,6 +70,8 @@ export const useScriptEditorCharacters = ({
         handleSetCharacterColor,
         handleSetCharacterGender,
         handleSetCharacterOutline,
+        handleSetCharacterVoiceType,
+        handleSetCharacterVocalRange,
         handleUpsertCharacterGender,
     } = useCharacterActions({
         catalog,
@@ -120,6 +122,8 @@ export const useScriptEditorCharacters = ({
         handleSetCharacterColor,
         handleSetCharacterGender,
         handleSetCharacterOutline,
+        handleSetCharacterVoiceType,
+        handleSetCharacterVocalRange,
         handleUpsertCharacterGender,
         handleCreateGroup,
         handleDeleteGroup,

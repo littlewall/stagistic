@@ -27,5 +27,8 @@ export const useFocusEditorBlock = () => {
         const element = node instanceof Element ? node : node.parentElement;
 
         element?.scrollIntoView({block: 'start'});
+
+        // Tints the block on arrival so the jump has a visible target.
+        editor.commands.flashBlockFocus(blockId);
     }, [editor]);
 };

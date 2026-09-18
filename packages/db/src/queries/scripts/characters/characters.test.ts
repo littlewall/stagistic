@@ -23,6 +23,8 @@ import {
     updateScriptCharacterColor,
     updateScriptCharacterKey,
     updateScriptCharacterOutline,
+    updateScriptCharacterVocalRange,
+    updateScriptCharacterVoiceType,
     upsertScriptCharacter,
 } from './write';
 
@@ -66,6 +68,9 @@ describe('script character read/write', () => {
             notes: 'a note',
             backstory: 'a backstory',
             outline: 'a short outline',
+            voiceType: null,
+            vocalRangeLow: null,
+            vocalRangeHigh: null,
         };
 
         expect(await getScriptCharacterByKey(db, {scriptId: SCRIPT_ID, characterKey: 'ANNA'}))
@@ -165,6 +170,9 @@ describe('script character read/write', () => {
                 notes: null,
                 backstory: null,
                 outline: null,
+                voiceType: null,
+                vocalRangeLow: null,
+                vocalRangeHigh: null,
             },
         ]);
         expect(await listScriptSpeakingEntities(db, SCRIPT_ID)).toEqual([
@@ -177,6 +185,9 @@ describe('script character read/write', () => {
                 notes: null,
                 backstory: null,
                 outline: null,
+                voiceType: null,
+                vocalRangeLow: null,
+                vocalRangeHigh: null,
             }, {
                 id: 'group-1',
                 kind: 'group',
@@ -251,6 +262,40 @@ describe('script character read/write', () => {
         const row = await getScriptCharacterById(db, {scriptId: SCRIPT_ID, characterId: 'c1'});
 
         expect(row).toMatchObject({colorHex: '#111111', outline: 'brooding rival'});
+    });
+
+    it('updateScriptCharacterVoiceType changes only the voice type', async () => {
+        const db = await setup();
+
+        await upsert(db, {colorHex: '#111111', voiceType: null});
+        await updateScriptCharacterVoiceType(db, {
+            scriptId: SCRIPT_ID, characterId: 'c1', voiceType: 'tenor', updatedAt: 2,
+        });
+
+        const row = await getScriptCharacterById(db, {scriptId: SCRIPT_ID, characterId: 'c1'});
+
+        expect(row).toMatchObject({colorHex: '#111111', voiceType: 'tenor'});
+    });
+
+    it('updateScriptCharacterVocalRange changes both bounds together', async () => {
+        const db = await setup();
+
+        await upsert(db, {
+            colorHex: '#111111', vocalRangeLow: null, vocalRangeHigh: null,
+        });
+        await updateScriptCharacterVocalRange(db, {
+            scriptId: SCRIPT_ID,
+            characterId: 'c1',
+            vocalRangeLow: 'C3',
+            vocalRangeHigh: 'A4',
+            updatedAt: 2,
+        });
+
+        const row = await getScriptCharacterById(db, {scriptId: SCRIPT_ID, characterId: 'c1'});
+
+        expect(row).toMatchObject({
+            colorHex: '#111111', vocalRangeLow: 'C3', vocalRangeHigh: 'A4',
+        });
     });
 
     it('updateScriptCharacterKey renames the lookup key', async () => {

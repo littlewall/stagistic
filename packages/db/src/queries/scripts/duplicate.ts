@@ -238,6 +238,9 @@ export const duplicateScriptRows = async (
                 notes: entity.kind === 'character' ? entity.notes : null,
                 backstory: entity.kind === 'character' ? entity.backstory : null,
                 outline: entity.kind === 'character' ? entity.outline : null,
+                voiceType: entity.kind === 'character' ? entity.voiceType : null,
+                vocalRangeLow: entity.kind === 'character' ? entity.vocalRangeLow : null,
+                vocalRangeHigh: entity.kind === 'character' ? entity.vocalRangeHigh : null,
                 createdAt: now,
                 updatedAt: now,
             })));

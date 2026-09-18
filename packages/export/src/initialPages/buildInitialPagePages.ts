@@ -1,30 +1,32 @@
 import type {EditorSettings} from '@stagistic/script';
 
 import type {InitialPagePlan} from '../plan';
-import {
-    buildCharactersAndPlacesPages,
-    type VisualPage,
-} from './buildCharactersAndPlacesPages';
+import type {InitialPageVisualPage} from '../visualLine';
+import {buildCharactersAndPlacesPages} from './buildCharactersAndPlacesPages';
+import {buildVocalRangesPages} from './buildVocalRangesPages';
+import {buildContentsPages} from './contents/buildContentsPages';
+import type {ContentsPageNumbers} from './contents/contentsPageNumbers';
 
-type InitialPageBuilderMap = {
-    [Kind in InitialPagePlan['kind']]: (
-        plan: Extract<InitialPagePlan, {kind: Kind}>,
-        settings: EditorSettings,
-    ) => VisualPage[];
-};
+type InitialPageBuilder = (
+    plan: InitialPagePlan,
+    settings: EditorSettings,
+    pageNumbers?: ContentsPageNumbers,
+) => InitialPageVisualPage[];
 
-const BUILDERS: InitialPageBuilderMap = {
-    'characters-and-places': buildCharactersAndPlacesPages,
+const BUILDERS: Record<InitialPagePlan['kind'], InitialPageBuilder> = {
+    'characters-and-places': (plan, settings) => plan.kind === 'characters-and-places'
+        ? buildCharactersAndPlacesPages(plan, settings)
+        : [],
+    contents: (plan, settings, pageNumbers) => plan.kind === 'contents'
+        ? buildContentsPages(plan, settings, pageNumbers)
+        : [],
+    'vocal-ranges': (plan, settings) => plan.kind === 'vocal-ranges'
+        ? buildVocalRangesPages(plan, settings)
+        : [],
 };
 
 export const buildInitialPagePages = (
     plan: InitialPagePlan,
     settings: EditorSettings,
-): VisualPage[] => {
-    const builder = BUILDERS[plan.kind] as (
-        value: InitialPagePlan,
-        valueSettings: EditorSettings,
-    ) => VisualPage[];
-
-    return builder(plan, settings);
-};
+    pageNumbers?: ContentsPageNumbers,
+): InitialPageVisualPage[] => BUILDERS[plan.kind](plan, settings, pageNumbers);

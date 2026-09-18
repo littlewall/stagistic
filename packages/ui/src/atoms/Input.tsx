@@ -7,7 +7,7 @@ import {
 
 import styles from './Input.module.css';
 
-type InputSize = 'sm' | 'md';
+type InputSize = 'sm' | 'md' | 'lg';
 
 type InputVariant = 'default' | 'raised';
 

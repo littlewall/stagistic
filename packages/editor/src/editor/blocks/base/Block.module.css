@@ -13,3 +13,76 @@
     margin: 0;
     white-space: pre-wrap;
 }
+
+/*
+ * Collapsed scene body. `SceneCollapseExtension` marks every block of a
+ * collapsed scene with a node decoration; hiding lives here rather than in
+ * scene.module.css because the attribute lands on blocks of any type, and the
+ * rule has to out-specify the `display: block` reset above.
+ */
+.block[data-scene-content-collapsed = 'true'] {
+    display: none;
+}
+
+/*
+ * Jump-to feedback. Clicking a scene, character or music row in a sidebar moves
+ * the caret and scrolls the block into view; once the scroll settles there is
+ * nothing left pointing at the block that was asked for. The tint lands with no
+ * ramp-in (the answer is wanted immediately), holds while the eye lands on it,
+ * then fades out over the last second and leaves no residue — it is feedback,
+ * not state, so it must not compete with selection once it has been read.
+ *
+ * Clipped to the content box. Block spacing lives in padding-top (the shared
+ * pagination model measures a border box and counts that spacing as part of the
+ * block), so a border-box tint would swallow the gap above the block and read
+ * as "this block plus the silence before it". The content box is exactly the
+ * text, which is what was navigated to.
+ *
+ * Two phases carry identical keyframes: re-clicking the same sidebar row has to
+ * replay the animation, and a changed attribute *value* alone would not restart
+ * it — a changed animation-name does.
+ *
+ * Hold + fade total must stay in sync with BLOCK_FOCUS_FLASH_DURATION_MS in
+ * BlockFocusFlashExtension.ts, which is what removes the attribute again.
+ *
+ * Each phase carries the whole shorthand, name included: a shorthand without a
+ * name is a no-op animation, and Lightning CSS — which apps/web uses as its CSS
+ * transformer, the test runner does not — is entitled to minify it away to
+ * `animation: none`, taking the duration with it and leaving nothing to see.
+ */
+.block[data-focus-flash] {
+    --block-focus-flash-duration: 3s;
+
+    background-clip: content-box;
+    border-radius: var(--radius-sm);
+}
+
+.block[data-focus-flash = 'a'] {
+    animation: block-focus-flash-a var(--block-focus-flash-duration) linear both;
+}
+
+.block[data-focus-flash = 'b'] {
+    animation: block-focus-flash-b var(--block-focus-flash-duration) linear both;
+}
+
+@keyframes block-focus-flash-a {
+    0%,
+    66% {
+        background-color: var(--state-flash);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}
+
+@keyframes block-focus-flash-b {
+    0%,
+    66% {
+        background-color: var(--state-flash);
+    }
+
+    100% {
+        background-color: transparent;
+    }
+}

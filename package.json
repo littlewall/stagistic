@@ -11,30 +11,16 @@
         "pnpm": ">=11.0.0"
     },
     "packageManager": "pnpm@11.17.0",
-    "scripts": {
-        "lint": "eslint . && stylelint \"**/*.{css,scss}\" && node scripts/check-route-css-headers.mjs",
-        "pretypecheck": "pnpm db:check-migrations",
-        "typecheck": "tsc -b",
-        "pretest": "pnpm db:check-migrations",
-        "test": "vp test run",
-        "test:watch": "vp test watch",
-        "db:generate": "pnpm -C packages/db db:generate",
-        "db:compile-migrations": "pnpm -C packages/db db:compile-migrations",
-        "db:check-migrations": "pnpm -C packages/db db:check-migrations",
-        "db:check": "pnpm -C packages/db db:check",
-        "clean": "vp run -r clean && rm -rf node_modules",
-        "docker:up": "docker compose up -d",
-        "docker:down": "docker compose down",
-        "docker:https": "docker compose -f docker-compose.yml -f infra/proxy/caddy/docker-compose.https.yml up -d",
-        "docker:logs": "docker compose logs -f"
-    },
     "devDependencies": {
-        "@dvdevcz/eslint": "^0.4.0",
+        "@biomejs/biome": "^2.5.14",
+        "@moonrepo/cli": "^2.5.5",
         "@stagistic/stylelint-config": "workspace:*",
         "@types/node": "^24.13.1",
+        "oxfmt": "^0.68.0",
+        "oxlint": "^1.83.0",
         "stylelint": "^17.15.0",
         "typescript": "^5.9.3",
         "typescript-plugin-css-modules": "^5.2.0",
-        "vite-plus": "^0.1.24"
+        "vite-plus": "^0.3.0"
     }
 }

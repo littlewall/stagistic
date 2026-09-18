@@ -129,5 +129,12 @@ export const scrollToMusicPill = (
         inline: 'nearest',
     });
 
+    // Same arrival feedback as a sidebar jump: the scroll alone points at nothing.
+    const blockId = pill.closest<HTMLElement>('[data-id]')?.dataset.id;
+
+    if (blockId) {
+        editor.commands.flashBlockFocus(blockId);
+    }
+
     return true;
 };
