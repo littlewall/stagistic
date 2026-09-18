@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:stagistic:stepkg:title-page:v1",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "subtitle": {"type": "string"},
+        "credits": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["credit", "authors"], "properties": {"credit": {"type": "string"}, "authors": {"type": "array", "items": {"type": "string"}}}}},
+        "source": {"type": "string"},
+        "draftDateMode": {"enum": ["auto", "manual"]},
+        "draftDate": {"type": "string"},
+        "dateFormat": {"enum": ["dmy", "mdy"]},
+        "contact": {"type": "string"},
+        "copyright": {"type": "string"}
+    }
+}

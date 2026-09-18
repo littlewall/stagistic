@@ -1,0 +1,13 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:stagistic:stepkg:characters:v1",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["characters", "groups", "genderOptions"],
+    "properties": {"characters": {"type": "array", "items": {"$ref": "#/$defs/character"}}, "groups": {"type": "array", "items": {"$ref": "#/$defs/group"}}, "genderOptions": {"type": "array", "items": {"$ref": "#/$defs/gender"}}},
+    "$defs": {
+        "character": {"type": "object", "additionalProperties": false, "required": ["id", "key", "colorHex", "genderKey", "notes", "backstory", "outline", "voiceType", "vocalRangeLow", "vocalRangeHigh", "createdAt", "updatedAt"], "properties": {"id": {"type": "string"}, "key": {"type": "string"}, "colorHex": {"type": ["string", "null"]}, "genderKey": {"type": ["string", "null"]}, "notes": {"type": ["string", "null"]}, "backstory": {"type": ["string", "null"]}, "outline": {"type": ["string", "null"]}, "voiceType": {"type": ["string", "null"]}, "vocalRangeLow": {"type": ["string", "null"]}, "vocalRangeHigh": {"type": ["string", "null"]}, "createdAt": {"type": "string", "format": "date-time"}, "updatedAt": {"type": "string", "format": "date-time"}}},
+        "group": {"type": "object", "additionalProperties": false, "required": ["id", "key", "colorHex", "memberIds", "createdAt", "updatedAt"], "properties": {"id": {"type": "string"}, "key": {"type": "string"}, "colorHex": {"type": ["string", "null"]}, "memberIds": {"type": "array", "items": {"type": "string"}}, "createdAt": {"type": "string", "format": "date-time"}, "updatedAt": {"type": "string", "format": "date-time"}}},
+        "gender": {"type": "object", "additionalProperties": false, "required": ["id", "key", "label", "createdAt", "updatedAt"], "properties": {"id": {"type": "string"}, "key": {"type": "string"}, "label": {"type": "string"}, "createdAt": {"type": "string", "format": "date-time"}, "updatedAt": {"type": "string", "format": "date-time"}}}
+    }
+}

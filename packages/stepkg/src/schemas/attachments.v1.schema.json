@@ -1,0 +1,8 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:stagistic:stepkg:attachments:v1",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["items", "bindings"],
+    "properties": {"items": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["id", "filename", "mimeType", "sizeBytes", "assetPath", "createdAt", "updatedAt"], "properties": {"id": {"type": "string"}, "filename": {"type": "string"}, "mimeType": {"type": "string"}, "sizeBytes": {"type": "integer", "minimum": 0}, "assetPath": {"type": "string"}, "createdAt": {"type": "string", "format": "date-time"}, "updatedAt": {"type": "string", "format": "date-time"}}}}, "bindings": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["target", "attachmentId", "role", "order", "createdAt"], "properties": {"target": {"type": "object", "additionalProperties": false, "required": ["type", "id"], "properties": {"type": {"const": "music"}, "id": {"type": "string"}}}, "attachmentId": {"type": "string"}, "role": {"type": "string"}, "order": {"type": "integer"}, "createdAt": {"type": "string", "format": "date-time"}}}}}
+}

@@ -1,0 +1,18 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:stagistic:stepkg:manifest:v1",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["format", "formatVersion", "documentSchemaVersion", "createdAt", "generator", "script", "entrypoints", "files"],
+    "properties": {
+        "format": {"const": "stagistic-package"},
+        "formatVersion": {"const": 1},
+        "documentSchemaVersion": {"type": "integer", "minimum": 1},
+        "createdAt": {"type": "string", "format": "date-time"},
+        "generator": {"type": "object", "additionalProperties": false, "required": ["name", "version"], "properties": {"name": {"type": "string", "minLength": 1}, "version": {"type": "string", "minLength": 1}}},
+        "script": {"type": "object", "additionalProperties": false, "required": ["id", "title", "updatedAt"], "properties": {"id": {"type": "string", "minLength": 1}, "title": {"type": "string", "minLength": 1}, "updatedAt": {"type": "string", "format": "date-time"}}},
+        "entrypoints": {"type": "object", "additionalProperties": false, "required": ["document", "text"], "properties": {"document": {"const": "document.json"}, "text": {"const": "script.stagistic"}}},
+        "files": {"type": "array", "items": {"$ref": "#/$defs/file"}}
+    },
+    "$defs": {"file": {"type": "object", "additionalProperties": false, "required": ["path", "mediaType", "byteLength", "sha256"], "properties": {"path": {"type": "string", "minLength": 1}, "mediaType": {"type": "string", "minLength": 1}, "byteLength": {"type": "integer", "minimum": 0}, "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"}}}}
+}

@@ -1,0 +1,8 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:stagistic:stepkg:script:v1",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["id", "title", "subtitle", "createdAt", "updatedAt"],
+    "properties": {"id": {"type": "string", "minLength": 1}, "title": {"type": "string"}, "subtitle": {"type": ["string", "null"]}, "createdAt": {"type": "string", "format": "date-time"}, "updatedAt": {"type": "string", "format": "date-time"}}
+}

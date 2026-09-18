@@ -1,0 +1,9 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:stagistic:stepkg:scenes:v1",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["scenes", "locations"],
+    "properties": {"scenes": {"type": "array", "items": {"$ref": "#/$defs/scene"}}, "locations": {"type": "array", "items": {"$ref": "#/$defs/location"}}},
+    "$defs": {"scene": {"type": "object", "additionalProperties": false, "required": ["id", "headingBlockId", "sceneNumber", "colorHex", "synopsis", "locationIds", "createdAt", "updatedAt"], "properties": {"id": {"type": "string"}, "headingBlockId": {"type": ["string", "null"]}, "sceneNumber": {"type": ["string", "null"]}, "colorHex": {"type": ["string", "null"]}, "synopsis": {"type": ["string", "null"]}, "locationIds": {"type": "array", "items": {"type": "string"}}, "createdAt": {"type": "string", "format": "date-time"}, "updatedAt": {"type": "string", "format": "date-time"}}}, "location": {"type": "object", "additionalProperties": false, "required": ["id", "name", "description", "createdAt", "updatedAt"], "properties": {"id": {"type": "string"}, "name": {"type": "string"}, "description": {"type": ["string", "null"]}, "createdAt": {"type": "string", "format": "date-time"}, "updatedAt": {"type": "string", "format": "date-time"}}}}
+}
