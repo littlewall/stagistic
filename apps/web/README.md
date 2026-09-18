@@ -26,14 +26,14 @@ src/
 
 ```bash
 pnpm install
-pnpm --filter @stagistic/web dev
+moon run web:dev
 ```
 
 Visit `http://localhost:3000/editor` to see the editor scaffold.
 
 ## Scripts
 
-- `pnpm --filter @stagistic/web dev`
-- `pnpm --filter @stagistic/web build`
-- `pnpm --filter @stagistic/web lint`
-- `pnpm --filter @stagistic/web format`
+- `moon run web:dev`
+- `moon run web:build`
+- `moon run web:lint`
+- `moon run root:format`

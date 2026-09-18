@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/tasks.json
+$schema: 'https://moonrepo.dev/schemas/tasks.json'
+
+# NOTE: this moon build (v2.5.5) reads global tasks from the `.moon/tasks/`
+# DIRECTORY, not a single `.moon/tasks.yml`. Scope is controlled by the
+# `inheritedBy` field, not the filename. No `inheritedBy` here -> these tasks
+# are inherited by ALL projects. A project only needs a moon.yml when it
+# OVERRIDES the command, ADDS a task, or EXCLUDES an inherited one.
+#
+# `cache: false` everywhere -> moon is a pure command runner for now (no
+# inputs/outputs to get wrong). Turn caching on later, task by task.
+tasks:
+  lint:
+    command: 'vp lint'
+    options:
+      cache: false
+
+  typecheck:
+    command: 'tsc -b'
+    options:
+      cache: false
+
+  test:
+    command: 'vp test run'
+    options:
+      cache: false

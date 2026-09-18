@@ -4,8 +4,8 @@
     "version": "0.1.0",
     "identifier": "com.stagistic.editor",
     "build": {
-        "beforeDevCommand": "pnpm -w db:compile-migrations && pnpm dev:ui",
-        "beforeBuildCommand": "pnpm -w db:compile-migrations && pnpm build:ui",
+        "beforeDevCommand": "pnpm exec moon run desktop:dev-ui",
+        "beforeBuildCommand": "pnpm exec moon run desktop:build-ui",
         "devUrl": "http://localhost:5173",
         "frontendDist": "../dist",
         "removeUnusedCommands": true

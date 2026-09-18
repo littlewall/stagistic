@@ -38,7 +38,7 @@ description: Personal code style preferences used when writing or reviewing Type
   // ✅ import { Button } from '@stagistic/ui';
   ```
 - **Use `pnpm` instead of `npm` or `yarn`** for package management, and follow the workspace conventions for adding dependencies (e.g. `pnpm add -w` for root dependencies, `pnpm add -F <package>` for package-specific dependencies).
-- **Use `pnpm` scripts for dev, build, lint, and test commands**, and avoid using custom scripts or aliases that deviate from the standard `pnpm` commands.
+- **Use Moon tasks for repository commands**: run dev, build, lint, format, typecheck, and tests as `moon run <project>:<task>` (repository-wide workflows use the `root` project). Use `pnpm` only for dependency and workspace package management; `package.json` files intentionally contain no `scripts`.
 
 ## Composition & UI Rules
 

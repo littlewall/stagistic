@@ -13,6 +13,33 @@ export default defineConfig({
     options: {
         typeAware: true,
     },
+    overrides: [
+        {
+            files: ['**/*.{js,jsx,mjs,cjs}'],
+            plugins: ['oxc', 'unicorn'],
+            rules: {
+                'typescript/ban-ts-comment': 'off',
+                'typescript/no-empty-object-type': 'off',
+                'typescript/no-explicit-any': 'off',
+                'typescript/no-misused-promises': 'off',
+                'typescript/no-namespace': 'off',
+                'typescript/no-require-imports': 'off',
+                'typescript/no-unnecessary-type-assertion': 'off',
+                'typescript/no-unnecessary-type-constraint': 'off',
+                'typescript/no-unsafe-argument': 'off',
+                'typescript/no-unsafe-assignment': 'off',
+                'typescript/no-unsafe-call': 'off',
+                'typescript/no-unsafe-enum-comparison': 'off',
+                'typescript/no-unsafe-function-type': 'off',
+                'typescript/no-unsafe-member-access': 'off',
+                'typescript/no-unsafe-return': 'off',
+                'typescript/only-throw-error': 'off',
+                'typescript/prefer-promise-reject-errors': 'off',
+                'typescript/require-await': 'off',
+                'typescript/restrict-plus-operands': 'off',
+            },
+        },
+    ],
     plugins: ['oxc', 'typescript', 'unicorn'],
     rules: {
         'eslint/no-array-constructor': 'error',

@@ -8,13 +8,13 @@ with Playwright; Recordly is responsible for recording and post-production.
 Start the web app in one terminal:
 
 ```sh
-corepack pnpm --filter @stagistic/web dev
+moon run web:dev
 ```
 
 Then start the capture runner in another terminal:
 
 ```sh
-corepack pnpm --filter @stagistic/feature-demos demo:editor-blocks
+moon run feature-loops:demo-editor-blocks
 ```
 
 The runner opens a headed Chromium window at 1440 × 900, 100% zoom, dark mode,
@@ -33,7 +33,7 @@ To use a different local server address:
 
 ```sh
 STAGISTIC_DEMO_BASE_URL=http://localhost:3000 \
-corepack pnpm --filter @stagistic/feature-demos demo:editor-blocks
+moon run feature-loops:demo-editor-blocks
 ```
 
 The flow writes `ACT I`, a scene and stage direction, MARA and ELI through the
@@ -45,7 +45,7 @@ real character suggestions, dialogue, aside, and two lyric lines. It starts
 Start the web app as above, then run:
 
 ```sh
-corepack pnpm --filter @stagistic/feature-demos demo:acts-and-scenes
+moon run feature-loops:demo-acts-and-scenes
 ```
 
 The runner opens the same 1440 × 900 dark-mode editor and waits for Recordly

@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# Astro app: no `vp lint`, no unit tests. `typecheck` is overridden below to
+# use `astro check` instead of the inherited `tsc -b` -> the command name stays
+# `landing:typecheck`, only its body changes. This is exactly the "same command,
+# different implementation" case.
+workspace:
+  inheritedTasks:
+    exclude: ['lint', 'test']
+
+tasks:
+  dev:
+    command: 'astro dev'
+    preset: 'server'
+
+  build:
+    command: 'astro build'
+    options:
+      cache: false
+
+  preview:
+    command: 'astro preview'
+    preset: 'server'
+
+  typecheck:
+    command: 'astro check'
+    options:
+      cache: false
+      # fully replace the inherited `tsc -b`, don't merge its args
+      mergeArgs: 'replace'

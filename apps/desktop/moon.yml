@@ -1,0 +1,26 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# Inherits `lint` (vp lint) + `typecheck` (tsc -b). No tests here.
+workspace:
+  inheritedTasks:
+    exclude: ['test']
+
+tasks:
+  dev:
+    command: 'tauri dev'
+    preset: 'server'
+
+  dev-ui:
+    command: 'vp dev'
+    preset: 'server'
+
+  build:
+    command: 'tauri build'
+    options:
+      cache: false
+
+  build-ui:
+    command: 'vp build'
+    options:
+      cache: false

@@ -15,7 +15,5 @@
         {"path": "./apps/web"},
         {"path": "./demos/feature-loops"}
     ],
-    "include": [
-        "vite.config.ts"
-    ]
+    "include": ["vite.config.ts", "oxfmt.config.ts", "oxlint.config.ts"]
 }

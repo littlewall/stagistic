@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/project.json
+$schema: 'https://moonrepo.dev/schemas/project.json'
+
+# Inherits lint + typecheck + test. Adds browser-test variants.
+tasks:
+  test-watch:
+    command: 'vp test watch'
+    preset: 'server'
+
+  test-browser:
+    command: 'vp test run -c vitest.browser.config.ts'
+    options:
+      cache: false
+
+  test-browser-debug:
+    command: 'vp test run -c vitest.browser.debug.config.ts'
+    options:
+      cache: false

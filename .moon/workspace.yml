@@ -1,0 +1,22 @@
+# yaml-language-server: $schema=https://moonrepo.dev/schemas/workspace.json
+$schema: 'https://moonrepo.dev/schemas/workspace.json'
+
+# Projects are auto-discovered from these globs. Project id = folder name,
+# so tasks are addressed as `web:lint`, `landing:typecheck`, `db:test`, ...
+projects:
+  globs:
+    - 'apps/*'
+    - 'packages/*'
+    - 'demos/*'
+  sources:
+    root: '.'
+
+vcs:
+  defaultBranch: 'main'
+  # moon owns the hook and invokes the root task. The task delegates staged-file
+  # selection and re-staging to vite-plus through the `staged` map in
+  # vite.config.ts.
+  hooks:
+    pre-commit:
+      - 'pnpm exec moon run root:staged'
+  sync: true

@@ -27,6 +27,7 @@ apps/desktop/src-tauri/icons/*.ico
 .parcel-cache
 .eslintcache
 .superpowers
+.moon/cache
 
 # Logs
 *.log

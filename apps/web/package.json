@@ -3,16 +3,6 @@
     "version": "0.1.0",
     "private": true,
     "type": "module",
-    "scripts": {
-        "predev": "pnpm --filter @stagistic/db db:compile-migrations",
-        "dev": "vp dev",
-        "prebuild": "pnpm --filter @stagistic/db db:compile-migrations",
-        "build": "vp build",
-        "preview": "vp preview",
-        "lint": "eslint .",
-        "typecheck": "tsc -b",
-        "test:browser": "vp test run -c vitest.browser.config.ts"
-    },
     "dependencies": {
         "@electric-sql/pglite": "^0.3.7",
         "@stagistic/app-core": "workspace:*",

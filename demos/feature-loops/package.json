@@ -12,12 +12,6 @@
     "dependencies": {
         "@stagistic/script": "workspace:*"
     },
-    "scripts": {
-        "demo:acts-and-scenes": "tsx src/runActsAndScenesDemo.ts",
-        "demo:editor-blocks": "tsx src/runEditorBlocksDemo.ts",
-        "test": "vp test run -c vitest.config.ts",
-        "typecheck": "tsc -b"
-    },
     "devDependencies": {
         "@types/node": "^24.13.1",
         "playwright": "^1.61.0",
