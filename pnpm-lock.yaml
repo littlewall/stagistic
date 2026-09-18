@@ -20,12 +20,15 @@ importers:
       '@types/node':
         specifier: ^24.13.1
         version: 24.13.1
+      '@vitest/browser-playwright':
+        specifier: 4.1.11
+        version: 4.1.11(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))(playwright@1.61.0)(vitest@4.1.11)
       oxfmt:
         specifier: ^0.68.0
-        version: 0.68.0(vite-plus@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
+        version: 0.68.0(vite-plus@0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
       oxlint:
         specifier: ^1.83.0
-        version: 1.83.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
+        version: 1.83.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
       stylelint:
         specifier: ^17.15.0
         version: 17.15.0(supports-color@10.2.2)(typescript@5.9.3)
@@ -37,7 +40,7 @@ importers:
         version: 5.2.0(supports-color@10.2.2)(typescript@5.9.3)
       vite-plus:
         specifier: ^0.3.0
-        version: 0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)
+        version: 0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)
 
   apps/desktop:
     dependencies:
@@ -483,6 +486,9 @@ importers:
         specifier: ^6.10.6
         version: 6.10.6(react-dnd-html5-backend@16.0.1)(react-dnd@16.0.1(@types/node@24.13.1)(@types/react@19.2.10)(react@19.2.4))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     devDependencies:
+      '@types/node':
+        specifier: ^24.13.1
+        version: 24.13.1
       '@types/react':
         specifier: ^19.0.0
         version: 19.2.10
@@ -3137,6 +3143,12 @@ packages:
         optional: true
       babel-plugin-react-compiler:
         optional: true
+
+  '@vitest/browser-playwright@4.1.11':
+    resolution: {integrity: sha512-riLBxPqwnJ0lWs2DN2WeUfYeKLoAjbP2Xx8cLQdSddzMi20sksIa6K2mPz79DyMZKKVKH2ksOC2yJvtNcZg8cg==}
+    peerDependencies:
+      playwright: '*'
+      vitest: 4.1.11
 
   '@vitest/browser-preview@4.1.11':
     resolution: {integrity: sha512-iPKSE6Ibayey6HFgK1V1/aHgyhx7HSRk1YMi+lnBZGmlIiNV5Uc7xRkD9Su8RDylTxDECK23t7kTHdRKoqSYDQ==}
@@ -7671,12 +7683,25 @@ snapshots:
       '@rolldown/pluginutils': 1.0.1
       vite: 8.3.0(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(yaml@2.9.0)
 
+  '@vitest/browser-playwright@4.1.11(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))(playwright@1.61.0)(vitest@4.1.11)':
+    dependencies:
+      '@vitest/browser': 4.1.11(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))(vitest@4.1.11)
+      '@vitest/mocker': 4.1.11(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
+      playwright: 1.61.0
+      tinyrainbow: 3.1.1
+      vitest: 4.1.11(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
+    transitivePeerDependencies:
+      - bufferutil
+      - msw
+      - utf-8-validate
+      - vite
+
   '@vitest/browser-preview@4.1.11(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))(vitest@4.1.11)':
     dependencies:
       '@testing-library/dom': 10.4.2
       '@testing-library/user-event': 14.6.7(@testing-library/dom@10.4.2)
       '@vitest/browser': 4.1.11(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))(vitest@4.1.11)
-      vitest: 4.1.11(@types/node@24.13.1)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
+      vitest: 4.1.11(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
     transitivePeerDependencies:
       - bufferutil
       - msw
@@ -7692,7 +7717,7 @@ snapshots:
       pngjs: 7.0.0
       sirv: 3.0.2
       tinyrainbow: 3.1.1
-      vitest: 4.1.11(@types/node@24.13.1)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
+      vitest: 4.1.11(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
       ws: 8.21.0
     transitivePeerDependencies:
       - bufferutil
@@ -9071,7 +9096,7 @@ snapshots:
 
   orderedmap@2.1.1: {}
 
-  oxfmt@0.67.0(vite-plus@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)):
+  oxfmt@0.67.0(vite-plus@0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)):
     dependencies:
       tinypool: 2.1.2
     optionalDependencies:
@@ -9094,9 +9119,9 @@ snapshots:
       '@oxfmt/binding-win32-arm64-msvc': 0.67.0
       '@oxfmt/binding-win32-ia32-msvc': 0.67.0
       '@oxfmt/binding-win32-x64-msvc': 0.67.0
-      vite-plus: 0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)
+      vite-plus: 0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)
 
-  oxfmt@0.68.0(vite-plus@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)):
+  oxfmt@0.68.0(vite-plus@0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)):
     dependencies:
       tinypool: 2.1.2
     optionalDependencies:
@@ -9119,7 +9144,7 @@ snapshots:
       '@oxfmt/binding-win32-arm64-msvc': 0.68.0
       '@oxfmt/binding-win32-ia32-msvc': 0.68.0
       '@oxfmt/binding-win32-x64-msvc': 0.68.0
-      vite-plus: 0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)
+      vite-plus: 0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)
 
   oxlint-tsgolint@7.0.2001:
     optionalDependencies:
@@ -9130,7 +9155,7 @@ snapshots:
       '@oxlint-tsgolint/win32-arm64': 7.0.2001
       '@oxlint-tsgolint/win32-x64': 7.0.2001
 
-  oxlint@1.82.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)):
+  oxlint@1.82.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)):
     optionalDependencies:
       '@oxlint/binding-android-arm-eabi': 1.82.0
       '@oxlint/binding-android-arm64': 1.82.0
@@ -9152,9 +9177,9 @@ snapshots:
       '@oxlint/binding-win32-ia32-msvc': 1.82.0
       '@oxlint/binding-win32-x64-msvc': 1.82.0
       oxlint-tsgolint: 7.0.2001
-      vite-plus: 0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)
+      vite-plus: 0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)
 
-  oxlint@1.83.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)):
+  oxlint@1.83.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)):
     optionalDependencies:
       '@oxlint/binding-android-arm-eabi': 1.83.0
       '@oxlint/binding-android-arm64': 1.83.0
@@ -9176,7 +9201,7 @@ snapshots:
       '@oxlint/binding-win32-ia32-msvc': 1.83.0
       '@oxlint/binding-win32-x64-msvc': 1.83.0
       oxlint-tsgolint: 7.0.2001
-      vite-plus: 0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)
+      vite-plus: 0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)
 
   p-limit@7.3.0:
     dependencies:
@@ -10089,7 +10114,7 @@ snapshots:
       '@types/unist': 3.0.3
       vfile-message: 4.0.3
 
-  vite-plus@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0):
+  vite-plus@0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0):
     dependencies:
       '@oxc-project/types': 0.149.0
       '@oxlint/plugins': 1.79.0
@@ -10102,12 +10127,13 @@ snapshots:
       '@vitest/snapshot': 4.1.11
       '@vitest/spy': 4.1.11
       '@vitest/utils': 4.1.11
-      oxfmt: 0.67.0(vite-plus@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
-      oxlint: 1.82.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
+      oxfmt: 0.67.0(vite-plus@0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
+      oxlint: 1.82.0(oxlint-tsgolint@7.0.2001)(vite-plus@0.3.2(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
       oxlint-tsgolint: 7.0.2001
       vite: '@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)'
-      vitest: 4.1.11(@types/node@24.13.1)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
+      vitest: 4.1.11(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
     optionalDependencies:
+      '@vitest/browser-playwright': 4.1.11(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))(playwright@1.61.0)(vitest@4.1.11)
       '@voidzero-dev/vite-plus-darwin-arm64': 0.3.2
       '@voidzero-dev/vite-plus-darwin-x64': 0.3.2
       '@voidzero-dev/vite-plus-linux-arm64-gnu': 0.3.2
@@ -10167,7 +10193,7 @@ snapshots:
     optionalDependencies:
       vite: 8.3.0(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(yaml@2.9.0)
 
-  vitest@4.1.11(@types/node@24.13.1)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)):
+  vitest@4.1.11(@types/node@24.13.1)(@vitest/browser-playwright@4.1.11)(@vitest/browser-preview@4.1.11)(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.11
       '@vitest/mocker': 4.1.11(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))
@@ -10181,7 +10207,7 @@ snapshots:
       magic-string: 0.30.21
       obug: 2.1.2
       pathe: 2.0.3
-      picomatch: 4.0.5
+      picomatch: 4.0.7
       std-env: 4.1.0
       tinybench: 2.9.0
       tinyexec: 1.2.4
@@ -10191,6 +10217,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 24.13.1
+      '@vitest/browser-playwright': 4.1.11(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))(playwright@1.61.0)(vitest@4.1.11)
       '@vitest/browser-preview': 4.1.11(@voidzero-dev/vite-plus-core@0.3.2(@types/node@24.13.1)(esbuild@0.28.1)(less@4.6.4)(sass@1.100.0)(stylus@0.62.0(supports-color@10.2.2))(tsx@4.21.0)(typescript@5.9.3)(yaml@2.9.0))(vitest@4.1.11)
     transitivePeerDependencies:
       - msw

@@ -1,53 +1,31 @@
 import clsx from 'clsx';
-import {
-    type ReactNode,
-    useEffect,
-    useState,
-} from 'react';
-import {Button as RACButton} from 'react-aria-components';
+import {type ReactNode, useEffect, useState} from 'react';
+import {Button as RACButton, MenuTrigger} from 'react-aria-components';
 
 import {Button} from '../atoms/Button';
 import {Tooltip} from '../atoms/Tooltip';
-import {
-    AttributeManagerIcon,
-    DownloadIcon,
-    HomeIcon,
-    PlusIcon,
-    SettingsIcon,
-    UploadIcon,
-} from '../icons/ui';
-import {
-    applyAppThemeMode,
-    type AppThemeMode,
-    readPreferredAppThemeMode,
-    subscribeToSystemThemeChange,
-} from '../theme';
-import styles from './AppHeader.module.css';
+import {AttributeManagerIcon, DownloadIcon, HomeIcon, PlusIcon, SettingsIcon, UploadIcon} from '../icons/ui';
+import {DropdownMenu} from '../molecules/DropdownMenu';
+import {applyAppThemeMode, type AppThemeMode, readPreferredAppThemeMode, subscribeToSystemThemeChange} from '../theme';
 import {AccountMenu} from './header/AccountMenu';
 import {ScriptTitle} from './header/ScriptTitle';
 import {SyncIndicator} from './header/SyncIndicator';
-import type {
-    ScriptListItem,
-    ScriptSyncState,
-    ScriptView,
-} from './header/types';
+import type {ScriptListItem, ScriptSyncState, ScriptView} from './header/types';
 import {ViewSwitcher} from './header/ViewSwitcher';
 
-export type {
-    ScriptListItem,
-    ScriptSyncState,
-    ScriptView,
-};
+import styles from './AppHeader.module.css';
+
+export type {ScriptListItem, ScriptSyncState, ScriptView};
 
 export type AppHeaderProps = {
-    leftControls?: ReactNode,
-    scriptControls?: ReactNode,
-    scriptActions?: ReactNode,
-    onHome: () => void,
-    onNewScript?: () => void,
-    onImportScript?: () => void,
-    isFullWidth?: boolean,
-    contentInset?: 'default' | 'page',
+    leftControls?: ReactNode;
+    scriptControls?: ReactNode;
+    scriptActions?: ReactNode;
+    onHome: () => void;
+    onNewScript?: () => void;
+    onImportScript?: () => void;
+    isFullWidth?: boolean;
+    contentInset?: 'default' | 'page';
 };
 
 export const AppHeader = ({
@@ -76,72 +54,40 @@ export const AppHeader = ({
 
     return (
         <header className={styles.header}>
-            <div
-                className={styles.dragRegion}
-                data-tauri-drag-region
-                aria-hidden="true"
-            />
-            <div
-                className={clsx(
-                    styles.inner,
-                    isFullWidth && styles.full,
-                    contentInset === 'page' && styles.pageInset,
-                )}
-            >
+            <div className={styles.dragRegion} data-tauri-drag-region aria-hidden="true" />
+            <div className={clsx(styles.inner, isFullWidth && styles.full, contentInset === 'page' && styles.pageInset)}>
                 <div className={styles.leftControls}>
                     <Tooltip label="Home" placement="bottom">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            onPress={onHome}
-                            aria-label="Go to home"
-                        >
+                        <Button variant="ghost" size="icon" onPress={onHome} aria-label="Go to home">
                             <HomeIcon className={styles.icon} aria-hidden="true" />
                         </Button>
                     </Tooltip>
                     {onNewScript ? (
                         <Tooltip label="New script" placement="bottom">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onPress={onNewScript}
-                                aria-label="New script"
-                            >
+                            <Button variant="ghost" size="icon" onPress={onNewScript} aria-label="New script">
                                 <PlusIcon className={styles.icon} aria-hidden="true" />
                             </Button>
                         </Tooltip>
                     ) : null}
                     {onImportScript ? (
                         <Tooltip label="Import script" placement="bottom">
-                            <Button
-                                variant="ghost"
-                                size="icon"
-                                onPress={onImportScript}
-                                aria-label="Import script"
-                            >
+                            <Button variant="ghost" size="icon" onPress={onImportScript} aria-label="Import script">
                                 <UploadIcon className={styles.icon} aria-hidden="true" />
                             </Button>
                         </Tooltip>
                     ) : null}
                     {leftControls ?? null}
                 </div>
-                <div className={styles.scriptControls}>
-                    {scriptControls ?? null}
-                </div>
+                <div className={styles.scriptControls}>{scriptControls ?? null}</div>
                 <div className={styles.rightControls}>
                     {scriptActions ? (
                         <>
-                            <div className={styles.actionGroup}>
-                                {scriptActions}
-                            </div>
+                            <div className={styles.actionGroup}>{scriptActions}</div>
                             <span className={styles.actionDivider} aria-hidden="true" />
                         </>
                     ) : null}
                     <div className={styles.actionGroup}>
-                        <AccountMenu
-                            themeMode={themeMode}
-                            onThemeChange={setThemeMode}
-                        />
+                        <AccountMenu themeMode={themeMode} onThemeChange={setThemeMode} />
                     </div>
                 </div>
             </div>
@@ -150,16 +96,16 @@ export const AppHeader = ({
 };
 
 export type ScriptEditorAppHeaderProps = {
-    currentScript: ScriptListItem,
-    onMenuAction?: (actionId: string) => void,
-    onRenameScript?: (name: string) => void,
-    scriptSyncState?: ScriptSyncState,
-    onHome: () => void,
-    onBackToEditor?: () => void,
-    backToEditorLabel?: string,
-    isFullWidth?: boolean,
-    activeView: ScriptView,
-    onSelectView: (view: ScriptView) => void,
+    currentScript: ScriptListItem;
+    onMenuAction?: (actionId: string) => void;
+    onRenameScript?: (name: string) => void;
+    scriptSyncState?: ScriptSyncState;
+    onHome: () => void;
+    onBackToEditor?: () => void;
+    backToEditorLabel?: string;
+    isFullWidth?: boolean;
+    activeView: ScriptView;
+    onSelectView: (view: ScriptView) => void;
 };
 
 export const ScriptEditorAppHeader = ({
@@ -179,47 +125,41 @@ export const ScriptEditorAppHeader = ({
             onHome={onHome}
             isFullWidth={isFullWidth}
             scriptControls={<ViewSwitcher activeView={activeView} onSelectView={onSelectView} />}
-            scriptActions={onMenuAction ? (
-                <>
-                    <Tooltip label="Open script settings" placement="bottom">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Open script settings"
-                            onPress={() => onMenuAction('settings')}
-                        >
-                            <SettingsIcon className={styles.icon} aria-hidden="true" />
-                        </Button>
-                    </Tooltip>
-                    <Tooltip label="Open attribute manager" placement="bottom">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Open attribute manager"
-                            onPress={() => onMenuAction('attributes')}
-                        >
-                            <AttributeManagerIcon className={styles.icon} aria-hidden="true" />
-                        </Button>
-                    </Tooltip>
-                    <Tooltip label="Download .stagistic file" placement="bottom">
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Download .stagistic file"
-                            onPress={() => onMenuAction('export-stagistic')}
-                        >
-                            <DownloadIcon className={styles.icon} aria-hidden="true" />
-                        </Button>
-                    </Tooltip>
-                </>
-            ) : null}
-            leftControls={(
+            scriptActions={
+                onMenuAction ? (
+                    <>
+                        <Tooltip label="Open script settings" placement="bottom">
+                            <Button variant="ghost" size="icon" aria-label="Open script settings" onPress={() => onMenuAction('settings')}>
+                                <SettingsIcon className={styles.icon} aria-hidden="true" />
+                            </Button>
+                        </Tooltip>
+                        <Tooltip label="Open attribute manager" placement="bottom">
+                            <Button variant="ghost" size="icon" aria-label="Open attribute manager" onPress={() => onMenuAction('attributes')}>
+                                <AttributeManagerIcon className={styles.icon} aria-hidden="true" />
+                            </Button>
+                        </Tooltip>
+                        <MenuTrigger>
+                            <Tooltip label="Download" placement="bottom">
+                                <Button variant="ghost" size="icon" aria-label="Download script">
+                                    <DownloadIcon className={styles.icon} aria-hidden="true" />
+                                </Button>
+                            </Tooltip>
+                            <DropdownMenu
+                                aria-label="Download script"
+                                items={[
+                                    {id: 'export-stagistic', label: 'Script (.stagistic)'},
+                                    {id: 'export-stepkg', label: 'Script & metadata (.stepkg)'},
+                                ]}
+                                onAction={key => onMenuAction(String(key))}
+                            />
+                        </MenuTrigger>
+                    </>
+                ) : null
+            }
+            leftControls={
                 <>
                     {onBackToEditor ? (
-                        <RACButton
-                            className={clsx(styles.menuTrigger, styles.backButton)}
-                            onPress={onBackToEditor}
-                        >
+                        <RACButton className={clsx(styles.menuTrigger, styles.backButton)} onPress={onBackToEditor}>
                             {backToEditorLabel}
                         </RACButton>
                     ) : null}
@@ -228,7 +168,7 @@ export const ScriptEditorAppHeader = ({
                         <SyncIndicator state={scriptSyncState} />
                     </div>
                 </>
-            )}
+            }
         />
     );
 };

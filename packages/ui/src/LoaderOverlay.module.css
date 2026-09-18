@@ -18,3 +18,8 @@
         transform: translateY(-50%);
     }
 }
+
+.scrim {
+    background: color-mix(in oklch, var(--color-bg) 56%, transparent);
+    backdrop-filter: blur(2px);
+}
