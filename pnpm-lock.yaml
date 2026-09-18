@@ -186,6 +186,9 @@ importers:
       '@stagistic/shared':
         specifier: workspace:*
         version: link:../shared
+      '@stagistic/stepkg':
+        specifier: workspace:*
+        version: link:../stepkg
       '@tanstack/pacer':
         specifier: 0.21.1
         version: 0.21.1

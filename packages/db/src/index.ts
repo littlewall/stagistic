@@ -6,10 +6,8 @@ export type {DbClient} from './queries';
 export * from './queries';
 export * as dbQueries from './queries';
 export * from './reactive';
-export {
-    createLocalPgliteRepository,
-    type LocalPgliteRepositoryDeps,
-} from './repo/createLocalPgliteRepository';
+export {createLocalPgliteRepository, type LocalPgliteRepositoryDeps} from './repo/createLocalPgliteRepository';
+export type {ScriptPackageSource} from './scriptPackageSource';
 export {
     createProjectedTableDocumentSource,
     createSqlScriptDocumentProjectionWriter,
