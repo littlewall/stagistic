@@ -1,16 +1,7 @@
-import {
-    type EditorSettings,
-} from '@stagistic/script';
-import {
-    clampCharacterColorSaturation,
-    type EditorSettingsOverride,
-    normalizeEditorSettingsBlockType,
-} from '@stagistic/script';
+import {type EditorSettings} from '@stagistic/script';
+import {clampCharacterColorSaturation, type EditorSettingsOverride, isSceneNumberFormat, normalizeEditorSettingsBlockType} from '@stagistic/script';
 
-import {
-    LINE_HEIGHT_OPTIONS,
-    SPACING_BEFORE_OPTIONS,
-} from './constants';
+import {LINE_HEIGHT_OPTIONS, SPACING_BEFORE_OPTIONS} from './constants';
 import {getClosestStepValue} from './math';
 
 export const normalizeSettingsOverride = (settings: EditorSettingsOverride): EditorSettingsOverride => {
@@ -67,62 +58,56 @@ export const normalizeSettingsOverride = (settings: EditorSettingsOverride): Edi
         return nextSettings;
     }
 
-    const nextBlocks = Object.entries(settings.blocks).reduce<NonNullable<EditorSettingsOverride['blocks']>>(
-        (acc, [blockType, blockSettings]) => {
-            const normalizedBlockType = normalizeEditorSettingsBlockType(blockType);
+    const nextBlocks = Object.entries(settings.blocks).reduce<NonNullable<EditorSettingsOverride['blocks']>>((acc, [blockType, blockSettings]) => {
+        const normalizedBlockType = normalizeEditorSettingsBlockType(blockType);
 
-            if (!normalizedBlockType) {
-                return acc;
-            }
+        if (!normalizedBlockType) {
+            return acc;
+        }
 
-            if (!blockSettings) {
-                acc[normalizedBlockType] = blockSettings;
-
-                return acc;
-            }
-
-            const normalizedBlockSettings = {
-                ...blockSettings,
-            };
-
-            if (blockSettings.nextElement !== undefined) {
-                normalizedBlockSettings.nextElement = normalizeEditorSettingsBlockType(blockSettings.nextElement)
-                    ?? undefined;
-            }
-
-            if (typeof blockSettings.spacingBeforeEm === 'number') {
-                normalizedBlockSettings.spacingBeforeEm = getClosestStepValue(
-                    SPACING_BEFORE_OPTIONS,
-                    blockSettings.spacingBeforeEm,
-                );
-            }
-
-            if (typeof blockSettings.lineHeight === 'number') {
-                normalizedBlockSettings.lineHeight = getClosestStepValue(
-                    LINE_HEIGHT_OPTIONS,
-                    blockSettings.lineHeight,
-                );
-            }
-
-            const compactedBlockSettings = Object.fromEntries(
-                Object.entries(normalizedBlockSettings).filter(([, value]) => value !== undefined),
-            ) as Partial<EditorSettings['blocks'][string]>;
-
-            if (Object.keys(compactedBlockSettings).length === 0) {
-                return acc;
-            }
-
-            const existingBlockSettings = acc[normalizedBlockType] ?? {};
-
-            acc[normalizedBlockType] = {
-                ...existingBlockSettings,
-                ...compactedBlockSettings,
-            };
+        if (!blockSettings) {
+            acc[normalizedBlockType] = blockSettings;
 
             return acc;
-        },
-        {},
-    );
+        }
+
+        const normalizedBlockSettings = {
+            ...blockSettings,
+        };
+
+        if (blockSettings.nextElement !== undefined) {
+            normalizedBlockSettings.nextElement = normalizeEditorSettingsBlockType(blockSettings.nextElement) ?? undefined;
+        }
+
+        if (typeof blockSettings.spacingBeforeEm === 'number') {
+            normalizedBlockSettings.spacingBeforeEm = getClosestStepValue(SPACING_BEFORE_OPTIONS, blockSettings.spacingBeforeEm);
+        }
+
+        if (typeof blockSettings.lineHeight === 'number') {
+            normalizedBlockSettings.lineHeight = getClosestStepValue(LINE_HEIGHT_OPTIONS, blockSettings.lineHeight);
+        }
+
+        if (blockSettings.sceneNumberFormat !== undefined) {
+            normalizedBlockSettings.sceneNumberFormat = isSceneNumberFormat(blockSettings.sceneNumberFormat) ? blockSettings.sceneNumberFormat : undefined;
+        }
+
+        const compactedBlockSettings = Object.fromEntries(Object.entries(normalizedBlockSettings).filter(([, value]) => value !== undefined)) as Partial<
+            EditorSettings['blocks'][string]
+        >;
+
+        if (Object.keys(compactedBlockSettings).length === 0) {
+            return acc;
+        }
+
+        const existingBlockSettings = acc[normalizedBlockType] ?? {};
+
+        acc[normalizedBlockType] = {
+            ...existingBlockSettings,
+            ...compactedBlockSettings,
+        };
+
+        return acc;
+    }, {});
 
     return {
         ...nextSettings,

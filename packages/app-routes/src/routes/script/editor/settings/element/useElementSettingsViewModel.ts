@@ -4,6 +4,10 @@ import {
     BLOCK_SHORTCUT_OPTIONS,
     BLOCK_TEXT_ALIGN_OPTIONS,
     DEFAULT_EDITOR_SETTINGS,
+    DEFAULT_SCENE_NUMBER_FORMAT,
+    isSceneNumberFormat,
+    SCENE_NUMBER_FORMAT_OPTIONS,
+    type SceneNumberFormat,
 } from '@stagistic/script';
 import {type CSSProperties, useMemo} from 'react';
 
@@ -18,16 +22,14 @@ import {
     SCREENPLAY_CHARS_PER_INCH,
     SPACING_BEFORE_OPTIONS,
 } from '../constants';
-import {
-    clamp,
-    formatLines,
-    formatNumeric,
-    getClosestStepValue,
-} from '../math';
-import type {
-    ElementSettingsPanelProps,
-    ElementSettingsViewModel,
-} from '../types';
+import {clamp, formatLines, formatNumeric, getClosestStepValue} from '../math';
+import type {ElementSettingsPanelProps, ElementSettingsViewModel} from '../types';
+
+const SCENE_NUMBER_FORMAT_LABELS: Record<SceneNumberFormat, string> = {
+    none: 'No numbering',
+    dot: '1.',
+    paren: '1)',
+};
 
 export const useElementSettingsViewModel = ({
     blockType,
@@ -42,55 +44,47 @@ export const useElementSettingsViewModel = ({
         const pageWidthPx = resolvedScriptSettings.page.widthPx ?? DEFAULT_EDITOR_SETTINGS.page.widthPx;
         const pageMarginLeftPx = resolvedScriptSettings.page.marginLeftPx ?? DEFAULT_EDITOR_SETTINGS.page.marginLeftPx;
         const pageMarginRightPx = resolvedScriptSettings.page.marginRightPx ?? DEFAULT_EDITOR_SETTINGS.page.marginRightPx;
-        const typographyFontSizePx = resolvedScriptSettings.typography.fontSizePx
-            ?? DEFAULT_EDITOR_SETTINGS.typography.fontSizePx;
-        const fallbackTypographyLineHeight = resolvedScriptSettings.typography.lineHeight
-            ?? DEFAULT_EDITOR_SETTINGS.typography.lineHeight;
+        const typographyFontSizePx = resolvedScriptSettings.typography.fontSizePx ?? DEFAULT_EDITOR_SETTINGS.typography.fontSizePx;
+        const fallbackTypographyLineHeight = resolvedScriptSettings.typography.lineHeight ?? DEFAULT_EDITOR_SETTINGS.typography.lineHeight;
         const previewReferenceChars = Math.max(
             MIN_PREVIEW_CONTENT_CHARS,
-            Math.round(
-                Math.max(0, (pageWidthPx - pageMarginLeftPx - pageMarginRightPx) / PX_PER_INCH) * SCREENPLAY_CHARS_PER_INCH,
-            ),
+            Math.round(Math.max(0, (pageWidthPx - pageMarginLeftPx - pageMarginRightPx) / PX_PER_INCH) * SCREENPLAY_CHARS_PER_INCH),
         );
-        const defaultContentChars = Math.max(
-            1,
-            previewReferenceChars - (blockDefaults.indentLeftChars ?? 0) - (blockDefaults.indentRightChars ?? 0),
-        );
+        const defaultContentChars = Math.max(1, previewReferenceChars - (blockDefaults.indentLeftChars ?? 0) - (blockDefaults.indentRightChars ?? 0));
         const minPreviewContentChars = Math.min(MIN_PREVIEW_CONTENT_CHARS, defaultContentChars);
-        const spacingBefore = getClosestStepValue(
-            SPACING_BEFORE_OPTIONS,
-            blockSettings.spacingBeforeEm ?? blockDefaults.spacingBeforeEm ?? 0,
-        );
+        const spacingBefore = getClosestStepValue(SPACING_BEFORE_OPTIONS, blockSettings.spacingBeforeEm ?? blockDefaults.spacingBeforeEm ?? 0);
         const hasSpacingAfter = blockDefaults.spacingAfterEm !== undefined;
-        const spacingAfterRaw = hasSpacingAfter
-            ? blockSettings.spacingAfterEm ?? blockDefaults.spacingAfterEm ?? 0
-            : undefined;
-        const spacingAfter = spacingAfterRaw === undefined
-            ? undefined
-            : getClosestStepValue(SPACING_BEFORE_OPTIONS, spacingAfterRaw);
-        const lineHeight = getClosestStepValue(
-            LINE_HEIGHT_OPTIONS,
-            blockSettings.lineHeight ?? blockDefaults.lineHeight ?? fallbackTypographyLineHeight,
-        );
+        const spacingAfterRaw = hasSpacingAfter ? (blockSettings.spacingAfterEm ?? blockDefaults.spacingAfterEm ?? 0) : undefined;
+        const spacingAfter = spacingAfterRaw === undefined ? undefined : getClosestStepValue(SPACING_BEFORE_OPTIONS, spacingAfterRaw);
+        const lineHeight = getClosestStepValue(LINE_HEIGHT_OPTIONS, blockSettings.lineHeight ?? blockDefaults.lineHeight ?? fallbackTypographyLineHeight);
         const leftIndent = blockSettings.indentLeftChars ?? blockDefaults.indentLeftChars ?? 0;
         const rightIndent = blockSettings.indentRightChars ?? blockDefaults.indentRightChars ?? 0;
         const isActBlock = blockType === 'act';
-        const shortcut = isActBlock
-            ? undefined
-            : blockSettings.shortcut ?? blockDefaults.shortcut ?? BLOCK_SHORTCUT_OPTIONS[0];
-        const isValidNextElement = (
-            value: unknown,
-        ): value is ElementSettingsViewModel['numeric']['nextElement'] => {
-            return typeof value === 'string'
-                && nextElementItems.some(item => item.blockType === value);
+        const shortcut = isActBlock ? undefined : (blockSettings.shortcut ?? blockDefaults.shortcut ?? BLOCK_SHORTCUT_OPTIONS[0]);
+        const isValidNextElement = (value: unknown): value is ElementSettingsViewModel['numeric']['nextElement'] => {
+            return typeof value === 'string' && nextElementItems.some(item => item.blockType === value);
         };
         const nextElement = isActBlock
             ? undefined
             : (() => {
-                const candidate = blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType;
+                  const candidate = blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType;
 
-                return isValidNextElement(candidate) ? candidate : nextElementItems[0]?.blockType;
-            })();
+                  return isValidNextElement(candidate) ? candidate : nextElementItems[0]?.blockType;
+              })();
+        const isSceneBlock = blockType === 'scene';
+        const sceneNumberFormat = isSceneBlock
+            ? (() => {
+                  const candidate = blockSettings.sceneNumberFormat ?? blockDefaults.sceneNumberFormat ?? DEFAULT_SCENE_NUMBER_FORMAT;
+
+                  return isSceneNumberFormat(candidate) ? candidate : DEFAULT_SCENE_NUMBER_FORMAT;
+              })()
+            : undefined;
+        const sceneNumberFormatOptions = isSceneBlock
+            ? SCENE_NUMBER_FORMAT_OPTIONS.map(option => ({
+                  value: option,
+                  label: SCENE_NUMBER_FORMAT_LABELS[option],
+              }))
+            : undefined;
         const textAlign = blockSettings.textAlign ?? blockDefaults.textAlign ?? BLOCK_TEXT_ALIGN_OPTIONS[0];
         const casing = blockSettings.casing ?? blockDefaults.casing ?? BLOCK_CASING_OPTIONS[0];
         const isBold = blockSettings.isBold ?? blockDefaults.isBold ?? false;
@@ -109,64 +103,37 @@ export const useElementSettingsViewModel = ({
         const shortcutOptions = isActBlock
             ? undefined
             : BLOCK_SHORTCUT_OPTIONS.map(option => ({
-                value: option,
-                label: option,
-            }));
+                  value: option,
+                  label: option,
+              }));
         const nextElementOptions = isActBlock
             ? undefined
             : nextElementItems.map(item => ({
-                value: item.blockType,
-                label: item.label,
-                icon: BLOCK_ICONS[item.blockType],
-            }));
-        const normalizedLeftIndent = clamp(
-            Math.round(leftIndent),
-            0,
-            MAX_INDENT_CHARS,
-        );
-        const normalizedRightIndent = clamp(
-            Math.round(rightIndent),
-            0,
-            MAX_INDENT_CHARS,
-        );
+                  value: item.blockType,
+                  label: item.label,
+                  icon: BLOCK_ICONS[item.blockType],
+              }));
+        const normalizedLeftIndent = clamp(Math.round(leftIndent), 0, MAX_INDENT_CHARS);
+        const normalizedRightIndent = clamp(Math.round(rightIndent), 0, MAX_INDENT_CHARS);
         const defaultSliderStartChars = 0;
         const defaultSliderEndChars = previewReferenceChars;
         const currentEndChars = previewReferenceChars - normalizedRightIndent;
-        const initialSliderStart = clamp(
-            normalizedLeftIndent,
-            defaultSliderStartChars,
-            defaultSliderEndChars - minPreviewContentChars,
-        );
-        const initialSliderEnd = clamp(
-            currentEndChars,
-            defaultSliderStartChars + minPreviewContentChars,
-            defaultSliderEndChars,
-        );
-        const sliderStart = clamp(
-            initialSliderStart,
-            defaultSliderStartChars,
-            initialSliderEnd - minPreviewContentChars,
-        );
-        const sliderEnd = clamp(
-            initialSliderEnd,
-            sliderStart + minPreviewContentChars,
-            defaultSliderEndChars,
-        );
+        const initialSliderStart = clamp(normalizedLeftIndent, defaultSliderStartChars, defaultSliderEndChars - minPreviewContentChars);
+        const initialSliderEnd = clamp(currentEndChars, defaultSliderStartChars + minPreviewContentChars, defaultSliderEndChars);
+        const sliderStart = clamp(initialSliderStart, defaultSliderStartChars, initialSliderEnd - minPreviewContentChars);
+        const sliderEnd = clamp(initialSliderEnd, sliderStart + minPreviewContentChars, defaultSliderEndChars);
         const contentChars = Math.max(minPreviewContentChars, sliderEnd - sliderStart);
-        const leftTotalInches = (pageMarginLeftPx / PX_PER_INCH) + (sliderStart / SCREENPLAY_CHARS_PER_INCH);
-        const rightTotalInches = (pageMarginRightPx / PX_PER_INCH)
-            + ((previewReferenceChars - sliderEnd) / SCREENPLAY_CHARS_PER_INCH);
+        const leftTotalInches = pageMarginLeftPx / PX_PER_INCH + sliderStart / SCREENPLAY_CHARS_PER_INCH;
+        const rightTotalInches = pageMarginRightPx / PX_PER_INCH + (previewReferenceChars - sliderEnd) / SCREENPLAY_CHARS_PER_INCH;
         const safePageWidthPx = Math.max(1, pageWidthPx);
         const pageStartPercent = clamp((pageMarginLeftPx / safePageWidthPx) * 100, 0, 45);
-        const pageEndPercent = clamp(100 - ((pageMarginRightPx / safePageWidthPx) * 100), 55, 100);
+        const pageEndPercent = clamp(100 - (pageMarginRightPx / safePageWidthPx) * 100, 55, 100);
         const pageContentPercent = Math.max(8, pageEndPercent - pageStartPercent);
-        const lineStartPercent = pageStartPercent + ((sliderStart / previewReferenceChars) * pageContentPercent);
-        const lineEndPercent = pageStartPercent + ((sliderEnd / previewReferenceChars) * pageContentPercent);
+        const lineStartPercent = pageStartPercent + (sliderStart / previewReferenceChars) * pageContentPercent;
+        const lineEndPercent = pageStartPercent + (sliderEnd / previewReferenceChars) * pageContentPercent;
         const previewStyle = {
             '--preview-spacing-before': `${Math.max(0, spacingBefore) * typographyFontSizePx}px`,
-            '--preview-spacing-after': spacingAfter === undefined
-                ? '0px'
-                : `${Math.max(0, spacingAfter) * typographyFontSizePx}px`,
+            '--preview-spacing-after': spacingAfter === undefined ? '0px' : `${Math.max(0, spacingAfter) * typographyFontSizePx}px`,
             '--preview-spacing-line-unit': `${typographyFontSizePx}px`,
             '--preview-line-height': String(lineHeight),
             '--preview-line-box-height': `${typographyFontSizePx}px`,
@@ -190,9 +157,9 @@ export const useElementSettingsViewModel = ({
 
         const spacingAfterOptions = hasSpacingAfter
             ? SPACING_BEFORE_OPTIONS.map(option => ({
-                value: option,
-                label: formatLines(option),
-            }))
+                  value: option,
+                  label: formatLines(option),
+              }))
             : undefined;
 
         return {
@@ -209,11 +176,13 @@ export const useElementSettingsViewModel = ({
                 lineHeight,
                 shortcut,
                 nextElement,
+                sceneNumberFormat,
                 spacingBeforeOptions,
                 spacingAfterOptions,
                 lineHeightOptions,
                 shortcutOptions,
                 nextElementOptions,
+                sceneNumberFormatOptions,
             },
             preview: {
                 previewText,
