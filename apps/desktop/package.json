@@ -4,11 +4,12 @@
     "private": true,
     "type": "module",
     "dependencies": {
+        "@tauri-apps/api": "^3.0.0-alpha.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0"
     },
     "devDependencies": {
-        "@tauri-apps/cli": "^2.0.0",
+        "@tauri-apps/cli": "^3.0.0-alpha.1",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@vitejs/plugin-react": "^6.0.3",
