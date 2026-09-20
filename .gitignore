@@ -67,9 +67,20 @@ temp
 *.tmp
 tsconfig.tsbuildinfo
 
-# vite-plus compiled config artifact (source is vite.config.ts)
+# Compiled config artifacts (sources are the matching *.config.ts). Emitted by
+# `tsc -b` because the root project is composite with declaration output.
 vite.config.js
 vite.config.js.map
+vite.config.d.ts
+vite.config.d.ts.map
+oxfmt.config.js
+oxfmt.config.js.map
+oxfmt.config.d.ts
+oxfmt.config.d.ts.map
+oxlint.config.js
+oxlint.config.js.map
+oxlint.config.d.ts
+oxlint.config.d.ts.map
 
 # Graphify
 graphify-out/

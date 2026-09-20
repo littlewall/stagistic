@@ -10,7 +10,11 @@
     "core:event:allow-listen",
     "core:path:default",
     "core:path:allow-resolve-directory",
+    "core:window:allow-close",
+    "core:window:allow-destroy",
     "dialog:default",
+    "fs:allow-appdata-read-recursive",
+    "fs:allow-appdata-write-recursive",
     {
       "identifier": "fs:allow-read-text-file",
       "allow": [

@@ -1,0 +1,4 @@
+/* Desktop-level overrides beyond base.css.
+ * The macOS window uses titleBarStyle "Overlay"; the shared UI header reserves
+ * the traffic-light space and enables its drag region via the `platform-macos`
+ * class set in src/platform.ts. */

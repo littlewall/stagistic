@@ -81,6 +81,13 @@
     padding-left: calc(var(--space-xl) + var(--traffic-light-space));
 }
 
+/* `.pageInset` sets padding-inline, which would otherwise override the
+   traffic-light clearance on the leading edge. Match its specificity and keep
+   the clearance while leaving its trailing padding intact. */
+:global(.platform-macos) .inner.pageInset {
+    padding-left: calc(var(--space-xl) + var(--traffic-light-space));
+}
+
 .menuTrigger {
     cursor: pointer;
     display: inline-flex;
