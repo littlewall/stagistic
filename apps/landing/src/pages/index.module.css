@@ -63,6 +63,32 @@
     gap: .75rem;
 }
 
+.heroMeta {
+    margin-top: 1rem;
+    font-family: var(--font-mono);
+    font-size: .8125rem;
+    color: var(--color-text-muted);
+}
+
+.heroMetaLink {
+    color: inherit;
+    text-decoration-color: transparent;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: .25rem;
+    transition: text-decoration-color .15s ease;
+
+    &:hover {
+        text-decoration-color: currentcolor;
+    }
+
+    &:focus-visible {
+        border-radius: .125rem;
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 3px;
+    }
+}
+
 .heroScript {
     isolation: isolate;
     position: relative;
@@ -263,9 +289,9 @@
 .textLink {
     color: var(--color-text);
     text-decoration: underline;
-    text-underline-offset: 2px;
     text-decoration-color: var(--color-text-muted);
-    transition: text-decoration-color 0.15s ease;
+    text-underline-offset: 2px;
+    transition: text-decoration-color .15s ease;
 
     &:hover {
         text-decoration-color: var(--color-text);
@@ -541,10 +567,10 @@
 
 .previewCheckMark {
     display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    color: currentColor;
-    flex-shrink: 0;
+    color: currentcolor;
 }
 
 .previewCheckMark svg {
@@ -557,6 +583,14 @@
     display: flex;
     flex-direction: column;
     gap: .625rem;
+}
+
+.previewMeta {
+    margin: .25rem 0 0;
+    font-family: var(--font-mono);
+    font-size: .75rem;
+    line-height: 1.6;
+    color: var(--color-text-muted);
 }
 
 .reveal {

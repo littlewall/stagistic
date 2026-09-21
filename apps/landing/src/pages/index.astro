@@ -4,6 +4,11 @@ import LandingMiniEditor from '../components/mini-editor/LandingMiniEditor';
 import Layout from '../layouts/Layout.astro';
 import s from './index.module.css';
 
+// Direct .dmg download (Apple Silicon). `releases/latest` always resolves to the
+// newest build; swap for a pinned `/releases/latest/download/<asset>.dmg` URL
+// once the asset name is stable.
+const DOWNLOAD_MACOS_URL = 'https://github.com/littlewall/stagistic/releases/latest';
+
 const features = [
     {
         label: 'A playwriting structure',
@@ -74,7 +79,19 @@ const faqs = [
     },
     {
         q: 'Where is my data stored?',
-        a: 'Locally in your browser. You can download a .stagistic backup and import it again whenever you need it. Cloud sync is not ready yet; but when it is, it will be free.',
+        a: 'On your own device. In the browser it lives in local storage; in the macOS app it lives on your Mac. Either way you can download a .stagistic backup and import it again whenever you need it. Cloud sync is not ready yet; but when it is, it will be free.',
+    },
+    {
+        q: 'Is there a macOS app?',
+        a: 'Yes. There is a native macOS app for Apple Silicon (M1 and newer) running on macOS 11 Big Sur or later. It is the same editor as the browser version, and it keeps itself up to date automatically. Download the .dmg and you are ready to write.',
+    },
+    {
+        q: 'Why download the app instead of using the browser?',
+        a: 'The real difference is offline use. In the browser, Stagistic Editor keeps your work on your device and never sends it to a server — but you still need a connection to load the page. The macOS app removes that: once installed, it opens and runs with no internet at all. Everything else — the editor, the features, the free price — is identical.',
+    },
+    {
+        q: 'Are Windows and Linux supported?',
+        a: 'Not yet. We are deliberately focused on stabilising the editor and its core features first, rather than splitting our attention across platforms this early. Other systems may follow later. For now, everyone can use the full editor in any modern browser.',
     },
     {
         q: 'Can I use it for a commercial production?',
@@ -101,7 +118,7 @@ const faqs = [
 
 <Layout
     title="Stagistic Editor - Script editor built for theatre"
-    description="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
+    description="Stagistic Editor is a script editor built specifically for theatrical plays and musicals — free, in your browser or as a native macOS app. Not screenwriting. Not prose. The stage."
     canonical={new URL("/", Astro.site).href}
 >
     <div class={s.page}>
@@ -125,10 +142,15 @@ const faqs = [
                             <a href="https://editor.stagistic.app" class={s.btnPrimary}>
                                 Open editor in browser
                             </a>
-                            <a href="#features" class={s.btnOutline}>
-                                Explore features
+                            <a href={DOWNLOAD_MACOS_URL} class={s.btnOutline}>
+                                Download for macOS
                             </a>
                         </div>
+
+                        <p class={clsx(s.heroMeta, s.fadeUp, s.fadeUpD2)}>
+                            Free &middot; Apple Silicon &middot; macOS 11+
+                            &middot; <a href="#features" class={s.heroMetaLink}>Explore features</a>
+                        </p>
                     </div>
 
                     <div class={clsx(s.heroScript, s.fadeUp, s.fadeUpD3)}>
@@ -311,8 +333,8 @@ const faqs = [
                 </div>
             </section>
 
-            <!-- Public preview / CTA -->
-            <section class={s.preview} id="preview">
+            <!-- Public preview / download CTA -->
+            <section class={s.preview} id="download">
                 <div class={clsx(s.previewInner, s.reveal)} data-reveal>
                     <div>
                         <h2 class={s.previewTitle}>
@@ -322,6 +344,11 @@ const faqs = [
                             Stagistic Editor is free to use in your browser, with no
                             account or paywall. Every current and future Editor
                             feature will remain free.
+                        </p>
+                        <p class={s.previewTextSecondary}>
+                            Prefer to work offline? Download the native macOS app for
+                            Apple Silicon &mdash; the same editor, no connection needed
+                            once it is installed.
                         </p>
 
                     </div>
@@ -351,11 +378,25 @@ const faqs = [
                                 </span>
                                 <span>Stored locally by default</span>
                             </div>
+                            <div class={s.previewCheckItem}>
+                                <span class={s.previewCheckMark}>
+                                    <svg viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
+                                        <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                    </svg>
+                                </span>
+                                <span>Works offline on macOS</span>
+                            </div>
                         </div>
                         <div class={s.previewCtas}>
                             <a href="https://editor.stagistic.app" class={s.btnPrimary}>
                                 Open editor in browser
                             </a>
+                            <a href={DOWNLOAD_MACOS_URL} class={s.btnOutline}>
+                                Download for macOS
+                            </a>
+                            <p class={s.previewMeta}>
+                                Apple Silicon &middot; macOS 11 Big Sur or later &middot; Free, no account
+                            </p>
                             <p class={s.desktopOnlyNotice} role="note">
                                 Stagistic Editor is built for larger screens. Open it
                                 on a laptop or desktop at least 1000 pixels wide
