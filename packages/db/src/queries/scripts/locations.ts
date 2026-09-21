@@ -20,6 +20,10 @@ export const insertScriptLocations = async (db: DbClient, rows: InferInsertModel
     await db.insert(scriptLocations).values(rows);
 };
 
+export const deleteScriptLocationsByScriptId = async (db: DbClient, scriptId: string) => {
+    await db.delete(scriptLocations).where(eq(scriptLocations.scriptId, scriptId));
+};
+
 export const listScriptLocations = async (db: DbClient, scriptId: string) => {
     return db.select().from(scriptLocations).where(eq(scriptLocations.scriptId, scriptId)).orderBy(asc(scriptLocations.name));
 };

@@ -1,16 +1,8 @@
 import {createRoot, type Root} from 'react-dom/client';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-    vi,
-} from 'vite-plus/test';
-import {
-    page,
-} from 'vite-plus/test/browser';
+import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {page} from 'vite-plus/test/browser';
 
-import {DeleteScriptConfirm} from './DeleteScriptConfirm';
+import {TypeToConfirmAction} from './TypeToConfirmAction';
 
 const mountedRoots: Root[] = [];
 
@@ -32,7 +24,7 @@ const waitForElement = async <T extends Element>(selector: string): Promise<T> =
     throw new Error(`Expected element matching ${selector}`);
 };
 
-const renderConfirm = (onConfirm: () => void) => {
+const renderAction = (onConfirm: () => void) => {
     const host = document.createElement('div');
 
     host.style.width = '480px';
@@ -40,7 +32,7 @@ const renderConfirm = (onConfirm: () => void) => {
 
     const root = createRoot(host);
 
-    root.render(<DeleteScriptConfirm scriptTitle="My Play" onConfirm={onConfirm} />);
+    root.render(<TypeToConfirmAction phrase="replace me" confirmLabel="Replace script" onConfirm={onConfirm} />);
     mountedRoots.push(root);
 };
 
@@ -50,51 +42,38 @@ afterEach(() => {
     document.body.innerHTML = '';
 });
 
-describe('DeleteScriptConfirm', () => {
-    it('keeps the delete button disabled until the confirm phrase is typed exactly', async () => {
+describe('TypeToConfirmAction', () => {
+    it('keeps the confirm button disabled until the exact phrase is typed', async () => {
         const onConfirm = vi.fn();
 
-        renderConfirm(onConfirm);
+        renderAction(onConfirm);
 
         const input = page.elementLocator(await waitForElement('input'));
         const button = await waitForElement<HTMLButtonElement>('button');
 
         expect(button.disabled).toBe(true);
+        expect(button.textContent).toBe('Replace script');
 
-        await input.fill('delete');
+        await input.fill('replace');
         expect(button.disabled).toBe(true);
 
-        await input.fill('delete me');
+        await input.fill('replace me');
         expect(button.disabled).toBe(false);
     });
 
-    it('blocks the delete button while locked and calls onConfirm once unlocked', async () => {
+    it('calls onConfirm once unlocked, and trims surrounding whitespace', async () => {
         const onConfirm = vi.fn();
 
-        renderConfirm(onConfirm);
+        renderAction(onConfirm);
 
         const input = page.elementLocator(await waitForElement('input'));
         const buttonElement = await waitForElement<HTMLButtonElement>('button');
         const button = page.elementLocator(buttonElement);
 
-        await input.fill('nope');
-        expect(buttonElement.disabled).toBe(true);
-        expect(onConfirm).not.toHaveBeenCalled();
+        await input.fill('  replace me  ');
+        expect(buttonElement.disabled).toBe(false);
 
-        await input.fill('delete me');
         await button.click();
         expect(onConfirm).toHaveBeenCalledTimes(1);
-    });
-
-    it('trims surrounding whitespace when matching the phrase', async () => {
-        const onConfirm = vi.fn();
-
-        renderConfirm(onConfirm);
-
-        const input = page.elementLocator(await waitForElement('input'));
-        const button = await waitForElement<HTMLButtonElement>('button');
-
-        await input.fill('  delete me  ');
-        expect(button.disabled).toBe(false);
     });
 });

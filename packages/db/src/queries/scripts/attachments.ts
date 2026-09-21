@@ -1,58 +1,40 @@
-import {
-    and, eq, sql,
-} from 'drizzle-orm';
+import {and, eq, sql} from 'drizzle-orm';
 
-import {
-    scriptAttachments,
-    scriptMusic,
-    scriptMusicAttachments,
-} from '../../schema';
-import type {
-    MusicAttachmentRole,
-    ScriptMusicAttachmentBinding,
-} from '../../types';
+import {scriptAttachments, scriptMusic, scriptMusicAttachments} from '../../schema';
+import type {MusicAttachmentRole, ScriptMusicAttachmentBinding} from '../../types';
 import type {DbClient} from '../types';
 
 export interface InsertAttachmentRow {
-    id: string,
-    scriptId: string,
-    filename: string,
-    mimeType: string,
-    sizeBytes: number,
-    storageKey: string,
-    createdAt: number,
-    updatedAt: number,
+    id: string;
+    scriptId: string;
+    filename: string;
+    mimeType: string;
+    sizeBytes: number;
+    storageKey: string;
+    createdAt: number;
+    updatedAt: number;
 }
 
 export type AttachmentRow = InsertAttachmentRow;
 
-export const listScriptAttachments = async (
-    db: DbClient,
-    scriptId: string,
-) => db
-    .select()
-    .from(scriptAttachments)
-    .where(eq(scriptAttachments.scriptId, scriptId));
+export const listScriptAttachments = async (db: DbClient, scriptId: string) =>
+    db.select().from(scriptAttachments).where(eq(scriptAttachments.scriptId, scriptId));
 
-export const listScriptMusicAttachmentBindings = async (
-    db: DbClient,
-    scriptId: string,
-) => {
-    const rows = await db.select({
-        musicId: scriptMusicAttachments.musicId,
-        attachmentId: scriptMusicAttachments.attachmentId,
-        role: scriptMusicAttachments.role,
-        sortOrder: scriptMusicAttachments.sortOrder,
-        createdAt: scriptMusicAttachments.createdAt,
-    })
+export const listScriptMusicAttachmentBindings = async (db: DbClient, scriptId: string) => {
+    const rows = await db
+        .select({
+            musicId: scriptMusicAttachments.musicId,
+            attachmentId: scriptMusicAttachments.attachmentId,
+            role: scriptMusicAttachments.role,
+            sortOrder: scriptMusicAttachments.sortOrder,
+            createdAt: scriptMusicAttachments.createdAt,
+        })
         .from(scriptMusicAttachments)
         .innerJoin(scriptMusic, eq(scriptMusicAttachments.musicId, scriptMusic.id))
         .where(eq(scriptMusic.scriptId, scriptId));
 
     return rows.flatMap<ScriptMusicAttachmentBinding>(row => {
-        return row.role === 'integrated_score'
-            ? [{...row, role: 'integrated_score'}]
-            : [];
+        return row.role === 'integrated_score' ? [{...row, role: 'integrated_score'}] : [];
     });
 };
 
@@ -63,21 +45,17 @@ export const insertAttachment = async (db: DbClient, row: InsertAttachmentRow) =
 export const insertMusicAttachmentLink = async (
     db: DbClient,
     row: {
-        musicId: string,
-        attachmentId: string,
-        role: MusicAttachmentRole,
-        sortOrder: number,
-        createdAt: number,
+        musicId: string;
+        attachmentId: string;
+        role: MusicAttachmentRole;
+        sortOrder: number;
+        createdAt: number;
     },
 ) => {
     await db.insert(scriptMusicAttachments).values(row);
 };
 
-export const getAttachmentByMusicRole = async (
-    db: DbClient,
-    musicId: string,
-    role: MusicAttachmentRole,
-): Promise<AttachmentRow | null> => {
+export const getAttachmentByMusicRole = async (db: DbClient, musicId: string, role: MusicAttachmentRole): Promise<AttachmentRow | null> => {
     const rows = await db
         .select({
             id: scriptAttachments.id,
@@ -91,39 +69,28 @@ export const getAttachmentByMusicRole = async (
         })
         .from(scriptMusicAttachments)
         .innerJoin(scriptAttachments, eq(scriptMusicAttachments.attachmentId, scriptAttachments.id))
-        .where(and(
-            eq(scriptMusicAttachments.musicId, musicId),
-            eq(scriptMusicAttachments.role, role),
-        ))
+        .where(and(eq(scriptMusicAttachments.musicId, musicId), eq(scriptMusicAttachments.role, role)))
         .limit(1);
 
     return rows[0] ?? null;
 };
 
 export const getAttachmentById = async (db: DbClient, attachmentId: string): Promise<AttachmentRow | null> => {
-    const rows = await db
-        .select()
-        .from(scriptAttachments)
-        .where(eq(scriptAttachments.id, attachmentId))
-        .limit(1);
+    const rows = await db.select().from(scriptAttachments).where(eq(scriptAttachments.id, attachmentId)).limit(1);
 
     return rows[0] ?? null;
 };
 
-export const deleteMusicAttachmentLinkByRole = async (
-    db: DbClient,
-    payload: {musicId: string, role: MusicAttachmentRole},
-) => {
-    await db
-        .delete(scriptMusicAttachments)
-        .where(and(
-            eq(scriptMusicAttachments.musicId, payload.musicId),
-            eq(scriptMusicAttachments.role, payload.role),
-        ));
+export const deleteMusicAttachmentLinkByRole = async (db: DbClient, payload: {musicId: string; role: MusicAttachmentRole}) => {
+    await db.delete(scriptMusicAttachments).where(and(eq(scriptMusicAttachments.musicId, payload.musicId), eq(scriptMusicAttachments.role, payload.role)));
 };
 
 export const deleteAttachment = async (db: DbClient, attachmentId: string) => {
     await db.delete(scriptAttachments).where(eq(scriptAttachments.id, attachmentId));
+};
+
+export const deleteScriptAttachmentsByScriptId = async (db: DbClient, scriptId: string) => {
+    await db.delete(scriptAttachments).where(eq(scriptAttachments.scriptId, scriptId));
 };
 
 export const countAttachmentLinks = async (db: DbClient, attachmentId: string): Promise<number> => {

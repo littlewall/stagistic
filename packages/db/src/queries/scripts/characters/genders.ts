@@ -28,6 +28,10 @@ export const insertScriptCharacterGenders = async (db: DbClient, rows: InferInse
     await db.insert(scriptCharacterGenders).values(rows);
 };
 
+export const deleteScriptCharacterGendersByScriptId = async (db: DbClient, scriptId: string) => {
+    await db.delete(scriptCharacterGenders).where(eq(scriptCharacterGenders.scriptId, scriptId));
+};
+
 export const upsertScriptCharacterGender = async (db: DbClient, payload: UpsertScriptCharacterGenderPayload) => {
     await db
         .insert(scriptCharacterGenders)

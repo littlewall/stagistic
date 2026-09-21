@@ -177,6 +177,7 @@ export interface ScriptRepository {
     createScript(title: string, initialContent?: ScriptDocument): Promise<string>;
     createScriptWithId(input: CreateScriptWithIdInput): Promise<void>;
     createScriptFromPackage(input: ScriptPackageWrite): Promise<void>;
+    restoreScriptFromPackage(input: ScriptPackageWrite): Promise<void>;
     renameScript(scriptId: string, input: RenameScriptInput): Promise<void>;
     renameScriptTitle(scriptId: string, title: string): Promise<void>;
     duplicateScript(sourceScriptId: string, input: DuplicateScriptInput): Promise<string>;

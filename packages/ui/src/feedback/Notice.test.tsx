@@ -1,11 +1,8 @@
 import {renderToStaticMarkup} from 'react-dom/server';
-import {
-    describe,
-    expect,
-    it,
-} from 'vite-plus/test';
+import {describe, expect, it} from 'vite-plus/test';
 
 import {Notice} from './Notice';
+
 import styles from './Notice.module.css';
 
 describe('Notice', () => {
@@ -15,6 +12,17 @@ describe('Notice', () => {
         expect(markup).toContain(styles.notice);
         expect(markup).toContain(styles.warning);
         expect(markup).toContain('role="status"');
+    });
+
+    it('renders a tinted warning surface when requested', () => {
+        const markup = renderToStaticMarkup(
+            <Notice variant="warning" appearance="tinted">
+                Missing PDFs
+            </Notice>,
+        );
+
+        expect(markup).toContain(styles.warning);
+        expect(markup).toContain(styles.tinted);
     });
 
     it('renders the error variant with an alert role', () => {
@@ -32,7 +40,11 @@ describe('Notice', () => {
     });
 
     it('lets the caller override the role', () => {
-        const markup = renderToStaticMarkup(<Notice variant="warning" role="alert">x</Notice>);
+        const markup = renderToStaticMarkup(
+            <Notice variant="warning" role="alert">
+                x
+            </Notice>,
+        );
 
         expect(markup).toContain('role="alert"');
     });

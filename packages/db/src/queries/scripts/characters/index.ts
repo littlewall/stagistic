@@ -1,5 +1,11 @@
 export type {ScriptCharacterGenderOption, ScriptCharacterGroupRef, ScriptCharacterRef, ScriptSpeakingEntityRef} from '../../../types';
-export {getScriptCharacterGenderByKey, insertScriptCharacterGenders, listScriptCharacterGenders, upsertScriptCharacterGender} from './genders';
+export {
+    deleteScriptCharacterGendersByScriptId,
+    getScriptCharacterGenderByKey,
+    insertScriptCharacterGenders,
+    listScriptCharacterGenders,
+    upsertScriptCharacterGender,
+} from './genders';
 export {
     createScriptCharacterGroup,
     deleteScriptCharacterGroup,
@@ -20,6 +26,7 @@ export {
 } from './read';
 export {
     deleteScriptCharacter,
+    deleteScriptCharactersByScriptId,
     insertScriptCharacters,
     touchScriptCharacter,
     updateScriptCharacterBackstory,

@@ -98,6 +98,7 @@ export const createLocalPgliteRepository = ({getLocalDb, syncToFs, fileStorage}:
         createScript: (title, initialContent) => scripts.create(title, initialContent),
         createScriptWithId: input => scripts.createWithId(input),
         createScriptFromPackage: input => importPackage.createScriptFromPackage(input),
+        restoreScriptFromPackage: input => importPackage.restoreScriptFromPackage(input),
         renameScript: (scriptId, input) => scripts.rename(scriptId, input),
         renameScriptTitle: (scriptId, title) => scripts.renameTitle(scriptId, title),
         duplicateScript: (scriptId, input) => scripts.duplicate(scriptId, input),
