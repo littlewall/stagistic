@@ -1,38 +1,30 @@
-import {
-    and,
-    asc,
-    eq,
-    inArray,
-} from 'drizzle-orm';
+import {and, asc, eq, inArray} from 'drizzle-orm';
 
-import {
-    scriptCharacterGroupMembers,
-    scriptCharacters,
-} from '../../../schema';
+import {scriptCharacterGroupMembers, scriptCharacters} from '../../../schema';
 import type {ScriptCharacterGroupRef} from '../../../types';
 import type {DbClient} from '../../types';
 
 interface CreateScriptCharacterGroupInput {
-    id: string,
-    scriptId: string,
-    characterKey: string,
-    colorHex: string | null,
-    createdAt: number,
-    updatedAt: number,
+    id: string;
+    scriptId: string;
+    characterKey: string;
+    colorHex: string | null;
+    createdAt: number;
+    updatedAt: number;
 }
 
 interface ScriptCharacterGroupUpdateInput {
-    scriptId: string,
-    groupId: string,
-    updatedAt: number,
+    scriptId: string;
+    groupId: string;
+    updatedAt: number;
 }
 
 interface RenameScriptCharacterGroupInput extends ScriptCharacterGroupUpdateInput {
-    characterKey: string,
+    characterKey: string;
 }
 
 interface SetScriptCharacterGroupColorInput extends ScriptCharacterGroupUpdateInput {
-    colorHex: string | null,
+    colorHex: string | null;
 }
 
 const groupSelectFields = {
@@ -53,10 +45,7 @@ const listMemberIdsByGroup = async (db: DbClient, groupIds: string[]) => {
         })
         .from(scriptCharacterGroupMembers)
         .where(inArray(scriptCharacterGroupMembers.groupId, groupIds))
-        .orderBy(
-            asc(scriptCharacterGroupMembers.groupId),
-            asc(scriptCharacterGroupMembers.characterId),
-        );
+        .orderBy(asc(scriptCharacterGroupMembers.groupId), asc(scriptCharacterGroupMembers.characterId));
     const memberIdsByGroup = new Map<string, string[]>();
 
     for (const row of rows) {
@@ -69,11 +58,14 @@ const listMemberIdsByGroup = async (db: DbClient, groupIds: string[]) => {
     return memberIdsByGroup;
 };
 
-const mapGroupRow = (row: {
-    id: string,
-    characterKey: string,
-    colorHex: string | null,
-}, memberIds: string[]): ScriptCharacterGroupRef => ({
+const mapGroupRow = (
+    row: {
+        id: string;
+        characterKey: string;
+        colorHex: string | null;
+    },
+    memberIds: string[],
+): ScriptCharacterGroupRef => ({
     id: row.id,
     kind: 'group',
     key: row.characterKey,
@@ -81,19 +73,16 @@ const mapGroupRow = (row: {
     memberIds,
 });
 
-export const listScriptCharacterGroups = async (
-    db: DbClient,
-    scriptId: string,
-): Promise<ScriptCharacterGroupRef[]> => {
+export const listScriptCharacterGroups = async (db: DbClient, scriptId: string): Promise<ScriptCharacterGroupRef[]> => {
     const rows = await db
         .select(groupSelectFields)
         .from(scriptCharacters)
-        .where(and(
-            eq(scriptCharacters.scriptId, scriptId),
-            eq(scriptCharacters.kind, 'group'),
-        ))
+        .where(and(eq(scriptCharacters.scriptId, scriptId), eq(scriptCharacters.kind, 'group')))
         .orderBy(asc(scriptCharacters.characterKey));
-    const memberIdsByGroup = await listMemberIdsByGroup(db, rows.map(row => row.id));
+    const memberIdsByGroup = await listMemberIdsByGroup(
+        db,
+        rows.map(row => row.id),
+    );
 
     return rows.map(row => mapGroupRow(row, memberIdsByGroup.get(row.id) ?? []));
 };
@@ -105,11 +94,7 @@ export const getScriptCharacterGroupById = async (
     const rows = await db
         .select(groupSelectFields)
         .from(scriptCharacters)
-        .where(and(
-            eq(scriptCharacters.scriptId, input.scriptId),
-            eq(scriptCharacters.id, input.groupId),
-            eq(scriptCharacters.kind, 'group'),
-        ))
+        .where(and(eq(scriptCharacters.scriptId, input.scriptId), eq(scriptCharacters.id, input.groupId), eq(scriptCharacters.kind, 'group')))
         .limit(1);
     const row = rows[0];
 
@@ -138,60 +123,51 @@ export const createScriptCharacterGroup = async (db: DbClient, input: CreateScri
     });
 };
 
-export const deleteScriptCharacterGroup = async (
-    db: DbClient,
-    input: Pick<ScriptCharacterGroupUpdateInput, 'scriptId' | 'groupId'>,
-) => {
-    await db.delete(scriptCharacters).where(and(
-        eq(scriptCharacters.scriptId, input.scriptId),
-        eq(scriptCharacters.id, input.groupId),
-        eq(scriptCharacters.kind, 'group'),
-    ));
+export const deleteScriptCharacterGroup = async (db: DbClient, input: Pick<ScriptCharacterGroupUpdateInput, 'scriptId' | 'groupId'>) => {
+    await db
+        .delete(scriptCharacters)
+        .where(and(eq(scriptCharacters.scriptId, input.scriptId), eq(scriptCharacters.id, input.groupId), eq(scriptCharacters.kind, 'group')));
 };
 
-export const renameScriptCharacterGroup = async (
-    db: DbClient,
-    input: RenameScriptCharacterGroupInput,
-) => {
-    await db.update(scriptCharacters).set({
-        characterKey: input.characterKey,
-        updatedAt: input.updatedAt,
-    }).where(and(
-        eq(scriptCharacters.scriptId, input.scriptId),
-        eq(scriptCharacters.id, input.groupId),
-        eq(scriptCharacters.kind, 'group'),
-    ));
+export const renameScriptCharacterGroup = async (db: DbClient, input: RenameScriptCharacterGroupInput) => {
+    await db
+        .update(scriptCharacters)
+        .set({
+            characterKey: input.characterKey,
+            updatedAt: input.updatedAt,
+        })
+        .where(and(eq(scriptCharacters.scriptId, input.scriptId), eq(scriptCharacters.id, input.groupId), eq(scriptCharacters.kind, 'group')));
 };
 
-export const setScriptCharacterGroupColor = async (
-    db: DbClient,
-    input: SetScriptCharacterGroupColorInput,
-) => {
-    await db.update(scriptCharacters).set({
-        colorHex: input.colorHex,
-        updatedAt: input.updatedAt,
-    }).where(and(
-        eq(scriptCharacters.scriptId, input.scriptId),
-        eq(scriptCharacters.id, input.groupId),
-        eq(scriptCharacters.kind, 'group'),
-    ));
+export const setScriptCharacterGroupColor = async (db: DbClient, input: SetScriptCharacterGroupColorInput) => {
+    await db
+        .update(scriptCharacters)
+        .set({
+            colorHex: input.colorHex,
+            updatedAt: input.updatedAt,
+        })
+        .where(and(eq(scriptCharacters.scriptId, input.scriptId), eq(scriptCharacters.id, input.groupId), eq(scriptCharacters.kind, 'group')));
 };
 
-export const replaceScriptCharacterGroupMembers = async (
-    db: DbClient,
-    input: {groupId: string, memberIds: string[]},
-) => {
-    await db.delete(scriptCharacterGroupMembers).where(eq(
-        scriptCharacterGroupMembers.groupId,
-        input.groupId,
-    ));
+export const insertScriptCharacterGroupMembers = async (db: DbClient, rows: {groupId: string; characterId: string}[]) => {
+    if (rows.length === 0) {
+        return;
+    }
+
+    await db.insert(scriptCharacterGroupMembers).values(rows);
+};
+
+export const replaceScriptCharacterGroupMembers = async (db: DbClient, input: {groupId: string; memberIds: string[]}) => {
+    await db.delete(scriptCharacterGroupMembers).where(eq(scriptCharacterGroupMembers.groupId, input.groupId));
 
     if (input.memberIds.length === 0) {
         return;
     }
 
-    await db.insert(scriptCharacterGroupMembers).values(input.memberIds.map(characterId => ({
-        groupId: input.groupId,
-        characterId,
-    })));
+    await db.insert(scriptCharacterGroupMembers).values(
+        input.memberIds.map(characterId => ({
+            groupId: input.groupId,
+            characterId,
+        })),
+    );
 };

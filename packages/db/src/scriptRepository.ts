@@ -2,6 +2,7 @@ import type {EditorSettingsOverride, ScriptDocument, TitlePageSettings} from '@s
 
 import type {ReactiveQuerySource} from './reactive';
 import type {ScriptPackageSource} from './scriptPackageSource';
+import type {ScriptPackageWrite} from './scriptPackageWrite';
 import type {
     MusicAttachmentRole,
     ScriptAttachment,
@@ -16,6 +17,7 @@ import type {
 } from './types';
 
 export type {ScriptCharacterGenderOption, ScriptCharacterGroupRef, ScriptCharacterRef} from './types';
+export type {ScriptPackageWrite} from './scriptPackageWrite';
 
 export interface ListScriptsOptions {
     limit?: number;
@@ -174,6 +176,7 @@ export interface ScriptRepository {
     getAttachmentBlob(storageKey: string): Promise<Blob | null>;
     createScript(title: string, initialContent?: ScriptDocument): Promise<string>;
     createScriptWithId(input: CreateScriptWithIdInput): Promise<void>;
+    createScriptFromPackage(input: ScriptPackageWrite): Promise<void>;
     renameScript(scriptId: string, input: RenameScriptInput): Promise<void>;
     renameScriptTitle(scriptId: string, title: string): Promise<void>;
     duplicateScript(sourceScriptId: string, input: DuplicateScriptInput): Promise<string>;

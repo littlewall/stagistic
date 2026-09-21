@@ -78,6 +78,82 @@ export const readScriptSettings = async (db: DbClient, scriptId: string): Promis
     return Object.keys(settings).length > 0 ? settings : null;
 };
 
+export const writeScriptSettingsTx = async (tx: DbClient, scriptId: string, settings: EditorSettingsOverride, now: number): Promise<void> => {
+    const headerFooterRows = (['header', 'footer'] as const).flatMap(area =>
+        ALIGNMENTS.flatMap(alignment => {
+            const cell = settings.headerFooter?.[area]?.[alignment];
+
+            return cell
+                ? [
+                      {
+                          id: uuidv7(),
+                          scriptId,
+                          area,
+                          alignment,
+                          textContent: cell.text ?? '',
+                          isBold: cell.isBold ?? false,
+                          isItalic: cell.isItalic ?? false,
+                          isUnderline: cell.isUnderline ?? false,
+                          isHiddenInEditor: cell.isHiddenInEditor ?? false,
+                          createdAt: now,
+                          updatedAt: now,
+                      },
+                  ]
+                : [];
+        }),
+    );
+
+    await dbQueries.deleteScriptSettings(tx, scriptId);
+
+    if (settings.page || settings.typography) {
+        await dbQueries.insertScriptPageLayoutSettings(tx, {
+            scriptId,
+            ...settings.page,
+            fontSizePx: settings.typography?.fontSizePx,
+            lineHeight: settings.typography?.lineHeight,
+            createdAt: now,
+            updatedAt: now,
+        });
+    }
+
+    if (settings.visual) {
+        await dbQueries.insertScriptVisualPreferences(tx, {
+            scriptId,
+            characterColorSaturation: settings.visual.characterColorSaturation,
+            createdAt: now,
+            updatedAt: now,
+        });
+    }
+
+    if (settings.structure) {
+        await dbQueries.insertScriptStructureSettings(tx, {
+            scriptId,
+            actLinesBefore: settings.structure.actDisplay?.linesBefore,
+            actLinesAfter: settings.structure.actDisplay?.linesAfter,
+            createdAt: now,
+            updatedAt: now,
+        });
+    }
+
+    if (settings.initialPages) {
+        await dbQueries.insertScriptInitialPagesSettings(tx, {
+            scriptId,
+            castOrderBy: settings.initialPages.castAndPlace?.castOrderBy,
+            showOutline: settings.initialPages.castAndPlace?.showOutline,
+            showCharactersInSongs: settings.initialPages.songs?.showCharactersInSongs,
+            createdAt: now,
+            updatedAt: now,
+        });
+    }
+
+    await dbQueries.insertScriptHeaderFooterSettings(tx, headerFooterRows);
+    await dbQueries.replaceScriptConfigBlocks(tx, {
+        scriptId,
+        rows: buildConfigRows(scriptId, settings, now),
+    });
+    await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+};
+
 export const createSettingsHandlers = ({getDb, recordOutbox, syncDb}: CreateSettingsHandlersArgs): SettingsHandlers => {
     const loadScriptSettings: SettingsHandlers['loadScriptSettings'] = async scriptId => {
         const db = await getDb();
@@ -172,80 +248,9 @@ export const createSettingsHandlers = ({getDb, recordOutbox, syncDb}: CreateSett
     const saveScriptSettings: SettingsHandlers['saveScriptSettings'] = async (scriptId, settings) => {
         const db = await getDb();
         const now = Date.now();
-        const headerFooterRows = (['header', 'footer'] as const).flatMap(area =>
-            ALIGNMENTS.flatMap(alignment => {
-                const cell = settings.headerFooter?.[area]?.[alignment];
-
-                return cell
-                    ? [
-                          {
-                              id: uuidv7(),
-                              scriptId,
-                              area,
-                              alignment,
-                              textContent: cell.text ?? '',
-                              isBold: cell.isBold ?? false,
-                              isItalic: cell.isItalic ?? false,
-                              isUnderline: cell.isUnderline ?? false,
-                              isHiddenInEditor: cell.isHiddenInEditor ?? false,
-                              createdAt: now,
-                              updatedAt: now,
-                          },
-                      ]
-                    : [];
-            }),
-        );
 
         await db.transaction(async tx => {
-            await dbQueries.deleteScriptSettings(tx, scriptId);
-
-            if (settings.page || settings.typography) {
-                await dbQueries.insertScriptPageLayoutSettings(tx, {
-                    scriptId,
-                    ...settings.page,
-                    fontSizePx: settings.typography?.fontSizePx,
-                    lineHeight: settings.typography?.lineHeight,
-                    createdAt: now,
-                    updatedAt: now,
-                });
-            }
-
-            if (settings.visual) {
-                await dbQueries.insertScriptVisualPreferences(tx, {
-                    scriptId,
-                    characterColorSaturation: settings.visual.characterColorSaturation,
-                    createdAt: now,
-                    updatedAt: now,
-                });
-            }
-
-            if (settings.structure) {
-                await dbQueries.insertScriptStructureSettings(tx, {
-                    scriptId,
-                    actLinesBefore: settings.structure.actDisplay?.linesBefore,
-                    actLinesAfter: settings.structure.actDisplay?.linesAfter,
-                    createdAt: now,
-                    updatedAt: now,
-                });
-            }
-
-            if (settings.initialPages) {
-                await dbQueries.insertScriptInitialPagesSettings(tx, {
-                    scriptId,
-                    castOrderBy: settings.initialPages.castAndPlace?.castOrderBy,
-                    showOutline: settings.initialPages.castAndPlace?.showOutline,
-                    showCharactersInSongs: settings.initialPages.songs?.showCharactersInSongs,
-                    createdAt: now,
-                    updatedAt: now,
-                });
-            }
-
-            await dbQueries.insertScriptHeaderFooterSettings(tx, headerFooterRows);
-            await dbQueries.replaceScriptConfigBlocks(tx, {
-                scriptId,
-                rows: buildConfigRows(scriptId, settings, now),
-            });
-            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
+            await writeScriptSettingsTx(tx, scriptId, settings, now);
             await recordOutbox(
                 {
                     scriptId,

@@ -8,6 +8,17 @@ export * as dbQueries from './queries';
 export * from './reactive';
 export {createLocalPgliteRepository, type LocalPgliteRepositoryDeps} from './repo/createLocalPgliteRepository';
 export type {ScriptPackageSource} from './scriptPackageSource';
+export type {
+    ScriptPackageWrite,
+    ScriptPackageWriteAttachment,
+    ScriptPackageWriteBinding,
+    ScriptPackageWriteCharacter,
+    ScriptPackageWriteGender,
+    ScriptPackageWriteGroup,
+    ScriptPackageWriteLocation,
+    ScriptPackageWriteMusic,
+    ScriptPackageWriteScene,
+} from './scriptPackageWrite';
 export {
     createProjectedTableDocumentSource,
     createSqlScriptDocumentProjectionWriter,

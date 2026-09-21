@@ -10,6 +10,7 @@ import {createCharacterHandlers} from './characters';
 import {createSettingsHandlers} from './config';
 import {createContentHandlers} from './content';
 import {createLocalPgliteReactiveSources} from './createLocalPgliteReactiveSources';
+import {createImportPackageHandler} from './importPackage';
 import {createLocationHandlers} from './locations';
 import {createMusicHandlers} from './music';
 import {createOutboxRecorder} from './outbox';
@@ -42,6 +43,10 @@ export const createLocalPgliteRepository = ({getLocalDb, syncToFs, fileStorage}:
     const music = createMusicHandlers(mutationDeps);
     const locations = createLocationHandlers(mutationDeps);
     const attachments = createAttachmentHandlers({
+        ...mutationDeps,
+        fileStorage,
+    });
+    const importPackage = createImportPackageHandler({
         ...mutationDeps,
         fileStorage,
     });
@@ -92,6 +97,7 @@ export const createLocalPgliteRepository = ({getLocalDb, syncToFs, fileStorage}:
         },
         createScript: (title, initialContent) => scripts.create(title, initialContent),
         createScriptWithId: input => scripts.createWithId(input),
+        createScriptFromPackage: input => importPackage.createScriptFromPackage(input),
         renameScript: (scriptId, input) => scripts.rename(scriptId, input),
         renameScriptTitle: (scriptId, title) => scripts.renameTitle(scriptId, title),
         duplicateScript: (scriptId, input) => scripts.duplicate(scriptId, input),
