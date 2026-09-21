@@ -1,17 +1,8 @@
-import {
-    act,
-    type Dispatch,
-    type SetStateAction,
-} from 'react';
+import type {ScriptRepository} from '@stagistic/app-core';
+import {act, type Dispatch, type SetStateAction} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import type {NavigateFunction} from 'react-router-dom';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-    vi,
-} from 'vite-plus/test';
+import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
 
 import {useGlobalModalMutations} from './useGlobalModalMutations';
 
@@ -59,6 +50,7 @@ describe('useGlobalModalMutations', () => {
                     duplicateScript: () => Promise.resolve('script-copy'),
                     deleteScript: () => Promise.resolve(),
                 },
+                repository: {} as ScriptRepository,
                 saveTitlePage: () => Promise.resolve(),
                 navigate,
                 addToast: vi.fn(),
@@ -68,6 +60,7 @@ describe('useGlobalModalMutations', () => {
                 setNewScriptTransitionPath,
                 setIsImportOpen: noopSetter,
                 setIsImportLoading: noopSetter,
+                setIsDownloadingBackup: noopSetter,
                 setPrefilledImport: noopSetter,
                 setScriptToDelete: noopSetter,
                 setIsDeleting: noopSetter,

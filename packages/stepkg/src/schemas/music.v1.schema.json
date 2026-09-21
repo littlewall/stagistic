@@ -1,0 +1,8 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:stagistic:stepkg:music:v1",
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["items"],
+    "properties": {"items": {"type": "array", "items": {"type": "object", "additionalProperties": false, "required": ["id", "sceneNumber", "indexInScene", "mode", "title", "kind", "startBlockId", "endBlockId", "createdAt", "updatedAt"], "properties": {"id": {"type": "string"}, "sceneNumber": {"type": "number"}, "indexInScene": {"type": "number"}, "mode": {"type": "string"}, "title": {"type": "string"}, "kind": {"type": ["string", "null"]}, "startBlockId": {"type": ["string", "null"]}, "endBlockId": {"type": ["string", "null"]}, "createdAt": {"type": "string", "format": "date-time"}, "updatedAt": {"type": "string", "format": "date-time"}}}}}
+}

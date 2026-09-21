@@ -1,0 +1,16 @@
+{
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$id": "urn:stagistic:stepkg:settings:v1",
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+        "page": {"type": "object", "additionalProperties": false, "properties": {"widthPx": {"type": "number"}, "heightPx": {"type": "number"}, "marginTopPx": {"type": "number"}, "marginRightPx": {"type": "number"}, "marginBottomPx": {"type": "number"}, "marginLeftPx": {"type": "number"}, "pageGapPx": {"type": "number"}, "pageBreakBackground": {"type": "string"}, "contentMarginTopPx": {"type": "number"}, "contentMarginBottomPx": {"type": "number"}}},
+        "typography": {"type": "object", "additionalProperties": false, "properties": {"fontSizePx": {"type": "number"}, "lineHeight": {"type": "number"}}},
+        "visual": {"type": "object", "additionalProperties": false, "properties": {"characterColorSaturation": {"type": "number"}}},
+        "structure": {"type": "object", "additionalProperties": false, "properties": {"actDisplay": {"type": "object", "additionalProperties": false, "properties": {"linesBefore": {"type": "number"}, "linesAfter": {"type": "number"}}}}},
+        "initialPages": {"type": "object", "additionalProperties": false, "properties": {"castAndPlace": {"type": "object", "additionalProperties": false, "properties": {"castOrderBy": {"enum": ["name", "appearance"]}, "showOutline": {"type": "boolean"}}}, "songs": {"type": "object", "additionalProperties": false, "properties": {"showCharactersInSongs": {"type": "boolean"}}}}},
+        "headerFooter": {"type": "object", "additionalProperties": false, "properties": {"header": {"$ref": "#/$defs/row"}, "footer": {"$ref": "#/$defs/row"}}},
+        "blocks": {"type": "object", "additionalProperties": {"type": "object", "additionalProperties": false, "properties": {"spacingBeforeEm": {"type": "number"}, "spacingAfterEm": {"type": "number"}, "indentLeftChars": {"type": "number"}, "indentRightChars": {"type": "number"}, "indentLeftPx": {"type": "number"}, "indentRightPx": {"type": "number"}, "fontSizePx": {"type": "number"}, "lineHeight": {"type": "number"}, "shortcut": {"type": "string"}, "nextElement": {"type": "string"}, "textAlign": {"type": "string"}, "casing": {"type": "string"}, "isBold": {"type": "boolean"}, "isItalic": {"type": "boolean"}, "isUnderline": {"type": "boolean"}, "sceneNumberFormat": {"type": "string"}}}}
+    },
+    "$defs": {"row": {"type": "object", "additionalProperties": false, "properties": {"left": {"$ref": "#/$defs/cell"}, "center": {"$ref": "#/$defs/cell"}, "right": {"$ref": "#/$defs/cell"}}}, "cell": {"type": "object", "additionalProperties": false, "properties": {"text": {"type": "string"}, "isBold": {"type": "boolean"}, "isItalic": {"type": "boolean"}, "isUnderline": {"type": "boolean"}, "isHiddenInEditor": {"type": "boolean"}}}}
+}

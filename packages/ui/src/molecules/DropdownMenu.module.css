@@ -1,0 +1,39 @@
+.popover {
+    padding: 0;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-popover);
+
+    &:focus-visible {
+        outline: none;
+    }
+}
+
+.menu {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 184px;
+    padding: var(--space-md);
+    font-size: var(--font-size-md);
+    outline: none;
+}
+
+.item,
+.dangerItem {
+    cursor: pointer;
+    padding: var(--space-md) var(--space-lg);
+    color: var(--color-text);
+    border-radius: var(--radius-md);
+    outline: none;
+
+    &[data-focused],
+    &[data-hovered] {
+        background: var(--state-hover);
+    }
+}
+
+.dangerItem {
+    color: var(--color-status-danger);
+}

@@ -1,39 +1,21 @@
 import {useScriptRepository} from '@stagistic/app-core';
-import {
-    type EditorMusicCreateRequest,
-    type EditorMusicRemoveRequest,
-    incrementRouteRenderCount,
-    ScriptEditor,
-} from '@stagistic/editor';
+import {type EditorMusicCreateRequest, type EditorMusicRemoveRequest, incrementRouteRenderCount, ScriptEditor} from '@stagistic/editor';
 import {resolveDraftDate} from '@stagistic/script';
 import {AppLayout, LoaderOverlay} from '@stagistic/ui';
-import {
-    useCallback,
-    useMemo,
-    useState,
-} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../useDocumentTitle';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
 import {DeferredScriptEditor} from './editor/DeferredScriptEditor';
-import {
-    AddMusicModal,
-    ScriptMusicSidebar,
-    UnassignMusicModal,
-} from './editor/music';
+import {AddMusicModal, ScriptMusicSidebar, UnassignMusicModal} from './editor/music';
 import {ConvertSceneHeadingModal} from './editor/scene/ConvertSceneHeadingModal';
 import {DeleteSceneHeadingModal} from './editor/scene/DeleteSceneHeadingModal';
 import {useSceneConversionState} from './editor/scene/useSceneConversionState';
 import {useSceneDeletionState} from './editor/scene/useSceneDeletionState';
-import {
-    type SidebarPanel,
-    useEditorSidebars,
-} from './editor/sidebar';
-import {
-    ScriptStructureSidebar,
-} from './editor/structure';
+import {type SidebarPanel, useEditorSidebars} from './editor/sidebar';
+import {ScriptStructureSidebar} from './editor/structure';
 import {useScriptCharacters} from './ScriptCharactersContext';
 import {ScriptSessionProvider} from './ScriptSessionContext';
 import {useScriptWorkspace} from './ScriptWorkspaceContext';
@@ -43,9 +25,7 @@ import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'var(--sidebar-width)';
 
-type AddMusicModalState =
-    | {source: 'sidebar'}
-    | {source: 'editor', request: EditorMusicCreateRequest};
+type AddMusicModalState = {source: 'sidebar'} | {source: 'editor'; request: EditorMusicCreateRequest};
 
 export const ScriptEditorRoute = () => {
     incrementRouteRenderCount();
@@ -82,33 +62,11 @@ export const ScriptEditorRoute = () => {
 
     const [addMusicModalState, setAddMusicModalState] = useState<AddMusicModalState | null>(null);
     const [removeMusicRequest, setRemoveMusicRequest] = useState<EditorMusicRemoveRequest | null>(null);
-    const {
-        pendingSceneDelete,
-        deleteSceneRequest,
-        requestDeleteScene,
-        closeSceneDeleteModal,
-        confirmDeleteScene,
-    } = useSceneDeletionState();
-    const {
-        pendingSceneConversion,
-        convertSceneRequest,
-        requestConvertScene,
-        closeSceneConvertModal,
-        confirmConvertScene,
-    } = useSceneConversionState();
-    const {
-        music,
-        createMusic,
-        unassignMusic,
-        markMusicAssigned,
-        markMusicUnassigned,
-        updateMusicRequest,
-    } = musicState;
+    const {pendingSceneDelete, deleteSceneRequest, requestDeleteScene, closeSceneDeleteModal, confirmDeleteScene} = useSceneDeletionState();
+    const {pendingSceneConversion, convertSceneRequest, requestConvertScene, closeSceneConvertModal, confirmConvertScene} = useSceneConversionState();
+    const {music, createMusic, unassignMusic, markMusicAssigned, markMusicUnassigned, updateMusicRequest} = musicState;
 
-    const displayedCurrentScript = useMemo(
-        () => currentScript ? {...currentScript, name: scriptTitleDraft} : null,
-        [currentScript, scriptTitleDraft],
-    );
+    const displayedCurrentScript = useMemo(() => (currentScript ? {...currentScript, name: scriptTitleDraft} : null), [currentScript, scriptTitleDraft]);
 
     const {
         getEditorValue,
@@ -117,13 +75,21 @@ export const ScriptEditorRoute = () => {
         handleEditorValueChange: handleResolvedEditorValueChange,
     } = useScriptCharacters();
 
-    const {handleMenuAction} = useScriptEditorHeaderActions({
+    const {handleMenuAction, isPreparingPackage} = useScriptEditorHeaderActions({
         navigate,
         currentScript: displayedCurrentScript,
         openSettingsModal,
         openAttributeManagerModal,
         getEditorValue,
         titlePage: titlePageDraft,
+        scriptRepository,
+        flushScript: async () => {
+            const editorValue = getEditorValue();
+
+            if (!editorValue || !(await handleManualSave(editorValue))) {
+                throw new Error('Could not flush script before export.');
+            }
+        },
     });
     const openAddMusicModal = useCallback(() => {
         setAddMusicModalState({source: 'sidebar'});
@@ -147,15 +113,18 @@ export const ScriptEditorRoute = () => {
     const handleRequestRemoveMusic = useCallback((request: EditorMusicRemoveRequest) => {
         setRemoveMusicRequest(request);
     }, []);
-    const handleCreateMusic = useCallback(async (input: Parameters<typeof createMusic>[0]) => {
-        const createdMusic = await createMusic(input);
+    const handleCreateMusic = useCallback(
+        async (input: Parameters<typeof createMusic>[0]) => {
+            const createdMusic = await createMusic(input);
 
-        if (createdMusic && addMusicModalState?.source === 'editor') {
-            addMusicModalState.request.complete(createdMusic);
-        }
+            if (createdMusic && addMusicModalState?.source === 'editor') {
+                addMusicModalState.request.complete(createdMusic);
+            }
 
-        return createdMusic;
-    }, [addMusicModalState, createMusic]);
+            return createdMusic;
+        },
+        [addMusicModalState, createMusic],
+    );
     const handleConfirmRemoveMusic = useCallback(async () => {
         if (!removeMusicRequest) {
             return;
@@ -168,55 +137,46 @@ export const ScriptEditorRoute = () => {
         setRemoveMusicRequest(null);
     }, [removeMusicRequest, unassignMusic]);
 
-    const sessionContextValue = useMemo(() => ({
-        currentScriptId,
-        scriptRepository,
-        resolvedScriptSettings,
-        indexSnapshot: initialIndexSnapshot ?? null,
-        handleAutoSave,
-    }), [
-        currentScriptId,
-        handleAutoSave,
-        initialIndexSnapshot,
-        resolvedScriptSettings,
-        scriptRepository,
-    ]);
+    const sessionContextValue = useMemo(
+        () => ({
+            currentScriptId,
+            scriptRepository,
+            resolvedScriptSettings,
+            indexSnapshot: initialIndexSnapshot ?? null,
+            handleAutoSave,
+        }),
+        [currentScriptId, handleAutoSave, initialIndexSnapshot, resolvedScriptSettings, scriptRepository],
+    );
 
-    const sidebarPanels = useMemo<readonly SidebarPanel[]>(() => [
-        {
-            id: 'structure',
-            label: 'Structure',
-            renderContent: header => <ScriptStructureSidebar header={header} />,
-        },
-        {
-            id: 'characters',
-            label: 'Characters',
-            renderContent: header => <ScriptCharactersSidebar header={header} />,
-        },
-        {
-            id: 'music',
-            label: 'Music',
-            renderContent: header => (
-                <ScriptMusicSidebar
-                    header={header}
-                    music={music}
-                    isLoading={musicState.isLoading}
-                    onAddMusic={openAddMusicModal}
-                    onUnassignMusic={unassignMusic}
-                />
-            ),
-        },
-    ], [
-        music,
-        openAddMusicModal,
-        unassignMusic,
-    ]);
-    const {
-        leftSidebarToggle,
-        rightSidebarToggle,
-        leftSidebar,
-        rightSidebar,
-    } = useEditorSidebars({
+    const sidebarPanels = useMemo<readonly SidebarPanel[]>(
+        () => [
+            {
+                id: 'structure',
+                label: 'Structure',
+                renderContent: header => <ScriptStructureSidebar header={header} />,
+            },
+            {
+                id: 'characters',
+                label: 'Characters',
+                renderContent: header => <ScriptCharactersSidebar header={header} />,
+            },
+            {
+                id: 'music',
+                label: 'Music',
+                renderContent: header => (
+                    <ScriptMusicSidebar
+                        header={header}
+                        music={music}
+                        isLoading={musicState.isLoading}
+                        onAddMusic={openAddMusicModal}
+                        onUnassignMusic={unassignMusic}
+                    />
+                ),
+            },
+        ],
+        [music, openAddMusicModal, unassignMusic],
+    );
+    const {leftSidebarToggle, rightSidebarToggle, leftSidebar, rightSidebar} = useEditorSidebars({
         panels: sidebarPanels,
         defaultLeftPanelId: 'structure',
         defaultRightPanelId: 'characters',
@@ -230,19 +190,14 @@ export const ScriptEditorRoute = () => {
      * later makes the script surface visibly rebuild.
      */
     if (!resolvedEditorInitialValue || !isEditorPresentationHydrated) {
-        return (
-            <LoaderOverlay
-                label="Preparing editor"
-                messages={['Loading editor settings']}
-            />
-        );
+        return <LoaderOverlay label="Preparing editor" messages={['Loading editor settings']} />;
     }
 
     return (
         <ScriptSessionProvider value={sessionContextValue}>
             <AppLayout
                 footer={null}
-                header={(
+                header={
                     displayedCurrentScript ? (
                         <ScriptEditorAppHeader
                             currentScript={displayedCurrentScript}
@@ -254,8 +209,9 @@ export const ScriptEditorRoute = () => {
                     ) : (
                         <AppHeader />
                     )
-                )}
+                }
             >
+                {isPreparingPackage ? <LoaderOverlay variant="scrim" label="Preparing package" messages={[]} /> : null}
                 {storageError ? (
                     <div role="alert" style={{padding: '12px 20px'}}>
                         {storageError}
@@ -300,18 +256,12 @@ export const ScriptEditorRoute = () => {
                         onRequestConvertScene: requestConvertScene,
                     }}
                 >
-                    <ScriptEditor.LeftSidebar>
-                        {leftSidebar}
-                    </ScriptEditor.LeftSidebar>
-                    <ScriptEditor.RightSidebar>
-                        {rightSidebar}
-                    </ScriptEditor.RightSidebar>
+                    <ScriptEditor.LeftSidebar>{leftSidebar}</ScriptEditor.LeftSidebar>
+                    <ScriptEditor.RightSidebar>{rightSidebar}</ScriptEditor.RightSidebar>
                 </DeferredScriptEditor>
                 <AddMusicModal
                     isOpen={addMusicModalState !== null}
-                    initialTitle={addMusicModalState?.source === 'editor'
-                        ? addMusicModalState.request.title
-                        : undefined}
+                    initialTitle={addMusicModalState?.source === 'editor' ? addMusicModalState.request.title : undefined}
                     onCancel={cancelAddMusicModal}
                     onClose={closeAddMusicModal}
                     onCreate={handleCreateMusic}
@@ -322,16 +272,8 @@ export const ScriptEditorRoute = () => {
                     onClose={() => setRemoveMusicRequest(null)}
                     onConfirm={handleConfirmRemoveMusic}
                 />
-                <DeleteSceneHeadingModal
-                    isOpen={pendingSceneDelete !== null}
-                    onClose={closeSceneDeleteModal}
-                    onConfirm={confirmDeleteScene}
-                />
-                <ConvertSceneHeadingModal
-                    isOpen={pendingSceneConversion !== null}
-                    onClose={closeSceneConvertModal}
-                    onConfirm={confirmConvertScene}
-                />
+                <DeleteSceneHeadingModal isOpen={pendingSceneDelete !== null} onClose={closeSceneDeleteModal} onConfirm={confirmDeleteScene} />
+                <ConvertSceneHeadingModal isOpen={pendingSceneConversion !== null} onClose={closeSceneConvertModal} onConfirm={confirmConvertScene} />
             </AppLayout>
         </ScriptSessionProvider>
     );

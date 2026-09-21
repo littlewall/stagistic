@@ -1,25 +1,17 @@
-import {
-    type ChangeEvent,
-    type FormEvent,
-    useCallback,
-    useEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
+import {type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
 
-import {
-    type DropEvent,
-    getFileBaseName,
-    isFileDropItem,
-    isStagisticFileName,
-    type SelectedFile,
-} from './model';
-import type {UseImportScriptModalStateArgs} from './types';
+import {classifyFileKind, type DropEvent, getFileBaseName, isFileDropItem, type SelectedFile} from './model';
+import type {StepkgPeekResult, UseImportScriptModalStateArgs} from './types';
+
+const UNSUPPORTED_FILE_ERROR = 'Only .stagistic or .stepkg files are supported.';
 
 export const useImportScriptModalState = ({
     isOpen,
-    onImport,
+    onImportStagistic,
+    onImportStepkgAsNew,
+    onReplaceWithStepkg,
+    onDownloadStepkgBackup,
+    onPeekStepkg,
     onPickFile,
     preselectedFile,
 }: UseImportScriptModalStateArgs) => {
@@ -27,14 +19,22 @@ export const useImportScriptModalState = ({
     const [name, setName] = useState('');
     const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
     const [fileError, setFileError] = useState<string | null>(null);
+    const [isPeeking, setIsPeeking] = useState(false);
+    const [stepkgPeek, setStepkgPeek] = useState<StepkgPeekResult | null>(null);
+    const [importChoice, setImportChoice] = useState<'new' | 'replace'>('new');
     const [isProcessing, setIsProcessing] = useState(false);
+    const [isDownloadingBackup, setIsDownloadingBackup] = useState(false);
 
     useEffect(() => {
         if (!isOpen) {
             setName('');
             setSelectedFile(null);
             setFileError(null);
+            setIsPeeking(false);
+            setStepkgPeek(null);
+            setImportChoice('new');
             setIsProcessing(false);
+            setIsDownloadingBackup(false);
 
             return;
         }
@@ -51,119 +51,128 @@ export const useImportScriptModalState = ({
             return;
         }
 
-        setSelectedFile({
-            name: preselectedFile.fileName,
-            text: preselectedFile.text,
-        });
+        setSelectedFile({kind: 'stagistic', name: preselectedFile.fileName, text: preselectedFile.text});
         setFileError(null);
-        setName(previous => {
-            if (previous.trim() === '') {
-                return getFileBaseName(preselectedFile.fileName);
-            }
-
-            return previous;
-        });
+        setStepkgPeek(null);
+        setImportChoice('new');
+        setName(previous => (previous.trim() === '' ? getFileBaseName(preselectedFile.fileName) : previous));
     }, [isOpen, preselectedFile]);
 
     const fileLabel = useMemo(() => {
         if (!selectedFile) {
-            return 'Drop your .stagistic file here';
+            return 'Drop your .stagistic or .stepkg file here';
         }
 
         return selectedFile.name;
     }, [selectedFile]);
 
-    const handleSubmit = useCallback(async (event: FormEvent) => {
-        event.preventDefault();
+    const peekStepkg = useCallback(
+        async (bytes: Uint8Array) => {
+            setIsPeeking(true);
 
-        if (!selectedFile || isProcessing) {
-            setFileError('Please drop a .stagistic file first.');
+            try {
+                const result = await onPeekStepkg(bytes);
 
-            return;
-        }
+                setIsPeeking(false);
 
-        const fileText = selectedFile.text ?? (selectedFile.file
-            ? await selectedFile.file.text()
-            : null);
+                if (!result.ok) {
+                    setFileError(result.message);
+                    setStepkgPeek(null);
 
-        if (!fileText) {
-            setFileError('Please drop a .stagistic file first.');
+                    return;
+                }
 
-            return;
-        }
-
-        setFileError(null);
-        setIsProcessing(true);
-
-        try {
-            await onImport({
-                name,
-                fileName: selectedFile.name,
-                text: fileText,
-            });
-        } finally {
-            setIsProcessing(false);
-        }
-    }, [
-        isProcessing,
-        name,
-        onImport,
-        selectedFile,
-    ]);
-
-    const applyFile = useCallback((file: SelectedFile) => {
-        setSelectedFile(file);
-        setFileError(null);
-        setName(previous => {
-            if (previous.trim() === '') {
-                return getFileBaseName(file.name);
+                setStepkgPeek(result);
+                setImportChoice('new');
+                setName(previous => (previous.trim() === '' ? result.packageTitle : previous));
+            } catch {
+                setIsPeeking(false);
+                setFileError('Failed to read the package.');
+                setStepkgPeek(null);
             }
+        },
+        [onPeekStepkg],
+    );
 
-            return previous;
-        });
+    const applyStagisticFile = useCallback((file: {name: string; file?: File; text?: string}) => {
+        setSelectedFile({kind: 'stagistic', ...file});
+        setFileError(null);
+        setStepkgPeek(null);
+        setImportChoice('new');
+        setName(previous => (previous.trim() === '' ? getFileBaseName(file.name) : previous));
     }, []);
+
+    const applyStepkgFile = useCallback(
+        (fileName: string, bytes: Uint8Array) => {
+            setSelectedFile({kind: 'stepkg', name: fileName, bytes});
+            setFileError(null);
+            setStepkgPeek(null);
+            void peekStepkg(bytes);
+        },
+        [peekStepkg],
+    );
 
     const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);
     }, []);
 
-    const handleDrop = useCallback(async (event: DropEvent) => {
-        const item = event.items.find(isFileDropItem);
+    const handleDrop = useCallback(
+        async (event: DropEvent) => {
+            const item = event.items.find(isFileDropItem);
 
-        if (!item) {
-            setFileError('Please drop a .stagistic file.');
+            if (!item) {
+                setFileError('Please drop a .stagistic or .stepkg file.');
 
-            return;
-        }
+                return;
+            }
 
-        const file = await item.getFile();
+            const file = await item.getFile();
+            const kind = classifyFileKind(file.name);
 
-        if (!isStagisticFileName(file.name)) {
-            setFileError('Only .stagistic files are supported.');
+            if (kind === 'stagistic') {
+                applyStagisticFile({name: file.name, file});
+
+                return;
+            }
+
+            if (kind === 'stepkg') {
+                applyStepkgFile(file.name, new Uint8Array(await file.arrayBuffer()));
+
+                return;
+            }
+
+            setFileError(UNSUPPORTED_FILE_ERROR);
             setSelectedFile(null);
+        },
+        [applyStagisticFile, applyStepkgFile],
+    );
 
-            return;
-        }
+    const handleFileSelect = useCallback(
+        (files: FileList | null) => {
+            if (!files || files.length === 0) {
+                return;
+            }
 
-        applyFile({name: file.name, file});
-    }, [applyFile]);
+            const file = files[0];
+            const kind = file ? classifyFileKind(file.name) : null;
 
-    const handleFileSelect = useCallback((files: FileList | null) => {
-        if (!files || files.length === 0) {
-            return;
-        }
+            if (!file || !kind) {
+                setFileError(UNSUPPORTED_FILE_ERROR);
+                setSelectedFile(null);
 
-        const file = files[0];
+                return;
+            }
 
-        if (!file || !isStagisticFileName(file.name)) {
-            setFileError('Only .stagistic files are supported.');
-            setSelectedFile(null);
+            if (kind === 'stagistic') {
+                applyStagisticFile({name: file.name, file});
 
-            return;
-        }
+                return;
+            }
 
-        applyFile({name: file.name, file});
-    }, [applyFile]);
+            void file.arrayBuffer().then(buffer => applyStepkgFile(file.name, new Uint8Array(buffer)));
+        },
+        [applyStagisticFile, applyStepkgFile],
+    );
 
     const handlePickFile = useCallback(async () => {
         if (!onPickFile) {
@@ -177,12 +186,106 @@ export const useImportScriptModalState = ({
                 return;
             }
 
-            applyFile({name: picked.fileName, text: picked.text});
+            applyStagisticFile({name: picked.fileName, text: picked.text});
         } catch (error) {
             console.error('Failed to pick file', error);
             setFileError('Failed to open the file picker.');
         }
-    }, [applyFile, onPickFile]);
+    }, [applyStagisticFile, onPickFile]);
+
+    const handleChoiceChange = useCallback((choice: 'new' | 'replace') => {
+        setImportChoice(choice);
+    }, []);
+
+    const showNameField =
+        selectedFile?.kind === 'stagistic' ||
+        (selectedFile?.kind === 'stepkg' && stepkgPeek?.ok === true && (stepkgPeek.existingLocalTitle === null || importChoice === 'new'));
+    const showChoiceToggle = selectedFile?.kind === 'stepkg' && stepkgPeek?.ok === true && stepkgPeek.existingLocalTitle !== null;
+    const showReplacePanel = showChoiceToggle && importChoice === 'replace';
+    const canSubmitNew =
+        !isProcessing &&
+        !isPeeking &&
+        ((selectedFile?.kind === 'stagistic' && Boolean(selectedFile.text || selectedFile.file)) ||
+            (selectedFile?.kind === 'stepkg' && Boolean(selectedFile.bytes) && stepkgPeek?.ok === true && !showReplacePanel));
+
+    const handleSubmit = useCallback(
+        async (event: FormEvent) => {
+            event.preventDefault();
+
+            if (!selectedFile || isProcessing) {
+                return;
+            }
+
+            if (selectedFile.kind === 'stepkg' && showReplacePanel) {
+                return;
+            }
+
+            if (selectedFile.kind === 'stagistic') {
+                const fileText = selectedFile.text ?? (selectedFile.file ? await selectedFile.file.text() : null);
+
+                if (!fileText) {
+                    setFileError('Please drop a .stagistic file first.');
+
+                    return;
+                }
+
+                setFileError(null);
+                setIsProcessing(true);
+
+                try {
+                    await onImportStagistic({name, fileName: selectedFile.name, text: fileText});
+                } finally {
+                    setIsProcessing(false);
+                }
+
+                return;
+            }
+
+            if (!selectedFile.bytes) {
+                setFileError('Please drop a .stepkg file first.');
+
+                return;
+            }
+
+            setFileError(null);
+            setIsProcessing(true);
+
+            try {
+                await onImportStepkgAsNew({fileName: selectedFile.name, bytes: selectedFile.bytes, title: name});
+            } finally {
+                setIsProcessing(false);
+            }
+        },
+        [isProcessing, name, onImportStagistic, onImportStepkgAsNew, selectedFile, showReplacePanel],
+    );
+
+    const handleReplaceConfirm = useCallback(async () => {
+        if (!selectedFile || selectedFile.kind !== 'stepkg' || !selectedFile.bytes || isProcessing) {
+            return;
+        }
+
+        setIsProcessing(true);
+
+        try {
+            await onReplaceWithStepkg({fileName: selectedFile.name, bytes: selectedFile.bytes});
+        } finally {
+            setIsProcessing(false);
+        }
+    }, [isProcessing, onReplaceWithStepkg, selectedFile]);
+
+    const handleDownloadBackup = useCallback(async () => {
+        if (!stepkgPeek?.ok || isDownloadingBackup) {
+            return;
+        }
+
+        setIsDownloadingBackup(true);
+
+        try {
+            await onDownloadStepkgBackup(stepkgPeek.scriptId);
+        } finally {
+            setIsDownloadingBackup(false);
+        }
+    }, [isDownloadingBackup, onDownloadStepkgBackup, stepkgPeek]);
 
     return {
         inputRef,
@@ -190,11 +293,22 @@ export const useImportScriptModalState = ({
         selectedFile,
         fileLabel,
         fileError,
+        isPeeking,
+        stepkgPeek,
+        importChoice,
         isProcessing,
+        isDownloadingBackup,
+        showNameField,
+        showChoiceToggle,
+        showReplacePanel,
+        canSubmitNew,
         handleSubmit,
         handleNameChange,
         handleDrop,
         handleFileSelect,
         handlePickFile,
+        handleChoiceChange,
+        handleReplaceConfirm,
+        handleDownloadBackup,
     };
 };

@@ -1,19 +1,11 @@
 import {useRef} from 'react';
-import {
-    Button,
-    FileTrigger,
-    useDrop,
-} from 'react-aria-components';
+import {Button, FileTrigger, useDrop} from 'react-aria-components';
 
-import styles from '../ImportScriptModal.module.css';
 import type {ImportDropZoneProps} from './types';
 
-export const ImportDropZone = ({
-    fileLabel,
-    onDrop,
-    onFileSelect,
-    onPickFile,
-}: ImportDropZoneProps) => {
+import styles from '../ImportScriptModal.module.css';
+
+export const ImportDropZone = ({fileLabel, hint, isFileSelected = false, acceptedExtensions, onDrop, onFileSelect, onPickFile}: ImportDropZoneProps) => {
     const dropZoneRef = useRef<HTMLDivElement | null>(null);
     const {dropProps, isDropTarget} = useDrop({
         ref: dropZoneRef,
@@ -36,7 +28,9 @@ export const ImportDropZone = ({
                     }}
                 >
                     <span className={styles.dropZoneLabel}>{fileLabel}</span>
-                    <span className={styles.dropZoneHint}>Drop a .stagistic file or click to browse.</span>
+                    <span className={styles.dropZoneHint} data-selected={isFileSelected || undefined}>
+                        {hint}
+                    </span>
                 </Button>
             </div>
         );
@@ -44,13 +38,12 @@ export const ImportDropZone = ({
 
     return (
         <div {...dropZoneProps} ref={dropZoneRef}>
-            <FileTrigger
-                acceptedFileTypes={['.stagistic']}
-                onSelect={onFileSelect}
-            >
+            <FileTrigger acceptedFileTypes={[...acceptedExtensions]} onSelect={onFileSelect}>
                 <Button className={styles.dropZoneTrigger}>
                     <span className={styles.dropZoneLabel}>{fileLabel}</span>
-                    <span className={styles.dropZoneHint}>Drop a .stagistic file or click to browse.</span>
+                    <span className={styles.dropZoneHint} data-selected={isFileSelected || undefined}>
+                        {hint}
+                    </span>
                 </Button>
             </FileTrigger>
         </div>

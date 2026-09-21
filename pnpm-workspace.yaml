@@ -11,3 +11,8 @@ minimumReleaseAgeExclude:
     - '@astrojs/internal-helpers@0.10.2'
     - '@astrojs/markdown-satteri@0.3.5'
     - astro@7.1.5
+    # Tauri 3 next (alpha) — freshly published, allow ahead of the min-age gate.
+    - '@tauri-apps/api'
+    - '@tauri-apps/cli'
+    - '@tauri-apps/plugin-dialog'
+    - '@tauri-apps/plugin-fs'

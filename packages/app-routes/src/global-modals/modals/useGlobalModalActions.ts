@@ -1,38 +1,18 @@
-import {
-    useCallback,
-    useMemo,
-    useState,
-} from 'react';
+import {useCallback, useMemo, useState} from 'react';
 
-import type {
-    GlobalModalActions,
-    ScriptImportFile,
-    ScriptToDelete,
-    ScriptToDuplicate,
-    ScriptToRename,
-    UseGlobalModalActionsArgs,
-} from './globalModalTypes';
+import type {GlobalModalActions, ScriptImportFile, ScriptToDelete, ScriptToDuplicate, ScriptToRename, UseGlobalModalActionsArgs} from './globalModalTypes';
 import {useGlobalModalMutations} from './useGlobalModalMutations';
 
-export type {
-    ScriptImportFile,
-    ScriptToDelete,
-    ScriptToDuplicate,
-    ScriptToRename,
-} from './globalModalTypes';
+export type {ScriptImportFile, ScriptToDelete, ScriptToDuplicate, ScriptToRename} from './globalModalTypes';
 
-export const useGlobalModalActions = ({
-    scriptActions,
-    saveTitlePage,
-    navigation,
-    notifications,
-}: UseGlobalModalActionsArgs): GlobalModalActions => {
+export const useGlobalModalActions = ({scriptActions, repository, saveTitlePage, navigation, notifications}: UseGlobalModalActionsArgs): GlobalModalActions => {
     const {navigate} = navigation;
     const {addToast} = notifications;
     const [isNewScriptOpen, setIsNewScriptOpen] = useState(false);
     const [newScriptTransitionPath, setNewScriptTransitionPath] = useState<string | null>(null);
     const [isImportOpen, setIsImportOpen] = useState(false);
     const [isImportLoading, setIsImportLoading] = useState(false);
+    const [isDownloadingBackup, setIsDownloadingBackup] = useState(false);
     const [prefilledImport, setPrefilledImport] = useState<ScriptImportFile | null>(null);
     const [scriptToDelete, setScriptToDelete] = useState<ScriptToDelete | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
@@ -78,6 +58,7 @@ export const useGlobalModalActions = ({
     }, [isDuplicating]);
     const mutations = useGlobalModalMutations({
         scriptActions,
+        repository,
         saveTitlePage,
         navigate,
         addToast,
@@ -87,6 +68,7 @@ export const useGlobalModalActions = ({
         setNewScriptTransitionPath,
         setIsImportOpen,
         setIsImportLoading,
+        setIsDownloadingBackup,
         setPrefilledImport,
         setScriptToDelete,
         setIsDeleting,
@@ -96,57 +78,62 @@ export const useGlobalModalActions = ({
         setIsDuplicating,
     });
 
-    return useMemo(() => ({
-        isNewScriptOpen,
-        newScriptTransitionPath,
-        isImportOpen,
-        prefilledImport,
-        isImportLoading,
-        scriptToDelete,
-        isDeleteScriptOpen: scriptToDelete !== null,
-        isDeleting,
-        scriptToRename,
-        isRenameScriptOpen: scriptToRename !== null,
-        isRenaming,
-        scriptToDuplicate,
-        isDuplicateScriptOpen: scriptToDuplicate !== null,
-        isDuplicating,
-        openNewScript,
-        closeNewScript,
-        completeNewScriptTransition,
-        openImportScript,
-        closeImportScript,
-        openDeleteScript,
-        closeDeleteScript,
-        openRenameScript,
-        closeRenameScript,
-        openDuplicateScript,
-        closeDuplicateScript,
-        setPrefilledImport,
-        ...mutations,
-    }), [
-        closeDeleteScript,
-        closeDuplicateScript,
-        closeImportScript,
-        closeNewScript,
-        completeNewScriptTransition,
-        closeRenameScript,
-        isDeleting,
-        isDuplicating,
-        isImportLoading,
-        isImportOpen,
-        isNewScriptOpen,
-        newScriptTransitionPath,
-        isRenaming,
-        mutations,
-        openDeleteScript,
-        openDuplicateScript,
-        openImportScript,
-        openNewScript,
-        openRenameScript,
-        prefilledImport,
-        scriptToDelete,
-        scriptToDuplicate,
-        scriptToRename,
-    ]);
+    return useMemo(
+        () => ({
+            isNewScriptOpen,
+            newScriptTransitionPath,
+            isImportOpen,
+            prefilledImport,
+            isImportLoading,
+            isDownloadingBackup,
+            scriptToDelete,
+            isDeleteScriptOpen: scriptToDelete !== null,
+            isDeleting,
+            scriptToRename,
+            isRenameScriptOpen: scriptToRename !== null,
+            isRenaming,
+            scriptToDuplicate,
+            isDuplicateScriptOpen: scriptToDuplicate !== null,
+            isDuplicating,
+            openNewScript,
+            closeNewScript,
+            completeNewScriptTransition,
+            openImportScript,
+            closeImportScript,
+            openDeleteScript,
+            closeDeleteScript,
+            openRenameScript,
+            closeRenameScript,
+            openDuplicateScript,
+            closeDuplicateScript,
+            setPrefilledImport,
+            ...mutations,
+        }),
+        [
+            closeDeleteScript,
+            closeDuplicateScript,
+            closeImportScript,
+            closeNewScript,
+            completeNewScriptTransition,
+            closeRenameScript,
+            isDeleting,
+            isDownloadingBackup,
+            isDuplicating,
+            isImportLoading,
+            isImportOpen,
+            isNewScriptOpen,
+            newScriptTransitionPath,
+            isRenaming,
+            mutations,
+            openDeleteScript,
+            openDuplicateScript,
+            openImportScript,
+            openNewScript,
+            openRenameScript,
+            prefilledImport,
+            scriptToDelete,
+            scriptToDuplicate,
+            scriptToRename,
+        ],
+    );
 };

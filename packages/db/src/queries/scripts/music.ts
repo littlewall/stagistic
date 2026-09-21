@@ -1,36 +1,26 @@
-import {
-    and,
-    asc,
-    eq,
-    inArray,
-    sql,
-} from 'drizzle-orm';
+import {and, asc, eq, inArray, sql} from 'drizzle-orm';
 
 import {scriptMusic} from '../../schema';
 import type {DbClient} from '../types';
 
 export interface ScriptMusicUpsertRow {
-    id: string,
-    scriptId: string,
-    sceneNumber: number,
-    indexInScene: number,
-    mode: string,
-    title: string,
-    kind: string | null,
-    startBlockId: string | null,
-    endBlockId: string | null,
-    createdAt: number,
-    updatedAt: number,
+    id: string;
+    scriptId: string;
+    sceneNumber: number;
+    indexInScene: number;
+    mode: string;
+    title: string;
+    kind: string | null;
+    startBlockId: string | null;
+    endBlockId: string | null;
+    createdAt: number;
+    updatedAt: number;
 }
 
 export type InsertScriptMusicRow = ScriptMusicUpsertRow;
 
 export const listScriptMusic = async (db: DbClient, scriptId: string) => {
-    return db
-        .select()
-        .from(scriptMusic)
-        .where(eq(scriptMusic.scriptId, scriptId))
-        .orderBy(asc(scriptMusic.sceneNumber), asc(scriptMusic.indexInScene));
+    return db.select().from(scriptMusic).where(eq(scriptMusic.scriptId, scriptId)).orderBy(asc(scriptMusic.sceneNumber), asc(scriptMusic.indexInScene));
 };
 
 export const bulkUpsertScriptMusic = async (db: DbClient, rows: ScriptMusicUpsertRow[]) => {
@@ -57,22 +47,18 @@ export const bulkUpsertScriptMusic = async (db: DbClient, rows: ScriptMusicUpser
 };
 
 export const insertScriptMusic = async (db: DbClient, row: InsertScriptMusicRow) => {
-    await db
-        .insert(scriptMusic)
-        .values(row);
+    await db.insert(scriptMusic).values(row);
 };
 
-export const getScriptMusicById = async (
-    db: DbClient,
-    payload: {scriptId: string, musicId: string},
-) => {
+export const deleteScriptMusicByScriptId = async (db: DbClient, scriptId: string) => {
+    await db.delete(scriptMusic).where(eq(scriptMusic.scriptId, scriptId));
+};
+
+export const getScriptMusicById = async (db: DbClient, payload: {scriptId: string; musicId: string}) => {
     const rows = await db
         .select()
         .from(scriptMusic)
-        .where(and(
-            eq(scriptMusic.scriptId, payload.scriptId),
-            eq(scriptMusic.id, payload.musicId),
-        ))
+        .where(and(eq(scriptMusic.scriptId, payload.scriptId), eq(scriptMusic.id, payload.musicId)))
         .limit(1);
 
     return rows[0] ?? null;
@@ -81,11 +67,11 @@ export const getScriptMusicById = async (
 export const updateScriptMusic = async (
     db: DbClient,
     payload: {
-        scriptId: string,
-        musicId: string,
-        title: string,
-        kind: 'song' | 'instrumental',
-        updatedAt: number,
+        scriptId: string;
+        musicId: string;
+        title: string;
+        kind: 'song' | 'instrumental';
+        updatedAt: number;
     },
 ) => {
     await db
@@ -95,10 +81,7 @@ export const updateScriptMusic = async (
             kind: payload.kind,
             updatedAt: payload.updatedAt,
         })
-        .where(and(
-            eq(scriptMusic.scriptId, payload.scriptId),
-            eq(scriptMusic.id, payload.musicId),
-        ));
+        .where(and(eq(scriptMusic.scriptId, payload.scriptId), eq(scriptMusic.id, payload.musicId)));
 };
 
 export const bulkUnassignScriptMusic = async (db: DbClient, musicIds: string[], updatedAt: number) => {
@@ -119,7 +102,9 @@ export const bulkUnassignScriptMusic = async (db: DbClient, musicIds: string[], 
 export const unassignScriptMusic = async (
     db: DbClient,
     payload: {
-        scriptId: string, musicId: string, updatedAt: number,
+        scriptId: string;
+        musicId: string;
+        updatedAt: number;
     },
 ) => {
     await db
@@ -129,22 +114,11 @@ export const unassignScriptMusic = async (
             endBlockId: null,
             updatedAt: payload.updatedAt,
         })
-        .where(and(
-            eq(scriptMusic.scriptId, payload.scriptId),
-            eq(scriptMusic.id, payload.musicId),
-        ));
+        .where(and(eq(scriptMusic.scriptId, payload.scriptId), eq(scriptMusic.id, payload.musicId)));
 };
 
-export const deleteScriptMusic = async (
-    db: DbClient,
-    payload: {scriptId: string, musicId: string},
-) => {
-    await db
-        .delete(scriptMusic)
-        .where(and(
-            eq(scriptMusic.scriptId, payload.scriptId),
-            eq(scriptMusic.id, payload.musicId),
-        ));
+export const deleteScriptMusic = async (db: DbClient, payload: {scriptId: string; musicId: string}) => {
+    await db.delete(scriptMusic).where(and(eq(scriptMusic.scriptId, payload.scriptId), eq(scriptMusic.id, payload.musicId)));
 };
 
 export const bulkDeleteScriptMusic = async (db: DbClient, musicIds: string[]) => {

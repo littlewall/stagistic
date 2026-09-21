@@ -1,21 +1,14 @@
+/// <reference types="node" />
+
 import {readdirSync, readFileSync} from 'node:fs';
-import {
-    dirname, join, relative, resolve,
-} from 'node:path';
+import {dirname, join, relative, resolve} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-import {
-    describe, expect, it,
-} from 'vite-plus/test';
+import {describe, expect, it} from 'vite-plus/test';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../..');
 
-const CSS_ROOTS = [
-    'packages/ui',
-    'packages/app-routes',
-    'packages/editor',
-    'apps/web',
-];
+const CSS_ROOTS = ['packages/ui', 'packages/app-routes', 'packages/editor', 'apps/web'];
 
 /*
  * Declared from a TypeScript inline style rather than in CSS, so no stylesheet
@@ -49,12 +42,10 @@ const collectCssFiles = (dir: string): string[] => {
 const DECLARATION = /(?:^|[;{\s])(--[a-z0-9-]+)\s*:/gi;
 const USAGE = /var\(\s*(--[a-z0-9-]+)\s*([,)])/gi;
 
-const sources = CSS_ROOTS
-    .flatMap(root => collectCssFiles(join(repoRoot, root)))
-    .map(path => ({
-        path: relative(repoRoot, path),
-        text: readFileSync(path, 'utf8'),
-    }));
+const sources = CSS_ROOTS.flatMap(root => collectCssFiles(join(repoRoot, root))).map(path => ({
+    path: relative(repoRoot, path),
+    text: readFileSync(path, 'utf8'),
+}));
 
 describe('css custom properties', () => {
     it('collects css from every in-scope package', () => {
@@ -74,10 +65,7 @@ describe('css custom properties', () => {
 
         for (const {text} of sources) {
             for (const match of text.matchAll(USAGE)) {
-                const [
-                    , name,
-                    terminator,
-                ] = match;
+                const [, name, terminator] = match;
 
                 if (terminator === ',') {
                     continue;
@@ -93,19 +81,14 @@ describe('css custom properties', () => {
     });
 
     it('declares no --select-* or --segment-* variable in :root', () => {
-        const tokens = readFileSync(
-            join(repoRoot, 'packages/ui/styles/tokens.css'),
-            'utf8',
-        );
+        const tokens = readFileSync(join(repoRoot, 'packages/ui/styles/tokens.css'), 'utf8');
 
         /*
          * --bubble-menu-* is deliberately allowed: both of its readers are
          * bubble menus, so the name describes the pattern rather than one
          * component. See docs/design/token-triage-2026-08-25.md.
          */
-        const offenders = [...tokens.matchAll(DECLARATION)]
-            .map(match => match[1])
-            .filter(name => (/^--(select|segment)-/).test(name));
+        const offenders = [...tokens.matchAll(DECLARATION)].map(match => match[1]).filter(name => /^--(select|segment)-/.test(name));
 
         expect(offenders).toEqual([]);
     });
@@ -113,16 +96,8 @@ describe('css custom properties', () => {
 
 describe('dev catalog coverage', () => {
     it('catalogues every component @stagistic/ui exports', () => {
-        const index = readFileSync(
-            join(repoRoot, 'packages/ui/src/index.ts'),
-            'utf8',
-        );
-        const registry = ['primitives', 'controls']
-            .map(name => readFileSync(
-                join(repoRoot, `apps/web/src/dev/registry/${name}.tsx`),
-                'utf8',
-            ))
-            .join('\n');
+        const index = readFileSync(join(repoRoot, 'packages/ui/src/index.ts'), 'utf8');
+        const registry = ['primitives', 'controls'].map(name => readFileSync(join(repoRoot, `apps/web/src/dev/registry/${name}.tsx`), 'utf8')).join('\n');
 
         /*
          * A component is a PascalCase value export. That excludes `type`
@@ -133,7 +108,7 @@ describe('dev catalog coverage', () => {
         const components = [...index.matchAll(/export \{([^}]*)\}/g)]
             .flatMap(match => match[1].split(','))
             .map(name => name.trim())
-            .filter(name => (/^[A-Z][A-Za-z0-9]*$/).test(name) && !(/^[A-Z0-9_]+$/).test(name));
+            .filter(name => /^[A-Z][A-Za-z0-9]*$/.test(name) && !/^[A-Z0-9_]+$/.test(name));
 
         /*
          * Everything packages/ui exports that the catalog does not cover yet.
@@ -156,7 +131,6 @@ describe('dev catalog coverage', () => {
             'CreateCharacterModal',
             'CreateGroupModal',
             'CreatePlaceModal',
-            'DeleteScriptConfirm',
             'DeleteScriptModal',
             'DuplicateScriptModal',
             'ImportScriptModal',
@@ -189,8 +163,10 @@ describe('dev catalog coverage', () => {
             'MultiComboBox',
             'SettingSwitch',
             'TextInput',
+            'DropdownMenu',
             'ScriptActionsMenu',
             'ToggleButtonGroup',
+            'TypeToConfirmAction',
             'Grid',
             'HeroLayout',
             'PageContainer',
@@ -199,9 +175,7 @@ describe('dev catalog coverage', () => {
             'SectionHeader',
         ]);
 
-        const missing = components
-            .filter(name => !NOT_CATALOGUED_YET.has(name))
-            .filter(name => !registry.includes(`name: '${name}'`));
+        const missing = components.filter(name => !NOT_CATALOGUED_YET.has(name)).filter(name => !registry.includes(`name: '${name}'`));
 
         expect(missing).toEqual([]);
     });

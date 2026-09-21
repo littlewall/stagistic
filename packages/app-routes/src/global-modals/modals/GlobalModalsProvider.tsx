@@ -1,38 +1,17 @@
-import {
-    useScriptActions,
-    useScriptRepository,
-} from '@stagistic/app-core';
-import {
-    DeleteScriptModal,
-    DuplicateScriptModal,
-    ImportScriptModal,
-    NewScriptModal,
-    RenameScriptModal,
-    useToastController,
-} from '@stagistic/ui';
-import {
-    createContext,
-    type ReactNode,
-    useCallback,
-    useContext,
-    useMemo,
-} from 'react';
+import {useScriptActions, useScriptRepository} from '@stagistic/app-core';
+import {DeleteScriptModal, DuplicateScriptModal, ImportScriptModal, NewScriptModal, RenameScriptModal, useToastController} from '@stagistic/ui';
+import {createContext, type ReactNode, useCallback, useContext, useMemo} from 'react';
 import {useNavigate} from 'react-router-dom';
 
-import {
-    type ScriptToDelete,
-    type ScriptToDuplicate,
-    type ScriptToRename,
-    useGlobalModalActions,
-} from './useGlobalModalActions';
+import {type ScriptToDelete, type ScriptToDuplicate, type ScriptToRename, useGlobalModalActions} from './useGlobalModalActions';
 import {useNewScriptTransitionCompletion} from './useNewScriptTransitionCompletion';
 
 type GlobalModalsController = {
-    openNewScript: () => void,
-    openImportScript: () => void,
-    openDeleteScript: (script: ScriptToDelete) => void,
-    openRenameScript: (script: ScriptToRename) => void,
-    openDuplicateScript: (script: ScriptToDuplicate) => void,
+    openNewScript: () => void;
+    openImportScript: () => void;
+    openDeleteScript: (script: ScriptToDelete) => void;
+    openRenameScript: (script: ScriptToRename) => void;
+    openDuplicateScript: (script: ScriptToDuplicate) => void;
 };
 
 const GlobalModalsContext = createContext<GlobalModalsController | null>(null);
@@ -48,17 +27,17 @@ export const useGlobalModals = () => {
 };
 
 interface GlobalModalsProviderProps {
-    children: ReactNode,
+    children: ReactNode;
 }
 
 export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
     const scriptActions = useScriptActions();
-    const saveTitlePage = useCallback((
-        scriptId: string,
-        settings: Parameters<typeof scriptRepository.saveTitlePage>[1],
-    ) => scriptRepository.saveTitlePage(scriptId, settings), [scriptRepository]);
+    const saveTitlePage = useCallback(
+        (scriptId: string, settings: Parameters<typeof scriptRepository.saveTitlePage>[1]) => scriptRepository.saveTitlePage(scriptId, settings),
+        [scriptRepository],
+    );
     const {addToast} = useToastController();
 
     const {
@@ -67,6 +46,7 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         isImportOpen,
         prefilledImport,
         isImportLoading,
+        isDownloadingBackup,
         scriptToDelete,
         isDeleteScriptOpen,
         isDeleting,
@@ -88,12 +68,17 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         openDuplicateScript,
         closeDuplicateScript,
         handleCreate,
-        handleImport,
+        handleImportStagistic,
+        handlePeekStepkg,
+        handleImportStepkgAsNew,
+        handleReplaceWithStepkg,
+        handleDownloadStepkgBackup,
         handleDelete,
         handleRename,
         handleDuplicate,
     } = useGlobalModalActions({
         scriptActions,
+        repository: scriptRepository,
         saveTitlePage,
         navigation: {
             navigate,
@@ -108,35 +93,32 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
         onComplete: completeNewScriptTransition,
     });
 
-    const contextValue = useMemo<GlobalModalsController>(() => ({
-        openNewScript,
-        openImportScript,
-        openDeleteScript,
-        openRenameScript,
-        openDuplicateScript,
-    }), [
-        openDeleteScript,
-        openDuplicateScript,
-        openImportScript,
-        openNewScript,
-        openRenameScript,
-    ]);
+    const contextValue = useMemo<GlobalModalsController>(
+        () => ({
+            openNewScript,
+            openImportScript,
+            openDeleteScript,
+            openRenameScript,
+            openDuplicateScript,
+        }),
+        [openDeleteScript, openDuplicateScript, openImportScript, openNewScript, openRenameScript],
+    );
 
     return (
         <GlobalModalsContext.Provider value={contextValue}>
             {children}
-            <NewScriptModal
-                isOpen={isNewScriptOpen}
-                isTransitioning={newScriptTransitionPath !== null}
-                onClose={closeNewScript}
-                onCreate={handleCreate}
-            />
+            <NewScriptModal isOpen={isNewScriptOpen} isTransitioning={newScriptTransitionPath !== null} onClose={closeNewScript} onCreate={handleCreate} />
             <ImportScriptModal
                 isOpen={isImportOpen}
                 onClose={closeImportScript}
-                onImport={handleImport}
+                onImportStagistic={handleImportStagistic}
+                onImportStepkgAsNew={handleImportStepkgAsNew}
+                onReplaceWithStepkg={handleReplaceWithStepkg}
+                onDownloadStepkgBackup={handleDownloadStepkgBackup}
+                onPeekStepkg={handlePeekStepkg}
                 preselectedFile={prefilledImport}
                 isLoading={isImportLoading}
+                isDownloadingBackup={isDownloadingBackup}
             />
             <DeleteScriptModal
                 isOpen={isDeleteScriptOpen}

@@ -9,16 +9,19 @@ const sanitizeFileName = (value: string) => {
     return normalized || 'Untitled';
 };
 
-export const downloadStagistic = (scriptTitle: string, content: string) => {
-    const blob = new Blob([content], {type: 'text/plain;charset=utf-8'});
+export const downloadBlob = (fileName: string, blob: Blob) => {
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
 
     anchor.href = url;
-    anchor.download = `${sanitizeFileName(scriptTitle)}.stagistic`;
+    anchor.download = fileName;
     anchor.style.display = 'none';
     document.body.append(anchor);
     anchor.click();
     anchor.remove();
     URL.revokeObjectURL(url);
+};
+
+export const downloadStagistic = (scriptTitle: string, content: string) => {
+    downloadBlob(`${sanitizeFileName(scriptTitle)}.stagistic`, new Blob([content], {type: 'text/plain;charset=utf-8'}));
 };

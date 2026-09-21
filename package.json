@@ -16,6 +16,7 @@
         "@moonrepo/cli": "^2.5.5",
         "@stagistic/stylelint-config": "workspace:*",
         "@types/node": "^24.13.1",
+        "@vitest/browser-playwright": "4.1.11",
         "oxfmt": "^0.68.0",
         "oxlint": "^1.83.0",
         "stylelint": "^17.15.0",

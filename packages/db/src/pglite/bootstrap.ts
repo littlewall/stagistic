@@ -11,34 +11,34 @@ export type LocalDb = PgliteDatabase<typeof dbSchema>;
 export type DbBootstrapStep = 'fs-bundle' | 'wasm' | 'client' | 'migrations' | 'ready';
 
 export type DbBootstrapUpdate = {
-    step: DbBootstrapStep,
-    label: string,
-    progress: number,
+    step: DbBootstrapStep;
+    label: string;
+    progress: number;
 };
 
+// Mirrors PGlite's DumpTarCompressionOptions (not re-exported from the public entry).
+export type DbDumpCompression = 'none' | 'gzip' | 'auto';
+
 interface CreatePgliteBootstrapOptions {
-    fsBundleUrl: string,
-    wasmUrl: string,
-    dataDir?: string,
-    workerFactory?: () => Worker,
+    fsBundleUrl: string;
+    wasmUrl: string;
+    dataDir?: string;
+    workerFactory?: () => Worker;
 }
 
 interface PgliteBootstrap {
-    getLocalDb: () => Promise<LocalDb>,
-    syncToFs: () => Promise<void>,
-    runMigrations: () => Promise<void>,
-    prepareLocalDb: () => Promise<void>,
-    prepareLocalDbWithProgress: (onProgress: (update: DbBootstrapUpdate) => void) => Promise<void>,
+    getLocalDb: () => Promise<LocalDb>;
+    syncToFs: () => Promise<void>;
+    runMigrations: () => Promise<void>;
+    prepareLocalDb: () => Promise<void>;
+    prepareLocalDbWithProgress: (onProgress: (update: DbBootstrapUpdate) => void) => Promise<void>;
+    // Snapshot the whole data dir as a single tarball (for backup/export/portability).
+    dumpDataDir: (compression?: DbDumpCompression) => Promise<Blob>;
 }
 
 const DEFAULT_DATA_DIR = 'idb://stagistic-main';
 
-export const createPgliteBootstrap = ({
-    fsBundleUrl,
-    wasmUrl,
-    dataDir = DEFAULT_DATA_DIR,
-    workerFactory,
-}: CreatePgliteBootstrapOptions): PgliteBootstrap => {
+export const createPgliteBootstrap = ({fsBundleUrl, wasmUrl, dataDir = DEFAULT_DATA_DIR, workerFactory}: CreatePgliteBootstrapOptions): PgliteBootstrap => {
     if (workerFactory) {
         let dbPromise: Promise<LocalDb> | null = null;
         let workerInstanceRef: PGliteWorker | null = null;
@@ -46,14 +46,11 @@ export const createPgliteBootstrap = ({
         const getLocalDb = async (): Promise<LocalDb> => {
             if (!dbPromise) {
                 dbPromise = (async () => {
-                    const workerInstance = await PGliteWorker.create(
-                        workerFactory(),
-                        {
-                            dataDir,
-                            extensions: {live},
-                            relaxedDurability: true,
-                        },
-                    );
+                    const workerInstance = await PGliteWorker.create(workerFactory(), {
+                        dataDir,
+                        extensions: {live},
+                        relaxedDurability: true,
+                    });
 
                     workerInstanceRef = workerInstance;
 
@@ -75,9 +72,18 @@ export const createPgliteBootstrap = ({
             await workerInstanceRef?.syncToFs();
         };
 
+        const dumpDataDir = async (compression?: DbDumpCompression): Promise<Blob> => {
+            if (!workerInstanceRef) {
+                await getLocalDb();
+            }
+
+            return workerInstanceRef!.dumpDataDir(compression);
+        };
+
         return {
             getLocalDb,
             syncToFs,
+            dumpDataDir,
             runMigrations: async () => {
                 await getLocalDb();
             },
@@ -197,9 +203,13 @@ export const createPgliteBootstrap = ({
         await client.syncToFs();
     };
 
-    const prepareLocalDbWithProgress = async (
-        onProgress: (update: DbBootstrapUpdate) => void,
-    ) => {
+    const dumpDataDir = async (compression?: DbDumpCompression): Promise<Blob> => {
+        const client = await getClient();
+
+        return client.dumpDataDir(compression);
+    };
+
+    const prepareLocalDbWithProgress = async (onProgress: (update: DbBootstrapUpdate) => void) => {
         onProgress({
             step: 'fs-bundle',
             label: 'Loading data bundle',
@@ -239,6 +249,7 @@ export const createPgliteBootstrap = ({
     return {
         getLocalDb,
         syncToFs,
+        dumpDataDir,
         runMigrations,
         prepareLocalDb,
         prepareLocalDbWithProgress,

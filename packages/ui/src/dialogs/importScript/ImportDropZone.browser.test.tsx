@@ -1,13 +1,7 @@
 import '../../../styles/tokens.css';
 
 import {createRoot, type Root} from 'react-dom/client';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-    vi,
-} from 'vite-plus/test';
+import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
 import {ImportDropZone} from './ImportDropZone';
@@ -22,6 +16,8 @@ const renderDropZone = (onPickFile?: () => void) => {
     mountedRoot.render(
         <ImportDropZone
             fileLabel="Choose a script"
+            hint="Drop a .stagistic or .stepkg file here, or click to browse."
+            acceptedExtensions={['.stagistic', '.stepkg']}
             onDrop={() => {}}
             onFileSelect={() => {}}
             onPickFile={onPickFile}

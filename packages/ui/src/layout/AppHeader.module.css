@@ -34,6 +34,10 @@
             justify-self: start;
             width: 100%;
             min-width: 0;
+
+            /* macOS traffic-light clearance is applied here (not on `.inner`) so
+               the symmetric grid stays centred; the variable is set below. */
+            padding-left: var(--tl-lead-pad, 0);
         }
 
         & .scriptControls {
@@ -77,7 +81,22 @@
     }
 }
 
+/* Reserve space for the macOS traffic lights by insetting the leading controls
+   (via --tl-lead-pad, consumed by .leftControls) rather than padding .inner.
+   Padding .inner would shift the symmetric `1fr auto 1fr` grid and push the
+   centred middle column (view switcher) off the window centre; insetting only
+   the leading controls keeps the grid symmetric so the view switcher stays
+   centred just like on the web. `- var(--space-lg)` accounts for .inner's base
+   padding so the leading control lands at the intended offset. */
 :global(.platform-macos) .inner {
+    --tl-lead-pad: calc(var(--space-xl) + var(--traffic-light-space) - var(--space-lg));
+}
+
+/* The page-inset layout has no centred controls, so simply shift the whole
+   content clear of the traffic lights and skip the leading-control inset. */
+:global(.platform-macos) .inner.pageInset {
+    --tl-lead-pad: 0;
+
     padding-left: calc(var(--space-xl) + var(--traffic-light-space));
 }
 

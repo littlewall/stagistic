@@ -7,6 +7,7 @@
     "dependencies": {
         "@stagistic/db": "workspace:*",
         "@stagistic/script": "workspace:*",
+        "@stagistic/stepkg": "workspace:*",
         "@stagistic/shared": "workspace:*",
         "@tanstack/pacer": "0.21.1",
         "@tanstack/react-db": "^0.1.92"

@@ -1,21 +1,15 @@
-import type {
-    TitlePageCredit,
-    TitlePageSettings,
-} from '@stagistic/script';
+import type {TitlePageCredit, TitlePageSettings} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 
 import * as dbQueries from '../queries';
+import type {DbClient} from '../queries';
 import type {ScriptTitlePageRepository} from '../scriptRepository';
-import type {
-    GetDb,
-    RecordOutbox,
-    SyncDb,
-} from './types';
+import type {GetDb, RecordOutbox, SyncDb} from './types';
 
 interface CreateTitlePageHandlersArgs {
-    getDb: GetDb,
-    recordOutbox: RecordOutbox,
-    syncDb: SyncDb,
+    getDb: GetDb;
+    recordOutbox: RecordOutbox;
+    syncDb: SyncDb;
 }
 
 /*
@@ -23,22 +17,13 @@ interface CreateTitlePageHandlersArgs {
  * (so the script list can read it without a join) and is bridged in
  * load()/save() below. The remaining fields live in scriptSettingsTitlePage.
  */
-const STRING_FIELDS = [
-    'source',
-    'draftDateMode',
-    'draftDate',
-    'dateFormat',
-    'contact',
-    'copyright',
-] as const;
+const STRING_FIELDS = ['source', 'draftDateMode', 'draftDate', 'dateFormat', 'contact', 'copyright'] as const;
 
-type StringField = typeof STRING_FIELDS[number];
+type StringField = (typeof STRING_FIELDS)[number];
 
 const isStringField = (value: string): value is StringField => STRING_FIELDS.includes(value as StringField);
 
-const toTitlePageSettings = (
-    rows: Awaited<ReturnType<typeof dbQueries.listScriptTitlePageFields>>,
-): TitlePageSettings | null => {
+export const toTitlePageSettings = (rows: Awaited<ReturnType<typeof dbQueries.listScriptTitlePageFields>>): TitlePageSettings | null => {
     if (rows.length === 0) {
         return null;
     }
@@ -69,77 +54,78 @@ const toTitlePageSettings = (
     });
 
     if (credits.size > 0) {
-        settings.credits = [...credits.entries()]
-            .sort(([left], [right]) => left - right)
-            .map(([, credit]) => credit);
+        settings.credits = [...credits.entries()].sort(([left], [right]) => left - right).map(([, credit]) => credit);
     }
 
     return settings;
 };
 
-export const createTitlePageHandlers = ({
-    getDb,
-    recordOutbox,
-    syncDb,
-}: CreateTitlePageHandlersArgs): ScriptTitlePageRepository => {
+export const readTitlePageSettings = async (db: DbClient, scriptId: string): Promise<TitlePageSettings | null> => {
+    const settings = toTitlePageSettings(await dbQueries.listScriptTitlePageFields(db, scriptId));
+    const subtitle = await dbQueries.getScriptSubtitle(db, scriptId);
+    return subtitle === null || subtitle.length === 0 ? settings : {...settings, subtitle};
+};
+
+export const writeTitlePageFieldsTx = async (tx: DbClient, scriptId: string, settings: TitlePageSettings, now: number): Promise<void> => {
+    let orderNo = 0;
+    const rows: dbQueries.ScriptTitlePageFieldRow[] = [];
+    const addRow = (fieldKey: string, fieldValue: string, groupNo: number | null = null) => {
+        rows.push({
+            id: uuidv7(),
+            fieldKey,
+            fieldValue,
+            groupNo,
+            orderNo,
+            createdAt: now,
+            updatedAt: now,
+        });
+        orderNo += 1;
+    };
+
+    STRING_FIELDS.forEach(fieldKey => {
+        const value = settings[fieldKey];
+
+        if (typeof value === 'string' && value.length > 0) {
+            addRow(fieldKey, value);
+        }
+    });
+    settings.credits?.forEach((credit, groupNo) => {
+        addRow('credit_label', credit.credit, groupNo);
+        credit.authors.forEach(author => addRow('credit_author', author, groupNo));
+    });
+
+    const subtitle = typeof settings.subtitle === 'string' ? settings.subtitle.trim() : '';
+
+    await dbQueries.replaceScriptTitlePageFields(tx, scriptId, rows);
+    await dbQueries.updateScriptSubtitle(tx, {
+        id: scriptId,
+        subtitle: subtitle.length > 0 ? subtitle : null,
+        updatedAt: now,
+    });
+};
+
+export const createTitlePageHandlers = ({getDb, recordOutbox, syncDb}: CreateTitlePageHandlersArgs): ScriptTitlePageRepository => {
     const load: ScriptTitlePageRepository['load'] = async scriptId => {
         const db = await getDb();
-        const settings = toTitlePageSettings(await dbQueries.listScriptTitlePageFields(db, scriptId));
-        const subtitle = await dbQueries.getScriptSubtitle(db, scriptId);
-
-        if (subtitle === null || subtitle.length === 0) {
-            return settings;
-        }
-
-        return {...settings, subtitle};
+        return readTitlePageSettings(db, scriptId);
     };
 
     const save: ScriptTitlePageRepository['save'] = async (scriptId, settings) => {
         const db = await getDb();
         const now = Date.now();
-        let orderNo = 0;
-        const rows: dbQueries.ScriptTitlePageFieldRow[] = [];
-        const addRow = (fieldKey: string, fieldValue: string, groupNo: number | null = null) => {
-            rows.push({
-                id: uuidv7(),
-                fieldKey,
-                fieldValue,
-                groupNo,
-                orderNo,
-                createdAt: now,
-                updatedAt: now,
-            });
-            orderNo += 1;
-        };
-
-        STRING_FIELDS.forEach(fieldKey => {
-            const value = settings[fieldKey];
-
-            if (typeof value === 'string' && value.length > 0) {
-                addRow(fieldKey, value);
-            }
-        });
-        settings.credits?.forEach((credit, groupNo) => {
-            addRow('credit_label', credit.credit, groupNo);
-            credit.authors.forEach(author => addRow('credit_author', author, groupNo));
-        });
-
-        const subtitle = typeof settings.subtitle === 'string' ? settings.subtitle.trim() : '';
 
         await db.transaction(async tx => {
-            await dbQueries.replaceScriptTitlePageFields(tx, scriptId, rows);
-            await dbQueries.updateScriptSubtitle(tx, {
-                id: scriptId,
-                subtitle: subtitle.length > 0 ? subtitle : null,
-                updatedAt: now,
-            });
-            await recordOutbox({
-                scriptId,
-                entityKey: `script:${scriptId}:title-page`,
-                opType: 'title-page.save',
-                occurredAt: now,
-                payloadJson: JSON.stringify({scriptId, updatedAt: now}),
-            }, tx);
+            await writeTitlePageFieldsTx(tx, scriptId, settings, now);
+            await recordOutbox(
+                {
+                    scriptId,
+                    entityKey: `script:${scriptId}:title-page`,
+                    opType: 'title-page.save',
+                    occurredAt: now,
+                    payloadJson: JSON.stringify({scriptId, updatedAt: now}),
+                },
+                tx,
+            );
         });
 
         /*
@@ -156,21 +142,28 @@ export const createTitlePageHandlers = ({
         await db.transaction(async tx => {
             await dbQueries.replaceScriptTitlePageFields(tx, scriptId, []);
             await dbQueries.updateScriptSubtitle(tx, {
-                id: scriptId, subtitle: null, updatedAt: now,
+                id: scriptId,
+                subtitle: null,
+                updatedAt: now,
             });
-            await recordOutbox({
-                scriptId,
-                entityKey: `script:${scriptId}:title-page`,
-                opType: 'title-page.delete',
-                occurredAt: now,
-                payloadJson: JSON.stringify({scriptId, deletedAt: now}),
-            }, tx);
+            await recordOutbox(
+                {
+                    scriptId,
+                    entityKey: `script:${scriptId}:title-page`,
+                    opType: 'title-page.delete',
+                    occurredAt: now,
+                    payloadJson: JSON.stringify({scriptId, deletedAt: now}),
+                },
+                tx,
+            );
         });
 
         await syncDb();
     };
 
     return {
-        load, save, delete: deleteTitlePage,
+        load,
+        save,
+        delete: deleteTitlePage,
     };
 };

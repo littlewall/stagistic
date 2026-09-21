@@ -6,8 +6,17 @@
         "jsx": "react-jsx",
         "module": "ESNext",
         "moduleResolution": "bundler",
-        "outDir": "./dist"
+        "outDir": "./dist",
+        "paths": {
+            "~db": ["./src/db/index.ts"],
+            "~db/*": ["./src/db/*"],
+            "~repo": ["./src/repo/index.ts"],
+            "~repo/*": ["./src/repo/*"]
+        }
     },
-    "include": ["src"],
+    "include": [
+        "src",
+        "vite.config.ts"
+    ],
     "references": []
 }

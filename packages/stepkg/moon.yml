@@ -1,0 +1,6 @@
+tasks:
+  test:
+    command: 'vp test run --dir .'
+    options:
+      cache: false
+      mergeArgs: 'replace'

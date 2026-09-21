@@ -1,13 +1,7 @@
 import '../../styles/tokens.css';
 
 import {createRoot, type Root} from 'react-dom/client';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-    vi,
-} from 'vite-plus/test';
+import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
 import {ScriptEditorAppHeader} from './AppHeader';
@@ -81,8 +75,7 @@ describe('ScriptEditorAppHeader', () => {
 
         expect(document.querySelector('button[aria-label="Open script settings"]')).not.toBeNull();
         expect(document.querySelector('button[aria-label="Open attribute manager"]')).not.toBeNull();
-        expect(document.querySelector('button[aria-label="Download .stagistic file"]')).not.toBeNull();
-        expect(document.querySelector('button[aria-haspopup="menu"]')).toBeNull();
+        expect(document.querySelector('button[aria-label="Download script"]')).not.toBeNull();
     });
 
     it('keeps the sync status in a fixed lane directly after the truncated script title', async () => {
@@ -102,18 +95,23 @@ describe('ScriptEditorAppHeader', () => {
         expect(statusRect.width).toBeGreaterThanOrEqual(20);
     });
 
-    it('dispatches each script action directly', async () => {
+    it('offers both script download formats', async () => {
         const {actions} = mountHeader();
 
         await userEvent.click(await waitForElement('button[aria-label="Open script settings"]'));
         await userEvent.click(await waitForElement('button[aria-label="Open attribute manager"]'));
-        await userEvent.click(await waitForElement('button[aria-label="Download .stagistic file"]'));
+        await userEvent.click(await waitForElement('button[aria-label="Download script"]'));
+        await userEvent.click(await waitForElement('[role="menuitem"]'));
+        await userEvent.click(await waitForElement('button[aria-label="Download script"]'));
+        const stepkgItem = [...document.querySelectorAll('[role="menuitem"]')].find(item => item.textContent === 'Script & metadata (.stepkg)');
 
-        expect(actions).toEqual([
-            'settings',
-            'attributes',
-            'export-stagistic',
-        ]);
+        if (!stepkgItem) {
+            throw new Error('Expected .stepkg download menu item.');
+        }
+
+        await userEvent.click(stepkgItem);
+
+        expect(actions).toEqual(['settings', 'attributes', 'export-stagistic', 'export-stepkg']);
     });
 
     it('commits a single-line rename and leaves Tab navigation intact', async () => {

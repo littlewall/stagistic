@@ -10,24 +10,22 @@ import {createCharacterHandlers} from './characters';
 import {createSettingsHandlers} from './config';
 import {createContentHandlers} from './content';
 import {createLocalPgliteReactiveSources} from './createLocalPgliteReactiveSources';
+import {createImportPackageHandler} from './importPackage';
 import {createLocationHandlers} from './locations';
 import {createMusicHandlers} from './music';
 import {createOutboxRecorder} from './outbox';
+import {createReadScriptPackageSource} from './readScriptPackageSource';
 import {createScriptsHandlers} from './scripts';
 import {createTitlePageHandlers} from './titlePage';
 import type {GetDb} from './types';
 
 export interface LocalPgliteRepositoryDeps {
-    getLocalDb: () => Promise<LocalDb>,
-    syncToFs: () => Promise<void>,
-    fileStorage: FileStorage,
+    getLocalDb: () => Promise<LocalDb>;
+    syncToFs: () => Promise<void>;
+    fileStorage: FileStorage;
 }
 
-export const createLocalPgliteRepository = ({
-    getLocalDb,
-    syncToFs,
-    fileStorage,
-}: LocalPgliteRepositoryDeps): ScriptRepository => {
+export const createLocalPgliteRepository = ({getLocalDb, syncToFs, fileStorage}: LocalPgliteRepositoryDeps): ScriptRepository => {
     const dbPromise = getLocalDb();
     const getDb: GetDb = async () => dbPromise;
     const recordOutbox = createOutboxRecorder(getDb);
@@ -48,9 +46,14 @@ export const createLocalPgliteRepository = ({
         ...mutationDeps,
         fileStorage,
     });
+    const importPackage = createImportPackageHandler({
+        ...mutationDeps,
+        fileStorage,
+    });
     const listScriptCharacters = async (scriptId: string) => {
         return dbQueries.listScriptCharacters(await getDb(), scriptId);
     };
+    const getScriptPackageSource = createReadScriptPackageSource({getDb});
     const reactiveSources = createLocalPgliteReactiveSources({
         getDb,
         listScripts: () => scripts.list(),
@@ -74,6 +77,7 @@ export const createLocalPgliteRepository = ({
         allocateScriptLocationId: uuidv7,
         listScripts: options => scripts.list(options),
         getScriptSummary: scriptId => scripts.getSummary(scriptId),
+        getScriptPackageSource,
         listScriptCharacters: scriptId => listScriptCharacters(scriptId),
         listScriptCharacterGroups: scriptId => characterGroupHandlers.listScriptCharacterGroups(scriptId),
         listScriptCharacterGenders: scriptId => characterHandlers.listScriptCharacterGenders(scriptId),
@@ -93,6 +97,8 @@ export const createLocalPgliteRepository = ({
         },
         createScript: (title, initialContent) => scripts.create(title, initialContent),
         createScriptWithId: input => scripts.createWithId(input),
+        createScriptFromPackage: input => importPackage.createScriptFromPackage(input),
+        restoreScriptFromPackage: input => importPackage.restoreScriptFromPackage(input),
         renameScript: (scriptId, input) => scripts.rename(scriptId, input),
         renameScriptTitle: (scriptId, title) => scripts.renameTitle(scriptId, title),
         duplicateScript: (scriptId, input) => scripts.duplicate(scriptId, input),
