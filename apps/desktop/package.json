@@ -4,11 +4,21 @@
     "private": true,
     "type": "module",
     "dependencies": {
+        "@electric-sql/pglite": "^0.3.7",
+        "@stagistic/app-core": "workspace:*",
+        "@stagistic/app-routes": "workspace:*",
+        "@stagistic/db": "workspace:*",
+        "@stagistic/shared": "workspace:*",
+        "@stagistic/ui": "workspace:*",
+        "@tauri-apps/api": "^3.0.0-alpha.0",
+        "@tauri-apps/plugin-dialog": "^3.0.0-alpha.0",
+        "@tauri-apps/plugin-fs": "^3.0.0-alpha.0",
         "react": "^19.0.0",
-        "react-dom": "^19.0.0"
+        "react-dom": "^19.0.0",
+        "react-router-dom": "^7.13.0"
     },
     "devDependencies": {
-        "@tauri-apps/cli": "^2.0.0",
+        "@tauri-apps/cli": "^3.0.0-alpha.1",
         "@types/react": "^19.0.0",
         "@types/react-dom": "^19.0.0",
         "@vitejs/plugin-react": "^6.0.3",

@@ -1,11 +1,24 @@
+import '@stagistic/ui/styles/base.css';
+import './index.css';
+
+import {bootstrapAppTheme} from '@stagistic/ui';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import {HashRouter} from 'react-router-dom';
 
+import App from './App';
+import {applyPlatformClass} from './platform';
+
+bootstrapAppTheme();
+// Reserves the header's traffic-light space and enables its drag region on macOS.
+applyPlatformClass();
+
+// HashRouter keeps routing self-contained under Tauri's custom protocol, so deep
+// links never depend on the host serving index.html for arbitrary paths.
 ReactDOM.createRoot(document.getElementById('root')!).render(
     <React.StrictMode>
-        <main style={{padding: '2rem', fontFamily: 'system-ui, sans-serif'}}>
-            <h1>Stagistic Desktop</h1>
-            <p>Placeholder. Desktop build is paused while the web app is being refactored.</p>
-        </main>
+        <HashRouter>
+            <App />
+        </HashRouter>
     </React.StrictMode>,
 );

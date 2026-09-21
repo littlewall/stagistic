@@ -55,8 +55,8 @@ export const AppHeader = ({
     return (
         <header className={styles.header}>
             <div className={styles.dragRegion} data-tauri-drag-region aria-hidden="true" />
-            <div className={clsx(styles.inner, isFullWidth && styles.full, contentInset === 'page' && styles.pageInset)}>
-                <div className={styles.leftControls}>
+            <div className={clsx(styles.inner, isFullWidth && styles.full, contentInset === 'page' && styles.pageInset)} data-tauri-drag-region>
+                <div className={styles.leftControls} data-tauri-drag-region>
                     <Tooltip label="Home" placement="bottom">
                         <Button variant="ghost" size="icon" onPress={onHome} aria-label="Go to home">
                             <HomeIcon className={styles.icon} aria-hidden="true" />
@@ -78,8 +78,10 @@ export const AppHeader = ({
                     ) : null}
                     {leftControls ?? null}
                 </div>
-                <div className={styles.scriptControls}>{scriptControls ?? null}</div>
-                <div className={styles.rightControls}>
+                <div className={styles.scriptControls} data-tauri-drag-region>
+                    {scriptControls ?? null}
+                </div>
+                <div className={styles.rightControls} data-tauri-drag-region>
                     {scriptActions ? (
                         <>
                             <div className={styles.actionGroup}>{scriptActions}</div>

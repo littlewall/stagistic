@@ -128,6 +128,9 @@ fn build_menu<R: tauri::Runtime>(app: &tauri::AppHandle<R>) -> tauri::Result<Men
 
 fn main() {
     tauri::Builder::default()
+        // Tauri 3 requires the runtime to be selected explicitly; without this
+        // the app fails to start with `RuntimeNotConfigured`.
+        .runtime(tauri_runtime_wry::Wry::default())
         .menu(|app| build_menu(app))
         .on_menu_event(|app, event| {
             if event.id() == MENU_ID_OPEN_SCRIPT {

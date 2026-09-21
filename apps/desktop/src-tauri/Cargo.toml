@@ -5,17 +5,22 @@ description = "Stagistic Editor"
 edition = "2021"
 
 [build-dependencies]
-tauri-build = { version = "2", features = [] }
+tauri-build = { version = "3.0.0-alpha", features = [] }
 
 [dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-tauri = { version = "2", features = [] }
-tauri-plugin-dialog = "2"
-tauri-plugin-fs = "2"
+tauri = { version = "3.0.0-alpha", features = [] }
+# Tauri 3 no longer bundles a webview runtime: the app must depend on a runtime
+# crate and select it via `Builder::runtime(...)` (see src/main.rs).
+tauri-runtime-wry = "3.0.0-alpha"
+tauri-plugin-dialog = "3.0.0-alpha"
+tauri-plugin-fs = "3.0.0-alpha"
 
 [features]
-default = ["custom-protocol"]
+# Enabled automatically by `tauri build` to switch from the dev server to the
+# bundled assets. DO NOT REMOVE and DO NOT add to `default` (that would break
+# `tauri dev`).
 custom-protocol = ["tauri/custom-protocol"]
 
 [profile.dev]
