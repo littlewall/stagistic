@@ -3,6 +3,7 @@ import {useState} from 'react';
 import {Button} from '../atoms/Button';
 import {ModalDialog} from '../dialogs/ModalDialog';
 import {PublicPreviewNotice} from '../dialogs/PublicPreviewNotice';
+
 import styles from './AppFooter.module.css';
 
 export const AppFooter = () => {
@@ -25,21 +26,14 @@ export const AppFooter = () => {
                     </Button>
                     )
                 </span>
-                <a className={styles.feedbackLink} href="mailto:feedback@stagistic.com">
-                    feedback@stagistic.com
+                <a className={styles.feedbackLink} href="https://feedback.stagistic.com">
+                    Give Feedback
                 </a>
             </footer>
-            <ModalDialog
-                ariaLabel="About the public preview"
-                isOpen={isPreviewDialogOpen}
-                onClose={() => setIsPreviewDialogOpen(false)}
-            >
+            <ModalDialog ariaLabel="About the public preview" isOpen={isPreviewDialogOpen} onClose={() => setIsPreviewDialogOpen(false)}>
                 <PublicPreviewNotice />
                 <div className={styles.modalActions}>
-                    <Button
-                        variant="secondary"
-                        onPress={() => setIsPreviewDialogOpen(false)}
-                    >
+                    <Button variant="secondary" onPress={() => setIsPreviewDialogOpen(false)}>
                         Close
                     </Button>
                 </div>
