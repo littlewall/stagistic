@@ -1,7 +1,17 @@
 .match {
-    background: color-mix(in srgb, var(--base-selection) 38%, transparent);
+    --search-match-background: color-mix(in srgb, var(--base-selection) 38%, transparent);
+
+    background: var(--search-match-background);
 }
 
 .current {
-    background: color-mix(in srgb, var(--base-selection) 70%, transparent);
+    --search-match-background: color-mix(in srgb, var(--base-selection) 70%, transparent);
+}
+
+:global(:root[data-theme = 'dark']) .match {
+    --search-match-background: oklch(from var(--base-selection) .3 calc(c * .9) h);
+}
+
+:global(:root[data-theme = 'dark']) .current {
+    --search-match-background: oklch(from var(--base-selection) .36 calc(c * 1.1) h);
 }

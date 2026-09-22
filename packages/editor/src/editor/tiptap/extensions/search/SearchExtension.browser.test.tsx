@@ -19,6 +19,45 @@ const criteria = (query: string): SearchCriteria => ({
     blockTypes: null,
 });
 
+const rgbChannels = (color: string) => {
+    const canvas = document.createElement('canvas');
+    const context = canvas.getContext('2d');
+
+    if (!context) {
+        throw new Error('Canvas context is unavailable');
+    }
+
+    context.fillStyle = color;
+    context.fillRect(0, 0, 1, 1);
+
+    return Array.from(context.getImageData(0, 0, 1, 1).data.slice(0, 3));
+};
+
+const relativeLuminance = (color: string) => {
+    const channels = rgbChannels(color).map(channel => {
+        const value = channel / 255;
+
+        return value <= 0.04045 ? value / 12.92 : ((value + 0.055) / 1.055) ** 2.4;
+    });
+
+    return 0.2126 * channels[0] + 0.7152 * channels[1] + 0.0722 * channels[2];
+};
+
+const colorfulness = (color: string) => {
+    const channels = rgbChannels(color);
+
+    return Math.max(...channels) - Math.min(...channels);
+};
+
+const contrastRatio = (foreground: string, background: string) => {
+    const foregroundLuminance = relativeLuminance(foreground);
+    const backgroundLuminance = relativeLuminance(background);
+    const lighter = Math.max(foregroundLuminance, backgroundLuminance);
+    const darker = Math.min(foregroundLuminance, backgroundLuminance);
+
+    return (lighter + 0.05) / (darker + 0.05);
+};
+
 const createSearchEditor = (value: string) => {
     const element = document.createElement('div');
 
@@ -59,6 +98,7 @@ afterEach(() => {
     editors.forEach(editor => editor.destroy());
     editors.length = 0;
     document.body.innerHTML = '';
+    delete document.documentElement.dataset.theme;
 });
 
 describe('SearchExtension', () => {
@@ -144,5 +184,28 @@ describe('SearchExtension', () => {
 
         expect(snapshot.results).toHaveLength(1);
         expect(snapshot.currentIndex).toBe(0);
+    });
+
+    it('keeps both dark-mode search highlight levels readable and visibly yellow', () => {
+        document.documentElement.dataset.theme = 'dark';
+        const editor = createSearchEditor('light one light two');
+
+        editor.commands.setSearchCriteria(criteria('light'));
+
+        const current = editor.view.dom.querySelector<HTMLElement>('[data-editor-search-current="true"]');
+        const passive = [...editor.view.dom.querySelectorAll<HTMLElement>('[data-editor-search-match="true"]')].find(match => match !== current);
+
+        if (!current || !passive) {
+            throw new Error('Expected current and passive search highlights');
+        }
+
+        const currentStyle = getComputedStyle(current);
+        const passiveStyle = getComputedStyle(passive);
+
+        expect(contrastRatio(currentStyle.color, currentStyle.backgroundColor)).toBeGreaterThanOrEqual(4.5);
+        expect(contrastRatio(passiveStyle.color, passiveStyle.backgroundColor)).toBeGreaterThanOrEqual(4.5);
+        expect(colorfulness(currentStyle.backgroundColor)).toBeGreaterThanOrEqual(40);
+        expect(colorfulness(passiveStyle.backgroundColor)).toBeGreaterThanOrEqual(40);
+        expect(currentStyle.backgroundColor).not.toBe(passiveStyle.backgroundColor);
     });
 });
