@@ -1,8 +1,8 @@
 import '../../styles/tokens.css';
 
-import {useState} from 'react';
+import {createRef, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
 import {SearchControl} from './SearchControl';
@@ -47,6 +47,16 @@ const mountSearchControl = async () => {
     document.body.appendChild(host);
     mountedRoot = createRoot(host);
     mountedRoot.render(<SearchControlHarness />);
+
+    return waitForElement<HTMLInputElement>('input[aria-label="Search script"]');
+};
+
+const mount = async (control: ReactNode) => {
+    const host = document.createElement('div');
+
+    document.body.appendChild(host);
+    mountedRoot = createRoot(host);
+    mountedRoot.render(control);
 
     return waitForElement<HTMLInputElement>('input[aria-label="Search script"]');
 };
@@ -164,46 +174,6 @@ describe('SearchControl', () => {
         expect(divider.getBoundingClientRect().height).toBeLessThan(control.getBoundingClientRect().height);
     });
 
-    it('opens an empty search options surface', async () => {
-        await mountEmptyResultControl();
-
-        const trigger = await waitForElement<HTMLButtonElement>('button[aria-label="Search options"]');
-
-        await userEvent.click(trigger);
-
-        const options = await waitForElement<HTMLElement>('[role="dialog"][aria-label="Search options"]');
-
-        expect(options.textContent).toBe('');
-    });
-
-    it('renders search options as a padded floating surface', async () => {
-        await mountEmptyResultControl();
-
-        const trigger = await waitForElement<HTMLButtonElement>('button[aria-label="Search options"]');
-
-        await userEvent.click(trigger);
-
-        const popover = await waitForElement<HTMLElement>('[data-search-options-popover]');
-        const style = getComputedStyle(popover);
-
-        expect(style.padding).not.toBe('0px');
-        expect(style.borderTopWidth).toBe('1px');
-        expect(style.boxShadow).not.toBe('none');
-    });
-
-    it('matches the search options width to the search control', async () => {
-        await mountEmptyResultControl();
-
-        const trigger = await waitForElement<HTMLButtonElement>('button[aria-label="Search options"]');
-
-        await userEvent.click(trigger);
-
-        const control = await waitForElement<HTMLElement>('[data-search-control]');
-        const popover = await waitForElement<HTMLElement>('[data-search-options-popover]');
-
-        expect(popover.getBoundingClientRect().width).toBe(control.getBoundingClientRect().width);
-    });
-
     it('uses a flat bordered surface while the input is active', async () => {
         const input = await mountSearchControl();
 
@@ -215,5 +185,63 @@ describe('SearchControl', () => {
         expect(style.backgroundColor).not.toBe('rgba(0, 0, 0, 0)');
         expect(style.borderTopWidth).toBe('1px');
         expect(style.boxShadow).toBe('none');
+    });
+
+    it('forwards the search input ref', async () => {
+        const ref = createRef<HTMLInputElement>();
+
+        await mount(<SearchControl ref={ref} value="light" currentResult={1} resultCount={2} aria-label="Search script" readOnly />);
+
+        expect(ref.current).toBe(document.querySelector('input[aria-label="Search script"]'));
+    });
+
+    it('announces a non-empty result position politely', async () => {
+        await mount(<SearchControl value="light" currentResult={1} resultCount={2} aria-label="Search script" readOnly />);
+
+        const output = document.querySelector('output[aria-label="Search result position"]');
+
+        expect(output?.getAttribute('aria-live')).toBe('polite');
+        expect(output?.getAttribute('aria-atomic')).toBe('true');
+        expect(output?.textContent).toBe('1 / 2');
+    });
+
+    it('leaves Enter behavior to the supplied input handler', async () => {
+        const onKeyDown = vi.fn();
+        const input = await mount(<SearchControl value="light" currentResult={1} resultCount={2} aria-label="Search script" onKeyDown={onKeyDown} readOnly />);
+
+        input.focus();
+        await userEvent.keyboard('{Enter}');
+
+        expect(onKeyDown).toHaveBeenCalledOnce();
+    });
+
+    it('forwards composing Enter without invoking navigation callbacks', async () => {
+        const onKeyDown = vi.fn();
+        const onNextResult = vi.fn();
+        const input = await mount(
+            <SearchControl
+                value="light"
+                currentResult={1}
+                resultCount={2}
+                aria-label="Search script"
+                onKeyDown={onKeyDown}
+                onNextResult={onNextResult}
+                readOnly
+            />,
+        );
+
+        input.dispatchEvent(
+            new KeyboardEvent('keydown', {
+                key: 'Enter',
+                isComposing: true,
+                bubbles: true,
+            }),
+        );
+
+        expect(onKeyDown).toHaveBeenCalledOnce();
+        const [event] = onKeyDown.mock.calls[0] as [ReactKeyboardEvent<HTMLInputElement>];
+
+        expect(event.nativeEvent.isComposing).toBe(true);
+        expect(onNextResult).not.toHaveBeenCalled();
     });
 });

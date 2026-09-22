@@ -4,6 +4,7 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 import {type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState} from 'react';
 
 import {BLOCKS_WITHOUT_ACT} from '../blocks/blockRegistry';
+import {useEditorSearch} from '../hooks/useEditorSearch';
 import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
 import {updateBlockType, updateBlockTypeForSelection} from '../tiptap/scriptBlock/commands';
 import {normalizeBlockNodeType} from '../tiptap/scriptCore';
@@ -28,7 +29,7 @@ const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState(false);
-    const [searchQuery, setSearchQuery] = useState('');
+    const search = useEditorSearch({editor});
     const {
         activeType,
         activeBlockInfo,
@@ -177,13 +178,17 @@ const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
             />
             <span className={styles.spacer} />
             <SearchControl
-                value={searchQuery}
-                currentResult={0}
-                resultCount={0}
+                ref={search.inputRef}
+                value={search.query}
+                currentResult={search.currentResult}
+                resultCount={search.resultCount}
                 aria-label="Search script"
                 placeholder="Find in script…"
-                onChange={event => setSearchQuery(event.target.value)}
-                onClear={() => setSearchQuery('')}
+                onChange={search.onQueryChange}
+                onKeyDown={search.onInputKeyDown}
+                onClear={search.onClear}
+                onPreviousResult={search.onPreviousResult}
+                onNextResult={search.onNextResult}
             />
         </div>
     );

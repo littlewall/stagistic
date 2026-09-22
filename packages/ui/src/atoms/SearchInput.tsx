@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import {type ComponentPropsWithoutRef, type ReactElement, type ReactNode} from 'react';
+import {type ComponentPropsWithoutRef, forwardRef, type ReactNode} from 'react';
 
 import {SearchIcon} from '../icons/ui/SearchIcon';
 import {Input} from './Input';
@@ -26,14 +26,16 @@ const SIZE_CLASS: Record<SearchInputSize, string> = {
     toolbar: styles.sizeToolbar,
 };
 
-export const SearchInput = ({size = 'md', className, startAdornment, endAdornment, ...props}: SearchInputProps): ReactElement => {
+export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({size = 'md', className, startAdornment, endAdornment, ...props}, ref) => {
     const resolvedStartAdornment = startAdornment === undefined ? <SearchIcon className={styles.icon} aria-hidden="true" /> : startAdornment;
 
     return (
         <div className={clsx(styles.field, SIZE_CLASS[size], className)}>
             {resolvedStartAdornment ? <span className={styles.startAdornment}>{resolvedStartAdornment}</span> : null}
-            <Input {...props} type="search" className={styles.input} />
+            <Input {...props} ref={ref} type="search" className={styles.input} />
             {endAdornment ? <span className={styles.endAdornment}>{endAdornment}</span> : null}
         </div>
     );
-};
+});
+
+SearchInput.displayName = 'SearchInput';
