@@ -1,12 +1,5 @@
-import {
-    DEFAULT_EDITOR_SETTINGS,
-    type TitlePageSettings,
-} from '@stagistic/script';
-import {
-    describe,
-    expect,
-    it,
-} from 'vite-plus/test';
+import {DEFAULT_EDITOR_SETTINGS, type TitlePageSettings} from '@stagistic/script';
+import {describe, expect, it} from 'vite-plus/test';
 
 import type {VisualLine} from '../visualLine';
 import {buildTitlePageItems} from './buildTitlePageItems';
@@ -53,7 +46,10 @@ describe('buildTitlePageItems', () => {
 
     it('omits credit rows with no label and no authors', () => {
         const titlePage: TitlePageSettings = {
-            credits: [{credit: '', authors: ['']}, {credit: 'lyrics by', authors: ['Maria']}],
+            credits: [
+                {credit: '', authors: ['']},
+                {credit: 'lyrics by', authors: ['Maria']},
+            ],
         };
         const lines = buildTitlePageItems(titlePage, 'T', DEFAULT_EDITOR_SETTINGS);
         const creditLikeLines = lines.filter(line => lineText(line).includes('by'));
@@ -104,5 +100,21 @@ describe('buildTitlePageItems', () => {
         expect(subtitle).toBeDefined();
         expect(subtitle && subtitle.y).toBeGreaterThan(lines[0].y);
         expect(source?.runs[0].italic).toBe(true);
+    });
+
+    it('keeps the title below a tall logo', () => {
+        const titlePage: TitlePageSettings = {
+            logo: {
+                dataUrl: 'data:image/png;base64,aGVsbG8=',
+                filename: 'logo.png',
+                mimeType: 'image/png',
+                widthPx: 400,
+                heightPx: 1000,
+                sizeBytes: 5,
+            },
+        };
+        const lines = buildTitlePageItems(titlePage, 'My Play', DEFAULT_EDITOR_SETTINGS);
+
+        expect(lines[0].y).toBeGreaterThan(DEFAULT_EDITOR_SETTINGS.page.heightPx * 0.28);
     });
 });

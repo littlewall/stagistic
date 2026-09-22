@@ -331,6 +331,29 @@ describe('transcribeExportPlan', () => {
         expect(sceneIndex).toBeGreaterThan(firstBreak);
     });
 
+    it('places a configured logo before the title on page one', () => {
+        const transcript = transcribeExportPlan(
+            {
+                ...plan([block('scene', 's1', 'Scene one')]),
+                scriptTitle: 'My Play',
+                titlePage: {
+                    logo: {
+                        dataUrl: 'data:image/png;base64,aGVsbG8=',
+                        filename: 'logo.png',
+                        mimeType: 'image/png',
+                        widthPx: 400,
+                        heightPx: 200,
+                        sizeBytes: 5,
+                    },
+                },
+            },
+            DEFAULT_EDITOR_SETTINGS,
+        );
+
+        expect(transcript.items[0]).toMatchObject({type: 'title-page-image'});
+        expect(indexOfText(transcript.items, 'My Play')).toBe(1);
+    });
+
     it('adds an unnumbered balancing blank when no leading pages are configured', () => {
         const transcript = transcribeExportPlan(plan([block('scene', 's1', 'Scene one')]), DEFAULT_EDITOR_SETTINGS);
         const pages = splitPages(transcript.items);

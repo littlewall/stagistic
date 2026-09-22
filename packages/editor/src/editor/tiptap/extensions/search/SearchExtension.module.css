@@ -1,0 +1,7 @@
+.match {
+    background: color-mix(in srgb, var(--base-selection) 38%, transparent);
+}
+
+.current {
+    background: color-mix(in srgb, var(--base-selection) 70%, transparent);
+}

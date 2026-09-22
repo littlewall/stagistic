@@ -1,9 +1,4 @@
-import {
-    formatDatePreview,
-    getTodayIso,
-    type TitlePageDateFormat,
-    type TitlePageSettings,
-} from '@stagistic/script';
+import {formatDatePreview, getTodayIso, type TitlePageDateFormat, type TitlePageSettings} from '@stagistic/script';
 import {
     Checkbox,
     formControlStyles,
@@ -15,41 +10,44 @@ import {
     PanelHeader,
     SettingsGroup,
 } from '@stagistic/ui';
-import {
-    useCallback,
-    useEffect,
-    useMemo,
-    useState,
-} from 'react';
+import {useCallback, useEffect, useMemo, useState} from 'react';
+
+import {TitlePageLogoField} from './TitlePageLogoField';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import styles from './TitlePageSettingsPanel.module.css';
 
 const CREDITS_COLUMNS: readonly InputTableColumnDef[] = [
     {
-        key: 'credit', label: 'Credit', type: 'string', placeholder: 'Written by',
-    }, {
-        key: 'authors', label: 'Author(s)', type: 'string-array', placeholder: 'Author name', addEntryLabel: 'Add author',
+        key: 'credit',
+        label: 'Credit',
+        type: 'string',
+        placeholder: 'Written by',
+    },
+    {
+        key: 'authors',
+        label: 'Author(s)',
+        type: 'string-array',
+        placeholder: 'Author name',
+        addEntryLabel: 'Add author',
     },
 ];
 
 const CREDITS_ROW_COUNT = {type: 'dynamic' as const, min: 1};
 
-const DATE_FORMAT_OPTIONS: FormSelectOption[] = [{value: 'dmy', label: 'dd/mm/yyyy'}, {value: 'mdy', label: 'mm/dd/yyyy'}];
+const DATE_FORMAT_OPTIONS: FormSelectOption[] = [
+    {value: 'dmy', label: 'dd/mm/yyyy'},
+    {value: 'mdy', label: 'mm/dd/yyyy'},
+];
 
 interface TitlePageSettingsPanelProps {
-    scriptTitle: string,
-    settings: TitlePageSettings,
-    onUpdateScriptTitle: (title: string) => void,
-    onUpdate: (patch: Partial<TitlePageSettings>) => void,
+    scriptTitle: string;
+    settings: TitlePageSettings;
+    onUpdateScriptTitle: (title: string) => void;
+    onUpdate: (patch: Partial<TitlePageSettings>) => void;
 }
 
-export const TitlePageSettingsPanel = ({
-    scriptTitle,
-    settings,
-    onUpdateScriptTitle,
-    onUpdate,
-}: TitlePageSettingsPanelProps) => {
+export const TitlePageSettingsPanel = ({scriptTitle, settings, onUpdateScriptTitle, onUpdate}: TitlePageSettingsPanelProps) => {
     const draftDateMode = settings.draftDateMode ?? 'auto';
     const dateFormat = settings.dateFormat ?? 'mdy';
     const [localDraftDateMode, setLocalDraftDateMode] = useState(draftDateMode);
@@ -75,32 +73,44 @@ export const TitlePageSettingsPanel = ({
     })();
 
     const creditRows = useMemo<InputTableRow[]>(
-        () => (settings.credits ?? [{credit: 'Written by', authors: ['']}]).map(c => ({
-            credit: c.credit,
-            authors: c.authors,
-        }))
-        , [settings.credits],
+        () =>
+            (settings.credits ?? [{credit: 'Written by', authors: ['']}]).map(c => ({
+                credit: c.credit,
+                authors: c.authors,
+            })),
+        [settings.credits],
     );
 
-    const handleCreditsChange = useCallback((rows: InputTableRow[]) => {
-        onUpdate({
-            credits: rows.map(r => ({
-                credit: r['credit'] as string,
-                authors: r['authors'] as string[],
-            })),
-        });
-    }, [onUpdate]);
+    const handleCreditsChange = useCallback(
+        (rows: InputTableRow[]) => {
+            onUpdate({
+                credits: rows.map(r => ({
+                    credit: r['credit'] as string,
+                    authors: r['authors'] as string[],
+                })),
+            });
+        },
+        [onUpdate],
+    );
 
-    const handleContactChange = useCallback((value: string) => {
-        onUpdate({contact: value.replace(/\n{2,}/g, '\n')});
-    }, [onUpdate]);
+    const handleContactChange = useCallback(
+        (value: string) => {
+            onUpdate({contact: value.replace(/\n{2,}/g, '\n')});
+        },
+        [onUpdate],
+    );
 
     return (
         <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
             <PanelHeader level={3} title="Title page" />
             <div className={styles.section}>
+                <TitlePageLogoField logo={settings.logo} onChange={logo => onUpdate({logo})} />
+            </div>
+            <div className={styles.section}>
                 <div className={formControlStyles.field}>
-                    <label className={formControlStyles.label} htmlFor="tp-title">Title</label>
+                    <label className={formControlStyles.label} htmlFor="tp-title">
+                        Title
+                    </label>
                     <input
                         id="tp-title"
                         type="text"
@@ -111,7 +121,9 @@ export const TitlePageSettingsPanel = ({
                     />
                 </div>
                 <div className={formControlStyles.field}>
-                    <label className={formControlStyles.label} htmlFor="tp-subtitle">Subtitle</label>
+                    <label className={formControlStyles.label} htmlFor="tp-subtitle">
+                        Subtitle
+                    </label>
                     <input
                         id="tp-subtitle"
                         type="text"
@@ -135,7 +147,9 @@ export const TitlePageSettingsPanel = ({
             </div>
             <div className={styles.section}>
                 <div className={formControlStyles.field}>
-                    <label className={formControlStyles.label} htmlFor="tp-source">Source</label>
+                    <label className={formControlStyles.label} htmlFor="tp-source">
+                        Source
+                    </label>
                     <input
                         id="tp-source"
                         type="text"
@@ -152,7 +166,9 @@ export const TitlePageSettingsPanel = ({
                 <div className={styles.title}>Draft Date</div>
                 <div className={styles.draftDateRow}>
                     <div className={styles.draftDateField}>
-                        <label className={styles.subFieldLabel} htmlFor="tp-date-format">Date format</label>
+                        <label className={styles.subFieldLabel} htmlFor="tp-date-format">
+                            Date format
+                        </label>
                         <FormSelect
                             id="tp-date-format"
                             value={localDateFormat}
@@ -167,7 +183,9 @@ export const TitlePageSettingsPanel = ({
                         />
                     </div>
                     <div className={styles.draftDateField}>
-                        <label className={styles.subFieldLabel} htmlFor="tp-date">Date</label>
+                        <label className={styles.subFieldLabel} htmlFor="tp-date">
+                            Date
+                        </label>
                         <input
                             id="tp-date"
                             type="date"
@@ -202,7 +220,9 @@ export const TitlePageSettingsPanel = ({
             </div>
             <div className={styles.section}>
                 <div className={formControlStyles.field}>
-                    <label className={formControlStyles.label} htmlFor="tp-copyright">Copyright</label>
+                    <label className={formControlStyles.label} htmlFor="tp-copyright">
+                        Copyright
+                    </label>
                     <input
                         id="tp-copyright"
                         type="text"
@@ -217,7 +237,9 @@ export const TitlePageSettingsPanel = ({
             </div>
             <div className={styles.section}>
                 <div className={formControlStyles.field}>
-                    <label className={formControlStyles.label} htmlFor="tp-contact">Contact</label>
+                    <label className={formControlStyles.label} htmlFor="tp-contact">
+                        Contact
+                    </label>
                     <textarea
                         id="tp-contact"
                         className={formControlStyles.textarea}

@@ -27,6 +27,7 @@ import {
     SceneCollapseExtension,
     SceneGuardExtension,
     SceneNumberingExtension,
+    SearchExtension,
     ScriptBehaviorExtension,
 } from './tiptap/extensions';
 import {DocumentWithSettings} from './tiptap/extensions/DocumentExtension';
@@ -198,6 +199,7 @@ export const useEditorExtensions = ({
             MusicNumberingExtension,
             MusicRailExtension,
             PlaceholderExtension,
+            SearchExtension,
             BlockFocusFlashExtension,
             sceneCommandsExtension,
             SceneCollapseExtension,

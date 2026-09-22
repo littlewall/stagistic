@@ -29,16 +29,70 @@
     --search-padding-end: var(--control-trigger-padding-inline);
 }
 
-.icon {
+.sizeToolbar {
+    --search-icon-size: var(--icon-size-sm);
+    --search-icon-inset: 0rem;
+    --search-text-inset: var(--space-lg);
+    --search-padding-end: 0rem;
+    --input-bg: transparent;
+    --input-border-color: transparent;
+    --input-hover-bg: transparent;
+    --input-radius: 0;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+
+    & .endAdornment {
+        position: static;
+        transform: none;
+        grid-column: 2;
+        height: 100%;
+    }
+
+    & .input {
+        grid-column: 1;
+        padding: 0 var(--space-sm) 0 var(--control-trigger-padding-inline);
+
+        &::-webkit-search-cancel-button {
+            display: none;
+        }
+
+        &[data-focused] {
+            border-color: transparent;
+        }
+
+        &[data-focus-visible] {
+            outline: none;
+        }
+    }
+}
+
+.startAdornment {
     pointer-events: none;
     position: absolute;
     z-index: 1;
     top: 50%;
     left: var(--search-icon-inset);
     transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.icon {
     width: var(--search-icon-size);
     height: var(--search-icon-size);
     color: var(--color-text-muted);
+}
+
+.endAdornment {
+    position: absolute;
+    z-index: 1;
+    top: 50%;
+    right: var(--search-icon-inset);
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
 }
 
 /* Two classes deep so the start inset survives `Input`'s own padding shorthand. */

@@ -19,5 +19,6 @@ export * from './plan';
 export * from './scenes';
 export * from './scriptData';
 export * from './titlePage/buildTitlePageItems';
+export * from './titlePage/buildTitlePageLogoItem';
 export * from './transcribeExportPlan';
 export * from './visualLine';

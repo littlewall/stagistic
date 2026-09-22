@@ -23,11 +23,7 @@
 
 // ─── Behaviour ───────────────────────────────────────────────────────────────
 
-export {
-    characterTagComposeKey,
-    CharacterTagInputExtension,
-    getCharacterTagComposeFromState,
-} from './CharacterTagInputExtension';
+export {characterTagComposeKey, CharacterTagInputExtension, getCharacterTagComposeFromState} from './CharacterTagInputExtension';
 export {
     EMPTY_ENTER_CHOOSER_WRITER_TYPES,
     EmptyEnterChooserExtension,
@@ -35,12 +31,7 @@ export {
     isEmptyEnterChooserWriterType,
 } from './EmptyEnterChooserExtension';
 export {MusicCommandsExtension} from './music/MusicCommandsExtension';
-export {
-    getMusicComposeFromState,
-    musicComposeKey,
-    type MusicComposeState,
-    MusicInputExtension,
-} from './MusicInputExtension';
+export {getMusicComposeFromState, musicComposeKey, type MusicComposeState, MusicInputExtension} from './MusicInputExtension';
 export {MusicNumberingExtension} from './MusicNumberingExtension';
 export {MusicRailExtension} from './musicRail/MusicRailExtension';
 export {SceneCommandsExtension} from './SceneCommandsExtension';
@@ -48,19 +39,12 @@ export {ScriptBehaviorExtension} from './ScriptBehaviorExtension';
 
 // ─── Decorations ─────────────────────────────────────────────────────────────
 
-export {
-    BLOCK_FOCUS_FLASH_ATTRIBUTE,
-    BLOCK_FOCUS_FLASH_DURATION_MS,
-    BlockFocusFlashExtension,
-} from './BlockFocusFlashExtension';
+export {BLOCK_FOCUS_FLASH_ATTRIBUTE, BLOCK_FOCUS_FLASH_DURATION_MS, BlockFocusFlashExtension} from './BlockFocusFlashExtension';
 export {PlaceholderExtension} from './PlaceholderExtension';
+export {getEditorSearchSnapshot, SearchExtension, type EditorSearchSnapshot, type SearchCriteria, type SearchResult} from './search';
 export {SceneGuardExtension} from './SceneGuardExtension';
 export {SceneNumberingExtension} from './SceneNumberingExtension';
-export {
-    getSceneCollapseSnapshot,
-    SceneCollapseExtension,
-    type SceneCollapseSnapshot,
-} from './sceneCollapse/SceneCollapseExtension';
+export {getSceneCollapseSnapshot, SceneCollapseExtension, type SceneCollapseSnapshot} from './sceneCollapse/SceneCollapseExtension';
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
 
@@ -69,12 +53,6 @@ export {createPaginationExtension, PaginationExtension} from './PaginationExtens
 
 // ─── Runtime indexes ─────────────────────────────────────────────────────────
 
-export {
-    BlockUiEventsExtension,
-    getBlockUiEventsFromState,
-} from './BlockUiEventsExtension';
+export {BlockUiEventsExtension, getBlockUiEventsFromState} from './BlockUiEventsExtension';
 export {CharacterRefSyncExtension} from './CharacterRefSyncExtension';
-export {
-    EditorRuntimeExtension,
-    getEditorRuntimeFromState,
-} from './EditorRuntimeExtension';
+export {EditorRuntimeExtension, getEditorRuntimeFromState} from './EditorRuntimeExtension';

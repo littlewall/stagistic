@@ -6,6 +6,7 @@ import {
     PanelHeader,
     ProgressCircle,
     RadioChoiceGroup,
+    SearchControl,
     SearchInput,
     Select,
     SettingRow,
@@ -18,17 +19,8 @@ import {
 import type {CatalogGroup} from './types';
 
 const PlusGlyph = () => (
-    <svg
-        viewBox="0 0 16 16"
-        fill="none"
-        aria-hidden="true"
-    >
-        <path
-            d="M8 3v10M3 8h10"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-        />
+    <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
     </svg>
 );
 
@@ -54,11 +46,8 @@ export const controls: CatalogGroup = {
                 {
                     label: 'icon',
                     node: (
-                        <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label="Menu"
-                        >☰
+                        <Button variant="ghost" size="icon" aria-label="Menu">
+                            ☰
                         </Button>
                     ),
                 },
@@ -75,23 +64,54 @@ export const controls: CatalogGroup = {
              */
             variables: [],
             samples: [
-                {label: 'ghost / sm', node: <IconButton aria-label="Add"><PlusGlyph /></IconButton>},
                 {
-                    label: 'outline / md / pill',
+                    label: 'ghost / sm',
                     node: (
-                        <IconButton
-                            variant="outline"
-                            size="md"
-                            shape="pill"
-                            aria-label="Add"
-                        ><PlusGlyph />
+                        <IconButton aria-label="Add">
+                            <PlusGlyph />
                         </IconButton>
                     ),
                 },
-                {label: 'filled / sm', node: <IconButton variant="filled" aria-label="Add"><PlusGlyph /></IconButton>},
-                {label: 'xs', node: <IconButton size="xs" aria-label="Add"><PlusGlyph /></IconButton>},
-                {label: 'danger', node: <IconButton tone="danger" aria-label="Remove"><PlusGlyph /></IconButton>},
-                {label: 'selected', node: <IconButton isSelected aria-label="Bold"><PlusGlyph /></IconButton>},
+                {
+                    label: 'outline / md / pill',
+                    node: (
+                        <IconButton variant="outline" size="md" shape="pill" aria-label="Add">
+                            <PlusGlyph />
+                        </IconButton>
+                    ),
+                },
+                {
+                    label: 'filled / sm',
+                    node: (
+                        <IconButton variant="filled" aria-label="Add">
+                            <PlusGlyph />
+                        </IconButton>
+                    ),
+                },
+                {
+                    label: 'xs',
+                    node: (
+                        <IconButton size="xs" aria-label="Add">
+                            <PlusGlyph />
+                        </IconButton>
+                    ),
+                },
+                {
+                    label: 'danger',
+                    node: (
+                        <IconButton tone="danger" aria-label="Remove">
+                            <PlusGlyph />
+                        </IconButton>
+                    ),
+                },
+                {
+                    label: 'selected',
+                    node: (
+                        <IconButton isSelected aria-label="Bold">
+                            <PlusGlyph />
+                        </IconButton>
+                    ),
+                },
             ],
         },
         {
@@ -107,8 +127,12 @@ export const controls: CatalogGroup = {
                     label: 'group + rows',
                     node: (
                         <SettingsGroup>
-                            <SettingRow><span>First</span></SettingRow>
-                            <SettingRow><span>Second</span></SettingRow>
+                            <SettingRow>
+                                <span>First</span>
+                            </SettingRow>
+                            <SettingRow>
+                                <span>Second</span>
+                            </SettingRow>
                         </SettingsGroup>
                     ),
                 },
@@ -117,7 +141,16 @@ export const controls: CatalogGroup = {
         {
             name: 'SettingRow',
             variables: [],
-            samples: [{label: 'row', node: <SettingRow><span>Label</span></SettingRow>}],
+            samples: [
+                {
+                    label: 'row',
+                    node: (
+                        <SettingRow>
+                            <span>Label</span>
+                        </SettingRow>
+                    ),
+                },
+            ],
         },
         {
             name: 'PanelHeader',
@@ -126,7 +159,8 @@ export const controls: CatalogGroup = {
                 {
                     label: 'title + description',
                     node: <PanelHeader title="Layout" description="Adjust the page." />,
-                }, {label: 'title only', node: <PanelHeader title="Layout" />},
+                },
+                {label: 'title only', node: <PanelHeader title="Layout" />},
             ],
         },
         {
@@ -150,30 +184,10 @@ export const controls: CatalogGroup = {
                 '--input-radius',
             ],
             samples: [
-                {label: 'sm',
-                    node: <Input
-                        aria-label="Small input"
-                        size="sm"
-                        placeholder="Small"
-                    />},
-                {label: 'md',
-                    node: <Input
-                        aria-label="Medium input"
-                        size="md"
-                        placeholder="Medium"
-                    />},
-                {label: 'raised',
-                    node: <Input
-                        aria-label="Raised input"
-                        variant="raised"
-                        placeholder="Raised"
-                    />},
-                {label: 'disabled',
-                    node: <Input
-                        aria-label="Disabled input"
-                        placeholder="Disabled"
-                        disabled
-                    />},
+                {label: 'sm', node: <Input aria-label="Small input" size="sm" placeholder="Small" />},
+                {label: 'md', node: <Input aria-label="Medium input" size="md" placeholder="Medium" />},
+                {label: 'raised', node: <Input aria-label="Raised input" variant="raised" placeholder="Raised" />},
+                {label: 'disabled', node: <Input aria-label="Disabled input" placeholder="Disabled" disabled />},
             ],
         },
         {
@@ -211,7 +225,10 @@ export const controls: CatalogGroup = {
                             <Select
                                 ariaLabel="Plain select"
                                 value="a"
-                                options={[{value: 'a', label: 'Option A'}, {value: 'b', label: 'Option B'}]}
+                                options={[
+                                    {value: 'a', label: 'Option A'},
+                                    {value: 'b', label: 'Option B'},
+                                ]}
                                 onChange={() => {}}
                             />
                         </div>
@@ -226,7 +243,10 @@ export const controls: CatalogGroup = {
                                 variant="form"
                                 size="lg"
                                 value="a"
-                                options={[{value: 'a', label: 'Option A'}, {value: 'b', label: 'Option B'}]}
+                                options={[
+                                    {value: 'a', label: 'Option A'},
+                                    {value: 'b', label: 'Option B'},
+                                ]}
                                 onChange={() => {}}
                             />
                         </div>
@@ -241,7 +261,10 @@ export const controls: CatalogGroup = {
                                 variant="panel"
                                 align="start"
                                 value="a"
-                                options={[{value: 'a', label: 'Option A'}, {value: 'b', label: 'Option B'}]}
+                                options={[
+                                    {value: 'a', label: 'Option A'},
+                                    {value: 'b', label: 'Option B'},
+                                ]}
                                 onChange={() => {}}
                             />
                         </div>
@@ -261,9 +284,14 @@ export const controls: CatalogGroup = {
                             value="a"
                             options={[
                                 {
-                                    value: 'a', label: 'Option A', description: 'First choice',
-                                }, {
-                                    value: 'b', label: 'Option B', description: 'Second choice',
+                                    value: 'a',
+                                    label: 'Option A',
+                                    description: 'First choice',
+                                },
+                                {
+                                    value: 'b',
+                                    label: 'Option B',
+                                    description: 'Second choice',
                                 },
                             ]}
                             onChange={() => {}}
@@ -290,7 +318,8 @@ export const controls: CatalogGroup = {
                             </Tooltip>
                         </div>
                     ),
-                }, {
+                },
+                {
                     label: 'with shortcut',
                     node: (
                         <div style={{position: 'relative'}}>
@@ -304,12 +333,25 @@ export const controls: CatalogGroup = {
         },
         {
             name: 'SearchInput',
-            variables: [
-                '--search-height',
-                '--search-radius',
-                '--search-icon-inset',
+            variables: ['--search-height', '--search-radius', '--search-icon-inset'],
+            samples: [
+                {label: 'md', node: <SearchInput placeholder="Search scripts" />},
+                {label: 'sm', node: <SearchInput size="sm" placeholder="Filter" />},
             ],
-            samples: [{label: 'md', node: <SearchInput placeholder="Search scripts" />}, {label: 'sm', node: <SearchInput size="sm" placeholder="Filter" />}],
+        },
+        {
+            name: 'SearchControl',
+            variables: ['--search-control-width'],
+            samples: [
+                {
+                    label: 'empty',
+                    node: <SearchControl value="" currentResult={0} resultCount={0} aria-label="Search script" placeholder="Find in script…" readOnly />,
+                },
+                {
+                    label: 'with results',
+                    node: <SearchControl value="night" currentResult={2} resultCount={7} aria-label="Search script" onClear={() => {}} readOnly />,
+                },
+            ],
         },
     ],
 };
