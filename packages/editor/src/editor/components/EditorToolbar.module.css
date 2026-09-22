@@ -75,7 +75,7 @@
     grid-template-columns: auto minmax(0, 1fr) auto;
     gap: var(--control-trigger-gap);
     align-items: center;
-    width: 210px;
+    width: 11.5rem;
     height: var(--control-trigger-height);
     padding: 0 var(--control-trigger-padding-inline);
     font-size: var(--control-trigger-font-size);

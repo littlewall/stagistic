@@ -39,6 +39,7 @@ import type {ContentsPageNumbers} from './initialPages/contents/contentsPageNumb
 import {planIntegratedAssembly} from './pdf/planIntegratedAssembly';
 import type {ExportPlan} from './plan';
 import {buildTitlePageItems} from './titlePage/buildTitlePageItems';
+import {buildTitlePageLogoItem} from './titlePage/buildTitlePageLogoItem';
 import type {PageItem, TranscriptResult, VisualLine, VisualRun} from './visualLine';
 
 const PAGE_BREAK_ITEM: PageItem = {type: '__page_break__'};
@@ -789,7 +790,8 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
               .filter(page => page.items.length > 0 || page.isInsertedBlank)
         : allScriptPages;
     const scriptItems = withHeaderFooter(scriptPages, plan, settings);
-    const titleItems = buildTitlePageItems(plan.titlePage, plan.scriptTitle, settings);
+    const titlePageLogo = buildTitlePageLogoItem(plan.titlePage, settings);
+    const titleItems: PageItem[] = [...(titlePageLogo ? [titlePageLogo] : []), ...buildTitlePageItems(plan.titlePage, plan.scriptTitle, settings)];
     const scriptPageSourceBlockIds = scriptPages.map(page => [...page.sourceBlockIds]);
     const scriptPageNumberByBlockId = new Map<string, number>();
 

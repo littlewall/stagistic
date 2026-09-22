@@ -1,4 +1,4 @@
-import type {TitlePageCredit, TitlePageSettings} from '@stagistic/script';
+import type {TitlePageCredit, TitlePageLogo, TitlePageSettings} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 
 import * as dbQueries from '../queries';
@@ -18,10 +18,19 @@ interface CreateTitlePageHandlersArgs {
  * load()/save() below. The remaining fields live in scriptSettingsTitlePage.
  */
 const STRING_FIELDS = ['source', 'draftDateMode', 'draftDate', 'dateFormat', 'contact', 'copyright'] as const;
+const LOGO_FIELD = 'logo';
 
 type StringField = (typeof STRING_FIELDS)[number];
 
 const isStringField = (value: string): value is StringField => STRING_FIELDS.includes(value as StringField);
+
+const parseLogo = (value: string): TitlePageLogo | undefined => {
+    try {
+        return JSON.parse(value) as TitlePageLogo;
+    } catch {
+        return undefined;
+    }
+};
 
 export const toTitlePageSettings = (rows: Awaited<ReturnType<typeof dbQueries.listScriptTitlePageFields>>): TitlePageSettings | null => {
     if (rows.length === 0) {
@@ -32,6 +41,12 @@ export const toTitlePageSettings = (rows: Awaited<ReturnType<typeof dbQueries.li
     const credits = new Map<number, TitlePageCredit>();
 
     rows.forEach(row => {
+        if (row.fieldKey === LOGO_FIELD) {
+            settings.logo = parseLogo(row.fieldValue);
+
+            return;
+        }
+
         if (isStringField(row.fieldKey)) {
             Object.assign(settings, {[row.fieldKey]: row.fieldValue});
 
@@ -89,6 +104,9 @@ export const writeTitlePageFieldsTx = async (tx: DbClient, scriptId: string, set
             addRow(fieldKey, value);
         }
     });
+    if (settings.logo) {
+        addRow(LOGO_FIELD, JSON.stringify(settings.logo));
+    }
     settings.credits?.forEach((credit, groupNo) => {
         addRow('credit_label', credit.credit, groupNo);
         credit.authors.forEach(author => addRow('credit_author', author, groupNo));

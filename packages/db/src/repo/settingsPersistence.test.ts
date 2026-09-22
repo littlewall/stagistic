@@ -1,8 +1,4 @@
-import {
-    describe,
-    expect,
-    it,
-} from 'vite-plus/test';
+import {describe, expect, it} from 'vite-plus/test';
 
 import {createTestDb, seedScript} from '../testing/createTestDb';
 import {createSettingsHandlers} from './config';
@@ -70,6 +66,14 @@ describe('settings persistence', () => {
         await handlers.save('script-title-page', {
             subtitle: 'A play',
             credits: [{credit: 'Written by', authors: ['Ada', 'Grace']}],
+            logo: {
+                dataUrl: 'data:image/png;base64,aGVsbG8=',
+                filename: 'logo.png',
+                mimeType: 'image/png',
+                widthPx: 400,
+                heightPx: 200,
+                sizeBytes: 5,
+            },
         });
 
         const stored = await handlers.load('script-title-page');
@@ -78,6 +82,14 @@ describe('settings persistence', () => {
 
         expect(stored?.subtitle).toBe('A play');
         expect(stored?.credits).toEqual([{credit: 'Written by', authors: ['Ada', 'Grace']}]);
+        expect(stored?.logo).toEqual({
+            dataUrl: 'data:image/png;base64,aGVsbG8=',
+            filename: 'logo.png',
+            mimeType: 'image/png',
+            widthPx: 400,
+            heightPx: 200,
+            sizeBytes: 5,
+        });
         expect(summary?.subtitle).toBe('A play');
     });
 

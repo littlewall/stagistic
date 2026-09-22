@@ -1,29 +1,16 @@
 import {jsPDF} from 'jspdf';
-import {
-    PDFDocument,
-    type PDFPage,
-    rgb,
-    StandardFonts,
-} from 'pdf-lib';
+import {PDFDocument, type PDFPage, rgb, StandardFonts} from 'pdf-lib';
 
-import type {
-    PageItem,
-    StaffRowItem,
-    TranscriptResult,
-    VisualLine,
-    VisualRun,
-} from '../visualLine';
+import type {PageItem, StaffRowItem, TitlePageImageItem, TranscriptResult, VisualLine, VisualRun} from '../visualLine';
 import {drawStaffRow} from './drawStaffRow';
-import {
-    getPdfMonoFontFamily,
-    registerFonts,
-} from './fonts';
+import {getPdfMonoFontFamily, registerFonts} from './fonts';
 import {planIntegratedAssembly} from './planIntegratedAssembly';
 
 const PX_TO_PT = 72 / 96;
 
 const isPageBreak = (item: PageItem): item is {type: '__page_break__'} => 'type' in item && item.type === '__page_break__';
 const isStaffRow = (item: PageItem): item is StaffRowItem => 'type' in item && item.type === 'staff-row';
+const isTitlePageImage = (item: PageItem): item is TitlePageImageItem => 'type' in item && item.type === 'title-page-image';
 const getFontStyle = (run: VisualRun) => {
     if (run.bold && run.italic) {
         return 'bolditalic';
@@ -36,11 +23,7 @@ const getFontStyle = (run: VisualRun) => {
     return run.italic ? 'italic' : 'normal';
 };
 
-const drawUnderline = (
-    doc: jsPDF,
-    run: VisualRun,
-    y: number,
-) => {
+const drawUnderline = (doc: jsPDF, run: VisualRun, y: number) => {
     const xPt = run.x * PX_TO_PT;
     const yPt = (y + run.fontSizePx * 0.85) * PX_TO_PT;
     const width = doc.getTextWidth(run.text);
@@ -49,11 +32,7 @@ const drawUnderline = (
     doc.line(xPt, yPt, xPt + width, yPt);
 };
 
-const drawLine = (
-    doc: jsPDF,
-    line: VisualLine,
-    monoFontFamily: string,
-) => {
+const drawLine = (doc: jsPDF, line: VisualLine, monoFontFamily: string) => {
     line.runs.forEach(run => {
         const family = run.fontFamily.includes('Courier') ? monoFontFamily : 'Helvetica';
 
@@ -79,11 +58,7 @@ const getFooterFont = (footer: NonNullable<TranscriptResult['integratedFooter']>
     return footer.italic ? StandardFonts.CourierOblique : StandardFonts.Courier;
 };
 
-const resolveFooterX = (
-    transcript: TranscriptResult,
-    footer: NonNullable<TranscriptResult['integratedFooter']>,
-    textWidth: number,
-) => {
+const resolveFooterX = (transcript: TranscriptResult, footer: NonNullable<TranscriptResult['integratedFooter']>, textWidth: number) => {
     const contentWidth = transcript.pageWidthPx - transcript.marginLeftPx - transcript.marginRightPx;
 
     if (footer.alignment === 'center') {
@@ -97,12 +72,7 @@ const resolveFooterX = (
     return transcript.marginLeftPx;
 };
 
-const drawIntegratedPageNumber = async (
-    document: PDFDocument,
-    page: PDFPage,
-    transcript: TranscriptResult,
-    pageNumber: number,
-) => {
+const drawIntegratedPageNumber = async (document: PDFDocument, page: PDFPage, transcript: TranscriptResult, pageNumber: number) => {
     const footer = transcript.integratedFooter;
 
     if (!footer) {
@@ -128,7 +98,11 @@ const drawIntegratedPageNumber = async (
         color: rgb(1, 1, 1),
     });
     page.drawText(text, {
-        x, y: baselineY, size: fontSizePt, font, color: rgb(0, 0, 0),
+        x,
+        y: baselineY,
+        size: fontSizePt,
+        font,
+        color: rgb(0, 0, 0),
     });
 
     if (footer.underline) {
@@ -141,9 +115,7 @@ const drawIntegratedPageNumber = async (
     }
 };
 
-export const drawPdf = async (
-    transcript: TranscriptResult,
-): Promise<Blob> => {
+export const drawPdf = async (transcript: TranscriptResult): Promise<Blob> => {
     const pageWidthPt = transcript.pageWidthPx * PX_TO_PT;
     const pageHeightPt = transcript.pageHeightPx * PX_TO_PT;
     const doc = new jsPDF({
@@ -169,6 +141,12 @@ export const drawPdf = async (
 
         if (isStaffRow(item)) {
             drawStaffRow(doc, item, monoFontFamily);
+
+            return;
+        }
+
+        if (isTitlePageImage(item)) {
+            doc.addImage(item.dataUrl, item.format, item.x * PX_TO_PT, item.y * PX_TO_PT, item.widthPx * PX_TO_PT, item.heightPx * PX_TO_PT);
 
             return;
         }

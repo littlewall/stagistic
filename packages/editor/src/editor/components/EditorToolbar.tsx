@@ -1,55 +1,34 @@
-import {
-    type BlockShortcut,
-    type ScriptBlockNodeType,
-} from '@stagistic/script';
+import {type BlockShortcut, type ScriptBlockNodeType} from '@stagistic/script';
+import {SearchControl} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
-import {
-    type MouseEvent as ReactMouseEvent,
-    useCallback,
-    useEffect,
-    useRef,
-    useState,
-} from 'react';
+import {type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState} from 'react';
 
 import {BLOCKS_WITHOUT_ACT} from '../blocks/blockRegistry';
 import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
-import {
-    updateBlockType,
-    updateBlockTypeForSelection,
-} from '../tiptap/scriptBlock/commands';
+import {updateBlockType, updateBlockTypeForSelection} from '../tiptap/scriptBlock/commands';
 import {normalizeBlockNodeType} from '../tiptap/scriptCore';
-import styles from './EditorToolbar.module.css';
 import {BlockTypeSelect} from './toolbar/BlockTypeSelect';
-import type {
-    BlockTypeSelectActions,
-    BlockTypeSelectState,
-    InlineMarksGroupActions,
-    InlineMarksGroupState,
-} from './toolbar/contracts';
+import type {BlockTypeSelectActions, BlockTypeSelectState, InlineMarksGroupActions, InlineMarksGroupState} from './toolbar/contracts';
 import {InlineMarksGroup} from './toolbar/InlineMarksGroup';
 import {useDropdownDismiss} from './toolbar/useDropdownDismiss';
 import {useToolbarState} from './toolbar/useToolbarState';
 
+import styles from './EditorToolbar.module.css';
+
 interface EditorToolbarProps {
-    editor: TiptapEditor | null,
-    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
+    editor: TiptapEditor | null;
+    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>;
 }
 
-const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
-    'stageDirection',
-    'dialogue',
-    'lyrics',
-]);
+const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>(['stageDirection', 'dialogue', 'lyrics']);
 
 const MULTI_BLOCK_OPTIONS = BLOCKS_WITHOUT_ACT.filter(option => MULTI_BLOCK_ALLOWED_TYPES.has(option.type));
 
-const EditorToolbar = ({
-    editor,
-    blockShortcuts,
-}: EditorToolbarProps) => {
+const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
     const dropdownRef = useRef<HTMLDivElement | null>(null);
     const toolbarRef = useRef<HTMLDivElement | null>(null);
     const [isOpen, setIsOpen] = useState(false);
+    const [searchQuery, setSearchQuery] = useState('');
     const {
         activeType,
         activeBlockInfo,
@@ -87,84 +66,78 @@ const EditorToolbar = ({
         }
     }, []);
 
-    const handleUndoMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        if (canUndo) {
-            editor
-                ?.chain()
-                .focus()
-                .undo()
-                .run();
-        }
-    }, [canUndo, editor]);
-    const handleRedoMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        if (canRedo) {
-            editor
-                ?.chain()
-                .focus()
-                .redo()
-                .run();
-        }
-    }, [canRedo, editor]);
-    const handleBoldMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        editor
-            ?.chain()
-            .focus()
-            .toggleBold()
-            .run();
-    }, [editor]);
-    const handleItalicMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        editor
-            ?.chain()
-            .focus()
-            .toggleItalic()
-            .run();
-    }, [editor]);
-    const handleUnderlineMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        editor
-            ?.chain()
-            .focus()
-            .toggleUnderline()
-            .run();
-    }, [editor]);
-    const handleSelectMouseDown = useCallback((event: ReactMouseEvent<HTMLButtonElement>) => {
-        event.preventDefault();
-        if (!canChangeBlockType) {
-            return;
-        }
+    const handleUndoMouseDown = useCallback(
+        (event: ReactMouseEvent<HTMLButtonElement>) => {
+            event.preventDefault();
+            if (canUndo) {
+                editor?.chain().focus().undo().run();
+            }
+        },
+        [canUndo, editor],
+    );
+    const handleRedoMouseDown = useCallback(
+        (event: ReactMouseEvent<HTMLButtonElement>) => {
+            event.preventDefault();
+            if (canRedo) {
+                editor?.chain().focus().redo().run();
+            }
+        },
+        [canRedo, editor],
+    );
+    const handleBoldMouseDown = useCallback(
+        (event: ReactMouseEvent<HTMLButtonElement>) => {
+            event.preventDefault();
+            editor?.chain().focus().toggleBold().run();
+        },
+        [editor],
+    );
+    const handleItalicMouseDown = useCallback(
+        (event: ReactMouseEvent<HTMLButtonElement>) => {
+            event.preventDefault();
+            editor?.chain().focus().toggleItalic().run();
+        },
+        [editor],
+    );
+    const handleUnderlineMouseDown = useCallback(
+        (event: ReactMouseEvent<HTMLButtonElement>) => {
+            event.preventDefault();
+            editor?.chain().focus().toggleUnderline().run();
+        },
+        [editor],
+    );
+    const handleSelectMouseDown = useCallback(
+        (event: ReactMouseEvent<HTMLButtonElement>) => {
+            event.preventDefault();
+            if (!canChangeBlockType) {
+                return;
+            }
 
-        setIsOpen(prev => !prev);
-    }, [canChangeBlockType]);
-    const handleMenuItemMouseDown = useCallback((
-        optionType: ScriptBlockNodeType,
-        event: ReactMouseEvent<HTMLButtonElement>,
-    ) => {
-        event.preventDefault();
-        setIsOpen(false);
-        if (!editor) {
-            return;
-        }
+            setIsOpen(prev => !prev);
+        },
+        [canChangeBlockType],
+    );
+    const handleMenuItemMouseDown = useCallback(
+        (optionType: ScriptBlockNodeType, event: ReactMouseEvent<HTMLButtonElement>) => {
+            event.preventDefault();
+            setIsOpen(false);
+            if (!editor) {
+                return;
+            }
 
-        if (isMultiBlockSelection) {
-            updateBlockTypeForSelection(editor, optionType);
+            if (isMultiBlockSelection) {
+                updateBlockTypeForSelection(editor, optionType);
 
-            return;
-        }
+                return;
+            }
 
-        if (optionType === activeBlockInfo?.type || activeBlockInfo?.type === 'act') {
-            return;
-        }
+            if (optionType === activeBlockInfo?.type || activeBlockInfo?.type === 'act') {
+                return;
+            }
 
-        updateBlockType(editor, normalizeBlockNodeType(optionType));
-    }, [
-        activeBlockInfo?.type,
-        editor,
-        isMultiBlockSelection,
-    ]);
+            updateBlockType(editor, normalizeBlockNodeType(optionType));
+        },
+        [activeBlockInfo?.type, editor, isMultiBlockSelection],
+    );
 
     const inlineMarksState: InlineMarksGroupState = {
         canUndo,
@@ -192,22 +165,25 @@ const EditorToolbar = ({
     };
 
     return (
-        <div
-            className={styles.toolbar}
-            ref={toolbarRef}
-            data-editor-toolbar="true"
-        >
-            <InlineMarksGroup
-                state={inlineMarksState}
-                actions={inlineMarksActions}
-            />
-            <span className={styles.spacer} />
+        <div className={styles.toolbar} ref={toolbarRef} data-editor-toolbar="true">
+            <InlineMarksGroup state={inlineMarksState} actions={inlineMarksActions} />
+            <span className={styles.divider} aria-hidden="true" />
             <BlockTypeSelect
                 options={isMultiBlockSelection ? MULTI_BLOCK_OPTIONS : BLOCKS_WITHOUT_ACT}
                 blockShortcuts={blockShortcuts}
                 dropdownRef={dropdownRef}
                 state={blockTypeState}
                 actions={blockTypeActions}
+            />
+            <span className={styles.spacer} />
+            <SearchControl
+                value={searchQuery}
+                currentResult={0}
+                resultCount={0}
+                aria-label="Search script"
+                placeholder="Find in script…"
+                onChange={event => setSearchQuery(event.target.value)}
+                onClear={() => setSearchQuery('')}
             />
         </div>
     );

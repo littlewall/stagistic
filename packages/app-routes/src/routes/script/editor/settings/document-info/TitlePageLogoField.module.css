@@ -1,0 +1,68 @@
+.field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+}
+
+.label {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-semibold);
+    color: var(--color-text-muted);
+}
+
+.preview {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    padding: var(--space-lg);
+    background: var(--layer-panel-bg);
+    border: 1px solid var(--layer-panel-edge);
+    border-radius: var(--radius-sm);
+
+    & img {
+        width: auto;
+        max-width: 10rem;
+        height: auto;
+        max-height: 6rem;
+        object-fit: contain;
+    }
+}
+
+.fileDetails {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    min-width: 0;
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+
+    & span:first-child {
+        overflow: hidden;
+        color: var(--color-text);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.actions {
+    display: flex;
+    gap: var(--space-md);
+    align-items: center;
+}
+
+.fileInput {
+    position: absolute;
+    overflow: hidden;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    white-space: nowrap;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.hint {
+    font-size: var(--font-size-sm);
+    color: var(--color-text-muted);
+    opacity: .7;
+}

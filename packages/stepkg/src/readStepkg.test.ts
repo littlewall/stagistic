@@ -35,13 +35,26 @@ const exportBytes = async (snapshot: StepkgSnapshot): Promise<Uint8Array> => {
 
 describe('readStepkg', () => {
     it('round-trips an exporter package into an equivalent snapshot', async () => {
-        const snapshot = baseSnapshot();
+        const snapshot: StepkgSnapshot = {
+            ...baseSnapshot(),
+            titlePage: {
+                logo: {
+                    dataUrl: 'data:image/png;base64,aGVsbG8=',
+                    filename: 'logo.png',
+                    mimeType: 'image/png',
+                    widthPx: 400,
+                    heightPx: 200,
+                    sizeBytes: 5,
+                },
+            },
+        };
         const result = await readStepkg(await exportBytes(snapshot));
 
         expect(result.ok).toBe(true);
         if (result.ok) {
             expect(result.package.snapshot.script.id).toBe('s1');
             expect(result.package.manifest.script.id).toBe('s1');
+            expect(result.package.snapshot.titlePage.logo).toEqual(snapshot.titlePage.logo);
         }
     });
 
