@@ -1,5 +1,5 @@
 import clsx from 'clsx';
-import {forwardRef} from 'react';
+import {forwardRef, useId} from 'react';
 
 import {IconButton} from '../atoms/IconButton';
 import {SearchInput, type SearchInputProps} from '../atoms/SearchInput';
@@ -20,6 +20,8 @@ export type SearchControlProps = {
 
 export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
     ({currentResult, resultCount, onPreviousResult, onNextResult, onClear, className, value, ...props}, ref) => {
+        const generatedInputId = useId();
+        const inputId = props.id ?? generatedInputId;
         const hasQuery = typeof value === 'string' && value.length > 0;
         const isNavigationDisabled = !hasQuery || resultCount === 0;
         const indicator = hasQuery ? (
@@ -27,9 +29,9 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
                 {currentResult} / {resultCount}
             </output>
         ) : (
-            <span className={styles.indicator}>
+            <label className={styles.indicator} htmlFor={inputId} aria-label="Focus search">
                 <SearchIcon aria-hidden="true" />
-            </span>
+            </label>
         );
         const controls = (
             <span className={styles.actions}>
@@ -54,7 +56,16 @@ export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
 
         return (
             <div className={clsx(styles.control, className)} data-search-control="">
-                <SearchInput {...props} ref={ref} className={styles.input} size="toolbar" value={value} startAdornment={null} endAdornment={controls} />
+                <SearchInput
+                    {...props}
+                    ref={ref}
+                    id={inputId}
+                    className={styles.input}
+                    size="toolbar"
+                    value={value}
+                    startAdornment={null}
+                    endAdornment={controls}
+                />
             </div>
         );
     },

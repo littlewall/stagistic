@@ -1,18 +1,7 @@
 import {normalizeEditorSettingsBlockType} from './normalize';
-import type {
-    BlockSettings,
-    BlockSpacingSettings,
-    EditorSettings,
-    EditorSettingsOverride,
-    PageSettings,
-    TypographySettings,
-    VisualSettings,
-} from './types';
+import type {BlockSettings, BlockSpacingSettings, EditorSettings, EditorSettingsOverride, PageSettings, TypographySettings, VisualSettings} from './types';
 
-export const mergeEditorSettings = (
-    base: EditorSettings,
-    ...overrides: Array<EditorSettingsOverride | null | undefined>
-): EditorSettings => {
+export const mergeEditorSettings = (base: EditorSettings, ...overrides: Array<EditorSettingsOverride | null | undefined>): EditorSettings => {
     let next: EditorSettings = {
         page: {...base.page},
         typography: {...base.typography},
@@ -73,7 +62,7 @@ export const mergeEditorSettings = (
                     continue;
                 }
 
-                mergedTypography[key as keyof TypographySettings] = value as never;
+                mergedTypography[key as keyof TypographySettings] = value;
             }
 
             next.typography = mergedTypography;
@@ -89,7 +78,7 @@ export const mergeEditorSettings = (
                     continue;
                 }
 
-                mergedVisual[key as keyof VisualSettings] = value as never;
+                mergedVisual[key as keyof VisualSettings] = value;
             }
 
             next.visual = mergedVisual;
@@ -98,10 +87,8 @@ export const mergeEditorSettings = (
         if (override.structure) {
             next.structure = {
                 actDisplay: {
-                    linesBefore: override.structure.actDisplay?.linesBefore
-                        ?? next.structure.actDisplay.linesBefore,
-                    linesAfter: override.structure.actDisplay?.linesAfter
-                        ?? next.structure.actDisplay.linesAfter,
+                    linesBefore: override.structure.actDisplay?.linesBefore ?? next.structure.actDisplay.linesBefore,
+                    linesAfter: override.structure.actDisplay?.linesAfter ?? next.structure.actDisplay.linesAfter,
                 },
             };
         }
@@ -109,14 +96,11 @@ export const mergeEditorSettings = (
         if (override.initialPages) {
             next.initialPages = {
                 castAndPlace: {
-                    castOrderBy: override.initialPages.castAndPlace?.castOrderBy
-                        ?? next.initialPages.castAndPlace.castOrderBy,
-                    showOutline: override.initialPages.castAndPlace?.showOutline
-                        ?? next.initialPages.castAndPlace.showOutline,
+                    castOrderBy: override.initialPages.castAndPlace?.castOrderBy ?? next.initialPages.castAndPlace.castOrderBy,
+                    showOutline: override.initialPages.castAndPlace?.showOutline ?? next.initialPages.castAndPlace.showOutline,
                 },
                 songs: {
-                    showCharactersInSongs: override.initialPages.songs?.showCharactersInSongs
-                        ?? next.initialPages.songs.showCharactersInSongs,
+                    showCharactersInSongs: override.initialPages.songs?.showCharactersInSongs ?? next.initialPages.songs.showCharactersInSongs,
                 },
             };
         }

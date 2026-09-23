@@ -1,0 +1,63 @@
+---
+interface Breadcrumb {
+    name: string;
+    url: string;
+}
+
+interface Props {
+    canonical: string;
+    description: string;
+    softwareApplication?: boolean;
+    breadcrumbs?: Breadcrumb[];
+}
+
+const {canonical, description, softwareApplication = false, breadcrumbs} = Astro.props;
+
+const siteUrl = new URL('/', Astro.site).href.replace(/\/$/, '');
+const graph = [
+    {
+        '@type': 'Organization',
+        '@id': `${siteUrl}#organization`,
+        name: 'Stagistic',
+        url: siteUrl,
+        logo: new URL('/favicon.svg', Astro.site).href,
+    },
+    {
+        '@type': 'WebSite',
+        '@id': `${siteUrl}#website`,
+        name: 'Stagistic',
+        url: siteUrl,
+        publisher: {
+            '@id': `${siteUrl}#organization`,
+        },
+    },
+    softwareApplication && {
+        '@type': 'SoftwareApplication',
+        '@id': `${canonical}#software-application`,
+        name: 'Stagistic Editor',
+        applicationCategory: 'WritingApplication',
+        operatingSystem: 'Web',
+        description,
+        url: canonical,
+        image: new URL('/opengraph.jpg', Astro.site).href,
+        offers: {
+            '@type': 'Offer',
+            price: '0',
+            priceCurrency: 'USD',
+        },
+    },
+    breadcrumbs && {
+        '@type': 'BreadcrumbList',
+        itemListElement: breadcrumbs.map((breadcrumb, index) => ({
+            '@type': 'ListItem',
+            position: index + 1,
+            name: breadcrumb.name,
+            item: breadcrumb.url,
+        })),
+    },
+].filter(Boolean);
+
+const json = JSON.stringify({'@context': 'https://schema.org', '@graph': graph}).replace(/</g, '\\u003c');
+---
+
+<script is:inline type="application/ld+json" set:html={json}></script>

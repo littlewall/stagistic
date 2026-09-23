@@ -13,21 +13,20 @@ import s from './index.module.css';
         <section class={s.hero}>
             <div class={s.heroInner}>
                 <div class={s.heroContent}>
-                    <h1 class={clsx(s.heroTitle, s.fadeUp)}>
-                        Free, open-source script editor for theatre.
-                    </h1>
+                    <h1 class={clsx(s.heroTitle, s.fadeUp)}>Free, open-source script editor for theatre.</h1>
                     <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
                         No paywalls. No forced accounts. Open your browser and start writing. Your work belongs to you.
                     </p>
-                    <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD2)}>
-                        <a href="https://github.com/littlewall/stagistic" class={s.btnPrimary}>
-                            View on GitHub
-                        </a>
+                    <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD2)}>
+                        Released under the MIT licence, Stagistic Editor runs in your browser even without an account and stores scripts locally by default.
+                    </p>
+                    <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD3)}>
+                        <a href="https://github.com/littlewall/stagistic" class={s.btnPrimary}> View on GitHub </a>
                     </div>
                 </div>
             </div>
         </section>
-        
+
         <section class={s.forTheatre}>
             <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
                 <div>
@@ -35,10 +34,12 @@ import s from './index.module.css';
                 </div>
                 <div>
                     <p class={s.forTheatreText}>
-                        We believe a writer's work should be private and secure. Stagistic Editor runs entirely in your browser and saves your data locally on your device.
+                        We believe a writer's work should be private and secure. Stagistic Editor runs entirely in your browser and saves your data locally on
+                        your device.
                     </p>
                     <p class={s.forTheatreText}>
-                        You don't need to create an account or sign in to start writing. While cloud sync features will be added in the future for convenience, the core editor will always work perfectly offline.
+                        You don't need to create an account or sign in to start writing. While cloud sync features will be added in the future for convenience,
+                        the core editor will always work perfectly offline.
                     </p>
                 </div>
             </div>
@@ -53,10 +54,11 @@ import s from './index.module.css';
                 </div>
                 <div>
                     <p class={s.forTheatreText}>
-                        The theatre industry runs on passion, and access to professional tools shouldn't be gated by expensive subscriptions. 
+                        The theatre industry runs on passion, and access to professional tools shouldn't be gated by expensive subscriptions.
                     </p>
                     <p class={s.forTheatreText}>
-                        Stagistic Editor is free forever. The entire project is open-source under the MIT licence, meaning the code is completely open for anyone to inspect, modify, or contribute to.
+                        Stagistic Editor is free forever. The entire project is open-source under the MIT licence, meaning the code is completely open for
+                        anyone to inspect, modify, or contribute to.
                     </p>
                 </div>
             </div>
@@ -70,33 +72,31 @@ import s from './index.module.css';
                     <h2 class={s.forTheatreTitle}>You own your data.</h2>
                 </div>
                 <div>
+                    <p class={s.forTheatreText}>Proprietary file formats exist to lock you into a specific software ecosystem. We hate that.</p>
                     <p class={s.forTheatreText}>
-                        Proprietary file formats exist to lock you into a specific software ecosystem. We hate that.
-                    </p>
-                    <p class={s.forTheatreText}>
-                        Stagistic Editor uses its own open, plain-text <a href="/editor/syntax" class={s.textLink}>Stagistic Syntax</a>. When you export a backup of your script, it's saved as a readable text file. You can always access your work, even without the editor.
+                        Stagistic Editor uses its own open, plain-text <a href="/editor/syntax" class={s.textLink}>Stagistic Syntax</a>. When you export a
+                        backup of your script, it's saved as a readable text file. You can always access your work, even without the editor.
                     </p>
                 </div>
             </div>
         </section>
-
     </div>
 
     <script>
-        const observer = new IntersectionObserver(
-            (entries) => {
-                for (const entry of entries) {
-                    if (entry.isIntersecting) {
-                        entry.target.setAttribute('data-visible', '');
-                        observer.unobserve(entry.target);
-                    }
+    const observer = new IntersectionObserver(
+        entries => {
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                    entry.target.setAttribute('data-visible', '');
+                    observer.unobserve(entry.target);
                 }
-            },
-            {threshold: 0.06, rootMargin: '-20px'},
-        );
+            }
+        },
+        {threshold: 0.06, rootMargin: '-20px'},
+    );
 
-        document.querySelectorAll('[data-reveal]').forEach((el) => {
-            observer.observe(el);
-        });
+    document.querySelectorAll('[data-reveal]').forEach(el => {
+        observer.observe(el);
+    });
     </script>
 </Layout>
