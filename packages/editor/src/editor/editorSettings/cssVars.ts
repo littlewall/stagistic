@@ -71,11 +71,7 @@ const toUnderline = (value?: boolean) => {
  * variables below are uniform across all block types: padding/indent,
  * line height, alignment, casing, font weight/style, and underline.
  */
-const buildStandardBlockVars = (
-    prefix: string,
-    block: BlockSpacingSettings | undefined,
-    fallbackLineHeight: number,
-): Record<string, string | undefined> => {
+const buildStandardBlockVars = (prefix: string, block: BlockSpacingSettings | undefined, fallbackLineHeight: number): Record<string, string | undefined> => {
     return {
         [`--${prefix}-spacing-before`]: toEm(block?.spacingBeforeEm),
         [`--${prefix}-spacing-after`]: toEm(block?.spacingAfterEm),
@@ -90,11 +86,7 @@ const buildStandardBlockVars = (
     };
 };
 
-export const getEditorCssVars = (
-    settings: EditorSettings,
-    scale = 1,
-    editorZoom = 1,
-): EditorCssVars => {
+export const getEditorCssVars = (settings: EditorSettings, scale = 1, editorZoom = 1): EditorCssVars => {
     const blocks = settings.blocks;
     const baseLineHeight = settings.typography.lineHeight;
     const vars: Record<string, string | undefined> = {
@@ -125,5 +117,5 @@ export const getEditorCssVars = (
 
     vars['--act-line-height'] = String(actLineHeight);
 
-    return vars as EditorCssVars;
+    return vars;
 };

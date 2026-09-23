@@ -1,52 +1,44 @@
-import {
-    collectCharacterTags,
-    normalizeCharacterKey,
-    type ScriptNode,
-    splitCharacterTokens,
-} from '@stagistic/script';
+import {collectCharacterTags, normalizeCharacterKey, type ScriptNode, splitCharacterTokens} from '@stagistic/script';
 import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
 
 import {isScriptBlockNodeName} from '../tiptap/scriptCore';
-import {
-    readNormalizedRefsFromAttrs,
-    visitCharacterBlocks,
-} from './characterRefUtils';
+import {readNormalizedRefsFromAttrs, visitCharacterBlocks} from './characterRefUtils';
 
 export interface CharacterTokenEntry {
-    blockId: string,
-    blockStart: number,
-    tokenIndex: number,
-    key: string,
-    characterId: string | null,
-    valueStart: number,
-    valueEnd: number,
-    end: number,
+    blockId: string;
+    blockStart: number;
+    tokenIndex: number;
+    key: string;
+    characterId: string | null;
+    valueStart: number;
+    valueEnd: number;
+    end: number;
     /**
      * 'cue' = a token inside a character (cue) block, decorated via the
      * runtime. 'tag' = a characterTag mark in a stage direction, which
      * renders its own DOM — it contributes colors/counts but is skipped by
      * the decoration builder.
      */
-    source: 'cue' | 'tag',
+    source: 'cue' | 'tag';
 }
 
 export interface ActiveCharacterToken {
-    id: string,
-    blockId: string,
-    tokenIndex: number,
-    key: string,
-    characterId: string | null,
+    id: string;
+    blockId: string;
+    tokenIndex: number;
+    key: string;
+    characterId: string | null;
 }
 
 export interface CharacterTokenScanResult {
-    tokenEntries: CharacterTokenEntry[],
-    tokenCountByKey: ReadonlyMap<string, number>,
-    activeToken: ActiveCharacterToken | null,
+    tokenEntries: CharacterTokenEntry[];
+    tokenCountByKey: ReadonlyMap<string, number>;
+    activeToken: ActiveCharacterToken | null;
 }
 
 interface ScanCharacterTokensArgs {
-    doc: ProseMirrorNode,
-    selectionFrom?: number | null,
+    doc: ProseMirrorNode;
+    selectionFrom?: number | null;
 }
 
 export const getActiveTokenIndex = (line: string, offset: number) => {
@@ -85,10 +77,7 @@ export const getCharacterTokenColorKey = (blockId: string, tokenIndex: number) =
     return `${blockId}\u0001${tokenIndex}`;
 };
 
-export const scanCharacterTokensFromDoc = ({
-    doc,
-    selectionFrom,
-}: ScanCharacterTokensArgs): CharacterTokenScanResult => {
+export const scanCharacterTokensFromDoc = ({doc, selectionFrom}: ScanCharacterTokensArgs): CharacterTokenScanResult => {
     const tokenEntries: CharacterTokenEntry[] = [];
     const tokenCountByKey = new Map<string, number>();
     let activeToken: ActiveCharacterToken | null = null;
@@ -99,15 +88,13 @@ export const scanCharacterTokensFromDoc = ({
             onCharacterBlock: (node, pos) => {
                 const text = node.textContent ?? '';
                 const tokens = splitCharacterTokens(text);
-                const refsByKey = readNormalizedRefsFromAttrs(node.attrs as Record<string, unknown>);
+                const refsByKey = readNormalizedRefsFromAttrs(node.attrs);
                 const blockStart = pos + 1;
                 const blockId = resolveCharacterBlockId(node.attrs.id, pos);
 
                 tokens.forEach((token, tokenIndex) => {
                     const key = normalizeCharacterKey(token.value);
-                    const characterId = key
-                        ? refsByKey[key] ?? null
-                        : null;
+                    const characterId = key ? (refsByKey[key] ?? null) : null;
 
                     tokenEntries.push({
                         blockId,
@@ -146,9 +133,7 @@ export const scanCharacterTokensFromDoc = ({
 
                 const token = tokens[activeTokenIndex];
                 const key = normalizeCharacterKey(token.value);
-                const characterId = key
-                    ? refsByKey[key] ?? null
-                    : null;
+                const characterId = key ? (refsByKey[key] ?? null) : null;
 
                 activeToken = {
                     id: getCharacterTokenColorKey(blockId, activeTokenIndex),

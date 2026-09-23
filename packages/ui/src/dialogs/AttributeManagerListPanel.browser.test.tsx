@@ -1,36 +1,24 @@
-import {
-    type ComponentProps,
-    type ComponentType,
-} from 'react';
+import {type ComponentProps, type ComponentType} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-    vi,
-} from 'vite-plus/test';
+import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
-import {
-    type AttributeManagerListItem,
-    AttributeManagerListPanel,
-} from './AttributeManagerListPanel';
+import {type AttributeManagerListItem, AttributeManagerListPanel} from './AttributeManagerListPanel';
 
 const mountedRoots: Root[] = [];
 
 type SearchableListPanelProps = ComponentProps<typeof AttributeManagerListPanel> & {
     search?: {
-        ariaLabel: string,
-        placeholder: string,
-    },
+        ariaLabel: string;
+        placeholder: string;
+    };
     createAction?: {
-        ariaLabel: string,
-        tooltipLabel: string,
-        onPress: () => void,
-    },
-    hideDetailTypeLabel?: boolean,
-    wrapDetailTitle?: boolean,
+        ariaLabel: string;
+        tooltipLabel: string;
+        onPress: () => void;
+    };
+    hideDetailTypeLabel?: boolean;
+    wrapDetailTitle?: boolean;
 };
 
 const SearchableListPanel = AttributeManagerListPanel as ComponentType<SearchableListPanelProps>;
@@ -53,10 +41,7 @@ const waitForElement = async <T extends Element>(selector: string): Promise<T> =
     throw new Error(`Expected element matching ${selector}`);
 };
 
-const renderPanel = (
-    items: AttributeManagerListItem[],
-    initialSelectedItemId?: string,
-) => {
+const renderPanel = (items: AttributeManagerListItem[], initialSelectedItemId?: string) => {
     const host = document.createElement('div');
 
     host.style.width = '900px';
@@ -89,9 +74,14 @@ describe('AttributeManagerListPanel', () => {
     it('lists items and opens the selected detail on click', async () => {
         const host = renderPanel([
             {
-                id: 's1', number: '1.', title: 'Opening',
-            }, {
-                id: 's2', number: '2.', title: 'The reveal',
+                id: 's1',
+                number: '1.',
+                title: 'Opening',
+            },
+            {
+                id: 's2',
+                number: '2.',
+                title: 'The reveal',
             },
         ]);
 
@@ -101,7 +91,7 @@ describe('AttributeManagerListPanel', () => {
 
         expect(buttons.map(button => button.textContent)).toEqual(['1.Opening', '2.The reveal']);
 
-        const secondItem = page.elementLocator(buttons[1] as HTMLButtonElement);
+        const secondItem = page.elementLocator(buttons[1]);
 
         await secondItem.click();
 
@@ -151,19 +141,26 @@ describe('AttributeManagerListPanel', () => {
     });
 
     it('opens the requested item detail initially', async () => {
-        renderPanel([
-            {
-                id: 'c1', number: '1.', title: 'Opening',
-            }, {
-                id: 'c2', number: '2.', title: 'Finale',
-            },
-        ], 'c2');
+        renderPanel(
+            [
+                {
+                    id: 'c1',
+                    number: '1.',
+                    title: 'Opening',
+                },
+                {
+                    id: 'c2',
+                    number: '2.',
+                    title: 'Finale',
+                },
+            ],
+            'c2',
+        );
 
         const detail = await waitForElement('[aria-label="Scene detail"]');
 
         expect(detail.textContent).toContain('Finale');
-        expect(document.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.textContent)
-            .toContain('Finale');
+        expect(document.querySelector<HTMLButtonElement>('[aria-pressed="true"]')?.textContent).toContain('Finale');
     });
 
     it('places the number before the title and the icon after it', async () => {
@@ -178,11 +175,7 @@ describe('AttributeManagerListPanel', () => {
 
         const button = await waitForElement<HTMLButtonElement>('[aria-label="Scene list"] button');
 
-        expect(Array.from(button.children).map(child => child.textContent)).toEqual([
-            '1.',
-            'Overture',
-            'Music kind',
-        ]);
+        expect(Array.from(button.children).map(child => child.textContent)).toEqual(['1.', 'Overture', 'Music kind']);
         expect(host.contains(button)).toBe(true);
     });
 
@@ -208,7 +201,8 @@ describe('AttributeManagerListPanel', () => {
                 number: '1.',
                 title: 'Opening',
                 group: {id: 'act-1', label: 'Act I'},
-            }, {
+            },
+            {
                 id: 's2',
                 number: '2.',
                 title: 'Finale',
@@ -226,9 +220,9 @@ describe('AttributeManagerListPanel', () => {
          * the results are headings is circular, and would keep passing if the
          * group labels regressed to plain elements.
          */
-        const labelElements = Array.from(host.querySelectorAll<HTMLElement>('*'))
-            .filter(element => element.childElementCount === 0
-                && (element.textContent === 'Act I' || element.textContent === 'Act II'));
+        const labelElements = Array.from(host.querySelectorAll<HTMLElement>('*')).filter(
+            element => element.childElementCount === 0 && (element.textContent === 'Act I' || element.textContent === 'Act II'),
+        );
 
         expect(headings.map(heading => heading.textContent)).toEqual(['Act I', 'Act II']);
         expect(buttons.map(button => button.textContent)).toEqual(['1.Opening', '2.Finale']);
@@ -247,9 +241,14 @@ describe('AttributeManagerListPanel', () => {
             <SearchableListPanel
                 items={[
                     {
-                        id: 'm1', number: '1.', title: 'Overture',
-                    }, {
-                        id: 'm2', number: '', title: 'Finale',
+                        id: 'm1',
+                        number: '1.',
+                        title: 'Overture',
+                    },
+                    {
+                        id: 'm2',
+                        number: '',
+                        title: 'Finale',
                     },
                 ]}
                 detailTypeLabel="Music"

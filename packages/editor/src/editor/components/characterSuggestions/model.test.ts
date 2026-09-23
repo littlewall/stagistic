@@ -1,31 +1,16 @@
-import {
-    CHARACTER_TAG_KEY_ATTR,
-    CHARACTER_TAG_MARK_NAME,
-} from '@stagistic/script';
+import {CHARACTER_TAG_KEY_ATTR, CHARACTER_TAG_MARK_NAME} from '@stagistic/script';
 import {Schema} from '@tiptap/pm/model';
-import {
-    EditorState,
-    Plugin,
-    TextSelection,
-} from '@tiptap/pm/state';
+import {EditorState, Plugin, TextSelection} from '@tiptap/pm/state';
 import type {EditorView} from '@tiptap/pm/view';
 import type {Editor as TiptapEditor} from '@tiptap/react';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-} from 'vite-plus/test';
+import {afterEach, describe, expect, it} from 'vite-plus/test';
 
 import {PLACEHOLDER_CHARACTER} from '../../tiptap/extensions/characterTagInput/constants';
 import {createCharacterTagComposePlugin} from '../../tiptap/extensions/characterTagInput/plugin';
 import {buildOpenComposeTransaction} from '../../tiptap/extensions/characterTagInput/transactions';
 import {getCharacterTagComposeFromState} from '../../tiptap/extensions/CharacterTagInputExtension';
 import {characterTagComposeKey} from '../../tiptap/extensions/CharacterTagInputExtension';
-import {
-    computeCharacterSuggestions,
-    normalizePersistentCharacters,
-} from './model';
+import {computeCharacterSuggestions, normalizePersistentCharacters} from './model';
 
 const schema = new Schema({
     nodes: {
@@ -277,7 +262,8 @@ describe('computeCharacterSuggestions', () => {
                     id: 'jan-id',
                     key: 'Jan',
                     colorHex: null,
-                }, {
+                },
+                {
                     id: 'jana-id',
                     key: 'Jana',
                     colorHex: null,
@@ -327,11 +313,7 @@ describe('computeCharacterSuggestions', () => {
         } as unknown as Window & typeof globalThis;
 
         const view = createView(createComposeFlowState());
-        const openComposeTransaction = buildOpenComposeTransaction(
-            view.state,
-            view.state.selection.from,
-            view.state.selection.from,
-        );
+        const openComposeTransaction = buildOpenComposeTransaction(view.state, view.state.selection.from, view.state.selection.from);
 
         if (!openComposeTransaction) {
             throw new Error('Expected open compose transaction');
@@ -347,13 +329,7 @@ describe('computeCharacterSuggestions', () => {
         }
 
         const from = view.state.selection.from;
-        const handled = (handleTextInput as OmitThisParameter<typeof handleTextInput>)(
-            view,
-            from,
-            from,
-            'J',
-            () => view.state.tr,
-        );
+        const handled = handleTextInput(view, from, from, 'J', () => view.state.tr);
 
         expect(handled).toBe(true);
         expect(getCharacterTagComposeFromState(view.state)?.query).toBe('J');
@@ -392,11 +368,7 @@ describe('computeCharacterSuggestions', () => {
 
     it('keeps compose state across no-op transactions after opening a tag', () => {
         const view = createView(createComposeFlowState());
-        const openComposeTransaction = buildOpenComposeTransaction(
-            view.state,
-            view.state.selection.from,
-            view.state.selection.from,
-        );
+        const openComposeTransaction = buildOpenComposeTransaction(view.state, view.state.selection.from, view.state.selection.from);
 
         if (!openComposeTransaction) {
             throw new Error('Expected open compose transaction');
@@ -412,11 +384,7 @@ describe('computeCharacterSuggestions', () => {
 
     it('preserves a typed compose tag when selection moves to another block', () => {
         const view = createView(createMultiBlockComposeFlowState());
-        const openComposeTransaction = buildOpenComposeTransaction(
-            view.state,
-            view.state.selection.from,
-            view.state.selection.from,
-        );
+        const openComposeTransaction = buildOpenComposeTransaction(view.state, view.state.selection.from, view.state.selection.from);
 
         if (!openComposeTransaction) {
             throw new Error('Expected open compose transaction');
@@ -431,13 +399,7 @@ describe('computeCharacterSuggestions', () => {
         }
 
         const from = view.state.selection.from;
-        const handled = (handleTextInput as OmitThisParameter<typeof handleTextInput>)(
-            view,
-            from,
-            from,
-            'J',
-            () => view.state.tr,
-        );
+        const handled = handleTextInput(view, from, from, 'J', () => view.state.tr);
 
         expect(handled).toBe(true);
         expect(getCharacterTagComposeFromState(view.state)?.query).toBe('J');

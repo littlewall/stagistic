@@ -1,12 +1,7 @@
 import {useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import type {NavigateFunction, SetURLSearchParams} from 'react-router-dom';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-} from 'vite-plus/test';
+import type {NavigateFunction} from 'react-router-dom';
+import {afterEach, describe, expect, it} from 'vite-plus/test';
 
 import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
 
@@ -39,7 +34,7 @@ const Harness = ({deleteScript}: {deleteScript: (scriptId: string) => Promise<vo
         currentScriptId: 'script-1',
         navigate: ((to: string) => setPathname(to)) as NavigateFunction,
         searchParams: new URLSearchParams(),
-        setSearchParams: (() => undefined) as unknown as SetURLSearchParams,
+        setSearchParams: () => undefined,
         deleteScript,
     });
 

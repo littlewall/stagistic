@@ -263,9 +263,9 @@
 .textLink {
     color: var(--color-text);
     text-decoration: underline;
-    text-underline-offset: 2px;
     text-decoration-color: var(--color-text-muted);
-    transition: text-decoration-color 0.15s ease;
+    text-underline-offset: 2px;
+    transition: text-decoration-color .15s ease;
 
     &:hover {
         text-decoration-color: var(--color-text);
@@ -541,10 +541,10 @@
 
 .previewCheckMark {
     display: inline-flex;
+    flex-shrink: 0;
     align-items: center;
     justify-content: center;
-    color: currentColor;
-    flex-shrink: 0;
+    color: currentcolor;
 }
 
 .previewCheckMark svg {

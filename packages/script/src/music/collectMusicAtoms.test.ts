@@ -1,6 +1,4 @@
-import {
-    describe, expect, it,
-} from 'vite-plus/test';
+import {describe, expect, it} from 'vite-plus/test';
 
 import {collectMusicAtoms} from './collectMusicAtoms';
 
@@ -10,18 +8,28 @@ describe('collectMusicAtoms', () => {
             type: 'stageDirection',
             content: [
                 {type: 'text', text: 'Lights fade.'},
-                {type: 'musicStart',
+                {
+                    type: 'musicStart',
                     attrs: {
-                        musicId: 'c1', mode: 'open', title: 'Night', kind: null,
-                    }},
+                        musicId: 'c1',
+                        mode: 'open',
+                        title: 'Night',
+                        kind: null,
+                    },
+                },
                 {type: 'musicOut'},
             ],
         };
 
         expect(collectMusicAtoms(block as never)).toEqual([
             {
-                role: 'start', musicId: 'c1', mode: 'open', title: 'Night', kind: null,
-            }, {role: 'out'},
+                role: 'start',
+                musicId: 'c1',
+                mode: 'open',
+                title: 'Night',
+                kind: null,
+            },
+            {role: 'out'},
         ]);
     });
 
@@ -30,12 +38,16 @@ describe('collectMusicAtoms', () => {
 
         expect(collectMusicAtoms(block as never)).toEqual([
             {
-                role: 'start', musicId: '', mode: 'open', title: '', kind: null,
+                role: 'start',
+                musicId: '',
+                mode: 'open',
+                title: '',
+                kind: null,
             },
         ]);
     });
 
     it('returns [] when the block has no content', () => {
-        expect(collectMusicAtoms({type: 'stageDirection'} as never)).toEqual([]);
+        expect(collectMusicAtoms({type: 'stageDirection'})).toEqual([]);
     });
 });

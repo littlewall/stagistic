@@ -14,6 +14,7 @@ const features = [
         videoFit: 'contain',
         shape: 'one',
         href: '/editor/playwriting',
+        linkLabel: 'Explore stage playwriting',
     },
     {
         label: 'Acts and scenes that stay connected',
@@ -23,6 +24,8 @@ const features = [
         videoTitle: 'The scene outline beside a script in Stagistic Editor',
         videoFit: 'contain',
         shape: 'two',
+        href: '/editor/syntax',
+        linkLabel: 'Read the Stagistic syntax reference',
     },
     {
         label: 'Smart character management',
@@ -42,6 +45,7 @@ const features = [
         imageFit: 'contain',
         shape: 'one',
         href: '/editor/musicals',
+        linkLabel: 'Explore musical theatre writing',
     },
     {
         label: 'A writing flow you can configure',
@@ -102,7 +106,8 @@ const faqs = [
 <Layout
     title="Stagistic Editor - Script editor built for theatre"
     description="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
-    canonical={new URL("/", Astro.site).href}
+    canonical={new URL("/", Astro.site).href.replace(/\/$/, '')}
+    softwareApplication
 >
     <div class={s.page}>
         <!-- Hero -->
@@ -112,8 +117,8 @@ const faqs = [
                     <h1 class={clsx(s.heroTitle, s.fadeUp)}>Write for the stage, not the screen.</h1>
 
                     <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
-                        Most script editors force you to think in camera angles. Stagistic Editor provides a structural foundation built entirely for theatrical
-                        plays and musicals.
+                        Your play is not a screenplay with the camera removed. Stagistic Editor is a free, browser-based script editor built for acts, scenes,
+                        dialogue, lyrics, and music cues. Not shots and cuts.
                     </p>
 
                     <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD2)}>
@@ -210,7 +215,7 @@ const faqs = [
                                         {f.href && (
                                             <div class={s.featureLinkWrap}>
                                                 <a href={f.href} class={s.btnOutline}>
-                                                    Learn more &rarr;
+                                                    {f.linkLabel} &rarr;
                                                 </a>
                                             </div>
                                         )}

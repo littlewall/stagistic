@@ -1,18 +1,7 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
 import {createRoot, type Root} from 'react-dom/client';
-import {
-    MemoryRouter,
-    Route,
-    Routes,
-    useLocation,
-} from 'react-router-dom';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-    vi,
-} from 'vite-plus/test';
+import {MemoryRouter, Route, Routes, useLocation} from 'react-router-dom';
+import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
 import {ScriptEditorAppHeader} from '../../layout/AppHeader';
@@ -36,12 +25,18 @@ vi.mock('./ScriptWorkspaceContext', () => ({
         characterCatalog: {
             characters: [
                 {
-                    id: 'anna', kind: 'character', key: 'ANNA', outline: null,
+                    id: 'anna',
+                    kind: 'character',
+                    key: 'ANNA',
+                    outline: null,
                 },
             ],
             groups: [
                 {
-                    id: 'all', kind: 'group', key: 'ALL', memberIds: ['anna'],
+                    id: 'all',
+                    kind: 'group',
+                    key: 'ALL',
+                    memberIds: ['anna'],
                 },
             ],
         },
@@ -56,7 +51,8 @@ vi.mock('./ScriptWorkspaceContext', () => ({
                     actBlockId: null,
                     sceneBlockId: null,
                     characterRefs: [{key: 'ANNA', characterId: 'anna'}],
-                }, {
+                },
+                {
                     blockId: 'all-cue',
                     orderNo: 1,
                     blockType: 'character',
@@ -76,12 +72,18 @@ vi.mock('./ScriptCharactersContext', () => ({
     useScriptCharacters: () => ({
         confirmedCharacterRecords: [
             {
-                id: 'anna', kind: 'character', key: 'ANNA', outline: null,
+                id: 'anna',
+                kind: 'character',
+                key: 'ANNA',
+                outline: null,
             },
         ],
         confirmedGroupRecords: [
             {
-                id: 'all', kind: 'group', key: 'ALL', memberIds: ['anna'],
+                id: 'all',
+                kind: 'group',
+                key: 'ALL',
+                memberIds: ['anna'],
             },
         ],
     }),
@@ -111,10 +113,7 @@ const renderAt = (view: 'editor' | 'export') => {
 
     root.render(
         <MemoryRouter initialEntries={[`/script/s1/${view}`]}>
-            <ScriptEditorAppHeader
-                currentScript={{id: 's1', name: 'My Script'}}
-                activeView={view}
-            />
+            <ScriptEditorAppHeader currentScript={{id: 's1', name: 'My Script'}} activeView={view} />
             <Routes>
                 <Route path="/script/:scriptId/editor" element={<LocationProbe />} />
                 <Route path="/script/:scriptId/export" element={<LocationProbe />} />
@@ -143,24 +142,17 @@ const pathname = () => document.querySelector('[data-testid="pathname"]')?.textC
 const ExportCharacterFilterProbe = () => {
     const {script} = useExportScriptData();
 
-    return (
-        <CharacterFilterModule
-            value={{mode: 'only', characterIds: []}}
-            characters={script?.characters ?? []}
-            onChange={() => undefined}
-        />
-    );
+    return <CharacterFilterModule value={{mode: 'only', characterIds: []}} characters={script?.characters ?? []} onChange={() => undefined} />;
 };
 
 const findSegment = (label: string): HTMLElement => {
-    const button = Array.from(document.querySelectorAll('button'))
-        .find(el => el.textContent?.trim() === label);
+    const button = Array.from(document.querySelectorAll('button')).find(el => el.textContent?.trim() === label);
 
     if (!button) {
         throw new Error(`Segment "${label}" not found`);
     }
 
-    return button as HTMLElement;
+    return button;
 };
 
 afterEach(() => {
@@ -210,8 +202,7 @@ describe('export character filter', () => {
 
         await waitFor(() => document.querySelectorAll(chipSelector).length > 0);
 
-        const labels = Array.from(document.querySelectorAll(chipSelector))
-            .map(chip => chip.textContent?.trim());
+        const labels = Array.from(document.querySelectorAll(chipSelector)).map(chip => chip.textContent?.trim());
 
         expect(labels).toContain('Anna');
         expect(labels).not.toContain('All');

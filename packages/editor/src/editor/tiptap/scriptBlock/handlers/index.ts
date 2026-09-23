@@ -5,31 +5,16 @@ import {getEmptyEnterChooserFromState} from '../../extensions/EmptyEnterChooserE
 import {handleSceneCollapseKeyDown} from '../../extensions/sceneCollapse/sceneCollapseKeyDown';
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
 import {createBlockContext} from '../context';
-import {
-    deleteSelectionPreservingScenes,
-    selectionSpansScene,
-} from '../deleteSelectionPreservingScenes';
-import {
-    deleteEmptyBlockAfterScene,
-    shouldBlockBackspace,
-    shouldBlockForwardDelete,
-} from '../sceneDeletionGuard';
+import {deleteSelectionPreservingScenes, selectionSpansScene} from '../deleteSelectionPreservingScenes';
+import {deleteEmptyBlockAfterScene, shouldBlockBackspace, shouldBlockForwardDelete} from '../sceneDeletionGuard';
 import {enterHandlerMaps, handleEnter} from './enter';
 import {handlePaste, pasteHandlerMaps} from './paste';
 import {handleBlockShortcut, handleBlockTypeCycle} from './shortcuts';
 import {handleTab, tabHandlerMaps} from './tab';
 import {handleTextInput, textInputHandlerMaps} from './textInput';
-import {
-    type BlockCasingMap,
-    type BlockNextElementMap,
-    type BlockShortcutMap,
-} from './types';
+import {type BlockCasingMap, type BlockNextElementMap, type BlockShortcutMap} from './types';
 
-export type {
-    BlockCasingMap,
-    BlockNextElementMap,
-    BlockShortcutMap,
-};
+export type {BlockCasingMap, BlockNextElementMap, BlockShortcutMap};
 
 const hasShortcutModifier = (event: KeyboardEvent) => {
     if (isApplePlatform()) {
@@ -40,22 +25,17 @@ const hasShortcutModifier = (event: KeyboardEvent) => {
 };
 
 interface EmptyEnterChooserCommands {
-    closeEmptyEnterChooser?: () => boolean,
-    moveEmptyEnterChooserSelection?: (direction: -1 | 1) => boolean,
-    confirmEmptyEnterChooserType?: () => boolean,
-    insertNextEmptyFromEmptyEnterChooser?: () => boolean,
+    closeEmptyEnterChooser?: () => boolean;
+    moveEmptyEnterChooserSelection?: (direction: -1 | 1) => boolean;
+    confirmEmptyEnterChooserType?: () => boolean;
+    insertNextEmptyFromEmptyEnterChooser?: () => boolean;
 }
 
 const getEmptyEnterChooserCommands = (editor: Editor): EmptyEnterChooserCommands => {
-    return editor.commands as EmptyEnterChooserCommands;
+    return editor.commands;
 };
 
-export const handleKeyDown = (
-    editor: Editor,
-    event: KeyboardEvent,
-    blockShortcuts?: BlockShortcutMap,
-    blockNextElements?: BlockNextElementMap,
-) => {
+export const handleKeyDown = (editor: Editor, event: KeyboardEvent, blockShortcuts?: BlockShortcutMap, blockNextElements?: BlockNextElementMap) => {
     const emptyEnterChooserState = getEmptyEnterChooserFromState(editor.state);
 
     if (emptyEnterChooserState.isOpen) {
@@ -129,10 +109,7 @@ export const handleKeyDown = (
         return handleTab(editor, event);
     }
 
-    if (
-        (event.key === 'Backspace' || event.key === 'Delete')
-        && selectionSpansScene(editor.state)
-    ) {
+    if ((event.key === 'Backspace' || event.key === 'Delete') && selectionSpansScene(editor.state)) {
         event.preventDefault();
 
         return deleteSelectionPreservingScenes(editor);
@@ -171,12 +148,7 @@ export const handleKeyDown = (
     return handler(createBlockContext(editor, block), event);
 };
 
-export {
-    handleEnter,
-    handlePaste,
-    handleTab,
-    handleTextInput,
-};
+export {handleEnter, handlePaste, handleTab, handleTextInput};
 
 export const scriptBlockHandlerMaps = {
     ...enterHandlerMaps,

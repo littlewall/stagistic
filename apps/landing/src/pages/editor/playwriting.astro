@@ -8,6 +8,11 @@ import s from '../index.module.css';
     title="Playwriting Software - Stagistic Editor"
     description="A professional playwriting software built for the stage. Format acts, scenes, stage directions, and multi-character dialogue effortlessly."
     canonical={new URL("/editor/playwriting", Astro.site).href}
+    softwareApplication
+    breadcrumbs={[
+        {name: 'Stagistic', url: new URL('/', Astro.site).href.replace(/\/$/, '')},
+        {name: 'Playwriting', url: new URL('/editor/playwriting', Astro.site).href},
+    ]}
 >
     <div class={s.page}>
         <section class={s.hero}>
@@ -17,7 +22,8 @@ import s from '../index.module.css';
                         Playwriting software built for the stage.
                     </h1>
                     <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
-                        Screenplay software forces you into camera angles. Stagistic Editor provides a structural foundation designed purely for the theatre.
+                        Acts and scenes are not camera setups. Stagistic Editor keeps your play structured around characters, dialogue, and stage directions
+                        without making theatre conform to screenplay logic.
                     </p>
                     <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD2)}>
                         <a href="https://editor.stagistic.app" class={s.btnPrimary}>

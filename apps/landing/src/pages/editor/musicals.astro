@@ -8,16 +8,22 @@ import s from '../index.module.css';
     title="Musical Theatre Script Software - Stagistic Editor"
     description="The only script editor built with first-class support for musical theatre. Write librettos, format lyrics, and export integrated scores."
     canonical={new URL("/editor/musicals", Astro.site).href}
+    softwareApplication
+    breadcrumbs={[
+        {name: 'Stagistic', url: new URL('/', Astro.site).href.replace(/\/$/, '')},
+        {name: 'Musicals', url: new URL('/editor/musicals', Astro.site).href},
+    ]}
 >
     <div class={s.page}>
         <section class={s.hero}>
             <div class={s.heroInner}>
                 <div class={s.heroContent}>
                     <h1 class={clsx(s.heroTitle, s.fadeUp)}>
-                        The only script editor that understands musicals.
+                        Your libretto and score belong in the same script.
                     </h1>
                     <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
-                        Stop manually merging your libretto and sheet music. Stagistic Editor treats lyrics and music cues as first-class elements, bringing your entire show together.
+                        Write dialogue and lyrics as distinct parts of the show, manage songs and instrumentals, attach PDF scores to musical numbers, and export
+                        the whole production as one paginated document.
                     </p>
                     <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD2)}>
                         <a href="https://editor.stagistic.app" class={s.btnPrimary}>

@@ -130,6 +130,15 @@ describe('SearchControl', () => {
         expect(position.textContent).toBe('2 / 7');
     });
 
+    it('focuses the search input when its empty-state icon is clicked', async () => {
+        const input = await mountSearchControl();
+        const searchLabel = await waitForElement<HTMLLabelElement>('label[aria-label="Focus search"]');
+
+        await userEvent.click(searchLabel);
+
+        expect(document.activeElement).toBe(input);
+    });
+
     it('disables result navigation when there are no matches', async () => {
         await mountEmptyResultControl();
 

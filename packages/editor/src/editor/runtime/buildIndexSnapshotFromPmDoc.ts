@@ -13,14 +13,8 @@ import {
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 
-import {
-    isCharacterBlockType,
-    readNormalizedRefsFromAttrs,
-} from '../characters/characterRefUtils';
-import {
-    isScriptBlockNodeName,
-    normalizeBlockNodeType,
-} from '../tiptap/scriptCore';
+import {isCharacterBlockType, readNormalizedRefsFromAttrs} from '../characters/characterRefUtils';
+import {isScriptBlockNodeName, normalizeBlockNodeType} from '../tiptap/scriptCore';
 
 const toTagCharacterRefs = (node: ProseMirrorNode): IndexedScriptCharacterRef[] | null => {
     const idByKey = new Map<string, string | null>();
@@ -93,9 +87,7 @@ const toCharacterRefs = (
 
 const resolveBlockType = (node: ProseMirrorNode) => {
     const attrs = node.attrs as Record<string, unknown>;
-    const resolvedBlockType = resolveScriptBlockNodeType(node.type.name)
-        ?? attrs.blockType
-        ?? 'stageDirection';
+    const resolvedBlockType = resolveScriptBlockNodeType(node.type.name) ?? attrs.blockType ?? 'stageDirection';
 
     return normalizeBlockNodeType(resolvedBlockType);
 };
@@ -119,9 +111,7 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
         }
 
         const blockType = resolveBlockType(node);
-        const blockId = typeof node.attrs.id === 'string' && node.attrs.id.trim().length > 0
-            ? node.attrs.id.trim()
-            : `missing-block-${orderNo + 1}`;
+        const blockId = typeof node.attrs.id === 'string' && node.attrs.id.trim().length > 0 ? node.attrs.id.trim() : `missing-block-${orderNo + 1}`;
         const textContent = node.textContent.trim();
 
         if (blockType === 'act') {
@@ -139,12 +129,7 @@ export const buildIndexSnapshotFromPmDoc = (doc: ProseMirrorNode): ScriptBlockIn
             textContent,
             actBlockId: currentActBlockId,
             sceneBlockId: currentSceneBlockId,
-            characterRefs: toCharacterRefs(
-                node,
-                blockType,
-                textContent,
-                node.attrs as Record<string, unknown>,
-            ),
+            characterRefs: toCharacterRefs(node, blockType, textContent, node.attrs),
         });
 
         musicBlockInputs.push({
