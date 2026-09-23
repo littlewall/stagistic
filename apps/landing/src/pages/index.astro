@@ -46,7 +46,7 @@ const features = [
     {
         label: 'A writing flow you can configure',
         description:
-            'Configure page format, title page, headers and footers, and each block\'s indentation, alignment, emphasis, and casing. Set keyboard shortcuts and decide which block follows next, so the editor matches the way you write.',
+            "Configure page format, title page, headers and footers, and each block's indentation, alignment, emphasis, and casing. Set keyboard shortcuts and decide which block follows next, so the editor matches the way you write.",
         imageSrc: '/features/writing-flow.png',
         imageAlt: 'Formatting controls above a script in Stagistic Editor',
         imageFit: 'cover',
@@ -105,51 +105,35 @@ const faqs = [
     canonical={new URL("/", Astro.site).href}
 >
     <div class={s.page}>
+        <!-- Hero -->
+        <section class={s.hero}>
+            <div class={s.heroInner}>
+                <div class={s.heroContent}>
+                    <h1 class={clsx(s.heroTitle, s.fadeUp)}>Write for the stage, not the screen.</h1>
 
-            <!-- Hero -->
-            <section class={s.hero}>
-                <div class={s.heroInner}>
+                    <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
+                        Most script editors force you to think in camera angles. Stagistic Editor provides a structural foundation built entirely for theatrical
+                        plays and musicals.
+                    </p>
 
-                    <div class={s.heroContent}>
-                        <h1 class={clsx(s.heroTitle, s.fadeUp)}>
-                            Write for the stage, not the screen.
-                        </h1>
-
-                        <p class={clsx(s.heroDescription, s.fadeUp, s.fadeUpD1)}>
-                            Most script editors force you to think in camera angles.
-                            Stagistic Editor provides a structural foundation built entirely
-                            for theatrical plays and musicals.
-                        </p>
-
-                        <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD2)}>
-                            <a href="https://editor.stagistic.app" class={s.btnPrimary}>
-                                Open editor in browser
-                            </a>
-                            <a href="#features" class={s.btnOutline}>
-                                Explore features
-                            </a>
-                        </div>
+                    <div class={clsx(s.heroCtas, s.fadeUp, s.fadeUpD2)}>
+                        <a href="https://editor.stagistic.app" class={s.btnPrimary}> Open editor in browser </a>
+                        <a href="#features" class={s.btnOutline}> Explore features </a>
                     </div>
+                </div>
 
-                    <div class={clsx(s.heroScript, s.fadeUp, s.fadeUpD3)}>
-                        <div
-                            class={s.tryEditorCallout}
-                            data-try-editor-callout
-                        >
-                            <span class={s.visuallyHidden}>Try it!</span>
-                            <svg
-                                viewBox="0 0 176 90"
-                                aria-hidden="true"
-                                focusable="false"
-                            >
-                                <path
-                                    class={clsx(
+                <div class={clsx(s.heroScript, s.fadeUp, s.fadeUpD3)}>
+                    <div class={s.tryEditorCallout} data-try-editor-callout>
+                        <span class={s.visuallyHidden}>Try it!</span>
+                        <svg viewBox="0 0 176 90" aria-hidden="true" focusable="false">
+                            <path
+                                class={clsx(
                                         s.tryEditorCalloutStroke,
                                         s.tryEditorCalloutText,
                                     )}
-                                    pathLength="1"
-                                    vector-effect="non-scaling-stroke"
-                                    d="
+                                pathLength="1"
+                                vector-effect="non-scaling-stroke"
+                                d="
                                         M8 17C19 13 31 12 43 14
                                         M25 13C22 22 20 32 19 42
                                         M38 25C37 31 37 36 37 41
@@ -165,70 +149,60 @@ const faqs = [
                                         M121 18C119 26 118 33 117 38
                                         M116 45L116.5 45
                                     "
-                                />
-                                <path
-                                    class={clsx(
+                            />
+                            <path
+                                class={clsx(
                                         s.tryEditorCalloutStroke,
                                         s.tryEditorCalloutArrow,
                                     )}
-                                    pathLength="1"
-                                    vector-effect="non-scaling-stroke"
-                                    d="
+                                pathLength="1"
+                                vector-effect="non-scaling-stroke"
+                                d="
                                         M132 27C158 28 170 38 166 52
                                         C162 66 142 73 120 70
                                         M120 70C126 66 131 61 134 57
                                         M120 70C127 72 132 76 136 80
                                     "
-                                />
-                            </svg>
-                        </div>
-                        <div
-                            class={s.scriptExcerpt}
-                            aria-label="Interactive preview of Stagistic Editor"
-                        >
-                            <LandingMiniEditor client:media="not (max-width: 1000px)" />
-                        </div>
-                        <p class={s.desktopOnlyNotice} role="note">
-                            Stagistic Editor is built for larger screens. Open it on
-                            a laptop or desktop at least 1000 pixels wide &mdash;
-                            mobile support is on the way.
-                        </p>
+                            />
+                        </svg>
                     </div>
-
+                    <div class={s.scriptExcerpt} aria-describedby="interactive-preview-description">
+                        <LandingMiniEditor client:media="not (max-width: 1000px)" />
+                    </div>
+                    <p class={s.desktopOnlyNotice} role="note">
+                        Stagistic Editor is built for larger screens. Open it on a laptop or desktop at least 1000 pixels wide &mdash; mobile support is on the
+                        way.
+                    </p>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- For Theatre -->
-            <section class={s.forTheatre}>
-                <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
-                    <div>
-                        <h2 class={s.forTheatreTitle}>
-                            The screenplay problem.
-                        </h2>
-                    </div>
-                    <div>
-                        <p class={s.forTheatreText}>
-                            Industry standard tools like Final Draft are built for film. They assume your story is driven by <em>INT/EXT</em> camera setups, shots, and cuts. When you try to write a play in them, you spend more time fighting the formatting than writing.
-                        </p>
-                        <p class={s.forTheatreText}>
-                            Stagistic Editor is different. It understands the craft of theatre: acts, scenes, musical cues, and complex character interactions. It doesn't force a screenplay structure onto your stage play.
-                        </p>
-                    </div>
+        <!-- For Theatre -->
+        <section class={s.forTheatre}>
+            <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
+                <div>
+                    <h2 class={s.forTheatreTitle}>The screenplay problem.</h2>
                 </div>
-            </section>
+                <div>
+                    <p class={s.forTheatreText}>
+                        Industry standard tools like Final Draft are built for film. They assume your story is driven by <em>INT/EXT</em> camera setups, shots,
+                        and cuts. When you try to write a play in them, you spend more time fighting the formatting than writing.
+                    </p>
+                    <p class={s.forTheatreText}>
+                        Stagistic Editor is different. It understands the craft of theatre: acts, scenes, musical cues, and complex character interactions. It
+                        doesn't force a screenplay structure onto your stage play.
+                    </p>
+                </div>
+            </div>
+        </section>
 
-            <div
-                class={s.sectionDivider}
-                data-section-divider
-                aria-hidden="true"
-            ></div>
+        <div class={s.sectionDivider} data-section-divider aria-hidden="true"></div>
 
-            <section class={s.features} id="features">
-                <div class={clsx(s.featuresInner, s.reveal)} data-reveal>
-                    <h2 class={s.featuresTitle}>Features built for playwrights and librettists.</h2>
-                    <div class={s.featuresList}>
-                        {
-                            features.map((f) => (
+        <section class={s.features} id="features">
+            <div class={clsx(s.featuresInner, s.reveal)} data-reveal>
+                <h2 class={s.featuresTitle}>Features built for playwrights and librettists.</h2>
+                <div class={s.featuresList}>
+                    {features.map((f) => (
                                 <article class={s.featureItem}>
                                     <div class={s.featureCopy}>
                                         <h3 class={s.featureLabel}>{f.label}</h3>
@@ -277,27 +251,21 @@ const faqs = [
                                         ) : null }
                                     </div>
                                 </article>
-                            ))
-                        }
-                    </div>
+                            ))}
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <div
-                class={s.sectionDivider}
-                data-section-divider
-                aria-hidden="true"
-            ></div>
+        <div class={s.sectionDivider} data-section-divider aria-hidden="true"></div>
 
-            <!-- FAQ -->
-            <section class={s.faq} id="faq">
-                <div class={clsx(s.faqInner, s.reveal)} data-reveal>
-                    <div>
-                        <h2 class={s.faqTitle}>Common<br />questions.</h2>
-                    </div>
-                    <div class={s.faqList}>
-                        {
-                            faqs.map((faq) => (
+        <!-- FAQ -->
+        <section class={s.faq} id="faq">
+            <div class={clsx(s.faqInner, s.reveal)} data-reveal>
+                <div>
+                    <h2 class={s.faqTitle}>Common<br>questions.</h2>
+                </div>
+                <div class={s.faqList}>
+                    {faqs.map((faq) => (
                                 <details class={s.faqItem}>
                                     <summary>
                                         <span>{faq.q}</span>
@@ -305,84 +273,74 @@ const faqs = [
                                     </summary>
                                     <p class={s.faqAnswer}>{faq.a}</p>
                                 </details>
-                            ))
-                        }
-                    </div>
+                            ))}
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Public preview / CTA -->
-            <section class={s.preview} id="preview">
-                <div class={clsx(s.previewInner, s.reveal)} data-reveal>
-                    <div>
-                        <h2 class={s.previewTitle}>
-                            Stagistic Editor is free.<br />Forever.
-                        </h2>
-                        <p class={s.previewText}>
-                            Stagistic Editor is free to use in your browser, with no
-                            account or paywall. Every current and future Editor
-                            feature will remain free.
+        <!-- Public preview / CTA -->
+        <section class={s.preview} id="preview">
+            <div class={clsx(s.previewInner, s.reveal)} data-reveal>
+                <div>
+                    <h2 class={s.previewTitle}>Stagistic Editor is free.<br>Forever.</h2>
+                    <p class={s.previewText}>
+                        Stagistic Editor is free to use in your browser, with no account or paywall. Every current and future Editor feature will remain free.
+                    </p>
+                </div>
+                <div class={s.previewCard}>
+                    <div class={s.previewChecks}>
+                        <div class={s.previewCheckItem}>
+                            <span class={s.previewCheckMark}>
+                                <svg viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
+                                    <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span>Free &amp; open source</span>
+                        </div>
+                        <div class={s.previewCheckItem}>
+                            <span class={s.previewCheckMark}>
+                                <svg viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
+                                    <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span>No account needed</span>
+                        </div>
+                        <div class={s.previewCheckItem}>
+                            <span class={s.previewCheckMark}>
+                                <svg viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
+                                    <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </span>
+                            <span>Stored locally by default</span>
+                        </div>
+                    </div>
+                    <div class={s.previewCtas}>
+                        <a href="https://editor.stagistic.app" class={s.btnPrimary}> Open editor in browser </a>
+                        <p class={s.desktopOnlyNotice} role="note">
+                            Stagistic Editor is built for larger screens. Open it on a laptop or desktop at least 1000 pixels wide &mdash; mobile support is on
+                            the way.
                         </p>
-
-                    </div>
-                    <div class={s.previewCard}>
-                        <div class={s.previewChecks}>
-                            <div class={s.previewCheckItem}>
-                                <span class={s.previewCheckMark}>
-                                    <svg viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
-                                        <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </span>
-                                <span>Free &amp; open source</span>
-                            </div>
-                            <div class={s.previewCheckItem}>
-                                <span class={s.previewCheckMark}>
-                                    <svg viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
-                                        <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </span>
-                                <span>No account needed</span>
-                            </div>
-                            <div class={s.previewCheckItem}>
-                                <span class={s.previewCheckMark}>
-                                    <svg viewBox="0 0 14 14" fill="none" aria-hidden="true" focusable="false">
-                                        <path d="M3 7.5L5.5 10L11 4" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                                    </svg>
-                                </span>
-                                <span>Stored locally by default</span>
-                            </div>
-                        </div>
-                        <div class={s.previewCtas}>
-                            <a href="https://editor.stagistic.app" class={s.btnPrimary}>
-                                Open editor in browser
-                            </a>
-                            <p class={s.desktopOnlyNotice} role="note">
-                                Stagistic Editor is built for larger screens. Open it
-                                on a laptop or desktop at least 1000 pixels wide
-                                &mdash; mobile support is on the way.
-                            </p>
-                        </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
+    </div>
 
-        </div>
+    <script>
+    const observer = new IntersectionObserver(
+        entries => {
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                    entry.target.setAttribute('data-visible', '');
+                    observer.unobserve(entry.target);
+                }
+            }
+        },
+        {threshold: 0.06, rootMargin: '-20px'},
+    );
 
-        <script>
-            const observer = new IntersectionObserver(
-                (entries) => {
-                    for (const entry of entries) {
-                        if (entry.isIntersecting) {
-                            entry.target.setAttribute('data-visible', '');
-                            observer.unobserve(entry.target);
-                        }
-                    }
-                },
-                {threshold: 0.06, rootMargin: '-20px'},
-            );
-
-            document.querySelectorAll('[data-reveal]').forEach((el) => {
-                observer.observe(el);
-            });
-        </script>
+    document.querySelectorAll('[data-reveal]').forEach(el => {
+        observer.observe(el);
+    });
+    </script>
 </Layout>
