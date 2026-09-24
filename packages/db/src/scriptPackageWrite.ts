@@ -80,6 +80,29 @@ export interface ScriptPackageWriteBinding {
     createdAt: number;
 }
 
+export interface ScriptPackageWriteCommentThread {
+    id: string;
+    anchorKind: string;
+    anchorBlockId: string | null;
+    quotedText: string;
+    status: string;
+    resolvedAt: number | null;
+    resolvedBy: string | null;
+    createdBy: string;
+    createdAt: number;
+    updatedAt: number;
+}
+
+export interface ScriptPackageWriteCommentMessage {
+    id: string;
+    threadId: string;
+    authorId: string;
+    body: string;
+    createdAt: number;
+    updatedAt: number;
+    editedAt: number | null;
+}
+
 export interface ScriptPackageWrite {
     script: {id: string; title: string; subtitle: string | null; createdAt: number; updatedAt: number};
     document: ScriptDocument;
@@ -93,4 +116,5 @@ export interface ScriptPackageWrite {
     scenes: ScriptPackageWriteScene[];
     attachments: ScriptPackageWriteAttachment[];
     bindings: ScriptPackageWriteBinding[];
+    comments: {threads: ScriptPackageWriteCommentThread[]; messages: ScriptPackageWriteCommentMessage[]};
 }

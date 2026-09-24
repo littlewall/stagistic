@@ -113,6 +113,14 @@ const writePackageDomainRowsTx = async (
         trigger: LEGACY_TO_BLOCKS_TRIGGERS.createScript,
         context: LEGACY_TO_BLOCKS_TRIGGERS.createScript,
     });
+    await dbQueries.bulkInsertScriptCommentThreads(
+        tx,
+        input.comments.threads.map(thread => ({...thread, scriptId})),
+    );
+    await dbQueries.bulkInsertScriptCommentMessages(
+        tx,
+        input.comments.messages.map(message => ({...message, scriptId})),
+    );
 
     const projectedScenes = await tx
         .select({id: scriptScenes.id, headingBlockId: scriptScenes.headingBlockId})
@@ -238,6 +246,7 @@ export const createImportPackageHandler = ({getDb, recordOutbox, syncDb, fileSto
                 await dbQueries.deleteScriptCharacterGendersByScriptId(tx, scriptId);
                 await dbQueries.deleteScriptLocationsByScriptId(tx, scriptId);
                 await dbQueries.deleteScriptMusicByScriptId(tx, scriptId);
+                await dbQueries.deleteScriptCommentThreadsByScriptId(tx, scriptId);
                 await dbQueries.deleteScriptAttachmentsByScriptId(tx, scriptId);
 
                 await writePackageDomainRowsTx(tx, scriptId, input, storageKeyByAttachment, now);

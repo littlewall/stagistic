@@ -1,4 +1,4 @@
-import {useScriptRepository} from '@stagistic/app-core';
+import {useScriptComments, useScriptRepository} from '@stagistic/app-core';
 import {type EditorMusicCreateRequest, type EditorMusicRemoveRequest, incrementRouteRenderCount, ScriptEditor} from '@stagistic/editor';
 import {resolveDraftDate} from '@stagistic/script';
 import {AppLayout, LoaderOverlay} from '@stagistic/ui';
@@ -8,6 +8,7 @@ import {useNavigate} from 'react-router-dom';
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../useDocumentTitle';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
+import {ScriptCommentsSidebar, useCommentsEditorBridge, useCommentsPanelState} from './editor/comments';
 import {DeferredScriptEditor} from './editor/DeferredScriptEditor';
 import {AddMusicModal, ScriptMusicSidebar, UnassignMusicModal} from './editor/music';
 import {ConvertSceneHeadingModal} from './editor/scene/ConvertSceneHeadingModal';
@@ -65,6 +66,8 @@ export const ScriptEditorRoute = () => {
     const {pendingSceneDelete, deleteSceneRequest, requestDeleteScene, closeSceneDeleteModal, confirmDeleteScene} = useSceneDeletionState();
     const {pendingSceneConversion, convertSceneRequest, requestConvertScene, closeSceneConvertModal, confirmConvertScene} = useSceneConversionState();
     const {music, createMusic, unassignMusic, markMusicAssigned, markMusicUnassigned, updateMusicRequest} = musicState;
+    const comments = useScriptComments(currentScriptId, scriptRepository);
+    const commentsPanelState = useCommentsPanelState();
 
     const displayedCurrentScript = useMemo(() => (currentScript ? {...currentScript, name: scriptTitleDraft} : null), [currentScript, scriptTitleDraft]);
 
@@ -173,14 +176,27 @@ export const ScriptEditorRoute = () => {
                     />
                 ),
             },
+            {
+                id: 'comments',
+                label: 'Comments',
+                renderContent: header => <ScriptCommentsSidebar header={header} comments={comments} panelState={commentsPanelState} />,
+            },
         ],
-        [music, openAddMusicModal, unassignMusic],
+        [comments, commentsPanelState, music, openAddMusicModal, unassignMusic],
     );
-    const {leftSidebarToggle, rightSidebarToggle, leftSidebar, rightSidebar} = useEditorSidebars({
+    const {leftSidebarToggle, rightSidebarToggle, leftSidebar, rightSidebar, revealPanel, isPanelOpen} = useEditorSidebars({
         panels: sidebarPanels,
         defaultLeftPanelId: 'structure',
         defaultRightPanelId: 'characters',
         storageScope: currentScriptId ?? 'new-script',
+    });
+    const revealCommentsPanel = useCallback(() => revealPanel('comments'), [revealPanel]);
+    const isCommentsPanelOpen = useCallback(() => isPanelOpen('comments'), [isPanelOpen]);
+    const commentsBridge = useCommentsEditorBridge({
+        comments,
+        panelState: commentsPanelState,
+        revealPanel: revealCommentsPanel,
+        isPanelOpen: isCommentsPanelOpen,
     });
     const resolvedEditorInitialValue = editorOverrideValue ?? initialValue;
 
@@ -225,6 +241,7 @@ export const ScriptEditorRoute = () => {
                         initialValue: resolvedEditorInitialValue,
                         persistentCharacters: normalizedSpeakingEntityRecords,
                         persistentMusic: music,
+                        commentThreads: commentsBridge.commentThreads,
                         scriptTitle: scriptTitleDraft,
                         draftDate: resolveDraftDate(titlePageDraft),
                     }}
@@ -254,6 +271,7 @@ export const ScriptEditorRoute = () => {
                         onMusicUnassigned: markMusicUnassigned,
                         onRequestDeleteScene: requestDeleteScene,
                         onRequestConvertScene: requestConvertScene,
+                        ...commentsBridge.callbacks,
                     }}
                 >
                     <ScriptEditor.LeftSidebar>{leftSidebar}</ScriptEditor.LeftSidebar>

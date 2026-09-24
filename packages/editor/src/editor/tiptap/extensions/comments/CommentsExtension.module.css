@@ -1,0 +1,12 @@
+.anchor {
+    text-decoration: underline dotted var(--state-selected-strong) 2px;
+    text-underline-offset: 3px;
+}
+
+.anchorActive {
+    background: var(--state-selected);
+}
+
+.draft {
+    background: var(--state-selected);
+}

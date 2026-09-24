@@ -1,10 +1,4 @@
-import {
-    createContext,
-    type ReactNode,
-    useCallback,
-    useContext,
-    useMemo,
-} from 'react';
+import {createContext, type ReactNode, useCallback, useContext, useMemo} from 'react';
 import {
     Button,
     type QueuedToast,
@@ -18,18 +12,21 @@ import {
 } from 'react-aria-components';
 
 import {CloseIcon} from '../icons/ui';
+
 import styles from './ToastProvider.module.css';
 
 export type ToastVariant = 'success' | 'error' | 'info';
 
 export type ToastContent = {
-    title: string,
-    description?: string,
-    variant?: ToastVariant,
+    title: string;
+    description?: string;
+    variant?: ToastVariant;
+    /** Optional inline action (e.g. Undo); pressing it runs the action and closes the toast. */
+    action?: {label: string; onAction: () => void};
 };
 
 type ToastContextValue = {
-    addToast: (content: ToastContent, options?: ToastOptions) => string,
+    addToast: (content: ToastContent, options?: ToastOptions) => string;
 };
 
 const ToastContext = createContext<ToastContextValue | null>(null);
@@ -39,11 +36,7 @@ const ToastItem = ({toast}: {toast: QueuedToast<ToastContent>}) => {
     const variant = useMemo(() => toast.content.variant ?? 'info', [toast.content.variant]);
 
     return (
-        <Toast
-            toast={toast}
-            className={styles.toast}
-            data-variant={variant}
-        >
+        <Toast toast={toast} className={styles.toast} data-variant={variant}>
             <span className={styles.statusIndicator} aria-hidden="true" />
             <ToastContent className={styles.content}>
                 <Text slot="title" className={styles.title}>
@@ -55,11 +48,18 @@ const ToastItem = ({toast}: {toast: QueuedToast<ToastContent>}) => {
                     </Text>
                 )}
             </ToastContent>
-            <Button
-                slot="close"
-                className={styles.closeButton}
-                aria-label="Dismiss notification"
-            >
+            {toast.content.action && (
+                <Button
+                    className={styles.actionButton}
+                    onPress={() => {
+                        toast.content.action?.onAction();
+                        toastQueue.close(toast.key);
+                    }}
+                >
+                    {toast.content.action.label}
+                </Button>
+            )}
+            <Button slot="close" className={styles.closeButton} aria-label="Dismiss notification">
                 <CloseIcon />
             </Button>
         </Toast>
@@ -68,32 +68,22 @@ const ToastItem = ({toast}: {toast: QueuedToast<ToastContent>}) => {
 
 export const ToastProvider = ({children}: {children: ReactNode}) => {
     const addToast = useCallback(
-        (content: ToastContent, options?: ToastOptions) => toastQueue.add(content, {
-            timeout: 4000,
-            ...options,
-        }),
+        (content: ToastContent, options?: ToastOptions) =>
+            toastQueue.add(content, {
+                timeout: 4000,
+                ...options,
+            }),
         [],
     );
 
     const value = useMemo(() => ({addToast}), [addToast]);
-    const renderToast = useCallback(
-        ({toast}: {toast: QueuedToast<ToastContent>}) => (
-            <ToastItem toast={toast} />
-        ),
-        [],
-    );
+    const renderToast = useCallback(({toast}: {toast: QueuedToast<ToastContent>}) => <ToastItem toast={toast} />, []);
 
     return (
         <ToastContext.Provider value={value}>
             {children}
-            <ToastRegion
-                queue={toastQueue}
-                className={styles.region}
-                aria-label="Notifications"
-            >
-                <ToastList className={styles.list}>
-                    {renderToast}
-                </ToastList>
+            <ToastRegion queue={toastQueue} className={styles.region} aria-label="Notifications">
+                <ToastList className={styles.list}>{renderToast}</ToastList>
             </ToastRegion>
         </ToastContext.Provider>
     );

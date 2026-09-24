@@ -1,35 +1,16 @@
-import {
-    coerceUnknownBlocksToStageDirections,
-    type ScriptDocument,
-} from '@stagistic/script';
-import {
-    type ReactNode,
-    useCallback,
-    useEffect,
-    useLayoutEffect,
-    useMemo,
-    useRef,
-    useState,
-} from 'react';
+import {coerceUnknownBlocksToStageDirections, type ScriptDocument} from '@stagistic/script';
+import {type ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
 
 import {EditorActCommandsProvider} from './actCommands/context';
 import {buildEditorRootStyle} from './buildRootStyle';
 import {EditorShell} from './components/editorShell/EditorShell';
 import {EditorInstanceProvider} from './context';
 import type {EditorProps} from './contracts';
-import {
-    getEditorCssVars,
-    resolveEditorSettings,
-    selectEditorRebuildSettings,
-    stripScriptSettings,
-} from './editorSettings';
+import {getEditorCssVars, resolveEditorSettings, selectEditorRebuildSettings, stripScriptSettings} from './editorSettings';
 import {useEditorRuntimeSettings} from './editorSettings/useEditorRuntimeSettings';
 import {LeftSidebar, RightSidebar} from './editorSlots';
 import {EditorElementSelectionProvider} from './elementSelection/context';
-import {
-    serializeDocumentForSave,
-    useAutosaveController,
-} from './hooks/useAutosaveController';
+import {serializeDocumentForSave, useAutosaveController} from './hooks/useAutosaveController';
 import {useEditorCharacterColors} from './hooks/useEditorCharacterColors';
 import {useEditorCharacterSync} from './hooks/useEditorCharacterSync';
 import {useEditorLifecycle} from './hooks/useEditorLifecycle';
@@ -38,15 +19,10 @@ import {usePaginationReady} from './hooks/usePaginationReady';
 import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
 import {EditorSnapshotStoreProvider} from './live/context';
-import {
-    getBlockNextElements,
-    getBlockShortcuts,
-} from './model/blockSettingMaps';
-import {
-    type CharacterColorRefsBundle,
-    createCharacterColorRefsBundle,
-} from './surface/editorSurfaceCache';
+import {getBlockNextElements, getBlockShortcuts} from './model/blockSettingMaps';
+import {type CharacterColorRefsBundle, createCharacterColorRefsBundle} from './surface/editorSurfaceCache';
 import {useScriptEditorInstance} from './surface/useScriptEditorInstance';
+import type {CommentsExtensionCallbacks} from './tiptap/extensions/comments';
 import {useEditorExtensions} from './useEditorExtensions';
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -63,29 +39,10 @@ const Editor = ({
     liveStore: providedLiveStore,
     children,
 }: EditorProps & {children?: ReactNode}) => {
-    const {
-        initialValue,
-        persistentCharacters = [],
-        persistentMusic = [],
-        scriptTitle,
-        draftDate,
-    } = document;
-    const {
-        settings: globalSettings,
-        scriptSettings,
-    } = settingsProps ?? {};
-    const {
-        onAutoSave,
-        onManualSave,
-        onDirtyChange,
-        autoSaveDelayMs,
-    } = save ?? {};
-    const {
-        autoFocus,
-        leftSidebarToggle,
-        rightSidebarToggle,
-        sidebarWidth,
-    } = layout ?? {};
+    const {initialValue, persistentCharacters = [], persistentMusic = [], commentThreads, scriptTitle, draftDate} = document;
+    const {settings: globalSettings, scriptSettings} = settingsProps ?? {};
+    const {onAutoSave, onManualSave, onDirtyChange, autoSaveDelayMs} = save ?? {};
+    const {autoFocus, leftSidebarToggle, rightSidebarToggle, sidebarWidth} = layout ?? {};
     const {
         onValueChange,
         onIndexChange,
@@ -98,51 +55,33 @@ const Editor = ({
         onMusicUnassigned,
         onRequestDeleteScene,
         onRequestConvertScene,
+        onRequestRevealComments,
+        onCommentAnchorClick,
+        onCommentBlocksMerged,
     } = callbacks ?? {};
 
-    const resolvedInitialValue = useMemo(
-        () => coerceUnknownBlocksToStageDirections(initialValue).value,
-        [initialValue],
-    );
-    const initialSerialized = useMemo(
-        () => serializeDocumentForSave(resolvedInitialValue),
-        [resolvedInitialValue],
-    );
+    const resolvedInitialValue = useMemo(() => coerceUnknownBlocksToStageDirections(initialValue).value, [initialValue]);
+    const initialSerialized = useMemo(() => serializeDocumentForSave(resolvedInitialValue), [resolvedInitialValue]);
     const rootRef = useRef<HTMLDivElement | null>(null);
     const canvasHostRef = useRef<HTMLDivElement | null>(null);
 
     const runtimeGlobalSettings = useEditorRuntimeSettings(globalSettings);
-    const runtimeScriptSettings = useEditorRuntimeSettings(
-        scriptSettings ?? resolvedInitialValue.attrs?.settings,
-    );
-    const resolvedSettings = useMemo(
-        () => resolveEditorSettings(runtimeGlobalSettings, runtimeScriptSettings),
-        [runtimeGlobalSettings, runtimeScriptSettings],
-    );
-    const blockShortcuts = useMemo(
-        () => getBlockShortcuts(resolvedSettings.blocks),
-        [resolvedSettings.blocks],
-    );
-    const blockNextElements = useMemo(
-        () => getBlockNextElements(resolvedSettings.blocks),
-        [resolvedSettings.blocks],
-    );
+    const runtimeScriptSettings = useEditorRuntimeSettings(scriptSettings ?? resolvedInitialValue.attrs?.settings);
+    const resolvedSettings = useMemo(() => resolveEditorSettings(runtimeGlobalSettings, runtimeScriptSettings), [runtimeGlobalSettings, runtimeScriptSettings]);
+    const blockShortcuts = useMemo(() => getBlockShortcuts(resolvedSettings.blocks), [resolvedSettings.blocks]);
+    const blockNextElements = useMemo(() => getBlockNextElements(resolvedSettings.blocks), [resolvedSettings.blocks]);
 
-    const initialContentSignature = useMemo(
-        () => JSON.stringify(stripScriptSettings(resolvedInitialValue)),
-        [resolvedInitialValue],
+    const initialContentSignature = useMemo(() => JSON.stringify(stripScriptSettings(resolvedInitialValue)), [resolvedInitialValue]);
+    const surfaceSignature = useMemo(
+        () =>
+            JSON.stringify({
+                content: initialContentSignature,
+                settings: selectEditorRebuildSettings(resolvedSettings),
+                editorZoom,
+                blockUi: Boolean(onBlockUiEvent),
+            }),
+        [editorZoom, initialContentSignature, onBlockUiEvent, resolvedSettings],
     );
-    const surfaceSignature = useMemo(() => JSON.stringify({
-        content: initialContentSignature,
-        settings: selectEditorRebuildSettings(resolvedSettings),
-        editorZoom,
-        blockUi: Boolean(onBlockUiEvent),
-    }), [
-        editorZoom,
-        initialContentSignature,
-        onBlockUiEvent,
-        resolvedSettings,
-    ]);
     /*
      * The color refs are captured by editor extensions via closure, so a
      * restored cached surface must keep using the bundle its extensions hold.
@@ -151,9 +90,19 @@ const Editor = ({
     const surfaceRefsRef = useRef<CharacterColorRefsBundle | null>(null);
 
     if (!surfaceRefsRef.current) {
-        surfaceRefsRef.current = surfaceCache?.acquire(surfaceSignature)?.characterColorRefs
-            ?? createCharacterColorRefsBundle();
+        surfaceRefsRef.current = surfaceCache?.acquire(surfaceSignature)?.characterColorRefs ?? createCharacterColorRefsBundle();
     }
+
+    const commentCallbacksRef = useRef<CommentsExtensionCallbacks>({});
+
+    // Read at event time by the comments plugin, so the latest host callbacks always win.
+    useLayoutEffect(() => {
+        commentCallbacksRef.current = {
+            onRequestReveal: onRequestRevealComments,
+            onAnchorClick: onCommentAnchorClick,
+            onBlocksMerged: onCommentBlocksMerged,
+        };
+    });
 
     const persistentMusicRef = useRef(persistentMusic);
 
@@ -161,13 +110,7 @@ const Editor = ({
         persistentMusicRef.current = persistentMusic;
     }, [persistentMusic]);
 
-    const {
-        colorByCharacterIdRef,
-        rememberedColorByKeyRef,
-        persistentCharactersRef,
-        confirmedCharacterColorsById,
-        liveStore,
-    } = useEditorCharacterColors({
+    const {colorByCharacterIdRef, rememberedColorByKeyRef, persistentCharactersRef, confirmedCharacterColorsById, liveStore} = useEditorCharacterColors({
         persistentCharacters,
         characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
         resolvedInitialValue,
@@ -183,23 +126,10 @@ const Editor = ({
         pageWidthPx: resolvedSettings.page.widthPx,
         editorZoom,
     });
-    const renderScale = useMemo(
-        () => editorZoom * responsiveScale,
-        [editorZoom, responsiveScale],
-    );
-    const editorStyle = useMemo(
-        () => getEditorCssVars(resolvedSettings, renderScale, editorZoom),
-        [
-            editorZoom,
-            renderScale,
-            resolvedSettings,
-        ],
-    );
+    const renderScale = useMemo(() => editorZoom * responsiveScale, [editorZoom, responsiveScale]);
+    const editorStyle = useMemo(() => getEditorCssVars(resolvedSettings, renderScale, editorZoom), [editorZoom, renderScale, resolvedSettings]);
 
-    const {
-        resolvedLayout, handleLeftSidebarToggleMouseDown, handleRightSidebarToggleMouseDown,
-    } =
-        useEditorSidebarLayout({children, layout});
+    const {resolvedLayout, handleLeftSidebarToggleMouseDown, handleRightSidebarToggleMouseDown} = useEditorSidebarLayout({children, layout});
 
     const extensions = useEditorExtensions({
         resolvedSettings,
@@ -215,6 +145,7 @@ const Editor = ({
         onMusicUnassigned,
         onRequestDeleteScene,
         onRequestConvertScene,
+        commentCallbacksRef,
         enableBlockUiEvents: Boolean(onBlockUiEvent),
     });
     const initialDoc = useMemo<ScriptDocument>(
@@ -230,11 +161,13 @@ const Editor = ({
         characterColorRefs: surfaceRefsRef.current,
     });
 
-    useEditorCharacterSync(
-        editor,
-        persistentCharacters,
-        resolvedSettings.visual.characterColorSaturation,
-    );
+    useEffect(() => {
+        if (editor && !editor.isDestroyed) {
+            editor.commands.setCommentThreads(commentThreads ?? []);
+        }
+    }, [commentThreads, editor]);
+
+    useEditorCharacterSync(editor, persistentCharacters, resolvedSettings.visual.characterColorSaturation);
 
     const resolveLatestValue = useCallback(() => {
         if (!editor) {
@@ -242,19 +175,14 @@ const Editor = ({
         }
 
         const paginationCommands = editor.commands as {
-            forcePaginationRecalc?: () => boolean,
+            forcePaginationRecalc?: () => boolean;
         };
 
         paginationCommands.forcePaginationRecalc?.();
 
         return stripScriptSettings(editor.getJSON() as ScriptDocument);
     }, [editor]);
-    const {
-        scheduleAutosave,
-        handleManualSave,
-        setLatestValue,
-        syncInitialValue,
-    } = useAutosaveController({
+    const {scheduleAutosave, handleManualSave, setLatestValue, syncInitialValue} = useAutosaveController({
         onAutoSave,
         onManualSave,
         onDirtyChange,
@@ -264,19 +192,17 @@ const Editor = ({
             onValueChange?.(value, {source: 'typing', revision});
         },
     });
-    const rootStyle = useMemo(() => buildEditorRootStyle({
-        persistentCharacters,
-        editorStyle,
-        sidebarWidth,
-        isLeftSidebarOpen,
-        isRightSidebarOpen,
-    }), [
-        editorStyle,
-        isLeftSidebarOpen,
-        isRightSidebarOpen,
-        persistentCharacters,
-        sidebarWidth,
-    ]);
+    const rootStyle = useMemo(
+        () =>
+            buildEditorRootStyle({
+                persistentCharacters,
+                editorStyle,
+                sidebarWidth,
+                isLeftSidebarOpen,
+                isRightSidebarOpen,
+            }),
+        [editorStyle, isLeftSidebarOpen, isRightSidebarOpen, persistentCharacters, sidebarWidth],
+    );
 
     usePaginationSettings({
         editor,

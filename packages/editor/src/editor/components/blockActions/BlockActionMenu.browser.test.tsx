@@ -1,27 +1,12 @@
 import '@stagistic/ui/styles/base.css';
 
-import type {
-    ScriptDocument,
-    ScriptNode,
-} from '@stagistic/script';
+import type {ScriptDocument, ScriptNode} from '@stagistic/script';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
-import {
-    createRoot,
-    type Root,
-} from 'react-dom/client';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-    vi,
-} from 'vite-plus/test';
-import {
-    page,
-    userEvent,
-} from 'vite-plus/test/browser';
+import {createRoot, type Root} from 'react-dom/client';
+import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {page, userEvent} from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../../context';
 import type {EditorProps} from '../../contracts';
@@ -58,8 +43,8 @@ const EditorProbe = () => {
 const mountedRoots: Root[] = [];
 
 type RenderEditorOptions = {
-    document?: Partial<Omit<EditorProps['document'], 'initialValue'>>,
-    callbacks?: EditorProps['callbacks'],
+    document?: Partial<Omit<EditorProps['document'], 'initialValue'>>;
+    callbacks?: EditorProps['callbacks'];
 };
 
 /*
@@ -67,10 +52,7 @@ type RenderEditorOptions = {
  * coefficient fell back to 1. editorZoom={1} states that explicitly now that the
  * value is a prop rather than an ambient global.
  */
-const renderEditor = (
-    initialValue: ScriptDocument = createDocument(),
-    options: RenderEditorOptions = {},
-) => {
+const renderEditor = (initialValue: ScriptDocument = createDocument(), options: RenderEditorOptions = {}) => {
     const host = document.createElement('div');
 
     host.style.width = '1024px';
@@ -97,7 +79,7 @@ const renderEditor = (
     mountedRoots.push(root);
 };
 
-const poll = async <T, >(get: () => T | null | undefined, label: string): Promise<T> => {
+const poll = async <T,>(get: () => T | null | undefined, label: string): Promise<T> => {
     const deadline = Date.now() + 2000;
 
     while (Date.now() < deadline) {
@@ -113,10 +95,7 @@ const poll = async <T, >(get: () => T | null | undefined, label: string): Promis
     throw new Error(`Timed out waiting for ${label}`);
 };
 
-const getEditor = () => poll(
-    () => (window as BlockActionTestWindow).__blockActionTestEditor ?? null,
-    'editor instance',
-);
+const getEditor = () => poll(() => (window as BlockActionTestWindow).__blockActionTestEditor ?? null, 'editor instance');
 
 const focusBlock = (editor: Editor, blockId: string) => {
     const block = findScriptBlockByIdFromState(editor.state, blockId);
@@ -125,37 +104,29 @@ const focusBlock = (editor: Editor, blockId: string) => {
         throw new Error(`Block "${blockId}" not found`);
     }
 
-    editor.view.dispatch(
-        editor.state.tr.setSelection(TextSelection.create(editor.state.doc, block.from)),
-    );
+    editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, block.from)));
     editor.commands.focus();
 };
 
-const getActionTrigger = (blockId: string) => poll(
-    () => document.querySelector<HTMLButtonElement>(
-        `[data-block-action-trigger="true"][data-block-id="${blockId}"]`,
-    ),
-    `action trigger for ${blockId}`,
-);
+const getActionTrigger = (blockId: string) =>
+    poll(() => document.querySelector<HTMLButtonElement>(`[data-block-action-trigger="true"][data-block-id="${blockId}"]`), `action trigger for ${blockId}`);
 
 const openActionMenu = async (blockId: string) => {
     const trigger = await getActionTrigger(blockId);
 
     await page.elementLocator(trigger).click();
 
-    return poll(
-        () => document.querySelector<HTMLElement>('[data-block-action-menu="true"]'),
-        'block action menu',
-    );
+    return poll(() => document.querySelector<HTMLElement>('[data-block-action-menu="true"]'), 'block action menu');
 };
 
 const findMenuItem = (label: string) => {
-    return Array.from(document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'))
-        .find(item => {
+    return (
+        Array.from(document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')).find(item => {
             const accessibleLabel = item.getAttribute('aria-label') ?? item.textContent?.trim();
 
             return accessibleLabel === label || accessibleLabel?.startsWith(`${label} `);
-        }) ?? null;
+        }) ?? null
+    );
 };
 
 const openMusicSubmenu = async () => {
@@ -184,16 +155,12 @@ describe('block action menu', () => {
 
         await page.elementLocator(addMusic).click();
 
-        const input = await poll(
-            () => document.querySelector<HTMLElement>(
-                '[data-id="sd-1"] [data-music-title-input="start"]',
-            ),
-            'new music title input',
-        );
+        const input = await poll(() => document.querySelector<HTMLElement>('[data-id="sd-1"] [data-music-title-input="start"]'), 'new music title input');
 
         expect(document.activeElement).toBe(input);
         expect(document.querySelector('[data-music-number]')?.textContent).toBe('0)');
-        expect(document.querySelector('[data-block-action-trigger="true"]')).toBeNull();
+        // Every block keeps "Add comment", so the trigger stays; the menu itself must close.
+        expect(document.querySelector('[data-block-action-menu="true"]')).toBeNull();
     });
 
     it('suggests and assigns an unassigned music from a new music pill', async () => {
@@ -234,30 +201,18 @@ describe('block action menu', () => {
 
         await page.elementLocator(addMusic).click();
 
-        const input = await poll(
-            () => document.querySelector<HTMLElement>('[data-music-draft="true"]'),
-            'draft music title input',
-        );
-        const listbox = await poll(
-            () => document.querySelector<HTMLElement>('[role="listbox"][aria-label="Music suggestions"]'),
-            'music suggestions',
-        );
+        const input = await poll(() => document.querySelector<HTMLElement>('[data-music-draft="true"]'), 'draft music title input');
+        const listbox = await poll(() => document.querySelector<HTMLElement>('[role="listbox"][aria-label="Music suggestions"]'), 'music suggestions');
 
         expect(listbox.textContent).toContain('Overture');
         expect(listbox.textContent).toContain('Finale');
         expect(listbox.textContent).toContain('Music 9');
 
         await userEvent.type(input, 'Over');
-        await poll(
-            () => listbox.textContent?.includes('Overture') && !listbox.textContent.includes('Finale')
-                ? true
-                : null,
-            'filtered music suggestions',
-        );
+        await poll(() => (listbox.textContent?.includes('Overture') && !listbox.textContent.includes('Finale') ? true : null), 'filtered music suggestions');
         await userEvent.keyboard('{ArrowDown}{Enter}');
 
-        const musicStart = editor.getJSON().content?.[0]?.content
-            ?.find(node => node.type === 'musicStart') as ScriptNode | undefined;
+        const musicStart = editor.getJSON().content?.[0]?.content?.find(node => node.type === 'musicStart') as ScriptNode | undefined;
 
         expect(musicStart?.attrs).toMatchObject({
             musicId: 'music-overture',
@@ -297,10 +252,7 @@ describe('block action menu', () => {
         await openActionMenu('sd-2');
         await openMusicSubmenu();
 
-        const addOut = await poll(
-            () => findMenuItem('Set music end (0) Night'),
-            'Set music end item',
-        );
+        const addOut = await poll(() => findMenuItem('Set music end (0) Night'), 'Set music end item');
 
         await page.elementLocator(addOut).click();
 
@@ -317,10 +269,7 @@ describe('block action menu', () => {
         await openActionMenu('sd-2');
         await openMusicSubmenu();
 
-        expect(await poll(
-            () => findMenuItem('Set music end (0)'),
-            'untitled Set music end item',
-        )).toBeTruthy();
+        expect(await poll(() => findMenuItem('Set music end (0)'), 'untitled Set music end item')).toBeTruthy();
     });
 
     it('does not offer a music end command for a hit music', async () => {
@@ -341,27 +290,29 @@ describe('block action menu', () => {
         renderEditor();
 
         await getEditor();
-        await poll(
-            () => document.activeElement?.matches('[data-editor="true"]') ? true : null,
-            'editor autofocus',
-        );
+        await poll(() => (document.activeElement?.matches('[data-editor="true"]') ? true : null), 'editor autofocus');
 
         const trigger = await getActionTrigger('sd-1');
 
         trigger.focus();
-        trigger.dispatchEvent(new KeyboardEvent('keydown', {
-            key: 'Enter',
-            bubbles: true,
-            cancelable: true,
-        }));
+        trigger.dispatchEvent(
+            new KeyboardEvent('keydown', {
+                key: 'Enter',
+                bubbles: true,
+                cancelable: true,
+            }),
+        );
 
         const musicItem = await poll(() => findMenuItem('Music'), 'Music item');
 
-        await poll(
-            () => document.activeElement === musicItem ? musicItem : null,
-            'Music item focus',
-        );
+        await poll(() => (document.activeElement === musicItem ? musicItem : null), 'Music item focus');
 
+        /*
+         * The pointer rests where the previous test left it, which can land on
+         * "Add comment" and steal focus by hover. Park it on the focused item.
+         */
+        await page.elementLocator(musicItem).hover();
+        musicItem.focus();
         await userEvent.keyboard('{ArrowRight}');
 
         const addMusic = await poll(() => findMenuItem('Start new music'), 'Start new music item');
@@ -369,10 +320,7 @@ describe('block action menu', () => {
         expect(document.activeElement).toBe(addMusic);
 
         await userEvent.keyboard('{Escape}');
-        await poll(
-            () => document.querySelector('[data-block-action-menu="true"]') ? null : true,
-            'closed action menu',
-        );
+        await poll(() => (document.querySelector('[data-block-action-menu="true"]') ? null : true), 'closed action menu');
 
         /*
          * The gutter remounts its trigger while the menu is open, so identity
@@ -383,9 +331,7 @@ describe('block action menu', () => {
         const activeElement = document.activeElement;
 
         expect(activeElement).not.toBe(document.body);
-        expect(activeElement?.matches(
-            '[data-block-action-trigger="true"][data-block-id="sd-1"]',
-        )).toBe(true);
+        expect(activeElement?.matches('[data-block-action-trigger="true"][data-block-id="sd-1"]')).toBe(true);
     });
 
     it('closes the submenu when the pointer leaves its parent and panel', async () => {
@@ -394,10 +340,7 @@ describe('block action menu', () => {
         await getEditor();
         await openActionMenu('sd-1');
         await openMusicSubmenu();
-        await poll(
-            () => document.querySelector('[data-block-submenu-panel="music"]'),
-            'Music submenu',
-        );
+        await poll(() => document.querySelector('[data-block-submenu-panel="music"]'), 'Music submenu');
 
         const typeTrigger = document.querySelector<HTMLElement>('[data-block-actions-trigger="true"]');
 
@@ -440,13 +383,9 @@ describe('block action menu', () => {
         await getEditor();
 
         const trigger = await getActionTrigger('sd-1');
-        const typeTrigger = await poll(
-            () => document.querySelector<HTMLButtonElement>('[data-block-actions-trigger="true"]'),
-            'block type trigger',
-        );
+        const typeTrigger = await poll(() => document.querySelector<HTMLButtonElement>('[data-block-actions-trigger="true"]'), 'block type trigger');
 
-        expect(window.getComputedStyle(trigger).transitionDuration)
-            .toBe(window.getComputedStyle(typeTrigger).transitionDuration);
+        expect(window.getComputedStyle(trigger).transitionDuration).toBe(window.getComputedStyle(typeTrigger).transitionDuration);
 
         const menu = await openActionMenu('sd-1');
         const triggerRect = trigger.getBoundingClientRect();
@@ -469,10 +408,7 @@ describe('block action menu', () => {
 
         await getEditor();
 
-        const block = await poll(
-            () => document.querySelector<HTMLElement>('[data-id="sd-1"]'),
-            'stage direction block',
-        );
+        const block = await poll(() => document.querySelector<HTMLElement>('[data-id="sd-1"]'), 'stage direction block');
         const event = new MouseEvent('contextmenu', {
             bubbles: true,
             cancelable: true,

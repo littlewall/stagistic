@@ -41,6 +41,17 @@ export {ScriptBehaviorExtension} from './ScriptBehaviorExtension';
 
 export {BLOCK_FOCUS_FLASH_ATTRIBUTE, BLOCK_FOCUS_FLASH_DURATION_MS, BlockFocusFlashExtension} from './BlockFocusFlashExtension';
 export {PlaceholderExtension} from './PlaceholderExtension';
+export {
+    type CommentAnchorLocation,
+    type CommentBlockMerge,
+    type CommentDraft,
+    CommentsExtension,
+    type CommentsExtensionCallbacks,
+    commentsPluginKey,
+    type CommentsPluginState,
+    type EditorCommentThreadRef,
+    getCommentsState,
+} from './comments';
 export {getEditorSearchSnapshot, SearchExtension, type EditorSearchSnapshot, type SearchCriteria, type SearchResult} from './search';
 export {SceneGuardExtension} from './SceneGuardExtension';
 export {SceneNumberingExtension} from './SceneNumberingExtension';

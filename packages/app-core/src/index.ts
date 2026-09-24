@@ -1,5 +1,6 @@
 export * from './attachments';
 export * from './characters';
+export * from './comments';
 export * from './drafts';
 export * from './editor-settings';
 export * from './music';

@@ -5,6 +5,7 @@ export {AttributeManagerIcon} from './AttributeManagerIcon';
 export {ChevronDownIcon} from './ChevronDownIcon';
 export {ChevronUpIcon} from './ChevronUpIcon';
 export {CloseIcon} from './CloseIcon';
+export {CommentIcon} from './CommentIcon';
 export {DarkThemeIcon} from './DarkThemeIcon';
 export {DownloadIcon} from './DownloadIcon';
 export {EditPencilIcon} from './EditPencilIcon';

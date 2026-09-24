@@ -102,6 +102,7 @@ const snapshot: StepkgSnapshot = {
             updatedAt: '2026-09-18T10:00:00.000Z',
         },
     ],
+    comments: {threads: [], messages: []},
     attachmentBindings: [
         {target: {type: 'music', id: 'music-1'}, attachmentId: 'missing-attachment', role: 'score', order: 0, createdAt: '2026-09-18T10:00:00.000Z'},
     ],
@@ -115,6 +116,38 @@ describe('validateStepkgSnapshot', () => {
             ['broken_reference', 'scene', 'scene-1'],
             ['broken_reference', 'music', 'music-1'],
             ['broken_reference', 'attachment', 'missing-attachment'],
+        ]);
+    });
+
+    it('reports duplicate comment ids and messages pointing at missing threads', () => {
+        const thread = {
+            id: 'thread-1',
+            anchorKind: 'block' as const,
+            anchorBlockId: 'gone',
+            quotedText: '',
+            status: 'open' as const,
+            resolvedAt: null,
+            resolvedBy: null,
+            createdBy: 'local',
+            createdAt: '2026-09-18T10:00:00.000Z',
+            updatedAt: '2026-09-18T10:00:00.000Z',
+        };
+        const clean: StepkgSnapshot = {
+            ...snapshot,
+            characters: {...snapshot.characters, characters: [snapshot.characters.characters[0]], groups: []},
+            scenes: {scenes: [], locations: []},
+            music: {items: []},
+            attachments: [],
+            attachmentBindings: [],
+            comments: {
+                threads: [thread, thread],
+                messages: [{id: 'message-1', threadId: 'missing', authorId: 'local', body: 'b', createdAt: 'x', updatedAt: 'x', editedAt: null}],
+            },
+        };
+
+        expect(validateStepkgSnapshot(clean).map(issue => [issue.code, issue.entity?.type, issue.entity?.id])).toEqual([
+            ['duplicate_id', 'comment', 'thread-1'],
+            ['broken_reference', 'comment', 'message-1'],
         ]);
     });
 });

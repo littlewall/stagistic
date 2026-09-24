@@ -34,6 +34,7 @@ const baseSnapshot = (): StepkgSnapshot => ({
     scenes: {scenes: [], locations: []},
     attachments: [],
     attachmentBindings: [],
+    comments: {threads: [], messages: []},
 });
 
 const exportBytes = async (snapshot: StepkgSnapshot): Promise<Uint8Array> => {

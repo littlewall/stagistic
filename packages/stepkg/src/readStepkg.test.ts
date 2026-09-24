@@ -17,6 +17,7 @@ const baseSnapshot = (): StepkgSnapshot => ({
     music: {items: []},
     scenes: {scenes: [], locations: []},
     attachments: [],
+    comments: {threads: [], messages: []},
     attachmentBindings: [],
 });
 
@@ -33,7 +34,65 @@ const exportBytes = async (snapshot: StepkgSnapshot): Promise<Uint8Array> => {
     return new Uint8Array(await result.blob.arrayBuffer());
 };
 
+const messageRow = (id: string, threadId: string) => ({
+    id,
+    threadId,
+    authorId: 'local',
+    body: 'b',
+    createdAt: '2026-09-18T10:00:00.000Z',
+    updatedAt: '2026-09-18T10:00:00.000Z',
+    editedAt: null,
+});
+const threadRow = (id: string) => ({
+    id,
+    anchorKind: 'range' as const,
+    anchorBlockId: null,
+    quotedText: 'q',
+    status: 'open' as const,
+    resolvedAt: null,
+    resolvedBy: null,
+    createdBy: 'local',
+    createdAt: '2026-09-18T10:00:00.000Z',
+    updatedAt: '2026-09-18T10:00:00.000Z',
+});
+
 describe('readStepkg', () => {
+    it('round-trips comment threads and messages', async () => {
+        const snapshot: StepkgSnapshot = {...baseSnapshot(), comments: {threads: [threadRow('t1')], messages: [messageRow('m1', 't1')]}};
+        const result = await readStepkg(await exportBytes(snapshot));
+
+        expect(result.ok).toBe(true);
+        if (result.ok) expect(result.package.snapshot.comments).toEqual(snapshot.comments);
+    });
+
+    it('reads a package without data/comments.json as having no comments', async () => {
+        const entries = unzipSync(await exportBytes(baseSnapshot()));
+        const manifest = JSON.parse(new TextDecoder().decode(entries['manifest.json'])) as {files: {path: string}[]};
+
+        delete entries['data/comments.json'];
+        manifest.files = manifest.files.filter(file => file.path !== 'data/comments.json');
+        entries['manifest.json'] = encoder.encode(JSON.stringify(manifest));
+
+        const result = await readStepkg(zipSync(entries));
+
+        expect(result.ok).toBe(true);
+        if (result.ok) expect(result.package.snapshot.comments).toEqual({threads: [], messages: []});
+    });
+
+    it('reports a comment message whose thread is missing', async () => {
+        const entries = unzipSync(await exportBytes(baseSnapshot()));
+        const manifest = JSON.parse(new TextDecoder().decode(entries['manifest.json'])) as {files: {path: string}[]};
+
+        manifest.files = manifest.files.filter(file => file.path !== 'data/comments.json');
+        entries['manifest.json'] = encoder.encode(JSON.stringify(manifest));
+        entries['data/comments.json'] = encoder.encode(JSON.stringify({threads: [], messages: [messageRow('m1', 'missing')]}));
+
+        const result = await readStepkg(zipSync(entries));
+
+        expect(result.ok).toBe(false);
+        if (!result.ok) expect(result.issues).toContainEqual(expect.objectContaining({code: 'broken_reference', entity: {type: 'comment', id: 'm1'}}));
+    });
+
     it('round-trips an exporter package into an equivalent snapshot', async () => {
         const snapshot: StepkgSnapshot = {
             ...baseSnapshot(),

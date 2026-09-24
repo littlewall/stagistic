@@ -54,6 +54,7 @@ const snapshot = (): StepkgSnapshot => ({
     attachments: [
         {id: 'old-att', filename: 'a.pdf', mimeType: 'application/pdf', sizeBytes: 3, createdAt: 'x', updatedAt: 'x', contentKey: 'assets/old-att/a.pdf'},
     ],
+    comments: {threads: [], messages: []},
     attachmentBindings: [{target: {type: 'music', id: 'old-music'}, attachmentId: 'old-att', role: 'integrated_score', order: 0, createdAt: 'x'}],
 });
 
@@ -95,5 +96,37 @@ describe('remapStepkgIds', () => {
 
         expect(next.scenes.scenes[0]?.id).toBe('scene-1');
         expect(next.scenes.scenes[0]?.headingBlockId).toBe('b1');
+    });
+
+    it('remaps comment thread ids in rows and in commentAnchor marks, and message ids', () => {
+        const input = snapshot();
+
+        input.document.content[0].content = [{type: 'text', text: 'Hi', marks: [{type: 'commentAnchor', attrs: {threadId: 'old-thread'}}]}];
+        input.comments = {
+            threads: [
+                {
+                    id: 'old-thread',
+                    anchorKind: 'range',
+                    anchorBlockId: null,
+                    quotedText: 'Hi',
+                    status: 'open',
+                    resolvedAt: null,
+                    resolvedBy: null,
+                    createdBy: 'local',
+                    createdAt: 'x',
+                    updatedAt: 'x',
+                },
+            ],
+            messages: [{id: 'old-message', threadId: 'old-thread', authorId: 'local', body: 'b', createdAt: 'x', updatedAt: 'x', editedAt: null}],
+        };
+
+        let counter = 0;
+        const {snapshot: next, idMap} = remapStepkgIds(input, () => `new-${++counter}`);
+        const newThreadId = idMap.commentThreads['old-thread'];
+
+        expect(newThreadId).toMatch(/^new-/);
+        expect(next.comments.threads[0].id).toBe(newThreadId);
+        expect(next.comments.messages[0]).toMatchObject({id: idMap.commentMessages['old-message'], threadId: newThreadId});
+        expect(next.document.content[0].content?.[0].marks?.[0].attrs).toEqual({threadId: newThreadId});
     });
 });

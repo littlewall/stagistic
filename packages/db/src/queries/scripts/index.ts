@@ -3,6 +3,7 @@ export * from './attachments';
 export * from './blockCharacterRefs';
 export * from './blocks';
 export * from './characters';
+export * from './comments';
 export * from './config';
 export * from './crud';
 export * from './duplicate';
