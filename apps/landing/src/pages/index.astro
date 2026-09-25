@@ -1,5 +1,6 @@
 ---
 import {clsx} from 'clsx';
+import CreatorNote from '../components/CreatorNote.astro';
 import LandingMiniEditor from '../components/mini-editor/LandingMiniEditor';
 import Layout from '../layouts/Layout.astro';
 import s from './index.module.css';
@@ -280,6 +281,8 @@ const faqs = [
                 </div>
             </div>
         </section>
+
+        <CreatorNote />
 
         <!-- Public preview / CTA -->
         <section class={s.preview} id="preview">
