@@ -96,5 +96,14 @@ export const validateStepkgSnapshot = (snapshot: StepkgSnapshot): StepkgExportIs
         }
     }
 
+    // Block anchors may point at deleted blocks (Detached), so anchorBlockId is not validated.
+    const commentThreadIds = addDuplicateAndEmptyIdIssues(snapshot.comments.threads, 'comment', issues);
+    addDuplicateAndEmptyIdIssues(snapshot.comments.messages, 'comment', issues);
+    for (const message of snapshot.comments.messages) {
+        if (!commentThreadIds.has(message.threadId)) {
+            issues.push(issue('broken_reference', 'comment', message.id));
+        }
+    }
+
     return issues;
 };

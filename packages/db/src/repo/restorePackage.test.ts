@@ -57,6 +57,23 @@ const baseWrite = (): ScriptPackageWrite => ({
     scenes: [],
     attachments: [{id: 'a1', filename: 'score.pdf', mimeType: 'application/pdf', sizeBytes: 3, blob: new Blob(['pdf']), createdAt: 1_000, updatedAt: 1_000}],
     bindings: [{musicId: 'm1', attachmentId: 'a1', role: 'integrated_score', sortOrder: 0, createdAt: 1_000}],
+    comments: {
+        threads: [
+            {
+                id: 't1',
+                anchorKind: 'range',
+                anchorBlockId: null,
+                quotedText: 'Q',
+                status: 'open',
+                resolvedAt: null,
+                resolvedBy: null,
+                createdBy: 'local',
+                createdAt: 1_000,
+                updatedAt: 1_000,
+            },
+        ],
+        messages: [{id: 'cm1', threadId: 't1', authorId: 'local', body: 'B', createdAt: 1_000, updatedAt: 1_000, editedAt: null}],
+    },
 });
 
 const makeRepository = (db: Awaited<ReturnType<typeof createTestDb>>['db'], fileStorage = new InMemoryFileStorage()) =>
@@ -96,6 +113,7 @@ describe('restoreScriptFromPackage', () => {
             locations: [],
             attachments: [],
             bindings: [],
+            comments: {threads: [], messages: []},
         };
 
         await repository.restoreScriptFromPackage(replacement);
@@ -106,6 +124,7 @@ describe('restoreScriptFromPackage', () => {
         expect(restored?.music).toEqual([]);
         expect(restored?.locations).toEqual([]);
         expect(restored?.attachments).toEqual([]);
+        expect(restored?.comments).toEqual({threads: [], messages: []});
         expect(await fileStorage.get(oldAttachmentKey)).toBeNull();
     });
 

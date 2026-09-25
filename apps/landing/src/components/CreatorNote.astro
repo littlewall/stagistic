@@ -1,0 +1,19 @@
+---
+import {clsx} from 'clsx';
+import s from '../pages/index.module.css';
+---
+
+<section class={s.forTheatre} id="creator">
+    <div class={clsx(s.forTheatreInner, s.reveal)} data-reveal>
+        <div>
+            <h2 class={s.forTheatreTitle}>Built by a writer, for writers.</h2>
+        </div>
+        <div>
+            <p class={s.forTheatreText}>
+                I'm <a href="https://milanzitka.cz" class={s.textLink}>Milan Zítka</a>, a software developer with more than 15 years of experience and an author
+                of several musicals. I originally built Stagistic Editor for my own writing. Now I'm offering it free to the whole theatre community, because I
+                believe the ability to write for the stage shouldn't depend on paying for basic software.
+            </p>
+        </div>
+    </div>
+</section>

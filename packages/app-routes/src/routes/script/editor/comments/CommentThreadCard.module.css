@@ -1,0 +1,220 @@
+/*
+ * One comment thread card (draft, collapsed, active). Local because the card is
+ * specific to the Comments panel; no shared list-row primitive fits a thread.
+ */
+.card {
+    overflow: hidden;
+    font-family: var(--font-family-sans);
+    font-size: var(--font-size-sm);
+    line-height: var(--line-height-normal);
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border-subtle);
+    border-radius: var(--radius-sm);
+}
+
+.active {
+    border-color: var(--color-border);
+}
+
+/* Lit by hover (editor or card): a lighter tint than the active header, so the two never blur. */
+.highlighted .summary {
+    background: color-mix(in oklch, var(--state-selected) 50%, transparent);
+}
+
+.resolved {
+    color: var(--color-text-muted);
+}
+
+.summary {
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    width: 100%;
+    padding: var(--space-md) var(--space-lg);
+    font: inherit;
+    color: inherit;
+    text-align: left;
+    background: transparent;
+    border: 0;
+
+    &:hover {
+        background: var(--state-hover);
+    }
+
+    &:focus-visible {
+        outline: var(--focus-ring);
+        outline-offset: calc(var(--focus-ring-offset) * -1);
+    }
+}
+
+.summaryHead,
+.header,
+.replyHead {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+    justify-content: space-between;
+    font-size: var(--font-size-xs);
+}
+
+/* Tinted strip; clicking anywhere outside the menu collapses the card. */
+.header {
+    position: relative;
+    height: var(--control-height-md);
+    padding: 0 var(--space-md) 0 var(--space-lg);
+    /* Same tint as the anchored text/block in the editor, tying card and target together. */
+    background: var(--state-selected);
+    border-bottom: 1px solid var(--color-border-subtle);
+}
+
+.collapseButton {
+    cursor: pointer;
+    position: absolute;
+    inset: 0;
+    background: transparent;
+    border: 0;
+
+    &:hover {
+        background: color-mix(in oklch, var(--color-text) 4%, transparent);
+    }
+
+    &:focus-visible {
+        outline: var(--focus-ring);
+        outline-offset: calc(var(--focus-ring-offset) * -1);
+    }
+}
+
+.header .label,
+.headerMeta {
+    pointer-events: none;
+    position: relative;
+}
+
+.headerMeta {
+    display: inline-flex;
+    gap: var(--space-sm);
+    align-items: center;
+
+    & button {
+        pointer-events: auto;
+    }
+}
+
+.label {
+    font-weight: var(--font-weight-semibold);
+}
+
+.time,
+.edited,
+.meta,
+.hint {
+    font-size: var(--font-size-xs);
+    color: var(--color-text-muted);
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    padding: var(--space-md) var(--space-lg) var(--space-lg);
+}
+
+.quote {
+    overflow: hidden;
+    margin: 0;
+    font-size: var(--font-size-xs);
+    font-style: italic;
+    color: var(--color-text-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.body {
+    margin: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.clamped {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+/* Replies hang off a quiet timeline under the root message. */
+.replies {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    margin-left: var(--space-sm);
+    padding-left: var(--space-lg);
+    border-left: 1px solid var(--color-border);
+}
+
+.reply {
+    position: relative;
+    min-width: 0;
+}
+
+.replyHead {
+    height: var(--control-height-xs);
+    margin-bottom: var(--space-xs);
+}
+
+.railPoint {
+    position: absolute;
+    top: calc(var(--control-height-xs) / 2 - var(--space-xs));
+    left: calc(var(--space-lg) * -1 - var(--space-xs) - var(--space-px));
+    width: 5px;
+    height: 5px;
+    background: var(--color-text-muted);
+    border-radius: var(--radius-full);
+}
+
+.composer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+/* Separates the reply box from the thread above it, with or without replies. */
+.replyComposer {
+    margin-top: var(--space-md);
+}
+
+.textarea {
+    resize: vertical;
+    width: 100%;
+    min-height: 48px;
+    padding: var(--space-sm) var(--space-md);
+    font-family: inherit;
+    font-size: var(--font-size-sm);
+    color: var(--color-text);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+
+    &:focus-visible {
+        outline: 2px solid var(--color-focus-ring);
+        outline-offset: 0;
+    }
+
+    &::placeholder {
+        color: var(--color-text-placeholder);
+    }
+}
+
+.composerActions {
+    display: flex;
+    gap: var(--space-sm);
+    align-items: center;
+    justify-content: space-between;
+}
+
+.composerButtons {
+    display: flex;
+    gap: var(--space-sm);
+}

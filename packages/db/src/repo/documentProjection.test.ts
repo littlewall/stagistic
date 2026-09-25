@@ -1,34 +1,19 @@
+import {SCRIPT_DOCUMENT_SCHEMA_VERSION} from '@stagistic/script';
 import {asc, eq} from 'drizzle-orm';
-import {
-    describe, expect, it,
-} from 'vite-plus/test';
+import {describe, expect, it} from 'vite-plus/test';
 
-import {
-    makeSceneId,
-    rebuildScriptDocumentFromBlocks,
-    type RewriteScriptDocument,
-} from '../blocks';
-import {
-    scriptBlockCharacterRefs,
-    scriptBlocks,
-    scriptCharacterGroupMembers,
-    scriptCharacters,
-    scriptLocations,
-    scriptScenes,
-} from '../schema';
-import {
-    createTestDb,
-    seedScript,
-    type TestDb,
-} from '../testing/createTestDb';
-import {
-    loadScriptDocumentFromProjection,
-    rebuildScriptProjection,
-} from './documentProjection';
+import {makeSceneId, rebuildScriptDocumentFromBlocks, type RewriteScriptDocument} from '../blocks';
+import {scriptBlockCharacterRefs, scriptBlocks, scriptCharacterGroupMembers, scriptCharacters, scriptLocations, scriptScenes} from '../schema';
+import {createTestDb, seedScript, type TestDb} from '../testing/createTestDb';
+import {loadScriptDocumentFromProjection, rebuildScriptProjection} from './documentProjection';
 
-const doc = (blocks: {
-    id: string, type?: string, text: string,
-}[]): RewriteScriptDocument => ({
+const doc = (
+    blocks: {
+        id: string;
+        type?: string;
+        text: string;
+    }[],
+): RewriteScriptDocument => ({
     type: 'doc',
     content: blocks.map(b => ({
         type: b.type ?? 'stageDirection',
@@ -38,11 +23,7 @@ const doc = (blocks: {
 });
 
 const readBlockIds = async (db: TestDb, scriptId: string) => {
-    const rows = await db
-        .select({id: scriptBlocks.id})
-        .from(scriptBlocks)
-        .where(eq(scriptBlocks.scriptId, scriptId))
-        .orderBy(asc(scriptBlocks.blockOrder));
+    const rows = await db.select({id: scriptBlocks.id}).from(scriptBlocks).where(eq(scriptBlocks.scriptId, scriptId)).orderBy(asc(scriptBlocks.blockOrder));
 
     return rows.map(row => row.id);
 };
@@ -58,11 +39,15 @@ describe('documentProjection', () => {
             scriptId: 's1',
             document: doc([
                 {
-                    id: 'h1', type: 'scene', text: 'A',
+                    id: 'h1',
+                    type: 'scene',
+                    text: 'A',
                 },
                 {id: 'a1', text: 'old'},
                 {
-                    id: 'h2', type: 'scene', text: 'B',
+                    id: 'h2',
+                    type: 'scene',
+                    text: 'B',
                 },
                 {id: 'b1', text: 'stale'},
             ]),
@@ -94,17 +79,17 @@ describe('documentProjection', () => {
             scriptId: 's1',
             document: doc([
                 {
-                    id: 'h1', type: 'scene', text: 'A renamed',
-                }, {id: 'a2', text: 'new'},
+                    id: 'h1',
+                    type: 'scene',
+                    text: 'A renamed',
+                },
+                {id: 'a2', text: 'new'},
             ]),
         });
 
         expect(await readBlockIds(db, 's1')).toEqual(['h1', 'a2']);
 
-        const scenes = await db
-            .select()
-            .from(scriptScenes)
-            .where(eq(scriptScenes.scriptId, 's1'));
+        const scenes = await db.select().from(scriptScenes).where(eq(scriptScenes.scriptId, 's1'));
 
         expect(scenes).toHaveLength(1);
         expect(scenes[0]).toMatchObject({
@@ -126,28 +111,31 @@ describe('documentProjection', () => {
             scriptId: 's1',
             document: doc([
                 {
-                    id: 'h1', type: 'scene', text: 'INT. ROOM',
-                }, {id: 'a1', text: 'Action.'},
+                    id: 'h1',
+                    type: 'scene',
+                    text: 'INT. ROOM',
+                },
+                {id: 'a1', text: 'Action.'},
             ]),
         });
 
         const loaded = await loadScriptDocumentFromProjection(db, 's1');
 
         expect(loaded?.document.content.map(node => node.attrs?.id)).toEqual(['h1', 'a1']);
-        expect(loaded?.schemaVersion).toBe(3);
+        expect(loaded?.schemaVersion).toBe(SCRIPT_DOCUMENT_SCHEMA_VERSION);
 
-        const storedBlocks = await db
-            .select()
-            .from(scriptBlocks)
-            .where(eq(scriptBlocks.scriptId, 's1'))
-            .orderBy(asc(scriptBlocks.blockOrder));
-        const rebuilt = rebuildScriptDocumentFromBlocks('s1', storedBlocks.map(row => ({
-            id: row.id,
-            blockType: row.blockType,
-            blockOrder: row.blockOrder,
-            textContent: row.textContent,
-            contentJson: row.contentJson,
-        })), []);
+        const storedBlocks = await db.select().from(scriptBlocks).where(eq(scriptBlocks.scriptId, 's1')).orderBy(asc(scriptBlocks.blockOrder));
+        const rebuilt = rebuildScriptDocumentFromBlocks(
+            's1',
+            storedBlocks.map(row => ({
+                id: row.id,
+                blockType: row.blockType,
+                blockOrder: row.blockOrder,
+                textContent: row.textContent,
+                contentJson: row.contentJson,
+            })),
+            [],
+        );
 
         expect(rebuilt.document.content.map(node => node.attrs?.id)).toEqual(['h1', 'a1']);
     });
@@ -158,9 +146,19 @@ describe('documentProjection', () => {
         await seedScript(db, 's1');
         await db.insert(scriptCharacters).values([
             {
-                id: 'char-1', scriptId: 's1', characterKey: 'ANNA', createdAt: 1, updatedAt: 1,
-            }, {
-                id: 'group-1', scriptId: 's1', characterKey: 'ALL', kind: 'group', createdAt: 1, updatedAt: 1,
+                id: 'char-1',
+                scriptId: 's1',
+                characterKey: 'ANNA',
+                createdAt: 1,
+                updatedAt: 1,
+            },
+            {
+                id: 'group-1',
+                scriptId: 's1',
+                characterKey: 'ALL',
+                kind: 'group',
+                createdAt: 1,
+                updatedAt: 1,
             },
         ]);
         await db.insert(scriptCharacterGroupMembers).values({groupId: 'group-1', characterId: 'char-1'});

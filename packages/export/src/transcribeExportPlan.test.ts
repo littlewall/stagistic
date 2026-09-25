@@ -71,6 +71,25 @@ describe('transcribeExportPlan', () => {
         expect(text).toContain('Zvědavá jsem, co mě čeká.');
     });
 
+    it('ignores comment anchors so commented text prints exactly like uncommented text', () => {
+        const plain = block('stageDirection', 'sd1', 'She exits slowly.');
+        const commented: ExportPlan['doc']['content'][number] = {
+            type: 'stageDirection',
+            attrs: {id: 'sd1', blockType: 'stageDirection'},
+            content: [
+                {type: 'text', text: 'She '},
+                {type: 'text', text: 'exits', marks: [{type: 'commentAnchor', attrs: {threadId: 't1'}}]},
+                {type: 'text', text: ' slowly.'},
+            ],
+        };
+        const runs = (doc: ExportPlan['doc']['content']) =>
+            transcribeExportPlan(plan(doc), DEFAULT_EDITOR_SETTINGS)
+                .items.filter(isVisualLine)
+                .map(line => line.runs);
+
+        expect(runs([commented])).toEqual(runs([plain]));
+    });
+
     const findLineWithRun = (items: PageItem[], runText: string): VisualLine | undefined =>
         items.filter(isVisualLine).find(line => line.runs.some(run => run.text === runText));
 

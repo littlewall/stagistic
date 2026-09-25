@@ -1,5 +1,6 @@
 export * from './blocks';
 export * from './characters';
+export * from './comments';
 export * from './document';
 export * from './indexing';
 export * from './music';
@@ -10,11 +11,4 @@ export * from './settings';
 export * from './structure';
 export * from './syntax';
 export * from './titlePage';
-export {
-    clampNumber,
-    collapseWhitespace,
-    createNodeId,
-    isObjectRecord,
-    splitTrailingParentheticalSuffix,
-    trimOrFallback,
-} from '@stagistic/shared';
+export {clampNumber, collapseWhitespace, createNodeId, isObjectRecord, splitTrailingParentheticalSuffix, trimOrFallback} from '@stagistic/shared';

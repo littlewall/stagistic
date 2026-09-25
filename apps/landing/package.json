@@ -4,12 +4,12 @@
     "private": true,
     "type": "module",
     "dependencies": {
-        "@astrojs/react": "^6.0.2",
+        "@astrojs/react": "^7.0.0",
         "@fontsource-variable/ibm-plex-sans": "^5.2.8",
         "@fontsource/courier-prime": "^5.2.8",
         "@stagistic/editor": "workspace:*",
         "@stagistic/script": "workspace:*",
-        "astro": "^7.1.5",
+        "astro": "^7.3.5",
         "clsx": "^2.1.1",
         "react": "^19.2.4",
         "react-dom": "^19.2.4"

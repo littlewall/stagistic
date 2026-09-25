@@ -16,6 +16,6 @@ export interface StepkgImportIssue {
     code: StepkgImportIssueCode;
     stage: StepkgImportStage;
     path?: string;
-    entity?: {type: 'script' | 'character' | 'music' | 'scene' | 'attachment'; id: string; label?: string};
+    entity?: {type: 'script' | 'character' | 'music' | 'scene' | 'attachment' | 'comment'; id: string; label?: string};
     details?: Record<string, string | number>;
 }

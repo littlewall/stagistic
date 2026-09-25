@@ -22,6 +22,7 @@ const snapshot: StepkgSnapshot = {
             updatedAt: '2026-09-18T10:00:00.000Z',
         },
     ],
+    comments: {threads: [], messages: []},
     attachmentBindings: [],
 };
 

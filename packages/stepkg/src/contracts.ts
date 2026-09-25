@@ -122,6 +122,34 @@ export interface StepkgAttachmentsData {
     bindings: StepkgAttachmentBinding[];
 }
 
+export interface StepkgCommentThread {
+    id: string;
+    anchorKind: 'range' | 'block';
+    anchorBlockId: string | null;
+    quotedText: string;
+    status: 'open' | 'resolved';
+    resolvedAt: string | null;
+    resolvedBy: string | null;
+    createdBy: string;
+    createdAt: string;
+    updatedAt: string;
+}
+
+export interface StepkgCommentMessage {
+    id: string;
+    threadId: string;
+    authorId: string;
+    body: string;
+    createdAt: string;
+    updatedAt: string;
+    editedAt: string | null;
+}
+
+export interface StepkgCommentsData {
+    threads: StepkgCommentThread[];
+    messages: StepkgCommentMessage[];
+}
+
 export interface StepkgSnapshot {
     script: StepkgScriptData;
     document: ScriptDocument;
@@ -132,6 +160,7 @@ export interface StepkgSnapshot {
     scenes: StepkgScenesData;
     attachments: StepkgAttachmentSnapshot[];
     attachmentBindings: StepkgAttachmentBinding[];
+    comments: StepkgCommentsData;
 }
 
 export interface StepkgManifestFile {
@@ -191,7 +220,7 @@ export interface StepkgExportIssue {
     code: StepkgIssueCode;
     stage: StepkgIssueStage;
     entity?: {
-        type: 'script' | 'character' | 'music' | 'scene' | 'attachment';
+        type: 'script' | 'character' | 'music' | 'scene' | 'attachment' | 'comment';
         id: string;
         label?: string;
     };

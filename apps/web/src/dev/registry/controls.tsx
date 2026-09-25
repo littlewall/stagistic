@@ -2,6 +2,7 @@ import {
     Button,
     IconButton,
     Input,
+    MoreActionsMenu,
     Notice,
     PanelHeader,
     ProgressCircle,
@@ -53,6 +54,29 @@ export const controls: CatalogGroup = {
                 },
                 {label: 'size sm', node: <Button size="sm">Small</Button>},
                 {label: 'disabled', node: <Button isDisabled>Disabled</Button>},
+            ],
+        },
+        {
+            name: 'MoreActionsMenu',
+            /*
+             * An xs ghost IconButton that opens a DropdownMenu; both read
+             * their tokens directly, so it declares no custom properties.
+             */
+            variables: [],
+            samples: [
+                {
+                    label: 'edit / delete',
+                    node: (
+                        <MoreActionsMenu
+                            aria-label="More actions"
+                            items={[
+                                {id: 'edit', label: 'Edit'},
+                                {id: 'delete', label: 'Delete', tone: 'danger'},
+                            ]}
+                            onAction={() => undefined}
+                        />
+                    ),
+                },
             ],
         },
         {

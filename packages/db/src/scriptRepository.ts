@@ -4,11 +4,15 @@ import type {ReactiveQuerySource} from './reactive';
 import type {ScriptPackageSource} from './scriptPackageSource';
 import type {ScriptPackageWrite} from './scriptPackageWrite';
 import type {
+    CommentAnchorKind,
+    CommentThreadStatus,
     MusicAttachmentRole,
     ScriptAttachment,
     ScriptCharacterGenderOption,
     ScriptCharacterGroupRef,
     ScriptCharacterRef,
+    ScriptCommentMessage,
+    ScriptCommentThread,
     ScriptLocation,
     ScriptMusic,
     ScriptMusicAttachment,
@@ -89,6 +93,41 @@ export interface ScriptMusicRepository {
     delete(scriptId: string, musicId: string): Promise<void>;
 }
 
+export interface CreateScriptCommentThreadInput {
+    id: string;
+    messageId: string;
+    anchorKind: CommentAnchorKind;
+    anchorBlockId: string | null;
+    quotedText: string;
+    body: string;
+    timestamp?: number;
+}
+
+export interface AddScriptCommentMessageInput {
+    id: string;
+    threadId: string;
+    body: string;
+    timestamp?: number;
+}
+
+export interface ScriptCommentThreadSnapshot {
+    thread: ScriptCommentThread;
+    messages: ScriptCommentMessage[];
+}
+
+export interface ScriptCommentsRepository {
+    listThreads(scriptId: string): Promise<ScriptCommentThread[]>;
+    listMessages(scriptId: string): Promise<ScriptCommentMessage[]>;
+    create(scriptId: string, input: CreateScriptCommentThreadInput): Promise<ScriptCommentThread | null>;
+    addMessage(scriptId: string, input: AddScriptCommentMessageInput): Promise<ScriptCommentMessage | null>;
+    updateMessage(scriptId: string, messageId: string, body: string): Promise<ScriptCommentMessage | null>;
+    deleteMessage(scriptId: string, messageId: string): Promise<void>;
+    setStatus(scriptId: string, threadId: string, status: CommentThreadStatus): Promise<ScriptCommentThread | null>;
+    moveBlockAnchors(scriptId: string, fromBlockId: string, toBlockId: string): Promise<void>;
+    delete(scriptId: string, threadId: string): Promise<void>;
+    restore(scriptId: string, snapshot: ScriptCommentThreadSnapshot): Promise<void>;
+}
+
 export interface ScriptLocationsRepository {
     list(scriptId: string): Promise<ScriptLocation[]>;
     listSceneAssignments(scriptId: string): Promise<ScriptSceneLocationAssignment[]>;
@@ -142,6 +181,8 @@ export interface ScriptRepository {
     allocateScriptCharacterGenderId(): string;
     allocateScriptMusicId(): string;
     allocateScriptLocationId(): string;
+    allocateScriptCommentThreadId(): string;
+    allocateScriptCommentMessageId(): string;
     getScriptCharactersSource(scriptId: string): ReactiveQuerySource<ScriptCharacterRef>;
     getScriptCharacterGroupsSource(scriptId: string): ReactiveQuerySource<ScriptCharacterGroupRef>;
     getScriptCharacterGendersSource(scriptId: string): ReactiveQuerySource<ScriptCharacterGenderOption>;
@@ -152,6 +193,8 @@ export interface ScriptRepository {
     getScriptEditorSettingsSource(scriptId: string): ReactiveQuerySource<ScriptEditorSettingsRecord>;
     getScriptAttachmentsSource(scriptId: string): ReactiveQuerySource<ScriptAttachment>;
     getScriptMusicAttachmentBindingsSource(scriptId: string): ReactiveQuerySource<ScriptMusicAttachmentBinding>;
+    getScriptCommentThreadsSource(scriptId: string): ReactiveQuerySource<ScriptCommentThread>;
+    getScriptCommentMessagesSource(scriptId: string): ReactiveQuerySource<ScriptCommentMessage>;
     listScripts(options?: ListScriptsOptions): Promise<ScriptSummary[]>;
     getScriptSummary(scriptId: string): Promise<ScriptSummary | null>;
     getScriptPackageSource(scriptId: string): Promise<ScriptPackageSource | null>;
@@ -163,6 +206,14 @@ export interface ScriptRepository {
     createScriptMusicWithId(scriptId: string, input: CreateScriptMusicWithIdInput): Promise<ScriptMusic | null>;
     updateScriptMusic(scriptId: string, musicId: string, input: UpdateScriptMusicInput): Promise<ScriptMusic | null>;
     deleteScriptMusic(scriptId: string, musicId: string): Promise<void>;
+    createScriptCommentThread(scriptId: string, input: CreateScriptCommentThreadInput): Promise<ScriptCommentThread | null>;
+    addScriptCommentMessage(scriptId: string, input: AddScriptCommentMessageInput): Promise<ScriptCommentMessage | null>;
+    updateScriptCommentMessage(scriptId: string, messageId: string, body: string): Promise<ScriptCommentMessage | null>;
+    deleteScriptCommentMessage(scriptId: string, messageId: string): Promise<void>;
+    setScriptCommentThreadStatus(scriptId: string, threadId: string, status: CommentThreadStatus): Promise<ScriptCommentThread | null>;
+    moveScriptCommentBlockAnchors(scriptId: string, fromBlockId: string, toBlockId: string): Promise<void>;
+    deleteScriptCommentThread(scriptId: string, threadId: string): Promise<void>;
+    restoreScriptCommentThread(scriptId: string, snapshot: ScriptCommentThreadSnapshot): Promise<void>;
     listScriptLocations(scriptId: string): Promise<ScriptLocation[]>;
     listScriptSceneLocations(scriptId: string): Promise<ScriptSceneLocationAssignment[]>;
     createScriptLocation(scriptId: string, input: CreateScriptLocationInput): Promise<ScriptLocation | null>;

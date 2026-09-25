@@ -33,4 +33,5 @@ export const serializeStepkgContent = (snapshot: StepkgSnapshot): StepkgEntry[] 
     jsonEntry('data/characters.json', snapshot.characters),
     jsonEntry('data/music.json', snapshot.music),
     jsonEntry('data/scenes.json', snapshot.scenes),
+    jsonEntry('data/comments.json', snapshot.comments),
 ];

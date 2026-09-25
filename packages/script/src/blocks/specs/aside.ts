@@ -10,7 +10,7 @@ export const asideSpec = {
         spacingBeforeEm: 0,
         lineHeight: 1.2,
         indentLeftChars: 16,
-        indentRightChars: 21,
+        indentRightChars: 12,
         shortcut: '4',
         nextElement: 'dialogue',
         textAlign: 'left',

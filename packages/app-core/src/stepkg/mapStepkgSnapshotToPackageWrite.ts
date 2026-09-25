@@ -91,4 +91,27 @@ export const mapStepkgSnapshotToPackageWrite = (snapshot: StepkgSnapshot, assets
         sortOrder: binding.order,
         createdAt: toEpoch(binding.createdAt),
     })),
+    comments: {
+        threads: snapshot.comments.threads.map(thread => ({
+            id: thread.id,
+            anchorKind: thread.anchorKind,
+            anchorBlockId: thread.anchorBlockId,
+            quotedText: thread.quotedText,
+            status: thread.status,
+            resolvedAt: thread.resolvedAt === null ? null : toEpoch(thread.resolvedAt),
+            resolvedBy: thread.resolvedBy,
+            createdBy: thread.createdBy,
+            createdAt: toEpoch(thread.createdAt),
+            updatedAt: toEpoch(thread.updatedAt),
+        })),
+        messages: snapshot.comments.messages.map(message => ({
+            id: message.id,
+            threadId: message.threadId,
+            authorId: message.authorId,
+            body: message.body,
+            createdAt: toEpoch(message.createdAt),
+            updatedAt: toEpoch(message.updatedAt),
+            editedAt: message.editedAt === null ? null : toEpoch(message.editedAt),
+        })),
+    },
 });

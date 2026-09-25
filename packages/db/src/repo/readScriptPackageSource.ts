@@ -2,10 +2,12 @@ import {asc, eq, inArray} from 'drizzle-orm';
 
 import * as dbQueries from '../queries';
 import {
+    scriptAttachments,
     scriptCharacterGenders,
     scriptCharacterGroupMembers,
     scriptCharacters,
-    scriptAttachments,
+    scriptCommentMessages,
+    scriptCommentThreads,
     scriptLocations,
     scriptMusic,
     scriptMusicAttachments,
@@ -25,7 +27,22 @@ export const createReadScriptPackageSource =
         return db.transaction(async tx => {
             const script = await dbQueries.getScriptSummary(tx, scriptId);
             if (!script) return null;
-            const [loadedDocument, titlePage, settings, characters, , characterGenders, music, locations, scenes, , attachments] = await Promise.all([
+            const [
+                loadedDocument,
+                titlePage,
+                settings,
+                characters,
+                ,
+                characterGenders,
+                music,
+                locations,
+                scenes,
+                ,
+                attachments,
+                ,
+                commentThreads,
+                commentMessages,
+            ] = await Promise.all([
                 loadScriptDocumentFromProjection(tx, scriptId),
                 readTitlePageSettings(tx, scriptId),
                 readScriptSettings(tx, scriptId),
@@ -38,6 +55,16 @@ export const createReadScriptPackageSource =
                 Promise.resolve([]),
                 tx.select().from(scriptAttachments).where(eq(scriptAttachments.scriptId, scriptId)).orderBy(asc(scriptAttachments.createdAt)),
                 Promise.resolve([]),
+                tx
+                    .select()
+                    .from(scriptCommentThreads)
+                    .where(eq(scriptCommentThreads.scriptId, scriptId))
+                    .orderBy(asc(scriptCommentThreads.createdAt), asc(scriptCommentThreads.id)),
+                tx
+                    .select()
+                    .from(scriptCommentMessages)
+                    .where(eq(scriptCommentMessages.scriptId, scriptId))
+                    .orderBy(asc(scriptCommentMessages.threadId), asc(scriptCommentMessages.createdAt), asc(scriptCommentMessages.id)),
             ]);
             if (!loadedDocument) return null;
             const groupIds = characters.filter(character => character.kind === 'group').map(character => character.id);
@@ -88,6 +115,7 @@ export const createReadScriptPackageSource =
                 sceneLocations: locationsByScene,
                 attachments,
                 musicAttachmentBindings: attachmentsByMusic,
+                comments: {threads: commentThreads, messages: commentMessages},
             };
         });
     };

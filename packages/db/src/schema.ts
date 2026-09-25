@@ -1,14 +1,4 @@
-import {
-    bigint,
-    boolean,
-    index,
-    integer,
-    pgTable,
-    primaryKey,
-    real,
-    text,
-    uniqueIndex,
-} from 'drizzle-orm/pg-core';
+import {bigint, boolean, index, integer, pgTable, primaryKey, real, text, uniqueIndex} from 'drizzle-orm/pg-core';
 
 export const scripts = pgTable('scripts', {
     id: text('id').primaryKey(),
@@ -102,8 +92,7 @@ export const scriptSettingsHeadersFooters = pgTable(
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },
     table => ({
-        scriptAreaAlignmentUniqueIdx: uniqueIndex('script_settings_headers_footers_cell_unique_idx')
-            .on(table.scriptId, table.area, table.alignment),
+        scriptAreaAlignmentUniqueIdx: uniqueIndex('script_settings_headers_footers_cell_unique_idx').on(table.scriptId, table.area, table.alignment),
         scriptIdIdx: index('script_settings_headers_footers_script_id_idx').on(table.scriptId),
     }),
 );
@@ -131,8 +120,7 @@ export const scriptSettingsBlocks = pgTable(
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },
     table => ({
-        scriptBlockTypeUniqueIdx: uniqueIndex('script_settings_blocks_script_block_type_unique_idx')
-            .on(table.scriptId, table.blockType),
+        scriptBlockTypeUniqueIdx: uniqueIndex('script_settings_blocks_script_block_type_unique_idx').on(table.scriptId, table.blockType),
         scriptIdIdx: index('script_settings_blocks_script_id_idx').on(table.scriptId),
     }),
 );
@@ -158,8 +146,7 @@ export const scriptCharacters = pgTable(
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },
     table => ({
-        scriptCharacterUniqueIdx: uniqueIndex('script_characters_script_character_unique_idx')
-            .on(table.scriptId, table.characterKey),
+        scriptCharacterUniqueIdx: uniqueIndex('script_characters_script_character_unique_idx').on(table.scriptId, table.characterKey),
         scriptIdIdx: index('script_characters_script_id_idx').on(table.scriptId),
     }),
 );
@@ -193,8 +180,7 @@ export const scriptCharacterGenders = pgTable(
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },
     table => ({
-        scriptGenderUniqueIdx: uniqueIndex('script_character_genders_script_gender_unique_idx')
-            .on(table.scriptId, table.genderKey),
+        scriptGenderUniqueIdx: uniqueIndex('script_character_genders_script_gender_unique_idx').on(table.scriptId, table.genderKey),
         scriptIdIdx: index('script_character_genders_script_id_idx').on(table.scriptId),
     }),
 );
@@ -212,8 +198,7 @@ export const scriptLocations = pgTable(
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },
     table => ({
-        scriptNameUniqueIdx: uniqueIndex('script_locations_script_name_unique_idx')
-            .on(table.scriptId, table.name),
+        scriptNameUniqueIdx: uniqueIndex('script_locations_script_name_unique_idx').on(table.scriptId, table.name),
         scriptIdIdx: index('script_locations_script_id_idx').on(table.scriptId),
     }),
 );
@@ -275,8 +260,7 @@ export const scriptSettingsTitlePage = pgTable(
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },
     table => ({
-        scriptOrderUniqueIdx: uniqueIndex('script_settings_title_page_script_order_unique_idx')
-            .on(table.scriptId, table.orderNo),
+        scriptOrderUniqueIdx: uniqueIndex('script_settings_title_page_script_order_unique_idx').on(table.scriptId, table.orderNo),
         scriptIdIdx: index('script_settings_title_page_script_id_idx').on(table.scriptId),
     }),
 );
@@ -324,8 +308,7 @@ export const scriptBlocks = pgTable(
         updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
     },
     table => ({
-        scriptOrderIdx: index('script_blocks_script_order_idx')
-            .on(table.scriptId, table.blockOrder),
+        scriptOrderIdx: index('script_blocks_script_order_idx').on(table.scriptId, table.blockOrder),
         scriptTypeIdx: index('script_blocks_script_type_idx').on(table.scriptId, table.blockType),
         scriptSceneIdx: index('script_blocks_script_scene_idx').on(table.scriptId, table.sceneId),
         scriptActIdx: index('script_blocks_script_act_idx').on(table.scriptId, table.actId),
@@ -422,10 +405,62 @@ export const scriptMusicAttachments = pgTable(
     },
     table => ({
         pk: primaryKey({columns: [table.musicId, table.attachmentId]}),
-        musicRoleUniqueIdx: uniqueIndex('script_music_attachments_music_role_unique_idx')
-            .on(table.musicId, table.role),
+        musicRoleUniqueIdx: uniqueIndex('script_music_attachments_music_role_unique_idx').on(table.musicId, table.role),
         musicIdIdx: index('script_music_attachments_music_id_idx').on(table.musicId),
         attachmentIdIdx: index('script_music_attachments_attachment_id_idx').on(table.attachmentId),
+    }),
+);
+
+/*
+ * Private comment threads. Range anchors live in the document as
+ * `commentAnchor` marks; block anchors are `anchor_block_id`. Not projection-owned:
+ * never rebuilt from the document.
+ */
+export const scriptCommentThreads = pgTable(
+    'script_comment_threads',
+    {
+        id: text('id').primaryKey(),
+        scriptId: text('script_id')
+            .notNull()
+            .references(() => scripts.id, {onDelete: 'cascade'}),
+        anchorKind: text('anchor_kind').notNull(),
+        anchorBlockId: text('anchor_block_id'),
+        quotedText: text('quoted_text').notNull().default(''),
+        status: text('status').notNull().default('open'),
+        resolvedAt: bigint('resolved_at', {mode: 'number'}),
+        resolvedBy: text('resolved_by'),
+        createdBy: text('created_by').notNull(),
+        createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+        updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+    },
+    table => ({
+        scriptIdIdx: index('script_comment_threads_script_id_idx').on(table.scriptId),
+    }),
+);
+
+/*
+ * Flat replies of a comment thread (first row = root message). script_id is
+ * denormalized so reactive sources can watch by script without a join.
+ */
+export const scriptCommentMessages = pgTable(
+    'script_comment_messages',
+    {
+        id: text('id').primaryKey(),
+        scriptId: text('script_id')
+            .notNull()
+            .references(() => scripts.id, {onDelete: 'cascade'}),
+        threadId: text('thread_id')
+            .notNull()
+            .references(() => scriptCommentThreads.id, {onDelete: 'cascade'}),
+        authorId: text('author_id').notNull(),
+        body: text('body').notNull(),
+        createdAt: bigint('created_at', {mode: 'number'}).notNull(),
+        updatedAt: bigint('updated_at', {mode: 'number'}).notNull(),
+        editedAt: bigint('edited_at', {mode: 'number'}),
+    },
+    table => ({
+        threadCreatedIdx: index('script_comment_messages_thread_created_idx').on(table.threadId, table.createdAt),
+        scriptIdIdx: index('script_comment_messages_script_id_idx').on(table.scriptId),
     }),
 );
 
@@ -451,4 +486,6 @@ export const dbSchema = {
     scriptMusic,
     scriptAttachments,
     scriptMusicAttachments,
+    scriptCommentThreads,
+    scriptCommentMessages,
 };

@@ -23,6 +23,33 @@ const snapshot: StepkgSnapshot = {
         },
     ],
     attachmentBindings: [{target: {type: 'music', id: 'm1'}, attachmentId: 'a1', role: 'integrated_score', order: 0, createdAt: '2026-09-18T10:00:00.000Z'}],
+    comments: {
+        threads: [
+            {
+                id: 't1',
+                anchorKind: 'block',
+                anchorBlockId: 'b1',
+                quotedText: 'Q',
+                status: 'resolved',
+                resolvedAt: '2026-09-18T10:30:00.000Z',
+                resolvedBy: 'local',
+                createdBy: 'local',
+                createdAt: '2026-09-18T10:00:00.000Z',
+                updatedAt: '2026-09-18T10:30:00.000Z',
+            },
+        ],
+        messages: [
+            {
+                id: 'm1',
+                threadId: 't1',
+                authorId: 'local',
+                body: 'B',
+                createdAt: '2026-09-18T10:00:00.000Z',
+                updatedAt: '2026-09-18T10:00:00.000Z',
+                editedAt: null,
+            },
+        ],
+    },
 };
 
 describe('mapStepkgSnapshotToPackageWrite', () => {
@@ -34,5 +61,17 @@ describe('mapStepkgSnapshotToPackageWrite', () => {
         expect(write.script.updatedAt).toBe(new Date('2026-09-18T11:00:00.000Z').getTime());
         expect(write.attachments[0]?.blob.size).toBe(3);
         expect(write.bindings[0]).toMatchObject({musicId: 'm1', attachmentId: 'a1', sortOrder: 0});
+    });
+
+    it('converts comment timestamps to epoch and keeps nulls', () => {
+        const write = mapStepkgSnapshotToPackageWrite(snapshot, new Map());
+
+        expect(write.comments.threads[0]).toMatchObject({
+            id: 't1',
+            anchorBlockId: 'b1',
+            status: 'resolved',
+            resolvedAt: new Date('2026-09-18T10:30:00.000Z').getTime(),
+        });
+        expect(write.comments.messages[0]).toMatchObject({id: 'm1', threadId: 't1', editedAt: null, createdAt: new Date('2026-09-18T10:00:00.000Z').getTime()});
     });
 });

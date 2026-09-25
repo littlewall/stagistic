@@ -17,6 +17,7 @@ const source = {
     sceneLocations: [],
     attachments: [],
     musicAttachmentBindings: [],
+    comments: {threads: [], messages: []},
 } as ScriptPackageSource;
 
 describe('exportScriptPackage', () => {

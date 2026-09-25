@@ -15,6 +15,8 @@ import {
     BlockUiEventsExtension,
     CharacterRefSyncExtension,
     CharacterTagInputExtension,
+    CommentsExtension,
+    type CommentsExtensionCallbacks,
     createPaginationExtension,
     EditorRuntimeExtension,
     EmptyEnterChooserExtension,
@@ -31,7 +33,7 @@ import {
     ScriptBehaviorExtension,
 } from './tiptap/extensions';
 import {DocumentWithSettings} from './tiptap/extensions/DocumentExtension';
-import {CharacterTagMark} from './tiptap/marks';
+import {CharacterTagMark, CommentAnchorMark} from './tiptap/marks';
 import {MusicOutNode, MusicStartNode, SCRIPT_BLOCK_NODE_NAMES, ScriptBlockNodes} from './tiptap/nodes';
 import type {BlockNodeType} from './tiptap/scriptCore';
 
@@ -51,6 +53,7 @@ type UseEditorExtensionsArgs = {
     onMusicUnassigned?: (musicId: string) => void;
     onRequestDeleteScene?: (sceneHeadingBlockId: string) => void;
     onRequestConvertScene?: (sceneHeadingBlockId: string, targetBlockType: BlockNodeType) => void;
+    commentCallbacksRef?: {current: CommentsExtensionCallbacks};
     enableBlockUiEvents?: boolean;
 };
 
@@ -68,6 +71,7 @@ export const useEditorExtensions = ({
     onMusicUnassigned,
     onRequestDeleteScene,
     onRequestConvertScene,
+    commentCallbacksRef,
     enableBlockUiEvents,
 }: UseEditorExtensionsArgs): Extensions => {
     const paginationExtensionRef = useRef<ReturnType<typeof createPaginationExtension> | null>(null);
@@ -170,6 +174,7 @@ export const useEditorExtensions = ({
         [onMusicAssigned, onOpenMusicManager, onRequestCreateMusic, onRequestRemoveMusic, persistentMusicRef],
     );
     const musicOutNode = useMemo(() => MusicOutNode.configure({onOpenMusicManager}), [onOpenMusicManager]);
+    const commentsExtension = useMemo(() => CommentsExtension.configure({getCallbacks: () => commentCallbacksRef?.current ?? {}}), [commentCallbacksRef]);
     const uniqueIdExtension = useMemo(() => {
         const uniqueIdTypes = [...SCRIPT_BLOCK_NODE_NAMES];
 
@@ -190,6 +195,7 @@ export const useEditorExtensions = ({
             Italic,
             Underline,
             characterTagMark,
+            CommentAnchorMark,
             characterTagInputExtension,
             ...ScriptBlockNodes,
             musicStartNode,
@@ -200,6 +206,7 @@ export const useEditorExtensions = ({
             MusicRailExtension,
             PlaceholderExtension,
             SearchExtension,
+            commentsExtension,
             BlockFocusFlashExtension,
             sceneCommandsExtension,
             SceneCollapseExtension,
@@ -221,6 +228,7 @@ export const useEditorExtensions = ({
         characterRefSyncExtension,
         characterTagMark,
         characterTagInputExtension,
+        commentsExtension,
         musicCommandsExtension,
         musicInputExtension,
         musicOutNode,

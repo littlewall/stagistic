@@ -164,6 +164,8 @@ describe('dev catalog coverage', () => {
             'SettingSwitch',
             'TextInput',
             'DropdownMenu',
+            'IconDropdownMenu',
+            'IconPopover',
             'ScriptActionsMenu',
             'ToggleButtonGroup',
             'TypeToConfirmAction',

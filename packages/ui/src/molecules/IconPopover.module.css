@@ -1,0 +1,15 @@
+.popover {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-popover);
+}
+
+.dialog {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    min-width: 200px;
+    padding: var(--space-lg);
+    outline: none;
+}

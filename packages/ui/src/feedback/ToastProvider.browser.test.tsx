@@ -2,18 +2,9 @@ import '../../styles/tokens.css';
 
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-} from 'vite-plus/test';
+import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
 
-import {
-    ToastProvider,
-    type ToastVariant,
-    useToastController,
-} from './ToastProvider';
+import {ToastProvider, type ToastVariant, useToastController} from './ToastProvider';
 
 const mountedRoots: Root[] = [];
 
@@ -35,17 +26,18 @@ const ToastSeeder = () => {
     const {addToast} = useToastController();
 
     useEffect(() => {
-        const variants: ToastVariant[] = [
-            'success',
-            'error',
-            'info',
-        ];
+        const variants: ToastVariant[] = ['success', 'error', 'info'];
 
-        variants.forEach(variant => addToast({
-            title: variant,
-            description: `${variant} description`,
-            variant,
-        }, {timeout: 60_000}));
+        variants.forEach(variant =>
+            addToast(
+                {
+                    title: variant,
+                    description: `${variant} description`,
+                    variant,
+                },
+                {timeout: 60_000},
+            ),
+        );
     }, [addToast]);
 
     return null;
@@ -83,13 +75,9 @@ describe('ToastProvider', () => {
 
         expect(new Set(backgrounds).size).toBe(1);
         expect(toasts.every(toast => getComputedStyle(toast).boxShadow === 'none')).toBe(true);
-        expect(toasts.every(
-            toast => toast.querySelector(':scope > [aria-hidden="true"]') !== null,
-        )).toBe(true);
+        expect(toasts.every(toast => toast.querySelector(':scope > [aria-hidden="true"]') !== null)).toBe(true);
 
-        const closeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>(
-            'button[aria-label="Dismiss notification"]',
-        ));
+        const closeButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('button[aria-label="Dismiss notification"]'));
 
         expect(closeButtons).toHaveLength(3);
         closeButtons.forEach(button => {
@@ -101,5 +89,38 @@ describe('ToastProvider', () => {
             expect(iconStyle.width).toBe('12px');
             expect(iconStyle.height).toBe('12px');
         });
+    });
+
+    it('renders an action button that runs the action and dismisses the toast', async () => {
+        const onAction = vi.fn();
+        const ActionSeeder = () => {
+            const {addToast} = useToastController();
+
+            useEffect(() => {
+                addToast({title: 'Comment deleted', action: {label: 'Undo', onAction}}, {timeout: 60_000});
+            }, [addToast]);
+
+            return null;
+        };
+        const host = document.createElement('div');
+
+        document.body.appendChild(host);
+
+        const root = createRoot(host);
+
+        root.render(
+            <ToastProvider>
+                <ActionSeeder />
+            </ToastProvider>,
+        );
+        mountedRoots.push(root);
+
+        const findUndo = () => Array.from(document.querySelectorAll<HTMLButtonElement>('button')).find(button => button.textContent?.trim() === 'Undo');
+
+        await waitFor(() => Boolean(findUndo()));
+        findUndo()?.click();
+
+        expect(onAction).toHaveBeenCalledTimes(1);
+        await waitFor(() => !document.body.textContent?.includes('Comment deleted'));
     });
 });

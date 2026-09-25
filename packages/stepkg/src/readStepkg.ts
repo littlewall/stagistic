@@ -77,6 +77,7 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
     let titlePage: StepkgSnapshot['titlePage'];
     let settings: StepkgSnapshot['settings'];
     let attachmentsFile: StepkgAttachmentsFile;
+    let comments: StepkgSnapshot['comments'] = {threads: [], messages: []};
     try {
         document = decode(files.get('document.json')!) as ScriptDocument;
         script = decode(files.get('data/script.json')!) as StepkgSnapshot['script'];
@@ -86,6 +87,9 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
         music = decode(files.get('data/music.json')!) as StepkgSnapshot['music'];
         scenes = decode(files.get('data/scenes.json')!) as StepkgSnapshot['scenes'];
         attachmentsFile = decode(files.get('data/attachments.json')!) as StepkgAttachmentsFile;
+        // Optional: packages written before comments existed have no comments file.
+        const commentsBytes = files.get('data/comments.json');
+        if (commentsBytes) comments = decode(commentsBytes) as StepkgSnapshot['comments'];
     } catch {
         return {ok: false, issues: [{code: 'schema_invalid', stage: 'schema'}]};
     }
@@ -136,6 +140,13 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
             issues.push({code: 'broken_reference', stage: 'validation', entity: {type: 'attachment', id: binding.attachmentId}});
     });
 
+    const commentThreadIds = new Set(comments.threads.map(thread => thread.id));
+    comments.messages.forEach(message => {
+        if (!commentThreadIds.has(message.threadId)) {
+            issues.push({code: 'broken_reference', stage: 'validation', entity: {type: 'comment', id: message.id}, details: {threadId: message.threadId}});
+        }
+    });
+
     const assets = new Map<string, Uint8Array>();
     attachmentsFile.items.forEach(item => {
         const content = files.get(item.assetPath);
@@ -168,6 +179,7 @@ export const readStepkg = async (bytes: Uint8Array): Promise<StepkgReadResult> =
         scenes,
         attachments,
         attachmentBindings: attachmentsFile.bindings,
+        comments,
     };
 
     return {ok: true, package: {manifest, snapshot, assets}};

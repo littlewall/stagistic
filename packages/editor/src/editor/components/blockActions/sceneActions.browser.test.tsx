@@ -1,22 +1,11 @@
 import '@stagistic/ui/styles/base.css';
 
-import type {
-    ScriptDocument,
-    ScriptNode,
-} from '@stagistic/script';
+import type {ScriptDocument, ScriptNode} from '@stagistic/script';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
-import {
-    createRoot,
-    type Root,
-} from 'react-dom/client';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-} from 'vite-plus/test';
+import {createRoot, type Root} from 'react-dom/client';
+import {afterEach, describe, expect, it} from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../../context';
@@ -73,7 +62,7 @@ const renderEditor = (initialValue: ScriptDocument) => {
     mountedRoots.push(root);
 };
 
-const poll = async <T, >(get: () => T | null | undefined, label: string): Promise<T> => {
+const poll = async <T,>(get: () => T | null | undefined, label: string): Promise<T> => {
     const deadline = Date.now() + 2000;
 
     while (Date.now() < deadline) {
@@ -91,10 +80,7 @@ const poll = async <T, >(get: () => T | null | undefined, label: string): Promis
     throw new Error(`Timed out waiting for ${label}`);
 };
 
-const getEditor = () => poll(
-    () => (window as SceneActionsTestWindow).__sceneActionsTestEditor ?? null,
-    'editor instance',
-);
+const getEditor = () => poll(() => (window as SceneActionsTestWindow).__sceneActionsTestEditor ?? null, 'editor instance');
 
 const focusBlock = (editor: Editor, blockId: string) => {
     const block = findScriptBlockByIdFromState(editor.state, blockId);
@@ -103,19 +89,11 @@ const focusBlock = (editor: Editor, blockId: string) => {
         throw new Error(`Block "${blockId}" not found`);
     }
 
-    editor.view.dispatch(
-        editor.state.tr.setSelection(TextSelection.create(editor.state.doc, block.from)),
-    );
+    editor.view.dispatch(editor.state.tr.setSelection(TextSelection.create(editor.state.doc, block.from)));
     editor.commands.focus();
 };
 
-const actionTrigger = (blockId: string) => document.querySelector<HTMLButtonElement>(
-    `[data-block-action-trigger="true"][data-block-id="${blockId}"]`,
-);
-
-const typeTrigger = (blockId: string) => document.querySelector<HTMLButtonElement>(
-    `[data-block-actions-trigger="true"][data-block-id="${blockId}"]`,
-);
+const actionTrigger = (blockId: string) => document.querySelector<HTMLButtonElement>(`[data-block-action-trigger="true"][data-block-id="${blockId}"]`);
 
 afterEach(() => {
     mountedRoots.forEach(root => root.unmount());
@@ -127,11 +105,7 @@ describe('scene block actions', () => {
     it('offers a Delete scene heading action on a non-first scene', async () => {
         renderEditor({
             type: 'doc',
-            content: [
-                scene('s1', 'S1'),
-                dialogue('d1', 'hi'),
-                scene('s2', 'S2'),
-            ],
+            content: [scene('s1', 'S1'), dialogue('d1', 'hi'), scene('s2', 'S2')],
         });
 
         const editor = await getEditor();
@@ -143,33 +117,41 @@ describe('scene block actions', () => {
         await page.elementLocator(trigger).click();
 
         const menuItem = await poll(
-            () => Array.from(document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]'))
-                .find(item => (item.getAttribute('aria-label') ?? item.textContent?.trim())
-                    === 'Delete scene heading') ?? null,
+            () =>
+                Array.from(document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')).find(
+                    item => (item.getAttribute('aria-label') ?? item.textContent?.trim()) === 'Delete scene heading',
+                ) ?? null,
             'Delete scene heading item',
         );
 
         expect(menuItem).not.toBeNull();
     });
 
-    it('hides the action trigger on the first scene', async () => {
+    it('offers no Delete scene heading action on the first scene', async () => {
         renderEditor({
             type: 'doc',
-            content: [
-                scene('s1', 'S1'),
-                dialogue('d1', 'hi'),
-                scene('s2', 'S2'),
-            ],
+            content: [scene('s1', 'S1'), dialogue('d1', 'hi'), scene('s2', 'S2')],
         });
 
         const editor = await getEditor();
 
         focusBlock(editor, 's1');
 
-        // The always-present type trigger proves the gutter for s1 rendered…
-        await poll(() => typeTrigger('s1'), 's1 type trigger');
+        // The first scene still has a block-action (⋮) trigger for "Add comment"…
+        const trigger = await poll(() => actionTrigger('s1'), 's1 action trigger');
 
-        // …but the first scene exposes no block-action (⋮) trigger.
-        expect(actionTrigger('s1')).toBeNull();
+        await page.elementLocator(trigger).click();
+
+        const labels = await poll(() => {
+            const items = Array.from(document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')).map(
+                item => item.getAttribute('aria-label') ?? item.textContent?.trim() ?? '',
+            );
+
+            return items.length > 0 ? items : null;
+        }, 's1 menu items');
+
+        // …but it can never be deleted.
+        expect(labels.some(label => label.startsWith('Add comment'))).toBe(true);
+        expect(labels).not.toContain('Delete scene heading');
     });
 });

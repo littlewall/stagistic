@@ -2,7 +2,17 @@ import type {EditorSettingsOverride, ScriptDocument, TitlePageSettings} from '@s
 import type {InferSelectModel} from 'drizzle-orm';
 
 import type {scriptCharacterGroupMembers, scriptMusicAttachments, scriptSceneLocations} from './schema';
-import type {ScriptCharacter, ScriptCharacterGender, ScriptAttachment, ScriptLocation, ScriptMusic, ScriptScene, ScriptSummary} from './types';
+import type {
+    ScriptAttachment,
+    ScriptCharacter,
+    ScriptCharacterGender,
+    ScriptCommentMessage,
+    ScriptCommentThread,
+    ScriptLocation,
+    ScriptMusic,
+    ScriptScene,
+    ScriptSummary,
+} from './types';
 
 export type ScriptCharacterGroupMember = Pick<InferSelectModel<typeof scriptCharacterGroupMembers>, 'groupId' | 'characterId'>;
 export type ScriptSceneLocationAssignment = InferSelectModel<typeof scriptSceneLocations>;
@@ -22,4 +32,5 @@ export interface ScriptPackageSource {
     sceneLocations: ScriptSceneLocationAssignment[];
     attachments: ScriptAttachment[];
     musicAttachmentBindings: ScriptMusicAttachmentBinding[];
+    comments: {threads: ScriptCommentThread[]; messages: ScriptCommentMessage[]};
 }

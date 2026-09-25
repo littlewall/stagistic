@@ -7,6 +7,7 @@ import type {ScriptRepository} from '../scriptRepository';
 import {createAttachmentHandlers} from './attachments';
 import {createCharacterGroupHandlers} from './characterGroupHandlers';
 import {createCharacterHandlers} from './characters';
+import {createCommentHandlers} from './comments';
 import {createSettingsHandlers} from './config';
 import {createContentHandlers} from './content';
 import {createLocalPgliteReactiveSources} from './createLocalPgliteReactiveSources';
@@ -42,6 +43,7 @@ export const createLocalPgliteRepository = ({getLocalDb, syncToFs, fileStorage}:
     const titlePageHandlers = createTitlePageHandlers(mutationDeps);
     const music = createMusicHandlers(mutationDeps);
     const locations = createLocationHandlers(mutationDeps);
+    const comments = createCommentHandlers(mutationDeps);
     const attachments = createAttachmentHandlers({
         ...mutationDeps,
         fileStorage,
@@ -61,6 +63,8 @@ export const createLocalPgliteRepository = ({getLocalDb, syncToFs, fileStorage}:
         listCharacterGroups: scriptId => characterGroupHandlers.listScriptCharacterGroups(scriptId),
         listCharacterGenders: scriptId => characterHandlers.listScriptCharacterGenders(scriptId),
         listMusic: scriptId => music.list(scriptId),
+        listCommentThreads: scriptId => comments.listThreads(scriptId),
+        listCommentMessages: scriptId => comments.listMessages(scriptId),
         listLocations: scriptId => locations.list(scriptId),
         listSceneLocations: scriptId => locations.listSceneAssignments(scriptId),
         loadTitlePage: scriptId => titlePageHandlers.load(scriptId),
@@ -75,6 +79,8 @@ export const createLocalPgliteRepository = ({getLocalDb, syncToFs, fileStorage}:
         allocateScriptCharacterGenderId: uuidv7,
         allocateScriptMusicId: uuidv7,
         allocateScriptLocationId: uuidv7,
+        allocateScriptCommentThreadId: uuidv7,
+        allocateScriptCommentMessageId: uuidv7,
         listScripts: options => scripts.list(options),
         getScriptSummary: scriptId => scripts.getSummary(scriptId),
         getScriptPackageSource,
@@ -86,6 +92,14 @@ export const createLocalPgliteRepository = ({getLocalDb, syncToFs, fileStorage}:
         createScriptMusicWithId: (scriptId, input) => music.createWithId(scriptId, input),
         updateScriptMusic: (scriptId, musicId, input) => music.update(scriptId, musicId, input),
         deleteScriptMusic: (scriptId, musicId) => music.delete(scriptId, musicId),
+        createScriptCommentThread: (scriptId, input) => comments.create(scriptId, input),
+        addScriptCommentMessage: (scriptId, input) => comments.addMessage(scriptId, input),
+        updateScriptCommentMessage: (scriptId, messageId, body) => comments.updateMessage(scriptId, messageId, body),
+        deleteScriptCommentMessage: (scriptId, messageId) => comments.deleteMessage(scriptId, messageId),
+        setScriptCommentThreadStatus: (scriptId, threadId, status) => comments.setStatus(scriptId, threadId, status),
+        moveScriptCommentBlockAnchors: (scriptId, fromBlockId, toBlockId) => comments.moveBlockAnchors(scriptId, fromBlockId, toBlockId),
+        deleteScriptCommentThread: (scriptId, threadId) => comments.delete(scriptId, threadId),
+        restoreScriptCommentThread: (scriptId, snapshot) => comments.restore(scriptId, snapshot),
         listScriptLocations: scriptId => locations.list(scriptId),
         listScriptSceneLocations: scriptId => locations.listSceneAssignments(scriptId),
         createScriptLocation: (scriptId, input) => locations.create(scriptId, input),

@@ -13,6 +13,8 @@ export type {
     ScriptPackageWriteAttachment,
     ScriptPackageWriteBinding,
     ScriptPackageWriteCharacter,
+    ScriptPackageWriteCommentMessage,
+    ScriptPackageWriteCommentThread,
     ScriptPackageWriteGender,
     ScriptPackageWriteGroup,
     ScriptPackageWriteLocation,
@@ -33,6 +35,8 @@ export {
 } from './repo/documentProjection';
 export * from './schema';
 export type {
+    AddScriptCommentMessageInput,
+    CreateScriptCommentThreadInput,
     CreateScriptLocationInput,
     CreateScriptLocationWithIdInput,
     CreateScriptMusicInput,
@@ -42,6 +46,8 @@ export type {
     ListScriptsOptions,
     MusicAttachmentUpload,
     RenameScriptInput,
+    ScriptCommentsRepository,
+    ScriptCommentThreadSnapshot,
     ScriptEditorSettingsRecord,
     ScriptLocationsRepository,
     ScriptMusicRepository,
@@ -52,6 +58,8 @@ export type {
     UpdateScriptMusicInput,
 } from './scriptRepository';
 export type {
+    CommentAnchorKind,
+    CommentThreadStatus,
     MusicAttachmentRole,
     Script,
     ScriptAct,
@@ -64,6 +72,8 @@ export type {
     ScriptCharacterGroupRef,
     ScriptCharacterKind,
     ScriptCharacterRef,
+    ScriptCommentMessage,
+    ScriptCommentThread,
     ScriptLocation,
     ScriptMusic,
     ScriptMusicAttachment,
@@ -74,4 +84,4 @@ export type {
     ScriptSummary,
     ScriptTitlePageField,
 } from './types';
-export {MUSIC_ATTACHMENT_ROLES} from './types';
+export {LOCAL_COMMENT_AUTHOR_ID, MUSIC_ATTACHMENT_ROLES} from './types';

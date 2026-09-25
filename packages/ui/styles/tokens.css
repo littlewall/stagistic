@@ -188,6 +188,7 @@
 
     --shell-height: 3rem; /* 48px */
     --sidebar-width: 16rem; /* 256px */
+    --sidebar-max-width: 22rem; /* 352px */
     --sidebar-head-height: var(--control-height-md);
 
     /* ── Interaction states ────────────────────────────────────────

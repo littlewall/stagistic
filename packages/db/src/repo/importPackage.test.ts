@@ -29,6 +29,7 @@ const write = (): ScriptPackageWrite => ({
     scenes: [],
     attachments: [],
     bindings: [],
+    comments: {threads: [], messages: []},
 });
 
 const makeRepository = (db: Awaited<ReturnType<typeof createTestDb>>['db'], fileStorage = new InMemoryFileStorage()) =>
@@ -104,6 +105,36 @@ describe('createScriptFromPackage', () => {
 
         const blob = await fileStorage.get(source!.attachments.find(attachment => attachment.id === 'a1')!.storageKey);
         expect(blob).not.toBeNull();
+    });
+
+    it('imports comment threads and messages with the package', async () => {
+        const {db} = await createTestDb();
+        const repository = makeRepository(db);
+        const input = write();
+
+        input.comments = {
+            threads: [
+                {
+                    id: 't1',
+                    anchorKind: 'block',
+                    anchorBlockId: 'b1',
+                    quotedText: 'Q',
+                    status: 'resolved',
+                    resolvedAt: 5,
+                    resolvedBy: 'local',
+                    createdBy: 'local',
+                    createdAt: 1,
+                    updatedAt: 5,
+                },
+            ],
+            messages: [{id: 'm1', threadId: 't1', authorId: 'local', body: 'B', createdAt: 1, updatedAt: 1, editedAt: null}],
+        };
+
+        await repository.createScriptFromPackage(input);
+
+        const source = await repository.getScriptPackageSource('imported-1');
+        expect(source?.comments.threads).toMatchObject([{id: 't1', anchorBlockId: 'b1', status: 'resolved', resolvedAt: 5}]);
+        expect(source?.comments.messages).toMatchObject([{id: 'm1', threadId: 't1', body: 'B'}]);
     });
 
     it('rolls back and cleans blobs when the document is invalid', async () => {

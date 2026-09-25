@@ -1,4 +1,4 @@
-import {MUSIC_ID_ATTR, type ScriptDocument} from '@stagistic/script';
+import {COMMENT_ANCHOR_MARK_NAME, COMMENT_THREAD_ID_ATTR, MUSIC_ID_ATTR, type ScriptDocument} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 
 import type {StepkgSnapshot} from './contracts';
@@ -10,6 +10,8 @@ export interface StepkgIdMap {
     music: Record<string, string>;
     locations: Record<string, string>;
     attachments: Record<string, string>;
+    commentThreads: Record<string, string>;
+    commentMessages: Record<string, string>;
 }
 
 export interface StepkgRemapResult {
@@ -23,8 +25,14 @@ const buildMap = (ids: string[], newId: () => string): Record<string, string> =>
 
 const isRecord = (value: unknown): value is Record<string, unknown> => typeof value === 'object' && value !== null && !Array.isArray(value);
 
-const remapDocument = (node: unknown, characters: Record<string, string>, music: Record<string, string>): unknown => {
-    if (Array.isArray(node)) return node.map(child => remapDocument(child, characters, music));
+interface DocumentIdMaps {
+    characters: Record<string, string>;
+    music: Record<string, string>;
+    commentThreads: Record<string, string>;
+}
+
+const remapDocument = (node: unknown, maps: DocumentIdMaps): unknown => {
+    if (Array.isArray(node)) return node.map(child => remapDocument(child, maps));
     if (!isRecord(node)) return node;
 
     const next: Record<string, unknown> = {...node};
@@ -33,17 +41,21 @@ const remapDocument = (node: unknown, characters: Record<string, string>, music:
         const characterRefs = attrs[CHARACTER_REFS_ATTR];
         if (isRecord(characterRefs)) {
             attrs[CHARACTER_REFS_ATTR] = Object.fromEntries(
-                Object.entries(characterRefs).map(([key, value]) => [key, typeof value === 'string' ? (characters[value] ?? value) : value]),
+                Object.entries(characterRefs).map(([key, value]) => [key, typeof value === 'string' ? (maps.characters[value] ?? value) : value]),
             );
         }
         const musicId = attrs[MUSIC_ID_ATTR];
         if (typeof musicId === 'string') {
-            attrs[MUSIC_ID_ATTR] = music[musicId] ?? musicId;
+            attrs[MUSIC_ID_ATTR] = maps.music[musicId] ?? musicId;
+        }
+        const threadId = attrs[COMMENT_THREAD_ID_ATTR];
+        if (next.type === COMMENT_ANCHOR_MARK_NAME && typeof threadId === 'string') {
+            attrs[COMMENT_THREAD_ID_ATTR] = maps.commentThreads[threadId] ?? threadId;
         }
         next.attrs = attrs;
     }
-    if (Array.isArray(next.content)) next.content = next.content.map(child => remapDocument(child, characters, music));
-    if (Array.isArray(next.marks)) next.marks = next.marks.map(child => remapDocument(child, characters, music));
+    if (Array.isArray(next.content)) next.content = next.content.map(child => remapDocument(child, maps));
+    if (Array.isArray(next.marks)) next.marks = next.marks.map(child => remapDocument(child, maps));
     return next;
 };
 
@@ -73,11 +85,19 @@ export const remapStepkgIds = (snapshot: StepkgSnapshot, newId: () => string = u
             snapshot.attachments.map(attachment => attachment.id),
             newId,
         ),
+        commentThreads: buildMap(
+            snapshot.comments.threads.map(thread => thread.id),
+            newId,
+        ),
+        commentMessages: buildMap(
+            snapshot.comments.messages.map(message => message.id),
+            newId,
+        ),
     };
 
     const next: StepkgSnapshot = {
         script: {...snapshot.script, id: newId()},
-        document: remapDocument(snapshot.document, idMap.characters, idMap.music) as ScriptDocument,
+        document: remapDocument(snapshot.document, {characters: idMap.characters, music: idMap.music, commentThreads: idMap.commentThreads}) as ScriptDocument,
         titlePage: snapshot.titlePage,
         settings: snapshot.settings,
         characters: {
@@ -103,6 +123,14 @@ export const remapStepkgIds = (snapshot: StepkgSnapshot, newId: () => string = u
             attachmentId: idMap.attachments[binding.attachmentId] ?? binding.attachmentId,
             target: {...binding.target, id: idMap.music[binding.target.id] ?? binding.target.id},
         })),
+        comments: {
+            threads: snapshot.comments.threads.map(thread => ({...thread, id: idMap.commentThreads[thread.id]})),
+            messages: snapshot.comments.messages.map(message => ({
+                ...message,
+                id: idMap.commentMessages[message.id],
+                threadId: idMap.commentThreads[message.threadId] ?? message.threadId,
+            })),
+        },
     };
 
     return {snapshot: next, idMap};
