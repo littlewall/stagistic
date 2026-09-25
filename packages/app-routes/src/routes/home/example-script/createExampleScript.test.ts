@@ -1,19 +1,9 @@
-import type {ScriptRepository} from '@stagistic/app-core';
-import {buildScriptBlockIndex, parseStagistic} from '@stagistic/script';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-    vi,
-} from 'vite-plus/test';
+import {buildScriptBlockIndex, collectCommentAnchorThreadIds, parseStagistic} from '@stagistic/script';
+import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
 
-import {createExampleScript} from './createExampleScript';
+import {createExampleScript, type ExampleScriptRepository} from './createExampleScript';
 import source from './example-script.stagistic?raw';
-import {
-    type ExampleScriptTemplate,
-    loadExampleScriptTemplate,
-} from './loadExampleScriptTemplate';
+import {type ExampleScriptTemplate, loadExampleScriptTemplate} from './loadExampleScriptTemplate';
 import {prepareExampleScriptDocument} from './prepareExampleScriptDocument';
 
 const INTEGRATED_SCORE_ROLE = 'integrated_score';
@@ -21,16 +11,6 @@ const INTEGRATED_SCORE_ROLE = 'integrated_score';
 vi.mock('./loadExampleScriptTemplate', () => ({
     loadExampleScriptTemplate: vi.fn(),
 }));
-
-type ExampleRepository = Pick<
-    ScriptRepository,
-    | 'allocateScriptCharacterId'
-    | 'confirmScriptCharacterWithId'
-    | 'saveLatest'
-    | 'saveTitlePage'
-    | 'setMusicAttachment'
-    | 'removeMusicAttachment'
->;
 
 const createTemplate = (): ExampleScriptTemplate => ({
     ...prepareExampleScriptDocument(parseStagistic(source).document),
@@ -44,9 +24,9 @@ const createTemplate = (): ExampleScriptTemplate => ({
     },
 });
 
-const createCharacter = (id: string, key: string) => ({
+const createEntity = (id: string, key: string, kind: 'character' | 'group' = 'character') => ({
     id,
-    kind: 'character' as const,
+    kind,
     key,
     colorHex: null,
     genderKey: null,
@@ -56,21 +36,46 @@ const createCharacter = (id: string, key: string) => ({
     voiceType: null,
     vocalRangeLow: null,
     vocalRangeHigh: null,
+    memberIds: [],
 });
 
-const createRepository = (): ExampleRepository => {
-    let characterNumber = 0;
+const createRepository = () => {
+    let idNumber = 0;
+    const nextId = (prefix: string) => () => `${prefix}-${++idNumber}`;
+    const resolved = <T>(value: T) => vi.fn((..._args: unknown[]) => Promise.resolve(value));
 
     return {
-        allocateScriptCharacterId: () => `character-${++characterNumber}`,
-        confirmScriptCharacterWithId: vi.fn((_scriptId: string, input: {id: string, key: string}) => {
-            return Promise.resolve(createCharacter(input.id, input.key));
+        allocateScriptCharacterId: nextId('character'),
+        allocateScriptCharacterGroupId: nextId('group'),
+        allocateScriptCommentThreadId: nextId('thread'),
+        allocateScriptCommentMessageId: nextId('message'),
+        allocateScriptLocationId: nextId('location'),
+        confirmScriptCharacterWithId: vi.fn((_scriptId: string, input: {id: string; key: string}) => {
+            return Promise.resolve(createEntity(input.id, input.key));
         }),
-        saveLatest: vi.fn(() => Promise.resolve(undefined)),
-        saveTitlePage: vi.fn(() => Promise.resolve(undefined)),
-        setMusicAttachment: vi.fn(() => Promise.resolve(null)),
-        removeMusicAttachment: vi.fn(() => Promise.resolve(undefined)),
-    };
+        createScriptCharacterGroupWithId: vi.fn((_scriptId: string, input: {id: string; key: string}) => {
+            return Promise.resolve(createEntity(input.id, input.key, 'group'));
+        }),
+        replaceScriptCharacterGroupMembers: resolved(null),
+        upsertScriptCharacterGender: vi.fn((_scriptId: string, label: string) => {
+            return Promise.resolve({id: `gender-${label}`, key: label.toLowerCase(), label});
+        }),
+        setScriptCharacterGender: resolved(null),
+        setScriptCharacterOutline: resolved(null),
+        setScriptCharacterVoiceType: resolved(null),
+        setScriptCharacterVocalRange: resolved(null),
+        createScriptCommentThread: vi.fn((_scriptId: string, input: {id: string}) => Promise.resolve({id: input.id})),
+        addScriptCommentMessage: resolved(null),
+        setScriptCommentThreadStatus: resolved(null),
+        createScriptLocationWithId: vi.fn((_scriptId: string, input: {id: string; name: string}) => {
+            return Promise.resolve({id: input.id, name: input.name});
+        }),
+        replaceScriptSceneLocations: resolved([]),
+        saveLatest: resolved(undefined),
+        saveTitlePage: resolved(undefined),
+        setMusicAttachment: resolved(null),
+        removeMusicAttachment: resolved(undefined),
+    } as unknown as ExampleScriptRepository;
 };
 
 const createActions = () => ({
@@ -83,7 +88,7 @@ afterEach(() => {
 });
 
 describe('createExampleScript', () => {
-    it('creates linked characters, persists the document, and attaches the score', async () => {
+    it('creates the full example cast, comments, and locations before attaching the score', async () => {
         const template = createTemplate();
         const repository = createRepository();
         const actions = createActions();
@@ -96,20 +101,26 @@ describe('createExampleScript', () => {
         });
 
         expect(actions.createScript).toHaveBeenCalledWith('Example musical', template.document);
-        expect(repository.confirmScriptCharacterWithId).toHaveBeenCalledTimes(2);
-        expect(repository.setMusicAttachment).toHaveBeenCalledWith(
-            'script-new',
-            template.scoreMusicId,
-            INTEGRATED_SCORE_ROLE,
-            template.score,
-        );
+        expect(repository.confirmScriptCharacterWithId).toHaveBeenCalledTimes(4);
+        expect(repository.setScriptCharacterVocalRange).toHaveBeenCalledTimes(4);
+        expect(repository.upsertScriptCharacterGender).toHaveBeenCalledTimes(2);
+        expect(repository.createScriptCharacterGroupWithId).toHaveBeenCalledWith('script-new', expect.objectContaining({key: 'CREW'}));
+        expect(repository.replaceScriptCharacterGroupMembers).toHaveBeenCalledWith('script-new', expect.any(String), [expect.any(String), expect.any(String)]);
+        expect(repository.createScriptCommentThread).toHaveBeenCalledTimes(3);
+        expect(repository.addScriptCommentMessage).toHaveBeenCalledTimes(1);
+        expect(repository.setScriptCommentThreadStatus).toHaveBeenCalledWith('script-new', expect.any(String), 'resolved');
+        expect(repository.replaceScriptSceneLocations).toHaveBeenCalledTimes(4);
+        expect(repository.setMusicAttachment).toHaveBeenCalledWith('script-new', template.scoreMusicId, INTEGRATED_SCORE_ROLE, template.score);
         expect(actions.deleteScript).not.toHaveBeenCalled();
 
         const savedDocument = vi.mocked(repository.saveLatest).mock.calls[0]?.[1];
-        const characterRefs = buildScriptBlockIndex(savedDocument).snapshot.blocks
-            .flatMap(block => block.characterRefs ?? []);
+        const characterRefs = buildScriptBlockIndex(savedDocument).snapshot.blocks.flatMap(block => block.characterRefs ?? []);
 
-        expect(characterRefs).toEqual(expect.arrayContaining([expect.objectContaining({characterId: 'character-1'}), expect.objectContaining({characterId: 'character-2'})]));
+        expect(characterRefs.every(ref => ref.characterId !== null)).toBe(true);
+        expect(collectCommentAnchorThreadIds(savedDocument).size).toBe(2);
+        expect(vi.mocked(repository.saveLatest).mock.invocationCallOrder[0]).toBeLessThan(
+            vi.mocked(repository.replaceScriptSceneLocations).mock.invocationCallOrder[0] ?? 0,
+        );
     });
 
     it('deletes the incomplete script when document persistence fails', async () => {
@@ -137,14 +148,10 @@ describe('createExampleScript', () => {
 
         await expect(createExampleScript({actions, repository})).rejects.toBe(failure);
 
-        expect(repository.removeMusicAttachment).toHaveBeenCalledWith(
-            'script-new',
-            template.scoreMusicId,
-            INTEGRATED_SCORE_ROLE,
-        );
+        expect(repository.removeMusicAttachment).toHaveBeenCalledWith('script-new', template.scoreMusicId, INTEGRATED_SCORE_ROLE);
         expect(actions.deleteScript).toHaveBeenCalledWith('script-new');
-        expect(
-            vi.mocked(repository.removeMusicAttachment).mock.invocationCallOrder[0],
-        ).toBeLessThan(vi.mocked(actions.deleteScript).mock.invocationCallOrder[0] ?? Infinity);
+        expect(vi.mocked(repository.removeMusicAttachment).mock.invocationCallOrder[0]).toBeLessThan(
+            vi.mocked(actions.deleteScript).mock.invocationCallOrder[0] ?? Infinity,
+        );
     });
 });

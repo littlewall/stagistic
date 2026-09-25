@@ -1,7 +1,6 @@
 import {useCallback, useMemo, useSyncExternalStore} from 'react';
 
 import {useEditorInstance} from '../context';
-import {useFocusEditorBlock} from '../hooks/useFocusEditorBlock';
 import {commentsPluginKey, type CommentsPluginState} from '../tiptap/extensions/comments';
 
 export interface EditorCommentsApi {
@@ -19,7 +18,6 @@ export interface EditorCommentsApi {
 /** Comments plugin state and commands for UI rendered inside the editor context. */
 export const useEditorComments = (): EditorCommentsApi => {
     const editor = useEditorInstance();
-    const focusBlock = useFocusEditorBlock();
     const subscribe = useCallback(
         (listener: () => void) => {
             editor?.on('transaction', listener);
@@ -60,12 +58,18 @@ export const useEditorComments = (): EditorCommentsApi => {
             revealAnchor: threadId => {
                 const anchor = state?.anchors.get(threadId);
 
-                if (anchor) {
-                    focusBlock(anchor.blockId);
-                    editor?.commands.setActiveCommentThread(threadId);
+                if (!editor || !anchor) {
+                    return;
                 }
+
+                // No block flash: the active thread's own tint (text or block) marks the target.
+                const {node} = editor.view.domAtPos(anchor.from);
+                const element = node instanceof Element ? node : node.parentElement;
+
+                element?.scrollIntoView({block: 'center'});
+                editor.commands.setActiveCommentThread(threadId);
             },
         }),
-        [editor, focusBlock, state],
+        [editor, state],
     );
 };

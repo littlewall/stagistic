@@ -1,7 +1,7 @@
 import type {ScriptCommentMessage, ScriptCommentsState, ScriptCommentThread} from '@stagistic/app-core';
 import {type CommentAnchorLocation, useEditorComments} from '@stagistic/editor';
-import {SidebarMiniHeader, ToggleButtonGroup, useToastController} from '@stagistic/ui';
-import {type ReactNode, useEffect, useMemo} from 'react';
+import {IconPopover, SearchOptionsIcon, Select, SidebarMiniHeader, ToggleButtonGroup, useToastController} from '@stagistic/ui';
+import {type ReactNode, useEffect, useMemo, useRef} from 'react';
 
 import {CommentsBesideView} from './CommentsBesideView';
 import {CommentsListView} from './CommentsListView';
@@ -13,7 +13,7 @@ import type {CommentsPanelState} from './useCommentsPanelState';
 import styles from './ScriptCommentsSidebar.module.css';
 
 const VIEW_OPTIONS = [
-    {value: 'beside', label: 'Beside text'},
+    {value: 'beside', label: 'Anchored'},
     {value: 'list', label: 'List'},
 ] as const satisfies readonly {value: CommentsViewMode; label: string}[];
 
@@ -48,9 +48,32 @@ export const ScriptCommentsSidebar = ({header, comments, panelState}: ScriptComm
     const anchors = editorComments.state?.anchors ?? NO_ANCHORS;
     const draft = editorComments.state?.draft ?? null;
     const activeThreadId = editorComments.state?.activeThreadId ?? null;
+    const hoveredThreadId = editorComments.state?.hoveredThreadId ?? null;
+    const hoveredBlockId = editorComments.state?.hoveredBlockId ?? null;
+    const openThreadIdsByBlockId = editorComments.state?.openThreadIdsByBlockId;
+    // Hovering a card, its underline or its block's margin marker lights the card(s).
+    const highlightedThreadIds = useMemo(
+        () => new Set([...(hoveredThreadId ? [hoveredThreadId] : []), ...((hoveredBlockId && openThreadIdsByBlockId?.get(hoveredBlockId)) || [])]),
+        [hoveredBlockId, hoveredThreadId, openThreadIdsByBlockId],
+    );
     const messagesByThreadId = useMemo(() => groupMessagesByThread(comments.messages), [comments.messages]);
     const visibleThreads = useMemo(() => comments.threads.filter(thread => matchesCommentFilter(thread, filter)), [comments.threads, filter]);
     const {setActive} = editorComments;
+
+    // A group opened for one thread folds back once the active thread leaves it.
+    const previousActiveRef = useRef(activeThreadId);
+
+    useEffect(() => {
+        if (previousActiveRef.current === activeThreadId) {
+            return;
+        }
+
+        previousActiveRef.current = activeThreadId;
+
+        if (expandedBlockId && (activeThreadId === null || anchors.get(activeThreadId)?.blockId !== expandedBlockId)) {
+            setExpandedBlockId(null);
+        }
+    }, [activeThreadId, anchors, expandedBlockId, setExpandedBlockId]);
 
     useEffect(() => {
         if (pendingActivation?.[0]) {
@@ -121,7 +144,9 @@ export const ScriptCommentsSidebar = ({header, comments, panelState}: ScriptComm
             thread={thread}
             messages={messagesByThreadId.get(thread.id) ?? []}
             isActive={activeThreadId === thread.id}
+            isHighlighted={highlightedThreadIds.has(thread.id)}
             showQuote={showQuote}
+            onCollapse={() => editorComments.setActive(null)}
             onActivate={() => {
                 // Detached threads have nothing to scroll to but must still open for Resolve/Delete.
                 if (viewMode === 'list' && anchors.has(thread.id)) {
@@ -149,6 +174,7 @@ export const ScriptCommentsSidebar = ({header, comments, panelState}: ScriptComm
             isActive
             showQuote={showQuote}
             onActivate={() => undefined}
+            onCollapse={() => undefined}
             onHover={() => undefined}
             onSubmitDraft={body => void submitDraft(body)}
             onCancelDraft={editorComments.cancelDraft}
@@ -164,17 +190,34 @@ export const ScriptCommentsSidebar = ({header, comments, panelState}: ScriptComm
 
     return (
         <div className={styles.content} data-comments-panel="true">
-            <SidebarMiniHeader navigation={header} />
-            <div className={styles.toolbar}>
-                <ToggleButtonGroup ariaLabel="Comments view" options={VIEW_OPTIONS} value={viewMode} onChange={setViewMode} />
-                <ToggleButtonGroup
-                    ariaLabel="Comment status"
-                    options={STATUS_OPTIONS}
-                    value={filter.status}
-                    variant="chips"
-                    onChange={status => setFilter({...filter, status})}
-                />
-            </div>
+            <SidebarMiniHeader
+                navigation={header}
+                controls={
+                    <IconPopover aria-label="Comments view and filter" icon={<SearchOptionsIcon aria-hidden="true" />} size="xs">
+                        <div className={styles.displayField}>
+                            <span className={styles.displayLabel}>View</span>
+                            <ToggleButtonGroup ariaLabel="Comments view" options={VIEW_OPTIONS} value={viewMode} onChange={setViewMode} />
+                        </div>
+                        <div className={styles.displayField}>
+                            <span className={styles.displayLabel}>Status</span>
+                            <Select
+                                ariaLabel="Comment status"
+                                variant="form"
+                                size="md"
+                                options={[...STATUS_OPTIONS]}
+                                value={filter.status}
+                                onChange={status => {
+                                    const option = STATUS_OPTIONS.find(item => item.value === status);
+
+                                    if (option) {
+                                        setFilter({...filter, status: option.value});
+                                    }
+                                }}
+                            />
+                        </div>
+                    </IconPopover>
+                }
+            />
             {isEmpty ? (
                 <p className={styles.empty}>No comments. Select text and press ⌘⌥M.</p>
             ) : viewMode === 'beside' ? (
@@ -183,6 +226,7 @@ export const ScriptCommentsSidebar = ({header, comments, panelState}: ScriptComm
                     anchors={anchors}
                     activeThreadId={activeThreadId}
                     expandedBlockId={expandedBlockId}
+                    hoveredBlockId={hoveredBlockId}
                     draft={draft}
                     onExpandBlock={setExpandedBlockId}
                     renderCard={thread => renderCard(thread, {showQuote: false})}

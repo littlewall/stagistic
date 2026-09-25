@@ -245,6 +245,51 @@ const findButton = (label: string, root: ParentNode = document) =>
         button => (button.getAttribute('aria-label') ?? button.textContent?.trim()) === label,
     ) ?? null;
 const card = (threadId: string) => document.querySelector<HTMLElement>(`article[data-thread-id="${threadId}"]`);
+const menuItem = (label: string) =>
+    Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]')).find(item => item.textContent?.replace('✓', '').trim() === label);
+
+const chooseMenuItem = async (label: string) => {
+    await page.elementLocator(await poll(() => menuItem(label), `${label} item`)).click();
+};
+
+const displayDialog = () => document.querySelector<HTMLElement>('[role="dialog"][aria-label="Comments view and filter"]');
+
+const openDisplayDialog = async () => {
+    if (!displayDialog()) {
+        await page.elementLocator(await poll(() => findButton('Comments view and filter', panel() ?? document), 'display trigger')).click();
+    }
+
+    return poll(() => displayDialog(), 'display dialog');
+};
+
+const chooseView = async (label: string) => {
+    const dialog = await openDisplayDialog();
+
+    await page.elementLocator(await poll(() => findButton(label, dialog), `${label} view`)).click();
+    await userEvent.keyboard('{Escape}');
+    await poll(() => !displayDialog(), 'display dialog closed');
+};
+
+const chooseStatus = async (label: string) => {
+    const dialog = await openDisplayDialog();
+
+    await page.elementLocator(await poll(() => findButton('Comment status', dialog), 'status select')).click();
+    await page
+        .elementLocator(
+            await poll(
+                () => Array.from(dialog.querySelectorAll<HTMLElement>('[role="option"]')).find(option => option.textContent?.trim() === label),
+                `${label} option`,
+            ),
+        )
+        .click();
+    await userEvent.keyboard('{Escape}');
+    await poll(() => !displayDialog(), 'display dialog closed');
+};
+
+const chooseThreadAction = async (threadId: string, label: string) => {
+    await page.elementLocator(await poll(() => findButton('More actions', card(threadId) ?? document), 'More actions')).click();
+    await chooseMenuItem(label);
+};
 
 const threeThreads = () => ({
     threads: [thread('t1'), thread('t2'), thread('t3')],
@@ -300,11 +345,69 @@ describe('ScriptCommentsSidebar', () => {
         await mount(threeThreads());
 
         await page.elementLocator(await poll(() => card('t1'), 't1 card')).click();
-        await page.elementLocator(await poll(() => findButton('Resolve', card('t1') ?? document), 'Resolve')).click();
+        await chooseThreadAction('t1', 'Resolve');
         await poll(() => !card('t1'), 't1 hidden');
 
-        await page.elementLocator(await poll(() => findButton('Resolved', panel() ?? document), 'Resolved filter')).click();
+        await chooseStatus('Resolved');
         expect(await poll(() => card('t1'), 't1 under Resolved')).toBeTruthy();
+    });
+
+    it('a margin marker activates the first card of its block, in editor order', async () => {
+        // The range thread is older, but the block anchor comes first in the editor.
+        const editor = await mount({
+            threads: [thread('t1'), thread('tb', {anchorKind: 'block', anchorBlockId: 'b1', createdAt: 2})],
+            messages: [message('m1', 't1', 'Range'), message('mb', 'tb', 'Block')],
+        });
+
+        await page.elementLocator(await poll(() => document.querySelector<HTMLElement>('[data-comment-marker-block-id="b1"]'), 'b1 marker')).click();
+        await poll(() => getCommentsState(editor.state).activeThreadId === 'tb', 'tb active');
+
+        const [blockCard, rangeCard] = await poll(() => {
+            const cards = [card('tb'), card('t1')];
+
+            return cards.every(Boolean) ? cards.map(element => element!.getBoundingClientRect()) : null;
+        }, 'both cards');
+
+        expect(blockCard.top).toBeLessThan(rangeCard.top);
+    });
+
+    it('hovering a margin marker lights every card of its block', async () => {
+        await mount(threeThreads());
+
+        const b1Marker = await poll(() => document.querySelector<HTMLElement>('[data-comment-marker-block-id="b1"]'), 'b1 marker');
+
+        await userEvent.hover(b1Marker);
+        await poll(() => card('t1')?.dataset.highlighted === 'true', 't1 lit');
+        expect(card('t2')?.dataset.highlighted).toBeUndefined();
+
+        await userEvent.unhover(b1Marker);
+        await poll(() => card('t1')?.dataset.highlighted === undefined, 't1 unlit');
+    });
+
+    it('a group opened by activating one of its threads folds back when it is collapsed', async () => {
+        const editor = await mount({
+            content: baseDocument([scene('s1', 'INT. ROOM'), dialogue('b1', 'Hello world', ['g1', 'g2', 'g3'])]),
+            threads: [thread('g1'), thread('g2'), thread('g3')],
+            messages: [message('m1', 'g1', 'One'), message('m2', 'g2', 'Two'), message('m3', 'g3', 'Three')],
+        });
+        const group = () => findButton('3 comments', panel() ?? document);
+
+        await page.elementLocator(await poll(() => group(), 'folded group')).click();
+        await page.elementLocator(await poll(() => card('g1'), 'g1 card')).click();
+        await poll(() => getCommentsState(editor.state).activeThreadId === 'g1', 'g1 active');
+
+        await page.elementLocator(await poll(() => findButton('Collapse comment', card('g1') ?? document), 'header')).click();
+        expect(await poll(() => group(), 'group folded again')).toBeTruthy();
+    });
+
+    it('clicking the tinted header collapses the active thread', async () => {
+        const editor = await mount(threeThreads());
+
+        await page.elementLocator(await poll(() => card('t1'), 't1 card')).click();
+        await poll(() => getCommentsState(editor.state).activeThreadId === 't1', 't1 active');
+        await page.elementLocator(await poll(() => findButton('Collapse comment', card('t1') ?? document), 'header')).click();
+
+        await poll(() => getCommentsState(editor.state).activeThreadId === null, 't1 collapsed');
     });
 
     it('List view groups by scene and lists detached threads with their quote', async () => {
@@ -313,7 +416,7 @@ describe('ScriptCommentsSidebar', () => {
             messages: [message('m1', 't1', 'Anchored'), message('m9', 't9', 'Orphan')],
         });
 
-        await page.elementLocator(await poll(() => findButton('List', panel() ?? document), 'List toggle')).click();
+        await chooseView('List');
 
         expect(await poll(() => findByText('INT. ROOM', panel() ?? document), 'scene heading')).toBeTruthy();
         expect(await poll(() => findByText('Detached', panel() ?? document), 'Detached heading')).toBeTruthy();
@@ -351,15 +454,7 @@ describe('ScriptCommentsSidebar', () => {
         const editor = await mount({threads: [thread('t1')], messages: [message('m1', 't1', 'Fix')]});
 
         await page.elementLocator(await poll(() => card('t1'), 't1 card')).click();
-        await page.elementLocator(await poll(() => findButton('More actions', card('t1') ?? document), 'More actions')).click();
-        await page
-            .elementLocator(
-                await poll(
-                    () => Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]')).find(item => item.textContent?.trim() === 'Delete'),
-                    'Delete item',
-                ),
-            )
-            .click();
+        await chooseThreadAction('t1', 'Delete');
 
         await poll(() => !getCommentsState(editor.state).anchors.has('t1'), 'anchor removed');
         await page
@@ -388,22 +483,14 @@ describe('ScriptCommentsSidebar', () => {
     it('a detached thread in List view can be activated, resolved and deleted', async () => {
         await mount({threads: [thread('t9', {quotedText: 'gone words'})], messages: [message('m9', 't9', 'Orphan')]});
 
-        await page.elementLocator(await poll(() => findButton('List', panel() ?? document), 'List toggle')).click();
+        await chooseView('List');
         await page.elementLocator(await poll(() => card('t9'), 'detached card')).click();
-        await page.elementLocator(await poll(() => findButton('Resolve', card('t9') ?? document), 'Resolve on detached')).click();
+        await chooseThreadAction('t9', 'Resolve');
         await poll(() => testWindow.__comments?.threads[0]?.status === 'resolved', 'resolved');
 
-        await page.elementLocator(await poll(() => findButton('All', panel() ?? document), 'All filter')).click();
+        await chooseStatus('All');
         await page.elementLocator(await poll(() => card('t9'), 'detached card under All')).click();
-        await page.elementLocator(await poll(() => findButton('More actions', card('t9') ?? document), 'More actions')).click();
-        await page
-            .elementLocator(
-                await poll(
-                    () => Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]')).find(item => item.textContent?.trim() === 'Delete'),
-                    'Delete item',
-                ),
-            )
-            .click();
+        await chooseThreadAction('t9', 'Delete');
 
         await poll(() => testWindow.__comments?.threads.length === 0, 'deleted');
     });

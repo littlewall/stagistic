@@ -55,8 +55,12 @@ After invoking:
 
 Canvas only indicates; all management happens in the panel.
 - Range anchor: subtle dotted underline, Creamed Corn tone.
-- Margin marker: shown beside every block that has ≥1 open thread (range or block
-  anchor); shows a count when >1. It is the only canvas element that opens the panel.
+- Margin marker: a small saturated dot centred midway between the music rail and the
+  scrollbar, vertically on the block's first text line (like the left gutter controls),
+  beside every block that has ≥1 open thread (range or block anchor);
+  shows a count when >1. It is the only canvas element that opens the panel and the
+  only block-level indicator (no block-edge line). The dot gets a ring when its thread
+  is active/hovered, and appears (ringed) on a block with an unsaved block draft.
 - Resolved threads: no canvas indication.
 - Click on underline:
   - panel open → highlight the thread;

@@ -9,6 +9,8 @@ import styles from './ScriptCommentsSidebar.module.css';
 const DEFAULT_CARD_HEIGHT = 72;
 const COLLAPSED_CARD_HEIGHT = 32;
 const CARD_GAP = 8;
+/** Extra space around a block's run of several cards, so they read as one group. */
+const GROUP_GAP = 16;
 const SCROLL_CONTAINER_SELECTOR = '[data-editor-scroll-container="true"]';
 
 interface CommentsBesideViewProps {
@@ -16,6 +18,8 @@ interface CommentsBesideViewProps {
     anchors: ReadonlyMap<string, CommentAnchorLocation>;
     activeThreadId: string | null;
     expandedBlockId: string | null;
+    /** Block whose editor margin marker is hovered; its folded group lights up. */
+    hoveredBlockId: string | null;
     draft: {blockId: string} | null;
     onExpandBlock: (blockId: string) => void;
     renderCard: (thread: ScriptCommentThread) => ReactNode;
@@ -64,6 +68,7 @@ export const CommentsBesideView = ({
     anchors,
     activeThreadId,
     expandedBlockId,
+    hoveredBlockId,
     draft,
     onExpandBlock,
     renderCard,
@@ -73,7 +78,20 @@ export const CommentsBesideView = ({
     const bodyRef = useRef<HTMLDivElement | null>(null);
     const [bodyTop, setBodyTop] = useState(0);
     const {heights, observe} = useMeasuredHeights();
-    const anchoredThreads = useMemo(() => threads.filter(thread => anchors.has(thread.id)), [anchors, threads]);
+    // Same order as the editor's margin marker (position, block anchors first), so a marker click
+    // activates the first card of its block.
+    const anchoredThreads = useMemo(
+        () =>
+            threads
+                .filter(thread => anchors.has(thread.id))
+                .sort((left, right) => {
+                    const leftAnchor = anchors.get(left.id)!;
+                    const rightAnchor = anchors.get(right.id)!;
+
+                    return leftAnchor.from - rightAnchor.from || (leftAnchor.kind === 'block' ? -1 : 0) - (rightAnchor.kind === 'block' ? -1 : 0);
+                }),
+        [anchors, threads],
+    );
     const tops = useCommentAnchorTops(anchoredThreads.map(thread => thread.id));
     const threadById = useMemo(() => new Map(threads.map(thread => [thread.id, thread])), [threads]);
 
@@ -123,6 +141,7 @@ export const CommentsBesideView = ({
             expandedBlockId,
             collapsedHeight: COLLAPSED_CARD_HEIGHT,
             gap: CARD_GAP,
+            groupGap: GROUP_GAP,
         });
     }, [activeThreadId, anchoredThreads, anchors, bodyTop, draft, expandedBlockId, heights, tops]);
 
@@ -139,7 +158,12 @@ export const CommentsBesideView = ({
                 return (
                     <div key={entry.key} ref={observe} className={styles.slot} style={{top: entry.top}} data-layout-key={entry.key}>
                         {entry.collapsed ? (
-                            <button type="button" className={styles.collapsed} onClick={() => onExpandBlock(entry.blockId)}>
+                            <button
+                                type="button"
+                                className={styles.collapsed}
+                                data-highlighted={entry.blockId === hoveredBlockId ? 'true' : undefined}
+                                onClick={() => onExpandBlock(entry.blockId)}
+                            >
                                 {`${entry.threadIds.length} comments`}
                             </button>
                         ) : entry.key === COMMENT_DRAFT_ANCHOR_KEY ? (

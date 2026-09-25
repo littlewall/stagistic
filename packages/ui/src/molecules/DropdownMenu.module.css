@@ -23,6 +23,10 @@
 .item,
 .dangerItem {
     cursor: pointer;
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: space-between;
     padding: var(--space-md) var(--space-lg);
     color: var(--color-text);
     border-radius: var(--radius-md);
@@ -32,6 +36,18 @@
     &[data-hovered] {
         background: var(--state-hover);
     }
+}
+
+.currentMark {
+    flex: 0 0 auto;
+    color: var(--color-text-muted);
+}
+
+.dividerBefore {
+    margin-top: var(--space-sm);
+    border-top: 1px solid var(--color-border-subtle);
+    border-top-left-radius: 0;
+    border-top-right-radius: 0;
 }
 
 .dangerItem {

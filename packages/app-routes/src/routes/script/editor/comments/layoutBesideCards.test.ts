@@ -14,6 +14,17 @@ describe('layoutBesideCards', () => {
         ]);
     });
 
+    it('adds the group gap around a block with several cards', () => {
+        expect(
+            tops(layoutBesideCards({...base, groupGap: 16, cards: [card('a', 'b1', 0), card('b', 'b2', 10), card('c', 'b2', 10), card('d', 'b3', 20)]})),
+        ).toEqual([
+            ['a', 0],
+            ['b', 56],
+            ['c', 104],
+            ['d', 160],
+        ]);
+    });
+
     it('pushes colliding cards down with a gap', () => {
         expect(tops(layoutBesideCards({...base, cards: [card('a', 'b1', 0), card('b', 'b2', 10), card('c', 'b3', 20)]}))).toEqual([
             ['a', 0],

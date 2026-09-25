@@ -89,6 +89,8 @@ export {useDropdownDismiss} from './molecules/forms/useDropdownDismiss';
 export {ListPanel, type ListPanelProps} from './molecules/ListPanel';
 export {ListRow, type ListRowProps} from './molecules/ListRow';
 export {DropdownMenu, type DropdownMenuItem, type DropdownMenuProps} from './molecules/DropdownMenu';
+export {IconDropdownMenu, type IconDropdownMenuProps} from './molecules/IconDropdownMenu';
+export {IconPopover, type IconPopoverProps} from './molecules/IconPopover';
 export {MoreActionsMenu, type MoreActionsMenuProps} from './molecules/MoreActionsMenu';
 export {SearchControl, type SearchControlProps} from './molecules/SearchControl';
 export {ScriptActionsMenu} from './molecules/ScriptActionsMenu';

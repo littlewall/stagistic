@@ -2,16 +2,27 @@
 title: One Small Light
 subtitle: A short musical in two acts
 credits:
-  - credit: Book, Music and Lyrics
+  - credit: Book and Lyrics by
     authors:
       - John Doe
+  - credit: Music by
+    authors:
+      - Jane Doe
+source: Inspired by the lighthouse keepers of the northern coast
+draftDate: 2026-09-25
+contact: |-
+  Placeholder Productions
+  hello@example.com
+copyright: © 2026 John Doe and Jane Doe. Demo script for Stagistic.
 ---
 
 # Act One
 
 ## Storm is coming
 
-A storm gathers over the sea. The lighthouse is dark.
+A storm gathers over the sea. The lighthouse is *dark*.
+
+[[Open on sound only: wind, gulls, a distant bell.]]
 
 MARA
 The fishing boats will return before midnight.
@@ -21,17 +32,15 @@ ELI
 And our lamp is broken.
 
 MARA
-Then we fix it.
+Then we fix it. My father kept this light burning for thirty years.
 
 !@Eli takes an old key from his pocket.
 
 ELI
-(offers her the key)
+(offers @Mara the key)
 After you.
 
-MARA
-(brightly)
-I knew you believed in me.
+MARA: I knew you believed in me.
 
 They enter the lighthouse.
 
@@ -50,7 +59,7 @@ ELI
 Of course it did.
 
 MARA
-Tonight, we need to believe him.
+Tonight, we need to **believe** him.
 
 Music starts to play. @@music 1 "One Small Light"
 
@@ -73,7 +82,7 @@ BE THE LIGHT
 ~
 WE NEED TO SEE.
 
-The lamp bursts into flame. @@out 1
+The lamp *bursts* into flame. @@out 1
 
 ELI
 (amazed)
@@ -81,11 +90,17 @@ It worked.
 
 A thunderclap shakes the tower.
 
-Blackout.
+@@music 2 "Thunderclap"
+
+@@out 2
+
+**Blackout.**
 
 # Act Two
 
 ## Broken window
+
+@@music 3 "Storm Underscore"
 
 Wind howls through a broken window. The flame flickers.
 
@@ -103,9 +118,9 @@ ELI
 It is stuck.
 
 MARA
-Then we pull together.
+Then we pull _together_.
 
-They force the window shut. The flame steadies.
+They force the window shut. The flame steadies. @@out 3
 
 A ship's bell sounds in the distance.
 
@@ -118,13 +133,35 @@ And now they can see us.
 
 ## After the storm
 
-The storm has passed. A fishing boat enters the harbor.
+The storm has passed. A fishing boat enters the harbor. @Rook and @Tam leap onto the pier.
+
+ROOK
+We saw your light from the reef. One more minute and we would have hit the rocks.
+
+TAM
+(to @Eli)
+Was that you singing up there?
 
 ELI
 One lamp saved an entire crew.
 
 MARA
 Not one lamp. Two people kept it burning.
+
+[[Cut this exchange if the reprise runs long.]]
+
+Music starts to play. @@music 4 "One Small Light (Reprise)"
+
+CREW
+SHINE, SHINE,
+ACROSS THE SEA.
+
+MARA / ELI
+YOU WERE THE LIGHT
+~
+WE NEEDED TO SEE.
+
+The crew raises a cheer. @@out 4
 
 ELI
 (proudly)
@@ -134,8 +171,6 @@ MARA
 (smiles)
 Bring oil next time.
 
-They watch the boat reach the shore.
+They watch the sun rise over the harbor.
 
-The lighthouse shines as the sun rises.
-
-Blackout.
+**Blackout.**

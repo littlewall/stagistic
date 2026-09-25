@@ -29,6 +29,8 @@ const dialogue = (id: string, text: string, threadIds: readonly string[] = []): 
     ],
 });
 
+const scene = (id: string, text: string): ScriptNode => ({type: 'scene', attrs: {id}, content: [{type: 'text', text}]});
+
 const createDocument = (blocks: ScriptNode[] = [dialogue('b1', 'Hello world'), dialogue('b2', 'Second line')]): ScriptDocument => ({
     type: 'doc',
     content: blocks,
@@ -220,7 +222,7 @@ describe('selection toolbar', () => {
 const marker = (blockId: string) => document.querySelector<HTMLButtonElement>(`[data-comment-marker-block-id="${blockId}"]`);
 
 describe('comment margin markers', () => {
-    it('renders one marker per block with open comments, with a count above one', async () => {
+    it('renders one marker per block with open comments, larger and without a count above one', async () => {
         await mountEditor({
             content: createDocument([dialogue('b1', 'Hello', ['t1', 't2']), dialogue('b2', 'Other', ['t3'])]),
             commentThreads: [openRange('t1'), openRange('t2'), {...openRange('t3'), status: 'resolved'}],
@@ -228,21 +230,22 @@ describe('comment margin markers', () => {
 
         const b1 = await poll(() => marker('b1'), 'b1 marker');
 
-        expect(b1.textContent).toBe('2');
+        expect(b1.textContent).toBe('');
+        expect(b1.dataset.multiple).toBe('true');
         expect(b1.getAttribute('aria-label')).toBe('2 comments');
         expect(marker('b2')).toBeNull();
     });
 
-    it('marks block-anchored threads too, without a count for one', async () => {
+    it('marks block-anchored threads too, as a single dot for one', async () => {
         await mountEditor({commentThreads: [{id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b2'}]});
 
         const b2 = await poll(() => marker('b2'), 'b2 marker');
 
-        expect(b2.textContent).toBe('');
+        expect(b2.dataset.multiple).toBeUndefined();
         expect(b2.getAttribute('aria-label')).toBe('1 comment');
     });
 
-    it('clicking a marker activates the first thread and requests reveal', async () => {
+    it('clicking a marker toggles its first thread and requests reveal on open', async () => {
         const onRequestRevealComments = vi.fn();
         const {editor} = await mountEditor({
             content: createDocument([dialogue('b1', 'Hello', ['t1'])]),
@@ -253,6 +256,11 @@ describe('comment margin markers', () => {
         await page.elementLocator(await poll(() => marker('b1'), 'b1 marker')).click();
 
         expect(getCommentsState(editor.state).activeThreadId).toBe('t1');
+        expect(onRequestRevealComments).toHaveBeenCalledTimes(1);
+
+        // A second click on the active thread's marker closes it again.
+        await page.elementLocator(await poll(() => marker('b1'), 'b1 marker')).click();
+        expect(getCommentsState(editor.state).activeThreadId).toBeNull();
         expect(onRequestRevealComments).toHaveBeenCalledTimes(1);
     });
 
@@ -304,5 +312,35 @@ describe('comment indicators', () => {
 
         expect(rect.left - railX).toBeGreaterThanOrEqual(4);
         expect(rect.width).toBeLessThanOrEqual(8);
+    });
+});
+
+describe('comment marker placement', () => {
+    const centerY = (rect: DOMRect) => (rect.top + rect.bottom) / 2;
+
+    it('centres the marker on the first text line, not the block box (spacing before)', async () => {
+        const {editor} = await mountEditor({
+            content: createDocument([dialogue('b1', 'Opening line'), scene('s1', 'INT. HALL'), dialogue('b2', 'After')]),
+            commentThreads: [{id: 'ts', status: 'open', anchorKind: 'block', anchorBlockId: 's1'}],
+        });
+        const markerRect = (await poll(() => marker('s1'), 's1 marker')).getBoundingClientRect();
+        const block = findScriptBlockByIdFromState(editor.state, 's1')!;
+        const firstLine = editor.view.coordsAtPos(block.from);
+        const blockRect = (editor.view.nodeDOM(block.pos) as HTMLElement).getBoundingClientRect();
+
+        expect(firstLine.top - blockRect.top).toBeGreaterThan(4);
+        expect(Math.abs(centerY(markerRect) - (firstLine.top + firstLine.bottom) / 2)).toBeLessThanOrEqual(1.5);
+    });
+
+    it('sits midway between the music rail and the scrollbar', async () => {
+        await mountEditor({commentThreads: [{id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1'}]});
+
+        const rect = (await poll(() => marker('b1'), 'b1 marker')).getBoundingClientRect();
+        const canvas = document.querySelector<HTMLElement>('[data-editor-scroll-container="true"]')!;
+        const canvasLeft = canvas.getBoundingClientRect().left;
+        const railX = canvasLeft + resolveMusicRailLeft(canvas) - canvas.scrollLeft;
+        const scrollbarX = canvasLeft + canvas.clientWidth;
+
+        expect(Math.abs((rect.left + rect.right) / 2 - (railX + scrollbarX) / 2)).toBeLessThanOrEqual(1);
     });
 });

@@ -30,6 +30,13 @@
         padding: var(--space-md) var(--space-xl);
     }
 
+    /* Inline actions in dense panels (comment composer). */
+    &.xs {
+        padding: var(--space-xs) var(--space-lg);
+        font-size: var(--font-size-xs);
+        line-height: var(--line-height-normal);
+    }
+
     &.icon {
         flex: 0 0 var(--control-height-md);
         box-sizing: border-box;

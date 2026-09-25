@@ -13,12 +13,24 @@
     border-top: 1px solid var(--color-border-subtle);
 }
 
-.previewStatus {
-    justify-self: center;
+.start {
+    overflow: hidden;
+    justify-self: start;
+    min-width: 0;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.center {
+    display: flex;
+    gap: var(--space-lg);
+    align-items: center;
+    justify-content: center;
     white-space: nowrap;
 }
 
 .previewLink {
+    cursor: pointer;
     display: inline;
     min-height: 0;
     padding: 0;
@@ -45,6 +57,7 @@
     justify-self: end;
     color: inherit;
     text-underline-offset: 2px;
+    white-space: nowrap;
 
     &:hover {
         color: var(--color-text);

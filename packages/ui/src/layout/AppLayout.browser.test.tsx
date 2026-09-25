@@ -2,16 +2,8 @@ import '../../styles/base.css';
 
 import type {ReactNode} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-} from 'vite-plus/test';
-import {
-    page,
-    userEvent,
-} from 'vite-plus/test/browser';
+import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {page, userEvent} from 'vite-plus/test/browser';
 
 import {formControlStyles} from '../molecules/forms/formControlStyles';
 import {AppLayout} from './AppLayout';
@@ -39,11 +31,7 @@ const renderLayout = (children: ReactNode = <div>Script canvas</div>) => {
 
     const root = createRoot(host);
 
-    root.render(
-        <AppLayout>
-            {children}
-        </AppLayout>,
-    );
+    root.render(<AppLayout>{children}</AppLayout>);
     mountedRoots.push(root);
 };
 
@@ -88,20 +76,15 @@ describe('AppLayout', () => {
 
         await waitFor(() => document.querySelector('footer') !== null);
 
-        expect(document.body.textContent).toContain('Made with 💛 in Prague');
+        expect(document.body.textContent).toContain('💛 Stagistic Editor • Public preview');
 
-        const feedback = document.querySelector<HTMLAnchorElement>(
-            'a[href="mailto:feedback@stagistic.com"]',
-        );
-        const explainPreview = document.querySelector<HTMLButtonElement>(
-            'button[aria-label="What does public preview mean?"]',
-        );
+        const feedback = document.querySelector<HTMLAnchorElement>('a[href="https://feedback.stagistic.com"]');
+        const explainPreview = document.querySelector<HTMLButtonElement>('button[aria-label="What does public preview mean?"]');
 
-        expect(feedback?.textContent).toBe('feedback@stagistic.com');
+        expect(feedback?.textContent).toBe('Feedback & bug reports');
+        expect(feedback?.target).toBe('_blank');
         expect(explainPreview?.textContent).toBe('what does it mean?');
-        expect(explainPreview?.parentElement?.textContent).toBe(
-            'Public preview (what does it mean?)',
-        );
+        expect(explainPreview?.parentElement?.textContent).toBe('💛 Stagistic Editor • Public preview (what does it mean?)');
 
         await page.elementLocator(explainPreview!).click();
         await waitFor(() => document.querySelector<HTMLDialogElement>('dialog')?.open === true);
@@ -120,9 +103,7 @@ describe('AppLayout', () => {
         expect(dialogText).toContain('Back up your work regularly.');
         expect(dialogText).toContain('may permanently remove it');
 
-        const closeButton = Array
-            .from(dialog.querySelectorAll('button'))
-            .find(button => button.textContent === 'Close');
+        const closeButton = Array.from(dialog.querySelectorAll('button')).find(button => button.textContent === 'Close');
 
         expect(closeButton).toBeDefined();
 

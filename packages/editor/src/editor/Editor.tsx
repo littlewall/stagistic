@@ -198,10 +198,11 @@ const Editor = ({
                 persistentCharacters,
                 editorStyle,
                 sidebarWidth,
+                pageSpanPx: resolvedSettings.page.widthPx * editorZoom,
                 isLeftSidebarOpen,
                 isRightSidebarOpen,
             }),
-        [editorStyle, isLeftSidebarOpen, isRightSidebarOpen, persistentCharacters, sidebarWidth],
+        [editorStyle, editorZoom, isLeftSidebarOpen, isRightSidebarOpen, persistentCharacters, resolvedSettings.page.widthPx, sidebarWidth],
     );
 
     usePaginationSettings({

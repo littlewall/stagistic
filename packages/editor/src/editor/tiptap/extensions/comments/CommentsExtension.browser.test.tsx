@@ -243,6 +243,37 @@ describe('CommentsExtension', () => {
         expect(callbacks.onAnchorClick).toHaveBeenCalledWith(['t1']);
     });
 
+    it('tints the whole block while its block comment is active or drafted', () => {
+        const {editor} = withComments();
+        const tinted = () => Array.from(editor.view.dom.querySelectorAll<HTMLElement>('[data-comment-block-active]')).map(element => element.textContent);
+
+        editor.commands.setCommentThreads([
+            {id: 't1', status: 'open', anchorKind: 'range', anchorBlockId: null},
+            {id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1'},
+        ]);
+        expect(tinted()).toEqual([]);
+
+        editor.commands.setActiveCommentThread('tb');
+        expect(tinted()).toEqual(['Hello world']);
+
+        // Hovering the block's marker tints lighter, and never over the active tint.
+        const hoveredBlocks = () => editor.view.dom.querySelectorAll('[data-comment-block-hovered]').length;
+
+        editor.commands.setHoveredCommentBlock('b1');
+        expect(hoveredBlocks()).toBe(0);
+        editor.chain().setActiveCommentThread(null).run();
+        expect(tinted()).toEqual([]);
+        expect(hoveredBlocks()).toBe(1);
+        editor.chain().setHoveredCommentBlock(null).setActiveCommentThread('tb').run();
+
+        // A range comment tints only its text, never the block.
+        editor.commands.setActiveCommentThread('t1');
+        expect(tinted()).toEqual([]);
+
+        editor.chain().setActiveCommentThread(null).setTextSelection(3).startCommentDraft().run();
+        expect(tinted()).toHaveLength(1);
+    });
+
     it('keeps a block anchor on the first half when splitting mid-block', () => {
         const {editor} = withComments();
 

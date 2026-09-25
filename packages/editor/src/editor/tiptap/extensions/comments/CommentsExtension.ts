@@ -17,6 +17,7 @@ type CommentsMeta =
     | {type: 'commit'; threadId: string}
     | {type: 'active'; threadId: string | null}
     | {type: 'hovered'; threadId: string | null}
+    | {type: 'hoveredBlock'; blockId: string | null}
     | {type: 'tombstone'; threadId: string; tombstone: CommentTombstone | null};
 
 type CommentsBaseState = Omit<CommentsPluginState, 'anchors' | 'openThreadIdsByBlockId' | 'decorations'>;
@@ -34,10 +35,59 @@ const groupOpenThreadsByBlock = (anchors: ReadonlyMap<string, CommentAnchorLocat
     return grouped;
 };
 
-const buildDecorations = (doc: ProseMirrorNode, state: CommentsBaseState & {anchors: ReadonlyMap<string, CommentAnchorLocation>}) => {
-    // Block anchors and block drafts are indicated by the margin marker only (CommentMarkersOverlay).
+/** Tints the whole block whose content starts at `contentFrom`; hover uses a lighter tint. */
+const blockHighlight = (doc: ProseMirrorNode, contentFrom: number, tone: 'active' | 'hovered' = 'active') => {
+    const $pos = doc.resolve(contentFrom);
+
+    if ($pos.depth === 0) {
+        return null;
+    }
+
+    const blockPos = $pos.before($pos.depth);
+
+    return Decoration.node(blockPos, blockPos + $pos.parent.nodeSize, {
+        class: tone === 'active' ? styles.blockActive : styles.blockHovered,
+        'data-comment-block-active': tone === 'active' ? 'true' : undefined,
+        'data-comment-block-hovered': tone === 'hovered' ? 'true' : undefined,
+    });
+};
+
+const anchorClass = (tone: 'active' | 'hovered' | null) => {
+    if (tone === 'active') {
+        return `${styles.anchor} ${styles.anchorActive}`;
+    }
+
+    return tone === 'hovered' ? `${styles.anchor} ${styles.anchorHovered}` : styles.anchor;
+};
+
+type DecorationInput = CommentsBaseState & {
+    anchors: ReadonlyMap<string, CommentAnchorLocation>;
+    openThreadIdsByBlockId: ReadonlyMap<string, readonly string[]>;
+};
+
+const buildDecorations = (doc: ProseMirrorNode, state: DecorationInput) => {
+    // Active/hovered threads tint what they belong to: the underlined text for range
+    // anchors, the whole block for block anchors. The margin marker marks both.
     const decorations: Decoration[] = [];
-    const highlighted = new Set([state.activeThreadId, state.hoveredThreadId].filter((id): id is string => Boolean(id)));
+    // Hover is a lighter tint than the active thread, which wins when both apply.
+    const hovered = new Set([
+        ...(state.hoveredThreadId ? [state.hoveredThreadId] : []),
+        ...(state.hoveredBlockId ? (state.openThreadIdsByBlockId.get(state.hoveredBlockId) ?? []) : []),
+    ]);
+    const toneOf = (threadId: string) => (threadId === state.activeThreadId ? 'active' : hovered.has(threadId) ? 'hovered' : null);
+
+    [...hovered, ...(state.activeThreadId ? [state.activeThreadId] : [])].forEach(threadId => {
+        const anchor = state.anchors.get(threadId);
+        const tone = toneOf(threadId);
+
+        if (tone && anchor?.kind === 'block' && state.threads.get(threadId)?.status === 'open') {
+            const decoration = blockHighlight(doc, anchor.from, tone);
+
+            if (decoration) {
+                decorations.push(decoration);
+            }
+        }
+    });
 
     doc.descendants((node, pos) => {
         if (!node.isText) {
@@ -53,7 +103,7 @@ const buildDecorations = (doc: ProseMirrorNode, state: CommentsBaseState & {anch
 
             decorations.push(
                 Decoration.inline(pos, pos + node.nodeSize, {
-                    class: highlighted.has(threadId) ? `${styles.anchor} ${styles.anchorActive}` : styles.anchor,
+                    class: anchorClass(toneOf(threadId)),
                     'data-comment-anchor': threadId,
                 }),
             );
@@ -66,17 +116,26 @@ const buildDecorations = (doc: ProseMirrorNode, state: CommentsBaseState & {anch
         decorations.push(Decoration.inline(state.draft.from, state.draft.to, {class: styles.draft}));
     }
 
+    if (state.draft?.kind === 'block') {
+        const decoration = blockHighlight(doc, state.draft.from);
+
+        if (decoration) {
+            decorations.push(decoration);
+        }
+    }
+
     return DecorationSet.create(doc, decorations);
 };
 
 const finalize = (doc: ProseMirrorNode, base: CommentsBaseState): CommentsPluginState => {
     const anchors = buildCommentAnchorIndex(doc, base.threads);
+    const openThreadIdsByBlockId = groupOpenThreadsByBlock(anchors, base.threads);
 
     return {
         ...base,
         anchors,
-        openThreadIdsByBlockId: groupOpenThreadsByBlock(anchors, base.threads),
-        decorations: buildDecorations(doc, {...base, anchors}),
+        openThreadIdsByBlockId,
+        decorations: buildDecorations(doc, {...base, anchors, openThreadIdsByBlockId}),
     };
 };
 
@@ -138,6 +197,8 @@ const applyMeta = (base: CommentsBaseState, meta: CommentsMeta | undefined): Com
             return {...base, activeThreadId: meta.threadId};
         case 'hovered':
             return {...base, hoveredThreadId: meta.threadId};
+        case 'hoveredBlock':
+            return {...base, hoveredBlockId: meta.blockId};
         case 'tombstone': {
             const tombstones = new Map(base.tombstones);
 
@@ -181,6 +242,7 @@ declare module '@tiptap/core' {
             restoreCommentAnchor: (threadId: string) => ReturnType;
             setActiveCommentThread: (threadId: string | null) => ReturnType;
             setHoveredCommentThread: (threadId: string | null) => ReturnType;
+            setHoveredCommentBlock: (blockId: string | null) => ReturnType;
             /** Asks the host to reveal the Comments panel (margin marker click). */
             requestCommentsReveal: () => ReturnType;
         };
@@ -307,6 +369,13 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
 
                     return true;
                 },
+            setHoveredCommentBlock:
+                blockId =>
+                ({tr, dispatch}) => {
+                    dispatch?.(withMeta(tr, {type: 'hoveredBlock', blockId}));
+
+                    return true;
+                },
             requestCommentsReveal:
                 () =>
                 ({dispatch}) => {
@@ -332,6 +401,7 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                             draft: null,
                             activeThreadId: null,
                             hoveredThreadId: null,
+                            hoveredBlockId: null,
                             tombstones: new Map(),
                             mergedBlocks: [],
                         }),
@@ -354,6 +424,7 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                             draft: mapDraft(previous.draft, tr),
                             activeThreadId: previous.activeThreadId,
                             hoveredThreadId: previous.hoveredThreadId,
+                            hoveredBlockId: previous.hoveredBlockId,
                             tombstones: tr.docChanged ? mapTombstones(previous.tombstones, tr) : previous.tombstones,
                             // Only a shrinking block count can be a join; undo/redo never reports.
                             mergedBlocks: isAppended ? [...previous.mergedBlocks, ...detectedMerges] : detectedMerges,

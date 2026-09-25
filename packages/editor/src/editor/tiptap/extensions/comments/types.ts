@@ -50,6 +50,8 @@ export interface CommentsPluginState {
     draft: CommentDraft | null;
     activeThreadId: string | null;
     hoveredThreadId: string | null;
+    /** Block whose margin marker is hovered; lights all of its open threads. */
+    hoveredBlockId: string | null;
     tombstones: ReadonlyMap<string, CommentTombstone>;
     mergedBlocks: readonly CommentBlockMerge[];
     decorations: DecorationSet;

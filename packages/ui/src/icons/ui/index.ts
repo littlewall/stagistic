@@ -20,6 +20,7 @@ export {MusicDoubleNoteIcon} from './MusicDoubleNoteIcon';
 export {PlusIcon} from './PlusIcon';
 export {ScriptIcon} from './ScriptIcon';
 export {SearchIcon} from './SearchIcon';
+export {SearchOptionsIcon} from './SearchOptionsIcon';
 export {SettingsIcon} from './SettingsIcon';
 export {SystemThemeIcon} from './SystemThemeIcon';
 export {TableIcon} from './TableIcon';

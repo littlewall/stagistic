@@ -1,21 +1,15 @@
-import {
-    describe,
-    expect,
-    it,
-} from 'vite-plus/test';
+import {describe, expect, it} from 'vite-plus/test';
 
 import {buildEditorRootStyle} from './buildRootStyle';
 
-const build = (
-    isLeftSidebarOpen: boolean,
-    isRightSidebarOpen: boolean,
-) => buildEditorRootStyle({
-    persistentCharacters: [],
-    editorStyle: {},
-    sidebarWidth: '280px',
-    isLeftSidebarOpen,
-    isRightSidebarOpen,
-}) as Record<string, string>;
+const build = (isLeftSidebarOpen: boolean, isRightSidebarOpen: boolean) =>
+    buildEditorRootStyle({
+        persistentCharacters: [],
+        editorStyle: {},
+        sidebarWidth: '280px',
+        isLeftSidebarOpen,
+        isRightSidebarOpen,
+    }) as Record<string, string>;
 
 describe('buildEditorRootStyle', () => {
     it('defers to the canonical panel width token by default', () => {
@@ -42,5 +36,17 @@ describe('buildEditorRootStyle', () => {
 
         expect(style['--left-sidebar-size']).toBe('0px');
         expect(style['--right-sidebar-size']).toBe('0px');
+    });
+
+    it('grows sidebars only into width the page does not need', () => {
+        const style = buildEditorRootStyle({
+            persistentCharacters: [],
+            editorStyle: {},
+            pageSpanPx: 793.7,
+            isLeftSidebarOpen: true,
+            isRightSidebarOpen: true,
+        }) as Record<string, string>;
+
+        expect(style['--editor-sidebar-width']).toBe('clamp(var(--sidebar-width), calc((100vw - 794px - 2 * var(--space-3xl)) / 2), var(--sidebar-max-width))');
     });
 });
