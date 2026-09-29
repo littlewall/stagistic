@@ -65,9 +65,6 @@ importers:
       '@tauri-apps/api':
         specifier: ^3.0.0-alpha.0
         version: 3.0.0-alpha.0
-      '@tauri-apps/plugin-dialog':
-        specifier: ^3.0.0-alpha.0
-        version: 3.0.0-alpha.0
       '@tauri-apps/plugin-fs':
         specifier: ^3.0.0-alpha.0
         version: 3.0.0-alpha.0
@@ -397,9 +394,6 @@ importers:
 
   packages/export:
     dependencies:
-      '@pdf-lib/fontkit':
-        specifier: ^1.1.1
-        version: 1.1.1
       '@stagistic/script':
         specifier: workspace:*
         version: link:../script
@@ -2487,9 +2481,6 @@ packages:
     resolution: {integrity: sha512-tmmZ3lQxAe/k/+rNnXQRawJ4NjxO2hqiOLTHvWchtGZULp4RyFeh6aU4XdOYBFe2KE1oShQTv4AblOs2iOrNnQ==}
     engines: {node: '>= 10.0.0'}
 
-  '@pdf-lib/fontkit@1.1.1':
-    resolution: {integrity: sha512-KjMd7grNapIWS/Dm0gvfHEilSyAmeLvrEGVcqLGi0VYebuqqzTbgF29efCx7tvx+IEbG3zQciRSWl3GkUSvjZg==}
-
   '@pdf-lib/standard-fonts@1.0.0':
     resolution: {integrity: sha512-hU30BK9IUN/su0Mn9VdlVKsWBS6GyhVfqjwl1FjZN4TxP6cCw0jP2w7V3Hf5uX7M0AZJ16vey9yE0ny7Sa59ZA==}
 
@@ -2796,9 +2787,6 @@ packages:
     resolution: {integrity: sha512-7KSBFGBZk07THOp18HtMIntgxyYQNMDNcm0EEcmRmGTdcUS7X0BkrWDxtw8PRDMA9RZ1oYZKcjJjFyA8Lwr6dw==}
     engines: {node: '>= 10'}
     hasBin: true
-
-  '@tauri-apps/plugin-dialog@3.0.0-alpha.0':
-    resolution: {integrity: sha512-ZnHHbwYlB/1nJqs0gZdi7eHumo3mArCSakx/7T1pqEIkqmXV4PHC+dSZLzsc20+A/HNgIQqa2uR/+yaXKWDzbw==}
 
   '@tauri-apps/plugin-fs@3.0.0-alpha.0':
     resolution: {integrity: sha512-PlpcBFbWNZZrOvd0pUJbdTGaDFXuFVtW5tmF2D2w7mf/KwRI0w7jzrR1b7Sy6fs0lOR5zI/sXQHdt7ExKoEMcQ==}
@@ -4898,10 +4886,6 @@ packages:
   sax@1.3.0:
     resolution: {integrity: sha512-0s+oAmw9zLl1V1cS9BtZN7JAd0cW5e0QH4W3LWEK6a4LaLEA2OTpGYWDY+6XasBLtz6wkm3u1xRw95mRuJ59WA==}
 
-  sax@1.6.0:
-    resolution: {integrity: sha512-6R3J5M4AcbtLUdZmRv2SygeVaM7IhrLXu9BmnOGmmACak8fiUtOsYNWUS4uK7upbmHIBbLBeFeI//477BKLBzA==}
-    engines: {node: '>=11.0.0'}
-
   sax@1.6.1:
     resolution: {integrity: sha512-42tBVwLWnaQvW5zc4HbZrTuWccECCZfBi92FDuwtqxasH+JbPB3/FOKb1m222K42R4WxuxzzMsTswfzgtSu64Q==}
     engines: {node: '>=11.0.0'}
@@ -6869,10 +6853,6 @@ snapshots:
       '@parcel/watcher-win32-x64': 2.5.6
     optional: true
 
-  '@pdf-lib/fontkit@1.1.1':
-    dependencies:
-      pako: 1.0.11
-
   '@pdf-lib/standard-fonts@1.0.0':
     dependencies:
       pako: 1.0.11
@@ -7105,10 +7085,6 @@ snapshots:
       '@tauri-apps/cli-win32-arm64-msvc': 3.0.0-alpha.1
       '@tauri-apps/cli-win32-ia32-msvc': 3.0.0-alpha.1
       '@tauri-apps/cli-win32-x64-msvc': 3.0.0-alpha.1
-
-  '@tauri-apps/plugin-dialog@3.0.0-alpha.0':
-    dependencies:
-      '@tauri-apps/api': 2.11.1
 
   '@tauri-apps/plugin-fs@3.0.0-alpha.0':
     dependencies:
@@ -8625,7 +8601,7 @@ snapshots:
   needle@3.5.0:
     dependencies:
       iconv-lite: 0.6.3
-      sax: 1.6.0
+      sax: 1.6.1
     optional: true
 
   neotraverse@1.0.1: {}
@@ -9237,9 +9213,6 @@ snapshots:
       '@bruits/satteri-win32-x64-msvc': 0.10.5
 
   sax@1.3.0:
-    optional: true
-
-  sax@1.6.0:
     optional: true
 
   sax@1.6.1: {}

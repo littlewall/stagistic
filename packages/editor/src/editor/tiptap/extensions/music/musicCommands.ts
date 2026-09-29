@@ -15,11 +15,7 @@ import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {EditorState, Transaction} from '@tiptap/pm/state';
 
 import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
-import {
-    type ActiveScriptBlock,
-    findScriptBlockByIdFromState,
-    getActiveScriptBlockFromState,
-} from '../../scriptCore';
+import {type ActiveScriptBlock, findScriptBlockByIdFromState, getActiveScriptBlockFromState} from '../../scriptCore';
 import {findMusicAtomRange} from './musicOutCommands';
 
 const STAGE_DIRECTION_NODE_TYPE = 'stageDirection';
@@ -48,8 +44,7 @@ const placeCaretAtEnd = (element: HTMLElement) => {
 
 export const focusMusicTitle = (editorDom: HTMLElement, blockId: string) => {
     const focus = () => {
-        const block = Array.from(editorDom.querySelectorAll<HTMLElement>('[data-id]'))
-            .find(candidate => candidate.dataset.id === blockId);
+        const block = Array.from(editorDom.querySelectorAll<HTMLElement>('[data-id]')).find(candidate => candidate.dataset.id === blockId);
         const input = block?.querySelector<HTMLElement>('[data-music-title-input="start"]');
 
         if (!input) {
@@ -72,40 +67,14 @@ export const focusMusicTitle = (editorDom: HTMLElement, blockId: string) => {
  * block id (right-click / compose target) or, when null, the active block.
  * Returns null when the target is not a stage direction.
  */
-export const resolveMusicTargetBlock = (
-    state: EditorState,
-    blockId?: string | null,
-): ActiveScriptBlock | null => {
-    const block = blockId
-        ? findScriptBlockByIdFromState(state, blockId)
-        : getActiveScriptBlockFromState(state);
+export const resolveMusicTargetBlock = (state: EditorState, blockId?: string | null): ActiveScriptBlock | null => {
+    const block = blockId ? findScriptBlockByIdFromState(state, blockId) : getActiveScriptBlockFromState(state);
 
     return block && block.blockType === STAGE_DIRECTION_NODE_TYPE ? block : null;
 };
 
-export const resolveScriptTargetBlock = (
-    state: EditorState,
-    blockId?: string | null,
-): ActiveScriptBlock | null => {
-    return blockId
-        ? findScriptBlockByIdFromState(state, blockId)
-        : getActiveScriptBlockFromState(state);
-};
-
-/**
- * True when the block already holds a music atom. A stage direction carries at
- * most one music marker — a start OR an out, never both (§4.1).
- */
-export const blockHasMusicAtom = (block: ActiveScriptBlock): boolean => {
-    let found = false;
-
-    block.node.forEach(child => {
-        if (child.type.name === MUSIC_START_NODE_NAME || child.type.name === MUSIC_OUT_NODE_NAME) {
-            found = true;
-        }
-    });
-
-    return found;
+export const resolveScriptTargetBlock = (state: EditorState, blockId?: string | null): ActiveScriptBlock | null => {
+    return blockId ? findScriptBlockByIdFromState(state, blockId) : getActiveScriptBlockFromState(state);
 };
 
 export const blockHasMusicStart = (block: ActiveScriptBlock): boolean => {
@@ -119,9 +88,9 @@ export const buildInsertMusicStart = (
     title: string,
     mode: MusicMode,
     options: {
-        musicId?: string,
-        kind?: string | null,
-        isDraft?: boolean,
+        musicId?: string;
+        kind?: string | null;
+        isDraft?: boolean;
     } = {},
 ): Transaction => {
     const node = state.schema.nodes[MUSIC_START_NODE_NAME].create({
@@ -135,10 +104,7 @@ export const buildInsertMusicStart = (
     return state.tr.insert(block.to, node);
 };
 
-export const resolveNewMusicNumber = (
-    snapshot: ScriptBlockIndexSnapshot,
-    blockId: string,
-): string | null => {
+export const resolveNewMusicNumber = (snapshot: ScriptBlockIndexSnapshot, blockId: string): string | null => {
     const blocksById = new Map(snapshot.blocks.map(block => [block.blockId, block] as const));
     const targetBlock = blocksById.get(blockId);
 
@@ -149,8 +115,8 @@ export const resolveNewMusicNumber = (
     const sceneMusic = snapshot.music.filter(music => {
         return blocksById.get(music.startBlockId)?.sceneBlockId === targetBlock.sceneBlockId;
     });
-    const sceneNumber = sceneMusic[0]?.sceneNumber
-        ?? snapshot.blocks.filter(block => block.blockType === 'scene' && block.orderNo <= targetBlock.orderNo).length;
+    const sceneNumber =
+        sceneMusic[0]?.sceneNumber ?? snapshot.blocks.filter(block => block.blockType === 'scene' && block.orderNo <= targetBlock.orderNo).length;
     const indexInScene = sceneMusic.filter(music => {
         return (blocksById.get(music.startBlockId)?.orderNo ?? -1) < targetBlock.orderNo;
     }).length;
@@ -167,11 +133,7 @@ export const resolveNewMusicNumber = (
  * later in the doc (§3.1 pairing), both atoms are removed in one
  * transaction so a single undo restores both.
  */
-export const buildDeleteMusicStart = (
-    state: EditorState,
-    pos: number,
-    node: ProseMirrorNode,
-): Transaction => {
+export const buildDeleteMusicStart = (state: EditorState, pos: number, node: ProseMirrorNode): Transaction => {
     const musicId = node.attrs[MUSIC_ID_ATTR] as string;
     const snapshot = buildIndexSnapshotFromPmDoc(state.doc);
     const music = snapshot.music.find(candidate => candidate.musicId === musicId);
@@ -189,12 +151,7 @@ export const buildDeleteMusicStart = (
     return tr.delete(pos, pos + node.nodeSize);
 };
 
-export const buildUpdateMusicMode = (
-    state: EditorState,
-    pos: number,
-    node: ProseMirrorNode,
-    mode: MusicMode,
-): Transaction => {
+export const buildUpdateMusicMode = (state: EditorState, pos: number, node: ProseMirrorNode, mode: MusicMode): Transaction => {
     const currentMode = node.attrs[MUSIC_MODE_ATTR] === 'hit' ? 'hit' : 'open';
 
     if (currentMode !== 'open' || mode !== 'hit') {

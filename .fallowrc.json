@@ -1,0 +1,32 @@
+{
+    "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
+    "entry": [
+        "src/index.{ts,tsx,js,jsx}",
+        "src/main.{ts,tsx,js,jsx}",
+        "**/vitest.browser*.config.ts",
+        "scripts/*.mjs",
+        "packages/db/scripts/*.mjs",
+        "demos/feature-loops/src/run*.ts"
+    ],
+    "dynamicallyLoaded": ["apps/landing/src/pages/editor/syntax.module.css", "packages/ui/src/dialogs/dialogForm.module.css"],
+    "ignoreExports": [
+        {
+            "file": "**/*.module.css",
+            "exports": ["ProseMirror", "ProseMirror-focused", "ProseMirror-separator", "ProseMirror-trailingBreak", "node-musicOut", "platform-macos"]
+        },
+        {
+            "file": "packages/ui/src/molecules/forms/formControlStyles.ts",
+            "exports": ["formControlStyles"]
+        }
+    ],
+    "ignorePatterns": ["graphify-out/**", "tmp/**", "apps/desktop/src-tauri/target/**"],
+    "ignoreDependencies": ["@moonrepo/cli", "@tauri-apps/cli", "lightningcss", "vite-plus"],
+    "ignoreUnresolvedImports": ["@pglite-data?url", "@pglite-wasm?url"],
+    "workspaces": {
+        "patterns": ["apps/*", "demos/*", "packages/*"]
+    },
+    "duplicates": {
+        "minOccurrences": 3
+    },
+    "rules": {}
+}

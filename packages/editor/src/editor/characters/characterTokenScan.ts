@@ -65,7 +65,7 @@ export const getActiveTokenIndex = (line: string, offset: number) => {
     return tokens.length - 1;
 };
 
-export const resolveCharacterBlockId = (rawBlockId: unknown, blockPos: number) => {
+const resolveCharacterBlockId = (rawBlockId: unknown, blockPos: number) => {
     if (typeof rawBlockId !== 'string' || rawBlockId.trim().length === 0) {
         return `block-pos:${blockPos}`;
     }

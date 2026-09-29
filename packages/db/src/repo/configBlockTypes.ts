@@ -5,17 +5,12 @@ import {
     type BlockCasing,
     type BlockShortcut,
     type BlockTextAlign,
-    isScriptBlockType,
     resolveScriptBlockType,
     type ScriptBlockType,
 } from '@stagistic/script';
 
 export const normalizeSettingsBlockType = (value: unknown): ScriptBlockType | null => {
     return typeof value === 'string' ? resolveScriptBlockType(value) : null;
-};
-
-export const isKnownBlockType = (value: unknown): value is ScriptBlockType => {
-    return isScriptBlockType(value);
 };
 
 export const isBlockTextAlign = (value: unknown): value is BlockTextAlign => {

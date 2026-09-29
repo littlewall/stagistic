@@ -1,126 +1,40 @@
 import * as dbQueries from '../../queries';
 import type {CharacterMutationDeps} from './mutationDeps';
-import {
-    buildCharacterVocalRangePayload,
-    buildCharacterVoiceTypePayload,
-} from './outboxPayloads';
+import {buildCharacterVocalRangePayload, buildCharacterVoiceTypePayload} from './outboxPayloads';
 import type {CharacterHandlers} from './types';
+import {createCharacterAttributeUpdater} from './updateCharacterAttribute';
 
-export const createVocalRangeMutations = ({
-    getDb,
-    recordOutbox,
-    syncDb,
-}: CharacterMutationDeps): Pick<
-    CharacterHandlers,
-    'setScriptCharacterVoiceType' | 'setScriptCharacterVocalRange'
-> => {
-    const setScriptCharacterVoiceType: CharacterHandlers['setScriptCharacterVoiceType'] = async (
-        scriptId,
-        characterId,
-        voiceType,
-    ) => {
-        if (!characterId) {
-            return null;
-        }
+export const createVocalRangeMutations = (
+    deps: CharacterMutationDeps,
+): Pick<CharacterHandlers, 'setScriptCharacterVoiceType' | 'setScriptCharacterVocalRange'> => {
+    const updateCharacterAttribute = createCharacterAttributeUpdater(deps);
 
-        const db = await getDb();
-        const now = Date.now();
-        const currentCharacter = await dbQueries.getScriptCharacterById(db, {
-            scriptId,
-            characterId,
+    const setScriptCharacterVoiceType: CharacterHandlers['setScriptCharacterVoiceType'] = (scriptId, characterId, voiceType) =>
+        updateCharacterAttribute(scriptId, characterId, {
+            opType: 'character.voiceType',
+            update: (tx, updatedAt) =>
+                dbQueries.updateScriptCharacterVoiceType(tx, {
+                    scriptId,
+                    characterId,
+                    voiceType,
+                    updatedAt,
+                }),
+            buildPayload: now => buildCharacterVoiceTypePayload(scriptId, characterId, voiceType, now),
         });
 
-        if (!currentCharacter) {
-            return null;
-        }
-
-        await db.transaction(async tx => {
-            await dbQueries.updateScriptCharacterVoiceType(tx, {
-                scriptId,
-                characterId,
-                voiceType,
-                updatedAt: now,
-            });
-            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `character:${characterId}`,
-                opType: 'character.voiceType',
-                occurredAt: now,
-                payloadJson: buildCharacterVoiceTypePayload(scriptId, characterId, voiceType, now),
-            }, tx);
-        });
-
-        /*
-         * Voice type is edited in the sidebar, which never mutates editor content,
-         * so no content autosave follows to flush PGlite. Flush explicitly here or
-         * the value is lost on refresh.
-         */
-        await syncDb();
-
-        return dbQueries.getScriptCharacterById(db, {
-            scriptId,
-            characterId,
-        });
-    };
-
-    const setScriptCharacterVocalRange: CharacterHandlers['setScriptCharacterVocalRange'] = async (
-        scriptId,
-        characterId,
-        vocalRangeLow,
-        vocalRangeHigh,
-    ) => {
-        if (!characterId) {
-            return null;
-        }
-
-        const db = await getDb();
-        const now = Date.now();
-        const currentCharacter = await dbQueries.getScriptCharacterById(db, {
-            scriptId,
-            characterId,
-        });
-
-        if (!currentCharacter) {
-            return null;
-        }
-
-        await db.transaction(async tx => {
-            await dbQueries.updateScriptCharacterVocalRange(tx, {
-                scriptId,
-                characterId,
-                vocalRangeLow,
-                vocalRangeHigh,
-                updatedAt: now,
-            });
-            await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
-            await recordOutbox({
-                scriptId,
-                entityKey: `character:${characterId}`,
-                opType: 'character.vocalRange',
-                occurredAt: now,
-                payloadJson: buildCharacterVocalRangePayload(
+    const setScriptCharacterVocalRange: CharacterHandlers['setScriptCharacterVocalRange'] = (scriptId, characterId, vocalRangeLow, vocalRangeHigh) =>
+        updateCharacterAttribute(scriptId, characterId, {
+            opType: 'character.vocalRange',
+            update: (tx, updatedAt) =>
+                dbQueries.updateScriptCharacterVocalRange(tx, {
                     scriptId,
                     characterId,
                     vocalRangeLow,
                     vocalRangeHigh,
-                    now,
-                ),
-            }, tx);
+                    updatedAt,
+                }),
+            buildPayload: now => buildCharacterVocalRangePayload(scriptId, characterId, vocalRangeLow, vocalRangeHigh, now),
         });
-
-        /*
-         * Vocal range is edited in the sidebar, which never mutates editor content,
-         * so no content autosave follows to flush PGlite. Flush explicitly here or
-         * the value is lost on refresh.
-         */
-        await syncDb();
-
-        return dbQueries.getScriptCharacterById(db, {
-            scriptId,
-            characterId,
-        });
-    };
 
     return {
         setScriptCharacterVoiceType,

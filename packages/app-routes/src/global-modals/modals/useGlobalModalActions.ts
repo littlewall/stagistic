@@ -3,7 +3,7 @@ import {useCallback, useMemo, useState} from 'react';
 import type {GlobalModalActions, ScriptImportFile, ScriptToDelete, ScriptToDuplicate, ScriptToRename, UseGlobalModalActionsArgs} from './globalModalTypes';
 import {useGlobalModalMutations} from './useGlobalModalMutations';
 
-export type {ScriptImportFile, ScriptToDelete, ScriptToDuplicate, ScriptToRename} from './globalModalTypes';
+export type {ScriptToDelete, ScriptToDuplicate, ScriptToRename} from './globalModalTypes';
 
 export const useGlobalModalActions = ({scriptActions, repository, saveTitlePage, navigation, notifications}: UseGlobalModalActionsArgs): GlobalModalActions => {
     const {navigate} = navigation;

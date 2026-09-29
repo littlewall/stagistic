@@ -6,7 +6,8 @@ export default defineConfig({
     bracketSpacing: false,
     endOfLine: 'lf',
     experimentalOperatorPosition: 'end',
-    ignorePatterns: ['**/*.d.ts', '**/*.d.mts', '**/build/**', '**/dist/**'],
+    // migrations.compiled.ts is generated; db:db-check-migrations compares it byte-for-byte.
+    ignorePatterns: ['**/*.d.ts', '**/*.d.mts', '**/build/**', '**/dist/**', 'packages/db/src/migrations.compiled.ts'],
     insertFinalNewline: true,
     jsxSingleQuote: false,
     objectWrap: 'preserve',

@@ -15,12 +15,6 @@
     box-shadow: var(--shadow-popover);
 }
 
-.empty {
-    padding: var(--space-sm) var(--space-md);
-    font-size: var(--font-size-sm);
-    color: var(--color-text-muted);
-}
-
 .item {
     cursor: pointer;
     display: grid;

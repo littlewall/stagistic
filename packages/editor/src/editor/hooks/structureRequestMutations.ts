@@ -1,15 +1,8 @@
-import {
-    buildScriptBlockIndex,
-    type ScriptDocument,
-    type ScriptNode,
-} from '@stagistic/script';
+import {buildScriptBlockIndex, type ScriptDocument, type ScriptNode} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import type {MutableRefObject} from 'react';
 
-import type {
-    EditorIndexSnapshot,
-    EditorValueChangeMeta,
-} from '../contracts';
+import type {EditorIndexSnapshot, EditorValueChangeMeta} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
 import {PAGINATION_CONTROL_META_KEY} from '../tiptap/extensions/pagination/plugin/createPaginationPlugin';
 import {buildSceneReorderTransaction} from './sceneReorder';
@@ -19,12 +12,12 @@ let paginationRecalcToken = 0;
 const nextPaginationRecalcToken = () => ++paginationRecalcToken;
 
 export interface CommitContext {
-    editor: TiptapEditor,
-    setLatestValue: (value: ScriptDocument, revision?: number) => void,
-    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
-    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
-    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
-    revisionRef: MutableRefObject<number>,
+    editor: TiptapEditor;
+    setLatestValue: (value: ScriptDocument, revision?: number) => void;
+    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>;
+    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>;
+    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void;
+    revisionRef: MutableRefObject<number>;
 }
 
 export {
@@ -32,16 +25,11 @@ export {
     buildDeleteActContent,
     buildDeleteSceneHeadingContent,
     buildInsertActContent,
-    insertActBlockBeforeId,
-    removeActBlockById,
-    removeSceneBlockById,
     setPlainTextContent,
 } from './blockMutations';
 
 const commitDocument = (
-    {
-        editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef,
-    }: CommitContext,
+    {editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef}: CommitContext,
     nextContent: ScriptNode[],
     currentDocAttrs: ScriptDocument['attrs'],
 ) => {
@@ -52,17 +40,9 @@ const commitDocument = (
     };
 
     editor.commands.setContent(nextDocument, {emitUpdate: false});
-    editor.view.dispatch(
-        editor.state.tr
-            .setDocAttribute('settings', currentDocAttrs?.settings ?? null)
-            .setMeta('preventUpdate', true),
-    );
+    editor.view.dispatch(editor.state.tr.setDocAttribute('settings', currentDocAttrs?.settings ?? null).setMeta('preventUpdate', true));
 
-    editor.view.dispatch(
-        editor.state.tr
-            .setMeta('preventUpdate', true)
-            .setMeta(PAGINATION_CONTROL_META_KEY, {forceRecalcToken: nextPaginationRecalcToken()}),
-    );
+    editor.view.dispatch(editor.state.tr.setMeta('preventUpdate', true).setMeta(PAGINATION_CONTROL_META_KEY, {forceRecalcToken: nextPaginationRecalcToken()}));
 
     const savedValue = stripScriptSettings(nextDocument);
 
@@ -97,9 +77,7 @@ export const tryCommitSceneReorder = (
     didChange: boolean,
     currentDocAttrs: ScriptDocument['attrs'],
 ) => {
-    const {
-        editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef,
-    } = ctx;
+    const {editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef} = ctx;
 
     if (!didChange || !Array.isArray(nextContent)) {
         return;
@@ -122,9 +100,7 @@ export const tryCommitSceneReorder = (
         editor.view.dispatch(surgicalTr);
 
         editor.view.dispatch(
-            editor.state.tr
-                .setMeta('preventUpdate', true)
-                .setMeta(PAGINATION_CONTROL_META_KEY, {forceRecalcToken: nextPaginationRecalcToken()}),
+            editor.state.tr.setMeta('preventUpdate', true).setMeta(PAGINATION_CONTROL_META_KEY, {forceRecalcToken: nextPaginationRecalcToken()}),
         );
 
         setLatestValue(savedValue, revision);
@@ -155,11 +131,7 @@ export const tryCommitSceneReorder = (
     };
 
     editor.commands.setContent(nextDocument, {emitUpdate: false});
-    editor.view.dispatch(
-        editor.state.tr
-            .setDocAttribute('settings', currentDocAttrs?.settings ?? null)
-            .setMeta('preventUpdate', true),
-    );
+    editor.view.dispatch(editor.state.tr.setDocAttribute('settings', currentDocAttrs?.settings ?? null).setMeta('preventUpdate', true));
 
     setLatestValue(savedValue, revision);
     onValueChangeRef.current?.(savedValue, {
@@ -177,12 +149,7 @@ export const tryCommitSceneReorder = (
     });
 };
 
-export const tryCommitDocument = (
-    ctx: CommitContext,
-    nextContent: ScriptNode[] | undefined,
-    didChange: boolean,
-    currentDocAttrs: ScriptDocument['attrs'],
-) => {
+export const tryCommitDocument = (ctx: CommitContext, nextContent: ScriptNode[] | undefined, didChange: boolean, currentDocAttrs: ScriptDocument['attrs']) => {
     if (!didChange || !Array.isArray(nextContent)) {
         return;
     }

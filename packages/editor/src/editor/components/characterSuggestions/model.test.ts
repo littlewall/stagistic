@@ -329,7 +329,7 @@ describe('computeCharacterSuggestions', () => {
         }
 
         const from = view.state.selection.from;
-        const handled = handleTextInput(view, from, from, 'J', () => view.state.tr);
+        const handled = handleTextInput.call(view.state.plugins[0], view, from, from, 'J', () => view.state.tr);
 
         expect(handled).toBe(true);
         expect(getCharacterTagComposeFromState(view.state)?.query).toBe('J');
@@ -399,7 +399,7 @@ describe('computeCharacterSuggestions', () => {
         }
 
         const from = view.state.selection.from;
-        const handled = handleTextInput(view, from, from, 'J', () => view.state.tr);
+        const handled = handleTextInput.call(view.state.plugins[0], view, from, from, 'J', () => view.state.tr);
 
         expect(handled).toBe(true);
         expect(getCharacterTagComposeFromState(view.state)?.query).toBe('J');

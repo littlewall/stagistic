@@ -24,7 +24,7 @@ const getNodeTextContent = (value: {textContent?: string | null}) => {
     return value.textContent ?? '';
 };
 
-export const findCanonicalKeyForCharacterId = (editor: Editor, characterId: string, fallbackOldName?: string): string | null => {
+const findCanonicalKeyForCharacterId = (editor: Editor, characterId: string, fallbackOldName?: string): string | null => {
     const {state} = editor;
     let canonicalOldKey: string | null = null;
 

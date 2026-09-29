@@ -6,15 +6,9 @@ import {PluginKey} from '@tiptap/pm/state';
 
 import {getActiveScriptBlockFromState} from '../../scriptCore';
 import {STAGE_DIRECTION_BLOCK_TYPE} from './constants';
-import {
-    charAt,
-    isCharacterTagMarkedAt,
-} from './markRanges';
+import {charAt, isCharacterTagMarkedAt} from './markRanges';
 import {stripLeadingPlaceholder} from './text';
-import type {
-    CharacterTagComposeRawState,
-    CharacterTagComposeState,
-} from './types';
+import type {CharacterTagComposeRawState, CharacterTagComposeState} from './types';
 
 export const characterTagComposeKey = new PluginKey<CharacterTagComposeRawState | null>('character-tag-compose');
 
@@ -42,7 +36,9 @@ export const getCharacterTagComposeFromState = (state: EditorState): CharacterTa
     const query = stripLeadingPlaceholder(text);
 
     return {
-        from, to, query,
+        from,
+        to,
+        query,
     };
 };
 
@@ -57,13 +53,13 @@ const getComposeBlock = (state: EditorState): ComposeBlock | null => {
 const isWordBoundaryBefore = (state: EditorState, block: ComposeBlock, from: number): boolean => {
     const charBefore = from > block.from ? charAt(state, from - 1) : '';
 
-    return charBefore.length === 0 || (/\s/).test(charBefore);
+    return charBefore.length === 0 || /\s/.test(charBefore);
 };
 
 const isWordBoundaryAfter = (state: EditorState, block: ComposeBlock, from: number): boolean => {
     const charAfter = from < block.to ? charAt(state, from) : '';
 
-    return charAfter.length === 0 || (/\s/).test(charAfter);
+    return charAfter.length === 0 || /\s/.test(charAfter);
 };
 
 const isAtCharacterTagRangeStart = (state: EditorState, from: number, markType: MarkType): boolean => {
@@ -72,9 +68,12 @@ const isAtCharacterTagRangeStart = (state: EditorState, from: number, markType: 
     return range?.from === from;
 };
 
-export const getOpenComposeOptions = (state: EditorState, from: number): {
-    insertLeadingSpace: boolean,
-    insertTrailingSpace: boolean,
+export const getOpenComposeOptions = (
+    state: EditorState,
+    from: number,
+): {
+    insertLeadingSpace: boolean;
+    insertTrailingSpace: boolean;
 } | null => {
     if (!state.selection.empty) {
         return null;
@@ -137,8 +136,4 @@ export const detectCompose = (state: EditorState): CharacterTagComposeRawState |
     }
 
     return {from};
-};
-
-export const canOpenCompose = (state: EditorState, from: number): boolean => {
-    return getOpenComposeOptions(state, from) !== null;
 };

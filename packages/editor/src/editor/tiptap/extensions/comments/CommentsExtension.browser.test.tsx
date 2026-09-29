@@ -10,7 +10,8 @@ import {Plugin} from '@tiptap/pm/state';
 import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
 
 import {CommentAnchorMark} from '../../marks';
-import {SCRIPT_BLOCK_NODE_NAMES, ScriptBlockNodes} from '../../nodes';
+import {ScriptBlockNodes} from '../../nodes';
+import {SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
 import {DocumentWithSettings} from '../DocumentExtension';
 import {CommentsExtension, getCommentsState} from './CommentsExtension';
 import type {CommentsExtensionCallbacks} from './types';

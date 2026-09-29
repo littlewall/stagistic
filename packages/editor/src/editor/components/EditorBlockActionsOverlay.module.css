@@ -311,12 +311,6 @@
     white-space: nowrap;
 }
 
-.menuSeparator {
-    height: 1px;
-    margin: var(--space-sm) var(--space-md);
-    background: var(--color-border);
-}
-
 .menuItemCaret {
     justify-self: end;
     margin-left: auto;

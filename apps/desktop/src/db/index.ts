@@ -1,4 +1,4 @@
-import {createPgliteBootstrap, type DbBootstrapStep, type DbBootstrapUpdate, type DbDumpCompression, type LocalDb} from '@stagistic/db/pglite';
+import {createPgliteBootstrap} from '@stagistic/db/pglite';
 
 // Live store lives in IndexedDB (OPFS is unreliable in macOS WKWebView —
 // `createSyncAccessHandle` fails with "Invalid platform file handle"). Eviction
@@ -15,7 +15,6 @@ const bootstrap = createPgliteBootstrap({
     workerFactory: () => new Worker(new URL('./pglite.worker.ts', import.meta.url), {type: 'module'}),
 });
 
-export {type DbBootstrapStep, type DbBootstrapUpdate, type DbDumpCompression, type LocalDb};
 export const getLocalDb = bootstrap.getLocalDb;
 export const syncToFs = bootstrap.syncToFs;
 export const prepareLocalDbWithProgress = bootstrap.prepareLocalDbWithProgress;

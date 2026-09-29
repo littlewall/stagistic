@@ -1,9 +1,5 @@
 import {Extension} from '@tiptap/core';
-import {
-    type EditorState,
-    Plugin,
-    PluginKey,
-} from '@tiptap/pm/state';
+import {type EditorState, Plugin, PluginKey} from '@tiptap/pm/state';
 import {DecorationSet} from '@tiptap/pm/view';
 
 import type {PersistentCharacterRef} from '../../contracts';
@@ -12,9 +8,7 @@ import {
     incrementCharacterRuntimeRebuildCount,
     incrementStructureRuntimeRebuildCount,
 } from '../../perf/editorPerfMetrics';
-import {
-    buildCharacterRuntime,
-} from '../../runtime/buildCharacterRuntime';
+import {buildCharacterRuntime} from '../../runtime/buildCharacterRuntime';
 import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
 import {buildStructureRuntime} from '../../runtime/buildStructureRuntime';
 import type {EditorRuntimeState} from '../../runtime/editorRuntimeTypes';
@@ -25,39 +19,38 @@ import {
     transactionTouchesMusic,
     transactionTouchesStructureBlocks,
 } from '../../runtime/transactionGuards';
-import {
-    type BlockNodeType,
-    getActiveScriptBlockFromState,
-} from '../scriptCore';
+import {type BlockNodeType, getActiveScriptBlockFromState} from '../scriptCore';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         editorRuntime: {
-            refreshCharacterTagDecorations: () => ReturnType,
-        },
+            refreshCharacterTagDecorations: () => ReturnType;
+        };
     }
 }
 
 interface EditorRuntimeOptions {
-    characterColorSaturation?: number,
-    colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
-    rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>},
-    persistentCharactersRef?: {current: readonly PersistentCharacterRef[]},
+    characterColorSaturation?: number;
+    colorByCharacterIdRef?: {current: ReadonlyMap<string, string>};
+    rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>};
+    persistentCharactersRef?: {current: readonly PersistentCharacterRef[]};
     characterTagClassNames?: {
-        tag: string,
-        separator: string,
-    },
+        tag: string;
+        separator: string;
+    };
 }
 
 const EMPTY_DECORATIONS = DecorationSet.empty;
 
-export const editorRuntimeKey = new PluginKey<EditorRuntimeState>('editor-runtime');
+const editorRuntimeKey = new PluginKey<EditorRuntimeState>('editor-runtime');
 
 const EDITOR_RUNTIME_REFRESH_META_KEY = 'editor-runtime-refresh';
 
-const resolveActiveBlock = (state: EditorState): {
-    activeBlockId: string | null,
-    activeBlockType: BlockNodeType | null,
+const resolveActiveBlock = (
+    state: EditorState,
+): {
+    activeBlockId: string | null;
+    activeBlockType: BlockNodeType | null;
 } => {
     const activeBlock = getActiveScriptBlockFromState(state);
 
@@ -67,10 +60,7 @@ const resolveActiveBlock = (state: EditorState): {
     };
 };
 
-const buildCharacterState = (
-    state: EditorState,
-    options: EditorRuntimeOptions,
-) => {
+const buildCharacterState = (state: EditorState, options: EditorRuntimeOptions) => {
     incrementCharacterRuntimeRebuildCount();
 
     const nextRuntime = buildCharacterRuntime({
@@ -88,10 +78,7 @@ const buildCharacterState = (
     return nextRuntime;
 };
 
-const createInitialState = (
-    state: EditorState,
-    options: EditorRuntimeOptions,
-): EditorRuntimeState => {
+const createInitialState = (state: EditorState, options: EditorRuntimeOptions): EditorRuntimeState => {
     const characterState = buildCharacterState(state, options);
     const activeBlock = resolveActiveBlock(state);
 
@@ -127,15 +114,17 @@ export const EditorRuntimeExtension = Extension.create<EditorRuntimeOptions>({
 
     addCommands() {
         return {
-            refreshCharacterTagDecorations: () => ({state, dispatch}) => {
-                if (!dispatch) {
+            refreshCharacterTagDecorations:
+                () =>
+                ({state, dispatch}) => {
+                    if (!dispatch) {
+                        return true;
+                    }
+
+                    dispatch(state.tr.setMeta(EDITOR_RUNTIME_REFRESH_META_KEY, true));
+
                     return true;
-                }
-
-                dispatch(state.tr.setMeta(EDITOR_RUNTIME_REFRESH_META_KEY, true));
-
-                return true;
-            },
+                },
         };
     },
 
@@ -148,17 +137,13 @@ export const EditorRuntimeExtension = Extension.create<EditorRuntimeOptions>({
                 state: {
                     init: (_config, state) => createInitialState(state, options),
                     apply: (tr, pluginState, oldState, newState) => {
-                        const shouldRefreshCharacters = tr.getMeta(EDITOR_RUNTIME_REFRESH_META_KEY) === true
-                            || transactionTouchesCharacterBlocks(tr, oldState.doc, tr.doc)
-                            || transactionTouchesCharacterTags(tr, oldState.doc, tr.doc)
-                            || selectionTouchesCharacterBlock(oldState, newState, tr);
-                        const shouldRefreshStructure = transactionTouchesStructureBlocks(
-                            tr,
-                            oldState.doc,
-                            tr.doc,
-                        );
-                        const shouldRefreshMusic = shouldRefreshStructure
-                            || transactionTouchesMusic(tr, oldState.doc, tr.doc);
+                        const shouldRefreshCharacters =
+                            tr.getMeta(EDITOR_RUNTIME_REFRESH_META_KEY) === true ||
+                            transactionTouchesCharacterBlocks(tr, oldState.doc, tr.doc) ||
+                            transactionTouchesCharacterTags(tr, oldState.doc, tr.doc) ||
+                            selectionTouchesCharacterBlock(oldState, newState, tr);
+                        const shouldRefreshStructure = transactionTouchesStructureBlocks(tr, oldState.doc, tr.doc);
+                        const shouldRefreshMusic = shouldRefreshStructure || transactionTouchesMusic(tr, oldState.doc, tr.doc);
 
                         if (!tr.docChanged && !tr.selectionSet && !shouldRefreshCharacters) {
                             return pluginState;

@@ -1,28 +1,17 @@
 import {Extension} from '@tiptap/core';
 
-import {
-    characterTagComposeKey,
-    getCharacterTagComposeFromState,
-} from './characterTagInput/composeState';
+import {characterTagComposeKey, getCharacterTagComposeFromState} from './characterTagInput/composeState';
 import {createCharacterTagComposePlugin} from './characterTagInput/plugin';
 import {buildCommitTransaction} from './characterTagInput/transactions';
-import type {
-    CharacterTagComposeState,
-    CharacterTagInputExtensionOptions,
-    CommitCharacterTagPayload,
-} from './characterTagInput/types';
+import type {CharacterTagInputExtensionOptions, CommitCharacterTagPayload} from './characterTagInput/types';
 
-export {
-    characterTagComposeKey,
-    type CharacterTagComposeState,
-    getCharacterTagComposeFromState,
-};
+export {characterTagComposeKey, getCharacterTagComposeFromState};
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         characterTagInput: {
-            commitCharacterTag: (payload?: CommitCharacterTagPayload) => ReturnType,
-        },
+            commitCharacterTag: (payload?: CommitCharacterTagPayload) => ReturnType;
+        };
     }
 }
 
@@ -38,23 +27,21 @@ export const CharacterTagInputExtension = Extension.create<CharacterTagInputExte
 
     addCommands() {
         return {
-            commitCharacterTag: payload => ({state, dispatch}) => {
-                const tr = buildCommitTransaction(
-                    state,
-                    this.options.persistentCharactersRef?.current ?? [],
-                    payload,
-                );
+            commitCharacterTag:
+                payload =>
+                ({state, dispatch}) => {
+                    const tr = buildCommitTransaction(state, this.options.persistentCharactersRef?.current ?? [], payload);
 
-                if (!tr) {
-                    return false;
-                }
+                    if (!tr) {
+                        return false;
+                    }
 
-                if (dispatch) {
-                    dispatch(tr);
-                }
+                    if (dispatch) {
+                        dispatch(tr);
+                    }
 
-                return true;
-            },
+                    return true;
+                },
         };
     },
 

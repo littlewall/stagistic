@@ -11,7 +11,6 @@
         "@stagistic/shared": "workspace:*",
         "@stagistic/ui": "workspace:*",
         "@tauri-apps/api": "^3.0.0-alpha.0",
-        "@tauri-apps/plugin-dialog": "^3.0.0-alpha.0",
         "@tauri-apps/plugin-fs": "^3.0.0-alpha.0",
         "react": "^19.0.0",
         "react-dom": "^19.0.0",

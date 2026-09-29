@@ -1,55 +1,37 @@
-import {
-    canBlockTypeHaveCharacterTags,
-    collectCharacterTags,
-} from '../characters/characterTagMarks';
-import {
-    getCharacterRefByKey,
-    getNodeTextContent,
-    isCharacterBlockType,
-} from '../characters/documentHelpers';
-import {
-    getScriptBlockId,
-    getScriptBlockNodeType,
-    isScriptBlockNode,
-    type ScriptDocument,
-    type ScriptNode,
-} from '../document';
-import {
-    collectMusicAtoms,
-    type DerivedMusic,
-    deriveMusicTimeline,
-    type MusicBlockInput,
-} from '../music';
-import {
-    extractCharacterKeys,
-} from '../syntax';
+import {canBlockTypeHaveCharacterTags, collectCharacterTags} from '../characters/characterTagMarks';
+import {getCharacterRefByKey, getNodeTextContent, isCharacterBlockType} from '../characters/documentHelpers';
+import {getScriptBlockId, getScriptBlockNodeType, isScriptBlockNode, type ScriptDocument, type ScriptNode} from '../document';
+import {collectMusicAtoms} from '../music/collectMusicAtoms';
+import {deriveMusicTimeline} from '../music/deriveMusic';
+import type {DerivedMusic, MusicBlockInput} from '../music/types';
+import {extractCharacterKeys} from '../syntax';
 
 export const SCRIPT_BLOCK_INDEX_SCHEMA_VERSION = 2;
 
 export interface IndexedScriptCharacterRef {
-    key: string,
-    characterId: string | null,
+    key: string;
+    characterId: string | null;
 }
 
 export interface IndexedScriptBlock {
-    blockId: string,
-    orderNo: number,
-    blockType: string,
-    textContent: string,
-    actBlockId: string | null,
-    sceneBlockId: string | null,
-    characterRefs: IndexedScriptCharacterRef[] | null,
+    blockId: string;
+    orderNo: number;
+    blockType: string;
+    textContent: string;
+    actBlockId: string | null;
+    sceneBlockId: string | null;
+    characterRefs: IndexedScriptCharacterRef[] | null;
 }
 
 export interface ScriptBlockIndexSnapshot {
-    blocks: IndexedScriptBlock[],
-    music: DerivedMusic[],
-    orphanMusicOutBlockIds: string[],
+    blocks: IndexedScriptBlock[];
+    music: DerivedMusic[];
+    orphanMusicOutBlockIds: string[];
 }
 
 export interface BuildScriptBlockIndexResult {
-    snapshot: ScriptBlockIndexSnapshot,
-    blockCount: number,
+    snapshot: ScriptBlockIndexSnapshot;
+    blockCount: number;
 }
 
 const toTagCharacterRefs = (node: ScriptNode): IndexedScriptCharacterRef[] | null => {
@@ -115,9 +97,7 @@ const toCharacterRefs = (
     return refs.length > 0 ? refs : null;
 };
 
-export const buildScriptBlockIndex = (
-    value: ScriptDocument | null | undefined,
-): BuildScriptBlockIndexResult => {
+export const buildScriptBlockIndex = (value: ScriptDocument | null | undefined): BuildScriptBlockIndexResult => {
     if (!value || !Array.isArray(value.content) || value.content.length === 0) {
         return {
             snapshot: {
@@ -151,9 +131,7 @@ export const buildScriptBlockIndex = (
                 return;
             }
 
-            const attrs = node.attrs && typeof node.attrs === 'object'
-                ? node.attrs
-                : undefined;
+            const attrs = node.attrs && typeof node.attrs === 'object' ? node.attrs : undefined;
             const blockType = getScriptBlockNodeType(node, 'stageDirection');
             const blockId = getScriptBlockId(node) ?? `missing-block-${orderNo + 1}`;
             const textContent = getNodeTextContent(node).trim();

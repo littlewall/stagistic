@@ -1,26 +1,14 @@
-import {
-    CHARACTER_TAG_MARK_NAME,
-    MUSIC_OUT_NODE_NAME,
-    MUSIC_START_NODE_NAME,
-} from '@stagistic/script';
+import {CHARACTER_TAG_MARK_NAME, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME} from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
-import type {
-    EditorState,
-    Transaction,
-} from '@tiptap/pm/state';
+import type {EditorState, Transaction} from '@tiptap/pm/state';
 
-import {
-    type BlockNodeType,
-    getActiveScriptBlockFromState,
-    isScriptBlockNodeName,
-    normalizeBlockNodeType,
-} from '../tiptap/scriptCore';
+import {type BlockNodeType, getActiveScriptBlockFromState, isScriptBlockNodeName, normalizeBlockNodeType} from '../tiptap/scriptCore';
 
 interface ChangedRange {
-    oldFrom: number,
-    oldTo: number,
-    newFrom: number,
-    newTo: number,
+    oldFrom: number;
+    oldTo: number;
+    newFrom: number;
+    newTo: number;
 }
 
 const isCharacterBlockType = (blockType: BlockNodeType) => {
@@ -55,7 +43,7 @@ const resolveSafeRange = (maxPos: number, from: number, to: number) => {
     };
 };
 
-export const collectChangedRanges = (transaction: Transaction): ChangedRange[] => {
+const collectChangedRanges = (transaction: Transaction): ChangedRange[] => {
     const ranges: ChangedRange[] = [];
 
     transaction.mapping.maps.forEach(stepMap => {
@@ -72,12 +60,7 @@ export const collectChangedRanges = (transaction: Transaction): ChangedRange[] =
     return ranges;
 };
 
-const hasMatchingBlocksInRange = (
-    doc: ProseMirrorNode,
-    from: number,
-    to: number,
-    predicate: (blockType: BlockNodeType) => boolean,
-) => {
+const hasMatchingBlocksInRange = (doc: ProseMirrorNode, from: number, to: number, predicate: (blockType: BlockNodeType) => boolean) => {
     const safeRange = resolveSafeRange(doc.content.size, from, to);
 
     if (!safeRange) {
@@ -140,26 +123,20 @@ export const transactionMayAffectBlockStructure = (transaction: Transaction) => 
     });
 };
 
-export const transactionTouchesCharacterBlocks = (
-    transaction: Transaction,
-    oldDoc: ProseMirrorNode,
-    newDoc: ProseMirrorNode,
-) => {
+export const transactionTouchesCharacterBlocks = (transaction: Transaction, oldDoc: ProseMirrorNode, newDoc: ProseMirrorNode) => {
     if (!transaction.docChanged) {
         return false;
     }
 
     return collectChangedRanges(transaction).some(range => {
-        return hasMatchingBlocksInRange(oldDoc, range.oldFrom, range.oldTo, isCharacterBlockType)
-            || hasMatchingBlocksInRange(newDoc, range.newFrom, range.newTo, isCharacterBlockType);
+        return (
+            hasMatchingBlocksInRange(oldDoc, range.oldFrom, range.oldTo, isCharacterBlockType) ||
+            hasMatchingBlocksInRange(newDoc, range.newFrom, range.newTo, isCharacterBlockType)
+        );
     });
 };
 
-const rangeHasCharacterTagMark = (
-    doc: ProseMirrorNode,
-    from: number,
-    to: number,
-) => {
+const rangeHasCharacterTagMark = (doc: ProseMirrorNode, from: number, to: number) => {
     const markType = doc.type.schema.marks[CHARACTER_TAG_MARK_NAME];
 
     if (!markType) {
@@ -181,26 +158,17 @@ const rangeHasCharacterTagMark = (
  * character-block guards miss them — the sidebar roster needs this to refresh
  * on tag commit / edit / unlink.
  */
-export const transactionTouchesCharacterTags = (
-    transaction: Transaction,
-    oldDoc: ProseMirrorNode,
-    newDoc: ProseMirrorNode,
-) => {
+export const transactionTouchesCharacterTags = (transaction: Transaction, oldDoc: ProseMirrorNode, newDoc: ProseMirrorNode) => {
     if (!transaction.docChanged) {
         return false;
     }
 
     return collectChangedRanges(transaction).some(range => {
-        return rangeHasCharacterTagMark(oldDoc, range.oldFrom, range.oldTo)
-            || rangeHasCharacterTagMark(newDoc, range.newFrom, range.newTo);
+        return rangeHasCharacterTagMark(oldDoc, range.oldFrom, range.oldTo) || rangeHasCharacterTagMark(newDoc, range.newFrom, range.newTo);
     });
 };
 
-export const transactionTouchesStructureBlocks = (
-    transaction: Transaction,
-    oldDoc: ProseMirrorNode,
-    newDoc: ProseMirrorNode,
-) => {
+export const transactionTouchesStructureBlocks = (transaction: Transaction, oldDoc: ProseMirrorNode, newDoc: ProseMirrorNode) => {
     if (!transaction.docChanged) {
         return false;
     }
@@ -210,16 +178,14 @@ export const transactionTouchesStructureBlocks = (
     }
 
     return collectChangedRanges(transaction).some(range => {
-        return hasMatchingBlocksInRange(oldDoc, range.oldFrom, range.oldTo, isStructureBlockType)
-            || hasMatchingBlocksInRange(newDoc, range.newFrom, range.newTo, isStructureBlockType);
+        return (
+            hasMatchingBlocksInRange(oldDoc, range.oldFrom, range.oldTo, isStructureBlockType) ||
+            hasMatchingBlocksInRange(newDoc, range.newFrom, range.newTo, isStructureBlockType)
+        );
     });
 };
 
-const rangeHasMusicNode = (
-    doc: ProseMirrorNode,
-    from: number,
-    to: number,
-) => {
+const rangeHasMusicNode = (doc: ProseMirrorNode, from: number, to: number) => {
     const safeRange = resolveSafeRange(doc.content.size, from, to);
 
     if (!safeRange) {
@@ -239,26 +205,17 @@ const rangeHasMusicNode = (
     return found;
 };
 
-export const transactionTouchesMusic = (
-    transaction: Transaction,
-    oldDoc: ProseMirrorNode,
-    newDoc: ProseMirrorNode,
-) => {
+export const transactionTouchesMusic = (transaction: Transaction, oldDoc: ProseMirrorNode, newDoc: ProseMirrorNode) => {
     if (!transaction.docChanged) {
         return false;
     }
 
     return collectChangedRanges(transaction).some(range => {
-        return rangeHasMusicNode(oldDoc, range.oldFrom, range.oldTo)
-            || rangeHasMusicNode(newDoc, range.newFrom, range.newTo);
+        return rangeHasMusicNode(oldDoc, range.oldFrom, range.oldTo) || rangeHasMusicNode(newDoc, range.newFrom, range.newTo);
     });
 };
 
-export const selectionTouchesCharacterBlock = (
-    oldState: EditorState,
-    newState: EditorState,
-    transaction: Transaction,
-) => {
+export const selectionTouchesCharacterBlock = (oldState: EditorState, newState: EditorState, transaction: Transaction) => {
     if (!transaction.selectionSet) {
         return false;
     }
@@ -266,8 +223,5 @@ export const selectionTouchesCharacterBlock = (
     const previousBlock = getActiveScriptBlockFromState(oldState);
     const nextBlock = getActiveScriptBlockFromState(newState);
 
-    return Boolean(
-        (previousBlock && isCharacterBlockType(previousBlock.blockType))
-        || (nextBlock && isCharacterBlockType(nextBlock.blockType)),
-    );
+    return Boolean((previousBlock && isCharacterBlockType(previousBlock.blockType)) || (nextBlock && isCharacterBlockType(nextBlock.blockType)));
 };
