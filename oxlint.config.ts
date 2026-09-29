@@ -15,6 +15,13 @@ export default defineConfig({
     },
     overrides: [
         {
+            // Tests hold long scenario tables; the generated migrations bundle is emitted as one file.
+            files: ['**/*.test.{ts,tsx}', 'packages/db/src/migrations.compiled.ts'],
+            rules: {
+                'eslint/max-lines': 'off',
+            },
+        },
+        {
             files: ['**/*.{js,jsx,mjs,cjs}'],
             plugins: ['oxc', 'unicorn'],
             rules: {
@@ -42,6 +49,8 @@ export default defineConfig({
     ],
     plugins: ['oxc', 'typescript', 'unicorn'],
     rules: {
+        'eslint/func-style': ['error', 'expression'],
+        'eslint/max-lines': ['error', {max: 300}],
         'eslint/no-array-constructor': 'error',
         'eslint/no-case-declarations': 'error',
         'eslint/no-empty': 'error',
@@ -54,6 +63,7 @@ export default defineConfig({
         'eslint/prefer-const': 'error',
         'eslint/prefer-rest-params': 'error',
         'eslint/prefer-spread': 'error',
+        'eslint/prefer-arrow-callback': 'error',
         'eslint/preserve-caught-error': 'error',
         'typescript/ban-ts-comment': 'error',
         'typescript/no-empty-object-type': 'error',
