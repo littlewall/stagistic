@@ -52,10 +52,9 @@ const navLinks = [
     display: flex;
     align-items: center;
     justify-content: space-between;
-    max-width: 72rem;
+    width: min(72rem, calc(100% - 3rem));
     height: 3rem;
     margin: 0 auto;
-    padding: 0 1.5rem;
 }
 
 .navLogo {
@@ -139,17 +138,19 @@ const navLinks = [
     }
 }
 
-@media (max-width: 640px) {
+@media (max-width: 62.4375em) {
+    .navCta {
+        display: none;
+    }
+}
+
+@media (max-width: 40em) {
     .navInner {
-        padding: 0 1rem;
+        width: calc(100% - 2rem);
     }
 
     .navLinks {
         display: none;
-    }
-
-    .navCta {
-        min-height: 2.75rem;
     }
 }
 </style>
