@@ -3,7 +3,6 @@ import {Extension} from '@tiptap/core';
 import {type EditorState, Plugin, PluginKey, type Transaction} from '@tiptap/pm/state';
 
 import type {EditorBlockUiEvent} from '../../contracts';
-import {incrementFullIndexBuildCount} from '../../perf/editorPerfMetrics';
 import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
 import {transactionMayAffectBlockStructure} from '../../runtime/transactionGuards';
 import {getActiveScriptBlockFromState} from '../scriptCore';
@@ -35,8 +34,6 @@ const shouldDiffBlocks = (transaction: Transaction, previousSnapshot: ScriptBloc
 };
 
 const buildIndexSnapshotFromState = (state: EditorState): ScriptBlockIndexSnapshot => {
-    incrementFullIndexBuildCount();
-
     return buildIndexSnapshotFromPmDoc(state.doc);
 };
 

@@ -1,19 +1,10 @@
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
-import {
-    type EditorState,
-    Plugin,
-    PluginKey,
-} from '@tiptap/pm/state';
+import {type EditorState, Plugin, PluginKey} from '@tiptap/pm/state';
 import {DecorationSet} from '@tiptap/pm/view';
 
-import {incrementPaginationRecalcCount} from '../../../../perf/editorPerfMetrics';
 import {buildPaginationState} from '../layout/buildPaginationState';
 import {createInitialPaginationState} from '../state/createInitialPaginationState';
-import {
-    type BlockCacheEntry,
-    type PaginationPluginState,
-    type PaginationStorage,
-} from '../types';
+import {type BlockCacheEntry, type PaginationPluginState, type PaginationStorage} from '../types';
 
 export const paginationKey = new PluginKey<PaginationPluginState>('script-pagination');
 export const PAGINATION_CONTROL_META_KEY = 'script-pagination-control';
@@ -26,12 +17,8 @@ const TYPING_RECALC_DELAY_MS = 250;
 
 const computeLayoutMetrics = (storage: PaginationStorage, view: {dom: {clientWidth: number}}) => {
     const options = storage.options;
-    const heightKey = `${options.pageWidth}|${options.marginLeft}|`
-        + `${options.marginRight}|${options.lineHeightPx}`;
-    const contentWidth = Math.max(
-        0,
-        view.dom.clientWidth - options.marginLeft - options.marginRight,
-    );
+    const heightKey = `${options.pageWidth}|${options.marginLeft}|` + `${options.marginRight}|${options.lineHeightPx}`;
+    const contentWidth = Math.max(0, view.dom.clientWidth - options.marginLeft - options.marginRight);
 
     return {heightKey, contentWidth};
 };
@@ -55,9 +42,11 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
             },
             apply: (tr, pluginState: PaginationPluginState) => {
                 const meta = tr.getMeta(paginationKey) as PaginationPluginState | undefined;
-                const controlMeta = tr.getMeta(PAGINATION_CONTROL_META_KEY) as {
-                    forceRecalcToken?: number,
-                } | undefined;
+                const controlMeta = tr.getMeta(PAGINATION_CONTROL_META_KEY) as
+                    | {
+                          forceRecalcToken?: number;
+                      }
+                    | undefined;
 
                 if (meta) {
                     storage.state = meta.pagination;
@@ -66,11 +55,7 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                     return meta;
                 }
 
-                if (
-                    controlMeta
-                    && typeof controlMeta.forceRecalcToken === 'number'
-                    && controlMeta.forceRecalcToken !== pluginState.forceRecalcToken
-                ) {
+                if (controlMeta && typeof controlMeta.forceRecalcToken === 'number' && controlMeta.forceRecalcToken !== pluginState.forceRecalcToken) {
                     storage.forceRecalcToken = controlMeta.forceRecalcToken;
 
                     return {
@@ -147,13 +132,7 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                         lastContentWidth = contentWidth;
                     }
 
-                    const {
-                        decorations,
-                        pagination,
-                        nextCache,
-                        hasInlineBreaks,
-                        usedFallbackMeasurements,
-                    } = buildPaginationState(
+                    const {decorations, pagination, nextCache, hasInlineBreaks, usedFallbackMeasurements} = buildPaginationState(
                         view,
                         storage.options,
                         blockCache,
@@ -171,7 +150,6 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                     });
 
                     view.dispatch(tr);
-                    incrementPaginationRecalcCount();
 
                     if (hasInlineBreaks && lastInlineBreakDoc !== view.state.doc) {
                         lastInlineBreakDoc = view.state.doc;
@@ -232,9 +210,11 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
             }
 
             if (typeof document !== 'undefined' && 'fonts' in document) {
-                document.fonts.ready.then(() => {
-                    scheduleImmediateRecalc();
-                }).catch(() => {});
+                document.fonts.ready
+                    .then(() => {
+                        scheduleImmediateRecalc();
+                    })
+                    .catch(() => {});
             }
 
             scheduleImmediateRecalc();
@@ -247,18 +227,9 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                     const layoutChanged = heightKey !== lastHeightKey || contentWidth !== lastContentWidth;
                     const previousPluginState = paginationKey.getState(prevState);
                     const currentPluginState = paginationKey.getState(view.state);
-                    const forceRecalcTokenChanged = (
-                        previousPluginState?.forceRecalcToken ?? 0
-                    ) !== (
-                        currentPluginState?.forceRecalcToken ?? 0
-                    );
+                    const forceRecalcTokenChanged = (previousPluginState?.forceRecalcToken ?? 0) !== (currentPluginState?.forceRecalcToken ?? 0);
 
-                    if (
-                        !docChanged
-                        && optionsVersion === lastOptionsVersion
-                        && !layoutChanged
-                        && !forceRecalcTokenChanged
-                    ) {
+                    if (!docChanged && optionsVersion === lastOptionsVersion && !layoutChanged && !forceRecalcTokenChanged) {
                         return;
                     }
 

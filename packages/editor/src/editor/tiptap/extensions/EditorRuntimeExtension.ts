@@ -3,11 +3,6 @@ import {type EditorState, Plugin, PluginKey} from '@tiptap/pm/state';
 import {DecorationSet} from '@tiptap/pm/view';
 
 import type {PersistentCharacterRef} from '../../contracts';
-import {
-    incrementCharacterDecorationRebuildCount,
-    incrementCharacterRuntimeRebuildCount,
-    incrementStructureRuntimeRebuildCount,
-} from '../../perf/editorPerfMetrics';
 import {buildCharacterRuntime} from '../../runtime/buildCharacterRuntime';
 import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
 import {buildStructureRuntime} from '../../runtime/buildStructureRuntime';
@@ -61,8 +56,6 @@ const resolveActiveBlock = (
 };
 
 const buildCharacterState = (state: EditorState, options: EditorRuntimeOptions) => {
-    incrementCharacterRuntimeRebuildCount();
-
     const nextRuntime = buildCharacterRuntime({
         doc: state.doc,
         selectionFrom: state.selection.from,
@@ -73,16 +66,12 @@ const buildCharacterState = (state: EditorState, options: EditorRuntimeOptions) 
         characterTagClassNames: options.characterTagClassNames,
     });
 
-    incrementCharacterDecorationRebuildCount();
-
     return nextRuntime;
 };
 
 const createInitialState = (state: EditorState, options: EditorRuntimeOptions): EditorRuntimeState => {
     const characterState = buildCharacterState(state, options);
     const activeBlock = resolveActiveBlock(state);
-
-    incrementStructureRuntimeRebuildCount();
 
     return {
         revision: 0,
@@ -168,7 +157,6 @@ export const EditorRuntimeExtension = Extension.create<EditorRuntimeOptions>({
                         }
 
                         if (shouldRefreshStructure) {
-                            incrementStructureRuntimeRebuildCount();
                             nextStructure = buildStructureRuntime(newState.doc);
                         }
 

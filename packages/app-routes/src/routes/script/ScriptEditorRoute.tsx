@@ -1,5 +1,5 @@
 import {useScriptComments, useScriptRepository} from '@stagistic/app-core';
-import {type EditorMusicCreateRequest, type EditorMusicRemoveRequest, incrementRouteRenderCount, ScriptEditor} from '@stagistic/editor';
+import {type EditorMusicCreateRequest, type EditorMusicRemoveRequest, ScriptEditor} from '@stagistic/editor';
 import {resolveDraftDate} from '@stagistic/script';
 import {AppLayout, LoaderOverlay} from '@stagistic/ui';
 import {useCallback, useMemo, useState} from 'react';
@@ -29,8 +29,6 @@ const SIDEBAR_WIDTH = 'var(--sidebar-width)';
 type AddMusicModalState = {source: 'sidebar'} | {source: 'editor'; request: EditorMusicCreateRequest};
 
 export const ScriptEditorRoute = () => {
-    incrementRouteRenderCount();
-
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
     const {

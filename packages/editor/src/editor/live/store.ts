@@ -5,7 +5,6 @@ import type {
     EditorLiveSnapshot,
     EditorLiveStructureSnapshot,
 } from '../contracts';
-import {incrementSidebarStorePatchCount} from '../perf/editorPerfMetrics';
 
 type Listener = () => void;
 
@@ -95,7 +94,6 @@ export const createEditorSnapshotStore = (initialSnapshot?: EditorLiveSnapshot):
         }
 
         snapshot = nextSnapshot;
-        incrementSidebarStorePatchCount();
         emit();
     };
 
@@ -123,7 +121,6 @@ export const createEditorSnapshotStore = (initialSnapshot?: EditorLiveSnapshot):
         }
 
         snapshot = nextSnapshot;
-        incrementSidebarStorePatchCount();
         emit();
     };
 
