@@ -1,43 +1,20 @@
 import * as dbQueries from '../queries';
 import type {ScriptRepository} from '../scriptRepository';
-import {
-    createProjectedTableDocumentSource,
-    createSqlScriptDocumentProjectionWriter,
-} from './documentProjection';
-import type {
-    GetDb,
-    RecordOutbox,
-    SyncDb,
-} from './types';
+import {createProjectedTableDocumentSource, createSqlScriptDocumentProjectionWriter} from './documentProjection';
+import type {GetDb, RecordOutbox, SyncDb} from './types';
 
 type ContentHandlers = {
-    loadLatest: ScriptRepository['loadLatest'],
-    saveLatest: ScriptRepository['saveLatest'],
-};
-
-/*
- * Opt-in save timing: localStorage.setItem('stagistic:perf', '1').
- * Evaluated lazily — this module also runs in node tests without localStorage.
- */
-const isPerfLoggingEnabled = (): boolean => {
-    try {
-        return typeof localStorage !== 'undefined' && localStorage.getItem('stagistic:perf') === '1';
-    } catch {
-        return false;
-    }
+    loadLatest: ScriptRepository['loadLatest'];
+    saveLatest: ScriptRepository['saveLatest'];
 };
 
 interface CreateContentHandlersArgs {
-    getDb: GetDb,
-    recordOutbox: RecordOutbox,
-    syncDb: SyncDb,
+    getDb: GetDb;
+    recordOutbox: RecordOutbox;
+    syncDb: SyncDb;
 }
 
-export const createContentHandlers = ({
-    getDb,
-    recordOutbox,
-    syncDb,
-}: CreateContentHandlersArgs): ContentHandlers => {
+export const createContentHandlers = ({getDb, recordOutbox, syncDb}: CreateContentHandlersArgs): ContentHandlers => {
     const projectionWriter = createSqlScriptDocumentProjectionWriter({getDb});
     const documentSource = createProjectedTableDocumentSource({getDb, projectionWriter});
 
@@ -53,8 +30,6 @@ export const createContentHandlers = ({
 
     const saveLatest: ContentHandlers['saveLatest'] = async (scriptId, value) => {
         const now = Date.now();
-        const perfEnabled = isPerfLoggingEnabled();
-        const startedAt = perfEnabled ? performance.now() : 0;
 
         /*
          * Granular persist: diff the document against the last-saved blocks and
@@ -68,17 +43,18 @@ export const createContentHandlers = ({
                     updatedAt: now,
                 });
 
-                await recordOutbox({
-                    scriptId,
-                    entityKey: `script:${scriptId}:document`,
-                    opType: 'latest.save',
-                    occurredAt: now,
-                    payloadJson: JSON.stringify({scriptId, updatedAt: now}),
-                }, tx);
+                await recordOutbox(
+                    {
+                        scriptId,
+                        entityKey: `script:${scriptId}:document`,
+                        opType: 'latest.save',
+                        occurredAt: now,
+                        payloadJson: JSON.stringify({scriptId, updatedAt: now}),
+                    },
+                    tx,
+                );
             },
         });
-
-        const persistDoneAt = perfEnabled ? performance.now() : 0;
 
         /*
          * PGlite does not call syncToFs() after transaction COMMIT — the WAL
@@ -86,15 +62,6 @@ export const createContentHandlers = ({
          * on page refresh (the worker dies and the unflushed WAL disappears).
          */
         await syncDb();
-
-        if (perfEnabled) {
-            const syncDoneAt = performance.now();
-
-            console.debug(
-                `[db-local] saveLatest ${scriptId}: persist ${Math.round(persistDoneAt - startedAt)}ms, `
-                + `syncToFs ${Math.round(syncDoneAt - persistDoneAt)}ms, total ${Math.round(syncDoneAt - startedAt)}ms`,
-            );
-        }
     };
 
     return {

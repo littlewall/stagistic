@@ -14,7 +14,7 @@ export interface BesideCardEntry {
     collapsed: boolean;
 }
 
-export const COLLAPSE_THRESHOLD = 3;
+const COLLAPSE_THRESHOLD = 3;
 
 interface LayoutBesideCardsArgs {
     cards: readonly BesideCardInput[];

@@ -15,7 +15,7 @@ import type {
 } from './types';
 
 export type ScriptCharacterGroupMember = Pick<InferSelectModel<typeof scriptCharacterGroupMembers>, 'groupId' | 'characterId'>;
-export type ScriptSceneLocationAssignment = InferSelectModel<typeof scriptSceneLocations>;
+export type ScriptSceneLocationRow = InferSelectModel<typeof scriptSceneLocations>;
 export type ScriptMusicAttachmentBinding = InferSelectModel<typeof scriptMusicAttachments>;
 
 export interface ScriptPackageSource {
@@ -29,7 +29,7 @@ export interface ScriptPackageSource {
     music: ScriptMusic[];
     locations: ScriptLocation[];
     scenes: ScriptScene[];
-    sceneLocations: ScriptSceneLocationAssignment[];
+    sceneLocations: ScriptSceneLocationRow[];
     attachments: ScriptAttachment[];
     musicAttachmentBindings: ScriptMusicAttachmentBinding[];
     comments: {threads: ScriptCommentThread[]; messages: ScriptCommentMessage[]};

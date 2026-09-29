@@ -1,56 +1,27 @@
 import {execFileSync} from 'node:child_process';
-import {
-    existsSync,
-    readFileSync,
-} from 'node:fs';
+import {existsSync, readFileSync} from 'node:fs';
 
-import {
-    beforeAll,
-    describe,
-    expect,
-    it,
-} from 'vite-plus/test';
+import {beforeAll, describe, expect, it} from 'vite-plus/test';
 
 describe('web document metadata', () => {
     let html = '';
 
     beforeAll(() => {
-        execFileSync(
-            'pnpm',
-            [
-                '--filter',
-                '@stagistic/web',
-                'build',
-            ],
-            {
-                cwd: new URL('../../..', import.meta.url),
-                stdio: 'pipe',
-            },
-        );
-        html = readFileSync(
-            new URL('../dist/index.html', import.meta.url),
-            'utf8',
-        );
+        execFileSync('moon', ['run', 'web:build'], {
+            cwd: new URL('../../..', import.meta.url),
+            stdio: 'pipe',
+        });
+        html = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8');
     }, 30_000);
 
     it('exposes the complete editor favicon set and base title', () => {
         expect(html).toContain('<title>Stagistic Editor</title>');
-        expect(html).toContain(
-            '<link rel="icon" href="/favicon.svg" type="image/svg+xml" />',
-        );
-        expect(html).toContain(
-            '<link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />',
-        );
-        expect(html).toContain(
-            '<link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />',
-        );
+        expect(html).toContain('<link rel="icon" href="/favicon.svg" type="image/svg+xml" />');
+        expect(html).toContain('<link rel="icon" href="/favicon-32x32.png" sizes="32x32" type="image/png" />');
+        expect(html).toContain('<link rel="icon" href="/favicon-16x16.png" sizes="16x16" type="image/png" />');
         expect(html).toContain('<link rel="shortcut icon" href="/favicon.ico" />');
-        expect(html).toContain(
-            '<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />',
-        );
-        expect(html).toContain(
-            '<meta name="theme-color" content="#3d2a1d" />',
-        );
+        expect(html).toContain('<link rel="apple-touch-icon" href="/apple-touch-icon.png" sizes="180x180" />');
+        expect(html).toContain('<meta name="theme-color" content="#3d2a1d" />');
     });
 
     it('ships every favicon file declared by the document', () => {
@@ -68,19 +39,12 @@ describe('web document metadata', () => {
     });
 
     it('ships the square-cropped theme-aware two-path favicon mark', () => {
-        const faviconSvg = readFileSync(
-            new URL('../dist/favicon.svg', import.meta.url),
-            'utf8',
-        );
+        const faviconSvg = readFileSync(new URL('../dist/favicon.svg', import.meta.url), 'utf8');
 
-        expect(faviconSvg).toContain(
-            'viewBox="9.95484 8.87608 94.88736 94.88736"',
-        );
+        expect(faviconSvg).toContain('viewBox="9.95484 8.87608 94.88736 94.88736"');
         expect(faviconSvg.match(/<path\b/g) ?? []).toHaveLength(2);
         expect(faviconSvg).toMatch(/\.mark\s*\{\s*fill:\s*#3d2a1d/);
-        expect(faviconSvg).toMatch(
-            /@media\s*\(prefers-color-scheme:\s*dark\)/,
-        );
+        expect(faviconSvg).toMatch(/@media\s*\(prefers-color-scheme:\s*dark\)/);
         expect(faviconSvg).toMatch(/fill:\s*#f4f1ec/);
     });
 });

@@ -32,7 +32,7 @@ const parseLogo = (value: string): TitlePageLogo | undefined => {
     }
 };
 
-export const toTitlePageSettings = (rows: Awaited<ReturnType<typeof dbQueries.listScriptTitlePageFields>>): TitlePageSettings | null => {
+const toTitlePageSettings = (rows: Awaited<ReturnType<typeof dbQueries.listScriptTitlePageFields>>): TitlePageSettings | null => {
     if (rows.length === 0) {
         return null;
     }

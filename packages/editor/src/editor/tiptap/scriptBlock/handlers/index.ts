@@ -7,10 +7,10 @@ import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scri
 import {createBlockContext} from '../context';
 import {deleteSelectionPreservingScenes, selectionSpansScene} from '../deleteSelectionPreservingScenes';
 import {deleteEmptyBlockAfterScene, shouldBlockBackspace, shouldBlockForwardDelete} from '../sceneDeletionGuard';
-import {enterHandlerMaps, handleEnter} from './enter';
-import {handlePaste, pasteHandlerMaps} from './paste';
+import {handleEnter} from './enter';
+import {handlePaste} from './paste';
 import {handleBlockShortcut, handleBlockTypeCycle} from './shortcuts';
-import {handleTab, tabHandlerMaps} from './tab';
+import {handleTab} from './tab';
 import {handleTextInput, textInputHandlerMaps} from './textInput';
 import {type BlockCasingMap, type BlockNextElementMap, type BlockShortcutMap} from './types';
 
@@ -148,11 +148,4 @@ export const handleKeyDown = (editor: Editor, event: KeyboardEvent, blockShortcu
     return handler(createBlockContext(editor, block), event);
 };
 
-export {handleEnter, handlePaste, handleTab, handleTextInput};
-
-export const scriptBlockHandlerMaps = {
-    ...enterHandlerMaps,
-    ...tabHandlerMaps,
-    ...textInputHandlerMaps,
-    ...pasteHandlerMaps,
-};
+export {handlePaste, handleTab, handleTextInput};

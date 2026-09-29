@@ -1,40 +1,20 @@
-import {type Node as ProseMirrorNode} from '@tiptap/pm/model';
-
 import type {PersistentCharacterRef} from '../contracts';
 import type {CharacterColorResolvers} from './characterColorPolicy';
-import {
-    createCharacterColorResolvers,
-    getUnconfirmedCharacterColor,
-} from './characterColorPolicy';
-import {
-    type ActiveCharacterToken,
-    type CharacterTokenEntry,
-    type CharacterTokenScanResult,
-    getCharacterTokenColorKey,
-    scanCharacterTokensFromDoc,
-} from './characterTokenScan';
+import {createCharacterColorResolvers, getUnconfirmedCharacterColor} from './characterColorPolicy';
+import {type ActiveCharacterToken, type CharacterTokenEntry, type CharacterTokenScanResult, getCharacterTokenColorKey} from './characterTokenScan';
 import {normalizePersistentCharacterRefs} from './persistentRefNormalization';
 
 export interface CharacterDocColorState {
-    colorByToken: ReadonlyMap<string, string>,
-    displayColorByKey: ReadonlyMap<string, string>,
-}
-
-interface BuildCharacterDocColorStateArgs {
-    doc: ProseMirrorNode,
-    selectionFrom?: number | null,
-    persistentCharacters?: readonly PersistentCharacterRef[],
-    characterColorSaturation?: number,
-    colorByCharacterId?: ReadonlyMap<string, string>,
-    rememberedColorByKey?: ReadonlyMap<string, string>,
+    colorByToken: ReadonlyMap<string, string>;
+    displayColorByKey: ReadonlyMap<string, string>;
 }
 
 interface BuildCharacterDocColorStateFromTokenScanArgs {
-    tokenScan: CharacterTokenScanResult,
-    persistentCharacters?: readonly PersistentCharacterRef[],
-    characterColorSaturation?: number,
-    colorByCharacterId?: ReadonlyMap<string, string>,
-    rememberedColorByKey?: ReadonlyMap<string, string>,
+    tokenScan: CharacterTokenScanResult;
+    persistentCharacters?: readonly PersistentCharacterRef[];
+    characterColorSaturation?: number;
+    colorByCharacterId?: ReadonlyMap<string, string>;
+    rememberedColorByKey?: ReadonlyMap<string, string>;
 }
 
 const resolveTokenBaseColor = (
@@ -58,23 +38,14 @@ const resolveTokenBaseColor = (
         return resolvers.resolveConfirmedColorById(persistentCharacter.id);
     }
 
-    return rememberedColor
-        ?? unconfirmedDraftColorByKey.get(tokenEntry.key)
-        ?? getUnconfirmedCharacterColor(tokenEntry.key, characterColorSaturation);
+    return rememberedColor ?? unconfirmedDraftColorByKey.get(tokenEntry.key) ?? getUnconfirmedCharacterColor(tokenEntry.key, characterColorSaturation);
 };
 
-const buildUnconfirmedDraftColorByKey = (
-    tokenEntries: readonly CharacterTokenEntry[],
-    resolvers: CharacterColorResolvers,
-): ReadonlyMap<string, string> => {
+const buildUnconfirmedDraftColorByKey = (tokenEntries: readonly CharacterTokenEntry[], resolvers: CharacterColorResolvers): ReadonlyMap<string, string> => {
     const unconfirmedDraftColorByKey = new Map<string, string>();
 
     tokenEntries.forEach(tokenEntry => {
-        if (
-            !tokenEntry.key
-            || tokenEntry.characterId
-            || unconfirmedDraftColorByKey.has(tokenEntry.key)
-        ) {
+        if (!tokenEntry.key || tokenEntry.characterId || unconfirmedDraftColorByKey.has(tokenEntry.key)) {
             return;
         }
 
@@ -92,10 +63,7 @@ const buildUnconfirmedDraftColorByKey = (
             return;
         }
 
-        unconfirmedDraftColorByKey.set(
-            tokenEntry.key,
-            resolvers.resolveDraftTokenColor(tokenEntry.blockId, tokenEntry.tokenIndex),
-        );
+        unconfirmedDraftColorByKey.set(tokenEntry.key, resolvers.resolveDraftTokenColor(tokenEntry.blockId, tokenEntry.tokenIndex));
     });
 
     return unconfirmedDraftColorByKey;
@@ -114,26 +82,18 @@ const buildBaseDisplayColorByKey = (
             return;
         }
 
-        displayColorByKey.set(
-            tokenEntry.key,
-            resolveTokenBaseColor(
-                tokenEntry,
-                unconfirmedDraftColorByKey,
-                resolvers,
-                characterColorSaturation,
-            ),
-        );
+        displayColorByKey.set(tokenEntry.key, resolveTokenBaseColor(tokenEntry, unconfirmedDraftColorByKey, resolvers, characterColorSaturation));
     });
 
     return displayColorByKey;
 };
 
 interface ResolveActiveTokenColorArgs {
-    activeToken: ActiveCharacterToken | null,
-    tokenCountByKey: ReadonlyMap<string, number>,
-    baseDisplayColorByKey: ReadonlyMap<string, string>,
-    resolvers: CharacterColorResolvers,
-    characterColorSaturation?: number,
+    activeToken: ActiveCharacterToken | null;
+    tokenCountByKey: ReadonlyMap<string, number>;
+    baseDisplayColorByKey: ReadonlyMap<string, string>;
+    resolvers: CharacterColorResolvers;
+    characterColorSaturation?: number;
 }
 
 const resolveActiveTokenColor = ({
@@ -167,8 +127,7 @@ const resolveActiveTokenColor = ({
         const hasOtherTokens = (tokenCountByKey.get(activeToken.key) ?? 0) > 1;
 
         if (hasOtherTokens) {
-            return baseDisplayColorByKey.get(activeToken.key)
-                ?? getUnconfirmedCharacterColor(activeToken.key, characterColorSaturation);
+            return baseDisplayColorByKey.get(activeToken.key) ?? getUnconfirmedCharacterColor(activeToken.key, characterColorSaturation);
         }
     }
 
@@ -176,12 +135,12 @@ const resolveActiveTokenColor = ({
 };
 
 interface BuildColorByTokenArgs {
-    tokenEntries: readonly CharacterTokenEntry[],
-    activeToken: ActiveCharacterToken | null,
-    activeTokenColor: string | null,
-    unconfirmedDraftColorByKey: ReadonlyMap<string, string>,
-    resolvers: CharacterColorResolvers,
-    characterColorSaturation?: number,
+    tokenEntries: readonly CharacterTokenEntry[];
+    activeToken: ActiveCharacterToken | null;
+    activeTokenColor: string | null;
+    unconfirmedDraftColorByKey: ReadonlyMap<string, string>;
+    resolvers: CharacterColorResolvers;
+    characterColorSaturation?: number;
 }
 
 const buildColorByToken = ({
@@ -196,12 +155,7 @@ const buildColorByToken = ({
 
     tokenEntries.forEach(tokenEntry => {
         const tokenColorKey = getCharacterTokenColorKey(tokenEntry.blockId, tokenEntry.tokenIndex);
-        let color = resolveTokenBaseColor(
-            tokenEntry,
-            unconfirmedDraftColorByKey,
-            resolvers,
-            characterColorSaturation,
-        );
+        let color = resolveTokenBaseColor(tokenEntry, unconfirmedDraftColorByKey, resolvers, characterColorSaturation);
 
         if (activeToken && activeToken.id === tokenColorKey && activeTokenColor) {
             color = activeTokenColor;
@@ -227,18 +181,9 @@ export const buildCharacterDocColorStateFromTokenScan = ({
         colorByCharacterId,
         rememberedColorByKey,
     });
-    const {
-        tokenEntries,
-        tokenCountByKey,
-        activeToken,
-    } = tokenScan;
+    const {tokenEntries, tokenCountByKey, activeToken} = tokenScan;
     const unconfirmedDraftColorByKey = buildUnconfirmedDraftColorByKey(tokenEntries, resolvers);
-    const baseDisplayColorByKey = buildBaseDisplayColorByKey(
-        tokenEntries,
-        unconfirmedDraftColorByKey,
-        resolvers,
-        characterColorSaturation,
-    );
+    const baseDisplayColorByKey = buildBaseDisplayColorByKey(tokenEntries, unconfirmedDraftColorByKey, resolvers, characterColorSaturation);
     const activeTokenColor = resolveActiveTokenColor({
         activeToken,
         tokenCountByKey,
@@ -264,24 +209,4 @@ export const buildCharacterDocColorStateFromTokenScan = ({
         colorByToken,
         displayColorByKey,
     };
-};
-
-export const buildCharacterDocColorState = ({
-    doc,
-    selectionFrom,
-    persistentCharacters = [],
-    characterColorSaturation,
-    colorByCharacterId,
-    rememberedColorByKey,
-}: BuildCharacterDocColorStateArgs): CharacterDocColorState => {
-    return buildCharacterDocColorStateFromTokenScan({
-        tokenScan: scanCharacterTokensFromDoc({
-            doc,
-            selectionFrom,
-        }),
-        persistentCharacters,
-        characterColorSaturation,
-        colorByCharacterId,
-        rememberedColorByKey,
-    });
 };

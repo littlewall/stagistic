@@ -1,28 +1,16 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {useHotkey} from '@tanstack/react-hotkeys';
-import {
-    type Selection,
-    TextSelection,
-    type Transaction,
-} from '@tiptap/pm/state';
+import {type Selection, TextSelection, type Transaction} from '@tiptap/pm/state';
 import {type Editor as TiptapEditor} from '@tiptap/react';
-import {
-    useEffect,
-    useRef,
-} from 'react';
+import {useEffect, useRef} from 'react';
 
 import type {EditorActCommands} from '../actCommands/context';
 import {useBuildActCommands} from '../actCommands/useBuildActCommands';
 import type {EditorIndexSnapshot, EditorValueChangeMeta} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
-import {incrementFullDocJsonSerializeCount, incrementFullIndexBuildCount} from '../perf/editorPerfMetrics';
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
 import {IMMEDIATE_SAVE_META_KEY} from '../saveMeta';
-import {
-    sanitizeScriptBlocks,
-    type UseEditorLifecycleArgs,
-    useEditorLifecycleSync,
-} from './editorLifecycleSync';
+import {sanitizeScriptBlocks, type UseEditorLifecycleArgs, useEditorLifecycleSync} from './editorLifecycleSync';
 import {useEditorStructureRequests} from './useEditorStructureRequests';
 import {useLatestRef} from './useLatestRef';
 
@@ -82,13 +70,7 @@ export const useEditorLifecycle = ({
     requests,
 }: UseEditorLifecycleArgs): {actCommands: EditorActCommands} => {
     const {instance, autoFocus} = editor;
-    const {
-        initialValue,
-        initialSerialized,
-        setLatestValue,
-        syncInitialValue,
-        scheduleAutosave,
-    } = document;
+    const {initialValue, initialSerialized, setLatestValue, syncInitialValue, scheduleAutosave} = document;
     const {onManualSave, handleManualSave} = save;
     const isApplyingInitialRef = useRef(false);
     const revisionRef = useRef(0);
@@ -98,22 +80,17 @@ export const useEditorLifecycle = ({
     const onActiveBlockChangeRef = useLatestRef(callbacks.onActiveBlockChange);
     const onBlockUiEventRef = useLatestRef(callbacks.onBlockUiEvent);
 
-    const {
-        syncValueFromEditor,
-        patchFallbackSnapshot,
-        syncRuntimeSnapshotFromEditor,
-        emitIndexFromEditor,
-        emitBlockUiEventsFromEditor,
-    } = useEditorLifecycleSync({
-        liveStore,
-        setLatestValue,
-        characters,
-        lastEmittedActiveBlockIdRef,
-        onValueChangeRef,
-        onIndexChangeRef,
-        onActiveBlockChangeRef,
-        onBlockUiEventRef,
-    });
+    const {syncValueFromEditor, patchFallbackSnapshot, syncRuntimeSnapshotFromEditor, emitIndexFromEditor, emitBlockUiEventsFromEditor} =
+        useEditorLifecycleSync({
+            liveStore,
+            setLatestValue,
+            characters,
+            lastEmittedActiveBlockIdRef,
+            onValueChangeRef,
+            onIndexChangeRef,
+            onActiveBlockChangeRef,
+            onBlockUiEventRef,
+        });
 
     const structureOnIndexChangeRef = useLatestRef((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => {
         if (!meta) {
@@ -168,7 +145,7 @@ export const useEditorLifecycle = ({
             return;
         }
 
-        const handleUpdate = ({editor: updatedEditor, transaction}: {editor: TiptapEditor, transaction: Transaction}) => {
+        const handleUpdate = ({editor: updatedEditor, transaction}: {editor: TiptapEditor; transaction: Transaction}) => {
             if (isApplyingInitialRef.current) {
                 return;
             }
@@ -198,12 +175,7 @@ export const useEditorLifecycle = ({
         return () => {
             instance.off('update', handleUpdate);
         };
-    }, [
-        emitIndexFromEditor,
-        instance,
-        onIndexChangeRef,
-        scheduleAutosave,
-    ]);
+    }, [emitIndexFromEditor, instance, onIndexChangeRef, scheduleAutosave]);
 
     useEffect(() => {
         if (!instance) {
@@ -220,11 +192,7 @@ export const useEditorLifecycle = ({
         return () => {
             instance.off('transaction', handleTransaction);
         };
-    }, [
-        emitBlockUiEventsFromEditor,
-        instance,
-        syncRuntimeSnapshotFromEditor,
-    ]);
+    }, [emitBlockUiEventsFromEditor, instance, syncRuntimeSnapshotFromEditor]);
 
     useEffect(() => {
         if (!instance) {
@@ -235,7 +203,8 @@ export const useEditorLifecycle = ({
 
         if (!isRestoredSurface) {
             isApplyingInitialRef.current = true;
-            instance.chain()
+            instance
+                .chain()
                 .setContent(initialValue, {emitUpdate: false})
                 .command(({tr}) => {
                     tr.setMeta('addToHistory', false);
@@ -263,14 +232,9 @@ export const useEditorLifecycle = ({
 
         if (!isRestoredSurface) {
             instance.view.dispatch(
-                instance.state.tr
-                    .setSelection(resolveInitialSelection(instance))
-                    .setMeta('preventUpdate', true)
-                    .setMeta('addToHistory', false),
+                instance.state.tr.setSelection(resolveInitialSelection(instance)).setMeta('preventUpdate', true).setMeta('addToHistory', false),
             );
         }
-
-        incrementFullDocJsonSerializeCount();
 
         /*
          * A restored surface keeps its live content (potentially newer than the
@@ -287,8 +251,6 @@ export const useEditorLifecycle = ({
             return;
         }
 
-        incrementFullIndexBuildCount();
-
         const snapshot = buildIndexSnapshotFromPmDoc(instance.state.doc);
 
         syncRuntimeSnapshotFromEditor(instance, snapshot);
@@ -296,14 +258,7 @@ export const useEditorLifecycle = ({
             source: 'structure',
             revision: revisionRef.current,
         });
-    }, [
-        instance,
-        initialSerialized,
-        initialValue,
-        onIndexChangeRef,
-        syncRuntimeSnapshotFromEditor,
-        syncInitialValue,
-    ]);
+    }, [instance, initialSerialized, initialValue, onIndexChangeRef, syncRuntimeSnapshotFromEditor, syncInitialValue]);
 
     useEffect(() => {
         if (!instance) {
@@ -329,21 +284,25 @@ export const useEditorLifecycle = ({
         instance.commands.focus(resolveInitialSelection(instance).from);
     }, [autoFocus, instance]);
 
-    useHotkey('Mod+S', () => {
-        if (!instance || !onManualSave) {
-            return;
-        }
+    useHotkey(
+        'Mod+S',
+        () => {
+            if (!instance || !onManualSave) {
+                return;
+            }
 
-        forcePaginationRecalc(instance);
-        syncValueFromEditor(instance, {
-            source: 'typing',
-            revision: revisionRef.current,
-        });
-        void handleManualSave();
-    }, {
-        enabled: Boolean(instance && onManualSave),
-        target: getWindowTarget(),
-    });
+            forcePaginationRecalc(instance);
+            syncValueFromEditor(instance, {
+                source: 'typing',
+                revision: revisionRef.current,
+            });
+            void handleManualSave();
+        },
+        {
+            enabled: Boolean(instance && onManualSave),
+            target: getWindowTarget(),
+        },
+    );
 
     return {actCommands};
 };

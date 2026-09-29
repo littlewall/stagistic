@@ -157,9 +157,10 @@ describe('landing page', () => {
         const miniEditorIsland = miniEditorIslandMarkup.match(/<astro-island\b[^>]*>/)?.[0] ?? '';
 
         expect(miniEditorIsland).toContain('client="media"');
-        expect(miniEditorIsland).toContain('&quot;value&quot;:&quot;not (max-width: 1000px)&quot;');
+        expect(miniEditorIsland).toContain('&quot;value&quot;:&quot;(min-width: 1000px)&quot;');
         expect(homeCss).toContain('@media (width<=62.4375em)');
-        expect(homeCss).toMatch(/@media \(width<=62\.4375em\)\{[^@]*\._scriptExcerpt_[^{]+\{display:none}/);
+        expect(homeCss).toMatch(/@media \(width<=62\.4375em\)\{[^@]*\._heroScript_[^{]+\{display:none}/);
+        expect(homeHtml).not.toContain('Stagistic Editor is built for larger screens.');
     });
 
     it('stacks the hero content on small screens', () => {

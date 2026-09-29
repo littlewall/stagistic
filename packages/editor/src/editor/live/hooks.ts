@@ -1,8 +1,4 @@
-import {
-    useCallback,
-    useRef,
-    useSyncExternalStore,
-} from 'react';
+import {useCallback, useRef, useSyncExternalStore} from 'react';
 
 import type {
     EditorLiveActiveBlockInfo,
@@ -12,20 +8,11 @@ import type {
     EditorLiveSnapshot,
     EditorLiveStructureSnapshot,
 } from '../contracts';
-import {trackSidebarSelectorDuration} from '../perf/editorPerfMetrics';
 import {useEditorSnapshotStore} from './context';
 
 const identity = <TValue>(value: TValue) => value;
 
 const defaultIsEqual = <TValue>(previous: TValue, next: TValue) => Object.is(previous, next);
-const getNow = () => {
-    if (typeof performance !== 'undefined') {
-        return performance.now();
-    }
-
-    return Date.now();
-};
-
 const useLatestValue = <TValue>(value: TValue) => {
     const ref = useRef(value);
 
@@ -44,40 +31,30 @@ export const useEditorLiveSelector = <TSelected>(
     const selectedRef = useRef<TSelected>(selector(store.getSnapshot()));
 
     const maybeSyncSelected = useCallback(() => {
-        const startedAt = getNow();
         const nextSelected = selectorRef.current(store.getSnapshot());
 
         if (isEqualRef.current(selectedRef.current, nextSelected)) {
-            trackSidebarSelectorDuration(getNow() - startedAt);
-
             return;
         }
 
         selectedRef.current = nextSelected;
-        trackSidebarSelectorDuration(getNow() - startedAt);
-    }, [
-        isEqualRef,
-        selectorRef,
-        store,
-    ]);
+    }, [isEqualRef, selectorRef, store]);
 
     maybeSyncSelected();
 
-    const subscribe = useCallback((notify: () => void) => {
-        return store.subscribeSelector(
-            snapshot => selectorRef.current(snapshot),
-            (previous, next) => isEqualRef.current(previous, next),
-            () => {
-                maybeSyncSelected();
-                notify();
-            },
-        );
-    }, [
-        isEqualRef,
-        maybeSyncSelected,
-        selectorRef,
-        store,
-    ]);
+    const subscribe = useCallback(
+        (notify: () => void) => {
+            return store.subscribeSelector(
+                snapshot => selectorRef.current(snapshot),
+                (previous, next) => isEqualRef.current(previous, next),
+                () => {
+                    maybeSyncSelected();
+                    notify();
+                },
+            );
+        },
+        [isEqualRef, maybeSyncSelected, selectorRef, store],
+    );
     const getSnapshot = useCallback(() => selectedRef.current, []);
 
     return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
@@ -108,10 +85,13 @@ export const useEditorLiveActiveBlock = () => {
 };
 
 export const useEditorLiveActiveBlockInfo = () => {
-    return useEditorLiveSelector<EditorLiveActiveBlockInfo>(snapshot => ({
-        id: snapshot.activeBlockId,
-        type: snapshot.activeBlockType,
-    }), (previous, next) => {
-        return previous.id === next.id && previous.type === next.type;
-    });
+    return useEditorLiveSelector<EditorLiveActiveBlockInfo>(
+        snapshot => ({
+            id: snapshot.activeBlockId,
+            type: snapshot.activeBlockType,
+        }),
+        (previous, next) => {
+            return previous.id === next.id && previous.type === next.type;
+        },
+    );
 };

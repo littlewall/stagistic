@@ -171,12 +171,8 @@ const faqs = [
                         </svg>
                     </div>
                     <div class={s.scriptExcerpt} aria-describedby="interactive-preview-description">
-                        <LandingMiniEditor client:media="not (max-width: 1000px)" />
+                        <LandingMiniEditor client:media="(min-width: 1000px)" />
                     </div>
-                    <p class={s.desktopOnlyNotice} role="note">
-                        Stagistic Editor is built for larger screens. Open it on a laptop or desktop at least 1000 pixels wide &mdash; mobile support is on the
-                        way.
-                    </p>
                 </div>
             </div>
         </section>
@@ -322,10 +318,6 @@ const faqs = [
                     </div>
                     <div class={s.previewCtas}>
                         <a href="https://editor.stagistic.app" class={s.btnPrimary}> Open editor in browser </a>
-                        <p class={s.desktopOnlyNotice} role="note">
-                            Stagistic Editor is built for larger screens. Open it on a laptop or desktop at least 1000 pixels wide &mdash; mobile support is on
-                            the way.
-                        </p>
                     </div>
                 </div>
             </div>

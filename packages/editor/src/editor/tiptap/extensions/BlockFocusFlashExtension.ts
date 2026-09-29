@@ -1,13 +1,7 @@
 import {Extension} from '@tiptap/core';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
-import {
-    Plugin,
-    PluginKey,
-} from '@tiptap/pm/state';
-import {
-    Decoration,
-    DecorationSet,
-} from '@tiptap/pm/view';
+import {Plugin, PluginKey} from '@tiptap/pm/state';
+import {Decoration, DecorationSet} from '@tiptap/pm/view';
 
 import {isScriptBlockNodeName} from '../scriptCore';
 
@@ -26,31 +20,28 @@ import {isScriptBlockNodeName} from '../scriptCore';
 type BlockFocusFlashPhase = 'a' | 'b';
 
 interface BlockFocusFlashState {
-    blockId: string,
-    phase: BlockFocusFlashPhase,
-    decorations: DecorationSet,
+    blockId: string;
+    phase: BlockFocusFlashPhase;
+    decorations: DecorationSet;
 }
 
 interface BlockFocusFlashMeta {
-    blockId: string,
+    blockId: string;
 }
 
 /** Hold + fade of the flash keyframes in `blocks/base/Block.module.css`. */
-export const BLOCK_FOCUS_FLASH_DURATION_MS = 3000;
+const BLOCK_FOCUS_FLASH_DURATION_MS = 3000;
 
 export const BLOCK_FOCUS_FLASH_ATTRIBUTE = 'data-focus-flash';
 
 const blockFocusFlashKey = new PluginKey<BlockFocusFlashState | null>('block-focus-flash');
 
 interface ScriptBlockRange {
-    from: number,
-    to: number,
+    from: number;
+    to: number;
 }
 
-const findScriptBlockRange = (
-    doc: ProseMirrorNode,
-    blockId: string,
-): ScriptBlockRange | null => {
+const findScriptBlockRange = (doc: ProseMirrorNode, blockId: string): ScriptBlockRange | null => {
     let range: ScriptBlockRange | null = null;
 
     doc.descendants((node, pos) => {
@@ -74,11 +65,7 @@ const findScriptBlockRange = (
     return range;
 };
 
-const buildFlashState = (
-    doc: ProseMirrorNode,
-    blockId: string,
-    phase: BlockFocusFlashPhase,
-): BlockFocusFlashState | null => {
+const buildFlashState = (doc: ProseMirrorNode, blockId: string, phase: BlockFocusFlashPhase): BlockFocusFlashState | null => {
     const range = findScriptBlockRange(doc, blockId);
 
     if (!range) {
@@ -95,8 +82,8 @@ const buildFlashState = (
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         blockFocusFlash: {
-            flashBlockFocus: (blockId: string) => ReturnType,
-        },
+            flashBlockFocus: (blockId: string) => ReturnType;
+        };
     }
 }
 
@@ -105,19 +92,19 @@ export const BlockFocusFlashExtension = Extension.create({
 
     addCommands() {
         return {
-            flashBlockFocus: blockId => ({tr, dispatch}) => {
-                if (!findScriptBlockRange(tr.doc, blockId)) {
-                    return false;
-                }
+            flashBlockFocus:
+                blockId =>
+                ({tr, dispatch}) => {
+                    if (!findScriptBlockRange(tr.doc, blockId)) {
+                        return false;
+                    }
 
-                if (dispatch) {
-                    tr
-                        .setMeta(blockFocusFlashKey, {blockId} satisfies BlockFocusFlashMeta)
-                        .setMeta('addToHistory', false);
-                }
+                    if (dispatch) {
+                        tr.setMeta(blockFocusFlashKey, {blockId} satisfies BlockFocusFlashMeta).setMeta('addToHistory', false);
+                    }
 
-                return true;
-            },
+                    return true;
+                },
         };
     },
 
@@ -128,8 +115,7 @@ export const BlockFocusFlashExtension = Extension.create({
                 state: {
                     init: () => null,
                     apply: (tr, value) => {
-                        const meta = tr.getMeta(blockFocusFlashKey) as
-                            BlockFocusFlashMeta | null | undefined;
+                        const meta = tr.getMeta(blockFocusFlashKey) as BlockFocusFlashMeta | null | undefined;
 
                         if (meta === null) {
                             return null;
@@ -142,11 +128,7 @@ export const BlockFocusFlashExtension = Extension.create({
                              * row replay the flash instead of leaving the
                              * running one to finish.
                              */
-                            return buildFlashState(
-                                tr.doc,
-                                meta.blockId,
-                                value?.phase === 'a' ? 'b' : 'a',
-                            );
+                            return buildFlashState(tr.doc, meta.blockId, value?.phase === 'a' ? 'b' : 'a');
                         }
 
                         if (!value) {
@@ -192,11 +174,7 @@ export const BlockFocusFlashExtension = Extension.create({
 
                             timer = window.setTimeout(() => {
                                 timer = null;
-                                currentView.dispatch(
-                                    currentView.state.tr
-                                        .setMeta(blockFocusFlashKey, null)
-                                        .setMeta('addToHistory', false),
-                                );
+                                currentView.dispatch(currentView.state.tr.setMeta(blockFocusFlashKey, null).setMeta('addToHistory', false));
                             }, BLOCK_FOCUS_FLASH_DURATION_MS);
                         },
                         destroy: clearTimer,

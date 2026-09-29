@@ -1,7 +1,4 @@
-import {
-    createNodeId,
-    resolveScriptBlockNodeType,
-} from '@stagistic/script';
+import {createNodeId, resolveScriptBlockNodeType} from '@stagistic/script';
 import {getEnterFallback} from '@stagistic/script';
 import type {NodeType} from '@tiptap/pm/model';
 import {TextSelection} from '@tiptap/pm/state';
@@ -16,27 +13,16 @@ import {
     normalizeBlockNodeType,
     SCRIPT_BLOCK_NODE_NAMES,
 } from '../../scriptCore';
-import {
-    insertActionBefore,
-    setBlockTypeWithSelection,
-    splitBlockWithType,
-} from '../commands';
-import {
-    type BlockContext,
-    createBlockContext,
-    isEmptyDialogueLikeBlock,
-} from '../context';
+import {insertActionBefore, setBlockTypeWithSelection, splitBlockWithType} from '../commands';
+import {type BlockContext, createBlockContext, isEmptyDialogueLikeBlock} from '../context';
 import {resolveAsideFlowTarget} from './tab';
-import {
-    type BlockNextElementMap,
-    type HandlerMap,
-} from './types';
+import {type BlockNextElementMap, type HandlerMap} from './types';
 
 type DialogueLikeBlockType = 'dialogue' | 'lyrics';
 
 type ScriptBlockEntry = {
-    pos: number,
-    blockType: BlockNodeType,
+    pos: number;
+    blockType: BlockNodeType;
 };
 
 const isDialogueLikeType = (blockType: BlockNodeType): blockType is DialogueLikeBlockType => {
@@ -62,11 +48,7 @@ const collectScriptBlocks = (editor: Editor) => {
     return blocks;
 };
 
-const findNearestDialogueLikeType = (
-    blocks: ScriptBlockEntry[],
-    blockIndex: number,
-    direction: -1 | 1,
-): DialogueLikeBlockType | null => {
+const findNearestDialogueLikeType = (blocks: ScriptBlockEntry[], blockIndex: number, direction: -1 | 1): DialogueLikeBlockType | null => {
     for (let index = blockIndex + direction; index >= 0 && index < blocks.length; index += direction) {
         const {blockType} = blocks[index];
 
@@ -78,7 +60,7 @@ const findNearestDialogueLikeType = (
     return null;
 };
 
-export const resolveParentheticalTabTarget = (editor: Editor, blockPos: number): DialogueLikeBlockType => {
+const resolveParentheticalTabTarget = (editor: Editor, blockPos: number): DialogueLikeBlockType => {
     const blocks = collectScriptBlocks(editor);
     const blockIndex = blocks.findIndex(({pos}) => pos === blockPos);
 
@@ -86,15 +68,10 @@ export const resolveParentheticalTabTarget = (editor: Editor, blockPos: number):
         return 'dialogue';
     }
 
-    return findNearestDialogueLikeType(blocks, blockIndex, -1)
-        ?? findNearestDialogueLikeType(blocks, blockIndex, 1)
-        ?? 'dialogue';
+    return findNearestDialogueLikeType(blocks, blockIndex, -1) ?? findNearestDialogueLikeType(blocks, blockIndex, 1) ?? 'dialogue';
 };
 
-export const resolveNextTypeOnEnter = (
-    blockType: BlockNodeType,
-    blockNextElements?: BlockNextElementMap,
-): BlockNodeType => {
+export const resolveNextTypeOnEnter = (blockType: BlockNodeType, blockNextElements?: BlockNextElementMap): BlockNodeType => {
     const configured = blockNextElements?.[blockType];
 
     return configured ?? normalizeBlockNodeType(getEnterFallback(blockType));
@@ -107,12 +84,8 @@ export const resolveNextTypeOnEnter = (
  * the setting where it knows something the setting cannot: a lyrics flow.
  * Dialogue flows keep honouring the configured type.
  */
-export const resolveAdvanceTypeOnEnter = (
-    context: BlockContext,
-    blockNextElements?: BlockNextElementMap,
-): BlockNodeType => {
-    const isResumingLyrics = context.block.blockType === 'aside'
-        && resolveAsideFlowTarget(context.editor.state.doc, context.block.pos) === 'lyrics';
+const resolveAdvanceTypeOnEnter = (context: BlockContext, blockNextElements?: BlockNextElementMap): BlockNodeType => {
+    const isResumingLyrics = context.block.blockType === 'aside' && resolveAsideFlowTarget(context.editor.state.doc, context.block.pos) === 'lyrics';
 
     if (isResumingLyrics) {
         return 'lyrics';
@@ -132,17 +105,10 @@ export const resolveAdvanceTypeOnEnter = (
  * must never produce a second scene heading — mid-content or not. It always
  * advances to the configured next type, carrying any trailing text along.
  */
-const resolveSplitType = (
-    context: BlockContext,
-    blockNextElements?: BlockNextElementMap,
-): BlockNodeType => context.isAtEnd || context.block.blockType === 'scene'
-    ? resolveAdvanceTypeOnEnter(context, blockNextElements)
-    : context.block.blockType;
+const resolveSplitType = (context: BlockContext, blockNextElements?: BlockNextElementMap): BlockNodeType =>
+    context.isAtEnd || context.block.blockType === 'scene' ? resolveAdvanceTypeOnEnter(context, blockNextElements) : context.block.blockType;
 
-const insertBlockAfter = (
-    context: BlockContext,
-    blockType: BlockNodeType,
-) => {
+const insertBlockAfter = (context: BlockContext, blockType: BlockNodeType) => {
     const nodes = context.editor.schema.nodes as Record<string, NodeType>;
     const nextNodeType = nodes[resolveScriptBlockNodeType(blockType) ?? ''];
 
@@ -186,17 +152,10 @@ const shiftEnterHandlers: HandlerMap<(context: BlockContext) => boolean> = {
     ['character']: context => splitBlockWithType(context.editor, 'dialogue'),
     ['dialogue']: context => splitBlockWithType(context.editor, 'dialogue'),
     ['lyrics']: context => splitBlockWithType(context.editor, 'lyrics'),
-    ['aside']: context => splitBlockWithType(
-        context.editor,
-        resolveParentheticalTabTarget(context.editor, context.block.pos),
-    ),
+    ['aside']: context => splitBlockWithType(context.editor, resolveParentheticalTabTarget(context.editor, context.block.pos)),
 };
 
-export const handleEnter = (
-    editor: Editor,
-    event: KeyboardEvent,
-    blockNextElements?: BlockNextElementMap,
-) => {
+export const handleEnter = (editor: Editor, event: KeyboardEvent, blockNextElements?: BlockNextElementMap) => {
     const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 
     if (!block) {
@@ -204,25 +163,14 @@ export const handleEnter = (
     }
 
     const isEmptyBlock = isScriptBlockContentEmpty(block.node);
-    const hasOnlyNonTextContent = !isEmptyBlock
-        && (block.node.textContent ?? '').trim().length === 0;
+    const hasOnlyNonTextContent = !isEmptyBlock && (block.node.textContent ?? '').trim().length === 0;
     const wasSelectionEmpty = editor.state.selection.empty;
 
-    if (
-        !event.shiftKey
-        && editor.state.selection.empty
-        && isEmptyBlock
-        && isEmptyEnterChooserWriterType(block.blockType)
-    ) {
+    if (!event.shiftKey && editor.state.selection.empty && isEmptyBlock && isEmptyEnterChooserWriterType(block.blockType)) {
         event.preventDefault();
 
         const chooserCommands = editor.commands as {
-            openEmptyEnterChooser?: (payload: {
-                blockId: string,
-                blockPos: number,
-                blockType: BlockNodeType,
-                selectedType?: BlockNodeType,
-            }) => boolean,
+            openEmptyEnterChooser?: (payload: {blockId: string; blockPos: number; blockType: BlockNodeType; selectedType?: BlockNodeType}) => boolean;
         };
 
         chooserCommands.openEmptyEnterChooser?.({
@@ -244,16 +192,10 @@ export const handleEnter = (
     const context = createBlockContext(editor, block);
 
     if (!event.shiftKey && wasSelectionEmpty && hasOnlyNonTextContent) {
-        return insertBlockAfter(
-            context,
-            resolveAdvanceTypeOnEnter(context, blockNextElements),
-        );
+        return insertBlockAfter(context, resolveAdvanceTypeOnEnter(context, blockNextElements));
     }
 
-    if (
-        block.blockType === 'aside'
-        && isScriptBlockContentEmpty(block.node)
-    ) {
+    if (block.blockType === 'aside' && isScriptBlockContentEmpty(block.node)) {
         return setBlockTypeWithSelection(editor, block, 'character');
     }
 
@@ -278,9 +220,4 @@ export const handleEnter = (
     }
 
     return splitBlockWithType(editor, resolveSplitType(context, blockNextElements));
-};
-
-export const enterHandlerMaps = {
-    enterHandlers,
-    shiftEnterHandlers,
 };

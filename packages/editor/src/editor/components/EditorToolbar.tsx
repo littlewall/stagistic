@@ -1,5 +1,5 @@
 import {type BlockShortcut, type ScriptBlockNodeType} from '@stagistic/script';
-import {SearchControl} from '@stagistic/ui';
+import {SearchControl, useDropdownDismiss} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState} from 'react';
 
@@ -11,7 +11,6 @@ import {normalizeBlockNodeType} from '../tiptap/scriptCore';
 import {BlockTypeSelect} from './toolbar/BlockTypeSelect';
 import type {BlockTypeSelectActions, BlockTypeSelectState, InlineMarksGroupActions, InlineMarksGroupState} from './toolbar/contracts';
 import {InlineMarksGroup} from './toolbar/InlineMarksGroup';
-import {useDropdownDismiss} from './toolbar/useDropdownDismiss';
 import {useToolbarState} from './toolbar/useToolbarState';
 
 import styles from './EditorToolbar.module.css';
@@ -43,11 +42,7 @@ const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
         isMultiBlockSelection,
     } = useToolbarState({editor});
 
-    useDropdownDismiss({
-        isOpen,
-        setIsOpen,
-        dropdownRef,
-    });
+    useDropdownDismiss(isOpen, setIsOpen, dropdownRef);
 
     useExclusiveOverlay(isOpen, () => setIsOpen(false));
 

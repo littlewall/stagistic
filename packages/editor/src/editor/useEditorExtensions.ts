@@ -34,8 +34,8 @@ import {
 } from './tiptap/extensions';
 import {DocumentWithSettings} from './tiptap/extensions/DocumentExtension';
 import {CharacterTagMark, CommentAnchorMark} from './tiptap/marks';
-import {MusicOutNode, MusicStartNode, SCRIPT_BLOCK_NODE_NAMES, ScriptBlockNodes} from './tiptap/nodes';
-import type {BlockNodeType} from './tiptap/scriptCore';
+import {MusicOutNode, MusicStartNode, ScriptBlockNodes} from './tiptap/nodes';
+import {type BlockNodeType, SCRIPT_BLOCK_NODE_NAMES} from './tiptap/scriptCore';
 
 import characterTagStyles from './tiptap/scriptBlock/CharacterTagDecorations.module.css';
 

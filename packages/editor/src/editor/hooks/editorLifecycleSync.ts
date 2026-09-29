@@ -2,37 +2,15 @@ import type {ScriptDocument} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useCallback, useRef} from 'react';
 
-import type {
-    EditorIndexSnapshot,
-    EditorLiveScenePlacementSnapshot,
-    EditorLiveSnapshot,
-    EditorValueChangeMeta,
-} from '../contracts';
+import type {EditorIndexSnapshot, EditorLiveScenePlacementSnapshot, EditorLiveSnapshot, EditorValueChangeMeta} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
-import {
-    buildSidebarProjectionFromIndex,
-    type SidebarProjectionColorContext,
-} from '../live/buildSidebarProjectionFromIndex';
+import {buildSidebarProjectionFromIndex, type SidebarProjectionColorContext} from '../live/buildSidebarProjectionFromIndex';
 import {type EditorSnapshotStore, EMPTY_SCENE_PLACEMENT} from '../live/store';
-import {
-    incrementFullDocJsonSerializeCount,
-    incrementFullIndexBuildCount,
-    incrementTransactionBridgePatchCount,
-    trackIndexUpdateDuration,
-} from '../perf/editorPerfMetrics';
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
 import {buildScenePlacements} from '../runtime/buildScenePlacements';
-import {
-    getBlockUiEventsFromState,
-    getEditorRuntimeFromState,
-    getPaginationPluginState,
-} from '../tiptap/extensions';
+import {getBlockUiEventsFromState, getEditorRuntimeFromState, getPaginationPluginState} from '../tiptap/extensions';
 import type {PaginationState} from '../tiptap/extensions/pagination/types';
-import {
-    ensureScriptBlockId,
-    isScriptBlockNodeName,
-    normalizeBlockNodeType,
-} from '../tiptap/scriptCore';
+import {ensureScriptBlockId, isScriptBlockNodeName, normalizeBlockNodeType} from '../tiptap/scriptCore';
 import type {UseEditorLifecycleArgs} from './editorLifecycleTypes';
 import type {useLatestRef} from './useLatestRef';
 
@@ -79,18 +57,7 @@ export const sanitizeScriptBlocks = (editor: TiptapEditor) => {
     editor.view.dispatch(tr.setMeta('preventUpdate', true).setMeta('addToHistory', false));
 };
 
-const getNow = () => {
-    if (typeof performance !== 'undefined') {
-        return performance.now();
-    }
-
-    return Date.now();
-};
-
-const resolveSidebarProjection = (
-    snapshot: EditorIndexSnapshot,
-    colorContext?: SidebarProjectionColorContext,
-) => {
+const resolveSidebarProjection = (snapshot: EditorIndexSnapshot, colorContext?: SidebarProjectionColorContext) => {
     return {
         projection: buildSidebarProjectionFromIndex(snapshot, colorContext),
         change: {
@@ -106,30 +73,28 @@ const hasStructureRows = (snapshot: EditorLiveSnapshot['structure']) => {
 };
 
 const hasCharacterRows = (snapshot: EditorLiveSnapshot['characters']) => {
-    return snapshot.countsByKey.size > 0
-        || snapshot.countsByCharacterId.size > 0
-        || snapshot.keyByCharacterId.size > 0;
+    return snapshot.countsByKey.size > 0 || snapshot.countsByCharacterId.size > 0 || snapshot.keyByCharacterId.size > 0;
 };
 
 type LatestRef<T> = ReturnType<typeof useLatestRef<T>>;
 
 interface UseEditorLifecycleSyncArgs {
-    liveStore: EditorSnapshotStore,
-    setLatestValue: UseEditorLifecycleArgs['document']['setLatestValue'],
-    characters: UseEditorLifecycleArgs['characters'],
-    lastEmittedActiveBlockIdRef: {current: string | null | undefined},
-    onValueChangeRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onValueChange']>,
-    onIndexChangeRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onIndexChange']>,
-    onActiveBlockChangeRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onActiveBlockChange']>,
-    onBlockUiEventRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onBlockUiEvent']>,
+    liveStore: EditorSnapshotStore;
+    setLatestValue: UseEditorLifecycleArgs['document']['setLatestValue'];
+    characters: UseEditorLifecycleArgs['characters'];
+    lastEmittedActiveBlockIdRef: {current: string | null | undefined};
+    onValueChangeRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onValueChange']>;
+    onIndexChangeRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onIndexChange']>;
+    onActiveBlockChangeRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onActiveBlockChange']>;
+    onBlockUiEventRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onBlockUiEvent']>;
 }
 
 export interface EditorLifecycleSyncCallbacks {
-    syncValueFromEditor: (targetEditor: TiptapEditor, meta: EditorValueChangeMeta) => void,
-    patchFallbackSnapshot: (snapshot: EditorIndexSnapshot, meta: EditorValueChangeMeta) => void,
-    syncRuntimeSnapshotFromEditor: (targetEditor: TiptapEditor, snapshot?: EditorIndexSnapshot) => void,
-    emitIndexFromEditor: (targetEditor: TiptapEditor, meta: EditorValueChangeMeta) => void,
-    emitBlockUiEventsFromEditor: (targetEditor: TiptapEditor) => void,
+    syncValueFromEditor: (targetEditor: TiptapEditor, meta: EditorValueChangeMeta) => void;
+    patchFallbackSnapshot: (snapshot: EditorIndexSnapshot, meta: EditorValueChangeMeta) => void;
+    syncRuntimeSnapshotFromEditor: (targetEditor: TiptapEditor, snapshot?: EditorIndexSnapshot) => void;
+    emitIndexFromEditor: (targetEditor: TiptapEditor, meta: EditorValueChangeMeta) => void;
+    emitBlockUiEventsFromEditor: (targetEditor: TiptapEditor) => void;
 }
 
 /*
@@ -162,9 +127,7 @@ export const useEditorLifecycleSync = ({
     const scenePlacementRef = useRef<EditorLiveScenePlacementSnapshot>(EMPTY_SCENE_PLACEMENT);
     const scenePlacementFingerprintRef = useRef<string>('');
 
-    const resolveScenePlacement = useCallback((
-        targetEditor: TiptapEditor,
-    ): EditorLiveScenePlacementSnapshot => {
+    const resolveScenePlacement = useCallback((targetEditor: TiptapEditor): EditorLiveScenePlacementSnapshot => {
         const paginationPlugin = getPaginationPluginState(targetEditor.state);
         const pagination = paginationPlugin?.pagination ?? null;
 
@@ -186,149 +149,140 @@ export const useEditorLifecycleSync = ({
         return scenePlacementRef.current;
     }, []);
 
-    const syncValueFromEditor = useCallback((
-        targetEditor: TiptapEditor,
-        meta: EditorValueChangeMeta,
-    ) => {
-        incrementFullDocJsonSerializeCount();
+    const syncValueFromEditor = useCallback(
+        (targetEditor: TiptapEditor, meta: EditorValueChangeMeta) => {
+            const nextValue = stripScriptSettings(targetEditor.getJSON() as ScriptDocument);
 
-        const nextValue = stripScriptSettings(targetEditor.getJSON() as ScriptDocument);
+            setLatestValue(nextValue, meta.revision);
+            onValueChangeRef.current?.(nextValue, meta);
+        },
+        [onValueChangeRef, setLatestValue],
+    );
 
-        setLatestValue(nextValue, meta.revision);
-        onValueChangeRef.current?.(nextValue, meta);
-    }, [onValueChangeRef, setLatestValue]);
-
-    const patchFallbackSnapshot = useCallback((
-        snapshot: EditorIndexSnapshot,
-        meta: EditorValueChangeMeta,
-    ) => {
-        const hasIndexSubscriber = Boolean(onIndexChangeRef.current);
-        const {projection, change} = resolveSidebarProjection(snapshot, {
-            characterColorSaturation: characters?.characterColorSaturation,
-            colorByCharacterId: characters?.colorByCharacterIdRef?.current,
-            rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
-            persistentCharacters: characters?.persistentCharactersRef?.current,
-        });
-        const patch: Partial<EditorLiveSnapshot> = {
-            revision: meta.revision,
-            music: snapshot.music,
-            activeBlockId: liveStore.getSnapshot().activeBlockId,
-            activeBlockType: liveStore.getSnapshot().activeBlockType,
-        };
-
-        if (hasIndexSubscriber) {
-            patch.index = snapshot;
-        }
-
-        if (meta.source === 'structure' || change.structureChanged) {
-            patch.structure = projection.structure;
-        }
-
-        if (meta.source === 'structure' || change.charactersChanged) {
-            patch.characters = projection.characters;
-        }
-
-        liveStore.patchSnapshot(patch);
-
-        if (hasIndexSubscriber) {
-            onIndexChangeRef.current?.(snapshot, meta);
-        }
-    }, [
-        characters?.characterColorSaturation,
-        characters?.colorByCharacterIdRef,
-        characters?.rememberedColorByKeyRef,
-        characters?.persistentCharactersRef,
-        liveStore,
-        onIndexChangeRef,
-    ]);
-
-    const syncRuntimeSnapshotFromEditor = useCallback((
-        targetEditor: TiptapEditor,
-        snapshot?: EditorIndexSnapshot,
-    ) => {
-        const runtime = getEditorRuntimeFromState(targetEditor.state);
-
-        if (!runtime) {
-            return;
-        }
-
-        const currentSnapshot = liveStore.getSnapshot();
-        const fallbackProjection = snapshot
-            ? buildSidebarProjectionFromIndex(snapshot, {
+    const patchFallbackSnapshot = useCallback(
+        (snapshot: EditorIndexSnapshot, meta: EditorValueChangeMeta) => {
+            const hasIndexSubscriber = Boolean(onIndexChangeRef.current);
+            const {projection, change} = resolveSidebarProjection(snapshot, {
                 characterColorSaturation: characters?.characterColorSaturation,
                 colorByCharacterId: characters?.colorByCharacterIdRef?.current,
                 rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
                 persistentCharacters: characters?.persistentCharactersRef?.current,
-            })
-            : null;
-        const nextStructure = hasStructureRows(runtime.structure)
-            ? runtime.structure
-            : fallbackProjection?.structure ?? currentSnapshot.structure;
-        const nextCharacters = hasCharacterRows(runtime.characters)
-            ? runtime.characters
-            : fallbackProjection?.characters ?? currentSnapshot.characters;
+            });
+            const patch: Partial<EditorLiveSnapshot> = {
+                revision: meta.revision,
+                music: snapshot.music,
+                activeBlockId: liveStore.getSnapshot().activeBlockId,
+                activeBlockType: liveStore.getSnapshot().activeBlockType,
+            };
 
-        incrementTransactionBridgePatchCount();
-        liveStore.patchSnapshot({
-            revision: runtime.revision,
-            activeBlockId: runtime.activeBlockId,
-            activeBlockType: runtime.activeBlockType,
-            structure: nextStructure,
-            scenePlacement: resolveScenePlacement(targetEditor),
-            characters: nextCharacters,
-            music: runtime.music,
-            ...snapshot ? {index: snapshot} : {},
-        });
+            if (hasIndexSubscriber) {
+                patch.index = snapshot;
+            }
 
-        if (lastEmittedActiveBlockIdRef.current !== runtime.activeBlockId) {
-            lastEmittedActiveBlockIdRef.current = runtime.activeBlockId;
-            onActiveBlockChangeRef.current?.(runtime.activeBlockId);
-        }
-    }, [
-        characters?.characterColorSaturation,
-        characters?.colorByCharacterIdRef,
-        characters?.persistentCharactersRef,
-        characters?.rememberedColorByKeyRef,
-        lastEmittedActiveBlockIdRef,
-        liveStore,
-        onActiveBlockChangeRef,
-        resolveScenePlacement,
-    ]);
+            if (meta.source === 'structure' || change.structureChanged) {
+                patch.structure = projection.structure;
+            }
 
-    const emitIndexFromEditor = useCallback((
-        targetEditor: TiptapEditor,
-        meta: EditorValueChangeMeta,
-    ) => {
-        if (!onIndexChangeRef.current) {
-            return;
-        }
+            if (meta.source === 'structure' || change.charactersChanged) {
+                patch.characters = projection.characters;
+            }
 
-        const startedAt = getNow();
+            liveStore.patchSnapshot(patch);
 
-        incrementFullIndexBuildCount();
+            if (hasIndexSubscriber) {
+                onIndexChangeRef.current?.(snapshot, meta);
+            }
+        },
+        [
+            characters?.characterColorSaturation,
+            characters?.colorByCharacterIdRef,
+            characters?.rememberedColorByKeyRef,
+            characters?.persistentCharactersRef,
+            liveStore,
+            onIndexChangeRef,
+        ],
+    );
 
-        const snapshot = buildIndexSnapshotFromPmDoc(targetEditor.state.doc);
+    const syncRuntimeSnapshotFromEditor = useCallback(
+        (targetEditor: TiptapEditor, snapshot?: EditorIndexSnapshot) => {
+            const runtime = getEditorRuntimeFromState(targetEditor.state);
 
-        syncRuntimeSnapshotFromEditor(targetEditor, snapshot);
-        onIndexChangeRef.current?.(snapshot, meta);
-        trackIndexUpdateDuration(getNow() - startedAt);
-    }, [onIndexChangeRef, syncRuntimeSnapshotFromEditor]);
+            if (!runtime) {
+                return;
+            }
 
-    const emitBlockUiEventsFromEditor = useCallback((targetEditor: TiptapEditor) => {
-        if (!onBlockUiEventRef.current) {
-            return;
-        }
+            const currentSnapshot = liveStore.getSnapshot();
+            const fallbackProjection = snapshot
+                ? buildSidebarProjectionFromIndex(snapshot, {
+                      characterColorSaturation: characters?.characterColorSaturation,
+                      colorByCharacterId: characters?.colorByCharacterIdRef?.current,
+                      rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
+                      persistentCharacters: characters?.persistentCharactersRef?.current,
+                  })
+                : null;
+            const nextStructure = hasStructureRows(runtime.structure) ? runtime.structure : (fallbackProjection?.structure ?? currentSnapshot.structure);
+            const nextCharacters = hasCharacterRows(runtime.characters) ? runtime.characters : (fallbackProjection?.characters ?? currentSnapshot.characters);
 
-        const events = getBlockUiEventsFromState(targetEditor.state);
+            liveStore.patchSnapshot({
+                revision: runtime.revision,
+                activeBlockId: runtime.activeBlockId,
+                activeBlockType: runtime.activeBlockType,
+                structure: nextStructure,
+                scenePlacement: resolveScenePlacement(targetEditor),
+                characters: nextCharacters,
+                music: runtime.music,
+                ...(snapshot ? {index: snapshot} : {}),
+            });
 
-        if (events.length === 0) {
-            return;
-        }
+            if (lastEmittedActiveBlockIdRef.current !== runtime.activeBlockId) {
+                lastEmittedActiveBlockIdRef.current = runtime.activeBlockId;
+                onActiveBlockChangeRef.current?.(runtime.activeBlockId);
+            }
+        },
+        [
+            characters?.characterColorSaturation,
+            characters?.colorByCharacterIdRef,
+            characters?.persistentCharactersRef,
+            characters?.rememberedColorByKeyRef,
+            lastEmittedActiveBlockIdRef,
+            liveStore,
+            onActiveBlockChangeRef,
+            resolveScenePlacement,
+        ],
+    );
 
-        events.forEach(event => {
-            onBlockUiEventRef.current?.(event);
-        });
-    }, [onBlockUiEventRef]);
+    const emitIndexFromEditor = useCallback(
+        (targetEditor: TiptapEditor, meta: EditorValueChangeMeta) => {
+            if (!onIndexChangeRef.current) {
+                return;
+            }
+
+            const snapshot = buildIndexSnapshotFromPmDoc(targetEditor.state.doc);
+
+            syncRuntimeSnapshotFromEditor(targetEditor, snapshot);
+            onIndexChangeRef.current?.(snapshot, meta);
+        },
+        [onIndexChangeRef, syncRuntimeSnapshotFromEditor],
+    );
+
+    const emitBlockUiEventsFromEditor = useCallback(
+        (targetEditor: TiptapEditor) => {
+            if (!onBlockUiEventRef.current) {
+                return;
+            }
+
+            const events = getBlockUiEventsFromState(targetEditor.state);
+
+            if (events.length === 0) {
+                return;
+            }
+
+            events.forEach(event => {
+                onBlockUiEventRef.current?.(event);
+            });
+        },
+        [onBlockUiEventRef],
+    );
 
     return {
         syncValueFromEditor,

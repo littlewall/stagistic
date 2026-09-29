@@ -48,23 +48,6 @@
     }
 }
 
-.textIcon {
-    font-family: var(--font-family-mono);
-    font-size: var(--font-size-sm);
-    font-weight: var(--font-weight-bold);
-    letter-spacing: var(--letter-spacing-sm);
-}
-
-.textIconItalic {
-    font-weight: var(--font-weight-semibold);
-    font-style: italic;
-}
-
-.textIconUnderline {
-    text-decoration: underline;
-    text-underline-offset: 2px;
-}
-
 .dropdown {
     position: relative;
 }
@@ -220,10 +203,6 @@
             background: var(--menu-item-active-bg);
         }
     }
-}
-
-.menuItemLabel {
-    line-height: var(--line-height-snug);
 }
 
 .menuLabel {

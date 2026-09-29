@@ -1,18 +1,10 @@
-import {
-    getScriptBlockId,
-    type ScriptDocument,
-    type ScriptNode,
-} from '../document';
-import {buildScriptBlockIndex} from '../indexing';
-import {
-    MUSIC_ID_ATTR,
-    MUSIC_OUT_NODE_NAME,
-    MUSIC_START_NODE_NAME,
-} from './constants';
+import {getScriptBlockId, type ScriptDocument, type ScriptNode} from '../document';
+import {buildScriptBlockIndex} from '../indexing/scriptBlockIndex';
+import {MUSIC_ID_ATTR, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME} from './constants';
 
 export interface RemoveMusicFromScriptDocumentResult {
-    value: ScriptDocument,
-    changed: boolean,
+    value: ScriptDocument;
+    changed: boolean;
 }
 
 const getMusicId = (node: ScriptNode) => {
@@ -21,20 +13,14 @@ const getMusicId = (node: ScriptNode) => {
     return typeof musicId === 'string' ? musicId : '';
 };
 
-export const removeMusicFromScriptDocument = (
-    document: ScriptDocument,
-    musicId: string,
-): RemoveMusicFromScriptDocumentResult => {
-    const music = buildScriptBlockIndex(document).snapshot.music
-        .find(candidate => candidate.musicId === musicId);
+export const removeMusicFromScriptDocument = (document: ScriptDocument, musicId: string): RemoveMusicFromScriptDocumentResult => {
+    const music = buildScriptBlockIndex(document).snapshot.music.find(candidate => candidate.musicId === musicId);
 
     if (!music) {
         return {value: document, changed: false};
     }
 
-    const explicitEndBlockId = music.endKind === 'explicit'
-        ? music.endBlockId
-        : null;
+    const explicitEndBlockId = music.endKind === 'explicit' ? music.endBlockId : null;
     let changed = false;
 
     const transformNode = (node: ScriptNode): ScriptNode => {
@@ -44,10 +30,8 @@ export const removeMusicFromScriptDocument = (
 
         const blockId = getScriptBlockId(node);
         const nextContent = node.content.flatMap(child => {
-            const isSelectedStart = child.type === MUSIC_START_NODE_NAME
-                && getMusicId(child) === musicId;
-            const isPairedOut = child.type === MUSIC_OUT_NODE_NAME
-                && blockId === explicitEndBlockId;
+            const isSelectedStart = child.type === MUSIC_START_NODE_NAME && getMusicId(child) === musicId;
+            const isPairedOut = child.type === MUSIC_OUT_NODE_NAME && blockId === explicitEndBlockId;
 
             if (isSelectedStart || isPairedOut) {
                 changed = true;
@@ -57,14 +41,11 @@ export const removeMusicFromScriptDocument = (
 
             return [transformNode(child)];
         });
-        const contentChanged = nextContent.some((child, index) => child !== node.content?.[index])
-            || nextContent.length !== node.content.length;
+        const contentChanged = nextContent.some((child, index) => child !== node.content?.[index]) || nextContent.length !== node.content.length;
 
         return contentChanged ? {...node, content: nextContent} : node;
     };
     const nextContent = document.content.map(transformNode);
 
-    return changed
-        ? {value: {...document, content: nextContent}, changed: true}
-        : {value: document, changed: false};
+    return changed ? {value: {...document, content: nextContent}, changed: true} : {value: document, changed: false};
 };

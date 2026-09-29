@@ -1,17 +1,14 @@
 import {getMarkRange} from '@tiptap/core';
-import type {
-    Mark,
-    MarkType,
-} from '@tiptap/pm/model';
+import type {Mark, MarkType} from '@tiptap/pm/model';
 import type {EditorState} from '@tiptap/pm/state';
 
 import {readCharacterTagId} from '../../scriptBlock/characterTagMarkCommands';
 import {isPendingTagSpaceGap} from './text';
 
 export interface EndTypingTagRange {
-    from: number,
-    to: number,
-    replaceTo: number,
+    from: number;
+    to: number;
+    replaceTo: number;
 }
 
 export const charAt = (state: EditorState, pos: number): string => {
@@ -22,11 +19,7 @@ export const charAt = (state: EditorState, pos: number): string => {
     return state.doc.textBetween(pos, pos + 1, '\n', '\n');
 };
 
-export const readCharacterTagMarkAt = (
-    state: EditorState,
-    pos: number,
-    markType: MarkType,
-): Mark | null => {
+const readCharacterTagMarkAt = (state: EditorState, pos: number, markType: MarkType): Mark | null => {
     if (pos < 0 || pos > state.doc.content.size) {
         return null;
     }
@@ -48,11 +41,7 @@ export const readCharacterTagMarkAt = (
     return readMark(state.doc.resolve(pos + 1).nodeBefore?.marks);
 };
 
-export const isCharacterTagMarkedAt = (
-    state: EditorState,
-    pos: number,
-    markType: MarkType,
-): boolean => {
+export const isCharacterTagMarkedAt = (state: EditorState, pos: number, markType: MarkType): boolean => {
     return readCharacterTagMarkAt(state, pos, markType) !== null;
 };
 
@@ -62,11 +51,7 @@ export const isCharacterTagMarkedAt = (
  * Used to gate compose suggestions so they only appear at the end of a pill,
  * never while editing in its middle.
  */
-export const isCaretAtCharacterTagEnd = (
-    state: EditorState,
-    pos: number,
-    markType: MarkType,
-): boolean => {
+export const isCaretAtCharacterTagEnd = (state: EditorState, pos: number, markType: MarkType): boolean => {
     if (pos < 0 || pos > state.doc.content.size) {
         return false;
     }
@@ -79,12 +64,7 @@ export const isCaretAtCharacterTagEnd = (
     return hasMark(resolved.nodeBefore?.marks) && !hasMark(resolved.nodeAfter?.marks);
 };
 
-export const readCommittedTagCharacterId = (
-    state: EditorState,
-    from: number,
-    to: number,
-    markType: MarkType,
-): string | null => {
+export const readCommittedTagCharacterId = (state: EditorState, from: number, to: number, markType: MarkType): string | null => {
     let characterId: string | null = null;
 
     state.doc.nodesBetween(from, to, child => {
@@ -98,10 +78,7 @@ export const readCommittedTagCharacterId = (
     return characterId;
 };
 
-export const findCommittedTagBeforeCursor = (
-    state: EditorState,
-    markType: MarkType,
-): {from: number, to: number} | null => {
+export const findCommittedTagBeforeCursor = (state: EditorState, markType: MarkType): {from: number; to: number} | null => {
     const cursor = state.selection.from;
 
     for (let probe = cursor; probe >= cursor - 4 && probe > 0; probe -= 1) {
@@ -115,10 +92,7 @@ export const findCommittedTagBeforeCursor = (
     return null;
 };
 
-export const findTagRangeForEndTyping = (
-    state: EditorState,
-    markType: MarkType,
-): EndTypingTagRange | null => {
+export const findTagRangeForEndTyping = (state: EditorState, markType: MarkType): EndTypingTagRange | null => {
     const cursor = state.selection.from;
     const directRange = getMarkRange(state.selection.$from, markType);
 
@@ -145,10 +119,7 @@ export const findTagRangeForEndTyping = (
     return null;
 };
 
-export const findTagRangeForConfirm = (
-    state: EditorState,
-    markType: MarkType,
-): {from: number, to: number} | null => {
+export const findTagRangeForConfirm = (state: EditorState, markType: MarkType): {from: number; to: number} | null => {
     const cursor = state.selection.from;
     const directRange = getMarkRange(state.selection.$from, markType);
 
@@ -175,19 +146,13 @@ export const findTagRangeForConfirm = (
     return null;
 };
 
-export const findProtectedTagSeparator = (
-    state: EditorState,
-    markType: MarkType,
-    spaceFrom: number,
-): {from: number, to: number} | null => {
+export const findProtectedTagSeparator = (state: EditorState, markType: MarkType, spaceFrom: number): {from: number; to: number} | null => {
     if (spaceFrom < 0 || charAt(state, spaceFrom) !== ' ') {
         return null;
     }
 
     const previousRange = getMarkRange(state.doc.resolve(spaceFrom), markType);
-    const nextRange = spaceFrom + 1 <= state.doc.content.size
-        ? getMarkRange(state.doc.resolve(spaceFrom + 1), markType)
-        : null;
+    const nextRange = spaceFrom + 1 <= state.doc.content.size ? getMarkRange(state.doc.resolve(spaceFrom + 1), markType) : null;
 
     if (!previousRange || !nextRange) {
         return null;
@@ -195,8 +160,8 @@ export const findProtectedTagSeparator = (
 
     return previousRange.to === spaceFrom && nextRange.from === spaceFrom + 1
         ? {
-            from: spaceFrom,
-            to: spaceFrom + 1,
-        }
+              from: spaceFrom,
+              to: spaceFrom + 1,
+          }
         : null;
 };

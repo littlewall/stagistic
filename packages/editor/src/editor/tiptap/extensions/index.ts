@@ -23,15 +23,10 @@
 
 // ─── Behaviour ───────────────────────────────────────────────────────────────
 
-export {characterTagComposeKey, CharacterTagInputExtension, getCharacterTagComposeFromState} from './CharacterTagInputExtension';
-export {
-    EMPTY_ENTER_CHOOSER_WRITER_TYPES,
-    EmptyEnterChooserExtension,
-    getEmptyEnterChooserFromState,
-    isEmptyEnterChooserWriterType,
-} from './EmptyEnterChooserExtension';
+export {CharacterTagInputExtension} from './CharacterTagInputExtension';
+export {EmptyEnterChooserExtension} from './EmptyEnterChooserExtension';
 export {MusicCommandsExtension} from './music/MusicCommandsExtension';
-export {getMusicComposeFromState, musicComposeKey, type MusicComposeState, MusicInputExtension} from './MusicInputExtension';
+export {getMusicComposeFromState, MusicInputExtension} from './MusicInputExtension';
 export {MusicNumberingExtension} from './MusicNumberingExtension';
 export {MusicRailExtension} from './musicRail/MusicRailExtension';
 export {SceneCommandsExtension} from './SceneCommandsExtension';
@@ -39,28 +34,18 @@ export {ScriptBehaviorExtension} from './ScriptBehaviorExtension';
 
 // ─── Decorations ─────────────────────────────────────────────────────────────
 
-export {BLOCK_FOCUS_FLASH_ATTRIBUTE, BLOCK_FOCUS_FLASH_DURATION_MS, BlockFocusFlashExtension} from './BlockFocusFlashExtension';
+export {BlockFocusFlashExtension} from './BlockFocusFlashExtension';
 export {PlaceholderExtension} from './PlaceholderExtension';
-export {
-    type CommentAnchorLocation,
-    type CommentBlockMerge,
-    type CommentDraft,
-    CommentsExtension,
-    type CommentsExtensionCallbacks,
-    commentsPluginKey,
-    type CommentsPluginState,
-    type EditorCommentThreadRef,
-    getCommentsState,
-} from './comments';
-export {getEditorSearchSnapshot, SearchExtension, type EditorSearchSnapshot, type SearchCriteria, type SearchResult} from './search';
+export {CommentsExtension, type CommentsExtensionCallbacks} from './comments';
+export {getEditorSearchSnapshot, SearchExtension} from './search';
 export {SceneGuardExtension} from './SceneGuardExtension';
 export {SceneNumberingExtension} from './SceneNumberingExtension';
-export {getSceneCollapseSnapshot, SceneCollapseExtension, type SceneCollapseSnapshot} from './sceneCollapse/SceneCollapseExtension';
+export {getSceneCollapseSnapshot, SceneCollapseExtension} from './sceneCollapse/SceneCollapseExtension';
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
 
 export {getPaginationPluginState} from './pagination/plugin/createPaginationPlugin';
-export {createPaginationExtension, PaginationExtension} from './PaginationExtension';
+export {createPaginationExtension} from './PaginationExtension';
 
 // ─── Runtime indexes ─────────────────────────────────────────────────────────
 

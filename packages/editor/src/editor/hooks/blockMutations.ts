@@ -10,11 +10,7 @@ import {
     type ScriptNode,
 } from '@stagistic/script';
 
-export const setPlainTextContent = (
-    nodes: ScriptNode[] | undefined,
-    blockId: string,
-    nextName: string,
-): [ScriptNode[] | undefined, boolean] => {
+export const setPlainTextContent = (nodes: ScriptNode[] | undefined, blockId: string, nextName: string): [ScriptNode[] | undefined, boolean] => {
     if (!Array.isArray(nodes) || nodes.length === 0) {
         return [nodes, false];
     }
@@ -25,11 +21,7 @@ export const setPlainTextContent = (
             return node;
         }
 
-        if (
-            isScriptBlockNode(node)
-            && getScriptBlockId(node) === blockId
-            && getScriptBlockNodeType(node) === 'act'
-        ) {
+        if (isScriptBlockNode(node) && getScriptBlockId(node) === blockId && getScriptBlockNodeType(node) === 'act') {
             const currentText = (node.content ?? [])
                 .map(child => {
                     return typeof child.text === 'string' ? child.text : '';
@@ -45,12 +37,15 @@ export const setPlainTextContent = (
 
             return {
                 ...node,
-                content: normalizedName.length > 0 ? [
-                    {
-                        type: 'text',
-                        text: normalizedName,
-                    },
-                ] : [],
+                content:
+                    normalizedName.length > 0
+                        ? [
+                              {
+                                  type: 'text',
+                                  text: normalizedName,
+                              },
+                          ]
+                        : [],
             };
         }
 
@@ -71,10 +66,7 @@ export const setPlainTextContent = (
     return [didChange ? nextNodes : nodes, didChange];
 };
 
-export const removeActBlockById = (
-    nodes: ScriptNode[] | undefined,
-    blockId: string,
-): [ScriptNode[] | undefined, boolean] => {
+const removeActBlockById = (nodes: ScriptNode[] | undefined, blockId: string): [ScriptNode[] | undefined, boolean] => {
     if (!Array.isArray(nodes) || nodes.length === 0) {
         return [nodes, false];
     }
@@ -89,11 +81,7 @@ export const removeActBlockById = (
             return;
         }
 
-        if (
-            isScriptBlockNode(node)
-            && getScriptBlockId(node) === blockId
-            && getScriptBlockNodeType(node) === 'act'
-        ) {
+        if (isScriptBlockNode(node) && getScriptBlockId(node) === blockId && getScriptBlockNodeType(node) === 'act') {
             didChange = true;
 
             return;
@@ -117,19 +105,13 @@ export const removeActBlockById = (
     return [didChange ? nextNodes : nodes, didChange];
 };
 
-export const buildDeleteActContent = (
-    currentValue: ScriptDocument,
-    blockId: string,
-): {nextContent: ScriptNode[] | undefined, didChange: boolean} => {
+export const buildDeleteActContent = (currentValue: ScriptDocument, blockId: string): {nextContent: ScriptNode[] | undefined; didChange: boolean} => {
     const [nextContent, didChange] = removeActBlockById(currentValue.content, blockId);
 
     return {nextContent, didChange};
 };
 
-export const removeSceneBlockById = (
-    nodes: ScriptNode[] | undefined,
-    blockId: string,
-): [ScriptNode[] | undefined, boolean] => {
+export const removeSceneBlockById = (nodes: ScriptNode[] | undefined, blockId: string): [ScriptNode[] | undefined, boolean] => {
     if (!Array.isArray(nodes) || nodes.length === 0) {
         return [nodes, false];
     }
@@ -144,11 +126,7 @@ export const removeSceneBlockById = (
             return;
         }
 
-        if (
-            isScriptBlockNode(node)
-            && getScriptBlockId(node) === blockId
-            && getScriptBlockNodeType(node) === 'scene'
-        ) {
+        if (isScriptBlockNode(node) && getScriptBlockId(node) === blockId && getScriptBlockNodeType(node) === 'scene') {
             didChange = true;
 
             return;
@@ -172,10 +150,7 @@ export const removeSceneBlockById = (
     return [didChange ? nextNodes : nodes, didChange];
 };
 
-export const buildDeleteSceneHeadingContent = (
-    currentValue: ScriptDocument,
-    blockId: string,
-): ScriptDocument | null => {
+export const buildDeleteSceneHeadingContent = (currentValue: ScriptDocument, blockId: string): ScriptDocument | null => {
     const [nextContent, didChange] = removeSceneBlockById(currentValue.content, blockId);
 
     if (!didChange || !Array.isArray(nextContent)) {
@@ -188,11 +163,7 @@ export const buildDeleteSceneHeadingContent = (
     };
 };
 
-const convertSceneBlockById = (
-    nodes: ScriptNode[] | undefined,
-    blockId: string,
-    nextNodeType: string,
-): [ScriptNode[] | undefined, boolean] => {
+const convertSceneBlockById = (nodes: ScriptNode[] | undefined, blockId: string, nextNodeType: string): [ScriptNode[] | undefined, boolean] => {
     if (!Array.isArray(nodes) || nodes.length === 0) {
         return [nodes, false];
     }
@@ -203,11 +174,7 @@ const convertSceneBlockById = (
             return node;
         }
 
-        if (
-            isScriptBlockNode(node)
-            && getScriptBlockId(node) === blockId
-            && getScriptBlockNodeType(node) === 'scene'
-        ) {
+        if (isScriptBlockNode(node) && getScriptBlockId(node) === blockId && getScriptBlockNodeType(node) === 'scene') {
             didChange = true;
 
             return {
@@ -241,11 +208,7 @@ const convertSceneBlockById = (
  * of {@link buildDeleteSceneHeadingContent}. Returns null when the target isn't
  * a scene, the target type is `scene` (a no-op), or the id can't be resolved.
  */
-export const buildConvertSceneHeadingContent = (
-    currentValue: ScriptDocument,
-    blockId: string,
-    targetBlockType: string,
-): ScriptDocument | null => {
+export const buildConvertSceneHeadingContent = (currentValue: ScriptDocument, blockId: string, targetBlockType: string): ScriptDocument | null => {
     const nextNodeType = resolveScriptBlockNodeType(targetBlockType);
 
     if (!nextNodeType || nextNodeType === 'scene') {
@@ -264,11 +227,7 @@ export const buildConvertSceneHeadingContent = (
     };
 };
 
-export const insertActBlockBeforeId = (
-    nodes: ScriptNode[] | undefined,
-    beforeBlockId: string,
-    actNode: ScriptNode,
-): [ScriptNode[] | undefined, boolean] => {
+const insertActBlockBeforeId = (nodes: ScriptNode[] | undefined, beforeBlockId: string, actNode: ScriptNode): [ScriptNode[] | undefined, boolean] => {
     if (!Array.isArray(nodes) || nodes.length === 0) {
         return [nodes, false];
     }
@@ -283,11 +242,7 @@ export const insertActBlockBeforeId = (
             return;
         }
 
-        if (
-            !didInsert
-            && isScriptBlockNode(node)
-            && getScriptBlockId(node) === beforeBlockId
-        ) {
+        if (!didInsert && isScriptBlockNode(node) && getScriptBlockId(node) === beforeBlockId) {
             nextNodes.push(actNode, node);
             didInsert = true;
 
@@ -295,11 +250,7 @@ export const insertActBlockBeforeId = (
         }
 
         if (!didInsert && Array.isArray(node.content)) {
-            const [nextContent, childInserted] = insertActBlockBeforeId(
-                node.content,
-                beforeBlockId,
-                actNode,
-            );
+            const [nextContent, childInserted] = insertActBlockBeforeId(node.content, beforeBlockId, actNode);
 
             if (childInserted) {
                 nextNodes.push({
@@ -318,13 +269,8 @@ export const insertActBlockBeforeId = (
     return [didInsert ? nextNodes : nodes, didInsert];
 };
 
-export const buildInsertActContent = (
-    currentValue: ScriptDocument,
-    beforeBlockId: string | null,
-): {nextContent: ScriptNode[], didChange: boolean} => {
-    const actCount = collectStructureBlocks(currentValue.content)
-        .filter(block => block.blockType === 'act')
-        .length;
+export const buildInsertActContent = (currentValue: ScriptDocument, beforeBlockId: string | null): {nextContent: ScriptNode[]; didChange: boolean} => {
+    const actCount = collectStructureBlocks(currentValue.content).filter(block => block.blockType === 'act').length;
     const nextActName = getDefaultActName(actCount + 1);
     const nextActNodeType = resolveScriptBlockNodeType('act') ?? 'act';
     const nextActBlock: ScriptNode = {
@@ -347,11 +293,7 @@ export const buildInsertActContent = (
     }
 
     if (typeof resolvedBeforeBlockId === 'string' && resolvedBeforeBlockId.length > 0) {
-        const [insertedContent, didInsert] = insertActBlockBeforeId(
-            currentValue.content,
-            resolvedBeforeBlockId,
-            nextActBlock,
-        );
+        const [insertedContent, didInsert] = insertActBlockBeforeId(currentValue.content, resolvedBeforeBlockId, nextActBlock);
 
         if (didInsert && Array.isArray(insertedContent)) {
             nextContent = insertedContent;

@@ -63,7 +63,6 @@ export {
 } from './editor/live/hooks';
 export {createEditorSnapshotStore, type EditorSnapshotStore} from './editor/live/store';
 export {MiniScriptEditor, type MiniScriptEditorProps} from './editor/mini/MiniScriptEditor';
-export {getEditorPerfMetricsSnapshot, incrementRouteRenderCount, resetEditorPerfMetrics} from './editor/perf/editorPerfMetrics';
 export {
     type CharacterColorRefsBundle,
     createCharacterColorRefsBundle,

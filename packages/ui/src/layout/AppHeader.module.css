@@ -133,13 +133,6 @@
         outline: var(--focus-ring);
         outline-offset: var(--focus-ring-offset);
     }
-
-    & .label {
-        overflow: hidden;
-        max-width: 220px;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
 }
 
 .backButton {
@@ -229,12 +222,6 @@
     padding: var(--space-xs) var(--space-sm);
 }
 
-.caret {
-    width: var(--icon-size-sm);
-    height: var(--icon-size-sm);
-    color: var(--color-text-muted);
-}
-
 .menuPopover {
     padding: 0;
     background: var(--color-surface);
@@ -244,94 +231,6 @@
 
     &:focus-visible {
         outline: none;
-    }
-}
-
-.menu {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-md);
-    min-width: 240px;
-    padding: var(--space-md) 0;
-    font-size: var(--font-size-md);
-
-    &:focus-visible {
-        outline: none;
-    }
-
-    & .menuSection {
-        display: flex;
-        flex-direction: column;
-    }
-
-    & .menuHeader {
-        padding: var(--space-sm) var(--space-lg);
-        font-size: var(--font-size-xxs);
-        font-weight: var(--font-weight-medium);
-        color: var(--color-text-muted);
-    }
-
-    & .currentScriptBlock {
-        cursor: default;
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-sm);
-        align-items: flex-start;
-        width: 100%;
-        margin-bottom: var(--space-md);
-        padding: var(--space-md) var(--space-lg);
-        background: color-mix(in oklch, var(--color-surface-raised) 75%, transparent);
-
-        & .label {
-            font-size: var(--font-size-xxs);
-            font-weight: var(--font-weight-medium);
-            color: var(--color-text-muted);
-        }
-
-        & .name {
-            font-size: var(--font-size-md);
-            font-weight: var(--font-weight-medium);
-            color: var(--color-text);
-        }
-    }
-
-    & .menuItem {
-        cursor: pointer;
-        display: flex;
-        gap: var(--space-md);
-        align-items: center;
-        margin: 0 var(--space-md);
-        padding: var(--space-md) var(--space-md);
-        border-radius: var(--radius-md);
-        transition: background var(--duration-normal) var(--ease-standard), box-shadow var(--duration-normal) var(--ease-standard);
-
-        &:focus-visible,
-        &[data-focus-visible] {
-            outline: var(--focus-ring);
-            outline-offset: var(--focus-ring-offset);
-        }
-
-        &[data-focused],
-        &[data-hovered] {
-            background: var(--state-hover);
-        }
-
-        &[data-disabled] {
-            cursor: default;
-            color: var(--color-text-muted);
-        }
-    }
-
-    & .menuIcon {
-        width: var(--icon-size-md);
-        height: var(--icon-size-md);
-        color: var(--color-text-muted);
-    }
-
-    & .menuSeparator {
-        height: 1px;
-        margin: var(--space-sm) 0;
-        background: var(--color-border);
     }
 }
 

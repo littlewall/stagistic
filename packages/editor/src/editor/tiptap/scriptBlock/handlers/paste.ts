@@ -1,17 +1,8 @@
-import {
-    Fragment,
-    Slice,
-} from '@tiptap/pm/model';
+import {Fragment, Slice} from '@tiptap/pm/model';
 import type {Editor} from '@tiptap/react';
 
-import {
-    getActiveScriptBlockFromState,
-    SCRIPT_BLOCK_NODE_NAMES,
-} from '../../scriptCore';
-import {
-    type BlockContext,
-    createBlockContext,
-} from '../context';
+import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
+import {type BlockContext, createBlockContext} from '../context';
 import {type HandlerMap} from './types';
 
 const STRUCTURED_SCRIPT_HTML_PATTERN = /<p\b[^>]*\b(?:blocktype|data-block-type)\s*=/i;
@@ -26,9 +17,7 @@ const normalizePastedText = (blockType: BlockContext['block']['blockType'], text
 };
 
 const splitPastedTextLines = (text: string) => {
-    const lines = text
-        .replace(/\r\n?/g, '\n')
-        .split('\n');
+    const lines = text.replace(/\r\n?/g, '\n').split('\n');
 
     while (lines.length > 1 && lines.at(-1)?.trim().length === 0) {
         lines.pop();
@@ -47,13 +36,10 @@ const isExternalMultilinePaste = (event: ClipboardEvent) => {
     const html = clipboardData.getData('text/html');
     const text = clipboardData.getData('text/plain');
 
-    return !STRUCTURED_SCRIPT_HTML_PATTERN.test(html) && (/[\r\n]/).test(text);
+    return !STRUCTURED_SCRIPT_HTML_PATTERN.test(html) && /[\r\n]/.test(text);
 };
 
-const pasteMultilineAsActiveBlockType = (
-    context: BlockContext,
-    event: ClipboardEvent,
-) => {
+const pasteMultilineAsActiveBlockType = (context: BlockContext, event: ClipboardEvent) => {
     const text = event.clipboardData?.getData('text/plain');
     const blockNodeType = context.editor.schema.nodes[context.block.blockType];
 
@@ -62,19 +48,16 @@ const pasteMultilineAsActiveBlockType = (
     }
 
     const marks = context.editor.state.selection.$from.marks();
-    const blocks = splitPastedTextLines(text)
-        .map(line => {
-            const normalized = normalizePastedText(context.block.blockType, line);
-            const content = normalized ? context.editor.schema.text(normalized, marks) : undefined;
+    const blocks = splitPastedTextLines(text).map(line => {
+        const normalized = normalizePastedText(context.block.blockType, line);
+        const content = normalized ? context.editor.schema.text(normalized, marks) : undefined;
 
-            return blockNodeType.create({blockType: context.block.blockType}, content);
-        });
+        return blockNodeType.create({blockType: context.block.blockType}, content);
+    });
     const slice = new Slice(Fragment.fromArray(blocks), 1, 1);
 
     event.preventDefault();
-    context.editor.view.dispatch(
-        context.editor.state.tr.replaceSelection(slice).scrollIntoView(),
-    );
+    context.editor.view.dispatch(context.editor.state.tr.replaceSelection(slice).scrollIntoView());
 
     return true;
 };
@@ -89,9 +72,7 @@ const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) =
 
         event.preventDefault();
 
-        const normalized = text
-            .replace(/\s*\n+\s*/g, ' ')
-            .toLocaleUpperCase();
+        const normalized = text.replace(/\s*\n+\s*/g, ' ').toLocaleUpperCase();
 
         context.editor.commands.insertContent(normalized);
 
@@ -106,9 +87,7 @@ const pasteHandlers: HandlerMap<(context: BlockContext, event: ClipboardEvent) =
 
         event.preventDefault();
 
-        const sanitized = text
-            .replace(/\s*\n+\s*/g, ' ')
-            .replace(/[()]/g, '');
+        const sanitized = text.replace(/\s*\n+\s*/g, ' ').replace(/[()]/g, '');
 
         context.editor.commands.insertContent(sanitized);
 
@@ -136,8 +115,4 @@ export const handlePaste = (editor: Editor, event: ClipboardEvent) => {
     }
 
     return handler(context, event);
-};
-
-export const pasteHandlerMaps = {
-    pasteHandlers,
 };
