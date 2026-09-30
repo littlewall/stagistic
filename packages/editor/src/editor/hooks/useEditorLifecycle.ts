@@ -1,6 +1,6 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {useHotkey} from '@tanstack/react-hotkeys';
-import {type Selection, TextSelection, type Transaction} from '@tiptap/pm/state';
+import {type Transaction} from '@tiptap/pm/state';
 import {type Editor as TiptapEditor} from '@tiptap/react';
 import {useEffect, useRef} from 'react';
 
@@ -10,54 +10,13 @@ import type {EditorIndexSnapshot, EditorValueChangeMeta} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
 import {IMMEDIATE_SAVE_META_KEY} from '../saveMeta';
+import {forcePaginationRecalc, getWindowTarget, resolveInitialSelection} from './editorLifecycleHelpers';
 import {sanitizeScriptBlocks, type UseEditorLifecycleArgs, useEditorLifecycleSync} from './editorLifecycleSync';
 import {useEditorStructureRequests} from './useEditorStructureRequests';
 import {useLatestRef} from './useLatestRef';
 
 export type {UseEditorLifecycleArgs};
 
-const getWindowTarget = () => {
-    if (typeof window === 'undefined') {
-        return null;
-    }
-
-    return window;
-};
-
-const forcePaginationRecalc = (editor: TiptapEditor) => {
-    type PaginationCommands = {forcePaginationRecalc?: () => boolean};
-    (editor.commands as PaginationCommands).forcePaginationRecalc?.();
-};
-
-const resolveInitialSelection = (editor: TiptapEditor): Selection => {
-    let firstScenePosition: number | null = null;
-
-    editor.state.doc.descendants((node, pos) => {
-        if (firstScenePosition !== null) {
-            return false;
-        }
-
-        if (node.type.name !== 'scene') {
-            return true;
-        }
-
-        firstScenePosition = pos + 1;
-
-        return false;
-    });
-
-    if (firstScenePosition === null) {
-        return TextSelection.atStart(editor.state.doc);
-    }
-
-    return TextSelection.near(editor.state.doc.resolve(firstScenePosition), 1);
-};
-
-/*
- * Tracks which initial content each editor instance already applied. A cached
- * surface re-attached on a later mount must NOT re-apply the load-time initial
- * value — it would wipe newer live content and re-pay setContent + pagination.
- */
 const appliedInitialByEditor = new WeakMap<TiptapEditor, string>();
 
 export const useEditorLifecycle = ({

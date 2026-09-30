@@ -7,12 +7,9 @@ import {
     type PersistedDraftSnapshot,
     toDraftError,
 } from './persistedDraftContract';
+import {reconcileDraftEntity} from './reconcileDraftEntity';
 
-export type {
-    PersistedDraftScheduler,
-    PersistedDraftSnapshot,
-    PersistedDraftStatus,
-} from './persistedDraftContract';
+export type {PersistedDraftScheduler, PersistedDraftSnapshot, PersistedDraftStatus} from './persistedDraftContract';
 
 export const createPersistedDraftController = <TKey, TValue>({
     defaultValue,
@@ -44,7 +41,7 @@ export const createPersistedDraftController = <TKey, TValue>({
      * database is about to contain it, so it — not entity.confirmedValue —
      * is the baseline for dirtiness checks and confirmed-echo reconciliation.
      */
-    let inFlight: {key: TKey, value: TValue} | null = null;
+    let inFlight: {key: TKey; value: TValue} | null = null;
 
     const isSaveInFlight = () => inFlight !== null && Object.is(inFlight.key, entity.key);
 
@@ -75,19 +72,16 @@ export const createPersistedDraftController = <TKey, TValue>({
         getGeneration: () => generation,
         run: async saveGeneration => {
             try {
-                while (
-                    saveGeneration === generation
-                    && entity.key !== null
-                    && snapshot.isHydrated
-                    && snapshot.isDirty
-                ) {
+                while (saveGeneration === generation && entity.key !== null && snapshot.isHydrated && snapshot.isDirty) {
                     const saveRevision = revision;
                     const value = snapshot.value;
                     const key = entity.key;
 
                     inFlight = {key, value};
                     emit({
-                        ...snapshot, status: 'saving', error: null,
+                        ...snapshot,
+                        status: 'saving',
+                        error: null,
                     });
 
                     try {
@@ -115,7 +109,9 @@ export const createPersistedDraftController = <TKey, TValue>({
                         }
 
                         emit({
-                            ...snapshot, status: 'error', error: toDraftError(error),
+                            ...snapshot,
+                            status: 'error',
+                            error: toDraftError(error),
                         });
                         throw error;
                     }
@@ -154,13 +150,10 @@ export const createPersistedDraftController = <TKey, TValue>({
     });
     const runSaveLoop = saveQueue.execute;
 
-    const persistencePacer = createAsyncPersistencePacer(
-        () => runSaveLoop(),
-        {
-            key: 'persisted-draft',
-            waitMs: debounceMs,
-        },
-    );
+    const persistencePacer = createAsyncPersistencePacer(() => runSaveLoop(), {
+        key: 'persisted-draft',
+        waitMs: debounceMs,
+    });
 
     const scheduleSave = () => {
         cancelScheduledSave();
@@ -181,85 +174,37 @@ export const createPersistedDraftController = <TKey, TValue>({
         }, debounceMs);
     };
 
-    const setEntity = ({
-        key,
-        confirmedValue,
-        isHydrated,
-    }: PersistedDraftEntity<TKey, TValue>) => {
-        if (!Object.is(entity.key, key)) {
+    const setEntity = (next: PersistedDraftEntity<TKey, TValue>) => {
+        const result = reconcileDraftEntity({
+            previous: entity,
+            next,
+            snapshot,
+            defaultValue,
+            equals,
+            isSaveInFlight: isSaveInFlight(),
+        });
+
+        if (result.type === 'switch') {
             generation += 1;
             revision = 0;
             cancelScheduledSave();
-            entity = {
-                key, confirmedValue, isHydrated: key === null || isHydrated,
-            };
-            emit({
-                value: key === null || isHydrated ? confirmedValue : defaultValue,
-                status: key !== null && !isHydrated ? 'loading' : 'idle',
-                isHydrated: key === null || isHydrated,
-                isDirty: false,
-                error: null,
-            });
-
-            return;
         }
-
-        const wasHydrated = entity.isHydrated;
 
         entity = {
-            key, confirmedValue, isHydrated: key === null || isHydrated,
+            key: next.key,
+            confirmedValue: next.confirmedValue,
+            isHydrated: next.key === null || next.isHydrated,
         };
 
-        if (key !== null && !isHydrated) {
-            if (!wasHydrated) {
-                emit({
-                    ...snapshot, status: 'loading', isHydrated: false,
-                });
-            }
-
+        if (result.type === 'none') {
             return;
         }
 
-        if (!wasHydrated) {
-            emit({
-                value: confirmedValue,
-                status: 'idle',
-                isHydrated: true,
-                isDirty: false,
-                error: null,
-            });
-
-            return;
+        if (result.type === 'emit' && result.cancelSave) {
+            cancelScheduledSave();
         }
 
-        if (snapshot.isDirty) {
-            if (
-                snapshot.status !== 'saving'
-                && equals(snapshot.value, confirmedValue)
-            ) {
-                cancelScheduledSave();
-                emit({
-                    ...snapshot, status: 'saved', isDirty: false, error: null,
-                });
-            }
-
-            return;
-        }
-
-        if (!equals(snapshot.value, confirmedValue)) {
-            if (isSaveInFlight()) {
-                // Reconcile after the save settles; the echo may predate it.
-                return;
-            }
-
-            emit({
-                value: confirmedValue,
-                status: 'idle',
-                isHydrated: true,
-                isDirty: false,
-                error: null,
-            });
-        }
+        emit(result.snapshot);
     };
 
     const update = (next: TValue | ((previous: TValue) => TValue)) => {
@@ -267,12 +212,8 @@ export const createPersistedDraftController = <TKey, TValue>({
             return;
         }
 
-        const value = typeof next === 'function'
-            ? (next as (previous: TValue) => TValue)(snapshot.value)
-            : next;
-        const baseline = isSaveInFlight() && inFlight
-            ? inFlight.value
-            : entity.confirmedValue;
+        const value = typeof next === 'function' ? (next as (previous: TValue) => TValue)(snapshot.value) : next;
+        const baseline = isSaveInFlight() && inFlight ? inFlight.value : entity.confirmedValue;
         const isDirty = !equals(value, baseline);
 
         revision += 1;

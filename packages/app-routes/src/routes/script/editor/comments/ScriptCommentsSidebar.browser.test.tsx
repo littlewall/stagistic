@@ -194,7 +194,11 @@ const Harness = ({content, threads, messages, isInitiallyOpen}: HarnessProps) =>
                 <EditorProbe />
             </ScriptEditor.LeftSidebar>
             <ScriptEditor.RightSidebar>
-                <ScriptCommentsSidebar header={null} comments={comments} panelState={panelState} />
+                <ScriptCommentsSidebar
+                    header={null}
+                    comments={comments}
+                    panelState={panelState}
+                />
             </ScriptEditor.RightSidebar>
         </ScriptEditor>
     );
@@ -230,7 +234,12 @@ const mount = async ({content = baseDocument(), threads = [], messages = [], isI
     roots.push(root);
     root.render(
         <ToastProvider>
-            <Harness content={content} threads={threads} messages={messages} isInitiallyOpen={isInitiallyOpen} />
+            <Harness
+                content={content}
+                threads={threads}
+                messages={messages}
+                isInitiallyOpen={isInitiallyOpen}
+            />
         </ToastProvider>,
     );
 
@@ -328,6 +337,20 @@ describe('ScriptCommentsSidebar', () => {
         await poll(() => document.querySelector('[data-comment-anchor]'), 'underline');
         expect(testWindow.__comments?.threads).toHaveLength(1);
         expect(await poll(() => findByText('Tighten this', panel() ?? document), 'saved body')).toBeTruthy();
+    });
+
+    it('opens the closed Comments sidebar and shows the composer when writing starts in the editor', async () => {
+        const editor = await mount({content: baseDocument([dialogue('b1', 'Hello world')]), isInitiallyOpen: false});
+
+        editor.chain().focus().setTextSelection({from: 2, to: 6}).run();
+        await page
+            .elementLocator(await poll(() => findButton('Comment', document.querySelector('[aria-label="Selection actions"]') ?? document), 'toolbar Comment'))
+            .click();
+
+        const textarea = await poll(() => panel()?.querySelector<HTMLTextAreaElement>('textarea[aria-label="Comment"]'), 'draft composer');
+
+        expect(textarea.closest('aside')?.getAttribute('aria-hidden')).toBe('false');
+        expect(document.activeElement).toBe(textarea);
     });
 
     it('Esc discards the draft with no writes', async () => {

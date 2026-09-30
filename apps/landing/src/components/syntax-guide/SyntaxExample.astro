@@ -1,0 +1,23 @@
+---
+import s from '../../pages/editor/syntax.module.css';
+
+interface Props {
+    /** Stagistic source shown in the "You type" column. */
+    source: string;
+}
+
+const {source} = Astro.props;
+---
+
+<div class={s.example}>
+    <div class={s.exampleCol}>
+        <p class={s.exampleLabel}>You type</p>
+        <pre class={s.codeBlock}>{source}</pre>
+    </div>
+    <div class={s.exampleCol}>
+        <p class={s.exampleLabel}>Renders as</p>
+        <div class={s.rendered}>
+            <slot />
+        </div>
+    </div>
+</div>

@@ -16,8 +16,8 @@ interface UseEditorSidebarsResult {
     rightSidebarToggle: SidebarToggle;
     leftSidebar: ReactNode;
     rightSidebar: ReactNode;
-    /** Shows a panel: opens its side if it is already selected there, else selects it on the right. */
-    revealPanel: (panelId: SidebarPanelId) => void;
+    /** Shows a panel on its selected side, or always on the right when requested. */
+    revealPanel: (panelId: SidebarPanelId, options?: {side: 'right'}) => void;
     isPanelOpen: (panelId: SidebarPanelId) => boolean;
 }
 
@@ -66,8 +66,8 @@ export const useEditorSidebars = ({panels, defaultLeftPanelId, defaultRightPanel
 
     const {leftPanelId, rightPanelId, isLeftOpen, isRightOpen, toggleLeft, toggleRight, selectRight} = layout;
     const revealPanel = useCallback(
-        (panelId: SidebarPanelId) => {
-            if (leftPanelId === panelId) {
+        (panelId: SidebarPanelId, options?: {side: 'right'}) => {
+            if (options?.side !== 'right' && leftPanelId === panelId) {
                 if (!isLeftOpen) {
                     toggleLeft();
                 }

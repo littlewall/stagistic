@@ -1,11 +1,6 @@
 import {normalizeCharacterKey} from '@stagistic/script';
 import clsx from 'clsx';
-import {
-    type CSSProperties,
-    type FormEvent,
-    useMemo,
-    useState,
-} from 'react';
+import {type CSSProperties, type FormEvent, useMemo, useState} from 'react';
 
 import {Button} from '../atoms/Button';
 import {Tooltip} from '../atoms/Tooltip';
@@ -16,33 +11,27 @@ import type {EditorSidebarCharacter} from '../editor-panels/types';
 import {TrashIcon} from '../icons';
 import {formControlStyles} from '../molecules/forms/formControlStyles';
 import {VocalRangeSection} from '../vocal-range/VocalRangeSection';
-import type {AttributeManagerCharacter} from './AttributeManagerCharactersPanel';
-import styles from './AttributeManagerCharactersPanel.module.css';
+import type {AttributeManagerCharacter} from './attributeManagerCharacterTypes';
 import {RemoveCharacterModal} from './RemoveCharacterModal';
 
+import styles from './AttributeManagerCharactersPanel.module.css';
+
 interface AttributeManagerCharacterDetailProps {
-    character: AttributeManagerCharacter,
-    confirmedName: string,
-    characters: AttributeManagerCharacter[],
-    characterColorSaturation?: number,
-    isDeleting: boolean,
-    isRenaming: boolean,
-    isColorUpdating: boolean,
-    onNameDraftChange: (name: string) => void,
-    onResetNameDraft: () => void,
-    onRenameCharacter?: (
-        characterId: string,
-        previousName: string,
-        nextName: string,
-    ) => void | Promise<unknown>,
-    onSetCharacterColor?: (
-        characterId: string,
-        colorHex: string | null,
-    ) => void | Promise<unknown>,
-    onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
-    onSetCharacterVoiceType?: (characterId: string, voiceType: string | null) => void,
-    onSetCharacterVocalRange?: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void,
-    onDeleteCharacter?: (characterId: string) => void,
+    character: AttributeManagerCharacter;
+    confirmedName: string;
+    characters: AttributeManagerCharacter[];
+    characterColorSaturation?: number;
+    isDeleting: boolean;
+    isRenaming: boolean;
+    isColorUpdating: boolean;
+    onNameDraftChange: (name: string) => void;
+    onResetNameDraft: () => void;
+    onRenameCharacter?: (characterId: string, previousName: string, nextName: string) => void | Promise<unknown>;
+    onSetCharacterColor?: (characterId: string, colorHex: string | null) => void | Promise<unknown>;
+    onSetCharacterOutline?: (characterId: string, outline: string | null) => void;
+    onSetCharacterVoiceType?: (characterId: string, voiceType: string | null) => void;
+    onSetCharacterVocalRange?: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void;
+    onDeleteCharacter?: (characterId: string) => void;
 }
 
 export const AttributeManagerCharacterDetail = ({
@@ -63,20 +52,22 @@ export const AttributeManagerCharacterDetail = ({
     onDeleteCharacter,
 }: AttributeManagerCharacterDetailProps) => {
     const [isRemoveOpen, setIsRemoveOpen] = useState(false);
-    const editorCharacter = useMemo<EditorSidebarCharacter>(() => ({
-        id: character.id,
-        key: character.name,
-        color: character.color ?? '',
-        colorHex: character.color,
-        outline: character.outline,
-        isConfirmed: true,
-    }), [character]);
+    const editorCharacter = useMemo<EditorSidebarCharacter>(
+        () => ({
+            id: character.id,
+            key: character.name,
+            color: character.color ?? '',
+            colorHex: character.color,
+            outline: character.outline,
+            isConfirmed: true,
+        }),
+        [character],
+    );
     const isColorActionDisabled = isDeleting || isColorUpdating || !onSetCharacterColor;
     const trimmedName = character.name.trim();
     const normalizedName = normalizeCharacterKey(trimmedName);
     const isDuplicate = characters.some(candidate => {
-        return candidate.id !== character.id
-            && normalizeCharacterKey(candidate.name) === normalizedName;
+        return candidate.id !== character.id && normalizeCharacterKey(candidate.name) === normalizedName;
     });
     const isInvalid = trimmedName.length === 0 || isDuplicate;
     const errorId = isInvalid ? `character-name-error-${character.id}` : undefined;
@@ -147,7 +138,10 @@ export const AttributeManagerCharacterDetail = ({
                         <h3 className={styles.detailTitle}>{character.name}</h3>
                     </div>
                 </div>
-                <Tooltip label={`Remove ${character.name}`} placement="left">
+                <Tooltip
+                    label={`Remove ${character.name}`}
+                    placement="left"
+                >
                     <Button
                         className={styles.deleteButton}
                         variant="ghost"
@@ -156,7 +150,10 @@ export const AttributeManagerCharacterDetail = ({
                         aria-label={`Remove ${character.name}`}
                         onPress={() => setIsRemoveOpen(true)}
                     >
-                        <TrashIcon className={styles.actionIcon} aria-hidden="true" />
+                        <TrashIcon
+                            className={styles.actionIcon}
+                            aria-hidden="true"
+                        />
                     </Button>
                 </Tooltip>
             </header>
@@ -166,7 +163,10 @@ export const AttributeManagerCharacterDetail = ({
                     onSubmit={handleNameSubmit}
                     aria-busy={isRenaming}
                 >
-                    <label className={formControlStyles.label} htmlFor={`character-name-${character.id}`}>
+                    <label
+                        className={formControlStyles.label}
+                        htmlFor={`character-name-${character.id}`}
+                    >
                         Name
                     </label>
                     <input
@@ -186,10 +186,11 @@ export const AttributeManagerCharacterDetail = ({
                         }}
                     />
                     {isInvalid ? (
-                        <p id={errorId} className={styles.error}>
-                            {isDuplicate
-                                ? 'A character or group with this name already exists.'
-                                : 'Name cannot be empty.'}
+                        <p
+                            id={errorId}
+                            className={styles.error}
+                        >
+                            {isDuplicate ? 'A character or group with this name already exists.' : 'Name cannot be empty.'}
                         </p>
                     ) : null}
                 </form>

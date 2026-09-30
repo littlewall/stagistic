@@ -14,7 +14,7 @@ export default defineConfig({
     printWidth: 160,
     quoteProps: 'as-needed',
     semi: true,
-    singleAttributePerLine: false,
+    singleAttributePerLine: true,
     singleQuote: true,
     sortImports: {
         customGroups: [

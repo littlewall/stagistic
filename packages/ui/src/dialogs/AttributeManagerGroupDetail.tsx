@@ -1,9 +1,5 @@
 import {normalizeCharacterKey} from '@stagistic/script';
-import {
-    type FormEvent,
-    useMemo,
-    useState,
-} from 'react';
+import {type FormEvent, useMemo, useState} from 'react';
 
 import {Button} from '../atoms/Button';
 import {Tooltip} from '../atoms/Tooltip';
@@ -13,28 +9,26 @@ import type {EditorSidebarCharacter} from '../editor-panels/types';
 import {TrashIcon} from '../icons';
 import {formControlStyles} from '../molecules/forms/formControlStyles';
 import {MultiComboBox} from '../molecules/forms/MultiComboBox';
-import type {
-    AttributeManagerCharacter,
-    AttributeManagerGroup,
-} from './AttributeManagerCharactersPanel';
-import styles from './AttributeManagerCharactersPanel.module.css';
+import type {AttributeManagerCharacter, AttributeManagerGroup} from './attributeManagerCharacterTypes';
 import {RemoveGroupModal} from './RemoveGroupModal';
 
+import styles from './AttributeManagerCharactersPanel.module.css';
+
 interface AttributeManagerGroupDetailProps {
-    group: AttributeManagerGroup,
-    confirmedName: string,
-    speakingEntities: Array<{id: string, name: string}>,
-    characters: AttributeManagerCharacter[],
-    characterColorSaturation?: number,
-    isDeleting: boolean,
-    isRenaming: boolean,
-    isColorUpdating: boolean,
-    onNameDraftChange: (name: string) => void,
-    onResetNameDraft: () => void,
-    onRenameGroup?: (groupId: string, previousName: string, nextName: string) => void | Promise<unknown>,
-    onSetGroupColor?: (groupId: string, colorHex: string | null) => void | Promise<unknown>,
-    onChangeMemberIds?: (memberIds: string[]) => void | Promise<unknown>,
-    onDeleteGroup?: (groupId: string) => void | Promise<unknown>,
+    group: AttributeManagerGroup;
+    confirmedName: string;
+    speakingEntities: Array<{id: string; name: string}>;
+    characters: AttributeManagerCharacter[];
+    characterColorSaturation?: number;
+    isDeleting: boolean;
+    isRenaming: boolean;
+    isColorUpdating: boolean;
+    onNameDraftChange: (name: string) => void;
+    onResetNameDraft: () => void;
+    onRenameGroup?: (groupId: string, previousName: string, nextName: string) => void | Promise<unknown>;
+    onSetGroupColor?: (groupId: string, colorHex: string | null) => void | Promise<unknown>;
+    onChangeMemberIds?: (memberIds: string[]) => void | Promise<unknown>;
+    onDeleteGroup?: (groupId: string) => void | Promise<unknown>;
 }
 
 export const AttributeManagerGroupDetail = ({
@@ -54,20 +48,22 @@ export const AttributeManagerGroupDetail = ({
     onDeleteGroup,
 }: AttributeManagerGroupDetailProps) => {
     const [isRemoveOpen, setIsRemoveOpen] = useState(false);
-    const editorGroup = useMemo<EditorSidebarCharacter>(() => ({
-        id: group.id,
-        key: group.name,
-        color: group.color ?? '',
-        colorHex: group.color,
-        outline: null,
-        isConfirmed: true,
-    }), [group]);
+    const editorGroup = useMemo<EditorSidebarCharacter>(
+        () => ({
+            id: group.id,
+            key: group.name,
+            color: group.color ?? '',
+            colorHex: group.color,
+            outline: null,
+            isConfirmed: true,
+        }),
+        [group],
+    );
     const isColorActionDisabled = isDeleting || isColorUpdating || !onSetGroupColor;
     const trimmedName = group.name.trim();
     const normalizedName = normalizeCharacterKey(trimmedName);
     const isDuplicate = speakingEntities.some(entity => {
-        return entity.id !== group.id
-            && normalizeCharacterKey(entity.name) === normalizedName;
+        return entity.id !== group.id && normalizeCharacterKey(entity.name) === normalizedName;
     });
     const isInvalid = normalizedName.length === 0 || isDuplicate;
     const errorId = isInvalid ? `group-name-error-${group.id}` : undefined;
@@ -137,7 +133,10 @@ export const AttributeManagerGroupDetail = ({
                     />
                     <h3 className={styles.detailTitle}>{group.name}</h3>
                 </div>
-                <Tooltip label={`Remove ${group.name}`} placement="left">
+                <Tooltip
+                    label={`Remove ${group.name}`}
+                    placement="left"
+                >
                     <Button
                         className={styles.deleteButton}
                         variant="ghost"
@@ -146,7 +145,10 @@ export const AttributeManagerGroupDetail = ({
                         aria-label={`Remove ${group.name}`}
                         onPress={() => setIsRemoveOpen(true)}
                     >
-                        <TrashIcon className={styles.actionIcon} aria-hidden="true" />
+                        <TrashIcon
+                            className={styles.actionIcon}
+                            aria-hidden="true"
+                        />
                     </Button>
                 </Tooltip>
             </header>
@@ -156,7 +158,10 @@ export const AttributeManagerGroupDetail = ({
                     onSubmit={handleNameSubmit}
                     aria-busy={isRenaming}
                 >
-                    <label className={formControlStyles.label} htmlFor={`group-name-${group.id}`}>
+                    <label
+                        className={formControlStyles.label}
+                        htmlFor={`group-name-${group.id}`}
+                    >
                         Name
                     </label>
                     <input
@@ -176,10 +181,11 @@ export const AttributeManagerGroupDetail = ({
                         }}
                     />
                     {isInvalid ? (
-                        <p id={errorId} className={styles.error}>
-                            {isDuplicate
-                                ? 'A character or group with this name already exists.'
-                                : 'Name cannot be empty.'}
+                        <p
+                            id={errorId}
+                            className={styles.error}
+                        >
+                            {isDuplicate ? 'A character or group with this name already exists.' : 'Name cannot be empty.'}
                         </p>
                     ) : null}
                 </form>

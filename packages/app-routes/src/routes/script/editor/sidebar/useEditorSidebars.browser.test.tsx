@@ -2,6 +2,7 @@ import {act} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
 
+import {getStorageKey, type SidebarLayoutState} from './sidebarLayoutStorage';
 import type {SidebarPanel} from './types';
 import {useEditorSidebars} from './useEditorSidebars';
 
@@ -18,9 +19,14 @@ const panels: readonly SidebarPanel[] = [
 
 type Sidebars = ReturnType<typeof useEditorSidebars>;
 
-const mount = () => {
+const mount = (initialState?: SidebarLayoutState) => {
     const captured: {current: Sidebars | null} = {current: null};
     const storageScope = `reveal-${++mountCount}-${Date.now()}`;
+
+    if (initialState) {
+        window.localStorage.setItem(getStorageKey(storageScope), JSON.stringify(initialState));
+    }
+
     const Probe = () => {
         captured.current = useEditorSidebars({
             panels,
@@ -42,7 +48,7 @@ const mount = () => {
 };
 
 afterEach(() => {
-    roots.forEach(root => root.unmount());
+    act(() => roots.forEach(root => root.unmount()));
     roots.length = 0;
     document.body.innerHTML = '';
     vi.unstubAllGlobals();
@@ -72,6 +78,15 @@ describe('useEditorSidebars.revealPanel', () => {
 
         expect(sidebars.current.leftSidebarToggle.isOpen).toBe(true);
         expect(sidebars.current.rightSidebarToggle.label).toBe('Characters');
+    });
+
+    it('shows comments on the right when writing starts even if comments were selected on the left', () => {
+        const sidebars = mount({leftPanelId: 'comments', rightPanelId: 'characters', isLeftOpen: false, isRightOpen: false});
+
+        act(() => sidebars.current.revealPanel('comments', {side: 'right'}));
+
+        expect(sidebars.current.rightSidebarToggle.label).toBe('Comments');
+        expect(sidebars.current.rightSidebarToggle.isOpen).toBe(true);
     });
 
     it('reports a panel that is not shown as closed', () => {

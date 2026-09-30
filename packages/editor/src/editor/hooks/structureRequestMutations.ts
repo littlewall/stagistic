@@ -20,13 +20,8 @@ export interface CommitContext {
     revisionRef: MutableRefObject<number>;
 }
 
-export {
-    buildConvertSceneHeadingContent,
-    buildDeleteActContent,
-    buildDeleteSceneHeadingContent,
-    buildInsertActContent,
-    setPlainTextContent,
-} from './blockMutations';
+export {buildDeleteActContent, buildInsertActContent} from './actBlockMutations';
+export {buildConvertSceneHeadingContent, buildDeleteSceneHeadingContent, setPlainTextContent} from './blockMutations';
 
 const commitDocument = (
     {editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef}: CommitContext,
