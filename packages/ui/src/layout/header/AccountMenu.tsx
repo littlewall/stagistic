@@ -1,24 +1,19 @@
-import {
-    MenuTrigger,
-    Popover,
-} from 'react-aria-components';
+import {MenuTrigger, Popover} from 'react-aria-components';
 
-import {Button} from '../../atoms/Button';
-import {Tooltip} from '../../atoms/Tooltip';
+import {Button} from '../../atoms/Button/Button';
+import {Tooltip} from '../../atoms/Tooltip/Tooltip';
 import {AppearanceIcon} from '../../icons/ui';
-import {type AppThemeMode} from '../../theme';
-import styles from '../AppHeader.module.css';
+import {type AppThemeMode} from '../../theme/theme';
 import {ThemeModeToggle} from './ThemeModeToggle';
 
+import styles from '../AppHeader.module.css';
+
 type AccountMenuProps = {
-    themeMode: AppThemeMode,
-    onThemeChange: (mode: AppThemeMode) => void,
+    themeMode: AppThemeMode;
+    onThemeChange: (mode: AppThemeMode) => void;
 };
 
-export const AccountMenuContent = ({
-    themeMode,
-    onThemeChange,
-}: AccountMenuProps) => {
+export const AccountMenuContent = ({themeMode, onThemeChange}: AccountMenuProps) => {
     return (
         <div className={styles.settingsMenu}>
             <div className={styles.settingsMenuHeader}>Appearance</div>
@@ -30,30 +25,36 @@ export const AccountMenuContent = ({
     );
 };
 
-export const AccountMenu = ({
-    themeMode,
-    onThemeChange,
-}: AccountMenuProps) => {
+export const AccountMenu = ({themeMode, onThemeChange}: AccountMenuProps) => {
     return (
         <MenuTrigger>
             {/*
-              * A cog promises the whole settings surface, but this popover only
-              * carries `Appearance` — the real settings live behind the header's
-              * own gear. The palette matches what is behind the button and stays honest
-              * as the menu grows with further look-and-feel controls (density is
-              * the obvious next one, though nothing implements it today — the dead
-              * `.size-sm/md/lg` classes went with the density coefficient they set).
-              */}
-            <Tooltip label="Appearance" placement="bottom">
+             * A cog promises the whole settings surface, but this popover only
+             * carries `Appearance` — the real settings live behind the header's
+             * own gear. The palette matches what is behind the button and stays honest
+             * as the menu grows with further look-and-feel controls (density is
+             * the obvious next one, though nothing implements it today — the dead
+             * `.size-sm/md/lg` classes went with the density coefficient they set).
+             */}
+            <Tooltip
+                label="Appearance"
+                placement="bottom"
+            >
                 <Button
                     variant="ghost"
                     size="icon"
                     aria-label="Appearance"
                 >
-                    <AppearanceIcon className={styles.icon} aria-hidden="true" />
+                    <AppearanceIcon
+                        className={styles.icon}
+                        aria-hidden="true"
+                    />
                 </Button>
             </Tooltip>
-            <Popover className={styles.menuPopover} placement="bottom end">
+            <Popover
+                className={styles.menuPopover}
+                placement="bottom end"
+            >
                 <AccountMenuContent
                     themeMode={themeMode}
                     onThemeChange={onThemeChange}

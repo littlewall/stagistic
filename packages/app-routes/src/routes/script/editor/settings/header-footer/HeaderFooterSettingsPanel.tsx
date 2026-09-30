@@ -6,41 +6,24 @@ import {
     resolveDraftDate,
     type TitlePageSettings,
 } from '@stagistic/script';
-import {
-    BoldIcon,
-    Button,
-    clsx,
-    formControlStyles,
-    IconButton,
-    ItalicIcon,
-    PanelHeader,
-    SettingsGroup,
-    Switch,
-    UnderlineIcon,
-} from '@stagistic/ui';
-import {
-    useRef,
-    useState,
-} from 'react';
+import {BoldIcon, Button, formControlStyles, IconButton, ItalicIcon, PanelHeader, SettingsGroup, Switch, UnderlineIcon} from '@stagistic/ui';
+import clsx from 'clsx';
+import {useRef, useState} from 'react';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import styles from './HeaderFooterSettingsPanel.module.css';
 
 type Area = 'header' | 'footer';
-type Selection = {area: Area, alignment: HeaderFooterAlignment};
+type Selection = {area: Area; alignment: HeaderFooterAlignment};
 
 interface HeaderFooterSettingsPanelProps {
-    settings: HeaderFooterSettings,
-    scriptTitle: string,
-    titlePageSettings: TitlePageSettings,
-    onUpdate: (patch: HeaderFooterSettingsPatch) => void,
+    settings: HeaderFooterSettings;
+    scriptTitle: string;
+    titlePageSettings: TitlePageSettings;
+    onUpdate: (patch: HeaderFooterSettingsPatch) => void;
 }
 
-const ALIGNMENTS: HeaderFooterAlignment[] = [
-    'left',
-    'center',
-    'right',
-];
+const ALIGNMENTS: HeaderFooterAlignment[] = ['left', 'center', 'right'];
 const VARIABLES = [
     {label: 'Page mark', token: '{{page}}'},
     {label: 'Script title', token: '{{script_title}}'},
@@ -54,10 +37,7 @@ const PAGE_NUMBER_TOKEN = '{{page_number}}';
 const PAGE_NUMBER_PREVIEW = '1.';
 
 // These cells have fixed content — only their style (B/I/U) and editor visibility can change.
-const getFixedCell = (
-    area: Area,
-    alignment: HeaderFooterAlignment,
-): {label: string, example: string} | null => {
+const getFixedCell = (area: Area, alignment: HeaderFooterAlignment): {label: string; example: string} | null => {
     if (area === 'header' && alignment === 'right') {
         return {label: 'Page number', example: PAGE_MARK_PREVIEW};
     }
@@ -69,18 +49,14 @@ const getFixedCell = (
     return null;
 };
 
-const resolvePreview = (text: string, scriptTitle: string, draftDate: string) => text
-    .replaceAll('{{page}}', PAGE_MARK_PREVIEW)
-    .replaceAll(PAGE_NUMBER_TOKEN, PAGE_NUMBER_PREVIEW)
-    .replaceAll('{{script_title}}', scriptTitle || 'Untitled')
-    .replaceAll('{{draft_date}}', draftDate);
+const resolvePreview = (text: string, scriptTitle: string, draftDate: string) =>
+    text
+        .replaceAll('{{page}}', PAGE_MARK_PREVIEW)
+        .replaceAll(PAGE_NUMBER_TOKEN, PAGE_NUMBER_PREVIEW)
+        .replaceAll('{{script_title}}', scriptTitle || 'Untitled')
+        .replaceAll('{{draft_date}}', draftDate);
 
-export const HeaderFooterSettingsPanel = ({
-    settings,
-    scriptTitle,
-    titlePageSettings,
-    onUpdate,
-}: HeaderFooterSettingsPanelProps) => {
+export const HeaderFooterSettingsPanel = ({settings, scriptTitle, titlePageSettings, onUpdate}: HeaderFooterSettingsPanelProps) => {
     const draftDate = resolveDraftDate(titlePageSettings);
     const [selection, setSelection] = useState<Selection | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -122,7 +98,10 @@ export const HeaderFooterSettingsPanel = ({
     };
 
     const renderRow = (area: Area) => (
-        <section className={styles.previewSection} aria-label={`${area} preview`}>
+        <section
+            className={styles.previewSection}
+            aria-label={`${area} preview`}
+        >
             <span className={styles.previewLabel}>{area}</span>
             <div className={styles.previewRow}>
                 {ALIGNMENTS.map(alignment => {
@@ -155,13 +134,22 @@ export const HeaderFooterSettingsPanel = ({
     );
 
     return (
-        <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
-            <PanelHeader level={3} title="Header and footer" />
+        <SettingsGroup
+            gap="2xl"
+            className={panelStyles.panelTokens}
+        >
+            <PanelHeader
+                level={3}
+                title="Header and footer"
+            />
             <div className={styles.composer}>
                 {renderRow('header')}
                 <div className={styles.editor}>
                     <div className={styles.editorToolbar}>
-                        <div className={styles.formattingGroup} aria-label="Text formatting">
+                        <div
+                            className={styles.formattingGroup}
+                            aria-label="Text formatting"
+                        >
                             <IconButton
                                 variant="filled"
                                 className={clsx(activeCell?.isBold && styles.activeFormat)}
@@ -169,7 +157,8 @@ export const HeaderFooterSettingsPanel = ({
                                 onPress={() => updateActiveCell({isBold: !activeCell?.isBold})}
                                 aria-label="Bold"
                                 aria-pressed={activeCell?.isBold ?? false}
-                            ><BoldIcon />
+                            >
+                                <BoldIcon />
                             </IconButton>
                             <IconButton
                                 variant="filled"
@@ -178,7 +167,8 @@ export const HeaderFooterSettingsPanel = ({
                                 onPress={() => updateActiveCell({isItalic: !activeCell?.isItalic})}
                                 aria-label="Italic"
                                 aria-pressed={activeCell?.isItalic ?? false}
-                            ><ItalicIcon />
+                            >
+                                <ItalicIcon />
                             </IconButton>
                             <IconButton
                                 variant="filled"
@@ -187,50 +177,54 @@ export const HeaderFooterSettingsPanel = ({
                                 onPress={() => updateActiveCell({isUnderline: !activeCell?.isUnderline})}
                                 aria-label="Underline"
                                 aria-pressed={activeCell?.isUnderline ?? false}
-                            ><UnderlineIcon />
+                            >
+                                <UnderlineIcon />
                             </IconButton>
                         </div>
                         <Switch
                             isDisabled={!activeCell}
                             isSelected={activeCell?.isHiddenInEditor ?? false}
                             onChange={isHiddenInEditor => updateActiveCell({isHiddenInEditor})}
-                        >Hide in editor
+                        >
+                            Hide in editor
                         </Switch>
                     </div>
-                    {activeFixed
-                        ? (
-                            <div className={styles.fixedNote}>
-                                <span className={styles.fixedNoteLabel}>{activeFixed.label}</span>
-                                <span className={styles.fixedNoteExample}>{activeFixed.example}</span>
+                    {activeFixed ? (
+                        <div className={styles.fixedNote}>
+                            <span className={styles.fixedNoteLabel}>{activeFixed.label}</span>
+                            <span className={styles.fixedNoteExample}>{activeFixed.example}</span>
+                        </div>
+                    ) : (
+                        <>
+                            <input
+                                ref={inputRef}
+                                type="text"
+                                className={formControlStyles.input}
+                                disabled={!activeCell}
+                                value={activeCell?.text ?? ''}
+                                placeholder={selection ? 'Enter text or add a variable' : 'Select a header or footer area'}
+                                onChange={event => updateActiveCell({text: event.target.value})}
+                                aria-label="Header or footer content"
+                            />
+                            <div
+                                className={styles.variables}
+                                aria-label="Variables"
+                            >
+                                {VARIABLES.map(variable => (
+                                    <Button
+                                        key={variable.token}
+                                        variant="outline"
+                                        size="sm"
+                                        className={styles.variableButton}
+                                        isDisabled={!activeCell}
+                                        onPress={() => insertVariable(variable.token)}
+                                    >
+                                        {variable.label}
+                                    </Button>
+                                ))}
                             </div>
-                        )
-                        : (
-                            <>
-                                <input
-                                    ref={inputRef}
-                                    type="text"
-                                    className={formControlStyles.input}
-                                    disabled={!activeCell}
-                                    value={activeCell?.text ?? ''}
-                                    placeholder={selection ? 'Enter text or add a variable' : 'Select a header or footer area'}
-                                    onChange={event => updateActiveCell({text: event.target.value})}
-                                    aria-label="Header or footer content"
-                                />
-                                <div className={styles.variables} aria-label="Variables">
-                                    {VARIABLES.map(variable => (
-                                        <Button
-                                            key={variable.token}
-                                            variant="outline"
-                                            size="sm"
-                                            className={styles.variableButton}
-                                            isDisabled={!activeCell}
-                                            onPress={() => insertVariable(variable.token)}
-                                        >{variable.label}
-                                        </Button>
-                                    ))}
-                                </div>
-                            </>
-                        )}
+                        </>
+                    )}
                 </div>
                 {renderRow('footer')}
             </div>

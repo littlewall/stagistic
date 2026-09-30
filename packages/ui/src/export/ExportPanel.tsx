@@ -1,7 +1,7 @@
 import type {ReactNode} from 'react';
 import {Disclosure, DisclosurePanel} from 'react-aria-components';
 
-import {Button} from '../atoms/Button';
+import {Button} from '../atoms/Button/Button';
 import {ChevronDownIcon} from '../icons';
 
 import styles from './ExportPanel.module.css';

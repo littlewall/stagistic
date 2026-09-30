@@ -1,28 +1,16 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
-import {
-    clsx,
-    formControlStyles,
-    FormSelect,
-    PanelHeader,
-    SettingsGroup,
-} from '@stagistic/ui';
-import {
-    startTransition,
-    useEffect,
-    useRef,
-    useState,
-} from 'react';
+import {formControlStyles, FormSelect, PanelHeader, SettingsGroup} from '@stagistic/ui';
+import clsx from 'clsx';
+import {startTransition, useEffect, useRef, useState} from 'react';
 
 import {MIN_PAGE_MARGIN_HORIZONTAL_PX, PX_PER_INCH} from '../constants';
 import {IndentRangeSlider} from '../IndentRangeSlider';
 import {clamp, formatInches} from '../math';
-import panelStyles from '../ScriptEditorSettingsPanel.module.css';
-import type {
-    PageLayoutHandlers,
-    ScriptEditorSettingsPanelProps,
-} from '../types';
-import styles from './PageLayoutSettingsPanel.module.css';
+import type {PageLayoutHandlers, ScriptEditorSettingsPanelProps} from '../types';
 import {usePageLayoutSettingsViewModel} from './usePageLayoutSettingsViewModel';
+
+import panelStyles from '../ScriptEditorSettingsPanel.module.css';
+import styles from './PageLayoutSettingsPanel.module.css';
 
 const MIN_PAGE_CONTENT_WIDTH_PX = 320;
 
@@ -33,7 +21,8 @@ const PAGE_SIZE_PRESETS = [
         label: 'A4',
         widthPx: 794,
         heightPx: 1123,
-    }, {
+    },
+    {
         id: 'letter',
         label: 'US Letter',
         widthPx: 816,
@@ -42,43 +31,21 @@ const PAGE_SIZE_PRESETS = [
 ] as const;
 
 const resolvePageSizePresetId = (widthPx: number, heightPx: number): string => {
-    const preset = PAGE_SIZE_PRESETS.find(
-        candidate => candidate.widthPx === widthPx && candidate.heightPx === heightPx,
-    );
+    const preset = PAGE_SIZE_PRESETS.find(candidate => candidate.widthPx === widthPx && candidate.heightPx === heightPx);
 
     return preset?.id ?? 'custom';
 };
 
 interface PageLayoutSettingsPanelProps {
-    resolvedScriptSettings: ScriptEditorSettingsPanelProps['resolvedScriptSettings'],
-    onUpdatePageSettings: PageLayoutHandlers['onUpdatePageSettings'],
+    resolvedScriptSettings: ScriptEditorSettingsPanelProps['resolvedScriptSettings'];
+    onUpdatePageSettings: PageLayoutHandlers['onUpdatePageSettings'];
 }
 
-export const PageLayoutSettingsPanel = ({
-    resolvedScriptSettings,
-    onUpdatePageSettings,
-}: PageLayoutSettingsPanelProps) => {
-    const {
-        preview,
-        slider,
-        numeric,
-    } = usePageLayoutSettingsViewModel({resolvedScriptSettings});
-    const {
-        pagePreviewStyle, headerRows, footerRows, contentRows,
-    } = preview;
-    const {
-        sliderStyle,
-        sliderStart,
-        sliderEnd,
-        previewReferenceTotal,
-        minSliderStart,
-        maxSliderEnd,
-    } = slider;
-    const {
-        topMarginRows,
-        bottomMarginRows,
-        marginRowOptions,
-    } = numeric;
+export const PageLayoutSettingsPanel = ({resolvedScriptSettings, onUpdatePageSettings}: PageLayoutSettingsPanelProps) => {
+    const {preview, slider, numeric} = usePageLayoutSettingsViewModel({resolvedScriptSettings});
+    const {pagePreviewStyle, headerRows, footerRows, contentRows} = preview;
+    const {sliderStyle, sliderStart, sliderEnd, previewReferenceTotal, minSliderStart, maxSliderEnd} = slider;
+    const {topMarginRows, bottomMarginRows, marginRowOptions} = numeric;
 
     const fontSizePx = resolvedScriptSettings.typography.fontSizePx;
 
@@ -89,9 +56,8 @@ export const PageLayoutSettingsPanel = ({
         ...PAGE_SIZE_PRESETS.map(preset => ({
             value: preset.id,
             label: preset.label,
-        })), ...pageSizePresetId === 'custom'
-            ? [{value: 'custom', label: 'Custom'}]
-            : [],
+        })),
+        ...(pageSizePresetId === 'custom' ? [{value: 'custom', label: 'Custom'}] : []),
     ];
 
     const marginSliderStep = 0.05 * 96; // 0.05"
@@ -124,9 +90,7 @@ export const PageLayoutSettingsPanel = ({
     const localMarginRightPx = previewReferenceTotal - localSliderEnd;
     const localLeftMarginInches = formatInches(localSliderStart / PX_PER_INCH);
     const localRightMarginInches = formatInches(localMarginRightPx / PX_PER_INCH);
-    const localContentWidthInches = formatInches(
-        Math.max(0, previewReferenceTotal - localSliderStart - localMarginRightPx) / PX_PER_INCH,
-    );
+    const localContentWidthInches = formatInches(Math.max(0, previewReferenceTotal - localSliderStart - localMarginRightPx) / PX_PER_INCH);
     const localSliderStyleOverride = {
         '--preview-indent-start-percent': `${(localSliderStart / safeTotal) * 100}%`,
         '--preview-indent-end-percent': `${(localSliderEnd / safeTotal) * 100}%`,
@@ -139,8 +103,14 @@ export const PageLayoutSettingsPanel = ({
     } as React.CSSProperties;
 
     return (
-        <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
-            <PanelHeader level={3} title="Page layout" />
+        <SettingsGroup
+            gap="2xl"
+            className={panelStyles.panelTokens}
+        >
+            <PanelHeader
+                level={3}
+                title="Page layout"
+            />
             <div className={formControlStyles.previewCard}>
                 <div className={clsx(formControlStyles.flatGrid, styles.threeColumn)}>
                     <div className={formControlStyles.field}>
@@ -195,20 +165,17 @@ export const PageLayoutSettingsPanel = ({
                         />
                     </div>
                 </div>
-                <div className={styles.pageSchematic} style={{...pagePreviewStyle, ...localSchematicOverride}}>
+                <div
+                    className={styles.pageSchematic}
+                    style={{...pagePreviewStyle, ...localSchematicOverride}}
+                >
                     <div className={styles.pageSchematicMarginTop} />
                     <div className={styles.pageSchematicMiddle}>
                         <div className={clsx(styles.pageSchematicMargin, styles.pageSchematicMarginLeft)} />
                         <div className={styles.pageSchematicCenter}>
-                            <div className={styles.pageSchematicZone}>
-                                {`Header: ${headerRows} row${headerRows === 1 ? '' : 's'}`}
-                            </div>
-                            <div className={styles.pageSchematicContent}>
-                                {`~${contentRows} rows`}
-                            </div>
-                            <div className={styles.pageSchematicZone}>
-                                {`Footer: ${footerRows} row${footerRows === 1 ? '' : 's'}`}
-                            </div>
+                            <div className={styles.pageSchematicZone}>{`Header: ${headerRows} row${headerRows === 1 ? '' : 's'}`}</div>
+                            <div className={styles.pageSchematicContent}>{`~${contentRows} rows`}</div>
+                            <div className={styles.pageSchematicZone}>{`Footer: ${footerRows} row${footerRows === 1 ? '' : 's'}`}</div>
                         </div>
                         <div className={clsx(styles.pageSchematicMargin, styles.pageSchematicMarginRight)} />
                     </div>
@@ -224,11 +191,7 @@ export const PageLayoutSettingsPanel = ({
                         ariaLabel: 'Left page margin',
                         onChange: event => {
                             const rawStart = Number.parseFloat(event.target.value);
-                            const maxStart = clamp(
-                                latestEnd.current - MIN_PAGE_CONTENT_WIDTH_PX,
-                                minSliderStart,
-                                previewReferenceTotal,
-                            );
+                            const maxStart = clamp(latestEnd.current - MIN_PAGE_CONTENT_WIDTH_PX, minSliderStart, previewReferenceTotal);
                             const next = clamp(rawStart, minSliderStart, maxStart);
 
                             latestStart.current = next;
@@ -248,11 +211,7 @@ export const PageLayoutSettingsPanel = ({
                         ariaLabel: 'Right page margin',
                         onChange: event => {
                             const rawEnd = Number.parseFloat(event.target.value);
-                            const minEnd = clamp(
-                                latestStart.current + MIN_PAGE_CONTENT_WIDTH_PX,
-                                0,
-                                maxSliderEnd,
-                            );
+                            const minEnd = clamp(latestStart.current + MIN_PAGE_CONTENT_WIDTH_PX, 0, maxSliderEnd);
                             const next = clamp(rawEnd, minEnd, maxSliderEnd);
 
                             latestEnd.current = next;
@@ -267,13 +226,22 @@ export const PageLayoutSettingsPanel = ({
                             });
                         },
                     }}
-                    labels={(
+                    labels={
                         <>
-                            <span>{'Left: '}{localLeftMarginInches}</span>
-                            <span>{localContentWidthInches}{' wide'}</span>
-                            <span>{'Right: '}{localRightMarginInches}</span>
+                            <span>
+                                {'Left: '}
+                                {localLeftMarginInches}
+                            </span>
+                            <span>
+                                {localContentWidthInches}
+                                {' wide'}
+                            </span>
+                            <span>
+                                {'Right: '}
+                                {localRightMarginInches}
+                            </span>
                         </>
-                    )}
+                    }
                 />
             </div>
         </SettingsGroup>

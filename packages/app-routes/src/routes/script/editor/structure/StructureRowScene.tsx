@@ -1,21 +1,13 @@
 import {useSortable} from '@dnd-kit/react/sortable';
-import {clsx} from '@stagistic/ui';
+import clsx from 'clsx';
 import {memo} from 'react';
 
 import {SCENE_DND_TYPE} from './dnd';
-import styles from './ScriptStructureSidebar.module.css';
 import type {StructureRowSceneProps} from './types';
 
-export const StructureRowScene = memo(({
-    blockId,
-    title,
-    sceneNumber,
-    index,
-    groupId,
-    isActive,
-    startPage,
-    onFocus,
-}: StructureRowSceneProps) => {
+import styles from './ScriptStructureSidebar.module.css';
+
+export const StructureRowScene = memo(({blockId, title, sceneNumber, index, groupId, isActive, startPage, onFocus}: StructureRowSceneProps) => {
     const {ref, handleRef} = useSortable({
         id: blockId,
         index,
@@ -48,9 +40,7 @@ export const StructureRowScene = memo(({
             >
                 <span className={clsx(styles.itemLabel, styles.sceneTitle)}>{`${sceneNumber}. ${title}`}</span>
             </button>
-            {startPage !== undefined && (
-                <span className={styles.pageBadge}>{`p. ${startPage}`}</span>
-            )}
+            {startPage !== undefined && <span className={styles.pageBadge}>{`p. ${startPage}`}</span>}
         </li>
     );
 });

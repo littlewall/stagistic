@@ -2,11 +2,11 @@ import clsx from 'clsx';
 import {type ReactNode, useEffect, useState} from 'react';
 import {Button as RACButton, MenuTrigger} from 'react-aria-components';
 
-import {Button} from '../atoms/Button';
-import {Tooltip} from '../atoms/Tooltip';
+import {Button} from '../atoms/Button/Button';
+import {Tooltip} from '../atoms/Tooltip/Tooltip';
 import {AttributeManagerIcon, DownloadIcon, HomeIcon, PlusIcon, SettingsIcon, UploadIcon} from '../icons/ui';
-import {DropdownMenu} from '../molecules/DropdownMenu';
-import {applyAppThemeMode, type AppThemeMode, readPreferredAppThemeMode, subscribeToSystemThemeChange} from '../theme';
+import {DropdownMenu} from '../molecules/DropdownMenu/DropdownMenu';
+import {applyAppThemeMode, type AppThemeMode, readPreferredAppThemeMode, subscribeToSystemThemeChange} from '../theme/theme';
 import {AccountMenu} from './header/AccountMenu';
 import {ScriptTitle} from './header/ScriptTitle';
 import {SyncIndicator} from './header/SyncIndicator';
@@ -54,42 +54,97 @@ export const AppHeader = ({
 
     return (
         <header className={styles.header}>
-            <div className={styles.dragRegion} data-tauri-drag-region aria-hidden="true" />
-            <div className={clsx(styles.inner, isFullWidth && styles.full, contentInset === 'page' && styles.pageInset)} data-tauri-drag-region>
-                <div className={styles.leftControls} data-tauri-drag-region>
-                    <Tooltip label="Home" placement="bottom">
-                        <Button variant="ghost" size="icon" onPress={onHome} aria-label="Go to home">
-                            <HomeIcon className={styles.icon} aria-hidden="true" />
+            <div
+                className={styles.dragRegion}
+                data-tauri-drag-region
+                aria-hidden="true"
+            />
+            <div
+                className={clsx(styles.inner, isFullWidth && styles.full, contentInset === 'page' && styles.pageInset)}
+                data-tauri-drag-region
+            >
+                <div
+                    className={styles.leftControls}
+                    data-tauri-drag-region
+                >
+                    <Tooltip
+                        label="Home"
+                        placement="bottom"
+                    >
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onPress={onHome}
+                            aria-label="Go to home"
+                        >
+                            <HomeIcon
+                                className={styles.icon}
+                                aria-hidden="true"
+                            />
                         </Button>
                     </Tooltip>
                     {onNewScript ? (
-                        <Tooltip label="New script" placement="bottom">
-                            <Button variant="ghost" size="icon" onPress={onNewScript} aria-label="New script">
-                                <PlusIcon className={styles.icon} aria-hidden="true" />
+                        <Tooltip
+                            label="New script"
+                            placement="bottom"
+                        >
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onPress={onNewScript}
+                                aria-label="New script"
+                            >
+                                <PlusIcon
+                                    className={styles.icon}
+                                    aria-hidden="true"
+                                />
                             </Button>
                         </Tooltip>
                     ) : null}
                     {onImportScript ? (
-                        <Tooltip label="Import script" placement="bottom">
-                            <Button variant="ghost" size="icon" onPress={onImportScript} aria-label="Import script">
-                                <UploadIcon className={styles.icon} aria-hidden="true" />
+                        <Tooltip
+                            label="Import script"
+                            placement="bottom"
+                        >
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onPress={onImportScript}
+                                aria-label="Import script"
+                            >
+                                <UploadIcon
+                                    className={styles.icon}
+                                    aria-hidden="true"
+                                />
                             </Button>
                         </Tooltip>
                     ) : null}
                     {leftControls ?? null}
                 </div>
-                <div className={styles.scriptControls} data-tauri-drag-region>
+                <div
+                    className={styles.scriptControls}
+                    data-tauri-drag-region
+                >
                     {scriptControls ?? null}
                 </div>
-                <div className={styles.rightControls} data-tauri-drag-region>
+                <div
+                    className={styles.rightControls}
+                    data-tauri-drag-region
+                >
                     {scriptActions ? (
                         <>
                             <div className={styles.actionGroup}>{scriptActions}</div>
-                            <span className={styles.actionDivider} aria-hidden="true" />
+                            <span
+                                className={styles.actionDivider}
+                                aria-hidden="true"
+                            />
                         </>
                     ) : null}
                     <div className={styles.actionGroup}>
-                        <AccountMenu themeMode={themeMode} onThemeChange={setThemeMode} />
+                        <AccountMenu
+                            themeMode={themeMode}
+                            onThemeChange={setThemeMode}
+                        />
                     </div>
                 </div>
             </div>
@@ -126,24 +181,61 @@ export const ScriptEditorAppHeader = ({
         <AppHeader
             onHome={onHome}
             isFullWidth={isFullWidth}
-            scriptControls={<ViewSwitcher activeView={activeView} onSelectView={onSelectView} />}
+            scriptControls={
+                <ViewSwitcher
+                    activeView={activeView}
+                    onSelectView={onSelectView}
+                />
+            }
             scriptActions={
                 onMenuAction ? (
                     <>
-                        <Tooltip label="Open script settings" placement="bottom">
-                            <Button variant="ghost" size="icon" aria-label="Open script settings" onPress={() => onMenuAction('settings')}>
-                                <SettingsIcon className={styles.icon} aria-hidden="true" />
+                        <Tooltip
+                            label="Open script settings"
+                            placement="bottom"
+                        >
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Open script settings"
+                                onPress={() => onMenuAction('settings')}
+                            >
+                                <SettingsIcon
+                                    className={styles.icon}
+                                    aria-hidden="true"
+                                />
                             </Button>
                         </Tooltip>
-                        <Tooltip label="Open attribute manager" placement="bottom">
-                            <Button variant="ghost" size="icon" aria-label="Open attribute manager" onPress={() => onMenuAction('attributes')}>
-                                <AttributeManagerIcon className={styles.icon} aria-hidden="true" />
+                        <Tooltip
+                            label="Open attribute manager"
+                            placement="bottom"
+                        >
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                aria-label="Open attribute manager"
+                                onPress={() => onMenuAction('attributes')}
+                            >
+                                <AttributeManagerIcon
+                                    className={styles.icon}
+                                    aria-hidden="true"
+                                />
                             </Button>
                         </Tooltip>
                         <MenuTrigger>
-                            <Tooltip label="Download" placement="bottom">
-                                <Button variant="ghost" size="icon" aria-label="Download script">
-                                    <DownloadIcon className={styles.icon} aria-hidden="true" />
+                            <Tooltip
+                                label="Download"
+                                placement="bottom"
+                            >
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    aria-label="Download script"
+                                >
+                                    <DownloadIcon
+                                        className={styles.icon}
+                                        aria-hidden="true"
+                                    />
                                 </Button>
                             </Tooltip>
                             <DropdownMenu
@@ -161,12 +253,21 @@ export const ScriptEditorAppHeader = ({
             leftControls={
                 <>
                     {onBackToEditor ? (
-                        <RACButton className={clsx(styles.menuTrigger, styles.backButton)} onPress={onBackToEditor}>
+                        <RACButton
+                            className={clsx(styles.menuTrigger, styles.backButton)}
+                            onPress={onBackToEditor}
+                        >
                             {backToEditorLabel}
                         </RACButton>
                     ) : null}
-                    <div className={styles.scriptIdentity} data-script-identity>
-                        <ScriptTitle name={currentScript.name} onRename={onRenameScript} />
+                    <div
+                        className={styles.scriptIdentity}
+                        data-script-identity
+                    >
+                        <ScriptTitle
+                            name={currentScript.name}
+                            onRename={onRenameScript}
+                        />
                         <SyncIndicator state={scriptSyncState} />
                     </div>
                 </>

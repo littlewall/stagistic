@@ -1,25 +1,18 @@
-import {
-    useEffect,
-    useRef,
-    useState,
-} from 'react';
+import {useEffect, useRef, useState} from 'react';
 
-import {Input} from '../atoms/Input';
-import {useDropdownDismiss} from '../molecules/forms/useDropdownDismiss';
-import styles from './VoiceTypeField.module.css';
+import {Input} from '../atoms/Input/Input';
+import {useDropdownDismiss} from '../molecules/forms/shared/useDropdownDismiss';
 import {VOICE_TYPE_SUGGESTIONS} from './voiceTypes';
 
+import styles from './VoiceTypeField.module.css';
+
 interface VoiceTypeFieldProps {
-    value: string | null,
-    onChange: (value: string | null) => void,
-    id?: string,
+    value: string | null;
+    onChange: (value: string | null) => void;
+    id?: string;
 }
 
-export const VoiceTypeField = ({
-    value,
-    onChange,
-    id,
-}: VoiceTypeFieldProps) => {
+export const VoiceTypeField = ({value, onChange, id}: VoiceTypeFieldProps) => {
     const [draft, setDraft] = useState(value ?? '');
     const [isOpen, setIsOpen] = useState(false);
     const rootRef = useRef<HTMLDivElement>(null);
@@ -31,9 +24,7 @@ export const VoiceTypeField = ({
     }, [value]);
 
     const normalizedDraft = draft.trim().toLowerCase();
-    const suggestions = VOICE_TYPE_SUGGESTIONS.filter(
-        option => option.includes(normalizedDraft),
-    );
+    const suggestions = VOICE_TYPE_SUGGESTIONS.filter(option => option.includes(normalizedDraft));
 
     const commit = () => {
         const trimmed = draft.trim();
@@ -47,7 +38,10 @@ export const VoiceTypeField = ({
     };
 
     return (
-        <div ref={rootRef} className={styles.root}>
+        <div
+            ref={rootRef}
+            className={styles.root}
+        >
             <Input
                 id={id}
                 size="lg"
@@ -73,18 +67,20 @@ export const VoiceTypeField = ({
                     aria-label="Voice type suggestions"
                     className={styles.menu}
                 >
-                    {suggestions.length > 0 ? suggestions.map(option => (
-                        <li
-                            key={option}
-                            role="option"
-                            aria-selected={option === normalizedDraft}
-                            className={styles.item}
-                            onMouseDown={event => event.preventDefault()}
-                            onClick={() => selectSuggestion(option)}
-                        >
-                            {option}
-                        </li>
-                    )) : (
+                    {suggestions.length > 0 ? (
+                        suggestions.map(option => (
+                            <li
+                                key={option}
+                                role="option"
+                                aria-selected={option === normalizedDraft}
+                                className={styles.item}
+                                onMouseDown={event => event.preventDefault()}
+                                onClick={() => selectSuggestion(option)}
+                            >
+                                {option}
+                            </li>
+                        ))
+                    ) : (
                         <li className={styles.empty}>No matching voice types</li>
                     )}
                 </ul>

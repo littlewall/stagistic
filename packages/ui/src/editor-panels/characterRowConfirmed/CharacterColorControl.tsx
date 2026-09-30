@@ -1,27 +1,20 @@
 import clsx from 'clsx';
-import {
-    type CSSProperties,
-    type KeyboardEvent,
-} from 'react';
+import {type CSSProperties, type KeyboardEvent} from 'react';
 
-import {Tooltip} from '../../atoms/Tooltip';
-import styles from '../EditorSidebar.module.css';
+import {Tooltip} from '../../atoms/Tooltip/Tooltip';
 import {CharacterColorPopover} from './CharacterColorPopover';
 import type {CharacterRowColorControls} from './contracts';
 
+import styles from '../EditorSidebar.module.css';
+
 interface CharacterColorControlProps {
-    characterKey: string,
-    color: CharacterRowColorControls,
-    className?: string,
-    swatchClassName?: string,
+    characterKey: string;
+    color: CharacterRowColorControls;
+    className?: string;
+    swatchClassName?: string;
 }
 
-export const CharacterColorControl = ({
-    characterKey,
-    color,
-    className,
-    swatchClassName,
-}: CharacterColorControlProps) => {
+export const CharacterColorControl = ({characterKey, color, className, swatchClassName}: CharacterColorControlProps) => {
     const handleKeyDown = (event: KeyboardEvent<HTMLSpanElement>) => {
         event.stopPropagation();
 

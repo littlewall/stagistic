@@ -1,17 +1,21 @@
 import clsx from 'clsx';
 
-import {Tooltip} from '../../atoms/Tooltip';
-import styles from '../AppHeader.module.css';
+import {Tooltip} from '../../atoms/Tooltip/Tooltip';
 import type {ScriptSyncState} from './types';
 
+import styles from '../AppHeader.module.css';
+
 type SyncIndicatorProps = {
-    state?: ScriptSyncState,
+    state?: ScriptSyncState;
 };
 
-const syncMetaByState: Record<ScriptSyncState, {
-    label: string,
-    className: string,
-}> = {
+const syncMetaByState: Record<
+    ScriptSyncState,
+    {
+        label: string;
+        className: string;
+    }
+> = {
     idle: {
         label: '',
         className: styles.idle,
@@ -35,7 +39,10 @@ export const SyncIndicator = ({state = 'idle'}: SyncIndicatorProps) => {
     const isIdle = state === 'idle';
 
     return (
-        <Tooltip label={syncMeta.label} isDisabled={isIdle}>
+        <Tooltip
+            label={syncMeta.label}
+            isDisabled={isIdle}
+        >
             <span
                 className={clsx(styles.scriptStatus, syncMeta.className)}
                 data-sync-status

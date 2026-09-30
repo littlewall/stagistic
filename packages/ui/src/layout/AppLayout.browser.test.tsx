@@ -5,7 +5,7 @@ import {createRoot, type Root} from 'react-dom/client';
 import {afterEach, describe, expect, it} from 'vite-plus/test';
 import {page, userEvent} from 'vite-plus/test/browser';
 
-import {formControlStyles} from '../molecules/forms/formControlStyles';
+import {formControlStyles} from '../molecules/forms/shared/formControlStyles';
 import {AppLayout} from './AppLayout';
 
 const mountedRoots: Root[] = [];
@@ -43,7 +43,12 @@ afterEach(() => {
 
 describe('AppLayout', () => {
     it('does not show a focus ring after a pointer focuses a text input', async () => {
-        renderLayout(<input className={formControlStyles.input} aria-label="Script title" />);
+        renderLayout(
+            <input
+                className={formControlStyles.input}
+                aria-label="Script title"
+            />,
+        );
 
         await waitFor(() => document.querySelector('[aria-label="Script title"]') !== null);
 
@@ -60,7 +65,12 @@ describe('AppLayout', () => {
     });
 
     it('shows a focus ring when the keyboard focuses a text input', async () => {
-        renderLayout(<input className={formControlStyles.input} aria-label="Script title" />);
+        renderLayout(
+            <input
+                className={formControlStyles.input}
+                aria-label="Script title"
+            />,
+        );
 
         await waitFor(() => document.querySelector('[aria-label="Script title"]') !== null);
         await userEvent.tab();

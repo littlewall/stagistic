@@ -1,12 +1,7 @@
 import {createRoot, type Root} from 'react-dom/client';
-import {
-    afterEach,
-    describe,
-    expect,
-    it,
-} from 'vite-plus/test';
+import {afterEach, describe, expect, it} from 'vite-plus/test';
 
-import {AttributeManagerCharactersPanel} from '../dialogs/AttributeManagerCharactersPanel';
+import {AttributeManagerCharactersPanel} from '../dialogs/attribute-manager/AttributeManagerCharactersPanel';
 
 const mountedRoots: Root[] = [];
 
@@ -77,8 +72,7 @@ describe('VocalRangeSection layout', () => {
         const previousStaffScale = (voiceTypeRect.width * 0.7) / 316;
         const previousStaffHeight = (voiceTypeRect.width * 0.6 * 116) / 316;
         const [lowNoteRect, highNoteRect] = noteheads.map(note => note.getBoundingClientRect());
-        const noteGap = highNoteRect.x + highNoteRect.width / 2
-            - (lowNoteRect.x + lowNoteRect.width / 2);
+        const noteGap = highNoteRect.x + highNoteRect.width / 2 - (lowNoteRect.x + lowNoteRect.width / 2);
 
         expect(voiceTypeRect.width).toBe(nameRect.width);
         expect(voiceTypeRect.height).toBe(nameRect.height);

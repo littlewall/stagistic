@@ -271,6 +271,9 @@ importers:
       '@stagistic/ui':
         specifier: workspace:*
         version: link:../ui
+      clsx:
+        specifier: ^2.1.1
+        version: 2.1.1
       pdfjs-dist:
         specifier: ^5.4.394
         version: 5.7.284
