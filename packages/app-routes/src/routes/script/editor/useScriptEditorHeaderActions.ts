@@ -7,9 +7,9 @@ import {
 import {useCallback, useState} from 'react';
 import {type NavigateFunction} from 'react-router-dom';
 
-import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
-import {downloadBlob, downloadStagistic} from './downloadStagistic';
-import type {CurrentScriptItem} from './types';
+import {useGlobalModals} from '../../../global-modals/GlobalModalsProvider';
+import {downloadBlob, downloadStagistic} from '../../../shared/downloadStagistic';
+import type {CurrentScriptItem} from '../workspace/types';
 
 interface HeaderActionsParams {
     navigate: NavigateFunction,

@@ -23,10 +23,10 @@ import {
     useState,
 } from 'react';
 
-import {ATTRIBUTE_MANAGER_PANEL_CHARACTERS} from '../../attributes/attributeManagerMenu';
-import {useScriptCharacters} from '../../ScriptCharactersContext';
-import {useScriptSession} from '../../ScriptSessionContext';
+import {ATTRIBUTE_MANAGER_PANEL_CHARACTERS} from '../../attribute-manager/attributeManagerMenu';
 import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalContext';
+import {useScriptCharacters} from '../../workspace/ScriptCharactersContext';
+import {useScriptSession} from '../../workspace/ScriptSessionContext';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import {AddCharacterModal} from './AddCharacterModal';
 import {CharactersSidebarContextActions} from './CharactersSidebarContextActions';

@@ -6,7 +6,7 @@ import {
 } from '@stagistic/app-core';
 import {useCallback} from 'react';
 
-import {downloadBlob} from '../../routes/script/downloadStagistic';
+import {downloadBlob} from '../shared/downloadStagistic';
 import type {UseGlobalModalMutationsArgs} from './useGlobalModalMutations';
 
 const PEEK_ERROR_MESSAGES: Record<string, string> = {

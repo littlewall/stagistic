@@ -11,9 +11,9 @@ import {
 } from 'react';
 import {Outlet, useParams} from 'react-router-dom';
 
-import {ScriptWorkspaceProvider, type ScriptWorkspaceValue} from './ScriptWorkspaceContext';
 import {ScriptSettingsModalProvider} from './settings/ScriptSettingsModalProvider';
-import {useScriptEditorController} from './useScriptEditorController';
+import {ScriptWorkspaceProvider, type ScriptWorkspaceValue} from './workspace/ScriptWorkspaceContext';
+import {useScriptEditorController} from './workspace/useScriptEditorController';
 
 export const ScriptWorkspaceRoute = () => {
     const {scriptId} = useParams();

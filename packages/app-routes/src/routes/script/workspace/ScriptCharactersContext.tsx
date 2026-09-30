@@ -11,12 +11,12 @@ import type {
     DeleteEditorCallbacks,
     RenameEditorCallbacks,
     RenamePreviewEditorCallbacks,
-} from './editor/characters/actions/types';
+} from '../editor/characters/actions/types';
 import type {
     CharacterGenderOption,
     ScriptCharacterGroupRecord,
     ScriptCharacterRecord,
-} from './editor/characters/types';
+} from '../editor/characters/types';
 
 export interface ScriptCharactersContextValue {
     // Consumed by ScriptEditor (via route)

@@ -8,7 +8,7 @@ import {
     useContext,
 } from 'react';
 
-import type {ScriptEditorController} from './controller/types';
+import type {ScriptEditorController} from './controllerTypes';
 
 export type ScriptWorkspaceValue = ScriptEditorController & {
     editorSurfaceCache: EditorSurfaceCache,

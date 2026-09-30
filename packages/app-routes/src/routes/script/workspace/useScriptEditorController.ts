@@ -12,13 +12,13 @@ import {useToastController} from '@stagistic/ui';
 import {useMemo} from 'react';
 import {useNavigate} from 'react-router-dom';
 
-import {deriveEditorLoadState} from './controller/editorLoadState';
-import type {ScriptEditorController} from './controller/types';
-import {useEditorRedirects} from './controller/useEditorRedirects';
-import {useSaveIndicator} from './controller/useSaveIndicator';
-import {useScriptLoader} from './controller/useScriptLoader';
-import {useScriptSaveHandlers} from './controller/useScriptSaveHandlers';
-import {useSeedDefaultScript} from './controller/useSeedDefaultScript';
+import type {ScriptEditorController} from './controllerTypes';
+import {deriveEditorLoadState} from './editorLoadState';
+import {useEditorRedirects} from './useEditorRedirects';
+import {useSaveIndicator} from './useSaveIndicator';
+import {useScriptLoader} from './useScriptLoader';
+import {useScriptSaveHandlers} from './useScriptSaveHandlers';
+import {useSeedDefaultScript} from './useSeedDefaultScript';
 
 export const useScriptEditorController = (scriptId: string | undefined): ScriptEditorController => {
     const navigate = useNavigate();

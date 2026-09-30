@@ -11,7 +11,7 @@ import {
 } from '@stagistic/script';
 import {type CSSProperties, useMemo} from 'react';
 
-import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from '../../../settings/settingsMenu';
+import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from '../../settingsMenu';
 import {
     BLOCK_PREVIEW_TEXT,
     BLOCK_PREVIEW_TEXT_COLOR,

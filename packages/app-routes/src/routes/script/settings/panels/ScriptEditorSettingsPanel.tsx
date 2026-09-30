@@ -1,7 +1,7 @@
 import {
     getBlockTypeFromElementPanelId,
     isElementSettingsPanelId,
-} from '../../settings/settingsMenu';
+} from '../settingsMenu';
 import {ElementSettingsPanel} from './element/ElementSettingsPanel';
 import {SECTION_RENDERERS} from './registry';
 import type {ScriptEditorSettingsPanelProps} from './types';

@@ -19,7 +19,7 @@ import {userEvent} from 'vite-plus/test/browser';
 import {
     type ScriptCharactersContextValue,
     ScriptCharactersProvider,
-} from '../../ScriptCharactersContext';
+} from '../../workspace/ScriptCharactersContext';
 import {ScriptCharactersSidebar} from './ScriptCharactersSidebar';
 
 vi.mock('@stagistic/editor', async importOriginal => {
@@ -31,7 +31,7 @@ vi.mock('@stagistic/editor', async importOriginal => {
     };
 });
 
-vi.mock('../../ScriptSessionContext', () => ({
+vi.mock('../../workspace/ScriptSessionContext', () => ({
     useScriptSession: () => ({resolvedScriptSettings: DEFAULT_EDITOR_SETTINGS}),
 }));
 

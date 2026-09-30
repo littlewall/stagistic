@@ -6,7 +6,7 @@ import {
     ATTRIBUTE_MANAGER_PANEL_PLACES,
     ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
     type AttributeManagerPanelId,
-} from '../../attributes/attributeManagerMenu';
+} from '../../attribute-manager/attributeManagerMenu';
 import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalContext';
 import {SidebarContextButton} from './SidebarContextButton';
 

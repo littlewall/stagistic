@@ -7,7 +7,7 @@ import {
     Text,
 } from '@stagistic/ui';
 
-import {formatLastEdited} from '../../utils/formatLastEdited';
+import {formatLastEdited} from '../../shared/formatLastEdited';
 import styles from './HomeRoute.module.css';
 
 interface ScriptListSectionProps {

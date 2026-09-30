@@ -22,7 +22,7 @@ import {
     useState,
 } from 'react';
 
-import {ATTRIBUTE_MANAGER_PANEL_MUSIC} from '../../attributes/attributeManagerMenu';
+import {ATTRIBUTE_MANAGER_PANEL_MUSIC} from '../../attribute-manager/attributeManagerMenu';
 import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalContext';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import {MusicSidebarContextActions} from './MusicSidebarContextActions';

@@ -29,7 +29,7 @@ vi.mock('@stagistic/app-core', async importOriginal => {
     };
 });
 
-vi.mock('./ScriptWorkspaceContext', () => ({
+vi.mock('./workspace/ScriptWorkspaceContext', () => ({
     useScriptWorkspace: () => ({
         currentScript: {id: 's1', name: 'My Script'},
         currentScriptId: 's1',
@@ -79,7 +79,7 @@ vi.mock('./ScriptWorkspaceContext', () => ({
     }),
 }));
 
-vi.mock('./ScriptCharactersContext', () => ({
+vi.mock('./workspace/ScriptCharactersContext', () => ({
     useScriptCharacters: () => ({
         confirmedCharacterRecords: [
             {

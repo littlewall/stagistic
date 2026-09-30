@@ -7,7 +7,7 @@ import {
     vi,
 } from 'vite-plus/test';
 
-import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attributes/attributeManagerMenu';
+import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attribute-manager/attributeManagerMenu';
 import {AttributeManagerSidebarButton} from './AttributeManagerSidebarButton';
 
 const openAttributeManagerModalWithPanel = vi.fn();

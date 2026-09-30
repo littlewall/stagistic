@@ -16,7 +16,7 @@ import type {
 import {useMemo} from 'react';
 
 import type {useScriptMusicState} from '../editor/music';
-import type {useScriptCharactersContextValue} from '../useScriptCharactersContextValue';
+import type {useScriptCharactersContextValue} from '../workspace/useScriptCharactersContextValue';
 import {
     buildAttributeManagerMusicItems,
     buildAttributeManagerMusicItemsFromLive,

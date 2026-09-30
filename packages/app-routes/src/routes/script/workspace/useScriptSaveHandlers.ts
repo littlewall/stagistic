@@ -4,7 +4,7 @@ import {useCallback} from 'react';
 import type {
     AppToastPayload,
     CurrentScriptItem,
-} from '../types';
+} from './types';
 
 interface SaveIndicatorControls {
     startSaveIndicator: () => void,

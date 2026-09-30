@@ -1,4 +1,4 @@
-import type {EditorLoadState} from './types';
+import type {EditorLoadState} from './controllerTypes';
 
 type EditorLoadItemStatus = 'error' | 'active' | 'done' | 'pending';
 

@@ -3,8 +3,8 @@ import {
     useMemo,
 } from 'react';
 
-import {useScriptEditorCharacters} from './editor/characters/useScriptEditorCharacters';
-import type {UseScriptEditorCharactersArgs} from './editor/characters/useScriptEditorCharacters.types';
+import {useScriptEditorCharacters} from '../editor/characters/useScriptEditorCharacters';
+import type {UseScriptEditorCharactersArgs} from '../editor/characters/useScriptEditorCharacters.types';
 import type {ScriptCharactersContextValue} from './ScriptCharactersContext';
 
 interface UseScriptCharactersContextValueResult {

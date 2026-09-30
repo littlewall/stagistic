@@ -18,7 +18,7 @@ import {
     ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
     ATTRIBUTE_MANAGER_PANEL_MUSIC,
     ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
-} from '../attributes/attributeManagerMenu';
+} from './attributeManagerMenu';
 import {ScriptAttributeManagerModal} from './ScriptAttributeManagerModal';
 
 const roots: Root[] = [];

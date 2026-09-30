@@ -24,7 +24,7 @@ import {
 import {
     type BlockSettingsPatch,
     normalizeSettingsOverride,
-} from './editor/settings';
+} from '../settings/panels';
 
 type HeaderFooterRowPatch = NonNullable<HeaderFooterSettingsPatch['header']>;
 

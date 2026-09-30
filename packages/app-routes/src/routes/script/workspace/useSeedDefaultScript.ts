@@ -10,7 +10,7 @@ import {
 } from 'react';
 import {type NavigateFunction} from 'react-router-dom';
 
-import type {AppToastPayload} from '../types';
+import type {AppToastPayload} from './types';
 
 const DEFAULT_SCRIPT_TITLE = 'Untitled script';
 const SEED_COOLDOWN_MS = 5000;

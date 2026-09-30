@@ -3,7 +3,7 @@ import type {ScriptDocument, TitlePageSettings} from '@stagistic/script';
 import type {NewScriptShape, StepkgPeekResult} from '@stagistic/ui';
 import type {NavigateFunction} from 'react-router-dom';
 
-import type {AppToastPayload} from '../../routes/script/types';
+import type {AppToastPayload} from '../routes/script/workspace/types';
 
 export interface ScriptImportFile {
     fileName: string,

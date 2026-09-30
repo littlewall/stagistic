@@ -4,7 +4,7 @@ import {
 } from 'react';
 import {type NavigateFunction} from 'react-router-dom';
 
-import type {CurrentScriptItem} from '../types';
+import type {CurrentScriptItem} from './types';
 
 interface UseEditorRedirectsArgs {
     state: {

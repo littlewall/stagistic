@@ -14,8 +14,8 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
-import {MusicAttachmentsDetail} from '../attributes/MusicAttachmentsDetail';
-import type {useMusicAttachmentsState} from '../attributes/useMusicAttachmentsState';
+import {MusicAttachmentsDetail} from './MusicAttachmentsDetail';
+import type {useMusicAttachmentsState} from './useMusicAttachmentsState';
 
 vi.mock('../export/renderPdfToCanvases', () => ({
     renderPdfToCanvases: () => {

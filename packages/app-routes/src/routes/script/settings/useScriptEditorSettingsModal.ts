@@ -7,9 +7,9 @@ import type {
 import {
     type ScriptSettingsPanelId,
     SETTINGS_MODAL_QUERY_KEY,
-} from './settings/settingsMenu';
-import {useScriptSettingsModalQuerySync} from './settings/useScriptSettingsModalQuerySync';
-import {useScriptSettingsModalState} from './settings/useScriptSettingsModalState';
+} from './settingsMenu';
+import {useScriptSettingsModalQuerySync} from './useScriptSettingsModalQuerySync';
+import {useScriptSettingsModalState} from './useScriptSettingsModalState';
 
 interface UseScriptEditorSettingsModalArgs {
     currentScriptId: string | null | undefined,

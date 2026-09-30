@@ -7,7 +7,7 @@ import {
     useMemo,
 } from 'react';
 
-import type {AppToastPayload} from '../../routes/script/types';
+import type {AppToastPayload} from '../routes/script/workspace/types';
 import type {
     ScriptImportFile,
     ScriptToDelete,

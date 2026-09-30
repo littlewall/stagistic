@@ -4,7 +4,7 @@ import {
     it,
 } from 'vite-plus/test';
 
-import {isEditorSettingsOverrideEmpty} from './types';
+import {isEditorSettingsOverrideEmpty} from './controllerTypes';
 
 describe('isEditorSettingsOverrideEmpty', () => {
     it('treats header and footer settings as persisted content', () => {

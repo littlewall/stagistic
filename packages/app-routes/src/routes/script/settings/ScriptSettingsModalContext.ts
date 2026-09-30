@@ -5,8 +5,8 @@ import {
 } from '@stagistic/script';
 import {createContext, useContext} from 'react';
 
-import {type AttributeManagerPanelId} from '../attributes/attributeManagerMenu';
-import {type useMusicAttachmentsState} from '../attributes/useMusicAttachmentsState';
+import {type AttributeManagerPanelId} from '../attribute-manager/attributeManagerMenu';
+import {type useMusicAttachmentsState} from '../attribute-manager/useMusicAttachmentsState';
 import {type useScriptMusicState} from '../editor/music/useScriptMusicState';
 
 export interface ScriptSettingsModalContextValue {

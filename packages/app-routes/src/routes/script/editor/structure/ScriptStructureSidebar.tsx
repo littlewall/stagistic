@@ -24,8 +24,8 @@ import {
     useState,
 } from 'react';
 
-import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attributes/attributeManagerMenu';
-import {useScriptSession} from '../../ScriptSessionContext';
+import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attribute-manager/attributeManagerMenu';
+import {useScriptSession} from '../../workspace/ScriptSessionContext';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import styles from './ScriptStructureSidebar.module.css';
 import {

@@ -14,23 +14,23 @@ import {
 } from '@stagistic/ui';
 import {useState} from 'react';
 
+import {AddMusicModal} from '../editor/music/AddMusicModal';
+import {DeleteMusicModal} from '../editor/music/DeleteMusicModal';
+import type {useScriptMusicState} from '../editor/music/useScriptMusicState';
+import {DeleteSceneHeadingModal} from '../editor/scene/DeleteSceneHeadingModal';
+import type {useScriptCharactersContextValue} from '../workspace/useScriptCharactersContextValue';
 import {
     ATTRIBUTE_MANAGER_PANEL_CHARACTERS,
     ATTRIBUTE_MANAGER_PANEL_MUSIC,
     ATTRIBUTE_MANAGER_PANEL_PLACES,
     ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
     type AttributeManagerPanelId,
-} from '../attributes/attributeManagerMenu';
-import {MusicAttachmentsDetail} from '../attributes/MusicAttachmentsDetail';
-import type {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
-import type {useMusicAttachmentsState} from '../attributes/useMusicAttachmentsState';
-import type {useScriptPlacesState} from '../attributes/useScriptPlacesState';
-import {AddMusicModal} from '../editor/music/AddMusicModal';
-import {DeleteMusicModal} from '../editor/music/DeleteMusicModal';
-import type {useScriptMusicState} from '../editor/music/useScriptMusicState';
-import {DeleteSceneHeadingModal} from '../editor/scene/DeleteSceneHeadingModal';
-import type {useScriptCharactersContextValue} from '../useScriptCharactersContextValue';
+} from './attributeManagerMenu';
+import {MusicAttachmentsDetail} from './MusicAttachmentsDetail';
 import styles from './ScriptAttributeManagerModal.module.css';
+import type {useAttributeManagerModalState} from './useAttributeManagerModalState';
+import type {useMusicAttachmentsState} from './useMusicAttachmentsState';
+import type {useScriptPlacesState} from './useScriptPlacesState';
 
 interface ScriptAttributeManagerModalProps {
     currentScriptId: string | null,

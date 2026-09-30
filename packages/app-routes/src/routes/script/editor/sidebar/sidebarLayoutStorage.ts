@@ -1,4 +1,4 @@
-import {SIDEBAR_LAYOUT_STORAGE_KEY} from '../../../../storageKeys';
+import {SIDEBAR_LAYOUT_STORAGE_KEY} from '../../../../shared/storageKeys';
 import type {SidebarPanelId} from './types';
 
 export type OverlayDrawer = 'left' | 'right' | null;

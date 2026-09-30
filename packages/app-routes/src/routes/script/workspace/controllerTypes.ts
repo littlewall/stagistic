@@ -9,7 +9,7 @@ import type {
 } from '@stagistic/script';
 import type {ScriptSyncState} from '@stagistic/ui';
 
-import type {CurrentScriptItem} from '../types';
+import type {CurrentScriptItem} from './types';
 
 export type EditorLoadState = {
     progress: number,

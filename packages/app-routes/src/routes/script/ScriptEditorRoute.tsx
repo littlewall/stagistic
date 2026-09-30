@@ -6,7 +6,7 @@ import {useCallback, useMemo} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
-import {useDocumentTitle} from '../../useDocumentTitle';
+import {useDocumentTitle} from '../../shared/useDocumentTitle';
 import {useCommentsEditorBridge, useCommentsPanelState} from './editor/comments';
 import {DeferredScriptEditor} from './editor/DeferredScriptEditor';
 import {
@@ -19,11 +19,11 @@ import {DeleteSceneHeadingModal} from './editor/scene/DeleteSceneHeadingModal';
 import {useSceneConversionState} from './editor/scene/useSceneConversionState';
 import {useSceneDeletionState} from './editor/scene/useSceneDeletionState';
 import {useEditorSidebars, useScriptSidebarPanels} from './editor/sidebar';
-import {useScriptCharacters} from './ScriptCharactersContext';
-import {ScriptSessionProvider} from './ScriptSessionContext';
-import {useScriptWorkspace} from './ScriptWorkspaceContext';
+import {useScriptEditorHeaderActions} from './editor/useScriptEditorHeaderActions';
 import {useScriptSettingsModal} from './settings/ScriptSettingsModalContext';
-import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
+import {useScriptCharacters} from './workspace/ScriptCharactersContext';
+import {ScriptSessionProvider} from './workspace/ScriptSessionContext';
+import {useScriptWorkspace} from './workspace/ScriptWorkspaceContext';
 
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'var(--sidebar-width)';

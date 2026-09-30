@@ -24,7 +24,7 @@ import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import {AppHeader} from '../../layout/AppHeader';
-import {useDocumentTitle} from '../../useDocumentTitle';
+import {useDocumentTitle} from '../../shared/useDocumentTitle';
 import {buildHomeDashboardModel, type ScriptSort} from './homeDashboardModel';
 import styles from './HomeRoute.module.css';
 import {ScriptListSection} from './ScriptListSection';
@@ -108,7 +108,7 @@ export const HomeRoute = () => {
         setExampleError(null);
 
         try {
-            const {createExampleScript} = await import('./example-script/createExampleScript');
+            const {createExampleScript} = await import('../../example-script/createExampleScript');
             const example = await createExampleScript({
                 actions: {
                     createScript,

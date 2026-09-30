@@ -8,7 +8,7 @@ import {
     useState,
 } from 'react';
 
-import type {MusicAttachmentsState} from '../attributes/useMusicAttachmentsState';
+import type {MusicAttachmentsState} from '../attribute-manager/useMusicAttachmentsState';
 import {hasExportableScriptContent} from './hasExportableScriptContent';
 
 export type ExportStatus = 'idle' | 'regenerating' | 'error';
