@@ -1,26 +1,33 @@
 import {type BlockShortcut, type ScriptBlockNodeType} from '@stagistic/script';
 import {SearchControl, useDropdownDismiss} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
-import {type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {
+    type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState,
+} from 'react';
 
 import {BLOCKS_WITHOUT_ACT} from '../blocks/blockRegistry';
 import {useEditorSearch} from '../hooks/useEditorSearch';
 import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
 import {updateBlockType, updateBlockTypeForSelection} from '../tiptap/scriptBlock/commands';
 import {normalizeBlockNodeType} from '../tiptap/scriptCore';
+import styles from './EditorToolbar.module.css';
 import {BlockTypeSelect} from './toolbar/BlockTypeSelect';
-import type {BlockTypeSelectActions, BlockTypeSelectState, InlineMarksGroupActions, InlineMarksGroupState} from './toolbar/contracts';
+import type {
+    BlockTypeSelectActions, BlockTypeSelectState, InlineMarksGroupActions, InlineMarksGroupState,
+} from './toolbar/contracts';
 import {InlineMarksGroup} from './toolbar/InlineMarksGroup';
 import {useToolbarState} from './toolbar/useToolbarState';
 
-import styles from './EditorToolbar.module.css';
-
 interface EditorToolbarProps {
-    editor: TiptapEditor | null;
-    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>;
+    editor: TiptapEditor | null,
+    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
 }
 
-const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>(['stageDirection', 'dialogue', 'lyrics']);
+const MULTI_BLOCK_ALLOWED_TYPES = new Set<ScriptBlockNodeType>([
+    'stageDirection',
+    'dialogue',
+    'lyrics',
+]);
 
 const MULTI_BLOCK_OPTIONS = BLOCKS_WITHOUT_ACT.filter(option => MULTI_BLOCK_ALLOWED_TYPES.has(option.type));
 
@@ -66,7 +73,8 @@ const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
             if (canUndo) {
-                editor?.chain().focus().undo().run();
+                editor?.chain().focus().undo()
+                    .run();
             }
         },
         [canUndo, editor],
@@ -75,7 +83,8 @@ const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
             if (canRedo) {
-                editor?.chain().focus().redo().run();
+                editor?.chain().focus().redo()
+                    .run();
             }
         },
         [canRedo, editor],
@@ -83,21 +92,24 @@ const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
     const handleBoldMouseDown = useCallback(
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
-            editor?.chain().focus().toggleBold().run();
+            editor?.chain().focus().toggleBold()
+                .run();
         },
         [editor],
     );
     const handleItalicMouseDown = useCallback(
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
-            editor?.chain().focus().toggleItalic().run();
+            editor?.chain().focus().toggleItalic()
+                .run();
         },
         [editor],
     );
     const handleUnderlineMouseDown = useCallback(
         (event: ReactMouseEvent<HTMLButtonElement>) => {
             event.preventDefault();
-            editor?.chain().focus().toggleUnderline().run();
+            editor?.chain().focus().toggleUnderline()
+                .run();
         },
         [editor],
     );
@@ -132,7 +144,11 @@ const EditorToolbar = ({editor, blockShortcuts}: EditorToolbarProps) => {
 
             updateBlockType(editor, normalizeBlockNodeType(optionType));
         },
-        [activeBlockInfo?.type, editor, isMultiBlockSelection],
+        [
+            activeBlockInfo?.type,
+            editor,
+            isMultiBlockSelection,
+        ],
     );
 
     const inlineMarksState: InlineMarksGroupState = {

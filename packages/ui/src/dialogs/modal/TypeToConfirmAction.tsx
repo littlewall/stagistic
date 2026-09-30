@@ -1,25 +1,28 @@
-import {type ReactNode, useCallback, useState} from 'react';
+import {
+    type ReactNode, useCallback, useState,
+} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {TextInput} from '../../molecules/forms/TextInput/TextInput';
-
 import styles from './TypeToConfirmAction.module.css';
 
 export interface TypeToConfirmFieldProps {
-    phrase: string;
-    value: string;
-    inputAriaLabel?: string;
-    isPending?: boolean;
-    onChange: (value: string) => void;
+    phrase: string,
+    value: string,
+    inputAriaLabel?: string,
+    isPending?: boolean,
+    onChange: (value: string) => void,
 }
 
-export const TypeToConfirmField = ({phrase, value, inputAriaLabel, isPending = false, onChange}: TypeToConfirmFieldProps) => (
+export const TypeToConfirmField = ({
+    phrase, value, inputAriaLabel, isPending = false, onChange,
+}: TypeToConfirmFieldProps) => (
     <TextInput
-        label={
+        label={(
             <span className={styles.confirmLabel}>
                 Type <code className={styles.confirmPhrase}>{phrase}</code> to confirm
             </span>
-        }
+        )}
         type="text"
         size="sm"
         className={styles.confirmField}
@@ -35,15 +38,17 @@ export const TypeToConfirmField = ({phrase, value, inputAriaLabel, isPending = f
 );
 
 export interface TypeToConfirmActionProps {
-    phrase: string;
-    confirmLabel: ReactNode;
-    inputAriaLabel?: string;
-    isPending?: boolean;
-    secondaryAction?: ReactNode;
-    onConfirm: () => void | Promise<void>;
+    phrase: string,
+    confirmLabel: ReactNode,
+    inputAriaLabel?: string,
+    isPending?: boolean,
+    secondaryAction?: ReactNode,
+    onConfirm: () => void | Promise<void>,
 }
 
-export const TypeToConfirmAction = ({phrase, confirmLabel, inputAriaLabel, isPending = false, secondaryAction, onConfirm}: TypeToConfirmActionProps) => {
+export const TypeToConfirmAction = ({
+    phrase, confirmLabel, inputAriaLabel, isPending = false, secondaryAction, onConfirm,
+}: TypeToConfirmActionProps) => {
     const [confirmText, setConfirmText] = useState('');
     const isUnlocked = confirmText.trim() === phrase;
 
@@ -53,7 +58,11 @@ export const TypeToConfirmAction = ({phrase, confirmLabel, inputAriaLabel, isPen
         }
 
         void onConfirm();
-    }, [isUnlocked, isPending, onConfirm]);
+    }, [
+        isUnlocked,
+        isPending,
+        onConfirm,
+    ]);
 
     return (
         <div className={styles.stack}>

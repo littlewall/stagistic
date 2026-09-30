@@ -9,12 +9,14 @@ type InputSize = 'sm' | 'md' | 'lg';
 type InputVariant = 'default' | 'raised';
 
 type InputProps = {
-    size?: InputSize;
-    variant?: InputVariant;
-    className?: string;
+    size?: InputSize,
+    variant?: InputVariant,
+    className?: string,
 } & Omit<ReactAriaInputProps, 'className' | 'size'>;
 
-export const Input = forwardRef<HTMLInputElement, InputProps>(({size = 'sm', variant = 'default', className, ...props}, ref) => (
+export const Input = forwardRef<HTMLInputElement, InputProps>(({
+    size = 'sm', variant = 'default', className, ...props
+}, ref) => (
     <ReactAriaInput
         {...props}
         ref={ref}

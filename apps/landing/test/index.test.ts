@@ -1,7 +1,9 @@
 import {execFileSync} from 'node:child_process';
 import {existsSync, readFileSync} from 'node:fs';
 
-import {beforeAll, describe, expect, it} from 'vite-plus/test';
+import {
+    beforeAll, describe, expect, it,
+} from 'vite-plus/test';
 
 const readSvgCanvas = (relativePath: string) => {
     const svg = readFileSync(new URL(relativePath, import.meta.url), 'utf8');
@@ -45,6 +47,7 @@ describe('landing page', () => {
             stdio: 'pipe',
         });
         homeHtml = readFileSync(new URL('../dist/index.html', import.meta.url), 'utf8');
+
         const cssPaths = Array.from(homeHtml.matchAll(/<link rel="stylesheet" href="([^"]+\.css)">/g)).map(m => m[1]);
 
         expect(cssPaths.length).toBeGreaterThan(0);
@@ -116,7 +119,10 @@ describe('landing page', () => {
     });
 
     it('links feature descriptions to their specific editor guides', () => {
-        const links = Array.from(homeHtml.matchAll(/<a href="([^"]+)"[^>]*>\s*([^<]+?)\s*<\/a>/g), ([, href, label]) => ({
+        const links = Array.from(homeHtml.matchAll(/<a href="([^"]+)"[^>]*>\s*([^<]+?)\s*<\/a>/g), ([
+            , href,
+            label,
+        ]) => ({
             href,
             label: label.replace(/&rarr;/g, '→').trim(),
         }));
@@ -225,10 +231,7 @@ describe('landing page', () => {
         expect(readPngDimensions('../public/favicon-16x16.png')).toEqual([16, 16]);
         expect(readPngDimensions('../public/favicon-32x32.png')).toEqual([32, 32]);
         expect(readPngDimensions('../public/apple-touch-icon.png')).toEqual([180, 180]);
-        expect(readIcoDimensions('../public/favicon.ico')).toEqual([
-            [16, 16],
-            [32, 32],
-        ]);
+        expect(readIcoDimensions('../public/favicon.ico')).toEqual([[16, 16], [32, 32]]);
     });
 
     it('ships the two-path favicon mark in steel wool and paper theme colours', () => {
@@ -269,18 +272,19 @@ describe('landing page', () => {
             }
 
             const h1s = html.match(/<h1\b[^>]*>[\s\S]*?<\/h1>/g) ?? [];
+
             expect(h1s).toHaveLength(1);
         }
     });
 
     it('publishes structured data for the site and product pages', () => {
         type GraphEntry = {
-            '@type': string;
-            url?: string;
-            itemListElement?: Array<{name: string; position: number}>;
-            applicationCategory?: string;
-            operatingSystem?: string;
-            offers?: {price: string; priceCurrency: string};
+            '@type': string,
+            url?: string,
+            itemListElement?: Array<{name: string, position: number}>,
+            applicationCategory?: string,
+            operatingSystem?: string,
+            offers?: {price: string, priceCurrency: string},
         };
         type StructuredData = {'@graph': GraphEntry[]};
 
@@ -322,7 +326,11 @@ describe('landing page', () => {
 
         expect(home.find(entry => entry['@type'] === 'WebSite')).toMatchObject({url: 'https://stagistic.com'});
 
-        for (const route of ['../dist/editor/playwriting.html', '../dist/editor/musicals.html', '../dist/editor/syntax.html']) {
+        for (const route of [
+            '../dist/editor/playwriting.html',
+            '../dist/editor/musicals.html',
+            '../dist/editor/syntax.html',
+        ]) {
             const graph = readStructuredData(route)['@graph'];
             const breadcrumb = graph.find(entry => entry['@type'] === 'BreadcrumbList');
 

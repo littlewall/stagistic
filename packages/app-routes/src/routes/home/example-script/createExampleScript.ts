@@ -1,15 +1,17 @@
 import type {ScriptRepository} from '@stagistic/app-core';
 import {linkCharacterRefInScriptDocument, type ScriptDocument} from '@stagistic/script';
 
-import {EXAMPLE_CHARACTERS, EXAMPLE_COMMENT_THREADS, EXAMPLE_GROUPS, EXAMPLE_LOCATIONS} from './exampleScriptMetadata';
+import {
+    EXAMPLE_CHARACTERS, EXAMPLE_COMMENT_THREADS, EXAMPLE_GROUPS, EXAMPLE_LOCATIONS,
+} from './exampleScriptMetadata';
 import {loadExampleScriptTemplate} from './loadExampleScriptTemplate';
 import {anchorExampleComment} from './prepareExampleScriptDocument';
 
 const INTEGRATED_SCORE_ROLE = 'integrated_score';
 
 export interface ExampleScriptActions {
-    createScript(title: string, document: ScriptDocument): Promise<string>;
-    deleteScript(scriptId: string): Promise<void>;
+    createScript(title: string, document: ScriptDocument): Promise<string>,
+    deleteScript(scriptId: string): Promise<void>,
 }
 
 export type ExampleScriptRepository = Pick<
@@ -39,13 +41,13 @@ export type ExampleScriptRepository = Pick<
 >;
 
 interface CreateExampleScriptArgs {
-    actions: ExampleScriptActions;
-    repository: ExampleScriptRepository;
+    actions: ExampleScriptActions,
+    repository: ExampleScriptRepository,
 }
 
 interface CreatedExampleScript {
-    scriptId: string;
-    title: string;
+    scriptId: string,
+    title: string,
 }
 
 const required = <T>(value: T | null | undefined, message: string): T => {
@@ -166,7 +168,7 @@ const createLocations = async (repository: ExampleScriptRepository, scriptId: st
         location.sceneTitles.forEach(title => {
             const sceneId = required(sceneBlockIdsByTitle.get(title), `Unknown example scene: ${title}.`);
 
-            locationIdsBySceneId.set(sceneId, [...(locationIdsBySceneId.get(sceneId) ?? []), created.id]);
+            locationIdsBySceneId.set(sceneId, [...locationIdsBySceneId.get(sceneId) ?? [], created.id]);
         });
     }
 

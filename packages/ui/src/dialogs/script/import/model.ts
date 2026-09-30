@@ -1,19 +1,23 @@
 export interface ImportPayload {
-    name: string;
-    fileName: string;
-    text: string;
+    name: string,
+    fileName: string,
+    text: string,
 }
 
-export type SelectedFile = {kind: 'stagistic'; name: string; file?: File; text?: string} | {kind: 'stepkg'; name: string; file?: File; bytes?: Uint8Array};
+export type SelectedFile = {
+    kind: 'stagistic', name: string, file?: File, text?: string,
+} | {
+    kind: 'stepkg', name: string, file?: File, bytes?: Uint8Array,
+};
 
 export interface DropEvent {
-    items: readonly unknown[];
+    items: readonly unknown[],
 }
 
 interface FileDropItem {
-    kind: 'file';
-    name: string;
-    getFile: () => Promise<File>;
+    kind: 'file',
+    name: string,
+    getFile: () => Promise<File>,
 }
 
 export const isFileDropItem = (item: unknown): item is FileDropItem => {
@@ -36,7 +40,9 @@ export const isStepkgFileName = (name: string) => {
 
 export const classifyFileKind = (name: string): 'stagistic' | 'stepkg' | null => {
     if (isStagisticFileName(name)) return 'stagistic';
+
     if (isStepkgFileName(name)) return 'stepkg';
+
     return null;
 };
 

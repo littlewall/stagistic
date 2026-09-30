@@ -1,4 +1,6 @@
-import {createNodeId, resolveScriptBlockNodeType, SCRIPT_BLOCK_NODE_TYPES} from '@stagistic/script';
+import {
+    createNodeId, resolveScriptBlockNodeType, SCRIPT_BLOCK_NODE_TYPES,
+} from '@stagistic/script';
 import type {Node as ProseMirrorNode, ResolvedPos} from '@tiptap/pm/model';
 import type {EditorState} from '@tiptap/pm/state';
 
@@ -38,12 +40,12 @@ const resolveNodeNameMatcher = (nodeName: string | readonly string[]) => {
 export {type BlockNodeType, normalizeBlockNodeType} from '../blocks/script';
 
 export type ActiveScriptBlock = {
-    pos: number;
-    from: number;
-    to: number;
-    node: ProseMirrorNode;
-    blockType: BlockNodeType;
-    id: string;
+    pos: number,
+    from: number,
+    to: number,
+    node: ProseMirrorNode,
+    blockType: BlockNodeType,
+    id: string,
 };
 
 export const ensureScriptBlockId = (value: unknown) => {
@@ -101,8 +103,10 @@ const getScriptBlockAtResolvedPosition = ($position: ResolvedPos, nodeName: stri
     return null;
 };
 
-export const getActiveScriptBlockFromState = (state: EditorState, nodeName: string | readonly string[] = SCRIPT_BLOCK_NODE_NAMES) =>
-    getScriptBlockAtResolvedPosition(state.selection.$from, nodeName);
+export const getActiveScriptBlockFromState = (
+    state: EditorState,
+    nodeName: string | readonly string[] = SCRIPT_BLOCK_NODE_NAMES,
+) => getScriptBlockAtResolvedPosition(state.selection.$from, nodeName);
 
 export const findScriptBlockByIdFromState = (
     state: EditorState,

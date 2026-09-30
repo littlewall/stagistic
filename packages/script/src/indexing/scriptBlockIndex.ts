@@ -1,6 +1,10 @@
 import {canBlockTypeHaveCharacterTags, collectCharacterTags} from '../characters/characterTagMarks';
-import {getCharacterRefByKey, getNodeTextContent, isCharacterBlockType} from '../characters/documentHelpers';
-import {getScriptBlockId, getScriptBlockNodeType, isScriptBlockNode, type ScriptDocument, type ScriptNode} from '../document';
+import {
+    getCharacterRefByKey, getNodeTextContent, isCharacterBlockType,
+} from '../characters/documentHelpers';
+import {
+    getScriptBlockId, getScriptBlockNodeType, isScriptBlockNode, type ScriptDocument, type ScriptNode,
+} from '../document';
 import {collectMusicAtoms} from '../music/collectMusicAtoms';
 import {deriveMusicTimeline} from '../music/deriveMusic';
 import type {DerivedMusic, MusicBlockInput} from '../music/types';
@@ -9,29 +13,29 @@ import {extractCharacterKeys} from '../syntax';
 export const SCRIPT_BLOCK_INDEX_SCHEMA_VERSION = 2;
 
 export interface IndexedScriptCharacterRef {
-    key: string;
-    characterId: string | null;
+    key: string,
+    characterId: string | null,
 }
 
 export interface IndexedScriptBlock {
-    blockId: string;
-    orderNo: number;
-    blockType: string;
-    textContent: string;
-    actBlockId: string | null;
-    sceneBlockId: string | null;
-    characterRefs: IndexedScriptCharacterRef[] | null;
+    blockId: string,
+    orderNo: number,
+    blockType: string,
+    textContent: string,
+    actBlockId: string | null,
+    sceneBlockId: string | null,
+    characterRefs: IndexedScriptCharacterRef[] | null,
 }
 
 export interface ScriptBlockIndexSnapshot {
-    blocks: IndexedScriptBlock[];
-    music: DerivedMusic[];
-    orphanMusicOutBlockIds: string[];
+    blocks: IndexedScriptBlock[],
+    music: DerivedMusic[],
+    orphanMusicOutBlockIds: string[],
 }
 
 export interface BuildScriptBlockIndexResult {
-    snapshot: ScriptBlockIndexSnapshot;
-    blockCount: number;
+    snapshot: ScriptBlockIndexSnapshot,
+    blockCount: number,
 }
 
 const toTagCharacterRefs = (node: ScriptNode): IndexedScriptCharacterRef[] | null => {

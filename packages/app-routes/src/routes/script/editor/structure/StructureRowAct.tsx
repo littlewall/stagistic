@@ -1,13 +1,16 @@
 import {useSortable} from '@dnd-kit/react/sortable';
 import clsx from 'clsx';
-import {memo, useCallback, useRef} from 'react';
+import {
+    memo, useCallback, useRef,
+} from 'react';
 
 import {ACT_DND_TYPE, SCENE_DND_TYPE} from './dnd';
+import styles from './ScriptStructureSidebar.module.css';
 import type {StructureRowActContentProps, StructureRowActProps} from './types';
 
-import styles from './ScriptStructureSidebar.module.css';
-
-const ActRowContent = memo(({blockId, name, namePreview, onRename, onNamePreview, onNamePreviewClear, onDelete}: StructureRowActContentProps) => {
+const ActRowContent = memo(({
+    blockId, name, namePreview, onRename, onNamePreview, onNamePreviewClear, onDelete,
+}: StructureRowActContentProps) => {
     // Set by Escape so the following blur discards the draft instead of committing.
     const revertOnBlurRef = useRef(false);
 
@@ -25,7 +28,12 @@ const ActRowContent = memo(({blockId, name, namePreview, onRename, onNamePreview
 
             onRename(blockId, value.trim());
         },
-        [blockId, name, onNamePreview, onRename],
+        [
+            blockId,
+            name,
+            onNamePreview,
+            onRename,
+        ],
     );
 
     const handleBlur = useCallback(() => {
@@ -48,7 +56,13 @@ const ActRowContent = memo(({blockId, name, namePreview, onRename, onNamePreview
          * in the editor propagate back into the sidebar.
          */
         onNamePreviewClear(blockId);
-    }, [blockId, name, namePreview, onNamePreviewClear, onRename]);
+    }, [
+        blockId,
+        name,
+        namePreview,
+        onNamePreviewClear,
+        onRename,
+    ]);
 
     return (
         <>

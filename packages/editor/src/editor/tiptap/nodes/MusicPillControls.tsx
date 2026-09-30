@@ -7,17 +7,19 @@ import styles from './MusicPill.module.css';
 export type MusicMode = 'open' | 'hit';
 
 type MusicMenuButtonProps = {
-    label: string;
-    isDanger?: boolean;
-    onClick: () => void;
-    children: ReactNode;
+    label: string,
+    isDanger?: boolean,
+    onClick: () => void,
+    children: ReactNode,
 };
 
 const keepEditorFocus = (event: {preventDefault: () => void}) => {
     event.preventDefault();
 };
 
-export const MusicMenuButton = ({label, isDanger = false, onClick, children}: MusicMenuButtonProps) => (
+export const MusicMenuButton = ({
+    label, isDanger = false, onClick, children,
+}: MusicMenuButtonProps) => (
     <Tooltip label={label}>
         <button
             type="button"

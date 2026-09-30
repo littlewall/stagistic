@@ -4,13 +4,12 @@ import {Button} from '../../atoms/Button/Button';
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
 import {AppearanceIcon} from '../../icons/ui';
 import {type AppThemeMode} from '../../theme/theme';
+import styles from '../AppHeader.module.css';
 import {ThemeModeToggle} from './ThemeModeToggle';
 
-import styles from '../AppHeader.module.css';
-
 type AccountMenuProps = {
-    themeMode: AppThemeMode;
-    onThemeChange: (mode: AppThemeMode) => void;
+    themeMode: AppThemeMode,
+    onThemeChange: (mode: AppThemeMode) => void,
 };
 
 export const AccountMenuContent = ({themeMode, onThemeChange}: AccountMenuProps) => {

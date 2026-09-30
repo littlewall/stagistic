@@ -1,31 +1,40 @@
 import clsx from 'clsx';
-import {type ReactNode, useEffect, useState} from 'react';
+import {
+    type ReactNode, useEffect, useState,
+} from 'react';
 import {Button as RACButton, MenuTrigger} from 'react-aria-components';
 
 import {Button} from '../atoms/Button/Button';
 import {Tooltip} from '../atoms/Tooltip/Tooltip';
-import {AttributeManagerIcon, DownloadIcon, HomeIcon, PlusIcon, SettingsIcon, UploadIcon} from '../icons/ui';
+import {
+    AttributeManagerIcon, DownloadIcon, HomeIcon, PlusIcon, SettingsIcon, UploadIcon,
+} from '../icons/ui';
 import {DropdownMenu} from '../molecules/DropdownMenu/DropdownMenu';
-import {applyAppThemeMode, type AppThemeMode, readPreferredAppThemeMode, subscribeToSystemThemeChange} from '../theme/theme';
+import {
+    applyAppThemeMode, type AppThemeMode, readPreferredAppThemeMode, subscribeToSystemThemeChange,
+} from '../theme/theme';
+import styles from './AppHeader.module.css';
 import {AccountMenu} from './header/AccountMenu';
 import {ScriptTitle} from './header/ScriptTitle';
 import {SyncIndicator} from './header/SyncIndicator';
-import type {ScriptListItem, ScriptSyncState, ScriptView} from './header/types';
+import type {
+    ScriptListItem, ScriptSyncState, ScriptView,
+} from './header/types';
 import {ViewSwitcher} from './header/ViewSwitcher';
 
-import styles from './AppHeader.module.css';
-
-export type {ScriptListItem, ScriptSyncState, ScriptView};
+export type {
+    ScriptListItem, ScriptSyncState, ScriptView,
+};
 
 export type AppHeaderProps = {
-    leftControls?: ReactNode;
-    scriptControls?: ReactNode;
-    scriptActions?: ReactNode;
-    onHome: () => void;
-    onNewScript?: () => void;
-    onImportScript?: () => void;
-    isFullWidth?: boolean;
-    contentInset?: 'default' | 'page';
+    leftControls?: ReactNode,
+    scriptControls?: ReactNode,
+    scriptActions?: ReactNode,
+    onHome: () => void,
+    onNewScript?: () => void,
+    onImportScript?: () => void,
+    isFullWidth?: boolean,
+    contentInset?: 'default' | 'page',
 };
 
 export const AppHeader = ({
@@ -153,16 +162,16 @@ export const AppHeader = ({
 };
 
 export type ScriptEditorAppHeaderProps = {
-    currentScript: ScriptListItem;
-    onMenuAction?: (actionId: string) => void;
-    onRenameScript?: (name: string) => void;
-    scriptSyncState?: ScriptSyncState;
-    onHome: () => void;
-    onBackToEditor?: () => void;
-    backToEditorLabel?: string;
-    isFullWidth?: boolean;
-    activeView: ScriptView;
-    onSelectView: (view: ScriptView) => void;
+    currentScript: ScriptListItem,
+    onMenuAction?: (actionId: string) => void,
+    onRenameScript?: (name: string) => void,
+    scriptSyncState?: ScriptSyncState,
+    onHome: () => void,
+    onBackToEditor?: () => void,
+    backToEditorLabel?: string,
+    isFullWidth?: boolean,
+    activeView: ScriptView,
+    onSelectView: (view: ScriptView) => void,
 };
 
 export const ScriptEditorAppHeader = ({
@@ -181,12 +190,12 @@ export const ScriptEditorAppHeader = ({
         <AppHeader
             onHome={onHome}
             isFullWidth={isFullWidth}
-            scriptControls={
+            scriptControls={(
                 <ViewSwitcher
                     activeView={activeView}
                     onSelectView={onSelectView}
                 />
-            }
+            )}
             scriptActions={
                 onMenuAction ? (
                     <>
@@ -240,17 +249,14 @@ export const ScriptEditorAppHeader = ({
                             </Tooltip>
                             <DropdownMenu
                                 aria-label="Download script"
-                                items={[
-                                    {id: 'export-stagistic', label: 'Script (.stagistic)'},
-                                    {id: 'export-stepkg', label: 'Script & metadata (.stepkg)'},
-                                ]}
+                                items={[{id: 'export-stagistic', label: 'Script (.stagistic)'}, {id: 'export-stepkg', label: 'Script & metadata (.stepkg)'}]}
                                 onAction={key => onMenuAction(String(key))}
                             />
                         </MenuTrigger>
                     </>
                 ) : null
             }
-            leftControls={
+            leftControls={(
                 <>
                     {onBackToEditor ? (
                         <RACButton
@@ -271,7 +277,7 @@ export const ScriptEditorAppHeader = ({
                         <SyncIndicator state={scriptSyncState} />
                     </div>
                 </>
-            }
+            )}
         />
     );
 };

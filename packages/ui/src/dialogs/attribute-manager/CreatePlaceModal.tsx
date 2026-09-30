@@ -1,23 +1,26 @@
-import {type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {
+    type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState,
+} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {formControlStyles} from '../../molecules/forms/shared/formControlStyles';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
 import {ModalHeader} from '../modal/ModalHeader';
-
 import styles from './CreatePlaceModal.module.css';
 
 export interface CreatePlaceModalProps {
-    isOpen: boolean;
-    existingPlaceNames?: readonly string[];
-    onClose: () => void;
-    onCreate: (placeName: string) => void | Promise<void>;
+    isOpen: boolean,
+    existingPlaceNames?: readonly string[],
+    onClose: () => void,
+    onCreate: (placeName: string) => void | Promise<void>,
 }
 
 const normalizePlaceName = (name: string) => name.trim().toLocaleLowerCase();
 
-export const CreatePlaceModal = ({isOpen, existingPlaceNames = [], onClose, onCreate}: CreatePlaceModalProps) => {
+export const CreatePlaceModal = ({
+    isOpen, existingPlaceNames = [], onClose, onCreate,
+}: CreatePlaceModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
     const [isCreating, setIsCreating] = useState(false);
@@ -62,7 +65,12 @@ export const CreatePlaceModal = ({isOpen, existingPlaceNames = [], onClose, onCr
                 setIsCreating(false);
             }
         },
-        [canSubmit, onClose, onCreate, trimmedName],
+        [
+            canSubmit,
+            onClose,
+            onCreate,
+            trimmedName,
+        ],
     );
 
     return (

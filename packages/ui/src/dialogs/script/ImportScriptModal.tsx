@@ -10,9 +10,8 @@ import {ModalHeader} from '../modal/ModalHeader';
 import {TypeToConfirmField} from '../modal/TypeToConfirmAction';
 import {ImportDropZone} from './import/ImportDropZone';
 import {useImportScriptModalState} from './import/useImportScriptModalState';
-import type {ImportScriptModalProps} from './types';
-
 import styles from './ImportScriptModal.module.css';
+import type {ImportScriptModalProps} from './types';
 
 const REPLACE_SCRIPT_CONFIRM_PHRASE = 'replace me';
 
@@ -68,7 +67,11 @@ export const ImportScriptModal = ({
 
     useEffect(() => {
         setReplaceConfirmText('');
-    }, [existingScriptId, isOpen, showReplacePanel]);
+    }, [
+        existingScriptId,
+        isOpen,
+        showReplacePanel,
+    ]);
 
     return (
         <ModalDialog
@@ -108,10 +111,7 @@ export const ImportScriptModal = ({
                     {showChoiceToggle ? (
                         <ToggleButtonGroup
                             ariaLabel="Import mode"
-                            options={[
-                                {value: 'new', label: 'Import as new copy'},
-                                {value: 'replace', label: `Replace existing "${existingTitle}"`},
-                            ]}
+                            options={[{value: 'new', label: 'Import as new copy'}, {value: 'replace', label: `Replace existing "${existingTitle}"`}]}
                             value={importChoice}
                             onChange={handleChoiceChange}
                         />

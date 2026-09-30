@@ -5,13 +5,15 @@ import {MoreIcon} from '../../icons';
 import {DropdownMenu, type DropdownMenuItem} from '../DropdownMenu/DropdownMenu';
 
 export interface MoreActionsMenuProps {
-    'aria-label': string;
-    items: readonly DropdownMenuItem[];
-    onAction: (id: string) => void;
+    'aria-label': string,
+    items: readonly DropdownMenuItem[],
+    onAction: (id: string) => void,
 }
 
 /** Compact "⋯" trigger opening a DropdownMenu; for row- and card-level actions. */
-export const MoreActionsMenu = ({'aria-label': ariaLabel, items, onAction}: MoreActionsMenuProps) => (
+export const MoreActionsMenu = ({
+    'aria-label': ariaLabel, items, onAction,
+}: MoreActionsMenuProps) => (
     <MenuTrigger>
         <IconButton
             size="xs"

@@ -5,11 +5,11 @@ import {getActiveScriptBlockFromState} from '../../../tiptap/scriptCore';
 import {getActiveTokenIndex} from './tokenUtils';
 
 type ActiveTokenResult = {
-    text: string;
-    tokens: ReturnType<typeof splitCharacterTokens>;
-    offset: number;
-    activeTokenIndex: number;
-    activeToken: NonNullable<ReturnType<typeof splitCharacterTokens>[number]>;
+    text: string,
+    tokens: ReturnType<typeof splitCharacterTokens>,
+    offset: number,
+    activeTokenIndex: number,
+    activeToken: NonNullable<ReturnType<typeof splitCharacterTokens>[number]>,
 };
 
 export const resolveActiveToken = (editor: TiptapEditor, block: NonNullable<ReturnType<typeof getActiveScriptBlockFromState>>): ActiveTokenResult | null => {
@@ -21,11 +21,11 @@ export const resolveActiveToken = (editor: TiptapEditor, block: NonNullable<Retu
 
     return activeToken
         ? {
-              text,
-              tokens,
-              offset,
-              activeTokenIndex,
-              activeToken,
-          }
+            text,
+            tokens,
+            offset,
+            activeTokenIndex,
+            activeToken,
+        }
         : null;
 };

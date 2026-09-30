@@ -1,10 +1,16 @@
-import {type DerivedMusic, formatMusicNumber, type IndexedScriptBlock, MUSIC_OUT_NODE_NAME, type ScriptBlockIndexSnapshot} from '@stagistic/script';
+import {
+    type DerivedMusic, formatMusicNumber, type IndexedScriptBlock, MUSIC_OUT_NODE_NAME, type ScriptBlockIndexSnapshot,
+} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
-import {blockHasMusicStart, resolveMusicTargetBlock, resolveNewMusicNumber, resolveScriptTargetBlock} from '../../tiptap/extensions/music/musicCommands';
+import {
+    blockHasMusicStart, resolveMusicTargetBlock, resolveNewMusicNumber, resolveScriptTargetBlock,
+} from '../../tiptap/extensions/music/musicCommands';
 import {findMusicAtomRange, resolveMusicOutCandidate} from '../../tiptap/extensions/music/musicOutCommands';
-import type {BlockActionCommand, BlockActionContext, BlockActionItem} from './actionTypes';
+import type {
+    BlockActionCommand, BlockActionContext, BlockActionItem,
+} from './actionTypes';
 
 const MUSIC_TITLE_PREVIEW_LENGTH = 10;
 
@@ -107,24 +113,24 @@ const formatAddMusicLabel = (newMusicNumber: string) => {
 
 export {resolveNewMusicNumber} from '../../tiptap/extensions/music/musicCommands';
 
-export const resolveOpenMusicAtBlock = (snapshot: ScriptBlockIndexSnapshot, blockId: string): DerivedMusic | null =>
-    resolveMusicOutCandidate(snapshot, blockId);
-
+export const resolveOpenMusicAtBlock = (snapshot: ScriptBlockIndexSnapshot, blockId: string): DerivedMusic | null => {
+    return resolveMusicOutCandidate(snapshot, blockId);
+};
 export type MusicOutBoundaryAction = 'add' | 'set' | 'remove';
 
 export interface MusicBoundaryAvailability {
-    canAddMusic: boolean;
-    newMusicNumber: string | null;
-    outAction: MusicOutBoundaryAction | null;
-    outMusic: DerivedMusic | null;
-    isOrphanOut: boolean;
+    canAddMusic: boolean,
+    newMusicNumber: string | null,
+    outAction: MusicOutBoundaryAction | null,
+    outMusic: DerivedMusic | null,
+    isOrphanOut: boolean,
     /** False when the end has nowhere to move to, which is when it is not worth offering. */
-    canResetEnd: boolean;
+    canResetEnd: boolean,
 }
 
 export interface MusicBoundaryAtomState {
-    hasMusicStart: boolean;
-    hasMusicOut: boolean;
+    hasMusicStart: boolean,
+    hasMusicOut: boolean,
 }
 
 export const resolveMusicBoundaryAvailabilityFromSnapshot = (
@@ -146,7 +152,7 @@ export const resolveMusicBoundaryAvailabilityFromSnapshot = (
     return {
         canAddMusic,
         newMusicNumber: canAddMusic ? resolveNewMusicNumber(snapshot, blockId) : null,
-        outAction: atoms.hasMusicOut ? 'remove' : outMusic ? (outMusic.endBlockId ? 'set' : 'add') : null,
+        outAction: atoms.hasMusicOut ? 'remove' : outMusic ? outMusic.endBlockId ? 'set' : 'add' : null,
         outMusic,
         isOrphanOut,
         canResetEnd: canResetMusicEnd(snapshot, blockId),
@@ -255,13 +261,13 @@ export const resolveMusicBoundaryActions = ({editor, blockId}: BlockActionContex
 
     return items.length > 0
         ? [
-              {
-                  kind: 'submenu',
-                  id: 'music',
-                  label: 'Music',
-                  icon: 'music',
-                  items,
-              },
-          ]
+            {
+                kind: 'submenu',
+                id: 'music',
+                label: 'Music',
+                icon: 'music',
+                items,
+            },
+        ]
         : [];
 };

@@ -1,38 +1,39 @@
 import clsx from 'clsx';
-import {type MouseEvent, type ReactNode, useId, useMemo, useRef, useState} from 'react';
+import {
+    type MouseEvent, type ReactNode, useId, useMemo, useRef, useState,
+} from 'react';
 
 import {useAnchoredMenuPlacement} from '../shared/useAnchoredMenuHeight';
 import {useDropdownDismiss} from '../shared/useDropdownDismiss';
-
 import styles from './Select.module.css';
 
 export interface SelectOption {
-    value: number | string;
-    label: string;
-    icon?: ReactNode;
+    value: number | string,
+    label: string,
+    icon?: ReactNode,
 }
 
 interface SelectProps {
-    id?: string;
-    value: number | string;
-    options: SelectOption[];
-    ariaLabel: string;
-    onChange: (value: number | string) => void;
-    className?: string;
-    isOpen?: boolean;
-    onIsOpenChange?: (isOpen: boolean) => void;
-    width?: 'full' | 'content';
-    variant?: 'panel' | 'plain' | 'form';
-    size?: 'md' | 'lg';
+    id?: string,
+    value: number | string,
+    options: SelectOption[],
+    ariaLabel: string,
+    onChange: (value: number | string) => void,
+    className?: string,
+    isOpen?: boolean,
+    onIsOpenChange?: (isOpen: boolean) => void,
+    width?: 'full' | 'content',
+    variant?: 'panel' | 'plain' | 'form',
+    size?: 'md' | 'lg',
     /** Pin the menu to one edge of the trigger and let it grow. Omit to match the trigger's width exactly. */
-    align?: 'end' | 'start';
+    align?: 'end' | 'start',
     /** Name the listbox itself when the trigger's own label is not the right name for it. */
-    menuAriaLabel?: string;
+    menuAriaLabel?: string,
     /**
      * Open and choose on `mousedown` with the default prevented, so focus stays where it is.
      * Set only where moving focus would tear down the caller's selection — the editor chrome.
      */
-    preserveFocus?: boolean;
+    preserveFocus?: boolean,
 }
 
 export const Select = ({

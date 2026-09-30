@@ -1,4 +1,6 @@
-import {parseStagistic, type TitlePageLogo, type TitlePageSettings, trimOrFallback} from '@stagistic/script';
+import {
+    parseStagistic, type TitlePageLogo, type TitlePageSettings, trimOrFallback,
+} from '@stagistic/script';
 
 import logoUrl from './example-logo.png?url&no-inline';
 import scoreUrl from './example-score.pdf?url&no-inline';
@@ -6,14 +8,14 @@ import source from './example-script.stagistic?raw';
 import {type PreparedExampleScript, prepareExampleScriptDocument} from './prepareExampleScriptDocument';
 
 export interface ExampleScriptTemplate extends PreparedExampleScript {
-    title: string;
-    titlePage: TitlePageSettings;
+    title: string,
+    titlePage: TitlePageSettings,
     score: {
-        name: string;
-        type: 'application/pdf';
-        size: number;
-        blob: Blob;
-    };
+        name: string,
+        type: 'application/pdf',
+        size: number,
+        blob: Blob,
+    },
 }
 
 const EXAMPLE_LOGO_SIZE = {widthPx: 888, heightPx: 451};
@@ -34,21 +36,21 @@ const fetchAsset = async (url: string, label: string, type: string) => {
     return blob;
 };
 
-const readDataUrl = (blob: Blob) =>
-    new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
+const readDataUrl = (blob: Blob) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
 
-        reader.addEventListener('load', () => {
-            if (typeof reader.result === 'string') {
-                resolve(reader.result);
-                return;
-            }
+    reader.addEventListener('load', () => {
+        if (typeof reader.result === 'string') {
+            resolve(reader.result);
 
-            reject(new Error('Example logo could not be read.'));
-        });
-        reader.addEventListener('error', () => reject(new Error('Example logo could not be read.')));
-        reader.readAsDataURL(blob);
+            return;
+        }
+
+        reject(new Error('Example logo could not be read.'));
     });
+    reader.addEventListener('error', () => reject(new Error('Example logo could not be read.')));
+    reader.readAsDataURL(blob);
+});
 
 const loadLogo = async (): Promise<TitlePageLogo> => {
     const blob = await fetchAsset(logoUrl, 'logo', 'image/png');

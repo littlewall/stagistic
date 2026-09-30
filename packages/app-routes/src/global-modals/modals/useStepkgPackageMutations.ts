@@ -1,16 +1,18 @@
-import {exportScriptPackage, importScriptPackageAsNew, peekStepkgPackage, restoreScriptPackage} from '@stagistic/app-core';
+import {
+    exportScriptPackage, importScriptPackageAsNew, peekStepkgPackage, restoreScriptPackage,
+} from '@stagistic/app-core';
 import {useCallback} from 'react';
 
 import {downloadBlob} from '../../routes/script/downloadStagistic';
 import type {UseGlobalModalMutationsArgs} from './useGlobalModalMutations';
 
 const PEEK_ERROR_MESSAGES: Record<string, string> = {
-    not_a_zip: "This file isn't a valid Stagistic package.",
-    manifest_invalid: "This file isn't a valid Stagistic package.",
+    not_a_zip: 'This file isn\'t a valid Stagistic package.',
+    manifest_invalid: 'This file isn\'t a valid Stagistic package.',
     unsupported_format_version: 'This package was created by an incompatible version of Stagistic.',
     unsupported_document_schema_version: 'This package was created by a newer version of Stagistic. Update the app to import it.',
 };
-const DEFAULT_PEEK_ERROR = "This file isn't a valid Stagistic package.";
+const DEFAULT_PEEK_ERROR = 'This file isn\'t a valid Stagistic package.';
 const PACKAGE_SUBMIT_ERROR = 'This package appears to be corrupted or incomplete. Try exporting it again.';
 
 type UseStepkgPackageMutationsArgs = Pick<
@@ -48,11 +50,15 @@ export const useStepkgPackageMutations = ({
         [repository],
     );
     const handleImportStepkgAsNew = useCallback(
-        async (payload: {fileName: string; bytes: Uint8Array; title: string}) => {
+        async (payload: {
+            fileName: string, bytes: Uint8Array, title: string,
+        }) => {
             setIsImportLoading(true);
 
             try {
-                const result = await importScriptPackageAsNew({repository, bytes: payload.bytes, title: payload.title});
+                const result = await importScriptPackageAsNew({
+                    repository, bytes: payload.bytes, title: payload.title,
+                });
 
                 if (!result.ok) {
                     throw new Error(PACKAGE_SUBMIT_ERROR);
@@ -77,10 +83,17 @@ export const useStepkgPackageMutations = ({
                 setIsImportLoading(false);
             }
         },
-        [addToast, navigate, repository, setIsImportLoading, setIsImportOpen, setPrefilledImport],
+        [
+            addToast,
+            navigate,
+            repository,
+            setIsImportLoading,
+            setIsImportOpen,
+            setPrefilledImport,
+        ],
     );
     const handleReplaceWithStepkg = useCallback(
-        async (payload: {fileName: string; bytes: Uint8Array}) => {
+        async (payload: {fileName: string, bytes: Uint8Array}) => {
             setIsImportLoading(true);
 
             try {
@@ -109,14 +122,23 @@ export const useStepkgPackageMutations = ({
                 setIsImportLoading(false);
             }
         },
-        [addToast, navigate, repository, setIsImportLoading, setIsImportOpen, setPrefilledImport],
+        [
+            addToast,
+            navigate,
+            repository,
+            setIsImportLoading,
+            setIsImportOpen,
+            setPrefilledImport,
+        ],
     );
     const handleDownloadStepkgBackup = useCallback(
         async (scriptId: string) => {
             setIsDownloadingBackup(true);
 
             try {
-                const result = await exportScriptPackage({repository, scriptId, generator: {name: 'Stagistic', version: 'web'}});
+                const result = await exportScriptPackage({
+                    repository, scriptId, generator: {name: 'Stagistic', version: 'web'},
+                });
 
                 if (result.ok) {
                     downloadBlob(result.fileName, result.blob);

@@ -5,22 +5,23 @@ import {useMemo} from 'react';
 import type {CommentsPanelState} from './useCommentsPanelState';
 
 interface UseCommentsEditorBridgeArgs {
-    comments: ScriptCommentsState;
-    panelState: CommentsPanelState;
-    revealPanel: () => void;
-    isPanelOpen: () => boolean;
+    comments: ScriptCommentsState,
+    panelState: CommentsPanelState,
+    revealPanel: () => void,
+    isPanelOpen: () => boolean,
 }
 
 /** Thread refs and editor callbacks connecting the editor's comment anchors to the Comments panel. */
-export const useCommentsEditorBridge = ({comments, panelState, revealPanel, isPanelOpen}: UseCommentsEditorBridgeArgs) => {
+export const useCommentsEditorBridge = ({
+    comments, panelState, revealPanel, isPanelOpen,
+}: UseCommentsEditorBridgeArgs) => {
     const commentThreads = useMemo<readonly EditorCommentThreadRef[]>(
-        () =>
-            comments.threads.map(thread => ({
-                id: thread.id,
-                status: thread.status === 'resolved' ? 'resolved' : 'open',
-                anchorKind: thread.anchorKind === 'block' ? 'block' : 'range',
-                anchorBlockId: thread.anchorBlockId,
-            })),
+        () => comments.threads.map(thread => ({
+            id: thread.id,
+            status: thread.status === 'resolved' ? 'resolved' : 'open',
+            anchorKind: thread.anchorKind === 'block' ? 'block' : 'range',
+            anchorBlockId: thread.anchorBlockId,
+        })),
         [comments.threads],
     );
     const {requestActivation} = panelState;
@@ -41,7 +42,12 @@ export const useCommentsEditorBridge = ({comments, panelState, revealPanel, isPa
                 });
             },
         }),
-        [isPanelOpen, moveBlockAnchors, requestActivation, revealPanel],
+        [
+            isPanelOpen,
+            moveBlockAnchors,
+            requestActivation,
+            revealPanel,
+        ],
     );
 
     return {commentThreads, callbacks};

@@ -3,17 +3,18 @@ import {Button, MenuTrigger} from 'react-aria-components';
 
 import {MoreIcon} from '../../icons';
 import {DropdownMenu} from '../DropdownMenu/DropdownMenu';
-
 import styles from './ScriptActionsMenu.module.css';
 
 interface ScriptActionsMenuProps {
-    scriptTitle: string;
-    onDelete?: () => void;
-    onRename?: () => void;
-    onDuplicate?: () => void;
+    scriptTitle: string,
+    onDelete?: () => void,
+    onRename?: () => void,
+    onDuplicate?: () => void,
 }
 
-export const ScriptActionsMenu = ({scriptTitle, onDelete, onRename, onDuplicate}: ScriptActionsMenuProps) => {
+export const ScriptActionsMenu = ({
+    scriptTitle, onDelete, onRename, onDuplicate,
+}: ScriptActionsMenuProps) => {
     const handleAction = (key: Key) => {
         if (key === 'rename') {
             onRename?.();
@@ -40,7 +41,9 @@ export const ScriptActionsMenu = ({scriptTitle, onDelete, onRename, onDuplicate}
                 items={[
                     {id: 'rename', label: 'Rename script'},
                     {id: 'duplicate', label: 'Duplicate script'},
-                    {id: 'delete', label: 'Delete script', tone: 'danger'},
+                    {
+                        id: 'delete', label: 'Delete script', tone: 'danger',
+                    },
                 ]}
                 onAction={handleAction}
             />

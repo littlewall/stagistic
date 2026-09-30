@@ -1,15 +1,16 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {buildEditorRootStyle} from './buildRootStyle';
 
-const build = (isLeftSidebarOpen: boolean, isRightSidebarOpen: boolean) =>
-    buildEditorRootStyle({
-        persistentCharacters: [],
-        editorStyle: {},
-        sidebarWidth: '280px',
-        isLeftSidebarOpen,
-        isRightSidebarOpen,
-    }) as Record<string, string>;
+const build = (isLeftSidebarOpen: boolean, isRightSidebarOpen: boolean) => buildEditorRootStyle({
+    persistentCharacters: [],
+    editorStyle: {},
+    sidebarWidth: '280px',
+    isLeftSidebarOpen,
+    isRightSidebarOpen,
+}) as Record<string, string>;
 
 describe('buildEditorRootStyle', () => {
     it('defers to the canonical panel width token by default', () => {

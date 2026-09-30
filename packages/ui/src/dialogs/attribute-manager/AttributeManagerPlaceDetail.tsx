@@ -5,17 +5,16 @@ import {Tooltip} from '../../atoms/Tooltip/Tooltip';
 import {TrashIcon} from '../../icons';
 import {formControlStyles} from '../../molecules/forms/shared/formControlStyles';
 import type {AttributeManagerPlace} from './AttributeManagerPlacesPanel';
+import styles from './AttributeManagerPlacesPanel.module.css';
 import {RemovePlaceModal} from './RemovePlaceModal';
 
-import styles from './AttributeManagerPlacesPanel.module.css';
-
 interface AttributeManagerPlaceDetailProps {
-    place: AttributeManagerPlace;
-    confirmedName: string;
-    places: AttributeManagerPlace[];
-    onNameDraftChange: (name: string) => void;
-    onRenamePlace: (placeId: string, name: string) => void | Promise<unknown>;
-    onDeletePlace: (placeId: string) => void | Promise<unknown>;
+    place: AttributeManagerPlace,
+    confirmedName: string,
+    places: AttributeManagerPlace[],
+    onNameDraftChange: (name: string) => void,
+    onRenamePlace: (placeId: string, name: string) => void | Promise<unknown>,
+    onDeletePlace: (placeId: string) => void | Promise<unknown>,
 }
 
 const normalizePlaceName = (name: string) => name.trim().toLocaleLowerCase();

@@ -1,4 +1,6 @@
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 import {page, userEvent} from 'vite-plus/test/browser';
 
 import {
@@ -44,10 +46,9 @@ describe('AttributeManagerCharactersPanel character actions', () => {
     it('keeps the newest color visible while older persistence is still pending', async () => {
         const resolvers: Array<() => void> = [];
         const onSetCharacterColor = vi.fn<(characterId: string, colorHex: string | null) => Promise<void>>(
-            () =>
-                new Promise<void>(resolve => {
-                    resolvers.push(resolve);
-                }),
+            () => new Promise<void>(resolve => {
+                resolvers.push(resolve);
+            }),
         );
 
         renderPanel(undefined, onSetCharacterColor);
@@ -75,10 +76,9 @@ describe('AttributeManagerCharactersPanel character actions', () => {
     it('shows a null color reset while persistence is pending', async () => {
         let resolvePersistence: () => void = () => undefined;
         const onSetCharacterColor = vi.fn(
-            () =>
-                new Promise<void>(resolve => {
-                    resolvePersistence = resolve;
-                }),
+            () => new Promise<void>(resolve => {
+                resolvePersistence = resolve;
+            }),
         );
 
         renderPanel(undefined, onSetCharacterColor);

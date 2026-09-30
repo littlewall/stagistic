@@ -20,7 +20,7 @@ interface UseExportPreviewArgs<TConfig> {
     onArtifact?: (artifact: Blob) => void,
 }
 
-export const useExportPreview = <TConfig >({
+export const useExportPreview = <TConfig>({
     config,
     derive,
     onArtifact,

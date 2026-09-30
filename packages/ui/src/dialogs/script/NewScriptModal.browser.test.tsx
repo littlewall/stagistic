@@ -1,5 +1,7 @@
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
 import {NewScriptModal} from './NewScriptModal';
@@ -100,10 +102,9 @@ describe('NewScriptModal', () => {
     it('shows a loader while creation is pending and preserves the draft', async () => {
         let resolveCreate: (() => void) | undefined;
         const onCreate = vi.fn(
-            () =>
-                new Promise<void>(resolve => {
-                    resolveCreate = resolve;
-                }),
+            () => new Promise<void>(resolve => {
+                resolveCreate = resolve;
+            }),
         );
 
         renderModal(onCreate);
@@ -131,13 +132,11 @@ describe('NewScriptModal', () => {
     it('keeps the loader visible while the editor route is transitioning', async () => {
         let resolveCreate: (() => void) | undefined;
         let creationSettled = false;
-        const onCreate = vi.fn(() =>
-            new Promise<void>(resolve => {
-                resolveCreate = resolve;
-            }).finally(() => {
-                creationSettled = true;
-            }),
-        );
+        const onCreate = vi.fn(() => new Promise<void>(resolve => {
+            resolveCreate = resolve;
+        }).finally(() => {
+            creationSettled = true;
+        }));
         const modal = renderModal(onCreate);
 
         await page.elementLocator(await waitForElement('button[type="submit"]')).click();

@@ -1,20 +1,24 @@
 import * as dbQueries from '../queries';
 import type {ScriptRepository} from '../scriptRepository';
 import {createProjectedTableDocumentSource, createSqlScriptDocumentProjectionWriter} from './documentProjection';
-import type {GetDb, RecordOutbox, SyncDb} from './types';
+import type {
+    GetDb, RecordOutbox, SyncDb,
+} from './types';
 
 type ContentHandlers = {
-    loadLatest: ScriptRepository['loadLatest'];
-    saveLatest: ScriptRepository['saveLatest'];
+    loadLatest: ScriptRepository['loadLatest'],
+    saveLatest: ScriptRepository['saveLatest'],
 };
 
 interface CreateContentHandlersArgs {
-    getDb: GetDb;
-    recordOutbox: RecordOutbox;
-    syncDb: SyncDb;
+    getDb: GetDb,
+    recordOutbox: RecordOutbox,
+    syncDb: SyncDb,
 }
 
-export const createContentHandlers = ({getDb, recordOutbox, syncDb}: CreateContentHandlersArgs): ContentHandlers => {
+export const createContentHandlers = ({
+    getDb, recordOutbox, syncDb,
+}: CreateContentHandlersArgs): ContentHandlers => {
     const projectionWriter = createSqlScriptDocumentProjectionWriter({getDb});
     const documentSource = createProjectedTableDocumentSource({getDb, projectionWriter});
 

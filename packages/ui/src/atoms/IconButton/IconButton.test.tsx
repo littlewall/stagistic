@@ -1,8 +1,9 @@
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {IconButton} from './IconButton';
-
 import styles from './IconButton.module.css';
 
 describe('IconButton', () => {

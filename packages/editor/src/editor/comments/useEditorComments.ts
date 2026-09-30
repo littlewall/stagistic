@@ -1,18 +1,20 @@
-import {useCallback, useMemo, useSyncExternalStore} from 'react';
+import {
+    useCallback, useMemo, useSyncExternalStore,
+} from 'react';
 
 import {useEditorInstance} from '../context';
 import {commentsPluginKey, type CommentsPluginState} from '../tiptap/extensions/comments';
 
 export interface EditorCommentsApi {
-    state: CommentsPluginState | null;
-    startDraft: () => void;
-    cancelDraft: () => void;
-    commitDraft: (threadId: string) => void;
-    removeAnchor: (threadId: string) => void;
-    restoreAnchor: (threadId: string) => void;
-    setActive: (threadId: string | null) => void;
-    setHovered: (threadId: string | null) => void;
-    revealAnchor: (threadId: string) => void;
+    state: CommentsPluginState | null,
+    startDraft: () => void,
+    cancelDraft: () => void,
+    commitDraft: (threadId: string) => void,
+    removeAnchor: (threadId: string) => void,
+    restoreAnchor: (threadId: string) => void,
+    setActive: (threadId: string | null) => void,
+    setHovered: (threadId: string | null) => void,
+    revealAnchor: (threadId: string) => void,
 }
 
 /** Comments plugin state and commands for UI rendered inside the editor context. */
@@ -28,7 +30,7 @@ export const useEditorComments = (): EditorCommentsApi => {
         },
         [editor],
     );
-    const getSnapshot = useCallback(() => (editor && !editor.isDestroyed ? (commentsPluginKey.getState(editor.state) ?? null) : null), [editor]);
+    const getSnapshot = useCallback(() => editor && !editor.isDestroyed ? commentsPluginKey.getState(editor.state) ?? null : null, [editor]);
     const state = useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 
     return useMemo(
@@ -38,7 +40,8 @@ export const useEditorComments = (): EditorCommentsApi => {
                 editor?.commands.startCommentDraft();
             },
             cancelDraft: () => {
-                editor?.chain().cancelCommentDraft().focus().run();
+                editor?.chain().cancelCommentDraft().focus()
+                    .run();
             },
             commitDraft: threadId => {
                 editor?.commands.commitCommentDraft(threadId);

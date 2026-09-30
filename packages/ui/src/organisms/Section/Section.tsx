@@ -4,12 +4,14 @@ import type {ReactNode} from 'react';
 import styles from './Section.module.css';
 
 type SectionProps = {
-    children: ReactNode;
-    variant?: 'default' | 'danger';
-    className?: string;
+    children: ReactNode,
+    variant?: 'default' | 'danger',
+    className?: string,
 };
 
-export const Section = ({children, variant = 'default', className}: SectionProps) => {
+export const Section = ({
+    children, variant = 'default', className,
+}: SectionProps) => {
     return (
         <section
             className={clsx(
@@ -26,8 +28,8 @@ export const Section = ({children, variant = 'default', className}: SectionProps
 };
 
 type SectionHeaderProps = {
-    children: ReactNode;
-    className?: string;
+    children: ReactNode,
+    className?: string,
 };
 
 export const SectionHeader = ({children, className}: SectionHeaderProps) => {

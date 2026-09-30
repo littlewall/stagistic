@@ -1,24 +1,28 @@
 import clsx from 'clsx';
-import {type MouseEvent as ReactMouseEvent, type ReactNode, useCallback, useEffect} from 'react';
+import {
+    type MouseEvent as ReactMouseEvent, type ReactNode, useCallback, useEffect,
+} from 'react';
 
 import styles from './AttributeManagerModal.module.css';
 
 export interface AttributeManagerTab {
-    id: string;
-    label: string;
+    id: string,
+    label: string,
 }
 
 export interface AttributeManagerModalProps {
-    isOpen: boolean;
-    title?: string;
-    tabs: AttributeManagerTab[];
-    activeTabId: string;
-    onClose: () => void;
-    onSelectTab: (tabId: string) => void;
-    children?: ReactNode;
+    isOpen: boolean,
+    title?: string,
+    tabs: AttributeManagerTab[],
+    activeTabId: string,
+    onClose: () => void,
+    onSelectTab: (tabId: string) => void,
+    children?: ReactNode,
 }
 
-export const AttributeManagerModal = ({isOpen, title = 'Attribute manager', tabs, activeTabId, onClose, onSelectTab, children}: AttributeManagerModalProps) => {
+export const AttributeManagerModal = ({
+    isOpen, title = 'Attribute manager', tabs, activeTabId, onClose, onSelectTab, children,
+}: AttributeManagerModalProps) => {
     useEffect(() => {
         if (!isOpen) {
             return undefined;

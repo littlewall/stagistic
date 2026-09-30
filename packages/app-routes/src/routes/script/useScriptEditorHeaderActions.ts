@@ -1,5 +1,7 @@
 import {exportScriptPackage, type ScriptRepository} from '@stagistic/app-core';
-import {type ScriptDocument, serializeStagistic, type TitlePageSettings} from '@stagistic/script';
+import {
+    type ScriptDocument, serializeStagistic, type TitlePageSettings,
+} from '@stagistic/script';
 import {useCallback, useState} from 'react';
 import {type NavigateFunction} from 'react-router-dom';
 
@@ -8,14 +10,14 @@ import {downloadBlob, downloadStagistic} from './downloadStagistic';
 import type {CurrentScriptItem} from './types';
 
 interface HeaderActionsParams {
-    navigate: NavigateFunction;
-    currentScript: CurrentScriptItem | null;
-    openSettingsModal: () => void;
-    openAttributeManagerModal: () => void;
-    getEditorValue: () => ScriptDocument | null;
-    titlePage: TitlePageSettings;
-    scriptRepository: ScriptRepository;
-    flushScript: () => Promise<void>;
+    navigate: NavigateFunction,
+    currentScript: CurrentScriptItem | null,
+    openSettingsModal: () => void,
+    openAttributeManagerModal: () => void,
+    getEditorValue: () => ScriptDocument | null,
+    titlePage: TitlePageSettings,
+    scriptRepository: ScriptRepository,
+    flushScript: () => Promise<void>,
 }
 
 export const useScriptEditorHeaderActions = ({
@@ -65,14 +67,12 @@ export const useScriptEditorHeaderActions = ({
             if (actionId === 'export-stepkg' && currentScript) {
                 setIsPreparingPackage(true);
                 void new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
-                    .then(() =>
-                        exportScriptPackage({
-                            repository: scriptRepository,
-                            scriptId: currentScript.id,
-                            flush: flushScript,
-                            generator: {name: 'Stagistic', version: 'web'},
-                        }),
-                    )
+                    .then(() => exportScriptPackage({
+                        repository: scriptRepository,
+                        scriptId: currentScript.id,
+                        flush: flushScript,
+                        generator: {name: 'Stagistic', version: 'web'},
+                    }))
                     .then(result => {
                         if (result.ok) {
                             downloadBlob(result.fileName, result.blob);
@@ -82,7 +82,17 @@ export const useScriptEditorHeaderActions = ({
                     .finally(() => setIsPreparingPackage(false));
             }
         },
-        [currentScript, getEditorValue, navigate, openNewScript, openAttributeManagerModal, openSettingsModal, scriptRepository, titlePage, flushScript],
+        [
+            currentScript,
+            getEditorValue,
+            navigate,
+            openNewScript,
+            openAttributeManagerModal,
+            openSettingsModal,
+            scriptRepository,
+            titlePage,
+            flushScript,
+        ],
     );
 
     return {handleMenuAction, isPreparingPackage};

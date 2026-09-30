@@ -4,14 +4,16 @@ import clsx from 'clsx';
 import styles from './ProgressBar.module.css';
 
 type ProgressBarProps = {
-    value?: number;
-    label?: string;
-    size?: 'sm' | 'md';
+    value?: number,
+    label?: string,
+    size?: 'sm' | 'md',
 };
 
 const clampProgress = (value: number) => clampNumber(value, 0, 1);
 
-export const ProgressBar = ({value, label, size = 'md'}: ProgressBarProps) => {
+export const ProgressBar = ({
+    value, label, size = 'md',
+}: ProgressBarProps) => {
     const hasValue = typeof value === 'number';
     const progressValue = hasValue ? clampProgress(value) : null;
     const percent = hasValue ? Math.round(progressValue! * 100) : null;

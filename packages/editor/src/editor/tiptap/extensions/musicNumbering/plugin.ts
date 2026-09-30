@@ -13,16 +13,18 @@ import {
     type ScriptNode,
 } from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
-import {type EditorState, Plugin, PluginKey} from '@tiptap/pm/state';
+import {
+    type EditorState, Plugin, PluginKey,
+} from '@tiptap/pm/state';
 import {Decoration, DecorationSet} from '@tiptap/pm/view';
 
 import {isScriptBlockNodeName, normalizeBlockNodeType} from '../../scriptCore';
 import {buildMusicLabelMap} from './musicLabels';
 
 interface MusicNumberingState {
-    signature: string;
-    decorations: DecorationSet;
-    decorationCount: number;
+    signature: string,
+    decorations: DecorationSet,
+    decorationCount: number,
 }
 
 const musicNumberingPluginKey = new PluginKey<MusicNumberingState>('musicNumbering');
@@ -81,11 +83,11 @@ const computeSignature = (doc: ProseMirrorNode): string => {
 const buildDecorations = (doc: ProseMirrorNode): DecorationSet => {
     const musicBlockInputs: MusicBlockInput[] = [];
     const atomSites: {
-        pos: number;
-        size: number;
-        name: string;
-        musicId: string;
-        blockId: string;
+        pos: number,
+        size: number,
+        name: string,
+        musicId: string,
+        blockId: string,
     }[] = [];
     let currentBlockId = '';
 
@@ -161,36 +163,35 @@ const createMusicNumberingState = (doc: ProseMirrorNode, signature = computeSign
     };
 };
 
-export const musicNumberingPlugin = () =>
-    new Plugin<MusicNumberingState>({
-        key: musicNumberingPluginKey,
-        state: {
-            init: (_config, state) => createMusicNumberingState(state.doc),
-            apply: (tr, prev) => {
-                if (!tr.docChanged) {
-                    return prev;
-                }
+export const musicNumberingPlugin = () => new Plugin<MusicNumberingState>({
+    key: musicNumberingPluginKey,
+    state: {
+        init: (_config, state) => createMusicNumberingState(state.doc),
+        apply: (tr, prev) => {
+            if (!tr.docChanged) {
+                return prev;
+            }
 
-                const signature = computeSignature(tr.doc);
+            const signature = computeSignature(tr.doc);
 
-                if (signature !== prev.signature) {
-                    return createMusicNumberingState(tr.doc, signature);
-                }
+            if (signature !== prev.signature) {
+                return createMusicNumberingState(tr.doc, signature);
+            }
 
-                const decorations = prev.decorations.map(tr.mapping, tr.doc);
+            const decorations = prev.decorations.map(tr.mapping, tr.doc);
 
-                if (decorations.find().length !== prev.decorationCount) {
-                    return createMusicNumberingState(tr.doc, signature);
-                }
+            if (decorations.find().length !== prev.decorationCount) {
+                return createMusicNumberingState(tr.doc, signature);
+            }
 
-                return {
-                    signature,
-                    decorations,
-                    decorationCount: prev.decorationCount,
-                };
-            },
+            return {
+                signature,
+                decorations,
+                decorationCount: prev.decorationCount,
+            };
         },
-        props: {
-            decorations: state => musicNumberingPluginKey.getState(state)?.decorations,
-        },
-    });
+    },
+    props: {
+        decorations: state => musicNumberingPluginKey.getState(state)?.decorations,
+    },
+});

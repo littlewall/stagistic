@@ -50,16 +50,15 @@ export const useScriptPlaces = (
                 return result;
             },
             {},
-        )
-        , [assignmentsQuery.data],
+        ),
+        [assignmentsQuery.data],
     );
     const createPlace = useCallback(
         (name: string) => store?.createPlace(name) ?? Promise.resolve(null),
         [store],
     );
     const renamePlace = useCallback(
-        (placeId: string, name: string) => store?.renamePlace(placeId, name) ?? Promise.resolve(null)
-        ,
+        (placeId: string, name: string) => store?.renamePlace(placeId, name) ?? Promise.resolve(null),
         [store],
     );
     const deletePlace = useCallback(
@@ -67,8 +66,7 @@ export const useScriptPlaces = (
         [store],
     );
     const setScenePlaces = useCallback(
-        (sceneHeadingBlockId: string, placeIds: string[]) => store?.setScenePlaces(sceneHeadingBlockId, placeIds) ?? Promise.resolve([])
-        ,
+        (sceneHeadingBlockId: string, placeIds: string[]) => store?.setScenePlaces(sceneHeadingBlockId, placeIds) ?? Promise.resolve([]),
         [store],
     );
 

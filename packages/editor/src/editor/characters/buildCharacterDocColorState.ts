@@ -1,20 +1,22 @@
 import type {PersistentCharacterRef} from '../contracts';
 import type {CharacterColorResolvers} from './characterColorPolicy';
 import {createCharacterColorResolvers, getUnconfirmedCharacterColor} from './characterColorPolicy';
-import {type ActiveCharacterToken, type CharacterTokenEntry, type CharacterTokenScanResult, getCharacterTokenColorKey} from './characterTokenScan';
+import {
+    type ActiveCharacterToken, type CharacterTokenEntry, type CharacterTokenScanResult, getCharacterTokenColorKey,
+} from './characterTokenScan';
 import {normalizePersistentCharacterRefs} from './persistentRefNormalization';
 
 export interface CharacterDocColorState {
-    colorByToken: ReadonlyMap<string, string>;
-    displayColorByKey: ReadonlyMap<string, string>;
+    colorByToken: ReadonlyMap<string, string>,
+    displayColorByKey: ReadonlyMap<string, string>,
 }
 
 interface BuildCharacterDocColorStateFromTokenScanArgs {
-    tokenScan: CharacterTokenScanResult;
-    persistentCharacters?: readonly PersistentCharacterRef[];
-    characterColorSaturation?: number;
-    colorByCharacterId?: ReadonlyMap<string, string>;
-    rememberedColorByKey?: ReadonlyMap<string, string>;
+    tokenScan: CharacterTokenScanResult,
+    persistentCharacters?: readonly PersistentCharacterRef[],
+    characterColorSaturation?: number,
+    colorByCharacterId?: ReadonlyMap<string, string>,
+    rememberedColorByKey?: ReadonlyMap<string, string>,
 }
 
 const resolveTokenBaseColor = (
@@ -89,11 +91,11 @@ const buildBaseDisplayColorByKey = (
 };
 
 interface ResolveActiveTokenColorArgs {
-    activeToken: ActiveCharacterToken | null;
-    tokenCountByKey: ReadonlyMap<string, number>;
-    baseDisplayColorByKey: ReadonlyMap<string, string>;
-    resolvers: CharacterColorResolvers;
-    characterColorSaturation?: number;
+    activeToken: ActiveCharacterToken | null,
+    tokenCountByKey: ReadonlyMap<string, number>,
+    baseDisplayColorByKey: ReadonlyMap<string, string>,
+    resolvers: CharacterColorResolvers,
+    characterColorSaturation?: number,
 }
 
 const resolveActiveTokenColor = ({
@@ -135,12 +137,12 @@ const resolveActiveTokenColor = ({
 };
 
 interface BuildColorByTokenArgs {
-    tokenEntries: readonly CharacterTokenEntry[];
-    activeToken: ActiveCharacterToken | null;
-    activeTokenColor: string | null;
-    unconfirmedDraftColorByKey: ReadonlyMap<string, string>;
-    resolvers: CharacterColorResolvers;
-    characterColorSaturation?: number;
+    tokenEntries: readonly CharacterTokenEntry[],
+    activeToken: ActiveCharacterToken | null,
+    activeTokenColor: string | null,
+    unconfirmedDraftColorByKey: ReadonlyMap<string, string>,
+    resolvers: CharacterColorResolvers,
+    characterColorSaturation?: number,
 }
 
 const buildColorByToken = ({
@@ -181,7 +183,9 @@ export const buildCharacterDocColorStateFromTokenScan = ({
         colorByCharacterId,
         rememberedColorByKey,
     });
-    const {tokenEntries, tokenCountByKey, activeToken} = tokenScan;
+    const {
+        tokenEntries, tokenCountByKey, activeToken,
+    } = tokenScan;
     const unconfirmedDraftColorByKey = buildUnconfirmedDraftColorByKey(tokenEntries, resolvers);
     const baseDisplayColorByKey = buildBaseDisplayColorByKey(tokenEntries, unconfirmedDraftColorByKey, resolvers, characterColorSaturation);
     const activeTokenColor = resolveActiveTokenColor({

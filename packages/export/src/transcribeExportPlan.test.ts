@@ -1,5 +1,7 @@
 import {CHARACTER_TAG_MARK_NAME, DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {BASIC_DEFAULTS} from './config';
 import {deriveBasicExportPlan} from './deriveBasicExportPlan';
@@ -78,21 +80,22 @@ describe('transcribeExportPlan', () => {
             attrs: {id: 'sd1', blockType: 'stageDirection'},
             content: [
                 {type: 'text', text: 'She '},
-                {type: 'text', text: 'exits', marks: [{type: 'commentAnchor', attrs: {threadId: 't1'}}]},
+                {
+                    type: 'text', text: 'exits', marks: [{type: 'commentAnchor', attrs: {threadId: 't1'}}],
+                },
                 {type: 'text', text: ' slowly.'},
             ],
         };
-        const runs = (doc: ExportPlan['doc']['content']) =>
-            transcribeExportPlan(plan(doc), DEFAULT_EDITOR_SETTINGS)
-                .items.filter(isVisualLine)
-                .map(line => line.runs);
+        const runs = (doc: ExportPlan['doc']['content']) => transcribeExportPlan(plan(doc), DEFAULT_EDITOR_SETTINGS)
+            .items.filter(isVisualLine)
+            .map(line => line.runs);
 
         expect(runs([commented])).toEqual(runs([plain]));
     });
 
-    const findLineWithRun = (items: PageItem[], runText: string): VisualLine | undefined =>
-        items.filter(isVisualLine).find(line => line.runs.some(run => run.text === runText));
-
+    const findLineWithRun = (items: PageItem[], runText: string): VisualLine | undefined => {
+        return items.filter(isVisualLine).find(line => line.runs.some(run => run.text === runText));
+    };
     const settingsWithSceneFormat = (format: 'none' | 'dot' | 'paren') => ({
         ...DEFAULT_EDITOR_SETTINGS,
         blocks: {
@@ -141,8 +144,7 @@ describe('transcribeExportPlan', () => {
     it('transcribes music atoms as their numbered label so they occupy a line', () => {
         const transcript = transcribeExportPlan(
             plan([
-                block('scene', 's1', 'Scene one'),
-                {
+                block('scene', 's1', 'Scene one'), {
                     type: 'stageDirection',
                     attrs: {id: 'sd1', blockType: 'stageDirection'},
                     content: [
@@ -176,8 +178,7 @@ describe('transcribeExportPlan', () => {
                             type: 'text',
                             text: 'Anna',
                             marks: [{type: CHARACTER_TAG_MARK_NAME}],
-                        },
-                        {type: 'text', text: ' enters.'},
+                        }, {type: 'text', text: ' enters.'},
                     ],
                 },
             ]),
@@ -193,13 +194,11 @@ describe('transcribeExportPlan', () => {
     it('renders music labels inside stage directions in bold', () => {
         const transcript = transcribeExportPlan(
             plan([
-                block('scene', 's1', 'Scene one'),
-                {
+                block('scene', 's1', 'Scene one'), {
                     type: 'stageDirection',
                     attrs: {id: 'sd1', blockType: 'stageDirection'},
                     content: [
-                        {type: 'text', text: 'Lights shift'},
-                        {
+                        {type: 'text', text: 'Lights shift'}, {
                             type: 'musicStart',
                             attrs: {
                                 musicId: 'c1',

@@ -1,16 +1,18 @@
-import {type CSSProperties, type RefObject, useLayoutEffect, useState} from 'react';
+import {
+    type CSSProperties, type RefObject, useLayoutEffect, useState,
+} from 'react';
 
 import {type AnchoredMenuPlacement, resolveAnchoredMenuPlacement} from './anchoredMenuPlacement';
 
 interface UseAnchoredMenuPlacementArgs {
-    anchorRef: RefObject<HTMLElement | null>;
-    menuRef: RefObject<HTMLElement | null>;
-    isOpen: boolean;
-    viewportMargin?: number;
+    anchorRef: RefObject<HTMLElement | null>,
+    menuRef: RefObject<HTMLElement | null>,
+    isOpen: boolean,
+    viewportMargin?: number,
 }
 
 type AnchoredMenuHeightStyle = CSSProperties & {
-    '--anchored-menu-max-height'?: string;
+    '--anchored-menu-max-height'?: string,
 };
 
 const DEFAULT_VIEWPORT_MARGIN = 8;
@@ -21,8 +23,8 @@ export const useAnchoredMenuPlacement = ({
     isOpen,
     viewportMargin = DEFAULT_VIEWPORT_MARGIN,
 }: UseAnchoredMenuPlacementArgs): {
-    placement: AnchoredMenuPlacement;
-    style: AnchoredMenuHeightStyle;
+    placement: AnchoredMenuPlacement,
+    style: AnchoredMenuHeightStyle,
 } => {
     const [placement, setPlacement] = useState<AnchoredMenuPlacement>('below');
     const [style, setStyle] = useState<AnchoredMenuHeightStyle>({});
@@ -96,7 +98,12 @@ export const useAnchoredMenuPlacement = ({
             window.removeEventListener('resize', scheduleUpdate);
             window.removeEventListener('scroll', scheduleUpdate, true);
         };
-    }, [anchorRef, isOpen, menuRef, viewportMargin]);
+    }, [
+        anchorRef,
+        isOpen,
+        menuRef,
+        viewportMargin,
+    ]);
 
     return {
         placement,

@@ -1,4 +1,6 @@
-import {bigint, index, pgTable, primaryKey, text, uniqueIndex} from 'drizzle-orm/pg-core';
+import {
+    bigint, index, pgTable, primaryKey, text, uniqueIndex,
+} from 'drizzle-orm/pg-core';
 
 import {scripts} from './scripts';
 

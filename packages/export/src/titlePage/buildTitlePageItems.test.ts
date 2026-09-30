@@ -1,5 +1,7 @@
 import {DEFAULT_EDITOR_SETTINGS, type TitlePageSettings} from '@stagistic/script';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import type {VisualLine} from '../visualLine';
 import {buildTitlePageItems} from './buildTitlePageItems';
@@ -46,10 +48,7 @@ describe('buildTitlePageItems', () => {
 
     it('omits credit rows with no label and no authors', () => {
         const titlePage: TitlePageSettings = {
-            credits: [
-                {credit: '', authors: ['']},
-                {credit: 'lyrics by', authors: ['Maria']},
-            ],
+            credits: [{credit: '', authors: ['']}, {credit: 'lyrics by', authors: ['Maria']}],
         };
         const lines = buildTitlePageItems(titlePage, 'T', DEFAULT_EDITOR_SETTINGS);
         const creditLikeLines = lines.filter(line => lineText(line).includes('by'));

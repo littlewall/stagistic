@@ -7,7 +7,7 @@ const normalizeJson = (value: unknown): unknown => {
         return Object.fromEntries(
             Object.entries(value)
                 .filter(([, field]) => field !== undefined)
-                .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+                .sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)
                 .map(([key, field]) => [key, normalizeJson(field)]),
         );
     }

@@ -2,7 +2,9 @@ import '../../../styles/tokens.css';
 
 import {Button, MenuTrigger} from 'react-aria-components';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
 import {DropdownMenu} from './DropdownMenu';
@@ -50,6 +52,7 @@ describe('DropdownMenu', () => {
         );
 
         await userEvent.click(await waitForElement('button'));
+
         const item = await waitForElement('[role="menuitem"]');
 
         expect(item.textContent).toBe('Custom action');

@@ -4,18 +4,19 @@ import {Tooltip} from '../atoms/Tooltip/Tooltip';
 import {EditPencilIcon} from '../icons';
 import {CharacterColorControl} from './characterRowConfirmed/CharacterColorControl';
 import {useCharacterColorPickerState} from './characterRowConfirmed/useCharacterColorPickerState';
+import styles from './EditorSidebar.module.css';
 import type {EditorSidebarCharacter} from './types';
 
-import styles from './EditorSidebar.module.css';
-
 interface CharacterRowConfirmedProps {
-    character: EditorSidebarCharacter;
-    characterColorSaturation?: number;
-    onEditCharacter?: (characterId: string) => void;
-    onSetCharacterColor?: (characterId: string, colorHex: string | null) => void;
+    character: EditorSidebarCharacter,
+    characterColorSaturation?: number,
+    onEditCharacter?: (characterId: string) => void,
+    onSetCharacterColor?: (characterId: string, colorHex: string | null) => void,
 }
 
-export const CharacterRowConfirmed = ({character, characterColorSaturation, onEditCharacter, onSetCharacterColor}: CharacterRowConfirmedProps) => {
+export const CharacterRowConfirmed = ({
+    character, characterColorSaturation, onEditCharacter, onSetCharacterColor,
+}: CharacterRowConfirmedProps) => {
     const isColorActionDisabled = Boolean(character.isColorUpdatePending) || !onSetCharacterColor;
     const isEditDisabled = !character.id || !onEditCharacter;
     const colorPicker = useCharacterColorPickerState({

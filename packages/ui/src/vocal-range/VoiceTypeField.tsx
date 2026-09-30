@@ -1,18 +1,21 @@
-import {useEffect, useRef, useState} from 'react';
+import {
+    useEffect, useRef, useState,
+} from 'react';
 
 import {Input} from '../atoms/Input/Input';
 import {useDropdownDismiss} from '../molecules/forms/shared/useDropdownDismiss';
+import styles from './VoiceTypeField.module.css';
 import {VOICE_TYPE_SUGGESTIONS} from './voiceTypes';
 
-import styles from './VoiceTypeField.module.css';
-
 interface VoiceTypeFieldProps {
-    value: string | null;
-    onChange: (value: string | null) => void;
-    id?: string;
+    value: string | null,
+    onChange: (value: string | null) => void,
+    id?: string,
 }
 
-export const VoiceTypeField = ({value, onChange, id}: VoiceTypeFieldProps) => {
+export const VoiceTypeField = ({
+    value, onChange, id,
+}: VoiceTypeFieldProps) => {
     const [draft, setDraft] = useState(value ?? '');
     const [isOpen, setIsOpen] = useState(false);
     const rootRef = useRef<HTMLDivElement>(null);
@@ -67,7 +70,7 @@ export const VoiceTypeField = ({value, onChange, id}: VoiceTypeFieldProps) => {
                     aria-label="Voice type suggestions"
                     className={styles.menu}
                 >
-                    {suggestions.length > 0 ? (
+                    {suggestions.length > 0 ?
                         suggestions.map(option => (
                             <li
                                 key={option}
@@ -80,9 +83,9 @@ export const VoiceTypeField = ({value, onChange, id}: VoiceTypeFieldProps) => {
                                 {option}
                             </li>
                         ))
-                    ) : (
-                        <li className={styles.empty}>No matching voice types</li>
-                    )}
+                        : (
+                            <li className={styles.empty}>No matching voice types</li>
+                        )}
                 </ul>
             ) : null}
         </div>

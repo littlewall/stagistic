@@ -1,8 +1,9 @@
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {ActionCard} from './ActionCard';
-
 import styles from './ActionCard.module.css';
 
 describe('ActionCard', () => {

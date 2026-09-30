@@ -1,6 +1,8 @@
 import {COMMENT_ANCHOR_MARK_NAME, COMMENT_THREAD_ID_ATTR} from '@stagistic/script';
 import {Mark, mergeAttributes} from '@tiptap/core';
-import {Fragment, type Node as ProseMirrorNode, Slice} from '@tiptap/pm/model';
+import {
+    Fragment, type Node as ProseMirrorNode, Slice,
+} from '@tiptap/pm/model';
 import {Plugin, PluginKey} from '@tiptap/pm/state';
 
 const stripAnchorMarks = (fragment: Fragment): Fragment => {
@@ -39,7 +41,11 @@ export const CommentAnchorMark = Mark.create({
     },
 
     renderHTML({HTMLAttributes}) {
-        return ['span', mergeAttributes(HTMLAttributes), 0];
+        return [
+            'span',
+            mergeAttributes(HTMLAttributes),
+            0,
+        ];
     },
 
     addProseMirrorPlugins() {

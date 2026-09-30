@@ -1,6 +1,8 @@
 import {CHARACTER_TAG_MARK_NAME} from '../characters';
 import {type ScriptNode} from '../document';
-import {MUSIC_MODE_ATTR, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME, MUSIC_TITLE_ATTR} from '../music';
+import {
+    MUSIC_MODE_ATTR, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME, MUSIC_TITLE_ATTR,
+} from '../music';
 import type {SerializationState} from './serializeStagistic';
 
 export const getText = (node: ScriptNode): string => {
@@ -16,7 +18,7 @@ const escapeQuotedLiteral = (value: string) => value.replace(/\\/gu, '\\\\').rep
 const quoteLiteral = (value: string) => `"${escapeQuotedLiteral(value)}"`;
 
 export const quoteNameWhenRequired = (value: string, force = false) => {
-    return force || /[\s.@/"\\]/u.test(value) ? quoteLiteral(value) : value;
+    return force || (/[\s.@/"\\]/u).test(value) ? quoteLiteral(value) : value;
 };
 
 const applyEmphasisMarks = (value: string, node: ScriptNode) => {
@@ -69,9 +71,9 @@ export const serializeInlineContent = (
     state: SerializationState,
     options: {includeOut?: boolean} = {},
 ): {
-    text: string;
-    hitOut: string | null;
-    outMarkers: string[];
+    text: string,
+    hitOut: string | null,
+    outMarkers: string[],
 } => {
     let text = '';
     let hitOut: string | null = null;
@@ -136,7 +138,7 @@ export const serializeInlineContent = (
                 }
 
                 const nextText = content[index + 1]?.text ?? '';
-                const mustSeparateFollowingText = nextText.length > 0 && !/^\s/u.test(nextText);
+                const mustSeparateFollowingText = nextText.length > 0 && !(/^\s/u).test(nextText);
 
                 text += applyEmphasisMarks(`@${quoteNameWhenRequired(taggedText, mustSeparateFollowingText)}`, node);
                 continue;

@@ -1,9 +1,13 @@
 import {ScriptRepositoryProvider} from '@stagistic/app-core';
-import {GlobalModalsProvider, HomeRoute, ScriptEditorRoute, ScriptExportRoute, ScriptSettingsRoute, ScriptWorkspaceRoute} from '@stagistic/app-routes';
+import {
+    GlobalModalsProvider, HomeRoute, ScriptEditorRoute, ScriptExportRoute, ScriptSettingsRoute, ScriptWorkspaceRoute,
+} from '@stagistic/app-routes';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
 import {getCurrentWindow} from '@tauri-apps/api/window';
 import {useEffect, useState} from 'react';
-import {Navigate, Route, Routes} from 'react-router-dom';
+import {
+    Navigate, Route, Routes,
+} from 'react-router-dom';
 
 import {prepareLocalDbWithProgress, requestPersistentStorage} from './db';
 import {startBackupSchedule, writeBackup} from './db/backups';
@@ -80,8 +84,10 @@ const App = () => {
         };
     }, []);
 
-    // Portable backup snapshots into the app data folder: periodic while running,
-    // plus a best-effort snapshot when the window is closed.
+    /*
+     * Portable backup snapshots into the app data folder: periodic while running,
+     * plus a best-effort snapshot when the window is closed.
+     */
     useEffect(() => {
         if (!scriptRepository) {
             return undefined;

@@ -1,30 +1,34 @@
 import {trimOrFallback} from '@stagistic/script';
 import type {NewScriptShape} from '@stagistic/ui';
-import {type Dispatch, type SetStateAction, useCallback, useMemo} from 'react';
+import {
+    type Dispatch, type SetStateAction, useCallback, useMemo,
+} from 'react';
 
 import type {AppToastPayload} from '../../routes/script/types';
-import type {ScriptImportFile, ScriptToDelete, ScriptToDuplicate, ScriptToRename, UseGlobalModalActionsArgs} from './globalModalTypes';
+import type {
+    ScriptImportFile, ScriptToDelete, ScriptToDuplicate, ScriptToRename, UseGlobalModalActionsArgs,
+} from './globalModalTypes';
 import {importStagisticFile} from './importStagisticFile';
 import {createInitialScriptDocument} from './initialScriptDocument';
 import {useStepkgPackageMutations} from './useStepkgPackageMutations';
 
 export interface UseGlobalModalMutationsArgs extends Pick<UseGlobalModalActionsArgs, 'saveTitlePage' | 'scriptActions' | 'repository'> {
-    navigate: UseGlobalModalActionsArgs['navigation']['navigate'];
-    addToast: (toast: AppToastPayload) => void;
-    scriptToDelete: ScriptToDelete | null;
-    scriptToRename: ScriptToRename | null;
-    scriptToDuplicate: ScriptToDuplicate | null;
-    setNewScriptTransitionPath: Dispatch<SetStateAction<string | null>>;
-    setIsImportOpen: Dispatch<SetStateAction<boolean>>;
-    setIsImportLoading: Dispatch<SetStateAction<boolean>>;
-    setIsDownloadingBackup: Dispatch<SetStateAction<boolean>>;
-    setPrefilledImport: Dispatch<SetStateAction<ScriptImportFile | null>>;
-    setScriptToDelete: Dispatch<SetStateAction<ScriptToDelete | null>>;
-    setIsDeleting: Dispatch<SetStateAction<boolean>>;
-    setScriptToRename: Dispatch<SetStateAction<ScriptToRename | null>>;
-    setIsRenaming: Dispatch<SetStateAction<boolean>>;
-    setScriptToDuplicate: Dispatch<SetStateAction<ScriptToDuplicate | null>>;
-    setIsDuplicating: Dispatch<SetStateAction<boolean>>;
+    navigate: UseGlobalModalActionsArgs['navigation']['navigate'],
+    addToast: (toast: AppToastPayload) => void,
+    scriptToDelete: ScriptToDelete | null,
+    scriptToRename: ScriptToRename | null,
+    scriptToDuplicate: ScriptToDuplicate | null,
+    setNewScriptTransitionPath: Dispatch<SetStateAction<string | null>>,
+    setIsImportOpen: Dispatch<SetStateAction<boolean>>,
+    setIsImportLoading: Dispatch<SetStateAction<boolean>>,
+    setIsDownloadingBackup: Dispatch<SetStateAction<boolean>>,
+    setPrefilledImport: Dispatch<SetStateAction<ScriptImportFile | null>>,
+    setScriptToDelete: Dispatch<SetStateAction<ScriptToDelete | null>>,
+    setIsDeleting: Dispatch<SetStateAction<boolean>>,
+    setScriptToRename: Dispatch<SetStateAction<ScriptToRename | null>>,
+    setIsRenaming: Dispatch<SetStateAction<boolean>>,
+    setScriptToDuplicate: Dispatch<SetStateAction<ScriptToDuplicate | null>>,
+    setIsDuplicating: Dispatch<SetStateAction<boolean>>,
 }
 
 export const useGlobalModalMutations = ({
@@ -72,7 +76,12 @@ export const useGlobalModalMutations = ({
                 });
             }
         },
-        [addToast, navigate, scriptActions, setNewScriptTransitionPath],
+        [
+            addToast,
+            navigate,
+            scriptActions,
+            setNewScriptTransitionPath,
+        ],
     );
     const handleImportStagistic = useCallback(
         async (payload: ScriptImportFile & {name: string}) => {
@@ -105,9 +114,19 @@ export const useGlobalModalMutations = ({
                 setIsImportLoading(false);
             }
         },
-        [addToast, navigate, saveTitlePage, scriptActions, setIsImportLoading, setIsImportOpen, setPrefilledImport],
+        [
+            addToast,
+            navigate,
+            saveTitlePage,
+            scriptActions,
+            setIsImportLoading,
+            setIsImportOpen,
+            setPrefilledImport,
+        ],
     );
-    const {handlePeekStepkg, handleImportStepkgAsNew, handleReplaceWithStepkg, handleDownloadStepkgBackup} = useStepkgPackageMutations({
+    const {
+        handlePeekStepkg, handleImportStepkgAsNew, handleReplaceWithStepkg, handleDownloadStepkgBackup,
+    } = useStepkgPackageMutations({
         repository,
         navigate,
         addToast,
@@ -141,9 +160,15 @@ export const useGlobalModalMutations = ({
         } finally {
             setIsDeleting(false);
         }
-    }, [addToast, scriptActions, scriptToDelete, setIsDeleting, setScriptToDelete]);
+    }, [
+        addToast,
+        scriptActions,
+        scriptToDelete,
+        setIsDeleting,
+        setScriptToDelete,
+    ]);
     const handleRename = useCallback(
-        async (values: {title: string; subtitle: string}) => {
+        async (values: {title: string, subtitle: string}) => {
             if (!scriptToRename) {
                 return;
             }
@@ -172,10 +197,18 @@ export const useGlobalModalMutations = ({
                 setIsRenaming(false);
             }
         },
-        [addToast, scriptActions, scriptToRename, setIsRenaming, setScriptToRename],
+        [
+            addToast,
+            scriptActions,
+            scriptToRename,
+            setIsRenaming,
+            setScriptToRename,
+        ],
     );
     const handleDuplicate = useCallback(
-        async (values: {title: string; copySettings: boolean; copyAttributes: boolean; openInEditor: boolean}) => {
+        async (values: {
+            title: string, copySettings: boolean, copyAttributes: boolean, openInEditor: boolean,
+        }) => {
             if (!scriptToDuplicate) {
                 return;
             }
@@ -210,7 +243,14 @@ export const useGlobalModalMutations = ({
                 setIsDuplicating(false);
             }
         },
-        [addToast, navigate, scriptActions, scriptToDuplicate, setIsDuplicating, setScriptToDuplicate],
+        [
+            addToast,
+            navigate,
+            scriptActions,
+            scriptToDuplicate,
+            setIsDuplicating,
+            setScriptToDuplicate,
+        ],
     );
 
     return useMemo(

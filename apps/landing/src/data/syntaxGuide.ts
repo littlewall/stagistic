@@ -1,18 +1,44 @@
 // --- Table of contents -----------------------------------------------------
 export const toc = [
-    {id: 'core', n: '01', title: 'The core idea'},
-    {id: 'frontmatter', n: '02', title: 'Frontmatter'},
-    {id: 'structure', n: '03', title: 'Acts & scenes'},
-    {id: 'dialogue', n: '04', title: 'Cues & dialogue'},
-    {id: 'asides', n: '05', title: 'Asides'},
-    {id: 'lyrics', n: '06', title: 'Lyrics'},
-    {id: 'soft-break', n: '07', title: 'Soft breaks'},
-    {id: 'stage-directions', n: '08', title: 'Stage directions'},
-    {id: 'music', n: '09', title: 'Music'},
-    {id: 'quoting', n: '10', title: 'Quoting'},
-    {id: 'inline', n: '11', title: 'Inline marks'},
-    {id: 'example', n: '12', title: 'Full example'},
-    {id: 'reference', n: '13', title: 'Marker reference'},
+    {
+        id: 'core', n: '01', title: 'The core idea',
+    },
+    {
+        id: 'frontmatter', n: '02', title: 'Frontmatter',
+    },
+    {
+        id: 'structure', n: '03', title: 'Acts & scenes',
+    },
+    {
+        id: 'dialogue', n: '04', title: 'Cues & dialogue',
+    },
+    {
+        id: 'asides', n: '05', title: 'Asides',
+    },
+    {
+        id: 'lyrics', n: '06', title: 'Lyrics',
+    },
+    {
+        id: 'soft-break', n: '07', title: 'Soft breaks',
+    },
+    {
+        id: 'stage-directions', n: '08', title: 'Stage directions',
+    },
+    {
+        id: 'music', n: '09', title: 'Music',
+    },
+    {
+        id: 'quoting', n: '10', title: 'Quoting',
+    },
+    {
+        id: 'inline', n: '11', title: 'Inline marks',
+    },
+    {
+        id: 'example', n: '12', title: 'Full example',
+    },
+    {
+        id: 'reference', n: '13', title: 'Marker reference',
+    },
 ];
 
 // --- Example sources (rendered as plain text) ------------------------------
@@ -50,7 +76,7 @@ It's fine. I was waiting.`;
 export const exUnison = `ANNA / PETER
 AND THE WORLD WILL STOP`;
 
-export const exInlineCue = `JANE: I told you already.`;
+export const exInlineCue = 'JANE: I told you already.';
 
 export const exAside = `ANNA
 (quietly)
@@ -68,7 +94,7 @@ SECOND LINE OF THE SONG
 ~
 A LATER LINE — STILL PETER, NOT A NEW CHARACTER`;
 
-export const exStageDir = `Anna stands at the window. @Peter enters quietly from behind.`;
+export const exStageDir = 'Anna stands at the window. @Peter enters quietly from behind.';
 
 export const exForcedStageDir = `!ALL LIGHTS SNAP OUT
 

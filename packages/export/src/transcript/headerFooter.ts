@@ -9,8 +9,12 @@ import {
 } from '@stagistic/script';
 
 import type {ExportPlan} from '../plan';
-import type {PageItem, VisualLine, VisualRun} from '../visualLine';
-import {CHAR_WIDTH_EM, HEADER_FOOTER_ALIGNMENTS, HEADER_FOOTER_MAX_WIDTH_RATIO, MONO_FONT_FAMILY, PAGE_BREAK_ITEM, type ScriptPage} from './model';
+import type {
+    PageItem, VisualLine, VisualRun,
+} from '../visualLine';
+import {
+    CHAR_WIDTH_EM, HEADER_FOOTER_ALIGNMENTS, HEADER_FOOTER_MAX_WIDTH_RATIO, MONO_FONT_FAMILY, PAGE_BREAK_ITEM, type ScriptPage,
+} from './model';
 
 const makeHeaderFooterRun = (text: string, x: number, cell: HeaderFooterCellSettings, fontSizePx: number): VisualRun => ({
     text,
@@ -28,10 +32,10 @@ const resolveHeaderFooterX = ({
     settings,
     fontSizePx,
 }: {
-    alignment: HeaderFooterAlignment;
-    text: string;
-    settings: EditorSettings;
-    fontSizePx: number;
+    alignment: HeaderFooterAlignment,
+    text: string,
+    settings: EditorSettings,
+    fontSizePx: number,
 }) => {
     const charWidthPx = fontSizePx * CHAR_WIDTH_EM;
     const textWidthPx = text.length * charWidthPx;
@@ -65,24 +69,24 @@ const buildHeaderFooterLine = ({
     plan,
     settings,
 }: {
-    area: 'header' | 'footer';
-    row: HeaderFooterRowSettings;
-    y: number;
-    page: ScriptPage;
-    pageNumber: number;
-    pageMarkNumber: number;
-    draftDate: string;
-    plan: ExportPlan;
-    settings: EditorSettings;
+    area: 'header' | 'footer',
+    row: HeaderFooterRowSettings,
+    y: number,
+    page: ScriptPage,
+    pageNumber: number,
+    pageMarkNumber: number,
+    draftDate: string,
+    plan: ExportPlan,
+    settings: EditorSettings,
 }): VisualLine | null => {
     const mark = page.mark ?? {actIndex: null, sceneNumber: 0};
     const pageMark = page.isInsertedBlank
         ? ''
         : buildPageMark({
-              actIndex: mark.actIndex,
-              sceneNumber: mark.sceneNumber,
-              pageNumber: pageMarkNumber,
-          });
+            actIndex: mark.actIndex,
+            sceneNumber: mark.sceneNumber,
+            pageNumber: pageMarkNumber,
+        });
     const runs = HEADER_FOOTER_ALIGNMENTS.flatMap(alignment => {
         const cell = row[alignment];
 
@@ -152,7 +156,11 @@ export const withHeaderFooter = (pages: ScriptPage[], plan: ExportPlan, settings
             plan,
             settings,
         });
-        const pageItems: PageItem[] = [...(header ? [header] : []), ...page.items, ...(footer ? [footer] : [])];
+        const pageItems: PageItem[] = [
+            ...header ? [header] : [],
+            ...page.items,
+            ...footer ? [footer] : [],
+        ];
 
         return index === pages.length - 1 ? pageItems : [...pageItems, PAGE_BREAK_ITEM];
     });

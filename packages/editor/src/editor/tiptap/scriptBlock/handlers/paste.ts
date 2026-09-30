@@ -36,7 +36,7 @@ const isExternalMultilinePaste = (event: ClipboardEvent) => {
     const html = clipboardData.getData('text/html');
     const text = clipboardData.getData('text/plain');
 
-    return !STRUCTURED_SCRIPT_HTML_PATTERN.test(html) && /[\r\n]/.test(text);
+    return !STRUCTURED_SCRIPT_HTML_PATTERN.test(html) && (/[\r\n]/).test(text);
 };
 
 const pasteMultilineAsActiveBlockType = (context: BlockContext, event: ClipboardEvent) => {

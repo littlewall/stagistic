@@ -22,7 +22,9 @@ import {
     SCREENPLAY_CHARS_PER_INCH,
     SPACING_BEFORE_OPTIONS,
 } from '../constants';
-import {clamp, formatLines, formatNumeric, getClosestStepValue} from '../math';
+import {
+    clamp, formatLines, formatNumeric, getClosestStepValue,
+} from '../math';
 import type {ElementSettingsPanelProps, ElementSettingsViewModel} from '../types';
 
 const SCENE_NUMBER_FORMAT_LABELS: Record<SceneNumberFormat, string> = {
@@ -54,36 +56,36 @@ export const useElementSettingsViewModel = ({
         const minPreviewContentChars = Math.min(MIN_PREVIEW_CONTENT_CHARS, defaultContentChars);
         const spacingBefore = getClosestStepValue(SPACING_BEFORE_OPTIONS, blockSettings.spacingBeforeEm ?? blockDefaults.spacingBeforeEm ?? 0);
         const hasSpacingAfter = blockDefaults.spacingAfterEm !== undefined;
-        const spacingAfterRaw = hasSpacingAfter ? (blockSettings.spacingAfterEm ?? blockDefaults.spacingAfterEm ?? 0) : undefined;
+        const spacingAfterRaw = hasSpacingAfter ? blockSettings.spacingAfterEm ?? blockDefaults.spacingAfterEm ?? 0 : undefined;
         const spacingAfter = spacingAfterRaw === undefined ? undefined : getClosestStepValue(SPACING_BEFORE_OPTIONS, spacingAfterRaw);
         const lineHeight = getClosestStepValue(LINE_HEIGHT_OPTIONS, blockSettings.lineHeight ?? blockDefaults.lineHeight ?? fallbackTypographyLineHeight);
         const leftIndent = blockSettings.indentLeftChars ?? blockDefaults.indentLeftChars ?? 0;
         const rightIndent = blockSettings.indentRightChars ?? blockDefaults.indentRightChars ?? 0;
         const isActBlock = blockType === 'act';
-        const shortcut = isActBlock ? undefined : (blockSettings.shortcut ?? blockDefaults.shortcut ?? BLOCK_SHORTCUT_OPTIONS[0]);
+        const shortcut = isActBlock ? undefined : blockSettings.shortcut ?? blockDefaults.shortcut ?? BLOCK_SHORTCUT_OPTIONS[0];
         const isValidNextElement = (value: unknown): value is ElementSettingsViewModel['numeric']['nextElement'] => {
             return typeof value === 'string' && nextElementItems.some(item => item.blockType === value);
         };
         const nextElement = isActBlock
             ? undefined
             : (() => {
-                  const candidate = blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType;
+                const candidate = blockSettings.nextElement ?? blockDefaults.nextElement ?? blockType;
 
-                  return isValidNextElement(candidate) ? candidate : nextElementItems[0]?.blockType;
-              })();
+                return isValidNextElement(candidate) ? candidate : nextElementItems[0]?.blockType;
+            })();
         const isSceneBlock = blockType === 'scene';
         const sceneNumberFormat = isSceneBlock
             ? (() => {
-                  const candidate = blockSettings.sceneNumberFormat ?? blockDefaults.sceneNumberFormat ?? DEFAULT_SCENE_NUMBER_FORMAT;
+                const candidate = blockSettings.sceneNumberFormat ?? blockDefaults.sceneNumberFormat ?? DEFAULT_SCENE_NUMBER_FORMAT;
 
-                  return isSceneNumberFormat(candidate) ? candidate : DEFAULT_SCENE_NUMBER_FORMAT;
-              })()
+                return isSceneNumberFormat(candidate) ? candidate : DEFAULT_SCENE_NUMBER_FORMAT;
+            })()
             : undefined;
         const sceneNumberFormatOptions = isSceneBlock
             ? SCENE_NUMBER_FORMAT_OPTIONS.map(option => ({
-                  value: option,
-                  label: SCENE_NUMBER_FORMAT_LABELS[option],
-              }))
+                value: option,
+                label: SCENE_NUMBER_FORMAT_LABELS[option],
+            }))
             : undefined;
         const textAlign = blockSettings.textAlign ?? blockDefaults.textAlign ?? BLOCK_TEXT_ALIGN_OPTIONS[0];
         const casing = blockSettings.casing ?? blockDefaults.casing ?? BLOCK_CASING_OPTIONS[0];
@@ -103,16 +105,16 @@ export const useElementSettingsViewModel = ({
         const shortcutOptions = isActBlock
             ? undefined
             : BLOCK_SHORTCUT_OPTIONS.map(option => ({
-                  value: option,
-                  label: option,
-              }));
+                value: option,
+                label: option,
+            }));
         const nextElementOptions = isActBlock
             ? undefined
             : nextElementItems.map(item => ({
-                  value: item.blockType,
-                  label: item.label,
-                  icon: BLOCK_ICONS[item.blockType],
-              }));
+                value: item.blockType,
+                label: item.label,
+                icon: BLOCK_ICONS[item.blockType],
+            }));
         const normalizedLeftIndent = clamp(Math.round(leftIndent), 0, MAX_INDENT_CHARS);
         const normalizedRightIndent = clamp(Math.round(rightIndent), 0, MAX_INDENT_CHARS);
         const defaultSliderStartChars = 0;
@@ -157,9 +159,9 @@ export const useElementSettingsViewModel = ({
 
         const spacingAfterOptions = hasSpacingAfter
             ? SPACING_BEFORE_OPTIONS.map(option => ({
-                  value: option,
-                  label: formatLines(option),
-              }))
+                value: option,
+                label: formatLines(option),
+            }))
             : undefined;
 
         return {

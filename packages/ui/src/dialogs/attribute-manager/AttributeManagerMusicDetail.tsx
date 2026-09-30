@@ -3,57 +3,53 @@ import {type FormEvent, useRef} from 'react';
 import {Button} from '../../atoms/Button/Button';
 import {FormSelect, type FormSelectOption} from '../../molecules/forms/FormSelect/FormSelect';
 import {formControlStyles} from '../../molecules/forms/shared/formControlStyles';
-
 import styles from './AttributeManagerMusicDetail.module.css';
 
 export type MusicKind = 'song' | 'instrumental';
 
-const MUSIC_KIND_OPTIONS: FormSelectOption[] = [
-    {value: 'song', label: 'Song'},
-    {value: 'instrumental', label: 'Instrumental'},
-];
+const MUSIC_KIND_OPTIONS: FormSelectOption[] = [{value: 'song', label: 'Song'}, {value: 'instrumental', label: 'Instrumental'}];
 
 export interface MusicAttachmentView {
-    id: string;
-    filename: string;
-    sizeBytes: number;
-    isAvailable: boolean;
+    id: string,
+    filename: string,
+    sizeBytes: number,
+    isAvailable: boolean,
 }
 
 export interface MusicAttachmentSlotView {
-    id: string;
-    label: string;
-    attachment: MusicAttachmentView | null;
-    isUploading: boolean;
+    id: string,
+    label: string,
+    attachment: MusicAttachmentView | null,
+    isUploading: boolean,
 }
 
 export interface AttributeManagerMusicDetailProps {
-    musicId: string;
-    musicTitle: string;
-    confirmedMusicTitle: string;
-    musicKind: MusicKind;
-    attachmentSlots: MusicAttachmentSlotView[];
-    onUpdateMusic: (input: {title: string; kind: MusicKind}) => unknown;
-    onMusicTitleChange: (title: string) => void;
-    onUploadPdf: (slotId: string, file: File) => void;
-    onPreview: (attachmentId: string) => void;
-    onRemove: (slotId: string) => void;
+    musicId: string,
+    musicTitle: string,
+    confirmedMusicTitle: string,
+    musicKind: MusicKind,
+    attachmentSlots: MusicAttachmentSlotView[],
+    onUpdateMusic: (input: {title: string, kind: MusicKind}) => unknown,
+    onMusicTitleChange: (title: string) => void,
+    onUploadPdf: (slotId: string, file: File) => void,
+    onPreview: (attachmentId: string) => void,
+    onRemove: (slotId: string) => void,
 }
 
 interface MusicMetadataFieldsProps {
-    musicId: string;
-    musicTitle: string;
-    confirmedMusicTitle: string;
-    musicKind: MusicKind;
-    onUpdateMusic: AttributeManagerMusicDetailProps['onUpdateMusic'];
-    onMusicTitleChange: AttributeManagerMusicDetailProps['onMusicTitleChange'];
+    musicId: string,
+    musicTitle: string,
+    confirmedMusicTitle: string,
+    musicKind: MusicKind,
+    onUpdateMusic: AttributeManagerMusicDetailProps['onUpdateMusic'],
+    onMusicTitleChange: AttributeManagerMusicDetailProps['onMusicTitleChange'],
 }
 
 interface AttachmentSlotProps {
-    slot: MusicAttachmentSlotView;
-    onUploadPdf: AttributeManagerMusicDetailProps['onUploadPdf'];
-    onPreview: AttributeManagerMusicDetailProps['onPreview'];
-    onRemove: AttributeManagerMusicDetailProps['onRemove'];
+    slot: MusicAttachmentSlotView,
+    onUploadPdf: AttributeManagerMusicDetailProps['onUploadPdf'],
+    onPreview: AttributeManagerMusicDetailProps['onPreview'],
+    onRemove: AttributeManagerMusicDetailProps['onRemove'],
 }
 
 const formatSize = (bytes: number): string => {
@@ -66,7 +62,9 @@ const formatSize = (bytes: number): string => {
     return kb < 1024 ? `${Math.round(kb)} KB` : `${(kb / 1024).toFixed(1)} MB`;
 };
 
-const MusicMetadataFields = ({musicId, musicTitle, confirmedMusicTitle, musicKind, onUpdateMusic, onMusicTitleChange}: MusicMetadataFieldsProps) => {
+const MusicMetadataFields = ({
+    musicId, musicTitle, confirmedMusicTitle, musicKind, onUpdateMusic, onMusicTitleChange,
+}: MusicMetadataFieldsProps) => {
     const persistTitle = () => {
         const title = musicTitle.trim();
 
@@ -144,7 +142,9 @@ const MusicMetadataFields = ({musicId, musicTitle, confirmedMusicTitle, musicKin
     );
 };
 
-const AttachmentSlot = ({slot, onUploadPdf, onPreview, onRemove}: AttachmentSlotProps) => {
+const AttachmentSlot = ({
+    slot, onUploadPdf, onPreview, onRemove,
+}: AttachmentSlotProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const {attachment} = slot;
 

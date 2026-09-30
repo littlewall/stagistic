@@ -1,8 +1,9 @@
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {ListPanel} from './ListPanel';
-
 import styles from './ListPanel.module.css';
 
 describe('ListPanel', () => {

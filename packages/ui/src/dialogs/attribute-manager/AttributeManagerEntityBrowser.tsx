@@ -5,29 +5,28 @@ import {Button} from '../../atoms/Button/Button';
 import {Input} from '../../atoms/Input/Input';
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
 import {PlusIcon, SearchIcon} from '../../icons';
-
 import styles from './AttributeManagerCharactersPanel.module.css';
 
 export interface AttributeManagerBrowserItem {
-    id: string;
-    name: string;
-    color: string | null;
+    id: string,
+    name: string,
+    color: string | null,
 }
 
 interface AttributeManagerEntityBrowserProps {
-    items: AttributeManagerBrowserItem[];
-    selectedItemId: string | null;
-    listLabel: string;
-    searchLabel: string;
-    createAriaLabel: string;
-    createTooltipLabel: string;
-    emptyLabel: string;
-    loadingLabel: string;
-    noMatchesLabel: string;
-    isLoading: boolean;
-    isCreateDisabled: boolean;
-    onSelectItem: (itemId: string) => void;
-    onCreate: () => void;
+    items: AttributeManagerBrowserItem[],
+    selectedItemId: string | null,
+    listLabel: string,
+    searchLabel: string,
+    createAriaLabel: string,
+    createTooltipLabel: string,
+    emptyLabel: string,
+    loadingLabel: string,
+    noMatchesLabel: string,
+    isLoading: boolean,
+    isCreateDisabled: boolean,
+    onSelectItem: (itemId: string) => void,
+    onCreate: () => void,
 }
 
 export const AttributeManagerEntityBrowser = ({

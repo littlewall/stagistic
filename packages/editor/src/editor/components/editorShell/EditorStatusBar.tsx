@@ -13,13 +13,14 @@ import {
     formatTabShortcutLabel,
 } from '../../model/formatBlockShortcut';
 import {resolveAsideFlowTarget, resolveAsideToggleTarget} from '../../tiptap/scriptBlock/handlers/tab';
-import {getActiveScriptBlockFromState, isScriptBlockContentEmpty, isSelectionAcrossBlocks, SCRIPT_BLOCK_NODE_NAMES} from '../../tiptap/scriptCore';
-
+import {
+    getActiveScriptBlockFromState, isScriptBlockContentEmpty, isSelectionAcrossBlocks, SCRIPT_BLOCK_NODE_NAMES,
+} from '../../tiptap/scriptCore';
 import styles from './EditorStatusBar.module.css';
 
 interface EditorStatusBarProps {
-    editor: TiptapEditor | null;
-    blockNextElements: Partial<Record<ScriptBlockNodeType, ScriptBlockNodeType>>;
+    editor: TiptapEditor | null,
+    blockNextElements: Partial<Record<ScriptBlockNodeType, ScriptBlockNodeType>>,
 }
 
 const CYCLE_TYPES = BLOCKS_WITHOUT_ACT.map(block => block.type);
@@ -27,13 +28,13 @@ const labelByType = new Map(BLOCKS.map(block => [block.type, block.label]));
 const DIALOGUE_LIKE_TYPES: ReadonlySet<ScriptBlockNodeType> = new Set(['dialogue', 'lyrics']);
 
 type EditorStatusBarSegment = {
-    id: string;
-    key: string;
-    description: string;
+    id: string,
+    key: string,
+    description: string,
 };
 
 export interface EditorStatusBarBlockState extends EnterHintBlockState {
-    asideToggleTarget: ScriptBlockNodeType | null;
+    asideToggleTarget: ScriptBlockNodeType | null,
 }
 
 const getLabel = (type: ScriptBlockNodeType) => labelByType.get(type) ?? type;
@@ -143,8 +144,7 @@ export const EditorStatusBar = ({editor, blockNextElements}: EditorStatusBarProp
                 asideToggleTarget: resolveAsideToggleTarget(stateEditor.state.doc, activeBlock.blockType, activeBlock.pos),
             };
         },
-        equalityFn: (previous, next) =>
-            previous?.type === next?.type &&
+        equalityFn: (previous, next) => previous?.type === next?.type &&
             previous?.isEmpty === next?.isEmpty &&
             previous?.hasOnlyNonTextContent === next?.hasOnlyNonTextContent &&
             previous?.isAtStart === next?.isAtStart &&

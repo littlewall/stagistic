@@ -1,5 +1,7 @@
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 
 import type {StepkgPeekResult} from './types';
 import {useImportScriptModalState} from './useImportScriptModalState';
@@ -11,6 +13,7 @@ const waitFor = async (predicate: () => boolean) => {
 
     while (Date.now() < deadline) {
         if (predicate()) return;
+
         await new Promise(resolve => {
             window.setTimeout(resolve, 10);
         });
@@ -39,6 +42,7 @@ const mount = (args: Parameters<typeof useImportScriptModalState>[0]) => {
     let api: Api | null = null;
     const Harness = () => {
         api = useImportScriptModalState(args);
+
         return null;
     };
     const host = document.createElement('div');
@@ -61,7 +65,9 @@ describe('useImportScriptModalState', () => {
             onImportStepkgAsNew: () => Promise.resolve(),
             onReplaceWithStepkg: () => Promise.resolve(),
             onDownloadStepkgBackup: () => Promise.resolve(),
-            onPeekStepkg: () => Promise.resolve({ok: true, scriptId: 's', packageTitle: 'T', existingLocalTitle: null} satisfies StepkgPeekResult),
+            onPeekStepkg: () => Promise.resolve({
+                ok: true, scriptId: 's', packageTitle: 'T', existingLocalTitle: null,
+            } satisfies StepkgPeekResult),
         });
 
         await waitFor(() => getApi() !== null);
@@ -79,7 +85,9 @@ describe('useImportScriptModalState', () => {
             onImportStepkgAsNew: () => Promise.resolve(),
             onReplaceWithStepkg: () => Promise.resolve(),
             onDownloadStepkgBackup: () => Promise.resolve(),
-            onPeekStepkg: () => Promise.resolve({ok: true, scriptId: 's', packageTitle: 'T', existingLocalTitle: null} satisfies StepkgPeekResult),
+            onPeekStepkg: () => Promise.resolve({
+                ok: true, scriptId: 's', packageTitle: 'T', existingLocalTitle: null,
+            } satisfies StepkgPeekResult),
         });
 
         await waitFor(() => getApi() !== null);
@@ -92,9 +100,9 @@ describe('useImportScriptModalState', () => {
     });
 
     it('peeks a .stepkg selection and shows only the name field when there is no collision', async () => {
-        const onPeekStepkg = vi.fn(() =>
-            Promise.resolve({ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: null} satisfies StepkgPeekResult),
-        );
+        const onPeekStepkg = vi.fn(() => Promise.resolve({
+            ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: null,
+        } satisfies StepkgPeekResult));
         const getApi = mount({
             isOpen: true,
             onImportStagistic: () => Promise.resolve(),
@@ -116,8 +124,9 @@ describe('useImportScriptModalState', () => {
     });
 
     it('reveals the New/Replace choice on collision, and the replace panel when Replace is selected', async () => {
-        const onPeekStepkg = () =>
-            Promise.resolve({ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: 'Local Copy'} satisfies StepkgPeekResult);
+        const onPeekStepkg = () => Promise.resolve({
+            ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: 'Local Copy',
+        } satisfies StepkgPeekResult);
         const getApi = mount({
             isOpen: true,
             onImportStagistic: () => Promise.resolve(),
@@ -151,27 +160,28 @@ describe('useImportScriptModalState', () => {
             onImportStepkgAsNew: () => Promise.resolve(),
             onReplaceWithStepkg: () => Promise.resolve(),
             onDownloadStepkgBackup: () => Promise.resolve(),
-            onPeekStepkg: () => Promise.resolve({ok: false, message: "This file isn't a valid Stagistic package."} satisfies StepkgPeekResult),
+            onPeekStepkg: () => Promise.resolve({ok: false, message: 'This file isn\'t a valid Stagistic package.'} satisfies StepkgPeekResult),
         });
 
         await waitFor(() => getApi() !== null);
         getApi()!.handleFileSelect(buildFileList(new File(['not a zip'], 'broken.stepkg')));
         await waitFor(() => getApi()!.fileError !== null);
 
-        expect(getApi()!.fileError).toBe("This file isn't a valid Stagistic package.");
+        expect(getApi()!.fileError).toBe('This file isn\'t a valid Stagistic package.');
         expect(getApi()!.showNameField).toBe(false);
     });
 
     it('calls onReplaceWithStepkg with the selected bytes when replace is confirmed', async () => {
-        const onReplaceWithStepkg = vi.fn<(payload: {fileName: string; bytes: Uint8Array}) => Promise<void>>(() => Promise.resolve());
+        const onReplaceWithStepkg = vi.fn<(payload: {fileName: string, bytes: Uint8Array}) => Promise<void>>(() => Promise.resolve());
         const getApi = mount({
             isOpen: true,
             onImportStagistic: () => Promise.resolve(),
             onImportStepkgAsNew: () => Promise.resolve(),
             onReplaceWithStepkg,
             onDownloadStepkgBackup: () => Promise.resolve(),
-            onPeekStepkg: () =>
-                Promise.resolve({ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: 'Local Copy'} satisfies StepkgPeekResult),
+            onPeekStepkg: () => Promise.resolve({
+                ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: 'Local Copy',
+            } satisfies StepkgPeekResult),
         });
 
         await waitFor(() => getApi() !== null);
@@ -194,8 +204,9 @@ describe('useImportScriptModalState', () => {
             onImportStepkgAsNew: () => Promise.resolve(),
             onReplaceWithStepkg: () => Promise.resolve(),
             onDownloadStepkgBackup,
-            onPeekStepkg: () =>
-                Promise.resolve({ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: 'Local Copy'} satisfies StepkgPeekResult),
+            onPeekStepkg: () => Promise.resolve({
+                ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: 'Local Copy',
+            } satisfies StepkgPeekResult),
         });
 
         await waitFor(() => getApi() !== null);

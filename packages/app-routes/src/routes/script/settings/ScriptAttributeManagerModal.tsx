@@ -30,34 +30,33 @@ import {DeleteMusicModal} from '../editor/music/DeleteMusicModal';
 import type {useScriptMusicState} from '../editor/music/useScriptMusicState';
 import {DeleteSceneHeadingModal} from '../editor/scene/DeleteSceneHeadingModal';
 import type {useScriptCharactersContextValue} from '../useScriptCharactersContextValue';
-
 import styles from './ScriptAttributeManagerModal.module.css';
 
 interface ScriptAttributeManagerModalProps {
-    currentScriptId: string | null;
-    isOpen: boolean;
-    tabs: ReturnType<typeof useAttributeManagerModalState>['tabs'];
-    activePanelId: AttributeManagerPanelId;
-    selectedCharacterId: string | null;
-    selectedGroupId?: string | null;
-    selectedMusicId: string | null;
-    initialWorkspaceId?: ReturnType<typeof useAttributeManagerModalState>['initialWorkspaceId'];
-    onClose: () => void;
-    onSelectPanel: (panelId: string) => void;
-    characters: ReturnType<typeof useScriptCharactersContextValue>['contextValue'];
-    characterItems: AttributeManagerCharacter[];
-    groupItems: AttributeManagerGroup[];
-    characterColorSaturation: EditorSettings['visual']['characterColorSaturation'];
-    sceneItems: AttributeManagerListItem[];
-    firstSceneHeadingBlockId: string | null;
-    onDeleteScene: (sceneHeadingBlockId: string) => Promise<void>;
-    placeState: ReturnType<typeof useScriptPlacesState>;
-    musicState: ReturnType<typeof useScriptMusicState>;
-    musicItems: AttributeManagerListItem[];
-    musicAttachmentsState: ReturnType<typeof useMusicAttachmentsState>;
-    setMusicTitleDraft: (musicId: string, title: string) => void;
-    persistMusicTitleDraft: (musicId: string, title: string, persist: (title: string) => void | Promise<unknown>) => Promise<void>;
-    onDeleteMusic: (musicId: string) => Promise<void>;
+    currentScriptId: string | null,
+    isOpen: boolean,
+    tabs: ReturnType<typeof useAttributeManagerModalState>['tabs'],
+    activePanelId: AttributeManagerPanelId,
+    selectedCharacterId: string | null,
+    selectedGroupId?: string | null,
+    selectedMusicId: string | null,
+    initialWorkspaceId?: ReturnType<typeof useAttributeManagerModalState>['initialWorkspaceId'],
+    onClose: () => void,
+    onSelectPanel: (panelId: string) => void,
+    characters: ReturnType<typeof useScriptCharactersContextValue>['contextValue'],
+    characterItems: AttributeManagerCharacter[],
+    groupItems: AttributeManagerGroup[],
+    characterColorSaturation: EditorSettings['visual']['characterColorSaturation'],
+    sceneItems: AttributeManagerListItem[],
+    firstSceneHeadingBlockId: string | null,
+    onDeleteScene: (sceneHeadingBlockId: string) => Promise<void>,
+    placeState: ReturnType<typeof useScriptPlacesState>,
+    musicState: ReturnType<typeof useScriptMusicState>,
+    musicItems: AttributeManagerListItem[],
+    musicAttachmentsState: ReturnType<typeof useMusicAttachmentsState>,
+    setMusicTitleDraft: (musicId: string, title: string) => void,
+    persistMusicTitleDraft: (musicId: string, title: string, persist: (title: string) => void | Promise<unknown>) => Promise<void>,
+    onDeleteMusic: (musicId: string) => Promise<void>,
 }
 
 export const ScriptAttributeManagerModal = ({
@@ -202,9 +201,11 @@ export const ScriptAttributeManagerModal = ({
                                     displayTitle={item.title}
                                     state={musicAttachmentsState}
                                     onTitleDraftChange={title => setMusicTitleDraft(music.id, title)}
-                                    onUpdateMusic={(musicId, input) =>
-                                        persistMusicTitleDraft(musicId, input.title, title => musicState.updateMusic(musicId, {...input, title}))
-                                    }
+                                    onUpdateMusic={(musicId, input) => persistMusicTitleDraft(
+                                        musicId,
+                                        input.title,
+                                        title => musicState.updateMusic(musicId, {...input, title}),
+                                    )}
                                 />
                             ) : null;
                         }}

@@ -4,13 +4,13 @@ import {getCharacterColorVarName, normalizeCharacterColorHex} from './characters
 import type {PersistentCharacterRef} from './contracts';
 
 type BuildEditorRootStyleArgs = {
-    persistentCharacters: readonly PersistentCharacterRef[];
-    editorStyle: CSSProperties;
-    sidebarWidth?: string;
+    persistentCharacters: readonly PersistentCharacterRef[],
+    editorStyle: CSSProperties,
+    sidebarWidth?: string,
     /** Unscaled on-screen page width; lets sidebars grow into space the page does not need. */
-    pageSpanPx?: number;
-    isLeftSidebarOpen: boolean;
-    isRightSidebarOpen: boolean;
+    pageSpanPx?: number,
+    isLeftSidebarOpen: boolean,
+    isRightSidebarOpen: boolean,
 };
 
 export const buildEditorRootStyle = ({

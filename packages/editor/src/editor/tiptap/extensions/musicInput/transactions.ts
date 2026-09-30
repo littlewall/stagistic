@@ -1,13 +1,17 @@
-import {createNodeId, MUSIC_ID_ATTR, MUSIC_KIND_ATTR, MUSIC_MODE_ATTR, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME, MUSIC_TITLE_ATTR} from '@stagistic/script';
-import {type EditorState, TextSelection, type Transaction} from '@tiptap/pm/state';
+import {
+    createNodeId, MUSIC_ID_ATTR, MUSIC_KIND_ATTR, MUSIC_MODE_ATTR, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME, MUSIC_TITLE_ATTR,
+} from '@stagistic/script';
+import {
+    type EditorState, TextSelection, type Transaction,
+} from '@tiptap/pm/state';
 
 import type {MusicComposeState} from './composeState';
 import {MUSIC_COMPOSE_CLOSE_META, MUSIC_OUT_KEYWORD} from './constants';
 
 export interface MusicStartCommitOptions {
-    musicId?: string;
-    kind?: string | null;
-    title?: string;
+    musicId?: string,
+    kind?: string | null,
+    title?: string,
 }
 
 export const buildAbandonMusic = (state: EditorState, compose: MusicComposeState): Transaction => {
@@ -31,11 +35,11 @@ export const buildCommitMusic = (state: EditorState, compose: MusicComposeState,
     const node = shouldCommitOut
         ? state.schema.nodes[MUSIC_OUT_NODE_NAME].create()
         : state.schema.nodes[MUSIC_START_NODE_NAME].create({
-              [MUSIC_ID_ATTR]: options.musicId ?? createNodeId(),
-              [MUSIC_MODE_ATTR]: 'open',
-              [MUSIC_TITLE_ATTR]: title,
-              [MUSIC_KIND_ATTR]: options.kind ?? null,
-          });
+            [MUSIC_ID_ATTR]: options.musicId ?? createNodeId(),
+            [MUSIC_MODE_ATTR]: 'open',
+            [MUSIC_TITLE_ATTR]: title,
+            [MUSIC_KIND_ATTR]: options.kind ?? null,
+        });
     const tr = state.tr.replaceWith(compose.from, compose.to, node);
 
     return tr.setSelection(TextSelection.create(tr.doc, compose.from)).setMeta(MUSIC_COMPOSE_CLOSE_META, true).scrollIntoView();

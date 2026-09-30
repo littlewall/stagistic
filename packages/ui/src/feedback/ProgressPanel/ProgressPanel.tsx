@@ -2,17 +2,18 @@ import clsx from 'clsx';
 import type {ReactNode} from 'react';
 
 import {ProgressBar} from '../ProgressBar/ProgressBar';
-
 import styles from './ProgressPanel.module.css';
 
 type ProgressPanelProps = {
-    label: string;
-    messages: ReactNode[];
-    progress?: number;
-    size?: 'sm' | 'md';
+    label: string,
+    messages: ReactNode[],
+    progress?: number,
+    size?: 'sm' | 'md',
 };
 
-export const ProgressPanel = ({label, messages, progress, size = 'md'}: ProgressPanelProps) => {
+export const ProgressPanel = ({
+    label, messages, progress, size = 'md',
+}: ProgressPanelProps) => {
     return (
         <div className={clsx(styles.panel, size === 'sm' && styles.small)}>
             <ProgressBar

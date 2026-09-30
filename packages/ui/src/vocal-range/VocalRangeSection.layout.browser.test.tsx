@@ -1,5 +1,7 @@
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it,
+} from 'vite-plus/test';
 
 import {AttributeManagerCharactersPanel} from '../dialogs/attribute-manager/AttributeManagerCharactersPanel';
 

@@ -1,35 +1,36 @@
 import clsx from 'clsx';
-import {type ReactNode, useEffect, useMemo, useState} from 'react';
+import {
+    type ReactNode, useEffect, useMemo, useState,
+} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {Input} from '../../atoms/Input/Input';
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
 import {PlusIcon, SearchIcon} from '../../icons';
-
 import styles from './AttributeManagerListPanel.module.css';
 
 export interface AttributeManagerListItem {
-    id: string;
-    number: string;
-    title: string;
+    id: string,
+    number: string,
+    title: string,
     group?: {
-        id: string;
-        label: string;
-    };
-    subtitle?: string | null;
-    detailSubtitle?: string | null;
+        id: string,
+        label: string,
+    },
+    subtitle?: string | null,
+    detailSubtitle?: string | null,
     /** Trailing glyph, e.g. a music-kind icon. */
-    icon?: ReactNode;
+    icon?: ReactNode,
     detailMetadata?: Array<{
-        label: string;
-        value: string;
-    }>;
+        label: string,
+        value: string,
+    }>,
 }
 
 interface AttributeManagerListGroup {
-    id: string;
-    label: string | null;
-    items: AttributeManagerListItem[];
+    id: string,
+    label: string | null,
+    items: AttributeManagerListItem[],
 }
 
 const groupListItems = (items: AttributeManagerListItem[]): AttributeManagerListGroup[] => {
@@ -54,29 +55,29 @@ const groupListItems = (items: AttributeManagerListItem[]): AttributeManagerList
 };
 
 export interface AttributeManagerListPanelProps {
-    items: AttributeManagerListItem[];
-    initialSelectedItemId?: string | null;
-    isLoading?: boolean;
+    items: AttributeManagerListItem[],
+    initialSelectedItemId?: string | null,
+    isLoading?: boolean,
     /** Singular label shown above the selected item's title, e.g. "Scene". */
-    detailTypeLabel: string;
-    hideDetailTypeLabel?: boolean;
-    wrapDetailTitle?: boolean;
+    detailTypeLabel: string,
+    hideDetailTypeLabel?: boolean,
+    wrapDetailTitle?: boolean,
     /** Shown in the list column when there is nothing to list. */
-    emptyListLabel: string;
+    emptyListLabel: string,
     /** Shown in the detail column when no item is selected. */
-    emptyDetailLabel: string;
+    emptyDetailLabel: string,
     search?: {
-        ariaLabel: string;
-        placeholder: string;
-    };
+        ariaLabel: string,
+        placeholder: string,
+    },
     createAction?: {
-        ariaLabel: string;
-        tooltipLabel: string;
-        onPress: () => void;
-    };
+        ariaLabel: string,
+        tooltipLabel: string,
+        onPress: () => void,
+    },
     /** When provided, renders custom detail-body content for the selected item instead of the placeholder. */
-    renderDetail?: (item: AttributeManagerListItem) => ReactNode;
-    renderDetailAction?: (item: AttributeManagerListItem) => ReactNode;
+    renderDetail?: (item: AttributeManagerListItem) => ReactNode,
+    renderDetailAction?: (item: AttributeManagerListItem) => ReactNode,
 }
 
 export const AttributeManagerListPanel = ({
@@ -116,8 +117,12 @@ export const AttributeManagerListPanel = ({
 
         const initialSelectionExists = items.some(item => item.id === initialSelectedItemId);
 
-        setSelectedItemId(initialSelectionExists ? (initialSelectedItemId ?? null) : (items[0]?.id ?? null));
-    }, [initialSelectedItemId, items, selectedItemId]);
+        setSelectedItemId(initialSelectionExists ? initialSelectedItemId ?? null : items[0]?.id ?? null);
+    }, [
+        initialSelectedItemId,
+        items,
+        selectedItemId,
+    ]);
 
     const listStatus = isLoading ? 'Loading...' : emptyListLabel;
 

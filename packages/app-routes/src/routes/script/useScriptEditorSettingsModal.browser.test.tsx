@@ -1,7 +1,9 @@
 import {useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
 import type {NavigateFunction} from 'react-router-dom';
-import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it,
+} from 'vite-plus/test';
 
 import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
 

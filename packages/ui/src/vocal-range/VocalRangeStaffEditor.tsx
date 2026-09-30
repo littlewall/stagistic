@@ -4,24 +4,22 @@ import {Button} from '../atoms/Button/Button';
 import {IconButton} from '../atoms/IconButton/IconButton';
 import {Tooltip} from '../atoms/Tooltip/Tooltip';
 import {ChevronDownIcon, ChevronUpIcon} from '../icons';
+import styles from './VocalRangeStaff.module.css';
 import type {VocalRangeNote} from './VocalRangeStaff.types';
 
-import styles from './VocalRangeStaff.module.css';
-
 interface RangeHeaderProps {
-    low: Pitch | null;
-    high: Pitch | null;
-    selectedNote: VocalRangeNote | null;
-    onSelect: (which: VocalRangeNote) => void;
+    low: Pitch | null,
+    high: Pitch | null,
+    selectedNote: VocalRangeNote | null,
+    onSelect: (which: VocalRangeNote) => void,
 }
 
-export const VocalRangeHeader = ({low, high, selectedNote, onSelect}: RangeHeaderProps) => (
+export const VocalRangeHeader = ({
+    low, high, selectedNote, onSelect,
+}: RangeHeaderProps) => (
     <div className={styles.rangeHeader}>
         {(
-            [
-                ['low', low],
-                ['high', high],
-            ] as const
+            [['low', low], ['high', high]] as const
         ).map(([which, pitch]) => {
             const label = which === 'low' ? 'Low' : 'High';
             const value = pitch ? formatPitch(pitch) : '—';
@@ -50,15 +48,17 @@ export const VocalRangeHeader = ({low, high, selectedNote, onSelect}: RangeHeade
 );
 
 interface NoteControlsProps {
-    which: VocalRangeNote;
-    pitch: Pitch;
-    canAdjustOctave: (which: VocalRangeNote, delta: 1 | -1) => boolean;
-    canToggleAccidental: (which: VocalRangeNote, target: 1 | -1) => boolean;
-    onAdjustOctave: (which: VocalRangeNote, delta: 1 | -1) => void;
-    onToggleAccidental: (which: VocalRangeNote, target: 1 | -1) => void;
+    which: VocalRangeNote,
+    pitch: Pitch,
+    canAdjustOctave: (which: VocalRangeNote, delta: 1 | -1) => boolean,
+    canToggleAccidental: (which: VocalRangeNote, target: 1 | -1) => boolean,
+    onAdjustOctave: (which: VocalRangeNote, delta: 1 | -1) => void,
+    onToggleAccidental: (which: VocalRangeNote, target: 1 | -1) => void,
 }
 
-export const VocalRangeNoteControls = ({which, pitch, canAdjustOctave, canToggleAccidental, onAdjustOctave, onToggleAccidental}: NoteControlsProps) => (
+export const VocalRangeNoteControls = ({
+    which, pitch, canAdjustOctave, canToggleAccidental, onAdjustOctave, onToggleAccidental,
+}: NoteControlsProps) => (
     <footer
         className={styles.noteControls}
         data-note-editor=""

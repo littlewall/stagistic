@@ -1,12 +1,20 @@
 import '@stagistic/ui/styles/base.css';
 
-import type {ScriptCommentMessage, ScriptCommentsState, ScriptCommentThread, ScriptCommentThreadSnapshot} from '@stagistic/app-core';
-import {getCommentsState, ScriptEditor, useEditorInstance} from '@stagistic/editor';
+import type {
+    ScriptCommentMessage, ScriptCommentsState, ScriptCommentThread, ScriptCommentThreadSnapshot,
+} from '@stagistic/app-core';
+import {
+    getCommentsState, ScriptEditor, useEditorInstance,
+} from '@stagistic/editor';
 import type {ScriptDocument, ScriptNode} from '@stagistic/script';
 import {ToastProvider} from '@stagistic/ui';
-import {useEffect, useMemo, useRef, useState} from 'react';
+import {
+    useEffect, useMemo, useRef, useState,
+} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it,
+} from 'vite-plus/test';
 import {page, userEvent} from 'vite-plus/test/browser';
 
 import {ScriptCommentsSidebar} from './ScriptCommentsSidebar';
@@ -15,9 +23,9 @@ import {useCommentsPanelState} from './useCommentsPanelState';
 
 type EditorInstance = NonNullable<ReturnType<typeof useEditorInstance>>;
 type CommentsTestWindow = Window & {
-    __commentsEditor?: EditorInstance | null;
-    __comments?: ScriptCommentsState;
-    __setPanelOpen?: (isOpen: boolean) => void;
+    __commentsEditor?: EditorInstance | null,
+    __comments?: ScriptCommentsState,
+    __setPanelOpen?: (isOpen: boolean) => void,
 };
 
 const testWindow = window as CommentsTestWindow;
@@ -29,12 +37,14 @@ const dialogue = (id: string, text: string, threadIds: readonly string[] = []): 
         {
             type: 'text',
             text,
-            ...(threadIds.length > 0 ? {marks: threadIds.map(threadId => ({type: 'commentAnchor', attrs: {threadId}}))} : {}),
+            ...threadIds.length > 0 ? {marks: threadIds.map(threadId => ({type: 'commentAnchor', attrs: {threadId}}))} : {},
         },
     ],
 });
 
-const scene = (id: string, text: string): ScriptNode => ({type: 'scene', attrs: {id}, content: [{type: 'text', text}]});
+const scene = (id: string, text: string): ScriptNode => ({
+    type: 'scene', attrs: {id}, content: [{type: 'text', text}],
+});
 
 const baseDocument = (
     blocks: ScriptNode[] = [
@@ -92,7 +102,9 @@ const useFakeComments = (initialThreads: ScriptCommentThread[], initialMessages:
             error: null,
             allocateThreadId: () => allocate('thread'),
             createThread: input => {
-                const created = thread(input.id, {anchorKind: input.anchorKind, anchorBlockId: input.anchorBlockId, quotedText: input.quotedText});
+                const created = thread(input.id, {
+                    anchorKind: input.anchorKind, anchorBlockId: input.anchorBlockId, quotedText: input.quotedText,
+                });
 
                 setThreads(previous => [...previous, created]);
                 setMessages(previous => [...previous, message(allocate('message'), input.id, input.body.trim())]);
@@ -107,7 +119,9 @@ const useFakeComments = (initialThreads: ScriptCommentThread[], initialMessages:
                 return Promise.resolve(created);
             },
             editMessage: (messageId, body) => {
-                setMessages(previous => previous.map(row => (row.id === messageId ? {...row, body, editedAt: 2} : row)));
+                setMessages(previous => previous.map(row => (row.id === messageId ? {
+                    ...row, body, editedAt: 2,
+                } : row)));
 
                 return Promise.resolve(null);
             },
@@ -139,9 +153,7 @@ const useFakeComments = (initialThreads: ScriptCommentThread[], initialMessages:
                 return Promise.resolve();
             },
             moveBlockAnchors: (fromBlockId, toBlockId) => {
-                setThreads(previous =>
-                    previous.map(row => (row.anchorKind === 'block' && row.anchorBlockId === fromBlockId ? {...row, anchorBlockId: toBlockId} : row)),
-                );
+                setThreads(previous => previous.map(row => (row.anchorKind === 'block' && row.anchorBlockId === fromBlockId ? {...row, anchorBlockId: toBlockId} : row)));
 
                 return Promise.resolve();
             },
@@ -160,13 +172,15 @@ const EditorProbe = () => {
 };
 
 interface HarnessProps {
-    content: ScriptDocument;
-    threads: ScriptCommentThread[];
-    messages: ScriptCommentMessage[];
-    isInitiallyOpen: boolean;
+    content: ScriptDocument,
+    threads: ScriptCommentThread[],
+    messages: ScriptCommentMessage[],
+    isInitiallyOpen: boolean,
 }
 
-const Harness = ({content, threads, messages, isInitiallyOpen}: HarnessProps) => {
+const Harness = ({
+    content, threads, messages, isInitiallyOpen,
+}: HarnessProps) => {
     const comments = useFakeComments(threads, messages);
     const panelState = useCommentsPanelState();
     const [isOpen, setIsOpen] = useState(isInitiallyOpen);
@@ -186,7 +200,9 @@ const Harness = ({content, threads, messages, isInitiallyOpen}: HarnessProps) =>
             callbacks={bridge.callbacks}
             layout={{
                 autoFocus: true,
-                rightSidebarToggle: {isOpen, label: 'Comments', onToggle: () => setIsOpen(value => !value)},
+                rightSidebarToggle: {
+                    isOpen, label: 'Comments', onToggle: () => setIsOpen(value => !value),
+                },
             }}
             editorZoom={1}
         >
@@ -222,7 +238,9 @@ const poll = async <T,>(getValue: () => T | null | undefined | false, label: str
     throw new Error(`Timed out waiting for ${label}`);
 };
 
-const mount = async ({content = baseDocument(), threads = [], messages = [], isInitiallyOpen = true}: Partial<HarnessProps> = {}) => {
+const mount = async ({
+    content = baseDocument(), threads = [], messages = [], isInitiallyOpen = true,
+}: Partial<HarnessProps> = {}) => {
     const host = document.createElement('div');
 
     host.style.width = '1400px';
@@ -247,15 +265,12 @@ const mount = async ({content = baseDocument(), threads = [], messages = [], isI
 };
 
 const panel = () => document.querySelector<HTMLElement>('[data-comments-panel="true"]');
-const findByText = (text: string, root: ParentNode = document) =>
-    Array.from(root.querySelectorAll<HTMLElement>('p, h3, blockquote, button, span')).find(element => element.textContent?.trim() === text) ?? null;
-const findButton = (label: string, root: ParentNode = document) =>
-    Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
-        button => (button.getAttribute('aria-label') ?? button.textContent?.trim()) === label,
-    ) ?? null;
+const findByText = (text: string, root: ParentNode = document) => Array.from(root.querySelectorAll<HTMLElement>('p, h3, blockquote, button, span')).find(element => element.textContent?.trim() === text) ?? null;
+const findButton = (label: string, root: ParentNode = document) => Array.from(root.querySelectorAll<HTMLButtonElement>('button')).find(
+    button => (button.getAttribute('aria-label') ?? button.textContent?.trim()) === label,
+) ?? null;
 const card = (threadId: string) => document.querySelector<HTMLElement>(`article[data-thread-id="${threadId}"]`);
-const menuItem = (label: string) =>
-    Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]')).find(item => item.textContent?.replace('✓', '').trim() === label);
+const menuItem = (label: string) => Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]')).find(item => item.textContent?.replace('✓', '').trim() === label);
 
 const chooseMenuItem = async (label: string) => {
     await page.elementLocator(await poll(() => menuItem(label), `${label} item`)).click();
@@ -301,8 +316,16 @@ const chooseThreadAction = async (threadId: string, label: string) => {
 };
 
 const threeThreads = () => ({
-    threads: [thread('t1'), thread('t2'), thread('t3')],
-    messages: [message('m1', 't1', 'First note'), message('m2', 't2', 'Second note'), message('m3', 't3', 'Third note')],
+    threads: [
+        thread('t1'),
+        thread('t2'),
+        thread('t3'),
+    ],
+    messages: [
+        message('m1', 't1', 'First note'),
+        message('m2', 't2', 'Second note'),
+        message('m3', 't3', 'Third note'),
+    ],
 });
 
 afterEach(() => {
@@ -323,7 +346,8 @@ describe('ScriptCommentsSidebar', () => {
     it('creates a range comment from the selection toolbar', async () => {
         const editor = await mount({content: baseDocument([dialogue('b1', 'Hello world')])});
 
-        editor.chain().focus().setTextSelection({from: 2, to: 6}).run();
+        editor.chain().focus().setTextSelection({from: 2, to: 6})
+            .run();
         await page
             .elementLocator(await poll(() => findButton('Comment', document.querySelector('[aria-label="Selection actions"]') ?? document), 'toolbar Comment'))
             .click();
@@ -342,7 +366,8 @@ describe('ScriptCommentsSidebar', () => {
     it('opens the closed Comments sidebar and shows the composer when writing starts in the editor', async () => {
         const editor = await mount({content: baseDocument([dialogue('b1', 'Hello world')]), isInitiallyOpen: false});
 
-        editor.chain().focus().setTextSelection({from: 2, to: 6}).run();
+        editor.chain().focus().setTextSelection({from: 2, to: 6})
+            .run();
         await page
             .elementLocator(await poll(() => findButton('Comment', document.querySelector('[aria-label="Selection actions"]') ?? document), 'toolbar Comment'))
             .click();
@@ -356,7 +381,9 @@ describe('ScriptCommentsSidebar', () => {
     it('Esc discards the draft with no writes', async () => {
         const editor = await mount({content: baseDocument([dialogue('b1', 'Hello world')])});
 
-        editor.chain().focus().setTextSelection(3).startCommentDraft().run();
+        editor.chain().focus().setTextSelection(3)
+            .startCommentDraft()
+            .run();
         await poll(() => panel()?.querySelector('textarea[aria-label="Comment"]'), 'draft composer');
         await userEvent.keyboard('{Escape}');
 
@@ -378,7 +405,11 @@ describe('ScriptCommentsSidebar', () => {
     it('a margin marker activates the first card of its block, in editor order', async () => {
         // The range thread is older, but the block anchor comes first in the editor.
         const editor = await mount({
-            threads: [thread('t1'), thread('tb', {anchorKind: 'block', anchorBlockId: 'b1', createdAt: 2})],
+            threads: [
+                thread('t1'), thread('tb', {
+                    anchorKind: 'block', anchorBlockId: 'b1', createdAt: 2,
+                }),
+            ],
             messages: [message('m1', 't1', 'Range'), message('mb', 'tb', 'Block')],
         });
 
@@ -409,9 +440,23 @@ describe('ScriptCommentsSidebar', () => {
 
     it('a group opened by activating one of its threads folds back when it is collapsed', async () => {
         const editor = await mount({
-            content: baseDocument([scene('s1', 'INT. ROOM'), dialogue('b1', 'Hello world', ['g1', 'g2', 'g3'])]),
-            threads: [thread('g1'), thread('g2'), thread('g3')],
-            messages: [message('m1', 'g1', 'One'), message('m2', 'g2', 'Two'), message('m3', 'g3', 'Three')],
+            content: baseDocument([
+                scene('s1', 'INT. ROOM'), dialogue('b1', 'Hello world', [
+                    'g1',
+                    'g2',
+                    'g3',
+                ]),
+            ]),
+            threads: [
+                thread('g1'),
+                thread('g2'),
+                thread('g3'),
+            ],
+            messages: [
+                message('m1', 'g1', 'One'),
+                message('m2', 'g2', 'Two'),
+                message('m3', 'g3', 'Three'),
+            ],
         });
         const group = () => findButton('3 comments', panel() ?? document);
 
@@ -450,7 +495,11 @@ describe('ScriptCommentsSidebar', () => {
         await mount(threeThreads());
 
         const rects = await poll(() => {
-            const cards = ['t1', 't2', 't3'].map(id => card(id));
+            const cards = [
+                't1',
+                't2',
+                't3',
+            ].map(id => card(id));
 
             return cards.every(Boolean) ? cards.map(element => element!.getBoundingClientRect()) : null;
         }, 'three cards');
@@ -468,7 +517,9 @@ describe('ScriptCommentsSidebar', () => {
         });
 
         await poll(() => getCommentsState(editor.state).anchors.get('tb'), 'block anchor');
-        editor.chain().focus().setTextSelection(6).joinBackward().run();
+        editor.chain().focus().setTextSelection(6)
+            .joinBackward()
+            .run();
 
         await poll(() => testWindow.__comments?.threads[0]?.anchorBlockId === 'b1', 'anchor moved');
     });

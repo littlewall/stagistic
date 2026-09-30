@@ -10,15 +10,17 @@ type IconButtonSize = 'xs' | 'sm' | 'md';
 type IconButtonTone = 'neutral' | 'danger';
 
 type IconButtonProps = {
-    variant?: IconButtonVariant;
-    size?: IconButtonSize;
-    tone?: IconButtonTone;
-    shape?: 'default' | 'pill';
-    isSelected?: boolean;
-    className?: string;
+    variant?: IconButtonVariant,
+    size?: IconButtonSize,
+    tone?: IconButtonTone,
+    shape?: 'default' | 'pill',
+    isSelected?: boolean,
+    className?: string,
 } & Omit<RACButtonProps, 'className'>;
 
-export const IconButton = ({variant = 'ghost', size = 'sm', tone = 'neutral', shape = 'default', isSelected = false, className, ...props}: IconButtonProps) => (
+export const IconButton = ({
+    variant = 'ghost', size = 'sm', tone = 'neutral', shape = 'default', isSelected = false, className, ...props
+}: IconButtonProps) => (
     <RACButton
         {...props}
         data-selected={isSelected || undefined}

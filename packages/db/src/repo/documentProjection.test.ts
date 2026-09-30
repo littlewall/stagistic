@@ -1,17 +1,25 @@
 import {SCRIPT_DOCUMENT_SCHEMA_VERSION} from '@stagistic/script';
 import {asc, eq} from 'drizzle-orm';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
-import {makeSceneId, rebuildScriptDocumentFromBlocks, type RewriteScriptDocument} from '../blocks';
-import {scriptBlockCharacterRefs, scriptBlocks, scriptCharacterGroupMembers, scriptCharacters, scriptLocations, scriptScenes} from '../schema';
-import {createTestDb, seedScript, type TestDb} from '../testing/createTestDb';
+import {
+    makeSceneId, rebuildScriptDocumentFromBlocks, type RewriteScriptDocument,
+} from '../blocks';
+import {
+    scriptBlockCharacterRefs, scriptBlocks, scriptCharacterGroupMembers, scriptCharacters, scriptLocations, scriptScenes,
+} from '../schema';
+import {
+    createTestDb, seedScript, type TestDb,
+} from '../testing/createTestDb';
 import {loadScriptDocumentFromProjection, rebuildScriptProjection} from './documentProjection';
 
 const doc = (
     blocks: {
-        id: string;
-        type?: string;
-        text: string;
+        id: string,
+        type?: string,
+        text: string,
     }[],
 ): RewriteScriptDocument => ({
     type: 'doc',
@@ -23,7 +31,8 @@ const doc = (
 });
 
 const readBlockIds = async (db: TestDb, scriptId: string) => {
-    const rows = await db.select({id: scriptBlocks.id}).from(scriptBlocks).where(eq(scriptBlocks.scriptId, scriptId)).orderBy(asc(scriptBlocks.blockOrder));
+    const rows = await db.select({id: scriptBlocks.id}).from(scriptBlocks).where(eq(scriptBlocks.scriptId, scriptId))
+        .orderBy(asc(scriptBlocks.blockOrder));
 
     return rows.map(row => row.id);
 };
@@ -82,8 +91,7 @@ describe('documentProjection', () => {
                     id: 'h1',
                     type: 'scene',
                     text: 'A renamed',
-                },
-                {id: 'a2', text: 'new'},
+                }, {id: 'a2', text: 'new'},
             ]),
         });
 
@@ -114,8 +122,7 @@ describe('documentProjection', () => {
                     id: 'h1',
                     type: 'scene',
                     text: 'INT. ROOM',
-                },
-                {id: 'a1', text: 'Action.'},
+                }, {id: 'a1', text: 'Action.'},
             ]),
         });
 
@@ -124,7 +131,8 @@ describe('documentProjection', () => {
         expect(loaded?.document.content.map(node => node.attrs?.id)).toEqual(['h1', 'a1']);
         expect(loaded?.schemaVersion).toBe(SCRIPT_DOCUMENT_SCHEMA_VERSION);
 
-        const storedBlocks = await db.select().from(scriptBlocks).where(eq(scriptBlocks.scriptId, 's1')).orderBy(asc(scriptBlocks.blockOrder));
+        const storedBlocks = await db.select().from(scriptBlocks).where(eq(scriptBlocks.scriptId, 's1'))
+            .orderBy(asc(scriptBlocks.blockOrder));
         const rebuilt = rebuildScriptDocumentFromBlocks(
             's1',
             storedBlocks.map(row => ({
@@ -151,8 +159,7 @@ describe('documentProjection', () => {
                 characterKey: 'ANNA',
                 createdAt: 1,
                 updatedAt: 1,
-            },
-            {
+            }, {
                 id: 'group-1',
                 scriptId: 's1',
                 characterKey: 'ALL',

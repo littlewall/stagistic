@@ -1,11 +1,19 @@
-import {useCallback, useMemo, useState} from 'react';
+import {
+    useCallback, useMemo, useState,
+} from 'react';
 
-import type {GlobalModalActions, ScriptImportFile, ScriptToDelete, ScriptToDuplicate, ScriptToRename, UseGlobalModalActionsArgs} from './globalModalTypes';
+import type {
+    GlobalModalActions, ScriptImportFile, ScriptToDelete, ScriptToDuplicate, ScriptToRename, UseGlobalModalActionsArgs,
+} from './globalModalTypes';
 import {useGlobalModalMutations} from './useGlobalModalMutations';
 
-export type {ScriptToDelete, ScriptToDuplicate, ScriptToRename} from './globalModalTypes';
+export type {
+    ScriptToDelete, ScriptToDuplicate, ScriptToRename,
+} from './globalModalTypes';
 
-export const useGlobalModalActions = ({scriptActions, repository, saveTitlePage, navigation, notifications}: UseGlobalModalActionsArgs): GlobalModalActions => {
+export const useGlobalModalActions = ({
+    scriptActions, repository, saveTitlePage, navigation, notifications,
+}: UseGlobalModalActionsArgs): GlobalModalActions => {
     const {navigate} = navigation;
     const {addToast} = notifications;
     const [isNewScriptOpen, setIsNewScriptOpen] = useState(false);

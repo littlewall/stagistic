@@ -1,5 +1,7 @@
 import clsx from 'clsx';
-import {useEffect, useMemo, useState} from 'react';
+import {
+    useEffect, useMemo, useState,
+} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {Input} from '../../atoms/Input/Input';
@@ -7,22 +9,21 @@ import {Tooltip} from '../../atoms/Tooltip/Tooltip';
 import {useKeyedFieldDrafts} from '../../hooks/useKeyedFieldDrafts';
 import {PlusIcon, SearchIcon} from '../../icons';
 import {AttributeManagerPlaceDetail} from './AttributeManagerPlaceDetail';
+import styles from './AttributeManagerPlacesPanel.module.css';
 import {CreatePlaceModal} from './CreatePlaceModal';
 
-import styles from './AttributeManagerPlacesPanel.module.css';
-
 export interface AttributeManagerPlace {
-    id: string;
-    name: string;
+    id: string,
+    name: string,
 }
 
 export interface AttributeManagerPlacesPanelProps {
-    places: AttributeManagerPlace[];
-    isLoading?: boolean;
-    draftScopeKey?: string | null;
-    onCreatePlace: (name: string) => AttributeManagerPlace | null | Promise<AttributeManagerPlace | null>;
-    onRenamePlace: (placeId: string, name: string) => void | Promise<unknown>;
-    onDeletePlace: (placeId: string) => void | Promise<unknown>;
+    places: AttributeManagerPlace[],
+    isLoading?: boolean,
+    draftScopeKey?: string | null,
+    onCreatePlace: (name: string) => AttributeManagerPlace | null | Promise<AttributeManagerPlace | null>,
+    onRenamePlace: (placeId: string, name: string) => void | Promise<unknown>,
+    onDeletePlace: (placeId: string) => void | Promise<unknown>,
 }
 
 export const AttributeManagerPlacesPanel = ({
@@ -36,13 +37,14 @@ export const AttributeManagerPlacesPanel = ({
     const [selectedPlaceId, setSelectedPlaceId] = useState<string | null>(null);
     const [isCreateOpen, setIsCreateOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
-    const {getValue: getNameDraft, persistValue: persistNameDraft, setValue: setNameDraft} = useKeyedFieldDrafts<string>(draftScopeKey);
+    const {
+        getValue: getNameDraft, persistValue: persistNameDraft, setValue: setNameDraft,
+    } = useKeyedFieldDrafts<string>(draftScopeKey);
     const displayedPlaces = useMemo(
-        () =>
-            places.map(place => ({
-                ...place,
-                name: getNameDraft(place.id, place.name),
-            })),
+        () => places.map(place => ({
+            ...place,
+            name: getNameDraft(place.id, place.name),
+        })),
         [getNameDraft, places],
     );
     const selectedPlace = displayedPlaces.find(place => place.id === selectedPlaceId) ?? null;

@@ -2,7 +2,9 @@ import '../../../../styles/tokens.css';
 
 import {useState} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 import {page, userEvent} from 'vite-plus/test/browser';
 
 import {MultiComboBox} from './MultiComboBox';
@@ -68,10 +70,7 @@ const renderComboBox = () => {
             <MultiComboBox
                 label="Places"
                 placeholder="Select places"
-                options={[
-                    {id: 'backstage', label: 'Backstage'},
-                    {id: 'main-stage', label: 'Main stage'},
-                ]}
+                options={[{id: 'backstage', label: 'Backstage'}, {id: 'main-stage', label: 'Main stage'}]}
                 value={value}
                 onChange={nextValue => {
                     onChange(nextValue);
@@ -167,10 +166,7 @@ describe('MultiComboBox', () => {
             <MultiComboBox
                 label="Places"
                 placeholder="Select places"
-                options={[
-                    {id: 'backstage', label: 'Backstage'},
-                    {id: 'main-stage', label: 'Main stage'},
-                ]}
+                options={[{id: 'backstage', label: 'Backstage'}, {id: 'main-stage', label: 'Main stage'}]}
                 value={[]}
                 onChange={onChange}
             />,
@@ -201,10 +197,7 @@ describe('MultiComboBox', () => {
                     <MultiComboBox
                         label="Places"
                         placeholder="Select places"
-                        options={[
-                            {id: 'backstage', label: 'Backstage'},
-                            {id: 'main-stage', label: 'Main stage'},
-                        ]}
+                        options={[{id: 'backstage', label: 'Backstage'}, {id: 'main-stage', label: 'Main stage'}]}
                         value={value}
                         onChange={() => undefined}
                     />

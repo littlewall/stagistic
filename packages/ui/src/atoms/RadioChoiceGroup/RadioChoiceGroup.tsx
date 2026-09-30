@@ -4,21 +4,23 @@ import {Radio as RACRadio, RadioGroup as RACRadioGroup} from 'react-aria-compone
 import styles from './RadioChoiceGroup.module.css';
 
 export interface RadioChoiceOption<T extends string> {
-    value: T;
-    label: string;
-    description?: string;
+    value: T,
+    label: string,
+    description?: string,
 }
 
 interface RadioChoiceGroupProps<T extends string> {
-    ariaLabel: string;
-    className?: string;
-    value: T;
-    options: RadioChoiceOption<T>[];
-    onChange: (value: T) => void;
-    isDisabled?: boolean;
+    ariaLabel: string,
+    className?: string,
+    value: T,
+    options: RadioChoiceOption<T>[],
+    onChange: (value: T) => void,
+    isDisabled?: boolean,
 }
 
-export const RadioChoiceGroup = <T extends string>({ariaLabel, className, value, options, onChange, isDisabled}: RadioChoiceGroupProps<T>) => (
+export const RadioChoiceGroup = <T extends string>({
+    ariaLabel, className, value, options, onChange, isDisabled,
+}: RadioChoiceGroupProps<T>) => (
     <RACRadioGroup
         aria-label={ariaLabel}
         className={clsx(styles.group, className)}

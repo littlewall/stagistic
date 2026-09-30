@@ -1,5 +1,7 @@
 import {getEnterFallback} from '@stagistic/script';
-import {type EditorState, Plugin, PluginKey} from '@tiptap/pm/state';
+import {
+    type EditorState, Plugin, PluginKey,
+} from '@tiptap/pm/state';
 
 import type {BlockNextElementMap} from '../scriptBlock/handlers/types';
 import {
@@ -12,12 +14,12 @@ import {
 } from '../scriptCore';
 
 export interface EmptyEnterChooserState {
-    isOpen: boolean;
-    blockId: string | null;
-    blockPos: number | null;
-    blockType: BlockNodeType | null;
-    selectedType: BlockNodeType | null;
-    openedByEmptyEnter: boolean;
+    isOpen: boolean,
+    blockId: string | null,
+    blockPos: number | null,
+    blockType: BlockNodeType | null,
+    selectedType: BlockNodeType | null,
+    openedByEmptyEnter: boolean,
 }
 
 const CLOSED_EMPTY_ENTER_CHOOSER_STATE: EmptyEnterChooserState = {
@@ -29,7 +31,11 @@ const CLOSED_EMPTY_ENTER_CHOOSER_STATE: EmptyEnterChooserState = {
     openedByEmptyEnter: false,
 };
 
-export const EMPTY_ENTER_CHOOSER_WRITER_TYPES: readonly BlockNodeType[] = ['scene', 'stageDirection', 'character'];
+export const EMPTY_ENTER_CHOOSER_WRITER_TYPES: readonly BlockNodeType[] = [
+    'scene',
+    'stageDirection',
+    'character',
+];
 
 const EMPTY_ENTER_CHOOSER_WRITER_TYPE_SET = new Set(EMPTY_ENTER_CHOOSER_WRITER_TYPES);
 
@@ -38,10 +44,10 @@ export const CLOSE_META_KEY = 'empty-enter-chooser-close';
 export const SELECT_META_KEY = 'empty-enter-chooser-select';
 
 export interface OpenMetaPayload {
-    blockId: string;
-    blockPos: number;
-    blockType: BlockNodeType;
-    selectedType?: BlockNodeType;
+    blockId: string,
+    blockPos: number,
+    blockType: BlockNodeType,
+    selectedType?: BlockNodeType,
 }
 
 export const normalizeWriterType = (value: unknown): BlockNodeType => {

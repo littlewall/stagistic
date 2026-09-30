@@ -1,27 +1,30 @@
-import {type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {
+    type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState,
+} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
 import {ModalHeader} from '../modal/ModalHeader';
-
 import styles from './RenameScriptModal.module.css';
 
 export interface RenameScriptSubmit {
-    title: string;
-    subtitle: string;
+    title: string,
+    subtitle: string,
 }
 
 export interface RenameScriptModalProps {
-    isOpen: boolean;
-    initialTitle: string;
-    initialSubtitle: string;
-    isPending?: boolean;
-    onClose: () => void;
-    onSubmit: (values: RenameScriptSubmit) => void | Promise<void>;
+    isOpen: boolean,
+    initialTitle: string,
+    initialSubtitle: string,
+    isPending?: boolean,
+    onClose: () => void,
+    onSubmit: (values: RenameScriptSubmit) => void | Promise<void>,
 }
 
-export const RenameScriptModal = ({isOpen, initialTitle, initialSubtitle, isPending = false, onClose, onSubmit}: RenameScriptModalProps) => {
+export const RenameScriptModal = ({
+    isOpen, initialTitle, initialSubtitle, isPending = false, onClose, onSubmit,
+}: RenameScriptModalProps) => {
     const titleInputRef = useRef<HTMLInputElement | null>(null);
     const [title, setTitle] = useState(initialTitle);
     const [subtitle, setSubtitle] = useState(initialSubtitle);
@@ -41,7 +44,11 @@ export const RenameScriptModal = ({isOpen, initialTitle, initialSubtitle, isPend
         }, 0);
 
         return () => window.clearTimeout(focusTimer);
-    }, [isOpen, initialTitle, initialSubtitle]);
+    }, [
+        isOpen,
+        initialTitle,
+        initialSubtitle,
+    ]);
 
     const handleSubmit = useCallback(
         (event: FormEvent) => {
@@ -53,7 +60,13 @@ export const RenameScriptModal = ({isOpen, initialTitle, initialSubtitle, isPend
 
             void onSubmit({title, subtitle});
         },
-        [canSubmit, isPending, onSubmit, title, subtitle],
+        [
+            canSubmit,
+            isPending,
+            onSubmit,
+            title,
+            subtitle,
+        ],
     );
     const handleTitleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setTitle(event.target.value);

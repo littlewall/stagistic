@@ -1,4 +1,6 @@
-import {type EditorSettings, resolveDraftDate, type TitlePageCredit, type TitlePageSettings} from '@stagistic/script';
+import {
+    type EditorSettings, resolveDraftDate, type TitlePageCredit, type TitlePageSettings,
+} from '@stagistic/script';
 
 import type {VisualLine, VisualRun} from '../visualLine';
 import {buildTitlePageLogoItem} from './buildTitlePageLogoItem';
@@ -26,14 +28,14 @@ const COPYRIGHT_Y_RATIO = 0.88;
 
 const UNTITLED = 'Untitled';
 
-type Emphasis = {bold?: boolean; italic?: boolean};
+type Emphasis = {bold?: boolean, italic?: boolean};
 
 interface Geometry {
-    pageWidthPx: number;
-    marginLeftPx: number;
-    marginRightPx: number;
-    fontSizePx: number;
-    lineHeightPx: number;
+    pageWidthPx: number,
+    marginLeftPx: number,
+    marginRightPx: number,
+    fontSizePx: number,
+    lineHeightPx: number,
 }
 
 const charWidthFor = (fontSizePx: number) => fontSizePx * CHAR_WIDTH_EM;

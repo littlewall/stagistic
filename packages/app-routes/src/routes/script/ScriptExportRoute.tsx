@@ -10,10 +10,9 @@ import {ExportControlPanel} from './export/ExportControlPanel';
 import {ExportPreview} from './export/ExportPreview';
 import {ExportProvider} from './export/ExportProvider';
 import {useExportScriptData} from './export/useExportScriptData';
+import styles from './ScriptExportRoute.module.css';
 import {useScriptWorkspace} from './ScriptWorkspaceContext';
 import {useScriptSettingsModal} from './settings/ScriptSettingsModalProvider';
-
-import styles from './ScriptExportRoute.module.css';
 
 export const ScriptExportRoute = () => {
     const {currentScript} = useScriptWorkspace();
@@ -23,7 +22,9 @@ export const ScriptExportRoute = () => {
     useDocumentTitle(currentScript ? `Export · ${currentScript.name}` : 'Export');
 
     const {script, settings} = useExportScriptData();
-    const {openSettingsModal, openAttributeManagerModal, scriptTitleDraft, updateScriptTitle, musicAttachmentsState} = useScriptSettingsModal();
+    const {
+        openSettingsModal, openAttributeManagerModal, scriptTitleDraft, updateScriptTitle, musicAttachmentsState,
+    } = useScriptSettingsModal();
 
     const handleMenuAction = useCallback(
         (actionId: string) => {
@@ -53,13 +54,11 @@ export const ScriptExportRoute = () => {
             if (actionId === 'export-stepkg' && currentScript) {
                 setIsPreparingPackage(true);
                 void new Promise<void>(resolve => requestAnimationFrame(() => resolve()))
-                    .then(() =>
-                        exportScriptPackage({
-                            repository,
-                            scriptId: currentScript.id,
-                            generator: {name: 'Stagistic', version: 'web'},
-                        }),
-                    )
+                    .then(() => exportScriptPackage({
+                        repository,
+                        scriptId: currentScript.id,
+                        generator: {name: 'Stagistic', version: 'web'},
+                    }))
                     .then(result => {
                         if (result.ok) {
                             downloadBlob(result.fileName, result.blob);
@@ -69,7 +68,14 @@ export const ScriptExportRoute = () => {
                     .finally(() => setIsPreparingPackage(false));
             }
         },
-        [openAttributeManagerModal, openSettingsModal, script, scriptTitleDraft, currentScript, repository],
+        [
+            openAttributeManagerModal,
+            openSettingsModal,
+            script,
+            scriptTitleDraft,
+            currentScript,
+            repository,
+        ],
     );
 
     return (

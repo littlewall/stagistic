@@ -1,16 +1,24 @@
 import {useScriptComments, useScriptRepository} from '@stagistic/app-core';
-import {type EditorMusicCreateRequest, type EditorMusicRemoveRequest, ScriptEditor} from '@stagistic/editor';
+import {
+    type EditorMusicCreateRequest, type EditorMusicRemoveRequest, ScriptEditor,
+} from '@stagistic/editor';
 import {resolveDraftDate} from '@stagistic/script';
 import {AppLayout, LoaderOverlay} from '@stagistic/ui';
-import {useCallback, useMemo, useState} from 'react';
+import {
+    useCallback, useMemo, useState,
+} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../useDocumentTitle';
 import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
-import {ScriptCommentsSidebar, useCommentsEditorBridge, useCommentsPanelState} from './editor/comments';
+import {
+    ScriptCommentsSidebar, useCommentsEditorBridge, useCommentsPanelState,
+} from './editor/comments';
 import {DeferredScriptEditor} from './editor/DeferredScriptEditor';
-import {AddMusicModal, ScriptMusicSidebar, UnassignMusicModal} from './editor/music';
+import {
+    AddMusicModal, ScriptMusicSidebar, UnassignMusicModal,
+} from './editor/music';
 import {ConvertSceneHeadingModal} from './editor/scene/ConvertSceneHeadingModal';
 import {DeleteSceneHeadingModal} from './editor/scene/DeleteSceneHeadingModal';
 import {useSceneConversionState} from './editor/scene/useSceneConversionState';
@@ -26,7 +34,7 @@ import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'var(--sidebar-width)';
 
-type AddMusicModalState = {source: 'sidebar'} | {source: 'editor'; request: EditorMusicCreateRequest};
+type AddMusicModalState = {source: 'sidebar'} | {source: 'editor', request: EditorMusicCreateRequest};
 
 export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
@@ -61,13 +69,19 @@ export const ScriptEditorRoute = () => {
 
     const [addMusicModalState, setAddMusicModalState] = useState<AddMusicModalState | null>(null);
     const [removeMusicRequest, setRemoveMusicRequest] = useState<EditorMusicRemoveRequest | null>(null);
-    const {pendingSceneDelete, deleteSceneRequest, requestDeleteScene, closeSceneDeleteModal, confirmDeleteScene} = useSceneDeletionState();
-    const {pendingSceneConversion, convertSceneRequest, requestConvertScene, closeSceneConvertModal, confirmConvertScene} = useSceneConversionState();
-    const {music, createMusic, unassignMusic, markMusicAssigned, markMusicUnassigned, updateMusicRequest} = musicState;
+    const {
+        pendingSceneDelete, deleteSceneRequest, requestDeleteScene, closeSceneDeleteModal, confirmDeleteScene,
+    } = useSceneDeletionState();
+    const {
+        pendingSceneConversion, convertSceneRequest, requestConvertScene, closeSceneConvertModal, confirmConvertScene,
+    } = useSceneConversionState();
+    const {
+        music, createMusic, unassignMusic, markMusicAssigned, markMusicUnassigned, updateMusicRequest,
+    } = musicState;
     const comments = useScriptComments(currentScriptId, scriptRepository);
     const commentsPanelState = useCommentsPanelState();
 
-    const displayedCurrentScript = useMemo(() => (currentScript ? {...currentScript, name: scriptTitleDraft} : null), [currentScript, scriptTitleDraft]);
+    const displayedCurrentScript = useMemo(() => currentScript ? {...currentScript, name: scriptTitleDraft} : null, [currentScript, scriptTitleDraft]);
 
     const {
         getEditorValue,
@@ -87,7 +101,7 @@ export const ScriptEditorRoute = () => {
         flushScript: async () => {
             const editorValue = getEditorValue();
 
-            if (!editorValue || !(await handleManualSave(editorValue))) {
+            if (!editorValue || !await handleManualSave(editorValue)) {
                 throw new Error('Could not flush script before export.');
             }
         },
@@ -146,7 +160,13 @@ export const ScriptEditorRoute = () => {
             indexSnapshot: initialIndexSnapshot ?? null,
             handleAutoSave,
         }),
-        [currentScriptId, handleAutoSave, initialIndexSnapshot, resolvedScriptSettings, scriptRepository],
+        [
+            currentScriptId,
+            handleAutoSave,
+            initialIndexSnapshot,
+            resolvedScriptSettings,
+            scriptRepository,
+        ],
     );
 
     const sidebarPanels = useMemo<readonly SidebarPanel[]>(
@@ -186,9 +206,17 @@ export const ScriptEditorRoute = () => {
                 ),
             },
         ],
-        [comments, commentsPanelState, music, openAddMusicModal, unassignMusic],
+        [
+            comments,
+            commentsPanelState,
+            music,
+            openAddMusicModal,
+            unassignMusic,
+        ],
     );
-    const {leftSidebarToggle, rightSidebarToggle, leftSidebar, rightSidebar, revealPanel, isPanelOpen} = useEditorSidebars({
+    const {
+        leftSidebarToggle, rightSidebarToggle, leftSidebar, rightSidebar, revealPanel, isPanelOpen,
+    } = useEditorSidebars({
         panels: sidebarPanels,
         defaultLeftPanelId: 'structure',
         defaultRightPanelId: 'characters',

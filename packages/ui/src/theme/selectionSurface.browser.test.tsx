@@ -1,7 +1,9 @@
 import '../../styles/base.css';
 
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it,
+} from 'vite-plus/test';
 
 import {IconButton} from '../atoms/IconButton/IconButton';
 import {ListRow} from '../molecules/ListRow/ListRow';
@@ -40,7 +42,7 @@ const waitForElement = async (host: HTMLElement, selector: string) => {
     throw new Error(`Expected element matching ${selector}`);
 };
 
-const isTransparent = (color: string) => /rgba\(0, 0, 0, 0\)|transparent/.test(color);
+const isTransparent = (color: string) => (/rgba\(0, 0, 0, 0\)|transparent/).test(color);
 
 afterEach(() => {
     mountedRoots.splice(0).forEach(root => {
@@ -94,8 +96,7 @@ describe('selection is carried by fill alone', () => {
                     {
                         value: 'left',
                         label: 'Left',
-                    },
-                    {
+                    }, {
                         value: 'center',
                         label: 'Center',
                     },

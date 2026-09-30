@@ -1,10 +1,14 @@
 import type {ScriptPackageSource, ScriptRepository} from '@stagistic/db';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {exportScriptPackage} from './exportScriptPackage';
 
 const source = {
-    script: {id: 'script-1', title: 'Test', subtitle: null, createdAt: 1_726_657_200_000, updatedAt: 1_726_657_200_000},
+    script: {
+        id: 'script-1', title: 'Test', subtitle: null, createdAt: 1_726_657_200_000, updatedAt: 1_726_657_200_000,
+    },
     document: {type: 'doc', content: []},
     titlePage: {},
     settings: {},
@@ -26,6 +30,7 @@ describe('exportScriptPackage', () => {
         const repository = {
             getScriptPackageSource: () => {
                 events.push('snapshot');
+
                 return Promise.resolve(source);
             },
             getAttachmentBlob: () => Promise.resolve(null),
@@ -35,6 +40,7 @@ describe('exportScriptPackage', () => {
             scriptId: 'script-1',
             flush: () => {
                 events.push('flush');
+
                 return Promise.resolve();
             },
             generator: {name: 'Stagistic', version: 'test'},
@@ -47,6 +53,7 @@ describe('exportScriptPackage', () => {
 
     it('makes flush failures safe for later UI presentation', async () => {
         const repository = {} as ScriptRepository;
+
         await expect(
             exportScriptPackage({
                 repository,

@@ -1,11 +1,15 @@
 import '@stagistic/ui/styles/base.css';
 
-import {COMMENT_ANCHOR_MARK_NAME, type ScriptDocument, type ScriptNode} from '@stagistic/script';
+import {
+    COMMENT_ANCHOR_MARK_NAME, type ScriptDocument, type ScriptNode,
+} from '@stagistic/script';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../context';
@@ -24,19 +28,23 @@ const dialogue = (id: string, text: string, threadIds: readonly string[] = []): 
         {
             type: 'text',
             text,
-            ...(threadIds.length > 0 ? {marks: threadIds.map(threadId => ({type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId}}))} : {}),
+            ...threadIds.length > 0 ? {marks: threadIds.map(threadId => ({type: COMMENT_ANCHOR_MARK_NAME, attrs: {threadId}}))} : {},
         },
     ],
 });
 
-const scene = (id: string, text: string): ScriptNode => ({type: 'scene', attrs: {id}, content: [{type: 'text', text}]});
+const scene = (id: string, text: string): ScriptNode => ({
+    type: 'scene', attrs: {id}, content: [{type: 'text', text}],
+});
 
 const createDocument = (blocks: ScriptNode[] = [dialogue('b1', 'Hello world'), dialogue('b2', 'Second line')]): ScriptDocument => ({
     type: 'doc',
     content: blocks,
 });
 
-const openRange = (id: string): EditorCommentThreadRef => ({id, status: 'open', anchorKind: 'range', anchorBlockId: null});
+const openRange = (id: string): EditorCommentThreadRef => ({
+    id, status: 'open', anchorKind: 'range', anchorBlockId: null,
+});
 
 const EditorProbe = () => {
     const editor = useEditorInstance();
@@ -55,9 +63,9 @@ const EditorProbe = () => {
 const mountedRoots: Root[] = [];
 
 interface MountOptions {
-    content?: ScriptDocument;
-    commentThreads?: readonly EditorCommentThreadRef[];
-    callbacks?: EditorProps['callbacks'];
+    content?: ScriptDocument,
+    commentThreads?: readonly EditorCommentThreadRef[],
+    callbacks?: EditorProps['callbacks'],
 }
 
 const renderScriptEditor = (root: Root, options: MountOptions) => {
@@ -122,12 +130,11 @@ const placeCaret = (editor: Editor, blockId: string) => {
     editor.commands.focus();
 };
 
-const findMenuItem = (label: string) =>
-    Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]')).find(item => {
-        const accessibleLabel = item.getAttribute('aria-label') ?? item.textContent?.trim();
+const findMenuItem = (label: string) => Array.from(document.querySelectorAll<HTMLElement>('[role="menuitem"]')).find(item => {
+    const accessibleLabel = item.getAttribute('aria-label') ?? item.textContent?.trim();
 
-        return accessibleLabel === label || accessibleLabel?.startsWith(label);
-    }) ?? null;
+    return accessibleLabel === label || accessibleLabel?.startsWith(label);
+}) ?? null;
 
 afterEach(() => {
     mountedRoots.forEach(root => root.unmount());
@@ -154,7 +161,11 @@ describe('comment host contract', () => {
     it('pushes host thread refs into the editor', async () => {
         const {editor, rerender} = await mountEditor({commentThreads: []});
 
-        rerender({commentThreads: [{id: 't1', status: 'open', anchorKind: 'block', anchorBlockId: 'b1'}]});
+        rerender({commentThreads: [
+            {
+                id: 't1', status: 'open', anchorKind: 'block', anchorBlockId: 'b1',
+            },
+        ]});
 
         await poll(() => getCommentsState(editor.state).anchors.get('t1'), 'block anchor');
         expect(getCommentsState(editor.state).anchors.get('t1')?.blockId).toBe('b1');
@@ -177,8 +188,7 @@ describe('comment host contract', () => {
 
 const selectionToolbar = () => document.querySelector<HTMLElement>('[role="toolbar"][aria-label="Selection actions"]');
 
-const toolbarButton = (label: string) =>
-    Array.from(selectionToolbar()?.querySelectorAll<HTMLButtonElement>('button') ?? []).find(button => button.textContent?.trim() === label) ?? null;
+const toolbarButton = (label: string) => Array.from(selectionToolbar()?.querySelectorAll<HTMLButtonElement>('button') ?? []).find(button => button.textContent?.trim() === label) ?? null;
 
 const selectRange = (editor: Editor, from: number, to: number) => {
     editor.commands.focus();
@@ -195,7 +205,7 @@ describe('selection toolbar', () => {
 
         expect(getCommentsState(editor.state).draft).toMatchObject({kind: 'range', blockId: 'b1'});
         expect(onRequestRevealComments).toHaveBeenCalledTimes(1);
-        await poll(() => (selectionToolbar() ? null : true), 'toolbar hidden during draft');
+        await poll(() => selectionToolbar() ? null : true, 'toolbar hidden during draft');
     });
 
     it('copies the selected text without collapsing the selection', async () => {
@@ -225,7 +235,11 @@ describe('comment margin markers', () => {
     it('renders one marker per block with open comments, larger and without a count above one', async () => {
         await mountEditor({
             content: createDocument([dialogue('b1', 'Hello', ['t1', 't2']), dialogue('b2', 'Other', ['t3'])]),
-            commentThreads: [openRange('t1'), openRange('t2'), {...openRange('t3'), status: 'resolved'}],
+            commentThreads: [
+                openRange('t1'),
+                openRange('t2'),
+                {...openRange('t3'), status: 'resolved'},
+            ],
         });
 
         const b1 = await poll(() => marker('b1'), 'b1 marker');
@@ -237,7 +251,11 @@ describe('comment margin markers', () => {
     });
 
     it('marks block-anchored threads too, as a single dot for one', async () => {
-        await mountEditor({commentThreads: [{id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b2'}]});
+        await mountEditor({commentThreads: [
+            {
+                id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b2',
+            },
+        ]});
 
         const b2 = await poll(() => marker('b2'), 'b2 marker');
 
@@ -283,7 +301,11 @@ describe('comment margin markers', () => {
 
 describe('comment indicators', () => {
     it('never draws a block-edge line; the active block comment lights its marker instead', async () => {
-        const {editor} = await mountEditor({commentThreads: [{id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1'}]});
+        const {editor} = await mountEditor({commentThreads: [
+            {
+                id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1',
+            },
+        ]});
 
         await poll(() => marker('b1'), 'b1 marker');
         editor.commands.setActiveCommentThread('tb');
@@ -296,7 +318,8 @@ describe('comment indicators', () => {
     it('shows an active marker on the block of an unsaved block draft', async () => {
         const {editor} = await mountEditor();
 
-        editor.chain().setTextSelection(3).startCommentDraft().run();
+        editor.chain().setTextSelection(3).startCommentDraft()
+            .run();
 
         const draftMarker = await poll(() => marker('b1'), 'draft marker');
 
@@ -304,7 +327,11 @@ describe('comment indicators', () => {
     });
 
     it('keeps the marker clear of the music rail', async () => {
-        await mountEditor({commentThreads: [{id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1'}]});
+        await mountEditor({commentThreads: [
+            {
+                id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1',
+            },
+        ]});
 
         const rect = (await poll(() => marker('b1'), 'b1 marker')).getBoundingClientRect();
         const canvas = document.querySelector<HTMLElement>('[data-editor-scroll-container="true"]')!;
@@ -320,8 +347,16 @@ describe('comment marker placement', () => {
 
     it('centres the marker on the first text line, not the block box (spacing before)', async () => {
         const {editor} = await mountEditor({
-            content: createDocument([dialogue('b1', 'Opening line'), scene('s1', 'INT. HALL'), dialogue('b2', 'After')]),
-            commentThreads: [{id: 'ts', status: 'open', anchorKind: 'block', anchorBlockId: 's1'}],
+            content: createDocument([
+                dialogue('b1', 'Opening line'),
+                scene('s1', 'INT. HALL'),
+                dialogue('b2', 'After'),
+            ]),
+            commentThreads: [
+                {
+                    id: 'ts', status: 'open', anchorKind: 'block', anchorBlockId: 's1',
+                },
+            ],
         });
         const markerRect = (await poll(() => marker('s1'), 's1 marker')).getBoundingClientRect();
         const block = findScriptBlockByIdFromState(editor.state, 's1')!;
@@ -333,7 +368,11 @@ describe('comment marker placement', () => {
     });
 
     it('sits midway between the music rail and the scrollbar', async () => {
-        await mountEditor({commentThreads: [{id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1'}]});
+        await mountEditor({commentThreads: [
+            {
+                id: 'tb', status: 'open', anchorKind: 'block', anchorBlockId: 'b1',
+            },
+        ]});
 
         const rect = (await poll(() => marker('b1'), 'b1 marker')).getBoundingClientRect();
         const canvas = document.querySelector<HTMLElement>('[data-editor-scroll-container="true"]')!;

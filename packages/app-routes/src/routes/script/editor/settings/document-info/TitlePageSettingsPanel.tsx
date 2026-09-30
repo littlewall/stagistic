@@ -1,4 +1,6 @@
-import {formatDatePreview, getTodayIso, type TitlePageDateFormat, type TitlePageSettings} from '@stagistic/script';
+import {
+    formatDatePreview, getTodayIso, type TitlePageDateFormat, type TitlePageSettings,
+} from '@stagistic/script';
 import {
     Checkbox,
     formControlStyles,
@@ -10,11 +12,12 @@ import {
     PanelHeader,
     SettingsGroup,
 } from '@stagistic/ui';
-import {useCallback, useEffect, useMemo, useState} from 'react';
-
-import {TitlePageLogoField} from './TitlePageLogoField';
+import {
+    useCallback, useEffect, useMemo, useState,
+} from 'react';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
+import {TitlePageLogoField} from './TitlePageLogoField';
 import styles from './TitlePageSettingsPanel.module.css';
 
 const CREDITS_COLUMNS: readonly InputTableColumnDef[] = [
@@ -23,8 +26,7 @@ const CREDITS_COLUMNS: readonly InputTableColumnDef[] = [
         label: 'Credit',
         type: 'string',
         placeholder: 'Written by',
-    },
-    {
+    }, {
         key: 'authors',
         label: 'Author(s)',
         type: 'string-array',
@@ -35,19 +37,18 @@ const CREDITS_COLUMNS: readonly InputTableColumnDef[] = [
 
 const CREDITS_ROW_COUNT = {type: 'dynamic' as const, min: 1};
 
-const DATE_FORMAT_OPTIONS: FormSelectOption[] = [
-    {value: 'dmy', label: 'dd/mm/yyyy'},
-    {value: 'mdy', label: 'mm/dd/yyyy'},
-];
+const DATE_FORMAT_OPTIONS: FormSelectOption[] = [{value: 'dmy', label: 'dd/mm/yyyy'}, {value: 'mdy', label: 'mm/dd/yyyy'}];
 
 interface TitlePageSettingsPanelProps {
-    scriptTitle: string;
-    settings: TitlePageSettings;
-    onUpdateScriptTitle: (title: string) => void;
-    onUpdate: (patch: Partial<TitlePageSettings>) => void;
+    scriptTitle: string,
+    settings: TitlePageSettings,
+    onUpdateScriptTitle: (title: string) => void,
+    onUpdate: (patch: Partial<TitlePageSettings>) => void,
 }
 
-export const TitlePageSettingsPanel = ({scriptTitle, settings, onUpdateScriptTitle, onUpdate}: TitlePageSettingsPanelProps) => {
+export const TitlePageSettingsPanel = ({
+    scriptTitle, settings, onUpdateScriptTitle, onUpdate,
+}: TitlePageSettingsPanelProps) => {
     const draftDateMode = settings.draftDateMode ?? 'auto';
     const dateFormat = settings.dateFormat ?? 'mdy';
     const [localDraftDateMode, setLocalDraftDateMode] = useState(draftDateMode);
@@ -73,11 +74,10 @@ export const TitlePageSettingsPanel = ({scriptTitle, settings, onUpdateScriptTit
     })();
 
     const creditRows = useMemo<InputTableRow[]>(
-        () =>
-            (settings.credits ?? [{credit: 'Written by', authors: ['']}]).map(c => ({
-                credit: c.credit,
-                authors: c.authors,
-            })),
+        () => (settings.credits ?? [{credit: 'Written by', authors: ['']}]).map(c => ({
+            credit: c.credit,
+            authors: c.authors,
+        })),
         [settings.credits],
     );
 

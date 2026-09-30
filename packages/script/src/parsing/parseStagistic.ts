@@ -1,11 +1,15 @@
 import {createNodeId, splitTrailingParentheticalSuffix} from '@stagistic/shared';
 
-import {createScriptBlockNode, type ScriptDocument, type ScriptNode} from '../document';
-import {isForcedCharacterCueLine, isQuotedCharacterCueLine, isUppercaseSyntaxLine} from '../syntax';
+import {
+    createScriptBlockNode, type ScriptDocument, type ScriptNode,
+} from '../document';
+import {
+    isForcedCharacterCueLine, isQuotedCharacterCueLine, isUppercaseSyntaxLine,
+} from '../syntax';
 import {parseStagisticFrontmatter} from './frontmatter';
 import {parseInlineText, parseStageDirectionLine} from './inline';
 import {decodeNameLiteral, splitOutsideQuotes} from './literals';
-import {resolveMusicModes, type ParsedBlock} from './resolveMusicModes';
+import {type ParsedBlock, resolveMusicModes} from './resolveMusicModes';
 import {type ParseStagisticResult, StagisticParseError} from './types';
 
 type SpeechBlockType = 'dialogue' | 'lyrics';
@@ -100,9 +104,11 @@ const isParenthetical = (value: string) => {
 };
 
 export const parseStagistic = (source: string): ParseStagisticResult => {
-    const {body, bodyStartLine, title, titlePage} = parseStagisticFrontmatter(source);
+    const {
+        body, bodyStartLine, title, titlePage,
+    } = parseStagisticFrontmatter(source);
     const lines = body.split('\n');
-    const hasActs = lines.some(line => /^##\s+/u.test(line));
+    const hasActs = lines.some(line => (/^##\s+/u).test(line));
     const blocks: ParsedBlock[] = [];
     let inSpeech = false;
     let lastSpeechType: SpeechBlockType = 'dialogue';
@@ -161,7 +167,7 @@ export const parseStagistic = (source: string): ParseStagisticResult => {
             return;
         }
 
-        const headingMatch = /^(#{1,2})\s+(.*)$/u.exec(rawLine);
+        const headingMatch = (/^(#{1,2})\s+(.*)$/u).exec(rawLine);
 
         if (headingMatch) {
             const type = headingMatch[1] === '##' || !hasActs ? 'scene' : 'act';

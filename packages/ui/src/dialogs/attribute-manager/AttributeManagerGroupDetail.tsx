@@ -1,5 +1,7 @@
 import {normalizeCharacterKey} from '@stagistic/script';
-import {type FormEvent, useMemo, useState} from 'react';
+import {
+    type FormEvent, useMemo, useState,
+} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
@@ -9,26 +11,25 @@ import type {EditorSidebarCharacter} from '../../editor-panels/types';
 import {TrashIcon} from '../../icons';
 import {MultiComboBox} from '../../molecules/forms/MultiComboBox/MultiComboBox';
 import {formControlStyles} from '../../molecules/forms/shared/formControlStyles';
+import styles from './AttributeManagerCharactersPanel.module.css';
 import type {AttributeManagerCharacter, AttributeManagerGroup} from './attributeManagerCharacterTypes';
 import {RemoveGroupModal} from './RemoveGroupModal';
 
-import styles from './AttributeManagerCharactersPanel.module.css';
-
 interface AttributeManagerGroupDetailProps {
-    group: AttributeManagerGroup;
-    confirmedName: string;
-    speakingEntities: Array<{id: string; name: string}>;
-    characters: AttributeManagerCharacter[];
-    characterColorSaturation?: number;
-    isDeleting: boolean;
-    isRenaming: boolean;
-    isColorUpdating: boolean;
-    onNameDraftChange: (name: string) => void;
-    onResetNameDraft: () => void;
-    onRenameGroup?: (groupId: string, previousName: string, nextName: string) => void | Promise<unknown>;
-    onSetGroupColor?: (groupId: string, colorHex: string | null) => void | Promise<unknown>;
-    onChangeMemberIds?: (memberIds: string[]) => void | Promise<unknown>;
-    onDeleteGroup?: (groupId: string) => void | Promise<unknown>;
+    group: AttributeManagerGroup,
+    confirmedName: string,
+    speakingEntities: Array<{id: string, name: string}>,
+    characters: AttributeManagerCharacter[],
+    characterColorSaturation?: number,
+    isDeleting: boolean,
+    isRenaming: boolean,
+    isColorUpdating: boolean,
+    onNameDraftChange: (name: string) => void,
+    onResetNameDraft: () => void,
+    onRenameGroup?: (groupId: string, previousName: string, nextName: string) => void | Promise<unknown>,
+    onSetGroupColor?: (groupId: string, colorHex: string | null) => void | Promise<unknown>,
+    onChangeMemberIds?: (memberIds: string[]) => void | Promise<unknown>,
+    onDeleteGroup?: (groupId: string) => void | Promise<unknown>,
 }
 
 export const AttributeManagerGroupDetail = ({

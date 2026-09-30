@@ -7,6 +7,19 @@ export * from './queries';
 export * as dbQueries from './queries';
 export * from './reactive';
 export {createLocalPgliteRepository, type LocalPgliteRepositoryDeps} from './repo/createLocalPgliteRepository';
+export {
+    createProjectedTableDocumentSource,
+    createSqlScriptDocumentProjectionWriter,
+    type LoadedProjectionDocument,
+    type LoadedScriptDocument,
+    loadScriptDocumentFromProjection,
+    rebuildScriptProjection,
+    type RebuildScriptProjectionArgs,
+    type SaveScriptDocumentOptions,
+    type ScriptDocumentProjectionWriter,
+    type ScriptDocumentSource,
+} from './repo/documentProjection';
+export * from './schema';
 export type {ScriptPackageSource} from './scriptPackageSource';
 export type {
     ScriptPackageWrite,
@@ -21,19 +34,6 @@ export type {
     ScriptPackageWriteMusic,
     ScriptPackageWriteScene,
 } from './scriptPackageWrite';
-export {
-    createProjectedTableDocumentSource,
-    createSqlScriptDocumentProjectionWriter,
-    type LoadedProjectionDocument,
-    type LoadedScriptDocument,
-    loadScriptDocumentFromProjection,
-    rebuildScriptProjection,
-    type RebuildScriptProjectionArgs,
-    type SaveScriptDocumentOptions,
-    type ScriptDocumentProjectionWriter,
-    type ScriptDocumentSource,
-} from './repo/documentProjection';
-export * from './schema';
 export type {
     AddScriptCommentMessageInput,
     CreateScriptCommentThreadInput,

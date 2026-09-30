@@ -1,17 +1,17 @@
 import {eq} from 'drizzle-orm';
 
 import type {ExtractedMusicRow} from '../../blocks';
-import {bulkUnassignScriptMusic, bulkUpsertScriptMusic, type DbClient} from '../../queries';
+import {
+    bulkUnassignScriptMusic, bulkUpsertScriptMusic, type DbClient,
+} from '../../queries';
 import {scriptMusic} from '../../schema';
 
 /** Identity of the derived music list; unchanged signature means nothing to reconcile. */
-export const getMusicSignature = (music: readonly ExtractedMusicRow[]) =>
-    music
-        .map(
-            item =>
-                `${item.id}:${item.sceneNumber}:${item.indexInScene}:${item.mode}:${item.title}:${item.kind ?? ''}:${item.startBlockId}:${item.endBlockId ?? ''}`,
-        )
-        .join('|');
+export const getMusicSignature = (music: readonly ExtractedMusicRow[]) => music
+    .map(
+        item => `${item.id}:${item.sceneNumber}:${item.indexInScene}:${item.mode}:${item.title}:${item.kind ?? ''}:${item.startBlockId}:${item.endBlockId ?? ''}`,
+    )
+    .join('|');
 
 /** Upserts derived music rows and unassigns rows no longer present in the document. */
 export const reconcileScriptMusic = async (tx: DbClient, scriptId: string, music: readonly ExtractedMusicRow[], now: number) => {

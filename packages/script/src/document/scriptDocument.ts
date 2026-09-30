@@ -1,50 +1,52 @@
 import {createNodeId} from '@stagistic/shared';
 
 import type {EditorSettingsOverride} from '../settings';
-import {isScriptBlockNodeType, resolveScriptBlockNodeType, type ScriptBlockNodeType} from '../syntax';
+import {
+    isScriptBlockNodeType, resolveScriptBlockNodeType, type ScriptBlockNodeType,
+} from '../syntax';
 
 export const DEFAULT_SCRIPT_BLOCK_NODE_TYPE: ScriptBlockNodeType = 'stageDirection';
 export const SCRIPT_DOCUMENT_SCHEMA_VERSION = 4;
 
 export type ScriptNode = {
-    type?: string;
-    attrs?: Record<string, unknown>;
-    content?: ScriptNode[];
+    type?: string,
+    attrs?: Record<string, unknown>,
+    content?: ScriptNode[],
     marks?: Array<{
-        type: string;
-        attrs?: Record<string, unknown>;
-    }>;
-    text?: string;
+        type: string,
+        attrs?: Record<string, unknown>,
+    }>,
+    text?: string,
 };
 
 export type ScriptDocument = {
-    type: 'doc';
+    type: 'doc',
     attrs?: {
         /*
          * Keep user/domain metadata out of the script body when possible.
          * Settings/import metadata are transitional document attributes; persisted
          * saves strip editor settings before writing the content projection.
          */
-        settings?: EditorSettingsOverride;
-        importMeta?: ScriptImportMetadata;
-    };
-    content: ScriptNode[];
+        settings?: EditorSettingsOverride,
+        importMeta?: ScriptImportMetadata,
+    },
+    content: ScriptNode[],
 };
 
 export interface ScriptImportedTitlePageField {
-    fieldKey: string;
-    value: string;
-    orderNo: number;
+    fieldKey: string,
+    value: string,
+    orderNo: number,
 }
 
 export interface ScriptImportedSceneSynopsis {
-    headingBlockId: string;
-    synopsis: string;
+    headingBlockId: string,
+    synopsis: string,
 }
 
 export interface ScriptImportMetadata {
-    titlePageFields?: ScriptImportedTitlePageField[];
-    sceneSynopses?: ScriptImportedSceneSynopsis[];
+    titlePageFields?: ScriptImportedTitlePageField[],
+    sceneSynopses?: ScriptImportedSceneSynopsis[],
 }
 
 export const getNodeAttrs = (node: ScriptNode): Record<string, unknown> | undefined => {
@@ -104,8 +106,7 @@ export const createEmptyScriptDocument = (blockId?: string, settings?: EditorSet
             {
                 ...actBlock,
                 content: [{type: 'text', text: 'ACT ONE'}],
-            },
-            createScriptBlockNode('scene', blockId),
+            }, createScriptBlockNode('scene', blockId),
         ],
     };
 };

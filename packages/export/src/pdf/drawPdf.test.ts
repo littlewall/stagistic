@@ -1,5 +1,7 @@
 import {PDFDocument} from 'pdf-lib';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import type {StaffRowItem, TranscriptResult} from '../visualLine';
 import {drawPdf} from './drawPdf';
@@ -24,8 +26,7 @@ const staffRow: StaffRowItem = {
                 alter: 0,
                 ledgerPositions: [-2],
                 xFraction: 0.15,
-            },
-            {
+            }, {
                 position: 10,
                 alter: 1,
                 ledgerPositions: [10],
@@ -72,8 +73,7 @@ describe('drawPdf special items', () => {
                                 alter: 0,
                                 ledgerPositions: [],
                                 xFraction: 0.15,
-                            },
-                            {
+                            }, {
                                 position: 4,
                                 alter: -1,
                                 ledgerPositions: [],

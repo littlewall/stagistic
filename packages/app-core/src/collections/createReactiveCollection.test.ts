@@ -1,11 +1,13 @@
 import {createInMemoryReactiveQuerySource} from '@stagistic/db';
-import {describe, expect, it, vi} from 'vite-plus/test';
+import {
+    describe, expect, it, vi,
+} from 'vite-plus/test';
 
 import {createReactiveCollection} from './createReactiveCollection';
 
 interface Row {
-    id: string;
-    title: string;
+    id: string,
+    title: string,
 }
 
 const deferred = () => {
@@ -112,8 +114,8 @@ describe('reactive collection bridge', () => {
 
     it('confirms an update whose source echo differs in key order and empty sections', async () => {
         interface SettingsRow {
-            id: string;
-            settings: Record<string, unknown>;
+            id: string,
+            settings: Record<string, unknown>,
         }
 
         const source = createInMemoryReactiveQuerySource<SettingsRow>([

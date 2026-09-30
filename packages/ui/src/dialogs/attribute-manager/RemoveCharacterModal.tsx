@@ -3,15 +3,17 @@ import type {ReactNode} from 'react';
 import {ConfirmModal} from '../modal/ConfirmModal';
 
 export interface RemoveCharacterModalProps {
-    isOpen: boolean;
-    characterKey?: string;
-    groupNames?: string[];
-    isRemoving?: boolean;
-    onClose: () => void;
-    onConfirm: () => void | Promise<void>;
+    isOpen: boolean,
+    characterKey?: string,
+    groupNames?: string[],
+    isRemoving?: boolean,
+    onClose: () => void,
+    onConfirm: () => void | Promise<void>,
 }
 
-export const RemoveCharacterModal = ({isOpen, characterKey, groupNames = [], isRemoving = false, onClose, onConfirm}: RemoveCharacterModalProps) => {
+export const RemoveCharacterModal = ({
+    isOpen, characterKey, groupNames = [], isRemoving = false, onClose, onConfirm,
+}: RemoveCharacterModalProps) => {
     const notes: ReactNode[] = ['Its lines and blocks stay in the script — nothing is removed from the screenplay.'];
 
     if (characterKey && groupNames.length > 0) {
@@ -26,19 +28,19 @@ export const RemoveCharacterModal = ({isOpen, characterKey, groupNames = [], isR
         <ConfirmModal
             isOpen={isOpen}
             ariaLabel="Remove character"
-            title={
+            title={(
                 <>
                     Remove
                     {characterKey ? ` ${characterKey}` : ' character'}?
                 </>
-            }
-            description={
+            )}
+            description={(
                 <>
                     This only deletes the character record:
                     {characterKey ? <strong>{` ${characterKey} `}</strong> : ' the character '}
                     stops being confirmed and its color, outline, and other metadata are cleared.
                 </>
-            }
+            )}
             notes={notes}
             confirmLabel="Remove"
             isPending={isRemoving}

@@ -1,4 +1,6 @@
-import {DEFAULT_SCENE_NUMBER_FORMAT, type EditorSettings, formatSceneNumber, getScriptBlockId, getScriptBlockNodeType} from '@stagistic/script';
+import {
+    DEFAULT_SCENE_NUMBER_FORMAT, type EditorSettings, formatSceneNumber, getScriptBlockId, getScriptBlockNodeType,
+} from '@stagistic/script';
 import {
     FIT_EPSILON_PX,
     isOrphanCandidateBlockType,
@@ -18,15 +20,21 @@ import {buildTitlePageItems} from './titlePage/buildTitlePageItems';
 import {buildTitlePageLogoItem} from './titlePage/buildTitlePageLogoItem';
 import {getIntegratedFooter, withHeaderFooter} from './transcript/headerFooter';
 import {makeRun, resolveLineX} from './transcript/lineLayout';
-import {CHAR_WIDTH_EM, DEFAULT_BLOCK_TYPE, PAGE_BREAK_ITEM, type PreparedBlock, type ScriptPage} from './transcript/model';
+import {
+    CHAR_WIDTH_EM, DEFAULT_BLOCK_TYPE, PAGE_BREAK_ITEM, type PreparedBlock, type ScriptPage,
+} from './transcript/model';
 import {buildStructureMarks} from './transcript/structureMarks';
-import {buildMusicLabels, getBlockRawSegments, normalizeBlockSegments} from './transcript/textSegments';
+import {
+    buildMusicLabels, getBlockRawSegments, normalizeBlockSegments,
+} from './transcript/textSegments';
 import {wrapSegments} from './transcript/wrapSegments';
-import type {PageItem, TranscriptResult, VisualLine} from './visualLine';
+import type {
+    PageItem, TranscriptResult, VisualLine,
+} from './visualLine';
 
 export interface TranscribeOptions {
     /** Page count of each attached score PDF, keyed by music id. */
-    scorePageCounts?: Record<string, number>;
+    scorePageCounts?: Record<string, number>,
 }
 
 export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings, options: TranscribeOptions = {}): TranscriptResult => {
@@ -42,8 +50,8 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
         const fontSizePx = block.fontSizePx ?? settings.typography.fontSizePx;
         const lineHeightPx = fontSizePx * (block.lineHeight ?? settings.typography.lineHeight);
         const charWidthPx = fontSizePx * CHAR_WIDTH_EM;
-        const indentLeftPx = typeof block.indentLeftChars === 'number' ? block.indentLeftChars * charWidthPx : (block.indentLeftPx ?? 0);
-        const indentRightPx = typeof block.indentRightChars === 'number' ? block.indentRightChars * charWidthPx : (block.indentRightPx ?? 0);
+        const indentLeftPx = typeof block.indentLeftChars === 'number' ? block.indentLeftChars * charWidthPx : block.indentLeftPx ?? 0;
+        const indentRightPx = typeof block.indentRightChars === 'number' ? block.indentRightChars * charWidthPx : block.indentRightPx ?? 0;
         const availableWidthPx = Math.max(charWidthPx, contentWidthPx - indentLeftPx - indentRightPx);
         const maxChars = Math.max(1, Math.floor(availableWidthPx / charWidthPx));
         const rawSegments = getBlockRawSegments(node, blockId ?? '', musicLabels);
@@ -217,15 +225,15 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
     const visibleBlockIds = plan.visibleBlockIds ? new Set(plan.visibleBlockIds) : null;
     const scriptPages = visibleBlockIds
         ? allScriptPages
-              .map(page => ({
-                  ...page,
-                  items: page.items.filter(line => !line.sourceBlockId || visibleBlockIds.has(line.sourceBlockId)),
-              }))
-              .filter(page => page.items.length > 0 || page.isInsertedBlank)
+            .map(page => ({
+                ...page,
+                items: page.items.filter(line => !line.sourceBlockId || visibleBlockIds.has(line.sourceBlockId)),
+            }))
+            .filter(page => page.items.length > 0 || page.isInsertedBlank)
         : allScriptPages;
     const scriptItems = withHeaderFooter(scriptPages, plan, settings);
     const titlePageLogo = buildTitlePageLogoItem(plan.titlePage, settings);
-    const titleItems: PageItem[] = [...(titlePageLogo ? [titlePageLogo] : []), ...buildTitlePageItems(plan.titlePage, plan.scriptTitle, settings)];
+    const titleItems: PageItem[] = [...titlePageLogo ? [titlePageLogo] : [], ...buildTitlePageItems(plan.titlePage, plan.scriptTitle, settings)];
     const scriptPageSourceBlockIds = scriptPages.map(page => [...page.sourceBlockIds]);
     const scriptPageNumberByBlockId = new Map<string, number>();
 
@@ -241,14 +249,14 @@ export const transcribeExportPlan = (plan: ExportPlan, settings: EditorSettings,
 
     const scoreStartPageByMusicId = options.scorePageCounts
         ? planIntegratedAssembly({
-              scriptPageSourceBlockIds,
-              scores: plan.postSteps.map(step => ({
-                  musicId: step.musicId,
-                  startBlockId: step.startBlockId,
-                  afterBlockId: step.afterBlockId,
-                  pageCount: options.scorePageCounts?.[step.musicId] ?? 0,
-              })),
-          }).scoreStartPageByMusicId
+            scriptPageSourceBlockIds,
+            scores: plan.postSteps.map(step => ({
+                musicId: step.musicId,
+                startBlockId: step.startBlockId,
+                afterBlockId: step.afterBlockId,
+                pageCount: options.scorePageCounts?.[step.musicId] ?? 0,
+            })),
+        }).scoreStartPageByMusicId
         : new Map<string, number>();
     const pageNumbers: ContentsPageNumbers = {
         scriptPageNumberByBlockId,

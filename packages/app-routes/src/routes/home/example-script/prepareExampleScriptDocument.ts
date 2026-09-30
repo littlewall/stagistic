@@ -20,11 +20,11 @@ import {
 } from './exampleScriptMetadata';
 
 export interface PreparedExampleScript {
-    document: ScriptDocument;
-    characterKeys: readonly string[];
-    groupKeys: readonly string[];
-    scoreMusicId: string;
-    sceneBlockIdsByTitle: ReadonlyMap<string, string>;
+    document: ScriptDocument,
+    characterKeys: readonly string[],
+    groupKeys: readonly string[],
+    scoreMusicId: string,
+    sceneBlockIdsByTitle: ReadonlyMap<string, string>,
 }
 
 const invalidExampleScript = (message: string): never => {
@@ -160,7 +160,9 @@ const markTextRange = (content: ScriptNode[], from: number, to: number, mark: No
         const cutTo = Math.min(to, end) - start;
         const pieces = [
             {...child, text: child.text.slice(0, cutFrom)},
-            {...child, text: child.text.slice(cutFrom, cutTo), marks: [...(child.marks ?? []), mark]},
+            {
+                ...child, text: child.text.slice(cutFrom, cutTo), marks: [...child.marks ?? [], mark],
+            },
             {...child, text: child.text.slice(cutTo)},
         ];
 
@@ -174,8 +176,10 @@ const markTextRange = (content: ScriptNode[], from: number, to: number, mark: No
  */
 export const anchorExampleComment = (
     document: ScriptDocument,
-    thread: {id: string; blockText: string; quote?: string},
-): {document: ScriptDocument; blockId: string} => {
+    thread: {
+        id: string, blockText: string, quote?: string,
+    },
+): {document: ScriptDocument, blockId: string} => {
     const blockIndex = document.content.findIndex(node => {
         return (node.content ?? []).map(child => child.text ?? '').join('') === thread.blockText;
     });
@@ -195,7 +199,7 @@ export const anchorExampleComment = (
     return {
         document: {
             ...document,
-            content: document.content.map((node, index) => (index === blockIndex ? {...node, content} : node)),
+            content: document.content.map((node, index) => index === blockIndex ? {...node, content} : node),
         },
         blockId,
     };

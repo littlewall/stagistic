@@ -1,5 +1,5 @@
-export * from './constants';
 export * from './buildEntries';
+export * from './constants';
 export * from './contracts';
 export * from './createStepkg';
 export * from './errors';

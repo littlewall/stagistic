@@ -1,6 +1,8 @@
 import type {TitlePageLogo, TitlePageLogoMimeType} from '@stagistic/script';
 import {Button, Notice} from '@stagistic/ui';
-import {type ChangeEvent, useRef, useState} from 'react';
+import {
+    type ChangeEvent, useRef, useState,
+} from 'react';
 
 import styles from './TitlePageLogoField.module.css';
 
@@ -22,34 +24,33 @@ export const validateTitlePageLogoFile = ({size, type}: Pick<File, 'size' | 'typ
     return null;
 };
 
-const readDataUrl = (file: File) =>
-    new Promise<string>((resolve, reject) => {
-        const reader = new FileReader();
+const readDataUrl = (file: File) => new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
 
-        reader.addEventListener('load', () => {
-            if (typeof reader.result === 'string') {
-                resolve(reader.result);
-                return;
-            }
+    reader.addEventListener('load', () => {
+        if (typeof reader.result === 'string') {
+            resolve(reader.result);
 
-            reject(new Error('The selected image could not be read.'));
-        });
-        reader.addEventListener('error', () => reject(new Error('The selected image could not be read.')));
-        reader.readAsDataURL(file);
+            return;
+        }
+
+        reject(new Error('The selected image could not be read.'));
     });
+    reader.addEventListener('error', () => reject(new Error('The selected image could not be read.')));
+    reader.readAsDataURL(file);
+});
 
-const readImageDimensions = (dataUrl: string) =>
-    new Promise<{widthPx: number; heightPx: number}>((resolve, reject) => {
-        const image = new Image();
+const readImageDimensions = (dataUrl: string) => new Promise<{widthPx: number, heightPx: number}>((resolve, reject) => {
+    const image = new Image();
 
-        image.addEventListener('load', () => resolve({widthPx: image.naturalWidth, heightPx: image.naturalHeight}));
-        image.addEventListener('error', () => reject(new Error('The selected file is not a valid image.')));
-        image.src = dataUrl;
-    });
+    image.addEventListener('load', () => resolve({widthPx: image.naturalWidth, heightPx: image.naturalHeight}));
+    image.addEventListener('error', () => reject(new Error('The selected file is not a valid image.')));
+    image.src = dataUrl;
+});
 
 interface TitlePageLogoFieldProps {
-    logo?: TitlePageLogo;
-    onChange: (logo: TitlePageLogo | undefined) => void;
+    logo?: TitlePageLogo,
+    onChange: (logo: TitlePageLogo | undefined) => void,
 }
 
 export const TitlePageLogoField = ({logo, onChange}: TitlePageLogoFieldProps) => {
@@ -68,6 +69,7 @@ export const TitlePageLogoField = ({logo, onChange}: TitlePageLogoFieldProps) =>
 
         if (validationError) {
             setError(validationError);
+
             return;
         }
 

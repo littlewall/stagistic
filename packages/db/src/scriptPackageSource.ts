@@ -1,7 +1,11 @@
-import type {EditorSettingsOverride, ScriptDocument, TitlePageSettings} from '@stagistic/script';
+import type {
+    EditorSettingsOverride, ScriptDocument, TitlePageSettings,
+} from '@stagistic/script';
 import type {InferSelectModel} from 'drizzle-orm';
 
-import type {scriptCharacterGroupMembers, scriptMusicAttachments, scriptSceneLocations} from './schema';
+import type {
+    scriptCharacterGroupMembers, scriptMusicAttachments, scriptSceneLocations,
+} from './schema';
 import type {
     ScriptAttachment,
     ScriptCharacter,
@@ -19,18 +23,18 @@ export type ScriptSceneLocationRow = InferSelectModel<typeof scriptSceneLocation
 export type ScriptMusicAttachmentBinding = InferSelectModel<typeof scriptMusicAttachments>;
 
 export interface ScriptPackageSource {
-    script: ScriptSummary;
-    document: ScriptDocument;
-    titlePage: TitlePageSettings;
-    settings: EditorSettingsOverride;
-    characters: ScriptCharacter[];
-    characterGroupMembers: ScriptCharacterGroupMember[];
-    characterGenders: ScriptCharacterGender[];
-    music: ScriptMusic[];
-    locations: ScriptLocation[];
-    scenes: ScriptScene[];
-    sceneLocations: ScriptSceneLocationRow[];
-    attachments: ScriptAttachment[];
-    musicAttachmentBindings: ScriptMusicAttachmentBinding[];
-    comments: {threads: ScriptCommentThread[]; messages: ScriptCommentMessage[]};
+    script: ScriptSummary,
+    document: ScriptDocument,
+    titlePage: TitlePageSettings,
+    settings: EditorSettingsOverride,
+    characters: ScriptCharacter[],
+    characterGroupMembers: ScriptCharacterGroupMember[],
+    characterGenders: ScriptCharacterGender[],
+    music: ScriptMusic[],
+    locations: ScriptLocation[],
+    scenes: ScriptScene[],
+    sceneLocations: ScriptSceneLocationRow[],
+    attachments: ScriptAttachment[],
+    musicAttachmentBindings: ScriptMusicAttachmentBinding[],
+    comments: {threads: ScriptCommentThread[], messages: ScriptCommentMessage[]},
 }

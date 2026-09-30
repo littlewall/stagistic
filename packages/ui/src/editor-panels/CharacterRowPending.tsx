@@ -2,19 +2,18 @@ import {Button} from 'react-aria-components';
 
 import {Tooltip} from '../atoms/Tooltip/Tooltip';
 import {EyeIcon} from '../icons/ui';
-import type {EditorSidebarCharacter} from './types';
-
 import styles from './EditorSidebar.module.css';
+import type {EditorSidebarCharacter} from './types';
 
 interface CharacterRowPendingProps {
     model: {
-        character: EditorSidebarCharacter;
-        isConfirmPending: boolean;
-    };
+        character: EditorSidebarCharacter,
+        isConfirmPending: boolean,
+    },
     actions: {
-        onConfirmCharacter?: (characterKey: string, colorHex?: string | null) => void;
-        onFocusCharacter?: (characterKey: string) => void;
-    };
+        onConfirmCharacter?: (characterKey: string, colorHex?: string | null) => void,
+        onFocusCharacter?: (characterKey: string) => void,
+    },
 }
 
 const getConfirmTooltipLabel = (

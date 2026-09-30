@@ -15,29 +15,31 @@ import {
     UploadIcon,
 } from '@stagistic/ui';
 import clsx from 'clsx';
-import {useCallback, useMemo, useState} from 'react';
+import {
+    useCallback, useMemo, useState,
+} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {useGlobalModals} from '../../global-modals/GlobalModalsProvider';
 import {AppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../useDocumentTitle';
 import {buildHomeDashboardModel, type ScriptSort} from './homeDashboardModel';
+import styles from './HomeRoute.module.css';
 import {ScriptListSection} from './ScriptListSection';
 
-import styles from './HomeRoute.module.css';
-
-const SORT_OPTIONS = [
-    {value: 'newest', label: 'Newest first'},
-    {value: 'title', label: 'Title A–Z'},
-];
+const SORT_OPTIONS = [{value: 'newest', label: 'Newest first'}, {value: 'title', label: 'Title A–Z'}];
 
 export const HomeRoute = () => {
     useDocumentTitle('Scripts');
 
     const navigate = useNavigate();
     const repository = useScriptRepository();
-    const {scriptSummaries, isLoading: scriptsLoading, error, refreshScripts, createScript, deleteScript: deleteScriptRecord} = useScripts();
-    const {openNewScript, openImportScript, openDeleteScript, openRenameScript, openDuplicateScript} = useGlobalModals();
+    const {
+        scriptSummaries, isLoading: scriptsLoading, error, refreshScripts, createScript, deleteScript: deleteScriptRecord,
+    } = useScripts();
+    const {
+        openNewScript, openImportScript, openDeleteScript, openRenameScript, openDuplicateScript,
+    } = useGlobalModals();
     const [query, setQuery] = useState('');
     const [sort, setSort] = useState<ScriptSort>('newest');
     const [isCreatingExample, setIsCreatingExample] = useState(false);
@@ -46,13 +48,17 @@ export const HomeRoute = () => {
     const showLibraryTools = scriptSummaries.length >= 5;
 
     const dashboard = useMemo(
-        () =>
-            buildHomeDashboardModel({
-                scripts: scriptSummaries,
-                query: showLibraryTools ? query : '',
-                sort: showLibraryTools ? sort : 'newest',
-            }),
-        [query, scriptSummaries, showLibraryTools, sort],
+        () => buildHomeDashboardModel({
+            scripts: scriptSummaries,
+            query: showLibraryTools ? query : '',
+            sort: showLibraryTools ? sort : 'newest',
+        }),
+        [
+            query,
+            scriptSummaries,
+            showLibraryTools,
+            sort,
+        ],
     );
     const openScript = useCallback(
         (scriptId: string) => {
@@ -61,13 +67,15 @@ export const HomeRoute = () => {
         [navigate],
     );
     const deleteScript = useCallback(
-        (script: {id: string; title: string}) => {
+        (script: {id: string, title: string}) => {
             openDeleteScript({id: script.id, title: script.title});
         },
         [openDeleteScript],
     );
     const renameScript = useCallback(
-        (script: {id: string; title: string; subtitle: string | null}) => {
+        (script: {
+            id: string, title: string, subtitle: string | null,
+        }) => {
             openRenameScript({
                 id: script.id,
                 title: script.title,
@@ -77,7 +85,7 @@ export const HomeRoute = () => {
         [openRenameScript],
     );
     const duplicateScript = useCallback(
-        (script: {id: string; title: string}) => {
+        (script: {id: string, title: string}) => {
             openDuplicateScript({id: script.id, title: script.title});
         },
         [openDuplicateScript],
@@ -103,7 +111,12 @@ export const HomeRoute = () => {
         } finally {
             setIsCreatingExample(false);
         }
-    }, [createScript, deleteScriptRecord, navigate, repository]);
+    }, [
+        createScript,
+        deleteScriptRecord,
+        navigate,
+        repository,
+    ]);
 
     if (isCreatingExample) {
         return (
@@ -116,12 +129,12 @@ export const HomeRoute = () => {
 
     return (
         <AppLayout
-            header={
+            header={(
                 <AppHeader
                     contentInset="page"
                     showScriptActions={false}
                 />
-            }
+            )}
         >
             <PageContainer variant="standard">
                 <div className={styles.content}>

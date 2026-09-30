@@ -1,22 +1,25 @@
 import clsx from 'clsx';
-import {type ComponentPropsWithoutRef, forwardRef, type ReactNode, useId, useMemo} from 'react';
+import {
+    type ComponentPropsWithoutRef, forwardRef, type ReactNode, useId, useMemo,
+} from 'react';
 
 import {Input} from '../../../atoms/Input/Input';
-
 import styles from './TextInput.module.css';
 
 type TextInputProps = {
-    label: ReactNode;
-    description?: string;
-    className?: string;
-    inputClassName?: string;
-    size?: ComponentPropsWithoutRef<typeof Input>['size'];
+    label: ReactNode,
+    description?: string,
+    className?: string,
+    inputClassName?: string,
+    size?: ComponentPropsWithoutRef<typeof Input>['size'],
 } & Omit<ComponentPropsWithoutRef<typeof Input>, 'className' | 'size'>;
 
-export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({label, description, className, inputClassName, size = 'md', id, ...props}, ref) => {
+export const TextInput = forwardRef<HTMLInputElement, TextInputProps>(({
+    label, description, className, inputClassName, size = 'md', id, ...props
+}, ref) => {
     const fallbackId = useId();
     const resolvedId = useMemo(() => id ?? fallbackId, [id, fallbackId]);
-    const descriptionId = useMemo(() => (description ? `${resolvedId}-description` : undefined), [description, resolvedId]);
+    const descriptionId = useMemo(() => description ? `${resolvedId}-description` : undefined, [description, resolvedId]);
 
     return (
         <label

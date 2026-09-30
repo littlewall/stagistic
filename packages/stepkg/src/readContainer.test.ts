@@ -1,22 +1,29 @@
 import {zipSync} from 'fflate';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {readStepkgContainer} from './readContainer';
 
 const encoder = new TextEncoder();
 
-const zipWith = (entries: Record<string, string>): Uint8Array =>
-    zipSync(Object.fromEntries(Object.entries(entries).map(([path, value]) => [path, encoder.encode(value)])));
+const zipWith = (entries: Record<string, string>): Uint8Array => {
+    const files = Object.entries(entries).map(([path, value]) => [path, encoder.encode(value)]);
+
+    return zipSync(Object.fromEntries(files));
+};
 
 interface ManifestFixture {
-    format: string;
-    formatVersion: number;
-    documentSchemaVersion: number;
-    createdAt: string;
-    generator: {name: string; version: string};
-    script: {id: string; title: string; updatedAt: string};
-    entrypoints: {document: string; text: string};
-    files: unknown[];
+    format: string,
+    formatVersion: number,
+    documentSchemaVersion: number,
+    createdAt: string,
+    generator: {name: string, version: string},
+    script: {
+        id: string, title: string, updatedAt: string,
+    },
+    entrypoints: {document: string, text: string},
+    files: unknown[],
 }
 
 const manifestFixture = (): ManifestFixture => ({
@@ -25,7 +32,9 @@ const manifestFixture = (): ManifestFixture => ({
     documentSchemaVersion: 3,
     createdAt: '2026-09-18T12:00:00.000Z',
     generator: {name: 'Stagistic', version: '0.0.0'},
-    script: {id: 's1', title: 'T', updatedAt: '2026-09-18T11:00:00.000Z'},
+    script: {
+        id: 's1', title: 'T', updatedAt: '2026-09-18T11:00:00.000Z',
+    },
     entrypoints: {document: 'document.json', text: 'script.stagistic'},
     files: [],
 });
@@ -49,7 +58,9 @@ describe('readStepkgContainer', () => {
 
     it('rejects an unsupported formatVersion', async () => {
         const manifest = manifestFixture();
+
         manifest.formatVersion = 2;
+
         const result = await readStepkgContainer(zipWith({'manifest.json': JSON.stringify(manifest)}));
 
         expect(result.ok).toBe(false);
@@ -58,7 +69,9 @@ describe('readStepkgContainer', () => {
 
     it('rejects a too-new documentSchemaVersion', async () => {
         const manifest = manifestFixture();
+
         manifest.documentSchemaVersion = 999;
+
         const result = await readStepkgContainer(zipWith({'manifest.json': JSON.stringify(manifest)}));
 
         expect(result.ok).toBe(false);

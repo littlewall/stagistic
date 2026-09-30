@@ -1,5 +1,7 @@
 import {type EditorSettings} from '@stagistic/script';
-import {clampCharacterColorSaturation, type EditorSettingsOverride, isSceneNumberFormat, normalizeEditorSettingsBlockType} from '@stagistic/script';
+import {
+    clampCharacterColorSaturation, type EditorSettingsOverride, isSceneNumberFormat, normalizeEditorSettingsBlockType,
+} from '@stagistic/script';
 
 import {LINE_HEIGHT_OPTIONS, SPACING_BEFORE_OPTIONS} from './constants';
 import {getClosestStepValue} from './math';

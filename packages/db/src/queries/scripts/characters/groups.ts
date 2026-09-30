@@ -1,30 +1,32 @@
-import {and, asc, eq, inArray} from 'drizzle-orm';
+import {
+    and, asc, eq, inArray,
+} from 'drizzle-orm';
 
 import {scriptCharacterGroupMembers, scriptCharacters} from '../../../schema';
 import type {ScriptCharacterGroupRef} from '../../../types';
 import type {DbClient} from '../../types';
 
 interface CreateScriptCharacterGroupInput {
-    id: string;
-    scriptId: string;
-    characterKey: string;
-    colorHex: string | null;
-    createdAt: number;
-    updatedAt: number;
+    id: string,
+    scriptId: string,
+    characterKey: string,
+    colorHex: string | null,
+    createdAt: number,
+    updatedAt: number,
 }
 
 interface ScriptCharacterGroupUpdateInput {
-    scriptId: string;
-    groupId: string;
-    updatedAt: number;
+    scriptId: string,
+    groupId: string,
+    updatedAt: number,
 }
 
 interface RenameScriptCharacterGroupInput extends ScriptCharacterGroupUpdateInput {
-    characterKey: string;
+    characterKey: string,
 }
 
 interface SetScriptCharacterGroupColorInput extends ScriptCharacterGroupUpdateInput {
-    colorHex: string | null;
+    colorHex: string | null,
 }
 
 const groupSelectFields = {
@@ -60,9 +62,9 @@ const listMemberIdsByGroup = async (db: DbClient, groupIds: string[]) => {
 
 const mapGroupRow = (
     row: {
-        id: string;
-        characterKey: string;
-        colorHex: string | null;
+        id: string,
+        characterKey: string,
+        colorHex: string | null,
     },
     memberIds: string[],
 ): ScriptCharacterGroupRef => ({
@@ -149,7 +151,7 @@ export const setScriptCharacterGroupColor = async (db: DbClient, input: SetScrip
         .where(and(eq(scriptCharacters.scriptId, input.scriptId), eq(scriptCharacters.id, input.groupId), eq(scriptCharacters.kind, 'group')));
 };
 
-export const insertScriptCharacterGroupMembers = async (db: DbClient, rows: {groupId: string; characterId: string}[]) => {
+export const insertScriptCharacterGroupMembers = async (db: DbClient, rows: {groupId: string, characterId: string}[]) => {
     if (rows.length === 0) {
         return;
     }
@@ -157,7 +159,7 @@ export const insertScriptCharacterGroupMembers = async (db: DbClient, rows: {gro
     await db.insert(scriptCharacterGroupMembers).values(rows);
 };
 
-export const replaceScriptCharacterGroupMembers = async (db: DbClient, input: {groupId: string; memberIds: string[]}) => {
+export const replaceScriptCharacterGroupMembers = async (db: DbClient, input: {groupId: string, memberIds: string[]}) => {
     await db.delete(scriptCharacterGroupMembers).where(eq(scriptCharacterGroupMembers.groupId, input.groupId));
 
     if (input.memberIds.length === 0) {

@@ -1,22 +1,25 @@
 import {normalizeCharacterKey} from '@stagistic/script';
-import {type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {
+    type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState,
+} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {formControlStyles} from '../../molecules/forms/shared/formControlStyles';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
 import {ModalHeader} from '../modal/ModalHeader';
-
 import styles from './CreateCharacterModal.module.css';
 
 export interface CreateCharacterModalProps {
-    isOpen: boolean;
-    existingCharacterNames?: readonly string[];
-    onClose: () => void;
-    onCreate: (characterName: string) => void;
+    isOpen: boolean,
+    existingCharacterNames?: readonly string[],
+    onClose: () => void,
+    onCreate: (characterName: string) => void,
 }
 
-export const CreateCharacterModal = ({isOpen, existingCharacterNames = [], onClose, onCreate}: CreateCharacterModalProps) => {
+export const CreateCharacterModal = ({
+    isOpen, existingCharacterNames = [], onClose, onCreate,
+}: CreateCharacterModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
     const [isTouched, setIsTouched] = useState(false);
@@ -60,7 +63,12 @@ export const CreateCharacterModal = ({isOpen, existingCharacterNames = [], onClo
             onCreate(normalizedName);
             onClose();
         },
-        [canSubmit, normalizedName, onClose, onCreate],
+        [
+            canSubmit,
+            normalizedName,
+            onClose,
+            onCreate,
+        ],
     );
 
     return (

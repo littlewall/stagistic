@@ -1,22 +1,25 @@
 import {normalizeCharacterKey} from '@stagistic/script';
-import {type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {
+    type ChangeEvent, type FormEvent, useCallback, useEffect, useMemo, useRef, useState,
+} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {formControlStyles} from '../../molecules/forms/shared/formControlStyles';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
 import {ModalHeader} from '../modal/ModalHeader';
-
 import styles from './CreateCharacterModal.module.css';
 
 export interface CreateGroupModalProps {
-    isOpen: boolean;
-    existingEntityNames: readonly string[];
-    onClose: () => void;
-    onCreate: (groupName: string) => void | Promise<unknown>;
+    isOpen: boolean,
+    existingEntityNames: readonly string[],
+    onClose: () => void,
+    onCreate: (groupName: string) => void | Promise<unknown>,
 }
 
-export const CreateGroupModal = ({isOpen, existingEntityNames, onClose, onCreate}: CreateGroupModalProps) => {
+export const CreateGroupModal = ({
+    isOpen, existingEntityNames, onClose, onCreate,
+}: CreateGroupModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
     const [isTouched, setIsTouched] = useState(false);
@@ -65,7 +68,12 @@ export const CreateGroupModal = ({isOpen, existingEntityNames, onClose, onCreate
                 setIsSubmitting(false);
             }
         },
-        [isInvalid, isSubmitting, normalizedName, onCreate],
+        [
+            isInvalid,
+            isSubmitting,
+            normalizedName,
+            onCreate,
+        ],
     );
 
     return (

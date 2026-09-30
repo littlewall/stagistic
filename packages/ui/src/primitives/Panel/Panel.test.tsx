@@ -1,8 +1,9 @@
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {Panel} from './Panel';
-
 import styles from './Panel.module.css';
 
 describe('Panel', () => {

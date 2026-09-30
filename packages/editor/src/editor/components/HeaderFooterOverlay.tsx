@@ -7,29 +7,34 @@ import {
 } from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
-import {type CSSProperties, type RefObject, useLayoutEffect, useState} from 'react';
+import {
+    type CSSProperties, type RefObject, useLayoutEffect, useState,
+} from 'react';
 
 import {usePageStructureMarks} from '../headerFooter/usePageStructureMarks';
 import {usePaginationState} from '../headerFooter/usePaginationState';
-
 import styles from './HeaderFooterOverlay.module.css';
 
-const ALIGNMENTS = ['left', 'center', 'right'] as const;
+const ALIGNMENTS = [
+    'left',
+    'center',
+    'right',
+] as const;
 
 type HeaderFooterOverlayProps = {
-    editor: TiptapEditor | null;
-    canvasRef: RefObject<HTMLElement | null>;
-    headerFooter: HeaderFooterSettings;
-    scriptTitle: string;
-    draftDate: string;
+    editor: TiptapEditor | null,
+    canvasRef: RefObject<HTMLElement | null>,
+    headerFooter: HeaderFooterSettings,
+    scriptTitle: string,
+    draftDate: string,
 };
 
 type ContentGeometry = {
-    top: number;
-    left: number;
-    width: number;
-    height: number;
-    innerWidth: number;
+    top: number,
+    left: number,
+    width: number,
+    height: number,
+    innerWidth: number,
 };
 
 const getContentElement = (canvas: HTMLElement | null): HTMLElement | null => {
@@ -38,37 +43,38 @@ const getContentElement = (canvas: HTMLElement | null): HTMLElement | null => {
     return prosemirror?.parentElement ?? null;
 };
 
-const renderCells = (row: HeaderFooterRowSettings, resolve: (cell: HeaderFooterCellSettings) => string) =>
-    ALIGNMENTS.map(alignment => {
-        const cell = row[alignment];
+const renderCells = (row: HeaderFooterRowSettings, resolve: (cell: HeaderFooterCellSettings) => string) => ALIGNMENTS.map(alignment => {
+    const cell = row[alignment];
 
-        if (cell.isHiddenInEditor) {
-            return null;
-        }
+    if (cell.isHiddenInEditor) {
+        return null;
+    }
 
-        const text = resolve(cell);
+    const text = resolve(cell);
 
-        if (!text) {
-            return null;
-        }
+    if (!text) {
+        return null;
+    }
 
-        return (
-            <span
-                key={alignment}
-                className={clsx(
-                    styles.cell,
-                    styles[alignment],
-                    cell.isBold && styles.bold,
-                    cell.isItalic && styles.italic,
-                    cell.isUnderline && styles.underline,
-                )}
-            >
-                {text}
-            </span>
-        );
-    });
+    return (
+        <span
+            key={alignment}
+            className={clsx(
+                styles.cell,
+                styles[alignment],
+                cell.isBold && styles.bold,
+                cell.isItalic && styles.italic,
+                cell.isUnderline && styles.underline,
+            )}
+        >
+            {text}
+        </span>
+    );
+});
 
-export const HeaderFooterOverlay = ({editor, canvasRef, headerFooter, scriptTitle, draftDate}: HeaderFooterOverlayProps) => {
+export const HeaderFooterOverlay = ({
+    editor, canvasRef, headerFooter, scriptTitle, draftDate,
+}: HeaderFooterOverlayProps) => {
     const pagination = usePaginationState(editor);
     const marks = usePageStructureMarks(editor, pagination?.pages ?? []);
     const [geometry, setGeometry] = useState<ContentGeometry | null>(null);
@@ -111,7 +117,9 @@ export const HeaderFooterOverlay = ({editor, canvasRef, headerFooter, scriptTitl
         return null;
     }
 
-    const {pageHeight, marginTop, marginBottom, marginLeft} = pagination;
+    const {
+        pageHeight, marginTop, marginBottom, marginLeft,
+    } = pagination;
 
     const layerStyle: CSSProperties = {
         top: geometry.top,
@@ -135,13 +143,12 @@ export const HeaderFooterOverlay = ({editor, canvasRef, headerFooter, scriptTitl
                     sceneNumber: mark.sceneNumber,
                     pageNumber,
                 });
-                const resolve = (cell: HeaderFooterCellSettings) =>
-                    resolveHeaderFooterText(cell.text, {
-                        scriptTitle,
-                        draftDate,
-                        pageMark,
-                        pageNumber,
-                    });
+                const resolve = (cell: HeaderFooterCellSettings) => resolveHeaderFooterText(cell.text, {
+                    scriptTitle,
+                    draftDate,
+                    pageMark,
+                    pageNumber,
+                });
                 const top = index * pageHeight;
 
                 return (

@@ -1,6 +1,8 @@
 import {useMemo, useState} from 'react';
 
-import {type CommentFilter, type CommentsViewMode, DEFAULT_COMMENT_FILTER} from './types';
+import {
+    type CommentFilter, type CommentsViewMode, DEFAULT_COMMENT_FILTER,
+} from './types';
 
 /*
  * Route-level so switching sidebar panels (which remounts their content) keeps
@@ -25,7 +27,12 @@ export const useCommentsPanelState = () => {
             requestActivation: setPendingActivation,
             clearPendingActivation: () => setPendingActivation(null),
         }),
-        [expandedBlockId, filter, pendingActivation, viewMode],
+        [
+            expandedBlockId,
+            filter,
+            pendingActivation,
+            viewMode,
+        ],
     );
 };
 

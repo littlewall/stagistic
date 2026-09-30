@@ -1,27 +1,33 @@
-import {type ReactNode, useCallback, useMemo} from 'react';
+import {
+    type ReactNode, useCallback, useMemo,
+} from 'react';
 
 import {SidebarPanelSelect} from './SidebarPanelSelect';
-import type {SidebarPanel, SidebarPanelId, SidebarToggle} from './types';
+import type {
+    SidebarPanel, SidebarPanelId, SidebarToggle,
+} from './types';
 import {useSidebarLayout} from './useSidebarLayout';
 
 interface UseEditorSidebarsArgs {
-    panels: readonly SidebarPanel[];
-    defaultLeftPanelId?: SidebarPanelId;
-    defaultRightPanelId?: SidebarPanelId;
-    storageScope: string;
+    panels: readonly SidebarPanel[],
+    defaultLeftPanelId?: SidebarPanelId,
+    defaultRightPanelId?: SidebarPanelId,
+    storageScope: string,
 }
 
 interface UseEditorSidebarsResult {
-    leftSidebarToggle: SidebarToggle;
-    rightSidebarToggle: SidebarToggle;
-    leftSidebar: ReactNode;
-    rightSidebar: ReactNode;
+    leftSidebarToggle: SidebarToggle,
+    rightSidebarToggle: SidebarToggle,
+    leftSidebar: ReactNode,
+    rightSidebar: ReactNode,
     /** Shows a panel on its selected side, or always on the right when requested. */
-    revealPanel: (panelId: SidebarPanelId, options?: {side: 'right'}) => void;
-    isPanelOpen: (panelId: SidebarPanelId) => boolean;
+    revealPanel: (panelId: SidebarPanelId, options?: {side: 'right'}) => void,
+    isPanelOpen: (panelId: SidebarPanelId) => boolean,
 }
 
-export const useEditorSidebars = ({panels, defaultLeftPanelId, defaultRightPanelId, storageScope}: UseEditorSidebarsArgs): UseEditorSidebarsResult => {
+export const useEditorSidebars = ({
+    panels, defaultLeftPanelId, defaultRightPanelId, storageScope,
+}: UseEditorSidebarsArgs): UseEditorSidebarsResult => {
     const availablePanelIds = useMemo(() => panels.map(panel => panel.id), [panels]);
     const resolvedDefaultLeft = defaultLeftPanelId ?? panels[0]?.id ?? '';
     const resolvedDefaultRight = defaultRightPanelId ?? panels[panels.length - 1]?.id ?? resolvedDefaultLeft;
@@ -64,7 +70,9 @@ export const useEditorSidebars = ({panels, defaultLeftPanelId, defaultRightPanel
         />
     );
 
-    const {leftPanelId, rightPanelId, isLeftOpen, isRightOpen, toggleLeft, toggleRight, selectRight} = layout;
+    const {
+        leftPanelId, rightPanelId, isLeftOpen, isRightOpen, toggleLeft, toggleRight, selectRight,
+    } = layout;
     const revealPanel = useCallback(
         (panelId: SidebarPanelId, options?: {side: 'right'}) => {
             if (options?.side !== 'right' && leftPanelId === panelId) {
@@ -83,13 +91,26 @@ export const useEditorSidebars = ({panels, defaultLeftPanelId, defaultRightPanel
                 toggleRight();
             }
         },
-        [isLeftOpen, isRightOpen, leftPanelId, rightPanelId, selectRight, toggleLeft, toggleRight],
+        [
+            isLeftOpen,
+            isRightOpen,
+            leftPanelId,
+            rightPanelId,
+            selectRight,
+            toggleLeft,
+            toggleRight,
+        ],
     );
     const isPanelOpen = useCallback(
         (panelId: SidebarPanelId) => {
             return (leftPanelId === panelId && isLeftOpen) || (rightPanelId === panelId && isRightOpen);
         },
-        [isLeftOpen, isRightOpen, leftPanelId, rightPanelId],
+        [
+            isLeftOpen,
+            isRightOpen,
+            leftPanelId,
+            rightPanelId,
+        ],
     );
 
     return {

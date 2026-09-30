@@ -6,18 +6,18 @@ import {ModalDialog} from './ModalDialog';
 import {ModalHeader} from './ModalHeader';
 
 export interface ConfirmModalProps {
-    isOpen: boolean;
-    ariaLabel: string;
-    title: ReactNode;
-    description?: ReactNode;
-    notes?: ReactNode[];
-    confirmLabel: string;
-    cancelLabel?: string;
-    isPending?: boolean;
+    isOpen: boolean,
+    ariaLabel: string,
+    title: ReactNode,
+    description?: ReactNode,
+    notes?: ReactNode[],
+    confirmLabel: string,
+    cancelLabel?: string,
+    isPending?: boolean,
     /* Blocks the backdrop and Esc while the confirm action is in flight. */
-    lockWhilePending?: boolean;
-    onClose: () => void;
-    onConfirm: () => void | Promise<void>;
+    lockWhilePending?: boolean,
+    onClose: () => void,
+    onConfirm: () => void | Promise<void>,
 }
 
 export const ConfirmModal = ({

@@ -1,5 +1,7 @@
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
 import {AttributeManagerPlacesPanel} from './AttributeManagerPlacesPanel';
@@ -46,10 +48,7 @@ const renderPanel = () => {
 
     root.render(
         <AttributeManagerPlacesPanel
-            places={[
-                {id: 'place-1', name: 'Backstage'},
-                {id: 'place-2', name: 'Main stage'},
-            ]}
+            places={[{id: 'place-1', name: 'Backstage'}, {id: 'place-2', name: 'Main stage'}]}
             onCreatePlace={onCreatePlace}
             onRenamePlace={onRenamePlace}
             onDeletePlace={onDeletePlace}

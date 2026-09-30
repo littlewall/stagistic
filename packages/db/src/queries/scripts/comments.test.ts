@@ -1,4 +1,6 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {createTestDb, seedScript} from '../../testing/createTestDb';
 import {
@@ -59,10 +61,16 @@ describe('script comment queries', () => {
 
         await seedScript(db, 's1');
         await insertScriptCommentThread(db, thread('t1'));
-        await updateScriptCommentThreadStatus(db, {scriptId: 's1', threadId: 't1', status: 'resolved', resolvedAt: 5, resolvedBy: 'local', updatedAt: 5});
-        expect((await listScriptCommentThreads(db, 's1'))[0]).toMatchObject({status: 'resolved', resolvedAt: 5, resolvedBy: 'local'});
+        await updateScriptCommentThreadStatus(db, {
+            scriptId: 's1', threadId: 't1', status: 'resolved', resolvedAt: 5, resolvedBy: 'local', updatedAt: 5,
+        });
+        expect((await listScriptCommentThreads(db, 's1'))[0]).toMatchObject({
+            status: 'resolved', resolvedAt: 5, resolvedBy: 'local',
+        });
 
-        await updateScriptCommentThreadStatus(db, {scriptId: 's1', threadId: 't1', status: 'open', resolvedAt: null, resolvedBy: null, updatedAt: 6});
+        await updateScriptCommentThreadStatus(db, {
+            scriptId: 's1', threadId: 't1', status: 'open', resolvedAt: null, resolvedBy: null, updatedAt: 6,
+        });
         expect((await listScriptCommentThreads(db, 's1'))[0]).toMatchObject({status: 'open', resolvedAt: null});
     });
 
@@ -71,9 +79,13 @@ describe('script comment queries', () => {
 
         await seedScript(db, 's1');
         await insertScriptCommentThread(db, thread('t1', {anchorKind: 'block', anchorBlockId: 'b2'}));
-        await insertScriptCommentThread(db, thread('t2', {anchorKind: 'block', anchorBlockId: 'b3', createdAt: 2}));
+        await insertScriptCommentThread(db, thread('t2', {
+            anchorKind: 'block', anchorBlockId: 'b3', createdAt: 2,
+        }));
 
-        const moved = await moveScriptCommentBlockAnchors(db, {scriptId: 's1', fromBlockId: 'b2', toBlockId: 'b1', updatedAt: 9});
+        const moved = await moveScriptCommentBlockAnchors(db, {
+            scriptId: 's1', fromBlockId: 'b2', toBlockId: 'b1', updatedAt: 9,
+        });
 
         expect(moved).toEqual(['t1']);
         expect((await listScriptCommentThreads(db, 's1')).map(row => row.anchorBlockId)).toEqual(['b1', 'b3']);
@@ -85,9 +97,13 @@ describe('script comment queries', () => {
         await seedScript(db, 's1');
         await insertScriptCommentThread(db, thread('t1'));
         await insertScriptCommentMessage(db, message('m1', 't1', 1));
-        await updateScriptCommentMessageBody(db, {scriptId: 's1', messageId: 'm1', body: 'new', editedAt: 7});
+        await updateScriptCommentMessageBody(db, {
+            scriptId: 's1', messageId: 'm1', body: 'new', editedAt: 7,
+        });
 
-        expect((await listScriptCommentMessages(db, 's1'))[0]).toMatchObject({body: 'new', editedAt: 7, updatedAt: 7});
+        expect((await listScriptCommentMessages(db, 's1'))[0]).toMatchObject({
+            body: 'new', editedAt: 7, updatedAt: 7,
+        });
     });
 
     it('deletes a single message, and cascades messages when a thread is deleted', async () => {

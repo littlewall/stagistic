@@ -1,15 +1,16 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
-import {type MouseEvent as ReactMouseEvent, type RefObject, useEffect, useState} from 'react';
+import {
+    type MouseEvent as ReactMouseEvent, type RefObject, useEffect, useState,
+} from 'react';
 
 import {commentsPluginKey} from '../tiptap/extensions/comments';
-
 import styles from './SelectionToolbarOverlay.module.css';
 
 const TOOLBAR_GAP_PX = 8;
 
 interface ToolbarPosition {
-    top: number;
-    left: number;
+    top: number,
+    left: number,
 }
 
 const readPosition = (editor: TiptapEditor, canvas: HTMLElement): ToolbarPosition | null => {
@@ -35,8 +36,8 @@ const readPosition = (editor: TiptapEditor, canvas: HTMLElement): ToolbarPositio
 const keepEditorSelection = (event: ReactMouseEvent) => event.preventDefault();
 
 interface SelectionToolbarOverlayProps {
-    editor: TiptapEditor | null;
-    canvasRef: RefObject<HTMLElement | null>;
+    editor: TiptapEditor | null,
+    canvasRef: RefObject<HTMLElement | null>,
 }
 
 export const SelectionToolbarOverlay = ({editor, canvasRef}: SelectionToolbarOverlayProps) => {

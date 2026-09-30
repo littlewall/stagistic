@@ -5,38 +5,40 @@ import {ToggleButton as RACToggleButton, ToggleButtonGroup as RACToggleButtonGro
 import styles from './ToggleButtonGroup.module.css';
 
 export interface ToggleButtonGroupOption<Value extends string> {
-    value: Value;
-    label: string;
-    content?: ReactNode;
-    isIconOnly?: boolean;
+    value: Value,
+    label: string,
+    content?: ReactNode,
+    isIconOnly?: boolean,
 }
 
 interface ToggleButtonGroupBaseProps<Value extends string> {
-    options: readonly ToggleButtonGroupOption<Value>[];
-    ariaLabel?: string;
-    ariaLabelledBy?: string;
-    className?: string;
-    isDisabled?: boolean;
-    variant?: 'default' | 'chips';
+    options: readonly ToggleButtonGroupOption<Value>[],
+    ariaLabel?: string,
+    ariaLabelledBy?: string,
+    className?: string,
+    isDisabled?: boolean,
+    variant?: 'default' | 'chips',
 }
 
 interface SingleToggleButtonGroupProps<Value extends string> {
-    selectionMode?: 'single';
-    value: Value;
-    onChange: (value: Value) => void;
+    selectionMode?: 'single',
+    value: Value,
+    onChange: (value: Value) => void,
 }
 
 interface MultipleToggleButtonGroupProps<Value extends string> {
-    selectionMode: 'multiple';
-    value: readonly Value[];
-    onChange: (value: Value[]) => void;
+    selectionMode: 'multiple',
+    value: readonly Value[],
+    onChange: (value: Value[]) => void,
 }
 
 export type ToggleButtonGroupProps<Value extends string> = ToggleButtonGroupBaseProps<Value> &
     (SingleToggleButtonGroupProps<Value> | MultipleToggleButtonGroupProps<Value>);
 
 export const ToggleButtonGroup = <Value extends string>(props: ToggleButtonGroupProps<Value>) => {
-    const {options, ariaLabel, ariaLabelledBy, className, isDisabled, variant = 'default'} = props;
+    const {
+        options, ariaLabel, ariaLabelledBy, className, isDisabled, variant = 'default',
+    } = props;
     const selectionMode = props.selectionMode ?? 'single';
     const selectedKeys = props.selectionMode === 'multiple' ? props.value : [props.value];
 

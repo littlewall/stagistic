@@ -2,7 +2,7 @@
  * Remaps a nullable foreign key through an id map. Unknown ids fall back to null
  * (the referenced row was not copied), matching the `on delete set null` behavior.
  */
-export const remapNullable = (map: ReadonlyMap<string, string>, id: string | null): string | null => (id === null ? null : (map.get(id) ?? null));
+export const remapNullable = (map: ReadonlyMap<string, string>, id: string | null): string | null => id === null ? null : map.get(id) ?? null;
 
 export const remapCharacterTagIds = (contentJson: string | null, entityIdMap: ReadonlyMap<string, string> | null): string | null => {
     if (contentJson === null) {
@@ -31,7 +31,7 @@ export const remapCharacterTagIds = (contentJson: string | null, entityIdMap: Re
             ...record,
             attrs: {
                 ...attrs,
-                characterId: oldId === null ? null : (entityIdMap?.get(oldId) ?? null),
+                characterId: oldId === null ? null : entityIdMap?.get(oldId) ?? null,
             },
         };
     };

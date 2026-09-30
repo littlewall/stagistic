@@ -1,7 +1,11 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
-import {buildTitlePageLogoItem, TITLE_PAGE_LOGO_MAX_HEIGHT_PX, TITLE_PAGE_LOGO_MAX_WIDTH_PX} from './buildTitlePageLogoItem';
+import {
+    buildTitlePageLogoItem, TITLE_PAGE_LOGO_MAX_HEIGHT_PX, TITLE_PAGE_LOGO_MAX_WIDTH_PX,
+} from './buildTitlePageLogoItem';
 
 const logo = {
     dataUrl: 'data:image/png;base64,aGVsbG8=',

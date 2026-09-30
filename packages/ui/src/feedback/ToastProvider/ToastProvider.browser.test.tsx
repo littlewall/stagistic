@@ -2,9 +2,13 @@ import '../../../styles/tokens.css';
 
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 
-import {ToastProvider, type ToastVariant, useToastController} from './ToastProvider';
+import {
+    ToastProvider, type ToastVariant, useToastController,
+} from './ToastProvider';
 
 const mountedRoots: Root[] = [];
 
@@ -26,18 +30,20 @@ const ToastSeeder = () => {
     const {addToast} = useToastController();
 
     useEffect(() => {
-        const variants: ToastVariant[] = ['success', 'error', 'info'];
+        const variants: ToastVariant[] = [
+            'success',
+            'error',
+            'info',
+        ];
 
-        variants.forEach(variant =>
-            addToast(
-                {
-                    title: variant,
-                    description: `${variant} description`,
-                    variant,
-                },
-                {timeout: 60_000},
-            ),
-        );
+        variants.forEach(variant => addToast(
+            {
+                title: variant,
+                description: `${variant} description`,
+                variant,
+            },
+            {timeout: 60_000},
+        ));
     }, [addToast]);
 
     return null;

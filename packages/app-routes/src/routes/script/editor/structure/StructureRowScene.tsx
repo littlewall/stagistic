@@ -3,11 +3,12 @@ import clsx from 'clsx';
 import {memo} from 'react';
 
 import {SCENE_DND_TYPE} from './dnd';
+import styles from './ScriptStructureSidebar.module.css';
 import type {StructureRowSceneProps} from './types';
 
-import styles from './ScriptStructureSidebar.module.css';
-
-export const StructureRowScene = memo(({blockId, title, sceneNumber, index, groupId, isActive, startPage, onFocus}: StructureRowSceneProps) => {
+export const StructureRowScene = memo(({
+    blockId, title, sceneNumber, index, groupId, isActive, startPage, onFocus,
+}: StructureRowSceneProps) => {
     const {ref, handleRef} = useSortable({
         id: blockId,
         index,

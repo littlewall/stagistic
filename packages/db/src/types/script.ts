@@ -20,8 +20,8 @@ import type {MusicAttachmentRole} from './musicAttachments';
 export type Script = InferSelectModel<typeof scripts>;
 
 export interface ScriptSummary extends Pick<Script, 'id' | 'title' | 'createdAt' | 'updatedAt'> {
-    activeBlockId?: Script['activeBlockId'];
-    subtitle: string | null;
+    activeBlockId?: Script['activeBlockId'],
+    subtitle: string | null,
 }
 
 export type ScriptSettingsBlock = InferSelectModel<typeof scriptSettingsBlocks>;
@@ -43,9 +43,9 @@ export const LOCAL_COMMENT_AUTHOR_ID = 'local';
 type ScriptMusicAttachmentBindingRow = InferSelectModel<typeof scriptMusicAttachments>;
 
 export interface ScriptMusicAttachmentBinding extends Omit<ScriptMusicAttachmentBindingRow, 'role'> {
-    role: MusicAttachmentRole;
+    role: MusicAttachmentRole,
 }
 
 export interface ScriptMusicAttachment extends ScriptAttachment {
-    role: MusicAttachmentRole;
+    role: MusicAttachmentRole,
 }

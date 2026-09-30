@@ -1,14 +1,16 @@
 import type {VisualLine, VisualRun} from '../../visualLine';
-import {type ContentsGeometry, MONO_FONT_FAMILY, SCORE_COLUMN_HEADER, SCRIPT_COLUMN_HEADER} from './contentsGeometry';
+import {
+    type ContentsGeometry, MONO_FONT_FAMILY, SCORE_COLUMN_HEADER, SCRIPT_COLUMN_HEADER,
+} from './contentsGeometry';
 
 export const makeRun = (
     text: string,
     x: number,
     fontSizePx: number,
     emphasis: {
-        bold?: boolean;
-        italic?: boolean;
-        underline?: boolean;
+        bold?: boolean,
+        italic?: boolean,
+        underline?: boolean,
     } = {},
 ): VisualRun => ({
     text,
@@ -20,11 +22,13 @@ export const makeRun = (
     fontFamily: MONO_FONT_FAMILY,
 });
 
-export const centeredRun = (geometry: ContentsGeometry, text: string, fontSizePx: number, emphasis: {bold?: boolean} = {}) =>
-    makeRun(text, (geometry.pageWidthPx - text.length * fontSizePx * 0.6) / 2, fontSizePx, emphasis);
+export const centeredRun = (geometry: ContentsGeometry, text: string, fontSizePx: number, emphasis: {bold?: boolean} = {}) => {
+    return makeRun(text, (geometry.pageWidthPx - text.length * fontSizePx * 0.6) / 2, fontSizePx, emphasis);
+};
 
-const rightAlignedRun = (text: string, rightPx: number, fontSizePx: number, charWidthPx: number, emphasis: {underline?: boolean} = {}) =>
-    makeRun(text, rightPx - text.length * charWidthPx, fontSizePx, emphasis);
+const rightAlignedRun = (text: string, rightPx: number, fontSizePx: number, charWidthPx: number, emphasis: {underline?: boolean} = {}) => {
+    return makeRun(text, rightPx - text.length * charWidthPx, fontSizePx, emphasis);
+};
 
 export const numberRuns = (geometry: ContentsGeometry, scriptPage: number | null, scorePage: number | null): VisualRun[] => {
     const runs: VisualRun[] = [];

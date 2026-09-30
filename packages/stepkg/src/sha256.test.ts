@@ -1,4 +1,6 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {sha256Hex} from './sha256';
 

@@ -1,4 +1,6 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {collectMusicAtoms} from './collectMusicAtoms';
 
@@ -28,8 +30,7 @@ describe('collectMusicAtoms', () => {
                 mode: 'open',
                 title: 'Night',
                 kind: null,
-            },
-            {role: 'out'},
+            }, {role: 'out'},
         ]);
     });
 

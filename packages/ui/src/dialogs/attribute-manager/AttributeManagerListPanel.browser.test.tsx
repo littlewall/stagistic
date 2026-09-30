@@ -1,6 +1,8 @@
 import {type ComponentProps, type ComponentType} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
 import {type AttributeManagerListItem, AttributeManagerListPanel} from './AttributeManagerListPanel';
@@ -9,16 +11,16 @@ const mountedRoots: Root[] = [];
 
 type SearchableListPanelProps = ComponentProps<typeof AttributeManagerListPanel> & {
     search?: {
-        ariaLabel: string;
-        placeholder: string;
-    };
+        ariaLabel: string,
+        placeholder: string,
+    },
     createAction?: {
-        ariaLabel: string;
-        tooltipLabel: string;
-        onPress: () => void;
-    };
-    hideDetailTypeLabel?: boolean;
-    wrapDetailTitle?: boolean;
+        ariaLabel: string,
+        tooltipLabel: string,
+        onPress: () => void,
+    },
+    hideDetailTypeLabel?: boolean,
+    wrapDetailTitle?: boolean,
 };
 
 const SearchableListPanel = AttributeManagerListPanel as ComponentType<SearchableListPanelProps>;
@@ -77,8 +79,7 @@ describe('AttributeManagerListPanel', () => {
                 id: 's1',
                 number: '1.',
                 title: 'Opening',
-            },
-            {
+            }, {
                 id: 's2',
                 number: '2.',
                 title: 'The reveal',
@@ -147,8 +148,7 @@ describe('AttributeManagerListPanel', () => {
                     id: 'c1',
                     number: '1.',
                     title: 'Opening',
-                },
-                {
+                }, {
                     id: 'c2',
                     number: '2.',
                     title: 'Finale',
@@ -175,7 +175,11 @@ describe('AttributeManagerListPanel', () => {
 
         const button = await waitForElement<HTMLButtonElement>('[aria-label="Scene list"] button');
 
-        expect(Array.from(button.children).map(child => child.textContent)).toEqual(['1.', 'Overture', 'Music kind']);
+        expect(Array.from(button.children).map(child => child.textContent)).toEqual([
+            '1.',
+            'Overture',
+            'Music kind',
+        ]);
         expect(host.contains(button)).toBe(true);
     });
 
@@ -201,8 +205,7 @@ describe('AttributeManagerListPanel', () => {
                 number: '1.',
                 title: 'Opening',
                 group: {id: 'act-1', label: 'Act I'},
-            },
-            {
+            }, {
                 id: 's2',
                 number: '2.',
                 title: 'Finale',
@@ -244,8 +247,7 @@ describe('AttributeManagerListPanel', () => {
                         id: 'm1',
                         number: '1.',
                         title: 'Overture',
-                    },
-                    {
+                    }, {
                         id: 'm2',
                         number: '',
                         title: 'Finale',

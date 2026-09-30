@@ -1,29 +1,32 @@
-import {type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {
+    type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState,
+} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {Switch} from '../../atoms/Switch/Switch';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
 import {ModalHeader} from '../modal/ModalHeader';
-
 import styles from './DuplicateScriptModal.module.css';
 
 export interface DuplicateScriptSubmit {
-    title: string;
-    copySettings: boolean;
-    copyAttributes: boolean;
-    openInEditor: boolean;
+    title: string,
+    copySettings: boolean,
+    copyAttributes: boolean,
+    openInEditor: boolean,
 }
 
 export interface DuplicateScriptModalProps {
-    isOpen: boolean;
-    initialTitle: string;
-    isPending?: boolean;
-    onClose: () => void;
-    onSubmit: (values: DuplicateScriptSubmit) => void | Promise<void>;
+    isOpen: boolean,
+    initialTitle: string,
+    isPending?: boolean,
+    onClose: () => void,
+    onSubmit: (values: DuplicateScriptSubmit) => void | Promise<void>,
 }
 
-export const DuplicateScriptModal = ({isOpen, initialTitle, isPending = false, onClose, onSubmit}: DuplicateScriptModalProps) => {
+export const DuplicateScriptModal = ({
+    isOpen, initialTitle, isPending = false, onClose, onSubmit,
+}: DuplicateScriptModalProps) => {
     const titleInputRef = useRef<HTMLInputElement | null>(null);
     const [title, setTitle] = useState(initialTitle);
     const [copySettings, setCopySettings] = useState(false);
@@ -64,7 +67,15 @@ export const DuplicateScriptModal = ({isOpen, initialTitle, isPending = false, o
                 openInEditor,
             });
         },
-        [canSubmit, isPending, onSubmit, title, copySettings, copyAttributes, openInEditor],
+        [
+            canSubmit,
+            isPending,
+            onSubmit,
+            title,
+            copySettings,
+            copyAttributes,
+            openInEditor,
+        ],
     );
     const handleTitleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setTitle(event.target.value);

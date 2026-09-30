@@ -1,6 +1,8 @@
 import type {ComponentProps, ComponentType} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 import {page, userEvent} from 'vite-plus/test/browser';
 
 import {AttributeManagerCharactersPanel} from './AttributeManagerCharactersPanel';
@@ -8,20 +10,20 @@ import {AttributeManagerCharactersPanel} from './AttributeManagerCharactersPanel
 type RenameableCharactersPanelProps = Omit<ComponentProps<typeof AttributeManagerCharactersPanel>, 'characters'> & {
     characters: Array<
         ComponentProps<typeof AttributeManagerCharactersPanel>['characters'][number] & {
-            groupNames?: string[];
+            groupNames?: string[],
         }
-    >;
-    draftScopeKey?: string | null;
-    renamingCharacterIds?: string[];
+    >,
+    draftScopeKey?: string | null,
+    renamingCharacterIds?: string[],
     groups?: Array<{
-        id: string;
-        name: string;
-        color: string | null;
-        memberIds: string[];
-        usageCount: number;
-    }>;
-    onRenameGroup?: (groupId: string, previousName: string, nextName: string) => void | Promise<unknown>;
-    onRenameCharacter?: (characterId: string, previousName: string, nextName: string) => void | Promise<unknown>;
+        id: string,
+        name: string,
+        color: string | null,
+        memberIds: string[],
+        usageCount: number,
+    }>,
+    onRenameGroup?: (groupId: string, previousName: string, nextName: string) => void | Promise<unknown>,
+    onRenameCharacter?: (characterId: string, previousName: string, nextName: string) => void | Promise<unknown>,
 };
 
 const RenameableCharactersPanel = AttributeManagerCharactersPanel as ComponentType<RenameableCharactersPanelProps>;
@@ -66,8 +68,7 @@ const renderPanel = (
                     vocalRangeLow: null,
                     vocalRangeHigh: null,
                     groupNames: ['ALL', 'ENSEMBLE'],
-                },
-                {
+                }, {
                     id: 'char-2',
                     name: 'BORIS',
                     color: null,
@@ -186,9 +187,7 @@ describe('AttributeManagerCharactersPanel rename', () => {
         await new Promise(resolve => window.setTimeout(resolve, 20));
         await page
             .elementLocator(
-                Array.from(document.querySelectorAll<HTMLButtonElement>('[aria-label="Characters list"] button')).find(button =>
-                    button.textContent?.includes('BORIS'),
-                )!,
+                Array.from(document.querySelectorAll<HTMLButtonElement>('[aria-label="Characters list"] button')).find(button => button.textContent?.includes('BORIS'))!,
             )
             .click();
 

@@ -1,11 +1,20 @@
-import {MUSIC_DRAFT_ATTR, MUSIC_ID_ATTR, MUSIC_MODE_ATTR, MUSIC_TITLE_ATTR} from '@stagistic/script';
+import {
+    MUSIC_DRAFT_ATTR, MUSIC_ID_ATTR, MUSIC_MODE_ATTR, MUSIC_TITLE_ATTR,
+} from '@stagistic/script';
 import {ArrowRightIcon, EditPencilIcon} from '@stagistic/ui';
 import {type NodeViewProps, NodeViewWrapper} from '@tiptap/react';
 import clsx from 'clsx';
-import {useEffect, useId, useRef, useState} from 'react';
+import {
+    useEffect, useId, useRef, useState,
+} from 'react';
 
-import type {EditorMusicCreateRequest, EditorMusicRemoveRequest, PersistentMusicRef} from '../../contracts';
-import {MusicMenuButton, type MusicMode, MusicUnassignIcon} from './MusicPillControls';
+import type {
+    EditorMusicCreateRequest, EditorMusicRemoveRequest, PersistentMusicRef,
+} from '../../contracts';
+import styles from './MusicPill.module.css';
+import {
+    MusicMenuButton, type MusicMode, MusicUnassignIcon,
+} from './MusicPillControls';
 import {requestMusicPillCreation} from './musicPillCreation';
 import {
     findMusicPillElement,
@@ -18,16 +27,14 @@ import {
 } from './musicPillHelpers';
 import {MusicPillMenuPopover} from './MusicPillMenuPopover';
 
-import styles from './MusicPill.module.css';
-
 interface MusicStartPillProps extends NodeViewProps {
-    locked?: boolean;
-    numberLabel?: string;
-    onMusicAssigned?: (musicId: string) => void;
-    onOpenMusicManager?: (musicId: string) => void;
-    onRequestCreateMusic?: (request: EditorMusicCreateRequest) => void;
-    onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void;
-    persistentMusicRef?: {current: readonly PersistentMusicRef[]};
+    locked?: boolean,
+    numberLabel?: string,
+    onMusicAssigned?: (musicId: string) => void,
+    onOpenMusicManager?: (musicId: string) => void,
+    onRequestCreateMusic?: (request: EditorMusicCreateRequest) => void,
+    onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
+    persistentMusicRef?: {current: readonly PersistentMusicRef[]},
 }
 
 export const MusicStartPill = ({
@@ -45,7 +52,9 @@ export const MusicStartPill = ({
     onRequestRemoveMusic,
     persistentMusicRef,
 }: MusicStartPillProps) => {
-    const {active, setActive, rootRef} = usePillActivation();
+    const {
+        active, setActive, rootRef,
+    } = usePillActivation();
     const anchorName = `--music-pill-${useId().replaceAll(/[^a-zA-Z0-9_-]/g, '')}`;
     const titleRef = useRef<HTMLSpanElement>(null);
     const mode: MusicMode = node.attrs[MUSIC_MODE_ATTR] === 'hit' ? 'hit' : 'open';
@@ -109,18 +118,17 @@ export const MusicStartPill = ({
         setActive(false);
         scrollToMusicPill(editor, 'out', musicId);
     };
-    const requestMusicCreation = (value = titleRef.current?.textContent ?? draftTitle) =>
-        requestMusicPillCreation({
-            title: value,
-            isDraft,
-            musicId,
-            editor,
-            getPos,
-            updateAttributes,
-            persistentMusicRef,
-            onMusicAssigned,
-            onRequestCreateMusic,
-        });
+    const requestMusicCreation = (value = titleRef.current?.textContent ?? draftTitle) => requestMusicPillCreation({
+        title: value,
+        isDraft,
+        musicId,
+        editor,
+        getPos,
+        updateAttributes,
+        persistentMusicRef,
+        onMusicAssigned,
+        onRequestCreateMusic,
+    });
 
     return (
         <NodeViewWrapper

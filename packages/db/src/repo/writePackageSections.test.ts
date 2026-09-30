@@ -1,4 +1,6 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {createTestDb, seedScript} from '../testing/createTestDb';
 import {readScriptSettings, writeScriptSettingsTx} from './config';
@@ -7,6 +9,7 @@ import {readTitlePageSettings, writeTitlePageFieldsTx} from './titlePage';
 describe('tx-level package section writers', () => {
     it('writes title page and settings inside a caller transaction', async () => {
         const {db} = await createTestDb();
+
         await seedScript(db, 'sc1');
 
         await db.transaction(async tx => {

@@ -86,35 +86,35 @@ export const toExtractedImportMetadata = (scriptId: string, sourceDocument: Scri
     const titlePageFieldsRaw = importMeta.titlePageFields;
     const titlePageFields = Array.isArray(titlePageFieldsRaw)
         ? titlePageFieldsRaw
-              .map((field, index) => {
-                  if (!isObjectRecord(field)) {
-                      warnings.push(`Script ${scriptId}: invalid title page field at index ${index}.`);
+            .map((field, index) => {
+                if (!isObjectRecord(field)) {
+                    warnings.push(`Script ${scriptId}: invalid title page field at index ${index}.`);
 
-                      return null;
-                  }
+                    return null;
+                }
 
-                  const fieldKey = typeof field.fieldKey === 'string' ? field.fieldKey.trim() : '';
-                  const fieldValue = typeof field.value === 'string' ? field.value.trim() : '';
-                  const orderNo = typeof field.orderNo === 'number' && Number.isFinite(field.orderNo) ? Math.max(0, Math.floor(field.orderNo)) : index;
+                const fieldKey = typeof field.fieldKey === 'string' ? field.fieldKey.trim() : '';
+                const fieldValue = typeof field.value === 'string' ? field.value.trim() : '';
+                const orderNo = typeof field.orderNo === 'number' && Number.isFinite(field.orderNo) ? Math.max(0, Math.floor(field.orderNo)) : index;
 
-                  if (fieldKey.length === 0) {
-                      warnings.push(`Script ${scriptId}: skipped title page field with empty key at index ${index}.`);
+                if (fieldKey.length === 0) {
+                    warnings.push(`Script ${scriptId}: skipped title page field with empty key at index ${index}.`);
 
-                      return null;
-                  }
+                    return null;
+                }
 
-                  return {
-                      fieldKey,
-                      fieldValue,
-                      orderNo,
-                  };
-              })
-              .filter((field): field is ExtractedImportTitlePageField => Boolean(field))
-              .sort((a, b) => a.orderNo - b.orderNo)
-              .map((field, index) => ({
-                  ...field,
-                  orderNo: index,
-              }))
+                return {
+                    fieldKey,
+                    fieldValue,
+                    orderNo,
+                };
+            })
+            .filter((field): field is ExtractedImportTitlePageField => Boolean(field))
+            .sort((a, b) => a.orderNo - b.orderNo)
+            .map((field, index) => ({
+                ...field,
+                orderNo: index,
+            }))
         : null;
     const sceneSynopsisByHeadingBlockId = new Map<string, string>();
 
@@ -179,7 +179,7 @@ export const sanitizeInlineContentNode = (node: unknown): ScriptNode | null => {
 
     if (Array.isArray(node.marks)) {
         const marks = node.marks
-            .filter((mark): mark is {type: string; attrs?: Record<string, unknown>} => {
+            .filter((mark): mark is {type: string, attrs?: Record<string, unknown>} => {
                 return isObjectRecord(mark) && typeof mark.type === 'string';
             })
             .map(mark => {

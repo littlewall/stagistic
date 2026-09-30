@@ -5,12 +5,14 @@ import {Switch as RACSwitch, type SwitchProps as RACSwitchProps} from 'react-ari
 import styles from './Switch.module.css';
 
 export type SwitchProps = Omit<RACSwitchProps, 'children' | 'className'> & {
-    className?: string;
-    children?: ReactNode;
-    variant?: 'default' | 'setting';
+    className?: string,
+    children?: ReactNode,
+    variant?: 'default' | 'setting',
 };
 
-export const Switch = ({className, children, variant = 'default', ...props}: SwitchProps) => (
+export const Switch = ({
+    className, children, variant = 'default', ...props
+}: SwitchProps) => (
     <RACSwitch
         {...props}
         className={clsx(styles.switch, variant === 'setting' && styles.setting, className)}

@@ -1,5 +1,7 @@
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {ToggleButtonGroup} from './ToggleButtonGroup';
 
@@ -9,8 +11,7 @@ describe('ToggleButtonGroup', () => {
             <ToggleButtonGroup
                 ariaLabel="Example"
                 options={[
-                    {value: 'text', label: 'Text'},
-                    {
+                    {value: 'text', label: 'Text'}, {
                         value: 'icon',
                         label: 'Icon',
                         content: <span data-icon="true">I</span>,
@@ -33,10 +34,7 @@ describe('ToggleButtonGroup', () => {
         const markup = renderToStaticMarkup(
             <ToggleButtonGroup
                 ariaLabel="Formatting"
-                options={[
-                    {value: 'bold', label: 'Bold'},
-                    {value: 'italic', label: 'Italic'},
-                ]}
+                options={[{value: 'bold', label: 'Bold'}, {value: 'italic', label: 'Italic'}]}
                 selectionMode="multiple"
                 value={['bold', 'italic']}
                 onChange={() => {}}

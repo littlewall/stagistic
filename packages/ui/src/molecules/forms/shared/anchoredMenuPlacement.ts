@@ -1,16 +1,16 @@
 export type AnchoredMenuPlacement = 'above' | 'below';
 
 interface ResolveAnchoredMenuPlacementArgs {
-    anchorTop: number;
-    anchorBottom: number;
-    menuHeight: number;
-    viewportHeight: number;
-    viewportMargin: number;
+    anchorTop: number,
+    anchorBottom: number,
+    menuHeight: number,
+    viewportHeight: number,
+    viewportMargin: number,
 }
 
 interface ResolvedAnchoredMenuPlacement {
-    placement: AnchoredMenuPlacement;
-    maxHeight: number;
+    placement: AnchoredMenuPlacement,
+    maxHeight: number,
 }
 
 export const resolveAnchoredMenuPlacement = ({

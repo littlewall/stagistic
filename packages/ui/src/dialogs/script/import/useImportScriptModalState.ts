@@ -1,4 +1,6 @@
-import {type FormEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {
+    type FormEvent, useCallback, useEffect, useRef, useState,
+} from 'react';
 
 import type {UseImportScriptModalStateArgs} from './types';
 import {useImportFileSelection} from './useImportFileSelection';
@@ -28,7 +30,9 @@ export const useImportScriptModalState = ({
         handleFileSelect,
         handlePickFile,
         handleChoiceChange,
-    } = useImportFileSelection({isOpen, onPeekStepkg, onPickFile, preselectedFile});
+    } = useImportFileSelection({
+        isOpen, onPeekStepkg, onPickFile, preselectedFile,
+    });
     const [isProcessing, setIsProcessing] = useState(false);
     const [isDownloadingBackup, setIsDownloadingBackup] = useState(false);
 
@@ -83,7 +87,9 @@ export const useImportScriptModalState = ({
                 setIsProcessing(true);
 
                 try {
-                    await onImportStagistic({name, fileName: selectedFile.name, text: fileText});
+                    await onImportStagistic({
+                        name, fileName: selectedFile.name, text: fileText,
+                    });
                 } finally {
                     setIsProcessing(false);
                 }
@@ -101,12 +107,21 @@ export const useImportScriptModalState = ({
             setIsProcessing(true);
 
             try {
-                await onImportStepkgAsNew({fileName: selectedFile.name, bytes: selectedFile.bytes, title: name});
+                await onImportStepkgAsNew({
+                    fileName: selectedFile.name, bytes: selectedFile.bytes, title: name,
+                });
             } finally {
                 setIsProcessing(false);
             }
         },
-        [isProcessing, name, onImportStagistic, onImportStepkgAsNew, selectedFile, showReplacePanel],
+        [
+            isProcessing,
+            name,
+            onImportStagistic,
+            onImportStepkgAsNew,
+            selectedFile,
+            showReplacePanel,
+        ],
     );
 
     const handleReplaceConfirm = useCallback(async () => {
@@ -121,7 +136,11 @@ export const useImportScriptModalState = ({
         } finally {
             setIsProcessing(false);
         }
-    }, [isProcessing, onReplaceWithStepkg, selectedFile]);
+    }, [
+        isProcessing,
+        onReplaceWithStepkg,
+        selectedFile,
+    ]);
 
     const handleDownloadBackup = useCallback(async () => {
         if (!stepkgPeek?.ok || isDownloadingBackup) {
@@ -135,7 +154,11 @@ export const useImportScriptModalState = ({
         } finally {
             setIsDownloadingBackup(false);
         }
-    }, [isDownloadingBackup, onDownloadStepkgBackup, stepkgPeek]);
+    }, [
+        isDownloadingBackup,
+        onDownloadStepkgBackup,
+        stepkgPeek,
+    ]);
 
     return {
         inputRef,

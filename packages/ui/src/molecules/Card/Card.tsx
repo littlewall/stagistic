@@ -1,14 +1,16 @@
 import clsx from 'clsx';
-import type {ComponentPropsWithoutRef, ElementType, ReactNode} from 'react';
+import type {
+    ComponentPropsWithoutRef, ElementType, ReactNode,
+} from 'react';
 
 import styles from './Card.module.css';
 
 type CardProps<T extends ElementType> = {
-    children: ReactNode;
-    className?: string;
-    as?: T;
-    variant?: 'default' | 'highlight';
-    compact?: boolean;
+    children: ReactNode,
+    className?: string,
+    as?: T,
+    variant?: 'default' | 'highlight',
+    compact?: boolean,
 } & Omit<ComponentPropsWithoutRef<T>, 'as' | 'className'>;
 
 const defaultElement = 'article';
@@ -43,8 +45,8 @@ export const Card = <T extends ElementType = typeof defaultElement>({
 };
 
 type CardSectionProps = {
-    children: ReactNode;
-    className?: string;
+    children: ReactNode,
+    className?: string,
 };
 
 export const CardHeader = ({children, className}: CardSectionProps) => <div className={clsx(styles.header, className)}>{children}</div>;

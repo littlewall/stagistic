@@ -1,6 +1,10 @@
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 
-import {APP_THEME_STORAGE_KEY, applyAppThemeMode, readStoredAppThemeMode} from './theme';
+import {
+    APP_THEME_STORAGE_KEY, applyAppThemeMode, readStoredAppThemeMode,
+} from './theme';
 
 const createLocalStorage = () => {
     const values = new Map<string, string>();
@@ -34,7 +38,11 @@ afterEach(() => {
 });
 
 describe('app theme persistence', () => {
-    it.each(['light', 'dark', 'auto'] as const)('stores %s mode in localStorage', mode => {
+    it.each([
+        'light',
+        'dark',
+        'auto',
+    ] as const)('stores %s mode in localStorage', mode => {
         const localStorage = createLocalStorage();
 
         vi.stubGlobal('window', {localStorage});
@@ -49,18 +57,20 @@ describe('app theme persistence', () => {
 
 describe('theme swap cross-fade', () => {
     type Environment = {
-        documentElement: ReturnType<typeof createDocumentElement>;
-        startViewTransition: ReturnType<typeof vi.fn>;
+        documentElement: ReturnType<typeof createDocumentElement>,
+        startViewTransition: ReturnType<typeof vi.fn>,
     };
 
     const stubEnvironment = (
         options: {
-            documentTheme?: string;
-            reducedMotion?: boolean;
-            viewTransitions?: boolean;
+            documentTheme?: string,
+            reducedMotion?: boolean,
+            viewTransitions?: boolean,
         } = {},
     ): Environment => {
-        const {documentTheme, reducedMotion = false, viewTransitions = true} = options;
+        const {
+            documentTheme, reducedMotion = false, viewTransitions = true,
+        } = options;
         const documentElement = createDocumentElement(documentTheme ? {'data-theme': documentTheme} : {});
         /* Runs the callback straight away, the way the browser does — one frame later. */
         const startViewTransition = vi.fn((callback: () => void) => {

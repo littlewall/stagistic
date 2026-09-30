@@ -4,8 +4,8 @@ import type {ReactNode} from 'react';
 import styles from './modalChrome.module.css';
 
 export interface ModalActionsProps {
-    children: ReactNode;
-    spacing?: 'lg' | 'none';
+    children: ReactNode,
+    spacing?: 'lg' | 'none',
 }
 
 export const ModalActions = ({children, spacing = 'none'}: ModalActionsProps) => (

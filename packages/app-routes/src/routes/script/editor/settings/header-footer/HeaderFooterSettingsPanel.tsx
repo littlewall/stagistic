@@ -6,7 +6,9 @@ import {
     resolveDraftDate,
     type TitlePageSettings,
 } from '@stagistic/script';
-import {BoldIcon, Button, formControlStyles, IconButton, ItalicIcon, PanelHeader, SettingsGroup, Switch, UnderlineIcon} from '@stagistic/ui';
+import {
+    BoldIcon, Button, formControlStyles, IconButton, ItalicIcon, PanelHeader, SettingsGroup, Switch, UnderlineIcon,
+} from '@stagistic/ui';
 import clsx from 'clsx';
 import {useRef, useState} from 'react';
 
@@ -14,16 +16,20 @@ import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import styles from './HeaderFooterSettingsPanel.module.css';
 
 type Area = 'header' | 'footer';
-type Selection = {area: Area; alignment: HeaderFooterAlignment};
+type Selection = {area: Area, alignment: HeaderFooterAlignment};
 
 interface HeaderFooterSettingsPanelProps {
-    settings: HeaderFooterSettings;
-    scriptTitle: string;
-    titlePageSettings: TitlePageSettings;
-    onUpdate: (patch: HeaderFooterSettingsPatch) => void;
+    settings: HeaderFooterSettings,
+    scriptTitle: string,
+    titlePageSettings: TitlePageSettings,
+    onUpdate: (patch: HeaderFooterSettingsPatch) => void,
 }
 
-const ALIGNMENTS: HeaderFooterAlignment[] = ['left', 'center', 'right'];
+const ALIGNMENTS: HeaderFooterAlignment[] = [
+    'left',
+    'center',
+    'right',
+];
 const VARIABLES = [
     {label: 'Page mark', token: '{{page}}'},
     {label: 'Script title', token: '{{script_title}}'},
@@ -37,7 +43,7 @@ const PAGE_NUMBER_TOKEN = '{{page_number}}';
 const PAGE_NUMBER_PREVIEW = '1.';
 
 // These cells have fixed content — only their style (B/I/U) and editor visibility can change.
-const getFixedCell = (area: Area, alignment: HeaderFooterAlignment): {label: string; example: string} | null => {
+const getFixedCell = (area: Area, alignment: HeaderFooterAlignment): {label: string, example: string} | null => {
     if (area === 'header' && alignment === 'right') {
         return {label: 'Page number', example: PAGE_MARK_PREVIEW};
     }
@@ -49,14 +55,15 @@ const getFixedCell = (area: Area, alignment: HeaderFooterAlignment): {label: str
     return null;
 };
 
-const resolvePreview = (text: string, scriptTitle: string, draftDate: string) =>
-    text
-        .replaceAll('{{page}}', PAGE_MARK_PREVIEW)
-        .replaceAll(PAGE_NUMBER_TOKEN, PAGE_NUMBER_PREVIEW)
-        .replaceAll('{{script_title}}', scriptTitle || 'Untitled')
-        .replaceAll('{{draft_date}}', draftDate);
+const resolvePreview = (text: string, scriptTitle: string, draftDate: string) => text
+    .replaceAll('{{page}}', PAGE_MARK_PREVIEW)
+    .replaceAll(PAGE_NUMBER_TOKEN, PAGE_NUMBER_PREVIEW)
+    .replaceAll('{{script_title}}', scriptTitle || 'Untitled')
+    .replaceAll('{{draft_date}}', draftDate);
 
-export const HeaderFooterSettingsPanel = ({settings, scriptTitle, titlePageSettings, onUpdate}: HeaderFooterSettingsPanelProps) => {
+export const HeaderFooterSettingsPanel = ({
+    settings, scriptTitle, titlePageSettings, onUpdate,
+}: HeaderFooterSettingsPanelProps) => {
     const draftDate = resolveDraftDate(titlePageSettings);
     const [selection, setSelection] = useState<Selection | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);

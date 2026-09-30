@@ -1,17 +1,23 @@
 import {useScriptActions, useScriptRepository} from '@stagistic/app-core';
-import {DeleteScriptModal, DuplicateScriptModal, ImportScriptModal, NewScriptModal, RenameScriptModal, useToastController} from '@stagistic/ui';
-import {createContext, type ReactNode, useCallback, useContext, useMemo} from 'react';
+import {
+    DeleteScriptModal, DuplicateScriptModal, ImportScriptModal, NewScriptModal, RenameScriptModal, useToastController,
+} from '@stagistic/ui';
+import {
+    createContext, type ReactNode, useCallback, useContext, useMemo,
+} from 'react';
 import {useNavigate} from 'react-router-dom';
 
-import {type ScriptToDelete, type ScriptToDuplicate, type ScriptToRename, useGlobalModalActions} from './useGlobalModalActions';
+import {
+    type ScriptToDelete, type ScriptToDuplicate, type ScriptToRename, useGlobalModalActions,
+} from './useGlobalModalActions';
 import {useNewScriptTransitionCompletion} from './useNewScriptTransitionCompletion';
 
 type GlobalModalsController = {
-    openNewScript: () => void;
-    openImportScript: () => void;
-    openDeleteScript: (script: ScriptToDelete) => void;
-    openRenameScript: (script: ScriptToRename) => void;
-    openDuplicateScript: (script: ScriptToDuplicate) => void;
+    openNewScript: () => void,
+    openImportScript: () => void,
+    openDeleteScript: (script: ScriptToDelete) => void,
+    openRenameScript: (script: ScriptToRename) => void,
+    openDuplicateScript: (script: ScriptToDuplicate) => void,
 };
 
 const GlobalModalsContext = createContext<GlobalModalsController | null>(null);
@@ -27,7 +33,7 @@ export const useGlobalModals = () => {
 };
 
 interface GlobalModalsProviderProps {
-    children: ReactNode;
+    children: ReactNode,
 }
 
 export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
@@ -101,7 +107,13 @@ export const GlobalModalsProvider = ({children}: GlobalModalsProviderProps) => {
             openRenameScript,
             openDuplicateScript,
         }),
-        [openDeleteScript, openDuplicateScript, openImportScript, openNewScript, openRenameScript],
+        [
+            openDeleteScript,
+            openDuplicateScript,
+            openImportScript,
+            openNewScript,
+            openRenameScript,
+        ],
     );
 
     return (

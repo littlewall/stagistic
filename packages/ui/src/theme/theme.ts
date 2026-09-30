@@ -78,7 +78,7 @@ export const readPreferredAppTheme = (): AppTheme => {
 };
 
 type ViewTransitionDocument = Document & {
-    startViewTransition?: (callback: () => void) => unknown;
+    startViewTransition?: (callback: () => void) => unknown,
 };
 
 /**
@@ -154,7 +154,7 @@ export const toggleAppThemeMode = (themeMode: AppThemeMode): AppThemeMode => {
     return 'light';
 };
 
-export const subscribeToSystemThemeChange = (onChange: (theme: AppTheme) => void): (() => void) => {
+export const subscribeToSystemThemeChange = (onChange: (theme: AppTheme) => void): () => void => {
     if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
         return () => {};
     }

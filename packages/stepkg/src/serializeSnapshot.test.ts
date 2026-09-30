@@ -1,4 +1,6 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import type {StepkgSnapshot} from './contracts';
 import {serializeStepkgContent} from './serializeSnapshot';
@@ -11,10 +13,17 @@ const snapshot: StepkgSnapshot = {
         createdAt: '2026-09-18T10:00:00.000Z',
         updatedAt: '2026-09-18T11:00:00.000Z',
     },
-    document: {type: 'doc', content: [{type: 'act', attrs: {id: 'block-1'}, content: [{type: 'text', text: 'Act One'}]}]},
+    document: {type: 'doc',
+        content: [
+            {
+                type: 'act', attrs: {id: 'block-1'}, content: [{type: 'text', text: 'Act One'}],
+            },
+        ]},
     titlePage: {},
     settings: {page: {widthPx: 816}},
-    characters: {characters: [], groups: [], genderOptions: []},
+    characters: {
+        characters: [], groups: [], genderOptions: [],
+    },
     music: {items: []},
     scenes: {scenes: [], locations: []},
     attachments: [],
@@ -24,6 +33,7 @@ const snapshot: StepkgSnapshot = {
 
 const decode = (path: string): string => {
     const entry = serializeStepkgContent(snapshot).find(item => item.path === path);
+
     return new TextDecoder().decode(entry?.bytes);
 };
 

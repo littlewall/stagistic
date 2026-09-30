@@ -1,5 +1,7 @@
 import clsx from 'clsx';
-import {type ComponentPropsWithoutRef, createElement, type ElementType, type ReactElement} from 'react';
+import {
+    type ComponentPropsWithoutRef, createElement, type ElementType, type ReactElement,
+} from 'react';
 
 import styles from './Stack.module.css';
 
@@ -10,13 +12,13 @@ type StackAlign = 'start' | 'center' | 'end' | 'stretch' | 'baseline';
 type StackJustify = 'start' | 'center' | 'end' | 'between';
 
 export type StackProps<T extends ElementType = 'div'> = {
-    as?: T;
-    direction?: 'row' | 'column';
-    gap?: StackGap;
-    align?: StackAlign;
-    justify?: StackJustify;
-    wrap?: boolean;
-    className?: string;
+    as?: T,
+    direction?: 'row' | 'column',
+    gap?: StackGap,
+    align?: StackAlign,
+    justify?: StackJustify,
+    wrap?: boolean,
+    className?: string,
 } & Omit<ComponentPropsWithoutRef<T>, 'as' | 'className' | 'wrap'>;
 
 const GAP_CLASS: Record<StackGap, string> = {

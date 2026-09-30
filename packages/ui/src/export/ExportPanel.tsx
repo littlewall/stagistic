@@ -3,16 +3,15 @@ import {Disclosure, DisclosurePanel} from 'react-aria-components';
 
 import {Button} from '../atoms/Button/Button';
 import {ChevronDownIcon} from '../icons';
-
 import styles from './ExportPanel.module.css';
 
 interface ExportPanelProps {
-    children: ReactNode;
+    children: ReactNode,
 }
 
 interface ExportPanelSectionProps {
-    title: string;
-    children: ReactNode;
+    title: string,
+    children: ReactNode,
 }
 
 const ExportPanelSection = ({title, children}: ExportPanelSectionProps) => (

@@ -2,7 +2,11 @@ export type {EditorActCommands} from './editor/actCommands/context';
 export {useEditorActCommands} from './editor/actCommands/context';
 export {BLOCK_ICONS} from './editor/blocks/controls/blockIcons';
 export {getCharacterColor, getCharacterColorVarName} from './editor/characters/characterColors';
-export {getConfirmedCharacterColor, getUnconfirmedCharacterColor, normalizePersistentCharacterRefs} from './editor/characters/colorResolver';
+export {
+    getConfirmedCharacterColor, getUnconfirmedCharacterColor, normalizePersistentCharacterRefs,
+} from './editor/characters/colorResolver';
+export {COMMENT_DRAFT_ANCHOR_KEY, useCommentAnchorTops} from './editor/comments/useCommentAnchorTops';
+export {type EditorCommentsApi, useEditorComments} from './editor/comments/useEditorComments';
 export {EditorCanvas} from './editor/components/EditorCanvas';
 export {default as EditorToolbar} from './editor/components/EditorToolbar';
 export {EditorInstanceProvider, useEditorInstance} from './editor/context';
@@ -45,8 +49,6 @@ export type {
 export {default as ScriptEditor} from './editor/Editor';
 export {type EditorElementSelection, useEditorElementSelection} from './editor/elementSelection/context';
 export {buildConvertSceneHeadingContent, buildDeleteSceneHeadingContent} from './editor/hooks/blockMutations';
-export {COMMENT_DRAFT_ANCHOR_KEY, useCommentAnchorTops} from './editor/comments/useCommentAnchorTops';
-export {type EditorCommentsApi, useEditorComments} from './editor/comments/useEditorComments';
 export {useExclusiveOverlay} from './editor/hooks/useExclusiveOverlay';
 export {useFocusEditorBlock} from './editor/hooks/useFocusEditorBlock';
 export {useFocusEditorMusic} from './editor/hooks/useFocusEditorMusic';
@@ -71,13 +73,6 @@ export {
     type EditorSurfaceEntry,
 } from './editor/surface/editorSurfaceCache';
 export {
-    focusFirstCharacterBlock,
-    linkCharacterRef,
-    renameCharacterText,
-    replaceCharacterRefId,
-    unlinkCharacterRef,
-} from './editor/tiptap/scriptBlock/characterRefCommands';
-export {
     type CommentAnchorLocation,
     type CommentBlockMerge,
     type CommentDraft,
@@ -85,5 +80,12 @@ export {
     type EditorCommentThreadRef,
     getCommentsState,
 } from './editor/tiptap/extensions/comments';
+export {
+    focusFirstCharacterBlock,
+    linkCharacterRef,
+    renameCharacterText,
+    replaceCharacterRefId,
+    unlinkCharacterRef,
+} from './editor/tiptap/scriptBlock/characterRefCommands';
 export type {BlockNodeType} from './editor/tiptap/scriptCore';
 export {normalizeCharacterColorHex} from '@stagistic/script';

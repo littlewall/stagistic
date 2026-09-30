@@ -1,4 +1,6 @@
-import type {CommentThreadStatus, ScriptCommentMessage, ScriptCommentThread, ScriptCommentThreadSnapshot, ScriptRepository} from '@stagistic/db';
+import type {
+    CommentThreadStatus, ScriptCommentMessage, ScriptCommentThread, ScriptCommentThreadSnapshot, ScriptRepository,
+} from '@stagistic/db';
 import {useLiveQuery} from '@tanstack/react-db';
 import {useMemo} from 'react';
 
@@ -6,27 +8,27 @@ import {useReactiveCollectionStatus} from '../collections';
 import {type CreateCommentThreadInput, getScriptCommentsStore} from './scriptCommentsStore';
 
 export interface ScriptCommentsState {
-    threads: readonly ScriptCommentThread[];
-    messages: readonly ScriptCommentMessage[];
-    isLoading: boolean;
-    error: Error | null;
-    allocateThreadId: () => string;
-    createThread: (input: CreateCommentThreadInput) => Promise<ScriptCommentThread | null>;
-    reply: (threadId: string, body: string) => Promise<ScriptCommentMessage | null>;
-    editMessage: (messageId: string, body: string) => Promise<ScriptCommentMessage | null>;
-    deleteMessage: (messageId: string) => Promise<void>;
-    setStatus: (threadId: string, status: CommentThreadStatus) => Promise<void>;
+    threads: readonly ScriptCommentThread[],
+    messages: readonly ScriptCommentMessage[],
+    isLoading: boolean,
+    error: Error | null,
+    allocateThreadId: () => string,
+    createThread: (input: CreateCommentThreadInput) => Promise<ScriptCommentThread | null>,
+    reply: (threadId: string, body: string) => Promise<ScriptCommentMessage | null>,
+    editMessage: (messageId: string, body: string) => Promise<ScriptCommentMessage | null>,
+    deleteMessage: (messageId: string) => Promise<void>,
+    setStatus: (threadId: string, status: CommentThreadStatus) => Promise<void>,
     /** Resolves to a snapshot that restoreThread can re-insert (Undo). */
-    deleteThread: (threadId: string) => Promise<ScriptCommentThreadSnapshot | null>;
-    restoreThread: (snapshot: ScriptCommentThreadSnapshot) => Promise<void>;
-    moveBlockAnchors: (fromBlockId: string, toBlockId: string) => Promise<void>;
+    deleteThread: (threadId: string) => Promise<ScriptCommentThreadSnapshot | null>,
+    restoreThread: (snapshot: ScriptCommentThreadSnapshot) => Promise<void>,
+    moveBlockAnchors: (fromBlockId: string, toBlockId: string) => Promise<void>,
 }
 
 const resolveNull = () => Promise.resolve(null);
 const resolveVoid = () => Promise.resolve();
 
 export const useScriptComments = (scriptId: string | null, repository: ScriptRepository): ScriptCommentsState => {
-    const store = useMemo(() => (scriptId ? getScriptCommentsStore(repository, scriptId) : null), [repository, scriptId]);
+    const store = useMemo(() => scriptId ? getScriptCommentsStore(repository, scriptId) : null, [repository, scriptId]);
     const threadsStatus = useReactiveCollectionStatus(store?.threadsStatus);
     const messagesStatus = useReactiveCollectionStatus(store?.messagesStatus);
     const threadsQuery = useLiveQuery(

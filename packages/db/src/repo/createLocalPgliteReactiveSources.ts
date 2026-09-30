@@ -1,6 +1,8 @@
 import * as dbQueries from '../queries';
 import {createPgliteReactiveQuerySource, type ReactiveQuerySource} from '../reactive';
-import type {ScriptEditorSettingsRecord, ScriptSceneLocationAssignment, ScriptTitlePageRecord} from '../scriptRepository';
+import type {
+    ScriptEditorSettingsRecord, ScriptSceneLocationAssignment, ScriptTitlePageRecord,
+} from '../scriptRepository';
 import type {
     ScriptAttachment,
     ScriptCharacterGenderOption,
@@ -16,18 +18,18 @@ import type {
 import type {GetDb} from './types';
 
 interface CreateLocalPgliteReactiveSourcesArgs {
-    getDb: GetDb;
-    listScripts: () => Promise<ScriptSummary[]>;
-    listCharacters: (scriptId: string) => Promise<ScriptCharacterRef[]>;
-    listCharacterGroups: (scriptId: string) => Promise<ScriptCharacterGroupRef[]>;
-    listCharacterGenders: (scriptId: string) => Promise<ScriptCharacterGenderOption[]>;
-    listMusic: (scriptId: string) => Promise<ScriptMusic[]>;
-    listCommentThreads: (scriptId: string) => Promise<ScriptCommentThread[]>;
-    listCommentMessages: (scriptId: string) => Promise<ScriptCommentMessage[]>;
-    listLocations: (scriptId: string) => Promise<ScriptLocation[]>;
-    listSceneLocations: (scriptId: string) => Promise<ScriptSceneLocationAssignment[]>;
-    loadTitlePage: (scriptId: string) => Promise<ScriptTitlePageRecord['settings'] | null>;
-    loadEditorSettings: (scriptId: string) => Promise<ScriptEditorSettingsRecord['settings'] | null>;
+    getDb: GetDb,
+    listScripts: () => Promise<ScriptSummary[]>,
+    listCharacters: (scriptId: string) => Promise<ScriptCharacterRef[]>,
+    listCharacterGroups: (scriptId: string) => Promise<ScriptCharacterGroupRef[]>,
+    listCharacterGenders: (scriptId: string) => Promise<ScriptCharacterGenderOption[]>,
+    listMusic: (scriptId: string) => Promise<ScriptMusic[]>,
+    listCommentThreads: (scriptId: string) => Promise<ScriptCommentThread[]>,
+    listCommentMessages: (scriptId: string) => Promise<ScriptCommentMessage[]>,
+    listLocations: (scriptId: string) => Promise<ScriptLocation[]>,
+    listSceneLocations: (scriptId: string) => Promise<ScriptSceneLocationAssignment[]>,
+    loadTitlePage: (scriptId: string) => Promise<ScriptTitlePageRecord['settings'] | null>,
+    loadEditorSettings: (scriptId: string) => Promise<ScriptEditorSettingsRecord['settings'] | null>,
 }
 
 const createScriptSourceRegistry = <T>(createSource: (scriptId: string) => ReactiveQuerySource<T>) => {

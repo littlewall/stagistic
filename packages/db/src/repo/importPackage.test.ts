@@ -1,5 +1,7 @@
 import {parseStagistic} from '@stagistic/script';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {InMemoryFileStorage} from '../fileStorage';
 import type {ScriptPackageWrite} from '../scriptPackageWrite';
@@ -17,7 +19,9 @@ SING TO ME.
 `;
 
 const write = (): ScriptPackageWrite => ({
-    script: {id: 'imported-1', title: 'Imported', subtitle: null, createdAt: 1_000, updatedAt: 2_000},
+    script: {
+        id: 'imported-1', title: 'Imported', subtitle: null, createdAt: 1_000, updatedAt: 2_000,
+    },
     document: parseStagistic(source).document,
     titlePage: {source: 'Original'},
     settings: {visual: {characterColorSaturation: 0.4}},
@@ -32,8 +36,9 @@ const write = (): ScriptPackageWrite => ({
     comments: {threads: [], messages: []},
 });
 
-const makeRepository = (db: Awaited<ReturnType<typeof createTestDb>>['db'], fileStorage = new InMemoryFileStorage()) =>
-    createLocalPgliteRepository({getLocalDb: () => Promise.resolve(db), syncToFs: () => Promise.resolve(), fileStorage});
+const makeRepository = (db: Awaited<ReturnType<typeof createTestDb>>['db'], fileStorage = new InMemoryFileStorage()) => createLocalPgliteRepository({
+    getLocalDb: () => Promise.resolve(db), syncToFs: () => Promise.resolve(), fileStorage,
+});
 
 describe('createScriptFromPackage', () => {
     it('materializes a full script in one transaction', async () => {
@@ -43,6 +48,7 @@ describe('createScriptFromPackage', () => {
         await repository.createScriptFromPackage(write());
 
         const source = await repository.getScriptPackageSource('imported-1');
+
         expect(source?.script.title).toBe('Imported');
         expect(source?.titlePage).toMatchObject({source: 'Original'});
         expect(source?.settings).toMatchObject({visual: {characterColorSaturation: 0.4}});
@@ -54,6 +60,7 @@ describe('createScriptFromPackage', () => {
         const fileStorage = new InMemoryFileStorage();
         const repository = makeRepository(db, fileStorage);
         const input = write();
+
         input.characters = [
             {
                 id: 'c1',
@@ -70,9 +77,21 @@ describe('createScriptFromPackage', () => {
                 updatedAt: 1_000,
             },
         ];
-        input.genders = [{id: 'gd1', key: 'f', label: 'Female', createdAt: 1_000, updatedAt: 1_000}];
-        input.groups = [{id: 'g1', key: 'FAMILY', colorHex: null, memberIds: ['c1'], createdAt: 1_000, updatedAt: 1_000}];
-        input.locations = [{id: 'l1', name: 'Kitchen', description: null, createdAt: 1_000, updatedAt: 1_000}];
+        input.genders = [
+            {
+                id: 'gd1', key: 'f', label: 'Female', createdAt: 1_000, updatedAt: 1_000,
+            },
+        ];
+        input.groups = [
+            {
+                id: 'g1', key: 'FAMILY', colorHex: null, memberIds: ['c1'], createdAt: 1_000, updatedAt: 1_000,
+            },
+        ];
+        input.locations = [
+            {
+                id: 'l1', name: 'Kitchen', description: null, createdAt: 1_000, updatedAt: 1_000,
+            },
+        ];
         input.music = [
             {
                 id: 'm1',
@@ -88,13 +107,20 @@ describe('createScriptFromPackage', () => {
             },
         ];
         input.attachments = [
-            {id: 'a1', filename: 'score.pdf', mimeType: 'application/pdf', sizeBytes: 3, blob: new Blob(['pdf']), createdAt: 1_000, updatedAt: 1_000},
+            {
+                id: 'a1', filename: 'score.pdf', mimeType: 'application/pdf', sizeBytes: 3, blob: new Blob(['pdf']), createdAt: 1_000, updatedAt: 1_000,
+            },
         ];
-        input.bindings = [{musicId: 'm1', attachmentId: 'a1', role: 'integrated_score', sortOrder: 0, createdAt: 1_000}];
+        input.bindings = [
+            {
+                musicId: 'm1', attachmentId: 'a1', role: 'integrated_score', sortOrder: 0, createdAt: 1_000,
+            },
+        ];
 
         await repository.createScriptFromPackage(input);
 
         const source = await repository.getScriptPackageSource('imported-1');
+
         expect(source?.characters.some(character => character.id === 'c1')).toBe(true);
         expect(source?.characterGenders.some(gender => gender.id === 'gd1')).toBe(true);
         expect(source?.characterGroupMembers).toContainEqual({groupId: 'g1', characterId: 'c1'});
@@ -104,6 +130,7 @@ describe('createScriptFromPackage', () => {
         expect(source?.musicAttachmentBindings.some(binding => binding.attachmentId === 'a1')).toBe(true);
 
         const blob = await fileStorage.get(source!.attachments.find(attachment => attachment.id === 'a1')!.storageKey);
+
         expect(blob).not.toBeNull();
     });
 
@@ -127,14 +154,27 @@ describe('createScriptFromPackage', () => {
                     updatedAt: 5,
                 },
             ],
-            messages: [{id: 'm1', threadId: 't1', authorId: 'local', body: 'B', createdAt: 1, updatedAt: 1, editedAt: null}],
+            messages: [
+                {
+                    id: 'm1', threadId: 't1', authorId: 'local', body: 'B', createdAt: 1, updatedAt: 1, editedAt: null,
+                },
+            ],
         };
 
         await repository.createScriptFromPackage(input);
 
         const source = await repository.getScriptPackageSource('imported-1');
-        expect(source?.comments.threads).toMatchObject([{id: 't1', anchorBlockId: 'b1', status: 'resolved', resolvedAt: 5}]);
-        expect(source?.comments.messages).toMatchObject([{id: 'm1', threadId: 't1', body: 'B'}]);
+
+        expect(source?.comments.threads).toMatchObject([
+            {
+                id: 't1', anchorBlockId: 'b1', status: 'resolved', resolvedAt: 5,
+            },
+        ]);
+        expect(source?.comments.messages).toMatchObject([
+            {
+                id: 'm1', threadId: 't1', body: 'B',
+            },
+        ]);
     });
 
     it('rolls back and cleans blobs when the document is invalid', async () => {
@@ -142,8 +182,13 @@ describe('createScriptFromPackage', () => {
         const fileStorage = new InMemoryFileStorage();
         const repository = makeRepository(db, fileStorage);
         const broken = write();
+
         broken.document = {type: 'doc'} as ScriptPackageWrite['document'];
-        broken.attachments = [{id: 'a1', filename: 'a.pdf', mimeType: 'application/pdf', sizeBytes: 3, blob: new Blob(['pdf']), createdAt: 1, updatedAt: 1}];
+        broken.attachments = [
+            {
+                id: 'a1', filename: 'a.pdf', mimeType: 'application/pdf', sizeBytes: 3, blob: new Blob(['pdf']), createdAt: 1, updatedAt: 1,
+            },
+        ];
 
         await expect(repository.createScriptFromPackage(broken)).rejects.toBeTruthy();
         expect(await repository.getScriptSummary('imported-1')).toBeNull();

@@ -1,7 +1,11 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
 import {createRoot, type Root} from 'react-dom/client';
-import {MemoryRouter, Route, Routes, useLocation} from 'react-router-dom';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    MemoryRouter, Route, Routes, useLocation,
+} from 'react-router-dom';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
 import {ScriptEditorAppHeader} from '../../layout/AppHeader';
@@ -51,8 +55,7 @@ vi.mock('./ScriptWorkspaceContext', () => ({
                     actBlockId: null,
                     sceneBlockId: null,
                     characterRefs: [{key: 'ANNA', characterId: 'anna'}],
-                },
-                {
+                }, {
                     blockId: 'all-cue',
                     orderNo: 1,
                     blockType: 'character',

@@ -1,8 +1,11 @@
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
-import {PanelHeader, SettingRow, SettingsGroup} from './SettingsGroup';
-
+import {
+    PanelHeader, SettingRow, SettingsGroup,
+} from './SettingsGroup';
 import styles from './SettingsGroup.module.css';
 
 describe('SettingsGroup', () => {

@@ -1,16 +1,22 @@
 import type {ScriptRepository, ScriptSummary} from '@stagistic/db';
 import {createEmptyScriptDocument} from '@stagistic/script';
 import {createStepkg, type StepkgSnapshot} from '@stagistic/stepkg';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {peekStepkgPackage} from './peekStepkgPackage';
 
 const snapshot: StepkgSnapshot = {
-    script: {id: 'script-1', title: 'My Play', subtitle: null, createdAt: '2026-09-21T10:00:00.000Z', updatedAt: '2026-09-21T11:00:00.000Z'},
+    script: {
+        id: 'script-1', title: 'My Play', subtitle: null, createdAt: '2026-09-21T10:00:00.000Z', updatedAt: '2026-09-21T11:00:00.000Z',
+    },
     document: createEmptyScriptDocument(),
     titlePage: {},
     settings: {},
-    characters: {characters: [], groups: [], genderOptions: []},
+    characters: {
+        characters: [], groups: [], genderOptions: [],
+    },
     music: {items: []},
     scenes: {scenes: [], locations: []},
     attachments: [],
@@ -45,7 +51,9 @@ describe('peekStepkgPackage', () => {
     });
 
     it('reports a collision with the local script title', async () => {
-        const existing: ScriptSummary = {id: 'script-1', title: 'Local Copy', subtitle: null, createdAt: 1, updatedAt: 1};
+        const existing: ScriptSummary = {
+            id: 'script-1', title: 'Local Copy', subtitle: null, createdAt: 1, updatedAt: 1,
+        };
         const repository = {getScriptSummary: () => Promise.resolve(existing)} as unknown as ScriptRepository;
         const result = await peekStepkgPackage({repository, bytes: await exportBytes()});
 
@@ -67,6 +75,7 @@ describe('peekStepkgPackage', () => {
 
         expect(result.ok).toBe(false);
         if (!result.ok) expect(result.issues[0]?.code).toBe('not_a_zip');
+
         expect(called).toBe(false);
     });
 });

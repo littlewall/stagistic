@@ -1,21 +1,24 @@
-import type {CastOrderBy, InitialPagesSettings, InitialPagesSettingsPatch} from '@stagistic/script';
-import {formControlStyles, PanelHeader, SettingsGroup, ToggleButtonGroup, type ToggleButtonGroupOption} from '@stagistic/ui';
+import type {
+    CastOrderBy, InitialPagesSettings, InitialPagesSettingsPatch,
+} from '@stagistic/script';
+import {
+    formControlStyles, PanelHeader, SettingsGroup, ToggleButtonGroup, type ToggleButtonGroupOption,
+} from '@stagistic/ui';
 import clsx from 'clsx';
 
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
 import styles from './InitialPagesSettingsPanel.module.css';
 
 interface InitialPagesSettingsPanelProps {
-    settings: InitialPagesSettings;
-    onUpdate: (patch: InitialPagesSettingsPatch) => void;
+    settings: InitialPagesSettings,
+    onUpdate: (patch: InitialPagesSettingsPatch) => void,
 }
 
 const CAST_ORDER_OPTIONS: ToggleButtonGroupOption<CastOrderBy>[] = [
     {
         label: 'Name',
         value: 'name',
-    },
-    {
+    }, {
         label: 'Appearance',
         value: 'appearance',
     },
@@ -27,8 +30,7 @@ const BOOLEAN_OPTIONS: ToggleButtonGroupOption<BooleanOption>[] = [
     {
         label: 'Yes',
         value: 'yes',
-    },
-    {
+    }, {
         label: 'No',
         value: 'no',
     },
@@ -77,11 +79,9 @@ export const InitialPagesSettingsPanel = ({settings, onUpdate}: InitialPagesSett
                             ariaLabelledBy="initial-pages-show-outline"
                             options={BOOLEAN_OPTIONS}
                             value={toBooleanOption(settings.castAndPlace.showOutline)}
-                            onChange={value =>
-                                onUpdate({
-                                    castAndPlace: {showOutline: fromBooleanOption(value)},
-                                })
-                            }
+                            onChange={value => onUpdate({
+                                castAndPlace: {showOutline: fromBooleanOption(value)},
+                            })}
                         />
                     </div>
                 </div>
@@ -99,11 +99,9 @@ export const InitialPagesSettingsPanel = ({settings, onUpdate}: InitialPagesSett
                         ariaLabelledBy="initial-pages-song-characters"
                         options={BOOLEAN_OPTIONS}
                         value={toBooleanOption(settings.songs.showCharactersInSongs)}
-                        onChange={value =>
-                            onUpdate({
-                                songs: {showCharactersInSongs: fromBooleanOption(value)},
-                            })
-                        }
+                        onChange={value => onUpdate({
+                            songs: {showCharactersInSongs: fromBooleanOption(value)},
+                        })}
                     />
                 </div>
             </section>

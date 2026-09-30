@@ -1,9 +1,10 @@
 import clsx from 'clsx';
-import {type ComponentPropsWithoutRef, forwardRef, type ReactNode} from 'react';
+import {
+    type ComponentPropsWithoutRef, forwardRef, type ReactNode,
+} from 'react';
 
 import {SearchIcon} from '../../icons/ui/SearchIcon';
 import {Input} from '../Input/Input';
-
 import styles from './SearchInput.module.css';
 
 /*
@@ -14,10 +15,10 @@ import styles from './SearchInput.module.css';
 type SearchInputSize = 'sm' | 'md' | 'toolbar';
 
 export type SearchInputProps = {
-    size?: SearchInputSize;
-    className?: string;
-    startAdornment?: ReactNode;
-    endAdornment?: ReactNode;
+    size?: SearchInputSize,
+    className?: string,
+    startAdornment?: ReactNode,
+    endAdornment?: ReactNode,
 } & Omit<ComponentPropsWithoutRef<'input'>, 'className' | 'type' | 'size'>;
 
 const SIZE_CLASS: Record<SearchInputSize, string> = {
@@ -26,16 +27,17 @@ const SIZE_CLASS: Record<SearchInputSize, string> = {
     toolbar: styles.sizeToolbar,
 };
 
-export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({size = 'md', className, startAdornment, endAdornment, ...props}, ref) => {
+export const SearchInput = forwardRef<HTMLInputElement, SearchInputProps>(({
+    size = 'md', className, startAdornment, endAdornment, ...props
+}, ref) => {
     const resolvedStartAdornment =
         startAdornment === undefined ? (
             <SearchIcon
                 className={styles.icon}
                 aria-hidden="true"
             />
-        ) : (
-            startAdornment
-        );
+        ) :
+            startAdornment;
 
     return (
         <div className={clsx(styles.field, SIZE_CLASS[size], className)}>

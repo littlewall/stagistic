@@ -21,12 +21,14 @@ import {createTitlePageHandlers} from './titlePage';
 import type {GetDb} from './types';
 
 export interface LocalPgliteRepositoryDeps {
-    getLocalDb: () => Promise<LocalDb>;
-    syncToFs: () => Promise<void>;
-    fileStorage: FileStorage;
+    getLocalDb: () => Promise<LocalDb>,
+    syncToFs: () => Promise<void>,
+    fileStorage: FileStorage,
 }
 
-export const createLocalPgliteRepository = ({getLocalDb, syncToFs, fileStorage}: LocalPgliteRepositoryDeps): ScriptRepository => {
+export const createLocalPgliteRepository = ({
+    getLocalDb, syncToFs, fileStorage,
+}: LocalPgliteRepositoryDeps): ScriptRepository => {
     const dbPromise = getLocalDb();
     const getDb: GetDb = async () => dbPromise;
     const recordOutbox = createOutboxRecorder(getDb);

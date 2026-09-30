@@ -1,12 +1,13 @@
 import {CommentIcon, TrashIcon} from '@stagistic/ui';
 import {type ReactNode} from 'react';
 
+import styles from '../EditorBlockActionsOverlay.module.css';
 import {MusicHitIcon, MusicRangeIcon} from '../MusicIcons';
-import type {BlockActionCommand, BlockActionIcon, BlockActionItem} from './actionTypes';
+import type {
+    BlockActionCommand, BlockActionIcon, BlockActionItem,
+} from './actionTypes';
 import {ContextMenu, type ContextMenuItem} from './ContextMenu';
 import type {BlockActionMenuProps} from './types';
-
-import styles from '../EditorBlockActionsOverlay.module.css';
 
 const ActionIcon = ({icon}: {icon: BlockActionIcon}) => {
     const paths: Record<BlockActionIcon, ReactNode> = {
@@ -41,7 +42,9 @@ const toContextMenuItem = (item: BlockActionItem, onExecute: (command: BlockActi
     };
 };
 
-export const BlockActionMenu = ({items, isMenuAbove, menuRef, menuStyle, onClose, onExecute}: BlockActionMenuProps) => {
+export const BlockActionMenu = ({
+    items, isMenuAbove, menuRef, menuStyle, onClose, onExecute,
+}: BlockActionMenuProps) => {
     return (
         <ContextMenu
             ariaLabel="Block actions"

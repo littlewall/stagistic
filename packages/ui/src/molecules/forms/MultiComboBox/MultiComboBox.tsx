@@ -1,35 +1,38 @@
 import clsx from 'clsx';
-import {type MouseEvent, useEffect, useId, useRef, useState} from 'react';
+import {
+    type MouseEvent, useEffect, useId, useRef, useState,
+} from 'react';
 import {Group} from 'react-aria-components';
 import {type Tag, WithContext as ReactTags} from 'react-tag-input';
 
 import {CloseIcon} from '../../../icons';
-
 import styles from './MultiComboBox.module.css';
 
 export interface MultiComboBoxOption {
-    id: string;
-    label: string;
+    id: string,
+    label: string,
 }
 
 interface MultiComboBoxProps {
-    label: string;
-    placeholder: string;
-    options: MultiComboBoxOption[];
-    value: string[];
-    onChange: (value: string[]) => void;
-    className?: string;
-    isDisabled?: boolean;
-    emptyLabel?: string;
+    label: string,
+    placeholder: string,
+    options: MultiComboBoxOption[],
+    value: string[],
+    onChange: (value: string[]) => void,
+    className?: string,
+    isDisabled?: boolean,
+    emptyLabel?: string,
 }
 
 interface RemoveTagButtonProps {
-    className?: string;
-    onRemove: (event: MouseEvent<HTMLButtonElement>) => void;
-    tag: Tag;
+    className?: string,
+    onRemove: (event: MouseEvent<HTMLButtonElement>) => void,
+    tag: Tag,
 }
 
-const RemoveTagButton = ({className, onRemove, tag}: RemoveTagButtonProps) => (
+const RemoveTagButton = ({
+    className, onRemove, tag,
+}: RemoveTagButtonProps) => (
     <button
         className={className}
         type="button"
@@ -46,7 +49,9 @@ const toTag = ({id, label}: MultiComboBoxOption): Tag => ({
     className: '',
 });
 
-export const MultiComboBox = ({label, placeholder, options, value, onChange, className, isDisabled = false}: MultiComboBoxProps) => {
+export const MultiComboBox = ({
+    label, placeholder, options, value, onChange, className, isDisabled = false,
+}: MultiComboBoxProps) => {
     const inputId = useId();
     const rootRef = useRef<HTMLDivElement>(null);
     const [isFocused, setIsFocused] = useState(false);

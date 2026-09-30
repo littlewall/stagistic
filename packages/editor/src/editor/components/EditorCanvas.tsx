@@ -1,12 +1,17 @@
-import type {BlockShortcut, HeaderFooterSettings, ScriptBlockNodeType} from '@stagistic/script';
+import type {
+    BlockShortcut, HeaderFooterSettings, ScriptBlockNodeType,
+} from '@stagistic/script';
 import {type Editor as TiptapEditor, EditorContent} from '@tiptap/react';
 import {type CSSProperties, useRef} from 'react';
 
 import {SCRIPT_EDITOR_DESCRIPTION_ID} from '../accessibility';
-import type {EditorMusicRemoveRequest, PersistentCharacterRef, PersistentMusicRef} from '../contracts';
+import type {
+    EditorMusicRemoveRequest, PersistentCharacterRef, PersistentMusicRef,
+} from '../contracts';
 import CharacterSuggestionsOverlay from './CharacterSuggestionsOverlay';
 import {CommentMarkersOverlay} from './CommentMarkersOverlay';
 import EditorBlockActionsOverlay from './EditorBlockActionsOverlay';
+import styles from './EditorCanvas.module.css';
 import {EmptyEnterBlockChooserOverlay} from './emptyEnterChooser/EmptyEnterBlockChooserOverlay';
 import {HeaderFooterOverlay} from './HeaderFooterOverlay';
 import MusicDraftSuggestionsOverlay from './MusicDraftSuggestionsOverlay';
@@ -15,22 +20,20 @@ import MusicSuggestionsOverlay from './MusicSuggestionsOverlay';
 import {SceneCollapseOverlay} from './sceneCollapse/SceneCollapseOverlay';
 import {SelectionToolbarOverlay} from './SelectionToolbarOverlay';
 
-import styles from './EditorCanvas.module.css';
-
 type EditorCanvasProps = {
-    editor: TiptapEditor | null;
-    persistentCharacters?: readonly PersistentCharacterRef[];
-    persistentMusic?: readonly PersistentMusicRef[];
-    onMusicAssigned?: (musicId: string) => void;
-    onOpenMusicManager?: (musicId: string) => void;
-    onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void;
-    characterColorSaturation?: number;
-    autoFocus?: boolean;
-    style?: CSSProperties;
-    headerFooter: HeaderFooterSettings;
-    scriptTitle?: string;
-    draftDate?: string;
-    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>;
+    editor: TiptapEditor | null,
+    persistentCharacters?: readonly PersistentCharacterRef[],
+    persistentMusic?: readonly PersistentMusicRef[],
+    onMusicAssigned?: (musicId: string) => void,
+    onOpenMusicManager?: (musicId: string) => void,
+    onRequestRemoveMusic?: (request: EditorMusicRemoveRequest) => void,
+    characterColorSaturation?: number,
+    autoFocus?: boolean,
+    style?: CSSProperties,
+    headerFooter: HeaderFooterSettings,
+    scriptTitle?: string,
+    draftDate?: string,
+    blockShortcuts?: Partial<Record<ScriptBlockNodeType, BlockShortcut>>,
 };
 
 export const EditorCanvas = ({

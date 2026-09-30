@@ -1,13 +1,15 @@
-import {useMemo, useRef, useState} from 'react';
+import {
+    useMemo, useRef, useState,
+} from 'react';
 
 interface ColorItem {
-    id: string;
-    color: string | null;
+    id: string,
+    color: string | null,
 }
 
 interface ColorIntent {
-    color: string | null;
-    revision: number;
+    color: string | null,
+    revision: number,
 }
 
 export const useOptimisticAttributeManagerColors = <TItem extends ColorItem>(
@@ -17,11 +19,10 @@ export const useOptimisticAttributeManagerColors = <TItem extends ColorItem>(
     const revisionRef = useRef(0);
     const [intents, setIntents] = useState<Record<string, ColorIntent>>({});
     const colorizedItems = useMemo(
-        () =>
-            items.map(item => ({
-                ...item,
-                color: item.id in intents ? (intents[item.id]?.color ?? null) : item.color,
-            })),
+        () => items.map(item => ({
+            ...item,
+            color: item.id in intents ? intents[item.id]?.color ?? null : item.color,
+        })),
         [intents, items],
     );
     const setColor = (itemId: string, colorHex: string | null) => {

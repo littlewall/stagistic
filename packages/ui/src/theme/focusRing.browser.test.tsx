@@ -1,6 +1,8 @@
 import '../../styles/base.css';
 
-import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it,
+} from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
 /*

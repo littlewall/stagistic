@@ -1,5 +1,9 @@
-import type {ComponentProps, ReactElement, ReactNode} from 'react';
-import {Focusable, Tooltip as AriaTooltip, type TooltipProps as AriaTooltipProps, TooltipTrigger} from 'react-aria-components';
+import type {
+    ComponentProps, ReactElement, ReactNode,
+} from 'react';
+import {
+    Focusable, Tooltip as AriaTooltip, type TooltipProps as AriaTooltipProps, TooltipTrigger,
+} from 'react-aria-components';
 
 import styles from './Tooltip.module.css';
 
@@ -7,19 +11,19 @@ type FocusableChild = ComponentProps<typeof Focusable>['children'];
 
 export interface TooltipProps {
     /** Tooltip text shown on hover/focus. */
-    label: ReactNode;
+    label: ReactNode,
     /** Optional keyboard shortcut shown below the label. */
-    shortcut?: ReactNode;
+    shortcut?: ReactNode,
     /** Placement relative to the trigger. Defaults to 'top'. */
-    placement?: AriaTooltipProps['placement'];
+    placement?: AriaTooltipProps['placement'],
     /** Hover open delay in ms. Defaults to 0 (no delay). */
-    delay?: number;
+    delay?: number,
     /** Delay before closing after hover leaves the trigger. Defaults to 0 (no delay). */
-    closeDelay?: number;
+    closeDelay?: number,
     /** Disable the tooltip (e.g. when the trigger button is disabled). */
-    isDisabled?: boolean;
+    isDisabled?: boolean,
     /** A single focusable trigger element (e.g. a native <button>). */
-    children: ReactElement;
+    children: ReactElement,
 }
 
 /**
@@ -27,7 +31,9 @@ export interface TooltipProps {
  * native <button>) so the same styling as the app header applies everywhere —
  * toolbars, bubble menus, gutter controls.
  */
-export const Tooltip = ({label, shortcut, placement = 'top', delay = 0, closeDelay = 0, isDisabled = false, children}: TooltipProps) => {
+export const Tooltip = ({
+    label, shortcut, placement = 'top', delay = 0, closeDelay = 0, isDisabled = false, children,
+}: TooltipProps) => {
     if (isDisabled) {
         return children;
     }
@@ -50,9 +56,8 @@ export const Tooltip = ({label, shortcut, placement = 'top', delay = 0, closeDel
                         <span>{label}</span>
                         <kbd className={styles.shortcut}>{shortcut}</kbd>
                     </span>
-                ) : (
-                    label
-                )}
+                ) :
+                    label}
             </AriaTooltip>
         </TooltipTrigger>
     );

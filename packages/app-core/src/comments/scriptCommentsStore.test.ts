@@ -1,5 +1,9 @@
-import {createInMemoryReactiveQuerySource, type ScriptCommentMessage, type ScriptCommentThread, type ScriptRepository} from '@stagistic/db';
-import {describe, expect, it, vi} from 'vite-plus/test';
+import {
+    createInMemoryReactiveQuerySource, type ScriptCommentMessage, type ScriptCommentThread, type ScriptRepository,
+} from '@stagistic/db';
+import {
+    describe, expect, it, vi,
+} from 'vite-plus/test';
 
 import {createScriptCommentsStore} from './scriptCommentsStore';
 
@@ -17,9 +21,15 @@ const thread: ScriptCommentThread = {
     updatedAt: 1,
 };
 const messages: ScriptCommentMessage[] = [
-    {id: 'm2', scriptId: 's1', threadId: 't1', authorId: 'local', body: 'reply', createdAt: 2, updatedAt: 2, editedAt: null},
-    {id: 'm1', scriptId: 's1', threadId: 't1', authorId: 'local', body: 'root', createdAt: 1, updatedAt: 1, editedAt: null},
-    {id: 'x1', scriptId: 's1', threadId: 'other', authorId: 'local', body: 'other', createdAt: 1, updatedAt: 1, editedAt: null},
+    {
+        id: 'm2', scriptId: 's1', threadId: 't1', authorId: 'local', body: 'reply', createdAt: 2, updatedAt: 2, editedAt: null,
+    },
+    {
+        id: 'm1', scriptId: 's1', threadId: 't1', authorId: 'local', body: 'root', createdAt: 1, updatedAt: 1, editedAt: null,
+    },
+    {
+        id: 'x1', scriptId: 's1', threadId: 'other', authorId: 'local', body: 'other', createdAt: 1, updatedAt: 1, editedAt: null,
+    },
 ];
 
 const createRepository = () => {
@@ -49,9 +59,13 @@ describe('script comments store', () => {
         const repository = createRepository();
         const store = createScriptCommentsStore(repository as unknown as ScriptRepository, 's1');
 
-        await store.createThread({id: 't-new', anchorKind: 'range', anchorBlockId: null, quotedText: 'Q', body: 'B'});
+        await store.createThread({
+            id: 't-new', anchorKind: 'range', anchorBlockId: null, quotedText: 'Q', body: 'B',
+        });
 
-        expect(repository.createScriptCommentThread).toHaveBeenCalledWith('s1', expect.objectContaining({id: 't-new', messageId: 'm-new-1', body: 'B'}));
+        expect(repository.createScriptCommentThread).toHaveBeenCalledWith('s1', expect.objectContaining({
+            id: 't-new', messageId: 'm-new-1', body: 'B',
+        }));
     });
 
     it('replies with a freshly allocated message id', async () => {
@@ -60,7 +74,9 @@ describe('script comments store', () => {
 
         await store.reply('t1', 'hi');
 
-        expect(repository.addScriptCommentMessage).toHaveBeenCalledWith('s1', {id: 'm-new-1', threadId: 't1', body: 'hi'});
+        expect(repository.addScriptCommentMessage).toHaveBeenCalledWith('s1', {
+            id: 'm-new-1', threadId: 't1', body: 'hi',
+        });
     });
 
     it('returns a restorable snapshot with messages in creation order when deleting a thread', async () => {
@@ -68,6 +84,7 @@ describe('script comments store', () => {
         const store = createScriptCommentsStore(repository as unknown as ScriptRepository, 's1');
 
         await store.ready();
+
         const snapshot = await store.deleteThread('t1');
 
         expect(snapshot).toEqual({thread, messages: [messages[1], messages[0]]});

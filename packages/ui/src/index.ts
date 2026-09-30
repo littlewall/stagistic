@@ -50,14 +50,20 @@ export {Tooltip, type TooltipProps} from './atoms/Tooltip/Tooltip';
 // ─── Molecules ──────────────────────────────────────────────────────────────
 export {ActionCard, type ActionCardProps} from './molecules/ActionCard/ActionCard';
 export {ButtonGroup} from './molecules/ButtonGroup/ButtonGroup';
-export {Card, CardContent, CardFooter, CardHeader} from './molecules/Card/Card';
+export {
+    Card, CardContent, CardFooter, CardHeader,
+} from './molecules/Card/Card';
 export {ListPanel, type ListPanelProps} from './molecules/ListPanel/ListPanel';
 export {ListRow, type ListRowProps} from './molecules/ListRow/ListRow';
 export {SearchControl, type SearchControlProps} from './molecules/SearchControl/SearchControl';
-export {ToggleButtonGroup, type ToggleButtonGroupOption, type ToggleButtonGroupProps} from './molecules/ToggleButtonGroup/ToggleButtonGroup';
+export {
+    ToggleButtonGroup, type ToggleButtonGroupOption, type ToggleButtonGroupProps,
+} from './molecules/ToggleButtonGroup/ToggleButtonGroup';
 
 // Menus & popovers
-export {DropdownMenu, type DropdownMenuItem, type DropdownMenuProps} from './molecules/DropdownMenu/DropdownMenu';
+export {
+    DropdownMenu, type DropdownMenuItem, type DropdownMenuProps,
+} from './molecules/DropdownMenu/DropdownMenu';
 export {IconDropdownMenu, type IconDropdownMenuProps} from './molecules/IconDropdownMenu/IconDropdownMenu';
 export {IconPopover, type IconPopoverProps} from './molecules/IconPopover/IconPopover';
 export {MoreActionsMenu, type MoreActionsMenuProps} from './molecules/MoreActionsMenu/MoreActionsMenu';
@@ -65,15 +71,19 @@ export {ScriptActionsMenu} from './molecules/ScriptActionsMenu/ScriptActionsMenu
 
 // ─── Forms ──────────────────────────────────────────────────────────────────
 export {FormSelect, type FormSelectOption} from './molecules/forms/FormSelect/FormSelect';
-export {InputTable, type InputTableColumnDef, type InputTableProps, type InputTableRow, type InputTableRowCount} from './molecules/forms/InputTable/InputTable';
+export {
+    InputTable, type InputTableColumnDef, type InputTableProps, type InputTableRow, type InputTableRowCount,
+} from './molecules/forms/InputTable/InputTable';
 export {MultiComboBox, type MultiComboBoxOption} from './molecules/forms/MultiComboBox/MultiComboBox';
 export {Select, type SelectOption} from './molecules/forms/Select/Select';
-export {PanelHeader, SettingRow, SettingsGroup} from './molecules/forms/SettingsGroup/SettingsGroup';
+export {
+    PanelHeader, SettingRow, SettingsGroup,
+} from './molecules/forms/SettingsGroup/SettingsGroup';
 export {SettingSwitch} from './molecules/forms/SettingSwitch/SettingSwitch';
-export {TextInput} from './molecules/forms/TextInput/TextInput';
 export {formControlStyles} from './molecules/forms/shared/formControlStyles';
 export {useAnchoredMenuPlacement} from './molecules/forms/shared/useAnchoredMenuHeight';
 export {useDropdownDismiss} from './molecules/forms/shared/useDropdownDismiss';
+export {TextInput} from './molecules/forms/TextInput/TextInput';
 
 // ─── Organisms ──────────────────────────────────────────────────────────────
 export {Grid} from './organisms/Grid/Grid';
@@ -87,7 +97,9 @@ export {LoaderOverlay} from './feedback/LoaderOverlay/LoaderOverlay';
 export {Notice} from './feedback/Notice/Notice';
 export {ProgressBar} from './feedback/ProgressBar/ProgressBar';
 export {ProgressPanel} from './feedback/ProgressPanel/ProgressPanel';
-export {type ToastContent, ToastProvider, useToastController} from './feedback/ToastProvider/ToastProvider';
+export {
+    type ToastContent, ToastProvider, useToastController,
+} from './feedback/ToastProvider/ToastProvider';
 
 // ─── App layout ─────────────────────────────────────────────────────────────
 export {AppFooter} from './layout/AppFooter';
@@ -114,23 +126,29 @@ export {TypeToConfirmAction, type TypeToConfirmActionProps} from './dialogs/moda
 // ─── Dialogs: script ────────────────────────────────────────────────────────
 export {DELETE_SCRIPT_CONFIRM_PHRASE} from './dialogs/script/deleteScriptConfirmPhrase';
 export {DeleteScriptModal} from './dialogs/script/DeleteScriptModal';
-export {DuplicateScriptModal, type DuplicateScriptModalProps, type DuplicateScriptSubmit} from './dialogs/script/DuplicateScriptModal';
+export {
+    DuplicateScriptModal, type DuplicateScriptModalProps, type DuplicateScriptSubmit,
+} from './dialogs/script/DuplicateScriptModal';
 export type {StepkgPeekResult} from './dialogs/script/import/types';
 export {ImportScriptModal} from './dialogs/script/ImportScriptModal';
 export {NewScriptModal} from './dialogs/script/NewScriptModal';
 export {PublicPreviewNotice} from './dialogs/script/PublicPreviewNotice';
-export {RenameScriptModal, type RenameScriptModalProps, type RenameScriptSubmit} from './dialogs/script/RenameScriptModal';
-export {ScriptSettingsModal, type SettingsNavGroup, type SettingsNavItem, type SettingsNavSubItem} from './dialogs/script/ScriptSettingsModal';
+export {
+    RenameScriptModal, type RenameScriptModalProps, type RenameScriptSubmit,
+} from './dialogs/script/RenameScriptModal';
+export {
+    ScriptSettingsModal, type SettingsNavGroup, type SettingsNavItem, type SettingsNavSubItem,
+} from './dialogs/script/ScriptSettingsModal';
 export type {NewScriptShape} from './dialogs/script/types';
 
 // ─── Dialogs: attribute manager ─────────────────────────────────────────────
+export {AttributeManagerCharactersPanel} from './dialogs/attribute-manager/AttributeManagerCharactersPanel';
 export type {
     AttributeManagerCharacter,
     AttributeManagerCharactersPanelProps,
     AttributeManagerCharacterWorkspaceId,
     AttributeManagerGroup,
 } from './dialogs/attribute-manager/attributeManagerCharacterTypes';
-export {AttributeManagerCharactersPanel} from './dialogs/attribute-manager/AttributeManagerCharactersPanel';
 export {type AttributeManagerDetailTab, AttributeManagerDetailTabs} from './dialogs/attribute-manager/AttributeManagerDetailTabs';
 export {AttributeManagerGroupDetail} from './dialogs/attribute-manager/AttributeManagerGroupDetail';
 export {
@@ -138,7 +156,9 @@ export {
     AttributeManagerListPanel,
     type AttributeManagerListPanelProps,
 } from './dialogs/attribute-manager/AttributeManagerListPanel';
-export {AttributeManagerModal, type AttributeManagerModalProps, type AttributeManagerTab} from './dialogs/attribute-manager/AttributeManagerModal';
+export {
+    AttributeManagerModal, type AttributeManagerModalProps, type AttributeManagerTab,
+} from './dialogs/attribute-manager/AttributeManagerModal';
 export {
     AttributeManagerMusicDetail,
     type AttributeManagerMusicDetailProps,
@@ -159,5 +179,7 @@ export {RemoveAttachmentModal, type RemoveAttachmentModalProps} from './dialogs/
 export {RemoveGroupModal, type RemoveGroupModalProps} from './dialogs/attribute-manager/RemoveGroupModal';
 
 // ─── Editor panels ──────────────────────────────────────────────────────────
-export {EditorSidebar, type EditorSidebarCharacter, type EditorSidebarGroup} from './editor-panels/EditorSidebar';
+export {
+    EditorSidebar, type EditorSidebarCharacter, type EditorSidebarGroup,
+} from './editor-panels/EditorSidebar';
 export {ExportPanel} from './export/ExportPanel';

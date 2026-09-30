@@ -1,18 +1,24 @@
-import {getScriptBlockNodeType, type ScriptDocument, type ScriptNode} from '../document';
-import {isQuotedCharacterCueLine, isUppercaseSyntaxLine, shouldForceStageDirection, splitCharacterTokens} from '../syntax';
+import {
+    getScriptBlockNodeType, type ScriptDocument, type ScriptNode,
+} from '../document';
+import {
+    isQuotedCharacterCueLine, isUppercaseSyntaxLine, shouldForceStageDirection, splitCharacterTokens,
+} from '../syntax';
 import type {TitlePageSettings} from '../titlePage';
 import {serializeStagisticFrontmatter} from './frontmatter';
-import {getText, quoteNameWhenRequired, serializeInlineContent} from './serializeInline';
+import {
+    getText, quoteNameWhenRequired, serializeInlineContent,
+} from './serializeInline';
 
 export interface SerializeStagisticOptions {
-    scriptTitle: string;
-    titlePage?: TitlePageSettings;
-    exportDate?: Date;
+    scriptTitle: string,
+    titlePage?: TitlePageSettings,
+    exportDate?: Date,
 }
 
 export type SerializationState = {
-    musicNumber: number;
-    openMusicNumber: number | null;
+    musicNumber: number,
+    openMusicNumber: number | null,
 };
 
 const serializeCharacterCue = (node: ScriptNode) => {
@@ -27,7 +33,9 @@ const serializeCharacterCue = (node: ScriptNode) => {
 
 const serializeSpeechBlock = (node: ScriptNode, state: SerializationState) => {
     const blockType = getScriptBlockNodeType(node);
-    const {text, hitOut, outMarkers} = serializeInlineContent(node.content, state, {includeOut: false});
+    const {
+        text, hitOut, outMarkers,
+    } = serializeInlineContent(node.content, state, {includeOut: false});
     let serialized: string;
 
     if ((blockType === 'dialogue' || blockType === 'lyrics') && text.length === 0) {
@@ -39,7 +47,7 @@ const serializeSpeechBlock = (node: ScriptNode, state: SerializationState) => {
 
         serialized = trimmed.startsWith('(') && trimmed.endsWith(')') ? trimmed : `(${trimmed})`;
     } else if (blockType === 'lyrics') {
-        const match = /^(\t*)(.*)$/su.exec(text);
+        const match = (/^(\t*)(.*)$/su).exec(text);
 
         serialized = `${match?.[1] ?? ''}${(match?.[2] ?? '').toUpperCase()}`;
     } else {
@@ -49,7 +57,11 @@ const serializeSpeechBlock = (node: ScriptNode, state: SerializationState) => {
     return outMarkers.length > 0 ? `${serialized}\n${outMarkers.map(marker => `!${marker}`).join('\n')}` : serialized;
 };
 
-const SPEECH_CONTINUATION_TYPES = ['aside', 'dialogue', 'lyrics'];
+const SPEECH_CONTINUATION_TYPES = [
+    'aside',
+    'dialogue',
+    'lyrics',
+];
 
 const stageDirectionRunContinuesSpeech = (content: ScriptNode[], fromIndex: number): boolean => {
     let index = fromIndex;

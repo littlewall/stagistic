@@ -1,4 +1,6 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {
     CHARACTER_COLOR_SATURATION_DEFAULT,
@@ -12,7 +14,12 @@ import {
 
 describe('isBlockShortcut', () => {
     it('accepts the single-digit strings 0-9', () => {
-        for (const digit of ['0', '1', '5', '9']) {
+        for (const digit of [
+            '0',
+            '1',
+            '5',
+            '9',
+        ]) {
             expect(isBlockShortcut(digit)).toBe(true);
         }
     });

@@ -1,7 +1,9 @@
 import '../../../styles/tokens.css';
 
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
 import type {StepkgPeekResult} from './import/types';
@@ -14,6 +16,7 @@ const waitFor = async (predicate: () => boolean) => {
 
     while (Date.now() < deadline) {
         if (predicate()) return;
+
         await new Promise(resolve => {
             window.setTimeout(resolve, 10);
         });
@@ -63,7 +66,9 @@ describe('ImportScriptModal', () => {
                 onImportStepkgAsNew={() => Promise.resolve()}
                 onReplaceWithStepkg={() => Promise.resolve()}
                 onDownloadStepkgBackup={() => Promise.resolve()}
-                onPeekStepkg={() => Promise.resolve({ok: true, scriptId: 's', packageTitle: 'T', existingLocalTitle: null} satisfies StepkgPeekResult)}
+                onPeekStepkg={() => Promise.resolve({
+                    ok: true, scriptId: 's', packageTitle: 'T', existingLocalTitle: null,
+                } satisfies StepkgPeekResult)}
             />,
         );
         mountedRoots.push(root);
@@ -72,8 +77,9 @@ describe('ImportScriptModal', () => {
     });
 
     it('reveals the New/Replace toggle and the replace panel on a .stepkg collision', async () => {
-        const onPeekStepkg = () =>
-            Promise.resolve({ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: 'Local Copy'} satisfies StepkgPeekResult);
+        const onPeekStepkg = () => Promise.resolve({
+            ok: true, scriptId: 'script-1', packageTitle: 'My Play', existingLocalTitle: 'Local Copy',
+        } satisfies StepkgPeekResult);
         const onDownloadStepkgBackup = vi.fn(() => Promise.resolve());
         const onReplaceWithStepkg = vi.fn(() => Promise.resolve());
         const host = document.createElement('div');

@@ -22,14 +22,16 @@ const FOCUSABLE_SELECTOR = [
 ].join(',');
 
 interface ModalDialogProps {
-    isOpen: boolean;
-    onClose: () => void;
-    ariaLabel: string;
-    children: ReactNode;
-    panelClassName?: string;
+    isOpen: boolean,
+    onClose: () => void,
+    ariaLabel: string,
+    children: ReactNode,
+    panelClassName?: string,
 }
 
-export const ModalDialog = ({isOpen, onClose, ariaLabel, children, panelClassName}: ModalDialogProps) => {
+export const ModalDialog = ({
+    isOpen, onClose, ariaLabel, children, panelClassName,
+}: ModalDialogProps) => {
     const dialogRef = useRef<HTMLDialogElement | null>(null);
     const restoreFocusRef = useRef<HTMLElement | null>(null);
     const [isMounted, setIsMounted] = useState(isOpen);

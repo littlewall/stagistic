@@ -1,15 +1,18 @@
-import {BLOCK_TEXT_ALIGN_OPTIONS, type BlockCasing, type BlockTextAlign, type ScriptBlockNodeType} from '@stagistic/script';
+import {
+    BLOCK_TEXT_ALIGN_OPTIONS, type BlockCasing, type BlockTextAlign, type ScriptBlockNodeType,
+} from '@stagistic/script';
 import {ToggleButtonGroup, type ToggleButtonGroupOption} from '@stagistic/ui';
 import clsx from 'clsx';
 
-import type {BlockSettingsPatch, ElementFormattingModel, ElementsHandlers} from '../types';
-
+import type {
+    BlockSettingsPatch, ElementFormattingModel, ElementsHandlers,
+} from '../types';
 import styles from './ElementFormattingToolbar.module.css';
 
 interface ElementFormattingToolbarProps {
-    blockType: ScriptBlockNodeType;
-    model: ElementFormattingModel;
-    handlers: ElementsHandlers;
+    blockType: ScriptBlockNodeType,
+    model: ElementFormattingModel,
+    handlers: ElementsHandlers,
 }
 
 type TextStyle = 'bold' | 'italic' | 'underline';
@@ -63,9 +66,13 @@ const TEXT_STYLE_OPTIONS: ToggleButtonGroupOption<TextStyle>[] = [
     },
 ];
 
-export const ElementFormattingToolbar = ({blockType, model, handlers}: ElementFormattingToolbarProps) => {
+export const ElementFormattingToolbar = ({
+    blockType, model, handlers,
+}: ElementFormattingToolbarProps) => {
     const update = (patch: BlockSettingsPatch) => handlers.onUpdateBlockSettings(blockType, patch);
-    const {textAlign, casing, isBold, isItalic, isUnderline} = model;
+    const {
+        textAlign, casing, isBold, isItalic, isUnderline,
+    } = model;
     const activeTextStyles: TextStyle[] = [];
 
     if (isBold) {
@@ -99,13 +106,11 @@ export const ElementFormattingToolbar = ({blockType, model, handlers}: ElementFo
                 options={TEXT_STYLE_OPTIONS}
                 selectionMode="multiple"
                 value={activeTextStyles}
-                onChange={values =>
-                    update({
-                        isBold: values.includes('bold'),
-                        isItalic: values.includes('italic'),
-                        isUnderline: values.includes('underline'),
-                    })
-                }
+                onChange={values => update({
+                    isBold: values.includes('bold'),
+                    isItalic: values.includes('italic'),
+                    isUnderline: values.includes('underline'),
+                })}
             />
         </div>
     );

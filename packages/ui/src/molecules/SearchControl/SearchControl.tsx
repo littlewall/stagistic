@@ -7,19 +7,20 @@ import {ChevronDownIcon} from '../../icons/ui/ChevronDownIcon';
 import {ChevronUpIcon} from '../../icons/ui/ChevronUpIcon';
 import {CloseIcon} from '../../icons/ui/CloseIcon';
 import {SearchIcon} from '../../icons/ui/SearchIcon';
-
 import styles from './SearchControl.module.css';
 
 export type SearchControlProps = {
-    currentResult: number;
-    resultCount: number;
-    onPreviousResult?: () => void;
-    onNextResult?: () => void;
-    onClear?: () => void;
+    currentResult: number,
+    resultCount: number,
+    onPreviousResult?: () => void,
+    onNextResult?: () => void,
+    onClear?: () => void,
 } & Omit<SearchInputProps, 'startAdornment' | 'endAdornment' | 'children' | 'onClear'>;
 
 export const SearchControl = forwardRef<HTMLInputElement, SearchControlProps>(
-    ({currentResult, resultCount, onPreviousResult, onNextResult, onClear, className, value, ...props}, ref) => {
+    ({
+        currentResult, resultCount, onPreviousResult, onNextResult, onClear, className, value, ...props
+    }, ref) => {
         const generatedInputId = useId();
         const inputId = props.id ?? generatedInputId;
         const hasQuery = typeof value === 'string' && value.length > 0;

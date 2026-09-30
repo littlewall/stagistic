@@ -1,6 +1,10 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
-import {classifyFileKind, getFileBaseName, isStagisticFileName, isStepkgFileName} from './model';
+import {
+    classifyFileKind, getFileBaseName, isStagisticFileName, isStepkgFileName,
+} from './model';
 
 describe('Stagistic import file model', () => {
     it('accepts only .stagistic files case-insensitively', () => {

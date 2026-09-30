@@ -1,4 +1,6 @@
-import {type RefObject, useEffect, useRef} from 'react';
+import {
+    type RefObject, useEffect, useRef,
+} from 'react';
 
 export const useDropdownDismiss = (isOpen: boolean, setIsOpen: (value: boolean) => void, containerRef: RefObject<HTMLElement | null>) => {
     const setIsOpenRef = useRef(setIsOpen);

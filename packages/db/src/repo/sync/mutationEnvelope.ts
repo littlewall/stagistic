@@ -1,28 +1,29 @@
 const MUTATION_ENVELOPE_VERSION = 1;
+
 export const LOCAL_ACTOR_PLACEHOLDER = 'local-actor';
 export const LOCAL_DEVICE_PLACEHOLDER = 'local-device';
 
 export interface MutationEnvelope<TPayload = unknown> {
-    version: typeof MUTATION_ENVELOPE_VERSION;
-    operationId: string;
-    operationType: string;
-    entityKey: string;
-    scriptId: string;
-    actorId: string;
-    deviceId: string;
-    occurredAt: number;
-    payload: TPayload;
+    version: typeof MUTATION_ENVELOPE_VERSION,
+    operationId: string,
+    operationType: string,
+    entityKey: string,
+    scriptId: string,
+    actorId: string,
+    deviceId: string,
+    occurredAt: number,
+    payload: TPayload,
 }
 
 interface CreateMutationEnvelopeInput<TPayload> {
-    operationId: string;
-    operationType: string;
-    entityKey: string;
-    scriptId: string;
-    occurredAt: number;
-    payload: TPayload;
-    actorId?: string;
-    deviceId?: string;
+    operationId: string,
+    operationType: string,
+    entityKey: string,
+    scriptId: string,
+    occurredAt: number,
+    payload: TPayload,
+    actorId?: string,
+    deviceId?: string,
 }
 
 export const createMutationEnvelope = <TPayload>({

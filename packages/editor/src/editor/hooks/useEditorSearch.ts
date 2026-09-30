@@ -1,29 +1,33 @@
 import {useHotkey} from '@tanstack/react-hotkeys';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useEditorState} from '@tiptap/react';
-import type {ChangeEventHandler, KeyboardEventHandler, RefObject} from 'react';
-import {useCallback, useEffect, useRef} from 'react';
+import type {
+    ChangeEventHandler, KeyboardEventHandler, RefObject,
+} from 'react';
+import {
+    useCallback, useEffect, useRef,
+} from 'react';
 
 import {getEditorSearchSnapshot, getSceneCollapseSnapshot} from '../tiptap/extensions';
 import {findCollapsedSceneContainingPosition} from '../tiptap/extensions/sceneCollapse/sceneCollapseModel';
 
 interface UseEditorSearchArgs {
-    editor: TiptapEditor | null;
+    editor: TiptapEditor | null,
 }
 
 export interface UseEditorSearchResult {
-    inputRef: RefObject<HTMLInputElement | null>;
-    query: string;
-    currentResult: number;
-    resultCount: number;
-    onQueryChange: ChangeEventHandler<HTMLInputElement>;
-    onInputKeyDown: KeyboardEventHandler<HTMLInputElement>;
-    onClear: () => void;
-    onPreviousResult: () => void;
-    onNextResult: () => void;
+    inputRef: RefObject<HTMLInputElement | null>,
+    query: string,
+    currentResult: number,
+    resultCount: number,
+    onQueryChange: ChangeEventHandler<HTMLInputElement>,
+    onInputKeyDown: KeyboardEventHandler<HTMLInputElement>,
+    onClear: () => void,
+    onPreviousResult: () => void,
+    onNextResult: () => void,
 }
 
-const getWindowTarget = () => (typeof window === 'undefined' ? null : window);
+const getWindowTarget = () => typeof window === 'undefined' ? null : window;
 
 const ownsAnotherEditingContext = (target: EventTarget | null, editorElement: HTMLElement, searchInput: HTMLInputElement | null) => {
     if (!(target instanceof HTMLElement)) {
@@ -43,7 +47,9 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
         editor,
         selector: ({editor: stateEditor}) => {
             if (!stateEditor) {
-                return {query: '', currentIndex: -1, resultCount: 0, activeFrom: null};
+                return {
+                    query: '', currentIndex: -1, resultCount: 0, activeFrom: null,
+                };
             }
 
             const snapshot = getEditorSearchSnapshot(stateEditor.state);
@@ -56,9 +62,16 @@ export const useEditorSearch = ({editor}: UseEditorSearchArgs): UseEditorSearchR
                 activeFrom: active?.from ?? null,
             };
         },
-        equalityFn: (a, b) =>
-            Boolean(a && b && a.query === b.query && a.currentIndex === b.currentIndex && a.resultCount === b.resultCount && a.activeFrom === b.activeFrom),
-    }) ?? {query: '', currentIndex: -1, resultCount: 0, activeFrom: null};
+        equalityFn: (a, b) => Boolean(
+            a && b
+            && a.query === b.query
+            && a.currentIndex === b.currentIndex
+            && a.resultCount === b.resultCount
+            && a.activeFrom === b.activeFrom,
+        ),
+    }) ?? {
+        query: '', currentIndex: -1, resultCount: 0, activeFrom: null,
+    };
 
     const onQueryChange = useCallback<ChangeEventHandler<HTMLInputElement>>(
         event => {

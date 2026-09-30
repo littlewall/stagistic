@@ -1,6 +1,10 @@
-import {type ChangeEvent, useCallback, useEffect, useMemo, useState} from 'react';
+import {
+    type ChangeEvent, useCallback, useEffect, useMemo, useState,
+} from 'react';
 
-import {classifyFileKind, type DropEvent, getFileBaseName, isFileDropItem, type SelectedFile} from './model';
+import {
+    classifyFileKind, type DropEvent, getFileBaseName, isFileDropItem, type SelectedFile,
+} from './model';
 import type {StepkgPeekResult, UseImportScriptModalStateArgs} from './types';
 
 const UNSUPPORTED_FILE_ERROR = 'Only .stagistic or .stepkg files are supported.';
@@ -8,7 +12,9 @@ const UNSUPPORTED_FILE_ERROR = 'Only .stagistic or .stepkg files are supported.'
 type UseImportFileSelectionArgs = Pick<UseImportScriptModalStateArgs, 'isOpen' | 'onPeekStepkg' | 'onPickFile' | 'preselectedFile'>;
 
 /** Selected file, its .stepkg peek result, and the name/choice the user derives from it. */
-export const useImportFileSelection = ({isOpen, onPeekStepkg, onPickFile, preselectedFile}: UseImportFileSelectionArgs) => {
+export const useImportFileSelection = ({
+    isOpen, onPeekStepkg, onPickFile, preselectedFile,
+}: UseImportFileSelectionArgs) => {
     const [name, setName] = useState('');
     const [selectedFile, setSelectedFile] = useState<SelectedFile | null>(null);
     const [fileError, setFileError] = useState<string | null>(null);
@@ -34,7 +40,9 @@ export const useImportFileSelection = ({isOpen, onPeekStepkg, onPickFile, presel
             return;
         }
 
-        setSelectedFile({kind: 'stagistic', name: preselectedFile.fileName, text: preselectedFile.text});
+        setSelectedFile({
+            kind: 'stagistic', name: preselectedFile.fileName, text: preselectedFile.text,
+        });
         setFileError(null);
         setStepkgPeek(null);
         setImportChoice('new');
@@ -77,7 +85,9 @@ export const useImportFileSelection = ({isOpen, onPeekStepkg, onPickFile, presel
         [onPeekStepkg],
     );
 
-    const applyStagisticFile = useCallback((file: {name: string; file?: File; text?: string}) => {
+    const applyStagisticFile = useCallback((file: {
+        name: string, file?: File, text?: string,
+    }) => {
         setSelectedFile({kind: 'stagistic', ...file});
         setFileError(null);
         setStepkgPeek(null);
@@ -87,7 +97,9 @@ export const useImportFileSelection = ({isOpen, onPeekStepkg, onPickFile, presel
 
     const applyStepkgFile = useCallback(
         (fileName: string, bytes: Uint8Array) => {
-            setSelectedFile({kind: 'stepkg', name: fileName, bytes});
+            setSelectedFile({
+                kind: 'stepkg', name: fileName, bytes,
+            });
             setFileError(null);
             setStepkgPeek(null);
             void peekStepkg(bytes);

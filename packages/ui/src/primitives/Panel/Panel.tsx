@@ -1,5 +1,7 @@
 import clsx from 'clsx';
-import {type ComponentPropsWithoutRef, createElement, type ElementType, type ReactElement} from 'react';
+import {
+    type ComponentPropsWithoutRef, createElement, type ElementType, type ReactElement,
+} from 'react';
 
 import styles from './Panel.module.css';
 
@@ -8,11 +10,11 @@ type PanelLayer = 'shell' | 'panel' | 'float';
 type PanelPadding = 'none' | 'sm' | 'md' | 'lg';
 
 export type PanelProps<T extends ElementType = 'div'> = {
-    as?: T;
-    layer?: PanelLayer;
-    padding?: PanelPadding;
-    bordered?: boolean;
-    className?: string;
+    as?: T,
+    layer?: PanelLayer,
+    padding?: PanelPadding,
+    bordered?: boolean,
+    className?: string,
 } & Omit<ComponentPropsWithoutRef<T>, 'as' | 'className'>;
 
 const LAYER_CLASS: Record<PanelLayer, string> = {

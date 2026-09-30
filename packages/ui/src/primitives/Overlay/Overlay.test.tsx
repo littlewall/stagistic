@@ -1,8 +1,9 @@
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {Overlay} from './Overlay';
-
 import styles from './Overlay.module.css';
 
 describe('Overlay', () => {

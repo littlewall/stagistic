@@ -1,12 +1,16 @@
 import {coerceUnknownBlocksToStageDirections, type ScriptDocument} from '@stagistic/script';
-import {type ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState} from 'react';
+import {
+    type ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState,
+} from 'react';
 
 import {EditorActCommandsProvider} from './actCommands/context';
 import {buildEditorRootStyle} from './buildRootStyle';
 import {EditorShell} from './components/editorShell/EditorShell';
 import {EditorInstanceProvider} from './context';
 import type {EditorProps} from './contracts';
-import {getEditorCssVars, resolveEditorSettings, selectEditorRebuildSettings, stripScriptSettings} from './editorSettings';
+import {
+    getEditorCssVars, resolveEditorSettings, selectEditorRebuildSettings, stripScriptSettings,
+} from './editorSettings';
 import {useEditorRuntimeSettings} from './editorSettings/useEditorRuntimeSettings';
 import {LeftSidebar, RightSidebar} from './editorSlots';
 import {EditorElementSelectionProvider} from './elementSelection/context';
@@ -39,10 +43,16 @@ const Editor = ({
     liveStore: providedLiveStore,
     children,
 }: EditorProps & {children?: ReactNode}) => {
-    const {initialValue, persistentCharacters = [], persistentMusic = [], commentThreads, scriptTitle, draftDate} = document;
+    const {
+        initialValue, persistentCharacters = [], persistentMusic = [], commentThreads, scriptTitle, draftDate,
+    } = document;
     const {settings: globalSettings, scriptSettings} = settingsProps ?? {};
-    const {onAutoSave, onManualSave, onDirtyChange, autoSaveDelayMs} = save ?? {};
-    const {autoFocus, leftSidebarToggle, rightSidebarToggle, sidebarWidth} = layout ?? {};
+    const {
+        onAutoSave, onManualSave, onDirtyChange, autoSaveDelayMs,
+    } = save ?? {};
+    const {
+        autoFocus, leftSidebarToggle, rightSidebarToggle, sidebarWidth,
+    } = layout ?? {};
     const {
         onValueChange,
         onIndexChange,
@@ -73,14 +83,18 @@ const Editor = ({
 
     const initialContentSignature = useMemo(() => JSON.stringify(stripScriptSettings(resolvedInitialValue)), [resolvedInitialValue]);
     const surfaceSignature = useMemo(
-        () =>
-            JSON.stringify({
-                content: initialContentSignature,
-                settings: selectEditorRebuildSettings(resolvedSettings),
-                editorZoom,
-                blockUi: Boolean(onBlockUiEvent),
-            }),
-        [editorZoom, initialContentSignature, onBlockUiEvent, resolvedSettings],
+        () => JSON.stringify({
+            content: initialContentSignature,
+            settings: selectEditorRebuildSettings(resolvedSettings),
+            editorZoom,
+            blockUi: Boolean(onBlockUiEvent),
+        }),
+        [
+            editorZoom,
+            initialContentSignature,
+            onBlockUiEvent,
+            resolvedSettings,
+        ],
     );
     /*
      * The color refs are captured by editor extensions via closure, so a
@@ -110,7 +124,9 @@ const Editor = ({
         persistentMusicRef.current = persistentMusic;
     }, [persistentMusic]);
 
-    const {colorByCharacterIdRef, rememberedColorByKeyRef, persistentCharactersRef, confirmedCharacterColorsById, liveStore} = useEditorCharacterColors({
+    const {
+        colorByCharacterIdRef, rememberedColorByKeyRef, persistentCharactersRef, confirmedCharacterColorsById, liveStore,
+    } = useEditorCharacterColors({
         persistentCharacters,
         characterColorSaturation: resolvedSettings.visual.characterColorSaturation,
         resolvedInitialValue,
@@ -127,9 +143,15 @@ const Editor = ({
         editorZoom,
     });
     const renderScale = useMemo(() => editorZoom * responsiveScale, [editorZoom, responsiveScale]);
-    const editorStyle = useMemo(() => getEditorCssVars(resolvedSettings, renderScale, editorZoom), [editorZoom, renderScale, resolvedSettings]);
+    const editorStyle = useMemo(() => getEditorCssVars(resolvedSettings, renderScale, editorZoom), [
+        editorZoom,
+        renderScale,
+        resolvedSettings,
+    ]);
 
-    const {resolvedLayout, handleLeftSidebarToggleMouseDown, handleRightSidebarToggleMouseDown} = useEditorSidebarLayout({children, layout});
+    const {
+        resolvedLayout, handleLeftSidebarToggleMouseDown, handleRightSidebarToggleMouseDown,
+    } = useEditorSidebarLayout({children, layout});
 
     const extensions = useEditorExtensions({
         resolvedSettings,
@@ -150,7 +172,6 @@ const Editor = ({
     });
     const initialDoc = useMemo<ScriptDocument>(
         () => resolvedInitialValue,
-        // eslint-disable-next-line react-hooks/exhaustive-deps
         [initialContentSignature],
     );
     const {editor} = useScriptEditorInstance({
@@ -175,14 +196,16 @@ const Editor = ({
         }
 
         const paginationCommands = editor.commands as {
-            forcePaginationRecalc?: () => boolean;
+            forcePaginationRecalc?: () => boolean,
         };
 
         paginationCommands.forcePaginationRecalc?.();
 
         return stripScriptSettings(editor.getJSON() as ScriptDocument);
     }, [editor]);
-    const {scheduleAutosave, handleManualSave, setLatestValue, syncInitialValue} = useAutosaveController({
+    const {
+        scheduleAutosave, handleManualSave, setLatestValue, syncInitialValue,
+    } = useAutosaveController({
         onAutoSave,
         onManualSave,
         onDirtyChange,
@@ -193,16 +216,23 @@ const Editor = ({
         },
     });
     const rootStyle = useMemo(
-        () =>
-            buildEditorRootStyle({
-                persistentCharacters,
-                editorStyle,
-                sidebarWidth,
-                pageSpanPx: resolvedSettings.page.widthPx * editorZoom,
-                isLeftSidebarOpen,
-                isRightSidebarOpen,
-            }),
-        [editorStyle, editorZoom, isLeftSidebarOpen, isRightSidebarOpen, persistentCharacters, resolvedSettings.page.widthPx, sidebarWidth],
+        () => buildEditorRootStyle({
+            persistentCharacters,
+            editorStyle,
+            sidebarWidth,
+            pageSpanPx: resolvedSettings.page.widthPx * editorZoom,
+            isLeftSidebarOpen,
+            isRightSidebarOpen,
+        }),
+        [
+            editorStyle,
+            editorZoom,
+            isLeftSidebarOpen,
+            isRightSidebarOpen,
+            persistentCharacters,
+            resolvedSettings.page.widthPx,
+            sidebarWidth,
+        ],
     );
 
     usePaginationSettings({

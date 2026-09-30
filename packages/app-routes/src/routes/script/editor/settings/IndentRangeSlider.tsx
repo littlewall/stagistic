@@ -1,26 +1,28 @@
 import clsx from 'clsx';
-import type {ChangeEvent, CSSProperties, ReactNode} from 'react';
+import type {
+    ChangeEvent, CSSProperties, ReactNode,
+} from 'react';
 
 import styles from './IndentRangeSlider.module.css';
 
 export interface IndentRangeHandle {
-    value: number;
-    min: number;
-    max: number;
-    step: number;
-    ariaLabel: string;
-    onChange: (event: ChangeEvent<HTMLInputElement>) => void;
+    value: number,
+    min: number,
+    max: number,
+    step: number,
+    ariaLabel: string,
+    onChange: (event: ChangeEvent<HTMLInputElement>) => void,
     /** Commit the dragged value; the handles are local until the pointer is released. */
-    onCommit: () => void;
+    onCommit: () => void,
 }
 
 interface IndentRangeSliderProps {
     /** The `--preview-*` percentages that place the rail, the selection and the ticks. */
-    style?: CSSProperties;
-    start: IndentRangeHandle;
-    end: IndentRangeHandle;
+    style?: CSSProperties,
+    start: IndentRangeHandle,
+    end: IndentRangeHandle,
     /** Three spans: the left measure, the centred content measure, the right measure. */
-    labels: ReactNode;
+    labels: ReactNode,
 }
 
 const handleProps = (handle: IndentRangeHandle) => ({
@@ -34,7 +36,9 @@ const handleProps = (handle: IndentRangeHandle) => ({
     'aria-label': handle.ariaLabel,
 });
 
-export const IndentRangeSlider = ({style, start, end, labels}: IndentRangeSliderProps) => (
+export const IndentRangeSlider = ({
+    style, start, end, labels,
+}: IndentRangeSliderProps) => (
     <>
         <div
             className={styles.track}

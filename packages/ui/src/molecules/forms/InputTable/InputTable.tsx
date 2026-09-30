@@ -3,40 +3,40 @@ import {clsx} from 'clsx';
 import styles from './InputTable.module.css';
 
 interface StringColumnDef {
-    key: string;
-    label: string;
-    type: 'string';
-    placeholder?: string;
-    width?: string;
+    key: string,
+    label: string,
+    type: 'string',
+    placeholder?: string,
+    width?: string,
 }
 
 interface StringArrayColumnDef {
-    key: string;
-    label: string;
-    type: 'string-array';
-    placeholder?: string;
-    addEntryLabel?: string;
-    width?: string;
+    key: string,
+    label: string,
+    type: 'string-array',
+    placeholder?: string,
+    addEntryLabel?: string,
+    width?: string,
 }
 
 export type InputTableColumnDef = StringColumnDef | StringArrayColumnDef;
 
 export type InputTableRowCount =
-    | {type: 'fixed'; count: number}
+    | {type: 'fixed', count: number}
     | {
-          type: 'dynamic';
-          min?: number;
-          max?: number;
-      };
+        type: 'dynamic',
+        min?: number,
+        max?: number,
+    };
 
 export type InputTableRow = Record<string, string | string[]>;
 
 export interface InputTableProps {
-    columns: readonly InputTableColumnDef[];
-    rows: readonly InputTableRow[];
-    onChange: (rows: InputTableRow[]) => void;
-    rowCount?: InputTableRowCount;
-    addRowLabel?: string;
+    columns: readonly InputTableColumnDef[],
+    rows: readonly InputTableRow[],
+    onChange: (rows: InputTableRow[]) => void,
+    rowCount?: InputTableRowCount,
+    addRowLabel?: string,
 }
 
 const getCellString = (row: InputTableRow, key: string): string => {
@@ -67,10 +67,10 @@ const StringArrayCell = ({
     addEntryLabel,
     onChange,
 }: {
-    values: string[];
-    placeholder?: string;
-    addEntryLabel?: string;
-    onChange: (values: string[]) => void;
+    values: string[],
+    placeholder?: string,
+    addEntryLabel?: string,
+    onChange: (values: string[]) => void,
 }) => (
     <div className={styles.arrayCell}>
         {values.map((val, i) => (
@@ -84,7 +84,7 @@ const StringArrayCell = ({
                     value={val}
                     placeholder={placeholder}
                     onChange={e => {
-                        onChange(values.map((v, vi) => (vi === i ? e.target.value : v)));
+                        onChange(values.map((v, vi) => vi === i ? e.target.value : v));
                     }}
                 />
                 {values.length > 1 ? (
@@ -113,17 +113,19 @@ const StringArrayCell = ({
     </div>
 );
 
-export const InputTable = ({columns, rows, onChange, rowCount, addRowLabel}: InputTableProps) => {
+export const InputTable = ({
+    columns, rows, onChange, rowCount, addRowLabel,
+}: InputTableProps) => {
     const showDeleteColumn = rowCount?.type !== 'fixed';
     const columnWidths = columns.map(c => c.width ?? '1fr');
-    const gridTemplateColumns = [...columnWidths, ...(showDeleteColumn ? ['24px'] : [])].join(' ');
+    const gridTemplateColumns = [...columnWidths, ...showDeleteColumn ? ['24px'] : []].join(' ');
 
-    const canRemoveRow = showDeleteColumn && rows.length > (rowCount?.type === 'dynamic' ? (rowCount.min ?? 1) : 1);
+    const canRemoveRow = showDeleteColumn && rows.length > (rowCount?.type === 'dynamic' ? rowCount.min ?? 1 : 1);
 
     const canAddRow = showDeleteColumn && (rowCount?.type !== 'dynamic' || rowCount.max === undefined || rows.length < rowCount.max);
 
     const handleCellChange = (rowIndex: number, key: string, value: string | string[]) => {
-        onChange(rows.map((row, i) => (i === rowIndex ? {...row, [key]: value} : row)));
+        onChange(rows.map((row, i) => i === rowIndex ? {...row, [key]: value} : row));
     };
 
     const handleRemoveRow = (rowIndex: number) => {

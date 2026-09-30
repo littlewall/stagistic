@@ -1,10 +1,12 @@
-import {type ScriptRepository, usePersistedDraft, useScriptTitlePageRecord} from '@stagistic/app-core';
+import {
+    type ScriptRepository, usePersistedDraft, useScriptTitlePageRecord,
+} from '@stagistic/app-core';
 import type {TitlePageSettings} from '@stagistic/script';
 import {useCallback} from 'react';
 
 interface UseTitlePageDraftArgs {
-    currentScriptId: string | null;
-    repository: ScriptRepository;
+    currentScriptId: string | null,
+    repository: ScriptRepository,
 }
 
 const EMPTY_TITLE_PAGE: TitlePageSettings = {

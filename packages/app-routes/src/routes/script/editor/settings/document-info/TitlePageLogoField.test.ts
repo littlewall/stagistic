@@ -1,4 +1,6 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {TITLE_PAGE_LOGO_MAX_BYTES, validateTitlePageLogoFile} from './TitlePageLogoField';
 

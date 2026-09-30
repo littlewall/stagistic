@@ -5,18 +5,19 @@ import {Tooltip} from '../atoms/Tooltip/Tooltip';
 import {EditPencilIcon} from '../icons';
 import {CharacterColorControl} from './characterRowConfirmed/CharacterColorControl';
 import {useCharacterColorPickerState} from './characterRowConfirmed/useCharacterColorPickerState';
+import styles from './EditorSidebar.module.css';
 import type {EditorSidebarGroup} from './types';
 
-import styles from './EditorSidebar.module.css';
-
 interface CharacterGroupRowProps {
-    group: EditorSidebarGroup;
-    characterColorSaturation?: number;
-    onEditGroup?: (groupId: string) => void;
-    onSetGroupColor?: (groupId: string, colorHex: string | null) => void;
+    group: EditorSidebarGroup,
+    characterColorSaturation?: number,
+    onEditGroup?: (groupId: string) => void,
+    onSetGroupColor?: (groupId: string, colorHex: string | null) => void,
 }
 
-export const CharacterGroupRow = ({group, characterColorSaturation, onEditGroup, onSetGroupColor}: CharacterGroupRowProps) => {
+export const CharacterGroupRow = ({
+    group, characterColorSaturation, onEditGroup, onSetGroupColor,
+}: CharacterGroupRowProps) => {
     const isColorActionDisabled = Boolean(group.isColorUpdatePending) || !onSetGroupColor;
     const isEditDisabled = !group.id || !onEditGroup;
     const colorPicker = useCharacterColorPickerState({

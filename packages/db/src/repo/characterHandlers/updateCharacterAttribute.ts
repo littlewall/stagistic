@@ -3,9 +3,9 @@ import * as dbQueries from '../../queries';
 import type {CharacterMutationDeps} from './mutationDeps';
 
 interface CharacterAttributeUpdate {
-    opType: string;
-    update: (tx: DbClient, updatedAt: number) => Promise<unknown>;
-    buildPayload: (occurredAt: number) => string;
+    opType: string,
+    update: (tx: DbClient, updatedAt: number) => Promise<unknown>,
+    buildPayload: (occurredAt: number) => string,
 }
 
 /**
@@ -17,8 +17,11 @@ interface CharacterAttributeUpdate {
  * is lost on refresh.
  */
 export const createCharacterAttributeUpdater =
-    ({getDb, recordOutbox, syncDb}: CharacterMutationDeps) =>
-    async (scriptId: string, characterId: string, {opType, update, buildPayload}: CharacterAttributeUpdate) => {
+    ({
+        getDb, recordOutbox, syncDb,
+    }: CharacterMutationDeps) => async (scriptId: string, characterId: string, {
+        opType, update, buildPayload,
+    }: CharacterAttributeUpdate) => {
         if (!characterId) {
             return null;
         }

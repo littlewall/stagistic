@@ -1,8 +1,11 @@
 import clsx from 'clsx';
-import {useEffect, useMemo, useState} from 'react';
+import {
+    useEffect, useMemo, useState,
+} from 'react';
 
 import {useKeyedFieldDrafts} from '../../hooks/useKeyedFieldDrafts';
 import {AttributeManagerCharacterDetail} from './AttributeManagerCharacterDetail';
+import styles from './AttributeManagerCharactersPanel.module.css';
 import type {AttributeManagerCharactersPanelProps, WorkspaceId} from './attributeManagerCharacterTypes';
 import {AttributeManagerEntityBrowser} from './AttributeManagerEntityBrowser';
 import {AttributeManagerGroupDetail} from './AttributeManagerGroupDetail';
@@ -11,11 +14,8 @@ import {CreateGroupModal} from './CreateGroupModal';
 import {useAttributeManagerCharacterNames} from './useAttributeManagerCharacterNames';
 import {useOptimisticAttributeManagerColors} from './useOptimisticAttributeManagerColors';
 
-import styles from './AttributeManagerCharactersPanel.module.css';
-
-const WORKSPACES: Array<{id: WorkspaceId; label: string}> = [
-    {id: 'characters', label: 'Characters'},
-    {id: 'groups', label: 'Groups'},
+const WORKSPACES: Array<{id: WorkspaceId, label: string}> = [
+    {id: 'characters', label: 'Characters'}, {id: 'groups', label: 'Groups'},
     // {id: 'cast', label: 'Cast'},
 ];
 
@@ -53,7 +53,9 @@ export const AttributeManagerCharactersPanel = ({
     const [isCreateCharacterOpen, setIsCreateCharacterOpen] = useState(false);
     const [isCreateGroupOpen, setIsCreateGroupOpen] = useState(false);
     const {colorizedItems: colorizedCharacters, setColor: handleSetCharacterColor} = useOptimisticAttributeManagerColors(characters, onSetCharacterColor);
-    const {displayedCharacters, persistName, resetName, setName} = useAttributeManagerCharacterNames({
+    const {
+        displayedCharacters, persistName, resetName, setName,
+    } = useAttributeManagerCharacterNames({
         characters: colorizedCharacters,
         draftScopeKey,
         onRenameCharacter,
@@ -65,11 +67,10 @@ export const AttributeManagerCharactersPanel = ({
         setValue: setGroupName,
     } = useKeyedFieldDrafts<string>(draftScopeKey);
     const displayedGroups = useMemo(
-        () =>
-            groups.map(group => ({
-                ...group,
-                name: getGroupName(group.id, group.name),
-            })),
+        () => groups.map(group => ({
+            ...group,
+            name: getGroupName(group.id, group.name),
+        })),
         [getGroupName, groups],
     );
     const selectedCharacter = displayedCharacters.find(item => item.id === selectedCharacterId) ?? null;
@@ -92,8 +93,12 @@ export const AttributeManagerCharactersPanel = ({
 
         const initialExists = characters.some(item => item.id === initialSelectedCharacterId);
 
-        setSelectedCharacterId(initialExists ? (initialSelectedCharacterId ?? null) : (characters[0]?.id ?? null));
-    }, [characters, initialSelectedCharacterId, selectedCharacterId]);
+        setSelectedCharacterId(initialExists ? initialSelectedCharacterId ?? null : characters[0]?.id ?? null);
+    }, [
+        characters,
+        initialSelectedCharacterId,
+        selectedCharacterId,
+    ]);
     useEffect(() => {
         if (groups.some(item => item.id === selectedGroupId)) {
             return;
@@ -101,8 +106,12 @@ export const AttributeManagerCharactersPanel = ({
 
         const initialExists = groups.some(item => item.id === initialSelectedGroupId);
 
-        setSelectedGroupId(initialExists ? (initialSelectedGroupId ?? null) : (groups[0]?.id ?? null));
-    }, [groups, initialSelectedGroupId, selectedGroupId]);
+        setSelectedGroupId(initialExists ? initialSelectedGroupId ?? null : groups[0]?.id ?? null);
+    }, [
+        groups,
+        initialSelectedGroupId,
+        selectedGroupId,
+    ]);
 
     const handleCreateGroup = async (name: string) => {
         const created = await onCreateGroup?.(name);
@@ -161,7 +170,7 @@ export const AttributeManagerCharactersPanel = ({
                 <section
                     className={styles.detail}
                     aria-label={`${activeWorkspace.label} detail`}
-                    data-selected-group-id={!isCharactersWorkspace ? (selectedGroupId ?? undefined) : undefined}
+                    data-selected-group-id={!isCharactersWorkspace ? selectedGroupId ?? undefined : undefined}
                 >
                     {isCharactersWorkspace && selectedCharacter && selectedConfirmedCharacter ? (
                         <AttributeManagerCharacterDetail

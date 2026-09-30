@@ -5,14 +5,16 @@ import {IconButton} from '../../atoms/IconButton/IconButton';
 import {DropdownMenu, type DropdownMenuItem} from '../DropdownMenu/DropdownMenu';
 
 export interface IconDropdownMenuProps {
-    'aria-label': string;
-    icon: ReactNode;
-    items: readonly DropdownMenuItem[];
-    size?: ComponentProps<typeof IconButton>['size'];
-    onAction: (id: string) => void;
+    'aria-label': string,
+    icon: ReactNode,
+    items: readonly DropdownMenuItem[],
+    size?: ComponentProps<typeof IconButton>['size'],
+    onAction: (id: string) => void,
 }
 
-export const IconDropdownMenu = ({'aria-label': ariaLabel, icon, items, size = 'sm', onAction}: IconDropdownMenuProps) => (
+export const IconDropdownMenu = ({
+    'aria-label': ariaLabel, icon, items, size = 'sm', onAction,
+}: IconDropdownMenuProps) => (
     <MenuTrigger>
         <IconButton
             size={size}

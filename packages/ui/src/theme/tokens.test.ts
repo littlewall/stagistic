@@ -1,14 +1,23 @@
 /// <reference types="node" />
 
 import {readdirSync, readFileSync} from 'node:fs';
-import {dirname, join, relative, resolve} from 'node:path';
+import {
+    dirname, join, relative, resolve,
+} from 'node:path';
 import {fileURLToPath} from 'node:url';
 
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 const repoRoot = resolve(dirname(fileURLToPath(import.meta.url)), '../../../..');
 
-const CSS_ROOTS = ['packages/ui', 'packages/app-routes', 'packages/editor', 'apps/web'];
+const CSS_ROOTS = [
+    'packages/ui',
+    'packages/app-routes',
+    'packages/editor',
+    'apps/web',
+];
 
 /*
  * Declared from a TypeScript inline style rather than in CSS, so no stylesheet
@@ -65,7 +74,10 @@ describe('css custom properties', () => {
 
         for (const {text} of sources) {
             for (const match of text.matchAll(USAGE)) {
-                const [, name, terminator] = match;
+                const [
+                    , name,
+                    terminator,
+                ] = match;
 
                 if (terminator === ',') {
                     continue;
@@ -88,7 +100,7 @@ describe('css custom properties', () => {
          * bubble menus, so the name describes the pattern rather than one
          * component. See docs/design/token-triage-2026-08-25.md.
          */
-        const offenders = [...tokens.matchAll(DECLARATION)].map(match => match[1]).filter(name => /^--(select|segment)-/.test(name));
+        const offenders = [...tokens.matchAll(DECLARATION)].map(match => match[1]).filter(name => (/^--(select|segment)-/).test(name));
 
         expect(offenders).toEqual([]);
     });

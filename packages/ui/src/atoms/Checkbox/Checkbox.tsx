@@ -5,11 +5,13 @@ import {Checkbox as RACCheckbox, type CheckboxProps as RACCheckboxProps} from 'r
 import styles from './Checkbox.module.css';
 
 export type CheckboxProps = Omit<RACCheckboxProps, 'children' | 'className'> & {
-    className?: string;
-    children?: ReactNode;
+    className?: string,
+    children?: ReactNode,
 };
 
-export const Checkbox = ({className, children, ...props}: CheckboxProps) => (
+export const Checkbox = ({
+    className, children, ...props
+}: CheckboxProps) => (
     <RACCheckbox
         {...props}
         className={clsx(styles.checkbox, className)}

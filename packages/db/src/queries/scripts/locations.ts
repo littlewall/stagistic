@@ -1,15 +1,17 @@
-import {and, asc, eq, type InferInsertModel} from 'drizzle-orm';
+import {
+    and, asc, eq, type InferInsertModel,
+} from 'drizzle-orm';
 
 import {scriptLocations} from '../../schema';
 import type {DbClient} from '../types';
 
 export interface UpsertScriptLocationPayload {
-    id: string;
-    scriptId: string;
-    name: string;
-    description: string | null;
-    createdAt: number;
-    updatedAt: number;
+    id: string,
+    scriptId: string,
+    name: string,
+    description: string | null,
+    createdAt: number,
+    updatedAt: number,
 }
 
 export const insertScriptLocations = async (db: DbClient, rows: InferInsertModel<typeof scriptLocations>[]) => {
@@ -25,10 +27,11 @@ export const deleteScriptLocationsByScriptId = async (db: DbClient, scriptId: st
 };
 
 export const listScriptLocations = async (db: DbClient, scriptId: string) => {
-    return db.select().from(scriptLocations).where(eq(scriptLocations.scriptId, scriptId)).orderBy(asc(scriptLocations.name));
+    return db.select().from(scriptLocations).where(eq(scriptLocations.scriptId, scriptId))
+        .orderBy(asc(scriptLocations.name));
 };
 
-export const getScriptLocationById = async (db: DbClient, payload: {scriptId: string; locationId: string}) => {
+export const getScriptLocationById = async (db: DbClient, payload: {scriptId: string, locationId: string}) => {
     const rows = await db
         .select()
         .from(scriptLocations)
@@ -62,10 +65,10 @@ export const upsertScriptLocation = async (db: DbClient, payload: UpsertScriptLo
 export const updateScriptLocationName = async (
     db: DbClient,
     payload: {
-        scriptId: string;
-        locationId: string;
-        name: string;
-        updatedAt: number;
+        scriptId: string,
+        locationId: string,
+        name: string,
+        updatedAt: number,
     },
 ) => {
     await db
@@ -77,6 +80,6 @@ export const updateScriptLocationName = async (
         .where(and(eq(scriptLocations.scriptId, payload.scriptId), eq(scriptLocations.id, payload.locationId)));
 };
 
-export const deleteScriptLocation = async (db: DbClient, payload: {scriptId: string; locationId: string}) => {
+export const deleteScriptLocation = async (db: DbClient, payload: {scriptId: string, locationId: string}) => {
     await db.delete(scriptLocations).where(and(eq(scriptLocations.scriptId, payload.scriptId), eq(scriptLocations.id, payload.locationId)));
 };

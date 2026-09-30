@@ -1,16 +1,19 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
-import {formControlStyles, FormSelect, PanelHeader, SettingsGroup} from '@stagistic/ui';
+import {
+    formControlStyles, FormSelect, PanelHeader, SettingsGroup,
+} from '@stagistic/ui';
 import clsx from 'clsx';
-import {startTransition, useEffect, useRef, useState} from 'react';
+import {
+    startTransition, useEffect, useRef, useState,
+} from 'react';
 
 import {MIN_PAGE_MARGIN_HORIZONTAL_PX, PX_PER_INCH} from '../constants';
 import {IndentRangeSlider} from '../IndentRangeSlider';
 import {clamp, formatInches} from '../math';
-import type {PageLayoutHandlers, ScriptEditorSettingsPanelProps} from '../types';
-import {usePageLayoutSettingsViewModel} from './usePageLayoutSettingsViewModel';
-
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
+import type {PageLayoutHandlers, ScriptEditorSettingsPanelProps} from '../types';
 import styles from './PageLayoutSettingsPanel.module.css';
+import {usePageLayoutSettingsViewModel} from './usePageLayoutSettingsViewModel';
 
 const MIN_PAGE_CONTENT_WIDTH_PX = 320;
 
@@ -21,8 +24,7 @@ const PAGE_SIZE_PRESETS = [
         label: 'A4',
         widthPx: 794,
         heightPx: 1123,
-    },
-    {
+    }, {
         id: 'letter',
         label: 'US Letter',
         widthPx: 816,
@@ -37,15 +39,23 @@ const resolvePageSizePresetId = (widthPx: number, heightPx: number): string => {
 };
 
 interface PageLayoutSettingsPanelProps {
-    resolvedScriptSettings: ScriptEditorSettingsPanelProps['resolvedScriptSettings'];
-    onUpdatePageSettings: PageLayoutHandlers['onUpdatePageSettings'];
+    resolvedScriptSettings: ScriptEditorSettingsPanelProps['resolvedScriptSettings'],
+    onUpdatePageSettings: PageLayoutHandlers['onUpdatePageSettings'],
 }
 
 export const PageLayoutSettingsPanel = ({resolvedScriptSettings, onUpdatePageSettings}: PageLayoutSettingsPanelProps) => {
-    const {preview, slider, numeric} = usePageLayoutSettingsViewModel({resolvedScriptSettings});
-    const {pagePreviewStyle, headerRows, footerRows, contentRows} = preview;
-    const {sliderStyle, sliderStart, sliderEnd, previewReferenceTotal, minSliderStart, maxSliderEnd} = slider;
-    const {topMarginRows, bottomMarginRows, marginRowOptions} = numeric;
+    const {
+        preview, slider, numeric,
+    } = usePageLayoutSettingsViewModel({resolvedScriptSettings});
+    const {
+        pagePreviewStyle, headerRows, footerRows, contentRows,
+    } = preview;
+    const {
+        sliderStyle, sliderStart, sliderEnd, previewReferenceTotal, minSliderStart, maxSliderEnd,
+    } = slider;
+    const {
+        topMarginRows, bottomMarginRows, marginRowOptions,
+    } = numeric;
 
     const fontSizePx = resolvedScriptSettings.typography.fontSizePx;
 
@@ -56,8 +66,7 @@ export const PageLayoutSettingsPanel = ({resolvedScriptSettings, onUpdatePageSet
         ...PAGE_SIZE_PRESETS.map(preset => ({
             value: preset.id,
             label: preset.label,
-        })),
-        ...(pageSizePresetId === 'custom' ? [{value: 'custom', label: 'Custom'}] : []),
+        })), ...pageSizePresetId === 'custom' ? [{value: 'custom', label: 'Custom'}] : [],
     ];
 
     const marginSliderStep = 0.05 * 96; // 0.05"
@@ -226,7 +235,7 @@ export const PageLayoutSettingsPanel = ({resolvedScriptSettings, onUpdatePageSet
                             });
                         },
                     }}
-                    labels={
+                    labels={(
                         <>
                             <span>
                                 {'Left: '}
@@ -241,7 +250,7 @@ export const PageLayoutSettingsPanel = ({resolvedScriptSettings, onUpdatePageSet
                                 {localRightMarginInches}
                             </span>
                         </>
-                    }
+                    )}
                 />
             </div>
         </SettingsGroup>

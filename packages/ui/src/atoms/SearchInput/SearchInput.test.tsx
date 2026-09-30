@@ -1,8 +1,9 @@
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {SearchInput} from './SearchInput';
-
 import styles from './SearchInput.module.css';
 
 describe('SearchInput', () => {

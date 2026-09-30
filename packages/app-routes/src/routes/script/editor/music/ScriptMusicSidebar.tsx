@@ -1,34 +1,41 @@
-import {useEditorElementSelection, useEditorInstance, useEditorLiveMusic, useFocusEditorMusic} from '@stagistic/editor';
+import {
+    useEditorElementSelection, useEditorInstance, useEditorLiveMusic, useFocusEditorMusic,
+} from '@stagistic/editor';
 import {formatMusicNumber} from '@stagistic/script';
-import {EditPencilIcon, IconButton, LinkSlashIcon, ListRow, SidebarActionsGroup, SidebarMiniHeader, Tooltip} from '@stagistic/ui';
+import {
+    EditPencilIcon, IconButton, LinkSlashIcon, ListRow, SidebarActionsGroup, SidebarMiniHeader, Tooltip,
+} from '@stagistic/ui';
 import clsx from 'clsx';
-import {type ReactNode, useCallback, useMemo, useState} from 'react';
+import {
+    type ReactNode, useCallback, useMemo, useState,
+} from 'react';
 
 import {ATTRIBUTE_MANAGER_PANEL_MUSIC} from '../../attributes/attributeManagerMenu';
 import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalProvider';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import {MusicSidebarContextActions} from './MusicSidebarContextActions';
+import styles from './ScriptMusicSidebar.module.css';
 import type {ScriptMusicListItem} from './types';
 import {UnassignMusicModal} from './UnassignMusicModal';
 
-import styles from './ScriptMusicSidebar.module.css';
-
 interface ScriptMusicSidebarProps {
-    header?: ReactNode;
-    music: readonly ScriptMusicListItem[];
-    isLoading?: boolean;
-    onAddMusic: () => void;
-    onUnassignMusic: (musicId: string) => void | Promise<void>;
+    header?: ReactNode,
+    music: readonly ScriptMusicListItem[],
+    isLoading?: boolean,
+    onAddMusic: () => void,
+    onUnassignMusic: (musicId: string) => void | Promise<void>,
 }
 
 interface RowActionButtonProps {
-    ariaLabel: string;
-    tooltipLabel: string;
-    onPress: () => void;
-    children: ReactNode;
+    ariaLabel: string,
+    tooltipLabel: string,
+    onPress: () => void,
+    children: ReactNode,
 }
 
-const RowActionButton = ({ariaLabel, tooltipLabel, onPress, children}: RowActionButtonProps) => (
+const RowActionButton = ({
+    ariaLabel, tooltipLabel, onPress, children,
+}: RowActionButtonProps) => (
     <Tooltip
         label={tooltipLabel}
         placement="bottom"
@@ -47,16 +54,18 @@ const RowActionButton = ({ariaLabel, tooltipLabel, onPress, children}: RowAction
 );
 
 interface MusicRowProps {
-    music: ScriptMusicListItem;
-    isActive: boolean;
-    number: string | null;
-    startBlockId: string | null;
-    onFocus: (blockId: string) => void;
-    onRequestUnassign: (music: ScriptMusicListItem) => void;
-    onOpenMusicManager: (musicId: string) => void;
+    music: ScriptMusicListItem,
+    isActive: boolean,
+    number: string | null,
+    startBlockId: string | null,
+    onFocus: (blockId: string) => void,
+    onRequestUnassign: (music: ScriptMusicListItem) => void,
+    onOpenMusicManager: (musicId: string) => void,
 }
 
-const MusicRow = ({music, isActive, number, startBlockId, onFocus, onRequestUnassign, onOpenMusicManager}: MusicRowProps) => {
+const MusicRow = ({
+    music, isActive, number, startBlockId, onFocus, onRequestUnassign, onOpenMusicManager,
+}: MusicRowProps) => {
     const isAssigned = Boolean(music.assignmentLabel);
     const label = (
         <>
@@ -77,7 +86,7 @@ const MusicRow = ({music, isActive, number, startBlockId, onFocus, onRequestUnas
             /* The navigable label already carries aria-current; the row must not add aria-selected. */
             announceSelected={false}
             className={clsx(styles.row, !startBlockId && styles.staticRow)}
-            trailing={
+            trailing={(
                 <span className={styles.actions}>
                     {isAssigned ? (
                         <RowActionButton
@@ -96,7 +105,7 @@ const MusicRow = ({music, isActive, number, startBlockId, onFocus, onRequestUnas
                         <EditPencilIcon aria-hidden="true" />
                     </RowActionButton>
                 </span>
-            }
+            )}
         >
             {startBlockId ? (
                 <button
@@ -119,7 +128,9 @@ const MusicRow = ({music, isActive, number, startBlockId, onFocus, onRequestUnas
     );
 };
 
-export const ScriptMusicSidebar = ({header, music, isLoading = false, onAddMusic, onUnassignMusic}: ScriptMusicSidebarProps) => {
+export const ScriptMusicSidebar = ({
+    header, music, isLoading = false, onAddMusic, onUnassignMusic,
+}: ScriptMusicSidebarProps) => {
     const editor = useEditorInstance();
     const elementSelection = useEditorElementSelection();
     const focusMusic = useFocusEditorMusic();
@@ -128,38 +139,34 @@ export const ScriptMusicSidebar = ({header, music, isLoading = false, onAddMusic
     const [unassignTarget, setUnassignTarget] = useState<ScriptMusicListItem | null>(null);
 
     const musicMetadataById = useMemo(
-        () =>
-            new Map(
-                documentMusic.map(
-                    (music, index) =>
-                        [
-                            music.musicId,
-                            {
-                                number: formatMusicNumber(music),
-                                order: index,
-                                startBlockId: music.startBlockId,
-                                title: music.title,
-                            },
-                        ] as const,
-                ),
+        () => new Map(
+            documentMusic.map(
+                (music, index) => [
+                    music.musicId, {
+                        number: formatMusicNumber(music),
+                        order: index,
+                        startBlockId: music.startBlockId,
+                        title: music.title,
+                    },
+                ] as const,
             ),
+        ),
         [documentMusic],
     );
     const displayedMusic = useMemo(
-        () =>
-            music.map(music => {
-                const liveMetadata = musicMetadataById.get(music.id);
+        () => music.map(music => {
+            const liveMetadata = musicMetadataById.get(music.id);
 
-                if (!liveMetadata) {
-                    return music;
-                }
+            if (!liveMetadata) {
+                return music;
+            }
 
-                return {
-                    ...music,
-                    assignmentLabel: music.assignmentLabel ?? liveMetadata.number,
-                    title: liveMetadata.title.trim() || music.title,
-                };
-            }),
+            return {
+                ...music,
+                assignmentLabel: music.assignmentLabel ?? liveMetadata.number,
+                title: liveMetadata.title.trim() || music.title,
+            };
+        }),
         [musicMetadataById, music],
     );
     const {assignedMusic, unassignedMusic} = useMemo(
@@ -186,7 +193,11 @@ export const ScriptMusicSidebar = ({header, music, isLoading = false, onAddMusic
 
         await onUnassignMusic(unassignTarget.id);
         setUnassignTarget(null);
-    }, [editor, onUnassignMusic, unassignTarget]);
+    }, [
+        editor,
+        onUnassignMusic,
+        unassignTarget,
+    ]);
 
     const renderMusicList = (items: readonly ScriptMusicListItem[]) => (
         <ul className={styles.itemList}>
@@ -210,11 +221,11 @@ export const ScriptMusicSidebar = ({header, music, isLoading = false, onAddMusic
             <SidebarMiniHeader
                 navigation={header}
                 actions={<MusicSidebarContextActions onAddMusic={onAddMusic} />}
-                controls={
+                controls={(
                     <SidebarActionsGroup>
                         <AttributeManagerSidebarButton panelId={ATTRIBUTE_MANAGER_PANEL_MUSIC} />
                     </SidebarActionsGroup>
-                }
+                )}
             />
             {isLoading ? (
                 <section

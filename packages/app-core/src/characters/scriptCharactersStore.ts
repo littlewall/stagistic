@@ -1,7 +1,11 @@
-import type {ScriptCharacterGenderOption, ScriptCharacterRef, ScriptRepository} from '@stagistic/db';
+import type {
+    ScriptCharacterGenderOption, ScriptCharacterRef, ScriptRepository,
+} from '@stagistic/db';
 import {normalizeCharacterKey} from '@stagistic/script';
 
-import {createReactiveCollection, createReactiveCollectionStatusStore, toDomainCollectionValue} from '../collections';
+import {
+    createReactiveCollection, createReactiveCollectionStatusStore, toDomainCollectionValue,
+} from '../collections';
 import {type CharacterField, persistCharacterFieldChanges} from './persistCharacterFieldChanges';
 
 const normalizeGenderLabel = (label: string) => label.trim().replace(/\s+/g, ' ');

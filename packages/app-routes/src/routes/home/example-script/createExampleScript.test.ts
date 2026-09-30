@@ -1,5 +1,9 @@
-import {buildScriptBlockIndex, collectCommentAnchorThreadIds, parseStagistic} from '@stagistic/script';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    buildScriptBlockIndex, collectCommentAnchorThreadIds, parseStagistic,
+} from '@stagistic/script';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 
 import {createExampleScript, type ExampleScriptRepository} from './createExampleScript';
 import source from './example-script.stagistic?raw';
@@ -50,15 +54,17 @@ const createRepository = () => {
         allocateScriptCommentThreadId: nextId('thread'),
         allocateScriptCommentMessageId: nextId('message'),
         allocateScriptLocationId: nextId('location'),
-        confirmScriptCharacterWithId: vi.fn((_scriptId: string, input: {id: string; key: string}) => {
+        confirmScriptCharacterWithId: vi.fn((_scriptId: string, input: {id: string, key: string}) => {
             return Promise.resolve(createEntity(input.id, input.key));
         }),
-        createScriptCharacterGroupWithId: vi.fn((_scriptId: string, input: {id: string; key: string}) => {
+        createScriptCharacterGroupWithId: vi.fn((_scriptId: string, input: {id: string, key: string}) => {
             return Promise.resolve(createEntity(input.id, input.key, 'group'));
         }),
         replaceScriptCharacterGroupMembers: resolved(null),
         upsertScriptCharacterGender: vi.fn((_scriptId: string, label: string) => {
-            return Promise.resolve({id: `gender-${label}`, key: label.toLowerCase(), label});
+            return Promise.resolve({
+                id: `gender-${label}`, key: label.toLowerCase(), label,
+            });
         }),
         setScriptCharacterGender: resolved(null),
         setScriptCharacterOutline: resolved(null),
@@ -67,7 +73,7 @@ const createRepository = () => {
         createScriptCommentThread: vi.fn((_scriptId: string, input: {id: string}) => Promise.resolve({id: input.id})),
         addScriptCommentMessage: resolved(null),
         setScriptCommentThreadStatus: resolved(null),
-        createScriptLocationWithId: vi.fn((_scriptId: string, input: {id: string; name: string}) => {
+        createScriptLocationWithId: vi.fn((_scriptId: string, input: {id: string, name: string}) => {
             return Promise.resolve({id: input.id, name: input.name});
         }),
         replaceScriptSceneLocations: resolved([]),

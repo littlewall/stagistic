@@ -1,4 +1,6 @@
-import {type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {
+    type ChangeEvent, type FormEvent, useCallback, useEffect, useRef, useState,
+} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {RadioChoiceGroup, type RadioChoiceOption} from '../../atoms/RadioChoiceGroup/RadioChoiceGroup';
@@ -6,24 +8,24 @@ import {LoaderOverlay} from '../../feedback/LoaderOverlay/LoaderOverlay';
 import {ModalActions} from '../modal/ModalActions';
 import {ModalDialog} from '../modal/ModalDialog';
 import {ModalHeader} from '../modal/ModalHeader';
-import type {NewScriptModalProps, NewScriptShape} from './types';
-
 import styles from './NewScriptModal.module.css';
+import type {NewScriptModalProps, NewScriptShape} from './types';
 
 const SCRIPT_SHAPE_OPTIONS: RadioChoiceOption<NewScriptShape>[] = [
     {
         value: 'multi-act',
         label: 'Multi-act',
         description: 'Starts with Act One and a scene.',
-    },
-    {
+    }, {
         value: 'one-act',
         label: 'One-act',
         description: 'Starts with a scene only.',
     },
 ];
 
-export const NewScriptModal = ({isOpen, isTransitioning = false, onClose, onCreate}: NewScriptModalProps) => {
+export const NewScriptModal = ({
+    isOpen, isTransitioning = false, onClose, onCreate,
+}: NewScriptModalProps) => {
     const inputRef = useRef<HTMLInputElement | null>(null);
     const [name, setName] = useState('');
     const [shape, setShape] = useState<NewScriptShape>('multi-act');
@@ -66,7 +68,11 @@ export const NewScriptModal = ({isOpen, isTransitioning = false, onClose, onCrea
                 setIsPending(false);
             }
         },
-        [name, onCreate, shape],
+        [
+            name,
+            onCreate,
+            shape,
+        ],
     );
     const handleNameChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
         setName(event.target.value);

@@ -1,4 +1,4 @@
-import {zip, type AsyncZippable} from 'fflate';
+import {type AsyncZippable, zip} from 'fflate';
 
 import {STEPKG_MEDIA_TYPE} from './constants';
 import type {StepkgEntry} from './contracts';
@@ -10,8 +10,10 @@ export const writeStepkgArchive = (entries: StepkgEntry[]): Promise<Blob> => {
         zip(zippable, (error, data) => {
             if (error) {
                 reject(error);
+
                 return;
             }
+
             resolve(new Blob([data], {type: STEPKG_MEDIA_TYPE}));
         });
     });

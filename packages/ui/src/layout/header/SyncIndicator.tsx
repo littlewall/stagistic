@@ -1,19 +1,18 @@
 import clsx from 'clsx';
 
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
+import styles from '../AppHeader.module.css';
 import type {ScriptSyncState} from './types';
 
-import styles from '../AppHeader.module.css';
-
 type SyncIndicatorProps = {
-    state?: ScriptSyncState;
+    state?: ScriptSyncState,
 };
 
 const syncMetaByState: Record<
     ScriptSyncState,
     {
-        label: string;
-        className: string;
+        label: string,
+        className: string,
     }
 > = {
     idle: {

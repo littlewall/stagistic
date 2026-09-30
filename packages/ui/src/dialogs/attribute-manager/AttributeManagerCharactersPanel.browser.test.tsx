@@ -1,10 +1,14 @@
 import {useState} from 'react';
 import {createRoot} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 import {page, userEvent} from 'vite-plus/test/browser';
 
 import {AttributeManagerCharactersPanel} from './AttributeManagerCharactersPanel';
-import {CHARACTERS, cleanupPanels, findButtonByText, GROUPS, mountedRoots, waitForElement} from './AttributeManagerCharactersPanel.browser.testUtils';
+import {
+    CHARACTERS, cleanupPanels, findButtonByText, GROUPS, mountedRoots, waitForElement,
+} from './AttributeManagerCharactersPanel.browser.testUtils';
 
 afterEach(cleanupPanels);
 
@@ -98,8 +102,7 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
             const [groups, setGroups] = useState(GROUPS);
             const handleCreate = async (name: string) => {
                 setGroups(current => [
-                    ...current,
-                    {
+                    ...current, {
                         id: 'group-3',
                         name,
                         color: null,
@@ -193,11 +196,9 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
         const TestCase = () => {
             const [groups, setGroups] = useState(GROUPS);
             const handleChange = (id: string, memberIds: string[]) => {
-                setGroups(current =>
-                    current.map(group => {
-                        return group.id === id ? {...group, memberIds} : group;
-                    }),
-                );
+                setGroups(current => current.map(group => {
+                    return group.id === id ? {...group, memberIds} : group;
+                }));
 
                 return onChange(id, memberIds);
             };
@@ -274,11 +275,9 @@ describe('AttributeManagerCharactersPanel groups workspace', () => {
             const handleSetColor = async (id: string, color: string | null) => {
                 const confirmed = groups;
 
-                setGroups(current =>
-                    current.map(group => {
-                        return group.id === id ? {...group, color} : group;
-                    }),
-                );
+                setGroups(current => current.map(group => {
+                    return group.id === id ? {...group, color} : group;
+                }));
                 try {
                     await onSetColor(id, color);
                 } catch (error) {

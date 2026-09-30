@@ -5,15 +5,15 @@ import type {ReactNode} from 'react';
 import styles from './ScriptCommentsSidebar.module.css';
 
 interface CommentsListViewProps {
-    threads: readonly ScriptCommentThread[];
-    anchors: ReadonlyMap<string, CommentAnchorLocation>;
-    renderCard: (thread: ScriptCommentThread, options: {showQuote: boolean}) => ReactNode;
+    threads: readonly ScriptCommentThread[],
+    anchors: ReadonlyMap<string, CommentAnchorLocation>,
+    renderCard: (thread: ScriptCommentThread, options: {showQuote: boolean}) => ReactNode,
 }
 
 interface SceneGroup {
-    key: string;
-    title: string;
-    threads: ScriptCommentThread[];
+    key: string,
+    title: string,
+    threads: ScriptCommentThread[],
 }
 
 const groupByScene = (threads: readonly ScriptCommentThread[], anchors: ReadonlyMap<string, CommentAnchorLocation>) => {
@@ -38,14 +38,18 @@ const groupByScene = (threads: readonly ScriptCommentThread[], anchors: Readonly
             return;
         }
 
-        groups.push({key, title: anchor?.sceneTitle || 'No scene', threads: [thread]});
+        groups.push({
+            key, title: anchor?.sceneTitle || 'No scene', threads: [thread],
+        });
     });
 
     return groups;
 };
 
 /** Every thread matching the filter, in script order by scene, then Detached ones. */
-export const CommentsListView = ({threads, anchors, renderCard}: CommentsListViewProps) => {
+export const CommentsListView = ({
+    threads, anchors, renderCard,
+}: CommentsListViewProps) => {
     const groups = groupByScene(threads, anchors);
     const detached = threads.filter(thread => !anchors.has(thread.id));
 

@@ -1,20 +1,26 @@
 import {COMMENT_ANCHOR_MARK_NAME, COMMENT_THREAD_ID_ATTR} from '@stagistic/script';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
-import {type EditorState, PluginKey, type Transaction} from '@tiptap/pm/state';
+import {
+    type EditorState, PluginKey, type Transaction,
+} from '@tiptap/pm/state';
 
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
 import {buildCommentAnchorIndex} from './buildCommentAnchorIndex';
 import {buildDecorations} from './commentDecorations';
-import type {CommentAnchorLocation, CommentDraft, CommentsPluginState, CommentTombstone, EditorCommentThreadRef} from './types';
+import type {
+    CommentAnchorLocation, CommentDraft, CommentsPluginState, CommentTombstone, EditorCommentThreadRef,
+} from './types';
 
 export type CommentsMeta =
-    | {type: 'threads'; threads: readonly EditorCommentThreadRef[]}
-    | {type: 'draft'; draft: CommentDraft | null}
-    | {type: 'commit'; threadId: string}
-    | {type: 'active'; threadId: string | null}
-    | {type: 'hovered'; threadId: string | null}
-    | {type: 'hoveredBlock'; blockId: string | null}
-    | {type: 'tombstone'; threadId: string; tombstone: CommentTombstone | null};
+    | {type: 'threads', threads: readonly EditorCommentThreadRef[]}
+    | {type: 'draft', draft: CommentDraft | null}
+    | {type: 'commit', threadId: string}
+    | {type: 'active', threadId: string | null}
+    | {type: 'hovered', threadId: string | null}
+    | {type: 'hoveredBlock', blockId: string | null}
+    | {
+        type: 'tombstone', threadId: string, tombstone: CommentTombstone | null,
+    };
 
 export type CommentsBaseState = Omit<CommentsPluginState, 'anchors' | 'openThreadIdsByBlockId' | 'decorations'>;
 
@@ -26,7 +32,7 @@ const groupOpenThreadsByBlock = (anchors: ReadonlyMap<string, CommentAnchorLocat
     [...anchors.values()]
         .filter(anchor => threads.get(anchor.threadId)?.status === 'open')
         .sort((left, right) => left.from - right.from || (left.kind === 'block' ? -1 : 1))
-        .forEach(anchor => grouped.set(anchor.blockId, [...(grouped.get(anchor.blockId) ?? []), anchor.threadId]));
+        .forEach(anchor => grouped.set(anchor.blockId, [...grouped.get(anchor.blockId) ?? [], anchor.threadId]));
 
     return grouped;
 };
@@ -39,7 +45,9 @@ export const finalize = (doc: ProseMirrorNode, base: CommentsBaseState): Comment
         ...base,
         anchors,
         openThreadIdsByBlockId,
-        decorations: buildDecorations(doc, {...base, anchors, openThreadIdsByBlockId}),
+        decorations: buildDecorations(doc, {
+            ...base, anchors, openThreadIdsByBlockId,
+        }),
     };
 };
 
@@ -55,7 +63,9 @@ export const mapDraft = (draft: CommentDraft | null, tr: Transaction): CommentDr
         return null;
     }
 
-    return {...draft, from, to};
+    return {
+        ...draft, from, to,
+    };
 };
 
 export const mapTombstones = (tombstones: ReadonlyMap<string, CommentTombstone>, tr: Transaction) => {
@@ -86,7 +96,9 @@ export const readDraft = (state: EditorState): CommentDraft | null => {
         };
     }
 
-    return {kind: 'block', blockId: block.id, from: block.from, to: block.to, quotedText: block.node.textContent};
+    return {
+        kind: 'block', blockId: block.id, from: block.from, to: block.to, quotedText: block.node.textContent,
+    };
 };
 
 export const applyMeta = (base: CommentsBaseState, meta: CommentsMeta | undefined): CommentsBaseState => {
@@ -94,9 +106,13 @@ export const applyMeta = (base: CommentsBaseState, meta: CommentsMeta | undefine
         case 'threads':
             return {...base, threads: new Map(meta.threads.map(thread => [thread.id, thread]))};
         case 'draft':
-            return {...base, draft: meta.draft, activeThreadId: meta.draft ? null : base.activeThreadId};
+            return {
+                ...base, draft: meta.draft, activeThreadId: meta.draft ? null : base.activeThreadId,
+            };
         case 'commit':
-            return {...base, draft: null, activeThreadId: meta.threadId};
+            return {
+                ...base, draft: null, activeThreadId: meta.threadId,
+            };
         case 'active':
             return {...base, activeThreadId: meta.threadId};
         case 'hovered':

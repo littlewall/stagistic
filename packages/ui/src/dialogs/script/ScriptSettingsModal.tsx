@@ -1,10 +1,11 @@
 import clsx from 'clsx';
 
 import {ModalDialog} from '../modal/ModalDialog';
-import type {ScriptSettingsModalProps} from './types';
-
 import styles from './ScriptSettingsModal.module.css';
-export type {SettingsNavGroup, SettingsNavItem, SettingsNavSubItem} from './types';
+import type {ScriptSettingsModalProps} from './types';
+export type {
+    SettingsNavGroup, SettingsNavItem, SettingsNavSubItem,
+} from './types';
 
 export const ScriptSettingsModal = ({
     isOpen,

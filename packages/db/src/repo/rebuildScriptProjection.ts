@@ -4,17 +4,21 @@ import {eq} from 'drizzle-orm';
 import {extractScriptBlocks} from '../blocks';
 import * as dbQueries from '../queries';
 import {type DbClient, generateBlockOrderKeys} from '../queries';
-import {scriptActs, scriptBlocks, scriptMusic, scriptScenes} from '../schema';
+import {
+    scriptActs, scriptBlocks, scriptMusic, scriptScenes,
+} from '../schema';
 import {toCharacterRefRows} from './characterRefRows';
 import type {SaveScriptDocumentOptions} from './documentProjection';
 
 export interface RebuildScriptProjectionArgs extends SaveScriptDocumentOptions {
-    db: DbClient;
-    scriptId: string;
-    document: ScriptDocument;
+    db: DbClient,
+    scriptId: string,
+    document: ScriptDocument,
 }
 
-export const rebuildScriptProjection = async ({db, scriptId, document, afterPersist}: RebuildScriptProjectionArgs): Promise<void> => {
+export const rebuildScriptProjection = async ({
+    db, scriptId, document, afterPersist,
+}: RebuildScriptProjectionArgs): Promise<void> => {
     const now = Date.now();
     const extracted = extractScriptBlocks(scriptId, document);
     const orderKeys = generateBlockOrderKeys(extracted.blocks.length);
@@ -95,8 +99,8 @@ export const rebuildScriptProjection = async ({db, scriptId, document, afterPers
                 blockOrder: orderKeyById.get(block.blockId) ?? '',
                 textContent: block.textContent,
                 contentJson: block.contentJson,
-                sceneId: block.sceneHeadingBlockId ? (sceneIdByHeading.get(block.sceneHeadingBlockId) ?? null) : null,
-                actId: block.actHeadingBlockId ? (actIdByHeading.get(block.actHeadingBlockId) ?? null) : null,
+                sceneId: block.sceneHeadingBlockId ? sceneIdByHeading.get(block.sceneHeadingBlockId) ?? null : null,
+                actId: block.actHeadingBlockId ? actIdByHeading.get(block.actHeadingBlockId) ?? null : null,
                 createdAt: now,
                 updatedAt: now,
             })),

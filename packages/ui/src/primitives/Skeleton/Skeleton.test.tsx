@@ -1,8 +1,9 @@
 import {renderToStaticMarkup} from 'react-dom/server';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe, expect, it,
+} from 'vite-plus/test';
 
 import {Skeleton} from './Skeleton';
-
 import styles from './Skeleton.module.css';
 
 describe('Skeleton', () => {

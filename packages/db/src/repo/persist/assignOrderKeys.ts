@@ -17,7 +17,7 @@ import {computeOrderKeyAssignments} from './minimalOrderKeys';
 export const assignOrderKeys = (
     blocks: readonly ExtractedBlockRow[],
     baselineOrderKeys: Map<string, string>,
-): {orderKeyById: Map<string, string>; changedOrders: {id: string; blockOrder: string}[]} => {
+): {orderKeyById: Map<string, string>, changedOrders: {id: string, blockOrder: string}[]} => {
     const minimal = computeOrderKeyAssignments(
         blocks.map(block => block.blockId),
         baselineOrderKeys,

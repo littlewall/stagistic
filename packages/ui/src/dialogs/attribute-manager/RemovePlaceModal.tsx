@@ -1,14 +1,16 @@
 import {ConfirmModal} from '../modal/ConfirmModal';
 
 export interface RemovePlaceModalProps {
-    isOpen: boolean;
-    placeName: string;
-    isRemoving?: boolean;
-    onClose: () => void;
-    onConfirm: () => void | Promise<void>;
+    isOpen: boolean,
+    placeName: string,
+    isRemoving?: boolean,
+    onClose: () => void,
+    onConfirm: () => void | Promise<void>,
 }
 
-export const RemovePlaceModal = ({isOpen, placeName, isRemoving = false, onClose, onConfirm}: RemovePlaceModalProps) => (
+export const RemovePlaceModal = ({
+    isOpen, placeName, isRemoving = false, onClose, onConfirm,
+}: RemovePlaceModalProps) => (
     <ConfirmModal
         isOpen={isOpen}
         ariaLabel="Remove place"

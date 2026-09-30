@@ -4,7 +4,6 @@ import clsx from 'clsx';
 import type {PersistentMusicRef} from '../contracts';
 import type {MusicSuggestionsOverlayProps} from './musicSuggestions/musicSuggestionModel';
 import {useMusicSuggestionsOverlay} from './musicSuggestions/useMusicSuggestionsOverlay';
-
 import styles from './MusicSuggestionsOverlay.module.css';
 
 const MusicKindIcon = ({kind}: {kind: PersistentMusicRef['kind']}) => {
@@ -18,8 +17,12 @@ const MusicKindIcon = ({kind}: {kind: PersistentMusicRef['kind']}) => {
     );
 };
 
-const MusicSuggestionsOverlay = ({editor, canvasRef, persistentMusic = [], onMusicAssigned}: MusicSuggestionsOverlayProps) => {
-    const {overlayRef, overlayState, suggestions, activeSuggestionIndex, handleSuggestionMouseDown} = useMusicSuggestionsOverlay({
+const MusicSuggestionsOverlay = ({
+    editor, canvasRef, persistentMusic = [], onMusicAssigned,
+}: MusicSuggestionsOverlayProps) => {
+    const {
+        overlayRef, overlayState, suggestions, activeSuggestionIndex, handleSuggestionMouseDown,
+    } = useMusicSuggestionsOverlay({
         editor,
         canvasRef,
         persistentMusic,

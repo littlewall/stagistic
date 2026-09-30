@@ -1,8 +1,12 @@
 import '../../../styles/tokens.css';
 
-import {createRef, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, useState} from 'react';
+import {
+    createRef, type KeyboardEvent as ReactKeyboardEvent, type ReactNode, useState,
+} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it, vi,
+} from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
 import {SearchControl} from './SearchControl';
@@ -292,6 +296,7 @@ describe('SearchControl', () => {
         );
 
         expect(onKeyDown).toHaveBeenCalledOnce();
+
         const [event] = onKeyDown.mock.calls[0] as [ReactKeyboardEvent<HTMLInputElement>];
 
         expect(event.nativeEvent.isComposing).toBe(true);

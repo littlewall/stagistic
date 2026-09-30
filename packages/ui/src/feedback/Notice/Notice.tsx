@@ -25,11 +25,11 @@ export const Notice = ({
     role,
     appearance = 'plain',
 }: {
-    variant: NoticeVariant;
-    children: ReactNode;
-    className?: string;
-    role?: string;
-    appearance?: NoticeAppearance;
+    variant: NoticeVariant,
+    children: ReactNode,
+    className?: string,
+    role?: string,
+    appearance?: NoticeAppearance,
 }) => (
     <div
         role={role ?? DEFAULT_ROLE[variant]}

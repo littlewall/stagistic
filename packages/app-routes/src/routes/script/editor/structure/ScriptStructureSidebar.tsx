@@ -1,26 +1,35 @@
-import {Accessibility, Feedback, KeyboardSensor, PointerSensor} from '@dnd-kit/dom';
+import {
+    Accessibility, Feedback, KeyboardSensor, PointerSensor,
+} from '@dnd-kit/dom';
 import {DragDropProvider} from '@dnd-kit/react';
 import {useScriptActions} from '@stagistic/app-core';
-import {useEditorActCommands, useEditorLiveActiveBlock, useEditorLiveScenePlacement, useEditorLiveStructure, useFocusEditorBlock} from '@stagistic/editor';
+import {
+    useEditorActCommands, useEditorLiveActiveBlock, useEditorLiveScenePlacement, useEditorLiveStructure, useFocusEditorBlock,
+} from '@stagistic/editor';
 import {SidebarActionsGroup, SidebarMiniHeader} from '@stagistic/ui';
-import {Fragment, type ReactNode, useCallback, useEffect, useMemo, useRef, useState} from 'react';
+import {
+    Fragment, type ReactNode, useCallback, useEffect, useMemo, useRef, useState,
+} from 'react';
 
 import {ATTRIBUTE_MANAGER_PANEL_STRUCTURE} from '../../attributes/attributeManagerMenu';
 import {useScriptSession} from '../../ScriptSessionContext';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
-import {buildAccessibilityPlugin, configuredKeyboardSensor, configuredPointerSensor, feedbackWithoutDropAnimation} from './structureDndConfig';
+import styles from './ScriptStructureSidebar.module.css';
+import {
+    buildAccessibilityPlugin, configuredKeyboardSensor, configuredPointerSensor, feedbackWithoutDropAnimation,
+} from './structureDndConfig';
 import {StructureRowAct, StructureRowActStatic} from './StructureRowAct';
-import {deriveStructureStateFromIndex, deriveStructureStateFromLive, resolveActiveSceneBlockId, ROOT_ACT_GROUP, type SceneItem} from './structureRows';
+import {
+    deriveStructureStateFromIndex, deriveStructureStateFromLive, resolveActiveSceneBlockId, ROOT_ACT_GROUP, type SceneItem,
+} from './structureRows';
 import {StructureRowScene} from './StructureRowScene';
 import {StructureSidebarContextActions} from './StructureSidebarContextActions';
 import {useStructureSidebarDnd} from './useStructureSidebarDnd';
 
-import styles from './ScriptStructureSidebar.module.css';
-
 const ACTIVE_BLOCK_PERSIST_DELAY_MS = 250;
 
 interface ScriptStructureSidebarProps {
-    header?: ReactNode;
+    header?: ReactNode,
 }
 
 export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) => {
@@ -98,7 +107,12 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
             persistTimerRef.current = null;
             flushPendingActiveBlockPersist();
         }, ACTIVE_BLOCK_PERSIST_DELAY_MS);
-    }, [clearPendingPersistTimer, currentScriptId, flushPendingActiveBlockPersist, liveActiveBlockId]);
+    }, [
+        clearPendingPersistTimer,
+        currentScriptId,
+        flushPendingActiveBlockPersist,
+        liveActiveBlockId,
+    ]);
 
     // ── Structure state ───────────────────────────────────────────────────────
     const state = useMemo(() => {
@@ -194,7 +208,11 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
     const accessibilityPlugin = useMemo(() => buildAccessibilityPlugin(sceneByBlockId), [sceneByBlockId]);
 
     const plugins = useCallback(
-        (defaults: readonly unknown[]) => [...defaults.filter(p => p !== Accessibility && p !== Feedback), accessibilityPlugin, feedbackWithoutDropAnimation],
+        (defaults: readonly unknown[]) => [
+            ...defaults.filter(p => p !== Accessibility && p !== Feedback),
+            accessibilityPlugin,
+            feedbackWithoutDropAnimation,
+        ],
         [accessibilityPlugin],
     );
 
@@ -213,12 +231,12 @@ export const ScriptStructureSidebar = ({header}: ScriptStructureSidebarProps) =>
         <div className={styles.content}>
             <SidebarMiniHeader
                 navigation={header}
-                controls={
+                controls={(
                     <SidebarActionsGroup>
                         <StructureSidebarContextActions />
                         <AttributeManagerSidebarButton panelId={ATTRIBUTE_MANAGER_PANEL_STRUCTURE} />
                     </SidebarActionsGroup>
-                }
+                )}
             />
             <DragDropProvider onDragEnd={handleDragEnd} plugins={plugins as never} sensors={sensors as never}>
                 {!hasContent ? (

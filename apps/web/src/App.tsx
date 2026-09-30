@@ -1,8 +1,14 @@
 import {ScriptRepositoryProvider} from '@stagistic/app-core';
-import {GlobalModalsProvider, HomeRoute, ScriptEditorRoute, ScriptExportRoute, ScriptSettingsRoute, ScriptWorkspaceRoute} from '@stagistic/app-routes';
+import {
+    GlobalModalsProvider, HomeRoute, ScriptEditorRoute, ScriptExportRoute, ScriptSettingsRoute, ScriptWorkspaceRoute,
+} from '@stagistic/app-routes';
 import {LoaderOverlay, ToastProvider} from '@stagistic/ui';
-import {lazy, Suspense, useEffect, useState} from 'react';
-import {Navigate, Route, Routes} from 'react-router-dom';
+import {
+    lazy, Suspense, useEffect, useState,
+} from 'react';
+import {
+    Navigate, Route, Routes,
+} from 'react-router-dom';
 
 import {prepareLocalDbWithProgress} from './db';
 import {PublicPreviewGate} from './publicPreview/PublicPreviewGate';
@@ -81,21 +87,21 @@ const BootedApp = () => {
                         {EditorBlocksDemoRoute ? (
                             <Route
                                 path="/dev/demos/editor-blocks"
-                                element={
+                                element={(
                                     <Suspense fallback={null}>
                                         <EditorBlocksDemoRoute />
                                     </Suspense>
-                                }
+                                )}
                             />
                         ) : null}
                         {ActsAndScenesDemoRoute ? (
                             <Route
                                 path="/dev/demos/acts-and-scenes"
-                                element={
+                                element={(
                                     <Suspense fallback={null}>
                                         <ActsAndScenesDemoRoute />
                                     </Suspense>
-                                }
+                                )}
                             />
                         ) : null}
                         <Route path="*" element={<Navigate to="/" replace />} />

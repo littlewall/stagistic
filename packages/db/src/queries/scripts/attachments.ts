@@ -1,24 +1,30 @@
-import {and, eq, sql} from 'drizzle-orm';
+import {
+    and, eq, sql,
+} from 'drizzle-orm';
 
-import {scriptAttachments, scriptMusic, scriptMusicAttachments} from '../../schema';
+import {
+    scriptAttachments, scriptMusic, scriptMusicAttachments,
+} from '../../schema';
 import type {MusicAttachmentRole, ScriptMusicAttachmentBinding} from '../../types';
 import type {DbClient} from '../types';
 
 export interface InsertAttachmentRow {
-    id: string;
-    scriptId: string;
-    filename: string;
-    mimeType: string;
-    sizeBytes: number;
-    storageKey: string;
-    createdAt: number;
-    updatedAt: number;
+    id: string,
+    scriptId: string,
+    filename: string,
+    mimeType: string,
+    sizeBytes: number,
+    storageKey: string,
+    createdAt: number,
+    updatedAt: number,
 }
 
 export type AttachmentRow = InsertAttachmentRow;
 
-export const listScriptAttachments = async (db: DbClient, scriptId: string) =>
-    db.select().from(scriptAttachments).where(eq(scriptAttachments.scriptId, scriptId));
+export const listScriptAttachments = async (db: DbClient, scriptId: string) => db
+    .select()
+    .from(scriptAttachments)
+    .where(eq(scriptAttachments.scriptId, scriptId));
 
 export const listScriptMusicAttachmentBindings = async (db: DbClient, scriptId: string) => {
     const rows = await db
@@ -45,11 +51,11 @@ export const insertAttachment = async (db: DbClient, row: InsertAttachmentRow) =
 export const insertMusicAttachmentLink = async (
     db: DbClient,
     row: {
-        musicId: string;
-        attachmentId: string;
-        role: MusicAttachmentRole;
-        sortOrder: number;
-        createdAt: number;
+        musicId: string,
+        attachmentId: string,
+        role: MusicAttachmentRole,
+        sortOrder: number,
+        createdAt: number,
     },
 ) => {
     await db.insert(scriptMusicAttachments).values(row);
@@ -76,12 +82,13 @@ export const getAttachmentByMusicRole = async (db: DbClient, musicId: string, ro
 };
 
 export const getAttachmentById = async (db: DbClient, attachmentId: string): Promise<AttachmentRow | null> => {
-    const rows = await db.select().from(scriptAttachments).where(eq(scriptAttachments.id, attachmentId)).limit(1);
+    const rows = await db.select().from(scriptAttachments).where(eq(scriptAttachments.id, attachmentId))
+        .limit(1);
 
     return rows[0] ?? null;
 };
 
-export const deleteMusicAttachmentLinkByRole = async (db: DbClient, payload: {musicId: string; role: MusicAttachmentRole}) => {
+export const deleteMusicAttachmentLinkByRole = async (db: DbClient, payload: {musicId: string, role: MusicAttachmentRole}) => {
     await db.delete(scriptMusicAttachments).where(and(eq(scriptMusicAttachments.musicId, payload.musicId), eq(scriptMusicAttachments.role, payload.role)));
 };
 

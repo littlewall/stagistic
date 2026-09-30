@@ -4,6 +4,8 @@ import {Plugin} from '@tiptap/pm/state';
 
 import {
     applyMeta,
+    type CommentsBaseState,
+    type CommentsMeta,
     commentsPluginKey,
     createAnchorMark,
     finalize,
@@ -11,30 +13,30 @@ import {
     mapDraft,
     mapTombstones,
     readDraft,
-    type CommentsBaseState,
-    type CommentsMeta,
     withMeta,
 } from './commentsPluginState';
 import {detectMergedBlocks} from './detectMergedBlocks';
-import type {CommentsExtensionCallbacks, CommentsPluginState, EditorCommentThreadRef} from './types';
+import type {
+    CommentsExtensionCallbacks, CommentsPluginState, EditorCommentThreadRef,
+} from './types';
 
 export {commentsPluginKey, getCommentsState} from './commentsPluginState';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         comments: {
-            setCommentThreads: (threads: readonly EditorCommentThreadRef[]) => ReturnType;
-            startCommentDraft: () => ReturnType;
-            cancelCommentDraft: () => ReturnType;
-            commitCommentDraft: (threadId: string) => ReturnType;
-            removeCommentAnchor: (threadId: string) => ReturnType;
-            restoreCommentAnchor: (threadId: string) => ReturnType;
-            setActiveCommentThread: (threadId: string | null) => ReturnType;
-            setHoveredCommentThread: (threadId: string | null) => ReturnType;
-            setHoveredCommentBlock: (blockId: string | null) => ReturnType;
+            setCommentThreads: (threads: readonly EditorCommentThreadRef[]) => ReturnType,
+            startCommentDraft: () => ReturnType,
+            cancelCommentDraft: () => ReturnType,
+            commitCommentDraft: (threadId: string) => ReturnType,
+            removeCommentAnchor: (threadId: string) => ReturnType,
+            restoreCommentAnchor: (threadId: string) => ReturnType,
+            setActiveCommentThread: (threadId: string | null) => ReturnType,
+            setHoveredCommentThread: (threadId: string | null) => ReturnType,
+            setHoveredCommentBlock: (blockId: string | null) => ReturnType,
             /** Asks the host to reveal the Comments panel (margin marker click). */
-            requestCommentsReveal: () => ReturnType;
-        };
+            requestCommentsReveal: () => ReturnType,
+        },
     }
 }
 
@@ -43,7 +45,7 @@ export interface CommentsExtensionOptions {
      * A getter, not a ref object: Tiptap's configure() deep-merges plain-object
      * options, which would copy a ref and freeze its first value.
      */
-    getCallbacks: () => CommentsExtensionCallbacks;
+    getCallbacks: () => CommentsExtensionCallbacks,
 }
 
 export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
@@ -62,15 +64,15 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
     addCommands() {
         return {
             setCommentThreads:
-                threads =>
-                ({tr, dispatch}) => {
+                threads => ({tr, dispatch}) => {
                     dispatch?.(withMeta(tr, {type: 'threads', threads}));
 
                     return true;
                 },
             startCommentDraft:
-                () =>
-                ({tr, state, dispatch}) => {
+                () => ({
+                    tr, state, dispatch,
+                }) => {
                     const draft = readDraft(state);
 
                     if (!draft) {
@@ -82,15 +84,15 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                     return true;
                 },
             cancelCommentDraft:
-                () =>
-                ({tr, dispatch}) => {
+                () => ({tr, dispatch}) => {
                     dispatch?.(withMeta(tr, {type: 'draft', draft: null}));
 
                     return true;
                 },
             commitCommentDraft:
-                threadId =>
-                ({tr, state, dispatch}) => {
+                threadId => ({
+                    tr, state, dispatch,
+                }) => {
                     const draft = getCommentsState(state).draft;
 
                     if (!draft) {
@@ -108,8 +110,9 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                     return true;
                 },
             removeCommentAnchor:
-                threadId =>
-                ({tr, state, dispatch}) => {
+                threadId => ({
+                    tr, state, dispatch,
+                }) => {
                     const anchor = getCommentsState(state).anchors.get(threadId);
 
                     if (dispatch) {
@@ -130,8 +133,9 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                     return true;
                 },
             restoreCommentAnchor:
-                threadId =>
-                ({tr, state, dispatch}) => {
+                threadId => ({
+                    tr, state, dispatch,
+                }) => {
                     const tombstone = getCommentsState(state).tombstones.get(threadId);
 
                     if (dispatch) {
@@ -139,35 +143,33 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                             tr.addMark(tombstone.from, tombstone.to, createAnchorMark(state, threadId));
                         }
 
-                        dispatch(withMeta(tr, {type: 'tombstone', threadId, tombstone: null}));
+                        dispatch(withMeta(tr, {
+                            type: 'tombstone', threadId, tombstone: null,
+                        }));
                     }
 
                     return true;
                 },
             setActiveCommentThread:
-                threadId =>
-                ({tr, dispatch}) => {
+                threadId => ({tr, dispatch}) => {
                     dispatch?.(withMeta(tr, {type: 'active', threadId}));
 
                     return true;
                 },
             setHoveredCommentThread:
-                threadId =>
-                ({tr, dispatch}) => {
+                threadId => ({tr, dispatch}) => {
                     dispatch?.(withMeta(tr, {type: 'hovered', threadId}));
 
                     return true;
                 },
             setHoveredCommentBlock:
-                blockId =>
-                ({tr, dispatch}) => {
+                blockId => ({tr, dispatch}) => {
                     dispatch?.(withMeta(tr, {type: 'hoveredBlock', blockId}));
 
                     return true;
                 },
             requestCommentsReveal:
-                () =>
-                ({dispatch}) => {
+                () => ({dispatch}) => {
                     if (dispatch) {
                         this.options.getCallbacks().onRequestReveal?.();
                     }
@@ -184,16 +186,15 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
             new Plugin<CommentsPluginState>({
                 key: commentsPluginKey,
                 state: {
-                    init: (_config, state) =>
-                        finalize(state.doc, {
-                            threads: new Map(),
-                            draft: null,
-                            activeThreadId: null,
-                            hoveredThreadId: null,
-                            hoveredBlockId: null,
-                            tombstones: new Map(),
-                            mergedBlocks: [],
-                        }),
+                    init: (_config, state) => finalize(state.doc, {
+                        threads: new Map(),
+                        draft: null,
+                        activeThreadId: null,
+                        hoveredThreadId: null,
+                        hoveredBlockId: null,
+                        tombstones: new Map(),
+                        mergedBlocks: [],
+                    }),
                     apply: (tr, previous, oldState) => {
                         const meta = tr.getMeta(commentsPluginKey) as CommentsMeta | undefined;
                         // Plugin follow-ups (appendTransaction) belong to the same user step: keep its merges.
@@ -226,7 +227,7 @@ export const CommentsExtension = Extension.create<CommentsExtensionOptions>({
                     decorations: state => commentsPluginKey.getState(state)?.decorations,
                     handleClick: (view, pos) => {
                         const pluginState = commentsPluginKey.getState(view.state);
-                        const threadIds = [...(pluginState?.anchors.values() ?? [])]
+                        const threadIds = [...pluginState?.anchors.values() ?? []]
                             .filter(anchor => anchor.kind === 'range' && anchor.from <= pos && pos <= anchor.to)
                             .filter(anchor => pluginState?.threads.get(anchor.threadId)?.status === 'open')
                             .map(anchor => anchor.threadId);

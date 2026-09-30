@@ -1,16 +1,44 @@
 import '../../styles/base.css';
 
-import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it,
+} from 'vite-plus/test';
 
-import {getContrastRatio, getRgb, readTokenColor, type Rgb} from '../test/colorContrast';
+import {
+    getContrastRatio, getRgb, readTokenColor, type Rgb,
+} from '../test/colorContrast';
 
 const read = (name: string) => readTokenColor(name);
 
 const PALETTE: ReadonlyArray<readonly [string, Rgb]> = [
-    ['--palette-steel-wool', [91, 98, 103]],
-    ['--palette-creamed-corn', [247, 224, 159]],
-    ['--palette-primrose-yellow', [244, 202, 82]],
-    ['--palette-paper', [244, 241, 236]],
+    [
+        '--palette-steel-wool', [
+            91,
+            98,
+            103,
+        ],
+    ],
+    [
+        '--palette-creamed-corn', [
+            247,
+            224,
+            159,
+        ],
+    ],
+    [
+        '--palette-primrose-yellow', [
+            244,
+            202,
+            82,
+        ],
+    ],
+    [
+        '--palette-paper', [
+            244,
+            241,
+            236,
+        ],
+    ],
 ];
 
 afterEach(() => {

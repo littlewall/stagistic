@@ -5,32 +5,32 @@
  */
 
 export interface ExampleCharacter {
-    key: string;
-    colorHex: string;
-    genderLabel: string;
-    outline: string;
-    voiceType: string;
-    vocalRange: {low: string; high: string};
+    key: string,
+    colorHex: string,
+    genderLabel: string,
+    outline: string,
+    voiceType: string,
+    vocalRange: {low: string, high: string},
 }
 
 export interface ExampleGroup {
-    key: string;
-    colorHex: string;
-    memberKeys: readonly string[];
+    key: string,
+    colorHex: string,
+    memberKeys: readonly string[],
 }
 
 export interface ExampleLocation {
-    name: string;
-    sceneTitles: readonly string[];
+    name: string,
+    sceneTitles: readonly string[],
 }
 
 export interface ExampleCommentThread {
     /** Full text of the anchored block. */
-    blockText: string;
+    blockText: string,
     /** Range anchor inside the block; omitted for a whole-block comment. */
-    quote?: string;
-    messages: readonly string[];
-    resolved?: boolean;
+    quote?: string,
+    messages: readonly string[],
+    resolved?: boolean,
 }
 
 export const EXAMPLE_CHARACTERS: readonly ExampleCharacter[] = [
@@ -68,7 +68,11 @@ export const EXAMPLE_CHARACTERS: readonly ExampleCharacter[] = [
     },
 ];
 
-export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [{key: 'CREW', colorHex: '#9AA7B8', memberKeys: ['ROOK', 'TAM']}];
+export const EXAMPLE_GROUPS: readonly ExampleGroup[] = [
+    {
+        key: 'CREW', colorHex: '#9AA7B8', memberKeys: ['ROOK', 'TAM'],
+    },
+];
 
 export const EXAMPLE_MUSIC_KINDS: Readonly<Record<string, 'song' | 'instrumental'>> = {
     'One Small Light': 'song',

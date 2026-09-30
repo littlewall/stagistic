@@ -1,6 +1,8 @@
 import {normalizeCharacterKey} from '@stagistic/script';
 import clsx from 'clsx';
-import {type CSSProperties, type FormEvent, useMemo, useState} from 'react';
+import {
+    type CSSProperties, type FormEvent, useMemo, useState,
+} from 'react';
 
 import {Button} from '../../atoms/Button/Button';
 import {Tooltip} from '../../atoms/Tooltip/Tooltip';
@@ -11,27 +13,26 @@ import type {EditorSidebarCharacter} from '../../editor-panels/types';
 import {TrashIcon} from '../../icons';
 import {formControlStyles} from '../../molecules/forms/shared/formControlStyles';
 import {VocalRangeSection} from '../../vocal-range/VocalRangeSection';
+import styles from './AttributeManagerCharactersPanel.module.css';
 import type {AttributeManagerCharacter} from './attributeManagerCharacterTypes';
 import {RemoveCharacterModal} from './RemoveCharacterModal';
 
-import styles from './AttributeManagerCharactersPanel.module.css';
-
 interface AttributeManagerCharacterDetailProps {
-    character: AttributeManagerCharacter;
-    confirmedName: string;
-    characters: AttributeManagerCharacter[];
-    characterColorSaturation?: number;
-    isDeleting: boolean;
-    isRenaming: boolean;
-    isColorUpdating: boolean;
-    onNameDraftChange: (name: string) => void;
-    onResetNameDraft: () => void;
-    onRenameCharacter?: (characterId: string, previousName: string, nextName: string) => void | Promise<unknown>;
-    onSetCharacterColor?: (characterId: string, colorHex: string | null) => void | Promise<unknown>;
-    onSetCharacterOutline?: (characterId: string, outline: string | null) => void;
-    onSetCharacterVoiceType?: (characterId: string, voiceType: string | null) => void;
-    onSetCharacterVocalRange?: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void;
-    onDeleteCharacter?: (characterId: string) => void;
+    character: AttributeManagerCharacter,
+    confirmedName: string,
+    characters: AttributeManagerCharacter[],
+    characterColorSaturation?: number,
+    isDeleting: boolean,
+    isRenaming: boolean,
+    isColorUpdating: boolean,
+    onNameDraftChange: (name: string) => void,
+    onResetNameDraft: () => void,
+    onRenameCharacter?: (characterId: string, previousName: string, nextName: string) => void | Promise<unknown>,
+    onSetCharacterColor?: (characterId: string, colorHex: string | null) => void | Promise<unknown>,
+    onSetCharacterOutline?: (characterId: string, outline: string | null) => void,
+    onSetCharacterVoiceType?: (characterId: string, voiceType: string | null) => void,
+    onSetCharacterVocalRange?: (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => void,
+    onDeleteCharacter?: (characterId: string) => void,
 }
 
 export const AttributeManagerCharacterDetail = ({

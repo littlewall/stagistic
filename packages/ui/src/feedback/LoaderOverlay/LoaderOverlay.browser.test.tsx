@@ -1,5 +1,7 @@
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {
+    afterEach, describe, expect, it,
+} from 'vite-plus/test';
 
 import {LoaderOverlay} from './LoaderOverlay';
 
@@ -36,7 +38,7 @@ const waitFor = async (predicate: () => boolean) => {
 };
 
 type LoaderCopy = {
-    messages?: string[];
+    messages?: string[],
 };
 
 const renderLoader = (copy?: LoaderCopy) => {

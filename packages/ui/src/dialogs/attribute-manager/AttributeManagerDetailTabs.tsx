@@ -3,18 +3,20 @@ import clsx from 'clsx';
 import styles from './AttributeManagerCharactersPanel.module.css';
 
 export interface AttributeManagerDetailTab {
-    id: string;
-    label: string;
+    id: string,
+    label: string,
 }
 
 interface AttributeManagerDetailTabsProps {
-    tabs: AttributeManagerDetailTab[];
-    activeTabId: string;
-    ariaLabel: string;
-    onSelectTab: (tabId: string) => void;
+    tabs: AttributeManagerDetailTab[],
+    activeTabId: string,
+    ariaLabel: string,
+    onSelectTab: (tabId: string) => void,
 }
 
-export const AttributeManagerDetailTabs = ({tabs, activeTabId, ariaLabel, onSelectTab}: AttributeManagerDetailTabsProps) => (
+export const AttributeManagerDetailTabs = ({
+    tabs, activeTabId, ariaLabel, onSelectTab,
+}: AttributeManagerDetailTabsProps) => (
     <nav
         className={styles.detailNavigation}
         aria-label={ariaLabel}

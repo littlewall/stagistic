@@ -6,16 +6,20 @@ import type {CharacterSuggestionsResult} from '../types';
 import {resolveActiveToken} from './activeToken';
 import {isCharacterBlockType} from './blockUtils';
 import {buildSuggestionRows} from './buildSuggestionRows';
-import {buildSuggestionEntries, computeCharacterTagComposeSuggestions, type OverlayComputationArgs} from './composeSuggestions';
-import {CHARACTER_TAG_HORIZONTAL_PADDING_PX, MAX_SUGGESTIONS, OVERLAY_WIDTH_PX} from './constants';
+import {
+    buildSuggestionEntries, computeCharacterTagComposeSuggestions, type OverlayComputationArgs,
+} from './composeSuggestions';
+import {
+    CHARACTER_TAG_HORIZONTAL_PADDING_PX, MAX_SUGGESTIONS, OVERLAY_WIDTH_PX,
+} from './constants';
 import {computeOverlayStyle} from './overlayPosition';
 import {getPersistentColorByKey} from './persistentCharacters';
 
-export {normalizePersistentCharacters} from './persistentCharacters';
-
+export type {
+    CharacterSuggestionsResult, PersistentCharacterRef, SuggestionEntry, SuppressedSelection,
+} from '../types';
 export {applyCharacterSuggestion} from './applyCharacterSuggestion';
-
-export type {CharacterSuggestionsResult, PersistentCharacterRef, SuggestionEntry, SuppressedSelection} from '../types';
+export {normalizePersistentCharacters} from './persistentCharacters';
 
 export const computeCharacterSuggestions = ({
     editor,
@@ -63,7 +67,9 @@ export const computeCharacterSuggestions = ({
         return null;
     }
 
-    const {tokens, activeTokenIndex, activeToken} = tokenResult;
+    const {
+        tokens, activeTokenIndex, activeToken,
+    } = tokenResult;
     const activeKey = normalizeCharacterKey(activeToken.value);
     /*
      * Collect keys of all other tokens in the same character group

@@ -1,10 +1,11 @@
-import {DELETE_SCRIPT_CONFIRM_PHRASE, PanelHeader, SettingsGroup, TypeToConfirmAction} from '@stagistic/ui';
+import {
+    DELETE_SCRIPT_CONFIRM_PHRASE, PanelHeader, SettingsGroup, TypeToConfirmAction,
+} from '@stagistic/ui';
 import {useToastController} from '@stagistic/ui';
 import {useCallback, useState} from 'react';
 
-import type {DangerZoneHandlers} from '../types';
-
 import panelStyles from '../ScriptEditorSettingsPanel.module.css';
+import type {DangerZoneHandlers} from '../types';
 import styles from './DangerZoneSettingsPanel.module.css';
 
 type DangerZoneSettingsPanelProps = DangerZoneHandlers;
@@ -32,7 +33,11 @@ export const DangerZoneSettingsPanel = ({scriptTitle, onDeleteScript}: DangerZon
             });
             setIsDeleting(false);
         }
-    }, [onDeleteScript, addToast, scriptTitle]);
+    }, [
+        onDeleteScript,
+        addToast,
+        scriptTitle,
+    ]);
 
     return (
         <SettingsGroup gap="2xl" className={panelStyles.panelTokens}>
@@ -42,13 +47,13 @@ export const DangerZoneSettingsPanel = ({scriptTitle, onDeleteScript}: DangerZon
                     level={4}
                     className={styles.dangerHeader}
                     title="Delete script"
-                    description={
+                    description={(
                         <>
                             Permanently deletes
                             {scriptTitle ? <strong>{` “${scriptTitle}” `}</strong> : ' this script '}
                             and all of its content. This action cannot be undone.
                         </>
-                    }
+                    )}
                 />
                 <TypeToConfirmAction
                     phrase={DELETE_SCRIPT_CONFIRM_PHRASE}

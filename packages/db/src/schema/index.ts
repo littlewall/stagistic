@@ -1,7 +1,11 @@
 import {scriptBlockCharacterRefs, scriptBlocks} from './blocks';
-import {scriptCharacterGenders, scriptCharacterGroupMembers, scriptCharacters} from './characters';
+import {
+    scriptCharacterGenders, scriptCharacterGroupMembers, scriptCharacters,
+} from './characters';
 import {scriptCommentMessages, scriptCommentThreads} from './comments';
-import {scriptAttachments, scriptMusic, scriptMusicAttachments} from './music';
+import {
+    scriptAttachments, scriptMusic, scriptMusicAttachments,
+} from './music';
 import {scripts, syncOutbox} from './scripts';
 import {
     scriptSettingsBlocks,
@@ -12,8 +16,18 @@ import {
     scriptSettingsTitlePage,
     scriptSettingsVisualPreferences,
 } from './settings';
-import {scriptActs, scriptLocations, scriptSceneLocations, scriptScenes} from './structure';
+import {
+    scriptActs, scriptLocations, scriptSceneLocations, scriptScenes,
+} from './structure';
 
+export {scriptBlockCharacterRefs, scriptBlocks} from './blocks';
+export {
+    scriptCharacterGenders, scriptCharacterGroupMembers, scriptCharacters,
+} from './characters';
+export {scriptCommentMessages, scriptCommentThreads} from './comments';
+export {
+    scriptAttachments, scriptMusic, scriptMusicAttachments,
+} from './music';
 export {scripts, syncOutbox} from './scripts';
 export {
     scriptSettingsBlocks,
@@ -24,11 +38,9 @@ export {
     scriptSettingsTitlePage,
     scriptSettingsVisualPreferences,
 } from './settings';
-export {scriptCharacterGenders, scriptCharacterGroupMembers, scriptCharacters} from './characters';
-export {scriptActs, scriptLocations, scriptSceneLocations, scriptScenes} from './structure';
-export {scriptBlockCharacterRefs, scriptBlocks} from './blocks';
-export {scriptAttachments, scriptMusic, scriptMusicAttachments} from './music';
-export {scriptCommentMessages, scriptCommentThreads} from './comments';
+export {
+    scriptActs, scriptLocations, scriptSceneLocations, scriptScenes,
+} from './structure';
 
 export const dbSchema = {
     scripts,

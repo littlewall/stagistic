@@ -15,7 +15,9 @@ import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {EditorState, Transaction} from '@tiptap/pm/state';
 
 import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
-import {type ActiveScriptBlock, findScriptBlockByIdFromState, getActiveScriptBlockFromState} from '../../scriptCore';
+import {
+    type ActiveScriptBlock, findScriptBlockByIdFromState, getActiveScriptBlockFromState,
+} from '../../scriptCore';
 import {findMusicAtomRange} from './musicOutCommands';
 
 const STAGE_DIRECTION_NODE_TYPE = 'stageDirection';
@@ -88,9 +90,9 @@ export const buildInsertMusicStart = (
     title: string,
     mode: MusicMode,
     options: {
-        musicId?: string;
-        kind?: string | null;
-        isDraft?: boolean;
+        musicId?: string,
+        kind?: string | null,
+        isDraft?: boolean,
     } = {},
 ): Transaction => {
     const node = state.schema.nodes[MUSIC_START_NODE_NAME].create({
