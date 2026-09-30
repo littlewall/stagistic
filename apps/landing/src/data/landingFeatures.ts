@@ -23,18 +23,18 @@ export const landingFeatures = [
         label: 'Smart character management',
         description:
             'Build a character catalogue directly from your script. Assign colours, highlight appearances, group characters, rename characters, tag them inside stage directions, and write dialogue for two or more characters speaking together.',
-        imageSrc: '/features/characters.png',
-        imageAlt: 'The character catalogue in Stagistic Editor',
-        imageFit: 'contain',
+        videoSrc: '/features/characters.mp4',
+        videoTitle: 'Managing characters in Stagistic Editor',
+        videoFit: 'contain',
         shape: 'three',
     },
     {
         label: 'First-class musical theatre support',
         description:
             'Write lyrics as their own block type, manage songs and instrumentals, place music cues directly in the script, and attach score PDFs to individual musical numbers.',
-        imageSrc: '/features/musical.png',
-        imageAlt: 'Lyrics formatted inside a musical script in Stagistic Editor',
-        imageFit: 'contain',
+        videoSrc: '/features/musical-theatre.mp4',
+        videoTitle: 'Writing lyrics and managing musical numbers in Stagistic Editor',
+        videoFit: 'contain',
         shape: 'one',
         href: '/editor/musicals',
         linkLabel: 'Explore musical theatre writing',
@@ -43,9 +43,9 @@ export const landingFeatures = [
         label: 'A writing flow you can configure',
         description:
             'Configure page format, title page, headers and footers, and each block\'s indentation, alignment, emphasis, and casing. Set keyboard shortcuts and decide which block follows next, so the editor matches the way you write.',
-        imageSrc: '/features/writing-flow.png',
-        imageAlt: 'Formatting controls above a script in Stagistic Editor',
-        imageFit: 'cover',
+        videoSrc: '/features/writing-flow.mp4',
+        videoTitle: 'Configuring formatting and writing flow in Stagistic Editor',
+        videoFit: 'contain',
         shape: 'three',
     },
     {
