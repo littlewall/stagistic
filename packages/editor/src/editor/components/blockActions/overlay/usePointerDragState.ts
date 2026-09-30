@@ -1,6 +1,9 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    type RefObject, useCallback, useRef, useState,
+    type RefObject,
+    useCallback,
+    useRef,
+    useState,
 } from 'react';
 
 import type {BlockNodeType} from '../../../tiptap/scriptCore';

@@ -4,7 +4,16 @@ import HardBreak from '@tiptap/extension-hard-break';
 import Text from '@tiptap/extension-text';
 import {EditorContent} from '@tiptap/react';
 import clsx from 'clsx';
-import {type ReactElement, type ReactNode, useCallback, useEffect, useId, useMemo, useRef, useState} from 'react';
+import {
+    type ReactElement,
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useId,
+    useMemo,
+    useRef,
+    useState,
+} from 'react';
 
 import {SCRIPT_EDITOR_DESCRIPTION_ID} from '../accessibility';
 import {buildCharacterTagPaletteCss} from '../characters/buildCharacterTagPaletteCss';
@@ -13,10 +22,16 @@ import {EditorSnapshotStoreProvider} from '../live/context';
 import {createEditorSnapshotStore} from '../live/store';
 import {createCharacterColorRefsBundle} from '../surface/editorSurfaceCache';
 import {useScriptEditorInstance} from '../surface/useScriptEditorInstance';
-import {CharacterTagInputExtension, EditorRuntimeExtension, MusicNumberingExtension, SceneNumberingExtension} from '../tiptap/extensions';
+import {
+    CharacterTagInputExtension,
+    EditorRuntimeExtension,
+    MusicNumberingExtension,
+    SceneNumberingExtension,
+} from '../tiptap/extensions';
 import {DocumentWithSettings} from '../tiptap/extensions/DocumentExtension';
 import {CharacterTagMark, CommentAnchorMark} from '../tiptap/marks';
 import {MusicStartNode, ScriptBlockNodes} from '../tiptap/nodes';
+import characterTagStyles from '../tiptap/scriptBlock/CharacterTagDecorations.module.css';
 import {getActiveScriptBlockFromState} from '../tiptap/scriptCore';
 import {MiniBlockTypeIndicator} from './MiniBlockTypeIndicator';
 import {
@@ -28,24 +43,26 @@ import {
 } from './miniEditorCharacters';
 import {buildMiniEditorDocumentStructureSignature, MiniEditorGuardExtension} from './MiniEditorGuardExtension';
 import {MiniMusicCaretExtension} from './MiniMusicCaretExtension';
-
-import characterTagStyles from '../tiptap/scriptBlock/CharacterTagDecorations.module.css';
 import styles from './MiniScriptEditor.module.css';
 
 export type MiniScriptEditorProps = {
-    document: ScriptDocument;
-    className?: string;
-    musicNumberLabel?: string;
-    staticFallback?: ReactNode;
+    document: ScriptDocument,
+    className?: string,
+    musicNumberLabel?: string,
+    staticFallback?: ReactNode,
 };
 
 type MiniScriptEditorSurfaceProps = {
-    className?: string;
-    document: ScriptDocument;
-    musicNumberLabel?: string;
+    className?: string,
+    document: ScriptDocument,
+    musicNumberLabel?: string,
 };
 
-const MiniScriptEditorSurface = ({className, document, musicNumberLabel}: MiniScriptEditorSurfaceProps) => {
+const MiniScriptEditorSurface = ({
+    className,
+    document,
+    musicNumberLabel,
+}: MiniScriptEditorSurfaceProps) => {
     const rootRef = useRef<HTMLDivElement | null>(null);
     const characterColorRefs = useMemo(() => createCharacterColorRefsBundle(), []);
     const signature = useMemo(() => {
@@ -65,12 +82,11 @@ const MiniScriptEditorSurface = ({className, document, musicNumberLabel}: MiniSc
     const characterTagScopeId = useMemo(() => rawCharacterTagScopeId.replace(/[^a-zA-Z0-9_-]/g, ''), [rawCharacterTagScopeId]);
     const characterPresentation = useMemo(() => buildMiniEditorCharacterPresentation(document, persistentCharacters), [document, persistentCharacters]);
     const characterTagPaletteCss = useMemo(
-        () =>
-            buildCharacterTagPaletteCss({
-                colorByCharacterId: characterPresentation.colorByCharacterId,
-                displayColorByKey: characterPresentation.displayColorByKey,
-                scopeAttributeValue: characterTagScopeId,
-            }),
+        () => buildCharacterTagPaletteCss({
+            colorByCharacterId: characterPresentation.colorByCharacterId,
+            displayColorByKey: characterPresentation.displayColorByKey,
+            scopeAttributeValue: characterTagScopeId,
+        }),
         [characterPresentation, characterTagScopeId],
     );
 
@@ -110,7 +126,11 @@ const MiniScriptEditorSurface = ({className, document, musicNumberLabel}: MiniSc
             MiniMusicCaretExtension,
             MiniEditorGuardExtension.configure({signature}),
         ],
-        [characterColorRefs, musicNumberLabel, signature],
+        [
+            characterColorRefs,
+            musicNumberLabel,
+            signature,
+        ],
     );
     const editorSignature = useMemo(() => JSON.stringify({document, signature}), [document, signature]);
     const {editor} = useScriptEditorInstance({
@@ -147,7 +167,11 @@ const MiniScriptEditorSurface = ({className, document, musicNumberLabel}: MiniSc
         if (didCharactersChange) {
             editor.commands.refreshCharacterTagDecorations();
         }
-    }, [characterColorRefs, editor, liveStore]);
+    }, [
+        characterColorRefs,
+        editor,
+        liveStore,
+    ]);
 
     useEffect(() => {
         updateCharacters();
@@ -180,7 +204,12 @@ const MiniScriptEditorSurface = ({className, document, musicNumberLabel}: MiniSc
     );
 };
 
-export const MiniScriptEditor = ({className, document, musicNumberLabel, staticFallback = null}: MiniScriptEditorProps): ReactElement | null => {
+export const MiniScriptEditor = ({
+    className,
+    document,
+    musicNumberLabel,
+    staticFallback = null,
+}: MiniScriptEditorProps): ReactElement | null => {
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {

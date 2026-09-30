@@ -2,10 +2,9 @@ import {COMMENT_ANCHOR_MARK_NAME, COMMENT_THREAD_ID_ATTR} from '@stagistic/scrip
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {Decoration, DecorationSet} from '@tiptap/pm/view';
 
+import styles from './CommentsExtension.module.css';
 import type {CommentsBaseState} from './commentsPluginState';
 import type {CommentAnchorLocation} from './types';
-
-import styles from './CommentsExtension.module.css';
 
 /** Tints the whole block whose content starts at `contentFrom`; hover uses a lighter tint. */
 const blockHighlight = (doc: ProseMirrorNode, contentFrom: number, tone: 'active' | 'hovered' = 'active') => {
@@ -33,22 +32,23 @@ const anchorClass = (tone: 'active' | 'hovered' | null) => {
 };
 
 type DecorationInput = CommentsBaseState & {
-    anchors: ReadonlyMap<string, CommentAnchorLocation>;
-    openThreadIdsByBlockId: ReadonlyMap<string, readonly string[]>;
+    anchors: ReadonlyMap<string, CommentAnchorLocation>,
+    openThreadIdsByBlockId: ReadonlyMap<string, readonly string[]>,
 };
 
 export const buildDecorations = (doc: ProseMirrorNode, state: DecorationInput) => {
-    // Active/hovered threads tint what they belong to: the underlined text for range
-    // anchors, the whole block for block anchors. The margin marker marks both.
+    /*
+     * Active/hovered threads tint what they belong to: the underlined text for range
+     * anchors, the whole block for block anchors. The margin marker marks both.
+     */
     const decorations: Decoration[] = [];
     // Hover is a lighter tint than the active thread, which wins when both apply.
-    const hovered = new Set([
-        ...(state.hoveredThreadId ? [state.hoveredThreadId] : []),
-        ...(state.hoveredBlockId ? (state.openThreadIdsByBlockId.get(state.hoveredBlockId) ?? []) : []),
-    ]);
+    const hoveredThreadIds = state.hoveredThreadId ? [state.hoveredThreadId] : [];
+    const hoveredBlockThreadIds = state.hoveredBlockId ? state.openThreadIdsByBlockId.get(state.hoveredBlockId) ?? [] : [];
+    const hovered = new Set([...hoveredThreadIds, ...hoveredBlockThreadIds]);
     const toneOf = (threadId: string) => (threadId === state.activeThreadId ? 'active' : hovered.has(threadId) ? 'hovered' : null);
 
-    [...hovered, ...(state.activeThreadId ? [state.activeThreadId] : [])].forEach(threadId => {
+    [...hovered, ...state.activeThreadId ? [state.activeThreadId] : []].forEach(threadId => {
         const anchor = state.anchors.get(threadId);
         const tone = toneOf(threadId);
 

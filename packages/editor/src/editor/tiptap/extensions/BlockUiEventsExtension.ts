@@ -1,6 +1,11 @@
 import {type ScriptBlockIndexSnapshot} from '@stagistic/script';
 import {Extension} from '@tiptap/core';
-import {type EditorState, Plugin, PluginKey, type Transaction} from '@tiptap/pm/state';
+import {
+    type EditorState,
+    Plugin,
+    PluginKey,
+    type Transaction,
+} from '@tiptap/pm/state';
 
 import type {EditorBlockUiEvent} from '../../contracts';
 import {buildIndexSnapshotFromPmDoc} from '../../runtime/buildIndexSnapshotFromPmDoc';
@@ -8,7 +13,7 @@ import {transactionMayAffectBlockStructure} from '../../runtime/transactionGuard
 import {getActiveScriptBlockFromState} from '../scriptCore';
 
 interface BlockUiEventsPluginState {
-    events: EditorBlockUiEvent[];
+    events: EditorBlockUiEvent[],
 }
 
 type IndexedSnapshotBlock = ScriptBlockIndexSnapshot['blocks'][number];

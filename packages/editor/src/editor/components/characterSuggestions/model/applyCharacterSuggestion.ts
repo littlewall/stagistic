@@ -21,7 +21,11 @@ export const applyCharacterSuggestion = (editor: TiptapEditor, suggestion: strin
         return null;
     }
 
-    const {tokens, activeTokenIndex, activeToken} = tokenResult;
+    const {
+        tokens,
+        activeTokenIndex,
+        activeToken,
+    } = tokenResult;
 
     const {suffix} = splitBaseAndSuffix(activeToken.value);
     const replacement = suffix.length > 0 ? `${suggestion} ${suffix}` : suggestion;

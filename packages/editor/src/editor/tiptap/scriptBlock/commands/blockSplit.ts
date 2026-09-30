@@ -1,10 +1,19 @@
-import {createNodeId, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME} from '@stagistic/script';
+import {
+    createNodeId,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
+} from '@stagistic/script';
 import type {Node as ProseMirrorNode, NodeType} from '@tiptap/pm/model';
 import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
 import {IMMEDIATE_SAVE_META_KEY} from '../../../saveMeta';
-import {type ActiveScriptBlock, type BlockNodeType, getActiveScriptBlockFromState, normalizeBlockNodeType} from '../../scriptCore';
+import {
+    type ActiveScriptBlock,
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+    normalizeBlockNodeType,
+} from '../../scriptCore';
 import {applyBlockType, resolveNodeTypeForBlockType} from './blockTypeChange';
 import {focusEditor} from './selection';
 

@@ -6,7 +6,7 @@ export default defineConfig({
     integrations: [react()],
     trailingSlash: 'never',
     build: {
-        format: 'file'
+        format: 'file',
     },
     vite: {
         css: {

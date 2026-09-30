@@ -1,4 +1,8 @@
-import {bigint, pgTable, text} from 'drizzle-orm/pg-core';
+import {
+    bigint,
+    pgTable,
+    text,
+} from 'drizzle-orm/pg-core';
 
 export const scripts = pgTable('scripts', {
     id: text('id').primaryKey(),

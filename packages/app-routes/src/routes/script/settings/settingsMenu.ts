@@ -22,9 +22,9 @@ const rawBlockItems = BLOCK_ITEMS.map(item => ({
 }));
 
 export const SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS: Array<{
-    id: string;
-    blockType: ScriptBlockNodeType;
-    label: string;
+    id: string,
+    blockType: ScriptBlockNodeType,
+    label: string,
 }> = [...rawBlockItems.filter(item => item.blockType === 'act'), ...rawBlockItems.filter(item => item.blockType !== 'act')];
 
 export type ElementSettingsPanelId = `${typeof SCRIPT_SETTINGS_PANEL_ELEMENT_PREFIX}${ScriptBlockNodeType}`;
@@ -34,8 +34,9 @@ const getElementSettingsPanelId = (blockType: ScriptBlockNodeType): ElementSetti
 const ELEMENT_SETTINGS_PANEL_IDS = new Set(SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => getElementSettingsPanelId(item.blockType)));
 const ELEMENT_BLOCK_TYPE_SET = new Set(SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => item.blockType));
 
-export const isElementSettingsPanelId = (panelId: string): panelId is ElementSettingsPanelId =>
-    ELEMENT_SETTINGS_PANEL_IDS.has(panelId as ElementSettingsPanelId);
+export const isElementSettingsPanelId = (panelId: string): panelId is ElementSettingsPanelId => {
+    return ELEMENT_SETTINGS_PANEL_IDS.has(panelId as ElementSettingsPanelId);
+};
 export const getBlockTypeFromElementPanelId = (panelId: string): ScriptBlockNodeType | null => {
     if (!isElementSettingsPanelId(panelId)) {
         return null;

@@ -8,17 +8,17 @@ import {
     type ScriptDocument,
 } from '@stagistic/script';
 
-import type {ContentsValue} from '../../config';
+import type {ContentsValue} from '../../model/config';
 import type {
     ContentsActGroup,
     ContentsInitialPagePlan,
     ContentsMusicEntry,
     ContentsSceneEntry,
-} from '../../plan';
+} from '../../model/plan';
 import type {
     ExportCharacter,
     ExportCharacterGroup,
-} from '../../scriptData';
+} from '../../model/scriptData';
 import {collectMusicSingers} from './collectMusicSingers';
 
 const UNTITLED_SCENE = 'Untitled scene';
@@ -46,7 +46,9 @@ const toMusicEntry = (
     groups: ExportCharacterGroup[],
 ): ContentsMusicEntry => {
     const singers = collectMusicSingers(music, {
-        blocks, characters, groups,
+        blocks,
+        characters,
+        groups,
     });
     const isInstrumental = music.kind === 'instrumental' || singers.length === 0;
 
@@ -82,7 +84,9 @@ export const deriveContentsPlan = (
     const ensureAct = (): ContentsActGroup => {
         if (!currentAct) {
             currentAct = {
-                name: null, preSceneMusic: [], scenes: [],
+                name: null,
+                preSceneMusic: [],
+                scenes: [],
             };
             acts.push(currentAct);
         }

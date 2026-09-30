@@ -27,7 +27,8 @@ const groupDocument = (linked: boolean): ScriptDocument => ({
                 characterRefs: linked ? {ALL: 'group-1'} : {},
             },
             content: [{type: 'text', text: 'ALL'}],
-        }, {
+        },
+        {
             type: 'stageDirection',
             attrs: {id: 'direction-1'},
             content: [
@@ -89,7 +90,8 @@ const Harness = ({
         confirmedSpeakingEntitySet: new Set(hasConfirmedGroup ? ['ALL'] : []),
         confirmedGroupsById: new Map(hasConfirmedGroup ? [
             [
-                'group-1', {
+                'group-1',
+                {
                     id: 'group-1',
                     kind: 'group',
                     key: 'ALL',

@@ -13,9 +13,13 @@ export type StepkgImportIssueCode =
     | 'write_failed';
 
 export interface StepkgImportIssue {
-    code: StepkgImportIssueCode;
-    stage: StepkgImportStage;
-    path?: string;
-    entity?: {type: 'script' | 'character' | 'music' | 'scene' | 'attachment' | 'comment'; id: string; label?: string};
-    details?: Record<string, string | number>;
+    code: StepkgImportIssueCode,
+    stage: StepkgImportStage,
+    path?: string,
+    entity?: {
+        type: 'script' | 'character' | 'music' | 'scene' | 'attachment' | 'comment',
+        id: string,
+        label?: string,
+    },
+    details?: Record<string, string | number>,
 }

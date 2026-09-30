@@ -1,4 +1,11 @@
-import {MUSIC_ID_ATTR, MUSIC_KIND_ATTR, MUSIC_OUT_NODE_NAME, MUSIC_START_NODE_NAME, MUSIC_TITLE_ATTR, type MusicMode} from '@stagistic/script';
+import {
+    MUSIC_ID_ATTR,
+    MUSIC_KIND_ATTR,
+    MUSIC_OUT_NODE_NAME,
+    MUSIC_START_NODE_NAME,
+    MUSIC_TITLE_ATTR,
+    type MusicMode,
+} from '@stagistic/script';
 import {Extension} from '@tiptap/core';
 
 import {buildIndexSnapshotFromPmDoc} from '../../../runtime/buildIndexSnapshotFromPmDoc';
@@ -14,10 +21,16 @@ import {
     resolveMusicTargetBlock,
     resolveScriptTargetBlock,
 } from './musicCommands';
-import {buildMoveOrphanMusicOut, buildRemoveMusicOutAtBlock, buildSetMusicOutAtBlock, findMusicAtomRange, resolveMusicOutCandidate} from './musicOutCommands';
+import {
+    buildMoveOrphanMusicOut,
+    buildRemoveMusicOutAtBlock,
+    buildSetMusicOutAtBlock,
+    findMusicAtomRange,
+    resolveMusicOutCandidate,
+} from './musicOutCommands';
 
 interface MusicCommandsExtensionOptions {
-    onMusicUnassigned?: (musicId: string) => void;
+    onMusicUnassigned?: (musicId: string) => void,
 }
 
 declare module '@tiptap/core' {
@@ -28,21 +41,21 @@ declare module '@tiptap/core' {
                 title: string,
                 mode?: MusicMode,
                 options?: {
-                    musicId?: string;
-                    kind?: string | null;
-                    isDraft?: boolean;
+                    musicId?: string,
+                    kind?: string | null,
+                    isDraft?: boolean,
                 },
-            ) => ReturnType;
-            insertMusicOut: (blockId: string | null) => ReturnType;
-            insertMusicDraft: (blockId: string | null) => ReturnType;
-            setMusicOutAtBlock: (blockId: string | null) => ReturnType;
-            removeMusicOutAtBlock: (blockId: string) => ReturnType;
-            moveOrphanMusicOut: (sourceBlockId: string, targetBlockId: string) => ReturnType;
-            deleteMusicStart: (pos: number) => ReturnType;
-            updateMusicMode: (pos: number, mode: MusicMode) => ReturnType;
-            unassignMusic: (musicId: string) => ReturnType;
-            updateMusicMetadata: (musicId: string, title: string, kind: 'song' | 'instrumental') => ReturnType;
-        };
+            ) => ReturnType,
+            insertMusicOut: (blockId: string | null) => ReturnType,
+            insertMusicDraft: (blockId: string | null) => ReturnType,
+            setMusicOutAtBlock: (blockId: string | null) => ReturnType,
+            removeMusicOutAtBlock: (blockId: string) => ReturnType,
+            moveOrphanMusicOut: (sourceBlockId: string, targetBlockId: string) => ReturnType,
+            deleteMusicStart: (pos: number) => ReturnType,
+            updateMusicMode: (pos: number, mode: MusicMode) => ReturnType,
+            unassignMusic: (musicId: string) => ReturnType,
+            updateMusicMetadata: (musicId: string, title: string, kind: 'song' | 'instrumental') => ReturnType,
+        },
     }
 }
 
@@ -56,8 +69,7 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
     addCommands() {
         return {
             insertMusicStart:
-                (blockId, title, mode = 'open', options) =>
-                ({state, dispatch}) => {
+                (blockId, title, mode = 'open', options) => ({state, dispatch}) => {
                     const block = resolveMusicTargetBlock(state, blockId);
 
                     if (!block || blockHasMusicStart(block)) {
@@ -71,8 +83,7 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
                     return true;
                 },
             insertMusicDraft:
-                blockId =>
-                ({state, dispatch}) => {
+                blockId => ({state, dispatch}) => {
                     const block = resolveMusicTargetBlock(state, blockId);
 
                     if (!block || blockHasMusicStart(block)) {
@@ -87,12 +98,9 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
                     return true;
                 },
             insertMusicOut:
-                blockId =>
-                ({commands}) =>
-                    commands.setMusicOutAtBlock(blockId),
+                blockId => ({commands}) => commands.setMusicOutAtBlock(blockId),
             setMusicOutAtBlock:
-                blockId =>
-                ({state, dispatch}) => {
+                blockId => ({state, dispatch}) => {
                     const block = resolveScriptTargetBlock(state, blockId);
 
                     if (!block) {
@@ -118,8 +126,7 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
                     return true;
                 },
             removeMusicOutAtBlock:
-                blockId =>
-                ({state, dispatch}) => {
+                blockId => ({state, dispatch}) => {
                     const tr = buildRemoveMusicOutAtBlock(state, blockId);
 
                     if (!tr) {
@@ -131,8 +138,7 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
                     return true;
                 },
             moveOrphanMusicOut:
-                (sourceBlockId, targetBlockId) =>
-                ({state, dispatch}) => {
+                (sourceBlockId, targetBlockId) => ({state, dispatch}) => {
                     const transaction = buildMoveOrphanMusicOut(state, sourceBlockId, targetBlockId);
 
                     if (!transaction) {
@@ -144,8 +150,7 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
                     return true;
                 },
             deleteMusicStart:
-                pos =>
-                ({state, dispatch}) => {
+                pos => ({state, dispatch}) => {
                     const node = state.doc.nodeAt(pos);
 
                     if (!node || node.type.name !== MUSIC_START_NODE_NAME) {
@@ -165,8 +170,7 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
                     return true;
                 },
             updateMusicMode:
-                (pos, mode) =>
-                ({state, dispatch}) => {
+                (pos, mode) => ({state, dispatch}) => {
                     const node = state.doc.nodeAt(pos);
 
                     if (!node || node.type.name !== MUSIC_START_NODE_NAME) {
@@ -178,8 +182,7 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
                     return true;
                 },
             unassignMusic:
-                musicId =>
-                ({state, dispatch}) => {
+                musicId => ({state, dispatch}) => {
                     const pos = findMusicStartPositionById(state, musicId);
 
                     if (pos === null) {
@@ -200,8 +203,7 @@ export const MusicCommandsExtension = Extension.create<MusicCommandsExtensionOpt
                     return true;
                 },
             updateMusicMetadata:
-                (musicId, title, kind) =>
-                ({state, dispatch}) => {
+                (musicId, title, kind) => ({state, dispatch}) => {
                     const pos = findMusicStartPositionById(state, musicId);
                     const normalizedTitle = title.trim();
 

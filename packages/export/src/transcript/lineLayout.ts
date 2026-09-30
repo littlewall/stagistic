@@ -1,7 +1,7 @@
 import {type EditorSettings} from '@stagistic/script';
 
-import type {VisualRun} from '../visualLine';
-import {MONO_FONT_FAMILY, type InlineStyle} from './model';
+import type {VisualRun} from '../model/visualLine';
+import {type InlineStyle, MONO_FONT_FAMILY} from './model';
 
 export const makeRun = (
     text: string,
@@ -26,11 +26,11 @@ export const resolveLineX = ({
     availableWidthPx,
     charWidthPx,
 }: {
-    block: NonNullable<EditorSettings['blocks'][string]>;
-    line: string;
-    baseX: number;
-    availableWidthPx: number;
-    charWidthPx: number;
+    block: NonNullable<EditorSettings['blocks'][string]>,
+    line: string,
+    baseX: number,
+    availableWidthPx: number,
+    charWidthPx: number,
 }) => {
     const textWidthPx = line.length * charWidthPx;
 

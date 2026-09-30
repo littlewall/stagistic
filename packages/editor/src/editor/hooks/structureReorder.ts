@@ -1,4 +1,9 @@
-import {getScriptBlockId, getScriptBlockNodeType, isScriptBlockNode, type ScriptNode} from '@stagistic/script';
+import {
+    getScriptBlockId,
+    getScriptBlockNodeType,
+    isScriptBlockNode,
+    type ScriptNode,
+} from '@stagistic/script';
 
 type MoveResult = [ScriptNode[] | undefined, boolean];
 
@@ -59,8 +64,8 @@ const recurseIntoChildren = (nodes: ScriptNode[], moveFn: (children: ScriptNode[
 };
 
 type SceneRange = {
-    start: number;
-    end: number;
+    start: number,
+    end: number,
 };
 
 const findSceneRangeByBlockId = (nodes: ScriptNode[], sceneBlockId: string): SceneRange | null => {

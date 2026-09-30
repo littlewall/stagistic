@@ -11,4 +11,11 @@ export * from './settings';
 export * from './structure';
 export * from './syntax';
 export * from './titlePage';
-export {clampNumber, collapseWhitespace, createNodeId, isObjectRecord, splitTrailingParentheticalSuffix, trimOrFallback} from '@stagistic/shared';
+export {
+    clampNumber,
+    collapseWhitespace,
+    createNodeId,
+    isObjectRecord,
+    splitTrailingParentheticalSuffix,
+    trimOrFallback,
+} from '@stagistic/shared';

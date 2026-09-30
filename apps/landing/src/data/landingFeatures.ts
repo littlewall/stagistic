@@ -42,7 +42,7 @@ export const landingFeatures = [
     {
         label: 'A writing flow you can configure',
         description:
-            "Configure page format, title page, headers and footers, and each block's indentation, alignment, emphasis, and casing. Set keyboard shortcuts and decide which block follows next, so the editor matches the way you write.",
+            'Configure page format, title page, headers and footers, and each block\'s indentation, alignment, emphasis, and casing. Set keyboard shortcuts and decide which block follows next, so the editor matches the way you write.',
         imageSrc: '/features/writing-flow.png',
         imageAlt: 'Formatting controls above a script in Stagistic Editor',
         imageFit: 'cover',

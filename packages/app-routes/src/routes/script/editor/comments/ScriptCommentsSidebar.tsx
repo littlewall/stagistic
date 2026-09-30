@@ -1,27 +1,39 @@
-import type {ScriptCommentMessage, ScriptCommentsState, ScriptCommentThread} from '@stagistic/app-core';
+import type {
+    ScriptCommentMessage,
+    ScriptCommentsState,
+    ScriptCommentThread,
+} from '@stagistic/app-core';
 import {type CommentAnchorLocation, useEditorComments} from '@stagistic/editor';
-import {IconPopover, SearchOptionsIcon, Select, SidebarMiniHeader, ToggleButtonGroup, useToastController} from '@stagistic/ui';
-import {type ReactNode, useEffect, useMemo, useRef} from 'react';
+import {
+    IconPopover,
+    SearchOptionsIcon,
+    Select,
+    SidebarMiniHeader,
+    ToggleButtonGroup,
+    useToastController,
+} from '@stagistic/ui';
+import {
+    type ReactNode,
+    useEffect,
+    useMemo,
+    useRef,
+} from 'react';
 
 import {CommentsBesideView} from './CommentsBesideView';
 import {CommentsListView} from './CommentsListView';
 import {CommentThreadCard} from './CommentThreadCard';
 import {matchesCommentFilter} from './filterThreads';
+import styles from './ScriptCommentsSidebar.module.css';
 import type {CommentStatusFilter, CommentsViewMode} from './types';
 import type {CommentsPanelState} from './useCommentsPanelState';
 
-import styles from './ScriptCommentsSidebar.module.css';
-
-const VIEW_OPTIONS = [
-    {value: 'beside', label: 'Anchored'},
-    {value: 'list', label: 'List'},
-] as const satisfies readonly {value: CommentsViewMode; label: string}[];
+const VIEW_OPTIONS = [{value: 'beside', label: 'Anchored'}, {value: 'list', label: 'List'}] as const satisfies readonly {value: CommentsViewMode, label: string}[];
 
 const STATUS_OPTIONS = [
     {value: 'open', label: 'Open'},
     {value: 'resolved', label: 'Resolved'},
     {value: 'all', label: 'All'},
-] as const satisfies readonly {value: CommentStatusFilter; label: string}[];
+] as const satisfies readonly {value: CommentStatusFilter, label: string}[];
 
 const NO_ANCHORS: ReadonlyMap<string, CommentAnchorLocation> = new Map();
 
@@ -30,21 +42,34 @@ const groupMessagesByThread = (messages: readonly ScriptCommentMessage[]) => {
 
     [...messages]
         .sort((left, right) => left.createdAt - right.createdAt)
-        .forEach(message => grouped.set(message.threadId, [...(grouped.get(message.threadId) ?? []), message]));
+        .forEach(message => grouped.set(message.threadId, [...grouped.get(message.threadId) ?? [], message]));
 
     return grouped;
 };
 
 interface ScriptCommentsSidebarProps {
-    header: ReactNode;
-    comments: ScriptCommentsState;
-    panelState: CommentsPanelState;
+    header: ReactNode,
+    comments: ScriptCommentsState,
+    panelState: CommentsPanelState,
 }
 
-export const ScriptCommentsSidebar = ({header, comments, panelState}: ScriptCommentsSidebarProps) => {
+export const ScriptCommentsSidebar = ({
+    header,
+    comments,
+    panelState,
+}: ScriptCommentsSidebarProps) => {
     const editorComments = useEditorComments();
     const {addToast} = useToastController();
-    const {viewMode, setViewMode, filter, setFilter, expandedBlockId, setExpandedBlockId, pendingActivation, clearPendingActivation} = panelState;
+    const {
+        viewMode,
+        setViewMode,
+        filter,
+        setFilter,
+        expandedBlockId,
+        setExpandedBlockId,
+        pendingActivation,
+        clearPendingActivation,
+    } = panelState;
     const anchors = editorComments.state?.anchors ?? NO_ANCHORS;
     const draft = editorComments.state?.draft ?? null;
     const activeThreadId = editorComments.state?.activeThreadId ?? null;
@@ -53,8 +78,12 @@ export const ScriptCommentsSidebar = ({header, comments, panelState}: ScriptComm
     const openThreadIdsByBlockId = editorComments.state?.openThreadIdsByBlockId;
     // Hovering a card, its underline or its block's margin marker lights the card(s).
     const highlightedThreadIds = useMemo(
-        () => new Set([...(hoveredThreadId ? [hoveredThreadId] : []), ...((hoveredBlockId && openThreadIdsByBlockId?.get(hoveredBlockId)) || [])]),
-        [hoveredBlockId, hoveredThreadId, openThreadIdsByBlockId],
+        () => new Set([...hoveredThreadId ? [hoveredThreadId] : [], ...(hoveredBlockId && openThreadIdsByBlockId?.get(hoveredBlockId)) || []]),
+        [
+            hoveredBlockId,
+            hoveredThreadId,
+            openThreadIdsByBlockId,
+        ],
     );
     const messagesByThreadId = useMemo(() => groupMessagesByThread(comments.messages), [comments.messages]);
     const visibleThreads = useMemo(() => comments.threads.filter(thread => matchesCommentFilter(thread, filter)), [comments.threads, filter]);
@@ -73,14 +102,23 @@ export const ScriptCommentsSidebar = ({header, comments, panelState}: ScriptComm
         if (expandedBlockId && (activeThreadId === null || anchors.get(activeThreadId)?.blockId !== expandedBlockId)) {
             setExpandedBlockId(null);
         }
-    }, [activeThreadId, anchors, expandedBlockId, setExpandedBlockId]);
+    }, [
+        activeThreadId,
+        anchors,
+        expandedBlockId,
+        setExpandedBlockId,
+    ]);
 
     useEffect(() => {
         if (pendingActivation?.[0]) {
             setActive(pendingActivation[0]);
             clearPendingActivation();
         }
-    }, [clearPendingActivation, pendingActivation, setActive]);
+    }, [
+        clearPendingActivation,
+        pendingActivation,
+        setActive,
+    ]);
 
     const submitDraft = async (body: string) => {
         if (!draft) {
@@ -192,7 +230,7 @@ export const ScriptCommentsSidebar = ({header, comments, panelState}: ScriptComm
         <div className={styles.content} data-comments-panel="true">
             <SidebarMiniHeader
                 navigation={header}
-                controls={
+                controls={(
                     <IconPopover aria-label="Comments view and filter" icon={<SearchOptionsIcon aria-hidden="true" />} size="xs">
                         <div className={styles.displayField}>
                             <span className={styles.displayLabel}>View</span>
@@ -216,7 +254,7 @@ export const ScriptCommentsSidebar = ({header, comments, panelState}: ScriptComm
                             />
                         </div>
                     </IconPopover>
-                }
+                )}
             />
             {isEmpty ? (
                 <p className={styles.empty}>No comments. Select text and press ⌘⌥M.</p>

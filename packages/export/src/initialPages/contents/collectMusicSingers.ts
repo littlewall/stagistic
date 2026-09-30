@@ -7,7 +7,7 @@ import {
 import type {
     ExportCharacter,
     ExportCharacterGroup,
-} from '../../scriptData';
+} from '../../model/scriptData';
 
 export interface MusicSingerInput {
     blocks: IndexedScriptBlock[],

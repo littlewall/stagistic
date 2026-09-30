@@ -9,7 +9,11 @@ import {
 } from './persistedDraftContract';
 import {reconcileDraftEntity} from './reconcileDraftEntity';
 
-export type {PersistedDraftScheduler, PersistedDraftSnapshot, PersistedDraftStatus} from './persistedDraftContract';
+export type {
+    PersistedDraftScheduler,
+    PersistedDraftSnapshot,
+    PersistedDraftStatus,
+} from './persistedDraftContract';
 
 export const createPersistedDraftController = <TKey, TValue>({
     defaultValue,
@@ -41,7 +45,7 @@ export const createPersistedDraftController = <TKey, TValue>({
      * database is about to contain it, so it — not entity.confirmedValue —
      * is the baseline for dirtiness checks and confirmed-echo reconciliation.
      */
-    let inFlight: {key: TKey; value: TValue} | null = null;
+    let inFlight: {key: TKey, value: TValue} | null = null;
 
     const isSaveInFlight = () => inFlight !== null && Object.is(inFlight.key, entity.key);
 

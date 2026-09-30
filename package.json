@@ -14,10 +14,10 @@
     "devDependencies": {
         "@biomejs/biome": "^2.5.14",
         "@moonrepo/cli": "^2.5.5",
-        "@stagistic/stylelint-config": "workspace:*",
+        "@stagistic/linters": "workspace:*",
         "@types/node": "^24.13.1",
         "@vitest/browser-playwright": "4.1.11",
-        "oxfmt": "^0.68.0",
+        "eslint": "^10.0.0",
         "oxlint": "^1.83.0",
         "stylelint": "^17.15.0",
         "typescript": "^5.9.3",

@@ -1,4 +1,8 @@
-import {DEFAULT_SCENE_NUMBER_FORMAT, formatSceneNumber, type SceneNumberFormat} from '@stagistic/script';
+import {
+    DEFAULT_SCENE_NUMBER_FORMAT,
+    formatSceneNumber,
+    type SceneNumberFormat,
+} from '@stagistic/script';
 import {Extension} from '@tiptap/core';
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import {Plugin, PluginKey} from '@tiptap/pm/state';
@@ -11,7 +15,7 @@ const sceneNumberingKey = new PluginKey<DecorationSet>('scene-numbering');
 
 export interface SceneNumberingOptions {
     /** Whether and how the scene number label is rendered. */
-    format: SceneNumberFormat;
+    format: SceneNumberFormat,
 }
 
 /*

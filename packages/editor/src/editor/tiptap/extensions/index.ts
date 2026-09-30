@@ -35,12 +35,12 @@ export {ScriptBehaviorExtension} from './ScriptBehaviorExtension';
 // ─── Decorations ─────────────────────────────────────────────────────────────
 
 export {BlockFocusFlashExtension} from './BlockFocusFlashExtension';
-export {PlaceholderExtension} from './PlaceholderExtension';
 export {CommentsExtension, type CommentsExtensionCallbacks} from './comments';
-export {getEditorSearchSnapshot, SearchExtension} from './search';
+export {PlaceholderExtension} from './PlaceholderExtension';
+export {getSceneCollapseSnapshot, SceneCollapseExtension} from './sceneCollapse/SceneCollapseExtension';
 export {SceneGuardExtension} from './SceneGuardExtension';
 export {SceneNumberingExtension} from './SceneNumberingExtension';
-export {getSceneCollapseSnapshot, SceneCollapseExtension} from './sceneCollapse/SceneCollapseExtension';
+export {getEditorSearchSnapshot, SearchExtension} from './search';
 
 // ─── Layout ──────────────────────────────────────────────────────────────────
 

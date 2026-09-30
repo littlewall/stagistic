@@ -1,5 +1,9 @@
 import {Extension} from '@tiptap/core';
-import {type EditorState, Plugin, PluginKey} from '@tiptap/pm/state';
+import {
+    type EditorState,
+    Plugin,
+    PluginKey,
+} from '@tiptap/pm/state';
 import {DecorationSet} from '@tiptap/pm/view';
 
 import type {PersistentCharacterRef} from '../../contracts';
@@ -19,20 +23,20 @@ import {type BlockNodeType, getActiveScriptBlockFromState} from '../scriptCore';
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         editorRuntime: {
-            refreshCharacterTagDecorations: () => ReturnType;
-        };
+            refreshCharacterTagDecorations: () => ReturnType,
+        },
     }
 }
 
 interface EditorRuntimeOptions {
-    characterColorSaturation?: number;
-    colorByCharacterIdRef?: {current: ReadonlyMap<string, string>};
-    rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>};
-    persistentCharactersRef?: {current: readonly PersistentCharacterRef[]};
+    characterColorSaturation?: number,
+    colorByCharacterIdRef?: {current: ReadonlyMap<string, string>},
+    rememberedColorByKeyRef?: {current: ReadonlyMap<string, string>},
+    persistentCharactersRef?: {current: readonly PersistentCharacterRef[]},
     characterTagClassNames?: {
-        tag: string;
-        separator: string;
-    };
+        tag: string,
+        separator: string,
+    },
 }
 
 const EMPTY_DECORATIONS = DecorationSet.empty;
@@ -44,8 +48,8 @@ const EDITOR_RUNTIME_REFRESH_META_KEY = 'editor-runtime-refresh';
 const resolveActiveBlock = (
     state: EditorState,
 ): {
-    activeBlockId: string | null;
-    activeBlockType: BlockNodeType | null;
+    activeBlockId: string | null,
+    activeBlockType: BlockNodeType | null,
 } => {
     const activeBlock = getActiveScriptBlockFromState(state);
 
@@ -104,8 +108,7 @@ export const EditorRuntimeExtension = Extension.create<EditorRuntimeOptions>({
     addCommands() {
         return {
             refreshCharacterTagDecorations:
-                () =>
-                ({state, dispatch}) => {
+                () => ({state, dispatch}) => {
                     if (!dispatch) {
                         return true;
                     }

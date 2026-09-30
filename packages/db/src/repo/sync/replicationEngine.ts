@@ -25,7 +25,9 @@ export type ReplicationStatus =
     | {state: 'sending', operationCount: number}
     | {state: 'receiving'}
     | {
-        state: 'retrying', attempt: number, nextAttemptAt: number,
+        state: 'retrying',
+        attempt: number,
+        nextAttemptAt: number,
     }
     | {state: 'error', error: Error};
 

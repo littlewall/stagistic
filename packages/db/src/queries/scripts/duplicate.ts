@@ -20,12 +20,12 @@ import {duplicateSettings} from './duplicate/duplicateSettings';
 import {remapCharacterTagIds, remapNullable} from './duplicate/remapIds';
 
 export interface DuplicateScriptQueryPayload {
-    sourceScriptId: string;
-    targetScriptId: string;
-    title: string;
-    now: number;
-    copySettings: boolean;
-    copyAttributes: boolean;
+    sourceScriptId: string,
+    targetScriptId: string,
+    title: string,
+    now: number,
+    copySettings: boolean,
+    copyAttributes: boolean,
 }
 
 /**
@@ -37,7 +37,14 @@ export interface DuplicateScriptQueryPayload {
  * cross-reference is remapped to the new ids.
  */
 export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScriptQueryPayload): Promise<void> => {
-    const {sourceScriptId, targetScriptId, title, now, copySettings, copyAttributes} = payload;
+    const {
+        sourceScriptId,
+        targetScriptId,
+        title,
+        now,
+        copySettings,
+        copyAttributes,
+    } = payload;
 
     await db.insert(scripts).values({
         id: targetScriptId,
@@ -194,9 +201,10 @@ export const duplicateScriptRows = async (db: DbClient, payload: DuplicateScript
         const blockIds = blockRows.map(row => row.id);
         const refRows =
             blockIds.length > 0
-                ? (await db.select().from(scriptBlockCharacterRefs).where(inArray(scriptBlockCharacterRefs.blockId, blockIds))).filter(row =>
-                      entityIdMap!.has(row.characterId),
-                  )
+                ? (await db
+                    .select()
+                    .from(scriptBlockCharacterRefs)
+                    .where(inArray(scriptBlockCharacterRefs.blockId, blockIds))).filter(row => entityIdMap!.has(row.characterId))
                 : [];
 
         if (refRows.length > 0) {

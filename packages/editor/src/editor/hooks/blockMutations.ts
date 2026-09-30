@@ -1,4 +1,11 @@
-import {getScriptBlockId, getScriptBlockNodeType, isScriptBlockNode, resolveScriptBlockNodeType, type ScriptDocument, type ScriptNode} from '@stagistic/script';
+import {
+    getScriptBlockId,
+    getScriptBlockNodeType,
+    isScriptBlockNode,
+    resolveScriptBlockNodeType,
+    type ScriptDocument,
+    type ScriptNode,
+} from '@stagistic/script';
 
 export const setPlainTextContent = (nodes: ScriptNode[] | undefined, blockId: string, nextName: string): [ScriptNode[] | undefined, boolean] => {
     if (!Array.isArray(nodes) || nodes.length === 0) {
@@ -30,11 +37,11 @@ export const setPlainTextContent = (nodes: ScriptNode[] | undefined, blockId: st
                 content:
                     normalizedName.length > 0
                         ? [
-                              {
-                                  type: 'text',
-                                  text: normalizedName,
-                              },
-                          ]
+                            {
+                                type: 'text',
+                                text: normalizedName,
+                            },
+                        ]
                         : [],
             };
         }

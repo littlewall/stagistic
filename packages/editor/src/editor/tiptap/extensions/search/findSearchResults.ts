@@ -4,9 +4,9 @@ import {isScriptBlockNodeName, normalizeBlockNodeType} from '../../scriptCore';
 import type {SearchCriteria, SearchResult} from './types';
 
 interface TextSegment {
-    textFrom: number;
-    textTo: number;
-    docFrom: number;
+    textFrom: number,
+    textTo: number,
+    docFrom: number,
 }
 
 const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/gu, '\\$&');

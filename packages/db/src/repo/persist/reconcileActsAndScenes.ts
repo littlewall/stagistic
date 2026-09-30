@@ -1,7 +1,13 @@
 import {eq} from 'drizzle-orm';
 
 import type {ExtractedActRow, ExtractedSceneRow} from '../../blocks';
-import {bulkDeleteScriptActs, bulkDeleteScriptScenes, bulkUpsertScriptActs, bulkUpsertScriptScenes, type DbClient} from '../../queries';
+import {
+    bulkDeleteScriptActs,
+    bulkDeleteScriptScenes,
+    bulkUpsertScriptActs,
+    bulkUpsertScriptScenes,
+    type DbClient,
+} from '../../queries';
 import {scriptActs, scriptScenes} from '../../schema';
 
 /**
@@ -11,7 +17,7 @@ import {scriptActs, scriptScenes} from '../../schema';
 export const reconcileActsAndScenes = async (
     tx: DbClient,
     scriptId: string,
-    {acts, scenes}: {acts: readonly ExtractedActRow[]; scenes: readonly ExtractedSceneRow[]},
+    {acts, scenes}: {acts: readonly ExtractedActRow[], scenes: readonly ExtractedSceneRow[]},
     now: number,
 ) => {
     const existingActs = await tx.select({id: scriptActs.id}).from(scriptActs).where(eq(scriptActs.scriptId, scriptId));

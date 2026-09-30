@@ -48,7 +48,8 @@ describe('buildMusicRailBoundaries', () => {
                 endBlockId: null,
                 effectiveEndBlockId: 'block-2',
                 endKind: 'next-music',
-            }, {
+            },
+            {
                 musicId: 'second',
                 sceneNumber: 1,
                 indexInScene: 1,
@@ -65,9 +66,16 @@ describe('buildMusicRailBoundaries', () => {
 
         const boundaries = buildMusicRailBoundaries(index, [
             {
-                blockId: 'block-1', pos: 10, hasMusicStart: true, hasMusicOut: false,
-            }, {
-                blockId: 'block-2', pos: 20, hasMusicStart: true, hasMusicOut: false,
+                blockId: 'block-1',
+                pos: 10,
+                hasMusicStart: true,
+                hasMusicOut: false,
+            },
+            {
+                blockId: 'block-2',
+                pos: 20,
+                hasMusicStart: true,
+                hasMusicOut: false,
             },
         ]);
 
@@ -106,9 +114,16 @@ describe('buildMusicRailBoundaries', () => {
 
         const boundaries = buildMusicRailBoundaries(index, [
             {
-                blockId: 'block-1', pos: 10, hasMusicStart: true, hasMusicOut: false,
-            }, {
-                blockId: 'block-2', pos: 20, hasMusicStart: false, hasMusicOut: true,
+                blockId: 'block-1',
+                pos: 10,
+                hasMusicStart: true,
+                hasMusicOut: false,
+            },
+            {
+                blockId: 'block-2',
+                pos: 20,
+                hasMusicStart: false,
+                hasMusicOut: true,
             },
         ]);
 
@@ -125,7 +140,8 @@ describe('canDropMusicOutAtBoundary', () => {
                 ...index.blocks[0],
                 blockId: 'start',
                 orderNo: 0,
-            }, {
+            },
+            {
                 ...index.blocks[0],
                 blockId: 'target',
                 orderNo: 1,
@@ -160,7 +176,9 @@ describe('canDropMusicOutAtBoundary', () => {
             'next',
             'after',
         ].map((blockId, orderNo) => ({
-            ...index.blocks[0], blockId, orderNo,
+            ...index.blocks[0],
+            blockId,
+            orderNo,
         }));
         index.music = [
             {

@@ -1,7 +1,21 @@
-import {and, eq, sql} from 'drizzle-orm';
+import {
+    and,
+    eq,
+    sql,
+} from 'drizzle-orm';
 
-import {type ExtractedBlockRow, extractScriptBlocks, type RewriteScriptDocument} from '../../blocks';
-import {bulkDeleteScriptBlocks, bulkReplaceScriptBlockCharacterRefs, type DbClient, listScriptSpeakingEntities, writeFinalBlockOrders} from '../../queries';
+import {
+    type ExtractedBlockRow,
+    extractScriptBlocks,
+    type RewriteScriptDocument,
+} from '../../blocks';
+import {
+    bulkDeleteScriptBlocks,
+    bulkReplaceScriptBlockCharacterRefs,
+    type DbClient,
+    listScriptSpeakingEntities,
+    writeFinalBlockOrders,
+} from '../../queries';
 import {scriptBlocks} from '../../schema';
 import {toCharacterRefRows} from '../characterRefRows';
 import {assignOrderKeys} from './assignOrderKeys';
@@ -80,8 +94,8 @@ export const createDocumentPersister = (scriptId: string) => {
             blockOrder: orderKeyById.get(block.blockId) ?? '',
             textContent: block.textContent,
             contentJson: block.contentJson,
-            sceneId: block.sceneHeadingBlockId ? (sceneIdByHeading.get(block.sceneHeadingBlockId) ?? null) : null,
-            actId: block.actHeadingBlockId ? (actIdByHeading.get(block.actHeadingBlockId) ?? null) : null,
+            sceneId: block.sceneHeadingBlockId ? sceneIdByHeading.get(block.sceneHeadingBlockId) ?? null : null,
+            actId: block.actHeadingBlockId ? actIdByHeading.get(block.actHeadingBlockId) ?? null : null,
             createdAt: now,
             updatedAt: now,
         });

@@ -4,15 +4,15 @@ import {type CSSProperties, type RefObject} from 'react';
 import type {PersistentMusicRef} from '../../contracts';
 
 export type MusicSuggestionOverlayState = {
-    style: CSSProperties;
-    suggestions: PersistentMusicRef[];
+    style: CSSProperties,
+    suggestions: PersistentMusicRef[],
 };
 
 export type MusicSuggestionsOverlayProps = {
-    editor: TiptapEditor | null;
-    canvasRef: RefObject<HTMLElement | null>;
-    persistentMusic?: readonly PersistentMusicRef[];
-    onMusicAssigned?: (musicId: string) => void;
+    editor: TiptapEditor | null,
+    canvasRef: RefObject<HTMLElement | null>,
+    persistentMusic?: readonly PersistentMusicRef[],
+    onMusicAssigned?: (musicId: string) => void,
 };
 
 const normalizeMusicTitle = (value: string) => {

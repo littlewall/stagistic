@@ -1,7 +1,18 @@
 import {DEFAULT_EDITOR_SETTINGS} from '@stagistic/script';
 import {createRoot, type Root} from 'react-dom/client';
-import {MemoryRouter, Route, Routes, useLocation} from 'react-router-dom';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    MemoryRouter,
+    Route,
+    Routes,
+    useLocation,
+} from 'react-router-dom';
+import {
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
+} from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
 import {ScriptEditorAppHeader} from '../../layout/AppHeader';
@@ -18,7 +29,7 @@ vi.mock('@stagistic/app-core', async importOriginal => {
     };
 });
 
-vi.mock('./ScriptWorkspaceContext', () => ({
+vi.mock('./workspace/ScriptWorkspaceContext', () => ({
     useScriptWorkspace: () => ({
         currentScript: {id: 's1', name: 'My Script'},
         currentScriptId: 's1',
@@ -68,7 +79,7 @@ vi.mock('./ScriptWorkspaceContext', () => ({
     }),
 }));
 
-vi.mock('./ScriptCharactersContext', () => ({
+vi.mock('./workspace/ScriptCharactersContext', () => ({
     useScriptCharacters: () => ({
         confirmedCharacterRecords: [
             {
@@ -89,7 +100,7 @@ vi.mock('./ScriptCharactersContext', () => ({
     }),
 }));
 
-vi.mock('./settings/ScriptSettingsModalProvider', () => ({
+vi.mock('./settings/ScriptSettingsModalContext', () => ({
     useScriptSettingsModal: () => ({
         resolvedScriptSettings: DEFAULT_EDITOR_SETTINGS,
         titlePageDraft: null,

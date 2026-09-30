@@ -6,9 +6,9 @@ import {readCharacterTagId} from '../../scriptBlock/characterTagMarkCommands';
 import {isPendingTagSpaceGap} from './text';
 
 export interface EndTypingTagRange {
-    from: number;
-    to: number;
-    replaceTo: number;
+    from: number,
+    to: number,
+    replaceTo: number,
 }
 
 export const charAt = (state: EditorState, pos: number): string => {
@@ -78,7 +78,7 @@ export const readCommittedTagCharacterId = (state: EditorState, from: number, to
     return characterId;
 };
 
-export const findCommittedTagBeforeCursor = (state: EditorState, markType: MarkType): {from: number; to: number} | null => {
+export const findCommittedTagBeforeCursor = (state: EditorState, markType: MarkType): {from: number, to: number} | null => {
     const cursor = state.selection.from;
 
     for (let probe = cursor; probe >= cursor - 4 && probe > 0; probe -= 1) {
@@ -119,7 +119,7 @@ export const findTagRangeForEndTyping = (state: EditorState, markType: MarkType)
     return null;
 };
 
-export const findTagRangeForConfirm = (state: EditorState, markType: MarkType): {from: number; to: number} | null => {
+export const findTagRangeForConfirm = (state: EditorState, markType: MarkType): {from: number, to: number} | null => {
     const cursor = state.selection.from;
     const directRange = getMarkRange(state.selection.$from, markType);
 
@@ -146,7 +146,7 @@ export const findTagRangeForConfirm = (state: EditorState, markType: MarkType): 
     return null;
 };
 
-export const findProtectedTagSeparator = (state: EditorState, markType: MarkType, spaceFrom: number): {from: number; to: number} | null => {
+export const findProtectedTagSeparator = (state: EditorState, markType: MarkType, spaceFrom: number): {from: number, to: number} | null => {
     if (spaceFrom < 0 || charAt(state, spaceFrom) !== ' ') {
         return null;
     }
@@ -160,8 +160,8 @@ export const findProtectedTagSeparator = (state: EditorState, markType: MarkType
 
     return previousRange.to === spaceFrom && nextRange.from === spaceFrom + 1
         ? {
-              from: spaceFrom,
-              to: spaceFrom + 1,
-          }
+            from: spaceFrom,
+            to: spaceFrom + 1,
+        }
         : null;
 };

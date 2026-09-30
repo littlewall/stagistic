@@ -5,20 +5,28 @@ import {getCharacterColor} from '../../../characters/characterColors';
 import {isCaretAtCharacterTagEnd, readCommittedTagCharacterId} from '../../../tiptap/extensions/characterTagInput/markRanges';
 import {getCharacterTagComposeFromState} from '../../../tiptap/extensions/CharacterTagInputExtension';
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../../tiptap/scriptCore';
-import type {CharacterSuggestionsResult, PersistentCharacterRef, SuppressedSelection} from '../types';
+import type {
+    CharacterSuggestionsResult,
+    PersistentCharacterRef,
+    SuppressedSelection,
+} from '../types';
 import {buildSuggestionRows} from './buildSuggestionRows';
-import {CHARACTER_TAG_HORIZONTAL_PADDING_PX, MAX_SUGGESTIONS, OVERLAY_WIDTH_PX} from './constants';
+import {
+    CHARACTER_TAG_HORIZONTAL_PADDING_PX,
+    MAX_SUGGESTIONS,
+    OVERLAY_WIDTH_PX,
+} from './constants';
 import {computeOverlayStyle} from './overlayPosition';
 import {getPersistentColorByKey} from './persistentCharacters';
 
 export type OverlayComputationArgs = {
-    editor: TiptapEditor;
-    canvas: HTMLElement;
-    normalizedPersistentCharacters: readonly PersistentCharacterRef[];
-    liveCountsByKey: ReadonlyMap<string, number>;
-    suppressedSelection: SuppressedSelection | null;
-    previousOrderByKey?: ReadonlyMap<string, number>;
-    characterColorSaturation?: number;
+    editor: TiptapEditor,
+    canvas: HTMLElement,
+    normalizedPersistentCharacters: readonly PersistentCharacterRef[],
+    liveCountsByKey: ReadonlyMap<string, number>,
+    suppressedSelection: SuppressedSelection | null,
+    previousOrderByKey?: ReadonlyMap<string, number>,
+    characterColorSaturation?: number,
 };
 
 export const buildSuggestionEntries = (
@@ -46,7 +54,7 @@ export const computeCharacterTagComposeSuggestions = ({
     characterColorSaturation,
     compose,
 }: OverlayComputationArgs & {
-    compose: NonNullable<ReturnType<typeof getCharacterTagComposeFromState>>;
+    compose: NonNullable<ReturnType<typeof getCharacterTagComposeFromState>>,
 }): CharacterSuggestionsResult | null => {
     const block = getActiveScriptBlockFromState(editor.state, SCRIPT_BLOCK_NODE_NAMES);
 

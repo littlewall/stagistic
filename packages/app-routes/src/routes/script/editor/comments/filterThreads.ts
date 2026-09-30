@@ -1,8 +1,8 @@
 import type {CommentFilter} from './types';
 
 export interface FilterableThread {
-    id: string;
-    status: string;
+    id: string,
+    status: string,
 }
 
 export const matchesCommentFilter = (thread: FilterableThread, filter: CommentFilter): boolean => {

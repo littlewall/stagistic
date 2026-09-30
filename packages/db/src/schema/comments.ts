@@ -1,4 +1,9 @@
-import {bigint, index, pgTable, text} from 'drizzle-orm/pg-core';
+import {
+    bigint,
+    index,
+    pgTable,
+    text,
+} from 'drizzle-orm/pg-core';
 
 import {scripts} from './scripts';
 

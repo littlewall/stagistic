@@ -4,9 +4,19 @@ import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
 import {IMMEDIATE_SAVE_META_KEY} from '../../../saveMeta';
-import {type ActiveScriptBlock, type BlockNodeType, getActiveScriptBlockFromState, isScriptBlockNodeName, normalizeBlockNodeType} from '../../scriptCore';
+import {
+    type ActiveScriptBlock,
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+    isScriptBlockNodeName,
+    normalizeBlockNodeType,
+} from '../../scriptCore';
 import {normalizeFormerStageDirectionContent} from '../normalizeStageDirectionContent';
-import {normalizeCharacterMusicText, stripLeadingActionTabs, stripRenderedBlockDelimiters} from './blockTextNormalization';
+import {
+    normalizeCharacterMusicText,
+    stripLeadingActionTabs,
+    stripRenderedBlockDelimiters,
+} from './blockTextNormalization';
 import {focusEditor, restoreBlockSelection} from './selection';
 
 export const resolveNodeTypeForBlockType = (nodes: Record<string, NodeType>, blockType: BlockNodeType) => {

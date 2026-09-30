@@ -35,7 +35,9 @@ describe('script location queries', () => {
         await upsertScriptLocation(db, location({id: 'b', name: 'Backstage'}));
         await upsertScriptLocation(db, location({id: 'a', name: 'Auditorium'}));
         await upsertScriptLocation(db, location({
-            id: 'other', scriptId: 'script-2', name: 'Outside',
+            id: 'other',
+            scriptId: 'script-2',
+            name: 'Outside',
         }));
 
         expect((await listScriptLocations(db, 'script-1')).map(row => row.name))
@@ -49,7 +51,9 @@ describe('script location queries', () => {
         await seedScript(db, 'script-2');
         await upsertScriptLocation(db, location());
         await upsertScriptLocation(db, location({
-            id: 'place-2', scriptId: 'script-2', name: 'Other',
+            id: 'place-2',
+            scriptId: 'script-2',
+            name: 'Other',
         }));
 
         await updateScriptLocationName(db, {
@@ -64,10 +68,12 @@ describe('script location queries', () => {
         });
 
         expect(await getScriptLocationById(db, {
-            scriptId: 'script-1', locationId: 'place-1',
+            scriptId: 'script-1',
+            locationId: 'place-1',
         })).toMatchObject({name: 'Main stage', updatedAt: 2});
         expect(await getScriptLocationById(db, {
-            scriptId: 'script-2', locationId: 'place-2',
+            scriptId: 'script-2',
+            locationId: 'place-2',
         })).toMatchObject({name: 'Other'});
     });
 

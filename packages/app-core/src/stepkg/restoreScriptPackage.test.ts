@@ -1,16 +1,30 @@
 import type {ScriptPackageWrite, ScriptRepository} from '@stagistic/db';
 import {createEmptyScriptDocument} from '@stagistic/script';
 import {createStepkg, type StepkgSnapshot} from '@stagistic/stepkg';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe,
+    expect,
+    it,
+} from 'vite-plus/test';
 
 import {restoreScriptPackage} from './restoreScriptPackage';
 
 const snapshot: StepkgSnapshot = {
-    script: {id: 'script-1', title: 'Original', subtitle: null, createdAt: '2026-09-21T10:00:00.000Z', updatedAt: '2026-09-21T11:00:00.000Z'},
+    script: {
+        id: 'script-1',
+        title: 'Original',
+        subtitle: null,
+        createdAt: '2026-09-21T10:00:00.000Z',
+        updatedAt: '2026-09-21T11:00:00.000Z',
+    },
     document: createEmptyScriptDocument(),
     titlePage: {},
     settings: {},
-    characters: {characters: [], groups: [], genderOptions: []},
+    characters: {
+        characters: [],
+        groups: [],
+        genderOptions: [],
+    },
     music: {items: []},
     scenes: {scenes: [], locations: []},
     attachments: [],
@@ -32,7 +46,7 @@ const exportBytes = async (): Promise<Uint8Array> => {
 };
 
 describe('restoreScriptPackage', () => {
-    it("restores using the package's own script id, without remapping", async () => {
+    it('restores using the package\'s own script id, without remapping', async () => {
         let captured: ScriptPackageWrite | null = null;
         const repository = {
             restoreScriptFromPackage: (input: ScriptPackageWrite) => {
@@ -49,6 +63,7 @@ describe('restoreScriptPackage', () => {
             expect(result.scriptId).toBe('script-1');
             expect(result.title).toBe('Original');
         }
+
         expect(captured).not.toBeNull();
         expect(captured!.script.id).toBe('script-1');
     });
@@ -67,6 +82,7 @@ describe('restoreScriptPackage', () => {
 
         expect(result.ok).toBe(false);
         if (!result.ok) expect(result.issues[0]?.code).toBe('not_a_zip');
+
         expect(called).toBe(false);
     });
 

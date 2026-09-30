@@ -7,22 +7,27 @@ import {createReactiveSourceStore} from './createReactiveSourceStore';
 import {createReactiveCollectionStatusStore} from './reactiveCollectionStatus';
 
 export interface ReactiveCollectionMutationHandlers<T extends object> {
-    insert?: (value: T) => Promise<void>;
-    update?: (original: T, modified: T, changes: Partial<T>) => Promise<void>;
-    delete?: (value: T) => Promise<void>;
+    insert?: (value: T) => Promise<void>,
+    update?: (original: T, modified: T, changes: Partial<T>) => Promise<void>,
+    delete?: (value: T) => Promise<void>,
 }
 
 interface CreateReactiveCollectionOptions<T extends object, TKey extends string | number> {
-    id: string;
-    source: ReactiveQuerySource<T>;
-    getKey: (value: T) => TKey;
-    handlers?: ReactiveCollectionMutationHandlers<T>;
-    confirmationTimeoutMs?: number;
+    id: string,
+    source: ReactiveQuerySource<T>,
+    getKey: (value: T) => TKey,
+    handlers?: ReactiveCollectionMutationHandlers<T>,
+    confirmationTimeoutMs?: number,
 }
 
 type ReactiveMutationAction = 'insert' | 'update' | 'delete';
 
-const COLLECTION_VIRTUAL_KEYS = ['$collectionId', '$key', '$origin', '$synced'] as const;
+const COLLECTION_VIRTUAL_KEYS = [
+    '$collectionId',
+    '$key',
+    '$origin',
+    '$synced',
+] as const;
 
 export const toDomainCollectionValue = <T extends object>(value: T): T => {
     const domainValue = {...value} as T & Record<string, unknown>;
@@ -122,32 +127,31 @@ export const createReactiveCollection = <T extends object, TKey extends string |
     const confirmed = createReactiveSourceStore<T>();
     const enqueueEntityMutation = createKeyedTaskQueue<TKey>();
 
-    const persist = async (mutation: ReactivePendingMutation<T, TKey>, action: ReactiveMutationAction) =>
-        enqueueEntityMutation(mutation.key, async () => {
-            status.startMutation({entityKey: mutation.key, action});
+    const persist = async (mutation: ReactivePendingMutation<T, TKey>, action: ReactiveMutationAction) => enqueueEntityMutation(mutation.key, async () => {
+        status.startMutation({entityKey: mutation.key, action});
 
-            try {
-                const commands = {
-                    insert: handlers.insert ? () => handlers.insert?.(mutation.modified) : undefined,
-                    update: handlers.update ? () => handlers.update?.(mutation.original as T, mutation.modified, mutation.changes) : undefined,
-                    delete: handlers.delete ? () => handlers.delete?.(mutation.original as T) : undefined,
-                };
-                const command = commands[action];
+        try {
+            const commands = {
+                insert: handlers.insert ? () => handlers.insert?.(mutation.modified) : undefined,
+                update: handlers.update ? () => handlers.update?.(mutation.original as T, mutation.modified, mutation.changes) : undefined,
+                delete: handlers.delete ? () => handlers.delete?.(mutation.original as T) : undefined,
+            };
+            const command = commands[action];
 
-                if (!command) {
-                    throw new Error(`Missing ${action} handler for collection ${id}`);
-                }
-
-                await command();
-                await waitForConfirmation(source, mutation, getKey, confirmationTimeoutMs);
-                status.finishMutation(mutation.key, action);
-            } catch (error) {
-                const normalizedError = error instanceof Error ? error : new Error(String(error));
-
-                status.failMutation(mutation.key, action, normalizedError);
-                throw normalizedError;
+            if (!command) {
+                throw new Error(`Missing ${action} handler for collection ${id}`);
             }
-        });
+
+            await command();
+            await waitForConfirmation(source, mutation, getKey, confirmationTimeoutMs);
+            status.finishMutation(mutation.key, action);
+        } catch (error) {
+            const normalizedError = error instanceof Error ? error : new Error(String(error));
+
+            status.failMutation(mutation.key, action, normalizedError);
+            throw normalizedError;
+        }
+    });
 
     const collection = createCollection<T, TKey>({
         id,
@@ -156,7 +160,13 @@ export const createReactiveCollection = <T extends object, TKey extends string |
         syncMode: 'eager',
         sync: {
             rowUpdateMode: 'full',
-            sync: ({begin, write, commit, markReady, truncate}) => {
+            sync: ({
+                begin,
+                write,
+                commit,
+                markReady,
+                truncate,
+            }) => {
                 let active = true;
                 let unsubscribe: (() => void) | undefined;
 

@@ -7,40 +7,40 @@ import {createDocumentPersister} from './persist/persistDocumentDelta';
 import {rebuildScriptProjection} from './rebuildScriptProjection';
 import type {GetDb} from './types';
 
-export {rebuildScriptProjection} from './rebuildScriptProjection';
 export type {RebuildScriptProjectionArgs} from './rebuildScriptProjection';
+export {rebuildScriptProjection} from './rebuildScriptProjection';
 
 export interface LoadedScriptDocument {
-    document: ScriptDocument;
-    schemaVersion: number;
+    document: ScriptDocument,
+    schemaVersion: number,
 }
 
 export interface LoadedProjectionDocument extends LoadedScriptDocument {
-    orderKeyByBlockId: Map<string, string>;
+    orderKeyByBlockId: Map<string, string>,
 }
 
 export interface SaveScriptDocumentOptions {
-    afterPersist?: (tx: DbClient) => Promise<void>;
+    afterPersist?: (tx: DbClient) => Promise<void>,
 }
 
 export interface ScriptDocumentSource {
-    load(scriptId: string): Promise<LoadedScriptDocument | null>;
-    save(scriptId: string, value: ScriptDocument, options?: SaveScriptDocumentOptions): Promise<void>;
+    load(scriptId: string): Promise<LoadedScriptDocument | null>,
+    save(scriptId: string, value: ScriptDocument, options?: SaveScriptDocumentOptions): Promise<void>,
 }
 
 export interface ScriptDocumentProjectionWriter {
-    seedBaseline(scriptId: string, document: ScriptDocument, orderKeyByBlockId?: Map<string, string>): void;
-    updateFromDocument(scriptId: string, document: ScriptDocument, options?: SaveScriptDocumentOptions): Promise<void>;
-    rebuildFromDocument(scriptId: string, document: ScriptDocument, options?: SaveScriptDocumentOptions): Promise<void>;
+    seedBaseline(scriptId: string, document: ScriptDocument, orderKeyByBlockId?: Map<string, string>): void,
+    updateFromDocument(scriptId: string, document: ScriptDocument, options?: SaveScriptDocumentOptions): Promise<void>,
+    rebuildFromDocument(scriptId: string, document: ScriptDocument, options?: SaveScriptDocumentOptions): Promise<void>,
 }
 
 interface CreateProjectedTableDocumentSourceArgs {
-    getDb: GetDb;
-    projectionWriter: ScriptDocumentProjectionWriter;
+    getDb: GetDb,
+    projectionWriter: ScriptDocumentProjectionWriter,
 }
 
 interface CreateSqlScriptDocumentProjectionWriterArgs {
-    getDb: GetDb;
+    getDb: GetDb,
 }
 
 export const loadScriptDocumentFromProjection = async (db: DbClient, scriptId: string): Promise<LoadedProjectionDocument | null> => {

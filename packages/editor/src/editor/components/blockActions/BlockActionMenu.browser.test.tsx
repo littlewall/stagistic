@@ -5,7 +5,13 @@ import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
+} from 'vite-plus/test';
 import {page, userEvent} from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../../context';
@@ -43,8 +49,8 @@ const EditorProbe = () => {
 const mountedRoots: Root[] = [];
 
 type RenderEditorOptions = {
-    document?: Partial<Omit<EditorProps['document'], 'initialValue'>>;
-    callbacks?: EditorProps['callbacks'];
+    document?: Partial<Omit<EditorProps['document'], 'initialValue'>>,
+    callbacks?: EditorProps['callbacks'],
 };
 
 /*
@@ -108,8 +114,10 @@ const focusBlock = (editor: Editor, blockId: string) => {
     editor.commands.focus();
 };
 
-const getActionTrigger = (blockId: string) =>
-    poll(() => document.querySelector<HTMLButtonElement>(`[data-block-action-trigger="true"][data-block-id="${blockId}"]`), `action trigger for ${blockId}`);
+const getActionTrigger = (blockId: string) => poll(
+    () => document.querySelector<HTMLButtonElement>(`[data-block-action-trigger="true"][data-block-id="${blockId}"]`),
+    `action trigger for ${blockId}`,
+);
 
 const openActionMenu = async (blockId: string) => {
     const trigger = await getActionTrigger(blockId);
@@ -209,7 +217,7 @@ describe('block action menu', () => {
         expect(listbox.textContent).toContain('Music 9');
 
         await userEvent.type(input, 'Over');
-        await poll(() => (listbox.textContent?.includes('Overture') && !listbox.textContent.includes('Finale') ? true : null), 'filtered music suggestions');
+        await poll(() => listbox.textContent?.includes('Overture') && !listbox.textContent.includes('Finale') ? true : null, 'filtered music suggestions');
         await userEvent.keyboard('{ArrowDown}{Enter}');
 
         const musicStart = editor.getJSON().content?.[0]?.content?.find(node => node.type === 'musicStart') as ScriptNode | undefined;
@@ -290,7 +298,7 @@ describe('block action menu', () => {
         renderEditor();
 
         await getEditor();
-        await poll(() => (document.activeElement?.matches('[data-editor="true"]') ? true : null), 'editor autofocus');
+        await poll(() => document.activeElement?.matches('[data-editor="true"]') ? true : null, 'editor autofocus');
 
         const trigger = await getActionTrigger('sd-1');
 
@@ -305,7 +313,7 @@ describe('block action menu', () => {
 
         const musicItem = await poll(() => findMenuItem('Music'), 'Music item');
 
-        await poll(() => (document.activeElement === musicItem ? musicItem : null), 'Music item focus');
+        await poll(() => document.activeElement === musicItem ? musicItem : null, 'Music item focus');
 
         /*
          * The pointer rests where the previous test left it, which can land on
@@ -320,7 +328,7 @@ describe('block action menu', () => {
         expect(document.activeElement).toBe(addMusic);
 
         await userEvent.keyboard('{Escape}');
-        await poll(() => (document.querySelector('[data-block-action-menu="true"]') ? null : true), 'closed action menu');
+        await poll(() => document.querySelector('[data-block-action-menu="true"]') ? null : true, 'closed action menu');
 
         /*
          * The gutter remounts its trigger while the menu is open, so identity

@@ -1,4 +1,10 @@
-import {type MouseEvent as ReactMouseEvent, useCallback, useEffect, useRef, useState} from 'react';
+import {
+    type MouseEvent as ReactMouseEvent,
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
 
 import type {PersistentMusicRef} from '../../contracts';
 import {useExclusiveOverlay} from '../../hooks/useExclusiveOverlay';
@@ -6,7 +12,12 @@ import {getMusicComposeFromState} from '../../tiptap/extensions';
 import {buildCommitMusic} from '../../tiptap/extensions/musicInput/transactions';
 import {getActiveScriptBlockFromState} from '../../tiptap/scriptCore';
 import {computeOverlayStyle} from '../characterSuggestions/model/overlayPosition';
-import {getMusicSuggestions, getSafeIsFocused, type MusicSuggestionOverlayState, type MusicSuggestionsOverlayProps} from './musicSuggestionModel';
+import {
+    getMusicSuggestions,
+    getSafeIsFocused,
+    type MusicSuggestionOverlayState,
+    type MusicSuggestionsOverlayProps,
+} from './musicSuggestionModel';
 
 export const useMusicSuggestionsOverlay = ({
     editor,
@@ -76,7 +87,12 @@ export const useMusicSuggestionsOverlay = ({
             style,
             suggestions: nextSuggestions,
         });
-    }, [canvasRef, closeOverlay, editor, persistentMusic]);
+    }, [
+        canvasRef,
+        closeOverlay,
+        editor,
+        persistentMusic,
+    ]);
     const cancelScheduledOverlayUpdate = useCallback(() => {
         if (rafIdRef.current === null) {
             return;
@@ -117,7 +133,11 @@ export const useMusicSuggestionsOverlay = ({
             onMusicAssigned?.(music.id);
             closeOverlay();
         },
-        [closeOverlay, editor, onMusicAssigned],
+        [
+            closeOverlay,
+            editor,
+            onMusicAssigned,
+        ],
     );
     const handleSuggestionMouseDown = useCallback(
         (music: PersistentMusicRef, event: ReactMouseEvent<HTMLButtonElement>) => {
@@ -161,7 +181,12 @@ export const useMusicSuggestionsOverlay = ({
             editor.off('focus', handleFocus);
             editor.off('blur', handleBlur);
         };
-    }, [cancelScheduledOverlayUpdate, closeOverlay, editor, scheduleOverlayUpdate]);
+    }, [
+        cancelScheduledOverlayUpdate,
+        closeOverlay,
+        editor,
+        scheduleOverlayUpdate,
+    ]);
 
     useEffect(() => {
         return () => {
@@ -235,7 +260,13 @@ export const useMusicSuggestionsOverlay = ({
         return () => {
             document.removeEventListener('keydown', handleKeyDown, true);
         };
-    }, [activeSuggestionIndex, editor, overlayState, selectMusic, suggestions]);
+    }, [
+        activeSuggestionIndex,
+        editor,
+        overlayState,
+        selectMusic,
+        suggestions,
+    ]);
 
     useEffect(() => {
         const handleResize = () => {

@@ -1,6 +1,6 @@
 import {BLOCK_ITEMS, type ScriptBlockNodeType} from '@stagistic/script';
 
-export const BLOCKS: {type: ScriptBlockNodeType; label: string}[] = BLOCK_ITEMS.map(item => ({
+export const BLOCKS: {type: ScriptBlockNodeType, label: string}[] = BLOCK_ITEMS.map(item => ({
     type: item.nodeType,
     label: item.label,
 }));

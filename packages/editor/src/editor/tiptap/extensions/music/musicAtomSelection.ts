@@ -1,5 +1,9 @@
 import {MUSIC_ID_ATTR, MUSIC_START_NODE_NAME} from '@stagistic/script';
-import {type EditorState, TextSelection, type Transaction} from '@tiptap/pm/state';
+import {
+    type EditorState,
+    TextSelection,
+    type Transaction,
+} from '@tiptap/pm/state';
 
 import {isMusicAtom} from './musicCaret';
 import {resolveScriptTargetBlock} from './musicCommands';
@@ -28,8 +32,8 @@ export const resolveTrailingMusicClickPosition = (state: EditorState, event: Mou
 };
 
 type PositionRange = {
-    from: number;
-    to: number;
+    from: number,
+    to: number,
 };
 
 const getMusicAtomRangesInSelection = (state: EditorState) => {

@@ -8,10 +8,14 @@ import {
 import type {VocalRangeNote} from './VocalRangeStaff.types';
 
 const BOUND_LOW: Pitch = {
-    step: 'C', alter: 0, octave: 2,
+    step: 'C',
+    alter: 0,
+    octave: 2,
 };
 const BOUND_HIGH: Pitch = {
-    step: 'C', alter: 0, octave: 6,
+    step: 'C',
+    alter: 0,
+    octave: 6,
 };
 
 interface RangePitches {

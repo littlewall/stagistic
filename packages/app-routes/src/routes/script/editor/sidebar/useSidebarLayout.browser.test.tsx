@@ -8,7 +8,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
-import {SIDEBAR_LAYOUT_STORAGE_KEY} from '../../../../storageKeys';
+import {SIDEBAR_LAYOUT_STORAGE_KEY} from '../../../../shared/storageKeys';
 import {useSidebarLayout} from './useSidebarLayout';
 
 const roots: Root[] = [];

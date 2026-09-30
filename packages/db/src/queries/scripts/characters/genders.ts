@@ -1,4 +1,9 @@
-import {and, asc, eq, type InferInsertModel} from 'drizzle-orm';
+import {
+    and,
+    asc,
+    eq,
+    type InferInsertModel,
+} from 'drizzle-orm';
 
 import {scriptCharacterGenders} from '../../../schema';
 import type {ScriptCharacterGenderOption} from '../../../types';

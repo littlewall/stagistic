@@ -32,7 +32,10 @@ describe('planIntegratedAssembly', () => {
             scriptPageSourceBlockIds: [['start'], ['end']],
             scores: [
                 {
-                    musicId: 'm1', startBlockId: 'start', afterBlockId: 'end', pageCount: 2,
+                    musicId: 'm1',
+                    startBlockId: 'start',
+                    afterBlockId: 'end',
+                    pageCount: 2,
                 },
             ],
         });
@@ -57,7 +60,10 @@ describe('planIntegratedAssembly', () => {
             ],
             scores: [
                 {
-                    musicId: 'm1', startBlockId: 'start', afterBlockId: 'end', pageCount: 1,
+                    musicId: 'm1',
+                    startBlockId: 'start',
+                    afterBlockId: 'end',
+                    pageCount: 1,
                 },
             ],
         });
@@ -79,7 +85,10 @@ describe('planIntegratedAssembly', () => {
             scriptPageSourceBlockIds: [['end'], ['end', 'other']],
             scores: [
                 {
-                    musicId: 'm1', startBlockId: 'end', afterBlockId: 'end', pageCount: 1,
+                    musicId: 'm1',
+                    startBlockId: 'end',
+                    afterBlockId: 'end',
+                    pageCount: 1,
                 },
             ],
         });
@@ -101,7 +110,10 @@ describe('planIntegratedAssembly', () => {
             ],
             scores: [
                 {
-                    musicId: 'm1', startBlockId: 'start', afterBlockId: 'end', pageCount: 0,
+                    musicId: 'm1',
+                    startBlockId: 'start',
+                    afterBlockId: 'end',
+                    pageCount: 0,
                 },
             ],
         });
@@ -120,7 +132,10 @@ describe('planIntegratedAssembly', () => {
             scriptPageSourceBlockIds: [['b1']],
             scores: [
                 {
-                    musicId: 'm1', startBlockId: 'gone', afterBlockId: 'gone', pageCount: 3,
+                    musicId: 'm1',
+                    startBlockId: 'gone',
+                    afterBlockId: 'gone',
+                    pageCount: 3,
                 },
             ],
         });

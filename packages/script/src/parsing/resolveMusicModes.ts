@@ -4,6 +4,7 @@ import {type ParsedStageBlock} from './inline';
 import {StagisticParseError} from './types';
 
 export type ParsedBlock = ParsedStageBlock & {line: number};
+
 const getSingleMusicMarker = (block: ParsedBlock) => {
     return block.music?.length === 1 ? block.music[0] : null;
 };
@@ -77,7 +78,7 @@ export const resolveMusicModes = (blocks: ParsedBlock[]): ScriptNode[] => {
             const previous = result.at(-1);
 
             if (previous) {
-                previous.content = [...(previous.content ?? []), ...(block.node.content ?? [])];
+                previous.content = [...previous.content ?? [], ...block.node.content ?? []];
                 continue;
             }
         }

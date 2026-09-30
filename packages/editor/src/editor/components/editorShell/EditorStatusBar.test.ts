@@ -83,7 +83,9 @@ describe('getEditorStatusBarSegments', () => {
         }) => {
             const defaultNextType = blockType === 'lyrics' ? 'lyrics' : 'character';
             const expected: {
-                id: string, key: string, description: string,
+                id: string,
+                key: string,
+                description: string,
             }[] = [
                 {
                     id: 'enter',
@@ -120,7 +122,8 @@ describe('getEditorStatusBarSegments', () => {
                 id: 'enter',
                 key: '⏎',
                 description: 'Character',
-            }, {
+            },
+            {
                 id: 'shift-enter',
                 key: shiftEnterKey,
                 description: 'Dialogue',

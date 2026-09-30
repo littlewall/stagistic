@@ -25,7 +25,7 @@ vi.mock('../sidebar/AttributeManagerSidebarButton', () => ({
     AttributeManagerSidebarButton: () => null,
 }));
 
-vi.mock('../../settings/ScriptSettingsModalProvider', () => ({
+vi.mock('../../settings/ScriptSettingsModalContext', () => ({
     useScriptSettingsModal: () => ({
         openAttributeManagerMusic,
     }),
@@ -41,7 +41,8 @@ const documentWithMusic: ScriptDocument = {
             type: 'scene',
             attrs: {id: 'scene-1'},
             content: [],
-        }, {
+        },
+        {
             type: 'stageDirection',
             attrs: {id: 'music-block'},
             content: [
@@ -124,7 +125,8 @@ const mountSidebar = ({
                             title: 'Overture',
                             kind: 'instrumental',
                             assignmentLabel: '1)',
-                        }, {
+                        },
+                        {
                             id: 'music-unassigned',
                             title: 'Finale',
                             kind: 'song',
@@ -186,7 +188,8 @@ describe('ScriptMusicSidebar', () => {
                     type: 'scene',
                     attrs: {id: 'scene-1'},
                     content: [],
-                }, {
+                },
+                {
                     type: 'stageDirection',
                     attrs: {id: 'music-block'},
                     content: [

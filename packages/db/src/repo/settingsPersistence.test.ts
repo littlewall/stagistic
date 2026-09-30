@@ -1,4 +1,8 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe,
+    expect,
+    it,
+} from 'vite-plus/test';
 
 import {createTestDb, seedScript} from '../testing/createTestDb';
 import {createSettingsHandlers} from './config';

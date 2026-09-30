@@ -5,17 +5,23 @@ const toIso = (timestamp: number): string => new Date(timestamp).toISOString();
 
 export const mapScriptPackageSourceToStepkg = (source: ScriptPackageSource): StepkgSnapshot => {
     const memberIdsByGroup = new Map<string, string[]>();
+
     source.characterGroupMembers.forEach(member => {
         const memberIds = memberIdsByGroup.get(member.groupId) ?? [];
+
         memberIds.push(member.characterId);
         memberIdsByGroup.set(member.groupId, memberIds);
     });
+
     const locationIdsByScene = new Map<string, string[]>();
+
     source.sceneLocations.forEach(assignment => {
         const locationIds = locationIdsByScene.get(assignment.sceneId) ?? [];
+
         locationIds.push(assignment.locationId);
         locationIdsByScene.set(assignment.sceneId, locationIds);
     });
+
     const musicById = new Map(source.music.map(music => [music.id, music]));
 
     return {

@@ -1,22 +1,25 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
-import {type RefObject, useEffect, useState} from 'react';
+import {
+    type RefObject,
+    useEffect,
+    useState,
+} from 'react';
 
 import {commentsPluginKey} from '../tiptap/extensions/comments';
 import {findScriptBlockByIdFromState} from '../tiptap/scriptCore';
 import {resolveBlockFirstLineCenter} from './blockActions/useBlockActionsOverlayAnchor';
+import styles from './CommentMarkersOverlay.module.css';
 import {resolveMusicRailLeft} from './musicRange/musicRailDom';
 
-import styles from './CommentMarkersOverlay.module.css';
-
 interface CommentMarker {
-    blockId: string;
-    threadIds: readonly string[];
+    blockId: string,
+    threadIds: readonly string[],
     /** Centre of the block's first text line, like the left gutter controls. */
-    top: number;
+    top: number,
     /** Midway between the music rail and the scrollbar. */
-    left: number;
+    left: number,
     /** Active or hovered thread lives here, or this block has an unsaved block draft. */
-    isActive: boolean;
+    isActive: boolean,
 }
 
 const readMarkers = (editor: TiptapEditor, canvas: HTMLElement): CommentMarker[] => {
@@ -69,8 +72,8 @@ const isSameMarkers = (left: readonly CommentMarker[], right: readonly CommentMa
 };
 
 interface CommentMarkersOverlayProps {
-    editor: TiptapEditor | null;
-    canvasRef: RefObject<HTMLElement | null>;
+    editor: TiptapEditor | null,
+    canvasRef: RefObject<HTMLElement | null>,
 }
 
 /** Right-margin markers for blocks with open comments; the only canvas control that opens the panel. */

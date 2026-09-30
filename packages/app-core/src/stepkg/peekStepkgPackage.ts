@@ -2,16 +2,22 @@ import type {ScriptRepository} from '@stagistic/db';
 import {readStepkgContainer, type StepkgImportIssue} from '@stagistic/stepkg';
 
 export type StepkgPeekResult =
-    | {ok: true; scriptId: string; packageTitle: string; existingScript: {id: string; title: string} | null}
-    | {ok: false; issues: StepkgImportIssue[]};
+    | {
+        ok: true,
+        scriptId: string,
+        packageTitle: string,
+        existingScript: {id: string, title: string} | null,
+    }
+    | {ok: false, issues: StepkgImportIssue[]};
 
 export interface PeekStepkgPackageArgs {
-    repository: ScriptRepository;
-    bytes: Uint8Array;
+    repository: ScriptRepository,
+    bytes: Uint8Array,
 }
 
 export const peekStepkgPackage = async ({repository, bytes}: PeekStepkgPackageArgs): Promise<StepkgPeekResult> => {
     const container = await readStepkgContainer(bytes);
+
     if (!container.ok) return container;
 
     const {manifest} = container;

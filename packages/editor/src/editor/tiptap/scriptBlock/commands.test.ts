@@ -9,7 +9,9 @@ import {type Node as ProseMirrorNode, Schema} from '@tiptap/pm/model';
 import {EditorState, TextSelection} from '@tiptap/pm/state';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {BlockNodeType} from '../scriptCore';
@@ -43,7 +45,9 @@ const schema = new Schema({
             attrs: {title: {default: ''}},
         },
         [MUSIC_OUT_NODE_NAME]: {
-            group: 'inline', inline: true, atom: true,
+            group: 'inline',
+            inline: true,
+            atom: true,
         },
         character: createBlockSpec('character'),
         stageDirection: createBlockSpec('stageDirection'),
@@ -109,11 +113,15 @@ const createEditor = (
 
 const createMultiBlockEditor = (
     blocks: Array<{
-        blockType: BlockNodeType, text: string, id: string,
+        blockType: BlockNodeType,
+        text: string,
+        id: string,
     }>,
 ) => {
     const nodes = blocks.map(({
-        blockType, text, id,
+        blockType,
+        text,
+        id,
     }) => schema.node(
         blockType,
         {
@@ -358,9 +366,14 @@ describe('updateBlockTypeForSelection', () => {
     it('changes the actual node type (not just the blockType attribute) for every block in the selection', () => {
         const {editor, getBlocks} = createMultiBlockEditor([
             {
-                blockType: 'dialogue', text: 'Hello there', id: 'block-1',
-            }, {
-                blockType: 'dialogue', text: 'General Kenobi', id: 'block-2',
+                blockType: 'dialogue',
+                text: 'Hello there',
+                id: 'block-1',
+            },
+            {
+                blockType: 'dialogue',
+                text: 'General Kenobi',
+                id: 'block-2',
             },
         ]);
 
@@ -376,13 +389,19 @@ describe('updateBlockTypeForSelection', () => {
     it('dispatches a single transaction so the bulk change is one undo step', () => {
         const {editor, getDispatchCount} = createMultiBlockEditor([
             {
-                blockType: 'dialogue', text: 'Hello there', id: 'block-1',
+                blockType: 'dialogue',
+                text: 'Hello there',
+                id: 'block-1',
             },
             {
-                blockType: 'dialogue', text: 'General Kenobi', id: 'block-2',
+                blockType: 'dialogue',
+                text: 'General Kenobi',
+                id: 'block-2',
             },
             {
-                blockType: 'dialogue', text: 'You are a bold one', id: 'block-3',
+                blockType: 'dialogue',
+                text: 'You are a bold one',
+                id: 'block-3',
             },
         ]);
 
@@ -394,9 +413,14 @@ describe('updateBlockTypeForSelection', () => {
     it('converts mixed dialogue and stage-direction blocks and resets characterRefs from a former stage direction', () => {
         const {editor, getBlocks} = createMultiBlockEditor([
             {
-                blockType: 'dialogue', text: 'Hello there', id: 'block-1',
-            }, {
-                blockType: 'stageDirection', text: '\tGeneral Kenobi', id: 'block-2',
+                blockType: 'dialogue',
+                text: 'Hello there',
+                id: 'block-1',
+            },
+            {
+                blockType: 'stageDirection',
+                text: '\tGeneral Kenobi',
+                id: 'block-2',
             },
         ]);
 
@@ -412,9 +436,14 @@ describe('updateBlockTypeForSelection', () => {
     it('leaves blocks whose type is not eligible for bulk change (act) untouched', () => {
         const {editor, getBlocks} = createMultiBlockEditor([
             {
-                blockType: 'act', text: 'ACT ONE', id: 'block-1',
-            }, {
-                blockType: 'dialogue', text: 'Hello there', id: 'block-2',
+                blockType: 'act',
+                text: 'ACT ONE',
+                id: 'block-1',
+            },
+            {
+                blockType: 'dialogue',
+                text: 'Hello there',
+                id: 'block-2',
             },
         ]);
 
@@ -428,9 +457,14 @@ describe('updateBlockTypeForSelection', () => {
     it('strips wrapping parens from each block when bulk-converting to aside', () => {
         const {editor, getBlocks} = createMultiBlockEditor([
             {
-                blockType: 'dialogue', text: '(quietly)', id: 'block-1',
-            }, {
-                blockType: 'lyrics', text: 'La la la', id: 'block-2',
+                blockType: 'dialogue',
+                text: '(quietly)',
+                id: 'block-1',
+            },
+            {
+                blockType: 'lyrics',
+                text: 'La la la',
+                id: 'block-2',
             },
         ]);
 
@@ -445,9 +479,14 @@ describe('updateBlockTypeForSelection', () => {
     it('strips wrapping note delimiters from each block when bulk-converting to note', () => {
         const {editor, getBlocks} = createMultiBlockEditor([
             {
-                blockType: 'dialogue', text: '[[ first ]]', id: 'block-1',
-            }, {
-                blockType: 'lyrics', text: '[[ second ]]', id: 'block-2',
+                blockType: 'dialogue',
+                text: '[[ first ]]',
+                id: 'block-1',
+            },
+            {
+                blockType: 'lyrics',
+                text: '[[ second ]]',
+                id: 'block-2',
             },
         ]);
 
@@ -461,10 +500,14 @@ describe('updateBlockTypeForSelection', () => {
 
     it('does nothing and returns false when no block in the selection can change', () => {
         const {
-            editor, getBlocks, getDispatchCount,
+            editor,
+            getBlocks,
+            getDispatchCount,
         } = createMultiBlockEditor([
             {
-                blockType: 'lyrics', text: 'Hello there', id: 'block-1',
+                blockType: 'lyrics',
+                text: 'Hello there',
+                id: 'block-1',
             },
         ]);
 

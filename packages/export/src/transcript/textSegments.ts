@@ -15,7 +15,12 @@ import {
     type ScriptNode,
 } from '@stagistic/script';
 
-import {DEFAULT_BLOCK_TYPE, type InlineStyle, type MusicLabels, type TextSegment} from './model';
+import {
+    DEFAULT_BLOCK_TYPE,
+    type InlineStyle,
+    type MusicLabels,
+    type TextSegment,
+} from './model';
 
 const getNodeText = (node: ScriptNode): string => {
     const ownText = typeof node.text === 'string' ? node.text : '';
@@ -131,7 +136,7 @@ export const normalizeBlockSegments = (rawSegments: TextSegment[], blockType: st
         const casedText = isCharacterTag ? segment.text.toLocaleUpperCase() : applyCasing(segment.text, casing);
 
         Array.from(casedText).forEach(character => {
-            if (/\s/u.test(character)) {
+            if ((/\s/u).test(character)) {
                 pendingSpace = segments.length > 0;
 
                 return;

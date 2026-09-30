@@ -8,9 +8,7 @@ export {MusicStartNode} from './MusicStartNode';
 /**
  * Tiptap node definitions, one per block binding.
  */
-export const ScriptBlockNodes = ALL_BLOCK_BINDINGS.map(binding =>
-    createScriptNode({
-        name: binding.spec.nodeType,
-        blockType: normalizeBlockNodeType(binding.spec.nodeType),
-    }),
-);
+export const ScriptBlockNodes = ALL_BLOCK_BINDINGS.map(binding => createScriptNode({
+    name: binding.spec.nodeType,
+    blockType: normalizeBlockNodeType(binding.spec.nodeType),
+}));

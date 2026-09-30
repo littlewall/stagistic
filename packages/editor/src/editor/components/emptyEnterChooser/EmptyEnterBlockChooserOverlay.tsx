@@ -122,7 +122,9 @@ export const EmptyEnterBlockChooserOverlay = ({
     }, [editor, syncChooserStateFromEditor]);
 
     const anchorStyle = useChooserAnchor({
-        canvasRef, editor, chooserState,
+        canvasRef,
+        editor,
+        chooserState,
     });
 
     const labelByType = useMemo(() => {

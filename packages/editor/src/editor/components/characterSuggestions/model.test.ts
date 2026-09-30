@@ -1,9 +1,18 @@
 import {CHARACTER_TAG_KEY_ATTR, CHARACTER_TAG_MARK_NAME} from '@stagistic/script';
 import {Schema} from '@tiptap/pm/model';
-import {EditorState, Plugin, TextSelection} from '@tiptap/pm/state';
+import {
+    EditorState,
+    Plugin,
+    TextSelection,
+} from '@tiptap/pm/state';
 import type {EditorView} from '@tiptap/pm/view';
 import type {Editor as TiptapEditor} from '@tiptap/react';
-import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {
+    afterEach,
+    describe,
+    expect,
+    it,
+} from 'vite-plus/test';
 
 import {PLACEHOLDER_CHARACTER} from '../../tiptap/extensions/characterTagInput/constants';
 import {createCharacterTagComposePlugin} from '../../tiptap/extensions/characterTagInput/plugin';

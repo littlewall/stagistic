@@ -9,10 +9,10 @@ import type {
 type Listener = () => void;
 
 type SelectorListener<TSelected> = {
-    selector: (snapshot: EditorLiveSnapshot) => TSelected;
-    isEqual: (previous: TSelected, next: TSelected) => boolean;
-    selected: TSelected;
-    listener: Listener;
+    selector: (snapshot: EditorLiveSnapshot) => TSelected,
+    isEqual: (previous: TSelected, next: TSelected) => boolean,
+    selected: TSelected,
+    listener: Listener,
 };
 
 const EMPTY_INDEX: EditorIndexSnapshot = {
@@ -54,15 +54,15 @@ const createEmptyEditorLiveSnapshot = (): EditorLiveSnapshot => {
 };
 
 export interface EditorSnapshotStore {
-    getSnapshot: () => EditorLiveSnapshot;
-    setSnapshot: (nextSnapshot: EditorLiveSnapshot) => void;
-    patchSnapshot: (patch: Partial<EditorLiveSnapshot>) => void;
-    subscribe: (listener: Listener) => () => void;
+    getSnapshot: () => EditorLiveSnapshot,
+    setSnapshot: (nextSnapshot: EditorLiveSnapshot) => void,
+    patchSnapshot: (patch: Partial<EditorLiveSnapshot>) => void,
+    subscribe: (listener: Listener) => () => void,
     subscribeSelector: <TSelected>(
         selector: (snapshot: EditorLiveSnapshot) => TSelected,
         isEqual: (previous: TSelected, next: TSelected) => boolean,
         listener: Listener,
-    ) => () => void;
+    ) => () => void,
 }
 
 const notifySelectors = (selectorListeners: Set<SelectorListener<unknown>>, snapshot: EditorLiveSnapshot) => {

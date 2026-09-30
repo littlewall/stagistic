@@ -1,20 +1,20 @@
-import {SIDEBAR_LAYOUT_STORAGE_KEY} from '../../../../storageKeys';
+import {SIDEBAR_LAYOUT_STORAGE_KEY} from '../../../../shared/storageKeys';
 import type {SidebarPanelId} from './types';
 
 export type OverlayDrawer = 'left' | 'right' | null;
 
 export interface SidebarLayoutState {
-    isLeftOpen: boolean;
-    isRightOpen: boolean;
-    leftPanelId: SidebarPanelId;
-    rightPanelId: SidebarPanelId;
+    isLeftOpen: boolean,
+    isRightOpen: boolean,
+    leftPanelId: SidebarPanelId,
+    rightPanelId: SidebarPanelId,
 }
 
 interface StoredSidebarLayoutState {
-    isLeftOpen?: boolean;
-    isRightOpen?: boolean;
-    leftPanelId?: SidebarPanelId;
-    rightPanelId?: SidebarPanelId;
+    isLeftOpen?: boolean,
+    isRightOpen?: boolean,
+    leftPanelId?: SidebarPanelId,
+    rightPanelId?: SidebarPanelId,
 }
 
 export const getIsMatchingViewport = (query: string) => {

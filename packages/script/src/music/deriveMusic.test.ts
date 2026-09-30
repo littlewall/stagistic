@@ -1,15 +1,21 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {deriveMusic, deriveMusicTimeline} from './deriveMusic';
 import type {MusicBlockInput} from './types';
 
 const sd = (blockId: string, musicAtoms: MusicBlockInput['musicAtoms']): MusicBlockInput => ({
-    blockId, blockType: 'stageDirection', musicAtoms,
+    blockId,
+    blockType: 'stageDirection',
+    musicAtoms,
 });
 const scene = (blockId: string): MusicBlockInput => ({
-    blockId, blockType: 'scene', musicAtoms: [],
+    blockId,
+    blockType: 'scene',
+    musicAtoms: [],
 });
 
 describe('deriveMusic', () => {
@@ -17,14 +23,29 @@ describe('deriveMusic', () => {
         const music = deriveMusic([
             sd('b1', [
                 {
-                    role: 'start', musicId: 'c1', mode: 'open', title: 'Song', kind: null,
+                    role: 'start',
+                    musicId: 'c1',
+                    mode: 'open',
+                    title: 'Song',
+                    kind: null,
                 },
-            ]), sd('b2', [{role: 'out'}]),
+            ]),
+            sd('b2', [{role: 'out'}]),
         ]);
 
         expect(music).toEqual([
             {
-                musicId: 'c1', sceneNumber: 0, indexInScene: 0, sceneMusicCount: 1, mode: 'open', title: 'Song', kind: null, startBlockId: 'b1', endBlockId: 'b2', effectiveEndBlockId: 'b2', endKind: 'explicit',
+                musicId: 'c1',
+                sceneNumber: 0,
+                indexInScene: 0,
+                sceneMusicCount: 1,
+                mode: 'open',
+                title: 'Song',
+                kind: null,
+                startBlockId: 'b1',
+                endBlockId: 'b2',
+                effectiveEndBlockId: 'b2',
+                endKind: 'explicit',
             },
         ]);
     });
@@ -33,7 +54,11 @@ describe('deriveMusic', () => {
         const music = deriveMusic([
             sd('b1', [
                 {
-                    role: 'start', musicId: 'c1', mode: 'open', title: 'Song', kind: null,
+                    role: 'start',
+                    musicId: 'c1',
+                    mode: 'open',
+                    title: 'Song',
+                    kind: null,
                 },
             ]),
         ]);
@@ -45,11 +70,20 @@ describe('deriveMusic', () => {
         const music = deriveMusic([
             sd('b1', [
                 {
-                    role: 'start', musicId: 'c1', mode: 'open', title: 'A', kind: null,
+                    role: 'start',
+                    musicId: 'c1',
+                    mode: 'open',
+                    title: 'A',
+                    kind: null,
                 },
-            ]), sd('b2', [
+            ]),
+            sd('b2', [
                 {
-                    role: 'start', musicId: 'c2', mode: 'open', title: 'B', kind: null,
+                    role: 'start',
+                    musicId: 'c2',
+                    mode: 'open',
+                    title: 'B',
+                    kind: null,
                 },
             ]),
         ]);
@@ -61,7 +95,11 @@ describe('deriveMusic', () => {
         const music = deriveMusic([
             sd('b1', [
                 {
-                    role: 'start', musicId: 'c1', mode: 'open', title: 'A', kind: null,
+                    role: 'start',
+                    musicId: 'c1',
+                    mode: 'open',
+                    title: 'A',
+                    kind: null,
                 },
             ]),
             scene('s2'),
@@ -76,12 +114,20 @@ describe('deriveMusic', () => {
         const music = deriveMusic([
             sd('b1', [
                 {
-                    role: 'start', musicId: 'c1', mode: 'open', title: 'Song', kind: null,
+                    role: 'start',
+                    musicId: 'c1',
+                    mode: 'open',
+                    title: 'Song',
+                    kind: null,
                 },
             ]),
             sd('b2', [
                 {
-                    role: 'start', musicId: 'h1', mode: 'hit', title: 'Sting', kind: null,
+                    role: 'start',
+                    musicId: 'h1',
+                    mode: 'hit',
+                    title: 'Sting',
+                    kind: null,
                 },
             ]),
             sd('b3', [{role: 'out'}]),
@@ -89,24 +135,52 @@ describe('deriveMusic', () => {
 
         expect(music).toEqual([
             {
-                musicId: 'c1', sceneNumber: 0, indexInScene: 0, sceneMusicCount: 2, mode: 'open', title: 'Song', kind: null, startBlockId: 'b1', endBlockId: 'b3', effectiveEndBlockId: 'b3', endKind: 'explicit',
-            }, {
-                musicId: 'h1', sceneNumber: 0, indexInScene: 1, sceneMusicCount: 2, mode: 'hit', title: 'Sting', kind: null, startBlockId: 'b2', endBlockId: 'b2', effectiveEndBlockId: 'b2', endKind: 'hit',
+                musicId: 'c1',
+                sceneNumber: 0,
+                indexInScene: 0,
+                sceneMusicCount: 2,
+                mode: 'open',
+                title: 'Song',
+                kind: null,
+                startBlockId: 'b1',
+                endBlockId: 'b3',
+                effectiveEndBlockId: 'b3',
+                endKind: 'explicit',
+            },
+            {
+                musicId: 'h1',
+                sceneNumber: 0,
+                indexInScene: 1,
+                sceneMusicCount: 2,
+                mode: 'hit',
+                title: 'Sting',
+                kind: null,
+                startBlockId: 'b2',
+                endBlockId: 'b2',
+                effectiveEndBlockId: 'b2',
+                endKind: 'hit',
             },
         ]);
     });
 
     it('numbers music per scene: one start gets index 0 / count 1', () => {
         const music = deriveMusic([
-            scene('s1'), sd('b1', [
+            scene('s1'),
+            sd('b1', [
                 {
-                    role: 'start', musicId: 'c1', mode: 'open', title: 'A', kind: null,
+                    role: 'start',
+                    musicId: 'c1',
+                    mode: 'open',
+                    title: 'A',
+                    kind: null,
                 },
             ]),
         ]);
 
         expect(music[0]).toMatchObject({
-            sceneNumber: 1, indexInScene: 0, sceneMusicCount: 1,
+            sceneNumber: 1,
+            indexInScene: 0,
+            sceneMusicCount: 1,
         });
     });
 
@@ -115,13 +189,21 @@ describe('deriveMusic', () => {
             scene('s1'),
             sd('b1', [
                 {
-                    role: 'start', musicId: 'c1', mode: 'open', title: 'A', kind: null,
+                    role: 'start',
+                    musicId: 'c1',
+                    mode: 'open',
+                    title: 'A',
+                    kind: null,
                 },
             ]),
             sd('b2', [{role: 'out'}]),
             sd('b3', [
                 {
-                    role: 'start', musicId: 'c2', mode: 'open', title: 'B', kind: null,
+                    role: 'start',
+                    musicId: 'c2',
+                    mode: 'open',
+                    title: 'B',
+                    kind: null,
                 },
             ]),
         ]);
@@ -136,7 +218,8 @@ describe('deriveMusic', () => {
                     1,
                     0,
                     2,
-                ], [
+                ],
+                [
                     1,
                     1,
                     2,
@@ -149,13 +232,21 @@ describe('deriveMusic', () => {
             scene('s1'),
             sd('b1', [
                 {
-                    role: 'start', musicId: 'c1', mode: 'open', title: 'A', kind: null,
+                    role: 'start',
+                    musicId: 'c1',
+                    mode: 'open',
+                    title: 'A',
+                    kind: null,
                 },
             ]),
             scene('s2'),
             sd('b2', [
                 {
-                    role: 'start', musicId: 'h1', mode: 'hit', title: 'Sting', kind: null,
+                    role: 'start',
+                    musicId: 'h1',
+                    mode: 'hit',
+                    title: 'Sting',
+                    kind: null,
                 },
             ]),
         ]);
@@ -172,7 +263,8 @@ describe('deriveMusic', () => {
                     1,
                     0,
                     1,
-                ], [
+                ],
+                [
                     'h1',
                     2,
                     0,
@@ -188,30 +280,50 @@ describe('deriveMusicTimeline', () => {
             scene('s1'),
             sd('a1', [
                 {
-                    role: 'start', musicId: 'a', mode: 'open', title: 'A', kind: null,
+                    role: 'start',
+                    musicId: 'a',
+                    mode: 'open',
+                    title: 'A',
+                    kind: null,
                 },
             ]),
             sd('a2', [{role: 'out'}]),
             sd('b1', [
                 {
-                    role: 'start', musicId: 'b', mode: 'open', title: 'B', kind: null,
+                    role: 'start',
+                    musicId: 'b',
+                    mode: 'open',
+                    title: 'B',
+                    kind: null,
                 },
             ]),
             sd('h1', [
                 {
-                    role: 'start', musicId: 'hit', mode: 'hit', title: 'Hit', kind: null,
+                    role: 'start',
+                    musicId: 'hit',
+                    mode: 'hit',
+                    title: 'Hit',
+                    kind: null,
                 },
             ]),
             sd('c1', [
                 {
-                    role: 'start', musicId: 'c', mode: 'open', title: 'C', kind: null,
+                    role: 'start',
+                    musicId: 'c',
+                    mode: 'open',
+                    title: 'C',
+                    kind: null,
                 },
             ]),
             sd('c2', []),
             scene('s2'),
             sd('d1', [
                 {
-                    role: 'start', musicId: 'd', mode: 'open', title: 'D', kind: null,
+                    role: 'start',
+                    musicId: 'd',
+                    mode: 'open',
+                    title: 'D',
+                    kind: null,
                 },
             ]),
             sd('d2', []),
@@ -224,19 +336,34 @@ describe('deriveMusicTimeline', () => {
             kind: music.endKind,
         }))).toEqual([
             {
-                id: 'a', explicit: 'a2', effective: 'a2', kind: 'explicit',
+                id: 'a',
+                explicit: 'a2',
+                effective: 'a2',
+                kind: 'explicit',
             },
             {
-                id: 'b', explicit: null, effective: 'c1', kind: 'next-music',
+                id: 'b',
+                explicit: null,
+                effective: 'c1',
+                kind: 'next-music',
             },
             {
-                id: 'hit', explicit: 'h1', effective: 'h1', kind: 'hit',
+                id: 'hit',
+                explicit: 'h1',
+                effective: 'h1',
+                kind: 'hit',
             },
             {
-                id: 'c', explicit: null, effective: 'c2', kind: 'scene-end',
+                id: 'c',
+                explicit: null,
+                effective: 'c2',
+                kind: 'scene-end',
             },
             {
-                id: 'd', explicit: null, effective: 'd2', kind: 'document-end',
+                id: 'd',
+                explicit: null,
+                effective: 'd2',
+                kind: 'document-end',
             },
         ]);
     });
@@ -245,22 +372,37 @@ describe('deriveMusicTimeline', () => {
         const timeline = deriveMusicTimeline([
             sd('b1', [
                 {
-                    role: 'start', musicId: 'a', mode: 'open', title: 'A', kind: null,
+                    role: 'start',
+                    musicId: 'a',
+                    mode: 'open',
+                    title: 'A',
+                    kind: null,
                 },
             ]),
             sd('b2', [
-                {role: 'out'}, {
-                    role: 'start', musicId: 'b', mode: 'open', title: 'B', kind: null,
+                {role: 'out'},
+                {
+                    role: 'start',
+                    musicId: 'b',
+                    mode: 'open',
+                    title: 'B',
+                    kind: null,
                 },
             ]),
             sd('b3', []),
         ]);
 
         expect(timeline.music[0]).toMatchObject({
-            musicId: 'a', endBlockId: 'b2', effectiveEndBlockId: 'b2', endKind: 'explicit',
+            musicId: 'a',
+            endBlockId: 'b2',
+            effectiveEndBlockId: 'b2',
+            endKind: 'explicit',
         });
         expect(timeline.music[1]).toMatchObject({
-            musicId: 'b', endBlockId: null, effectiveEndBlockId: 'b3', endKind: 'document-end',
+            musicId: 'b',
+            endBlockId: null,
+            effectiveEndBlockId: 'b3',
+            endKind: 'document-end',
         });
     });
 
@@ -269,12 +411,20 @@ describe('deriveMusicTimeline', () => {
             sd('orphan', [{role: 'out'}]),
             sd('b1', [
                 {
-                    role: 'start', musicId: 'a', mode: 'open', title: 'A', kind: null,
+                    role: 'start',
+                    musicId: 'a',
+                    mode: 'open',
+                    title: 'A',
+                    kind: null,
                 },
             ]),
             sd('h1', [
                 {
-                    role: 'start', musicId: 'hit', mode: 'hit', title: 'Hit', kind: null,
+                    role: 'start',
+                    musicId: 'hit',
+                    mode: 'hit',
+                    title: 'Hit',
+                    kind: null,
                 },
             ]),
             sd('b2', [{role: 'out'}]),
@@ -282,10 +432,15 @@ describe('deriveMusicTimeline', () => {
         ]);
 
         expect(timeline.music[0]).toMatchObject({
-            musicId: 'a', endBlockId: 'b2', effectiveEndBlockId: 'b2', endKind: 'explicit',
+            musicId: 'a',
+            endBlockId: 'b2',
+            effectiveEndBlockId: 'b2',
+            endKind: 'explicit',
         });
         expect(timeline.music[1]).toMatchObject({
-            musicId: 'hit', effectiveEndBlockId: 'h1', endKind: 'hit',
+            musicId: 'hit',
+            effectiveEndBlockId: 'h1',
+            endKind: 'hit',
         });
         expect(timeline.orphanOutBlockIds).toEqual(['orphan', 'orphan-2']);
     });
@@ -294,18 +449,25 @@ describe('deriveMusicTimeline', () => {
         const timeline = deriveMusicTimeline([
             sd('b1', [
                 {
-                    role: 'start', musicId: 'a', mode: 'open', title: 'A', kind: null,
+                    role: 'start',
+                    musicId: 'a',
+                    mode: 'open',
+                    title: 'A',
+                    kind: null,
                 },
             ]),
             sd('b2', []),
             {
-                blockId: 'act-2', blockType: 'act', musicAtoms: [],
+                blockId: 'act-2',
+                blockType: 'act',
+                musicAtoms: [],
             },
             sd('b3', []),
         ]);
 
         expect(timeline.music[0]).toMatchObject({
-            effectiveEndBlockId: 'b2', endKind: 'scene-end',
+            effectiveEndBlockId: 'b2',
+            endKind: 'scene-end',
         });
     });
 });

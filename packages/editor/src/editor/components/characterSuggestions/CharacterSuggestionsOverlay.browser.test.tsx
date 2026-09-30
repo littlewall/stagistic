@@ -66,7 +66,8 @@ const createTwoStageDirectionDocument = (): ScriptDocument => ({
                 id: 'stage-direction-1',
             },
             content: [],
-        }, {
+        },
+        {
             type: 'stageDirection',
             attrs: {
                 id: 'stage-direction-2',

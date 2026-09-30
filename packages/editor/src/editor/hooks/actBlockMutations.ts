@@ -49,7 +49,7 @@ const removeActBlockById = (nodes: ScriptNode[] | undefined, blockId: string): [
     return [didChange ? nextNodes : nodes, didChange];
 };
 
-export const buildDeleteActContent = (currentValue: ScriptDocument, blockId: string): {nextContent: ScriptNode[] | undefined; didChange: boolean} => {
+export const buildDeleteActContent = (currentValue: ScriptDocument, blockId: string): {nextContent: ScriptNode[] | undefined, didChange: boolean} => {
     const [nextContent, didChange] = removeActBlockById(currentValue.content, blockId);
 
     return {nextContent, didChange};
@@ -97,7 +97,7 @@ const insertActBlockBeforeId = (nodes: ScriptNode[] | undefined, beforeBlockId: 
     return [didInsert ? nextNodes : nodes, didInsert];
 };
 
-export const buildInsertActContent = (currentValue: ScriptDocument, beforeBlockId: string | null): {nextContent: ScriptNode[]; didChange: boolean} => {
+export const buildInsertActContent = (currentValue: ScriptDocument, beforeBlockId: string | null): {nextContent: ScriptNode[], didChange: boolean} => {
     const actCount = collectStructureBlocks(currentValue.content).filter(block => block.blockType === 'act').length;
     const nextActName = getDefaultActName(actCount + 1);
     const nextActNodeType = resolveScriptBlockNodeType('act') ?? 'act';

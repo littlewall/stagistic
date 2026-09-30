@@ -1,6 +1,8 @@
 import {eq} from 'drizzle-orm';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
@@ -20,7 +22,9 @@ import {
 import {rebuildScriptProjection} from './documentProjection';
 
 const doc = (blocks: {
-    id: string, type?: string, text: string,
+    id: string,
+    type?: string,
+    text: string,
 }[]): RewriteScriptDocument => ({
     type: 'doc',
     content: blocks.map(b => ({
@@ -36,11 +40,15 @@ const doc = (blocks: {
  */
 const twoScenes = doc([
     {
-        id: 'h1', type: 'scene', text: 'INT. ROOM',
+        id: 'h1',
+        type: 'scene',
+        text: 'INT. ROOM',
     },
     {id: 'a1', text: 'Anna waits.'},
     {
-        id: 'h2', type: 'scene', text: 'EXT. STREET',
+        id: 'h2',
+        type: 'scene',
+        text: 'EXT. STREET',
     },
     {id: 'b1', text: 'Rain falls.'},
 ]);
@@ -51,7 +59,9 @@ const twoScenes = doc([
  */
 const headingRemoved = doc([
     {
-        id: 'h1', type: 'scene', text: 'INT. ROOM',
+        id: 'h1',
+        type: 'scene',
+        text: 'INT. ROOM',
     },
     {id: 'a1', text: 'Anna waits.'},
     {id: 'b1', text: 'Rain falls.'},
@@ -84,13 +94,17 @@ describe('documentProjection scene-heading deletion', () => {
 
         await seedScript(db, 's1');
         await rebuildScriptProjection({
-            db, scriptId: 's1', document: twoScenes,
+            db,
+            scriptId: 's1',
+            document: twoScenes,
         });
 
         const removedSceneId = await seedSecondSceneMetadata(db, 's1');
 
         await rebuildScriptProjection({
-            db, scriptId: 's1', document: headingRemoved,
+            db,
+            scriptId: 's1',
+            document: headingRemoved,
         });
 
         const scenes = await db
@@ -115,17 +129,23 @@ describe('documentProjection scene-heading deletion', () => {
 
         await seedScript(db, 's1');
         await rebuildScriptProjection({
-            db, scriptId: 's1', document: twoScenes,
+            db,
+            scriptId: 's1',
+            document: twoScenes,
         });
 
         const sceneId = await seedSecondSceneMetadata(db, 's1');
 
         // Delete the heading, then re-project the original document (undo).
         await rebuildScriptProjection({
-            db, scriptId: 's1', document: headingRemoved,
+            db,
+            scriptId: 's1',
+            document: headingRemoved,
         });
         await rebuildScriptProjection({
-            db, scriptId: 's1', document: twoScenes,
+            db,
+            scriptId: 's1',
+            document: twoScenes,
         });
 
         const scenes = await db

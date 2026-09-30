@@ -1,6 +1,10 @@
 import {createEmptyScriptDocument} from '@stagistic/script';
 import {unzipSync, zipSync} from 'fflate';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe,
+    expect,
+    it,
+} from 'vite-plus/test';
 
 const encoder = new TextEncoder();
 
@@ -9,11 +13,21 @@ import {createStepkg} from './createStepkg';
 import {readStepkg} from './readStepkg';
 
 const baseSnapshot = (): StepkgSnapshot => ({
-    script: {id: 's1', title: 'Round trip', subtitle: null, createdAt: '2026-09-18T10:00:00.000Z', updatedAt: '2026-09-18T11:00:00.000Z'},
+    script: {
+        id: 's1',
+        title: 'Round trip',
+        subtitle: null,
+        createdAt: '2026-09-18T10:00:00.000Z',
+        updatedAt: '2026-09-18T11:00:00.000Z',
+    },
     document: createEmptyScriptDocument(),
     titlePage: {},
     settings: {},
-    characters: {characters: [], groups: [], genderOptions: []},
+    characters: {
+        characters: [],
+        groups: [],
+        genderOptions: [],
+    },
     music: {items: []},
     scenes: {scenes: [], locations: []},
     attachments: [],
@@ -120,7 +134,9 @@ describe('readStepkg', () => {
     it('reports checksum_mismatch when a file is tampered', async () => {
         const bytes = await exportBytes(baseSnapshot());
         const entries = unzipSync(bytes);
+
         entries['document.json'] = new TextEncoder().encode('{"tampered":true}');
+
         const result = await readStepkg(zipSync(entries));
 
         expect(result.ok).toBe(false);
@@ -130,7 +146,9 @@ describe('readStepkg', () => {
     it('reports file_missing when a manifest-listed file is absent', async () => {
         const bytes = await exportBytes(baseSnapshot());
         const entries = unzipSync(bytes);
+
         delete entries['data/script.json'];
+
         const result = await readStepkg(zipSync(entries));
 
         expect(result.ok).toBe(false);
@@ -138,28 +156,49 @@ describe('readStepkg', () => {
     });
 
     it('reports broken_reference for an unresolved group member', async () => {
-        // The exporter itself rejects a broken group reference (export design §12), so this package
-        // is hand-built to reach the reader's own cross-reference check directly.
+        /*
+         * The exporter itself rejects a broken group reference (export design §12), so this package
+         * is hand-built to reach the reader's own cross-reference check directly.
+         */
         const manifest = {
             format: 'stagistic-package',
             formatVersion: 1,
             documentSchemaVersion: 3,
             createdAt: '2026-09-18T12:00:00.000Z',
             generator: {name: 'Stagistic', version: '0.0.0'},
-            script: {id: 's1', title: 'T', updatedAt: '2026-09-18T11:00:00.000Z'},
+            script: {
+                id: 's1',
+                title: 'T',
+                updatedAt: '2026-09-18T11:00:00.000Z',
+            },
             entrypoints: {document: 'document.json', text: 'script.stagistic'},
             files: [],
         };
         const entries: Record<string, Uint8Array> = {
             'manifest.json': encoder.encode(JSON.stringify(manifest)),
             'document.json': encoder.encode(JSON.stringify(createEmptyScriptDocument())),
-            'data/script.json': encoder.encode(JSON.stringify({id: 's1', title: 'T', subtitle: null, createdAt: 'x', updatedAt: 'x'})),
+            'data/script.json': encoder.encode(JSON.stringify({
+                id: 's1',
+                title: 'T',
+                subtitle: null,
+                createdAt: 'x',
+                updatedAt: 'x',
+            })),
             'data/title-page.json': encoder.encode('{}'),
             'data/settings.json': encoder.encode('{}'),
             'data/characters.json': encoder.encode(
                 JSON.stringify({
                     characters: [],
-                    groups: [{id: 'g1', key: 'FAMILY', colorHex: null, memberIds: ['missing-char'], createdAt: 'x', updatedAt: 'x'}],
+                    groups: [
+                        {
+                            id: 'g1',
+                            key: 'FAMILY',
+                            colorHex: null,
+                            memberIds: ['missing-char'],
+                            createdAt: 'x',
+                            updatedAt: 'x',
+                        },
+                    ],
                     genderOptions: [],
                 }),
             ),
@@ -174,25 +213,41 @@ describe('readStepkg', () => {
     });
 
     it('reports asset_missing when attachments.json references an asset the archive does not contain', async () => {
-        // Hand-built package: manifest.files is empty (skips the checksum loop entirely), so this
-        // exercises the assets stage in isolation from checksum/file_missing handling.
+        /*
+         * Hand-built package: manifest.files is empty (skips the checksum loop entirely), so this
+         * exercises the assets stage in isolation from checksum/file_missing handling.
+         */
         const manifest = {
             format: 'stagistic-package',
             formatVersion: 1,
             documentSchemaVersion: 3,
             createdAt: '2026-09-18T12:00:00.000Z',
             generator: {name: 'Stagistic', version: '0.0.0'},
-            script: {id: 's1', title: 'T', updatedAt: '2026-09-18T11:00:00.000Z'},
+            script: {
+                id: 's1',
+                title: 'T',
+                updatedAt: '2026-09-18T11:00:00.000Z',
+            },
             entrypoints: {document: 'document.json', text: 'script.stagistic'},
             files: [],
         };
         const entries: Record<string, Uint8Array> = {
             'manifest.json': encoder.encode(JSON.stringify(manifest)),
             'document.json': encoder.encode(JSON.stringify(createEmptyScriptDocument())),
-            'data/script.json': encoder.encode(JSON.stringify({id: 's1', title: 'T', subtitle: null, createdAt: 'x', updatedAt: 'x'})),
+            'data/script.json': encoder.encode(JSON.stringify({
+                id: 's1',
+                title: 'T',
+                subtitle: null,
+                createdAt: 'x',
+                updatedAt: 'x',
+            })),
             'data/title-page.json': encoder.encode('{}'),
             'data/settings.json': encoder.encode('{}'),
-            'data/characters.json': encoder.encode(JSON.stringify({characters: [], groups: [], genderOptions: []})),
+            'data/characters.json': encoder.encode(JSON.stringify({
+                characters: [],
+                groups: [],
+                genderOptions: [],
+            })),
             'data/music.json': encoder.encode(JSON.stringify({items: []})),
             'data/scenes.json': encoder.encode(JSON.stringify({scenes: [], locations: []})),
             'data/attachments.json': encoder.encode(

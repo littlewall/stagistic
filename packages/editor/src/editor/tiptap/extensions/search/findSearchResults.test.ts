@@ -1,8 +1,16 @@
-import type {ScriptBlockNodeType, ScriptDocument, ScriptNode} from '@stagistic/script';
+import type {
+    ScriptBlockNodeType,
+    ScriptDocument,
+    ScriptNode,
+} from '@stagistic/script';
 import {Editor} from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
 import Text from '@tiptap/extension-text';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe,
+    expect,
+    it,
+} from 'vite-plus/test';
 
 import {ScriptBlockNodes} from '../../nodes';
 import {DocumentWithSettings} from '../DocumentExtension';
@@ -41,7 +49,12 @@ const createDocument = (content: ScriptNode[]) => {
             type: 'doc',
             content,
         } satisfies ScriptDocument,
-        extensions: [DocumentWithSettings, Text, Bold, ...ScriptBlockNodes],
+        extensions: [
+            DocumentWithSettings,
+            Text,
+            Bold,
+            ...ScriptBlockNodes,
+        ],
     });
     const document = editor.state.doc;
 

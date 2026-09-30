@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
@@ -7,7 +9,9 @@ import {
     scriptCharacters,
 } from '../../../schema';
 import {
-    createTestDb, seedScript, type TestDb,
+    createTestDb,
+    seedScript,
+    type TestDb,
 } from '../../../testing/createTestDb';
 import type {UpsertScriptCharacterPayload} from '../payloads';
 import {
@@ -85,14 +89,18 @@ describe('script character read/write', () => {
 
         await upsert(db, {id: 'c1', colorHex: '#111111'});
         await upsert(db, {
-            id: 'c2', colorHex: '#222222', updatedAt: 2,
+            id: 'c2',
+            colorHex: '#222222',
+            updatedAt: 2,
         });
 
         const rows = await listScriptCharacters(db, SCRIPT_ID);
 
         expect(rows).toHaveLength(1);
         expect(rows[0]).toMatchObject({
-            id: 'c1', key: 'ANNA', colorHex: '#222222',
+            id: 'c1',
+            key: 'ANNA',
+            colorHex: '#222222',
         });
     });
 
@@ -111,18 +119,34 @@ describe('script character read/write', () => {
         const db = await setup();
 
         await upsertScriptCharacter(db, {
-            id: 'z', scriptId: SCRIPT_ID, characterKey: 'ZARA', createdAt: 1, updatedAt: 1,
+            id: 'z',
+            scriptId: SCRIPT_ID,
+            characterKey: 'ZARA',
+            createdAt: 1,
+            updatedAt: 1,
         });
         await upsertScriptCharacter(db, {
-            id: 'a', scriptId: SCRIPT_ID, characterKey: 'ANNA', createdAt: 1, updatedAt: 1,
+            id: 'a',
+            scriptId: SCRIPT_ID,
+            characterKey: 'ANNA',
+            createdAt: 1,
+            updatedAt: 1,
         });
         await upsertScriptCharacter(db, {
-            id: 'm', scriptId: SCRIPT_ID, characterKey: 'MIRA', createdAt: 1, updatedAt: 1,
+            id: 'm',
+            scriptId: SCRIPT_ID,
+            characterKey: 'MIRA',
+            createdAt: 1,
+            updatedAt: 1,
         });
 
         await seedScript(db, 'script-2');
         await upsertScriptCharacter(db, {
-            id: 'o', scriptId: 'script-2', characterKey: 'OTHER', createdAt: 1, updatedAt: 1,
+            id: 'o',
+            scriptId: 'script-2',
+            characterKey: 'OTHER',
+            createdAt: 1,
+            updatedAt: 1,
         });
 
         expect((await listScriptCharacters(db, SCRIPT_ID)).map(c => c.key))
@@ -188,7 +212,8 @@ describe('script character read/write', () => {
                 voiceType: null,
                 vocalRangeLow: null,
                 vocalRangeHigh: null,
-            }, {
+            },
+            {
                 id: 'group-1',
                 kind: 'group',
                 key: 'ENSEMBLE',
@@ -197,7 +222,8 @@ describe('script character read/write', () => {
             },
         ]);
         expect(await getScriptSpeakingEntityByKey(db, {
-            scriptId: SCRIPT_ID, characterKey: 'ENSEMBLE',
+            scriptId: SCRIPT_ID,
+            characterKey: 'ENSEMBLE',
         })).toEqual({
             id: 'group-1',
             kind: 'group',
@@ -206,7 +232,8 @@ describe('script character read/write', () => {
             memberIds: ['c1'],
         });
         expect(await getScriptSpeakingEntityById(db, {
-            scriptId: SCRIPT_ID, characterId: 'group-1',
+            scriptId: SCRIPT_ID,
+            characterId: 'group-1',
         })).toEqual({
             id: 'group-1',
             kind: 'group',
@@ -243,7 +270,10 @@ describe('script character read/write', () => {
 
         await upsert(db, {colorHex: '#111111', notes: 'unchanged'});
         await updateScriptCharacterColor(db, {
-            scriptId: SCRIPT_ID, characterId: 'c1', colorHex: '#999999', updatedAt: 2,
+            scriptId: SCRIPT_ID,
+            characterId: 'c1',
+            colorHex: '#999999',
+            updatedAt: 2,
         });
 
         const row = await getScriptCharacterById(db, {scriptId: SCRIPT_ID, characterId: 'c1'});
@@ -256,7 +286,10 @@ describe('script character read/write', () => {
 
         await upsert(db, {colorHex: '#111111', outline: null});
         await updateScriptCharacterOutline(db, {
-            scriptId: SCRIPT_ID, characterId: 'c1', outline: 'brooding rival', updatedAt: 2,
+            scriptId: SCRIPT_ID,
+            characterId: 'c1',
+            outline: 'brooding rival',
+            updatedAt: 2,
         });
 
         const row = await getScriptCharacterById(db, {scriptId: SCRIPT_ID, characterId: 'c1'});
@@ -269,7 +302,10 @@ describe('script character read/write', () => {
 
         await upsert(db, {colorHex: '#111111', voiceType: null});
         await updateScriptCharacterVoiceType(db, {
-            scriptId: SCRIPT_ID, characterId: 'c1', voiceType: 'tenor', updatedAt: 2,
+            scriptId: SCRIPT_ID,
+            characterId: 'c1',
+            voiceType: 'tenor',
+            updatedAt: 2,
         });
 
         const row = await getScriptCharacterById(db, {scriptId: SCRIPT_ID, characterId: 'c1'});
@@ -281,7 +317,9 @@ describe('script character read/write', () => {
         const db = await setup();
 
         await upsert(db, {
-            colorHex: '#111111', vocalRangeLow: null, vocalRangeHigh: null,
+            colorHex: '#111111',
+            vocalRangeLow: null,
+            vocalRangeHigh: null,
         });
         await updateScriptCharacterVocalRange(db, {
             scriptId: SCRIPT_ID,
@@ -294,7 +332,9 @@ describe('script character read/write', () => {
         const row = await getScriptCharacterById(db, {scriptId: SCRIPT_ID, characterId: 'c1'});
 
         expect(row).toMatchObject({
-            colorHex: '#111111', vocalRangeLow: 'C3', vocalRangeHigh: 'A4',
+            colorHex: '#111111',
+            vocalRangeLow: 'C3',
+            vocalRangeHigh: 'A4',
         });
     });
 
@@ -303,7 +343,10 @@ describe('script character read/write', () => {
 
         await upsert(db);
         await updateScriptCharacterKey(db, {
-            scriptId: SCRIPT_ID, characterId: 'c1', characterKey: 'ANNABEL', updatedAt: 2,
+            scriptId: SCRIPT_ID,
+            characterId: 'c1',
+            characterKey: 'ANNABEL',
+            updatedAt: 2,
         });
 
         expect(await getScriptCharacterByKey(db, {scriptId: SCRIPT_ID, characterKey: 'ANNABEL'}))

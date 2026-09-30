@@ -1,31 +1,43 @@
-import {MUSIC_DRAFT_ATTR, MUSIC_ID_ATTR, MUSIC_KIND_ATTR, MUSIC_START_NODE_NAME, MUSIC_TITLE_ATTR} from '@stagistic/script';
+import {
+    MUSIC_DRAFT_ATTR,
+    MUSIC_ID_ATTR,
+    MUSIC_KIND_ATTR,
+    MUSIC_START_NODE_NAME,
+    MUSIC_TITLE_ATTR,
+} from '@stagistic/script';
 import {MicrophoneIcon, MusicDoubleNoteIcon} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import clsx from 'clsx';
-import {type CSSProperties, type MouseEvent as ReactMouseEvent, type RefObject, useCallback, useEffect, useState} from 'react';
+import {
+    type CSSProperties,
+    type MouseEvent as ReactMouseEvent,
+    type RefObject,
+    useCallback,
+    useEffect,
+    useState,
+} from 'react';
 
 import type {PersistentMusicRef} from '../contracts';
 import {useExclusiveOverlay} from '../hooks/useExclusiveOverlay';
 import {getMusicSuggestions} from './musicSuggestions/musicSuggestionModel';
-
 import styles from './MusicSuggestionsOverlay.module.css';
 
 interface MusicDraftSuggestionsOverlayProps {
-    editor: TiptapEditor | null;
-    canvasRef: RefObject<HTMLElement | null>;
-    persistentMusic?: readonly PersistentMusicRef[];
-    onMusicAssigned?: (musicId: string) => void;
+    editor: TiptapEditor | null,
+    canvasRef: RefObject<HTMLElement | null>,
+    persistentMusic?: readonly PersistentMusicRef[],
+    onMusicAssigned?: (musicId: string) => void,
 }
 
 interface DraftTarget {
-    draftMusicId: string;
-    editable: HTMLElement;
-    query: string;
+    draftMusicId: string,
+    editable: HTMLElement,
+    query: string,
 }
 interface OverlayState {
-    style: CSSProperties;
-    target: DraftTarget;
-    suggestions: PersistentMusicRef[];
+    style: CSSProperties,
+    target: DraftTarget,
+    suggestions: PersistentMusicRef[],
 }
 
 const getDraftTarget = (): DraftTarget | null => {
@@ -39,10 +51,10 @@ const getDraftTarget = (): DraftTarget | null => {
 
     return draftMusicId
         ? {
-              draftMusicId,
-              editable,
-              query: editable.textContent ?? '',
-          }
+            draftMusicId,
+            editable,
+            query: editable.textContent ?? '',
+        }
         : null;
 };
 
@@ -94,7 +106,12 @@ const assignDraftMusic = (editor: TiptapEditor, draftMusicId: string, music: Per
     return true;
 };
 
-const MusicDraftSuggestionsOverlay = ({editor, canvasRef, persistentMusic = [], onMusicAssigned}: MusicDraftSuggestionsOverlayProps) => {
+const MusicDraftSuggestionsOverlay = ({
+    editor,
+    canvasRef,
+    persistentMusic = [],
+    onMusicAssigned,
+}: MusicDraftSuggestionsOverlayProps) => {
     const [overlayState, setOverlayState] = useState<OverlayState | null>(null);
     const [activeSuggestionIndex, setActiveSuggestionIndex] = useState<number | null>(null);
     const suggestions = overlayState?.suggestions ?? [];
@@ -125,7 +142,12 @@ const MusicDraftSuggestionsOverlay = ({editor, canvasRef, persistentMusic = [], 
             target,
             suggestions: nextSuggestions,
         });
-    }, [canvasRef, closeOverlay, editor, persistentMusic]);
+    }, [
+        canvasRef,
+        closeOverlay,
+        editor,
+        persistentMusic,
+    ]);
     const selectMusic = useCallback(
         (music: PersistentMusicRef) => {
             if (!editor || !overlayState) {
@@ -138,7 +160,12 @@ const MusicDraftSuggestionsOverlay = ({editor, canvasRef, persistentMusic = [], 
 
             closeOverlay();
         },
-        [closeOverlay, editor, onMusicAssigned, overlayState],
+        [
+            closeOverlay,
+            editor,
+            onMusicAssigned,
+            overlayState,
+        ],
     );
     const handleSuggestionMouseDown = useCallback(
         (music: PersistentMusicRef, event: ReactMouseEvent<HTMLButtonElement>) => {
@@ -215,7 +242,12 @@ const MusicDraftSuggestionsOverlay = ({editor, canvasRef, persistentMusic = [], 
         document.addEventListener('keydown', handleKeyDown, true);
 
         return () => document.removeEventListener('keydown', handleKeyDown, true);
-    }, [activeSuggestionIndex, overlayState, selectMusic, suggestions]);
+    }, [
+        activeSuggestionIndex,
+        overlayState,
+        selectMusic,
+        suggestions,
+    ]);
 
     useEffect(() => {
         setActiveSuggestionIndex(previous => {

@@ -1,4 +1,8 @@
-import {useCallback, useRef, useSyncExternalStore} from 'react';
+import {
+    useCallback,
+    useRef,
+    useSyncExternalStore,
+} from 'react';
 
 import type {
     EditorLiveActiveBlockInfo,
@@ -38,7 +42,11 @@ export const useEditorLiveSelector = <TSelected>(
         }
 
         selectedRef.current = nextSelected;
-    }, [isEqualRef, selectorRef, store]);
+    }, [
+        isEqualRef,
+        selectorRef,
+        store,
+    ]);
 
     maybeSyncSelected();
 
@@ -53,7 +61,12 @@ export const useEditorLiveSelector = <TSelected>(
                 },
             );
         },
-        [isEqualRef, maybeSyncSelected, selectorRef, store],
+        [
+            isEqualRef,
+            maybeSyncSelected,
+            selectorRef,
+            store,
+        ],
     );
     const getSnapshot = useCallback(() => selectedRef.current, []);
 

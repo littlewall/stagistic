@@ -1,4 +1,9 @@
-import type {InlineStyle, TextSegment, TextWord, WrappedLine} from './model';
+import type {
+    InlineStyle,
+    TextSegment,
+    TextWord,
+    WrappedLine,
+} from './model';
 import {pushSegment} from './textSegments';
 
 const splitLongWord = (word: TextSegment[], maxChars: number): TextSegment[][] => {

@@ -2,16 +2,16 @@
 import {clsx} from 'clsx';
 import CreatorNote from '../components/CreatorNote.astro';
 import LandingMiniEditor from '../components/mini-editor/LandingMiniEditor';
-import Layout from '../layouts/Layout.astro';
-import s from './index.module.css';
 import {landingFaqs} from '../data/landingFaqs';
 import {landingFeatures} from '../data/landingFeatures';
+import Layout from '../layouts/Layout.astro';
+import s from './index.module.css';
 ---
 
 <Layout
     title="Stagistic Editor - Script editor built for theatre"
     description="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
-    canonical={new URL("/", Astro.site).href.replace(/\/$/, '')}
+    canonical={new URL('/', Astro.site).href.replace(/\/$/, '')}
     softwareApplication
 >
     <div class={s.page}>
@@ -37,10 +37,7 @@ import {landingFeatures} from '../data/landingFeatures';
                         <span class={s.visuallyHidden}>Try it!</span>
                         <svg viewBox="0 0 176 90" aria-hidden="true" focusable="false">
                             <path
-                                class={clsx(
-                                        s.tryEditorCalloutStroke,
-                                        s.tryEditorCalloutText,
-                                    )}
+                                class={clsx(s.tryEditorCalloutStroke, s.tryEditorCalloutText)}
                                 pathLength="1"
                                 vector-effect="non-scaling-stroke"
                                 d="
@@ -61,10 +58,7 @@ import {landingFeatures} from '../data/landingFeatures';
                                     "
                             />
                             <path
-                                class={clsx(
-                                        s.tryEditorCalloutStroke,
-                                        s.tryEditorCalloutArrow,
-                                    )}
+                                class={clsx(s.tryEditorCalloutStroke, s.tryEditorCalloutArrow)}
                                 pathLength="1"
                                 vector-effect="non-scaling-stroke"
                                 d="
@@ -108,56 +102,44 @@ import {landingFeatures} from '../data/landingFeatures';
             <div class={clsx(s.featuresInner, s.reveal)} data-reveal>
                 <h2 class={s.featuresTitle}>Features built for playwrights and librettists.</h2>
                 <div class={s.featuresList}>
-                    {landingFeatures.map((f) => (
-                                <article class={s.featureItem}>
-                                    <div class={s.featureCopy}>
-                                        <h3 class={s.featureLabel}>{f.label}</h3>
-                                        <p class={s.featureDesc}>{f.description}</p>
-                                        {f.href && (
-                                            <div class={s.featureLinkWrap}>
-                                                <a href={f.href} class={s.btnOutline}>
-                                                    {f.linkLabel} &rarr;
-                                                </a>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div
-                                        class={s.featureMedia}
-                                        data-feature-media
-                                        data-shape={f.shape}
-                                    >
-                                        { f.videoSrc ? (
-                                            <div class={s.featureMediaFrame}>
-                                                <video
-                                                    data-feature-video
-                                                    src={f.videoSrc}
-                                                    title={f.videoTitle}
-                                                    class={s.featureVideo}
-                                                    data-fit={f.videoFit}
-                                                    autoplay
-                                                    muted
-                                                    loop
-                                                    playsinline
-                                                >
-                                                    <source src={f.videoSrc} type="video/mp4" />
-                                                </video>
-                                            </div>
-                                        ) : f.imageSrc ? (
-                                            <div class={s.featureMediaFrame}>
-                                                <img
-                                                    data-feature-image
-                                                    src={f.imageSrc}
-                                                    alt={f.imageAlt}
-                                                    class={s.featureImage}
-                                                    data-fit={f.imageFit}
-                                                    loading="lazy"
-                                                    decoding="async"
-                                                />
-                                            </div>
-                                        ) : null }
-                                    </div>
-                                </article>
-                            ))}
+                    {landingFeatures.map(f => (
+    <article class={s.featureItem}>
+        <div class={s.featureCopy}>
+            <h3 class={s.featureLabel}>{f.label}</h3>
+            <p class={s.featureDesc}>{f.description}</p>
+            {f.href && (
+                <div class={s.featureLinkWrap}>
+                    <a href={f.href} class={s.btnOutline}>
+                        {f.linkLabel} &rarr;
+                    </a>
+                </div>
+            )}
+        </div>
+        <div class={s.featureMedia} data-feature-media data-shape={f.shape}>
+            {f.videoSrc ? (
+                <div class={s.featureMediaFrame}>
+                    <video
+                        data-feature-video
+                        src={f.videoSrc}
+                        title={f.videoTitle}
+                        class={s.featureVideo}
+                        data-fit={f.videoFit}
+                        autoplay
+                        muted
+                        loop
+                        playsinline
+                    >
+                        <source src={f.videoSrc} type="video/mp4" />
+                    </video>
+                </div>
+            ) : f.imageSrc ? (
+                <div class={s.featureMediaFrame}>
+                    <img data-feature-image src={f.imageSrc} alt={f.imageAlt} class={s.featureImage} data-fit={f.imageFit} loading="lazy" decoding="async" />
+                </div>
+            ) : null}
+        </div>
+    </article>
+))}
                 </div>
             </div>
         </section>
@@ -171,15 +153,17 @@ import {landingFeatures} from '../data/landingFeatures';
                     <h2 class={s.faqTitle}>Common<br>questions.</h2>
                 </div>
                 <div class={s.faqList}>
-                    {landingFaqs.map((faq) => (
-                                <details class={s.faqItem}>
-                                    <summary>
-                                        <span>{faq.q}</span>
-                                        <span class={s.faqIcon} aria-hidden="true">+</span>
-                                    </summary>
-                                    <p class={s.faqAnswer}>{faq.a}</p>
-                                </details>
-                            ))}
+                    {landingFaqs.map(faq => (
+    <details class={s.faqItem}>
+        <summary>
+            <span>{faq.q}</span>
+            <span class={s.faqIcon} aria-hidden="true">
+                +
+            </span>
+        </summary>
+        <p class={s.faqAnswer}>{faq.a}</p>
+    </details>
+))}
                 </div>
             </div>
         </section>

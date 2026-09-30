@@ -4,14 +4,22 @@ import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
 import {IMMEDIATE_SAVE_META_KEY} from '../../../saveMeta';
-import {type ActiveScriptBlock, type BlockNodeType, normalizeBlockNodeType} from '../../scriptCore';
+import {
+    type ActiveScriptBlock,
+    type BlockNodeType,
+    normalizeBlockNodeType,
+} from '../../scriptCore';
 import {normalizeFormerStageDirectionContent} from '../normalizeStageDirectionContent';
 import {stripLeadingActionTabs, stripRenderedBlockDelimiters} from './blockTextNormalization';
 import {resolveNodeTypeForBlockType} from './blockTypeChange';
 import {focusEditor, restoreBlockSelection} from './selection';
 
-export {insertParenPair, updateBlockType, updateBlockTypeForSelection} from './blockTypeChange';
 export {splitBlockWithType} from './blockSplit';
+export {
+    insertParenPair,
+    updateBlockType,
+    updateBlockTypeForSelection,
+} from './blockTypeChange';
 
 export const insertActionBefore = (editor: Editor, blockPos: number, blockStart: number) => {
     const nodes = editor.schema.nodes as Record<string, NodeType>;

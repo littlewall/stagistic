@@ -34,5 +34,9 @@ export const useNativeMenuActions = (): void => {
         return () => {
             void unlisten.then(dispose => dispose());
         };
-    }, [openNewScript, openImportScript, navigate]);
+    }, [
+        openNewScript,
+        openImportScript,
+        navigate,
+    ]);
 };

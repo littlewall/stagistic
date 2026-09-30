@@ -1,16 +1,21 @@
-import {MUSIC_DRAFT_ATTR, MUSIC_ID_ATTR, MUSIC_KIND_ATTR, MUSIC_TITLE_ATTR} from '@stagistic/script';
+import {
+    MUSIC_DRAFT_ATTR,
+    MUSIC_ID_ATTR,
+    MUSIC_KIND_ATTR,
+    MUSIC_TITLE_ATTR,
+} from '@stagistic/script';
 import type {NodeViewProps} from '@tiptap/react';
 
 import type {EditorMusicCreateRequest, PersistentMusicRef} from '../../contracts';
 import {cancelMusicDraft} from './musicPillHelpers';
 
 interface RequestMusicPillCreationArgs extends Pick<NodeViewProps, 'editor' | 'getPos' | 'updateAttributes'> {
-    title: string;
-    isDraft: boolean;
-    musicId: string;
-    persistentMusicRef?: {current: readonly PersistentMusicRef[]};
-    onMusicAssigned?: (musicId: string) => void;
-    onRequestCreateMusic?: (request: EditorMusicCreateRequest) => void;
+    title: string,
+    isDraft: boolean,
+    musicId: string,
+    persistentMusicRef?: {current: readonly PersistentMusicRef[]},
+    onMusicAssigned?: (musicId: string) => void,
+    onRequestCreateMusic?: (request: EditorMusicCreateRequest) => void,
 }
 
 /**

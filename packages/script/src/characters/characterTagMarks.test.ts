@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import type {ScriptNode} from '../document';
@@ -24,11 +26,15 @@ const block = (): ScriptNode => ({
     attrs: {id: 'b1'},
     content: [
         {
-            type: 'text', text: 'Anna', marks: [tagMark('ANNA', 'char-anna')],
+            type: 'text',
+            text: 'Anna',
+            marks: [tagMark('ANNA', 'char-anna')],
         },
         {type: 'text', text: ' goes in. '},
         {
-            type: 'text', text: 'Steve', marks: [tagMark('STEVE', null)],
+            type: 'text',
+            text: 'Steve',
+            marks: [tagMark('STEVE', null)],
         },
         {type: 'text', text: ' follows Anna.'},
     ],
@@ -40,9 +46,14 @@ describe('characterTagMarks', () => {
 
         expect(tags).toEqual([
             {
-                key: 'ANNA', characterId: 'char-anna', text: 'Anna',
-            }, {
-                key: 'STEVE', characterId: null, text: 'Steve',
+                key: 'ANNA',
+                characterId: 'char-anna',
+                text: 'Anna',
+            },
+            {
+                key: 'STEVE',
+                characterId: null,
+                text: 'Steve',
             },
         ]);
     });
@@ -53,11 +64,15 @@ describe('characterTagMarks', () => {
             attrs: {id: 'b2'},
             content: [
                 {
-                    type: 'text', text: 'Anna', marks: [tagMark('ANNA', 'char-anna')],
+                    type: 'text',
+                    text: 'Anna',
+                    marks: [tagMark('ANNA', 'char-anna')],
                 },
                 {type: 'text', text: ' and '},
                 {
-                    type: 'text', text: 'Anna', marks: [tagMark('ANNA', 'char-anna')],
+                    type: 'text',
+                    text: 'Anna',
+                    marks: [tagMark('ANNA', 'char-anna')],
                 },
             ],
         };

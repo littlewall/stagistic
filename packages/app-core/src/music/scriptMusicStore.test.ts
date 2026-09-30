@@ -35,7 +35,9 @@ const deferred = () => {
     });
 
     return {
-        promise, resolve, reject,
+        promise,
+        resolve,
+        reject,
     };
 };
 
@@ -76,7 +78,9 @@ const createRepository = (initialRows: ScriptMusic[] = [music()]) => {
             }
 
             const updated = {
-                ...original, ...input, updatedAt: original.updatedAt + 1,
+                ...original,
+                ...input,
+                updatedAt: original.updatedAt + 1,
             };
 
             source.emit((await source.read()).map(row => {

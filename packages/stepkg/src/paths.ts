@@ -5,10 +5,13 @@ const unsafeFilename = /[<>:"/\\|?*]/g;
 
 const replaceControlCharacters = (value: string): string => {
     let result = '';
+
     for (let index = 0; index < value.length; index += 1) {
         const character = value[index];
+
         result += character.charCodeAt(0) < 32 ? '-' : character;
     }
+
     return result;
 };
 

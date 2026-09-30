@@ -45,7 +45,10 @@ interface FixtureProps {
 }
 
 const AutosaveFixture = ({
-    controllerRef, onAutoSave, onValueSynced, resolveLatestValue,
+    controllerRef,
+    onAutoSave,
+    onValueSynced,
+    resolveLatestValue,
 }: FixtureProps) => {
     const controller = useAutosaveController({
         onAutoSave,

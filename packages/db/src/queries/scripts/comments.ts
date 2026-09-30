@@ -1,4 +1,9 @@
-import {and, asc, eq, type InferInsertModel} from 'drizzle-orm';
+import {
+    and,
+    asc,
+    eq,
+    type InferInsertModel,
+} from 'drizzle-orm';
 
 import {scriptCommentMessages, scriptCommentThreads} from '../../schema';
 import type {DbClient} from '../types';
@@ -22,7 +27,7 @@ export const listScriptCommentMessages = async (db: DbClient, scriptId: string) 
         .orderBy(asc(scriptCommentMessages.threadId), asc(scriptCommentMessages.createdAt), asc(scriptCommentMessages.id));
 };
 
-export const listScriptCommentMessagesByThread = async (db: DbClient, payload: {scriptId: string; threadId: string}) => {
+export const listScriptCommentMessagesByThread = async (db: DbClient, payload: {scriptId: string, threadId: string}) => {
     return db
         .select()
         .from(scriptCommentMessages)
@@ -50,7 +55,7 @@ export const bulkInsertScriptCommentMessages = async (db: DbClient, rows: Insert
     }
 };
 
-export const getScriptCommentThreadById = async (db: DbClient, payload: {scriptId: string; threadId: string}) => {
+export const getScriptCommentThreadById = async (db: DbClient, payload: {scriptId: string, threadId: string}) => {
     const rows = await db
         .select()
         .from(scriptCommentThreads)
@@ -60,7 +65,7 @@ export const getScriptCommentThreadById = async (db: DbClient, payload: {scriptI
     return rows[0] ?? null;
 };
 
-export const getScriptCommentMessageById = async (db: DbClient, payload: {scriptId: string; messageId: string}) => {
+export const getScriptCommentMessageById = async (db: DbClient, payload: {scriptId: string, messageId: string}) => {
     const rows = await db
         .select()
         .from(scriptCommentMessages)
@@ -72,17 +77,34 @@ export const getScriptCommentMessageById = async (db: DbClient, payload: {script
 
 export const updateScriptCommentThreadStatus = async (
     db: DbClient,
-    payload: {scriptId: string; threadId: string; status: string; resolvedAt: number | null; resolvedBy: string | null; updatedAt: number},
+    payload: {
+        scriptId: string,
+        threadId: string,
+        status: string,
+        resolvedAt: number | null,
+        resolvedBy: string | null,
+        updatedAt: number,
+    },
 ) => {
     await db
         .update(scriptCommentThreads)
-        .set({status: payload.status, resolvedAt: payload.resolvedAt, resolvedBy: payload.resolvedBy, updatedAt: payload.updatedAt})
+        .set({
+            status: payload.status,
+            resolvedAt: payload.resolvedAt,
+            resolvedBy: payload.resolvedBy,
+            updatedAt: payload.updatedAt,
+        })
         .where(and(eq(scriptCommentThreads.scriptId, payload.scriptId), eq(scriptCommentThreads.id, payload.threadId)));
 };
 
 export const moveScriptCommentBlockAnchors = async (
     db: DbClient,
-    payload: {scriptId: string; fromBlockId: string; toBlockId: string; updatedAt: number},
+    payload: {
+        scriptId: string,
+        fromBlockId: string,
+        toBlockId: string,
+        updatedAt: number,
+    },
 ): Promise<string[]> => {
     const rows = await db
         .update(scriptCommentThreads)
@@ -99,14 +121,23 @@ export const moveScriptCommentBlockAnchors = async (
     return rows.map(row => row.id);
 };
 
-export const updateScriptCommentMessageBody = async (db: DbClient, payload: {scriptId: string; messageId: string; body: string; editedAt: number}) => {
+export const updateScriptCommentMessageBody = async (db: DbClient, payload: {
+    scriptId: string,
+    messageId: string,
+    body: string,
+    editedAt: number,
+}) => {
     await db
         .update(scriptCommentMessages)
-        .set({body: payload.body, editedAt: payload.editedAt, updatedAt: payload.editedAt})
+        .set({
+            body: payload.body,
+            editedAt: payload.editedAt,
+            updatedAt: payload.editedAt,
+        })
         .where(and(eq(scriptCommentMessages.scriptId, payload.scriptId), eq(scriptCommentMessages.id, payload.messageId)));
 };
 
-export const deleteScriptCommentMessage = async (db: DbClient, payload: {scriptId: string; messageId: string}) => {
+export const deleteScriptCommentMessage = async (db: DbClient, payload: {scriptId: string, messageId: string}) => {
     await db.delete(scriptCommentMessages).where(and(eq(scriptCommentMessages.scriptId, payload.scriptId), eq(scriptCommentMessages.id, payload.messageId)));
 };
 
@@ -114,6 +145,6 @@ export const deleteScriptCommentThreadsByScriptId = async (db: DbClient, scriptI
     await db.delete(scriptCommentThreads).where(eq(scriptCommentThreads.scriptId, scriptId));
 };
 
-export const deleteScriptCommentThread = async (db: DbClient, payload: {scriptId: string; threadId: string}) => {
+export const deleteScriptCommentThread = async (db: DbClient, payload: {scriptId: string, threadId: string}) => {
     await db.delete(scriptCommentThreads).where(and(eq(scriptCommentThreads.scriptId, payload.scriptId), eq(scriptCommentThreads.id, payload.threadId)));
 };

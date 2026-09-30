@@ -1,6 +1,18 @@
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {
+    useCallback,
+    useEffect,
+    useRef,
+    useState,
+} from 'react';
 
-import {createInitialState, getIsMatchingViewport, getStorageKey, resolvePanelId, type OverlayDrawer, type SidebarLayoutState} from './sidebarLayoutStorage';
+import {
+    createInitialState,
+    getIsMatchingViewport,
+    getStorageKey,
+    type OverlayDrawer,
+    resolvePanelId,
+    type SidebarLayoutState,
+} from './sidebarLayoutStorage';
 import {SIDEBAR_EXCLUSIVE_QUERY, SIDEBAR_OVERLAY_QUERY} from './sidebarViewport';
 import type {SidebarPanelId} from './types';
 
@@ -17,13 +29,18 @@ import type {SidebarPanelId} from './types';
  * range), which is why it is a single slot rather than two booleans.
  */
 interface UseSidebarLayoutArgs {
-    availablePanelIds: readonly SidebarPanelId[];
-    defaultLeftPanelId: SidebarPanelId;
-    defaultRightPanelId: SidebarPanelId;
-    storageScope: string;
+    availablePanelIds: readonly SidebarPanelId[],
+    defaultLeftPanelId: SidebarPanelId,
+    defaultRightPanelId: SidebarPanelId,
+    storageScope: string,
 }
 
-export const useSidebarLayout = ({availablePanelIds, defaultLeftPanelId, defaultRightPanelId, storageScope}: UseSidebarLayoutArgs) => {
+export const useSidebarLayout = ({
+    availablePanelIds,
+    defaultLeftPanelId,
+    defaultRightPanelId,
+    storageScope,
+}: UseSidebarLayoutArgs) => {
     const storageScopeRef = useRef(storageScope);
     const [state, setState] = useState<SidebarLayoutState>(() => createInitialState(storageScope, defaultLeftPanelId, defaultRightPanelId, availablePanelIds));
     const [isExclusiveViewport, setIsExclusiveViewport] = useState(() => getIsMatchingViewport(SIDEBAR_EXCLUSIVE_QUERY));
@@ -79,7 +96,12 @@ export const useSidebarLayout = ({availablePanelIds, defaultLeftPanelId, default
         storageScopeRef.current = storageScope;
         setOverlayDrawer(null);
         setState(createInitialState(storageScope, defaultLeftPanelId, defaultRightPanelId, availablePanelIds));
-    }, [availablePanelIds, defaultLeftPanelId, defaultRightPanelId, storageScope]);
+    }, [
+        availablePanelIds,
+        defaultLeftPanelId,
+        defaultRightPanelId,
+        storageScope,
+    ]);
 
     // Reconcile state when the set of available panels changes.
     useEffect(() => {
@@ -97,7 +119,11 @@ export const useSidebarLayout = ({availablePanelIds, defaultLeftPanelId, default
                 rightPanelId: nextRight,
             };
         });
-    }, [availablePanelIds, defaultLeftPanelId, defaultRightPanelId]);
+    }, [
+        availablePanelIds,
+        defaultLeftPanelId,
+        defaultRightPanelId,
+    ]);
 
     /*
      * Docked sidebars are mutually exclusive below the exclusive breakpoint.
@@ -112,7 +138,12 @@ export const useSidebarLayout = ({availablePanelIds, defaultLeftPanelId, default
         if (state.isLeftOpen && state.isRightOpen) {
             setState(previous => ({...previous, isLeftOpen: false}));
         }
-    }, [isExclusiveViewport, isOverlayViewport, state.isLeftOpen, state.isRightOpen]);
+    }, [
+        isExclusiveViewport,
+        isOverlayViewport,
+        state.isLeftOpen,
+        state.isRightOpen,
+    ]);
 
     const toggleLeft = useCallback(() => {
         if (isOverlayViewport) {

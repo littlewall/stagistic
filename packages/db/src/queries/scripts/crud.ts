@@ -98,7 +98,9 @@ export const updateScript = async (db: DbClient, payload: UpdateScriptPayload) =
     await db
         .update(scripts)
         .set({
-            title: payload.title, subtitle: payload.subtitle, updatedAt: payload.updatedAt,
+            title: payload.title,
+            subtitle: payload.subtitle,
+            updatedAt: payload.updatedAt,
         })
         .where(eq(scripts.id, payload.id));
 };

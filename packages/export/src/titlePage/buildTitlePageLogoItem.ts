@@ -1,6 +1,6 @@
 import type {EditorSettings, TitlePageSettings} from '@stagistic/script';
 
-import type {TitlePageImageItem} from '../visualLine';
+import type {TitlePageImageItem} from '../model/visualLine';
 
 export const TITLE_PAGE_LOGO_MAX_WIDTH_PX = 500;
 export const TITLE_PAGE_LOGO_MAX_HEIGHT_PX = 300;

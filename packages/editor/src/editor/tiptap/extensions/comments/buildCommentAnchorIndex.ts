@@ -10,7 +10,7 @@ const groupBlockAnchors = (threads: ReadonlyMap<string, EditorCommentThreadRef>)
 
     threads.forEach(thread => {
         if (thread.anchorKind === 'block' && thread.anchorBlockId) {
-            byBlockId.set(thread.anchorBlockId, [...(byBlockId.get(thread.anchorBlockId) ?? []), thread.id]);
+            byBlockId.set(thread.anchorBlockId, [...byBlockId.get(thread.anchorBlockId) ?? [], thread.id]);
         }
     });
 
@@ -25,7 +25,7 @@ export const buildCommentAnchorIndex = (doc: ProseMirrorNode, threads: ReadonlyM
     const index = new Map<string, CommentAnchorLocation>();
     const blockAnchorsByBlockId = groupBlockAnchors(threads);
     let blockIndex = -1;
-    let scene: {id: string; title: string} | null = null;
+    let scene: {id: string, title: string} | null = null;
 
     doc.descendants((node, pos) => {
         if (!isScriptBlock(node)) {
@@ -41,7 +41,7 @@ export const buildCommentAnchorIndex = (doc: ProseMirrorNode, threads: ReadonlyM
         }
 
         const contentFrom = pos + 1;
-        const currentScene: {id: string; title: string} | null = scene;
+        const currentScene: {id: string, title: string} | null = scene;
         const base = {
             blockId,
             blockIndex,
@@ -51,7 +51,13 @@ export const buildCommentAnchorIndex = (doc: ProseMirrorNode, threads: ReadonlyM
 
         blockAnchorsByBlockId.get(blockId)?.forEach(threadId => {
             if (!index.has(threadId)) {
-                index.set(threadId, {threadId, kind: 'block', from: contentFrom, to: contentFrom + node.content.size, ...base});
+                index.set(threadId, {
+                    threadId,
+                    kind: 'block',
+                    from: contentFrom,
+                    to: contentFrom + node.content.size,
+                    ...base,
+                });
             }
         });
 
@@ -74,8 +80,18 @@ export const buildCommentAnchorIndex = (doc: ProseMirrorNode, threads: ReadonlyM
                 index.set(
                     threadId,
                     existing?.kind === 'range'
-                        ? {...existing, from: Math.min(existing.from, from), to: Math.max(existing.to, to)}
-                        : {threadId, kind: 'range', from, to, ...base},
+                        ? {
+                            ...existing,
+                            from: Math.min(existing.from, from),
+                            to: Math.max(existing.to, to),
+                        }
+                        : {
+                            threadId,
+                            kind: 'range',
+                            from,
+                            to,
+                            ...base,
+                        },
                 );
             });
         });

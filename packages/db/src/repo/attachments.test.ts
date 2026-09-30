@@ -1,12 +1,15 @@
 import {
-    describe, expect, it, vi,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 
+import {dbSchema} from '../schema';
 import {
     type FileStorage,
     InMemoryFileStorage,
-} from '../fileStorage';
-import {dbSchema} from '../schema';
+} from '../storage/fileStorage';
 import {createTestDb, seedScript} from '../testing/createTestDb';
 import {MUSIC_ATTACHMENT_ROLES} from '../types';
 import {createAttachmentHandlers} from './attachments';
@@ -78,14 +81,20 @@ const setup = async (fileStorage: FileStorage = new InMemoryFileStorage()) => {
     });
 
     return {
-        db, scriptId, musicId, handlers, fileStorage,
+        db,
+        scriptId,
+        musicId,
+        handlers,
+        fileStorage,
     };
 };
 
 describe('createAttachmentHandlers', () => {
     it('sets and gets a music attachment by role', async () => {
         const {
-            scriptId, musicId, handlers,
+            scriptId,
+            musicId,
+            handlers,
         } = await setup();
 
         const created = await handlers.setForMusic(
@@ -104,7 +113,10 @@ describe('createAttachmentHandlers', () => {
 
     it('replaces the existing attachment in the same music role', async () => {
         const {
-            db, scriptId, musicId, handlers,
+            db,
+            scriptId,
+            musicId,
+            handlers,
         } = await setup();
         const first = await handlers.setForMusic(
             scriptId,
@@ -129,7 +141,9 @@ describe('createAttachmentHandlers', () => {
 
     it('removes the link and GCs the orphaned attachment + blob', async () => {
         const {
-            scriptId, musicId, handlers,
+            scriptId,
+            musicId,
+            handlers,
         } = await setup();
         const created = await handlers.setForMusic(
             scriptId,

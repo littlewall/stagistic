@@ -44,7 +44,9 @@ const deferred = () => {
     });
 
     return {
-        promise, resolve, reject,
+        promise,
+        resolve,
+        reject,
     };
 };
 
@@ -168,7 +170,8 @@ describe('script character groups store', () => {
             'setScriptCharacterGroupColor',
             '#abcdef',
             'setGroupColor',
-        ], [
+        ],
+        [
             'memberIds',
             'replaceScriptCharacterGroupMembers',
             ['character-2'],

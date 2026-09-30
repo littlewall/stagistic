@@ -1,25 +1,39 @@
-import * as dbQueries from '../queries';
 import type {DbClient} from '../queries';
-import type {ScriptCommentsRepository} from '../scriptRepository';
+import * as dbQueries from '../queries';
 import {LOCAL_COMMENT_AUTHOR_ID} from '../types';
-import type {GetDb, RecordOutbox, SyncDb} from './types';
+import type {ScriptCommentsRepository} from '../types/scriptRepository';
+import type {
+    GetDb,
+    RecordOutbox,
+    SyncDb,
+} from './types';
 
 interface CreateCommentHandlersArgs {
-    getDb: GetDb;
-    recordOutbox: RecordOutbox;
-    syncDb: SyncDb;
+    getDb: GetDb,
+    recordOutbox: RecordOutbox,
+    syncDb: SyncDb,
 }
 
 interface CommentOutboxEntry {
-    scriptId: string;
-    entityKey: string;
-    opType: string;
-    now: number;
-    payload: Record<string, unknown>;
+    scriptId: string,
+    entityKey: string,
+    opType: string,
+    now: number,
+    payload: Record<string, unknown>,
 }
 
-export const createCommentHandlers = ({getDb, recordOutbox, syncDb}: CreateCommentHandlersArgs): ScriptCommentsRepository => {
-    const touchScript = async (tx: DbClient, {scriptId, entityKey, opType, now, payload}: CommentOutboxEntry) => {
+export const createCommentHandlers = ({
+    getDb,
+    recordOutbox,
+    syncDb,
+}: CreateCommentHandlersArgs): ScriptCommentsRepository => {
+    const touchScript = async (tx: DbClient, {
+        scriptId,
+        entityKey,
+        opType,
+        now,
+        payload,
+    }: CommentOutboxEntry) => {
         await dbQueries.updateScriptTimestamp(tx, {scriptId, updatedAt: now});
         await recordOutbox(
             {
@@ -133,7 +147,12 @@ export const createCommentHandlers = ({getDb, recordOutbox, syncDb}: CreateComme
         const now = Date.now();
 
         await db.transaction(async tx => {
-            await dbQueries.updateScriptCommentMessageBody(tx, {scriptId, messageId, body, editedAt: now});
+            await dbQueries.updateScriptCommentMessageBody(tx, {
+                scriptId,
+                messageId,
+                body,
+                editedAt: now,
+            });
             await touchScript(tx, {
                 scriptId,
                 entityKey: `comment-message:${messageId}`,
@@ -197,7 +216,12 @@ export const createCommentHandlers = ({getDb, recordOutbox, syncDb}: CreateComme
         let movedCount = 0;
 
         await db.transaction(async tx => {
-            const moved = await dbQueries.moveScriptCommentBlockAnchors(tx, {scriptId, fromBlockId, toBlockId, updatedAt: now});
+            const moved = await dbQueries.moveScriptCommentBlockAnchors(tx, {
+                scriptId,
+                fromBlockId,
+                toBlockId,
+                updatedAt: now,
+            });
 
             movedCount = moved.length;
 
@@ -207,7 +231,11 @@ export const createCommentHandlers = ({getDb, recordOutbox, syncDb}: CreateComme
                     entityKey: `comment-block:${fromBlockId}`,
                     opType: 'comment.anchor.move',
                     now,
-                    payload: {fromBlockId, toBlockId, threadIds: moved},
+                    payload: {
+                        fromBlockId,
+                        toBlockId,
+                        threadIds: moved,
+                    },
                 });
             }
         });

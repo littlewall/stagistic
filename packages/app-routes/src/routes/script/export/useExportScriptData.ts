@@ -14,9 +14,9 @@ import {
 } from '@stagistic/script';
 import {useMemo} from 'react';
 
-import {useScriptCharacters} from '../ScriptCharactersContext';
-import {useScriptWorkspace} from '../ScriptWorkspaceContext';
-import {useScriptSettingsModal} from '../settings/ScriptSettingsModalProvider';
+import {useScriptSettingsModal} from '../settings/ScriptSettingsModalContext';
+import {useScriptCharacters} from '../workspace/ScriptCharactersContext';
+import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
 import {
     collectInitialPageData,
     type ExportCatalogEntity,
@@ -77,7 +77,8 @@ export const useExportScriptData = (): {
             ...confirmedCharacterRecords.map(character => ({
                 ...character,
                 kind: 'character' as const,
-            })), ...confirmedGroupRecords,
+            })),
+            ...confirmedGroupRecords,
         ];
         const {
             initialCharacters,

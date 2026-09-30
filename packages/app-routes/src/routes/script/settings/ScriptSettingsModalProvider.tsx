@@ -1,67 +1,44 @@
 import {useScriptActions, useScriptRepository} from '@stagistic/app-core';
-import {type EditorSettings, type EditorSettingsOverride, type TitlePageSettings} from '@stagistic/script';
 import {isApplePlatform} from '@stagistic/shared';
 import {ScriptSettingsModal, useKeyedFieldDrafts} from '@stagistic/ui';
-import {createContext, type ReactNode, useContext, useMemo} from 'react';
+import {type ReactNode, useMemo} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
-import {type AttributeManagerPanelId} from '../attributes/attributeManagerMenu';
-import {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
-import {useMusicAttachmentsState} from '../attributes/useMusicAttachmentsState';
-import {useScriptPlacesState} from '../attributes/useScriptPlacesState';
+import {deleteAttributeManagerMusic} from '../attribute-manager/deleteAttributeManagerMusic';
+import {deleteAttributeManagerScene} from '../attribute-manager/deleteAttributeManagerScene';
+import {ScriptAttributeManagerModal} from '../attribute-manager/ScriptAttributeManagerModal';
+import {useAttributeManagerItems} from '../attribute-manager/useAttributeManagerItems';
+import {useAttributeManagerModalState} from '../attribute-manager/useAttributeManagerModalState';
+import {useMusicAttachmentsState} from '../attribute-manager/useMusicAttachmentsState';
+import {useScriptPlacesState} from '../attribute-manager/useScriptPlacesState';
+import {DraftSaveError} from '../drafts/DraftSaveError';
+import {useScriptEditorSettingsDraft} from '../drafts/useScriptEditorSettingsDraft';
+import {useScriptTitleDraft} from '../drafts/useScriptTitleDraft';
+import {useTitlePageDraft} from '../drafts/useTitlePageDraft';
 import {useScriptMusicState} from '../editor/music/useScriptMusicState';
-import {ScriptEditorSettingsPanel} from '../editor/settings';
-import {ScriptCharactersProvider} from '../ScriptCharactersContext';
-import {useScriptWorkspace} from '../ScriptWorkspaceContext';
-import {useScriptCharactersContextValue} from '../useScriptCharactersContextValue';
-import {useScriptEditorSettingsDraft} from '../useScriptEditorSettingsDraft';
-import {useScriptEditorSettingsModal} from '../useScriptEditorSettingsModal';
-import {useScriptTitleDraft} from '../useScriptTitleDraft';
-import {useTitlePageDraft} from '../useTitlePageDraft';
-import {deleteAttributeManagerMusic} from './deleteAttributeManagerMusic';
-import {deleteAttributeManagerScene} from './deleteAttributeManagerScene';
-import {DraftSaveError} from './DraftSaveError';
-import {ScriptAttributeManagerModal} from './ScriptAttributeManagerModal';
+import {ScriptCharactersProvider} from '../workspace/ScriptCharactersContext';
+import {useScriptWorkspace} from '../workspace/ScriptWorkspaceContext';
+import {useScriptCharactersContextValue} from '../workspace/useScriptCharactersContextValue';
+import {ScriptEditorSettingsPanel} from './panels';
+import {ScriptSettingsModalContext, type ScriptSettingsModalContextValue} from './ScriptSettingsModalContext';
 import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
-import {useAttributeManagerItems} from './useAttributeManagerItems';
+import {useScriptEditorSettingsModal} from './useScriptEditorSettingsModal';
 
 const BLOCK_LABEL_BY_TYPE = new Map(SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const));
-
-interface ScriptSettingsModalContextValue {
-    resolvedScriptSettings: EditorSettings;
-    effectiveScriptSettingsDraft: EditorSettingsOverride;
-    isEditorPresentationHydrated: boolean;
-    titlePageDraft: TitlePageSettings;
-    scriptTitleDraft: string;
-    updateScriptTitle: (title: string) => void;
-    musicState: ReturnType<typeof useScriptMusicState>;
-    musicAttachmentsState: ReturnType<typeof useMusicAttachmentsState>;
-    openSettingsModal: () => void;
-    openAttributeManagerModal: () => void;
-    openAttributeManagerModalWithPanel: (panelId: AttributeManagerPanelId) => void;
-    openAttributeManagerCharacter: (characterId: string) => void;
-    openAttributeManagerGroup: (groupId: string) => void;
-    openAttributeManagerMusic: (musicId: string) => void;
-}
-
-const ScriptSettingsModalContext = createContext<ScriptSettingsModalContextValue | null>(null);
-
-export const useScriptSettingsModal = (): ScriptSettingsModalContextValue => {
-    const context = useContext(ScriptSettingsModalContext);
-
-    if (!context) {
-        throw new Error('useScriptSettingsModal must be used inside ScriptSettingsModalProvider');
-    }
-
-    return context;
-};
 
 export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) => {
     const navigate = useNavigate();
     const scriptRepository = useScriptRepository();
     const {deleteScript, renameScriptTitle} = useScriptActions();
     const [searchParams, setSearchParams] = useSearchParams();
-    const {currentScript, currentScriptId, characterCatalog, musicCatalog, initialValue, handleAutoSave} = useScriptWorkspace();
+    const {
+        currentScript,
+        currentScriptId,
+        characterCatalog,
+        musicCatalog,
+        initialValue,
+        handleAutoSave,
+    } = useScriptWorkspace();
     const {
         effectiveScriptSettingsDraft,
         isScriptSettingsHydrated,
@@ -79,11 +56,23 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         currentScriptId,
         repository: scriptRepository,
     });
-    const {titlePageDraft, isTitlePageHydrated, updateTitlePage, titlePageDraftError, retryTitlePage} = useTitlePageDraft({
+    const {
+        titlePageDraft,
+        isTitlePageHydrated,
+        updateTitlePage,
+        titlePageDraftError,
+        retryTitlePage,
+    } = useTitlePageDraft({
         currentScriptId,
         repository: scriptRepository,
     });
-    const {scriptTitleDraft, isScriptTitleHydrated, updateScriptTitle, scriptTitleDraftError, retryScriptTitle} = useScriptTitleDraft({
+    const {
+        scriptTitleDraft,
+        isScriptTitleHydrated,
+        updateScriptTitle,
+        scriptTitleDraftError,
+        retryScriptTitle,
+    } = useScriptTitleDraft({
         currentScriptId,
         currentScriptTitle: currentScript?.name ?? '',
         renameScriptTitle,
@@ -135,7 +124,11 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
         handleAutoSave,
     });
     const musicState = useScriptMusicState(currentScriptId, musicCatalog);
-    const {getValue: getMusicTitleDraft, persistValue: persistMusicTitleDraft, setValue: setMusicTitleDraft} = useKeyedFieldDrafts<string>(currentScriptId);
+    const {
+        getValue: getMusicTitleDraft,
+        persistValue: persistMusicTitleDraft,
+        setValue: setMusicTitleDraft,
+    } = useKeyedFieldDrafts<string>(currentScriptId);
     const placeState = useScriptPlacesState(currentScriptId, scriptRepository);
     const musicAttachmentsState = useMusicAttachmentsState(currentScriptId, scriptRepository);
     const {
@@ -161,24 +154,22 @@ export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) =
             scriptTitleDraftError ? retryScriptTitle() : Promise.resolve(),
         ]);
     };
-    const handleDeleteMusic = (musicId: string) =>
-        deleteAttributeManagerMusic({
-            document: getEditorValue(),
-            musicId,
-            applyDocumentChange,
-            deleteMusic: musicState.deleteMusic,
-        });
+    const handleDeleteMusic = (musicId: string) => deleteAttributeManagerMusic({
+        document: getEditorValue(),
+        musicId,
+        applyDocumentChange,
+        deleteMusic: musicState.deleteMusic,
+    });
     /*
      * Scene items are built in document order, so the first entry is the
      * document-first scene heading — the one that can never be deleted.
      */
     const firstSceneHeadingBlockId = attributeManagerScenes[0]?.id ?? null;
-    const handleDeleteScene = (sceneHeadingBlockId: string) =>
-        deleteAttributeManagerScene({
-            document: getEditorValue(),
-            sceneHeadingBlockId,
-            applyDocumentChange,
-        });
+    const handleDeleteScene = (sceneHeadingBlockId: string) => deleteAttributeManagerScene({
+        document: getEditorValue(),
+        sceneHeadingBlockId,
+        applyDocumentChange,
+    });
 
     const contextValue = useMemo<ScriptSettingsModalContextValue>(
         () => ({

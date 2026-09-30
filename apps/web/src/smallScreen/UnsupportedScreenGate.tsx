@@ -1,5 +1,7 @@
 import {
-    type ReactNode, useEffect, useState,
+    type ReactNode,
+    useEffect,
+    useState,
 } from 'react';
 
 import styles from './UnsupportedScreenGate.module.css';

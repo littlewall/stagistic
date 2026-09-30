@@ -17,9 +17,14 @@ import ScriptEditor from '../../Editor';
 
 const persistentCharacters = [
     {
-        id: 'johny-id', key: 'Johny', colorHex: null,
-    }, {
-        id: 'josef-id', key: 'Josef', colorHex: null,
+        id: 'johny-id',
+        key: 'Johny',
+        colorHex: null,
+    },
+    {
+        id: 'josef-id',
+        key: 'Josef',
+        colorHex: null,
     },
 ];
 

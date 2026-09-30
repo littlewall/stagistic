@@ -2,10 +2,14 @@ import '@stagistic/ui/styles/base.css';
 
 import type {ScriptDocument} from '@stagistic/script';
 import {
-    createRoot, type Root,
+    createRoot,
+    type Root,
 } from 'react-dom/client';
 import {
-    afterEach, describe, expect, it,
+    afterEach,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {useEditorInstance} from '../../context';

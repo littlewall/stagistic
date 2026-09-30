@@ -1,62 +1,4 @@
-export * from './blocks';
-export {type FileStorage, InMemoryFileStorage} from './fileStorage';
-export {compiledMigrations} from './migrations.compiled';
-export * from './pglite';
-export type {DbClient} from './queries';
-export * from './queries';
-export * as dbQueries from './queries';
-export * from './reactive';
-export {createLocalPgliteRepository, type LocalPgliteRepositoryDeps} from './repo/createLocalPgliteRepository';
-export type {ScriptPackageSource} from './scriptPackageSource';
-export type {
-    ScriptPackageWrite,
-    ScriptPackageWriteAttachment,
-    ScriptPackageWriteBinding,
-    ScriptPackageWriteCharacter,
-    ScriptPackageWriteCommentMessage,
-    ScriptPackageWriteCommentThread,
-    ScriptPackageWriteGender,
-    ScriptPackageWriteGroup,
-    ScriptPackageWriteLocation,
-    ScriptPackageWriteMusic,
-    ScriptPackageWriteScene,
-} from './scriptPackageWrite';
-export {
-    createProjectedTableDocumentSource,
-    createSqlScriptDocumentProjectionWriter,
-    type LoadedProjectionDocument,
-    type LoadedScriptDocument,
-    loadScriptDocumentFromProjection,
-    rebuildScriptProjection,
-    type RebuildScriptProjectionArgs,
-    type SaveScriptDocumentOptions,
-    type ScriptDocumentProjectionWriter,
-    type ScriptDocumentSource,
-} from './repo/documentProjection';
-export * from './schema';
-export type {
-    AddScriptCommentMessageInput,
-    CreateScriptCommentThreadInput,
-    CreateScriptLocationInput,
-    CreateScriptLocationWithIdInput,
-    CreateScriptMusicInput,
-    CreateScriptWithIdInput,
-    DuplicateScriptInput,
-    DuplicateScriptWithIdInput,
-    ListScriptsOptions,
-    MusicAttachmentUpload,
-    RenameScriptInput,
-    ScriptCommentsRepository,
-    ScriptCommentThreadSnapshot,
-    ScriptEditorSettingsRecord,
-    ScriptLocationsRepository,
-    ScriptMusicRepository,
-    ScriptRepository,
-    ScriptSceneLocationAssignment,
-    ScriptTitlePageRecord,
-    ScriptTitlePageRepository,
-    UpdateScriptMusicInput,
-} from './scriptRepository';
+// ─── Types & repository contracts ──────────────────────────────────────────────
 export type {
     CommentAnchorKind,
     CommentThreadStatus,
@@ -85,3 +27,75 @@ export type {
     ScriptTitlePageField,
 } from './types';
 export {LOCAL_COMMENT_AUTHOR_ID, MUSIC_ATTACHMENT_ROLES} from './types';
+export type {ScriptPackageSource} from './types/scriptPackageSource';
+export type {
+    ScriptPackageWrite,
+    ScriptPackageWriteAttachment,
+    ScriptPackageWriteBinding,
+    ScriptPackageWriteCharacter,
+    ScriptPackageWriteCommentMessage,
+    ScriptPackageWriteCommentThread,
+    ScriptPackageWriteGender,
+    ScriptPackageWriteGroup,
+    ScriptPackageWriteLocation,
+    ScriptPackageWriteMusic,
+    ScriptPackageWriteScene,
+} from './types/scriptPackageWrite';
+export type {
+    AddScriptCommentMessageInput,
+    CreateScriptCommentThreadInput,
+    CreateScriptLocationInput,
+    CreateScriptLocationWithIdInput,
+    CreateScriptMusicInput,
+    CreateScriptWithIdInput,
+    DuplicateScriptInput,
+    DuplicateScriptWithIdInput,
+    ListScriptsOptions,
+    MusicAttachmentUpload,
+    RenameScriptInput,
+    ScriptCommentsRepository,
+    ScriptCommentThreadSnapshot,
+    ScriptEditorSettingsRecord,
+    ScriptLocationsRepository,
+    ScriptMusicRepository,
+    ScriptRepository,
+    ScriptSceneLocationAssignment,
+    ScriptTitlePageRecord,
+    ScriptTitlePageRepository,
+    UpdateScriptMusicInput,
+} from './types/scriptRepository';
+
+// ─── Schema ────────────────────────────────────────────────────────────────────
+export * from './schema';
+
+// ─── PGlite ────────────────────────────────────────────────────────────────────
+export * from './pglite';
+export {compiledMigrations} from './pglite/migrations.compiled';
+
+// ─── Queries ───────────────────────────────────────────────────────────────────
+export * from './queries';
+export * as dbQueries from './queries';
+
+// ─── Blocks (document ↔ rows) ──────────────────────────────────────────────────
+export * from './blocks';
+
+// ─── Local repository ──────────────────────────────────────────────────────────
+export {createLocalPgliteRepository, type LocalPgliteRepositoryDeps} from './repo/createLocalPgliteRepository';
+export {
+    createProjectedTableDocumentSource,
+    createSqlScriptDocumentProjectionWriter,
+    type LoadedProjectionDocument,
+    type LoadedScriptDocument,
+    loadScriptDocumentFromProjection,
+    rebuildScriptProjection,
+    type RebuildScriptProjectionArgs,
+    type SaveScriptDocumentOptions,
+    type ScriptDocumentProjectionWriter,
+    type ScriptDocumentSource,
+} from './repo/document/documentProjection';
+
+// ─── Reactive sources ──────────────────────────────────────────────────────────
+export * from './reactive';
+
+// ─── File storage ──────────────────────────────────────────────────────────────
+export {type FileStorage, InMemoryFileStorage} from './storage/fileStorage';

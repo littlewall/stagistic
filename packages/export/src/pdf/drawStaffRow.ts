@@ -6,7 +6,7 @@ import {
 } from '@stagistic/script';
 import type {jsPDF} from 'jspdf';
 
-import type {StaffRowItem} from '../visualLine';
+import type {StaffRowItem} from '../model/visualLine';
 
 type StaffRowNote = StaffRowItem['staff']['notes'][number];
 

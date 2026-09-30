@@ -46,13 +46,19 @@ const music = (
 
 const characters = [
     {
-        id: 'c-kylie', key: 'KYLIE', displayName: 'Kylie',
+        id: 'c-kylie',
+        key: 'KYLIE',
+        displayName: 'Kylie',
     },
     {
-        id: 'c-shane', key: 'SHANE', displayName: 'Shane',
+        id: 'c-shane',
+        key: 'SHANE',
+        displayName: 'Shane',
     },
     {
-        id: 'c-whit', key: 'WHIT', displayName: 'Whit',
+        id: 'c-whit',
+        key: 'WHIT',
+        displayName: 'Whit',
     },
 ];
 
@@ -69,7 +75,9 @@ describe('collectMusicSingers', () => {
         ];
 
         expect(collectMusicSingers(music('start', 'end'), {
-            blocks, characters, groups: [],
+            blocks,
+            characters,
+            groups: [],
         })).toEqual(['Kylie', 'Shane']);
     });
 
@@ -82,7 +90,9 @@ describe('collectMusicSingers', () => {
         ];
 
         expect(collectMusicSingers(music('start', 'end'), {
-            blocks, characters, groups: [],
+            blocks,
+            characters,
+            groups: [],
         })).toEqual(['Kylie', 'Shane']);
     });
 
@@ -96,7 +106,9 @@ describe('collectMusicSingers', () => {
         ];
 
         expect(collectMusicSingers(music('start', 'end'), {
-            blocks, characters, groups: [],
+            blocks,
+            characters,
+            groups: [],
         })).toEqual([]);
     });
 
@@ -109,7 +121,9 @@ describe('collectMusicSingers', () => {
         ];
 
         expect(collectMusicSingers(music('start', 'end'), {
-            blocks, characters, groups: [],
+            blocks,
+            characters,
+            groups: [],
         })).toEqual(['Jerod']);
     });
 
@@ -130,7 +144,9 @@ describe('collectMusicSingers', () => {
             characters,
             groups: [
                 {
-                    id: 'g1', key: 'EVERYONE', memberIds: ['c-kylie', 'c-shane'],
+                    id: 'g1',
+                    key: 'EVERYONE',
+                    memberIds: ['c-kylie', 'c-shane'],
                 },
             ],
         })).toEqual(['Kylie', 'Shane']);
@@ -151,7 +167,9 @@ describe('collectMusicSingers', () => {
             characters,
             groups: [
                 {
-                    id: 'g1', key: 'EVERYONE', memberIds: ['c-kylie', 'c-whit'],
+                    id: 'g1',
+                    key: 'EVERYONE',
+                    memberIds: ['c-kylie', 'c-whit'],
                 },
             ],
         })).toEqual(['Kylie', 'Everyone']);
@@ -170,7 +188,9 @@ describe('collectMusicSingers', () => {
             characters,
             groups: [
                 {
-                    id: 'g1', key: 'EVERYONE', memberIds: [],
+                    id: 'g1',
+                    key: 'EVERYONE',
+                    memberIds: [],
                 },
             ],
         })).toEqual(['Everyone']);
@@ -188,13 +208,17 @@ describe('collectMusicSingers', () => {
         ];
 
         expect(collectMusicSingers(music('start', 'end'), {
-            blocks, characters, groups: [],
+            blocks,
+            characters,
+            groups: [],
         })).toEqual(['Kylie']);
     });
 
     it('returns nothing when the range cannot be resolved', () => {
         expect(collectMusicSingers(music('missing', 'end'), {
-            blocks: [block('end', 'stageDirection')], characters, groups: [],
+            blocks: [block('end', 'stageDirection')],
+            characters,
+            groups: [],
         })).toEqual([]);
     });
 });

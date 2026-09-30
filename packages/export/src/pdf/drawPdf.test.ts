@@ -1,7 +1,11 @@
 import {PDFDocument} from 'pdf-lib';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe,
+    expect,
+    it,
+} from 'vite-plus/test';
 
-import type {StaffRowItem, TranscriptResult} from '../visualLine';
+import type {StaffRowItem, TranscriptResult} from '../model/visualLine';
 import {drawPdf} from './drawPdf';
 
 const staffRow: StaffRowItem = {
