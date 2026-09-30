@@ -1,14 +1,9 @@
-import {
-    formatPitch, type Pitch,
-} from '@stagistic/script';
+import {formatPitch, type Pitch} from '@stagistic/script';
 
-import {Button} from '../atoms/Button';
-import {IconButton} from '../atoms/IconButton';
-import {Tooltip} from '../atoms/Tooltip';
-import {
-    ChevronDownIcon,
-    ChevronUpIcon,
-} from '../icons';
+import {Button} from '../atoms/Button/Button';
+import {IconButton} from '../atoms/IconButton/IconButton';
+import {Tooltip} from '../atoms/Tooltip/Tooltip';
+import {ChevronDownIcon, ChevronUpIcon} from '../icons';
 import styles from './VocalRangeStaff.module.css';
 import type {VocalRangeNote} from './VocalRangeStaff.types';
 
@@ -26,7 +21,9 @@ export const VocalRangeHeader = ({
     onSelect,
 }: RangeHeaderProps) => (
     <div className={styles.rangeHeader}>
-        {([['low', low], ['high', high]] as const).map(([which, pitch]) => {
+        {(
+            [['low', low], ['high', high]] as const
+        ).map(([which, pitch]) => {
             const label = which === 'low' ? 'Low' : 'High';
             const value = pitch ? formatPitch(pitch) : '—';
 
@@ -70,40 +67,61 @@ export const VocalRangeNoteControls = ({
     onAdjustOctave,
     onToggleAccidental,
 }: NoteControlsProps) => (
-    <footer className={styles.noteControls} data-note-editor="">
+    <footer
+        className={styles.noteControls}
+        data-note-editor=""
+    >
         <div
             className={styles.controlGroup}
             role="group"
             aria-label="Octave"
         >
-            <Tooltip label="Octave down" isDisabled={!canAdjustOctave(which, -1)}>
+            <Tooltip
+                label="Octave down"
+                isDisabled={!canAdjustOctave(which, -1)}
+            >
                 <IconButton
                     shape="pill"
                     aria-label="Octave down"
                     isDisabled={!canAdjustOctave(which, -1)}
                     onPress={() => onAdjustOctave(which, -1)}
                 >
-                    <ChevronDownIcon className={styles.controlIcon} aria-hidden="true" />
+                    <ChevronDownIcon
+                        className={styles.controlIcon}
+                        aria-hidden="true"
+                    />
                 </IconButton>
             </Tooltip>
-            <Tooltip label="Octave up" isDisabled={!canAdjustOctave(which, 1)}>
+            <Tooltip
+                label="Octave up"
+                isDisabled={!canAdjustOctave(which, 1)}
+            >
                 <IconButton
                     shape="pill"
                     aria-label="Octave up"
                     isDisabled={!canAdjustOctave(which, 1)}
                     onPress={() => onAdjustOctave(which, 1)}
                 >
-                    <ChevronUpIcon className={styles.controlIcon} aria-hidden="true" />
+                    <ChevronUpIcon
+                        className={styles.controlIcon}
+                        aria-hidden="true"
+                    />
                 </IconButton>
             </Tooltip>
         </div>
-        <span className={styles.controlDivider} aria-hidden="true" />
+        <span
+            className={styles.controlDivider}
+            aria-hidden="true"
+        />
         <div
             className={styles.controlGroup}
             role="group"
             aria-label="Accidental"
         >
-            <Tooltip label="Flat" isDisabled={!canToggleAccidental(which, -1)}>
+            <Tooltip
+                label="Flat"
+                isDisabled={!canToggleAccidental(which, -1)}
+            >
                 <IconButton
                     shape="pill"
                     isSelected={pitch.alter === -1}
@@ -112,10 +130,18 @@ export const VocalRangeNoteControls = ({
                     isDisabled={!canToggleAccidental(which, -1)}
                     onPress={() => onToggleAccidental(which, -1)}
                 >
-                    <span className={styles.accidentalIcon} aria-hidden="true">♭</span>
+                    <span
+                        className={styles.accidentalIcon}
+                        aria-hidden="true"
+                    >
+                        ♭
+                    </span>
                 </IconButton>
             </Tooltip>
-            <Tooltip label="Sharp" isDisabled={!canToggleAccidental(which, 1)}>
+            <Tooltip
+                label="Sharp"
+                isDisabled={!canToggleAccidental(which, 1)}
+            >
                 <IconButton
                     shape="pill"
                     isSelected={pitch.alter === 1}
@@ -124,7 +150,12 @@ export const VocalRangeNoteControls = ({
                     isDisabled={!canToggleAccidental(which, 1)}
                     onPress={() => onToggleAccidental(which, 1)}
                 >
-                    <span className={styles.accidentalIcon} aria-hidden="true">♯</span>
+                    <span
+                        className={styles.accidentalIcon}
+                        aria-hidden="true"
+                    >
+                        ♯
+                    </span>
                 </IconButton>
             </Tooltip>
         </div>

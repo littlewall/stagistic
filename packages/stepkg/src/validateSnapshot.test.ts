@@ -1,11 +1,30 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe,
+    expect,
+    it,
+} from 'vite-plus/test';
 
 import type {StepkgSnapshot} from './contracts';
 import {validateStepkgSnapshot} from './validateSnapshot';
 
 const snapshot: StepkgSnapshot = {
-    script: {id: 'script-1', title: 'Test', subtitle: null, createdAt: '2026-09-18T10:00:00.000Z', updatedAt: '2026-09-18T11:00:00.000Z'},
-    document: {type: 'doc', content: [{type: 'scene', attrs: {id: 'block-1'}, content: []}]},
+    script: {
+        id: 'script-1',
+        title: 'Test',
+        subtitle: null,
+        createdAt: '2026-09-18T10:00:00.000Z',
+        updatedAt: '2026-09-18T11:00:00.000Z',
+    },
+    document: {
+        type: 'doc',
+        content: [
+            {
+                type: 'scene',
+                attrs: {id: 'block-1'},
+                content: [],
+            },
+        ],
+    },
     titlePage: {},
     settings: {},
     characters: {
@@ -104,18 +123,48 @@ const snapshot: StepkgSnapshot = {
     ],
     comments: {threads: [], messages: []},
     attachmentBindings: [
-        {target: {type: 'music', id: 'music-1'}, attachmentId: 'missing-attachment', role: 'score', order: 0, createdAt: '2026-09-18T10:00:00.000Z'},
+        {
+            target: {type: 'music', id: 'music-1'},
+            attachmentId: 'missing-attachment',
+            role: 'score',
+            order: 0,
+            createdAt: '2026-09-18T10:00:00.000Z',
+        },
     ],
 };
 
 describe('validateStepkgSnapshot', () => {
     it('returns all deterministic relationship diagnostics', () => {
-        expect(validateStepkgSnapshot(snapshot).map(issue => [issue.code, issue.entity?.type, issue.entity?.id])).toEqual([
-            ['duplicate_id', 'character', 'character-1'],
-            ['broken_reference', 'character', 'group-1'],
-            ['broken_reference', 'scene', 'scene-1'],
-            ['broken_reference', 'music', 'music-1'],
-            ['broken_reference', 'attachment', 'missing-attachment'],
+        expect(validateStepkgSnapshot(snapshot).map(issue => [
+            issue.code,
+            issue.entity?.type,
+            issue.entity?.id,
+        ])).toEqual([
+            [
+                'duplicate_id',
+                'character',
+                'character-1',
+            ],
+            [
+                'broken_reference',
+                'character',
+                'group-1',
+            ],
+            [
+                'broken_reference',
+                'scene',
+                'scene-1',
+            ],
+            [
+                'broken_reference',
+                'music',
+                'music-1',
+            ],
+            [
+                'broken_reference',
+                'attachment',
+                'missing-attachment',
+            ],
         ]);
     });
 
@@ -134,20 +183,46 @@ describe('validateStepkgSnapshot', () => {
         };
         const clean: StepkgSnapshot = {
             ...snapshot,
-            characters: {...snapshot.characters, characters: [snapshot.characters.characters[0]], groups: []},
+            characters: {
+                ...snapshot.characters,
+                characters: [snapshot.characters.characters[0]],
+                groups: [],
+            },
             scenes: {scenes: [], locations: []},
             music: {items: []},
             attachments: [],
             attachmentBindings: [],
             comments: {
                 threads: [thread, thread],
-                messages: [{id: 'message-1', threadId: 'missing', authorId: 'local', body: 'b', createdAt: 'x', updatedAt: 'x', editedAt: null}],
+                messages: [
+                    {
+                        id: 'message-1',
+                        threadId: 'missing',
+                        authorId: 'local',
+                        body: 'b',
+                        createdAt: 'x',
+                        updatedAt: 'x',
+                        editedAt: null,
+                    },
+                ],
             },
         };
 
-        expect(validateStepkgSnapshot(clean).map(issue => [issue.code, issue.entity?.type, issue.entity?.id])).toEqual([
-            ['duplicate_id', 'comment', 'thread-1'],
-            ['broken_reference', 'comment', 'message-1'],
+        expect(validateStepkgSnapshot(clean).map(issue => [
+            issue.code,
+            issue.entity?.type,
+            issue.entity?.id,
+        ])).toEqual([
+            [
+                'duplicate_id',
+                'comment',
+                'thread-1',
+            ],
+            [
+                'broken_reference',
+                'comment',
+                'message-1',
+            ],
         ]);
     });
 });

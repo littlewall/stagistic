@@ -1,6 +1,8 @@
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    MemoryRouter, Route, Routes,
+    MemoryRouter,
+    Route,
+    Routes,
 } from 'react-router-dom';
 import {
     afterEach,

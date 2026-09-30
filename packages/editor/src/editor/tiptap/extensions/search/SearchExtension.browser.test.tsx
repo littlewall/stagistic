@@ -4,7 +4,12 @@ import type {ScriptDocument} from '@stagistic/script';
 import {Editor} from '@tiptap/core';
 import Bold from '@tiptap/extension-bold';
 import Text from '@tiptap/extension-text';
-import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {
+    afterEach,
+    describe,
+    expect,
+    it,
+} from 'vite-plus/test';
 
 import {ScriptBlockNodes} from '../../nodes';
 import {DocumentWithSettings} from '../DocumentExtension';
@@ -75,7 +80,13 @@ const createSearchEditor = (value: string) => {
                 },
             ],
         } satisfies ScriptDocument,
-        extensions: [DocumentWithSettings, Text, Bold, ...ScriptBlockNodes, SearchExtension],
+        extensions: [
+            DocumentWithSettings,
+            Text,
+            Bold,
+            ...ScriptBlockNodes,
+            SearchExtension,
+        ],
     });
 
     editors.push(editor);
@@ -118,7 +129,9 @@ describe('SearchExtension', () => {
         const editor = createSearchEditor('light one light two');
 
         editor.commands.setTextSelection(1);
+
         const selectionBefore = editor.state.selection.from;
+
         editor.commands.setSearchCriteria(criteria('light'));
         editor.commands.goToPreviousSearchResult();
 
@@ -136,6 +149,7 @@ describe('SearchExtension', () => {
 
         editor.commands.setSearchCriteria(criteria('light'));
         editor.commands.goToNextSearchResult();
+
         const activeBefore = activeResult(editor).from;
 
         editor.commands.insertContentAt(1, 'new ');
@@ -148,6 +162,7 @@ describe('SearchExtension', () => {
 
         editor.commands.setSearchCriteria(criteria('light'));
         editor.commands.goToNextSearchResult();
+
         const removed = activeResult(editor);
         const transaction = editor.state.tr.delete(removed.from, removed.to);
         const expectedSelection = transaction.selection.from;
@@ -188,6 +203,7 @@ describe('SearchExtension', () => {
 
     it('keeps both dark-mode search highlight levels readable and visibly yellow', () => {
         document.documentElement.dataset.theme = 'dark';
+
         const editor = createSearchEditor('light one light two');
 
         editor.commands.setSearchCriteria(criteria('light'));

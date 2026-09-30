@@ -5,8 +5,7 @@
         "src/main.{ts,tsx,js,jsx}",
         "**/vitest.browser*.config.ts",
         "scripts/*.mjs",
-        "packages/db/scripts/*.mjs",
-        "demos/feature-loops/src/run*.ts"
+        "packages/db/scripts/*.mjs"
     ],
     "dynamicallyLoaded": ["apps/landing/src/pages/editor/syntax.module.css", "packages/ui/src/dialogs/dialogForm.module.css"],
     "ignoreExports": [
@@ -23,7 +22,7 @@
     "ignoreDependencies": ["@moonrepo/cli", "@tauri-apps/cli", "lightningcss", "vite-plus"],
     "ignoreUnresolvedImports": ["@pglite-data?url", "@pglite-wasm?url"],
     "workspaces": {
-        "patterns": ["apps/*", "demos/*", "packages/*"]
+        "patterns": ["apps/*", "packages/*"]
     },
     "duplicates": {
         "minOccurrences": 3

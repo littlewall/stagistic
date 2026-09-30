@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
@@ -26,25 +28,35 @@ describe('toRoman', () => {
 describe('buildPageMark', () => {
     it('formats act-scene-page with a Roman act', () => {
         expect(buildPageMark({
-            actIndex: 1, sceneNumber: 1, pageNumber: 1,
+            actIndex: 1,
+            sceneNumber: 1,
+            pageNumber: 1,
         })).toBe('I-1-1');
         expect(buildPageMark({
-            actIndex: 2, sceneNumber: 3, pageNumber: 12,
+            actIndex: 2,
+            sceneNumber: 3,
+            pageNumber: 12,
         })).toBe('II-3-12');
     });
 
     it('omits the act component when there is no act', () => {
         expect(buildPageMark({
-            actIndex: null, sceneNumber: 1, pageNumber: 1,
+            actIndex: null,
+            sceneNumber: 1,
+            pageNumber: 1,
         })).toBe('1-1');
         expect(buildPageMark({
-            actIndex: 0, sceneNumber: 2, pageNumber: 5,
+            actIndex: 0,
+            sceneNumber: 2,
+            pageNumber: 5,
         })).toBe('2-5');
     });
 
     it('clamps the scene component to at least 1', () => {
         expect(buildPageMark({
-            actIndex: null, sceneNumber: 0, pageNumber: 3,
+            actIndex: null,
+            sceneNumber: 0,
+            pageNumber: 3,
         })).toBe('1-3');
     });
 });

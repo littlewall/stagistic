@@ -53,13 +53,13 @@ const getComposeBlock = (state: EditorState): ComposeBlock | null => {
 const isWordBoundaryBefore = (state: EditorState, block: ComposeBlock, from: number): boolean => {
     const charBefore = from > block.from ? charAt(state, from - 1) : '';
 
-    return charBefore.length === 0 || /\s/.test(charBefore);
+    return charBefore.length === 0 || (/\s/).test(charBefore);
 };
 
 const isWordBoundaryAfter = (state: EditorState, block: ComposeBlock, from: number): boolean => {
     const charAfter = from < block.to ? charAt(state, from) : '';
 
-    return charAfter.length === 0 || /\s/.test(charAfter);
+    return charAfter.length === 0 || (/\s/).test(charAfter);
 };
 
 const isAtCharacterTagRangeStart = (state: EditorState, from: number, markType: MarkType): boolean => {
@@ -72,8 +72,8 @@ export const getOpenComposeOptions = (
     state: EditorState,
     from: number,
 ): {
-    insertLeadingSpace: boolean;
-    insertTrailingSpace: boolean;
+    insertLeadingSpace: boolean,
+    insertTrailingSpace: boolean,
 } | null => {
     if (!state.selection.empty) {
         return null;

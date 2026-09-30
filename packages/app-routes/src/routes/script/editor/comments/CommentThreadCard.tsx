@@ -1,32 +1,35 @@
 import type {ScriptCommentMessage, ScriptCommentThread} from '@stagistic/app-core';
 import {Button, MoreActionsMenu} from '@stagistic/ui';
-import {type KeyboardEvent, type Ref, useState} from 'react';
-
-import {formatCommentTime} from './formatCommentTime';
+import {
+    type KeyboardEvent,
+    type Ref,
+    useState,
+} from 'react';
 
 import styles from './CommentThreadCard.module.css';
+import {formatCommentTime} from './formatCommentTime';
 
 export interface CommentThreadCardProps {
     /** null renders the unsaved draft composer. */
-    thread: ScriptCommentThread | null;
-    messages: readonly ScriptCommentMessage[];
-    draftQuote?: string;
-    isActive: boolean;
+    thread: ScriptCommentThread | null,
+    messages: readonly ScriptCommentMessage[],
+    draftQuote?: string,
+    isActive: boolean,
     /** Lit from the editor: its underline, block or margin marker is hovered. */
-    isHighlighted?: boolean;
+    isHighlighted?: boolean,
     /** The List view shows the anchored text; the Anchored view sits next to it instead. */
-    showQuote: boolean;
-    onActivate: () => void;
-    onCollapse: () => void;
-    onHover: (isHovered: boolean) => void;
-    onSubmitDraft: (body: string) => void;
-    onCancelDraft: () => void;
-    onReply: (body: string) => void;
-    onEditMessage: (messageId: string, body: string) => void;
-    onDeleteMessage: (messageId: string) => void;
-    onToggleResolved: () => void;
-    onDeleteThread: () => void;
-    measureRef?: Ref<HTMLElement>;
+    showQuote: boolean,
+    onActivate: () => void,
+    onCollapse: () => void,
+    onHover: (isHovered: boolean) => void,
+    onSubmitDraft: (body: string) => void,
+    onCancelDraft: () => void,
+    onReply: (body: string) => void,
+    onEditMessage: (messageId: string, body: string) => void,
+    onDeleteMessage: (messageId: string) => void,
+    onToggleResolved: () => void,
+    onDeleteThread: () => void,
+    measureRef?: Ref<HTMLElement>,
 }
 
 const classNames = (...names: Array<string | false | undefined>) => names.filter(Boolean).join(' ');
@@ -44,16 +47,24 @@ const handleComposerKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>, submit
 };
 
 interface ComposerProps {
-    label: string;
-    submitLabel: string;
-    placeholder?: string;
-    initialValue?: string;
-    autoFocus?: boolean;
-    onSubmit: (body: string) => void;
-    onCancel?: () => void;
+    label: string,
+    submitLabel: string,
+    placeholder?: string,
+    initialValue?: string,
+    autoFocus?: boolean,
+    onSubmit: (body: string) => void,
+    onCancel?: () => void,
 }
 
-const Composer = ({label, submitLabel, placeholder, initialValue = '', autoFocus = false, onSubmit, onCancel}: ComposerProps) => {
+const Composer = ({
+    label,
+    submitLabel,
+    placeholder,
+    initialValue = '',
+    autoFocus = false,
+    onSubmit,
+    onCancel,
+}: ComposerProps) => {
     const [value, setValue] = useState(initialValue);
     const submit = () => {
         if (value.trim()) {
@@ -92,35 +103,46 @@ const Composer = ({label, submitLabel, placeholder, initialValue = '', autoFocus
 };
 
 interface MessageProps {
-    message: ScriptCommentMessage;
-    isEditing: boolean;
-    onStartEdit: () => void;
-    onStopEdit: () => void;
-    onEdit: (body: string) => void;
-    onDelete: () => void;
+    message: ScriptCommentMessage,
+    isEditing: boolean,
+    onStartEdit: () => void,
+    onStopEdit: () => void,
+    onEdit: (body: string) => void,
+    onDelete: () => void,
 }
 
-const MessageBody = ({message, isEditing, onStopEdit, onEdit}: Pick<MessageProps, 'message' | 'isEditing' | 'onStopEdit' | 'onEdit'>) =>
-    isEditing ? (
-        <Composer
-            label="Edit comment"
-            submitLabel="Save"
-            initialValue={message.body}
-            autoFocus
-            onSubmit={body => {
-                onEdit(body);
-                onStopEdit();
-            }}
-            onCancel={onStopEdit}
-        />
-    ) : (
-        <p className={styles.body}>
-            {message.body}
-            {message.editedAt !== null ? <span className={styles.edited}> · edited</span> : null}
-        </p>
-    );
+const MessageBody = ({
+    message,
+    isEditing,
+    onStopEdit,
+    onEdit,
+}: Pick<MessageProps, 'message' | 'isEditing' | 'onStopEdit' | 'onEdit'>) => isEditing ? (
+    <Composer
+        label="Edit comment"
+        submitLabel="Save"
+        initialValue={message.body}
+        autoFocus
+        onSubmit={body => {
+            onEdit(body);
+            onStopEdit();
+        }}
+        onCancel={onStopEdit}
+    />
+) : (
+    <p className={styles.body}>
+        {message.body}
+        {message.editedAt !== null ? <span className={styles.edited}> · edited</span> : null}
+    </p>
+);
 
-const Reply = ({message, isEditing, onStartEdit, onStopEdit, onEdit, onDelete}: MessageProps) => (
+const Reply = ({
+    message,
+    isEditing,
+    onStartEdit,
+    onStopEdit,
+    onEdit,
+    onDelete,
+}: MessageProps) => (
     <div className={styles.reply}>
         <span className={styles.railPoint} aria-hidden="true" />
         <div className={styles.replyHead}>
@@ -129,7 +151,11 @@ const Reply = ({message, isEditing, onStartEdit, onStopEdit, onEdit, onDelete}: 
                 aria-label="Reply actions"
                 items={[
                     {id: 'edit', label: 'Edit'},
-                    {id: 'delete', label: 'Delete', tone: 'danger'},
+                    {
+                        id: 'delete',
+                        label: 'Delete',
+                        tone: 'danger',
+                    },
                 ]}
                 onAction={id => (id === 'edit' ? onStartEdit() : onDelete())}
             />
@@ -199,7 +225,11 @@ export const CommentThreadCard = ({
                                 items={[
                                     {id: 'edit', label: 'Edit'},
                                     {id: 'status', label: isResolved ? 'Reopen' : 'Resolve'},
-                                    {id: 'delete', label: 'Delete', tone: 'danger'},
+                                    {
+                                        id: 'delete',
+                                        label: 'Delete',
+                                        tone: 'danger',
+                                    },
                                 ]}
                                 onAction={id => {
                                     if (id === 'edit') {

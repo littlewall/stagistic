@@ -59,7 +59,9 @@ const documentWithMusicOut: ScriptDocument = {
                 {
                     type: 'musicStart',
                     attrs: {
-                        musicId: 'music-1', mode: 'open', title: 'Night',
+                        musicId: 'music-1',
+                        mode: 'open',
+                        title: 'Night',
                     },
                 },
             ],

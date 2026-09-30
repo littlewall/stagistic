@@ -2,7 +2,11 @@ import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
 import type {Editor} from '@tiptap/react';
 
 import {getBlockQuickToggleTarget} from '../../../model/blockQuickToggle';
-import {type BlockNodeType, getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
+import {
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
+} from '../../scriptCore';
 import {setBlockTypeWithSelection} from '../commands';
 import {type BlockContext, createBlockContext} from '../context';
 import {type HandlerMap} from './types';
@@ -115,9 +119,9 @@ export const resolveAsideToggleTarget = (doc: ProseMirrorNode, blockType: BlockN
     return null;
 };
 
-const toggleAsideTarget = (context: BlockContext): BlockNodeType | null =>
-    resolveAsideToggleTarget(context.editor.state.doc, context.block.blockType, context.block.pos);
-
+const toggleAsideTarget = (context: BlockContext): BlockNodeType | null => {
+    return resolveAsideToggleTarget(context.editor.state.doc, context.block.blockType, context.block.pos);
+};
 const handleQuickToggle = (context: BlockContext, event: KeyboardEvent) => {
     const nextBlockType = getBlockQuickToggleTarget(context.block.blockType);
 

@@ -1,6 +1,8 @@
 import type {ScriptBlockIndexSnapshot} from '@stagistic/script';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {resolveMusicOutCandidate} from './musicOutCommands';
@@ -58,7 +60,10 @@ describe('resolveMusicOutCandidate', () => {
             [
                 music('a', 'a'),
                 {
-                    ...music('hit', 'hit'), mode: 'hit', endBlockId: 'hit', endKind: 'hit',
+                    ...music('hit', 'hit'),
+                    mode: 'hit',
+                    endBlockId: 'hit',
+                    endKind: 'hit',
                 },
                 music('b', 'b'),
             ],
@@ -87,7 +92,8 @@ describe('resolveMusicOutCandidate', () => {
         );
 
         expect(resolveMusicOutCandidate(value, 'target')).toMatchObject({
-            musicId: 'song', endBlockId: 'out',
+            musicId: 'song',
+            endBlockId: 'out',
         });
     });
 

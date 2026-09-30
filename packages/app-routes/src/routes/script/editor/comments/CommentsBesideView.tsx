@@ -1,9 +1,21 @@
 import type {ScriptCommentThread} from '@stagistic/app-core';
-import {COMMENT_DRAFT_ANCHOR_KEY, type CommentAnchorLocation, useCommentAnchorTops, useEditorInstance} from '@stagistic/editor';
-import {type ReactNode, useCallback, useEffect, useMemo, useRef, useState, type WheelEvent} from 'react';
+import {
+    COMMENT_DRAFT_ANCHOR_KEY,
+    type CommentAnchorLocation,
+    useCommentAnchorTops,
+    useEditorInstance,
+} from '@stagistic/editor';
+import {
+    type ReactNode,
+    useCallback,
+    useEffect,
+    useMemo,
+    useRef,
+    useState,
+    type WheelEvent,
+} from 'react';
 
 import {layoutBesideCards} from './layoutBesideCards';
-
 import styles from './ScriptCommentsSidebar.module.css';
 
 const DEFAULT_CARD_HEIGHT = 72;
@@ -14,16 +26,16 @@ const GROUP_GAP = 16;
 const SCROLL_CONTAINER_SELECTOR = '[data-editor-scroll-container="true"]';
 
 interface CommentsBesideViewProps {
-    threads: readonly ScriptCommentThread[];
-    anchors: ReadonlyMap<string, CommentAnchorLocation>;
-    activeThreadId: string | null;
-    expandedBlockId: string | null;
+    threads: readonly ScriptCommentThread[],
+    anchors: ReadonlyMap<string, CommentAnchorLocation>,
+    activeThreadId: string | null,
+    expandedBlockId: string | null,
     /** Block whose editor margin marker is hovered; its folded group lights up. */
-    hoveredBlockId: string | null;
-    draft: {blockId: string} | null;
-    onExpandBlock: (blockId: string) => void;
-    renderCard: (thread: ScriptCommentThread) => ReactNode;
-    renderDraft: () => ReactNode;
+    hoveredBlockId: string | null,
+    draft: {blockId: string} | null,
+    onExpandBlock: (blockId: string) => void,
+    renderCard: (thread: ScriptCommentThread) => ReactNode,
+    renderDraft: () => ReactNode,
 }
 
 /* Heights of rendered slots, keyed by layout key; updated only when a size changes. */
@@ -78,18 +90,19 @@ export const CommentsBesideView = ({
     const bodyRef = useRef<HTMLDivElement | null>(null);
     const [bodyTop, setBodyTop] = useState(0);
     const {heights, observe} = useMeasuredHeights();
-    // Same order as the editor's margin marker (position, block anchors first), so a marker click
-    // activates the first card of its block.
+    /*
+     * Same order as the editor's margin marker (position, block anchors first), so a marker click
+     * activates the first card of its block.
+     */
     const anchoredThreads = useMemo(
-        () =>
-            threads
-                .filter(thread => anchors.has(thread.id))
-                .sort((left, right) => {
-                    const leftAnchor = anchors.get(left.id)!;
-                    const rightAnchor = anchors.get(right.id)!;
+        () => threads
+            .filter(thread => anchors.has(thread.id))
+            .sort((left, right) => {
+                const leftAnchor = anchors.get(left.id)!;
+                const rightAnchor = anchors.get(right.id)!;
 
-                    return leftAnchor.from - rightAnchor.from || (leftAnchor.kind === 'block' ? -1 : 0) - (rightAnchor.kind === 'block' ? -1 : 0);
-                }),
+                return leftAnchor.from - rightAnchor.from || (leftAnchor.kind === 'block' ? -1 : 0) - (rightAnchor.kind === 'block' ? -1 : 0);
+            }),
         [anchors, threads],
     );
     const tops = useCommentAnchorTops(anchoredThreads.map(thread => thread.id));
@@ -143,7 +156,16 @@ export const CommentsBesideView = ({
             gap: CARD_GAP,
             groupGap: GROUP_GAP,
         });
-    }, [activeThreadId, anchoredThreads, anchors, bodyTop, draft, expandedBlockId, heights, tops]);
+    }, [
+        activeThreadId,
+        anchoredThreads,
+        anchors,
+        bodyTop,
+        draft,
+        expandedBlockId,
+        heights,
+        tops,
+    ]);
 
     // The panel does not scroll on its own; the wheel scrolls the script it annotates.
     const handleWheel = (event: WheelEvent<HTMLDivElement>) => {
@@ -166,11 +188,11 @@ export const CommentsBesideView = ({
                             >
                                 {`${entry.threadIds.length} comments`}
                             </button>
-                        ) : entry.key === COMMENT_DRAFT_ANCHOR_KEY ? (
+                        ) : entry.key === COMMENT_DRAFT_ANCHOR_KEY ?
                             renderDraft()
-                        ) : thread ? (
-                            renderCard(thread)
-                        ) : null}
+                            : thread ?
+                                renderCard(thread)
+                                : null}
                     </div>
                 );
             })}

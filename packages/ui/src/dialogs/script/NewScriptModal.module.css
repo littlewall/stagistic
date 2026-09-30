@@ -1,0 +1,15 @@
+.form {
+    composes: form from '../modal/dialogForm.module.css';
+}
+
+.label {
+    composes: label from '../modal/dialogForm.module.css';
+}
+
+.input {
+    composes: input from '../modal/dialogForm.module.css';
+}
+
+.shapeOptions {
+    margin-top: calc(-1 * var(--space-sm));
+}

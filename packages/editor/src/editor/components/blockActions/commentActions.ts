@@ -18,7 +18,9 @@ export const resolveCommentActions = ({editor, blockId}: BlockActionContext): re
                 const block = findScriptBlockByIdFromState(editor.state, blockId);
 
                 if (block) {
-                    editor.chain().focus().setTextSelection(block.to).startCommentDraft().run();
+                    editor.chain().focus().setTextSelection(block.to)
+                        .startCommentDraft()
+                        .run();
                 }
             },
         },

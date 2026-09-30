@@ -1,10 +1,12 @@
 import {uuidv7} from '@stagistic/shared';
 
-import type {FileStorage} from '../fileStorage';
 import * as dbQueries from '../queries';
-import type {ScriptAttachmentsRepository} from '../scriptRepository';
+import type {FileStorage} from '../storage/fileStorage';
+import type {ScriptAttachmentsRepository} from '../types/scriptRepository';
 import type {
-    GetDb, RecordOutbox, SyncDb,
+    GetDb,
+    RecordOutbox,
+    SyncDb,
 } from './types';
 
 interface CreateAttachmentHandlersArgs {
@@ -38,7 +40,7 @@ export const createAttachmentHandlers = ({
         const attachmentId = uuidv7();
         const filename = file.name.trim() || 'attachment.pdf';
 
-        let previousStorageKey: string | null = null;
+        let previousStorageKey: string | null;
 
         try {
             previousStorageKey = await db.transaction(async tx => {
@@ -174,6 +176,9 @@ export const createAttachmentHandlers = ({
     };
 
     return {
-        getByMusicRole, setForMusic, removeFromMusic, getBlob,
+        getByMusicRole,
+        setForMusic,
+        removeFromMusic,
+        getBlob,
     };
 };

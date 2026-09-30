@@ -8,13 +8,23 @@ import type {Clef} from './types';
 
 export type GlyphCommand =
     | {
-        c: 'M', x: number, y: number,
+        c: 'M',
+        x: number,
+        y: number,
     }
     | {
-        c: 'L', x: number, y: number,
+        c: 'L',
+        x: number,
+        y: number,
     }
     | {
-        c: 'C', x1: number, y1: number, x2: number, y2: number, x: number, y: number,
+        c: 'C',
+        x1: number,
+        y1: number,
+        x2: number,
+        y2: number,
+        x: number,
+        y: number,
     }
     | {
         c: 'Z',
@@ -68,7 +78,9 @@ const parseGlyphPath = (path: string): GlyphCommand[] => {
             const [x, y] = readNumbers(2) as [number, number];
 
             commands.push({
-                c: command, x, y,
+                c: command,
+                x,
+                y,
             });
 
             continue;
@@ -85,7 +97,13 @@ const parseGlyphPath = (path: string): GlyphCommand[] => {
             ] = readNumbers(6) as [number, number, number, number, number, number];
 
             commands.push({
-                c: command, x1, y1, x2, y2, x, y,
+                c: command,
+                x1,
+                y1,
+                x2,
+                y2,
+                x,
+                y,
             });
 
             continue;
@@ -119,47 +137,81 @@ export const CLEF_GLYPHS: Record<Clef, Glyph> = {
 /** Sharp: two parallel slanted verticals crossed by two parallel slanted horizontals. */
 const SHARP_COMMANDS: GlyphCommand[] = [
     {
-        c: 'M', x: 3, y: 1,
+        c: 'M',
+        x: 3,
+        y: 1,
     },
     {
-        c: 'L', x: 2, y: 19,
+        c: 'L',
+        x: 2,
+        y: 19,
     },
     {
-        c: 'M', x: 7, y: 1,
+        c: 'M',
+        x: 7,
+        y: 1,
     },
     {
-        c: 'L', x: 6, y: 19,
+        c: 'L',
+        x: 6,
+        y: 19,
     },
     {
-        c: 'M', x: 1, y: 7,
+        c: 'M',
+        x: 1,
+        y: 7,
     },
     {
-        c: 'L', x: 9, y: 5,
+        c: 'L',
+        x: 9,
+        y: 5,
     },
     {
-        c: 'M', x: 1, y: 15,
+        c: 'M',
+        x: 1,
+        y: 15,
     },
     {
-        c: 'L', x: 9, y: 13,
+        c: 'L',
+        x: 9,
+        y: 13,
     },
 ];
 
 /** Flat: a vertical stem with a rounded bowl attached partway down. */
 const FLAT_COMMANDS: GlyphCommand[] = [
     {
-        c: 'M', x: 2, y: 1,
+        c: 'M',
+        x: 2,
+        y: 1,
     },
     {
-        c: 'L', x: 2, y: 17,
+        c: 'L',
+        x: 2,
+        y: 17,
     },
     {
-        c: 'M', x: 2, y: 9,
+        c: 'M',
+        x: 2,
+        y: 9,
     },
     {
-        c: 'C', x1: 5.5, y1: 8.5, x2: 8, y2: 10, x: 8, y: 12.5,
+        c: 'C',
+        x1: 5.5,
+        y1: 8.5,
+        x2: 8,
+        y2: 10,
+        x: 8,
+        y: 12.5,
     },
     {
-        c: 'C', x1: 8, y1: 15, x2: 4.5, y2: 17, x: 2, y: 16,
+        c: 'C',
+        x1: 8,
+        y1: 15,
+        x2: 4.5,
+        y2: 17,
+        x: 2,
+        y: 16,
     },
 ];
 

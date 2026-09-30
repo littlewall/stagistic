@@ -4,9 +4,9 @@ import type {Mapping} from '@tiptap/pm/transform';
 import type {CommentBlockMerge} from './types';
 
 interface BlockSpan {
-    id: string;
-    pos: number;
-    size: number;
+    id: string,
+    pos: number,
+    size: number,
 }
 
 const collectBlocks = (doc: ProseMirrorNode) => {
@@ -14,7 +14,11 @@ const collectBlocks = (doc: ProseMirrorNode) => {
 
     doc.descendants((node, pos) => {
         if (node.isTextblock && typeof node.attrs.id === 'string') {
-            blocks.push({id: node.attrs.id, pos, size: node.content.size});
+            blocks.push({
+                id: node.attrs.id,
+                pos,
+                size: node.content.size,
+            });
 
             return false;
         }

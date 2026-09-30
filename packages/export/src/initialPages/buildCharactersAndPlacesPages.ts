@@ -1,10 +1,10 @@
 import type {EditorSettings} from '@stagistic/script';
 
-import type {CharactersAndPlacesInitialPagePlan} from '../plan';
+import type {CharactersAndPlacesInitialPagePlan} from '../model/plan';
 import type {
     VisualLine,
     VisualRun,
-} from '../visualLine';
+} from '../model/visualLine';
 import {balanceTextLines} from './balanceTextLines';
 
 export type VisualPage = VisualLine[];

@@ -5,7 +5,12 @@ import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it} from 'vite-plus/test';
+import {
+    afterEach,
+    describe,
+    expect,
+    it,
+} from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../../context';
@@ -105,7 +110,11 @@ describe('scene block actions', () => {
     it('offers a Delete scene heading action on a non-first scene', async () => {
         renderEditor({
             type: 'doc',
-            content: [scene('s1', 'S1'), dialogue('d1', 'hi'), scene('s2', 'S2')],
+            content: [
+                scene('s1', 'S1'),
+                dialogue('d1', 'hi'),
+                scene('s2', 'S2'),
+            ],
         });
 
         const editor = await getEditor();
@@ -117,10 +126,9 @@ describe('scene block actions', () => {
         await page.elementLocator(trigger).click();
 
         const menuItem = await poll(
-            () =>
-                Array.from(document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')).find(
-                    item => (item.getAttribute('aria-label') ?? item.textContent?.trim()) === 'Delete scene heading',
-                ) ?? null,
+            () => Array.from(document.querySelectorAll<HTMLButtonElement>('[role="menuitem"]')).find(
+                item => (item.getAttribute('aria-label') ?? item.textContent?.trim()) === 'Delete scene heading',
+            ) ?? null,
             'Delete scene heading item',
         );
 
@@ -130,7 +138,11 @@ describe('scene block actions', () => {
     it('offers no Delete scene heading action on the first scene', async () => {
         renderEditor({
             type: 'doc',
-            content: [scene('s1', 'S1'), dialogue('d1', 'hi'), scene('s2', 'S2')],
+            content: [
+                scene('s1', 'S1'),
+                dialogue('d1', 'hi'),
+                scene('s2', 'S2'),
+            ],
         });
 
         const editor = await getEditor();

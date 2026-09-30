@@ -2,7 +2,11 @@ import {Extension} from '@tiptap/core';
 
 import {splitBlockWithType, updateBlockType} from '../scriptBlock/commands';
 import type {BlockNextElementMap} from '../scriptBlock/handlers/types';
-import {type BlockNodeType, getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../scriptCore';
+import {
+    type BlockNodeType,
+    getActiveScriptBlockFromState,
+    SCRIPT_BLOCK_NODE_NAMES,
+} from '../scriptCore';
 import {
     CLOSE_META_KEY,
     createEmptyEnterChooserPlugin,
@@ -17,23 +21,32 @@ import {
 const PREVENT_DISPATCH_META_KEY = 'preventDispatch';
 
 export type {EmptyEnterChooserState} from './emptyEnterChooserState';
-export {EMPTY_ENTER_CHOOSER_WRITER_TYPES, getEmptyEnterChooserFromState, isEmptyEnterChooserWriterType} from './emptyEnterChooserState';
+export {
+    EMPTY_ENTER_CHOOSER_WRITER_TYPES,
+    getEmptyEnterChooserFromState,
+    isEmptyEnterChooserWriterType,
+} from './emptyEnterChooserState';
 
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         emptyEnterChooser: {
-            openEmptyEnterChooser: (payload: {blockId: string; blockPos: number; blockType: BlockNodeType; selectedType?: BlockNodeType}) => ReturnType;
-            closeEmptyEnterChooser: () => ReturnType;
-            selectEmptyEnterChooserType: (type: BlockNodeType) => ReturnType;
-            moveEmptyEnterChooserSelection: (direction: -1 | 1) => ReturnType;
-            confirmEmptyEnterChooserType: (type?: BlockNodeType) => ReturnType;
-            insertNextEmptyFromEmptyEnterChooser: () => ReturnType;
-        };
+            openEmptyEnterChooser: (payload: {
+                blockId: string,
+                blockPos: number,
+                blockType: BlockNodeType,
+                selectedType?: BlockNodeType,
+            }) => ReturnType,
+            closeEmptyEnterChooser: () => ReturnType,
+            selectEmptyEnterChooserType: (type: BlockNodeType) => ReturnType,
+            moveEmptyEnterChooserSelection: (direction: -1 | 1) => ReturnType,
+            confirmEmptyEnterChooserType: (type?: BlockNodeType) => ReturnType,
+            insertNextEmptyFromEmptyEnterChooser: () => ReturnType,
+        },
     }
 }
 
 export const EmptyEnterChooserExtension = Extension.create<{
-    blockNextElements?: BlockNextElementMap;
+    blockNextElements?: BlockNextElementMap,
 }>({
     name: 'EmptyEnterChooser',
 
@@ -46,7 +59,7 @@ export const EmptyEnterChooserExtension = Extension.create<{
     addCommands() {
         const closeChooser = () => {
             const commands = this.editor.commands as {
-                closeEmptyEnterChooser?: () => boolean;
+                closeEmptyEnterChooser?: () => boolean,
             };
 
             if (this.editor.isDestroyed) {
@@ -58,8 +71,7 @@ export const EmptyEnterChooserExtension = Extension.create<{
 
         return {
             openEmptyEnterChooser:
-                payload =>
-                ({state, dispatch}) => {
+                payload => ({state, dispatch}) => {
                     if (!dispatch) {
                         return true;
                     }
@@ -69,8 +81,7 @@ export const EmptyEnterChooserExtension = Extension.create<{
                     return true;
                 },
             closeEmptyEnterChooser:
-                () =>
-                ({state, dispatch}) => {
+                () => ({state, dispatch}) => {
                     if (!dispatch) {
                         return true;
                     }
@@ -80,8 +91,7 @@ export const EmptyEnterChooserExtension = Extension.create<{
                     return true;
                 },
             selectEmptyEnterChooserType:
-                type =>
-                ({state, dispatch}) => {
+                type => ({state, dispatch}) => {
                     if (!dispatch) {
                         return true;
                     }
@@ -91,8 +101,7 @@ export const EmptyEnterChooserExtension = Extension.create<{
                     return true;
                 },
             moveEmptyEnterChooserSelection:
-                direction =>
-                ({state, dispatch}) => {
+                direction => ({state, dispatch}) => {
                     if (!dispatch) {
                         return true;
                     }
@@ -119,8 +128,7 @@ export const EmptyEnterChooserExtension = Extension.create<{
                     return true;
                 },
             confirmEmptyEnterChooserType:
-                type =>
-                ({tr}) => {
+                type => ({tr}) => {
                     tr.setMeta(PREVENT_DISPATCH_META_KEY, true);
 
                     const chooserState = getEmptyEnterChooserFromState(this.editor.state);
@@ -159,8 +167,7 @@ export const EmptyEnterChooserExtension = Extension.create<{
                     return didUpdate;
                 },
             insertNextEmptyFromEmptyEnterChooser:
-                () =>
-                ({tr}) => {
+                () => ({tr}) => {
                     tr.setMeta(PREVENT_DISPATCH_META_KEY, true);
 
                     const chooserState = getEmptyEnterChooserFromState(this.editor.state);

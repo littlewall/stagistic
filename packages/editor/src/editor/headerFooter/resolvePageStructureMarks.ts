@@ -18,7 +18,9 @@ export const resolvePageStructureMarks = (
 ): PageStructureMark[] => {
     const sorted = [...blocks].sort((a, b) => a.pos - b.pos);
     const running: {
-        pos: number, actIndex: number, sceneNumber: number,
+        pos: number,
+        actIndex: number,
+        sceneNumber: number,
     }[] = [];
     let actIndex = 0;
     let sceneNumber = 0;
@@ -33,7 +35,9 @@ export const resolvePageStructureMarks = (
         }
 
         running.push({
-            pos: block.pos, actIndex, sceneNumber,
+            pos: block.pos,
+            actIndex,
+            sceneNumber,
         });
     }
 

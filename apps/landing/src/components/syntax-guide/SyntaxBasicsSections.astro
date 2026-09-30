@@ -1,0 +1,125 @@
+---
+// Core idea, frontmatter, acts & scenes, cues & dialogue.
+import s from '../../pages/editor/syntax.module.css';
+import {exDialogue, exFrontmatter, exInlineCue, exStructure, exUnison} from '../../data/syntaxGuide';
+import SyntaxExample from './SyntaxExample.astro';
+import SyntaxSection from './SyntaxSection.astro';
+---
+
+<!-- Core idea -->
+<SyntaxSection id="core" n="01" title="The core idea">
+    <p class={s.prose}>
+        Two things decide what every line is:
+        <strong> where it sits</strong>
+        and
+        <strong> its letter case</strong>. A blank line ends a speech, so the parser knows whether it is waiting for a new character or
+        reading the lines under one.
+    </p>
+    <ul class={s.bullets}>
+        <li>
+            Right after a blank line, an
+            <span class={s.code}>UPPERCASE</span>
+            line is a <strong>character cue</strong>.
+        </li>
+        <li>
+            Inside a speech, an
+            <span class={s.code}>UPPERCASE</span>
+            line is
+            <strong> lyrics</strong>
+            (sung); a normal-case line is <strong>dialogue</strong>
+            (spoken).
+        </li>
+        <li>A line in normal case at the start of a block is a <strong>stage direction</strong>.</li>
+    </ul>
+    <p class={s.prose}>
+        So <span class={s.code}>ANNA</span> on its own line after a blank line is a cue, while
+        <span class={s.code}>PASS ME THE SUGAR</span>
+        inside a speech is a lyric — identical casing, the position decides. To shout, use bold (<span class={s.code}>**Stop!**</span>);
+        caps inside a speech always mean singing.
+    </p>
+    <p class={s.prose}>
+        To make an uppercase line a stage direction, force it with
+        <span class={s.code}>!</span>.
+    </p>
+</SyntaxSection>
+
+<!-- Frontmatter -->
+<SyntaxSection id="frontmatter" n="02" title="Frontmatter">
+    <p class={s.prose}>
+        Optional. If the file opens with a
+        <span class={s.code}>---</span>
+        line, everything up to the next <span class={s.code}>---</span> is a YAML metadata block. The script begins after it.
+    </p>
+    <p class={s.prose}>
+        The supported fields mirror the title page:
+        <span class={s.code}>title</span>,
+        <span class={s.code}>subtitle</span>,
+        <span class={s.code}>credits</span>,
+        <span class={s.code}>source</span>,
+        <span class={s.code}>draftDate</span>,
+        <span class={s.code}>contact</span>, and
+        <span class={s.code}>copyright</span>. A credit always contains an
+        <span class={s.code}>authors</span>
+        list, even for one author. Draft dates use
+        <span class={s.code}>YYYY-MM-DD</span>.
+    </p>
+    <div class={s.exampleSolo}>
+        <p class={s.exampleLabel}>You type</p>
+        <pre class={s.codeBlock}>{exFrontmatter}</pre>
+    </div>
+</SyntaxSection>
+
+<!-- Acts & scenes -->
+<SyntaxSection id="structure" n="03" title="Acts & scenes">
+    <p class={s.prose}>
+        Markdown-style headings:
+        <span class={s.code}>#</span>
+        is an act,
+        <span class={s.code}>##</span>
+        is a scene. The text after the marker is free — location, time, anything; the editor handles numbering.
+    </p>
+    <p class={s.prose}>
+        Scenes are the base unit; acts are an optional layer above. If a script has no
+        <span class={s.code}>##</span>
+        anywhere, a
+        <span class={s.code}>#</span>
+        is treated as a scene — so a one-act play just uses
+        <span class={s.code}>#</span>
+        per scene.
+    </p>
+    <SyntaxExample source={exStructure}>
+        <p class={s.rAct}>Act One</p>
+        <p class={s.rScene}>1 — A garden. Dusk.</p>
+</SyntaxExample>
+</SyntaxSection>
+
+<!-- Cues & dialogue -->
+<SyntaxSection id="dialogue" n="04" title="Character cues & dialogue">
+    <p class={s.prose}>
+        A character cue is the name in caps on its own line; the lines below it, up to the next blank line, are that character's speech.
+    </p>
+    <SyntaxExample source={exDialogue}>
+        <p class={s.rChar}>PETER</p>
+        <p class={s.rAside}>(from the doorway)</p>
+        <p class={s.rLine}>Sorry I'm late.</p>
+        <p class={s.rChar}>ANNA</p>
+        <p class={s.rLine}>It's fine. I was waiting.</p>
+</SyntaxExample>
+    <p class={s.prose}>
+        For two characters speaking or singing the same words at once, join the names with
+        <span class={s.code}>/</span>
+        (spaces optional). The shared content follows once.
+    </p>
+    <div class={s.exampleSolo}>
+        <p class={s.exampleLabel}>You type</p>
+        <pre class={s.codeBlock}>{exUnison}</pre>
+    </div>
+    <p class={s.prose}>
+        As a convenience the parser also accepts inline dialogue — <span class={s.code}>NAME: text</span>
+        on one line — but the editor always writes it back out stacked, with the cue on its own line.
+    </p>
+    <div class={s.exampleSolo}>
+        <p class={s.exampleLabel}>You type</p>
+        <pre class={s.codeBlock}>{exInlineCue}</pre>
+    </div>
+</SyntaxSection>

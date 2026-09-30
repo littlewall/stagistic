@@ -1,18 +1,36 @@
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe,
+    expect,
+    it,
+} from 'vite-plus/test';
 
 import {createTestDb, seedScript} from '../../testing/createTestDb';
-import {deleteScriptAttachmentsByScriptId, insertAttachment, listScriptAttachments} from './attachments';
+import {
+    deleteScriptAttachmentsByScriptId,
+    insertAttachment,
+    listScriptAttachments,
+} from './attachments';
 import {deleteScriptCharacterGendersByScriptId, insertScriptCharacterGenders} from './characters/genders';
 import {listScriptCharacters} from './characters/read';
 import {deleteScriptCharactersByScriptId, insertScriptCharacters} from './characters/write';
-import {deleteScriptLocationsByScriptId, insertScriptLocations, listScriptLocations} from './locations';
-import {deleteScriptMusicByScriptId, insertScriptMusic, listScriptMusic} from './music';
+import {
+    deleteScriptLocationsByScriptId,
+    insertScriptLocations,
+    listScriptLocations,
+} from './locations';
+import {
+    deleteScriptMusicByScriptId,
+    insertScriptMusic,
+    listScriptMusic,
+} from './music';
 
 describe('bulk delete-by-scriptId queries', () => {
     it('removes only the rows belonging to the given script', async () => {
         const {db} = await createTestDb();
+
         await seedScript(db, 'sc1');
         await seedScript(db, 'sc2');
+
         const now = 1_000;
 
         await insertScriptCharacters(db, [
@@ -50,12 +68,40 @@ describe('bulk delete-by-scriptId queries', () => {
             },
         ]);
         await insertScriptCharacterGenders(db, [
-            {id: 'g1', scriptId: 'sc1', genderKey: 'f', genderLabel: 'Female', createdAt: now, updatedAt: now},
-            {id: 'g2', scriptId: 'sc2', genderKey: 'f', genderLabel: 'Female', createdAt: now, updatedAt: now},
+            {
+                id: 'g1',
+                scriptId: 'sc1',
+                genderKey: 'f',
+                genderLabel: 'Female',
+                createdAt: now,
+                updatedAt: now,
+            },
+            {
+                id: 'g2',
+                scriptId: 'sc2',
+                genderKey: 'f',
+                genderLabel: 'Female',
+                createdAt: now,
+                updatedAt: now,
+            },
         ]);
         await insertScriptLocations(db, [
-            {id: 'l1', scriptId: 'sc1', name: 'Kitchen', description: null, createdAt: now, updatedAt: now},
-            {id: 'l2', scriptId: 'sc2', name: 'Attic', description: null, createdAt: now, updatedAt: now},
+            {
+                id: 'l1',
+                scriptId: 'sc1',
+                name: 'Kitchen',
+                description: null,
+                createdAt: now,
+                updatedAt: now,
+            },
+            {
+                id: 'l2',
+                scriptId: 'sc2',
+                name: 'Attic',
+                description: null,
+                createdAt: now,
+                updatedAt: now,
+            },
         ]);
         await insertScriptMusic(db, {
             id: 'm1',
@@ -122,6 +168,7 @@ describe('bulk delete-by-scriptId queries', () => {
 
     it('is a no-op when the script has no rows in a domain', async () => {
         const {db} = await createTestDb();
+
         await seedScript(db, 'sc3');
 
         await deleteScriptCharactersByScriptId(db, 'sc3');

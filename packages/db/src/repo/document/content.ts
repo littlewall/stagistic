@@ -1,0 +1,79 @@
+import * as dbQueries from '../../queries';
+import type {ScriptRepository} from '../../types/scriptRepository';
+import type {
+    GetDb,
+    RecordOutbox,
+    SyncDb,
+} from '../types';
+import {createProjectedTableDocumentSource, createSqlScriptDocumentProjectionWriter} from './documentProjection';
+
+type ContentHandlers = {
+    loadLatest: ScriptRepository['loadLatest'],
+    saveLatest: ScriptRepository['saveLatest'],
+};
+
+interface CreateContentHandlersArgs {
+    getDb: GetDb,
+    recordOutbox: RecordOutbox,
+    syncDb: SyncDb,
+}
+
+export const createContentHandlers = ({
+    getDb,
+    recordOutbox,
+    syncDb,
+}: CreateContentHandlersArgs): ContentHandlers => {
+    const projectionWriter = createSqlScriptDocumentProjectionWriter({getDb});
+    const documentSource = createProjectedTableDocumentSource({getDb, projectionWriter});
+
+    const loadLatest: ContentHandlers['loadLatest'] = async scriptId => {
+        const loaded = await documentSource.load(scriptId);
+
+        if (!loaded) {
+            return null;
+        }
+
+        return loaded.document;
+    };
+
+    const saveLatest: ContentHandlers['saveLatest'] = async (scriptId, value) => {
+        const now = Date.now();
+
+        /*
+         * Granular persist: diff the document against the last-saved blocks and
+         * write only the delta (Case A content-only UPDATEs; Case B structural).
+         * Timestamp + outbox ride in the same transaction as the delta.
+         */
+        await documentSource.save(scriptId, value, {
+            afterPersist: async tx => {
+                await dbQueries.updateScriptTimestamp(tx, {
+                    scriptId,
+                    updatedAt: now,
+                });
+
+                await recordOutbox(
+                    {
+                        scriptId,
+                        entityKey: `script:${scriptId}:document`,
+                        opType: 'latest.save',
+                        occurredAt: now,
+                        payloadJson: JSON.stringify({scriptId, updatedAt: now}),
+                    },
+                    tx,
+                );
+            },
+        });
+
+        /*
+         * PGlite does not call syncToFs() after transaction COMMIT — the WAL
+         * stays in memory until explicitly flushed. Without this, data is lost
+         * on page refresh (the worker dies and the unflushed WAL disappears).
+         */
+        await syncDb();
+    };
+
+    return {
+        loadLatest,
+        saveLatest,
+    };
+};

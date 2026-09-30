@@ -9,7 +9,12 @@ import type {
 const buildHeaderFooterCell = (
     overrides: Partial<HeaderFooterCellSettings> = {},
 ): HeaderFooterCellSettings => ({
-    text: '', isBold: false, isItalic: false, isUnderline: false, isHiddenInEditor: false, ...overrides,
+    text: '',
+    isBold: false,
+    isItalic: false,
+    isUnderline: false,
+    isHiddenInEditor: false,
+    ...overrides,
 });
 
 const buildHeaderFooterRow = (

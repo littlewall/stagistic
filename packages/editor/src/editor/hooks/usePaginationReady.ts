@@ -1,6 +1,7 @@
 import type {Editor as TiptapEditor} from '@tiptap/core';
 import {
     useEffect,
+    useLayoutEffect,
     useState,
 } from 'react';
 
@@ -45,4 +46,18 @@ export const usePaginationReady = (editor: TiptapEditor) => {
     }, [editor, isReady]);
 
     return isReady;
+};
+
+/** Like `usePaginationReady`, but stays true once the canvas has been presented. */
+export const useInitialCanvasReady = (editor: TiptapEditor) => {
+    const isPaginationReady = usePaginationReady(editor);
+    const [hasPresentedCanvas, setHasPresentedCanvas] = useState(isPaginationReady);
+
+    useLayoutEffect(() => {
+        if (isPaginationReady) {
+            setHasPresentedCanvas(true);
+        }
+    }, [isPaginationReady]);
+
+    return hasPresentedCanvas || isPaginationReady;
 };

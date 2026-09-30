@@ -136,7 +136,8 @@ export const createScriptNode = ({name, blockType: defaultBlockType}: CreateScri
 
                         return blockType === defaultBlockType ? {} : false;
                     },
-                }, {
+                },
+                {
                     tag: 'p[data-block-type]',
                     getAttrs: (element: HTMLElement) => {
                         const blockType = resolveParsedBlockType(element, defaultBlockType);

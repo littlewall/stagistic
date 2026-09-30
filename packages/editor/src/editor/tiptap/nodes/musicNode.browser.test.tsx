@@ -5,13 +5,19 @@ import {TextSelection} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {
-    createRoot, type Root,
+    createRoot,
+    type Root,
 } from 'react-dom/client';
 import {
-    afterEach, describe, expect, it, vi,
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
 } from 'vite-plus/test';
 import {
-    page, userEvent,
+    page,
+    userEvent,
 } from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../../context';
@@ -24,13 +30,19 @@ import {findScriptBlockByIdFromState} from '../scriptCore';
 type MusicTestWindow = Window & {__musicTestEditor?: Editor | null};
 
 const createStageDirection = (id: string, content: ScriptNode[] = []): ScriptNode => ({
-    type: 'stageDirection', attrs: {id}, content,
+    type: 'stageDirection',
+    attrs: {id},
+    content,
 });
 const createAside = (id: string, content: ScriptNode[] = []): ScriptNode => ({
-    type: 'aside', attrs: {id}, content,
+    type: 'aside',
+    attrs: {id},
+    content,
 });
 const createNote = (id: string, content: ScriptNode[] = []): ScriptNode => ({
-    type: 'note', attrs: {id}, content,
+    type: 'note',
+    attrs: {id},
+    content,
 });
 const EditorProbe = () => {
     const editor = useEditorInstance();
@@ -1101,11 +1113,19 @@ describe('music pill node views', () => {
         const elements = vi.spyOn(document, 'elementsFromPoint').mockReturnValue([target]);
 
         source.dispatchEvent(new PointerEvent('pointerdown', {
-            bubbles: true, pointerId: 1, button: 0, clientX: 10, clientY: 10,
+            bubbles: true,
+            pointerId: 1,
+            button: 0,
+            clientX: 10,
+            clientY: 10,
         }));
         await new Promise(resolve => window.setTimeout(resolve, 400));
         source.dispatchEvent(new PointerEvent('pointermove', {
-            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 30,
+            bubbles: true,
+            pointerId: 1,
+            buttons: 1,
+            clientX: 30,
+            clientY: 30,
         }));
 
         const preview = document.querySelector<HTMLElement>(
@@ -1115,7 +1135,11 @@ describe('music pill node views', () => {
         expect(preview).not.toBeNull();
 
         source.dispatchEvent(new PointerEvent('pointerup', {
-            bubbles: true, pointerId: 1, button: 0, clientX: 30, clientY: 30,
+            bubbles: true,
+            pointerId: 1,
+            button: 0,
+            clientX: 30,
+            clientY: 30,
         }));
 
         capture.mockRestore();
@@ -1165,13 +1189,21 @@ describe('music pill node views', () => {
         const elements = vi.spyOn(document, 'elementsFromPoint').mockReturnValue([target]);
 
         source.dispatchEvent(new PointerEvent('pointerdown', {
-            bubbles: true, pointerId: 1, button: 0, clientX: 10, clientY: 10,
+            bubbles: true,
+            pointerId: 1,
+            button: 0,
+            clientX: 10,
+            clientY: 10,
         }));
 
         expect(document.querySelector('[data-music-rail-drop-target="true"]')).toBeNull();
 
         source.dispatchEvent(new PointerEvent('pointermove', {
-            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 30,
+            bubbles: true,
+            pointerId: 1,
+            buttons: 1,
+            clientX: 30,
+            clientY: 30,
         }));
 
         expect(document.querySelector('[data-music-rail-drop-target="true"]')).toBeNull();
@@ -1179,7 +1211,11 @@ describe('music pill node views', () => {
         await new Promise(resolve => window.setTimeout(resolve, 400));
 
         source.dispatchEvent(new PointerEvent('pointermove', {
-            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 30,
+            bubbles: true,
+            pointerId: 1,
+            buttons: 1,
+            clientX: 30,
+            clientY: 30,
         }));
 
         const dropTargets = Array.from(
@@ -1292,11 +1328,19 @@ describe('music pill node views', () => {
         const elements = vi.spyOn(document, 'elementsFromPoint').mockReturnValue([canvas]);
 
         source.dispatchEvent(new PointerEvent('pointerdown', {
-            bubbles: true, pointerId: 1, button: 0, clientX: 10, clientY: 40,
+            bubbles: true,
+            pointerId: 1,
+            button: 0,
+            clientX: 10,
+            clientY: 40,
         }));
         await new Promise(resolve => window.setTimeout(resolve, 400));
         source.dispatchEvent(new PointerEvent('pointermove', {
-            bubbles: true, pointerId: 1, buttons: 1, clientX: 30, clientY: 260,
+            bubbles: true,
+            pointerId: 1,
+            buttons: 1,
+            clientX: 30,
+            clientY: 260,
         }));
 
         expect(document.querySelector(
@@ -1304,7 +1348,8 @@ describe('music pill node views', () => {
         )).not.toBeNull();
 
         source.dispatchEvent(new PointerEvent('pointercancel', {
-            bubbles: true, pointerId: 1,
+            bubbles: true,
+            pointerId: 1,
         }));
 
         rectSpies.forEach(spy => spy.mockRestore());

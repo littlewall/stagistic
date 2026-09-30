@@ -1,7 +1,7 @@
 import {Button} from 'react-aria-components';
 
-import {Tag} from '../atoms/Tag';
-import {Tooltip} from '../atoms/Tooltip';
+import {Tag} from '../atoms/Tag/Tag';
+import {Tooltip} from '../atoms/Tooltip/Tooltip';
 import {EditPencilIcon} from '../icons';
 import {CharacterColorControl} from './characterRowConfirmed/CharacterColorControl';
 import {useCharacterColorPickerState} from './characterRowConfirmed/useCharacterColorPickerState';
@@ -57,9 +57,7 @@ export const CharacterGroupRow = ({
                 }}
             />
             <span className={styles.characterName}>{group.key}</span>
-            {group.isEmpty ? (
-                <Tag className={styles.groupEmptyTag}>Empty</Tag>
-            ) : null}
+            {group.isEmpty ? <Tag className={styles.groupEmptyTag}>Empty</Tag> : null}
             <Tooltip
                 label={`Manage group ${group.key}`}
                 placement="left"
@@ -77,7 +75,10 @@ export const CharacterGroupRow = ({
                         onEditGroup(group.id);
                     }}
                 >
-                    <EditPencilIcon className={styles.iconGlyph} aria-hidden="true" />
+                    <EditPencilIcon
+                        className={styles.iconGlyph}
+                        aria-hidden="true"
+                    />
                 </Button>
             </Tooltip>
         </div>

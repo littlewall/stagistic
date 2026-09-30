@@ -12,7 +12,7 @@ import {
 } from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
-import {createExampleScript} from './example-script/createExampleScript';
+import {createExampleScript} from '../../example-script/createExampleScript';
 import {HomeRoute} from './HomeRoute';
 
 const {
@@ -56,7 +56,7 @@ vi.mock('@stagistic/app-core', async importOriginal => {
     };
 });
 
-vi.mock('./example-script/createExampleScript', () => ({
+vi.mock('../../example-script/createExampleScript', () => ({
     createExampleScript: vi.fn(),
 }));
 

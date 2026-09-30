@@ -1,0 +1,19 @@
+---
+import s from '../../pages/editor/syntax.module.css';
+
+interface Props {
+    id: string;
+    n: string;
+    title: string;
+}
+
+const {id, n, title} = Astro.props;
+---
+
+<section id={id} class={s.section}>
+    <h2 class={s.sectionTitle}>
+        <span class={s.sectionNum}>{n}</span>
+        {title}
+    </h2>
+    <slot />
+</section>

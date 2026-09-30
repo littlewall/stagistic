@@ -1,4 +1,8 @@
-import {buildScriptBlockIndex, type ScriptDocument, type ScriptNode} from '@stagistic/script';
+import {
+    buildScriptBlockIndex,
+    type ScriptDocument,
+    type ScriptNode,
+} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import type {MutableRefObject} from 'react';
 
@@ -12,24 +16,30 @@ let paginationRecalcToken = 0;
 const nextPaginationRecalcToken = () => ++paginationRecalcToken;
 
 export interface CommitContext {
-    editor: TiptapEditor;
-    setLatestValue: (value: ScriptDocument, revision?: number) => void;
-    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>;
-    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>;
-    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void;
-    revisionRef: MutableRefObject<number>;
+    editor: TiptapEditor,
+    setLatestValue: (value: ScriptDocument, revision?: number) => void,
+    onValueChangeRef: MutableRefObject<((value: ScriptDocument, meta?: EditorValueChangeMeta) => void) | undefined>,
+    onIndexChangeRef: MutableRefObject<((snapshot: EditorIndexSnapshot, meta?: EditorValueChangeMeta) => void) | undefined>,
+    scheduleAutosave: (value?: ScriptDocument | AutosaveSchedulePayload) => void,
+    revisionRef: MutableRefObject<number>,
 }
 
+export {buildDeleteActContent, buildInsertActContent} from './actBlockMutations';
 export {
     buildConvertSceneHeadingContent,
-    buildDeleteActContent,
     buildDeleteSceneHeadingContent,
-    buildInsertActContent,
     setPlainTextContent,
 } from './blockMutations';
 
 const commitDocument = (
-    {editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef}: CommitContext,
+    {
+        editor,
+        setLatestValue,
+        onValueChangeRef,
+        onIndexChangeRef,
+        scheduleAutosave,
+        revisionRef,
+    }: CommitContext,
     nextContent: ScriptNode[],
     currentDocAttrs: ScriptDocument['attrs'],
 ) => {
@@ -77,7 +87,14 @@ export const tryCommitSceneReorder = (
     didChange: boolean,
     currentDocAttrs: ScriptDocument['attrs'],
 ) => {
-    const {editor, setLatestValue, onValueChangeRef, onIndexChangeRef, scheduleAutosave, revisionRef} = ctx;
+    const {
+        editor,
+        setLatestValue,
+        onValueChangeRef,
+        onIndexChangeRef,
+        scheduleAutosave,
+        revisionRef,
+    } = ctx;
 
     if (!didChange || !Array.isArray(nextContent)) {
         return;

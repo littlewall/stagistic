@@ -1,5 +1,13 @@
 import {normalizeEditorSettingsBlockType} from './normalize';
-import type {BlockSettings, BlockSpacingSettings, EditorSettings, EditorSettingsOverride, PageSettings, TypographySettings, VisualSettings} from './types';
+import type {
+    BlockSettings,
+    BlockSpacingSettings,
+    EditorSettings,
+    EditorSettingsOverride,
+    PageSettings,
+    TypographySettings,
+    VisualSettings,
+} from './types';
 
 export const mergeEditorSettings = (base: EditorSettings, ...overrides: Array<EditorSettingsOverride | null | undefined>): EditorSettings => {
     let next: EditorSettings = {

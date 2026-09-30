@@ -5,8 +5,8 @@ import {
     it,
 } from 'vite-plus/test';
 
-import type {CharactersAndPlacesInitialPagePlan} from '../plan';
-import type {VisualLine} from '../visualLine';
+import type {CharactersAndPlacesInitialPagePlan} from '../model/plan';
+import type {VisualLine} from '../model/visualLine';
 import {buildCharactersAndPlacesPages} from './buildCharactersAndPlacesPages';
 
 const textOf = (line: VisualLine) => line.runs.map(run => run.text).join('');
@@ -26,9 +26,14 @@ const basePlan = (
     kind: 'characters-and-places',
     characters: [
         {
-            id: 'anna', displayName: 'Anna', outline: 'A brave lead',
-        }, {
-            id: 'bob', displayName: 'Bob', outline: 'A careful friend',
+            id: 'anna',
+            displayName: 'Anna',
+            outline: 'A brave lead',
+        },
+        {
+            id: 'bob',
+            displayName: 'Bob',
+            outline: 'A careful friend',
         },
     ],
     places: [{id: 'attic', name: 'Attic'}, {id: 'stage', name: 'Stage'}],

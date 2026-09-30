@@ -1,4 +1,11 @@
-import {BaseDirectory, mkdir, readDir, remove, writeFile} from '@tauri-apps/plugin-fs';
+import {
+    BaseDirectory,
+    mkdir,
+    readDir,
+    remove,
+    writeFile,
+} from '@tauri-apps/plugin-fs';
+
 import {dumpDataDir} from '~db';
 
 const BACKUP_DIR = 'backups';
@@ -30,9 +37,11 @@ const pruneOldBackups = async (): Promise<void> => {
     await Promise.all(stale.map(name => remove(`${BACKUP_DIR}/${name}`, {baseDir: BaseDirectory.AppData})));
 };
 
-// Snapshot the whole pglite data dir to a single portable file in the app data
-// folder. The live store already persists incrementally to OPFS; this is the
-// durable, inspectable, exportable copy the user can back up or migrate.
+/*
+ * Snapshot the whole pglite data dir to a single portable file in the app data
+ * folder. The live store already persists incrementally to OPFS; this is the
+ * durable, inspectable, exportable copy the user can back up or migrate.
+ */
 export const writeBackup = async (): Promise<void> => {
     const dump = await dumpDataDir('gzip');
     const bytes = new Uint8Array(await dump.arrayBuffer());
@@ -45,11 +54,13 @@ export const writeBackup = async (): Promise<void> => {
 };
 
 export interface BackupSchedule {
-    stop: () => void;
+    stop: () => void,
 }
 
-// Periodic snapshots. Call the returned `stop()` on teardown; pair with a
-// window-close handler that awaits `writeBackup()` for a final snapshot.
+/*
+ * Periodic snapshots. Call the returned `stop()` on teardown; pair with a
+ * window-close handler that awaits `writeBackup()` for a final snapshot.
+ */
 export const startBackupSchedule = (intervalMs: number = DEFAULT_INTERVAL_MS): BackupSchedule => {
     const runSafely = () => {
         void writeBackup().catch(error => {

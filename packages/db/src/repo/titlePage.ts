@@ -1,15 +1,23 @@
-import type {TitlePageCredit, TitlePageLogo, TitlePageSettings} from '@stagistic/script';
+import type {
+    TitlePageCredit,
+    TitlePageLogo,
+    TitlePageSettings,
+} from '@stagistic/script';
 import {uuidv7} from '@stagistic/shared';
 
-import * as dbQueries from '../queries';
 import type {DbClient} from '../queries';
+import * as dbQueries from '../queries';
 import type {ScriptTitlePageRepository} from '../scriptRepository';
-import type {GetDb, RecordOutbox, SyncDb} from './types';
+import type {
+    GetDb,
+    RecordOutbox,
+    SyncDb,
+} from './types';
 
 interface CreateTitlePageHandlersArgs {
-    getDb: GetDb;
-    recordOutbox: RecordOutbox;
-    syncDb: SyncDb;
+    getDb: GetDb,
+    recordOutbox: RecordOutbox,
+    syncDb: SyncDb,
 }
 
 /*
@@ -17,7 +25,14 @@ interface CreateTitlePageHandlersArgs {
  * (so the script list can read it without a join) and is bridged in
  * load()/save() below. The remaining fields live in scriptSettingsTitlePage.
  */
-const STRING_FIELDS = ['source', 'draftDateMode', 'draftDate', 'dateFormat', 'contact', 'copyright'] as const;
+const STRING_FIELDS = [
+    'source',
+    'draftDateMode',
+    'draftDate',
+    'dateFormat',
+    'contact',
+    'copyright',
+] as const;
 const LOGO_FIELD = 'logo';
 
 type StringField = (typeof STRING_FIELDS)[number];
@@ -78,6 +93,7 @@ const toTitlePageSettings = (rows: Awaited<ReturnType<typeof dbQueries.listScrip
 export const readTitlePageSettings = async (db: DbClient, scriptId: string): Promise<TitlePageSettings | null> => {
     const settings = toTitlePageSettings(await dbQueries.listScriptTitlePageFields(db, scriptId));
     const subtitle = await dbQueries.getScriptSubtitle(db, scriptId);
+
     return subtitle === null || subtitle.length === 0 ? settings : {...settings, subtitle};
 };
 
@@ -107,6 +123,7 @@ export const writeTitlePageFieldsTx = async (tx: DbClient, scriptId: string, set
     if (settings.logo) {
         addRow(LOGO_FIELD, JSON.stringify(settings.logo));
     }
+
     settings.credits?.forEach((credit, groupNo) => {
         addRow('credit_label', credit.credit, groupNo);
         credit.authors.forEach(author => addRow('credit_author', author, groupNo));
@@ -122,9 +139,14 @@ export const writeTitlePageFieldsTx = async (tx: DbClient, scriptId: string, set
     });
 };
 
-export const createTitlePageHandlers = ({getDb, recordOutbox, syncDb}: CreateTitlePageHandlersArgs): ScriptTitlePageRepository => {
+export const createTitlePageHandlers = ({
+    getDb,
+    recordOutbox,
+    syncDb,
+}: CreateTitlePageHandlersArgs): ScriptTitlePageRepository => {
     const load: ScriptTitlePageRepository['load'] = async scriptId => {
         const db = await getDb();
+
         return readTitlePageSettings(db, scriptId);
     };
 

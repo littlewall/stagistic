@@ -75,14 +75,10 @@
     --line-height-tight: 1.1;
     --line-height-snug: 1.2;
     --line-height-normal: 1.5;
-    --line-height-relaxed: 1.7;
 
-    --letter-spacing-tight: -.02em;
     --letter-spacing-normal: 0em;
     --letter-spacing-sm: .02em;
-    --letter-spacing-md: .05em;
     --letter-spacing-lg: .08em;
-    --letter-spacing-xl: .12em;
 
     /* ── Control heights ───────────────────────────────────────── */
     --control-height-xs: 1.5rem; /* 24px */
@@ -136,7 +132,6 @@
     --L-bg: .97;
     --L-surface: .985;
     --L-paper: .985;
-    --L-accent: .908;
     --L-highlight: .952;
     --L-text: .155;
     --L-text-muted: .465;
@@ -166,7 +161,6 @@
     --color-text: oklch(from var(--base-neutral) var(--L-text) calc(c * var(--C-block)) h);
     --color-text-muted: oklch(from var(--base-neutral) var(--L-text-muted) calc(c * var(--C-block)) h);
     --color-text-placeholder: oklch(from var(--base-neutral) var(--L-text-placeholder) calc(c * var(--C-block)) h);
-    --color-text-link: oklch(from var(--base-selection) .58 c h);
     --color-accent: var(--base-accent);
 
     /* Borders */
@@ -231,7 +225,6 @@
     --color-status-danger: oklch(from var(--base-red) var(--L-danger) c h);
 
     /* Shadows */
-    --shadow-none: none;
     --color-shadow-popover: oklch(from var(--base-shadow) .13 c h / var(--A-shadow-popover));
     --color-shadow-card: oklch(from var(--base-shadow) .14 c h / var(--A-shadow-card));
     --color-shadow-panel: oklch(from var(--base-shadow) .14 c h / var(--A-shadow-panel));
@@ -303,7 +296,6 @@
     --L-bg: .135;
     --L-surface: .17;
     --L-paper: .26;
-    --L-accent: .278;
     --L-highlight: .33;
 
     --L-text: .92;
@@ -336,7 +328,6 @@
 
     --color-border-subtle: oklch(from var(--base-neutral) .28 calc(c * var(--C-block)) h);
     --color-border-strong: oklch(from var(--base-neutral) .52 calc(c * var(--C-block)) h);
-    --color-text-link: oklch(from var(--base-selection) .68 c h);
     --color-focus-ring: oklch(from var(--base-selection) .68 c h);
 
     color-scheme: dark;

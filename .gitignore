@@ -74,10 +74,6 @@ vite.config.js
 vite.config.js.map
 vite.config.d.ts
 vite.config.d.ts.map
-oxfmt.config.js
-oxfmt.config.js.map
-oxfmt.config.d.ts
-oxfmt.config.d.ts.map
 oxlint.config.js
 oxlint.config.js.map
 oxlint.config.d.ts

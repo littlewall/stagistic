@@ -2,110 +2,16 @@
 import {clsx} from 'clsx';
 import CreatorNote from '../components/CreatorNote.astro';
 import LandingMiniEditor from '../components/mini-editor/LandingMiniEditor';
+import {landingFaqs} from '../data/landingFaqs';
+import {landingFeatures} from '../data/landingFeatures';
 import Layout from '../layouts/Layout.astro';
 import s from './index.module.css';
-
-const features = [
-    {
-        label: 'A playwriting structure',
-        description:
-            'Dedicated blocks for acts, scene headings, character cues, dialogue, stage directions, lyrics, and notes. Every part of the script keeps its own formatting and behaviour.',
-        videoSrc: '/features/theatre-writing.mp4',
-        videoTitle: 'A formatted theatre script in Stagistic Editor',
-        videoFit: 'contain',
-        shape: 'one',
-        href: '/editor/playwriting',
-        linkLabel: 'Explore stage playwriting',
-    },
-    {
-        label: 'Acts and scenes that stay connected',
-        description:
-            'A live outline keeps the structure visible as you write. Jump directly to any scene, reorder scenes, and group them into acts instead of forcing your play into a screenplay-shaped structure.',
-        videoSrc: '/features/acts-and-scenes.mp4',
-        videoTitle: 'The scene outline beside a script in Stagistic Editor',
-        videoFit: 'contain',
-        shape: 'two',
-    },
-    {
-        label: 'Smart character management',
-        description:
-            'Build a character catalogue directly from your script. Assign colours, highlight appearances, group characters, rename characters, tag them inside stage directions, and write dialogue for two or more characters speaking together.',
-        imageSrc: '/features/characters.png',
-        imageAlt: 'The character catalogue in Stagistic Editor',
-        imageFit: 'contain',
-        shape: 'three',
-    },
-    {
-        label: 'First-class musical theatre support',
-        description:
-            'Write lyrics as their own block type, manage songs and instrumentals, place music cues directly in the script, and attach score PDFs to individual musical numbers.',
-        imageSrc: '/features/musical.png',
-        imageAlt: 'Lyrics formatted inside a musical script in Stagistic Editor',
-        imageFit: 'contain',
-        shape: 'one',
-        href: '/editor/musicals',
-        linkLabel: 'Explore musical theatre writing',
-    },
-    {
-        label: 'A writing flow you can configure',
-        description:
-            "Configure page format, title page, headers and footers, and each block's indentation, alignment, emphasis, and casing. Set keyboard shortcuts and decide which block follows next, so the editor matches the way you write.",
-        imageSrc: '/features/writing-flow.png',
-        imageAlt: 'Formatting controls above a script in Stagistic Editor',
-        imageFit: 'cover',
-        shape: 'three',
-    },
-    {
-        label: 'Integrated script and score export',
-        description:
-            'Export your script and sheet music into a single, print-ready PDF. Stagistic Editor automatically handles page numbering across your text and inserted music scores, so actors and musicians always stay on the same page.',
-        imageSrc: '/features/export.png',
-        imageAlt: 'A print-ready theatre script displayed in Stagistic Editor',
-        imageFit: 'cover',
-        shape: 'two',
-    },
-];
-
-const faqs = [
-    {
-        q: 'Is Stagistic Editor free?',
-        a: 'Yes. Stagistic Editor is free now and will remain free in the future. There is no subscription, trial, or paywall for writing, structuring, or exporting your scripts.',
-    },
-    {
-        q: 'Do I need an account?',
-        a: 'No. You can open the editor and start writing without signing up. Your scripts are stored locally in your browser by default. You can also download a backup of your work and import it again whenever you need it.',
-    },
-    {
-        q: 'Where is my data stored?',
-        a: 'Locally in your browser. You can download a .stagistic backup and import it again whenever you need it. Cloud sync is not ready yet; but when it is, it will be free.',
-    },
-    {
-        q: 'Can I use it for a commercial production?',
-        a: 'Absolutely! There are no restrictions on how you use scripts you write in Stagistic Editor. The editor is free for everyone.',
-    },
-    {
-        q: 'How is Stagistic Editor different from other software?',
-        a: 'Industry standard tools like Final Draft use a screenplay structure (INT/EXT) which Stagistic Editor deliberately avoids in favour of theatre acts and scenes. It is designed from the ground up specifically for stage plays and musicals.',
-    },
-    {
-        q: 'How does Stagistic Editor help me format a stage script?',
-        a: 'Instead of formatting text with spaces and tabs, Stagistic Editor uses dedicated blocks for elements like stage directions, dialogue, and lyrics. This means your play stays perfectly structured, character names remain linked to a central cast list, and stage directions format automatically.',
-    },
-    {
-        q: 'How do I format a musical script?',
-        a: 'Writing a libretto is natively supported. Stagistic Editor has dedicated blocks for lyrics, handles songs and instrumentals via a catalogue, and allows you to attach PDF scores directly to musical numbers. The export engine then seamlessly combines your script and scores into one paginated document.',
-    },
-    {
-        q: 'Is Stagistic Editor open source?',
-        a: 'Yes, the editor is available on GitHub under the MIT licence. Any contributions are welcome!',
-    },
-];
 ---
 
 <Layout
     title="Stagistic Editor - Script editor built for theatre"
     description="Stagistic Editor is a script editor built specifically for theatrical plays and musicals. Not screenwriting. Not prose. The stage."
-    canonical={new URL("/", Astro.site).href.replace(/\/$/, '')}
+    canonical={new URL('/', Astro.site).href.replace(/\/$/, '')}
     softwareApplication
 >
     <div class={s.page}>
@@ -131,10 +37,7 @@ const faqs = [
                         <span class={s.visuallyHidden}>Try it!</span>
                         <svg viewBox="0 0 176 90" aria-hidden="true" focusable="false">
                             <path
-                                class={clsx(
-                                        s.tryEditorCalloutStroke,
-                                        s.tryEditorCalloutText,
-                                    )}
+                                class={clsx(s.tryEditorCalloutStroke, s.tryEditorCalloutText)}
                                 pathLength="1"
                                 vector-effect="non-scaling-stroke"
                                 d="
@@ -155,10 +58,7 @@ const faqs = [
                                     "
                             />
                             <path
-                                class={clsx(
-                                        s.tryEditorCalloutStroke,
-                                        s.tryEditorCalloutArrow,
-                                    )}
+                                class={clsx(s.tryEditorCalloutStroke, s.tryEditorCalloutArrow)}
                                 pathLength="1"
                                 vector-effect="non-scaling-stroke"
                                 d="
@@ -202,56 +102,44 @@ const faqs = [
             <div class={clsx(s.featuresInner, s.reveal)} data-reveal>
                 <h2 class={s.featuresTitle}>Features built for playwrights and librettists.</h2>
                 <div class={s.featuresList}>
-                    {features.map((f) => (
-                                <article class={s.featureItem}>
-                                    <div class={s.featureCopy}>
-                                        <h3 class={s.featureLabel}>{f.label}</h3>
-                                        <p class={s.featureDesc}>{f.description}</p>
-                                        {f.href && (
-                                            <div class={s.featureLinkWrap}>
-                                                <a href={f.href} class={s.btnOutline}>
-                                                    {f.linkLabel} &rarr;
-                                                </a>
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div
-                                        class={s.featureMedia}
-                                        data-feature-media
-                                        data-shape={f.shape}
-                                    >
-                                        { f.videoSrc ? (
-                                            <div class={s.featureMediaFrame}>
-                                                <video
-                                                    data-feature-video
-                                                    src={f.videoSrc}
-                                                    title={f.videoTitle}
-                                                    class={s.featureVideo}
-                                                    data-fit={f.videoFit}
-                                                    autoplay
-                                                    muted
-                                                    loop
-                                                    playsinline
-                                                >
-                                                    <source src={f.videoSrc} type="video/mp4" />
-                                                </video>
-                                            </div>
-                                        ) : f.imageSrc ? (
-                                            <div class={s.featureMediaFrame}>
-                                                <img
-                                                    data-feature-image
-                                                    src={f.imageSrc}
-                                                    alt={f.imageAlt}
-                                                    class={s.featureImage}
-                                                    data-fit={f.imageFit}
-                                                    loading="lazy"
-                                                    decoding="async"
-                                                />
-                                            </div>
-                                        ) : null }
-                                    </div>
-                                </article>
-                            ))}
+                    {landingFeatures.map(f => (
+    <article class={s.featureItem}>
+        <div class={s.featureCopy}>
+            <h3 class={s.featureLabel}>{f.label}</h3>
+            <p class={s.featureDesc}>{f.description}</p>
+            {f.href && (
+                <div class={s.featureLinkWrap}>
+                    <a href={f.href} class={s.btnOutline}>
+                        {f.linkLabel} &rarr;
+                    </a>
+                </div>
+            )}
+        </div>
+        <div class={s.featureMedia} data-feature-media data-shape={f.shape}>
+            {f.videoSrc ? (
+                <div class={s.featureMediaFrame}>
+                    <video
+                        data-feature-video
+                        src={f.videoSrc}
+                        title={f.videoTitle}
+                        class={s.featureVideo}
+                        data-fit={f.videoFit}
+                        autoplay
+                        muted
+                        loop
+                        playsinline
+                    >
+                        <source src={f.videoSrc} type="video/mp4" />
+                    </video>
+                </div>
+            ) : f.imageSrc ? (
+                <div class={s.featureMediaFrame}>
+                    <img data-feature-image src={f.imageSrc} alt={f.imageAlt} class={s.featureImage} data-fit={f.imageFit} loading="lazy" decoding="async" />
+                </div>
+            ) : null}
+        </div>
+    </article>
+))}
                 </div>
             </div>
         </section>
@@ -265,15 +153,17 @@ const faqs = [
                     <h2 class={s.faqTitle}>Common<br>questions.</h2>
                 </div>
                 <div class={s.faqList}>
-                    {faqs.map((faq) => (
-                                <details class={s.faqItem}>
-                                    <summary>
-                                        <span>{faq.q}</span>
-                                        <span class={s.faqIcon} aria-hidden="true">+</span>
-                                    </summary>
-                                    <p class={s.faqAnswer}>{faq.a}</p>
-                                </details>
-                            ))}
+                    {landingFaqs.map(faq => (
+    <details class={s.faqItem}>
+        <summary>
+            <span>{faq.q}</span>
+            <span class={s.faqIcon} aria-hidden="true">
+                +
+            </span>
+        </summary>
+        <p class={s.faqAnswer}>{faq.a}</p>
+    </details>
+))}
                 </div>
             </div>
         </section>

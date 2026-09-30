@@ -6,15 +6,27 @@ import {handleSceneCollapseKeyDown} from '../../extensions/sceneCollapse/sceneCo
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../scriptCore';
 import {createBlockContext} from '../context';
 import {deleteSelectionPreservingScenes, selectionSpansScene} from '../deleteSelectionPreservingScenes';
-import {deleteEmptyBlockAfterScene, shouldBlockBackspace, shouldBlockForwardDelete} from '../sceneDeletionGuard';
+import {
+    deleteEmptyBlockAfterScene,
+    shouldBlockBackspace,
+    shouldBlockForwardDelete,
+} from '../sceneDeletionGuard';
 import {handleEnter} from './enter';
 import {handlePaste} from './paste';
 import {handleBlockShortcut, handleBlockTypeCycle} from './shortcuts';
 import {handleTab} from './tab';
 import {handleTextInput, textInputHandlerMaps} from './textInput';
-import {type BlockCasingMap, type BlockNextElementMap, type BlockShortcutMap} from './types';
+import {
+    type BlockCasingMap,
+    type BlockNextElementMap,
+    type BlockShortcutMap,
+} from './types';
 
-export type {BlockCasingMap, BlockNextElementMap, BlockShortcutMap};
+export type {
+    BlockCasingMap,
+    BlockNextElementMap,
+    BlockShortcutMap,
+};
 
 const hasShortcutModifier = (event: KeyboardEvent) => {
     if (isApplePlatform()) {
@@ -25,10 +37,10 @@ const hasShortcutModifier = (event: KeyboardEvent) => {
 };
 
 interface EmptyEnterChooserCommands {
-    closeEmptyEnterChooser?: () => boolean;
-    moveEmptyEnterChooserSelection?: (direction: -1 | 1) => boolean;
-    confirmEmptyEnterChooserType?: () => boolean;
-    insertNextEmptyFromEmptyEnterChooser?: () => boolean;
+    closeEmptyEnterChooser?: () => boolean,
+    moveEmptyEnterChooserSelection?: (direction: -1 | 1) => boolean,
+    confirmEmptyEnterChooserType?: () => boolean,
+    insertNextEmptyFromEmptyEnterChooser?: () => boolean,
 }
 
 const getEmptyEnterChooserCommands = (editor: Editor): EmptyEnterChooserCommands => {
@@ -148,4 +160,8 @@ export const handleKeyDown = (editor: Editor, event: KeyboardEvent, blockShortcu
     return handler(createBlockContext(editor, block), event);
 };
 
-export {handlePaste, handleTab, handleTextInput};
+export {
+    handlePaste,
+    handleTab,
+    handleTextInput,
+};

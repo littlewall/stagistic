@@ -7,7 +7,11 @@ import type {
     ScriptRepository,
 } from '@stagistic/db';
 
-import {createReactiveCollection, createRepositoryStoreRegistry, toDomainCollectionValue} from '../collections';
+import {
+    createReactiveCollection,
+    createRepositoryStoreRegistry,
+    toDomainCollectionValue,
+} from '../collections';
 
 export type CreateCommentThreadInput = Omit<CreateScriptCommentThreadInput, 'messageId' | 'timestamp'>;
 

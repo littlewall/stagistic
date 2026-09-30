@@ -6,7 +6,6 @@ import {
 } from '@stagistic/editor';
 import {formatMusicNumber} from '@stagistic/script';
 import {
-    clsx,
     EditPencilIcon,
     IconButton,
     LinkSlashIcon,
@@ -15,6 +14,7 @@ import {
     SidebarMiniHeader,
     Tooltip,
 } from '@stagistic/ui';
+import clsx from 'clsx';
 import {
     type ReactNode,
     useCallback,
@@ -22,8 +22,8 @@ import {
     useState,
 } from 'react';
 
-import {ATTRIBUTE_MANAGER_PANEL_MUSIC} from '../../attributes/attributeManagerMenu';
-import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalProvider';
+import {ATTRIBUTE_MANAGER_PANEL_MUSIC} from '../../attribute-manager/attributeManagerMenu';
+import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalContext';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import {MusicSidebarContextActions} from './MusicSidebarContextActions';
 import styles from './ScriptMusicSidebar.module.css';
@@ -51,7 +51,10 @@ const RowActionButton = ({
     onPress,
     children,
 }: RowActionButtonProps) => (
-    <Tooltip label={tooltipLabel} placement="bottom">
+    <Tooltip
+        label={tooltipLabel}
+        placement="bottom"
+    >
         <IconButton
             size="xs"
             aria-label={ariaLabel}
@@ -89,8 +92,7 @@ const MusicRow = ({
         <>
             {number ? (
                 <>
-                    <span className={styles.number}>{number}</span>
-                    {' '}
+                    <span className={styles.number}>{number}</span>{' '}
                 </>
             ) : null}
             {music.title}
@@ -140,7 +142,9 @@ const MusicRow = ({
                 >
                     {label}
                 </button>
-            ) : <span className={styles.label}>{label}</span>}
+            ) : (
+                <span className={styles.label}>{label}</span>
+            )}
         </ListRow>
     );
 };
@@ -159,37 +163,51 @@ export const ScriptMusicSidebar = ({
     const {openAttributeManagerMusic} = useScriptSettingsModal();
     const [unassignTarget, setUnassignTarget] = useState<ScriptMusicListItem | null>(null);
 
-    const musicMetadataById = useMemo(() => new Map(documentMusic.map((music, index) => [
-        music.musicId, {
-            number: formatMusicNumber(music),
-            order: index,
-            startBlockId: music.startBlockId,
-            title: music.title,
-        },
-    ] as const)), [documentMusic]);
-    const displayedMusic = useMemo(() => music.map(music => {
-        const liveMetadata = musicMetadataById.get(music.id);
+    const musicMetadataById = useMemo(
+        () => new Map(
+            documentMusic.map(
+                (music, index) => [
+                    music.musicId,
+                    {
+                        number: formatMusicNumber(music),
+                        order: index,
+                        startBlockId: music.startBlockId,
+                        title: music.title,
+                    },
+                ] as const,
+            ),
+        ),
+        [documentMusic],
+    );
+    const displayedMusic = useMemo(
+        () => music.map(music => {
+            const liveMetadata = musicMetadataById.get(music.id);
 
-        if (!liveMetadata) {
-            return music;
-        }
+            if (!liveMetadata) {
+                return music;
+            }
 
-        return {
-            ...music,
-            assignmentLabel: music.assignmentLabel ?? liveMetadata.number,
-            title: liveMetadata.title.trim() || music.title,
-        };
-    }), [musicMetadataById, music]);
-    const {
-        assignedMusic,
-        unassignedMusic,
-    } = useMemo(() => ({
-        assignedMusic: displayedMusic.filter(music => music.assignmentLabel).sort((left, right) => {
-            return (musicMetadataById.get(left.id)?.order ?? Number.MAX_SAFE_INTEGER)
-                - (musicMetadataById.get(right.id)?.order ?? Number.MAX_SAFE_INTEGER);
+            return {
+                ...music,
+                assignmentLabel: music.assignmentLabel ?? liveMetadata.number,
+                title: liveMetadata.title.trim() || music.title,
+            };
         }),
-        unassignedMusic: displayedMusic.filter(music => !music.assignmentLabel),
-    }), [musicMetadataById, displayedMusic]);
+        [musicMetadataById, music],
+    );
+    const {assignedMusic, unassignedMusic} = useMemo(
+        () => ({
+            assignedMusic: displayedMusic
+                .filter(music => music.assignmentLabel)
+                .sort((left, right) => {
+                    return (
+                        (musicMetadataById.get(left.id)?.order ?? Number.MAX_SAFE_INTEGER) - (musicMetadataById.get(right.id)?.order ?? Number.MAX_SAFE_INTEGER)
+                    );
+                }),
+            unassignedMusic: displayedMusic.filter(music => !music.assignmentLabel),
+        }),
+        [musicMetadataById, displayedMusic],
+    );
     const handleConfirmUnassign = useCallback(async () => {
         if (!unassignTarget) {
             return;
@@ -236,19 +254,36 @@ export const ScriptMusicSidebar = ({
                 )}
             />
             {isLoading ? (
-                <section className={styles.section} aria-label="Music">
-                    <p className={styles.empty} role="status">Loading music...</p>
+                <section
+                    className={styles.section}
+                    aria-label="Music"
+                >
+                    <p
+                        className={styles.empty}
+                        role="status"
+                    >
+                        Loading music...
+                    </p>
                 </section>
             ) : (
                 <>
-                    <section className={styles.section} aria-label="Assigned music">
-                        {assignedMusic.length > 0 ? renderMusicList(assignedMusic) : (
-                            <p className={styles.empty}>No assigned music yet.</p>
-                        )}
+                    <section
+                        className={styles.section}
+                        aria-label="Assigned music"
+                    >
+                        {assignedMusic.length > 0 ? renderMusicList(assignedMusic) : <p className={styles.empty}>No assigned music yet.</p>}
                     </section>
                     {unassignedMusic.length > 0 ? (
-                        <section className={styles.section} aria-labelledby="music-unassigned">
-                            <h3 id="music-unassigned" className={styles.sectionTitle}>Unassigned</h3>
+                        <section
+                            className={styles.section}
+                            aria-labelledby="music-unassigned"
+                        >
+                            <h3
+                                id="music-unassigned"
+                                className={styles.sectionTitle}
+                            >
+                                Unassigned
+                            </h3>
                             {renderMusicList(unassignedMusic)}
                         </section>
                     ) : null}

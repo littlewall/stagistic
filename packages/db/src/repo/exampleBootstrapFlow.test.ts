@@ -8,7 +8,7 @@ import {
     it,
 } from 'vite-plus/test';
 
-import {InMemoryFileStorage} from '../fileStorage';
+import {InMemoryFileStorage} from '../storage/fileStorage';
 import {createTestDb} from '../testing/createTestDb';
 import {createLocalPgliteRepository} from './createLocalPgliteRepository';
 

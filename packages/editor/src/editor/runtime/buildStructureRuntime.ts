@@ -10,7 +10,9 @@ import {
 
 export const buildStructureRuntime = (doc: ProseMirrorNode): EditorLiveStructureSnapshot => {
     const blocks: {
-        blockId: string, blockType: string, textContent: string,
+        blockId: string,
+        blockType: string,
+        textContent: string,
     }[] = [];
 
     try {
@@ -29,7 +31,9 @@ export const buildStructureRuntime = (doc: ProseMirrorNode): EditorLiveStructure
             }
 
             blocks.push({
-                blockId, blockType, textContent: node.textContent,
+                blockId,
+                blockType,
+                textContent: node.textContent,
             });
 
             return false;

@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
@@ -22,7 +24,9 @@ describe('buildScriptBlockIndex', () => {
     it('returns an empty snapshot for nullish or empty documents', () => {
         const empty = {
             snapshot: {
-                blocks: [], music: [], orphanMusicOutBlockIds: [],
+                blocks: [],
+                music: [],
+                orphanMusicOutBlockIds: [],
             },
             blockCount: 0,
         };
@@ -46,13 +50,20 @@ describe('buildScriptBlockIndex', () => {
             2,
         ]);
         expect(snapshot.blocks[0]).toMatchObject({
-            blockId: 'a1', blockType: 'act', actBlockId: 'a1', sceneBlockId: null,
+            blockId: 'a1',
+            blockType: 'act',
+            actBlockId: 'a1',
+            sceneBlockId: null,
         });
         expect(snapshot.blocks[1]).toMatchObject({
-            blockId: 's1', actBlockId: 'a1', sceneBlockId: 's1',
+            blockId: 's1',
+            actBlockId: 'a1',
+            sceneBlockId: 's1',
         });
         expect(snapshot.blocks[2]).toMatchObject({
-            blockId: 'd1', actBlockId: 'a1', sceneBlockId: 's1',
+            blockId: 'd1',
+            actBlockId: 'a1',
+            sceneBlockId: 's1',
         });
     });
 
@@ -79,7 +90,9 @@ describe('buildScriptBlockIndex', () => {
     it('synthesizes a fallback id for blocks without one', () => {
         const {snapshot} = buildScriptBlockIndex(doc([
             {
-                type: 'scene', attrs: {}, content: [{type: 'text', text: 'x'}],
+                type: 'scene',
+                attrs: {},
+                content: [{type: 'text', text: 'x'}],
             },
         ]));
 
@@ -101,7 +114,9 @@ describe('buildScriptBlockIndex', () => {
     it('derives character-block refs from the characterRefs attribute', () => {
         const {snapshot} = buildScriptBlockIndex(doc([
             {
-                type: 'character', attrs: {id: 'c1', characterRefs: {ANNA: 'char-1'}}, content: [],
+                type: 'character',
+                attrs: {id: 'c1', characterRefs: {ANNA: 'char-1'}},
+                content: [],
             },
         ]));
 
@@ -140,21 +155,38 @@ describe('buildScriptBlockIndex', () => {
                 type: 'stageDirection',
                 attrs: {id: 'b1'},
                 content: [
-                    {type: 'text', text: 'Lights fade.'}, {
+                    {type: 'text', text: 'Lights fade.'},
+                    {
                         type: 'musicStart',
                         attrs: {
-                            musicId: 'c1', mode: 'open', title: 'Night', kind: null,
+                            musicId: 'c1',
+                            mode: 'open',
+                            title: 'Night',
+                            kind: null,
                         },
                     },
                 ],
-            }, {
-                type: 'stageDirection', attrs: {id: 'b2'}, content: [{type: 'musicOut'}],
+            },
+            {
+                type: 'stageDirection',
+                attrs: {id: 'b2'},
+                content: [{type: 'musicOut'}],
             },
         ]));
 
         expect(snapshot.music).toEqual([
             {
-                musicId: 'c1', sceneNumber: 0, indexInScene: 0, sceneMusicCount: 1, mode: 'open', title: 'Night', kind: null, startBlockId: 'b1', endBlockId: 'b2', effectiveEndBlockId: 'b2', endKind: 'explicit',
+                musicId: 'c1',
+                sceneNumber: 0,
+                indexInScene: 0,
+                sceneMusicCount: 1,
+                mode: 'open',
+                title: 'Night',
+                kind: null,
+                startBlockId: 'b1',
+                endBlockId: 'b2',
+                effectiveEndBlockId: 'b2',
+                endKind: 'explicit',
             },
         ]);
     });
@@ -162,7 +194,9 @@ describe('buildScriptBlockIndex', () => {
     it('projects orphan music out block ids', () => {
         const {snapshot} = buildScriptBlockIndex(doc([
             {
-                type: 'dialogue', attrs: {id: 'b1'}, content: [{type: 'musicOut'}],
+                type: 'dialogue',
+                attrs: {id: 'b1'},
+                content: [{type: 'musicOut'}],
             },
         ]));
 

@@ -1,7 +1,13 @@
 import type {Pitch} from './types';
 
 const SEMITONE_BY_STEP: Record<Pitch['step'], number> = {
-    C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11,
+    C: 0,
+    D: 2,
+    E: 4,
+    F: 5,
+    G: 7,
+    A: 9,
+    B: 11,
 };
 const PITCH_PATTERN = /^([A-G])([#b]?)(-?\d+)$/u;
 
@@ -13,7 +19,8 @@ export const parsePitch = (spn: string): Pitch | null => {
     }
 
     const [
-        , step,
+        ,
+        step,
         accidental,
         octave,
     ] = match;

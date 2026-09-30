@@ -10,8 +10,8 @@ export {characterTagComposeKey, getCharacterTagComposeFromState};
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         characterTagInput: {
-            commitCharacterTag: (payload?: CommitCharacterTagPayload) => ReturnType;
-        };
+            commitCharacterTag: (payload?: CommitCharacterTagPayload) => ReturnType,
+        },
     }
 }
 
@@ -28,8 +28,7 @@ export const CharacterTagInputExtension = Extension.create<CharacterTagInputExte
     addCommands() {
         return {
             commitCharacterTag:
-                payload =>
-                ({state, dispatch}) => {
+                payload => ({state, dispatch}) => {
                     const tr = buildCommitTransaction(state, this.options.persistentCharactersRef?.current ?? [], payload);
 
                     if (!tr) {

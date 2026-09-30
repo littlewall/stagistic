@@ -2,13 +2,18 @@ import {normalizeCharacterKey, splitCharacterTokens} from '@stagistic/script';
 import type {Transaction} from '@tiptap/pm/state';
 import type {Editor} from '@tiptap/react';
 
-import {type CharacterRefByKey, readNormalizedRefsFromAttrs, visitCharacterBlocks, writeRefsToNodeAttrs} from '../../characters/characterRefUtils';
+import {
+    type CharacterRefByKey,
+    readNormalizedRefsFromAttrs,
+    visitCharacterBlocks,
+    writeRefsToNodeAttrs,
+} from '../../characters/characterRefUtils';
 import {applyTagMarkRename, getCharacterTagMarkType} from './characterTagMarkCommands';
 
 /** Splits "NAME (V.O.)" into { base: "NAME", suffix: "(V.O.)" }. */
-const splitTrailingParenthetical = (value: string): {base: string; suffix: string} => {
+const splitTrailingParenthetical = (value: string): {base: string, suffix: string} => {
     const trimmed = value.trim();
-    const match = /\s*(\([^()]*\)\s*)+$/.exec(trimmed);
+    const match = (/\s*(\([^()]*\)\s*)+$/).exec(trimmed);
 
     if (!match) {
         return {base: trimmed, suffix: ''};
@@ -58,19 +63,19 @@ const findCanonicalKeyForCharacterId = (editor: Editor, characterId: string, fal
 };
 
 interface PendingChange {
-    pos: number;
-    contentSize: number;
-    newText: string;
-    newRefs: CharacterRefByKey;
-    nodeAttrs: Record<string, unknown>;
+    pos: number,
+    contentSize: number,
+    newText: string,
+    newRefs: CharacterRefByKey,
+    nodeAttrs: Record<string, unknown>,
 }
 
 interface RunCharacterRefRenameCommandArgs {
-    editor: Editor;
-    characterId: string;
-    newName: string;
-    getCharacterNameForBlockType?: (name: string, blockType: unknown) => string;
-    fallbackOldName?: string;
+    editor: Editor,
+    characterId: string,
+    newName: string,
+    getCharacterNameForBlockType?: (name: string, blockType: unknown) => string,
+    fallbackOldName?: string,
 }
 
 export const runCharacterRefRenameCommand = ({

@@ -48,7 +48,9 @@ const deferred = () => {
     });
 
     return {
-        promise, resolve, reject,
+        promise,
+        resolve,
+        reject,
     };
 };
 
@@ -218,7 +220,9 @@ describe('useScriptCharacterCatalog', () => {
             createScriptCharacterGroupWithId: async (
                 _scriptId: string,
                 input: {
-                    id: string, key: string, colorHex?: string | null,
+                    id: string,
+                    key: string,
+                    colorHex?: string | null,
                 },
             ) => {
                 await createGate.promise;

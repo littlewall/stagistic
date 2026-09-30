@@ -1,12 +1,22 @@
 import type {ScriptPackageWrite, ScriptRepository} from '@stagistic/db';
 import {createEmptyScriptDocument} from '@stagistic/script';
 import {createStepkg, type StepkgSnapshot} from '@stagistic/stepkg';
-import {describe, expect, it} from 'vite-plus/test';
+import {
+    describe,
+    expect,
+    it,
+} from 'vite-plus/test';
 
 import {importScriptPackageAsNew} from './importScriptPackageAsNew';
 
 const baseSnapshot = (): StepkgSnapshot => ({
-    script: {id: 'original-id', title: 'Original', subtitle: null, createdAt: '2026-09-18T10:00:00.000Z', updatedAt: '2026-09-18T11:00:00.000Z'},
+    script: {
+        id: 'original-id',
+        title: 'Original',
+        subtitle: null,
+        createdAt: '2026-09-18T10:00:00.000Z',
+        updatedAt: '2026-09-18T11:00:00.000Z',
+    },
     document: createEmptyScriptDocument(),
     titlePage: {source: 'Original'},
     settings: {},
@@ -57,6 +67,7 @@ describe('importScriptPackageAsNew', () => {
         const repository = {
             createScriptFromPackage: (input: ScriptPackageWrite) => {
                 captured = input;
+
                 return Promise.resolve();
             },
         } as unknown as ScriptRepository;
@@ -68,6 +79,7 @@ describe('importScriptPackageAsNew', () => {
             expect(result.scriptId).not.toBe('original-id');
             expect(result.title).toBe('Original');
         }
+
         expect(captured).not.toBeNull();
         expect(captured!.script.id).not.toBe('original-id');
         expect(captured!.characters[0]?.id).not.toBe('char-1');
@@ -78,11 +90,21 @@ describe('importScriptPackageAsNew', () => {
         const bytes = await exportBytes(baseSnapshot());
         const repository = {createScriptFromPackage: () => Promise.resolve()} as unknown as ScriptRepository;
 
-        const overridden = await importScriptPackageAsNew({repository, bytes, title: 'My Copy'});
+        const overridden = await importScriptPackageAsNew({
+            repository,
+            bytes,
+            title: 'My Copy',
+        });
+
         expect(overridden.ok).toBe(true);
         if (overridden.ok) expect(overridden.title).toBe('My Copy');
 
-        const fallback = await importScriptPackageAsNew({repository, bytes, title: '   '});
+        const fallback = await importScriptPackageAsNew({
+            repository,
+            bytes,
+            title: '   ',
+        });
+
         expect(fallback.ok).toBe(true);
         if (fallback.ok) expect(fallback.title).toBe('Original');
     });
@@ -92,6 +114,7 @@ describe('importScriptPackageAsNew', () => {
         const repository = {
             createScriptFromPackage: () => {
                 called = true;
+
                 return Promise.resolve();
             },
         } as unknown as ScriptRepository;
@@ -100,6 +123,7 @@ describe('importScriptPackageAsNew', () => {
 
         expect(result.ok).toBe(false);
         if (!result.ok) expect(result.issues[0]?.code).toBe('not_a_zip');
+
         expect(called).toBe(false);
     });
 

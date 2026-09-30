@@ -1,10 +1,18 @@
 import type {Node as ProseMirrorNode} from '@tiptap/pm/model';
-import {type EditorState, Plugin, PluginKey} from '@tiptap/pm/state';
+import {
+    type EditorState,
+    Plugin,
+    PluginKey,
+} from '@tiptap/pm/state';
 import {DecorationSet} from '@tiptap/pm/view';
 
 import {buildPaginationState} from '../layout/buildPaginationState';
 import {createInitialPaginationState} from '../state/createInitialPaginationState';
-import {type BlockCacheEntry, type PaginationPluginState, type PaginationStorage} from '../types';
+import {
+    type BlockCacheEntry,
+    type PaginationPluginState,
+    type PaginationStorage,
+} from '../types';
 
 export const paginationKey = new PluginKey<PaginationPluginState>('script-pagination');
 export const PAGINATION_CONTROL_META_KEY = 'script-pagination-control';
@@ -44,8 +52,8 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                 const meta = tr.getMeta(paginationKey) as PaginationPluginState | undefined;
                 const controlMeta = tr.getMeta(PAGINATION_CONTROL_META_KEY) as
                     | {
-                          forceRecalcToken?: number;
-                      }
+                        forceRecalcToken?: number,
+                    }
                     | undefined;
 
                 if (meta) {
@@ -132,7 +140,13 @@ export const createPaginationPlugin = (storage: PaginationStorage) => {
                         lastContentWidth = contentWidth;
                     }
 
-                    const {decorations, pagination, nextCache, hasInlineBreaks, usedFallbackMeasurements} = buildPaginationState(
+                    const {
+                        decorations,
+                        pagination,
+                        nextCache,
+                        hasInlineBreaks,
+                        usedFallbackMeasurements,
+                    } = buildPaginationState(
                         view,
                         storage.options,
                         blockCache,

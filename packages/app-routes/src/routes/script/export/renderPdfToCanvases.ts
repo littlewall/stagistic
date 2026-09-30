@@ -18,7 +18,9 @@ const renderPage = async (page: pdfjs.PDFPageProxy, scale: number): Promise<HTML
     canvas.style.height = `${viewport.height}px`;
 
     await page.render({
-        canvas, canvasContext: context, viewport,
+        canvas,
+        canvasContext: context,
+        viewport,
     }).promise;
 
     return canvas;

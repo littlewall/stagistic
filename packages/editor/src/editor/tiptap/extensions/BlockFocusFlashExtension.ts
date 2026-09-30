@@ -20,13 +20,13 @@ import {isScriptBlockNodeName} from '../scriptCore';
 type BlockFocusFlashPhase = 'a' | 'b';
 
 interface BlockFocusFlashState {
-    blockId: string;
-    phase: BlockFocusFlashPhase;
-    decorations: DecorationSet;
+    blockId: string,
+    phase: BlockFocusFlashPhase,
+    decorations: DecorationSet,
 }
 
 interface BlockFocusFlashMeta {
-    blockId: string;
+    blockId: string,
 }
 
 /** Hold + fade of the flash keyframes in `blocks/base/Block.module.css`. */
@@ -37,8 +37,8 @@ export const BLOCK_FOCUS_FLASH_ATTRIBUTE = 'data-focus-flash';
 const blockFocusFlashKey = new PluginKey<BlockFocusFlashState | null>('block-focus-flash');
 
 interface ScriptBlockRange {
-    from: number;
-    to: number;
+    from: number,
+    to: number,
 }
 
 const findScriptBlockRange = (doc: ProseMirrorNode, blockId: string): ScriptBlockRange | null => {
@@ -82,8 +82,8 @@ const buildFlashState = (doc: ProseMirrorNode, blockId: string, phase: BlockFocu
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         blockFocusFlash: {
-            flashBlockFocus: (blockId: string) => ReturnType;
-        };
+            flashBlockFocus: (blockId: string) => ReturnType,
+        },
     }
 }
 
@@ -93,8 +93,7 @@ export const BlockFocusFlashExtension = Extension.create({
     addCommands() {
         return {
             flashBlockFocus:
-                blockId =>
-                ({tr, dispatch}) => {
+                blockId => ({tr, dispatch}) => {
                     if (!findScriptBlockRange(tr.doc, blockId)) {
                         return false;
                     }

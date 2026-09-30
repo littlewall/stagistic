@@ -1,6 +1,6 @@
 import {Button} from 'react-aria-components';
 
-import {Tooltip} from '../atoms/Tooltip';
+import {Tooltip} from '../atoms/Tooltip/Tooltip';
 import {EditPencilIcon} from '../icons';
 import {CharacterColorControl} from './characterRowConfirmed/CharacterColorControl';
 import {useCharacterColorPickerState} from './characterRowConfirmed/useCharacterColorPickerState';
@@ -73,7 +73,10 @@ export const CharacterRowConfirmed = ({
                         onEditCharacter(character.id);
                     }}
                 >
-                    <EditPencilIcon className={styles.iconGlyph} aria-hidden="true" />
+                    <EditPencilIcon
+                        className={styles.iconGlyph}
+                        aria-hidden="true"
+                    />
                 </Button>
             </Tooltip>
         </div>

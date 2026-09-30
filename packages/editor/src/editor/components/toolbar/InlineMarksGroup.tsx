@@ -1,5 +1,11 @@
 import {
-    BoldIcon, IconButton, ItalicIcon, RedoIcon, Tooltip, UnderlineIcon, UndoIcon,
+    BoldIcon,
+    IconButton,
+    ItalicIcon,
+    RedoIcon,
+    Tooltip,
+    UnderlineIcon,
+    UndoIcon,
 } from '@stagistic/ui';
 
 import {getToolbarShortcutLabels} from '../../model/toolbarShortcutLabels';

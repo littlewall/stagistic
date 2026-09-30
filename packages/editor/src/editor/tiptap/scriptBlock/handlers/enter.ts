@@ -13,16 +13,24 @@ import {
     normalizeBlockNodeType,
     SCRIPT_BLOCK_NODE_NAMES,
 } from '../../scriptCore';
-import {insertActionBefore, setBlockTypeWithSelection, splitBlockWithType} from '../commands';
-import {type BlockContext, createBlockContext, isEmptyDialogueLikeBlock} from '../context';
+import {
+    insertActionBefore,
+    setBlockTypeWithSelection,
+    splitBlockWithType,
+} from '../commands';
+import {
+    type BlockContext,
+    createBlockContext,
+    isEmptyDialogueLikeBlock,
+} from '../context';
 import {resolveAsideFlowTarget} from './tab';
 import {type BlockNextElementMap, type HandlerMap} from './types';
 
 type DialogueLikeBlockType = 'dialogue' | 'lyrics';
 
 type ScriptBlockEntry = {
-    pos: number;
-    blockType: BlockNodeType;
+    pos: number,
+    blockType: BlockNodeType,
 };
 
 const isDialogueLikeType = (blockType: BlockNodeType): blockType is DialogueLikeBlockType => {
@@ -105,8 +113,7 @@ const resolveAdvanceTypeOnEnter = (context: BlockContext, blockNextElements?: Bl
  * must never produce a second scene heading — mid-content or not. It always
  * advances to the configured next type, carrying any trailing text along.
  */
-const resolveSplitType = (context: BlockContext, blockNextElements?: BlockNextElementMap): BlockNodeType =>
-    context.isAtEnd || context.block.blockType === 'scene' ? resolveAdvanceTypeOnEnter(context, blockNextElements) : context.block.blockType;
+const resolveSplitType = (context: BlockContext, blockNextElements?: BlockNextElementMap): BlockNodeType => context.isAtEnd || context.block.blockType === 'scene' ? resolveAdvanceTypeOnEnter(context, blockNextElements) : context.block.blockType;
 
 const insertBlockAfter = (context: BlockContext, blockType: BlockNodeType) => {
     const nodes = context.editor.schema.nodes as Record<string, NodeType>;
@@ -170,7 +177,12 @@ export const handleEnter = (editor: Editor, event: KeyboardEvent, blockNextEleme
         event.preventDefault();
 
         const chooserCommands = editor.commands as {
-            openEmptyEnterChooser?: (payload: {blockId: string; blockPos: number; blockType: BlockNodeType; selectedType?: BlockNodeType}) => boolean;
+            openEmptyEnterChooser?: (payload: {
+                blockId: string,
+                blockPos: number,
+                blockType: BlockNodeType,
+                selectedType?: BlockNodeType,
+            }) => boolean,
         };
 
         chooserCommands.openEmptyEnterChooser?.({

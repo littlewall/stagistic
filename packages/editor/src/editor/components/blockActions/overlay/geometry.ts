@@ -1,6 +1,10 @@
 import type {Editor as TiptapEditor} from '@tiptap/react';
 
-import {SCRIPT_BLOCK_DOM_ID_ATTRIBUTE, SCRIPT_BLOCK_DOM_SELECTOR, SCRIPT_BLOCK_DOM_TYPE_ATTRIBUTE} from '../../../tiptap/scriptCore';
+import {
+    SCRIPT_BLOCK_DOM_ID_ATTRIBUTE,
+    SCRIPT_BLOCK_DOM_SELECTOR,
+    SCRIPT_BLOCK_DOM_TYPE_ATTRIBUTE,
+} from '../../../tiptap/scriptCore';
 import type {TopLevelBlockMetrics} from './types';
 
 export const clamp = (value: number, min: number, max: number) => {
@@ -41,7 +45,7 @@ export const resolveScriptBlockElementById = (editor: TiptapEditor, blockId: str
     return editor.view.dom.querySelector<HTMLElement>(`${SCRIPT_BLOCK_DOM_SELECTOR}[${SCRIPT_BLOCK_DOM_ID_ATTRIBUTE}="${escapedBlockId}"]`);
 };
 
-export const resolveElementOffsetWithinAncestor = (element: HTMLElement, ancestor: HTMLElement): {top: number; left: number} | null => {
+export const resolveElementOffsetWithinAncestor = (element: HTMLElement, ancestor: HTMLElement): {top: number, left: number} | null => {
     let top = 0;
     let left = 0;
     let current: HTMLElement | null = element;
@@ -97,19 +101,19 @@ export const collectTopLevelBlockMetrics = (_editor: TiptapEditor, canvas: HTMLE
 };
 
 interface ResolveDropLocationArgs {
-    sourceBlockId: string;
-    pointerClientY: number;
-    editor: TiptapEditor;
-    canvas: HTMLElement;
-    dragDisabledBlockTypes: Set<unknown>;
+    sourceBlockId: string,
+    pointerClientY: number,
+    editor: TiptapEditor,
+    canvas: HTMLElement,
+    dragDisabledBlockTypes: Set<unknown>,
 }
 
 interface ResolveDropLocationFromMetricsArgs {
-    sourceBlockId: string;
-    pointerClientY: number;
-    canvas: HTMLElement;
-    dragDisabledBlockTypes: Set<unknown>;
-    metrics: readonly TopLevelBlockMetrics[];
+    sourceBlockId: string,
+    pointerClientY: number,
+    canvas: HTMLElement,
+    dragDisabledBlockTypes: Set<unknown>,
+    metrics: readonly TopLevelBlockMetrics[],
 }
 
 const resolveDropLocationFromMetrics = ({

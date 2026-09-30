@@ -30,5 +30,12 @@ export const ALL_BLOCK_SPECS = [
 ] as const;
 
 export {
-    actSpec, asideSpec, characterSpec, dialogueSpec, lyricsSpec, noteSpec, sceneSpec, stageDirectionSpec,
+    actSpec,
+    asideSpec,
+    characterSpec,
+    dialogueSpec,
+    lyricsSpec,
+    noteSpec,
+    sceneSpec,
+    stageDirectionSpec,
 };

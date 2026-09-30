@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
@@ -7,7 +9,8 @@ import {
     listScriptMusic,
 } from '../../queries';
 import {
-    createTestDb, seedScript,
+    createTestDb,
+    seedScript,
 } from '../../testing/createTestDb';
 import {createDocumentPersister} from './persistDocumentDelta';
 
@@ -17,15 +20,21 @@ const docWithMusic = (title: string) => ({
     type: 'doc',
     content: [
         {
-            type: 'scene', attrs: {id: 's1'}, content: [{type: 'text', text: 'Scene'}],
-        }, {
+            type: 'scene',
+            attrs: {id: 's1'},
+            content: [{type: 'text', text: 'Scene'}],
+        },
+        {
             type: 'stageDirection',
             attrs: {id: 'b1'},
             content: [
                 {
                     type: 'musicStart',
                     attrs: {
-                        musicId: 'c1', mode: 'open', title, kind: null,
+                        musicId: 'c1',
+                        mode: 'open',
+                        title,
+                        kind: null,
                     },
                 },
             ],
@@ -37,9 +46,14 @@ const docWithoutMusic = () => ({
     type: 'doc',
     content: [
         {
-            type: 'scene', attrs: {id: 's1'}, content: [{type: 'text', text: 'Scene'}],
-        }, {
-            type: 'stageDirection', attrs: {id: 'b1'}, content: [{type: 'text', text: 'No music'}],
+            type: 'scene',
+            attrs: {id: 's1'},
+            content: [{type: 'text', text: 'Scene'}],
+        },
+        {
+            type: 'stageDirection',
+            attrs: {id: 'b1'},
+            content: [{type: 'text', text: 'No music'}],
         },
     ],
 });
@@ -71,7 +85,10 @@ describe('persist music', () => {
 
         expect(afterCreate).toHaveLength(1);
         expect(afterCreate[0]).toMatchObject({
-            id: 'c1', title: 'Night', startBlockId: 'b1', endBlockId: null,
+            id: 'c1',
+            title: 'Night',
+            startBlockId: 'b1',
+            endBlockId: null,
         });
 
         await persister.persist(db, docWithMusic('Dawn') as never);
@@ -87,7 +104,10 @@ describe('persist music', () => {
 
         expect(afterUnassign).toHaveLength(1);
         expect(afterUnassign[0]).toMatchObject({
-            id: 'c1', title: 'Dawn', startBlockId: null, endBlockId: null,
+            id: 'c1',
+            title: 'Dawn',
+            startBlockId: null,
+            endBlockId: null,
         });
     });
 

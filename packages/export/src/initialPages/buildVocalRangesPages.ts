@@ -6,13 +6,13 @@ import {
     staffPosition,
 } from '@stagistic/script';
 
-import type {VocalRangesInitialPagePlan} from '../plan';
+import type {VocalRangesInitialPagePlan} from '../model/plan';
 import type {
     InitialPageVisualPage,
     StaffRowItem,
     VisualLine,
     VisualRun,
-} from '../visualLine';
+} from '../model/visualLine';
 
 const MONO_FONT_FAMILY = 'Courier Prime';
 const CHAR_WIDTH_EM = 0.6;
@@ -130,7 +130,8 @@ const buildRow = (
                     alter: low.alter,
                     ledgerPositions: ledgerPositions(staffPosition(low, clef)),
                     xFraction: LOW_NOTE_X_FRACTION,
-                }, {
+                },
+                {
                     position: staffPosition(high, clef),
                     alter: high.alter,
                     ledgerPositions: ledgerPositions(staffPosition(high, clef)),

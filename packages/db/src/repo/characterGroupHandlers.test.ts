@@ -66,7 +66,10 @@ describe('character group handlers', () => {
             updatedAt: 1,
         });
         await groupHandlers.createScriptCharacterGroupWithId(scriptId, {
-            id: 'group-all', key: 'All', colorHex: '#112233', timestamp: 100,
+            id: 'group-all',
+            key: 'All',
+            colorHex: '#112233',
+            timestamp: 100,
         });
         vi.spyOn(Date, 'now').mockReturnValueOnce(200);
         await groupHandlers.renameScriptCharacterGroup(scriptId, 'group-all', 'Ensemble');
@@ -85,26 +88,53 @@ describe('character group handlers', () => {
             opType: payload.opType,
             payload: JSON.parse(payload.payloadJson) as Record<string, unknown>,
         }))).toEqual([
-            {opType: 'character-group.create',
+            {
+                opType: 'character-group.create',
                 payload: {
-                    scriptId, groupId: 'group-all', key: 'ALL', colorHex: '#112233', createdAt: 100,
-                }},
-            {opType: 'character-group.rename',
+                    scriptId,
+                    groupId: 'group-all',
+                    key: 'ALL',
+                    colorHex: '#112233',
+                    createdAt: 100,
+                },
+            },
+            {
+                opType: 'character-group.rename',
                 payload: {
-                    scriptId, groupId: 'group-all', previousKey: 'ALL', nextKey: 'ENSEMBLE', renamedAt: 200,
-                }},
-            {opType: 'character-group.color',
+                    scriptId,
+                    groupId: 'group-all',
+                    previousKey: 'ALL',
+                    nextKey: 'ENSEMBLE',
+                    renamedAt: 200,
+                },
+            },
+            {
+                opType: 'character-group.color',
                 payload: {
-                    scriptId, groupId: 'group-all', colorHex: '#abcdef', updatedAt: 300,
-                }},
-            {opType: 'character-group.members',
+                    scriptId,
+                    groupId: 'group-all',
+                    colorHex: '#abcdef',
+                    updatedAt: 300,
+                },
+            },
+            {
+                opType: 'character-group.members',
                 payload: {
-                    scriptId, groupId: 'group-all', memberIds: ['character-alice'], updatedAt: 400,
-                }},
-            {opType: 'character-group.delete',
+                    scriptId,
+                    groupId: 'group-all',
+                    memberIds: ['character-alice'],
+                    updatedAt: 400,
+                },
+            },
+            {
+                opType: 'character-group.delete',
                 payload: {
-                    scriptId, groupId: 'group-all', key: 'ENSEMBLE', deletedAt: 500,
-                }},
+                    scriptId,
+                    groupId: 'group-all',
+                    key: 'ENSEMBLE',
+                    deletedAt: 500,
+                },
+            },
         ]);
     });
 

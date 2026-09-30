@@ -1,4 +1,8 @@
-import {MUSIC_ATTACHMENT_ROLES, type MusicAttachmentRole, type ScriptPackageWrite} from '@stagistic/db';
+import {
+    MUSIC_ATTACHMENT_ROLES,
+    type MusicAttachmentRole,
+    type ScriptPackageWrite,
+} from '@stagistic/db';
 import type {StepkgSnapshot} from '@stagistic/stepkg';
 
 const toEpoch = (iso: string): number => new Date(iso).getTime();
@@ -7,8 +11,11 @@ const toBlobPart = (bytes: Uint8Array): ArrayBuffer => bytes.buffer.slice(bytes.
 
 const KNOWN_MUSIC_ATTACHMENT_ROLES: string[] = Object.values(MUSIC_ATTACHMENT_ROLES);
 
-const toMusicAttachmentRole = (role: string): MusicAttachmentRole =>
-    (KNOWN_MUSIC_ATTACHMENT_ROLES.includes(role) ? role : MUSIC_ATTACHMENT_ROLES.integratedScore) as MusicAttachmentRole;
+const toMusicAttachmentRole = (role: string): MusicAttachmentRole => {
+    const known = KNOWN_MUSIC_ATTACHMENT_ROLES.includes(role) ? role : MUSIC_ATTACHMENT_ROLES.integratedScore;
+
+    return known as MusicAttachmentRole;
+};
 
 export const mapStepkgSnapshotToPackageWrite = (snapshot: StepkgSnapshot, assets: Map<string, Uint8Array>): ScriptPackageWrite => ({
     script: {

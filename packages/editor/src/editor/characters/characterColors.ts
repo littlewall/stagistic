@@ -40,9 +40,13 @@ const hexToRgb = (hexColor: string) => {
 };
 
 const rgbToHsl = ({
-    r, g, b,
+    r,
+    g,
+    b,
 }: {
-    r: number, g: number, b: number,
+    r: number,
+    g: number,
+    b: number,
 }) => {
     const red = r / 255;
     const green = g / 255;

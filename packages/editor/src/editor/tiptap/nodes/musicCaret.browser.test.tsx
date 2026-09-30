@@ -25,7 +25,9 @@ import ScriptEditor from '../../Editor';
 type MusicCaretTestWindow = Window & {__musicCaretTestEditor?: Editor | null};
 
 const createStageDirection = (id: string, content: ScriptNode[] = []): ScriptNode => ({
-    type: 'stageDirection', attrs: {id}, content,
+    type: 'stageDirection',
+    attrs: {id},
+    content,
 });
 
 const createDocument = (): ScriptDocument => ({

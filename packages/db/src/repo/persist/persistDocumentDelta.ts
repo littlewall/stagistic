@@ -1,5 +1,7 @@
 import {
-    and, eq, sql,
+    and,
+    eq,
+    sql,
 } from 'drizzle-orm';
 
 import {
@@ -8,60 +10,19 @@ import {
     type RewriteScriptDocument,
 } from '../../blocks';
 import {
-    bulkDeleteScriptActs,
     bulkDeleteScriptBlocks,
-    bulkDeleteScriptScenes,
     bulkReplaceScriptBlockCharacterRefs,
-    bulkUnassignScriptMusic,
-    bulkUpsertScriptActs,
-    bulkUpsertScriptMusic,
-    bulkUpsertScriptScenes,
     type DbClient,
-    generateBlockOrderKeys,
     listScriptSpeakingEntities,
     writeFinalBlockOrders,
 } from '../../queries';
-import {
-    scriptActs, scriptBlocks, scriptMusic, scriptScenes,
-} from '../../schema';
+import {scriptBlocks} from '../../schema';
+import {toCharacterRefRows} from '../characterRefRows';
+import {assignOrderKeys} from './assignOrderKeys';
+import {nonOrderFieldsDiffer, refsDiffer} from './blockRowDiff';
 import {diffExtractedBlocks} from './diffExtractedBlocks';
-import {computeOrderKeyAssignments} from './minimalOrderKeys';
-
-const serializeRefByKey = (refByKey: Record<string, string>): string => {
-    return Object.entries(refByKey)
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([key, id]) => `${key}:${id}`)
-        .join('|');
-};
-
-const nonOrderFieldsDiffer = (prev: ExtractedBlockRow | undefined, next: ExtractedBlockRow): boolean => {
-    if (!prev) {
-        return true;
-    }
-
-    return prev.blockType !== next.blockType
-        || prev.textContent !== next.textContent
-        || prev.contentJson !== next.contentJson
-        || prev.sceneHeadingBlockId !== next.sceneHeadingBlockId
-        || prev.actHeadingBlockId !== next.actHeadingBlockId;
-};
-
-const refsDiffer = (prev: ExtractedBlockRow | undefined, next: ExtractedBlockRow): boolean => {
-    if (!prev) {
-        return true;
-    }
-
-    return serializeRefByKey(prev.characterRefByKey) !== serializeRefByKey(next.characterRefByKey);
-};
-
-const toCharacterRefRows = (block: ExtractedBlockRow, knownCharacterIds: Set<string>) => {
-    return Object.entries(block.characterRefByKey)
-        .filter(([, characterId]) => knownCharacterIds.has(characterId))
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([characterKey, characterId]) => ({
-            characterId, characterKey, isConfirmed: true,
-        }));
-};
+import {reconcileActsAndScenes} from './reconcileActsAndScenes';
+import {getMusicSignature, reconcileScriptMusic} from './reconcileScriptMusic';
 
 /**
  * Stateful per-script persister. Holds the last-saved extracted blocks as the
@@ -84,46 +45,17 @@ export const createDocumentPersister = (scriptId: string) => {
         lastSavedMusicSignature = '';
     };
 
-    const persistImpl = async (
-        db: DbClient,
-        document: RewriteScriptDocument,
-        afterPersist?: (tx: DbClient) => Promise<void>,
-    ): Promise<void> => {
+    const persistImpl = async (db: DbClient, document: RewriteScriptDocument, afterPersist?: (tx: DbClient) => Promise<void>): Promise<void> => {
         const now = Date.now();
         const extracted = extractScriptBlocks(scriptId, document);
 
-        const musicSignature = extracted.music
-            .map(music => `${music.id}:${music.sceneNumber}:${music.indexInScene}:${music.mode}:${music.title}:${music.kind ?? ''}:${music.startBlockId}:${music.endBlockId ?? ''}`)
-            .join('|');
+        const musicSignature = getMusicSignature(extracted.music);
         const reconcileMusic = async (tx: DbClient) => {
             if (musicSignature === lastSavedMusicSignature) {
                 return;
             }
 
-            const existingMusic = await tx
-                .select({id: scriptMusic.id})
-                .from(scriptMusic)
-                .where(eq(scriptMusic.scriptId, scriptId));
-            const nextMusicIds = new Set(extracted.music.map(music => music.id));
-
-            await bulkUpsertScriptMusic(tx, extracted.music.map(music => ({
-                id: music.id,
-                scriptId,
-                sceneNumber: music.sceneNumber,
-                indexInScene: music.indexInScene,
-                mode: music.mode,
-                title: music.title,
-                kind: music.kind,
-                startBlockId: music.startBlockId,
-                endBlockId: music.endBlockId,
-                createdAt: now,
-                updatedAt: now,
-            })));
-            await bulkUnassignScriptMusic(
-                tx,
-                existingMusic.filter(row => !nextMusicIds.has(row.id)).map(row => row.id),
-                now,
-            );
+            await reconcileScriptMusic(tx, scriptId, extracted.music, now);
         };
 
         const diff = diffExtractedBlocks(Array.from(lastSavedBlocks.values()), extracted.blocks);
@@ -147,37 +79,9 @@ export const createDocumentPersister = (scriptId: string) => {
         const sceneIdByHeading = new Map(extracted.scenes.map(scene => [scene.headingBlockId, scene.id]));
         const actIdByHeading = new Map(extracted.acts.map(act => [act.headingBlockId, act.id]));
 
-        /*
-         * Fractional-indexing strategy: keys are lexicographic strings from the
-         * `fractional-indexing` library. On a structural save we re-key minimally —
-         * blocks on the longest increasing subsequence of baseline keys keep them,
-         * only moved/inserted blocks get fresh keys between the stable anchors. Full
-         * re-key (evenly spaced keys for all blocks) is the fallback when no usable
-         * baseline exists, which also bounds key-length growth over time.
-         * The unique constraint on (script_id, block_order) was intentionally removed
-         * by migrations 0004/0005: PostgreSQL checks uniqueness row-by-row inside a
-         * single UPDATE, so swapping keys between two blocks always triggers a
-         * spurious violation before both rows are committed.
-         */
-        let orderKeyById = baselineOrderKeys;
-        let changedOrders: {id: string, blockOrder: string}[] = [];
-
-        if (diff.structural) {
-            const minimal = computeOrderKeyAssignments(
-                extracted.blocks.map(block => block.blockId),
-                baselineOrderKeys,
-            );
-
-            if (minimal) {
-                orderKeyById = minimal.keyById;
-                changedOrders = minimal.changed;
-            } else {
-                const fullKeys = generateBlockOrderKeys(extracted.blocks.length);
-
-                orderKeyById = new Map(extracted.blocks.map(block => [block.blockId, fullKeys[block.orderNo]]));
-                changedOrders = extracted.blocks.map(block => ({id: block.blockId, blockOrder: fullKeys[block.orderNo]}));
-            }
-        }
+        const {orderKeyById, changedOrders} = diff.structural
+            ? assignOrderKeys(extracted.blocks, baselineOrderKeys)
+            : {orderKeyById: baselineOrderKeys, changedOrders: []};
 
         /*
          * blockOrder fallback is never written: Case A skips order writes entirely
@@ -212,22 +116,22 @@ export const createDocumentPersister = (scriptId: string) => {
                 .where(and(eq(scriptBlocks.scriptId, scriptId), eq(scriptBlocks.id, row.id)));
         };
 
-        const fieldChangedUpdated = diff.updated.filter(
-            block => nonOrderFieldsDiffer(lastSavedBlocks.get(block.blockId), block),
-        );
-        const refChangedUpdated = diff.updated.filter(
-            block => refsDiffer(lastSavedBlocks.get(block.blockId), block),
-        );
+        const fieldChangedUpdated = diff.updated.filter(block => nonOrderFieldsDiffer(lastSavedBlocks.get(block.blockId), block));
+        const refChangedUpdated = diff.updated.filter(block => refsDiffer(lastSavedBlocks.get(block.blockId), block));
 
-        const knownCharacterIds = diff.inserted.length > 0 || refChangedUpdated.length > 0
-            ? new Set((await listScriptSpeakingEntities(db, scriptId)).map(entity => entity.id))
-            : new Set<string>();
+        const knownCharacterIds =
+            diff.inserted.length > 0 || refChangedUpdated.length > 0
+                ? new Set((await listScriptSpeakingEntities(db, scriptId)).map(entity => entity.id))
+                : new Set<string>();
 
         const replaceRefs = async (tx: DbClient, blocks: ExtractedBlockRow[]) => {
-            await bulkReplaceScriptBlockCharacterRefs(tx, blocks.map(block => ({
-                blockId: block.blockId,
-                rows: toCharacterRefRows(block, knownCharacterIds),
-            })));
+            await bulkReplaceScriptBlockCharacterRefs(
+                tx,
+                blocks.map(block => ({
+                    blockId: block.blockId,
+                    rows: toCharacterRefRows(block, knownCharacterIds),
+                })),
+            );
         };
 
         /*
@@ -236,9 +140,7 @@ export const createDocumentPersister = (scriptId: string) => {
          * so the scriptScenes/scriptActs tables are guaranteed unchanged —
          * reconciliation can be skipped entirely.
          */
-        const isPureReorder = diff.inserted.length === 0
-            && diff.deletedIds.length === 0
-            && fieldChangedUpdated.length === 0;
+        const isPureReorder = diff.inserted.length === 0 && diff.deletedIds.length === 0 && fieldChangedUpdated.length === 0;
 
         const writeDelta = async (tx: DbClient) => {
             if (!diff.structural) {
@@ -260,50 +162,8 @@ export const createDocumentPersister = (scriptId: string) => {
                 return;
             }
 
-            /*
-             * Case B: structural change (insert/delete/heading edit).
-             * 1. Reconcile acts.
-             */
-            const existingActs = await tx.select({id: scriptActs.id}).from(scriptActs).where(eq(scriptActs.scriptId, scriptId));
-            const nextActIds = new Set(extracted.acts.map(act => act.id));
-
-            await bulkUpsertScriptActs(tx, extracted.acts.map(act => ({
-                id: act.id,
-                scriptId,
-                headingBlockId: act.headingBlockId,
-                name: act.name,
-                createdAt: now,
-                updatedAt: now,
-            })));
-
-            await bulkDeleteScriptActs(tx, existingActs.filter(act => !nextActIds.has(act.id)).map(act => act.id));
-
-            // 2. Reconcile scenes (preserve existing metadata).
-            const existingScenes = await tx.select().from(scriptScenes).where(eq(scriptScenes.scriptId, scriptId));
-            const existingSceneByHeading = new Map(
-                existingScenes
-                    .filter(scene => scene.headingBlockId)
-                    .map(scene => [scene.headingBlockId as string, scene] as const),
-            );
-            const nextSceneIds = new Set(extracted.scenes.map(scene => scene.id));
-
-            await bulkUpsertScriptScenes(tx, extracted.scenes.map(scene => {
-                const prev = existingSceneByHeading.get(scene.headingBlockId) ?? null;
-
-                return {
-                    id: scene.id,
-                    scriptId,
-                    headingBlockId: scene.headingBlockId,
-                    sceneNumber: scene.sceneNumber,
-                    colorHex: prev?.colorHex ?? null,
-                    synopsis: prev?.synopsis ?? null,
-                    locationId: prev?.locationId ?? null,
-                    createdAt: prev?.createdAt ?? now,
-                    updatedAt: now,
-                };
-            }));
-
-            await bulkDeleteScriptScenes(tx, existingScenes.filter(scene => !nextSceneIds.has(scene.id)).map(scene => scene.id));
+            // Case B: structural change (insert/delete/heading edit). 1–2. Reconcile acts and scenes.
+            await reconcileActsAndScenes(tx, scriptId, extracted, now);
 
             // 3. Delete removed blocks (their character refs cascade).
             await bulkDeleteScriptBlocks(tx, diff.deletedIds);
@@ -314,20 +174,25 @@ export const createDocumentPersister = (scriptId: string) => {
              *    inserted the same block (serialization edge case), update it.
              */
             if (diff.inserted.length > 0) {
-                await tx.insert(scriptBlocks).values(diff.inserted.map(block => ({
-                    ...toDbBlock(block),
-                }))).onConflictDoUpdate({
-                    target: scriptBlocks.id,
-                    set: {
-                        blockType: sql`excluded."block_type"`,
-                        blockOrder: sql`excluded."block_order"`,
-                        textContent: sql`excluded."text_content"`,
-                        contentJson: sql`excluded."content_json"`,
-                        sceneId: sql`excluded."scene_id"`,
-                        actId: sql`excluded."act_id"`,
-                        updatedAt: sql`excluded."updated_at"`,
-                    },
-                });
+                await tx
+                    .insert(scriptBlocks)
+                    .values(
+                        diff.inserted.map(block => ({
+                            ...toDbBlock(block),
+                        })),
+                    )
+                    .onConflictDoUpdate({
+                        target: scriptBlocks.id,
+                        set: {
+                            blockType: sql`excluded."block_type"`,
+                            blockOrder: sql`excluded."block_order"`,
+                            textContent: sql`excluded."text_content"`,
+                            contentJson: sql`excluded."content_json"`,
+                            sceneId: sql`excluded."scene_id"`,
+                            actId: sql`excluded."act_id"`,
+                            updatedAt: sql`excluded."updated_at"`,
+                        },
+                    });
             }
 
             /*
@@ -368,11 +233,7 @@ export const createDocumentPersister = (scriptId: string) => {
         lastSavedMusicSignature = musicSignature;
     };
 
-    const persist = (
-        db: DbClient,
-        document: RewriteScriptDocument,
-        afterPersist?: (tx: DbClient) => Promise<void>,
-    ): Promise<void> => {
+    const persist = (db: DbClient, document: RewriteScriptDocument, afterPersist?: (tx: DbClient) => Promise<void>): Promise<void> => {
         const result = queue.then(() => persistImpl(db, document, afterPersist));
 
         /*

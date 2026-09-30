@@ -7,8 +7,10 @@ import {runPgliteMigrations} from '@stagistic/db/pglite';
 
 void worker({
     async init(options) {
-        // Desktop persists to IndexedDB (OPFS is unreliable in macOS WKWebView).
-        // The dataDir is chosen in ../db/index.ts.
+        /*
+         * Desktop persists to IndexedDB (OPFS is unreliable in macOS WKWebView).
+         * The dataDir is chosen in ../db/index.ts.
+         */
         const dataDir = options.dataDir ?? 'idb://stagistic-main';
 
         const [fsBundleResponse, wasmResponse] = await Promise.all([fetch(pgliteDataUrl), fetch(pgliteWasmUrl)]);

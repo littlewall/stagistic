@@ -8,7 +8,6 @@ export type {
     ScriptSpeakingEntityRef,
 } from './characters';
 export {MUSIC_ATTACHMENT_ROLES, type MusicAttachmentRole} from './musicAttachments';
-export {LOCAL_COMMENT_AUTHOR_ID} from './script';
 export type {
     CommentAnchorKind,
     CommentThreadStatus,
@@ -28,3 +27,4 @@ export type {
     ScriptSummary,
     ScriptTitlePageField,
 } from './script';
+export {LOCAL_COMMENT_AUTHOR_ID} from './script';

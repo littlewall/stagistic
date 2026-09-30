@@ -125,7 +125,8 @@ export const parseInlineText = (source: string, line: number): ScriptNode[] => {
 
             if (tagText) {
                 const marks = [
-                    ...getEmphasisMarks(activeMarks), {
+                    ...getEmphasisMarks(activeMarks),
+                    {
                         type: CHARACTER_TAG_MARK_NAME,
                         attrs: {
                             [CHARACTER_TAG_KEY_ATTR]: normalizeCharacterKey(tagText),
@@ -220,7 +221,9 @@ export const parseStageDirectionLine = (source: string, line: number): ParsedSta
 
         content.push(marker.node);
         music.push({
-            role: marker.role, number: marker.number, line,
+            role: marker.role,
+            number: marker.number,
+            line,
         });
         cursor = marker.end;
     }

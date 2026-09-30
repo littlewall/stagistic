@@ -1,6 +1,9 @@
 import {createRoot, type Root} from 'react-dom/client';
 import {
-    afterEach, describe, expect, it,
+    afterEach,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 import {page} from 'vite-plus/test/browser';
 
@@ -35,7 +38,7 @@ afterEach(async () => {
 describe('UnsupportedScreenGate', () => {
     it('shows the notice below 1000px and the editor at or above', async () => {
         const {UnsupportedScreenGate, MIN_SUPPORTED_WIDTH} = await import(
-            './UnsupportedScreenGate'
+            './UnsupportedScreenGate',
         );
 
         expect(MIN_SUPPORTED_WIDTH).toBe(1000);

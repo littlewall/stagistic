@@ -5,8 +5,8 @@ import {
     type HeaderFooterSettings,
     resolveHeaderFooterText,
 } from '@stagistic/script';
-import {clsx} from '@stagistic/ui';
 import type {Editor as TiptapEditor} from '@tiptap/react';
+import clsx from 'clsx';
 import {
     type CSSProperties,
     type RefObject,
@@ -46,10 +46,7 @@ const getContentElement = (canvas: HTMLElement | null): HTMLElement | null => {
     return prosemirror?.parentElement ?? null;
 };
 
-const renderCells = (
-    row: HeaderFooterRowSettings,
-    resolve: (cell: HeaderFooterCellSettings) => string,
-) => ALIGNMENTS.map(alignment => {
+const renderCells = (row: HeaderFooterRowSettings, resolve: (cell: HeaderFooterCellSettings) => string) => ALIGNMENTS.map(alignment => {
     const cell = row[alignment];
 
     if (cell.isHiddenInEditor) {
@@ -72,7 +69,8 @@ const renderCells = (
                 cell.isItalic && styles.italic,
                 cell.isUnderline && styles.underline,
             )}
-        >{text}
+        >
+            {text}
         </span>
     );
 });
@@ -127,7 +125,10 @@ export const HeaderFooterOverlay = ({
     }
 
     const {
-        pageHeight, marginTop, marginBottom, marginLeft,
+        pageHeight,
+        marginTop,
+        marginBottom,
+        marginLeft,
     } = pagination;
 
     const layerStyle: CSSProperties = {

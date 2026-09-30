@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {
@@ -11,19 +13,25 @@ import {
 describe('parsePitch', () => {
     it('parses a natural note', () => {
         expect(parsePitch('C4')).toEqual({
-            step: 'C', alter: 0, octave: 4,
+            step: 'C',
+            alter: 0,
+            octave: 4,
         });
     });
 
     it('parses a sharp', () => {
         expect(parsePitch('F#3')).toEqual({
-            step: 'F', alter: 1, octave: 3,
+            step: 'F',
+            alter: 1,
+            octave: 3,
         });
     });
 
     it('parses a flat', () => {
         expect(parsePitch('Bb2')).toEqual({
-            step: 'B', alter: -1, octave: 2,
+            step: 'B',
+            alter: -1,
+            octave: 2,
         });
     });
 
@@ -50,7 +58,9 @@ describe('formatPitch', () => {
 describe('pitchToMidi', () => {
     it('places middle C at 60', () => {
         expect(pitchToMidi({
-            step: 'C', alter: 0, octave: 4,
+            step: 'C',
+            alter: 0,
+            octave: 4,
         })).toBe(60);
     });
 

@@ -26,7 +26,8 @@ const initialValue: ScriptDocument = {
             type: 'scene',
             attrs: {id: 'scene-casing'},
             content: [{type: 'text', text: 'ScEnE MiXeD'}],
-        }, {
+        },
+        {
             type: 'dialogue',
             attrs: {id: 'dialogue-casing'},
             content: [{type: 'text', text: 'DiAlOgUe MiXeD'}],

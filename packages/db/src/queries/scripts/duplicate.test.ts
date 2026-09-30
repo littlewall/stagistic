@@ -107,7 +107,8 @@ const seedSource = async (db: TestDb): Promise<void> => {
             colorHex: '#ff0000',
             createdAt: 1,
             updatedAt: 1,
-        }, {
+        },
+        {
             id: 'group-1',
             scriptId: SOURCE_ID,
             characterKey: 'ALL',
@@ -124,7 +125,8 @@ const seedSource = async (db: TestDb): Promise<void> => {
             characterId: 'char-1',
             characterKey: 'ANNA',
             isConfirmed: true,
-        }, {
+        },
+        {
             blockId: 'block-3',
             characterId: 'group-1',
             characterKey: 'ALL',
@@ -166,7 +168,13 @@ const listTarget = async (db: TestDb) => {
         .where(eq(scriptSettingsInitialPages.scriptId, TARGET_ID));
 
     return {
-        blocks, acts, scenes, characters, memberships, structure, initialPages,
+        blocks,
+        acts,
+        scenes,
+        characters,
+        memberships,
+        structure,
+        initialPages,
     };
 };
 
@@ -185,7 +193,12 @@ describe('duplicateScriptRows', () => {
         });
 
         const {
-            blocks, acts, scenes, structure, characters, initialPages,
+            blocks,
+            acts,
+            scenes,
+            structure,
+            characters,
+            initialPages,
         } = await listTarget(db);
 
         expect(blocks).toHaveLength(3);
@@ -255,7 +268,9 @@ describe('duplicateScriptRows', () => {
         });
 
         const {
-            characters, memberships, blocks,
+            characters,
+            memberships,
+            blocks,
         } = await listTarget(db);
         const character = characters.find(row => row.kind === 'character');
         const group = characters.find(row => row.kind === 'group');
@@ -311,7 +326,9 @@ describe('duplicateScriptRows', () => {
         });
 
         const {
-            blocks, characters, memberships,
+            blocks,
+            characters,
+            memberships,
         } = await listTarget(db);
         const blockIds = blocks.map(block => block.id);
         const allRefs = await db.select().from(scriptBlockCharacterRefs);

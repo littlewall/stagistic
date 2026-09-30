@@ -248,7 +248,9 @@ export const MusicRailMenu = ({
             role="menu"
             data-music-rail-menu="true"
             style={{
-                left: menu.left, top: menu.top, transform: 'translateX(-100%)',
+                left: menu.left,
+                top: menu.top,
+                transform: 'translateX(-100%)',
             }}
             onPointerDown={event => event.stopPropagation()}
         >

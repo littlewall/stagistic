@@ -1,5 +1,6 @@
 import {
-    type DerivedMusic, formatMusicNumber,
+    type DerivedMusic,
+    formatMusicNumber,
 } from '@stagistic/script';
 
 export interface MusicLabelMap {

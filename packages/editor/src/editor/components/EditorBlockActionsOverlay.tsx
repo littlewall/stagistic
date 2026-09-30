@@ -37,7 +37,9 @@ interface EditorBlockActionsOverlayProps {
 }
 
 const EditorBlockActionsOverlay = ({
-    editor, canvasRef, blockShortcuts,
+    editor,
+    canvasRef,
+    blockShortcuts,
 }: EditorBlockActionsOverlayProps) => {
     const liveRevision = useEditorLiveSelector(snapshot => snapshot.revision);
     const typeTriggerRef = useRef<HTMLButtonElement | null>(null);

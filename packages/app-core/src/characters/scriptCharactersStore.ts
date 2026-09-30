@@ -10,15 +10,11 @@ import {
     createReactiveCollectionStatusStore,
     toDomainCollectionValue,
 } from '../collections';
-
-type CharacterField = 'colorHex' | 'genderKey' | 'outline' | 'voiceType' | 'vocalRangeLow' | 'vocalRangeHigh';
+import {type CharacterField, persistCharacterFieldChanges} from './persistCharacterFieldChanges';
 
 const normalizeGenderLabel = (label: string) => label.trim().replace(/\s+/g, ' ');
 
-export const createScriptCharactersStore = (
-    repository: ScriptRepository,
-    scriptId: string,
-) => {
+export const createScriptCharactersStore = (repository: ScriptRepository, scriptId: string) => {
     const charactersSource = repository.getScriptCharactersSource(scriptId);
     const gendersSource = repository.getScriptCharacterGendersSource(scriptId);
     const actionStatus = createReactiveCollectionStatusStore();
@@ -38,60 +34,7 @@ export const createScriptCharactersStore = (
                     throw new Error('The character could not be confirmed');
                 }
             },
-            update: async (original, modified, changes) => {
-                const fieldCommands: Partial<Record<CharacterField, () => Promise<unknown>>> = {
-                    colorHex: () => repository.setScriptCharacterColor(
-                        scriptId,
-                        original.id,
-                        modified.colorHex,
-                    ),
-                    genderKey: () => repository.setScriptCharacterGender(
-                        scriptId,
-                        original.id,
-                        modified.genderKey,
-                    ),
-                    outline: () => repository.setScriptCharacterOutline(
-                        scriptId,
-                        original.id,
-                        modified.outline,
-                    ),
-                    voiceType: () => repository.setScriptCharacterVoiceType(
-                        scriptId,
-                        original.id,
-                        modified.voiceType,
-                    ),
-                    /*
-                     * Both keys read the current low+high pair and call the same
-                     * combined setter, since the range is only ever edited as a pair.
-                     * When a single edit changes both bounds at once, this fires twice
-                     * with identical (already-current) arguments — harmless, but keeps
-                     * the per-changed-field loop below correct for either bound alone.
-                     */
-                    vocalRangeLow: () => repository.setScriptCharacterVocalRange(
-                        scriptId,
-                        original.id,
-                        modified.vocalRangeLow,
-                        modified.vocalRangeHigh,
-                    ),
-                    vocalRangeHigh: () => repository.setScriptCharacterVocalRange(
-                        scriptId,
-                        original.id,
-                        modified.vocalRangeLow,
-                        modified.vocalRangeHigh,
-                    ),
-                };
-                const changedFields = Object.keys(changes).filter(
-                    (field): field is CharacterField => field in fieldCommands,
-                );
-
-                for (const field of changedFields) {
-                    const updated = await fieldCommands[field]?.();
-
-                    if (!updated) {
-                        throw new Error(`The character ${field} could not be saved`);
-                    }
-                }
-            },
+            update: (original, modified, changes) => persistCharacterFieldChanges(repository, scriptId, original, modified, changes),
             delete: character => repository.deleteScriptCharacter(scriptId, character.id),
         },
     });
@@ -115,11 +58,7 @@ export const createScriptCharactersStore = (
 
     actionStatus.setReady();
 
-    const runAction = async <T>(
-        entityKey: string,
-        action: string,
-        task: () => Promise<T>,
-    ) => {
+    const runAction = async <T>(entityKey: string, action: string, task: () => Promise<T>) => {
         actionStatus.startMutation({entityKey, action});
 
         try {
@@ -129,9 +68,7 @@ export const createScriptCharactersStore = (
 
             return result;
         } catch (error) {
-            const normalizedError = error instanceof Error
-                ? error
-                : new Error(String(error));
+            const normalizedError = error instanceof Error ? error : new Error(String(error));
 
             actionStatus.failMutation(entityKey, action, normalizedError);
             throw normalizedError;
@@ -177,11 +114,7 @@ export const createScriptCharactersStore = (
         });
     };
 
-    const updateField = async (
-        characterId: string,
-        field: CharacterField,
-        value: string | null,
-    ) => {
+    const updateField = async (characterId: string, field: CharacterField, value: string | null) => {
         if (!characters.collection.has(characterId)) {
             return null;
         }
@@ -199,11 +132,7 @@ export const createScriptCharactersStore = (
         });
     };
 
-    const updateVocalRange = async (
-        characterId: string,
-        vocalRangeLow: string | null,
-        vocalRangeHigh: string | null,
-    ) => {
+    const updateVocalRange = async (characterId: string, vocalRangeLow: string | null, vocalRangeHigh: string | null) => {
         if (!characters.collection.has(characterId)) {
             return null;
         }
@@ -248,11 +177,7 @@ export const createScriptCharactersStore = (
 
         try {
             const renamed = await runAction(characterId, 'rename', async () => {
-                const result = await repository.renameScriptCharacter(
-                    scriptId,
-                    characterId,
-                    normalizedKey,
-                );
+                const result = await repository.renameScriptCharacter(scriptId, characterId, normalizedKey);
 
                 if (!result) {
                     throw new Error('The character could not be renamed');
@@ -267,9 +192,7 @@ export const createScriptCharactersStore = (
 
             return renamed;
         } catch (error) {
-            const normalizedError = error instanceof Error
-                ? error
-                : new Error(String(error));
+            const normalizedError = error instanceof Error ? error : new Error(String(error));
 
             renameKeys.forEach(key => {
                 actionStatus.failMutation(key, 'renameKey', normalizedError);
@@ -294,7 +217,9 @@ export const createScriptCharactersStore = (
 
         const id = repository.allocateScriptCharacterGenderId();
         const transaction = genders.collection.insert({
-            id, key, label: normalizedLabel,
+            id,
+            key,
+            label: normalizedLabel,
         });
 
         return runAction(key, 'createGender', async () => {
@@ -319,11 +244,7 @@ export const createScriptCharactersStore = (
         setCharacterGender: (id: string, value: string | null) => updateField(id, 'genderKey', value),
         setCharacterOutline: (id: string, value: string | null) => updateField(id, 'outline', value),
         setCharacterVoiceType: (id: string, value: string | null) => updateField(id, 'voiceType', value),
-        setCharacterVocalRange: (id: string, low: string | null, high: string | null) => updateVocalRange(
-            id,
-            low,
-            high,
-        ),
+        setCharacterVocalRange: (id: string, low: string | null, high: string | null) => updateVocalRange(id, low, high),
         createGender,
     };
 };

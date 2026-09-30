@@ -4,7 +4,13 @@ import type {ScriptDocument, ScriptNode} from '@stagistic/script';
 import type {Editor} from '@tiptap/react';
 import {useEffect} from 'react';
 import {createRoot, type Root} from 'react-dom/client';
-import {afterEach, describe, expect, it, vi} from 'vite-plus/test';
+import {
+    afterEach,
+    describe,
+    expect,
+    it,
+    vi,
+} from 'vite-plus/test';
 import {userEvent} from 'vite-plus/test/browser';
 
 import {useEditorInstance} from '../../../context';
@@ -95,16 +101,14 @@ const getEditor = () => poll(() => (window as SearchTestWindow).__editorSearchTe
 
 const findSearchInput = () => poll(() => document.querySelector<HTMLInputElement>('input[aria-label="Search script"]'), 'search input');
 
-const resultText = () =>
-    poll(() => document.querySelector<HTMLOutputElement>('output[aria-label="Search result position"]')?.textContent, 'search result position');
+const resultText = () => poll(() => document.querySelector<HTMLOutputElement>('output[aria-label="Search result position"]')?.textContent, 'search result position');
 
-const waitForResult = (expected: string) =>
-    poll(
-        () => (document.querySelector<HTMLOutputElement>('output[aria-label="Search result position"]')?.textContent === expected ? expected : null),
-        `search result position ${expected}`,
-    );
+const waitForResult = (expected: string) => poll(
+    () => document.querySelector<HTMLOutputElement>('output[aria-label="Search result position"]')?.textContent === expected ? expected : null,
+    `search result position ${expected}`,
+);
 
-const platformModKey = () => (navigator.platform.toLowerCase().includes('mac') ? 'Meta' : 'Control');
+const platformModKey = () => navigator.platform.toLowerCase().includes('mac') ? 'Meta' : 'Control';
 
 const setSearchQuery = (input: HTMLInputElement, value: string) => {
     const descriptor = Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value');
@@ -123,7 +127,7 @@ const setSearchQuery = (input: HTMLInputElement, value: string) => {
     );
 };
 
-const pressEnter = (input: HTMLInputElement, options: {shiftKey?: boolean; isComposing?: boolean} = {}) => {
+const pressEnter = (input: HTMLInputElement, options: {shiftKey?: boolean, isComposing?: boolean} = {}) => {
     input.dispatchEvent(
         new KeyboardEvent('keydown', {
             key: 'Enter',
@@ -159,6 +163,7 @@ afterEach(() => {
 describe('editor search', () => {
     it('searches instantly and navigates while retaining input focus and editor selection', async () => {
         renderEditor();
+
         const editor = await getEditor();
         const input = await findSearchInput();
         const selectionBefore = editor.state.selection.from;
@@ -182,6 +187,7 @@ describe('editor search', () => {
 
     it('does not navigate on composing Enter', async () => {
         renderEditor();
+
         const input = await findSearchInput();
 
         setSearchQuery(input, 'light');
@@ -192,6 +198,7 @@ describe('editor search', () => {
 
     it('shows zero results, disables navigation, and restores the search icon on clear', async () => {
         renderEditor();
+
         const input = await findSearchInput();
 
         setSearchQuery(input, 'missing');
@@ -202,7 +209,7 @@ describe('editor search', () => {
 
         document.querySelector<HTMLButtonElement>('button[aria-label="Clear search"]')?.click();
 
-        await poll(() => (input.value === '' ? true : null), 'cleared search input');
+        await poll(() => input.value === '' ? true : null, 'cleared search input');
 
         expect(input.value).toBe('');
         expect(document.querySelector('output[aria-label="Search result position"]')).toBeNull();
@@ -210,6 +217,7 @@ describe('editor search', () => {
 
     it('wraps button navigation between the last and first results', async () => {
         renderEditor();
+
         const input = await findSearchInput();
 
         setSearchQuery(input, 'light');
@@ -223,6 +231,7 @@ describe('editor search', () => {
 
     it('focuses and selects search through the find shortcut without stealing it from other inputs', async () => {
         renderEditor();
+
         const editor = await getEditor();
         const input = await findSearchInput();
         const secondBlock = findScriptBlockByIdFromState(editor.state, 'dialogue-2');
@@ -240,6 +249,7 @@ describe('editor search', () => {
         expect(input.selectionEnd).toBe(input.value.length);
 
         const outsideInput = document.createElement('input');
+
         outsideInput.value = 'outside';
         document.body.appendChild(outsideInput);
         outsideInput.focus();
@@ -248,8 +258,11 @@ describe('editor search', () => {
         expect(document.activeElement).toBe(outsideInput);
 
         const dialog = document.createElement('div');
+
         dialog.setAttribute('role', 'dialog');
+
         const dialogInput = document.createElement('input');
+
         dialog.appendChild(dialogInput);
         document.body.appendChild(dialog);
         dialogInput.focus();
@@ -260,6 +273,7 @@ describe('editor search', () => {
 
     it('expands a collapsed scene and scrolls the active match into view', async () => {
         renderEditor(collapsedSearchFixture());
+
         const editor = await getEditor();
         const scrollIntoView = vi.spyOn(Element.prototype, 'scrollIntoView').mockImplementation(() => undefined);
 
@@ -267,8 +281,8 @@ describe('editor search', () => {
         setSearchQuery(await findSearchInput(), 'hidden light');
 
         await poll(() => document.querySelector('[data-editor-search-current="true"]'), 'active search decoration');
-        await poll(() => (getSceneCollapseSnapshot(editor.state).collapsedSceneIds.includes('scene-2') ? null : true), 'collapsed scene expansion');
-        await poll(() => (scrollIntoView.mock.calls.length > 0 ? true : null), 'active search result scroll');
+        await poll(() => getSceneCollapseSnapshot(editor.state).collapsedSceneIds.includes('scene-2') ? null : true, 'collapsed scene expansion');
+        await poll(() => scrollIntoView.mock.calls.length > 0 ? true : null, 'active search result scroll');
 
         expect(getSceneCollapseSnapshot(editor.state).collapsedSceneIds).not.toContain('scene-2');
         expect(scrollIntoView).toHaveBeenCalledWith({block: 'center', inline: 'nearest'});
@@ -276,6 +290,7 @@ describe('editor search', () => {
 
     it('keeps the search input focused after pointer navigation', async () => {
         renderEditor();
+
         const input = await findSearchInput();
 
         setSearchQuery(input, 'light');
@@ -293,6 +308,7 @@ describe('editor search', () => {
 
     it('uses only background intensity to distinguish the active result', async () => {
         renderEditor();
+
         const input = await findSearchInput();
 
         setSearchQuery(input, 'light');

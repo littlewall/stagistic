@@ -5,7 +5,14 @@ import {
     useState,
 } from 'react';
 
-import {SIDEBAR_LAYOUT_STORAGE_KEY} from '../../../../storageKeys';
+import {
+    createInitialState,
+    getIsMatchingViewport,
+    getStorageKey,
+    type OverlayDrawer,
+    resolvePanelId,
+    type SidebarLayoutState,
+} from './sidebarLayoutStorage';
 import {SIDEBAR_EXCLUSIVE_QUERY, SIDEBAR_OVERLAY_QUERY} from './sidebarViewport';
 import type {SidebarPanelId} from './types';
 
@@ -21,107 +28,12 @@ import type {SidebarPanelId} from './types';
  * drawer can be open at a time (the overlay range is a subset of the exclusive
  * range), which is why it is a single slot rather than two booleans.
  */
-type OverlayDrawer = 'left' | 'right' | null;
-
-interface SidebarLayoutState {
-    isLeftOpen: boolean,
-    isRightOpen: boolean,
-    leftPanelId: SidebarPanelId,
-    rightPanelId: SidebarPanelId,
-}
-
-interface StoredSidebarLayoutState {
-    isLeftOpen?: boolean,
-    isRightOpen?: boolean,
-    leftPanelId?: SidebarPanelId,
-    rightPanelId?: SidebarPanelId,
-}
-
 interface UseSidebarLayoutArgs {
     availablePanelIds: readonly SidebarPanelId[],
     defaultLeftPanelId: SidebarPanelId,
     defaultRightPanelId: SidebarPanelId,
     storageScope: string,
 }
-
-const getIsMatchingViewport = (query: string) => {
-    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') {
-        return false;
-    }
-
-    return window.matchMedia(query).matches;
-};
-
-const isStoredSidebarLayoutState = (value: unknown): value is StoredSidebarLayoutState => {
-    if (!value || typeof value !== 'object') {
-        return false;
-    }
-
-    const candidate = value as Record<string, unknown>;
-
-    return (
-        (candidate.isLeftOpen === undefined || typeof candidate.isLeftOpen === 'boolean')
-        && (candidate.isRightOpen === undefined || typeof candidate.isRightOpen === 'boolean')
-        && (candidate.leftPanelId === undefined || typeof candidate.leftPanelId === 'string')
-        && (candidate.rightPanelId === undefined || typeof candidate.rightPanelId === 'string')
-    );
-};
-
-const getStorageKey = (storageScope: string) => {
-    return `${SIDEBAR_LAYOUT_STORAGE_KEY}:${storageScope}`;
-};
-
-const readStored = (storageScope: string): StoredSidebarLayoutState | null => {
-    if (typeof window === 'undefined') {
-        return null;
-    }
-
-    try {
-        const raw = window.localStorage.getItem(getStorageKey(storageScope));
-
-        if (!raw) {
-            return null;
-        }
-
-        const parsed: unknown = JSON.parse(raw);
-
-        if (!isStoredSidebarLayoutState(parsed)) {
-            return null;
-        }
-
-        return parsed;
-    } catch {
-        return null;
-    }
-};
-
-const resolvePanelId = (
-    stored: SidebarPanelId | undefined,
-    fallback: SidebarPanelId,
-    available: readonly SidebarPanelId[],
-): SidebarPanelId => {
-    if (stored && available.includes(stored)) {
-        return stored;
-    }
-
-    return fallback;
-};
-
-const createInitialState = (
-    storageScope: string,
-    defaultLeftPanelId: SidebarPanelId,
-    defaultRightPanelId: SidebarPanelId,
-    availablePanelIds: readonly SidebarPanelId[],
-): SidebarLayoutState => {
-    const stored = readStored(storageScope);
-
-    return {
-        isLeftOpen: stored?.isLeftOpen ?? true,
-        isRightOpen: stored?.isRightOpen ?? true,
-        leftPanelId: resolvePanelId(stored?.leftPanelId, defaultLeftPanelId, availablePanelIds),
-        rightPanelId: resolvePanelId(stored?.rightPanelId, defaultRightPanelId, availablePanelIds),
-    };
-};
 
 export const useSidebarLayout = ({
     availablePanelIds,
@@ -130,18 +42,9 @@ export const useSidebarLayout = ({
     storageScope,
 }: UseSidebarLayoutArgs) => {
     const storageScopeRef = useRef(storageScope);
-    const [state, setState] = useState<SidebarLayoutState>(() => createInitialState(
-        storageScope,
-        defaultLeftPanelId,
-        defaultRightPanelId,
-        availablePanelIds,
-    ));
-    const [isExclusiveViewport, setIsExclusiveViewport] = useState(
-        () => getIsMatchingViewport(SIDEBAR_EXCLUSIVE_QUERY),
-    );
-    const [isOverlayViewport, setIsOverlayViewport] = useState(
-        () => getIsMatchingViewport(SIDEBAR_OVERLAY_QUERY),
-    );
+    const [state, setState] = useState<SidebarLayoutState>(() => createInitialState(storageScope, defaultLeftPanelId, defaultRightPanelId, availablePanelIds));
+    const [isExclusiveViewport, setIsExclusiveViewport] = useState(() => getIsMatchingViewport(SIDEBAR_EXCLUSIVE_QUERY));
+    const [isOverlayViewport, setIsOverlayViewport] = useState(() => getIsMatchingViewport(SIDEBAR_OVERLAY_QUERY));
     const [overlayDrawer, setOverlayDrawer] = useState<OverlayDrawer>(null);
 
     useEffect(() => {
@@ -192,12 +95,7 @@ export const useSidebarLayout = ({
 
         storageScopeRef.current = storageScope;
         setOverlayDrawer(null);
-        setState(createInitialState(
-            storageScope,
-            defaultLeftPanelId,
-            defaultRightPanelId,
-            availablePanelIds,
-        ));
+        setState(createInitialState(storageScope, defaultLeftPanelId, defaultRightPanelId, availablePanelIds));
     }, [
         availablePanelIds,
         defaultLeftPanelId,
@@ -262,9 +160,7 @@ export const useSidebarLayout = ({
             return {
                 ...previous,
                 isLeftOpen: nextIsLeftOpen,
-                isRightOpen: isExclusiveViewport && nextIsLeftOpen
-                    ? false
-                    : previous.isRightOpen,
+                isRightOpen: isExclusiveViewport && nextIsLeftOpen ? false : previous.isRightOpen,
             };
         });
     }, [isExclusiveViewport, isOverlayViewport]);
@@ -283,9 +179,7 @@ export const useSidebarLayout = ({
 
             return {
                 ...previous,
-                isLeftOpen: isExclusiveViewport && nextIsRightOpen
-                    ? false
-                    : previous.isLeftOpen,
+                isLeftOpen: isExclusiveViewport && nextIsRightOpen ? false : previous.isLeftOpen,
                 isRightOpen: nextIsRightOpen,
             };
         });

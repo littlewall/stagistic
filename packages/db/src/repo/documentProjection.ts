@@ -1,27 +1,14 @@
-import {
-    SCRIPT_DOCUMENT_SCHEMA_VERSION,
-    type ScriptDocument,
-} from '@stagistic/script';
-import {eq} from 'drizzle-orm';
+import {SCRIPT_DOCUMENT_SCHEMA_VERSION, type ScriptDocument} from '@stagistic/script';
 
-import {
-    type ExtractedBlockRow,
-    extractScriptBlocks,
-    rebuildScriptDocumentFromBlocks,
-} from '../blocks';
+import {extractScriptBlocks, rebuildScriptDocumentFromBlocks} from '../blocks';
 import * as dbQueries from '../queries';
-import {
-    type DbClient,
-    generateBlockOrderKeys,
-} from '../queries';
-import {
-    scriptActs,
-    scriptBlocks,
-    scriptMusic,
-    scriptScenes,
-} from '../schema';
+import {type DbClient} from '../queries';
 import {createDocumentPersister} from './persist/persistDocumentDelta';
+import {rebuildScriptProjection} from './rebuildScriptProjection';
 import type {GetDb} from './types';
+
+export type {RebuildScriptProjectionArgs} from './rebuildScriptProjection';
+export {rebuildScriptProjection} from './rebuildScriptProjection';
 
 export interface LoadedScriptDocument {
     document: ScriptDocument,
@@ -56,25 +43,7 @@ interface CreateSqlScriptDocumentProjectionWriterArgs {
     getDb: GetDb,
 }
 
-export interface RebuildScriptProjectionArgs extends SaveScriptDocumentOptions {
-    db: DbClient,
-    scriptId: string,
-    document: ScriptDocument,
-}
-
-const toCharacterRefRows = (block: ExtractedBlockRow, knownCharacterIds: Set<string>) => {
-    return Object.entries(block.characterRefByKey)
-        .filter(([, characterId]) => knownCharacterIds.has(characterId))
-        .sort((a, b) => a[0].localeCompare(b[0]))
-        .map(([characterKey, characterId]) => ({
-            characterId, characterKey, isConfirmed: true,
-        }));
-};
-
-export const loadScriptDocumentFromProjection = async (
-    db: DbClient,
-    scriptId: string,
-): Promise<LoadedProjectionDocument | null> => {
+export const loadScriptDocumentFromProjection = async (db: DbClient, scriptId: string): Promise<LoadedProjectionDocument | null> => {
     const storedBlocks = await dbQueries.listScriptBlocks(db, scriptId);
 
     if (storedBlocks.length === 0) {
@@ -109,126 +78,7 @@ export const loadScriptDocumentFromProjection = async (
     };
 };
 
-export const rebuildScriptProjection = async ({
-    db,
-    scriptId,
-    document,
-    afterPersist,
-}: RebuildScriptProjectionArgs): Promise<void> => {
-    const now = Date.now();
-    const extracted = extractScriptBlocks(scriptId, document);
-    const orderKeys = generateBlockOrderKeys(extracted.blocks.length);
-    const orderKeyById = new Map(extracted.blocks.map((block, index) => [block.blockId, orderKeys[index]]));
-    const sceneIdByHeading = new Map(extracted.scenes.map(scene => [scene.headingBlockId, scene.id]));
-    const actIdByHeading = new Map(extracted.acts.map(act => [act.headingBlockId, act.id]));
-
-    await db.transaction(async tx => {
-        const existingActs = await tx.select({id: scriptActs.id}).from(scriptActs).where(eq(scriptActs.scriptId, scriptId));
-        const existingScenes = await tx.select().from(scriptScenes).where(eq(scriptScenes.scriptId, scriptId));
-        const existingBlocks = await tx.select({id: scriptBlocks.id}).from(scriptBlocks).where(eq(scriptBlocks.scriptId, scriptId));
-        const existingMusic = await tx.select({id: scriptMusic.id}).from(scriptMusic).where(eq(scriptMusic.scriptId, scriptId));
-        const knownSpeakingEntities = await dbQueries.listScriptSpeakingEntities(tx, scriptId);
-
-        const nextActIds = new Set(extracted.acts.map(act => act.id));
-
-        await dbQueries.bulkUpsertScriptActs(tx, extracted.acts.map(act => ({
-            id: act.id,
-            scriptId,
-            headingBlockId: act.headingBlockId,
-            name: act.name,
-            createdAt: now,
-            updatedAt: now,
-        })));
-        await dbQueries.bulkDeleteScriptActs(tx, existingActs.filter(act => !nextActIds.has(act.id)).map(act => act.id));
-
-        /*
-         * Scene rows are hybrid rows: heading identity/ordering is projection-owned,
-         * while color/synopsis/location are user metadata. Rebuild must refresh the
-         * projection fields without erasing metadata for surviving heading blocks.
-         */
-        const existingSceneByHeading = new Map(
-            existingScenes
-                .filter(scene => scene.headingBlockId)
-                .map(scene => [scene.headingBlockId as string, scene] as const),
-        );
-        const nextSceneIds = new Set(extracted.scenes.map(scene => scene.id));
-
-        await dbQueries.bulkUpsertScriptScenes(tx, extracted.scenes.map(scene => {
-            const prev = existingSceneByHeading.get(scene.headingBlockId) ?? null;
-
-            return {
-                id: scene.id,
-                scriptId,
-                headingBlockId: scene.headingBlockId,
-                sceneNumber: scene.sceneNumber,
-                colorHex: prev?.colorHex ?? null,
-                synopsis: prev?.synopsis ?? null,
-                locationId: prev?.locationId ?? null,
-                createdAt: prev?.createdAt ?? now,
-                updatedAt: now,
-            };
-        }));
-        await dbQueries.bulkDeleteScriptScenes(
-            tx,
-            existingScenes.filter(scene => !nextSceneIds.has(scene.id)).map(scene => scene.id),
-        );
-
-        const nextBlockIds = new Set(extracted.blocks.map(block => block.blockId));
-
-        await dbQueries.bulkDeleteScriptBlocks(
-            tx,
-            existingBlocks.filter(block => !nextBlockIds.has(block.id)).map(block => block.id),
-        );
-        await dbQueries.bulkUpsertScriptBlocks(tx, extracted.blocks.map(block => ({
-            id: block.blockId,
-            scriptId,
-            blockType: block.blockType,
-            blockOrder: orderKeyById.get(block.blockId) ?? '',
-            textContent: block.textContent,
-            contentJson: block.contentJson,
-            sceneId: block.sceneHeadingBlockId ? sceneIdByHeading.get(block.sceneHeadingBlockId) ?? null : null,
-            actId: block.actHeadingBlockId ? actIdByHeading.get(block.actHeadingBlockId) ?? null : null,
-            createdAt: now,
-            updatedAt: now,
-        })));
-
-        const knownCharacterIds = new Set(knownSpeakingEntities.map(entity => entity.id));
-
-        await dbQueries.bulkReplaceScriptBlockCharacterRefs(tx, extracted.blocks.map(block => ({
-            blockId: block.blockId,
-            rows: toCharacterRefRows(block, knownCharacterIds),
-        })));
-
-        const nextMusicIds = new Set(extracted.music.map(music => music.id));
-
-        await dbQueries.bulkUpsertScriptMusic(tx, extracted.music.map(music => ({
-            id: music.id,
-            scriptId,
-            sceneNumber: music.sceneNumber,
-            indexInScene: music.indexInScene,
-            mode: music.mode,
-            title: music.title,
-            kind: music.kind,
-            startBlockId: music.startBlockId,
-            endBlockId: music.endBlockId,
-            createdAt: now,
-            updatedAt: now,
-        })));
-        await dbQueries.bulkUnassignScriptMusic(
-            tx,
-            existingMusic.filter(music => !nextMusicIds.has(music.id)).map(music => music.id),
-            now,
-        );
-
-        if (afterPersist) {
-            await afterPersist(tx);
-        }
-    });
-};
-
-export const createSqlScriptDocumentProjectionWriter = ({
-    getDb,
-}: CreateSqlScriptDocumentProjectionWriterArgs): ScriptDocumentProjectionWriter => {
+export const createSqlScriptDocumentProjectionWriter = ({getDb}: CreateSqlScriptDocumentProjectionWriterArgs): ScriptDocumentProjectionWriter => {
     const persisters = new Map<string, ReturnType<typeof createDocumentPersister>>();
 
     const getPersister = (scriptId: string) => {
@@ -242,31 +92,19 @@ export const createSqlScriptDocumentProjectionWriter = ({
         return persister;
     };
 
-    const seedBaseline: ScriptDocumentProjectionWriter['seedBaseline'] = (
-        scriptId,
-        document,
-        orderKeyByBlockId,
-    ) => {
+    const seedBaseline: ScriptDocumentProjectionWriter['seedBaseline'] = (scriptId, document, orderKeyByBlockId) => {
         const baseline = extractScriptBlocks(scriptId, document);
 
         getPersister(scriptId).setBaseline(baseline.blocks, orderKeyByBlockId);
     };
 
-    const updateFromDocument: ScriptDocumentProjectionWriter['updateFromDocument'] = async (
-        scriptId,
-        document,
-        options,
-    ) => {
+    const updateFromDocument: ScriptDocumentProjectionWriter['updateFromDocument'] = async (scriptId, document, options) => {
         const db = await getDb();
 
         await getPersister(scriptId).persist(db, document, options?.afterPersist);
     };
 
-    const rebuildFromDocument: ScriptDocumentProjectionWriter['rebuildFromDocument'] = async (
-        scriptId,
-        document,
-        options,
-    ) => {
+    const rebuildFromDocument: ScriptDocumentProjectionWriter['rebuildFromDocument'] = async (scriptId, document, options) => {
         const db = await getDb();
 
         await rebuildScriptProjection({
@@ -288,10 +126,7 @@ export const createSqlScriptDocumentProjectionWriter = ({
     };
 };
 
-export const createProjectedTableDocumentSource = ({
-    getDb,
-    projectionWriter,
-}: CreateProjectedTableDocumentSourceArgs): ScriptDocumentSource => {
+export const createProjectedTableDocumentSource = ({getDb, projectionWriter}: CreateProjectedTableDocumentSourceArgs): ScriptDocumentSource => {
     const load: ScriptDocumentSource['load'] = async scriptId => {
         const db = await getDb();
         const loaded = await loadScriptDocumentFromProjection(db, scriptId);

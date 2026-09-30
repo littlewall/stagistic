@@ -1,6 +1,8 @@
 import type {ScriptDocument} from '@stagistic/script';
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {extractScriptBlocks} from './extract';
@@ -9,8 +11,11 @@ const doc: ScriptDocument = {
     type: 'doc',
     content: [
         {
-            type: 'scene', attrs: {id: 's1'}, content: [{type: 'text', text: 'Scene 1'}],
-        }, {
+            type: 'scene',
+            attrs: {id: 's1'},
+            content: [{type: 'text', text: 'Scene 1'}],
+        },
+        {
             type: 'stageDirection',
             attrs: {id: 'b1'},
             content: [

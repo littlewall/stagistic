@@ -2,15 +2,28 @@ import type {ScriptDocument} from '@stagistic/script';
 import type {Editor as TiptapEditor} from '@tiptap/react';
 import {useCallback, useRef} from 'react';
 
-import type {EditorIndexSnapshot, EditorLiveScenePlacementSnapshot, EditorLiveSnapshot, EditorValueChangeMeta} from '../contracts';
+import type {
+    EditorIndexSnapshot,
+    EditorLiveScenePlacementSnapshot,
+    EditorLiveSnapshot,
+    EditorValueChangeMeta,
+} from '../contracts';
 import {stripScriptSettings} from '../editorSettings';
 import {buildSidebarProjectionFromIndex, type SidebarProjectionColorContext} from '../live/buildSidebarProjectionFromIndex';
 import {type EditorSnapshotStore, EMPTY_SCENE_PLACEMENT} from '../live/store';
 import {buildIndexSnapshotFromPmDoc} from '../runtime/buildIndexSnapshotFromPmDoc';
 import {buildScenePlacements} from '../runtime/buildScenePlacements';
-import {getBlockUiEventsFromState, getEditorRuntimeFromState, getPaginationPluginState} from '../tiptap/extensions';
+import {
+    getBlockUiEventsFromState,
+    getEditorRuntimeFromState,
+    getPaginationPluginState,
+} from '../tiptap/extensions';
 import type {PaginationState} from '../tiptap/extensions/pagination/types';
-import {ensureScriptBlockId, isScriptBlockNodeName, normalizeBlockNodeType} from '../tiptap/scriptCore';
+import {
+    ensureScriptBlockId,
+    isScriptBlockNodeName,
+    normalizeBlockNodeType,
+} from '../tiptap/scriptCore';
 import type {UseEditorLifecycleArgs} from './editorLifecycleTypes';
 import type {useLatestRef} from './useLatestRef';
 
@@ -79,22 +92,22 @@ const hasCharacterRows = (snapshot: EditorLiveSnapshot['characters']) => {
 type LatestRef<T> = ReturnType<typeof useLatestRef<T>>;
 
 interface UseEditorLifecycleSyncArgs {
-    liveStore: EditorSnapshotStore;
-    setLatestValue: UseEditorLifecycleArgs['document']['setLatestValue'];
-    characters: UseEditorLifecycleArgs['characters'];
-    lastEmittedActiveBlockIdRef: {current: string | null | undefined};
-    onValueChangeRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onValueChange']>;
-    onIndexChangeRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onIndexChange']>;
-    onActiveBlockChangeRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onActiveBlockChange']>;
-    onBlockUiEventRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onBlockUiEvent']>;
+    liveStore: EditorSnapshotStore,
+    setLatestValue: UseEditorLifecycleArgs['document']['setLatestValue'],
+    characters: UseEditorLifecycleArgs['characters'],
+    lastEmittedActiveBlockIdRef: {current: string | null | undefined},
+    onValueChangeRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onValueChange']>,
+    onIndexChangeRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onIndexChange']>,
+    onActiveBlockChangeRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onActiveBlockChange']>,
+    onBlockUiEventRef: LatestRef<UseEditorLifecycleArgs['callbacks']['onBlockUiEvent']>,
 }
 
 export interface EditorLifecycleSyncCallbacks {
-    syncValueFromEditor: (targetEditor: TiptapEditor, meta: EditorValueChangeMeta) => void;
-    patchFallbackSnapshot: (snapshot: EditorIndexSnapshot, meta: EditorValueChangeMeta) => void;
-    syncRuntimeSnapshotFromEditor: (targetEditor: TiptapEditor, snapshot?: EditorIndexSnapshot) => void;
-    emitIndexFromEditor: (targetEditor: TiptapEditor, meta: EditorValueChangeMeta) => void;
-    emitBlockUiEventsFromEditor: (targetEditor: TiptapEditor) => void;
+    syncValueFromEditor: (targetEditor: TiptapEditor, meta: EditorValueChangeMeta) => void,
+    patchFallbackSnapshot: (snapshot: EditorIndexSnapshot, meta: EditorValueChangeMeta) => void,
+    syncRuntimeSnapshotFromEditor: (targetEditor: TiptapEditor, snapshot?: EditorIndexSnapshot) => void,
+    emitIndexFromEditor: (targetEditor: TiptapEditor, meta: EditorValueChangeMeta) => void,
+    emitBlockUiEventsFromEditor: (targetEditor: TiptapEditor) => void,
 }
 
 /*
@@ -214,14 +227,14 @@ export const useEditorLifecycleSync = ({
             const currentSnapshot = liveStore.getSnapshot();
             const fallbackProjection = snapshot
                 ? buildSidebarProjectionFromIndex(snapshot, {
-                      characterColorSaturation: characters?.characterColorSaturation,
-                      colorByCharacterId: characters?.colorByCharacterIdRef?.current,
-                      rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
-                      persistentCharacters: characters?.persistentCharactersRef?.current,
-                  })
+                    characterColorSaturation: characters?.characterColorSaturation,
+                    colorByCharacterId: characters?.colorByCharacterIdRef?.current,
+                    rememberedColorByKey: characters?.rememberedColorByKeyRef?.current,
+                    persistentCharacters: characters?.persistentCharactersRef?.current,
+                })
                 : null;
-            const nextStructure = hasStructureRows(runtime.structure) ? runtime.structure : (fallbackProjection?.structure ?? currentSnapshot.structure);
-            const nextCharacters = hasCharacterRows(runtime.characters) ? runtime.characters : (fallbackProjection?.characters ?? currentSnapshot.characters);
+            const nextStructure = hasStructureRows(runtime.structure) ? runtime.structure : fallbackProjection?.structure ?? currentSnapshot.structure;
+            const nextCharacters = hasCharacterRows(runtime.characters) ? runtime.characters : fallbackProjection?.characters ?? currentSnapshot.characters;
 
             liveStore.patchSnapshot({
                 revision: runtime.revision,
@@ -231,7 +244,7 @@ export const useEditorLifecycleSync = ({
                 scenePlacement: resolveScenePlacement(targetEditor),
                 characters: nextCharacters,
                 music: runtime.music,
-                ...(snapshot ? {index: snapshot} : {}),
+                ...snapshot ? {index: snapshot} : {},
             });
 
             if (lastEmittedActiveBlockIdRef.current !== runtime.activeBlockId) {

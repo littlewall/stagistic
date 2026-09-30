@@ -1,18 +1,12 @@
-import type {
-    ScriptDocument,
-    ScriptNode,
-} from '@stagistic/script';
-import {
-    ensureSceneHeading,
-    getScriptBlockNodeType,
-} from '@stagistic/script';
+import type {ScriptDocument, ScriptNode} from '@stagistic/script';
+import {ensureSceneHeading, getScriptBlockNodeType} from '@stagistic/script';
 import {
     describe,
     expect,
     it,
 } from 'vite-plus/test';
 
-import {buildDeleteActContent} from './blockMutations';
+import {buildDeleteActContent} from './actBlockMutations';
 
 const block = (type: string, id: string): ScriptNode => ({
     type,
@@ -57,7 +51,6 @@ describe('buildDeleteActContent', () => {
             content: result.nextContent ?? [],
         });
 
-        expect(reloaded.content.map(node => getScriptBlockNodeType(node)))
-            .toEqual(['scene']);
+        expect(reloaded.content.map(node => getScriptBlockNodeType(node))).toEqual(['scene']);
     });
 });

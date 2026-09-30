@@ -36,7 +36,8 @@ describe('buildMiniEditorCharacters', () => {
                 id: 'mini-character:ANNA',
                 key: 'ANNA',
                 colorHex: null,
-            }, {
+            },
+            {
                 id: 'mini-character:BORIS',
                 key: 'BORIS',
                 colorHex: null,

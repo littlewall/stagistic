@@ -4,12 +4,15 @@ import {Plugin, PluginKey} from '@tiptap/pm/state';
 import {Decoration, DecorationSet} from '@tiptap/pm/view';
 
 import {findSearchResults} from './findSearchResults';
-import type {EditorSearchSnapshot, SearchCriteria, SearchResult} from './types';
+import styles from './SearchExtension.module.css';
+import type {
+    EditorSearchSnapshot,
+    SearchCriteria,
+    SearchResult,
+} from './types';
 import {DEFAULT_SEARCH_CRITERIA} from './types';
 
-import styles from './SearchExtension.module.css';
-
-type SearchMeta = {type: 'criteria'; criteria: SearchCriteria} | {type: 'clear'} | {type: 'next'} | {type: 'previous'};
+type SearchMeta = {type: 'criteria', criteria: SearchCriteria} | {type: 'clear'} | {type: 'next'} | {type: 'previous'};
 
 const editorSearchPluginKey = new PluginKey<EditorSearchSnapshot>('editor-search');
 
@@ -34,17 +37,14 @@ const moveIndex = (current: number, count: number, delta: -1 | 1) => {
     return (current + delta + count) % count;
 };
 
-const buildDecorations = (document: ProseMirrorNode, results: readonly SearchResult[], currentIndex: number) =>
-    DecorationSet.create(
-        document,
-        results.map((result, index) =>
-            Decoration.inline(result.from, result.to, {
-                class: index === currentIndex ? `${styles.match} ${styles.current}` : styles.match,
-                'data-editor-search-match': 'true',
-                ...(index === currentIndex ? {'data-editor-search-current': 'true'} : {}),
-            }),
-        ),
-    );
+const buildDecorations = (document: ProseMirrorNode, results: readonly SearchResult[], currentIndex: number) => DecorationSet.create(
+    document,
+    results.map((result, index) => Decoration.inline(result.from, result.to, {
+        class: index === currentIndex ? `${styles.match} ${styles.current}` : styles.match,
+        'data-editor-search-match': 'true',
+        ...index === currentIndex ? {'data-editor-search-current': 'true'} : {},
+    })),
+);
 
 const buildSnapshot = (document: ProseMirrorNode, criteria: SearchCriteria, results: readonly SearchResult[], currentIndex: number): EditorSearchSnapshot => ({
     criteria,
@@ -79,11 +79,11 @@ export const getEditorSearchSnapshot = (state: Parameters<PluginKey<EditorSearch
 declare module '@tiptap/core' {
     interface Commands<ReturnType> {
         editorSearch: {
-            setSearchCriteria: (criteria: SearchCriteria) => ReturnType;
-            clearSearch: () => ReturnType;
-            goToNextSearchResult: () => ReturnType;
-            goToPreviousSearchResult: () => ReturnType;
-        };
+            setSearchCriteria: (criteria: SearchCriteria) => ReturnType,
+            clearSearch: () => ReturnType,
+            goToNextSearchResult: () => ReturnType,
+            goToPreviousSearchResult: () => ReturnType,
+        },
     }
 }
 
@@ -93,8 +93,7 @@ export const SearchExtension = Extension.create({
     addCommands() {
         return {
             setSearchCriteria:
-                criteria =>
-                ({tr, dispatch}) => {
+                criteria => ({tr, dispatch}) => {
                     if (dispatch) {
                         tr.setMeta(editorSearchPluginKey, {type: 'criteria', criteria} satisfies SearchMeta).setMeta('addToHistory', false);
                     }
@@ -102,8 +101,7 @@ export const SearchExtension = Extension.create({
                     return true;
                 },
             clearSearch:
-                () =>
-                ({tr, dispatch}) => {
+                () => ({tr, dispatch}) => {
                     if (dispatch) {
                         tr.setMeta(editorSearchPluginKey, {type: 'clear'} satisfies SearchMeta).setMeta('addToHistory', false);
                     }
@@ -111,8 +109,7 @@ export const SearchExtension = Extension.create({
                     return true;
                 },
             goToNextSearchResult:
-                () =>
-                ({tr, dispatch}) => {
+                () => ({tr, dispatch}) => {
                     if (dispatch) {
                         tr.setMeta(editorSearchPluginKey, {type: 'next'} satisfies SearchMeta).setMeta('addToHistory', false);
                     }
@@ -120,8 +117,7 @@ export const SearchExtension = Extension.create({
                     return true;
                 },
             goToPreviousSearchResult:
-                () =>
-                ({tr, dispatch}) => {
+                () => ({tr, dispatch}) => {
                     if (dispatch) {
                         tr.setMeta(editorSearchPluginKey, {type: 'previous'} satisfies SearchMeta).setMeta('addToHistory', false);
                     }

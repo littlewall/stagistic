@@ -1,4 +1,8 @@
-import {and, eq, type InferInsertModel} from 'drizzle-orm';
+import {
+    and,
+    eq,
+    type InferInsertModel,
+} from 'drizzle-orm';
 
 import {scriptCharacters} from '../../../schema';
 import type {DbClient} from '../../types';

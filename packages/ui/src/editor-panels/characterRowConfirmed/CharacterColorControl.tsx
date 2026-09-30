@@ -1,10 +1,7 @@
 import clsx from 'clsx';
-import {
-    type CSSProperties,
-    type KeyboardEvent,
-} from 'react';
+import {type CSSProperties, type KeyboardEvent} from 'react';
 
-import {Tooltip} from '../../atoms/Tooltip';
+import {Tooltip} from '../../atoms/Tooltip/Tooltip';
 import styles from '../EditorSidebar.module.css';
 import {CharacterColorPopover} from './CharacterColorPopover';
 import type {CharacterRowColorControls} from './contracts';

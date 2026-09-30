@@ -1,20 +1,24 @@
 import {eq} from 'drizzle-orm';
 
 import type {FileStorage} from '../fileStorage';
-import * as dbQueries from '../queries';
 import type {DbClient} from '../queries';
+import * as dbQueries from '../queries';
 import {scriptScenes} from '../schema';
 import type {ScriptPackageWrite} from '../scriptPackageWrite';
 import {writeScriptSettingsTx} from './config';
 import {LEGACY_TO_BLOCKS_TRIGGERS, migrateScriptDocumentToBlocks} from './migration/legacyToBlocks';
 import {writeTitlePageFieldsTx} from './titlePage';
-import type {GetDb, RecordOutbox, SyncDb} from './types';
+import type {
+    GetDb,
+    RecordOutbox,
+    SyncDb,
+} from './types';
 
 interface CreateImportPackageHandlerArgs {
-    getDb: GetDb;
-    recordOutbox: RecordOutbox;
-    syncDb: SyncDb;
-    fileStorage: FileStorage;
+    getDb: GetDb,
+    recordOutbox: RecordOutbox,
+    syncDb: SyncDb,
+    fileStorage: FileStorage,
 }
 
 const writePackageDomainRowsTx = async (
@@ -130,10 +134,22 @@ const writePackageDomainRowsTx = async (
 
     for (const scene of input.scenes) {
         if (!scene.headingBlockId) continue;
+
         const projectedSceneId = sceneIdByHeading.get(scene.headingBlockId);
+
         if (!projectedSceneId) continue;
-        await dbQueries.updateScriptSceneMetadata(tx, {sceneId: projectedSceneId, colorHex: scene.colorHex, synopsis: scene.synopsis, updatedAt: now});
-        await dbQueries.replaceScriptSceneLocations(tx, {scriptId, sceneHeadingBlockId: scene.headingBlockId, locationIds: scene.locationIds});
+
+        await dbQueries.updateScriptSceneMetadata(tx, {
+            sceneId: projectedSceneId,
+            colorHex: scene.colorHex,
+            synopsis: scene.synopsis,
+            updatedAt: now,
+        });
+        await dbQueries.replaceScriptSceneLocations(tx, {
+            scriptId,
+            sceneHeadingBlockId: scene.headingBlockId,
+            locationIds: scene.locationIds,
+        });
     }
 
     await writeTitlePageFieldsTx(tx, scriptId, input.titlePage, now);
@@ -151,6 +167,7 @@ const writePackageDomainRowsTx = async (
             updatedAt: attachment.updatedAt,
         });
     }
+
     for (const binding of input.bindings) {
         await dbQueries.insertMusicAttachmentLink(tx, {
             musicId: binding.musicId,
@@ -165,12 +182,13 @@ const writePackageDomainRowsTx = async (
 const saveAttachmentBlobs = async (
     fileStorage: FileStorage,
     input: ScriptPackageWrite,
-): Promise<{storageKeyByAttachment: Map<string, string>; savedKeys: string[]}> => {
+): Promise<{storageKeyByAttachment: Map<string, string>, savedKeys: string[]}> => {
     const storageKeyByAttachment = new Map<string, string>();
     const savedKeys: string[] = [];
 
     for (const attachment of input.attachments) {
         const key = await fileStorage.save(attachment.blob);
+
         storageKeyByAttachment.set(attachment.id, key);
         savedKeys.push(key);
     }
@@ -180,15 +198,18 @@ const saveAttachmentBlobs = async (
 
 const deleteBlobsBestEffort = async (fileStorage: FileStorage, keys: string[], context: string): Promise<void> => {
     await Promise.all(
-        keys.map(key =>
-            fileStorage.delete(key).catch(() => {
-                console.error(`[import] Failed to clean up ${context}.`);
-            }),
-        ),
+        keys.map(key => fileStorage.delete(key).catch(() => {
+            console.error(`[import] Failed to clean up ${context}.`);
+        })),
     );
 };
 
-export const createImportPackageHandler = ({getDb, recordOutbox, syncDb, fileStorage}: CreateImportPackageHandlerArgs) => {
+export const createImportPackageHandler = ({
+    getDb,
+    recordOutbox,
+    syncDb,
+    fileStorage,
+}: CreateImportPackageHandlerArgs) => {
     const createScriptFromPackage = async (input: ScriptPackageWrite): Promise<void> => {
         const db = await getDb();
         const scriptId = input.script.id;
@@ -204,7 +225,11 @@ export const createImportPackageHandler = ({getDb, recordOutbox, syncDb, fileSto
                     updatedAt: input.script.updatedAt,
                 });
                 if (input.script.subtitle) {
-                    await dbQueries.updateScriptSubtitle(tx, {id: scriptId, subtitle: input.script.subtitle, updatedAt: now});
+                    await dbQueries.updateScriptSubtitle(tx, {
+                        id: scriptId,
+                        subtitle: input.script.subtitle,
+                        updatedAt: now,
+                    });
                 }
 
                 await writePackageDomainRowsTx(tx, scriptId, input, storageKeyByAttachment, now);
@@ -237,9 +262,15 @@ export const createImportPackageHandler = ({getDb, recordOutbox, syncDb, fileSto
 
         try {
             await db.transaction(async tx => {
-                await dbQueries.updateScript(tx, {id: scriptId, title: input.script.title, subtitle: input.script.subtitle, updatedAt: now});
+                await dbQueries.updateScript(tx, {
+                    id: scriptId,
+                    title: input.script.title,
+                    subtitle: input.script.subtitle,
+                    updatedAt: now,
+                });
 
                 const existingAttachments = await dbQueries.listScriptAttachments(tx, scriptId);
+
                 removedStorageKeys = existingAttachments.map(attachment => attachment.storageKey);
 
                 await dbQueries.deleteScriptCharactersByScriptId(tx, scriptId);

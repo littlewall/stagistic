@@ -1,5 +1,7 @@
 import {
-    describe, expect, it,
+    describe,
+    expect,
+    it,
 } from 'vite-plus/test';
 
 import {CHARACTER_TAG_MARK_NAME, type ScriptDocument} from '..';
@@ -65,7 +67,9 @@ copyright: "© 2026 Jane Smith"
                         {
                             type: 'musicStart',
                             attrs: {
-                                musicId: 'music-1', mode: 'open', title: 'She said "Yes"',
+                                musicId: 'music-1',
+                                mode: 'open',
+                                title: 'She said "Yes"',
                             },
                         },
                     ],
@@ -148,15 +152,20 @@ LYRICS TWO`);
         const document: ScriptDocument = {
             type: 'doc',
             content: [
-                {type: 'stageDirection',
+                {
+                    type: 'stageDirection',
                     content: [
                         {
-                            type: 'musicStart', attrs: {mode: 'open', title: 'Night'},
+                            type: 'musicStart',
+                            attrs: {mode: 'open', title: 'Night'},
                         },
-                    ]},
+                    ],
+                },
                 {type: 'character', content: [text('JOHN')]},
-                {type: 'dialogue',
-                    content: [text('The music dies.'), {type: 'musicOut'}]},
+                {
+                    type: 'dialogue',
+                    content: [text('The music dies.'), {type: 'musicOut'}],
+                },
                 {type: 'stageDirection', content: [{type: 'musicOut'}]},
             ],
         };

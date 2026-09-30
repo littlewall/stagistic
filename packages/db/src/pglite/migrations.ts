@@ -1,6 +1,6 @@
 import type {PGlite} from '@electric-sql/pglite';
 
-import {compiledMigrations} from '../migrations.compiled';
+import {compiledMigrations} from './migrations.compiled';
 
 const MIGRATIONS_TABLE = '__stagistic_migrations';
 const MIGRATIONS_LOCK = `LOCK TABLE ${MIGRATIONS_TABLE} IN EXCLUSIVE MODE;`;
