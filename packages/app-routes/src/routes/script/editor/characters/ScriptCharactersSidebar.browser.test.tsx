@@ -35,7 +35,7 @@ vi.mock('../../ScriptSessionContext', () => ({
     useScriptSession: () => ({resolvedScriptSettings: DEFAULT_EDITOR_SETTINGS}),
 }));
 
-vi.mock('../../settings/ScriptSettingsModalProvider', () => ({
+vi.mock('../../settings/ScriptSettingsModalContext', () => ({
     useScriptSettingsModal: () => ({
         openAttributeManagerCharacter: () => {},
         openAttributeManagerGroup: () => {},

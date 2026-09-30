@@ -4,11 +4,11 @@ import {
     it,
 } from 'vite-plus/test';
 
-import {filterScriptByCharacter} from './filterByCharacter';
 import {
     block,
     sampleDoc,
-} from './testUtils';
+} from '../test/testUtils';
+import {filterScriptByCharacter} from './filterByCharacter';
 
 const characters = [
     {

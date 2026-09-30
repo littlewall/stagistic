@@ -6,13 +6,13 @@ import {
     type MusicBlockInput,
 } from '@stagistic/script';
 
-import type {IntegratedScoreExportConfig} from './config';
-import {deriveBasicExportPlan} from './deriveBasicExportPlan';
+import type {IntegratedScoreExportConfig} from '../model/config';
 import type {
     ExportPlan,
     IntegratedScorePostStep,
-} from './plan';
-import type {ScriptData} from './scriptData';
+} from '../model/plan';
+import type {ScriptData} from '../model/scriptData';
+import {deriveBasicExportPlan} from './deriveBasicExportPlan';
 
 /**
  * Derives fixed music units for the Integrated score template. Hits are point

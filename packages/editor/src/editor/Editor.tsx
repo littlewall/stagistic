@@ -1,12 +1,9 @@
 import {coerceUnknownBlocksToStageDirections, type ScriptDocument} from '@stagistic/script';
 import {
     type ReactNode,
-    useCallback,
     useEffect,
-    useLayoutEffect,
     useMemo,
     useRef,
-    useState,
 } from 'react';
 
 import {EditorActCommandsProvider} from './actCommands/context';
@@ -23,19 +20,20 @@ import {
 import {useEditorRuntimeSettings} from './editorSettings/useEditorRuntimeSettings';
 import {LeftSidebar, RightSidebar} from './editorSlots';
 import {EditorElementSelectionProvider} from './elementSelection/context';
-import {serializeDocumentForSave, useAutosaveController} from './hooks/useAutosaveController';
+import {serializeDocumentForSave} from './hooks/useAutosaveController';
+import {useCommentCallbacksRef} from './hooks/useCommentCallbacksRef';
+import {useEditorAutosave} from './hooks/useEditorAutosave';
 import {useEditorCharacterColors} from './hooks/useEditorCharacterColors';
 import {useEditorCharacterSync} from './hooks/useEditorCharacterSync';
 import {useEditorLifecycle} from './hooks/useEditorLifecycle';
 import {useEditorSidebarLayout} from './hooks/useEditorSidebarLayout';
-import {usePaginationReady} from './hooks/usePaginationReady';
+import {useInitialCanvasReady} from './hooks/usePaginationReady';
 import {usePaginationSettings} from './hooks/usePaginationSettings';
 import {useResponsiveScale} from './hooks/useResponsiveScale';
 import {EditorSnapshotStoreProvider} from './live/context';
 import {getBlockNextElements, getBlockShortcuts} from './model/blockSettingMaps';
 import {type CharacterColorRefsBundle, createCharacterColorRefsBundle} from './surface/editorSurfaceCache';
 import {useScriptEditorInstance} from './surface/useScriptEditorInstance';
-import type {CommentsExtensionCallbacks} from './tiptap/extensions/comments';
 import {useEditorExtensions} from './useEditorExtensions';
 
 // ─── Component ───────────────────────────────────────────────────────────────
@@ -127,15 +125,10 @@ const Editor = ({
         surfaceRefsRef.current = surfaceCache?.acquire(surfaceSignature)?.characterColorRefs ?? createCharacterColorRefsBundle();
     }
 
-    const commentCallbacksRef = useRef<CommentsExtensionCallbacks>({});
-
-    // Read at event time by the comments plugin, so the latest host callbacks always win.
-    useLayoutEffect(() => {
-        commentCallbacksRef.current = {
-            onRequestReveal: onRequestRevealComments,
-            onAnchorClick: onCommentAnchorClick,
-            onBlocksMerged: onCommentBlocksMerged,
-        };
+    const commentCallbacksRef = useCommentCallbacksRef({
+        onRequestReveal: onRequestRevealComments,
+        onAnchorClick: onCommentAnchorClick,
+        onBlocksMerged: onCommentBlocksMerged,
     });
 
     const persistentMusicRef = useRef(persistentMusic);
@@ -216,33 +209,17 @@ const Editor = ({
 
     useEditorCharacterSync(editor, persistentCharacters, resolvedSettings.visual.characterColorSaturation);
 
-    const resolveLatestValue = useCallback(() => {
-        if (!editor) {
-            return null;
-        }
-
-        const paginationCommands = editor.commands as {
-            forcePaginationRecalc?: () => boolean,
-        };
-
-        paginationCommands.forcePaginationRecalc?.();
-
-        return stripScriptSettings(editor.getJSON() as ScriptDocument);
-    }, [editor]);
     const {
         scheduleAutosave,
         handleManualSave,
         setLatestValue,
         syncInitialValue,
-    } = useAutosaveController({
+    } = useEditorAutosave(editor, {
         onAutoSave,
         onManualSave,
         onDirtyChange,
         autoSaveDelayMs,
-        resolveLatestValue,
-        onValueSynced: (value, revision) => {
-            onValueChange?.(value, {source: 'typing', revision});
-        },
+        onValueChange,
     });
     const rootStyle = useMemo(
         () => buildEditorRootStyle({
@@ -270,16 +247,7 @@ const Editor = ({
         renderScale,
     });
 
-    const isPaginationReady = usePaginationReady(editor);
-    const [hasPresentedCanvas, setHasPresentedCanvas] = useState(isPaginationReady);
-
-    useLayoutEffect(() => {
-        if (isPaginationReady) {
-            setHasPresentedCanvas(true);
-        }
-    }, [isPaginationReady]);
-
-    const isInitialCanvasReady = hasPresentedCanvas || isPaginationReady;
+    const isInitialCanvasReady = useInitialCanvasReady(editor);
 
     const {actCommands} = useEditorLifecycle({
         editor: {

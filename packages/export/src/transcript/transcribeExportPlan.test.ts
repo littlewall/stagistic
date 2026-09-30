@@ -5,12 +5,12 @@ import {
     it,
 } from 'vite-plus/test';
 
-import {BASIC_DEFAULTS} from './config';
-import {deriveBasicExportPlan} from './deriveBasicExportPlan';
-import type {ExportPlan} from './plan';
-import {block, sampleDoc} from './testUtils';
+import {BASIC_DEFAULTS} from '../model/config';
+import type {ExportPlan} from '../model/plan';
+import type {PageItem, VisualLine} from '../model/visualLine';
+import {deriveBasicExportPlan} from '../plan/deriveBasicExportPlan';
+import {block, sampleDoc} from '../test/testUtils';
 import {transcribeExportPlan} from './transcribeExportPlan';
-import type {PageItem, VisualLine} from './visualLine';
 
 const plan = (blocks: ExportPlan['doc']['content']): ExportPlan => ({
     doc: {

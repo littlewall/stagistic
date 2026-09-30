@@ -1,6 +1,6 @@
 import {type EditorSettings, type HeaderFooterAlignment} from '@stagistic/script';
 
-import type {PageItem, VisualLine} from '../visualLine';
+import type {PageItem, VisualLine} from '../model/visualLine';
 
 export const PAGE_BREAK_ITEM: PageItem = {type: '__page_break__'};
 export const MONO_FONT_FAMILY = 'Courier Prime';

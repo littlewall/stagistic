@@ -12,7 +12,7 @@ import {ExportProvider} from './export/ExportProvider';
 import {useExportScriptData} from './export/useExportScriptData';
 import styles from './ScriptExportRoute.module.css';
 import {useScriptWorkspace} from './ScriptWorkspaceContext';
-import {useScriptSettingsModal} from './settings/ScriptSettingsModalProvider';
+import {useScriptSettingsModal} from './settings/ScriptSettingsModalContext';
 
 export const ScriptExportRoute = () => {
     const {currentScript} = useScriptWorkspace();

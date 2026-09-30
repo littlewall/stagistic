@@ -26,7 +26,7 @@ import {
 import {ATTRIBUTE_MANAGER_PANEL_CHARACTERS} from '../../attributes/attributeManagerMenu';
 import {useScriptCharacters} from '../../ScriptCharactersContext';
 import {useScriptSession} from '../../ScriptSessionContext';
-import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalProvider';
+import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalContext';
 import {AttributeManagerSidebarButton} from '../sidebar/AttributeManagerSidebarButton';
 import {AddCharacterModal} from './AddCharacterModal';
 import {CharactersSidebarContextActions} from './CharactersSidebarContextActions';

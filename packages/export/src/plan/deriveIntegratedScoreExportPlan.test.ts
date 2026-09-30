@@ -4,9 +4,9 @@ import {
     it,
 } from 'vite-plus/test';
 
-import {INTEGRATED_SCORE_DEFAULTS} from './config';
+import {INTEGRATED_SCORE_DEFAULTS} from '../model/config';
+import {block} from '../test/testUtils';
 import {deriveIntegratedScoreExportPlan} from './deriveIntegratedScoreExportPlan';
-import {block} from './testUtils';
 
 const script = {
     doc: {

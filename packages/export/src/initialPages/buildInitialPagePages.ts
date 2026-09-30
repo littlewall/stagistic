@@ -1,7 +1,7 @@
 import type {EditorSettings} from '@stagistic/script';
 
-import type {InitialPagePlan} from '../plan';
-import type {InitialPageVisualPage} from '../visualLine';
+import type {InitialPagePlan} from '../model/plan';
+import type {InitialPageVisualPage} from '../model/visualLine';
 import {buildCharactersAndPlacesPages} from './buildCharactersAndPlacesPages';
 import {buildVocalRangesPages} from './buildVocalRangesPages';
 import {buildContentsPages} from './contents/buildContentsPages';

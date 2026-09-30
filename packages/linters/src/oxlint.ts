@@ -60,7 +60,14 @@ export default defineConfig({
     ],
     rules: {
         'eslint/func-style': ['error', 'expression'],
-        'eslint/max-lines': ['error', {max: 300}],
+        'eslint/max-lines': [
+            'error',
+            {
+                max: 300,
+                skipBlankLines: true,
+                skipComments: true,
+            },
+        ],
         'eslint/no-array-constructor': 'error',
         'eslint/no-case-declarations': 'error',
         'eslint/no-empty': 'error',

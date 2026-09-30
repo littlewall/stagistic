@@ -100,7 +100,7 @@ vi.mock('./ScriptCharactersContext', () => ({
     }),
 }));
 
-vi.mock('./settings/ScriptSettingsModalProvider', () => ({
+vi.mock('./settings/ScriptSettingsModalContext', () => ({
     useScriptSettingsModal: () => ({
         resolvedScriptSettings: DEFAULT_EDITOR_SETTINGS,
         titlePageDraft: null,

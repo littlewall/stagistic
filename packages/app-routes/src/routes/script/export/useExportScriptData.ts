@@ -16,7 +16,7 @@ import {useMemo} from 'react';
 
 import {useScriptCharacters} from '../ScriptCharactersContext';
 import {useScriptWorkspace} from '../ScriptWorkspaceContext';
-import {useScriptSettingsModal} from '../settings/ScriptSettingsModalProvider';
+import {useScriptSettingsModal} from '../settings/ScriptSettingsModalContext';
 import {
     collectInitialPageData,
     type ExportCatalogEntity,

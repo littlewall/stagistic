@@ -5,8 +5,8 @@ import {
     it,
 } from 'vite-plus/test';
 
-import type {VocalRangesInitialPagePlan} from '../plan';
-import type {StaffRowItem} from '../visualLine';
+import type {VocalRangesInitialPagePlan} from '../model/plan';
+import type {StaffRowItem} from '../model/visualLine';
 import {buildVocalRangesPages} from './buildVocalRangesPages';
 
 const plan: VocalRangesInitialPagePlan = {

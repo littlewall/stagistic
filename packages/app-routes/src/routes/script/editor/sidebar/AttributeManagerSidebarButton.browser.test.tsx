@@ -29,7 +29,7 @@ const waitForElement = async <T extends Element>(selector: string): Promise<T> =
     throw new Error(`Expected element matching ${selector}`);
 };
 
-vi.mock('../../settings/ScriptSettingsModalProvider', () => ({
+vi.mock('../../settings/ScriptSettingsModalContext', () => ({
     useScriptSettingsModal: () => ({openAttributeManagerModalWithPanel}),
 }));
 

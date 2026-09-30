@@ -5,8 +5,8 @@ import type {
     ContentsInitialPagePlan,
     ContentsMusicEntry,
     ContentsSceneEntry,
-} from '../../plan';
-import type {VisualRun} from '../../visualLine';
+} from '../../model/plan';
+import type {VisualRun} from '../../model/visualLine';
 import type {VisualPage} from '../buildCharactersAndPlacesPages';
 import {
     type ContentsGeometry,

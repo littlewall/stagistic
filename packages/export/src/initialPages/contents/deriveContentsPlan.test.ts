@@ -8,7 +8,7 @@ import {
 import {
     block,
     text,
-} from '../../testUtils';
+} from '../../test/testUtils';
 import {deriveContentsPlan} from './deriveContentsPlan';
 
 const MUSIC_ID_ATTR = 'musicId';

@@ -4,7 +4,7 @@ import {
     it,
 } from 'vite-plus/test';
 
-import type {StaffRowItem} from '../visualLine';
+import type {StaffRowItem} from '../model/visualLine';
 import {createStaffRowDrawingGeometry} from './drawStaffRow';
 
 const staffRow: StaffRowItem = {

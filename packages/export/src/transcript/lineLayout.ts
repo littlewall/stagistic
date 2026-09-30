@@ -1,6 +1,6 @@
 import {type EditorSettings} from '@stagistic/script';
 
-import type {VisualRun} from '../visualLine';
+import type {VisualRun} from '../model/visualLine';
 import {type InlineStyle, MONO_FONT_FAMILY} from './model';
 
 export const makeRun = (

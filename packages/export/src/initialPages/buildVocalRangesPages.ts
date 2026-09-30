@@ -6,13 +6,13 @@ import {
     staffPosition,
 } from '@stagistic/script';
 
-import type {VocalRangesInitialPagePlan} from '../plan';
+import type {VocalRangesInitialPagePlan} from '../model/plan';
 import type {
     InitialPageVisualPage,
     StaffRowItem,
     VisualLine,
     VisualRun,
-} from '../visualLine';
+} from '../model/visualLine';
 
 const MONO_FONT_FAMILY = 'Courier Prime';
 const CHAR_WIDTH_EM = 0.6;

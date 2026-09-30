@@ -1,48 +1,32 @@
 import {useScriptComments, useScriptRepository} from '@stagistic/app-core';
-import {
-    type EditorMusicCreateRequest,
-    type EditorMusicRemoveRequest,
-    ScriptEditor,
-} from '@stagistic/editor';
+import {ScriptEditor} from '@stagistic/editor';
 import {resolveDraftDate} from '@stagistic/script';
 import {AppLayout, LoaderOverlay} from '@stagistic/ui';
-import {
-    useCallback,
-    useMemo,
-    useState,
-} from 'react';
+import {useCallback, useMemo} from 'react';
 import {useNavigate} from 'react-router-dom';
 
 import {AppHeader, ScriptEditorAppHeader} from '../../layout/AppHeader';
 import {useDocumentTitle} from '../../useDocumentTitle';
-import {ScriptCharactersSidebar} from './editor/characters/ScriptCharactersSidebar';
-import {
-    ScriptCommentsSidebar,
-    useCommentsEditorBridge,
-    useCommentsPanelState,
-} from './editor/comments';
+import {useCommentsEditorBridge, useCommentsPanelState} from './editor/comments';
 import {DeferredScriptEditor} from './editor/DeferredScriptEditor';
 import {
     AddMusicModal,
-    ScriptMusicSidebar,
     UnassignMusicModal,
+    useMusicModalsState,
 } from './editor/music';
 import {ConvertSceneHeadingModal} from './editor/scene/ConvertSceneHeadingModal';
 import {DeleteSceneHeadingModal} from './editor/scene/DeleteSceneHeadingModal';
 import {useSceneConversionState} from './editor/scene/useSceneConversionState';
 import {useSceneDeletionState} from './editor/scene/useSceneDeletionState';
-import {type SidebarPanel, useEditorSidebars} from './editor/sidebar';
-import {ScriptStructureSidebar} from './editor/structure';
+import {useEditorSidebars, useScriptSidebarPanels} from './editor/sidebar';
 import {useScriptCharacters} from './ScriptCharactersContext';
 import {ScriptSessionProvider} from './ScriptSessionContext';
 import {useScriptWorkspace} from './ScriptWorkspaceContext';
-import {useScriptSettingsModal} from './settings/ScriptSettingsModalProvider';
+import {useScriptSettingsModal} from './settings/ScriptSettingsModalContext';
 import {useScriptEditorHeaderActions} from './useScriptEditorHeaderActions';
 
 const AUTOSAVE_DELAY_MS = 1500;
 const SIDEBAR_WIDTH = 'var(--sidebar-width)';
-
-type AddMusicModalState = {source: 'sidebar'} | {source: 'editor', request: EditorMusicCreateRequest};
 
 export const ScriptEditorRoute = () => {
     const navigate = useNavigate();
@@ -75,8 +59,6 @@ export const ScriptEditorRoute = () => {
 
     useDocumentTitle(scriptTitleDraft);
 
-    const [addMusicModalState, setAddMusicModalState] = useState<AddMusicModalState | null>(null);
-    const [removeMusicRequest, setRemoveMusicRequest] = useState<EditorMusicRemoveRequest | null>(null);
     const {
         pendingSceneDelete,
         deleteSceneRequest,
@@ -93,8 +75,6 @@ export const ScriptEditorRoute = () => {
     } = useSceneConversionState();
     const {
         music,
-        createMusic,
-        unassignMusic,
         markMusicAssigned,
         markMusicUnassigned,
         updateMusicRequest,
@@ -127,51 +107,7 @@ export const ScriptEditorRoute = () => {
             }
         },
     });
-    const openAddMusicModal = useCallback(() => {
-        setAddMusicModalState({source: 'sidebar'});
-    }, []);
-    const closeAddMusicModal = useCallback(() => {
-        setAddMusicModalState(null);
-    }, []);
-    const cancelAddMusicModal = useCallback(() => {
-        if (addMusicModalState?.source === 'editor') {
-            addMusicModalState.request.cancel?.();
-        }
-
-        setAddMusicModalState(null);
-    }, [addMusicModalState]);
-    const handleRequestCreateMusic = useCallback((request: EditorMusicCreateRequest) => {
-        setAddMusicModalState({
-            source: 'editor',
-            request,
-        });
-    }, []);
-    const handleRequestRemoveMusic = useCallback((request: EditorMusicRemoveRequest) => {
-        setRemoveMusicRequest(request);
-    }, []);
-    const handleCreateMusic = useCallback(
-        async (input: Parameters<typeof createMusic>[0]) => {
-            const createdMusic = await createMusic(input);
-
-            if (createdMusic && addMusicModalState?.source === 'editor') {
-                addMusicModalState.request.complete(createdMusic);
-            }
-
-            return createdMusic;
-        },
-        [addMusicModalState, createMusic],
-    );
-    const handleConfirmRemoveMusic = useCallback(async () => {
-        if (!removeMusicRequest) {
-            return;
-        }
-
-        if (removeMusicRequest.complete()) {
-            await unassignMusic(removeMusicRequest.musicId);
-        }
-
-        setRemoveMusicRequest(null);
-    }, [removeMusicRequest, unassignMusic]);
+    const musicModals = useMusicModalsState(musicState);
 
     const sessionContextValue = useMemo(
         () => ({
@@ -190,51 +126,12 @@ export const ScriptEditorRoute = () => {
         ],
     );
 
-    const sidebarPanels = useMemo<readonly SidebarPanel[]>(
-        () => [
-            {
-                id: 'structure',
-                label: 'Structure',
-                renderContent: header => <ScriptStructureSidebar header={header} />,
-            },
-            {
-                id: 'characters',
-                label: 'Characters',
-                renderContent: header => <ScriptCharactersSidebar header={header} />,
-            },
-            {
-                id: 'music',
-                label: 'Music',
-                renderContent: header => (
-                    <ScriptMusicSidebar
-                        header={header}
-                        music={music}
-                        isLoading={musicState.isLoading}
-                        onAddMusic={openAddMusicModal}
-                        onUnassignMusic={unassignMusic}
-                    />
-                ),
-            },
-            {
-                id: 'comments',
-                label: 'Comments',
-                renderContent: header => (
-                    <ScriptCommentsSidebar
-                        header={header}
-                        comments={comments}
-                        panelState={commentsPanelState}
-                    />
-                ),
-            },
-        ],
-        [
-            comments,
-            commentsPanelState,
-            music,
-            openAddMusicModal,
-            unassignMusic,
-        ],
-    );
+    const sidebarPanels = useScriptSidebarPanels({
+        comments,
+        commentsPanelState,
+        musicState,
+        onAddMusic: musicModals.addMusic.open,
+    });
     const {
         leftSidebarToggle,
         rightSidebarToggle,
@@ -336,8 +233,8 @@ export const ScriptEditorRoute = () => {
                     }}
                     callbacks={{
                         onValueChange: handleResolvedEditorValueChange,
-                        onRequestCreateMusic: handleRequestCreateMusic,
-                        onRequestRemoveMusic: handleRequestRemoveMusic,
+                        onRequestCreateMusic: musicModals.handleRequestCreateMusic,
+                        onRequestRemoveMusic: musicModals.handleRequestRemoveMusic,
                         onOpenMusicManager: openAttributeManagerMusic,
                         onMusicAssigned: markMusicAssigned,
                         onMusicUnassigned: markMusicUnassigned,
@@ -350,17 +247,17 @@ export const ScriptEditorRoute = () => {
                     <ScriptEditor.RightSidebar>{rightSidebar}</ScriptEditor.RightSidebar>
                 </DeferredScriptEditor>
                 <AddMusicModal
-                    isOpen={addMusicModalState !== null}
-                    initialTitle={addMusicModalState?.source === 'editor' ? addMusicModalState.request.title : undefined}
-                    onCancel={cancelAddMusicModal}
-                    onClose={closeAddMusicModal}
-                    onCreate={handleCreateMusic}
+                    isOpen={musicModals.addMusic.isOpen}
+                    initialTitle={musicModals.addMusic.initialTitle}
+                    onCancel={musicModals.addMusic.cancel}
+                    onClose={musicModals.addMusic.close}
+                    onCreate={musicModals.addMusic.create}
                 />
                 <UnassignMusicModal
-                    isOpen={removeMusicRequest !== null}
-                    musicTitle={removeMusicRequest?.title}
-                    onClose={() => setRemoveMusicRequest(null)}
-                    onConfirm={handleConfirmRemoveMusic}
+                    isOpen={musicModals.removeMusic.isOpen}
+                    musicTitle={musicModals.removeMusic.musicTitle}
+                    onClose={musicModals.removeMusic.close}
+                    onConfirm={musicModals.removeMusic.confirm}
                 />
                 <DeleteSceneHeadingModal
                     isOpen={pendingSceneDelete !== null}

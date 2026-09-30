@@ -7,7 +7,7 @@ import {
     ATTRIBUTE_MANAGER_PANEL_STRUCTURE,
     type AttributeManagerPanelId,
 } from '../../attributes/attributeManagerMenu';
-import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalProvider';
+import {useScriptSettingsModal} from '../../settings/ScriptSettingsModalContext';
 import {SidebarContextButton} from './SidebarContextButton';
 
 const PANEL_LABEL_BY_ID = {

@@ -1,20 +1,9 @@
 import {useScriptActions, useScriptRepository} from '@stagistic/app-core';
-import {
-    type EditorSettings,
-    type EditorSettingsOverride,
-    type TitlePageSettings,
-} from '@stagistic/script';
 import {isApplePlatform} from '@stagistic/shared';
 import {ScriptSettingsModal, useKeyedFieldDrafts} from '@stagistic/ui';
-import {
-    createContext,
-    type ReactNode,
-    useContext,
-    useMemo,
-} from 'react';
+import {type ReactNode, useMemo} from 'react';
 import {useNavigate, useSearchParams} from 'react-router-dom';
 
-import {type AttributeManagerPanelId} from '../attributes/attributeManagerMenu';
 import {useAttributeManagerModalState} from '../attributes/useAttributeManagerModalState';
 import {useMusicAttachmentsState} from '../attributes/useMusicAttachmentsState';
 import {useScriptPlacesState} from '../attributes/useScriptPlacesState';
@@ -31,39 +20,11 @@ import {deleteAttributeManagerMusic} from './deleteAttributeManagerMusic';
 import {deleteAttributeManagerScene} from './deleteAttributeManagerScene';
 import {DraftSaveError} from './DraftSaveError';
 import {ScriptAttributeManagerModal} from './ScriptAttributeManagerModal';
+import {ScriptSettingsModalContext, type ScriptSettingsModalContextValue} from './ScriptSettingsModalContext';
 import {SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS} from './settingsMenu';
 import {useAttributeManagerItems} from './useAttributeManagerItems';
 
 const BLOCK_LABEL_BY_TYPE = new Map(SCRIPT_SETTINGS_ELEMENT_BLOCK_ITEMS.map(item => [item.blockType, item.label] as const));
-
-interface ScriptSettingsModalContextValue {
-    resolvedScriptSettings: EditorSettings,
-    effectiveScriptSettingsDraft: EditorSettingsOverride,
-    isEditorPresentationHydrated: boolean,
-    titlePageDraft: TitlePageSettings,
-    scriptTitleDraft: string,
-    updateScriptTitle: (title: string) => void,
-    musicState: ReturnType<typeof useScriptMusicState>,
-    musicAttachmentsState: ReturnType<typeof useMusicAttachmentsState>,
-    openSettingsModal: () => void,
-    openAttributeManagerModal: () => void,
-    openAttributeManagerModalWithPanel: (panelId: AttributeManagerPanelId) => void,
-    openAttributeManagerCharacter: (characterId: string) => void,
-    openAttributeManagerGroup: (groupId: string) => void,
-    openAttributeManagerMusic: (musicId: string) => void,
-}
-
-const ScriptSettingsModalContext = createContext<ScriptSettingsModalContextValue | null>(null);
-
-export const useScriptSettingsModal = (): ScriptSettingsModalContextValue => {
-    const context = useContext(ScriptSettingsModalContext);
-
-    if (!context) {
-        throw new Error('useScriptSettingsModal must be used inside ScriptSettingsModalProvider');
-    }
-
-    return context;
-};
 
 export const ScriptSettingsModalProvider = ({children}: {children: ReactNode}) => {
     const navigate = useNavigate();

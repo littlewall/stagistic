@@ -8,12 +8,12 @@ import {
     resolveHeaderFooterText,
 } from '@stagistic/script';
 
-import type {ExportPlan} from '../plan';
+import type {ExportPlan} from '../model/plan';
 import type {
     PageItem,
     VisualLine,
     VisualRun,
-} from '../visualLine';
+} from '../model/visualLine';
 import {
     CHAR_WIDTH_EM,
     HEADER_FOOTER_ALIGNMENTS,

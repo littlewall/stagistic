@@ -13,7 +13,7 @@ import type {
     TranscriptResult,
     VisualLine,
     VisualRun,
-} from '../visualLine';
+} from '../model/visualLine';
 import {drawStaffRow} from './drawStaffRow';
 import {getPdfMonoFontFamily, registerFonts} from './fonts';
 import {planIntegratedAssembly} from './planIntegratedAssembly';

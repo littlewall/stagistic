@@ -5,7 +5,7 @@ import {
     it,
 } from 'vite-plus/test';
 
-import type {VisualLine} from '../visualLine';
+import type {VisualLine} from '../model/visualLine';
 import {buildTitlePageItems} from './buildTitlePageItems';
 
 const {page} = DEFAULT_EDITOR_SETTINGS;

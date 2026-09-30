@@ -4,11 +4,11 @@ import {
     it,
 } from 'vite-plus/test';
 
+import {sampleDoc} from '../test/testUtils';
 import {
     groupScenes,
     sceneMentionsCharacter,
 } from './scenes';
-import {sampleDoc} from './testUtils';
 
 describe('groupScenes', () => {
     it('splits content into act and scene groups', () => {

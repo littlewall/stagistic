@@ -3,17 +3,17 @@ import {
     getScriptBlockNodeType,
 } from '@stagistic/script';
 
-import type {BasicExportConfig} from './config';
-import {filterScriptByCharacter} from './filterByCharacter';
-import {deriveContentsPlan} from './initialPages/contents/deriveContentsPlan';
+import {deriveContentsPlan} from '../initialPages/contents/deriveContentsPlan';
+import type {BasicExportConfig} from '../model/config';
 import type {
     CharactersAndPlacesInitialPagePlan,
     ExportPlan,
     ForcedBreak,
     VocalRangesInitialPagePlan,
-} from './plan';
+} from '../model/plan';
+import type {ScriptData} from '../model/scriptData';
+import {filterScriptByCharacter} from './filterByCharacter';
 import {groupScenes} from './scenes';
-import type {ScriptData} from './scriptData';
 
 interface OrderableInitialEntry {
     displayName: string,

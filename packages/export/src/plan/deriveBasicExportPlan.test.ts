@@ -7,12 +7,12 @@ import {
 import {
     BASIC_DEFAULTS,
     type BasicExportConfig,
-} from './config';
-import {deriveBasicExportPlan} from './deriveBasicExportPlan';
+} from '../model/config';
 import {
     block,
     sampleDoc,
-} from './testUtils';
+} from '../test/testUtils';
+import {deriveBasicExportPlan} from './deriveBasicExportPlan';
 
 const script = {
     doc: sampleDoc(),

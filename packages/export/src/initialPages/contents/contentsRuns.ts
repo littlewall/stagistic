@@ -1,4 +1,4 @@
-import type {VisualLine, VisualRun} from '../../visualLine';
+import type {VisualLine, VisualRun} from '../../model/visualLine';
 import {
     type ContentsGeometry,
     MONO_FONT_FAMILY,

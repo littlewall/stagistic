@@ -16,33 +16,33 @@ import {
     type PaginatorBlock,
 } from '@stagistic/script-pagination';
 
-import {composeLeadingPages} from './initialPages/composeLeadingPages';
-import type {ContentsPageNumbers} from './initialPages/contents/contentsPageNumbers';
-import {planIntegratedAssembly} from './pdf/planIntegratedAssembly';
-import type {ExportPlan} from './plan';
-import {buildTitlePageItems} from './titlePage/buildTitlePageItems';
-import {buildTitlePageLogoItem} from './titlePage/buildTitlePageLogoItem';
-import {getIntegratedFooter, withHeaderFooter} from './transcript/headerFooter';
-import {makeRun, resolveLineX} from './transcript/lineLayout';
+import {composeLeadingPages} from '../initialPages/composeLeadingPages';
+import type {ContentsPageNumbers} from '../initialPages/contents/contentsPageNumbers';
+import type {ExportPlan} from '../model/plan';
+import type {
+    PageItem,
+    TranscriptResult,
+    VisualLine,
+} from '../model/visualLine';
+import {planIntegratedAssembly} from '../pdf/planIntegratedAssembly';
+import {buildTitlePageItems} from '../titlePage/buildTitlePageItems';
+import {buildTitlePageLogoItem} from '../titlePage/buildTitlePageLogoItem';
+import {getIntegratedFooter, withHeaderFooter} from './headerFooter';
+import {makeRun, resolveLineX} from './lineLayout';
 import {
     CHAR_WIDTH_EM,
     DEFAULT_BLOCK_TYPE,
     PAGE_BREAK_ITEM,
     type PreparedBlock,
     type ScriptPage,
-} from './transcript/model';
-import {buildStructureMarks} from './transcript/structureMarks';
+} from './model';
+import {buildStructureMarks} from './structureMarks';
 import {
     buildMusicLabels,
     getBlockRawSegments,
     normalizeBlockSegments,
-} from './transcript/textSegments';
-import {wrapSegments} from './transcript/wrapSegments';
-import type {
-    PageItem,
-    TranscriptResult,
-    VisualLine,
-} from './visualLine';
+} from './textSegments';
+import {wrapSegments} from './wrapSegments';
 
 export interface TranscribeOptions {
     /** Page count of each attached score PDF, keyed by music id. */

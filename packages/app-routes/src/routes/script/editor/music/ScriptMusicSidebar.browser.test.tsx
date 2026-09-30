@@ -25,7 +25,7 @@ vi.mock('../sidebar/AttributeManagerSidebarButton', () => ({
     AttributeManagerSidebarButton: () => null,
 }));
 
-vi.mock('../../settings/ScriptSettingsModalProvider', () => ({
+vi.mock('../../settings/ScriptSettingsModalContext', () => ({
     useScriptSettingsModal: () => ({
         openAttributeManagerMusic,
     }),

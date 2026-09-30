@@ -5,7 +5,7 @@ import {
     type TitlePageSettings,
 } from '@stagistic/script';
 
-import type {VisualLine, VisualRun} from '../visualLine';
+import type {VisualLine, VisualRun} from '../model/visualLine';
 import {buildTitlePageLogoItem} from './buildTitlePageLogoItem';
 
 /*

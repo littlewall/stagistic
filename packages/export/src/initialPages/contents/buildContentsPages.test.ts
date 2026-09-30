@@ -5,8 +5,8 @@ import {
     it,
 } from 'vite-plus/test';
 
-import type {ContentsInitialPagePlan} from '../../plan';
-import type {VisualLine} from '../../visualLine';
+import type {ContentsInitialPagePlan} from '../../model/plan';
+import type {VisualLine} from '../../model/visualLine';
 import {buildContentsPages} from './buildContentsPages';
 
 const SETTINGS = DEFAULT_EDITOR_SETTINGS;
