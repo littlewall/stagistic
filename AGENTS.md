@@ -19,7 +19,7 @@ metadata columns, UI, autosave internals, or export layout changes.
 Canonical commands run through moon. Root workflows are defined in `moon.yml`; reusable project tasks live in `.moon/tasks/global.yml`; project overrides live beside each app/package in `moon.yml`. The implementation still uses Vite+, oxfmt, oxlint, stylelint, Biome, Astro, and other underlying tools, but invoke them through moon.
 - Typecheck: `moon run root:typecheck` (whole graph) or `moon run <project>:typecheck`.
 - Lint: `moon run root:lint`; auto-fix: `moon run root:lint-fix`. For one project use `moon run <project>:lint`.
-- Format: `moon run root:format` (writes in place) / `moon run root:format-check`.
+- Format: `moon run root:format` (ESLint `@stylistic` + import sort, writes in place) / `moon run root:format-check`. Linter configs (ESLint, oxlint, stylelint) live in `packages/linters`. oxlint handles correctness only; there is no oxfmt.
 - Commit hook: moon manages `.moon/hooks` from `.moon/workspace.yml` and runs `moon run root:staged`. The task delegates staged-file selection and re-staging to Vite+ using the map in `vite.config.ts`. Run `moon sync hooks` to install or refresh hooks explicitly; normal moon commands also sync them because `vcs.sync` is enabled.
 - Node tests: `moon run root:test` (whole repo), `moon run <project>:test`, or `moon run <project>:test-watch`. Test imports use `vite-plus/test`.
 - Browser tests: `moon run <project>:test-browser` (app-core/app-routes/editor/ui). They pin no viewport → layout/caret asserts are env-sensitive; editor has known pre-existing reds (overlay viewport-fit, cueCaret off-by-one, tied to WIP).
