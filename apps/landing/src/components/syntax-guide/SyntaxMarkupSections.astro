@@ -1,0 +1,119 @@
+---
+// Music, quoting, inline marks, full example, marker reference.
+import {clsx} from 'clsx';
+import s from '../../pages/editor/syntax.module.css';
+import {exFull, exMarks, exMusic, exQuoting, markers} from '../../data/syntaxGuide';
+import SyntaxExample from './SyntaxExample.astro';
+import SyntaxSection from './SyntaxSection.astro';
+---
+
+<!-- Music -->
+<SyntaxSection id="music" n="09" title="Music">
+    <p class={s.prose}>
+        A music item marks a song or instrumental passage for actors and directors. Write it inline inside a stage direction:
+        <span class={s.code}>@@music N "title"</span>
+        to start it and <span class={s.code}>@@out N</span>
+        to end it. The number ties the two together. With no <span class={s.code}>@@out</span>, the music runs to the end of the scene.
+    </p>
+    <SyntaxExample source={exMusic}>
+        <p class={s.rDir}>
+            The lights slowly fade.
+            <span class={s.rMusic}> ♪ 1 — When Night Falls</span>
+        </p>
+        <p class={s.rChar}>ANNA</p>
+        <p class={s.rLyric}>WHEN NIGHT FALLS AND THE LIGHTS GO DOWN</p>
+        <p class={s.rDir}>
+            The lights come up.
+            <span class={s.rMusic}> ♪ out 1</span>
+        </p>
+</SyntaxExample>
+</SyntaxSection>
+
+<!-- Quoting -->
+<SyntaxSection id="quoting" n="10" title="The quoting rule">
+    <p class={s.prose}>
+        Double quotes delimit a literal name or title anywhere a space, period, or special character (<span class={s.code}>@</span>,
+        <span class={s.code}>/</span>) would otherwise break parsing. A bare <span class={s.code}>@Name</span>
+        tags only one word — once a name has a space or a dot, quote it.
+    </p>
+    <p class={s.prose}>
+        Inside quotes, use
+        <span class={s.code}>\"</span>
+        for a literal double quote and <span class={s.code}>\\</span>
+        for a literal backslash.
+    </p>
+    <div class={s.exampleSolo}>
+        <p class={s.exampleLabel}>You type</p>
+        <pre class={s.codeBlock}>{exQuoting}</pre>
+    </div>
+</SyntaxSection>
+
+<!-- Inline marks -->
+<SyntaxSection id="inline" n="11" title="Inline marks & notes">
+    <p class={s.prose}>
+        Emphasis carries over from Fountain:
+        <span class={s.code}>*italic*</span>,
+        <span class={s.code}>**bold**</span>,
+        <span class={s.code}>_underline_</span>. A note in
+        <span class={s.code}>[[ double brackets ]]</span>
+        is included in exports by default.
+    </p>
+    <SyntaxExample source={exMarks}>
+        <p class={s.rLine}>
+            <em>italic</em>
+            <strong> bold</strong>
+            <u> underline</u>
+        </p>
+        <p class={s.rNote}>[[ a note to self ]]</p>
+</SyntaxExample>
+</SyntaxSection>
+
+<!-- Full example -->
+<SyntaxSection id="example" n="12" title="A full example">
+    <p class={s.prose}>
+        Everything together: frontmatter, an act and scene, a stage direction with a tagged character, spoken dialogue, a sung number
+        bracketed by music markers, unison singing, and an author note.
+    </p>
+    <SyntaxExample source={exFull}>
+        <p class={s.rAct}>Act One</p>
+        <p class={s.rScene}>1 — A garden. Dusk.</p>
+        <p class={s.rDir}>
+            Anna stands at the window.
+            <span class={s.rTag}> PETER</span>
+            enters quietly from behind.
+        </p>
+        <p class={s.rChar}>PETER</p>
+        <p class={s.rAside}>(from the doorway)</p>
+        <p class={s.rLine}>Sorry I'm late.</p>
+        <p class={s.rChar}>ANNA</p>
+        <p class={s.rLine}>It's fine. I was waiting.</p>
+        <p class={s.rDir}>
+            The lights slowly fade.
+            <span class={s.rMusic}> ♪ 1 — When Night Falls</span>
+        </p>
+        <p class={s.rChar}>ANNA</p>
+        <p class={s.rLyric}>WHEN NIGHT FALLS AND THE LIGHTS GO DOWN</p>
+        <p class={clsx(s.rLyric, s.rLyricB)}>AND I'LL BE STANDING HERE</p>
+        <p class={s.rChar}>PETER</p>
+        <p class={s.rLyric}>SO I'LL COME CLOSER</p>
+        <p class={s.rChar}>ANNA / PETER</p>
+        <p class={s.rLyric}>AND THE WORLD WILL STOP</p>
+        <p class={s.rDir}>
+            The lights come up.
+            <span class={s.rMusic}> ♪ out 1</span>
+        </p>
+</SyntaxExample>
+</SyntaxSection>
+
+<!-- Marker reference -->
+<SyntaxSection id="reference" n="13" title="Marker reference">
+    <p class={s.prose}>The complete set of explicit markers. Everything else is implicit, by position and letter case.</p>
+    <div class={s.refTable}>
+        {markers.map((m) => (
+                    <div class={s.refRow}>
+                        <code class={s.refMarker}>{m[0]}</code>
+                        <span class={s.refDesc}>{m[1]}</span>
+                    </div>
+                ))}
+    </div>
+</SyntaxSection>

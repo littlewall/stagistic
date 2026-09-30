@@ -1,0 +1,21 @@
+---
+import {toc} from '../../data/syntaxGuide';
+import s from '../../pages/editor/syntax.module.css';
+
+interface Props {
+    class: string;
+}
+
+const {class: listClass} = Astro.props;
+---
+
+<ul class={listClass}>
+    {toc.map((item) => (
+        <li>
+            <a href={`#${item.id}`} class={s.tocLink}>
+                <span class={s.tocNum}>{item.n}</span>
+                {item.title}
+            </a>
+        </li>
+    ))}
+</ul>

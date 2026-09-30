@@ -9,13 +9,13 @@ export {SearchInput, type SearchInputProps} from './atoms/SearchInput';
 export {Switch} from './atoms/Switch';
 export {Tag} from './atoms/Tag';
 export {Tooltip, type TooltipProps} from './atoms/Tooltip';
-export {
-    type AttributeManagerCharacter,
-    AttributeManagerCharactersPanel,
-    type AttributeManagerCharactersPanelProps,
-    type AttributeManagerCharacterWorkspaceId,
-    type AttributeManagerGroup,
-} from './dialogs/AttributeManagerCharactersPanel';
+export {AttributeManagerCharactersPanel} from './dialogs/AttributeManagerCharactersPanel';
+export type {
+    AttributeManagerCharacter,
+    AttributeManagerCharactersPanelProps,
+    AttributeManagerCharacterWorkspaceId,
+    AttributeManagerGroup,
+} from './dialogs/attributeManagerCharacterTypes';
 export {type AttributeManagerDetailTab, AttributeManagerDetailTabs} from './dialogs/AttributeManagerDetailTabs';
 export {AttributeManagerGroupDetail} from './dialogs/AttributeManagerGroupDetail';
 export {type AttributeManagerListItem, AttributeManagerListPanel, type AttributeManagerListPanelProps} from './dialogs/AttributeManagerListPanel';

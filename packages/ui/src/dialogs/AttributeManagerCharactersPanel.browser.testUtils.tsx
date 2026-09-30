@@ -1,12 +1,8 @@
 import {createRoot, type Root} from 'react-dom/client';
 import {vi} from 'vite-plus/test';
 
-import {
-    type AttributeManagerCharacter,
-    AttributeManagerCharactersPanel,
-    type AttributeManagerCharacterWorkspaceId,
-    type AttributeManagerGroup,
-} from './AttributeManagerCharactersPanel';
+import {AttributeManagerCharactersPanel} from './AttributeManagerCharactersPanel';
+import type {AttributeManagerCharacter, AttributeManagerCharacterWorkspaceId, AttributeManagerGroup} from './attributeManagerCharacterTypes';
 
 export const mountedRoots: Root[] = [];
 
@@ -19,7 +15,8 @@ export const CHARACTERS: AttributeManagerCharacter[] = [
         voiceType: null,
         vocalRangeLow: null,
         vocalRangeHigh: null,
-    }, {
+    },
+    {
         id: 'char-2',
         name: 'BORIS',
         color: '#aa9988',
@@ -37,7 +34,8 @@ export const GROUPS: AttributeManagerGroup[] = [
         color: '#778899',
         memberIds: [],
         usageCount: 2,
-    }, {
+    },
+    {
         id: 'group-2',
         name: 'ENSEMBLE',
         color: null,
@@ -63,8 +61,7 @@ export const waitForElement = async <T extends Element>(selector: string): Promi
 };
 
 export const findButtonByText = (label: string): HTMLButtonElement => {
-    const button = Array.from(document.querySelectorAll('button'))
-        .find(candidate => candidate.textContent?.trim() === label);
+    const button = Array.from(document.querySelectorAll('button')).find(candidate => candidate.textContent?.trim() === label);
 
     if (!button) {
         throw new Error(`Expected a button labelled ${label}`);
@@ -77,8 +74,7 @@ export const waitForVisibleElement = async <T extends Element>(selector: string)
     const deadline = Date.now() + 1000;
 
     while (Date.now() < deadline) {
-        const element = Array.from(document.querySelectorAll<T>(selector))
-            .find(candidate => candidate.getClientRects().length > 0);
+        const element = Array.from(document.querySelectorAll<T>(selector)).find(candidate => candidate.getClientRects().length > 0);
 
         if (element) {
             return element;
@@ -91,8 +87,9 @@ export const waitForVisibleElement = async <T extends Element>(selector: string)
 };
 
 export const findVisibleButtonByText = (label: string): HTMLButtonElement => {
-    const button = Array.from(document.querySelectorAll('button'))
-        .find(candidate => candidate.textContent?.trim() === label && candidate.getClientRects().length > 0);
+    const button = Array.from(document.querySelectorAll('button')).find(
+        candidate => candidate.textContent?.trim() === label && candidate.getClientRects().length > 0,
+    );
 
     if (!button) {
         throw new Error(`Expected a visible button labelled ${label}`);
@@ -103,20 +100,17 @@ export const findVisibleButtonByText = (label: string): HTMLButtonElement => {
 
 export const renderPanel = (
     initialSelectedCharacterId?: string,
-    onSetCharacterColor: (
-        characterId: string,
-        colorHex: string | null,
-    ) => void | Promise<unknown> = vi.fn(),
+    onSetCharacterColor: (characterId: string, colorHex: string | null) => void | Promise<unknown> = vi.fn(),
     characters: AttributeManagerCharacter[] = CHARACTERS,
     initialWorkspaceId?: AttributeManagerCharacterWorkspaceId,
     initialSelectedGroupId?: string,
     groups: AttributeManagerGroup[] = [],
 ): {
-        onSetCharacterColor: (characterId: string, colorHex: string | null) => unknown,
-        onSetCharacterOutline: (characterId: string, outline: string | null) => unknown,
-        onDeleteCharacter: (characterId: string) => unknown,
-        onCreateCharacter: (characterName: string) => unknown,
-    } => {
+    onSetCharacterColor: (characterId: string, colorHex: string | null) => unknown;
+    onSetCharacterOutline: (characterId: string, outline: string | null) => unknown;
+    onDeleteCharacter: (characterId: string) => unknown;
+    onCreateCharacter: (characterName: string) => unknown;
+} => {
     const host = document.createElement('div');
     const onSetCharacterOutline = vi.fn();
     const onDeleteCharacter = vi.fn();

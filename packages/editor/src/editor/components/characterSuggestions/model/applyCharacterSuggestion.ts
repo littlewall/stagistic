@@ -4,8 +4,8 @@ import type {Editor as TiptapEditor} from '@tiptap/react';
 
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../../tiptap/scriptCore';
 import type {SuppressedSelection} from '../types';
+import {resolveActiveToken} from './activeToken';
 import {isCharacterBlockType} from './blockUtils';
-import {resolveActiveToken} from './index';
 import {splitBaseAndSuffix} from './tokenUtils';
 
 export const applyCharacterSuggestion = (editor: TiptapEditor, suggestion: string): SuppressedSelection | null => {

@@ -1,63 +1,21 @@
-import {normalizeCharacterKey, splitCharacterTokens} from '@stagistic/script';
-import type {Editor as TiptapEditor} from '@tiptap/react';
+import {normalizeCharacterKey} from '@stagistic/script';
 
-import {normalizeCharacterColorHex} from '../../../characters/characterColors';
-import {getConfirmedCharacterColor, normalizePersistentCharacterRefs} from '../../../characters/colorResolver';
 import {getCharacterTagComposeFromState} from '../../../tiptap/extensions/CharacterTagInputExtension';
 import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../../tiptap/scriptCore';
-import type {CharacterSuggestionsResult, PersistentCharacterRef} from '../types';
+import type {CharacterSuggestionsResult} from '../types';
+import {resolveActiveToken} from './activeToken';
 import {isCharacterBlockType} from './blockUtils';
 import {buildSuggestionRows} from './buildSuggestionRows';
 import {buildSuggestionEntries, computeCharacterTagComposeSuggestions, type OverlayComputationArgs} from './composeSuggestions';
 import {CHARACTER_TAG_HORIZONTAL_PADDING_PX, MAX_SUGGESTIONS, OVERLAY_WIDTH_PX} from './constants';
 import {computeOverlayStyle} from './overlayPosition';
-import {getActiveTokenIndex} from './tokenUtils';
+import {getPersistentColorByKey} from './persistentCharacters';
+
+export {normalizePersistentCharacters} from './persistentCharacters';
 
 export {applyCharacterSuggestion} from './applyCharacterSuggestion';
 
 export type {CharacterSuggestionsResult, PersistentCharacterRef, SuggestionEntry, SuppressedSelection} from '../types';
-
-export const getPersistentColorByKey = (normalizedPersistentCharacters: readonly PersistentCharacterRef[], characterColorSaturation?: number) => {
-    return new Map(
-        normalizedPersistentCharacters.map(character => {
-            return [character.key, getConfirmedCharacterColor(character.id, character.colorHex ?? null, characterColorSaturation)] as const;
-        }),
-    );
-};
-
-export const normalizePersistentCharacters = (persistentCharacters: readonly PersistentCharacterRef[]) => {
-    return normalizePersistentCharacterRefs(persistentCharacters).map(character => ({
-        id: character.id,
-        key: character.key,
-        colorHex: normalizeCharacterColorHex(character.colorHex) ?? null,
-    }));
-};
-
-type ActiveTokenResult = {
-    text: string;
-    tokens: ReturnType<typeof splitCharacterTokens>;
-    offset: number;
-    activeTokenIndex: number;
-    activeToken: NonNullable<ReturnType<typeof splitCharacterTokens>[number]>;
-};
-
-export const resolveActiveToken = (editor: TiptapEditor, block: NonNullable<ReturnType<typeof getActiveScriptBlockFromState>>): ActiveTokenResult | null => {
-    const text = block.node.textContent ?? '';
-    const tokens = splitCharacterTokens(text);
-    const offset = Math.max(0, editor.state.selection.from - block.from);
-    const activeTokenIndex = getActiveTokenIndex(text, offset);
-    const activeToken = tokens[activeTokenIndex];
-
-    return activeToken
-        ? {
-              text,
-              tokens,
-              offset,
-              activeTokenIndex,
-              activeToken,
-          }
-        : null;
-};
 
 export const computeCharacterSuggestions = ({
     editor,

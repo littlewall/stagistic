@@ -8,8 +8,8 @@ import {getActiveScriptBlockFromState, SCRIPT_BLOCK_NODE_NAMES} from '../../../t
 import type {CharacterSuggestionsResult, PersistentCharacterRef, SuppressedSelection} from '../types';
 import {buildSuggestionRows} from './buildSuggestionRows';
 import {CHARACTER_TAG_HORIZONTAL_PADDING_PX, MAX_SUGGESTIONS, OVERLAY_WIDTH_PX} from './constants';
-import {getPersistentColorByKey} from './index';
 import {computeOverlayStyle} from './overlayPosition';
+import {getPersistentColorByKey} from './persistentCharacters';
 
 export type OverlayComputationArgs = {
     editor: TiptapEditor;
