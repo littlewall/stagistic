@@ -167,9 +167,6 @@ importers:
         specifier: ^7.13.0
         version: 7.13.0(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
     devDependencies:
-      '@stagistic/feature-demos':
-        specifier: workspace:*
-        version: link:../../demos/feature-loops
       '@types/react':
         specifier: ^19.0.0
         version: 19.2.10
@@ -182,25 +179,6 @@ importers:
       lightningcss:
         specifier: ^1.30.1
         version: 1.31.1
-      typescript:
-        specifier: ^5.9.2
-        version: 5.9.3
-
-  demos/feature-loops:
-    dependencies:
-      '@stagistic/script':
-        specifier: workspace:*
-        version: link:../../packages/script
-    devDependencies:
-      '@types/node':
-        specifier: ^24.13.1
-        version: 24.13.1
-      playwright:
-        specifier: ^1.61.0
-        version: 1.61.0
-      tsx:
-        specifier: ^4.21.0
-        version: 4.21.0
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
@@ -8350,6 +8328,7 @@ snapshots:
       '@esbuild/win32-arm64': 0.27.7
       '@esbuild/win32-ia32': 0.27.7
       '@esbuild/win32-x64': 0.27.7
+    optional: true
 
   esbuild@0.28.1:
     optionalDependencies:
@@ -8565,6 +8544,7 @@ snapshots:
   get-tsconfig@4.14.0:
     dependencies:
       resolve-pkg-maps: 1.0.0
+    optional: true
 
   get-tsconfig@5.0.0-beta.4:
     dependencies:
@@ -9933,6 +9913,7 @@ snapshots:
       get-tsconfig: 4.14.0
     optionalDependencies:
       fsevents: 2.3.3
+    optional: true
 
   type-check@0.4.0:
     dependencies:

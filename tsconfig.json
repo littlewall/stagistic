@@ -13,8 +13,7 @@
         {"path": "./packages/export"},
         {"path": "./packages/stepkg"},
         {"path": "./apps/desktop"},
-        {"path": "./apps/web"},
-        {"path": "./demos/feature-loops"}
+        {"path": "./apps/web"}
     ],
     "include": ["vite.config.ts", "oxlint.config.ts"]
 }
