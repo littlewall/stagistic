@@ -177,7 +177,13 @@ export const ScriptEditorRoute = () => {
             {
                 id: 'comments',
                 label: 'Comments',
-                renderContent: header => <ScriptCommentsSidebar header={header} comments={comments} panelState={commentsPanelState} />,
+                renderContent: header => (
+                    <ScriptCommentsSidebar
+                        header={header}
+                        comments={comments}
+                        panelState={commentsPanelState}
+                    />
+                ),
             },
         ],
         [comments, commentsPanelState, music, openAddMusicModal, unassignMusic],
@@ -188,7 +194,7 @@ export const ScriptEditorRoute = () => {
         defaultRightPanelId: 'characters',
         storageScope: currentScriptId ?? 'new-script',
     });
-    const revealCommentsPanel = useCallback(() => revealPanel('comments'), [revealPanel]);
+    const revealCommentsPanel = useCallback(() => revealPanel('comments', {side: 'right'}), [revealPanel]);
     const isCommentsPanelOpen = useCallback(() => isPanelOpen('comments'), [isPanelOpen]);
     const commentsBridge = useCommentsEditorBridge({
         comments,
@@ -204,7 +210,12 @@ export const ScriptEditorRoute = () => {
      * later makes the script surface visibly rebuild.
      */
     if (!resolvedEditorInitialValue || !isEditorPresentationHydrated) {
-        return <LoaderOverlay label="Preparing editor" messages={['Loading editor settings']} />;
+        return (
+            <LoaderOverlay
+                label="Preparing editor"
+                messages={['Loading editor settings']}
+            />
+        );
     }
 
     return (
@@ -225,9 +236,18 @@ export const ScriptEditorRoute = () => {
                     )
                 }
             >
-                {isPreparingPackage ? <LoaderOverlay variant="scrim" label="Preparing package" messages={[]} /> : null}
+                {isPreparingPackage ? (
+                    <LoaderOverlay
+                        variant="scrim"
+                        label="Preparing package"
+                        messages={[]}
+                    />
+                ) : null}
                 {storageError ? (
-                    <div role="alert" style={{padding: '12px 20px'}}>
+                    <div
+                        role="alert"
+                        style={{padding: '12px 20px'}}
+                    >
                         {storageError}
                     </div>
                 ) : null}
@@ -288,8 +308,16 @@ export const ScriptEditorRoute = () => {
                     onClose={() => setRemoveMusicRequest(null)}
                     onConfirm={handleConfirmRemoveMusic}
                 />
-                <DeleteSceneHeadingModal isOpen={pendingSceneDelete !== null} onClose={closeSceneDeleteModal} onConfirm={confirmDeleteScene} />
-                <ConvertSceneHeadingModal isOpen={pendingSceneConversion !== null} onClose={closeSceneConvertModal} onConfirm={confirmConvertScene} />
+                <DeleteSceneHeadingModal
+                    isOpen={pendingSceneDelete !== null}
+                    onClose={closeSceneDeleteModal}
+                    onConfirm={confirmDeleteScene}
+                />
+                <ConvertSceneHeadingModal
+                    isOpen={pendingSceneConversion !== null}
+                    onClose={closeSceneConvertModal}
+                    onConfirm={confirmConvertScene}
+                />
             </AppLayout>
         </ScriptSessionProvider>
     );
