@@ -1,7 +1,7 @@
 import {uuidv7} from '@stagistic/shared';
 
 import * as dbQueries from '../queries';
-import type {ScriptMusicRepository} from '../scriptRepository';
+import type {ScriptMusicRepository} from '../types/scriptRepository';
 import type {
     GetDb,
     RecordOutbox,

@@ -5,11 +5,11 @@ import {
     vi,
 } from 'vite-plus/test';
 
+import {dbSchema} from '../schema';
 import {
     type FileStorage,
     InMemoryFileStorage,
-} from '../fileStorage';
-import {dbSchema} from '../schema';
+} from '../storage/fileStorage';
 import {createTestDb, seedScript} from '../testing/createTestDb';
 import {MUSIC_ATTACHMENT_ROLES} from '../types';
 import {createAttachmentHandlers} from './attachments';

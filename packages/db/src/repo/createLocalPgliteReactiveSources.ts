@@ -1,11 +1,6 @@
 import * as dbQueries from '../queries';
 import {createPgliteReactiveQuerySource, type ReactiveQuerySource} from '../reactive';
 import type {
-    ScriptEditorSettingsRecord,
-    ScriptSceneLocationAssignment,
-    ScriptTitlePageRecord,
-} from '../scriptRepository';
-import type {
     ScriptAttachment,
     ScriptCharacterGenderOption,
     ScriptCharacterGroupRef,
@@ -17,6 +12,11 @@ import type {
     ScriptMusicAttachmentBinding,
     ScriptSummary,
 } from '../types';
+import type {
+    ScriptEditorSettingsRecord,
+    ScriptSceneLocationAssignment,
+    ScriptTitlePageRecord,
+} from '../types/scriptRepository';
 import type {GetDb} from './types';
 
 interface CreateLocalPgliteReactiveSourcesArgs {

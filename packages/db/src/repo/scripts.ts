@@ -8,7 +8,7 @@ import * as dbQueries from '../queries';
 import {
     LEGACY_TO_BLOCKS_TRIGGERS,
     migrateScriptDocumentToBlocks,
-} from './migration/legacyToBlocks';
+} from './document/migration/legacyToBlocks';
 import type {
     GetDb,
     RecordOutbox,

@@ -1,7 +1,7 @@
 import type {DbClient} from '../queries';
 import * as dbQueries from '../queries';
-import type {ScriptCommentsRepository} from '../scriptRepository';
 import {LOCAL_COMMENT_AUTHOR_ID} from '../types';
+import type {ScriptCommentsRepository} from '../types/scriptRepository';
 import type {
     GetDb,
     RecordOutbox,

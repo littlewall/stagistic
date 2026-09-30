@@ -6,8 +6,8 @@ import {
     it,
 } from 'vite-plus/test';
 
-import {compiledMigrations} from '../migrations.compiled';
 import {runPgliteMigrations} from './migrations';
+import {compiledMigrations} from './migrations.compiled';
 
 const clients: PGlite[] = [];
 

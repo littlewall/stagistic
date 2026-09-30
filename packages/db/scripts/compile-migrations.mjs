@@ -7,7 +7,7 @@ import {
 import path from 'node:path';
 
 const migrationsDir = path.resolve(process.cwd(), 'drizzle');
-const outputPath = path.resolve(process.cwd(), 'src', 'migrations.compiled.ts');
+const outputPath = path.resolve(process.cwd(), 'src', 'pglite', 'migrations.compiled.ts');
 const checkOnly = process.argv.includes('--check');
 
 /** @param {string} sql */

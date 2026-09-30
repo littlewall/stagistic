@@ -22,7 +22,7 @@ export default defineConfig({
     overrides: [
         {
             // Tests hold long scenario tables; the generated migrations bundle is emitted as one file.
-            files: ['**/*.test.{ts,tsx}', 'packages/db/src/migrations.compiled.ts'],
+            files: ['**/*.test.{ts,tsx}', 'packages/db/src/pglite/migrations.compiled.ts'],
             rules: {
                 'eslint/max-lines': 'off',
             },

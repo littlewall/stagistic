@@ -1,23 +1,23 @@
 import {uuidv7} from '@stagistic/shared';
 
-import type {FileStorage} from '../fileStorage';
 import type {LocalDb} from '../pglite';
 import * as dbQueries from '../queries';
-import type {ScriptRepository} from '../scriptRepository';
+import type {FileStorage} from '../storage/fileStorage';
+import type {ScriptRepository} from '../types/scriptRepository';
 import {createAttachmentHandlers} from './attachments';
-import {createCharacterGroupHandlers} from './characterGroupHandlers';
-import {createCharacterHandlers} from './characters';
+import {createCharacterGroupHandlers} from './characters/characterGroupHandlers';
+import {createCharacterHandlers} from './characters/characters';
 import {createCommentHandlers} from './comments';
-import {createSettingsHandlers} from './config';
-import {createContentHandlers} from './content';
+import {createSettingsHandlers} from './config/config';
+import {createTitlePageHandlers} from './config/titlePage';
 import {createLocalPgliteReactiveSources} from './createLocalPgliteReactiveSources';
-import {createImportPackageHandler} from './importPackage';
+import {createContentHandlers} from './document/content';
 import {createLocationHandlers} from './locations';
 import {createMusicHandlers} from './music';
 import {createOutboxRecorder} from './outbox';
-import {createReadScriptPackageSource} from './readScriptPackageSource';
+import {createImportPackageHandler} from './package/importPackage';
+import {createReadScriptPackageSource} from './package/readScriptPackageSource';
 import {createScriptsHandlers} from './scripts';
-import {createTitlePageHandlers} from './titlePage';
 import type {GetDb} from './types';
 
 export interface LocalPgliteRepositoryDeps {
